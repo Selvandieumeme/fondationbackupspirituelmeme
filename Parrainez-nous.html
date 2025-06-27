@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#003366" />
+  <meta name="description"
+        content="Participez au changement en parrainant un enfant, un projet ou la fondation elle-même. Rejoignez-nous dans notre mission !" />
+  <title>Parrainez-nous – Fondation Backup Spirituel</title>
+
+  <style>
+    body{font-family:Arial,Helvetica,sans-serif;margin:0;padding:0;background:#fff;color:#333}
+    header{background:#003366;padding:20px;color:#fff;text-align:center}
+    header img{max-height:80px}
+    nav{background:#0033cc}
+    nav ul{list-style:none;margin:0;padding:0;display:flex;justify-content:center;flex-wrap:wrap;gap:10px}
+    nav li{position:relative}
+    nav a{display:block;padding:12px 20px;color:#fff;text-decoration:none;font-weight:bold}
+    nav a:hover{background:#002699;color:#ffcc00;border-radius:5px}
+    .dropdown-content{display:none;position:absolute;top:100%;left:0;background:#0033cc;min-width:200px;z-index:1;border-radius:4px}
+    .dropdown:hover .dropdown-content{display:block}
+    main{padding:40px 20px;max-width:1000px;margin:auto}
+    main p{text-align:justify;line-height:1.6;font-size:1.1em;margin-bottom:20px}
+    .don-btn{background:#003366;color:#fff;padding:10px 20px;border-radius:6px;text-decoration:none;font-weight:bold;display:inline-block;margin:10px 5px}
+    .don-btn:hover{background:#0055aa}
+    form{max-width:600px;margin:30px auto;background:#f4f4f4;padding:20px;border-radius:10px}
+    input,textarea{width:100%;padding:12px;margin:10px 0;border:1px solid #ccc;border-radius:5px}
+    button{background:#007BFF;color:#fff;padding:10px 20px;border:none;border-radius:6px;cursor:pointer}
+    footer{background:#003366;color:#fff;text-align:center;padding:15px 0;margin-top:40px}
+    #formMessage{text-align:center;font-weight:bold;margin-top:10px;color:green}
+  </style>
+</head>
+
+<body>
+  <header>
+    <img src="logofobas.png" alt="Logo Fondation Backup Spirituel">
+    <h1>FONDATION BACKUP SPIRITUEL</h1>
+  </header>
+
+  <nav>
+    <ul>
+      <li><a href="index.html">Accueil</a></li>
+      <li><a href="Qui-sommes-nous.html">Qui sommes-nous</a></li>
+      <li><a href="Parrainez-nous.html">Parrainez-nous</a></li>
+      <li><a href="Notre-programme-d'alphabetisation.html">Notre Prog. d'Alphabetisation</a></li>
+      <li><a href="Notre-ecole-d'informatique.html">Notre Ecole d'Informatique</a></li>
+      <li><a href="Contact.html">Contact</a></li>
+      <li class="dropdown">
+        <a href="#">Autres ▾</a>
+        <ul class="dropdown-content">
+          <li><a href="Actualites.html">Actualités</a></li>
+          <li><a href="Blagues-et-histoires.html">Blagues & Histoires</a></li>
+          <li><a href="Emission-Backup-Spirituel.html">Émission Backup Spirituel</a></li>
+          <li><a href="Faire-un-don.html">Faire un don</a></li>
+          <li><a href="Galerie.html">Galerie complète</a></li>
+          <li><a href="Jouez-avec-nous.html">Jouez avec nous</a></li>
+          <li><a href="Nos-actions.html" style="color:yellow;">Nos actions (détail)</a></li>
+          <li><a href="Chat-en-Direct-fobas.html">Chat en Direct Fobas</a></li>
+          <li><a href="Politique-de-confidentialite.html">Politique de confidentialité</a></li>
+        </ul>
+      </li>
+    </ul>
+  </nav>
+  <main>
+    <h2>Pourquoi nous parrainer&nbsp;?</h2>
+    <p>
+      Le parrainage est une opportunité unique de transformer la vie d’un enfant,
+      d’un projet ou d’une communauté entière. Grâce à votre soutien, la Fondation
+      Backup Spirituel assure la scolarisation, la formation, la santé, la spiritualité
+      et l’épanouissement des enfants en Haïti.
+    </p>
+    <p>
+      Vous choisissez le domaine que vous souhaitez soutenir. Chaque parrainage
+      contribue à construire un avenir meilleur et durable pour nos bénéficiaires :
+      dignité, confiance et joie retrouvées !
+    </p>
+
+    <h3>Choisissez une forme de parrainage :</h3>
+    <a class="don-btn" href="https://www.paypal.com/donate?business=assobackupspiritueldhaiti@gmail.com&item_name=Parrainage+Enfant" target="_blank">Parrainez un de nos enfants</a>
+    <a class="don-btn" href="https://www.paypal.com/donate?business=assobackupspiritueldhaiti@gmail.com&item_name=Parrainage+Fondation" target="_blank">Parrainez la Fondation</a>
+    <a class="don-btn" href="https://www.paypal.com/donate?business=assobackupspiritueldhaiti@gmail.com&item_name=Parrainage+Ecole"   target="_blank">Parrainez notre École d'Informatique</a>
+    <a class="don-btn" href="https://www.paypal.com/donate?business=assobackupspiritueldhaiti@gmail.com&item_name=Parrainage+Scolaire" target="_blank">Parrainez notre Projet Scolaire</a>
+
+    <h3 style="margin-top:40px;">Formulaire d'inscription au parrainage</h3>
+    <!-- Men li deja gen tout redireksyon, botcheck ak tout strikti ok -->
+<form action="https://api.web3forms.com/submit" method="POST" id="parrainageForm">
+  <!-- Clé publique Web3Forms -->
+  <input type="hidden" name="access_key" value="34c56edb-5db8-45f4-aa97-376ddc127b4d">
+  
+  <!-- Redirection silencieuse vers votre page Merci -->
+  <input type="hidden" name="redirect" value="https://www.fondationbackupspirituel.com/merci.html">
+
+  <input type="text"  name="nom"    placeholder="Nom complet"                    required>
+  <input type="email" name="email"  placeholder="Adresse email"                  required>
+  <input type="text"  name="pays"   placeholder="Pays de résidence"              required>
+  <textarea name="message" rows="5" placeholder="Motivation pour parrainer / Questions éventuelles..." required></textarea>
+
+  <!-- Champ honeypot anti-bot -->
+  <input type="text" name="botcheck" style="display:none;">
+
+  <button type="submit">📩 Envoyer ma demande</button>
+    </form>
+    <p id="formMessage"></p>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 Fondation Backup Spirituel. Tous droits réservés.</p>
+  </footer>
+
+  <script>
+    /* Anti-bot + petit message local (facultatif) */
+    document.getElementById("parrainageForm").addEventListener("submit", function(e){
+      const botCheck = document.querySelector("input[name='botcheck']").value;
+      if(botCheck!==""){
+        e.preventDefault();
+        document.getElementById("formMessage").textContent = "Formulaire bloqué : suspicion de spam.";
+      }else{
+        document.getElementById("formMessage").textContent = "⏳ Envoi en cours…";
+      }
+    });
+  </script>
+</body>
+</html>

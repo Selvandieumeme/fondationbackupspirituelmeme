@@ -1,0 +1,192 @@
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Chat Privé - Fobas Pro</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    body {
+      background: linear-gradient(135deg, #0d1a46, #091123);
+      font-family: 'Poppins', sans-serif;
+      color: white;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .container {
+      max-width: 700px;
+      width: 100%;
+      margin: 20px auto;
+      background: rgba(255, 255, 255, 0.05);
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.5);
+    }
+    .title {
+      font-size: 24px;
+      font-weight: bold;
+      text-align: center;
+      margin-bottom: 15px;
+    }
+    input, button {
+      padding: 10px;
+      border: none;
+      border-radius: 6px;
+      margin: 5px 0;
+    }
+    input {
+      width: calc(100% - 20px);
+      background: rgba(255, 255, 255, 0.1);
+      color: white;
+    }
+    button {
+      background-color: #2563eb;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .chat-box {
+      background: rgba(255, 255, 255, 0.07);
+      padding: 10px;
+      border-radius: 10px;
+      height: 250px;
+      overflow-y: auto;
+      margin-bottom: 10px;
+    }
+    .users-list {
+      margin-top: 10px;
+      background: rgba(255,255,255,0.05);
+      padding: 10px;
+      border-radius: 10px;
+    }
+    .message {
+      background-color: rgba(255,255,255,0.1);
+      padding: 6px 10px;
+      border-radius: 8px;
+      margin-bottom: 5px;
+    }
+    .footer-note {
+      text-align: center;
+      color: #ccc;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="title">Chat Privé - Fondation Backup Spirituel</div>
+
+    <div id="auth-section">
+      <input type="text" id="username" placeholder="Entrez votre nom d'utilisateur" />
+      <button onclick="login()">Connexion</button>
+    </div>
+
+    <div id="chat-section" style="display:none;">
+      <div id="chat-box" class="chat-box"></div>
+      <input type="text" id="message" placeholder="Tapez votre message..." />
+      <button onclick="sendMessage()">Envoyer</button>
+
+      <div class="users-list" id="users-list">
+        <strong>Utilisateurs connectés :</strong>
+        <ul id="users-ul"></ul>
+      </div>
+    </div>
+    <div class="footer-note">© 2025 Fondation Backup Spirituel</div>
+  </div>
+
+  <script>
+    let currentUser = "";
+    let friends = [];
+
+    function login() {
+      const name = document.getElementById("username").value.trim();
+      if (!name) return;
+      currentUser = name;
+      localStorage.setItem("user", name);
+      document.getElementById("auth-section").style.display = "none";
+      document.getElementById("chat-section").style.display = "block";
+      fetchUsers();
+      setInterval(fetchMessages, 3000);
+    }
+
+    function fetchUsers() {
+      // Exemple local JSON
+      let users = JSON.parse(localStorage.getItem("users") || "[]");
+      if (!users.includes(currentUser)) {
+        users.push(currentUser);
+        localStorage.setItem("users", JSON.stringify(users));
+      }
+
+      const ul = document.getElementById("users-ul");
+      ul.innerHTML = "";
+      users.forEach(u => {
+        if (u !== currentUser) {
+          const li = document.createElement("li");
+          li.innerHTML = u + 
+            ` <button onclick="addFriend('${u}')">Demande</button>` +
+            ` <button onclick="rejectFriend('${u}')">Refuser</button>`;
+          ul.appendChild(li);
+        }
+      });
+    }
+
+    function addFriend(user) {
+      let req = JSON.parse(localStorage.getItem("friends_" + currentUser) || "[]");
+      if (!req.includes(user)) {
+        req.push(user);
+        localStorage.setItem("friends_" + currentUser, JSON.stringify(req));
+        alert("Demande envoyée à " + user);
+      }
+    }
+
+    function rejectFriend(user) {
+      alert("Vous avez refusé la demande de " + user);
+    }
+
+    function isFriend(user) {
+      const friendList = JSON.parse(localStorage.getItem("friends_" + user) || "[]");
+      return friendList.includes(currentUser);
+    }
+
+    function sendMessage() {
+      const msgInput = document.getElementById("message");
+      const msg = msgInput.value.trim();
+      if (!msg) return;
+
+      const time = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+      let history = JSON.parse(localStorage.getItem("messages") || "[]");
+
+      history.push({ user: currentUser, message: msg, time });
+      localStorage.setItem("messages", JSON.stringify(history));
+      msgInput.value = "";
+      fetchMessages();
+    }
+
+    function fetchMessages() {
+      const chatBox = document.getElementById("chat-box");
+      const messages = JSON.parse(localStorage.getItem("messages") || "[]");
+      chatBox.innerHTML = "";
+      messages.forEach(msg => {
+        if (msg.user === currentUser || isFriend(msg.user)) {
+          const div = document.createElement("div");
+          div.className = "message";
+          div.innerHTML = `<strong>${msg.user}</strong> (${msg.time}): ${msg.message}`;
+          chatBox.appendChild(div);
+        }
+      });
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    window.onload = function () {
+      if (localStorage.getItem("user")) {
+        document.getElementById("username").value = localStorage.getItem("user");
+        login();
+      }
+    }
+  </script>
+</body>
+</html>
