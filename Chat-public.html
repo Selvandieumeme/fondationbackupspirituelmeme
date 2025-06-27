@@ -1,0 +1,283 @@
+<!DOCTYPE html> 
+<html lang="ht">
+<head>
+  <meta charset="UTF-8">
+  <title>Chat en Direct Fobas</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    /* CSS la rete menm jan — pa gen modifikasyon ki nesesè isit la */
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
+      margin: 0;
+      padding: 0;
+    }
+    header, footer {
+      background-color: #2c3e50;
+      color: white;
+      padding: 15px 20px;
+      text-align: center;
+    }
+    nav ul {
+      list-style: none;
+      padding: 0;
+    }
+    nav ul li {
+      display: inline;
+      margin-right: 15px;
+    }
+    nav ul li a {
+      color: white;
+      text-decoration: none;
+    }
+    nav ul li a.active {
+      font-weight: bold;
+      text-decoration: underline;
+    }
+    .chat-container {
+      max-width: 700px;
+      margin: 40px auto;
+      background-color: #fff;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.1);
+    }
+    .chat-container h2 {
+      text-align: center;
+      margin-top: 0;
+    }
+    #messageList {
+      border: 1px solid #ccc;
+      padding: 15px;
+      height: 300px;
+      overflow-y: auto;
+      margin-bottom: 20px;
+      background: #f2f2f2;
+      border-radius: 5px;
+      font-size: 14px;
+      line-height: 1.4;
+    }
+    #messageList div {
+      margin-bottom: 12px;
+      padding: 10px;
+      background: #e8f0fe;
+      border-left: 4px solid #3498db;
+      border-radius: 5px;
+    }
+    .form-group {
+      margin-bottom: 15px;
+    }
+    input[type="text"] {
+      padding: 10px;
+      width: calc(100% - 20px);
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+    #mesaj {
+      width: 70%;
+      margin-right: 5px;
+    }
+    #username {
+      width: 50%;
+      margin-bottom: 10px;
+    }
+    button {
+      padding: 10px 20px;
+      border: none;
+      background-color: #3498db;
+      color: white;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #2980b9;
+    }
+    .btn-clear {
+      background-color: #e74c3c;
+      margin-left: 10px;
+    }
+    .btn-clear:hover {
+      background-color: #c0392b;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header>
+    <h1>Fondation Backup Spirituel</h1>
+    <nav>
+      <ul>
+        <li><a href="index.html">Accueil</a></li>
+        <li><a href="Chat-en-Direct-fobas.html" class="active">Chat en Direct Fobas</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <!-- ZÒN CHAT -->
+  <main>
+    <div class="chat-container">
+      <h2>Chat en Direct Fobas</h2>
+      <p>Diskite an dirèk ak lòt vizitè yo!</p>
+
+      <!-- Zòn mesaj yo -->
+      <div id="messageList"></div>
+
+      <!-- Non itilizatè -->
+      <div class="form-group">
+        <input type="text" id="username" placeholder="Non w la (obligatwa)">
+      </div>
+
+      <!-- Antre mesaj + bouton -->
+      <div class="form-group">
+        <input type="text" id="mesaj" placeholder="Ekri mesaj ou...">
+        <button id="btnVoye" onclick="voye()">Voye</button>
+        <button class="btn-clear" onclick="efaseTout()">Efase tout</button>
+      </div>
+    </div>
+  </main>
+
+  <!-- FOOTER -->
+  <footer>
+    <p>&copy; 2025 Fondation Backup Spirituel - Tout dwa rezève</p>
+  </footer>
+
+  <!-- SON MP3 -->
+  <audio id="messageSound" src="https://notificationsounds.com/storage/sounds/file-sounds-1152-pristine.mp3" preload="auto"></audio>
+
+  <!-- SCRIPT PUSHER + CHAT -->
+  <script src="https://js.pusher.com/7.2/pusher.min.js"></script>
+  <script>
+    // Pwoteksyon kont HTML Injection
+    function netwaye(mesaj) {
+      return mesaj.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    }
+
+    // Chaje non itilizatè ki te sove deja
+    window.onload = () => {
+      const savedName = localStorage.getItem("fobas_username");
+      if (savedName) document.getElementById("username").value = savedName;
+    };
+
+    // Ajoute nouvo mesaj nan lis la epi scroll anba otomatikman
+    function ajouteMesajTekst(texte) {
+      const list = document.getElementById("messageList");
+      const isAtBottom = list.scrollHeight - list.scrollTop <= list.clientHeight + 50;
+
+      const newMessage = document.createElement("div");
+      newMessage.innerHTML = texte; // Sa vin sekirize paske nou itilize netwaye()
+      list.appendChild(newMessage);
+
+      if (isAtBottom) {
+        list.scrollTop = list.scrollHeight;
+      }
+
+      // Jwe son notifikasyon
+      document.getElementById("messageSound").play().catch(() => {});
+    }
+
+    // Voye mesaj bay backend la, epi reset input si voye mache
+    function voye() {
+      const non = document.getElementById("username").value.trim();
+      const mesaj = document.getElementById("mesaj").value.trim();
+
+      if (non === "" || mesaj === "") {
+        alert("Tanpri mete non ou epi ekri yon mesaj.");
+        return;
+      }
+
+      document.getElementById("btnVoye").disabled = true;
+      localStorage.setItem("fobas_username", non);
+
+      const now = new Date();
+      const timestamp = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      const safeMesaj = netwaye(mesaj);
+      const konbine = `[${timestamp}] ${netwaye(non)}: ${safeMesaj}`;
+
+      
+      
+      const boutonVoye = document.getElementById("btn-voye");
+
+boutonVoye.addEventListener("click", () => {
+  const mesaj = document.getElementById("mesaj").value.trim();
+  if (mesaj === "") return;
+
+  fetch("https://chat-en-direct-fobas.onrender.com/public-chat", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      sender: "Anonim",   // Ou ka mete yon varyab si ou gen sesyon
+      content: mesaj
+    })
+  })
+  .then(res => res.text())  // Paske repons lan se yon string, pa JSON
+  .then(() => {
+    ajouteMesajTekst(mesaj); // Afiche mesaj sou ekran ou
+    document.getElementById("mesaj").value = ""; // Vide kare tèks la
+  })
+  .catch(err => {
+    alert("❌ Mesaj la pa rive voye. Tcheke koneksyon.");
+    console.error(err);
+  });
+});
+
+
+
+
+
+      
+      reponnBot(mesaj);
+    }
+
+    // Efase tout mesaj sou ekran an
+    function efaseTout() {
+      document.getElementById("messageList").innerHTML = "";
+    }
+
+    // Koneksyon ak Pusher pou resevwa nouvo mesaj real-time
+    const pusher = new Pusher("5c6d93290538e3d2fbda", {
+      cluster: "us2",
+      encrypted: true
+    });
+
+   const channel = pusher.subscribe("public-chat");
+
+channel.bind("new-message", function(data) {
+  ajouteMesajTekst(netwaye(data.message));
+});
+
+      // Ajoute mesaj ki sòti nan Pusher
+      ajouteMesajTekst(netwaye(data.message));
+    });
+
+    // Fonksyon chatbot pou reponn ak kèk fraz senp
+    function reponnBot(mesajUser) {
+      const reponsSenp = {
+        "bonjou": "Bonjou! Kijan ou ye jodi a?",
+        "ki jan ou ye": "Mwen byen, mèsi! E ou menm?",
+        "mèsi": "Ou byenveni!",
+        "ok": "Dakò!",
+        "ki sa w fè": "M se yon chatbot Fobas pou ede w diskite ak lòt moun."
+      };
+
+      const mesajMini = mesajUser.trim().toLowerCase();
+      const repons = Object.keys(reponsSenp).find(cle => mesajMini.includes(cle));
+
+      if (repons) {
+        const now = new Date();
+        const timestamp = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        const botMessage = `[${timestamp}] BOT Fobas: ${reponsSenp[repons]}`;
+
+        fetch("https://chat-en-direct-fobas.onrender.com/send", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ message: botMessage })
+        });
+      }
+    }
+  </script>
+
+</body>
+</html>

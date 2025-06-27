@@ -1,0 +1,153 @@
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Chat Privé Fobas - Auth & Amis</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    * {margin: 0;padding: 0;box-sizing: border-box;font-family: 'Poppins', sans-serif;}
+    body {background: linear-gradient(135deg, #0d1a46, #091123);color: white;min-height: 100vh;padding: 20px;display: flex;flex-direction: column;align-items: center;}
+    .container {max-width: 800px;width: 100%;background: rgba(255,255,255,0.04);padding: 20px;border-radius: 15px;}
+    .section {margin-bottom: 20px;}
+    h2 {text-align: center;margin-bottom: 15px;}
+    input[type="text"], input[type="password"] {width: 100%;padding: 10px;margin-bottom: 10px;border: none;border-radius: 6px;background: rgba(255,255,255,0.1);color: white;}
+    button {padding: 10px 15px;border: none;border-radius: 6px;cursor: pointer;font-weight: bold;}
+    .btn-blue {background-color: #2563eb;color: white;}
+    .btn-green {background-color: #22c55e;color: white;}
+    .btn-red {background-color: #ef4444;color: white;}
+    .chat-box, .friends-box {background: rgba(255,255,255,0.05);padding: 10px;min-height: 150px;border-radius: 10px;margin-top: 10px;overflow-y: auto;}
+    .user-row {display: flex;justify-content: space-between;align-items: center;margin: 5px 0;}
+    .hidden {display: none;}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div id="auth-section" class="section">
+      <h2>Connexion</h2>
+      <input type="text" id="auth-username" placeholder="Nom d'utilisateur" />
+      <input type="password" id="auth-password" placeholder="Mot de passe" />
+      <button class="btn-blue" onclick="login()">Connexion</button>
+      <button class="btn-green" onclick="register()">Inscription</button>
+    </div>
+
+    <div id="main-chat" class="hidden">
+      <h2>Bienvenue, <span id="current-user"></span></h2>
+
+      <div class="section">
+        <h3>Utilisateurs connectés</h3>
+        <div id="user-list" class="chat-box"></div>
+      </div>
+
+      <div class="section">
+        <h3>Demandes d’amis reçues</h3>
+        <div id="friend-requests" class="chat-box"></div>
+      </div>
+
+      <div class="section">
+        <h3>Amis</h3>
+        <div id="friends-list" class="chat-box"></div>
+        <input type="text" id="chat-message" placeholder="Écrire à un ami" />
+        <button class="btn-blue" onclick="sendMessage()">Envoyer</button>
+        <div id="chat-messages" class="chat-box"></div>
+      </div>
+    </div>
+  </div>
+
+<script>
+let users = {};
+let onlineUsers = {};
+let currentUser = null;
+
+function register() {
+  const name = document.getElementById('auth-username').value;
+  const pass = document.getElementById('auth-password').value;
+  if (!users[name]) {
+    users[name] = {password: pass, friends: [], requests: [], messages: []};
+    alert("Inscription réussie !");
+  } else {
+    alert("Ce nom est déjà pris !");
+  }
+}
+
+function login() {
+  const name = document.getElementById('auth-username').value;
+  const pass = document.getElementById('auth-password').value;
+  if (users[name] && users[name].password === pass) {
+    currentUser = name;
+    onlineUsers[name] = true;
+    document.getElementById('current-user').innerText = name;
+    document.getElementById('auth-section').classList.add("hidden");
+    document.getElementById('main-chat').classList.remove("hidden");
+    updateUI();
+  } else {
+    alert("Identifiants invalides !");
+  }
+}
+
+function updateUI() {
+  const userList = document.getElementById('user-list');
+  userList.innerHTML = '';
+  for (let name in users) {
+    if (name !== currentUser) {
+      const isOnline = onlineUsers[name];
+      const btn = `<button onclick="sendFriendRequest('${name}')">Demande</button>`;
+      userList.innerHTML += `<div class="user-row"><span>${name} ${isOnline ? '(En ligne)' : '(Hors ligne)'}</span>${btn}</div>`;
+    }
+  }
+
+  const reqList = document.getElementById('friend-requests');
+  reqList.innerHTML = '';
+  users[currentUser].requests.forEach(req => {
+    reqList.innerHTML += `<div class="user-row">
+      <span>${req}</span>
+      <button class="btn-green" onclick="acceptFriend('${req}')">Accepter</button>
+      <button class="btn-red" onclick="refuseFriend('${req}')">Refuser</button>
+    </div>`;
+  });
+
+  const friendList = document.getElementById('friends-list');
+  friendList.innerHTML = '';
+  users[currentUser].friends.forEach(friend => {
+    friendList.innerHTML += `<div>${friend}</div>`;
+  });
+
+  const messages = document.getElementById('chat-messages');
+  messages.innerHTML = '';
+  users[currentUser].messages.forEach(msg => {
+    messages.innerHTML += `<div><strong>${msg.from}:</strong> ${msg.text}</div>`;
+  });
+}
+
+function sendFriendRequest(to) {
+  if (!users[to].requests.includes(currentUser)) {
+    users[to].requests.push(currentUser);
+    alert("Demande envoyée !");
+  }
+}
+
+function acceptFriend(name) {
+  users[currentUser].friends.push(name);
+  users[name].friends.push(currentUser);
+  users[currentUser].requests = users[currentUser].requests.filter(req => req !== name);
+  updateUI();
+}
+
+function refuseFriend(name) {
+  users[currentUser].requests = users[currentUser].requests.filter(req => req !== name);
+  updateUI();
+}
+
+function sendMessage() {
+  const text = document.getElementById("chat-message").value;
+  const friend = users[currentUser].friends[0]; // simple: chat avec 1er ami
+  if (!friend) return alert("Aucun ami !");
+  users[friend].messages.push({from: currentUser, text});
+  users[currentUser].messages.push({from: currentUser, text});
+  document.getElementById("chat-message").value = "";
+  updateUI();
+}
+</script>
+</body>
+</html>

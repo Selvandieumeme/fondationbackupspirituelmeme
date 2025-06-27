@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Créer un compte</title>
+  <style>
+    body { font-family: Arial; background: #f9f9f9; padding: 40px; }
+    form { max-width: 400px; margin: auto; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px #ccc; }
+    input { width: 100%; padding: 10px; margin: 10px 0; }
+    button { padding: 10px 20px; background: green; color: white; border: none; cursor: pointer; }
+    button:disabled { background: gray; cursor: not-allowed; }
+    #verifyForm { display: none; margin-top: 20px; }
+  </style>
+</head>
+<body>
+  <h2>Créer un compte</h2>
+  <form id="signupForm">
+    <input type="text" id="username" placeholder="Nom d'utilisateur" required>
+    <input type="email" id="email" placeholder="Adresse e-mail" required>
+    <input type="password" id="password" placeholder="Mot de passe" required>
+    <button type="submit">S'inscrire</button>
+  </form>
+
+  <form id="verifyForm">
+    <input type="text" id="code" placeholder="Entrez le code reçu par e-mail" required>
+    <button type="button" id="verifyButton">Valider le code</button>
+  </form>
+
+  <script>
+    const signupForm = document.getElementById('signupForm');
+    const verifyForm = document.getElementById('verifyForm');
+    const verifyButton = document.getElementById('verifyButton');
+
+    let savedEmail = "";
+
+    signupForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const button = signupForm.querySelector('button');
+      button.disabled = true;
+      button.textContent = "Création...";
+
+      const data = {
+        username: document.getElementById('username').value.trim(),
+        email: document.getElementById('email').value.trim(),
+        password: document.getElementById('password').value
+      };
+
+      savedEmail = data.email;
+
+      try {
+        const res = await fetch('https://fondation-backup-spirituel.onrender.com/api/auth/signup', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        });
+
+        const result = await res.json().catch(() => ({}));
+        console.log("Réponse du serveur:", result);
+
+        if (res.ok) {
+          alert(result.message || "Compte créé. Vérifiez votre e-mail.");
+          verifyForm.style.display = 'block';
+        } else {
+          alert(result.message || "Une erreur est survenue !");
+        }
+
+      } catch (error) {
+        console.error("Erreur réseau :", error);
+        alert("Impossible de contacter le serveur.");
+      } finally {
+        button.disabled = false;
+        button.textContent = "S'inscrire";
+      }
+    });
+
+    // ❗ ATANSYON: route verify-email sa a pa egziste sou backend ou
+    // Si ou vle verifye ak kòd, ou dwe kreye route sa nan auth.js
+    verifyButton.addEventListener('click', async () => {
+      const code = document.getElementById('code').value.trim();
+
+      try {
+        const res = await fetch('https://fondation-backup-spirituel.onrender.com/api/auth/verify-email', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: savedEmail, code })
+        });
+
+        const result = await res.json();
+
+        if (res.ok) {
+          alert("E-mail validé avec succès.");
+          window.location.href = "login.html";
+        } else {
+          alert(result.message || "Code incorrect.");
+        }
+      } catch (err) {
+        alert("Erreur lors de la vérification : " + err.message);
+      }
+    });
+  </script>
+</body>
+</html>

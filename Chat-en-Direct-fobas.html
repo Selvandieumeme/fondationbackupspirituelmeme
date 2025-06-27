@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Connexion - Chat Fobas</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Poppins', sans-serif;
+    }
+
+    body {
+      background: linear-gradient(135deg, #0d1a46, #091123);
+      color: white;
+      min-height: 100vh;
+      padding: 40px 20px;
+    }
+
+    .container {
+      background: rgba(255, 255, 255, 0.03);
+      border-radius: 20px;
+      padding: 30px;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      align-items: stretch;
+      width: 100%;
+      max-width: 720px;
+      margin: auto;
+      box-shadow: 0 0 40px rgba(0,0,0,0.5);
+    }
+
+    .left, .right {
+      width: 100%;
+      padding: 15px;
+    }
+
+    h1 {
+      font-size: 2.2rem;
+      margin-bottom: 20px;
+    }
+
+    .buttons {
+      margin-bottom: 25px;
+    }
+
+    .buttons button {
+      background: #1e3a8a;
+      border: none;
+      color: white;
+      padding: 10px 22px;
+      margin-right: 10px;
+      font-size: 1rem;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+
+    .chat-box {
+      background: rgba(255, 255, 255, 0.05);
+      padding: 15px;
+      border-radius: 15px;
+    }
+
+    .chat-box h3 {
+      margin-bottom: 12px;
+      font-size: 1.1rem;
+      font-weight: 600;
+    }
+
+    .chat-message {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 8px;
+      font-size: 0.9rem;
+    }
+
+    .right form {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .right input {
+      padding: 10px;
+      margin-bottom: 12px;
+      border: none;
+      border-radius: 8px;
+      background: rgba(255,255,255,0.1);
+      color: white;
+    }
+
+    .right input::placeholder {
+      color: #ccc;
+    }
+
+    .checkbox {
+      display: flex;
+      align-items: center;
+      margin-bottom: 16px;
+      font-size: 0.9rem;
+    }
+
+    .checkbox input {
+      margin-right: 8px;
+    }
+
+    .seminar-btn {
+      background: #2563eb;
+      padding: 11px 18px;
+      border: none;
+      border-radius: 10px;
+      font-weight: bold;
+      color: white;
+      cursor: pointer;
+      margin-bottom: 18px;
+      font-size: 0.95rem;
+    }
+
+    .lock {
+      width: 55px;
+      margin-left: auto;
+      opacity: 0.6;
+    }
+
+    .footer-logo {
+      margin-top: 30px;
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+    }
+
+    .footer-logo img {
+      height: 35px;
+      margin-right: 10px;
+    }
+
+    .footer-logo span {
+      font-weight: bold;
+      font-size: 1rem;
+      color: #fff;
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        padding: 25px 15px;
+      }
+
+      .footer-logo {
+        justify-content: center;
+        margin-top: 20px;
+      }
+
+      h1 {
+        font-size: 1.9rem;
+        text-align: center;
+      }
+
+      .buttons {
+        text-align: center;
+      }
+
+      .lock {
+        display: block;
+        margin: 0 auto 10px;
+      }
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.7);
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+
+    .modal-content {
+      background: #1f2a48;
+      padding: 25px;
+      border-radius: 15px;
+      width: 90%;
+      max-width: 400px;
+      color: white;
+    }
+
+    .modal-content h2 {
+      margin-bottom: 15px;
+      text-align: center;
+    }
+
+    .modal-content input {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 12px;
+      border: none;
+      border-radius: 8px;
+      background: rgba(255,255,255,0.1);
+      color: white;
+    }
+
+    .modal-content button {
+      width: 100%;
+      background: #2563eb;
+      padding: 10px;
+      border: none;
+      border-radius: 10px;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .close-btn {
+      margin-top: 10px;
+      text-align: center;
+      cursor: pointer;
+      color: #aaa;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <div class="left">
+      <h1>Sign in to<br>your account</h1>
+      <div class="buttons">
+        <button onclick="openModal('signin')">Sign In</button>
+        <button onclick="openModal('signup')" style="background: rgba(255,255,255,0.1);">Sign Up</button>
+      </div>
+      <div class="chat-box">
+        <h3>Public Chat</h3>
+        <div class="chat-message">
+          <span><strong>User1</strong>: Hello!</span>
+          <span>14:00</span>
+        </div>
+        <div class="chat-message">
+          <span><strong>User2</strong>: Hello!</span>
+          <span>14:00</span>
+        </div>
+        <div class="chat-message">
+          <span><strong>User3</strong>: Hello!</span>
+          <span>14:00</span>
+        </div>
+
+        <!-- Bouton pou louvri Chat-public.html -->
+        <div style="margin-top: 15px;">
+          <a href="Chat-public.html" class="seminar-btn" style="display: inline-block; text-align: center; text-decoration: none;">Accéder au Chat Public</a>
+        </div>
+      </div>
+    </div>
+
+
+<!-- CHAT PRIVÉ AJOUTÉ -->
+<div class="chat-box" style="margin-top: 25px;">
+  <h3>Chat Privé</h3>
+  <div class="chat-message">
+    <span><strong>User4</strong>: Salut !</span>
+    <span>14:10</span>
+  </div>
+  <div class="chat-message">
+    <span><strong>User5</strong>: Reçu ton message.</span>
+    <span>14:11</span>
+  </div>
+  <div class="chat-message">
+    <span><strong>User6</strong>: C’est confidentiel.</span>
+    <span>14:12</span>
+  </div>
+
+  <!-- Bouton pou louvri Chat-prive.html -->
+  <div style="margin-top: 15px;">
+    <a href="Chat-prive.html" class="seminar-btn" style="display: inline-block; text-align: center; text-decoration: none;">Accéder au Chat Privé</a>
+  </div>
+</div>
+<!-- FIN CHAT PRIVÉ -->
+
+    
+    <div class="right">
+      <form>
+        <input type="email" placeholder="Email address" required>
+        <input type="password" placeholder="Password" required>
+        <div class="checkbox">
+          <input type="checkbox" checked>
+          <label>Forgot password?</label>
+        </div>
+        <button class="seminar-btn">Séminaire Cyber-sécurité et Piratage</button>
+      </form>
+      <img src="https://cdn-icons-png.flaticon.com/512/3064/3064197.png" alt="lock" class="lock">
+      <div class="footer-logo">
+        <img src="https://cdn-icons-png.flaticon.com/512/869/869869.png" alt="logo soleil">
+        <span>Foundation Backup Spirituel</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Sign In -->
+  <div id="modal-signin" class="modal">
+    <div class="modal-content">
+      <h2>Connexion</h2>
+      <input type="email" placeholder="Email" required>
+      <input type="password" placeholder="Mot de passe" required>
+      <button>Se connecter</button>
+      <div class="close-btn" onclick="closeModal()">Fermer</div>
+    </div>
+  </div>
+
+  <!-- Modal Sign Up -->
+<div id="modal-signup" class="modal">
+  <div class="modal-content">
+    <h2>Créer un compte</h2>
+    <input id="signup-name" type="text" placeholder="Nom complet" required>
+    <input id="signup-email" type="email" placeholder="Email" required>
+    <input id="signup-password" type="password" placeholder="Mot de passe" required>
+    <input id="signup-confirm" type="password" placeholder="Confirmer mot de passe" required>
+    <button onclick="submitSignup()">Créer un compte</button>
+    <div class="close-btn" onclick="closeModal()">Fermer</div>
+  </div>
+</div>
+
+  <script>
+    function openModal(type) {
+      document.getElementById('modal-signin').style.display = 'none';
+      document.getElementById('modal-signup').style.display = 'none';
+
+      if (type === 'signin') {
+        document.getElementById('modal-signin').style.display = 'flex';
+      } else {
+        document.getElementById('modal-signup').style.display = 'flex';
+      }
+    }
+
+    function closeModal() {
+      document.getElementById('modal-signin').style.display = 'none';
+      document.getElementById('modal-signup').style.display = 'none';
+    }
+  </script>
+
+
+  <script>
+  function submitSignup() {
+    const name = document.getElementById("signup-name").value.trim();
+    const email = document.getElementById("signup-email").value.trim();
+    const password = document.getElementById("signup-password").value.trim();
+    const confirm = document.getElementById("signup-confirm").value.trim();
+
+    if (!name || !email || !password || !confirm) {
+      alert("Tanpri ranpli tout chan yo.");
+      return;
+    }
+
+    if (password !== confirm) {
+      alert("Modpas yo pa menm!");
+      return;
+    }
+
+    fetch("https://chat-en-direct-fobas.onrender.com/api/auth/signup", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ name, email, password })
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (data.success) {
+      alert("✅ Kont kreye! Tanpri verifye imel ou.");
+      closeModal();
+    } else {
+      alert("❌ " + data.message);
+    }
+  })
+  .catch(err => {
+    console.error(err);
+    alert("❌ Erè pandan enskripsyon.");
+  });
+}
+</script>
+  
+</body>
+</html>
