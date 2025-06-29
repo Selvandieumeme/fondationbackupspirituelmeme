@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Fondation Backup Spirituel</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #f5f5f5;
+      color: #333;
+    }
+    header {
+      background: #007bff;
+      color: white;
+      padding: 40px 20px;
+      text-align: center;
+    }
+    nav {
+      background: #0056b3;
+      padding: 10px 20px;
+      text-align: center;
+    }
+    nav a {
+      color: white;
+      margin: 0 15px;
+      text-decoration: none;
+      font-weight: bold;
+    }
+    section {
+      padding: 40px 20px;
+      max-width: 900px;
+      margin: auto;
+    }
+    footer {
+      background: #222;
+      color: white;
+      text-align: center;
+      padding: 20px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Fondation Backup Spirituel</h1>
+    <p>Ensemble pour un avenir meilleur</p>
+  </header>
+
+  <nav>
+    <a href="#">Accueil</a>
+    <a href="#">Qui sommes-nous</a>
+    <a href="#">Nos actions</a>
+    <a href="#">Contact</a>
+  </nav>
+
+  <section>
+    <h2>Bienvenue</h2>
+    <p>
+      La Fondation Backup Spirituel est une organisation à but non lucratif engagée dans l’éducation, le soutien social et spirituel des enfants en Haïti.
+    </p>
+  </section>
+
+  <footer>
+    © 2025 Fondation Backup Spirituel — Tous droits réservés.
+  </footer>
+</body>
+</html>
