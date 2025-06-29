@@ -1,69 +1,203 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Fondation Backup Spirituel</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>Fondation Backup Spirituel – Accueil</title>
+
+  <!-- ░░░  Styles globaux  ░░░ -->
   <style>
-    body {
-      font-family: 'Segoe UI', sans-serif;
-      margin: 0;
-      padding: 0;
-      background: #f5f5f5;
-      color: #333;
+    :root{
+      --bleu:#003366;
+      --bleu-clair:#0055aa;
+      --jaune:#ffcc00;
+      --gris:#f4f4f4;
+      --maxw:1100px;
     }
-    header {
-      background: #007bff;
-      color: white;
-      padding: 40px 20px;
-      text-align: center;
-    }
-    nav {
-      background: #0056b3;
-      padding: 10px 20px;
-      text-align: center;
-    }
-    nav a {
-      color: white;
-      margin: 0 15px;
-      text-decoration: none;
-      font-weight: bold;
-    }
-    section {
-      padding: 40px 20px;
-      max-width: 900px;
-      margin: auto;
-    }
-    footer {
-      background: #222;
-      color: white;
-      text-align: center;
-      padding: 20px;
+    *{box-sizing:border-box;margin:0;padding:0;font-family:Arial,Helvetica,sans-serif}
+    body{color:#333;background:#fff;line-height:1.6}
+    a{text-decoration:none;color:inherit}
+
+    /* ░ Header ░ */
+    header{background:var(--bleu);color:#fff;padding:15px 10px;text-align:center}
+    header img{height:85px;vertical-align:middle}
+    header h1{font-size:2.2rem;font-weight:700;margin-top:8px}
+
+    /* ░ NAV ░ */
+    nav{background:var(--jaune);font-weight:bold}
+    nav ul{display:flex;flex-wrap:wrap;justify-content:center;list-style:none;gap:12px;padding:10px}
+    nav li{position:relative}
+    nav a{padding:10px 16px;border-radius:4px;color:var(--bleu);transition:.25s}
+    nav a:hover{background:var(--bleu);color:#fff}
+    /* lien actif exemple */
+    nav a.active{background:var(--bleu);color:#fff}
+    /* dropdown */
+    .dropdown-content{display:none;position:absolute;top:100%;left:0;background:var(--bleu);min-width:220px;border-radius:4px;z-index:99}
+    .dropdown-content a{display:block;padding:10px 14px;color:#fff}
+    .dropdown-content a:hover{background:var(--bleu-clair)}
+    li.dropdown:hover .dropdown-content{display:block}
+
+    /* ░ HERO ░ */
+    .hero{background:var(--bleu) url("Fobas.jpg") center/cover no-repeat;height:45vh;display:flex;align-items:center;justify-content:center;color:#fff;text-align:center;padding:0 15px}
+    .hero h2{font-size:2.1rem;background:rgba(0,0,0,.45);padding:10px 18px;border-radius:6px}
+
+    /* ░ Sections générales ░ */
+    section{padding:55px 15px;margin:auto;max-width:var(--maxw)}
+    section h2{text-align:center;color:var(--bleu);margin-bottom:28px;font-size:1.9rem}
+    .justify{text-align:justify;}
+
+    /* Fondateurs */
+    .fondateurs{display:flex;flex-wrap:wrap;gap:25px;justify-content:center}
+    .fondateurs figure{flex:1 1 220px;text-align:center}
+    .fondateurs img{width:100%;max-width:250px;border-radius:8px}
+
+    /* Don / Paypal */
+    .don-box{text-align:center}
+    .don-btn{display:inline-block;margin-top:15px;padding:12px 26px;background:var(--bleu);color:#fff;border-radius:8px;font-weight:bold}
+    .don-btn:hover{background:var(--bleu-clair)}
+
+    /* Émission radio */
+    iframe{border:0;border-radius:10px;max-width:100%}
+
+    /* Formulaire contact rapide */
+    form{background:var(--gris);padding:25px;border-radius:10px;max-width:600px;margin:0 auto}
+    input,textarea{width:100%;padding:12px;margin:8px 0;border:1px solid #ccc;border-radius:6px}
+    button.submit{background:var(--bleu);color:#fff;font-weight:bold;padding:12px 24px;border:none;border-radius:6px;cursor:pointer;width:100%}
+    button.submit:hover{background:var(--bleu-clair)}
+
+    /* Footer */
+    footer{background:var(--bleu);color:#fff;text-align:center;padding:18px 10px;margin-top:50px}
+
+    /* ░ Responsive ░ */
+    @media(max-width:700px){
+      header h1{font-size:1.6rem}
+      nav ul{gap:6px}
+      .hero{height:35vh}
+      .fondateurs{flex-direction:column;align-items:center}
     }
   </style>
 </head>
 <body>
+
+  <!-- ░░ Header ░░ -->
   <header>
-    <h1>Fondation Backup Spirituel</h1>
-    <p>Ensemble pour un avenir meilleur</p>
+    <img src="logofobas.png" alt="Logo Fondation">
+    <h1>FONDATION&nbsp;BACKUP&nbsp;SPIRITUEL</h1>
   </header>
 
+  <!-- ░░ Navigation ░░ -->
   <nav>
-    <a href="#">Accueil</a>
-    <a href="#">Qui sommes-nous</a>
-    <a href="#">Nos actions</a>
-    <a href="#">Contact</a>
+    <ul>
+      <li><a href="index.html" class="active">Accueil</a></li>
+      <li><a href="Qui-sommes-nous.html">Qui sommes‑nous</a></li>
+      <li><a href="Parrainez-nous.html">Parrainez‑nous</a></li>
+      <li><a href="Notre-programme-d'alphabetisation.html">Notre&nbsp;Prog.&nbsp;d'Alphabetisation</a></li>
+      <li><a href="Notre-ecole-d'informatique.html">Notre&nbsp;École&nbsp;d'Info.</a></li>
+      <li><a href="Contact.html">Contact</a></li>
+
+      <li class="dropdown">
+        <a href="#">Autres ▾</a>
+        <ul class="dropdown-content">
+          <li><a href="Actualites.html">Actualités</a></li>
+          <li><a href="Blagues-et-histoires.html">Blagues & Histoires</a></li>
+          <li><a href="Emission-Backup-Spirituel.html">Émission Backup Spirituel</a></li>
+          <li><a href="Faire-un-don.html">Faire un don</a></li>
+          <li><a href="Galerie.html">Galerie complète</a></li>
+          <li><a href="Jouez-avec-nous.html">Jouez avec nous</a></li>
+          <li><a href="Nos-actions.html">Nos actions (détail)</a></li>
+          <li><a href="Chat-en-Direct-fobas.html">Chat en Direct Fobas</a></li>
+          <li><a href="Politique-de-confidentialite.html">Politique de confidentialité</a></li>
+        </ul>
+      </li>
+    </ul>
   </nav>
 
+  <!-- ░░ Bandeau / hero ░░ -->
+  <section class="hero">
+    <h2>Ensemble, œuvrons pour un avenir meilleur&nbsp;!</h2>
+  </section>
+
+  <!-- ░░ A propos ░░ -->
   <section>
-    <h2>Bienvenue</h2>
-    <p>
-      La Fondation Backup Spirituel est une organisation � but non lucratif engag�e dans l��ducation, le soutien social et spirituel des enfants en Ha�ti.
+    <h2>À propos de la Fondation</h2>
+    <p class="justify">
+      La <strong>Fondation Backup Spirituel</strong> est une organisation à but non lucratif qui milite pour les
+      droits humains, l’éducation et le soutien communautaire, en particulier pour les femmes et les enfants
+      du Nord‑Ouest d’Haïti. Nos activités reposent sur l’amour, la solidarité, la justice et l’espoir afin de
+      transformer durablement la société haïtienne.
     </p>
   </section>
 
+  <!-- ░░ Fondateurs ░░ -->
+  <section>
+    <h2>Nos Fondateurs</h2>
+    <div class="fondateurs">
+      <figure>
+        <img src="Selvandieu.jpg" alt="M. MEME Selvandieu">
+        <figcaption><strong>M.&nbsp;MEME Selvandieu</strong></figcaption>
+      </figure>
+      <figure>
+        <img src="Ranise.jpg" alt="Mme. MOISE Ranise">
+        <figcaption><strong>Mme&nbsp;MOISE Ranise</strong></figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <!-- ░░ Soutien / Paypal ░░ -->
+  <section>
+    <h2>Nous soutenir</h2>
+    <p class="justify">
+      Vous pouvez changer une vie dès aujourd’hui en faisant un don ou en devenant bénévole.
+    </p>
+    <div class="don-box">
+      <a class="don-btn" href="https://www.paypal.com/donate?business=assobackupspiritueldhaiti@gmail.com" target="_blank">
+        Faire un don via PayPal
+      </a>
+    </div>
+  </section>
+
+  <!-- ░░ Émission Radio ░░ -->
+  <section>
+    <h2>Émission Backup Spirituel</h2>
+    <p style="text-align:center;margin-bottom:20px">
+      En direct chaque <strong>mercredi, jeudi et vendredi</strong> de <strong>12h&nbsp;→&nbsp;14h30</strong>
+      sur Firmament&nbsp;FM&nbsp;88.1
+    </p>
+    <iframe src="https://zeno.fm/player/radiotele-firmament-fm" width="100%" height="140" allow="autoplay"></iframe>
+  </section>
+
+  <!-- ░░ Formulaire Contact rapide (Web3Forms) ░░ -->
+  <section>
+    <h2>Contactez‑nous</h2>
+    <form action="https://api.web3forms.com/submit" method="POST">
+      <!-- Remplace par ta clé -->
+      <input type="hidden" name="access_key" value="VOTRE_CLE_WEB3FORMS">
+      <input type="text" name="name" placeholder="Votre nom" required>
+      <input type="email" name="email" placeholder="Votre e‑mail" required>
+      <textarea name="message" rows="5" placeholder="Votre message…" required></textarea>
+      <button class="submit" type="submit">📩 Envoyer</button>
+    </form>
+  </section>
+
+  <!-- ░░ Coordonnées ░░ -->
+  <section>
+    <h2>Contact</h2>
+    <p style="text-align:center;margin-bottom:8px">
+      📧 Email&nbsp;: <a href="mailto:infos@fondationbackupspirituel.com">infos@fondationbackupspirituel.com</a><br>
+      📍 Adresse&nbsp;: B.P. 59, HT‑4110, Gonaïves, Haïti
+    </p>
+    <div style="text-align:center;margin-top:18px">
+      <a href="https://wa.me/50946057952" target="_blank"
+         style="display:inline-block;background:#25D366;padding:12px 24px;border-radius:30px;color:#fff;font-weight:bold">
+        💬 Écrire sur WhatsApp
+      </a>
+    </div>
+  </section>
+
+  <!-- ░░ Pied de page ░░ -->
   <footer>
-    � 2025 Fondation Backup Spirituel � Tous droits r�serv�s.
+    © 2025 Fondation Backup Spirituel – Tous droits réservés.
   </footer>
+
 </body>
 </html>
