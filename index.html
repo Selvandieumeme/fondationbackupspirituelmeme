@@ -190,18 +190,56 @@ button.submit:hover {
     <iframe src="https://zeno.fm/player/radiotele-firmament-fm" width="100%" height="140" allow="autoplay"></iframe>
   </section>
 
-  <!-- ░░ Formulaire Contact rapide (Web3Forms) ░░ -->
-  <section>
-    <h2>Contactez‑nous</h2>
-    <form action="https://api.web3forms.com/submit" method="POST">
-      <!-- Remplace par ta clé -->
-      <input type="hidden" name="access_key" value="VOTRE_CLE_WEB3FORMS">
-      <input type="text" name="name" placeholder="Votre nom" required>
-      <input type="email" name="email" placeholder="Votre e‑mail" required>
-      <textarea name="message" rows="5" placeholder="Votre message…" required></textarea>
-      <button class="submit" type="submit">📩 Envoyer</button>
-    </form>
-  </section>
+<form action="https://api.web3forms.com/submit" method="POST" onsubmit="return handleFormSubmit(event)">
+  <!-- Kle Web3Forms ou -->
+  <input type="hidden" name="access_key" value="34c56edb-5db8-45f4-aa97-376ddc127b4d">
+
+  <!-- Non -->
+  <input type="text" name="name" placeholder="Votre nom" required>
+
+  <!-- Imèl -->
+  <input type="email" name="email" placeholder="Votre e-mail" required>
+
+  <!-- Mesaj -->
+  <textarea name="message" placeholder="Écrivez votre message ici..." required></textarea>
+
+  <!-- Bouton -->
+  <button type="submit" class="submit">📩 Envoyer le message</button>
+
+  <!-- Mesaj siksè (kache anvan) -->
+  <div id="success-message" style="display:none; color:green; margin-top:15px;">
+    ✅ Merci ! Votre message a bien été envoyé.
+  </div>
+</form>
+
+<!-- Script pou evite redireksyon ak montre mesaj siksè a -->
+<script>
+  function handleFormSubmit(event) {
+    event.preventDefault(); // Anpeche fòm nan voye jan li ye a
+
+    const form = event.target;
+    const formData = new FormData(form);
+
+    fetch(form.action, {
+      method: "POST",
+      body: formData,
+    })
+    .then(response => {
+      if (response.ok) {
+        document.getElementById("success-message").style.display = "block";
+        form.reset(); // Netwaye fòm nan
+      } else {
+        alert("❌ Erè pandan envoi. Tanpri eseye ankò.");
+      }
+    })
+    .catch(error => {
+      alert("❌ Erè rezo. Tanpri eseye ankò.");
+      console.error(error);
+    });
+
+    return false;
+  }
+</script>
 
   <!-- ░░ Coordonnées ░░ -->
   <section>
