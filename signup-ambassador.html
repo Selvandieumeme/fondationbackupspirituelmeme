@@ -15,6 +15,14 @@
   <button type="submit">Siyen & Deveni Ambasadè</button>
 </form>
 
+
+<script>
+function trackClick(ref) {
+  gtag('event', 'ambassador_click', { 'ref_id': ref });
+}
+</script>
+
+
 <script>
 /* Lè fòm nan valide, nou sove imel la nan localStorage pou tracking GA4 */
 document.getElementById('formAmb').addEventListener('submit', e=>{
