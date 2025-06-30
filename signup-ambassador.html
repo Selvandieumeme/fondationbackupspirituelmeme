@@ -1,1 +1,46 @@
+<!-- 1. Fòm enskripsyon Ambasadè -->
+<form action="https://api.web3forms.com/submit" method="POST" id="formAmb">
+  <input type="hidden" name="access_key" value="VOTECLEWEB3FORMS">
+  <input type="hidden" name="redirect"
+         value="https://www.fondationbackupspirituel.com/merci.html">
+  <label>Non konplè
+    <input type="text" name="fullname" required>
+  </label>
+  <label>Email (id anbasadè)
+    <input type="email" name="email" required>
+  </label>
+  <label>Mwen dakò ak 15 règ yo
+    <input type="checkbox" name="agree" required>
+  </label>
+  <button type="submit">Siyen & Deveni Ambasadè</button>
+</form>
 
+<script>
+/* Lè fòm nan valide, nou sove imel la nan localStorage pou tracking GA4 */
+document.getElementById('formAmb').addEventListener('submit', e=>{
+  const mail = e.target.email.value;
+  localStorage.setItem('amb_email', mail);
+});
+</script>
+
+<!-- 2. GA4 + tracking klik AdSense -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXX"></script>
+<script>
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'G-XXXXXXX', {
+  'user_id': localStorage.getItem('amb_email')||'(visiteur)'
+});
+
+/* Track chaque klik nativ sou anons (iframe) */
+document.addEventListener('click', (ev)=>{
+  const ad = ev.target.closest('ins.adsbygoogle');
+  if(ad){
+    gtag('event','ad_click',{
+      'event_category':'AdSense',
+      'event_label': localStorage.getItem('amb_email')||'visiteur'
+    });
+  }
+});
+</script>
