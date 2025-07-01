@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1.0">
-  <title>Offre d’emploi – Ambassadeur Digital | Fondation Backup Spirituel</title>
+  <title>Ambassadeur Digital – Fondation Backup Spirituel</title>
 
   <style>
     :root{--bleu:#003366;--bleu-clair:#0055aa;--jaune:#ffcc00;--gris:#f5f7fa;--maxw:1100px}
@@ -11,26 +11,28 @@
     body{background:#fff;color:#333;line-height:1.6}
     a{text-decoration:none;color:inherit}
 
-    /* ░ Header ░ */
+    /* ── HEADER ── */
     header{background:var(--bleu);color:#fff;text-align:center;padding:18px 10px}
     header img{height:85px}
     header h1{margin-top:6px;font-size:2rem;font-weight:700}
 
-    /* ░ NAV ░ */
+    /* ── NAV ── */
     nav{background:var(--jaune);font-weight:bold}
-    nav ul{display:flex;flex-wrap:wrap;justify-content:center;gap:12px;list-style:none;padding:10px}
+    nav ul{display:flex;flex-wrap:wrap;justify-content:center;gap:12px;list-style:none;padding:10px;white-space:nowrap}
     nav a{padding:10px 16px;border-radius:4px;color:var(--bleu);transition:.25s}
     nav a:hover,nav a.active{background:var(--bleu);color:#fff}
-    .dropdown-content{display:none;position:absolute;top:100%;left:0;background:var(--bleu);min-width:220px;border-radius:4px;z-index:99}
+    li{position:relative}
+    /* dropdown */
+    .dropdown-content{display:none;position:absolute;top:100%;left:0;background:var(--bleu);min-width:220px;border-radius:4px;z-index:9999}
     .dropdown-content a{display:block;padding:10px 14px;color:#fff}
     .dropdown-content a:hover{background:var(--bleu-clair)}
     li.dropdown:hover .dropdown-content{display:block}
 
-    /* ░ Section ░ */
+    /* ── SECTION ── */
     section{max-width:var(--maxw);margin:auto;padding:50px 15px}
-    section h2{text-align:center;color:var(--bleu);margin-bottom:28px;font-size:2rem}
+    h2{color:var(--bleu);text-align:center;margin-bottom:28px;font-size:2rem}
 
-    /* ░ Form ░ */
+    /* ── FORM ── */
     .form-box{background:var(--gris);padding:30px;border-radius:12px;max-width:600px;margin:0 auto}
     .form-box label{display:block;margin-bottom:12px;font-weight:bold}
     .form-box input,.form-box textarea{width:100%;padding:12px;border:1px solid #ccc;border-radius:6px;margin-top:6px}
@@ -38,11 +40,11 @@
     .form-box button:hover{background:var(--bleu-clair)}
     #msgOK{display:none;margin-top:18px;font-weight:bold;color:green;text-align:center}
 
-    /* ░ Règlement ░ */
-    ol.regles{margin-top:40px;max-width:700px;margin-inline:auto;color:#111}
+    /* ── RÈG ── */
+    ol.regles{margin-top:40px;max-width:700px;margin-inline:auto}
     ol.regles li{margin-bottom:10px;text-align:justify}
 
-    /* ░ Footer ░ */
+    /* ── FOOTER ── */
     footer{background:var(--bleu);color:#fff;text-align:center;padding:18px 10px;margin-top:60px}
 
     @media(max-width:700px){
@@ -53,106 +55,95 @@
 </head>
 <body>
 
-  <!-- Header -->
-  <header>
-    <img src="logofobas.png" alt="Logo Fondation">
-    <h1>FONDATION BACKUP SPIRITUEL</h1>
-  </header>
+<header>
+  <img src="logofobas.png" alt="Logo Fondation">
+  <h1>FONDATION BACKUP SPIRITUEL</h1>
+</header>
 
-  <!-- Navigation -->
-  <nav>
-    <ul>
-      <li><a href="index.html">Accueil</a></li>
-      <li><a href="Qui-sommes-nous.html">Qui sommes‑nous</a></li>
-      <li><a href="Parrainez-nous.html">Parrainez‑nous</a></li>
-      <li><a href="Notre-programme-d'alphabetisation.html">Notre Prog. d’Alphabétisation</a></li>
-      <li><a href="Notre-ecole-d'informatique.html">Notre École d’Info.</a></li>
-      <li><a href="Contact.html">Contact</a></li>
-      <li class="dropdown">
-        <a href="#">Autres ▾</a>
-        <ul class="dropdown-content">
-          <li><a href="Actualites.html">Actualités</a></li>
-          <li><a href="Blagues-et-histoires.html">Blagues & Histoires</a></li>
-          <li><a href="Emission-Backup-Spirituel.html">Émission Backup Spirituel</a></li>
-          <li><a href="Faire-un-don.html">Faire un don</a></li>
-          <li><a href="Galerie.html">Galerie complète</a></li>
-          <li><a href="Jouez-avec-nous.html">Jouez avec nous</a></li>
-          <li><a href="Nos-actions.html">Nos actions (détail)</a></li>
-          <li><a href="Chat-en-Direct-fobas.html">Chat en Direct Fobas</a></li>
-          <li><a href="Politique-de-confidentialite.html">Politique de confidentialité</a></li>
-        </ul>
-      </li>
-    </ul>
-  </nav>
+<nav>
+  <ul>
+    <li><a href="index.html">Accueil</a></li>
+    <li><a href="Qui-sommes-nous.html">Qui sommes‑nous</a></li>
+    <li><a href="Parrainez-nous.html">Parrainez‑nous</a></li>
+    <li><a href="Notre-programme-d'alphabetisation.html">Notre Prog. d’Alphabétisation</a></li>
+    <li><a href="Notre-ecole-d'informatique.html">Notre École d’Info.</a></li>
+    <li><a href="Contact.html">Contact</a></li>
+    <li class="dropdown">
+      <a href="#">Autres ▾</a>
+      <ul class="dropdown-content">
+        <li><a href="Actualites.html">Actualités</a></li>
+        <li><a href="Blagues-et-histoires.html">Blagues & Histoires</a></li>
+        <li><a href="Emission-Backup-Spirituel.html">Émission Backup Spirituel</a></li>
+        <li><a href="Faire-un-don.html">Faire un don</a></li>
+        <li><a href="Galerie.html">Galerie complète</a></li>
+        <li><a href="Jouez-avec-nous.html">Jouez avec nous</a></li>
+        <li><a href="Nos-actions.html">Nos actions (détail)</a></li>
+        <li><a href="Chat-en-Direct-fobas.html">Chat en Direct Fobas</a></li>
+        <li><a href="Politique-de-confidentialite.html">Politique de confidentialité</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav>
 
-  <!-- Offre -->
-  <section>
-    <h2 style="color:var(--jaune);font-size:2.2rem">OFFRE D’EMPLOI URGENT : Ambassadeur Digital</h2>
+<section>
+  <h2 style="color:var(--jaune);font-size:2.2rem">OFFRE D’EMPLOI URGENT : Ambassadeur Digital</h2>
 
-    <!-- Formulaire -->
-    <div class="form-box">
-      <form action="https://api.web3forms.com/submit" method="POST" id="formAmb">
-        <!-- Web3Forms -->
-        <input type="hidden" name="access_key" value="VOTECLEWEB3FORMS">
-        <input type="hidden" name="redirect" value="https://www.fondationbackupspirituel.com/merci.html">
+  <div class="form-box">
+    <form action="https://api.web3forms.com/submit" method="POST" id="formAmb">
+      <input type="hidden" name="access_key" value="34c56edb-5db8-45f4-aa97-376ddc127b4d">
+      <input type="hidden" name="redirect" value="https://www.fondationbackupspirituel.com/merci.html">
+      <label>Nom complet
+        <input type="text" name="fullname" required>
+      </label>
+      <label>Email (ID ambassadeur)
+        <input type="email" name="email" required>
+      </label>
+      <label style="display:flex;align-items:center;gap:8px">
+        <input type="checkbox" name="agree" required>
+        Mwen dakò ak 15 règ ki anba yo
+      </label>
+      <button type="submit">📩 Siyen & Deveni Ambassadeur</button>
+      <div id="msgOK">✅ Mèsi ! Demann ou an byen voye.</div>
+    </form>
+  </div>
 
-        <label>Nom complet
-          <input type="text" name="fullname" required>
-        </label>
+  <ol class="regles">
+    <li>Pa janm klike sou pwòp anons ou.</li>
+    <li>Pa fòse ni twonpe moun pou klike.</li>
+    <li>Pa sèvi ak VPN, proxys, bot pou trafik.</li>
+    <li>Yon sèl kont/ID pa moun.</li>
+    <li>Pa modifye kòd sit la san otorizasyon.</li>
+    <li>Imèl ou dwe veritab & aksesib.</li>
+    <li>Trafik dwe òganik, soti nan kominote w.</li>
+    <li>Rapòte tousuit nenpòt defo oswa abiz.</li>
+    <li>Respekte règ Google AdSense nèt.</li>
+    <li>Entèdi rafrechi paj la otomatikman.</li>
+    <li>Limite a 2 klik pa anons pa vizitè.</li>
+    <li>Pa janm achte ni vann klik.</li>
+    <li>Pwoteje done & vi‑prive vizitè yo.</li>
+    <li>Pa pataje aksè administratè ou.</li>
+    <li>Sispansyon & ranbousman si ou vyole règ yo.</li>
+  </ol>
+</section>
 
-        <label>Email (utilisé comme ID ambassadeur)
-          <input type="email" name="email" required>
-        </label>
+<footer>
+  © 2025 Fondation Backup Spirituel – Tous droits réservés.
+</footer>
 
-        <label>
-          <input type="checkbox" name="agree" required>
-          Mwen li & m’aksepte 15 règ yo
-        </label>
+<script>
+function handleFormSubmit(e){
+  e.preventDefault();
+  const f=e.target, fd=new FormData(f);
+  fetch(f.action,{method:"POST",body:fd})
+    .then(r=>{
+      if(r.ok){document.getElementById('msgOK').style.display='block';f.reset();}
+      else{alert("❌ Erè pandan voye, tanpri re‑eseye.");}
+    })
+    .catch(()=>alert("❌ Pwoblèm rezo, re‑eseye."));
+  return false;
+}
+document.getElementById('formAmb').addEventListener('submit',handleFormSubmit);
+</script>
 
-        <button type="submit">📩 Siyen & Deveni Ambassadeur</button>
-
-        <div id="msgOK">✅ Mèsi ! Demann ou an byen voye.</div>
-      </form>
-    </div>
-
-    <!-- 15 règ strik -->
-    <ol class="regles">
-      <li>Pa janm klike sou pwòp anons ou.</li>
-      <li>Pa fòse ni twonpe moun pou klike.</li>
-      <li>Pa sèvi ak VPN, proxys ni bot pou trafik.</li>
-      <li>Yon sèl kont/ID pa moun.</li>
-      <li>Pa modifye kòd sit la san otorizasyon.</li>
-      <li>Imèl ou dwe veritab & aksesib.</li>
-      <li>Trafik dwe òganik, soti nan kominote w.</li>
-      <li>Rapòte imedyatman nenpòt defo oswa abiz.</li>
-      <li>Respekte règ Google AdSense an antye.</li>
-      <li>Entèdi rafrechi paj la otomatikman.</li>
-      <li>Limite a 2 klik pa anons pa sesyon/vizitè.</li>
-      <li>Pa janm achte ni vann klik.</li>
-      <li>Pwoteje done & vi‑prive vizitè yo.</li>
-      <li>Pa pataje aksè administratè ou.</li>
-      <li>Vyolasyon = revokasyon + peye anile.</li>
-    </ol>
-  </section>
-
-  <footer>
-    © 2025 Fondation Backup Spirituel – Tous droits réservés.
-  </footer>
-
-  <!-- JS : anti‑redirection + tracking simple -->
-  <script>
-    function handleFormSubmit(e){
-      e.preventDefault();
-      const f=e.target, fd=new FormData(f);
-      fetch(f.action,{method:"POST",body:fd})
-        .then(r=>{
-          if(r.ok){document.getElementById("msgOK").style.display="block";f.reset();}
-          else{alert("❌ Erè pandan voye, tanpri re‑eseye.");}
-        })
-        .catch(()=>alert("❌ Pwoblèm rezo, re‑eseye."));
-      return false;
-    }
-    document.getElementById('formAmb').addEventListener('submit',handleFormSubmit);
-  </script>
 </body>
 </html>
