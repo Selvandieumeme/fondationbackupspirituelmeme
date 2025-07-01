@@ -3,17 +3,16 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <meta name="theme-color" content="#003366">
+  <meta name="description" content="Site officiel de la Fondation Backup Spirituel en Haïti.">
+  <!-- Open‑Graph (bonus SEO) -->
+  <meta property="og:title" content="Fondation Backup Spirituel">
+  <meta property="og:description" content="Œuvrons ensemble pour un avenir meilleur en Haïti.">
   <title>Fondation Backup Spirituel – Accueil</title>
 
   <!-- ░░░  Styles globaux  ░░░ -->
   <style>
-    :root{
-      --bleu:#003366;
-      --bleu-clair:#0055aa;
-      --jaune:#ffcc00;
-      --gris:#f4f4f4;
-      --maxw:1100px;
-    }
+    :root{--bleu:#003366;--bleu-clair:#0055aa;--jaune:#ffcc00;--gris:#f4f4f4;--maxw:1100px}
     *{box-sizing:border-box;margin:0;padding:0;font-family:Arial,Helvetica,sans-serif}
     body{color:#333;background:#fff;line-height:1.6}
     a{text-decoration:none;color:inherit}
@@ -28,10 +27,7 @@
     nav ul{display:flex;flex-wrap:wrap;justify-content:center;list-style:none;gap:12px;padding:10px}
     nav li{position:relative}
     nav a{padding:10px 16px;border-radius:4px;color:var(--bleu);transition:.25s}
-    nav a:hover{background:var(--bleu);color:#fff}
-    /* lien actif exemple */
-    nav a.active{background:var(--bleu);color:#fff}
-    /* dropdown */
+    nav a:hover,nav a.active{background:var(--bleu);color:#fff}
     .dropdown-content{display:none;position:absolute;top:100%;left:0;background:var(--bleu);min-width:220px;border-radius:4px;z-index:99}
     .dropdown-content a{display:block;padding:10px 14px;color:#fff}
     .dropdown-content a:hover{background:var(--bleu-clair)}
@@ -41,7 +37,7 @@
     .hero{background:var(--bleu) url("Fobasbon1.jpg") center/cover no-repeat;height:45vh;display:flex;align-items:center;justify-content:center;color:#fff;text-align:center;padding:0 15px}
     .hero h2{font-size:2.1rem;background:rgba(0,0,0,.45);padding:10px 18px;border-radius:6px}
 
-    /* ░ Sections générales ░ */
+    /* ░ Sections ░ */
     section{padding:55px 15px;margin:auto;max-width:var(--maxw)}
     section h2{text-align:center;color:var(--bleu);margin-bottom:28px;font-size:1.9rem}
     .justify{text-align:justify;}
@@ -56,14 +52,10 @@
     .don-btn{display:inline-block;margin-top:15px;padding:12px 26px;background:var(--bleu);color:#fff;border-radius:8px;font-weight:bold}
     .don-btn:hover{background:var(--bleu-clair)}
 
-    /* Émission radio */
-    iframe{border:0;border-radius:10px;max-width:100%}
-
-
     /* Footer */
     footer{background:var(--bleu);color:#fff;text-align:center;padding:18px 10px;margin-top:50px}
 
-    /* ░ Responsive ░ */
+    /* Responsive */
     @media(max-width:700px){
       header h1{font-size:1.6rem}
       nav ul{gap:6px}
@@ -74,13 +66,13 @@
 </head>
 <body>
 
-  <!-- ░░ Header ░░ -->
+  <!-- ░ Header ░ -->
   <header>
     <img src="logofobas.png" alt="Logo Fondation">
     <h1>FONDATION&nbsp;BACKUP&nbsp;SPIRITUEL</h1>
   </header>
 
-  <!-- ░░ Navigation ░░ -->
+  <!-- ░ Navigation ░ -->
   <nav>
     <ul>
       <li><a href="index.html" class="active">Accueil</a></li>
@@ -102,18 +94,18 @@
           <li><a href="Nos-actions.html">Nos actions (détail)</a></li>
           <li><a href="Chat-en-Direct-fobas.html">Chat en Direct Fobas</a></li>
           <li><a href="Politique-de-confidentialite.html">Politique de confidentialité</a></li>
-          <li><a href="signup-ambassador.html">Ambassadeur Digital</a></li>
+          <li><a href="signup-ambassador.html">Inscription Ambassadeur Digital</a></li>
         </ul>
       </li>
     </ul>
   </nav>
 
-  <!-- ░░ Bandeau / hero ░░ -->
+  <!-- ░ Bandeau ░ -->
   <section class="hero">
     <h2>Ensemble, œuvrons pour un avenir meilleur&nbsp;!</h2>
   </section>
 
-  <!-- ░░ A propos ░░ -->
+  <!-- ░ A propos ░ -->
   <section>
     <h2>À propos de la Fondation</h2>
     <p class="justify">
@@ -124,7 +116,7 @@
     </p>
   </section>
 
-  <!-- ░░ Fondateurs ░░ -->
+  <!-- ░ Fondateurs ░ -->
   <section>
     <h2>Nos Fondateurs</h2>
     <div class="fondateurs">
@@ -138,21 +130,19 @@
       </figure>
     </div>
   </section>
-  
-  <!-- ░░ Soutien / Paypal ░░ -->
+
+  <!-- ░ Soutien ░ -->
   <section>
     <h2>Nous soutenir</h2>
-    <p class="justify">
-      Vous pouvez changer une vie dès aujourd’hui en faisant un don ou en devenant bénévole.
-    </p>
+    <p class="justify">Vous pouvez changer une vie dès aujourd’hui en faisant un don ou en devenant bénévole.</p>
     <div class="don-box">
       <a class="don-btn" href="https://www.paypal.com/donate?business=assobackupspiritueldhaiti@gmail.com" target="_blank">
-        Faire un don via PayPal
+        <img src="paypal-logo.png" alt="" style="width:22px;vertical-align:middle;margin-right:8px">Faire un don via PayPal
       </a>
     </div>
   </section>
 
-  <!-- ░░ Émission Radio ░░ -->
+  <!-- ░ Émission ░ -->
   <section>
     <h2>Émission Backup Spirituel</h2>
     <p style="text-align:center;margin-bottom:20px">
@@ -162,58 +152,34 @@
     <iframe src="https://zeno.fm/player/radiotele-firmament-fm" width="100%" height="140" allow="autoplay"></iframe>
   </section>
 
-<form action="https://api.web3forms.com/submit" method="POST" onsubmit="return handleFormSubmit(event)">
-  <!-- Kle Web3Forms ou -->
-  <input type="hidden" name="access_key" value="34c56edb-5db8-45f4-aa97-376ddc127b4d">
+  <!-- ░ Fòm kontak ░ -->
+  <section id="contact-form">
+    <h2>Contactez‑nous</h2>
 
-  <!-- Non -->
-  <input type="text" name="name" placeholder="Votre nom" required>
+    <form action="https://api.web3forms.com/submit"
+          method="POST" data-form-type="contact"
+          onsubmit="return handleFormSubmit(event)"
+          style="background:var(--gris);padding:25px;border-radius:10px;max-width:600px;margin:0 auto">
+      
+      <input type="hidden" name="access_key" value="34c56edb-5db8-45f4-aa97-376ddc127b4d">
+      
+      <input type="text"   name="name"    placeholder="Votre nom"           required>
+      <input type="email"  name="email"   placeholder="Votre e‑mail"        required>
+      <textarea name="message" rows="5"   placeholder="Écrivez votre message ici..." required></textarea>
+      
+      <button type="submit" class="submit"
+              style="background:var(--bleu);color:#fff;padding:12px 24px;border:none;border-radius:6px;cursor:pointer;width:100%">
+        📩 Envoyer le message
+      </button>
+      
+      <div id="success-message"
+           style="display:none;color:green;margin-top:15px;font-weight:bold;text-align:center">
+        ✅ Merci ! Votre message a bien été envoyé.
+      </div>
+    </form>
+  </section>
 
-  <!-- Imèl -->
-  <input type="email" name="email" placeholder="Votre e-mail" required>
-
-  <!-- Mesaj -->
-  <textarea name="message" placeholder="Écrivez votre message ici..." required></textarea>
-
-  <!-- Bouton -->
-  <button type="submit" class="submit">📩 Envoyer le message</button>
-
-  <!-- Mesaj siksè (kache anvan) -->
-  <div id="success-message" style="display:none; color:green; margin-top:15px;">
-    ✅ Merci ! Votre message a bien été envoyé.
-  </div>
-</form>
-
-<!-- Script pou evite redireksyon ak montre mesaj siksè a -->
-<script>
-  function handleFormSubmit(event) {
-    event.preventDefault(); // Anpeche fòm nan voye jan li ye a
-
-    const form = event.target;
-    const formData = new FormData(form);
-
-    fetch(form.action, {
-      method: "POST",
-      body: formData,
-    })
-    .then(response => {
-      if (response.ok) {
-        document.getElementById("success-message").style.display = "block";
-        form.reset(); // Netwaye fòm nan
-      } else {
-        alert("❌ Erè pandan envoi. Tanpri eseye ankò.");
-      }
-    })
-    .catch(error => {
-      alert("❌ Erè rezo. Tanpri eseye ankò.");
-      console.error(error);
-    });
-
-    return false;
-  }
-</script>
-
-  <!-- ░░ Coordonnées ░░ -->
+  <!-- ░ Coordonnées ░ -->
   <section>
     <h2>Contact</h2>
     <p style="text-align:center;margin-bottom:8px">
@@ -228,10 +194,28 @@
     </div>
   </section>
 
-  <!-- ░░ Pied de page ░░ -->
   <footer>
     © 2025 Fondation Backup Spirituel – Tous droits réservés.
   </footer>
 
+  <!-- ░ JS Form handler ░ -->
+  <script>
+    function handleFormSubmit(e){
+      e.preventDefault();
+      const form = e.target, fd = new FormData(form);
+
+      fetch(form.action,{method:"POST",body:fd})
+        .then(r=>{
+          if(r.ok){
+            document.getElementById("success-message").style.display="block";
+            form.reset();
+          }else{
+            alert("❌ Erreur lors de l’envoi, réessayez.");
+          }
+        })
+        .catch(()=>alert("❌ Problème réseau, réessayez."));
+      return false;
+    }
+  </script>
 </body>
 </html>
