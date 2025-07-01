@@ -139,6 +139,54 @@
     </div>
   </section>
 
+<!-- *** Mete anba pati ‘Nos actions’ oswa nenpòt kote ou vle *** -->
+<section id="devenir-ambassadeur" style="padding:40px 15px;">
+  <h2>Vin Ambassadeur Digital</h2>
+
+  <!-- FÒM -->
+  <!-- Kole ENTÈGRAL, **anndan body** la -->
+  <form action="https://api.web3forms.com/submit"
+        method="POST" id="ambassadorForm">
+      <input type="hidden" name="access_key"
+             value="VOTRE_CLE_ICI">
+      <input type="hidden" name="subject"
+             value="Nouvo Demande Ambassadeur">
+
+      <label>Non konplè *</label>
+      <input type="text" name="name" required>
+
+      <label>Imèl *</label>
+      <input type="email" name="email" required>
+
+      <label>WhatsApp (opsyonèl)</label>
+      <input type="text" name="whatsapp">
+
+      <button type="submit">📩 Mwen vle patisipe</button>
+  </form>
+
+  <p id="amb-msg" style="font-weight:bold;"></p>
+</section>
+
+<script>
+/*  ➜ Kole skript sa Apre fòm nan, toujou anndan <body>  */
+document.getElementById('ambassadorForm')
+ .addEventListener('submit',async(e)=>{
+   e.preventDefault();
+   const fd = new FormData(e.target);
+   const id = crypto.randomUUID().slice(0,8);
+   fd.append('ambassador_id', id);
+
+   document.cookie = `ambassador=${id}; max-age=${60*60*24*365}; path=/`;
+
+   const rsp = await fetch(e.target.action,{method:'POST',body:fd});
+   document.getElementById('amb-msg').innerText =
+      rsp.ok ? "✅ Demande resevwa ! Nou kontakte w byento." :
+               "❌ Erè pandan envoi. Rekòmanse.";
+   if(rsp.ok) e.target.reset();
+});
+</script>
+
+  
   <!-- ░░ Soutien / Paypal ░░ -->
   <section>
     <h2>Nous soutenir</h2>
