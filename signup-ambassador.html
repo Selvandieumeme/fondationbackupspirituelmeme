@@ -1,4 +1,4 @@
-<!-- signup-ambassador.html – Vèsyon fikse -->
+<!-- signup-ambassador.html – version finale korije ak nouvo kle -->
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -50,7 +50,6 @@
 </head>
 <body>
 
-<!-- ░ Header & nav rete menm jan ░ -->
 <header>
   <img src="logofobas.png" alt="Logo Fondation">
   <h1>FONDATION BACKUP SPIRITUEL</h1>
@@ -84,7 +83,6 @@
 <section>
   <h2 style="color:var(--jaune);font-size:2.2rem">OFFRE D’EMPLOI URGENT : Ambassadeur Digital</h2>
 
-  <!-- ░ Formulaire ░ -->
   <div class="form-box">
     <form id="formAmb">
       <input type="hidden" name="access_key" value="34c56edb-5db8-45f4-aa97-376ddc127b4d">
@@ -123,7 +121,6 @@
     </form>
   </div>
 
-  <!-- Règleman -->
   <ol class="regles">
     <li>Pa janm klike sou pwòp anons ou.</li>
     <li>Pa fòse ni twonpe moun pou klike.</li>
@@ -147,26 +144,25 @@
   © 2025 Fondation Backup Spirituel – Tous droits réservés.
 </footer>
 
-<!-- ░ JavaScript : envoi AJAX + feedback ░ -->
 <script>
-document.getElementById('formAmb').addEventListener('submit',async e=>{
+document.getElementById('formAmb').addEventListener('submit', async e => {
   e.preventDefault();
   const fd = new FormData(e.target);
-  fd.append('redirect','0');            // di Web3Forms pou pa redirije
-  try{
-    const r = await fetch('https://api.web3forms.com/submit',{
-      method:'POST',
-      headers:{'Accept':'application/json'},
-      body:fd
+  fd.append('redirect', '0'); // Kenbe sou menm paj
+  try {
+    const r = await fetch('https://api.web3forms.com/submit', {
+      method: 'POST',
+      headers: {'Accept': 'application/json'},
+      body: fd
     });
     const res = await r.json();
-    if(res.success){
-      document.getElementById('msgOK').style.display='block';
+    if (r.ok && res.success) {
+      document.getElementById('msgOK').style.display = 'block';
       e.target.reset();
-    }else{
-      alert('❌ Erè: '+(res.message||'tanpri eseye ankò.'));
+    } else {
+      alert('❌ Erè: ' + (res.message || 'Tanpri eseye ankò.'));
     }
-  }catch{
+  } catch {
     alert('❌ Pwoblèm rezo; tanpri re‑eseye.');
   }
 });
