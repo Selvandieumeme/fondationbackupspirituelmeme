@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1.0">
   <title>Contact – Fondation Backup Spirituel</title>
 
-  <!-- STYLES communs (menm ak lòt paj) -->
+  <!-- Styles globaux (bleu & jaune fondasyon) -->
   <style>
     :root{--bleu:#003366;--bleu-clair:#0055aa;--jaune:#ffcc00;--gris:#f5f7fa;--maxw:1100px}
     *{box-sizing:border-box;margin:0;padding:0;font-family:Arial,Helvetica,sans-serif}
@@ -17,7 +17,7 @@
     header img{height:85px}
     header h1{margin-top:6px;font-size:2rem;font-weight:700}
 
-    /* NAV */
+    /* NAVIGATION */
     nav{background:var(--jaune);font-weight:bold}
     nav ul{display:flex;flex-wrap:wrap;justify-content:center;gap:12px;list-style:none;padding:10px;white-space:nowrap}
     nav a{padding:10px 16px;border-radius:4px;color:var(--bleu);transition:.25s}
@@ -28,14 +28,14 @@
     .dropdown-content a:hover{background:var(--bleu-clair)}
     li.dropdown:hover .dropdown-content{display:block}
 
-    /* SECTION */
+    /* CONTENU */
     section{max-width:var(--maxw);margin:auto;padding:50px 15px}
     h2{color:var(--bleu);text-align:center;margin-bottom:28px;font-size:2rem}
     .infos{display:flex;flex-direction:column;gap:14px;margin-bottom:35px;font-size:1.1rem}
     .infos span{display:flex;align-items:center;gap:8px}
     .infos i{font-style:normal;color:var(--bleu)}
 
-    /* FORM */
+    /* FORMULAIRE */
     form{background:var(--gris);padding:25px;border-radius:10px;max-width:650px;margin:auto}
     label{display:block;margin-top:14px;font-weight:bold}
     input,textarea{width:100%;padding:12px;margin-top:6px;border:1px solid #ccc;border-radius:6px;font-size:1rem}
@@ -55,13 +55,13 @@
 </head>
 <body>
 
-<!-- HEADER -->
+<!-- ░░ Header ░░ -->
 <header>
   <img src="logofobas.png" alt="Logo Fondation">
   <h1>FONDATION BACKUP SPIRITUEL</h1>
 </header>
 
-<!-- NAVIGATION -->
+<!-- ░░ Navigation ░░ -->
 <nav>
   <ul>
     <li><a href="index.html">Accueil</a></li>
@@ -88,7 +88,7 @@
   </ul>
 </nav>
 
-<!-- CONTENU -->
+<!-- ░░ Section Contact ░░ -->
 <section>
   <h2>Contactez‑nous</h2>
 
@@ -99,10 +99,10 @@
     <span><i>💬</i> WhatsApp : <a href="https://wa.me/50946057952" target="_blank">+509 4605 7952</a></span>
   </div>
 
-  <!-- FÒM -->
+  <!-- Formulaire -->
   <form action="https://api.web3forms.com/submit" method="POST" id="contactForm">
+    <!-- kle piblik Web3Forms -->
     <input type="hidden" name="access_key" value="34c56edb-5db8-45f4-aa97-376ddc127b4d">
-    <input type="hidden" name="redirect" value="https://www.fondationbackupspirituel.com/merci.html">
 
     <label>Nom / Prénom
       <input type="text" name="name" required>
@@ -121,20 +121,20 @@
     </label>
 
     <button type="submit">📩 Envoyer</button>
-    <div id="success">✅ Merci ! Votre message a été envoyé.</div>
+    <div id="success">✅ Merci ! Votre message a bien été envoyé.</div>
   </form>
 </section>
 
-<!-- FOOTER -->
+<!-- ░░ Footer ░░ -->
 <footer>
   © 2025 Fondation Backup Spirituel – Tous droits réservés.
 </footer>
 
-<!-- JS : envoi AJAX pour rester sur le domaine -->
+<!-- JS : envoi AJAX + confirmation locale -->
 <script>
-  document.getElementById('contactForm').addEventListener('submit',function(e){
+  document.getElementById('contactForm').addEventListener('submit', function(e){
     e.preventDefault();
-    const f=new FormData(this);
+    const f = new FormData(this);
     fetch(this.action,{method:'POST',body:f})
       .then(r=>{
         if(r.ok){
