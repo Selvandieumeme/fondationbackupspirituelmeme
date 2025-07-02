@@ -1,1 +1,150 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>Contact – Fondation Backup Spirituel</title>
 
+  <!-- STYLES communs (menm ak lòt paj) -->
+  <style>
+    :root{--bleu:#003366;--bleu-clair:#0055aa;--jaune:#ffcc00;--gris:#f5f7fa;--maxw:1100px}
+    *{box-sizing:border-box;margin:0;padding:0;font-family:Arial,Helvetica,sans-serif}
+    body{background:#fff;color:#333;line-height:1.6}
+    a{text-decoration:none;color:inherit}
+
+    /* HEADER */
+    header{background:var(--bleu);color:#fff;text-align:center;padding:18px 10px}
+    header img{height:85px}
+    header h1{margin-top:6px;font-size:2rem;font-weight:700}
+
+    /* NAV */
+    nav{background:var(--jaune);font-weight:bold}
+    nav ul{display:flex;flex-wrap:wrap;justify-content:center;gap:12px;list-style:none;padding:10px;white-space:nowrap}
+    nav a{padding:10px 16px;border-radius:4px;color:var(--bleu);transition:.25s}
+    nav a:hover,nav a.active{background:var(--bleu);color:#fff}
+    li{position:relative}
+    .dropdown-content{display:none;position:absolute;top:100%;left:0;background:var(--bleu);min-width:220px;border-radius:4px;z-index:99}
+    .dropdown-content a{display:block;padding:10px 14px;color:#fff}
+    .dropdown-content a:hover{background:var(--bleu-clair)}
+    li.dropdown:hover .dropdown-content{display:block}
+
+    /* SECTION */
+    section{max-width:var(--maxw);margin:auto;padding:50px 15px}
+    h2{color:var(--bleu);text-align:center;margin-bottom:28px;font-size:2rem}
+    .infos{display:flex;flex-direction:column;gap:14px;margin-bottom:35px;font-size:1.1rem}
+    .infos span{display:flex;align-items:center;gap:8px}
+    .infos i{font-style:normal;color:var(--bleu)}
+
+    /* FORM */
+    form{background:var(--gris);padding:25px;border-radius:10px;max-width:650px;margin:auto}
+    label{display:block;margin-top:14px;font-weight:bold}
+    input,textarea{width:100%;padding:12px;margin-top:6px;border:1px solid #ccc;border-radius:6px;font-size:1rem}
+    textarea{resize:vertical;min-height:140px}
+    button{margin-top:18px;width:100%;padding:14px;background:var(--bleu);color:#fff;font-weight:bold;border:none;border-radius:8px;cursor:pointer;font-size:1.05rem}
+    button:hover{background:var(--bleu-clair)}
+    #success{display:none;color:green;text-align:center;margin-top:15px;font-weight:bold}
+
+    /* FOOTER */
+    footer{background:var(--bleu);color:#fff;text-align:center;padding:18px 10px;margin-top:60px}
+
+    @media(max-width:700px){
+      header h1{font-size:1.5rem}
+      nav ul{gap:6px}
+    }
+  </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <img src="logofobas.png" alt="Logo Fondation">
+  <h1>FONDATION BACKUP SPIRITUEL</h1>
+</header>
+
+<!-- NAVIGATION -->
+<nav>
+  <ul>
+    <li><a href="index.html">Accueil</a></li>
+    <li><a href="Qui-sommes-nous.html">Qui sommes‑nous</a></li>
+    <li><a href="Parrainez-nous.html">Parrainez‑nous</a></li>
+    <li><a href="Notre-programme-d'alphabetisation.html">Prog. d’Alphabétisation</a></li>
+    <li><a href="Notre-ecole-d'informatique.html">Notre École d’Info.</a></li>
+    <li><a href="Contact.html" class="active">Contact</a></li>
+
+    <li class="dropdown">
+      <a href="#">Autres ▾</a>
+      <ul class="dropdown-content">
+        <li><a href="Actualites.html">Actualités</a></li>
+        <li><a href="Blagues-et-histoires.html">Blagues & Histoires</a></li>
+        <li><a href="Emission-Backup-Spirituel.html">Émission Backup Spirituel</a></li>
+        <li><a href="Faire-un-don.html">Faire un don</a></li>
+        <li><a href="Galerie.html">Galerie complète</a></li>
+        <li><a href="Jouez-avec-nous.html">Jouez avec nous</a></li>
+        <li><a href="Nos-actions.html">Nos actions (détail)</a></li>
+        <li><a href="Chat-en-Direct-fobas.html">Chat en Direct Fobas</a></li>
+        <li><a href="Politique-de-confidentialite.html">Politique de confidentialité</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+
+<!-- CONTENU -->
+<section>
+  <h2>Contactez‑nous</h2>
+
+  <!-- Infos rapides -->
+  <div class="infos">
+    <span><i>📧</i> Email : <a href="mailto:infos@fondationbackupspirituel.com">infos@fondationbackupspirituel.com</a></span>
+    <span><i>📍</i> Adresse : B.P. 59, HT‑4110, Gonaïves, Haïti</span>
+    <span><i>💬</i> WhatsApp : <a href="https://wa.me/50946057952" target="_blank">+509 4605 7952</a></span>
+  </div>
+
+  <!-- FÒM -->
+  <form action="https://api.web3forms.com/submit" method="POST" id="contactForm">
+    <input type="hidden" name="access_key" value="34c56edb-5db8-45f4-aa97-376ddc127b4d">
+    <input type="hidden" name="redirect" value="https://www.fondationbackupspirituel.com/merci.html">
+
+    <label>Nom / Prénom
+      <input type="text" name="name" required>
+    </label>
+
+    <label>Pays
+      <input type="text" name="country" required>
+    </label>
+
+    <label>Email
+      <input type="email" name="email" required>
+    </label>
+
+    <label>Message
+      <textarea name="message" required></textarea>
+    </label>
+
+    <button type="submit">📩 Envoyer</button>
+    <div id="success">✅ Merci ! Votre message a été envoyé.</div>
+  </form>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  © 2025 Fondation Backup Spirituel – Tous droits réservés.
+</footer>
+
+<!-- JS : envoi AJAX pour rester sur le domaine -->
+<script>
+  document.getElementById('contactForm').addEventListener('submit',function(e){
+    e.preventDefault();
+    const f=new FormData(this);
+    fetch(this.action,{method:'POST',body:f})
+      .then(r=>{
+        if(r.ok){
+          document.getElementById('success').style.display='block';
+          this.reset();
+        }else alert("❌ Erreur d’envoi, réessayez.");
+      })
+      .catch(()=>alert("❌ Problème réseau, réessayez."));
+  });
+</script>
+
+</body>
+</html>
