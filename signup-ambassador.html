@@ -160,10 +160,10 @@ document.getElementById('formAmb').addEventListener('submit', async e => {
       document.getElementById('msgOK').style.display = 'block';
       e.target.reset();
     } else {
-      alert('❌ reyisi: ' + (res.message || 'Tanpri Merci, mesaj ou byen ale.'));
+      alert('❌ Erè: ' + (res.message || 'Tanpri eseye ankò.'));
     }
   } catch {
-    alert('❌ Merci, mesaj byen ale!.');
+    alert('❌ Pwoblèm rezo; tanpri re‑eseye.');
   }
 });
 </script>
