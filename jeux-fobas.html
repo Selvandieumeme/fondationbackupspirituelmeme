@@ -10,6 +10,12 @@
     body{background:#fff;color:#333;line-height:1.6}
     a{text-decoration:none;color:inherit}
 
+/* === QUIZ JEZIKRI === */
+.quizJCQ{margin-bottom:10px;font-weight:bold}
+#jcOpts button{margin:5px 8px}
+#jcExplain{margin-top:14px;color:#0055aa}
+
+    
     /* HEADER & NAV */
     header{background:var(--bleu);color:#fff;text-align:center;padding:18px 10px}
     header img{height:85px}
@@ -46,6 +52,14 @@
       .cards{grid-template-columns:repeat(4,70px)}
       .card{width:70px;height:70px}
     }
+
+/* DOMINO */
+.domBoard{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin:15px auto 20px}
+.domTile{width:60px;height:28px;background:#fff;border:2px solid var(--bleu-clair);border-radius:4px;
+         display:flex;align-items:center;justify-content:space-between;padding:0 6px;font-weight:bold;cursor:default}
+.domHand{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-top:15px}
+.domHand .domTile{cursor:pointer;background:#fffbdd}
+    
   </style>
 </head>
 <body>
@@ -136,6 +150,28 @@
   <button onclick="startMem()">Rekòmanse</button>
 </section>
 
+<!-- JEU 6 – Domino 7×7 -->
+<section class="game">
+  <h3>6. Domino (Ou kont Robo)</h3>
+  <p>Klike sou yon domino nan men ou ki matche youn nan bout yo. Premye ki fini wòch li yo genyen !</p>
+  <div id="domBoard" class="domBoard"></div>
+  <strong>Men ou :</strong>
+  <div id="playerHand" class="domHand"></div>
+  <p id="domMsg"></p>
+  <button onclick="initDomino()">Rekòmanse</button>
+</section>
+
+<!-- JEU 7 – Dekouvri Jezikri -->
+<section class="game">
+  <h3>7. Dekouvri Jezikri – Gran Quiz Biblik</h3>
+  <p>Reponn 15 kesyon sou lavi Jezi‑Kris. Apre chak repons, w ap jwenn ti eksplikasyon ak vèsè Bib pou w aprann plis. Eseye fè 12/15 pou vin “Elèv Jezi” !</p>
+
+  <p id="jcQ" class="quizJCQ"></p>
+  <div id="jcOpts"></div>
+  <p id="jcExplain"></p>
+  <p id="jcScore"></p>
+  <button id="jcNext" onclick="nextJC()">Kòmanse</button>
+</section>
 <footer>
   © 2025 Fondation Backup Spirituel – Tous droits réservés.
 </footer>
@@ -219,27 +255,7 @@ function finishQuiz(){
   document.getElementById('nextQ').textContent="Rekòmanse"; document.getElementById('nextQ').style.display="inline-block";
   qIndex=0; score=0;
 }
-
-/* === QUIZ JEZIKRI === */
-.quizJCQ{margin-bottom:10px;font-weight:bold}
-#jcOpts button{margin:5px 8px}
-#jcExplain{margin-top:14px;color:#0055aa}
-
-  
-<!-- JEU 7 – Dekouvri Jezikri -->
-<section class="game">
-  <h3>7. Dekouvri Jezikri – Gran Quiz Biblik</h3>
-  <p>Reponn 15 kesyon sou lavi Jezi‑Kris. Apre chak repons, w ap jwenn ti eksplikasyon ak vèsè Bib pou w aprann plis. Eseye fè 12/15 pou vin “Elèv Jezi” !</p>
-
-  <p id="jcQ" class="quizJCQ"></p>
-  <div id="jcOpts"></div>
-  <p id="jcExplain"></p>
-  <p id="jcScore"></p>
-  <button id="jcNext" onclick="nextJC()">Kòmanse</button>
-</section>
-
-  
-  
+   
 /* 5) Memory Match */
 let memCards=[], first=null, lock=false, matched=0;
 function startMem(){
@@ -268,13 +284,62 @@ function flip(i,el){
 }
 startMem();
 
-/* DOMINO */
-<script>.domBoard{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin:15px auto 20px}
-.domTile{width:60px;height:28px;background:#fff;border:2px solid var(--bleu-clair);border-radius:4px;
-         display:flex;align-items:center;justify-content:space-between;padding:0 6px;font-weight:bold;cursor:default}
-.domHand{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-top:15px}
-.domHand .domTile{cursor:pointer;background:#fffbdd} 
 
+/* 6) Domino */
+let stock=[], player=[], bot=[], chain=[];
+function initDomino(){
+  // kreye tout 28 wòch [0‑6]
+  stock=[]; for(let i=0;i<=6;i++)for(let j=i;j<=6;j++)stock.push([i,j]);
+  stock=stock.sort(()=>Math.random()-0.5);
+  player=stock.splice(0,7); bot=stock.splice(0,7);
+  // chwazi pi gwo doub pou kòmanse
+  let start=[6,6]; ["[5,5]","[4,4]","[3,3]","[2,2]","[1,1]","[0,0]"].some(s=>{
+      const arr=JSON.parse(s); if(player.find(d=>d+""===arr+""))start=arr;
+      else if(bot.find(d=>d+""===arr+"")){start=arr; bot.splice(bot.findIndex(d=>d+""===arr+""),1);}
+  });
+  chain=[start]; player=player.filter(d=>d+""!==start+""); renderDomino();
+  document.getElementById('domMsg').textContent="Jwe ‑ klike sou yon domino ki anfòm.";
+}
+function renderDomino(){
+  const board=document.getElementById('domBoard'); board.innerHTML="";
+  chain.forEach(d=>board.appendChild(tileEl(d)));
+  const hand=document.getElementById('playerHand'); hand.innerHTML="";
+  player.forEach((d,i)=>{const el=tileEl(d); el.onclick=()=>playDomino(i); hand.appendChild(el);});
+}
+function tileEl(d){ const e=document.createElement('div'); e.className='domTile';
+  e.textContent=`${d[0]} | ${d[1]}`; return e;}
+function playDomino(idx){
+  const d=player[idx], left=chain[0][0], right=chain[chain.length-1][1];
+  if(d[1]===left){chain.unshift([d[1],d[0]]);} // flip
+  else if(d[0]===left){chain.unshift(d);}
+  else if(d[0]===right){chain.push(d);}
+  else if(d[1]===right){chain.push([d[1],d[0]]);}
+  else {document.getElementById('domMsg').textContent="Domino sa pa anfòm."; return;}
+  player.splice(idx,1); renderDomino();
+  if(endCheck())return; setTimeout(botDomino,600);
+}
+function botDomino(){
+  const left=chain[0][0], right=chain[chain.length-1][1];
+  let move=-1, flip=false, addFront=false;
+  bot.some((d,i)=>{
+    if(d[0]===left || d[1]===left){move=i; addFront=true; flip=d[0]===left; return true;}
+    if(d[0]===right || d[1]===right){move=i; addFront=false; flip=d[1]===right; return true;}
+  });
+  if(move>-1){
+    let d=bot.splice(move,1)[0];
+    if(flip)d=[d[1],d[0]];
+    addFront?chain.unshift(d):chain.push(d);
+  }else if(stock.length){bot.push(stock.pop());}
+  renderDomino(); endCheck();
+}
+function endCheck(){
+  if(!player.length){document.getElementById('domMsg').textContent="🎉 Ou genyen Domino a !"; return true;}
+  if(!bot.length){document.getElementById('domMsg').textContent="🤖 Robo a genyen Domino a."; return true;}
+  return false;
+}
+initDomino();
+
+  
 /* === 7) Dekouvri Jezikri – Quiz Biblik === */
 const jcQuiz=[
   {q:"1. Ki vil Jezi te fèt ?",o:["Nazaret","Betleyèm","Jeriko"],a:1,
@@ -338,11 +403,7 @@ function finishJC(){
   document.getElementById('jcNext').style.display="inline-block";
   jcIdx=0; jcPts=0;
 }
-Sa se tout !
-         
-</script>
-
-
-  
+Sa se tout !        
+</script>  
 </body>
 </html>
