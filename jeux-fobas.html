@@ -10,6 +10,23 @@
     body{background:#fff;color:#333;line-height:1.6}
     a{text-decoration:none;color:inherit}
 
+
+/* === JEUX TIMOUN (9‑11) === */
+@keyframes bounce{0%{transform:scale(.9)}50%{transform:scale(1.1)}100%{transform:scale(1)}}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
+
+.tileA,.shapeBtn,.mathOpt{background:#0066ff;color:#fff;border-radius:6px;display:inline-flex;
+  align-items:center;justify-content:center;font-weight:bold;cursor:pointer;user-select:none}
+.tileA{width:50px;height:50px;margin:6px;font-size:1.3rem}
+.shapeBtn{width:90px;height:90px;margin:8px;font-size:2.2rem}
+.mathOpt{padding:10px 18px;margin:6px;font-size:1.2rem}
+
+.correct{animation:bounce .4s forwards}
+.wrong{animation:shake .4s}
+
+.audioHide{display:none}
+    
+
 /* 🚀 SHOOTER */
 #shootWrap{display:flex;flex-direction:column;align-items:center}
 #shootCanvas{background:#000;display:block;border:2px solid var(--bleu-clair)}
@@ -189,6 +206,34 @@
     <p style="font-size:0.9rem;margin-top:6px">◄ / ► oswa A‑D → Deplase · Espas → Tire</p>
   </div>
 </section>
+
+
+<!-- JEU 9 – Ranje Lèt Alfabet la -->
+<section class="game">
+  <h3>9. 🎵 Ranje Lèt Alfabet la (A → Z)</h3>
+  <p>Mete lèt yo nan lòd alfabetik. Klike sou 2 lèt pou w chanje plas yo.</p>
+  <div id="alphaZone"></div>
+  <button onclick="startAlpha()">Rekòmanse</button>
+</section>
+
+<!-- JEU 10 – Rekonèt Fòm Geometrik yo -->
+<section class="game">
+  <h3>10. 🎵 Rekonèt Fòm Geometrik yo</h3>
+  <p id="shapeAsk"></p>
+  <div id="shapeZone"></div>
+</section>
+
+<!-- JEU 11 – Ti Kalkil (1 + 1 = ?) -->
+<section class="game">
+  <h3>11. 🎵 Ti Kalkil (1 + 1 = ?)</h3>
+  <p id="mathQ"></p>
+  <div id="mathZone"></div>
+</section>
+
+<!-- AUDIO -->
+<audio id="sndClick" class="audioHide" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_519b9532d0.mp3?filename=menu-click-110376.mp3"></audio>
+<audio id="sndGood"  class="audioHide" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_c89e998f7a.mp3?filename=positive-201522.mp3"></audio>
+<audio id="sndBad"   class="audioHide" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_5a4f7f6b9f.mp3?filename=error-126627.mp3"></audio>
   
 <footer>
   © 2025 Fondation Backup Spirituel – Tous droits réservés.
@@ -487,6 +532,73 @@ function gameOver(){
   shCtx.fillStyle="#003366"; shCtx.font="20px Arial";
   shCtx.fillText("FINI ! Pwen : "+shScore,60,185);
 }
+
+
+/* 🔊 util pou son */
+function playS(id){document.getElementById(id).currentTime=0;document.getElementById(id).play();}
+
+/* === 9) Ranje Lèt Alfabet === */
+const alphaDiv=document.getElementById('alphaZone'); let alphaArr=[],pick=-1;
+function startAlpha(){
+  alphaArr="ABCDEFGHIJK".split("").sort(()=>Math.random()-0.5); // 11 lèt pou timoun
+  renderAlpha(); pick=-1;
+}
+function renderAlpha(){
+  alphaDiv.innerHTML="";
+  alphaArr.forEach((l,i)=>{
+    const t=document.createElement('div');t.className="tileA";t.textContent=l;
+    t.onclick=()=>swapAlpha(i,t); alphaDiv.appendChild(t);
+  });
+}
+function swapAlpha(i,el){
+  playS('sndClick');
+  if(pick<0){pick=i; el.style.outline="3px solid #ffcc00";return;}
+  [alphaArr[pick],alphaArr[i]]=[alphaArr[i],alphaArr[pick]]; pick=-1; renderAlpha();
+  if(alphaArr.join("")==="ABCDEFGHIJK"){alphaDiv.querySelectorAll('.tileA').forEach(e=>e.classList.add('correct'));playS('sndGood');}
+}
+startAlpha();
+
+/* === 10) Fòm Geometrik === */
+const shapes=["Kare","Kwon","Triyang","Sèk"];
+const shapeColors={"Kare":"#e74c3c","Kwon":"#9b59b6","Triyang":"#2ecc71","Sèk":"#f1c40f"};
+let askShape="";
+function startShape(){ askShape=shapes[Math.floor(Math.random()*shapes.length)];
+  document.getElementById('shapeAsk').textContent=`Chwazi fòm « ${askShape} » a.`;
+  const z=document.getElementById('shapeZone');z.innerHTML="";
+  shapes.sort(()=>Math.random()-0.5).forEach(s=>{
+    const b=document.createElement('div');b.className="shapeBtn"; b.style.background="#003366";
+    const inner=document.createElement('div'); inner.style.width="60px";inner.style.height="60px";inner.style.margin="0 auto";
+    inner.style.background=shapeColors[s];
+    if(s==="Triyang"){inner.style.width=0;inner.style.height=0;inner.style.borderLeft="30px solid transparent";
+      inner.style.borderRight="30px solid transparent";inner.style.borderBottom="60px solid "+shapeColors[s];inner.style.background="transparent";}
+    if(s==="Sèk"){inner.style.borderRadius="50%";}
+    b.appendChild(inner);
+    b.onclick=()=>checkShape(s,b); z.appendChild(b);
+  });
+}
+function checkShape(sel,btn){
+  if(sel===askShape){btn.classList.add('correct');playS('sndGood');setTimeout(startShape,800);}
+  else{btn.classList.add('wrong');playS('sndBad'); setTimeout(()=>btn.classList.remove('wrong'),400);}
+}
+startShape();
+
+/* === 11) Ti Kalkil === */
+let n1,n2,ans;
+function newMath(){
+  n1=Math.floor(Math.random()*6)+1; n2=Math.floor(Math.random()*5)+1; ans=n1+n2;
+  document.getElementById('mathQ').textContent=`${n1} + ${n2} = ?`;
+  const opts=[ans,ans+1,ans-1].sort(()=>Math.random()-0.5);
+  const z=document.getElementById('mathZone');z.innerHTML="";
+  opts.forEach(o=>{
+    const b=document.createElement('div');b.className="mathOpt";b.textContent=o;
+    b.onclick=()=>checkMath(o,b); z.appendChild(b);
+  });
+}
+function checkMath(o,btn){
+  if(o===ans){btn.classList.add('correct');playS('sndGood'); setTimeout(newMath,800);}
+  else{btn.classList.add('wrong');playS('sndBad'); setTimeout(()=>btn.classList.remove('wrong'),400);}
+}
+newMath();
   
 </script>  
 </body>
