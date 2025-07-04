@@ -11,6 +11,22 @@
     a{text-decoration:none;color:inherit}
 
 
+/* === JEUX PRÉSCOLAIRE (12‑16) === */
+.psBtn{display:inline-flex;align-items:center;justify-content:center;
+       background:#0066ff;color:#fff;border-radius:6px;margin:6px;
+       font-weight:bold;cursor:pointer;user-select:none;transition:.2s}
+
+.colorTile{width:60px;height:60px}
+.numOpt{padding:12px 20px;font-size:1.3rem}
+.shapeBox{width:70px;height:70px;border:3px dashed #888;border-radius:8px;margin:6px}
+.shapeDr{width:70px;height:70px;border-radius:8px;margin:6px;cursor:grab}
+
+.animalOpt,.fruitOpt{padding:12px 16px;font-size:2rem;width:70px;height:70px}
+
+.fadeIn{animation:fade .5s}@keyframes fade{from{opacity:0}to{opacity:1}}
+
+    
+
 /* === JEUX TIMOUN (9‑11) === */
 @keyframes bounce{0%{transform:scale(.9)}50%{transform:scale(1.1)}100%{transform:scale(1)}}
 @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
@@ -230,6 +246,41 @@
   <div id="mathZone"></div>
 </section>
 
+<!-- ───────────────────  JEUX PRÉSCO 12‑16  ─────────────────── -->
+<section class="game">
+  <h3>12. 🎵 Koulè Koresponn</h3>
+  <p>Klike koulè ki koresponn ak non an.</p>
+  <p id="colWord" style="font-size:1.3rem;font-weight:bold"></p>
+  <div id="colZone"></div>
+</section>
+
+<section class="game">
+  <h3>13. 🎵 Konte Zetwal (1‑5)</h3>
+  <p id="numStars" style="font-size:1.6rem"></p>
+  <div id="numZone"></div>
+</section>
+
+<section class="game">
+  <h3>14. 🎵 Fòm & Silwèt</h3>
+  <p>Trennen fòm nan sou bon kare a.</p>
+  <div id="shapeTargets"></div>
+  <div id="shapeDrags"></div>
+</section>
+
+<section class="game">
+  <h3>15. 🎵 Chwazi Bèt la</h3>
+  <p id="aniAsk"></p>
+  <div id="aniZone"></div>
+</section>
+
+<section class="game">
+  <h3>16. 🎵 Rekonèt Fwi a</h3>
+  <p id="fruitAsk"></p>
+  <div id="fruitZone"></div>
+</section>
+<!-- ─────────────────────────────────────────────────────────── -->
+  
+  
 <!-- AUDIO -->
 <audio id="sndClick" class="audioHide" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_519b9532d0.mp3?filename=menu-click-110376.mp3"></audio>
 <audio id="sndGood"  class="audioHide" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_c89e998f7a.mp3?filename=positive-201522.mp3"></audio>
@@ -599,6 +650,124 @@ function checkMath(o,btn){
   else{btn.classList.add('wrong');playS('sndBad'); setTimeout(()=>btn.classList.remove('wrong'),400);}
 }
 newMath();
+
+
+/* util son */
+function bip(){playS('sndClick');}
+function good(){playS('sndGood');}
+function bad(){playS('sndBad');}
+
+/* === 12) Koulè Koresponn === */
+const colors=[["Wouj","#e74c3c"],["Vèt","#27ae60"],["Jòn","#f1c40f"],["Ble","#3498db"]];
+let colAnswer="";
+function startColor(){
+  colAnswer=colors[Math.floor(Math.random()*colors.length)];
+  document.getElementById('colWord').textContent=colAnswer[0];
+  const zone=document.getElementById('colZone'); zone.innerHTML="";
+  colors.sort(()=>Math.random()-0.5).forEach(c=>{
+    const d=document.createElement('div');d.className="psBtn colorTile fadeIn";
+    d.style.background=c[1]; d.onclick=()=>pickColor(c,d); zone.appendChild(d);
+  });
+}
+function pickColor(c,el){
+  bip();
+  if(c===colAnswer){el.classList.add('correct');good();setTimeout(startColor,800);}
+  else{el.classList.add('wrong');bad(); setTimeout(()=>el.classList.remove('wrong'),400);}
+}
+startColor();
+
+/* === 13) Konte Zetwal === */
+function star(n){return "⭐".repeat(n);}
+let numAns=0;
+function newNum(){
+  numAns=Math.floor(Math.random()*5)+1;
+  document.getElementById('numStars').textContent=star(numAns);
+  const zone=document.getElementById('numZone'); zone.innerHTML="";
+  [numAns,numAns+1,numAns-1].filter(x=>x>=1&&x<=5).sort(()=>Math.random()-0.5).forEach(n=>{
+    const b=document.createElement('div');b.className="psBtn numOpt";b.textContent=n;
+    b.onclick=()=>pickNum(n,b); zone.appendChild(b);
+  });
+}
+function pickNum(n,btn){
+  bip();
+  if(n===numAns){btn.classList.add('correct');good(); setTimeout(newNum,700);}
+  else{btn.classList.add('wrong');bad(); setTimeout(()=>btn.classList.remove('wrong'),400);}
+}
+newNum();
+
+/* === 14) Fòm & Silwèt (drag‑drop simplifié) === */
+const shArr=[["Kare","#e74c3c"],["Sèk","#f1c40f"],["Triyang","#2ecc71"]];
+function drawShape(el,shape,col){
+  if(shape==="Kare"){el.style.background=col;}
+  if(shape==="Sèk"){el.style.background=col;el.style.borderRadius="50%";}
+  if(shape==="Triyang"){
+    el.style.width=0;el.style.height=0;el.style.borderLeft="35px solid transparent";
+    el.style.borderRight="35px solid transparent";el.style.borderBottom="70px solid "+col;el.style.background="transparent";
+  }
+}
+function startShapeDrag(){
+  const tgt=document.getElementById('shapeTargets');tgt.innerHTML="";
+  const dr=document.getElementById('shapeDrags');dr.innerHTML="";
+  shArr.forEach(s=>{
+    const box=document.createElement('div');box.className="shapeBox";box.dataset.shape=s[0];
+    tgt.appendChild(box);
+  });
+  shArr.sort(()=>Math.random()-0.5).forEach(s=>{
+    const d=document.createElement('div');d.className="shapeDr fadeIn";d.draggable=true;
+    d.dataset.shape=s[0];drawShape(d,s[0],s[1]);
+    d.ondragstart=e=>e.dataTransfer.setData("text",s[0]);
+    dr.appendChild(d);
+  });
+  [...document.querySelectorAll('.shapeBox')].forEach(box=>{
+    box.ondragover=e=>e.preventDefault();
+    box.ondrop=e=>{
+      const sh=e.dataTransfer.getData("text");
+      if(sh===box.dataset.shape){box.innerHTML="✔";box.style.borderColor="#27ae60";good();
+        document.querySelector(`[data-shape='${sh}'].shapeDr`)?.remove();
+        if(!document.querySelector('.shapeDr'))setTimeout(startShapeDrag,800);
+      }else{bad();box.classList.add('wrong');setTimeout(()=>box.classList.remove('wrong'),400);}
+    };
+  });
+}
+startShapeDrag();
+
+/* === 15) Animal Emoji === */
+const animals=[["Chat","🐱"],["Chen","🐶"],["Vyann bèf","🐮"]];
+let aniAns=[];
+function newAnimal(){
+  aniAns=animals[Math.floor(Math.random()*animals.length)];
+  document.getElementById('aniAsk').textContent=`Klike sou bèt « ${aniAns[0]} » la.`;
+  const zone=document.getElementById('aniZone');zone.innerHTML="";
+  animals.sort(()=>Math.random()-0.5).forEach(a=>{
+    const d=document.createElement('div');d.className="psBtn animalOpt fadeIn";d.textContent=a[1];
+    d.onclick=()=>pickAni(a,d); zone.appendChild(d);
+  });
+}
+function pickAni(a,btn){
+  bip();
+  if(a===aniAns){btn.classList.add('correct');good();setTimeout(newAnimal,800);}
+  else{btn.classList.add('wrong');bad();setTimeout(()=>btn.classList.remove('wrong'),400);}
+}
+newAnimal();
+
+/* === 16) Fwi Emoji === */
+const fruits=[["Pòm","🍎"],["Mango","🥭"],["Banann","🍌"]];
+let fruitAns=[];
+function newFruit(){
+  fruitAns=fruits[Math.floor(Math.random()*fruits.length)];
+  document.getElementById('fruitAsk').textContent=`Klike sou fwi « ${fruitAns[0]} » a.`;
+  const zone=document.getElementById('fruitZone');zone.innerHTML="";
+  fruits.sort(()=>Math.random()-0.5).forEach(f=>{
+    const d=document.createElement('div');d.className="psBtn fruitOpt fadeIn";d.textContent=f[1];
+    d.onclick=()=>pickFruit(f,d); zone.appendChild(d);
+  });
+}
+function pickFruit(f,btn){
+  bip();
+  if(f===fruitAns){btn.classList.add('correct');good();setTimeout(newFruit,800);}
+  else{btn.classList.add('wrong');bad();setTimeout(()=>btn.classList.remove('wrong'),400);}
+}
+newFruit();
   
 </script>  
 </body>
