@@ -247,6 +247,13 @@ function flip(i,el){
   }
 }
 startMem();
+
+/* DOMINO */
+.domBoard{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin:15px auto 20px}
+.domTile{width:60px;height:28px;background:#fff;border:2px solid var(--bleu-clair);border-radius:4px;
+         display:flex;align-items:center;justify-content:space-between;padding:0 6px;font-weight:bold;cursor:default}
+.domHand{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-top:15px}
+.domHand .domTile{cursor:pointer;background:#fffbdd}
 </script>
 
 </body>
