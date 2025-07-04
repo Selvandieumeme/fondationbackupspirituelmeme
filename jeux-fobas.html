@@ -220,6 +220,26 @@ function finishQuiz(){
   qIndex=0; score=0;
 }
 
+/* === QUIZ JEZIKRI === */
+.quizJCQ{margin-bottom:10px;font-weight:bold}
+#jcOpts button{margin:5px 8px}
+#jcExplain{margin-top:14px;color:#0055aa}
+
+  
+<!-- JEU 7 – Dekouvri Jezikri -->
+<section class="game">
+  <h3>7. Dekouvri Jezikri – Gran Quiz Biblik</h3>
+  <p>Reponn 15 kesyon sou lavi Jezi‑Kris. Apre chak repons, w ap jwenn ti eksplikasyon ak vèsè Bib pou w aprann plis. Eseye fè 12/15 pou vin “Elèv Jezi” !</p>
+
+  <p id="jcQ" class="quizJCQ"></p>
+  <div id="jcOpts"></div>
+  <p id="jcExplain"></p>
+  <p id="jcScore"></p>
+  <button id="jcNext" onclick="nextJC()">Kòmanse</button>
+</section>
+
+  
+  
 /* 5) Memory Match */
 let memCards=[], first=null, lock=false, matched=0;
 function startMem(){
@@ -249,61 +269,44 @@ function flip(i,el){
 startMem();
 
 /* DOMINO */
-.domBoard{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin:15px auto 20px}
+<script>.domBoard{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin:15px auto 20px}
 .domTile{width:60px;height:28px;background:#fff;border:2px solid var(--bleu-clair);border-radius:4px;
          display:flex;align-items:center;justify-content:space-between;padding:0 6px;font-weight:bold;cursor:default}
 .domHand{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-top:15px}
-.domHand .domTile{cursor:pointer;background:#fffbdd}
-</script>
+.domHand .domTile{cursor:pointer;background:#fffbdd} 
 
-/* QUIZ JEZIKRI */
-.quizJCQ{margin-bottom:10px;font-weight:bold}
-#jcOpts button{margin:5px 8px}
-#jcExplain{margin-top:14px;color:#0055aa}
-
-<!-- JEU 7 – Dekouvri Jezikri -->
-<section class="game">
-  <h3>7. Dekouvri Jezikri – Gran Quiz Biblik</h3>
-  <p>Reponn 15 kesyon sou lavi Jezi‑Kris. Apre chak repons, w ap jwenn ti eksplikasyon ak vèsè Bib pou w aprann plis. Chèche 12/15 pou w konsidere “Elèv Jezi” !</p>
-  <p id="jcQ" class="quizJCQ"></p>
-  <div id="jcOpts"></div>
-  <p id="jcExplain"></p>
-  <p id="jcScore"></p>
-  <button id="jcNext" onclick="nextJC()">Kòmanse</button>
-
-
-  /* 7) Dekouvri Jezikri – Quiz */
+/* === 7) Dekouvri Jezikri – Quiz Biblik === */
 const jcQuiz=[
   {q:"1. Ki vil Jezi te fèt ?",o:["Nazaret","Betleyèm","Jeriko"],a:1,
-   e:"Jezi te fèt Betleyèm dapre Matye 2 :1 ; pwofesi Miche 5 :2 te anonse li."},
-  {q:"2. Ki manman Jezi dapre Bib la ?",o:["Marta","Mari","Elizabèt"],a:1,
-   e:"Mari, vyèj la, te resevwa mesaj zanj Gabriel (Lik 1 :26‑38)."},
-  {q:"3. Ki non papa adoptif Jezi an tè ?",o:["Zakari","Joseph","Siméon"],a:1,
-   e:"Joseph, bòs chapant la, te desandan David (Matye 1 :20‑21)."},
-  {q:"4. Premye mirak piblik Jezi se te …",o:["Louvri je avèg","Fè dlo tounen diven","Mache sou dlo"],a:1,
-   e:"Jezi chanje dlo an diven nan maryaj Kana (Jan 2 :1‑11)."},
-  {q:"5. Ki disip ki mache sou dlo avèk Jezi ?",o:["Pyè","Jan","Toma"],a:0,
-   e:"Pyè te mache sou dlo lè Jezi rele li (Matye 14 :29)."},
-  {q:"6. Konbyen disip orijinal Jezi te chwazi ?",o:["10","12","70"],a:1,
-   e:"Jezi te rele 12 disip prensipal (Lik 6 :13‑16)."},
-  {q:"7. Ki prédikasyon pi popilè Jezi sou mòn lan rele ?",o:["Semon sou mòn lan","Parabòl fiyèt estab","Lalinj David"],a:0,
-   e:"Semon sou Mòn lan (Matye chapit 5‑7)."},
-  {q:"8. Jezi di : “Mwen se … lavi a.” Ki lòt mo ki ale la a ?",o:["chèmen an & laverite a","lumière a & sèl la","bon berje a"],a:0,
-   e:"« Mwen se chèmen an, laverite a ak lavi a » (Jan 14 :6)."},
-  {q:"9. Ki disip te trayi Jezi pou 30 pyès ajan ?",o:["Andre","Jida Iskaryòt","Filip"],a:1,
-   e:"Jida Iskaryòt te trayi Jezi (Matye 26 :14‑16)."},
-  {q:"10. Ki fason Jezi te mouri ?",o:["Kouwaze sou kwa","Wòch jouke","Koupe tèt"],a:0,
-   e:"Li te kouwaze sou kwa ant de vòlè (Jan 19 :17‑18)."},
-  {q:"11. Ki twazyèm jou apre lanmò Jezi te pase ?",o:["Siklonn","Rezirèksyon","Asansyon"],a:1,
-   e:"Jezi leve sòti vivan (Lik 24 :6‑7)."},
-  {q:"12. Ki premye moun ki wè Jezi resisite dapre Jan chapit 20 ?",o:["Pyè","Maria Magdala","Jèn gason Emmaus"],a:1,
-   e:"Maria Magdala te premye temwen (Jan 20 :14‑18)."},
-  {q:"13. Konbyen tan Jezi ret sou latè aprè li leve sòti vivan ?",o:["3 jou","40 jou","100 jou"],a:1,
-   e:"Li te parèt bay disip li yo pandan 40 jou (Travay 1 :3)."},
+   e:"Jezi te fèt Betleyèm (Matye 2 :1; Miche 5 :2)."},
+  {q:"2. Ki manman Jezi ?",o:["Marta","Mari","Elizabèt"],a:1,
+   e:"Mari, vyèj la, resevwa mesaj zanj Gabriel (Lik 1 :26‑38)."},
+  {q:"3. Ki papa adoptif Jezi ?",o:["Zakari","Joseph","Siméon"],a:1,
+   e:"Joseph, bòs chapant la (Matye 1 :20‑21)."},
+  {q:"4. Premye mirak Jezi ?",o:["Louvri je avèg","Fè dlo tounen diven","Mache sou dlo"],a:1,
+   e:"Chanje dlo an diven nan Kana (Jan 2 :1‑11)."},
+  {q:"5. Ki disip ki mache sou dlo ?",o:["Pyè","Jan","Toma"],a:0,
+   e:"Pyè mache sou dlo ak Jezi (Matye 14 :29)."},
+  {q:"6. Konbyen disip prensipal ?",o:["10","12","70"],a:1,
+   e:"Jezi rele 12 disip (Lik 6 :13‑16)."},
+  {q:"7. Ki prédikasyon popilè Jezi ?",o:["Semon sou mòn lan","Parabòl fiyèt estab","Lalinj David"],a:0,
+   e:"Semon sou Mòn lan (Matye 5–7)."},
+  {q:"8. Jezi di : “Mwen se … lavi a.”",o:["chèmen an & laverite a","lumière a & sèl la","bon berje a"],a:0,
+   e:"« Mwen se chèmen an, laverite a ak lavi a » (Jan 14 :6)."},
+  {q:"9. Ki disip trayi Jezi ?",o:["Andre","Jida Iskaryòt","Filip"],a:1,
+   e:"Jida Iskaryòt pou 30 pyès ajan (Matye 26 :14‑16)."},
+  {q:"10. Ki fason Jezi mouri ?",o:["Sou kwa","Wòch jouke","Koupe tèt"],a:0,
+   e:"Kouwaze sou kwa (Jan 19 :17‑18)."},
+  {q:"11. Twazyèm jou sa k pase ?",o:["Siklonn","Rezirèksyon","Asansyon"],a:1,
+   e:"Jezi leve sòti vivan (Lik 24 :6‑7)."},
+  {q:"12. Premye moun ki wè Jezi resisite ?",o:["Pyè","Maria Magdala","Gason Emmaus"],a:1,
+   e:"Maria Magdala (Jan 20 :14‑18)."},
+  {q:"13. Konbyen tan Jezi rete sou latè aprè rezirèksyon ?",o:["3 jou","40 jou","100 jou"],a:1,
+   e:"Li parèt pandan 40 jou (Travay 1 :3)."},
   {q:"14. Ki kote Jezi monte nan Syèl la ?",o:["Betani","Nazaret","Galile"],a:0,
-   e:"Asansyon an fèt toupre Betani, sou Mòn Oliv (Lik 24 :50‑51)."},
-  {q:"15. Selon Jan 3 :16, kisa Bondye fè paske li renmen mond lan ?",o:["Li voye pwop Pitit li a","Li detwi move moun yo","Li anile lalwa"],a:0,
-   e:"« Paske Bondye sitèlman renmen mond lan, li bay sèl Pitit li … » (Jan 3 :16)."}
+   e:"Betani, Mòn Oliv (Lik 24 :50‑51)."},
+  {q:"15. Dapre Jan 3 :16, kisa Bondye fè ?",o:["Voye Pitit li","Detwi move moun","Anile lalwa"],a:0,
+   e:"« Bondye … bay sèl Pitit li … » (Jan 3 :16)."}
 ];
 let jcIdx=0,jcPts=0;
 function nextJC(){
@@ -314,8 +317,11 @@ function nextJC(){
   document.getElementById('jcExplain').textContent="";
   Q.o.forEach((opt,i)=>{
     const b=document.createElement('button'); b.textContent=opt;
-    b.onclick=()=>{if(i===Q.a)jcPts++; document.getElementById('jcExplain').textContent=Q.e;
-      jcIdx++; document.getElementById('jcNext').style.display="inline-block"; b.disabled=true;
+    b.onclick=()=>{
+      if(i===Q.a)jcPts++;
+      document.getElementById('jcExplain').textContent=Q.e;
+      jcIdx++; document.getElementById('jcNext').style.display="inline-block";
+      // dezaktive tout boutton yo
       [...document.querySelectorAll('#jcOpts button')].forEach(x=>x.disabled=true);
     };
     document.getElementById('jcOpts').appendChild(b);
@@ -326,13 +332,17 @@ function finishJC(){
   document.getElementById('jcQ').textContent="Quiz fini !";
   document.getElementById('jcOpts').innerHTML="";
   document.getElementById('jcExplain').textContent="";
-  document.getElementById('jcScore').textContent=`Rezilta : ${jcPts}/${jcQuiz.length}`+
-    (jcPts>=12?" – Bravo, ou merite tit « Elèv Jezi » !":" – Kontinye etidye pawòl la.");
-  document.getElementById('jcNext').textContent="Rekòmanse"; document.getElementById('jcNext').style.display="inline-block";
-  jcIdx=0;jcPts=0;
+  document.getElementById('jcScore').textContent=`Rezilta : ${jcPts}/15`+
+    (jcPts>=12?" – Bravo ! Ou se « Elèv Jezi ».":" – Kontinye etidye Pawòl la.");
+  document.getElementById('jcNext').textContent="Rekòmanse"; 
+  document.getElementById('jcNext').style.display="inline-block";
+  jcIdx=0; jcPts=0;
 }
+Sa se tout !
+         
+</script>
 
-</section>
+
   
 </body>
 </html>
