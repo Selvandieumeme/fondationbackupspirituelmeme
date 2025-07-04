@@ -10,6 +10,12 @@
     body{background:#fff;color:#333;line-height:1.6}
     a{text-decoration:none;color:inherit}
 
+/* 🚀 SHOOTER */
+#shootWrap{display:flex;flex-direction:column;align-items:center}
+#shootCanvas{background:#000;display:block;border:2px solid var(--bleu-clair)}
+#shootInfo{color:var(--bleu);margin-top:8px;font-weight:bold}
+
+    
 /* === QUIZ JEZIKRI === */
 .quizJCQ{margin-bottom:10px;font-weight:bold}
 #jcOpts button{margin:5px 8px}
@@ -172,6 +178,18 @@
   <p id="jcScore"></p>
   <button id="jcNext" onclick="nextJC()">Kòmanse</button>
 </section>
+
+<!-- JEU 8 – Guerrier Spirituel (Shooter) -->
+<section class="game">
+  <h3>8. Guerrier Spirituel – Je Tire !</h3>
+  <div id="shootWrap">
+    <canvas id="shootCanvas" width="320" height="400"></canvas>
+    <p id="shootInfo">Pwen : 0 | Lavi : 3</p>
+    <button onclick="startShooter()">Kòmanse / Rekòmanse</button>
+    <p style="font-size:0.9rem;margin-top:6px">◄ / ► oswa A‑D → Deplase · Espas → Tire</p>
+  </div>
+</section>
+  
 <footer>
   © 2025 Fondation Backup Spirituel – Tous droits réservés.
 </footer>
@@ -403,6 +421,73 @@ function finishJC(){
   document.getElementById('jcNext').style.display="inline-block";
   jcIdx=0; jcPts=0;
 }       
+
+/* 8) Shooter – Guerrier Spirituel */
+let shCtx, shPlayer, shBullets, shEnemies, shScore, shLives, shRun, shKey={};
+function startShooter(){
+  const c=document.getElementById('shootCanvas');
+  shCtx=c.getContext('2d');
+  shPlayer={x:c.width/2-15,y:c.height-30,w:30,h:10};
+  shBullets=[]; shEnemies=[]; shScore=0; shLives=3; shRun=true;
+  document.getElementById('shootInfo').textContent=`Pwen : ${shScore} | Lavi : ${shLives}`;
+  shKey={}; // netwaye
+  cancelAnimationFrame(shLoop); shLoop(); // lanse
+}
+document.addEventListener('keydown',e=>{shKey[e.code]=true;if(e.code==="Space"&&shRun)shoot();});
+document.addEventListener('keyup',e=>{shKey[e.code]=false});
+function shoot(){shBullets.push({x:shPlayer.x+12,y:shPlayer.y-5});}
+function addEnemy(){
+  const x=Math.random()*290,y=-20,speed=1+Math.random()*1.5;
+  shEnemies.push({x,y,w:20,h:20,vy:speed});
+}
+let lastEnemy=0;
+function shLoop(time){
+  if(!shRun)return;
+  const c=document.getElementById('shootCanvas');
+  shCtx.clearRect(0,0,c.width,c.height);
+  /* mouvman jwè */
+  if(shKey['ArrowLeft']||shKey['KeyA'])shPlayer.x=Math.max(0,shPlayer.x-3);
+  if(shKey['ArrowRight']||shKey['KeyD'])shPlayer.x=Math.min(c.width-shPlayer.w,shPlayer.x+3);
+  /* desen player */
+  shCtx.fillStyle="#ffcc00"; shCtx.fillRect(shPlayer.x,shPlayer.y,shPlayer.w,shPlayer.h);
+  /* bullets */
+  shCtx.fillStyle="#00fffd";
+  shBullets.forEach((b,i)=>{
+    b.y-=4; shCtx.fillRect(b.x,b.y,6,6);
+    if(b.y<0)shBullets.splice(i,1);
+  });
+  /* enemies */
+  if(time-lastEnemy>800){addEnemy(); lastEnemy=time;}
+  shCtx.fillStyle="#ff4444";
+  shEnemies.forEach((en,i)=>{
+    en.y+=en.vy; shCtx.fillRect(en.x,en.y,en.w,en.h);
+    /* colizyon ak player */
+    if(en.y+en.h>shPlayer.y && en.x<shPlayer.x+shPlayer.w && en.x+en.w>shPlayer.x){
+      shEnemies.splice(i,1); shLives--; updateInfo();
+    }
+    /* bulle frape enmi */
+    shBullets.forEach((b,j)=>{
+      if(b.x<en.x+en.w && b.x+6>en.x && b.y<en.y+en.h && b.y+6>en.y){
+         shEnemies.splice(i,1); shBullets.splice(j,1); shScore+=10; updateInfo();
+      }
+    });
+    if(en.y>c.height){shEnemies.splice(i,1);}
+  });
+  /* verifye lavi */
+  if(shLives<=0){gameOver(); return;}
+  requestAnimationFrame(shLoop);
+}
+function updateInfo(){
+  document.getElementById('shootInfo').textContent=`Pwen : ${shScore} | Lavi : ${shLives}`;
+}
+function gameOver(){
+  shRun=false;
+  shCtx.fillStyle="#ffffffaa";
+  shCtx.fillRect(0,150,320,60);
+  shCtx.fillStyle="#003366"; shCtx.font="20px Arial";
+  shCtx.fillText("FINI ! Pwen : "+shScore,60,185);
+}
+  
 </script>  
 </body>
 </html>
