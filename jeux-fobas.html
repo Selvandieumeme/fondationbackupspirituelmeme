@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="ht">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>Jouez avec nou – Fondation Backup Spirituel</title>
+  <style>
+    :root{--bleu:#003366;--bleu-clair:#0055aa;--jaune:#ffcc00;--gris:#f5f7fa;--maxw:1100px}
+    *{box-sizing:border-box;margin:0;padding:0;font-family:Arial,Helvetica,sans-serif}
+    body{background:#fff;color:#333;line-height:1.6}
+    a{text-decoration:none;color:inherit}
+
+    /* HEADER & NAV */
+    header{background:var(--bleu);color:#fff;text-align:center;padding:18px 10px}
+    header img{height:85px}
+    header h1{margin-top:6px;font-size:2rem;font-weight:700}
+    nav{background:var(--jaune);font-weight:bold}
+    nav ul{display:flex;flex-wrap:wrap;justify-content:center;gap:12px;list-style:none;padding:10px;white-space:nowrap}
+    nav a{padding:10px 16px;border-radius:4px;color:var(--bleu);transition:.25s}
+    nav a:hover,nav a.active{background:var(--bleu);color:#fff}
+    li.dropdown{position:relative}
+    .dropdown-content{display:none;position:absolute;top:100%;left:0;background:var(--bleu);min-width:220px;border-radius:4px;z-index:99}
+    .dropdown-content a{display:block;padding:10px 14px;color:#fff}
+    .dropdown-content a:hover{background:var(--bleu-clair)}
+    li.dropdown:hover .dropdown-content{display:block}
+
+    /* SECTIONS */
+    section{max-width:var(--maxw);margin:auto;padding:45px 15px}
+    h2{color:var(--bleu);text-align:center;margin-bottom:28px;font-size:2rem}
+    .game{background:var(--gris);padding:25px;border-radius:10px;margin-bottom:55px}
+    h3{text-align:center;margin-bottom:18px;color:var(--bleu-clair)}
+    button,select,input[type=number]{padding:9px 14px;margin:6px;font-size:1rem;border:1px solid #888;border-radius:6px;cursor:pointer}
+    button:hover{background:var(--bleu);color:#fff;border-color:var(--bleu)}
+    .board{display:grid;grid-template-columns:repeat(3,80px);gap:5px;justify-content:center;margin:15px auto}
+    .cell{width:80px;height:80px;background:#fff;border:2px solid #0055aa;font-size:2rem;display:flex;align-items:center;justify-content:center;cursor:pointer}
+    .quizQ{margin-bottom:8px;font-weight:bold}
+    .cards{display:grid;grid-template-columns:repeat(4,90px);gap:10px;justify-content:center}
+    .card{width:90px;height:90px;background:#0055aa;border-radius:6px;color:#fff;font-size:2rem;display:flex;align-items:center;justify-content:center;cursor:pointer}
+    .hidden{background:#ccc;color:#ccc;cursor:pointer}
+    footer{background:var(--bleu);color:#fff;text-align:center;padding:18px 10px;margin-top:60px}
+
+    @media(max-width:700px){
+      header h1{font-size:1.5rem}
+      .board{grid-template-columns:repeat(3,60px)}
+      .cell{width:60px;height:60px}
+      .cards{grid-template-columns:repeat(4,70px)}
+      .card{width:70px;height:70px}
+    }
+  </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <img src="logofobas.png" alt="Logo Fondation">
+  <h1>FONDATION BACKUP SPIRITUEL</h1>
+</header>
+
+<!-- NAVIGATION -->
+<nav>
+  <ul>
+    <li><a href="index.html">Accueil</a></li>
+    <li><a href="Qui-sommes-nous.html">Qui sommes‑nous</a></li>
+    <li><a href="Parrainez-nous.html">Parrainez‑nous</a></li>
+    <li><a href="Notre-programme-d'alphabetisation.html">Prog. d’Alphabétisation</a></li>
+    <li><a href="Notre-ecole-d'informatique.html">Notre École d’Info.</a></li>
+    <li><a href="Contact.html">Contact</a></li>
+    <li class="dropdown">
+      <a href="#">Autres ▾</a>
+      <ul class="dropdown-content">
+        <li><a href="Actualites.html">Actualités</a></li>
+        <li><a href="Blagues-et-histoires.html">Blagues & Histoires</a></li>
+        <li><a href="Emission-Backup-Spirituel.html">Émission Backup Spirituel</a></li>
+        <li><a href="Faire-un-don.html">Faire un don</a></li>
+        <li><a href="Galerie.html">Galerie complète</a></li>
+        <li><a href="Jouez-avec-nous.html" class="active">Jouez avec nous</a></li>
+        <li><a href="Nos-actions.html">Nos actions (détail)</a></li>
+        <li><a href="Chat-en-Direct-fobas.html">Chat en Direct Fobas</a></li>
+        <li><a href="Politique-de-confidentialite.html">Politique de confidentialité</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+
+<!-- INTRO -->
+<section>
+  <h2>🎮 Byenvini nan kwen Jwèt Fondasyon an !</h2>
+  <p style="text-align:justify;margin-bottom:35px">
+    Fè kè w kontan, detann lespri w ! 5 ti jwèt fasil sa yo pèmèt ou teste entèlijans ou kont yon “robo” ki veye mouvman ; epi chak klik ou sou
+    paj sa a avèk anons yo ede nou soutni travay Fondasyon an. Jwe, pataje ak zanmi w, epi tounen chak jou pou bat rekò w !
+  </p>
+</section>
+
+<!-- JEU 1 – Nombre Caché -->
+<section class="game">
+  <h3>1. Chif kache (1‑20)</h3>
+  <p>Robo a chwazi yon chif. Eske w ka devine li an mwens de 6 tantativ ?</p>
+  <input type="number" id="guess" min="1" max="20" placeholder="Antre chif…">
+  <button onclick="checkNumber()">Devine !</button>
+  <p id="resultNum"></p>
+</section>
+
+<!-- JEU 2 – Roche‑Papye‑Sizo -->
+<section class="game">
+  <h3>2. Tòch‑Papye‑Sizo</h3>
+  <select id="rpsChoice">
+    <option value="">Chwazi mouvman …</option>
+    <option>Roche</option><option>Papye</option><option>Sizo</option>
+  </select>
+  <button onclick="playRPS()">Jwe</button>
+  <p id="rpsResult"></p>
+</section>
+
+<!-- JEU 3 – Tic‑Tac‑Toe -->
+<section class="game">
+  <h3>3. Morye‑Tòwo (Tic‑Tac‑Toe)</h3>
+  <div id="board" class="board"></div>
+  <p id="tttMsg"></p>
+  <button onclick="resetTTT()">Rekòmanse</button>
+</section>
+
+<!-- JEU 4 – Kwiz Flash -->
+<section class="game">
+  <h3>4. Kwiz Flash – 5 Kesyon</h3>
+  <p id="quizQ" class="quizQ"></p>
+  <div id="quizOpts"></div>
+  <p id="quizScore"></p>
+  <button id="nextQ" onclick="nextQuiz()">Kòmanse</button>
+</section>
+
+<!-- JEU 5 – Match Memwa -->
+<section class="game">
+  <h3>5. Match Memwa (4 pè)</h3>
+  <div id="memGrid" class="cards"></div>
+  <p id="memMsg"></p>
+  <button onclick="startMem()">Rekòmanse</button>
+</section>
+
+<footer>
+  © 2025 Fondation Backup Spirituel – Tous droits réservés.
+</footer>
+
+<!-- SCRIPT TOUS JEUX -->
+<script>
+/* 1) Nombre caché */
+let secret = Math.floor(Math.random()*20)+1, tries=0;
+function checkNumber(){
+  const g=parseInt(document.getElementById('guess').value);
+  if(!g||g<1||g>20)return;
+  tries++;
+  if(g===secret){document.getElementById('resultNum').textContent="Bravo ! Ou jwenn li an "+tries+" tantativ."; secret=Math.floor(Math.random()*20)+1; tries=0;}
+  else if(tries>=6){document.getElementById('resultNum').textContent="Pèdi ! Chif la te "+secret+". Nou rekòmanse."; secret=Math.floor(Math.random()*20)+1; tries=0;}
+  else document.getElementById('resultNum').textContent=g<secret?"Trop piti !":"Trop gwo !";
+}
+
+/* 2) Roche‑Papye‑Sizo */
+function playRPS(){
+  const user=document.getElementById('rpsChoice').value;
+  if(!user)return;
+  const opts=["Roche","Papye","Sizo"], bot=opts[Math.floor(Math.random()*3)];
+  let res="Nul";
+  if(user===bot)res="Egalite!";
+  else if((user==="Roche"&&bot==="Sizo")||(user==="Papye"&&bot==="Roche")||(user==="Sizo"&&bot==="Papye"))res="Ou genyen!";
+  else res="Robo a genyen!";
+  document.getElementById('rpsResult').textContent=`Ou : ${user} – Robo : ${bot} → ${res}`;
+}
+
+/* 3) Tic‑Tac‑Toe */
+let board=["","","","","","","","",""], turn=true; // true=user
+const boardDiv=document.getElementById('board');
+function render(){
+  boardDiv.innerHTML="";
+  board.forEach((v,i)=>{
+    const c=document.createElement('div'); c.className='cell'; c.textContent=v;
+    c.onclick=()=>move(i); boardDiv.appendChild(c);
+  });
+}
+function move(i){
+  if(board[i]||!turn)return; board[i]="X"; turn=false; render(); 
+  if(checkWin("X")){msg("Ou genyen!");return;}
+  setTimeout(botMove,400);
+}
+function botMove(){
+  let empty=board.map((v,i)=>v===""?i:null).filter(v=>v!==null);
+  const idx=empty[Math.floor(Math.random()*empty.length)];
+  board[idx]="O"; turn=true; render();
+  if(checkWin("O"))msg("Robo a genyen!");
+}
+function checkWin(p){const w=[[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+  if(w.some(c=>c.every(i=>board[i]===p))){turn=true; return true;} if(board.every(v=>v)){msg("Egalite!");}
+}
+function msg(t){document.getElementById('tttMsg').textContent=t;}
+function resetTTT(){board=["","","","","","","","",""]; msg(""); render();}render();
+
+/* 4) Quiz Flash */
+const questions=[
+  {q:"Ki kapital Ayiti ?",o:["Gonaïves","Pòtoprens","Jakmèl"],a:1},
+  {q:"Ki li non premye liv nan Bib la ?",o:["Jenèz","Sòm","Lik"],a:0},
+  {q:"Konbyen disip Jezi te genyen ?",o:["10","12","14"],a:1},
+  {q:"Drapo Ayiti gen ki koulè ?",o:["Ble & Wouj","Vèt & Jòn","Ble & Jòn"],a:0},
+  {q:"Ki doley Amerik di Nò a ?",o:["Euro","Gourde","Dola US"],a:2}
+];
+let qIndex=0, score=0;
+function nextQuiz(){
+  if(qIndex>=questions.length)return finishQuiz();
+  const Q=questions[qIndex];
+  document.getElementById('quizQ').textContent=Q.q;
+  document.getElementById('quizOpts').innerHTML="";
+  Q.o.forEach((opt,i)=>{
+    const b=document.createElement('button'); b.textContent=opt;
+    b.onclick=()=>{if(i===Q.a)score++; qIndex++; nextQuiz();};
+    document.getElementById('quizOpts').appendChild(b);
+  });
+  document.getElementById('nextQ').style.display="none";
+}
+function finishQuiz(){
+  document.getElementById('quizQ').textContent=`Rezilta : ${score}/${questions.length}`;
+  document.getElementById('quizOpts').innerHTML="";
+  document.getElementById('nextQ').textContent="Rekòmanse"; document.getElementById('nextQ').style.display="inline-block";
+  qIndex=0; score=0;
+}
+
+/* 5) Memory Match */
+let memCards=[], first=null, lock=false, matched=0;
+function startMem(){
+  const icons=["🍎","🍇","🍊","🍋"]; memCards=[...icons,...icons].sort(()=>Math.random()-0.5);
+  renderMem();
+  document.getElementById('memMsg').textContent="";
+  matched=0; first=null; lock=false;
+}
+function renderMem(){
+  const g=document.getElementById('memGrid'); g.innerHTML="";
+  memCards.forEach((v,i)=>{
+    const d=document.createElement('div'); d.className='card hidden'; d.textContent=v;
+    d.onclick=()=>flip(i,d); g.appendChild(d);
+  });
+}
+function flip(i,el){
+  if(lock||!el.classList.contains('hidden'))return;
+  el.classList.remove('hidden');
+  if(first===null){first={i,el};}
+  else{
+    if(memCards[i]===memCards[first.i]){matched+=2; if(matched===memCards.length)document.getElementById('memMsg').textContent="Bravo – Ou matche tout !";}
+    else{
+      lock=true; setTimeout(()=>{el.classList.add('hidden'); first.el.classList.add('hidden'); lock=false;},700);
+    } first=null;
+  }
+}
+startMem();
+</script>
+
+</body>
+</html>
