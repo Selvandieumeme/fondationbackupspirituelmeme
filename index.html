@@ -10,6 +10,64 @@
   <meta property="og:description" content="Œuvrons ensemble pour un avenir meilleur en Haïti.">
   <title>Fondation Backup Spirituel – Accueil</title>
 
+<!-- ░░░ STYLE – mete sa nan <head> ou, anvan </style> final ou ░░░ -->
+<style>
+  /* VIDÉO PROMO FOBAS */
+  .fobas-video-wrapper{
+      position:relative;
+      width:100%;
+      max-width:720px;           /* ajiste si w vle pi gran */
+      margin:40px auto;
+      border:4px solid #ffcc00;  /* jòn fondasyon an */
+      border-radius:12px;
+      overflow:hidden;
+      box-shadow:0 4px 12px rgba(0,0,0,.3);
+  }
+  .fobas-video-wrapper video{width:100%;display:block}
+
+  /* Overlay teks sou videyo */
+  .fobas-overlay{
+      position:absolute;inset:0;
+      display:flex;flex-direction:column;
+      align-items:center;justify-content:center;
+      background:rgba(0,0,0,.4);
+      color:#fff;text-align:center;
+      font-family:Arial,Helvetica,sans-serif;
+      padding:0 12px;pointer-events:none;
+  }
+  .fobas-overlay h2{
+      font-size:2rem;
+      color:#ffcc00;
+      margin-bottom:6px;
+      text-shadow:0 0 6px #000;
+  }
+  .fobas-overlay p{
+      font-size:1.1rem;text-shadow:0 0 4px #000;
+  }
+
+  /* Bouton CTA anba videyo */
+  .btn-fobas{
+      display:inline-block;
+      background:#003366;
+      color:#fff;
+      padding:12px 28px;
+      border-radius:30px;
+      margin-top:12px;
+      font-weight:bold;
+      text-decoration:none;
+      transition:.3s;
+  }
+  .btn-fobas:hover{background:#0055aa}
+
+  /* Responsive */
+  @media(max-width:600px){
+      .fobas-overlay h2{font-size:1.4rem}
+      .fobas-overlay p{font-size:.95rem}
+  }
+</style>
+
+
+  
   <!-- ░░░  Styles globaux  ░░░ -->
   <style>
     :root{--bleu:#003366;--bleu-clair:#0055aa;--jaune:#ffcc00;--gris:#f4f4f4;--maxw:1100px}
@@ -37,6 +95,30 @@
     .hero{background:var(--bleu) url("Fobasbon1.jpg") center/cover no-repeat;height:45vh;display:flex;align-items:center;justify-content:center;color:jaune:#ffcc00;text-align:center;padding:0 15px}
     .hero h2{font-size:2.1rem;background:rgba(0,0,0,.45);padding:10px 18px;border-radius:6px}
 
+<!-- ░░░  VIDEO SECTION – mete sa nan <body> kote w vle li parèt ░░░ -->
+<div class="fobas-video-wrapper">
+   <!-- Videyo 30 s ou a  -->
+   <video id="fobasPromo" autoplay muted loop playsinline
+          poster="media/poster_fobas.jpg">
+        <source src="media/FOBAS_ads_promo.mp4" type="video/mp4">
+        Navigatè ou pa sipòte HTML5 video 😢.
+   </video>
+
+   <!-- Overlay mesaj -->
+   <div class="fobas-overlay">
+        <h2>Vin Ambassadeur Digital&nbsp;FOBAS</h2>
+        <p>Klike sou anons yo ➜ Ede timoun yo ➜ Fè lajan w!</p>
+   </div>
+</div>
+
+<div style="text-align:center">
+   <a class="btn-fobas" href="https://fondationbackupspirituel.com">
+      ➜  Vizite Sit la kounye a  !
+   </a>
+</div>
+
+
+    
     /* ░ Sections ░ */
     section{padding:55px 15px;margin:auto;max-width:var(--maxw)}
     section h2{text-align:center;color:var(--bleu);margin-bottom:28px;font-size:1.9rem}
