@@ -1,1 +1,13 @@
-
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Test Video</title>
+</head>
+<body>
+  <video width="640" height="360" controls autoplay muted loop>
+      <source src="media/FOBAS_ads_promo.mp4" type="video/mp4">
+      Navigatè ou pa sipòte HTML5 videyo 😢.
+  </video>
+</body>
+</html>
