@@ -69,6 +69,29 @@
 </style>
 
 
+<style>
+/* === Barre mobile FOBAS sticky === */
+#fobasBar{
+  position:fixed;left:0;right:0;bottom:0;z-index:9999;
+  background:#003366;color:#fff;font-family:Arial,Helvetica,sans-serif;
+  display:flex;align-items:center;gap:12px;padding:10px 14px;
+  box-shadow:0 -3px 8px rgba(0,0,0,.35);transform:translateY(100%);
+  transition:.4s ease-in-out;font-size:14px;
+}
+#fobasBar.show{transform:translateY(0)}
+#fobasBar img{height:36px;flex:none}
+#fobasBar b{color:#ffcc00}
+#fobasBar a.btn{
+  background:#ffcc00;color:#003366;font-weight:bold;border-radius:24px;
+  padding:8px 18px;text-decoration:none;white-space:nowrap;font-size:13px;
+}
+#fobasClose{
+  margin-left:auto;font-weight:bold;cursor:pointer;color:#ffcc00;font-size:18px;
+}
+@media (min-width:801px){#fobasBar{display:none}}
+</style>
+
+  
   
   <!-- ░░░  Styles globaux  ░░░ -->
   <style>
@@ -381,5 +404,43 @@ button.submit:hover {
       return false;
     }
   </script>
+
+
+<script>
+(function(){
+  const bar=document.getElementById('fobasBar'),
+        close=document.getElementById('fobasClose');
+  // Afficher la barre après 2 s pour ne pas surprendre l’internaute
+  setTimeout(()=>bar.classList.add('show'),2000);
+  close.addEventListener('click',()=>bar.classList.remove('show'));
+})();
+</script>
+
+  
+  
+<!-- ░░ Barre Sticky Fondation Backup Spirituel ░░ -->
+<div id="fobasBar">
+  <!-- Petit logo SVG soleil+vague -->
+  <svg width="36" height="36" viewBox="0 0 100 100" style="flex:none">
+    <path d="M0 70 Q25 60 50 70 T100 70 V100 H0Z" fill="#0055aa"/>
+    <circle cx="50" cy="45" r="20" fill="#ffcc00"/>
+    <g stroke="#ffcc00" stroke-width="4">
+      <line x1="50" y1="15" x2="50" y2="0"/>
+      <line x1="28" y1="28" x2="15" y2="15"/>
+      <line x1="72" y1="28" x2="85" y2="15"/>
+    </g>
+  </svg>
+
+  <span>
+    <b>Soutenez 50 enfants</b> : restez 15 s sur nos partenaires et aidez‑nous à payer l’école !
+  </span>
+
+  <a class="btn" href="https://fondationbackupspirituel.com" target="_blank">
+     Découvrir !
+  </a>
+  <span id="fobasClose" title="Fermer">✖︎</span>
+</div>
+
+  
 </body>
 </html>
