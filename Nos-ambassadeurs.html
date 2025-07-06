@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>Nos Ambassadeurs – Fondation Backup Spirituel</title>
+
+  <!-- STYLE GLOBAL (bleu & jaune) -->
+  <style>
+  :root{--bleu:#003366;--bleu-clair:#0055aa;--jaune:#ffcc00;--gris:#f5f7fa;--maxw:1100px}
+  *{box-sizing:border-box;margin:0;padding:0;font-family:Arial,Helvetica,sans-serif}
+  body{background:#fff;color:#333;line-height:1.6}
+  a{text-decoration:none;color:inherit}
+  header{background:var(--bleu);color:#fff;text-align:center;padding:18px 10px}
+  header img{height:85px}
+  header h1{margin-top:6px;font-size:2rem;font-weight:700}
+  nav{background:var(--jaune);font-weight:bold}
+  nav ul{display:flex;flex-wrap:wrap;justify-content:center;gap:12px;list-style:none;padding:10px}
+  nav a{padding:10px 16px;border-radius:4px;color:var(--bleu);transition:.25s}
+  nav a:hover,nav a.active{background:var(--bleu);color:#fff}
+  li.dropdown{position:relative}
+  .dropdown-content{display:none;position:absolute;top:100%;left:0;background:var(--bleu);min-width:220px;border-radius:4px;z-index:99}
+  .dropdown-content a{display:block;padding:10px 14px;color:#fff}
+  .dropdown-content a:hover{background:var(--bleu-clair)}
+  li.dropdown:hover .dropdown-content{display:block}
+
+  section{max-width:var(--maxw);margin:auto;padding:50px 15px}
+  h2{color:var(--bleu);text-align:center;margin-bottom:28px;font-size:2rem}
+  table{width:100%;border-collapse:collapse;margin-top:20px}
+  th,td{padding:12px;border:1px solid #ccc;text-align:left}
+  th{background:var(--bleu);color:#fff}
+  tr:nth-child(even){background:var(--gris)}
+  footer{background:var(--bleu);color:#fff;text-align:center;padding:18px 10px;margin-top:60px}
+  @media(max-width:700px){header h1{font-size:1.5rem}}
+  </style>
+
+  <!-- ░░ Bloc tracking Ambassadeur ░░ -->
+  <script>
+  (function(){
+    const p=new URLSearchParams(location.search);
+    if(p.has('ref'))document.cookie="amb="+encodeURIComponent(p.get('ref'))+";path=/;max-age=7776000";
+    const who=(document.cookie.match(/(?:^|;)\s*amb=([^;]+)/)||[])[1]||"inconnu";
+    navigator.sendBeacon && navigator.sendBeacon("/logger.php",
+       new URLSearchParams({page:location.pathname,ref:who,t:Date.now()}));
+  })();
+  </script>
+  <!-- ░░ Fin bloc ░░ -->
+</head>
+<body>
+
+<!-- ░░ Header ░░ -->
+<header>
+  <img src="logofobas.png" alt="Logo Fondation">
+  <h1>FONDATION BACKUP SPIRITUEL</h1>
+</header>
+
+<!-- ░░ Navigation (même que les autres pages) ░░ -->
+<nav>
+  <ul>
+    <li><a href="index.html">Accueil</a></li>
+    <li><a href="Qui-sommes-nous.html">Qui sommes‑nous</a></li>
+    <li><a href="Parrainez-nous.html">Parrainez‑nous</a></li>
+    <li><a href="Notre-programme-d'alphabetisation.html">Prog. d’Alphabétisation</a></li>
+    <li><a href="Notre-ecole-d'informatique.html">École d’Info</a></li>
+    <li><a href="Contact.html">Contact</a></li>
+    <li class="dropdown">
+      <a href="#">Autres ▾</a>
+      <ul class="dropdown-content">
+        <li><a href="Actualites.html">Actualités</a></li>
+        <li><a href="Blagues-et-histoires.html">Blagues & Histoires</a></li>
+        <li><a href="Jouez-avec-nous.html">Jouez avec nous</a></li>
+        <li><a href="Nos-Ambassadeurs.html" class="active">Nos Ambassadeurs</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+
+<!-- ░░ Section liste des Ambassadeurs ░░ -->
+<section>
+  <h2>Nos Ambassadeurs Digitaux</h2>
+  <p>Chaque ambassadeur dispose d’un lien personnel pour promouvoir la Fondation. Lorsqu’un visiteur utilise ce lien, nous pouvons mesurer l’impact (pages visitées, temps passé) dans le respect des règles AdSense.</p>
+
+  <table>
+    <tr><th>#</th><th>Nom &amp; Prénom</th><th>Lien personnel</th></tr>
+    <tr><td>1</td><td>Thelus Christela</td>
+        <td><a href="https://fondationbackupspirituel.com/?ref=Thelus_Christela" target="_blank">
+            https://fondationbackupspirituel.com/?ref=Thelus_Christela</a></td></tr>
+
+    <!-- Exemples supplémentaires (remplacez / complétez avec vos véritables ambassadeurs) -->
+    <tr><td>2</td><td>Jacques Pierre</td>
+        <td><a href="https://fondationbackupspirituel.com/?ref=Jacques_Pierre" target="_blank">
+            …/?ref=Jacques_Pierre</a></td></tr>
+    <tr><td>3</td><td>Antoinette Louis</td>
+        <td><a href="https://fondationbackupspirituel.com/?ref=Antoinette_Louis" target="_blank">
+            …/?ref=Antoinette_Louis</a></td></tr>
+    <tr><td>4</td><td>Jean Alex</td>
+        <td><a href="https://fondationbackupspirituel.com/?ref=Jean_Alex" target="_blank">
+            …/?ref=Jean_Alex</a></td></tr>
+    <!-- … ajoutez jusqu’à 20 ambassadeurs ou plus … -->
+  </table>
+</section>
+
+<!-- ░░ Footer ░░ -->
+<footer>
+  © 2025 Fondation Backup Spirituel – Tous droits réservés.
+</footer>
+
+</body>
+</html>
