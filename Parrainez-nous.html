@@ -33,6 +33,26 @@
     footer{background:#003366;color:#fff;text-align:center;padding:15px 0;margin-top:40px}
     #formMessage{text-align:center;font-weight:bold;margin-top:10px;color:green}
   </style>
+
+
+<script>
+(function(){
+  /* 1 – si l’URL contient ?ref=nom, on stocke dans un cookie 90 jours */
+  const p = new URLSearchParams(location.search);
+  if (p.has('ref')) {
+      document.cookie = "amb="+encodeURIComponent(p.get('ref'))+";path=/;max-age=7776000";
+  }
+  /* 2 – on lit le cookie (ou 'inconnu') */
+  const who = (document.cookie.match(/(?:^|;)\s*amb=([^;]+)/)||[])[1] || "inconnu";
+
+  /* 3 – on envoie un ping (Beacon) au serveur */
+  if (navigator.sendBeacon) {
+      navigator.sendBeacon("/logger.php",
+          new URLSearchParams({page:location.pathname,ref:who,t:Date.now()}));
+  }
+})();
+</script>
+     
 </head>
 
 <body>
