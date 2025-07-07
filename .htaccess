@@ -1,0 +1,4 @@
+AuthType Basic
+AuthName "FOBAS Dashboard"
+AuthUserFile /chemin/vers/.htpasswd
+Require valid-user
