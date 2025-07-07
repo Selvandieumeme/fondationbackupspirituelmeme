@@ -5,40 +5,50 @@
   <title>Dashboard - Activité des Ambassadeurs</title>
   <style>
     body {
-        font-family: Arial, sans-serif;
-        background: #f4f6fa;
-        padding: 20px;
+      font-family: Arial, sans-serif;
+      background: #f4f6fa;
+      padding: 20px;
     }
     h1 {
-        color: #004080;
+      color: #004080;
     }
     table {
-        border-collapse: collapse;
-        width: 100%;
-        background: #fff;
-        box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      border-collapse: collapse;
+      width: 100%;
+      background: #fff;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
     }
     th, td {
-        padding: 10px;
-        border: 1px solid #ccc;
-        text-align: left;
+      padding: 10px;
+      border: 1px solid #ccc;
+      text-align: left;
     }
     th {
-        background-color: #004080;
-        color: white;
+      background-color: #004080;
+      color: white;
     }
     tr:nth-child(even) {
-        background-color: #eef3fb;
+      background-color: #eef3fb;
     }
     tr:hover {
-        background-color: #dce6f7;
+      background-color: #dce6f7;
     }
-    select {
-        padding: 8px;
-        margin: 10px 5px;
-        width: 220px;
-        border: 1px solid #ccc;
-        border-radius: 4px;
+    select, button {
+      padding: 8px;
+      margin: 10px 5px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    button {
+      background-color: #004080;
+      color: white;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #003060;
+    }
+    .top-controls {
+      margin-bottom: 15px;
     }
   </style>
 </head>
@@ -46,20 +56,25 @@
 
 <h1>📊 Dashboard Ambassadeurs Digitaux</h1>
 
-<label>🔍 Rechercher par nom:</label>
-<select id="refFilter" onchange="filtrer()">
-  <option value="">-- Tous --</option>
-</select>
+<div class="top-controls">
+  <label>🔍 Rechercher par nom:</label>
+  <select id="refFilter" onchange="filtrer()">
+    <option value="">-- Tous --</option>
+  </select>
 
-<label>🔍 par IP:</label>
-<select id="ipFilter" onchange="filtrer()">
-  <option value="">-- Toutes --</option>
-</select>
+  <label>🔍 par IP:</label>
+  <select id="ipFilter" onchange="filtrer()">
+    <option value="">-- Toutes --</option>
+  </select>
 
-<label>🔍 par page:</label>
-<select id="pageFilter" onchange="filtrer()">
-  <option value="">-- Toutes --</option>
-</select>
+  <label>🔍 par page:</label>
+  <select id="pageFilter" onchange="filtrer()">
+    <option value="">-- Toutes --</option>
+  </select>
+
+  <button onclick="reinitialiserFiltres()">🔄 Réinitialiser filtres</button>
+  <button onclick="telechargerCSV()">⬇️ Télécharger CSV</button>
+</div>
 
 <table id="amb-table">
   <thead>
@@ -137,6 +152,17 @@ function displayRows(data) {
     `;
     tbody.appendChild(tr);
   });
+}
+
+function reinitialiserFiltres() {
+  document.getElementById("refFilter").value = "";
+  document.getElementById("ipFilter").value = "";
+  document.getElementById("pageFilter").value = "";
+  filtrer();
+}
+
+function telechargerCSV() {
+  window.location.href = "amb_logs.csv";
 }
 </script>
 
