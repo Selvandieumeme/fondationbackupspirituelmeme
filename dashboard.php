@@ -1,3 +1,11 @@
+<?php
+session_start();
+if (!isset($_SESSION['connecte'])) {
+    header('Location: login.php');
+    exit;
+}
+?>
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -53,6 +61,11 @@
   </style>
 </head>
 <body>
+
+
+<div style="text-align: right;">
+  <a href="logout.php" style="color: #004080; font-weight: bold;">🚪 Déconnexion</a>
+</div>
 
 <h1>📊 Dashboard Ambassadeurs Digitaux</h1>
 
