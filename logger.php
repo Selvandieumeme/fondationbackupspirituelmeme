@@ -1,6 +1,5 @@
 <?php
-/* logger.php – enregistre date, ambassadeur, page, IP */
-
+/* logger.php – enregistre : date; ref; page; ip */
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') { http_response_code(405); exit; }
 
 $page = $_POST['page'] ?? 'inconnu';
