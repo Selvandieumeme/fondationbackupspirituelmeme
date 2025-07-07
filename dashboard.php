@@ -1,4 +1,4 @@
-<?php
+<?php 
 // dashboard.php – Affiche les données depuis amb_logs.csv
 $csvFile = __DIR__ . '/amb_logs.csv';
 $lines = [];
@@ -40,27 +40,35 @@ if (file_exists($csvFile)) {
         tr:nth-child(even) {
             background-color: #eef3fb;
         }
+        tr:hover {
+            background-color: #dce6f7;
+        }
         input[type="text"] {
             padding: 8px;
             margin: 10px 5px;
             width: 200px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
         }
     </style>
     <script>
         function filtrerTableau() {
-            let refFilter = document.getElementById("refFilter").value.toLowerCase();
-            let ipFilter  = document.getElementById("ipFilter").value.toLowerCase();
-            let pageFilter= document.getElementById("pageFilter").value.toLowerCase();
-            let rows = document.querySelectorAll("tbody tr");
+            const refFilter = document.getElementById("refFilter").value.toLowerCase();
+            const ipFilter = document.getElementById("ipFilter").value.toLowerCase();
+            const pageFilter = document.getElementById("pageFilter").value.toLowerCase();
+            const rows = document.querySelectorAll("#amb-table tbody tr");
 
             rows.forEach(row => {
-                let ref  = row.cells[1].textContent.toLowerCase();
-                let page = row.cells[2].textContent.toLowerCase();
-                let ip   = row.cells[3].textContent.toLowerCase();
+                const ref  = row.cells[1].textContent.toLowerCase();
+                const page = row.cells[2].textContent.toLowerCase();
+                const ip   = row.cells[3].textContent.toLowerCase();
 
-                row.style.display =
-                    (ref.includes(refFilter) && ip.includes(ipFilter) && page.includes(pageFilter))
-                    ? "" : "none";
+                const match = 
+                    ref.includes(refFilter) &&
+                    ip.includes(ipFilter) &&
+                    page.includes(pageFilter);
+
+                row.style.display = match ? "" : "none";
             });
         }
     </script>
@@ -69,13 +77,13 @@ if (file_exists($csvFile)) {
     <h1>📊 Dashboard Ambassadeurs Digitaux</h1>
 
     <label>🔍 Rechercher par nom:</label>
-    <input type="text" id="refFilter" onkeyup="filtrerTableau()" placeholder="Ex: Thelus Christela">
+    <input type="text" id="refFilter" oninput="filtrerTableau()" placeholder="Ex: Thelus Christela">
     <label>🔍 par IP:</label>
-    <input type="text" id="ipFilter" onkeyup="filtrerTableau()" placeholder="Ex: 192.168.0.1">
+    <input type="text" id="ipFilter" oninput="filtrerTableau()" placeholder="Ex: 192.168.0.1">
     <label>🔍 par page:</label>
-    <input type="text" id="pageFilter" onkeyup="filtrerTableau()" placeholder="Ex: accueil, parrainez-nous...">
+    <input type="text" id="pageFilter" oninput="filtrerTableau()" placeholder="Ex: accueil, parrainez-nous...">
 
-    <table>
+    <table id="amb-table">
         <thead>
             <tr>
                 <th>Date/Heure</th>
@@ -86,12 +94,19 @@ if (file_exists($csvFile)) {
         </thead>
         <tbody>
             <?php foreach ($lines as $line): ?>
-                <?php list($date, $ref, $page, $ip) = explode(";", $line); ?>
+                <?php
+                    $parts = explode(";", $line);
+                    if (count($parts) === 4) {
+                        [$date, $ref, $page, $ip] = $parts;
+                    } else {
+                        continue; // si gen erè nan liy CSV la
+                    }
+                ?>
                 <tr>
-                    <td><?= htmlspecialchars($date) ?></td>
-                    <td><?= htmlspecialchars($ref) ?></td>
-                    <td><?= htmlspecialchars($page) ?></td>
-                    <td><?= htmlspecialchars($ip) ?></td>
+                    <td><?= htmlspecialchars(utf8_encode($date)) ?></td>
+                    <td><?= htmlspecialchars(utf8_encode($ref)) ?></td>
+                    <td><?= htmlspecialchars(utf8_encode($page)) ?></td>
+                    <td><?= htmlspecialchars(utf8_encode($ip)) ?></td>
                 </tr>
             <?php endforeach; ?>
         </tbody>
