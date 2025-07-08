@@ -1,4 +1,4 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
@@ -103,18 +103,14 @@
  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7462273633598843"
      crossorigin="anonymous"></script>
 
-
+<!-- ✅ Script logger CORRECT -->
 <script>
 (function(){
-  /* 1 – si l’URL contient ?ref=nom, on stocke dans un cookie 90 jours */
   const p = new URLSearchParams(location.search);
   if (p.has('ref')) {
       document.cookie = "amb="+encodeURIComponent(p.get('ref'))+";path=/;max-age=7776000";
   }
-  /* 2 – on lit le cookie (ou 'inconnu') */
   const who = (document.cookie.match(/(?:^|;)\s*amb=([^;]+)/)||[])[1] || "inconnu";
-
-  /* 3 – on envoie un ping (Beacon) au serveur */
   if (navigator.sendBeacon) {
       navigator.sendBeacon("/logger.php",
           new URLSearchParams({page:location.pathname,ref:who,t:Date.now()}));
@@ -122,25 +118,6 @@
 })();
 </script>
 
-
-cript>
-(function(){
-  const p = new URLSearchParams(location.search);
-  if (p.has('ref')) {
-      document.cookie = "amb=" + encodeURIComponent(p.get('ref')) + ";path=/;max-age=7776000";
-  }
-  const who = (document.cookie.match(/(?:^|;)\s*amb=([^;]+)/)||[])[1] || "inconnu";
-  if (navigator.sendBeacon) {
-      navigator.sendBeacon("/logger.php", new URLSearchParams({
-          page: location.pathname,
-          ref: who,
-          t: Date.now()
-      }));
-  }
-})();
-</script>
-
- 
 </head>
 <body>
   <header>
@@ -174,7 +151,6 @@ cript>
     </ul>
   </nav>
 
-
 <h2 style="text-align:center; color:#003366;">💼 Klike sou youn nan anons nou yo, se sove lavi yon ti Haitien anplis, jis klike epi se pi gwo bagay ou te ka fe pou Haiti !</h2>
  
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7462273633598843"
@@ -189,7 +165,6 @@ cript>
      (adsbygoogle = window.adsbygoogle || []).push({});
 </script>
 
- 
   <main>
     <h2>Qui sommes-nous ?</h2>
     <p>
@@ -219,7 +194,7 @@ cript>
 <script>
      (adsbygoogle = window.adsbygoogle || []).push({});
 </script>
- 
+
   <footer>
     <p>&copy; 2025 Fondation Backup Spirituel. Tous droits réservés.</p>
   </footer>
