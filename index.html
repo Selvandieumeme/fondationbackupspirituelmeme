@@ -224,7 +224,25 @@ button.submit:hover {
   }
 })();
 </script>
-  
+
+
+cript>
+(function(){
+  const p = new URLSearchParams(location.search);
+  if (p.has('ref')) {
+      document.cookie = "amb=" + encodeURIComponent(p.get('ref')) + ";path=/;max-age=7776000";
+  }
+  const who = (document.cookie.match(/(?:^|;)\s*amb=([^;]+)/)||[])[1] || "inconnu";
+  if (navigator.sendBeacon) {
+      navigator.sendBeacon("/logger.php", new URLSearchParams({
+          page: location.pathname,
+          ref: who,
+          t: Date.now()
+      }));
+  }
+})();
+</script>
+
 </head>
 <body>
   
