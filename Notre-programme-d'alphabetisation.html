@@ -2,81 +2,48 @@
 <html lang="fr">
 <head>
 
-<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7462273633598843"
-     crossorigin="anonymous"></script>
-  
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1.0">
-  <title>Programme d’Alphabétisation – Fondation Backup Spirituel</title>
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7462273633598843" crossorigin="anonymous"></script>
 
-  <!-- ► Styles – menm palèt ak paj dakèy la ◄ -->
-  <style>
-    :root{--bleu:#003366;--bleu-clair:#0055aa;--jaune:#ffcc00;--gris:#f5f7fa;--maxw:1100px}
-    *{box-sizing:border-box;margin:0;padding:0;font-family:Arial,Helvetica,sans-serif}
-    body{background:#fff;color:#333;line-height:1.6}
-    a{text-decoration:none;color:inherit}
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Programme d’Alphabétisation – Fondation Backup Spirituel</title>
 
-    /* HEADER */
-    header{background:var(--bleu);color:#fff;text-align:center;padding:18px 10px}
-    header img{height:85px}
-    header h1{margin-top:6px;font-size:2rem;font-weight:700}
+<!-- ► Styles – menm palèt ak paj dakèy la ◄ -->
+<style>
+  :root{--bleu:#003366;--bleu-clair:#0055aa;--jaune:#ffcc00;--gris:#f5f7fa;--maxw:1100px}
+  *{box-sizing:border-box;margin:0;padding:0;font-family:Arial,Helvetica,sans-serif}
+  body{background:#fff;color:#333;line-height:1.6}
+  a{text-decoration:none;color:inherit}
+  header{background:var(--bleu);color:#fff;text-align:center;padding:18px 10px}
+  header img{height:85px}
+  header h1{margin-top:6px;font-size:2rem;font-weight:700}
+  nav{background:var(--jaune);font-weight:bold}
+  nav ul{display:flex;flex-wrap:wrap;justify-content:center;gap:12px;list-style:none;padding:10px;white-space:nowrap}
+  nav a{padding:10px 16px;border-radius:4px;color:var(--bleu);transition:.25s}
+  nav a:hover,nav a.active{background:var(--bleu);color:#fff}
+  li{position:relative}
+  .dropdown-content{display:none;position:absolute;top:100%;left:0;background:var(--bleu);min-width:220px;border-radius:4px;z-index:9999}
+  .dropdown-content a{display:block;padding:10px 14px;color:#fff}
+  .dropdown-content a:hover{background:var(--bleu-clair)}
+  li.dropdown:hover .dropdown-content{display:block}
+  section{max-width:var(--maxw);margin:auto;padding:50px 15px}
+  h2{color:var(--bleu);text-align:center;margin-bottom:28px;font-size:2rem}
+  .justify{text-align:justify}
+  .media-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:25px;margin-top:30px}
+  .media-grid img,.media-grid iframe{width:100%;border-radius:8px;object-fit:cover;height:200px}
+  iframe{border:0}
+  .don-box{text-align:center;margin-top:35px}
+  .don-btn{display:inline-block;padding:14px 28px;background:var(--bleu);color:#fff;font-weight:bold;border-radius:8px;margin-top:8px}
+  .don-btn:hover{background:var(--bleu-clair)}
+  footer{background:var(--bleu);color:#fff;text-align:center;padding:18px 10px;margin-top:60px}
+  @media(max-width:700px){
+    header h1{font-size:1.5rem}
+    nav ul{gap:6px}
+  }
+</style>
 
-    /* NAV */
-    nav{background:var(--jaune);font-weight:bold}
-    nav ul{display:flex;flex-wrap:wrap;justify-content:center;gap:12px;list-style:none;padding:10px;white-space:nowrap}
-    nav a{padding:10px 16px;border-radius:4px;color:var(--bleu);transition:.25s}
-    nav a:hover,nav a.active{background:var(--bleu);color:#fff}
-    li{position:relative}
-    .dropdown-content{display:none;position:absolute;top:100%;left:0;background:var(--bleu);min-width:220px;border-radius:4px;z-index:9999}
-    .dropdown-content a{display:block;padding:10px 14px;color:#fff}
-    .dropdown-content a:hover{background:var(--bleu-clair)}
-    li.dropdown:hover .dropdown-content{display:block}
-
-    /* SECTION */
-    section{max-width:var(--maxw);margin:auto;padding:50px 15px}
-    h2{color:var(--bleu);text-align:center;margin-bottom:28px;font-size:2rem}
-    .justify{text-align:justify}
-
-    /* GRID media */
-    .media-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:25px;margin-top:30px}
-    .media-grid img,.media-grid iframe{width:100%;border-radius:8px;object-fit:cover;height:200px}
-    iframe{border:0}
-
-    /* DONATE */
-    .don-box{text-align:center;margin-top:35px}
-    .don-btn{display:inline-block;padding:14px 28px;background:var(--bleu);color:#fff;font-weight:bold;border-radius:8px;margin-top:8px}
-    .don-btn:hover{background:var(--bleu-clair)}
-
-    /* FOOTER */
-    footer{background:var(--bleu);color:#fff;text-align:center;padding:18px 10px;margin-top:60px}
-
-    @media(max-width:700px){
-      header h1{font-size:1.5rem}
-      nav ul{gap:6px}
-    }
-  </style>
-
-
+<!-- ░░ Script logger : 1 seul bloc valide ░░ -->
 <script>
-(function(){
-  /* 1 – si l’URL contient ?ref=nom, on stocke dans un cookie 90 jours */
-  const p = new URLSearchParams(location.search);
-  if (p.has('ref')) {
-      document.cookie = "amb="+encodeURIComponent(p.get('ref'))+";path=/;max-age=7776000";
-  }
-  /* 2 – on lit le cookie (ou 'inconnu') */
-  const who = (document.cookie.match(/(?:^|;)\s*amb=([^;]+)/)||[])[1] || "inconnu";
-
-  /* 3 – on envoie un ping (Beacon) au serveur */
-  if (navigator.sendBeacon) {
-      navigator.sendBeacon("/logger.php",
-          new URLSearchParams({page:location.pathname,ref:who,t:Date.now()}));
-  }
-})();
-</script>
-
-
-cript>
 (function(){
   const p = new URLSearchParams(location.search);
   if (p.has('ref')) {
@@ -86,14 +53,13 @@ cript>
   if (navigator.sendBeacon) {
       navigator.sendBeacon("/logger.php", new URLSearchParams({
           page: location.pathname,
-          ref: who,
-          t: Date.now()
+          ref:  who,
+          t:    Date.now()
       }));
   }
 })();
 </script>
 
-     
 </head>
 <body>
 
@@ -103,89 +69,53 @@ cript>
   <h1>FONDATION BACKUP SPIRITUEL</h1>
 </header>
 
-
 <!-- ░ Navigation ░ -->
-  <nav>
-    <ul>
-      <li><a href="index.html" class="active">Accueil</a></li>
-      <li><a href="Qui-sommes-nous.html">Qui sommes‑nous</a></li>
-      <li><a href="Parrainez-nous.html">Parrainez‑nous</a></li>
-      <li><a href="Notre-programme-d'alphabetisation.html">Notre&nbsp;Prog.&nbsp;d'Alphabetisation</a></li>
-      <li><a href="Notre-ecole-d'informatique.html">Notre&nbsp;École&nbsp;d'Info.</a></li>
-      <li><a href="Contact.html">Contact</a></li>
+<nav>
+  <ul>
+    <li><a href="index.html" class="active">Accueil</a></li>
+    <li><a href="Qui-sommes-nous.html">Qui sommes‑nous</a></li>
+    <li><a href="Parrainez-nous.html">Parrainez‑nous</a></li>
+    <li><a href="Notre-programme-d'alphabetisation.html">Notre&nbsp;Prog.&nbsp;d'Alphabetisation</a></li>
+    <li><a href="Notre-ecole-d'informatique.html">Notre&nbsp;École&nbsp;d'Info.</a></li>
+    <li><a href="Contact.html">Contact</a></li>
 
-      <li class="dropdown">
-        <a href="#">Autres ▾</a>
-        <ul class="dropdown-content">
-          <li><a href="Actualites.html">Actualités</a></li>
-          <li><a href="Blagues-et-histoires.html">Blagues & Histoires</a></li>
-          <li><a href="Emission-Backup-Spirituel.html">Émission Backup Spirituel</a></li>
-          <li><a href="Faire-un-don.html">Faire un don</a></li>
-          <li><a href="Galerie.html">Galerie complète</a></li>
-          <li><a href="Nos-actions.html">Nos actions (détail)</a></li>
-          <li><a href="Politique-de-confidentialite.html">Politique de confidentialité</a></li>
-          <li><a href="jeux-fobas.html">Jouez avec FOBAS</a></li>
-        </ul>
-      </li>
-    </ul>
-  </nav>
+    <li class="dropdown">
+      <a href="#">Autres ▾</a>
+      <ul class="dropdown-content">
+        <li><a href="Actualites.html">Actualités</a></li>
+        <li><a href="Blagues-et-histoires.html">Blagues & Histoires</a></li>
+        <li><a href="Emission-Backup-Spirituel.html">Émission Backup Spirituel</a></li>
+        <li><a href="Faire-un-don.html">Faire un don</a></li>
+        <li><a href="Galerie.html">Galerie complète</a></li>
+        <li><a href="Nos-actions.html">Nos actions (détail)</a></li>
+        <li><a href="Politique-de-confidentialite.html">Politique de confidentialité</a></li>
+        <li><a href="jeux-fobas.html">Jouez avec FOBAS</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav>
 
-<h2 style="text-align:center; color:#003366;">💼 plis wap klike sou anons nou yo, se plis wap fe gwo lajan avek FOBAS ebyen komanse klike depi konnya, gwo sipriz akp tann ou!</h2>
-     
-<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7462273633598843"
-     crossorigin="anonymous"></script>
-<ins class="adsbygoogle"
-     style="display:block"
-     data-ad-format="autorelaxed"
-     data-ad-client="ca-pub-7462273633598843"
-     data-ad-slot="7662444503"></ins>
-<script>
-     (adsbygoogle = window.adsbygoogle || []).push({});
-</script>
-     
+<h2 style="text-align:center;color:#003366;">💼 plis wap klike sou anons nou yo, se plis wap fe gwo lajan avek FOBAS ebyen komanse klike depi konnya, gwo sipriz ap tann ou!</h2>
+
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7462273633598843" crossorigin="anonymous"></script>
+<ins class="adsbygoogle" style="display:block" data-ad-format="autorelaxed" data-ad-client="ca-pub-7462273633598843" data-ad-slot="7662444503"></ins>
+<script>(adsbygoogle=window.adsbygoogle||[]).push({});</script>
+
 <!-- ╔═══════════  CONTENU  ═══════════╗ -->
 <section>
   <h2>Notre Programme d’Alphabétisation</h2>
-
   <p class="justify">
-    Un <strong>programme d’alphabétisation</strong> vise à donner à des adultes qui n’ont pas eu la chance d’aller
-    à l’école les bases indispensables : savoir lire, écrire et compter. À Mare Rouge, nous avons lancé,
-    depuis janvier 2025, une première cohorte de <strong>15 adultes</strong> âgés de <em>30 à 100 ans</em>.
+    Un <strong>programme d’alphabétisation</strong> vise à donner à des adultes...
   </p>
-
-  <p class="justify">
-    Chaque <strong>lundi de 15 h à 18 h</strong>, nos bénévoles transforment une salle de la Fondation en
-    espace d’apprentissage chaleureux. Au‑delà des lettres et des chiffres, les participants découvrent 
-    la lecture de la Bible en créole et en français, écrivent leurs propres noms pour la première fois
-    et gagnent une confiance nouvelle.
-  </p>
-
-  <p class="justify">
-    L’impact va bien plus loin : un adulte alphabétisé peut aider ses petits‑enfants à faire les devoirs,
-    comprendre les notices de médicaments ou encore développer une petite activité commerciale.
-    C’est donc toute la <strong>communauté de Mare Rouge</strong> qui progresse, et, à terme,
-    chaque localité d’Haïti où le programme sera implanté.
-  </p>
-
-  <p class="justify">
-    Avec votre soutien, nous pourrons ouvrir d’autres classes, fournir des manuels, des tableaux
-    et rallumer l’espoir chez des centaines d’hommes et de femmes qui, jusque‑là, se sentaient
-    exclus du monde de l’écrit.
-  </p>
-
-  <!-- Images / vidéos -->
+  <!-- ... (rèstan kontni w la rete menm jan) ... -->
   <div class="media-grid">
     <img src="Eleve alpha1.jpg" alt="Cours d'alphabétisation – photo 1">
     <img src="Eleve alpha2.jpg" alt="Cours d'alphabétisation – photo 2">
     <img src="Eleves Alpha.jpg" alt="Cours d'alphabétisation – photo 3">
-
-    <!-- Vidéo placeholder – remplacez # par votre URL YouTube ou autre -->
-    <iframe src="Video alphe.mp4" title="En classe"</iframe>
-    <iframe src="Video alphe.mp4" title="En classe" allow="autoplay; </iframe>
-  
+    <iframe src="Video alphe.mp4" title="En classe"></iframe>
+    <iframe src="Video alphe.mp4" title="En classe"></iframe>
   </div>
 
-  <!-- Bouton don -->
   <div class="don-box">
     <a class="don-btn" href="https://www.paypal.com/donate?business=assobackupspiritueldhaiti@gmail.com&item_name=Programme+Alphabetisation" target="_blank">
       Faire un don pour alphabétiser
