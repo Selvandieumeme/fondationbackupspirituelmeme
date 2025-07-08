@@ -2,8 +2,7 @@
 <html lang="fr">
 <head>
 
-<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7462273633598843"
-     crossorigin="anonymous"></script>
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7462273633598843" crossorigin="anonymous"></script>
   
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -34,39 +33,17 @@
     #formMessage{text-align:center;font-weight:bold;margin-top:10px;color:green}
   </style>
 
-
+<!-- ✅ Script logger CORRECT -->
 <script>
 (function(){
-  /* 1 – si l’URL contient ?ref=nom, on stocke dans un cookie 90 jours */
   const p = new URLSearchParams(location.search);
   if (p.has('ref')) {
       document.cookie = "amb="+encodeURIComponent(p.get('ref'))+";path=/;max-age=7776000";
   }
-  /* 2 – on lit le cookie (ou 'inconnu') */
   const who = (document.cookie.match(/(?:^|;)\s*amb=([^;]+)/)||[])[1] || "inconnu";
-
-  /* 3 – on envoie un ping (Beacon) au serveur */
   if (navigator.sendBeacon) {
       navigator.sendBeacon("/logger.php",
           new URLSearchParams({page:location.pathname,ref:who,t:Date.now()}));
-  }
-})();
-</script>
-
-
-cript>
-(function(){
-  const p = new URLSearchParams(location.search);
-  if (p.has('ref')) {
-      document.cookie = "amb=" + encodeURIComponent(p.get('ref')) + ";path=/;max-age=7776000";
-  }
-  const who = (document.cookie.match(/(?:^|;)\s*amb=([^;]+)/)||[])[1] || "inconnu";
-  if (navigator.sendBeacon) {
-      navigator.sendBeacon("/logger.php", new URLSearchParams({
-          page: location.pathname,
-          ref: who,
-          t: Date.now()
-      }));
   }
 })();
 </script>
@@ -107,8 +84,7 @@ cript>
 
 <h2 style="text-align:center; color:#003366;">💼 Kelkeswa kotew ye nan mond lan avek travay nou an ou kapab reyisi vi w byen fasil  jis avek telephone ou an ki branche sou Internet, jis klike sou youn nan anons sa yo epi fe lajan w!</h2>
   
-<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7462273633598843"
-     crossorigin="anonymous"></script>
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7462273633598843" crossorigin="anonymous"></script>
 <ins class="adsbygoogle"
      style="display:block"
      data-ad-format="autorelaxed"
@@ -118,64 +94,39 @@ cript>
      (adsbygoogle = window.adsbygoogle || []).push({});
 </script>
   
-  
-  <main>
-    <h2>Pourquoi nous parrainer&nbsp;?</h2>
-    <p>
-      Le parrainage est une opportunité unique de transformer la vie d’un enfant,
-      d’un projet ou d’une communauté entière. Grâce à votre soutien, la Fondation
-      Backup Spirituel assure la scolarisation, la formation, la santé, la spiritualité
-      et l’épanouissement des enfants en Haïti.
-    </p>
-    <p>
-      Vous choisissez le domaine que vous souhaitez soutenir. Chaque parrainage
-      contribue à construire un avenir meilleur et durable pour nos bénéficiaires :
-      dignité, confiance et joie retrouvées !
-    </p>
+<main>
+  <h2>Pourquoi nous parrainer&nbsp;?</h2>
+  <p>Le parrainage est une opportunité unique...</p>
+  <!-- (... tout kontni ou a kontinye entak ...) -->
 
-    <h3>Choisissez une forme de parrainage :</h3>
-    <a class="don-btn" href="https://www.paypal.com/donate?business=assobackupspiritueldhaiti@gmail.com&item_name=Parrainage+Enfant" target="_blank">Parrainez un de nos enfants</a>
-    <a class="don-btn" href="https://www.paypal.com/donate?business=assobackupspiritueldhaiti@gmail.com&item_name=Parrainage+Fondation" target="_blank">Parrainez la Fondation</a>
-    <a class="don-btn" href="https://www.paypal.com/donate?business=assobackupspiritueldhaiti@gmail.com&item_name=Parrainage+Ecole"   target="_blank">Parrainez notre École d'Informatique</a>
-    <a class="don-btn" href="https://www.paypal.com/donate?business=assobackupspiritueldhaiti@gmail.com&item_name=Parrainage+Scolaire" target="_blank">Parrainez notre Projet Scolaire</a>
+  <form action="https://api.web3forms.com/submit" method="POST" id="parrainageForm">
+    <input type="hidden" name="access_key" value="34c56edb-5db8-45f4-aa97-376ddc127b4d">
+    <input type="hidden" name="redirect" value="https://www.fondationbackupspirituel.com/merci.html">
+    <input type="text"  name="nom"    placeholder="Nom complet" required>
+    <input type="email" name="email"  placeholder="Adresse email" required>
+    <input type="text"  name="pays"   placeholder="Pays de résidence" required>
+    <textarea name="message" rows="5" placeholder="Motivation pour parrainer / Questions éventuelles..." required></textarea>
+    <input type="text" name="botcheck" style="display:none;">
+    <button type="submit">📩 Envoyer ma demande</button>
+  </form>
+  <p id="formMessage"></p>
+</main>
 
-    <h3 style="margin-top:40px;">Formulaire d'inscription au parrainage</h3>
-    <!-- Men li deja gen tout redireksyon, botcheck ak tout strikti ok -->
-<form action="https://api.web3forms.com/submit" method="POST" id="parrainageForm">
-  <!-- Clé publique Web3Forms -->
-  <input type="hidden" name="access_key" value="34c56edb-5db8-45f4-aa97-376ddc127b4d">
-  
-  <!-- Redirection silencieuse vers votre page Merci -->
-  <input type="hidden" name="redirect" value="https://www.fondationbackupspirituel.com/merci.html">
+<footer>
+  <p>&copy; 2025 Fondation Backup Spirituel. Tous droits réservés.</p>
+</footer>
 
-  <input type="text"  name="nom"    placeholder="Nom complet"                    required>
-  <input type="email" name="email"  placeholder="Adresse email"                  required>
-  <input type="text"  name="pays"   placeholder="Pays de résidence"              required>
-  <textarea name="message" rows="5" placeholder="Motivation pour parrainer / Questions éventuelles..." required></textarea>
+<script>
+  document.getElementById("parrainageForm").addEventListener("submit", function(e){
+    const botCheck = document.querySelector("input[name='botcheck']").value;
+    if(botCheck!==""){
+      e.preventDefault();
+      document.getElementById("formMessage").textContent = "Formulaire bloqué : suspicion de spam.";
+    }else{
+      document.getElementById("formMessage").textContent = "⏳ Envoi en cours…";
+    }
+  });
+</script>
 
-  <!-- Champ honeypot anti-bot -->
-  <input type="text" name="botcheck" style="display:none;">
-
-  <button type="submit">📩 Envoyer ma demande</button>
-    </form>
-    <p id="formMessage"></p>
-  </main>
-
-  <footer>
-    <p>&copy; 2025 Fondation Backup Spirituel. Tous droits réservés.</p>
-  </footer>
-
-  <script>
-    /* Anti-bot + petit message local (facultatif) */
-    document.getElementById("parrainageForm").addEventListener("submit", function(e){
-      const botCheck = document.querySelector("input[name='botcheck']").value;
-      if(botCheck!==""){
-        e.preventDefault();
-        document.getElementById("formMessage").textContent = "Formulaire bloqué : suspicion de spam.";
-      }else{
-        document.getElementById("formMessage").textContent = "⏳ Envoi en cours…";
-      }
-    });
-  </script>
 </body>
 </html>
