@@ -1,124 +1,136 @@
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#003366">
-  <title>Églises Nord-Ouest d'Haïti – Fondation Backup Spirituel</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#003366" />
+  <meta name="description" content="Liste des Églises dans le Nord-Ouest d'Haïti inscrites sur le site de la Fondation Backup Spirituel." />
+  <title>Églises Nord-Ouest Haïti – Fondation Backup Spirituel</title>
   <style>
     body { font-family: Arial, sans-serif; margin: 0; padding: 0; background: #fff; color: #333; }
-    header { background: #003366; color: white; text-align: center; padding: 20px; }
+    header { background: #003366; color: white; padding: 20px; text-align: center; }
     nav { background: #ffcc00; }
-    nav ul { list-style: none; display: flex; justify-content: center; flex-wrap: wrap; padding: 0; margin: 0; gap: 10px; }
-    nav a { display: block; padding: 12px 20px; color: #003366; font-weight: bold; text-decoration: none; }
-    nav a:hover { background-color: #003366; color: white; border-radius: 5px; }
+    nav ul { list-style: none; margin: 0; padding: 0; display: flex; justify-content: center; flex-wrap: wrap; gap: 10px; }
+    nav a { display: block; padding: 12px 20px; color: #003366; text-decoration: none; font-weight: bold; }
+    nav a:hover { background: #003366; color: white; border-radius: 5px; }
+    .dropdown-content { display: none; position: absolute; background: #ffcc00; border-radius: 5px; }
+    .dropdown:hover .dropdown-content { display: block; }
+    main { padding: 40px 20px; max-width: 1000px; margin: auto; }
+    h2 { color: #003366; text-align: center; }
+    form { background: #f9f9f9; padding: 20px; border-radius: 10px; }
+    input, textarea, select { width: 100%; padding: 10px; margin-bottom: 15px; border-radius: 6px; border: 1px solid #ccc; }
+    button { background: #003366; color: white; padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; }
+    button:hover { background: #0055aa; }
+    .eglise-list { margin-top: 40px; }
+    .eglise-entry { border: 1px solid #ccc; padding: 15px; border-radius: 10px; margin-bottom: 20px; }
     footer { background: #003366; color: white; text-align: center; padding: 15px 0; margin-top: 40px; }
-    main { max-width: 1000px; margin: auto; padding: 20px; }
-    label { display: block; margin-top: 10px; font-weight: bold; }
-    input, textarea, select { width: 100%; padding: 8px; margin-top: 5px; }
-    button { margin-top: 15px; background: #003366; color: white; padding: 10px 20px; border: none; cursor: pointer; border-radius: 5px; }
-    .form-section { background: #f9f9f9; padding: 20px; border-radius: 10px; }
   </style>
 </head>
 <body>
+  <header>
+    <img src="logofobas.png" alt="Logo Fondation Backup Spirituel" style="max-height:80px;" />
+    <h1>FONDATION BACKUP SPIRITUEL</h1>
+  </header>
 
-<header>
-  <img src="logofobas.png" alt="Logo Fondation Backup Spirituel" style="max-height: 80px;"><br>
-  <h1>FONDATION BACKUP SPIRITUEL</h1>
-</header>
+  <nav>
+    <ul>
+      <li><a href="index.html">Accueil</a></li>
+      <li><a href="Qui-sommes-nous.html">Qui sommes‑nous</a></li>
+      <li><a href="Parrainez-nous.html">Parrainez‑nous</a></li>
+      <li><a href="Notre-programme-d'alphabetisation.html">Notre&nbsp;Prog.&nbsp;d'Alphabetisation</a></li>
+      <li><a href="Notre-ecole-d'informatique.html">Notre&nbsp;École&nbsp;d'Info.</a></li>
+      <li><a href="Contact.html">Contact</a></li>
+      <li class="dropdown">
+        <a href="#">Autres ▾</a>
+        <ul class="dropdown-content">
+          <li><a href="Actualites.html">Actualités</a></li>
+          <li><a href="Blagues-et-histoires.html">Blagues & Histoires</a></li>
+          <li><a href="Emission-Backup-Spirituel.html">Émission Backup Spirituel</a></li>
+          <li><a href="Faire-un-don.html">Faire un don</a></li>
+          <li><a href="Galerie.html">Galerie complète</a></li>
+          <li><a href="Nos-actions.html">Nos actions (détail)</a></li>
+          <li><a href="Politique-de-confidentialite.html">Politique de confidentialité</a></li>
+          <li><a href="jeux-fobas.html">Jouez avec FOBAS</a></li>
+        </ul>
+      </li>
+    </ul>
+  </nav>
 
-<nav>
-  <ul>
-    <li><a href="index.html">Accueil</a></li>
-    <li><a href="Qui-sommes-nous.html">Qui sommes‑nous</a></li>
-    <li><a href="Parrainez-nous.html">Parrainez‑nous</a></li>
-    <li><a href="Notre-programme-d'alphabetisation.html">Notre&nbsp;Prog.&nbsp;d'Alphabetisation</a></li>
-    <li><a href="Notre-ecole-d'informatique.html">Notre&nbsp;École&nbsp;d'Info.</a></li>
-    <li><a href="Contact.html">Contact</a></li>
-    <li><a href="#">Autres ▾</a></li>
-  </ul>
-</nav>
+  <main>
+    <h2>🕊️ Églises dans le Nord-Ouest d'Haïti</h2>
+    <p style="text-align: center;">
+      Bienvenue à tous les Pasteurs et leaders spirituels de la région du Nord-Ouest ! Cette plateforme vous permet de faire rayonner votre église et vos programmes. Remplissez le formulaire pour apparaître publiquement sur cette page, et laissez la lumière de Dieu atteindre encore plus d’âmes.
+    </p>
 
-<main>
-  <h2 style="text-align:center; color:#003366;">📌 Inscription des Églises du Nord-Ouest d'Haïti</h2>
-  <p>
-    Bienvenue dans l'espace dédié à toutes les églises du Nord-Ouest d'Haïti. Ce formulaire permet aux pasteurs et leaders religieux
-    d'enregistrer leur église pour être visible par le public et bénéficier du soutien de la Fondation Backup Spirituel. Toutes les
-    informations saisies seront affichées automatiquement sur cette page, et une alerte sera envoyée à l'adresse :
-    <strong>infos@fondationbackupspirituel.com</strong>.
-  </p>
-
-  <div class="form-section">
-    <form id="egliseForm" enctype="multipart/form-data">
-      <label>Nom de l'Église</label>
-      <input type="text" name="nom_eglise" required>
-
-      <label>Nom de la zone</label>
-      <input type="text" name="zone" required>
-
-      <label>Nom du Pasteur</label>
-      <input type="text" name="pasteur" required>
-
-      <label>Deux membres du comité</label>
-      <input type="text" name="membre1" required>
-      <input type="text" name="membre2" required>
-
-      <label>Adresse</label>
-      <input type="text" name="adresse" required>
-
-      <label>Téléphone</label>
-      <input type="text" name="telephone" required>
-
-      <label>Email</label>
-      <input type="email" name="email" required>
-
-      <label>Programmes (Dimanche à Samedi, matin, midi, soir)</label>
-      <textarea name="programme" rows="4" required></textarea>
-
-      <label>Autres activités</label>
-      <textarea name="activites" placeholder="Croisade, Réveil, Mission, Baptême, Mariage, Antenne..." rows="4"></textarea>
-
-      <label>Nombre de fidèles</label>
-      <input type="number" name="nombre_fideles">
-
-      <label>Veillée de nuit ?</label>
-      <select name="veillee">
-        <option value="non">Non</option>
-        <option value="oui">Oui</option>
+    <form id="egliseForm">
+      <input type="text" name="eglise" placeholder="Nom de l'Église" required />
+      <input type="text" name="zone" placeholder="Nom de la zone ou ville" required />
+      <input type="text" name="pasteur" placeholder="Nom du Pasteur Principal" required />
+      <input type="text" name="comite1" placeholder="Nom du premier membre du comité" />
+      <input type="text" name="comite2" placeholder="Nom du deuxième membre du comité" />
+      <input type="text" name="adresse" placeholder="Adresse de l'église" required />
+      <input type="tel" name="tel" placeholder="Téléphone" />
+      <input type="email" name="email" placeholder="Email de l'église" />
+      <textarea name="programme" placeholder="Programmes de la semaine (Dimanche à Samedi, matin à soir)" rows="5"></textarea>
+      <input type="text" name="activites" placeholder="Autres activités : croisade, réveil, mission, etc." />
+      <input type="number" name="membres" placeholder="Nombre de membres actuels de l’assemblée" />
+      <select name="veye_nwi">
+        <option value="">Veillée de nuit ?</option>
+        <option value="Oui">Oui</option>
+        <option value="Non">Non</option>
       </select>
-
-      <label>Jeunes en prière ?</label>
-      <select name="jeunes_priere">
-        <option value="non">Non</option>
-        <option value="oui">Oui</option>
+      <input type="text" name="le_veye" placeholder="Jour / Heure de la veillée (si applicable)" />
+      <select name="jeun">
+        <option value="">Jeûne de prière ?</option>
+        <option value="Oui">Oui</option>
+        <option value="Non">Non</option>
       </select>
-
-      <label>Lien Facebook</label>
-      <input type="url" name="facebook">
-
-      <label>Lien YouTube</label>
-      <input type="url" name="youtube">
-
-      <label>Photos de l'église (jusqu'à 5)</label>
-      <input type="file" name="photos[]" multiple accept="image/*">
-
-      <label>Vidéos de l'église (jusqu'à 5)</label>
-      <input type="file" name="videos[]" multiple accept="video/*">
-
-      <label>Église en construction ?</label>
-      <select name="construction">
-        <option value="non">Non</option>
-        <option value="oui">Oui</option>
+      <input type="text" name="le_jeun" placeholder="Jour / Heure du jeûne (si applicable)" />
+      <input type="url" name="facebook" placeholder="Page Facebook (si disponible)" />
+      <input type="url" name="youtube" placeholder="Chaîne YouTube (si disponible)" />
+      <input type="file" name="photos" accept="image/*" multiple />
+      <input type="file" name="videos" accept="video/*" multiple />
+      <select name="en_construction">
+        <option value="">Église en construction ?</option>
+        <option value="Oui">Oui</option>
+        <option value="Non">Non</option>
       </select>
-
-      <button type="submit">📨 Envoyer</button>
+      <button type="submit">Envoyer</button>
     </form>
-  </div>
-</main>
 
-<footer>
-  <p>&copy; 2025 Fondation Backup Spirituel. Tous droits réservés.</p>
-</footer>
+    <div class="eglise-list" id="egliseList"></div>
+  </main>
 
+  <footer>
+    <p>&copy; 2025 Fondation Backup Spirituel. Tous droits réservés.</p>
+  </footer>
+
+  <script>
+    const form = document.getElementById('egliseForm');
+    const list = document.getElementById('egliseList');
+
+    form.addEventListener('submit', function(e) {
+      e.preventDefault();
+      const data = new FormData(form);
+      const entry = document.createElement('div');
+      entry.className = 'eglise-entry';
+      entry.innerHTML = `
+        <h3>${data.get('eglise')} (${data.get('zone')})</h3>
+        <p><strong>Pasteur:</strong> ${data.get('pasteur')}</p>
+        <p><strong>Adresse:</strong> ${data.get('adresse')}</p>
+        <p><strong>Programme:</strong><br>${data.get('programme')}</p>
+        <p><strong>Activités:</strong> ${data.get('activites')}</p>
+        <p><strong>Nombre de membres:</strong> ${data.get('membres')}</p>
+      `;
+      list.prepend(entry);
+      form.reset();
+      fetch("https://formspree.io/f/xyyvbnpn", {
+        method: "POST",
+        body: data,
+        headers: { Accept: "application/json" }
+      });
+    });
+  </script>
 </body>
 </html>
