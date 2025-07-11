@@ -151,8 +151,10 @@
 
       fetch(scriptURL, { method: 'POST', body: data })
         .then(response => {
-          alert("✅ Done yo voye sou Google Sheets la avèk siksè !");
-          form.reset();
+  alert("✅ Done yo voye sou Google Sheets la avèk siksè !");
+  form.reset();
+  document.getElementById('egliseList').innerHTML = ""; // vide lis la
+  chajeDonneYo(); // rechaje done yo
         })
         .catch(error => {
           alert("⚠️ Gen yon erè pandan ou tap voye done yo!");
