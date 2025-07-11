@@ -23,6 +23,7 @@
     button:hover { background: #0055aa; }
     .eglise-list { margin-top: 40px; }
     .eglise-entry { border: 1px solid #ccc; padding: 15px; border-radius: 10px; margin-bottom: 20px; }
+    img, video { max-width: 100%; height: auto; display: block; margin-top: 10px; }
     footer { background: #003366; color: white; text-align: center; padding: 15px 0; margin-top: 40px; }
   </style>
 </head>
@@ -109,21 +110,63 @@
     const form = document.getElementById('egliseForm');
     const list = document.getElementById('egliseList');
 
+    // Charger les entrées sauvegardées
+    window.addEventListener('DOMContentLoaded', () => {
+      const entries = JSON.parse(localStorage.getItem('egliseEntries') || '[]');
+      entries.forEach(entry => list.insertAdjacentHTML('afterbegin', entry));
+    });
+
     form.addEventListener('submit', function(e) {
       e.preventDefault();
       const data = new FormData(form);
+
       const entry = document.createElement('div');
       entry.className = 'eglise-entry';
-      entry.innerHTML = `
+
+      let html = `
         <h3>${data.get('eglise')} (${data.get('zone')})</h3>
         <p><strong>Pasteur:</strong> ${data.get('pasteur')}</p>
         <p><strong>Adresse:</strong> ${data.get('adresse')}</p>
+        <p><strong>Comité 1:</strong> ${data.get('comite1')}</p>
+        <p><strong>Comité 2:</strong> ${data.get('comite2')}</p>
         <p><strong>Programme:</strong><br>${data.get('programme')}</p>
         <p><strong>Activités:</strong> ${data.get('activites')}</p>
-        <p><strong>Nombre de membres:</strong> ${data.get('membres')}</p>
+        <p><strong>Membres:</strong> ${data.get('membres')}</p>
+        <p><strong>Veillée:</strong> ${data.get('veye_nwi')} - ${data.get('le_veye')}</p>
+        <p><strong>Jeûne:</strong> ${data.get('jeun')} - ${data.get('le_jeun')}</p>
+        <p><strong>Facebook:</strong> <a href="${data.get('facebook')}" target="_blank">${data.get('facebook')}</a></p>
+        <p><strong>YouTube:</strong> <a href="${data.get('youtube')}" target="_blank">${data.get('youtube')}</a></p>
+        <p><strong>Église en construction ?</strong> ${data.get('en_construction')}</p>
       `;
+
+      // Images
+      const images = data.getAll('photos');
+      images.forEach(file => {
+        const img = document.createElement('img');
+        img.src = URL.createObjectURL(file);
+        entry.appendChild(img);
+      });
+
+      // Vidéos
+      const videos = data.getAll('videos');
+      videos.forEach(file => {
+        const video = document.createElement('video');
+        video.src = URL.createObjectURL(file);
+        video.controls = true;
+        entry.appendChild(video);
+      });
+
+      entry.innerHTML = html + entry.innerHTML;
       list.prepend(entry);
+
+      // Sauvegarde dans localStorage
+      const existing = JSON.parse(localStorage.getItem('egliseEntries') || '[]');
+      existing.unshift(entry.outerHTML);
+      localStorage.setItem('egliseEntries', JSON.stringify(existing));
+
       form.reset();
+
+      // Envoi vers Formspree
       fetch("https://formspree.io/f/xyyvbnpn", {
         method: "POST",
         body: data,
