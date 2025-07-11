@@ -8,7 +8,8 @@
   <title>Églises Nord-Ouest Haïti – Fondation Backup Spirituel</title>
   <style>
     body { font-family: Arial, sans-serif; margin: 0; padding: 0; background: #fff; color: #333; }
-    header { background: #003366; color: white; padding: 20px; text-align: center; }
+    header { background: #003366; color: white; padding: 20px; text-align: center; position: relative; }
+    header img { max-height: 80px; display: block; margin: 0 auto 10px; }
     nav { background: #ffcc00; }
     nav ul { list-style: none; margin: 0; padding: 0; display: flex; justify-content: center; flex-wrap: wrap; gap: 10px; }
     nav a { display: block; padding: 12px 20px; color: #003366; text-decoration: none; font-weight: bold; }
@@ -22,14 +23,16 @@
     button { background: #003366; color: white; padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; }
     button:hover { background: #0055aa; }
     .eglise-list { margin-top: 40px; }
-    .eglise-entry { border: 1px solid #ccc; padding: 15px; border-radius: 10px; margin-bottom: 20px; }
-    img, video { max-width: 100%; height: auto; display: block; margin-top: 10px; }
+    .eglise-entry { border: 1px solid #ccc; padding: 15px; border-radius: 10px; margin-bottom: 20px; position: relative; }
+    img { max-width: 100%; height: 250px; object-fit: cover; margin-top: 10px; }
+    video { max-width: 100%; height: 300px; margin-top: 10px; display: block; }
+    .download-btn { margin-top: 5px; display: inline-block; background: #0055aa; color: white; padding: 5px 10px; border-radius: 5px; text-decoration: none; }
     footer { background: #003366; color: white; text-align: center; padding: 15px 0; margin-top: 40px; }
   </style>
 </head>
 <body>
   <header>
-    <img src="logofobas.png" alt="Logo Fondation Backup Spirituel" style="max-height:80px;" />
+    <img src="logofobas.png" alt="Logo Fondation Backup Spirituel" />
     <h1>FONDATION BACKUP SPIRITUEL</h1>
   </header>
 
@@ -72,6 +75,7 @@
       <input type="text" name="adresse" placeholder="Adresse de l'église" required />
       <input type="tel" name="tel" placeholder="Téléphone" />
       <input type="email" name="email" placeholder="Email de l'église" />
+      <input type="text" name="whatsapp" placeholder="Numéro WhatsApp du Pasteur (ex: +50937223344)" />
       <textarea name="programme" placeholder="Programmes de la semaine (Dimanche à Samedi, matin à soir)" rows="5"></textarea>
       <input type="text" name="activites" placeholder="Autres activités : croisade, réveil, mission, etc." />
       <input type="number" name="membres" placeholder="Nombre de membres actuels de l’assemblée" />
@@ -110,23 +114,41 @@
     const form = document.getElementById('egliseForm');
     const list = document.getElementById('egliseList');
 
-    // Charger les entrées sauvegardées
+    // Filtre sou 1 mwa
+    const now = new Date();
+    const ONE_MONTH = 30 * 24 * 60 * 60 * 1000;
+
+    // Rekipere done yo
     window.addEventListener('DOMContentLoaded', () => {
       const entries = JSON.parse(localStorage.getItem('egliseEntries') || '[]');
-      entries.forEach(entry => list.insertAdjacentHTML('afterbegin', entry));
+      const filtered = entries.filter(entry => {
+        const obj = JSON.parse(entry);
+        return now - new Date(obj.timestamp) < ONE_MONTH;
+      });
+      filtered.forEach(obj => {
+        list.insertAdjacentHTML('afterbegin', obj.html);
+      });
+      localStorage.setItem('egliseEntries', JSON.stringify(filtered));
     });
 
     form.addEventListener('submit', function(e) {
       e.preventDefault();
       const data = new FormData(form);
 
+      if (data.getAll('photos').length > 5 || data.getAll('videos').length > 5) {
+        alert('Maximòm 5 foto ak 5 videyo!');
+        return;
+      }
+
       const entry = document.createElement('div');
       entry.className = 'eglise-entry';
 
+      const whatsapp = data.get('whatsapp');
       let html = `
         <h3>${data.get('eglise')} (${data.get('zone')})</h3>
         <p><strong>Pasteur:</strong> ${data.get('pasteur')}</p>
         <p><strong>Adresse:</strong> ${data.get('adresse')}</p>
+        <p><strong>WhatsApp:</strong> <a href="https://wa.me/${whatsapp.replace(/\D/g, '')}" target="_blank">${whatsapp}</a></p>
         <p><strong>Comité 1:</strong> ${data.get('comite1')}</p>
         <p><strong>Comité 2:</strong> ${data.get('comite2')}</p>
         <p><strong>Programme:</strong><br>${data.get('programme')}</p>
@@ -139,34 +161,40 @@
         <p><strong>Église en construction ?</strong> ${data.get('en_construction')}</p>
       `;
 
-      // Images
-      const images = data.getAll('photos');
-      images.forEach(file => {
+      // Ajoute imaj
+      data.getAll('photos').forEach(file => {
         const img = document.createElement('img');
         img.src = URL.createObjectURL(file);
         entry.appendChild(img);
       });
 
-      // Vidéos
-      const videos = data.getAll('videos');
-      videos.forEach(file => {
+      // Ajoute videyo
+      data.getAll('videos').forEach(file => {
+        const url = URL.createObjectURL(file);
         const video = document.createElement('video');
-        video.src = URL.createObjectURL(file);
+        video.src = url;
         video.controls = true;
         entry.appendChild(video);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = file.name;
+        link.className = 'download-btn';
+        link.textContent = 'Télécharger la vidéo';
+        entry.appendChild(link);
       });
 
       entry.innerHTML = html + entry.innerHTML;
       list.prepend(entry);
 
-      // Sauvegarde dans localStorage
-      const existing = JSON.parse(localStorage.getItem('egliseEntries') || '[]');
-      existing.unshift(entry.outerHTML);
-      localStorage.setItem('egliseEntries', JSON.stringify(existing));
+      const stored = JSON.parse(localStorage.getItem('egliseEntries') || '[]');
+      stored.unshift(JSON.stringify({
+        html: entry.outerHTML,
+        timestamp: new Date().toISOString()
+      }));
+      localStorage.setItem('egliseEntries', JSON.stringify(stored));
 
       form.reset();
 
-      // Envoi vers Formspree
       fetch("https://formspree.io/f/xyyvbnpn", {
         method: "POST",
         body: data,
