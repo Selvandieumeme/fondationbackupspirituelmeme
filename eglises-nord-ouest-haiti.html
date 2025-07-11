@@ -39,10 +39,10 @@
   <nav>
     <ul>
       <li><a href="index.html">Accueil</a></li>
-      <li><a href="Qui-sommes-nous.html">Qui sommes‑nous</a></li>
-      <li><a href="Parrainez-nous.html">Parrainez‑nous</a></li>
-      <li><a href="Notre-programme-d'alphabetisation.html">Notre&nbsp;Prog.&nbsp;d'Alphabetisation</a></li>
-      <li><a href="Notre-ecole-d'informatique.html">Notre&nbsp;École&nbsp;d'Info.</a></li>
+      <li><a href="Qui-sommes-nous.html">Qui sommes ‑ nous</a></li>
+      <li><a href="Parrainez-nous.html">Parrainez ‑ nous</a></li>
+      <li><a href="Notre-programme-d'alphabetisation.html">Notre Prog. d'Alphabetisation</a></li>
+      <li><a href="Notre-ecole-d'informatique.html">Notre École d'Info.</a></li>
       <li><a href="Contact.html">Contact</a></li>
       <li class="dropdown">
         <a href="#">Autres ▾</a>
@@ -96,7 +96,7 @@
       <input type="file" name="photos" accept="image/*" multiple />
       <input type="file" name="videos" accept="video/*" multiple />
       <select name="en_construction">
-        <option value="">Église en construction ?</option>
+        <option value="">Eglise en construction ?</option>
         <option value="Oui">Oui</option>
         <option value="Non">Non</option>
       </select>
@@ -112,88 +112,22 @@
 
   <script>
     const form = document.getElementById('egliseForm');
-    const list = document.getElementById('egliseList');
-    const ONE_MONTH = 30 * 24 * 60 * 60 * 1000;
+    const scriptURL = 'https://script.google.com/macros/s/AKfycbwrxELBGGZCEu3cc0DkKXRy_qDizc-ECjqZ4Nw2JP5ip3-VvT4slKMm5GsFj-4qTON7/exec';
 
-    window.addEventListener('DOMContentLoaded', () => {
-      const now = Date.now();
-      const entries = JSON.parse(localStorage.getItem('egliseEntries') || '[]');
-      const valid = entries.filter(e => now - new Date(e.timestamp).getTime() < ONE_MONTH);
-      valid.forEach(e => list.insertAdjacentHTML('beforeend', e.html));
-      localStorage.setItem('egliseEntries', JSON.stringify(valid));
-    });
-
-    form.addEventListener('submit', function(e) {
+    form.addEventListener('submit', e => {
       e.preventDefault();
       const data = new FormData(form);
+      data.append("timestamp", new Date().toISOString());
 
-      if (data.getAll('photos').length > 5 || data.getAll('videos').length > 5) {
-        alert('Maximòm 5 foto ak 5 videyo!');
-        return;
-      }
-
-      const whatsapp = data.get('whatsapp');
-      const entry = document.createElement('div');
-      entry.className = 'eglise-entry';
-
-      const programme = data.get('programme')
-        .split(/\n|\r/)
-        .map(l => `<div>${l.trim()}</div>`) // chak jou sou yon liy
-        .join('');
-
-      let html = `
-        <h3>${data.get('eglise')} (${data.get('zone')})</h3>
-        <p><strong>Pasteur:</strong> ${data.get('pasteur')}</p>
-        <p><strong>Adresse:</strong> ${data.get('adresse')}</p>
-        <p><strong>WhatsApp:</strong> <a href="https://wa.me/${whatsapp.replace(/\D/g, '')}" target="_blank">${whatsapp}</a></p>
-        <p><strong>Comité 1:</strong> ${data.get('comite1')}</p>
-        <p><strong>Comité 2:</strong> ${data.get('comite2')}</p>
-        <p><strong>Programme:</strong><br>${programme}</p>
-        <p><strong>Activités:</strong> ${data.get('activites')}</p>
-        <p><strong>Membres:</strong> ${data.get('membres')}</p>
-        <p><strong>Veillée:</strong> ${data.get('veye_nwi')} - ${data.get('le_veye')}</p>
-        <p><strong>Jeûne:</strong> ${data.get('jeun')} - ${data.get('le_jeun')}</p>
-        <p><strong>Facebook:</strong> <a href="${data.get('facebook')}" target="_blank">${data.get('facebook')}</a></p>
-        <p><strong>YouTube:</strong> <a href="${data.get('youtube')}" target="_blank">${data.get('youtube')}</a></p>
-        <p><strong>Église en construction ?</strong> ${data.get('en_construction')}</p>
-      `;
-
-      data.getAll('photos').forEach(file => {
-        const img = document.createElement('img');
-        img.src = URL.createObjectURL(file);
-        entry.appendChild(img);
-      });
-
-      data.getAll('videos').forEach(file => {
-        const url = URL.createObjectURL(file);
-        const video = document.createElement('video');
-        video.src = url;
-        video.controls = true;
-        video.autoplay = true;
-        video.muted = true;
-        entry.appendChild(video);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = file.name;
-        link.className = 'download-btn';
-        link.textContent = 'Télécharger la vidéo';
-        entry.appendChild(link);
-      });
-
-      entry.innerHTML = html + entry.innerHTML;
-      list.prepend(entry);
-
-      const stored = JSON.parse(localStorage.getItem('egliseEntries') || '[]');
-      stored.unshift({ html: entry.outerHTML, timestamp: new Date().toISOString() });
-      localStorage.setItem('egliseEntries', JSON.stringify(stored));
-
-      form.reset();
-
-      fetch("https://formspree.io/f/xyyvbnpn", {
-        method: "POST",
-        body: data,
-        headers: { Accept: "application/json" }
-      });
+      fetch(scriptURL, { method: 'POST', body: data })
+        .then(response => {
+          alert("✅ Done yo voye sou Google Sheets la avèk siksè !");
+          form.reset();
+        })
+        .catch(error => {
+          alert("⚠️ Gen yon erè pandan ou tap voye done yo!");
+          console.error('Error!', error.message);
+        });
     });
   </script>
 </body>
