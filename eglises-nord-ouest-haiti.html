@@ -25,7 +25,7 @@
     .eglise-list { margin-top: 40px; }
     .eglise-entry { border: 1px solid #ccc; padding: 15px; border-radius: 10px; margin-bottom: 20px; position: relative; }
     img { max-width: 100%; height: 250px; object-fit: cover; margin-top: 10px; }
-    video { max-width: 100%; height: 300px; margin-top: 10px; display: block; }
+    video { max-width: 100%; height: 250px; margin-top: 10px; display: block; }
     .download-btn { margin-top: 5px; display: inline-block; background: #0055aa; color: white; padding: 5px 10px; border-radius: 5px; text-decoration: none; }
     footer { background: #003366; color: white; text-align: center; padding: 15px 0; margin-top: 40px; }
   </style>
@@ -113,19 +113,14 @@
   <script>
     const form = document.getElementById('egliseForm');
     const list = document.getElementById('egliseList');
-
-    // Filtre sou 1 mwa
     const now = new Date();
     const ONE_MONTH = 30 * 24 * 60 * 60 * 1000;
 
-    // Rekipere done yo
     window.addEventListener('DOMContentLoaded', () => {
       const entries = JSON.parse(localStorage.getItem('egliseEntries') || '[]');
-      const filtered = entries.filter(entry => {
+      const filtered = entries.filter(entry => now - new Date(JSON.parse(entry).timestamp) < ONE_MONTH);
+      filtered.forEach(entry => {
         const obj = JSON.parse(entry);
-        return now - new Date(obj.timestamp) < ONE_MONTH;
-      });
-      filtered.forEach(obj => {
         list.insertAdjacentHTML('afterbegin', obj.html);
       });
       localStorage.setItem('egliseEntries', JSON.stringify(filtered));
@@ -143,15 +138,17 @@
       const entry = document.createElement('div');
       entry.className = 'eglise-entry';
 
-      const whatsapp = data.get('whatsapp');
-      let html = `
+      const programme = data.get('programme').split(/\n|<br\s*\/?>|,|;/).map(l => `<div>${l.trim()}</div>`).join('');
+      const whatsapp = data.get('whatsapp')?.replace(/\D/g, '');
+
+      entry.innerHTML = `
         <h3>${data.get('eglise')} (${data.get('zone')})</h3>
         <p><strong>Pasteur:</strong> ${data.get('pasteur')}</p>
         <p><strong>Adresse:</strong> ${data.get('adresse')}</p>
-        <p><strong>WhatsApp:</strong> <a href="https://wa.me/${whatsapp.replace(/\D/g, '')}" target="_blank">${whatsapp}</a></p>
+        <p><strong>WhatsApp:</strong> <a href="https://wa.me/${whatsapp}" target="_blank">${data.get('whatsapp')}</a></p>
         <p><strong>Comité 1:</strong> ${data.get('comite1')}</p>
         <p><strong>Comité 2:</strong> ${data.get('comite2')}</p>
-        <p><strong>Programme:</strong><br>${data.get('programme')}</p>
+        <p><strong>Programme:</strong><br>${programme}</p>
         <p><strong>Activités:</strong> ${data.get('activites')}</p>
         <p><strong>Membres:</strong> ${data.get('membres')}</p>
         <p><strong>Veillée:</strong> ${data.get('veye_nwi')} - ${data.get('le_veye')}</p>
@@ -161,14 +158,12 @@
         <p><strong>Église en construction ?</strong> ${data.get('en_construction')}</p>
       `;
 
-      // Ajoute imaj
       data.getAll('photos').forEach(file => {
         const img = document.createElement('img');
         img.src = URL.createObjectURL(file);
         entry.appendChild(img);
       });
 
-      // Ajoute videyo
       data.getAll('videos').forEach(file => {
         const url = URL.createObjectURL(file);
         const video = document.createElement('video');
@@ -183,16 +178,10 @@
         entry.appendChild(link);
       });
 
-      entry.innerHTML = html + entry.innerHTML;
-      list.prepend(entry);
-
       const stored = JSON.parse(localStorage.getItem('egliseEntries') || '[]');
-      stored.unshift(JSON.stringify({
-        html: entry.outerHTML,
-        timestamp: new Date().toISOString()
-      }));
+      stored.unshift(JSON.stringify({ html: entry.outerHTML, timestamp: new Date().toISOString() }));
       localStorage.setItem('egliseEntries', JSON.stringify(stored));
-
+      list.prepend(entry);
       form.reset();
 
       fetch("https://formspree.io/f/xyyvbnpn", {
