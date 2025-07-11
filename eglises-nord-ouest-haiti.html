@@ -111,6 +111,41 @@
   </footer>
 
   <script>
+    async function chajeDonneYo() {
+      const response = await fetch('https://opensheet.elk.sh/AKfycbwrxELBGGZCEu3cc0DkKXRy_qDizc-ECjqZ4Nw2JP5ip3-VvT4slKMm5GsFj-4qTON7/egliseForm');
+      const data = await response.json();
+      const list = document.getElementById('egliseList');
+      const now = new Date();
+
+      data.forEach(entry => {
+        const date = new Date(entry.timestamp);
+        const difference = now - date;
+        const ONE_MONTH = 30 * 24 * 60 * 60 * 1000;
+
+        if (difference < ONE_MONTH) {
+          const div = document.createElement('div');
+          div.className = 'eglise-entry';
+          div.innerHTML = `
+            <h3>${entry.eglise} (${entry.zone})</h3>
+            <p><strong>Pasteur:</strong> ${entry.pasteur}</p>
+            <p><strong>Adresse:</strong> ${entry.adresse}</p>
+            <p><strong>WhatsApp:</strong> <a href="https://wa.me/${entry.whatsapp.replace(/\D/g, '')}" target="_blank">${entry.whatsapp}</a></p>
+            <p><strong>Comité 1:</strong> ${entry.comite1}</p>
+            <p><strong>Comité 2:</strong> ${entry.comite2}</p>
+            <p><strong>Programme:</strong><br>${entry.programme.replace(/\n/g, "<br>")}</p>
+            <p><strong>Activités:</strong> ${entry.activites}</p>
+            <p><strong>Membres:</strong> ${entry.membres}</p>
+            <p><strong>Veillée:</strong> ${entry.veye_nwi} - ${entry.le_veye}</p>
+            <p><strong>Jeûne:</strong> ${entry.jeun} - ${entry.le_jeun}</p>
+            <p><strong>Facebook:</strong> <a href="${entry.facebook}" target="_blank">${entry.facebook}</a></p>
+            <p><strong>YouTube:</strong> <a href="${entry.youtube}" target="_blank">${entry.youtube}</a></p>
+            <p><strong>Église en construction ?</strong> ${entry.en_construction}</p>
+          `;
+          list.appendChild(div);
+        }
+      });
+    }
+
     const form = document.getElementById('egliseForm');
     const scriptURL = 'https://script.google.com/macros/s/AKfycbwrxELBGGZCEu3cc0DkKXRy_qDizc-ECjqZ4Nw2JP5ip3-VvT4slKMm5GsFj-4qTON7/exec';
 
@@ -129,6 +164,8 @@
           console.error('Error!', error.message);
         });
     });
+
+    window.addEventListener('DOMContentLoaded', chajeDonneYo);
   </script>
 </body>
 </html>
