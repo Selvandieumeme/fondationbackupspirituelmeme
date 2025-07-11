@@ -49,7 +49,6 @@
           <li><a href="Blagues-et-histoires.html">Blagues & Histoires</a></li>
           <li><a href="Emission-Backup-Spirituel.html">Émission Backup Spirituel</a></li>
           <li><a href="Faire-un-don.html">Faire un don</a></li>
-          <li><a href="Galerie.html">Galerie complète</a></li>
           <li><a href="Nos-actions.html">Nos actions (détail)</a></li>
           <li><a href="Politique-de-confidentialite.html">Politique de confidentialité</a></li>
           <li><a href="jeux-fobas.html">Jouez avec FOBAS</a></li>
@@ -134,5 +133,31 @@
 
     window.addEventListener("DOMContentLoaded", chajeDonneYo);
   </script>
+
+<script>
+  const form = document.getElementById('egliseForm');
+
+  form.addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    const formData = new FormData(form);
+
+    fetch("submit.php", {
+      method: "POST",
+      body: formData
+    })
+    .then(response => response.text())
+    .then(data => {
+      alert("✅ Fòm lan voye avèk siksè !");
+      form.reset();
+      chajeDonneYo(); // Reafiche done yo
+    })
+    .catch(error => {
+      alert("⚠️ Erè pandan voye done yo !");
+      console.error(error);
+    });
+  });
+</script>
+  
 </body>
 </html>
