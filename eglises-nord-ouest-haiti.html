@@ -113,17 +113,14 @@
   <script>
     const form = document.getElementById('egliseForm');
     const list = document.getElementById('egliseList');
-    const now = new Date();
     const ONE_MONTH = 30 * 24 * 60 * 60 * 1000;
 
     window.addEventListener('DOMContentLoaded', () => {
+      const now = Date.now();
       const entries = JSON.parse(localStorage.getItem('egliseEntries') || '[]');
-      const filtered = entries.filter(entry => now - new Date(JSON.parse(entry).timestamp) < ONE_MONTH);
-      filtered.forEach(entry => {
-        const obj = JSON.parse(entry);
-        list.insertAdjacentHTML('afterbegin', obj.html);
-      });
-      localStorage.setItem('egliseEntries', JSON.stringify(filtered));
+      const valid = entries.filter(e => now - new Date(e.timestamp).getTime() < ONE_MONTH);
+      valid.forEach(e => list.insertAdjacentHTML('beforeend', e.html));
+      localStorage.setItem('egliseEntries', JSON.stringify(valid));
     });
 
     form.addEventListener('submit', function(e) {
@@ -135,17 +132,20 @@
         return;
       }
 
+      const whatsapp = data.get('whatsapp');
       const entry = document.createElement('div');
       entry.className = 'eglise-entry';
 
-      const programme = data.get('programme').split(/\n|<br\s*\/?>|,|;/).map(l => `<div>${l.trim()}</div>`).join('');
-      const whatsapp = data.get('whatsapp')?.replace(/\D/g, '');
+      const programme = data.get('programme')
+        .split(/\n|\r/)
+        .map(l => `<div>${l.trim()}</div>`) // chak jou sou yon liy
+        .join('');
 
-      entry.innerHTML = `
+      let html = `
         <h3>${data.get('eglise')} (${data.get('zone')})</h3>
         <p><strong>Pasteur:</strong> ${data.get('pasteur')}</p>
         <p><strong>Adresse:</strong> ${data.get('adresse')}</p>
-        <p><strong>WhatsApp:</strong> <a href="https://wa.me/${whatsapp}" target="_blank">${data.get('whatsapp')}</a></p>
+        <p><strong>WhatsApp:</strong> <a href="https://wa.me/${whatsapp.replace(/\D/g, '')}" target="_blank">${whatsapp}</a></p>
         <p><strong>Comité 1:</strong> ${data.get('comite1')}</p>
         <p><strong>Comité 2:</strong> ${data.get('comite2')}</p>
         <p><strong>Programme:</strong><br>${programme}</p>
@@ -169,6 +169,8 @@
         const video = document.createElement('video');
         video.src = url;
         video.controls = true;
+        video.autoplay = true;
+        video.muted = true;
         entry.appendChild(video);
         const link = document.createElement('a');
         link.href = url;
@@ -178,10 +180,13 @@
         entry.appendChild(link);
       });
 
-      const stored = JSON.parse(localStorage.getItem('egliseEntries') || '[]');
-      stored.unshift(JSON.stringify({ html: entry.outerHTML, timestamp: new Date().toISOString() }));
-      localStorage.setItem('egliseEntries', JSON.stringify(stored));
+      entry.innerHTML = html + entry.innerHTML;
       list.prepend(entry);
+
+      const stored = JSON.parse(localStorage.getItem('egliseEntries') || '[]');
+      stored.unshift({ html: entry.outerHTML, timestamp: new Date().toISOString() });
+      localStorage.setItem('egliseEntries', JSON.stringify(stored));
+
       form.reset();
 
       fetch("https://formspree.io/f/xyyvbnpn", {
