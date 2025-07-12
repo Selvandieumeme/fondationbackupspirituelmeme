@@ -2,10 +2,14 @@
 const mongoose = require('mongoose');
 
 const messageSchema = new mongoose.Schema({
-  from: { type: String, required: true },
-  to: { type: String, required: true },
-  message: { type: String, required: true },
-  timestamp: { type: Date, default: Date.now }
+  pasteur: String,
+  legliz: String,
+  mesaj: String,
+  date: {
+    type: Date,
+    default: Date.now,
+    expires: 2592000 // 30 jou (30j * 24h * 60m * 60s)
+  }
 });
 
 module.exports = mongoose.model('Message', messageSchema);
