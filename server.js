@@ -12,11 +12,15 @@ connectDB();
 // Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(express.static(path.join(__dirname, 'public')));
 
 // API routes
 const messageRoutes = require('./routes/messages');
 app.use('/api/messages', messageRoutes);
+
+// Fichye HTML prensipal la (nan rasin repo a)
+app.get('/eglises-nord-ouest-haiti.html', (req, res) => {
+  res.sendFile(path.join(__dirname, 'eglises-nord-ouest-haiti.html'));
+});
 
 // Tcheke si tout ap mache
 app.get('/', (req, res) => {
@@ -26,10 +30,4 @@ app.get('/', (req, res) => {
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`🚀 Sèvè a koute sou http://localhost:${PORT}`);
-});
-
-const path = require('path');
-
-app.get('/eglises-nord-ouest-haiti.html', (req, res) => {
-  res.sendFile(path.join(__dirname, 'eglises-nord-ouest-haiti.html'));
 });
