@@ -63,7 +63,7 @@
       Bienvenue à tous les Pasteurs et leaders spirituels de la région du Nord-Ouest ! Cette plateforme vous permet de faire rayonner votre église et vos programmes. Remplissez le formulaire pour apparaître publiquement sur cette page, et laissez la lumière de Dieu atteindre encore plus d’âmes.
     </p>
 
-    <form id="egliseForm" action="submit.php" method="POST" enctype="multipart/form-data">
+    <form id="egliseForm" method="POST" enctype="multipart/form-data">
       <input type="text" name="eglise" placeholder="Nom de l'Église" required />
       <input type="text" name="zone" placeholder="Nom de la zone ou ville" required />
       <input type="text" name="pasteur" placeholder="Nom du Pasteur Principal" required />
@@ -134,30 +134,29 @@
     window.addEventListener("DOMContentLoaded", chajeDonneYo);
   </script>
 
-<script>
-  const form = document.getElementById('egliseForm');
+  <script>
+    const form = document.getElementById('egliseForm');
 
-  form.addEventListener('submit', function(e) {
-    e.preventDefault();
+    form.addEventListener('submit', function(e) {
+      e.preventDefault();
 
-    const formData = new FormData(form);
+      const formData = new FormData(form);
 
-    fetch("submit.php", {
-      method: "POST",
-      body: formData
-    })
-    .then(response => response.text())
-    .then(data => {
-      alert("✅ Fòm lan voye avèk siksè !");
-      form.reset();
-      chajeDonneYo(); // Reafiche done yo
-    })
-    .catch(error => {
-      alert("⚠️ Erè pandan voye done yo !");
-      console.error(error);
+      fetch("submit.php", {
+        method: "POST",
+        body: formData
+      })
+      .then(response => response.text())
+      .then(data => {
+        alert("✅ Fòm lan voye avèk siksè !");
+        form.reset();
+        chajeDonneYo(); // Reafiche done yo
+      })
+      .catch(error => {
+        alert("⚠️ Erè pandan voye done yo !");
+        console.error(error);
+      });
     });
-  });
-</script>
-  
+  </script>
 </body>
 </html>
