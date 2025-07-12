@@ -27,3 +27,9 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`🚀 Sèvè a koute sou http://localhost:${PORT}`);
 });
+
+const path = require('path');
+
+app.get('/eglises-nord-ouest-haiti.html', (req, res) => {
+  res.sendFile(path.join(__dirname, 'eglises-nord-ouest-haiti.html'));
+});
