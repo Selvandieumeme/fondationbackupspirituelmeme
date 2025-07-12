@@ -1,26 +1,23 @@
 <?php
 $dataFile = 'eglises_data.json';
 
-// Asire dosye uploads egziste
-if (!is_dir('uploads')) {
-    mkdir('uploads', 0775, true);
-}
-
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $newData = $_POST;
     $newData['timestamp'] = date('c');
+
+    // Asire folder uploads la egziste
+    if (!file_exists('uploads')) {
+        mkdir('uploads', 0775, true);
+    }
 
     // Upload photos
     $uploadedPhotos = [];
     if (!empty($_FILES['photos']['name'][0])) {
         foreach ($_FILES['photos']['tmp_name'] as $index => $tmpPath) {
-            if ($_FILES['photos']['error'][$index] === UPLOAD_ERR_OK) {
-                $extension = pathinfo($_FILES['photos']['name'][$index], PATHINFO_EXTENSION);
-                $uniqueName = time() . '_' . uniqid() . '.' . $extension;
-                $target = 'uploads/' . $uniqueName;
-                if (move_uploaded_file($tmpPath, $target)) {
-                    $uploadedPhotos[] = $uniqueName;
-                }
+            $fileName = basename($_FILES['photos']['name'][$index]);
+            $target = 'uploads/' . $fileName;
+            if (move_uploaded_file($tmpPath, $target)) {
+                $uploadedPhotos[] = $fileName;
             }
         }
     }
@@ -29,13 +26,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $uploadedVideos = [];
     if (!empty($_FILES['videos']['name'][0])) {
         foreach ($_FILES['videos']['tmp_name'] as $index => $tmpPath) {
-            if ($_FILES['videos']['error'][$index] === UPLOAD_ERR_OK) {
-                $extension = pathinfo($_FILES['videos']['name'][$index], PATHINFO_EXTENSION);
-                $uniqueName = time() . '_' . uniqid() . '.' . $extension;
-                $target = 'uploads/' . $uniqueName;
-                if (move_uploaded_file($tmpPath, $target)) {
-                    $uploadedVideos[] = $uniqueName;
-                }
+            $fileName = basename($_FILES['videos']['name'][$index]);
+            $target = 'uploads/' . $fileName;
+            if (move_uploaded_file($tmpPath, $target)) {
+                $uploadedVideos[] = $fileName;
             }
         }
     }
@@ -43,19 +37,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $newData['photos'] = $uploadedPhotos;
     $newData['videos'] = $uploadedVideos;
 
-    // Chaje done ki deja la
-    $oldData = file_exists($dataFile) ? json_decode(file_get_contents($dataFile), true) : [];
-    if (!is_array($oldData)) {
-        $oldData = [];
+    // Kreye fichye si li pa ekziste
+    if (!file_exists($dataFile)) {
+        file_put_contents($dataFile, json_encode([], JSON_PRETTY_PRINT));
     }
 
-    // Mete nouvo done a anwo lis la
+    // Chaje done ki te la deja
+    $oldData = json_decode(file_get_contents($dataFile), true);
+
+    // Ajoute nouvo done a nan tèt lis la
     array_unshift($oldData, $newData);
 
-    // Rekri dosye a
-    file_put_contents($dataFile, json_encode($oldData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+    // Sove li tounen
+    file_put_contents($dataFile, json_encode($oldData, JSON_PRETTY_PRINT));
 
-    // Retounen repons pou JavaScript
-    echo "✅ Fòm lan voye avèk siksè!";
+    echo "Success";
+    exit;
 }
 ?>
