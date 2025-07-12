@@ -63,7 +63,7 @@
       Bienvenue à tous les Pasteurs et leaders spirituels de la région du Nord-Ouest ! Cette plateforme vous permet de faire rayonner votre église et vos programmes. Remplissez le formulaire pour apparaître publiquement sur cette page, et laissez la lumière de Dieu atteindre encore plus d’âmes.
     </p>
 
-    <form id="egliseForm" method="POST" enctype="multipart/form-data">
+    <form id="egliseForm" enctype="multipart/form-data">
       <input type="text" name="eglise" placeholder="Nom de l'Église" required />
       <input type="text" name="zone" placeholder="Nom de la zone ou ville" required />
       <input type="text" name="pasteur" placeholder="Nom du Pasteur Principal" required />
@@ -83,8 +83,8 @@
       <input type="url" name="facebook" placeholder="Page Facebook" />
       <input type="url" name="youtube" placeholder="Chaîne YouTube" />
       <select name="en_construction"><option value="">Église en construction ?</option><option>Oui</option><option>Non</option></select>
-      <label>Photos (max 5): <input type="file" name="photos[]" multiple accept="image/*" /></label>
-      <label>Vidéos (max 5): <input type="file" name="videos[]" multiple accept="video/*" /></label>
+      <label>Photos (max 5): <input type="file" name="photos" multiple accept="image/*" /></label>
+      <label>Vidéos (max 5): <input type="file" name="videos" multiple accept="video/*" /></label>
       <button type="submit">Envoyer</button>
     </form>
 
@@ -96,66 +96,28 @@
   </footer>
 
   <script>
-    async function chajeDonneYo() {
-      const res = await fetch("load.php");
-      const data = await res.json();
-      const now = new Date();
-      const list = document.getElementById("egliseList");
-      list.innerHTML = "";
-
-      data.forEach(entry => {
-        const timestamp = new Date(entry.timestamp);
-        const delay = 30 * 24 * 60 * 60 * 1000;
-        if (now - timestamp <= delay) {
-          const div = document.createElement("div");
-          div.className = "eglise-entry";
-          div.innerHTML = `
-            <h3>${entry.eglise} (${entry.zone})</h3>
-            <p><strong>Pasteur:</strong> ${entry.pasteur}</p>
-            <p><strong>Adresse:</strong> ${entry.adresse}</p>
-            <p><strong>WhatsApp:</strong> ${entry.whatsapp}</p>
-            <p><strong>Comité:</strong> ${entry.comite1 || ''}, ${entry.comite2 || ''}</p>
-            <p><strong>Programme:</strong><br>${entry.programme.replace(/\n/g, "<br>")}</p>
-            <p><strong>Activités:</strong> ${entry.activites}</p>
-            <p><strong>Membres:</strong> ${entry.membres}</p>
-            <p><strong>Veillée:</strong> ${entry.veye_nwi} - ${entry.le_veye}</p>
-            <p><strong>Jeûne:</strong> ${entry.jeun} - ${entry.le_jeun}</p>
-            <p><strong>Facebook:</strong> <a href="${entry.facebook}" target="_blank">${entry.facebook}</a></p>
-            <p><strong>YouTube:</strong> <a href="${entry.youtube}" target="_blank">${entry.youtube}</a></p>
-            <p><strong>Construction ?</strong> ${entry.en_construction}</p>
-            ${(entry.photos || []).map(p => `<img class="media" src="uploads/${p}" alt="photo" />`).join('')}
-            ${(entry.videos || []).map(v => `<video class="media" controls src="uploads/${v}"></video>`).join('')}
-          `;
-          list.appendChild(div);
-        }
-      });
-    }
-
-    window.addEventListener("DOMContentLoaded", chajeDonneYo);
-  </script>
-
-  <script>
     const form = document.getElementById('egliseForm');
 
-    form.addEventListener('submit', function(e) {
+    form.addEventListener('submit', async function(e) {
       e.preventDefault();
 
       const formData = new FormData(form);
+      try {
+        const res = await fetch("/api/eglises", {
+          method: "POST",
+          body: formData
+        });
 
-      fetch("submit.php", {
-        method: "POST",
-        body: formData
-      })
-      .then(response => response.text())
-      .then(data => {
-        alert("✅ Fòm lan voye avèk siksè !");
-        form.reset();
-        chajeDonneYo(); // Reafiche done yo
-      })
-      .catch(error => {
-        alert("⚠️ Erè pandan voye done yo !");
+        if (res.ok) {
+          alert("✅ Fòm lan voye avèk siksè !");
+          form.reset();
+        } else {
+          alert("⚠️ Gen yon erè. Tanpri verifye enfòmasyon yo.");
+        }
+      } catch (error) {
+        alert("❌ Erè pandan koneksyon ak sèvè!");
         console.error(error);
-      });
+      }
     });
   </script>
 </body>
