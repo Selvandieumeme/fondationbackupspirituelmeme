@@ -150,7 +150,7 @@
       const formData = new FormData(form);
       try {
         const controller = new AbortController();
-        const timeout = setTimeout(() => controller.abort(), 30000);
+        const timeout = setTimeout(() => controller.abort(), 60000);
 
         // Voye done nan API prensipal ou
         const res = await fetch("https://api-fondationbackupspirituel.onrender.com/api/messages", {
