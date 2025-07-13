@@ -167,18 +167,30 @@
           form.reset();
           chargerLegliz(); // rafrechi lis legliz yo
 
+          
           await fetch("https://api.web3forms.com/submit", {
   method: "POST",
-  headers: { "Content-Type": "application/json" },
+  headers: {
+    "Content-Type": "application/json"
+  },
   body: JSON.stringify({
     access_key: "34c56edb-5db8-45f4-aa97-376ddc127b4d",
+    name: "Fondation Backup Spirituel",
+    email: "infos@fondationbackupspirituel.com",
     subject: "Nouvo fòm legliz sou paj GitHub la",
-    from_name: "Fondation Backup Spirituel",
-    message: "Nouvo fòm legliz ranpli. Verifye MongoDB!",
-    email: "infos@fondationbackupspirituel.com"
+    message: `Yon nouvo fòm legliz te ranpli sou sit ou a.
+    Legliz: ${formData.get("eglise")}
+    Zone: ${formData.get("zone")}
+    Pasteur: ${formData.get("pasteur")}
+    Comité: ${formData.get("comite1")} / ${formData.get("comite2")}
+    Téléphone: ${formData.get("tel")}
+    Email legliz la: ${formData.get("email")}
+    Membres: ${formData.get("membres")}
+    Programme: ${formData.get("programme")}
+    `
   })
-});
-
+})
+          
         } else {
           alert("⚠️ Erè repons: " + (data?.error || 'Inconnu'));
         }
