@@ -29,6 +29,47 @@
   </style>
 </head>
 <body>
+
+<script>
+const form = document.getElementById('form-message');
+const liste = document.getElementById('liste-messages');
+
+form.addEventListener('submit', async (e) => {
+  e.preventDefault();
+
+  const data = {
+    nom: form.nom.value,
+    email: form.email.value,
+    message: form.message.value
+  };
+
+  await fetch('https://api-fondationbackupspirituel.onrender.com/api/messages', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data)
+  });
+
+  form.reset();
+  chargerMessages();
+});
+
+async function chargerMessages() {
+  const res = await fetch('https://api-fondationbackupspirituel.onrender.com/api/messages');
+  const messages = await res.json();
+  liste.innerHTML = messages.map(m => `
+    <div style="border: 1px solid #ccc; margin: 10px; padding: 10px">
+      <strong>${m.nom}</strong> (${m.email})<br>
+      ${m.message}<br>
+      <small>${new Date(m.date).toLocaleString()}</small>
+    </div>
+  `).join('');
+}
+
+window.addEventListener('DOMContentLoaded', chargerMessages);
+</script>
+
+
+  
   <header>
     <img src="logofobas.png" alt="Logo Fondation Backup Spirituel" />
     <h1>FONDATION BACKUP SPIRITUEL</h1>
@@ -103,7 +144,7 @@
 
       const formData = new FormData(form);
       try {
-        const res = await fetch("/api/messages", {
+        const res = await fetch("https://api-fondationbackupspirituel.onrender.com/api/messages", {
           method: "POST",
           body: formData
         });
