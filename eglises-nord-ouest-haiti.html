@@ -121,8 +121,8 @@
     });
   </script>
 
-
 <script>
+  // 1. SCRIPT KI CHARGE LISTE LEGLIZ YO (ou te mete deja, nou pa manyen li)
   async function chargerLegliz() {
     const res = await fetch("https://api-fondationbackupspirituel.onrender.com/api/messages");
     const eglises = await res.json();
@@ -157,7 +157,51 @@
   }
 
   window.addEventListener('DOMContentLoaded', chargerLegliz);
+
+  // 2. SCRIPT KI JERE FORM SUBMIT LA (avèk loader ak timeout)
+  const form = document.getElementById('egliseForm');
+  const loader = document.createElement('p');
+  loader.textContent = "⏳ Ap voye... tanpri tann...";
+  loader.style.color = "blue";
+
+  form.addEventListener('submit', async function(e) {
+    e.preventDefault();
+    form.after(loader); // montre loading
+
+    const formData = new FormData(form);
+    try {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 30000); // 30 segonn timeout
+
+      const res = await fetch("https://api-fondationbackupspirituel.onrender.com/api/messages", {
+        method: "POST",
+        body: formData,
+        signal: controller.signal
+      });
+
+      clearTimeout(timeout);
+      const data = await res.json();
+
+      if (res.ok) {
+        alert("✅ Fòm lan voye avèk siksè !");
+        form.reset();
+        chargerLegliz(); // rekòmanse afichaj pou mete nouvo legliz lan
+      } else {
+        alert("⚠️ Erè repons: " + (data?.error || 'Inconnu'));
+      }
+    } catch (error) {
+      if (error.name === 'AbortError') {
+        alert("❌ Tan limit depase! Sèvè a pa reponn alè.");
+      } else {
+        alert("❌ Erè pandan koneksyon ak sèvè!");
+        console.error("Fetch error:", error);
+      }
+    } finally {
+      loader.remove(); // retire loading
+    }
+  });
 </script>
+
   
 </body>
 </html>
