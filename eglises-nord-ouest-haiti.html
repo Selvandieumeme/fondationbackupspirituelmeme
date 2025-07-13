@@ -63,7 +63,7 @@
       Bienvenue à tous les Pasteurs et leaders spirituels de la région du Nord-Ouest ! Cette plateforme vous permet de faire rayonner votre église et vos programmes. Remplissez le formulaire pour apparaître publiquement sur cette page, et laissez la lumière de Dieu atteindre encore plus d’âmes.
     </p>
 
-    <form id="egliseForm" enctype="multipart/form-data">
+    <form action="https://formspree.io/f/xoqgwepj" method="POST" enctype="multipart/form-data">
       <input type="text" name="eglise" placeholder="Nom de l'Église" required />
       <input type="text" name="zone" placeholder="Nom de la zone ou ville" required />
       <input type="text" name="pasteur" placeholder="Nom du Pasteur Principal" required />
@@ -88,125 +88,13 @@
       <button type="submit">Envoyer</button>
     </form>
 
-    <div class="eglise-list" id="egliseList"></div>
+    <div class="eglise-list" id="egliseList">
+      <!-- Ou kapab mete manyèlman legliz isit -->
+    </div>
   </main>
 
   <footer>
     <p>&copy; 2025 Fondation Backup Spirituel. Tous droits réservés.</p>
   </footer>
-  
-<script>
-  // Fonksyon pou chaje lis legliz yo
-  async function chargerLegliz() {
-    try {
-      const res = await fetch("https://api-fondationbackupspirituel.onrender.com/api/messages");
-      if (!res.ok) throw new Error('Erreur réseau');
-      const eglises = await res.json();
-      const liste = document.getElementById("egliseList");
-
-      liste.innerHTML = eglises.map(e => `
-        <div class="eglise-entry">
-          <h3>⛪ ${e.eglise} – ${e.zone}</h3>
-          <p><strong>Pasteur:</strong> ${e.pasteur}</p>
-          <p><strong>Adresse:</strong> ${e.adresse}</p>
-          <p><strong>Téléphone:</strong> ${e.tel} | WhatsApp: ${e.whatsapp}</p>
-          <p><strong>Email:</strong> ${e.email}</p>
-          <p><strong>Comité:</strong> ${e.comite1} / ${e.comite2}</p>
-          <p><strong>Programme:</strong> ${e.programme}</p>
-          <p><strong>Activités:</strong> ${e.activites}</p>
-          <p><strong>Membres:</strong> ${e.membres}</p>
-          <p><strong>Veillée:</strong> ${e.veye_nwi} (${e.le_veye})</p>
-          <p><strong>Jeûne:</strong> ${e.jeun} (${e.le_jeun})</p>
-          <p><strong>Facebook:</strong> ${e.facebook || 'N/A'}</p>
-          <p><strong>YouTube:</strong> ${e.youtube || 'N/A'}</p>
-          <p><strong>Église en construction:</strong> ${e.en_construction}</p>
-          ${e.photos?.map(photo => `<img class="media" src="https://api-fondationbackupspirituel.onrender.com/uploads/${photo}" alt="photo">`).join('')}
-          ${e.videos?.map(video => `
-            <video class="media" controls>
-              <source src="https://api-fondationbackupspirituel.onrender.com/uploads/${video}" type="video/mp4">
-              Vidéo pa ka jwe.
-            </video>
-          `).join('')}
-          <small style="color: gray;">🕓 ${new Date(e.date).toLocaleString()}</small>
-        </div>
-      `).join('');
-    } catch (error) {
-      console.error("Erreur chargement liste legliz:", error);
-    }
-  }
-
-  document.addEventListener('DOMContentLoaded', () => {
-    chargerLegliz();
-
-    const form = document.getElementById('egliseForm');
-    const loader = document.createElement('p');
-    loader.textContent = "⏳ Ap voye... tanpri tann...";
-    loader.style.color = "blue";
-
-    form.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      form.after(loader);
-
-      const formData = new FormData(form);
-      try {
-        const controller = new AbortController();
-        const timeout = setTimeout(() => controller.abort(), 60000);
-
-        // Voye done nan API prensipal ou
-        const res = await fetch("https://api-fondationbackupspirituel.onrender.com/api/messages", {
-          method: "POST",
-          body: formData,
-          signal: controller.signal
-        });
-
-        clearTimeout(timeout);
-        const data = await res.json();
-
-        if (res.ok) {
-          alert("✅ Fòm lan voye avèk siksè !");
-          form.reset();
-          chargerLegliz(); // rafrechi lis legliz yo
-
-          
-          await fetch("https://api.web3forms.com/submit", {
-  method: "POST",
-  headers: {
-    "Content-Type": "application/json"
-  },
-  body: JSON.stringify({
-    access_key: "34c56edb-5db8-45f4-aa97-376ddc127b4d",
-    name: "Fondation Backup Spirituel",
-    email: "infos@fondationbackupspirituel.com",
-    subject: "Nouvo fòm legliz sou paj GitHub la",
-    message: `Yon nouvo fòm legliz te ranpli sou sit ou a.
-    Legliz: ${formData.get("eglise")}
-    Zone: ${formData.get("zone")}
-    Pasteur: ${formData.get("pasteur")}
-    Comité: ${formData.get("comite1")} / ${formData.get("comite2")}
-    Téléphone: ${formData.get("tel")}
-    Email legliz la: ${formData.get("email")}
-    Membres: ${formData.get("membres")}
-    Programme: ${formData.get("programme")}
-    `
-  })
-})
-          
-        } else {
-          alert("⚠️ Erè repons: " + (data?.error || 'Inconnu'));
-        }
-      } catch (error) {
-        if (error.name === 'AbortError') {
-          alert("❌ Tan limit depase! Sèvè a pa reponn alè.");
-        } else {
-          alert("❌ Erè pandan koneksyon ak sèvè!");
-          console.error("Fetch error:", error);
-        }
-      } finally {
-        loader.remove();
-      }
-    });
-  });
-</script>
-
 </body>
 </html>
