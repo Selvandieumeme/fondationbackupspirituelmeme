@@ -167,16 +167,18 @@
           form.reset();
           chargerLegliz(); // rafrechi lis legliz yo
 
-          // Voye notifikasyon imel nan Formspree
-          await fetch("https://formspree.io/f/34c56edb-5db8-45f4-aa97-376ddc127b4d", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              message: "Nouvo fòm legliz sou paj GitHub la. Verifye MongoDB!",
-              source: "egliseForm GitHub",
-              from: "noreply@fobas.ht"
-            })
-          });
+          await fetch("https://api.web3forms.com/submit", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({
+    access_key: "34c56edb-5db8-45f4-aa97-376ddc127b4d",
+    subject: "Nouvo fòm legliz sou paj GitHub la",
+    from_name: "Fondation Backup Spirituel",
+    message: "Nouvo fòm legliz ranpli. Verifye MongoDB!",
+    email: "infos@fondationbackupspirituel.com"
+  })
+});
+
         } else {
           alert("⚠️ Erè repons: " + (data?.error || 'Inconnu'));
         }
