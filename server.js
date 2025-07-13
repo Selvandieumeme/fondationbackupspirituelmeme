@@ -1,15 +1,18 @@
-// server.js
 require('dotenv').config();
 const express = require('express');
 const path = require('path');
+const cors = require('cors'); // ✅ AJOUTE LIGNE SA
 const connectDB = require('./db');
 
 const app = express();
 
-// Konekte ak MongoDB
 connectDB();
 
-// Middleware
+// ✅ AJOUTE CORS AVANT ROUTES YO
+app.use(cors({
+  origin: 'https://fondationbackupspirituelmeme.github.io'
+}));
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
