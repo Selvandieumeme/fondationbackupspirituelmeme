@@ -120,5 +120,44 @@
       }
     });
   </script>
+
+
+<script>
+  async function chargerLegliz() {
+    const res = await fetch("https://api-fondationbackupspirituel.onrender.com/api/messages");
+    const eglises = await res.json();
+    const liste = document.getElementById("egliseList");
+
+    liste.innerHTML = eglises.map(e => `
+      <div class="eglise-entry">
+        <h3>⛪ ${e.eglise} – ${e.zone}</h3>
+        <p><strong>Pasteur:</strong> ${e.pasteur}</p>
+        <p><strong>Adresse:</strong> ${e.adresse}</p>
+        <p><strong>Téléphone:</strong> ${e.tel} | WhatsApp: ${e.whatsapp}</p>
+        <p><strong>Email:</strong> ${e.email}</p>
+        <p><strong>Comité:</strong> ${e.comite1} / ${e.comite2}</p>
+        <p><strong>Programme:</strong> ${e.programme}</p>
+        <p><strong>Activités:</strong> ${e.activites}</p>
+        <p><strong>Membres:</strong> ${e.membres}</p>
+        <p><strong>Veillée:</strong> ${e.veye_nwi} (${e.le_veye})</p>
+        <p><strong>Jeûne:</strong> ${e.jeun} (${e.le_jeun})</p>
+        <p><strong>Facebook:</strong> ${e.facebook || 'N/A'}</p>
+        <p><strong>YouTube:</strong> ${e.youtube || 'N/A'}</p>
+        <p><strong>Église en construction:</strong> ${e.en_construction}</p>
+        ${e.photos?.map(photo => `<img class="media" src="https://api-fondationbackupspirituel.onrender.com/uploads/${photo}" alt="photo">`).join('')}
+        ${e.videos?.map(video => `
+          <video class="media" controls>
+            <source src="https://api-fondationbackupspirituel.onrender.com/uploads/${video}" type="video/mp4">
+            Videyo pa ka jwe.
+          </video>
+        `).join('')}
+        <small style="color: gray;">🕓 ${new Date(e.date).toLocaleString()}</small>
+      </div>
+    `).join('');
+  }
+
+  window.addEventListener('DOMContentLoaded', chargerLegliz);
+</script>
+  
 </body>
 </html>
