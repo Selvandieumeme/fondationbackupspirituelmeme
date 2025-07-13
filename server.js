@@ -8,6 +8,8 @@ const app = express();
 
 connectDB();
 
+app.use('/uploads', express.static('uploads'));
+
 // ✅ AJOUTE CORS AVANT ROUTES YO
 app.use(cors({
   origin: 'https://fondationbackupspirituelmeme.github.io'
