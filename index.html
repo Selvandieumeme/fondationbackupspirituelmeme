@@ -430,7 +430,7 @@ button.submit:hover {
 </div>
 
 
-  <!-- ✅ SCRIPT 1: DETEKTE BOT AK ALÈT OTOMATIK VIA WEBHOOK -->
+ <!-- ✅ SCRIPT 1: DETEKTE BOT AK ALÈT OTOMATIK VIA WEB3FORMS -->
 <script>
 (async () => {
   const knownBots = [
@@ -448,15 +448,27 @@ button.submit:hover {
 
   const userAgent = navigator.userAgent;
   const isBot = knownBots.some(pattern => pattern.test(userAgent));
+  const now = new Date().toLocaleString();
 
   if (isBot) {
-    await fetch("https://formspree.io/f/xpzvplpz", {
+    const ip = await fetch("https://api.ipify.org?format=json")
+      .then(res => res.json())
+      .then(data => data.ip)
+      .catch(() => "IP non disponible");
+
+    await fetch("https://api.web3forms.com/submit", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
+        access_key: "34c56edb-5db8-45f4-aa97-376ddc127b4d",
+        subject: "⚠️ Bot sispèk vizite sit la!",
+        from_name: "Sécurité du site Fondation Backup Spirituel",
+        email: "infos@fondationbackupspirituel.com",
         message: "⚠️ Bot sispèk vizite sit la!",
-        userAgent,
-        url: location.href
+        userAgent: userAgent,
+        url: location.href,
+        ip_address: ip,
+        date_time: now
       })
     });
     console.warn("⚠️ Bot detekte: ", userAgent);
@@ -464,45 +476,47 @@ button.submit:hover {
 })();
 </script>
 
+<!-- ✅ SCRIPT 2: DETEKTE CLIK ANONS REPETITIF KI SISPÈK -->
 <script>
-  (function () {
-    let clickCount = 0;
-    let firstClickTime = null;
+(function () {
+  const adClickKey = "fobas-ad-click-count";
+  const lastClickKey = "fobas-last-click-time";
+  const now = Date.now();
+  const dateTime = new Date().toLocaleString();
+  const last = parseInt(localStorage.getItem(lastClickKey) || "0");
+  const clicks = parseInt(localStorage.getItem(adClickKey) || "0");
 
-    document.addEventListener('click', function (e) {
-      const isAdsense = e.target.closest('ins.adsbygoogle');
+  if (now - last < 10 * 60 * 1000 && clicks >= 3) {
+    fetch("https://api.ipify.org?format=json")
+      .then(res => res.json())
+      .then(data => {
+        fetch("https://api.web3forms.com/submit", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            access_key: "34c56edb-5db8-45f4-aa97-376ddc127b4d",
+            subject: "⚠️ Klik anons sispèk fèt sou sit la!",
+            from_name: "Sécurité du site Fondation Backup Spirituel",
+            email: "infos@fondationbackupspirituel.com",
+            message: `⚠️ Yon itilizatè fè ${clicks} klik rapid sou anons.`,
+            page: window.location.href,
+            ip_address: data.ip,
+            date_time: dateTime
+          })
+        });
+        console.warn("⚠️ Aktivite klik sispèk sou anons.");
+      }).catch(() => {
+        console.warn("⚠️ Pa ka jwenn IP pou klik sispèk.");
+      });
+  }
 
-      if (isAdsense) {
-        const now = Date.now();
-
-        if (!firstClickTime || now - firstClickTime > 300000) { // 5 minit = 300000 ms
-          // Rekòmanse konte a
-          firstClickTime = now;
-          clickCount = 1;
-        } else {
-          clickCount++;
-        }
-
-        if (clickCount > 3) {
-          alert("⚠️ Pou sekirite nou, ou depase kantite klik limite sou anons yo.");
-
-          // Voye alèt pou sipèvizyon
-          fetch("https://formspree.io/f/xpzvplpz", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              message: "⚠️ Yon itilizatè te eseye klike plis ke 3 fwa sou anons nan 5 minit.",
-              email: "infos@fondationbackupspirituel.com",
-              subject: "Alerte klik sou anons – sekirite"
-            })
-          });
-
-          e.preventDefault();
-          return false;
-        }
-      }
-    }, true);
-  })();
+  document.addEventListener("click", (e) => {
+    if (e.target.closest(".adsbygoogle")) {
+      localStorage.setItem(lastClickKey, Date.now());
+      localStorage.setItem(adClickKey, clicks + 1);
+    }
+  });
+})();
 </script>
   
 </body>
