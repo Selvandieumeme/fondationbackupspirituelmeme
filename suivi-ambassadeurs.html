@@ -1,1 +1,129 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Suivi des Ambassadeurs Digitaux - Fondation Backup Spirituel</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
+    }
+    header {
+      background-color: #003366;
+      color: white;
+      padding: 20px;
+      text-align: center;
+    }
+    nav {
+      background-color: yellow;
+      padding: 10px;
+      text-align: center;
+    }
+    nav a {
+      margin: 0 15px;
+      color: #003366;
+      text-decoration: none;
+      font-weight: bold;
+    }
+    nav a:hover {
+      background-color: #003366;
+      color: white;
+      padding: 5px 10px;
+      border-radius: 5px;
+    }
+    main {
+      padding: 40px;
+      background-color: #fff;
+    }
+    footer {
+      background-color: #003366;
+      color: white;
+      text-align: center;
+      padding: 20px;
+    }
+    .description {
+      max-width: 800px;
+      margin: auto;
+      text-align: center;
+      color: #003366;
+    }
+    .description h2 {
+      color: #003366;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <img src="logofobas.png" alt="Logo Fondation Backup Spirituel" height="80" />
+    <h1>Suivi des Ambassadeurs Digitaux</h1>
+  </header>
+  <nav>
+    <a href="/">Accueil</a>
+    <a href="/apropos.html">À Propos</a>
+    <a href="/contact.html">Contact</a>
+    <a href="/devenir-ambassadeur.html">Devenir Ambassadeur</a>
+  </nav>
 
+  <main>
+    <div class="description">
+      <h2>🌍 Rejoignez le Mouvement Digital de la Fondation!</h2>
+      <p>
+        En tant qu’Ambassadeur Digital, vous devenez la voix et la lumière de notre Fondation à travers le monde.<br />
+        Vous inspirez, motivez et attirez des âmes nouvelles vers notre vision commune.<br />
+        Chaque action que vous entreprenez compte : partagez, motivez, connectez.<br />
+        Ce tableau de bord permet de suivre votre impact au quotidien.<br />
+        Engagez-vous avec cœur et intégrité, votre influence compte vraiment.<br />
+        Notre Fondation valorise votre effort et reconnaît votre contribution réelle.<br />
+        C’est ici que tout commence, ici que vous laissez votre empreinte! 🌟<br /><br />
+        <em>🇺🇸 As a Digital Ambassador, you're the voice and light of our Foundation across the world.<br />
+        This tracking page shows the real influence of your actions. Share wisely, act with purpose! 💫</em>
+      </p>
+    </div>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 Fondation Backup Spirituel. Tous droits réservés.</p>
+  </footer>
+
+  <!-- ✅ SCRIPT AUTO TRACKING REF AMBASSADEUR -->
+  <script>
+  (async () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const ref = urlParams.get("ref");
+    if (!ref) return;
+
+    const now = new Date();
+    const dateISO = now.toISOString().slice(0, 10);
+    const lastKey = `ambassador-last-track-${ref}`;
+    const lastTracked = localStorage.getItem(lastKey);
+
+    if (lastTracked === dateISO) return;
+
+    localStorage.setItem(lastKey, dateISO);
+
+    let ip = "N/A";
+    try {
+      const res = await fetch("https://api.ipify.org?format=json");
+      const data = await res.json();
+      ip = data.ip;
+    } catch (err) {
+      console.warn("IP pa disponib", err);
+    }
+
+    await fetch("https://api.web3forms.com/submit", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        access_key: "cd9e4473-a66b-4449-93aa-b489c32a7fbd",
+        from_name: "Suivi Ambassadeur FOBAS",
+        subject: `🧭 Vizit pa ${ref}`,
+        message: `Nouvo vizit soti nan Ambassadeur: ${ref}\n🕓 Dat ak lè: ${now.toLocaleString()}\n🌐 IP: ${ip}\n📄 Paj vizite: ${location.href}`,
+        email: "fondationbackupspirituel@gmail.com"
+      })
+    });
+  })();
+  </script>
+</body>
+</html>
