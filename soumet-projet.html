@@ -85,6 +85,50 @@
     <p id="etatForm"></p>
   </main>
 
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const soumetDate = new Date();
+    const expirationDate = new Date();
+    expirationDate.setFullYear(soumetDate.getFullYear() + 1);
+
+    const formatDate = (d) => {
+      return d.toLocaleDateString("fr-FR", {
+        year: "numeric", month: "long", day: "numeric"
+      });
+    };
+
+    const exempleProjet = `
+      <section style="background:#eef6ff; padding:30px; border-radius:10px; margin-bottom:40px; border:1px solid #ccd;">
+        <h3 style="color:#003366;">📌 Exemple de projet soumis</h3>
+        <img src="https://upload.wikimedia.org/wikipedia/commons/6/65/Chicken_farm_-_geograph.org.uk_-_5628397.jpg" 
+             alt="Exemple poulailler communautaire" 
+             style="max-width:100%; border-radius:8px; margin:10px 0;" />
+        <p><strong>Nom complet :</strong> Fondation Backup Spirituel</p>
+        <p><strong>Adresse email :</strong> fondationbackupspirituel@gmail.com</p>
+        <p><strong>Numéro de téléphone :</strong> +509 4605 7952</p>
+        <p><strong>Titre du projet :</strong> Développement d’un Poulailler Communautaire Durable</p>
+        <p><strong>Description :</strong> Ce projet vise à créer un espace de production de volailles au sein de la communauté de Mare Rouge. Le poulailler aura une capacité initiale de 300 poules pondeuses et sera géré par un comité local de jeunes et femmes en difficulté économique. Les œufs seront utilisés pour lutter contre la malnutrition et générer un revenu pour les familles impliquées.</p>
+        <p><strong>Pourquoi ce projet est important ?</strong><br>
+        Le chômage, la malnutrition et l’exode rural sont des problèmes graves dans notre communauté. Ce poulailler offrira des opportunités concrètes de formation, d’alimentation locale et de revenu immédiat pour les jeunes et mères célibataires.</p>
+        <p><strong>Localisation :</strong> Mare Rouge, Département du Nord-Ouest, Haïti</p>
+        <p><strong>Budget estimatif :</strong> 3 500 USD (achat poussins, construction, alimentation, matériel sanitaire)</p>
+        <p><strong>Niveau d’urgence :</strong> 🚨 Élevé – début demandé dès le mois prochain</p>
+        <p style="color:gray; font-size:0.9em;">
+          ⏳ Soumis le <strong>${formatDate(soumetDate)}</strong> – Expire le <strong>${formatDate(expirationDate)}</strong>
+        </p>
+      </section>
+    `;
+
+    const form = document.querySelector("form");
+    if (form) {
+      const wrapper = document.createElement("div");
+      wrapper.innerHTML = exempleProjet;
+      form.parentNode.insertBefore(wrapper, form);
+    }
+  });
+</script>
+  
   <footer>
     <p>&copy; 2025 Fondation Backup Spirituel. Tous droits réservés.</p>
   </footer>
