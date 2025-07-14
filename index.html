@@ -464,37 +464,45 @@ button.submit:hover {
 })();
 </script>
 
-<!-- ✅ SCRIPT 2: DETEKTE CLIK ANONS REPETITIF KI SISPÈK -->
 <script>
-(function () {
-  const adClickKey = "fobas-ad-click-count";
-  const lastClickKey = "fobas-last-click-time";
-  const now = Date.now();
-  const last = parseInt(localStorage.getItem(lastClickKey) || "0");
-  const clicks = parseInt(localStorage.getItem(adClickKey) || "0");
+  (function () {
+    let clickCount = 0;
+    let firstClickTime = null;
 
-  // Si moun nan klike sou plis ke 5 fwa anndan 10 minit
-  if (now - last < 10 * 60 * 1000 && clicks >= 5) {
-    fetch("https://formspree.io/f/xpzvplpz", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        message: "⚠️ Klik anons sispèk fèt sou sit la.",
-        clicks,
-        page: window.location.href
-      })
-    });
-    console.warn("⚠️ Aktivite klik sispèk sou anons.");
-  }
+    document.addEventListener('click', function (e) {
+      const isAdsense = e.target.closest('ins.adsbygoogle');
 
-  // Chak fwa yon moun klike sou yon <a> ki gen "adsbygoogle"
-  document.addEventListener("click", (e) => {
-    if (e.target.closest(".adsbygoogle")) {
-      localStorage.setItem(lastClickKey, Date.now());
-      localStorage.setItem(adClickKey, clicks + 1);
-    }
-  });
-})();
+      if (isAdsense) {
+        const now = Date.now();
+
+        if (!firstClickTime || now - firstClickTime > 300000) { // 5 minit = 300000 ms
+          // Rekòmanse konte a
+          firstClickTime = now;
+          clickCount = 1;
+        } else {
+          clickCount++;
+        }
+
+        if (clickCount > 3) {
+          alert("⚠️ Pou sekirite nou, ou depase kantite klik limite sou anons yo.");
+
+          // Voye alèt pou sipèvizyon
+          fetch("https://formspree.io/f/xpzvplpz", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              message: "⚠️ Yon itilizatè te eseye klike plis ke 3 fwa sou anons nan 5 minit.",
+              email: "infos@fondationbackupspirituel.com",
+              subject: "Alerte klik sou anons – sekirite"
+            })
+          });
+
+          e.preventDefault();
+          return false;
+        }
+      }
+    }, true);
+  })();
 </script>
   
 </body>
