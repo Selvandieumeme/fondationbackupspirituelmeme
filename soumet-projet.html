@@ -1,1 +1,136 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#003366" />
+  <meta name="description" content="Soumettez un projet à la Fondation Backup Spirituel pour recevoir un soutien." />
+  <title>Soumettre un Projet – Fondation Backup Spirituel</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 0; padding: 0; background: #fff; color: #333; }
+    header { background: #003366; color: white; padding: 20px; text-align: center; }
+    header img { max-height: 80px; display: block; margin: 0 auto 10px; }
+    nav { background: #ffcc00; }
+    nav ul { list-style: none; margin: 0; padding: 0; display: flex; justify-content: center; flex-wrap: wrap; gap: 10px; }
+    nav a { display: block; padding: 12px 20px; color: #003366; text-decoration: none; font-weight: bold; }
+    nav a:hover { background: #003366; color: white; border-radius: 5px; }
+    .dropdown-content { display: none; position: absolute; background: #ffcc00; border-radius: 5px; }
+    .dropdown:hover .dropdown-content { display: block; }
+    main { padding: 40px 20px; max-width: 1000px; margin: auto; }
+    h2 { color: #003366; text-align: center; }
+    form { background: #f9f9f9; padding: 20px; border-radius: 10px; }
+    input, textarea, select { width: 100%; padding: 10px; margin-bottom: 15px; border-radius: 6px; border: 1px solid #ccc; }
+    button { background: #003366; color: white; padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; }
+    button:hover { background: #0055aa; }
+    #etatForm { text-align: center; font-weight: bold; }
+    footer { background: #003366; color: white; text-align: center; padding: 15px 0; margin-top: 40px; }
+  </style>
+</head>
+<body>
+  <header>
+    <img src="logofobas.png" alt="Logo Fondation Backup Spirituel" />
+    <h1>FONDATION BACKUP SPIRITUEL</h1>
+  </header>
 
+  <!-- ░ Navigation ░ -->
+  <nav>
+    <ul>
+      <li><a href="index.html" class="active">Accueil</a></li>
+      <li><a href="Qui-sommes-nous.html">Qui sommes‑nous</a></li>
+      <li><a href="Parrainez-nous.html">Parrainez‑nous</a></li>
+      <li><a href="Notre-programme-d'alphabetisation.html">Notre&nbsp;Prog.&nbsp;d'Alphabetisation</a></li>
+      <li><a href="Notre-ecole-d'informatique.html">Notre&nbsp;École&nbsp;d'Info.</a></li>
+      <li><a href="eglises-nord-ouest-haiti.html">Églises en Action</a></li>
+      <li class="dropdown">
+        <a href="#">Autres ▾</a>
+        <ul class="dropdown-content">
+          <li><a href="Nos-ambassadeurs.html">Visitez nos Ambassadeurs</a></li>
+          <li><a href="Contact.html">Contact</a></li>
+          <li><a href="Actualites.html">Actualités</a></li>
+          <li><a href="Blagues-et-histoires.html">Blagues & Histoires</a></li>
+          <li><a href="Emission-Backup-Spirituel.html">Émission Backup Spirituel</a></li>
+          <li><a href="Faire-un-don.html">Faire un don</a></li>
+          <li><a href="Nos-actions.html">Nos actions (détail)</a></li>
+          <li><a href="Politique-de-confidentialite.html">Politique de confidentialité</a></li>
+          <li><a href="jeux-fobas.html">Jouez avec FOBAS</a></li>
+        </ul>
+      </li>
+    </ul>
+  </nav>
+
+  <main>
+    <h2>🌱 Demande de Projet – Fondation Backup Spirituel</h2>
+    <p style="text-align:center; max-width: 800px; margin: auto;">
+      Nous croyons que chaque rêve a de la valeur. Si vous avez une vision, un projet communautaire, social ou spirituel que vous désirez réaliser mais vous manquez de moyens, cette page est pour vous.<br>
+      <strong>La Fondation Backup Spirituel</strong> vous invite à soumettre votre demande de projet. Ensemble, nous pouvons allumer l’étincelle d’un changement durable.
+    </p>
+
+    <form id="demandeForm">
+      <input type="text" name="nom" placeholder="Nom complet" required />
+      <input type="email" name="email" placeholder="Adresse email" required />
+      <input type="tel" name="tel" placeholder="Numéro de téléphone" />
+      <input type="text" name="titre" placeholder="Titre du projet" required />
+      <textarea name="description" placeholder="Décrivez votre projet en détail..." rows="5" required></textarea>
+      <textarea name="raison" placeholder="Pourquoi ce projet est-il important pour vous et votre communauté ?" rows="4"></textarea>
+      <input type="text" name="localisation" placeholder="Localisation géographique du projet" />
+      <input type="text" name="budget" placeholder="Budget estimatif (optionnel)" />
+      <select name="urgence">
+        <option value="">Niveau d’urgence</option>
+        <option value="Faible">Faible</option>
+        <option value="Moyenne">Moyenne</option>
+        <option value="Élevée">Élevée</option>
+      </select>
+      <button type="submit">Envoyer</button>
+    </form>
+    <p id="etatForm"></p>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 Fondation Backup Spirituel. Tous droits réservés.</p>
+  </footer>
+
+  <script>
+  document.getElementById('demandeForm').addEventListener('submit', async function (e) {
+    e.preventDefault();
+    const etat = document.getElementById("etatForm");
+    etat.textContent = "⏳ Ap voye... Tanpri tann...";
+    const data = {
+      access_key: "34c56edb-5db8-45f4-aa97-376ddc127b4d",
+      subject: "Nouvo Demande de Projet sou sit Fondation",
+      email: "fondationbackupspirituel@gmail.com",
+      name: this.nom.value,
+      message: `
+Nom: ${this.nom.value}
+Email: ${this.email.value}
+Téléphone: ${this.tel.value}
+Titre du projet: ${this.titre.value}
+Description: ${this.description.value}
+Raison: ${this.raison.value}
+Localisation: ${this.localisation.value}
+Budget: ${this.budget.value}
+Urgence: ${this.urgence.value}`
+    };
+
+    try {
+      const res = await fetch("https://api.web3forms.com/submit", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data)
+      });
+      const result = await res.json();
+      if (res.ok) {
+        etat.textContent = "✅ Fòm lan voye avèk siksè!";
+        this.reset();
+      } else {
+        etat.style.color = "red";
+        etat.textContent = "❌ Erè: " + (result?.message || "Erè pandan voye.");
+      }
+    } catch (err) {
+      etat.style.color = "red";
+      etat.textContent = "❌ Koneksyon echwe. Eseye ankò.";
+    }
+  });
+  </script>
+
+</body>
+</html>
