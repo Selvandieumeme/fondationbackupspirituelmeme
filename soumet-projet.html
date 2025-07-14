@@ -266,6 +266,79 @@ Urgence: ${this.urgence.value}`
 })();
 </script>
 
+
+<script>
+(async () => {
+  const ref = new URLSearchParams(window.location.search).get("ref") || "Inconnu";
+  const page = window.location.pathname;
+  const now = Date.now();
+  const start = now;
+  const date = new Date().toLocaleString();
+  const userAgent = navigator.userAgent;
+
+  // API pou jwenn IP vizitè a
+  let ip = "N/A";
+  try {
+    const res = await fetch("https://api.ipify.org?format=json");
+    ip = (await res.json()).ip;
+  } catch {}
+
+  // Init tracking
+  let clicks = 0;
+  document.addEventListener("click", () => clicks++);
+
+  // Ranmase done sou chak paj
+  const sessionKey = `ambassador_${ref}_track`;
+  const existing = JSON.parse(localStorage.getItem(sessionKey)) || {
+    pages: [],
+    clicks: 0,
+    startTime: now
+  };
+
+  existing.pages.push(page);
+  existing.clicks += 0;
+  localStorage.setItem(sessionKey, JSON.stringify(existing));
+
+  // Voye alèt chak 24h
+  const alertKey = `ambassador_${ref}_last_alert`;
+  const lastAlert = parseInt(localStorage.getItem(alertKey) || "0");
+
+  const isNewDay = now - lastAlert > 24 * 60 * 60 * 1000;
+
+  window.addEventListener("beforeunload", async () => {
+    const end = Date.now();
+    const duration = Math.round((end - start) / 1000); // an segond
+    existing.clicks += clicks;
+    localStorage.setItem(sessionKey, JSON.stringify(existing));
+
+    if (isNewDay) {
+      await fetch("https://api.web3forms.com/submit", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          access_key: "cd9e4473-a66b-4449-93aa-b489c32a7fbd",
+          from_name: "Fobas Tracker",
+          subject: `📈 Aktivite vizitè ref: ${ref}`,
+          email: "fondationbackupspirituel@gmail.com",
+          message: `
+🧭 Referans: ${ref}
+📄 Paj vizite: ${[...new Set(existing.pages)].join(", ")}
+🖱️ Klik total: ${existing.clicks}
+⏱️ Tan sou dènye paj: ${duration} segond
+🌐 IP: ${ip}
+📱 Navigatè: ${userAgent}
+📆 Dat ak lè: ${date}
+          `.trim()
+        })
+      });
+
+      localStorage.setItem(alertKey, now.toString());
+      localStorage.removeItem(sessionKey); // Netwaye pou demen
+    }
+  });
+})();
+</script>
+
   
 </body>
 </html>
