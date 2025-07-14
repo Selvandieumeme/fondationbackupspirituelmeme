@@ -149,7 +149,7 @@
 </footer>
 
 
-     <!-- ✅ SCRIPT 1: DETEKTE BOT AK ALÈT OTOMATIK VIA WEBHOOK -->
+ <!-- ✅ SCRIPT 1: DETEKTE BOT AK ALÈT OTOMATIK VIA WEB3FORMS -->
 <script>
 (async () => {
   const knownBots = [
@@ -167,15 +167,27 @@
 
   const userAgent = navigator.userAgent;
   const isBot = knownBots.some(pattern => pattern.test(userAgent));
+  const now = new Date().toLocaleString();
 
   if (isBot) {
-    await fetch("https://formspree.io/f/xpzvplpz", {
+    const ip = await fetch("https://api.ipify.org?format=json")
+      .then(res => res.json())
+      .then(data => data.ip)
+      .catch(() => "IP non disponible");
+
+    await fetch("https://api.web3forms.com/submit", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
+        access_key: "34c56edb-5db8-45f4-aa97-376ddc127b4d",
+        subject: "⚠️ Bot sispèk vizite sit la!",
+        from_name: "Sécurité du site Fondation Backup Spirituel",
+        email: "infos@fondationbackupspirituel.com",
         message: "⚠️ Bot sispèk vizite sit la!",
-        userAgent,
-        url: location.href
+        userAgent: userAgent,
+        url: location.href,
+        ip_address: ip,
+        date_time: now
       })
     });
     console.warn("⚠️ Bot detekte: ", userAgent);
@@ -189,24 +201,34 @@
   const adClickKey = "fobas-ad-click-count";
   const lastClickKey = "fobas-last-click-time";
   const now = Date.now();
+  const dateTime = new Date().toLocaleString();
   const last = parseInt(localStorage.getItem(lastClickKey) || "0");
   const clicks = parseInt(localStorage.getItem(adClickKey) || "0");
 
-  // Si moun nan klike sou plis ke 3 fwa anndan 5 minit
   if (now - last < 10 * 60 * 1000 && clicks >= 3) {
-    fetch("https://formspree.io/f/xpzvplpz", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        message: "⚠️ Klik anons sispèk fèt sou sit la.",
-        clicks,
-        page: window.location.href
-      })
-    });
-    console.warn("⚠️ Aktivite klik sispèk sou anons.");
+    fetch("https://api.ipify.org?format=json")
+      .then(res => res.json())
+      .then(data => {
+        fetch("https://api.web3forms.com/submit", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            access_key: "34c56edb-5db8-45f4-aa97-376ddc127b4d",
+            subject: "⚠️ Klik anons sispèk fèt sou sit la!",
+            from_name: "Sécurité du site Fondation Backup Spirituel",
+            email: "infos@fondationbackupspirituel.com",
+            message: `⚠️ Yon itilizatè fè ${clicks} klik rapid sou anons.`,
+            page: window.location.href,
+            ip_address: data.ip,
+            date_time: dateTime
+          })
+        });
+        console.warn("⚠️ Aktivite klik sispèk sou anons.");
+      }).catch(() => {
+        console.warn("⚠️ Pa ka jwenn IP pou klik sispèk.");
+      });
   }
 
-  // Chak fwa yon moun klike sou yon <a> ki gen "adsbygoogle"
   document.addEventListener("click", (e) => {
     if (e.target.closest(".adsbygoogle")) {
       localStorage.setItem(lastClickKey, Date.now());
