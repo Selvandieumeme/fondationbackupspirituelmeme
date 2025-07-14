@@ -63,7 +63,7 @@
       Bienvenue à tous les Pasteurs et leaders spirituels de la région du Nord-Ouest ! Cette plateforme vous permet de faire rayonner votre église et vos programmes. Remplissez le formulaire pour apparaître publiquement sur cette page, et laissez la lumière de Dieu atteindre encore plus d’âmes.
     </p>
 
-    <form action="https://formspree.io/f/xoqgwepj" method="POST" enctype="multipart/form-data">
+    <form id="egliseForm">
       <input type="text" name="eglise" placeholder="Nom de l'Église" required />
       <input type="text" name="zone" placeholder="Nom de la zone ou ville" required />
       <input type="text" name="pasteur" placeholder="Nom du Pasteur Principal" required />
@@ -83,8 +83,6 @@
       <input type="url" name="facebook" placeholder="Page Facebook" />
       <input type="url" name="youtube" placeholder="Chaîne YouTube" />
       <select name="en_construction"><option value="">Église en construction ?</option><option>Oui</option><option>Non</option></select>
-      <label>Photos (max 5): <input type="file" name="photos" multiple accept="image/*" /></label>
-      <label>Vidéos (max 5): <input type="file" name="videos" multiple accept="video/*" /></label>
       <button type="submit">Envoyer</button>
     </form>
 
@@ -97,38 +95,74 @@
     <p>&copy; 2025 Fondation Backup Spirituel. Tous droits réservés.</p>
   </footer>
 
-  <script>
+<script>
 document.addEventListener("DOMContentLoaded", () => {
   const form = document.getElementById("egliseForm");
-  const loader = document.createElement("p");
-  loader.textContent = "⏳ Ap voye... tanpri tann...";
-  loader.style.color = "blue";
 
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
+
+    const loader = document.createElement("p");
+    loader.textContent = "⏳ Ap voye... Tanpri tann...";
+    loader.style.color = "blue";
     form.after(loader);
 
     const formData = new FormData(form);
+
+    const message = `
+Nouvo fòm legliz sou sit ou a:
+Eglise: ${formData.get("eglise")}
+Zone: ${formData.get("zone")}
+Pasteur: ${formData.get("pasteur")}
+Comité: ${formData.get("comite1")} / ${formData.get("comite2")}
+Adresse: ${formData.get("adresse")}
+Téléphone: ${formData.get("tel")}
+Email legliz la: ${formData.get("email")}
+WhatsApp: ${formData.get("whatsapp")}
+Membres: ${formData.get("membres")}
+Programme: ${formData.get("programme")}
+Activités: ${formData.get("activites")}
+Veillée: ${formData.get("veye_nwi")} (${formData.get("le_veye")})
+Jeûne: ${formData.get("jeun")} (${formData.get("le_jeun")})
+Facebook: ${formData.get("facebook")}
+YouTube: ${formData.get("youtube")}
+Église en construction: ${formData.get("en_construction")}
+
+⚠️ Foto ak videyo yo pa voye otomatikman. Tanpri voye yo manyèlman sou WhatsApp: +50946057952.
+    `;
+
     const jsonData = {
       access_key: "34c56edb-5db8-45f4-aa97-376ddc127b4d",
       name: "Fondation Backup Spirituel",
       email: "infos@fondationbackupspirituel.com",
       subject: "Nouvo fòm legliz sou paj GitHub la",
-      message: `
-        Yon nouvo fòm legliz te ranpli sou sit ou a.
-        Legliz: ${formData.get("eglise")}
-        Zone: ${formData.get("zone")}
-        Pasteur: ${formData.get("pasteur")}
-        Comité: ${formData.get("comite1")} / ${formData.get("comite2")}
-        Téléphone: ${formData.get("tel")}
-        Email legliz la: ${formData.get("email")}
-        Membres: ${formData.get("membres")}
-        Programme: ${formData.get("programme")}
-      `
+      message: message
     };
 
     try {
-      const r
-  
+      const res = await fetch("https://api.web3forms.com/submit", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(jsonData)
+      });
+
+      const result = await res.json();
+      loader.remove();
+
+      if (res.ok) {
+        alert("✅ Fòm lan voye avèk siksè !");
+        form.reset();
+      } else {
+        alert("⚠️ Erè: " + (result?.message || "Repons pa bon."));
+      }
+    } catch (err) {
+      loader.remove();
+      alert("❌ Erè pandan voye mesaj la. Tanpri tcheke koneksyon w.");
+      console.error(err);
+    }
+  });
+});
+</script>
+
 </body>
 </html>
