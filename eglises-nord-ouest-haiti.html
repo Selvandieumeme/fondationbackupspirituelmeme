@@ -96,5 +96,39 @@
   <footer>
     <p>&copy; 2025 Fondation Backup Spirituel. Tous droits réservés.</p>
   </footer>
+
+  <script>
+document.addEventListener("DOMContentLoaded", () => {
+  const form = document.getElementById("egliseForm");
+  const loader = document.createElement("p");
+  loader.textContent = "⏳ Ap voye... tanpri tann...";
+  loader.style.color = "blue";
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    form.after(loader);
+
+    const formData = new FormData(form);
+    const jsonData = {
+      access_key: "34c56edb-5db8-45f4-aa97-376ddc127b4d",
+      name: "Fondation Backup Spirituel",
+      email: "infos@fondationbackupspirituel.com",
+      subject: "Nouvo fòm legliz sou paj GitHub la",
+      message: `
+        Yon nouvo fòm legliz te ranpli sou sit ou a.
+        Legliz: ${formData.get("eglise")}
+        Zone: ${formData.get("zone")}
+        Pasteur: ${formData.get("pasteur")}
+        Comité: ${formData.get("comite1")} / ${formData.get("comite2")}
+        Téléphone: ${formData.get("tel")}
+        Email legliz la: ${formData.get("email")}
+        Membres: ${formData.get("membres")}
+        Programme: ${formData.get("programme")}
+      `
+    };
+
+    try {
+      const r
+  
 </body>
 </html>
