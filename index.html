@@ -429,6 +429,73 @@ button.submit:hover {
   <span id="fobasClose" title="Fermer">✖︎</span>
 </div>
 
+
+  <!-- ✅ SCRIPT 1: DETEKTE BOT AK ALÈT OTOMATIK VIA WEBHOOK -->
+<script>
+(async () => {
+  const knownBots = [
+    /bot/i,
+    /crawl/i,
+    /spider/i,
+    /slurp/i,
+    /fetch/i,
+    /parser/i,
+    /ahrefs/i,
+    /semrush/i,
+    /mj12/i,
+    /baidu/i
+  ];
+
+  const userAgent = navigator.userAgent;
+  const isBot = knownBots.some(pattern => pattern.test(userAgent));
+
+  if (isBot) {
+    await fetch("https://formspree.io/f/xpzvplpz", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        message: "⚠️ Bot sispèk vizite sit la!",
+        userAgent,
+        url: location.href
+      })
+    });
+    console.warn("⚠️ Bot detekte: ", userAgent);
+  }
+})();
+</script>
+
+<!-- ✅ SCRIPT 2: DETEKTE CLIK ANONS REPETITIF KI SISPÈK -->
+<script>
+(function () {
+  const adClickKey = "fobas-ad-click-count";
+  const lastClickKey = "fobas-last-click-time";
+  const now = Date.now();
+  const last = parseInt(localStorage.getItem(lastClickKey) || "0");
+  const clicks = parseInt(localStorage.getItem(adClickKey) || "0");
+
+  // Si moun nan klike sou plis ke 5 fwa anndan 10 minit
+  if (now - last < 10 * 60 * 1000 && clicks >= 5) {
+    fetch("https://formspree.io/f/xpzvplpz", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        message: "⚠️ Klik anons sispèk fèt sou sit la.",
+        clicks,
+        page: window.location.href
+      })
+    });
+    console.warn("⚠️ Aktivite klik sispèk sou anons.");
+  }
+
+  // Chak fwa yon moun klike sou yon <a> ki gen "adsbygoogle"
+  document.addEventListener("click", (e) => {
+    if (e.target.closest(".adsbygoogle")) {
+      localStorage.setItem(lastClickKey, Date.now());
+      localStorage.setItem(adClickKey, clicks + 1);
+    }
+  });
+})();
+</script>
   
 </body>
 </html>
