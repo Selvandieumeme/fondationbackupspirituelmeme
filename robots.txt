@@ -19,6 +19,14 @@ Disallow: /
 User-agent: AhrefsBot
 Disallow: /
 
+User-agent: *
+Crawl-delay: 10
+
+User-agent: *
+Disallow: /*.php$
+Disallow: /*?*
+
+
 User-agent: SemrushBot
 Disallow: /
 
