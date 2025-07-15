@@ -1,96 +1,77 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Fondation Backup Spirituel</title>
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7462273633598843" crossorigin="anonymous"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>Suivi des Ambassadeurs – Fondation Backup Spirituel</title>
+
+  <!-- Styles globaux (bleu & jaune fondasyon) -->
   <style>
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background-color: #f4f4f4;
-    }
-    header {
-      background-color: #003366;
-      color: white;
-      padding: 20px;
-      text-align: center;
-    }
-    nav {
-      background-color: yellow;
-      padding: 10px;
-      text-align: center;
-    }
-    nav a {
-      margin: 0 15px;
-      color: #003366;
-      text-decoration: none;
-      font-weight: bold;
-    }
-    nav a:hover {
-      background-color: #003366;
-      color: white;
-      padding: 5px 10px;
-      border-radius: 5px;
-    }
-    main {
-      padding: 40px;
-      background-color: #fff;
-    }
-    footer {
-      background-color: #003366;
-      color: white;
-      text-align: center;
-      padding: 20px;
-    }
-    .description {
-      max-width: 800px;
-      margin: auto;
-      text-align: center;
-      color: #003366;
-    }
-    .description h2 {
-      color: #003366;
+    :root{--bleu:#003366;--bleu-clair:#0055aa;--jaune:#ffcc00;--gris:#f5f7fa;--maxw:1100px}
+    *{box-sizing:border-box;margin:0;padding:0;font-family:Arial,Helvetica,sans-serif}
+    body{background:#fff;color:#333;line-height:1.6}
+    a{text-decoration:none;color:inherit}
+
+    header{background:var(--bleu);color:#fff;text-align:center;padding:18px 10px}
+    header img{height:85px}
+    header h1{margin-top:6px;font-size:2rem;font-weight:700}
+
+    nav{background:var(--jaune);font-weight:bold}
+    nav ul{display:flex;flex-wrap:wrap;justify-content:center;gap:12px;list-style:none;padding:10px;white-space:nowrap}
+    nav a{padding:10px 16px;border-radius:4px;color:var(--bleu);transition:.25s}
+    nav a:hover,nav a.active{background:var(--bleu);color:#fff}
+    li{position:relative}
+    .dropdown-content{display:none;position:absolute;top:100%;left:0;background:var(--bleu);min-width:220px;border-radius:4px;z-index:99}
+    .dropdown-content a{display:block;padding:10px 14px;color:#fff}
+    .dropdown-content a:hover{background:var(--bleu-clair)}
+    li.dropdown:hover .dropdown-content{display:block}
+
+    section{max-width:var(--maxw);margin:auto;padding:50px 15px;text-align:center}
+    h2{color:var(--bleu);margin-bottom:28px;font-size:2rem}
+    p{font-size:1.1rem;margin-bottom:1em}
+
+    footer{background:var(--bleu);color:#fff;text-align:center;padding:18px 10px;margin-top:60px}
+    @media(max-width:700px){
+      header h1{font-size:1.5rem}
+      nav ul{gap:6px}
     }
   </style>
 </head>
 <body>
-  <header>
-    <img src="logofobas.png" alt="Logo Fondation Backup Spirituel" height="80" />
-    <h1>Suivi des Ambassadeurs Digitaux</h1>
-  </header>
- 
-  <!-- ░ Navigation ░ -->
-  <nav>
-    <ul>
-      <li><a href="index.html" class="active">Accueil</a></li>
-      <li><a href="Qui-sommes-nous.html">Qui sommes‑nous</a></li>
-      <li><a href="Parrainez-nous.html">Parrainez‑nous</a></li>
-      <li><a href="suivi-ambassadeurs.html">Suivi Ambassadeurs</a></li>
-      <li><a href="soumet-projet.html">Votre Projet Ici</a></li>
-      <li><a href="eglises-nord-ouest-haiti.html">Églises en Action</a></li>
 
-      <li class="dropdown">
-        <a href="#">Autres ▾</a>
-        <ul class="dropdown-content">
-          <li><a href="Nos-ambassadeurs.html">Visitez nos Ambassadeurs</a></li>
-          <li><a href="Notre-ecole-d'informatique.html">Notre&nbsp;École&nbsp;d'Info.</a></li>
-          <li><a href="Contact.html">Contact</a></li>
-          <li><a href="Actualites.html">Actualités</a></li>
-          <li><a href="Blagues-et-histoires.html">Blagues & Histoires</a></li>
-          <li><a href="Notre-programme-d'alphabetisation.html">Notre&nbsp;Prog.&nbsp;d'Alphabetisation</a></li>
-          <li><a href="Emission-Backup-Spirituel.html">Émission Backup Spirituel</a></li>
-          <li><a href="Faire-un-don.html">Faire un don</a></li>
-          <li><a href="Nos-actions.html">Nos actions (détail)</a></li>
-          <li><a href="Politique-de-confidentialite.html">Politique de confidentialité</a></li>
-          <li><a href="jeux-fobas.html">Jouez avec FOBAS</a></li>
-        </ul>
-      </li>
-    </ul>
-  </nav>
+<header>
+  <img src="logofobas.png" alt="Logo Fondation">
+  <h1>FONDATION BACKUP SPIRITUEL</h1>
+</header>
 
-  <!-- Tout rès script 316 lignes yo rete entak pi ba a -->
-
+<nav>
+  <ul>
+    <li><a href="index.html">Accueil</a></li>
+    <li><a href="Qui-sommes-nous.html">Qui sommes‑nous</a></li>
+    <li><a href="Parrainez-nous.html">Parrainez‑nous</a></li>
+    <li><a href="suivi-ambassadeurs.html" class="active">Suivi Ambassadeurs</a></li>
+    <li><a href="soumet-projet.html">Votre Projet Ici</a></li>
+    <li><a href="eglises-nord-ouest-haiti.html">Églises en Action</a></li>
+    <li class="dropdown">
+      <a href="#">Autres ▾</a>
+      <ul class="dropdown-content">
+        <li><a href="Nos-ambassadeurs.html">Visitez nos Ambassadeurs</a></li>
+        <li><a href="Notre-ecole-d'informatique.html">Notre École d'Info.</a></li>
+        <li><a href="Contact.html">Contact</a></li>
+        <li><a href="Actualites.html">Actualités</a></li>
+        <li><a href="Blagues-et-histoires.html">Blagues & Histoires</a></li>
+        <li><a href="Notre-programme-d'alphabetisation.html">Notre Prog. d'Alphabetisation</a></li>
+        <li><a href="Emission-Backup-Spirituel.html">Émission Backup Spirituel</a></li>
+        <li><a href="Faire-un-don.html">Faire un don</a></li>
+        <li><a href="Nos-actions.html">Nos actions (détail)</a></li>
+        <li><a href="Politique-de-confidentialite.html">Politique de confidentialité</a></li>
+        <li><a href="jeux-fobas.html">Jouez avec FOBAS</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+  
   <main>
     <div class="description">
       <h2>🌍 Suivi des Ambassadeurs Digitaux de la Fondation!</h2>
