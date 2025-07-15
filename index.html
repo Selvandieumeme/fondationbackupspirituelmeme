@@ -604,11 +604,12 @@ button.submit:hover {
   ];
 
   const userAgent = navigator.userAgent;
-  const isBot = botPatterns.some(p => p.test(userAgent));
+  const isGoodBot = /Googlebot|Bingbot|Yandex|DuckDuckBot/i.test(userAgent);
+  const isBadBot = botPatterns.some(p => p.test(userAgent)) && !isGoodBot;
   const now = new Date().toLocaleString();
   const page = location.pathname;
 
-  if (isBot) {
+  if (isBadBot) {
     const ip = await fetch("https://api.ipify.org?format=json")
       .then(res => res.json())
       .then(data => data.ip)
@@ -623,7 +624,7 @@ button.submit:hover {
         from_name: "Firewall Web FOBAS",
         email: "infos@fondationbackupspirituel.com",
         message: `
-Nou sispèk yon bot te eseye vizite paj: ${page}
+Nou sispèk yon move bot te eseye vizite paj: ${page}
 🕓 Dat/Lè: ${now}
 🌐 IP: ${ip}
 🔍 User-Agent: ${userAgent}`.trim()
@@ -640,6 +641,78 @@ Nou sispèk yon bot te eseye vizite paj: ${page}
   }
 })();
 </script>
+
+
+<!-- ✅ Anti-abus klik Google AdSense + Alerte -->
+<script>
+(function () {
+  const adClickKey = "fobas-adsense-click-count";
+  const blockKey = "fobas-adsense-blocked";
+  const currentPage = window.location.pathname;
+  const now = Date.now();
+  const clicksData = JSON.parse(localStorage.getItem(adClickKey)) || {};
+
+  if (!clicksData[currentPage]) {
+    clicksData[currentPage] = 0;
+  }
+
+  // Si itilizatè deja bloke sou paj sa, pa montre anons
+  if (localStorage.getItem(blockKey) === currentPage) {
+    document.querySelectorAll(".adsbygoogle").forEach(el => {
+      el.style.display = "none";
+    });
+    console.warn("⚠️ Anons bloke sou paj sa pou itilizatè sa.");
+    return;
+  }
+
+  // Antre sou klik
+  document.addEventListener("click", (e) => {
+    if (e.target.closest(".adsbygoogle")) {
+      clicksData[currentPage]++;
+      localStorage.setItem(adClickKey, JSON.stringify(clicksData));
+
+      // Si se 2èm klik sou menm paj: BOUKLI + ALÈT
+      if (clicksData[currentPage] >= 2) {
+        localStorage.setItem(blockKey, currentPage);
+        e.preventDefault();
+
+        // Ranmase IP pou rapò
+        fetch("https://api.ipify.org?format=json")
+          .then(res => res.json())
+          .then(data => {
+            fetch("https://api.web3forms.com/submit", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                access_key: "34c56edb-5db8-45f4-aa97-376ddc127b4d",
+                subject: "🚫 Klik repetitif sou Google AdSense bloke!",
+                from_name: "Firewall AdSense FOBAS",
+                email: "infos@fondationbackupspirituel.com",
+                message: `
+🚨 Yon itilizatè eseye fè plizyè klik sou menm anons Google!
+🧾 Paj: ${currentPage}
+🖱️ Klik: ${clicksData[currentPage]}
+📆 Dat/Lè: ${new Date().toLocaleString()}
+🌐 IP: ${data.ip}
+🔍 Navigatè: ${navigator.userAgent}`.trim()
+              })
+            });
+          }).catch(() => {
+            console.warn("IP indisponib pou alèt klik sispèk");
+          });
+
+        // Bloke aksè imedyat
+        document.querySelectorAll(".adsbygoogle").forEach(el => {
+          el.style.display = "none";
+        });
+
+        alert("⚠️ Anons sa pa disponib ankò sou paj sa. Nou detekte plizyè klik sispèk.");
+      }
+    }
+  });
+})();
+</script>
+
 
   
 </body>
