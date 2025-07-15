@@ -333,6 +333,55 @@
 })();
 </script>
      
+<!-- ✅ Firewall entelijan anti-bot pou mete sou tout paj ou -->
+<script>
+(async () => {
+  const botPatterns = [
+    /bot/i, /crawl/i, /spider/i, /scanner/i, /fetch/i, /scrapy/i,
+    /wget/i, /curl/i, /python/i, /axios/i, /libwww/i, /httpclient/i,
+    /node/i, /phantom/i, /headless/i, /selenium/i, /java/i, /perl/i,
+    /go-http-client/i, /ruby/i, /nikto/i, /nmap/i, /masscan/i
+  ];
+
+  const userAgent = navigator.userAgent;
+  const isBot = botPatterns.some(p => p.test(userAgent));
+  const now = new Date().toLocaleString();
+  const page = location.pathname;
+
+  if (isBot) {
+    const ip = await fetch("https://api.ipify.org?format=json")
+      .then(res => res.json())
+      .then(data => data.ip)
+      .catch(() => "IP non disponible");
+
+    await fetch("https://api.web3forms.com/submit", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        access_key: "34c56edb-5db8-45f4-aa97-376ddc127b4d",
+        subject: "🚨 Bot sispèk bloke pa Firewall",
+        from_name: "Firewall Web FOBAS",
+        email: "infos@fondationbackupspirituel.com",
+        message: `
+Nou sispèk yon bot te eseye vizite paj: ${page}
+🕓 Dat/Lè: ${now}
+🌐 IP: ${ip}
+🔍 User-Agent: ${userAgent}`.trim()
+      })
+    });
+
+    document.body.innerHTML = `
+      <div style="background:#003366;color:white;font-family:sans-serif;padding:60px;text-align:center">
+        <h1>⚠️ Aksè Refize</h1>
+        <p>Nou sispèk aktivite otomatik sou sit sa. Si ou panse sa se yon erè, tanpri kontakte administratè sit la.</p>
+      </div>
+    `;
+    throw new Error("Bot access blocked");
+  }
+})();
+</script>
+
+     
      
 </body>
 </html>
