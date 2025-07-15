@@ -100,47 +100,7 @@
     <p>&copy; 2025 Fondation Backup Spirituel. Tous droits réservés.</p>
   </footer>
 
-  <!-- ✅ SCRIPT AUTO TRACKING REF AMBASSADEUR -->
-  <script>
-  (async () => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const ref = urlParams.get("ref");
-    if (!ref) return;
-
-    const now = new Date();
-    const dateISO = now.toISOString().slice(0, 10);
-    const lastKey = `ambassador-last-track-${ref}`;
-    const lastTracked = localStorage.getItem(lastKey);
-
-    if (lastTracked === dateISO) return;
-
-    localStorage.setItem(lastKey, dateISO);
-
-    let ip = "N/A";
-    try {
-      const res = await fetch("https://api.ipify.org?format=json");
-      const data = await res.json();
-      ip = data.ip;
-    } catch (err) {
-      console.warn("IP pa disponib", err);
-    }
-
-    await fetch("https://api.web3forms.com/submit", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        access_key: "cd9e4473-a66b-4449-93aa-b489c32a7fbd",
-        from_name: "Suivi Ambassadeur FOBAS",
-        subject: `🧭 Vizit pa ${ref}`,
-        message: `Nouvo vizit soti nan Ambassadeur: ${ref}\n🕓 Dat ak lè: ${now.toLocaleString()}\n🌐 IP: ${ip}\n📄 Paj vizite: ${location.href}`,
-        email: "fondationbackupspirituel@gmail.com"
-      })
-    });
-  })();
-  </script>
-
-
- <!-- ✅ SCRIPT 1: DETEKTE BOT AK ALÈT OTOMATIK VIA WEB3FORMS -->
+  <!-- ✅ SCRIPT 1: DETEKTE BOT AK ALÈT OTOMATIK VIA WEB3FORMS -->
 <script>
 (async () => {
   const knownBots = [
@@ -230,6 +190,7 @@
 </script>
 
 
+!-- ✅ Anti-abus Google AdSense + Tracker Avanse Ambassadeurs -->
 <script>
 (async () => {
   const ref = new URLSearchParams(window.location.search).get("ref") || "Inconnu";
@@ -239,68 +200,101 @@
   const date = new Date().toLocaleString();
   const userAgent = navigator.userAgent;
 
-  // API pou jwenn IP vizitè a
-  let ip = "N/A";
+  // API pou jwenn IP ak peyi vizitè a
+  let ip = "N/A", country = "N/A";
   try {
-    const res = await fetch("https://api.ipify.org?format=json");
-    ip = (await res.json()).ip;
+    const res = await fetch("https://ipapi.co/json");
+    const data = await res.json();
+    ip = data.ip;
+    country = data.country_name;
   } catch {}
 
-  // Init tracking
-  let clicks = 0;
-  document.addEventListener("click", () => clicks++);
-
-  // Ranmase done sou chak paj
+  // ➤ TRACKING REF
   const sessionKey = `ambassador_${ref}_track`;
   const existing = JSON.parse(localStorage.getItem(sessionKey)) || {
     pages: [],
     clicks: 0,
     startTime: now
   };
-
   existing.pages.push(page);
-  existing.clicks += 0;
   localStorage.setItem(sessionKey, JSON.stringify(existing));
 
-  // Voye alèt chak 24h
-  const alertKey = `ambassador_${ref}_last_alert`;
-  const lastAlert = parseInt(localStorage.getItem(alertKey) || "0");
+  // ➤ ANTI-KLIK ABIZIF ADSENSE PAR ID
+  const adClickKey = "fobas-adsense-click-count";
+  const blockKey = "fobas-adsense-blocked";
+  const statsKey = "fobas-adsense-click-stats";
+  const stats = JSON.parse(localStorage.getItem(statsKey)) || {};
+  const adClicks = JSON.parse(localStorage.getItem(adClickKey)) || {};
 
-  const isNewDay = now - lastAlert > 24 * 60 * 60 * 1000;
+  document.addEventListener("click", async (e) => {
+    const adEl = e.target.closest(".adsbygoogle");
+    if (!adEl) return;
+    const adId = adEl.getAttribute("data-ad-id") || "default";
+    const blockIdKey = `${blockKey}_${adId}`;
+    const lastClickKey = `${adClickKey}_${adId}`;
 
-  window.addEventListener("beforeunload", async () => {
-    const end = Date.now();
-    const duration = Math.round((end - start) / 1000); // an segond
-    existing.clicks += clicks;
-    localStorage.setItem(sessionKey, JSON.stringify(existing));
+    // ➤ Bloke tanporèman apre +1 klik jiskaske 8h AM
+    const nowH = new Date().getHours();
+    const isBlocked = localStorage.getItem(blockIdKey);
+    if (isBlocked && nowH < 8) {
+      adEl.style.display = "none";
+      return;
+    } else if (nowH >= 8) {
+      localStorage.removeItem(blockIdKey);
+    }
 
-    if (isNewDay) {
+    // ➤ Konte klik yo
+    adClicks[adId] = (adClicks[adId] || 0) + 1;
+    localStorage.setItem(adClickKey, JSON.stringify(adClicks));
+
+    // ➤ Statistik klik global yo
+    stats[adId] = stats[adId] || { good: 0, bad: 0 };
+
+    if (adClicks[adId] === 1) {
+      stats[adId].good++;
+    } else if (adClicks[adId] > 1) {
+      stats[adId].bad++;
+      localStorage.setItem(blockIdKey, true);
+      adEl.style.display = "none";
+      e.preventDefault();
+
+      // ➤ Voye ALÈT Imedyat
       await fetch("https://api.web3forms.com/submit", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          access_key: "cd9e4473-a66b-4449-93aa-b489c32a7fbd",
-          from_name: "Fobas Tracker",
-          subject: `📈 Aktivite vizitè ref: ${ref}`,
-          email: "fondationbackupspirituel@gmail.com",
+          access_key: "34c56edb-5db8-45f4-aa97-376ddc127b4d",
+          subject: "🚫 Klik abizif bloke sou Google AdSense",
+          from_name: "FOBAS AdSense Tracker",
+          email: "infos@fondationbackupspirituel.com",
           message: `
-🧭 Referans: ${ref}
-📄 Paj vizite: ${[...new Set(existing.pages)].join(", ")}
-🖱️ Klik total: ${existing.clicks}
-⏱️ Tan sou dènye paj: ${duration} segond
-🌐 IP: ${ip}
-📱 Navigatè: ${userAgent}
-📆 Dat ak lè: ${date}
-          `.trim()
+⛔ Ref: ${ref}
+🧾 Paj: ${page}
+🆔 Ad ID: ${adId}
+🖱️ Klik total: ${adClicks[adId]}
+✅ Bon klik: ${stats[adId].good} | ❌ Move klik: ${stats[adId].bad}
+🌐 IP: ${ip} (${country})
+📆 Dat/Lè: ${date}
+🔍 Navigatè: ${userAgent}
+`.trim()
         })
       });
-
-      localStorage.setItem(alertKey, now.toString());
-      localStorage.removeItem(sessionKey); // Netwaye pou demen
     }
+
+    localStorage.setItem(statsKey, JSON.stringify(stats));
+  });
+
+  // ➤ TRACK tan pase pou chak ambassadeur
+  window.addEventListener("beforeunload", async () => {
+    const end = Date.now();
+    const duration = Math.round((end - start) / 1000);
+    existing.clicks = Object.values(adClicks).reduce((a, b) => a + b, 0);
+    localStorage.setItem(sessionKey, JSON.stringify(existing));
   });
 })();
 </script>
+
+
 
 <!-- ✅ Firewall entelijan anti-bot pou mete sou tout paj ou -->
 <script>
@@ -313,11 +307,12 @@
   ];
 
   const userAgent = navigator.userAgent;
-  const isBot = botPatterns.some(p => p.test(userAgent));
+  const isGoodBot = /Googlebot|Bingbot|Yandex|DuckDuckBot/i.test(userAgent);
+  const isBadBot = botPatterns.some(p => p.test(userAgent)) && !isGoodBot;
   const now = new Date().toLocaleString();
   const page = location.pathname;
 
-  if (isBot) {
+  if (isBadBot) {
     const ip = await fetch("https://api.ipify.org?format=json")
       .then(res => res.json())
       .then(data => data.ip)
@@ -332,7 +327,7 @@
         from_name: "Firewall Web FOBAS",
         email: "infos@fondationbackupspirituel.com",
         message: `
-Nou sispèk yon bot te eseye vizite paj: ${page}
+Nou sispèk yon move bot te eseye vizite paj: ${page}
 🕓 Dat/Lè: ${now}
 🌐 IP: ${ip}
 🔍 User-Agent: ${userAgent}`.trim()
@@ -347,6 +342,95 @@ Nou sispèk yon bot te eseye vizite paj: ${page}
     `;
     throw new Error("Bot access blocked");
   }
+})();
+</script>
+
+
+<!-- ✅ Anti-abus klik Google AdSense + Alerte + Reset chak 8h AM + Deteksyon Peyi + Referrer -->
+<script>
+(function () {
+  const adClickKey = "fobas-adsense-click-count";
+  const blockKey = "fobas-adsense-blocked";
+  const resetKey = "fobas-adsense-next-reset";
+
+  const now = new Date();
+  const currentTime = now.getTime();
+  const referrer = document.referrer || "Pa gen referans"; // Nouvo: sa montre ki kote moun soti
+
+  function getNextResetTime() {
+    const nextReset = new Date();
+    nextReset.setHours(8, 0, 0, 0);
+    if (now > nextReset) {
+      nextReset.setDate(nextReset.getDate() + 1);
+    }
+    return nextReset.getTime();
+  }
+
+  const savedResetTime = localStorage.getItem(resetKey);
+  if (!savedResetTime || currentTime >= parseInt(savedResetTime)) {
+    localStorage.removeItem(adClickKey);
+    localStorage.removeItem(blockKey);
+    localStorage.setItem(resetKey, getNextResetTime());
+    console.log("🔁 Debloke tout anons paske se nouvo jou a 8h AM.");
+  }
+
+  const clicksData = JSON.parse(localStorage.getItem(adClickKey)) || {};
+  const blockedData = JSON.parse(localStorage.getItem(blockKey)) || {};
+  const ads = document.querySelectorAll(".adsbygoogle");
+
+  ads.forEach((ad, index) => {
+    const adId = `${window.location.pathname}#ad-${index}`;
+
+    if (blockedData[adId]) {
+      ad.style.display = "none";
+      console.warn("⚠️ Anons bloke pou itilizatè sa sou:", adId);
+      return;
+    }
+
+    ad.addEventListener("click", (e) => {
+      clicksData[adId] = (clicksData[adId] || 0) + 1;
+      localStorage.setItem(adClickKey, JSON.stringify(clicksData));
+
+      if (clicksData[adId] >= 2) {
+        blockedData[adId] = true;
+        localStorage.setItem(blockKey, JSON.stringify(blockedData));
+        e.preventDefault();
+
+        // Ranmase IP + peyi
+        fetch("https://ipapi.co/json")
+          .then(res => res.json())
+          .then(data => {
+            const ip = data.ip || "IP pa jwenn";
+            const country = data.country_name || "Peyi pa detekte";
+
+            fetch("https://api.web3forms.com/submit", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                access_key: "34c56edb-5db8-45f4-aa97-376ddc127b4d",
+                subject: "🚫 Klik repetitif sou Google AdSense bloke!",
+                from_name: "Firewall AdSense FOBAS",
+                email: "infos@fondationbackupspirituel.com",
+                message: `
+🚨 Yon itilizatè eseye fè plizyè klik sou MENM anons Google!
+🧾 Anons ID: ${adId}
+🖱️ Klik: ${clicksData[adId]}
+🌍 Peyi: ${country}
+🌐 IP: ${ip}
+📥 Referans: ${referrer}
+📆 Dat/Lè: ${new Date().toLocaleString()}
+🔍 Navigatè: ${navigator.userAgent}`.trim()
+              })
+            });
+          }).catch(() => {
+            console.warn("IP oswa Peyi pa ka jwenn pou alèt klik sispèk");
+          });
+
+        ad.style.display = "none";
+        alert("⚠️ Anons sa pa disponib ankò. Nou detekte plizyè klik sispèk.");
+      }
+    });
+  });
 })();
 </script>
 
