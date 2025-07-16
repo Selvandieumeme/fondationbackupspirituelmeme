@@ -763,6 +763,70 @@ Nou sispèk yon move bot te eseye vizite paj: ${page}
 })();
 </script>
 
+
+
+
+  <script>
+(async () => {
+  const ref = new URLSearchParams(window.location.search).get("ref") || "Inconnu";
+  const page = window.location.pathname;
+  const startTime = Date.now();
+  const userAgent = navigator.userAgent;
+
+  // Antre pou kalkile klik
+  let totalClicks = 0;
+  document.addEventListener("click", (e) => {
+    if (
+      e.target.tagName === "A" || 
+      e.target.tagName === "IMG" || 
+      e.target.tagName === "VIDEO" || 
+      e.target.closest("a") || 
+      e.target.closest("img") || 
+      e.target.closest("video")
+    ) {
+      totalClicks++;
+    }
+  });
+
+  // Ranmasse IP ak peyi
+  let ip = "N/A", country = "N/A";
+  try {
+    const res = await fetch("https://ipapi.co/json");
+    const data = await res.json();
+    ip = data.ip;
+    country = data.country_name;
+  } catch {}
+
+  // Lè itilizatè ap kite paj la
+  window.addEventListener("beforeunload", () => {
+    const endTime = Date.now();
+    const durationSec = Math.round((endTime - startTime) / 1000);
+    const now = new Date().toLocaleString();
+
+    fetch("https://api.web3forms.com/submit", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        access_key: "34c56edb-5db8-45f4-aa97-376ddc127b4d",
+        subject: `📡 Tès Avanse Ref: ${ref}`,
+        from_name: "FOBAS Test Script",
+        email: "infos@fondationbackupspirituel.com",
+        message: `
+✅ Tès avanse ap fèt pou kontwòl referans
+🔗 Referans: ${ref}
+📄 Paj: ${page}
+🖱️ Klik total sou bouton/lien/imaj/videyo: ${totalClicks}
+⏱️ Tan sou paj: ${durationSec} segond
+🌍 Peyi: ${country}
+🌐 IP: ${ip}
+🧭 Navigatè: ${userAgent}
+📆 Dat/Lè: ${now}
+        `.trim()
+      })
+    });
+  });
+})();
+</script>
   
 </body>
 </html>
