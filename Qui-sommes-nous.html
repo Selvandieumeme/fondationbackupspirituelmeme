@@ -175,92 +175,52 @@
     <p>&copy; 2025 Fondation Backup Spirituel. Tous droits réservés.</p>
   </footer>
 
-
-<!-- ✅ Anti-abus klik Google AdSense + Alerte + Reset chak 8h AM + Deteksyon Peyi + Referrer -->
+<!-- ✅ Firewall entelijan anti-bot pou mete sou tout paj ou -->
 <script>
-(function () {
-  const adClickKey = "fobas-adsense-click-count";
-  const blockKey = "fobas-adsense-blocked";
-  const resetKey = "fobas-adsense-next-reset";
+(async () => {
+  const botPatterns = [
+    /bot/i, /crawl/i, /spider/i, /scanner/i, /fetch/i, /scrapy/i,
+    /wget/i, /curl/i, /python/i, /axios/i, /libwww/i, /httpclient/i,
+    /node/i, /phantom/i, /headless/i, /selenium/i, /java/i, /perl/i,
+    /go-http-client/i, /ruby/i, /nikto/i, /nmap/i, /masscan/i
+  ];
 
-  const now = new Date();
-  const currentTime = now.getTime();
-  const referrer = document.referrer || "Pa gen referans"; // Nouvo: sa montre ki kote moun soti
+  const userAgent = navigator.userAgent;
+  const isGoodBot = /Googlebot|Bingbot|Yandex|DuckDuckBot/i.test(userAgent);
+  const isBadBot = botPatterns.some(p => p.test(userAgent)) && !isGoodBot;
+  const now = new Date().toLocaleString();
+  const page = location.pathname;
 
-  function getNextResetTime() {
-    const nextReset = new Date();
-    nextReset.setHours(8, 0, 0, 0);
-    if (now > nextReset) {
-      nextReset.setDate(nextReset.getDate() + 1);
-    }
-    return nextReset.getTime();
-  }
+  if (isBadBot) {
+    const ip = await fetch("https://api.ipify.org?format=json")
+      .then(res => res.json())
+      .then(data => data.ip)
+      .catch(() => "IP non disponible");
 
-  const savedResetTime = localStorage.getItem(resetKey);
-  if (!savedResetTime || currentTime >= parseInt(savedResetTime)) {
-    localStorage.removeItem(adClickKey);
-    localStorage.removeItem(blockKey);
-    localStorage.setItem(resetKey, getNextResetTime());
-    console.log("🔁 Debloke tout anons paske se nouvo jou a 8h AM.");
-  }
-
-  const clicksData = JSON.parse(localStorage.getItem(adClickKey)) || {};
-  const blockedData = JSON.parse(localStorage.getItem(blockKey)) || {};
-  const ads = document.querySelectorAll(".adsbygoogle");
-
-  ads.forEach((ad, index) => {
-    const adId = `${window.location.pathname}#ad-${index}`;
-
-    if (blockedData[adId]) {
-      ad.style.display = "none";
-      console.warn("⚠️ Anons bloke pou itilizatè sa sou:", adId);
-      return;
-    }
-
-    ad.addEventListener("click", (e) => {
-      clicksData[adId] = (clicksData[adId] || 0) + 1;
-      localStorage.setItem(adClickKey, JSON.stringify(clicksData));
-
-      if (clicksData[adId] >= 2) {
-        blockedData[adId] = true;
-        localStorage.setItem(blockKey, JSON.stringify(blockedData));
-        e.preventDefault();
-
-        // Ranmase IP + peyi
-        fetch("https://ipapi.co/json")
-          .then(res => res.json())
-          .then(data => {
-            const ip = data.ip || "IP pa jwenn";
-            const country = data.country_name || "Peyi pa detekte";
-
-            fetch("https://api.web3forms.com/submit", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                access_key: "34c56edb-5db8-45f4-aa97-376ddc127b4d",
-                subject: "🚫 Klik repetitif sou Google AdSense bloke!",
-                from_name: "Firewall AdSense FOBAS",
-                email: "infos@fondationbackupspirituel.com",
-                message: `
-🚨 Yon itilizatè eseye fè plizyè klik sou MENM anons Google!
-🧾 Anons ID: ${adId}
-🖱️ Klik: ${clicksData[adId]}
-🌍 Peyi: ${country}
+    await fetch("https://api.web3forms.com/submit", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        access_key: "34c56edb-5db8-45f4-aa97-376ddc127b4d",
+        subject: "🚨 Bot sispèk bloke pa Firewall",
+        from_name: "Firewall Web FOBAS",
+        email: "infos@fondationbackupspirituel.com",
+        message: `
+Nou sispèk yon move bot te eseye vizite paj: ${page}
+🕓 Dat/Lè: ${now}
 🌐 IP: ${ip}
-📥 Referans: ${referrer}
-📆 Dat/Lè: ${new Date().toLocaleString()}
-🔍 Navigatè: ${navigator.userAgent}`.trim()
-              })
-            });
-          }).catch(() => {
-            console.warn("IP oswa Peyi pa ka jwenn pou alèt klik sispèk");
-          });
-
-        ad.style.display = "none";
-        alert("⚠️ Anons sa pa disponib ankò. Nou detekte plizyè klik sispèk.");
-      }
+🔍 User-Agent: ${userAgent}`.trim()
+      })
     });
-  });
+
+    document.body.innerHTML = `
+      <div style="background:#003366;color:white;font-family:sans-serif;padding:60px;text-align:center">
+        <h1>⚠️ Aksè Refize</h1>
+        <p>Nou sispèk aktivite otomatik sou sit sa. Si ou panse sa se yon erè, tanpri kontakte administratè sit la.</p>
+      </div>
+    `;
+    throw new Error("Bot access blocked");
+  }
 })();
 </script>
   
