@@ -1,1 +1,103 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#003366" />
+  <meta name="description" content="Espace Vendre et Acheter de la Fondation Backup Spirituel" />
+  <title>Vendre et Acheter – Fondation Backup Spirituel</title>
+  <style>
+    body{font-family:Arial,sans-serif;margin:0;padding:0;background:#fff;color:#333}
+    header{background:#003366;padding:20px;color:#fff;text-align:center}
+    header img{max-height:80px}
+    nav{background:#ffcc00}
+    nav ul{list-style:none;margin:0;padding:0;display:flex;justify-content:center;flex-wrap:wrap;gap:10px}
+    nav li{position:relative}
+    nav a{display:block;padding:12px 20px;color:blue;text-decoration:none;font-weight:bold}
+    nav a:hover{background:#003366;color:#fff;border-radius:5px}
+    .dropdown-content{display:none;position:absolute;top:100%;left:0;background:#ffcc00;min-width:200px;z-index:1;border-radius:4px}
+    .dropdown:hover .dropdown-content{display:block}
+    main{padding:40px 20px;max-width:1000px;margin:auto}
+    main h2{text-align:center;color:#003366}
+    main p{text-align:justify;line-height:1.6;font-size:1.1em;margin-bottom:20px}
+    form{margin-top:30px;background:#f9f9f9;padding:20px;border-radius:8px;box-shadow:0 2px 5px rgba(0,0,0,0.1)}
+    input,textarea{width:100%;padding:10px;margin:10px 0;border:1px solid #ccc;border-radius:5px;font-size:1em}
+    button{background:#003366;color:#fff;padding:10px 20px;border:none;border-radius:5px;cursor:pointer;font-weight:bold}
+    button:hover{background:#0055aa}
+    .whatsapp-button{display:inline-block;margin-top:20px;background:#25D366;color:#fff;padding:10px 20px;border-radius:5px;text-decoration:none;font-weight:bold}
+    footer{background:#003366;color:#fff;text-align:center;padding:15px 0;margin-top:40px}
+  </style>
+</head>
+<body>
+  <header>
+    <img src="logofobas.png" alt="Logo Fondation Backup Spirituel" />
+    <h1>FONDATION BACKUP SPIRITUEL</h1>
+  </header>
 
+  <nav>
+    <ul>
+      <li><a href="index.html">Accueil</a></li>
+      <li><a href="Qui-sommes-nous.html">Qui sommes‑nous</a></li>
+      <li><a href="Parrainez-nous.html">Parrainez‑nous</a></li>
+      <li><a href="suivi-ambassadeurs.html">Suivi Ambassadeurs</a></li>
+      <li><a href="soumet-projet.html">Votre Projet Ici</a></li>
+      <li><a href="eglises-nord-ouest-haiti.html">Églises en Action</a></li>
+      <li class="dropdown">
+        <a href="#">Autres ▾</a>
+        <ul class="dropdown-content">
+          <li><a href="Nos-ambassadeurs.html">Visitez nos Ambassadeurs</a></li>
+          <li><a href="Notre-ecole-d'informatique.html">Notre&nbsp;École&nbsp;d'Info.</a></li>
+          <li><a href="Contact.html">Contact</a></li>
+          <li><a href="Actualites.html">Actualités</a></li>
+          <li><a href="Blagues-et-histoires.html">Blagues & Histoires</a></li>
+          <li><a href="Notre-programme-d'alphabetisation.html">Notre&nbsp;Prog.&nbsp;d'Alphabetisation</a></li>
+          <li><a href="Emission-Backup-Spirituel.html">Émission Backup Spirituel</a></li>
+          <li><a href="Faire-un-don.html">Faire un don</a></li>
+          <li><a href="Nos-actions.html">Nos actions (détail)</a></li>
+          <li><a href="Politique-de-confidentialite.html">Politique de confidentialité</a></li>
+          <li><a href="jeux-fobas.html">Jouez avec FOBAS</a></li>
+          <li><a href="aides-moi-prier.html">Aides-moi à prier</a></li>
+        </ul>
+      </li>
+    </ul>
+  </nav>
+
+  <main>
+    <h2>Vendre et Acheter</h2>
+    <p>
+      Bienvenue dans l'espace <strong>Vendre et Acheter</strong> de la Fondation Backup Spirituel. Ici, tout le monde peut librement poster des annonces de produits ou services à vendre, ou rechercher ce qu’il souhaite acheter. L’objectif est de créer un espace de confiance et d'entraide entre membres responsables et respectueux.
+    </p>
+    <p>
+      ⚠️ <strong>Interdiction formelle</strong> de publier des armes, drogues, objets volés ou tout autre produit illégal. Tout contenu non conforme sera supprimé sans préavis.
+    </p>
+
+    <form action="https://api.web3forms.com/submit" method="POST">
+      <input type="hidden" name="access_key" value="34c56edb-5db8-45f4-aa97-376ddc127b4d" />
+      <label for="nom">Nom complet</label>
+      <input type="text" id="nom" name="nom" required />
+
+      <label for="produit">Nom du produit ou service</label>
+      <input type="text" id="produit" name="produit" required />
+
+      <label for="prix">Prix proposé (en gourdes ou en dollars)</label>
+      <input type="text" id="prix" name="prix" required />
+
+      <label for="details">Détails importants (quantité, qualité, date, lieu…)</label>
+      <textarea id="details" name="details" rows="5" required></textarea>
+
+      <label for="contact">Adresse e-mail ou numéro WhatsApp</label>
+      <input type="text" id="contact" name="contact" required />
+
+      <button type="submit">Envoyer</button>
+    </form>
+
+    <a class="whatsapp-button" href="https://wa.me/+50946057952" target="_blank">
+      📸 Envoyez vos photos par WhatsApp
+    </a>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 Fondation Backup Spirituel – Tous droits réservés.</p>
+  </footer>
+</body>
+</html>
