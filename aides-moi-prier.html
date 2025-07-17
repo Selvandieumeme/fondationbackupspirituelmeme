@@ -83,7 +83,7 @@
         Si vous avez une requête de prière ou un besoin spirituel, remplissez ce formulaire ci-dessous. Nous prierons avec vous.
       </p>
 
-<form action="https://api.web3forms.com/submit" method="POST" onsubmit="return afficherMessage();">
+<form id="prayerForm" method="POST">
   <input type="hidden" name="access_key" value="34c56edb-5db8-45f4-aa97-376ddc127b4d" />
   <input type="hidden" name="email" value="infos@fondationbackupspirituel.com" />
 
@@ -101,9 +101,9 @@
 
   <button type="submit" style="padding:10px 20px;">Envoyer</button>
 
-  <!-- Zòn mesaj siksè -->
-  <p id="message-success" style="display:none;color:green;margin-top:20px;text-align:justify;">
-    Merci pour votre requête de prière, nous l'afficherons très bientôt sur la page pour vous.
+  <!-- Mesaj siksè -->
+  <p id="message-success" style="display:none;color:green;margin-top:20px;">
+    Merci, votre message a été envoyé avec succès.
   </p>
 </form>
   </main>
