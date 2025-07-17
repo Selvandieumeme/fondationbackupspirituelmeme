@@ -83,27 +83,29 @@
         Si vous avez une requête de prière ou un besoin spirituel, remplissez ce formulaire ci-dessous. Nous prierons avec vous.
       </p>
 
-      <form action="https://api.web3forms.com/submit" method="POST" style="max-width:600px;margin:auto;padding:20px;border:1px solid #ccc;border-radius:8px;">
-        <input type="hidden" name="access_key" value="34c56edb-5db8-45f4-aa97-376ddc127b4d" />
-        <input type="hidden" name="from_name" value="Site Fondation Backup Spirituel" />
-        <input type="hidden" name="subject" value="Nouvelle Requête de Prière" />
-        <input type="hidden" name="redirect" value="https://fondationbackupspirituel.com/merci.html" />
-        <input type="hidden" name="email" value="infos@fondationbackupspirituel.com" />
+<form action="https://api.web3forms.com/submit" method="POST" onsubmit="return afficherMessage();">
+  <input type="hidden" name="access_key" value="34c56edb-5db8-45f4-aa97-376ddc127b4d" />
+  <input type="hidden" name="email" value="infos@fondationbackupspirituel.com" />
 
-        <label for="nom">Votre nom :</label><br />
-        <input type="text" id="nom" name="name" required style="width:100%;padding:10px;margin-bottom:10px;" /><br />
+  <label for="nom">Votre nom :</label><br />
+  <input type="text" id="nom" name="name" required style="width:100%;padding:10px;margin-bottom:10px;" /><br />
 
-        <label for="email">Votre adresse email :</label><br />
-        <input type="email" id="email" name="email" required style="width:100%;padding:10px;margin-bottom:10px;" /><br />
+  <label for="whatsapp">Votre numéro WhatsApp :</label><br />
+  <input type="text" id="whatsapp" name="whatsapp" required placeholder="+509XXXXXXXX" style="width:100%;padding:10px;margin-bottom:10px;" /><br />
 
-        <label for="message">Votre requête de prière :</label><br />
-        <textarea id="message" name="message" rows="5" required style="width:100%;padding:10px;margin-bottom:20px;"></textarea><br />
+  <label for="pays">Votre pays de résidence :</label><br />
+  <input type="text" id="pays" name="country" required placeholder="Haïti, France, etc." style="width:100%;padding:10px;margin-bottom:10px;" /><br />
 
-        <div style="text-align:center;">
-          <button type="submit" style="padding:10px 20px;background:#003366;color:#fff;border:none;border-radius:5px;cursor:pointer;">Envoyer</button>
-        </div>
-      </form>
-    </section>
+  <label for="message">Votre requête de prière :</label><br />
+  <textarea id="message" name="message" required style="width:100%;padding:10px;margin-bottom:10px;"></textarea><br />
+
+  <button type="submit" style="padding:10px 20px;">Envoyer</button>
+
+  <!-- Zòn mesaj siksè -->
+  <p id="message-success" style="display:none;color:green;margin-top:20px;text-align:justify;">
+    Merci pour votre requête de prière, nous l'afficherons très bientôt sur la page pour vous.
+  </p>
+</form>
   </main>
 
   <footer>
