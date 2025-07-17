@@ -2,21 +2,44 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Aides-moi à prier</title>
-  <link rel="stylesheet" href="style.css" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#003366" />
+  <meta name="description" content="Une page pour prier ensemble avec la Fondation Backup Spirituel." />
+  <title>Aides-moi à prier – Fondation Backup Spirituel</title>
+  <style>
+    body{font-family:Arial,sans-serif;margin:0;padding:0;background:#fff;color:#333}
+    header{background:#003366;padding:20px;color:#fff;text-align:center}
+    header img{max-height:80px}
+    nav{background:#ffcc00}
+    nav ul{list-style:none;margin:0;padding:0;display:flex;justify-content:center;flex-wrap:wrap;gap:10px}
+    nav li{position:relative}
+    nav a{display:block;padding:12px 20px;color:black;text-decoration:none;font-weight:bold}
+    nav a:hover{background:#003366;color:#fff;border-radius:5px}
+    .dropdown-content{display:none;position:absolute;top:100%;left:0;background:#ffcc00;min-width:200px;z-index:1;border-radius:4px}
+    .dropdown:hover .dropdown-content{display:block}
+    main{padding:40px 20px;max-width:1000px;margin:auto}
+    main h2{text-align:center;color:#003366}
+    main p{text-align:justify;line-height:1.6;font-size:1.1em;margin-bottom:20px}
+    footer{background:#003366;color:#fff;text-align:center;padding:15px 0;margin-top:40px}
+  </style>
 </head>
+
 <body>
+  <header>
+    <img src="logofobas.png" alt="Logo Fondation Backup Spirituel" />
+    <h1>FONDATION BACKUP SPIRITUEL</h1>
+  </header>
 
   <!-- ░ Navigation ░ -->
   <nav>
     <ul>
-      <li><a href="index.html" class="active">Accueil</a></li>
+      <li><a href="index.html">Accueil</a></li>
       <li><a href="Qui-sommes-nous.html">Qui sommes‑nous</a></li>
       <li><a href="Parrainez-nous.html">Parrainez‑nous</a></li>
       <li><a href="suivi-ambassadeurs.html">Suivi Ambassadeurs</a></li>
       <li><a href="soumet-projet.html">Votre Projet Ici</a></li>
       <li><a href="eglises-nord-ouest-haiti.html">Églises en Action</a></li>
+
       <li class="dropdown">
         <a href="#">Autres ▾</a>
         <ul class="dropdown-content">
@@ -31,67 +54,60 @@
           <li><a href="Nos-actions.html">Nos actions (détail)</a></li>
           <li><a href="Politique-de-confidentialite.html">Politique de confidentialité</a></li>
           <li><a href="jeux-fobas.html">Jouez avec FOBAS</a></li>
+          <li><a href="aides-moi-prier.html" class="active">Aides-moi à prier</a></li>
         </ul>
       </li>
     </ul>
   </nav>
 
-  <!-- ░ Entwodiksyon ak bouton ░ -->
-  <section style="padding: 2rem;">
-    <h1>Aides-moi à prier</h1>
-    <p style="text-align: justify;">
-      Gen moman nan lavi a kote nou pa ka pale ak pèsonn, men nou ka pale ak Bondye. <br/>
-      Lapriyè se pa dènye solisyon, li se premye zouti ki gen pouvwa. <br/>
-      Fondasyon nou an mete yon espas sakre pou ou depoze tout sa k’ ap peze sou kè w. <br/>
-      Kit se pou oumenm, ou pou lòt moun ou renmen, ou ka mete demann ou isit. <br/>
-      Nou kwè Bondye tande, li reponn, e li toujou ap aji. <br/>
-      Pa pè mande, pa pè kwè, Bondye gen yon plan pou ou. <br/>
-      Nou ansanm ak ou nan chak batay espirityèl. Sèvi ak fòm lan anba pou voye reket ou.
+  <!-- ░ Contenu Principal + Formulaire ░ -->
+  <main>
+    <h2>Aides-moi à prier</h2>
+    <p>
+      Seigneur tout-puissant, je viens devant toi humblement. J’ai besoin de ta force, de ta paix et de ta sagesse dans ce moment de ma vie.
+      Aide-moi à prier avec foi, avec amour, et avec confiance en ta bonté.
     </p>
-    <a href="#formulaire-priere" class="btn">Aides-moi prier</a>
-  </section>
+    <p>
+      Seigneur, que ton Esprit Saint m'inspire dans chaque parole, dans chaque silence.
+      Que cette prière monte vers toi comme un doux parfum, et que ton nom soit glorifié.
+    </p>
+    <p>
+      Merci pour ta fidélité éternelle. Fortifie-moi chaque jour, et apprends-moi à toujours te faire confiance, même dans les moments difficiles.
+      Amen.
+    </p>
 
-  <!-- ░ Fòm demann lapriyè ░ -->
-  <section id="formulaire-priere" style="padding: 2rem;">
-    <h2>Formulaire de demande de prière</h2>
-    <form action="https://api.web3forms.com/submit" method="POST">
-      <input type="hidden" name="access_key" value="34c56edb-5db8-45f4-aa97-376ddc127b4d" />
+    <!-- ░░░ Formulaire de prière ░░░ -->
+    <section id="aides-moi-prier">
+      <h2 style="text-align:center;color:#003366;">Soumettez votre requête de prière</h2>
+      <p style="text-align:center;">
+        Si vous avez une requête de prière ou un besoin spirituel, remplissez ce formulaire ci-dessous. Nous prierons avec vous.
+      </p>
 
-      <label>Nom :</label>
-      <input type="text" name="nom" required>
+      <form action="https://api.web3forms.com/submit" method="POST" style="max-width:600px;margin:auto;padding:20px;border:1px solid #ccc;border-radius:8px;">
+        <input type="hidden" name="access_key" value="34c56edb-5db8-45f4-aa97-376ddc127b4d" />
+        <input type="hidden" name="from_name" value="Site Fondation Backup Spirituel" />
+        <input type="hidden" name="subject" value="Nouvelle Requête de Prière" />
+        <input type="hidden" name="redirect" value="https://fondationbackupspirituel.com/merci.html" />
+        <input type="hidden" name="email" value="infos@fondationbackupspirituel.com" />
 
-      <label>Prénom :</label>
-      <input type="text" name="prenom" required>
+        <label for="nom">Votre nom :</label><br />
+        <input type="text" id="nom" name="name" required style="width:100%;padding:10px;margin-bottom:10px;" /><br />
 
-      <label>Email :</label>
-      <input type="email" name="email" required>
+        <label for="email">Votre adresse email :</label><br />
+        <input type="email" id="email" name="email" required style="width:100%;padding:10px;margin-bottom:10px;" /><br />
 
-      <label>WhatsApp :</label>
-      <input type="text" name="whatsapp" required>
+        <label for="message">Votre requête de prière :</label><br />
+        <textarea id="message" name="message" rows="5" required style="width:100%;padding:10px;margin-bottom:20px;"></textarea><br />
 
-      <label>Peyi w ap viv la :</label>
-      <input type="text" name="pays" required>
+        <div style="text-align:center;">
+          <button type="submit" style="padding:10px 20px;background:#003366;color:#fff;border:none;border-radius:5px;cursor:pointer;">Envoyer</button>
+        </div>
+      </form>
+    </section>
+  </main>
 
-      <label>Non premye moun ou ap mande priyè pou li (si genyen) :</label>
-      <input type="text" name="personne1">
-
-      <label>Non dezyèm moun ou ap mande priyè pou li (si genyen) :</label>
-      <input type="text" name="personne2">
-
-      <label>Bi lapriyè a :</label>
-      <input type="text" name="sujet" required>
-
-      <label>Deskripsyon detay demann lan :</label>
-      <textarea name="message" rows="5" required></textarea>
-
-      <button type="submit">Envoyer</button>
-    </form>
-  </section>
-
-  <!-- ░ Pye de paj ░ -->
   <footer>
-    <p>&copy; 2025 Fondation Backup Spirituel. Tous droits réservés.</p>
+    &copy; 2025 Fondation Backup Spirituel – Tous droits réservés.
   </footer>
-
 </body>
 </html>
