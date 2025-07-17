@@ -111,5 +111,31 @@
   <footer>
     &copy; 2025 Fondation Backup Spirituel – Tous droits réservés.
   </footer>
+
+<script>
+  document.getElementById("prayerForm").addEventListener("submit", function(event) {
+    event.preventDefault(); // Anpeche paj la rechaje
+
+    const form = event.target;
+    const formData = new FormData(form);
+
+    fetch("https://api.web3forms.com/submit", {
+      method: "POST",
+      body: formData
+    })
+    .then(response => {
+      if (response.ok) {
+        document.getElementById("message-success").style.display = "block";
+        form.reset(); // Netwaye fòm lan
+      } else {
+        alert("Une erreur est survenue. Veuillez réessayer.");
+      }
+    })
+    .catch(error => {
+      alert("Erreur de réseau. Vérifiez votre connexion Internet.");
+    });
+  });
+</script>
+  
 </body>
 </html>
