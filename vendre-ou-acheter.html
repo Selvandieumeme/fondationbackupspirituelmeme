@@ -83,7 +83,13 @@
   <input type="text" name="whatsapp" placeholder="WhatsApp" required><br><br>
   <input type="text" name="pays" placeholder="Pays" required><br><br>
   <input type="text" name="ville" placeholder="Ville" required><br><br>
-  <input type="hidden" name="choix" value="vendre">
+   <!-- Nouvo seleksyon: vendre ou acheter -->
+  <label for="choix">Souhaitez-vous vendre ou acheter ?</label>
+  <select id="choix" name="choix" required>
+    <option value="">-- Faites un choix --</option>
+    <option value="vendre">Vendre</option>
+    <option value="acheter">Acheter</option>
+  </select>
   
   <button type="submit">Envoyer</button>
 </form>
