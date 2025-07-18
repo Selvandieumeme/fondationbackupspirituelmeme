@@ -71,53 +71,25 @@
       ⚠️ <strong>Interdiction formelle</strong> de publier des armes, drogues, objets volés ou tout autre produit illégal. Tout contenu non conforme sera supprimé sans préavis.
     </p>
 
-    <form action="https://api.web3forms.com/submit" method="POST">
-      <input type="hidden" name="access_key" value="34c56edb-5db8-45f4-aa97-376ddc127b4d" />
 
-  <label for="nom">Nom complet</label>
-  <input type="text" id="nom" name="nom" required />
+<form id="venteAchatForm" action="https://api.web3forms.com/submit" method="POST">
+  <input type="hidden" name="access_key" value="34c56edb-5db8-45f4-aa97-376ddc127b4d" />
 
-  <label for="produit">Nom du produit ou service</label>
-  <input type="text" id="produit" name="produit" required />
-
-  <label for="prix">Prix proposé (en gourdes ou en dollars)</label>
-  <input type="text" id="prix" name="prix" required />
-
-  <label for="details">Détails importants (quantité, qualité, date, lieu…)</label>
-  <textarea id="details" name="details" rows="5" required></textarea>
-
-  <!-- Nouvo chan pou imèl -->
-  <label for="email">Adresse e-mail</label>
-  <input type="email" id="email" name="email" required />
-
-  <!-- Nouvo chan pou WhatsApp -->
-  <label for="whatsapp">Numéro WhatsApp</label>
-  <input type="tel" id="whatsapp" name="whatsapp" />
-
-  <!-- Nouvo chan pou peyi -->
-  <label for="pays">Pays</label>
-  <input type="text" id="pays" name="pays" required />
-
-  <!-- Nouvo chan pou vil / zòn -->
-  <label for="ville">Ville / Zone</label>
-  <input type="text" id="ville" name="ville" required />
-
-  <!-- Nouvo seleksyon: vendre ou acheter -->
-  <label for="choix">Souhaitez-vous vendre ou acheter ?</label>
-  <select id="choix" name="choix" required>
-    <option value="">-- Faites un choix --</option>
-    <option value="vendre">Vendre</option>
-    <option value="acheter">Acheter</option>
-  </select>
-
+  <input type="text" name="nom" placeholder="Votre nom" required><br><br>
+  <input type="text" name="produit" placeholder="Nom du produit" required><br><br>
+  <input type="text" name="prix" placeholder="Prix" required><br><br>
+  <textarea name="details" placeholder="Détails du produit" required></textarea><br><br>
+  <input type="email" name="email" placeholder="Votre email" required><br><br>
+  <input type="text" name="whatsapp" placeholder="WhatsApp" required><br><br>
+  <input type="text" name="pays" placeholder="Pays" required><br><br>
+  <input type="text" name="ville" placeholder="Ville" required><br><br>
+  <input type="hidden" name="choix" value="vendre">
+  
   <button type="submit">Envoyer</button>
+</form>
 
-  <!-- Espas pou mesaj siksè -->
-  <p id="formSuccess" style="display: none; color: green; margin-top: 10px;">
-    Merci, votre message a été envoyé avec succès.
-  </p>
-    </form>
-
+<p id="confirmationMessage" style="color: green; font-weight: bold;"></p>
+    
     <a class="whatsapp-button" href="https://wa.me/+50946057952" target="_blank">
       📸 Envoyez vos photos par WhatsApp
     </a>
