@@ -5,32 +5,33 @@ services:
     image: jitsi/web:stable
     restart: always
     ports:
-      - '8000:80'
+      - '80:80'
+      - '443:443'
+    volumes:
+      - ${CONFIG}/web:/config
     environment:
-      - ENABLE_AUTH=0
       - ENABLE_GUESTS=1
+      - ENABLE_AUTH=0
       - ENABLE_LETSENCRYPT=0
-      - PUBLIC_URL=https://selvandieumeme.github.io/live
+      - PUBLIC_URL=https://localhost
       - TZ=America/Port-au-Prince
       - XMPP_SERVER=xmpp.meet.jitsi
-    volumes:
-      - web-config:/config
 
   prosody:
     image: jitsi/prosody:stable
     restart: always
+    volumes:
+      - ${CONFIG}/prosody:/config
     environment:
       - AUTH_TYPE=anonymous
-    volumes:
-      - prosody-config:/config
 
   jicofo:
     image: jitsi/jicofo:stable
     restart: always
+    volumes:
+      - ${CONFIG}/jicofo:/config
     environment:
       - XMPP_DOMAIN=meet.jitsi
-    volumes:
-      - jicofo-config:/config
 
   jvb:
     image: jitsi/jvb:stable
@@ -38,10 +39,4 @@ services:
     ports:
       - '10000:10000/udp'
     volumes:
-      - jvb-config:/config
-
-volumes:
-  web-config:
-  prosody-config:
-  jicofo-config:
-  jvb-config:
+      - ${CONFIG}/jvb:/config
