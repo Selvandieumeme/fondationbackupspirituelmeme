@@ -1,42 +1,83 @@
+// server.js
 require('dotenv').config();
 const express = require('express');
-const path = require('path');
+const mongoose = require('mongoose');
+const Pusher = require('pusher');
 const cors = require('cors');
-const connectDB = require('./db');
 
+// Init app
 const app = express();
-
-// Koneksyon ak MongoDB
-connectDB();
-
-// Pèmèt aksè fichye uploads (foto/videyo)
-app.use('/uploads', express.static('uploads'));
-
-// CORS: GitHub Pages sèlman
-app.use(cors({
-  origin: 'https://fondationbackupspirituelmeme.github.io'
-}));
-
-// Body parser pou JSON & forms
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(cors());
 
-// API routes
-const messageRoutes = require('./routes/messages');
-app.use('/api/messages', messageRoutes);
-
-// Serve fichye HTML prensipal si bezwen (pa nesesè sou GitHub Pages)
-app.get('/eglises-nord-ouest-haiti.html', (req, res) => {
-  res.sendFile(path.join(__dirname, 'eglises-nord-ouest-haiti.html'));
+// Pusher config
+const pusher = new Pusher({
+  appId: process.env.PUSHER_APP_ID,
+  key: process.env.PUSHER_KEY,
+  secret: process.env.PUSHER_SECRET,
+  cluster: process.env.PUSHER_CLUSTER,
+  useTLS: true
 });
 
-// Rasin API a
+// Connect to MongoDB Atlas
+mongoose.connect(process.env.MONGO_URI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true
+});
+
+const db = mongoose.connection;
+db.once('open', () => {
+  console.log('✅ MongoDB Connected');
+
+  const msgCollection = db.collection('messages');
+  const changeStream = msgCollection.watch();
+
+  changeStream.on('change', (change) => {
+    if (change.operationType === 'insert') {
+      const messageDetails = change.fullDocument;
+      pusher.trigger('chat-channel', 'new-message', {
+        username: messageDetails.username,
+        message: messageDetails.message,
+        timestamp: messageDetails.timestamp
+      });
+    }
+  });
+});
+
+// Mongo Schema
+const MessageSchema = new mongoose.Schema({
+  username: String,
+  message: String,
+  timestamp: String
+});
+
+const Message = mongoose.model('Message', MessageSchema);
+
+// Routes
+app.post('/api/messages', async (req, res) => {
+  const { username, message } = req.body;
+
+  try {
+    const newMsg = new Message({
+      username,
+      message,
+      timestamp: new Date().toISOString()
+    });
+
+    await newMsg.save();
+    res.status(201).json({ success: true });
+  } catch (error) {
+    console.error('Error saving message:', error);
+    res.status(500).json({ success: false });
+  }
+});
+
 app.get('/', (req, res) => {
-  res.send('✅ API legliz la mache byen sou Render!');
+  res.send('Chat API is running...');
 });
 
-// Port deployman
+// Start server
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log(`🚀 Sèvè a koute sou http://localhost:${PORT}`);
+  console.log(`🚀 Server running on port ${PORT}`);
 });
