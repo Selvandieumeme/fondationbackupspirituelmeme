@@ -48,27 +48,31 @@
       background: #fff;
       border-radius: 6px;
       margin-bottom: 20px;
+      white-space: pre-wrap; /* pou kenbe espas / retou */
     }
     #messages p {
       margin-bottom: 10px;
     }
-    .chat-form input {
+    .chat-form input[type="text"] {
       width: 100%;
-      padding: 10px;
+      padding: 12px;
       font-size: 1rem;
       border: 1px solid #ccc;
       border-radius: 6px;
-      margin-bottom: 10px;
+      margin-bottom: 12px;
+      box-sizing: border-box;
     }
     .chat-form button {
       width: 100%;
-      padding: 12px;
+      padding: 14px;
       font-size: 1rem;
       background-color: var(--bleu);
       color: #fff;
       border: none;
       border-radius: 8px;
       cursor: pointer;
+      font-weight: bold;
+      transition: background-color 0.3s ease;
     }
     .chat-form button:hover {
       background-color: var(--bleu-clair);
@@ -120,10 +124,15 @@
 <!-- ░ Contenu Chat Public ░ -->
 <section>
   <h2>💬 Espace de Chat Public en Temps Réel</h2>
-  <div id="messages"></div>
-  <input type="text" id="name" placeholder="Nom..." /><br />
-  <input type="text" id="message" placeholder="Tapez votre message ici..." />
-  <button onclick="sendMessage()">Envoyer</button>
+  
+  <div class="chat-container">
+    <div id="messages"></div>
+    <form class="chat-form" onsubmit="event.preventDefault(); sendMessage();">
+      <input type="text" id="name" placeholder="Nom..." required />
+      <input type="text" id="message" placeholder="Tapez votre message ici..." required />
+      <button type="submit">Envoyer</button>
+    </form>
+  </div>
 
   <script src="https://js.pusher.com/7.2/pusher.min.js"></script>
   <script>
@@ -143,8 +152,10 @@
 
     // Voye nouvo mesaj
     function sendMessage() {
-      const name = document.getElementById("name").value;
-      const message = document.getElementById("message").value;
+      const name = document.getElementById("name").value.trim();
+      const message = document.getElementById("message").value.trim();
+      if (!name || !message) return; // Evite mesaj vid
+
       const timestamp = new Date().toLocaleTimeString();
 
       fetch("/messages/new", {
