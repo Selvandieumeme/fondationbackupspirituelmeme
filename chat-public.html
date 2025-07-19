@@ -120,13 +120,52 @@
 <!-- ░ Contenu Chat Public ░ -->
 <section>
   <h2>💬 Espace de Chat Public en Temps Réel</h2>
-  <div class="chat-container">
-    <div id="messages"></div>
-    <form id="chatForm" class="chat-form">
-      <input type="text" id="messageInput" placeholder="Tapez votre message ici..." required />
-      <button type="submit">Envoyer</button>
-    </form>
-  </div>
+  <div id="messages"></div>
+  <input type="text" id="name" placeholder="Nom..." /><br />
+  <input type="text" id="message" placeholder="Tapez votre message ici..." />
+  <button onclick="sendMessage()">Envoyer</button>
+
+  <script src="https://js.pusher.com/7.2/pusher.min.js"></script>
+  <script>
+    const messagesDiv = document.getElementById("messages");
+
+    function appendMessage(msg) {
+      const p = document.createElement("p");
+      p.innerText = `[${msg.timestamp}] ${msg.name}: ${msg.message}`;
+      messagesDiv.appendChild(p);
+      messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    }
+
+    // Rechaje tout ansyen mesaj yo
+    fetch("/messages/sync")
+      .then(res => res.json())
+      .then(data => data.forEach(appendMessage));
+
+    // Voye nouvo mesaj
+    function sendMessage() {
+      const name = document.getElementById("name").value;
+      const message = document.getElementById("message").value;
+      const timestamp = new Date().toLocaleTimeString();
+
+      fetch("/messages/new", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, message, timestamp }),
+      });
+
+      document.getElementById("message").value = "";
+    }
+
+    // Pusher pou resevwa an tan reyèl
+    const pusher = new Pusher("50534b64465373224fa1", {
+      cluster: "us2",
+    });
+
+    const channel = pusher.subscribe("chat");
+    channel.bind("newMessage", function (data) {
+      appendMessage(data);
+    });
+  </script>
 </section>
 
 <!-- ░ Footer ░ -->
