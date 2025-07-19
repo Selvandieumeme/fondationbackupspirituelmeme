@@ -173,47 +173,5 @@
   © 2025 Fondation Backup Spirituel – Tous droits réservés.
 </footer>
 
-<!-- ░ Script Firebase (modèn) ░ -->
-<script type="module">
-  // 🔑 Konfig Firebase ou a
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-  import { getDatabase, ref, push, onChildAdded } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
-
-  const firebaseConfig = {
-    apiKey: "VOTRE_API_KEY",
-    authDomain: "VOTRE_PROJET.firebaseapp.com",
-    databaseURL: "https://VOTRE_PROJET.firebaseio.com",
-    projectId: "VOTRE_PROJET_ID",
-    storageBucket: "VOTRE_PROJET.appspot.com",
-    messagingSenderId: "VOTRE_ID",
-    appId: "VOTRE_APP_ID"
-  };
-
-  const app = initializeApp(firebaseConfig);
-  const db = getDatabase(app);
-  const chatRef = ref(db, "public-chat");
-
-  const messagesDiv = document.getElementById("messages");
-  const chatForm = document.getElementById("chatForm");
-  const input = document.getElementById("messageInput");
-
-  chatForm.addEventListener("submit", e => {
-    e.preventDefault();
-    const msg = input.value.trim();
-    if (msg) {
-      push(chatRef, { text: msg, timestamp: Date.now() });
-      input.value = "";
-    }
-  });
-
-  onChildAdded(chatRef, snapshot => {
-    const msg = snapshot.val();
-    const p = document.createElement("p");
-    p.textContent = msg.text;
-    messagesDiv.appendChild(p);
-    messagesDiv.scrollTop = messagesDiv.scrollHeight;
-  });
-</script>
-
 </body>
 </html>
