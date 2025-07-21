@@ -145,6 +145,82 @@
     </p>
   </div>
 
+
+<!-- SECTION PRIMAIRE -->
+<h2 style="text-align: center; color: #003366;">Primaire</h2>
+<form action="https://api.web3forms.com/submit" method="POST" id="primaireForm">
+  <input type="hidden" name="access_key" value="34c56edb-5db8-45f4-aa97-376ddc127b4d" />
+  <input type="hidden" name="from_name" value="Formulaire Primaire Fondation" />
+  <input type="hidden" name="redirect" value="https://fondationbackupspirituel.com/success.html" />
+
+  <!-- Chwa ant Elèv ou Pwofese -->
+  <label for="role">Ou se:</label>
+  <select id="role" name="role" required>
+    <option value="">-- Chwazi wòl ou --</option>
+    <option value="Élève">Élève</option>
+    <option value="Professeur">Professeur</option>
+  </select><br><br>
+
+  <!-- Chwa Klas -->
+  <label for="classe">Chwazi Klas:</label>
+  <select id="classe" name="classe" onchange="updateSubjects()" required>
+    <option value="">-- Chwazi klas ou --</option>
+    <option value="3e A.F">3e A.F</option>
+    <option value="4e A.F">4e A.F</option>
+    <option value="5e A.F">5e A.F</option>
+    <option value="6e A.F">6e A.F</option>
+    <option value="7e A.F">7e A.F</option>
+    <option value="8e A.F">8e A.F</option>
+    <option value="9e A.F">9e A.F</option>
+  </select><br><br>
+
+  <!-- Chwa Matyè -->
+  <label for="matiere">Chwazi Matyè:</label>
+  <select id="matiere" name="matiere" required>
+    <option value="">-- Tanpri chwazi klas an premye --</option>
+  </select><br><br>
+
+  <!-- Zòn pou Ekzèsis la -->
+  <label for="exercice">Ekri ekzèsis ou oswa kesyon ou an:</label><br>
+  <textarea id="exercice" name="exercice" rows="6" cols="50" required></textarea><br><br>
+
+  <!-- Bouton Envoyer -->
+  <button type="submit">Envoyer</button>
+</form>
+
+<!-- SCRIPT POU CHWA MATYÈ SELON KLAS -->
+<script>
+  const subjectsPerClass = {
+    "3e A.F": ["Mathématiques", "Français", "SVT", "Histoire", "Géographie", "Physique", "Chimie", "Anglais", "Créole", "Espagnol"],
+    "4e A.F": ["Mathématiques", "Français", "Biologie", "Éducation Civique", "Technologie", "Physique", "Anglais", "Créole", "Espagnol", "Musique"],
+    "5e A.F": ["Mathématiques", "Physique", "Chimie", "Biologie", "Français", "Anglais", "Philo", "Espagnol", "Informatique", "Créole"],
+    "6e A.F": ["Mathématiques", "Physique", "Chimie", "SVT", "Français", "Anglais", "Philo", "Éducation Civique", "Créole", "Espagnol"],
+    "7e A.F": ["Français", "Philosophie", "Histoire", "Géographie", "Créole", "Espagnol", "Anglais", "Économie", "Statistiques", "Éducation Civique"],
+    "8e A.F": ["Français", "Philosophie", "Histoire", "Statistique", "Anglais", "Créole", "Espagnol", "Économie", "Comptabilité", "Droit"],
+    "9e A.F": ["Français", "Philosophie", "Histoire", "Statistique", "Anglais", "Créole", "Espagnol", "Économie", "Comptabilité", "Droit"]
+  };
+
+  function updateSubjects() {
+    const classe = document.getElementById("classe").value;
+    const matiereSelect = document.getElementById("matiere");
+    matiereSelect.innerHTML = "";
+
+    if (subjectsPerClass[classe]) {
+      subjectsPerClass[classe].forEach(subject => {
+        const option = document.createElement("option");
+        option.value = subject;
+        option.textContent = subject;
+        matiereSelect.appendChild(option);
+      });
+    } else {
+      const option = document.createElement("option");
+      option.value = "";
+      option.textContent = "-- Tanpri chwazi klas an premye --";
+      matiereSelect.appendChild(option);
+    }
+  }
+</script>
+
   
   
 <!-- ░░ Contenu Éducation ░░ -->
