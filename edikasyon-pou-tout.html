@@ -216,19 +216,19 @@ function updateForm() {
 }
 
 const subjectsPerClass = {
-  "3e A.F": ["Mathématiques", "Français", "SVT", "Histoire", "Géographie", "Physique", "Chimie", "Anglais", "Créole", "Espagnol"],
-  "4e A.F": ["Mathématiques", "Français", "Biologie", "Éducation Civique", "Technologie", "Physique", "Anglais", "Créole", "Espagnol", "Musique"],
-  "5e A.F": ["Mathématiques", "Physique", "Chimie", "Biologie", "Français", "Anglais", "Philo", "Espagnol", "Informatique", "Créole"],
-  "6e A.F": ["Mathématiques", "Physique", "Chimie", "SVT", "Français", "Anglais", "Philo", "Éducation Civique", "Créole", "Espagnol"],
-  "7e A.F": ["Français", "Philosophie", "Histoire", "Géographie", "Créole", "Espagnol", "Anglais", "Économie", "Statistiques", "Éducation Civique"],
-  "8e A.F": ["Français", "Philosophie", "Histoire", "Statistique", "Anglais", "Créole", "Espagnol", "Économie", "Comptabilité", "Droit"],
-  "9e A.F": ["Français", "Philosophie", "Histoire", "Statistique", "Anglais", "Créole", "Espagnol", "Économie", "Comptabilité", "Droit"],
+  "3e A.F": ["Mathématiques", "Français", "Biologie", "Histoire", "Géographie", "Anglais", "Créole", "Espagnol", "Éducation Civique", "Sciences Sociales"],
+  "4e A.F": ["Mathématiques", "Français", "SVT", "Histoire", "Géographie", "Anglais", "Créole", "Espagnol", "Technologie", "Éducation Civique"],
+  "5e A.F": ["Mathématiques", "Français", "Biologie", "Histoire", "Géographie", "Anglais", "Créole", "Espagnol", "Technologie", "Éducation Civique"],
+  "6e A.F": ["Mathématiques", "Français", "Biologie", "Histoire", "Géographie", "Anglais", "Créole", "Espagnol", "Sciences Sociales", "Technologie"],
+  "7e A.F": ["Mathématiques", "Français", "Biologie", "Histoire", "Géographie", "Anglais", "Créole", "Espagnol", "Éducation Civique", "Technologie"],
+  "8e A.F": ["Mathématiques", "Français", "Biologie", "Histoire", "Géographie", "Anglais", "Créole", "Espagnol", "Technologie", "Éducation Civique"],
+  "9e A.F": ["Mathématiques", "Français", "Biologie", "Histoire", "Géographie", "Anglais", "Créole", "Espagnol", "Technologie", "Éducation Civique"],
   "NS1": ["Mathématiques", "Physique", "Chimie", "Biologie", "Français", "Anglais", "Philosophie", "Créole", "Espagnol", "Informatique"],
   "NS2": ["Mathématiques", "Physique", "SVT", "Chimie", "Français", "Anglais", "Philosophie", "Informatique", "Créole", "Éducation Civique"],
   "NS3": ["Français", "Philosophie", "Histoire", "Géographie", "Créole", "Anglais", "Espagnol", "Économie", "Sociologie", "Psychologie"],
   "NS4": ["Philosophie", "Français", "Histoire", "Sociologie", "Créole", "Anglais", "Espagnol", "Économie", "Sciences Sociales", "Statistiques"]
 };
-
+  
 function updateSubjects() {
   const classe = document.getElementById("classe").value;
   const matiereSelect = document.getElementById("matiere");
