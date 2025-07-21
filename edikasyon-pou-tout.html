@@ -73,16 +73,38 @@
   <h1>FONDATION BACKUP SPIRITUEL</h1>
 </header>
 
-<!-- ░░ Navigation ░░ -->
-<nav>
-  <ul>
-    <li><a href="index.html">Accueil</a></li>
-    <li><a href="Qui-sommes-nous.html">Qui sommes‑nous</a></li>
-    <li><a href="Parrainez-nous.html">Parrainez‑nous</a></li>
-    <li><a href="Notre-ecole-d'informatique.html">Notre École d'Info.</a></li>
-    <li><a href="Contact.html">Contact</a></li>
-  </ul>
-</nav>
+ <!-- ░ Navigation ░ -->
+  <nav>
+    <ul>
+      <li><a href="index.html" class="active">Accueil</a></li>
+      <li><a href="conference-live-fobas.html">Live FOBAS</a></li>
+      <li><a href="aides-moi-prier.html">Aides-moi prier</a></li>
+      <li><a href="vendre-ou-acheter.html">Acheter/vendre vos Produits</a></li>
+      <li><a href="soumet-projet.html">Votre Projet Ici</a></li>
+      <li><a href="eglises-nord-ouest-haiti.html">Églises en Action</a></li>
+
+      <li class="dropdown">
+        <a href="#">Autres ▾</a>
+        <ul class="dropdown-content">
+          <li><a href="edikasyon-pou-tout.html">Edikasyon pou nou tout</a></li>
+          <li><a href="Nos-ambassadeurs.html">Visitez nos Ambassadeurs</a></li>
+          <li><a href="Notre-ecole-d'informatique.html">Notre&nbsp;École&nbsp;d'Info.</a></li>
+          <li><a href="Contact.html">Contact</a></li>
+          <li><a href="Qui-sommes-nous.html">Qui sommes‑nous</a></li>
+          <li><a href="Parrainez-nous.html">Parrainez‑nous</a></li>
+          <li><a href="suivi-ambassadeurs.html">Suivi Ambassadeurs</a></li>
+          <li><a href="Actualites.html">Actualités</a></li>
+          <li><a href="Blagues-et-histoires.html">Blagues & Histoires</a></li>
+          <li><a href="Notre-programme-d'alphabetisation.html">Notre&nbsp;Prog.&nbsp;d'Alphabetisation</a></li>
+          <li><a href="Emission-Backup-Spirituel.html">Émission Backup Spirituel</a></li>
+          <li><a href="Faire-un-don.html">Faire un don</a></li>
+          <li><a href="Nos-actions.html">Nos actions (détail)</a></li>
+          <li><a href="Politique-de-confidentialite.html">Politique de confidentialité</a></li>
+          <li><a href="jeux-fobas.html">Jouez avec FOBAS</a></li>
+        </ul>
+      </li>
+    </ul>
+  </nav>
 
 
 div style="text-align: justify; color: black; font-size: 18px; margin-bottom: 20px;">
@@ -138,11 +160,12 @@ div style="text-align: justify; color: black; font-size: 18px; margin-bottom: 20
       <select id="classe" name="Klas" onchange="updateSubjects()" required>
         <option value="">-- Chwazi klas --</option>
         <option value="3eA">3e A</option>
-        <option value="3eF">3e F</option>
-        <option value="S1">S1</option>
-        <option value="S2">S2</option>
-        <option value="R1">R1</option>
-        <option value="R2">R2</option>
+        <option value="4eA">4e A</option>
+        <option value="5eA">5e A</option>
+        <option value="6eA">6e A</option>
+        <option value="7eA">7e A</option>
+        <option value="8eA">8e A</option>
+        <option value="9eA">9e A</option>
         <option value="NS1">NS1</option>
         <option value="NS2">NS2</option>
         <option value="NS3">NS3</option>
@@ -186,15 +209,16 @@ function updateForm() {
 }
 
 const subjectsPerClass = {
-  "3eA": ["Mathématiques", "Français", "SVT", "Histoire", "Géographie", "Physique", "Chimie", "Anglais", "Créole", "Espagnol"],
-  "3eF": ["Mathématiques", "Français", "Biologie", "Éducation Civique", "Technologie", "Physique", "Anglais", "Créole", "Espagnol", "Musique"],
-  "S1": ["Mathématiques", "Physique", "Chimie", "Biologie", "Français", "Anglais", "Philo", "Espagnol", "Informatique", "Créole"],
-  "S2": ["Mathématiques", "Physique", "Chimie", "SVT", "Français", "Anglais", "Philo", "Éducation Civique", "Créole", "Espagnol"],
-  "R1": ["Français", "Philosophie", "Histoire", "Géographie", "Créole", "Espagnol", "Anglais", "Économie", "Statistiques", "Éducation Civique"],
-  "R2": ["Français", "Philo", "Histoire", "Statistique", "Anglais", "Créole", "Espagnol", "Économie", "Comptabilité", "Droit"],
-  "NS1": ["Mathématiques", "Physique", "Chimie", "Biologie", "Français", "Anglais", "Philo", "Créole", "Espagnol", "Informatique"],
-  "NS2": ["Mathématiques", "Physique", "SVT", "Chimie", "Français", "Anglais", "Philo", "Informatique", "Créole", "Éducation Civique"],
-  "NS3": ["Français", "Philo", "Histoire", "Géographie", "Créole", "Anglais", "Espagnol", "Économie", "Sociologie", "Psychologie"],
+  "3e A.F": ["Mathématiques", "Français", "SVT", "Histoire", "Géographie", "Physique", "Chimie", "Anglais", "Créole", "Espagnol"],
+  "4e A.F": ["Mathématiques", "Français", "Biologie", "Éducation Civique", "Technologie", "Physique", "Anglais", "Créole", "Espagnol", "Musique"],
+  "5e A.F": ["Mathématiques", "Physique", "Chimie", "Biologie", "Français", "Anglais", "Philo", "Espagnol", "Informatique", "Créole"],
+  "6e A.F": ["Mathématiques", "Physique", "Chimie", "SVT", "Français", "Anglais", "Philo", "Éducation Civique", "Créole", "Espagnol"],
+  "7e A.F": ["Français", "Philosophie", "Histoire", "Géographie", "Créole", "Espagnol", "Anglais", "Économie", "Statistiques", "Éducation Civique"],
+  "8e A.F": ["Français", "Philo", "Histoire", "Statistique", "Anglais", "Créole", "Espagnol", "Économie", "Comptabilité", "Droit"],
+  "9e A.F": ["Français", "Philo", "Histoire", "Statistique", "Anglais", "Créole", "Espagnol", "Économie", "Comptabilité", "Droit"],
+  "NS1": ["Mathématiques", "Physique", "Chimie", "Biologie", "Français", "Anglais", "Philosophie", "Créole", "Espagnol", "Informatique"],
+  "NS2": ["Mathématiques", "Physique", "SVT", "Chimie", "Français", "Anglais", "Philosophie", "Informatique", "Créole", "Éducation Civique"],
+  "NS3": ["Français", "Philosophie", "Histoire", "Géographie", "Créole", "Anglais", "Espagnol", "Économie", "Sociologie", "Psychologie"],
   "NS4": ["Philosophie", "Français", "Histoire", "Sociologie", "Créole", "Anglais", "Espagnol", "Économie", "Sciences Sociales", "Statistiques"]
 };
 
