@@ -145,7 +145,7 @@
     </p>
   </div>
 
-
+  
 <!-- SECTION PRIMAIRE -->
 <h2 style="text-align: center; color: #003366;">Primaire</h2>
 
@@ -157,7 +157,19 @@
 <form action="https://api.web3forms.com/submit" method="POST" id="primaireForm">
   <input type="hidden" name="access_key" value="34c56edb-5db8-45f4-aa97-376ddc127b4d" />
   <input type="hidden" name="from_name" value="Formulaire Primaire Fondation" />
-  <!-- retire sa ki t ap redirije paj la -->
+
+  <!-- Chan ou kapab modifye -->
+  <label>Nom :</label><br>
+  <input type="text" name="name" required><br><br>
+
+  <label>Email :</label><br>
+  <input type="email" name="email" required><br><br>
+
+  <label>Message :</label><br>
+  <textarea name="message" rows="4" required></textarea><br><br>
+
+  <!-- Bouton envoye -->
+  <button type="submit">Envoyer</button>
 </form>
 
 <script>
@@ -186,6 +198,7 @@
     });
   });
 </script>
+
 
   
   <!-- Chwa ant Elèv ou Pwofese -->
