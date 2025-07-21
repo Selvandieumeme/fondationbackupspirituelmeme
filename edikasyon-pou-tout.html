@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+  <title>Chat Public – Fondation Backup Spirituel</title>
+
+  <!-- Google Ads -->
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7462273633598843" crossorigin="anonymous"></script>
+
+  <!-- Styles globaux Fondation -->
+  <style>
+    :root{--bleu:#003366;--bleu-clair:#0055aa;--jaune:#ffcc00;--gris:#f5f7fa;--maxw:1100px}
+    *{box-sizing:border-box;margin:0;padding:0;font-family:Arial,Helvetica,sans-serif}
+    body{background:#fff;color:#333;line-height:1.6}
+    a{text-decoration:none;color:inherit}
+    header{background:var(--bleu);color:#fff;text-align:center;padding:18px 10px}
+    header img{height:85px}
+    header h1{margin-top:6px;font-size:2rem;font-weight:700}
+    nav{background:var(--jaune);font-weight:bold}
+    nav ul{display:flex;flex-wrap:wrap;justify-content:center;gap:12px;list-style:none;padding:10px;white-space:nowrap}
+    nav a{padding:10px 16px;border-radius:4px;color:var(--bleu);transition:.25s}
+    nav a:hover,nav a.active{background:var(--bleu);color:#fff}
+    li{position:relative}
+    .dropdown-content{display:none;position:absolute;top:100%;left:0;background:var(--bleu);min-width:220px;border-radius:4px;z-index:99}
+    .dropdown-content a{display:block;padding:10px 14px;color:#fff}
+    .dropdown-content a:hover{background:var(--bleu-clair)}
+    li.dropdown:hover .dropdown-content{display:block}
+    section{max-width:var(--maxw);margin:auto;padding:50px 15px}
+    h2{color:var(--bleu);text-align:center;margin-bottom:28px;font-size:2rem}
+    footer{background:var(--bleu);color:#fff;text-align:center;padding:18px 10px;margin-top:60px}
+
+    /* Zone Chat */
+    .chat-container {
+      max-width: 700px;
+      margin: 0 auto;
+      background: var(--gris);
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    #messages {
+      border: 1px solid #ccc;
+      padding: 15px;
+      min-height: 200px;
+      max-height: 400px;
+      overflow-y: auto;
+      background: #fff;
+      border-radius: 6px;
+      margin-bottom: 20px;
+      white-space: pre-wrap;
+    }
+    #messages p {
+      margin-bottom: 10px;
+    }
+    .chat-form input[type="text"] {
+      width: 100%;
+      padding: 12px;
+      font-size: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      margin-bottom: 12px;
+      box-sizing: border-box;
+    }
+    .chat-form button {
+      width: 100%;
+      padding: 14px;
+      font-size: 1rem;
+      background-color: var(--bleu);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: background-color 0.3s ease;
+    }
+    .chat-form button:hover {
+      background-color: var(--bleu-clair);
+    }
+
+    @media(max-width:700px){
+      header h1{font-size:1.5rem}
+      nav ul{gap:6px}
+    }
+  </style>
+</head>
+
+<body>
+
+<!-- ░░ Header ░░ -->
+<header>
+  <img src="logofobas.png" alt="Logo Fondation">
+  <h1>FONDATION BACKUP SPIRITUEL</h1>
+</header>
+
+<!-- ░ Navigation ░ -->
+<nav>
+  <ul>
+    <li><a href="index.html">Accueil</a></li>
+    <li><a href="Qui-sommes-nous.html">Qui sommes‑nous</a></li>
+    <li><a href="Parrainez-nous.html">Parrainez‑nous</a></li>
+    <li><a href="suivi-ambassadeurs.html">Suivi Ambassadeurs</a></li>
+    <li><a href="soumet-projet.html">Votre Projet Ici</a></li>
+    <li><a href="eglises-nord-ouest-haiti.html">Églises en Action</a></li>
+    <li class="dropdown">
+      <a href="#">Autres ▾</a>
+      <ul class="dropdown-content">
+        <li><a href="Nos-ambassadeurs.html">Visitez nos Ambassadeurs</a></li>
+        <li><a href="Notre-ecole-d'informatique.html">Notre École d'Info.</a></li>
+        <li><a href="Contact.html">Contact</a></li>
+        <li><a href="Actualites.html">Actualités</a></li>
+        <li><a href="Blagues-et-histoires.html">Blagues & Histoires</a></li>
+        <li><a href="Notre-programme-d'alphabetisation.html">Prog. d'Alphabétisation</a></li>
+        <li><a href="Emission-Backup-Spirituel.html">Émission Backup Spirituel</a></li>
+        <li><a href="Faire-un-don.html">Faire un don</a></li>
+        <li><a href="Nos-actions.html">Nos actions</a></li>
+        <li><a href="Politique-de-confidentialite.html">Politique de confidentialité</a></li>
+        <li><a href="jeux-fobas.html">Jouez avec FOBAS</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+
+<!-- ░░ Zone Chat + Web3Forms ░░ -->
+<section>
+  <h2>Zone de Chat Public</h2>
+  <div class="chat-container">
+    <form class="chat-form" action="https://api.web3forms.com/submit" method="POST">
+      <input type="hidden" name="access_key" value="34c56edb-5db8-45f4-aa97-376ddc127b4d">
+      <input type="hidden" name="subject" value="Nouveau message du Chat Public FOBAS">
+      <input type="hidden" name="from_name" value="Chat Public FOBAS">
+      <input type="text" name="name" placeholder="Votre nom" required>
+      <input type="text" name="message" placeholder="Votre message public" required>
+      <button type="submit">Envoyer le message</button>
+    </form>
+  </div>
+</section>
+
+<!-- ░░ Footer ░░ -->
+<footer>
+  <p>&copy; 2025 Fondation Backup Spirituel – Tous droits réservés.</p>
+</footer>
+</body>
+</html>
