@@ -148,11 +148,46 @@
 
 <!-- SECTION PRIMAIRE -->
 <h2 style="text-align: center; color: #003366;">Primaire</h2>
+
+<!-- Mesaj konfimasyon (kache okòmansman) -->
+<div id="confirmationMessage" style="display: none; color: green; text-align: center; margin-bottom: 10px;">
+  Votre message a été envoyé avec succès.
+</div>
+
 <form action="https://api.web3forms.com/submit" method="POST" id="primaireForm">
   <input type="hidden" name="access_key" value="34c56edb-5db8-45f4-aa97-376ddc127b4d" />
   <input type="hidden" name="from_name" value="Formulaire Primaire Fondation" />
-  <input type="hidden" name="redirect" value="https://fondationbackupspirituel.com/success.html" />
+  <!-- retire sa ki t ap redirije paj la -->
+</form>
 
+<script>
+  const form = document.getElementById('primaireForm');
+  const confirmationMessage = document.getElementById('confirmationMessage');
+
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+
+    const formData = new FormData(form);
+
+    fetch("https://api.web3forms.com/submit", {
+      method: "POST",
+      body: formData
+    })
+    .then(response => {
+      if (response.ok) {
+        form.reset();
+        confirmationMessage.style.display = "block";
+      } else {
+        alert("Erè pandan ou t ap voye mesaj la.");
+      }
+    })
+    .catch(() => {
+      alert("Erè rezo oswa serve.");
+    });
+  });
+</script>
+
+  
   <!-- Chwa ant Elèv ou Pwofese -->
   <label for="role">Ou se:</label>
   <select id="role" name="role" required>
