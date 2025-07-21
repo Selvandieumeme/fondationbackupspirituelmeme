@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1.0" />
-  <title>Chat Public – Fondation Backup Spirituel</title>
+  <title>Éducation – Fondation Backup Spirituel</title>
 
   <!-- Google Ads -->
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7462273633598843" crossorigin="anonymous"></script>
@@ -29,41 +29,26 @@
     section{max-width:var(--maxw);margin:auto;padding:50px 15px}
     h2{color:var(--bleu);text-align:center;margin-bottom:28px;font-size:2rem}
     footer{background:var(--bleu);color:#fff;text-align:center;padding:18px 10px;margin-top:60px}
-
-    /* Zone Chat */
-    .chat-container {
+    form {
       max-width: 700px;
-      margin: 0 auto;
+      margin: auto;
       background: var(--gris);
       padding: 20px;
       border-radius: 10px;
       box-shadow: 0 0 10px rgba(0,0,0,0.1);
     }
-    #messages {
-      border: 1px solid #ccc;
-      padding: 15px;
-      min-height: 200px;
-      max-height: 400px;
-      overflow-y: auto;
-      background: #fff;
-      border-radius: 6px;
-      margin-bottom: 20px;
-      white-space: pre-wrap;
-    }
-    #messages p {
-      margin-bottom: 10px;
-    }
-    .chat-form input[type="text"] {
+    label, select, textarea, input {
+      display: block;
       width: 100%;
-      padding: 12px;
-      font-size: 1rem;
-      border: 1px solid #ccc;
-      border-radius: 6px;
       margin-bottom: 12px;
-      box-sizing: border-box;
+      font-size: 1rem;
     }
-    .chat-form button {
-      width: 100%;
+    select, textarea, input[type="text"] {
+      padding: 10px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+    button {
       padding: 14px;
       font-size: 1rem;
       background-color: var(--bleu);
@@ -74,13 +59,8 @@
       font-weight: bold;
       transition: background-color 0.3s ease;
     }
-    .chat-form button:hover {
+    button:hover {
       background-color: var(--bleu-clair);
-    }
-
-    @media(max-width:700px){
-      header h1{font-size:1.5rem}
-      nav ul{gap:6px}
     }
   </style>
 </head>
@@ -93,86 +73,82 @@
   <h1>FONDATION BACKUP SPIRITUEL</h1>
 </header>
 
-<!-- ░ Navigation ░ -->
+<!-- ░░ Navigation ░░ -->
 <nav>
   <ul>
     <li><a href="index.html">Accueil</a></li>
     <li><a href="Qui-sommes-nous.html">Qui sommes‑nous</a></li>
     <li><a href="Parrainez-nous.html">Parrainez‑nous</a></li>
-    <li><a href="suivi-ambassadeurs.html">Suivi Ambassadeurs</a></li>
-    <li><a href="soumet-projet.html">Votre Projet Ici</a></li>
-    <li><a href="eglises-nord-ouest-haiti.html">Églises en Action</a></li>
-    <li class="dropdown">
-      <a href="#">Autres ▾</a>
-      <ul class="dropdown-content">
-        <li><a href="Nos-ambassadeurs.html">Visitez nos Ambassadeurs</a></li>
-        <li><a href="Notre-ecole-d'informatique.html">Notre École d'Info.</a></li>
-        <li><a href="Contact.html">Contact</a></li>
-        <li><a href="Actualites.html">Actualités</a></li>
-        <li><a href="Blagues-et-histoires.html">Blagues & Histoires</a></li>
-        <li><a href="Notre-programme-d'alphabetisation.html">Prog. d'Alphabétisation</a></li>
-        <li><a href="Emission-Backup-Spirituel.html">Émission Backup Spirituel</a></li>
-        <li><a href="Faire-un-don.html">Faire un don</a></li>
-        <li><a href="Nos-actions.html">Nos actions</a></li>
-        <li><a href="Politique-de-confidentialite.html">Politique de confidentialité</a></li>
-        <li><a href="jeux-fobas.html">Jouez avec FOBAS</a></li>
-      </ul>
-    </li>
+    <li><a href="Notre-ecole-d'informatique.html">Notre École d'Info.</a></li>
+    <li><a href="Contact.html">Contact</a></li>
   </ul>
 </nav>
 
-<h2>Fè pati de solisyon an</h2>
-<form id="eduForm">
-  <label for="role">Mwen se:</label>
-  <select id="role" name="role" onchange="updateForm()">
-    <option value="">-- Chwazi wòl ou --</option>
-    <option value="elev">Elèv</option>
-    <option value="prof">Pwofesè</option>
-  </select>
+<!-- ░░ Contenu Éducation ░░ -->
+<section>
+  <h2>Fè pati de solisyon an</h2>
+  <form action="https://api.web3forms.com/submit" method="POST">
+    <input type="hidden" name="access_key" value="votre_cle_api_web3form_la">
 
-  <div id="commonFields" style="display: none;">
-    <label for="classe">Chwazi Klas ou:</label>
-    <select id="classe" name="classe" onchange="updateSubjects()" required>
-      <option value="">-- Chwazi klas --</option>
-      <option value="3eA">3e A</option>
-      <option value="3eF">3e F</option>
-      <option value="S1">S1</option>
-      <option value="S2">S2</option>
-      <option value="R1">R1</option>
-      <option value="R2">R2</option>
-      <option value="NS1">NS1</option>
-      <option value="NS2">NS2</option>
-      <option value="NS3">NS3</option>
-      <option value="NS4">NS4 (Philo)</option>
+    <input type="hidden" name="redirect" value="https://fondationbackupspirituel.com/merci.html">
+
+    <label for="role">Mwen se:</label>
+    <select id="role" name="Wòl" onchange="updateForm()" required>
+      <option value="">-- Chwazi wòl ou --</option>
+      <option value="Elèv">Elèv</option>
+      <option value="Pwofesè">Pwofesè</option>
     </select>
 
-    <label for="matiere">Chwazi Matyè ou:</label>
-    <select id="matiere" name="matiere" required>
-      <option value="">-- Chwazi matyè --</option>
-    </select>
-  </div>
+    <div id="commonFields" style="display: none;">
+      <label for="classe">Chwazi Klas ou:</label>
+      <select id="classe" name="Klas" onchange="updateSubjects()" required>
+        <option value="">-- Chwazi klas --</option>
+        <option value="3eA">3e A</option>
+        <option value="3eF">3e F</option>
+        <option value="S1">S1</option>
+        <option value="S2">S2</option>
+        <option value="R1">R1</option>
+        <option value="R2">R2</option>
+        <option value="NS1">NS1</option>
+        <option value="NS2">NS2</option>
+        <option value="NS3">NS3</option>
+        <option value="NS4">NS4 (Philo)</option>
+      </select>
 
-  <div id="elevFields" style="display: none;">
-    <label for="question">Kesyon oswa egzèsis ou pa konprann:</label>
-    <textarea id="question" name="question" rows="4"></textarea>
-  </div>
+      <label for="matiere">Chwazi Matyè ou:</label>
+      <select id="matiere" name="Matière" required>
+        <option value="">-- Chwazi matyè --</option>
+      </select>
+    </div>
 
-  <div id="profFields" style="display: none;">
-    <label for="dispo">Orè ou dispo pou ede (eg: Dimanch 2PM):</label>
-    <input type="text" id="dispo" name="dispo" />
-    <label for="solution">Repons oswa egzanp solisyon pou ede:</label>
-    <textarea id="solution" name="solution" rows="4"></textarea>
-  </div>
+    <div id="elevFields" style="display: none;">
+      <label for="question">Kesyon oswa egzèsis ou pa konprann:</label>
+      <textarea id="question" name="Kesyon_Elèv" rows="4"></textarea>
+    </div>
 
-  <button type="submit">Voye</button>
-</form>
+    <div id="profFields" style="display: none;">
+      <label for="dispo">Orè ou dispo pou ede (eg: Dimanch 2PM):</label>
+      <input type="text" id="dispo" name="Orè_Pwofesè" />
+      <label for="solution">Repons oswa egzanp solisyon pou ede:</label>
+      <textarea id="solution" name="Solisyon_Pwofesè" rows="4"></textarea>
+    </div>
 
+    <button type="submit">Voye</button>
+  </form>
+</section>
+
+<!-- ░░ Footer ░░ -->
+<footer>
+  <p>&copy; 2025 Fondation Backup Spirituel – Tous droits réservés.</p>
+</footer>
+
+<!-- ░░ Script pou interaktivite ░░ -->
 <script>
 function updateForm() {
   const role = document.getElementById("role").value;
   document.getElementById("commonFields").style.display = role ? "block" : "none";
-  document.getElementById("elevFields").style.display = role === "elev" ? "block" : "none";
-  document.getElementById("profFields").style.display = role === "prof" ? "block" : "none";
+  document.getElementById("elevFields").style.display = role === "Elèv" ? "block" : "none";
+  document.getElementById("profFields").style.display = role === "Pwofesè" ? "block" : "none";
 }
 
 const subjectsPerClass = {
@@ -204,9 +180,5 @@ function updateSubjects() {
 }
 </script>
 
-<!-- ░░ Footer ░░ -->
-<footer>
-  <p>&copy; 2025 Fondation Backup Spirituel – Tous droits réservés.</p>
-</footer>
 </body>
 </html>
