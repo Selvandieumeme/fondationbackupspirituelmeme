@@ -253,13 +253,6 @@ function updateForm() {
 }
 
 const subjectsPerClass = {
-  "3e A.F": ["Mathématiques", "Français", "Biologie", "Histoire", "Géographie", "Anglais", "Créole", "Espagnol", "Éducation Civique", "Sciences Sociales"],
-  "4e A.F": ["Mathématiques", "Français", "SVT", "Histoire", "Géographie", "Anglais", "Créole", "Espagnol", "Technologie", "Éducation Civique"],
-  "5e A.F": ["Mathématiques", "Français", "Biologie", "Histoire", "Géographie", "Anglais", "Créole", "Espagnol", "Technologie", "Éducation Civique"],
-  "6e A.F": ["Mathématiques", "Français", "Biologie", "Histoire", "Géographie", "Anglais", "Créole", "Espagnol", "Sciences Sociales", "Technologie"],
-  "7e A.F": ["Mathématiques", "Français", "Biologie", "Histoire", "Géographie", "Anglais", "Créole", "Espagnol", "Éducation Civique", "Technologie"],
-  "8e A.F": ["Mathématiques", "Français", "Biologie", "Histoire", "Géographie", "Anglais", "Créole", "Espagnol", "Technologie", "Éducation Civique"],
-  "9e A.F": ["Mathématiques", "Français", "Biologie", "Histoire", "Géographie", "Anglais", "Créole", "Espagnol", "Technologie", "Éducation Civique"],
   "NS1": ["Mathématiques", "Physique", "Chimie", "Biologie", "Français", "Anglais", "Philosophie", "Créole", "Espagnol", "Informatique"],
   "NS2": ["Mathématiques", "Physique", "SVT", "Chimie", "Français", "Anglais", "Philosophie", "Informatique", "Créole", "Éducation Civique"],
   "NS3": ["Français", "Philosophie", "Histoire", "Géographie", "Créole", "Anglais", "Espagnol", "Économie", "Sociologie", "Psychologie"],
@@ -282,5 +275,47 @@ function updateSubjects() {
 }
 </script>
 
+const subjectsPerClass = {
+    "3e A.F": ["Mathématiques", "Français", "SVT", "Histoire", "Géographie", "Physique", "Chimie", "Anglais", "Créole", "Espagnol"],
+    "4e A.F": ["Mathématiques", "Français", "Biologie", "Éducation Civique", "Technologie", "Physique", "Anglais", "Créole", "Espagnol", "Musique"],
+    "5e A.F": ["Mathématiques", "Physique", "Chimie", "Biologie", "Français", "Anglais", "Éducation Civique", "Espagnol", "Informatique", "Créole"],
+    "6e A.F": ["Mathématiques", "Physique", "Chimie", "SVT", "Français", "Anglais", "Philosophie", "Éducation Civique", "Créole", "Espagnol"],
+    "7e A.F": ["Français", "Philosophie", "Histoire", "Géographie", "Créole", "Espagnol", "Anglais", "Économie", "Statistiques", "Éducation Civique"],
+    "8e A.F": ["Français", "Philosophie", "Histoire", "Statistiques", "Anglais", "Créole", "Espagnol", "Économie", "Comptabilité", "Droit"],
+    "9e A.F": ["Français", "Philosophie", "Histoire", "Statistiques", "Anglais", "Créole", "Espagnol", "Économie", "Comptabilité", "Droit"]
+  };
+
+  const dropdownContainer = document.getElementById('dropdowns');
+
+  for (let className in subjectsPerClass) {
+    const block = document.createElement('div');
+    block.className = 'select-block';
+
+    const label = document.createElement('label');
+    label.innerText = `Klas ${className}`;
+    block.appendChild(label);
+
+    const select = document.createElement('select');
+    select.name = `matiere-${className}`;
+
+    const defaultOption = document.createElement('option');
+    defaultOption.value = "";
+    defaultOption.innerText = "Chwazi yon matyè...";
+    defaultOption.disabled = true;
+    defaultOption.selected = true;
+    select.appendChild(defaultOption);
+
+    subjectsPerClass[className].forEach(subject => {
+      const option = document.createElement('option');
+      option.value = subject;
+      option.innerText = subject;
+      select.appendChild(option);
+    });
+
+    block.appendChild(select);
+    dropdownContainer.appendChild(block);
+  }
+</script>
+  
 </body>
 </html>
