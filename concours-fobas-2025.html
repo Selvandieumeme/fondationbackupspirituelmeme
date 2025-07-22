@@ -1,166 +1,77 @@
 <!DOCTYPE html>
-<html lang="ht">
+<html lang="fr">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Concours Fobas 2025 - Fondation Backup Spirituel</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+  <title>FONDATION BACKUP SPIRITUEL</title>
 
-  <script>
-    let userAuthorized = false;
-    let voteSubmitted = false;
+  <!-- Google Ads -->
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7462273633598843" crossorigin="anonymous"></script>
 
-    function authorizeAfterAdClick() {
-      userAuthorized = true;
-      localStorage.setItem("adClick", "true");
-      localStorage.setItem("adClickTime", Date.now().toString());
-      document.getElementById("vote-btn").disabled = false;
-    }
-
-    function checkAuthorization() {
-      const adClicked = localStorage.getItem("adClick");
-      const adClickTime = parseInt(localStorage.getItem("adClickTime"));
-      const now = Date.now();
-      if (adClicked === "true" && (now - adClickTime) >= 60000) {
-        userAuthorized = true;
-        document.getElementById("vote-btn").disabled = false;
-      } else {
-        document.getElementById("vote-btn").disabled = true;
-      }
-    }
-
-    window.onload = () => {
-      checkAuthorization();
-    };
-
-    function handleVote(e) {
-      if (!userAuthorized) {
-        e.preventDefault();
-        alert("Ou dwe sipòte atis ou a avan ou vote. Tanpri klike sou yon anons sou paj la, retounen apre 1 minit.");
-        return false;
-      } else {
-        document.getElementById("voteForm").submit();
-        voteSubmitted = true;
-      }
-    }
-
-    function simulateAdClickEvent() {
-      authorizeAfterAdClick();
-    }
-  </script>
-
+  <!-- Styles globaux Fondation -->
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 0;
-      padding: 0;
-      background: #f4f4f4;
-    }
-
-    header {
-      background-color: #003366;
-      color: #fff;
-      padding: 20px 0;
-      text-align: center;
-    }
-
-    .logo {
-      width: 80px;
-      display: block;
-      margin: 0 auto 10px;
-    }
-
-    nav {
-      background-color: #ffcc00;
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      padding: 12px 0;
-      gap: 20px;
-    }
-
-    nav a, .dropdown-btn {
-      color: #003366;
-      font-weight: bold;
-      text-decoration: none;
-      padding: 8px 14px;
-      border-radius: 5px;
-    }
-
-    nav a:hover, .dropdown:hover .dropdown-btn {
-      background-color: #003366;
-      color: #fff;
-    }
-
-    .dropdown {
-      position: relative;
-      display: inline-block;
-    }
-
-    .dropdown-content {
-      display: none;
-      position: absolute;
-      background-color: #ffffff;
-      min-width: 200px;
-      box-shadow: 0px 8px 16px rgba(0,0,0,0.2);
-      z-index: 1;
-    }
-
-    .dropdown-content a {
-      color: #003366;
-      padding: 12px 16px;
-      text-decoration: none;
-      display: block;
-    }
-
-    .dropdown-content a:hover {
-      background-color: #eee;
-    }
-
-    .dropdown:hover .dropdown-content {
-      display: block;
-    }
-
-    .container {
+    :root{--bleu:#003366;--bleu-clair:#0055aa;--jaune:#ffcc00;--gris:#f5f7fa;--maxw:1100px}
+    *{box-sizing:border-box;margin:0;padding:0;font-family:Arial,Helvetica,sans-serif}
+    body{background:#fff;color:#333;line-height:1.6}
+    a{text-decoration:none;color:inherit}
+    header{background:var(--bleu);color:#fff;text-align:center;padding:18px 10px}
+    header img{height:85px}
+    header h1{margin-top:6px;font-size:2rem;font-weight:700}
+    nav{background:var(--jaune);font-weight:bold}
+    nav ul{display:flex;flex-wrap:wrap;justify-content:center;gap:12px;list-style:none;padding:10px;white-space:nowrap}
+    nav a{padding:10px 16px;border-radius:4px;color:var(--bleu);transition:.25s}
+    nav a:hover,nav a.active{background:var(--bleu);color:#fff}
+    li{position:relative}
+    .dropdown-content{display:none;position:absolute;top:100%;left:0;background:var(--bleu);min-width:220px;border-radius:4px;z-index:99}
+    .dropdown-content a{display:block;padding:10px 14px;color:#fff}
+    .dropdown-content a:hover{background:var(--bleu-clair)}
+    li.dropdown:hover .dropdown-content{display:block}
+    section{max-width:var(--maxw);margin:auto;padding:50px 15px}
+    h2{color:var(--bleu);text-align:center;margin-bottom:28px;font-size:2rem}
+    footer{background:var(--bleu);color:#fff;text-align:center;padding:18px 10px;margin-top:60px}
+    form {
       max-width: 700px;
-      margin: 30px auto;
-      background: #fff;
-      padding: 25px;
-      border-radius: 12px;
-      box-shadow: 0 0 15px rgba(0,0,0,0.1);
+      margin: auto;
+      background: var(--gris);
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
     }
-
-    .btn {
-      padding: 10px 20px;
-      border: none;
-      background: #2c7;
-      color: white;
-      font-weight: bold;
-      cursor: pointer;
-      border-radius: 5px;
+    label, select, textarea, input {
+      display: block;
+      width: 100%;
+      margin-bottom: 12px;
+      font-size: 1rem;
     }
-
-    .btn:disabled {
-      background: #aaa;
-      cursor: not-allowed;
+    select, textarea, input[type="text"] {
+      padding: 10px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
     }
-
-    footer {
-      background-color: #003366;
+    button {
+      padding: 14px;
+      font-size: 1rem;
+      background-color: var(--bleu);
       color: #fff;
-      text-align: center;
-      padding: 15px;
-      margin-top: 40px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: background-color 0.3s ease;
+    }
+    button:hover {
+      background-color: var(--bleu-clair);
     }
   </style>
 </head>
 
 <body>
 
-  <header>
-    <img src="logo-fondation.png" alt="Logo Fondation" class="logo">
-    <h1>FONDATION BACKUP SPIRITUEL</h1>
-  </header>
-
+<!-- ░░ Header ░░ -->
+<header>
+  <img src="logofobas.png" alt="Logo Fondation">
+  <h1>FONDATION BACKUP SPIRITUEL</h1>
+</header>
      <!-- ░ Navigation ░ -->
   <nav>
     <ul>
