@@ -308,6 +308,41 @@ function updateSubjects() {
   }
 }
 </script>
+
+
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const form = document.getElementById('primaireForm');
+    const confirmationMessage = document.getElementById('confirmationMessage');
+
+    form.addEventListener("submit", function (e) {
+      e.preventDefault();
+      const formData = new FormData(form);
+
+      fetch("https://api.web3forms.com/submit", {
+        method: "POST",
+        body: formData
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          form.reset();
+          confirmationMessage.style.display = "block";
+          setTimeout(() => {
+            confirmationMessage.style.display = "none";
+          }, 5000);
+        } else {
+          alert("Erè pandan ou t ap voye mesaj la.");
+        }
+      })
+      .catch(() => {
+        alert("Erè rezo oswa serve.");
+      });
+    });
+  });
+</script>
+
   
 </body>
 </html>
