@@ -215,15 +215,16 @@
       method: "POST",
       body: formData
     })
-    .then(response => {
-      if (response.ok) {
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
         form.reset();
         confirmationMessage.style.display = "block";
         setTimeout(() => {
           confirmationMessage.style.display = "none";
         }, 5000);
       } else {
-        alert("Erè pandan ou t ap voye mesaj la.");
+        alert("Erè: " + data.message || "Erè pandan ou t ap voye mesaj la.");
       }
     })
     .catch(() => {
@@ -231,7 +232,6 @@
     });
   });
 </script>
-
 
   
 
