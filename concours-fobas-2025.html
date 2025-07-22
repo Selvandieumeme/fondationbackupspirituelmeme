@@ -1,9 +1,10 @@
 <!DOCTYPE html>
 <html lang="ht">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Concours Fobas 2025 - Fondation Backup Spirituel</title>
+
   <script>
     let userAuthorized = false;
     let voteSubmitted = false;
@@ -50,46 +51,71 @@
   <style>
     body {
       font-family: Arial, sans-serif;
-      background-color: #f4f4f4;
       margin: 0;
       padding: 0;
+      background: #f4f4f4;
     }
-    header, footer {
+
+    header {
       background-color: #003366;
       color: #fff;
-      padding: 15px;
+      padding: 20px 0;
       text-align: center;
     }
+
+    .logo {
+      width: 80px;
+      display: block;
+      margin: 0 auto 10px;
+    }
+
     nav {
       background-color: #ffcc00;
       display: flex;
+      flex-wrap: wrap;
       justify-content: center;
-      padding: 10px;
+      padding: 12px 0;
+      gap: 20px;
     }
+
     nav a, .dropdown-btn {
-      margin: 0 15px;
-      text-decoration: none;
-      color: #000;
+      color: #003366;
       font-weight: bold;
+      text-decoration: none;
+      padding: 8px 14px;
+      border-radius: 5px;
     }
+
+    nav a:hover, .dropdown:hover .dropdown-btn {
+      background-color: #003366;
+      color: #fff;
+    }
+
     .dropdown {
       position: relative;
       display: inline-block;
     }
+
     .dropdown-content {
       display: none;
       position: absolute;
-      background-color: #fff;
-      min-width: 150px;
+      background-color: #ffffff;
+      min-width: 200px;
       box-shadow: 0px 8px 16px rgba(0,0,0,0.2);
       z-index: 1;
     }
+
     .dropdown-content a {
-      color: black;
-      padding: 10px 12px;
+      color: #003366;
+      padding: 12px 16px;
       text-decoration: none;
       display: block;
     }
+
+    .dropdown-content a:hover {
+      background-color: #eee;
+    }
+
     .dropdown:hover .dropdown-content {
       display: block;
     }
@@ -98,10 +124,11 @@
       max-width: 700px;
       margin: 30px auto;
       background: #fff;
-      padding: 20px;
-      border-radius: 10px;
+      padding: 25px;
+      border-radius: 12px;
       box-shadow: 0 0 15px rgba(0,0,0,0.1);
     }
+
     .btn {
       padding: 10px 20px;
       border: none;
@@ -111,21 +138,27 @@
       cursor: pointer;
       border-radius: 5px;
     }
+
     .btn:disabled {
       background: #aaa;
       cursor: not-allowed;
     }
-    .logo {
-      width: 60px;
-      vertical-align: middle;
+
+    footer {
+      background-color: #003366;
+      color: #fff;
+      text-align: center;
+      padding: 15px;
+      margin-top: 40px;
     }
   </style>
 </head>
+
 <body>
 
   <header>
     <img src="logo-fondation.png" alt="Logo Fondation" class="logo">
-    <h1>Fondation Backup Spirituel</h1>
+    <h1>FONDATION BACKUP SPIRITUEL</h1>
   </header>
 
      <!-- ░ Navigation ░ -->
