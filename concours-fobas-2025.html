@@ -106,47 +106,48 @@
     </ul>
   </nav>
 
-  <div class="container">
-    <h2>Vòt Konkou Atis - 8 Out 2025</h2>
+ <div class="container">
+  <h2 style="margin-bottom: 5px;">Vòt Konkou Atis - 8 Out 2025</h2>
 
-    <!-- Zòn pou mete anons Google AdSense -->
-    <div onclick="simulateAdClickEvent()" style="margin-bottom: 20px;">
-      <!-- Ads Google ap parèt la -->
-      <ins class="adsbygoogle"
-           style="display:block"
-           data-ad-client="ca-pub-xxxxxxxxxxxxxxxx"
-           data-ad-slot="xxxxxxxxxx"
-           data-ad-format="auto"
-           data-full-width-responsive="true"></ins>
-    </div>
-
-    <!-- Fòm pou vote atis -->
-    <form id="voteForm" action="https://api.web3forms.com/submit" method="POST" onsubmit="handleVote(event)">
-      <input type="hidden" name="access_key" value="34c56edb-5db8-45f4-aa97-376ddc127b4d">
-      <input type="hidden" name="subject" value="Nouvo Vòt Atis Sou Sit Fondasyon">
-      <input type="hidden" name="from_name" value="Fondation Vote System">
-
-      <label>Non w:</label>
-      <input type="text" name="name" required style="width:100%; padding:10px;"><br><br>
-
-      <label>Chwazi Atis:</label>
-      <select name="artist" required style="width:100%; padding:10px;">
-        <option value="Atis 1">Atis 1</option>
-        <option value="Atis 2">Atis 2</option>
-      </select><br><br>
-
-      <button type="submit" id="vote-btn" class="btn" disabled>Vote pou Atis ou a</button>
-    </form>
+  <!-- Zòn pou mete anons Google AdSense -->
+  <div onclick="simulateAdClickEvent()" style="margin-bottom: 20px;">
+    <!-- Ads Google ap parèt la -->
+    <ins class="adsbygoogle"
+         style="display:block"
+         data-ad-client="ca-pub-xxxxxxxxxxxxxxxx"
+         data-ad-slot="xxxxxxxxxx"
+         data-ad-format="auto"
+         data-full-width-responsive="true"></ins>
   </div>
 
-  <footer>
-    <p>&copy; 2025 Fondation Backup Spirituel - Tout Dwa Rezève</p>
-  </footer>
+  <!-- Fòm pou vote atis -->
+  <form id="voteForm" action="https://api.web3forms.com/submit" method="POST" onsubmit="handleVote(event)">
+    <input type="hidden" name="access_key" value="34c56edb-5db8-45f4-aa97-376ddc127b4d">
+    <input type="hidden" name="subject" value="Nouvo Vòt Atis Sou Sit Fondasyon">
+    <input type="hidden" name="from_name" value="Fondation Vote System">
 
-  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
-  <script>
-    (adsbygoogle = window.adsbygoogle || []).push({});
-  </script>
+    <label>Non w:</label>
+    <input type="text" name="name" required style="width:100%; padding:10px;"><br><br>
+
+    <label>Chwazi Atis:</label>
+    <select name="artist" required style="width:100%; padding:10px;">
+      <option value="Atis 1">Atis 1</option>
+      <option value="Atis 2">Atis 2</option>
+    </select><br><br>
+
+    <button type="submit" id="vote-btn" class="btn" disabled>Vote pou Atis ou a</button>
+  </form>
+</div>
+
+<footer>
+  <p>&copy; 2025 Fondation Backup Spirituel - Tout Dwa Rezève</p>
+</footer>
+
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<script>
+  (adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
 
 </body>
 </html>
