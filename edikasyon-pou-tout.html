@@ -146,10 +146,10 @@
   </div>
 
   
-<!-- SECTION PRIMAIRE + SECONDAIRE -->
-<h2 style="text-align: center; color: #003366;">Primaire & Secondaire</h2>
+<!-- SECTION PRIMAIRE -->
+<h2 style="text-align: center; color: #003366;">Primaire</h2>
 
-<!-- Mesaj konfimasyon (pa modifye li si li gentan mache lakay ou) -->
+<!-- Mesaj konfimasyon (kache okòmansman) -->
 <div id="confirmationMessage" style="display: none; color: green; text-align: center; margin-bottom: 10px;">
   Votre message a été envoyé avec succès.
 </div>
@@ -158,49 +158,103 @@
   <input type="hidden" name="access_key" value="34c56edb-5db8-45f4-aa97-376ddc127b4d" />
   <input type="hidden" name="from_name" value="Formulaire Primaire Fondation" />
 
-  <!-- Chan obligatwa yo -->
-  <label>Nom :</label><br>
-  <input type="text" name="name" required><br><br>
+<script>
+  const form = document.getElementById('primaireForm');
+  const confirmationMessage = document.getElementById('confirmationMessage');
 
-  <label>Email :</label><br>
-  <input type="email" name="email" required><br><br>
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
 
-  <!-- Kisa ou ye (Élève ou Professeur) -->
-  <label>Vous êtes :</label><br>
-  <select name="statut" required>
-    <option value="">-- Choisissez une option --</option>
+    const formData = new FormData(form);
+
+    fetch("https://api.web3forms.com/submit", {
+      method: "POST",
+      body: formData
+    })
+    .then(response => {
+      if (response.ok) {
+        form.reset();
+        confirmationMessage.style.display = "block";
+      } else {
+        alert("Erè pandan ou t ap voye mesaj la.");
+      }
+    })
+    .catch(() => {
+      alert("Erè rezo oswa serve.");
+    });
+  });
+</script>
+
+
+  
+  <!-- Chwa ant Elèv ou Pwofese -->
+  <label for="role">Ou se:</label>
+  <select id="role" name="role" required>
+    <option value="">-- Chwazi wòl ou --</option>
     <option value="Élève">Élève</option>
     <option value="Professeur">Professeur</option>
   </select><br><br>
 
-  <!-- Klas yo -->
-  <label>Classe :</label><br>
-  <select name="classe" required>
-    <option value="">-- Choisissez une classe --</option>
-    <option value="3ème année fondamentale">3ème AF</option>
-    <option value="4ème année fondamentale">4ème AF</option>
-    <option value="5ème année fondamentale">5ème AF</option>
-    <option value="6ème année fondamentale">6ème AF</option>
-    <option value="7ème année fondamentale">7ème AF</option>
-    <option value="8ème année fondamentale">8ème AF</option>
-    <option value="9ème année fondamentale">9ème AF</option>
-    <option value="NS1 (Secondaire 1)">NS1</option>
-    <option value="NS2 (Secondaire 2)">NS2</option>
-    <option value="NS3 (Secondaire 3)">NS3</option>
-    <option value="NS4 (Secondaire 4)">NS4</option>
+  <!-- Chwa Klas -->
+  <label for="classe">Chwazi Klas:</label>
+  <select id="classe" name="classe" onchange="updateSubjects()" required>
+    <option value="">-- Chwazi klas ou --</option>
+    <option value="3e A.F">3e A.F</option>
+    <option value="4e A.F">4e A.F</option>
+    <option value="5e A.F">5e A.F</option>
+    <option value="6e A.F">6e A.F</option>
+    <option value="7e A.F">7e A.F</option>
+    <option value="8e A.F">8e A.F</option>
+    <option value="9e A.F">9e A.F</option>
   </select><br><br>
 
-  <!-- Matières -->
-  <label>10 Matières (écrivez une par ligne ou séparées par des virgules) :</label><br>
-  <textarea name="matieres" rows="6" required placeholder="Mathématiques, Créole, Français, SVT, Physique, Chimie, Histoire, Géographie, Anglais, Informatique..."></textarea><br><br>
+  <!-- Chwa Matyè -->
+  <label for="matiere">Chwazi Matyè:</label>
+  <select id="matiere" name="matiere" required>
+    <option value="">-- Tanpri chwazi klas an premye --</option>
+  </select><br><br>
 
-  <!-- Message / Komantè -->
-  <label>Message ou Remarques :</label><br>
-  <textarea name="message" rows="4" placeholder="Ajoute yon komantè si ou vle..."></textarea><br><br>
+  <!-- Zòn pou Ekzèsis la -->
+  <label for="exercice">Ekri ekzèsis ou oswa kesyon ou an:</label><br>
+  <textarea id="exercice" name="exercice" rows="6" cols="50" required></textarea><br><br>
 
-  <!-- Bouton -->
+  <!-- Bouton Envoyer -->
   <button type="submit">Envoyer</button>
 </form>
+
+<!-- SCRIPT POU CHWA MATYÈ SELON KLAS -->
+<script>
+  const subjectsPerClass = {
+    "3e A.F": ["Mathématiques", "Français", "SVT", "Histoire", "Géographie", "Physique", "Chimie", "Anglais", "Créole", "Espagnol"],
+    "4e A.F": ["Mathématiques", "Français", "Biologie", "Éducation Civique", "Technologie", "Physique", "Anglais", "Créole", "Espagnol", "Musique"],
+    "5e A.F": ["Mathématiques", "Physique", "Chimie", "Biologie", "Français", "Anglais", "Philo", "Espagnol", "Informatique", "Créole"],
+    "6e A.F": ["Mathématiques", "Physique", "Chimie", "SVT", "Français", "Anglais", "Philo", "Éducation Civique", "Créole", "Espagnol"],
+    "7e A.F": ["Français", "Philosophie", "Histoire", "Géographie", "Créole", "Espagnol", "Anglais", "Économie", "Statistiques", "Éducation Civique"],
+    "8e A.F": ["Français", "Philosophie", "Histoire", "Statistique", "Anglais", "Créole", "Espagnol", "Économie", "Comptabilité", "Droit"],
+    "9e A.F": ["Français", "Philosophie", "Histoire", "Statistique", "Anglais", "Créole", "Espagnol", "Économie", "Comptabilité", "Droit"]
+  };
+
+  function updateSubjects() {
+    const classe = document.getElementById("classe").value;
+    const matiereSelect = document.getElementById("matiere");
+    matiereSelect.innerHTML = "";
+
+    if (subjectsPerClass[classe]) {
+      subjectsPerClass[classe].forEach(subject => {
+        const option = document.createElement("option");
+        option.value = subject;
+        option.textContent = subject;
+        matiereSelect.appendChild(option);
+      });
+    } else {
+      const option = document.createElement("option");
+      option.value = "";
+      option.textContent = "-- Tanpri chwazi klas an premye --";
+      matiereSelect.appendChild(option);
+    }
+  }
+</script>
+
 
   
 
