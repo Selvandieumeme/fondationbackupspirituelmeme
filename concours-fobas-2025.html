@@ -340,6 +340,119 @@
   });
 })();
 </script>
+
+
+
+
   
+  <script>
+  const form = document.getElementById("voteForm");
+  const atisID = form.querySelector("input[name='artist_id']").value;
+
+  const ipKey = `voted_${atisID}`;
+  const hasVoted = localStorage.getItem(ipKey);
+
+  if (hasVoted) {
+    document.getElementById("vote-btn").disabled = true;
+    alert("Ou gentan vote atis sa deja nan match sa.");
+  }
+
+  form.addEventListener("submit", () => {
+    localStorage.setItem(ipKey, "true");
+  });
+</script>
+
+
+
+  <script>
+  async function handleVote(e) {
+    e.preventDefault();
+
+    if (!hasClickedAd) {
+      alert("Ou poko sipote atis ou a");
+      return;
+    }
+
+    const form = document.getElementById("voteForm");
+    const formData = new FormData(form);
+
+    // ✅ Ranmasse IP & peyi
+    let ip = "N/A", country = "N/A";
+    try {
+      const res = await fetch("https://ipapi.co/json");
+      const data = await res.json();
+      ip = data.ip;
+      country = data.country_name;
+    } catch {}
+
+    // ⏱️ Tan sou paj
+    const durationSec = Math.round((Date.now() - window.startVoteTime) / 1000);
+    const userAgent = navigator.userAgent;
+    const page = window.location.pathname;
+    const ref = new URLSearchParams(window.location.search).get("ref") || "Inconnu";
+    const now = new Date().toLocaleString();
+
+    // ✅ Voye notifikasyon sou Web3Forms
+    await fetch("https://api.web3forms.com/submit", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        access_key: "cd9e4473-a66b-4449-93aa-b489c32a7fbd",
+        subject: `✅ Vòt atis Ref: ${ref}`,
+        from_name: "Vote Atis Script",
+        email: "fondationbackupspirituel@gmail.com",
+        message: `
+🎤 Yon moun fè yon vòt pou atis la
+🔗 Referans: ${ref}
+📄 Paj: ${page}
+🌍 Peyi: ${country}
+🌐 IP: ${ip}
+🧭 Navigatè: ${userAgent}
+⏱️ Tan sou paj: ${durationSec} segond
+📆 Dat/Lè: ${now}
+        `.trim()
+      })
+    });
+
+    // ✅ Voye fòm lan (egzanp si ou itilize Web3Forms tou)
+    fetch(form.action, {
+      method: form.method,
+      body: formData,
+      headers: { 'Accept': 'application/json' }
+    }).then(response => {
+      if (response.ok) {
+        alert("Vòt ou an voye avèk siksè.");
+        form.reset();
+        document.getElementById("vote-btn").disabled = true;
+        hasClickedAd = false;
+      } else {
+        alert("Gen yon erè pandan ou tap vote.");
+      }
+    }).catch(() => {
+      alert("Erè rezo. Tanpri tcheke koneksyon ou.");
+    });
+  }
+
+  window.addEventListener("DOMContentLoaded", () => {
+    window.startVoteTime = Date.now(); // Tan ou ouvè paj la
+    document.getElementById("voteForm").addEventListener("submit", handleVote);
+  });
+</script>
+
+
+
+  <script>
+  let hasClickedAd = false;
+
+  document.addEventListener("DOMContentLoaded", function () {
+    const adElements = document.querySelectorAll("[id^='adsense']");
+    adElements.forEach(el => {
+      el.addEventListener("click", () => {
+        hasClickedAd = true;
+        document.getElementById("vote-btn").disabled = false;
+      });
+    });
+  });
+</script>
 </body>
 </html>
