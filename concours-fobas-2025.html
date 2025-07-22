@@ -202,5 +202,62 @@
 </script>
 
 
+
+<script>
+  let hasClickedAd = false;
+
+  // Fonksyon pou detekte klik sou nenpòt anons Adsense (ID espesifik yo mete nan paj la)
+  function registerAdClick() {
+    hasClickedAd = true;
+    document.getElementById("vote-btn").disabled = false;
+  }
+
+  // Script pou detekte klik sou ID yo
+  document.addEventListener("DOMContentLoaded", function () {
+    const adElements = document.querySelectorAll("[id^='adsense']");
+    adElements.forEach(function (el) {
+      el.addEventListener("click", registerAdClick);
+    });
+  });
+
+  // Fonksyon pou jere fom vot la
+  function handleVote(e) {
+    if (!hasClickedAd) {
+      e.preventDefault(); // Anpeche voye fòm lan
+      alert("Ou poko sipote atis pa w la");
+    } else {
+      // Kontinye soumèt fòm lan
+      const form = document.getElementById("voteForm");
+      const formData = new FormData(form);
+
+      fetch(form.action, {
+        method: form.method,
+        body: formData,
+        headers: { 'Accept': 'application/json' }
+      })
+        .then(response => {
+          if (response.ok) {
+            const msg = document.createElement("p");
+            msg.textContent = "Votre message a été envoyé avec succès.";
+            msg.style.color = "green";
+            msg.style.marginTop = "15px";
+            form.appendChild(msg);
+            form.reset();
+            document.getElementById("vote-btn").disabled = true;
+            hasClickedAd = false;
+          } else {
+            alert("Gen yon erè pandan ou tap vote. Eseye ankò.");
+          }
+        })
+        .catch(() => {
+          alert("Gen yon erè rezo. Tanpri tcheke koneksyon ou.");
+        });
+
+      e.preventDefault(); // Pa kite navigatè a refresh paj la
+    }
+  }
+</script>
+
+  
 </body>
 </html>
