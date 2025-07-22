@@ -3,12 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Vòt Atis - Fondation Backup Spirituel</title>
+  <title>Concours Fobas 2025 - Fondation Backup Spirituel</title>
   <script>
     let userAuthorized = false;
     let voteSubmitted = false;
 
-    // Fonksyon pou aktive vòt apre klike sou anons
     function authorizeAfterAdClick() {
       userAuthorized = true;
       localStorage.setItem("adClick", "true");
@@ -16,7 +15,6 @@
       document.getElementById("vote-btn").disabled = false;
     }
 
-    // Fonksyon pou verifye si itilizatè deja klike sou anons lan
     function checkAuthorization() {
       const adClicked = localStorage.getItem("adClick");
       const adClickTime = parseInt(localStorage.getItem("adClickTime"));
@@ -33,37 +31,76 @@
       checkAuthorization();
     };
 
-    // Fonksyon pou trete fòm vot la
     function handleVote(e) {
       if (!userAuthorized) {
         e.preventDefault();
         alert("Ou dwe sipòte atis ou a avan ou vote. Tanpri klike sou yon anons sou paj la, retounen apre 1 minit.");
         return false;
       } else {
-        // Vote ap soumèt epi voye pa Web3Forms
         document.getElementById("voteForm").submit();
         voteSubmitted = true;
       }
     }
 
-    // Similasyon klik sou nenpòt anons (tanpri mete li sou tout zòn adsense yo)
     function simulateAdClickEvent() {
       authorizeAfterAdClick();
     }
   </script>
+
   <style>
     body {
       font-family: Arial, sans-serif;
       background-color: #f4f4f4;
-      padding: 20px;
+      margin: 0;
+      padding: 0;
     }
+    header, footer {
+      background-color: #003366;
+      color: #fff;
+      padding: 15px;
+      text-align: center;
+    }
+    nav {
+      background-color: #ffcc00;
+      display: flex;
+      justify-content: center;
+      padding: 10px;
+    }
+    nav a, .dropdown-btn {
+      margin: 0 15px;
+      text-decoration: none;
+      color: #000;
+      font-weight: bold;
+    }
+    .dropdown {
+      position: relative;
+      display: inline-block;
+    }
+    .dropdown-content {
+      display: none;
+      position: absolute;
+      background-color: #fff;
+      min-width: 150px;
+      box-shadow: 0px 8px 16px rgba(0,0,0,0.2);
+      z-index: 1;
+    }
+    .dropdown-content a {
+      color: black;
+      padding: 10px 12px;
+      text-decoration: none;
+      display: block;
+    }
+    .dropdown:hover .dropdown-content {
+      display: block;
+    }
+
     .container {
-      max-width: 600px;
-      margin: auto;
+      max-width: 700px;
+      margin: 30px auto;
       background: #fff;
       padding: 20px;
       border-radius: 10px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      box-shadow: 0 0 15px rgba(0,0,0,0.1);
     }
     .btn {
       padding: 10px 20px;
@@ -78,9 +115,33 @@
       background: #aaa;
       cursor: not-allowed;
     }
+    .logo {
+      width: 60px;
+      vertical-align: middle;
+    }
   </style>
 </head>
 <body>
+
+  <header>
+    <img src="logo-fondation.png" alt="Logo Fondation" class="logo">
+    <h1>Fondation Backup Spirituel</h1>
+  </header>
+
+  <nav>
+    <a href="index.html">Akèy</a>
+    <a href="apropos.html">A Propos</a>
+    <a href="contact.html">Kontak</a>
+    <div class="dropdown">
+      <span class="dropdown-btn">Autres ▾</span>
+      <div class="dropdown-content">
+        <a href="evenements.html">Evènman</a>
+        <a href="projets.html">Projè</a>
+        <a href="concours-fobas-2025.html">Concours Fobas 2025</a>
+      </div>
+    </div>
+  </nav>
+
   <div class="container">
     <h2>Vòt Konkou Atis - 8 Out 2025</h2>
 
@@ -114,9 +175,14 @@
     </form>
   </div>
 
+  <footer>
+    <p>&copy; 2025 Fondation Backup Spirituel - Tout Dwa Rezève</p>
+  </footer>
+
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
   <script>
     (adsbygoogle = window.adsbygoogle || []).push({});
   </script>
+
 </body>
 </html>
