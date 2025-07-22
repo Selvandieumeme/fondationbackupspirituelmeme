@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="ht">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vòt Atis - Fondation Backup Spirituel</title>
+  <script>
+    let userAuthorized = false;
+    let voteSubmitted = false;
+
+    // Fonksyon pou aktive vòt apre klike sou anons
+    function authorizeAfterAdClick() {
+      userAuthorized = true;
+      localStorage.setItem("adClick", "true");
+      localStorage.setItem("adClickTime", Date.now().toString());
+      document.getElementById("vote-btn").disabled = false;
+    }
+
+    // Fonksyon pou verifye si itilizatè deja klike sou anons lan
+    function checkAuthorization() {
+      const adClicked = localStorage.getItem("adClick");
+      const adClickTime = parseInt(localStorage.getItem("adClickTime"));
+      const now = Date.now();
+      if (adClicked === "true" && (now - adClickTime) >= 60000) {
+        userAuthorized = true;
+        document.getElementById("vote-btn").disabled = false;
+      } else {
+        document.getElementById("vote-btn").disabled = true;
+      }
+    }
+
+    window.onload = () => {
+      checkAuthorization();
+    };
+
+    // Fonksyon pou trete fòm vot la
+    function handleVote(e) {
+      if (!userAuthorized) {
+        e.preventDefault();
+        alert("Ou dwe sipòte atis ou a avan ou vote. Tanpri klike sou yon anons sou paj la, retounen apre 1 minit.");
+        return false;
+      } else {
+        // Vote ap soumèt epi voye pa Web3Forms
+        document.getElementById("voteForm").submit();
+        voteSubmitted = true;
+      }
+    }
+
+    // Similasyon klik sou nenpòt anons (tanpri mete li sou tout zòn adsense yo)
+    function simulateAdClickEvent() {
+      authorizeAfterAdClick();
+    }
+  </script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
+      padding: 20px;
+    }
+    .container {
+      max-width: 600px;
+      margin: auto;
+      background: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    .btn {
+      padding: 10px 20px;
+      border: none;
+      background: #2c7;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+      border-radius: 5px;
+    }
+    .btn:disabled {
+      background: #aaa;
+      cursor: not-allowed;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Vòt Konkou Atis - 8 Out 2025</h2>
+
+    <!-- Zòn pou mete anons Google AdSense -->
+    <div onclick="simulateAdClickEvent()" style="margin-bottom: 20px;">
+      <!-- Ads Google ap parèt la -->
+      <ins class="adsbygoogle"
+           style="display:block"
+           data-ad-client="ca-pub-xxxxxxxxxxxxxxxx"
+           data-ad-slot="xxxxxxxxxx"
+           data-ad-format="auto"
+           data-full-width-responsive="true"></ins>
+    </div>
+
+    <!-- Fòm pou vote atis -->
+    <form id="voteForm" action="https://api.web3forms.com/submit" method="POST" onsubmit="handleVote(event)">
+      <input type="hidden" name="access_key" value="34c56edb-5db8-45f4-aa97-376ddc127b4d">
+      <input type="hidden" name="subject" value="Nouvo Vòt Atis Sou Sit Fondasyon">
+      <input type="hidden" name="from_name" value="Fondation Vote System">
+
+      <label>Non w:</label>
+      <input type="text" name="name" required style="width:100%; padding:10px;"><br><br>
+
+      <label>Chwazi Atis:</label>
+      <select name="artist" required style="width:100%; padding:10px;">
+        <option value="Atis 1">Atis 1</option>
+        <option value="Atis 2">Atis 2</option>
+      </select><br><br>
+
+      <button type="submit" id="vote-btn" class="btn" disabled>Vote pou Atis ou a</button>
+    </form>
+  </div>
+
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+  <script>
+    (adsbygoogle = window.adsbygoogle || []).push({});
+  </script>
+</body>
+</html>
