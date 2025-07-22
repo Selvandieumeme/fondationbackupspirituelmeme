@@ -123,24 +123,74 @@
   </p>
 </div><br>
 
-  <!-- Fòm pou vote atis -->
-  <form id="voteForm" action="https://api.web3forms.com/submit" method="POST" onsubmit="handleVote(event)">
-    <input type="hidden" name="access_key" value="34c56edb-5db8-45f4-aa97-376ddc127b4d">
-    <input type="hidden" name="subject" value="Nouvo Vòt Atis Sou Sit Fondasyon">
-    <input type="hidden" name="from_name" value="Fondation Vote System">
-
-    <label>Non w:</label>
-    <input type="text" name="name" required style="width:100%; padding:10px;"><br><br>
-
-    <label>Chwazi Atis:</label>
-    <select name="artist" required style="width:100%; padding:10px;">
-      <option value="Atis 1">Atis 1</option>
-      <option value="Atis 2">Atis 2</option>
-    </select><br><br>
-
-    <button type="submit" id="vote-btn" class="btn" disabled>Vote pou Atis ou a</button>
-  </form>
+ <!-- ░░ ZÒN ANONS ADSENSE KLIKAB ░░ -->
+<div onclick="simulateAdClickEvent()" id="ad-zone" style="margin-bottom: 20px; cursor:pointer;">
+  <ins class="adsbygoogle"
+       style="display:block"
+       data-ad-client="ca-pub-xxxxxxxxxxxxxxxx"
+       data-ad-slot="xxxxxxxxxx"
+       data-ad-format="auto"
+       data-full-width-responsive="true"></ins>
 </div>
+
+<!-- ░░ MESAJ SIKSÈ ░░ -->
+<div id="success-message" style="display:none; color:green; font-weight:bold; margin-top:15px;"></div>
+
+<!-- ░░ FÒM VOT KONKOU ░░ -->
+<form id="voteForm" action="https://api.web3forms.com/submit" method="POST">
+  <input type="hidden" name="access_key" value="34c56edb-5db8-45f4-aa97-376ddc127b4d">
+  <input type="hidden" name="subject" value="Nouvo Vòt Atis Sou Sit Fondasyon">
+  <input type="hidden" name="from_name" value="Fondation Vote System">
+
+  <label>Non w:</label>
+  <input type="text" name="name" required style="width:100%; padding:10px;"><br><br>
+
+  <label>Chwazi Atis:</label>
+  <select name="artist" required style="width:100%; padding:10px;">
+    <option value="Atis 1">Atis 1</option>
+    <option value="Atis 2">Atis 2</option>
+  </select><br><br>
+
+  <button type="submit" id="vote-btn" class="btn" disabled style="opacity:0.6;">Vote pou Atis ou a</button>
+</form>
+
+<!-- ░░ SCRIPT ADSENSE + JS LOGIC ░░ -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<script>
+  // Aktivasyon bouton apre klik sou zòn anons lan
+  function simulateAdClickEvent() {
+    const btn = document.getElementById("vote-btn");
+    btn.disabled = false;
+    btn.style.opacity = "1";
+  }
+
+  // Soumèt fòm ak mesaj siksè
+  const form = document.getElementById("voteForm");
+  form.addEventListener("submit", async function(e) {
+    e.preventDefault();
+
+    const formData = new FormData(form);
+
+    try {
+      const response = await fetch(form.action, {
+        method: "POST",
+        body: formData
+      });
+
+      if (response.ok) {
+        document.getElementById("success-message").innerText = "Votre message a été envoyé avec succès!";
+        document.getElementById("success-message").style.display = "block";
+        form.reset();
+        document.getElementById("vote-btn").disabled = true;
+        document.getElementById("vote-btn").style.opacity = "0.6";
+      } else {
+        alert("Erè pandan ou te ap voye mesaj la. Tanpri eseye ankò.");
+      }
+    } catch (error) {
+      alert("Echèk koneksyon. Tanpri verifye entènèt ou.");
+    }
+  });
+</script>
 
 <footer>
   <p>&copy; 2025 Fondation Backup Spirituel - Tout Dwa Rezève</p>
