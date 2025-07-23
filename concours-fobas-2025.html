@@ -223,6 +223,47 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 </script>
 
+
+
+
+
+  <script>
+  // 1. Kreye bouton "Tounen vote demen"
+  const boutonRetour = document.createElement("button");
+  boutonRetour.innerText = "⏰ Tounen vote demen";
+  boutonRetour.id = "retour-btn";
+  boutonRetour.disabled = true;
+  boutonRetour.style.padding = "10px 15px";
+  boutonRetour.style.marginTop = "15px";
+  boutonRetour.style.backgroundColor = "#888";
+  boutonRetour.style.color = "#fff";
+  boutonRetour.style.border = "none";
+  boutonRetour.style.borderRadius = "5px";
+  boutonRetour.style.cursor = "not-allowed";
+  document.body.appendChild(boutonRetour);
+
+  // 2. Kalkile dat 8h AM demen nan
+  const now = new Date();
+  const relouvriDemain = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 8, 0, 0); // Demen 8h AM
+
+  // 3. Mete yon fonksyon ki tcheke si 8h AM rive
+  function checkActivationTime() {
+    const now = new Date();
+    if (now >= relouvriDemain) {
+      const btn = document.getElementById("retour-btn");
+      if (btn) {
+        btn.disabled = false;
+        btn.style.backgroundColor = "#28a745";
+        btn.style.cursor = "pointer";
+        btn.innerText = "✅ Vote ou ouvè kounya!";
+      }
+    }
+  }
+
+  // 4. Tcheke chak 10 segonn si bouton ka aktive
+  setInterval(checkActivationTime, 10000);
+</script>
+
 <footer style="background-color: #222; color: #fff; padding: 20px 0; text-align: center; font-family: Arial, sans-serif;">
   <div style="max-width: 1000px; margin: auto;">
     <p style="margin: 5px 0;">&copy; 2025 Fondation Backup Spirituel. Tout dwa rezève.</p>
