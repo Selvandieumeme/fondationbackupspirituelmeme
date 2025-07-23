@@ -132,6 +132,12 @@
   <!-- Pa redireksyon sou lòt paj -->
   <input type="hidden" name="_next" value="">
 
+  <!-- Fiks: Vale 10 Pts ki ale ak chak vote -->
+  <input type="hidden" name="pts" value="10 Pts">
+
+  <!-- Hidden field pou mete IP aprè nou detekte li -->
+  <input type="hidden" name="ip" id="ipField">
+
   <h3>Chwazi atis ou vle vote pou li :</h3>
 
   <label>
@@ -142,33 +148,36 @@
   <label>
     <input type="radio" name="vote_pou" value="Rose_Marie">
     Atis 2 - Rose Marie
-  </label><br>
-
-  <label>
-    <input type="radio" name="vote_pou" value="10_Pts">
-    10 Pts
   </label><br><br>
 
-  <!-- Nouvo seksyon pou non peyi moun nan -->
+  <!-- Peyi -->
   <label for="pays">Peyi kote w ap viv:</label><br>
   <input type="text" id="pays" name="peyi" placeholder="Egzanp: Haïti" required><br><br>
 
-  <!-- Nouvo seksyon pou non vil -->
+  <!-- Vil -->
   <label for="ville">Vil kote w ap viv:</label><br>
-  <input type="text" id="ville" name="vil" placeholder="Egzanp: Port-de-Paix" required><br><br>
+  <input type="text" id="ville" name="vil" placeholder="Egzanp: Mare-Rouge" required><br><br>
 
   <button type="submit">Vote</button>
 </form>
 
 <!-- Bwat mesaj siksè -->
 <div id="successMessage" style="display:none; color: green; font-weight: bold; margin-top: 15px;">
-  ✅ Votre message a été envoyé avec succès.
+  ✅ Vote ou a ale avèk siksè. Mèsi anpil!
 </div>
 
 <!-- SCRIPT JAVASCRIPT -->
 <script>
   const voteForm = document.getElementById('voteForm');
   const successMessage = document.getElementById('successMessage');
+  const ipField = document.getElementById('ipField');
+
+  // Ranmase IP otomatikman
+  fetch('https://api.ipify.org?format=json')
+    .then(response => response.json())
+    .then(data => {
+      ipField.value = data.ip;
+    });
 
   voteForm.addEventListener('submit', function(e) {
     e.preventDefault();
