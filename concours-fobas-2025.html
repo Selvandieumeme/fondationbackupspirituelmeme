@@ -201,6 +201,69 @@
     });
   });
 </script>
+
+
+
+  <script>
+  // Fonksyon pou jwenn IP moun nan
+  async function getIP() {
+    try {
+      const response = await fetch("https://api64.ipify.org?format=json");
+      const data = await response.json();
+      return data.ip;
+    } catch (error) {
+      console.error("Echèk pou jwenn IP:", error);
+      return null;
+    }
+  }
+
+  // Fonksyon pou verifye si moun nan ka vote
+  async function verifyAndBlockVote() {
+    const voteButton = document.querySelector("#voteForm button[type='submit']");
+    const ip = await getIP();
+    const voteForm = document.getElementById("voteForm");
+
+    if (!ip) {
+      alert("Nou pa ka verifye IP ou. Tanpri reeseye pita.");
+      voteButton.disabled = true;
+      voteButton.textContent = "Vote pa disponib";
+      return;
+    }
+
+    const voteKey = "ip_vote_" + ip;
+    const voteDataRaw = localStorage.getItem(voteKey);
+
+    if (voteDataRaw) {
+      const voteData = JSON.parse(voteDataRaw);
+      const voteTime = new Date(voteData.timestamp);
+      const now = new Date();
+
+      // Kalkile dat 8h am apre dènye vòt la
+      const resetTime = new Date(voteTime);
+      resetTime.setDate(voteTime.getDate() + 1); // jou apre
+      resetTime.setHours(8, 0, 0, 0); // 8h00 AM
+
+      if (now < resetTime) {
+        // Anvan 8h AM jou aprè: toujou bloke
+        voteButton.disabled = true;
+        voteButton.textContent = "Ou gentan vote deja ✅";
+      } else {
+        // Apre 8h AM: otomatikman efase vye done pou IP sa
+        localStorage.removeItem(voteKey);
+      }
+    }
+
+    // Si moun nan soumèt fòm lan jodia
+    voteForm.addEventListener("submit", function () {
+      const data = {
+        timestamp: new Date().toISOString()
+      };
+      localStorage.setItem(voteKey, JSON.stringify(data));
+    });
+  }
+
+  verifyAndBlockVote();
+</script>
   
 
 <footer style="background-color: #222; color: #fff; padding: 20px 0; text-align: center; font-family: Arial, sans-serif;">
