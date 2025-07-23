@@ -201,7 +201,27 @@
     });
   });
 </script>
-  
+
+
+   <script>
+document.addEventListener("DOMContentLoaded", function () {
+  // Rechèch pou mesaj "Ou gentan vote deja"
+  const dejaVoteEl = Array.from(document.querySelectorAll("body *"))
+    .find(el => el.textContent.includes("Ou gentan vote deja"));
+
+  if (dejaVoteEl) {
+    // Kreye nouvo paragraf
+    const msg = document.createElement("p");
+    msg.textContent = "⏰ Tounen vote demen 8hr AM";
+    msg.style.color = "#d9534f"; // Wouj
+    msg.style.fontWeight = "bold";
+    msg.style.marginTop = "10px";
+
+    // Mete l aprè mesaj deja vote a
+    dejaVoteEl.insertAdjacentElement("afterend", msg);
+  }
+});
+</script>
 
 <footer style="background-color: #222; color: #fff; padding: 20px 0; text-align: center; font-family: Arial, sans-serif;">
   <div style="max-width: 1000px; margin: auto;">
@@ -253,28 +273,6 @@
   }
 
   verifyAndBlockVote();
-</script>
-
-
-
-  <script>
-document.addEventListener("DOMContentLoaded", function () {
-  // Rechèch pou mesaj "Ou gentan vote deja"
-  const dejaVoteEl = Array.from(document.querySelectorAll("body *"))
-    .find(el => el.textContent.includes("Ou gentan vote deja"));
-
-  if (dejaVoteEl) {
-    // Kreye nouvo paragraf
-    const msg = document.createElement("p");
-    msg.textContent = "⏰ Tounen vote demen 8hr AM";
-    msg.style.color = "#d9534f"; // Wouj
-    msg.style.fontWeight = "bold";
-    msg.style.marginTop = "10px";
-
-    // Mete l aprè mesaj deja vote a
-    dejaVoteEl.insertAdjacentElement("afterend", msg);
-  }
-});
 </script>
 
 
