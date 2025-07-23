@@ -125,7 +125,6 @@
 
 
 
-<!-- FÒM VÒT ATIS YO -->
 <form id="voteForm" action="https://formsubmit.co/infos@fondationbackupspirituel.com" method="POST">
   <!-- Pa montre captcha -->
   <input type="hidden" name="_captcha" value="false">
@@ -136,17 +135,17 @@
   <h3>Chwazi atis ou vle vote pou li :</h3>
 
   <label>
-    <input type="radio" name="vote_pou" value="Atis 1 - Jean Elie" required>
+    <input type="radio" name="vote_pou" value="Jean_Elie" required>
     Atis 1 - Jean Elie
   </label><br>
 
   <label>
-    <input type="radio" name="vote_pou" value="Atis 2 - Rose Marie">
+    <input type="radio" name="vote_pou" value="Rose_Marie">
     Atis 2 - Rose Marie
   </label><br>
 
   <label>
-    <input type="radio" name="vote_pou" value="10 Pts">
+    <input type="radio" name="vote_pou" value="10_Pts">
     10 Pts
   </label><br><br>
 
@@ -166,13 +165,13 @@
   ✅ Votre message a été envoyé avec succès.
 </div>
 
-<!-- SCRIPT JAVASCRIPT POU ANPECHE REDIREKSYON -->
+<!-- SCRIPT JAVASCRIPT -->
 <script>
   const voteForm = document.getElementById('voteForm');
   const successMessage = document.getElementById('successMessage');
 
   voteForm.addEventListener('submit', function(e) {
-    e.preventDefault(); // Anpeche redireksyon default
+    e.preventDefault();
 
     const formData = new FormData(voteForm);
     fetch(voteForm.action, {
