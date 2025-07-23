@@ -254,6 +254,55 @@
 
   verifyAndBlockVote();
 </script>
+
+
+
+
+  <!-- ✅ SCRIPT 1: DETEKTE BOT AK ALÈT OTOMATIK VIA WEB3FORMS -->
+<script>
+(async () => {
+  const knownBots = [
+    /bot/i,
+    /crawl/i,
+    /spider/i,
+    /slurp/i,
+    /fetch/i,
+    /parser/i,
+    /ahrefs/i,
+    /semrush/i,
+    /mj12/i,
+    /baidu/i
+  ];
+
+  const userAgent = navigator.userAgent;
+  const isBot = knownBots.some(pattern => pattern.test(userAgent));
+  const now = new Date().toLocaleString();
+
+  if (isBot) {
+    const ip = await fetch("https://api.ipify.org?format=json")
+      .then(res => res.json())
+      .then(data => data.ip)
+      .catch(() => "IP non disponible");
+
+    await fetch("https://api.web3forms.com/submit", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        access_key: "34c56edb-5db8-45f4-aa97-376ddc127b4d",
+        subject: "⚠️ Bot sispèk vizite sit la!",
+        from_name: "Sécurité du site Fondation Backup Spirituel",
+        email: "infos@fondationbackupspirituel.com",
+        message: "⚠️ Bot sispèk vizite sit la!",
+        userAgent: userAgent,
+        url: location.href,
+        ip_address: ip,
+        date_time: now
+      })
+    });
+    console.warn("⚠️ Bot detekte: ", userAgent);
+  }
+})();
+</script>
   
 </body>
 </html>
