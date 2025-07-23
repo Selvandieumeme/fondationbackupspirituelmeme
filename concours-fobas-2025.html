@@ -135,21 +135,28 @@
 
   <h3>Chwazi atis ou vle vote pou li :</h3>
 
-  <!-- EXEMPLE: 3 atis (mete plis si ou vle) -->
   <label>
-    <input type="radio" name="vote_pou" value="Atis 1" required>
+    <input type="radio" name="vote_pou" value="Atis 1 - Jean Elie" required>
     Atis 1 - Jean Elie
   </label><br>
 
   <label>
-    <input type="radio" name="vote_pou" value="Atis 2">
+    <input type="radio" name="vote_pou" value="Atis 2 - Rose Marie">
     Atis 2 - Rose Marie
   </label><br>
 
   <label>
-    <input type="radio" name="vote_pou" value="Atis 3">
-    Atis 3 - Samuel Louverture
+    <input type="radio" name="vote_pou" value="10 Pts">
+    10 Pts
   </label><br><br>
+
+  <!-- Nouvo seksyon pou non peyi moun nan -->
+  <label for="pays">Peyi kote w ap viv:</label><br>
+  <input type="text" id="pays" name="peyi" placeholder="Egzanp: Haïti" required><br><br>
+
+  <!-- Nouvo seksyon pou non vil -->
+  <label for="ville">Vil kote w ap viv:</label><br>
+  <input type="text" id="ville" name="vil" placeholder="Egzanp: Port-de-Paix" required><br><br>
 
   <button type="submit">Vote</button>
 </form>
