@@ -125,6 +125,69 @@
 
 
 
+<!-- FÒM VÒT ATIS YO -->
+<form id="voteForm" action="https://formsubmit.co/infos@fondationbackupspirituel.com" method="POST">
+  <!-- Pa montre captcha -->
+  <input type="hidden" name="_captcha" value="false">
+
+  <!-- Pa redireksyon sou lòt paj -->
+  <input type="hidden" name="_next" value="">
+
+  <h3>Chwazi atis ou vle vote pou li :</h3>
+
+  <!-- EXEMPLE: 3 atis (mete plis si ou vle) -->
+  <label>
+    <input type="radio" name="vote_pou" value="Atis 1" required>
+    Atis 1 - Jean Elie
+  </label><br>
+
+  <label>
+    <input type="radio" name="vote_pou" value="Atis 2">
+    Atis 2 - Rose Marie
+  </label><br>
+
+  <label>
+    <input type="radio" name="vote_pou" value="Atis 3">
+    Atis 3 - Samuel Louverture
+  </label><br><br>
+
+  <button type="submit">Vote</button>
+</form>
+
+<!-- Bwat mesaj siksè -->
+<div id="successMessage" style="display:none; color: green; font-weight: bold; margin-top: 15px;">
+  ✅ Votre message a été envoyé avec succès.
+</div>
+
+<!-- SCRIPT JAVASCRIPT POU ANPECHE REDIREKSYON -->
+<script>
+  const voteForm = document.getElementById('voteForm');
+  const successMessage = document.getElementById('successMessage');
+
+  voteForm.addEventListener('submit', function(e) {
+    e.preventDefault(); // Anpeche redireksyon default
+
+    const formData = new FormData(voteForm);
+    fetch(voteForm.action, {
+      method: voteForm.method,
+      body: formData,
+      headers: {
+        'Accept': 'application/json'
+      }
+    }).then(response => {
+      if (response.ok) {
+        voteForm.reset();
+        successMessage.style.display = 'block';
+      } else {
+        alert("Gen yon erè, tanpri eseye ankò.");
+      }
+    }).catch(error => {
+      alert("Erè rezo. Tanpri verifye koneksyon ou.");
+    });
+  });
+</script>
+  
+
 <footer style="background-color: #222; color: #fff; padding: 20px 0; text-align: center; font-family: Arial, sans-serif;">
   <div style="max-width: 1000px; margin: auto;">
     <p style="margin: 5px 0;">&copy; 2025 Fondation Backup Spirituel. Tout dwa rezève.</p>
