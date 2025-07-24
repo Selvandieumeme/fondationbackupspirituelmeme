@@ -139,10 +139,10 @@
     background-color: #fff;
     border: 2px solid #004080;
     border-radius: 10px;
-    padding: 5px;
-    text-align: center;
+    overflow: hidden;
     box-shadow: 0 0 8px rgba(0, 0, 0, 0.2);
     transition: transform 0.2s;
+    text-align: center;
   }
 
   .artist-card:hover {
@@ -151,10 +151,16 @@
 
   .artist-card img {
     width: 100%;
-    height: auto;
-    max-width: 100px;
-    border-radius: 8px;
-    margin-bottom: 5px;
+    height: 100px;
+    object-fit: cover;
+    display: block;
+  }
+
+  .artist-card p {
+    margin: 5px 0;
+    font-weight: bold;
+    color: #333;
+    font-size: 14px;
   }
 
   @media screen and (max-width: 600px) {
@@ -169,7 +175,6 @@
     <img src="Cedieu-Dieunise.jpg" alt="Cedieu Dieunise">
     <p>Cedieu Dieunise</p>
   </div>
-  <!-- Ou ka kopye sa yo 4 fwa anko pou w mete lòt atis yo -->
   <div class="artist-card">
     <img src="Toutin-Danoise.jpg" alt="Toutin Danoise">
     <p>Toutin Danoise</p>
@@ -186,7 +191,7 @@
     <img src="Artist5.jpg" alt="Artist 5">
     <p>Artist 5</p>
   </div>
-  <!-- Ajoute plis atis jiska 20 -->
+  <!-- Ajoute lòt atis jiska 20 la -->
 </div>
   
 
