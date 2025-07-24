@@ -124,74 +124,47 @@
 </div><br>
 
 
-<!-- Seksyon Galri Atis yo -->
 <style>
-  .artist-gallery {
+  .artist-grid {
     display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    gap: 10px;
-    max-width: 100%;
-    margin: 30px auto;
-    padding: 10px;
+    grid-template-columns: repeat(5, 1fr); /* 5 imaj pa ranje */
+    gap: 15px;
+    margin-top: 20px;
   }
 
   .artist-card {
-    background-color: #fff;
-    border: 2px solid #004080;
-    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-color: #f4f4f4;
+    border-radius: 12px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     overflow: hidden;
-    box-shadow: 0 0 8px rgba(0, 0, 0, 0.2);
-    transition: transform 0.2s;
-    text-align: center;
-  }
-
-  .artist-card:hover {
-    transform: scale(1.05);
+    height: 260px;
+    width: 150px; /* fòm portrait */
   }
 
   .artist-card img {
     width: 100%;
-    height: 100px;
-    object-fit: cover;
-    display: block;
+    height: 200px;
+    object-fit: cover; /* plen tout espas kadran san pèdi tèt */
+    border-bottom: 1px solid #ccc;
   }
 
-  .artist-card p {
-    margin: 5px 0;
-    font-weight: bold;
-    color: #333;
+  .artist-name {
     font-size: 14px;
-  }
-
-  @media screen and (max-width: 600px) {
-    .artist-gallery {
-      grid-template-columns: repeat(2, 1fr);
-    }
+    font-weight: bold;
+    text-align: center;
+    padding: 8px 4px;
   }
 </style>
 
-<div class="artist-gallery">
+<div class="artist-grid">
   <div class="artist-card">
     <img src="Cedieu-Dieunise.jpg" alt="Cedieu Dieunise">
-    <p>Cedieu Dieunise</p>
+    <div class="artist-name">Cedieu Dieunise</div>
   </div>
-  <div class="artist-card">
-    <img src="Toutin-Danoise.jpg" alt="Toutin Danoise">
-    <p>Toutin Danoise</p>
-  </div>
-  <div class="artist-card">
-    <img src="Artist3.jpg" alt="Artist 3">
-    <p>Artist 3</p>
-  </div>
-  <div class="artist-card">
-    <img src="Artist4.jpg" alt="Artist 4">
-    <p>Artist 4</p>
-  </div>
-  <div class="artist-card">
-    <img src="Artist5.jpg" alt="Artist 5">
-    <p>Artist 5</p>
-  </div>
-  <!-- Ajoute lòt atis jiska 20 la -->
+  <!-- Ou ka repete kadran sa a pou lòt atis yo -->
 </div>
   
 
