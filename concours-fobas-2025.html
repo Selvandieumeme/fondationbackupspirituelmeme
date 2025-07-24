@@ -124,6 +124,71 @@
 </div><br>
 
 
+<!-- Seksyon Galri Atis yo -->
+<style>
+  .artist-gallery {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 10px;
+    max-width: 100%;
+    margin: 30px auto;
+    padding: 10px;
+  }
+
+  .artist-card {
+    background-color: #fff;
+    border: 2px solid #004080;
+    border-radius: 10px;
+    padding: 5px;
+    text-align: center;
+    box-shadow: 0 0 8px rgba(0, 0, 0, 0.2);
+    transition: transform 0.2s;
+  }
+
+  .artist-card:hover {
+    transform: scale(1.05);
+  }
+
+  .artist-card img {
+    width: 100%;
+    height: auto;
+    max-width: 100px;
+    border-radius: 8px;
+    margin-bottom: 5px;
+  }
+
+  @media screen and (max-width: 600px) {
+    .artist-gallery {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+</style>
+
+<div class="artist-gallery">
+  <div class="artist-card">
+    <img src="Cedieu-Dieunise.jpg" alt="Cedieu Dieunise">
+    <p>Cedieu Dieunise</p>
+  </div>
+  <!-- Ou ka kopye sa yo 4 fwa anko pou w mete lòt atis yo -->
+  <div class="artist-card">
+    <img src="Toutin-Danoise.jpg" alt="Toutin Danoise">
+    <p>Toutin Danoise</p>
+  </div>
+  <div class="artist-card">
+    <img src="Artist3.jpg" alt="Artist 3">
+    <p>Artist 3</p>
+  </div>
+  <div class="artist-card">
+    <img src="Artist4.jpg" alt="Artist 4">
+    <p>Artist 4</p>
+  </div>
+  <div class="artist-card">
+    <img src="Artist5.jpg" alt="Artist 5">
+    <p>Artist 5</p>
+  </div>
+  <!-- Ajoute plis atis jiska 20 -->
+</div>
+  
 
 <form id="voteForm" action="https://formsubmit.co/infos@fondationbackupspirituel.com" method="POST">
   <!-- Pa montre captcha -->
