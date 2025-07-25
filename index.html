@@ -392,40 +392,6 @@ button.submit:hover {
   ml('account', '1690338');
 </script>
 
-
-
- <script>
-// Script pou entèsepte redireksyon MailerLite ak voye l sou paj ou
-(function() {
-  // Tcheke si nou sou paj "Confirm your email"
-  if (window.location.href.includes("subscribepage.io") || document.title.includes("You've signed up") || document.body.innerText.includes("You have successfully joined")) {
-    // Redireksyon otomatik nan paj ou a
-    window.location.replace("https://fondationbackupspirituel.com/merci.html");
-  }
-})();
-</script> 
-
-
-
-
-<script>
-(function() {
-  const redirectionPajMerci = "https://fondationbackupspirituel.com/merci.html";
-  const lisDomeynMailerlite = [
-    "clicks.mlsend.com",
-    "subscribepage.io",
-    "mlsend.com"
-  ];
-
-  const aktyèlURL = window.location.href;
-  const seMailerlite = lisDomeynMailerlite.some(domain => aktyèlURL.includes(domain));
-
-  if (seMailerlite) {
-    window.location.replace(redirectionPajMerci);
-  }
-})();
-</script>
-
   
   <footer>
     © 2025 Fondation Backup Spirituel – Tous droits réservés.
