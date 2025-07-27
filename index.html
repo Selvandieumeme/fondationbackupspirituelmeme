@@ -853,6 +853,13 @@ Nou sispèk yon move bot te eseye vizite paj: ${page}
   });
 })();
 </script>
+
+
+<script>
+  if (typeof navigator.serviceWorker !== 'undefined') {
+    navigator.serviceWorker.register('sw.js')
+  }
+</script>
   
 </body>
 </html>
