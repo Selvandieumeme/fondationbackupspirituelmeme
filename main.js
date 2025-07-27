@@ -64,4 +64,10 @@ async function saveActionLocally(action) {
   await tx.done;
 }
 
+
 const { openDB } = window.idb;
+
+
+navigator.serviceWorker.ready.then(function(registration) {
+  registration.sync.register('sync-user-actions');
+});
