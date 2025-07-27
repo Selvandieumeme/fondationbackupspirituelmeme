@@ -45,3 +45,24 @@ self.addEventListener('fetch', event => {
 });
 
 
+self.addEventListener('sync', event => {
+  if (event.tag === 'sync-user-actions') {
+    event.waitUntil(syncUserActions());
+  }
+});
+
+async function syncUserActions() {
+  const actions = await getSavedActions(); // sòti nan IndexedDB ou lòt lokal kote ou mete yo
+  for (const action of actions) {
+    try {
+      await fetch('/api/sync', {
+        method: 'POST',
+        body: JSON.stringify(action),
+        headers: { 'Content-Type': 'application/json' }
+      });
+      await deleteSavedAction(action.id);
+    } catch (error) {
+      console.log('Toujou pa gen rezo, eseye pita');
+    }
+  }
+}
