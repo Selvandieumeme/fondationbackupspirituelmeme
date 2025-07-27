@@ -66,3 +66,52 @@ async function syncUserActions() {
     }
   }
 }
+
+
+
+// Enpòte bibliyotèk idb si w ap sèvi ak li (obligatwa pou IndexedDB)
+importScripts('https://cdn.jsdelivr.net/npm/idb@7/build/iife/index-min.js');
+const { openDB } = window.idb;
+
+// Fonksyon pou ouvri IndexedDB la
+async function getDB() {
+  return await openDB('user-actions-db', 1, {
+    upgrade(db) {
+      if (!db.objectStoreNames.contains('actions')) {
+        db.createObjectStore('actions', { autoIncrement: true });
+      }
+    },
+  });
+}
+
+// Fonksyon pou revoe tout aksyon yo sou sèvè
+self.addEventListener('sync', function (event) {
+  if (event.tag === 'sync-user-actions') {
+    event.waitUntil(syncUserActions());
+  }
+});
+
+async function syncUserActions() {
+  const db = await getDB();
+  const tx = db.transaction('actions', 'readwrite');
+  const store = tx.objectStore('actions');
+  const allActions = await store.getAll();
+
+  for (const action of allActions) {
+    try {
+      // Voye done ou a sou sèvè (ajiste URL la ak metòd si sa nesesè)
+      await fetch('/save-action', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(action),
+      });
+    } catch (err) {
+      console.error('Pa ka voye aksyon:', err);
+      return; // Sispann si gen echèk
+    }
+  }
+
+  // Si tout bagay pase byen, efase tout aksyon yo
+  await store.clear();
+  await tx.done;
+}
