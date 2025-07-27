@@ -50,3 +50,16 @@ async function deleteSavedAction(id) {
   await db.delete('actions', id);
 }
 
+
+// Fonksyon pou sove aksyon nan IndexedDB
+async function saveActionLocally(action) {
+  const db = await openDB('user-actions-db', 1, {
+    upgrade(db) {
+      db.createObjectStore('actions', { autoIncrement: true });
+    },
+  });
+
+  const tx = db.transaction('actions', 'readwrite');
+  await tx.objectStore('actions').add(action);
+  await tx.done;
+}
