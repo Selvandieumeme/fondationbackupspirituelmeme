@@ -63,3 +63,5 @@ async function saveActionLocally(action) {
   await tx.objectStore('actions').add(action);
   await tx.done;
 }
+
+const { openDB } = window.idb;
