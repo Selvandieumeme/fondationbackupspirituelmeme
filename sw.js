@@ -13,3 +13,7 @@ self.addEventListener('install', event => {
         cache.addAll(PRECACHE_ASSETS);
     })());
 });
+
+self.addEventListener('activate', event => {
+  event.waitUntil(self.clients.claim());
+});
