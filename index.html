@@ -920,36 +920,6 @@ self.addEventListener('fetch', (event) => {
     });
   }
 </script>
-
-<script>
-  async function sendAction(action) {
-    try {
-      const response = await fetch('/api/sync', {
-        method: 'POST',
-        body: JSON.stringify(action),
-        headers: { 'Content-Type': 'application/json' }
-      });
-
-      if (!response.ok) throw new Error('Network issue');
-    } catch (error) {
-      // Rezo down: mete aksyon nan lokal epi enskri background sync
-      await saveActionLocally(action); // LocalStorage ou IndexedDB
-      const reg = await navigator.serviceWorker.ready;
-      await reg.sync.register('sync-user-actions');
-    }
-  }
-
-  // Egzanp: ou ka rele fonksyon an konsa
-  document.querySelector('#btn-vote').addEventListener('click', () => {
-    const action = {
-      type: 'vote',
-      artisteId: '123',
-      userId: 'ABC',
-      timestamp: Date.now()
-    };
-    sendAction(action);
-  });
-</script>
   
 </body>
 </html>
