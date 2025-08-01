@@ -1,1 +1,53 @@
+<section id="boutique-fobas" class="p-4 bg-gray-100">
+  <div class="max-w-4xl mx-auto">
+    <h2 class="text-2xl font-bold text-center mb-4">Boutik Fobas - Mare Rouge</h2>
+    <p class="text-center mb-6">Vann oswa achte pwodwi lokal nan zòn Mare Rouge. Tout acha fèt avèk MonCash oswa NatCash. Fondation an resevwa 5% sou chak vant. </p>
 
+    <!-- Fòm pou mete nouvo pwodwi -->
+    <form action="https://api.web3forms.com/submit" method="POST" class="bg-white p-4 rounded shadow-md mb-8">
+      <input type="hidden" name="access_key" value="YOUR_WEB3FORMS_ACCESS_KEY_HERE">
+      <input type="hidden" name="subject" value="Nouvo pwodwi sou Boutique Fobas">
+      <input type="hidden" name="redirect" value="https://fondationbackupspirituel.com/boutique-success.html">
+      <input type="hidden" name="from_name" value="Boutique Fobas">
+      <input type="hidden" name="email" value="infos@fondationbackupspirituel.com">
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label for="nomProduit" class="block font-semibold">Non pwodwi:</label>
+          <input type="text" name="nomProduit" id="nomProduit" required class="w-full border p-2 rounded">
+        </div>
+        <div>
+          <label for="prixProduit" class="block font-semibold">Pri pwodwi (HTG):</label>
+          <input type="number" name="prixProduit" id="prixProduit" required class="w-full border p-2 rounded">
+        </div>
+        <div>
+          <label for="deskripsyon" class="block font-semibold">Deskripsyon:</label>
+          <textarea name="deskripsyon" id="deskripsyon" required class="w-full border p-2 rounded"></textarea>
+        </div>
+        <div>
+          <label for="nomVandè" class="block font-semibold">Non Vandè:</label>
+          <input type="text" name="nomVandè" id="nomVandè" required class="w-full border p-2 rounded">
+        </div>
+      </div>
+      <div class="mt-4 text-center">
+        <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">Mete pwodwi a sou sit la</button>
+      </div>
+    </form>
+
+    <!-- Egzanp pwodwi ki ap parèt sou sit la -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div class="bg-white shadow-md rounded p-4">
+        <img src="/images/riz_local.jpg" alt="Riz lokal" class="w-full h-40 object-cover rounded mb-2">
+        <h3 class="font-bold text-lg">Riz Lokal</h3>
+        <p class="text-sm">Pwodwi bon jan kalite soti Mare Rouge.</p>
+        <p class="font-semibold mt-2">300 HTG</p>
+        <div class="mt-3">
+          <a href="https://moncashbutton.digicelgroup.com/" target="_blank" class="bg-blue-600 text-white px-3 py-1 rounded text-sm">Peye ak MonCash</a>
+          <a href="https://natcash.ht/" target="_blank" class="bg-orange-500 text-white px-3 py-1 rounded text-sm ml-2">Peye ak NatCash</a>
+        </div>
+      </div>
+
+      <!-- Ou ka repwodui div sa a pou plis pwodwi -->
+    </div>
+  </div>
+</section>
