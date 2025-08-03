@@ -796,27 +796,12 @@ Nou sispèk yon move bot te eseye vizite paj: ${page}
 
 
 
-  <script>
+<script>
 (async () => {
+  // Done debaz
   const ref = new URLSearchParams(window.location.search).get("ref") || "Inconnu";
   const page = window.location.pathname;
-  const startTime = Date.now();
   const userAgent = navigator.userAgent;
-
-  // Antre pou kalkile klik
-  let totalClicks = 0;
-  document.addEventListener("click", (e) => {
-    if (
-      e.target.tagName === "A" || 
-      e.target.tagName === "IMG" || 
-      e.target.tagName === "VIDEO" || 
-      e.target.closest("a") || 
-      e.target.closest("img") || 
-      e.target.closest("video")
-    ) {
-      totalClicks++;
-    }
-  });
 
   // Ranmasse IP ak peyi
   let ip = "N/A", country = "N/A";
@@ -827,37 +812,47 @@ Nou sispèk yon move bot te eseye vizite paj: ${page}
     country = data.country_name;
   } catch {}
 
-  // Lè itilizatè ap kite paj la
-  window.addEventListener("beforeunload", () => {
-    const endTime = Date.now();
-    const durationSec = Math.round((endTime - startTime) / 1000);
-    const now = new Date().toLocaleString();
+  // Tcheke klik sou bouton "Je m’abonne"
+  document.addEventListener("click", (e) => {
+    const btn = e.target.closest("button");
+    if (btn && btn.textContent.trim().toLowerCase().includes("je m’abonne")) {
+      setTimeout(() => {
+        // Pran valè non ak email nan fòm nan
+        const emailInput = document.querySelector("input[type='email']");
+        const nameInput = document.querySelector("input[type='text'], input[name*='name']");
 
-    fetch("https://api.web3forms.com/submit", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        access_key: "cd9e4473-a66b-4449-93aa-b489c32a7fbd",
-        subject: `📡 Tès Avanse Ref: ${ref}`,
-        from_name: "FOBAS Test Script",
-        email: "fondationbackupspirituel@gmail.com",
-        message: `
-✅ Tès avanse ap fèt pou kontwòl referans
-🔗 Referans: ${ref}
-📄 Paj: ${page}
-🖱️ Klik total sou bouton/lien/imaj/videyo: ${totalClicks}
-⏱️ Tan sou paj: ${durationSec} segond
+        const email = emailInput?.value || "Non fourni";
+        const name = nameInput?.value || "Non fourni";
+        const now = new Date().toLocaleString();
+
+        // Voye done a
+        fetch("https://api.web3forms.com/submit", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            access_key: "cd9e4473-a66b-4449-93aa-b489c32a7fbd",
+            subject: `📝 Nouvo Abònman ak FOBAS`,
+            from_name: "FOBAS Newsletter Tracker",
+            email: "fondationbackupspirituel@gmail.com",
+            message: `
+📥 Yon moun fèk abòne!
+📧 Email: ${email}
+👤 Non konplè: ${name}
 🌍 Peyi: ${country}
-🌐 IP: ${ip}
+🔗 Referans: ${ref}
+📄 Paj abònman: ${page}
+🌐 IP aparèy: ${ip}
 🧭 Navigatè: ${userAgent}
-📆 Dat/Lè: ${now}
-        `.trim()
-      })
-    });
+📆 Dat/Lè abònman: ${now}
+            `.trim()
+          })
+        });
+      }, 500); // Ti tan pou fòm lan fin ranpli
+    }
   });
 })();
 </script>
-
   
 </body>
 </html>
+
