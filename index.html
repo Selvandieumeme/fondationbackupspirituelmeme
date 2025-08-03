@@ -796,63 +796,9 @@ Nou sispèk yon move bot te eseye vizite paj: ${page}
 
 
 
-<script>
-(async () => {
-  // Done debaz
-  const ref = new URLSearchParams(window.location.search).get("ref") || "Inconnu";
-  const page = window.location.pathname;
-  const userAgent = navigator.userAgent;
 
-  // Ranmasse IP ak peyi
-  let ip = "N/A", country = "N/A";
-  try {
-    const res = await fetch("https://ipapi.co/json");
-    const data = await res.json();
-    ip = data.ip;
-    country = data.country_name;
-  } catch {}
-
-  // Tcheke klik sou bouton "Je m’abonne"
-  document.addEventListener("click", (e) => {
-    const btn = e.target.closest("button");
-    if (btn && btn.textContent.trim().toLowerCase().includes("je m’abonne")) {
-      setTimeout(() => {
-        // Pran valè non ak email nan fòm nan
-        const emailInput = document.querySelector("input[type='email']");
-        const nameInput = document.querySelector("input[type='text'], input[name*='name']");
-
-        const email = emailInput?.value || "Non fourni";
-        const name = nameInput?.value || "Non fourni";
-        const now = new Date().toLocaleString();
-
-        // Voye done a
-        fetch("https://api.web3forms.com/submit", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            access_key: "cd9e4473-a66b-4449-93aa-b489c32a7fbd",
-            subject: `📝 Nouvo Abònman ak FOBAS`,
-            from_name: "FOBAS Newsletter Tracker",
-            email: "fondationbackupspirituel@gmail.com",
-            message: `
-📥 Yon moun fèk abòne!
-📧 Email: ${email}
-👤 Non konplè: ${name}
-🌍 Peyi: ${country}
-🔗 Referans: ${ref}
-📄 Paj abònman: ${page}
-🌐 IP aparèy: ${ip}
-🧭 Navigatè: ${userAgent}
-📆 Dat/Lè abònman: ${now}
-            `.trim()
-          })
-        });
-      }, 500); // Ti tan pou fòm lan fin ranpli
-    }
-  });
-})();
-</script>
   
 </body>
 </html>
+
 
