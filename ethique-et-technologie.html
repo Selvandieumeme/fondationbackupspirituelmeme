@@ -1,192 +1,183 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ethique et Technologie | Fondation Backup Spirituel</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #ffffff;
-            color: #000000;
-            margin: 0;
-            padding: 0;
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>FONDATION BACKUP SPIRITUEL</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #ffffff;
+      color: #000000;
+      margin: 0;
+      padding: 0;
+    }
 
-        /* -------- HEADER -------- */
-        header {
-            background-color: #007BFF;
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-            gap: 15px;
-            flex-wrap: wrap;
-        }
-        header img {
-            height: 60px;
-        }
-        header h1 {
-            margin: 0;
-            font-size: 26px;
-            text-transform: uppercase;
-        }
+    /* -------- HEADER -------- */
+    header {
+      background-color: #003366;
+      text-align: center;
+      padding: 20px 10px;
+    }
+    header img {
+      height: 85px;
+    }
+    header h1 {
+      color: white;
+      font-size: 2rem;
+      font-weight: bold;
+      margin-top: 10px;
+    }
 
-        /* -------- NAVIGATION -------- */
-        nav {
-            background-color: #FFD700;
-            overflow: hidden;
-            display: flex;
-            flex-wrap: wrap;
-        }
-        nav a, nav .dropbtn {
-            color: #007BFF;
-            text-align: center;
-            padding: 14px 16px;
-            text-decoration: none;
-            background-color: transparent;
-            border: none;
-            font-size: 16px;
-            cursor: pointer;
-        }
-        nav a:hover, nav .dropdown-content a:hover, nav .dropbtn:hover {
-            background-color: #007BFF;
-            color: white;
-        }
+    /* -------- NAVIGATION -------- */
+    nav {
+      background-color: #ffcc00;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      padding: 10px 0;
+      font-weight: bold;
+    }
+    nav a {
+      padding: 10px 16px;
+      margin: 4px;
+      text-decoration: none;
+      color: #003366;
+      border-radius: 6px;
+    }
+    nav a:hover {
+      background-color: #003366;
+      color: white;
+    }
 
-        nav .dropdown {
-            position: relative;
-            display: inline-block;
-        }
+    .dropdown {
+      position: relative;
+    }
+    .dropdown-content {
+      display: none;
+      position: absolute;
+      top: 100%;
+      left: 0;
+      background-color: #003366;
+      min-width: 200px;
+      border-radius: 4px;
+      z-index: 999;
+    }
+    .dropdown-content a {
+      display: block;
+      padding: 10px 14px;
+      color: white;
+      text-decoration: none;
+    }
+    .dropdown:hover .dropdown-content {
+      display: block;
+    }
 
-        nav .dropdown-content {
-            display: none;
-            position: absolute;
-            background-color: #f9f9f9;
-            min-width: 160px;
-            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
-            z-index: 1;
-        }
+    /* -------- MAIN (KONTNI) -------- */
+    main {
+      padding: 30px 50px;
+      text-align: justify;
+    }
+    h1 {
+      color: #007BFF;
+    }
 
-        nav .dropdown-content a {
-            color: #007BFF;
-            padding: 12px 16px;
-            text-decoration: none;
-            display: block;
-            text-align: left;
-        }
-
-        nav .dropdown:hover .dropdown-content {
-            display: block;
-        }
-
-        /* -------- MAIN (KONTNI) -------- */
-        main {
-            padding: 30px 50px;
-            text-align: justify;
-        }
-        h1 {
-            color: #007BFF;
-        }
-
-        /* -------- FOOTER -------- */
-        footer {
-            background-color: #007BFF;
-            color: white;
-            text-align: center;
-            padding: 20px;
-            font-size: 14px;
-            margin-top: 50px;
-        }
-    </style>
+    /* -------- FOOTER -------- */
+    footer {
+      background-color: #003366;
+      color: white;
+      text-align: center;
+      padding: 20px;
+      font-size: 14px;
+      margin-top: 50px;
+    }
+  </style>
 </head>
 <body>
-    <!-- ░░ Header ░░ -->
-<header>
-  <img src="logofobas.png" alt="Logo Fondation">
-  <h1>FONDATION BACKUP SPIRITUEL</h1>
-</header>
-    
-    <!-- ░ Navigation ░ -->
+  <!-- ===== HEADER ===== -->
+  <header>
+    <img src="logofobas.png" alt="Logo Fondation" />
+    <h1>FONDATION BACKUP SPIRITUEL</h1>
+  </header>
+
+  <!-- ===== NAVIGATION ===== -->
   <nav>
-    <ul>
-      <li><a href="index.html" class="active">Accueil</a></li>
-      <li><a href="conference-live-fobas.html">Live FOBAS</a></li>
-      <li><a href="aides-moi-prier.html">Aides-moi prier</a></li>
-      <li><a href="vendre-ou-acheter.html">Acheter/vendre vos Produits</a></li>
-      <li><a href="concours-fobas-2025.html">Concours FOBAS 2025</a></li>
-      <li><a href="eglises-nord-ouest-haiti.html">Églises en Action</a></li>
-
-      <li class="dropdown">
-        <a href="#">Autres ▾</a>
-        <ul class="dropdown-content">
-          <li><a href="edikasyon-pou-tout.html">Edikasyon pou nou tout</a></li>
-          <li><a href="soumet-projet.html">Votre Projet Ici</a></li>
-          <li><a href="Nos-ambassadeurs.html">Visitez nos Ambassadeurs</a></li>
-          <li><a href="Notre-ecole-d'informatique.html">Notre&nbsp;École&nbsp;d'Info.</a></li>
-          <li><a href="Contact.html">Contact</a></li>
-          <li><a href="Qui-sommes-nous.html">Qui sommes‑nous</a></li>
-          <li><a href="Parrainez-nous.html">Parrainez‑nous</a></li>
-          <li><a href="suivi-ambassadeurs.html">Suivi Ambassadeurs</a></li>
-          <li><a href="Actualites.html">Actualités</a></li>
-          <li><a href="Blagues-et-histoires.html">Blagues & Histoires</a></li>
-          <li><a href="Notre-programme-d'alphabetisation.html">Notre&nbsp;Prog.&nbsp;d'Alphabetisation</a></li>
-          <li><a href="Emission-Backup-Spirituel.html">Émission Backup Spirituel</a></li>
-          <li><a href="Faire-un-don.html">Faire un don</a></li>
-          <li><a href="Nos-actions.html">Nos actions (détail)</a></li>
-          <li><a href="Politique-de-confidentialite.html">Politique de confidentialité</a></li>
-          <li><a href="jeux-fobas.html">Jouez avec FOBAS</a></li>
-        </ul>
-      </li>
-    </ul>
+    <a href="index.html">Accueil</a>
+    <a href="conference-live-fobas.html">Live FOBAS</a>
+    <a href="aides-moi-prier.html">Aides-moi prier</a>
+    <a href="vendre-ou-acheter.html">Acheter/vendre vos Produits</a>
+    <a href="concours-fobas-2025.html">Concours FOBAS 2025</a>
+    <a href="eglises-nord-ouest-haiti.html">Églises en Action</a>
+    <div class="dropdown">
+      <a href="#">Autres ▾</a>
+      <div class="dropdown-content">
+        <a href="edikasyon-pou-tout.html">Edikasyon pou nou tout</a>
+        <a href="soumet-projet.html">Votre Projet Ici</a>
+        <a href="Nos-ambassadeurs.html">Visitez nos Ambassadeurs</a>
+        <a href="Notre-ecole-d'informatique.html">Notre École d'Info.</a>
+        <a href="Contact.html">Contact</a>
+        <a href="Qui-sommes-nous.html">Qui sommes‑nous</a>
+        <a href="Parrainez-nous.html">Parrainez‑nous</a>
+        <a href="suivi-ambassadeurs.html">Suivi Ambassadeurs</a>
+        <a href="Actualites.html">Actualités</a>
+        <a href="Blagues-et-histoires.html">Blagues & Histoires</a>
+        <a href="Notre-programme-d'alphabetisation.html">Notre Prog. d'Alphabetisation</a>
+        <a href="Emission-Backup-Spirituel.html">Émission Backup Spirituel</a>
+        <a href="Faire-un-don.html">Faire un don</a>
+        <a href="Nos-actions.html">Nos actions (détail)</a>
+        <a href="Politique-de-confidentialite.html">Politique de confidentialité</a>
+        <a href="jeux-fobas.html">Jouez avec FOBAS</a>
+      </div>
+    </div>
   </nav>
-    
-    <main>
-        <h1>Ethique et Technologie</h1>
 
-        <p>
-            Dans un monde où la technologie progresse à une vitesse fulgurante, il est essentiel de ne pas perdre de vue les fondements moraux et spirituels qui doivent guider son utilisation. L'éthique, cette discipline qui interroge le bien et le mal dans nos actions, joue un rôle fondamental dans l'encadrement de l'utilisation des technologies modernes. Sans éthique, la technologie peut devenir un outil de manipulation, de destruction ou de contrôle excessif.
-        </p>
+  <!-- ===== CONTENU PAJ LA ===== -->
+  <main>
+    <h1>Ethique et Technologie</h1>
 
-        <p>
-            La technologie, quant à elle, est l'ensemble des connaissances, outils et méthodes utilisés pour concevoir, fabriquer, et exploiter des systèmes techniques. Elle est présente dans tous les aspects de notre quotidien : la santé, l'éducation, la communication, l'agriculture, la sécurité et même dans notre spiritualité. Maîtriser la technologie aujourd'hui, c’est se donner une force pour influencer le monde de manière positive et constructive.
-        </p>
+    <p>
+      Dans un monde où la technologie progresse à une vitesse fulgurante, il est essentiel de ne pas perdre de vue les fondements moraux et spirituels qui doivent guider son utilisation. L'éthique, cette discipline qui interroge le bien et le mal dans nos actions, joue un rôle fondamental dans l'encadrement de l'utilisation des technologies modernes. Sans éthique, la technologie peut devenir un outil de manipulation, de destruction ou de contrôle excessif.
+    </p>
 
-        <p>
-            En Haïti, un pays en proie à de nombreuses difficultés économiques et sociales, l’union de l’éthique et de la technologie est un levier de développement durable. En formant des jeunes et des adultes à utiliser des outils technologiques tout en respectant les valeurs humaines, on peut créer une nouvelle génération de leaders intègres, honnêtes et compétents, capables de transformer la société.
-        </p>
+    <p>
+      La technologie, quant à elle, est l'ensemble des connaissances, outils et méthodes utilisés pour concevoir, fabriquer, et exploiter des systèmes techniques. Elle est présente dans tous les aspects de notre quotidien : la santé, l'éducation, la communication, l'agriculture, la sécurité et même dans notre spiritualité. Maîtriser la technologie aujourd'hui, c’est se donner une force pour influencer le monde de manière positive et constructive.
+    </p>
 
-        <h2 style="color: #007BFF;">Secteurs professionnels liés à l’éthique et la technologie :</h2>
-        <ul>
-            <li>Cybersécurité</li>
-            <li>Piratage éthique (Ethical hacking)</li>
-            <li>Développement web</li>
-            <li>Analyse de données</li>
-            <li>Réseautique</li>
-            <li>Robotique et Intelligence Artificielle</li>
-            <li>Technologie agricole</li>
-            <li>Santé numérique</li>
-            <li>Blockchain et crypto-monnaies</li>
-            <li>Domotique</li>
-            <li>Technologie de l’éducation</li>
-            <li>Entrepreneuriat numérique</li>
-            <li>Design et UX</li>
-            <li>Technologie environnementale</li>
-            <li>Technologie sociale (pour les ONG, fondations)</li>
-        </ul>
+    <p>
+      En Haïti, un pays en proie à de nombreuses difficultés économiques et sociales, l’union de l’éthique et de la technologie est un levier de développement durable. En formant des jeunes et des adultes à utiliser des outils technologiques tout en respectant les valeurs humaines, on peut créer une nouvelle génération de leaders intègres, honnêtes et compétents, capables de transformer la société.
+    </p>
 
-        <p>
-            La maîtrise de ces domaines ouvre de nombreuses portes à l’international. Un jeune haïtien bien formé, intègre et passionné peut être recruté par des entreprises étrangères, offrir ses services en ligne comme freelance ou même créer une startup technologique avec un fort impact social. De plus, avec une solide éthique, il peut se démarquer par sa fiabilité, sa transparence et sa vision humanitaire.
-        </p>
+    <h2 style="color: #007BFF;">Secteurs professionnels liés à l’éthique et la technologie :</h2>
+    <ul>
+      <li>Cybersécurité</li>
+      <li>Piratage éthique (Ethical hacking)</li>
+      <li>Développement web</li>
+      <li>Analyse de données</li>
+      <li>Réseautique</li>
+      <li>Robotique et Intelligence Artificielle</li>
+      <li>Technologie agricole</li>
+      <li>Santé numérique</li>
+      <li>Blockchain et crypto-monnaies</li>
+      <li>Domotique</li>
+      <li>Technologie de l’éducation</li>
+      <li>Entrepreneuriat numérique</li>
+      <li>Design et UX</li>
+      <li>Technologie environnementale</li>
+      <li>Technologie sociale (pour les ONG, fondations)</li>
+    </ul>
 
-        <p>
-            La Fondation Backup Spirituel croit fermement que Dieu a placé en chaque être humain un potentiel illimité. En combinant foi, valeurs et compétences techniques, nous pouvons bâtir un avenir meilleur, où la technologie n’écrase pas l’homme, mais le sert, en respectant la dignité humaine. Nous vous encourageons à revenir chaque jour sur cette page, à approfondir vos connaissances et à nourrir votre esprit d’outils éthiques et technologiques pour réussir légalement et avec Dieu à vos côtés.
-        </p>
-    </main>
+    <p>
+      La maîtrise de ces domaines ouvre de nombreuses portes à l’international. Un jeune haïtien bien formé, intègre et passionné peut être recruté par des entreprises étrangères, offrir ses services en ligne comme freelance ou même créer une startup technologique avec un fort impact social. De plus, avec une solide éthique, il peut se démarquer par sa fiabilité, sa transparence et sa vision humanitaire.
+    </p>
 
-    <footer>
-        <p>&copy; 2025 Fondation Backup Spirituel. Tous droits réservés.</p>
-    </footer>
+    <p>
+      La Fondation Backup Spirituel croit fermement que Dieu a placé en chaque être humain un potentiel illimité. En combinant foi, valeurs et compétences techniques, nous pouvons bâtir un avenir meilleur, où la technologie n’écrase pas l’homme, mais le sert, en respectant la dignité humaine. Nous vous encourageons à revenir chaque jour sur cette page, à approfondir vos connaissances et à nourrir votre esprit d’outils éthiques et technologiques pour réussir légalement et avec Dieu à vos côtés.
+    </p>
+  </main>
+
+  <!-- ===== FOOTER ===== -->
+  <footer>
+    <p>&copy; 2025 Fondation Backup Spirituel. Tous droits réservés.</p>
+  </footer>
 </body>
 </html>
