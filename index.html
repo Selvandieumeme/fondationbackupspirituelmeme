@@ -799,9 +799,26 @@ Nou sispèk yon move bot te eseye vizite paj: ${page}
 
 
 
-  
+<script>
+  // Rekipere paramèt nan URL la
+  const params = new URLSearchParams(window.location.search);
+  const ref = params.get("ref");
+
+  // Lis tout ref ki siprime
+  const refsSupprimes = [
+    "Thelus_Christela",
+    "Almonor_Fedarly"
+    // ou ka ajoute plis si ou vle
+  ];
+
+  // Si ref la egziste epi li se youn nan lis bloke yo, redireksyon
+  if (ref && refsSupprimes.includes(ref)) {
+    // Anrejistre ref la si ou vle (opsyonèl)
+    console.log("Lyen ref sa a te siprime :", ref);
+
+    // Redireksyon otomatik sou paj ref_supprime.html
+    window.location.href = "/ref_supprime.html";
+  }
+</script>
 </body>
 </html>
-
-
-
