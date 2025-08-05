@@ -1,7 +1,7 @@
 // ref_check.js
 
 // Lis referans ki siprime
-const refSupprimes = ["Celien", "ref_test1", "ref_expire"];
+const refSupprimes = ["Mémé_Saintanor", "Almonor_Fedarly", "ref_expire"];
 
 // Tcheke si URL gen paramet ref
 const urlParams = new URLSearchParams(window.location.search);
