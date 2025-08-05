@@ -474,6 +474,48 @@ Nou sispèk yon move bot te eseye vizite paj: ${page}
 
 
 
+<script>
+  (function () {
+    const authorizedRefs = [
+      "Jean_Bebie",
+      "Moise_Ranise",
+      "Dieuben_Branchedor",
+      "Francique_Saintibert",
+      "Dorcely_Penel",
+      "Mémé_Selvandieu",
+      "Exantus_Daniel",
+      "Branchedor_Dieuné"
+    ];
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const ref = urlParams.get("ref");
+
+    if (ref) {
+      if (!authorizedRefs.includes(ref)) {
+        // Kreye mesaj erè a
+        const errorBox = document.createElement("div");
+        errorBox.textContent = "Ref invalid";
+        errorBox.style.position = "fixed";
+        errorBox.style.top = "20px";
+        errorBox.style.left = "50%";
+        errorBox.style.transform = "translateX(-50%)";
+        errorBox.style.backgroundColor = "#ff4d4f";
+        errorBox.style.color = "white";
+        errorBox.style.padding = "12px 24px";
+        errorBox.style.borderRadius = "8px";
+        errorBox.style.fontSize = "18px";
+        errorBox.style.zIndex = "9999";
+        document.body.appendChild(errorBox);
+
+        // Apre 3 segond, retire mesaj la epi redirije sou paj prensipal
+        setTimeout(() => {
+          document.body.removeChild(errorBox);
+          window.location.href = "https://fondationbackupspirituel.com/";
+        }, 3000);
+      }
+    }
+  })();
+</script>
   
 </body>
 </html>
