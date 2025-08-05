@@ -91,39 +91,39 @@
   <table>
   
     <!-- Exemples supplémentaires (remplacez / complétez avec vos véritables ambassadeurs) -->
-    <tr><td>2</td><td>Jean Bebie</td>
+    <tr><td>1</td><td>Jean Bebie</td>
         <td><a href="https://fondationbackupspirituel.com/?ref=Jean_Bebie" target="_blank">
             …/?ref=Jean_Bebie</a></td></tr>
     
     
-    <tr><td>4</td><td>Moise Ranise</td>
+    <tr><td>2</td><td>Moise Ranise</td>
         <td><a href="https://fondationbackupspirituel.com/?ref=Moise_Ranise" target="_blank">
             …/?ref=Moise_Ranise</a></td></tr>
     
 
-<tr><td>9</td><td>Dieuben Branchedor</td>
+<tr><td>3</td><td>Dieuben Branchedor</td>
         <td><a href="https://fondationbackupspirituel.com/?ref=Dieuben_Branchedor" target="_blank">
             …/?ref=Dieuben_Branchedor</a></td></tr>
 
-<tr><td>10</td><td>Francique Saintibert</td>
+<tr><td>4</td><td>Francique Saintibert</td>
         <td><a href="https://fondationbackupspirituel.com/?ref=Francique_Saintibert" target="_blank">
             …/?ref=Francique_Saintibert</a></td></tr>
 
-    <tr><td>11</td><td>Dorcely Penel</td>
+    <tr><td>5</td><td>Dorcely Penel</td>
         <td><a href="https://fondationbackupspirituel.com/?ref=Dorcely_Penel" target="_blank">
             …/?ref=Dorcely_Penel</a></td></tr>
     
-<tr><td>12</td><td>Mémé Selvandieu</td>
+<tr><td>6</td><td>Mémé Selvandieu</td>
         <td><a href="https://fondationbackupspirituel.com/?ref=Mémé_Selvandieu" target="_blank">
             …/?ref=Mémé_Selvandieu</a></td></tr>
 
 
-    <tr><td>15</td><td>Exantus Daniel</td>
+    <tr><td>7</td><td>Exantus Daniel</td>
         <td><a href="https://fondationbackupspirituel.com/?ref=Exantus_Daniel" target="_blank">
             …/?ref=Exantus_Daniel</a></td></tr>
 
 
-<tr><td>16</td><td>Branchedor Dieuné</td>
+<tr><td>8</td><td>Branchedor Dieuné</td>
         <td><a href="https://fondationbackupspirituel.com/?ref=Branchedor_Dieuné" target="_blank">
             …/?ref=Branchedor_Dieuné</a></td></tr>
     
@@ -472,6 +472,31 @@ Nou sispèk yon move bot te eseye vizite paj: ${page}
 })();
 </script>
 
+
+
+
+<script>
+  // Lis ref ofisyèl ou vle otorize
+  const allowedRefs = [
+    "Exantus_Daniel",
+    "Branchedor_Dieuné",
+    "Mémé_Selvandieu",
+    "Dorcely_Penel",
+    "Francique_Saintibert",
+    "Dieuben_Branchedor",
+    "Moise_Ranise",
+    "Jean_Bebie"
+    // Ou ka ajoute plis otorize isit
+  ];
+
+  const urlParams = new URLSearchParams(window.location.search);
+  const ref = urlParams.get("ref");
+
+  // Si ref egziste men li pa nan lis otorize a → redirije
+  if (ref && !allowedRefs.map(r => r.toLowerCase()).includes(ref.toLowerCase().trim())) {
+    window.location.href = "https://fondationbackupspirituel.com";
+  }
+</script>
   
 </body>
 </html>
