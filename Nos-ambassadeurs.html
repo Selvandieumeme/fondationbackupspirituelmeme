@@ -473,6 +473,40 @@ Nou sispèk yon move bot te eseye vizite paj: ${page}
 </script>
 
 
+
+
+  <!-- ░░ Bloc tracking Ambassadeur AVEC gestion de ref supprimé ░░ -->
+<script>
+(function(){
+  const p = new URLSearchParams(location.search);
+  const ref = p.get('ref');
+
+  // ✅ Lis ref yo ke ou vle SUPRIME — mete NON yo isit la
+  const refsSupprimes = ['ref001', 'ref002', 'reftest', 'john-doe'];
+
+  if (ref) {
+    // Si ref nan lis ref supprimé, voye l sou paj avètisman
+    if (refsSupprimes.includes(ref)) {
+      window.location.href = "/ref_supprime.html";
+      return; // Pa kontinye script la
+    }
+
+    // Sinon, mete ref la nan cookie
+    document.cookie = "amb=" + encodeURIComponent(ref) + ";path=/;max-age=7776000";
+  }
+
+  // Ranmase ref nan cookie si li la
+  const who = (document.cookie.match(/(?:^|;)\s*amb=([^;]+)/) || [])[1] || "inconnu";
+
+  // Voye done yo bay logger.php (si ref valid)
+  navigator.sendBeacon && navigator.sendBeacon("/logger.php",
+    new URLSearchParams({
+      page: location.pathname,
+      ref: who,
+      t: Date.now()
+    }));
+})();
+</script>
   
 </body>
 </html>
