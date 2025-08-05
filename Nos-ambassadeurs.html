@@ -476,24 +476,16 @@ Nou sispèk yon move bot te eseye vizite paj: ${page}
 
 
 <script>
-  // Lis ref ofisyèl ou vle otorize
-  const allowedRefs = [
-    "Exantus_Daniel",
-    "Branchedor_Dieuné",
-    "Mémé_Selvandieu",
-    "Dorcely_Penel",
-    "Francique_Saintibert",
-    "Dieuben_Branchedor",
-    "Moise_Ranise",
-    "Jean_Bebie"
-    // Ou ka ajoute plis otorize isit
-  ];
+  // Ref spesifik ou vle bloke
+  const blockedRef = "Mémé_Saintanor";
 
+  // Ranmase paramèt "ref" nan URL la
   const urlParams = new URLSearchParams(window.location.search);
   const ref = urlParams.get("ref");
 
-  // Si ref egziste men li pa nan lis otorize a → redirije
-  if (ref && !allowedRefs.map(r => r.toLowerCase()).includes(ref.toLowerCase().trim())) {
+  // Si ref la se Mémé_Saintanor — bloke l imedyatman
+  if (ref && ref.trim().toLowerCase() === blockedRef.toLowerCase()) {
+    // Redirije sou sit prensipal la
     window.location.href = "https://fondationbackupspirituel.com";
   }
 </script>
