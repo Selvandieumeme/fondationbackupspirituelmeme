@@ -158,13 +158,17 @@
     <p>
       N'oubliez pas, l’amour est un don précieux. Il mérite qu’on en prenne soin, même dans les moments difficiles. Cette plateforme est un pas vers plus de compréhension, de dialogue et d’humanité dans nos relations.
     </p>
+  </main><br><br>
 
-<script>
+     <script>
   document.addEventListener("DOMContentLoaded", function () {
-    // Kreye fòm lan ak tout eleman li yo
+    // Chèche footer la
+    const footer = document.querySelector("footer") || document.querySelector("div.footer");
+
+    // Kreye yon nouvo kontenè pou fòm lan
     const formContainer = document.createElement("div");
     formContainer.innerHTML = `
-      <form id="contactForm" style="max-width: 500px; margin: auto; padding: 20px; background: #f9f9f9; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); font-family: Arial, sans-serif;">
+      <form id="contactForm" style="max-width: 500px; margin: 50px auto; padding: 20px; background: #f9f9f9; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); font-family: Arial, sans-serif;">
         <h2 style="text-align: center; color: #444;">Ekri mesaj ou a</h2>
         <input type="hidden" name="access_key" value="34c56edb-5db8-45f4-aa97-376ddc127b4d">
         <input type="hidden" name="to" value="infos@fondationbackupspirituel.com">
@@ -185,9 +189,15 @@
       </form>
     `;
 
-    document.body.appendChild(formContainer);
+    // Mete fòm lan anvan footer la
+    if (footer && footer.parentNode) {
+      footer.parentNode.insertBefore(formContainer, footer);
+    } else {
+      // Si pa gen footer, mete l nan fen body
+      document.body.appendChild(formContainer);
+    }
 
-    // Script pou voye ak Web3Forms
+    // Script pou voye done yo ak Web3Forms
     const form = document.getElementById("contactForm");
     const statusMsg = document.getElementById("formStatus");
 
@@ -219,8 +229,6 @@
     });
   });
 </script>
-  </main><br><br>
-
 
 
   <!-- ===== FOOTER ===== -->
