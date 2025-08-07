@@ -155,7 +155,75 @@
     <p>
       N'oubliez pas, l’amour est un don précieux. Il mérite qu’on en prenne soin, même dans les moments difficiles. Cette plateforme est un pas vers plus de compréhension, de dialogue et d’humanité dans nos relations.
     </p>
-  </main>
+  </main><br><br>
+
+
+
+  <!-- Formilè pou kesyon / repons avèk Web3Forms -->
+<form action="https://api.web3forms.com/submit" method="POST" id="formConseil">
+
+  <!-- Kle aksè Web3Forms ou -->
+  <input type="hidden" name="access_key" value="34c56edb-5db8-45f4-aa97-376ddc127b4d">
+
+  <!-- Imèl destinasyon -->
+  <input type="hidden" name="email" value="infos@fondationbackupspirituel.com">
+
+  <!-- Sijè imèl la -->
+  <input type="hidden" name="subject" value="Nouvo Kesyon oswa Repons sou AUC AMOUREUX">
+
+  <!-- Tip kontni an: kesyon oswa repons -->
+  <label for="type">Sa ou vle pataje:</label>
+  <select name="type" id="type" required>
+    <option value="Kesyon">Kesyon</option>
+    <option value="Repons">Repons</option>
+  </select><br><br>
+
+  <!-- Kontni mesaj la -->
+  <label for="message">Tape mesaj ou la:</label>
+  <textarea name="message" id="message" rows="5" required></textarea><br><br>
+
+  <!-- Surnom sekre moun nan -->
+  <label for="surnom">Ekri yon surnom sekre (obligatwa):</label>
+  <input type="text" name="surnom" id="surnom" required><br><br>
+
+  <!-- Espas pou commentaire sou kesyon oswa repons -->
+  <label for="commentaire">Ou ka ajoute yon ti kòmantè sou kesyon oswa repons lan (opsyonèl):</label>
+  <textarea name="commentaire" id="commentaire" rows="3"></textarea><br><br>
+
+  <!-- Bouton pou voye formilè a -->
+  <button type="submit">Voye</button>
+
+</form>
+
+<!-- SCRIPT POU REDIREKSYONE SOU MERCI.HTML -->
+<script>
+  document.getElementById('formConseil').addEventListener('submit', function (e) {
+    e.preventDefault(); // Anpeche voye fòm lan imedyatman
+    const form = e.target;
+
+    // Konstwi done pou voye
+    const formData = new FormData(form);
+
+    fetch(form.action, {
+      method: form.method,
+      body: formData,
+      headers: {
+        'Accept': 'application/json'
+      }
+    }).then(response => {
+      if (response.ok) {
+        window.location.href = "merci.html"; // redireksyon si tout bagay pase byen
+      } else {
+        return response.json().then(data => {
+          alert("Erè pandan ou tap voye mesaj la. Tanpri tcheke rezo a oswa re-esseye.");
+        });
+      }
+    }).catch(error => {
+      alert("Gen yon erè sou rezo a. Tanpri verifye koneksyon ou.");
+    });
+  });
+</script>
+  
 
   <!-- ===== FOOTER ===== -->
   <footer>
