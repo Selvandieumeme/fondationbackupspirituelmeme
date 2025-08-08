@@ -134,46 +134,45 @@
 
 <script>
 document.addEventListener("DOMContentLoaded", function(){
-  // Vize kontenè aktyalite ki deja la (ranplase '.contenu-actualites' ak selektè reyèl la nan paj ou)
-  const container = document.querySelector('.contenu-actualites');
+  const sec = document.createElement("section");
+  sec.style.maxWidth = "900px";
+  sec.style.margin = "auto";
+  sec.style.padding = "40px 15px";
+  sec.style.fontFamily = "Arial, sans-serif";
+  sec.style.color = "#000";
+  sec.style.textAlign = "justify";
 
-  if (container) {
-    const nouvelSeksyon = document.createElement("div");
-    nouvelSeksyon.innerHTML = `
-      <h2 style="color: #007BFF; text-align: center; margin-bottom: 25px;">
-        Actualités – Pèp Bondye & Ayiti (Jiyè à 7 Out 2025)
-      </h2>
+  sec.innerHTML = `
+    <h2 style="color:#007BFF; text-align:center; margin-bottom:20px;">
+      Aktualitas — Kretyen nan mond lan (Jiyè a 7 Out 2025)
+    </h2>
+    <p>Nan peyi Kongo, nan vil Komanda, yon legliz te sibi yon masak teris pandan yon ve priyè aswè, kote ADF, yon gwoup ki gen lyen ak E.Z.I.L., te pran lavi plis pase 40 moun kretyen. Yo t ap priye, boule dwe tounen sirans, e fanmi viktim yo kounye a chache rekonfò ak jistis nan lapriyè. </p>
+    <p>Nan peyi Siri, Legliz Mar Elias te sibi yon atak suicid pandan sèvis Legliz la t ap fèt. Anpil fidèl pèdi lavi yo; sa soulve reyaksyon entènasyonal kont vyolans sou legliz minorite yo. Reyajisman kwayans lib dwe vin yon evidans mondyal. </p>
+    <p>Nan Nazyeriya, milisyè Fulani te lanse yon atak san pitye sou vilaj kretyen nan Plateau, kote plis pase yon douzèn pèp pèdi lavi yo. Sa mete sou refleksyon mondyal sou nesesite pwoteksyon kominote relijye. </p>
+    <p>Legliz Katolik ak kominote jenn yo ap leve plis inisyativ pou lapriyè lapè, inite, e ankourajman, e sa ap mache avèk rezo entènasyonal fidèl yo, pataje sou premye lyen lapriyè pou pèp Bondye du la mond. </p>
+    <p>Na Gaza, lidè kretyen pase nan mitan konfli, men yo kenbe lafwa pi fò pase tout dènye lè. Lapriyè kontinyèl nan katakòm, e pèp la kenbe espwa ke limyè Kris la pap janm mouri sou tè sa a. </p>
 
-      <div style="margin-bottom:20px;">
-        <p>Dènye deklarasyon Biwo Episkopal Ayiti a (23 jiyè) leve alam sou lan degradasyon lavi pèp la: pèdi jistis, sekirite ak nesesite lavi chak jou. Bon 1.3 milyon moun deplase, ak timoun ki swaf manje nan lopital, selon UNICEF. L ap fè apèl pou retabli lafwa ak èd imanitè ki soti nan limyè Evanjil la.</p>
-      </div>
+    <h2 style="color:#007BFF; text-align:center; margin-top:40px; margin-bottom:20px;">
+      Aktualitas — Sitiyasyon Ayiti (Jiyè a 7 Out 2025)
+    </h2>
+    <p>Nan peyi a, pilfi gang kontinye ap ogmante enfliyans yo; pandan se prèch ke Legliz yo etabli espas sekirite ak priyè. Moun ap chèche refij espirityèl nan mitan tout vyolans ak destabilisasyon. </p>
+    <p>Pèlerinaj tradisyonèl Saut-d’Eau te deplase nan yon ti legliz nan Pòtoprens akoz gang pran kont dlo sakre a. Fidèl yo kenbe lafwa yo devan sitiyasyon difisil, lapriyè pou pwoteksyon ak retou dousè lespri. :contentReference[oaicite:0]{index=0}</p>
+    <p>Inyon Ewopeyen an agrave sanksyon kont twa lidè gang ki responsab pou masak ak kidnapan nan peyi a. Sa voye yon mesaj ke lapè ak jistis dwe ranplase vyolans sistemik la. :contentReference[oaicite:1]{index=1}</p>
+    <p>Pandan tout ane a, Haitian Christian Outreach selebre 40 ane sèvis: 10 legliz, 6 lekòl, lopital kominotè, e enpak fòtifye jèn kretyen nan edikasyon ak sante. Yo kontinye opere ak lafwa byen fòt. :contentReference[oaicite:2]{index=2}</p>
+    <p>Fòs sekirite ak leta ki limite gen 10 % kontwòl sou Pòtoprens. Lòt pati pòv, moun ap lite ak manje, sekirite, ak respè pou lavi yo — e Legliz rete yon fos moral ki Dijon nou. :contentReference[oaicite:3]{index=3}</p>
+  `;
 
-      <div style="margin-bottom:20px;">
-        <p>Nan mond lan, youn nan branch premye Legliz LDS (kretyen mormon) pou Ayisyen te etabli nan sidès Ozetazini, Springfield, Ohio. Li ranfòse kominote a atravè edikasyon ak relijyon, montan ak sant kominotè. Inisyativ sa kreye fòs ak espwa nan dyaspora a.</p>
-      </div>
-
-      <div style="margin-bottom:20px;">
-        <p>Nan Pòtoprens, ensékurite gang yo rive fè mache pran dife rapidman. Sitiyasyon sa a vin soulve kriz imen lè moun ap goumen pou sekirite. Rezidan yo oblije deplase pou chape anba vyolans la.</p>
-      </div>
-
-      <div style="margin-bottom:20px;">
-        <p>Nan anpil kote, Legliz yo kontinye òganize pledriye ak aksyon. Sè dominiken yo bay swen medikal, sipò psikolojik ak edikasyon pou pèp la. Yo pote espwa ak diyite nan kè fanmi k ap soufri ak gwo kriz la.</p>
-      </div>
-
-      <div style="margin-bottom:20px;">
-        <p>Daprè Open Doors, plis pase 380 milyon kretyen atravè mond la ap fè fas ak gwo nivo persekisyon, diskriminasyon ak menas sou lavi yo. Sitiyasyon sa egzije anpil lapriyè epi sipò enteryè.</p>
-      </div>
-
-      <p>Atravè lemond, Patri ak lòt lidè relijye te vizite Legliz Sen Fami nan Gaza apre li te sibi atak. Yo te fè apèl pou delè dife a ak defans sit sakre yo, kòm yon senbòl inite relijye nan tan kriz.</p>
-      <p>Legliz Katolik Inivèsèl la teste yon nouvo litiji espesyal, “Mès pou swen kreyasyon”, pou ankouraje priyè ak aksyon pou pwoteje anviwònman.</p>
-      <p>Nan Kenya, pastè kont plan gouvènman pou konstwi yon megatrè Katolik nan rezidans prezidans lan, pandan kominote a defann separasyon ant Leta ak Legliz.</p>
-      <p>Federasyon evanjelik Swis la lage rapò etik sou AI, ankouraje inovasyon ki respekte diyite imen.</p>
-    `;
-    container.appendChild(nouvelSeksyon);
+  const footer = document.querySelector("footer");
+  if (footer && footer.parentNode) {
+    footer.parentNode.insertBefore(sec, footer);
+  } else {
+    document.body.appendChild(sec);
   }
 });
 </script>
 
+
+     
   <!-- Tit ak paragraf santre -->
 <div style="text-align: center;">
   <h2>Inscrivez-vous à notre Newsletter</h2>
