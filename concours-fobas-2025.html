@@ -123,6 +123,66 @@
   </p>
 </div><br><br>
 
+
+ <script>
+// Données soumèt yo (exemple)
+const submission = {
+  voterName: "Chrislove josapha",
+  pts: "10 Pts",
+  ip: "190.115.175.156",
+  vote_pou: "Lyse Nina Choute",
+  peyi: "Grosab",
+  vil: "Grosab"
+};
+
+// Fonksyon pou kache pati nan IP
+function maskIP(ip) {
+  const parts = ip.split(".");
+  if (parts.length === 4) {
+    return `${parts[0]}.${parts[1]}...${parts[3]}`;
+  }
+  return ip;
+}
+
+// Kreye eleman afichaj la
+function displayVoteResult(data) {
+  const container = document.createElement("div");
+  container.style.margin = "20px auto";
+  container.style.padding = "15px";
+  container.style.maxWidth = "500px";
+  container.style.border = "2px solid #ccc";
+  container.style.borderRadius = "10px";
+  container.style.backgroundColor = "#f9f9f9";
+  container.style.boxShadow = "0 4px 8px rgba(0,0,0,0.1)";
+  container.style.fontFamily = "Arial, sans-serif";
+  container.style.textAlign = "left";
+
+  container.innerHTML = `
+    <h3 style="margin-top:0; color:#333; text-align:center;">📊 Nouveau Vote Reçu</h3>
+    <p><strong>Nom du votant :</strong> ${data.voterName}</p>
+    <p><strong>Points :</strong> ${data.pts}</p>
+    <p><strong>IP :</strong> ${maskIP(data.ip)}</p>
+    <p><strong>Pays :</strong> ${data.peyi}</p>
+    <p><strong>Ville :</strong> ${data.vil}</p>
+    <p><strong>Artiste voté :</strong> ${data.vote_pou}</p>
+  `;
+
+  // Mete li anwo footer
+  const footer = document.querySelector("footer");
+  if (footer) {
+    footer.parentNode.insertBefore(container, footer);
+  } else {
+    document.body.appendChild(container);
+  }
+}
+
+// Egzekite
+displayVoteResult(submission);
+</script><br>
+
+
+
+ 
   <section id="calendar" style="padding: 30px; margin-left: 60px;">
   <h2 style="font-size: 24px; color: #333;">📅 Kalandriye Konkou Mizikal 2025</h2>
   <div style="display: flex; gap: 50px;">
