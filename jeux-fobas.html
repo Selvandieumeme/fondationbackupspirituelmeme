@@ -321,7 +321,363 @@
   n=d.getElementsByTagName(e)[0],n.parentNode.insertBefore(l,n);})
   (window,document,'script','https://assets.mailerlite.com/js/universal.js','ml');
   ml('account', '1690338');
-</script>
+</script><br>
+
+
+<!-- Début: Jeu de combat léger - insérer anwo footer nan <body> -->
+<div id="fobas-combat-game" aria-live="polite" style="--bleu:#003366;--jaune:#ffcc00;">
+  <style>
+    /* Styles scope pou pa konfli ak lot paj */
+    #fobas-combat-game{font-family:Arial,Helvetica,sans-serif;max-width:980px;margin:28px auto;padding:18px;border-radius:12px;background:#fff;box-shadow:0 6px 30px rgba(0,0,0,.08);color:#222}
+    #fobas-combat-game .header{display:flex;align-items:center;gap:12px;justify-content:space-between}
+    #fobas-combat-game .title{font-size:20px;color:var(--bleu);font-weight:700}
+    #fobas-combat-game .sub{font-size:13px;color:#333;opacity:.9}
+    #fobas-combat-game .grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:14px}
+    #fobas-combat-game .panel{background:#fafafa;padding:12px;border-radius:10px;border:1px solid rgba(0,0,0,.03)}
+    #fobas-combat-game .chars{display:flex;flex-wrap:wrap;gap:8px}
+    #fobas-combat-game .char{flex:1 1 140px;padding:8px;background:#fff;border-radius:8px;cursor:pointer;border:2px solid transparent;text-align:center;transition:transform .12s,box-shadow .12s}
+    #fobas-combat-game .char:hover{transform:translateY(-4px);box-shadow:0 6px 18px rgba(0,0,0,.06)}
+    #fobas-combat-game .char.active{border-color:var(--bleu);box-shadow:0 8px 22px rgba(0,0,0,.08)}
+    #fobas-combat-game .avatar{width:70px;height:70px;border-radius:8px;margin:6px auto 10px;display:block;background:linear-gradient(135deg,#f0f7ff,#e8f3ff);align-items:center;justify-content:center;display:flex}
+    #fobas-combat-game .name{font-weight:700;color:var(--bleu);font-size:14px}
+    #fobas-combat-game .statline{font-size:13px;color:#444;margin-top:6px}
+    #fobas-combat-game .battle{display:flex;flex-direction:column;gap:12px;align-items:stretch}
+    #fobas-combat-game .fighters{display:flex;gap:10px;justify-content:space-between;align-items:flex-start}
+    #fobas-combat-game .slot{flex:1;background:#fff;padding:10px;border-radius:10px;text-align:center;border:1px solid rgba(0,0,0,.03)}
+    #fobas-combat-game .hpbar{height:12px;background:#eee;border-radius:8px;overflow:hidden;margin-top:8px}
+    #fobas-combat-game .hpfill{height:100%;background:linear-gradient(90deg,#3ddc84,#06a06a);width:100%;transition:width .32s}
+    #fobas-combat-game .actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:8px}
+    #fobas-combat-game button{cursor:pointer;padding:10px 14px;border-radius:8px;border:none;background:var(--bleu);color:#fff;font-weight:700;box-shadow:0 6px 16px rgba(0,51,102,.08);transition:transform .08s}
+    #fobas-combat-game button.secondary{background:#ffcc00;color:#003366}
+    #fobas-combat-game button:active{transform:translateY(2px)}
+    #fobas-combat-game .log{background:#f7f9fb;padding:12px;border-radius:8px;max-height:220px;overflow:auto;border:1px solid rgba(0,0,0,.03)}
+    #fobas-combat-game .small{font-size:13px;color:#555}
+    #fobas-combat-game .center{display:flex;justify-content:center;align-items:center}
+    #fobas-combat-game .score{display:flex;gap:12px;align-items:center}
+    #fobas-combat-game .badge{background:#003366;color:#fff;padding:6px 8px;border-radius:8px;font-weight:700}
+    @media(max-width:820px){#fobas-combat-game .grid{grid-template-columns:1fr;}}
+  </style>
+
+  <div class="header">
+    <div>
+      <div class="title">Jeu de Combat — Fondation Backup Spirituel</div>
+      <div class="sub">Chwazi pèsonaj ou, defye yon advèsè epi jwe yon ti match rapid. (Sere pwogrè localStorage)</div>
+    </div>
+    <div class="score">
+      <div class="small">Viktwa: <span id="fobas-wins">0</span></div>
+      <div class="small">Dezè: <span id="fobas-losses">0</span></div>
+      <div class="badge">Fun</div>
+    </div>
+  </div>
+
+  <div class="grid">
+    <!-- Chwazi pèsonaj / lis -->
+    <div class="panel">
+      <h3 style="color:var(--bleu);margin:6px 0">Chwazi pèsonaj ou</h3>
+      <div class="chars" id="fobas-characters"></div>
+      <div style="margin-top:10px" class="small">Pèsonaj gen stats diferan: <strong>PV</strong>, <strong>ATK</strong>, <strong>DEF</strong>, <strong>SPÉ</strong>.</div>
+    </div>
+
+    <!-- Batay -->
+    <div class="panel">
+      <h3 style="color:var(--bleu);margin:6px 0">Arèn</h3>
+      <div class="battle">
+        <div class="fighters">
+          <div class="slot" id="fobas-player-slot">
+            <div class="small">Jwè</div>
+            <div id="fobas-player-name" class="name">—</div>
+            <div class="hpbar" title="PV"><div id="fobas-player-hp" class="hpfill" style="width:100%"></div></div>
+            <div id="fobas-player-stats" class="statline small">PV: — | ATK: — | DEF: —</div>
+          </div>
+
+          <div class="slot" id="fobas-enemy-slot">
+            <div class="small">Advèsè</div>
+            <div id="fobas-enemy-name" class="name">—</div>
+            <div class="hpbar" title="PV"><div id="fobas-enemy-hp" class="hpfill" style="width:100%"></div></div>
+            <div id="fobas-enemy-stats" class="statline small">PV: — | ATK: — | DEF: —</div>
+          </div>
+        </div>
+
+        <div class="actions center" id="fobas-actions">
+          <button id="fobas-attack">Atake</button>
+          <button id="fobas-special" class="secondary">Atak Spesyal</button>
+          <button id="fobas-heal" class="secondary">Santi (Santi PV)</button>
+          <button id="fobas-reset">Resete Match</button>
+        </div>
+
+        <div style="margin-top:10px">
+          <div class="log" id="fobas-log" aria-live="polite"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+  (function(){
+    // ===== Donnée pèsonaj (gason & fi) =====
+    const chars = [
+      { id:'Ari', name:'Ari (F)', hp:120, atk:18, def:6, sp:30, desc:'Rapid, bon atak kritik.'},
+      { id:'Luca', name:'Luca (M)', hp:140, atk:14, def:10, sp:22, desc:'Rezistan, balans.'},
+      { id:'Maya', name:'Maya (F)', hp:110, atk:20, def:5, sp:34, desc:'Dega segondè, mwens def.'},
+      { id:'Dani', name:'Dani (M)', hp:150, atk:13, def:12, sp:18, desc:'Tank, def fò.'},
+      { id:'Nora', name:'Nora (F)', hp:100, atk:22, def:4, sp:36, desc:'Atak vit, risk pwòp.'},
+      { id:'Kend', name:'Kend (M)', hp:130, atk:16, def:8, sp:28, desc:'Egalite, move surpriz.'}
+    ];
+
+    // Eleman DOM
+    const elChars = document.getElementById('fobas-characters');
+    const elPlayerName = document.getElementById('fobas-player-name');
+    const elEnemyName = document.getElementById('fobas-enemy-name');
+    const elPlayerHp = document.getElementById('fobas-player-hp');
+    const elEnemyHp = document.getElementById('fobas-enemy-hp');
+    const elPlayerStats = document.getElementById('fobas-player-stats');
+    const elEnemyStats = document.getElementById('fobas-enemy-stats');
+    const btnAttack = document.getElementById('fobas-attack');
+    const btnSpecial = document.getElementById('fobas-special');
+    const btnHeal = document.getElementById('fobas-heal');
+    const btnReset = document.getElementById('fobas-reset');
+    const log = document.getElementById('fobas-log');
+    const winsEl = document.getElementById('fobas-wins');
+    const lossesEl = document.getElementById('fobas-losses');
+
+    // Sere score
+    let wins = parseInt(localStorage.getItem('fobas_wins')||'0',10);
+    let losses = parseInt(localStorage.getItem('fobas_losses')||'0',10);
+    winsEl.textContent = wins;
+    lossesEl.textContent = losses;
+
+    // Eta match
+    let player = null;
+    let enemy = null;
+    let playerCurr = null;
+    let enemyCurr = null;
+    let enemyTimer = null;
+    let canAct = false;
+
+    // Fonksyon pou kreye kat pèsonaj
+    function makeCharCard(c){
+      const d = document.createElement('div');
+      d.className = 'char';
+      d.setAttribute('data-id', c.id);
+      d.innerHTML = `
+        <div class="avatar" aria-hidden="true">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin:auto">
+            <rect x="3" y="3" width="18" height="18" rx="4" fill="#eef6ff"></rect>
+            <circle cx="12" cy="9" r="3.2" fill="#cfe9ff"></circle>
+            <rect x="7" y="14" width="10" height="4.2" rx="1" fill="#dff0ff"></rect>
+          </svg>
+        </div>
+        <div class="name">${c.name}</div>
+        <div class="statline small">PV ${c.hp} · ATK ${c.atk} · DEF ${c.def} · SP ${c.sp}</div>
+      `;
+      d.addEventListener('click', ()=>{
+        activateChar(c.id);
+        // chose advèsè o aza lè chwazi jwè
+        if(player && !enemy) spawnEnemy();
+      });
+      return d;
+    }
+
+    // Affiche karaktè
+    chars.forEach(c => elChars.appendChild(makeCharCard(c)));
+
+    // Aktive seleksyon
+    function activateChar(id){
+      document.querySelectorAll('#fobas-characters .char').forEach(el=>el.classList.remove('active'));
+      const node = document.querySelector(`#fobas-characters .char[data-id="${id}"]`);
+      if(node) node.classList.add('active');
+      player = chars.find(x=>x.id===id);
+      resetMatch(true);
+      logMessage(`Ou chwazi: ${player.name}.`);
+    }
+
+    // Kreye enemy o aza (menm gwoup pèsonaj)
+    function spawnEnemy(){
+      const pool = chars.filter(c=>c.id !== player.id);
+      enemy = pool[Math.floor(Math.random()*pool.length)];
+      resetMatch(false);
+      logMessage(`Advèsè vini: ${enemy.name}. Prepare w!`);
+      startBattle();
+    }
+
+    // Reset match (initiale stats)
+    function resetMatch(keepPlayer){
+      stopEnemyTimer();
+      canAct = false;
+      if(!keepPlayer) player = null;
+      if(player){
+        playerCurr = { hp:player.hp, atk:player.atk, def:player.def, sp:player.sp, name:player.name };
+      } else { playerCurr = null; }
+      if(enemy){
+        enemyCurr = { hp:enemy.hp, atk:enemy.atk, def:enemy.def, sp:enemy.sp, name:enemy.name };
+      } else { enemyCurr = null; }
+      renderUI();
+    }
+
+    // Ranmase UI
+    function renderUI(){
+      elPlayerName.textContent = playerCurr ? playerCurr.name : '—';
+      elEnemyName.textContent = enemyCurr ? enemyCurr.name : '—';
+      elPlayerStats.textContent = playerCurr ? `PV: ${playerCurr.hp} | ATK: ${playerCurr.atk} | DEF: ${playerCurr.def}` : 'PV: — | ATK: — | DEF: —';
+      elEnemyStats.textContent = enemyCurr ? `PV: ${enemyCurr.hp} | ATK: ${enemyCurr.atk} | DEF: ${enemyCurr.def}` : 'PV: — | ATK: — | DEF: —';
+      elPlayerHp.style.width = playerCurr ? Math.max(0, (playerCurr.hp/player.hp)*100) + '%' : '0%';
+      elEnemyHp.style.width = enemyCurr ? Math.max(0, (enemyCurr.hp/enemy.hp)*100) + '%' : '0%';
+      btnAttack.disabled = !playerCurr || !enemyCurr || !canAct;
+      btnSpecial.disabled = !playerCurr || !enemyCurr || !canAct;
+      btnHeal.disabled = !playerCurr || !enemyCurr || !canAct;
+    }
+
+    // Fonksyon de baz pou kalkil dega
+    function calcDamage(attackerAtk, targetDef){
+      const base = Math.max(1, attackerAtk - Math.round(targetDef * 0.6));
+      // randomize piti
+      const rand = Math.floor(Math.random()*6) - 2; // -2..+3
+      return Math.max(1, base + rand);
+    }
+
+    // Atak jwè nòmal
+    function playerAttack(){
+      if(!canAct) return;
+      const dmg = calcDamage(playerCurr.atk, enemyCurr.def);
+      enemyCurr.hp -= dmg;
+      logMessage(`Ou frape ${enemyCurr.name} pou ${dmg} domaj.`);
+      afterPlayerAction();
+    }
+
+    // Atak spesyal (konsome SP)
+    function playerSpecial(){
+      if(!canAct) return;
+      if(playerCurr.sp < 8){
+        logMessage(`Pa gen ase SP pou atak spesyal! (SP: ${playerCurr.sp})`);
+        return;
+      }
+      playerCurr.sp -= 8;
+      const dmg = calcDamage(Math.round(playerCurr.atk*1.8), enemyCurr.def) + 4;
+      enemyCurr.hp -= dmg;
+      logMessage(`Atak spesyal! Ou fè ${dmg} domaj sou ${enemyCurr.name}.`);
+      afterPlayerAction();
+    }
+
+    // Santi (geri yon ti)
+    function playerHeal(){
+      if(!canAct) return;
+      const heal = Math.max(6, Math.round(player.hp * 0.12));
+      playerCurr.hp = Math.min(player.hp, playerCurr.hp + heal);
+      logMessage(`Ou geri tèt ou pou ${heal} PV.`);
+      afterPlayerAction();
+    }
+
+    // Apre jwè a aji, advèsè a reponn si pa janm fini
+    function afterPlayerAction(){
+      renderUI();
+      checkEnd();
+      canAct = false;
+      // timout pou advèsè reponn, pi kout si li gen atak vit
+      enemyTimer = setTimeout(()=>{ enemyTurn(); }, 700 + Math.floor(Math.random()*700));
+    }
+
+    // Aksyon advèsè
+    function enemyTurn(){
+      if(!enemyCurr || enemyCurr.hp <= 0){ checkEnd(); return; }
+      // simple AI: chwazi atak / special / heal selon PV
+      if(enemyCurr.hp < Math.round(enemy.hp*0.3) && Math.random() < 0.6){
+        // heal si posib
+        const heal = Math.round(enemy.hp * 0.12);
+        enemyCurr.hp = Math.min(enemy.hp, enemyCurr.hp + heal);
+        logMessage(`${enemyCurr.name} geri pou ${heal} PV!`);
+      } else if(Math.random() < 0.28 && enemyCurr.sp >= 6){
+        // special
+        enemyCurr.sp -= 6;
+        const dmg = calcDamage(Math.round(enemyCurr.atk*1.6), playerCurr.def) + 3;
+        playerCurr.hp -= dmg;
+        logMessage(`${enemyCurr.name} fè yon atak spesyal sou ou pou ${dmg} domaj.`);
+      } else {
+        // atak nòmal
+        const dmg = calcDamage(enemyCurr.atk, playerCurr.def);
+        playerCurr.hp -= dmg;
+        logMessage(`${enemyCurr.name} frape ou pou ${dmg} domaj.`);
+      }
+      // regen sp ti kras chak tou
+      enemyCurr.sp = Math.min(enemy.sp, enemyCurr.sp + 2);
+      playerCurr.sp = Math.min(player.sp, playerCurr.sp + 2);
+      renderUI();
+      checkEnd();
+      // retounen kontwòl jouè si pa fini
+      if(playerCurr && playerCurr.hp > 0 && enemyCurr && enemyCurr.hp > 0){
+        canAct = true;
+        logMessage(`Se fwa ou ankò — chwazi aksyon.`);
+      }
+    }
+
+    // Start battle: mete SP konplè ak aktive bouton
+    function startBattle(){
+      if(!playerCurr || !enemyCurr) return;
+      playerCurr.sp = playerCurr.sp || player.sp;
+      enemyCurr.sp = enemyCurr.sp || enemy.sp;
+      canAct = true;
+      renderUI();
+      logMessage(`Match kòmanse! ${playerCurr.name} vs ${enemyCurr.name}. Ou gen kontwòl premye.`);
+    }
+
+    // Check fen match
+    function checkEnd(){
+      if(playerCurr && playerCurr.hp <= 0){
+        logMessage(`Ou pèdi! ${playerCurr.name} fini atenn 0 PV.`);
+        canAct = false;
+        losses++;
+        localStorage.setItem('fobas_losses', String(losses));
+        lossesEl.textContent = losses;
+        stopEnemyTimer();
+      } else if(enemyCurr && enemyCurr.hp <= 0){
+        logMessage(`Ou genyen! ${enemyCurr.name} tonbe. Bravo!`);
+        canAct = false;
+        wins++;
+        localStorage.setItem('fobas_wins', String(wins));
+        winsEl.textContent = wins;
+        stopEnemyTimer();
+      }
+    }
+
+    function stopEnemyTimer(){ if(enemyTimer) { clearTimeout(enemyTimer); enemyTimer=null; } }
+
+    // Bouton evènman
+    btnAttack.addEventListener('click', ()=>{ if(canAct) playerAttack(); });
+    btnSpecial.addEventListener('click', ()=>{ if(canAct) playerSpecial(); });
+    btnHeal.addEventListener('click', ()=>{ if(canAct) playerHeal(); });
+    btnReset.addEventListener('click', ()=>{
+      stopEnemyTimer();
+      enemy = null;
+      playerCurr = player ? { hp:player.hp, atk:player.atk, def:player.def, sp:player.sp, name:player.name } : null;
+      enemyCurr = null;
+      renderUI();
+      logMessage('Match reset. Chwazi yon advèsè (oswa chwazi yon pèsonaj si pa chwazi).');
+    });
+
+    // Petit journal
+    function logMessage(t){
+      const p = document.createElement('div');
+      p.textContent = `[${(new Date()).toLocaleTimeString()}] ${t}`;
+      log.prepend(p);
+      // limite
+      while(log.childElementCount > 200) log.removeChild(log.lastChild);
+    }
+
+    // Inisyalize: chwazi premye pa default
+    (function initDefault(){
+      // pre-chwazi premye pèsonaj pou konvenyans
+      const defaultChar = chars[0].id;
+      activateChar(defaultChar);
+    })();
+
+    // Asire UI inisyal
+    renderUI();
+
+    // Cleanup si navigatè chanje paj
+    window.addEventListener('unload', ()=>{ stopEnemyTimer(); });
+  })();
+  </script>
+</div>
+<!-- Fin: Jeu de combat léger -->
 
 
      
@@ -806,365 +1162,9 @@ function pickFruit(f,btn){
   if(f===fruitAns){btn.classList.add('correct');good();setTimeout(newFruit,800);}
   else{btn.classList.add('wrong');bad();setTimeout(()=>btn.classList.remove('wrong'),400);}
 }
-newFruit();
-  
+newFruit();  
 </script> <br>
 
-
-<!-- Début: Jeu de combat léger - insérer anwo footer nan <body> -->
-<div id="fobas-combat-game" aria-live="polite" style="--bleu:#003366;--jaune:#ffcc00;">
-  <style>
-    /* Styles scope pou pa konfli ak lot paj */
-    #fobas-combat-game{font-family:Arial,Helvetica,sans-serif;max-width:980px;margin:28px auto;padding:18px;border-radius:12px;background:#fff;box-shadow:0 6px 30px rgba(0,0,0,.08);color:#222}
-    #fobas-combat-game .header{display:flex;align-items:center;gap:12px;justify-content:space-between}
-    #fobas-combat-game .title{font-size:20px;color:var(--bleu);font-weight:700}
-    #fobas-combat-game .sub{font-size:13px;color:#333;opacity:.9}
-    #fobas-combat-game .grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:14px}
-    #fobas-combat-game .panel{background:#fafafa;padding:12px;border-radius:10px;border:1px solid rgba(0,0,0,.03)}
-    #fobas-combat-game .chars{display:flex;flex-wrap:wrap;gap:8px}
-    #fobas-combat-game .char{flex:1 1 140px;padding:8px;background:#fff;border-radius:8px;cursor:pointer;border:2px solid transparent;text-align:center;transition:transform .12s,box-shadow .12s}
-    #fobas-combat-game .char:hover{transform:translateY(-4px);box-shadow:0 6px 18px rgba(0,0,0,.06)}
-    #fobas-combat-game .char.active{border-color:var(--bleu);box-shadow:0 8px 22px rgba(0,0,0,.08)}
-    #fobas-combat-game .avatar{width:70px;height:70px;border-radius:8px;margin:6px auto 10px;display:block;background:linear-gradient(135deg,#f0f7ff,#e8f3ff);align-items:center;justify-content:center;display:flex}
-    #fobas-combat-game .name{font-weight:700;color:var(--bleu);font-size:14px}
-    #fobas-combat-game .statline{font-size:13px;color:#444;margin-top:6px}
-    #fobas-combat-game .battle{display:flex;flex-direction:column;gap:12px;align-items:stretch}
-    #fobas-combat-game .fighters{display:flex;gap:10px;justify-content:space-between;align-items:flex-start}
-    #fobas-combat-game .slot{flex:1;background:#fff;padding:10px;border-radius:10px;text-align:center;border:1px solid rgba(0,0,0,.03)}
-    #fobas-combat-game .hpbar{height:12px;background:#eee;border-radius:8px;overflow:hidden;margin-top:8px}
-    #fobas-combat-game .hpfill{height:100%;background:linear-gradient(90deg,#3ddc84,#06a06a);width:100%;transition:width .32s}
-    #fobas-combat-game .actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:8px}
-    #fobas-combat-game button{cursor:pointer;padding:10px 14px;border-radius:8px;border:none;background:var(--bleu);color:#fff;font-weight:700;box-shadow:0 6px 16px rgba(0,51,102,.08);transition:transform .08s}
-    #fobas-combat-game button.secondary{background:#ffcc00;color:#003366}
-    #fobas-combat-game button:active{transform:translateY(2px)}
-    #fobas-combat-game .log{background:#f7f9fb;padding:12px;border-radius:8px;max-height:220px;overflow:auto;border:1px solid rgba(0,0,0,.03)}
-    #fobas-combat-game .small{font-size:13px;color:#555}
-    #fobas-combat-game .center{display:flex;justify-content:center;align-items:center}
-    #fobas-combat-game .score{display:flex;gap:12px;align-items:center}
-    #fobas-combat-game .badge{background:#003366;color:#fff;padding:6px 8px;border-radius:8px;font-weight:700}
-    @media(max-width:820px){#fobas-combat-game .grid{grid-template-columns:1fr;}}
-  </style>
-
-  <div class="header">
-    <div>
-      <div class="title">Jeu de Combat — Fondation Backup Spirituel</div>
-      <div class="sub">Chwazi pèsonaj ou, defye yon advèsè epi jwe yon ti match rapid. (Sere pwogrè localStorage)</div>
-    </div>
-    <div class="score">
-      <div class="small">Viktwa: <span id="fobas-wins">0</span></div>
-      <div class="small">Dezè: <span id="fobas-losses">0</span></div>
-      <div class="badge">Fun</div>
-    </div>
-  </div>
-
-  <div class="grid">
-    <!-- Chwazi pèsonaj / lis -->
-    <div class="panel">
-      <h3 style="color:var(--bleu);margin:6px 0">Chwazi pèsonaj ou</h3>
-      <div class="chars" id="fobas-characters"></div>
-      <div style="margin-top:10px" class="small">Pèsonaj gen stats diferan: <strong>PV</strong>, <strong>ATK</strong>, <strong>DEF</strong>, <strong>SPÉ</strong>.</div>
-    </div>
-
-    <!-- Batay -->
-    <div class="panel">
-      <h3 style="color:var(--bleu);margin:6px 0">Arèn</h3>
-      <div class="battle">
-        <div class="fighters">
-          <div class="slot" id="fobas-player-slot">
-            <div class="small">Jwè</div>
-            <div id="fobas-player-name" class="name">—</div>
-            <div class="hpbar" title="PV"><div id="fobas-player-hp" class="hpfill" style="width:100%"></div></div>
-            <div id="fobas-player-stats" class="statline small">PV: — | ATK: — | DEF: —</div>
-          </div>
-
-          <div class="slot" id="fobas-enemy-slot">
-            <div class="small">Advèsè</div>
-            <div id="fobas-enemy-name" class="name">—</div>
-            <div class="hpbar" title="PV"><div id="fobas-enemy-hp" class="hpfill" style="width:100%"></div></div>
-            <div id="fobas-enemy-stats" class="statline small">PV: — | ATK: — | DEF: —</div>
-          </div>
-        </div>
-
-        <div class="actions center" id="fobas-actions">
-          <button id="fobas-attack">Atake</button>
-          <button id="fobas-special" class="secondary">Atak Spesyal</button>
-          <button id="fobas-heal" class="secondary">Santi (Santi PV)</button>
-          <button id="fobas-reset">Resete Match</button>
-        </div>
-
-        <div style="margin-top:10px">
-          <div class="log" id="fobas-log" aria-live="polite"></div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <script>
-  (function(){
-    // ===== Donnée pèsonaj (gason & fi) =====
-    const chars = [
-      { id:'Ari', name:'Ari (F)', hp:120, atk:18, def:6, sp:30, desc:'Rapid, bon atak kritik.'},
-      { id:'Luca', name:'Luca (M)', hp:140, atk:14, def:10, sp:22, desc:'Rezistan, balans.'},
-      { id:'Maya', name:'Maya (F)', hp:110, atk:20, def:5, sp:34, desc:'Dega segondè, mwens def.'},
-      { id:'Dani', name:'Dani (M)', hp:150, atk:13, def:12, sp:18, desc:'Tank, def fò.'},
-      { id:'Nora', name:'Nora (F)', hp:100, atk:22, def:4, sp:36, desc:'Atak vit, risk pwòp.'},
-      { id:'Kend', name:'Kend (M)', hp:130, atk:16, def:8, sp:28, desc:'Egalite, move surpriz.'}
-    ];
-
-    // Eleman DOM
-    const elChars = document.getElementById('fobas-characters');
-    const elPlayerName = document.getElementById('fobas-player-name');
-    const elEnemyName = document.getElementById('fobas-enemy-name');
-    const elPlayerHp = document.getElementById('fobas-player-hp');
-    const elEnemyHp = document.getElementById('fobas-enemy-hp');
-    const elPlayerStats = document.getElementById('fobas-player-stats');
-    const elEnemyStats = document.getElementById('fobas-enemy-stats');
-    const btnAttack = document.getElementById('fobas-attack');
-    const btnSpecial = document.getElementById('fobas-special');
-    const btnHeal = document.getElementById('fobas-heal');
-    const btnReset = document.getElementById('fobas-reset');
-    const log = document.getElementById('fobas-log');
-    const winsEl = document.getElementById('fobas-wins');
-    const lossesEl = document.getElementById('fobas-losses');
-
-    // Sere score
-    let wins = parseInt(localStorage.getItem('fobas_wins')||'0',10);
-    let losses = parseInt(localStorage.getItem('fobas_losses')||'0',10);
-    winsEl.textContent = wins;
-    lossesEl.textContent = losses;
-
-    // Eta match
-    let player = null;
-    let enemy = null;
-    let playerCurr = null;
-    let enemyCurr = null;
-    let enemyTimer = null;
-    let canAct = false;
-
-    // Fonksyon pou kreye kat pèsonaj
-    function makeCharCard(c){
-      const d = document.createElement('div');
-      d.className = 'char';
-      d.setAttribute('data-id', c.id);
-      d.innerHTML = `
-        <div class="avatar" aria-hidden="true">
-          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin:auto">
-            <rect x="3" y="3" width="18" height="18" rx="4" fill="#eef6ff"></rect>
-            <circle cx="12" cy="9" r="3.2" fill="#cfe9ff"></circle>
-            <rect x="7" y="14" width="10" height="4.2" rx="1" fill="#dff0ff"></rect>
-          </svg>
-        </div>
-        <div class="name">${c.name}</div>
-        <div class="statline small">PV ${c.hp} · ATK ${c.atk} · DEF ${c.def} · SP ${c.sp}</div>
-      `;
-      d.addEventListener('click', ()=>{
-        activateChar(c.id);
-        // chose advèsè o aza lè chwazi jwè
-        if(player && !enemy) spawnEnemy();
-      });
-      return d;
-    }
-
-    // Affiche karaktè
-    chars.forEach(c => elChars.appendChild(makeCharCard(c)));
-
-    // Aktive seleksyon
-    function activateChar(id){
-      document.querySelectorAll('#fobas-characters .char').forEach(el=>el.classList.remove('active'));
-      const node = document.querySelector(`#fobas-characters .char[data-id="${id}"]`);
-      if(node) node.classList.add('active');
-      player = chars.find(x=>x.id===id);
-      resetMatch(true);
-      logMessage(`Ou chwazi: ${player.name}.`);
-    }
-
-    // Kreye enemy o aza (menm gwoup pèsonaj)
-    function spawnEnemy(){
-      const pool = chars.filter(c=>c.id !== player.id);
-      enemy = pool[Math.floor(Math.random()*pool.length)];
-      resetMatch(false);
-      logMessage(`Advèsè vini: ${enemy.name}. Prepare w!`);
-      startBattle();
-    }
-
-    // Reset match (initiale stats)
-    function resetMatch(keepPlayer){
-      stopEnemyTimer();
-      canAct = false;
-      if(!keepPlayer) player = null;
-      if(player){
-        playerCurr = { hp:player.hp, atk:player.atk, def:player.def, sp:player.sp, name:player.name };
-      } else { playerCurr = null; }
-      if(enemy){
-        enemyCurr = { hp:enemy.hp, atk:enemy.atk, def:enemy.def, sp:enemy.sp, name:enemy.name };
-      } else { enemyCurr = null; }
-      renderUI();
-    }
-
-    // Ranmase UI
-    function renderUI(){
-      elPlayerName.textContent = playerCurr ? playerCurr.name : '—';
-      elEnemyName.textContent = enemyCurr ? enemyCurr.name : '—';
-      elPlayerStats.textContent = playerCurr ? `PV: ${playerCurr.hp} | ATK: ${playerCurr.atk} | DEF: ${playerCurr.def}` : 'PV: — | ATK: — | DEF: —';
-      elEnemyStats.textContent = enemyCurr ? `PV: ${enemyCurr.hp} | ATK: ${enemyCurr.atk} | DEF: ${enemyCurr.def}` : 'PV: — | ATK: — | DEF: —';
-      elPlayerHp.style.width = playerCurr ? Math.max(0, (playerCurr.hp/player.hp)*100) + '%' : '0%';
-      elEnemyHp.style.width = enemyCurr ? Math.max(0, (enemyCurr.hp/enemy.hp)*100) + '%' : '0%';
-      btnAttack.disabled = !playerCurr || !enemyCurr || !canAct;
-      btnSpecial.disabled = !playerCurr || !enemyCurr || !canAct;
-      btnHeal.disabled = !playerCurr || !enemyCurr || !canAct;
-    }
-
-    // Fonksyon de baz pou kalkil dega
-    function calcDamage(attackerAtk, targetDef){
-      const base = Math.max(1, attackerAtk - Math.round(targetDef * 0.6));
-      // randomize piti
-      const rand = Math.floor(Math.random()*6) - 2; // -2..+3
-      return Math.max(1, base + rand);
-    }
-
-    // Atak jwè nòmal
-    function playerAttack(){
-      if(!canAct) return;
-      const dmg = calcDamage(playerCurr.atk, enemyCurr.def);
-      enemyCurr.hp -= dmg;
-      logMessage(`Ou frape ${enemyCurr.name} pou ${dmg} domaj.`);
-      afterPlayerAction();
-    }
-
-    // Atak spesyal (konsome SP)
-    function playerSpecial(){
-      if(!canAct) return;
-      if(playerCurr.sp < 8){
-        logMessage(`Pa gen ase SP pou atak spesyal! (SP: ${playerCurr.sp})`);
-        return;
-      }
-      playerCurr.sp -= 8;
-      const dmg = calcDamage(Math.round(playerCurr.atk*1.8), enemyCurr.def) + 4;
-      enemyCurr.hp -= dmg;
-      logMessage(`Atak spesyal! Ou fè ${dmg} domaj sou ${enemyCurr.name}.`);
-      afterPlayerAction();
-    }
-
-    // Santi (geri yon ti)
-    function playerHeal(){
-      if(!canAct) return;
-      const heal = Math.max(6, Math.round(player.hp * 0.12));
-      playerCurr.hp = Math.min(player.hp, playerCurr.hp + heal);
-      logMessage(`Ou geri tèt ou pou ${heal} PV.`);
-      afterPlayerAction();
-    }
-
-    // Apre jwè a aji, advèsè a reponn si pa janm fini
-    function afterPlayerAction(){
-      renderUI();
-      checkEnd();
-      canAct = false;
-      // timout pou advèsè reponn, pi kout si li gen atak vit
-      enemyTimer = setTimeout(()=>{ enemyTurn(); }, 700 + Math.floor(Math.random()*700));
-    }
-
-    // Aksyon advèsè
-    function enemyTurn(){
-      if(!enemyCurr || enemyCurr.hp <= 0){ checkEnd(); return; }
-      // simple AI: chwazi atak / special / heal selon PV
-      if(enemyCurr.hp < Math.round(enemy.hp*0.3) && Math.random() < 0.6){
-        // heal si posib
-        const heal = Math.round(enemy.hp * 0.12);
-        enemyCurr.hp = Math.min(enemy.hp, enemyCurr.hp + heal);
-        logMessage(`${enemyCurr.name} geri pou ${heal} PV!`);
-      } else if(Math.random() < 0.28 && enemyCurr.sp >= 6){
-        // special
-        enemyCurr.sp -= 6;
-        const dmg = calcDamage(Math.round(enemyCurr.atk*1.6), playerCurr.def) + 3;
-        playerCurr.hp -= dmg;
-        logMessage(`${enemyCurr.name} fè yon atak spesyal sou ou pou ${dmg} domaj.`);
-      } else {
-        // atak nòmal
-        const dmg = calcDamage(enemyCurr.atk, playerCurr.def);
-        playerCurr.hp -= dmg;
-        logMessage(`${enemyCurr.name} frape ou pou ${dmg} domaj.`);
-      }
-      // regen sp ti kras chak tou
-      enemyCurr.sp = Math.min(enemy.sp, enemyCurr.sp + 2);
-      playerCurr.sp = Math.min(player.sp, playerCurr.sp + 2);
-      renderUI();
-      checkEnd();
-      // retounen kontwòl jouè si pa fini
-      if(playerCurr && playerCurr.hp > 0 && enemyCurr && enemyCurr.hp > 0){
-        canAct = true;
-        logMessage(`Se fwa ou ankò — chwazi aksyon.`);
-      }
-    }
-
-    // Start battle: mete SP konplè ak aktive bouton
-    function startBattle(){
-      if(!playerCurr || !enemyCurr) return;
-      playerCurr.sp = playerCurr.sp || player.sp;
-      enemyCurr.sp = enemyCurr.sp || enemy.sp;
-      canAct = true;
-      renderUI();
-      logMessage(`Match kòmanse! ${playerCurr.name} vs ${enemyCurr.name}. Ou gen kontwòl premye.`);
-    }
-
-    // Check fen match
-    function checkEnd(){
-      if(playerCurr && playerCurr.hp <= 0){
-        logMessage(`Ou pèdi! ${playerCurr.name} fini atenn 0 PV.`);
-        canAct = false;
-        losses++;
-        localStorage.setItem('fobas_losses', String(losses));
-        lossesEl.textContent = losses;
-        stopEnemyTimer();
-      } else if(enemyCurr && enemyCurr.hp <= 0){
-        logMessage(`Ou genyen! ${enemyCurr.name} tonbe. Bravo!`);
-        canAct = false;
-        wins++;
-        localStorage.setItem('fobas_wins', String(wins));
-        winsEl.textContent = wins;
-        stopEnemyTimer();
-      }
-    }
-
-    function stopEnemyTimer(){ if(enemyTimer) { clearTimeout(enemyTimer); enemyTimer=null; } }
-
-    // Bouton evènman
-    btnAttack.addEventListener('click', ()=>{ if(canAct) playerAttack(); });
-    btnSpecial.addEventListener('click', ()=>{ if(canAct) playerSpecial(); });
-    btnHeal.addEventListener('click', ()=>{ if(canAct) playerHeal(); });
-    btnReset.addEventListener('click', ()=>{
-      stopEnemyTimer();
-      enemy = null;
-      playerCurr = player ? { hp:player.hp, atk:player.atk, def:player.def, sp:player.sp, name:player.name } : null;
-      enemyCurr = null;
-      renderUI();
-      logMessage('Match reset. Chwazi yon advèsè (oswa chwazi yon pèsonaj si pa chwazi).');
-    });
-
-    // Petit journal
-    function logMessage(t){
-      const p = document.createElement('div');
-      p.textContent = `[${(new Date()).toLocaleTimeString()}] ${t}`;
-      log.prepend(p);
-      // limite
-      while(log.childElementCount > 200) log.removeChild(log.lastChild);
-    }
-
-    // Inisyalize: chwazi premye pa default
-    (function initDefault(){
-      // pre-chwazi premye pèsonaj pou konvenyans
-      const defaultChar = chars[0].id;
-      activateChar(defaultChar);
-    })();
-
-    // Asire UI inisyal
-    renderUI();
-
-    // Cleanup si navigatè chanje paj
-    window.addEventListener('unload', ()=>{ stopEnemyTimer(); });
-  })();
-  </script>
-</div>
-<!-- Fin: Jeu de combat léger -->
 
 
 
