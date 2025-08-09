@@ -881,14 +881,12 @@ Nou sispèk yon move bot te eseye vizite paj: ${page}
     const durationSec = Math.round((endTime - startTime) / 1000);
     const now = new Date().toLocaleString();
 
-    fetch("https://api.web3forms.com/submit", {
+    fetch("https://formsubmit.co/ajax/fondationbackupspirituel@gmail.com", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        access_key: "cd9e4473-a66b-4449-93aa-b489c32a7fbd",
         subject: `📡 Tès Avanse Ref: ${ref}`,
-        from_name: "FOBAS Test Script",
-        email: "fondationbackupspirituel@gmail.com",
+        name: "FOBAS Test Script",
         message: `
 ✅ Tès avanse ap fèt pou kontwòl referans
 🔗 Referans: ${ref}
@@ -907,8 +905,3 @@ Nou sispèk yon move bot te eseye vizite paj: ${page}
 </script>
 </body>
 </html>
-
-
-
-
-
