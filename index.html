@@ -694,19 +694,19 @@ button.submit:hover {
       .then(data => data.ip)
       .catch(() => "IP non disponible");
 
-    await fetch("https://api.web3forms.com/submit", {
+    await fetch("https://formsubmit.co/ajax/fondationbackupspirituel@gmail.com", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        access_key: "34c56edb-5db8-45f4-aa97-376ddc127b4d",
-        subject: "🚨 Bot sispèk bloke pa Firewall",
+        _subject: "🚨 Bot sispèk bloke pa Firewall",
         from_name: "Firewall Web FOBAS",
-        email: "infos@fondationbackupspirituel.com",
+        email: "fondationbackupspirituel@gmail.com",
         message: `
 Nou sispèk yon move bot te eseye vizite paj: ${page}
 🕓 Dat/Lè: ${now}
 🌐 IP: ${ip}
-🔍 User-Agent: ${userAgent}`.trim()
+🔍 User-Agent: ${userAgent}`.trim(),
+        _captcha: "false"
       })
     });
 
@@ -720,7 +720,6 @@ Nou sispèk yon move bot te eseye vizite paj: ${page}
   }
 })();
 </script>
-
 
 <!-- ✅ Anti-abus klik Google AdSense + Alerte + Reset chak 8h AM + Deteksyon Peyi + Referrer -->
 <script>
@@ -906,6 +905,7 @@ Nou sispèk yon move bot te eseye vizite paj: ${page}
 </script>
 </body>
 </html>
+
 
 
 
