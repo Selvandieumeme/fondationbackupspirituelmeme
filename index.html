@@ -278,10 +278,11 @@ button.submit:hover {
     </p>
   </section>
 
-  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7462273633598843"
+  <!-- ✅ Script orijinal AdSense ou (san chanjman) -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7462273633598843"
      crossorigin="anonymous"></script>
 <!-- Visitez notre Plateforme FOBAS -->
-<ins class="adsbygoogle"
+<ins id="ad-fobas-principal" class="adsbygoogle"
      style="display:block"
      data-ad-client="ca-pub-7462273633598843"
      data-ad-slot="9806417182"
@@ -289,7 +290,62 @@ button.submit:hover {
      data-full-width-responsive="true"></ins>
 <script>
      (adsbygoogle = window.adsbygoogle || []).push({});
-</script><br>
+</script>
+<br>
+
+<!-- ✅ Script deteksyon klike ak voye notifikasyon via FormSubmit -->
+<script>
+// ID eleman anons ou vle suiv
+const adElementId = "ad-fobas-principal";
+
+// API pou jwenn IP + peyi vizitè
+async function getVisitorInfo() {
+    try {
+        let res = await fetch("https://ipapi.co/json/");
+        return await res.json();
+    } catch (e) {
+        console.error("Erreur API IP:", e);
+        return {};
+    }
+}
+
+// Fonksyon pou voye imel atravè FormSubmit
+async function sendNotification(data) {
+    let formData = new FormData();
+    formData.append("email", "fondationbackupspirituel@gmail.com");
+    formData.append("subject", "🚨 Klik sou anons AdSense");
+    formData.append("message", `
+        📌 Ref Ambassadeur: ${data.ref || "Pa jwenn"}
+        🌐 IP: ${data.ip || "Pa jwenn"}
+        🗺️ Peyi: ${data.country_name || "Pa jwenn"}
+        🖥️ Navigatè: ${navigator.userAgent}
+        📅 Dat/Lè: ${new Date().toLocaleString()}
+    `);
+
+    fetch("https://formsubmit.co/ajax/fondationbackupspirituel@gmail.com", {
+        method: "POST",
+        body: formData
+    }).then(r => r.json())
+      .then(r => console.log("✅ Notifikasyon voye:", r))
+      .catch(err => console.error("Erreur FormSubmit:", err));
+}
+
+// Tcheke ref ambassadeur nan URL
+const urlParams = new URLSearchParams(window.location.search);
+const ref = urlParams.get("ref");
+
+// Mete detektè klike sou anons lan apre paj la chaje
+document.addEventListener("DOMContentLoaded", () => {
+    const adElement = document.getElementById(adElementId);
+    if (adElement) {
+        adElement.addEventListener("click", async () => {
+            let visitorData = await getVisitorInfo();
+            visitorData.ref = ref;
+            sendNotification(visitorData);
+        });
+    }
+});
+</script>
 
   <!-- ░ Fondateurs ░ -->
   <section>
@@ -567,109 +623,6 @@ button.submit:hover {
 })();
 </script>
 
-<!-- ✅ Anti-abus Google AdSense + Tracker Avanse Ambassadeurs -->
-<script>
-(async () => {
-  const ref = new URLSearchParams(window.location.search).get("ref") || "Inconnu";
-  const page = window.location.pathname;
-  const now = Date.now();
-  const start = now;
-  const date = new Date().toLocaleString();
-  const userAgent = navigator.userAgent;
-
-  // API pou jwenn IP ak peyi vizitè a
-  let ip = "N/A", country = "N/A";
-  try {
-    const res = await fetch("https://ipapi.co/json");
-    const data = await res.json();
-    ip = data.ip;
-    country = data.country_name;
-  } catch {}
-
-  // ➤ TRACKING REF
-  const sessionKey = `ambassador_${ref}_track`;
-  const existing = JSON.parse(localStorage.getItem(sessionKey)) || {
-    pages: [],
-    clicks: 0,
-    startTime: now
-  };
-  existing.pages.push(page);
-  localStorage.setItem(sessionKey, JSON.stringify(existing));
-
-  // ➤ ANTI-KLIK ABIZIF ADSENSE PAR ID
-  const adClickKey = "fobas-adsense-click-count";
-  const blockKey = "fobas-adsense-blocked";
-  const statsKey = "fobas-adsense-click-stats";
-  const stats = JSON.parse(localStorage.getItem(statsKey)) || {};
-  const adClicks = JSON.parse(localStorage.getItem(adClickKey)) || {};
-
-  document.addEventListener("click", async (e) => {
-    const adEl = e.target.closest(".adsbygoogle");
-    if (!adEl) return;
-    const adId = adEl.getAttribute("data-ad-id") || "default";
-    const blockIdKey = `${blockKey}_${adId}`;
-    const lastClickKey = `${adClickKey}_${adId}`;
-
-    // ➤ Bloke tanporèman apre +1 klik jiskaske 8h AM
-    const nowH = new Date().getHours();
-    const isBlocked = localStorage.getItem(blockIdKey);
-    if (isBlocked && nowH < 8) {
-      adEl.style.display = "none";
-      return;
-    } else if (nowH >= 8) {
-      localStorage.removeItem(blockIdKey);
-    }
-
-    // ➤ Konte klik yo
-    adClicks[adId] = (adClicks[adId] || 0) + 1;
-    localStorage.setItem(adClickKey, JSON.stringify(adClicks));
-
-    // ➤ Statistik klik global yo
-    stats[adId] = stats[adId] || { good: 0, bad: 0 };
-
-    if (adClicks[adId] === 1) {
-      stats[adId].good++;
-    } else if (adClicks[adId] > 1) {
-      stats[adId].bad++;
-      localStorage.setItem(blockIdKey, true);
-      adEl.style.display = "none";
-      e.preventDefault();
-
-      // ➤ Voye ALÈT Imedyat (FormSubmit)
-      await fetch("https://formsubmit.co/ajax/infos@fondationbackupspirituel.com", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          _subject: "🚫 Klik abizif bloke sou Google AdSense",
-          from_name: "FOBAS AdSense Tracker",
-          email: "infos@fondationbackupspirituel.com",
-          message: `
-⛔ Ref: ${ref}
-🧾 Paj: ${page}
-🆔 Ad ID: ${adId}
-🖱️ Klik total: ${adClicks[adId]}
-✅ Bon klik: ${stats[adId].good} | ❌ Move klik: ${stats[adId].bad}
-🌐 IP: ${ip} (${country})
-📆 Dat/Lè: ${date}
-🔍 Navigatè: ${userAgent}
-`.trim(),
-          _captcha: "false"
-        })
-      });
-    }
-
-    localStorage.setItem(statsKey, JSON.stringify(stats));
-  });
-
-  // ➤ TRACK tan pase pou chak ambassadeur
-  window.addEventListener("beforeunload", async () => {
-    const end = Date.now();
-    const duration = Math.round((end - start) / 1000);
-    existing.clicks = Object.values(adClicks).reduce((a, b) => a + b, 0);
-    localStorage.setItem(sessionKey, JSON.stringify(existing));
-  });
-})();
-</script>
 
 
 <!-- ✅ Firewall entelijan anti-bot pou mete sou tout paj ou -->
@@ -906,6 +859,7 @@ Nou sispèk yon move bot te eseye vizite paj: ${page}
 </script>
 </body>
 </html>
+
 
 
 
