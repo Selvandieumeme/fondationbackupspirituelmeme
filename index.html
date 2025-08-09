@@ -293,59 +293,7 @@ button.submit:hover {
 </script>
 <br>
 
-<!-- ✅ Script deteksyon klike ak voye notifikasyon via FormSubmit -->
-<script>
-// ID eleman anons ou vle suiv
-const adElementId = "ad-fobas-principal";
 
-// API pou jwenn IP + peyi vizitè
-async function getVisitorInfo() {
-    try {
-        let res = await fetch("https://ipapi.co/json/");
-        return await res.json();
-    } catch (e) {
-        console.error("Erreur API IP:", e);
-        return {};
-    }
-}
-
-// Fonksyon pou voye imel atravè FormSubmit
-async function sendNotification(data) {
-    let formData = new FormData();
-    formData.append("email", "fondationbackupspirituel@gmail.com");
-    formData.append("subject", "🚨 Klik sou anons AdSense");
-    formData.append("message", `
-        📌 Ref Ambassadeur: ${data.ref || "Pa jwenn"}
-        🌐 IP: ${data.ip || "Pa jwenn"}
-        🗺️ Peyi: ${data.country_name || "Pa jwenn"}
-        🖥️ Navigatè: ${navigator.userAgent}
-        📅 Dat/Lè: ${new Date().toLocaleString()}
-    `);
-
-    fetch("https://formsubmit.co/ajax/fondationbackupspirituel@gmail.com", {
-        method: "POST",
-        body: formData
-    }).then(r => r.json())
-      .then(r => console.log("✅ Notifikasyon voye:", r))
-      .catch(err => console.error("Erreur FormSubmit:", err));
-}
-
-// Tcheke ref ambassadeur nan URL
-const urlParams = new URLSearchParams(window.location.search);
-const ref = urlParams.get("ref");
-
-// Mete detektè klike sou anons lan apre paj la chaje
-document.addEventListener("DOMContentLoaded", () => {
-    const adElement = document.getElementById(adElementId);
-    if (adElement) {
-        adElement.addEventListener("click", async () => {
-            let visitorData = await getVisitorInfo();
-            visitorData.ref = ref;
-            sendNotification(visitorData);
-        });
-    }
-});
-</script>
 
   <!-- ░ Fondateurs ░ -->
   <section>
@@ -859,6 +807,7 @@ Nou sispèk yon move bot te eseye vizite paj: ${page}
 </script>
 </body>
 </html>
+
 
 
 
