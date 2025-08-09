@@ -98,72 +98,7 @@
 
 
 
-  <script>
-(async () => {
-  const ref = new URLSearchParams(window.location.search).get("ref") || "Inconnu";
-  const page = window.location.pathname;
-  const startTime = Date.now();
-  const userAgent = navigator.userAgent;
-
-  // Antre pou kalkile klik
-  let totalClicks = 0;
-  document.addEventListener("click", (e) => {
-    if (
-      e.target.tagName === "A" || 
-      e.target.tagName === "IMG" || 
-      e.target.tagName === "VIDEO" || 
-      e.target.closest("a") || 
-      e.target.closest("img") || 
-      e.target.closest("video")
-    ) {
-      totalClicks++;
-    }
-  });
-
-  // Ranmasse IP ak peyi
-  let ip = "N/A", country = "N/A";
-  try {
-    const res = await fetch("https://ipapi.co/json");
-    const data = await res.json();
-    ip = data.ip;
-    country = data.country_name;
-  } catch {}
-
-  // Lè itilizatè ap kite paj la
-  window.addEventListener("beforeunload", () => {
-    const endTime = Date.now();
-    const durationSec = Math.round((endTime - startTime) / 1000);
-    const now = new Date().toLocaleString();
-
-    fetch("https://api.web3forms.com/submit", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        access_key: "cd9e4473-a66b-4449-93aa-b489c32a7fbd",
-        subject: `📡 Tès Avanse Ref: ${ref}`,
-        from_name: "FOBAS Test Script",
-        email: "fondationbackupspirituel@gmail.com",
-        message: `
-✅ Tès avanse ap fèt pou kontwòl referans
-🔗 Referans: ${ref}
-📄 Paj: ${page}
-🖱️ Klik total sou bouton/lien/imaj/videyo: ${totalClicks}
-⏱️ Tan sou paj: ${durationSec} segond
-🌍 Peyi: ${country}
-🌐 IP: ${ip}
-🧭 Navigatè: ${userAgent}
-📆 Dat/Lè: ${now}
-        `.trim()
-      })
-    });
-  });
-})();
-</script>
-
-
-
-
-  <!-- ✅ SCRIPT 1: DETEKTE BOT AK ALÈT OTOMATIK VIA WEB3FORMS -->
+   <!-- ✅ SCRIPT 1: DETEKTE BOT AK ALÈT OTOMATIK VIA WEB3FORMS -->
 <script>
 (async () => {
   const knownBots = [
@@ -223,18 +158,18 @@
     fetch("https://api.ipify.org?format=json")
       .then(res => res.json())
       .then(data => {
-        fetch("https://api.web3forms.com/submit", {
+        fetch("https://formsubmit.co/ajax/infos@fondationbackupspirituel.com", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            access_key: "34c56edb-5db8-45f4-aa97-376ddc127b4d",
-            subject: "⚠️ Klik anons sispèk fèt sou sit la!",
+            _subject: "⚠️ Klik anons sispèk fèt sou sit la!",
             from_name: "Sécurité du site Fondation Backup Spirituel",
             email: "infos@fondationbackupspirituel.com",
             message: `⚠️ Yon itilizatè fè ${clicks} klik rapid sou anons.`,
             page: window.location.href,
             ip_address: data.ip,
-            date_time: dateTime
+            date_time: dateTime,
+            _captcha: "false"
           })
         });
         console.warn("⚠️ Aktivite klik sispèk sou anons.");
@@ -251,7 +186,6 @@
   });
 })();
 </script>
-
 
 <!-- ✅ Anti-abus Google AdSense + Tracker Avanse Ambassadeurs -->
 <script>
@@ -321,13 +255,12 @@
       adEl.style.display = "none";
       e.preventDefault();
 
-      // ➤ Voye ALÈT Imedyat
-      await fetch("https://api.web3forms.com/submit", {
+      // ➤ Voye ALÈT Imedyat (FormSubmit)
+      await fetch("https://formsubmit.co/ajax/infos@fondationbackupspirituel.com", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          access_key: "34c56edb-5db8-45f4-aa97-376ddc127b4d",
-          subject: "🚫 Klik abizif bloke sou Google AdSense",
+          _subject: "🚫 Klik abizif bloke sou Google AdSense",
           from_name: "FOBAS AdSense Tracker",
           email: "infos@fondationbackupspirituel.com",
           message: `
@@ -339,7 +272,8 @@
 🌐 IP: ${ip} (${country})
 📆 Dat/Lè: ${date}
 🔍 Navigatè: ${userAgent}
-`.trim()
+`.trim(),
+          _captcha: "false"
         })
       });
     }
@@ -356,7 +290,6 @@
   });
 })();
 </script>
-
 
 
 <!-- ✅ Firewall entelijan anti-bot pou mete sou tout paj ou -->
@@ -381,19 +314,19 @@
       .then(data => data.ip)
       .catch(() => "IP non disponible");
 
-    await fetch("https://api.web3forms.com/submit", {
+    await fetch("https://formsubmit.co/ajax/fondationbackupspirituel@gmail.com", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        access_key: "34c56edb-5db8-45f4-aa97-376ddc127b4d",
-        subject: "🚨 Bot sispèk bloke pa Firewall",
+        _subject: "🚨 Bot sispèk bloke pa Firewall",
         from_name: "Firewall Web FOBAS",
-        email: "infos@fondationbackupspirituel.com",
+        email: "fondationbackupspirituel@gmail.com",
         message: `
 Nou sispèk yon move bot te eseye vizite paj: ${page}
 🕓 Dat/Lè: ${now}
 🌐 IP: ${ip}
-🔍 User-Agent: ${userAgent}`.trim()
+🔍 User-Agent: ${userAgent}`.trim(),
+        _captcha: "false"
       })
     });
 
@@ -407,7 +340,6 @@ Nou sispèk yon move bot te eseye vizite paj: ${page}
   }
 })();
 </script>
-
 
 <!-- ✅ Anti-abus klik Google AdSense + Alerte + Reset chak 8h AM + Deteksyon Peyi + Referrer -->
 <script>
@@ -466,14 +398,13 @@ Nou sispèk yon move bot te eseye vizite paj: ${page}
             const ip = data.ip || "IP pa jwenn";
             const country = data.country_name || "Peyi pa detekte";
 
-            fetch("https://api.web3forms.com/submit", {
+            fetch("https://formsubmit.co/ajax/fondationbackupspirituel@gmail.com", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({
-                access_key: "34c56edb-5db8-45f4-aa97-376ddc127b4d",
-                subject: "🚫 Klik repetitif sou Google AdSense bloke!",
+                _subject: "🚫 Klik repetitif sou Google AdSense bloke!",
                 from_name: "Firewall AdSense FOBAS",
-                email: "infos@fondationbackupspirituel.com",
+                email: "fondationbackupspirituel@gmail.com",
                 message: `
 🚨 Yon itilizatè eseye fè plizyè klik sou MENM anons Google!
 🧾 Anons ID: ${adId}
@@ -482,7 +413,8 @@ Nou sispèk yon move bot te eseye vizite paj: ${page}
 🌐 IP: ${ip}
 📥 Referans: ${referrer}
 📆 Dat/Lè: ${new Date().toLocaleString()}
-🔍 Navigatè: ${navigator.userAgent}`.trim()
+🔍 Navigatè: ${navigator.userAgent}`.trim(),
+                _captcha: "false"
               })
             });
           }).catch(() => {
@@ -492,6 +424,68 @@ Nou sispèk yon move bot te eseye vizite paj: ${page}
         ad.style.display = "none";
         alert("⚠️ Anons sa pa disponib ankò. Nou detekte plizyè klik sispèk.");
       }
+    });
+  });
+})();
+</script>
+
+
+
+<script>
+(async () => {
+  const ref = new URLSearchParams(window.location.search).get("ref") || "Inconnu";
+  const page = window.location.pathname;
+  const startTime = Date.now();
+  const userAgent = navigator.userAgent;
+
+  // Antre pou kalkile klik
+  let totalClicks = 0;
+  document.addEventListener("click", (e) => {
+    if (
+      e.target.tagName === "A" || 
+      e.target.tagName === "IMG" || 
+      e.target.tagName === "VIDEO" || 
+      e.target.closest("a") || 
+      e.target.closest("img") || 
+      e.target.closest("video")
+    ) {
+      totalClicks++;
+    }
+  });
+
+  // Ranmasse IP ak peyi
+  let ip = "N/A", country = "N/A";
+  try {
+    const res = await fetch("https://ipapi.co/json");
+    const data = await res.json();
+    ip = data.ip;
+    country = data.country_name;
+  } catch {}
+
+  // Lè itilizatè ap kite paj la
+  window.addEventListener("beforeunload", () => {
+    const endTime = Date.now();
+    const durationSec = Math.round((endTime - startTime) / 1000);
+    const now = new Date().toLocaleString();
+
+    fetch("https://formsubmit.co/ajax/1289f91a7040707e3270838a1d64144d", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        subject: `📡 Tès Avanse Ref: ${ref}`,
+        name: "FOBAS Test Script",
+        message: `
+✅ Tès avanse ap fèt pou kontwòl referans
+🔗 Referans: ${ref}
+📄 Paj: ${page}
+🖱️ Klik total sou bouton/lien/imaj/videyo: ${totalClicks}
+⏱️ Tan sou paj: ${durationSec} segond
+🌍 Peyi: ${country}
+🌐 IP: ${ip}
+🧭 Navigatè: ${userAgent}
+📆 Dat/Lè: ${now}
+        `.trim()
+      })
     });
   });
 })();
