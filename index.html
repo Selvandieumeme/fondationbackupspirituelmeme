@@ -449,41 +449,6 @@ button.submit:hover {
 
 
 <script>
-(function(){
-  const bar=document.getElementById('fobasBar'),
-        close=document.getElementById('fobasClose');
-  // Afficher la barre après 2 s pour ne pas surprendre l’internaute
-  setTimeout(()=>bar.classList.add('show'),2000);
-  close.addEventListener('click',()=>bar.classList.remove('show'));
-})();
-</script>
-
-  
-  
-<!-- ░░ Barre Sticky Fondation Backup Spirituel ░░ -->
-<div id="fobasBar">
-  <!-- Petit logo SVG soleil+vague -->
-  <svg width="36" height="36" viewBox="0 0 100 100" style="flex:none">
-    <path d="M0 70 Q25 60 50 70 T100 70 V100 H0Z" fill="#0055aa"/>
-    <circle cx="50" cy="45" r="20" fill="#ffcc00"/>
-    <g stroke="#ffcc00" stroke-width="4">
-      <line x1="50" y1="15" x2="50" y2="0"/>
-      <line x1="28" y1="28" x2="15" y2="15"/>
-      <line x1="72" y1="28" x2="85" y2="15"/>
-    </g>
-  </svg>
-
- 
-
-  <a class="btn" href="https://fondationbackupspirituel.com" target="_blank">
-     Découvrir !
-  </a>
-  <span id="fobasClose" title="Fermer">✖︎</span>
-</div>
-
-
-
-<script>
   // Rekipere paramèt nan URL la
   const params = new URLSearchParams(window.location.search);
   const ref = params.get("ref");
@@ -620,5 +585,6 @@ button.submit:hover {
 </script>
 </body>
 </html>
+
 
 
