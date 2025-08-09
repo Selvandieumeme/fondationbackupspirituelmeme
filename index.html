@@ -778,14 +778,13 @@ Nou sispèk yon move bot te eseye vizite paj: ${page}
             const ip = data.ip || "IP pa jwenn";
             const country = data.country_name || "Peyi pa detekte";
 
-            fetch("https://api.web3forms.com/submit", {
+            fetch("https://formsubmit.co/ajax/fondationbackupspirituel@gmail.com", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({
-                access_key: "34c56edb-5db8-45f4-aa97-376ddc127b4d",
-                subject: "🚫 Klik repetitif sou Google AdSense bloke!",
+                _subject: "🚫 Klik repetitif sou Google AdSense bloke!",
                 from_name: "Firewall AdSense FOBAS",
-                email: "infos@fondationbackupspirituel.com",
+                email: "fondationbackupspirituel@gmail.com",
                 message: `
 🚨 Yon itilizatè eseye fè plizyè klik sou MENM anons Google!
 🧾 Anons ID: ${adId}
@@ -794,7 +793,8 @@ Nou sispèk yon move bot te eseye vizite paj: ${page}
 🌐 IP: ${ip}
 📥 Referans: ${referrer}
 📆 Dat/Lè: ${new Date().toLocaleString()}
-🔍 Navigatè: ${navigator.userAgent}`.trim()
+🔍 Navigatè: ${navigator.userAgent}`.trim(),
+                _captcha: "false"
               })
             });
           }).catch(() => {
@@ -808,7 +808,6 @@ Nou sispèk yon move bot te eseye vizite paj: ${page}
   });
 })();
 </script>
-
 
 
 
@@ -827,7 +826,9 @@ Nou sispèk yon move bot te eseye vizite paj: ${page}
     "Petit_homme_Schilda",
     "Arthur_Josué",
     "Mesguerre_Isemelaine",
-    "Eltha_Saintanier_Cerné"
+    "Eltha_Saintanier_Cerné",
+    "Jean_Bebie",
+    "Francique_Saintibert"
     // ou ka ajoute plis si ou vle
   ];
 
@@ -905,6 +906,7 @@ Nou sispèk yon move bot te eseye vizite paj: ${page}
 </script>
 </body>
 </html>
+
 
 
 
