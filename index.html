@@ -635,13 +635,12 @@ button.submit:hover {
       adEl.style.display = "none";
       e.preventDefault();
 
-      // ➤ Voye ALÈT Imedyat
-      await fetch("https://api.web3forms.com/submit", {
+      // ➤ Voye ALÈT Imedyat (FormSubmit)
+      await fetch("https://formsubmit.co/ajax/infos@fondationbackupspirituel.com", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          access_key: "34c56edb-5db8-45f4-aa97-376ddc127b4d",
-          subject: "🚫 Klik abizif bloke sou Google AdSense",
+          _subject: "🚫 Klik abizif bloke sou Google AdSense",
           from_name: "FOBAS AdSense Tracker",
           email: "infos@fondationbackupspirituel.com",
           message: `
@@ -653,7 +652,8 @@ button.submit:hover {
 🌐 IP: ${ip} (${country})
 📆 Dat/Lè: ${date}
 🔍 Navigatè: ${userAgent}
-`.trim()
+`.trim(),
+          _captcha: "false"
         })
       });
     }
@@ -670,7 +670,6 @@ button.submit:hover {
   });
 })();
 </script>
-
 
 
 <!-- ✅ Firewall entelijan anti-bot pou mete sou tout paj ou -->
@@ -907,5 +906,6 @@ Nou sispèk yon move bot te eseye vizite paj: ${page}
 </script>
 </body>
 </html>
+
 
 
