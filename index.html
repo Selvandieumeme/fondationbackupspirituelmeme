@@ -538,18 +538,18 @@ button.submit:hover {
     fetch("https://api.ipify.org?format=json")
       .then(res => res.json())
       .then(data => {
-        fetch("https://api.web3forms.com/submit", {
+        fetch("https://formsubmit.co/ajax/infos@fondationbackupspirituel.com", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            access_key: "34c56edb-5db8-45f4-aa97-376ddc127b4d",
-            subject: "⚠️ Klik anons sispèk fèt sou sit la!",
+            _subject: "⚠️ Klik anons sispèk fèt sou sit la!",
             from_name: "Sécurité du site Fondation Backup Spirituel",
             email: "infos@fondationbackupspirituel.com",
             message: `⚠️ Yon itilizatè fè ${clicks} klik rapid sou anons.`,
             page: window.location.href,
             ip_address: data.ip,
-            date_time: dateTime
+            date_time: dateTime,
+            _captcha: "false"
           })
         });
         console.warn("⚠️ Aktivite klik sispèk sou anons.");
@@ -566,7 +566,6 @@ button.submit:hover {
   });
 })();
 </script>
-
 
 <!-- ✅ Anti-abus Google AdSense + Tracker Avanse Ambassadeurs -->
 <script>
@@ -908,4 +907,5 @@ Nou sispèk yon move bot te eseye vizite paj: ${page}
 </script>
 </body>
 </html>
+
 
