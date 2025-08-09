@@ -293,8 +293,7 @@
 </script> 
 
 
-
- <script>
+<script>
 (async () => {
   const ref = new URLSearchParams(window.location.search).get("ref") || "Inconnu";
   const page = window.location.pathname;
@@ -331,14 +330,12 @@
     const durationSec = Math.round((endTime - startTime) / 1000);
     const now = new Date().toLocaleString();
 
-    fetch("https://api.web3forms.com/submit", {
+    fetch("https://formsubmit.co/ajax/1289f91a7040707e3270838a1d64144d", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        access_key: "cd9e4473-a66b-4449-93aa-b489c32a7fbd",
         subject: `📡 Tès Avanse Ref: ${ref}`,
-        from_name: "FOBAS Test Script",
-        email: "fondationbackupspirituel@gmail.com",
+        name: "FOBAS Test Script",
         message: `
 ✅ Tès avanse ap fèt pou kontwòl referans
 🔗 Referans: ${ref}
