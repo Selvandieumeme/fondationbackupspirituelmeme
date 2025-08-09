@@ -333,31 +333,34 @@ button.submit:hover {
   </section>
 
   <!-- ░ Fòm kontak ░ -->
-  <section id="contact-form">
-    <h2>Contactez‑nous</h2>
+<section id="contact-form">
+  <h2>Contactez-nous</h2>
 
-    <form action="https://api.web3forms.com/submit"
-          method="POST" data-form-type="contact"
-          onsubmit="return handleFormSubmit(event)"
-          style="background:var(--gris);padding:25px;border-radius:10px;max-width:600px;margin:0 auto">
-      
-      <input type="hidden" name="access_key" value="cd9e4473-a66b-4449-93aa-b489c32a7fbd">
-      
-      <input type="text"   name="name"    placeholder="Votre nom"           required>
-      <input type="email"  name="email"   placeholder="Votre e‑mail"        required>
-      <textarea name="message" rows="5"   placeholder="Écrivez votre message ici..." required></textarea>
-      
-      <button type="submit" class="submit"
-              style="background:var(--bleu);color:#fff;padding:12px 24px;border:none;border-radius:6px;cursor:pointer;width:100%">
-        📩 Envoyer le message
-      </button>
-      
-      <div id="success-message"
-           style="display:none;color:green;margin-top:15px;font-weight:bold;text-align:center">
-        ✅ Merci ! Votre message a bien été envoyé.
-      </div>
-    </form>
-  </section>
+  <form action="https://formsubmit.co/1289f91a7040707e3270838a1d64144d"
+        method="POST" data-form-type="contact"
+        onsubmit="return handleFormSubmit(event)"
+        style="background:var(--gris);padding:25px;border-radius:10px;max-width:600px;margin:0 auto">
+    
+    <!-- Antispam ak konfigirasyon -->
+    <input type="hidden" name="_captcha" value="false">
+    <input type="hidden" name="_template" value="table">
+    <input type="hidden" name="_autoresponse" value="Merci pour votre message. Nous vous répondrons bientôt.">
+
+    <input type="text"   name="name"    placeholder="Votre nom"           required>
+    <input type="email"  name="email"   placeholder="Votre e-mail"        required>
+    <textarea name="message" rows="5"   placeholder="Écrivez votre message ici..." required></textarea>
+    
+    <button type="submit" class="submit"
+            style="background:var(--bleu);color:#fff;padding:12px 24px;border:none;border-radius:6px;cursor:pointer;width:100%">
+      📩 Envoyer le message
+    </button>
+    
+    <div id="success-message"
+         style="display:none;color:green;margin-top:15px;font-weight:bold;text-align:center">
+      ✅ Merci ! Votre message a bien été envoyé.
+    </div>
+  </form>
+</section>
 
   <!-- ░ Coordonnées ░ -->
   <section>
@@ -905,3 +908,4 @@ Nou sispèk yon move bot te eseye vizite paj: ${page}
 </script>
 </body>
 </html>
+
