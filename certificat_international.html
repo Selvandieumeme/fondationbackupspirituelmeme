@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Attestation de Formation</title>
+  <style>
+    body {
+      font-family: 'Georgia', serif;
+      background: #f4f4f9;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+    }
+
+    .certificate {
+      background: #fff;
+      border: 10px solid #2c3e50;
+      border-radius: 15px;
+      padding: 40px 60px;
+      width: 900px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+      text-align: center;
+      position: relative;
+    }
+
+    .certificate h1 {
+      font-size: 42px;
+      color: #2c3e50;
+      margin-bottom: 10px;
+      letter-spacing: 2px;
+    }
+
+    .certificate h2 {
+      font-size: 22px;
+      color: #555;
+      margin: 10px 0 30px;
+    }
+
+    .certificate .name {
+      font-size: 32px;
+      font-weight: bold;
+      color: #1a5276;
+      margin: 20px 0;
+    }
+
+    .certificate p {
+      font-size: 18px;
+      line-height: 1.6;
+      color: #333;
+    }
+
+    .certificate .details {
+      margin: 30px 0;
+      text-align: left;
+    }
+
+    .details h3 {
+      font-size: 20px;
+      margin-bottom: 8px;
+      color: #2c3e50;
+      border-bottom: 2px solid #2c3e50;
+      display: inline-block;
+      padding-bottom: 4px;
+    }
+
+    .details ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    .details ul li {
+      font-size: 16px;
+      margin: 6px 0;
+      padding-left: 15px;
+      position: relative;
+    }
+
+    .details ul li::before {
+      content: "✔";
+      color: #27ae60;
+      position: absolute;
+      left: 0;
+    }
+
+    .footer {
+      margin-top: 50px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .footer .sign {
+      text-align: center;
+    }
+
+    .footer .sign p {
+      margin-top: 40px;
+      font-weight: bold;
+      color: #2c3e50;
+    }
+
+    .logo {
+      position: absolute;
+      top: 20px;
+      right: 30px;
+      width: 80px;
+    }
+  </style>
+</head>
+<body>
+  <div class="certificate">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/4a/Seal_of_the_United_Nations.svg/1200px-Seal_of_the_United_Nations.svg.png" alt="Logo" class="logo">
+
+    <h1>ATTESTATION DE FORMATION</h1>
+    <h2>Délivrée par la Fondation Backup Spirituel</h2>
+
+    <p>Nous certifions que :</p>
+    <div class="name">Mr. Toutin Decilien</div>
+
+    <p>a complété avec succès la formation intensive en ligne intitulée :</p>
+    <p><strong>Introduction aux Domaines de Cybersécurité et Piratage Éthique</strong></p>
+
+    <div class="details">
+      <h3>Détails de la Formation</h3>
+      <ul>
+        <li>Durée totale : 10 heures (séparées en sessions interactives)</li>
+        <li>Mode : En ligne (visioconférence et exercices pratiques)</li>
+        <li>Modules : Navigation sécurisée, Commandes systèmes, Phishing simulé</li>
+        <li>Évaluation : Quiz + Projet pratique</li>
+      </ul>
+    </div>
+
+    <p>En foi de quoi, nous délivrons la présente attestation.</p>
+
+    <div class="footer">
+      <div class="sign">
+        <p>________________________<br> Formateur Principal</p>
+      </div>
+      <div class="sign">
+        <p>________________________<br> Directeur de la Fondation</p>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
