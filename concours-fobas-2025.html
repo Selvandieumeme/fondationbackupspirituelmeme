@@ -224,7 +224,63 @@
   </div>
      
 </div><br><br>
-  
+
+
+<!-- Seksyon Audio pou Konkou -->
+<div style="display: flex; gap: 30px; justify-content: center; margin: 20px 0;">
+
+  <!-- Mizik 1 -->
+  <div style="text-align: center;">
+    <audio id="audio1" src="lise-nina-jn-rabel.mp3"></audio>
+    <div>
+      <button onclick="playAudio('audio1')">▶ Play</button>
+      <button onclick="stopAudio('audio1')">⏹ Stop</button>
+      <a href="lise-nina-jn-rabel.mp3" download>
+        <button>⬇ Télécharger</button>
+      </a>
+    </div>
+    <p style="margin-top: 5px; font-weight: bold;">Lise Nina - Jn Rabel</p>
+  </div>
+
+  <!-- Mizik 2 -->
+  <div style="text-align: center;">
+    <audio id="audio2" src="Audio_Bilove"></audio>
+    <div>
+      <button onclick="playAudio('audio2')">▶ Play</button>
+      <button onclick="stopAudio('audio2')">⏹ Stop</button>
+      <a href="Audio_Lise" download>
+        <button>⬇ Télécharger</button>
+      </a>
+    </div>
+    <p style="margin-top: 5px; font-weight: bold;">Bilove Annda - Mare Rouge</p>
+  </div>
+
+</div>
+
+<!-- Script pou kontwole mizik yo -->
+<script>
+  function playAudio(id) {
+    let audio = document.getElementById(id);
+    let audios = document.querySelectorAll("audio");
+
+    // Stope tout lòt mizik avan
+    audios.forEach(a => {
+      if (a !== audio) {
+        a.pause();
+        a.currentTime = 0;
+      }
+    });
+
+    audio.play();
+  }
+
+  function stopAudio(id) {
+    let audio = document.getElementById(id);
+    audio.pause();
+    audio.currentTime = 0;
+  }
+</script><br><br>
+ 
 
 <form id="voteForm" action="https://formsubmit.co/infos@fondationbackupspirituel.com" method="POST">
   <!-- Pa montre captcha -->
