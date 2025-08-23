@@ -526,7 +526,7 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   // Rele fonksyon an pou match sa
-  showMatchResult(430, 190, "Lise Nina", "Cedieu Dieunise", "F", "F");
+  showMatchResult(430, 190, "Lise Nina Jn-Rabel #1", "Cedieu Dieunise Bombarde #1", "F", "F");
 </script>
 
 
@@ -582,7 +582,287 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // Egzanp apèl pou match sa
   showMatchResult(250, 250, "Bilove-Annda Mare Rouge", "Chancy Brisly Jn-Rabel", "M", "F", "final-result2", "detailed-result2");
-</script>
+</script><br><br>
+
+
+ <!-- --- TI SCRIPT POU OU REKOPYE PI BA --- -->
+<!-- Ou jis chanje dat la, non atis yo, pwen yo, ak sèks yo (F=fi, M=gason) -->
+<div class="match-section" style="margin:30px auto; max-width:600px; padding:20px; border:2px solid #000; border-radius:12px; background:#f9f9f9;">
+  <h3 style="text-align:center; font-size:16px; font-weight:bold; margin-bottom:15px; color:#0047AB;">
+    Jedi 21 Out 2025
+  </h3>
+
+  <div style="font-size:14px; text-align:justify; line-height:1.6; color:#000;">
+    <p><strong>Laurore Laurie</strong> — <span>70</span> Pts</p>
+    <p><strong>Kenlove Samedy</strong> — <span>0</span> Pt</p>
+  </div>
+
+  <!-- Rezilta final otomatik -->
+  <div id="final-result2" style="margin-top:15px; font-size:15px; font-weight:bold; text-align:center; color:#333;"></div>
+
+  <!-- Afichaj tèks konplè: Gagné / Perdu -->
+  <div id="detailed-result2" style="margin-top:10px; font-size:14px; text-align:center; color:#111;"></div>
+</div>
+
+<script>
+  function showMatchResult(p1, p2, name1, name2, sex1, sex2, resultId="final-result2", detailId="detailed-result2") {
+    let winner = "", loser = "";
+    let winnerText = "", loserText = "";
+
+    if (p1 > p2) {
+      winner = name1;
+      loser = name2;
+      winnerText = (sex1 === "F") ? "Gagnée" : "Gagné";
+      loserText = "Perdu";
+    } else if (p2 > p1) {
+      winner = name2;
+      loser = name1;
+      winnerText = (sex2 === "F") ? "Gagnée" : "Gagné";
+      loserText = "Perdu";
+    } else {
+      document.getElementById(resultId).innerHTML = "Match Nul";
+      document.getElementById(detailId).innerHTML = `${name1} — Égalité<br>${name2} — Égalité`;
+      return;
+    }
+
+    // Rezilta kout (san non yo)
+    document.getElementById(resultId).innerHTML = winnerText;
+
+    // Rezilta detay (ak non yo)
+    document.getElementById(detailId).innerHTML = `
+      ${winner} — ${winnerText}<br>
+      ${loser} — ${loserText}
+    `;
+  }
+
+  // Egzanp apèl pou match sa
+  showMatchResult(70, 0, "Laurore Laurie Mare Rouge #2", "Kenlove Samedy #2", "F", "M", "final-result2", "detailed-result2");
+</script><br><br>
+
+
+ <!-- --- TI SCRIPT POU OU REKOPYE PI BA --- -->
+<!-- Ou jis chanje dat la, non atis yo, pwen yo, ak sèks yo (F=fi, M=gason) -->
+<div class="match-section" style="margin:30px auto; max-width:600px; padding:20px; border:2px solid #000; border-radius:12px; background:#f9f9f9;">
+  <h3 style="text-align:center; font-size:16px; font-weight:bold; margin-bottom:15px; color:#0047AB;">
+    Vandredi 22 Out 2025
+  </h3>
+
+  <div style="font-size:14px; text-align:justify; line-height:1.6; color:#000;">
+    <p><strong>Bilove-Annda</strong> — <span>Pas encore...</span> Pts</p>
+    <p><strong>Lise Nina</strong> — <span>Pas encore...</span> Pts</p>
+  </div>
+
+  <!-- Rezilta final otomatik -->
+  <div id="final-result2" style="margin-top:15px; font-size:15px; font-weight:bold; text-align:center; color:#333;"></div>
+
+  <!-- Afichaj tèks konplè: Gagné / Perdu -->
+  <div id="detailed-result2" style="margin-top:10px; font-size:14px; text-align:center; color:#111;"></div>
+</div>
+
+<script>
+  function showMatchResult(p1, p2, name1, name2, sex1, sex2, resultId="final-result2", detailId="detailed-result2") {
+    let winner = "", loser = "";
+    let winnerText = "", loserText = "";
+
+    if (p1 > p2) {
+      winner = name1;
+      loser = name2;
+      winnerText = (sex1 === "F") ? "Gagnée" : "Gagné";
+      loserText = "Perdu";
+    } else if (p2 > p1) {
+      winner = name2;
+      loser = name1;
+      winnerText = (sex2 === "F") ? "Gagnée" : "Gagné";
+      loserText = "Perdu";
+    } else {
+      document.getElementById(resultId).innerHTML = "Match Nul";
+      document.getElementById(detailId).innerHTML = `${name1} — Égalité<br>${name2} — Égalité`;
+      return;
+    }
+
+    // Rezilta kout (san non yo)
+    document.getElementById(resultId).innerHTML = winnerText;
+
+    // Rezilta detay (ak non yo)
+    document.getElementById(detailId).innerHTML = `
+      ${winner} — ${winnerText}<br>
+      ${loser} — ${loserText}
+    `;
+  }
+
+  // Egzanp apèl pou match sa
+  showMatchResult(Pas encore..., Pas encore..., "Bilove-Annda Mare Rouge #1", "Lise Nina Jn-Rabel #1", "F", "F", "final-result2", "detailed-result2");
+</script><br><br>
+
+
+ <!-- --- TI SCRIPT POU OU REKOPYE PI BA --- -->
+<!-- Ou jis chanje dat la, non atis yo, pwen yo, ak sèks yo (F=fi, M=gason) -->
+<div class="match-section" style="margin:30px auto; max-width:600px; padding:20px; border:2px solid #000; border-radius:12px; background:#f9f9f9;">
+  <h3 style="text-align:center; font-size:16px; font-weight:bold; margin-bottom:15px; color:#0047AB;">
+    Mekredi 27 Out 2025
+  </h3>
+
+  <div style="font-size:14px; text-align:justify; line-height:1.6; color:#000;">
+    <p><strong>Chancy Brisly</strong> — <span>Pas encore...</span> Pts</p>
+    <p><strong>Kenlove Samedy</strong> — <span>Pas encore...</span> Pts</p>
+  </div>
+
+  <!-- Rezilta final otomatik -->
+  <div id="final-result2" style="margin-top:15px; font-size:15px; font-weight:bold; text-align:center; color:#333;"></div>
+
+  <!-- Afichaj tèks konplè: Gagné / Perdu -->
+  <div id="detailed-result2" style="margin-top:10px; font-size:14px; text-align:center; color:#111;"></div>
+</div>
+
+<script>
+  function showMatchResult(p1, p2, name1, name2, sex1, sex2, resultId="final-result2", detailId="detailed-result2") {
+    let winner = "", loser = "";
+    let winnerText = "", loserText = "";
+
+    if (p1 > p2) {
+      winner = name1;
+      loser = name2;
+      winnerText = (sex1 === "F") ? "Gagnée" : "Gagné";
+      loserText = "Perdu";
+    } else if (p2 > p1) {
+      winner = name2;
+      loser = name1;
+      winnerText = (sex2 === "F") ? "Gagnée" : "Gagné";
+      loserText = "Perdu";
+    } else {
+      document.getElementById(resultId).innerHTML = "Match Nul";
+      document.getElementById(detailId).innerHTML = `${name1} — Égalité<br>${name2} — Égalité`;
+      return;
+    }
+
+    // Rezilta kout (san non yo)
+    document.getElementById(resultId).innerHTML = winnerText;
+
+    // Rezilta detay (ak non yo)
+    document.getElementById(detailId).innerHTML = `
+      ${winner} — ${winnerText}<br>
+      ${loser} — ${loserText}
+    `;
+  }
+
+  // Egzanp apèl pou match sa
+  showMatchResult(Pas encore..., Pas encore..., "Chancy Brisly Jn-Rabel #2", "Kenlove Samedy Bombarde #2", "M", "M", "final-result2", "detailed-result2");
+</script><br><br>
+
+
+
+ <!-- --- TI SCRIPT POU OU REKOPYE PI BA --- -->
+<!-- Ou jis chanje dat la, non atis yo, pwen yo, ak sèks yo (F=fi, M=gason) -->
+<div class="match-section" style="margin:30px auto; max-width:600px; padding:20px; border:2px solid #000; border-radius:12px; background:#f9f9f9;">
+  <h3 style="text-align:center; font-size:16px; font-weight:bold; margin-bottom:15px; color:#0047AB;">
+    Jedi 28 Out 2025
+  </h3>
+
+  <div style="font-size:14px; text-align:justify; line-height:1.6; color:#000;">
+    <p><strong>Laurore Laurie</strong> — <span>Pas encore...</span> Pts</p>
+    <p><strong>Lise Nina</strong> — <span>Pas encore...</span> Pts</p>
+  </div>
+
+  <!-- Rezilta final otomatik -->
+  <div id="final-result2" style="margin-top:15px; font-size:15px; font-weight:bold; text-align:center; color:#333;"></div>
+
+  <!-- Afichaj tèks konplè: Gagné / Perdu -->
+  <div id="detailed-result2" style="margin-top:10px; font-size:14px; text-align:center; color:#111;"></div>
+</div>
+
+<script>
+  function showMatchResult(p1, p2, name1, name2, sex1, sex2, resultId="final-result2", detailId="detailed-result2") {
+    let winner = "", loser = "";
+    let winnerText = "", loserText = "";
+
+    if (p1 > p2) {
+      winner = name1;
+      loser = name2;
+      winnerText = (sex1 === "F") ? "Gagnée" : "Gagné";
+      loserText = "Perdu";
+    } else if (p2 > p1) {
+      winner = name2;
+      loser = name1;
+      winnerText = (sex2 === "F") ? "Gagnée" : "Gagné";
+      loserText = "Perdu";
+    } else {
+      document.getElementById(resultId).innerHTML = "Match Nul";
+      document.getElementById(detailId).innerHTML = `${name1} — Égalité<br>${name2} — Égalité`;
+      return;
+    }
+
+    // Rezilta kout (san non yo)
+    document.getElementById(resultId).innerHTML = winnerText;
+
+    // Rezilta detay (ak non yo)
+    document.getElementById(detailId).innerHTML = `
+      ${winner} — ${winnerText}<br>
+      ${loser} — ${loserText}
+    `;
+  }
+
+  // Egzanp apèl pou match sa
+  showMatchResult(Pas encore..., Pas encore..., "Laurore Laurie Mare Rouge #2", "Lise Nina Jn-Rabel #1", "F", "F", "final-result2", "detailed-result2");
+</script><br><br>
+
+
+
+ <!-- --- TI SCRIPT POU OU REKOPYE PI BA --- -->
+<!-- Ou jis chanje dat la, non atis yo, pwen yo, ak sèks yo (F=fi, M=gason) -->
+<div class="match-section" style="margin:30px auto; max-width:600px; padding:20px; border:2px solid #000; border-radius:12px; background:#f9f9f9;">
+  <h3 style="text-align:center; font-size:16px; font-weight:bold; margin-bottom:15px; color:#0047AB;">
+    Vandredi 29 Out 2025
+  </h3>
+
+  <div style="font-size:14px; text-align:justify; line-height:1.6; color:#000;">
+    <p><strong>Bilove-Annda</strong> — <span>Pas encore...</span> Pts</p>
+    <p><strong>Cedieu Dieunise</strong> — <span>Pas encore...</span> Pts</p>
+  </div>
+
+  <!-- Rezilta final otomatik -->
+  <div id="final-result2" style="margin-top:15px; font-size:15px; font-weight:bold; text-align:center; color:#333;"></div>
+
+  <!-- Afichaj tèks konplè: Gagné / Perdu -->
+  <div id="detailed-result2" style="margin-top:10px; font-size:14px; text-align:center; color:#111;"></div>
+</div>
+
+<script>
+  function showMatchResult(p1, p2, name1, name2, sex1, sex2, resultId="final-result2", detailId="detailed-result2") {
+    let winner = "", loser = "";
+    let winnerText = "", loserText = "";
+
+    if (p1 > p2) {
+      winner = name1;
+      loser = name2;
+      winnerText = (sex1 === "F") ? "Gagnée" : "Gagné";
+      loserText = "Perdu";
+    } else if (p2 > p1) {
+      winner = name2;
+      loser = name1;
+      winnerText = (sex2 === "F") ? "Gagnée" : "Gagné";
+      loserText = "Perdu";
+    } else {
+      document.getElementById(resultId).innerHTML = "Match Nul";
+      document.getElementById(detailId).innerHTML = `${name1} — Égalité<br>${name2} — Égalité`;
+      return;
+    }
+
+    // Rezilta kout (san non yo)
+    document.getElementById(resultId).innerHTML = winnerText;
+
+    // Rezilta detay (ak non yo)
+    document.getElementById(detailId).innerHTML = `
+      ${winner} — ${winnerText}<br>
+      ${loser} — ${loserText}
+    `;
+  }
+
+  // Egzanp apèl pou match sa
+  showMatchResult(Pas encore..., Pas encore..., "Bilove-Annda Mare Rouge #1", "Cedieu Dieunise Bombarde #1", "F", "F", "final-result2", "detailed-result2");
+</script><br><br>
+
+
+
  
 <!-- Tit ak paragraf santre -->
 <div style="text-align: center;">
