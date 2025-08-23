@@ -542,11 +542,46 @@ document.addEventListener("DOMContentLoaded", function () {
     <p><strong>Atis B</strong> — <span>420</span> Pts</p>
   </div>
 
+  <!-- Rezilta final otomatik -->
   <div id="final-result2" style="margin-top:15px; font-size:15px; font-weight:bold; text-align:center; color:#333;"></div>
+
+  <!-- Afichaj tèks konplè: Gagné / Perdu -->
+  <div id="detailed-result2" style="margin-top:10px; font-size:14px; text-align:center; color:#111;"></div>
 </div>
 
 <script>
-  showMatchResult(500, 420, "Atis A", "Atis B", "M", "F");
+  function showMatchResult(p1, p2, name1, name2, sex1, sex2, resultId="final-result2", detailId="detailed-result2") {
+    let winner = "", loser = "";
+    let winnerText = "", loserText = "";
+
+    if (p1 > p2) {
+      winner = name1;
+      loser = name2;
+      winnerText = (sex1 === "F") ? "Gagnée" : "Gagné";
+      loserText = "Perdu";
+    } else if (p2 > p1) {
+      winner = name2;
+      loser = name1;
+      winnerText = (sex2 === "F") ? "Gagnée" : "Gagné";
+      loserText = "Perdu";
+    } else {
+      document.getElementById(resultId).innerHTML = "Match Nul";
+      document.getElementById(detailId).innerHTML = `${name1} — Égalité<br>${name2} — Égalité`;
+      return;
+    }
+
+    // Rezilta kout (san non yo)
+    document.getElementById(resultId).innerHTML = winnerText;
+
+    // Rezilta detay (ak non yo)
+    document.getElementById(detailId).innerHTML = `
+      ${winner} — ${winnerText}<br>
+      ${loser} — ${loserText}
+    `;
+  }
+
+  // Egzanp apèl pou match sa
+  showMatchResult(500, 420, "Atis A", "Atis B", "M", "F", "final-result2", "detailed-result2");
 </script><br><br>
  
 <!-- Tit ak paragraf santre -->
