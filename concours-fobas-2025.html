@@ -483,6 +483,72 @@ document.addEventListener("DOMContentLoaded", function () {
 </script><br><br><br>     
 
 
+<!-- Seksyon Match Rezilta FOBAS 2025 -->
+<div class="match-section" style="margin:30px auto; max-width:600px; padding:20px; border:2px solid #000; border-radius:12px; background:#f9f9f9;">
+
+  <!-- Dat Match la -->
+  <h3 style="text-align:center; font-size:16px; font-weight:bold; margin-bottom:15px; color:#0047AB;">
+    Vandredi 22 Out 2025
+  </h3>
+
+  <!-- Rezilta Atis yo -->
+  <div id="match-result" style="font-size:14px; text-align:justify; line-height:1.6; color:#000;">
+    <p><strong>Lise Nina</strong> — <span id="score1">430</span> Pts</p>
+    <p><strong>Bilove-Annda</strong> — <span id="score2">400</span> Pts</p>
+  </div>
+
+  <!-- Rezilta Final Otomatik -->
+  <div id="final-result" style="margin-top:15px; font-size:15px; font-weight:bold; text-align:center; color:#333;">
+    <!-- Rezilta a ap monte otomatikman isit -->
+  </div>
+</div>
+
+<!-- SCRIPT POU JERE MATCH YO -->
+<script>
+  function showMatchResult(score1, score2, name1, name2, gender1, gender2) {
+    let winner = "";
+    let loser = "";
+
+    if (score1 > score2) {
+      winner = (gender1 === "F") ? name1 + " — Gagnée" : name1 + " — Gagné";
+      loser = name2 + " — Perdu";
+    } else if (score2 > score1) {
+      winner = (gender2 === "F") ? name2 + " — Gagnée" : name2 + " — Gagné";
+      loser = name1 + " — Perdu";
+    } else {
+      winner = "Match Nul";
+    }
+
+    document.getElementById("final-result").innerHTML = `
+      <p style="color:green;">${winner}</p>
+      <p style="color:red;">${loser}</p>
+    `;
+  }
+
+  // Rele fonksyon an pou match sa
+  showMatchResult(430, 400, "Lise Nina", "Bilove-Annda", "F", "M");
+</script>
+
+
+<!-- --- TI SCRIPT POU OU REKOPYE PI BA --- -->
+<!-- Ou jis chanje dat la, non atis yo, pwen yo, ak sèks yo (F=fi, M=gason) -->
+<div class="match-section" style="margin:30px auto; max-width:600px; padding:20px; border:2px solid #000; border-radius:12px; background:#f9f9f9;">
+  <h3 style="text-align:center; font-size:16px; font-weight:bold; margin-bottom:15px; color:#0047AB;">
+    Samdi 23 Out 2025
+  </h3>
+
+  <div style="font-size:14px; text-align:justify; line-height:1.6; color:#000;">
+    <p><strong>Atis A</strong> — <span>500</span> Pts</p>
+    <p><strong>Atis B</strong> — <span>420</span> Pts</p>
+  </div>
+
+  <div id="final-result2" style="margin-top:15px; font-size:15px; font-weight:bold; text-align:center; color:#333;"></div>
+</div>
+
+<script>
+  showMatchResult(500, 420, "Atis A", "Atis B", "M", "F");
+</script><br><br>
+ 
 <!-- Tit ak paragraf santre -->
 <div style="text-align: center;">
   <h2>Inscrivez-vous à notre Newsletter</h2>
