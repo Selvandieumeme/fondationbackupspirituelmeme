@@ -472,14 +472,14 @@ s0.parentNode.insertBefore(s1,s0);
 <!-- STYLE POU KONTEUR -->
 <style>
   #fbs-counter {
-    position: absolute; 
-    top: 10px; 
-    left: 10px; 
-    display: flex; 
-    align-items: center; 
+    position: fixed; /* toujou vizib, pa deplase */
+    top: 10px;
+    left: 10px;
+    display: flex;
+    align-items: center;
     gap: 10px;
-    background: #ffffffdd; 
-    padding: 4px 10px; 
+    background: #ffffffdd;
+    padding: 4px 10px;
     border-radius: 12px;
     font-family: Arial, sans-serif;
     font-size: 12px;
@@ -487,11 +487,16 @@ s0.parentNode.insertBefore(s1,s0);
     color: #222;
     box-shadow: 0 0 6px rgba(0,0,0,0.2);
     z-index: 9999;
+    width: 150px;       /* fòse bwat la piti */
+    height: 80px;       /* limite wotè */
+    overflow: hidden;   /* anpeche depase */
   }
-  #fbs-counter script,
-  #fbs-counter iframe {
-    display: inline-block;
-    vertical-align: middle;
+
+  #fbs-counter iframe,
+  #fbs-counter canvas {
+    width: 100% !important;   /* adapte ak bwat la */
+    height: auto !important;  /* kenbe pwopòsyon */
+    max-height: 70px;         /* pa depase */
   }
 </style>
 
@@ -681,6 +686,7 @@ s0.parentNode.insertBefore(s1,s0);
   
 </body>
 </html>
+
 
 
 
