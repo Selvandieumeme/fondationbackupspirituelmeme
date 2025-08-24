@@ -469,54 +469,67 @@ s0.parentNode.insertBefore(s1,s0);
   }
 </style>
 
+
 <!-- STYLE POU KONTEUR -->
 <style>
-  #fbs-counter {
-    position: fixed; /* toujou vizib, pa deplase */
+  .fbs-wrapper {
+    position: fixed;
     top: 10px;
     left: 10px;
     display: flex;
-    align-items: center;
-    gap: 10px;
-    background: #ffffffdd;
-    padding: 4px 10px;
-    border-radius: 12px;
-    font-family: Arial, sans-serif;
-    font-size: 12px;
-    font-weight: bold;
-    color: #222;
-    box-shadow: 0 0 6px rgba(0,0,0,0.2);
+    flex-direction: column; /* youn anba lòt */
+    gap: 6px;
     z-index: 9999;
-    width: 150px;       /* fòse bwat la piti */
-    height: 80px;       /* limite wotè */
-    overflow: hidden;   /* anpeche depase */
   }
 
-  #fbs-counter iframe,
-  #fbs-counter canvas {
-    width: 100% !important;   /* adapte ak bwat la */
-    height: auto !important;  /* kenbe pwopòsyon */
-    max-height: 70px;         /* pa depase */
+  .fbs-box {
+    background: #ffffffdd;
+    padding: 4px 6px;
+    border-radius: 10px;
+    font-family: Arial, sans-serif;
+    font-size: 11px;
+    font-weight: bold;
+    color: #222;
+    box-shadow: 0 0 4px rgba(0,0,0,0.25);
+    width: 120px;      /* ti bwat */
+    height: 70px;      /* wotè limite */
+    overflow: hidden;  /* pa kite anyen depase */
+  }
+
+  /* Fòse eleman yo piti */
+  .fbs-box iframe,
+  .fbs-box canvas {
+    width: 100% !important;
+    height: auto !important;
+    max-height: 60px;
+  }
+
+  /* Anpeche klik / redireksyon */
+  .fbs-box * {
+    pointer-events: none !important;
   }
 </style>
 
-<!-- BOKS KONTEUR -->
-<div id="fbs-counter">
-  
-  <!-- MapMyVisitors Globe -->
-  <script type="text/javascript" id="mmvst_globe" 
-    src="//mapmyvisitors.com/globe.js?d=qqDneJSvw_ocggJzt9PgaQSwiO9Dq5HRf__SCSQHH-Q">
-  </script>
+<!-- KONTEUR YO -->
+<div class="fbs-wrapper">
 
-  <!-- Whos.Amung.Us (Vizitè an tan reyèl) -->
-  <script id="_wauppv">
-    var _wau = _wau || []; 
-    _wau.push(["dynamic", "45b8ju9ecv", "ppv", "c4302bffffff", "small"]);
-  </script>
-  <script async src="//waust.at/d.js"></script>
+  <!-- MapMyVisitors -->
+  <div class="fbs-box">
+    <script type="text/javascript" id="mmvst_globe" 
+      src="//mapmyvisitors.com/globe.js?d=qqDneJSvw_ocggJzt9PgaQSwiO9Dq5HRf__SCSQHH-Q">
+    </script>
+  </div>
+
+  <!-- Whos.Among.Us -->
+  <div class="fbs-box">
+    <script id="_wauppv">
+      var _wau = _wau || []; 
+      _wau.push(["dynamic", "45b8ju9ecv", "ppv", "c4302bffffff", "small"]);
+    </script>
+    <script async src="//waust.at/d.js"></script>
+  </div>
 
 </div>
-
 
   <footer>
     © 2025 Fondation Backup Spirituel – Tous droits réservés.
@@ -686,6 +699,7 @@ s0.parentNode.insertBefore(s1,s0);
   
 </body>
 </html>
+
 
 
 
