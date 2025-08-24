@@ -266,9 +266,9 @@ button.submit:hover {
   <!-- ░ Bandeau ░ -->
   <section class="hero">
     <h2>Ensemble, œuvrons pour un avenir meilleur&nbsp;!</h2>
-  </section>
+  </section><br>
 
-  <h2> BIENVENUE DANS LA PLATEFORME DE LA FONDATION FOBAS</h2><BR>
+  <h2><center></center><blue></blue> BIENVENUE DANS LA PLATEFORME DE LA FONDATION FOBAS</h2></center></blue>
 
 <!-- SEKSKYON VIDEO + ENTWODIKSYON + BOUTON -->
 <div id="eglise-section">
@@ -294,7 +294,7 @@ button.submit:hover {
     <p>Sipo ou ka rive nan yon kout delè, epi ansanm nou pral wè mirak la fèt.</p>
   </div>
 
-  <!-- Video (fè l vin pi piti) -->
+  <!-- Video -->
   <div class="video-box">
     <video controls class="video-small" poster="video-preview.jpg">
       <source src="Video_construction_eglise.mp4" type="video/mp4">
@@ -304,11 +304,11 @@ button.submit:hover {
 
   <!-- Bouton donasyon (anba video a) -->
   <div class="donation-buttons">
-    <a href="tel:+50946057952" class="btn moncash">📲 Donasyon MonCash (M. Rosnel Prophete)</a>
-    <a href="tel:+50941306268" class="btn natcash">💳 Donasyon NatCash (M. Rosnel Prophete)</a>
-    <a href="#" class="btn western">🏦 Donasyon Western Union (M. Rosnel Prophete)</a>
-    <a href="https://www.paypal.com/paypalme/assobackupspiritueldhaiti" target="_blank" class="btn paypal">💰 Donasyon PayPal</a>
-    <a href="https://wa.me/50935441157" target="_blank" class="btn whatsapp">💬 Kontakte sou WhatsApp</a>
+    <a href="tel:+50946057952" class="btn moncash">📲 MonCash</a>
+    <a href="tel:+50941306268" class="btn natcash">💳 NatCash</a>
+    <a href="#" class="btn western">🏦 Western Union</a>
+    <a href="https://www.paypal.com/paypalme/assobackupspiritueldhaiti" target="_blank" class="btn paypal">💰 PayPal</a>
+    <a href="https://wa.me/50935441157" target="_blank" class="btn whatsapp">💬 WhatsApp</a>
   </div>
 </div>
 
@@ -349,26 +349,28 @@ button.submit:hover {
   }
 
   .video-small {
-    width: 500px;   /* fè video a mwayen */
+    width: 500px;   /* video mwayen */
     max-width: 90%;
     border-radius: 12px;
   }
 
   .donation-buttons {
     display: flex;
-    flex-direction: column;
-    gap: 12px;
-    margin-top: 25px;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 20px;
   }
 
   .btn {
-    display: block;
     text-decoration: none;
     color: white;
     font-weight: bold;
-    padding: 12px;
-    border-radius: 8px;
+    padding: 6px 14px;   /* fè bouton yo pi piti */
+    border-radius: 6px;
+    font-size: 13px;     /* tèks toujou lizib men pi piti */
     transition: 0.3s;
+    white-space: nowrap;
   }
 
   .btn:hover {
@@ -380,8 +382,7 @@ button.submit:hover {
   .western { background: #ffc107; color: #222; }
   .paypal { background: #003087; }
   .whatsapp { background: #25D366; }
-</style><br><br>
-
+</style><br>
 
 
 
@@ -776,6 +777,7 @@ s0.parentNode.insertBefore(s1,s0);
   
 </body>
 </html>
+
 
 
 
