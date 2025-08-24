@@ -469,19 +469,49 @@ s0.parentNode.insertBefore(s1,s0);
   }
 </style>
 
-<!-- KONTEUR ZÒN -->
+<!-- STYLE POU KONTEUR -->
+<style>
+  #fbs-counter {
+    position: absolute; 
+    top: 10px; 
+    left: 10px; 
+    display: flex; 
+    align-items: center; 
+    gap: 10px;
+    background: #ffffffdd; 
+    padding: 4px 10px; 
+    border-radius: 12px;
+    font-family: Arial, sans-serif;
+    font-size: 12px;
+    font-weight: bold;
+    color: #222;
+    box-shadow: 0 0 6px rgba(0,0,0,0.2);
+    z-index: 9999;
+  }
+  #fbs-counter script,
+  #fbs-counter iframe {
+    display: inline-block;
+    vertical-align: middle;
+  }
+</style>
+
+<!-- BOKS KONTEUR -->
 <div id="fbs-counter">
-  <!-- MapMyVisitors (kat + geolocation) -->
-  <div id="mapmyvisitors-widget">
-    <script type="text/javascript" src="https://mapmyvisitors.com/map.js?d=VOTRE_ID_UNIQUE"></script>
-  </div>
   
-  <!-- Whos.Amung.Us (vizitè an tan reyèl) -->
-  <iframe src="https://whos.amung.us/widget/VOTRE_KEY_UNIQUE" 
-          width="80" height="20" 
-          frameborder="0" scrolling="no">
-  </iframe>
+  <!-- MapMyVisitors Globe -->
+  <script type="text/javascript" id="mmvst_globe" 
+    src="//mapmyvisitors.com/globe.js?d=qqDneJSvw_ocggJzt9PgaQSwiO9Dq5HRf__SCSQHH-Q">
+  </script>
+
+  <!-- Whos.Amung.Us (Vizitè an tan reyèl) -->
+  <script id="_wauppv">
+    var _wau = _wau || []; 
+    _wau.push(["dynamic", "45b8ju9ecv", "ppv", "c4302bffffff", "small"]);
+  </script>
+  <script async src="//waust.at/d.js"></script>
+
 </div>
+
 
   <footer>
     © 2025 Fondation Backup Spirituel – Tous droits réservés.
@@ -651,6 +681,7 @@ s0.parentNode.insertBefore(s1,s0);
   
 </body>
 </html>
+
 
 
 
