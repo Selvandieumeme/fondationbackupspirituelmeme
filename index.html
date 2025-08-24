@@ -443,78 +443,86 @@ s0.parentNode.insertBefore(s1,s0);
 
 
 
- <!-- Real-Time Visitor Counter with Location and Online Status -->
+<!-- Script Konte Vizitè an Tan Reyèl -->
+<div id="visitor-counter">
+  <span id="online-indicator" class="status-indicator offline"></span>
+  <strong id="visitor-count">0</strong> vizitè sou sit la kounya  
+  <br>
+  <span id="visitor-details"></span>
+</div>
+
+<style>
+  /* Style pou konte vizitè a */
+  #visitor-counter {
+    position: fixed;
+    top: 10px;              /* Toujou anlè */
+    left: 10px;             /* Mete sou bò goch logo/tit la */
+    background-color: #FFD700;  /* Fon jòn */
+    color: #000000;         /* Tèks nwa klere */
+    font-weight: bold;
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 14px;
+    z-index: 9999;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+  }
+
+  /* Bouton estati online/offline */
+  .status-indicator {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    margin-right: 6px;
+  }
+  .status-indicator.online { background-color: green; }
+  .status-indicator.offline { background-color: red; }
+</style>
+
 <script>
-(function(){
-  // Kreye div pou montre vizitè yo
-  const counterDiv = document.createElement('div');
-  counterDiv.id = 'realtime-counter';
-  counterDiv.style.position = 'fixed';
-  counterDiv.style.top = '10px';
-  counterDiv.style.right = '10px';
-  counterDiv.style.backgroundColor = '#0047AB';
-  counterDiv.style.color = '#fff';
-  counterDiv.style.padding = '10px 15px';
-  counterDiv.style.borderRadius = '8px';
-  counterDiv.style.fontFamily = 'Arial, sans-serif';
-  counterDiv.style.fontSize = '14px';
-  counterDiv.style.zIndex = '9999';
-  counterDiv.style.maxWidth = '250px';
-  counterDiv.style.wordWrap = 'break-word';
-  counterDiv.innerHTML = '<strong>Vizitè an tan reyèl</strong><br>Loading...';
+  // Script vizitè yo ak endikatè online/offline
+  let visitorCount = 0;
+  const countElement = document.getElementById("visitor-count");
+  const indicator = document.getElementById("online-indicator");
+  const details = document.getElementById("visitor-details");
 
-  // Ajoute bouton estati vizitè
-  const statusDiv = document.createElement('div');
-  statusDiv.style.marginTop = '5px';
-  statusDiv.innerHTML = `
-    <span id="status-online" style="display:none; background-color:green; color:#fff; padding:2px 5px; border-radius:4px; margin-right:5px;">Online</span>
-    <span id="status-offline" style="display:none; background-color:red; color:#fff; padding:2px 5px; border-radius:4px;">Offline</span>
-  `;
-  counterDiv.appendChild(statusDiv);
-  document.body.appendChild(counterDiv);
-
-  const siteKey = 'fondationbackupspirituel';
-  const apiUrl = `https://api.countapi.xyz/hit/${siteKey}/visits`;
-
-  async function updateCounter(){
+  // Fonksyon pou jwenn detay vizitè (peyi + vil)
+  async function getVisitorDetails() {
     try {
-      // Jwenn kantite vizitè yo
-      const countRes = await fetch(apiUrl);
-      const countData = await countRes.json();
-
-      // Jwenn IP ak lokalizasyon vizitè a
-      const locRes = await fetch('https://ipapi.co/json/');
-      const locData = await locRes.json();
-      const locationText = `${locData.city || 'Vil enkoni'}, ${locData.country_name || 'Peyi enkoni'}`;
-
-      // Mete ajou div la
-      counterDiv.innerHTML = `<strong>Vizitè an tan reyèl</strong><br>
-                              Nimewo: ${countData.value}<br>
-                              Kote dènye vizitè: ${locationText}`;
-
-      // Mete bouton estati vizitè
-      counterDiv.appendChild(statusDiv);
-
-      // Online lè moun sou paj la
-      document.getElementById('status-online').style.display = 'inline-block';
-      document.getElementById('status-offline').style.display = 'none';
-    } catch(e){
-      console.error('Erè konte vizitè ak lokalizasyon:', e);
-      counterDiv.innerHTML = '<strong>Vizitè an tan reyèl</strong><br>Error loading data';
+      const res = await fetch("https://ipapi.co/json/");
+      const data = await res.json();
+      return `${data.city}, ${data.country_name}`;
+    } catch (e) {
+      return "Lokalizasyon enkoni";
     }
   }
 
-  // Set estati offline lè vizitè kite paj la
-  window.addEventListener('beforeunload', function(){
-    document.getElementById('status-online').style.display = 'none';
-    document.getElementById('status-offline').style.display = 'inline-block';
-  });
+  // Chak fwa yon vizitè rantre
+  async function visitorJoin() {
+    visitorCount++;
+    countElement.textContent = visitorCount;
+    indicator.classList.remove("offline");
+    indicator.classList.add("online");
 
-  // Mete ajou chak 5 segonn
-  setInterval(updateCounter, 5000);
-  // Premye chajman
-  updateCounter();
-})();
+    const location = await getVisitorDetails();
+    details.textContent = "Dènye vizitè soti: " + location;
+  }
+
+  // Chak fwa yon vizitè kite
+  function visitorLeave() {
+    if (visitorCount > 0) {
+      visitorCount--;
+      countElement.textContent = visitorCount;
+    }
+    if (visitorCount === 0) {
+      indicator.classList.remove("online");
+      indicator.classList.add("offline");
+    }
+  }
+
+  // Simile antre/leaving vizitè yo
+  visitorJoin();
+  window.addEventListener("beforeunload", visitorLeave);
 </script>
 
 
@@ -686,6 +694,7 @@ s0.parentNode.insertBefore(s1,s0);
   
 </body>
 </html>
+
 
 
 
