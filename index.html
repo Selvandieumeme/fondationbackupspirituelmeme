@@ -470,60 +470,30 @@ s0.parentNode.insertBefore(s1,s0);
 </style>
 
 
-<!-- STYLE POU KONTEUR -->
+<!-- STYLE POU POZISYON KONTEUR -->
 <style>
-  /* Wrapper pou mete toude kontè yo */
-  #wau-top, #wau-bottom {
-    position: fixed;
+  #wau-counter {
+    position: fixed;   /* Toujou vizib */
+    top: 10px;         /* Anlè */
+    left: 10px;        /* Agoch */
     z-index: 9999;
-    background: #ffffffdd;
-    padding: 3px 6px;
-    border-radius: 8px;
-    box-shadow: 0 0 4px rgba(0,0,0,0.25);
-    font-family: Arial, sans-serif;
-    font-size: 11px;
-    font-weight: bold;
-    color: #222;
-    pointer-events: none; /* Anpeche klik/redireksyon */
+    pointer-events: none; /* Bloke klik, anpeche redireksyon */
   }
 
-  /* Youn anlè agoch */
-  #wau-top {
-    top: 10px;
-    left: 10px;
-  }
-
-  /* Youn anba agoch */
-  #wau-bottom {
-    bottom: 10px;
-    left: 10px;
-  }
-
-  /* Limite gwosè */
-  #wau-top iframe, #wau-bottom iframe,
-  #wau-top canvas, #wau-bottom canvas {
-    width: 120px !important;
-    height: 60px !important;
+  #wau-counter iframe,
+  #wau-counter canvas {
+    pointer-events: none !important; /* Asire pa gen klik ditou */
   }
 </style>
 
-<!-- KONTEUR ANLÈ -->
-<div id="wau-top">
-  <script>
+<!-- KONTEUR (afiche anlè a goch) -->
+<div id="wau-counter">
+  <script id="_wauxwz">
     var _wau = _wau || []; 
-    _wau.push(["dynamic", "45b8ju9ecv", "topv", "c4302bffffff", "small"]);
+    _wau.push(["dynamic", "45b8ju9ecv", "xwz", "c4302bffffff", "small"]);
   </script>
+  <script async src="//waust.at/d.js"></script>
 </div>
-
-<!-- KONTEUR ANBA -->
-<div id="wau-bottom">
-  <script>
-    _wau.push(["dynamic", "45b8ju9ecv", "botv", "c4302bffffff", "small"]);
-  </script>
-</div>
-
-<!-- Sèl fwa nou rele script la -->
-<script async src="//waust.at/d.js"></script>
 
   <footer>
     © 2025 Fondation Backup Spirituel – Tous droits réservés.
@@ -693,6 +663,7 @@ s0.parentNode.insertBefore(s1,s0);
   
 </body>
 </html>
+
 
 
 
