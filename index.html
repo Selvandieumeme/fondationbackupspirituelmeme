@@ -12,6 +12,82 @@
  <meta name="linkmania" content="f536dad19227554"> 
 
 
+
+  <!-- Real-Time Visitor Counter with Location and Online Status -->
+<script>
+(function(){
+  // Kreye div pou montre vizitè yo
+  const counterDiv = document.createElement('div');
+  counterDiv.id = 'realtime-counter';
+  counterDiv.style.position = 'fixed';
+  counterDiv.style.top = '10px';
+  counterDiv.style.right = '10px';
+  counterDiv.style.backgroundColor = '#0047AB';
+  counterDiv.style.color = '#fff';
+  counterDiv.style.padding = '10px 15px';
+  counterDiv.style.borderRadius = '8px';
+  counterDiv.style.fontFamily = 'Arial, sans-serif';
+  counterDiv.style.fontSize = '14px';
+  counterDiv.style.zIndex = '9999';
+  counterDiv.style.maxWidth = '250px';
+  counterDiv.style.wordWrap = 'break-word';
+  counterDiv.innerHTML = '<strong>Vizitè an tan reyèl</strong><br>Loading...';
+
+  // Ajoute bouton estati vizitè
+  const statusDiv = document.createElement('div');
+  statusDiv.style.marginTop = '5px';
+  statusDiv.innerHTML = `
+    <span id="status-online" style="display:none; background-color:green; color:#fff; padding:2px 5px; border-radius:4px; margin-right:5px;">Online</span>
+    <span id="status-offline" style="display:none; background-color:red; color:#fff; padding:2px 5px; border-radius:4px;">Offline</span>
+  `;
+  counterDiv.appendChild(statusDiv);
+  document.body.appendChild(counterDiv);
+
+  const siteKey = 'fondationbackupspirituel';
+  const apiUrl = `https://api.countapi.xyz/hit/${siteKey}/visits`;
+
+  async function updateCounter(){
+    try {
+      // Jwenn kantite vizitè yo
+      const countRes = await fetch(apiUrl);
+      const countData = await countRes.json();
+
+      // Jwenn IP ak lokalizasyon vizitè a
+      const locRes = await fetch('https://ipapi.co/json/');
+      const locData = await locRes.json();
+      const locationText = `${locData.city || 'Vil enkoni'}, ${locData.country_name || 'Peyi enkoni'}`;
+
+      // Mete ajou div la
+      counterDiv.innerHTML = `<strong>Vizitè an tan reyèl</strong><br>
+                              Nimewo: ${countData.value}<br>
+                              Kote dènye vizitè: ${locationText}`;
+
+      // Mete bouton estati vizitè
+      counterDiv.appendChild(statusDiv);
+
+      // Online lè moun sou paj la
+      document.getElementById('status-online').style.display = 'inline-block';
+      document.getElementById('status-offline').style.display = 'none';
+    } catch(e){
+      console.error('Erè konte vizitè ak lokalizasyon:', e);
+      counterDiv.innerHTML = '<strong>Vizitè an tan reyèl</strong><br>Error loading data';
+    }
+  }
+
+  // Set estati offline lè vizitè kite paj la
+  window.addEventListener('beforeunload', function(){
+    document.getElementById('status-online').style.display = 'none';
+    document.getElementById('status-offline').style.display = 'inline-block';
+  });
+
+  // Mete ajou chak 5 segonn
+  setInterval(updateCounter, 5000);
+  // Premye chajman
+  updateCounter();
+})();
+</script>
+
+
   <!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-387F2991P7"></script>
 <script>
@@ -609,6 +685,7 @@ s0.parentNode.insertBefore(s1,s0);
   
 </body>
 </html>
+
 
 
 
