@@ -609,7 +609,35 @@ s0.parentNode.insertBefore(s1,s0);
   <script async src="//waust.at/d.js"></script>
 </div>
 
-  
+
+
+  <!-- STYLE MAP WHOS.AMUNG.US -->
+<style>
+  #wau-mapbox {
+    position: fixed;  /* toujou vizib */
+    top: 10px;        /* espas anwo */
+    left: 10px;       /* espas agoch */
+    background: #ffffffdd;
+    padding: 4px;
+    border-radius: 8px;
+    box-shadow: 0 0 6px rgba(0,0,0,0.15);
+    z-index: 9999;    /* pou l toujou devan */
+  }
+  #wau-mapbox iframe, 
+  #wau-mapbox canvas {
+    width: 120px !important;   /* fè map la piti */
+    height: 80px !important;   /* limite wotè */
+  }
+</style>
+
+<!-- TI MAP VIZITÈ ANWO AGOCH -->
+<div id="wau-mapbox">
+  <script id="_waumap">
+    var _wau = _wau || [];
+    _wau.push(["map", "45b8ju9ecv", "maphead", "120", "80", "e8e8e8", "c4302b"]);
+  </script>
+  <script async src="//waust.at/d.js"></script>
+</div>
 
   <footer>
     © 2025 Fondation Backup Spirituel – Tous droits réservés.
@@ -779,6 +807,7 @@ s0.parentNode.insertBefore(s1,s0);
   
 </body>
 </html>
+
 
 
 
