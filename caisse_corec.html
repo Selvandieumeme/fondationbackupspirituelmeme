@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>COREC - Accueil</title>
   <style>
-    /* ===================== COULEURS DE BASE ===================== */
     :root {
       --corec-green: #1E7F43;
       --corec-yellow:#F7C948;
@@ -31,24 +30,41 @@
     header {
       background: linear-gradient(135deg, var(--corec-green), #2BAA5B);
       color: var(--corec-white);
-      padding: 20px 10px;
-      text-align: center;
+      padding: 10px 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
     }
-    header h1 {
+
+    .logo-container {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .logo-container img {
+      height: 40px;  /* piti, pwofesyonèl */
+      width: auto;
+    }
+
+    .logo-container h1 {
       margin: 0;
-      font-size: 2.2rem;
+      font-size: 2rem;
       font-weight: 800;
       text-transform: uppercase;
     }
+
     nav {
-      margin-top: 10px;
+      margin-top: 8px;
     }
+
     nav a {
       color: var(--corec-yellow);
       text-decoration: none;
       font-weight: bold;
       margin: 0 10px;
     }
+
     nav a:hover {
       text-decoration: underline;
     }
@@ -193,14 +209,6 @@
     <a href="#">Contact</a>
   </nav>
 </header>
-    <h1>COREC</h1>
-    <nav>
-      <a href="index.html">Accueil</a>
-      <a href="caissepopilairecorec.html">Produits & Services</a>
-      <a href="#">À propos</a>
-      <a href="#">Contact</a>
-    </nav>
-  </header>
 
   <!-- HERO -->
   <section class="hero">
