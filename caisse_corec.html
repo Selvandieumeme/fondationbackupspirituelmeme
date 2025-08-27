@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>COREC - Accueil</title>
+  <style>
+    /* ===================== COULEURS DE BASE ===================== */
+    :root {
+      --corec-green: #1E7F43;
+      --corec-yellow:#F7C948;
+      --corec-dark:  #1E2A36;
+      --corec-white: #FFFFFF;
+      --corec-muted: #6B7A8C;
+      --corec-card:  #F8FBF6;
+      --corec-radius-xl: 20px;
+      --corec-radius-md: 14px;
+      --corec-shadow: 0 8px 24px rgba(0,0,0,.08);
+      --corec-shadow-sm: 0 6px 18px rgba(0,0,0,.06);
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: var(--corec-white);
+      color: var(--corec-dark);
+      line-height: 1.6;
+    }
+
+    /* ===================== HEADER ===================== */
+    header {
+      background: linear-gradient(135deg, var(--corec-green), #2BAA5B);
+      color: var(--corec-white);
+      padding: 20px 10px;
+      text-align: center;
+    }
+    header h1 {
+      margin: 0;
+      font-size: 2.2rem;
+      font-weight: 800;
+      text-transform: uppercase;
+    }
+    nav {
+      margin-top: 10px;
+    }
+    nav a {
+      color: var(--corec-yellow);
+      text-decoration: none;
+      font-weight: bold;
+      margin: 0 10px;
+    }
+    nav a:hover {
+      text-decoration: underline;
+    }
+
+    /* ===================== HERO ===================== */
+    .hero {
+      text-align: center;
+      padding: 60px 20px;
+      background: linear-gradient(to right, var(--corec-yellow), #fff);
+    }
+    .hero h2 {
+      font-size: 1.8rem;
+      color: var(--corec-green);
+      margin-bottom: 10px;
+      font-weight: 700;
+    }
+    .hero p {
+      font-size: 1.1rem;
+      color: var(--corec-dark);
+    }
+
+    /* ===================== PRODUITS & SERVICES ===================== */
+    .corec-wrap{
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: clamp(20px, 3vw, 40px);
+      background: var(--corec-white);
+    }
+    .corec-hero{
+      text-align: center;
+      margin: 10px 0 24px 0;
+    }
+    .corec-hero--small{ margin-top: 28px; }
+    .corec-title{
+      font-size: clamp(34px, 5vw, 56px);
+      letter-spacing: .5px;
+      margin: 0 0 8px 0;
+      color: var(--corec-green);
+      font-weight: 800;
+      text-transform: uppercase;
+    }
+    .corec-subtitle{
+      font-size: clamp(22px, 3.5vw, 34px);
+      color: var(--corec-dark);
+      margin: 0;
+      font-weight: 800;
+    }
+    .corec-tagline{
+      color: var(--corec-muted);
+      margin-top: 6px;
+      font-size: clamp(14px, 2.2vw, 16px);
+    }
+    .corec-grid{
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: clamp(14px, 2vw, 22px);
+      margin-top: 18px;
+    }
+    .corec-grid--three{ grid-template-columns: repeat(3,1fr); }
+    .corec-grid--services{ grid-template-columns: repeat(5,1fr); }
+    @media (max-width: 1024px){
+      .corec-grid{ grid-template-columns: repeat(3, 1fr); }
+      .corec-grid--services{ grid-template-columns: repeat(3,1fr); }
+    }
+    @media (max-width: 640px){
+      .corec-grid,
+      .corec-grid--three,
+      .corec-grid--services{ grid-template-columns: repeat(2,1fr); }
+    }
+    @media (max-width: 420px){
+      .corec-grid,
+      .corec-grid--three,
+      .corec-grid--services{ grid-template-columns: 1fr; }
+    }
+    .corec-card{
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      padding: 22px 14px;
+      background:
+        radial-gradient(120px 60px at 20% -20%, rgba(247,201,72,.18), transparent 60%),
+        linear-gradient(0deg, var(--corec-card), var(--corec-card));
+      border-radius: var(--corec-radius-xl);
+      text-decoration: none;
+      color: var(--corec-dark);
+      box-shadow: var(--corec-shadow-sm);
+      transition: transform .25s ease, box-shadow .25s ease, background .25s ease;
+      border: 1px solid rgba(30,127,67,.08);
+      min-height: 150px;
+    }
+    .corec-card:hover{
+      transform: translateY(-4px);
+      box-shadow: var(--corec-shadow);
+      background:
+        radial-gradient(120px 60px at 100% -40%, rgba(247,201,72,.22), transparent 60%),
+        linear-gradient(0deg, #FFFFFF, #FFFFFF);
+    }
+    .corec-icon{
+      width: 86px; height: 86px;
+      border-radius: 50%;
+      display: grid; place-items: center;
+      font-weight: 900;
+      letter-spacing: .5px;
+      color: var(--corec-dark);
+      background:
+        radial-gradient(140px 80px at 30% 20%, rgba(255,255,255,.6), transparent 60%),
+        linear-gradient(135deg, var(--corec-green), #2BAA5B);
+      border: 3px solid var(--corec-yellow);
+      color: #ffffff;
+      font-size: 20px;
+      text-transform: uppercase;
+      box-shadow: inset 0 0 0 2px rgba(255,255,255,.25);
+    }
+    .corec-label{
+      text-align: center;
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--corec-dark);
+    }
+
+    /* ===================== FOOTER ===================== */
+    footer {
+      text-align: center;
+      padding: 20px;
+      background: var(--corec-green);
+      color: var(--corec-white);
+      margin-top: 30px;
+    }
+  </style>
+</head>
+<body>
+  <!-- HEADER -->
+  <header>
+    <h1>COREC</h1>
+    <nav>
+      <a href="index.html">Accueil</a>
+      <a href="caissepopilairecorec.html">Produits & Services</a>
+      <a href="#">À propos</a>
+      <a href="#">Contact</a>
+    </nav>
+  </header>
+
+  <!-- HERO -->
+  <section class="hero">
+    <h2>Bienvenue sur la plateforme COREC</h2>
+    <p>Coopérative Renaissance d'Épargne et de Crédit – Servir la communauté avec confiance et solidarité.</p>
+  </section>
+
+  <!-- ===================== PRODUITS & SERVICES ===================== -->
+  <section class="corec-wrap" aria-label="Produits et Services COREC">
+    <!-- Tèt seksyon an -->
+    <header class="corec-hero">
+      <h1 class="corec-title">PRODUITS DE LA COREC</h1>
+      <h2 class="corec-subtitle">Crédits</h2>
+      <p class="corec-tagline">L’accès au crédit, un engagement responsable</p>
+    </header>
+
+    <!-- GRID : CRÉDITS -->
+    <div class="corec-grid">
+      <a href="#" class="corec-card" aria-label="Crédit commercial">
+        <span class="corec-icon">CC</span>
+        <span class="corec-label">Crédit commercial</span>
+      </a>
+      <a href="#" class="corec-card" aria-label="Crédit à la consommation">
+        <span class="corec-icon">CONSO</span>
+        <span class="corec-label">Crédit à la consommation</span>
+      </a>
+      <a href="#" class="corec-card" aria-label="Crédit agricole">
+        <span class="corec-icon">AGRI</span>
+        <span class="corec-label">Crédit agricole</span>
+      </a>
+      <a href="#" class="corec-card" aria-label="Crédit écolage">
+        <span class="corec-icon">ÉCOLE</span>
+        <span class="corec-label">Crédit écolage</span>
+      </a>
+      <a href="#" class="corec-card" aria-label="Crédit logement">
+        <span class="corec-icon">LOGT</span>
+        <span class="corec-label">Crédit logement</span>
+      </a>
+      <a href="#" class="corec-card" aria-label="Crédit Ti Machann">
+        <span class="corec-icon">TM</span>
+        <span class="corec-label">Crédit “Ti Machann”</span>
+      </a>
+    </div>
+
+    <!-- Blòk EPARGNE -->
+    <header class="corec-hero corec-hero--small">
+      <h2 class="corec-subtitle">Épargne</h2>
+    </header>
+    <div class="corec-grid corec-grid--three">
+      <a href="#" class="corec-card">
+        <span class="corec-icon">VUE</span>
+        <span class="corec-label">Épargne à vue</span>
+      </a>
+      <a href="#" class="corec-card">
+        <span class="corec-icon">SPÉ</span>
+        <span class="corec-label">Épargne Spécialisée</span>
+      </a>
+      <a href="#" class="corec-card">
+        <span class="corec-icon">DAT</span>
+        <span class="corec-label">Épargne à terme (DAT)</span>
+      </a>
+    </div>
+
+    <!-- AUTRES SERVICES -->
+    <header class="corec-hero corec-hero--small">
+      <h2 class="corec-subtitle">Autres Services</h2>
+      <p class="corec-tagline">Autres services offerts par la COREC</p>
+    </header>
+    <div class="corec-grid corec-grid--services">
+      <a href="#" class="corec-card">
+        <span class="corec-icon">TIC</span>
+        <span class="corec-label">Transactions inter caisses</span>
+      </a>
+      <a href="#" class="corec-card">
+        <span class="corec-icon">DD</span>
+        <span class="corec-label">Dépôt Direct</span>
+      </a>
+      <a href="#" class="corec-card">
+        <span class="corec-icon">CHQ</span>
+        <span class="corec-label">Change de chèques</span>
+      </a>
+      <a href="#" class="corec-card">
+        <span class="corec-icon">TF</span>
+        <span class="corec-label">Transfert de fonds</span>
+      </a>
+      <a href="#" class="corec-card">
+        <span class="corec-icon">AC</span>
+        <span class="corec-label">Attestation de capital</span>
+      </a>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <p>&copy; 2025 COREC - Tous droits réservés.</p>
+  </footer>
+</body>
+</html>
