@@ -502,7 +502,8 @@
   <label for="ville">Vil kote w ap viv:</label><br>
   <input type="text" id="ville" name="vil" placeholder="Egzanp: Mare-Rouge" required><br><br>
 
-  <button type="submit">Vote</button>
+  <!-- ✅ Ajoute id="voteBtn" -->
+  <button type="submit" id="voteBtn">Vote</button>
 </form>
 
 <!-- Bwat mesaj siksè -->
@@ -515,6 +516,7 @@
   const voteForm = document.getElementById('voteForm');
   const successMessage = document.getElementById('successMessage');
   const ipField = document.getElementById('ipField');
+  const voteBtn = document.getElementById('voteBtn'); // Nouvo bouton ID
 
   // Ranmase IP otomatikman
   fetch('https://api.ipify.org?format=json')
@@ -537,6 +539,12 @@
       if (response.ok) {
         voteForm.reset();
         successMessage.style.display = 'block';
+
+        // ✅ Bloke bouton Vote a apre 2 segonn
+        setTimeout(function () {
+          voteBtn.disabled = true;
+        }, 2000);
+
       } else {
         alert("Gen yon erè, tanpri eseye ankò.");
       }
@@ -547,7 +555,7 @@
 </script>
 
 
-   <script>
+  <script>
 document.addEventListener("DOMContentLoaded", function () {
   // Rechèch pou mesaj "Ou gentan vote deja"
   const dejaVoteEl = Array.from(document.querySelectorAll("body *"))
@@ -563,6 +571,16 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Mete l aprè mesaj deja vote a
     dejaVoteEl.insertAdjacentElement("afterend", msg);
+  }
+
+  // --- ✅ Nouvo pati pou bloke bouton vote a ---
+  const voteBtn = document.querySelector("#voteBtn");
+  if (voteBtn) {
+    voteBtn.addEventListener("click", function () {
+      setTimeout(function () {
+        voteBtn.disabled = true;
+      }, 2000); // 2 segonn apre klike sou li
+    });
   }
 });
 </script>
@@ -596,14 +614,23 @@ document.addEventListener("DOMContentLoaded", function () {
         btn.style.backgroundColor = "#28a745";
         btn.style.cursor = "pointer";
         btn.innerText = "✅ Vote ou ouvè kounya!";
+
+        // ✅ Ajoute blokaj apre klike sou bouton an
+        btn.addEventListener("click", function () {
+          setTimeout(function () {
+            btn.disabled = true;
+            btn.style.backgroundColor = "#888";
+            btn.style.cursor = "not-allowed";
+            btn.innerText = "⛔ Ou deja vote pou jodi a";
+          }, 2000); // 2 segonn apre klike
+        });
       }
     }
   }
 
   // 4. Tcheke chak 10 segonn si bouton ka aktive
   setInterval(checkActivationTime, 10000);
-</script><br><br><br>     
-
+</script>
  
 
 
