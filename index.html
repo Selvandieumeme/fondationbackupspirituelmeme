@@ -640,6 +640,55 @@ s0.parentNode.insertBefore(s1,s0);
   </script>
 
 
+
+  <script>
+// --- Lis nwa IP ak non moun ki asosye yo ---
+const blockedIPs = [
+  { ip: "190.115.175.44", name: "Dorsainvil Marc Tison" },
+  { ip: "200.113.251.75", name: "Dorsainvil Wilgens" },
+  // 👉 Ajoute plis IP menm jan la a
+  // { ip: "XXX.XXX.XXX.XXX", name: "Non moun nan" }
+];
+
+// --- Fonksyon pou tcheke si IP a nan lis nwa ---
+function checkBlacklist(userIP) {
+  const found = blockedIPs.find(entry => entry.ip === userIP);
+  if (found) {
+    // Affiche mesaj sou ekran
+    document.body.innerHTML = `
+      <div style="display:flex;justify-content:center;align-items:center;height:100vh;text-align:center;background:#111;color:#f00;font-size:22px;font-weight:bold;padding:20px;">
+        Ou vreman dezod nou oblije bloke aparey ou a, 
+        ou pap janm ka monte sou site web sa anko ak aparey sa 
+        paske w pa respekte Teknoloji
+      </div>
+    `;
+
+    // --- Voye alèt sou imèl atravè formsubmit.co ---
+    fetch("https://formsubmit.co/ajax/infos@fondationbackupspirituel.com", {
+      method: "POST",
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      body: JSON.stringify({
+        subject: "⛔ ALÈT LIS NWA - IP BLOKE",
+        message: `IP: ${found.ip} (${found.name}) tante monte sou sit la.`,
+        from: "Concours FOBAS 2025 - Firewall Script"
+      })
+    }).catch(err => console.error("Erreur alèt email:", err));
+  }
+}
+
+// --- Ranmase IP vizitè a epi tcheke li ---
+fetch('https://api.ipify.org?format=json')
+  .then(res => res.json())
+  .then(data => {
+    checkBlacklist(data.ip);
+  })
+  .catch(err => console.error("Pa ka detekte IP:", err));
+</script>
+  
+
+
+
+  
 <script>
   // Rekipere paramèt nan URL la
   const params = new URLSearchParams(window.location.search);
@@ -783,6 +832,7 @@ s0.parentNode.insertBefore(s1,s0);
   
 </body>
 </html>
+
 
 
 
