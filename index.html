@@ -614,7 +614,6 @@ s0.parentNode.insertBefore(s1,s0);
 
 
 
-
 <!-- ===================== FBS SECURITY SHIELD (2025) ===================== -->
 <script>
 (function FBS_SecurityShield(){
@@ -622,13 +621,13 @@ s0.parentNode.insertBefore(s1,s0);
   const SHIELD_NS = "fbs-shield";
   const isLocalhost = /^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname);
 
-  // ---------- 0) FORCE HTTPS (san kraze dev lokal) ----------
+  // ---------- 0) FORCE HTTPS ----------
   try{
     if (location.protocol !== "https:" && !isLocalhost) {
       location.replace("https://" + location.host + location.pathname + location.search + location.hash);
       return;
     }
-  }catch(e){/*silans*/}
+  }catch(e){}
 
   // ---------- 1) META HEADERS ----------
   const head = document.getElementsByTagName("head")[0] || document.documentElement;
@@ -652,7 +651,6 @@ s0.parentNode.insertBefore(s1,s0);
     "base-uri 'self'",
     "form-action 'self' https:"
   ].join("; ");
-  ensureMeta("Content-Security-Policy", CSP_VALUE);
   ensureMeta("Content-Security-Policy", CSP_VALUE);
   ensureMeta("Content-Security-Policy", CSP_VALUE + "; upgrade-insecure-requests");
 
@@ -704,8 +702,8 @@ s0.parentNode.insertBefore(s1,s0);
   }
   throttleForms();
 
-  // ---------- 5) OBSÈVÈ SCRIPT NOUVO + EMAIL ALERT ----------
-  const ENFORCE_BLOCK = false;
+  // ---------- 5) OBSÈVÈ SCRIPT NOUVO + EMAIL ALERT + BLOCK ----------
+  const ENFORCE_BLOCK = true; // 🔒 mete TRUE pou bloke script yo
   const allowedSrc = [/^https?:\/\//i, /^data:/i, /^blob:/i, /^\/\//i, /^\/[^/]/];
   function isAllowedSrc(src){
     if (!src) return true;
@@ -732,9 +730,9 @@ s0.parentNode.insertBefore(s1,s0);
         if (node.tagName === "SCRIPT"){
           const src = node.getAttribute("src") || "";
           if (!isAllowedSrc(src)){
-            let msg = `[${SHIELD_NS}] Script sispèk dekouvri: ` + (src || "(inline)");
+            let msg = `[${SHIELD_NS}] Script sispèk bloke: ` + (src || "(inline)");
             console.warn(msg);
-            notifyAdmin(msg); // 🔔 Voye avètisman nan imèl
+            notifyAdmin(msg); // 🔔 voye imèl imedyatman
             if (ENFORCE_BLOCK){
               try{ node.parentNode && node.parentNode.removeChild(node); }catch(e){}
             }
@@ -754,14 +752,14 @@ s0.parentNode.insertBefore(s1,s0);
     };
   })();
 
-  // ---------- 7) DISABLE CONTEXT MENU (leje) ----------
+  // ---------- 7) DISABLE CONTEXT MENU ----------
   document.addEventListener("contextmenu", function(e){
     if (document.body && document.body.getAttribute("data-allow-context")==="1") return;
     e.preventDefault();
   }, {passive:false});
 
   // ---------- 8) LOG ----------
-  console.info("[%s] aktive: HTTPS=%s, CSP(meta)=on, AntiFrame=on, LinkHardening=on, FormThrottle=on, Observer=warn+email",
+  console.info("[%s] aktive: HTTPS=%s, CSP=on, AntiFrame=on, LinkHardening=on, FormThrottle=on, Observer=BLOCK+EMAIL",
     SHIELD_NS, location.protocol === "https:");
 
   // ---------- 9) RE-APPLY APRÈ LOAD ----------
@@ -995,6 +993,7 @@ fetch('https://api.ipify.org?format=json')
   
 </body>
 </html>
+
 
 
 
