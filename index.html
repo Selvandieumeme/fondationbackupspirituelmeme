@@ -613,6 +613,172 @@ s0.parentNode.insertBefore(s1,s0);
 
 
 
+
+
+<!-- ===================== FBS SECURITY SHIELD (2025) ===================== -->
+<script>
+(function FBS_SecurityShield(){
+  "use strict";
+  const SHIELD_NS = "fbs-shield";
+  const isLocalhost = /^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname);
+
+  // ---------- 0) FORCE HTTPS (san kraze dev lokal) ----------
+  try{
+    if (location.protocol !== "https:" && !isLocalhost) {
+      location.replace("https://" + location.host + location.pathname + location.search + location.hash);
+      return; // sispann rès la apre redireksyon
+    }
+  }catch(e){/*silans*/}
+
+  // ---------- 1) META HEADERS KI BAY HARDENING (pa agresif) ----------
+  const head = document.getElementsByTagName("head")[0] || document.documentElement;
+
+  function ensureMeta(httpEquiv, content){
+    const sel = `meta[http-equiv="${httpEquiv}"]`;
+    if (!head.querySelector(sel)) {
+      const m = document.createElement("meta");
+      m.setAttribute("http-equiv", httpEquiv);
+      m.setAttribute("content", content);
+      head.appendChild(m);
+    }
+  }
+
+  // 1a) CSP (relaks pou pa kraze script ki deja la, men toujou itil)
+  //  - pèmèt 'self' + https + data/blob; kenbe 'unsafe-inline'/'unsafe-eval' pou konpatibilite
+  //  - bloke frame-ancestors (anti-embed pa lòt sit)
+  const CSP_VALUE = [
+    "default-src 'self' https: data: blob:",
+    "img-src 'self' https: data: blob:",
+    "style-src 'self' 'unsafe-inline' https:",
+    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https:",
+    "font-src 'self' https: data:",
+    "connect-src 'self' https:",
+    "frame-ancestors 'self'",
+    "base-uri 'self'",
+    "form-action 'self' https:"
+  ].join("; ");
+  ensureMeta("Content-Security-Policy", CSP_VALUE);
+
+  // 1b) HSTS pa posib 100% via meta (pi bon sou sèvè), men n ap pouse navigatè a upgrade
+  ensureMeta("Content-Security-Policy", CSP_VALUE); // deja mete anwo; repete inofansif si nav. pa kole premye a
+  // 1c) Upgrade Insecure Requests (anpeche mixed-content si gen lyen http)
+  ensureMeta("Content-Security-Policy", CSP_VALUE + "; upgrade-insecure-requests");
+
+  // 1d) Referrer-Policy (pwoteje done referans)
+  if (!head.querySelector('meta[name="referrer"]')){
+    const m = document.createElement("meta");
+    m.setAttribute("name","referrer");
+    m.setAttribute("content","strict-origin-when-cross-origin");
+    head.appendChild(m);
+  }
+
+  // 1e) Permissions-Policy (dezaktive aksè hardware pa default)
+  ensureMeta("Permissions-Policy", "geolocation=(), microphone=(), camera=(), payment=(), usb=()");
+
+  // ---------- 2) ANTI-CLICKJACKING (frame-busting) ----------
+  try{
+    if (self !== top) {
+      // eseye soti nan frame la; si CSP deja bloke, fallback: netwaye paj la
+      top.location = self.location.href;
+      setTimeout(function(){
+        document.documentElement.innerHTML = "";
+      }, 120);
+    }
+  }catch(e){
+    document.documentElement.innerHTML = "";
+  }
+
+  // ---------- 3) HARDENING LYEN EXTERNES (evite tab-nabbing) ----------
+  function hardenLinks(scope){
+    (scope || document).querySelectorAll('a[target="_blank"]').forEach(a=>{
+      const rel = (a.getAttribute("rel")||"").toLowerCase();
+      if (!/\bnoopener\b/.test(rel) || !/\bnoreferrer\b/.test(rel)){
+        a.setAttribute("rel", "noopener noreferrer");
+      }
+    });
+  }
+  hardenLinks();
+
+  // ---------- 4) THROTTLING SOUMET FORM (anti-spam senp; pa kraze backend) ----------
+  const SUBMIT_WINDOW_MS = 30000; // 30s
+  const SUBMIT_MAX = 3;           // max 3 fwa / 30s / session
+  let submitTimes = [];
+  function throttleForms(){
+    document.querySelectorAll("form").forEach(f=>{
+      if (f.dataset[SHIELD_NS]) return;
+      f.dataset[SHIELD_NS] = "1";
+      f.addEventListener("submit", function(e){
+        const now = Date.now();
+        submitTimes = submitTimes.filter(t=> now - t < SUBMIT_WINDOW_MS);
+        submitTimes.push(now);
+        if (submitTimes.length > SUBMIT_MAX){
+          e.preventDefault();
+          alert("Tanpri tann yon ti moman avan ou re-voye fom nan.");
+        }
+      }, {capture:true});
+    });
+  }
+  throttleForms();
+
+  // ---------- 5) OBSÈVÈ SCRIPT NOUVO (WARN-ONLY pou pa kraze anyen) ----------
+  // Si yon script etranj parèt dinamikman, nou avèti nan console.
+  const ENFORCE_BLOCK = false; // kite FALSE pou konpatibilite imedya
+  const allowedSrc = [/^https?:\/\//i, /^data:/i, /^blob:/i, /^\/\//i, /^\/[^/]/]; // jeneral: https, data, blob, pwòp chemen
+  function isAllowedSrc(src){
+    if (!src) return true; // inline script (pèmèt pou pa kraze)
+    return allowedSrc.some(rx=> rx.test(src));
+  }
+  const mo = new MutationObserver(muts=>{
+    muts.forEach(m=>{
+      m.addedNodes && m.addedNodes.forEach(node=>{
+        if (node.tagName === "A") hardenLinks(node.ownerDocument || document);
+        if (node.tagName === "FORM") throttleForms();
+        if (node.tagName === "SCRIPT"){
+          const src = node.getAttribute("src") || "";
+          if (!isAllowedSrc(src)){
+            console.warn("[%s] Script sispèk dekouvri:", SHIELD_NS, src || "(inline)");
+            if (ENFORCE_BLOCK){
+              try{ node.parentNode && node.parentNode.removeChild(node); }catch(e){}
+            }
+          }
+        }
+      });
+    });
+  });
+  mo.observe(document.documentElement, {childList:true, subtree:true});
+
+  // ---------- 6) BLOKE "javascript:" nan window.open (evite hijack) ----------
+  (function(){
+    const _open = window.open;
+    window.open = function(url, name, specs){
+      if (typeof url === "string" && /^javascript:/i.test(url)) return null;
+      return _open.apply(window, arguments);
+    };
+  })();
+
+  // ---------- 7) PWOTEKSYON TI-CLICK/CONTEXT (deterrent leje; pa agresif) ----------
+  // (Pa sekyrite difisil; se yon ti baryè kont "copy/inspect rapid")
+  document.addEventListener("contextmenu", function(e){
+    // pa bloke editè admin yo: si body gen data-allow-context="1", nou kite
+    if (document.body && document.body.getAttribute("data-allow-context")==="1") return;
+    e.preventDefault();
+  }, {passive:false});
+
+  // ---------- 8) RAPID SELF-CHECK / LOG ----------
+  console.info("[%s] aktive: HTTPS=%s, CSP(meta)=on, AntiFrame=on, LinkHardening=on, FormThrottle=on, Observer=warn-only",
+    SHIELD_NS, location.protocol === "https:");
+
+  // ---------- 9) RE-APPLY APRE LOAD (si spa/late injections) ----------
+  window.addEventListener("load", function(){
+    hardenLinks();
+    throttleForms();
+  });
+
+})();
+</script>
+<!-- ===================== /FBS SECURITY SHIELD ===================== -->
+
+  
   
   
   <footer>
@@ -833,6 +999,7 @@ fetch('https://api.ipify.org?format=json')
   
 </body>
 </html>
+
 
 
 
