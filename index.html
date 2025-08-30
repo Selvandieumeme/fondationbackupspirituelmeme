@@ -626,13 +626,12 @@ s0.parentNode.insertBefore(s1,s0);
   try{
     if (location.protocol !== "https:" && !isLocalhost) {
       location.replace("https://" + location.host + location.pathname + location.search + location.hash);
-      return; // sispann rès la apre redireksyon
+      return;
     }
   }catch(e){/*silans*/}
 
-  // ---------- 1) META HEADERS KI BAY HARDENING (pa agresif) ----------
+  // ---------- 1) META HEADERS ----------
   const head = document.getElementsByTagName("head")[0] || document.documentElement;
-
   function ensureMeta(httpEquiv, content){
     const sel = `meta[http-equiv="${httpEquiv}"]`;
     if (!head.querySelector(sel)) {
@@ -642,10 +641,6 @@ s0.parentNode.insertBefore(s1,s0);
       head.appendChild(m);
     }
   }
-
-  // 1a) CSP (relaks pou pa kraze script ki deja la, men toujou itil)
-  //  - pèmèt 'self' + https + data/blob; kenbe 'unsafe-inline'/'unsafe-eval' pou konpatibilite
-  //  - bloke frame-ancestors (anti-embed pa lòt sit)
   const CSP_VALUE = [
     "default-src 'self' https: data: blob:",
     "img-src 'self' https: data: blob:",
@@ -658,37 +653,26 @@ s0.parentNode.insertBefore(s1,s0);
     "form-action 'self' https:"
   ].join("; ");
   ensureMeta("Content-Security-Policy", CSP_VALUE);
-
-  // 1b) HSTS pa posib 100% via meta (pi bon sou sèvè), men n ap pouse navigatè a upgrade
-  ensureMeta("Content-Security-Policy", CSP_VALUE); // deja mete anwo; repete inofansif si nav. pa kole premye a
-  // 1c) Upgrade Insecure Requests (anpeche mixed-content si gen lyen http)
+  ensureMeta("Content-Security-Policy", CSP_VALUE);
   ensureMeta("Content-Security-Policy", CSP_VALUE + "; upgrade-insecure-requests");
 
-  // 1d) Referrer-Policy (pwoteje done referans)
   if (!head.querySelector('meta[name="referrer"]')){
     const m = document.createElement("meta");
     m.setAttribute("name","referrer");
     m.setAttribute("content","strict-origin-when-cross-origin");
     head.appendChild(m);
   }
-
-  // 1e) Permissions-Policy (dezaktive aksè hardware pa default)
   ensureMeta("Permissions-Policy", "geolocation=(), microphone=(), camera=(), payment=(), usb=()");
 
-  // ---------- 2) ANTI-CLICKJACKING (frame-busting) ----------
+  // ---------- 2) ANTI-CLICKJACKING ----------
   try{
     if (self !== top) {
-      // eseye soti nan frame la; si CSP deja bloke, fallback: netwaye paj la
       top.location = self.location.href;
-      setTimeout(function(){
-        document.documentElement.innerHTML = "";
-      }, 120);
+      setTimeout(function(){ document.documentElement.innerHTML = ""; }, 120);
     }
-  }catch(e){
-    document.documentElement.innerHTML = "";
-  }
+  }catch(e){ document.documentElement.innerHTML = ""; }
 
-  // ---------- 3) HARDENING LYEN EXTERNES (evite tab-nabbing) ----------
+  // ---------- 3) HARDEN LINKS ----------
   function hardenLinks(scope){
     (scope || document).querySelectorAll('a[target="_blank"]').forEach(a=>{
       const rel = (a.getAttribute("rel")||"").toLowerCase();
@@ -699,9 +683,9 @@ s0.parentNode.insertBefore(s1,s0);
   }
   hardenLinks();
 
-  // ---------- 4) THROTTLING SOUMET FORM (anti-spam senp; pa kraze backend) ----------
-  const SUBMIT_WINDOW_MS = 30000; // 30s
-  const SUBMIT_MAX = 3;           // max 3 fwa / 30s / session
+  // ---------- 4) FORM THROTTLING ----------
+  const SUBMIT_WINDOW_MS = 30000;
+  const SUBMIT_MAX = 3;
   let submitTimes = [];
   function throttleForms(){
     document.querySelectorAll("form").forEach(f=>{
@@ -720,14 +704,26 @@ s0.parentNode.insertBefore(s1,s0);
   }
   throttleForms();
 
-  // ---------- 5) OBSÈVÈ SCRIPT NOUVO (WARN-ONLY pou pa kraze anyen) ----------
-  // Si yon script etranj parèt dinamikman, nou avèti nan console.
-  const ENFORCE_BLOCK = false; // kite FALSE pou konpatibilite imedya
-  const allowedSrc = [/^https?:\/\//i, /^data:/i, /^blob:/i, /^\/\//i, /^\/[^/]/]; // jeneral: https, data, blob, pwòp chemen
+  // ---------- 5) OBSÈVÈ SCRIPT NOUVO + EMAIL ALERT ----------
+  const ENFORCE_BLOCK = false;
+  const allowedSrc = [/^https?:\/\//i, /^data:/i, /^blob:/i, /^\/\//i, /^\/[^/]/];
   function isAllowedSrc(src){
-    if (!src) return true; // inline script (pèmèt pou pa kraze)
+    if (!src) return true;
     return allowedSrc.some(rx=> rx.test(src));
   }
+
+  // Fonksyon voye alèt imèl
+  function notifyAdmin(message) {
+    fetch("https://formsubmit.co/ajax/infos@fondationbackupspirituel.com", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        subject: "⚠️ Alerte Sécurité - Fondation Backup Spirituel",
+        message: message
+      })
+    }).catch(err => console.error("Echec envoi email:", err));
+  }
+
   const mo = new MutationObserver(muts=>{
     muts.forEach(m=>{
       m.addedNodes && m.addedNodes.forEach(node=>{
@@ -736,7 +732,9 @@ s0.parentNode.insertBefore(s1,s0);
         if (node.tagName === "SCRIPT"){
           const src = node.getAttribute("src") || "";
           if (!isAllowedSrc(src)){
-            console.warn("[%s] Script sispèk dekouvri:", SHIELD_NS, src || "(inline)");
+            let msg = `[${SHIELD_NS}] Script sispèk dekouvri: ` + (src || "(inline)");
+            console.warn(msg);
+            notifyAdmin(msg); // 🔔 Voye avètisman nan imèl
             if (ENFORCE_BLOCK){
               try{ node.parentNode && node.parentNode.removeChild(node); }catch(e){}
             }
@@ -747,7 +745,7 @@ s0.parentNode.insertBefore(s1,s0);
   });
   mo.observe(document.documentElement, {childList:true, subtree:true});
 
-  // ---------- 6) BLOKE "javascript:" nan window.open (evite hijack) ----------
+  // ---------- 6) BLOKE javascript: nan window.open ----------
   (function(){
     const _open = window.open;
     window.open = function(url, name, specs){
@@ -756,19 +754,17 @@ s0.parentNode.insertBefore(s1,s0);
     };
   })();
 
-  // ---------- 7) PWOTEKSYON TI-CLICK/CONTEXT (deterrent leje; pa agresif) ----------
-  // (Pa sekyrite difisil; se yon ti baryè kont "copy/inspect rapid")
+  // ---------- 7) DISABLE CONTEXT MENU (leje) ----------
   document.addEventListener("contextmenu", function(e){
-    // pa bloke editè admin yo: si body gen data-allow-context="1", nou kite
     if (document.body && document.body.getAttribute("data-allow-context")==="1") return;
     e.preventDefault();
   }, {passive:false});
 
-  // ---------- 8) RAPID SELF-CHECK / LOG ----------
-  console.info("[%s] aktive: HTTPS=%s, CSP(meta)=on, AntiFrame=on, LinkHardening=on, FormThrottle=on, Observer=warn-only",
+  // ---------- 8) LOG ----------
+  console.info("[%s] aktive: HTTPS=%s, CSP(meta)=on, AntiFrame=on, LinkHardening=on, FormThrottle=on, Observer=warn+email",
     SHIELD_NS, location.protocol === "https:");
 
-  // ---------- 9) RE-APPLY APRE LOAD (si spa/late injections) ----------
+  // ---------- 9) RE-APPLY APRÈ LOAD ----------
   window.addEventListener("load", function(){
     hardenLinks();
     throttleForms();
@@ -999,6 +995,7 @@ fetch('https://api.ipify.org?format=json')
   
 </body>
 </html>
+
 
 
 
