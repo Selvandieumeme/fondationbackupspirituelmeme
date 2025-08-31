@@ -777,24 +777,49 @@ s0.parentNode.insertBefore(s1,s0);
 
 
 <!-- Seksyon Achte Liv la -->
-<form action="https://formsubmit.co/infos@fondationbackupspirituel.com" method="POST" target="_blank" id="achat-alert-form">
-  <!-- Paramèt FormSubmit -->
+<form action="https://formsubmit.co/ajax/infos@fondationbackupspirituel.com" 
+      method="POST" id="achat-alert-form">
+  
+  <!-- Hidden Inputs -->
   <input type="hidden" name="_subject" value="Nouvo Acha sou Internet Book 1">
-  <input type="hidden" name="Message" value="Yon moun klike sou bouton achte a pou liv 'Internet Book 1'.">
+  <input type="hidden" name="Message" value="Yon moun klike sou bouton achte a sou StoreFOBAS.">
   <input type="hidden" name="_captcha" value="false">
-  <input type="hidden" name="_template" value="box"> <!-- bèl prezantasyon nan imèl -->
+  <input type="hidden" name="_template" value="box">
 </form>
 
 <!-- Bouton Achte -->
-<a href="https://payhip.com/b/7BXOf" target="_blank" class="fobas-buy-btn" 
-   onclick="document.getElementById('achat-alert-form').submit();">
-  📘 Achetez maintenant Livre – Internet Book 1
-</a>
+<button type="button" class="fobas-buy-btn" onclick="sendPurchaseAlert()">📘 Buy Now – Internet Book 1</button>
+
+<!-- Mesaj Konfimasyon -->
+<p id="achat-message" style="display:none; color:green; font-weight:bold; margin-top:10px;">
+  ✅ Mèsi! Nou resevwa demann ou a. Boutik ofisyèl nou an ap louvri pou ou.
+</p>
+
+<!-- Script pou trete -->
+<script>
+  function sendPurchaseAlert() {
+    const form = document.getElementById("achat-alert-form");
+    const data = new FormData(form);
+
+    fetch(form.action, {
+      method: "POST",
+      body: data,
+      headers: { "Accept": "application/json" }
+    }).then(response => {
+      // Afiche mesaj remèsiman sou paj la
+      document.getElementById("achat-message").style.display = "block";
+      
+      // Louvri boutik Payhip nan yon nouvo tab
+      window.open("https://payhip.com/StoreFOBAS", "_blank");
+    }).catch(error => {
+      alert("Yon erè rive, tanpri rekòmanse.");
+    });
+  }
+</script>
 
 <!-- Bouton Style -->
 <style>
   .fobas-buy-btn {
-    display: inline-block;
     padding: 14px 28px;
     font-size: 18px;
     font-weight: bold;
@@ -802,7 +827,7 @@ s0.parentNode.insertBefore(s1,s0);
     background: linear-gradient(45deg, #1E90FF, #FFD700);
     border: none;
     border-radius: 12px;
-    text-decoration: none;
+    cursor: pointer;
     box-shadow: 0 4px 12px rgba(0,0,0,0.2);
     transition: all 0.3s ease;
     font-family: Arial, sans-serif;
@@ -810,13 +835,7 @@ s0.parentNode.insertBefore(s1,s0);
 
   .fobas-buy-btn:hover {
     transform: scale(1.05);
-    box-shadow: 0 6px 18px rgba(0,0,0,0.3);
     background: linear-gradient(45deg, #FFD700, #1E90FF);
-  }
-
-  .fobas-buy-btn:active {
-    transform: scale(0.98);
-    box-shadow: 0 3px 10px rgba(0,0,0,0.2);
   }
 </style>
   
@@ -1039,6 +1058,7 @@ fetch('https://api.ipify.org?format=json')
   
 </body>
 </html>
+
 
 
 
