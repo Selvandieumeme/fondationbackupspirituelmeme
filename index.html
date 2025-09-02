@@ -843,14 +843,14 @@ s0.parentNode.insertBefore(s1,s0);
 
 
 
-<!-- CHATBOT BACKUP SPIRITUEL AK AVATA FANM -->
+<!-- CHATBOT BACKUP SPIRITUEL FINAL AK AJAX -->
 <style>
   /* Bouton chatbot */
   #chatbot-btn {
     position: fixed;
     bottom: 20px;
     left: 20px;
-    background: url('https://i.ibb.co/Y0JH7Qq/fanm-avatar.png') no-repeat center center; /* Avata fanm */
+    background: url('https://i.ibb.co/Y0JH7Qq/fanm-avatar.png') no-repeat center center;
     background-size: cover;
     border: none;
     border-radius: 50%;
@@ -864,7 +864,7 @@ s0.parentNode.insertBefore(s1,s0);
   #chatbot-window {
     position: fixed;
     bottom: 90px;
-    left: 90px; /* toujou parèt sou bò gòch bouton */
+    left: 90px;
     width: 350px;
     max-height: 500px;
     background: white;
@@ -973,7 +973,7 @@ function showMessage(text, sender="bot") {
 }
 
 function askNextQuestion() {
-  messages.innerHTML = messages.innerHTML; // netwaye bouton si te gen
+  messages.innerHTML = messages.innerHTML;
   if(index < qaList.length) {
     showMessage(qaList[index].q, "bot");
     if(qaList[index].a.length > 0){
@@ -991,31 +991,31 @@ function askNextQuestion() {
     }
   } else {
     showMessage("Mèsi pou patisipasyon ou 🙏🏾!", "bot");
-    sendEmail();
+    sendEmailAJAX();
   }
 }
 
-function sendEmail() {
-  const form = document.createElement("form");
-  form.action = "https://formsubmit.co/infos@fondationbackupspirituel.com";
-  form.method = "POST";
-  form.style.display = "none";
-
+function sendEmailAJAX() {
+  const formData = new FormData();
   for(const [key, value] of Object.entries(responses)){
-    const input = document.createElement("input");
-    input.type = "hidden";
-    input.name = key;
-    input.value = value;
-    form.appendChild(input);
+    formData.append(key, value);
   }
-  document.body.appendChild(form);
-  form.submit();
 
-  // fèmen bwat mesaj la apre voye
-  chatbotWindow.style.display = "none";
-  index = 0;
-  responses = {};
-  setTimeout(()=>{chatbotWindow.style.display="flex";}, 5000); // reapare apre 5s
+  fetch("https://formsubmit.co/ajax/infos@fondationbackupspirituel.com", {
+    method: "POST",
+    body: formData
+  })
+  .then(response => response.json())
+  .then(data => {
+    chatbotWindow.style.display = "none";
+    index = 0;
+    responses = {};
+    setTimeout(()=>{chatbotWindow.style.display="flex";}, 5000);
+    console.log("Repons yo voye avèk siksè:", data);
+  })
+  .catch(error => {
+    console.error("Erè pandan voye imel la:", error);
+  });
 }
 
 chatbotBtn.onclick = ()=>{
@@ -1037,6 +1037,7 @@ userInput.addEventListener("keypress", function(e){
   if(e.key==="Enter"){ sendBtn.click(); }
 });
 </script>
+  
   
   <footer>
     © 2025 Fondation Backup Spirituel – Tous droits réservés.
@@ -1256,6 +1257,7 @@ fetch('https://api.ipify.org?format=json')
   
 </body>
 </html>
+
 
 
 
