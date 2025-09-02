@@ -843,29 +843,28 @@ s0.parentNode.insertBefore(s1,s0);
 
 
 
-<!-- CHATBOT BACKUP SPIRITUEL -->
+<!-- CHATBOT BACKUP SPIRITUEL AK AVATA FANM -->
 <style>
-  /* Chatbot bouton */
+  /* Bouton chatbot */
   #chatbot-btn {
     position: fixed;
-    bottom: 20px;       /* distans anba paj la rete menm jan */
-    left: 20px;         /* chanje 'right' an 'left' pou bò gòch */
-    background: #6B3FA0;
-    color: white;
+    bottom: 20px;
+    left: 20px;
+    background: url('https://i.ibb.co/Y0JH7Qq/fanm-avatar.png') no-repeat center center; /* Avata fanm */
+    background-size: cover;
     border: none;
     border-radius: 50%;
     width: 60px;
     height: 60px;
-    font-size: 30px;
     cursor: pointer;
     z-index: 9999;
-}
+  }
 
-  /* Fenèt Chatbot */
+  /* Fenèt chatbot */
   #chatbot-window {
     position: fixed;
     bottom: 90px;
-    right: 20px;
+    left: 90px; /* toujou parèt sou bò gòch bouton */
     width: 350px;
     max-height: 500px;
     background: white;
@@ -922,7 +921,7 @@ s0.parentNode.insertBefore(s1,s0);
   }
 </style>
 
-<button id="chatbot-btn">💬</button>
+<button id="chatbot-btn"></button>
 
 <div id="chatbot-window">
   <div id="chatbot-messages"></div>
@@ -933,81 +932,112 @@ s0.parentNode.insertBefore(s1,s0);
 </div>
 
 <script>
-  const chatbotBtn = document.getElementById('chatbot-btn');
-  const chatbotWindow = document.getElementById('chatbot-window');
-  const messages = document.getElementById('chatbot-messages');
-  const userInput = document.getElementById('chatbot-user-input');
-  const sendBtn = document.getElementById('chatbot-send');
+const chatbotBtn = document.getElementById('chatbot-btn');
+const chatbotWindow = document.getElementById('chatbot-window');
+const messages = document.getElementById('chatbot-messages');
+const userInput = document.getElementById('chatbot-user-input');
+const sendBtn = document.getElementById('chatbot-send');
 
-  // 20 Kesyon/opsyon
-  const qaList = [
-    {q:"Byenvini sou Fondasyon BackUp Spirituel 🙏🏾! Èske ou ta renmen konnen plis sou misyon nou?", a:["Wi, tanpri eksplike m plis.","Non, m ap gade pou kont mwen."]},
-    {q:"Fondasyon nou an gen pou misyon ede moun nan espirityalite, edikasyon ak devlopman. Ki sa ki pi enterese w?", a:["Edikasyon","Espirityalite","Devlopman pèsonèl"]},
-    {q:"Èske ou ta renmen enskri pou resevwa nouvèl ak aktivite fondasyon an?", a:["Wi","Non"]},
-    {q:"Ki lang ou pi alèz pou kominike avèk nou?", a:["Kreyòl Ayisyen","Franse","Anglè"]},
-    {q:"Èske ou ta renmen patisipe nan fòmasyon sou entènèt nou yo?", a:["Wi","Non"]},
-    {q:"Ki pi gwo defi ou genyen nan lavi ou kounya?", a:["Finans","Relasyon","Lafwa/Espirityalite","Lòt bagay"]},
-    {q:"Èske ou ta renmen jwenn yon gid espirityèl pèsonèl nan fondasyon an?", a:["Wi","Non"]},
-    {q:"Fondasyon nou an fè anpil atelye. Ki tip ou ta renmen plis?", a:["Devlopman pèsonèl","Lapriyè/Meditasyon","Antreprenarya sosyal"]},
-    {q:"Èske ou ta renmen fè pati gwoup WhatsApp/Télégram nou an pou kominote a?", a:["Wi","Non"]},
-    {q:"Ki laj ou ye?", a:["Mwens pase 18 an","18 – 30 an","31 – 50 an","Plis pase 50 an"]},
-    {q:"Èske ou ta renmen vin yon volontè nan fondasyon an?", a:["Wi","Non"]},
-    {q:"Èske ou ta renmen jwenn aksè nan liv ak resous espirityèl gratis?", a:["Wi","Non"]},
-    {q:"Ki sa ki motive ou plis pou vizite sit fondasyon an?", a:["Konesans","Espirityalite","Fòmasyon","Rechèch sou pwojè sosyal"]},
-    {q:"Èske ou enterese nan evènman an pèsòn (konferans, rankont kominotè)?", a:["Wi","Non"]},
-    {q:"Èske ou ta renmen mete non ou nan lis lapriyè nou an?", a:["Wi","Non"]},
-    {q:"Èske ou ta renmen kontribye nan fondasyon an (nan tan, nan talan, oswa nan don)?", a:["Wi","Non"]},
-    {q:"Èske ou ta renmen resevwa chak semèn yon ti mesaj enspirasyon nan imel ou?", a:["Wi","Non"]},
-    {q:"Èske ou ta renmen konekte ak lòt moun ki gen menm vizyon espirityèl ak ou?", a:["Wi","Non"]},
-    {q:"Nan ki peyi w ap viv kounya?", a:[]},
-    {q:"Mèsi paske ou pran tan pou pale ak Fondasyon BackUp Spirituel 🙏🏾. Èske ou gen nenpòt kesyon pou nou?", a:[]}
-  ];
+const qaList = [
+  {q:"Byenvini sou Fondasyon BackUp Spirituel 🙏🏾! Èske ou ta renmen konnen plis sou misyon nou?", a:["Wi, tanpri eksplike m plis.","Non, m ap gade pou kont mwen."]},
+  {q:"Fondasyon nou an gen pou misyon ede moun nan espirityalite, edikasyon ak devlopman. Ki sa ki pi enterese w?", a:["Edikasyon","Espirityalite","Devlopman pèsonèl"]},
+  {q:"Èske ou ta renmen enskri pou resevwa nouvèl ak aktivite fondasyon an?", a:["Wi","Non"]},
+  {q:"Ki lang ou pi alèz pou kominike avèk nou?", a:["Kreyòl Ayisyen","Franse","Anglè"]},
+  {q:"Èske ou ta renmen patisipe nan fòmasyon sou entènèt nou yo?", a:["Wi","Non"]},
+  {q:"Ki pi gwo defi ou genyen nan lavi ou kounya?", a:["Finans","Relasyon","Lafwa/Espirityalite","Lòt bagay"]},
+  {q:"Èske ou ta renmen jwenn yon gid espirityèl pèsonèl nan fondasyon an?", a:["Wi","Non"]},
+  {q:"Fondasyon nou an fè anpil atelye. Ki tip ou ta renmen plis?", a:["Devlopman pèsonèl","Lapriyè/Meditasyon","Antreprenarya sosyal"]},
+  {q:"Èske ou ta renmen fè pati gwoup WhatsApp/Télégram nou an pou kominote a?", a:["Wi","Non"]},
+  {q:"Ki laj ou ye?", a:["Mwens pase 18 an","18 – 30 an","31 – 50 an","Plis pase 50 an"]},
+  {q:"Èske ou ta renmen vin yon volontè nan fondasyon an?", a:["Wi","Non"]},
+  {q:"Èske ou ta renmen jwenn aksè nan liv ak resous espirityèl gratis?", a:["Wi","Non"]},
+  {q:"Ki sa ki motive ou plis pou vizite sit fondasyon an?", a:["Konesans","Espirityalite","Fòmasyon","Rechèch sou pwojè sosyal"]},
+  {q:"Èske ou enterese nan evènman an pèsòn (konferans, rankont kominotè)?", a:["Wi","Non"]},
+  {q:"Èske ou ta renmen mete non ou nan lis lapriyè nou an?", a:["Wi","Non"]},
+  {q:"Èske ou ta renmen kontribye nan fondasyon an (nan tan, nan talan, oswa nan don)?", a:["Wi","Non"]},
+  {q:"Èske ou ta renmen resevwa chak semèn yon ti mesaj enspirasyon nan imel ou?", a:["Wi","Non"]},
+  {q:"Èske ou ta renmen konekte ak lòt moun ki gen menm vizyon espirityèl ak ou?", a:["Wi","Non"]},
+  {q:"Nan ki peyi w ap viv kounya?", a:[]},
+  {q:"Mèsi paske ou pran tan pou pale ak Fondasyon BackUp Spirituel 🙏🏾. Èske ou gen nenpòt kesyon pou nou?", a:[]}
+];
 
-  let index = 0;
+let index = 0;
+let responses = {};
 
-  function showMessage(text, sender="bot") {
-    const msg = document.createElement('div');
-    msg.className = 'chatbot-msg ' + sender;
-    msg.textContent = text;
-    messages.appendChild(msg);
-    messages.scrollTop = messages.scrollHeight;
-  }
+function showMessage(text, sender="bot") {
+  const msg = document.createElement('div');
+  msg.className = 'chatbot-msg ' + sender;
+  msg.textContent = text;
+  messages.appendChild(msg);
+  messages.scrollTop = messages.scrollHeight;
+}
 
-  function askNextQuestion() {
-    if(index < qaList.length) {
-      showMessage(qaList[index].q, "bot");
-      if(qaList[index].a.length > 0){
-        qaList[index].a.forEach(opt => {
-          const btn = document.createElement('button');
-          btn.textContent = opt;
-          btn.style.margin = "4px";
-          btn.onclick = ()=>{ showMessage(opt,"user"); index++; askNextQuestion(); };
-          messages.appendChild(btn);
-        });
-      }
-    } else {
-      showMessage("Mèsi pou patisipasyon ou 🙏🏾!", "bot");
+function askNextQuestion() {
+  messages.innerHTML = messages.innerHTML; // netwaye bouton si te gen
+  if(index < qaList.length) {
+    showMessage(qaList[index].q, "bot");
+    if(qaList[index].a.length > 0){
+      qaList[index].a.forEach(opt => {
+        const btn = document.createElement('button');
+        btn.textContent = opt;
+        btn.style.margin = "4px";
+        btn.onclick = ()=>{
+          showMessage(opt,"user");
+          responses[qaList[index].q] = opt;
+          index++; askNextQuestion();
+        };
+        messages.appendChild(btn);
+      });
     }
+  } else {
+    showMessage("Mèsi pou patisipasyon ou 🙏🏾!", "bot");
+    sendEmail();
   }
+}
 
-  chatbotBtn.onclick = ()=>{
-    chatbotWindow.style.display = chatbotWindow.style.display==="flex" ? "none" : "flex";
-    if(index===0) askNextQuestion();
+function sendEmail() {
+  const form = document.createElement("form");
+  form.action = "https://formsubmit.co/infos@fondationbackupspirituel.com";
+  form.method = "POST";
+  form.style.display = "none";
+
+  for(const [key, value] of Object.entries(responses)){
+    const input = document.createElement("input");
+    input.type = "hidden";
+    input.name = key;
+    input.value = value;
+    form.appendChild(input);
   }
+  document.body.appendChild(form);
+  form.submit();
 
-  sendBtn.onclick = ()=>{
-    if(userInput.value.trim() !== ""){
-      showMessage(userInput.value.trim(),"user");
-      userInput.value = "";
-      index++;
-      askNextQuestion();
-    }
+  // fèmen bwat mesaj la apre voye
+  chatbotWindow.style.display = "none";
+  index = 0;
+  responses = {};
+  setTimeout(()=>{chatbotWindow.style.display="flex";}, 5000); // reapare apre 5s
+}
+
+chatbotBtn.onclick = ()=>{
+  chatbotWindow.style.display = chatbotWindow.style.display==="flex" ? "none" : "flex";
+  if(index===0) askNextQuestion();
+}
+
+sendBtn.onclick = ()=>{
+  if(userInput.value.trim() !== ""){
+    showMessage(userInput.value.trim(),"user");
+    responses[qaList[index].q || "Repons"] = userInput.value.trim();
+    userInput.value = "";
+    index++;
+    askNextQuestion();
   }
+}
 
-  userInput.addEventListener("keypress", function(e){
-    if(e.key==="Enter"){ sendBtn.click(); }
-  });
+userInput.addEventListener("keypress", function(e){
+  if(e.key==="Enter"){ sendBtn.click(); }
+});
 </script>
+  
   <footer>
     © 2025 Fondation Backup Spirituel – Tous droits réservés.
   </footer>
@@ -1226,6 +1256,7 @@ fetch('https://api.ipify.org?format=json')
   
 </body>
 </html>
+
 
 
 
