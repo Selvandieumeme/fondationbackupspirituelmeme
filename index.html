@@ -843,123 +843,170 @@ s0.parentNode.insertBefore(s1,s0);
 
 
 
-  <!-- Collect.chat widget ak kesyon/repons yo -->
-<script>
-  (function(w, d) { 
-    w.CollectId = "68b7656706c9181d9fd07bb4"; 
-    var h = d.head || d.getElementsByTagName("head")[0]; 
-    var s = d.createElement("script"); 
-    s.setAttribute("type", "text/javascript"); 
-    s.async = true; 
-    s.setAttribute("src", "https://collectcdn.com/launcher.js"); 
-    h.appendChild(s); 
-  })(window, document);
-</script>
+<!-- CHATBOT BACKUP SPIRITUEL -->
+<style>
+  /* Chatbot bouton */
+  #chatbot-btn {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: #6B3FA0;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 60px;
+    height: 60px;
+    font-size: 30px;
+    cursor: pointer;
+    z-index: 9999;
+  }
 
-<!-- Kesyon/repons yo an Kreyòl -->
-<script type="application/json" id="collect-chatbot">
-{
-  "questions": [
-    {
-      "type": "multiple",
-      "question": "Byenvini sou Fondasyon BackUp Spirituel 🙏🏾! Èske ou ta renmen konnen plis sou misyon nou?",
-      "options": ["Wi, tanpri eksplike m plis.", "Non, m ap gade pou kont mwen."]
-    },
-    {
-      "type": "multiple",
-      "question": "Fondasyon nou an gen pou misyon ede moun nan espirityalite, edikasyon ak devlopman. Ki sa ki pi enterese w?",
-      "options": ["Edikasyon", "Espirityalite", "Devlopman pèsonèl"]
-    },
-    {
-      "type": "multiple",
-      "question": "Èske ou ta renmen enskri pou resevwa nouvèl ak aktivite fondasyon an?",
-      "options": ["Wi, m ap mete imel mwen.", "Non, pa kounya."]
-    },
-    {
-      "type": "multiple",
-      "question": "Ki lang ou pi alèz pou kominike avèk nou?",
-      "options": ["Kreyòl Ayisyen", "Franse", "Anglè"]
-    },
-    {
-      "type": "multiple",
-      "question": "Èske ou ta renmen patisipe nan fòmasyon sou entènèt nou yo?",
-      "options": ["Wi, m enterese.", "Non, m ap suiv lòt aktivite yo."]
-    },
-    {
-      "type": "multiple",
-      "question": "Ki pi gwo defi ou genyen nan lavi ou kounya?",
-      "options": ["Finans", "Relasyon", "Lafwa/Espirityalite", "Lòt bagay"]
-    },
-    {
-      "type": "multiple",
-      "question": "Èske ou ta renmen jwenn yon gid espirityèl pèsonèl nan fondasyon an?",
-      "options": ["Wi, tanpri mete m sou lis la.", "Non, m ap suiv aktivite jeneral yo sèlman."]
-    },
-    {
-      "type": "multiple",
-      "question": "Fondasyon nou an fè anpil atelye. Ki tip ou ta renmen plis?",
-      "options": ["Atelye sou devlopman pèsonèl", "Atelye sou lapriyè/meditasyon", "Atelye sou antreprenarya sosyal"]
-    },
-    {
-      "type": "multiple",
-      "question": "Èske ou ta renmen fè pati gwoup WhatsApp/Télégram nou an pou kominote a?",
-      "options": ["Wi, ban m lyen an.", "Non, m ap swiv sou sit la sèlman."]
-    },
-    {
-      "type": "multiple",
-      "question": "Ki laj ou ye?",
-      "options": ["Mwens pase 18 an", "18 – 30 an", "31 – 50 an", "Plis pase 50 an"]
-    },
-    {
-      "type": "multiple",
-      "question": "Èske ou ta renmen vin yon volontè nan fondasyon an?",
-      "options": ["Wi, m dispoze ede.", "Non, m pa ka disponib kounya."]
-    },
-    {
-      "type": "multiple",
-      "question": "Èske ou ta renmen jwenn aksè nan liv ak resous espirityèl gratis?",
-      "options": ["Wi, m ta renmen.", "Non, m ap tcheke pita."]
-    },
-    {
-      "type": "multiple",
-      "question": "Ki sa ki motive ou plis pou vizite sit fondasyon an?",
-      "options": ["Konesans", "Espirityalite", "Fòmasyon", "Rechèch sou pwojè sosyal"]
-    },
-    {
-      "type": "multiple",
-      "question": "Èske ou enterese nan evènman an pèsòn (konferans, rankont kominotè)?",
-      "options": ["Wi, ban m detay.", "Non, sèlman anliy."]
-    },
-    {
-      "type": "multiple",
-      "question": "Èske ou ta renmen mete non ou nan lis lapriyè nou an?",
-      "options": ["Wi, tanpri ajoute m.", "Non, mèsi."]
-    },
-    {
-      "type": "multiple",
-      "question": "Èske ou ta renmen kontribye nan fondasyon an (nan tan, nan talan, oswa nan don)?",
-      "options": ["Wi, ban m plis enfòmasyon.", "Non, m ap reflechi sou sa."]
-    },
-    {
-      "type": "multiple",
-      "question": "Èske ou ta renmen resevwa chak semèn yon ti mesaj enspirasyon nan imel ou?",
-      "options": ["Wi, tanpri voye m yo.", "Non, m pa enterese."]
-    },
-    {
-      "type": "multiple",
-      "question": "Èske ou ta renmen konekte ak lòt moun ki gen menm vizyon espirityèl ak ou?",
-      "options": ["Wi, sa enterese m.", "Non, pa kounya."]
-    },
-    {
-      "type": "text",
-      "question": "Nan ki peyi w ap viv kounya?"
-    },
-    {
-      "type": "text",
-      "question": "Mèsi paske ou pran tan pou pale ak Fondasyon BackUp Spirituel 🙏🏾. Èske ou gen nenpòt kesyon pou nou?"
+  /* Fenèt Chatbot */
+  #chatbot-window {
+    position: fixed;
+    bottom: 90px;
+    right: 20px;
+    width: 350px;
+    max-height: 500px;
+    background: white;
+    border: 2px solid #6B3FA0;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    display: none;
+    flex-direction: column;
+    z-index: 9999;
+    font-family: Arial, sans-serif;
+  }
+
+  #chatbot-messages {
+    flex: 1;
+    padding: 10px;
+    overflow-y: auto;
+  }
+
+  .chatbot-msg {
+    margin: 8px 0;
+    padding: 8px 12px;
+    border-radius: 12px;
+  }
+
+  .chatbot-msg.bot {
+    background: #EDE7F6;
+    align-self: flex-start;
+  }
+
+  .chatbot-msg.user {
+    background: #6B3FA0;
+    color: white;
+    align-self: flex-end;
+  }
+
+  #chatbot-input {
+    display: flex;
+    border-top: 1px solid #ccc;
+  }
+
+  #chatbot-input input {
+    flex: 1;
+    padding: 8px;
+    border: none;
+    outline: none;
+  }
+
+  #chatbot-input button {
+    padding: 8px 12px;
+    background: #6B3FA0;
+    color: white;
+    border: none;
+    cursor: pointer;
+  }
+</style>
+
+<button id="chatbot-btn">💬</button>
+
+<div id="chatbot-window">
+  <div id="chatbot-messages"></div>
+  <div id="chatbot-input">
+    <input type="text" id="chatbot-user-input" placeholder="Ekri repons ou isit la..."/>
+    <button id="chatbot-send">Voye</button>
+  </div>
+</div>
+
+<script>
+  const chatbotBtn = document.getElementById('chatbot-btn');
+  const chatbotWindow = document.getElementById('chatbot-window');
+  const messages = document.getElementById('chatbot-messages');
+  const userInput = document.getElementById('chatbot-user-input');
+  const sendBtn = document.getElementById('chatbot-send');
+
+  // 20 Kesyon/opsyon
+  const qaList = [
+    {q:"Byenvini sou Fondasyon BackUp Spirituel 🙏🏾! Èske ou ta renmen konnen plis sou misyon nou?", a:["Wi, tanpri eksplike m plis.","Non, m ap gade pou kont mwen."]},
+    {q:"Fondasyon nou an gen pou misyon ede moun nan espirityalite, edikasyon ak devlopman. Ki sa ki pi enterese w?", a:["Edikasyon","Espirityalite","Devlopman pèsonèl"]},
+    {q:"Èske ou ta renmen enskri pou resevwa nouvèl ak aktivite fondasyon an?", a:["Wi","Non"]},
+    {q:"Ki lang ou pi alèz pou kominike avèk nou?", a:["Kreyòl Ayisyen","Franse","Anglè"]},
+    {q:"Èske ou ta renmen patisipe nan fòmasyon sou entènèt nou yo?", a:["Wi","Non"]},
+    {q:"Ki pi gwo defi ou genyen nan lavi ou kounya?", a:["Finans","Relasyon","Lafwa/Espirityalite","Lòt bagay"]},
+    {q:"Èske ou ta renmen jwenn yon gid espirityèl pèsonèl nan fondasyon an?", a:["Wi","Non"]},
+    {q:"Fondasyon nou an fè anpil atelye. Ki tip ou ta renmen plis?", a:["Devlopman pèsonèl","Lapriyè/Meditasyon","Antreprenarya sosyal"]},
+    {q:"Èske ou ta renmen fè pati gwoup WhatsApp/Télégram nou an pou kominote a?", a:["Wi","Non"]},
+    {q:"Ki laj ou ye?", a:["Mwens pase 18 an","18 – 30 an","31 – 50 an","Plis pase 50 an"]},
+    {q:"Èske ou ta renmen vin yon volontè nan fondasyon an?", a:["Wi","Non"]},
+    {q:"Èske ou ta renmen jwenn aksè nan liv ak resous espirityèl gratis?", a:["Wi","Non"]},
+    {q:"Ki sa ki motive ou plis pou vizite sit fondasyon an?", a:["Konesans","Espirityalite","Fòmasyon","Rechèch sou pwojè sosyal"]},
+    {q:"Èske ou enterese nan evènman an pèsòn (konferans, rankont kominotè)?", a:["Wi","Non"]},
+    {q:"Èske ou ta renmen mete non ou nan lis lapriyè nou an?", a:["Wi","Non"]},
+    {q:"Èske ou ta renmen kontribye nan fondasyon an (nan tan, nan talan, oswa nan don)?", a:["Wi","Non"]},
+    {q:"Èske ou ta renmen resevwa chak semèn yon ti mesaj enspirasyon nan imel ou?", a:["Wi","Non"]},
+    {q:"Èske ou ta renmen konekte ak lòt moun ki gen menm vizyon espirityèl ak ou?", a:["Wi","Non"]},
+    {q:"Nan ki peyi w ap viv kounya?", a:[]},
+    {q:"Mèsi paske ou pran tan pou pale ak Fondasyon BackUp Spirituel 🙏🏾. Èske ou gen nenpòt kesyon pou nou?", a:[]}
+  ];
+
+  let index = 0;
+
+  function showMessage(text, sender="bot") {
+    const msg = document.createElement('div');
+    msg.className = 'chatbot-msg ' + sender;
+    msg.textContent = text;
+    messages.appendChild(msg);
+    messages.scrollTop = messages.scrollHeight;
+  }
+
+  function askNextQuestion() {
+    if(index < qaList.length) {
+      showMessage(qaList[index].q, "bot");
+      if(qaList[index].a.length > 0){
+        qaList[index].a.forEach(opt => {
+          const btn = document.createElement('button');
+          btn.textContent = opt;
+          btn.style.margin = "4px";
+          btn.onclick = ()=>{ showMessage(opt,"user"); index++; askNextQuestion(); };
+          messages.appendChild(btn);
+        });
+      }
+    } else {
+      showMessage("Mèsi pou patisipasyon ou 🙏🏾!", "bot");
     }
-  ]
-}
+  }
+
+  chatbotBtn.onclick = ()=>{
+    chatbotWindow.style.display = chatbotWindow.style.display==="flex" ? "none" : "flex";
+    if(index===0) askNextQuestion();
+  }
+
+  sendBtn.onclick = ()=>{
+    if(userInput.value.trim() !== ""){
+      showMessage(userInput.value.trim(),"user");
+      userInput.value = "";
+      index++;
+      askNextQuestion();
+    }
+  }
+
+  userInput.addEventListener("keypress", function(e){
+    if(e.key==="Enter"){ sendBtn.click(); }
+  });
 </script>
   <footer>
     © 2025 Fondation Backup Spirituel – Tous droits réservés.
@@ -1179,6 +1226,7 @@ fetch('https://api.ipify.org?format=json')
   
 </body>
 </html>
+
 
 
 
