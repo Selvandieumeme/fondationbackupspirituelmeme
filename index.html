@@ -843,13 +843,13 @@ s0.parentNode.insertBefore(s1,s0);
 
 
 
-<!-- CHATBOT BACKUP SPIRITUEL FINAL AK AJAX -->
+<!-- CHATBOT BACKUP SPIRITUEL FINAL AK AJAX (Endepandan) -->
 <style>
   /* Bouton chatbot */
-  #chatbot-btn {
+  #chatbot2-btn {
     position: fixed;
     bottom: 20px;
-    left: 20px;
+    left: 100px;
     background: url('https://i.ibb.co/Y0JH7Qq/fanm-avatar.png') no-repeat center center;
     background-size: cover;
     border: none;
@@ -857,11 +857,11 @@ s0.parentNode.insertBefore(s1,s0);
     width: 60px;
     height: 60px;
     cursor: pointer;
-    z-index: 9999;
+    z-index: 99999;
   }
 
   /* Fenèt chatbot */
-  #chatbot-window {
+  #chatbot2-window {
     position: fixed;
     bottom: 90px;
     left: 90px;
@@ -873,46 +873,46 @@ s0.parentNode.insertBefore(s1,s0);
     box-shadow: 0 5px 15px rgba(0,0,0,0.3);
     display: none;
     flex-direction: column;
-    z-index: 9999;
+    z-index: 99999;
     font-family: Arial, sans-serif;
   }
 
-  #chatbot-messages {
+  #chatbot2-messages {
     flex: 1;
     padding: 10px;
     overflow-y: auto;
   }
 
-  .chatbot-msg {
+  .chatbot2-msg {
     margin: 8px 0;
     padding: 8px 12px;
     border-radius: 12px;
   }
 
-  .chatbot-msg.bot {
+  .chatbot2-msg.bot {
     background: #EDE7F6;
     align-self: flex-start;
   }
 
-  .chatbot-msg.user {
+  .chatbot2-msg.user {
     background: #6B3FA0;
     color: white;
     align-self: flex-end;
   }
 
-  #chatbot-input {
+  #chatbot2-input {
     display: flex;
     border-top: 1px solid #ccc;
   }
 
-  #chatbot-input input {
+  #chatbot2-input input {
     flex: 1;
     padding: 8px;
     border: none;
     outline: none;
   }
 
-  #chatbot-input button {
+  #chatbot2-input button {
     padding: 8px 12px;
     background: #6B3FA0;
     color: white;
@@ -921,24 +921,24 @@ s0.parentNode.insertBefore(s1,s0);
   }
 </style>
 
-<button id="chatbot-btn"></button>
+<button id="chatbot2-btn"></button>
 
-<div id="chatbot-window">
-  <div id="chatbot-messages"></div>
-  <div id="chatbot-input">
-    <input type="text" id="chatbot-user-input" placeholder="Ekri repons ou isit la..."/>
-    <button id="chatbot-send">Voye</button>
+<div id="chatbot2-window">
+  <div id="chatbot2-messages"></div>
+  <div id="chatbot2-input">
+    <input type="text" id="chatbot2-user-input" placeholder="Ekri repons ou isit la..."/>
+    <button id="chatbot2-send">Voye</button>
   </div>
 </div>
 
 <script>
-const chatbotBtn = document.getElementById('chatbot-btn');
-const chatbotWindow = document.getElementById('chatbot-window');
-const messages = document.getElementById('chatbot-messages');
-const userInput = document.getElementById('chatbot-user-input');
-const sendBtn = document.getElementById('chatbot-send');
+const chatbot2Btn = document.getElementById('chatbot2-btn');
+const chatbot2Window = document.getElementById('chatbot2-window');
+const messages2 = document.getElementById('chatbot2-messages');
+const userInput2 = document.getElementById('chatbot2-user-input');
+const sendBtn2 = document.getElementById('chatbot2-send');
 
-const qaList = [
+const qaList2 = [
   {q:"Byenvini sou Fondasyon BackUp Spirituel 🙏🏾! Èske ou ta renmen konnen plis sou misyon nou?", a:["Wi, tanpri eksplike m plis.","Non, m ap gade pou kont mwen."]},
   {q:"Fondasyon nou an gen pou misyon ede moun nan espirityalite, edikasyon ak devlopman. Ki sa ki pi enterese w?", a:["Edikasyon","Espirityalite","Devlopman pèsonèl"]},
   {q:"Èske ou ta renmen enskri pou resevwa nouvèl ak aktivite fondasyon an?", a:["Wi","Non"]},
@@ -961,43 +961,42 @@ const qaList = [
   {q:"Mèsi paske ou pran tan pou pale ak Fondasyon BackUp Spirituel 🙏🏾. Èske ou gen nenpòt kesyon pou nou?", a:[]}
 ];
 
-let index = 0;
-let responses = {};
+let index2 = 0;
+let responses2 = {};
 
-function showMessage(text, sender="bot") {
+function showMessage2(text, sender="bot") {
   const msg = document.createElement('div');
-  msg.className = 'chatbot-msg ' + sender;
+  msg.className = 'chatbot2-msg ' + sender;
   msg.textContent = text;
-  messages.appendChild(msg);
-  messages.scrollTop = messages.scrollHeight;
+  messages2.appendChild(msg);
+  messages2.scrollTop = messages2.scrollHeight;
 }
 
-function askNextQuestion() {
-  messages.innerHTML = messages.innerHTML;
-  if(index < qaList.length) {
-    showMessage(qaList[index].q, "bot");
-    if(qaList[index].a.length > 0){
-      qaList[index].a.forEach(opt => {
+function askNextQuestion2() {
+  if(index2 < qaList2.length) {
+    showMessage2(qaList2[index2].q, "bot");
+    if(qaList2[index2].a.length > 0){
+      qaList2[index2].a.forEach(opt => {
         const btn = document.createElement('button');
         btn.textContent = opt;
         btn.style.margin = "4px";
         btn.onclick = ()=>{
-          showMessage(opt,"user");
-          responses[qaList[index].q] = opt;
-          index++; askNextQuestion();
+          showMessage2(opt,"user");
+          responses2[qaList2[index2].q] = opt;
+          index2++; askNextQuestion2();
         };
-        messages.appendChild(btn);
+        messages2.appendChild(btn);
       });
     }
   } else {
-    showMessage("Mèsi pou patisipasyon ou 🙏🏾!", "bot");
-    sendEmailAJAX();
+    showMessage2("Mèsi pou patisipasyon ou 🙏🏾!", "bot");
+    sendEmailAJAX2();
   }
 }
 
-function sendEmailAJAX() {
+function sendEmailAJAX2() {
   const formData = new FormData();
-  for(const [key, value] of Object.entries(responses)){
+  for(const [key, value] of Object.entries(responses2)){
     formData.append(key, value);
   }
 
@@ -1007,10 +1006,10 @@ function sendEmailAJAX() {
   })
   .then(response => response.json())
   .then(data => {
-    chatbotWindow.style.display = "none";
-    index = 0;
-    responses = {};
-    setTimeout(()=>{chatbotWindow.style.display="flex";}, 5000);
+    chatbot2Window.style.display = "none";
+    index2 = 0;
+    responses2 = {};
+    setTimeout(()=>{chatbot2Window.style.display="flex";}, 5000);
     console.log("Repons yo voye avèk siksè:", data);
   })
   .catch(error => {
@@ -1018,23 +1017,23 @@ function sendEmailAJAX() {
   });
 }
 
-chatbotBtn.onclick = ()=>{
-  chatbotWindow.style.display = chatbotWindow.style.display==="flex" ? "none" : "flex";
-  if(index===0) askNextQuestion();
+chatbot2Btn.onclick = ()=>{
+  chatbot2Window.style.display = chatbot2Window.style.display==="flex" ? "none" : "flex";
+  if(index2===0) askNextQuestion2();
 }
 
-sendBtn.onclick = ()=>{
-  if(userInput.value.trim() !== ""){
-    showMessage(userInput.value.trim(),"user");
-    responses[qaList[index].q || "Repons"] = userInput.value.trim();
-    userInput.value = "";
-    index++;
-    askNextQuestion();
+sendBtn2.onclick = ()=>{
+  if(userInput2.value.trim() !== ""){
+    showMessage2(userInput2.value.trim(),"user");
+    responses2[qaList2[index2].q || "Repons"] = userInput2.value.trim();
+    userInput2.value = "";
+    index2++;
+    askNextQuestion2();
   }
 }
 
-userInput.addEventListener("keypress", function(e){
-  if(e.key==="Enter"){ sendBtn.click(); }
+userInput2.addEventListener("keypress", function(e){
+  if(e.key==="Enter"){ sendBtn2.click(); }
 });
 </script>
   
@@ -1257,6 +1256,7 @@ fetch('https://api.ipify.org?format=json')
   
 </body>
 </html>
+
 
 
 
