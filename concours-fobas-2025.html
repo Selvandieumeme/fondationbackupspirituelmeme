@@ -872,6 +872,56 @@ s0.parentNode.insertBefore(s1,s0);
 })();
 </script>
 <!--End of Tawk.to Script-->
+
+
+
+
+
+
+<!-- Amazon Affiliate Button with Silent Notification -->
+<div style="text-align:center; margin:20px 0; border:1px solid #ddd; padding:15px; border-radius:8px; background-color:#f9f9f9;">
+  
+  <!-- Mesaj transparan pou vizitè (Kreyòl + Angle) -->
+  <p style="font-size:14px; color:#555; margin-bottom:10px; font-family:Arial, sans-serif; text-align:center;">
+    *Atansyon / Notice: Lyen sa a se yon lyen afilye Amazon. / This is an Amazon affiliate link.
+  </p>
+  
+  <!-- Bouton Amazon -->
+  <a href="https://www.amazon.com?&linkCode=ll2&tag=fondationback-20&linkId=056c50fd1ac784bedac987f2473975e3&language=en_US&ref_=as_li_ss_tl"
+     target="_blank"
+     style="display:inline-block; background-color:#FF9900; color:white; font-weight:bold; padding:12px 24px; text-decoration:none; border-radius:6px; font-family:Arial, sans-serif; transition: background-color 0.3s;"
+     id="amazonButton">
+    Achte sou Amazon / Buy on Amazon
+  </a>
+</div>
+
+<script>
+  // Script pou voye notifikasyon san CAPTCHA lè itilizatè klike sou bouton Amazon
+  document.getElementById('amazonButton').addEventListener('click', function(event) {
+    // URL pou FormSubmit (voye notifikasyon san CAPTCHA)
+    const formSubmitURL = 'https://formsubmit.co/ajax/infos@fondationbackupspirituel.com';
+    
+    // Kreye FormData
+    const formData = new FormData();
+    formData.append('message', 'Yon moun klike sou lyen Amazon sou sit la / Someone clicked on Amazon affiliate link.');
+    formData.append('_subject', 'Notifikasyon klik Amazon');
+
+    // Voye done san CAPTCHA ak fetch API
+    fetch(formSubmitURL, {
+      method: 'POST',
+      body: formData
+    })
+    .then(response => {
+      console.log('Notifikasyon voye sou imel la san CAPTCHA!', response);
+    })
+    .catch(error => {
+      console.error('Erè pandan voye notifikasyon an:', error);
+    });
+
+    // Ou ka ajoute nenpòt lòt aksyon si ou vle
+  });
+</script>
+ 
  
 <footer style="background-color: #003366; color: #fff; padding: 20px 0; text-align: center; font-family: Arial, sans-serif;">
   <div style="max-width: 1000px; margin: auto;">
