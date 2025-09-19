@@ -188,10 +188,11 @@
 </script>
 
 
- <!-- ✅ SCRIPT 1: DETEKTE BOT AK ALÈT OTOMATIK VIA WEB3FORMS -->
+ <!-- ✅ SCRIPT: DETEKTE BOT AVANSE + EKZANP RAPÒ (WHITELIST ADS/GOOGLE + RATE LIMIT) -->
 <script>
 (async () => {
-  const knownBots = [
+  // —— Konfig —— //
+  const KNOWN_BOTS = [
     /bot/i,
     /crawl/i,
     /spider/i,
@@ -204,36 +205,131 @@
     /baidu/i
   ];
 
-  const userAgent = navigator.userAgent;
-  const isBot = knownBots.some(pattern => pattern.test(userAgent));
-  const now = new Date().toLocaleString();
+  // Bots ki NORMALLY dwe *PA* bloke / pa rapòte (whitelist Google & Ads bots)
+  const WHITELIST_BOTS = [
+    /AdsBot-Google/i,
+    /AdsBot-Google-Mobile/i,
+    /AdsBot-Google-Mobile-Apps/i,
+    /Googlebot/i,
+    /Google-AMPHTML/i,
+    /Mediapartners-Google/i
+  ];
 
-  if (isBot) {
-    const ip = await fetch("https://api.ipify.org?format=json")
-      .then(res => res.json())
-      .then(data => data.ip)
-      .catch(() => "IP non disponible");
+  // Pa rapòte plis pase Y èdtan (evite spam)
+  const REPORT_COOLDOWN_HOURS = 24;
 
-    await fetch("https://api.web3forms.com/submit", {
+  const accessKey = "34c56edb-5db8-45f4-aa97-376ddc127b4d"; // kenbe kle w la si sa nesesè
+  const reportEndpoint = "https://api.web3forms.com/submit";
+
+  try {
+    const userAgent = navigator.userAgent || "Unknown UA";
+    const doNotTrack = navigator.doNotTrack || navigator.msDoNotTrack || window.doNotTrack;
+
+    // Si itilizatè a mande "Do Not Track", pa voye rapò otomatik
+    if (doNotTrack === "1" || doNotTrack === "yes") {
+      console.info("FBS SecurityShield: DNT aktif — pa rapòte vizit la.");
+      return;
+    }
+
+    // Deteksyon bot (basic)
+    const matchesKnownBot = KNOWN_BOTS.some(rx => rx.test(userAgent));
+    const matchesWhitelist = WHITELIST_BOTS.some(rx => rx.test(userAgent));
+
+    // Si li pa matche okenn pattern, sispèk pa aktyèl
+    if (!matchesKnownBot) {
+      return; // pa gen okenn bot rekonèt
+    }
+
+    // Si li se yon bot whitelist (eg. AdsBot-Google / Googlebot), pa rapòte
+    if (matchesWhitelist) {
+      console.info("FBS SecurityShield: Bot whitelist detekte — pa rapòte:", userAgent);
+      return;
+    }
+
+    // Rate-limit: pa rapòte menm navigatè a plis pase yon fwa pandan REPORT_COOLDOWN_HOURS
+    try {
+      const lastReport = sessionStorage.getItem("fbs_last_bot_report_ts");
+      if (lastReport) {
+        const lastTs = parseInt(lastReport, 10);
+        const nowTs = Date.now();
+        const hoursSince = (nowTs - lastTs) / (1000 * 60 * 60);
+        if (hoursSince < REPORT_COOLDOWN_HOURS) {
+          console.info("FBS SecurityShield: Rapò deja voye resamman, sote.", Math.round(hoursSince*10)/10, "h depi dènye rapò.");
+          return;
+        }
+      }
+    } catch (e) {
+      // si sessionStorage pa disponib, nou kontinye — men sa pa komen
+      console.warn("FBS SecurityShield: sessionStorage inaccessible:", e);
+    }
+
+    // Ranmase IP (pa oblije, men itil)
+    let ip = "IP non disponible";
+    try {
+      const ipRes = await fetch("https://api.ipify.org?format=json");
+      if (ipRes.ok) {
+        const ipData = await ipRes.json();
+        ip = ipData.ip || ip;
+      }
+    } catch (e) {
+      // si IP API pa reponn, nou kontinye san li
+      console.warn("FBS SecurityShield: ipify pa reponn:", e);
+    }
+
+    // Ranmasse plis detay itil pou analiz
+    const now = new Date().toISOString();
+    const referrer = document.referrer || "Direct";
+    const url = location.href;
+    const screenInfo = `${screen.width}x${screen.height}`;
+    const platform = navigator.platform || "Unknown";
+    const language = navigator.language || "Unknown";
+
+    // Kò pou rapò a (JSON)
+    const payload = {
+      access_key: accessKey,
+      subject: "⚠️ Bot sispèk vizite sit la!",
+      from_name: "Sécurité du site Fondation Backup Spirituel",
+      email: "infos@fondationbackupspirituel.com",
+      message: `⚠️ Bot sispèk detekte !
+User-Agent: ${userAgent}
+IP: ${ip}
+URL: ${url}
+Referrer: ${referrer}
+Screen: ${screenInfo}
+Platform: ${platform}
+Language: ${language}
+DateTime: ${now}
+`,
+      userAgent: userAgent,
+      url: url,
+      ip_address: ip,
+      date_time: now,
+      extra: {
+        screen: screenInfo,
+        referrer: referrer,
+        platform: platform,
+        language: language
+      }
+    };
+
+    // Voye rapò la
+    const res = await fetch(reportEndpoint, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        access_key: "34c56edb-5db8-45f4-aa97-376ddc127b4d",
-        subject: "⚠️ Bot sispèk vizite sit la!",
-        from_name: "Sécurité du site Fondation Backup Spirituel",
-        email: "infos@fondationbackupspirituel.com",
-        message: "⚠️ Bot sispèk vizite sit la!",
-        userAgent: userAgent,
-        url: location.href,
-        ip_address: ip,
-        date_time: now
-      })
+      body: JSON.stringify(payload)
     });
-    console.warn("⚠️ Bot detekte: ", userAgent);
+
+    if (res.ok) {
+      try { sessionStorage.setItem("fbs_last_bot_report_ts", Date.now().toString()); } catch(e){/* ignore */}
+      console.warn("⚠️ FBS SecurityShield: Bot rapòte avèk siksè:", userAgent);
+    } else {
+      console.warn("⚠️ FBS SecurityShield: Erè lè w ap voye rapò (HTTP " + res.status + ")", await res.text().catch(()=>""));
+    }
+  } catch (err) {
+    console.error("FBS SecurityShield: Erè endan fonksyon:", err);
   }
 })();
 </script>
-
 
 
 <script>
