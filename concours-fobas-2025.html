@@ -452,15 +452,15 @@
 
   <!-- Mizik 1 -->
   <div style="text-align: center;">
-    <audio id="audio1" src="demi finalLise-audio"></audio>
+    <audio id="audio1" src="AudioDieunise-demifinal"></audio>
     <div>
       <button onclick="playAudio('audio1')">▶ Play</button>
       <button onclick="stopAudio('audio1')">⏹ Stop</button>
-      <a href="demi finalLise-audio" download>
+      <a href="AudioDieunise-demifinal" download>
         <button>⬇ Télécharger</button>
       </a>
     </div>
-    <p style="margin-top: 5px; font-weight: bold;">Lise Nina - Jn-Rabel #1</p>
+    <p style="margin-top: 5px; font-weight: bold;">Cedieu Dieunise - Bombarde #1</p>
   </div>
 
   <!-- Mizik 2 -->
@@ -509,8 +509,8 @@
 
   <!-- Titre Match la -->
 <div style="text-align: center; margin-bottom: 20px;">
-  <h2 style="color: #2c3e50; font-weight: bold;">DEMI-FINAL : Lise Nina Vs Laurore Laurie</h2>
-  <p style="font-size: 16px; color: #555;">Vandredi 19 Septanb 2025</p>
+  <h2 style="color: #2c3e50; font-weight: bold;">Match de classement - 3ème place : Cedieu Dieunise Vs Laurore Laurie</h2>
+  <p style="font-size: 16px; color: #555;">Mekredi 24 Septanb 2025</p>
 </div>
 
 <!-- Chanm Nom Votè a -->
@@ -533,7 +533,7 @@
 
   <label>
     <input type="radio" name="vote_pou" value="Lise Nina" required>
-    Atis 1 - Lise Nina Jn-Rabel
+    Atis 1 - Cedieu Dieunise Bombarde
   </label><br>
 
   <label>
@@ -913,14 +913,14 @@ document.addEventListener("DOMContentLoaded", function () {
     Vandredi 19 Septanb 2025
   </h3>
   <div id="match113-result">
-    <p><strong>Laurore Laurie</strong> — <span id="score1-13">En cours</span> Pts</p>
-    <p><strong>Lise Nina</strong></strong> — <span id="score2-13">En cours</span> Pts</p>
+    <p><strong>Laurore Laurie</strong> — <span id="score1-13">530</span> Pts</p>
+    <p><strong>Lise Nina</strong></strong> — <span id="score2-13">740</span> Pts</p>
   </div>
   <div id="final13-result" style="margin-top:15px; font-weight:bold; text-align:center;"></div>
 </div>
 
 <script>
-  showMatchResult(En cours, En cours, "Laurore Laurie Mare-Rouge #2", "Lise Nina Jn-Rabel #1", "F", "F", "final13-result");
+  showMatchResult(530, 740, "Laurore Laurie Mare-Rouge #2", "Lise Nina Jn-Rabel #1", "F", "F", "final13-result");
 </script>
 
 
@@ -938,6 +938,41 @@ document.addEventListener("DOMContentLoaded", function () {
 
 <script>
   showMatchResult(Passe, Passe, "Bilove Annda Mare-Rouge #1", "Cedieu Dieunise Bombarde #1", "F", "F", "final14-result");
+</script>
+
+
+  <!-- MATCH 15 Classement-3EM PLACE-->
+<div class="match-section" style="margin:30px auto; max-width:600px; padding:20px; border:2px solid #000; border-radius:12px; background:#f9f9f9;">
+  <h3 style="text-align:center; font-size:16px; font-weight:bold; margin-bottom:15px; color:#0047AB;">
+    Mekredi 24 Septanb 2025 Match de classement (3ème place)
+  </h3>
+  <div id="match115-result">
+    <p><strong>Cedieu Dieunise</strong> — <span id="score1-15">Pas encors</span> Pts</p>
+    <p><strong>Laurie Laurore</strong></strong> — <span id="score2-15">Pas encors</span> Pts</p>
+  </div>
+  <div id="final15-result" style="margin-top:15px; font-weight:bold; text-align:center;"></div>
+</div>
+
+<script>
+  showMatchResult(Pas encors, Pas encors, "Cedieu Dieunise Bombarde #1", "Laurie Laurore Mare-Rouge #2", "F", "F", "final15-result");
+</script>
+
+
+
+   <!-- MATCH 16 GRAND-FINAL-->
+<div class="match-section" style="margin:30px auto; max-width:600px; padding:20px; border:2px solid #000; border-radius:12px; background:#f9f9f9;">
+  <h3 style="text-align:center; font-size:16px; font-weight:bold; margin-bottom:15px; color:#0047AB;">
+    Jedi 25 Septanb 2025 GRAND FINAL
+  </h3>
+  <div id="match116-result">
+    <p><strong>Bilove-Annda</strong> — <span id="score1-16">Pas encors</span> Pts</p>
+    <p><strong>Lise Nina</strong></strong> — <span id="score2-16">Pas encors</span> Pts</p>
+  </div>
+  <div id="final16-result" style="margin-top:15px; font-weight:bold; text-align:center;"></div>
+</div>
+
+<script>
+  showMatchResult(Pas encors, Pas encors, "Bilove-Annda Mare Rouge #1", "Lise Nina Jn-Rabel #1", "F", "F", "final16-result");
 </script>
  
 <!-- ================== FIN MATCHES ================== --><br><br>
