@@ -150,15 +150,21 @@
 <div id="video-steveai-container" style="max-width: 340px; margin: 20px auto; text-align: center; border: 2px solid #4CAF50; border-radius: 10px; padding: 10px; background: #ffffff; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
   <h3 style="font-family: Arial, sans-serif; color: #2c3e50; font-size: 16px;">🎬 Vidéo éducative Fondation</h3>
 
-  <!-- Ti bouton preview (piga itilize iframe inaktif) -->
-  <div id="video-thumbnail" style="position: relative; width: 320px; height: 180px; margin: 0 auto; background:#000; border-radius: 6px; overflow: hidden; cursor: pointer;">
-    <img src="https://via.placeholder.com/320x180.png?text=Video+Preview" alt="Preview vidéo" style="width:100%; height:100%; object-fit:cover;">
-    <div style="position: absolute; top:50%; left:50%; transform: translate(-50%,-50%); font-size:40px; color:white;">▶</div>
-  </div>
+  <!-- IFAME embed dirèk -->
+  <iframe 
+    id="video-steveai" 
+    src="https://app.steve.ai/video/MZGR9GTOQ396JG30?autoplay=0" 
+    width="320" 
+    height="180" 
+    frameborder="0" 
+    allow="autoplay; fullscreen" 
+    style="border-radius: 6px;">
+  </iframe>
 
   <!-- Bouton kontwòl -->
   <div style="margin-top: 12px;">
-    <button onclick="openSteveAI()" style="padding:6px 14px; border:none; border-radius:6px; background:#4CAF50; color:white; font-size:14px; font-weight:bold; cursor:pointer;">▶️ Jwe</button>
+    <button onclick="playSteveAI()" style="padding:6px 14px; border:none; border-radius:6px; background:#4CAF50; color:white; font-size:14px; font-weight:bold; cursor:pointer;">▶️ Jwe</button>
+    <button onclick="stopSteveAI()" style="padding:6px 14px; border:none; border-radius:6px; background:#e74c3c; color:white; font-size:14px; font-weight:bold; cursor:pointer;">⏹ Sispann</button>
     <a href="https://app.steve.ai/video/MZGR9GTOQ396JG30" target="_blank" style="padding:6px 14px; border:none; border-radius:6px; background:#3498db; color:white; font-size:14px; font-weight:bold; text-decoration:none;">⬇️ Telechaje</a>
   </div>
 </div>
@@ -166,15 +172,18 @@
 <!-- SCRIPT endepandan -->
 <script>
 (function() {
-  // Ouvri videyo a nan yon nouvo ti fenèt (paske Steve.ai pa gen iframe embed dirèk)
-  window.openSteveAI = function() {
-    window.open("https://app.steve.ai/video/MZGR9GTOQ396JG30", "_blank");
+  const videoFrame = document.getElementById("video-steveai");
+  const baseURL = "https://app.steve.ai/video/MZGR9GTOQ396JG30";
+
+  // bouton Jwe
+  window.playSteveAI = function() {
+    videoFrame.src = baseURL + "?autoplay=1";
   };
 
-  // Si moun klike sou thumbnail la, ouvri videyo a tou
-  document.getElementById("video-thumbnail").addEventListener("click", function() {
-    openSteveAI();
-  });
+  // bouton Sispann
+  window.stopSteveAI = function() {
+    videoFrame.src = baseURL + "?autoplay=0";
+  };
 })();
 </script>
 
