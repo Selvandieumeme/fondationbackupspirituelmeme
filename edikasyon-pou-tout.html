@@ -146,46 +146,37 @@
   </div>
 
 
-<!-- 📌 Seksyon videyo endepandan Fondation -->
-<div id="video-steveai-container" style="max-width: 720px; margin: 20px auto; text-align: center; border: 3px solid #4CAF50; border-radius: 12px; padding: 15px; background: #f9f9f9; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
-  <h2 style="font-family: Arial, sans-serif; color: #2c3e50;">🎬 Vidéo éducative Fondation</h2>
-  
-  <!-- IFRAME pou videyo a -->
-  <iframe 
-    id="video-steveai" 
-    src="https://app.steve.ai/video/MZGR9GTOQ396JG30" 
-    width="100%" 
-    height="405" 
-    frameborder="0" 
-    allowfullscreen 
-    style="border-radius: 10px;">
-  </iframe>
+<!-- 📌 Ti Kadran Video Fondation -->
+<div id="video-steveai-container" style="max-width: 340px; margin: 20px auto; text-align: center; border: 2px solid #4CAF50; border-radius: 10px; padding: 10px; background: #ffffff; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+  <h3 style="font-family: Arial, sans-serif; color: #2c3e50; font-size: 16px;">🎬 Vidéo éducative Fondation</h3>
+
+  <!-- Ti bouton preview (piga itilize iframe inaktif) -->
+  <div id="video-thumbnail" style="position: relative; width: 320px; height: 180px; margin: 0 auto; background:#000; border-radius: 6px; overflow: hidden; cursor: pointer;">
+    <img src="https://via.placeholder.com/320x180.png?text=Video+Preview" alt="Preview vidéo" style="width:100%; height:100%; object-fit:cover;">
+    <div style="position: absolute; top:50%; left:50%; transform: translate(-50%,-50%); font-size:40px; color:white;">▶</div>
+  </div>
 
   <!-- Bouton kontwòl -->
-  <div style="margin-top: 15px;">
-    <button onclick="playSteveAI()" style="padding:10px 20px; border:none; border-radius:8px; background:#4CAF50; color:white; font-weight:bold; cursor:pointer;">▶️ Jwe</button>
-    <button onclick="stopSteveAI()" style="padding:10px 20px; border:none; border-radius:8px; background:#e74c3c; color:white; font-weight:bold; cursor:pointer;">⏹ Sispann</button>
-    <a href="https://app.steve.ai/video/MZGR9GTOQ396JG30" target="_blank" download style="padding:10px 20px; border:none; border-radius:8px; background:#3498db; color:white; font-weight:bold; text-decoration:none;">⬇️ Telechaje</a>
+  <div style="margin-top: 12px;">
+    <button onclick="openSteveAI()" style="padding:6px 14px; border:none; border-radius:6px; background:#4CAF50; color:white; font-size:14px; font-weight:bold; cursor:pointer;">▶️ Jwe</button>
+    <a href="https://app.steve.ai/video/MZGR9GTOQ396JG30" target="_blank" style="padding:6px 14px; border:none; border-radius:6px; background:#3498db; color:white; font-size:14px; font-weight:bold; text-decoration:none;">⬇️ Telechaje</a>
   </div>
 </div>
 
 <!-- SCRIPT endepandan -->
 <script>
 (function() {
-  const videoFrame = document.getElementById("video-steveai");
-
-  window.playSteveAI = function() {
-    // relanse iframe la pou simile "play"
-    videoFrame.src = "https://app.steve.ai/video/MZGR9GTOQ396JG30?autoplay=1";
+  // Ouvri videyo a nan yon nouvo ti fenèt (paske Steve.ai pa gen iframe embed dirèk)
+  window.openSteveAI = function() {
+    window.open("https://app.steve.ai/video/MZGR9GTOQ396JG30", "_blank");
   };
 
-  window.stopSteveAI = function() {
-    // reload iframe pou "sispann"
-    videoFrame.src = "https://app.steve.ai/video/MZGR9GTOQ396JG30";
-  };
+  // Si moun klike sou thumbnail la, ouvri videyo a tou
+  document.getElementById("video-thumbnail").addEventListener("click", function() {
+    openSteveAI();
+  });
 })();
 </script>
-
 
   
   
