@@ -72,6 +72,26 @@ app.post('/api/messages', async (req, res) => {
   }
 });
 
+
+// 🔑 Password verification route
+app.post('/api/verify-password', (req, res) => {
+  const { password } = req.body;
+  
+  // Modpas orijinal ou a — men li dwe vini kòm ENV variable
+  // Ajoute li nan Render/Heroku etc: PASSWORD=Pyebwa509Haiti
+  const PASSWORD = process.env.PASSWORD;
+
+  if (!PASSWORD) {
+    return res.status(500).json({ ok: false, error: 'Server misconfigured: PASSWORD missing' });
+  }
+
+  if (password === PASSWORD) {
+    return res.json({ ok: true });
+  } else {
+    return res.status(401).json({ ok: false, error: 'Invalid password' });
+  }
+});
+
 app.get('/', (req, res) => {
   res.send('Chat API is running...');
 });
