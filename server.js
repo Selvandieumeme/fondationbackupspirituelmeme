@@ -77,18 +77,18 @@ app.post('/api/messages', async (req, res) => {
 app.post('/api/verify-password', (req, res) => {
   const { password } = req.body;
   
-  // Modpas orijinal ou a — men li dwe vini kòm ENV variable
-  // Ajoute li nan Render/Heroku etc: PASSWORD=Pyebwa509Haiti
+  // Modpas orijinal ou a — li dwe sòti nan ENV variable
+  // Mete li sou Render/Heroku etc: PASSWORD=Pyebwa509Haiti
   const PASSWORD = process.env.PASSWORD;
 
   if (!PASSWORD) {
-    return res.status(500).json({ ok: false, error: 'Server misconfigured: PASSWORD missing' });
+    return res.status(500).json({ success: false, error: 'Server misconfigured: PASSWORD missing' });
   }
 
   if (password === PASSWORD) {
-    return res.json({ ok: true });
+    return res.json({ success: true });
   } else {
-    return res.status(401).json({ ok: false, error: 'Invalid password' });
+    return res.status(401).json({ success: false, error: 'Invalid password' });
   }
 });
 
