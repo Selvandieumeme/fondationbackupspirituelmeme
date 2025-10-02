@@ -167,6 +167,7 @@
 <!-- Script: password gate, one-by-one questions (free answers), final AJAX submit -->
 <script>
 (function(){
+  // --- Unique scope variables
   const WRAP = document.getElementById('fbsp-onebyone-wrapper');
   const pwdInput = document.getElementById('fbsp-password-input');
   const pwdBtn = document.getElementById('fbsp-password-btn');
@@ -180,12 +181,11 @@
   const RESULTS_WRAP = document.getElementById('fbsp-final-results');
   const RESULTS_CONTENT = document.getElementById('fbsp-final-content');
 
-  // --- Base64 obfuske modpas
-  const PASSWORD_B64 = 'UHlld2JlNTA5SGFpdGk='; // Base64 encode "Pyebwa509Haiti"
-
-  // endpoint
+  // --- Config
+  const PASSWORD = 'Pyebwa509Haiti'; // exact password required
   const endpoint = 'https://formsubmit.co/ajax/infos@fondationbackupspirituel.com';
 
+  // Question bank: we keep questions, but we DO NOT enforce correct answers.
   const questions = [
     {q:"1) Kisa yon email ye?", hint:"Egzanp: yon mesaj ou voye sou entènèt pou yon lòt moun."},
     {q:"2) Ki sa 'cc' vle di nan email?", hint:"Lè w mete yon moun nan CC, yo resevwa kopi mesaj la."},
@@ -199,9 +199,11 @@
     {q:"10) Kisa 'username' nan konte email la ye?", hint:"Pati anvan @ nan adrès imel la."}
   ];
 
+  // state
   let currentIndex = 0;
-  const answers = Array(questions.length).fill('');
+  const answers = Array(questions.length).fill(''); // store user's answers (free text)
 
+  // render a question (index)
   function renderQuestion(index){
     const item = questions[index];
     Q_AREA.innerHTML = `
@@ -211,20 +213,21 @@
           <div style="font-size:12px;color:#7a8590;">Kesyon ${index+1} / ${questions.length}</div>
         </div>
         <div style="margin-bottom:8px;color:#394b57;font-size:13px;">${item.hint}</div>
-        <textarea id="fbsp-answer-input" placeholder="Ekri repons ou la..." style="width:100%;padding:10px;border:1px solid #d0d7de;border-radius:8px;min-height:80px;">${answers[index] || ''}</textarea>
+        <textarea id="fbsp-answer-input" placeholder="Ekri repons ou la... (ou gen libète pou ekri nenpòt sa ou vle)" style="width:100%;padding:10px;border:1px solid #d0d7de;border-radius:8px;min-height:80px;">${answers[index] || ''}</textarea>
       </div>
     `;
+
+    // show/hide prev/next buttons
     PREV_BTN.style.display = index === 0 ? 'none' : 'inline-block';
     NEXT_BTN.innerText = index === questions.length - 1 ? 'Soumèt Tout' : 'Next →';
     MSG.innerText = '';
   }
 
-  // --- Password handling (obfuske)
+  // password handling
   pwdBtn.addEventListener('click', function(){
     const val = pwdInput.value || '';
-    // encode user input in Base64
-    const valB64 = btoa(val);
-    if(valB64 === PASSWORD_B64){
+    if(val === PASSWORD){
+      // reveal form
       document.getElementById('fbsp-password-box').style.display = 'none';
       MAIN_FORM.style.display = 'block';
       renderQuestion(0);
@@ -238,17 +241,20 @@
 
   // Prev button
   PREV_BTN.addEventListener('click', function(){
+    // save current answer
     const ai = document.getElementById('fbsp-answer-input');
     if(ai) answers[currentIndex] = ai.value || '';
     if(currentIndex > 0) currentIndex--;
     renderQuestion(currentIndex);
   });
 
-  // Next / final
+  // Next / final button
   NEXT_BTN.addEventListener('click', async function(){
+    // save current answer (free input allowed, may be empty)
     const ai = document.getElementById('fbsp-answer-input');
     if(!ai) return;
-    answers[currentIndex] = ai.value;
+    const val = ai.value;
+    answers[currentIndex] = val;
 
     if(currentIndex < questions.length - 1){
       currentIndex++;
@@ -256,7 +262,8 @@
       return;
     }
 
-    // verify personal info
+    // If last question: prepare final submit
+    // Validate personal info presence (still required)
     const nom = document.getElementById('fbsp-nom').value.trim();
     const ecole = document.getElementById('fbsp-ecole').value.trim();
     const classe = document.getElementById('fbsp-classe').value.trim();
@@ -271,6 +278,7 @@
       return;
     }
 
+    // prepare FormData with all answers (no scoring, no correctness check)
     const fd = new FormData();
     fd.append('Nom / Prénom', nom);
     fd.append('Nom dEcole', ecole);
@@ -279,11 +287,15 @@
     fd.append('Email', email);
     fd.append('Whatsapp', whatsapp);
     fd.append('Peyi', pays);
+
+    // append questions and answers
     questions.forEach((it, idx) => {
       fd.append(`Q${idx+1} - ${it.q}`, answers[idx] || '[pa reponn]');
     });
+
     fd.append('Source Page', window.location.href);
 
+    // show loading and disable UI
     LOADING.style.display = 'inline-block';
     NEXT_BTN.disabled = true;
     PREV_BTN.disabled = true;
@@ -297,8 +309,10 @@
         headers: {'Accept': 'application/json'}
       });
       const data = await resp.json();
+
       if(!resp.ok) throw new Error(data.message || 'Erè nan voye fòm nan.');
 
+      // Success: show confirmation and detailed answers (no scoring)
       LOADING.style.display = 'none';
       RESULTS_WRAP.style.display = 'block';
       MAIN_FORM.style.display = 'none';
@@ -310,6 +324,7 @@
         <div style="margin-top:10px;">${answersHtml}</div>
         <p style="margin-top:12px;text-align:center;font-size:13px;color:#556674;">Nou pral kontakte w si gen bezwen - Fondasyon BackupSpirituel</p>`;
 
+      // Keep answers in memory (not clearing) — form is hidden now
     } catch (err) {
       LOADING.style.display = 'none';
       NEXT_BTN.disabled = false;
@@ -319,6 +334,7 @@
     }
   });
 
+  // utility: escape HTML for safe display
   function escapeHtml(unsafe) {
     return String(unsafe)
       .replace(/&/g, "&amp;")
@@ -328,10 +344,14 @@
       .replace(/'/g, "&#039;")
       .replace(/\n/g, "<br>");
   }
+
+  // initial: nothing until password correct
 })();
 </script>
-<!-- END: Fondasyon BackupSpirituel - Quiz One-by-One (Password gated, free-answer, AJAX submit at end) -->
-     
+<!-- END: Fondasyon BackupSpirituel - Quiz One-by-One (Password gated, free-answer, AJAX submit at end) -->  
+
+
+
 
      
      
