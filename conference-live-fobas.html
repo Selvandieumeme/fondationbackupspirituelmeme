@@ -103,87 +103,185 @@
 
 
 
-<!-- Quiz Container -->
-<div class="quiz-box">
-  <h3>Mini Quiz Entèaktif</h3>
-  <form action="https://formsubmit.co/infos@fondationbackupspirituel.com" 
-        method="POST" 
-        onsubmit="return checkAnswer(event)">
-        
-    <label for="q1">Kisa 2 + 2 ye?</label><br>
-    <input type="text" name="q1" id="q1" placeholder="Repons ou..." required>
-    
-    <button type="submit">Soumèt</button>
+<!-- BEGIN: Fondasyon BackupSpirituel - Quiz Form (Self-contained) -->
+<div id="fbsp-quiz-wrapper" style="max-width:680px;margin:28px auto;padding:18px;border:1px solid #e6e6e6;border-radius:12px;background:#ffffff;font-family:Inter, Arial, sans-serif;box-shadow:0 6px 20px rgba(0,0,0,0.04);">
+  <h3 style="margin:0 0 10px 0;color:#0b3b66;text-align:center;font-size:20px;">Mini Quiz — Internet de Base (Email)</h3>
+  <p style="margin:0 0 14px 0;color:#333;text-align:center;font-size:13px;">Ranpli fòm sa a. Repons yo ap voye dirèk nan: <strong>infos@fondationbackupspirituel.com</strong></p>
+
+  <form id="fbsp-quiz-form" autocomplete="off">
+    <input type="hidden" name="_captcha" value="false">
+    <!-- Personal info -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
+      <input name="nom_prenom" id="fbsp-nom" placeholder="Nom / Prénom *" required style="padding:10px;border:1px solid #d0d7de;border-radius:8px;">
+      <input name="domaine" id="fbsp-domaine" placeholder="Domaine (eg. Web, Dev, IT) *" required style="padding:10px;border:1px solid #d0d7de;border-radius:8px;">
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">
+      <input name="email" id="fbsp-email" type="email" placeholder="Email *" required style="padding:10px;border:1px solid #d0d7de;border-radius:8px;">
+      <input name="whatsapp" id="fbsp-whatsapp" placeholder="Whatsapp (nimewo) *" required style="padding:10px;border:1px solid #d0d7de;border-radius:8px;">
+    </div>
+
+    <div style="margin-bottom:14px;">
+      <input name="pays" id="fbsp-pays" placeholder="Peyi *" required style="width:100%;padding:10px;border:1px solid #d0d7de;border-radius:8px;">
+    </div>
+
+    <hr style="border:none;border-top:1px solid #f0f0f0;margin:12px 0 18px 0;">
+
+    <!-- Questions -->
+    <div id="fbsp-questions" style="margin-bottom:6px;">
+      <!-- JS will render questions here -->
+    </div>
+
+    <div style="display:flex;gap:10px;align-items:center;">
+      <button type="submit" id="fbsp-submit" style="flex:1;padding:11px 16px;background:#0b63b3;color:#fff;border:none;border-radius:8px;font-weight:600;cursor:pointer;">Soumèt repons</button>
+      <div id="fbsp-loading" style="display:none;color:#0b63b3;font-size:13px;">Voye... tanpri rete sou paj la</div>
+    </div>
+
+    <p id="fbsp-message" style="margin-top:12px;font-weight:600;text-align:center;"></p>
   </form>
 
-  <p id="feedback"></p>
+  <div id="fbsp-results" style="margin-top:14px;display:none;border-top:1px dashed #eee;padding-top:12px;">
+    <h4 style="margin:0 0 8px 0;color:#0b3b66;font-size:15px;">Rezilta Quiz</h4>
+    <div id="fbsp-results-content" style="font-size:14px;color:#222;"></div>
+  </div>
 </div>
 
-<!-- Styles Quiz la -->
-<style>
-.quiz-box {
-  max-width: 450px;
-  margin: 20px auto; /* ant bo gòch/dwat */
-  padding: 20px;
-  border: 1px solid #ddd;
-  border-radius: 12px;
-  background: #fafafa;
-  font-family: Arial, sans-serif;
-  box-shadow: 0 3px 8px rgba(0,0,0,0.08);
-}
-.quiz-box h3 {
-  text-align: center;
-  margin-bottom: 15px;
-  color: #333;
-}
-.quiz-box input {
-  width: 100%;
-  padding: 10px;
-  margin: 8px 0;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-}
-.quiz-box button {
-  display: block;
-  width: 100%;
-  padding: 10px;
-  background: #0056b3;
-  color: white;
-  font-weight: bold;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: 0.3s;
-}
-.quiz-box button:hover {
-  background: #003d80;
-}
-#feedback {
-  margin-top: 12px;
-  font-weight: bold;
-  text-align: center;
-}
-</style>
-
-<!-- Script Quiz la -->
+<!-- Script: Questions + AJAX submit to FormSubmit (no redirect, no captcha) -->
 <script>
-function checkAnswer(e){
-  e.preventDefault();
-  let repons = document.getElementById("q1").value.trim();
-  let feedback = document.getElementById("feedback");
-  
-  if(repons === "4"){
-    feedback.style.color = "green";
-    feedback.innerText = "✅ Korek! Bon travay 👏";
-  } else {
-    feedback.style.color = "red";
-    feedback.innerText = "❌ Pa korek. Eseye ankò!";
+(function(){
+  // --- Config
+  const form = document.getElementById('fbsp-quiz-form');
+  const questionsContainer = document.getElementById('fbsp-questions');
+  const submitBtn = document.getElementById('fbsp-submit');
+  const loadingEl = document.getElementById('fbsp-loading');
+  const messageEl = document.getElementById('fbsp-message');
+  const resultsWrap = document.getElementById('fbsp-results');
+  const resultsContent = document.getElementById('fbsp-results-content');
+  const endpoint = 'https://formsubmit.co/ajax/infos@fondationbackupspirituel.com'; // AJAX endpoint
+
+  // --- Simple question bank (10 Qs) - answers are simplified expected strings (lowercase)
+  const qb = [
+    {q: "1) Kisa yon email ye?", a: "yon mesaj elektwonik"},
+    {q: "2) Ki sa 'cc' vle di nan email?", a: "copie carbone"},
+    {q: "3) Ki sa 'subject' nan email la ye?", a: "tit email"},
+    {q: "4) Kote nou resevwa nouvo email yo?", a: "inbox"},
+    {q: "5) Kisa yon 'attachment' ye?", a: "fichye"},
+    {q: "6) Konbyen karaktè minimòm yon modpas fò tipikman gen? (ekri nimewo)", a: "8"},
+    {q: "7) Kisa '2FA' (two-factor authentication) fè?", a: "dezyem metòd sekirite"},
+    {q: "8) Kisa nou rele 'spam'?", a: "mesaj move/rekla"},
+    {q: "9) Ki pwotokòl ki voye email sou rezo a? (eg: smtp)", a: "smtp"},
+    {q: "10) Kisa 'username' nan konte email la ye?", a: "non itilizatè"}
+  ];
+
+  // Render questions as inputs
+  function renderQuestions(){
+    let html = '';
+    qb.forEach((item, idx) => {
+      const fid = 'fbsp-q' + (idx+1);
+      html += `
+      <div style="margin-bottom:10px;">
+        <label style="display:block;margin-bottom:6px;color:#263a4a;font-size:14px;">${item.q}</label>
+        <input name="${fid}" id="${fid}" placeholder="Repons..." style="width:100%;padding:9px;border:1px solid #d0d7de;border-radius:8px;">
+      </div>`;
+    });
+    questionsContainer.innerHTML = html;
   }
-  
-  // Voye fòm nan nan imel ou
-  e.target.submit();
-}
+
+  renderQuestions();
+
+  // Utility: normalize string for comparison
+  function norm(s){ return String(s||'').trim().toLowerCase().replace(/[’'"]/g,'').replace(/\s+/g,' '); }
+
+  // On submit: validate basic info, compute score, send to FormSubmit via fetch (no redirect)
+  form.addEventListener('submit', async function(e){
+    e.preventDefault();
+    messageEl.innerText = '';
+    resultsWrap.style.display = 'none';
+    resultsContent.innerHTML = '';
+
+    // Basic validation
+    const nom = document.getElementById('fbsp-nom').value.trim();
+    const domaine = document.getElementById('fbsp-domaine').value.trim();
+    const email = document.getElementById('fbsp-email').value.trim();
+    const whatsapp = document.getElementById('fbsp-whatsapp').value.trim();
+    const pays = document.getElementById('fbsp-pays').value.trim();
+
+    if(!nom || !domaine || !email || !whatsapp || !pays){
+      messageEl.style.color = 'crimson';
+      messageEl.innerText = 'Tanpri ranpli tout chan (*) yo anvan soumèt.';
+      return;
+    }
+
+    // Collect responses and compute score + feedback
+    let score = 0;
+    const details = [];
+    qb.forEach((item, idx) => {
+      const id = 'fbsp-q' + (idx+1);
+      const val = document.getElementById(id).value || '';
+      const ok = norm(val) === norm(item.a);
+      if(ok) score++;
+      details.push({question: item.q, answer: val, correctAnswer: item.a, ok: ok});
+    });
+
+    // Prepare payload to send to FormSubmit (as FormData)
+    const fd = new FormData();
+    fd.append('Nom / Prénom', nom);
+    fd.append('Domaine', domaine);
+    fd.append('Email', email);
+    fd.append('Whatsapp', whatsapp);
+    fd.append('Peyi', pays);
+    fd.append('Quiz Score', score + '/' + qb.length);
+    // add question details in a readable string
+    let detailText = details.map(d => `${d.question}\nRepons: ${d.answer}\nKorek: ${d.correctAnswer}\nOK: ${d.ok ? 'Wi' : 'Non'}`).join('\n\n');
+    fd.append('Quiz Details', detailText);
+
+    // Optional: include UTM / page info
+    fd.append('Source', window.location.href);
+
+    // Show loading
+    submitBtn.disabled = true;
+    loadingEl.style.display = 'block';
+    messageEl.style.color = '#0b63b3';
+    messageEl.innerText = 'Ap voye repons yo... pa kite paj la.';
+
+    try {
+      const resp = await fetch(endpoint, {
+        method: 'POST',
+        body: fd,
+        headers: {'Accept': 'application/json'}
+      });
+      const data = await resp.json();
+
+      if(resp.ok){
+        // Show inline results and success message, no redirect
+        loadingEl.style.display = 'none';
+        submitBtn.disabled = false;
+        messageEl.style.color = 'green';
+        messageEl.innerText = '✅ Repons yo voye avèk siksè! Yo te voye nan infos@fondationbackupspirituel.com';
+        // Show detailed results
+        let html = `<p>Scor: <strong>${score}/${qb.length}</strong></p>`;
+        html += '<ul style="padding-left:18px;">';
+        details.forEach(d => {
+          html += `<li style="margin-bottom:8px;"><strong>${d.question}</strong><br>Repons: ${d.answer || '<em>pa reponn</em>'} — <span style="color:${d.ok ? 'green' : 'crimson'}">${d.ok ? 'Korek' : 'Pa korek (koreksyon: '+d.correctAnswer+')'}</span></li>`;
+        });
+        html += '</ul>';
+        resultsContent.innerHTML = html;
+        resultsWrap.style.display = 'block';
+        // Keep form visible and do not redirect. Optionally clear inputs:
+        // form.reset();
+      } else {
+        throw new Error(data.message || 'FormSubmit pa retounen ok.');
+      }
+    } catch(err) {
+      loadingEl.style.display = 'none';
+      submitBtn.disabled = false;
+      messageEl.style.color = 'crimson';
+      messageEl.innerText = 'Erè pandan voye fòm nan: ' + (err.message || err);
+    }
+  });
+})();
 </script>
+<!-- END: Fondasyon BackupSpirituel - Quiz Form -->
      
   <footer>
     &copy; 2025 Fondation Backup Spirituel – Tous droits réservés
