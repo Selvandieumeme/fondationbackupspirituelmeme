@@ -1,8 +1,10 @@
 // server.js
 require('dotenv').config();
 const express = require('express');
+const cors = require('cors'); // 🔑 ajoute CORS
 const app = express();
 
+app.use(cors()); // 🔑 pèmèt tout domèn fè request
 app.use(express.json());
 
 // 🔑 Password verification route
