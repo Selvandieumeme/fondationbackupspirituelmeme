@@ -102,6 +102,88 @@
   </main>
 
 
+
+<!-- Quiz Container -->
+<div class="quiz-box">
+  <h3>Mini Quiz Entèaktif</h3>
+  <form action="https://formsubmit.co/infos@fondationbackupspirituel.com" 
+        method="POST" 
+        onsubmit="return checkAnswer(event)">
+        
+    <label for="q1">Kisa 2 + 2 ye?</label><br>
+    <input type="text" name="q1" id="q1" placeholder="Repons ou..." required>
+    
+    <button type="submit">Soumèt</button>
+  </form>
+
+  <p id="feedback"></p>
+</div>
+
+<!-- Styles Quiz la -->
+<style>
+.quiz-box {
+  max-width: 450px;
+  margin: 20px auto; /* ant bo gòch/dwat */
+  padding: 20px;
+  border: 1px solid #ddd;
+  border-radius: 12px;
+  background: #fafafa;
+  font-family: Arial, sans-serif;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.08);
+}
+.quiz-box h3 {
+  text-align: center;
+  margin-bottom: 15px;
+  color: #333;
+}
+.quiz-box input {
+  width: 100%;
+  padding: 10px;
+  margin: 8px 0;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+}
+.quiz-box button {
+  display: block;
+  width: 100%;
+  padding: 10px;
+  background: #0056b3;
+  color: white;
+  font-weight: bold;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+.quiz-box button:hover {
+  background: #003d80;
+}
+#feedback {
+  margin-top: 12px;
+  font-weight: bold;
+  text-align: center;
+}
+</style>
+
+<!-- Script Quiz la -->
+<script>
+function checkAnswer(e){
+  e.preventDefault();
+  let repons = document.getElementById("q1").value.trim();
+  let feedback = document.getElementById("feedback");
+  
+  if(repons === "4"){
+    feedback.style.color = "green";
+    feedback.innerText = "✅ Korek! Bon travay 👏";
+  } else {
+    feedback.style.color = "red";
+    feedback.innerText = "❌ Pa korek. Eseye ankò!";
+  }
+  
+  // Voye fòm nan nan imel ou
+  e.target.submit();
+}
+</script>
      
   <footer>
     &copy; 2025 Fondation Backup Spirituel – Tous droits réservés
