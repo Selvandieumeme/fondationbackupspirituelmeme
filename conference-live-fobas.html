@@ -103,16 +103,30 @@
 
 
 
-<!-- BEGIN: Fondasyon BackupSpirituel - Quiz Form (Self-contained) -->
-<div id="fbsp-quiz-wrapper" style="max-width:680px;margin:28px auto;padding:18px;border:1px solid #e6e6e6;border-radius:12px;background:#ffffff;font-family:Inter, Arial, sans-serif;box-shadow:0 6px 20px rgba(0,0,0,0.04);">
-  <h3 style="margin:0 0 10px 0;color:#0b3b66;text-align:center;font-size:20px;">Mini Quiz — Internet de Base (Email)</h3>
-  <p style="margin:0 0 14px 0;color:#333;text-align:center;font-size:13px;">Ranpli fòm sa a. Repons yo ap voye dirèk nan: <strong>infos@fondationbackupspirituel.com</strong></p>
+<!-- BEGIN: Fondasyon BackupSpirituel - Quiz One-by-One (Password gated, free-answer, AJAX submit at end) -->
+<div id="fbsp-onebyone-wrapper" style="max-width:760px;margin:28px auto;padding:20px;border:1px solid #e9eef3;border-radius:12px;background:#fff;font-family:Inter, Arial, sans-serif;box-shadow:0 6px 24px rgba(11,59,102,0.06);">
+  <h3 style="margin:0 0 6px 0;color:#073659;text-align:center;font-size:20px;">Mini Quiz — Internet de Base (Email)</h3>
+  <p style="margin:0 0 14px 0;color:#3a4b56;text-align:center;font-size:13px;">
+    Pou sekirite, antre modpas la pou kòmanse. Ou gen libète pou reponn nenpòt jan ou vle. Tout repons ap voye sèlman lè w fin tout 10 kesyon yo.
+  </p>
 
-  <form id="fbsp-quiz-form" autocomplete="off">
-    <input type="hidden" name="_captcha" value="false">
-    <!-- Personal info -->
+  <!-- Password gate -->
+  <div id="fbsp-password-box" style="margin-bottom:14px;display:block;text-align:center;">
+    <input id="fbsp-password-input" type="password" placeholder="Antre modpas pou wè quiz la" style="width:70%;max-width:420px;padding:10px;border:1px solid #d0d7de;border-radius:8px;">
+    <button id="fbsp-password-btn" style="margin-left:8px;padding:10px 12px;border-radius:8px;border:none;background:#0b63b3;color:white;cursor:pointer;font-weight:600;">Valide</button>
+    <p id="fbsp-password-msg" style="margin-top:8px;color:#d64545;font-size:13px;display:none;"></p>
+  </div>
+
+  <!-- Main form (hidden until correct password) -->
+  <form id="fbsp-main-form" style="display:none;">
+    <!-- Personal info area -->
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
       <input name="nom_prenom" id="fbsp-nom" placeholder="Nom / Prénom *" required style="padding:10px;border:1px solid #d0d7de;border-radius:8px;">
+      <input name="ecole" id="fbsp-ecole" placeholder="Nom d'Ecole *" required style="padding:10px;border:1px solid #d0d7de;border-radius:8px;">
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
+      <input name="classe" id="fbsp-classe" placeholder="Classe *" required style="padding:10px;border:1px solid #d0d7de;border-radius:8px;">
       <input name="domaine" id="fbsp-domaine" placeholder="Domaine (eg. Web, Dev, IT) *" required style="padding:10px;border:1px solid #d0d7de;border-radius:8px;">
     </div>
 
@@ -125,124 +139,168 @@
       <input name="pays" id="fbsp-pays" placeholder="Peyi *" required style="width:100%;padding:10px;border:1px solid #d0d7de;border-radius:8px;">
     </div>
 
-    <hr style="border:none;border-top:1px solid #f0f0f0;margin:12px 0 18px 0;">
+    <hr style="border:none;border-top:1px solid #f3f6f8;margin:12px 0 18px 0;">
 
-    <!-- Questions -->
-    <div id="fbsp-questions" style="margin-bottom:6px;">
-      <!-- JS will render questions here -->
+    <!-- Question area (one at a time) -->
+    <div id="fbsp-q-area" style="min-height:140px;">
+      <!-- JS will render questions and controls here -->
     </div>
 
-    <div style="display:flex;gap:10px;align-items:center;">
-      <button type="submit" id="fbsp-submit" style="flex:1;padding:11px 16px;background:#0b63b3;color:#fff;border:none;border-radius:8px;font-weight:600;cursor:pointer;">Soumèt repons</button>
+    <!-- Bottom controls -->
+    <div style="display:flex;gap:10px;align-items:center;margin-top:12px;">
+      <button type="button" id="fbsp-prev-btn" style="padding:10px 14px;border-radius:8px;border:1px solid #d0d7de;background:#fff;color:#0b63b3;cursor:pointer;display:none;">⟵ Prev</button>
+      <div style="flex:1"></div>
       <div id="fbsp-loading" style="display:none;color:#0b63b3;font-size:13px;">Voye... tanpri rete sou paj la</div>
+      <button type="button" id="fbsp-next-btn" style="padding:10px 14px;border-radius:8px;border:none;background:#0b63b3;color:white;cursor:pointer;font-weight:600;">Next →</button>
     </div>
 
-    <p id="fbsp-message" style="margin-top:12px;font-weight:600;text-align:center;"></p>
+    <p id="fbsp-msg" style="margin-top:12px;font-weight:600;text-align:center;"></p>
   </form>
 
-  <div id="fbsp-results" style="margin-top:14px;display:none;border-top:1px dashed #eee;padding-top:12px;">
-    <h4 style="margin:0 0 8px 0;color:#0b3b66;font-size:15px;">Rezilta Quiz</h4>
-    <div id="fbsp-results-content" style="font-size:14px;color:#222;"></div>
+  <!-- Results area -->
+  <div id="fbsp-final-results" style="margin-top:14px;display:none;border-top:1px dashed #eef2f5;padding-top:12px;">
+    <h4 style="margin:0 0 8px 0;color:#073659;font-size:15px;text-align:center;">Rezilta ak Konfimasyon</h4>
+    <div id="fbsp-final-content" style="font-size:14px;color:#222;"></div>
   </div>
 </div>
 
-<!-- Script: Questions + AJAX submit to FormSubmit (no redirect, no captcha) -->
+<!-- Script: password gate, one-by-one questions (free answers), final AJAX submit -->
 <script>
 (function(){
-  // --- Config
-  const form = document.getElementById('fbsp-quiz-form');
-  const questionsContainer = document.getElementById('fbsp-questions');
-  const submitBtn = document.getElementById('fbsp-submit');
-  const loadingEl = document.getElementById('fbsp-loading');
-  const messageEl = document.getElementById('fbsp-message');
-  const resultsWrap = document.getElementById('fbsp-results');
-  const resultsContent = document.getElementById('fbsp-results-content');
-  const endpoint = 'https://formsubmit.co/ajax/infos@fondationbackupspirituel.com'; // AJAX endpoint
+  // --- Unique scope variables
+  const WRAP = document.getElementById('fbsp-onebyone-wrapper');
+  const pwdInput = document.getElementById('fbsp-password-input');
+  const pwdBtn = document.getElementById('fbsp-password-btn');
+  const pwdMsg = document.getElementById('fbsp-password-msg');
+  const MAIN_FORM = document.getElementById('fbsp-main-form');
+  const Q_AREA = document.getElementById('fbsp-q-area');
+  const NEXT_BTN = document.getElementById('fbsp-next-btn');
+  const PREV_BTN = document.getElementById('fbsp-prev-btn');
+  const LOADING = document.getElementById('fbsp-loading');
+  const MSG = document.getElementById('fbsp-msg');
+  const RESULTS_WRAP = document.getElementById('fbsp-final-results');
+  const RESULTS_CONTENT = document.getElementById('fbsp-final-content');
 
-  // --- Simple question bank (10 Qs) - answers are simplified expected strings (lowercase)
-  const qb = [
-    {q: "1) Kisa yon email ye?", a: "yon mesaj elektwonik"},
-    {q: "2) Ki sa 'cc' vle di nan email?", a: "copie carbone"},
-    {q: "3) Ki sa 'subject' nan email la ye?", a: "tit email"},
-    {q: "4) Kote nou resevwa nouvo email yo?", a: "inbox"},
-    {q: "5) Kisa yon 'attachment' ye?", a: "fichye"},
-    {q: "6) Konbyen karaktè minimòm yon modpas fò tipikman gen? (ekri nimewo)", a: "8"},
-    {q: "7) Kisa '2FA' (two-factor authentication) fè?", a: "dezyem metòd sekirite"},
-    {q: "8) Kisa nou rele 'spam'?", a: "mesaj move/rekla"},
-    {q: "9) Ki pwotokòl ki voye email sou rezo a? (eg: smtp)", a: "smtp"},
-    {q: "10) Kisa 'username' nan konte email la ye?", a: "non itilizatè"}
+  // --- Config
+  const PASSWORD = 'Pyebwa509Haiti'; // exact password required
+  const endpoint = 'https://formsubmit.co/ajax/infos@fondationbackupspirituel.com';
+
+  // Question bank: we keep questions, but we DO NOT enforce correct answers.
+  const questions = [
+    {q:"1) Kisa yon email ye?", hint:"Egzanp: yon mesaj ou voye sou entènèt pou yon lòt moun."},
+    {q:"2) Ki sa 'cc' vle di nan email?", hint:"Lè w mete yon moun nan CC, yo resevwa kopi mesaj la."},
+    {q:"3) Ki sa 'subject' nan email la ye?", hint:"Li rezime sijè mesaj la."},
+    {q:"4) Kote nou resevwa nouvo email yo?", hint:"Se bwat resepsyon ou."},
+    {q:"5) Kisa yon 'attachment' ye?", hint:"Yon dokiman oswa foto kole ak email la."},
+    {q:"6) Konbyen karaktè minimòm yon modpas fò tipikman gen? (ekri nimewo)", hint:"Ekri yon chif: pa egzanp 8."},
+    {q:"7) Kisa '2FA' fè?", hint:"Yon kòd dezyèm etap tankou SMS oswa app authenticator."},
+    {q:"8) Kisa nou rele 'spam'?", hint:"Mesaj ou pa vle ki souvan piblisite envazif."},
+    {q:"9) Ki pwotokòl ki voye email sou rezo a? (eg: smtp)", hint:"Ekri egzanp tankou smtp."},
+    {q:"10) Kisa 'username' nan konte email la ye?", hint:"Pati anvan @ nan adrès imel la."}
   ];
 
-  // Render questions as inputs
-  function renderQuestions(){
-    let html = '';
-    qb.forEach((item, idx) => {
-      const fid = 'fbsp-q' + (idx+1);
-      html += `
-      <div style="margin-bottom:10px;">
-        <label style="display:block;margin-bottom:6px;color:#263a4a;font-size:14px;">${item.q}</label>
-        <input name="${fid}" id="${fid}" placeholder="Repons..." style="width:100%;padding:9px;border:1px solid #d0d7de;border-radius:8px;">
-      </div>`;
-    });
-    questionsContainer.innerHTML = html;
+  // state
+  let currentIndex = 0;
+  const answers = Array(questions.length).fill(''); // store user's answers (free text)
+
+  // render a question (index)
+  function renderQuestion(index){
+    const item = questions[index];
+    Q_AREA.innerHTML = `
+      <div style="padding:10px;border-radius:10px;background:#fcfeff;border:1px solid #eef3f7;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+          <div style="font-weight:700;color:#0b3b66;font-size:15px;">${item.q}</div>
+          <div style="font-size:12px;color:#7a8590;">Kesyon ${index+1} / ${questions.length}</div>
+        </div>
+        <div style="margin-bottom:8px;color:#394b57;font-size:13px;">${item.hint}</div>
+        <textarea id="fbsp-answer-input" placeholder="Ekri repons ou la... (ou gen libète pou ekri nenpòt sa ou vle)" style="width:100%;padding:10px;border:1px solid #d0d7de;border-radius:8px;min-height:80px;">${answers[index] || ''}</textarea>
+      </div>
+    `;
+
+    // show/hide prev/next buttons
+    PREV_BTN.style.display = index === 0 ? 'none' : 'inline-block';
+    NEXT_BTN.innerText = index === questions.length - 1 ? 'Soumèt Tout' : 'Next →';
+    MSG.innerText = '';
   }
 
-  renderQuestions();
+  // password handling
+  pwdBtn.addEventListener('click', function(){
+    const val = pwdInput.value || '';
+    if(val === PASSWORD){
+      // reveal form
+      document.getElementById('fbsp-password-box').style.display = 'none';
+      MAIN_FORM.style.display = 'block';
+      renderQuestion(0);
+      pwdMsg.style.display = 'none';
+      pwdInput.value = '';
+    } else {
+      pwdMsg.style.display = 'block';
+      pwdMsg.innerText = 'Modpas pa kòrèk. Tanpri tcheke li ankò.';
+    }
+  });
 
-  // Utility: normalize string for comparison
-  function norm(s){ return String(s||'').trim().toLowerCase().replace(/[’'"]/g,'').replace(/\s+/g,' '); }
+  // Prev button
+  PREV_BTN.addEventListener('click', function(){
+    // save current answer
+    const ai = document.getElementById('fbsp-answer-input');
+    if(ai) answers[currentIndex] = ai.value || '';
+    if(currentIndex > 0) currentIndex--;
+    renderQuestion(currentIndex);
+  });
 
-  // On submit: validate basic info, compute score, send to FormSubmit via fetch (no redirect)
-  form.addEventListener('submit', async function(e){
-    e.preventDefault();
-    messageEl.innerText = '';
-    resultsWrap.style.display = 'none';
-    resultsContent.innerHTML = '';
+  // Next / final button
+  NEXT_BTN.addEventListener('click', async function(){
+    // save current answer (free input allowed, may be empty)
+    const ai = document.getElementById('fbsp-answer-input');
+    if(!ai) return;
+    const val = ai.value;
+    answers[currentIndex] = val;
 
-    // Basic validation
+    if(currentIndex < questions.length - 1){
+      currentIndex++;
+      renderQuestion(currentIndex);
+      return;
+    }
+
+    // If last question: prepare final submit
+    // Validate personal info presence (still required)
     const nom = document.getElementById('fbsp-nom').value.trim();
+    const ecole = document.getElementById('fbsp-ecole').value.trim();
+    const classe = document.getElementById('fbsp-classe').value.trim();
     const domaine = document.getElementById('fbsp-domaine').value.trim();
     const email = document.getElementById('fbsp-email').value.trim();
     const whatsapp = document.getElementById('fbsp-whatsapp').value.trim();
     const pays = document.getElementById('fbsp-pays').value.trim();
 
-    if(!nom || !domaine || !email || !whatsapp || !pays){
-      messageEl.style.color = 'crimson';
-      messageEl.innerText = 'Tanpri ranpli tout chan (*) yo anvan soumèt.';
+    if(!nom || !ecole || !classe || !domaine || !email || !whatsapp || !pays){
+      MSG.style.color = 'crimson';
+      MSG.innerText = 'Tanpri ranpli tout chan pèsonèl yo (Nom, Ecole, Classe, Domaine, Email, Whatsapp, Peyi).';
       return;
     }
 
-    // Collect responses and compute score + feedback
-    let score = 0;
-    const details = [];
-    qb.forEach((item, idx) => {
-      const id = 'fbsp-q' + (idx+1);
-      const val = document.getElementById(id).value || '';
-      const ok = norm(val) === norm(item.a);
-      if(ok) score++;
-      details.push({question: item.q, answer: val, correctAnswer: item.a, ok: ok});
-    });
-
-    // Prepare payload to send to FormSubmit (as FormData)
+    // prepare FormData with all answers (no scoring, no correctness check)
     const fd = new FormData();
     fd.append('Nom / Prénom', nom);
+    fd.append('Nom dEcole', ecole);
+    fd.append('Classe', classe);
     fd.append('Domaine', domaine);
     fd.append('Email', email);
     fd.append('Whatsapp', whatsapp);
     fd.append('Peyi', pays);
-    fd.append('Quiz Score', score + '/' + qb.length);
-    // add question details in a readable string
-    let detailText = details.map(d => `${d.question}\nRepons: ${d.answer}\nKorek: ${d.correctAnswer}\nOK: ${d.ok ? 'Wi' : 'Non'}`).join('\n\n');
-    fd.append('Quiz Details', detailText);
 
-    // Optional: include UTM / page info
-    fd.append('Source', window.location.href);
+    // append questions and answers
+    questions.forEach((it, idx) => {
+      fd.append(`Q${idx+1} - ${it.q}`, answers[idx] || '[pa reponn]');
+    });
 
-    // Show loading
-    submitBtn.disabled = true;
-    loadingEl.style.display = 'block';
-    messageEl.style.color = '#0b63b3';
-    messageEl.innerText = 'Ap voye repons yo... pa kite paj la.';
+    fd.append('Source Page', window.location.href);
+
+    // show loading and disable UI
+    LOADING.style.display = 'inline-block';
+    NEXT_BTN.disabled = true;
+    PREV_BTN.disabled = true;
+    MSG.style.color = '#0b63b3';
+    MSG.innerText = 'Ap voye tout repons yo... pa kite paj la.';
 
     try {
       const resp = await fetch(endpoint, {
@@ -252,36 +310,45 @@
       });
       const data = await resp.json();
 
-      if(resp.ok){
-        // Show inline results and success message, no redirect
-        loadingEl.style.display = 'none';
-        submitBtn.disabled = false;
-        messageEl.style.color = 'green';
-        messageEl.innerText = '✅ Repons yo voye avèk siksè! Yo te voye nan infos@fondationbackupspirituel.com';
-        // Show detailed results
-        let html = `<p>Scor: <strong>${score}/${qb.length}</strong></p>`;
-        html += '<ul style="padding-left:18px;">';
-        details.forEach(d => {
-          html += `<li style="margin-bottom:8px;"><strong>${d.question}</strong><br>Repons: ${d.answer || '<em>pa reponn</em>'} — <span style="color:${d.ok ? 'green' : 'crimson'}">${d.ok ? 'Korek' : 'Pa korek (koreksyon: '+d.correctAnswer+')'}</span></li>`;
-        });
-        html += '</ul>';
-        resultsContent.innerHTML = html;
-        resultsWrap.style.display = 'block';
-        // Keep form visible and do not redirect. Optionally clear inputs:
-        // form.reset();
-      } else {
-        throw new Error(data.message || 'FormSubmit pa retounen ok.');
-      }
-    } catch(err) {
-      loadingEl.style.display = 'none';
-      submitBtn.disabled = false;
-      messageEl.style.color = 'crimson';
-      messageEl.innerText = 'Erè pandan voye fòm nan: ' + (err.message || err);
+      if(!resp.ok) throw new Error(data.message || 'Erè nan voye fòm nan.');
+
+      // Success: show confirmation and detailed answers (no scoring)
+      LOADING.style.display = 'none';
+      RESULTS_WRAP.style.display = 'block';
+      MAIN_FORM.style.display = 'none';
+      const answersHtml = questions.map((it, idx) => {
+        const user = answers[idx] || '<em>pa reponn</em>';
+        return `<div style="margin-bottom:8px;padding:8px;border-radius:8px;background:#fbfdff;border:1px solid #eef6fb;"><strong>${it.q}</strong><br>Repons elèv la: <div style="margin-top:6px;padding:8px;border-radius:6px;background:#fff;border:1px solid #f0f4f8;color:#222;">${escapeHtml(user)}</div></div>`;
+      }).join('');
+      RESULTS_CONTENT.innerHTML = `<p style="color:green;font-weight:700;text-align:center;">✅ Mèsi — egzamen an rive soumèt ak siksè! Nou resevwa repons ou yo nan <strong>infos@fondationbackupspirituel.com</strong>.</p>
+        <div style="margin-top:10px;">${answersHtml}</div>
+        <p style="margin-top:12px;text-align:center;font-size:13px;color:#556674;">Nou pral kontakte w si gen bezwen - Fondasyon BackupSpirituel</p>`;
+
+      // Keep answers in memory (not clearing) — form is hidden now
+    } catch (err) {
+      LOADING.style.display = 'none';
+      NEXT_BTN.disabled = false;
+      PREV_BTN.disabled = false;
+      MSG.style.color = 'crimson';
+      MSG.innerText = 'Erè pandan voye repons yo: ' + (err.message || err);
     }
   });
+
+  // utility: escape HTML for safe display
+  function escapeHtml(unsafe) {
+    return String(unsafe)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;")
+      .replace(/\n/g, "<br>");
+  }
+
+  // initial: nothing until password correct
 })();
 </script>
-<!-- END: Fondasyon BackupSpirituel - Quiz Form -->
+<!-- END: Fondasyon BackupSpirituel - Quiz One-by-One (Password gated, free-answer, AJAX submit at end) -->
      
   <footer>
     &copy; 2025 Fondation Backup Spirituel – Tous droits réservés
