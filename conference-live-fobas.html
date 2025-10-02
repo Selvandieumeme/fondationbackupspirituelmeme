@@ -182,7 +182,8 @@
   const RESULTS_CONTENT = document.getElementById('fbsp-final-content');
 
   // --- Config
-  const PASSWORD = 'Pyebwa509Haiti'; // exact password required
+  // STORED_HASH is SHA-256 of "Pyebwa609Haiti" — password is NOT in cleartext here.
+  const STORED_HASH = 'a230fcb6cbd75656f22a258242bcc30bf253e4f762641f16b8f946f17ad819f6';
   const endpoint = 'https://formsubmit.co/ajax/infos@fondationbackupspirituel.com';
 
   // Question bank: we keep questions, but we DO NOT enforce correct answers.
@@ -217,31 +218,52 @@
       </div>
     `;
 
-    // show/hide prev/next buttons
     PREV_BTN.style.display = index === 0 ? 'none' : 'inline-block';
     NEXT_BTN.innerText = index === questions.length - 1 ? 'Soumèt Tout' : 'Next →';
     MSG.innerText = '';
   }
 
-  // password handling
-  pwdBtn.addEventListener('click', function(){
-    const val = pwdInput.value || '';
-    if(val === PASSWORD){
-      // reveal form
-      document.getElementById('fbsp-password-box').style.display = 'none';
-      MAIN_FORM.style.display = 'block';
-      renderQuestion(0);
-      pwdMsg.style.display = 'none';
-      pwdInput.value = '';
-    } else {
+  // --- Password handling using client-side SHA-256 hash
+  async function sha256Hex(message) {
+    const encoder = new TextEncoder();
+    const data = encoder.encode(message);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+  }
+
+  pwdBtn.addEventListener('click', async function(){
+    const val = (pwdInput.value || '').trim();
+    pwdMsg.style.display = 'none';
+    if(!val){
       pwdMsg.style.display = 'block';
-      pwdMsg.innerText = 'Modpas pa kòrèk. Tanpri tcheke li ankò.';
+      pwdMsg.innerText = 'Tanpri antre modpas la.';
+      return;
+    }
+    try {
+      pwdBtn.disabled = true;
+      pwdBtn.innerText = 'Ap verifye...';
+      const hashed = await sha256Hex(val);
+      if(hashed === STORED_HASH){
+        document.getElementById('fbsp-password-box').style.display = 'none';
+        MAIN_FORM.style.display = 'block';
+        renderQuestion(0);
+        pwdInput.value = '';
+      } else {
+        pwdMsg.style.display = 'block';
+        pwdMsg.innerText = 'Modpas pa kòrèk. Tanpri tcheke li ankò.';
+      }
+    } catch(err){
+      pwdMsg.style.display = 'block';
+      pwdMsg.innerText = 'Erè verification modpas: ' + (err.message || err);
+    } finally {
+      pwdBtn.disabled = false;
+      pwdBtn.innerText = 'Valide';
     }
   });
 
   // Prev button
   PREV_BTN.addEventListener('click', function(){
-    // save current answer
     const ai = document.getElementById('fbsp-answer-input');
     if(ai) answers[currentIndex] = ai.value || '';
     if(currentIndex > 0) currentIndex--;
@@ -250,11 +272,9 @@
 
   // Next / final button
   NEXT_BTN.addEventListener('click', async function(){
-    // save current answer (free input allowed, may be empty)
     const ai = document.getElementById('fbsp-answer-input');
     if(!ai) return;
-    const val = ai.value;
-    answers[currentIndex] = val;
+    answers[currentIndex] = ai.value;
 
     if(currentIndex < questions.length - 1){
       currentIndex++;
@@ -262,8 +282,7 @@
       return;
     }
 
-    // If last question: prepare final submit
-    // Validate personal info presence (still required)
+    // Validate personal info presence
     const nom = document.getElementById('fbsp-nom').value.trim();
     const ecole = document.getElementById('fbsp-ecole').value.trim();
     const classe = document.getElementById('fbsp-classe').value.trim();
@@ -278,7 +297,7 @@
       return;
     }
 
-    // prepare FormData with all answers (no scoring, no correctness check)
+    // prepare FormData
     const fd = new FormData();
     fd.append('Nom / Prénom', nom);
     fd.append('Nom dEcole', ecole);
@@ -288,14 +307,11 @@
     fd.append('Whatsapp', whatsapp);
     fd.append('Peyi', pays);
 
-    // append questions and answers
     questions.forEach((it, idx) => {
       fd.append(`Q${idx+1} - ${it.q}`, answers[idx] || '[pa reponn]');
     });
-
     fd.append('Source Page', window.location.href);
 
-    // show loading and disable UI
     LOADING.style.display = 'inline-block';
     NEXT_BTN.disabled = true;
     PREV_BTN.disabled = true;
@@ -303,16 +319,10 @@
     MSG.innerText = 'Ap voye tout repons yo... pa kite paj la.';
 
     try {
-      const resp = await fetch(endpoint, {
-        method: 'POST',
-        body: fd,
-        headers: {'Accept': 'application/json'}
-      });
+      const resp = await fetch(endpoint, { method:'POST', body:fd, headers:{'Accept':'application/json'} });
       const data = await resp.json();
-
       if(!resp.ok) throw new Error(data.message || 'Erè nan voye fòm nan.');
 
-      // Success: show confirmation and detailed answers (no scoring)
       LOADING.style.display = 'none';
       RESULTS_WRAP.style.display = 'block';
       MAIN_FORM.style.display = 'none';
@@ -349,8 +359,9 @@
 })();
 </script>
 <!-- END: Fondasyon BackupSpirituel - Quiz One-by-One (Password gated, free-answer, AJAX submit at end) -->
+ 
      
-  <footer>
+<footer>
     &copy; 2025 Fondation Backup Spirituel – Tous droits réservés
   </footer>
 
