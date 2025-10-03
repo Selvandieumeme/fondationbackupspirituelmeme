@@ -15,6 +15,7 @@
   .school-container{margin-bottom:40px;border-top:2px solid #0b63b3;padding-top:20px;}
   .score-adjuster{margin-top:12px;border:1px dashed #0b63b3;padding:10px;border-radius:6px}
   .score-adjuster button{margin-right:6px}
+  input, textarea { font-family: inherit; }
 </style>
 </head>
 <body>
@@ -27,13 +28,84 @@
 
 <script>
 (() => {
-  const BASE_URL = 'https://examen-backend-ihlx.onrender.com';
-  const ENDPOINTS = {
-    school: BASE_URL + '/api/verify-school',
-    class: BASE_URL + '/api/verify-class',
-    subject: BASE_URL + '/api/verify-subject'
+  // ---------- (A) LOCAL PASSWORDS - per school/class/subject ----------
+  // Si ou ta vle ranplase sa pa verify sou sèvè (ENV), di m epi m'ap modifye server.js + JS pou rele endpoints
+  const LOCAL_PASSWORDS = {
+    fobas: {
+      school: "FOBAS509Haiti",
+      classes: {
+        "7em": "Fobas1Haiti",
+        "8em": "Fobas2Haiti",
+        "9em": "Fobas3Haiti",
+        "NS1":  "Fobas4Haiti",
+        "NS2":  "Fobas5Haiti",
+        "NS3":  "Fobas6Haiti",
+        "NS4":  "Fobas7Haiti"
+      },
+      subjects: {
+        math: "Fobasmath",
+        informatique: "Fobasinformatique",
+        creole: "Fobascreole",
+        francais: "Fobasfrancais",
+        anglais: "Fobasanglais",
+        sciences: "Fobassyans",
+        histoire: "Fobasistwa",
+        geographie: "Fobasgeographie",
+        espagnol: "Fobasespagnol",
+        philosophie: "Fobasphilosophie"
+      }
+    },
+    lumiere: {
+      school: "Lumiere509Haiti",
+      classes: {
+        "7em": "Lumiere1Haiti",
+        "8em": "Lumiere2Haiti",
+        "9em": "Lumiere3Haiti",
+        "NS1":  "Lumiere4Haiti",
+        "NS2":  "Lumiere5Haiti",
+        "NS3":  "Lumiere6Haiti",
+        "NS4":  "Lumiere7Haiti"
+      },
+      subjects: {
+        math: "Lumieremath",
+        informatique: "Lumiereinformatique",
+        creole: "Lumierekreyol",
+        francais: "Lumierefrancais",
+        anglais: "Lumiereanglais",
+        sciences: "Lumeresyans",
+        histoire: "Lumiereistwa",
+        geographie: "Lumieregeographie",
+        espagnol: "Lumiereespagnol",
+        philosophie: "Lumierephilosophie"
+      }
+    },
+    cefotech: {
+      school: "Cefotech509Haiti",
+      classes: {
+        "7em": "Cefotech1Haiti",
+        "8em": "Cefotech2Haiti",
+        "9em": "Cefotech3Haiti",
+        "NS1":  "Cefotech4Haiti",
+        "NS2":  "Cefotech5Haiti",
+        "NS3":  "Cefotech6Haiti",
+        "NS4":  "Cefotech7Haiti"
+      },
+      subjects: {
+        math: "Cefotechmath",
+        informatique: "Cefotechinformatique",
+        creole: "Cefotechkreyol",
+        francais: "Cefotechfrancais",
+        anglais: "Cefotechanglais",
+        sciences: "Cefotechsyans",
+        histoire: "Cefotechistwa",
+        geographie: "Cefotechgeographie",
+        espagnol: "Cefotechespagnol",
+        philosophie: "Cefotechphilosophie"
+      }
+    }
   };
 
+  // ---------- (B) Schools data (UI + formEmail) ----------
   const schools = [
     {
       id:'fobas',
@@ -84,6 +156,7 @@
 
   const schoolsWrapper = document.getElementById('schools-wrapper');
 
+  // ---------- (C) render each school block and init logic ----------
   function renderSchool(school){
     const div = document.createElement('div');
     div.className='school-container';
@@ -133,7 +206,6 @@
             <div style="margin-top:8px"><strong>2)</strong> Kisa 'subject' nan email ye?<br><textarea name="q2" style="width:100%;min-height:80px;padding:8px;border-radius:6px;border:1px solid #d0d7de"></textarea></div>
           </div>
 
-          <!-- Score Adjuster pou pwofesè -->
           <div class="score-adjuster hidden" id="${school.id}-score-adjuster">
             <span style="font-weight:700">Ajiste Nòt:</span>
             <button type="button" data-points="-5" class="btn-outline">-5 Pts</button>
@@ -153,6 +225,7 @@
   }
 
   function initSchoolLogic(school){
+    // UI refs for this school (unique ids)
     const schoolPw = document.getElementById(`${school.id}-school-pw`);
     const schoolValidate = document.getElementById(`${school.id}-school-validate`);
     const schoolMsg = document.getElementById(`${school.id}-school-msg`);
@@ -187,21 +260,23 @@
     function show(el){el.classList.remove('hidden');}
     function hide(el){el.classList.add('hidden');}
 
-    // Verify School
-    schoolValidate.addEventListener('click', async ()=>{
+    // ---------- Verify School (LOCAL check)
+    schoolValidate.addEventListener('click', ()=>{
       schoolMsg.style.display='none';
       const pw = (schoolPw.value||'').trim();
       if(!pw){ schoolMsg.style.display='block'; schoolMsg.innerText='Antre modpas lekòl la.'; return; }
-      try{
-        schoolValidate.disabled=true; schoolValidate.innerText='Ap verifye...';
-        const resp = await fetch(ENDPOINTS.school, {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ password: pw })});
-        const data = await resp.json();
-        if(resp.ok && data.success){ hide(document.getElementById(`${school.id}-school-box`)); show(classesBox); renderClassButtons(); }
-        else{ schoolMsg.style.display='block'; schoolMsg.innerText = (data && data.message)?data.message:'Modpas lekòl pa kòrèk'; }
-      } catch(err){ schoolMsg.style.display='block'; schoolMsg.innerText='Erè verifye: '+(err.message||err); }
-      finally{ schoolValidate.disabled=false; schoolValidate.innerText='Ouvri Espas'; }
+      const local = (LOCAL_PASSWORDS[school.id] && LOCAL_PASSWORDS[school.id].school) || null;
+      if(local && pw === local){
+        hide(document.getElementById(`${school.id}-school-box`));
+        show(classesBox);
+        renderClassButtons();
+      } else {
+        schoolMsg.style.display='block';
+        schoolMsg.innerText = 'Modpas lekòl pa kòrèk';
+      }
     });
 
+    // render list of classes for this school
     function renderClassButtons(){
       classList.innerHTML='';
       school.classes.forEach(c=>{
@@ -212,21 +287,21 @@
       });
     }
 
-    // Verify Class
-    classValidate.addEventListener('click', async ()=>{
+    // ---------- Verify Class (LOCAL check)
+    classValidate.addEventListener('click', ()=>{
       classMsg.style.display='none';
       const pw = (classPw.value||'').trim();
       if(!pw){ classMsg.style.display='block'; classMsg.innerText='Antre modpas klas la'; return; }
-      try{
-        classValidate.disabled=true; classValidate.innerText='Ap verifye...';
-        const resp = await fetch(ENDPOINTS.class, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ password: pw }) });
-        const data = await resp.json();
-        if(resp.ok && data.success){ hide(classPwBox); show(subjectsBox); renderSubjectsGrid(); }
-        else{ classMsg.style.display='block'; classMsg.innerText = (data && data.message)?data.message:'Modpas klas pa kòrèk'; }
-      } catch(err){ classMsg.style.display='block'; classMsg.innerText='Erè: '+(err.message||err); }
-      finally{ classValidate.disabled=false; classValidate.innerText='Valide Klas'; }
+      const localClasses = (LOCAL_PASSWORDS[school.id] && LOCAL_PASSWORDS[school.id].classes) || {};
+      const expected = localClasses[currentClass] || null;
+      if(expected && pw === expected){
+        hide(classPwBox); show(subjectsBox); renderSubjectsGrid();
+      } else {
+        classMsg.style.display='block'; classMsg.innerText = 'Modpas klas pa kòrèk';
+      }
     });
 
+    // render subjects
     function renderSubjectsGrid(){
       subjectsGrid.innerHTML='';
       school.subjects.forEach(s=>{
@@ -234,45 +309,39 @@
         d.style.border='1px solid #eef3f7'; d.style.padding='8px'; d.style.borderRadius='8px';
         d.style.textAlign='center'; d.style.cursor='pointer';
         d.innerHTML=`<div style="font-weight:700">${s.label}</div><div class="small">swiv egzamen</div>`;
-        d.onclick=()=>{
-          currentSubject=s.id; subjectTitle.innerText=s.label+' — Antre modpas';
-          subjectPw.value=''; subjectMsg.style.display='none';
-          show(subjectPwBox);
-        };
+        d.onclick=()=>{ currentSubject=s.id; subjectTitle.innerText=s.label+' — Antre modpas'; subjectPw.value=''; subjectMsg.style.display='none'; show(subjectPwBox); };
         subjectsGrid.appendChild(d);
       });
     }
 
-    // Verify Subject
-    subjectValidate.addEventListener('click', async ()=>{
+    // ---------- Verify Subject (LOCAL check) ----------
+    subjectValidate.addEventListener('click', ()=>{
       subjectMsg.style.display='none';
       const pw=(subjectPw.value||'').trim();
       if(!pw){ subjectMsg.style.display='block'; subjectMsg.innerText='Antre modpas matyè a'; return; }
-      try{
-        subjectValidate.disabled=true; subjectValidate.innerText='Ap verifye...';
-        const resp=await fetch(ENDPOINTS.subject,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({password:pw})});
-        const data=await resp.json();
-        if(resp.ok && data.success){
-          hide(subjectPwBox); startExam(currentSubject);
-          show(scoreAdjuster); scorePts=0; scoreDisplay.innerText=scorePts;
-        }
-        else{ subjectMsg.style.display='block'; subjectMsg.innerText=(data&&data.message)?data.message:'Modpas matyè pa kòrèk'; }
-      } catch(err){ subjectMsg.style.display='block'; subjectMsg.innerText='Erè: '+(err.message||err); }
-      finally{ subjectValidate.disabled=false; subjectValidate.innerText='Valide Matyè'; }
+      const localSubjects = (LOCAL_PASSWORDS[school.id] && LOCAL_PASSWORDS[school.id].subjects) || {};
+      const expected = localSubjects[currentSubject] || null;
+      if(expected && pw === expected){
+        hide(subjectPwBox); startExam(currentSubject);
+        show(scoreAdjuster); scorePts=0; scoreDisplay.innerText=scorePts;
+      } else {
+        subjectMsg.style.display='block'; subjectMsg.innerText='Modpas matyè pa kòrèk';
+      }
     });
 
-    // Score Adjuster buttons
+    // Score Adjuster
     scoreAdjuster.querySelectorAll('button').forEach(btn=>{
       btn.addEventListener('click', ()=>{
-        const pts=parseInt(btn.dataset.points)||0;
+        const pts = parseInt(btn.dataset.points)||0;
         scorePts += pts;
         scoreDisplay.innerText = scorePts;
       });
     });
 
-    // Start Exam
+    // Start exam
     function startExam(subjectId){
-      examTitle.innerText='Egzamen: '+school.subjects.find(s=>s.id===subjectId).label;
+      const subjLabel = (school.subjects.find(s=>s.id===subjectId) || {}).label || subjectId;
+      examTitle.innerText='Egzamen: '+subjLabel;
       show(examBox); examForm.reset(); submitMsg.style.display='none';
       remainingSeconds=120*60; timerEl.innerText=formatTime(remainingSeconds);
       if(timerInterval) clearInterval(timerInterval);
@@ -280,6 +349,7 @@
         remainingSeconds--; timerEl.innerText=formatTime(remainingSeconds);
         if(remainingSeconds<=0){ clearInterval(timerInterval); autoSubmit(); }
       },1000);
+      // ensure scoreAdjuster visible (teacher can click) - already shown above after subject verify
     }
 
     function formatTime(sec){ const m=Math.floor(sec/60).toString().padStart(2,'0'); const s=(sec%60).toString().padStart(2,'0'); return `${m}:${s}`; }
@@ -303,6 +373,7 @@
     }
   }
 
+  // render all schools
   schools.forEach(school => renderSchool(school));
 })();
 </script>
