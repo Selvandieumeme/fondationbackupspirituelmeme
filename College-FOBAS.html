@@ -2,7 +2,7 @@
 <html lang="ht">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>FOBAS — Espas Egzamen</title>
+<title>Espas Egzamen Modilè</title>
 <style>
   body{font-family:Arial,Helvetica,sans-serif;background:#f5f8fb;color:#072b44;padding:16px}
   .card{max-width:1000px;margin:12px auto;padding:18px;border-radius:10px;background:#fff;box-shadow:0 6px 20px rgba(11,59,102,0.05)}
@@ -12,324 +12,298 @@
   .hidden{display:none}
   .small{font-size:13px;color:#666}
   .timer{font-weight:700;color:#b02a37}
+  .school-container{margin-bottom:40px;border-top:2px solid #0b63b3;padding-top:20px;}
+  .score-adjuster{margin-top:12px;border:1px dashed #0b63b3;padding:10px;border-radius:6px}
+  .score-adjuster button{margin-right:6px}
 </style>
 </head>
 <body>
 <div class="card">
-  <h2 style="margin:0 0 8px">Fondation BackupSpirituel — Espas FOBAS</h2>
-  <p class="small">Antre modpas pou akses prive. Premye etap: verifye lekòl la.</p>
+  <h2 style="margin:0 0 8px">Fondation BackupSpirituel — Espas Egzamen Modilè</h2>
+  <p class="small">Antre modpas pou akses prive. Chak lekòl gen pwòp modpas, klas, matyè ak egzamen.</p>
 
-  <!-- step 1: school -->
-  <div id="school-box">
-    <input id="school-pw" type="password" placeholder="Modpas lekòl (FOBAS)" style="padding:8px;border:1px solid #d0d7de;border-radius:6px;width:60%">
-    <button id="school-validate" class="btn">Ouvri Espas FOBAS</button>
-    <div id="school-msg" class="small" style="margin-top:8px;color:#b02a37;display:none"></div>
-  </div>
-
-  <!-- step 2: classes -->
-  <div id="classes-box" class="hidden" style="margin-top:14px">
-    <h4 style="margin:6px 0">Chwazi Klas (verifye klas ak modpas)</h4>
-    <div id="class-list" style="display:flex;gap:8px;flex-wrap:wrap"></div>
-    <div id="class-pw-box" class="hidden" style="margin-top:10px">
-      <div id="class-title" style="font-weight:700;margin-bottom:6px"></div>
-      <input id="class-pw" type="password" placeholder="Modpas klas la" style="padding:8px;border:1px solid #d0d7de;border-radius:6px;width:50%">
-      <button id="class-validate" class="btn">Valide Klas</button>
-      <div id="class-msg" class="small" style="margin-top:6px;color:#b02a37;display:none"></div>
-    </div>
-  </div>
-
-  <!-- step 3: subjects -->
-  <div id="subjects-box" class="hidden" style="margin-top:14px">
-    <h4 style="margin:6px 0">Matières — antre modpas pou ouvri egzamen</h4>
-    <div id="subjects-grid" class="grid"></div>
-
-    <div id="subject-pw-box" class="hidden" style="margin-top:10px">
-      <div id="subject-title" style="font-weight:700;margin-bottom:6px"></div>
-      <input id="subject-pw" type="password" placeholder="Modpas matyè a" style="padding:8px;border:1px solid #d0d7de;border-radius:6px;width:50%">
-      <button id="subject-validate" class="btn">Valide Matyè</button>
-      <div id="subject-msg" class="small" style="margin-top:6px;color:#b02a37;display:none"></div>
-    </div>
-  </div>
-
-  <!-- exam form -->
-  <div id="exam-box" class="hidden" style="margin-top:14px">
-    <h4 id="exam-title"></h4>
-    <div class="small">Timer: <span id="timer" class="timer">120:00</span></div>
-    <form id="exam-form" style="margin-top:10px">
-      <div style="display:grid;gap:8px">
-        <input name="nom_prenom" placeholder="Nom / Prénom *" required style="padding:8px;border:1px solid #d0d7de;border-radius:6px;">
-        <input name="ecole" placeholder="Nom d'Ecole *" required style="padding:8px;border:1px solid #d0d7de;border-radius:6px;">
-        <input name="classe" placeholder="Classe *" required style="padding:8px;border:1px solid #d0d7de;border-radius:6px;">
-        <input name="email" type="email" placeholder="Email *" required style="padding:8px;border:1px solid #d0d7de;border-radius:6px;">
-      </div>
-      <hr>
-      <div id="exam-questions" style="margin-bottom:12px">
-        <div><strong>1)</strong> Kisa yon email ye?<br><textarea name="q1" style="width:100%;min-height:80px;padding:8px;border-radius:6px;border:1px solid #d0d7de"></textarea></div>
-        <div style="margin-top:8px"><strong>2)</strong> Kisa 'subject' nan email ye?<br><textarea name="q2" style="width:100%;min-height:80px;padding:8px;border-radius:6px;border:1px solid #d0d7de"></textarea></div>
-      </div>
-      <div style="display:flex;gap:8px;align-items:center">
-        <button type="submit" class="btn">Soumèt</button>
-        <div id="submit-msg" class="small" style="color:#0b63b3;display:none;margin-left:8px"></div>
-      </div>
-    </form>
-  </div>
-
+  <div id="schools-wrapper"></div>
 </div>
 
 <script>
 (() => {
-  // ---------- CONFIG ----------
-  const BASE_URL = 'https://examen-backend-ihlx.onrender.com'; 
+  const BASE_URL = 'https://examen-backend-ihlx.onrender.com';
   const ENDPOINTS = {
     school: BASE_URL + '/api/verify-school',
     class: BASE_URL + '/api/verify-class',
     subject: BASE_URL + '/api/verify-subject'
   };
-  const FORM_ENDPOINT = 'https://formsubmit.co/ajax/infos@fondationbackupspirituel.com';
 
-  // classes mapping
-  const classes = [
-    { id:'7em', label:'7èm' },
-    { id:'8em', label:'8èm' },
-    { id:'9em', label:'9èm' },
-    { id:'NS1', label:'NS I' },
-    { id:'NS2', label:'NS II' },
-    { id:'NS3', label:'NS III' },
-    { id:'NS4', label:'NS IV' }
+  const schools = [
+    {
+      id:'fobas',
+      name:'Fondation BackupSpirituel',
+      formEmail:'infos@fondationbackupspirituel.com',
+      classes:[
+        {id:'7em', label:'7èm'}, {id:'8em', label:'8èm'}, {id:'9em', label:'9èm'},
+        {id:'NS1', label:'NS I'}, {id:'NS2', label:'NS II'}, {id:'NS3', label:'NS III'}, {id:'NS4', label:'NS IV'}
+      ],
+      subjects:[
+        {id:'math', label:'Matematik'}, {id:'informatique', label:'Informatique'}, {id:'creole', label:'Kreyòl'},
+        {id:'francais', label:'Franse'}, {id:'anglais', label:'Anglè'}, {id:'sciences', label:'Syans'},
+        {id:'histoire', label:'Istwa'}, {id:'geographie', label:'Jeyografi'}, {id:'espagnol', label:'Espayòl'},
+        {id:'philosophie', label:'Filosofi'}
+      ]
+    },
+    {
+      id:'lumiere',
+      name:'College Lumiere Lakay de Mare Rouge',
+      formEmail:'lumiere@fondationbackupspirituel.com',
+      classes:[
+        {id:'7em', label:'7èm'}, {id:'8em', label:'8èm'}, {id:'9em', label:'9èm'},
+        {id:'NS1', label:'NS I'}, {id:'NS2', label:'NS II'}, {id:'NS3', label:'NS III'}, {id:'NS4', label:'NS IV'}
+      ],
+      subjects:[
+        {id:'math', label:'Matematik'}, {id:'informatique', label:'Informatique'}, {id:'creole', label:'Kreyòl'},
+        {id:'francais', label:'Franse'}, {id:'anglais', label:'Anglè'}, {id:'sciences', label:'Syans'},
+        {id:'histoire', label:'Istwa'}, {id:'geographie', label:'Jeyografi'}, {id:'espagnol', label:'Espayòl'},
+        {id:'philosophie', label:'Filosofi'}
+      ]
+    },
+    {
+      id:'cefotech',
+      name:'College CEFOTECH-CO de Mare Rouge',
+      formEmail:'cefotech@fondationbackupspirituel.com',
+      classes:[
+        {id:'7em', label:'7èm'}, {id:'8em', label:'8èm'}, {id:'9em', label:'9èm'},
+        {id:'NS1', label:'NS I'}, {id:'NS2', label:'NS II'}, {id:'NS3', label:'NS III'}, {id:'NS4', label:'NS IV'}
+      ],
+      subjects:[
+        {id:'math', label:'Matematik'}, {id:'informatique', label:'Informatique'}, {id:'creole', label:'Kreyòl'},
+        {id:'francais', label:'Franse'}, {id:'anglais', label:'Anglè'}, {id:'sciences', label:'Syans'},
+        {id:'histoire', label:'Istwa'}, {id:'geographie', label:'Jeyografi'}, {id:'espagnol', label:'Espayòl'},
+        {id:'philosophie', label:'Filosofi'}
+      ]
+    }
   ];
 
-  // subjects mapping
-  const subjects = [
-    { id:'math', label:'Matematik' },
-    { id:'informatique', label:'Informatique' },
-    { id:'creole', label:'Kreyòl' },
-    { id:'francais', label:'Franse' },
-    { id:'anglais', label:'Anglè' },
-    { id:'sciences', label:'Syans' },
-    { id:'histoire', label:'Istwa' },
-    { id:'geographie', label:'Jeyografi' },
-    { id:'espagnol', label:'Espayòl' },
-    { id:'philosophie', label:'Filosofi' }
-  ];
+  const schoolsWrapper = document.getElementById('schools-wrapper');
 
-  // UI refs
-  const schoolBox = document.getElementById('school-box');
-  const schoolPw = document.getElementById('school-pw');
-  const schoolValidate = document.getElementById('school-validate');
-  const schoolMsg = document.getElementById('school-msg');
+  function renderSchool(school){
+    const div = document.createElement('div');
+    div.className='school-container';
+    div.innerHTML=`
+      <h3>${school.name}</h3>
+      <div id="${school.id}-school-box">
+        <input id="${school.id}-school-pw" type="password" placeholder="Modpas lekòl" style="padding:8px;border:1px solid #d0d7de;border-radius:6px;width:60%">
+        <button id="${school.id}-school-validate" class="btn">Ouvri Espas</button>
+        <div id="${school.id}-school-msg" class="small" style="margin-top:8px;color:#b02a37;display:none"></div>
+      </div>
 
-  const classesBox = document.getElementById('classes-box');
-  const classList = document.getElementById('class-list');
-  const classPwBox = document.getElementById('class-pw-box');
-  const classTitle = document.getElementById('class-title');
-  const classPw = document.getElementById('class-pw');
-  const classValidate = document.getElementById('class-validate');
-  const classMsg = document.getElementById('class-msg');
+      <div id="${school.id}-classes-box" class="hidden" style="margin-top:14px">
+        <h4>Chwazi Klas</h4>
+        <div id="${school.id}-class-list" style="display:flex;gap:8px;flex-wrap:wrap"></div>
+        <div id="${school.id}-class-pw-box" class="hidden" style="margin-top:10px">
+          <div id="${school.id}-class-title" style="font-weight:700;margin-bottom:6px"></div>
+          <input id="${school.id}-class-pw" type="password" placeholder="Modpas klas la" style="padding:8px;border:1px solid #d0d7de;border-radius:6px;width:50%">
+          <button id="${school.id}-class-validate" class="btn">Valide Klas</button>
+          <div id="${school.id}-class-msg" class="small" style="margin-top:6px;color:#b02a37;display:none"></div>
+        </div>
+      </div>
 
-  const subjectsBox = document.getElementById('subjects-box');
-  const subjectsGrid = document.getElementById('subjects-grid');
-  const subjectPwBox = document.getElementById('subject-pw-box');
-  const subjectTitle = document.getElementById('subject-title');
-  const subjectPw = document.getElementById('subject-pw');
-  const subjectValidate = document.getElementById('subject-validate');
-  const subjectMsg = document.getElementById('subject-msg');
+      <div id="${school.id}-subjects-box" class="hidden" style="margin-top:14px">
+        <h4>Matières — antre modpas pou ouvri egzamen</h4>
+        <div id="${school.id}-subjects-grid" class="grid"></div>
+        <div id="${school.id}-subject-pw-box" class="hidden" style="margin-top:10px">
+          <div id="${school.id}-subject-title" style="font-weight:700;margin-bottom:6px"></div>
+          <input id="${school.id}-subject-pw" type="password" placeholder="Modpas matyè a" style="padding:8px;border:1px solid #d0d7de;border-radius:6px;width:50%">
+          <button id="${school.id}-subject-validate" class="btn">Valide Matyè</button>
+          <div id="${school.id}-subject-msg" class="small" style="margin-top:6px;color:#b02a37;display:none"></div>
+        </div>
+      </div>
 
-  const examBox = document.getElementById('exam-box');
-  const examTitle = document.getElementById('exam-title');
-  const examForm = document.getElementById('exam-form');
-  const submitMsg = document.getElementById('submit-msg');
-  const timerEl = document.getElementById('timer');
+      <div id="${school.id}-exam-box" class="hidden" style="margin-top:14px">
+        <h4 id="${school.id}-exam-title"></h4>
+        <div class="small">Timer: <span id="${school.id}-timer" class="timer">120:00</span></div>
+        <form id="${school.id}-exam-form" style="margin-top:10px">
+          <div style="display:grid;gap:8px">
+            <input name="nom_prenom" placeholder="Nom / Prénom *" required style="padding:8px;border:1px solid #d0d7de;border-radius:6px;">
+            <input name="ecole" placeholder="Nom d'Ecole *" required style="padding:8px;border:1px solid #d0d7de;border-radius:6px;">
+            <input name="classe" placeholder="Classe *" required style="padding:8px;border:1px solid #d0d7de;border-radius:6px;">
+            <input name="email" type="email" placeholder="Email *" required style="padding:8px;border:1px solid #d0d7de;border-radius:6px;">
+          </div>
+          <hr>
+          <div id="${school.id}-exam-questions" style="margin-bottom:12px">
+            <div><strong>1)</strong> Kisa yon email ye?<br><textarea name="q1" style="width:100%;min-height:80px;padding:8px;border-radius:6px;border:1px solid #d0d7de"></textarea></div>
+            <div style="margin-top:8px"><strong>2)</strong> Kisa 'subject' nan email ye?<br><textarea name="q2" style="width:100%;min-height:80px;padding:8px;border-radius:6px;border:1px solid #d0d7de"></textarea></div>
+          </div>
 
-  let currentClass = null;
-  let currentSubject = null;
-  let timerInterval = null;
-  let remainingSeconds = 120*60; // default 120 minutes
+          <!-- Score Adjuster pou pwofesè -->
+          <div class="score-adjuster hidden" id="${school.id}-score-adjuster">
+            <span style="font-weight:700">Ajiste Nòt:</span>
+            <button type="button" data-points="-5" class="btn-outline">-5 Pts</button>
+            <button type="button" data-points="-10" class="btn-outline">-10 Pts</button>
+            <span id="${school.id}-score-display" style="margin-left:10px;font-weight:700;color:#0b63b3">0</span> Pts
+          </div>
 
-  // helpers
-  function show(el){ el.classList.remove('hidden'); }
-  function hide(el){ el.classList.add('hidden'); }
+          <div style="display:flex;gap:8px;align-items:center;margin-top:8px">
+            <button type="submit" class="btn">Soumèt</button>
+            <div id="${school.id}-submit-msg" class="small" style="color:#0b63b3;display:none;margin-left:8px"></div>
+          </div>
+        </form>
+      </div>
+    `;
+    schoolsWrapper.appendChild(div);
+    initSchoolLogic(school);
+  }
 
-  // ---------- school verify ----------
-  schoolValidate.addEventListener('click', async ()=>{
-    schoolMsg.style.display='none';
-    const pw = (schoolPw.value||'').trim();
-    if(!pw){ schoolMsg.style.display='block'; schoolMsg.innerText='Antre modpas lekòl la.'; return; }
-    try{
-      schoolValidate.disabled=true; schoolValidate.innerText='Ap verifye...';
-      const resp = await fetch(ENDPOINTS.school, {
-        method:'POST',
-        headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({ password: pw })
-      });
-      const data = await resp.json();
-      if(resp.ok && data.success){
-        hide(schoolBox);
-        show(classesBox);
-        renderClassButtons();
-      } else {
-        schoolMsg.style.display='block';
-        schoolMsg.innerText = (data && data.message) ? data.message : 'Modpas lekòl pa kòrèk';
-      }
-    } catch(err){
-      schoolMsg.style.display='block';
-      schoolMsg.innerText = 'Erè verifye: '+(err.message||err);
-    } finally { schoolValidate.disabled=false; schoolValidate.innerText='Ouvri Espas FOBAS'; }
-  });
+  function initSchoolLogic(school){
+    const schoolPw = document.getElementById(`${school.id}-school-pw`);
+    const schoolValidate = document.getElementById(`${school.id}-school-validate`);
+    const schoolMsg = document.getElementById(`${school.id}-school-msg`);
 
-  // ---------- classes UI ----------
-  function renderClassButtons(){
-    classList.innerHTML='';
-    classes.forEach(c=>{
-      const b = document.createElement('button');
-      b.className='btn-outline';
-      b.style.margin='6px';
-      b.innerText = c.label;
-      b.onclick = ()=> {
-        currentClass = c.id;
-        classTitle.innerText = 'Modpas pou klas ' + c.label;
-        classPw.value='';
-        classMsg.style.display='none';
-        show(classPwBox);
-      };
-      classList.appendChild(b);
+    const classesBox = document.getElementById(`${school.id}-classes-box`);
+    const classList = document.getElementById(`${school.id}-class-list`);
+    const classPwBox = document.getElementById(`${school.id}-class-pw-box`);
+    const classTitle = document.getElementById(`${school.id}-class-title`);
+    const classPw = document.getElementById(`${school.id}-class-pw`);
+    const classValidate = document.getElementById(`${school.id}-class-validate`);
+    const classMsg = document.getElementById(`${school.id}-class-msg`);
+
+    const subjectsBox = document.getElementById(`${school.id}-subjects-box`);
+    const subjectsGrid = document.getElementById(`${school.id}-subjects-grid`);
+    const subjectPwBox = document.getElementById(`${school.id}-subject-pw-box`);
+    const subjectTitle = document.getElementById(`${school.id}-subject-title`);
+    const subjectPw = document.getElementById(`${school.id}-subject-pw`);
+    const subjectValidate = document.getElementById(`${school.id}-subject-validate`);
+    const subjectMsg = document.getElementById(`${school.id}-subject-msg`);
+
+    const examBox = document.getElementById(`${school.id}-exam-box`);
+    const examTitle = document.getElementById(`${school.id}-exam-title`);
+    const examForm = document.getElementById(`${school.id}-exam-form`);
+    const submitMsg = document.getElementById(`${school.id}-submit-msg`);
+    const timerEl = document.getElementById(`${school.id}-timer`);
+    const scoreAdjuster = document.getElementById(`${school.id}-score-adjuster`);
+    const scoreDisplay = document.getElementById(`${school.id}-score-display`);
+
+    let currentClass=null, currentSubject=null, timerInterval=null, remainingSeconds=120*60;
+    let scorePts=0;
+
+    function show(el){el.classList.remove('hidden');}
+    function hide(el){el.classList.add('hidden');}
+
+    // Verify School
+    schoolValidate.addEventListener('click', async ()=>{
+      schoolMsg.style.display='none';
+      const pw = (schoolPw.value||'').trim();
+      if(!pw){ schoolMsg.style.display='block'; schoolMsg.innerText='Antre modpas lekòl la.'; return; }
+      try{
+        schoolValidate.disabled=true; schoolValidate.innerText='Ap verifye...';
+        const resp = await fetch(ENDPOINTS.school, {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ password: pw })});
+        const data = await resp.json();
+        if(resp.ok && data.success){ hide(document.getElementById(`${school.id}-school-box`)); show(classesBox); renderClassButtons(); }
+        else{ schoolMsg.style.display='block'; schoolMsg.innerText = (data && data.message)?data.message:'Modpas lekòl pa kòrèk'; }
+      } catch(err){ schoolMsg.style.display='block'; schoolMsg.innerText='Erè verifye: '+(err.message||err); }
+      finally{ schoolValidate.disabled=false; schoolValidate.innerText='Ouvri Espas'; }
     });
-  }
 
-  classValidate.addEventListener('click', async ()=>{
-    classMsg.style.display='none';
-    const pw = (classPw.value||'').trim();
-    if(!pw){ classMsg.style.display='block'; classMsg.innerText='Antre modpas klas la'; return; }
-    try{
-      classValidate.disabled=true; classValidate.innerText='Ap verifye...';
-      const resp = await fetch(ENDPOINTS.class, {
-        method:'POST',
-        headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({ password: pw })
+    function renderClassButtons(){
+      classList.innerHTML='';
+      school.classes.forEach(c=>{
+        const b=document.createElement('button');
+        b.className='btn-outline'; b.style.margin='6px'; b.innerText=c.label;
+        b.onclick=()=>{ currentClass=c.id; classTitle.innerText='Modpas pou klas '+c.label; classPw.value=''; classMsg.style.display='none'; show(classPwBox); };
+        classList.appendChild(b);
       });
-      const data = await resp.json();
-      if(resp.ok && data.success){
-        hide(classPwBox);
-        show(subjectsBox);
-        renderSubjectsGrid();
-      } else {
-        classMsg.style.display='block';
-        classMsg.innerText = (data && data.message) ? data.message : 'Modpas klas pa kòrèk';
-      }
-    } catch(err){
-      classMsg.style.display='block';
-      classMsg.innerText='Erè: '+(err.message||err);
-    } finally { classValidate.disabled=false; classValidate.innerText='Valide Klas'; }
-  });
+    }
 
-  // ---------- subjects UI ----------
-  function renderSubjectsGrid(){
-    subjectsGrid.innerHTML='';
-    subjects.forEach(s=>{
-      const d=document.createElement('div');
-      d.style.border='1px solid #eef3f7';
-      d.style.padding='8px';
-      d.style.borderRadius='8px';
-      d.style.textAlign='center';
-      d.style.cursor='pointer';
-      d.innerHTML = `<div style="font-weight:700">${s.label}</div><div class="small">swiv egzamen</div>`;
-      d.onclick = ()=> {
-        currentSubject = s.id;
-        subjectTitle.innerText = s.label + ' — Antre modpas';
-        subjectPw.value=''; subjectMsg.style.display='none';
-        show(subjectPwBox);
-      };
-      subjectsGrid.appendChild(d);
+    // Verify Class
+    classValidate.addEventListener('click', async ()=>{
+      classMsg.style.display='none';
+      const pw = (classPw.value||'').trim();
+      if(!pw){ classMsg.style.display='block'; classMsg.innerText='Antre modpas klas la'; return; }
+      try{
+        classValidate.disabled=true; classValidate.innerText='Ap verifye...';
+        const resp = await fetch(ENDPOINTS.class, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ password: pw }) });
+        const data = await resp.json();
+        if(resp.ok && data.success){ hide(classPwBox); show(subjectsBox); renderSubjectsGrid(); }
+        else{ classMsg.style.display='block'; classMsg.innerText = (data && data.message)?data.message:'Modpas klas pa kòrèk'; }
+      } catch(err){ classMsg.style.display='block'; classMsg.innerText='Erè: '+(err.message||err); }
+      finally{ classValidate.disabled=false; classValidate.innerText='Valide Klas'; }
     });
-  }
 
-  subjectValidate.addEventListener('click', async ()=>{
-    subjectMsg.style.display='none';
-    const pw = (subjectPw.value||'').trim();
-    if(!pw){ subjectMsg.style.display='block'; subjectMsg.innerText='Antre modpas matyè a'; return; }
-    try{
-      subjectValidate.disabled=true; subjectValidate.innerText='Ap verifye...';
-      const resp = await fetch(ENDPOINTS.subject, {
-        method:'POST',
-        headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({ password: pw })
+    function renderSubjectsGrid(){
+      subjectsGrid.innerHTML='';
+      school.subjects.forEach(s=>{
+        const d=document.createElement('div');
+        d.style.border='1px solid #eef3f7'; d.style.padding='8px'; d.style.borderRadius='8px';
+        d.style.textAlign='center'; d.style.cursor='pointer';
+        d.innerHTML=`<div style="font-weight:700">${s.label}</div><div class="small">swiv egzamen</div>`;
+        d.onclick=()=>{
+          currentSubject=s.id; subjectTitle.innerText=s.label+' — Antre modpas';
+          subjectPw.value=''; subjectMsg.style.display='none';
+          show(subjectPwBox);
+        };
+        subjectsGrid.appendChild(d);
       });
-      const data = await resp.json();
-      if(resp.ok && data.success){
-        hide(subjectPwBox);
-        startExam(currentSubject);
-      } else {
-        subjectMsg.style.display='block';
-        subjectMsg.innerText = (data && data.message) ? data.message : 'Modpas matyè pa kòrèk';
-      }
-    } catch(err){
-      subjectMsg.style.display='block';
-      subjectMsg.innerText='Erè: '+(err.message||err);
-    } finally { subjectValidate.disabled=false; subjectValidate.innerText='Valide Matyè'; }
-  });
+    }
 
-  // ---------- exam flow ----------
-  function startExam(subjectId){
-    examTitle.innerText = 'Egzamen: ' + subjects.find(s=>s.id===subjectId).label;
-    show(examBox);
-    examForm.reset();
-    submitMsg.style.display='none';
-    remainingSeconds = 120 * 60;
-    timerEl.innerText = formatTime(remainingSeconds);
-    if(timerInterval) clearInterval(timerInterval);
-    timerInterval = setInterval(()=>{
-      remainingSeconds--;
-      timerEl.innerText = formatTime(remainingSeconds);
-      if(remainingSeconds <= 0){
-        clearInterval(timerInterval);
-        autoSubmit();
-      }
-    },1000);
-    examBox.scrollIntoView({behavior:'smooth'});
-  }
+    // Verify Subject
+    subjectValidate.addEventListener('click', async ()=>{
+      subjectMsg.style.display='none';
+      const pw=(subjectPw.value||'').trim();
+      if(!pw){ subjectMsg.style.display='block'; subjectMsg.innerText='Antre modpas matyè a'; return; }
+      try{
+        subjectValidate.disabled=true; subjectValidate.innerText='Ap verifye...';
+        const resp=await fetch(ENDPOINTS.subject,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({password:pw})});
+        const data=await resp.json();
+        if(resp.ok && data.success){
+          hide(subjectPwBox); startExam(currentSubject);
+          show(scoreAdjuster); scorePts=0; scoreDisplay.innerText=scorePts;
+        }
+        else{ subjectMsg.style.display='block'; subjectMsg.innerText=(data&&data.message)?data.message:'Modpas matyè pa kòrèk'; }
+      } catch(err){ subjectMsg.style.display='block'; subjectMsg.innerText='Erè: '+(err.message||err); }
+      finally{ subjectValidate.disabled=false; subjectValidate.innerText='Valide Matyè'; }
+    });
 
-  function formatTime(sec){
-    const m = Math.floor(sec/60).toString().padStart(2,'0');
-    const s = (sec % 60).toString().padStart(2,'0');
-    return `${m}:${s}`;
-  }
+    // Score Adjuster buttons
+    scoreAdjuster.querySelectorAll('button').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const pts=parseInt(btn.dataset.points)||0;
+        scorePts += pts;
+        scoreDisplay.innerText = scorePts;
+      });
+    });
 
-  async function autoSubmit(){
-    try {
-      submitMsg.style.display='block';
-      submitMsg.innerText='Tan fini — ap soumèt otomatikman...';
-      await submitExamForm(true);
-    } catch(e){
-      submitMsg.innerText='Echwe soumèt otomatikman: '+(e.message||e);
+    // Start Exam
+    function startExam(subjectId){
+      examTitle.innerText='Egzamen: '+school.subjects.find(s=>s.id===subjectId).label;
+      show(examBox); examForm.reset(); submitMsg.style.display='none';
+      remainingSeconds=120*60; timerEl.innerText=formatTime(remainingSeconds);
+      if(timerInterval) clearInterval(timerInterval);
+      timerInterval=setInterval(()=>{
+        remainingSeconds--; timerEl.innerText=formatTime(remainingSeconds);
+        if(remainingSeconds<=0){ clearInterval(timerInterval); autoSubmit(); }
+      },1000);
+    }
+
+    function formatTime(sec){ const m=Math.floor(sec/60).toString().padStart(2,'0'); const s=(sec%60).toString().padStart(2,'0'); return `${m}:${s}`; }
+
+    async function autoSubmit(){ try{ submitMsg.style.display='block'; submitMsg.innerText='Tan fini — ap soumèt otomatikman...'; await submitExamForm(true); } catch(e){ submitMsg.innerText='Echwe soumèt otomatikman: '+(e.message||e); } }
+
+    examForm.addEventListener('submit', async ev=>{ ev.preventDefault(); await submitExamForm(false); });
+
+    async function submitExamForm(isAuto=false){
+      const fd=new FormData(examForm);
+      fd.append('Exam Subject', currentSubject); fd.append('Exam Class', currentClass); fd.append('Exam School', school.id);
+      fd.append('Score Adjusted', scorePts);
+      fd.append('AutoSubmitted', isAuto?'yes':'no'); fd.append('Source Page', window.location.href);
+      try{
+        submitMsg.style.display='block'; submitMsg.innerText='Ap voye...';
+        const resp = await fetch(`https://formsubmit.co/ajax/${school.formEmail}`, { method:'POST', body:fd, headers:{'Accept':'application/json'} });
+        const data = await resp.json();
+        if(!resp.ok) throw new Error(data.message||'Erè soumèt');
+        submitMsg.innerText='✅ Egzamen soumèt ak siksè.'; hide(examBox);
+      } catch(err){ submitMsg.innerText='Erè pandan soumèt: '+(err.message||err); }
     }
   }
 
-  examForm.addEventListener('submit', async (ev)=>{
-    ev.preventDefault();
-    await submitExamForm(false);
-  });
-
-  async function submitExamForm(isAuto=false){
-    const form = examForm;
-    const fd = new FormData(form);
-    fd.append('Exam Subject', currentSubject);
-    fd.append('Exam Class', currentClass);
-    fd.append('Exam School', 'fobas');
-    fd.append('AutoSubmitted', isAuto ? 'yes' : 'no');
-    fd.append('Source Page', window.location.href);
-
-    try {
-      document.getElementById('submit-msg').style.display='block';
-      document.getElementById('submit-msg').innerText='Ap voye...';
-      const resp = await fetch(FORM_ENDPOINT, { method:'POST', body:fd, headers:{'Accept':'application/json'} });
-      const data = await resp.json();
-      if(!resp.ok) throw new Error(data.message||'Erè soumèt');
-      document.getElementById('submit-msg').innerText='✅ Egzamen soumèt ak siksè.';
-      hide(examBox);
-    } catch(err){
-      document.getElementById('submit-msg').innerText='Erè pandan soumèt: '+(err.message||err);
-    }
-  }
-
+  schools.forEach(school => renderSchool(school));
 })();
 </script>
 </body>
