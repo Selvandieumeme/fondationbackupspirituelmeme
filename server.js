@@ -1,153 +1,245 @@
 // server.js
 require('dotenv').config();
 const express = require('express');
-const cors = require('cors'); 
+const cors = require('cors');
 const app = express();
 
-app.use(cors()); 
+app.use(cors());
 app.use(express.json());
 
 /**
- * 🔑 1) Verifye lekòl
+ * HELPERS
+ */
+
+// Normalize school key (accept many casings)
+function normalizeSchoolKey(key) {
+  if (!key) return null;
+  const k = String(key).trim().toUpperCase();
+  // accept short keys like 'fobas' or full 'FOBAS'
+  return k;
+}
+
+// Build mappings from env variables present
+function buildEnvMappings() {
+  // Known school IDs we expect (you can add more here if you add ENVs)
+  const schools = ['FOBAS', 'LUMIERE', 'CEFOTECH'];
+
+  const mapping = {
+    schools: {},
+    classes: {},    // mapping[school] = { classKey: envValue, ... }
+    subjects: {}    // mapping[school] = { subjKey: envValue, ... }
+  };
+
+  // Legacy single-school variable (kept for backwards compatibility)
+  if (process.env.SCHOOL_PASSWORD) {
+    mapping.legacySchoolPassword = process.env.SCHOOL_PASSWORD;
+  }
+
+  schools.forEach(s => {
+    const sid = s.toUpperCase();
+    const schoolEnvName = `SCHOOL_${sid}`;
+    if (process.env[schoolEnvName]) {
+      mapping.schools[sid] = process.env[schoolEnvName];
+    } else {
+      // leave absent if not defined
+    }
+
+    // classes for each school: CLASS_<SCHOOL>_7EM etc
+    mapping.classes[sid] = {};
+    ['7em','8em','9em','NS1','NS2','NS3','NS4'].forEach(cls => {
+      // env name: CLASS_<SCHOOL>_7EM  (uppercase)
+      const envName = `CLASS_${sid}_${String(cls).toUpperCase()}`;
+      if (process.env[envName]) mapping.classes[sid][cls] = process.env[envName];
+    });
+
+    // subjects for each school: SUBJECT_<SCHOOL>_MATH etc
+    mapping.subjects[sid] = {};
+    const subjKeys = {
+      math: 'MATH',
+      informatique: 'INFO',
+      creole: 'CREOLE',
+      francais: 'FR',
+      anglais: 'EN',
+      espagnol: 'ES',
+      sciences: 'SC',
+      histoire: 'HIS',
+      geographie: 'GEO',
+      philosophie: 'PHILO'
+    };
+    Object.entries(subjKeys).forEach(([key, suffix]) => {
+      const envName = `SUBJECT_${sid}_${suffix}`;
+      if (process.env[envName]) mapping.subjects[sid][key] = process.env[envName];
+    });
+  });
+
+  return mapping;
+}
+
+const ENV_MAP = buildEnvMappings();
+
+/**
+ * Utility: find which school corresponds to a given password (search schools)
+ * Returns { schoolKey } or null
+ */
+function findSchoolByPassword(pw) {
+  if (!pw) return null;
+  const pass = String(pw);
+  // First check explicit school envs
+  for (const [schoolKey, val] of Object.entries(ENV_MAP.schools)) {
+    if (val && val === pass) return { school: schoolKey };
+  }
+  // Fallback: legacy single-school password
+  if (ENV_MAP.legacySchoolPassword && ENV_MAP.legacySchoolPassword === pass) {
+    // If legacy present, try to identify which school should be assumed.
+    // Prefer FOBAS if present; else pick the first defined school.
+    const prefer = ['FOBAS','LUMIERE','CEFOTECH'];
+    for (const p of prefer) {
+      if (ENV_MAP.schools[p]) return { school: p };
+    }
+    // otherwise return generic
+    return { school: 'FOBAS' };
+  }
+  return null;
+}
+
+/**
+ * Utility: find class+school by a given class password
+ * Returns { school, class } or null
+ */
+function findClassByPassword(pw) {
+  if (!pw) return null;
+  const pass = String(pw);
+  for (const schoolKey of Object.keys(ENV_MAP.classes)) {
+    const classes = ENV_MAP.classes[schoolKey] || {};
+    for (const clsKey of Object.keys(classes)) {
+      if (classes[clsKey] && classes[clsKey] === pass) {
+        return { school: schoolKey, class: clsKey };
+      }
+    }
+  }
+  return null;
+}
+
+/**
+ * Utility: find subject+school by subject password
+ * Returns { school, subject } or null
+ */
+function findSubjectByPassword(pw) {
+  if (!pw) return null;
+  const pass = String(pw);
+  for (const schoolKey of Object.keys(ENV_MAP.subjects)) {
+    const subs = ENV_MAP.subjects[schoolKey] || {};
+    for (const sKey of Object.keys(subs)) {
+      if (subs[sKey] && subs[sKey] === pass) {
+        return { school: schoolKey, subject: sKey };
+      }
+    }
+  }
+  return null;
+}
+
+/**
+ * ---------- ROUTES ----------
+ */
+
+/**
+ * Verify school.
+ * Accepts JSON: { school?: 'FOBAS'|'LUMIERE'|'CEFOTECH', password: '...' }
+ * If school omitted, attempts to match password to any SCHOOL_* or legacy SCHOOL_PASSWORD
  */
 app.post('/api/verify-school', (req, res) => {
   const { school, password } = req.body;
-
-  const schoolPasswords = {
-    "FOBAS": process.env.SCHOOL_FOBAS,
-    "LUMIERE": process.env.SCHOOL_LUMIERE,
-    "CEFOTECH": process.env.SCHOOL_CEFOTECH,
-  };
-
-  if (!school || !schoolPasswords[school]) {
-    return res.status(400).json({ error: 'Lekòl pa rekonèt' });
+  if (!password || typeof password !== 'string') {
+    return res.status(400).json({ success:false, message: 'Missing password' });
   }
 
-  if (password === schoolPasswords[school]) {
-    return res.json({ success: true, level: "school", school, message: `Lekòl ${school} ouvè` });
+  if (school) {
+    const sk = normalizeSchoolKey(school);
+    if (!ENV_MAP.schools[sk]) {
+      return res.status(400).json({ success:false, message: 'Lekòl pa rekonèt' });
+    }
+    if (ENV_MAP.schools[sk] === password) {
+      return res.json({ success:true, level:'school', school: sk, message: `Lekòl ${sk} ouvè` });
+    } else {
+      return res.status(401).json({ success:false, message: 'Invalid school password' });
+    }
   } else {
-    return res.status(401).json({ success: false, message: 'Invalid school password' });
+    // try to find which school this password belongs to
+    const found = findSchoolByPassword(password);
+    if (found && found.school) {
+      return res.json({ success:true, level:'school', school: found.school, message: `Lekòl ${found.school} ouvè` });
+    } else {
+      return res.status(401).json({ success:false, message: 'Invalid school password' });
+    }
   }
 });
 
 /**
- * 🔑 2) Verifye klas yo pou chak lekòl
+ * Verify class.
+ * Accepts JSON: { school?: 'FOBAS'|'LUMIERE'|'CEFOTECH', password: '...' }
+ * If school present, validates against that school's class envs.
+ * If not present, will search across all schools and return which school+class matched.
  */
 app.post('/api/verify-class', (req, res) => {
   const { school, password } = req.body;
-
-  const classPasswords = {
-    "FOBAS": {
-      "7em": process.env.CLASS_FOBAS_7EM,
-      "8em": process.env.CLASS_FOBAS_8EM,
-      "9em": process.env.CLASS_FOBAS_9EM,
-      "NS1": process.env.CLASS_FOBAS_NS1,
-      "NS2": process.env.CLASS_FOBAS_NS2,
-      "NS3": process.env.CLASS_FOBAS_NS3,
-      "NS4": process.env.CLASS_FOBAS_NS4,
-    },
-    "LUMIERE": {
-      "7em": process.env.CLASS_LUMIERE_7EM,
-      "8em": process.env.CLASS_LUMIERE_8EM,
-      "9em": process.env.CLASS_LUMIERE_9EM,
-      "NS1": process.env.CLASS_LUMIERE_NS1,
-      "NS2": process.env.CLASS_LUMIERE_NS2,
-      "NS3": process.env.CLASS_LUMIERE_NS3,
-      "NS4": process.env.CLASS_LUMIERE_NS4,
-    },
-    "CEFOTECH": {
-      "7em": process.env.CLASS_CEFOTECH_7EM,
-      "8em": process.env.CLASS_CEFOTECH_8EM,
-      "9em": process.env.CLASS_CEFOTECH_9EM,
-      "NS1": process.env.CLASS_CEFOTECH_NS1,
-      "NS2": process.env.CLASS_CEFOTECH_NS2,
-      "NS3": process.env.CLASS_CEFOTECH_NS3,
-      "NS4": process.env.CLASS_CEFOTECH_NS4,
-    },
-  };
-
-  if (!school || !classPasswords[school]) {
-    return res.status(400).json({ error: 'Lekòl pa rekonèt pou klas' });
+  if (!password || typeof password !== 'string') {
+    return res.status(400).json({ success:false, message: 'Missing password' });
   }
 
-  const validClass = Object.keys(classPasswords[school]).find(
-    cls => password === classPasswords[school][cls]
-  );
-
-  if (validClass) {
-    return res.json({ success: true, level: "class", school, class: validClass, message: `Klas ${validClass} ouvè nan ${school}` });
+  if (school) {
+    const sk = normalizeSchoolKey(school);
+    const classesFor = ENV_MAP.classes[sk];
+    if (!classesFor) return res.status(400).json({ success:false, message: 'Lekòl pa rekonèt pou klas' });
+    // find class key whose env value equals password
+    const validClass = Object.keys(classesFor).find(k => classesFor[k] === password);
+    if (validClass) {
+      return res.json({ success:true, level:'class', school: sk, class: validClass, message: `Klas ${validClass} ouvè nan ${sk}` });
+    } else {
+      return res.status(401).json({ success:false, message: 'Invalid class password' });
+    }
   } else {
-    return res.status(401).json({ success: false, message: 'Invalid class password' });
+    const found = findClassByPassword(password);
+    if (found) {
+      return res.json({ success:true, level:'class', school: found.school, class: found.class, message: `Klas ${found.class} ouvè nan ${found.school}` });
+    } else {
+      return res.status(401).json({ success:false, message: 'Invalid class password' });
+    }
   }
 });
 
 /**
- * 🔑 3) Verifye matyè pou chak lekòl
+ * Verify subject.
+ * Accepts JSON: { school?: 'FOBAS'|'LUMIERE'|'CEFOTECH', password: '...' }
  */
 app.post('/api/verify-subject', (req, res) => {
   const { school, password } = req.body;
-
-  const subjects = {
-    "FOBAS": {
-      "math": process.env.SUBJECT_FOBAS_MATH,
-      "informatique": process.env.SUBJECT_FOBAS_INFO,
-      "creole": process.env.SUBJECT_FOBAS_CREOLE,
-      "francais": process.env.SUBJECT_FOBAS_FR,
-      "anglais": process.env.SUBJECT_FOBAS_EN,
-      "espagnol": process.env.SUBJECT_FOBAS_ES,
-      "sciences": process.env.SUBJECT_FOBAS_SC,
-      "histoire": process.env.SUBJECT_FOBAS_HIS,
-      "geographie": process.env.SUBJECT_FOBAS_GEO,
-      "philosophie": process.env.SUBJECT_FOBAS_PHILO,
-    },
-    "LUMIERE": {
-      "math": process.env.SUBJECT_LUMIERE_MATH,
-      "informatique": process.env.SUBJECT_LUMIERE_INFO,
-      "creole": process.env.SUBJECT_LUMIERE_CREOLE,
-      "francais": process.env.SUBJECT_LUMIERE_FR,
-      "anglais": process.env.SUBJECT_LUMIERE_EN,
-      "espagnol": process.env.SUBJECT_LUMIERE_ES,
-      "sciences": process.env.SUBJECT_LUMIERE_SC,
-      "histoire": process.env.SUBJECT_LUMIERE_HIS,
-      "geographie": process.env.SUBJECT_LUMIERE_GEO,
-      "philosophie": process.env.SUBJECT_LUMIERE_PHILO,
-    },
-    "CEFOTECH": {
-      "math": process.env.SUBJECT_CEFOTECH_MATH,
-      "informatique": process.env.SUBJECT_CEFOTECH_INFO,
-      "creole": process.env.SUBJECT_CEFOTECH_CREOLE,
-      "francais": process.env.SUBJECT_CEFOTECH_FR,
-      "anglais": process.env.SUBJECT_CEFOTECH_EN,
-      "espagnol": process.env.SUBJECT_CEFOTECH_ES,
-      "sciences": process.env.SUBJECT_CEFOTECH_SC,
-      "histoire": process.env.SUBJECT_CEFOTECH_HIS,
-      "geographie": process.env.SUBJECT_CEFOTECH_GEO,
-      "philosophie": process.env.SUBJECT_CEFOTECH_PHILO,
-    },
-  };
-
-  if (!school || !subjects[school]) {
-    return res.status(400).json({ error: 'Lekòl pa rekonèt pou matyè' });
+  if (!password || typeof password !== 'string') {
+    return res.status(400).json({ success:false, message: 'Missing password' });
   }
 
-  const validSubject = Object.keys(subjects[school]).find(
-    subj => password === subjects[school][subj]
-  );
-
-  if (validSubject) {
-    return res.json({ success: true, level: "subject", school, subject: validSubject, message: `Egzamen ${validSubject} ouvè nan ${school}` });
+  if (school) {
+    const sk = normalizeSchoolKey(school);
+    const subsFor = ENV_MAP.subjects[sk];
+    if (!subsFor) return res.status(400).json({ success:false, message: 'Lekòl pa rekonèt pou matyè' });
+    const validSubject = Object.keys(subsFor).find(k => subsFor[k] === password);
+    if (validSubject) {
+      return res.json({ success:true, level:'subject', school: sk, subject: validSubject, message: `Egzamen ${validSubject} ouvè nan ${sk}` });
+    } else {
+      return res.status(401).json({ success:false, message: 'Invalid subject password' });
+    }
   } else {
-    return res.status(401).json({ success: false, message: 'Invalid subject password' });
+    const found = findSubjectByPassword(password);
+    if (found) {
+      return res.json({ success:true, level:'subject', school: found.school, subject: found.subject, message: `Egzamen ${found.subject} ouvè nan ${found.school}` });
+    } else {
+      return res.status(401).json({ success:false, message: 'Invalid subject password' });
+    }
   }
 });
 
-// Route tès
-app.get('/ping', (req, res) => {
-  res.send('pong');
-});
+// ping
+app.get('/ping', (req, res) => res.send('pong'));
 
-// Start server
+// start
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
-});
+app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
