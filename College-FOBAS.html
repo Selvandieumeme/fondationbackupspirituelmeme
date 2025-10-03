@@ -64,7 +64,6 @@
       </div>
       <hr>
       <div id="exam-questions" style="margin-bottom:12px">
-        <!-- example questions (you can replace with real ones or dynamic rendering) -->
         <div><strong>1)</strong> Kisa yon email ye?<br><textarea name="q1" style="width:100%;min-height:80px;padding:8px;border-radius:6px;border:1px solid #d0d7de"></textarea></div>
         <div style="margin-top:8px"><strong>2)</strong> Kisa 'subject' nan email ye?<br><textarea name="q2" style="width:100%;min-height:80px;padding:8px;border-radius:6px;border:1px solid #d0d7de"></textarea></div>
       </div>
@@ -80,23 +79,28 @@
 <script>
 (() => {
   // ---------- CONFIG ----------
-  const API_URL = 'https://examen-backend-ihlx.onrender.com/api/verify-level'; // votre Render endpoint
+  const BASE_URL = 'https://examen-backend-ihlx.onrender.com'; 
+  const ENDPOINTS = {
+    school: BASE_URL + '/api/verify-school',
+    class: BASE_URL + '/api/verify-class',
+    subject: BASE_URL + '/api/verify-subject'
+  };
   const FORM_ENDPOINT = 'https://formsubmit.co/ajax/infos@fondationbackupspirituel.com';
 
-  // classes mapping (ids correspond to server keys)
+  // classes mapping
   const classes = [
     { id:'7em', label:'7èm' },
     { id:'8em', label:'8èm' },
     { id:'9em', label:'9èm' },
-    { id:'nsi', label:'NS I' },
-    { id:'nsii', label:'NS II' },
-    { id:'nsiii', label:'NS III' },
-    { id:'nsiv', label:'NS IV' }
+    { id:'NS1', label:'NS I' },
+    { id:'NS2', label:'NS II' },
+    { id:'NS3', label:'NS III' },
+    { id:'NS4', label:'NS IV' }
   ];
 
-  // subjects mapping (ids)
+  // subjects mapping
   const subjects = [
-    { id:'mathematiques', label:'Matematik' },
+    { id:'math', label:'Matematik' },
     { id:'informatique', label:'Informatique' },
     { id:'creole', label:'Kreyòl' },
     { id:'francais', label:'Franse' },
@@ -104,8 +108,8 @@
     { id:'sciences', label:'Syans' },
     { id:'histoire', label:'Istwa' },
     { id:'geographie', label:'Jeyografi' },
-    { id:'economie', label:'Ekonomi' },
-    { id:'litterature', label:'Literati' }
+    { id:'espagnol', label:'Espayòl' },
+    { id:'philosophie', label:'Filosofi' }
   ];
 
   // UI refs
@@ -141,7 +145,7 @@
   let timerInterval = null;
   let remainingSeconds = 120*60; // default 120 minutes
 
-  // ---------- helpers ----------
+  // helpers
   function show(el){ el.classList.remove('hidden'); }
   function hide(el){ el.classList.add('hidden'); }
 
@@ -152,10 +156,10 @@
     if(!pw){ schoolMsg.style.display='block'; schoolMsg.innerText='Antre modpas lekòl la.'; return; }
     try{
       schoolValidate.disabled=true; schoolValidate.innerText='Ap verifye...';
-      const resp = await fetch(API_URL, {
+      const resp = await fetch(ENDPOINTS.school, {
         method:'POST',
         headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({ level:'school', id:'fobas', password: pw })
+        body: JSON.stringify({ password: pw })
       });
       const data = await resp.json();
       if(resp.ok && data.success){
@@ -197,10 +201,10 @@
     if(!pw){ classMsg.style.display='block'; classMsg.innerText='Antre modpas klas la'; return; }
     try{
       classValidate.disabled=true; classValidate.innerText='Ap verifye...';
-      const resp = await fetch(API_URL, {
+      const resp = await fetch(ENDPOINTS.class, {
         method:'POST',
         headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({ level:'class', id: currentClass, password: pw })
+        body: JSON.stringify({ password: pw })
       });
       const data = await resp.json();
       if(resp.ok && data.success){
@@ -244,10 +248,10 @@
     if(!pw){ subjectMsg.style.display='block'; subjectMsg.innerText='Antre modpas matyè a'; return; }
     try{
       subjectValidate.disabled=true; subjectValidate.innerText='Ap verifye...';
-      const resp = await fetch(API_URL, {
+      const resp = await fetch(ENDPOINTS.subject, {
         method:'POST',
         headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({ level:'subject', id: currentSubject, password: pw })
+        body: JSON.stringify({ password: pw })
       });
       const data = await resp.json();
       if(resp.ok && data.success){
@@ -267,10 +271,8 @@
   function startExam(subjectId){
     examTitle.innerText = 'Egzamen: ' + subjects.find(s=>s.id===subjectId).label;
     show(examBox);
-    // reset form and msg
     examForm.reset();
     submitMsg.style.display='none';
-    // start 120 min timer
     remainingSeconds = 120 * 60;
     timerEl.innerText = formatTime(remainingSeconds);
     if(timerInterval) clearInterval(timerInterval);
@@ -279,11 +281,9 @@
       timerEl.innerText = formatTime(remainingSeconds);
       if(remainingSeconds <= 0){
         clearInterval(timerInterval);
-        // auto-submit on timeout
         autoSubmit();
       }
     },1000);
-    // scroll to exam
     examBox.scrollIntoView({behavior:'smooth'});
   }
 
@@ -315,10 +315,8 @@
     fd.append('Exam Class', currentClass);
     fd.append('Exam School', 'fobas');
     fd.append('AutoSubmitted', isAuto ? 'yes' : 'no');
-    // add source page
     fd.append('Source Page', window.location.href);
 
-    // send to FormSubmit
     try {
       document.getElementById('submit-msg').style.display='block';
       document.getElementById('submit-msg').innerText='Ap voye...';
@@ -326,7 +324,6 @@
       const data = await resp.json();
       if(!resp.ok) throw new Error(data.message||'Erè soumèt');
       document.getElementById('submit-msg').innerText='✅ Egzamen soumèt ak siksè.';
-      // hide exam
       hide(examBox);
     } catch(err){
       document.getElementById('submit-msg').innerText='Erè pandan soumèt: '+(err.message||err);
