@@ -3,27 +3,29 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Espas Egzamen Modilè</title>
+<title>Nos Écoles — Espas Egzamen</title>
 <style>
-body{font-family:Arial,Helvetica,sans-serif;background:#f5f8fb;color:#072b44;padding:16px}
-.card{max-width:1000px;margin:12px auto;padding:18px;border-radius:10px;background:#fff;box-shadow:0 6px 20px rgba(11,59,102,0.05)}
-.btn{padding:8px 12px;border-radius:8px;border:none;background:#0b63b3;color:#fff;cursor:pointer}
-.btn-outline{background:#fff;color:#0b63b3;border:1px solid #0b63b3}
-.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
-.hidden{display:none}
-.small{font-size:13px;color:#666}
-.timer{font-weight:700;color:#b02a37}
-.school-container{margin-bottom:40px;border-top:2px solid #0b63b3;padding-top:20px;}
+  body{font-family:Arial,Helvetica,sans-serif;background:#f5f8fb;color:#072b44;padding:16px}
+  .card{max-width:1000px;margin:12px auto;padding:18px;border-radius:10px;background:#fff;box-shadow:0 6px 20px rgba(11,59,102,0.05)}
+  .btn{padding:8px 12px;border-radius:8px;border:none;background:#0b63b3;color:#fff;cursor:pointer}
+  .btn-outline{background:#fff;color:#0b63b3;border:1px solid #0b63b3}
+  .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+  .hidden{display:none}
+  .small{font-size:13px;color:#666}
+  .timer{font-weight:700;color:#b02a37}
+  .school-container{margin-bottom:40px;border-top:2px solid #0b63b3;padding-top:20px;}
+  .banner-lock{position:fixed;left:0;right:0;top:0;background:#ffc; color:#222;padding:8px 12px;border-bottom:2px solid #f0c040;z-index:99999;font-weight:700;text-align:center}
+  .no-select{user-select:none;-webkit-user-select:none;-ms-user-select:none}
+  input,textarea{font-family:inherit}
 </style>
 </head>
 <body>
+  <div class="card">
+    <h2 style="margin:0 0 8px">Fondation BackupSpirituel — Espas Egzamen</h2>
+    <p class="small">Chwazi lekòl anba a epi antre modpas lekòl / klas / matyè. Tout modpas verifye sou sèvè (Render) — pa gen modpas nan kòd la.</p>
+  </div>
 
-<div class="card">
-  <h2 style="margin:0 0 8px">Fondation BackupSpirituel — Espas Egzamen Modilè</h2>
-  <p class="small">Antre modpas pou chak lekòl. Chak lekòl gen pwòp klas, matyè ak egzamen.</p>
-</div>
-
-<div id="schools-wrapper"></div>
+  <div id="schools-wrapper" class="card"></div>
 
 <script>
 (() => {
@@ -34,28 +36,18 @@ body{font-family:Arial,Helvetica,sans-serif;background:#f5f8fb;color:#072b44;pad
     class: BASE_URL + '/api/verify-class',
     subject: BASE_URL + '/api/verify-subject'
   };
-  const FORM_ENDPOINT = 'https://formsubmit.co/ajax/infos@fondationbackupspirituel.com';
+  // Default formsubmit (will post to school's configured email or central info)
+  const GLOBAL_FORM_ENDPOINT = 'https://formsubmit.co/ajax/infos@fondationbackupspirituel.com';
 
-  // ---------- SCHOOLS DATA ----------
+  // ---------- SCHOOLS LIST (no passwords here) ----------
   const schools = [
-    {
-      id:'fobas',
-      name:'Fondation BackupSpirituel',
-      formEmail:'infos@fondationbackupspirituel.com'
-    },
-    {
-      id:'lumiere',
-      name:'College Lumiere Lakay de Mare Rouge',
-      formEmail:'infos@fondationbackupspirituel.com'
-    },
-    {
-      id:'cefotech',
-      name:'College CEFOTECH-CO de Mare Rouge',
-      formEmail:'infos@fondationbackupspirituel.com'
-    }
+    { id:'fobas', name:'Fondation BackupSpirituel', formEmail:'infos@fondationbackupspirituel.com' },
+    { id:'lumiere', name:'College Lumiere Lakay de Mare Rouge', formEmail:'lumiere@fondationbackupspirituel.com' },
+    { id:'cefotech', name:'College CEFOTECH-CO de Mare Rouge', formEmail:'cefotech@fondationbackupspirituel.com' }
   ];
 
-  const classes = [
+  // classes & subjects (shared lists)
+  const classesList = [
     { id:'7em', label:'7èm' },
     { id:'8em', label:'8èm' },
     { id:'9em', label:'9èm' },
@@ -65,7 +57,7 @@ body{font-family:Arial,Helvetica,sans-serif;background:#f5f8fb;color:#072b44;pad
     { id:'NS4', label:'NS IV' }
   ];
 
-  const subjects = [
+  const subjectsList = [
     { id:'math', label:'Matematik' },
     { id:'informatique', label:'Informatique' },
     { id:'creole', label:'Kreyòl' },
@@ -80,34 +72,46 @@ body{font-family:Arial,Helvetica,sans-serif;background:#f5f8fb;color:#072b44;pad
 
   const wrapper = document.getElementById('schools-wrapper');
 
-  // ---------- RENDER SCHOOL ----------
+  // ---------- UTILITIES (IP fetch) ----------
+  async function fetchClientIP(){
+    try{
+      const r = await fetch('https://api.ipify.org?format=json');
+      if(!r.ok) return 'unknown';
+      const j = await r.json();
+      return j.ip || 'unknown';
+    }catch(e){ return 'unknown'; }
+  }
+
+  // ---------- RENDER single school block ----------
   function renderSchool(school){
-    const div = document.createElement('div');
-    div.className='school-container';
-    div.innerHTML=`
+    const container = document.createElement('div');
+    container.className = 'school-container';
+    container.innerHTML = `
       <h3>${school.name}</h3>
-      <div class="small">Antre modpas lekòl pou kontinye</div>
-      <input type="password" class="school-pw" placeholder="Modpas lekòl">
-      <button class="btn school-validate">Ouvri Espas</button>
-      <div class="school-msg small" style="color:#b02a37;display:none"></div>
+
+      <div class="section-school">
+        <input class="school-pw" type="password" placeholder="Modpas lekòl (pa gen modpas nan kòd)">
+        <button class="btn school-validate">Ouvri Espas</button>
+        <div class="school-msg small" style="color:#b02a37;display:none"></div>
+      </div>
 
       <div class="classes-box hidden" style="margin-top:14px">
-        <h4 style="margin:6px 0">Chwazi Klas</h4>
+        <h4>Chwazi Klas</h4>
         <div class="class-list" style="display:flex;gap:8px;flex-wrap:wrap"></div>
         <div class="class-pw-box hidden" style="margin-top:10px">
           <div class="class-title" style="font-weight:700;margin-bottom:6px"></div>
-          <input type="password" class="class-pw" placeholder="Modpas klas">
+          <input class="class-pw" type="password" placeholder="Modpas klas">
           <button class="btn class-validate">Valide Klas</button>
           <div class="class-msg small" style="margin-top:6px;color:#b02a37;display:none"></div>
         </div>
       </div>
 
       <div class="subjects-box hidden" style="margin-top:14px">
-        <h4 style="margin:6px 0">Matières — antre modpas pou ouvri egzamen</h4>
+        <h4>Matières — antre modpas pou ouvri egzamen</h4>
         <div class="subjects-grid grid"></div>
         <div class="subject-pw-box hidden" style="margin-top:10px">
           <div class="subject-title" style="font-weight:700;margin-bottom:6px"></div>
-          <input type="password" class="subject-pw" placeholder="Modpas matyè">
+          <input class="subject-pw" type="password" placeholder="Modpas matyè">
           <button class="btn subject-validate">Valide Matyè</button>
           <div class="subject-msg small" style="margin-top:6px;color:#b02a37;display:none"></div>
         </div>
@@ -124,7 +128,11 @@ body{font-family:Arial,Helvetica,sans-serif;background:#f5f8fb;color:#072b44;pad
             <input name="email" type="email" placeholder="Email *" required style="padding:8px;border:1px solid #d0d7de;border-radius:6px;">
           </div>
           <hr>
-          <div class="exam-questions" style="margin-bottom:12px"></div>
+          <div class="exam-questions" style="margin-bottom:12px">
+            <div><strong>1)</strong> Kisa yon email ye?<br><textarea name="q1" style="width:100%;min-height:80px;padding:8px;border-radius:6px;border:1px solid #d0d7de"></textarea></div>
+            <div style="margin-top:8px"><strong>2)</strong> Kisa 'subject' nan email ye?<br><textarea name="q2" style="width:100%;min-height:80px;padding:8px;border-radius:6px;border:1px solid #d0d7de"></textarea></div>
+          </div>
+
           <div style="display:flex;gap:8px;align-items:center">
             <button type="submit" class="btn">Soumèt</button>
             <div class="submit-msg small" style="color:#0b63b3;display:none;margin-left:8px"></div>
@@ -132,52 +140,74 @@ body{font-family:Arial,Helvetica,sans-serif;background:#f5f8fb;color:#072b44;pad
         </form>
       </div>
     `;
-    wrapper.appendChild(div);
-    initSchoolLogic(div, school);
+    wrapper.appendChild(container);
+
+    // init logic for this school block
+    initSchoolLogic(container, school);
   }
 
-  // ---------- INIT SCHOOL LOGIC ----------
-  function initSchoolLogic(div, school){
-    const schoolPw = div.querySelector('.school-pw');
-    const schoolValidate = div.querySelector('.school-validate');
-    const schoolMsg = div.querySelector('.school-msg');
+  // ---------- School block logic (per instance) ----------
+  function initSchoolLogic(rootEl, school){
+    // UI refs
+    const schoolPw = rootEl.querySelector('.school-pw');
+    const schoolValidate = rootEl.querySelector('.school-validate');
+    const schoolMsg = rootEl.querySelector('.school-msg');
 
-    const classesBox = div.querySelector('.classes-box');
-    const classListEl = div.querySelector('.class-list');
-    const classPwBox = div.querySelector('.class-pw-box');
-    const classTitle = div.querySelector('.class-title');
-    const classPw = div.querySelector('.class-pw');
-    const classValidate = div.querySelector('.class-validate');
-    const classMsg = div.querySelector('.class-msg');
+    const classesBox = rootEl.querySelector('.classes-box');
+    const classListEl = rootEl.querySelector('.class-list');
+    const classPwBox = rootEl.querySelector('.class-pw-box');
+    const classTitle = rootEl.querySelector('.class-title');
+    const classPw = rootEl.querySelector('.class-pw');
+    const classValidate = rootEl.querySelector('.class-validate');
+    const classMsg = rootEl.querySelector('.class-msg');
 
-    const subjectsBox = div.querySelector('.subjects-box');
-    const subjectsGrid = div.querySelector('.subjects-grid');
-    const subjectPwBox = div.querySelector('.subject-pw-box');
-    const subjectTitle = div.querySelector('.subject-title');
-    const subjectPw = div.querySelector('.subject-pw');
-    const subjectValidate = div.querySelector('.subject-validate');
-    const subjectMsg = div.querySelector('.subject-msg');
+    const subjectsBox = rootEl.querySelector('.subjects-box');
+    const subjectsGrid = rootEl.querySelector('.subjects-grid');
+    const subjectPwBox = rootEl.querySelector('.subject-pw-box');
+    const subjectTitle = rootEl.querySelector('.subject-title');
+    const subjectPw = rootEl.querySelector('.subject-pw');
+    const subjectValidate = rootEl.querySelector('.subject-validate');
+    const subjectMsg = rootEl.querySelector('.subject-msg');
 
-    const examBox = div.querySelector('.exam-box');
-    const examTitle = div.querySelector('.exam-title');
-    const examForm = div.querySelector('.exam-form');
-    const submitMsg = div.querySelector('.submit-msg');
-    const timerEl = div.querySelector('.timer');
+    const examBox = rootEl.querySelector('.exam-box');
+    const examTitle = rootEl.querySelector('.exam-title');
+    const examForm = rootEl.querySelector('.exam-form');
+    const submitMsg = rootEl.querySelector('.submit-msg');
+    const timerEl = rootEl.querySelector('.timer');
 
+    // state
     let currentClass = null;
     let currentSubject = null;
     let timerInterval = null;
     let remainingSeconds = 120*60;
+    // anti-cheat tracking
+    let ipAddress = 'unknown';
+    let focusLostCount = 0;
+    let startTimestamp = null;
+    let endTimestamp = null;
+    let visibilityHandler = null;
+    let blurHandler = null;
+    let beforeUnloadHandler = null;
 
     function show(el){ el.classList.remove('hidden'); }
     function hide(el){ el.classList.add('hidden'); }
 
+    // BLOCK basic copy/context menu to discourage quick copy/paste (but not foolproof)
+    rootEl.addEventListener('contextmenu', e => e.preventDefault());
+    rootEl.addEventListener('keydown', e => {
+      // prevent Ctrl/Command+Tab? cannot fully, but prevent common copy keys
+      if ((e.ctrlKey || e.metaKey) && (e.key === 'c' || e.key === 'x' || e.key === 'v' || e.key === 'a')) {
+        e.preventDefault();
+      }
+    });
+
+    // ---------- school verification (delegated to backend) ----------
     schoolValidate.addEventListener('click', async ()=>{
-      schoolMsg.style.display='none';
+      schoolMsg.style.display = 'none';
       const pw = (schoolPw.value||'').trim();
-      if(!pw){ schoolMsg.style.display='block'; schoolMsg.innerText='Antre modpas lekòl la.'; return; }
+      if(!pw){ schoolMsg.style.display = 'block'; schoolMsg.innerText = 'Antre modpas lekòl la.'; return; }
       try{
-        schoolValidate.disabled=true; schoolValidate.innerText='Ap verifye...';
+        schoolValidate.disabled = true; schoolValidate.innerText = 'Ap verifye...';
         const resp = await fetch(ENDPOINTS.school, {
           method:'POST',
           headers:{'Content-Type':'application/json'},
@@ -185,42 +215,48 @@ body{font-family:Arial,Helvetica,sans-serif;background:#f5f8fb;color:#072b44;pad
         });
         const data = await resp.json();
         if(resp.ok && data.success){
-          hide(schoolPw); hide(schoolValidate); hide(schoolMsg);
+          // hide only the inputs for this school block (keep everything else intact)
+          schoolPw.style.display='none';
+          schoolValidate.style.display='none';
           show(classesBox);
-          renderClassButtons();
+          renderClasses();
         } else {
           schoolMsg.style.display='block';
           schoolMsg.innerText = (data && data.message) ? data.message : 'Modpas lekòl pa kòrèk';
         }
       } catch(err){
         schoolMsg.style.display='block';
-        schoolMsg.innerText = 'Erè verifye: '+(err.message||err);
-      } finally { schoolValidate.disabled=false; schoolValidate.innerText='Ouvri Espas'; }
+        schoolMsg.innerText = 'Erè verifye: ' + (err.message||err);
+      } finally {
+        schoolValidate.disabled = false; schoolValidate.innerText = 'Ouvri Espas';
+      }
     });
 
-    function renderClassButtons(){
-      classListEl.innerHTML='';
-      classes.forEach(c=>{
+    function renderClasses(){
+      classListEl.innerHTML = '';
+      classesList.forEach(c => {
         const b = document.createElement('button');
-        b.className='btn-outline';
-        b.style.margin='6px';
+        b.className = 'btn-outline';
+        b.style.margin = '6px';
         b.innerText = c.label;
-        b.onclick = ()=> {
+        b.onclick = () => {
           currentClass = c.id;
           classTitle.innerText = 'Modpas pou klas ' + c.label;
-          classPw.value=''; classMsg.style.display='none';
+          classPw.value = '';
+          classMsg.style.display = 'none';
           show(classPwBox);
         };
         classListEl.appendChild(b);
       });
     }
 
+    // ---------- class verification ----------
     classValidate.addEventListener('click', async ()=>{
-      classMsg.style.display='none';
+      classMsg.style.display = 'none';
       const pw = (classPw.value||'').trim();
       if(!pw){ classMsg.style.display='block'; classMsg.innerText='Antre modpas klas la'; return; }
       try{
-        classValidate.disabled=true; classValidate.innerText='Ap verifye...';
+        classValidate.disabled = true; classValidate.innerText='Ap verifye...';
         const resp = await fetch(ENDPOINTS.class, {
           method:'POST',
           headers:{'Content-Type':'application/json'},
@@ -230,28 +266,27 @@ body{font-family:Arial,Helvetica,sans-serif;background:#f5f8fb;color:#072b44;pad
         if(resp.ok && data.success){
           hide(classPwBox);
           show(subjectsBox);
-          renderSubjectsGrid();
+          renderSubjects();
         } else {
           classMsg.style.display='block';
           classMsg.innerText = (data && data.message) ? data.message : 'Modpas klas pa kòrèk';
         }
       } catch(err){
         classMsg.style.display='block';
-        classMsg.innerText='Erè: '+(err.message||err);
-      } finally { classValidate.disabled=false; classValidate.innerText='Valide Klas'; }
+        classMsg.innerText = 'Erè: ' + (err.message||err);
+      } finally {
+        classValidate.disabled=false; classValidate.innerText='Valide Klas';
+      }
     });
 
-    function renderSubjectsGrid(){
-      subjectsGrid.innerHTML='';
-      subjects.forEach(s=>{
-        const d=document.createElement('div');
-        d.style.border='1px solid #eef3f7';
-        d.style.padding='8px';
-        d.style.borderRadius='8px';
-        d.style.textAlign='center';
-        d.style.cursor='pointer';
+    function renderSubjects(){
+      subjectsGrid.innerHTML = '';
+      subjectsList.forEach(s => {
+        const d = document.createElement('div');
+        d.style.border='1px solid #eef3f7'; d.style.padding='8px'; d.style.borderRadius='8px';
+        d.style.textAlign='center'; d.style.cursor='pointer';
         d.innerHTML = `<div style="font-weight:700">${s.label}</div><div class="small">swiv egzamen</div>`;
-        d.onclick = ()=> {
+        d.onclick = () => {
           currentSubject = s.id;
           subjectTitle.innerText = s.label + ' — Antre modpas';
           subjectPw.value=''; subjectMsg.style.display='none';
@@ -261,6 +296,7 @@ body{font-family:Arial,Helvetica,sans-serif;background:#f5f8fb;color:#072b44;pad
       });
     }
 
+    // ---------- subject verification & exam start ----------
     subjectValidate.addEventListener('click', async ()=>{
       subjectMsg.style.display='none';
       const pw = (subjectPw.value||'').trim();
@@ -275,33 +311,91 @@ body{font-family:Arial,Helvetica,sans-serif;background:#f5f8fb;color:#072b44;pad
         const data = await resp.json();
         if(resp.ok && data.success){
           hide(subjectPwBox);
-          startExam(currentSubject);
+          // start anti-cheat protections + fetch IP
+          await prepareExamEnvironment();
+          startExam();
         } else {
           subjectMsg.style.display='block';
           subjectMsg.innerText = (data && data.message) ? data.message : 'Modpas matyè pa kòrèk';
         }
       } catch(err){
         subjectMsg.style.display='block';
-        subjectMsg.innerText='Erè: '+(err.message||err);
-      } finally { subjectValidate.disabled=false; subjectValidate.innerText='Valide Matyè'; }
+        subjectMsg.innerText='Erè: ' + (err.message||err);
+      } finally {
+        subjectValidate.disabled=false; subjectValidate.innerText='Valide Matyè';
+      }
     });
 
-    function startExam(subjectId){
-      examTitle.innerText = 'Egzamen: ' + subjects.find(s=>s.id===subjectId).label;
+    // ---------- prepare environment: fetch IP, set listeners ----------
+    async function prepareExamEnvironment(){
+      // get client IP (best-effort)
+      ipAddress = await fetchClientIP();
+
+      focusLostCount = 0;
+      startTimestamp = new Date().toISOString();
+
+      // warn on before unload
+      beforeUnloadHandler = function(e){
+        e.preventDefault();
+        e.returnValue = "Ou gen yon egzamen k ap kouri — si ou kite paj la soumèt la ka echwe.";
+        return e.returnValue;
+      };
+      window.addEventListener('beforeunload', beforeUnloadHandler);
+
+      // visibility change / focus/blur tracking
+      visibilityHandler = function(){
+        if(document.hidden) { focusLostCount++; }
+      };
+      blurHandler = function(){ focusLostCount++; };
+
+      document.addEventListener('visibilitychange', visibilityHandler);
+      window.addEventListener('blur', blurHandler);
+
+      // Attempt entering fullscreen (user may have to allow)
+      const el = rootEl.querySelector('.exam-box') || document.documentElement;
+      if(el.requestFullscreen){
+        try{ await el.requestFullscreen(); }catch(e){ /* ignore */ }
+      } else if(el.webkitRequestFullscreen){
+        try{ el.webkitRequestFullscreen(); }catch(e){ }
+      }
+
+      // show top banner to remind student
+      showLockBanner(rootEl);
+    }
+
+    // show a persistent banner at top (per school)
+    function showLockBanner(root){
+      // create if not exist
+      if(root.querySelector('.banner-lock')) return;
+      const b = document.createElement('div');
+      b.className = 'banner-lock no-select';
+      b.innerText = 'EXAMEN AN KOU — Pa kite paj la / pa fè multi-task. Bouton "Soumèt" dwe peze lè fini.';
+      root.appendChild(b);
+    }
+    function removeLockBanner(root){
+      const b = root.querySelector('.banner-lock');
+      if(b) b.remove();
+    }
+
+    // ---------- start exam UI + timer ----------
+    function startExam(){
+      const subjLabel = (subjectsList.find(s => s.id === currentSubject) || {}).label || currentSubject;
+      examTitle.innerText = 'Egzamen: ' + subjLabel;
       show(examBox);
       examForm.reset();
       submitMsg.style.display='none';
-      remainingSeconds = 120*60;
+      remainingSeconds = 120*60; // 120 minutes as requested
       timerEl.innerText = formatTime(remainingSeconds);
       if(timerInterval) clearInterval(timerInterval);
       timerInterval = setInterval(()=>{
         remainingSeconds--;
         timerEl.innerText = formatTime(remainingSeconds);
-        if(remainingSeconds <=0){
+        if(remainingSeconds <= 0){
           clearInterval(timerInterval);
           autoSubmit();
         }
-      },1000);
+      }, 1000);
+      // scroll into view
       examBox.scrollIntoView({behavior:'smooth'});
     }
 
@@ -311,42 +405,123 @@ body{font-family:Arial,Helvetica,sans-serif;background:#f5f8fb;color:#072b44;pad
       return `${m}:${s}`;
     }
 
+    // ---------- auto-submit when timer ends ----------
     async function autoSubmit(){
-      try {
+      try{
         submitMsg.style.display='block';
         submitMsg.innerText='Tan fini — ap soumèt otomatikman...';
         await submitExamForm(true);
-      } catch(e){ submitMsg.innerText='Echwe soumèt otomatikman: '+(e.message||e); }
+      }catch(e){
+        submitMsg.innerText='Echwe soumèt otomatikman: ' + (e.message || e);
+      }
     }
 
-    examForm.addEventListener('submit', async (ev)=>{
+    // ---------- submit handler (adds technical metadata) ----------
+    examForm.addEventListener('submit', async (ev) => {
       ev.preventDefault();
       await submitExamForm(false);
     });
 
     async function submitExamForm(isAuto=false){
+      endTimestamp = new Date().toISOString();
+
+      // append metadata to form data
       const fd = new FormData(examForm);
-      fd.append('Exam Subject', currentSubject);
-      fd.append('Exam Class', currentClass);
-      fd.append('Exam School', school.id);
+      fd.append('Exam Subject', currentSubject || '');
+      fd.append('Exam Class', currentClass || '');
+      fd.append('Exam School', school.id || '');
+      fd.append('Client IP', ipAddress);
+      fd.append('User Agent', navigator.userAgent || '');
+      fd.append('Focus Lost Count', String(focusLostCount));
+      fd.append('Start Time', startTimestamp || '');
+      fd.append('End Time', endTimestamp || '');
       fd.append('AutoSubmitted', isAuto ? 'yes' : 'no');
       fd.append('Source Page', window.location.href);
+
       try{
         submitMsg.style.display='block';
-        submitMsg.innerText='Ap voye...';
-        const resp = await fetch(FORM_ENDPOINT, { method:'POST', body:fd, headers:{'Accept':'application/json'} });
-        const data = await resp.json();
-        if(!resp.ok) throw new Error(data.message||'Erè soumèt');
-        submitMsg.innerText='✅ Egzamen soumèt ak siksè.';
+        submitMsg.innerText = 'Ap voye...';
+
+        // 1) Send to school email via formsubmit (primary)
+        const schoolEndpoint = `https://formsubmit.co/ajax/${school.formEmail}`;
+        const resp1 = await fetch(schoolEndpoint, { method:'POST', body: fd, headers:{'Accept':'application/json'} });
+        const data1 = await resp1.json();
+        if(!resp1.ok){
+          // still attempt to notify central info below, but throw later if needed
+          console.warn('School formsubmit failed', data1);
+        }
+
+        // 2) Send a separate centralized notification to infos@... (include details)
+        const notifFd = new FormData();
+        notifFd.append('Subject', `Nouvo soumèt egzamen — ${school.name} / ${currentClass || ''} / ${currentSubject || ''}`);
+        const details = [
+          `School: ${school.name} (${school.id})`,
+          `Class: ${currentClass || ''}`,
+          `Subject: ${currentSubject || ''}`,
+          `Student Name: ${fd.get('nom_prenom') || ''}`,
+          `Student Email: ${fd.get('email') || ''}`,
+          `Client IP: ${ipAddress}`,
+          `User Agent: ${navigator.userAgent || ''}`,
+          `Focus Lost Count: ${focusLostCount}`,
+          `Start Time: ${startTimestamp}`,
+          `End Time: ${endTimestamp}`,
+          `AutoSubmitted: ${isAuto ? 'yes' : 'no'}`,
+          `Source Page: ${window.location.href}`
+        ].join('\n');
+        notifFd.append('message', details);
+
+        try{
+          const resp2 = await fetch(GLOBAL_FORM_ENDPOINT, { method:'POST', body: notifFd, headers:{'Accept':'application/json'} });
+          const data2 = await resp2.json();
+          if(!resp2.ok){
+            console.warn('Central notification failed', data2);
+          }
+        }catch(e){
+          console.warn('Central notification fetch failed', e);
+        }
+
+        // if primary school response was not ok, still show success but log warning
+        if(!resp1.ok){
+          submitMsg.innerText = 'Soumèt (avètisman): te resevwa, men te gen yon pwoblèm avèk destinasyon imel lekòl la.';
+        } else {
+          submitMsg.innerText = '✅ Egzamen soumèt ak siksè.';
+        }
+
+        // cleanup protections
+        cleanupExamEnvironment();
+
+        // optionally hide exam after submit
         hide(examBox);
-      } catch(err){
-        submitMsg.innerText='Erè pandan soumèt: '+(err.message||err);
+      }catch(err){
+        submitMsg.innerText = 'Erè pandan soumèt: ' + (err.message || err);
       }
     }
-  }
 
-  // ---------- RENDER ALL SCHOOLS ----------
-  schools.forEach(school => renderSchool(school));
+    // ---------- cleanup after submit or abort ----------
+    function cleanupExamEnvironment(){
+      // remove listeners
+      if(beforeUnloadHandler) window.removeEventListener('beforeunload', beforeUnloadHandler);
+      if(visibilityHandler) document.removeEventListener('visibilitychange', visibilityHandler);
+      if(blurHandler) window.removeEventListener('blur', blurHandler);
+
+      // exit fullscreen if possible
+      if(document.fullscreenElement){
+        try{ document.exitFullscreen(); }catch(e){ /* ignore */ }
+      } else if(document.webkitFullscreenElement){
+        try{ document.webkitExitFullscreen(); }catch(e){ }
+      }
+
+      // remove banner
+      removeLockBanner(rootEl);
+
+      // clear timer
+      if(timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+    }
+
+  } // end initSchoolLogic
+
+  // ---------- render all schools on page ----------
+  schools.forEach(s => renderSchool(s));
 
 })();
 </script>
