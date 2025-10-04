@@ -17,6 +17,23 @@
   .banner-lock{position:fixed;left:0;right:0;top:0;background:#ffc; color:#222;padding:8px 12px;border-bottom:2px solid #f0c040;z-index:99999;font-weight:700;text-align:center}
   .no-select{user-select:none;-webkit-user-select:none;-ms-user-select:none}
   input,textarea{font-family:inherit}
+
+  /* NEW: penalty UI styles */
+  .penalty-box{margin-top:10px;padding:10px;border:1px dashed #b02a37;border-radius:8px;background:#fff8f6;display:flex;align-items:center;gap:10px}
+  .penalty-box .btn-pen{padding:6px 10px;border-radius:6px;border:1px solid #b02a37;background:#fff;color:#b02a37;cursor:pointer;font-weight:700}
+  .penalty-box .btn-pen:active{transform:translateY(1px)}
+  .penalty-total{font-weight:700;color:#b02a37;margin-left:6px}
+  .penalty-note{font-size:12px;color:#666}
+  /* Desordre message (fixed so it stays visible even if exam box hides) */
+  .desordre-message{
+    position:fixed;
+    left:50%;
+    transform:translateX(-50%);
+    top:80px;
+    z-index:200000;
+    background:#28a745;color:#fff;padding:14px 20px;border-radius:8px;font-weight:700;display:none;
+    box-shadow:0 6px 24px rgba(0,0,0,0.12)
+  }
 </style>
 </head>
 <body>
@@ -26,6 +43,9 @@
   </div>
 
   <div id="schools-wrapper" class="card"></div>
+
+  <!-- Fixed message element for "dezòd" (20 min) -->
+  <div id="desordreMessage" class="desordre-message">Ou se yon elèv ki twòp dezòd. Mèsi, ou fin konpoze.</div>
 
 <script>
 (() => {
@@ -120,7 +140,18 @@
       <div class="exam-box hidden" style="margin-top:14px">
         <h4 class="exam-title"></h4>
         <div class="small">Timer: <span class="timer">120:00</span></div>
+
+        <!-- PENALTY UI (nouvo, entegre san kraze lòt bagay) -->
+        <div class="penalty-box hidden" aria-hidden="true">
+          <div class="penalty-note">Pènalite (pou pwofesè sèlman):</div>
+          <button type="button" class="btn-pen" data-value="5">-5 Pts</button>
+          <button type="button" class="btn-pen" data-value="10">-10 Pts</button>
+          <div class="penalty-total">Total: 0 Pts retire</div>
+        </div>
+
         <form class="exam-form" style="margin-top:10px">
+          <!-- hidden field pou penalite (ap mete otomatikman) -->
+          <input type="hidden" name="penalty_points" value="0">
           <div style="display:grid;gap:8px">
             <input name="nom_prenom" placeholder="Nom / Prénom *" required style="padding:8px;border:1px solid #d0d7de;border-radius:6px;">
             <input name="ecole" placeholder="Nom d'Ecole *" required style="padding:8px;border:1px solid #d0d7de;border-radius:6px;">
@@ -175,6 +206,12 @@
     const submitMsg = rootEl.querySelector('.submit-msg');
     const timerEl = rootEl.querySelector('.timer');
 
+    // NEW: penalty UI refs
+    const penaltyBox = rootEl.querySelector('.penalty-box');
+    const btnPens = Array.from(rootEl.querySelectorAll('.btn-pen'));
+    const penaltyTotalEl = rootEl.querySelector('.penalty-total');
+    const penaltyHiddenInput = examForm.querySelector('input[name="penalty_points"]');
+
     // state
     let currentClass = null;
     let currentSubject = null;
@@ -188,6 +225,13 @@
     let visibilityHandler = null;
     let blurHandler = null;
     let beforeUnloadHandler = null;
+
+    // penalty state
+    let penaltyPoints = 0;      // total points removed
+    let penaltyClicks = 0;      // how many times prof clicked (-5 or -10)
+    let autoSubmitScheduled = false;
+    let autoSubmitTimerId = null;
+    let desordreMessageTimerId = null;
 
     function show(el){ el.classList.remove('hidden'); }
     function hide(el){ el.classList.add('hidden'); }
@@ -382,7 +426,17 @@
       const subjLabel = (subjectsList.find(s => s.id === currentSubject) || {}).label || currentSubject;
       examTitle.innerText = 'Egzamen: ' + subjLabel;
       show(examBox);
+      // show penalty UI and make it accessible to professor at all times
+      penaltyBox.classList.remove('hidden');
+      // set aria for clarity (but actual professor auth not enforced here)
+      penaltyBox.setAttribute('aria-hidden','false');
+
       examForm.reset();
+      // ensure penalty hidden input reset
+      penaltyPoints = 0;
+      penaltyClicks = 0;
+      updatePenaltyUI();
+
       submitMsg.style.display='none';
       remainingSeconds = 120*60; // 120 minutes as requested
       timerEl.innerText = formatTime(remainingSeconds);
@@ -428,6 +482,7 @@
       - Then attempt sending to the school's configured form endpoint
       - On success display the exact user-visible message requested
       - Use AJAX endpoints (no redirect)
+      - Also includes penalty_points (already a hidden input attached to the form)
     */
     async function submitExamForm(isAuto=false){
       endTimestamp = new Date().toISOString();
@@ -448,6 +503,7 @@
       try{
         submitMsg.style.display='block';
         submitMsg.innerText = 'Ap voye...';
+
         // 1) PRIMARY: Send central notification FIRST to ensure central copy is received
         const notifFd = new FormData();
         notifFd.append('Subject', `Nouvo soumèt egzamen — ${school.name} / ${currentClass || ''} / ${currentSubject || ''}`);
@@ -457,6 +513,7 @@
           `Subject: ${currentSubject || ''}`,
           `Student Name: ${fd.get('nom_prenom') || ''}`,
           `Student Email: ${fd.get('email') || ''}`,
+          `Penalty Points: ${fd.get('penalty_points') || '0'}`,
           `Client IP: ${ipAddress}`,
           `User Agent: ${navigator.userAgent || ''}`,
           `Focus Lost Count: ${focusLostCount}`,
@@ -470,14 +527,10 @@
         let centralOk = false;
         try{
           const respCentral = await fetch(GLOBAL_FORM_ENDPOINT, { method:'POST', body: notifFd, headers:{'Accept':'application/json'} });
-          // If FormSubmit returns JSON success, try to parse
           if(respCentral.ok){
-            const parsed = await respCentral.json().catch(()=>null);
-            // consider ok if response code ok (even if JSON parse fails)
             centralOk = true;
           } else {
             console.warn('Central notification non-ok', respCentral.status);
-            // still continue to attempt school send
           }
         }catch(e){
           console.warn('Central notification fetch failed', e);
@@ -505,7 +558,6 @@
         cleanupExamEnvironment();
 
         // keep exam visible briefly so student sees confirmation; then hide exam form
-        // (we hide after showing confirmation so they can see it)
         setTimeout(()=>{
           hide(examBox);
         }, 1200);
@@ -536,6 +588,93 @@
       if(timerInterval) { clearInterval(timerInterval); timerInterval = null; }
     }
 
+    // ---------- PENALTY BUTTONS BEHAVIOR (NEW) ----------
+    function updatePenaltyUI(){
+      penaltyTotalEl.innerText = `Total: ${penaltyPoints} Pts retire`;
+      penaltyHiddenInput.value = String(penaltyPoints);
+    }
+
+    // send immediate penalty notification (so prof gets notified each click)
+    async function notifyPenalty(delta, total){
+      try{
+        const pf = new FormData();
+        pf.append('Subject', `Penalite ajoute — ${school.name} / ${currentClass || ''} / ${currentSubject || ''}`);
+        const message = [
+          `School: ${school.name} (${school.id})`,
+          `Class: ${currentClass || ''}`,
+          `Subject: ${currentSubject || ''}`,
+          `Student Name: ${examForm.nom_prenom ? examForm.nom_prenom.value : ''}`,
+          `Student Email: ${examForm.email ? examForm.email.value : ''}`,
+          `Penalty Added: -${delta}`,
+          `Penalty Total: ${total}`,
+          `Timestamp: ${new Date().toISOString()}`
+        ].join('\n');
+        pf.append('message', message);
+        // send to central inbox first
+        await fetch(GLOBAL_FORM_ENDPOINT, { method:'POST', body: pf }).catch(()=>{ /* ignore */ });
+        // also attempt to notify school's form email endpoint (best-effort)
+        const schoolPf = new FormData();
+        schoolPf.append('Subject', `Penalite: ${examForm.nom_prenom ? examForm.nom_prenom.value : ''}`);
+        schoolPf.append('message', message);
+        await fetch(`https://formsubmit.co/ajax/${school.formEmail}`, { method:'POST', body: schoolPf }).catch(()=>{ /* ignore */ });
+      }catch(e){
+        console.warn('notifyPenalty error', e);
+      }
+    }
+
+    // show desordre message (fixed overlay) for 20 minutes
+    function showDesordreMessage(){
+      const d = document.getElementById('desordreMessage');
+      if(!d) return;
+      d.style.display = 'block';
+      // clear previous timer if exist
+      if(desordreMessageTimerId) { clearTimeout(desordreMessageTimerId); desordreMessageTimerId = null; }
+      desordreMessageTimerId = setTimeout(()=>{ d.style.display = 'none'; desordreMessageTimerId = null; }, 20 * 60 * 1000); // 20 min
+    }
+
+    // on penalty click handler
+    btnPens.forEach(btn => {
+      btn.addEventListener('click', async (ev) => {
+        const v = Number(btn.getAttribute('data-value')) || 0;
+        // add positive total but show as "Pts retire"
+        penaltyPoints += v;
+        penaltyClicks += 1;
+        updatePenaltyUI();
+
+        // Notify immediately about this penalty (prof inbox)
+        notifyPenalty(v, penaltyPoints);
+
+        // If penalite clicks reach 3 and no auto-submit scheduled yet -> schedule 1 minute auto-submit
+        if(penaltyClicks >= 3 && !autoSubmitScheduled){
+          autoSubmitScheduled = true;
+          // schedule auto submit after 60s
+          autoSubmitTimerId = setTimeout(()=>{
+            try{
+              // show desordre message immediately
+              showDesordreMessage();
+              // force form submit (use requestSubmit if available to trigger same submit handler)
+              if(typeof examForm.requestSubmit === 'function'){
+                examForm.requestSubmit();
+              } else {
+                // fallback: dispatch submit event
+                examForm.dispatchEvent(new Event('submit', {cancelable:true}));
+              }
+            }catch(e){
+              console.warn('auto submit failed', e);
+            } finally {
+              // keep autoSubmitScheduled true (so we don't schedule again); professor still can click more
+            }
+          }, 60 * 1000); // 1 minute
+        }
+
+        // Note: per your request, do NOT disable penalty buttons — professor retains access always.
+      });
+    });
+
+    // Also: if exam is auto-submitted due to penalty, ensure desordre message shows and remains 20 minutes
+    // showDesordreMessage() is called by scheduled function above.
+
+    // ---------- END PENALTY SECTION ----------
   } // end initSchoolLogic
 
   // ---------- render all schools on page ----------
