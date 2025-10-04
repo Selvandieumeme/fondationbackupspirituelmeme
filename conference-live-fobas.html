@@ -359,30 +359,31 @@
      
 
 
-<div id="stats-block" style="margin:20px 0;padding:12px;border:1px solid #eee;border-radius:8px">
-  <h3>Statistiques – École Professionnelle</h3>
-  <div id="stats-numbers" style="display:flex;gap:20px;font-size:14px"></div>
-  <svg id="stats-bars" width="100%" height="140"></svg>
+<div id="prof-stats-block" style="margin:20px 0;padding:12px;border:1px solid #eee;border-radius:8px">
+  <h3 style="margin:0 0 10px 0;font-size:16px;color:#0b63b3">📊 Statistiques – École Professionnelle</h3>
+  <div id="prof-stats-numbers" style="display:flex;gap:20px;font-size:14px"></div>
+  <svg id="prof-stats-bars" width="100%" height="140"></svg>
 </div>
 
 <script>
-(() => {
+(function(){
   const API_BASE = 'https://your-render-app.onrender.com'; // 🔑 ranplase ak URL backend Render ou
-  async function load(){
+
+  async function loadStats(){
     try {
-      const r = await fetch(`${API_BASE}/api/stats`);
+      const r = await fetch(`${API_BASE}/api/stats`, {cache:"no-store"});
       const s = await r.json();
 
-      // ✅ Blòk nimewo yo
-      const nums = document.getElementById('stats-numbers');
+      // ✅ Afichaj nimewo yo
+      const nums = document.getElementById('prof-stats-numbers');
       nums.innerHTML = `
-        <div><b>${s.totalEtudiants || 0}</b><div class="small">Étudiants</div></div>
-        <div><b>${s.activeExams || 0}</b><div class="small">Examen</div></div>
-        <div><b>${s.avgGrade || 0}</b><div class="small">Moyenne</div></div>
+        <div><b>${s.totalEtudiants || 0}</b><div style="font-size:12px;color:#555">Étudiants</div></div>
+        <div><b>${s.activeExams || 0}</b><div style="font-size:12px;color:#555">Examen</div></div>
+        <div><b>${s.avgGrade || 0}</b><div style="font-size:12px;color:#555">Moyenne</div></div>
       `;
 
-      // ✅ Graf (Cours Online vs Local)
-      const svg = document.getElementById('stats-bars'); 
+      // ✅ Graf Online vs Local
+      const svg = document.getElementById('prof-stats-bars'); 
       svg.innerHTML='';
       const items = s.byType || [];
       const w = svg.clientWidth; 
@@ -403,7 +404,9 @@
       console.error("Erreur stats:", err);
     }
   }
-  load();
+
+  // ✅ Chaje otomatik
+  loadStats();
 })();
 </script>
 
