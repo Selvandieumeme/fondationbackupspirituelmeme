@@ -242,4 +242,20 @@ app.get('/ping', (req, res) => res.send('pong'));
 
 // start
 const PORT = process.env.PORT || 3000;
+
+
+// 📊 Route Estatistik pou Lekòl Pwofesyonèl
+app.get('/api/stats', (req, res) => {
+  const stats = {
+    totalEtudiants: 200,    // kantite total etidyan (ajiste selon done reyèl)
+    activeExams: 5,         // kantite egzamen aktif
+    avgGrade: 75,           // mwayèn (ajiste si ou vle)
+    byType: [
+      { label: "Cours Online", count: 120 }, 
+      { label: "Cours Local", count: 80 }
+    ]
+  };
+  res.json(stats);
+});
+
 app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
