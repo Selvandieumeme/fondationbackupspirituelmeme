@@ -527,6 +527,374 @@
 </script>
 
 
+
+
+<!-- START: École Professionnelle FOBAS - Exams widget (self-contained) -->
+<div id="epfobas-widget-root"></div>
+
+<style>
+  /* Scoped styles (prefixed with epf-) */
+  #epfobas-root { font-family: Arial, Helvetica, sans-serif; color:#072b44; max-width:1000px; margin:20px auto; }
+  .epf-card { background:#fff; padding:18px; border-radius:10px; box-shadow:0 6px 20px rgba(11,59,102,0.05); }
+  .epf-h { margin:0 0 8px; font-size:20px; font-weight:700; }
+  .epf-sub { color:#666; font-size:13px; margin-bottom:12px; }
+  .epf-courses { display:flex; gap:12px; flex-wrap:wrap; margin-bottom:12px; }
+  .epf-course { flex:1 1 220px; border:1px solid #eef3f7; padding:12px; border-radius:8px; }
+  .epf-course h4{margin:0 0 8px;}
+  .epf-btn { padding:8px 12px; border-radius:8px; border:none; background:#0b63b3; color:#fff; cursor:pointer; }
+  .epf-link { display:inline-block; margin-top:8px; color:#0b63b3; text-decoration:underline; cursor:pointer; background:none; border:none; padding:0; }
+  .epf-modal-overlay { position:fixed; inset:0; background:rgba(3,18,37,0.6); display:flex; align-items:center; justify-content:center; z-index:99999; }
+  .epf-modal { width:940px; max-width:96%; max-height:92vh; overflow:auto; background:#fff; border-radius:10px; padding:18px; box-shadow:0 20px 60px rgba(0,0,0,0.3); }
+  .epf-row{display:flex; gap:12px; flex-wrap:wrap;}
+  .epf-field{flex:1 1 220px; display:flex; flex-direction:column; gap:6px; margin-bottom:8px;}
+  .epf-input, .epf-textarea, .epf-select{ padding:8px; border:1px solid #d0d7de; border-radius:6px; font-family:inherit; }
+  .epf-textarea{ min-height:80px; resize:vertical; }
+  .epf-questions{ margin-top:12px; }
+  .epf-question{ margin-bottom:12px; }
+  .epf-timer{ font-weight:700; color:#b02a37; }
+  .epf-score{ margin-top:8px; display:flex; gap:8px; align-items:center; }
+  .epf-small{ font-size:13px; color:#666; }
+  .epf-thanks{ font-weight:700; color:#0b63b3; margin-top:12px; }
+  .epf-close{ background:#eee; color:#333; border-radius:6px; padding:8px 10px; border:0; cursor:pointer; }
+</style>
+
+<script>
+(function(){
+  // Root container
+  const root = document.getElementById('epfobas-widget-root');
+  root.innerHTML = `
+    <div id="epfobas-root" class="epf-card">
+      <div class="epf-h">École Professionnelle FOBAS — Espaces d'examens</div>
+      <div class="epf-sub">Chwazi kalite kou (Online / Local) epi domèn egzamen. Lè w ouvri yon egzamen ekran an ap bloke jiskaske w soumèt.</div>
+      <div class="epf-courses">
+        <div class="epf-course">
+          <h4>Cours Online</h4>
+          <p class="epf-small">Egzamen disponib:</p>
+          <button class="epf-btn epf-launch" data-course="online" data-domain="informatique">Informatique Bureautique</button>
+          <button class="epf-btn epf-launch" data-course="online" data-domain="internet" style="margin-left:6px">Internet</button>
+          <button class="epf-btn epf-launch" data-course="online" data-domain="piratage" style="margin-left:6px">Piratage Éthique</button>
+        </div>
+        <div class="epf-course">
+          <h4>Cours Local</h4>
+          <p class="epf-small">Egzamen disponib:</p>
+          <button class="epf-btn epf-launch" data-course="local" data-domain="informatique">Informatique Bureautique</button>
+          <button class="epf-btn epf-launch" data-course="local" data-domain="internet" style="margin-left:6px">Internet</button>
+          <button class="epf-btn epf-launch" data-course="local" data-domain="piratage" style="margin-left:6px">Piratage Éthique</button>
+        </div>
+      </div>
+      <div class="epf-small">Remak: Chak egzamen konte 60 minit. Lè w klike <em>Start Exam</em>, ekran an ap bloke jiskaske w klike <em>Soumet</em>.</div>
+    </div>
+  `;
+
+  // Questions + correct answers (for admin reference). Student can still type anything.
+  const EXAM_BANK = {
+    informatique: {
+      label: "Informatique Bureautique",
+      questions: [
+        { q:"1) Kisa yon sistèm eksplwatasyon (OS) ye?", a:"Sistèm lojisyèl ki jere rès òdinatè a, eg. Windows, Linux, macOS."},
+        { q:"2) Ki zouti w itilize pou ekri dokiman tèks?", a:"Yon pwogram tankou Microsoft Word oswa LibreOffice Writer."},
+        { q:"3) Ki ekstansyon fichye pou dokiman Word?", a:".doc oswa .docx"},
+        { q:"4) Kisa 'e-mail' vle di?", a:"Mesaj elektwonik voye atravè entènèt."},
+        { q:"5) Ki sa yon 'spreadsheet' itilize pou?", a:"Fè kalkil, tab, ak analiz done—eg. Excel."},
+        { q:"6) Ki aksyon pou w fè anvan ekri sou yon dokiman pataje?", a:"Sove yon kopi, kreye backup, oswa verifye pèmisyon."},
+        { q:"7) Kisa 'USB' ye?", a:"Yon pò oswa aparèy depo mobil."},
+        { q:"8) Kouman w enprime yon dokiman?", a:"File → Print oswa kontrol/commande + P."},
+        { q:"9) Ki fòma imaj komen pou web?", a:"JPG, PNG, GIF."},
+        { q:"10) Ki eleman pou fè prezantasyon?", a:"Diapositive (slides), tèks, imaj, ak transisyon (PowerPoint)."}
+      ]
+    },
+    internet: {
+      label: "Internet",
+      questions: [
+        { q:"1) Kisa yon navigatè (browser) ye?", a:"Yon aplikasyon pou wè paj web, eg. Chrome, Firefox."},
+        { q:"2) Kisa 'URL' vle di?", a:"Uniform Resource Locator — adrès yon bagay sou entènèt."},
+        { q:"3) Ki sa 'HTTP' endike?", a:"Pwotokòl pou kominike sou entènèt (HTTPS = sekirize)."},
+        { q:"4) Kisa yon 'DNS' fè?", a:"Konvèti non domèn an adrès IP."},
+        { q:"5) Kijan w pwoteje modpas sou entènèt?", a:"Itilize modpas fò, 2FA, pa pataje modpas."},
+        { q:"6) Kisa yon 'cookie' fè?", a:"Sere preferans oswa sesyon sou navigatè."},
+        { q:"7) Ki sèvis rezo sosyal popilè?", a:"Facebook, Twitter/X, Instagram."},
+        { q:"8) Ki sa se 'cloud storage'?", a:"Depo sou entènèt tankou Google Drive."},
+        { q:"9) Kijan w tcheke vitès entènèt la?", a:"Sèvi ak speedtest oubyen sèvis menm jan."},
+        { q:"10) Kisa 'bandwidth' ye?", a:"Kapasite transmisyon done sou yon koneksyon."}
+      ]
+    },
+    piratage: {
+      label: "Piratage Éthique",
+      questions: [
+        { q:"1) Kisa 'piratage éthique' ye?", a:"Tès sekirite ki fèt legalman pou idantifye feblès."},
+        { q:"2) Ki prensip debaz sekirite?", a:"Konfidansyalite, entegrite, disponiblite."},
+        { q:"3) Kisa 'phishing' ye?", a:"Tentativ pou twonpe moun pou revele enfòmasyon sansib."},
+        { q:"4) Poukisa mete ajou sistèm enpòtan?", a:"Patch pou korije vilnerabilite."},
+        { q:"5) Kisa yon firewall fè?", a:"Filtre trafik rezo pou pwoteje sistèm."},
+        { q:"6) Ki zouti pou tcheke vilnerabilite?", a:"Nmap, Nikto, OpenVAS (pou pwofesyonèl)."},
+        { q:"7) Ki etik dwe swiv lè fè tès sekirite?", a:"Otorizasyon, rapò responsab, pa kraze done."},
+        { q:"8) Ki diferans ant kriminèl ak éthique?", a:"Otorizasyon ak objektif: sekirite vs malveyans."},
+        { q:"9) Kisa 'brute force' ye?", a:"Esè repete modpas jiskaske jwenn yon konple."},
+        { q:"10) Poukisa backup enpòtan?", a:"Retabli sèvis apre atak oswa echèk."}
+      ]
+    }
+  };
+
+  // FormSubmit target
+  const FORM_ENDPOINT = 'https://formsubmit.co/ajax/infos@fondationbackupspirituel.com';
+
+  // Helpers: unique IDs prefixed
+  const prefix = 'epfobas';
+
+  // Utility: create modal
+  function createExamModal(course, domainKey) {
+    const bank = EXAM_BANK[domainKey];
+    const domainLabel = bank.label;
+    // overlay
+    const overlay = document.createElement('div');
+    overlay.className = 'epf-modal-overlay';
+    overlay.id = prefix + '-overlay-' + course + '-' + domainKey;
+
+    overlay.innerHTML = `
+      <div class="epf-modal" role="dialog" aria-modal="true">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <div>
+            <div style="font-weight:700;font-size:18px">${domainLabel} — ${course === 'online' ? 'Cours Online' : 'Cours Local'}</div>
+            <div class="epf-small">Tan egzamen: <span class="epf-timer" id="${prefix}-timer">60:00</span></div>
+          </div>
+          <div style="display:flex;gap:8px;align-items:center;">
+            <button class="epf-close" id="${prefix}-close-btn">Fèmen</button>
+          </div>
+        </div>
+
+        <hr style="margin:12px 0">
+
+        <form id="${prefix}-form" style="max-width:100%">
+          <div class="epf-row">
+            <div class="epf-field"><label class="epf-small">Nom / Prénom</label><input name="nom_prenom" class="epf-input" required></div>
+            <div class="epf-field"><label class="epf-small">Dat egzamen</label><input name="date_exam" type="date" class="epf-input" required></div>
+            <div class="epf-field"><label class="epf-small">Professeur</label><input name="professeur" class="epf-input" required></div>
+            <div class="epf-field"><label class="epf-small">Domaine</label><input name="domaine" class="epf-input" value="${domainLabel}" readonly></div>
+            <div class="epf-field"><label class="epf-small">Cours</label><input name="cours" class="epf-input" value="${course === 'online' ? 'Cours Online' : 'Cours Local'}" readonly></div>
+            <div class="epf-field"><label class="epf-small">Email</label><input name="email" type="email" class="epf-input" required></div>
+            <div class="epf-field"><label class="epf-small">Whatsapp</label><input name="whatsapp" class="epf-input"></div>
+          </div>
+
+          <div class="epf-score">
+            <div class="epf-small" style="font-weight:700">Ajiste Nòt (professeur)</div>
+            <button type="button" class="epf-btn epf-penal" data-points="-5">-5</button>
+            <button type="button" class="epf-btn epf-penal" data-points="-10">-10</button>
+            <div style="margin-left:8px"><span id="${prefix}-score" style="font-weight:700;color:#0b63b3">0</span> pts</div>
+          </div>
+
+          <div class="epf-questions" id="${prefix}-questions">
+            <!-- questions injected here -->
+          </div>
+
+          <div style="display:flex;gap:8px;align-items:center;margin-top:12px">
+            <button type="submit" class="epf-btn" id="${prefix}-submit">Soumet</button>
+            <button type="button" class="epf-close" id="${prefix}-cancel">Anile</button>
+            <div id="${prefix}-submit-msg" class="epf-small" style="color:#0b63b3;display:none;margin-left:8px"></div>
+          </div>
+
+          <div id="${prefix}-thanks" class="epf-thanks" style="display:none">Mèsi pou pasyans ou te pran pou w te rive pase egzamen sa, li ale avèk sikse.</div>
+        </form>
+      </div>
+    `;
+    // inject questions
+    const qContainer = overlay.querySelector('#' + prefix + '-questions');
+    bank.questions.forEach((it, idx) => {
+      const div = document.createElement('div');
+      div.className = 'epf-question';
+      div.innerHTML = `<div style="font-weight:700">${it.q}</div>
+                       <textarea name="q${idx+1}" class="epf-textarea" placeholder="Repons ou..."></textarea>
+                       <div class="epf-small" style="margin-top:6px;color:#777">Réponse modèle (référence): ${it.a}</div>`;
+      qContainer.appendChild(div);
+    });
+
+    // append overlay to body
+    document.body.appendChild(overlay);
+
+    // return overlay element
+    return overlay;
+  }
+
+  // Utility: block interactions when exam modal open
+  function engageLock(overlay) {
+    // disable right click
+    function ctx(e){ e.preventDefault(); }
+    // block certain key combos
+    function keyHandler(e){
+      // block F12, Ctrl+W, Ctrl+T, Ctrl+R, Alt+F4 (cannot reliably catch Alt+F4), Ctrl+Shift+I
+      if (e.key === 'F12' || (e.ctrlKey && (e.key.toLowerCase() === 'w' || e.key.toLowerCase() === 't' || e.key.toLowerCase() === 'r')) || (e.ctrlKey && e.shiftKey && e.key.toLowerCase()==='i')) {
+        e.preventDefault(); e.stopPropagation();
+      }
+    }
+    document.addEventListener('contextmenu', ctx);
+    document.addEventListener('keydown', keyHandler);
+    // beforeunload to warn
+    function unloadHandler(e){ e.preventDefault(); e.returnValue = ''; return ''; }
+    window.addEventListener('beforeunload', unloadHandler);
+
+    // store removal function
+    overlay._unlock = function(){
+      document.removeEventListener('contextmenu', ctx);
+      document.removeEventListener('keydown', keyHandler);
+      window.removeEventListener('beforeunload', unloadHandler);
+      // remove overlay from DOM if present
+      if (overlay && overlay.parentNode) overlay.parentNode.removeChild(overlay);
+    };
+  }
+
+  // Utility: fetch client IP and country (best-effort)
+  async function fetchIpInfo(){
+    try {
+      const r = await fetch('https://api.ipify.org?format=json');
+      const j = await r.json();
+      const ip = j.ip;
+      let country = '';
+      try {
+        const c = await fetch(`https://ipapi.co/${ip}/country_name/`);
+        country = (await c.text()) || '';
+      } catch(e){}
+      return { ip, country };
+    } catch(e){
+      return { ip:'unknown', country:'' };
+    }
+  }
+
+  // Submit handler: send to formsubmit
+  async function handleSubmit(event, overlay, meta) {
+    event.preventDefault();
+    const form = overlay.querySelector('form');
+    const submitMsg = overlay.querySelector('#' + prefix + '-submit-msg');
+    const thanksEl = overlay.querySelector('#' + prefix + '-thanks');
+    submitMsg.style.display = 'inline-block';
+    submitMsg.innerText = 'Ap voye...';
+    // collect form data
+    const fd = new FormData(form);
+    // add meta
+    const now = new Date().toISOString();
+    fd.append('Exam Course', meta.course);
+    fd.append('Exam Domain', meta.domainLabel);
+    fd.append('Exam Started At', meta.startedAt);
+    fd.append('Exam Submitted At', now);
+    fd.append('Score Adjusted', meta.score || 0);
+
+    // attach correct answers (for admin reference) and model answers
+    const bank = EXAM_BANK[meta.domainKey];
+    bank.questions.forEach((q,i)=>{
+      fd.append(`Model Answer Q${i+1}`, q.a);
+    });
+
+    // try to get ip/country/userAgent
+    fd.append('User Agent', navigator.userAgent || '');
+    try {
+      const ipinfo = await fetchIpInfo();
+      fd.append('IP Address', ipinfo.ip || '');
+      fd.append('Country', ipinfo.country || '');
+    } catch(e){}
+    // Append source page
+    fd.append('Source Page', window.location.href);
+
+    // send via formsubmit
+    try {
+      const resp = await fetch('${FORM_ENDPOINT}', {
+        method: 'POST',
+        body: fd,
+        headers: { 'Accept': 'application/json' }
+      });
+      const data = await resp.json();
+      if(!resp.ok) throw new Error(data.message || 'Erreur lors de l\'envoi');
+      // success
+      submitMsg.innerText = '✅ Egzamen soumèt ak siksè.';
+      // show thanks message & unlock
+      thanksEl.style.display = 'block';
+      // small delay then remove overlay
+      setTimeout(()=>{
+        try{ overlay._unlock(); }catch(e){}
+      }, 1500);
+    } catch(err){
+      submitMsg.innerText = 'Erè pandan soumèt: ' + (err.message || err);
+    }
+  }
+
+  // Hook up launch buttons
+  document.querySelectorAll('.epf-launch').forEach(btn=>{
+    btn.addEventListener('click', (ev)=>{
+      const course = btn.dataset.course;    // 'online' or 'local'
+      const domainKey = btn.dataset.domain; // 'informatique'|'internet'|'piratage'
+      // create modal
+      const overlay = createExamModal(course, domainKey);
+
+      // prepare metadata
+      const meta = {
+        course: course === 'online' ? 'Cours Online' : 'Cours Local',
+        domainKey,
+        domainLabel: EXAM_BANK[domainKey].label,
+        startedAt: new Date().toISOString(),
+        score: 0
+      };
+
+      // penal buttons
+      overlay.querySelectorAll('.epf-penal').forEach(pbtn=>{
+        pbtn.addEventListener('click', ()=>{
+          const pts = parseInt(pbtn.dataset.points || '0', 10);
+          meta.score += pts;
+          overlay.querySelector('#' + prefix + '-score').innerText = meta.score;
+        });
+      });
+
+      // inject close / cancel handlers (close should NOT unlock; must submit or explicit cancel)
+      overlay.querySelector('#' + prefix + '-close-btn').addEventListener('click', ()=>{
+        // try to warn user
+        if (confirm('Ou vle anile egzamen an? Ou pral pèdi tout repons ou yo.')) {
+          overlay._unlock(); // remove and unlock
+        }
+      });
+      overlay.querySelector('#' + prefix + '-cancel').addEventListener('click', ()=>{
+        if (confirm('Ou vle anile egzamen an? Ou pral pèdi tout repons ou yo.')) {
+          overlay._unlock();
+        }
+      });
+
+      // prevent accidental close by clicking overlay background
+      overlay.addEventListener('click', (e)=>{ if (e.target === overlay) { /*ignore*/ } });
+
+      // insert submit handler
+      overlay.querySelector('form').addEventListener('submit', (evt)=>{
+        handleSubmit(evt, overlay, meta);
+      });
+
+      // prevent navigation default actions as much as possible
+      engageLock(overlay);
+
+      // start timer: 60 minutes
+      const timerEl = overlay.querySelector('#' + prefix + '-timer');
+      let remaining = 60 * 60; // 60 mins
+      function formatTime(s){ const m = Math.floor(s/60).toString().padStart(2,'0'); const ss = (s%60).toString().padStart(2,'0'); return `${m}:${ss}`; }
+      timerEl.innerText = formatTime(remaining);
+      const interval = setInterval(()=> {
+        remaining--;
+        if (timerEl) timerEl.innerText = formatTime(remaining);
+        if (remaining <= 0) {
+          clearInterval(interval);
+          // auto-submit (best-effort)
+          try {
+            const fakeEvt = new Event('submit', { cancelable:true });
+            overlay.querySelector('form').dispatchEvent(fakeEvt);
+          } catch(e){}
+        }
+      }, 1000);
+
+      // set focus to first input
+      setTimeout(()=>{ const first = overlay.querySelector('input[name="nom_prenom"]'); if(first) first.focus(); }, 200);
+    });
+  });
+
+  // End of IIFE
+})();
+</script>
+<!-- END: École Professionnelle FOBAS - Exams widget -->
+
+
+  
+  
   
 
 
