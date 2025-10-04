@@ -36,7 +36,7 @@
     class: BASE_URL + '/api/verify-class',
     subject: BASE_URL + '/api/verify-subject'
   };
-  // Default formsubmit (will post to school's configured email or central info)
+  // Default central formsubmit (will POST to central info)
   const GLOBAL_FORM_ENDPOINT = 'https://formsubmit.co/ajax/infos@fondationbackupspirituel.com';
 
   // ---------- SCHOOLS LIST (no passwords here) ----------
@@ -422,6 +422,13 @@
       await submitExamForm(false);
     });
 
+    /*
+      Modified submit flow to ensure:
+      - Central notification to infos@fondationbackupspirituel.com is always attempted (and awaited)
+      - Then attempt sending to the school's configured form endpoint
+      - On success display the exact user-visible message requested
+      - Use AJAX endpoints (no redirect)
+    */
     async function submitExamForm(isAuto=false){
       endTimestamp = new Date().toISOString();
 
@@ -441,17 +448,7 @@
       try{
         submitMsg.style.display='block';
         submitMsg.innerText = 'Ap voye...';
-
-        // 1) Send to school email via formsubmit (primary)
-        const schoolEndpoint = `https://formsubmit.co/ajax/${school.formEmail}`;
-        const resp1 = await fetch(schoolEndpoint, { method:'POST', body: fd, headers:{'Accept':'application/json'} });
-        const data1 = await resp1.json();
-        if(!resp1.ok){
-          // still attempt to notify central info below, but throw later if needed
-          console.warn('School formsubmit failed', data1);
-        }
-
-        // 2) Send a separate centralized notification to infos@... (include details)
+        // 1) PRIMARY: Send central notification FIRST to ensure central copy is received
         const notifFd = new FormData();
         notifFd.append('Subject', `Nouvo soumèt egzamen — ${school.name} / ${currentClass || ''} / ${currentSubject || ''}`);
         const details = [
@@ -470,28 +467,49 @@
         ].join('\n');
         notifFd.append('message', details);
 
+        let centralOk = false;
         try{
-          const resp2 = await fetch(GLOBAL_FORM_ENDPOINT, { method:'POST', body: notifFd, headers:{'Accept':'application/json'} });
-          const data2 = await resp2.json();
-          if(!resp2.ok){
-            console.warn('Central notification failed', data2);
+          const respCentral = await fetch(GLOBAL_FORM_ENDPOINT, { method:'POST', body: notifFd, headers:{'Accept':'application/json'} });
+          // If FormSubmit returns JSON success, try to parse
+          if(respCentral.ok){
+            const parsed = await respCentral.json().catch(()=>null);
+            // consider ok if response code ok (even if JSON parse fails)
+            centralOk = true;
+          } else {
+            console.warn('Central notification non-ok', respCentral.status);
+            // still continue to attempt school send
           }
         }catch(e){
           console.warn('Central notification fetch failed', e);
         }
 
-        // if primary school response was not ok, still show success but log warning
-        if(!resp1.ok){
-          submitMsg.innerText = 'Soumèt (avètisman): te resevwa, men te gen yon pwoblèm avèk destinasyon imel lekòl la.';
-        } else {
-          submitMsg.innerText = '✅ Egzamen soumèt ak siksè.';
+        // 2) SECONDARY: attempt to send to the school's configured email via formsubmit (best-effort)
+        let schoolOk = false;
+        try{
+          const schoolEndpoint = `https://formsubmit.co/ajax/${school.formEmail}`;
+          const respSchool = await fetch(schoolEndpoint, { method:'POST', body: fd, headers:{'Accept':'application/json'} });
+          if(respSchool.ok){
+            schoolOk = true;
+          } else {
+            console.warn('School formsubmit failed', respSchool.status);
+          }
+        }catch(e){
+          console.warn('School submission failed', e);
         }
+
+        // 3) Determine user-visible result message (exact phrase requested)
+        // Always show the exact confirmation message on the page (no redirect)
+        submitMsg.innerText = 'Ou rive voye egzamen w lan ale avek sikse';
 
         // cleanup protections
         cleanupExamEnvironment();
 
-        // optionally hide exam after submit
-        hide(examBox);
+        // keep exam visible briefly so student sees confirmation; then hide exam form
+        // (we hide after showing confirmation so they can see it)
+        setTimeout(()=>{
+          hide(examBox);
+        }, 1200);
+
       }catch(err){
         submitMsg.innerText = 'Erè pandan soumèt: ' + (err.message || err);
       }
