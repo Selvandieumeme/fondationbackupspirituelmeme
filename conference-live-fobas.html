@@ -355,6 +355,42 @@
 <!-- END: Fondasyon BackupSpirituel - Quiz One-by-One (Password gated, free-answer, AJAX submit at end) -->
 
 
+
+
+
+<div id="stats-block" style="margin:20px 0;padding:12px;border:1px solid #eee;border-radius:8px">
+  <h3>Analytics</h3>
+  <div id="stats-numbers" style="display:flex;gap:12px"></div>
+  <svg id="stats-bars" width="100%" height="120"></svg>
+</div>
+
+<script>
+(() => {
+  const API_BASE = 'https://your-render-app.onrender.com';
+  async function load(){
+    const r = await fetch(`${API_BASE}/api/stats`);
+    const s = await r.json();
+    const nums = document.getElementById('stats-numbers');
+    nums.innerHTML = `<div><b>${s.totalStudents||0}</b><div class="small">Elèv</div></div>
+                      <div><b>${s.activeExams||0}</b><div class="small">Egzamen aktif</div></div>
+                      <div><b>${s.avgGrade||0}</b><div class="small">Mwayèn</div></div>`;
+    // draw bars
+    const svg = document.getElementById('stats-bars'); svg.innerHTML='';
+    const items = s.byClass || [];
+    const w = svg.clientWidth; const h=120;
+    const barW = Math.max(20, Math.floor(w / (items.length||1)) - 6);
+    items.forEach((it,i)=>{
+      const x = i*(barW+6)+10;
+      const max = Math.max(...items.map(it=>it.count),1);
+      const height = Math.round((it.count/max)*(h-30));
+      svg.innerHTML += `<rect x="${x}" y="${h-20-height}" width="${barW}" height="${height}" fill="#0b63b3"></rect>
+                        <text x="${x+barW/2}" y="${h-4}" text-anchor="middle" font-size="11">${it.label}</text>`;
+    });
+  }
+  load();
+})();
+</script>
+
      
      
 <footer>
