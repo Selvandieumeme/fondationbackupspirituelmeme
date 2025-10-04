@@ -529,7 +529,7 @@
 
 
 
-<!-- START: École Professionnelle FOBAS - Exams widget (self-contained) -->
+<!-- START: École Professionnelle FOBAS - Exams widget (with school password check) -->
 <div id="epfobas-widget-root"></div>
 
 <style>
@@ -542,7 +542,6 @@
   .epf-course { flex:1 1 220px; border:1px solid #eef3f7; padding:12px; border-radius:8px; }
   .epf-course h4{margin:0 0 8px;}
   .epf-btn { padding:8px 12px; border-radius:8px; border:none; background:#0b63b3; color:#fff; cursor:pointer; }
-  .epf-link { display:inline-block; margin-top:8px; color:#0b63b3; text-decoration:underline; cursor:pointer; background:none; border:none; padding:0; }
   .epf-modal-overlay { position:fixed; inset:0; background:rgba(3,18,37,0.6); display:flex; align-items:center; justify-content:center; z-index:99999; }
   .epf-modal { width:940px; max-width:96%; max-height:92vh; overflow:auto; background:#fff; border-radius:10px; padding:18px; box-shadow:0 20px 60px rgba(0,0,0,0.3); }
   .epf-row{display:flex; gap:12px; flex-wrap:wrap;}
@@ -560,6 +559,10 @@
 
 <script>
 (function(){
+  // CONFIG
+  const BASE_API = 'https://examen-backend-ihlx.onrender.com'; // si backend Render diferan, ranplase la
+  const FORM_ENDPOINT = 'https://formsubmit.co/ajax/infos@fondationbackupspirituel.com';
+
   // Root container
   const root = document.getElementById('epfobas-widget-root');
   root.innerHTML = `
@@ -586,7 +589,7 @@
     </div>
   `;
 
-  // Questions + correct answers (for admin reference). Student can still type anything.
+  // QUESTIONS BANK
   const EXAM_BANK = {
     informatique: {
       label: "Informatique Bureautique",
@@ -635,21 +638,16 @@
     }
   };
 
-  // FormSubmit target
-  const FORM_ENDPOINT = 'https://formsubmit.co/ajax/infos@fondationbackupspirituel.com';
-
-  // Helpers: unique IDs prefixed
+  // Utils
   const prefix = 'epfobas';
 
-  // Utility: create modal
+  // Create modal (same as before)
   function createExamModal(course, domainKey) {
     const bank = EXAM_BANK[domainKey];
     const domainLabel = bank.label;
-    // overlay
     const overlay = document.createElement('div');
     overlay.className = 'epf-modal-overlay';
     overlay.id = prefix + '-overlay-' + course + '-' + domainKey;
-
     overlay.innerHTML = `
       <div class="epf-modal" role="dialog" aria-modal="true">
         <div style="display:flex;justify-content:space-between;align-items:center;">
@@ -682,9 +680,7 @@
             <div style="margin-left:8px"><span id="${prefix}-score" style="font-weight:700;color:#0b63b3">0</span> pts</div>
           </div>
 
-          <div class="epf-questions" id="${prefix}-questions">
-            <!-- questions injected here -->
-          </div>
+          <div class="epf-questions" id="${prefix}-questions"></div>
 
           <div style="display:flex;gap:8px;align-items:center;margin-top:12px">
             <button type="submit" class="epf-btn" id="${prefix}-submit">Soumet</button>
@@ -696,7 +692,6 @@
         </form>
       </div>
     `;
-    // inject questions
     const qContainer = overlay.querySelector('#' + prefix + '-questions');
     bank.questions.forEach((it, idx) => {
       const div = document.createElement('div');
@@ -706,42 +701,31 @@
                        <div class="epf-small" style="margin-top:6px;color:#777">Réponse modèle (référence): ${it.a}</div>`;
       qContainer.appendChild(div);
     });
-
-    // append overlay to body
     document.body.appendChild(overlay);
-
-    // return overlay element
     return overlay;
   }
 
-  // Utility: block interactions when exam modal open
+  // Locking interactions
   function engageLock(overlay) {
-    // disable right click
     function ctx(e){ e.preventDefault(); }
-    // block certain key combos
     function keyHandler(e){
-      // block F12, Ctrl+W, Ctrl+T, Ctrl+R, Alt+F4 (cannot reliably catch Alt+F4), Ctrl+Shift+I
       if (e.key === 'F12' || (e.ctrlKey && (e.key.toLowerCase() === 'w' || e.key.toLowerCase() === 't' || e.key.toLowerCase() === 'r')) || (e.ctrlKey && e.shiftKey && e.key.toLowerCase()==='i')) {
         e.preventDefault(); e.stopPropagation();
       }
     }
     document.addEventListener('contextmenu', ctx);
     document.addEventListener('keydown', keyHandler);
-    // beforeunload to warn
     function unloadHandler(e){ e.preventDefault(); e.returnValue = ''; return ''; }
     window.addEventListener('beforeunload', unloadHandler);
-
-    // store removal function
     overlay._unlock = function(){
       document.removeEventListener('contextmenu', ctx);
       document.removeEventListener('keydown', keyHandler);
       window.removeEventListener('beforeunload', unloadHandler);
-      // remove overlay from DOM if present
       if (overlay && overlay.parentNode) overlay.parentNode.removeChild(overlay);
     };
   }
 
-  // Utility: fetch client IP and country (best-effort)
+  // Fetch ip info
   async function fetchIpInfo(){
     try {
       const r = await fetch('https://api.ipify.org?format=json');
@@ -758,7 +742,7 @@
     }
   }
 
-  // Submit handler: send to formsubmit
+  // Submit handling (use FORM_ENDPOINT variable properly)
   async function handleSubmit(event, overlay, meta) {
     event.preventDefault();
     const form = overlay.querySelector('form');
@@ -766,63 +750,80 @@
     const thanksEl = overlay.querySelector('#' + prefix + '-thanks');
     submitMsg.style.display = 'inline-block';
     submitMsg.innerText = 'Ap voye...';
-    // collect form data
     const fd = new FormData(form);
-    // add meta
     const now = new Date().toISOString();
     fd.append('Exam Course', meta.course);
     fd.append('Exam Domain', meta.domainLabel);
     fd.append('Exam Started At', meta.startedAt);
     fd.append('Exam Submitted At', now);
     fd.append('Score Adjusted', meta.score || 0);
-
-    // attach correct answers (for admin reference) and model answers
     const bank = EXAM_BANK[meta.domainKey];
     bank.questions.forEach((q,i)=>{
       fd.append(`Model Answer Q${i+1}`, q.a);
     });
-
-    // try to get ip/country/userAgent
     fd.append('User Agent', navigator.userAgent || '');
     try {
       const ipinfo = await fetchIpInfo();
       fd.append('IP Address', ipinfo.ip || '');
       fd.append('Country', ipinfo.country || '');
     } catch(e){}
-    // Append source page
     fd.append('Source Page', window.location.href);
 
-    // send via formsubmit
     try {
-      const resp = await fetch('${FORM_ENDPOINT}', {
+      const resp = await fetch(FORM_ENDPOINT, {
         method: 'POST',
         body: fd,
         headers: { 'Accept': 'application/json' }
       });
       const data = await resp.json();
       if(!resp.ok) throw new Error(data.message || 'Erreur lors de l\'envoi');
-      // success
       submitMsg.innerText = '✅ Egzamen soumèt ak siksè.';
-      // show thanks message & unlock
       thanksEl.style.display = 'block';
-      // small delay then remove overlay
-      setTimeout(()=>{
-        try{ overlay._unlock(); }catch(e){}
-      }, 1500);
+      setTimeout(()=>{ try{ overlay._unlock(); }catch(e){} }, 1500);
     } catch(err){
       submitMsg.innerText = 'Erè pandan soumèt: ' + (err.message || err);
     }
   }
 
-  // Hook up launch buttons
-  document.querySelectorAll('.epf-launch').forEach(btn=>{
-    btn.addEventListener('click', (ev)=>{
-      const course = btn.dataset.course;    // 'online' or 'local'
-      const domainKey = btn.dataset.domain; // 'informatique'|'internet'|'piratage'
-      // create modal
-      const overlay = createExamModal(course, domainKey);
+  // Verify school password via backend for École Professionnelle FOBAS
+  async function verifySchoolPasswordForEPF(password) {
+    try {
+      const resp = await fetch(BASE_API + '/api/verify-school', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: JSON.stringify({ school: 'EPFOBAS', password: password })
+      });
+      if (!resp.ok) {
+        const err = await resp.json().catch(()=>({message:'Invalid'}));
+        return { ok:false, message: err && err.message ? err.message : 'Invalid password' };
+      }
+      const data = await resp.json();
+      return { ok:true, data };
+    } catch(e){
+      return { ok:false, message: e.message || 'Network error' };
+    }
+  }
 
-      // prepare metadata
+  // Hook up launch buttons with school-password gating for EPFOBAS
+  document.querySelectorAll('.epf-launch').forEach(btn=>{
+    btn.addEventListener('click', async (ev)=>{
+      const course = btn.dataset.course;
+      const domainKey = btn.dataset.domain;
+
+      // For École Professionnelle FOBAS, require school password verification first.
+      // Prompt for school password (you can replace prompt() with nicer modal UI later)
+      const pw = prompt('Antre modpas pou École Professionnelle FOBAS (pa pataje li):');
+      if (!pw) { alert('Modpas obligatwa pou antre nan espas lekol la.'); return; }
+
+      // verify on backend
+      const verify = await verifySchoolPasswordForEPF(pw);
+      if (!verify.ok) {
+        alert('Erè verifye modpas: ' + (verify.message || 'Mot de passe envalid'));
+        return;
+      }
+
+      // If verified -> open modal and lock
+      const overlay = createExamModal(course, domainKey);
       const meta = {
         course: course === 'online' ? 'Cours Online' : 'Cours Local',
         domainKey,
@@ -840,33 +841,20 @@
         });
       });
 
-      // inject close / cancel handlers (close should NOT unlock; must submit or explicit cancel)
       overlay.querySelector('#' + prefix + '-close-btn').addEventListener('click', ()=>{
-        // try to warn user
-        if (confirm('Ou vle anile egzamen an? Ou pral pèdi tout repons ou yo.')) {
-          overlay._unlock(); // remove and unlock
-        }
+        if (confirm('Ou vle anile egzamen an? Ou pral pèdi tout repons ou yo.')) overlay._unlock();
       });
       overlay.querySelector('#' + prefix + '-cancel').addEventListener('click', ()=>{
-        if (confirm('Ou vle anile egzamen an? Ou pral pèdi tout repons ou yo.')) {
-          overlay._unlock();
-        }
+        if (confirm('Ou vle anile egzamen an? Ou pral pèdi tout repons ou yo.')) overlay._unlock();
       });
 
-      // prevent accidental close by clicking overlay background
-      overlay.addEventListener('click', (e)=>{ if (e.target === overlay) { /*ignore*/ } });
+      overlay.querySelector('form').addEventListener('submit', (evt)=> handleSubmit(evt, overlay, meta) );
 
-      // insert submit handler
-      overlay.querySelector('form').addEventListener('submit', (evt)=>{
-        handleSubmit(evt, overlay, meta);
-      });
-
-      // prevent navigation default actions as much as possible
       engageLock(overlay);
 
-      // start timer: 60 minutes
+      // start timer
       const timerEl = overlay.querySelector('#' + prefix + '-timer');
-      let remaining = 60 * 60; // 60 mins
+      let remaining = 60 * 60; // 60 minutes
       function formatTime(s){ const m = Math.floor(s/60).toString().padStart(2,'0'); const ss = (s%60).toString().padStart(2,'0'); return `${m}:${ss}`; }
       timerEl.innerText = formatTime(remaining);
       const interval = setInterval(()=> {
@@ -874,23 +862,18 @@
         if (timerEl) timerEl.innerText = formatTime(remaining);
         if (remaining <= 0) {
           clearInterval(interval);
-          // auto-submit (best-effort)
-          try {
-            const fakeEvt = new Event('submit', { cancelable:true });
-            overlay.querySelector('form').dispatchEvent(fakeEvt);
-          } catch(e){}
+          try { overlay.querySelector('form').dispatchEvent(new Event('submit', {cancelable:true})); } catch(e){}
         }
       }, 1000);
 
-      // set focus to first input
       setTimeout(()=>{ const first = overlay.querySelector('input[name="nom_prenom"]'); if(first) first.focus(); }, 200);
     });
   });
 
-  // End of IIFE
 })();
 </script>
-<!-- END: École Professionnelle FOBAS - Exams widget -->
+<!-- END: École Professionnelle FOBAS - Exams widget (with password check) -->
+
 
 
   
