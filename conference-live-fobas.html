@@ -354,62 +354,6 @@
 </script>
 <!-- END: Fondasyon BackupSpirituel - Quiz One-by-One (Password gated, free-answer, AJAX submit at end) -->
 
-
-
-     
-
-
-<div id="prof-stats-block" style="margin:20px 0;padding:12px;border:1px solid #eee;border-radius:8px">
-  <h3 style="margin:0 0 10px 0;font-size:16px;color:#0b63b3">📊 Statistiques – École Professionnelle</h3>
-  <div id="prof-stats-numbers" style="display:flex;gap:20px;font-size:14px"></div>
-  <svg id="prof-stats-bars" width="100%" height="140"></svg>
-</div>
-
-<script>
-(function(){
-  const API_BASE = ' https://examen-backend-ihlx.onrender.com'; // 🔑 ranplase ak URL backend Render ou
-
-  async function loadStats(){
-    try {
-      const r = await fetch(`${API_BASE}/api/stats`, {cache:"no-store"});
-      const s = await r.json();
-
-      // ✅ Afichaj nimewo yo
-      const nums = document.getElementById('prof-stats-numbers');
-      nums.innerHTML = `
-        <div><b>${s.totalEtudiants || 0}</b><div style="font-size:12px;color:#555">Étudiants</div></div>
-        <div><b>${s.activeExams || 0}</b><div style="font-size:12px;color:#555">Examen</div></div>
-        <div><b>${s.avgGrade || 0}</b><div style="font-size:12px;color:#555">Moyenne</div></div>
-      `;
-
-      // ✅ Graf Online vs Local
-      const svg = document.getElementById('prof-stats-bars'); 
-      svg.innerHTML='';
-      const items = s.byType || [];
-      const w = svg.clientWidth; 
-      const h = 140;
-      const barW = Math.max(30, Math.floor(w / (items.length||1)) - 10);
-      const max = Math.max(...items.map(it=>it.count),1);
-
-      items.forEach((it,i)=>{
-        const x = i*(barW+30)+40;
-        const height = Math.round((it.count/max)*(h-40));
-        svg.innerHTML += `
-          <rect x="${x}" y="${h-20-height}" width="${barW}" height="${height}" fill="#0b63b3" rx="6"></rect>
-          <text x="${x+barW/2}" y="${h-4}" text-anchor="middle" font-size="12">${it.label}</text>
-          <text x="${x+barW/2}" y="${h-26-height}" text-anchor="middle" font-size="12" fill="#333">${it.count}</text>
-        `;
-      });
-    } catch (err){
-      console.error("Erreur stats:", err);
-    }
-  }
-
-  // ✅ Chaje otomatik
-  loadStats();
-})();
-</script>
-
      
      
 <footer>
