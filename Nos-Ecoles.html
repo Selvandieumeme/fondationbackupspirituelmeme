@@ -864,6 +864,7 @@ function escapeHtml(str){
       updatePenaltyUI();
 
 
+
 const examQuestionsFOBAS = {
   "7em": {
     "math": [
@@ -1209,7 +1210,7 @@ const examQuestionsFOBAS = {
       "Ki non mòn ki pi wo an Ayiti?"
     ],
     "espagnol": [
-      "Tradui: ‘Buenas noches’.",
+      "Tradui: ‘Buenas nights’ (note: corrige si bezwen).",
       "Ki jan yo di ‘mwen gen swaf’?",
       "Konjige vèb ‘comer’.",
       "Tradui: ‘Nou ap etidye’.",
@@ -1232,9 +1233,8 @@ const examQuestionsFOBAS = {
       "Kisa sajès ye?",
       "Kisa refleksyon filozofik fè nou konprann?"
     ]
-  }
-},
-  
+  },
+
   // ----------------------
   // NS I
   // ----------------------
@@ -1360,8 +1360,9 @@ const examQuestionsFOBAS = {
       "Kisa valè imen vle di?"
     ]
   },
+
   // ----------------------
-  // NS II
+  // NS II (ranpli ak kesyon egzanp pou tout matyè pou evite erè)
   // ----------------------
   "NS2": {
     "math": [
@@ -1388,24 +1389,139 @@ const examQuestionsFOBAS = {
       "Kisa 'cybersécurité' vle di?",
       "Ki sa 'open source' reprezante?"
     ],
-    // … (ou ka kontinye menm jan ak NS1 pou tout matyè yo)
+    "creole": [
+      "Bay defi paragraf ki eksplike yon evènman.",
+      "Ki eleman yon tèks deskriptif genyen?",
+      "Bay twa egzanp mo konektè.",
+      "Kisa tèm 'koerans' nan yon paragraf vle di?",
+      "Ki wòl tit nan yon tèks?",
+      "Bay yon egzanp kontrast nan lang kreyòl.",
+      "Ki siyifikasyon pwovèb 'Dèyè mòn gen mòn'?",
+      "Kisa 'registre' yon tèks ye?",
+      "Bay diferans ant fraz presiz ak fraz jeneral.",
+      "Ekri yon fraz ki sèvi ak konjonksyon 'poutèt'."
+    ],
+    "francais": [
+      "Expliquez la fonction d'un adjectif.",
+      "Conjuguez 'finir' au présent.",
+      "Donnez trois pronoms relatifs.",
+      "Transformez au pluriel: 'le livre rouge'.",
+      "Donnez un synonyme de 'triste'.",
+      "Qu'est-ce qu'une phrase impérative?",
+      "Donnez un exemple d'adverbe.",
+      "Conjuguez 'voir' au passé composé.",
+      "Qu'est-ce qu'un complément d'objet indirect?",
+      "Donnez un antonyme de 'rapide'."
+    ],
+    "anglais": [
+      "Translate: 'I have finished my homework.'",
+      "Give three modal verbs.",
+      "Write a short sentence in future tense.",
+      "What is the comparative of 'good'?",
+      "Translate: 'Nou te wè yon fim.'",
+      "Give two examples of irregular verbs.",
+      "Form a question with 'have'.",
+      "Translate: 'Li te fini egzamen an.'",
+      "What is the plural of 'lady'?",
+      "Write a sentence with 'although'."
+    ],
+    "sciences": [
+      "Expliquez la structure d'un atòm.",
+      "Qu'est-ce qu'une réaction chimique?",
+      "Définissez un écosystème.",
+      "Quelles sont les étapes de la photosynthèse?",
+      "Quelle est la fonction du système digestif?",
+      "Qu'est-ce que la biodiversité?",
+      "Quel est le rôle des bactéries dans l'environnement?",
+      "Donnez un exemple d'énergie renouvelable.",
+      "Qu'est-ce qu'un virus?",
+      "Définissez la notion de masse."
+    ],
+    "histoire": [
+      "Expliquez les causes d'une révolution.",
+      "Donnez la date d'un événement historique local.",
+      "Quels sont les effets d'une colonisation?",
+      "Qui était un leader important du passé?",
+      "Donnez un exemple de mouvement social.",
+      "Quel est le rôle des archives historiques?",
+      "Expliquez l'importance d'une constitution.",
+      "Donnez la définition d'un empire.",
+      "Que signifie 'indépendance'?",
+      "Donnez un exemple de changement politique majeur."
+    ],
+    "geographie": [
+      "Qu'est-ce qu'une carte climatique?",
+      "Définissez la notion de bassin hydrographique.",
+      "Quels facteurs déterminent un climat?",
+      "Donnez un exemple d'utilisation du sol.",
+      "Qu'est-ce qu'une région urbaine?",
+      "Expliquez la notion de densité de population.",
+      "Donnez un exemple de ressource naturelle.",
+      "Qu'est-ce qu'une frontière?",
+      "Donnez les principaux types de relief.",
+      "Expliquez l'impact des saisons sur l'agriculture."
+    ],
+    "espagnol": [
+      "Conjugue 'vivir' au présent.",
+      "Traduis: 'Mwen bezwen dlo.'",
+      "Donne trois noms d'animaux.",
+      "Que signifie 'por favor'?",
+      "Forme une phrase simple en espagnol.",
+      "Donne un synonyme de 'feliz'.",
+      "Traduis: 'Nou ap aprann.'",
+      "Conjugue 'ir' au futur proche.",
+      "Que veut dire 'hasta luego'?",
+      "Donne trois couleurs en espagnol."
+    ],
+    "philosophie": [
+      "Définissez la notion d'éthique.",
+      "Quelle est la différence entre opinion et savoir?",
+      "Qu'est-ce que la conscience?",
+      "Donnez un exemple de dilemme moral.",
+      "Expliquez ce qu'est la liberté.",
+      "Qu'est-ce que le scepticisme?",
+      "Donnez le nom d'un philosophe célèbre.",
+      "Qu'est-ce que la raison?",
+      "Expliquez brièvement le concept de justice.",
+      "Qu'est-ce qu'une valeur?"
+    ]
   },
 
   // ----------------------
-  // NS III
+  // NS III (placeholder; ou modifye pita)
   // ----------------------
   "NS3": {
-    // menm estrikti ak 10 kesyon pou chak matyè (ou ka modifye pita)
+    "math": ["NS3 math q1","NS3 math q2","NS3 math q3","NS3 math q4","NS3 math q5","NS3 math q6","NS3 math q7","NS3 math q8","NS3 math q9","NS3 math q10"],
+    "informatique": ["NS3 info q1","NS3 info q2","NS3 info q3","NS3 info q4","NS3 info q5","NS3 info q6","NS3 info q7","NS3 info q8","NS3 info q9","NS3 info q10"],
+    "creole": ["NS3 creole q1","NS3 creole q2","NS3 creole q3","NS3 creole q4","NS3 creole q5","NS3 creole q6","NS3 creole q7","NS3 creole q8","NS3 creole q9","NS3 creole q10"],
+    "francais": ["NS3 fr q1","NS3 fr q2","NS3 fr q3","NS3 fr q4","NS3 fr q5","NS3 fr q6","NS3 fr q7","NS3 fr q8","NS3 fr q9","NS3 fr q10"],
+    "anglais": ["NS3 en q1","NS3 en q2","NS3 en q3","NS3 en q4","NS3 en q5","NS3 en q6","NS3 en q7","NS3 en q8","NS3 en q9","NS3 en q10"],
+    "sciences": ["NS3 sc q1","NS3 sc q2","NS3 sc q3","NS3 sc q4","NS3 sc q5","NS3 sc q6","NS3 sc q7","NS3 sc q8","NS3 sc q9","NS3 sc q10"],
+    "histoire": ["NS3 hist q1","NS3 hist q2","NS3 hist q3","NS3 hist q4","NS3 hist q5","NS3 hist q6","NS3 hist q7","NS3 hist q8","NS3 hist q9","NS3 hist q10"],
+    "geographie": ["NS3 geo q1","NS3 geo q2","NS3 geo q3","NS3 geo q4","NS3 geo q5","NS3 geo q6","NS3 geo q7","NS3 geo q8","NS3 geo q9","NS3 geo q10"],
+    "espagnol": ["NS3 esp q1","NS3 esp q2","NS3 esp q3","NS3 esp q4","NS3 esp q5","NS3 esp q6","NS3 esp q7","NS3 esp q8","NS3 esp q9","NS3 esp q10"],
+    "philosophie": ["NS3 ph q1","NS3 ph q2","NS3 ph q3","NS3 ph q4","NS3 ph q5","NS3 ph q6","NS3 ph q7","NS3 ph q8","NS3 ph q9","NS3 ph q10"]
   },
 
   // ----------------------
-  // NS IV
+  // NS IV (placeholder; ou modifye pita)
   // ----------------------
   "NS4": {
-    // menm estrikti ak 10 kesyon pou chak matyè (ou ka modifye pita)
+    "math": ["NS4 math q1","NS4 math q2","NS4 math q3","NS4 math q4","NS4 math q5","NS4 math q6","NS4 math q7","NS4 math q8","NS4 math q9","NS4 math q10"],
+    "informatique": ["NS4 info q1","NS4 info q2","NS4 info q3","NS4 info q4","NS4 info q5","NS4 info q6","NS4 info q7","NS4 info q8","NS4 info q9","NS4 info q10"],
+    "creole": ["NS4 creole q1","NS4 creole q2","NS4 creole q3","NS4 creole q4","NS4 creole q5","NS4 creole q6","NS4 creole q7","NS4 creole q8","NS4 creole q9","NS4 creole q10"],
+    "francais": ["NS4 fr q1","NS4 fr q2","NS4 fr q3","NS4 fr q4","NS4 fr q5","NS4 fr q6","NS4 fr q7","NS4 fr q8","NS4 fr q9","NS4 fr q10"],
+    "anglais": ["NS4 en q1","NS4 en q2","NS4 en q3","NS4 en q4","NS4 en q5","NS4 en q6","NS4 en q7","NS4 en q8","NS4 en q9","NS4 en q10"],
+    "sciences": ["NS4 sc q1","NS4 sc q2","NS4 sc q3","NS4 sc q4","NS4 sc q5","NS4 sc q6","NS4 sc q7","NS4 sc q8","NS4 sc q9","NS4 sc q10"],
+    "histoire": ["NS4 hist q1","NS4 hist q2","NS4 hist q3","NS4 hist q4","NS4 hist q5","NS4 hist q6","NS4 hist q7","NS4 hist q8","NS4 hist q9","NS4 hist q10"],
+    "geographie": ["NS4 geo q1","NS4 geo q2","NS4 geo q3","NS4 geo q4","NS4 geo q5","NS4 geo q6","NS4 geo q7","NS4 geo q8","NS4 geo q9","NS4 geo q10"],
+    "espagnol": ["NS4 esp q1","NS4 esp q2","NS4 esp q3","NS4 esp q4","NS4 esp q5","NS4 esp q6","NS4 esp q7","NS4 esp q8","NS4 esp q9","NS4 esp q10"],
+    "philosophie": ["NS4 ph q1","NS4 ph q2","NS4 ph q3","NS4 ph q4","NS4 ph q5","NS4 ph q6","NS4 ph q7","NS4 ph q8","NS4 ph q9","NS4 ph q10"]
   }
+};
 
 
+    
 
 // ✅ Fonksyon pou chaje kesyon otomatikman
 function populateExamQuestions(schoolId, classId, subjectId, container){
