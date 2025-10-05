@@ -865,7 +865,137 @@ function escapeHtml(str){
 
 
   
-  // ✅ Fonksyon pou chaje kesyon otomatikman
+
+// ----------------------
+// EXAM QUESTIONS FOR FOBAS (7em–9em)
+// ----------------------
+
+const examQuestionsFOBAS = {
+  "7em": {
+    "math": [
+      "Kisa yon nimewo premyè ye?",
+      "Ki diferans ki genyen ant yon fraksyon ak yon desimal?",
+      "Rezoud: 5 + (3 × 2) - 4 = ?",
+      "Ki sa ki yon triyang ekilateral?",
+      "Kisa perimèt yon fòm reprezante?",
+      "Konvèti 250 cm an mèt.",
+      "Ki kantite degre yon ang dwat genyen?",
+      "Rezoud: (9 × 3) ÷ 3 = ?",
+      "Kisa ki yon nimewo par?",
+      "Ki rezilta 10% de 200?"
+    ],
+    "informatique": [
+      "Kisa òdinatè vle di?",
+      "Ki sa ki CPU a fè nan òdinatè a?",
+      "Kisa RAM vle di?",
+      "Ki diferans ki genyen ant lojisyèl ak pyès òdinatè?",
+      "Kisa yon sourit òdinatè ye?",
+      "Ki fonksyon klavye a genyen?",
+      "Kisa entènèt la reprezante?",
+      "Kisa ‘fichye’ vle di?",
+      "Ki itilizasyon yon USB?",
+      "Ki sa ki yon antivirus?"
+    ],
+    "creole": [
+      "Ki diferans ant non ak vèb nan yon fraz?",
+      "Bay twa egzanp adjektif nan lang kreyòl.",
+      "Ki sa yon pwovèb ye?",
+      "Bay yon egzanp fraz entèwogatif.",
+      "Kisa sijè yon fraz reprezante?",
+      "Bay yon egzanp fraz negatif.",
+      "Ki siyifikasyon mo 'zanmi'?",
+      "Bay yon sinonim pou mo 'bèl'.",
+      "Ki antitè yon tèks ye?",
+      "Bay yon egzanp fraz avèk konjonksyon 'men'."
+    ],
+    "francais": [
+      "Qu’est-ce qu’un nom commun?",
+      "Donnez trois adjectifs qualificatifs.",
+      "Conjuguez le verbe ‘avoir’ au présent.",
+      "Qu’est-ce qu’une phrase interrogative?",
+      "Donnez un synonyme de ‘heureux’.",
+      "Mettez le mot ‘école’ au pluriel.",
+      "Quelle est la fonction du verbe dans une phrase?",
+      "Donnez un exemple de verbe du premier groupe.",
+      "Qu’est-ce qu’un sujet?",
+      "Donnez un antonyme de ‘petit’."
+    ],
+    "anglais": [
+      "Translate: ‘Good morning’ in Creole.",
+      "What is the plural of ‘child’?",
+      "Conjugate the verb ‘to be’ in present tense.",
+      "What color is the sky?",
+      "Give two examples of fruits in English.",
+      "Translate: ‘I am a student.’",
+      "What is the opposite of ‘big’?",
+      "Write one sentence with ‘can’.",
+      "What is the English word for ‘liv’?",
+      "Translate: ‘Li renmen danse.’"
+    ],
+    "sciences": [
+      "Ki sa ki syans lan ye?",
+      "Ki wòl kè a nan kò moun?",
+      "Ki sa ki fotosentèz?",
+      "Ki sa ki dlo reprezante nan lanati?",
+      "Ki diferans ant bèt ak plant?",
+      "Ki sa ki yon gaz?",
+      "Kisa solèy la sèvi pou?",
+      "Ki eleman prensipal lè a genyen?",
+      "Ki sa ki yon materyèl solid?",
+      "Ki non senbol chimik pou dlo?"
+    ],
+    "histoire": [
+      "Ki moun ki te premye Prezidan Ayiti?",
+      "Ki dat endepandans Ayiti?",
+      "Ki sa revolisyon an te ye?",
+      "Ki peyi ki te kolonize Ayiti?",
+      "Ki non kapital Ayiti?",
+      "Ki non batay final endepandans lan?",
+      "Ki non Desalin te genyen anvan endepandans lan?",
+      "Ki non Drapo Ayiti a genyen de koulè?",
+      "Ki sa 18 me reprezante?",
+      "Ki non premye Anperè Ayiti?"
+    ],
+    "geographie": [
+      "Ki non de zile prensipal Ayiti a?",
+      "Ki oseyan ki bò Ayiti?",
+      "Ki non kapital peyi a?",
+      "Ki depatman Ayiti genyen?",
+      "Ki sa ki yon kat jeyografik?",
+      "Ki direksyon solèy leve?",
+      "Ki peyi ki sou fwontyè Ayiti?",
+      "Ki lanmè ki bò nò peyi a?",
+      "Ki mòn ki pi wo an Ayiti?",
+      "Ki diferans ant vil ak seksyon kominal?"
+    ],
+    "espagnol": [
+      "Tradui: ‘Buenos días’ an kreyòl.",
+      "Kijan yo di ‘liv’ an panyòl?",
+      "Bay twa koulè an panyòl.",
+      "Kisa ‘gracias’ vle di?",
+      "Konjige vèb ‘ser’ nan prezan.",
+      "Kijan yo di ‘mwen kontan’ an panyòl?",
+      "Bay de non bèt an panyòl.",
+      "Ki diferans ant ‘tú’ ak ‘usted’?",
+      "Kisa ‘hola’ vle di?",
+      "Tradui: ‘Mwen renmen lekòl la.’"
+    ],
+    "philosophie": [
+      "Kisa filozofi ye?",
+      "Ki non filozòf ki te di ‘Mwen panse, kidonk mwen egziste’?",
+      "Kisa moral la ye?",
+      "Ki diferans ant byen ak mal?",
+      "Kisa refleksyon filozofik vle di?",
+      "Kisa verite a reprezante?",
+      "Kisa lavi gen kòm sans selon filozofi?",
+      "Ki non disiplin ki etidye konesans?",
+      "Kisa yon valè moral ye?",
+      "Bay egzanp yon kesyon filozofik."
+    ]
+  }
+};
+
+// ✅ Fonksyon pou chaje kesyon otomatikman
 function populateExamQuestions(schoolId, classId, subjectId, container){
   if(schoolId !== "fobas") return; // sèlman pou FOBAS pou kounya
   const questions = examQuestionsFOBAS[classId]?.[subjectId] || [];
@@ -877,7 +1007,11 @@ function populateExamQuestions(schoolId, classId, subjectId, container){
   });
 }
 
+// populate questions dynamically for the current school/class/subject
+const questionsContainer = examForm.querySelector('.exam-questions');
+populateExamQuestions(school.id || '', currentClass || '', currentSubject || '', questionsContainer);
 
+  
   
       submitMsg.style.display='none';
       remainingSeconds = 120*60; // 120 minutes as requested
