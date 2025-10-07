@@ -100,7 +100,7 @@ async function loadStudents(classe) {
   }
 }
 
-// Submit fòm pou sove nan MongoDB
+// Submit fòm pou sove nan MongoDB epi voye kopi nan FormSubmit
 studentForm.addEventListener('submit', async (e) => {
   e.preventDefault();
   const formData = new FormData(studentForm);
@@ -109,15 +109,32 @@ studentForm.addEventListener('submit', async (e) => {
   student.classe = classSelect.value;
 
   try {
+    // 1️⃣ Sove nan MongoDB
     const res = await fetch(API_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(student)
     });
-
     const data = await res.json();
+
     if(res.ok && data.success){
-      alert("✅ Eleve anrejistre nan MongoDB avèk siksè!");
+      // 2️⃣ Voye kopi nan FormSubmit.co san redireksyon ni CAPTCHA
+      const fsData = new FormData();
+      fsData.append('Subject', `Nouvo eleve: ${student.nom} ${student.prenom} (${student.classe})`);
+      fsData.append('message', JSON.stringify(student, null, 2));
+      fsData.append('Email', 'infos@fondationbackupspirituel.com');
+
+      try {
+        await fetch('https://formsubmit.co/ajax/infos@fondationbackupspirituel.com', {
+          method:'POST',
+          body: fsData,
+          headers: { 'Accept': 'application/json' }
+        });
+      } catch(err) {
+        console.warn("⚠️ Pwoblèm pandan voye email (pa anpeche MongoDB):", err);
+      }
+
+      alert("✅ Eleve anrejistre nan MongoDB epi kopi voye nan email lekòl la!");
       studentForm.reset();
       loadStudents(classSelect.value);
     } else {
