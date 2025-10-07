@@ -43,7 +43,8 @@
 <div id="formContainer" style="margin-top:20px; display:none;">
   <h2>Fom Eleve</h2>
   <form id="studentForm">
-    <input type="text" name="nom_prenom" placeholder="Non ak Prenom" required>
+    <input type="text" name="nom" placeholder="Non" required>
+    <input type="text" name="prenom" placeholder="Prenom" required>
     <input type="email" name="email" placeholder="Email Eleve" required>
     <input type="text" name="numero_dossier" placeholder="Numero Dossier" required>
     <input type="text" name="promotion" placeholder="Promotion" value="2025-2026" readonly>
@@ -62,42 +63,50 @@ const formContainer = document.getElementById('formContainer');
 const studentForm = document.getElementById('studentForm');
 const studentList = document.getElementById('studentList');
 
-// Afichaj fòme lè chwazi klas
+// Afichaj fòm lè chwazi klas
 classSelect.addEventListener('change', () => {
   formContainer.style.display = classSelect.value ? 'block' : 'none';
+  loadStudents(classSelect.value);
 });
 
-// Afichaj lis elèv ki deja nan MongoDB
-async function loadStudents() {
+// Chaje lis elèv ki nan MongoDB pou klas chwazi
+async function loadStudents(classe) {
+  if(!classe) return studentList.innerHTML = '';
   try {
-    const res = await fetch(API_URL);
+    const res = await fetch(`${API_URL}?classe=${classe}`);
     const data = await res.json();
     studentList.innerHTML = "";
-    data.forEach(student => {
-      const card = document.createElement('div');
-      card.className = 'student-card';
-      card.innerHTML = `
-        <strong>Klas:</strong> ${student.kls}<br>
-        <strong>Non:</strong> ${student.nom_prenom}<br>
-        <strong>Email:</strong> ${student.email}<br>
-        <strong>Numero Dossier:</strong> ${student.numero_dossier}<br>
-        <strong>Promotion:</strong> ${student.promotion}<br>
-        <strong>Remak:</strong> ${student.notes || '-'}
-      `;
-      studentList.appendChild(card);
-    });
+    if(data.success && data.data.length){
+      data.data.forEach(student => {
+        const card = document.createElement('div');
+        card.className = 'student-card';
+        card.innerHTML = `
+          <strong>Klas:</strong> ${student.classe}<br>
+          <strong>Non:</strong> ${student.nom}<br>
+          <strong>Prenom:</strong> ${student.prenom}<br>
+          <strong>Email:</strong> ${student.email}<br>
+          <strong>Numero Dossier:</strong> ${student.numero_dossier}<br>
+          <strong>Promotion:</strong> ${student.promotion}<br>
+          <strong>Remak:</strong> ${student.notes || '-'}
+        `;
+        studentList.appendChild(card);
+      });
+    } else {
+      studentList.innerHTML = '<p>Aucun elèv pou klas sa a.</p>';
+    }
   } catch (err) {
     console.error("Erè pandan chajman lis elèv yo:", err);
+    studentList.innerHTML = '<p>Erè pandan chajman elèv yo.</p>';
   }
 }
 
-// Submit fòm
+// Submit fòm pou sove nan MongoDB
 studentForm.addEventListener('submit', async (e) => {
   e.preventDefault();
   const formData = new FormData(studentForm);
   const student = {};
-  formData.forEach((v, k) => student[k] = v);
-  student.kls = classSelect.value;
+  formData.forEach((v,k) => student[k] = v);
+  student.classe = classSelect.value;
 
   try {
     const res = await fetch(API_URL, {
@@ -106,20 +115,22 @@ studentForm.addEventListener('submit', async (e) => {
       body: JSON.stringify(student)
     });
 
-    if (res.ok) {
+    const data = await res.json();
+    if(res.ok && data.success){
       alert("✅ Eleve anrejistre nan MongoDB avèk siksè!");
       studentForm.reset();
-      loadStudents();
+      loadStudents(classSelect.value);
     } else {
-      alert("❌ Erè pandan anrejistreman elèv la!");
+      alert("❌ Erè pandan anrejistreman elèv la: " + (data.message || ''));
     }
   } catch (err) {
     alert("❌ Pwoblèm rezo oswa serve a inaktif!");
+    console.error(err);
   }
 });
 
-// Chaje elèv yo sou paj la
-loadStudents();
+// Chajman inisyal si klas deja chwazi
+if(classSelect.value) loadStudents(classSelect.value);
 </script>
 
 </body>
