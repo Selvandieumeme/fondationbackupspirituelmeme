@@ -3,7 +3,7 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
-const mongoose = require('mongoose'); // ✅ ajoute mongoose
+const mongoose = require('mongoose'); // ✅ mongoose deja enkli
 const app = express();
 
 app.use(cors());
@@ -18,14 +18,12 @@ if (!MONGO_URI) {
   process.exit(1);
 }
 
-mongoose.connect(MONGO_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-})
-.then(() => console.log('✅ MongoDB konekte avèk siksè!'))
-.catch(err => {
-  console.error('❌ Erè koneksyon MongoDB:', err.message);
-});
+// ✅ nouvo fason konekte san opsyon demode
+mongoose.connect(MONGO_URI)
+  .then(() => console.log('✅ MongoDB konekte avèk siksè!'))
+  .catch(err => {
+    console.error('❌ Erè koneksyon MongoDB:', err.message);
+  });
 
 /**
  * ---------- MONGODB SCHEMAS ----------
@@ -62,7 +60,6 @@ app.get('/Bases-donnees-nos-ecoles.html', (req, res) => {
 
 /**
  * ---------- API ROUTES: MONGO TEST ----------
- * Ou kapab teste rapidman koneksyon ak koleksyon yo.
  */
 
 // 📌 Ajoute yon elèv
