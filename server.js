@@ -36,8 +36,8 @@ const eleveSchema = new mongoose.Schema({
   email: { type: String, required: true },
   numero_dossier: { type: String, required: true },
   promotion: { type: String, required: true },
+  notes: { type: String, default: '' }, // ✅ remak/nòt
   classe: { type: String, required: true },
-  notes: { type: String, default: '' }, // ✅ Retabli chan notes
 });
 
 const Eleve = mongoose.model('Eleve', eleveSchema, 'eleves'); // koleksyon: "eleves"
@@ -49,9 +49,9 @@ const Eleve = mongoose.model('Eleve', eleveSchema, 'eleves'); // koleksyon: "ele
 // 📌 Ajoute yon elèv
 app.post('/api/eleves', async (req, res) => {
   try {
-    const { nom, prenom, email, numero_dossier, promotion, classe, notes } = req.body;
+    const { nom, prenom, email, numero_dossier, promotion, notes, classe } = req.body;
 
-    // ✅ Verifikasyon chan obligatwa pou evite erè validation
+    // ✅ Verifye tout chan obligatwa yo
     if (!nom || !prenom || !email || !numero_dossier || !promotion || !classe) {
       return res.status(400).json({
         success: false,
@@ -59,15 +59,15 @@ app.post('/api/eleves', async (req, res) => {
       });
     }
 
-    // Kreye nouvo elèv ak chan ki egziste nan schema, notes default si pa bay
+    // ✅ Kreye nouvo elèv ak tout chan
     const eleve = new Eleve({
       nom,
       prenom,
       email,
       numero_dossier,
       promotion,
-      classe,
-      notes: notes || '' // ✅ Default si pa bay
+      notes: notes || '', // ajoute nòt / remak si genyen
+      classe
     });
 
     await eleve.save();
@@ -78,10 +78,15 @@ app.post('/api/eleves', async (req, res) => {
   }
 });
 
-// 📌 Lis tout elèv
+// 📌 Lis tout elèv — ✅ KOUNYA LI FONKSYONE AK FILTRAJ PA KLAS
 app.get('/api/eleves', async (req, res) => {
   try {
-    const list = await Eleve.find();
+    const { classe } = req.query;
+
+    // Si gen klas nan query, filtre sèlman elèv sa yo
+    const query = classe ? { classe } : {};
+
+    const list = await Eleve.find(query).sort({ date_inscription: -1 });
     res.json({ success: true, count: list.length, data: list });
   } catch (err) {
     console.error('❌ Erè lè w ap chaje elèv:', err.message);
