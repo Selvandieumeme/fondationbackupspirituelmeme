@@ -36,7 +36,6 @@ const eleveSchema = new mongoose.Schema({
   email: { type: String, required: true },
   numero_dossier: { type: String, required: true },
   promotion: { type: String, required: true },
-  notes: { type: String, default: '' },
   classe: { type: String, required: true },
   date_inscription: { type: Date, default: Date.now }
 });
