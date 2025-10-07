@@ -37,7 +37,7 @@ const eleveSchema = new mongoose.Schema({
   numero_dossier: { type: String, required: true },
   promotion: { type: String, required: true },
   classe: { type: String, required: true },
-  date_inscription: { type: Date, default: Date.now }
+  notes: { type: String, default: '' }, // ✅ Retabli chan notes
 });
 
 const Eleve = mongoose.model('Eleve', eleveSchema, 'eleves'); // koleksyon: "eleves"
@@ -49,7 +49,7 @@ const Eleve = mongoose.model('Eleve', eleveSchema, 'eleves'); // koleksyon: "ele
 // 📌 Ajoute yon elèv
 app.post('/api/eleves', async (req, res) => {
   try {
-    const { nom, prenom, email, numero_dossier, promotion, classe } = req.body;
+    const { nom, prenom, email, numero_dossier, promotion, classe, notes } = req.body;
 
     // ✅ Verifikasyon chan obligatwa pou evite erè validation
     if (!nom || !prenom || !email || !numero_dossier || !promotion || !classe) {
@@ -59,14 +59,15 @@ app.post('/api/eleves', async (req, res) => {
       });
     }
 
-    // Kreye nouvo elèv ak chan ki egziste nan schema
+    // Kreye nouvo elèv ak chan ki egziste nan schema, notes default si pa bay
     const eleve = new Eleve({
       nom,
       prenom,
       email,
       numero_dossier,
       promotion,
-      classe
+      classe,
+      notes: notes || '' // ✅ Default si pa bay
     });
 
     await eleve.save();
