@@ -2,11 +2,30 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
-const path = require('path'); // <-- ajoute path pou HTML
+const path = require('path');
+const mongoose = require('mongoose'); // ✅ ajoute mongoose
 const app = express();
 
 app.use(cors());
 app.use(express.json());
+
+/**
+ * ---------- MONGODB CONNECTION ----------
+ */
+const MONGO_URI = process.env.MONGO_URI;
+if (!MONGO_URI) {
+  console.error('❌ MONGO_URI manke nan anviwònman!');
+  process.exit(1);
+}
+
+mongoose.connect(MONGO_URI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+})
+.then(() => console.log('✅ MongoDB konekte avèk siksè!'))
+.catch(err => {
+  console.error('❌ Erè koneksyon MongoDB:', err.message);
+});
 
 /**
  * ---------- SERVE STATIC HTML FILES WITHOUT /PUBLIC ----------
@@ -15,11 +34,6 @@ app.use(express.json());
 app.get('/Bases-donnees-nos-ecoles.html', (req, res) => {
   res.sendFile(path.join(__dirname, 'Bases-donnees-nos-ecoles.html'));
 });
-
-// Si ou gen lòt HTML nan rasin repo a, ou ka ajoute menm jan:
-// app.get('/autre-fichier.html', (req,res) => {
-//    res.sendFile(path.join(__dirname, 'autre-fichier.html'));
-// });
 
 /**
  * HELPERS
@@ -48,7 +62,11 @@ function buildEnvMappings() {
     });
 
     mapping.subjects[sid] = {};
-    const subjKeys = { math:'MATH', informatique:'INFO', creole:'CREOLE', francais:'FR', anglais:'EN', espagnol:'ES', sciences:'SC', histoire:'HIS', geographie:'GEO', philosophie:'PHILO' };
+    const subjKeys = {
+      math:'MATH', informatique:'INFO', creole:'CREOLE',
+      francais:'FR', anglais:'EN', espagnol:'ES',
+      sciences:'SC', histoire:'HIS', geographie:'GEO', philosophie:'PHILO'
+    };
     Object.entries(subjKeys).forEach(([key,suffix]) => {
       const envName = `SUBJECT_${sid}_${suffix}`;
       if (process.env[envName]) mapping.subjects[sid][key] = process.env[envName];
@@ -80,7 +98,8 @@ function findClassByPassword(pw) {
   for (const schoolKey of Object.keys(ENV_MAP.classes)) {
     const classes = ENV_MAP.classes[schoolKey] || {};
     for (const clsKey of Object.keys(classes)) {
-      if (classes[clsKey] && classes[clsKey] === pass) return { school: schoolKey, class: clsKey };
+      if (classes[clsKey] && classes[clsKey] === pass)
+        return { school: schoolKey, class: clsKey };
     }
   }
   return null;
@@ -92,7 +111,8 @@ function findSubjectByPassword(pw) {
   for (const schoolKey of Object.keys(ENV_MAP.subjects)) {
     const subs = ENV_MAP.subjects[schoolKey] || {};
     for (const sKey of Object.keys(subs)) {
-      if (subs[sKey] && subs[sKey] === pass) return { school: schoolKey, subject: sKey };
+      if (subs[sKey] && subs[sKey] === pass)
+        return { school: schoolKey, subject: sKey };
     }
   }
   return null;
@@ -104,52 +124,64 @@ function findSubjectByPassword(pw) {
 
 app.post('/api/verify-school', (req, res) => {
   const { school, password } = req.body;
-  if (!password || typeof password !== 'string') return res.status(400).json({ success:false, message:'Missing password' });
+  if (!password || typeof password !== 'string')
+    return res.status(400).json({ success:false, message:'Missing password' });
 
   if (school) {
     const sk = normalizeSchoolKey(school);
-    if (!ENV_MAP.schools[sk]) return res.status(400).json({ success:false, message:'Lekòl pa rekonèt' });
-    if (ENV_MAP.schools[sk] === password) return res.json({ success:true, level:'school', school: sk, message:`Lekòl ${sk} ouvè` });
+    if (!ENV_MAP.schools[sk])
+      return res.status(400).json({ success:false, message:'Lekòl pa rekonèt' });
+    if (ENV_MAP.schools[sk] === password)
+      return res.json({ success:true, level:'school', school: sk, message:`Lekòl ${sk} ouvè` });
     return res.status(401).json({ success:false, message:'Invalid school password' });
   } else {
     const found = findSchoolByPassword(password);
-    if (found && found.school) return res.json({ success:true, level:'school', school: found.school, message:`Lekòl ${found.school} ouvè` });
+    if (found && found.school)
+      return res.json({ success:true, level:'school', school: found.school, message:`Lekòl ${found.school} ouvè` });
     return res.status(401).json({ success:false, message:'Invalid school password' });
   }
 });
 
 app.post('/api/verify-class', (req, res) => {
   const { school, password } = req.body;
-  if (!password || typeof password !== 'string') return res.status(400).json({ success:false, message:'Missing password' });
+  if (!password || typeof password !== 'string')
+    return res.status(400).json({ success:false, message:'Missing password' });
 
   if (school) {
     const sk = normalizeSchoolKey(school);
     const classesFor = ENV_MAP.classes[sk];
-    if (!classesFor) return res.status(400).json({ success:false, message:'Lekòl pa rekonèt pou klas' });
+    if (!classesFor)
+      return res.status(400).json({ success:false, message:'Lekòl pa rekonèt pou klas' });
     const validClass = Object.keys(classesFor).find(k => classesFor[k] === password);
-    if (validClass) return res.json({ success:true, level:'class', school: sk, class: validClass, message:`Klas ${validClass} ouvè nan ${sk}` });
+    if (validClass)
+      return res.json({ success:true, level:'class', school: sk, class: validClass, message:`Klas ${validClass} ouvè nan ${sk}` });
     return res.status(401).json({ success:false, message:'Invalid class password' });
   } else {
     const found = findClassByPassword(password);
-    if (found) return res.json({ success:true, level:'class', school: found.school, class: found.class, message:`Klas ${found.class} ouvè nan ${found.school}` });
+    if (found)
+      return res.json({ success:true, level:'class', school: found.school, class: found.class, message:`Klas ${found.class} ouvè nan ${found.school}` });
     return res.status(401).json({ success:false, message:'Invalid class password' });
   }
 });
 
 app.post('/api/verify-subject', (req, res) => {
   const { school, password } = req.body;
-  if (!password || typeof password !== 'string') return res.status(400).json({ success:false, message:'Missing password' });
+  if (!password || typeof password !== 'string')
+    return res.status(400).json({ success:false, message:'Missing password' });
 
   if (school) {
     const sk = normalizeSchoolKey(school);
     const subsFor = ENV_MAP.subjects[sk];
-    if (!subsFor) return res.status(400).json({ success:false, message:'Lekòl pa rekonèt pou matyè' });
+    if (!subsFor)
+      return res.status(400).json({ success:false, message:'Lekòl pa rekonèt pou matyè' });
     const validSubject = Object.keys(subsFor).find(k => subsFor[k] === password);
-    if (validSubject) return res.json({ success:true, level:'subject', school: sk, subject: validSubject, message:`Egzamen ${validSubject} ouvè nan ${sk}` });
+    if (validSubject)
+      return res.json({ success:true, level:'subject', school: sk, subject: validSubject, message:`Egzamen ${validSubject} ouvè nan ${sk}` });
     return res.status(401).json({ success:false, message:'Invalid subject password' });
   } else {
     const found = findSubjectByPassword(password);
-    if (found) return res.json({ success:true, level:'subject', school: found.school, subject: found.subject, message:`Egzamen ${found.subject} ouvè nan ${found.school}` });
+    if (found)
+      return res.json({ success:true, level:'subject', school: found.school, subject: found.subject, message:`Egzamen ${found.subject} ouvè nan ${found.school}` });
     return res.status(401).json({ success:false, message:'Invalid subject password' });
   }
 });
