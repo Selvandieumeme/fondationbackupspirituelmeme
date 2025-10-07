@@ -33,9 +33,11 @@ mongoose.connect(MONGO_URI)
 const eleveSchema = new mongoose.Schema({
   nom: { type: String, required: true },
   prenom: { type: String, required: true },
-  ecole: { type: String, required: true },
+  email: { type: String, required: true },
+  numero_dossier: { type: String, required: true },
+  promotion: { type: String, required: true },
+  notes: { type: String, default: '' },
   classe: { type: String, required: true },
-  matieres: { type: [String], default: [] },
   date_inscription: { type: Date, default: Date.now }
 });
 
