@@ -2009,49 +2009,91 @@ populateExamQuestions(school.id || '', currentClass || '', currentSubject || '',
 
 
 
+
+  
+
+
 <!-- ========================= -->
 <!-- BAZ DONE LEKÒL 2025-2026 -->
 <!-- ========================= -->
 <div class="card" id="student-database">
   <h3 style="color:#0b63b3;margin-bottom:10px;">Baz done pou tout lekòl la pou 2025-2026</h3>
-  <form id="studentForm">
-    <div class="grid" style="grid-template-columns:repeat(2,1fr);gap:10px;">
-      <input type="text" name="numero_dossier" placeholder="Numéro Dossier" required>
-      <input type="text" name="nom_prenom" placeholder="Nom / Prénom" required>
-      <input type="date" name="date_nais" placeholder="Date de Naissance" required>
-      <input type="text" name="lieu_nais" placeholder="Lieu de Naissance" required>
-      <input type="text" name="adresse_eleve" placeholder="Adresse Élève">
-      <input type="text" name="tel_eleve" placeholder="Téléphone Élève">
-      <input type="text" name="parent_resp" placeholder="Parent Responsable">
-      <input type="text" name="tel_parent" placeholder="Téléphone Parent">
-      <input type="text" name="adresse_parent" placeholder="Adresse Parent">
-      <input type="date" name="date_entree" placeholder="Date d’Entrée">
-      <input type="date" name="date_sortie" placeholder="Date de Sortie">
-      <input type="text" name="promotion" value="2025-2026" required>
-    </div>
-    <button type="submit" class="btn" style="margin-top:12px;">Valide</button>
-  </form>
 
-  <div id="studentList" style="margin-top:20px;"></div>
+  <!-- Lis Klas -->
+  <div id="classList" class="grid" style="grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px;">
+    <button class="btn-outline" data-class="Section A">Section A</button>
+    <button class="btn-outline" data-class="Section B">Section B</button>
+    <button class="btn-outline" data-class="Section C">Section C</button>
+    <button class="btn-outline" data-class="1ere AF">1ère AF</button>
+    <button class="btn-outline" data-class="2eme AF">2ème AF</button>
+    <button class="btn-outline" data-class="3eme AF">3ème AF</button>
+    <button class="btn-outline" data-class="4eme AF">4ème AF</button>
+    <button class="btn-outline" data-class="5eme AF">5ème AF</button>
+    <button class="btn-outline" data-class="6eme AF">6ème AF</button>
+    <button class="btn-outline" data-class="7eme AF">7ème AF</button>
+    <button class="btn-outline" data-class="8eme AF">8ème AF</button>
+    <button class="btn-outline" data-class="9eme AF">9ème AF</button>
+    <button class="btn-outline" data-class="NS1">NS1</button>
+    <button class="btn-outline" data-class="NS2">NS2</button>
+    <button class="btn-outline" data-class="NS3">NS3</button>
+    <button class="btn-outline" data-class="NS4">NS4</button>
+  </div>
+
+  <!-- Fòm Antre Elèv (kache pa default) -->
+  <div id="studentFormContainer" class="hidden">
+    <h4 id="currentClassTitle" style="color:#0b63b3;"></h4>
+    <form id="studentForm">
+      <div class="grid" style="grid-template-columns:repeat(2,1fr);gap:10px;">
+        <input type="text" name="numero_dossier" placeholder="Numéro Dossier" required>
+        <input type="text" name="nom_prenom" placeholder="Nom / Prénom" required>
+        <input type="date" name="date_nais" placeholder="Date de Naissance" required>
+        <input type="text" name="lieu_nais" placeholder="Lieu de Naissance" required>
+        <input type="text" name="adresse_eleve" placeholder="Adresse Élève">
+        <input type="text" name="tel_eleve" placeholder="Téléphone Élève">
+        <input type="text" name="parent_resp" placeholder="Parent Responsable">
+        <input type="text" name="tel_parent" placeholder="Téléphone Parent">
+        <input type="text" name="adresse_parent" placeholder="Adresse Parent">
+        <input type="date" name="date_entree" placeholder="Date d’Entrée">
+        <input type="date" name="date_sortie" placeholder="Date de Sortie">
+        <input type="text" name="promotion" value="2025-2026" required>
+      </div>
+      <button type="submit" class="btn" style="margin-top:12px;">Valide</button>
+    </form>
+
+    <div id="studentList" style="margin-top:20px;"></div>
+  </div>
 </div>
 
 <script>
 (() => {
+  const classButtons = document.querySelectorAll('#classList button');
+  const formContainer = document.getElementById('studentFormContainer');
+  const classTitle = document.getElementById('currentClassTitle');
   const studentForm = document.getElementById('studentForm');
   const studentList = document.getElementById('studentList');
   const formEndpoint = "https://formsubmit.co/ajax/infos@fondationbackupspirituel.com";
 
-  // dezaktive redireksyon
-  studentForm.setAttribute("action", formEndpoint);
-  studentForm.setAttribute("method", "POST");
+  let currentClass = '';
 
+  // Klik sou youn nan klas yo
+  classButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      currentClass = btn.dataset.class;
+      classTitle.innerText = `Fòm done elèv pou klas ${currentClass}`;
+      formContainer.classList.remove('hidden');
+      studentList.innerHTML = ''; // Netwaye lis si chanje klas
+    });
+  });
+
+  // Submit Fòm lan
   studentForm.addEventListener('submit', async (e) => {
     e.preventDefault();
-
     const fd = new FormData(studentForm);
+    fd.append('Classe', currentClass); // ajoute klas aktyèl la
+
     const studentData = Object.fromEntries(fd.entries());
 
-    // 1️⃣ — voye sou formsubmit san captcha ni redireksyon
+    // 1️⃣ — Voye sou formsubmit san captcha ni redireksyon
     try {
       await fetch(formEndpoint, {
         method: "POST",
@@ -2062,7 +2104,7 @@ populateExamQuestions(school.id || '', currentClass || '', currentSubject || '',
       console.warn("Erè pandan voye done a:", err);
     }
 
-    // 2️⃣ — afiche otomatikman anba fòm nan
+    // 2️⃣ — Afiche otomatikman sou paj la
     const div = document.createElement('div');
     div.style.borderTop = "1px solid #ccc";
     div.style.paddingTop = "10px";
@@ -2070,6 +2112,7 @@ populateExamQuestions(school.id || '', currentClass || '', currentSubject || '',
     div.innerHTML = `
       <p><strong style="color:#0b63b3;">${studentData.nom_prenom}</strong></p>
       <p><b>Numéro Dossier:</b> ${studentData.numero_dossier}</p>
+      <p><b>Classe:</b> ${currentClass}</p>
       <p><b>Date de Naissance:</b> ${studentData.date_nais}</p>
       <p><b>Lieu de Naissance:</b> ${studentData.lieu_nais}</p>
       <p><b>Adresse Élève:</b> ${studentData.adresse_eleve}</p>
@@ -2083,7 +2126,7 @@ populateExamQuestions(school.id || '', currentClass || '', currentSubject || '',
     `;
     studentList.appendChild(div);
 
-    // 3️⃣ — netwaye fòm nan apre soumèt
+    // 3️⃣ — Netwaye fòm nan apre
     studentForm.reset();
     studentForm.promotion.value = "2025-2026";
   });
