@@ -2,10 +2,22 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
+const path = require('path'); // <-- ajoute path
 const app = express();
 
 app.use(cors());
 app.use(express.json());
+
+/**
+ * ---------- SERVE STATIC FILES ----------
+ */
+// Serve fichye statik soti nan folder "public" (ou ka mete HTML ou la)
+app.use(express.static(path.join(__dirname, 'public')));
+
+// si ou vle tout URL pa matche ale nan Bases-donnees-nos-ecoles.html (SPA style)
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'Bases-donnees-nos-ecoles.html'));
+});
 
 /**
  * HELPERS
@@ -47,7 +59,6 @@ function buildEnvMappings() {
     // classes for each school: CLASS_<SCHOOL>_7EM etc
     mapping.classes[sid] = {};
     ['7em','8em','9em','NS1','NS2','NS3','NS4'].forEach(cls => {
-      // env name: CLASS_<SCHOOL>_7EM  (uppercase)
       const envName = `CLASS_${sid}_${String(cls).toUpperCase()}`;
       if (process.env[envName]) mapping.classes[sid][cls] = process.env[envName];
     });
@@ -84,28 +95,19 @@ const ENV_MAP = buildEnvMappings();
 function findSchoolByPassword(pw) {
   if (!pw) return null;
   const pass = String(pw);
-  // First check explicit school envs
   for (const [schoolKey, val] of Object.entries(ENV_MAP.schools)) {
     if (val && val === pass) return { school: schoolKey };
   }
-  // Fallback: legacy single-school password
   if (ENV_MAP.legacySchoolPassword && ENV_MAP.legacySchoolPassword === pass) {
-    // If legacy present, try to identify which school should be assumed.
-    // Prefer FOBAS if present; else pick the first defined school.
     const prefer = ['FOBAS','LUMIERE','CEFOTECH'];
     for (const p of prefer) {
       if (ENV_MAP.schools[p]) return { school: p };
     }
-    // otherwise return generic
     return { school: 'FOBAS' };
   }
   return null;
 }
 
-/**
- * Utility: find class+school by a given class password
- * Returns { school, class } or null
- */
 function findClassByPassword(pw) {
   if (!pw) return null;
   const pass = String(pw);
@@ -120,10 +122,6 @@ function findClassByPassword(pw) {
   return null;
 }
 
-/**
- * Utility: find subject+school by subject password
- * Returns { school, subject } or null
- */
 function findSubjectByPassword(pw) {
   if (!pw) return null;
   const pass = String(pw);
@@ -142,11 +140,6 @@ function findSubjectByPassword(pw) {
  * ---------- ROUTES ----------
  */
 
-/**
- * Verify school.
- * Accepts JSON: { school?: 'FOBAS'|'LUMIERE'|'CEFOTECH', password: '...' }
- * If school omitted, attempts to match password to any SCHOOL_* or legacy SCHOOL_PASSWORD
- */
 app.post('/api/verify-school', (req, res) => {
   const { school, password } = req.body;
   if (!password || typeof password !== 'string') {
@@ -164,7 +157,6 @@ app.post('/api/verify-school', (req, res) => {
       return res.status(401).json({ success:false, message: 'Invalid school password' });
     }
   } else {
-    // try to find which school this password belongs to
     const found = findSchoolByPassword(password);
     if (found && found.school) {
       return res.json({ success:true, level:'school', school: found.school, message: `Lekòl ${found.school} ouvè` });
@@ -174,12 +166,6 @@ app.post('/api/verify-school', (req, res) => {
   }
 });
 
-/**
- * Verify class.
- * Accepts JSON: { school?: 'FOBAS'|'LUMIERE'|'CEFOTECH', password: '...' }
- * If school present, validates against that school's class envs.
- * If not present, will search across all schools and return which school+class matched.
- */
 app.post('/api/verify-class', (req, res) => {
   const { school, password } = req.body;
   if (!password || typeof password !== 'string') {
@@ -190,7 +176,6 @@ app.post('/api/verify-class', (req, res) => {
     const sk = normalizeSchoolKey(school);
     const classesFor = ENV_MAP.classes[sk];
     if (!classesFor) return res.status(400).json({ success:false, message: 'Lekòl pa rekonèt pou klas' });
-    // find class key whose env value equals password
     const validClass = Object.keys(classesFor).find(k => classesFor[k] === password);
     if (validClass) {
       return res.json({ success:true, level:'class', school: sk, class: validClass, message: `Klas ${validClass} ouvè nan ${sk}` });
@@ -207,10 +192,6 @@ app.post('/api/verify-class', (req, res) => {
   }
 });
 
-/**
- * Verify subject.
- * Accepts JSON: { school?: 'FOBAS'|'LUMIERE'|'CEFOTECH', password: '...' }
- */
 app.post('/api/verify-subject', (req, res) => {
   const { school, password } = req.body;
   if (!password || typeof password !== 'string') {
