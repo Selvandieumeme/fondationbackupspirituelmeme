@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="ht">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fom Eleves Direktè</title>
+<style>
+  body { font-family: Arial, sans-serif; margin:20px; background:#f9f9f9; }
+  h1,h2 { color:#333; }
+  select, input, textarea { padding:8px; margin:5px 0; width:100%; max-width:400px; border-radius:5px; border:1px solid #ccc; }
+  button { padding:10px 20px; background:#4CAF50; color:white; border:none; border-radius:5px; cursor:pointer; }
+  button:hover { background:#45a049; }
+  .student-list { margin-top:30px; }
+  .student-card { background:#fff; padding:10px; margin-bottom:10px; border-radius:5px; border:1px solid #ddd; }
+</style>
+</head>
+<body>
+
+<h1>Fom Ranpli Eleves</h1>
+
+<label for="classSelect">Chwazi Klas:</label>
+<select id="classSelect">
+  <option value="">-- Chwazi Klas --</option>
+  <option value="6eme">6ème</option>
+  <option value="5eme">5ème</option>
+  <option value="4eme">4ème</option>
+  <option value="3eme">3ème</option>
+  <option value="2nd">2nd</option>
+  <option value="1ere">1ère</option>
+  <option value="Tle">Tle</option>
+  <option value="PetiteSection">Petite Section</option>
+  <option value="MoyenneSection">Moyenne Section</option>
+  <option value="GrandeSection">Grande Section</option>
+  <option value="CP1">CP1</option>
+  <option value="CP2">CP2</option>
+  <option value="CE1">CE1</option>
+  <option value="CE2">CE2</option>
+  <option value="CM1">CM1</option>
+  <option value="CM2">CM2</option>
+</select>
+
+<div id="formContainer" style="margin-top:20px; display:none;">
+  <h2>Fom Eleve</h2>
+  <form id="studentForm">
+    <input type="text" name="nom_prenom" placeholder="Non ak Prenom" required>
+    <input type="email" name="email" placeholder="Email Eleve" required>
+    <input type="text" name="numero_dossier" placeholder="Numero Dossier" required>
+    <input type="text" name="promotion" placeholder="Promotion" value="2025-2026" readonly>
+    <textarea name="notes" placeholder="Nòt oswa Remak" rows="4"></textarea>
+    <button type="submit">Valide</button>
+  </form>
+</div>
+
+<h2>Lis Eleves Ranpli:</h2>
+<div id="studentList" class="student-list"></div>
+
+<script>
+const classSelect = document.getElementById('classSelect');
+const formContainer = document.getElementById('formContainer');
+const studentForm = document.getElementById('studentForm');
+const studentList = document.getElementById('studentList');
+
+// Affiche fom lè klas chwazi
+classSelect.addEventListener('change', () => {
+  if(classSelect.value) formContainer.style.display = 'block';
+  else formContainer.style.display = 'none';
+});
+
+// Submit fom
+studentForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const formData = new FormData(studentForm);
+  const student = {};
+  formData.forEach((value, key) => student[key] = value);
+  student.kls = classSelect.value;
+
+  // Ajoute nan lis sou paj la
+  const card = document.createElement('div');
+  card.className = 'student-card';
+  card.innerHTML = `
+    <strong>Klas:</strong> ${student.kls}<br>
+    <strong>Non:</strong> ${student.nom_prenom}<br>
+    <strong>Email:</strong> ${student.email}<br>
+    <strong>Numero Dossier:</strong> ${student.numero_dossier}<br>
+    <strong>Promotion:</strong> ${student.promotion}<br>
+    <strong>Remak:</strong> ${student.notes || '-'}
+  `;
+  studentList.appendChild(card);
+
+  // Voye kopi nan email via formsubmit
+  const fsData = new FormData();
+  fsData.append('Subject', `Nouvo eleve: ${student.nom_prenom} (${student.kls})`);
+  fsData.append('message', JSON.stringify(student, null, 2));
+  fsData.append('Email', 'infos@fondationbackupspirituel.com');
+
+  try {
+    await fetch('https://formsubmit.co/ajax/infos@fondationbackupspirituel.com', {
+      method:'POST',
+      body: fsData,
+      headers: { 'Accept': 'application/json' }
+    });
+    alert('Eleve voye avèk siksè nan email san redireksyon!');
+  } catch(err) {
+    alert('Erè pandan voye email: ' + err.message);
+  }
+
+  studentForm.reset();
+});
+</script>
+
+</body>
+</html>
