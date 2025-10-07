@@ -43,36 +43,37 @@ const eleveSchema = new mongoose.Schema({
 
 const Eleve = mongoose.model('Eleve', eleveSchema, 'eleves'); // koleksyon: "eleves"
 
-// ✅ Schema pou nòt elèv yo
-const noteSchema = new mongoose.Schema({
-  eleveId: { type: mongoose.Schema.Types.ObjectId, ref: 'Eleve', required: true },
-  matiere: { type: String, required: true },
-  note: { type: Number, required: true },
-  date_enregistrement: { type: Date, default: Date.now }
-});
-
-const Note = mongoose.model('Note', noteSchema, 'notes'); // koleksyon: "notes"
-
 /**
- * ---------- SERVE STATIC HTML FILES ----------
- */
-app.get('/Bases-donnees-nos-ecoles.html', (req, res) => {
-  res.sendFile(path.join(__dirname, 'Bases-donnees-nos-ecoles.html'));
-});
-
-/**
- * ---------- API ROUTES: MONGO TEST ----------
+ * ---------- ROUTES ELEVE ----------
  */
 
 // 📌 Ajoute yon elèv
 app.post('/api/eleves', async (req, res) => {
   try {
-    const { nom, prenom, ecole, classe, matieres } = req.body;
-    const eleve = new Eleve({ nom, prenom, ecole, classe, matieres });
+    const { nom, prenom, email, numero_dossier, promotion, classe } = req.body;
+
+    // ✅ Verifikasyon chan obligatwa pou evite erè validation
+    if (!nom || !prenom || !email || !numero_dossier || !promotion || !classe) {
+      return res.status(400).json({
+        success: false,
+        message: 'Tout chan obligatwa yo dwe ranpli (nom, prenom, email, numero_dossier, promotion, classe)'
+      });
+    }
+
+    // Kreye nouvo elèv ak chan ki egziste nan schema
+    const eleve = new Eleve({
+      nom,
+      prenom,
+      email,
+      numero_dossier,
+      promotion,
+      classe
+    });
+
     await eleve.save();
     res.json({ success: true, message: '✅ Elèv anrejistre avèk siksè', eleve });
   } catch (err) {
-    console.error('❌ Erè lè w ap sove elèv:', err);
+    console.error('❌ Erè lè w ap sove elèv:', err.message);
     res.status(500).json({ success: false, message: 'Erè sèvè lè w ap sove elèv' });
   }
 });
@@ -83,38 +84,14 @@ app.get('/api/eleves', async (req, res) => {
     const list = await Eleve.find();
     res.json({ success: true, count: list.length, data: list });
   } catch (err) {
-    console.error('❌ Erè lè w ap chaje elèv:', err);
+    console.error('❌ Erè lè w ap chaje elèv:', err.message);
     res.status(500).json({ success: false, message: 'Erè sèvè lè w ap chaje elèv' });
-  }
-});
-
-// 📌 Ajoute nòt pou yon elèv
-app.post('/api/notes', async (req, res) => {
-  try {
-    const { eleveId, matiere, note } = req.body;
-    const n = new Note({ eleveId, matiere, note });
-    await n.save();
-    res.json({ success: true, message: '✅ Nòt anrejistre avèk siksè', note: n });
-  } catch (err) {
-    console.error('❌ Erè lè w ap sove nòt:', err);
-    res.status(500).json({ success: false, message: 'Erè sèvè lè w ap sove nòt' });
-  }
-});
-
-// 📌 Lis tout nòt
-app.get('/api/notes', async (req, res) => {
-  try {
-    const notes = await Note.find().populate('eleveId', 'nom prenom ecole classe');
-    res.json({ success: true, count: notes.length, data: notes });
-  } catch (err) {
-    console.error('❌ Erè lè w ap chaje nòt:', err);
-    res.status(500).json({ success: false, message: 'Erè sèvè lè w ap chaje nòt' });
   }
 });
 
 /**
  * ---------- HELPERS ORIJINAL + ROUTES EXISTANTS ----------
- * (Tout pati ou te deja genyen rete entak)
+ * (Tout lòt pati nan server.js rete entak)
  */
 
 function normalizeSchoolKey(key) {
