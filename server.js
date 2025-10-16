@@ -277,6 +277,9 @@ const io = new Server(server, {
   }
 });
 
+// 🧩 Lis itilizatè konekte yo (kenbe nan memwa)
+if (!global.connectedUsers) global.connectedUsers = [];
+
 // ✅ Lè yon itilizatè konekte
 io.on('connection', async (socket) => {
   console.log('🟢 Nouvo itilizatè konekte:', socket.id);
@@ -303,7 +306,22 @@ io.on('connection', async (socket) => {
     console.error('❌ Erè pandan chajman mesaj:', err.message);
   }
 
-  // Resevwa nouvo mesaj epi difize l bay tout moun
+  // 🟢 Resevwa non itilizatè a depi front-end lan apre "Antre nan chat"
+  socket.on('setUsername', (username) => {
+    username = username?.trim() || 'Anonyme';
+    socket.username = username;
+
+    // Ajoute itilizatè a nan lis si li pa deja la
+    if (!global.connectedUsers.includes(username)) {
+      global.connectedUsers.push(username);
+    }
+
+    // Voye lis itilizatè aktyèl yo bay tout moun
+    io.emit('updateUserList', global.connectedUsers);
+    console.log(`👤 ${username} konekte.`);
+  });
+
+  // ✅ Resevwa nouvo mesaj epi difize l bay tout moun
   socket.on('chatMessage', async (data) => {
     try {
       // Aksepte swa { username, message } oswa { user, message }
@@ -312,11 +330,7 @@ io.on('connection', async (socket) => {
       const date = data && data.date ? new Date(data.date) : new Date();
 
       // Prepare pou sove
-      const messageData = {
-        user,
-        message,
-        date
-      };
+      const messageData = { user, message, date };
 
       // Sove mesaj la nan MongoDB
       const newMsg = new Message(messageData);
@@ -333,9 +347,16 @@ io.on('connection', async (socket) => {
     }
   });
 
-  // Lè itilizatè a dekonekte
+  // 🔴 Lè itilizatè a dekonekte
   socket.on('disconnect', () => {
-    console.log('🔴 Itilizatè dekonekte:', socket.id);
+    console.log('🔴 Itilizatè dekonekte:', socket.username || socket.id);
+
+    if (socket.username) {
+      global.connectedUsers = global.connectedUsers.filter(
+        (u) => u !== socket.username
+      );
+      io.emit('updateUserList', global.connectedUsers);
+    }
   });
 });
 
