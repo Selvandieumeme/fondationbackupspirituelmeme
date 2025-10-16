@@ -40,15 +40,15 @@ sendBtn.addEventListener('click', () => {
   const user = userInput.value.trim() || 'Anonyme';
   const message = msgInput.value.trim();
   if (message) {
-    socket.emit('chatMessage', { user, message });
-    msgInput.value = '';
-  }
+    socket.emit('chatMessage', {
+  username: username,
+  message: message
 });
 
 // Lè gen nouvo mesaj soti nan lòt moun
 socket.on('chatMessage', (data) => {
-  const li = document.createElement('li');
-  li.textContent = `${data.user}: ${data.message}`;
-  messages.appendChild(li);
-  messages.scrollTop = messages.scrollHeight;
+  const { username, message, time } = data;
+  const msg = document.createElement('p');
+  msg.textContent = `${username} [${time}]: ${message}`;
+  document.getElementById('messages').appendChild(msg);
 });
