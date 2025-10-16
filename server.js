@@ -5,6 +5,7 @@ const cors = require('cors');
 const path = require('path');
 const http = require('http'); // ✅ TRÈ ENPÒTAN pou Socket.io mache
 const { Server } = require('socket.io');
+const mongoose = require('mongoose');
 
 const app = express();
 
@@ -255,63 +256,61 @@ app.get('/ping', (req, res) => res.send('pong'));
 
 
 
-// ---------------------
+// ---------------------------
 // 💬 SOCKET.IO CHAT
-// ---------------------
-import mongoose from "mongoose";
-
+// ---------------------------
 // ✅ Modèl pou sove mesaj yo nan MongoDB
 const messageSchema = new mongoose.Schema({
   user: String,
   message: String,
-  date: { type: Date, default: Date.now }
+  date: { type: Date, default: Date.now },
 });
-const Message = mongoose.model("Message", messageSchema);
+const Message = mongoose.model('Message', messageSchema);
 
 // ✅ Kreye sèvè ak Socket.io
 const server = http.createServer(app);
 const io = new Server(server, {
-  cors: { origin: "*", methods: ["GET", "POST"] }
+  cors: { origin: '*', methods: ['GET', 'POST'] },
 });
 
 // ✅ Lè yon itilizatè konekte
-io.on("connection", async (socket) => {
-  console.log("🟢 Nouvo itilizatè konekte:", socket.id);
+io.on('connection', async (socket) => {
+  console.log('🟢 Nouvo itilizatè konekte:', socket.id);
 
   // Voye dènye 100 mesaj ki deja nan baz done a bay nouvo itilizatè a
   try {
     const anciensMessages = await Message.find().sort({ date: 1 }).limit(100);
-    socket.emit("loadMessages", anciensMessages);
+    socket.emit('loadMessages', anciensMessages);
   } catch (err) {
-    console.error("❌ Erè pandan chajman mesaj:", err.message);
+    console.error('❌ Erè pandan chajman mesaj:', err.message);
   }
 
   // Resevwa nouvo mesaj epi difize l bay tout moun
-  socket.on("chatMessage", async (data) => {
+  socket.on('chatMessage', async (data) => {
     try {
       const newMsg = new Message(data);
       await newMsg.save();
-      io.emit("chatMessage", newMsg); // difize mondyalman
+      io.emit('chatMessage', newMsg); // difize mondyalman
     } catch (err) {
-      console.error("❌ Erè pandan anrejistreman mesaj:", err.message);
+      console.error('❌ Erè pandan anrejistreman mesaj:', err.message);
     }
   });
 
   // Lè itilizatè a dekonekte
-  socket.on("disconnect", () => {
-    console.log("🔴 Itilizatè dekonekte:", socket.id);
+  socket.on('disconnect', () => {
+    console.log('🔴 Itilizatè dekonekte:', socket.id);
   });
 });
 
-// ---------------------
+// ---------------------------
 // 🗂️ CHAT PAGE
-// ---------------------
-app.get("/chat", (req, res) => {
-  res.sendFile(path.join(__dirname, "Chat-Spirituel.html"));
+// ---------------------------
+app.get('/chat', (req, res) => {
+  res.sendFile(path.join(__dirname, 'Chat-Spirituel.html'));
 });
 
-// ---------------------
+// ---------------------------
 // 🚀 START SERVER
-// ---------------------
+// ---------------------------
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
