@@ -1,24 +1,5 @@
 {
-  "name": "fondation-backup-spirituel",
-  "version": "1.0.0",
-  "main": "server.js",
-  "scripts": {
-    "start": "node server.js"
-  },
-  "dependencies": {
-    "express": "^4.21.2",
-    "dotenv": "^16.5.0",
-    "cors": "^2.8.5",
-    "mongoose": "^8.6.0"
-  }
-}
-
-
-
-
-
-{
-  "name": "fondation-chat",
+  "name": "fondation-backup-spirituel-chat",
   "version": "1.0.0",
   "main": "server.js",
   "type": "module",
@@ -26,10 +7,10 @@
     "start": "node server.js"
   },
   "dependencies": {
-    "express": "^4.19.2",
-    "mongoose": "^7.8.1",
-    "socket.io": "^4.7.5",
+    "express": "^4.21.2",
+    "dotenv": "^16.5.0",
     "cors": "^2.8.5",
-    "dotenv": "^16.4.5"
+    "mongoose": "^8.6.0",
+    "socket.io": "^4.7.5"
   }
 }
