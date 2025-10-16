@@ -202,30 +202,32 @@
   const usernameInput = document.getElementById('usernameInput');
   const userInput = document.getElementById('user'); // input chat deja egziste
 
+  // Mete nickname nan localStorage lè itilizatè klike bouton "Antre nan chat"
   enterChatBtn.addEventListener('click', () => {
     const username = usernameInput.value.trim() || 'Anonyme';
     localStorage.setItem('chatUsername', username);
     userInput.value = username;
-    loginOverlay.style.display = 'none';
+    loginOverlay.style.display = 'none'; // fè overlay disparèt
   });
 
+  // Pèmèt itilizatè tape Enter pou antre nan chat
   usernameInput.addEventListener('keypress', (e) => {
     if (e.key === 'Enter') enterChatBtn.click();
   });
 
-  // --- CHAT EXISTING SCRIPT ---
+  // --- CHAT SCRIPT ORIJINAL ---
   const socket = io('https://examen-backend-ihlx.onrender.com');
   const sendBtn = document.getElementById('send');
   const msgInput = document.getElementById('msg');
   const messages = document.getElementById('messages');
 
-  // Set pou kenbe mesaj deja afiche
+  // Set pou evite mesaj doub
   const displayedMessages = new Set();
 
   function addMessage(data, isMe = false) {
     if (!data || !data.message) return;
 
-    // Kreye yon id inik pou mesaj la
+    // id inik pou chak mesaj
     const msgId = `${data.user}-${data.date}-${data.message}`;
     if (displayedMessages.has(msgId)) return; // deja afiche
     displayedMessages.add(msgId);
@@ -234,10 +236,10 @@
     const user = data.user || 'Anonyme';
     const message = data.message || '';
     const dateObj = new Date(data.date || Date.now());
-    const hours = dateObj.getHours().toString().padStart(2,'0');
-    const minutes = dateObj.getMinutes().toString().padStart(2,'0');
-    const day = dateObj.getDate().toString().padStart(2,'0');
-    const month = (dateObj.getMonth()+1).toString().padStart(2,'0');
+    const hours = dateObj.getHours().toString().padStart(2, '0');
+    const minutes = dateObj.getMinutes().toString().padStart(2, '0');
+    const day = dateObj.getDate().toString().padStart(2, '0');
+    const month = (dateObj.getMonth() + 1).toString().padStart(2, '0');
     const year = dateObj.getFullYear();
     li.textContent = `${user} [${day}/${month}/${year} ${hours}:${minutes}]: ${message}`;
 
@@ -248,7 +250,7 @@
   }
 
   sendBtn.addEventListener('click', sendMessage);
-  msgInput.addEventListener('keypress', (e) => { if(e.key==='Enter') sendMessage(); });
+  msgInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') sendMessage(); });
 
   function sendMessage() {
     const user = localStorage.getItem('chatUsername') || 'Anonyme';
@@ -257,7 +259,7 @@
 
     const data = { user, message, date: new Date() };
     socket.emit('chatMessage', data);
-    addMessage(data, true);
+    addMessage(data, true); // montre mesaj lokal la
     msgInput.value = '';
   }
 
@@ -266,7 +268,7 @@
   });
 
   socket.on('loadMessages', (messagesArray) => {
-    if(!Array.isArray(messagesArray)) return;
+    if (!Array.isArray(messagesArray)) return;
     messagesArray.forEach(msg => {
       const currentUser = localStorage.getItem('chatUsername') || 'Anonyme';
       const isMe = msg.user === currentUser;
