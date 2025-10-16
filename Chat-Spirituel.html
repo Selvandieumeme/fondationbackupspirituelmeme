@@ -4,9 +4,86 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Chat Spirituel</title>
-  <link rel="stylesheet" href="style.css">
   <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+
+  <!-- ✅ Entègasyon konplè stil la -->
+  <style>
+    body {
+      background: linear-gradient(135deg, #0057b7, #f7d600, #ffffff);
+      font-family: 'Poppins', sans-serif;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+    }
+
+    .chat-container {
+      background: white;
+      border-radius: 15px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.2);
+      width: 400px;
+      height: 600px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    h1 {
+      background-color: #0057b7;
+      color: white;
+      text-align: center;
+      padding: 15px 0;
+      font-size: 1.5em;
+    }
+
+    #messages {
+      flex: 1;
+      list-style: none;
+      padding: 10px;
+      margin: 0;
+      overflow-y: auto;
+      background-color: #f9f9f9;
+    }
+
+    #messages li {
+      background: #f7d600;
+      color: #000;
+      padding: 8px 10px;
+      border-radius: 10px;
+      margin-bottom: 8px;
+      max-width: 80%;
+    }
+
+    .input-area {
+      display: flex;
+      border-top: 2px solid #0057b7;
+    }
+
+    .input-area input {
+      flex: 1;
+      padding: 10px;
+      border: none;
+      outline: none;
+    }
+
+    #send {
+      background: #0057b7;
+      color: white;
+      border: none;
+      padding: 10px 15px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    #send:hover {
+      background: #f7d600;
+      color: black;
+    }
+  </style>
 </head>
+
 <body>
   <div class="chat-container">
     <h1>💬 Chat Spirituel</h1>
