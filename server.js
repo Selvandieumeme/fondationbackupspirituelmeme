@@ -308,7 +308,7 @@ io.on("connection", async (socket) => {
 // 🗂️ CHAT PAGE
 // ---------------------
 app.get("/chat", (req, res) => {
-  res.sendFile(path.join(__dirname, "chat.html"));
+  res.sendFile(path.join(__dirname, "Chat-Spirituel.html"));
 });
 
 // ---------------------
