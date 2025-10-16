@@ -1,86 +1,173 @@
 <!DOCTYPE html>
 <html lang="ht">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Chat Spirituel</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>💬 Chat Spirituel Mondyal</title>
   <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
   <style>
+    * {
+      box-sizing: border-box;
+    }
+
     body {
       background: linear-gradient(135deg, #0057b7, #f7d600, #ffffff);
       font-family: 'Poppins', sans-serif;
       margin: 0;
       padding: 0;
+      height: 100vh;
       display: flex;
       align-items: center;
       justify-content: center;
-      height: 100vh;
     }
-    .chat-container {
-      background: white;
-      border-radius: 15px;
-      box-shadow: 0 0 20px rgba(0,0,0,0.2);
-      width: 400px;
-      height: 600px;
+
+    .chat-wrapper {
+      width: 95%;
+      max-width: 500px;
+      height: 85vh;
+      background: #fff;
+      border-radius: 18px;
+      box-shadow: 0 5px 25px rgba(0, 0, 0, 0.3);
       display: flex;
       flex-direction: column;
       overflow: hidden;
+      animation: fadeIn 0.6s ease;
     }
-    h1 {
-      background-color: #0057b7;
-      color: white;
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(0.95); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    header {
+      background: #0057b7;
+      color: #fff;
       text-align: center;
-      padding: 15px 0;
-      font-size: 1.5em;
+      padding: 18px;
+      font-size: 1.3rem;
+      font-weight: 600;
+      letter-spacing: 0.5px;
     }
+
     #messages {
       flex: 1;
-      list-style: none;
-      padding: 10px;
+      padding: 12px;
       margin: 0;
+      list-style: none;
       overflow-y: auto;
-      background-color: #f9f9f9;
+      background: #f4f6f9;
+      scroll-behavior: smooth;
     }
+
     #messages li {
+      display: inline-block;
+      clear: both;
       background: #f7d600;
       color: #000;
-      padding: 8px 10px;
-      border-radius: 10px;
-      margin-bottom: 8px;
+      padding: 10px 14px;
+      border-radius: 12px;
+      margin-bottom: 10px;
       max-width: 80%;
+      word-wrap: break-word;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+      animation: slideUp 0.3s ease;
     }
+
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    #messages li.me {
+      background: #0057b7;
+      color: #fff;
+      align-self: flex-end;
+      float: right;
+    }
+
     .input-area {
       display: flex;
+      flex-direction: column;
       border-top: 2px solid #0057b7;
+      padding: 10px;
+      background: #fff;
     }
-    .input-area input {
+
+    .input-top {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    .input-top input {
       flex: 1;
       padding: 10px;
-      border: none;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      outline: none;
+      transition: border-color 0.3s;
+    }
+
+    .input-top input:focus {
+      border-color: #0057b7;
+    }
+
+    .input-bottom {
+      display: flex;
+      gap: 8px;
+    }
+
+    #msg {
+      flex: 1;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
       outline: none;
     }
+
     #send {
       background: #0057b7;
-      color: white;
+      color: #fff;
       border: none;
-      padding: 10px 15px;
+      border-radius: 8px;
+      padding: 10px 20px;
+      font-weight: 600;
       cursor: pointer;
-      transition: 0.3s;
+      transition: 0.3s ease;
     }
+
     #send:hover {
       background: #f7d600;
-      color: black;
+      color: #000;
+      transform: scale(1.05);
+    }
+
+    @media (max-width: 600px) {
+      header {
+        font-size: 1.1rem;
+      }
+      #send {
+        padding: 10px 15px;
+      }
+      .chat-wrapper {
+        height: 90vh;
+      }
     }
   </style>
 </head>
 <body>
-  <div class="chat-container">
-    <h1>💬 Chat Spirituel</h1>
+  <div class="chat-wrapper">
+    <header>💬 Chat Spirituel Mondyal</header>
     <ul id="messages"></ul>
     <div class="input-area">
-      <input id="user" placeholder="Non ou..." />
-      <input id="msg" placeholder="Ekri mesaj ou..." />
-      <button id="send">Voye</button>
+      <div class="input-top">
+        <input id="user" placeholder="Antre non ou (opsyonèl)..." />
+      </div>
+      <div class="input-bottom">
+        <input id="msg" placeholder="Ekri mesaj ou..." />
+        <button id="send">📨 Voye</button>
+      </div>
     </div>
   </div>
 
@@ -92,20 +179,32 @@
     const userInput = document.getElementById('user');
     const messages = document.getElementById('messages');
 
-    sendBtn.addEventListener('click', () => {
-      const user = userInput.value.trim() || 'Anonyme';
-      const message = msgInput.value.trim();
-      if (message) {
-        socket.emit('chatMessage', { user, message });
-        msgInput.value = '';
-      }
-    });
-
-    socket.on('chatMessage', (data) => {
+    function addMessage(data, isMe = false) {
       const li = document.createElement('li');
       li.textContent = `${data.user}: ${data.message}`;
+      if (isMe) li.classList.add('me');
       messages.appendChild(li);
       messages.scrollTop = messages.scrollHeight;
+    }
+
+    sendBtn.addEventListener('click', sendMessage);
+    msgInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') sendMessage();
+    });
+
+    function sendMessage() {
+      const user = userInput.value.trim() || 'Anonyme';
+      const message = msgInput.value.trim();
+      if (!message) return;
+
+      const data = { user, message };
+      socket.emit('chatMessage', data);
+      addMessage(data, true);
+      msgInput.value = '';
+    }
+
+    socket.on('chatMessage', (data) => {
+      addMessage(data);
     });
   </script>
 </body>
