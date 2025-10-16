@@ -273,14 +273,7 @@ io.on('connection', (socket) => {
 
 
 
-import path from 'path';
-import { fileURLToPath } from 'url';
-
-// Sa pèmèt Node konprann chemen dosye a
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-// ✅ Route pou sèvi paj chat la
+// Route pou sèvi paj chat la
 app.get('/chat', (req, res) => {
   res.sendFile(path.join(__dirname, 'chat.html'));
 });
