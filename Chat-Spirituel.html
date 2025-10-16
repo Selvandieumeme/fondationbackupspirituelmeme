@@ -5,8 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Chat Spirituel</title>
   <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
-
-  <!-- ✅ Entègasyon konplè stil la -->
   <style>
     body {
       background: linear-gradient(135deg, #0057b7, #f7d600, #ffffff);
@@ -18,7 +16,6 @@
       justify-content: center;
       height: 100vh;
     }
-
     .chat-container {
       background: white;
       border-radius: 15px;
@@ -29,7 +26,6 @@
       flex-direction: column;
       overflow: hidden;
     }
-
     h1 {
       background-color: #0057b7;
       color: white;
@@ -37,7 +33,6 @@
       padding: 15px 0;
       font-size: 1.5em;
     }
-
     #messages {
       flex: 1;
       list-style: none;
@@ -46,7 +41,6 @@
       overflow-y: auto;
       background-color: #f9f9f9;
     }
-
     #messages li {
       background: #f7d600;
       color: #000;
@@ -55,19 +49,16 @@
       margin-bottom: 8px;
       max-width: 80%;
     }
-
     .input-area {
       display: flex;
       border-top: 2px solid #0057b7;
     }
-
     .input-area input {
       flex: 1;
       padding: 10px;
       border: none;
       outline: none;
     }
-
     #send {
       background: #0057b7;
       color: white;
@@ -76,19 +67,16 @@
       cursor: pointer;
       transition: 0.3s;
     }
-
     #send:hover {
       background: #f7d600;
       color: black;
     }
   </style>
 </head>
-
 <body>
   <div class="chat-container">
     <h1>💬 Chat Spirituel</h1>
     <ul id="messages"></ul>
-
     <div class="input-area">
       <input id="user" placeholder="Non ou..." />
       <input id="msg" placeholder="Ekri mesaj ou..." />
@@ -96,6 +84,29 @@
     </div>
   </div>
 
-  <script src="script.js"></script>
+  <script>
+    const socket = io();
+
+    const sendBtn = document.getElementById('send');
+    const msgInput = document.getElementById('msg');
+    const userInput = document.getElementById('user');
+    const messages = document.getElementById('messages');
+
+    sendBtn.addEventListener('click', () => {
+      const user = userInput.value.trim() || 'Anonyme';
+      const message = msgInput.value.trim();
+      if (message) {
+        socket.emit('chatMessage', { user, message });
+        msgInput.value = '';
+      }
+    });
+
+    socket.on('chatMessage', (data) => {
+      const li = document.createElement('li');
+      li.textContent = `${data.user}: ${data.message}`;
+      messages.appendChild(li);
+      messages.scrollTop = messages.scrollHeight;
+    });
+  </script>
 </body>
 </html>
