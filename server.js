@@ -277,8 +277,8 @@ const io = new Server(server, {
 });
 
 // ✅ Lè yon itilizatè konekte
-io.on('connection', async (socket) => {
-  console.log('🟢 Nouvo itilizatè konekte:', socket.id);
+io.on('connection', (socket) => {
+  console.log('Nouvo itilizatè konekte.');
 
   // Voye dènye 100 mesaj ki deja nan baz done a bay nouvo itilizatè a
 try {
@@ -301,14 +301,14 @@ try {
     
   // Resevwa nouvo mesaj epi difize l bay tout moun
 socket.on('chatMessage', async (data) => {
-  try {
+    const { username, message } = data;
+    const time = new Date().toLocaleString('fr-FR', { timeZone: 'America/New_York' });
     // Asire chak chan gen valè default pou evite undefined
-    const messageData = {
-      user: data.user || 'Anonyme',
-      message: data.message || '',
-      date: data.date ? new Date(data.date) : new Date(),
-    };
-
+    const msgData = { username, message, time };
+    await ChatMessage.create(msgData);
+    io.emit('chatMessage', msgData);
+  });
+});
     const newMsg = new Message(messageData);
     await newMsg.save();
 
