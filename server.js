@@ -276,6 +276,19 @@ io.on('connection', (socket) => {
   });
 });
 
+
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+// Sa pèmèt Node konprann chemen dosye a
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// ✅ Route pou sèvi paj chat la
+app.get('/chat', (req, res) => {
+  res.sendFile(path.join(__dirname, 'chat.html'));
+});
+
 // 🚀 Kòmanse sèvè a
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
