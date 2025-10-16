@@ -168,6 +168,34 @@
     </div>
   </div>
 
+
+
+
+
+<!-- Overlay pou antre non itilizatè a -->
+<div id="loginOverlay" style="
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  color: white;
+  z-index: 1000;
+">
+  <h2>👋 Bienvenue dans le Chat Fondation Backup Spirituel Mondial</h2>
+  <p>Antre non ou (nickname) pou kontinye:</p>
+  <input type="text" id="usernameInput" placeholder="Antre non ou..." style="padding:10px; border:none; border-radius:5px; width:60%; max-width:300px;">
+  <button id="enterChatBtn" style="margin-top:10px; padding:10px 20px; border:none; border-radius:5px; background:#00aaff; color:white; cursor:pointer;">
+    Antre nan Chat
+  </button>
+</div>
+
+  
+
+
+  
   <script>
   const socket = io('https://examen-backend-ihlx.onrender.com');
 
