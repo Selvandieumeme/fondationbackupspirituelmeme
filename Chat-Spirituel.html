@@ -268,13 +268,29 @@
   });
 
   socket.on('loadMessages', (messagesArray) => {
-    if (!Array.isArray(messagesArray)) return;
-    messagesArray.forEach(msg => {
-      const currentUser = localStorage.getItem('chatUsername') || 'Anonyme';
-      const isMe = msg.user === currentUser;
-      addMessage(msg, isMe);
-    });
+  if (!Array.isArray(messagesArray)) return;
+  messagesArray.forEach(msg => {
+    const currentUser = localStorage.getItem('chatUsername') || 'Anonyme';
+    const isMe = msg.user === currentUser;
+    addMessage(msg, isMe);
   });
+});
+
+
+// --- 🧩 LIS ITILIZATÈ KONEKTE AN TAN REYÈL ---
+const usersList = document.getElementById('usersList');
+
+// Lè sèvè a voye lis itilizatè ki konekte yo
+socket.on('updateUserList', (users) => {
+  usersList.innerHTML = ''; // vide lis la pou rafrechi
+  users.forEach(u => {
+    const li = document.createElement('li');
+    li.style.padding = '4px 0';
+    li.style.borderBottom = '1px solid #ddd';
+    li.textContent = `• ${u}`;
+    usersList.appendChild(li);
+  });
+});
 </script>
 
 
