@@ -195,7 +195,7 @@
 
 
   
-  <script>
+<script>
   // --- LOGIN / NICKNAME ---
   const loginOverlay = document.getElementById('loginOverlay');
   const enterChatBtn = document.getElementById('enterChatBtn');
@@ -204,14 +204,8 @@
 
   enterChatBtn.addEventListener('click', () => {
     const username = usernameInput.value.trim() || 'Anonyme';
-
-    // Sere nickname nan localStorage
     localStorage.setItem('chatUsername', username);
-
-    // Mete non nan chat input (pou script chat ou itilize li)
     userInput.value = username;
-
-    // Fè overlay disparèt
     loginOverlay.style.display = 'none';
   });
 
@@ -225,8 +219,16 @@
   const msgInput = document.getElementById('msg');
   const messages = document.getElementById('messages');
 
+  // Set pou kenbe mesaj deja afiche
+  const displayedMessages = new Set();
+
   function addMessage(data, isMe = false) {
     if (!data || !data.message) return;
+
+    // Kreye yon id inik pou mesaj la
+    const msgId = `${data.user}-${data.date}-${data.message}`;
+    if (displayedMessages.has(msgId)) return; // deja afiche
+    displayedMessages.add(msgId);
 
     const li = document.createElement('li');
     const user = data.user || 'Anonyme';
@@ -260,11 +262,7 @@
   }
 
   socket.on('chatMessage', (data) => {
-    const currentUser = localStorage.getItem('chatUsername') || 'Anonyme';
-    if(data.user === currentUser && new Date(data.date).getTime() === new Date().getTime()){
-      return; // evite double mesaj lokal deja afiche
-    }
-    addMessage(data);
+    addMessage(data); // pa gen risk double, Set la ap jere sa
   });
 
   socket.on('loadMessages', (messagesArray) => {
