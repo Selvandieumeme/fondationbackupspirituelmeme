@@ -257,9 +257,10 @@ app.get('/ping', (req, res) => res.send('pong'));
 
 
 // ---------------------------
-// 💬 SOCKET.IO CHAT
+// 💬 SOCKET.IO CHAT (vèsyon korije)
 // ---------------------------
-// ✅ Modèl pou sove mesaj yo nan MongoDB
+
+// ✅ Modèl pou sove mesaj yo nan MongoDB (ou te deja gen schema sa a)
 const messageSchema = new mongoose.Schema({
   user: String,
   message: String,
@@ -267,7 +268,7 @@ const messageSchema = new mongoose.Schema({
 });
 const Message = mongoose.model('Message', messageSchema);
 
-// ✅ Kreye sèvè ak Socket.io
+// ✅ Kreye sèvè ak Socket.io (ou te deja gen sa)
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
@@ -277,58 +278,66 @@ const io = new Server(server, {
 });
 
 // ✅ Lè yon itilizatè konekte
-io.on('connection', (socket) => {
-  console.log('Nouvo itilizatè konekte.');
+io.on('connection', async (socket) => {
+  console.log('🟢 Nouvo itilizatè konekte:', socket.id);
 
   // Voye dènye 100 mesaj ki deja nan baz done a bay nouvo itilizatè a
-try {
-  const anciensMessages = await Message.find()
-    .sort({ date: 1 })
-    .limit(100)
-    .lean();
+  try {
+    const anciensMessages = await Message.find()
+      .sort({ date: 1 })
+      .limit(100)
+      .lean();
 
-  // Map pou asire chak chan gen valè default si undefined
-  const formattedMessages = anciensMessages.map(msg => ({
-    user: msg.user && msg.user.trim() !== '' ? msg.user : 'Anonyme',
-    message: msg.message || '',
-    date: msg.date ? new Date(msg.date) : new Date()
-  }));
+    // Map pou asire chak chan gen valè default si undefined
+    const formattedMessages = anciensMessages.map(msg => ({
+      // sipòte tou swa 'user' oswa 'username' si genyen
+      user: (msg.user && msg.user.trim() !== '') ? msg.user
+           : (msg.username && msg.username.trim() !== '') ? msg.username
+           : 'Anonyme',
+      message: msg.message || '',
+      date: msg.date ? new Date(msg.date) : new Date()
+    }));
 
-  socket.emit('loadMessages', formattedMessages);
-} catch (err) {
-  console.error('❌ Erè pandan chajman mesaj:', err.message);
-}
-    
-  // Resevwa nouvo mesaj epi difize l bay tout moun
-socket.on('chatMessage', async (data) => {
-    const { username, message } = data;
-    const time = new Date().toLocaleString('fr-FR', { timeZone: 'America/New_York' });
-    // Asire chak chan gen valè default pou evite undefined
-    const msgData = { username, message, time };
-    await ChatMessage.create(msgData);
-    io.emit('chatMessage', msgData);
-  });
-});
-    const newMsg = new Message(messageData);
-    await newMsg.save();
-
-    // Voye mesaj ki sòti nan DB kòm objè senp pou front-end ka itilize dat
-    io.emit('chatMessage', {
-      user: newMsg.user,
-      message: newMsg.message,
-      date: newMsg.date,
-    });
+    socket.emit('loadMessages', formattedMessages);
   } catch (err) {
-    console.error('❌ Erè pandan anrejistreman mesaj:', err.message);
+    console.error('❌ Erè pandan chajman mesaj:', err.message);
   }
-});
+
+  // Resevwa nouvo mesaj epi difize l bay tout moun
+  socket.on('chatMessage', async (data) => {
+    try {
+      // Aksepte swa { username, message } oswa { user, message }
+      const user = (data && (data.username || data.user)) ? (data.username || data.user) : 'Anonyme';
+      const message = (data && data.message) ? data.message : '';
+      const date = data && data.date ? new Date(data.date) : new Date();
+
+      // Prepare pou sove
+      const messageData = {
+        user,
+        message,
+        date
+      };
+
+      // Sove mesaj la nan MongoDB
+      const newMsg = new Message(messageData);
+      await newMsg.save();
+
+      // Voye mesaj ki sòti nan DB kòm objè senp pou front-end ka itilize dat
+      io.emit('chatMessage', {
+        user: newMsg.user,
+        message: newMsg.message,
+        date: newMsg.date
+      });
+    } catch (err) {
+      console.error('❌ Erè pandan anrejistreman mesaj:', err.message);
+    }
+  });
 
   // Lè itilizatè a dekonekte
   socket.on('disconnect', () => {
     console.log('🔴 Itilizatè dekonekte:', socket.id);
   });
 });
-
 
 // ---------------------------
 // 🗂️ CHAT PAGE
@@ -342,3 +351,5 @@ app.get('/Chat-Spirituel.html', (req, res) => {
 // ---------------------------
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+
+
