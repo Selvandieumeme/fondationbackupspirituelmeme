@@ -169,63 +169,72 @@
   </div>
 
   <script>
-    const socket = io();
+  const socket = io();
 
-    const sendBtn = document.getElementById('send');
-    const msgInput = document.getElementById('msg');
-    const userInput = document.getElementById('user');
-    const messages = document.getElementById('messages');
+  const sendBtn = document.getElementById('send');
+  const msgInput = document.getElementById('msg');
+  const userInput = document.getElementById('user');
+  const messages = document.getElementById('messages');
 
-    // Fonkksyon pou ajoute mesaj nan lis la ak dat
-    function addMessage(data, isMe = false) {
-      const li = document.createElement('li');
+  // Fonkksyon pou ajoute mesaj nan lis la ak dat
+  function addMessage(data, isMe = false) {
+    if (!data || !data.message) return; // evite mesaj vid
 
-      // Konvèti jaden date a an objè Date
-      const date = new Date(data.date || Date.now());
-      const hours = date.getHours().toString().padStart(2, '0');
-      const minutes = date.getMinutes().toString().padStart(2, '0');
-      const day = date.getDate().toString().padStart(2, '0');
-      const month = (date.getMonth() + 1).toString().padStart(2, '0');
-      const year = date.getFullYear();
+    const li = document.createElement('li');
 
-      // Ajoute dat ak lè nan mesaj la
-      li.textContent = `${data.user} [${day}/${month}/${year} ${hours}:${minutes}]: ${data.message}`;
+    const user = data.user || 'Anonyme';
+    const message = data.message || '';
+    const dateObj = new Date(data.date || Date.now());
 
-      if (isMe) li.classList.add('me');
-      messages.appendChild(li);
-      messages.scrollTop = messages.scrollHeight; // scroll otomatik
-      li.scrollIntoView({ behavior: 'smooth', block: 'end' }); // smooth scroll
+    const hours = dateObj.getHours().toString().padStart(2, '0');
+    const minutes = dateObj.getMinutes().toString().padStart(2, '0');
+    const day = dateObj.getDate().toString().padStart(2, '0');
+    const month = (dateObj.getMonth() + 1).toString().padStart(2, '0');
+    const year = dateObj.getFullYear();
+
+    li.textContent = `${user} [${day}/${month}/${year} ${hours}:${minutes}]: ${message}`;
+
+    if (isMe) li.classList.add('me');
+    messages.appendChild(li);
+    messages.scrollTop = messages.scrollHeight;
+    li.scrollIntoView({ behavior: 'smooth', block: 'end' });
+  }
+
+  // Voye mesaj lè itilizatè klike oswa tape Enter
+  sendBtn.addEventListener('click', sendMessage);
+  msgInput.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') sendMessage();
+  });
+
+  function sendMessage() {
+    const user = userInput.value.trim() || 'Anonyme';
+    const message = msgInput.value.trim();
+    if (!message) return;
+
+    const data = { user, message, date: new Date() };
+    socket.emit('chatMessage', data);
+    addMessage(data, true); // montre mesaj lokal la
+    msgInput.value = '';
+  }
+
+  // Resevwa nouvo mesaj nan mond lan
+  socket.on('chatMessage', (data) => {
+    const currentUser = userInput.value.trim() || 'Anonyme';
+    if (data.user === currentUser && new Date(data.date).getTime() === new Date().getTime()) {
+      return; // evite double mesaj lokal deja afiche
     }
+    addMessage(data);
+  });
 
-    // Voye mesaj lè itilizatè klike oswa tape Enter
-    sendBtn.addEventListener('click', sendMessage);
-    msgInput.addEventListener('keypress', (e) => {
-      if (e.key === 'Enter') sendMessage();
+  // Chaje mesaj ki deja nan DB lè nouvo itilizatè konekte
+  socket.on('loadMessages', (messagesArray) => {
+    if (!Array.isArray(messagesArray)) return;
+    messagesArray.forEach(msg => {
+      const currentUser = userInput.value.trim() || 'Anonyme';
+      const isMe = msg.user === currentUser;
+      addMessage(msg, isMe);
     });
-
-    function sendMessage() {
-      const user = userInput.value.trim() || 'Anonyme';
-      const message = msgInput.value.trim();
-      if (!message) return;
-
-      const data = { user, message, date: new Date() };
-      socket.emit('chatMessage', data);
-      addMessage(data, true);
-      msgInput.value = '';
-    }
-
-    // Resevwa nouvo mesaj nan mond lan
-    socket.on('chatMessage', (data) => {
-      addMessage(data);
-    });
-
-    // Chaje mesaj ki deja nan DB lè nouvo itilizatè konekte
-    socket.on('loadMessages', (messagesArray) => {
-      messagesArray.forEach(msg => {
-        const isMe = msg.user === (userInput.value.trim() || 'Anonyme');
-        addMessage(msg, isMe);
-      });
-    });
-  </script>
+  });
+</script>
 </body>
 </html>
