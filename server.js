@@ -249,32 +249,28 @@ app.post('/api/verify-subject', (req, res) => {
 // ping
 app.get('/ping', (req, res) => res.send('pong'));
 
-// -------------------------
-// ⚡ SOCKET.IO CHAT INTEGRATION
-// -------------------------
-const http = require('http');
-const { Server } = require('socket.io');
+
+
+import http from 'http';
+import { Server } from 'socket.io';
 
 const server = http.createServer(app);
 const io = new Server(server, {
-  cors: {
-    origin: '*',
-    methods: ['GET', 'POST']
-  }
+  cors: { origin: '*', methods: ['GET', 'POST'] }
 });
 
 io.on('connection', (socket) => {
-  console.log('🟢 Yon nouvo itilizatè konekte');
+  console.log('🟢 Nouvo itilizatè konekte');
 
-  // Lè yon itilizatè voye mesaj
   socket.on('chatMessage', (data) => {
-    io.emit('chatMessage', data); // voye mesaj bay tout moun
+    io.emit('chatMessage', data);
   });
 
   socket.on('disconnect', () => {
     console.log('🔴 Itilizatè dekonekte');
   });
 });
+
 
 
 import path from 'path';
