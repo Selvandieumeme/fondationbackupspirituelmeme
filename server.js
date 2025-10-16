@@ -254,31 +254,61 @@ app.get('/ping', (req, res) => res.send('pong'));
 
 
 
+
+
 // ---------------------
 // 💬 SOCKET.IO CHAT
 // ---------------------
+import mongoose from "mongoose";
+
+// ✅ Modèl pou sove mesaj yo nan MongoDB
+const messageSchema = new mongoose.Schema({
+  user: String,
+  message: String,
+  date: { type: Date, default: Date.now }
+});
+const Message = mongoose.model("Message", messageSchema);
+
+// ✅ Kreye sèvè ak Socket.io
 const server = http.createServer(app);
 const io = new Server(server, {
-  cors: { origin: '*', methods: ['GET', 'POST'] }
+  cors: { origin: "*", methods: ["GET", "POST"] }
 });
 
-io.on('connection', (socket) => {
-  console.log('🟢 Nouvo itilizatè konekte');
+// ✅ Lè yon itilizatè konekte
+io.on("connection", async (socket) => {
+  console.log("🟢 Nouvo itilizatè konekte:", socket.id);
 
-  socket.on('chatMessage', (data) => {
-    io.emit('chatMessage', data);
+  // Voye dènye 100 mesaj ki deja nan baz done a bay nouvo itilizatè a
+  try {
+    const anciensMessages = await Message.find().sort({ date: 1 }).limit(100);
+    socket.emit("loadMessages", anciensMessages);
+  } catch (err) {
+    console.error("❌ Erè pandan chajman mesaj:", err.message);
+  }
+
+  // Resevwa nouvo mesaj epi difize l bay tout moun
+  socket.on("chatMessage", async (data) => {
+    try {
+      const newMsg = new Message(data);
+      await newMsg.save();
+      io.emit("chatMessage", newMsg); // difize mondyalman
+    } catch (err) {
+      console.error("❌ Erè pandan anrejistreman mesaj:", err.message);
+    }
   });
 
-  socket.on('disconnect', () => {
-    console.log('🔴 Itilizatè dekonekte');
+  // Lè itilizatè a dekonekte
+  socket.on("disconnect", () => {
+    console.log("🔴 Itilizatè dekonekte:", socket.id);
   });
 });
 
 // ---------------------
 // 🗂️ CHAT PAGE
 // ---------------------
-app.get('/chat', (req, res) => {
-  res.sendFile(path.join(__dirname, 'chat.html'));
+app.get("/chat", (req, res) => {
+  res.sendFile(path.join(__dirname, "chat.html"));
 });
 
 // ---------------------
