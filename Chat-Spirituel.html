@@ -195,31 +195,48 @@
 
 
   
-  
   <script>
-  const socket = io('https://examen-backend-ihlx.onrender.com');
+  // --- LOGIN / NICKNAME ---
+  const loginOverlay = document.getElementById('loginOverlay');
+  const enterChatBtn = document.getElementById('enterChatBtn');
+  const usernameInput = document.getElementById('usernameInput');
+  const userInput = document.getElementById('user'); // input chat deja egziste
 
+  enterChatBtn.addEventListener('click', () => {
+    const username = usernameInput.value.trim() || 'Anonyme';
+
+    // Sere nickname nan localStorage
+    localStorage.setItem('chatUsername', username);
+
+    // Mete non nan chat input (pou script chat ou itilize li)
+    userInput.value = username;
+
+    // Fè overlay disparèt
+    loginOverlay.style.display = 'none';
+  });
+
+  usernameInput.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') enterChatBtn.click();
+  });
+
+  // --- CHAT EXISTING SCRIPT ---
+  const socket = io('https://examen-backend-ihlx.onrender.com');
   const sendBtn = document.getElementById('send');
   const msgInput = document.getElementById('msg');
-  const userInput = document.getElementById('user');
   const messages = document.getElementById('messages');
 
-  // Fonkksyon pou ajoute mesaj nan lis la ak dat
   function addMessage(data, isMe = false) {
-    if (!data || !data.message) return; // evite mesaj vid
+    if (!data || !data.message) return;
 
     const li = document.createElement('li');
-
     const user = data.user || 'Anonyme';
     const message = data.message || '';
     const dateObj = new Date(data.date || Date.now());
-
-    const hours = dateObj.getHours().toString().padStart(2, '0');
-    const minutes = dateObj.getMinutes().toString().padStart(2, '0');
-    const day = dateObj.getDate().toString().padStart(2, '0');
-    const month = (dateObj.getMonth() + 1).toString().padStart(2, '0');
+    const hours = dateObj.getHours().toString().padStart(2,'0');
+    const minutes = dateObj.getMinutes().toString().padStart(2,'0');
+    const day = dateObj.getDate().toString().padStart(2,'0');
+    const month = (dateObj.getMonth()+1).toString().padStart(2,'0');
     const year = dateObj.getFullYear();
-
     li.textContent = `${user} [${day}/${month}/${year} ${hours}:${minutes}]: ${message}`;
 
     if (isMe) li.classList.add('me');
@@ -228,37 +245,32 @@
     li.scrollIntoView({ behavior: 'smooth', block: 'end' });
   }
 
-  // Voye mesaj lè itilizatè klike oswa tape Enter
   sendBtn.addEventListener('click', sendMessage);
-  msgInput.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') sendMessage();
-  });
+  msgInput.addEventListener('keypress', (e) => { if(e.key==='Enter') sendMessage(); });
 
   function sendMessage() {
-    const user = userInput.value.trim() || 'Anonyme';
+    const user = localStorage.getItem('chatUsername') || 'Anonyme';
     const message = msgInput.value.trim();
     if (!message) return;
 
     const data = { user, message, date: new Date() };
     socket.emit('chatMessage', data);
-    addMessage(data, true); // montre mesaj lokal la
+    addMessage(data, true);
     msgInput.value = '';
   }
 
-  // Resevwa nouvo mesaj nan mond lan
   socket.on('chatMessage', (data) => {
-    const currentUser = userInput.value.trim() || 'Anonyme';
-    if (data.user === currentUser && new Date(data.date).getTime() === new Date().getTime()) {
+    const currentUser = localStorage.getItem('chatUsername') || 'Anonyme';
+    if(data.user === currentUser && new Date(data.date).getTime() === new Date().getTime()){
       return; // evite double mesaj lokal deja afiche
     }
     addMessage(data);
   });
 
-  // Chaje mesaj ki deja nan DB lè nouvo itilizatè konekte
   socket.on('loadMessages', (messagesArray) => {
-    if (!Array.isArray(messagesArray)) return;
+    if(!Array.isArray(messagesArray)) return;
     messagesArray.forEach(msg => {
-      const currentUser = userInput.value.trim() || 'Anonyme';
+      const currentUser = localStorage.getItem('chatUsername') || 'Anonyme';
       const isMe = msg.user === currentUser;
       addMessage(msg, isMe);
     });
