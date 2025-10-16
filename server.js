@@ -5,7 +5,6 @@ const cors = require('cors');
 const path = require('path');
 const http = require('http'); // ✅ TRÈ ENPÒTAN pou Socket.io mache
 const { Server } = require('socket.io');
-const mongoose = require('mongoose');
 
 const app = express();
 
