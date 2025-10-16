@@ -321,6 +321,14 @@ io.on('connection', async (socket) => {
     console.log(`👤 ${username} konekte.`);
   });
 
+
+ // Lè itilizatè a voye non li
+  socket.on('setUsername', (username) => {
+    connectedUsers[socket.id] = username || 'Anonyme';
+    io.emit('updateUserList', Object.values(connectedUsers)); // voye lis la bay tout moun
+  });
+  
+
   // ✅ Resevwa nouvo mesaj epi difize l bay tout moun
   socket.on('chatMessage', async (data) => {
     try {
