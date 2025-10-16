@@ -278,23 +278,47 @@ io.on('connection', async (socket) => {
   console.log('🟢 Nouvo itilizatè konekte:', socket.id);
 
   // Voye dènye 100 mesaj ki deja nan baz done a bay nouvo itilizatè a
-  try {
-    const anciensMessages = await Message.find().sort({ date: 1 }).limit(100);
-    socket.emit('loadMessages', anciensMessages);
-  } catch (err) {
-    console.error('❌ Erè pandan chajman mesaj:', err.message);
-  }
+try {
+  const anciensMessages = await Message.find()
+    .sort({ date: 1 })
+    .limit(100)
+    .lean();
 
+  // Map pou asire chak chan gen valè default si undefined
+  const formattedMessages = anciensMessages.map(msg => ({
+    user: msg.user && msg.user.trim() !== '' ? msg.user : 'Anonyme',
+    message: msg.message || '',
+    date: msg.date ? new Date(msg.date) : new Date()
+  }));
+
+  socket.emit('loadMessages', formattedMessages);
+} catch (err) {
+  console.error('❌ Erè pandan chajman mesaj:', err.message);
+}
+    
   // Resevwa nouvo mesaj epi difize l bay tout moun
-  socket.on('chatMessage', async (data) => {
-    try {
-      const newMsg = new Message(data);
-      await newMsg.save();
-      io.emit('chatMessage', newMsg); // difize mondyalman
-    } catch (err) {
-      console.error('❌ Erè pandan anrejistreman mesaj:', err.message);
-    }
-  });
+socket.on('chatMessage', async (data) => {
+  try {
+    // Asire chak chan gen valè default pou evite undefined
+    const messageData = {
+      user: data.user || 'Anonyme',
+      message: data.message || '',
+      date: data.date ? new Date(data.date) : new Date(),
+    };
+
+    const newMsg = new Message(messageData);
+    await newMsg.save();
+
+    // Voye mesaj ki sòti nan DB kòm objè senp pou front-end ka itilize dat
+    io.emit('chatMessage', {
+      user: newMsg.user,
+      message: newMsg.message,
+      date: newMsg.date,
+    });
+  } catch (err) {
+    console.error('❌ Erè pandan anrejistreman mesaj:', err.message);
+  }
+});
 
   // Lè itilizatè a dekonekte
   socket.on('disconnect', () => {
