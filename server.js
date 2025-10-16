@@ -270,7 +270,10 @@ const Message = mongoose.model('Message', messageSchema);
 // ✅ Kreye sèvè ak Socket.io
 const server = http.createServer(app);
 const io = new Server(server, {
-  cors: { origin: '*', methods: ['GET', 'POST'] },
+  cors: {
+    origin: ['*', 'https://www.fondationbackupspirituel.com'],
+    methods: ['GET', 'POST']
+  }
 });
 
 // ✅ Lè yon itilizatè konekte
