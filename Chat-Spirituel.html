@@ -7,9 +7,7 @@
   <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
   <style>
-    * {
-      box-sizing: border-box;
-    }
+    * { box-sizing: border-box; }
 
     body {
       background: linear-gradient(135deg, #0057b7, #f7d600, #ffffff);
@@ -144,15 +142,14 @@
     }
 
     @media (max-width: 600px) {
-      header {
-        font-size: 1.1rem;
-      }
-      #send {
-        padding: 10px 15px;
-      }
-      .chat-wrapper {
-        height: 90vh;
-      }
+      header { font-size: 1.1rem; }
+      #send { padding: 10px 15px; }
+      .chat-wrapper { height: 90vh; }
+    }
+
+    @media (max-width: 400px) {
+      .chat-wrapper { width: 98%; height: 95vh; }
+      #msg, #user { font-size: 0.9rem; }
     }
   </style>
 </head>
@@ -179,14 +176,17 @@
     const userInput = document.getElementById('user');
     const messages = document.getElementById('messages');
 
+    // Fonkksyon pou ajoute mesaj nan lis la
     function addMessage(data, isMe = false) {
       const li = document.createElement('li');
       li.textContent = `${data.user}: ${data.message}`;
       if (isMe) li.classList.add('me');
       messages.appendChild(li);
-      messages.scrollTop = messages.scrollHeight;
+      messages.scrollTop = messages.scrollHeight; // scroll otomatik
+      li.scrollIntoView({ behavior: 'smooth', block: 'end' }); // smooth scroll
     }
 
+    // Voye mesaj lè itilizatè klike oswa tape Enter
     sendBtn.addEventListener('click', sendMessage);
     msgInput.addEventListener('keypress', (e) => {
       if (e.key === 'Enter') sendMessage();
@@ -203,8 +203,17 @@
       msgInput.value = '';
     }
 
+    // Resevwa nouvo mesaj nan mond lan
     socket.on('chatMessage', (data) => {
       addMessage(data);
+    });
+
+    // Chaje mesaj ki deja nan DB lè nouvo itilizatè konekte
+    socket.on('loadMessages', (messagesArray) => {
+      messagesArray.forEach(msg => {
+        const isMe = msg.user === (userInput.value.trim() || 'Anonyme');
+        addMessage(msg, isMe);
+      });
     });
   </script>
 </body>
