@@ -326,10 +326,11 @@ socket.on('chatMessage', async (data) => {
   });
 });
 
+
 // ---------------------------
 // 🗂️ CHAT PAGE
 // ---------------------------
-app.get('/chat', (req, res) => {
+app.get('/Chat-Spirituel.html', (req, res) => {
   res.sendFile(path.join(__dirname, 'Chat-Spirituel.html'));
 });
 
