@@ -249,6 +249,33 @@ app.post('/api/verify-subject', (req, res) => {
 // ping
 app.get('/ping', (req, res) => res.send('pong'));
 
-// start server
+// -------------------------
+// ⚡ SOCKET.IO CHAT INTEGRATION
+// -------------------------
+const http = require('http');
+const { Server } = require('socket.io');
+
+const server = http.createServer(app);
+const io = new Server(server, {
+  cors: {
+    origin: '*',
+    methods: ['GET', 'POST']
+  }
+});
+
+io.on('connection', (socket) => {
+  console.log('🟢 Yon nouvo itilizatè konekte');
+
+  // Lè yon itilizatè voye mesaj
+  socket.on('chatMessage', (data) => {
+    io.emit('chatMessage', data); // voye mesaj bay tout moun
+  });
+
+  socket.on('disconnect', () => {
+    console.log('🔴 Itilizatè dekonekte');
+  });
+});
+
+// 🚀 Kòmanse sèvè a
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+server.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
