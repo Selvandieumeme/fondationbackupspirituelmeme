@@ -12,3 +12,24 @@
     "mongoose": "^8.6.0"
   }
 }
+
+
+
+
+
+{
+  "name": "fondation-chat",
+  "version": "1.0.0",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "mongoose": "^7.8.1",
+    "socket.io": "^4.7.5",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5"
+  }
+}
