@@ -1,31 +1,36 @@
-// script.js
+// =======================
+// ✅ script.js FINAL KOREKTE
+// =======================
 
-// ✅ 1. Rekipere non itilizatè a depi nan localStorage
+// 1️⃣ — Rekipere non itilizatè a depi nan localStorage
 let user = localStorage.getItem('user');
 
-// ✅ 2. Konekte ak Socket.io
-const socket = io();
+// 2️⃣ — Konekte ak Socket.io
+const socket = io('https://examen-backend-ihlx.onrender.com');
 
-// ✅ 3. Lè paj la chaje, montre oswa kache overlay login lan
+// 3️⃣ — Lè paj la chaje
 window.addEventListener('load', () => {
   if (!user) {
     document.getElementById('loginOverlay').style.display = 'flex';
   } else {
     document.getElementById('loginOverlay').style.display = 'none';
 
-    // ✅ Voye non itilizatè a bay server pou panel itilizatè yo
+    // ✅ Voye non itilizatè a bay server
     if (socket && socket.connected) {
-      socket.emit('setUser', user);
+      socket.emit('setUsername', user);
+    } else {
+      socket.on('connect', () => socket.emit('setUsername', user));
     }
   }
 });
 
-// ✅ 4. Rekipere eleman HTML yo
+// 4️⃣ — Eleman HTML prensipal yo
 const sendBtn = document.getElementById('send');
 const msgInput = document.getElementById('msg');
 const messages = document.getElementById('messages');
+const userList = document.getElementById('userList'); // ti kadran itilizatè yo
 
-// ✅ 5. Fonkksyon pou ajoute mesaj nan lis la ak dat
+// 5️⃣ — Fonkksyon pou ajoute mesaj
 function addMessage(data, isMe = false) {
   if (!data || !data.message) return;
   const li = document.createElement('li');
@@ -37,22 +42,31 @@ function addMessage(data, isMe = false) {
   if (isMe) li.classList.add('me');
   messages.appendChild(li);
   messages.scrollTop = messages.scrollHeight;
-  li.scrollIntoView({ behavior: 'smooth', block: 'end' });
 }
 
-// ✅ 6. Voye mesaj lè itilizatè klike oswa tape Enter
+// 6️⃣ — Fonkksyon pou mete lis itilizatè yo (ti kadran)
+function renderUsers(arr) {
+  if (!Array.isArray(arr)) return;
+  userList.innerHTML = ''; // vide avan
+  arr.forEach(u => {
+    const li = document.createElement('li');
+    li.textContent = u;
+    userList.appendChild(li);
+  });
+}
+
+// 7️⃣ — Voye mesaj
 function sendMessage() {
   const message = msgInput.value.trim();
   if (!message) return;
 
-  // ✅ Voye non itilizatè a anvan premye mesaj si li poko voye
   if (socket && socket.connected) {
-    socket.emit('setUser', user);
+    socket.emit('setUsername', user);
   }
 
   const data = { user, message, date: new Date() };
   socket.emit('chatMessage', data);
-  addMessage(data, true); // montre mesaj lokal la
+  addMessage(data, true);
   msgInput.value = '';
 }
 
@@ -61,20 +75,32 @@ msgInput.addEventListener('keypress', (e) => {
   if (e.key === 'Enter') sendMessage();
 });
 
-// ✅ 7. Resevwa nouvo mesaj soti nan server la
+// 8️⃣ — Resevwa nouvo mesaj
 socket.on('chatMessage', (data) => {
-  // evite double mesaj lokal deja afiche
   if (data.user === user && new Date(data.date).getTime() === new Date().getTime()) {
     return;
   }
   addMessage(data);
 });
 
-// ✅ 8. Chaje mesaj ki deja nan DB lè nouvo itilizatè konekte
+// 9️⃣ — Chaje ansyen mesaj
 socket.on('loadMessages', (messagesArray) => {
   if (!Array.isArray(messagesArray)) return;
   messagesArray.forEach(msg => {
     const isMe = msg.user === user;
     addMessage(msg, isMe);
   });
+});
+
+// 🔟 — 📡 Evènman pou lis itilizatè yo
+socket.on('updateUserList', (arr) => {
+  renderUsers(arr);
+});
+
+socket.on('userConnected', (username) => {
+  console.log('🟢 Itilizatè konekte:', username);
+});
+
+socket.on('userDisconnected', (username) => {
+  console.log('🔴 Itilizatè dekonekte:', username);
 });
