@@ -365,28 +365,27 @@ socket.on('loadMessages', (messagesArray) => {
   });
 
   // Single user connected
-  sock.on('userConnected', (username) => {
-    if (!username) return;
-    if (!users.includes(username)) users.push(username);
+  sock.on('userConnected', (user) => {
+    if (!user) return;
+    if (!users.includes(user)) users.push(user);
     renderUsers();
-    addLog(`👤 ${username} konekte`);
-    flash(username, true);
+    addLog(`👤 ${user} konekte`);
+    flash(user, true);
   });
 
   // Single user disconnected
-  sock.on('userDisconnected', (username) => {
-    if (!username) return;
+  sock.on('userDisconnected', (user) => {
+    if (!user) return;
     // retire non la nan lis (si ou pito kenbe yo e make offline, modifye isit)
-    users = users.filter(u => u !== username);
+    users = users.filter(u => u !== user);
     renderUsers();
-    addLog(`🔴 ${username} dekonekte`);
-    flash(username, false);
+    addLog(`🔴 ${user} dekonekte`);
+    flash(user, false);
   });
 
   // Try to request list on connect
   sock.on('connect', () => {
     addLog('Panel konekte ak sèvè.');
-    // request list (server should handle or ignore)
     sock.emit('requestUserList');
   });
 
@@ -395,9 +394,9 @@ socket.on('loadMessages', (messagesArray) => {
   });
 
   // flash effect
-  function flash(username, online) {
+  function flash(user, online) {
     const items = Array.from(usersEl.children);
-    const item = items.find(li => li.querySelector('.fbsp-name')?.textContent === username);
+    const item = items.find(li => li.querySelector('.fbsp-name')?.textContent === user);
     if (!item) return;
     item.style.background = online ? 'rgba(36,195,106,0.12)' : 'rgba(255,71,87,0.06)';
     setTimeout(() => item.style.background = '', 900);
@@ -424,6 +423,7 @@ socket.on('loadMessages', (messagesArray) => {
 <!-- ===========================
      END INDEPENDANT USER LIST PANEL
      =========================== -->
+
 
   
   
