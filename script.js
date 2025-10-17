@@ -1,4 +1,5 @@
 // script.js
+
 let username = localStorage.getItem('username');
 
 // Si itilizatè a poko gen non, montre overlay la
@@ -19,14 +20,14 @@ document.getElementById('enterChatBtn').addEventListener('click', () => {
     username = name;
     localStorage.setItem('username', name);
     document.getElementById('loginOverlay').style.display = 'none';
+    socket.emit('setUsername', username); // ✅ Nouvo pati enpòtan pou lis itilizatè yo
   } else {
     alert('Tanpri antre yon non avan ou antre nan chat la.');
   }
 });
 
 
-
-
+// ✅ Konekte ak Socket.io
 const socket = io();
 
 // Rekipere eleman yo
@@ -35,20 +36,44 @@ const msgInput = document.getElementById('msg');
 const userInput = document.getElementById('user');
 const messages = document.getElementById('messages');
 
-// Lè moun voye mesaj
+// ✅ Lè itilizatè a deja gen non nan localStorage, voye li sou sèvè
+if (username) {
+  socket.emit('setUsername', username);
+}
+
+// ✅ Lè moun voye mesaj
 sendBtn.addEventListener('click', () => {
-  const user = userInput.value.trim() || 'Anonyme';
   const message = msgInput.value.trim();
   if (message) {
     socket.emit('chatMessage', {
-  username: username,
-  message: message
+      username: username || 'Anonyme',
+      message: message
+    });
+    msgInput.value = '';
+  }
 });
 
-// Lè gen nouvo mesaj soti nan lòt moun
+// ✅ Resevwa nouvo mesaj soti nan sèvè
 socket.on('chatMessage', (data) => {
-  const { username, message, time } = data;
+  const { user, username, message, date } = data;
+  const sender = username || user || 'Anonyme';
+  const time = date ? new Date(date).toLocaleTimeString() : '';
   const msg = document.createElement('p');
-  msg.textContent = `${username} [${time}]: ${message}`;
-  document.getElementById('messages').appendChild(msg);
+  msg.textContent = `${sender} [${time}]: ${message}`;
+  messages.appendChild(msg);
+  messages.scrollTop = messages.scrollHeight;
+});
+
+
+// ✅ Resevwa lis itilizatè konekte yo (kadran dwat la)
+socket.on('updateUserList', (users) => {
+  const usersList = document.getElementById('usersList');
+  if (!usersList) return;
+  usersList.innerHTML = '';
+  users.forEach(u => {
+    const li = document.createElement('li');
+    li.textContent = `• ${u}`;
+    li.style.padding = '3px 0';
+    usersList.appendChild(li);
+  });
 });
