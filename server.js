@@ -261,13 +261,14 @@ app.get('/ping', (req, res) => res.send('pong'));
 
 
 // ---------------------------
-// 💬 SOCKET.IO CHAT
+// 💬 SOCKET.IO CHAT — VÈSYON FINAL KORIJE
 // ---------------------------
+
 // ✅ Modèl pou sove mesaj yo nan MongoDB
 const messageSchema = new mongoose.Schema({
-  user: String,
-  message: String,
-  date: { type: Date, default: Date.now },
+  user: { type: String, default: 'Anonyme' },
+  message: { type: String, required: true },
+  date: { type: Date, default: Date.now }
 });
 const Message = mongoose.model('Message', messageSchema);
 
@@ -281,58 +282,56 @@ const io = new Server(server, {
 });
 
 // ✅ Lè yon itilizatè konekte
-io.on('connection', (socket) => {
-  console.log('Nouvo itilizatè konekte.');
+io.on('connection', async (socket) => {
+  console.log('🟢 Nouvo itilizatè konekte:', socket.id);
 
-  // Voye dènye 100 mesaj ki deja nan baz done a bay nouvo itilizatè a
-try {
-  const anciensMessages = await Message.find()
-    .sort({ date: 1 })
-    .limit(100)
-    .lean();
+  // ✅ Chaje 100 dènye mesaj ki nan baz done a
+  try {
+    const anciensMessages = await Message.find().sort({ date: 1 }).limit(100).lean();
 
-  // Map pou asire chak chan gen valè default si undefined
-  const formattedMessages = anciensMessages.map(msg => ({
-    user: msg.user && msg.user.trim() !== '' ? msg.user : 'Anonyme',
-    message: msg.message || '',
-    date: msg.date ? new Date(msg.date) : new Date()
-  }));
+    const formattedMessages = anciensMessages.map(msg => ({
+      user: msg.user?.trim() || 'Anonyme',
+      message: msg.message || '',
+      date: msg.date ? new Date(msg.date) : new Date()
+    }));
 
-  socket.emit('loadMessages', formattedMessages);
-} catch (err) {
-  console.error('❌ Erè pandan chajman mesaj:', err.message);
-}
-    
-  // Resevwa nouvo mesaj epi difize l bay tout moun
-socket.on('chatMessage', async (data) => {
-    const { username, message } = data;
-    const time = new Date().toLocaleString('fr-FR', { timeZone: 'America/New_York' });
-    // Asire chak chan gen valè default pou evite undefined
-    const msgData = { username, message, time };
-    await ChatMessage.create(msgData);
-    io.emit('chatMessage', msgData);
-  });
-});
-    const newMsg = new Message(messageData);
-    await newMsg.save();
-
-    // Voye mesaj ki sòti nan DB kòm objè senp pou front-end ka itilize dat
-    io.emit('chatMessage', {
-      user: newMsg.user,
-      message: newMsg.message,
-      date: newMsg.date,
-    });
+    // ✅ Voye yo bay nouvo itilizatè a sèlman
+    socket.emit('loadMessages', formattedMessages);
   } catch (err) {
-    console.error('❌ Erè pandan anrejistreman mesaj:', err.message);
+    console.error('❌ Erè pandan chajman mesaj:', err.message);
   }
-});
 
-  // Lè itilizatè a dekonekte
+  // ✅ Resevwa nouvo mesaj epi anrejistre l
+  socket.on('chatMessage', async (data) => {
+    try {
+      const username = data.user?.trim() || 'Anonyme';
+      const message = data.message?.trim();
+
+      if (!message) return; // evite mesaj vid
+
+      // ✅ Sove nan MongoDB
+      const newMsg = new Message({ user: username, message });
+      await newMsg.save();
+
+      // ✅ Fòmate dat la pou voye tounen
+      const formatted = {
+        user: newMsg.user,
+        message: newMsg.message,
+        date: newMsg.date
+      };
+
+      // ✅ Difize mesaj la bay TOUT itilizatè konekte yo
+      io.emit('chatMessage', formatted);
+    } catch (err) {
+      console.error('❌ Erè pandan anrejistreman mesaj:', err.message);
+    }
+  });
+
+  // ✅ Lè itilizatè a dekonekte
   socket.on('disconnect', () => {
     console.log('🔴 Itilizatè dekonekte:', socket.id);
   });
 });
-
 
 // ---------------------------
 // 🗂️ CHAT PAGE
@@ -345,4 +344,4 @@ app.get('/Chat-Spirituel.html', (req, res) => {
 // 🚀 START SERVER
 // ---------------------------
 const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => console.log(🚀 Server running on port ${PORT}));
+server.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
