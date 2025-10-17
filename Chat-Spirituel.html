@@ -245,14 +245,13 @@ socket.on('loadMessages', (messagesArray) => {
      Paste this BEFORE </body>
      =========================== -->
 <script>
-(function(){
-  const ID = 'fbsp-user-panel-v2';
+(function() {
+  const ID = 'fbsp-user-panel-v3';
   if (document.getElementById(ID)) return;
 
-  // Create panel root
+  // Create panel
   const panel = document.createElement('aside');
   panel.id = ID;
-  panel.setAttribute('aria-hidden', 'false');
   panel.innerHTML = `
     <div class="fbsp-head">
       <div class="fbsp-title">👥 Itilizatè</div>
@@ -266,26 +265,10 @@ socket.on('loadMessages', (messagesArray) => {
     <div class="fbsp-log" aria-live="polite"></div>
   `;
 
-  // CSS isolated with prefixed classes
+  // Style
   const style = document.createElement('style');
   style.textContent = `
-    #${ID} {
-      position: fixed;
-      right: 14px;
-      top: 14px;
-      width: 260px;
-      max-height: 72vh;
-      display:flex;
-      flex-direction:column;
-      background: linear-gradient(180deg,#ffffffef,#fbfbfb);
-      border-radius:12px;
-      box-shadow:0 12px 40px rgba(2,10,30,0.18);
-      border:1px solid rgba(0,0,0,0.05);
-      font-family: "Poppins", system-ui, -apple-system, "Segoe UI", Roboto, Arial;
-      color:#111;
-      z-index:999999;
-      overflow:hidden;
-    }
+    #${ID} { position: fixed; right: 14px; top: 14px; width: 260px; max-height: 72vh; display:flex; flex-direction:column; background:#fff; border-radius:12px; box-shadow:0 12px 40px rgba(2,10,30,0.18); border:1px solid rgba(0,0,0,0.05); font-family: "Poppins", sans-serif; color:#111; z-index:999999; overflow:hidden; }
     #${ID} .fbsp-head { display:flex; align-items:center; justify-content:space-between; padding:10px 12px; background:linear-gradient(90deg,#f4f7ff,#fff); border-bottom:1px solid rgba(0,0,0,0.04); }
     #${ID} .fbsp-title { font-weight:600; font-size:14px; }
     #${ID} .fbsp-actions { display:flex; gap:6px; }
@@ -298,55 +281,39 @@ socket.on('loadMessages', (messagesArray) => {
     #${ID} .fbsp-offline { background:#ff4757; }
     #${ID} .fbsp-name { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
     #${ID} .fbsp-log { font-size:12px; color:#666; padding:8px 12px; border-top:1px solid rgba(0,0,0,0.03); max-height:88px; overflow:auto; background:rgba(250,250,250,0.6); }
-    @media (max-width:640px) {
-      #${ID} { right:8px; top:8px; width:210px; max-height:58vh; }
-    }
+    @media (max-width:640px) { #${ID} { right:8px; top:8px; width:210px; max-height:58vh; } }
   `;
   document.head.appendChild(style);
   document.body.appendChild(panel);
 
-  // refs
+  // Refs
   const usersEl = panel.querySelector('.fbsp-users');
   const countEl = panel.querySelector('.fbsp-count');
   const logEl   = panel.querySelector('.fbsp-log');
   const refreshBtn = panel.querySelector('.fbsp-refresh');
   const closeBtn = panel.querySelector('.fbsp-close');
 
-  // create socket (reuse global io if available)
-  let sock;
-  try {
-    sock = (typeof io === 'function') ? io() : null;
-  } catch (e) {
-    sock = null;
-  }
-  if (!sock) {
-    // try connecting by origin explicitly
-    try {
-      sock = io(window.location.origin);
-    } catch (e) {
-      logEl.textContent = 'Socket.io non disponib sou paj la.';
-      return;
-    }
-  }
-
-  // local users state
+  // Local state
   let users = [];
 
-  // render helpers
+  // Socket
+  const socket = (typeof io === 'function') ? io() : io(window.location.origin);
+
+  // Render helpers
   function renderUsers() {
     usersEl.innerHTML = '';
     users.forEach(u => {
       const li = document.createElement('li');
       const dot = document.createElement('span');
-      dot.className = 'fbsp-dot fbsp-online';
+      dot.className = `fbsp-dot ${u.online ? 'fbsp-online' : 'fbsp-offline'}`;
       const name = document.createElement('span');
       name.className = 'fbsp-name';
-      name.textContent = u;
+      name.textContent = u.user;
       li.appendChild(dot);
       li.appendChild(name);
       usersEl.appendChild(li);
     });
-    countEl.textContent = String(users.length);
+    countEl.textContent = users.filter(u => u.online).length;
   }
 
   function addLog(text) {
@@ -356,66 +323,51 @@ socket.on('loadMessages', (messagesArray) => {
     while (logEl.children.length > 50) logEl.removeChild(logEl.lastChild);
   }
 
-  // Update full list event
-  sock.on('updateUserList', (arr) => {
-    if (!Array.isArray(arr)) return;
-    users = arr.filter(Boolean).map(String);
+  // Handle server events
+  socket.on('userConnected', (userName) => {
+    if (!userName) return;
+    const exist = users.find(u => u.user === userName);
+    if (!exist) users.push({ user: userName, online: true });
+    else exist.online = true;
     renderUsers();
-    addLog('Lis itilizatè mete ajou.');
+    addLog(`👤 ${userName} konekte`);
   });
 
-  // Single user connected
-  sock.on('userConnected', (user) => {
-    if (!user) return;
-    if (!users.includes(user)) users.push(user);
-    renderUsers();
-    addLog(`👤 ${user} konekte`);
-    flash(user, true);
-  });
-
-  // Single user disconnected
-  sock.on('userDisconnected', (user) => {
-    if (!user) return;
-    // retire non la nan lis (si ou pito kenbe yo e make offline, modifye isit)
-    users = users.filter(u => u !== user);
-    renderUsers();
-    addLog(`🔴 ${user} dekonekte`);
-    flash(user, false);
-  });
-
-  // Try to request list on connect
-  sock.on('connect', () => {
-    addLog('Panel konekte ak sèvè.');
-    sock.emit('requestUserList');
-  });
-
-  sock.on('disconnect', () => {
-    addLog('Koneksyon Socket.io pou panel la dekonekte.');
-  });
-
-  // flash effect
-  function flash(user, online) {
-    const items = Array.from(usersEl.children);
-    const item = items.find(li => li.querySelector('.fbsp-name')?.textContent === user);
-    if (!item) return;
-    item.style.background = online ? 'rgba(36,195,106,0.12)' : 'rgba(255,71,87,0.06)';
-    setTimeout(() => item.style.background = '', 900);
-  }
-
-  // manual refresh
-  refreshBtn.addEventListener('click', () => {
-    if (sock && sock.connected) {
-      sock.emit('requestUserList');
-      addLog('Mande lis itilizatè nan sèvè...');
+  socket.on('userDisconnected', (userName) => {
+    const exist = users.find(u => u.user === userName);
+    if (exist) {
+      exist.online = false;
+      renderUsers();
+      addLog(`🔴 ${userName} dekonekte`);
     }
   });
 
-  // close / toggle
+  // Manual refresh
+  refreshBtn.addEventListener('click', () => {
+    socket.emit('requestUserList');
+    addLog('Mande lis itilizatè nan sèvè...');
+  });
+
+  // Close/toggle panel
   let collapsed = false;
   closeBtn.addEventListener('click', () => {
     collapsed = !collapsed;
     panel.style.transform = collapsed ? 'translateX(120%)' : 'translateX(0)';
     panel.style.opacity = collapsed ? '0' : '1';
+  });
+
+  // On connect request current users
+  socket.on('connect', () => {
+    addLog('Panel konekte ak sèvè.');
+    socket.emit('requestUserList');
+  });
+
+  // On full user list from server
+  socket.on('updateUserList', (list) => {
+    if (!Array.isArray(list)) return;
+    users = list.map(u => ({ user: u, online: true }));
+    renderUsers();
+    addLog('Lis itilizatè mete ajou.');
   });
 
 })();
