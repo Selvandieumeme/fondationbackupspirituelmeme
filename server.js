@@ -259,9 +259,20 @@ app.get('/ping', (req, res) => res.send('pong'));
 
 
 // ---------------------------
-// 💬 SOCKET.IO CHAT — VÈSYON FINAL KORIJE AK LIS ITILIZATE AKTIF
+// 💬 SOCKET.IO CHAT — VÈSYON FINAL AK LISTE ITILIZATÈ AKTIF
 // ---------------------------
 
+import http from 'http';
+import { Server } from 'socket.io';
+import mongoose from 'mongoose';
+import path from 'path';
+import express from 'express';
+
+const app = express();
+
+// ---------------------------
+// 📦 Mongoose Schema
+// ---------------------------
 const messageSchema = new mongoose.Schema({
   user: { type: String, default: 'Anonyme' },
   message: { type: String, required: true },
@@ -269,6 +280,9 @@ const messageSchema = new mongoose.Schema({
 });
 const Message = mongoose.model('Message', messageSchema);
 
+// ---------------------------
+// ⚙️ Socket.IO Server
+// ---------------------------
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
@@ -277,11 +291,32 @@ const io = new Server(server, {
   }
 });
 
-const activeUsers = new Map(); // socket.id -> user
+// ---------------------------
+// 🧩 GESTION UTILISATÈ AKTIF
+// ---------------------------
+// Nou pral sèvi ak yon Map pou swiv tout itilizatè yo (id → {name, sockets})
+const onlineUsers = new Map();
 
+// Fonksyon pou mete ajou lis itilizatè yo an tan reyèl
+function broadcastOnline() {
+  const arr = [];
+  for (const [id, info] of onlineUsers.entries()) {
+    arr.push({
+      id,
+      name: info.name,
+      connected: info.sockets.size > 0
+    });
+  }
+  io.emit('online-users', arr);
+}
+
+// ---------------------------
+// ⚡ SOCKET.IO CONNECTION
+// ---------------------------
 io.on('connection', async (socket) => {
   console.log('🟢 Nouvo itilizatè konekte:', socket.id);
 
+  // ✅ Chaje 100 dènye mesaj yo pou nouvo itilizatè a
   try {
     const anciensMessages = await Message.find().sort({ date: 1 }).limit(100).lean();
     const formattedMessages = anciensMessages.map(msg => ({
@@ -294,23 +329,26 @@ io.on('connection', async (socket) => {
     console.error('❌ Erè pandan chajman mesaj:', err.message);
   }
 
-  // ✅ Lè itilizatè voye non li
-  socket.on('setUsername', (userName) => {
-    const cleanName = userName?.trim() || 'Anonyme';
+  // ✅ Resevwa non itilizatè a (nou itilize "setUser" kounya)
+  socket.on('setUser', (username) => {
+    const cleanName = username?.trim() || 'Anonyme';
+    const userId = cleanName.toLowerCase();
 
-    // Evite doublon
-    if (![...activeUsers.values()].includes(cleanName)) {
-      activeUsers.set(socket.id, cleanName);
+    // Gade si itilizatè a deja nan lis la
+    let record = onlineUsers.get(userId);
+    if (!record) {
+      record = { name: cleanName, sockets: new Set() };
+      onlineUsers.set(userId, record);
     }
 
-    // Emèt lis itilizatè aktyèl bay TOUT moun
-    io.emit('updateUserList', Array.from(activeUsers.values()));
+    // Mete ajou non li epi ajoute nouvo socket
+    record.name = cleanName;
+    record.sockets.add(socket.id);
+    socket.data.userId = userId;
 
-    // Emèt lis la sèlman pou nouvo itilizatè a
-    socket.emit('updateUserList', Array.from(activeUsers.values()));
-
-    // Emèt evènman "nouvo moun konekte"
+    // Notify tout moun ke li konekte
     io.emit('userConnected', cleanName);
+    broadcastOnline();
   });
 
   // ✅ Resevwa nouvo mesaj
@@ -335,29 +373,29 @@ io.on('connection', async (socket) => {
     }
   });
 
-  
-
-// ✅ Reponn lè yon kliyan mande lis itilizatè yo
-socket.on('requestUserList', () => {
-  io.emit('updateUserList', Array.from(activeUsers.values()));
-});
-  
-  
+  // ✅ Reponn lè yon kliyan mande lis itilizatè yo
+  socket.on('requestUserList', () => {
+    broadcastOnline();
+  });
 
   // ✅ Lè itilizatè a dekonekte
   socket.on('disconnect', () => {
-    const user = activeUsers.get(socket.id);
-    if (user) {
-      io.emit('userDisconnected', user);
-      activeUsers.delete(socket.id);
-      io.emit('updateUserList', Array.from(activeUsers.values()));
+    const userId = socket.data.userId;
+    if (!userId) return;
+
+    const record = onlineUsers.get(userId);
+    if (!record) return;
+
+    record.sockets.delete(socket.id);
+
+    if (record.sockets.size === 0) {
+      io.emit('userDisconnected', record.name);
     }
-    console.log('🔴 Itilizatè dekonekte:', socket.id);
+
+    broadcastOnline();
+    console.log('🔴 Itilizatè dekonekte:', userId);
   });
 });
-
-
-
 
 // ---------------------------
 // 🗂️ CHAT PAGE
@@ -367,7 +405,8 @@ app.get('/Chat-Spirituel.html', (req, res) => {
 });
 
 // ---------------------------
-// 🚀 START SERVER
+// 🚀 DEMARRE SERVEUR
 // ---------------------------
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+
