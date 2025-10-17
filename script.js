@@ -1,82 +1,54 @@
 // script.js
 
-let username = localStorage.getItem('username');
+// ✅ 1. Rekipere non itilizatè a depi nan localStorage
+let user = localStorage.getItem('user');
 
-// Si itilizatè a poko gen non, montre overlay la
+// ✅ 2. Lè paj la chaje, montre oswa kache overlay login lan
 window.addEventListener('load', () => {
-  if (!username) {
+  if (!user) {
     document.getElementById('loginOverlay').style.display = 'flex';
   } else {
     document.getElementById('loginOverlay').style.display = 'none';
   }
 });
 
-// ✅ Konekte ak Socket.io
-const socket = io();
-
-// Rekipere eleman yo
-const sendBtn = document.getElementById('send');
-const msgInput = document.getElementById('msg');
-const userInput = document.getElementById('user');
-const messages = document.getElementById('messages');
-
-// ✅ Lè itilizatè a deja gen non nan localStorage, voye li sou sèvè
-if (username) {
-  socket.emit('setUsername', username);
-}
-
-// Bouton pou antre nan chat la
+// ✅ 3. Bouton "Antre nan chat" pou mete non itilizatè a
 document.getElementById('enterChatBtn').addEventListener('click', () => {
   const input = document.getElementById('usernameInput');
   const name = input.value.trim();
 
   if (name) {
-    username = name;
-    localStorage.setItem('username', name);
+    user = name;
+    localStorage.setItem('user', name);
     document.getElementById('loginOverlay').style.display = 'none';
-    socket.emit('setUsername', username); // ✅ Voye non itilizatè a bay sèvè
-    userInput.value = username; // Mete non itilizatè a nan input chat la si bezwen
   } else {
     alert('Tanpri antre yon non avan ou antre nan chat la.');
   }
 });
 
-// ✅ Lè moun voye mesaj
+// ✅ 4. Konekte ak Socket.io
+const socket = io();
+
+// ✅ 5. Rekipere eleman HTML yo
+const sendBtn = document.getElementById('send');
+const msgInput = document.getElementById('msg');
+const userInput = document.getElementById('user');
+const messages = document.getElementById('messages');
+
+// ✅ 6. Lè itilizatè a klike sou "Voye"
 sendBtn.addEventListener('click', () => {
+  const currentUser = userInput.value.trim() || 'Anonyme';
   const message = msgInput.value.trim();
+
   if (message) {
-    socket.emit('chatMessage', {
-      username: username || 'Anonyme', // toujou itilize username
-      message: message
+    socket.emit('chatMessage', { user: user, message: message });
+
+    // ✅ 7. Lè gen nouvo mesaj soti nan lòt moun
+    socket.on('chatMessage', (data) => {
+      const { user, message, time } = data;
+      const msg = document.createElement('p');
+      msg.textContent = `${user} [${time}]: ${message}`;
+      document.getElementById('messages').appendChild(msg);
     });
-    msgInput.value = '';
   }
-});
-
-// Pèmèt itilizatè tape Enter pou voye mesaj
-msgInput.addEventListener('keypress', (e) => {
-  if (e.key === 'Enter') sendBtn.click();
-});
-
-// ✅ Resevwa nouvo mesaj soti nan sèvè
-socket.on('chatMessage', (data) => {
-  const sender = data.username || 'Anonyme'; // toujou pran username
-  const time = data.date ? new Date(data.date).toLocaleTimeString() : '';
-  const msg = document.createElement('p');
-  msg.textContent = `${sender} [${time}]: ${data.message}`;
-  messages.appendChild(msg);
-  messages.scrollTop = messages.scrollHeight;
-});
-
-// ✅ Resevwa lis itilizatè konekte yo (kadran dwat la)
-socket.on('updateUserList', (users) => {
-  const usersList = document.getElementById('usersList');
-  if (!usersList) return;
-  usersList.innerHTML = '';
-  users.forEach(u => {
-    const li = document.createElement('li');
-    li.textContent = `• ${u}`;
-    li.style.padding = '3px 0';
-    usersList.appendChild(li);
-  });
 });
