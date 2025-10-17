@@ -179,17 +179,24 @@ const msgInput = document.getElementById('msg');
 const userInput = document.getElementById('user');
 const messages = document.getElementById('messages');
 
+// Fè server konnen non itilizatè a pou panel endepandan
+function registerUser() {
+  const user = userInput.value.trim() || 'Anonyme';
+  socket.emit('setUsername', user); // voye non itilizatè a
+  socket.emit('userConnected', user); // evènman imedyat pou tout panel
+}
+
 // Fonkksyon pou ajoute mesaj nan lis la ak dat
 function addMessage(data, isMe = false) {
-  if (!data || !data.message) return; // evite mesaj vid
+  if (!data || !data.message) return;
   const li = document.createElement('li');
   const user = data.user || 'Anonyme';
   const message = data.message || '';
   const dateObj = new Date(data.date || Date.now());
-  const hours = dateObj.getHours().toString().padStart(2, '0');
-  const minutes = dateObj.getMinutes().toString().padStart(2, '0');
-  const day = dateObj.getDate().toString().padStart(2, '0');
-  const month = (dateObj.getMonth() + 1).toString().padStart(2, '0');
+  const hours = dateObj.getHours().toString().padStart(2,'0');
+  const minutes = dateObj.getMinutes().toString().padStart(2,'0');
+  const day = dateObj.getDate().toString().padStart(2,'0');
+  const month = (dateObj.getMonth()+1).toString().padStart(2,'0');
   const year = dateObj.getFullYear();
   li.textContent = `${user} [${day}/${month}/${year} ${hours}:${minutes}]: ${message}`;
   if (isMe) li.classList.add('me');
@@ -208,18 +215,20 @@ function sendMessage() {
   const user = userInput.value.trim() || 'Anonyme';
   const message = msgInput.value.trim();
   if (!message) return;
+
+  // Enregistre itilizatè a si li poko fè sa
+  registerUser();
+
   const data = { user, message, date: new Date() };
   socket.emit('chatMessage', data);
-  addMessage(data, true); // montre mesaj lokal la
+  addMessage(data, true);
   msgInput.value = '';
 }
 
 // Resevwa nouvo mesaj nan mond lan
 socket.on('chatMessage', (data) => {
   const currentUser = userInput.value.trim() || 'Anonyme';
-  if (data.user === currentUser && new Date(data.date).getTime() === new Date().getTime()) {
-    return; // evite double mesaj lokal deja afiche
-  }
+  if (data.user === currentUser && new Date(data.date).getTime() === new Date().getTime()) return;
   addMessage(data);
 });
 
@@ -233,7 +242,6 @@ socket.on('loadMessages', (messagesArray) => {
   });
 });
 </script>
-
 
 
 
