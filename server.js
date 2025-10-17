@@ -258,8 +258,6 @@ app.get('/ping', (req, res) => res.send('pong'));
 
 
 
-
-
 // ---------------------------
 // 💬 SOCKET.IO CHAT — VÈSYON FINAL KORIJE AK LIS ITILIZATE AKTIF
 // ---------------------------
@@ -282,7 +280,7 @@ const io = new Server(server, {
 });
 
 // ✅ Lis itilizatè konekte
-const activeUsers = new Map(); // socket.id -> username
+const activeUsers = new Map(); // socket.id -> user
 
 // ✅ Lè yon itilizatè konekte
 io.on('connection', async (socket) => {
@@ -304,8 +302,8 @@ io.on('connection', async (socket) => {
   }
 
   // ✅ Lè itilizatè voye non li pou panel
-  socket.on('setUsername', (username) => {
-    const cleanName = username?.trim() || 'Anonyme';
+  socket.on('setUser', (userName) => {
+    const cleanName = userName?.trim() || 'Anonyme';
     activeUsers.set(socket.id, cleanName);
 
     // Emèt lis itilizatè konekte yo bay tout moun
@@ -317,11 +315,11 @@ io.on('connection', async (socket) => {
   // ✅ Resevwa nouvo mesaj epi anrejistre l
   socket.on('chatMessage', async (data) => {
     try {
-      const username = data.user?.trim() || 'Anonyme';
+      const user = data.user?.trim() || 'Anonyme';
       const message = data.message?.trim();
       if (!message) return;
 
-      const newMsg = new Message({ user: username, message });
+      const newMsg = new Message({ user, message });
       await newMsg.save();
 
       const formatted = {
@@ -338,15 +336,19 @@ io.on('connection', async (socket) => {
 
   // ✅ Lè itilizatè a dekonekte
   socket.on('disconnect', () => {
-    const username = activeUsers.get(socket.id);
-    if (username) {
-      io.emit('userDisconnected', username); // evènman dekonekte
+    const user = activeUsers.get(socket.id);
+    if (user) {
+      io.emit('userDisconnected', user); // evènman dekonekte
       activeUsers.delete(socket.id);
       io.emit('updateUserList', Array.from(activeUsers.values())); // mete ajou lis
     }
     console.log('🔴 Itilizatè dekonekte:', socket.id);
   });
 });
+
+
+
+
 // ---------------------------
 // 🗂️ CHAT PAGE
 // ---------------------------
