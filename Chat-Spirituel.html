@@ -151,6 +151,48 @@
       .chat-wrapper { width: 98%; height: 95vh; }
       #msg, #user { font-size: 0.9rem; }
     }
+
+
+
+    #chatContainer {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+#chatMain {
+  flex: 3;
+}
+
+    
+
+#onlinePanel {
+  flex: 1;
+  background: #f8f9fa;
+  border-radius: 12px;
+  box-shadow: 0 0 8px rgba(0,0,0,0.1);
+  padding: 10px;
+  min-width: 200px;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+#onlinePanel h3 {
+  margin-top: 0;
+  text-align: center;
+  color: #0d6efd;
+}
+
+#userList li {
+  list-style: none;
+  padding: 5px;
+  margin: 3px 0;
+  background: #e0f0ff;
+  border-radius: 8px;
+  text-align: center;
+}
+    
   </style>
 </head>
 <body>
@@ -169,7 +211,23 @@
   </div>
 
 
+<div id="chatContainer">
+  <div id="chatMain">
+    <!-- lis mesaj -->
+    <ul id="messages"></ul>
+    <div id="inputZone">
+      <input id="user" placeholder="Antre non ou (opsyonèl)" />
+      <input id="msg" placeholder="Ekri mesaj ou..." />
+      <button id="send">📩 Voye</button>
+    </div>
+  </div>
 
+  <!-- ✅ Ti kadran pou lis itilizatè yo -->
+  <div id="onlinePanel">
+    <h3>Itilizatè konekte</h3>
+    <ul id="userList"></ul>
+  </div>
+</div>
 
 
 
@@ -264,6 +322,19 @@ socket.on('connect', () => {
   if (currentUser) socket.emit('setUser', currentUser);
 });
 </script>
+
+
+
+  
+  <!-- Socket.io deja la -->
+<script src="https://cdn.socket.io/4.7.4/socket.io.min.js"></script>
+
+<!-- Chat script prensipal -->
+<script src="script.js"></script>
+
+<!-- Panel itilizatè yo -->
+<script src="onlineUserPanel.js"></script>
+
   
 </body>
 </html>
