@@ -173,21 +173,24 @@
 
 
 <script>
+/* Chat script (korije) */
 const socket = io('https://examen-backend-ihlx.onrender.com');
+// expose shared socket pou panèl endepandan (rekipere olye kreye nouvo koneksyon)
+window.__fbsp_shared_socket = socket;
+
 const sendBtn = document.getElementById('send');
 const msgInput = document.getElementById('msg');
 const userInput = document.getElementById('user');
 const messages = document.getElementById('messages');
 
-// ✅ Fè server konnen non itilizatè a pou panel endepandan
+// Fè server konnen non itilizatè a pou panel endepandan
 function registerUser() {
   const user = userInput.value.trim() || 'Anonyme';
-  // Voye non itilizatè a bay server pou panel endepandan
-  socket.emit('setUser', user);        // pou panel lis itilizatè
-  socket.emit('userConnected', user);  // evènman imedyat pou tout panel
+  // Voye non itilizatè a bay server pou panel lis itilizatè (se sèl evènman sa a nou emèt)
+  socket.emit('setUser', user);
 }
 
-// ✅ Fonksyon pou ajoute mesaj nan lis la ak dat
+// Fonkksyon pou ajoute mesaj nan lis la ak dat
 function addMessage(data, isMe = false) {
   if (!data || !data.message) return;
   const li = document.createElement('li');
@@ -206,7 +209,25 @@ function addMessage(data, isMe = false) {
   li.scrollIntoView({ behavior: 'smooth', block: 'end' });
 }
 
-// ✅ Voye mesaj lè itilizatè klike oswa tape Enter
+// --- REGISTER GLOBAL HANDLERS ONCE ---
+// resevwa nouvo mesaj soti nan server (do not attach inside click)
+socket.on('chatMessage', (data) => {
+  // pa teste new Date(...).getTime() === new Date().getTime() paske sa p ap matche atravè machin
+  // nou baze sou serve a pou pa double emisyon; men si lokal nou deja ajoute (isMe true) moun ap wè li tou.
+  addMessage(data);
+});
+
+// chaje mesaj ki deja nan DB lè nouvo itilizatè konekte
+socket.on('loadMessages', (messagesArray) => {
+  if (!Array.isArray(messagesArray)) return;
+  messagesArray.forEach(msg => {
+    const currentUser = (userInput && userInput.value) ? userInput.value.trim() : 'Anonyme';
+    const isMe = msg.user === currentUser;
+    addMessage(msg, isMe);
+  });
+});
+
+// --- SEND MESSAGE LOGIC ---
 sendBtn.addEventListener('click', sendMessage);
 msgInput.addEventListener('keypress', (e) => {
   if (e.key === 'Enter') sendMessage();
@@ -217,42 +238,24 @@ function sendMessage() {
   const message = msgInput.value.trim();
   if (!message) return;
 
-  // ✅ Enregistre itilizatè a si li poko fè sa (asire panel ajou)
+  // Anrejistre itilizatè a (voye setUser) pou asire server gen non li
   registerUser();
 
   const data = { user, message, date: new Date() };
   socket.emit('chatMessage', data);
+  // Afichaj lokal la rapid (server ap re-emit tou pou tout lòt kliyan)
   addMessage(data, true);
   msgInput.value = '';
 }
-
-// ✅ Resevwa nouvo mesaj nan mond lan
-socket.on('chatMessage', (data) => {
-  const currentUser = userInput.value.trim() || 'Anonyme';
-  if (data.user === currentUser && new Date(data.date).getTime() === new Date().getTime()) return;
-  addMessage(data);
-});
-
-// ✅ Chaje mesaj ki deja nan DB lè nouvo itilizatè konekte
-socket.on('loadMessages', (messagesArray) => {
-  if (!Array.isArray(messagesArray)) return;
-  messagesArray.forEach(msg => {
-    const currentUser = userInput.value.trim() || 'Anonyme';
-    const isMe = msg.user === currentUser;
-    addMessage(msg, isMe);
-  });
-});
 </script>
 
 
 
 
-  
 
-<!-- ===========================
-     REAL-TIME USER LIST PANEL
-     Paste this BEFORE </body>
-     =========================== -->
+
+
+  <!-- REAL-TIME USER LIST PANEL (endepandan) -->
 <script>
 (function(){
   const ID = 'fbsp-user-panel-realtime';
@@ -273,79 +276,138 @@ socket.on('loadMessages', (messagesArray) => {
   panel.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
   panel.style.fontFamily = 'Arial, sans-serif';
   panel.style.zIndex = '999999';
+  panel.style.overflow = 'auto';
   panel.innerHTML = `
     <div style="font-weight:600; margin-bottom:6px;">👥 Itilizatè</div>
+    <div style="font-size:12px;margin-bottom:8px;">Online se vèt — Offline se wouj</div>
     <ul id="fbsp-users-list" style="list-style:none; padding:0; margin:0; max-height:60vh; overflow:auto;"></ul>
   `;
   document.body.appendChild(panel);
 
   const usersEl = document.getElementById('fbsp-users-list');
-  let users = new Map(); // user -> online state
+  // map: user -> online boolean
+  let users = new Map();
 
-  // Konekte socket
-  let sock;
-  try { sock = (typeof io === 'function') ? io() : null; } catch(e){ sock = null; }
-  if(!sock) try { sock = io(window.location.origin); } catch(e){ usersEl.innerHTML = '<li>Socket.io pa disponib</li>'; return; }
+  // Reuse shared socket si li egziste; sinon kreye nouvo:
+  let sock = window.__fbsp_shared_socket || null;
+  if (!sock) {
+    try {
+      sock = (typeof io === 'function') ? io() : null;
+    } catch (e) {
+      sock = null;
+    }
+    if (!sock) {
+      // try origin
+      try {
+        sock = io(window.location.origin);
+      } catch (e) {
+        usersEl.innerHTML = '<li style="color:#d00">Socket.io pa disponib</li>';
+        return;
+      }
+    }
+  }
+  // si nou jwenn socket la, si li pa te pataje, expose li pou lòt scripts
+  if (!window.__fbsp_shared_socket) window.__fbsp_shared_socket = sock;
 
-  // Fonksyon pou mete ajou lis la
+  // Render helper
   function renderUsers() {
     usersEl.innerHTML = '';
-    users.forEach((online, user) => {
+    // keep order: online first, then offline (optional)
+    const sorted = Array.from(users.entries()).sort((a,b) => {
+      if (a[1] === b[1]) return a[0].localeCompare(b[0]);
+      return (a[1] === true) ? -1 : 1;
+    });
+    sorted.forEach(([name, online]) => {
       const li = document.createElement('li');
-      li.textContent = user;
-      li.style.color = online ? '#24c36a' : '#ff4757'; // vèt = konekte, wouj = dekonekte
-      li.style.padding = '4px 6px';
+      li.style.display = 'flex';
+      li.style.alignItems = 'center';
+      li.style.justifyContent = 'space-between';
+      li.style.padding = '6px';
       li.style.borderBottom = '1px solid #eee';
       li.style.borderRadius = '4px';
       li.style.marginBottom = '2px';
+
+      const spanName = document.createElement('span');
+      spanName.textContent = name;
+      spanName.style.overflow = 'hidden';
+      spanName.style.textOverflow = 'ellipsis';
+      spanName.style.whiteSpace = 'nowrap';
+
+      const dot = document.createElement('span');
+      dot.style.width = '10px';
+      dot.style.height = '10px';
+      dot.style.borderRadius = '50%';
+      dot.style.display = 'inline-block';
+      dot.style.marginLeft = '8px';
+      dot.style.background = online ? '#24c36a' : '#ff4757';
+
+      li.appendChild(spanName);
+      li.appendChild(dot);
       usersEl.appendChild(li);
     });
   }
 
-  // Evènman lè lis itilizatè chanje (full list)
-  sock.on('updateUserList', (arr) => {
-    if(!Array.isArray(arr)) return;
-    users.clear();
-    arr.forEach(u => users.set(u, true)); // tout itilizatè konekte = vèt
-    renderUsers();
-  });
-
-  // Evènman lè yon itilizatè konekte
-  sock.on('userConnected', (user) => {
-    if(!user) return;
-    users.set(user, true);
-    renderUsers();
-  });
-
-  // Evènman lè yon itilizatè dekonekte
-  sock.on('userDisconnected', (user) => {
-    if(!user) return;
-    if(users.has(user)) users.set(user, false);
-    renderUsers();
-  });
-
-  // Chak fwa itilizatè voye mesaj premye fwa, voye li tounen kòm konekte
-  const sendBtn = document.getElementById('send');
-  const msgInput = document.getElementById('msg');
-  const userInput = document.getElementById('user');
-
-  function notifyUser() {
-    const user = userInput.value.trim() || 'Anonyme';
-    sock.emit('setUser', user); // fè server konnen itilizatè konekte
-    users.set(user, true);
+  function setOnline(name, online) {
+    if (!name) return;
+    users.set(name, !!online);
     renderUsers();
   }
 
-  sendBtn.addEventListener('click', notifyUser);
-  msgInput.addEventListener('keypress', e => {
-    if(e.key === 'Enter') notifyUser();
+  function setFullList(arr) {
+    users.clear();
+    arr.forEach(u => users.set(u, true));
+    renderUsers();
+  }
+
+  // Handlers (listen to server events)
+  sock.on('updateUserList', (arr) => {
+    if (!Array.isArray(arr)) return;
+    setFullList(arr);
   });
+
+  sock.on('userConnected', (name) => {
+    if (!name) return;
+    setOnline(name, true);
+  });
+
+  sock.on('userDisconnected', (name) => {
+    if (!name) return;
+    // Mark offline (keep in list)
+    if (users.has(name)) {
+      users.set(name, false);
+    } else {
+      // if not present, add as offline to keep history
+      users.set(name, false);
+    }
+    renderUsers();
+  });
+
+  // On connect, request the current list (server may ignore if not implemented)
+  sock.on('connect', () => {
+    try { sock.emit('requestUserList'); } catch (e) {}
+  });
+
+  // OPTIONAL: try to sync local user when pressing send or first message.
+  // If page already has #user input and #send button, attach a small notifier
+  const localUserInput = document.getElementById('user');
+  const localSendBtn = document.getElementById('send');
+  const localMsg = document.getElementById('msg');
+  if (localUserInput) {
+    // when user types a name and sends, ensure server knows it
+    function notifyLocalUser() {
+      const name = localUserInput.value.trim() || 'Anonyme';
+      sock.emit('setUser', name);
+      // also mark locally
+      users.set(name, true);
+      renderUsers();
+    }
+    if (localSendBtn) localSendBtn.addEventListener('click', notifyLocalUser);
+    if (localMsg) localMsg.addEventListener('keypress', (e) => { if (e.key === 'Enter') notifyLocalUser(); });
+  }
 
 })();
 </script>
-<!-- ===========================
-     END REAL-TIME USER LIST PANEL
-     =========================== -->
+<!-- END REAL-TIME USER LIST PANEL -->
 
 
   
