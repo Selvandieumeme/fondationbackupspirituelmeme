@@ -169,10 +169,6 @@
   </div>
 
 
-  <div id="userListPanel">
-  <h3>Itilizatè konekte yo</h3>
-  <ul id="userList"></ul>
-</div>
 
 
 
@@ -181,197 +177,93 @@
 
   
 <script>
-/* Chat script (korije) */
-const socket = io('https://examen-backend-ihlx.onrender.com');
-// expose shared socket pou panèl endepandan (rekipere olye kreye nouvo koneksyon)
-window.__fbsp_shared_socket = socket;
+/* =====================================================
+   ✅ CHAT SCRIPT FINAL KOREKTE POU SENK AVEK SERVER & PANEL
+   ===================================================== */
 
+// 1️⃣ — Ranfòse yon sèl koneksyon socket pataje
+const socket = window.__fbsp_shared_socket || io('https://examen-backend-ihlx.onrender.com');
+window.__fbsp_shared_socket = socket; // pou evite miltip koneksyon
+
+// 2️⃣ — Seleksyon eleman HTML prensipal yo
 const sendBtn = document.getElementById('send');
 const msgInput = document.getElementById('msg');
 const userInput = document.getElementById('user');
 const messages = document.getElementById('messages');
 
-// Fè server konnen non itilizatè a pou panel endepandan
+// 3️⃣ — Fonksyon pou anrejistre itilizatè a
 function registerUser() {
-  const user = userInput.value.trim() || 'Anonyme';
-  // Voye non itilizatè a bay server pou panel lis itilizatè (se sèl evènman sa a nou emèt)
-  socket.emit('setUser', user);
+  const user = userInput?.value.trim() || 'Anonyme';
+  socket.emit('setUser', user); // ✳️ sèlman evènman "setUser"
+  return user;
 }
 
-// Fonkksyon pou ajoute mesaj nan lis la ak dat
+// 4️⃣ — Fonksyon pou ajoute mesaj nan chat la
 function addMessage(data, isMe = false) {
   if (!data || !data.message) return;
   const li = document.createElement('li');
   const user = data.user || 'Anonyme';
   const message = data.message || '';
+
   const dateObj = new Date(data.date || Date.now());
-  const hours = dateObj.getHours().toString().padStart(2,'0');
-  const minutes = dateObj.getMinutes().toString().padStart(2,'0');
-  const day = dateObj.getDate().toString().padStart(2,'0');
-  const month = (dateObj.getMonth()+1).toString().padStart(2,'0');
+  const hours = dateObj.getHours().toString().padStart(2, '0');
+  const minutes = dateObj.getMinutes().toString().padStart(2, '0');
+  const day = dateObj.getDate().toString().padStart(2, '0');
+  const month = (dateObj.getMonth() + 1).toString().padStart(2, '0');
   const year = dateObj.getFullYear();
+
   li.textContent = `${user} [${day}/${month}/${year} ${hours}:${minutes}]: ${message}`;
   if (isMe) li.classList.add('me');
+
   messages.appendChild(li);
-  messages.scrollTop = messages.scrollHeight;
   li.scrollIntoView({ behavior: 'smooth', block: 'end' });
+  messages.scrollTop = messages.scrollHeight;
 }
 
-// --- REGISTER GLOBAL HANDLERS ONCE ---
-// resevwa nouvo mesaj soti nan server (do not attach inside click)
+// 5️⃣ — Resevwa mesaj yo soti nan serve a
 socket.on('chatMessage', (data) => {
-  // pa teste new Date(...).getTime() === new Date().getTime() paske sa p ap matche atravè machin
-  // nou baze sou serve a pou pa double emisyon; men si lokal nou deja ajoute (isMe true) moun ap wè li tou.
   addMessage(data);
 });
 
-// chaje mesaj ki deja nan DB lè nouvo itilizatè konekte
+// 6️⃣ — Resevwa tout ansyen mesaj (loadMessages)
 socket.on('loadMessages', (messagesArray) => {
   if (!Array.isArray(messagesArray)) return;
+  const currentUser = userInput?.value.trim() || 'Anonyme';
   messagesArray.forEach(msg => {
-    const currentUser = (userInput && userInput.value) ? userInput.value.trim() : 'Anonyme';
     const isMe = msg.user === currentUser;
     addMessage(msg, isMe);
   });
 });
 
-// --- SEND MESSAGE LOGIC ---
+// 7️⃣ — Fonksyon pou voye mesaj
+function sendMessage() {
+  const user = registerUser();
+  const message = msgInput.value.trim();
+  if (!message) return;
+
+  const data = { user, message, date: new Date() };
+
+  // Voye bay serve a
+  socket.emit('chatMessage', data);
+
+  // Afichaj lokal imedya
+  addMessage(data, true);
+
+  msgInput.value = '';
+}
+
+// 8️⃣ — Evenman bouton ak "Enter"
 sendBtn.addEventListener('click', sendMessage);
 msgInput.addEventListener('keypress', (e) => {
   if (e.key === 'Enter') sendMessage();
 });
 
-function sendMessage() {
-  const user = userInput.value.trim() || 'Anonyme';
-  const message = msgInput.value.trim();
-  if (!message) return;
-
-  // Anrejistre itilizatè a (voye setUser) pou asire server gen non li
-  registerUser();
-
-  const data = { user, message, date: new Date() };
-  socket.emit('chatMessage', data);
-  // Afichaj lokal la rapid (server ap re-emit tou pou tout lòt kliyan)
-  addMessage(data, true);
-  msgInput.value = '';
-}
+// 9️⃣ — Lè koneksyon etabli, si gen non deja nan chan an, voye li
+socket.on('connect', () => {
+  const currentUser = userInput?.value.trim();
+  if (currentUser) socket.emit('setUser', currentUser);
+});
 </script>
-
-
-
-
-
-
-
-<!-- REAL-TIME USER LIST PANEL (FINAL STABLE) -->
-<script>
-(function(){
-  const ID = 'fbsp-user-panel-realtime';
-  if (document.getElementById(ID)) return;
-
-  // --- Panel UI ---
-  const panel = document.createElement('aside');
-  panel.id = ID;
-  panel.style.position = 'fixed';
-  panel.style.right = '14px';
-  panel.style.top = '14px';
-  panel.style.width = '260px';
-  panel.style.maxHeight = '72vh';
-  panel.style.background = '#fff';
-  panel.style.border = '1px solid #ccc';
-  panel.style.borderRadius = '8px';
-  panel.style.padding = '10px';
-  panel.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
-  panel.style.fontFamily = 'Arial, sans-serif';
-  panel.style.zIndex = '999999';
-  panel.style.overflow = 'auto';
-  panel.innerHTML = `
-    <div style="font-weight:600; margin-bottom:6px;">👥 Itilizatè konekte</div>
-    <div style="font-size:12px;margin-bottom:8px;">Vèt = sou entènèt / Wouj = dekonekte</div>
-    <ul id="fbsp-users-list" style="list-style:none; padding:0; margin:0; max-height:60vh; overflow:auto;"></ul>
-  `;
-  document.body.appendChild(panel);
-
-  const usersEl = document.getElementById('fbsp-users-list');
-  const users = new Map();
-
-  // --- Reuse socket prensipal la ---
-  const sock = (typeof socket !== 'undefined') ? socket : io(window.location.origin);
-
-  // --- Fonksyon afichaj ---
-  function renderUsers() {
-    usersEl.innerHTML = '';
-    const sorted = Array.from(users.entries()).sort((a,b)=>{
-      if (a[1] === b[1]) return a[0].localeCompare(b[0]);
-      return a[1] ? -1 : 1;
-    });
-    sorted.forEach(([name, online])=>{
-      const li = document.createElement('li');
-      li.style.display = 'flex';
-      li.style.alignItems = 'center';
-      li.style.justifyContent = 'space-between';
-      li.style.padding = '6px';
-      li.style.borderBottom = '1px solid #eee';
-      li.style.borderRadius = '4px';
-      li.style.marginBottom = '2px';
-
-      const spanName = document.createElement('span');
-      spanName.textContent = name;
-      spanName.style.overflow = 'hidden';
-      spanName.style.textOverflow = 'ellipsis';
-      spanName.style.whiteSpace = 'nowrap';
-
-      const dot = document.createElement('span');
-      dot.style.width = '10px';
-      dot.style.height = '10px';
-      dot.style.borderRadius = '50%';
-      dot.style.display = 'inline-block';
-      dot.style.marginLeft = '8px';
-      dot.style.background = online ? '#24c36a' : '#ff4757';
-
-      li.appendChild(spanName);
-      li.appendChild(dot);
-      usersEl.appendChild(li);
-    });
-  }
-
-  // --- Fonksyon senkronizasyon ---
-  function setFullList(arr) {
-    users.clear();
-    arr.forEach(u => users.set(u, true));
-    renderUsers();
-  }
-
-  function setOnline(name, online) {
-    if (!name) return;
-    users.set(name, !!online);
-    renderUsers();
-  }
-
-  // --- Evènman socket yo ---
-  sock.on('updateUserList', (arr) => {
-    if (!Array.isArray(arr)) return;
-    setFullList(arr);
-  });
-
-  sock.on('userConnected', (name) => {
-    setOnline(name, true);
-  });
-
-  sock.on('userDisconnected', (name) => {
-    setOnline(name, false);
-  });
-
-  sock.on('connect', () => {
-    sock.emit('requestUserList'); // mande lis aktyèl la imedyatman
-  });
-
-})();
-</script>
-<!-- END REAL-TIME USER LIST PANEL -->
-
-
-  
   
 </body>
 </html>
