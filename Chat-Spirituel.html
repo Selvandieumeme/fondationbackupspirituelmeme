@@ -263,13 +263,13 @@ function sendMessage() {
 
 
 
-  <!-- REAL-TIME USER LIST PANEL (endepandan) -->
+ <!-- REAL-TIME USER LIST PANEL (KORIJE & SENKRO) -->
 <script>
 (function(){
   const ID = 'fbsp-user-panel-realtime';
   if (document.getElementById(ID)) return;
 
-  // Kreye panel
+  // --- Panel vizyèl la ---
   const panel = document.createElement('aside');
   panel.id = ID;
   panel.style.position = 'fixed';
@@ -293,39 +293,29 @@ function sendMessage() {
   document.body.appendChild(panel);
 
   const usersEl = document.getElementById('fbsp-users-list');
-  // map: user -> online boolean
-  let users = new Map();
+  const users = new Map();
 
-  // Reuse shared socket si li egziste; sinon kreye nouvo:
-  let sock = window.__fbsp_shared_socket || null;
-  if (!sock) {
+  // --- Itilize socket prensipal la (ki soti nan script chat la) ---
+  let sock = null;
+  if (typeof socket !== 'undefined') {
+    sock = socket; // Reuse koneksyon prensipal chat la
+  } else {
     try {
-      sock = (typeof io === 'function') ? io() : null;
+      sock = io('https://examen-backend-ihlx.onrender.com'); // backup
     } catch (e) {
-      sock = null;
-    }
-    if (!sock) {
-      // try origin
-      try {
-        sock = io(window.location.origin);
-      } catch (e) {
-        usersEl.innerHTML = '<li style="color:#d00">Socket.io pa disponib</li>';
-        return;
-      }
+      usersEl.innerHTML = '<li style="color:#d00">Socket.io pa disponib</li>';
+      return;
     }
   }
-  // si nou jwenn socket la, si li pa te pataje, expose li pou lòt scripts
-  if (!window.__fbsp_shared_socket) window.__fbsp_shared_socket = sock;
 
-  // Render helper
+  // --- Fonksyon afichaj ---
   function renderUsers() {
     usersEl.innerHTML = '';
-    // keep order: online first, then offline (optional)
-    const sorted = Array.from(users.entries()).sort((a,b) => {
+    const sorted = Array.from(users.entries()).sort((a,b)=>{
       if (a[1] === b[1]) return a[0].localeCompare(b[0]);
-      return (a[1] === true) ? -1 : 1;
+      return a[1] ? -1 : 1;
     });
-    sorted.forEach(([name, online]) => {
+    sorted.forEach(([name, online])=>{
       const li = document.createElement('li');
       li.style.display = 'flex';
       li.style.alignItems = 'center';
@@ -355,63 +345,51 @@ function sendMessage() {
     });
   }
 
-  function setOnline(name, online) {
-    if (!name) return;
-    users.set(name, !!online);
-    renderUsers();
-  }
-
   function setFullList(arr) {
     users.clear();
     arr.forEach(u => users.set(u, true));
     renderUsers();
   }
 
-  // Handlers (listen to server events)
-  sock.on('updateUserList', (arr) => {
+  function setOnline(name, online) {
+    if (!name) return;
+    users.set(name, !!online);
+    renderUsers();
+  }
+
+  // --- Evènman ki soti nan server ---
+  sock.on('updateUserList', (arr)=>{
     if (!Array.isArray(arr)) return;
     setFullList(arr);
   });
 
-  sock.on('userConnected', (name) => {
+  sock.on('userConnected', (name)=>{
     if (!name) return;
     setOnline(name, true);
   });
 
-  sock.on('userDisconnected', (name) => {
+  sock.on('userDisconnected', (name)=>{
     if (!name) return;
-    // Mark offline (keep in list)
-    if (users.has(name)) {
-      users.set(name, false);
-    } else {
-      // if not present, add as offline to keep history
-      users.set(name, false);
-    }
+    users.set(name, false);
     renderUsers();
   });
 
-  // On connect, request the current list (server may ignore if not implemented)
-  sock.on('connect', () => {
-    try { sock.emit('requestUserList'); } catch (e) {}
+  sock.on('connect', ()=>{
+    try { sock.emit('requestUserList'); } catch(e){}
   });
 
-  // OPTIONAL: try to sync local user when pressing send or first message.
-  // If page already has #user input and #send button, attach a small notifier
+  // --- Senkronize ak non lokal la ---
   const localUserInput = document.getElementById('user');
   const localSendBtn = document.getElementById('send');
   const localMsg = document.getElementById('msg');
-  if (localUserInput) {
-    // when user types a name and sends, ensure server knows it
-    function notifyLocalUser() {
-      const name = localUserInput.value.trim() || 'Anonyme';
-      sock.emit('setUser', name);
-      // also mark locally
-      users.set(name, true);
-      renderUsers();
-    }
-    if (localSendBtn) localSendBtn.addEventListener('click', notifyLocalUser);
-    if (localMsg) localMsg.addEventListener('keypress', (e) => { if (e.key === 'Enter') notifyLocalUser(); });
+  function notifyLocalUser() {
+    const name = localUserInput?.value.trim() || 'Anonyme';
+    sock.emit('setUser', name);
   }
+  if (localSendBtn) localSendBtn.addEventListener('click', notifyLocalUser);
+  if (localMsg) localMsg.addEventListener('keypress', e=>{
+    if (e.key === 'Enter') notifyLocalUser();
+  });
 
 })();
 </script>
