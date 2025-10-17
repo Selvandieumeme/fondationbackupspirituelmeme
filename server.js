@@ -256,13 +256,17 @@ app.get('/ping', (req, res) => res.send('pong'));
 
 
 
+
+
+
+
 // ---------------------------
-// 💬 SOCKET.IO CHAT (vèsyon korije)
+// 💬 SOCKET.IO CHAT (vèsyon korije ak "username")
 // ---------------------------
 
 // ✅ Modèl pou sove mesaj yo nan MongoDB (ou te deja gen schema sa a)
 const messageSchema = new mongoose.Schema({
-  user: String,
+  username: String, // ranplase user ak username
   message: String,
   date: { type: Date, default: Date.now },
 });
@@ -291,12 +295,8 @@ io.on('connection', async (socket) => {
       .limit(100)
       .lean();
 
-    // Map pou asire chak chan gen valè default si undefined
     const formattedMessages = anciensMessages.map(msg => ({
-      // sipòte tou swa 'user' oswa 'username' si genyen
-      user: (msg.user && msg.user.trim() !== '') ? msg.user
-           : (msg.username && msg.username.trim() !== '') ? msg.username
-           : 'Anonyme',
+      username: (msg.username && msg.username.trim() !== '') ? msg.username : 'Anonyme',
       message: msg.message || '',
       date: msg.date ? new Date(msg.date) : new Date()
     }));
@@ -321,32 +321,22 @@ io.on('connection', async (socket) => {
     console.log(`👤 ${username} konekte.`);
   });
 
-
- // Lè itilizatè a voye non li
-  socket.on('setUsername', (username) => {
-    connectedUsers[socket.id] = username || 'Anonyme';
-    io.emit('updateUserList', Object.values(connectedUsers)); // voye lis la bay tout moun
-  });
-  
-
   // ✅ Resevwa nouvo mesaj epi difize l bay tout moun
   socket.on('chatMessage', async (data) => {
     try {
-      // Aksepte swa { username, message } oswa { user, message }
-      const user = (data && (data.username || data.user)) ? (data.username || data.user) : 'Anonyme';
+      const username = (data && (data.username || data.user)) ? (data.username || data.user) : 'Anonyme';
       const message = (data && data.message) ? data.message : '';
       const date = data && data.date ? new Date(data.date) : new Date();
 
-      // Prepare pou sove
-      const messageData = { user, message, date };
+      const messageData = { username, message, date };
 
       // Sove mesaj la nan MongoDB
       const newMsg = new Message(messageData);
       await newMsg.save();
 
-      // Voye mesaj ki sòti nan DB kòm objè senp pou front-end ka itilize dat
+      // Voye mesaj bay tout moun
       io.emit('chatMessage', {
-        user: newMsg.user,
+        username: newMsg.username,
         message: newMsg.message,
         date: newMsg.date
       });
@@ -380,5 +370,3 @@ app.get('/Chat-Spirituel.html', (req, res) => {
 // ---------------------------
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
-
-
