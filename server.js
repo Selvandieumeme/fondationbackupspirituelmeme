@@ -261,7 +261,7 @@ app.get('/ping', (req, res) => res.send('pong'));
 
 
 // ---------------------------
-// 💬 SOCKET.IO CHAT — VÈSYON FINAL KORIJE
+// 💬 SOCKET.IO CHAT — VÈSYON FINAL KORIJE AK LIS ITILIZATE AKTIF
 // ---------------------------
 
 // ✅ Modèl pou sove mesaj yo nan MongoDB
@@ -281,6 +281,9 @@ const io = new Server(server, {
   }
 });
 
+// ✅ Lis itilizatè konekte
+const activeUsers = new Map(); // socket.id -> username
+
 // ✅ Lè yon itilizatè konekte
 io.on('connection', async (socket) => {
   console.log('🟢 Nouvo itilizatè konekte:', socket.id);
@@ -295,32 +298,38 @@ io.on('connection', async (socket) => {
       date: msg.date ? new Date(msg.date) : new Date()
     }));
 
-    // ✅ Voye yo bay nouvo itilizatè a sèlman
     socket.emit('loadMessages', formattedMessages);
   } catch (err) {
     console.error('❌ Erè pandan chajman mesaj:', err.message);
   }
+
+  // ✅ Lè itilizatè voye non li pou panel
+  socket.on('setUsername', (username) => {
+    const cleanName = username?.trim() || 'Anonyme';
+    activeUsers.set(socket.id, cleanName);
+
+    // Emèt lis itilizatè konekte yo bay tout moun
+    io.emit('updateUserList', Array.from(activeUsers.values()));
+    // Emèt evènman itilizatè konekte
+    io.emit('userConnected', cleanName);
+  });
 
   // ✅ Resevwa nouvo mesaj epi anrejistre l
   socket.on('chatMessage', async (data) => {
     try {
       const username = data.user?.trim() || 'Anonyme';
       const message = data.message?.trim();
+      if (!message) return;
 
-      if (!message) return; // evite mesaj vid
-
-      // ✅ Sove nan MongoDB
       const newMsg = new Message({ user: username, message });
       await newMsg.save();
 
-      // ✅ Fòmate dat la pou voye tounen
       const formatted = {
         user: newMsg.user,
         message: newMsg.message,
         date: newMsg.date
       };
 
-      // ✅ Difize mesaj la bay TOUT itilizatè konekte yo
       io.emit('chatMessage', formatted);
     } catch (err) {
       console.error('❌ Erè pandan anrejistreman mesaj:', err.message);
@@ -329,10 +338,15 @@ io.on('connection', async (socket) => {
 
   // ✅ Lè itilizatè a dekonekte
   socket.on('disconnect', () => {
+    const username = activeUsers.get(socket.id);
+    if (username) {
+      io.emit('userDisconnected', username); // evènman dekonekte
+      activeUsers.delete(socket.id);
+      io.emit('updateUserList', Array.from(activeUsers.values())); // mete ajou lis
+    }
     console.log('🔴 Itilizatè dekonekte:', socket.id);
   });
 });
-
 // ---------------------------
 // 🗂️ CHAT PAGE
 // ---------------------------
