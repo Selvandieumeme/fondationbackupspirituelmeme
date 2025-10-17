@@ -221,15 +221,25 @@
     if (e.key === 'Enter') enterChatBtn.click();
   });
 
-  // --- Fonksyon pou ajoute mesaj nan chat ---
-  function addMessage(data, isMe = false) {
+  function sendMessage() {
+    const username = localStorage.getItem('chatUsername') || 'Anonyme';
+    const message = msgInput.value.trim();
+    if (!message) return;
+
+    const data = { username, message, date: new Date() };
+    socket.emit('chatMessage', data);
+    addMessage(data, true);
+    msgInput.value = '';
+}
+
+function addMessage(data, isMe = false) {
     if (!data || !data.message) return;
-    const msgId = `${data.user}-${data.date}-${data.message}`;
+    const msgId = `${data.username}-${data.date}-${data.message}`;
     if (displayedMessages.has(msgId)) return;
     displayedMessages.add(msgId);
 
     const li = document.createElement('li');
-    const user = data.user || 'Anonyme';
+    const user = data.username || 'Anonyme';
     const message = data.message || '';
     const dateObj = new Date(data.date || Date.now());
     const hours = dateObj.getHours().toString().padStart(2,'0');
@@ -242,52 +252,20 @@
     messages.appendChild(li);
     messages.scrollTop = messages.scrollHeight;
     li.scrollIntoView({ behavior: 'smooth', block: 'end' });
-  }
+}
 
-  const sendBtn = document.getElementById('send');
-  const msgInput = document.getElementById('msg');
-  const messages = document.getElementById('messages');
-
-  sendBtn.addEventListener('click', sendMessage);
-  msgInput.addEventListener('keypress', (e) => { if(e.key==='Enter') sendMessage(); });
-
-  function sendMessage() {
-    const user = localStorage.getItem('chatUsername') || 'Anonyme';
-    const message = msgInput.value.trim();
-    if (!message) return;
-
-    const data = { user, message, date: new Date() };
-    socket.emit('chatMessage', data);
-    addMessage(data, true);
-    msgInput.value = '';
-  }
-
-  socket.on('chatMessage', (data) => {
+socket.on('chatMessage', (data) => {
     addMessage(data);
-  });
+});
 
-  socket.on('loadMessages', (messagesArray) => {
+socket.on('loadMessages', (messagesArray) => {
     if(!Array.isArray(messagesArray)) return;
+    const currentUser = localStorage.getItem('chatUsername') || 'Anonyme';
     messagesArray.forEach(msg => {
-      const currentUser = localStorage.getItem('chatUsername') || 'Anonyme';
-      const isMe = msg.user === currentUser;
-      addMessage(msg, isMe);
+        const isMe = msg.username === currentUser;
+        addMessage(msg, isMe);
     });
-  });
-
-  // --- Lis itilizatè konekte yo ---
-  const usersList = document.getElementById('usersList');
-  socket.on('updateUserList', (users) => {
-    if (!Array.isArray(users)) return;
-    usersList.innerHTML = '';
-    users.forEach(u => {
-      const li = document.createElement('li');
-      li.style.padding = '4px 0';
-      li.style.borderBottom = '1px solid #ddd';
-      li.textContent = `• ${u}`;
-      usersList.appendChild(li);
-    });
-  });
+});
 </script>
 
 
