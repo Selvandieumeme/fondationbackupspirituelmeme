@@ -277,47 +277,50 @@
 });
 
 
-// --- 🧩 LIS ITILIZATÈ KONEKTE AN TAN REYÈL ---
-const usersList = document.getElementById('usersList');
-
-// Lè sèvè a voye lis itilizatè ki konekte yo
-socket.on('updateUserList', (users) => {
-  usersList.innerHTML = ''; // vide lis la pou rafrechi
-  users.forEach(u => {
-    const li = document.createElement('li');
-    li.style.padding = '4px 0';
-    li.style.borderBottom = '1px solid #ddd';
-    li.textContent = `• ${u}`;
-    usersList.appendChild(li);
-  });
-});
-</script>
 
 
+  
+<!-- Kadran lis itilizatè yo -->
+<div id="usersListPanel" style="
+  position: fixed;
+  right: 10px;
+  top: 10px;
+  background: rgba(255,255,255,0.9);
+  border-radius: 10px;
+  padding: 10px;
+  width: 220px;
+  height: 300px;
+  overflow-y: auto;
+  box-shadow: 0 0 10px rgba(0,0,0,0.2);
+  font-size: 14px;
+">
+  <h4 style="margin-top:0;text-align:center;">👥 Itilizatè aktif</h4>
+  <ul id="usersList" style="list-style:none; padding:0; margin:0;"></ul>
+</div>
 
-
- <script>
-  // ✅ Apre itilizatè a antre nan chat
+<script>
+  // --- Apre itilizatè a antre nan chat ---
   enterChatBtn.addEventListener('click', () => {
     const username = usernameInput.value.trim() || 'Anonyme';
     localStorage.setItem('chatUsername', username);
     userInput.value = username;
     loginOverlay.style.display = 'none';
 
-    // 👉 Voye non itilizatè a bay sèvè a
+    // Voye non itilizatè a bay sèvè a
     socket.emit('setUsername', username);
   });
 
-  // ✅ Nou deja gen kadran <div id="usersListPanel"> ak <ul id="usersList">
+  // --- Lis itilizatè konekte yo ---
   const usersList = document.getElementById('usersList');
 
-  // ✅ Lè sèvè a voye nouvo lis itilizatè yo
   socket.on('updateUserList', (users) => {
     if (!Array.isArray(users)) return;
     usersList.innerHTML = ''; // efase lis anvan an
     users.forEach(u => {
       const li = document.createElement('li');
-      li.textContent = '• ' + u;
+      li.style.padding = '4px 0';
+      li.style.borderBottom = '1px solid #ddd';
+      li.textContent = `• ${u}`;
       usersList.appendChild(li);
     });
   });
