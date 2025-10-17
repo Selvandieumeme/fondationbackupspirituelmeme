@@ -249,139 +249,93 @@ socket.on('loadMessages', (messagesArray) => {
   
 
 <!-- ===========================
-     INDEPENDANT USER LIST PANEL
+     REAL-TIME USER LIST PANEL
      Paste this BEFORE </body>
      =========================== -->
 <script>
-(function() {
-  const ID = 'fbsp-user-panel-v3';
+(function(){
+  const ID = 'fbsp-user-panel-realtime';
   if (document.getElementById(ID)) return;
 
-  // Create panel
+  // kreye panel
   const panel = document.createElement('aside');
   panel.id = ID;
+  panel.style.position = 'fixed';
+  panel.style.right = '14px';
+  panel.style.top = '14px';
+  panel.style.width = '260px';
+  panel.style.maxHeight = '72vh';
+  panel.style.background = '#fff';
+  panel.style.border = '1px solid #ccc';
+  panel.style.borderRadius = '8px';
+  panel.style.padding = '10px';
+  panel.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
+  panel.style.fontFamily = 'Arial, sans-serif';
+  panel.style.zIndex = '999999';
   panel.innerHTML = `
-    <div class="fbsp-head">
-      <div class="fbsp-title">👥 Itilizatè</div>
-      <div class="fbsp-actions">
-        <button class="fbsp-refresh" title="Rafrechi lis">⟳</button>
-        <button class="fbsp-close" title="Fèmen">—</button>
-      </div>
-    </div>
-    <div class="fbsp-stats">Konekte: <span class="fbsp-count">0</span></div>
-    <ul class="fbsp-users"></ul>
-    <div class="fbsp-log" aria-live="polite"></div>
+    <div style="font-weight:600; margin-bottom:6px;">👥 Itilizatè</div>
+    <ul id="fbsp-users-list" style="list-style:none; padding:0; margin:0; max-height:60vh; overflow:auto;"></ul>
   `;
-
-  // Style
-  const style = document.createElement('style');
-  style.textContent = `
-    #${ID} { position: fixed; right: 14px; top: 14px; width: 260px; max-height: 72vh; display:flex; flex-direction:column; background:#fff; border-radius:12px; box-shadow:0 12px 40px rgba(2,10,30,0.18); border:1px solid rgba(0,0,0,0.05); font-family: "Poppins", sans-serif; color:#111; z-index:999999; overflow:hidden; }
-    #${ID} .fbsp-head { display:flex; align-items:center; justify-content:space-between; padding:10px 12px; background:linear-gradient(90deg,#f4f7ff,#fff); border-bottom:1px solid rgba(0,0,0,0.04); }
-    #${ID} .fbsp-title { font-weight:600; font-size:14px; }
-    #${ID} .fbsp-actions { display:flex; gap:6px; }
-    #${ID} .fbsp-actions button { background:transparent; border:none; cursor:pointer; padding:6px; border-radius:6px; font-size:13px; }
-    #${ID} .fbsp-stats { padding:8px 12px; font-size:13px; border-bottom:1px solid rgba(0,0,0,0.03); color:#333; }
-    #${ID} .fbsp-users { list-style:none; margin:0; padding:8px 6px; overflow:auto; flex:1; }
-    #${ID} .fbsp-users li { display:flex; align-items:center; gap:8px; padding:6px; border-radius:8px; margin-bottom:6px; font-size:13px; }
-    #${ID} .fbsp-dot { width:10px; height:10px; border-radius:50%; flex:0 0 10px; box-shadow:0 0 6px rgba(0,0,0,0.06); }
-    #${ID} .fbsp-online { background:#24c36a; }
-    #${ID} .fbsp-offline { background:#ff4757; }
-    #${ID} .fbsp-name { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-    #${ID} .fbsp-log { font-size:12px; color:#666; padding:8px 12px; border-top:1px solid rgba(0,0,0,0.03); max-height:88px; overflow:auto; background:rgba(250,250,250,0.6); }
-    @media (max-width:640px) { #${ID} { right:8px; top:8px; width:210px; max-height:58vh; } }
-  `;
-  document.head.appendChild(style);
   document.body.appendChild(panel);
 
-  // Refs
-  const usersEl = panel.querySelector('.fbsp-users');
-  const countEl = panel.querySelector('.fbsp-count');
-  const logEl   = panel.querySelector('.fbsp-log');
-  const refreshBtn = panel.querySelector('.fbsp-refresh');
-  const closeBtn = panel.querySelector('.fbsp-close');
+  const usersEl = document.getElementById('fbsp-users-list');
+  let users = new Map(); // user -> online state
 
-  // Local state
-  let users = [];
+  // konekte socket
+  let sock;
+  try { sock = (typeof io === 'function') ? io() : null; } catch(e){ sock = null; }
+  if(!sock) try { sock = io(window.location.origin); } catch(e){ usersEl.innerHTML = '<li>Socket.io pa disponib</li>'; return; }
 
-  // Socket
-  const socket = (typeof io === 'function') ? io() : io(window.location.origin);
-
-  // Render helpers
+  // fonksyon pou mete ajou lis la
   function renderUsers() {
     usersEl.innerHTML = '';
-    users.forEach(u => {
+    users.forEach((online, user) => {
       const li = document.createElement('li');
-      const dot = document.createElement('span');
-      dot.className = `fbsp-dot ${u.online ? 'fbsp-online' : 'fbsp-offline'}`;
-      const name = document.createElement('span');
-      name.className = 'fbsp-name';
-      name.textContent = u.user;
-      li.appendChild(dot);
-      li.appendChild(name);
+      li.textContent = user;
+      li.style.color = online ? '#24c36a' : '#ff4757'; // vèt = konekte, wouj = dekonekte
+      li.style.padding = '4px 6px';
+      li.style.borderBottom = '1px solid #eee';
+      li.style.borderRadius = '4px';
+      li.style.marginBottom = '2px';
       usersEl.appendChild(li);
     });
-    countEl.textContent = users.filter(u => u.online).length;
   }
 
-  function addLog(text) {
-    const d = document.createElement('div');
-    d.textContent = `${new Date().toLocaleTimeString()}: ${text}`;
-    logEl.prepend(d);
-    while (logEl.children.length > 50) logEl.removeChild(logEl.lastChild);
+  // evènman lè yon itilizatè konekte
+  sock.on('userConnected', (user) => {
+    if(!user) return;
+    users.set(user, true);
+    renderUsers();
+  });
+
+  // evènman lè yon itilizatè dekonekte
+  sock.on('userDisconnected', (user) => {
+    if(!user) return;
+    if(users.has(user)) users.set(user, false);
+    renderUsers();
+  });
+
+  // chak fwa itilizatè voye mesaj premye fwa, voye li tounen kòm konekte
+  const sendBtn = document.getElementById('send');
+  const msgInput = document.getElementById('msg');
+  const userInput = document.getElementById('user');
+
+  function notifyUser() {
+    const user = userInput.value.trim() || 'Anonyme';
+    sock.emit('setUser', user); // evènman pou fè server konnen itilizatè konekte
+    users.set(user, true);
+    renderUsers();
   }
 
-  // Handle server events
-  socket.on('userConnected', (userName) => {
-    if (!userName) return;
-    const exist = users.find(u => u.user === userName);
-    if (!exist) users.push({ user: userName, online: true });
-    else exist.online = true;
-    renderUsers();
-    addLog(`👤 ${userName} konekte`);
-  });
-
-  socket.on('userDisconnected', (userName) => {
-    const exist = users.find(u => u.user === userName);
-    if (exist) {
-      exist.online = false;
-      renderUsers();
-      addLog(`🔴 ${userName} dekonekte`);
-    }
-  });
-
-  // Manual refresh
-  refreshBtn.addEventListener('click', () => {
-    socket.emit('requestUserList');
-    addLog('Mande lis itilizatè nan sèvè...');
-  });
-
-  // Close/toggle panel
-  let collapsed = false;
-  closeBtn.addEventListener('click', () => {
-    collapsed = !collapsed;
-    panel.style.transform = collapsed ? 'translateX(120%)' : 'translateX(0)';
-    panel.style.opacity = collapsed ? '0' : '1';
-  });
-
-  // On connect request current users
-  socket.on('connect', () => {
-    addLog('Panel konekte ak sèvè.');
-    socket.emit('requestUserList');
-  });
-
-  // On full user list from server
-  socket.on('updateUserList', (list) => {
-    if (!Array.isArray(list)) return;
-    users = list.map(u => ({ user: u, online: true }));
-    renderUsers();
-    addLog('Lis itilizatè mete ajou.');
+  sendBtn.addEventListener('click', notifyUser);
+  msgInput.addEventListener('keypress', e => {
+    if(e.key === 'Enter') notifyUser();
   });
 
 })();
 </script>
 <!-- ===========================
-     END INDEPENDANT USER LIST PANEL
+     END REAL-TIME USER LIST PANEL
      =========================== -->
 
 
