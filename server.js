@@ -335,6 +335,15 @@ io.on('connection', async (socket) => {
     }
   });
 
+  
+
+// ✅ Reponn lè yon kliyan mande lis itilizatè yo
+socket.on('requestUserList', () => {
+  io.emit('updateUserList', Array.from(activeUsers.values()));
+});
+  
+  
+
   // ✅ Lè itilizatè a dekonekte
   socket.on('disconnect', () => {
     const user = activeUsers.get(socket.id);
