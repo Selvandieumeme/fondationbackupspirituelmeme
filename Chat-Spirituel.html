@@ -172,104 +172,67 @@
 
 
 
-<!-- Overlay pou antre non itilizatè a -->
-<div id="loginOverlay" style="
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.8);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-direction: column;
-  color: white;
-  z-index: 1000;
-">
-  <h2>👋 Bienvenue dans le Chat Fondation Backup Spirituel Mondial</h2>
-  <p>Antre non ou (nickname) pou kontinye:</p>
-  <input type="text" id="usernameInput" placeholder="Antre non ou..." style="padding:10px; border:none; border-radius:5px; width:60%; max-width:300px;">
-  <button id="enterChatBtn" style="margin-top:10px; padding:10px 20px; border:none; border-radius:5px; background:#00aaff; color:white; cursor:pointer;">
-    Antre nan Chat
-  </button>
-</div>
-
-
-
-  
 <script>
-  const loginOverlay = document.getElementById('loginOverlay');
-  const enterChatBtn = document.getElementById('enterChatBtn');
-  const usernameInput = document.getElementById('usernameInput');
-  const userInput = document.getElementById('user'); // input chat deja egziste
+const socket = io('https://examen-backend-ihlx.onrender.com');
+const sendBtn = document.getElementById('send');
+const msgInput = document.getElementById('msg');
+const userInput = document.getElementById('user');
+const messages = document.getElementById('messages');
 
-  const socket = io('https://examen-backend-ihlx.onrender.com');
-
-  // --- Set pou evite mesaj double ---
-  const displayedMessages = new Set();
-
-  // --- Bouton Antre nan chat (yon sèl listener) ---
-  enterChatBtn.addEventListener('click', () => {
-    const username = usernameInput.value.trim() || 'Anonyme';
-    localStorage.setItem('chatUsername', username);
-    userInput.value = username;
-    loginOverlay.style.display = 'none';
-
-    // Voye non itilizatè a bay sèvè a pou kadran lis itilizatè
-    socket.emit('setUsername', username);
-  });
-
-  usernameInput.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') enterChatBtn.click();
-  });
-
-  function sendMessage() {
-    const username = localStorage.getItem('chatUsername') || 'Anonyme';
-    const message = msgInput.value.trim();
-    if (!message) return;
-
-    const data = { username, message, date: new Date() };
-    socket.emit('chatMessage', data);
-    addMessage(data, true);
-    msgInput.value = '';
-}
-
+// Fonkksyon pou ajoute mesaj nan lis la ak dat
 function addMessage(data, isMe = false) {
-    if (!data || !data.message) return;
-    const msgId = `${data.username}-${data.date}-${data.message}`;
-    if (displayedMessages.has(msgId)) return;
-    displayedMessages.add(msgId);
-
-    const li = document.createElement('li');
-    const user = data.username || 'Anonyme';
-    const message = data.message || '';
-    const dateObj = new Date(data.date || Date.now());
-    const hours = dateObj.getHours().toString().padStart(2,'0');
-    const minutes = dateObj.getMinutes().toString().padStart(2,'0');
-    const day = dateObj.getDate().toString().padStart(2,'0');
-    const month = (dateObj.getMonth()+1).toString().padStart(2,'0');
-    const year = dateObj.getFullYear();
-    li.textContent = `${user} [${day}/${month}/${year} ${hours}:${minutes}]: ${message}`;
-    if (isMe) li.classList.add('me');
-    messages.appendChild(li);
-    messages.scrollTop = messages.scrollHeight;
-    li.scrollIntoView({ behavior: 'smooth', block: 'end' });
+  if (!data || !data.message) return; // evite mesaj vid
+  const li = document.createElement('li');
+  const user = data.user || 'Anonyme';
+  const message = data.message || '';
+  const dateObj = new Date(data.date || Date.now());
+  const hours = dateObj.getHours().toString().padStart(2, '0');
+  const minutes = dateObj.getMinutes().toString().padStart(2, '0');
+  const day = dateObj.getDate().toString().padStart(2, '0');
+  const month = (dateObj.getMonth() + 1).toString().padStart(2, '0');
+  const year = dateObj.getFullYear();
+  li.textContent = `${user} [${day}/${month}/${year} ${hours}:${minutes}]: ${message}`;
+  if (isMe) li.classList.add('me');
+  messages.appendChild(li);
+  messages.scrollTop = messages.scrollHeight;
+  li.scrollIntoView({ behavior: 'smooth', block: 'end' });
 }
 
-socket.on('chatMessage', (data) => {
-    addMessage(data);
+// Voye mesaj lè itilizatè klike oswa tape Enter
+sendBtn.addEventListener('click', sendMessage);
+msgInput.addEventListener('keypress', (e) => {
+  if (e.key === 'Enter') sendMessage();
 });
 
+function sendMessage() {
+  const user = userInput.value.trim() || 'Anonyme';
+  const message = msgInput.value.trim();
+  if (!message) return;
+  const data = { user, message, date: new Date() };
+  socket.emit('chatMessage', data);
+  addMessage(data, true); // montre mesaj lokal la
+  msgInput.value = '';
+}
+
+// Resevwa nouvo mesaj nan mond lan
+socket.on('chatMessage', (data) => {
+  const currentUser = userInput.value.trim() || 'Anonyme';
+  if (data.user === currentUser && new Date(data.date).getTime() === new Date().getTime()) {
+    return; // evite double mesaj lokal deja afiche
+  }
+  addMessage(data);
+});
+
+// Chaje mesaj ki deja nan DB lè nouvo itilizatè konekte
 socket.on('loadMessages', (messagesArray) => {
-    if(!Array.isArray(messagesArray)) return;
-    const currentUser = localStorage.getItem('chatUsername') || 'Anonyme';
-    messagesArray.forEach(msg => {
-        const isMe = msg.username === currentUser;
-        addMessage(msg, isMe);
-    });
+  if (!Array.isArray(messagesArray)) return;
+  messagesArray.forEach(msg => {
+    const currentUser = userInput.value.trim() || 'Anonyme';
+    const isMe = msg.user === currentUser;
+    addMessage(msg, isMe);
+  });
 });
 </script>
-
-
-
 
 
   
