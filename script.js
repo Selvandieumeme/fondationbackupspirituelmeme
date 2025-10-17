@@ -1,5 +1,5 @@
 // =======================
-// ✅ script.js FINAL KOREKTE
+// ✅ script.js FINAL KOREKTE — Vèsyon ak setUser sèlman
 // =======================
 
 // 1️⃣ — Rekipere non itilizatè a depi nan localStorage
@@ -7,6 +7,7 @@ let user = localStorage.getItem('user');
 
 // 2️⃣ — Konekte ak Socket.io
 const socket = io('https://examen-backend-ihlx.onrender.com');
+window.socket = socket; // 🔹 fè koneksyon an disponib pou lòt script (tankou onlineUsersPanel.js)
 
 // 3️⃣ — Lè paj la chaje
 window.addEventListener('load', () => {
@@ -15,11 +16,11 @@ window.addEventListener('load', () => {
   } else {
     document.getElementById('loginOverlay').style.display = 'none';
 
-    // ✅ Voye non itilizatè a bay server
+    // ✅ Voye non itilizatè a bay server avèk "setUser"
     if (socket && socket.connected) {
-      socket.emit('setUsername', user);
+      socket.emit('setUser', user);
     } else {
-      socket.on('connect', () => socket.emit('setUsername', user));
+      socket.on('connect', () => socket.emit('setUser', user));
     }
   }
 });
@@ -60,8 +61,9 @@ function sendMessage() {
   const message = msgInput.value.trim();
   if (!message) return;
 
+  // ✅ Asire itilizatè a byen idantifye sou server anvan li voye mesaj
   if (socket && socket.connected) {
-    socket.emit('setUsername', user);
+    socket.emit('setUser', user);
   }
 
   const data = { user, message, date: new Date() };
