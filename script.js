@@ -11,22 +11,6 @@ window.addEventListener('load', () => {
   }
 });
 
-// Bouton pou antre nan chat la
-document.getElementById('enterChatBtn').addEventListener('click', () => {
-  const input = document.getElementById('usernameInput');
-  const name = input.value.trim();
-
-  if (name) {
-    username = name;
-    localStorage.setItem('username', name);
-    document.getElementById('loginOverlay').style.display = 'none';
-    socket.emit('setUsername', username); // ✅ Nouvo pati enpòtan pou lis itilizatè yo
-  } else {
-    alert('Tanpri antre yon non avan ou antre nan chat la.');
-  }
-});
-
-
 // ✅ Konekte ak Socket.io
 const socket = io();
 
@@ -41,29 +25,48 @@ if (username) {
   socket.emit('setUsername', username);
 }
 
+// Bouton pou antre nan chat la
+document.getElementById('enterChatBtn').addEventListener('click', () => {
+  const input = document.getElementById('usernameInput');
+  const name = input.value.trim();
+
+  if (name) {
+    username = name;
+    localStorage.setItem('username', name);
+    document.getElementById('loginOverlay').style.display = 'none';
+    socket.emit('setUsername', username); // ✅ Voye non itilizatè a bay sèvè
+    userInput.value = username; // Mete non itilizatè a nan input chat la si bezwen
+  } else {
+    alert('Tanpri antre yon non avan ou antre nan chat la.');
+  }
+});
+
 // ✅ Lè moun voye mesaj
 sendBtn.addEventListener('click', () => {
   const message = msgInput.value.trim();
   if (message) {
     socket.emit('chatMessage', {
-      username: username || 'Anonyme',
+      username: username || 'Anonyme', // toujou itilize username
       message: message
     });
     msgInput.value = '';
   }
 });
 
+// Pèmèt itilizatè tape Enter pou voye mesaj
+msgInput.addEventListener('keypress', (e) => {
+  if (e.key === 'Enter') sendBtn.click();
+});
+
 // ✅ Resevwa nouvo mesaj soti nan sèvè
 socket.on('chatMessage', (data) => {
-  const { user, username, message, date } = data;
-  const sender = username || user || 'Anonyme';
-  const time = date ? new Date(date).toLocaleTimeString() : '';
+  const sender = data.username || 'Anonyme'; // toujou pran username
+  const time = data.date ? new Date(data.date).toLocaleTimeString() : '';
   const msg = document.createElement('p');
-  msg.textContent = `${sender} [${time}]: ${message}`;
+  msg.textContent = `${sender} [${time}]: ${data.message}`;
   messages.appendChild(msg);
   messages.scrollTop = messages.scrollHeight;
 });
-
 
 // ✅ Resevwa lis itilizatè konekte yo (kadran dwat la)
 socket.on('updateUserList', (users) => {
