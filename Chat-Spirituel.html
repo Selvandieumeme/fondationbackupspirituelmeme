@@ -263,13 +263,13 @@ function sendMessage() {
 
 
 
- <!-- REAL-TIME USER LIST PANEL (KORIJE & SENKRO) -->
+<!-- REAL-TIME USER LIST PANEL (FINAL STABLE) -->
 <script>
 (function(){
   const ID = 'fbsp-user-panel-realtime';
   if (document.getElementById(ID)) return;
 
-  // --- Panel vizyèl la ---
+  // --- Panel UI ---
   const panel = document.createElement('aside');
   panel.id = ID;
   panel.style.position = 'fixed';
@@ -286,8 +286,8 @@ function sendMessage() {
   panel.style.zIndex = '999999';
   panel.style.overflow = 'auto';
   panel.innerHTML = `
-    <div style="font-weight:600; margin-bottom:6px;">👥 Itilizatè</div>
-    <div style="font-size:12px;margin-bottom:8px;">Online se vèt — Offline se wouj</div>
+    <div style="font-weight:600; margin-bottom:6px;">👥 Itilizatè konekte</div>
+    <div style="font-size:12px;margin-bottom:8px;">Vèt = sou entènèt / Wouj = dekonekte</div>
     <ul id="fbsp-users-list" style="list-style:none; padding:0; margin:0; max-height:60vh; overflow:auto;"></ul>
   `;
   document.body.appendChild(panel);
@@ -295,18 +295,8 @@ function sendMessage() {
   const usersEl = document.getElementById('fbsp-users-list');
   const users = new Map();
 
-  // --- Itilize socket prensipal la (ki soti nan script chat la) ---
-  let sock = null;
-  if (typeof socket !== 'undefined') {
-    sock = socket; // Reuse koneksyon prensipal chat la
-  } else {
-    try {
-      sock = io('https://examen-backend-ihlx.onrender.com'); // backup
-    } catch (e) {
-      usersEl.innerHTML = '<li style="color:#d00">Socket.io pa disponib</li>';
-      return;
-    }
-  }
+  // --- Reuse socket prensipal la ---
+  const sock = (typeof socket !== 'undefined') ? socket : io(window.location.origin);
 
   // --- Fonksyon afichaj ---
   function renderUsers() {
@@ -345,6 +335,7 @@ function sendMessage() {
     });
   }
 
+  // --- Fonksyon senkronizasyon ---
   function setFullList(arr) {
     users.clear();
     arr.forEach(u => users.set(u, true));
@@ -357,38 +348,22 @@ function sendMessage() {
     renderUsers();
   }
 
-  // --- Evènman ki soti nan server ---
-  sock.on('updateUserList', (arr)=>{
+  // --- Evènman socket yo ---
+  sock.on('updateUserList', (arr) => {
     if (!Array.isArray(arr)) return;
     setFullList(arr);
   });
 
-  sock.on('userConnected', (name)=>{
-    if (!name) return;
+  sock.on('userConnected', (name) => {
     setOnline(name, true);
   });
 
-  sock.on('userDisconnected', (name)=>{
-    if (!name) return;
-    users.set(name, false);
-    renderUsers();
+  sock.on('userDisconnected', (name) => {
+    setOnline(name, false);
   });
 
-  sock.on('connect', ()=>{
-    try { sock.emit('requestUserList'); } catch(e){}
-  });
-
-  // --- Senkronize ak non lokal la ---
-  const localUserInput = document.getElementById('user');
-  const localSendBtn = document.getElementById('send');
-  const localMsg = document.getElementById('msg');
-  function notifyLocalUser() {
-    const name = localUserInput?.value.trim() || 'Anonyme';
-    sock.emit('setUser', name);
-  }
-  if (localSendBtn) localSendBtn.addEventListener('click', notifyLocalUser);
-  if (localMsg) localMsg.addEventListener('keypress', e=>{
-    if (e.key === 'Enter') notifyLocalUser();
+  sock.on('connect', () => {
+    sock.emit('requestUserList'); // mande lis aktyèl la imedyatman
   });
 
 })();
