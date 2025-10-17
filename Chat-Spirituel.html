@@ -196,61 +196,60 @@
 
   
 <script>
-  // --- LOGIN / NICKNAME ---
   const loginOverlay = document.getElementById('loginOverlay');
   const enterChatBtn = document.getElementById('enterChatBtn');
   const usernameInput = document.getElementById('usernameInput');
   const userInput = document.getElementById('user'); // input chat deja egziste
 
-  // Mete nickname nan localStorage lè itilizatè klike bouton "Antre nan chat"
+  const socket = io('https://examen-backend-ihlx.onrender.com');
+
+  // --- Set pou evite mesaj double ---
+  const displayedMessages = new Set();
+
+  // --- Bouton Antre nan chat (yon sèl listener) ---
   enterChatBtn.addEventListener('click', () => {
     const username = usernameInput.value.trim() || 'Anonyme';
     localStorage.setItem('chatUsername', username);
     userInput.value = username;
-    loginOverlay.style.display = 'none'; // fè overlay disparèt
+    loginOverlay.style.display = 'none';
+
+    // Voye non itilizatè a bay sèvè a pou kadran lis itilizatè
+    socket.emit('setUsername', username);
   });
 
-  // Pèmèt itilizatè tape Enter pou antre nan chat
   usernameInput.addEventListener('keypress', (e) => {
     if (e.key === 'Enter') enterChatBtn.click();
   });
 
-  // --- CHAT SCRIPT ORIJINAL ---
-  const socket = io('https://examen-backend-ihlx.onrender.com');
-  const sendBtn = document.getElementById('send');
-  const msgInput = document.getElementById('msg');
-  const messages = document.getElementById('messages');
-
-  // Set pou evite mesaj doub
-  const displayedMessages = new Set();
-
+  // --- Fonksyon pou ajoute mesaj nan chat ---
   function addMessage(data, isMe = false) {
     if (!data || !data.message) return;
-
-    // id inik pou chak mesaj
     const msgId = `${data.user}-${data.date}-${data.message}`;
-    if (displayedMessages.has(msgId)) return; // deja afiche
+    if (displayedMessages.has(msgId)) return;
     displayedMessages.add(msgId);
 
     const li = document.createElement('li');
     const user = data.user || 'Anonyme';
     const message = data.message || '';
     const dateObj = new Date(data.date || Date.now());
-    const hours = dateObj.getHours().toString().padStart(2, '0');
-    const minutes = dateObj.getMinutes().toString().padStart(2, '0');
-    const day = dateObj.getDate().toString().padStart(2, '0');
-    const month = (dateObj.getMonth() + 1).toString().padStart(2, '0');
+    const hours = dateObj.getHours().toString().padStart(2,'0');
+    const minutes = dateObj.getMinutes().toString().padStart(2,'0');
+    const day = dateObj.getDate().toString().padStart(2,'0');
+    const month = (dateObj.getMonth()+1).toString().padStart(2,'0');
     const year = dateObj.getFullYear();
     li.textContent = `${user} [${day}/${month}/${year} ${hours}:${minutes}]: ${message}`;
-
     if (isMe) li.classList.add('me');
     messages.appendChild(li);
     messages.scrollTop = messages.scrollHeight;
     li.scrollIntoView({ behavior: 'smooth', block: 'end' });
   }
 
+  const sendBtn = document.getElementById('send');
+  const msgInput = document.getElementById('msg');
+  const messages = document.getElementById('messages');
+
   sendBtn.addEventListener('click', sendMessage);
-  msgInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') sendMessage(); });
+  msgInput.addEventListener('keypress', (e) => { if(e.key==='Enter') sendMessage(); });
 
   function sendMessage() {
     const user = localStorage.getItem('chatUsername') || 'Anonyme';
@@ -259,63 +258,28 @@
 
     const data = { user, message, date: new Date() };
     socket.emit('chatMessage', data);
-    addMessage(data, true); // montre mesaj lokal la
+    addMessage(data, true);
     msgInput.value = '';
   }
 
   socket.on('chatMessage', (data) => {
-    addMessage(data); // pa gen risk double, Set la ap jere sa
+    addMessage(data);
   });
 
   socket.on('loadMessages', (messagesArray) => {
-  if (!Array.isArray(messagesArray)) return;
-  messagesArray.forEach(msg => {
-    const currentUser = localStorage.getItem('chatUsername') || 'Anonyme';
-    const isMe = msg.user === currentUser;
-    addMessage(msg, isMe);
-  });
-});
-
-
-
-
-  
-<!-- Kadran lis itilizatè yo -->
-<div id="usersListPanel" style="
-  position: fixed;
-  right: 10px;
-  top: 10px;
-  background: rgba(255,255,255,0.9);
-  border-radius: 10px;
-  padding: 10px;
-  width: 220px;
-  height: 300px;
-  overflow-y: auto;
-  box-shadow: 0 0 10px rgba(0,0,0,0.2);
-  font-size: 14px;
-">
-  <h4 style="margin-top:0;text-align:center;">👥 Itilizatè aktif</h4>
-  <ul id="usersList" style="list-style:none; padding:0; margin:0;"></ul>
-</div>
-
-<script>
-  // --- Apre itilizatè a antre nan chat ---
-  enterChatBtn.addEventListener('click', () => {
-    const username = usernameInput.value.trim() || 'Anonyme';
-    localStorage.setItem('chatUsername', username);
-    userInput.value = username;
-    loginOverlay.style.display = 'none';
-
-    // Voye non itilizatè a bay sèvè a
-    socket.emit('setUsername', username);
+    if(!Array.isArray(messagesArray)) return;
+    messagesArray.forEach(msg => {
+      const currentUser = localStorage.getItem('chatUsername') || 'Anonyme';
+      const isMe = msg.user === currentUser;
+      addMessage(msg, isMe);
+    });
   });
 
   // --- Lis itilizatè konekte yo ---
   const usersList = document.getElementById('usersList');
-
   socket.on('updateUserList', (users) => {
     if (!Array.isArray(users)) return;
-    usersList.innerHTML = ''; // efase lis anvan an
+    usersList.innerHTML = '';
     users.forEach(u => {
       const li = document.createElement('li');
       li.style.padding = '4px 0';
