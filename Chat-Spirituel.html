@@ -179,14 +179,15 @@ const msgInput = document.getElementById('msg');
 const userInput = document.getElementById('user');
 const messages = document.getElementById('messages');
 
-// Fè server konnen non itilizatè a pou panel endepandan
+// ✅ Fè server konnen non itilizatè a pou panel endepandan
 function registerUser() {
   const user = userInput.value.trim() || 'Anonyme';
-  socket.emit('setUsername', user); // voye non itilizatè a
-  socket.emit('userConnected', user); // evènman imedyat pou tout panel
+  // Voye non itilizatè a bay server pou panel endepandan
+  socket.emit('setUser', user);        // pou panel lis itilizatè
+  socket.emit('userConnected', user);  // evènman imedyat pou tout panel
 }
 
-// Fonkksyon pou ajoute mesaj nan lis la ak dat
+// ✅ Fonksyon pou ajoute mesaj nan lis la ak dat
 function addMessage(data, isMe = false) {
   if (!data || !data.message) return;
   const li = document.createElement('li');
@@ -205,7 +206,7 @@ function addMessage(data, isMe = false) {
   li.scrollIntoView({ behavior: 'smooth', block: 'end' });
 }
 
-// Voye mesaj lè itilizatè klike oswa tape Enter
+// ✅ Voye mesaj lè itilizatè klike oswa tape Enter
 sendBtn.addEventListener('click', sendMessage);
 msgInput.addEventListener('keypress', (e) => {
   if (e.key === 'Enter') sendMessage();
@@ -216,7 +217,7 @@ function sendMessage() {
   const message = msgInput.value.trim();
   if (!message) return;
 
-  // Enregistre itilizatè a si li poko fè sa
+  // ✅ Enregistre itilizatè a si li poko fè sa (asire panel ajou)
   registerUser();
 
   const data = { user, message, date: new Date() };
@@ -225,14 +226,14 @@ function sendMessage() {
   msgInput.value = '';
 }
 
-// Resevwa nouvo mesaj nan mond lan
+// ✅ Resevwa nouvo mesaj nan mond lan
 socket.on('chatMessage', (data) => {
   const currentUser = userInput.value.trim() || 'Anonyme';
   if (data.user === currentUser && new Date(data.date).getTime() === new Date().getTime()) return;
   addMessage(data);
 });
 
-// Chaje mesaj ki deja nan DB lè nouvo itilizatè konekte
+// ✅ Chaje mesaj ki deja nan DB lè nouvo itilizatè konekte
 socket.on('loadMessages', (messagesArray) => {
   if (!Array.isArray(messagesArray)) return;
   messagesArray.forEach(msg => {
@@ -257,7 +258,7 @@ socket.on('loadMessages', (messagesArray) => {
   const ID = 'fbsp-user-panel-realtime';
   if (document.getElementById(ID)) return;
 
-  // kreye panel
+  // Kreye panel
   const panel = document.createElement('aside');
   panel.id = ID;
   panel.style.position = 'fixed';
@@ -281,12 +282,12 @@ socket.on('loadMessages', (messagesArray) => {
   const usersEl = document.getElementById('fbsp-users-list');
   let users = new Map(); // user -> online state
 
-  // konekte socket
+  // Konekte socket
   let sock;
   try { sock = (typeof io === 'function') ? io() : null; } catch(e){ sock = null; }
   if(!sock) try { sock = io(window.location.origin); } catch(e){ usersEl.innerHTML = '<li>Socket.io pa disponib</li>'; return; }
 
-  // fonksyon pou mete ajou lis la
+  // Fonksyon pou mete ajou lis la
   function renderUsers() {
     usersEl.innerHTML = '';
     users.forEach((online, user) => {
@@ -301,28 +302,36 @@ socket.on('loadMessages', (messagesArray) => {
     });
   }
 
-  // evènman lè yon itilizatè konekte
+  // Evènman lè lis itilizatè chanje (full list)
+  sock.on('updateUserList', (arr) => {
+    if(!Array.isArray(arr)) return;
+    users.clear();
+    arr.forEach(u => users.set(u, true)); // tout itilizatè konekte = vèt
+    renderUsers();
+  });
+
+  // Evènman lè yon itilizatè konekte
   sock.on('userConnected', (user) => {
     if(!user) return;
     users.set(user, true);
     renderUsers();
   });
 
-  // evènman lè yon itilizatè dekonekte
+  // Evènman lè yon itilizatè dekonekte
   sock.on('userDisconnected', (user) => {
     if(!user) return;
     if(users.has(user)) users.set(user, false);
     renderUsers();
   });
 
-  // chak fwa itilizatè voye mesaj premye fwa, voye li tounen kòm konekte
+  // Chak fwa itilizatè voye mesaj premye fwa, voye li tounen kòm konekte
   const sendBtn = document.getElementById('send');
   const msgInput = document.getElementById('msg');
   const userInput = document.getElementById('user');
 
   function notifyUser() {
     const user = userInput.value.trim() || 'Anonyme';
-    sock.emit('setUser', user); // evènman pou fè server konnen itilizatè konekte
+    sock.emit('setUser', user); // fè server konnen itilizatè konekte
     users.set(user, true);
     renderUsers();
   }
