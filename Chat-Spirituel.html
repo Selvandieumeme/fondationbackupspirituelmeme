@@ -293,7 +293,7 @@
 
 
 
-<!-- ================== KADRAN ITILIZATÈ ENDIPANDAN ================== -->
+<!-- ================== KADRAN ITILIZATÈ ================== -->
 <div id="userStatusPanel" style="
   position: fixed;
   top: 10px;
@@ -313,49 +313,46 @@
 </div>
 
 <script>
-  // --- Endepandan kadran itilizatè ---
-  (function() {
-    const socket = io('https://examen-backend-ihlx.onrender.com'); // koneksyon Socket.io
-    const userStatusList = document.getElementById('userStatusList');
+(function() {
+  const userStatusList = document.getElementById('userStatusList');
 
-    // Fonksyon pou rafrechi lis itilizatè yo
-    function updateList(users) {
-      if (!Array.isArray(users)) return;
-      userStatusList.innerHTML = '';
-      users.forEach(u => {
-        const li = document.createElement('li');
-        li.textContent = '• ' + u;
-        li.style.padding = '4px 0';
-        li.style.borderBottom = '1px solid #ddd';
-        userStatusList.appendChild(li);
-      });
-    }
-
-    // --- Nouvo itilizatè konekte ---
-    socket.on('userConnected', (username) => {
+  function updateList(users) {
+    if (!Array.isArray(users)) return;
+    userStatusList.innerHTML = '';
+    users.forEach(u => {
       const li = document.createElement('li');
-      li.textContent = `👤 ${username} konekte`;
-      li.style.color = 'green';
-      li.style.padding = '2px 0';
+      li.textContent = '• ' + u;
+      li.style.padding = '4px 0';
+      li.style.borderBottom = '1px solid #ddd';
       userStatusList.appendChild(li);
-      userStatusList.scrollTop = userStatusList.scrollHeight;
     });
+  }
 
-    // --- Itilizatè dekonekte ---
-    socket.on('userDisconnected', (username) => {
-      const li = document.createElement('li');
-      li.textContent = `🔴 ${username} dekonekte`;
-      li.style.color = 'red';
-      li.style.padding = '2px 0';
-      userStatusList.appendChild(li);
-      userStatusList.scrollTop = userStatusList.scrollHeight;
-    });
+  // --- Nouvo itilizatè konekte ---
+  socket.on('userConnected', (username) => {
+    const li = document.createElement('li');
+    li.textContent = `👤 ${username} konekte`;
+    li.style.color = 'green';
+    li.style.padding = '2px 0';
+    userStatusList.appendChild(li);
+    userStatusList.scrollTop = userStatusList.scrollHeight;
+  });
 
-    // --- Rafrechi lis itilizatè konekte total (opsyonèl) ---
-    socket.on('updateUserList', (users) => {
-      updateList(users);
-    });
-  })();
+  // --- Itilizatè dekonekte ---
+  socket.on('userDisconnected', (username) => {
+    const li = document.createElement('li');
+    li.textContent = `🔴 ${username} dekonekte`;
+    li.style.color = 'red';
+    li.style.padding = '2px 0';
+    userStatusList.appendChild(li);
+    userStatusList.scrollTop = userStatusList.scrollHeight;
+  });
+
+  // --- Rafrechi lis itilizatè konekte total ---
+  socket.on('updateUserList', (users) => {
+    updateList(users);
+  });
+})();
 </script>
   
 </body>
