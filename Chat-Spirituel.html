@@ -289,5 +289,74 @@
     });
   });
 </script>
+
+
+
+
+<!-- ================== KADRAN ITILIZATÈ ENDIPANDAN ================== -->
+<div id="userStatusPanel" style="
+  position: fixed;
+  top: 10px;
+  right: 10px;
+  width: 220px;
+  max-height: 300px;
+  background: rgba(255,255,255,0.95);
+  border-radius: 10px;
+  padding: 10px;
+  overflow-y: auto;
+  box-shadow: 0 0 10px rgba(0,0,0,0.2);
+  font-size: 14px;
+  z-index: 9999;
+">
+  <h4 style="margin-top:0; text-align:center;">👥 Itilizatè aktif</h4>
+  <ul id="userStatusList" style="list-style:none; padding:0; margin:0;"></ul>
+</div>
+
+<script>
+  // --- Endepandan kadran itilizatè ---
+  (function() {
+    const socket = io('https://examen-backend-ihlx.onrender.com'); // koneksyon Socket.io
+    const userStatusList = document.getElementById('userStatusList');
+
+    // Fonksyon pou rafrechi lis itilizatè yo
+    function updateList(users) {
+      if (!Array.isArray(users)) return;
+      userStatusList.innerHTML = '';
+      users.forEach(u => {
+        const li = document.createElement('li');
+        li.textContent = '• ' + u;
+        li.style.padding = '4px 0';
+        li.style.borderBottom = '1px solid #ddd';
+        userStatusList.appendChild(li);
+      });
+    }
+
+    // --- Nouvo itilizatè konekte ---
+    socket.on('userConnected', (username) => {
+      const li = document.createElement('li');
+      li.textContent = `👤 ${username} konekte`;
+      li.style.color = 'green';
+      li.style.padding = '2px 0';
+      userStatusList.appendChild(li);
+      userStatusList.scrollTop = userStatusList.scrollHeight;
+    });
+
+    // --- Itilizatè dekonekte ---
+    socket.on('userDisconnected', (username) => {
+      const li = document.createElement('li');
+      li.textContent = `🔴 ${username} dekonekte`;
+      li.style.color = 'red';
+      li.style.padding = '2px 0';
+      userStatusList.appendChild(li);
+      userStatusList.scrollTop = userStatusList.scrollHeight;
+    });
+
+    // --- Rafrechi lis itilizatè konekte total (opsyonèl) ---
+    socket.on('updateUserList', (users) => {
+      updateList(users);
+    });
+  })();
+</script>
+  
 </body>
 </html>
