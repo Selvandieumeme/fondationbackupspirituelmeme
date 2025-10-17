@@ -262,7 +262,6 @@ app.get('/ping', (req, res) => res.send('pong'));
 // 💬 SOCKET.IO CHAT — VÈSYON FINAL AK LISTE ITILIZATÈ AKTIF
 // ---------------------------
 
-import http from 'http';
 import { Server } from 'socket.io';
 import mongoose from 'mongoose';
 import path from 'path';
