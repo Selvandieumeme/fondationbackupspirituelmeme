@@ -222,41 +222,41 @@
   
 <script>
 /* =====================================================
-   ✅ CHAT SCRIPT FINAL KOREKTE POU SENK AVEK SERVER & PANEL
+   ✅ CHAT SCRIPT FINAL KOREKTE + ONLINE USERS PANEL
    ===================================================== */
 
-// 1️⃣ — Ranfòse yon sèl koneksyon socket pataje
+// 1️⃣ — Yon sèl koneksyon socket pou tout paj la
 const socket = window.__fbsp_shared_socket || io('https://examen-backend-ihlx.onrender.com');
-window.__fbsp_shared_socket = socket; // pou evite miltip koneksyon
+window.__fbsp_shared_socket = socket;
 
 // 2️⃣ — Seleksyon eleman HTML prensipal yo
 const sendBtn = document.getElementById('send');
 const msgInput = document.getElementById('msg');
 const userInput = document.getElementById('user');
 const messages = document.getElementById('messages');
+const userList = document.getElementById('userList'); // <- ti panel a
 
 // 3️⃣ — Fonksyon pou anrejistre itilizatè a
 function registerUser() {
   const user = userInput?.value.trim() || 'Anonyme';
-  socket.emit('setUser', user); // ✳️ sèlman evènman "setUser"
+  socket.emit('setUser', user);
   return user;
 }
 
-// 4️⃣ — Fonksyon pou ajoute mesaj nan chat la
+// 4️⃣ — Fonksyon pou ajoute mesaj nan chat
 function addMessage(data, isMe = false) {
   if (!data || !data.message) return;
   const li = document.createElement('li');
   const user = data.user || 'Anonyme';
   const message = data.message || '';
-
   const dateObj = new Date(data.date || Date.now());
-  const hours = dateObj.getHours().toString().padStart(2, '0');
-  const minutes = dateObj.getMinutes().toString().padStart(2, '0');
-  const day = dateObj.getDate().toString().padStart(2, '0');
-  const month = (dateObj.getMonth() + 1).toString().padStart(2, '0');
-  const year = dateObj.getFullYear();
+  const h = dateObj.getHours().toString().padStart(2, '0');
+  const m = dateObj.getMinutes().toString().padStart(2, '0');
+  const d = dateObj.getDate().toString().padStart(2, '0');
+  const mo = (dateObj.getMonth() + 1).toString().padStart(2, '0');
+  const y = dateObj.getFullYear();
 
-  li.textContent = `${user} [${day}/${month}/${year} ${hours}:${minutes}]: ${message}`;
+  li.textContent = `${user} [${d}/${mo}/${y} ${h}:${m}]: ${message}`;
   if (isMe) li.classList.add('me');
 
   messages.appendChild(li);
@@ -264,12 +264,12 @@ function addMessage(data, isMe = false) {
   messages.scrollTop = messages.scrollHeight;
 }
 
-// 5️⃣ — Resevwa mesaj yo soti nan serve a
+// 5️⃣ — Resevwa mesaj yo
 socket.on('chatMessage', (data) => {
   addMessage(data);
 });
 
-// 6️⃣ — Resevwa tout ansyen mesaj (loadMessages)
+// 6️⃣ — Resevwa tout ansyen mesaj
 socket.on('loadMessages', (messagesArray) => {
   if (!Array.isArray(messagesArray)) return;
   const currentUser = userInput?.value.trim() || 'Anonyme';
@@ -286,26 +286,44 @@ function sendMessage() {
   if (!message) return;
 
   const data = { user, message, date: new Date() };
-
-  // Voye bay serve a
   socket.emit('chatMessage', data);
-
-  // Afichaj lokal imedya
   addMessage(data, true);
-
   msgInput.value = '';
 }
 
-// 8️⃣ — Evenman bouton ak "Enter"
+// 8️⃣ — Bouton & Enter
 sendBtn.addEventListener('click', sendMessage);
 msgInput.addEventListener('keypress', (e) => {
   if (e.key === 'Enter') sendMessage();
 });
 
-// 9️⃣ — Lè koneksyon etabli, si gen non deja nan chan an, voye li
+// ✅✅ ✅ NOUVÈL BLOK — TI PANEL ITILIZATÈ ONLINE A
+// 🟢 Resevwa lis itilizatè yo an tan reyèl
+socket.on('online-users', (arr) => {
+  if (!userList) return;
+  userList.innerHTML = '';
+  arr.forEach(user => {
+    const li = document.createElement('li');
+    li.textContent = user.name;
+    userList.appendChild(li);
+  });
+});
+
+// 🟢 Yon moun konekte
+socket.on('userConnected', (name) => {
+  console.log('🟢 Konekte:', name);
+});
+
+// 🔴 Yon moun dekonekte
+socket.on('userDisconnected', (name) => {
+  console.log('🔴 Dekonekte:', name);
+});
+
+// 📌 Mande lis itilizatè yo lè socket konekte
 socket.on('connect', () => {
   const currentUser = userInput?.value.trim();
   if (currentUser) socket.emit('setUser', currentUser);
+  socket.emit('requestUserList'); // <- esansyèl
 });
 </script>
 
