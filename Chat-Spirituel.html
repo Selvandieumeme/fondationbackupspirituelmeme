@@ -154,43 +154,38 @@
 
 
 
-    #chatContainer {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 10px;
-}
-
-#chatMain {
-  flex: 3;
-}
-
     
 
+   /* Ti kadran online panel la fikse sou bò dwat chat la */
 #onlinePanel {
-  flex: 1;
-  background: #f8f9fa;
-  border-radius: 12px;
-  box-shadow: 0 0 8px rgba(0,0,0,0.1);
-  padding: 10px;
-  min-width: 200px;
-  max-height: 400px;
-  overflow-y: auto;
+    position: absolute;      /* Fè l pa depann de layout prensipal la */
+    right: 10px;             /* Kole sou bò dwat */
+    top: 10px;               /* Ou ka mete 60px si gen navbar oswa header */
+    width: 200px;            /* Lajè ti kadran an */
+    background: #f8f9fa;
+    border-radius: 12px;
+    box-shadow: 0 0 8px rgba(0,0,0,0.1);
+    padding: 10px;
+    max-height: 400px;
+    overflow-y: auto;
+    z-index: 999;            /* Pou li toujou parèt devan tout lòt eleman */
 }
 
+/* Tit "Online Users" oswa h3 anndan panel la */
 #onlinePanel h3 {
-  margin-top: 0;
-  text-align: center;
-  color: #0d6efd;
+    margin-top: 0;
+    text-align: center;
+    color: #0d6efd;
 }
 
+/* Lis itilizatè yo anndan panel la */
 #userList li {
-  list-style: none;
-  padding: 5px;
-  margin: 3px 0;
-  background: #e0f0ff;
-  border-radius: 8px;
-  text-align: center;
+    list-style: none;
+    padding: 5px;
+    margin: 3px 0;
+    background: #e0f0ff;
+    border-radius: 8px;
+    text-align: center;
 }
     
   </style>
