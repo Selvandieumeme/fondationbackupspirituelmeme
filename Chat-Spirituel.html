@@ -220,6 +220,35 @@
 
 
   
+<style>
+  /* ✅ Ti stil pou ti panel itilizatè yo sou bò dwat */
+  #userList {
+    list-style: none;
+    margin: 0;
+    padding: 8px;
+    max-height: 250px;
+    overflow-y: auto;
+    background: #f8f9fa;
+    border-radius: 8px;
+    box-shadow: 0 0 6px rgba(0,0,0,0.1);
+  }
+  #userList li {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 6px;
+    border-bottom: 1px solid #eee;
+    font-size: 14px;
+  }
+  .status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+  }
+  .online { background-color: #2ecc71; }  /* 🟢 */
+  .offline { background-color: #e74c3c; } /* 🔴 */
+</style>
+
 <script>
 /* =====================================================
    ✅ CHAT SCRIPT FINAL KOREKTE + ONLINE USERS PANEL
@@ -297,14 +326,20 @@ msgInput.addEventListener('keypress', (e) => {
   if (e.key === 'Enter') sendMessage();
 });
 
-// ✅✅ ✅ NOUVÈL BLOK — TI PANEL ITILIZATÈ ONLINE A
+// ✅✅ ✅ TI PANEL ITILIZATÈ ONLINE YO
+
 // 🟢 Resevwa lis itilizatè yo an tan reyèl
 socket.on('online-users', (arr) => {
   if (!userList) return;
   userList.innerHTML = '';
+
   arr.forEach(user => {
     const li = document.createElement('li');
-    li.textContent = user.name;
+    const dot = document.createElement('span');
+    dot.classList.add('status-dot');
+    dot.classList.add(user.connected ? 'online' : 'offline');
+    li.appendChild(dot);
+    li.appendChild(document.createTextNode(user.name));
     userList.appendChild(li);
   });
 });
@@ -323,7 +358,7 @@ socket.on('userDisconnected', (name) => {
 socket.on('connect', () => {
   const currentUser = userInput?.value.trim();
   if (currentUser) socket.emit('setUser', currentUser);
-  socket.emit('requestUserList'); // <- esansyèl
+  socket.emit('requestUserList');
 });
 </script>
 
