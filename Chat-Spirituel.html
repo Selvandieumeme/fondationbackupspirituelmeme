@@ -352,18 +352,15 @@ socket.on('online-users', (arr) => {
   });
 });
 
-// 🔹 Louvri fenèt chat prive lè yon itilizatè klike sou yo
 userList.addEventListener('click', (e) => {
   const li = e.target.closest('li');
   if (!li) return;
 
-  // 🔹 NON ITILIZATÈ a soti nan dènye eleman nan lis la
-  const targetUser = li.lastChild.textContent.trim();
+  const targetUser = li.lastChild.textContent.trim(); // NON itilizatè a
   const currentUser = userInput?.value.trim() || 'Anonyme';
   if (!targetUser || targetUser === currentUser) return;
 
-  // 🔹 Louvri chat prive atravè ChatPrive.js
-  openPrivateWindow(targetUser);
+  openPrivateWindow(targetUser); // rele fonksyon ChatPrive.js
 });
 
 // 🟢 Yon moun konekte
