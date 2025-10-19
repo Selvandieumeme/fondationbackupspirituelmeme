@@ -1,0 +1,109 @@
+/* =======================================
+   Chatprivate.css
+   Ti stil pou fenèt chat prive
+   ======================================= */
+
+/* Fenèt chat prive */
+.private-chat-window {
+  font-family: 'Poppins', sans-serif;
+  font-size: 12px;
+  display: flex;
+  flex-direction: column;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  background: #fff;
+  width: 200px;
+  max-height: 300px;
+  position: fixed;
+  bottom: 10px;
+  z-index: 1000;
+  overflow: hidden;
+}
+
+/* Header fenèt prive */
+.private-chat-window > div:first-child {
+  background: #0057b7;
+  color: #fff;
+  padding: 6px;
+  font-weight: 600;
+  text-align: center;
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
+}
+
+/* Espas mesaj yo */
+.private-messages {
+  flex: 1;
+  padding: 4px;
+  overflow-y: auto;
+  background: #f4f6f9;
+}
+
+/* Chak mesaj prive */
+.private-messages div {
+  margin-bottom: 4px;
+  padding: 2px 4px;
+  border-radius: 4px;
+  word-wrap: break-word;
+}
+
+/* Mesaj voye pa itilizatè aktyèl la */
+.private-messages div.me {
+  background: #0057b7;
+  color: #fff;
+}
+
+/* Mesaj soti nan lòt itilizatè */
+.private-messages div.other {
+  background: #f7d600;
+  color: #000;
+}
+
+/* Input pou ekri mesaj */
+.private-chat-window input[type="text"] {
+  flex: 1;
+  padding: 4px;
+  border: none;
+  outline: none;
+  font-size: 12px;
+}
+
+/* Bouton voye mesaj */
+.private-chat-window button {
+  background: #0057b7;
+  color: #fff;
+  border: none;
+  padding: 4px 6px;
+  cursor: pointer;
+  font-size: 12px;
+  margin-left: 2px;
+  border-radius: 4px;
+  transition: 0.2s ease;
+}
+
+.private-chat-window button:hover {
+  background: #f7d600;
+  color: #000;
+}
+
+/* Bouton efase mesaj lokal */
+.private-chat-window button:last-child {
+  background: #e74c3c;
+}
+
+.private-chat-window button:last-child:hover {
+  background: #c0392b;
+  color: #fff;
+}
+
+/* Responsive ti ekran */
+@media (max-width: 500px) {
+  .private-chat-window {
+    width: 160px;
+    font-size: 11px;
+  }
+  .private-chat-window button {
+    padding: 3px 5px;
+    font-size: 11px;
+  }
+}
