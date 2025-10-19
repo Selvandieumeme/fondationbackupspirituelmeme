@@ -1,179 +1,135 @@
-/* ==========================================
+/* =====================================================
    ChatPrive.js
-   Chat prive pou 2 itilizatè sèlman
-   Sèvi ak menm socket.io ke chat piblik la
-   Pa modifye chat piblik oswa panel itilizatè yo
-   ========================================== */
+   Jesyon chat prive pou chak itilizatè
+   ===================================================== */
 
-// Sèvi ak menm socket deja egziste
-const privateSocket = window.__fbsp_shared_socket || io('https://examen-backend-ihlx.onrender.com');
+// 1️⃣ — Reutilize menm socket deja egziste a
+const socket = window.__fbsp_shared_socket || io('https://examen-backend-ihlx.onrender.com');
+window.__fbsp_shared_socket = socket;
 
-// Referans DOM
+// 2️⃣ — Seleksyon eleman HTML prensipal yo
 const userList = document.getElementById('userList');
-const body = document.body;
 
-// Kenbe yon map pou fenèt prive yo
-const privateWindows = new Map(); // key: "Itilizate1|Itilizate2", value: fenèt DOM
+// 3️⃣ — Kenbe referans fenèt prive ki louvri yo
+const privateWindows = {};
 
-// Fonksyon pou jenere kle inik pou 2 itilizatè
-function getPrivateKey(user1, user2) {
-  return [user1, user2].sort().join('|'); // sort pou asire menm kle pou menm 2 itilizatè
-}
+// 4️⃣ — Fonksyon pou kreye fenèt prive
+function openPrivateWindow(targetUser) {
+  const currentUser = document.getElementById('user')?.value.trim() || 'Anonyme';
+  const windowId = `private-${currentUser}-${targetUser}`;
 
-// Fonksyon pou kreye ti fenèt chat prive
-function openPrivateWindow(currentUser, targetUser) {
-  const key = getPrivateKey(currentUser, targetUser);
+  // Si fenèt deja egziste, pa kreye nouvo
+  if (privateWindows[windowId]) return;
 
-  if (privateWindows.has(key)) return; // si fenèt deja egziste
-
-  // Kreye eleman
+  // Kreye fenèt prive
   const container = document.createElement('div');
   container.classList.add('private-chat-window');
-  container.style.position = 'fixed';
-  container.style.bottom = '10px';
-  container.style.right = `${10 + privateWindows.size * 220}px`; // espas pou plizyè fenèt
-  container.style.width = '200px';
-  container.style.background = '#fff';
-  container.style.border = '1px solid #ccc';
-  container.style.borderRadius = '8px';
-  container.style.boxShadow = '0 2px 8px rgba(0,0,0,0.2)';
-  container.style.zIndex = 1000;
-  container.style.display = 'flex';
-  container.style.flexDirection = 'column';
-  container.style.fontFamily = 'Poppins, sans-serif';
-  container.style.fontSize = '12px';
-  container.style.maxHeight = '300px';
+  container.id = windowId;
 
-  // Header
+  // Header fenèt
   const header = document.createElement('div');
-  header.textContent = `Chat prive: ${targetUser}`;
-  header.style.background = '#0057b7';
-  header.style.color = '#fff';
-  header.style.padding = '6px';
-  header.style.fontWeight = '600';
-  header.style.borderTopLeftRadius = '8px';
-  header.style.borderTopRightRadius = '8px';
+  header.textContent = `Chat prive: ${currentUser} ➜ ${targetUser}`;
   container.appendChild(header);
 
   // Espas mesaj
   const messagesDiv = document.createElement('div');
   messagesDiv.classList.add('private-messages');
-  messagesDiv.style.flex = '1';
-  messagesDiv.style.overflowY = 'auto';
-  messagesDiv.style.padding = '4px';
-  messagesDiv.style.background = '#f4f6f9';
   container.appendChild(messagesDiv);
 
-  // Input
-  const inputDiv = document.createElement('div');
-  inputDiv.style.display = 'flex';
-  inputDiv.style.borderTop = '1px solid #ccc';
-
+  // Input + bouton
+  const inputContainer = document.createElement('div');
+  inputContainer.style.display = 'flex';
+  inputContainer.style.gap = '2px';
+  
   const input = document.createElement('input');
   input.type = 'text';
-  input.placeholder = 'Ekri mesaj...';
-  input.style.flex = '1';
-  input.style.padding = '4px';
-  input.style.border = 'none';
-  inputDiv.appendChild(input);
+  input.placeholder = 'Ekri mesaj ou...';
+  inputContainer.appendChild(input);
 
   const sendBtn = document.createElement('button');
   sendBtn.textContent = 'Voye';
-  sendBtn.style.background = '#0057b7';
-  sendBtn.style.color = '#fff';
-  sendBtn.style.border = 'none';
-  sendBtn.style.padding = '4px 6px';
-  sendBtn.style.cursor = 'pointer';
-  inputDiv.appendChild(sendBtn);
+  inputContainer.appendChild(sendBtn);
 
-  // Bouton efase lokal
-  const clearBtn = document.createElement('button');
-  clearBtn.textContent = 'Efase';
-  clearBtn.style.background = '#e74c3c';
-  clearBtn.style.color = '#fff';
-  clearBtn.style.border = 'none';
-  clearBtn.style.padding = '4px 6px';
-  clearBtn.style.cursor = 'pointer';
-  inputDiv.appendChild(clearBtn);
+  const deleteBtn = document.createElement('button');
+  deleteBtn.textContent = 'Efase lokal';
+  inputContainer.appendChild(deleteBtn);
 
-  container.appendChild(inputDiv);
+  container.appendChild(inputContainer);
 
-  body.appendChild(container);
-  privateWindows.set(key, container);
+  document.body.appendChild(container);
+  privateWindows[windowId] = { container, messagesDiv, input, targetUser };
 
-  // Fonksyon ajoute mesaj nan fenèt prive
-  function addPrivateMessage(data, isMe = false) {
-    const li = document.createElement('div');
-    li.textContent = `[${data.user}]: ${data.message}`;
-    li.style.marginBottom = '4px';
-    li.style.padding = '2px 4px';
-    li.style.borderRadius = '4px';
-    li.style.background = isMe ? '#0057b7' : '#f7d600';
-    li.style.color = isMe ? '#fff' : '#000';
-    messagesDiv.appendChild(li);
-    messagesDiv.scrollTop = messagesDiv.scrollHeight;
-  }
-
-  // Evènman voye mesaj
+  // Bouton voye mesaj
   sendBtn.addEventListener('click', () => {
-    const message = input.value.trim();
-    if (!message) return;
-    const data = { from: currentUser, to: targetUser, message, date: new Date() };
-    privateSocket.emit('privateMessage', data);
-    addPrivateMessage({ user: currentUser, message }, true);
-    input.value = '';
+    sendPrivateMessage(currentUser, targetUser, input.value, messagesDiv, input);
   });
 
-  // Enter key
+  // Enter pou voye
   input.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') sendBtn.click();
+    if (e.key === 'Enter') {
+      sendPrivateMessage(currentUser, targetUser, input.value, messagesDiv, input);
+    }
   });
 
   // Bouton efase lokal
-  clearBtn.addEventListener('click', () => {
+  deleteBtn.addEventListener('click', () => {
     messagesDiv.innerHTML = '';
   });
 }
 
-// Klike sou non itilizatè pou louvri chat prive
-userList.addEventListener('click', (e) => {
-  const li = e.target.closest('li');
-  if (!li) return;
-  const targetUser = li.textContent.replace(/\s*$/,''); // retire espas final
-  const currentUser = document.getElementById('user').value.trim() || 'Anonyme';
-  if (targetUser && targetUser !== currentUser) {
-    openPrivateWindow(currentUser, targetUser);
+// 5️⃣ — Fonksyon voye mesaj prive
+function sendPrivateMessage(sender, receiver, message, messagesDiv, input) {
+  if (!message.trim()) return;
+
+  const data = {
+    sender,
+    receiver,
+    message: message.trim(),
+    date: new Date(),
+    private: true
+  };
+
+  socket.emit('privateMessage', data);
+  addPrivateMessage(data, messagesDiv, true);
+  input.value = '';
+}
+
+// 6️⃣ — Ajoute mesaj nan fenèt prive
+function addPrivateMessage(data, messagesDiv, isMe) {
+  const msgDiv = document.createElement('div');
+  msgDiv.textContent = `[${new Date(data.date).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}] ${data.sender}: ${data.message}`;
+  msgDiv.classList.add(isMe ? 'me' : 'other');
+  messagesDiv.appendChild(msgDiv);
+  messagesDiv.scrollTop = messagesDiv.scrollHeight;
+}
+
+// 7️⃣ — Resevwa mesaj prive atravè socket
+socket.on('privateMessage', (data) => {
+  const currentUser = document.getElementById('user')?.value.trim() || 'Anonyme';
+  // Si mesaj se pou mwen oswa mwen se voye li
+  if (data.receiver === currentUser || data.sender === currentUser) {
+    const windowId = `private-${data.sender}-${data.receiver}`;
+    const reverseWindowId = `private-${data.receiver}-${data.sender}`;
+    let win = privateWindows[windowId] || privateWindows[reverseWindowId];
+
+    if (!win) {
+      // Ouvri nouvo fenèt si pa egziste
+      const otherUser = data.sender === currentUser ? data.receiver : data.sender;
+      openPrivateWindow(otherUser);
+      win = privateWindows[`private-${currentUser}-${otherUser}`];
+    }
+
+    addPrivateMessage(data, win.messagesDiv, data.sender === currentUser);
   }
 });
 
-// Resevwa mesaj prive
-privateSocket.on('privateMessage', (data) => {
-  const currentUser = document.getElementById('user').value.trim() || 'Anonyme';
-  const otherUser = data.from === currentUser ? data.to : data.from;
-  const key = getPrivateKey(currentUser, otherUser);
-
-  // Louvri fenèt si li poko egziste
-  if (!privateWindows.has(key)) {
-    openPrivateWindow(currentUser, otherUser);
-  }
-
-  // Ajoute mesaj nan fenèt la
-  const container = privateWindows.get(key);
-  if (!container) return;
-  const messagesDiv = container.querySelector('.private-messages');
-  if (!messagesDiv) return;
-
-  addPrivateMessage(data, data.from === currentUser);
-
-  function addPrivateMessage(data, isMe = false) {
-    const li = document.createElement('div');
-    li.textContent = `[${data.from}]: ${data.message}`;
-    li.style.marginBottom = '4px';
-    li.style.padding = '2px 4px';
-    li.style.borderRadius = '4px';
-    li.style.background = isMe ? '#0057b7' : '#f7d600';
-    li.style.color = isMe ? '#fff' : '#000';
-    messagesDiv.appendChild(li);
-    messagesDiv.scrollTop = messagesDiv.scrollHeight;
+// 8️⃣ — Fè klik sou lis itilizatè yo pou louvri chat prive
+userList.addEventListener('click', (e) => {
+  const li = e.target.closest('li');
+  if (!li) return;
+  const targetUser = li.textContent.replace(/\s/g,''); // retire espas si genyen
+  const currentUser = document.getElementById('user')?.value.trim() || 'Anonyme';
+  if (targetUser && targetUser !== currentUser) {
+    openPrivateWindow(targetUser);
   }
 });
