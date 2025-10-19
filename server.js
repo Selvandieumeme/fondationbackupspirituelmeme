@@ -321,29 +321,26 @@ io.on('connection', async (socket) => {
     console.error('❌ Erè pandan chajman mesaj:', err.message);
   }
 
-  // ✅ Resevwa non itilizatè a (nou itilize "setUser" kounya)
+  // ✅ Resevwa non itilizatè a
   socket.on('setUser', (username) => {
     const cleanName = username?.trim() || 'Anonyme';
     const userId = cleanName.toLowerCase();
 
-    // Gade si itilizatè a deja nan lis la
     let record = onlineUsers.get(userId);
     if (!record) {
       record = { name: cleanName, sockets: new Set() };
       onlineUsers.set(userId, record);
     }
 
-    // Mete ajou non li epi ajoute nouvo socket
     record.name = cleanName;
     record.sockets.add(socket.id);
     socket.data.userId = userId;
 
-    // Notify tout moun ke li konekte
     io.emit('userConnected', cleanName);
     broadcastOnline();
   });
 
-  // ✅ Resevwa nouvo mesaj
+  // ✅ Resevwa mesaj piblik
   socket.on('chatMessage', async (data) => {
     try {
       const user = data.user?.trim() || 'Anonyme';
@@ -365,12 +362,47 @@ io.on('connection', async (socket) => {
     }
   });
 
-  // ✅ Reponn lè yon kliyan mande lis itilizatè yo
+  // ✅ ✅ ✅ 🎯 AJOUT POU CHAT PRIVE LA
+  socket.on('privateMessage', ({ from, to, message }) => {
+    if (!from || !to || !message) return;
+
+    const targetId = to.toLowerCase();
+    const senderId = from.toLowerCase();
+
+    const targetUser = onlineUsers.get(targetId);
+    const senderUser = onlineUsers.get(senderId);
+
+    // ✅ Voye bay moun k ap resevwa a
+    if (targetUser) {
+      targetUser.sockets.forEach(socketId => {
+        io.to(socketId).emit('privateMessage', {
+          from,
+          to,
+          message,
+          date: new Date()
+        });
+      });
+    }
+
+    // ✅ Voye bay moun ki voye a (pou wè mesaj la nan pwòp fenèt li)
+    if (senderUser) {
+      senderUser.sockets.forEach(socketId => {
+        io.to(socketId).emit('privateMessage', {
+          from,
+          to,
+          message,
+          date: new Date()
+        });
+      });
+    }
+  });
+
+  // ✅ Moun mande lis itilizatè
   socket.on('requestUserList', () => {
     broadcastOnline();
   });
 
-  // ✅ Lè itilizatè a dekonekte
+  // ✅ Lè yon itilizatè dekonekte
   socket.on('disconnect', () => {
     const userId = socket.data.userId;
     if (!userId) return;
@@ -388,6 +420,7 @@ io.on('connection', async (socket) => {
     console.log('🔴 Itilizatè dekonekte:', userId);
   });
 });
+
 
 // ---------------------------
 // 🗂️ CHAT PAGE
