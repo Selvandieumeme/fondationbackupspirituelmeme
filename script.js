@@ -1,5 +1,5 @@
 // =======================
-// ✅ script.js FINAL KOREKTE — Vèsyon ak setUser sèlman
+// ✅ script.js FINAL AK SIPÒ CHAT PRIVE
 // =======================
 
 // 1️⃣ — Rekipere non itilizatè a depi nan localStorage
@@ -7,7 +7,7 @@ let user = localStorage.getItem('user');
 
 // 2️⃣ — Konekte ak Socket.io
 const socket = io('https://examen-backend-ihlx.onrender.com');
-window.socket = socket; // 🔹 fè koneksyon an disponib pou lòt script (tankou onlineUsersPanel.js)
+window.socket = socket; // 🔹 fè koneksyon an disponib pou chatprive.js
 
 // 3️⃣ — Lè paj la chaje
 window.addEventListener('load', () => {
@@ -15,8 +15,6 @@ window.addEventListener('load', () => {
     document.getElementById('loginOverlay').style.display = 'flex';
   } else {
     document.getElementById('loginOverlay').style.display = 'none';
-
-    // ✅ Voye non itilizatè a bay server avèk "setUser"
     if (socket && socket.connected) {
       socket.emit('setUser', user);
     } else {
@@ -29,9 +27,9 @@ window.addEventListener('load', () => {
 const sendBtn = document.getElementById('send');
 const msgInput = document.getElementById('msg');
 const messages = document.getElementById('messages');
-const userList = document.getElementById('userList'); // ti kadran itilizatè yo
+const userList = document.getElementById('userList'); // lis itilizatè online yo
 
-// 5️⃣ — Fonkksyon pou ajoute mesaj
+// 5️⃣ — Fonksyon pou ajoute mesaj nan chat piblik
 function addMessage(data, isMe = false) {
   if (!data || !data.message) return;
   const li = document.createElement('li');
@@ -45,23 +43,41 @@ function addMessage(data, isMe = false) {
   messages.scrollTop = messages.scrollHeight;
 }
 
-// 6️⃣ — Fonkksyon pou mete lis itilizatè yo (ti kadran)
+// ✅ ✅ ✅ NOUVO — Fonksyon pou ouvri chat prive
+function openPrivateChat(targetUser) {
+  if (!targetUser || targetUser === user) return;
+  console.log('🔐 Ou vle pale an prive ak:', targetUser);
+
+  // Sa ka swa:
+  // → Lanse yon nouvo fenèt chat prive
+  // → Oswa montre yon div chat prive deja kache
+  // → Oswa redireksyone sou chatprive.html
+  window.location.href = `chatprive.html?user=${user}&to=${targetUser}`;
+}
+
+// 6️⃣ — Fonksyon pou afiche itilizatè yo nan ti kadran
 function renderUsers(arr) {
   if (!Array.isArray(arr)) return;
-  userList.innerHTML = ''; // vide avan
+  userList.innerHTML = '';
+
   arr.forEach(u => {
     const li = document.createElement('li');
-    li.textContent = u;
+    li.textContent = u.name || u;
+
+    // ✅ Ajoute click event pou chat prive
+    li.addEventListener('click', () => {
+      openPrivateChat(u.name || u);
+    });
+
     userList.appendChild(li);
   });
 }
 
-// 7️⃣ — Voye mesaj
+// 7️⃣ — Voye mesaj piblik
 function sendMessage() {
   const message = msgInput.value.trim();
   if (!message) return;
 
-  // ✅ Asire itilizatè a byen idantifye sou server anvan li voye mesaj
   if (socket && socket.connected) {
     socket.emit('setUser', user);
   }
@@ -77,11 +93,9 @@ msgInput.addEventListener('keypress', (e) => {
   if (e.key === 'Enter') sendMessage();
 });
 
-// 8️⃣ — Resevwa nouvo mesaj
+// 8️⃣ — Resevwa mesaj piblik
 socket.on('chatMessage', (data) => {
-  if (data.user === user && new Date(data.date).getTime() === new Date().getTime()) {
-    return;
-  }
+  if (data.user === user) return;
   addMessage(data);
 });
 
@@ -94,8 +108,8 @@ socket.on('loadMessages', (messagesArray) => {
   });
 });
 
-// 🔟 — 📡 Evènman pou lis itilizatè yo
-socket.on('updateUserList', (arr) => {
+// 🔟 — 📡 Resevwa lis itilizatè online
+socket.on('online-users', (arr) => {
   renderUsers(arr);
 });
 
