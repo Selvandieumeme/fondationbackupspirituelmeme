@@ -233,6 +233,7 @@
     border-radius: 8px;
     box-shadow: 0 0 6px rgba(0,0,0,0.1);
   }
+
   #userList li {
     display: flex;
     align-items: center;
@@ -240,7 +241,14 @@
     padding: 4px 6px;
     border-bottom: 1px solid #eee;
     font-size: 14px;
+    cursor: pointer; /* 🔹 fè itilizatè yo klike-able */
+    transition: background 0.2s ease;
   }
+
+  #userList li:hover {
+    background: #cce5ff; /* 🔹 ti efè hover lè souri pase sou yo */
+  }
+
   .status-dot {
     width: 8px;
     height: 8px;
@@ -345,6 +353,18 @@ socket.on('online-users', (arr) => {
   });
 });
 
+// 🔹 Louvri fenèt chat prive lè yon itilizatè klike sou yo
+userList.addEventListener('click', (e) => {
+  const li = e.target.closest('li');
+  if (!li) return;
+  const targetUser = li.textContent.trim();
+  const currentUser = userInput?.value.trim() || 'Anonyme';
+  if (!targetUser || targetUser === currentUser) return;
+
+  // 🔹 Fonksyon openPrivateWindow nan ChatPrive.js dwe deja egziste
+  openPrivateWindow(targetUser);
+});
+
 // 🟢 Yon moun konekte
 socket.on('userConnected', (name) => {
   console.log('🟢 Konekte:', name);
@@ -362,7 +382,6 @@ socket.on('connect', () => {
   socket.emit('requestUserList');
 });
 </script>
-
 
 
   
