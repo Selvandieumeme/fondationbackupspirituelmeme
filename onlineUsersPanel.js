@@ -1,83 +1,136 @@
-// ✅ onlineUsersPanel.js — vèsyon final (sèvi sèlman ak "setUser")
-(function(){
-  const EVENTS = {
-    REQUEST: 'requestUserList',
-    LIST: 'updateUserList',
-    CONNECTED: 'userConnected',
-    DISCONNECTED: 'userDisconnected',
-    SETUSER: 'setUser'
-  };
+// =======================
+// ✅ script.js FINAL SAN REDIREKSYON — CHAT PRIVE SOU MENM PAJ
+// =======================
 
-  // 🔹 jwenn eleman pou lis itilizatè yo
-  const listEl = document.getElementById('userList');
-  if(!listEl){
-    console.warn('[onlineUsersPanel] Pa jwenn #userList nan paj la.');
-    return;
-  }
+// 1️⃣ — Rekipere non itilizatè a depi nan localStorage
+let user = localStorage.getItem('user');
 
-  // 🔹 verifye si socket.io konekte deja
-  if(!window.socket || typeof window.socket.on !== 'function'){
-    console.error('[onlineUsersPanel] window.socket pa disponib. Asire script.js deja chaje avan.');
-    return;
-  }
+// 2️⃣ — Konekte ak Socket.io
+const socket = io('https://examen-backend-ihlx.onrender.com');
+window.socket = socket; // Pou Chatprive.js kapab itilize li
 
-  const socket = window.socket;
-  const users = new Map();
-
-  // 🔹 fonksyon pou rafrechi afichaj itilizatè yo
-  function render(){
-    listEl.innerHTML = '';
-    const arr = Array.from(users.values()).sort((a,b)=>{
-      if(a.connected === b.connected) return a.name.localeCompare(b.name);
-      return a.connected ? -1 : 1;
-    });
-    arr.forEach(u=>{
-      const li = document.createElement('li');
-      li.className = 'online-user-item ' + (u.connected ? 'connected' : 'disconnected');
-      li.innerHTML = `
-        <div style="display:flex;align-items:center;">
-          <span class="status-dot ${u.connected ? 'connected':'disconnected'}"></span>
-          <span class="name">${u.name}</span>
-        </div>
-        <div style="font-size:12px;opacity:0.8;">
-          ${u.connected ? '🟢 konekte' : '🔴 dekonekte'}
-        </div>
-      `;
-      listEl.appendChild(li);
-    });
-  }
-
-  // 🔹 Evènman Socket.IO yo
-  socket.on(EVENTS.LIST, (arr)=>{
-    if(!Array.isArray(arr)) return;
-    arr.forEach(username=>{
-      users.set(username, { name: username, connected: true });
-    });
-    render();
-  });
-
-  socket.on(EVENTS.CONNECTED, (username)=>{
-    users.set(username, { name: username, connected: true });
-    render();
-  });
-
-  socket.on(EVENTS.DISCONNECTED, (username)=>{
-    if(users.has(username)){
-      const u = users.get(username);
-      u.connected = false;
-      users.set(username, u);
+// 3️⃣ — Lè paj la chaje
+window.addEventListener('load', () => {
+  if (!user) {
+    document.getElementById('loginOverlay').style.display = 'flex';
+  } else {
+    document.getElementById('loginOverlay').style.display = 'none';
+    if (socket && socket.connected) {
+      socket.emit('setUser', user);
     } else {
-      users.set(username, { name: username, connected: false });
+      socket.on('connect', () => socket.emit('setUser', user));
     }
-    render();
-  });
+  }
+});
 
-  // 🔹 Mande server a lis itilizatè yo
-  function requestList(){
-    socket.emit(EVENTS.REQUEST);
+// 4️⃣ — Eleman HTML prensipal yo
+const sendBtn = document.getElementById('send');
+const msgInput = document.getElementById('msg');
+const messages = document.getElementById('messages');
+const userList = document.getElementById('userList');
+
+// ✅ Ajoute referans pou chat prive si li egziste nan HTML
+const privateBox = document.getElementById('privateChat'); // <div id="privateChat" style="display:none;">
+const privateMessages = document.getElementById('privateMessages');
+const privateInput = document.getElementById('privateMsg');
+const privateSendBtn = document.getElementById('sendPrivate');
+
+// 5️⃣ — Fonksyon pou ajoute mesaj piblik
+function addMessage(data, isMe = false) {
+  if (!data || !data.message) return;
+  const li = document.createElement('li');
+  const msgUser = data.user || 'Anonyme';
+  const message = data.message || '';
+  const time = new Date(data.date || Date.now()).toLocaleTimeString();
+  li.textContent = `${msgUser} [${time}]: ${message}`;
+  if (isMe) li.classList.add('me');
+  messages.appendChild(li);
+  messages.scrollTop = messages.scrollHeight;
+}
+
+// ✅ ✅ ✅ NOUVO — Fonksyon pou ouvri chat prive sou menm paj la
+function openPrivateChat(targetUser) {
+  if (!targetUser || targetUser === user) return;
+  console.log('🔐 Ou ouvri chat prive ak:', targetUser);
+
+  // ✅ Kache chat piblik la
+  document.getElementById('publicChat').style.display = 'none';
+
+  // ✅ Montre div chat prive a
+  privateBox.style.display = 'block';
+
+  // ✅ Mete tit chat prive a
+  document.getElementById('privateChatTitle').textContent =
+    `Chat Prive ak ${targetUser}`;
+
+  // ✅ Di Chatprive.js ki moun n ap pale avè l
+  if (window.openPrivateSession) {
+    window.openPrivateSession(user, targetUser);
+  }
+}
+
+// 6️⃣ — Afiche lis itilizatè yo
+function renderUsers(arr) {
+  if (!Array.isArray(arr)) return;
+  userList.innerHTML = '';
+
+  arr.forEach(u => {
+    const li = document.createElement('li');
+    const username = u.name || u;
+    li.textContent = username;
+
+    // ✅ Ajoute klik pou ouvri chat prive
+    li.addEventListener('click', () => {
+      openPrivateChat(username);
+    });
+
+    userList.appendChild(li);
+  });
+}
+
+// 7️⃣ — Voye mesaj Piblik
+function sendMessage() {
+  const message = msgInput.value.trim();
+  if (!message) return;
+
+  if (socket && socket.connected) {
+    socket.emit('setUser', user);
   }
 
-  if(socket.connected) requestList();
-  else socket.once('connect', requestList);
+  const data = { user, message, date: new Date() };
+  socket.emit('chatMessage', data);
+  addMessage(data, true);
+  msgInput.value = '';
+}
 
-})();
+sendBtn.addEventListener('click', sendMessage);
+msgInput.addEventListener('keypress', (e) => {
+  if (e.key === 'Enter') sendMessage();
+});
+
+// 8️⃣ — Resevwa mesaj Piblik
+socket.on('chatMessage', (data) => {
+  if (data.user === user) return;
+  addMessage(data);
+});
+
+// 9️⃣ — Chaje ansyen mesaj Piblik
+socket.on('loadMessages', (messagesArray) => {
+  if (!Array.isArray(messagesArray)) return;
+  messagesArray.forEach(msg => {
+    addMessage(msg, msg.user === user);
+  });
+});
+
+// 🔟 — Resevwa lis itilizatè online
+socket.on('online-users', (arr) => {
+  renderUsers(arr);
+});
+
+socket.on('userConnected', (username) => {
+  console.log('🟢 Itilizatè konekte:', username);
+});
+
+socket.on('userDisconnected', (username) => {
+  console.log('🔴 Itilizatè dekonekte:', username);
+});
