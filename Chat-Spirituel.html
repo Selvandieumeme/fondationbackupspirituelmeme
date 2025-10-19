@@ -220,8 +220,7 @@
 
 
 
-  
-<style>
+  <style>
   /* ✅ Ti stil pou ti panel itilizatè yo sou bò dwat */
   #userList {
     list-style: none;
@@ -357,11 +356,13 @@ socket.on('online-users', (arr) => {
 userList.addEventListener('click', (e) => {
   const li = e.target.closest('li');
   if (!li) return;
-  const targetUser = li.lastChild.textContent.trim()
+
+  // 🔹 NON ITILIZATÈ a soti nan dènye eleman nan lis la
+  const targetUser = li.lastChild.textContent.trim();
   const currentUser = userInput?.value.trim() || 'Anonyme';
   if (!targetUser || targetUser === currentUser) return;
 
-  // 🔹 Fonksyon openPrivateWindow nan ChatPrive.js dwe deja egziste
+  // 🔹 Louvri chat prive atravè ChatPrive.js
   openPrivateWindow(targetUser);
 });
 
