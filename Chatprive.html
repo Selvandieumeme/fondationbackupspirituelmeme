@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chat Privé - Fondation Backup Spirituel</title>
+
+<!-- Styles Chat Prive -->
+<style>
+  /* Fond ak koulè fondation */
+  body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background: #ffffff; /* blan */
+    color: #333;
+  }
+
+  header {
+    background-color: #FFD700; /* jaune */
+    color: #fff;
+    padding: 15px;
+    text-align: center;
+    font-size: 1.5rem;
+    font-weight: bold;
+    position: relative;
+  }
+
+  header button#closeChat {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    background-color: #0d6efd; /* ble */
+    color: #fff;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background 0.2s ease;
+  }
+
+  header button#closeChat:hover {
+    background-color: #0056b3;
+  }
+
+  main {
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh - 70px);
+    padding: 10px;
+  }
+
+  /* Espas mesaj */
+  #privateMessages {
+    flex: 1;
+    overflow-y: auto;
+    border: 1px solid #0d6efd;
+    border-radius: 8px;
+    padding: 10px;
+    background-color: #f0f8ff; /* ble clair */
+    margin-bottom: 10px;
+  }
+
+  #privateMessages div {
+    padding: 5px 8px;
+    margin-bottom: 5px;
+    border-radius: 6px;
+    max-width: 80%;
+    word-wrap: break-word;
+  }
+
+  .me {
+    background-color: #FFD700; /* jaune */
+    align-self: flex-end;
+  }
+
+  .other {
+    background-color: #0d6efd; /* ble */
+    color: #fff;
+    align-self: flex-start;
+  }
+
+  /* Input container */
+  #inputContainer {
+    display: flex;
+    gap: 5px;
+  }
+
+  #privateMsg {
+    flex: 1;
+    padding: 8px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    font-size: 1rem;
+  }
+
+  #sendPrivate, #clearLocal {
+    padding: 8px 12px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background 0.2s ease;
+  }
+
+  #sendPrivate {
+    background-color: #0d6efd; /* ble */
+    color: #fff;
+  }
+
+  #sendPrivate:hover {
+    background-color: #0056b3;
+  }
+
+  #clearLocal {
+    background-color: #FFD700; /* jaune */
+  }
+
+  #clearLocal:hover {
+    background-color: #e6c200;
+  }
+
+</style>
+</head>
+<body>
+
+<header>
+  Chat Privé
+  <button id="closeChat">Close</button>
+</header>
+
+<main>
+  <div id="privateMessages"></div>
+  <div id="inputContainer">
+    <input type="text" id="privateMsg" placeholder="Écrire votre message...">
+    <button id="sendPrivate">Envoyer</button>
+    <button id="clearLocal">Effacer</button>
+  </div>
+</main>
+
+<!-- Socket.io -->
+<script src="https://cdn.socket.io/4.7.4/socket.io.min.js"></script>
+
+<!-- Script Chat Prive -->
+<script>
+  // Récupérer query string
+  const params = new URLSearchParams(window.location.search);
+  const currentUser = params.get('from') || 'Anonyme';
+  const targetUser = params.get('to') || '';
+
+  // Réutiliser socket existant si possible
+  const socket = window.__fbsp_shared_socket || io('https://examen-backend-ihlx.onrender.com');
+  window.__fbsp_shared_socket = socket;
+
+  // Éléments DOM
+  const messagesDiv = document.getElementById('privateMessages');
+  const msgInput = document.getElementById('privateMsg');
+  const sendBtn = document.getElementById('sendPrivate');
+  const clearBtn = document.getElementById('clearLocal');
+  const closeBtn = document.getElementById('closeChat');
+
+  // LocalStorage clé unique par conversation
+  const storageKey = `chat_${currentUser}_${targetUser}`;
+  function loadLocalMessages() {
+    const saved = JSON.parse(localStorage.getItem(storageKey) || '[]');
+    saved.forEach(m => appendMessageToDOM(m, m.sender === currentUser));
+  }
+
+  function saveLocalMessage(messageObj) {
+    const saved = JSON.parse(localStorage.getItem(storageKey) || '[]');
+    saved.push(messageObj);
+    localStorage.setItem(storageKey, JSON.stringify(saved));
+  }
+
+  function appendMessageToDOM(data, isMe) {
+    const div = document.createElement('div');
+    div.textContent = `[${new Date(data.date).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}] ${data.sender}: ${data.message}`;
+    div.classList.add(isMe ? 'me' : 'other');
+    messagesDiv.appendChild(div);
+    messagesDiv.scrollTop = messagesDiv.scrollHeight;
+  }
+
+  // Envoyer message
+  function sendMessage() {
+    const message = msgInput.value.trim();
+    if (!message) return;
+
+    const data = { sender: currentUser, receiver: targetUser, message, date: new Date() };
+    socket.emit('privateMessage', data);
+    appendMessageToDOM(data, true);
+    saveLocalMessage(data);
+    msgInput.value = '';
+  }
+
+  sendBtn.addEventListener('click', sendMessage);
+  msgInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') sendMessage(); });
+
+  // Effacer messages localement
+  clearBtn.addEventListener('click', () => {
+    messagesDiv.innerHTML = '';
+    localStorage.removeItem(storageKey);
+  });
+
+  // Close chat pour retourner à chat public
+  closeBtn.addEventListener('click', () => {
+    window.location.href = 'Chat-spirituel.html';
+  });
+
+  // Recevoir messages privés en temps réel
+  socket.on('privateMessage', (data) => {
+    if ((data.sender === currentUser && data.receiver === targetUser) ||
+        (data.sender === targetUser && data.receiver === currentUser)) {
+      appendMessageToDOM(data, data.sender === currentUser);
+      saveLocalMessage(data);
+    }
+  });
+
+  // Charger messages locaux au chargement
+  loadLocalMessages();
+</script>
+
+</body>
+</html>
