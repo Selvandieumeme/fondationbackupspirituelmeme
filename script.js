@@ -50,7 +50,7 @@ function openPrivateChat(targetUser) {
   console.log('🔐 Ou vle pale an prive ak:', targetUser);
 
   // Redireksyon nan chatprive.html ak 2 itilizatè yo
-  window.location.href = `chatprive.html?from=${encodeURIComponent(currentUser)}&to=${encodeURIComponent(targetUser)}`;
+  window.location.href = `https://fondationbackupspirituel.com/chatprive.html?from=${encodeURIComponent(currentUser)}&to=${encodeURIComponent(targetUser)}`;
 }
 
 // 6️⃣ — Fonksyon pou afiche itilizatè yo nan ti kadran
