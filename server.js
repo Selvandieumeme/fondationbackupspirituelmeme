@@ -466,5 +466,5 @@ app.get('/Chat-Spirituel.html', (req, res) => {
 // 🚀 DEMARRE SERVEUR
 // ---------------------------
 const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+server.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`)):
 
