@@ -142,26 +142,22 @@
 <!-- Socket.io -->
 <script src="https://cdn.socket.io/4.7.4/socket.io.min.js"></script>
 
-<!-- Script Chat Prive -->
 <script>
-  // Récupérer query string
   const params = new URLSearchParams(window.location.search);
   const currentUser = params.get('from') || 'Anonyme';
   const targetUser = params.get('to') || '';
 
-  // Réutiliser socket existant si possible
   const socket = window.__fbsp_shared_socket || io('https://examen-backend-ihlx.onrender.com');
   window.__fbsp_shared_socket = socket;
 
-  // Éléments DOM
   const messagesDiv = document.getElementById('privateMessages');
   const msgInput = document.getElementById('privateMsg');
   const sendBtn = document.getElementById('sendPrivate');
   const clearBtn = document.getElementById('clearLocal');
   const closeBtn = document.getElementById('closeChat');
 
-  // LocalStorage clé unique par conversation
   const storageKey = `chat_${currentUser}_${targetUser}`;
+
   function loadLocalMessages() {
     const saved = JSON.parse(localStorage.getItem(storageKey) || '[]');
     saved.forEach(m => appendMessageToDOM(m, m.sender === currentUser));
@@ -181,11 +177,9 @@
     messagesDiv.scrollTop = messagesDiv.scrollHeight;
   }
 
-  // Envoyer message
   function sendMessage() {
     const message = msgInput.value.trim();
     if (!message) return;
-
     const data = { sender: currentUser, receiver: targetUser, message, date: new Date() };
     socket.emit('privateMessage', data);
     appendMessageToDOM(data, true);
@@ -196,18 +190,15 @@
   sendBtn.addEventListener('click', sendMessage);
   msgInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') sendMessage(); });
 
-  // Effacer messages localement
   clearBtn.addEventListener('click', () => {
     messagesDiv.innerHTML = '';
     localStorage.removeItem(storageKey);
   });
 
-  // Close chat pour retourner à chat public
   closeBtn.addEventListener('click', () => {
-    window.location.href = 'Chat-spirituel.html';
+    window.location.href = 'https://fondationbackupspirituel.com/Chat-spirituel.html';
   });
 
-  // Recevoir messages privés en temps réel
   socket.on('privateMessage', (data) => {
     if ((data.sender === currentUser && data.receiver === targetUser) ||
         (data.sender === targetUser && data.receiver === currentUser)) {
@@ -216,7 +207,6 @@
     }
   });
 
-  // Charger messages locaux au chargement
   loadLocalMessages();
 </script>
 
