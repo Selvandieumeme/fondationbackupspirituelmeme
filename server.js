@@ -262,11 +262,19 @@ app.get('/ping', (req, res) => res.send('pong'));
 // 💬 SOCKET.IO CHAT — VÈSYON FINAL AK LISTE ITILIZATÈ AKTIF
 // ---------------------------
 
+const mongoose = require('mongoose');
+const http = require('http');
+const express = require('express');
+const { Server } = require('socket.io');
+const app = express();
+
 // ---------------------------
 // 📦 Mongoose Schema
 // ---------------------------
+// Mesaj piblik ak prive
 const messageSchema = new mongoose.Schema({
-  user: { type: String, default: 'Anonyme' },
+  from: { type: String, required: true },    // Itilizatè ki voye mesaj la
+  to: { type: String, required: true },      // Itilizatè k ap resevwa mesaj la ('public' pou piblik)
   message: { type: String, required: true },
   date: { type: Date, default: Date.now }
 });
@@ -286,10 +294,8 @@ const io = new Server(server, {
 // ---------------------------
 // 🧩 GESTION UTILISATÈ AKTIF
 // ---------------------------
-// Nou pral sèvi ak yon Map pou swiv tout itilizatè yo (id → {name, sockets})
 const onlineUsers = new Map();
 
-// Fonksyon pou mete ajou lis itilizatè yo an tan reyèl
 function broadcastOnline() {
   const arr = [];
   for (const [id, info] of onlineUsers.entries()) {
@@ -308,20 +314,24 @@ function broadcastOnline() {
 io.on('connection', async (socket) => {
   console.log('🟢 Nouvo itilizatè konekte:', socket.id);
 
-  // ✅ Chaje 100 dènye mesaj yo pou nouvo itilizatè a
+  // ---------------------------
+  // ✅ Chaje 100 dènye mesaj piblik yo
+  // ---------------------------
   try {
-    const anciensMessages = await Message.find().sort({ date: 1 }).limit(100).lean();
+    const anciensMessages = await Message.find({ to: 'public' }).sort({ date: 1 }).limit(100).lean();
     const formattedMessages = anciensMessages.map(msg => ({
-      user: msg.user?.trim() || 'Anonyme',
+      user: msg.from?.trim() || 'Anonyme',
       message: msg.message || '',
       date: msg.date ? new Date(msg.date) : new Date()
     }));
     socket.emit('loadMessages', formattedMessages);
   } catch (err) {
-    console.error('❌ Erè pandan chajman mesaj:', err.message);
+    console.error('❌ Erè pandan chajman mesaj piblik:', err.message);
   }
 
+  // ---------------------------
   // ✅ Resevwa non itilizatè a
+  // ---------------------------
   socket.on('setUser', (username) => {
     const cleanName = username?.trim() || 'Anonyme';
     const userId = cleanName.toLowerCase();
@@ -340,30 +350,34 @@ io.on('connection', async (socket) => {
     broadcastOnline();
   });
 
+  // ---------------------------
   // ✅ Resevwa mesaj piblik
+  // ---------------------------
   socket.on('chatMessage', async (data) => {
     try {
       const user = data.user?.trim() || 'Anonyme';
       const message = data.message?.trim();
       if (!message) return;
 
-      const newMsg = new Message({ user, message });
+      const newMsg = new Message({ from: user, to: 'public', message });
       await newMsg.save();
 
       const formatted = {
-        user: newMsg.user,
+        user: newMsg.from,
         message: newMsg.message,
         date: newMsg.date
       };
 
       io.emit('chatMessage', formatted);
     } catch (err) {
-      console.error('❌ Erè pandan anrejistreman mesaj:', err.message);
+      console.error('❌ Erè pandan anrejistreman mesaj piblik:', err.message);
     }
   });
 
-  // ✅ ✅ ✅ 🎯 AJOUT POU CHAT PRIVE LA
-  socket.on('privateMessage', ({ from, to, message }) => {
+  // ---------------------------
+  // ✅ Chat Prive
+  // ---------------------------
+  socket.on('privateMessage', async ({ from, to, message }) => {
     if (!from || !to || !message) return;
 
     const targetId = to.toLowerCase();
@@ -372,37 +386,56 @@ io.on('connection', async (socket) => {
     const targetUser = onlineUsers.get(targetId);
     const senderUser = onlineUsers.get(senderId);
 
-    // ✅ Voye bay moun k ap resevwa a
+    // Sove mesaj nan MongoDB
+    try {
+      const newMsg = new Message({ from, to, message });
+      await newMsg.save();
+    } catch (err) {
+      console.error('❌ Erè pandan sove mesaj prive:', err.message);
+    }
+
+    // Voye bay moun k ap resevwa a
     if (targetUser) {
       targetUser.sockets.forEach(socketId => {
-        io.to(socketId).emit('privateMessage', {
-          from,
-          to,
-          message,
-          date: new Date()
-        });
+        io.to(socketId).emit('privateMessage', { from, to, message, date: new Date() });
       });
     }
 
-    // ✅ Voye bay moun ki voye a (pou wè mesaj la nan pwòp fenèt li)
+    // Voye bay moun ki voye a
     if (senderUser) {
       senderUser.sockets.forEach(socketId => {
-        io.to(socketId).emit('privateMessage', {
-          from,
-          to,
-          message,
-          date: new Date()
-        });
+        io.to(socketId).emit('privateMessage', { from, to, message, date: new Date() });
       });
     }
   });
 
+  // ---------------------------
+  // ✅ Chaje tout mesaj prive ant 2 itilizatè
+  // ---------------------------
+  socket.on('loadPrivateMessages', async ({ from, to }) => {
+    try {
+      const messages = await Message.find({
+        $or: [
+          { from, to },
+          { from: to, to: from }
+        ]
+      }).sort({ date: 1 }).lean();
+      socket.emit('loadPrivateMessages', messages);
+    } catch (err) {
+      console.error('❌ Erè pandan chajman mesaj prive:', err.message);
+    }
+  });
+
+  // ---------------------------
   // ✅ Moun mande lis itilizatè
+  // ---------------------------
   socket.on('requestUserList', () => {
     broadcastOnline();
   });
 
+  // ---------------------------
   // ✅ Lè yon itilizatè dekonekte
+  // ---------------------------
   socket.on('disconnect', () => {
     const userId = socket.data.userId;
     if (!userId) return;
