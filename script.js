@@ -45,14 +45,12 @@ function addMessage(data, isMe = false) {
 
 // ✅ ✅ ✅ NOUVO — Fonksyon pou ouvri chat prive
 function openPrivateChat(targetUser) {
-  if (!targetUser || targetUser === user) return;
+  const currentUser = socket.data.user || user; // itilize user olye de username
+  if (!targetUser || targetUser === currentUser) return;
   console.log('🔐 Ou vle pale an prive ak:', targetUser);
 
-  // Sa ka swa:
-  // → Lanse yon nouvo fenèt chat prive
-  // → Oswa montre yon div chat prive deja kache
-  // → Oswa redireksyone sou chatprive.html
-  window.location.href = `chatprive.html?user=${user}&to=${targetUser}`;
+  // Redireksyon nan chatprive.html ak 2 itilizatè yo
+  window.location.href = `chatprive.html?from=${encodeURIComponent(currentUser)}&to=${encodeURIComponent(targetUser)}`;
 }
 
 // 6️⃣ — Fonksyon pou afiche itilizatè yo nan ti kadran
@@ -62,11 +60,11 @@ function renderUsers(arr) {
 
   arr.forEach(u => {
     const li = document.createElement('li');
-    li.textContent = u.name || u;
+    li.textContent = u.user || u;
 
     // ✅ Ajoute click event pou chat prive
     li.addEventListener('click', () => {
-      openPrivateChat(u.name || u);
+      openPrivateChat(u.user || u);
     });
 
     userList.appendChild(li);
@@ -113,10 +111,10 @@ socket.on('online-users', (arr) => {
   renderUsers(arr);
 });
 
-socket.on('userConnected', (username) => {
-  console.log('🟢 Itilizatè konekte:', username);
+socket.on('userConnected', (user) => {
+  console.log('🟢 Itilizatè konekte:', user);
 });
 
-socket.on('userDisconnected', (username) => {
-  console.log('🔴 Itilizatè dekonekte:', username);
+socket.on('userDisconnected', (user) => {
+  console.log('🔴 Itilizatè dekonekte:', user);
 });
