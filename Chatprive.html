@@ -147,6 +147,7 @@
   const currentUser = params.get('from') || 'Anonyme';
   const targetUser = params.get('to') || '';
 
+  // Koneksyon socket san kraze lòt kòd
   const socket = window.__fbsp_shared_socket || io('https://examen-backend-ihlx.onrender.com');
   window.__fbsp_shared_socket = socket;
 
@@ -156,19 +157,7 @@
   const clearBtn = document.getElementById('clearLocal');
   const closeBtn = document.getElementById('closeChat');
 
-  const storageKey = `chat_${currentUser}_${targetUser}`;
-
-  function loadLocalMessages() {
-    const saved = JSON.parse(localStorage.getItem(storageKey) || '[]');
-    saved.forEach(m => appendMessageToDOM(m, m.sender === currentUser));
-  }
-
-  function saveLocalMessage(messageObj) {
-    const saved = JSON.parse(localStorage.getItem(storageKey) || '[]');
-    saved.push(messageObj);
-    localStorage.setItem(storageKey, JSON.stringify(saved));
-  }
-
+  // Fonksyon pou ajoute mesaj nan DOM
   function appendMessageToDOM(data, isMe) {
     const div = document.createElement('div');
     div.textContent = `[${new Date(data.date).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}] ${data.sender}: ${data.message}`;
@@ -177,37 +166,44 @@
     messagesDiv.scrollTop = messagesDiv.scrollHeight;
   }
 
+  // Voye mesaj
   function sendMessage() {
     const message = msgInput.value.trim();
     if (!message) return;
     const data = { sender: currentUser, receiver: targetUser, message, date: new Date() };
-    socket.emit('privateMessage', data);
-    appendMessageToDOM(data, true);
-    saveLocalMessage(data);
+    socket.emit('privateMessage', data); // Ale nan MongoDB atravè backend
+    appendMessageToDOM(data, true);      // Ajoute nan ekran
     msgInput.value = '';
   }
 
   sendBtn.addEventListener('click', sendMessage);
   msgInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') sendMessage(); });
 
-  clearBtn.addEventListener('click', () => {
-    messagesDiv.innerHTML = '';
-    localStorage.removeItem(storageKey);
-  });
+  // Bouton pou efase ekran sèlman (pa touche DB)
+  clearBtn.addEventListener('click', () => { messagesDiv.innerHTML = ''; });
 
+  // Bouton Close
   closeBtn.addEventListener('click', () => {
     window.location.href = 'https://www.fondationbackupspirituel.com/Chat-Spirituel.html';
   });
 
+  // Resevwa mesaj prive an tan reyèl
   socket.on('privateMessage', (data) => {
     if ((data.sender === currentUser && data.receiver === targetUser) ||
         (data.sender === targetUser && data.receiver === currentUser)) {
       appendMessageToDOM(data, data.sender === currentUser);
-      saveLocalMessage(data);
     }
   });
 
-  loadLocalMessages();
+  // Chaje tout mesaj prive ki deja nan DB lè itilizatè konekte
+  socket.emit('loadPrivateMessages', { from: currentUser, to: targetUser });
+  socket.on('loadPrivateMessages', (messagesArray) => {
+    if (!Array.isArray(messagesArray)) return;
+    messagesArray.forEach(msg => {
+      appendMessageToDOM(msg, msg.sender === currentUser);
+    });
+  });
+
 </script>
 
 </body>
