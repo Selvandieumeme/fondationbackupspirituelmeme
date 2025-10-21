@@ -174,8 +174,7 @@
   function appendMessageToDOM(data, isMe) {
     const div = document.createElement('div');
     const time = new Date(data.date || Date.now()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    const sender = data.from || 'Anonyme';
-    div.textContent = `[${time}] ${sender}: ${data.message}`;
+    div.textContent = `[${time}] ${data.sender || data.from || 'Anonyme'}: ${data.message}`;
     div.classList.add(isMe ? 'me' : 'other');
     messagesDiv.appendChild(div);
     messagesDiv.scrollTop = messagesDiv.scrollHeight;
@@ -184,22 +183,20 @@
   // --- Chaje tout mesaj prive ki deja egziste ant currentUser ak targetUser
   function loadPrivateMessages() {
     if (!currentUser || !targetUser) return;
-    socket.emit('loadPrivateMessages', { from: currentUser, to: targetUser });
+    socket.emit('loadPrivateMessages', { user1: currentUser, user2: targetUser });
   }
 
-  // --- Resevwa lis mesaj prive depi server epi filtre sèlman konvèsasyon aktyèl
+  // --- Resevwa lis mesaj prive depi server epi filtre sèlman ant currentUser ak targetUser
   socket.on('loadPrivateMessages', (messages) => {
     messagesDiv.innerHTML = '';
     if (!Array.isArray(messages)) return;
 
-    messages
-      .filter(m =>
-        (m.from === currentUser && m.to === targetUser) ||
-        (m.from === targetUser && m.to === currentUser)
-      )
-      .forEach(m => {
-        appendMessageToDOM({ from: m.from, message: m.message, date: m.date }, m.from === currentUser);
-      });
+    messages.filter(m =>
+      (m.from === currentUser && m.to === targetUser) ||
+      (m.from === targetUser && m.to === currentUser)
+    ).forEach(m => {
+      appendMessageToDOM({ sender: m.from, message: m.message, date: m.date }, m.from === currentUser);
+    });
 
     messagesDiv.scrollTop = messagesDiv.scrollHeight;
   });
@@ -216,7 +213,8 @@
     const payload = { from: currentUser, to: targetUser, message };
     socket.emit('privateMessage', payload);
 
-    appendMessageToDOM({ from: currentUser, message, date: new Date() }, true);
+    // Mete mesaj imedyatman nan DOM
+    appendMessageToDOM({ sender: currentUser, message, date: new Date() }, true);
 
     msgInput.value = '';
     msgInput.focus();
@@ -224,21 +222,14 @@
 
   // --- Resevwa mesaj prive an tan reyèl epi filtre sèlman konvèsasyon aktyèl la
   socket.on('privateMessage', (data) => {
-    const sender = data.from;
-    const receiver = data.to;
+    const sender = data.sender || data.from;
+    const receiver = data.receiver || data.to;
     if (!sender || !receiver) return;
 
-    const isRelevant =
-      (sender === currentUser && receiver === targetUser) ||
-      (sender === targetUser && receiver === currentUser);
-
-    if (!isRelevant) return;
-
-    appendMessageToDOM({
-      from: sender,
-      message: data.message,
-      date: data.date || new Date()
-    }, sender === currentUser);
+    if ((sender === currentUser && receiver === targetUser) ||
+        (sender === targetUser && receiver === currentUser)) {
+      appendMessageToDOM({ sender, message: data.message, date: data.date || new Date() }, sender === currentUser);
+    }
   });
 
   // --- Bouton voye mesaj
@@ -253,75 +244,56 @@
     window.location.href = 'https://www.fondationbackupspirituel.com/Chat-Spirituel.html';
   });
 
-  // --- Lè socket konekte
-  socket.on('connect', () => {
-    if (currentUser && currentUser !== 'Anonyme') socket.emit('setUser', currentUser);
-    loadPrivateMessages();
-    socket.emit('requestUserList');
-  });
+  // --- Lè socket konekte, mande mesaj
+  socket.on('connect', () => { loadPrivateMessages(); });
 
-  if (socket.connected) {
-    if (currentUser && currentUser !== 'Anonyme') socket.emit('setUser', currentUser);
-    loadPrivateMessages();
-    socket.emit('requestUserList');
-  }
+  // --- Load inisyal lè paj chaje
+  loadPrivateMessages();
 
-  try { msgInput.focus(); } catch (e) { }
+  // Accessibility: mete focus sou input
+  msgInput.focus();
 
   // -----------------------------
   // --- Lis itilizatè aktif pou chwazi targetUser
-  (function ensureUserListPanel() {
-    if (document.getElementById('userList')) return;
+  const userListDiv = document.createElement('div');
+  userListDiv.id = 'userList';
+  userListDiv.style.position = 'fixed';
+  userListDiv.style.right = '10px';
+  userListDiv.style.top = '70px';
+  userListDiv.style.width = '180px';
+  userListDiv.style.height = '80vh';
+  userListDiv.style.overflowY = 'auto';
+  userListDiv.style.border = '1px solid #0d6efd';
+  userListDiv.style.borderRadius = '8px';
+  userListDiv.style.backgroundColor = '#f0f8ff';
+  userListDiv.style.padding = '5px';
+  document.body.appendChild(userListDiv);
 
-    const userListDiv = document.createElement('div');
-    userListDiv.id = 'userList';
-    userListDiv.style.position = 'fixed';
-    userListDiv.style.right = '10px';
-    userListDiv.style.top = '70px';
-    userListDiv.style.width = '180px';
-    userListDiv.style.height = '80vh';
-    userListDiv.style.overflowY = 'auto';
-    userListDiv.style.border = '1px solid #0d6efd';
-    userListDiv.style.borderRadius = '8px';
-    userListDiv.style.backgroundColor = '#f0f8ff';
-    userListDiv.style.padding = '5px';
-    userListDiv.style.zIndex = '9999';
-    document.body.appendChild(userListDiv);
-
-    function renderUserList(users) {
-      userListDiv.innerHTML = '';
-      users.forEach(u => {
-        if (u && u !== currentUser) {
-          const btn = document.createElement('button');
-          btn.textContent = u;
-          btn.style.display = 'block';
-          btn.style.width = '100%';
-          btn.style.marginBottom = '3px';
-          btn.style.cursor = 'pointer';
-          btn.addEventListener('click', () => {
-            targetUser = u;
-            try {
-              const newUrl = new URL(window.location.href);
-              newUrl.searchParams.set('to', u);
-              history.replaceState(null, '', newUrl.toString());
-            } catch (e) { }
-            loadPrivateMessages();
-          });
-          userListDiv.appendChild(btn);
-        }
-      });
-    }
-
-    socket.on('online-users', (usersArr) => {
-      const normalized = Array.isArray(usersArr) ? usersArr.map(item => {
-        if (typeof item === 'string') return item;
-        if (item && typeof item === 'object') return item.user || item.id;
-        return String(item);
-      }).filter(Boolean) : [];
-      renderUserList(normalized);
+  function renderUserList(users) {
+    userListDiv.innerHTML = '';
+    users.forEach(u => {
+      if(u !== currentUser) {
+        const btn = document.createElement('button');
+        btn.textContent = u;
+        btn.style.display = 'block';
+        btn.style.width = '100%';
+        btn.style.marginBottom = '3px';
+        btn.style.cursor = 'pointer';
+        btn.addEventListener('click', () => {
+          targetUser = u;
+          loadPrivateMessages(); // chaje konvèsasyon ak nouvo target
+        });
+        userListDiv.appendChild(btn);
+      }
     });
-  })();
+  }
+
+  // --- Mande lis itilizatè aktif nan server.js
+  socket.emit('requestUserList');
+  socket.on('online-users', users => {
+    const names = users.map(u => u.name);
+    renderUserList(names);
+  });
 </script>
-  
 </body>
 </html>
