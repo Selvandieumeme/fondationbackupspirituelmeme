@@ -174,34 +174,40 @@
   function appendMessageToDOM(data, isMe) {
     const div = document.createElement('div');
     const time = new Date(data.date || Date.now()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    div.textContent = `[${time}] ${data.sender || data.from || 'Anonyme'}: ${data.message}`;
+    // Affiche "from" (non ki soti nan DB: from) pou evite konfizyon ak 'user' fields
+    const senderName = data.from || data.sender || 'Anonyme';
+    div.textContent = `[${time}] ${senderName}: ${data.message}`;
     div.classList.add(isMe ? 'me' : 'other');
     messagesDiv.appendChild(div);
     messagesDiv.scrollTop = messagesDiv.scrollHeight;
   }
 
-  // --- Chaje tout mesaj prive ki deja egziste ant currentUser ak targetUser
+  // --- Chaje tout mesaj prive ki deja egziste ant currentUser ak targetUser (mande server)
   function loadPrivateMessages() {
     if (!currentUser || !targetUser) return;
-    socket.emit('loadPrivateMessages', { user1: currentUser, user2: targetUser });
+    // Nou voye from/to ke server.js ap itilize pou fè query sou MongoDB
+    socket.emit('loadPrivateMessages', { from: currentUser, to: targetUser });
   }
 
-  // --- Resevwa lis mesaj prive depi server epi filtre sèlman ant currentUser ak targetUser
+  // --- Resevwa lis mesaj prive depi server epi montre yo (server ta dwe retounen sèlman konvèsasyon sa)
   socket.on('loadPrivateMessages', (messages) => {
     messagesDiv.innerHTML = '';
     if (!Array.isArray(messages)) return;
 
-    messages.filter(m =>
-      (m.from === currentUser && m.to === targetUser) ||
-      (m.from === targetUser && m.to === currentUser)
-    ).forEach(m => {
-      appendMessageToDOM({ sender: m.from, message: m.message, date: m.date }, m.from === currentUser);
-    });
+    // Filtre anplis nan client pou asire sèlman konvèsasyon aktyèl parèt (siplemantè sekirite)
+    messages
+      .filter(m =>
+        (m.from === currentUser && m.to === targetUser) ||
+        (m.from === targetUser && m.to === currentUser)
+      )
+      .forEach(m => {
+        appendMessageToDOM(m, m.from === currentUser);
+      });
 
     messagesDiv.scrollTop = messagesDiv.scrollHeight;
   });
 
-  // --- Voye mesaj prive al server
+  // --- Voye mesaj prive al server (server ap sove nan MongoDB epi emèt bay reseptè ak sender)
   function sendMessage() {
     const message = msgInput.value.trim();
     if (!message) return;
@@ -211,10 +217,12 @@
     }
 
     const payload = { from: currentUser, to: targetUser, message };
+
+    // 1) Emèt pou server (server ap sove epi ap re-émèt 'privateMessage' bay toude pati)
     socket.emit('privateMessage', payload);
 
-    // Mete mesaj imedyatman nan DOM
-    appendMessageToDOM({ sender: currentUser, message, date: new Date() }, true);
+    // 2) Mete mesaj imedyatman nan DOM pou repons rapid (server pral re-emit menm mesaj la)
+    appendMessageToDOM({ from: currentUser, message, date: new Date() }, true);
 
     msgInput.value = '';
     msgInput.focus();
@@ -222,78 +230,121 @@
 
   // --- Resevwa mesaj prive an tan reyèl epi filtre sèlman konvèsasyon aktyèl la
   socket.on('privateMessage', (data) => {
-    const sender = data.sender || data.from;
-    const receiver = data.receiver || data.to;
+    // Server ka voye { from, to, message, date } oswa { sender, receiver, ... }
+    const sender = data.from || data.sender;
+    const receiver = data.to || data.receiver;
     if (!sender || !receiver) return;
 
-    if ((sender === currentUser && receiver === targetUser) ||
-        (sender === targetUser && receiver === currentUser)) {
-      appendMessageToDOM({ sender, message: data.message, date: data.date || new Date() }, sender === currentUser);
-    }
+    // Montre sèlman si mesaj la konsène konvèsasyon nou an
+    const isRelevant =
+      (sender === currentUser && receiver === targetUser) ||
+      (sender === targetUser && receiver === currentUser);
+
+    if (!isRelevant) return;
+
+    // Ajoute nan DOM
+    appendMessageToDOM({
+      from: sender,
+      message: data.message,
+      date: data.date || new Date()
+    }, sender === currentUser);
   });
 
   // --- Bouton voye mesaj
   sendBtn.addEventListener('click', sendMessage);
   msgInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') sendMessage(); });
 
-  // --- Efase sèlman DOM
+  // --- Efase sèlman DOM (pa efase nan DB) — konsistan ak demann ou
   clearBtn.addEventListener('click', () => { messagesDiv.innerHTML = ''; });
 
-  // --- Close: retounen sou Chat-Spirituel
+  // --- Close: retounen sou Chat-Spirituel (ou te di vèsyon "Chat-Spirituel.html" egzak)
   closeBtn.addEventListener('click', () => {
     window.location.href = 'https://www.fondationbackupspirituel.com/Chat-Spirituel.html';
   });
 
-  // --- Lè socket konekte, mande mesaj
-  socket.on('connect', () => { loadPrivateMessages(); });
+  // --- Lè socket konekte, asire server konnen non itilizatè a epi chaje mesaj prive
+  socket.on('connect', () => {
+    if (currentUser && currentUser !== 'Anonyme') {
+      socket.emit('setUser', currentUser);
+    }
+    // Mande tou lis mesaj prive aktyèl la si targetUser defini
+    loadPrivateMessages();
+    // Mande lis itilizatè online pou panel lateral (si ou vle mete li)
+    socket.emit('requestUserList');
+  });
 
-  // --- Load inisyal lè paj chaje
-  loadPrivateMessages();
-
-  // Accessibility: mete focus sou input
-  msgInput.focus();
-
-  // -----------------------------
-  // --- Lis itilizatè aktif pou chwazi targetUser
-  const userListDiv = document.createElement('div');
-  userListDiv.id = 'userList';
-  userListDiv.style.position = 'fixed';
-  userListDiv.style.right = '10px';
-  userListDiv.style.top = '70px';
-  userListDiv.style.width = '180px';
-  userListDiv.style.height = '80vh';
-  userListDiv.style.overflowY = 'auto';
-  userListDiv.style.border = '1px solid #0d6efd';
-  userListDiv.style.borderRadius = '8px';
-  userListDiv.style.backgroundColor = '#f0f8ff';
-  userListDiv.style.padding = '5px';
-  document.body.appendChild(userListDiv);
-
-  function renderUserList(users) {
-    userListDiv.innerHTML = '';
-    users.forEach(u => {
-      if(u !== currentUser) {
-        const btn = document.createElement('button');
-        btn.textContent = u;
-        btn.style.display = 'block';
-        btn.style.width = '100%';
-        btn.style.marginBottom = '3px';
-        btn.style.cursor = 'pointer';
-        btn.addEventListener('click', () => {
-          targetUser = u;
-          loadPrivateMessages(); // chaje konvèsasyon ak nouvo target
-        });
-        userListDiv.appendChild(btn);
-      }
-    });
+  // --- Load inisyal lè paj chaje (si deja connected)
+  if (socket.connected) {
+    if (currentUser && currentUser !== 'Anonyme') {
+      socket.emit('setUser', currentUser);
+    }
+    loadPrivateMessages();
+    socket.emit('requestUserList');
   }
 
-  // --- Mande lis itilizatè aktif nan server.js
-  socket.emit('requestUserList');
-  socket.on('online-users', users => {
-    const names = users.map(u => u.name);
-    renderUserList(names);
-  });
+  // Accessibility: mete focus sou input
+  try { msgInput.focus(); } catch (e) { /* ignore si pa jwenn */ }
+
+  // -----------------------------
+  // --- Lis itilizatè aktif pou chwazi targetUser (panel sou bò dwat)
+  //    Si ou deja genyen yon panel nan Chat-Spirituel.html, pa double-mete li.
+  //    Sa a se fallback: li kreye yon ti panel si li pa egziste.
+  (function ensureUserListPanel() {
+    // Si paj deja gen yon elem ak id 'userList' nou pa fè anyen
+    if (document.getElementById('userList')) return;
+
+    const userListDiv = document.createElement('div');
+    userListDiv.id = 'userList';
+    userListDiv.style.position = 'fixed';
+    userListDiv.style.right = '10px';
+    userListDiv.style.top = '70px';
+    userListDiv.style.width = '180px';
+    userListDiv.style.height = '80vh';
+    userListDiv.style.overflowY = 'auto';
+    userListDiv.style.border = '1px solid #0d6efd';
+    userListDiv.style.borderRadius = '8px';
+    userListDiv.style.backgroundColor = '#f0f8ff';
+    userListDiv.style.padding = '5px';
+    userListDiv.style.zIndex = '9999';
+    document.body.appendChild(userListDiv);
+
+    function renderUserList(users) {
+      userListDiv.innerHTML = '';
+      users.forEach(u => {
+        if (u && u !== currentUser) {
+          const btn = document.createElement('button');
+          btn.textContent = u;
+          btn.style.display = 'block';
+          btn.style.width = '100%';
+          btn.style.marginBottom = '3px';
+          btn.style.cursor = 'pointer';
+          btn.addEventListener('click', () => {
+            // chanje targetUser epi chaje konvèsasyon
+            targetUser = u;
+            // update URL san reload pou vizibilite (optional)
+            try {
+              const newUrl = new URL(window.location.href);
+              newUrl.searchParams.set('to', u);
+              history.replaceState(null, '', newUrl.toString());
+            } catch (e) { /* ignore si URL API pa sipòte */ }
+            loadPrivateMessages();
+          });
+          userListDiv.appendChild(btn);
+        }
+      });
+    }
+
+    // resevwa lis itilizatè (server ap emèt 'online-users' menm jan ak Chat-Spirituel)
+    socket.on('online-users', (usersArr) => {
+      // normalizasyon si server voye obj {id,name,connected}
+      const names = Array.isArray(usersArr) ? usersArr.map(item => {
+        if (typeof item === 'string') return item;
+        if (item && typeof item === 'object') return item.name || item.user || item.id;
+        return String(item);
+      }).filter(Boolean) : [];
+      renderUserList(names);
+    });
+  })();
 </script>
 
 </body>
