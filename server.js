@@ -259,26 +259,25 @@ app.get('/ping', (req, res) => res.send('pong'));
 
 
 // ---------------------------
-// 💬 SOCKET.IO CHAT — VÈSYON FINAL AK LISTE ITILizatè AKTIF
+// 💬 SOCKET.IO CHAT — VÈSYON FINAL AK LISTE ITILIZATÈ AKTIF
 // ---------------------------
-
 
 /* ---------------------------
    📦 Mongoose Schema
-   --------------------------- */
+--------------------------- */
 // Mesaj piblik ak prive (nou ajoute 'read' pou mesaj prive)
 const messageSchema = new mongoose.Schema({
   from: { type: String, required: true },    // Itilizatè ki voye mesaj la
   to: { type: String, required: true },      // Itilizatè k ap resevwa mesaj la ('public' pou piblik)
   message: { type: String, required: true },
   date: { type: Date, default: Date.now },
-  read: { type: Boolean, default: false }    // Nou ajoute sa pou unread/read counts
+  read: { type: Boolean, default: false }    // Pou unread/read counts
 });
 const Message = mongoose.model('Message', messageSchema);
 
 /* ---------------------------
    ⚙️ Socket.IO Server
-   --------------------------- */
+--------------------------- */
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
@@ -289,7 +288,7 @@ const io = new Server(server, {
 
 /* ---------------------------
    🧩 GESTION UTILISATÈ AKTIF
-   --------------------------- */
+--------------------------- */
 const onlineUsers = new Map();
 
 function broadcastOnline() {
@@ -297,7 +296,7 @@ function broadcastOnline() {
   for (const [id, info] of onlineUsers.entries()) {
     arr.push({
       id,
-      name: info.name,
+      user: info.user,          // chanje 'name' -> 'user'
       connected: info.sockets.size > 0
     });
   }
@@ -308,7 +307,6 @@ function broadcastOnline() {
 async function emitUnreadCount(userName) {
   if (!userName) return;
   try {
-    // Nou konte mesaj kote 'to' egal userName (egzak) epi read === false
     const count = await Message.countDocuments({ to: userName, read: false });
     const userRecord = onlineUsers.get((userName || '').toLowerCase());
     if (userRecord) {
@@ -323,7 +321,7 @@ async function emitUnreadCount(userName) {
 
 /* ---------------------------
    ⚡ SOCKET.IO CONNECTION
-   --------------------------- */
+--------------------------- */
 io.on('connection', async (socket) => {
   console.log('🟢 Nouvo itilizatè konekte:', socket.id);
 
@@ -346,24 +344,24 @@ io.on('connection', async (socket) => {
   // ✅ Resevwa non itilizatè a
   // ---------------------------
   socket.on('setUser', (username) => {
-    const cleanName = username?.trim() || 'Anonyme';
-    const userId = cleanName.toLowerCase();
+    const cleanUser = username?.trim() || 'Anonyme';
+    const userId = cleanUser.toLowerCase();
 
     let record = onlineUsers.get(userId);
     if (!record) {
-      record = { name: cleanName, sockets: new Set() };
+      record = { user: cleanUser, sockets: new Set() };  // chanje 'name' -> 'user'
       onlineUsers.set(userId, record);
     }
 
-    record.name = cleanName;
+    record.user = cleanUser;
     record.sockets.add(socket.id);
     socket.data.userId = userId;
 
-    io.emit('userConnected', cleanName);
+    io.emit('userConnected', cleanUser);
     broadcastOnline();
 
     // Lè yon itilizatè konekte, emèt unread count li
-    emitUnreadCount(cleanName).catch(e => {});
+    emitUnreadCount(cleanUser).catch(e => {});
   });
 
   // ---------------------------
@@ -375,7 +373,7 @@ io.on('connection', async (socket) => {
       const message = data.message?.trim();
       if (!message) return;
 
-      const newMsg = new Message({ from: user, to: 'public', message, read: true }); // public => mark read true
+      const newMsg = new Message({ from: user, to: 'public', message, read: true });
       await newMsg.save();
 
       const formatted = {
@@ -396,7 +394,6 @@ io.on('connection', async (socket) => {
   socket.on('privateMessage', async ({ from, to, message }) => {
     if (!from || !to || !message) return;
 
-    // Normalizasyon kle pou lookup onlineUsers (men nou sove 'from'/'to' jan yo ye pou lis mesaj)
     const targetId = to.toLowerCase();
     const senderId = from.toLowerCase();
 
@@ -420,7 +417,7 @@ io.on('connection', async (socket) => {
       });
     }
 
-    // Voye tou bay moun ki voye a pou li wè mesaj la nan fenèt li
+    // Voye tou bay moun ki voye a pou li wè mesaj la
     if (senderUser) {
       senderUser.sockets.forEach(socketId => {
         io.to(socketId).emit('privateMessage', payload);
@@ -436,7 +433,6 @@ io.on('connection', async (socket) => {
   // ---------------------------
   socket.on('loadPrivateMessages', async (payload) => {
     try {
-      // Sipòte diferan non param: { from, to } oswa { user1, user2 }
       const from = (payload && (payload.from || payload.user1)) || null;
       const to = (payload && (payload.to || payload.user2)) || null;
       if (!from || !to) {
@@ -444,7 +440,6 @@ io.on('connection', async (socket) => {
         return;
       }
 
-      // Chèche tout mesaj ant from <-> to (tou de direksyon)
       const messages = await Message.find({
         $or: [
           { from: from, to: to },
@@ -452,25 +447,18 @@ io.on('connection', async (socket) => {
         ]
       }).sort({ date: 1 }).lean();
 
-      // Make as read: si socket requester se 'from' nan payload user (li rele sa k ap resevwa), nou make
-      // tout mesaj kote 'to' === requesterName epi 'from' === other kòm read = true
-      // Nou bezwen konnen requester: si socket.data.userId egziste, li ka ede, men pi senp: si payload.from === requesterName
-      // Pou sekirite, nou pral chache requesterName nan socket.data.userId si li prezan
-      const requesterName = socket.data.userId ? onlineUsers.get(socket.data.userId)?.name : null;
+      const requesterName = socket.data.userId ? onlineUsers.get(socket.data.userId)?.user : null;
 
-      // If requesterName matches 'from', mark messages addressed to requester as read
       const markFor = (requesterName && requesterName === from) ? { to: from, from: to } : null;
       if (markFor) {
         try {
           await Message.updateMany({ from: markFor.from, to: markFor.to, read: false }, { $set: { read: true } }).exec();
-          // emèt unread count ajou pou requester
           emitUnreadCount(requesterName).catch(e => {});
         } catch (err) {
           console.error('❌ Erè pandan make mesaj kòm read:', err.message);
         }
       }
 
-      // Finalman, voye lis mesaj yo tounen bay socket requester
       socket.emit('loadPrivateMessages', messages);
 
     } catch (err) {
@@ -499,7 +487,7 @@ io.on('connection', async (socket) => {
     record.sockets.delete(socket.id);
 
     if (record.sockets.size === 0) {
-      io.emit('userDisconnected', record.name);
+      io.emit('userDisconnected', record.user); // chanje 'name' -> 'user'
     }
 
     broadcastOnline();
@@ -509,13 +497,13 @@ io.on('connection', async (socket) => {
 
 /* ---------------------------
    🗂️ CHAT PAGE
-   --------------------------- */
+--------------------------- */
 app.get('/Chat-Spirituel.html', (req, res) => {
   res.sendFile(path.join(__dirname, 'Chat-Spirituel.html'));
 });
 
 /* ---------------------------
    🚀 DEMARRE SERVEUR
-   --------------------------- */
+--------------------------- */
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
