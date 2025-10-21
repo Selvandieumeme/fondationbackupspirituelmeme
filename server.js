@@ -261,23 +261,22 @@ app.get('/ping', (req, res) => res.send('pong'));
 // ---------------------------
 // 💬 SOCKET.IO CHAT — VÈSYON FINAL AK LISTE ITILIZATÈ AKTIF
 // ---------------------------
-
-/* ---------------------------
-   📦 Mongoose Schema
---------------------------- */
-// Mesaj piblik ak prive (nou ajoute 'read' pou mesaj prive)
+	
+// ---------------------------
+// 📦 Mongoose Schema
+// ---------------------------
+// Mesaj piblik ak prive
 const messageSchema = new mongoose.Schema({
   from: { type: String, required: true },    // Itilizatè ki voye mesaj la
   to: { type: String, required: true },      // Itilizatè k ap resevwa mesaj la ('public' pou piblik)
   message: { type: String, required: true },
-  date: { type: Date, default: Date.now },
-  read: { type: Boolean, default: false }    // Pou unread/read counts
+  date: { type: Date, default: Date.now }
 });
 const Message = mongoose.model('Message', messageSchema);
 
-/* ---------------------------
-   ⚙️ Socket.IO Server
---------------------------- */
+// ---------------------------
+// ⚙️ Socket.IO Server
+// ---------------------------
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
@@ -286,9 +285,9 @@ const io = new Server(server, {
   }
 });
 
-/* ---------------------------
-   🧩 GESTION UTILISATÈ AKTIF
---------------------------- */
+// ---------------------------
+// 🧩 GESTION UTILISATÈ AKTIF
+// ---------------------------
 const onlineUsers = new Map();
 
 function broadcastOnline() {
@@ -296,32 +295,16 @@ function broadcastOnline() {
   for (const [id, info] of onlineUsers.entries()) {
     arr.push({
       id,
-      user: info.user,          // chanje 'name' -> 'user'
+      name: info.name,
       connected: info.sockets.size > 0
     });
   }
   io.emit('online-users', arr);
 }
 
-// Helper: emèt unread count pou yon itilizatè (si li online)
-async function emitUnreadCount(userName) {
-  if (!userName) return;
-  try {
-    const count = await Message.countDocuments({ to: userName, read: false });
-    const userRecord = onlineUsers.get((userName || '').toLowerCase());
-    if (userRecord) {
-      userRecord.sockets.forEach(sId => {
-        io.to(sId).emit('unread-count', { user: userName, count });
-      });
-    }
-  } catch (err) {
-    console.error('❌ Erè pandan kalkil unread count:', err.message);
-  }
-}
-
-/* ---------------------------
-   ⚡ SOCKET.IO CONNECTION
---------------------------- */
+// ---------------------------
+// ⚡ SOCKET.IO CONNECTION
+// ---------------------------
 io.on('connection', async (socket) => {
   console.log('🟢 Nouvo itilizatè konekte:', socket.id);
 
@@ -344,24 +327,21 @@ io.on('connection', async (socket) => {
   // ✅ Resevwa non itilizatè a
   // ---------------------------
   socket.on('setUser', (username) => {
-    const cleanUser = username?.trim() || 'Anonyme';
-    const userId = cleanUser.toLowerCase();
+    const cleanName = username?.trim() || 'Anonyme';
+    const userId = cleanName.toLowerCase();
 
     let record = onlineUsers.get(userId);
     if (!record) {
-      record = { user: cleanUser, sockets: new Set() };  // chanje 'name' -> 'user'
+      record = { name: cleanName, sockets: new Set() };
       onlineUsers.set(userId, record);
     }
 
-    record.user = cleanUser;
+    record.name = cleanName;
     record.sockets.add(socket.id);
     socket.data.userId = userId;
 
-    io.emit('userConnected', cleanUser);
+    io.emit('userConnected', cleanName);
     broadcastOnline();
-
-    // Lè yon itilizatè konekte, emèt unread count li
-    emitUnreadCount(cleanUser).catch(e => {});
   });
 
   // ---------------------------
@@ -373,7 +353,7 @@ io.on('connection', async (socket) => {
       const message = data.message?.trim();
       if (!message) return;
 
-      const newMsg = new Message({ from: user, to: 'public', message, read: true });
+      const newMsg = new Message({ from: user, to: 'public', message });
       await newMsg.save();
 
       const formatted = {
@@ -400,70 +380,43 @@ io.on('connection', async (socket) => {
     const targetUser = onlineUsers.get(targetId);
     const senderUser = onlineUsers.get(senderId);
 
-    // Sove mesaj nan MongoDB (read = false paske reseptè poko li)
+    // Sove mesaj nan MongoDB
     try {
-      const newMsg = new Message({ from, to, message, read: false });
+      const newMsg = new Message({ from, to, message });
       await newMsg.save();
     } catch (err) {
       console.error('❌ Erè pandan sove mesaj prive:', err.message);
     }
 
-    const payload = { from, to, message, date: new Date() };
-
-    // Voye bay moun k ap resevwa a (si li online)
+    // Voye bay moun k ap resevwa a
     if (targetUser) {
       targetUser.sockets.forEach(socketId => {
-        io.to(socketId).emit('privateMessage', payload);
+        io.to(socketId).emit('privateMessage', { from, to, message, date: new Date() });
       });
     }
 
-    // Voye tou bay moun ki voye a pou li wè mesaj la
+    // Voye bay moun ki voye a
     if (senderUser) {
       senderUser.sockets.forEach(socketId => {
-        io.to(socketId).emit('privateMessage', payload);
+        io.to(socketId).emit('privateMessage', { from, to, message, date: new Date() });
       });
     }
-
-    // Finalman, emèt unread count pou reseptè a
-    emitUnreadCount(to).catch(e => {});
   });
 
   // ---------------------------
   // ✅ Chaje tout mesaj prive ant 2 itilizatè
   // ---------------------------
-  socket.on('loadPrivateMessages', async (payload) => {
+  socket.on('loadPrivateMessages', async ({ from, to }) => {
     try {
-      const from = (payload && (payload.from || payload.user1)) || null;
-      const to = (payload && (payload.to || payload.user2)) || null;
-      if (!from || !to) {
-        socket.emit('loadPrivateMessages', []);
-        return;
-      }
-
       const messages = await Message.find({
         $or: [
-          { from: from, to: to },
+          { from, to },
           { from: to, to: from }
         ]
       }).sort({ date: 1 }).lean();
-
-      const requesterName = socket.data.userId ? onlineUsers.get(socket.data.userId)?.user : null;
-
-      const markFor = (requesterName && requesterName === from) ? { to: from, from: to } : null;
-      if (markFor) {
-        try {
-          await Message.updateMany({ from: markFor.from, to: markFor.to, read: false }, { $set: { read: true } }).exec();
-          emitUnreadCount(requesterName).catch(e => {});
-        } catch (err) {
-          console.error('❌ Erè pandan make mesaj kòm read:', err.message);
-        }
-      }
-
       socket.emit('loadPrivateMessages', messages);
-
     } catch (err) {
       console.error('❌ Erè pandan chajman mesaj prive:', err.message);
-      socket.emit('loadPrivateMessages', []);
     }
   });
 
@@ -487,7 +440,7 @@ io.on('connection', async (socket) => {
     record.sockets.delete(socket.id);
 
     if (record.sockets.size === 0) {
-      io.emit('userDisconnected', record.user); // chanje 'name' -> 'user'
+      io.emit('userDisconnected', record.name);
     }
 
     broadcastOnline();
@@ -495,15 +448,17 @@ io.on('connection', async (socket) => {
   });
 });
 
-/* ---------------------------
-   🗂️ CHAT PAGE
---------------------------- */
+
+// ---------------------------
+// 🗂️ CHAT PAGE
+// ---------------------------
 app.get('/Chat-Spirituel.html', (req, res) => {
   res.sendFile(path.join(__dirname, 'Chat-Spirituel.html'));
 });
 
-/* ---------------------------
-   🚀 DEMARRE SERVEUR
---------------------------- */
+// ---------------------------
+// 🚀 DEMARRE SERVEUR
+// ---------------------------
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+
