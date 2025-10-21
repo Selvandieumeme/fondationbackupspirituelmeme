@@ -170,11 +170,9 @@
   const clearBtn = document.getElementById('clearLocal');
   const closeBtn = document.getElementById('closeChat');
 
-  // --- Fè atansyon: nou SÒTI lokalStorage, nou SOVE nan MongoDB atravè server la.
   // --- Fonksyon pou ajoute mesaj nan DOM
   function appendMessageToDOM(data, isMe) {
     const div = document.createElement('div');
-    // fòma dat la klè
     const time = new Date(data.date || Date.now()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     div.textContent = `[${time}] ${data.sender || data.from || 'Anonyme'}: ${data.message}`;
     div.classList.add(isMe ? 'me' : 'other');
@@ -182,25 +180,28 @@
     messagesDiv.scrollTop = messagesDiv.scrollHeight;
   }
 
-  // --- Chaje tout mesaj prive ki deja egziste ant currentUser ak targetUser depi server (MongoDB)
+  // --- Chaje tout mesaj prive ki deja egziste ant currentUser ak targetUser
   function loadPrivateMessages() {
     if (!currentUser || !targetUser) return;
     socket.emit('loadPrivateMessages', { user1: currentUser, user2: targetUser });
   }
 
-  // --- Resevwa repons k ap retounen avek lis mesaj yo
+  // --- Resevwa lis mesaj prive depi server epi filtre sèlman ant currentUser ak targetUser
   socket.on('loadPrivateMessages', (messages) => {
-    // Asire nou nan konvèsasyon kòrèk
     messagesDiv.innerHTML = '';
     if (!Array.isArray(messages)) return;
-    messages.forEach(m => {
-      // server voye { sender, receiver, message, date }
-      appendMessageToDOM({ sender: m.sender, message: m.message, date: m.date }, m.sender === currentUser);
+
+    messages.filter(m =>
+      (m.from === currentUser && m.to === targetUser) ||
+      (m.from === targetUser && m.to === currentUser)
+    ).forEach(m => {
+      appendMessageToDOM({ sender: m.from, message: m.message, date: m.date }, m.from === currentUser);
     });
+
     messagesDiv.scrollTop = messagesDiv.scrollHeight;
   });
 
-  // --- Voye mesaj prive al server (server ap sove nan MongoDB epi re-emèt bay tout sockets releve)
+  // --- Voye mesaj prive al server
   function sendMessage() {
     const message = msgInput.value.trim();
     if (!message) return;
@@ -209,71 +210,48 @@
       return;
     }
 
-    const payload = {
-      from: currentUser,
-      to: targetUser,
-      message: message
-    };
-
-    // 1) Emèt pou server (server ap sove nan MongoDB epi emèt tounen bay reseptè ak sender)
+    const payload = { from: currentUser, to: targetUser, message };
     socket.emit('privateMessage', payload);
 
-    // 2) Mete message imedyatman nan DOM pou ogmante reaktivite (server ap re-emit menm mesaj la)
+    // Mete mesaj imedyatman nan DOM
     appendMessageToDOM({ sender: currentUser, message, date: new Date() }, true);
 
     msgInput.value = '';
     msgInput.focus();
   }
 
-  // --- Resevwa mesaj prive an tan reyèl (server ap emèt li apre li sove)
+  // --- Resevwa mesaj prive an tan reyèl epi filtre sèlman konvèsasyon aktyèl la
   socket.on('privateMessage', (data) => {
-    // Atansyon: server ap voye { from, to, message, date } oswa { sender, receiver, ... } depann sou implémentation
     const sender = data.sender || data.from;
     const receiver = data.receiver || data.to;
-    // Si mesaj la se pou konvèsasyon an (ant currentUser ak targetUser), montre li
     if (!sender || !receiver) return;
-    const isRelevant =
-      (sender === currentUser && receiver === targetUser) ||
-      (sender === targetUser && receiver === currentUser) ||
-      (data.from === currentUser && data.to === targetUser) ||
-      (data.from === targetUser && data.to === currentUser);
 
-    if (!isRelevant) return;
-
-    // Evite double-append si nou deja ajoute imedyatman lè te voye (men sèten servers re-émèt tou)
-    // Sa se yon chemen senp: si mesaj deja egziste san deduplikasyon id, nou aksepte yon kopi; sa pa degrade DB.
-    appendMessageToDOM({
-      sender: sender,
-      message: data.message,
-      date: data.date || new Date()
-    }, sender === currentUser);
+    if ((sender === currentUser && receiver === targetUser) ||
+        (sender === targetUser && receiver === currentUser)) {
+      appendMessageToDOM({ sender, message: data.message, date: data.date || new Date() }, sender === currentUser);
+    }
   });
 
-  // --- Klike bouton voye
+  // --- Bouton voye mesaj
   sendBtn.addEventListener('click', sendMessage);
   msgInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') sendMessage(); });
 
-  // --- Efase sèlman DOM (pa efase nan DB). Sa itil jan w te mande.
-  clearBtn.addEventListener('click', () => {
-    messagesDiv.innerHTML = '';
-  });
+  // --- Efase sèlman DOM
+  clearBtn.addEventListener('click', () => { messagesDiv.innerHTML = ''; });
 
-  // --- Close: retounen sou Chat-Spirituel (asire ranplase URL egzak ou itilize)
+  // --- Close: retounen sou Chat-Spirituel
   closeBtn.addEventListener('click', () => {
     window.location.href = 'https://www.fondationbackupspirituel.com/Chat-Spirituel.html';
   });
 
-  // --- Lè socket konekte, mande mesaj (si nou deja gen paramèt yo)
-  socket.on('connect', () => {
-    loadPrivateMessages();
-  });
+  // --- Lè socket konekte, mande mesaj
+  socket.on('connect', () => { loadPrivateMessages(); });
 
   // --- Load inisyal lè paj chaje
   loadPrivateMessages();
 
   // Accessibility: mete focus sou input
   msgInput.focus();
-
 </script>
 
 </body>
