@@ -157,7 +157,7 @@
   // --- Paramèt soti nan URL (from, to)
   const params = new URLSearchParams(window.location.search);
   const currentUser = params.get('from') || params.get('user') || 'Anonyme';
-  const targetUser = params.get('to') || params.get('toUser') || '';
+  let targetUser = params.get('to') || params.get('toUser') || '';
 
   // --- Reutilize menm socket global si li egziste, sinon kreye nouvo koneksyon
   const socket = window.__fbsp_shared_socket || io('https://examen-backend-ihlx.onrender.com');
@@ -252,6 +252,48 @@
 
   // Accessibility: mete focus sou input
   msgInput.focus();
+
+  // -----------------------------
+  // --- Lis itilizatè aktif pou chwazi targetUser
+  const userListDiv = document.createElement('div');
+  userListDiv.id = 'userList';
+  userListDiv.style.position = 'fixed';
+  userListDiv.style.right = '10px';
+  userListDiv.style.top = '70px';
+  userListDiv.style.width = '180px';
+  userListDiv.style.height = '80vh';
+  userListDiv.style.overflowY = 'auto';
+  userListDiv.style.border = '1px solid #0d6efd';
+  userListDiv.style.borderRadius = '8px';
+  userListDiv.style.backgroundColor = '#f0f8ff';
+  userListDiv.style.padding = '5px';
+  document.body.appendChild(userListDiv);
+
+  function renderUserList(users) {
+    userListDiv.innerHTML = '';
+    users.forEach(u => {
+      if(u !== currentUser) {
+        const btn = document.createElement('button');
+        btn.textContent = u;
+        btn.style.display = 'block';
+        btn.style.width = '100%';
+        btn.style.marginBottom = '3px';
+        btn.style.cursor = 'pointer';
+        btn.addEventListener('click', () => {
+          targetUser = u;
+          loadPrivateMessages(); // chaje konvèsasyon ak nouvo target
+        });
+        userListDiv.appendChild(btn);
+      }
+    });
+  }
+
+  // --- Mande lis itilizatè aktif nan server.js
+  socket.emit('requestUserList');
+  socket.on('online-users', users => {
+    const names = users.map(u => u.name);
+    renderUserList(names);
+  });
 </script>
 
 </body>
