@@ -262,9 +262,6 @@ app.get('/ping', (req, res) => res.send('pong'));
 // 💬 SOCKET.IO CHAT — VÈSYON FINAL AK LISTE ITILizatè AKTIF
 // ---------------------------
 
-const path = require('path');
-// (Asire w gen deja require pou express, http, mongoose, app, elatriye anwo fichye a)
-// Pa modifye rès bagay ki pa parèt isit la si yo egziste deja.
 
 /* ---------------------------
    📦 Mongoose Schema
