@@ -1,52 +1,35 @@
 // =======================
-// ✅ script.js FINAL AK SIPÒ CHAT PRIVE (san localStorage)
+// ✅ script.js FINAL AK SIPÒ CHAT PRIVE
 // =======================
 
-// 1️⃣ — Pa itilize localStorage; nou pran non itilizatè a depi <input id="user">
-const userInputEl = document.getElementById('user');
+// 1️⃣ — Rekipere non itilizatè a depi nan localStorage
+let user = localStorage.getItem('user');
 
-// 2️⃣ — Konekte ak Socket.io (reutilize socket global si li deja te kreye)
-const socket = window.__fbsp_shared_socket || io('https://examen-backend-ihlx.onrender.com');
-window.__fbsp_shared_socket = socket;
+// 2️⃣ — Konekte ak Socket.io
+const socket = io('https://examen-backend-ihlx.onrender.com');
+window.socket = socket; // 🔹 fè koneksyon an disponib pou chatprive.js
 
-// 3️⃣ — Fonksyon pou jwenn non aktyèl itilizatè (san default persistan)
-function getCurrentUser() {
-  return (userInputEl?.value || '').trim() || 'Anonyme';
-}
-
-// 4️⃣ — Si gen valè deja nan #user lè paj la chaje, mete li sou server
+// 3️⃣ — Lè paj la chaje
 window.addEventListener('load', () => {
-  const current = getCurrentUser();
-  if (current && current !== 'Anonyme') {
+  if (!user) {
+    document.getElementById('loginOverlay').style.display = 'flex';
+  } else {
+    document.getElementById('loginOverlay').style.display = 'none';
     if (socket && socket.connected) {
-      socket.emit('setUser', current);
+      socket.emit('setUser', user);
     } else {
-      socket.on('connect', () => socket.emit('setUser', current));
+      socket.on('connect', () => socket.emit('setUser', user));
     }
   }
 });
 
-// 5️⃣ — Si itilizatè modifye input non li, mete sa sou server (imedyatman)
-if (userInputEl) {
-  userInputEl.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') {
-      const user = getCurrentUser();
-      if (user) socket.emit('setUser', user);
-    }
-  });
-  userInputEl.addEventListener('blur', () => {
-    const user = getCurrentUser();
-    if (user) socket.emit('setUser', user);
-  });
-}
-
-// 6️⃣ — Eleman prensipal chat piblik
+// 4️⃣ — Eleman HTML prensipal yo
 const sendBtn = document.getElementById('send');
 const msgInput = document.getElementById('msg');
 const messages = document.getElementById('messages');
-const userList = document.getElementById('userList');
+const userList = document.getElementById('userList'); // lis itilizatè online yo
 
-// 7️⃣ — Fonksyon pou ajoute mesaj nan chat piblik
+// 5️⃣ — Fonksyon pou ajoute mesaj nan chat piblik
 function addMessage(data, isMe = false) {
   if (!data || !data.message) return;
   const li = document.createElement('li');
@@ -60,104 +43,78 @@ function addMessage(data, isMe = false) {
   messages.scrollTop = messages.scrollHeight;
 }
 
-// 8️⃣ — Fonksyon pou enregistre itilizatè anvan voye mesaj piblik
-function registerUserIfNeeded() {
-  const user = getCurrentUser();
-  if (!user) return 'Anonyme';
-  socket.emit('setUser', user);
-  return user;
+// ✅ ✅ ✅ NOUVO — Fonksyon pou ouvri chat prive
+function openPrivateChat(targetUser) {
+  const currentUser = socket.data.user || user; // itilize user olye de username
+  if (!targetUser || targetUser === currentUser) return;
+  console.log('🔐 Ou vle pale an prive ak:', targetUser);
+
+  // Redireksyon nan chatprive.html ak 2 itilizatè yo
+  window.location.href = `https://fondationbackupspirituel.com/chatprive.html?from=${encodeURIComponent(currentUser)}&to=${encodeURIComponent(targetUser)}`;
 }
 
-// 9️⃣ — Voye mesaj piblik
-function sendMessage() {
-  const currentUser = registerUserIfNeeded();
-  const message = msgInput.value.trim();
-  if (!message) return;
-
-  const data = { user: currentUser, message, date: new Date() };
-  socket.emit('chatMessage', data);
-  addMessage(data, true);
-  msgInput.value = '';
-}
-
-sendBtn.addEventListener('click', sendMessage);
-msgInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') sendMessage(); });
-
-// 🔟 — Resevwa mesaj piblik
-socket.on('chatMessage', (data) => {
-  const current = getCurrentUser();
-  if (data.user === current) return;
-  addMessage(data);
-});
-
-// 1️⃣1️⃣ — Chaje ansyen mesaj
-socket.on('loadMessages', (messagesArray) => {
-  if (!Array.isArray(messagesArray)) return;
-  const current = getCurrentUser();
-  messagesArray.forEach(msg => {
-    const isMe = msg.user === current;
-    addMessage(msg, isMe);
-  });
-});
-
-// 1️⃣2️⃣ — RENDER LIS ITILIZATÈ ONLINE (tout 'name' -> 'user')
+// 6️⃣ — Fonksyon pou afiche itilizatè yo nan ti kadran
 function renderUsers(arr) {
-  if (!Array.isArray(arr) || !userList) return;
+  if (!Array.isArray(arr)) return;
   userList.innerHTML = '';
 
   arr.forEach(u => {
     const li = document.createElement('li');
+    li.textContent = u.user || u;
 
-    const dot = document.createElement('span');
-    dot.className = 'status-dot ' + (u.connected ? 'online' : 'offline');
-    li.appendChild(dot);
-
-    const user = u.user || u;
-    const text = document.createTextNode(' ' + user);
-    li.appendChild(text);
-
-    li.dataset.user = user;
-
+    // ✅ Ajoute click event pou chat prive
     li.addEventListener('click', () => {
-      const target = li.dataset.user;
-      const current = getCurrentUser();
-      if (!target || target === current) return;
-      openPrivateChat(target);
+      openPrivateChat(u.user || u);
     });
 
     userList.appendChild(li);
   });
 }
 
-// 1️⃣3️⃣ — Fonksyon pou ouvri chat prive
-function openPrivateChat(targetUser) {
-  const currentUser = getCurrentUser();
-  if (!targetUser || !currentUser || targetUser === currentUser) return;
-  socket.emit('setUser', currentUser);
+// 7️⃣ — Voye mesaj piblik
+function sendMessage() {
+  const message = msgInput.value.trim();
+  if (!message) return;
 
-  const privateUrl = `https://fondationbackupspirituel.com/Chatprive.html?from=${encodeURIComponent(currentUser)}&to=${encodeURIComponent(targetUser)}`;
-  window.location.href = privateUrl;
+  if (socket && socket.connected) {
+    socket.emit('setUser', user);
+  }
+
+  const data = { user, message, date: new Date() };
+  socket.emit('chatMessage', data);
+  addMessage(data, true);
+  msgInput.value = '';
 }
 
-// 1️⃣4️⃣ — Evènman ki resevwa lis itilizatè yo
-socket.on('online-users', (arr) => {
-  const normalized = Array.isArray(arr) ? arr.map(item => {
-    if (typeof item === 'string') return { user: item, connected: true };
-    if (item && typeof item === 'object') {
-      return { user: item.user || item.id || 'Anonyme', connected: !!item.connected };
-    }
-    return { user: String(item), connected: true };
-  }) : [];
-  renderUsers(normalized);
+sendBtn.addEventListener('click', sendMessage);
+msgInput.addEventListener('keypress', (e) => {
+  if (e.key === 'Enter') sendMessage();
 });
 
-// 1️⃣5️⃣ — Evènman koneksyon / dekonèksyon (tou senp log)
-socket.on('userConnected', (user) => { console.log('🟢 Itilizatè konekte:', user); });
-socket.on('userDisconnected', (user) => { console.log('🔴 Itilizatè dekonekte:', user); });
+// 8️⃣ — Resevwa mesaj piblik
+socket.on('chatMessage', (data) => {
+  if (data.user === user) return;
+  addMessage(data);
+});
 
-// 1️⃣6️⃣ — Lè socket konekte, mande lis itilizatè yo
-socket.on('connect', () => {
-  const current = getCurrentUser();
-  if (current && current !== 'Anonyme') socket.emit('setUser', current);
-  socket.emit('requestUserList');
+// 9️⃣ — Chaje ansyen mesaj
+socket.on('loadMessages', (messagesArray) => {
+  if (!Array.isArray(messagesArray)) return;
+  messagesArray.forEach(msg => {
+    const isMe = msg.user === user;
+    addMessage(msg, isMe);
+  });
+});
+
+// 🔟 — 📡 Resevwa lis itilizatè online
+socket.on('online-users', (arr) => {
+  renderUsers(arr);
+});
+
+socket.on('userConnected', (user) => {
+  console.log('🟢 Itilizatè konekte:', user);
+});
+
+socket.on('userDisconnected', (user) => {
+  console.log('🔴 Itilizatè dekonekte:', user);
 });
