@@ -174,40 +174,37 @@
   function appendMessageToDOM(data, isMe) {
     const div = document.createElement('div');
     const time = new Date(data.date || Date.now()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    // Affiche "from" (non ki soti nan DB: from) pou evite konfizyon ak 'user' fields
-    const senderName = data.from || data.sender || 'Anonyme';
-    div.textContent = `[${time}] ${senderName}: ${data.message}`;
+    const sender = data.from || 'Anonyme';
+    div.textContent = `[${time}] ${sender}: ${data.message}`;
     div.classList.add(isMe ? 'me' : 'other');
     messagesDiv.appendChild(div);
     messagesDiv.scrollTop = messagesDiv.scrollHeight;
   }
 
-  // --- Chaje tout mesaj prive ki deja egziste ant currentUser ak targetUser (mande server)
+  // --- Chaje tout mesaj prive ki deja egziste ant currentUser ak targetUser
   function loadPrivateMessages() {
     if (!currentUser || !targetUser) return;
-    // Nou voye from/to ke server.js ap itilize pou fè query sou MongoDB
     socket.emit('loadPrivateMessages', { from: currentUser, to: targetUser });
   }
 
-  // --- Resevwa lis mesaj prive depi server epi montre yo (server ta dwe retounen sèlman konvèsasyon sa)
+  // --- Resevwa lis mesaj prive depi server epi filtre sèlman konvèsasyon aktyèl
   socket.on('loadPrivateMessages', (messages) => {
     messagesDiv.innerHTML = '';
     if (!Array.isArray(messages)) return;
 
-    // Filtre anplis nan client pou asire sèlman konvèsasyon aktyèl parèt (siplemantè sekirite)
     messages
       .filter(m =>
         (m.from === currentUser && m.to === targetUser) ||
         (m.from === targetUser && m.to === currentUser)
       )
       .forEach(m => {
-        appendMessageToDOM(m, m.from === currentUser);
+        appendMessageToDOM({ from: m.from, message: m.message, date: m.date }, m.from === currentUser);
       });
 
     messagesDiv.scrollTop = messagesDiv.scrollHeight;
   });
 
-  // --- Voye mesaj prive al server (server ap sove nan MongoDB epi emèt bay reseptè ak sender)
+  // --- Voye mesaj prive al server
   function sendMessage() {
     const message = msgInput.value.trim();
     if (!message) return;
@@ -217,11 +214,8 @@
     }
 
     const payload = { from: currentUser, to: targetUser, message };
-
-    // 1) Emèt pou server (server ap sove epi ap re-émèt 'privateMessage' bay toude pati)
     socket.emit('privateMessage', payload);
 
-    // 2) Mete mesaj imedyatman nan DOM pou repons rapid (server pral re-emit menm mesaj la)
     appendMessageToDOM({ from: currentUser, message, date: new Date() }, true);
 
     msgInput.value = '';
@@ -230,19 +224,16 @@
 
   // --- Resevwa mesaj prive an tan reyèl epi filtre sèlman konvèsasyon aktyèl la
   socket.on('privateMessage', (data) => {
-    // Server ka voye { from, to, message, date } oswa { sender, receiver, ... }
-    const sender = data.from || data.sender;
-    const receiver = data.to || data.receiver;
+    const sender = data.from;
+    const receiver = data.to;
     if (!sender || !receiver) return;
 
-    // Montre sèlman si mesaj la konsène konvèsasyon nou an
     const isRelevant =
       (sender === currentUser && receiver === targetUser) ||
       (sender === targetUser && receiver === currentUser);
 
     if (!isRelevant) return;
 
-    // Ajoute nan DOM
     appendMessageToDOM({
       from: sender,
       message: data.message,
@@ -254,43 +245,32 @@
   sendBtn.addEventListener('click', sendMessage);
   msgInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') sendMessage(); });
 
-  // --- Efase sèlman DOM (pa efase nan DB) — konsistan ak demann ou
+  // --- Efase sèlman DOM
   clearBtn.addEventListener('click', () => { messagesDiv.innerHTML = ''; });
 
-  // --- Close: retounen sou Chat-Spirituel (ou te di vèsyon "Chat-Spirituel.html" egzak)
+  // --- Close: retounen sou Chat-Spirituel
   closeBtn.addEventListener('click', () => {
     window.location.href = 'https://www.fondationbackupspirituel.com/Chat-Spirituel.html';
   });
 
-  // --- Lè socket konekte, asire server konnen non itilizatè a epi chaje mesaj prive
+  // --- Lè socket konekte
   socket.on('connect', () => {
-    if (currentUser && currentUser !== 'Anonyme') {
-      socket.emit('setUser', currentUser);
-    }
-    // Mande tou lis mesaj prive aktyèl la si targetUser defini
+    if (currentUser && currentUser !== 'Anonyme') socket.emit('setUser', currentUser);
     loadPrivateMessages();
-    // Mande lis itilizatè online pou panel lateral (si ou vle mete li)
     socket.emit('requestUserList');
   });
 
-  // --- Load inisyal lè paj chaje (si deja connected)
   if (socket.connected) {
-    if (currentUser && currentUser !== 'Anonyme') {
-      socket.emit('setUser', currentUser);
-    }
+    if (currentUser && currentUser !== 'Anonyme') socket.emit('setUser', currentUser);
     loadPrivateMessages();
     socket.emit('requestUserList');
   }
 
-  // Accessibility: mete focus sou input
-  try { msgInput.focus(); } catch (e) { /* ignore si pa jwenn */ }
+  try { msgInput.focus(); } catch (e) { }
 
   // -----------------------------
-  // --- Lis itilizatè aktif pou chwazi targetUser (panel sou bò dwat)
-  //    Si ou deja genyen yon panel nan Chat-Spirituel.html, pa double-mete li.
-  //    Sa a se fallback: li kreye yon ti panel si li pa egziste.
+  // --- Lis itilizatè aktif pou chwazi targetUser
   (function ensureUserListPanel() {
-    // Si paj deja gen yon elem ak id 'userList' nou pa fè anyen
     if (document.getElementById('userList')) return;
 
     const userListDiv = document.createElement('div');
@@ -319,14 +299,12 @@
           btn.style.marginBottom = '3px';
           btn.style.cursor = 'pointer';
           btn.addEventListener('click', () => {
-            // chanje targetUser epi chaje konvèsasyon
             targetUser = u;
-            // update URL san reload pou vizibilite (optional)
             try {
               const newUrl = new URL(window.location.href);
               newUrl.searchParams.set('to', u);
               history.replaceState(null, '', newUrl.toString());
-            } catch (e) { /* ignore si URL API pa sipòte */ }
+            } catch (e) { }
             loadPrivateMessages();
           });
           userListDiv.appendChild(btn);
@@ -334,18 +312,16 @@
       });
     }
 
-    // resevwa lis itilizatè (server ap emèt 'online-users' menm jan ak Chat-Spirituel)
     socket.on('online-users', (usersArr) => {
-      // normalizasyon si server voye obj {id,name,connected}
-      const names = Array.isArray(usersArr) ? usersArr.map(item => {
+      const normalized = Array.isArray(usersArr) ? usersArr.map(item => {
         if (typeof item === 'string') return item;
-        if (item && typeof item === 'object') return item.name || item.user || item.id;
+        if (item && typeof item === 'object') return item.user || item.id;
         return String(item);
       }).filter(Boolean) : [];
-      renderUserList(names);
+      renderUserList(normalized);
     });
   })();
 </script>
-
+  
 </body>
 </html>
