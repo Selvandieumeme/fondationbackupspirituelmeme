@@ -7,7 +7,7 @@ const userInputEl = document.getElementById('user');
 
 // 2️⃣ — Konekte ak Socket.io (reutilize socket global si li deja te kreye)
 const socket = window.__fbsp_shared_socket || io('https://examen-backend-ihlx.onrender.com');
-window.__fbsp_shared_socket = socket; // fè koneksyon an disponib pou lòt script/oswa Chatprive.html
+window.__fbsp_shared_socket = socket;
 
 // 3️⃣ — Fonksyon pou jwenn non aktyèl itilizatè (san default persistan)
 function getCurrentUser() {
@@ -28,27 +28,25 @@ window.addEventListener('load', () => {
 
 // 5️⃣ — Si itilizatè modifye input non li, mete sa sou server (imedyatman)
 if (userInputEl) {
-  // sou "enter" nan input non an
   userInputEl.addEventListener('keypress', (e) => {
     if (e.key === 'Enter') {
-      const name = getCurrentUser();
-      if (name) socket.emit('setUser', name);
+      const user = getCurrentUser();
+      if (user) socket.emit('setUser', user);
     }
   });
-  // sou "blur" (lè li soti nan input la)
   userInputEl.addEventListener('blur', () => {
-    const name = getCurrentUser();
-    if (name) socket.emit('setUser', name);
+    const user = getCurrentUser();
+    if (user) socket.emit('setUser', user);
   });
 }
 
-// 6️⃣ — Eleman prensipal chat piblik (pa chanje fonksyonalite yo)
+// 6️⃣ — Eleman prensipal chat piblik
 const sendBtn = document.getElementById('send');
 const msgInput = document.getElementById('msg');
 const messages = document.getElementById('messages');
-const userList = document.getElementById('userList'); // lis itilizatè online yo
+const userList = document.getElementById('userList');
 
-// 7️⃣ — Fonksyon pou ajoute mesaj nan chat piblik (pa chanje)
+// 7️⃣ — Fonksyon pou ajoute mesaj nan chat piblik
 function addMessage(data, isMe = false) {
   if (!data || !data.message) return;
   const li = document.createElement('li');
@@ -64,13 +62,13 @@ function addMessage(data, isMe = false) {
 
 // 8️⃣ — Fonksyon pou enregistre itilizatè anvan voye mesaj piblik
 function registerUserIfNeeded() {
-  const name = getCurrentUser();
-  if (!name) return 'Anonyme';
-  socket.emit('setUser', name);
-  return name;
+  const user = getCurrentUser();
+  if (!user) return 'Anonyme';
+  socket.emit('setUser', user);
+  return user;
 }
 
-// 9️⃣ — Voye mesaj piblik (menm jan ak orijinal)
+// 9️⃣ — Voye mesaj piblik
 function sendMessage() {
   const currentUser = registerUserIfNeeded();
   const message = msgInput.value.trim();
@@ -83,18 +81,16 @@ function sendMessage() {
 }
 
 sendBtn.addEventListener('click', sendMessage);
-msgInput.addEventListener('keypress', (e) => {
-  if (e.key === 'Enter') sendMessage();
-});
+msgInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') sendMessage(); });
 
-// 🔟 — Resevwa mesaj piblik (pa chanje)
+// 🔟 — Resevwa mesaj piblik
 socket.on('chatMessage', (data) => {
   const current = getCurrentUser();
   if (data.user === current) return;
   addMessage(data);
 });
 
-// 1️⃣1️⃣ — Chaje ansyen mesaj (pa chanje)
+// 1️⃣1️⃣ — Chaje ansyen mesaj
 socket.on('loadMessages', (messagesArray) => {
   if (!Array.isArray(messagesArray)) return;
   const current = getCurrentUser();
@@ -104,7 +100,7 @@ socket.on('loadMessages', (messagesArray) => {
   });
 });
 
-// 1️⃣2️⃣ — RENDER LIS ITILIZATÈ ONLINE (sipoze server voye {id, name, connected})
+// 1️⃣2️⃣ — RENDER LIS ITILIZATÈ ONLINE (tout 'name' -> 'user')
 function renderUsers(arr) {
   if (!Array.isArray(arr) || !userList) return;
   userList.innerHTML = '';
@@ -112,20 +108,16 @@ function renderUsers(arr) {
   arr.forEach(u => {
     const li = document.createElement('li');
 
-    // dot status (si w vle kenbe li)
     const dot = document.createElement('span');
     dot.className = 'status-dot ' + (u.connected ? 'online' : 'offline');
     li.appendChild(dot);
 
-    // text
-    const name = u.name || u;
-    const text = document.createTextNode(' ' + name);
+    const user = u.user || u;
+    const text = document.createTextNode(' ' + user);
     li.appendChild(text);
 
-    // mete dataset pou fasil rekapte non
-    li.dataset.user = name;
+    li.dataset.user = user;
 
-    // fè li klike-able pou chat prive
     li.addEventListener('click', () => {
       const target = li.dataset.user;
       const current = getCurrentUser();
@@ -137,12 +129,10 @@ function renderUsers(arr) {
   });
 }
 
-// 1️⃣3️⃣ — Fonksyon pou ouvri chat prive (redirije sou Chatprive.html ak 'from' & 'to')
-//    Remake: nou itilize URL absoli pou evite 404 ki ka soti ak diferans case/chemen
+// 1️⃣3️⃣ — Fonksyon pou ouvri chat prive
 function openPrivateChat(targetUser) {
   const currentUser = getCurrentUser();
   if (!targetUser || !currentUser || targetUser === currentUser) return;
-  // Asire server konnen non sa a
   socket.emit('setUser', currentUser);
 
   const privateUrl = `https://fondationbackupspirituel.com/Chatprive.html?from=${encodeURIComponent(currentUser)}&to=${encodeURIComponent(targetUser)}`;
@@ -151,28 +141,21 @@ function openPrivateChat(targetUser) {
 
 // 1️⃣4️⃣ — Evènman ki resevwa lis itilizatè yo
 socket.on('online-users', (arr) => {
-  // Server a ka voye swa yon array senp oswa obj {id,name,connected}
-  // Normalize: si se array string, map li nan fòm { name: string }
   const normalized = Array.isArray(arr) ? arr.map(item => {
-    if (typeof item === 'string') return { name: item, connected: true };
+    if (typeof item === 'string') return { user: item, connected: true };
     if (item && typeof item === 'object') {
-      // si server voye { id, name, connected } oswa { user, connected }
-      return { name: item.name || item.user || item.id || 'Anonyme', connected: !!item.connected };
+      return { user: item.user || item.id || 'Anonyme', connected: !!item.connected };
     }
-    return { name: String(item), connected: true };
+    return { user: String(item), connected: true };
   }) : [];
   renderUsers(normalized);
 });
 
 // 1️⃣5️⃣ — Evènman koneksyon / dekonèksyon (tou senp log)
-socket.on('userConnected', (name) => {
-  console.log('🟢 Itilizatè konekte:', name);
-});
-socket.on('userDisconnected', (name) => {
-  console.log('🔴 Itilizatè dekonekte:', name);
-});
+socket.on('userConnected', (user) => { console.log('🟢 Itilizatè konekte:', user); });
+socket.on('userDisconnected', (user) => { console.log('🔴 Itilizatè dekonekte:', user); });
 
-// 1️⃣6️⃣ — Lè socket konekte, mande lis itilizatè yo (asire UI ajou)
+// 1️⃣6️⃣ — Lè socket konekte, mande lis itilizatè yo
 socket.on('connect', () => {
   const current = getCurrentUser();
   if (current && current !== 'Anonyme') socket.emit('setUser', current);
