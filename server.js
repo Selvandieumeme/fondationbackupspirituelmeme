@@ -261,16 +261,7 @@ app.get('/ping', (req, res) => res.send('pong'));
 // server.js (Vèsyon final: CHAT PUBLIK entak; CHAT PRIVE - nouvo blòk separe)
 
 // ---------------------------
-// IMPORTS & SETUP (si yo pa deja ladan w: adapte si w gen yo anwo deja)
-// ---------------------------
-const express = require('express');
-const http = require('http');
-const path = require('path');
-const mongoose = require('mongoose');
-const { Server } = require('socket.io');
 
-const app = express();
-app.use(express.json());
 
 // Connect to Mongo (asire MONGO_URI nan env)
 mongoose.connect(process.env.MONGO_URI || 'mongodb://localhost:27017/chatdb', {
