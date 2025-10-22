@@ -2,28 +2,23 @@
 // ✅ script.js FINAL AK SIPÒ CHAT PRIVE
 // =======================
 
-// 1️⃣ — Rekipere non itilizatè a depi nan localStorage
-let user = localStorage.getItem('user');
+// 1️⃣ — Rekipere non itilizatè a depi nan socket (pa gen localStorage)
+let user = window.socketUser || prompt("Antre non w:") || 'Anonyme';
 
-// 2️⃣ — Konekte ak Socket.io
+// 2️⃣ — Koneksyon ak Socket.io pou chat piblik
 const socket = io('https://examen-backend-ihlx.onrender.com');
-window.socket = socket; // 🔹 fè koneksyon an disponib pou chatprive.js
+window.socket = socket; // fè koneksyon an disponib pou chat prive
 
 // 3️⃣ — Lè paj la chaje
 window.addEventListener('load', () => {
-  if (!user) {
-    document.getElementById('loginOverlay').style.display = 'flex';
+  if (socket && socket.connected) {
+    socket.emit('setUser', user);
   } else {
-    document.getElementById('loginOverlay').style.display = 'none';
-    if (socket && socket.connected) {
-      socket.emit('setUser', user);
-    } else {
-      socket.on('connect', () => socket.emit('setUser', user));
-    }
+    socket.on('connect', () => socket.emit('setUser', user));
   }
 });
 
-// 4️⃣ — Eleman HTML prensipal yo
+// 4️⃣ — Eleman HTML prensipal chat piblik
 const sendBtn = document.getElementById('send');
 const msgInput = document.getElementById('msg');
 const messages = document.getElementById('messages');
@@ -43,61 +38,26 @@ function addMessage(data, isMe = false) {
   messages.scrollTop = messages.scrollHeight;
 }
 
-// ✅ ✅ ✅ NOUVO — Fonksyon pou ouvri chat prive
-function openPrivateChat(targetUser) {
-  const currentUser = socket.data.user || user; // itilize user olye de username
-  if (!targetUser || targetUser === currentUser) return;
-  console.log('🔐 Ou vle pale an prive ak:', targetUser);
-
-  // Redireksyon nan chatprive.html ak 2 itilizatè yo
-  window.location.href = `https://fondationbackupspirituel.com/chatprive.html?from=${encodeURIComponent(currentUser)}&to=${encodeURIComponent(targetUser)}`;
-}
-
-// 6️⃣ — Fonksyon pou afiche itilizatè yo nan ti kadran
-function renderUsers(arr) {
-  if (!Array.isArray(arr)) return;
-  userList.innerHTML = '';
-
-  arr.forEach(u => {
-    const li = document.createElement('li');
-    li.textContent = u.user || u;
-
-    // ✅ Ajoute click event pou chat prive
-    li.addEventListener('click', () => {
-      openPrivateChat(u.user || u);
-    });
-
-    userList.appendChild(li);
-  });
-}
-
-// 7️⃣ — Voye mesaj piblik
+// 6️⃣ — Voye mesaj piblik
 function sendMessage() {
   const message = msgInput.value.trim();
   if (!message) return;
-
-  if (socket && socket.connected) {
-    socket.emit('setUser', user);
-  }
 
   const data = { user, message, date: new Date() };
   socket.emit('chatMessage', data);
   addMessage(data, true);
   msgInput.value = '';
 }
-
 sendBtn.addEventListener('click', sendMessage);
-msgInput.addEventListener('keypress', (e) => {
-  if (e.key === 'Enter') sendMessage();
-});
+msgInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') sendMessage(); });
 
-// 8️⃣ — Resevwa mesaj piblik
+// 7️⃣ — Resevwa mesaj piblik
 socket.on('chatMessage', (data) => {
   if (data.user === user) return;
   addMessage(data);
 });
 
-// 9️⃣ — Chaje ansyen mesaj
+// 8️⃣ — Chaje ansyen mesaj piblik
 socket.on('loadMessages', (messagesArray) => {
   if (!Array.isArray(messagesArray)) return;
   messagesArray.forEach(msg => {
@@ -106,15 +66,25 @@ socket.on('loadMessages', (messagesArray) => {
   });
 });
 
-// 🔟 — 📡 Resevwa lis itilizatè online
-socket.on('online-users', (arr) => {
-  renderUsers(arr);
-});
+// 9️⃣ — 📡 Resevwa lis itilizatè online
+function renderUsers(arr) {
+  if (!Array.isArray(arr)) return;
+  userList.innerHTML = '';
+  arr.forEach(u => {
+    const li = document.createElement('li');
+    li.textContent = u.name || u.user || u;
+    // ✅ Ouvri chat prive lè itilizatè klike sou li
+    li.addEventListener('click', () => {
+      // Ouvri chat prive nan Chatprive.html
+      const currentUser = user;
+      const targetUser = u.name || u.user || u;
+      if (targetUser === currentUser) return;
+      window.location.href = `Chatprive.html?from=${encodeURIComponent(currentUser)}&to=${encodeURIComponent(targetUser)}`;
+    });
+    userList.appendChild(li);
+  });
+}
 
-socket.on('userConnected', (user) => {
-  console.log('🟢 Itilizatè konekte:', user);
-});
-
-socket.on('userDisconnected', (user) => {
-  console.log('🔴 Itilizatè dekonekte:', user);
-});
+socket.on('online-users', (arr) => { renderUsers(arr); });
+socket.on('userConnected', (user) => { console.log('🟢 Itilizatè konekte:', user); });
+socket.on('userDisconnected', (user) => { console.log('🔴 Itilizatè dekonekte:', user); });
