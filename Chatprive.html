@@ -22,44 +22,55 @@
     --panel-bg: #f7f8fb;
     --btn-bg: var(--fond-bleu);
     --btn-hover: #4364f7;
+    --shadow: rgba(0,0,0,0.2);
   }
 
   body {
     margin: 0;
     font-family: 'Segoe UI', Roboto, Arial, sans-serif;
-    background: var(--fond-blanc);
+    background: linear-gradient(135deg, var(--fond-bleu), var(--fond-jaune));
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
   }
 
   .chat-container {
     display: flex;
-    height: 100vh;
-    overflow: hidden;
+    height: 90%;
+    width: 90%;
+    max-width: 1200px;
+    position: relative;
+    gap: 15px;
   }
 
-  /* Panel Utilisateur - bo dwat */
+  /* Panel Utilisateur - bo dwat, pi piti */
   .user-list-panel {
-    position: fixed;
+    position: absolute;
     right: 0;
     top: 0;
-    width: 220px;
-    height: 100vh;
+    width: 180px;
+    height: 100%;
     background: var(--fond-jaune);
-    padding: 10px;
-    box-shadow: -2px 0 10px rgba(0,0,0,0.1);
+    padding: 15px 10px;
+    box-shadow: -2px 0 15px var(--shadow);
     display: flex;
     flex-direction: column;
     gap: 10px;
+    border-radius: 0 12px 12px 0;
+    overflow-y: auto;
   }
 
   .user-list-panel h3 {
     margin: 0 0 10px 0;
     color: var(--fond-blanc);
-    font-size: 18px;
+    font-size: 16px;
+    text-align: center;
   }
 
   .user-list-panel button.user-btn {
     width: 100%;
-    padding: 8px 10px;
+    padding: 6px 8px;
     background: var(--fond-blanc);
     border: none;
     border-radius: 6px;
@@ -67,12 +78,15 @@
     text-align: left;
     font-weight: 500;
     color: var(--text-principal);
-    transition: background 0.2s;
+    transition: all 0.3s ease;
+    font-size: 14px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
   }
 
   .user-list-panel button.user-btn:hover {
     background: var(--btn-hover);
     color: var(--fond-blanc);
+    transform: scale(1.02);
   }
 
   .user-list-panel button.has-new-message::after {
@@ -83,28 +97,38 @@
 
   /* Fenèt Chat Privé */
   .private-chat-window {
-    margin: auto;
-    width: 450px;
-    max-width: 95%;
-    height: 600px;
+    flex: 1;
+    margin-right: 200px; /* espace pour panel utilisateur */
     display: flex;
     flex-direction: column;
     background: var(--fond-blanc);
     border-radius: 12px;
-    box-shadow: 0 12px 30px rgba(0,0,0,0.15);
+    box-shadow: 0 12px 30px var(--shadow);
     overflow: hidden;
     position: relative;
+    transition: all 0.3s ease;
+  }
+
+  .private-chat-window:hover {
+    transform: scale(1.005);
   }
 
   .pc-header {
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
     align-items: center;
-    padding: 12px 15px;
+    padding: 14px 15px;
     background: var(--fond-bleu);
     color: var(--fond-blanc);
     font-weight: 600;
-    font-size: 18px;
+    font-size: 20px;
+    position: relative;
+    box-shadow: 0 2px 6px var(--shadow);
+  }
+
+  .pc-header .controls {
+    position: absolute;
+    right: 15px;
   }
 
   .pc-header .controls button {
@@ -113,35 +137,53 @@
     color: var(--fond-blanc);
     font-size: 18px;
     cursor: pointer;
+    transition: transform 0.2s;
+  }
+
+  .pc-header .controls button:hover {
+    transform: scale(1.2);
   }
 
   .pc-messages {
     flex: 1;
-    padding: 12px;
+    padding: 15px;
     overflow-y: auto;
     background: var(--panel-bg);
+    scroll-behavior: smooth;
   }
 
   .pc-messages div.me {
     background: var(--msg-outgoing-bg);
     color: white;
     align-self: flex-end;
-    padding: 8px 12px;
+    padding: 10px 14px;
     margin: 6px 0;
     border-radius: 12px;
-    max-width: 80%;
+    max-width: 75%;
     word-wrap: break-word;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+
+  .pc-messages div.me:hover {
+    transform: scale(1.02);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.25);
   }
 
   .pc-messages div.other {
     background: var(--msg-incoming-bg);
     color: var(--text-principal);
     align-self: flex-start;
-    padding: 8px 12px;
+    padding: 10px 14px;
     margin: 6px 0;
     border-radius: 12px;
-    max-width: 80%;
+    max-width: 75%;
     word-wrap: break-word;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+
+  .pc-messages div.other:hover {
+    transform: scale(1.02);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
   }
 
   .typing-indicator {
@@ -154,36 +196,62 @@
     display: flex;
     flex-wrap: wrap;
     gap: 6px;
-    padding: 10px;
+    padding: 12px;
     border-top: 1px solid rgba(0,0,0,0.1);
     background: var(--fond-blanc);
   }
 
   .pc-input textarea {
     flex: 1 1 auto;
-    border-radius: 8px;
-    padding: 8px 10px;
+    border-radius: 10px;
+    padding: 10px 12px;
     border: 1px solid rgba(0,0,0,0.15);
     resize: none;
-    height: 40px;
+    height: 45px;
     font-size: 14px;
+    transition: all 0.2s;
+  }
+
+  .pc-input textarea:focus {
+    border-color: var(--fond-bleu);
+    box-shadow: 0 0 5px rgba(0,82,212,0.4);
+    outline: none;
   }
 
   .pc-input button {
-    padding: 8px 10px;
+    padding: 8px 14px;
     border: none;
-    border-radius: 8px;
+    border-radius: 10px;
     background: var(--btn-bg);
     color: var(--fond-blanc);
     cursor: pointer;
-    transition: background 0.2s;
+    transition: background 0.3s, transform 0.2s;
+    font-size: 14px;
   }
 
   .pc-input button:hover {
     background: var(--btn-hover);
+    transform: scale(1.05);
+  }
+
+  /* Scrollbar estil */
+  .pc-messages::-webkit-scrollbar {
+    width: 8px;
+  }
+  .pc-messages::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+  }
+  .pc-messages::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 4px;
+  }
+  .pc-messages::-webkit-scrollbar-thumb:hover {
+    background: #555;
   }
 
 </style>
+</head>
 <body>
   <div class="chat-container">
     <!-- Panel Utilisateur -->
@@ -219,10 +287,11 @@
 
   <div id="callContainer"></div>
 
+     
+     
 
-     
-     
-     
+
+  
 <script>
 /*
   Chatprive.html - Script final korije
