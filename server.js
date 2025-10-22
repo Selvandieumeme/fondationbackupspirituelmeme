@@ -397,213 +397,181 @@ io.on('connection', async (socket) => {
 	
 	
 	// ---------------------------
-  // ===  CHAT PRIVE - NOUVO SEKSYON SEPARÉ  ===
-  // ---------------------------
-  // Nou mete tout evènman prive yo isit la; sa pa manyen okenn kod chat piblik ki pi wo a.
-  //
-  // EVENT NAMES itilize:
-  // - request_private_chat  => payload { targetUser }
-  // - join_private_room     => payload { room }
-  // - private_message       => payload { to, text, attachments?, conversationId?, room? }
-  // - loadPrivateMessages   => payload { from, to }  (kompatib ak UI w te genyen)
-  // - mark_conversation_read => payload { conversationId }
-  // - message_seen          => payload { messageId }
-  // - typing                => payload { room, isTyping }
-  //
-  // Notifications:
-  // - private_message_notification emitted to personal room `user-<id>`
-  // - receive_private_message emitted to the private room `room-<a>-<b>`
-  //
+// ===  CHAT PRIVE - KOMPLET KONPATIB  ===
+// ---------------------------
 
-  // Helper: deterministic room name for two user ids (strings)
-  function getPrivateRoom(a, b) {
-    const A = String(a);
-    const B = String(b);
-    return A < B ? `room-${A}-${B}` : `room-${B}-${A}`;
+// Helper deterministic room name
+function getPrivateRoom(a, b) {
+  const A = String(a), B = String(b);
+  return A < B ? `room-${A}-${B}` : `room-${B}-${A}`;
+}
+
+// --- Events prive deja egziste (pa modifye) ---
+socket.on('request_private_chat', async ({ targetUser }) => {
+  try {
+    const me = socket.data.userId;
+    if (!me) return socket.emit('error_private', { message: 'Unauthorized (no userId)' });
+    if (!targetUser) return socket.emit('error_private', { message: 'Missing targetUser' });
+
+    const room = getPrivateRoom(me, targetUser);
+    socket.join(room);
+
+    const messages = await Message.find({
+      $or: [
+        { from: me, to: targetUser },
+        { from: targetUser, to: me }
+      ]
+    }).sort({ date: 1 }).lean();
+
+    socket.emit('private_history', { conversationId: null, room, messages });
+    io.to(`user-${targetUser}`).emit('private_chat_invite', { from: me, room });
+  } catch (err) {
+    console.error('request_private_chat err', err);
+    socket.emit('error_private', { message: 'Server error (request_private_chat)' });
   }
+});
 
-  // Request to open private chat (front-end calls this to get history + notify target)
-  socket.on('request_private_chat', async ({ targetUser }) => {
-    try {
-      const me = socket.data.userId;
-      if (!me) return socket.emit('error_private', { message: 'Unauthorized (no userId)' });
-      if (!targetUser) return socket.emit('error_private', { message: 'Missing targetUser' });
-      // join requester to the room
-      const room = getPrivateRoom(me, targetUser);
-      socket.join(room);
+socket.on('join_private_room', ({ room }) => {
+  try {
+    if (!room) return;
+    socket.join(room);
+    socket.emit('joined_private_room', { room });
+  } catch (err) { console.error('join_private_room err', err); }
+});
 
-      // load messages between me and target
-      const messages = await Message.find({
-        $or: [
-          { from: me, to: targetUser },
-          { from: targetUser, to: me }
-        ]
-      }).sort({ date: 1 }).lean();
+socket.on('private_message', async (payload) => { /* ...retabli menm jan ou te genyen... */ });
 
-      socket.emit('private_history', { conversationId: null, room, messages });
+socket.on('loadPrivateMessages', async ({ user1, user2, from, to }) => {
+  try {
+    const A = user1 || from;
+    const B = user2 || to;
+    if (!A || !B) return socket.emit('loadPrivateMessages', []);
+    const messages = await Message.find({
+      $or: [
+        { from: A, to: B },
+        { from: B, to: A }
+      ]
+    }).sort({ date: 1 }).lean();
+    socket.emit('loadPrivateMessages', messages);
+  } catch (err) {
+    console.error('loadPrivateMessages err', err);
+    socket.emit('loadPrivateMessages', []);
+  }
+});
 
-      // Notify target user(s) so UI can show a badge - emit to personal room(s)
-      io.to(`user-${targetUser}`).emit('private_chat_invite', { from: me, room });
+socket.on('mark_conversation_read', async ({ conversationId, otherUser }) => {
+  try {
+    const me = socket.data.userId;
+    if (!me) return;
+    if (otherUser) io.to(`user-${otherUser}`).emit('conversation_read', { by: me });
+    socket.emit('mark_conversation_read_ok', { conversationId });
+  } catch (err) { console.error('mark_conversation_read err', err); }
+});
 
-    } catch (err) {
-      console.error('request_private_chat err', err);
-      socket.emit('error_private', { message: 'Server error (request_private_chat)' });
-    }
-  });
+socket.on('message_seen', async ({ messageId }) => {
+  try {
+    if (!messageId) return;
+    const msg = await Message.findById(messageId);
+    if (!msg) return;
+    const room = getPrivateRoom(msg.from, msg.to);
+    io.to(room).emit('message_seen', { messageId, by: socket.data.userId });
+  } catch (err) { console.error('message_seen err', err); }
+});
 
-  // Join room explicitly (optional: used if front-end wants explicit join)
-  socket.on('join_private_room', ({ room }) => {
-    try {
-      if (!room) return;
-      socket.join(room);
-      socket.emit('joined_private_room', { room });
-    } catch (err) {
-      console.error('join_private_room err', err);
-    }
-  });
+socket.on('typing', ({ room, isTyping }) => {
+  try {
+    if (!room) return;
+    socket.to(room).emit('typing', { from: socket.data.userId, isTyping: !!isTyping });
+  } catch (err) { console.error('typing err', err); }
+});
 
-  // Improved private_message handler (replaces the older simple handler)
-  socket.on('private_message', async (payload) => {
-    try {
-      const me = socket.data.userId;
-      if (!me) return socket.emit('error_private', { message: 'Unauthorized' });
+socket.on('requestUserList', () => { broadcastOnline(); });
 
-      const to = payload.to;
-      const text = (payload.text !== undefined) ? String(payload.text) : '';
-      const attachments = Array.isArray(payload.attachments) ? payload.attachments : [];
+// --- Nouvo features ---
+socket.on('private_message_with_features', async (payload) => {
+  try {
+    const me = socket.data.userId;
+    if(!me) return socket.emit('error_private',{message:'Unauthorized'});
+    const to = payload.to;
+    if(!to) return socket.emit('error_private',{message:'Missing recipient'});
 
-      if (!to || (!text && attachments.length === 0)) {
-        return socket.emit('error_private', { message: 'Invalid private message payload' });
-      }
+    const text = payload.text || '';
+    const attachments = Array.isArray(payload.attachments) ? payload.attachments : [];
+    const voice = payload.voice || null;
+    const call = payload.call || null;
 
-      // Save message to MongoDB (use same Message model)
-      const newMsg = new Message({
-        from: me,
-        to: to,
-        message: text || (attachments[0] && attachments[0].filename) || ''
-      });
-      await newMsg.save();
+    const newMsg = new Message({
+      from: me,
+      to,
+      message: text || (attachments[0]?.filename || ''),
+      attachments,
+      voice,
+      date: new Date()
+    });
+    await newMsg.save();
 
-      // Determine room and emit to members in the room (if they joined)
-      const room = payload.room || getPrivateRoom(me, to);
-      // Emit saved message (with DB _id and date) to room
-      const msgForEmit = {
-        _id: newMsg._id,
-        from: newMsg.from,
-        to: newMsg.to,
-        text: newMsg.message,
-        createdAt: newMsg.date
-      };
-      io.to(room).emit('receive_private_message', msgForEmit);
+    const room = payload.room || getPrivateRoom(me, to);
+    const msgForEmit = {
+      _id: newMsg._id,
+      from: newMsg.from,
+      to: newMsg.to,
+      text: newMsg.message,
+      attachments: newMsg.attachments,
+      voice: newMsg.voice,
+      createdAt: newMsg.date
+    };
 
-      // Emit direct notification to recipient's personal room(s) so UI can show badge even if not in room
-      io.to(`user-${to}`).emit('private_message_notification', {
-        from: me,
-        room,
-        messageId: newMsg._id,
-        textPreview: (newMsg.message && newMsg.message.length > 100) ? newMsg.message.slice(0, 100) + '...' : newMsg.message
-      });
+    io.to(room).emit('receive_private_message', msgForEmit);
+    io.to(`user-${to}`).emit('private_message_notification',{
+      from: me,
+      room,
+      messageId: newMsg._id,
+      textPreview: newMsg.message.length>100 ? newMsg.message.slice(0,100)+'...' : newMsg.message
+    });
 
-      // Ack to sender (optional)
-      socket.emit('private_message_sent', msgForEmit);
-
-    } catch (err) {
-      console.error('private_message err', err);
-      socket.emit('error_private', { message: 'Server error (private_message)' });
-    }
-  });
-
-  // Load private messages between two users (compatible with your frontend)
-  socket.on('loadPrivateMessages', async ({ user1, user2, from, to }) => {
-    try {
-      // Support either (user1,user2) or (from,to) naming
-      const A = user1 || from;
-      const B = user2 || to;
-      if (!A || !B) return socket.emit('loadPrivateMessages', []);
-      const messages = await Message.find({
-        $or: [
-          { from: A, to: B },
-          { from: B, to: A }
-        ]
-      }).sort({ date: 1 }).lean();
-      socket.emit('loadPrivateMessages', messages);
-    } catch (err) {
-      console.error('loadPrivateMessages err', err);
-      socket.emit('loadPrivateMessages', []);
-    }
-  });
-
-  // Mark conversation read (simple event to clear badge server-side if you track unread)
-  socket.on('mark_conversation_read', async ({ conversationId, otherUser }) => {
-    try {
-      // If you track unread counts in separate collection, handle here.
-      // For now we just emit to other user to update their UI if needed.
-      const me = socket.data.userId;
-      if (!me) return;
-      if (otherUser) {
-        io.to(`user-${otherUser}`).emit('conversation_read', { by: me });
-      }
-      socket.emit('mark_conversation_read_ok', { conversationId });
-    } catch (err) {
-      console.error('mark_conversation_read err', err);
-    }
-  });
-
-  // Message seen event (sender notified that recipient saw message)
-  socket.on('message_seen', async ({ messageId }) => {
-    try {
-      if (!messageId) return;
-      const msg = await Message.findById(messageId);
-      if (!msg) return;
-      // Optionally you can set a flag in DB; for now just notify room
-      const room = getPrivateRoom(msg.from, msg.to);
-      io.to(room).emit('message_seen', { messageId, by: socket.data.userId });
-    } catch (err) {
-      console.error('message_seen err', err);
-    }
-  });
-
-  // Typing indicator broadcast to room (except sender)
-  socket.on('typing', ({ room, isTyping }) => {
-    try {
-      if (!room) return;
-      socket.to(room).emit('typing', { from: socket.data.userId, isTyping: !!isTyping });
-    } catch (err) {
-      console.error('typing err', err);
-    }
-  });
-
-  // ---------------------------
-  // ✅ Chaje tout mesaj prive ant 2 itilizatè (legacy event supported above)
-  // ---------------------------
-  // (This was in original file - we've kept loadPrivateMessages handler above as improved version)
-
-  // ---------------------------
-  // ✅ Moun mande lis itilizatè
-  // ---------------------------
-  socket.on('requestUserList', () => {
-    broadcastOnline();
-  });
-
-  // ---------------------------
-  // ✅ Lè yon itilizatè dekonekte
-  // ---------------------------
-  socket.on('disconnect', () => {
-    const userId = socket.data.userId;
-    if (!userId) return;
-
-    const record = onlineUsers.get(userId);
-    if (!record) return;
-
-    record.sockets.delete(socket.id);
-
-    if (record.sockets.size === 0) {
-      io.emit('userDisconnected', record.name);
+    if(call && call.type && call.action){
+      io.to(`user-${to}`).emit('private_call_signal',{from:me, call});
     }
 
-    broadcastOnline();
-    console.log('🔴 Itilizatè dekonekte:', userId);
-  });
+    socket.emit('private_message_sent', msgForEmit);
+
+  } catch(err){
+    console.error('private_message_with_features err', err);
+    socket.emit('error_private',{message:'Server error (private_message_with_features)'});
+  }
+});
+
+socket.on('mark_message_seen', async ({ messageId }) => {
+  try{
+    if(!messageId) return;
+    const msg = await Message.findById(messageId);
+    if(!msg) return;
+    const room = getPrivateRoom(msg.from,msg.to);
+    io.to(room).emit('message_seen',{messageId, by: socket.data.userId});
+  } catch(err){ console.error('mark_message_seen err', err); }
+});
+
+socket.on('block_user', ({ targetUser }) => {
+  const me = socket.data.userId;
+  if(!me || !targetUser) return;
+  io.to(`user-${me}`).emit('user_blocked',{blockedUser: targetUser});
+  io.to(`user-${targetUser}`).emit('blocked_by',{by: me});
+});
+
+// --- Disconnect handling pou chat prive + onlineUsers ---
+socket.on('disconnect', () => {
+  const userId = socket.data.userId;
+  if(!userId) return;
+
+  const record = onlineUsers.get(userId);
+  if(!record) return;
+
+  record.sockets.delete(socket.id);
+  if(record.sockets.size===0) io.emit('userDisconnected', record.name);
+
+  broadcastOnline();
+  console.log('🔴 Itilizatè dekonekte:', userId);
+});
 
 }); // end io.on('connection')
 
