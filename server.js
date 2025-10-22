@@ -264,125 +264,167 @@ app.get('/ping', (req, res) => res.send('pong'));
 
 
 // ---------------------------
-// 📦 Mongoose Schema
-// ---------------------------
-const messageSchema = new mongoose.Schema({
-  from: { type: String, required: true },
-  to: { type: String, required: true },  // 'public' pou chat piblik
-  message: { type: String, required: true },
-  date: { type: Date, default: Date.now }
-});
-const Message = mongoose.model('Message', messageSchema);
-
-// ---------------------------
-// ⚙️ Socket.IO Server
-// ---------------------------
-const server = http.createServer(app);
-const io = new Server(server, {
-  cors: {
-    origin: ['*', 'https://www.fondationbackupspirituel.com'],
-    methods: ['GET', 'POST']
-  }
-});
-
-// ---------------------------
-// 🧩 ONLINE USERS (AVEK "user" PITO "name")
-// ---------------------------
-const onlineUsers = new Map();
-
-function broadcastOnline() {
-  const usersArr = [];
-  for (const [id, info] of onlineUsers.entries()) {
-    usersArr.push({
-      id,
-      user: info.user, // ranplase name -> user
-      connected: info.sockets.size > 0
-    });
-  }
-  io.emit('online-users', usersArr);
-}
-
-// ---------------------------
-// ⚡ SOCKET.IO CONNECTION
+// ⚡ SOCKET.IO CONNECTION (robust, tolerant to different client patterns)
 // ---------------------------
 io.on('connection', async (socket) => {
   console.log('🟢 Nouvo itilizatè konekte:', socket.id);
 
-  // ✅ Chaje mesaj piblik
+  // Helper: register a user for this socket (will join personal room user-<id>)
+  function registerUser(rawUser) {
+    try {
+      const cleanUser = (rawUser || '').toString().trim() || 'Anonyme';
+      const userId = cleanUser.toLowerCase();
+
+      // If socket was previously registered under another userId, remove it from that record
+      const prevId = socket.data.userId;
+      if (prevId && prevId !== userId) {
+        const prevRecord = onlineUsers.get(prevId);
+        if (prevRecord) {
+          prevRecord.sockets.delete(socket.id);
+          if (prevRecord.sockets.size === 0) {
+            // keep record or remove? we remove to keep map clean
+            onlineUsers.delete(prevId);
+            io.emit('userDisconnected', prevRecord.user);
+          }
+        }
+      }
+
+      let record = onlineUsers.get(userId);
+      if (!record) {
+        record = { user: cleanUser, sockets: new Set() };
+        onlineUsers.set(userId, record);
+      }
+
+      record.user = cleanUser;
+      record.sockets.add(socket.id);
+      socket.data.userId = userId;
+
+      // join personal room for notifications (useful for private later)
+      socket.join(`user-${userId}`);
+
+      io.emit('userConnected', cleanUser);
+      broadcastOnline();
+      console.log(`🔵 Registered socket ${socket.id} as userId=${userId}`);
+    } catch (err) {
+      console.error('registerUser err', err);
+    }
+  }
+
+  // ------------- On connect: try to auto-register from handshake (query or auth)
+  try {
+    const handshakeUser = socket.handshake?.query?.user || socket.handshake?.auth?.user;
+    if (handshakeUser) {
+      registerUser(handshakeUser);
+    }
+  } catch (e) {
+    // ignore
+  }
+
+  // ---------------------------
+  // ✅ Chaje 100 dènye mesaj piblik yo
+  // ---------------------------
   try {
     const anciens = await Message.find({ to: 'public' }).sort({ date: 1 }).limit(100).lean();
     const formatted = anciens.map(msg => ({
-      user: msg.from?.trim() || 'Anonyme',
+      user: (msg.from || 'Anonyme').toString().trim(),
       message: msg.message || '',
       date: msg.date ? new Date(msg.date) : new Date()
     }));
     socket.emit('loadMessages', formatted);
   } catch (err) {
-    console.error('❌ Erè pandan chajman mesaj piblik:', err.message);
+    console.error('❌ Erè pandan chajman mesaj piblik:', err && err.message);
   }
 
-  // ✅ Resevwa non itilizatè (kounya se "user")
-  socket.on('setUser', (user) => {
-    const cleanUser = user?.trim() || 'Anonyme';
-    const userId = cleanUser.toLowerCase();
-
-    let record = onlineUsers.get(userId);
-    if (!record) {
-      record = { user: cleanUser, sockets: new Set() };
-      onlineUsers.set(userId, record);
+  // ---------------------------
+  // ✅ Resevwa non itilizatè (kounya se "user") - tolerant names
+  // ---------------------------
+  socket.on('setUser', (payload) => {
+    // accept either string or object { user, username, name }
+    let value = null;
+    if (typeof payload === 'string') value = payload;
+    else if (payload && typeof payload === 'object') {
+      value = payload.user || payload.username || payload.name || null;
     }
-
-    record.user = cleanUser;
-    record.sockets.add(socket.id);
-    socket.data.userId = userId;
-
-    io.emit('userConnected', cleanUser);
-    broadcastOnline();
+    if (!value) {
+      console.warn('setUser called without usable value from socket', socket.id);
+      return;
+    }
+    registerUser(value);
   });
 
+  // ---------------------------
   // ✅ Resevwa mesaj piblik
+  // ---------------------------
   socket.on('chatMessage', async (data) => {
     try {
-      const user = data.user?.trim() || 'Anonyme';
-      const message = data.message?.trim();
+      // accept data.user OR fallback to socket.data.userId (the registered id)
+      let userFrom = null;
+      if (data && typeof data === 'object') {
+        userFrom = (data.user || data.username || data.name || '').toString().trim();
+      }
+      if (!userFrom) {
+        // try the registered user id
+        if (socket.data && socket.data.userId) {
+          userFrom = socket.data.userId;
+        } else {
+          userFrom = 'Anonyme';
+        }
+      }
+
+      const message = (data && data.message) ? String(data.message).trim() : '';
       if (!message) return;
 
-      const newMsg = new Message({ from: user, to: 'public', message });
+      const newMsg = new Message({ from: userFrom, to: 'public', message });
       await newMsg.save();
 
-      io.emit('chatMessage', {
+      const emitPayload = {
         user: newMsg.from,
         message: newMsg.message,
         date: newMsg.date
-      });
+      };
+
+      // Emit to all connected clients
+      io.emit('chatMessage', emitPayload);
     } catch (err) {
-      console.error('❌ Erè pandan anrejistreman mesaj piblik:', err.message);
+      console.error('❌ Erè pandan anrejistreman mesaj piblik:', err && err.message);
     }
   });
 
+  // ---------------------------
   // ✅ Lis itilizatè
+  // ---------------------------
   socket.on('requestUserList', () => {
     broadcastOnline();
   });
 
-  // ✅ Dekoneksyon
+  // ---------------------------
+  // ✅ Lè yon itilizatè dekonekte
+  // ---------------------------
   socket.on('disconnect', () => {
-    const userId = socket.data.userId;
-    if (!userId) return;
+    try {
+      const userId = socket.data.userId;
+      if (!userId) {
+        console.log('🔴 Socket disconnected (no userId):', socket.id);
+        return;
+      }
 
-    const record = onlineUsers.get(userId);
-    if (!record) return;
+      const record = onlineUsers.get(userId);
+      if (!record) return;
 
-    record.sockets.delete(socket.id);
+      record.sockets.delete(socket.id);
 
-    if (record.sockets.size === 0) {
-      io.emit('userDisconnected', record.user);
+      if (record.sockets.size === 0) {
+        // remove record to avoid stale entries
+        onlineUsers.delete(userId);
+        io.emit('userDisconnected', record.user);
+      }
+
+      broadcastOnline();
+      console.log('🔴 Itilizatè dekonekte:', userId);
+    } catch (err) {
+      console.error('disconnect handler err', err);
     }
-
-    broadcastOnline();
-    console.log('🔴 Itilizatè dekonekte:', userId);
   });
-
 
 
   
