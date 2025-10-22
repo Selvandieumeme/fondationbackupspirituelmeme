@@ -263,23 +263,12 @@ app.get('/ping', (req, res) => res.send('pong'));
 // ---------------------------
 
 
-// Connect to Mongo (asire MONGO_URI nan env)
-mongoose.connect(process.env.MONGO_URI || 'mongodb://localhost:27017/chatdb', {
-  useNewUrlParser: true,
-  useUnifiedTopology: true
-}).then(()=> console.log('MongoDB connected')).catch(err => console.error('Mongo connect err', err));
-
-// ---------------------------
-// 💬 SOCKET.IO CHAT — VÈSYON FINAL AK LISTE ITILIZATÈ AKTIF
-// ---------------------------
-
 // ---------------------------
 // 📦 Mongoose Schema
 // ---------------------------
-// Mesaj piblik ak prive
 const messageSchema = new mongoose.Schema({
-  from: { type: String, required: true },    // Itilizatè ki voye mesaj la
-  to: { type: String, required: true },      // Itilizatè k ap resevwa mesaj la ('public' pou piblik)
+  from: { type: String, required: true },
+  to: { type: String, required: true },  // 'public' pou chat piblik
   message: { type: String, required: true },
   date: { type: Date, default: Date.now }
 });
@@ -297,20 +286,20 @@ const io = new Server(server, {
 });
 
 // ---------------------------
-// 🧩 GESTION UTILISATÈ AKTIF
+// 🧩 ONLINE USERS (AVEK "user" PITO "name")
 // ---------------------------
 const onlineUsers = new Map();
 
 function broadcastOnline() {
-  const arr = [];
+  const usersArr = [];
   for (const [id, info] of onlineUsers.entries()) {
-    arr.push({
+    usersArr.push({
       id,
-      name: info.name,
+      user: info.user, // ranplase name -> user
       connected: info.sockets.size > 0
     });
   }
-  io.emit('online-users', arr);
+  io.emit('online-users', usersArr);
 }
 
 // ---------------------------
@@ -319,45 +308,39 @@ function broadcastOnline() {
 io.on('connection', async (socket) => {
   console.log('🟢 Nouvo itilizatè konekte:', socket.id);
 
-  // ---------------------------
-  // ✅ Chaje 100 dènye mesaj piblik yo
-  // ---------------------------
+  // ✅ Chaje mesaj piblik
   try {
-    const anciensMessages = await Message.find({ to: 'public' }).sort({ date: 1 }).limit(100).lean();
-    const formattedMessages = anciensMessages.map(msg => ({
+    const anciens = await Message.find({ to: 'public' }).sort({ date: 1 }).limit(100).lean();
+    const formatted = anciens.map(msg => ({
       user: msg.from?.trim() || 'Anonyme',
       message: msg.message || '',
       date: msg.date ? new Date(msg.date) : new Date()
     }));
-    socket.emit('loadMessages', formattedMessages);
+    socket.emit('loadMessages', formatted);
   } catch (err) {
     console.error('❌ Erè pandan chajman mesaj piblik:', err.message);
   }
 
-  // ---------------------------
-  // ✅ Resevwa non itilizatè a
-  // ---------------------------
-  socket.on('setUser', (username) => {
-    const cleanName = username?.trim() || 'Anonyme';
-    const userId = cleanName.toLowerCase();
+  // ✅ Resevwa non itilizatè (kounya se "user")
+  socket.on('setUser', (user) => {
+    const cleanUser = user?.trim() || 'Anonyme';
+    const userId = cleanUser.toLowerCase();
 
     let record = onlineUsers.get(userId);
     if (!record) {
-      record = { name: cleanName, sockets: new Set() };
+      record = { user: cleanUser, sockets: new Set() };
       onlineUsers.set(userId, record);
     }
 
-    record.name = cleanName;
+    record.user = cleanUser;
     record.sockets.add(socket.id);
     socket.data.userId = userId;
 
-    io.emit('userConnected', cleanName);
+    io.emit('userConnected', cleanUser);
     broadcastOnline();
   });
 
-  // ---------------------------
   // ✅ Resevwa mesaj piblik
-  // ---------------------------
   socket.on('chatMessage', async (data) => {
     try {
       const user = data.user?.trim() || 'Anonyme';
@@ -367,17 +350,40 @@ io.on('connection', async (socket) => {
       const newMsg = new Message({ from: user, to: 'public', message });
       await newMsg.save();
 
-      const formatted = {
+      io.emit('chatMessage', {
         user: newMsg.from,
         message: newMsg.message,
         date: newMsg.date
-      };
-
-      io.emit('chatMessage', formatted);
+      });
     } catch (err) {
       console.error('❌ Erè pandan anrejistreman mesaj piblik:', err.message);
     }
   });
+
+  // ✅ Lis itilizatè
+  socket.on('requestUserList', () => {
+    broadcastOnline();
+  });
+
+  // ✅ Dekoneksyon
+  socket.on('disconnect', () => {
+    const userId = socket.data.userId;
+    if (!userId) return;
+
+    const record = onlineUsers.get(userId);
+    if (!record) return;
+
+    record.sockets.delete(socket.id);
+
+    if (record.sockets.size === 0) {
+      io.emit('userDisconnected', record.user);
+    }
+
+    broadcastOnline();
+    console.log('🔴 Itilizatè dekonekte:', userId);
+  });
+});
+
 
   
 	
