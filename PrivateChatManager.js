@@ -1,17 +1,12 @@
-/* 
-PrivateChatManager.js
-Jere chat prive ak Chatprive.html
-- One-to-one chat
-- Notifications wouj sou panel itilizate chat piblik
-- Voye/ resevwa mesaj
-- Mark read / typing
-- Attachments, voice (simply handled)
-- Minimize / close fenèt
-*/
+// =======================
+// ✅ PrivateChatManager.js FINAL PWOFESYONÈL
+// =======================
 
 // SOCKET.IO CONNECT
-const socket = io(); // asume socket.io client script deja enkli nan Chatprive.html
-const CURRENT_USER = window.CURRENT_USER; // id MongoDB itilizate a, mete sou paj la
+const socket = window.socket || io('https://examen-backend-ihlx.onrender.com');
+window.socket = socket;
+
+const CURRENT_USER = window.CURRENT_USER || new URLSearchParams(window.location.search).get('from') || 'Anonyme';
 
 // --- DOM Elements ---
 const chatWindow = document.querySelector('.private-chat-window');
@@ -37,12 +32,13 @@ function addMessage(msg, outgoing=false) {
   div.innerHTML = `
     <span>${msg.text || ''}</span>
     ${msg.attachments && msg.attachments.length ? msg.attachments.map(a=>`<div class="attachment"><img src="${a.url}" /></div>`).join('') : ''}
-    <span class="msg-meta">${new Date(msg.createdAt).toLocaleTimeString()}</span>
+    <span class="msg-meta">${new Date(msg.createdAt || Date.now()).toLocaleTimeString()}</span>
   `;
   messagesContainer.appendChild(div);
   messagesContainer.scrollTop = messagesContainer.scrollHeight;
 }
 
+// Notifikasyon wouj sou itilizatè nan panel chat piblik
 function showNotificationRedDot(userId) {
   const userEl = document.querySelector(`.user[data-user="${userId}"]`);
   if(userEl) userEl.classList.add('has-new-message');
@@ -50,7 +46,7 @@ function showNotificationRedDot(userId) {
 
 // ---------- SOCKET EVENTS ----------
 
-// Resevwa istwa chat
+// Resevwa istwa chat prive
 socket.on('private_history', data => {
   conversationId = data.conversationId;
   currentRoom = data.room;
@@ -58,19 +54,13 @@ socket.on('private_history', data => {
   data.messages.forEach(m => addMessage(m, m.from === CURRENT_USER));
 });
 
-// Resevwa mesaj
+// Resevwa nouvo mesaj prive
 socket.on('receive_private_message', msg => {
-  if(msg.from === targetUser) addMessage(msg, false);
-});
-
-// Notifikasyon pou nouvo mesaj
-socket.on('private_message_notification', data => {
-  if(data.from !== targetUser) showNotificationRedDot(data.from);
-});
-
-// Acknowledge mesaj voye
-socket.on('private_message_sent', msg => {
-  addMessage(msg, true);
+  if(msg.from === targetUser) {
+    addMessage(msg, false);
+  } else if(msg.to === CURRENT_USER) {
+    showNotificationRedDot(msg.from);
+  }
 });
 
 // Typing indicator
@@ -80,16 +70,34 @@ socket.on('typing', ({from,isTyping})=>{
 
 // ---------- UI EVENTS ----------
 
-// Send mesaj
-sendBtn.addEventListener('click', ()=>{
+// Voye mesaj
+sendBtn.addEventListener('click', ()=> sendPrivateMessage());
+inputField.addEventListener('keypress', (e)=>{
+  if(e.key==='Enter' && !e.shiftKey) {
+    e.preventDefault();
+    sendPrivateMessage();
+  }
+});
+
+function sendPrivateMessage(){
   const text = inputField.value.trim();
   if(!text || !targetUser) return;
-  socket.emit('private_message',{to: targetUser, text, conversationId, room: currentRoom});
+
+  socket.emit('private_message',{
+    to: targetUser,
+    text,
+    conversationId,
+    room: currentRoom
+  });
+
+  addMessage({text, from: CURRENT_USER, createdAt: new Date()}, true);
   inputField.value = '';
-});
+  inputField.focus();
+}
 
 // Detect typing
 inputField.addEventListener('input', ()=>{
+  if(!currentRoom) return;
   socket.emit('typing',{room: currentRoom,isTyping:true});
   clearTimeout(typingTimeout);
   typingTimeout = setTimeout(()=>{socket.emit('typing',{room:currentRoom,isTyping:false})},2000);
@@ -99,19 +107,22 @@ inputField.addEventListener('input', ()=>{
 minimizeBtn.addEventListener('click',()=>chatWindow.classList.toggle('minimized'));
 closeBtn.addEventListener('click',()=>chatWindow.style.display='none');
 
-// --- Fonksyon pou ouvè chat ak itilizate (lè klike sou panel chat piblik) ---
-function openPrivateChat(targetUserId){
-  targetUser = targetUserId;
+// ---------- OPEN CHAT ----------
+function openPrivateChat(userId){
+  targetUser = userId;
   chatWindow.style.display = 'flex';
   socket.emit('request_private_chat',{targetUser});
 }
 
-// Ex: chak user nan panel chat piblik la gen klas .user ak data-user="<id>"
+// Panel chat piblik: klike sou itilizatè pou ouvè chat prive
 document.querySelectorAll('.user').forEach(el=>{
   el.addEventListener('click', ()=>{
     const uid = el.dataset.user;
     openPrivateChat(uid);
-    // retire badge wouj si genyen
-    el.classList.remove('has-new-message');
+    el.classList.remove('has-new-message'); // retire badge wouj
   });
 });
+
+// ---------- INITIALIZATION ----------
+chatWindow.style.display = 'none';
+inputField.focus();
