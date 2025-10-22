@@ -1,109 +1,52 @@
-/* =======================================
-   Chatprivate.css
-   Ti stil pou fenèt chat prive
-   ======================================= */
-
-/* Fenèt chat prive */
 .private-chat-window {
-  font-family: 'Poppins', sans-serif;
-  font-size: 12px;
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  width: 360px;
+  max-width: calc(100% - 40px);
+  height: 480px;
   display: flex;
   flex-direction: column;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-  background: #fff;
-  width: 200px;
-  max-height: 300px;
-  position: fixed;
-  bottom: 10px;
-  z-index: 1000;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 12px 30px rgba(0,0,0,0.15);
+  font-family: Inter, "Segoe UI", Roboto, Arial;
   overflow: hidden;
+  z-index: 9999;
 }
 
-/* Header fenèt prive */
-.private-chat-window > div:first-child {
-  background: #0057b7;
-  color: #fff;
-  padding: 6px;
+.pc-header {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 12px;
+  background: linear-gradient(90deg,#0052d4,#4364f7);
+  color: white;
   font-weight: 600;
-  text-align: center;
-  border-top-left-radius: 8px;
-  border-top-right-radius: 8px;
+  cursor: move;
 }
 
-/* Espas mesaj yo */
-.private-messages {
-  flex: 1;
-  padding: 4px;
-  overflow-y: auto;
-  background: #f4f6f9;
-}
-
-/* Chak mesaj prive */
-.private-messages div {
-  margin-bottom: 4px;
-  padding: 2px 4px;
-  border-radius: 4px;
-  word-wrap: break-word;
-}
-
-/* Mesaj voye pa itilizatè aktyèl la */
-.private-messages div.me {
-  background: #0057b7;
-  color: #fff;
-}
-
-/* Mesaj soti nan lòt itilizatè */
-.private-messages div.other {
-  background: #f7d600;
-  color: #000;
-}
-
-/* Input pou ekri mesaj */
-.private-chat-window input[type="text"] {
-  flex: 1;
-  padding: 4px;
+.pc-header .controls button {
+  background: transparent;
   border: none;
-  outline: none;
-  font-size: 12px;
-}
-
-/* Bouton voye mesaj */
-.private-chat-window button {
-  background: #0057b7;
-  color: #fff;
-  border: none;
-  padding: 4px 6px;
+  color: white;
   cursor: pointer;
-  font-size: 12px;
-  margin-left: 2px;
-  border-radius: 4px;
-  transition: 0.2s ease;
+  margin-left: 6px;
 }
 
-.private-chat-window button:hover {
-  background: #f7d600;
-  color: #000;
+.pc-messages {
+  flex: 1;
+  padding: 12px;
+  overflow-y: auto;
+  background: #f7f8fb;
 }
 
-/* Bouton efase mesaj lokal */
-.private-chat-window button:last-child {
-  background: #e74c3c;
-}
+.msg { display:inline-block; max-width:80%; padding:8px 12px; margin:8px 0; border-radius:12px; font-size:14px; line-height:1.3; }
+.msg.incoming { background:#fff; color:#111827; border:1px solid rgba(0,0,0,0.04); align-self:flex-start; }
+.msg.outgoing { background: linear-gradient(90deg,#4f46e5,#06b6d4); color:white; align-self:flex-end; }
 
-.private-chat-window button:last-child:hover {
-  background: #c0392b;
-  color: #fff;
-}
+.pc-input { display:flex; gap:8px; padding:8px; border-top:1px solid rgba(0,0,0,0.06); }
+.pc-input textarea { flex:1; border-radius:8px; padding:8px 10px; border:1px solid rgba(0,0,0,0.08); resize:none; height:40px; }
 
-/* Responsive ti ekran */
-@media (max-width: 500px) {
-  .private-chat-window {
-    width: 160px;
-    font-size: 11px;
-  }
-  .private-chat-window button {
-    padding: 3px 5px;
-    font-size: 11px;
-  }
-}
+.typing-indicator { font-size:13px; color:#6b7280; padding:6px 0; }
+
+.user.has-new-message::after { content:'1'; position:absolute; top:6px; right:6px; background:red; color:white; font-size:11px; border-radius:999px; padding:2px 6px; }
