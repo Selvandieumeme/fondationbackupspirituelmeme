@@ -6,26 +6,75 @@
 <title>Chat Privé - Fondation Backup Spirituel</title>
 
 <link rel="stylesheet" href="ChatPrivate.css">
+
+<!-- Socket.io client -->
+<script src="/socket.io/socket.io.js"></script>
+<!-- ChatPrive.js -->
 <script src="ChatPrive.js" defer></script>
 
-<!-- SINGLE socket.io client lib: choose same-origin /socket.io path.
-     If you host socket server elsewhere, replace with the full CDN or target URL. -->
-<script src="/socket.io/socket.io.js"></script>
+</head>
+<body>
+  <!-- Main Chat Container -->
+  <div class="chat-container">
 
+    <!-- User List Panel (bo dwat) -->
+    <div id="userList" class="user-list-panel">
+      <h3>Utilisateurs Connectés</h3>
+      <!-- Boutons itilizatè yo pral ajoute dinamikman pa JS -->
+    </div>
+
+    <!-- Private Chat Window -->
+    <div class="private-chat-window">
+      <div class="pc-header">
+        <span id="chatTitle">Chat Privé</span>
+        <div class="controls">
+          <button id="closeChat" title="Fermer">X</button>
+        </div>
+      </div>
+
+      <!-- Messages -->
+      <div id="privateMessages" class="pc-messages">
+        <!-- Mesaj yo pral ajoute dinamikman -->
+      </div>
+
+      <!-- Typing indicator -->
+      <div id="typingIndicator" class="typing-indicator"></div>
+
+      <!-- Input & Action Buttons -->
+      <div class="pc-input">
+        <textarea id="privateMsg" placeholder="Écrire un message..."></textarea>
+        <button id="sendPrivate" title="Envoyer">Voye</button>
+        <button id="clearLocal" title="Effacer local">Efase</button>
+        <button id="attachBtn" title="Joindre image">📎</button>
+        <button id="voiceBtn" title="Enregistrer voix">🎤</button>
+        <button id="blockBtn" title="Bloquer utilisateur">🚫</button>
+        <button id="seenBtn" title="Marquer vu">✔️</button>
+        <button id="callBtn" title="Appel vocal">📞</button>
+        <button id="videoCallBtn" title="Appel vidéo">🎥</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Optional Call Window -->
+  <div id="callContainer"></div>
+
+
+     
+     
+     
 <script>
 /*
-  ChatPrive.html (corrigé + PrivateChatManager.js features)
-  - Uses window.CURRENT_USER in priority; fallback URL params for dev/testing
-  - Events aligned with PrivateChatManager server:
-      request_private_chat -> receive private_history
-      private_message -> server response: private_message_sent, receive_private_message, private_message_notification
-  - Adds: Attach Image, Voice, Block User, Seen, Voice/Video Call
+  Chatprive.html - Script final korije
+  Fully compatible with PrivateChatManager.js features
+  Supports Attach Image, Voice, Block User, Seen, Voice/Video Call
 */
 
 (function(){
+  // Current user from window var or URL param
   const CURRENT_USER = window.CURRENT_USER || new URLSearchParams(window.location.search).get('from') || null;
   if(!CURRENT_USER) console.warn('CURRENT_USER not set. URL fallback only.');
 
+  // Socket reuse
   const socket = window.__fbsp_shared_socket || io('https://examen-backend-ihlx.onrender.com');
   window.__fbsp_shared_socket = socket;
 
@@ -36,8 +85,6 @@
   const clearBtn = document.getElementById('clearLocal');
   const closeBtn = document.getElementById('closeChat');
   const userListDiv = document.getElementById('userList');
-
-  // Extra buttons (assume you added these in ChatPrive.html)
   const attachBtn = document.getElementById('attachBtn');
   const voiceBtn = document.getElementById('voiceBtn');
   const blockBtn = document.getElementById('blockBtn');
@@ -55,9 +102,10 @@
   const config = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] };
 
   // Helpers
-  function safeText(t){ return (t===null||t===undefined) ? '' : String(t); }
-  function formatTime(ts){ try{ return new Date(ts).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}); } catch(e){ return ''; } }
+  const safeText = t => (t==null ? '' : String(t));
+  const formatTime = ts => { try { return new Date(ts).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}); } catch(e){ return ''; } };
 
+  // Append message to DOM
   function appendMessageToDOM(msgDoc, isMe){
     const from = msgDoc.from || msgDoc.sender || 'unknown';
     const text = msgDoc.text || msgDoc.message || '';
@@ -84,7 +132,6 @@
   function sendMessage(){
     const text = msgInput.value.trim();
     if(!text || !CURRENT_USER || !targetUser) return alert('Utilisateur courant ou destinataire manquant.');
-
     const payload = { to: targetUser, text, conversationId, room: currentRoom };
     socket.emit('private_message', payload);
     appendMessageToDOM({ from: CURRENT_USER, text, createdAt: Date.now() }, true);
@@ -105,7 +152,7 @@
   clearBtn.addEventListener('click', clearMessagesDOM);
   closeBtn.addEventListener('click', ()=> window.location.href='Chat-Spirituel.html');
 
-  // Attach Image
+  // Attach image
   attachBtn?.addEventListener('click', ()=>{
     const fileInput=document.createElement('input'); fileInput.type='file'; fileInput.accept='image/*';
     fileInput.onchange=e=>{
@@ -122,38 +169,38 @@
     }; fileInput.click();
   });
 
-  // Voice (simple placeholder)
+  // Voice button (placeholder)
   voiceBtn?.addEventListener('click', async ()=>{
     if(!navigator.mediaDevices) return alert('Voice recording not supported');
     const stream=await navigator.mediaDevices.getUserMedia({audio:true});
     alert('Voice recording ready (implémentation needed)');
   });
 
-  // Block User
+  // Block user
   blockBtn?.addEventListener('click', ()=>{
     if(!targetUser) return;
-    socket.emit('block_user',{ user:targetUser });
+    socket.emit('block_user',{ targetUser });
     alert(`User ${targetUser} blocked`);
   });
 
-  // Seen button (manual mark seen)
+  // Seen
   seenBtn?.addEventListener('click', markConversationRead);
 
-  // WebRTC Voice/Video Call
+  // WebRTC call
   async function startCall(video=false){
     if(!targetUser) return;
-    localStream=await navigator.mediaDevices.getUserMedia({audio:true, video});
-    const callWindow=document.createElement('div'); callWindow.className='call-window';
+    localStream = await navigator.mediaDevices.getUserMedia({audio:true, video});
+    const callWindow = document.createElement('div'); callWindow.className='call-window';
     const localVideo=document.createElement('video'); localVideo.autoplay=true; localVideo.muted=true; localVideo.srcObject=localStream;
     const remoteVideo=document.createElement('video'); remoteVideo.autoplay=true;
     callWindow.appendChild(localVideo); callWindow.appendChild(remoteVideo); document.body.appendChild(callWindow);
 
-    peerConnection=new RTCPeerConnection(config);
+    peerConnection = new RTCPeerConnection(config);
     localStream.getTracks().forEach(track=>peerConnection.addTrack(track, localStream));
-    peerConnection.ontrack=e=>remoteVideo.srcObject=e.streams[0];
-    peerConnection.onicecandidate=e=>{ if(e.candidate) socket.emit('webrtc_candidate',{ candidate:e.candidate, to: targetUser }); };
+    peerConnection.ontrack = e => remoteVideo.srcObject = e.streams[0];
+    peerConnection.onicecandidate = e => { if(e.candidate) socket.emit('webrtc_candidate',{ candidate:e.candidate, to: targetUser }); };
 
-    const offer=await peerConnection.createOffer();
+    const offer = await peerConnection.createOffer();
     await peerConnection.setLocalDescription(offer);
     socket.emit('webrtc_offer',{ offer, to: targetUser });
   }
@@ -185,7 +232,7 @@
   socket.on('webrtc_answer', async ({ answer })=>{ await peerConnection.setRemoteDescription(answer); });
   socket.on('webrtc_candidate', async ({ candidate })=>{ try{ await peerConnection.addIceCandidate(candidate); }catch(e){console.error(e);} });
 
-  // Handle server-sent private history & messages
+  // Handle private history
   socket.on('private_history', ({ conversationId: convId, room, messages })=>{
     conversationId=convId||conversationId;
     currentRoom=room||currentRoom;
@@ -196,48 +243,10 @@
     markConversationRead();
   });
 
+  // Handle received private messages
   socket.on('receive_private_message', msgDoc=>{
     const inThisConv=(!conversationId&&!currentRoom)?false:(String(msgDoc.conversationId||'')===String(conversationId))||(msgDoc.room===currentRoom);
-    if(inThisConv||String(msgDoc.from)===String(targetUser)){
-      appendMessageToDOM(msgDoc,String(msgDoc.from)===String(CURRENT_USER));
-      if(String(msgDoc.from)!==String(CURRENT_USER)) socket.emit('message_seen',{ messageId: msgDoc._id });
-    } else {
-      const senderId=msgDoc.from||msgDoc.sender;
-      const btn=userListDiv.querySelector(`button[data-user="${senderId}"]`);
-      if(btn) btn.classList.add('has-new-message');
-    }
-  });
-
-  // Typing
-  socket.on('typing', ({ from, isTyping })=>{
-    if(String(from)===String(targetUser)){
-      const existing=document.getElementById('typingIndicator');
-      if(isTyping){
-        if(!existing){
-          const p=document.createElement('div'); p.id='typingIndicator'; p.style.fontSize='13px'; p.style.color='#555';
-          p.style.padding='6px 0'; p.textContent='Saisie en cours...';
-          messagesDiv.appendChild(p); messagesDiv.scrollTop=messagesDiv.scrollHeight;
-        }
-      } else { existing?.remove(); }
-    }
-  });
-
-  // User list
-  socket.emit('requestUserList');
-  socket.on('online-users', users=>{
-    const normalized=(users||[]).map(u=>typeof u==='string'?{_id:u}:u&&({_id:u._id||u.id})).filter(Boolean);
-    userListDiv.innerHTML='';
-    normalized.forEach(u=>{
-      if(String(u._id)===String(CURRENT_USER)) return;
-      const btn=document.createElement('button');
-      btn.className='user-btn'; btn.setAttribute('data-user',u._id); btn.textContent=u._id;
-      btn.addEventListener('click', ()=>{ btn.classList.remove('has-new-message'); openPrivateChatWith(u._id); });
-      userListDiv.appendChild(btn);
-    });
-  });
-
-  socket.on('connect', ()=>{ socket.emit('requestUserList'); if(targetUser) setTimeout(()=>openPrivateChatWith(targetUser),300); });
-})();
+    if(inThisConv||
 </script>
      
 </body>
