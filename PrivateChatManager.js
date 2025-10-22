@@ -1,6 +1,6 @@
 /* 
 PrivateChatManager.js
-Jere chat prive ak ChatPrive.html
+Jere chat prive ak Chatprive.html
 - One-to-one chat
 - Notifications wouj sou panel itilizate chat piblik
 - Voye/ resevwa mesaj
@@ -10,7 +10,7 @@ Jere chat prive ak ChatPrive.html
 */
 
 // SOCKET.IO CONNECT
-const socket = io(); // asume socket.io client script deja enkli nan ChatPrive.html
+const socket = io(); // asume socket.io client script deja enkli nan Chatprive.html
 const CURRENT_USER = window.CURRENT_USER; // id MongoDB itilizate a, mete sou paj la
 
 // --- DOM Elements ---
