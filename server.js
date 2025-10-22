@@ -614,13 +614,13 @@ app.get('/Chat-Spirituel.html', (req, res) => {
   res.sendFile(path.join(__dirname, 'Chat-Spirituel.html'));
 });
 
-// Serve ChatPrive.html (so you can inject from query param in dev; production should render CURRENT_USER)
-app.get('/ChatPrive.html', (req, res) => {
-  res.sendFile(path.join(__dirname, 'ChatPrive.html'));
+// Serve Chatprive.html (so you can inject from query param in dev; production should render CURRENT_USER)
+app.get('/Chatprive.html', (req, res) => {
+  res.sendFile(path.join(__dirname, 'Chatprive.html'));
 });
 
 // ---------------------------
 // 🚀 DEMARRE SERVEUR
 // ---------------------------
 const PORT = process.env.PORT || 3000;
-
+server.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
