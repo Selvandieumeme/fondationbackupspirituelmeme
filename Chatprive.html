@@ -11,67 +11,24 @@
      If you host socket server elsewhere, replace with the full CDN or target URL. -->
 <script src="/socket.io/socket.io.js"></script>
 
-<style>
-  /* (Kòd CSS inline pou fallback / rapid testing si ChatPrivate.css pa chaje) */
-  body { font-family: Arial, sans-serif; margin:0; padding:0; background:#fff; color:#333; }
-  header { background:#FFD700; color:#000; padding:15px; text-align:center; font-size:1.2rem; font-weight:700; position:relative;}
-  header button#closeChat { position:absolute; right:15px; top:50%; transform:translateY(-50%); background:#0d6efd; color:#fff; border:none; padding:6px 12px; border-radius:5px; cursor:pointer; }
-  main { display:flex; flex-direction:column; height:calc(100vh - 70px); padding:10px; }
-  #privateMessages { flex:1; overflow-y:auto; border:1px solid #0d6efd; border-radius:8px; padding:10px; background:#f0f8ff; margin-bottom:10px; }
-  #privateMessages div { padding:5px 8px; margin-bottom:5px; border-radius:6px; max-width:80%; word-wrap:break-word; display:inline-block; clear: both; }
-  .me { background:#FFD700; color:#000; float:right; }
-  .other { background:#0d6efd; color:#fff; float:left; }
-  #inputContainer { display:flex; gap:5px; }
-  #privateMsg { flex:1; padding:8px; border-radius:6px; border:1px solid #ccc; font-size:1rem; }
-  #sendPrivate,#clearLocal { padding:8px 12px; border:none; border-radius:6px; cursor:pointer; font-weight:bold; }
-  #sendPrivate { background:#0d6efd; color:#fff; }
-  #clearLocal { background:#FFD700; color:#000; }
-  #userList { position:fixed; right:10px; top:70px; width:180px; height:80vh; overflow-y:auto; border:1px solid #0d6efd; border-radius:8px; background:#f0f8ff; padding:5px; }
-  .user-btn { display:block; width:100%; margin-bottom:6px; cursor:pointer; padding:6px; border-radius:6px; border:none; background:white; text-align:left; }
-  .user-btn.has-new-message::after { content:'1'; position:absolute; right:16px; top:4px; background:red; color:white; font-size:11px; padding:2px 6px; border-radius:999px; }
-</style>
-</head>
-<body>
-
-<header>
-  Chat Privé
-  <button id="closeChat">Close</button>
-</header>
-
-<main>
-  <div id="privateMessages" aria-live="polite" aria-atomic="false"></div>
-  <div id="inputContainer">
-    <input type="text" id="privateMsg" placeholder="Écrire votre message..." autocomplete="off" />
-    <button id="sendPrivate">Envoyer</button>
-    <button id="clearLocal">Effacer</button>
-  </div>
-</main>
-
-<!-- USER LIST container (populated by script) -->
-<div id="userList" aria-label="Liste des utilisateurs connectés"></div>
-
 <script>
 /*
-  ChatPrive.html (corrigé)
-  - Utilise window.CURRENT_USER (injecté côté serveur) en priorité; fallback URL params pour dev/testing
-  - Événements sockets alignés ak PrivateChatManager server:
+  ChatPrive.html (corrigé + PrivateChatManager.js features)
+  - Uses window.CURRENT_USER in priority; fallback URL params for dev/testing
+  - Events aligned with PrivateChatManager server:
       request_private_chat -> receive private_history
-      private_message -> server response: private_message_sent (ack), receive_private_message (to room), private_message_notification (to target user)
-  - Uses `from`/`to`/`text`/`createdAt` fields from message doc (Mongo)
+      private_message -> server response: private_message_sent, receive_private_message, private_message_notification
+  - Adds: Attach Image, Voice, Block User, Seen, Voice/Video Call
 */
 
 (function(){
-  // Prefer server-injected CURRENT_USER (string Mongo _id)
-  const CURRENT_USER = window.CURRENT_USER || (new URLSearchParams(window.location.search).get('from')) || null;
-  if (!CURRENT_USER) {
-    console.warn('CURRENT_USER not set. Server should inject window.CURRENT_USER (mongo id). URL fallback used for dev only.');
-  }
+  const CURRENT_USER = window.CURRENT_USER || new URLSearchParams(window.location.search).get('from') || null;
+  if(!CURRENT_USER) console.warn('CURRENT_USER not set. URL fallback only.');
 
-  // Socket: reuse global if exists, otherwise default connect same-origin
-  const socket = window.__fbsp_shared_socket || io();
+  const socket = window.__fbsp_shared_socket || io('https://examen-backend-ihlx.onrender.com');
   window.__fbsp_shared_socket = socket;
 
-  // DOM
+  // DOM Elements
   const messagesDiv = document.getElementById('privateMessages');
   const msgInput = document.getElementById('privateMsg');
   const sendBtn = document.getElementById('sendPrivate');
@@ -79,195 +36,208 @@
   const closeBtn = document.getElementById('closeChat');
   const userListDiv = document.getElementById('userList');
 
-  // state
-  let targetUser = (new URLSearchParams(window.location.search).get('to')) || null;
+  // Extra buttons (assume you added these in ChatPrive.html)
+  const attachBtn = document.getElementById('attachBtn');
+  const voiceBtn = document.getElementById('voiceBtn');
+  const blockBtn = document.getElementById('blockBtn');
+  const seenBtn = document.getElementById('seenBtn');
+  const callBtn = document.getElementById('callBtn');
+  const videoCallBtn = document.getElementById('videoCallBtn');
+
+  // State
+  let targetUser = new URLSearchParams(window.location.search).get('to') || null;
   let currentRoom = null;
   let conversationId = null;
+  let typingTimeout = null;
+  let localStream = null;
+  let peerConnection = null;
+  const config = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] };
 
   // Helpers
   function safeText(t){ return (t===null||t===undefined) ? '' : String(t); }
-  function formatTime(ts){
-    try { return new Date(ts).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}); }
-    catch(e){ return ''; }
-  }
+  function formatTime(ts){ try{ return new Date(ts).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}); } catch(e){ return ''; } }
 
   function appendMessageToDOM(msgDoc, isMe){
-    // supports fields: from, to, text, createdAt  (and fallback: sender/message/date)
     const from = msgDoc.from || msgDoc.sender || 'unknown';
     const text = msgDoc.text || msgDoc.message || '';
     const createdAt = msgDoc.createdAt || msgDoc.date || Date.now();
 
     const div = document.createElement('div');
     div.classList.add(isMe ? 'me' : 'other');
-    div.innerHTML = `<strong>${isMe ? 'Moi' : from}</strong> <span style="font-size:11px;color:#444;margin-left:6px">[${formatTime(createdAt)}]</span><div>${safeText(text)}</div>`;
+    div.innerHTML = `<strong>${isMe ? 'Moi' : from}</strong> <span style="font-size:11px;color:#444;margin-left:6px">[${formatTime(createdAt)}]</span>
+      <div>${safeText(text)}</div>
+      ${msgDoc.attachments && msgDoc.attachments.length ? msgDoc.attachments.map(a=>`<div class="attachment"><img src="${a.url}" /></div>`).join('') : ''}
+    `;
     messagesDiv.appendChild(div);
     messagesDiv.scrollTop = messagesDiv.scrollHeight;
   }
 
-  function clearMessagesDOM(){ messagesDiv.innerHTML = ''; }
+  function clearMessagesDOM(){ messagesDiv.innerHTML=''; }
 
-  // Open / request private chat: ask server for history and join room
   function openPrivateChatWith(userId){
     if(!userId) return;
     targetUser = userId;
-    // Emit request to server - this will cause server to send 'private_history' and notify recipient if needed
-    socket.emit('request_private_chat', { targetUser: targetUser });
+    socket.emit('request_private_chat',{ targetUser });
   }
 
-  // Send message
   function sendMessage(){
     const text = msgInput.value.trim();
-    if(!text) return;
-    if(!CURRENT_USER || !targetUser){
-      alert('Utilisateur courant ou destinataire manquant. Assurez-vous d\'être connecté.');
-      return;
-    }
-    // payload consistent with server PrivateChatManager expectations
-    const payload = {
-      to: targetUser,
-      text: text,
-      conversationId: conversationId || undefined,
-      room: currentRoom || undefined
-    };
+    if(!text || !CURRENT_USER || !targetUser) return alert('Utilisateur courant ou destinataire manquant.');
+
+    const payload = { to: targetUser, text, conversationId, room: currentRoom };
     socket.emit('private_message', payload);
-    // optimistic UI: show locally
-    appendMessageToDOM({ from: CURRENT_USER, text: text, createdAt: Date.now() }, true);
-    msgInput.value = '';
-    msgInput.focus();
+    appendMessageToDOM({ from: CURRENT_USER, text, createdAt: Date.now() }, true);
+    msgInput.value=''; msgInput.focus();
   }
 
-  // Mark conversation read (call when user opens a chat / focuses window)
   function markConversationRead(){
     if(conversationId){
       socket.emit('mark_conversation_read', { conversationId });
-      // remove badge on user list UI
       const btn = userListDiv.querySelector(`button[data-user="${targetUser}"]`);
       if(btn) btn.classList.remove('has-new-message');
     }
   }
 
-  // UI events
+  // Event listeners
   sendBtn.addEventListener('click', sendMessage);
-  msgInput.addEventListener('keypress', function(e){ if(e.key === 'Enter') { e.preventDefault(); sendMessage(); }});
-  clearBtn.addEventListener('click', ()=> clearMessagesDOM());
-  closeBtn.addEventListener('click', ()=> { window.location.href = 'Chat-Spirituel.html'; });
+  msgInput.addEventListener('keypress', e=>{ if(e.key==='Enter'){ e.preventDefault(); sendMessage(); } });
+  clearBtn.addEventListener('click', clearMessagesDOM);
+  closeBtn.addEventListener('click', ()=> window.location.href='Chat-Spirituel.html');
 
-  // Handle server-sent private history (response to request_private_chat)
-  socket.on('private_history', ({ conversationId: convId, room, messages }) => {
-    conversationId = convId || conversationId;
-    currentRoom = room || currentRoom;
+  // Attach Image
+  attachBtn?.addEventListener('click', ()=>{
+    const fileInput=document.createElement('input'); fileInput.type='file'; fileInput.accept='image/*';
+    fileInput.onchange=e=>{
+      const file=e.target.files[0];
+      if(file){
+        const reader=new FileReader();
+        reader.onload=evt=>{
+          const imgData=evt.target.result;
+          const msg={ text:'', attachments:[{url:imgData}], from:CURRENT_USER, createdAt:new Date() };
+          socket.emit('private_message',{ to: targetUser, text:'', attachments:[{url:imgData}], conversationId, room:currentRoom });
+          appendMessageToDOM(msg,true);
+        }; reader.readAsDataURL(file);
+      }
+    }; fileInput.click();
+  });
+
+  // Voice (simple placeholder)
+  voiceBtn?.addEventListener('click', async ()=>{
+    if(!navigator.mediaDevices) return alert('Voice recording not supported');
+    const stream=await navigator.mediaDevices.getUserMedia({audio:true});
+    alert('Voice recording ready (implémentation needed)');
+  });
+
+  // Block User
+  blockBtn?.addEventListener('click', ()=>{
+    if(!targetUser) return;
+    socket.emit('block_user',{ user:targetUser });
+    alert(`User ${targetUser} blocked`);
+  });
+
+  // Seen button (manual mark seen)
+  seenBtn?.addEventListener('click', markConversationRead);
+
+  // WebRTC Voice/Video Call
+  async function startCall(video=false){
+    if(!targetUser) return;
+    localStream=await navigator.mediaDevices.getUserMedia({audio:true, video});
+    const callWindow=document.createElement('div'); callWindow.className='call-window';
+    const localVideo=document.createElement('video'); localVideo.autoplay=true; localVideo.muted=true; localVideo.srcObject=localStream;
+    const remoteVideo=document.createElement('video'); remoteVideo.autoplay=true;
+    callWindow.appendChild(localVideo); callWindow.appendChild(remoteVideo); document.body.appendChild(callWindow);
+
+    peerConnection=new RTCPeerConnection(config);
+    localStream.getTracks().forEach(track=>peerConnection.addTrack(track, localStream));
+    peerConnection.ontrack=e=>remoteVideo.srcObject=e.streams[0];
+    peerConnection.onicecandidate=e=>{ if(e.candidate) socket.emit('webrtc_candidate',{ candidate:e.candidate, to: targetUser }); };
+
+    const offer=await peerConnection.createOffer();
+    await peerConnection.setLocalDescription(offer);
+    socket.emit('webrtc_offer',{ offer, to: targetUser });
+  }
+
+  callBtn?.addEventListener('click', ()=> startCall(false));
+  videoCallBtn?.addEventListener('click', ()=> startCall(true));
+
+  socket.on('webrtc_offer', async ({ offer, from })=>{
+    if(from!==targetUser) return;
+    peerConnection=new RTCPeerConnection(config);
+    localStream=await navigator.mediaDevices.getUserMedia({audio:true, video:true});
+    localStream.getTracks().forEach(track=>peerConnection.addTrack(track, localStream));
+
+    const callWindow=document.createElement('div'); callWindow.className='call-window';
+    const localVideo=document.createElement('video'); localVideo.autoplay=true; localVideo.muted=true; localVideo.srcObject=localStream;
+    const remoteVideo=document.createElement('video'); remoteVideo.autoplay=true;
+    callWindow.appendChild(localVideo); callWindow.appendChild(remoteVideo);
+    document.body.appendChild(callWindow);
+
+    peerConnection.ontrack=e=>remoteVideo.srcObject=e.streams[0];
+    peerConnection.onicecandidate=e=>{ if(e.candidate) socket.emit('webrtc_candidate',{ candidate:e.candidate, to: from }); };
+
+    await peerConnection.setRemoteDescription(offer);
+    const answer=await peerConnection.createAnswer();
+    await peerConnection.setLocalDescription(answer);
+    socket.emit('webrtc_answer',{ answer, to: from });
+  });
+
+  socket.on('webrtc_answer', async ({ answer })=>{ await peerConnection.setRemoteDescription(answer); });
+  socket.on('webrtc_candidate', async ({ candidate })=>{ try{ await peerConnection.addIceCandidate(candidate); }catch(e){console.error(e);} });
+
+  // Handle server-sent private history & messages
+  socket.on('private_history', ({ conversationId: convId, room, messages })=>{
+    conversationId=convId||conversationId;
+    currentRoom=room||currentRoom;
     clearMessagesDOM();
-    if(Array.isArray(messages)) {
-      messages.forEach(m => appendMessageToDOM(m, String(m.from) === String(CURRENT_USER)));
+    if(Array.isArray(messages)){
+      messages.forEach(m=>appendMessageToDOM(m, String(m.from)===String(CURRENT_USER)));
     }
-    // mark read since user opened conversation
     markConversationRead();
   });
 
-  // Receive a message if in same room (server emits receive_private_message to room)
-  socket.on('receive_private_message', (msgDoc) => {
-    // if message belongs to current conversation -> show; otherwise, show badge
-    const inThisConv = (!conversationId && !currentRoom) ? false
-                     : (String(msgDoc.conversationId || '') === String(conversationId)) || (msgDoc.room === currentRoom);
-    if(inThisConv || String(msgDoc.from) === String(targetUser) || (String(msgDoc.to) === String(targetUser) && String(msgDoc.from)!==String(CURRENT_USER))){
-      appendMessageToDOM(msgDoc, String(msgDoc.from) === String(CURRENT_USER));
-      // if message from other, acknowledge seen
-      if(String(msgDoc.from) !== String(CURRENT_USER)) {
-        socket.emit('message_seen', { messageId: msgDoc._id });
-      }
+  socket.on('receive_private_message', msgDoc=>{
+    const inThisConv=(!conversationId&&!currentRoom)?false:(String(msgDoc.conversationId||'')===String(conversationId))||(msgDoc.room===currentRoom);
+    if(inThisConv||String(msgDoc.from)===String(targetUser)){
+      appendMessageToDOM(msgDoc,String(msgDoc.from)===String(CURRENT_USER));
+      if(String(msgDoc.from)!==String(CURRENT_USER)) socket.emit('message_seen',{ messageId: msgDoc._id });
     } else {
-      // Not in the active conversation— show red badge on user list element for sender
-      const senderId = msgDoc.from || msgDoc.sender;
-      const btn = userListDiv.querySelector(`button[data-user="${senderId}"]`);
+      const senderId=msgDoc.from||msgDoc.sender;
+      const btn=userListDiv.querySelector(`button[data-user="${senderId}"]`);
       if(btn) btn.classList.add('has-new-message');
     }
   });
 
-  // Notification (sent to recipient's personal room) to show badge in user list
-  socket.on('private_message_notification', ({ from, conversationId: convId, room, messageId, textPreview }) => {
-    const btn = userListDiv.querySelector(`button[data-user="${from}"]`);
-    if(btn) btn.classList.add('has-new-message');
-    // Optionally: show desktop notification (depends on user permission) — not included now
-  });
-
-  // ACK when message saved (optional)
-  socket.on('private_message_sent', (msgDoc) => {
-    // server acknowledged saved message; update message ID or status if needed
-    // we already showed optimistic UI, but you can update bubble to include msgDoc._id or timestamp
-    // (Implementation left minimal)
-  });
-
-  // Typing indicator from server (server emits 'typing')
-  socket.on('typing', ({ from, isTyping }) => {
-    // Show "Typing..." indicator if it's the active target user
-    if(String(from) === String(targetUser)) {
-      // simple indicator in header (optional)
-      // for minimal UI, append temporary line at top of messages area
-      const existing = document.getElementById('typingIndicator');
-      if(isTyping) {
-        if(!existing) {
-          const p = document.createElement('div');
-          p.id = 'typingIndicator';
-          p.style.fontSize='13px';
-          p.style.color='#555';
-          p.style.padding='6px 0';
-          p.textContent = 'Saisie en cours...';
-          messagesDiv.appendChild(p);
-          messagesDiv.scrollTop = messagesDiv.scrollHeight;
+  // Typing
+  socket.on('typing', ({ from, isTyping })=>{
+    if(String(from)===String(targetUser)){
+      const existing=document.getElementById('typingIndicator');
+      if(isTyping){
+        if(!existing){
+          const p=document.createElement('div'); p.id='typingIndicator'; p.style.fontSize='13px'; p.style.color='#555';
+          p.style.padding='6px 0'; p.textContent='Saisie en cours...';
+          messagesDiv.appendChild(p); messagesDiv.scrollTop=messagesDiv.scrollHeight;
         }
-      } else {
-        if(existing) existing.remove();
-      }
+      } else { existing?.remove(); }
     }
   });
 
-  // ----------------
-  // Request user list from server (if server supports 'requestUserList' event)
+  // User list
   socket.emit('requestUserList');
-  socket.on('online-users', (users) => {
-    // EXPECTED: users = array of user objects or ids (we'll handle both)
-    // normalize to array of ids or objects with _id
-    const normalized = (users||[]).map(u => {
-      if(typeof u === 'string') return { _id: u };
-      if(u && (u._id || u.id)) return { _id: (u._id||u.id) };
-      return null;
-    }).filter(Boolean);
-
-    userListDiv.innerHTML = '';
-    normalized.forEach(u => {
-      if(String(u._id) === String(CURRENT_USER)) return; // don't show current user in list
-      const btn = document.createElement('button');
-      btn.className = 'user-btn';
-      btn.setAttribute('data-user', u._id);
-      btn.textContent = u._id; // since no username, show the id; you can change to a label if DB provides one
-      btn.addEventListener('click', () => {
-        // open private chat with this user (and remove badge)
-        btn.classList.remove('has-new-message');
-        openPrivateChatWith(u._id);
-      });
+  socket.on('online-users', users=>{
+    const normalized=(users||[]).map(u=>typeof u==='string'?{_id:u}:u&&({_id:u._id||u.id})).filter(Boolean);
+    userListDiv.innerHTML='';
+    normalized.forEach(u=>{
+      if(String(u._id)===String(CURRENT_USER)) return;
+      const btn=document.createElement('button');
+      btn.className='user-btn'; btn.setAttribute('data-user',u._id); btn.textContent=u._id;
+      btn.addEventListener('click', ()=>{ btn.classList.remove('has-new-message'); openPrivateChatWith(u._id); });
       userListDiv.appendChild(btn);
     });
   });
 
-  // Reconnect behavior: request list & reload messages if target set
-  socket.on('connect', () => {
-    socket.emit('requestUserList');
-    if(targetUser) openPrivateChatWith(targetUser);
-  });
-
-  // initial open if URL had `to` param
-  if(targetUser) {
-    setTimeout(()=> openPrivateChatWith(targetUser), 300);
-  }
-
-  // Expose for debugging (optional)
-  window.__fbsp_chatprive = {
-    openPrivateChatWith,
-    sendMessage,
-    clearMessagesDOM,
-    getCurrentState: ()=>({ CURRENT_USER, targetUser, conversationId, currentRoom })
-  };
+  socket.on('connect', ()=>{ socket.emit('requestUserList'); if(targetUser) setTimeout(()=>openPrivateChatWith(targetUser),300); });
 })();
 </script>
+     
 </body>
 </html>
