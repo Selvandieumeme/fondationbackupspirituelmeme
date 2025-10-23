@@ -336,70 +336,60 @@ io.on('connection', async (socket) => {
   }
 
   // ✅ Enskri / mete ajou itilizatè
-  function registerUser(rawUser) {
-    try {
-      const { userId, display } = normalizeUser(rawUser);
+function registerUser(rawUser) {
+  try {
+    const { userId, display } = normalizeUser(rawUser);
 
-      // si socket te deja gen menm userId, pa fè anyen
-      if (socket.data.userId && socket.data.userId === userId) {
-        // Asire display name mete ajou
-        const existing = onlineUsers.get(userId);
-        if (existing) existing.user = display;
-        broadcastOnline();
-        return;
-      }
+    // si socket te deja gen menm userId, pa fè anyen
+    if (socket.data.userId && socket.data.userId === userId) {
+      const existing = onlineUsers.get(userId);
+      if (existing) existing.user = display;
+      broadcastOnline();
+      return;
+    }
 
-      // retire socket soti nan prev record si prevId diferan
-      const prevId = socket.data.userId;
-      if (prevId && prevId !== userId) {
-        const prevRecord = onlineUsers.get(prevId);
-        if (prevRecord) {
-          prevRecord.sockets.delete(socket.id);
-          if (prevRecord.sockets.size === 0) {
-            onlineUsers.delete(prevId);
-            io.emit('userDisconnected', prevRecord.user);
-          }
+    // retire socket soti nan prev record si prevId diferan
+    const prevId = socket.data.userId;
+    if (prevId && prevId !== userId) {
+      const prevRecord = onlineUsers.get(prevId);
+      if (prevRecord) {
+        prevRecord.sockets.delete(socket.id);
+        if (prevRecord.sockets.size === 0) {
+          onlineUsers.delete(prevId);
+          // ✅ kenbe menm style voye evènman, men ak userId
+          io.emit('userDisconnected', { userId: prevId, display: prevRecord.user });
         }
       }
-
-      // jwenn oswa kreye record pou userId la
-      let record = onlineUsers.get(userId);
-      if (!record) {
-        record = { user: display, sockets: new Set() };
-        onlineUsers.set(userId, record);
-      } else {
-        // mete display name ajou si li chanje
-        record.user = display;
-      }
-
-      // ajoute socket la
-      record.sockets.add(socket.id);
-      socket.data.userId = userId;
-
-      // join personal room
-      socket.join(`user-${userId}`);
-
-      // emèt events
-      io.emit('userConnected', display);
-      broadcastOnline();
-
-      console.log(`🔵 Registered socket ${socket.id} as userId=${userId} (display=${display})`);
-    } catch (err) {
-      console.error('registerUser err:', err);
     }
+
+    // jwenn oswa kreye record pou userId la
+    let record = onlineUsers.get(userId);
+    if (!record) {
+      record = { user: display, sockets: new Set() };
+      onlineUsers.set(userId, record);
+    } else {
+      record.user = display;
+    }
+
+    // ajoute socket la
+    record.sockets.add(socket.id);
+    socket.data.userId = userId;
+
+    // join personal room
+    socket.join(`user-${userId}`);
+
+    // ✅ EMÈT DONE YO KÒREK (userId + non itilizatè)
+    io.emit('userConnected', { userId, display });
+
+    // ✅ Mets ajou panel itilizatè a ak bon estrikti
+    broadcastOnline();
+
+    console.log(`🔵 Registered socket ${socket.id} as userId=${userId} (display=${display})`);
+  } catch (err) {
+    console.error('registerUser err:', err);
   }
 
-  // Si front-end pase user nan handshake (query oswa auth), enskri li imedyatman
-  try {
-    const handshakeUser =
-      socket.handshake?.query?.user ||
-      socket.handshake?.auth?.user ||
-      socket.handshake?.query?.userId ||
-      socket.handshake?.auth?.userId;
-    if (handshakeUser) registerUser(handshakeUser);
-  } catch (e) {
-    // ignore handshake parsing err
-  }
+	
 
   // ---------------------------
   // ✅ Chaje mesaj piblik sèlman pou jodi a
