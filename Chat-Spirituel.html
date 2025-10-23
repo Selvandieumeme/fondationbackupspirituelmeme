@@ -293,20 +293,28 @@
   msgInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') sendMessage(); });
 
   // ONLINE USERS PANEL
-  socket.on('online-users', (arr) => {
-    if (!userList) return;
-    userList.innerHTML = '';
-    arr.forEach(u => {
-      const li = document.createElement('li');
-      const dot = document.createElement('span');
-      dot.classList.add('status-dot');
-      dot.classList.add(u.connected ? 'online' : 'offline');
-      li.appendChild(dot);
-      li.appendChild(document.createTextNode(u.user)); // ✅ itilize user sèlman
-      userList.appendChild(li);
-    });
-  });
+socket.on('online-users', (arr) => {
+  if (!userList) return;
+  userList.innerHTML = '';
+  arr.forEach(u => {
+    const li = document.createElement('li');
+    const dot = document.createElement('span');
+    dot.classList.add('status-dot');
+    dot.classList.add(u.connected ? 'online' : 'offline');
+    li.appendChild(dot);
 
+    // ✅ montre display name ki soti nan server
+    li.appendChild(document.createTextNode(u.display)); 
+
+    // ✅ sove userId nan dataset pou itilize nan chat prive
+    li.dataset.userId = u.userId;
+
+    userList.appendChild(li);
+  });
+});
+
+
+    
   // ✅ Lanse chat prive lè itilizatè klike sou yon lòt
   userList.addEventListener('click', (e) => {
     const li = e.target.closest('li');
