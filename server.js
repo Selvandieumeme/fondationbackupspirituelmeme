@@ -262,12 +262,7 @@ app.get('/ping', (req, res) => res.send('pong'));
 
 // ---------------------------
 // ⚙️ KONFIGIRASYON DEBAZ
-// ---------------------------
-const app = express();
-app.use(cors());
-app.use(express.json());
 
-// ---------------------------
 // ⚡ HTTP + SOCKET.IO SERVER
 // ---------------------------
 const httpServer = http.createServer(app);
