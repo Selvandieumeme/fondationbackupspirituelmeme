@@ -1,100 +1,72 @@
-body {
-  margin: 0;
-  padding: 0;
-  font-family: 'Segoe UI', Roboto, sans-serif;
-  background: transparent;
-}
+/* userPanel.css */
+/* ✅ Ti panel sou bò dwat, style modèn, ble / jaune / blan */
 
-.panel-container {
+#userPanel {
   position: fixed;
-  top: 10%;
-  right: 10px;
-  width: 280px;
-  height: 400px;
+  top: 0;
+  right: 0;
+  width: 220px;
+  height: 100vh;
   background: #ffffff;
-  border-radius: 14px;
-  box-shadow: 0 6px 20px rgba(0, 123, 255, 0.25);
+  border-left: 3px solid #1E90FF;
+  box-shadow: -3px 0 10px rgba(0,0,0,0.1);
+  font-family: Arial, sans-serif;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
-  z-index: 9999;
 }
 
-.panel-header {
-  background: linear-gradient(90deg, #007bff, #ffd700);
+.panel-title {
+  background: #1E90FF;
   color: white;
+  padding: 12px;
+  font-size: 16px;
+  font-weight: bold;
   text-align: center;
-  padding: 0.7rem 0.5rem;
-  border-top-left-radius: 14px;
-  border-top-right-radius: 14px;
 }
 
-.panel-header h2 {
-  margin: 0;
-  font-size: 1.1rem;
-  letter-spacing: 0.5px;
-}
-
-.user-list {
-  list-style: none;
-  margin: 0;
-  padding: 0.5rem 0;
+#userList {
   flex: 1;
-  overflow-y: auto;
-  background: #fdfdfd;
+  overflow-y: auto; /* ✅ Scroll otomatik si >5 itilizatè */
+  margin: 0;
+  padding: 0;
+  list-style: none;
 }
 
-/* ✅ Scrollbar modèn */
-.user-list::-webkit-scrollbar {
-  width: 7px;
+/* ✅ Customize scroll bar (ble & jaune) */
+#userList::-webkit-scrollbar {
+  width: 6px;
+}
+#userList::-webkit-scrollbar-thumb {
+  background: #FFD700; /* Jaune */
+  border-radius: 4px;
+}
+#userList::-webkit-scrollbar-track {
+  background: #E6F0FF; /* Ble trè limyè */
 }
 
-.user-list::-webkit-scrollbar-thumb {
-  background-color: #007bff;
-  border-radius: 10px;
-}
-
-.user-list::-webkit-scrollbar-track {
-  background: #f1f1f1;
-}
-
-.user-list li {
+#userList li {
+  padding: 8px 10px;
+  cursor: pointer;
   display: flex;
   align-items: center;
-  justify-content: start;
-  padding: 0.6rem 1rem;
-  cursor: pointer;
-  transition: background 0.3s ease, transform 0.1s ease;
-  border-bottom: 1px solid #eee;
+  transition: background 0.2s;
 }
 
-.user-list li:hover {
-  background: #e8f2ff;
-  transform: translateX(3px);
+#userList li:hover {
+  background: #F0F8FF;
 }
 
 .status-dot {
   width: 10px;
   height: 10px;
   border-radius: 50%;
-  margin-right: 10px;
+  margin-right: 8px;
+  border: 1px solid #ccc;
 }
 
 .status-dot.online {
-  background-color: #28a745;
-  box-shadow: 0 0 5px #28a745;
+  background: #32CD32; /* Vèt */
 }
-
 .status-dot.offline {
-  background-color: #ccc;
-}
-
-.panel-footer {
-  background: #007bff;
-  color: white;
-  text-align: center;
-  padding: 0.4rem;
-  font-size: 0.8rem;
-  border-bottom-left-radius: 14px;
-  border-bottom-right-radius: 14px;
+  background: #FF4500; /* Wouj */
 }
