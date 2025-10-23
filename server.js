@@ -358,23 +358,30 @@ io.on('connection', async (socket) => {
     if (handshakeUser) registerUser(handshakeUser);
   } catch (e) {}
 
-  // ✅ Chaje 100 dènye mesaj piblik
-  try {
-    const anciens = await Message.find({ to: 'public' })
-      .sort({ date: 1 })
-      .limit(100)
-      .lean();
+ // ✅ Chaje mesaj piblik sèlman pou jodi a
+try {
+  const todayStart = new Date();
+  todayStart.setHours(0, 0, 0, 0); // 00:00:00
+  const todayEnd = new Date();
+  todayEnd.setHours(23, 59, 59, 999); // 23:59:59
 
-    const formatted = anciens.map((msg) => ({
-      user: (msg.from || 'Anonyme').toString().trim(),
-      message: msg.message || '',
-      date: msg.date ? new Date(msg.date) : new Date(),
-    }));
+  const todaysMessages = await Message.find({
+    to: 'public',
+    date: { $gte: todayStart, $lt: todayEnd }
+  })
+    .sort({ date: 1 })
+    .lean();
 
-    socket.emit('loadMessages', formatted);
-  } catch (err) {
-    console.error('❌ Erè chajman mesaj piblik:', err.message);
-  }
+  const formatted = todaysMessages.map((msg) => ({
+    user: (msg.from || 'Anonyme').toString().trim(),
+    message: msg.message || '',
+    date: msg.date ? new Date(msg.date) : new Date(),
+  }));
+
+  socket.emit('loadMessages', formatted);
+} catch (err) {
+  console.error('❌ Erè pandan chajman mesaj piblik jodi a:', err.message);
+}
 
   // ✅ Resevwa non itilizatè
   socket.on('setUser', (payload) => {
