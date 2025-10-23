@@ -231,104 +231,104 @@
   </div>
 
   <script>
-    /* =====================================================
-       ✅ CHAT SCRIPT FINAL + ONLINE USERS PANEL + REDIRECT CHAT PRIVE
-    ===================================================== */
+  /* =====================================================
+     ✅ CHAT SCRIPT FINAL + ONLINE USERS PANEL + REDIRECT CHAT PRIVE
+  ===================================================== */
 
-    const socket = window.__fbsp_shared_socket || io('https://examen-backend-ihlx.onrender.com');
-    window.__fbsp_shared_socket = socket;
+  const socket = window.__fbsp_shared_socket || io('https://examen-backend-ihlx.onrender.com');
+  window.__fbsp_shared_socket = socket;
 
-    const sendBtn = document.getElementById('send');
-    const msgInput = document.getElementById('msg');
-    const userInput = document.getElementById('user');
-    const messages = document.getElementById('messages');
-    const userList = document.getElementById('userList');
+  const sendBtn = document.getElementById('send');
+  const msgInput = document.getElementById('msg');
+  const userInput = document.getElementById('user');
+  const messages = document.getElementById('messages');
+  const userList = document.getElementById('userList');
 
-    function registerUser() {
-      const user = userInput?.value.trim() || 'Anonyme';
-      socket.emit('setUser', user);
-      return user;
-    }
+  function registerUser() {
+    const user = userInput?.value.trim() || 'Anonyme';
+    socket.emit('setUser', user);
+    return user;
+  }
 
-    function addMessage(data, isMe = false) {
-      if (!data || !data.message) return;
+  function addMessage(data, isMe = false) {
+    if (!data || !data.message) return;
+    const li = document.createElement('li');
+    const user = data.user || 'Anonyme';
+    const message = data.message || '';
+    const dateObj = new Date(data.date || Date.now());
+    const h = dateObj.getHours().toString().padStart(2, '0');
+    const m = dateObj.getMinutes().toString().padStart(2, '0');
+    const d = dateObj.getDate().toString().padStart(2, '0');
+    const mo = (dateObj.getMonth() + 1).toString().padStart(2, '0');
+    const y = dateObj.getFullYear();
+    li.textContent = `${user} [${d}/${mo}/${y} ${h}:${m}]: ${message}`;
+    if (isMe) li.classList.add('me');
+    messages.appendChild(li);
+    li.scrollIntoView({ behavior: 'smooth', block: 'end' });
+    messages.scrollTop = messages.scrollHeight;
+  }
+
+  socket.on('chatMessage', (data) => { addMessage(data); });
+
+  socket.on('loadMessages', (messagesArray) => {
+    if (!Array.isArray(messagesArray)) return;
+    const currentUser = userInput?.value.trim() || 'Anonyme';
+    messagesArray.forEach(msg => {
+      const isMe = msg.user === currentUser;
+      addMessage(msg, isMe);
+    });
+  });
+
+  function sendMessage() {
+    const user = registerUser();
+    const message = msgInput.value.trim();
+    if (!message) return;
+    const data = { user, message, date: new Date() };
+    socket.emit('chatMessage', data);
+    addMessage(data, true);
+    msgInput.value = '';
+  }
+
+  sendBtn.addEventListener('click', sendMessage);
+  msgInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') sendMessage(); });
+
+  // ONLINE USERS PANEL
+  socket.on('online-users', (arr) => {
+    if (!userList) return;
+    userList.innerHTML = '';
+    arr.forEach(u => {
       const li = document.createElement('li');
-      const user = data.user || 'Anonyme';
-      const message = data.message || '';
-      const dateObj = new Date(data.date || Date.now());
-      const h = dateObj.getHours().toString().padStart(2, '0');
-      const m = dateObj.getMinutes().toString().padStart(2, '0');
-      const d = dateObj.getDate().toString().padStart(2, '0');
-      const mo = (dateObj.getMonth() + 1).toString().padStart(2, '0');
-      const y = dateObj.getFullYear();
-      li.textContent = `${user} [${d}/${mo}/${y} ${h}:${m}]: ${message}`;
-      if (isMe) li.classList.add('me');
-      messages.appendChild(li);
-      li.scrollIntoView({ behavior: 'smooth', block: 'end' });
-      messages.scrollTop = messages.scrollHeight;
-    }
-
-    socket.on('chatMessage', (data) => { addMessage(data); });
-
-    socket.on('loadMessages', (messagesArray) => {
-      if (!Array.isArray(messagesArray)) return;
-      const currentUser = userInput?.value.trim() || 'Anonyme';
-      messagesArray.forEach(msg => {
-        const isMe = msg.user === currentUser;
-        addMessage(msg, isMe);
-      });
+      const dot = document.createElement('span');
+      dot.classList.add('status-dot');
+      dot.classList.add(u.connected ? 'online' : 'offline');
+      li.appendChild(dot);
+      li.appendChild(document.createTextNode(u.user)); // ✅ itilize user sèlman
+      userList.appendChild(li);
     });
+  });
 
-    function sendMessage() {
-      const user = registerUser();
-      const message = msgInput.value.trim();
-      if (!message) return;
-      const data = { user, message, date: new Date() };
-      socket.emit('chatMessage', data);
-      addMessage(data, true);
-      msgInput.value = '';
-    }
+  // ✅ Lanse chat prive lè itilizatè klike sou yon lòt
+  userList.addEventListener('click', (e) => {
+    const li = e.target.closest('li');
+    if (!li) return;
 
-    sendBtn.addEventListener('click', sendMessage);
-    msgInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') sendMessage(); });
+    const targetUser = li.lastChild.textContent.trim();
+    const currentUser = userInput?.value.trim() || 'Anonyme';
+    if (!targetUser || targetUser === currentUser) return;
 
-    // ONLINE USERS PANEL
-    socket.on('online-users', (arr) => {
-      if (!userList) return;
-      userList.innerHTML = '';
-      arr.forEach(user => {
-        const li = document.createElement('li');
-        const dot = document.createElement('span');
-        dot.classList.add('status-dot');
-        dot.classList.add(user.connected ? 'online' : 'offline');
-        li.appendChild(dot);
-        li.appendChild(document.createTextNode(user.name));
-        userList.appendChild(li);
-      });
-    });
+    // ✅ Redireksyon dirèk sou chat prive ak query string
+    const privateUrl = `https://fondationbackupspirituel.com/Chatprive.html?from=${encodeURIComponent(currentUser)}&to=${encodeURIComponent(targetUser)}`;
+    window.location.href = privateUrl;
+  });
 
-    // ✅ Lanse chat prive lè itilizatè klike sou yon lòt
-    userList.addEventListener('click', (e) => {
-      const li = e.target.closest('li');
-      if (!li) return;
+  socket.on('userConnected', (user) => { console.log('🟢 Konekte:', user); });
+  socket.on('userDisconnected', (user) => { console.log('🔴 Dekonekte:', user); });
 
-      const targetUser = li.lastChild.textContent.trim();
-      const currentUser = userInput?.value.trim() || 'Anonyme';
-      if (!targetUser || targetUser === currentUser) return;
-
-      // ✅ Redireksyon dirèk sou chat prive ak query string
-      const privateUrl = `https://fondationbackupspirituel.com/Chatprive.html?from=${encodeURIComponent(currentUser)}&to=${encodeURIComponent(targetUser)}`;
-      window.location.href = privateUrl;
-    });
-
-    socket.on('userConnected', (name) => { console.log('🟢 Konekte:', name); });
-    socket.on('userDisconnected', (name) => { console.log('🔴 Dekonekte:', name); });
-
-    socket.on('connect', () => {
-      const currentUser = userInput?.value.trim();
-      if (currentUser) socket.emit('setUser', currentUser);
-      socket.emit('requestUserList');
-    });
-  </script>
+  socket.on('connect', () => {
+    const currentUser = userInput?.value.trim();
+    if (currentUser) socket.emit('setUser', currentUser);
+    socket.emit('requestUserList');
+  });
+</script>
 </body>
 </html>
