@@ -302,24 +302,27 @@ const Message = mongoose.model('Message', messageSchema);
 // ---------------------------
 const onlineUsers = new Map();
 
+// ✅ Lè nou voye lis itilizate yo pou ti panel
 function broadcastOnline() {
-  const users = Array.from(onlineUsers.values()).map((r) => r.user);
+  const users = Array.from(onlineUsers.values()).map(record => ({
+    displayName: record.user,           // non itilizate
+    status: record.sockets.size > 0 ? 'online' : 'offline'  // koulè vèt/wouj
+  }));
   io.emit('onlineUsers', users);
 }
-
 // ---------------------------
 // ⚡ SOCKET.IO – CHAT PIBLIK
 // ---------------------------
 io.on('connection', async (socket) => {
   console.log('🟢 Nouvo itilizatè konekte:', socket.id);
 
-  // ✅ Anrejistre itilizatè
+  // ✅ Enskri itilizate
   function registerUser(rawUser) {
     try {
       const cleanUser = (rawUser || '').toString().trim() || 'Anonyme';
       const userId = cleanUser.toLowerCase();
 
-      // Retire ansyen user sou socket sa si egziste
+      // retire ansyen id si egziste
       const prevId = socket.data.userId;
       if (prevId && prevId !== userId) {
         const prevRecord = onlineUsers.get(prevId);
@@ -332,7 +335,6 @@ io.on('connection', async (socket) => {
         }
       }
 
-      // Mete oswa mete ajou user aktyèl la
       let record = onlineUsers.get(userId);
       if (!record) {
         record = { user: cleanUser, sockets: new Set() };
@@ -346,61 +348,69 @@ io.on('connection', async (socket) => {
       socket.join(`user-${userId}`);
       io.emit('userConnected', cleanUser);
       broadcastOnline();
+
+      console.log(`🔵 Registered socket ${socket.id} as userId=${userId}`);
     } catch (err) {
-      console.error('registerUser err:', err);
+      console.error('registerUser err', err);
     }
   }
 
-  // ✅ Si user voye nan handshake
+  // Si gen user nan handshake
   try {
     const handshakeUser =
       socket.handshake?.query?.user || socket.handshake?.auth?.user;
     if (handshakeUser) registerUser(handshakeUser);
   } catch (e) {}
 
- // ✅ Chaje mesaj piblik sèlman pou jodi a
-try {
-  const todayStart = new Date();
-  todayStart.setHours(0, 0, 0, 0); // 00:00:00
-  const todayEnd = new Date();
-  todayEnd.setHours(23, 59, 59, 999); // 23:59:59
+  // ---------------------------
+  // ✅ Chaje mesaj piblik jodi a
+  // ---------------------------
+  try {
+    const todayStart = new Date();
+    todayStart.setHours(0, 0, 0, 0);
+    const todayEnd = new Date();
+    todayEnd.setHours(23, 59, 59, 999);
 
-  const todaysMessages = await Message.find({
-    to: 'public',
-    date: { $gte: todayStart, $lt: todayEnd }
-  })
-    .sort({ date: 1 })
-    .lean();
+    const todaysMessages = await Message.find({
+      to: 'public',
+      date: { $gte: todayStart, $lt: todayEnd }
+    })
+      .sort({ date: 1 })
+      .lean();
 
-  const formatted = todaysMessages.map((msg) => ({
-    user: (msg.from || 'Anonyme').toString().trim(),
-    message: msg.message || '',
-    date: msg.date ? new Date(msg.date) : new Date(),
-  }));
+    const formatted = todaysMessages.map((msg) => ({
+      user: (msg.from || 'Anonyme').toString().trim(),
+      message: msg.message || '',
+      date: msg.date ? new Date(msg.date) : new Date(),
+    }));
 
-  socket.emit('loadMessages', formatted);
-} catch (err) {
-  console.error('❌ Erè pandan chajman mesaj piblik jodi a:', err.message);
-}
+    socket.emit('loadMessages', formatted);
+  } catch (err) {
+    console.error('❌ Erè pandan chajman mesaj piblik jodi a:', err.message);
+  }
 
+  // ---------------------------
   // ✅ Resevwa non itilizatè
+  // ---------------------------
   socket.on('setUser', (payload) => {
     let value = null;
     if (typeof payload === 'string') value = payload;
     else if (payload && typeof payload === 'object')
-      value = payload.user || payload.username || payload.name || null;
+      value = payload.userId || payload.user || null;
 
     if (!value) {
-      console.warn('⚠️ setUser san non valab:', socket.id);
+      console.warn('⚠️ setUser san userId valab:', socket.id);
       return;
     }
     registerUser(value);
   });
 
+  // ---------------------------
   // ✅ Resevwa mesaj piblik
+  // ---------------------------
   socket.on('chatMessage', async (data) => {
     try {
-      let userFrom = socket.data.userId || 'Anonyme';
+      const userFrom = socket.data.userId || 'Anonyme';
       const message = data?.message ? String(data.message).trim() : '';
       if (!message) return;
 
@@ -412,15 +422,22 @@ try {
         message: newMsg.message,
         date: newMsg.date,
       });
+
+      // Mete ajou ti panel itilizate yo otomatikman
+      broadcastOnline();
     } catch (err) {
-      console.error('❌ Erè pandan anrejistreman mesaj:', err.message);
+      console.error('❌ Erè pandan anrejistreman mesaj piblik:', err.message);
     }
   });
 
-  // ✅ Mande lis itilizatè yo
+  // ---------------------------
+  // ✅ Lis itilizatè yo
+  // ---------------------------
   socket.on('requestUserList', () => broadcastOnline());
 
-  // ✅ Lè itilizatè dekonekte
+  // ---------------------------
+  // ✅ Lè yon itilizatè dekonekte
+  // ---------------------------
   socket.on('disconnect', () => {
     try {
       const userId = socket.data.userId;
@@ -434,10 +451,11 @@ try {
         onlineUsers.delete(userId);
         io.emit('userDisconnected', record.user);
       }
+
       broadcastOnline();
       console.log('🔴 Itilizatè dekonekte:', userId);
     } catch (err) {
-      console.error('disconnect err:', err);
+      console.error('disconnect handler err', err);
     }
   });
 
