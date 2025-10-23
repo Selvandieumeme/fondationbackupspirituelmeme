@@ -306,15 +306,20 @@ const onlineUsers = new Map();
 
 // ✅ 2. Fonksyon pou voye lis tout itilizatè yo bay tout moun (pou ti panel a dwat la)
 function broadcastOnline() {
-    const users = Array.from(onlineUsers.values()).map(record => ({
-        displayName: record.user,        // non itilizatè a
-        status: record.sockets.size > 0 ? 'online' : 'offline'  // si konekte = vèt, si soti = wouj
-    }));
-	
+  const users = [];
+  for (const [userId, record] of onlineUsers.entries()) {
+    users.push({
+      userId,                  // ID inik itilizatè a (enpòtan pou chat prive)
+      display: record.user,    // non itilizatè a pou montre nan panel la
+      connected: record.sockets.size > 0 // si itilizatè a konekte
+    });
+  }
 
-  // Emit event name front-end ap koute: 'online-users'
+  // Emit event ke client-side la ap koute
   io.emit('online-users', users);
 }
+	
+
 
 
 // ---------------------------
@@ -336,61 +341,76 @@ io.on('connection', async (socket) => {
     return { userId, display: clean };
   }
 
-  // ---------------------------
-  // ✅ Enskri / mete ajou itilizatè san await
-  // ---------------------------
-  function registerUser(rawUser) {
-    try {
-      const { userId, display } = normalizeUser(rawUser);
+ // ---------------------------
+// ✅ Fonksyon pou voye lis itilizatè sou entènèt bay tout clients
+// ---------------------------
+function broadcastOnline() {
+  const users = [];
+  for (const [userId, record] of onlineUsers.entries()) {
+    users.push({
+      userId,
+      display: record.user,
+      connected: record.sockets.size > 0
+    });
+  }
+  io.emit('online-users', users); // nouvo panel ap koute sa
+}
 
-      // si socket deja gen menm userId
-      if (socket.data.userId && socket.data.userId === userId) {
-        const existing = onlineUsers.get(userId);
-        if (existing) existing.user = display;
-        broadcastOnline();
-        return;
-      }
+// ---------------------------
+// ✅ Enskri / mete ajou itilizatè
+// ---------------------------
+function registerUser(rawUser) {
+  try {
+    const { userId, display } = normalizeUser(rawUser);
 
-      // retire socket nan prev record si prevId diferan
-      const prevId = socket.data.userId;
-      if (prevId && prevId !== userId) {
-        const prevRecord = onlineUsers.get(prevId);
-        if (prevRecord) {
-          prevRecord.sockets.delete(socket.id);
-          if (prevRecord.sockets.size === 0) {
-            onlineUsers.delete(prevId);
-            io.emit('userDisconnected', { userId: prevId, display: prevRecord.user });
-          }
+    // Si socket deja gen menm userId, pa fè anyen men mete ajou display si chanje
+    if (socket.data.userId && socket.data.userId === userId) {
+      const existing = onlineUsers.get(userId);
+      if (existing) existing.user = display;
+      broadcastOnline();
+      return;
+    }
+
+    // Retire socket nan prev record si li egziste
+    const prevId = socket.data.userId;
+    if (prevId && prevId !== userId) {
+      const prevRecord = onlineUsers.get(prevId);
+      if (prevRecord) {
+        prevRecord.sockets.delete(socket.id);
+        if (prevRecord.sockets.size === 0) {
+          onlineUsers.delete(prevId);
+          io.emit('userDisconnected', { userId: prevId, display: prevRecord.user });
         }
       }
-
-      // jwenn oswa kreye record pou userId
-      let record = onlineUsers.get(userId);
-      if (!record) {
-        record = { user: display, sockets: new Set() };
-        onlineUsers.set(userId, record);
-      } else {
-        record.user = display;
-      }
-
-      // ajoute socket
-      record.sockets.add(socket.id);
-      socket.data.userId = userId;
-
-      // join personal room
-      socket.join(`user-${userId}`);
-
-      // emèt done korèk
-      io.emit('userConnected', { userId, display });
-
-      // mete ajou panel itilizatè
-      broadcastOnline();
-
-      console.log(`🔵 Registered socket ${socket.id} as userId=${userId} (display=${display})`);
-    } catch (err) {
-      console.error('registerUser err:', err);
     }
+
+    // Jwenn oswa kreye record pou userId
+    let record = onlineUsers.get(userId);
+    if (!record) {
+      record = { user: display, sockets: new Set() };
+      onlineUsers.set(userId, record);
+    } else {
+      record.user = display;
+    }
+
+    // Ajoute socket la
+    record.sockets.add(socket.id);
+    socket.data.userId = userId;
+
+    // Join personal room (si ou vle chat prive)
+    socket.join(`user-${userId}`);
+
+    // Emèt done koneksyon itilizatè
+    io.emit('userConnected', { userId, display });
+
+    // Mete ajou panel itilizatè a
+    broadcastOnline();
+
+    console.log(`🔵 Registered socket ${socket.id} as userId=${userId} (display=${display})`);
+  } catch (err) {
+    console.error('registerUser err:', err);
   }
+}
 
   // ---------------------------
   // Si front-end pase user nan handshake, enskri li imedyatman
