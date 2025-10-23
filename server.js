@@ -276,7 +276,7 @@ const io = new Server(server, {
 if (mongoose.connection.readyState === 0) {
   // Si pa gen koneksyon aktif, konekte
   mongoose
-    .connect(process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/chatapp')
+    .connect(process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/fobas-chat')
     .then(() => console.log('✅ MongoDB konekte avèk siksè'))
     .catch((err) => console.error('❌ Erè MongoDB:', err.message));
 } else {
