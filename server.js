@@ -262,9 +262,8 @@ app.get('/ping', (req, res) => res.send('pong'));
 
 // ---------------------------
 // ⚡ HTTP + SOCKET.IO SERVER
-// ---------------------------
-const httpServer = http.createServer(app);
-const io = new Server(httpServer, {
+const server = http.createServer(app);  // ✅ Renome httpServer an server
+const io = new Server(server, {
   cors: {
     origin: '*',
     methods: ['GET', 'POST'],
