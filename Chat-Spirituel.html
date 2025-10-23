@@ -172,9 +172,11 @@
   </div>
 
  
- <script>
+<script>
 /* =====================================================
    ✅ CHAT SCRIPT FINAL + ONLINE USERS PANEL + REDIRECT CHAT PRIVE
+   - Panel bèl ak koulè (jaune, bleue, blanc)
+   - Scroll lè >5 itilizatè
 ===================================================== */
 
 const socket = window.__fbsp_shared_socket || io('https://examen-backend-ihlx.onrender.com');
@@ -182,16 +184,22 @@ window.__fbsp_shared_socket = socket;
 
 const sendBtn = document.getElementById('send');
 const msgInput = document.getElementById('msg');
-const userInput = document.getElementById('user');
+const userInput = document.getElementById('user'); // kenbe user ak userId
 const messages = document.getElementById('messages');
 const userList = document.getElementById('userList');
 
+// ---------------------------
+// Fonksyon pou anrejistre itilizatè
+// ---------------------------
 function registerUser() {
   const user = userInput?.value.trim() || 'Anonyme';
   socket.emit('setUser', user);
   return user;
 }
 
+// ---------------------------
+// Fonksyon pou ajoute mesaj nan chat
+// ---------------------------
 function addMessage(data, isMe = false) {
   if (!data || !data.message) return;
   const li = document.createElement('li');
@@ -210,7 +218,10 @@ function addMessage(data, isMe = false) {
   messages.scrollTop = messages.scrollHeight;
 }
 
-socket.on('chatMessage', (data) => { addMessage(data); });
+// ---------------------------
+// Evènman chat
+// ---------------------------
+socket.on('chatMessage', (data) => addMessage(data));
 
 socket.on('loadMessages', (messagesArray) => {
   if (!Array.isArray(messagesArray)) return;
@@ -234,72 +245,141 @@ function sendMessage() {
 sendBtn.addEventListener('click', sendMessage);
 msgInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') sendMessage(); });
 
+// ---------------------------
+// ONLINE USERS PANEL AK CHAT PRIVE
+// ---------------------------
+function renderUsers(users) {
+  if (!userList) return;
+  userList.innerHTML = '';
+  users.forEach(u => {
+    const li = document.createElement('li');
+    li.dataset.userId = u.userId;      // kenbe userId
+    li.dataset.display = u.user;       // kenbe display name
 
+    const dot = document.createElement('span');
+    dot.classList.add('status-dot');
+    if (u.connected) dot.classList.add('online'); else dot.classList.add('offline');
+    li.appendChild(dot);
 
-// ✅ Lanse chat prive lè itilizatè klike sou yon lòt
-userList.addEventListener('click', (e) => {
-  const li = e.target.closest('li');
-  if (!li) return;
+    const nameSpan = document.createElement('span');
+    nameSpan.classList.add('user-name');
+    nameSpan.textContent = u.user;
+    li.appendChild(nameSpan);
 
-  const targetUserId = li.dataset.userId;
-  const targetDisplay = li.textContent.trim(); // pou montre non itilizatè a
+    userList.appendChild(li);
+  });
 
-  const currentUser = userInput?.value.trim() || 'Anonyme';
-  if (!targetUserId || targetUserId === currentUser) return;
+  // Scroll si plis pase 5 itilizatè
+  if (users.length > 5) {
+    userList.style.overflowY = 'auto';
+    userList.style.maxHeight = '300px';
+  } else {
+    userList.style.overflowY = 'hidden';
+    userList.style.maxHeight = 'auto';
+  }
+}
 
-  const privateUrl = `https://fondationbackupspirituel.com/Chatprive.html?from=${encodeURIComponent(currentUser)}&to=${encodeURIComponent(targetUserId)}`;
-  window.location.href = privateUrl;
-});
+// ---------------------------
+// Lanse chat prive sou klike
+// ---------------------------
+if (userList) {
+  userList.addEventListener('click', (e) => {
+    const li = e.target.closest('li');
+    if (!li) return;
+    const targetUserId = li.dataset.userId;
+    const targetDisplay = li.dataset.display || li.textContent.trim();
+    const currentUser = userInput?.value.trim() || 'Anonyme';
+    if (!targetUserId || targetUserId === currentUser) return;
+    const privateUrl = `https://fondationbackupspirituel.com/Chatprive.html?from=${encodeURIComponent(currentUser)}&to=${encodeURIComponent(targetUserId)}`;
+    window.location.href = privateUrl;
+  });
+}
 
-// ✅ Konekte/dekonekte itilizatè
+// ---------------------------
+// Konekte/dekonekte itilizatè
+// ---------------------------
 socket.on('userConnected', (user) => {
   if (!user) return;
-  const name = user.display || user.user || 'Anonyme';
-  console.log('🟢 Konekte:', name);
-
-  if (userList) {
-    let existingLi = Array.from(userList.children).find(li => li.dataset.userId === user.userId);
-    if (!existingLi) {
-      const li = document.createElement('li');
-      li.dataset.userId = user.userId;
-      const dot = document.createElement('span');
-      dot.classList.add('status-dot', 'online');
-      li.appendChild(dot);
-      li.appendChild(document.createTextNode(name));
-      userList.appendChild(li);
-    } else {
-      const dot = existingLi.querySelector('.status-dot');
-      if (dot) {
-        dot.classList.remove('offline');
-        dot.classList.add('online');
-      }
-    }
-  }
+  console.log('🟢 Konekte:', user.user);
+  socket.emit('requestUserList'); // rele lis itilizatè yo
 });
 
 socket.on('userDisconnected', (user) => {
   if (!user) return;
-  const name = user.display || user.user || 'Anonyme';
-  console.log('🔴 Dekonekte:', name);
-
-  if (userList) {
-    const li = Array.from(userList.children).find(li => li.dataset.userId === user.userId);
-    if (li) {
-      const dot = li.querySelector('.status-dot');
-      if (dot) {
-        dot.classList.remove('online');
-        dot.classList.add('offline');
-      }
-    }
-  }
+  console.log('🔴 Dekonekte:', user.user);
+  socket.emit('requestUserList'); // rele lis itilizatè yo
 });
 
+// ---------------------------
+// Lè socket konekte
+// ---------------------------
 socket.on('connect', () => {
   const currentUser = userInput?.value.trim();
   if (currentUser) socket.emit('setUser', currentUser);
   socket.emit('requestUserList');
 });
+
+// ---------------------------
+// Rele renderUsers sou lis itilizatè
+// ---------------------------
+socket.on('online-users', (arr) => renderUsers(arr));
+
 </script>
 
+<style>
+/* =======================
+   USER PANEL STYLING
+======================= */
+#userList {
+  position: fixed;
+  top: 80px;
+  right: 20px;
+  width: 220px;
+  background: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+  padding: 10px;
+  font-family: Arial, sans-serif;
+  font-size: 14px;
+  z-index: 999;
+  overflow-y: hidden;
+  transition: all 0.3s ease;
+}
+
+#userList li {
+  display: flex;
+  align-items: center;
+  margin-bottom: 6px;
+  padding: 4px 6px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+#userList li:hover {
+  background: #f0f8ff;
+}
+
+.status-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+  margin-right: 8px;
+}
+
+/* Koulè online / offline */
+.status-dot.online { background: #4CAF50; } /* vèt */
+.status-dot.offline { background: #FFC107; } /* jaune */
+
+.user-name {
+  color: #00008B; /* ble */
+  font-weight: 500;
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+</style>
 </body>
 </html>
