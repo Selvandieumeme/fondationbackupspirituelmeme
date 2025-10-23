@@ -316,13 +316,13 @@ function broadcastOnline() {
 io.on('connection', async (socket) => {
   console.log('🟢 Nouvo itilizatè konekte:', socket.id);
 
-  // ✅ Enskri itilizate
+  // ✅ Anrejistre itilizatè
   function registerUser(rawUser) {
     try {
       const cleanUser = (rawUser || '').toString().trim() || 'Anonyme';
       const userId = cleanUser.toLowerCase();
 
-      // retire ansyen id si egziste
+      // Retire ansyen user sou socket sa si egziste
       const prevId = socket.data.userId;
       if (prevId && prevId !== userId) {
         const prevRecord = onlineUsers.get(prevId);
@@ -335,6 +335,7 @@ io.on('connection', async (socket) => {
         }
       }
 
+      // Mete oswa mete ajou user aktyèl la
       let record = onlineUsers.get(userId);
       if (!record) {
         record = { user: cleanUser, sockets: new Set() };
@@ -348,23 +349,19 @@ io.on('connection', async (socket) => {
       socket.join(`user-${userId}`);
       io.emit('userConnected', cleanUser);
       broadcastOnline();
-
-      console.log(`🔵 Registered socket ${socket.id} as userId=${userId}`);
     } catch (err) {
-      console.error('registerUser err', err);
+      console.error('registerUser err:', err);
     }
   }
 
-  // Si gen user nan handshake
+  // ✅ Si user voye nan handshake
   try {
     const handshakeUser =
       socket.handshake?.query?.user || socket.handshake?.auth?.user;
     if (handshakeUser) registerUser(handshakeUser);
   } catch (e) {}
 
-  // ---------------------------
-  // ✅ Chaje mesaj piblik jodi a
-  // ---------------------------
+  // ✅ Chaje mesaj piblik sèlman pou jodi a
   try {
     const todayStart = new Date();
     todayStart.setHours(0, 0, 0, 0);
@@ -389,9 +386,7 @@ io.on('connection', async (socket) => {
     console.error('❌ Erè pandan chajman mesaj piblik jodi a:', err.message);
   }
 
-  // ---------------------------
   // ✅ Resevwa non itilizatè
-  // ---------------------------
   socket.on('setUser', (payload) => {
     let value = null;
     if (typeof payload === 'string') value = payload;
@@ -405,9 +400,7 @@ io.on('connection', async (socket) => {
     registerUser(value);
   });
 
-  // ---------------------------
   // ✅ Resevwa mesaj piblik
-  // ---------------------------
   socket.on('chatMessage', async (data) => {
     try {
       const userFrom = socket.data.userId || 'Anonyme';
@@ -430,14 +423,10 @@ io.on('connection', async (socket) => {
     }
   });
 
-  // ---------------------------
-  // ✅ Lis itilizatè yo
-  // ---------------------------
+  // ✅ Mande lis itilizatè yo
   socket.on('requestUserList', () => broadcastOnline());
 
-  // ---------------------------
-  // ✅ Lè yon itilizatè dekonekte
-  // ---------------------------
+  // ✅ Lè itilizatè dekonekte
   socket.on('disconnect', () => {
     try {
       const userId = socket.data.userId;
@@ -455,7 +444,7 @@ io.on('connection', async (socket) => {
       broadcastOnline();
       console.log('🔴 Itilizatè dekonekte:', userId);
     } catch (err) {
-      console.error('disconnect handler err', err);
+      console.error('disconnect err:', err);
     }
   });
 
