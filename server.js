@@ -511,7 +511,6 @@ io.on('connection', async (socket) => {
       console.error('disconnect err:', err);
     }
   });
-});
 
   
 	
