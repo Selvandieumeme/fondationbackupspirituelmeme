@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>💬 Chat Spirituel Mondyal</title>
+  <title>💬 CHAT FOBAS PUBLIC</title>
   <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="Chatprivate.css">
@@ -153,62 +153,8 @@
       .chat-wrapper { width: 98%; height: 95vh; }
       #msg, #user { font-size: 0.9rem; }
     }
-
-    /* Ti kadran online panel la fikse sou bò dwat chat la */
-    #onlinePanel {
-      position: absolute;
-      right: 10px;
-      top: 10px;
-      width: 200px;
-      background: #f8f9fa;
-      border-radius: 12px;
-      box-shadow: 0 0 8px rgba(0,0,0,0.1);
-      padding: 10px;
-      max-height: 400px;
-      overflow-y: auto;
-      z-index: 999;
-    }
-
-    #onlinePanel h3 {
-      margin-top: 0;
-      text-align: center;
-      color: #0d6efd;
-    }
-
-    #userList {
-      list-style: none;
-      margin: 0;
-      padding: 8px;
-      max-height: 250px;
-      overflow-y: auto;
-      background: #f8f9fa;
-      border-radius: 8px;
-      box-shadow: 0 0 6px rgba(0,0,0,0.1);
-    }
-
-    #userList li {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      padding: 4px 6px;
-      border-bottom: 1px solid #eee;
-      font-size: 14px;
-      cursor: pointer;
-      transition: background 0.2s ease;
-    }
-
-    #userList li:hover {
-      background: #cce5ff;
-    }
-
-    .status-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-    }
-    .online { background-color: #2ecc71; }
-    .offline { background-color: #e74c3c; }
   </style>
+  
 </head>
 <body>
   <div class="chat-wrapper">
@@ -225,12 +171,7 @@
     </div>
   </div>
 
-  <!-- Ti kadran pou lis itilizatè yo -->
-  <div id="onlinePanel">
-    <h3>Itilizatè konekte</h3>
-    <ul id="userList"></ul>
-  </div>
-
+ 
  <script>
 /* =====================================================
    ✅ CHAT SCRIPT FINAL + ONLINE USERS PANEL + REDIRECT CHAT PRIVE
@@ -293,21 +234,7 @@ function sendMessage() {
 sendBtn.addEventListener('click', sendMessage);
 msgInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') sendMessage(); });
 
-// ONLINE USERS PANEL
-socket.on('online-users', (arr) => {
-  if (!userList) return;
-  userList.innerHTML = '';
-  arr.forEach(u => {
-    const li = document.createElement('li');
-    li.dataset.userId = u.userId; // ✅ kenbe userId nan dataset
-    const dot = document.createElement('span');
-    dot.classList.add('status-dot');
-    dot.classList.add(u.connected ? 'online' : 'offline');
-    li.appendChild(dot);
-    li.appendChild(document.createTextNode(u.user)); // ✅ itilize user sèlman
-    userList.appendChild(li);
-  });
-});
+
 
 // ✅ Lanse chat prive lè itilizatè klike sou yon lòt
 userList.addEventListener('click', (e) => {
