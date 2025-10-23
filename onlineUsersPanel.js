@@ -76,12 +76,12 @@ function renderUsers(arr) {
 
   arr.forEach(u => {
     const li = document.createElement('li');
-    const username = u.name || u;
-    li.textContent = username;
+    const userId = u.user || u; // 🔹 Ranplase name/username ak user
+    li.textContent = userId;
 
     // ✅ Ajoute klik pou ouvri chat prive
     li.addEventListener('click', () => {
-      openPrivateChat(username);
+      openPrivateChat(userId);
     });
 
     userList.appendChild(li);
@@ -127,10 +127,10 @@ socket.on('online-users', (arr) => {
   renderUsers(arr);
 });
 
-socket.on('userConnected', (username) => {
-  console.log('🟢 Itilizatè konekte:', username);
+socket.on('userConnected', (userId) => {
+  console.log('🟢 Itilizatè konekte:', userId);
 });
 
-socket.on('userDisconnected', (username) => {
-  console.log('🔴 Itilizatè dekonekte:', username);
+socket.on('userDisconnected', (userId) => {
+  console.log('🔴 Itilizatè dekonekte:', userId);
 });
