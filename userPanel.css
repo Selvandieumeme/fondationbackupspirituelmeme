@@ -1,59 +1,49 @@
 /* userPanel.css */
-/* ✅ Ti panel sou bò dwat, style modèn, ble / jaune / blan */
-
-#userPanel {
+#userPanelContainer {
   position: fixed;
-  top: 0;
-  right: 0;
+  top: 20px;
+  right: 20px;
   width: 220px;
-  height: 100vh;
-  background: #ffffff;
-  border-left: 3px solid #1E90FF;
-  box-shadow: -3px 0 10px rgba(0,0,0,0.1);
-  font-family: Arial, sans-serif;
+  max-height: 350px;
+  background-color: #ffffff;
+  border: 2px solid #007BFF; /* ble */
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+  padding: 10px;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
+  font-family: Arial, sans-serif;
+  z-index: 1000;
 }
 
-.panel-title {
-  background: #1E90FF;
-  color: white;
-  padding: 12px;
+#userPanelContainer h3 {
+  margin: 0 0 10px 0;
   font-size: 16px;
-  font-weight: bold;
+  color: #FFD700; /* jòn */
   text-align: center;
 }
 
 #userList {
-  flex: 1;
-  overflow-y: auto; /* ✅ Scroll otomatik si >5 itilizatè */
-  margin: 0;
-  padding: 0;
   list-style: none;
-}
-
-/* ✅ Customize scroll bar (ble & jaune) */
-#userList::-webkit-scrollbar {
-  width: 6px;
-}
-#userList::-webkit-scrollbar-thumb {
-  background: #FFD700; /* Jaune */
-  border-radius: 4px;
-}
-#userList::-webkit-scrollbar-track {
-  background: #E6F0FF; /* Ble trè limyè */
+  padding: 0;
+  margin: 0;
+  flex: 1;
+  overflow-y: auto;
 }
 
 #userList li {
-  padding: 8px 10px;
-  cursor: pointer;
   display: flex;
   align-items: center;
+  padding: 5px 8px;
+  margin-bottom: 4px;
+  border-radius: 6px;
+  cursor: pointer;
   transition: background 0.2s;
 }
 
 #userList li:hover {
-  background: #F0F8FF;
+  background-color: #e0f0ff; /* limyè ble lè hover */
 }
 
 .status-dot {
@@ -61,12 +51,19 @@
   height: 10px;
   border-radius: 50%;
   margin-right: 8px;
-  border: 1px solid #ccc;
 }
 
-.status-dot.online {
-  background: #32CD32; /* Vèt */
+.online {
+  background-color: #28a745; /* vèt */
 }
-.status-dot.offline {
-  background: #FF4500; /* Wouj */
+
+.offline {
+  background-color: #dc3545; /* wouj */
+}
+
+footer {
+  font-size: 11px;
+  text-align: center;
+  margin-top: 8px;
+  color: #007BFF; /* ble */
 }
