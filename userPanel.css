@@ -1,0 +1,100 @@
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Segoe UI', Roboto, sans-serif;
+  background: transparent;
+}
+
+.panel-container {
+  position: fixed;
+  top: 10%;
+  right: 10px;
+  width: 280px;
+  height: 400px;
+  background: #ffffff;
+  border-radius: 14px;
+  box-shadow: 0 6px 20px rgba(0, 123, 255, 0.25);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  z-index: 9999;
+}
+
+.panel-header {
+  background: linear-gradient(90deg, #007bff, #ffd700);
+  color: white;
+  text-align: center;
+  padding: 0.7rem 0.5rem;
+  border-top-left-radius: 14px;
+  border-top-right-radius: 14px;
+}
+
+.panel-header h2 {
+  margin: 0;
+  font-size: 1.1rem;
+  letter-spacing: 0.5px;
+}
+
+.user-list {
+  list-style: none;
+  margin: 0;
+  padding: 0.5rem 0;
+  flex: 1;
+  overflow-y: auto;
+  background: #fdfdfd;
+}
+
+/* ✅ Scrollbar modèn */
+.user-list::-webkit-scrollbar {
+  width: 7px;
+}
+
+.user-list::-webkit-scrollbar-thumb {
+  background-color: #007bff;
+  border-radius: 10px;
+}
+
+.user-list::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+.user-list li {
+  display: flex;
+  align-items: center;
+  justify-content: start;
+  padding: 0.6rem 1rem;
+  cursor: pointer;
+  transition: background 0.3s ease, transform 0.1s ease;
+  border-bottom: 1px solid #eee;
+}
+
+.user-list li:hover {
+  background: #e8f2ff;
+  transform: translateX(3px);
+}
+
+.status-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  margin-right: 10px;
+}
+
+.status-dot.online {
+  background-color: #28a745;
+  box-shadow: 0 0 5px #28a745;
+}
+
+.status-dot.offline {
+  background-color: #ccc;
+}
+
+.panel-footer {
+  background: #007bff;
+  color: white;
+  text-align: center;
+  padding: 0.4rem;
+  font-size: 0.8rem;
+  border-bottom-left-radius: 14px;
+  border-bottom-right-radius: 14px;
+}
