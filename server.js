@@ -324,75 +324,88 @@ function broadcastOnline() {
 io.on('connection', async (socket) => {
   console.log('🟢 Nouvo itilizatè konekte:', socket.id);
 
-  // Helper: normalize a raw user string into a stable userId and display name
+  // ---------------------------
+  // Helper: normalize raw user string to stable userId + display name
+  // ---------------------------
   function normalizeUser(raw) {
     const clean = (raw || '').toString().trim();
     if (!clean) {
-      // fallback: create a stable temp id using socket id to avoid colliding "Anonyme"
       return { userId: `user-${socket.id}`, display: `Anonyme-${socket.id.slice(0,6)}` };
     }
     const userId = clean.toLowerCase();
     return { userId, display: clean };
   }
 
-  // ✅ Enskri / mete ajou itilizatè
-function registerUser(rawUser) {
-  try {
-    const { userId, display } = normalizeUser(rawUser);
+  // ---------------------------
+  // ✅ Enskri / mete ajou itilizatè san await
+  // ---------------------------
+  function registerUser(rawUser) {
+    try {
+      const { userId, display } = normalizeUser(rawUser);
 
-    // si socket te deja gen menm userId, pa fè anyen
-    if (socket.data.userId && socket.data.userId === userId) {
-      const existing = onlineUsers.get(userId);
-      if (existing) existing.user = display;
-      broadcastOnline();
-      return;
-    }
+      // si socket deja gen menm userId
+      if (socket.data.userId && socket.data.userId === userId) {
+        const existing = onlineUsers.get(userId);
+        if (existing) existing.user = display;
+        broadcastOnline();
+        return;
+      }
 
-    // retire socket soti nan prev record si prevId diferan
-    const prevId = socket.data.userId;
-    if (prevId && prevId !== userId) {
-      const prevRecord = onlineUsers.get(prevId);
-      if (prevRecord) {
-        prevRecord.sockets.delete(socket.id);
-        if (prevRecord.sockets.size === 0) {
-          onlineUsers.delete(prevId);
-          // ✅ kenbe menm style voye evènman, men ak userId
-          io.emit('userDisconnected', { userId: prevId, display: prevRecord.user });
+      // retire socket nan prev record si prevId diferan
+      const prevId = socket.data.userId;
+      if (prevId && prevId !== userId) {
+        const prevRecord = onlineUsers.get(prevId);
+        if (prevRecord) {
+          prevRecord.sockets.delete(socket.id);
+          if (prevRecord.sockets.size === 0) {
+            onlineUsers.delete(prevId);
+            io.emit('userDisconnected', { userId: prevId, display: prevRecord.user });
+          }
         }
       }
+
+      // jwenn oswa kreye record pou userId
+      let record = onlineUsers.get(userId);
+      if (!record) {
+        record = { user: display, sockets: new Set() };
+        onlineUsers.set(userId, record);
+      } else {
+        record.user = display;
+      }
+
+      // ajoute socket
+      record.sockets.add(socket.id);
+      socket.data.userId = userId;
+
+      // join personal room
+      socket.join(`user-${userId}`);
+
+      // emèt done korèk
+      io.emit('userConnected', { userId, display });
+
+      // mete ajou panel itilizatè
+      broadcastOnline();
+
+      console.log(`🔵 Registered socket ${socket.id} as userId=${userId} (display=${display})`);
+    } catch (err) {
+      console.error('registerUser err:', err);
     }
-
-    // jwenn oswa kreye record pou userId la
-    let record = onlineUsers.get(userId);
-    if (!record) {
-      record = { user: display, sockets: new Set() };
-      onlineUsers.set(userId, record);
-    } else {
-      record.user = display;
-    }
-
-    // ajoute socket la
-    record.sockets.add(socket.id);
-    socket.data.userId = userId;
-
-    // join personal room
-    socket.join(`user-${userId}`);
-
-    // ✅ EMÈT DONE YO KÒREK (userId + non itilizatè)
-    io.emit('userConnected', { userId, display });
-
-    // ✅ Mets ajou panel itilizatè a ak bon estrikti
-    broadcastOnline();
-
-    console.log(`🔵 Registered socket ${socket.id} as userId=${userId} (display=${display})`);
-  } catch (err) {
-    console.error('registerUser err:', err);
   }
 
-	
+  // ---------------------------
+  // Si front-end pase user nan handshake, enskri li imedyatman
+  // ---------------------------
+  try {
+    const handshakeUser =
+      socket.handshake?.query?.user ||
+      socket.handshake?.auth?.user ||
+      socket.handshake?.query?.userId ||
+      socket.handshake?.auth?.userId;
+    if (handshakeUser) registerUser(handshakeUser);
+  } catch (e) {}
 
   // ---------------------------
-  // ✅ Chaje mesaj piblik sèlman pou jodi a
+  // ✅ Chaje mesaj piblik jodi a (async nan top-level callback)
   // ---------------------------
   try {
     const todayStart = new Date();
@@ -407,7 +420,7 @@ function registerUser(rawUser) {
       .sort({ date: 1 })
       .lean();
 
-    const formatted = todaysMessages.map((msg) => ({
+    const formatted = todaysMessages.map(msg => ({
       user: (msg.from || 'Anonyme').toString().trim(),
       message: msg.message || '',
       date: msg.date ? new Date(msg.date) : new Date(),
@@ -415,11 +428,11 @@ function registerUser(rawUser) {
 
     socket.emit('loadMessages', formatted);
   } catch (err) {
-    console.error('❌ Erè pandan chajman mesaj piblik jodi a:', err && err.message);
+    console.error('❌ Erè pandan chajman mesaj piblik jodi a:', err?.message);
   }
 
   // ---------------------------
-  // ✅ Resevwa non itilizatè (front-end dwe voye userId oswa user)
+  // ✅ Resevwa non itilizatè / chatMessage
   // ---------------------------
   socket.on('setUser', (payload) => {
     try {
@@ -429,10 +442,8 @@ function registerUser(rawUser) {
         value = payload.userId || payload.user || null;
 
       if (!value) {
-        // si front-end pa bay anyen, kreye yon tanporè id pou asire panel la wè socket la
         const { userId } = normalizeUser(null);
         registerUser(userId);
-        console.warn('⚠️ setUser san userId valab. Kreye tanporè userId:', userId);
         return;
       }
 
@@ -442,14 +453,9 @@ function registerUser(rawUser) {
     }
   });
 
-  // ---------------------------
-  // ✅ Resevwa mesaj piblik
-  // ---------------------------
   socket.on('chatMessage', async (data) => {
     try {
-      // si socket pa gen userId ankò, asire li gen yon id tanporè pou panel la
       if (!socket.data.userId) {
-        // si front-end bay non nan data (eg data.user), enskri li; sinon kreye tanporè id
         const possible = data && typeof data === 'object' ? (data.user || data.userId || null) : null;
         if (possible) registerUser(possible);
         else registerUser(null);
@@ -468,30 +474,20 @@ function registerUser(rawUser) {
         date: newMsg.date,
       });
 
-      // Mete ajou ti panel itilizate yo otomatikman
-      try { broadcastOnline(); } catch (e) { /* swallow */ }
+      broadcastOnline();
     } catch (err) {
-      console.error('❌ Erè pandan anrejistreman mesaj piblik:', err && err.message);
+      console.error('❌ Erè pandan anrejistreman mesaj piblik:', err?.message);
     }
   });
 
-  // ---------------------------
-  // ✅ Mande lis itilizatè yo
-  // ---------------------------
   socket.on('requestUserList', () => {
-    try { broadcastOnline(); } catch (e) { /* swallow */ }
+    try { broadcastOnline(); } catch (e) {}
   });
 
-  // ---------------------------
-  // ✅ Lè itilizatè dekonekte
-  // ---------------------------
   socket.on('disconnect', () => {
     try {
       const userId = socket.data.userId;
-      if (!userId) {
-        console.log('🔴 Socket disconnected (no userId):', socket.id);
-        return;
-      }
+      if (!userId) return;
 
       const record = onlineUsers.get(userId);
       if (!record) return;
@@ -499,16 +495,15 @@ function registerUser(rawUser) {
       record.sockets.delete(socket.id);
       if (record.sockets.size === 0) {
         onlineUsers.delete(userId);
-        io.emit('userDisconnected', record.user);
+        io.emit('userDisconnected', { userId, display: record.user });
       }
 
-      try { broadcastOnline(); } catch (e) { /* swallow */ }
+      broadcastOnline();
       console.log('🔴 Itilizatè dekonekte:', userId);
     } catch (err) {
       console.error('disconnect err:', err);
     }
   });
-
   
 	
 	
