@@ -1,76 +1,59 @@
 // userPanel.js
-// ---------------------------
-// Endepandan panel itilizatè pou chat piblik / prive
-// ---------------------------
+// ✅ Panel itilizatè totalman endepandan
 
-// ⚡ Asire socket.io disponib nan paj la
-const socket = io(); // si socket.io deja enkli nan paj HTML
+const socket = io();
 
-// ⚡ Seleksyon DOM pou panel itilizatè
+// Seleksyon eleman HTML
 const userList = document.getElementById('userList');
-const userInput = document.getElementById('userNameInput'); // Optional: si ou gen yon input pou non itilizatè
+const userInput = document.getElementById('userInput'); // si ou gen sa sou paj lan
 
-// ---------------------------
-// Fonksyon pou mete ajou lis itilizatè yo
-// ---------------------------
+// ✅ Mete tout itilizatè yo ak status yo
 function renderUsers(users) {
   if (!userList) return;
   userList.innerHTML = '';
 
   users.forEach(u => {
     const li = document.createElement('li');
-    li.dataset.userId = u.userId;           // kenbe userId pou chat prive
-    li.dataset.display = u.display;         // kenbe display name
+    li.dataset.userId = u.userId;
+    li.dataset.display = u.display;
 
     const dot = document.createElement('span');
-    dot.classList.add('status-dot');
-    dot.classList.add(u.connected ? 'online' : 'offline');
+    dot.classList.add('status-dot', u.connected ? 'online' : 'offline');
     li.appendChild(dot);
 
-    li.appendChild(document.createTextNode(u.display)); // montre display name
+    li.appendChild(document.createTextNode(u.display));
     userList.appendChild(li);
   });
 }
 
-// ---------------------------
-// Rele lè server voye lis itilizatè yo
-// ---------------------------
+// ✅ Server voye lis itilizatè yo
 socket.on('online-users', (arr) => {
   renderUsers(arr);
 });
 
-// ---------------------------
-// Chaje lis itilizatè a imedyatman lè konekte
-// ---------------------------
+// ✅ Mande lis itilizatè yo dèske konekte
 socket.emit('requestUserList');
 
-// ---------------------------
-// Lanse chat prive lè itilizatè klike sou yon lòt
-// ---------------------------
-if (userList) {
-  userList.addEventListener('click', (e) => {
-    const li = e.target.closest('li');
-    if (!li) return;
+// ✅ Klike sou yon itilizatè pou ouvri Chatprive.html
+userList?.addEventListener('click', (e) => {
+  const li = e.target.closest('li');
+  if (!li) return;
 
-    const targetUserId = li.dataset.userId;
-    const targetDisplay = li.dataset.display || li.textContent.trim();
+  const targetId = li.dataset.userId;
+  const targetDisplay = li.dataset.display;
+  const currentUser = userInput?.value.trim() || 'Unknown';
 
-    const currentUser = userInput?.value.trim() || 'Anonyme';
-    if (!targetUserId || targetUserId === currentUser) return;
+  if (!targetId || targetId === currentUser) return;
 
-    // Redireksyon dirèk sou paj chat prive (si w gen yon Chatprive.html)
-    const privateUrl = `https://fondationbackupspirituel.com/Chatprive.html?from=${encodeURIComponent(currentUser)}&to=${encodeURIComponent(targetUserId)}`;
-    window.location.href = privateUrl;
-  });
-}
-
-// ---------------------------
-// Optional: konsol logs pou debug
-// ---------------------------
-socket.on('userConnected', ({ userId, display }) => {
-  console.log(`🟢 Konekte: ${display} (${userId})`);
+  window.location.href =
+    `Chatprive.html?from=${encodeURIComponent(currentUser)}&to=${encodeURIComponent(targetId)}`;
 });
 
-socket.on('userDisconnected', ({ userId, display }) => {
-  console.log(`🔴 Dekonekte: ${display} (${userId})`);
-});
+// ✅ Debug si ou vle
+socket.on('userConnected', ({userId, display}) =>
+  console.log('🟢 Konekte:', userId, display)
+);
+
+socket.on('userDisconnected', ({userId, display}) =>
+  console.log('🔴 Dekonekte:', userId, display)
+);
