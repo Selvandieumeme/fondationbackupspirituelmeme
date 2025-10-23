@@ -312,10 +312,6 @@ function broadcastOnline() {
     }));
 	
 
-    // Emit bay tout kliyan yo
-    io.emit('onlineUsers', users);
-}
-
   // Emit event name front-end ap koute: 'online-users'
   io.emit('online-users', users);
 }
