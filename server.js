@@ -276,22 +276,26 @@ const io = new Server(server, {
 if (mongoose.connection.readyState === 0) {
   // Si pa gen koneksyon aktif, konekte
   mongoose
-    .connect(process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/fobas-chat')
-    .then(() => console.log('✅ MongoDB konekte avèk siksè'))
+    .connect(process.env.MONGODB_URI, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    })
+    .then(() => console.log('✅ MongoDB konekte avèk siksè!'))
     .catch((err) => console.error('❌ Erè MongoDB:', err.message));
 } else {
   console.log('✅ MongoDB deja konekte');
 }
 
+// Definisyon schema pou mesaj piblik yo
 const messageSchema = new mongoose.Schema({
-  from: String,
-  to: String,
-  message: String,
-  date: { type: Date, default: Date.now },
+  from: String,          // userId itilizatè
+  to: String,            // 'public' pou chat piblik
+  message: String,       // kontni mesaj la
+  date: { type: Date, default: Date.now }, // dat otomatik
 });
 
+// Modèl Message pou MongoDB
 const Message = mongoose.model('Message', messageSchema);
-
 
 // ---------------------------
 // 👥 MEMWA ITILIZATÈ AK BROADCAST
