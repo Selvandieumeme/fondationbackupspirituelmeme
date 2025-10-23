@@ -298,16 +298,23 @@ const messageSchema = new mongoose.Schema({
 const Message = mongoose.model('Message', messageSchema);
 
 // ---------------------------
-// 👥 MEMWA ITILIZATÈ AK BROADCAST (konpatib ak front-end)
+// 👥 MEMWA ITILIZATÈ AK BROADCAST
 // ---------------------------
+
+// ✅ 1. Kreye memwa pou itilizatè yo
+const onlineUsers = new Map();
+
+// ✅ 2. Fonksyon pou voye lis tout itilizatè yo bay tout moun (pou ti panel a dwat la)
 function broadcastOnline() {
-  // Convert Map -> Array with the exact shape front-end expects:
-  // [{ user: 'mymame', connected: true }, ...]
-  const users = Array.from(onlineUsers.entries()).map(([userId, record]) => ({
-    user: record.user,                    // display string (sa front-end montre)
-    connected: record.sockets.size > 0,   // true = online (vèt), false = offline (wouj)
-    userId,                               // opzional: kenbe userId si front-end vle li pita
-  }));
+    const users = Array.from(onlineUsers.values()).map(record => ({
+        displayName: record.user,        // non itilizatè a
+        status: record.sockets.size > 0 ? 'online' : 'offline'  // si konekte = vèt, si soti = wouj
+    }));
+	
+
+    // Emit bay tout kliyan yo
+    io.emit('onlineUsers', users);
+}
 
   // Emit event name front-end ap koute: 'online-users'
   io.emit('online-users', users);
