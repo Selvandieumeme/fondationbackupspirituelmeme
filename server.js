@@ -271,12 +271,17 @@ const io = new Server(server, {
 });
 
 // ---------------------------
-// 🧩 MONGODB + MODEL MESAJ
+// 🧩 MONGODB + MODEL MESAJ (ak tcheke koneksyon)
 // ---------------------------
-mongoose
-  .connect(process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/chatapp')
-  .then(() => console.log('✅ MongoDB konekte'))
-  .catch((err) => console.error('❌ Erè MongoDB:', err.message));
+if (mongoose.connection.readyState === 0) {
+  // Si pa gen koneksyon aktif, konekte
+  mongoose
+    .connect(process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/chatapp')
+    .then(() => console.log('✅ MongoDB konekte avèk siksè'))
+    .catch((err) => console.error('❌ Erè MongoDB:', err.message));
+} else {
+  console.log('✅ MongoDB deja konekte');
+}
 
 const messageSchema = new mongoose.Schema({
   from: String,
@@ -286,6 +291,7 @@ const messageSchema = new mongoose.Schema({
 });
 
 const Message = mongoose.model('Message', messageSchema);
+
 
 // ---------------------------
 // 👥 MEMWA ITILIZATÈ AK BROADCAST
