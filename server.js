@@ -298,18 +298,22 @@ const messageSchema = new mongoose.Schema({
 const Message = mongoose.model('Message', messageSchema);
 
 // ---------------------------
-// 👥 MEMWA ITILIZATÈ AK BROADCAST
+// 👥 MEMWA ITILIZATÈ AK BROADCAST (konpatib ak front-end)
 // ---------------------------
-const onlineUsers = new Map();
-
-// ✅ Lè nou voye lis itilizate yo pou ti panel
 function broadcastOnline() {
-  const users = Array.from(onlineUsers.values()).map(record => ({
-    displayName: record.user,           // non itilizate
-    status: record.sockets.size > 0 ? 'online' : 'offline'  // koulè vèt/wouj
+  // Convert Map -> Array with the exact shape front-end expects:
+  // [{ user: 'mymame', connected: true }, ...]
+  const users = Array.from(onlineUsers.entries()).map(([userId, record]) => ({
+    user: record.user,                    // display string (sa front-end montre)
+    connected: record.sockets.size > 0,   // true = online (vèt), false = offline (wouj)
+    userId,                               // opzional: kenbe userId si front-end vle li pita
   }));
-  io.emit('onlineUsers', users);
+
+  // Emit event name front-end ap koute: 'online-users'
+  io.emit('online-users', users);
 }
+
+
 // ---------------------------
 
 // ⚡ SOCKET.IO – CHAT PIBLIK
