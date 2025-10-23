@@ -1,8 +1,8 @@
 // =======================
-// ✅ script.js FINAL AK SIPÒ CHAT PRIVE (KORIJÉ SAN KRAZE ANYEN)
+// ✅ script.js FINAL AK SIPÒ CHAT PRIVE (ADAPTE AK NOUVO PANEL)
 // =======================
 
-// 1️⃣ — Rekipere non itilizatè a (swa soti nan socketUser oswa prompt)
+// 1️⃣ — Rekipere id itilizatè a (swa soti nan socketUser oswa prompt)
 let user = window.socketUser || prompt("Antre non w:") || 'Anonyme';
 
 // 2️⃣ — Koneksyon ak Socket.io pou chat piblik
@@ -45,6 +45,10 @@ function sendMessage() {
   const data = { user, message, date: new Date() };
   socket.emit('chatMessage', data);
   addMessage(data, true);
+
+  // 🔹 REFRESH ONLINE USERS chak fwa yo voye mesaj
+  socket.emit('requestUserList');
+
   msgInput.value = '';
 }
 sendBtn.addEventListener('click', sendMessage);
@@ -64,26 +68,47 @@ socket.on('loadMessages', (messagesArray) => {
   });
 });
 
-// 9️⃣ — ✅ FONKSYON KORIJÉ: Afiche lis itilizatè san `undefined`
+// 9️⃣ — ✅ FONKSYON AJISTE: Afiche lis itilizatè ak userId ak display kòrèk
 function renderUsers(arr) {
   if (!Array.isArray(arr)) return;
   userList.innerHTML = '';
 
   arr.forEach(u => {
     const li = document.createElement('li');
-    const targetUser = u; // 🔹 paske backend ou voye userId sèlman
-    li.textContent = targetUser;
 
-    // ✅ Ouvri chat prive lè yo klike sou non
+    // 🔹 Mete userId ak display nan dataset
+    li.dataset.userId = u.userId || u.display || u;  
+    li.dataset.display = u.display || u.userId || u;  
+
+    // 🔹 Dot online/offline
+    const dot = document.createElement('span');
+    dot.classList.add('status-dot', u.status === 'online' ? 'online' : 'offline');
+    li.appendChild(dot);
+
+    // 🔹 Affiche display name
+    li.appendChild(document.createTextNode(u.display || u.userId || u));
+
+    // 🔹 Lanse chat prive lè yo klike sou yon non
     li.addEventListener('click', () => {
-      if (targetUser === user) return;
-      window.location.href = `Chatprive.html?from=${encodeURIComponent(user)}&to=${encodeURIComponent(targetUser)}`;
+      if ((u.userId || u.display) === user) return;
+      const privateUrl = `Chatprive.html?from=${encodeURIComponent(user)}&to=${encodeURIComponent(u.userId || u.display)}`;
+      window.location.href = privateUrl;
     });
 
     userList.appendChild(li);
   });
+
+  // 🔹 Scroll bar si plis pase 5 itilizatè
+  userList.style.overflowY = arr.length > 5 ? 'auto' : 'hidden';
 }
 
+// 10️⃣ — ONLINE USERS EVENTS
 socket.on('online-users', renderUsers);
-socket.on('userConnected', (u) => console.log('🟢 Itilizatè konekte:', u));
-socket.on('userDisconnected', (u) => console.log('🔴 Itilizatè dekonekte:', u));
+socket.on('userConnected', (u) => {
+  console.log('🟢 Itilizatè konekte:', u.display || u.userId || u);
+  socket.emit('requestUserList');
+});
+socket.on('userDisconnected', (u) => {
+  console.log('🔴 Itilizatè dekonekte:', u.display || u.userId || u);
+  socket.emit('requestUserList');
+});
