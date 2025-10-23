@@ -1,15 +1,15 @@
 // =======================
-// ✅ script.js FINAL AK SIPÒ CHAT PRIVE
+// ✅ script.js FINAL AK SIPÒ CHAT PRIVE (KORIJÉ SAN KRAZE ANYEN)
 // =======================
 
-// 1️⃣ — Rekipere non itilizatè a depi nan socket (pa gen localStorage)
+// 1️⃣ — Rekipere non itilizatè a (swa soti nan socketUser oswa prompt)
 let user = window.socketUser || prompt("Antre non w:") || 'Anonyme';
 
 // 2️⃣ — Koneksyon ak Socket.io pou chat piblik
 const socket = io('https://examen-backend-ihlx.onrender.com');
-window.socket = socket; // fè koneksyon an disponib pou chat prive
+window.socket = socket; // pou chat prive kapab itilize li
 
-// 3️⃣ — Lè paj la chaje
+// 3️⃣ — Lè paj la chaje, voye id itilizatè a nan backend la
 window.addEventListener('load', () => {
   if (socket && socket.connected) {
     socket.emit('setUser', user);
@@ -30,8 +30,7 @@ function addMessage(data, isMe = false) {
   const li = document.createElement('li');
   const msgUser = data.user || 'Anonyme';
   const message = data.message || '';
-  const dateObj = new Date(data.date || Date.now());
-  const time = dateObj.toLocaleTimeString();
+  const time = new Date(data.date || Date.now()).toLocaleTimeString();
   li.textContent = `${msgUser} [${time}]: ${message}`;
   if (isMe) li.classList.add('me');
   messages.appendChild(li);
@@ -61,30 +60,30 @@ socket.on('chatMessage', (data) => {
 socket.on('loadMessages', (messagesArray) => {
   if (!Array.isArray(messagesArray)) return;
   messagesArray.forEach(msg => {
-    const isMe = msg.user === user;
-    addMessage(msg, isMe);
+    addMessage(msg, msg.user === user);
   });
 });
 
-// 9️⃣ — 📡 Resevwa lis itilizatè online
+// 9️⃣ — ✅ FONKSYON KORIJÉ: Afiche lis itilizatè san `undefined`
 function renderUsers(arr) {
   if (!Array.isArray(arr)) return;
   userList.innerHTML = '';
+
   arr.forEach(u => {
     const li = document.createElement('li');
-    li.textContent = u.name || u.user || u;
-    // ✅ Ouvri chat prive lè itilizatè klike sou li
+    const targetUser = u; // 🔹 paske backend ou voye userId sèlman
+    li.textContent = targetUser;
+
+    // ✅ Ouvri chat prive lè yo klike sou non
     li.addEventListener('click', () => {
-      // Ouvri chat prive nan Chatprive.html
-      const currentUser = user;
-      const targetUser = u.name || u.user || u;
-      if (targetUser === currentUser) return;
-      window.location.href = `Chatprive.html?from=${encodeURIComponent(currentUser)}&to=${encodeURIComponent(targetUser)}`;
+      if (targetUser === user) return;
+      window.location.href = `Chatprive.html?from=${encodeURIComponent(user)}&to=${encodeURIComponent(targetUser)}`;
     });
+
     userList.appendChild(li);
   });
 }
 
-socket.on('online-users', (arr) => { renderUsers(arr); });
-socket.on('userConnected', (user) => { console.log('🟢 Itilizatè konekte:', user); });
-socket.on('userDisconnected', (user) => { console.log('🔴 Itilizatè dekonekte:', user); });
+socket.on('online-users', renderUsers);
+socket.on('userConnected', (u) => console.log('🟢 Itilizatè konekte:', u));
+socket.on('userDisconnected', (u) => console.log('🔴 Itilizatè dekonekte:', u));
