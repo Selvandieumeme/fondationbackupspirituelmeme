@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="ht">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Chat Premium — FOBAS</title>
+  <link rel="stylesheet" href="/premium.css">
+</head>
+<body>
+  <header>
+    <h1>Chat Premium — FOBAS</h1>
+    <p>Aksè prive, san piblisite, repons priyorite.</p>
+  </header>
+
+  <!-- ✅ Seksyon avantaj Chat Premium -->
+  <section class="advantages">
+    <h2>Avantaj Chat Premium FOBAS</h2>
+    <ul>
+      <li>✔ Chat prive 100% sekirize</li>
+      <li>✔ Diskite ak ekspè ak mentor an dirèk</li>
+      <li>✔ Pa gen piblisite ni entèripsyon</li>
+      <li>✔ Aksè a resous espesyal ak fich teknik</li>
+      <li>✔ Repons pi rapid ak priyorite</li>
+    </ul>
+  </section>
+
+  <!-- ✅ Lis metòd peman -->
+  <section class="payment-methods">
+    <h2>Chwazi metòd peman ou</h2>
+    <div class="methods">
+      <button class="pay-btn" data-method="paypal">PayPal</button>
+      <button class="pay-btn" data-method="moncash">MonCash</button>
+      <button class="pay-btn" data-method="natcash">NatCash</button>
+      <button class="pay-btn" data-method="western">Western Union</button>
+      <button class="pay-btn" data-method="zelle">Zelle</button>
+      <button class="pay-btn" data-method="card">Kat Kredi/Debit</button>
+    </div>
+  </section>
+
+  <!-- ✅ Fòm peman itilizatè -->
+  <section class="payment-form">
+    <h2>Antre enfòmasyon peman</h2>
+
+    <form id="paymentForm">
+      <label>Non konplè (userId):</label>
+      <input type="text" id="userId" placeholder="Antre user / userId (eg: Marie-Jeanne)" required>
+
+      <label>Email:</label>
+      <input type="email" id="email" placeholder="Antre email ou" required>
+
+      <label>Montan (USD):</label>
+      <input type="number" id="amount" placeholder="Eg: 10" min="1" required>
+
+      <label>Metòd peman:</label>
+      <select id="method" required>
+        <option value="">-- Chwazi --</option>
+        <option value="paypal">PayPal</option>
+        <option value="moncash">MonCash</option>
+        <option value="natcash">NatCash</option>
+        <option value="western">Western Union</option>
+        <option value="zelle">Zelle</option>
+        <option value="card">Kat Kredi/Debit</option>
+      </select>
+
+      <div id="paymentInfo" class="payment-info" aria-live="polite"></div>
+
+      <label>ID Tranzaksyon (si ou deja fè peman) — opsyonèl:</label>
+      <input type="text" id="transactionId" placeholder="Egzanp: MC12345678 (si genyen)">
+
+      <input type="hidden" id="recordId" value="">
+
+      <button type="submit" class="submit-btn">Kreye Demand Peman</button>
+    </form>
+
+    <div id="responseBox" class="response" aria-live="polite"></div>
+
+    <hr>
+
+    <h3>Ou deja gen yon demand? Mete ID tranzaksyon pou soumèt li pou verifikasyon:</h3>
+    <form id="submitTxnForm">
+      <label>ID Demand (Record ID):</label>
+      <input type="text" id="submitRecordId" placeholder="Id record ke w te resevwa">
+
+      <label>ID Tranzaksyon (MC / NW / WU):</label>
+      <input type="text" id="submitTxnId" placeholder="Eg: MC12345678">
+
+      <button id="submitTxnBtn" type="button">Soumèt ID Tranzaksyon</button>
+    </form>
+
+  </section>
+
+  <!-- ✅ Bouton navigasyon -->
+  <section class="navigation">
+    <button onclick="window.location.href='Chat-Spirituel.html'">⬅ Retounen nan Chat Piblik</button>
+  </section>
+
+  <script src="/premium.js"></script>
+</body>
+</html>
