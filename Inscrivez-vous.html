@@ -1,0 +1,74 @@
+<!-- File: register.html -->
+if (!isValidEmail(recovery.value)) { document.getElementById('recoveryError').textContent='Email de récupération invalide.'; document.getElementById('recoveryError').classList.remove('hidden'); submitBtn.disabled=false; return; }
+if (password.value.length < 12) { document.getElementById('passwordHelp').textContent='Le mot de passe doit contenir au moins 12 caractères.'; submitBtn.disabled=false; return; }
+if (password.value !== confirm.value) { document.getElementById('confirmError').textContent='Les mots de passe ne correspondent pas.'; document.getElementById('confirmError').classList.remove('hidden'); submitBtn.disabled=false; return; }
+
+
+// send to backend
+try{
+const resp = await fetch('/api/auth/register', {
+method: 'POST',
+headers: { 'Content-Type': 'application/json' },
+body: JSON.stringify({ email: email.value.trim(), recoveryEmail: recovery.value.trim(), password: password.value, confirmPassword: confirm.value })
+});
+const data = await resp.json();
+if (resp.ok){
+formMessage.className = 'mt-3 text-sm text-green-700';
+formMessage.textContent = data.message || 'Compte crée — vérifiez votre email.';
+form.reset(); renderPwMeter(); updateSubmitState();
+} else {
+formMessage.className = 'mt-3 text-sm text-red-700';
+formMessage.textContent = data.error || data.message || 'Erreur lors de la création du compte.';
+submitBtn.disabled = false;
+}
+} catch(err){
+formMessage.className = 'mt-3 text-sm text-red-700';
+formMessage.textContent = 'Impossible de contacter le serveur. Réessayez plus tard.';
+submitBtn.disabled = false;
+}
+});
+
+
+// initial
+renderPwMeter(); updateSubmitState();
+})();
+
+
+
+
+/* File: README-register.md (usage & integration notes) */
+
+
+# Page "Inscrivez-vous" — Integration notes
+
+
+Fichiers fournis:
+- `register.html` — page d'inscription prête (Tailwind via CDN)
+- `styles.css` — petites personnalisations (couleurs FOBA)
+- `register.js` — logique client : validation, meter, envoi à `/api/auth/register`
+
+
+## Connexion avec ton backend Render
+- L'endpoint attendu: `POST /api/auth/register`.
+- Corps JSON envoyé : `{ email, recoveryEmail, password, confirmPassword }`.
+- Réponses attendues :
+- `201` ou `200` avec `{ message: 'User created. Verify your email.' }` pour réussite
+- codes d'erreur (4xx/5xx) avec `{ error: '...' }`
+
+
+## Sécurité & production
+- Remplacer Tailwind CDN par build Tailwind dans ton repo avant prod.
+- Activer HTTPS (Render le fait par défaut).
+- Ajouter reCAPTCHA ou hCaptcha côté client + vérif serveur si spam/bot.
+- Limiter taille des champs et sanitize côté serveur.
+
+
+## Personnalisation
+- Couleurs principales définies dans `styles.css` (variables CSS `--fobas-*`).
+- Tu peux adapter labels (Kreyòl) selon besoin.
+
+
+---
+
+
+<!-- FIN du document -->
