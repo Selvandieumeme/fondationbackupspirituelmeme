@@ -1,0 +1,64 @@
+/* premium.css - style pou premium.html */
+:root{
+  --bg:#ffffff;
+  --accent-yellow:#FFD24C;
+  --accent-blue:#2B8CFF;
+  --muted:#f4f6f8;
+  --text:#222;
+  --card:#ffffff;
+  --success:#2ECC71;
+  --danger:#E74C3C;
+}
+
+body{
+  font-family: system-ui, Arial, sans-serif;
+  background: linear-gradient(180deg, #f7fafc 0%, #ffffff 100%);
+  color:var(--text);
+  margin:0;
+  padding:24px;
+}
+
+header{
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+  margin-bottom:18px;
+}
+
+h1{font-size:1.6rem;margin:0;}
+h2{font-size:1.15rem;color:var(--accent-blue);margin:10px 0;}
+section{background:var(--card);border-radius:10px;padding:12px;margin-bottom:14px;box-shadow:0 6px 18px rgba(30,40,60,0.04);}
+
+/* advantages */
+.advantages ul{padding-left:18px;margin:0}
+.advantages li{margin:6px 0;color:#333}
+
+/* methods */
+.methods{display:flex;flex-wrap:wrap;gap:8px}
+.pay-btn{border:0;background:var(--muted);padding:8px 12px;border-radius:8px;cursor:pointer}
+.pay-btn[data-method="moncash"]{background:linear-gradient(90deg,var(--accent-yellow),#f5c55a)}
+.pay-btn[data-method="natcash"]{background:linear-gradient(90deg,#ffd24c,#ffd885)}
+.pay-btn[data-method="western"]{background:linear-gradient(90deg,#c2dbff,var(--accent-blue))}
+.pay-btn[data-method="paypal"]{background:linear-gradient(90deg,#0070ba,#009bd6)}
+.pay-btn[data-method="zelle"]{background:linear-gradient(90deg,#6ee7b7,#34d399)}
+.pay-btn[data-method="card"]{background:linear-gradient(90deg,#f0f0f0,#e6e6e6)}
+
+.payment-form label{display:block;margin-top:8px;font-weight:600}
+.payment-form input[type="text"],
+.payment-form input[type="email"],
+.payment-form input[type="number"],
+.payment-form select{width:100%;padding:8px;border-radius:6px;border:1px solid #e6e6e6;margin-top:6px}
+
+.payment-info{margin:8px 0;background:#fff9ea;padding:10px;border-radius:6px;border-left:4px solid var(--accent-yellow);color:#5a4a00}
+.response{margin-top:10px;padding:10px;border-radius:6px;display:none}
+.response.success{display:block;background:#ecffef;border-left:4px solid var(--success);color:#1a7a3a}
+.response.pending{display:block;background:#fff8e6;border-left:4px solid #f5c55a;color:#6b4e00}
+
+/* small forms */
+#submitTxnForm{display:grid;grid-template-columns:1fr 1fr;gap:8px;align-items:end}
+#submitTxnBtn{grid-column:span 2;padding:8px;border-radius:6px;border:0;background:var(--accent-blue);color:#fff}
+
+/* responsive and small UI tweaks */
+@media (max-width:720px){
+  #submitTxnForm{grid-template-columns:1fr}
+}
