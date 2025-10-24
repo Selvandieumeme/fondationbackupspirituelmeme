@@ -1,234 +1,113 @@
-<!-- File: Inscrivez-vous.html -->
 <!doctype html>
 <html lang="fr">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Creez compte — FOBAS</title>
-  <!-- Tailwind CDN for rapid styling (replace with your build system in prod) -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <meta name="description" content="Créer un nouveau compte FOBAS — Fondasyon Backup Spirituel">
-  <link rel="stylesheet" href="/css/styles.css">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Créez un compte — FOBAS</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+:root {
+--fobas-yellow: #FFD43B;
+--fobas-blue: #0EA5E9;
+--fobas-white: #FFFFFF;
+}
+body {
+background: linear-gradient(to bottom right, var(--fobas-white), var(--fobas-blue), var(--fobas-yellow));
+}
+#pwMeterBar {
+background: linear-gradient(90deg, var(--fobas-blue) 0%, var(--fobas-yellow) 100%);
+width: 0%;
+height: 100%;
+transition: width 350ms ease-in-out;
+}
+.hidden { display: none; }
+@media (max-width: 768px) {
+main section { border-radius: 1rem; }
+}
+</style>
 </head>
-<body class="min-h-screen bg-gradient-to-br from-white via-sky-50 to-yellow-50">
-  <main class="flex items-center justify-center p-6">
-    <section class="w-full max-w-3xl bg-white/95 backdrop-blur-md rounded-2xl shadow-2xl overflow-hidden grid grid-cols-1 md:grid-cols-2">
-      <!-- Left: Branding / Illustration -->
-      <div class="p-8 md:p-10 bg-gradient-to-b from-sky-500 to-yellow-400 text-white flex flex-col justify-center">
-        <h1 class="text-3xl md:text-4xl font-extrabold mb-2">Bienvenue sur <span class="underline decoration-white/60">FOBAS</span></h1>
-        <p class="opacity-90 mb-6">Créez un compte sécurisé pour accéder à vos statistiques et services.</p>
-        <ul class="space-y-3 text-sm opacity-95">
-          <li class="flex items-start gap-3"><span class="font-bold">✓</span> Sécurité avancée</li>
-          <li class="flex items-start gap-3"><span class="font-bold">✓</span> Récupération par e‑mail</li>
-          <li class="flex items-start gap-3"><span class="font-bold">✓</span> Design professionnel</li>
-        </ul>
-        <p class="mt-6 text-xs opacity-80">Couleurs fondation: <span class="font-semibold">Jaune • Bleue • Blanc</span></p>
-      </div>
+<body class="min-h-screen flex items-center justify-center p-6">
+<main class="w-full max-w-3xl">
+<section class="bg-white/95 backdrop-blur-md rounded-2xl shadow-2xl overflow-hidden grid grid-cols-1 md:grid-cols-2">
+<!-- Branding -->
+<div class="p-8 md:p-10 bg-gradient-to-b from-sky-500 to-yellow-400 text-white flex flex-col justify-center">
+<h1 class="text-3xl md:text-4xl font-extrabold mb-2">Bienvenue sur <span class="underline decoration-white/60">FOBAS</span></h1>
+<p class="opacity-90 mb-6">Créez un compte sécurisé pour accéder à vos statistiques et services.</p>
+<ul class="space-y-3 text-sm opacity-95">
+<li class="flex items-start gap-3"><span class="font-bold">✓</span> Sécurité avancée</li>
+<li class="flex items-start gap-3"><span class="font-bold">✓</span> Récupération par e‑mail</li>
+<li class="flex items-start gap-3"><span class="font-bold">✓</span> Design professionnel</li>
+</ul>
+<p class="mt-6 text-xs opacity-80">Couleurs fondation: <span class="font-semibold">Jaune • Bleue • Blanc</span></p>
+</div>
 
-      <!-- Right: Form -->
-      <div class="p-8 md:p-10">
-        <h2 class="text-2xl font-bold mb-4">Inscrivez-vous</h2>
-        <form id="registerForm" class="space-y-4" novalidate>
-          <!-- Email (primary) -->
-          <div>
-            <label for="email" class="block text-sm font-medium text-gray-700">Email (Gmail conseillé)</label>
-            <input id="email" name="email" type="email" required autocomplete="email" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-2 focus:ring-sky-400 focus:border-sky-400" placeholder="votre.nom@gmail.com">
-            <p id="emailError" class="mt-1 text-xs text-red-600 hidden"></p>
-          </div>
 
-          <!-- Recovery email -->
-          <div>
-            <label for="recoveryEmail" class="block text-sm font-medium text-gray-700">Email de récupération (obligatoire)</label>
-            <input id="recoveryEmail" name="recoveryEmail" type="email" required autocomplete="email" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-2 focus:ring-yellow-400 focus:border-yellow-400" placeholder="email.recup@example.com">
-            <p id="recoveryError" class="mt-1 text-xs text-red-600 hidden"></p>
-          </div>
+<!-- Form -->
+<div class="p-8 md:p-10">
+<h2 class="text-2xl font-bold mb-4">Inscrivez-vous</h2>
+<form id="registerForm" class="space-y-4" novalidate>
+<div>
+<label for="email" class="block text-sm font-medium text-gray-700">Email (Gmail conseillé)</label>
+<input id="email" name="email" type="email" required autocomplete="email" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-2 focus:ring-sky-400 focus:border-sky-400" placeholder="votre.nom@gmail.com">
+<p id="emailError" class="mt-1 text-xs text-red-600 hidden"></p>
+</div>
 
-          <!-- Password -->
-          <div>
-            <label for="password" class="block text-sm font-medium text-gray-700">Mot de passe</label>
-            <div class="relative mt-1">
-              <input id="password" name="password" type="password" required autocomplete="new-password" class="peer block w-full rounded-md border-gray-300 shadow-sm pr-10 focus:ring-2 focus:ring-sky-400 focus:border-sky-400" placeholder="Min 12 caractères">
-              <button type="button" id="togglePwd" class="absolute right-2 top-2 text-sm text-gray-600">Montrer</button>
-            </div>
-            <div class="flex items-center gap-3 mt-2">
-              <div id="pwMeter" class="w-full h-2 bg-gray-200 rounded overflow-hidden">
-                <div id="pwMeterBar" class="h-full w-0 transition-width"></div>
-              </div>
-              <span id="pwScore" class="text-xs font-medium">0/4</span>
-            </div>
-            <p id="passwordHelp" class="mt-1 text-xs text-gray-600">Utilisez au moins 12 caractères, mélangez lettres, chiffres et symboles.</p>
-          </div>
 
-          <!-- Confirm password -->
-          <div>
-            <label for="confirmPassword" class="block text-sm font-medium text-gray-700">Confirmer mot de passe</label>
-            <input id="confirmPassword" name="confirmPassword" type="password" required autocomplete="new-password" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-2 focus:ring-yellow-400 focus:border-yellow-400" placeholder="Retapez mot de passe">
-            <p id="confirmError" class="mt-1 text-xs text-red-600 hidden"></p>
-          </div>
+<div>
+<label for="recoveryEmail" class="block text-sm font-medium text-gray-700">Email de récupération (obligatoire)</label>
+<input id="recoveryEmail" name="recoveryEmail" type="email" required autocomplete="email" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-2 focus:ring-yellow-400 focus:border-yellow-400" placeholder="email.recup@example.com">
+<p id="recoveryError" class="mt-1 text-xs text-red-600 hidden"></p>
+</div>
 
-          <!-- Terms checkbox -->
-          <div class="flex items-start">
-            <div class="flex items-center h-5">
-              <input id="terms" aria-describedby="termsDesc" name="terms" type="checkbox" class="w-4 h-4 text-sky-600 focus:ring-sky-500 border-gray-300 rounded">
-            </div>
-            <div class="ml-3 text-sm">
-              <label for="terms" class="font-medium text-gray-700">J'accepte les <a href="#" class="text-sky-600 underline">conditions</a></label>
-              <p id="termsDesc" class="text-gray-500">Vous acceptez la politique de confidentialité et les conditions d'utilisation.</p>
-            </div>
-          </div>
 
-          <!-- Submit -->
-          <div>
-            <button id="submitBtn" type="submit" class="w-full inline-flex justify-center items-center gap-2 rounded-md bg-sky-600 text-white px-4 py-2 font-semibold hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sky-400 disabled:opacity-60" disabled>
-              Créer mon compte FOBAS
-            </button>
-            <p id="formMessage" class="mt-3 text-sm"></p>
-          </div>
+<div>
+<label for="password" class="block text-sm font-medium text-gray-700">Mot de passe</label>
+<div class="relative mt-1">
+<input id="password" name="password" type="password" required autocomplete="new-password" class="peer block w-full rounded-md border-gray-300 shadow-sm pr-10 focus:ring-2 focus:ring-sky-400 focus:border-sky-400" placeholder="Min 12 caractères">
+<button type="button" id="togglePwd" class="absolute right-2 top-2 text-sm text-gray-600">Montrer</button>
+</div>
+<div class="flex items-center gap-3 mt-2">
+<div id="pwMeter" class="w-full h-2 bg-gray-200 rounded overflow-hidden">
+<div id="pwMeterBar"></div>
+</div>
+<span id="pwScore" class="text-xs font-medium">0/4</span>
+</div>
+<p id="passwordHelp" class="mt-1 text-xs text-gray-600">Utilisez au moins 12 caractères, mélangez lettres, chiffres et symboles.</p>
+</div>
 
-        </form>
 
-        <p class="mt-4 text-sm text-gray-600">Vous avez déjà un compte ? <a href="/login.html" class="text-sky-600 underline">Se connecter</a></p>
-      </div>
-    </section>
-  </main>
+<div>
+<label for="confirmPassword" class="block text-sm font-medium text-gray-700">Confirmer mot de passe</label>
+<input id="confirmPassword" name="confirmPassword" type="password" required autocomplete="new-password" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-2 focus:ring-yellow-400 focus:border-yellow-400" placeholder="Retapez mot de passe">
+<p id="confirmError" class="mt-1 text-xs text-red-600 hidden"></p>
+</div>
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/zxcvbn/4.4.2/zxcvbn.js" integrity="sha512-+aZ4Gx0C1A9J9hN3rQJx3m6h8v0NwQb8O2+3a5z1uQvQw1xk6oFvM3q2w1v7sP+G5k3tK0y1Z9b2w==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-  <script src="/js/register.js"></script>
+
+<div class="flex items-start">
+<div class="flex items-center h-5">
+<input id="terms" aria-describedby="termsDesc" name="terms" type="checkbox" class="w-4 h-4 text-sky-600 focus:ring-sky-500 border-gray-300 rounded">
+</div>
+<div class="ml-3 text-sm">
+<label for="terms" class="font-medium text-gray-700">J'accepte les <a href="#" class="text-sky-600 underline">conditions</a></label>
+<p id="termsDesc" class="text-gray-500">Vous acceptez la politique de confidentialité et les conditions d'utilisation.</p>
+</div>
+</div>
+
+
+<div>
+<button id="submitBtn" type="submit" class="w-full inline-flex justify-center items-center gap-2 rounded-md bg-sky-600 text-white px-4 py-2 font-semibold hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sky-400 disabled:opacity-60" disabled>
+Créer mon compte FOBAS
+</button>
+<p id="formMessage" class="mt-3 text-sm"></p>
+</div>
+</form>
+<p class="mt-4 text-sm text-gray-600">Vous avez déjà un compte ? <a href="/login.html" class="text-sky-600 underline">Se connecter</a></p>
+</div>
+</section>
+</main>
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/zxcvbn/4.4.2/zxcvbn.js" integrity="sha512-+aZ4Gx0C1A9J9hN3rQJx3m6h8v0NwQb8O2+3a5z1uQvQw1xk6oFvM3q2w1v7sP+G5k3tK0y1Z9b2w==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="Inscrivez-vous.js"></script>
 </body>
 </html>
-
-
-/* File: styles.css */
-/* Small custom tweaks to reinforce foundation colors and transitions */
-:root{
-  --fobas-yellow: #FFD43B;
-  --fobas-blue: #0EA5E9;
-  --fobas-white: #FFFFFF;
-}
-
-/* subtle meter color mapping */
-#pwMeterBar{ background: linear-gradient(90deg, rgba(14,165,233,1) 0%, rgba(255,212,59,1) 100%); width:0%; }
-.transition-width{ transition: width 350ms ease-in-out; }
-
-/* small responsive tweaks */
-@media (max-width: 768px){
-  main section{ border-radius: 1rem; }
-}
-
-
-/* File: register.js */
-(function(){
-  // Elements
-  const form = document.getElementById('registerForm');
-  const email = document.getElementById('email');
-  const recovery = document.getElementById('recoveryEmail');
-  const password = document.getElementById('password');
-  const confirm = document.getElementById('confirmPassword');
-  const submitBtn = document.getElementById('submitBtn');
-  const formMessage = document.getElementById('formMessage');
-  const pwMeterBar = document.getElementById('pwMeterBar');
-  const pwScore = document.getElementById('pwScore');
-  const togglePwd = document.getElementById('togglePwd');
-
-  // util validators
-  function isValidEmail(v){
-    try{ return /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v);}catch(e){return false}
-  }
-
-  function updateSubmitState(){
-    const ready = isValidEmail(email.value) && isValidEmail(recovery.value)
-      && password.value.length >= 12 && password.value === confirm.value
-      && document.getElementById('terms').checked;
-    submitBtn.disabled = !ready;
-  }
-
-  // password toggle
-  togglePwd.addEventListener('click', ()=>{
-    const t = password.type === 'password' ? 'text' : 'password';
-    password.type = t;
-    togglePwd.textContent = t === 'password' ? 'Montrer' : 'Cacher';
-  });
-
-  // zxcvbn password strength (if available)
-  function scorePassword(pw){
-    if (window.zxcvbn) {
-      try{ return zxcvbn(pw).score; } catch(e){ return 0 }
-    }
-    // fallback: simple heuristics
-    let score = 0;
-    if (pw.length >= 12) score++;
-    if (/[A-Z]/.test(pw)) score++;
-    if (/[0-9]/.test(pw)) score++;
-    if (/[^A-Za-z0-9]/.test(pw)) score++;
-    return Math.min(score,4);
-  }
-
-  function renderPwMeter(){
-    const s = scorePassword(password.value);
-    pwScore.textContent = `${s}/4`;
-    const pct = (s/4)*100;
-    pwMeterBar.style.width = pct + '%';
-    // color mapping via classes could be improved; using inline bg gradient in CSS
-  }
-
-  // live validation
-  [email, recovery, password, confirm].forEach(el=>el.addEventListener('input', ()=>{
-    // clear errors
-    document.getElementById(el.id + 'Error')?.classList.add('hidden');
-    renderPwMeter();
-    updateSubmitState();
-  }));
-
-  document.getElementById('terms').addEventListener('change', updateSubmitState);
-
-  confirm.addEventListener('input', ()=>{
-    const err = document.getElementById('confirmError');
-    if (confirm.value && confirm.value !== password.value){
-      err.textContent = 'Les mots de passe ne correspondent pas.'; err.classList.remove('hidden');
-    } else { err.classList.add('hidden'); }
-    updateSubmitState();
-  });
-
-  form.addEventListener('submit', async (e)=>{
-    e.preventDefault();
-    submitBtn.disabled = true;
-    formMessage.textContent = '';
-
-    // final validation
-    if (!isValidEmail(email.value)) { document.getElementById('emailError').textContent='Email invalide.'; document.getElementById('emailError').classList.remove('hidden'); submitBtn.disabled=false; return; }
-    if (!isValidEmail(recovery.value)) { document.getElementById('recoveryError').textContent='Email de récupération invalide.'; document.getElementById('recoveryError').classList.remove('hidden'); submitBtn.disabled=false; return; }
-    if (password.value.length < 12) { document.getElementById('passwordHelp').textContent='Le mot de passe doit contenir au moins 12 caractères.'; submitBtn.disabled=false; return; }
-    if (password.value !== confirm.value) { document.getElementById('confirmError').textContent='Les mots de passe ne correspondent pas.'; document.getElementById('confirmError').classList.remove('hidden'); submitBtn.disabled=false; return; }
-
-    // send to backend
-    try{
-      const resp = await fetch('/api/auth/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: email.value.trim(), recoveryEmail: recovery.value.trim(), password: password.value, confirmPassword: confirm.value })
-      });
-      const data = await resp.json();
-      if (resp.ok){
-        formMessage.className = 'mt-3 text-sm text-green-700';
-        formMessage.textContent = data.message || 'Compte crée — vérifiez votre email.';
-        form.reset(); renderPwMeter(); updateSubmitState();
-      } else {
-        formMessage.className = 'mt-3 text-sm text-red-700';
-        formMessage.textContent = data.error || data.message || 'Erreur lors de la création du compte.';
-        submitBtn.disabled = false;
-      }
-    } catch(err){
-      formMessage.className = 'mt-3 text-sm text-red-700';
-      formMessage.textContent = 'Impossible de contacter le serveur. Réessayez plus tard.';
-      submitBtn.disabled = false;
-    }
-  });
-
-  // initial
-  renderPwMeter(); updateSubmitState();
-})();
-
-
-/* File: README-register.md (usage & integration notes) */
-
-
