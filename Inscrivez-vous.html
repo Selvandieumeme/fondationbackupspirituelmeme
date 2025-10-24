@@ -1,4 +1,32 @@
 <!-- File: register.html -->
+[email, recovery, password, confirm].forEach(el=>el.addEventListener('input', ()=>{
+// clear errors
+document.getElementById(el.id + 'Error')?.classList.add('hidden');
+renderPwMeter();
+updateSubmitState();
+}));
+
+
+document.getElementById('terms').addEventListener('change', updateSubmitState);
+
+
+confirm.addEventListener('input', ()=>{
+const err = document.getElementById('confirmError');
+if (confirm.value && confirm.value !== password.value){
+err.textContent = 'Les mots de passe ne correspondent pas.'; err.classList.remove('hidden');
+} else { err.classList.add('hidden'); }
+updateSubmitState();
+});
+
+
+form.addEventListener('submit', async (e)=>{
+e.preventDefault();
+submitBtn.disabled = true;
+formMessage.textContent = '';
+
+
+// final validation
+if (!isValidEmail(email.value)) { document.getElementById('emailError').textContent='Email invalide.'; document.getElementById('emailError').classList.remove('hidden'); submitBtn.disabled=false; return; }
 if (!isValidEmail(recovery.value)) { document.getElementById('recoveryError').textContent='Email de récupération invalide.'; document.getElementById('recoveryError').classList.remove('hidden'); submitBtn.disabled=false; return; }
 if (password.value.length < 12) { document.getElementById('passwordHelp').textContent='Le mot de passe doit contenir au moins 12 caractères.'; submitBtn.disabled=false; return; }
 if (password.value !== confirm.value) { document.getElementById('confirmError').textContent='Les mots de passe ne correspondent pas.'; document.getElementById('confirmError').classList.remove('hidden'); submitBtn.disabled=false; return; }
@@ -37,38 +65,3 @@ renderPwMeter(); updateSubmitState();
 
 
 /* File: README-register.md (usage & integration notes) */
-
-
-# Page "Inscrivez-vous" — Integration notes
-
-
-Fichiers fournis:
-- `register.html` — page d'inscription prête (Tailwind via CDN)
-- `styles.css` — petites personnalisations (couleurs FOBA)
-- `register.js` — logique client : validation, meter, envoi à `/api/auth/register`
-
-
-## Connexion avec ton backend Render
-- L'endpoint attendu: `POST /api/auth/register`.
-- Corps JSON envoyé : `{ email, recoveryEmail, password, confirmPassword }`.
-- Réponses attendues :
-- `201` ou `200` avec `{ message: 'User created. Verify your email.' }` pour réussite
-- codes d'erreur (4xx/5xx) avec `{ error: '...' }`
-
-
-## Sécurité & production
-- Remplacer Tailwind CDN par build Tailwind dans ton repo avant prod.
-- Activer HTTPS (Render le fait par défaut).
-- Ajouter reCAPTCHA ou hCaptcha côté client + vérif serveur si spam/bot.
-- Limiter taille des champs et sanitize côté serveur.
-
-
-## Personnalisation
-- Couleurs principales définies dans `styles.css` (variables CSS `--fobas-*`).
-- Tu peux adapter labels (Kreyòl) selon besoin.
-
-
----
-
-
-<!-- FIN du document -->
