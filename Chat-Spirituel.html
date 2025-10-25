@@ -444,7 +444,7 @@ socket.on('online-users', (arr) => renderUsers(arr));
 
 
 
-<!-- ✅ PYE DE PAJ / FOOTER OFFISYÈL ak 2 bouton Premium -->
+<!-- ✅ Sticky Footer / Footer Offisyèl ak 2 bouton Premium -->
 <footer class="fobas-footer">
   
   <!-- Boutons Premium -->
@@ -465,24 +465,28 @@ socket.on('online-users', (arr) => renderUsers(arr));
   </div>
 </footer>
 
-<!-- ✅ Styles Footer ak Boutons Redwi -->
+<!-- ✅ Styles Sticky Footer ak Boutons -->
 <style>
-  /* Footer toujou anba paj */
+  /* Fòse footer toujou anba fen ekran an */
   .fobas-footer {
-    position: relative; /* si ou vle ou ka mete fixed: position: fixed; bottom: 0; width: 100%; */
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
     padding: 20px;
-    text-align: center;
     background: #222;
     color: #fff;
+    text-align: center;
+    z-index: 9999; /* pou li toujou anlè lòt eleman */
   }
 
   /* Bouton Premium nan footer */
   .footer-buttons {
-    margin-bottom: 12px;
     display: flex;
     justify-content: center;
     gap: 12px;
     flex-wrap: wrap;
+    margin-bottom: 6px;
   }
 
   .premium-btn-small {
@@ -507,7 +511,6 @@ socket.on('online-users', (arr) => renderUsers(arr));
 
   .footer-text {
     font-weight: 600;
-    margin-top: 6px;
   }
 
   @media (max-width: 480px) {
@@ -516,6 +519,11 @@ socket.on('online-users', (arr) => renderUsers(arr));
       font-size: 0.9rem;
       padding: 8px 14px;
     }
+  }
+
+  /* Pou kontni chat la pa ale anba footer la */
+  body {
+    padding-bottom: 120px; /* adapte selon wotè footer la */
   }
 </style>
 
