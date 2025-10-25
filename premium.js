@@ -1,58 +1,67 @@
-// premium.js
-// Frontend pou premium.html — konekte ak /api endpoints (pa itilize localStorage)
+// 🌟 premium.js - Version améliorée & compatible ak nouvo premium.html
 
-// Chwazi eleman
+// --- Sélection éléments ---
 const paymentButtons = document.querySelectorAll('.pay-btn');
-const paymentForm = document.getElementById('paymentForm');
-const paymentInfo = document.getElementById('paymentInfo');
-const responseBox = document.getElementById('responseBox');
-const submitTxnForm = document.getElementById('submitTxnForm');
-const submitTxnBtn = document.getElementById('submitTxnBtn');
+const paymentInfoBox = document.getElementById('paymentInfo');  // kote enfòmasyon metòd lan parèt
+const paymentForm = document.getElementById('paymentForm');     // 1er fòm: kreye demann Premium
+const responseBox = document.getElementById('responseBox');     // Mesaj repons (status-msg)
+const submitTxnBtn = document.getElementById('submitTxnBtn');   // Bouton pou soumèt ID tranzaksyon
 
-// Kontni fiks pou MonCash/NatCash/Western
+let selectedMethod = "";
+
+// --- Kontni pou chak mòd peman ---
 const PAYMENT_DETAILS = {
   moncash: {
-    title: 'MonCash (Vodafone/Digicel)',
-    text: 'MonCash - MEME Selvandieu — Nimewo: +509 46057952\nApre ou fè peman, antre ID tranzaksyon oubyen voye resi bay admin.'
+    title: 'MonCash (Digicel)',
+    text: 'Benefisyè : MEME Selvandieu\nNimewo : +509 46057952\nApre ou fin peye, antre ID tranzaksyon oswa upload resi.'
   },
   natcash: {
     title: 'NatCash (Natcom)',
-    text: 'NatCash - MEME Selvandieu — Nimewo: +509 41306268\nApre ou fè peman, antre ID tranzaksyon oubyen voye resi bay admin.'
+    text: 'Benefisyè : MEME Selvandieu\nNimewo : +509 41306268\nApre ou fin peye, antre ID tranzaksyon oswa voye resi bay admin.'
   },
   western: {
     title: 'Western Union',
-    text: 'Western Union - Benefisyè: MEME Selvandieu\nRemake: Mandew ajoute vil + non moun ki voye lajan an kòm ref.'
+    text: 'Benefisyè : MEME Selvandieu\nRemake : Mete vil + non moun ki voye lajan kòm referans.'
   },
   paypal: {
     title: 'PayPal',
-    text: 'PayPal instructions: You will be redirected to PayPal checkout.'
+    text: 'Ou pral redireksyone sou PayPal pou fini tranzaksyon an.'
   },
   card: {
-    title: 'Kat Kredi/Debit',
-    text: 'Kart chechout: (integ. stripe/similar required)'
+    title: 'Kat Bancaire',
+    text: 'Pou kat kredi/debit : Stripe oswa lòt sistèm obligatwa.'
   },
   zelle: {
     title: 'Zelle',
-    text: 'Zelle instructions - contact admin for details.'
+    text: 'Kontakte admin pou detay Zelle si disponib.'
   }
 };
 
-let selectedMethod = '';
-
-// Metòd: lè itilizatè chwazi bouton
+// --- Klik sou bouton metòd peman yo ---
 paymentButtons.forEach(btn => {
   btn.addEventListener('click', () => {
     selectedMethod = btn.dataset.method;
     const info = PAYMENT_DETAILS[selectedMethod];
-    paymentInfo.innerText = info ? `${info.title}\n\n${info.text}` : '';
-    document.getElementById('method').value = selectedMethod;
+
+    // Mete tèks enfòmasyon yo
+    if (info) {
+      paymentInfoBox.innerText = `${info.title}\n\n${info.text}`;
+    } else {
+      paymentInfoBox.innerText = '';
+    }
+
+    // Mete sa tou nan input hidden <input id="method">
+    const methodInput = document.getElementById('method');
+    if (methodInput) methodInput.value = selectedMethod;
   });
 });
 
-// Soumèt kreye record
+// --- Soumèt premye fòm lan: kreye demann premium ---
 paymentForm.addEventListener('submit', async (e) => {
   e.preventDefault();
-  responseBox.style.display = 'none';
+  showResponse("", ""); // netwaye msg
+
+  // Ranmase done yo
   const userId = document.getElementById('userId').value.trim();
   const email = document.getElementById('email').value.trim();
   const amount = Number(document.getElementById('amount').value);
@@ -60,58 +69,64 @@ paymentForm.addEventListener('submit', async (e) => {
   const txn = document.getElementById('transactionId').value.trim();
 
   if (!userId || !email || !amount || !method) {
-    showResponse('Tanpri ranpli tout chan obligatwa yo.', 'error');
-    return;
+    return showResponse("⚠️ Tanpri ranpli tout chan obligatwa yo.", "error");
   }
 
   try {
     const res = await fetch('/api/premium/create', {
       method: 'POST',
-      headers: {'Content-Type':'application/json'},
+      headers: { 'Content-Type':'application/json' },
       body: JSON.stringify({ userId, email, method, amount, txnId: txn || null })
     });
     const data = await res.json();
+
     if (!res.ok) {
-      showResponse(data.error || 'Erè sou sèvè', 'error');
-      return;
+      return showResponse(data.error || "❌ Erè sou sèvè.", "error");
     }
 
-    // si ok: resevwa record id, montre li itilizatè a
-    document.getElementById('recordId').value = data.id || '';
-    showResponse(`✅ Demand peman kreye. Record ID: ${data.id}. Si w fè peman, soumèt ID tranzaksyon an anba seksyon "Soumèt ID Tranzaksyon". Status: ${data.status}`, 'pending');
+    // Sove record ID pou 2èm fòm lan
+    document.getElementById('recordId').value = data.id || "";
+    return showResponse(`✅ Demann Premium kreye avèk siksè.\nID: ${data.id}\nStatus: ${data.status}`, "pending");
+
   } catch (err) {
-    showResponse('Erè rezo: ' + (err.message || err), 'error');
+    showResponse("❌ Erè rezo: " + err.message, "error");
   }
 });
 
-// Soumèt txn (user) pou verify
+// --- Soumèt ID tranzaksyon ---
 submitTxnBtn.addEventListener('click', async () => {
-  const id = document.getElementById('submitRecordId').value.trim();
-  const txn = document.getElementById('submitTxnId').value.trim();
-  if (!id || !txn) {
-    showResponse('Tanpri bay Record ID ak ID tranzaksyon an.', 'error');
-    return;
+  const recordId = document.getElementById('submitRecordId').value.trim();
+  const txnId = document.getElementById('submitTxnId').value.trim();
+
+  if (!recordId || !txnId) {
+    return showResponse("⚠️ Tanpri antre Record ID ak ID Tranzaksyon.", "error");
   }
+
   try {
     const res = await fetch('/api/premium/submit-txn', {
       method: 'POST',
-      headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({ id, txnId: txn })
+      headers: { 'Content-Type':'application/json' },
+      body: JSON.stringify({ id: recordId, txnId })
     });
     const data = await res.json();
-    if (!res.ok) return showResponse(data.error || 'Erè sou sèvè', 'error');
-    showResponse(`✅ Tranzaksyon soumèt pou verifikasyon. Record ${id} mete ajou. Lè admin konfime li, w ap gen aksè.`, 'pending');
+
+    if (!res.ok) {
+      return showResponse(data.error || "❌ Erè sou sèvè.", "error");
+    }
+
+    showResponse(`✅ ID tranzaksyon soumèt. Admin ap verifye.`, "pending");
   } catch (err) {
-    showResponse('Erè rezo: ' + err.message, 'error');
+    showResponse("❌ Erè rezo: " + err.message, "error");
   }
 });
 
-// Helper UI
+// --- Fonksyon pou jere mesaj repons ---
 function showResponse(msg, type) {
-  responseBox.style.display = 'block';
+  responseBox.style.display = "block";
   responseBox.textContent = msg;
-  responseBox.className = 'response';
-  if (type === 'success') responseBox.classList.add('success');
-  else if (type === 'pending') responseBox.classList.add('pending');
-  else responseBox.classList.add('error');
+  responseBox.className = "response";
+
+  if (type === "success") responseBox.classList.add("success");
+  else if (type === "pending") responseBox.classList.add("pending");
+  else if (type === "error") responseBox.classList.add("error");
 }
