@@ -449,14 +449,8 @@ socket.on('online-users', (arr) => renderUsers(arr));
   
   <!-- Boutons Premium -->
   <div class="footer-buttons">
-    <!-- Chat Premium -->
-    <a href="premium.html" class="premium-btn-small">
-      💎 Chat Premium
-    </a>
-    <!-- Connexion Premium -->
-    <button id="premiumLoginBtnSmall" class="premium-btn-small">
-      💎 Connexion Premium
-    </button>
+    <a href="premium.html" class="premium-btn-small">💎 Chat Premium</a>
+    <button id="premiumLoginBtnSmall" class="premium-btn-small">💎 Connexion Premium</button>
   </div>
 
   <!-- Tekst Footer -->
@@ -465,65 +459,55 @@ socket.on('online-users', (arr) => renderUsers(arr));
   </div>
 </footer>
 
-<!-- ✅ Styles Sticky Footer ak Boutons -->
+<!-- ✅ Styles Footer Amélioré -->
 <style>
-  /* Fòse footer toujou anba fen ekran an */
+  /* Footer pi slim + background oranj */
   .fobas-footer {
     position: fixed;
     bottom: 0;
     left: 0;
     width: 100%;
-    padding: 20px;
-    background: #222;
+    padding: 10px 12px; /* te 8px → mete yon ti ti plis epè */
+    background: #ff9800; /* Oranj sofistike olye de nwa */
     color: #fff;
     text-align: center;
-    z-index: 9999; /* pou li toujou anlè lòt eleman */
+    z-index: 9999;
+    box-shadow: 0 -3px 8px rgba(0,0,0,0.2); /* bay yon ti efè leve */
   }
 
-  /* Bouton Premium nan footer */
   .footer-buttons {
     display: flex;
     justify-content: center;
-    gap: 12px;
+    gap: 10px;
     flex-wrap: wrap;
-    margin-bottom: 6px;
+    margin-bottom: 5px;
   }
 
   .premium-btn-small {
     background: linear-gradient(135deg, #FFD24C, #2B8CFF, #ffffff);
     color: #222;
     font-weight: 700;
-    font-size: 1rem;
-    padding: 10px 20px;
-    border-radius: 12px;
+    font-size: 0.9rem;
+    padding: 6px 14px;
+    border-radius: 10px;
     border: none;
     cursor: pointer;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+    box-shadow: 0 3px 10px rgba(0,0,0,0.15);
     transition: all 0.3s ease;
   }
 
   .premium-btn-small:hover {
-    background: linear-gradient(135deg, #2B8CFF, #FFD24C, #ffffff);
-    color: #000;
-    transform: translateY(-2px) scale(1.05);
-    box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+    transform: translateY(-2px) scale(1.04);
   }
 
   .footer-text {
+    font-size: 0.85rem;
     font-weight: 600;
   }
 
-  @media (max-width: 480px) {
-    .premium-btn-small {
-      width: 45%;
-      font-size: 0.9rem;
-      padding: 8px 14px;
-    }
-  }
-
-  /* Pou kontni chat la pa ale anba footer la */
+  /* ✅ Ajoute espas anba kontni pou footer pa kole ak chat */
   body {
-    padding-bottom: 120px; /* adapte selon wotè footer la */
+    padding-bottom: 110px; /* te 90px, kounya ogmante pou ti espas ant chat ak footer */
   }
 </style>
 
