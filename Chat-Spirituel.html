@@ -440,83 +440,69 @@ socket.on('online-users', (arr) => renderUsers(arr));
 </style>
 
 
-<!-- Footer ak bouton Chat Premium -->
-<div class="chat-footer">
-  <a href="premium.html" class="premium-button">
-    💎 Chat Premium
-  </a>
-</div>
 
 
 
 
-<!-- Bouton Connexion Premium -->
-<footer style="text-align:center; margin-top: 24px;">
-  <button id="premiumLoginBtn" class="premium-btn">💎 Connexion Premium</button>
+<!-- ✅ PYE DE PAJ / FOOTER OFFISYÈL ak 2 bouton Premium -->
+<footer class="fobas-footer" style="position:relative; padding:20px; text-align:center; background:#222; color:#fff;">
+  
+  <!-- Boutons Premium -->
+  <div class="footer-buttons" style="margin-bottom:12px; display:flex; justify-content:center; gap:12px; flex-wrap:wrap;">
+    <!-- Chat Premium -->
+    <a href="premium.html" class="premium-btn-small">
+      💎 Chat Premium
+    </a>
+    <!-- Connexion Premium -->
+    <button id="premiumLoginBtnSmall" class="premium-btn-small">
+      💎 Connexion Premium
+    </button>
+  </div>
+
+  <!-- Tekst Footer -->
+  <div style="font-weight:600;">
+    Fondation Backup Spirituel - 2025
+  </div>
 </footer>
 
+<!-- ✅ Styles Bouton Redwi -->
 <style>
-  /* Bouton Premium Chat-Spirituel - gwo ak animasyon */
-  .premium-btn {
+  .premium-btn-small {
     background: linear-gradient(135deg, #FFD24C, #2B8CFF, #ffffff);
     color: #222;
     font-weight: 700;
-    font-size: 1.2rem;
-    padding: 16px 32px;
-    border-radius: 16px;
+    font-size: 1rem;
+    padding: 10px 20px;
+    border-radius: 12px;
     border: none;
     cursor: pointer;
-    box-shadow: 0 8px 25px rgba(0,0,0,0.2);
-    transition: all 0.4s ease;
-    position: relative;
-    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+    transition: all 0.3s ease;
   }
 
-  .premium-btn::before {
-    content: '';
-    position: absolute;
-    top: -50%;
-    left: -50%;
-    width: 200%;
-    height: 200%;
-    background: rgba(255,255,255,0.25);
-    transform: rotate(45deg) translate(-100%, -100%);
-    transition: all 0.5s ease;
-  }
-
-  .premium-btn:hover::before {
-    transform: rotate(45deg) translate(0, 0);
-  }
-
-  .premium-btn:hover {
+  .premium-btn-small:hover {
     background: linear-gradient(135deg, #2B8CFF, #FFD24C, #ffffff);
     color: #000;
-    transform: translateY(-3px) scale(1.05);
-    box-shadow: 0 12px 30px rgba(0,0,0,0.3);
+    transform: translateY(-2px) scale(1.05);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.25);
   }
 
   @media (max-width: 480px) {
-    .premium-btn {
-      width: 90%;
-      font-size: 1.1rem;
-      padding: 14px 28px;
+    .premium-btn-small {
+      width: 45%;
+      font-size: 0.9rem;
+      padding: 8px 14px;
     }
   }
 </style>
 
+<!-- ✅ Script Connexion Premium -->
 <script>
-  // Ouvri paj login-premium.html lè itilizate klike
-  document.getElementById('premiumLoginBtn').addEventListener('click', () => {
+  document.getElementById('premiumLoginBtnSmall').addEventListener('click', () => {
     window.location.href = 'login-premium.html';
   });
 </script>
 
-  
-
-  <!-- ✅ PYE DE PAJ / FOOTER OFFISYÈL -->
-<footer class="fobas-footer">
-  Fondation Backup Spirituel - 2025
-</footer>
   
 </body>
 </html>
