@@ -1,15 +1,15 @@
-// 🌟 premium.js - Version améliorée & compatible ak nouvo premium.html
+// 🌟 premium.js - Version final, konpatib ak premium.html + API Render/MongoDB
 
 // --- Sélection éléments ---
 const paymentButtons = document.querySelectorAll('.pay-btn');
-const paymentInfoBox = document.getElementById('paymentInfo');  // kote enfòmasyon metòd lan parèt
+const paymentInfoBox = document.getElementById('paymentInfo');  // kote enfòmasyon parèt
 const paymentForm = document.getElementById('paymentForm');     // 1er fòm: kreye demann Premium
-const responseBox = document.getElementById('responseBox');     // Mesaj repons (status-msg)
-const submitTxnBtn = document.getElementById('submitTxnBtn');   // Bouton pou soumèt ID tranzaksyon
+const responseBox = document.getElementById('responseBox');     // Mesaj repons
+const submitTxnBtn = document.getElementById('submitTxnBtn');   // Bouton soumèt ID tranzaksyon
 
 let selectedMethod = "";
 
-// --- Kontni pou chak mòd peman ---
+// --- Tout enfòmasyon pou chak metòd peman ---
 const PAYMENT_DETAILS = {
   moncash: {
     title: 'MonCash (Digicel)',
@@ -29,7 +29,7 @@ const PAYMENT_DETAILS = {
   },
   card: {
     title: 'Kat Bancaire',
-    text: 'Pou kat kredi/debit : Stripe oswa lòt sistèm obligatwa.'
+    text: 'Pou kat kredi/debit: Stripe oswa lòt sistèm obligatwa.'
   },
   zelle: {
     title: 'Zelle',
@@ -37,7 +37,7 @@ const PAYMENT_DETAILS = {
   }
 };
 
-// --- Klik sou bouton metòd peman yo ---
+// --- Klik sou yon bouton metòd peman ---
 paymentButtons.forEach(btn => {
   btn.addEventListener('click', () => {
     selectedMethod = btn.dataset.method;
@@ -50,16 +50,16 @@ paymentButtons.forEach(btn => {
       paymentInfoBox.innerText = '';
     }
 
-    // Mete sa tou nan input hidden <input id="method">
+    // Mete mòd la nan input hidden
     const methodInput = document.getElementById('method');
     if (methodInput) methodInput.value = selectedMethod;
   });
 });
 
-// --- Soumèt premye fòm lan: kreye demann premium ---
+// --- Soumèt premye fòm lan: Kreye demann premium ---
 paymentForm.addEventListener('submit', async (e) => {
   e.preventDefault();
-  showResponse("", ""); // netwaye msg
+  showResponse("", ""); // efase mesaj anvan
 
   // Ranmase done yo
   const userId = document.getElementById('userId').value.trim();
@@ -84,22 +84,22 @@ paymentForm.addEventListener('submit', async (e) => {
       return showResponse(data.error || "❌ Erè sou sèvè.", "error");
     }
 
-    // Sove record ID pou 2èm fòm lan
+    // Mete record ID la pou 2èm fòm lan
     document.getElementById('recordId').value = data.id || "";
-    return showResponse(`✅ Demann Premium kreye avèk siksè.\nID: ${data.id}\nStatus: ${data.status}`, "pending");
+    return showResponse(`✅ Demann Premium kreye.\n🆔 ID: ${data.id}\n📌 Status: ${data.status}`, "pending");
 
   } catch (err) {
     showResponse("❌ Erè rezo: " + err.message, "error");
   }
 });
 
-// --- Soumèt ID tranzaksyon ---
+// --- 2èm fòm: Soumèt ID tranzaksyon ---
 submitTxnBtn.addEventListener('click', async () => {
   const recordId = document.getElementById('submitRecordId').value.trim();
   const txnId = document.getElementById('submitTxnId').value.trim();
 
   if (!recordId || !txnId) {
-    return showResponse("⚠️ Tanpri antre Record ID ak ID Tranzaksyon.", "error");
+    return showResponse("⚠️ Tanpri antre Record ID + ID tranzaksyon.", "error");
   }
 
   try {
@@ -114,13 +114,13 @@ submitTxnBtn.addEventListener('click', async () => {
       return showResponse(data.error || "❌ Erè sou sèvè.", "error");
     }
 
-    showResponse(`✅ ID tranzaksyon soumèt. Admin ap verifye.`, "pending");
+    showResponse(`✅ ID tranzaksyon soumèt.\n⏳ Admin ap verifye li...`, "pending");
   } catch (err) {
     showResponse("❌ Erè rezo: " + err.message, "error");
   }
 });
 
-// --- Fonksyon pou jere mesaj repons ---
+// --- Fonksyon pou Afiche mesaj ti bwat repons lan ---
 function showResponse(msg, type) {
   responseBox.style.display = "block";
   responseBox.textContent = msg;
