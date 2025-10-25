@@ -448,6 +448,71 @@ socket.on('online-users', (arr) => renderUsers(arr));
 </div>
 
 
+
+
+<!-- Bouton Connexion Premium -->
+<footer style="text-align:center; margin-top: 24px;">
+  <button id="premiumLoginBtn" class="premium-btn">💎 Connexion Compte Premium</button>
+</footer>
+
+<style>
+  /* Bouton Premium Chat-Spirituel - gwo ak animasyon */
+  .premium-btn {
+    background: linear-gradient(135deg, #FFD24C, #2B8CFF, #ffffff);
+    color: #222;
+    font-weight: 700;
+    font-size: 1.2rem;
+    padding: 16px 32px;
+    border-radius: 16px;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+    transition: all 0.4s ease;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .premium-btn::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: rgba(255,255,255,0.25);
+    transform: rotate(45deg) translate(-100%, -100%);
+    transition: all 0.5s ease;
+  }
+
+  .premium-btn:hover::before {
+    transform: rotate(45deg) translate(0, 0);
+  }
+
+  .premium-btn:hover {
+    background: linear-gradient(135deg, #2B8CFF, #FFD24C, #ffffff);
+    color: #000;
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 0 12px 30px rgba(0,0,0,0.3);
+  }
+
+  @media (max-width: 480px) {
+    .premium-btn {
+      width: 90%;
+      font-size: 1.1rem;
+      padding: 14px 28px;
+    }
+  }
+</style>
+
+<script>
+  // Ouvri paj login-premium.html lè itilizate klike
+  document.getElementById('premiumLoginBtn').addEventListener('click', () => {
+    window.location.href = 'login-premium.html';
+  });
+</script>
+
+  
+
   <!-- ✅ PYE DE PAJ / FOOTER OFFISYÈL -->
 <footer class="fobas-footer">
   Fondation Backup Spirituel - 2025
