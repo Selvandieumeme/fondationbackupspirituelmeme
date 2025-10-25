@@ -790,6 +790,197 @@ const premiumRouter = require('express').Router();
 app.use(express.json()); // ensure body parser available
 // ---------------------------
 
+
+
+
+
+
+
+
+
+// POST /api/premium/register  -> create pending premium request + screenshot upload
+// Use multipart/form-data (fields + file "screenshot")
+premiumRouter.post('/register', upload.single('screenshot'), async (req, res) => {
+  try {
+    const { fullname, email, password, passwordConfirm, emailRecovery, method, txnId, amount } = req.body;
+
+    // Basic validation
+    if (!fullname || !email || !password || !passwordConfirm || !emailRecovery || !method) {
+      return res.status(400).json({ error: 'Tout chan obligatwa.' });
+    }
+    if (password !== passwordConfirm) return res.status(400).json({ error: 'Modpas pa matche.' });
+
+    // allowed methods
+    const methods = ['MonCash','NatCash','Western','PayPal','Card','Zelle'];
+    if (!methods.includes(method)) return res.status(400).json({ error: 'Metòd peman pa sipòte.' });
+
+    // hash password
+    const salt = await bcrypt.genSalt(10);
+    const passwordHash = await bcrypt.hash(password, salt);
+
+    // prepare record
+    const rec = new PremiumUser({
+      fullname,
+      email,
+      emailRecovery,
+      passwordHash,
+      method,
+      txnId: txnId || null,
+      amount: amount ? Number(amount) : 0,
+      status: 'pending'
+    });
+
+    // attach screenshot buffer if file present
+    if (req.file) {
+      rec.screenshot = {
+        data: req.file.buffer,
+        contentType: req.file.mimetype,
+        filename: req.file.originalname
+      };
+    }
+
+    await rec.save();
+
+    // Send notification email to admin with attached screenshot (if any)
+    const adminMail = {
+      from: process.env.SMTP_USER,
+      to: process.env.PREMIUM_ADMIN_EMAIL || 'infos@fondationbackupspirituel.com',
+      subject: `Nouvo demann Premium: ${rec.fullname} (${rec.email})`,
+      text: `Yon nouvo demann Premium te kreye.\n\nNon: ${rec.fullname}\nEmail: ${rec.email}\nMetòd: ${rec.method}\nTxnId: ${rec.txnId || 'N/A'}\nMontan: ${rec.amount || 'N/A'}\nID Rekò DB: ${rec._id}\n\nTanpri verifye screenshot ak konfime oswa rejte.`,
+      attachments: []
+    };
+    if (req.file) {
+      adminMail.attachments.push({
+        filename: req.file.originalname,
+        content: req.file.buffer,
+        contentType: req.file.mimetype
+      });
+    }
+
+    transporter.sendMail(adminMail).catch(err => console.error('mail send err', err));
+
+    return res.json({ ok: true, id: rec._id, status: rec.status });
+  } catch (err) {
+    console.error('premium/register err', err);
+    return res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// Admin: GET list (for admin dashboard)
+premiumRouter.get('/list', async (req, res) => {
+  try {
+    // NOTE: auth for admin not implemented here; protect in your admin dashboard!
+    const list = await PremiumUser.find().sort({ createdAt: -1 }).lean();
+    // Don't reveal passwordHash
+    const safe = list.map(r => ({
+      id: r._id, fullname: r.fullname, email: r.email, method: r.method, txnId: r.txnId,
+      amount: r.amount, status: r.status, createdAt: r.createdAt, approvedAt: r.approvedAt, adminNote: r.adminNote,
+      hasScreenshot: !!(r.screenshot && r.screenshot.data)
+    }));
+    res.json({ ok: true, data: safe });
+  } catch (err) {
+    console.error('premium/list err', err);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// Admin: GET screenshot by id (download)
+premiumRouter.get('/screenshot/:id', async (req, res) => {
+  try {
+    const rec = await PremiumUser.findById(req.params.id).lean();
+    if (!rec || !rec.screenshot || !rec.screenshot.data) return res.status(404).send('No screenshot');
+    res.set('Content-Type', rec.screenshot.contentType || 'application/octet-stream');
+    res.set('Content-Disposition', `attachment; filename="${rec.screenshot.filename || 'screenshot'}"`);
+    return res.send(Buffer.from(rec.screenshot.data.buffer || rec.screenshot.data));
+  } catch (err) {
+    console.error('premium/screenshot err', err);
+    res.status(500).send('Server error');
+  }
+});
+
+// Admin: confirm (approve) -> set status approved, generate token, send email to user
+premiumRouter.post('/admin/approve', async (req, res) => {
+  try {
+    const { id, adminNote } = req.body;
+    if (!id) return res.status(400).json({ error: 'Missing id' });
+    const rec = await PremiumUser.findById(id);
+    if (!rec) return res.status(404).json({ error: 'Not found' });
+
+    rec.status = 'approved';
+    rec.approvedAt = new Date();
+    rec.adminNote = adminNote || '';
+    await rec.save();
+
+    // create token (optional)
+    const token = makePremiumToken(rec._id.toString(), rec.email);
+
+    // email to user
+    const mail = {
+      from: process.env.SMTP_USER,
+      to: rec.email,
+      subject: 'Peman Premium - Aksè konfime',
+      text: `Bon nouvèl! Peman ou a verifye, kont premium ou ap aktive. Ou ka kounye a konekte ak email ou. Token: ${token}`
+    };
+    transporter.sendMail(mail).catch(err => console.error('mail err', err));
+
+    return res.json({ ok: true, token });
+  } catch (err) {
+    console.error('premium/approve err', err);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// Admin: reject
+premiumRouter.post('/admin/reject', async (req, res) => {
+  try {
+    const { id, adminNote } = req.body;
+    if (!id) return res.status(400).json({ error: 'Missing id' });
+    const rec = await PremiumUser.findById(id);
+    if (!rec) return res.status(404).json({ error: 'Not found' });
+
+    rec.status = 'rejected';
+    rec.adminNote = adminNote || '';
+    await rec.save();
+
+    const mail = {
+      from: process.env.SMTP_USER,
+      to: rec.email,
+      subject: 'Peman Premium - Rejete',
+      text: `Demann premium ou a te rejte. Nòt admin: ${rec.adminNote || 'Pa gen nòt'}. Tanpri kontakte ${process.env.PREMIUM_ADMIN_EMAIL || 'infos@fondationbackupspirituel.com'} si ou kwè gen erè.`
+    };
+    transporter.sendMail(mail).catch(err => console.error('mail err', err));
+
+    return res.json({ ok: true });
+  } catch (err) {
+    console.error('premium/reject err', err);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// Login for premium users
+premiumRouter.post('/login', async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    if (!email || !password) return res.status(400).json({ error: 'Missing fields' });
+
+    const rec = await PremiumUser.findOne({ email }).exec();
+    if (!rec) return res.status(401).json({ error: 'Invalid credentials' });
+    const match = await bcrypt.compare(password, rec.passwordHash);
+    if (!match) return res.status(401).json({ error: 'Invalid credentials' });
+    if (rec.status !== 'approved') return res.status(403).json({ error: 'Account not approved yet', status: rec.status });
+
+    const token = makePremiumToken(rec._id.toString(), rec.email);
+    return res.json({ ok: true, token, expiresAt: rec.approvedAt ? new Date(Date.now() + PREMIUM_EXP_DAYS * 24*3600*1000) : null });
+  } catch (err) {
+    console.error('premium/login err', err);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// Mount
+app.use('/api/premium', premiumRouter);
+
+
 // 🚀 DEMARRE SERVEUR
 // ---------------------------
 const PORT = process.env.PORT || 3000;
