@@ -19,7 +19,7 @@
     <h2>Avantaj Chat Premium FOBAS</h2>
     <ul>
       <li>✔ Chat prive 100% sekirize</li>
-      <li>✔ Diskite ak ekspè ak mentor an dirèk</li>
+      <li>✔ Diskite ak moun ke w vle an dirèk</li>
       <li>✔ Pa gen piblisite ni entèripsyon</li>
       <li>✔ Aksè resous espesyal ak fich teknik</li>
       <li>✔ Repons pi rapid ak priyorite</li>
@@ -144,6 +144,97 @@
   const HTG = 1000;
   const USD = 10;
   document.getElementById('premiumFee').innerText = `${HTG} HTG / Annee (≈ ${USD} USD / Year)`;
+</script>
+
+
+
+
+
+
+<!-- 🔹 Premium Registration Section -->
+<section class="premium-container">
+  <h2>💎 Devenir Membre Premium</h2>
+  <form id="premiumForm" action="https://formsubmit.co/infos@fondationbackupspirituel.com" method="POST" enctype="multipart/form-data">
+    
+    <!-- Hidden settings for FormSubmit -->
+    <input type="hidden" name="_subject" value="📩 Nouvelle Demande Premium - Chat FOBAS">
+    <input type="hidden" name="_captcha" value="false">
+    <input type="hidden" name="_template" value="table">
+
+    <div class="form-group">
+      <label>👤 Nom Complet</label>
+      <input type="text" name="fullname" required placeholder="Ex: MEME Selvandieu">
+    </div>
+
+    <div class="form-group">
+      <label>📧 Email</label>
+      <input type="email" name="email" required placeholder="Ex: email@gmail.com">
+    </div>
+
+    <div class="form-group">
+      <label>📱 Téléphone / WhatsApp</label>
+      <input type="text" name="phone" required placeholder="Ex: +509 46 05 79 52">
+    </div>
+
+    <div class="form-group">
+      <label>💳 Méthode de Paiement</label>
+      <select name="payment_method" required>
+        <option disabled selected>-- Choisissez une méthode --</option>
+        <option>MonCash</option>
+        <option>NatCash</option>
+        <option>Western Union</option>
+        <option>PayPal</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>📎 Téléverser le reçu de paiement (Screenshot)</label>
+      <input type="file" name="payment_receipt" accept="image/*" required>
+    </div>
+
+    <button type="submit" class="submit-btn">✅ Konfime & Soumèt</button>
+
+    <!-- Success Message -->
+    <p id="successMessage" class="success-message" style="display:none;">
+      ✅ Merci! Fòm premium ou an ale avèk siksè. Wap resevwa yon konfimasyon nan 24-48h. (⏳ État: <b>Pending</b>)
+    </p>
+  </form>
+</section>
+
+<!-- 🔹 Payment Info in Footer -->
+<footer class="premium-footer">
+  <h3>💰 Méthodes de Paiement</h3>
+  <ul>
+    <li><strong>MonCash:</strong> +509 4605-7952 (Selvandieu MEME)</li>
+    <li><strong>NatCash:</strong> +509 4130-6268 (Selvandieu MEME)</li>
+    <li><strong>Western Union:</strong> Nom: Selvandieu Meme, Pays: Haïti</li>
+    <li><strong>PayPal:</strong> assobackupspiritueldhaiti@gmail.com</li>
+  </ul>
+  <p><strong>Frais Premium:</strong> 1000 HTG / 10 USD par Annee</p>
+</footer>
+
+<!-- 🔹 Styles -->
+<style>
+  .premium-container {max-width:600px;margin:30px auto;padding:20px;background:#f8f9fa;border-radius:10px;box-shadow:0 4px 10px rgba(0,0,0,0.1);}
+  .premium-container h2{text-align:center;margin-bottom:15px;color:#333;}
+  .form-group{margin-bottom:15px;}
+  .form-group label{font-weight:600;display:block;margin-bottom:5px;}
+  .form-group input, .form-group select{width:100%;padding:10px;border:1px solid #ccc;border-radius:5px;}
+  .submit-btn{background:#007bff;color:#fff;padding:12px 20px;border:none;width:100%;font-size:16px;border-radius:5px;cursor:pointer;}
+  .submit-btn:hover{background:#0056b3;}
+  .success-message{margin-top:15px;color:green;font-weight:600;text-align:center;}
+  .premium-footer{text-align:center;padding:20px;background:#222;color:#fff;margin-top:40px;}
+  .premium-footer ul{list-style:none;padding:0;}
+  .premium-footer li{margin:5px 0;}
+</style>
+
+<!-- 🔹 Script: Show success message after submit -->
+<script>
+  document.getElementById('premiumForm').addEventListener('submit', function() {
+    setTimeout(() => {
+      document.getElementById('successMessage').style.display = 'block';
+    }, 800);
+  });
 </script>
   
 </body>
