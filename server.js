@@ -731,65 +731,76 @@ app.get('/Chatprive.html', (req, res) => {
 
 
 
-// ---------- PREMIUM / PAYMENTS (paste after Message model) ----------
+// ---------- PREMIUM / PAYMENTS SYSTEM (ajiste pou nouvo premium.html + premium.js) ----------
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const multer = require('multer');
 const nodemailer = require('nodemailer');
+const mongoose = require('mongoose');
 
-// Premium user schema (registre peman + screenshot + kont)
+// ✅ 1. SCHEMA POU PREMIUM USERS
 const premiumUserSchema = new mongoose.Schema({
-  fullname: { type: String, required: true },
-  email: { type: String, required: true },        // email login
-  emailRecovery: { type: String, required: true }, // 2em email restore
-  passwordHash: { type: String, required: true },
-  method: { type: String, required: true },       // MonCash|NatCash|Western|PayPal|Card|Zelle
-  txnId: { type: String, default: null },         // optional user-provided txn id
-  amount: { type: Number, default: 0 },
-  status: { type: String, default: 'pending' },   // pending | awaiting_txn | approved | rejected
-  screenshot: {
+  fullname: { type: String, required: true },          // Non konplè
+  email: { type: String, required: true, unique: true },  // Email pou login
+  emailRecovery: { type: String, required: true },     // 2èm email pou restore
+  passwordHash: { type: String, required: true },      // Hash mot de passe
+  method: { type: String, required: true },            // MonCash, NatCash, Western, PayPal, Card, Zelle
+  amount: { type: Number, default: 0 },                // Kantite lajan itilizatè peye
+  txnId: { type: String, default: null },              // ID tranzaksyon itilizatè soumèt
+  screenshot: {                                        // Fichier (resi) peman si upload fèt
     data: Buffer,
     contentType: String,
     filename: String
   },
+  status: { type: String, default: 'pending' },        // pending | awaiting_txn | approved | rejected
   createdAt: { type: Date, default: Date.now },
-  approvedAt: Date,
+  approvedAt: { type: Date },
   adminNote: String
 });
 const PremiumUser = mongoose.model('PremiumUser', premiumUserSchema);
 
-// JWT secret & settings
+// ✅ 2. JWT SETTINGS
 const PREMIUM_JWT_SECRET = process.env.PREMIUM_JWT_SECRET || 'please_change_me';
 const PREMIUM_EXP_DAYS = parseInt(process.env.PREMIUM_EXP_DAYS || '30', 10);
 
-// Helper: create token
 function makePremiumToken(userId, email) {
-  const payload = { userId, email, premium: true };
-  return jwt.sign(payload, PREMIUM_JWT_SECRET, { expiresIn: `${PREMIUM_EXP_DAYS}d` });
+  return jwt.sign(
+    { userId, email, premium: true },
+    PREMIUM_JWT_SECRET,
+    { expiresIn: `${PREMIUM_EXP_DAYS}d` }
+  );
 }
 function verifyPremiumToken(token) {
-  try { return jwt.verify(token, PREMIUM_JWT_SECRET); } catch (e) { return null; }
+  try { return jwt.verify(token, PREMIUM_JWT_SECRET); }
+  catch { return null; }
 }
 
-// Multer storage (memory storage -> we save Buffer to MongoDB)
-const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 5 * 1024 * 1024 } }); // 5MB max
+// ✅ 3. MULTER POU UPLOAD SCREENSHOT (Resi Peman)
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 5 * 1024 * 1024 } // max 5MB
+});
 
-// Nodemailer transport (use env vars)
+// ✅ 4. NODEMAILER TRANSPORT (Voye Imèl admin & konfimasyon)
 const transporter = nodemailer.createTransport({
   host: process.env.SMTP_HOST,
   port: parseInt(process.env.SMTP_PORT || '587', 10),
-  secure: process.env.SMTP_SECURE === 'true', // true for 465
+  secure: process.env.SMTP_SECURE === 'true',
   auth: {
     user: process.env.SMTP_USER,
     pass: process.env.SMTP_PASS
   }
 });
 
-// Router
+// ✅ 5. EXPRESS ROUTER BAZE
 const premiumRouter = require('express').Router();
-app.use(express.json()); // ensure body parser available
-// ---------------------------
-
+app.use(express.json());       // obligatwa pou li req.body JSON
+// ✅ Pi ba a n'a ajoute: 
+//   ➤ POST /api/premium/create
+//   ➤ POST /api/premium/submit-txn
+//   ➤ POST /api/premium/login
+//   ➤ GET /api/admin/premium-list
+//   ➤ POST /api/admin/premium/approve etc.
 
 
 
@@ -799,7 +810,6 @@ app.use(express.json()); // ensure body parser available
 
 
 // POST /api/premium/register  -> create pending premium request + screenshot upload
-// Use multipart/form-data (fields + file "screenshot")
 premiumRouter.post('/register', upload.single('screenshot'), async (req, res) => {
   try {
     const { fullname, email, password, passwordConfirm, emailRecovery, method, txnId, amount } = req.body;
@@ -810,7 +820,7 @@ premiumRouter.post('/register', upload.single('screenshot'), async (req, res) =>
     }
     if (password !== passwordConfirm) return res.status(400).json({ error: 'Modpas pa matche.' });
 
-    // allowed methods
+    // Allowed payment methods
     const methods = ['MonCash','NatCash','Western','PayPal','Card','Zelle'];
     if (!methods.includes(method)) return res.status(400).json({ error: 'Metòd peman pa sipòte.' });
 
@@ -841,22 +851,14 @@ premiumRouter.post('/register', upload.single('screenshot'), async (req, res) =>
 
     await rec.save();
 
-    // Send notification email to admin with attached screenshot (if any)
+    // Send notification email to admin
     const adminMail = {
       from: process.env.SMTP_USER,
       to: process.env.PREMIUM_ADMIN_EMAIL || 'infos@fondationbackupspirituel.com',
       subject: `Nouvo demann Premium: ${rec.fullname} (${rec.email})`,
-      text: `Yon nouvo demann Premium te kreye.\n\nNon: ${rec.fullname}\nEmail: ${rec.email}\nMetòd: ${rec.method}\nTxnId: ${rec.txnId || 'N/A'}\nMontan: ${rec.amount || 'N/A'}\nID Rekò DB: ${rec._id}\n\nTanpri verifye screenshot ak konfime oswa rejte.`,
-      attachments: []
+      text: `Nouvo demann Premium kreye.\nNon: ${rec.fullname}\nEmail: ${rec.email}\nMetòd: ${rec.method}\nTxnId: ${rec.txnId || 'N/A'}\nMontan: ${rec.amount || 'N/A'}\nID Rekò DB: ${rec._id}\nTanpri verifye screenshot.`,
+      attachments: req.file ? [{ filename: req.file.originalname, content: req.file.buffer, contentType: req.file.mimetype }] : []
     };
-    if (req.file) {
-      adminMail.attachments.push({
-        filename: req.file.originalname,
-        content: req.file.buffer,
-        contentType: req.file.mimetype
-      });
-    }
-
     transporter.sendMail(adminMail).catch(err => console.error('mail send err', err));
 
     return res.json({ ok: true, id: rec._id, status: rec.status });
@@ -866,12 +868,10 @@ premiumRouter.post('/register', upload.single('screenshot'), async (req, res) =>
   }
 });
 
-// Admin: GET list (for admin dashboard)
+// Admin: GET list
 premiumRouter.get('/list', async (req, res) => {
   try {
-    // NOTE: auth for admin not implemented here; protect in your admin dashboard!
     const list = await PremiumUser.find().sort({ createdAt: -1 }).lean();
-    // Don't reveal passwordHash
     const safe = list.map(r => ({
       id: r._id, fullname: r.fullname, email: r.email, method: r.method, txnId: r.txnId,
       amount: r.amount, status: r.status, createdAt: r.createdAt, approvedAt: r.approvedAt, adminNote: r.adminNote,
@@ -884,7 +884,7 @@ premiumRouter.get('/list', async (req, res) => {
   }
 });
 
-// Admin: GET screenshot by id (download)
+// Admin: GET screenshot by id
 premiumRouter.get('/screenshot/:id', async (req, res) => {
   try {
     const rec = await PremiumUser.findById(req.params.id).lean();
@@ -898,7 +898,7 @@ premiumRouter.get('/screenshot/:id', async (req, res) => {
   }
 });
 
-// Admin: confirm (approve) -> set status approved, generate token, send email to user
+// Admin: approve
 premiumRouter.post('/admin/approve', async (req, res) => {
   try {
     const { id, adminNote } = req.body;
@@ -911,7 +911,6 @@ premiumRouter.post('/admin/approve', async (req, res) => {
     rec.adminNote = adminNote || '';
     await rec.save();
 
-    // create token (optional)
     const token = makePremiumToken(rec._id.toString(), rec.email);
 
     // email to user
@@ -919,7 +918,7 @@ premiumRouter.post('/admin/approve', async (req, res) => {
       from: process.env.SMTP_USER,
       to: rec.email,
       subject: 'Peman Premium - Aksè konfime',
-      text: `Bon nouvèl! Peman ou a verifye, kont premium ou ap aktive. Ou ka kounye a konekte ak email ou. Token: ${token}`
+      text: `Kont premium ou aktive! Token: ${token}`
     };
     transporter.sendMail(mail).catch(err => console.error('mail err', err));
 
@@ -946,7 +945,7 @@ premiumRouter.post('/admin/reject', async (req, res) => {
       from: process.env.SMTP_USER,
       to: rec.email,
       subject: 'Peman Premium - Rejete',
-      text: `Demann premium ou a te rejte. Nòt admin: ${rec.adminNote || 'Pa gen nòt'}. Tanpri kontakte ${process.env.PREMIUM_ADMIN_EMAIL || 'infos@fondationbackupspirituel.com'} si ou kwè gen erè.`
+      text: `Demann premium ou a te rejte. Nòt admin: ${rec.adminNote || 'Pa gen nòt'}`
     };
     transporter.sendMail(mail).catch(err => console.error('mail err', err));
 
@@ -970,16 +969,15 @@ premiumRouter.post('/login', async (req, res) => {
     if (rec.status !== 'approved') return res.status(403).json({ error: 'Account not approved yet', status: rec.status });
 
     const token = makePremiumToken(rec._id.toString(), rec.email);
-    return res.json({ ok: true, token, expiresAt: rec.approvedAt ? new Date(Date.now() + PREMIUM_EXP_DAYS * 24*3600*1000) : null });
+    return res.json({ ok: true, token, expiresAt: rec.approvedAt ? new Date(Date.now() + PREMIUM_EXP_DAYS*24*3600*1000) : null });
   } catch (err) {
     console.error('premium/login err', err);
     res.status(500).json({ error: 'Server error' });
   }
 });
 
-// Mount
+// Mount router
 app.use('/api/premium', premiumRouter);
-
 
 // 🚀 DEMARRE SERVEUR
 // ---------------------------
