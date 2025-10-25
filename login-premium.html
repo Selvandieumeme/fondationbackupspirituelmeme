@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="ht">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Connexion Premium — FOBAS</title>
+  
+  <!-- STYLE ENTÈGRÉ -->
+  <style>
+    :root {
+      --yellow:#FFD24C;
+      --blue:#2B8CFF;
+      --white:#ffffff;
+      --dark:#222222;
+      --accent:#FFD24C;
+      --muted:#f4f6f8;
+      --success:#2ECC71;
+      --danger:#E74C3C;
+    }
+
+    body {
+      font-family: system-ui, Arial, sans-serif;
+      background: linear-gradient(135deg, var(--yellow), var(--blue), var(--white));
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      margin:0;
+    }
+
+    .login-container {
+      width: 100%;
+      max-width: 400px;
+      padding: 16px;
+    }
+
+    .login-card {
+      background: var(--white);
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.12);
+      text-align: center;
+    }
+
+    .login-card h1 {
+      color: var(--blue);
+      font-size: 1.8rem;
+      margin-bottom: 8px;
+    }
+
+    .login-card p {
+      color: var(--dark);
+      margin-bottom: 18px;
+    }
+
+    .login-card form {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .login-card label {
+      font-weight: 600;
+      text-align: left;
+    }
+
+    .login-card input[type="email"],
+    .login-card input[type="password"] {
+      width: 100%;
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid #ddd;
+      margin-top: 6px;
+    }
+
+    .login-card button {
+      background: var(--blue);
+      color: var(--white);
+      border: none;
+      border-radius: 10px;
+      padding: 12px;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    .login-card button:hover {
+      background: var(--yellow);
+      color: var(--dark);
+    }
+
+    .forgot-password {
+      margin-top: 20px;
+      border-top: 1px solid #eee;
+      padding-top: 12px;
+      text-align: center;
+    }
+
+    .forgot-password p {
+      font-weight: 600;
+      cursor: pointer;
+      color: var(--blue);
+      text-decoration: underline;
+    }
+
+    .forgot-password input[type="email"] {
+      margin-top: 6px;
+    }
+
+    .status-msg {
+      margin-top: 14px;
+      color: var(--danger);
+      font-weight: 600;
+    }
+
+    @media (max-width: 480px) {
+      .login-card {
+        padding: 16px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="login-container">
+    <div class="login-card">
+      <h1>💎 Connexion Premium</h1>
+      <p>Antre Email Gmail ak Modpas ou pou jwenn aksè nan Chat Prive.</p>
+
+      <form id="premiumLoginForm">
+        <label>Email Gmail:
+          <input type="email" name="email" placeholder="eg: user@gmail.com" required>
+        </label>
+
+        <label>Mot de Passe:
+          <input type="password" name="password" placeholder="Antre modpas ou" required>
+        </label>
+
+        <button type="submit" id="loginBtn">Se Connecter</button>
+      </form>
+
+      <div class="forgot-password">
+        <p>Mot de Passe Oublie?</p>
+        <form id="recoverForm">
+          <label>E-mail de recuperation:
+            <input type="email" name="emailRecovery" placeholder="Antre 2em email ou" required>
+          </label>
+          <button type="submit" id="recoverBtn">Rekiperasyon Modpas</button>
+        </form>
+      </div>
+
+      <p id="statusMessage" class="status-msg"></p>
+    </div>
+  </main>
+
+  <script src="login-premium.js"></script>
+</body>
+</html>
