@@ -723,7 +723,73 @@ app.get('/Chatprive.html', (req, res) => {
   res.sendFile(path.join(__dirname, 'Chatprive.html'));
 });
 
+
+
+
+
+
+
+
+
+// ---------- PREMIUM / PAYMENTS (paste after Message model) ----------
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
+const multer = require('multer');
+const nodemailer = require('nodemailer');
+
+// Premium user schema (registre peman + screenshot + kont)
+const premiumUserSchema = new mongoose.Schema({
+  fullname: { type: String, required: true },
+  email: { type: String, required: true },        // email login
+  emailRecovery: { type: String, required: true }, // 2em email restore
+  passwordHash: { type: String, required: true },
+  method: { type: String, required: true },       // MonCash|NatCash|Western|PayPal|Card|Zelle
+  txnId: { type: String, default: null },         // optional user-provided txn id
+  amount: { type: Number, default: 0 },
+  status: { type: String, default: 'pending' },   // pending | awaiting_txn | approved | rejected
+  screenshot: {
+    data: Buffer,
+    contentType: String,
+    filename: String
+  },
+  createdAt: { type: Date, default: Date.now },
+  approvedAt: Date,
+  adminNote: String
+});
+const PremiumUser = mongoose.model('PremiumUser', premiumUserSchema);
+
+// JWT secret & settings
+const PREMIUM_JWT_SECRET = process.env.PREMIUM_JWT_SECRET || 'please_change_me';
+const PREMIUM_EXP_DAYS = parseInt(process.env.PREMIUM_EXP_DAYS || '30', 10);
+
+// Helper: create token
+function makePremiumToken(userId, email) {
+  const payload = { userId, email, premium: true };
+  return jwt.sign(payload, PREMIUM_JWT_SECRET, { expiresIn: `${PREMIUM_EXP_DAYS}d` });
+}
+function verifyPremiumToken(token) {
+  try { return jwt.verify(token, PREMIUM_JWT_SECRET); } catch (e) { return null; }
+}
+
+// Multer storage (memory storage -> we save Buffer to MongoDB)
+const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 5 * 1024 * 1024 } }); // 5MB max
+
+// Nodemailer transport (use env vars)
+const transporter = nodemailer.createTransport({
+  host: process.env.SMTP_HOST,
+  port: parseInt(process.env.SMTP_PORT || '587', 10),
+  secure: process.env.SMTP_SECURE === 'true', // true for 465
+  auth: {
+    user: process.env.SMTP_USER,
+    pass: process.env.SMTP_PASS
+  }
+});
+
+// Router
+const premiumRouter = require('express').Router();
+app.use(express.json()); // ensure body parser available
 // ---------------------------
+
 // 🚀 DEMARRE SERVEUR
 // ---------------------------
 const PORT = process.env.PORT || 3000;
