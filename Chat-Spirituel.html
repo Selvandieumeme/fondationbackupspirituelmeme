@@ -445,10 +445,10 @@ socket.on('online-users', (arr) => renderUsers(arr));
 
 
 <!-- ✅ PYE DE PAJ / FOOTER OFFISYÈL ak 2 bouton Premium -->
-<footer class="fobas-footer" style="position:relative; padding:20px; text-align:center; background:#222; color:#fff;">
+<footer class="fobas-footer">
   
   <!-- Boutons Premium -->
-  <div class="footer-buttons" style="margin-bottom:12px; display:flex; justify-content:center; gap:12px; flex-wrap:wrap;">
+  <div class="footer-buttons">
     <!-- Chat Premium -->
     <a href="premium.html" class="premium-btn-small">
       💎 Chat Premium
@@ -460,13 +460,31 @@ socket.on('online-users', (arr) => renderUsers(arr));
   </div>
 
   <!-- Tekst Footer -->
-  <div style="font-weight:600;">
+  <div class="footer-text">
     Fondation Backup Spirituel - 2025
   </div>
 </footer>
 
-<!-- ✅ Styles Bouton Redwi -->
+<!-- ✅ Styles Footer ak Boutons Redwi -->
 <style>
+  /* Footer toujou anba paj */
+  .fobas-footer {
+    position: relative; /* si ou vle ou ka mete fixed: position: fixed; bottom: 0; width: 100%; */
+    padding: 20px;
+    text-align: center;
+    background: #222;
+    color: #fff;
+  }
+
+  /* Bouton Premium nan footer */
+  .footer-buttons {
+    margin-bottom: 12px;
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
   .premium-btn-small {
     background: linear-gradient(135deg, #FFD24C, #2B8CFF, #ffffff);
     color: #222;
@@ -485,6 +503,11 @@ socket.on('online-users', (arr) => renderUsers(arr));
     color: #000;
     transform: translateY(-2px) scale(1.05);
     box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+  }
+
+  .footer-text {
+    font-weight: 600;
+    margin-top: 6px;
   }
 
   @media (max-width: 480px) {
