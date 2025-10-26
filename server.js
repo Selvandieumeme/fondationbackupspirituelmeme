@@ -740,229 +740,122 @@ app.get('/Chatprive.html', (req, res) => {
 
 // ---------- PREMIUM / PAYMENTS SYSTEM (Nouvo konpatib premium.js + premium.html) ----------
 
-// ✅ 1. SCHEMA POU PREMIUM USERS
-const premiumUserSchema = new mongoose.Schema({
-  fullname: { type: String, required: true },
-  email: { type: String, required: true, unique: true },
-  emailRecovery: { type: String },
-  passwordHash: { type: String },
-  method: { type: String, required: true },
-  amount: { type: Number, default: 0 },
-  txnId: { type: String, default: null },
-  screenshot: {
-    data: Buffer,
-    contentType: String,
-    filename: String
-  },
+import { fileURLToPath } from 'url';
+import crypto from 'crypto';
+
+// --- Setup Express ---
+const app = express();
+const PORT = process.env.PORT || 3000;
+
+// --- MongoDB Connection ---
+const MONGO_URI = 'mongodb://127.0.0.1:27017/fobas';
+mongoose.connect(MONGO_URI)
+  .then(() => console.log('✅ MongoDB konekte'))
+  .catch(err => console.error('❌ Erè MongoDB:', err));
+
+// --- Schema MongoDB ---
+const premiumSchema = new mongoose.Schema({
+  fullname: String,
+  email: String,
+  emailRecovery: String,
+  phone: String,
+  password: String,
+  method: String,
+  amount: Number,
+  txnId: String,
+  screenshotPath: String,
   status: { type: String, default: 'pending' },
-  createdAt: { type: Date, default: Date.now },
-  approvedAt: { type: Date },
-  adminNote: String
+  createdAt: { type: Date, default: Date.now }
 });
-const PremiumUser = mongoose.model('PremiumUser', premiumUserSchema);
 
-// ✅ 2. JWT SETTINGS
-const PREMIUM_JWT_SECRET = process.env.PREMIUM_JWT_SECRET || 'please_change_me';
-const PREMIUM_EXP_DAYS = parseInt(process.env.PREMIUM_EXP_DAYS || '30', 10);
-function makePremiumToken(userId, email) {
-  return jwt.sign({ userId, email, premium: true }, PREMIUM_JWT_SECRET, { expiresIn: `${PREMIUM_EXP_DAYS}d` });
-}
+const Premium = mongoose.model('Premium', premiumSchema);
 
-// ✅ 3. MULTER POU UPLOAD SCREENSHOT
-const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 5 * 1024 * 1024 } });
+// --- Middleware ---
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-// ✅ 4. NODEMAILER TRANSPORT
+// Serve static files (HTML/CSS/JS)
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+app.use(express.static(path.join(__dirname, 'public')));
+
+// --- Upload Config (Multer) ---
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => cb(null, path.join(__dirname, 'uploads')),
+  filename: (req, file, cb) => {
+    const uniqueSuffix = Date.now() + '-' + crypto.randomBytes(4).toString('hex');
+    cb(null, `${uniqueSuffix}-${file.originalname}`);
+  }
+});
+const upload = multer({ storage });
+
+// --- Nodemailer Setup ---
 const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST,
-  port: parseInt(process.env.SMTP_PORT || '587', 10),
-  secure: process.env.SMTP_SECURE === 'true',
+  service: 'gmail',
   auth: {
-    user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASS
+    user: 'votreemail@gmail.com',        // <-- Mete imel ou la
+    pass: 'votremotdepasseappli'        // <-- Mete mot de pase aplikasyon Gmail
   }
 });
 
-// ✅ 5. EXPRESS ROUTER POU PREMIUM
-const premiumRouter = require('express').Router();
-app.use(express.json());
-
-// --- CREATE PREMIUM REQUEST ---
-// Nou itilize POST /api/premium/create kòm nan premium.js
-premiumRouter.post('/create', upload.single('screenshot'), async (req, res) => {
+// --- API: Kreye Demann Premium ---
+app.post('/api/premium/create', upload.single('screenshot'), async (req, res) => {
   try {
-    const { userId, email, method, amount, txnId } = req.body;
+    const { fullname, email, emailRecovery, phone, password, method, amount, txnId } = req.body;
+    const screenshotPath = req.file ? req.file.filename : null;
 
-    if (!userId || !email || !method || !amount) {
-      return res.status(400).json({ error: 'Tout chan obligatwa.' });
+    // Validation debaz
+    if (!fullname || !email || !phone || !method || !amount) {
+      return res.status(400).json({ error: 'Tout chan obligatwa yo dwe ranpli.' });
     }
 
-    const methods = ['MonCash','NatCash','Western','PayPal','Card','Zelle'];
-    if (!methods.includes(method)) return res.status(400).json({ error: 'Metòd peman pa sipòte.' });
-
-    // Kreye rekò a
-    const rec = new PremiumUser({
-      fullname: userId,  // frontend ap voye userId kòm non itilizatè/fidèl
+    // Kreye nouvo record
+    const newPremium = new Premium({
+      fullname,
       email,
+      emailRecovery,
+      phone,
+      password,
       method,
-      amount: Number(amount),
-      txnId: txnId || null,
-      status: 'pending'
+      amount,
+      txnId,
+      screenshotPath
+    });
+    await newPremium.save();
+
+    // Voye imel notifikasyon admin
+    const mailOptions = {
+      from: '"FOBAS Premium" <votreemail@gmail.com>',
+      to: 'infos@fondationbackupspirituel.com',  // <-- mete imel ou pou resevwa notifikasyon
+      subject: `Nouvelle Demande Premium: ${fullname}`,
+      text: `
+Nou gen yon nouvo demann Premium:
+
+Nom: ${fullname}
+Email: ${email}
+Email Recovery: ${emailRecovery}
+Téléphone: ${phone}
+Méthode de paiement: ${method}
+Montant: ${amount}
+ID Tranzaksyon: ${txnId || 'N/A'}
+Status: Pending
+
+Screenshot: ${screenshotPath ? screenshotPath : 'Pa uploadé'}
+      `
+    };
+    transporter.sendMail(mailOptions, (err, info) => {
+      if (err) console.error('❌ Erè voye imel:', err);
+      else console.log('✅ Imel voye:', info.response);
     });
 
-    // attach screenshot si genyen
-    if (req.file) {
-      rec.screenshot = {
-        data: req.file.buffer,
-        contentType: req.file.mimetype,
-        filename: req.file.originalname
-      };
-    }
-
-    await rec.save();
-
-    // Notifikasyon email admin
-    const mail = {
-      from: process.env.SMTP_USER,
-      to: process.env.PREMIUM_ADMIN_EMAIL || 'infos@fondationbackupspirituel.com',
-      subject: `Nouvo Demann Premium: ${rec.fullname}`,
-      text: `Nouvo demann Premium kreye.\nNon: ${rec.fullname}\nEmail: ${rec.email}\nMetòd: ${rec.method}\nTxnId: ${rec.txnId || 'N/A'}\nMontan: ${rec.amount}\nID Rekò DB: ${rec._id}`,
-      attachments: req.file ? [{ filename: req.file.originalname, content: req.file.buffer, contentType: req.file.mimetype }] : []
-    };
-    transporter.sendMail(mail).catch(err => console.error(err));
-
-    return res.json({ ok: true, id: rec._id, status: rec.status });
+    // Retounen JSON pou frontend
+    res.json({ id: newPremium._id, status: newPremium.status });
 
   } catch (err) {
-    console.error('premium/create err', err);
-    return res.status(500).json({ error: 'Server error' });
+    console.error(err);
+    res.status(500).json({ error: 'Erè sèvè pandan kreye demann.' });
   }
 });
-
-// --- SUBMIT TRANSACTION ID ---
-// POST /api/premium/submit-txn
-premiumRouter.post('/submit-txn', async (req, res) => {
-  try {
-    const { id, txnId } = req.body;
-    if (!id || !txnId) return res.status(400).json({ error: 'Tanpri bay Record ID + txnId.' });
-
-    const rec = await PremiumUser.findById(id);
-    if (!rec) return res.status(404).json({ error: 'Rekò pa jwenn.' });
-
-    rec.txnId = txnId;
-    rec.status = 'awaiting_txn';
-    await rec.save();
-
-    return res.json({ ok: true, message: 'ID tranzaksyon soumèt. Admin ap verifye.' });
-  } catch (err) {
-    console.error('premium/submit-txn err', err);
-    return res.status(500).json({ error: 'Server error' });
-  }
-});
-
-// --- LOGIN PREMIUM USER ---
-// POST /api/premium/login
-premiumRouter.post('/login', async (req, res) => {
-  try {
-    const { email, password } = req.body;
-    if (!email || !password) return res.status(400).json({ error: 'Champs manke.' });
-
-    const rec = await PremiumUser.findOne({ email });
-    if (!rec) return res.status(401).json({ error: 'Invalid credentials.' });
-    if (rec.status !== 'approved') return res.status(403).json({ error: 'Kont pa aktive.', status: rec.status });
-
-    const token = makePremiumToken(rec._id.toString(), rec.email);
-    return res.json({ ok: true, token, expiresAt: rec.approvedAt ? new Date(Date.now() + PREMIUM_EXP_DAYS*24*3600*1000) : null });
-
-  } catch (err) {
-    console.error('premium/login err', err);
-    return res.status(500).json({ error: 'Server error' });
-  }
-});
-
-// --- ADMIN: LIST PREMIUM USERS ---
-premiumRouter.get('/admin/list', async (req, res) => {
-  try {
-    const list = await PremiumUser.find().sort({ createdAt: -1 }).lean();
-    const safe = list.map(r => ({
-      id: r._id, fullname: r.fullname, email: r.email, method: r.method, txnId: r.txnId,
-      amount: r.amount, status: r.status, createdAt: r.createdAt, approvedAt: r.approvedAt, adminNote: r.adminNote,
-      hasScreenshot: !!(r.screenshot && r.screenshot.data)
-    }));
-    return res.json({ ok: true, data: safe });
-  } catch (err) {
-    console.error('premium/admin/list err', err);
-    return res.status(500).json({ error: 'Server error' });
-  }
-});
-
-// --- ADMIN: APPROVE / REJECT ---
-// POST /api/premium/admin/approve
-premiumRouter.post('/admin/approve', async (req, res) => {
-  try {
-    const { id, adminNote } = req.body;
-    if (!id) return res.status(400).json({ error: 'Missing id' });
-
-    const rec = await PremiumUser.findById(id);
-    if (!rec) return res.status(404).json({ error: 'Not found' });
-
-    rec.status = 'approved';
-    rec.approvedAt = new Date();
-    rec.adminNote = adminNote || '';
-    await rec.save();
-
-    const token = makePremiumToken(rec._id.toString(), rec.email);
-
-    const mail = { from: process.env.SMTP_USER, to: rec.email, subject: 'Kont Premium aktive', text: `Token: ${token}` };
-    transporter.sendMail(mail).catch(err => console.error(err));
-
-    return res.json({ ok: true, token });
-
-  } catch (err) {
-    console.error('premium/admin/approve err', err);
-    return res.status(500).json({ error: 'Server error' });
-  }
-});
-
-// POST /api/premium/admin/reject
-premiumRouter.post('/admin/reject', async (req, res) => {
-  try {
-    const { id, adminNote } = req.body;
-    if (!id) return res.status(400).json({ error: 'Missing id' });
-
-    const rec = await PremiumUser.findById(id);
-    if (!rec) return res.status(404).json({ error: 'Not found' });
-
-    rec.status = 'rejected';
-    rec.adminNote = adminNote || '';
-    await rec.save();
-
-    const mail = { from: process.env.SMTP_USER, to: rec.email, subject: 'Kont Premium rejte', text: `Nòt admin: ${rec.adminNote || 'Pa gen nòt'}` };
-    transporter.sendMail(mail).catch(err => console.error(err));
-
-    return res.json({ ok: true });
-  } catch (err) {
-    console.error('premium/admin/reject err', err);
-    return res.status(500).json({ error: 'Server error' });
-  }
-});
-
-// --- ADMIN GET SCREENSHOT BY ID
-premiumRouter.get('/admin/screenshot/:id', async (req, res) => {
-  try {
-    const rec = await PremiumUser.findById(req.params.id).lean();
-    if (!rec || !rec.screenshot || !rec.screenshot.data) return res.status(404).send('No screenshot');
-
-    res.set('Content-Type', rec.screenshot.contentType || 'application/octet-stream');
-    res.set('Content-Disposition', `attachment; filename="${rec.screenshot.filename || 'screenshot'}"`);
-    return res.send(Buffer.from(rec.screenshot.data.buffer || rec.screenshot.data));
-  } catch (err) {
-    console.error('premium/admin/screenshot err', err);
-    return res.status(500).send('Server error');
-  }
-});
-
-// --- MOUNT PREMIUM ROUTER
-app.use('/api/premium', premiumRouter);
 
 // 🚀 DEMARRE SERVEUR
 // ---------------------------
