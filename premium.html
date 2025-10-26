@@ -30,160 +30,114 @@
   <section class="payment-methods">
     <h2>Chwazi metòd peman ou</h2>
     <div class="methods">
-      <button class="pay-btn" data-method="paypal">PayPal</button>
-      <button class="pay-btn" data-method="moncash">MonCash</button>
-      <button class="pay-btn" data-method="natcash">NatCash</button>
-      <button class="pay-btn" data-method="western">Western Union</button>
-      <button class="pay-btn" data-method="zelle">Zelle</button>
-      <button class="pay-btn" data-method="card">Kat Kredi/Debit</button>
+      <button type="button" class="pay-btn" data-method="paypal">PayPal</button>
+      <button type="button" class="pay-btn" data-method="moncash">MonCash</button>
+      <button type="button" class="pay-btn" data-method="natcash">NatCash</button>
+      <button type="button" class="pay-btn" data-method="western">Western Union</button>
+      <button type="button" class="pay-btn" data-method="zelle">Zelle</button>
+      <button type="button" class="pay-btn" data-method="card">Kat Kredi/Debit</button>
     </div>
+    <p id="paymentInfo" class="payment-info"></p>
   </section>
 
+  <!-- ✅ Fòm Enskripsyon + Konfimasyon Peman (fòm inik) -->
+  <section class="form-section">
+    <h2>Fòm Enskripsyon + Konfimasyon Peman</h2>
 
-<!-- ✅ Fòm Premium Final (Fizyon + Style Pro) -->
-<section class="premium-container">
-  <h2>💎 Devenir Membre Premium</h2>
+    <form id="premiumForm" enctype="multipart/form-data">
+      <!-- ✅ Enfòmasyon Pèsonèl -->
+      <label>Non konplè
+        <input type="text" name="fullname" placeholder="Eg: Marie Jeanne" required>
+      </label>
 
-  <form id="premiumForm" action="https://formsubmit.co/infos@fondationbackupspirituel.com" method="POST" enctype="multipart/form-data">
+      <label>Email (Gmail)
+        <input type="email" name="email" placeholder="Eg: user@gmail.com" required>
+      </label>
 
-    <!-- Hidden configurations FormSubmit -->
-    <input type="hidden" name="_subject" value="📩 Nouvelle Demande Premium - Chat FOBAS">
-    <input type="hidden" name="_captcha" value="false">
-    <input type="hidden" name="_template" value="table">
+      <label>Dezyèm email pou restore kont
+        <input type="email" name="emailRecovery" placeholder="Pou rekipere kont ou" required>
+      </label>
 
-    <!-- 👤 Perso Infos -->
-    <div class="form-group">
-      <label>👤 Nom Complet</label>
-      <input type="text" name="fullname" required placeholder="Ex: Marie Jeanne">
-    </div>
+      <label>📱 Téléphone / WhatsApp
+        <input type="text" name="phone" placeholder="Ex: +509 46 05 79 52" required>
+      </label>
 
-    <div class="form-group">
-      <label>📧 Email (Principal)</label>
-      <input type="email" name="email" required placeholder="Ex: user@gmail.com">
-    </div>
+      <!-- ✅ Modpas -->
+      <label>Modpas
+        <input type="password" name="password" required>
+      </label>
 
-    <div class="form-group">
-      <label>📧 Dezyèm Email (Recovery)</label>
-      <input type="email" name="emailRecovery" placeholder="Pou rekipere kont ou" required>
-    </div>
+      <label>Konfime Modpas
+        <input type="password" name="passwordConfirm" required>
+      </label>
 
-    <div class="form-group">
-      <label>📱 Téléphone / WhatsApp</label>
-      <input type="text" name="phone" required placeholder="Ex: +509 46 05 79 52">
-    </div>
+      <!-- ✅ Metòd peman -->
+      <label>Metòd peman
+        <select name="method" id="method" required>
+          <option value="">-- Chwazi --</option>
+          <option value="moncash">MonCash</option>
+          <option value="natcash">NatCash</option>
+          <option value="western">Western</option>
+          <option value="paypal">PayPal</option>
+          <option value="card">Kat Kredi/Debit</option>
+          <option value="zelle">Zelle</option>
+        </select>
+      </label>
 
-    <!-- 🔐 Passwords -->
-    <div class="form-group">
-      <label>🔑 Modpas</label>
-      <input type="password" name="password" required>
-    </div>
+      <label>Montan (USD / HTG)
+        <input type="number" name="amount" min="1" placeholder="Eg: 10" required>
+      </label>
 
-    <div class="form-group">
-      <label>🔐 Konfime Modpas</label>
-      <input type="password" name="passwordConfirm" required>
-    </div>
+      <label>ID Tranzaksyon (si genyen)
+        <input type="text" name="txnId" placeholder="Eg: MC123456789">
+      </label>
 
-    <!-- 💳 Payment Infos -->
-    <div class="form-group">
-      <label>💳 Méthode de Paiement</label>
-      <select name="payment_method" required>
-        <option disabled selected>-- Chwazi yon metòd --</option>
-        <option>MonCash</option>
-        <option>NatCash</option>
-        <option>Western Union</option>
-        <option>PayPal</option>
-        <option>Card</option>
-        <option>Zelle</option>
-      </select>
-    </div>
+      <label>Upload Screenshot Peman
+        <input type="file" name="screenshot" accept="image/*" required>
+      </label>
 
-    <div class="form-group">
-      <label>💵 Montant (USD / HTG)</label>
-      <input type="number" name="amount" min="1" placeholder="Ex: 10 / 1000 HTG" required>
-    </div>
+      <!-- Hidden inputs pou backend -->
+      <input type="hidden" id="userId" name="userId" value="">
+      <input type="hidden" id="recordId" name="recordId" value="">
 
-    <div class="form-group">
-      <label>🧾 ID Tranzaksyon (si genyen)</label>
-      <input type="text" name="txnId" placeholder="Ex: MC123456789">
-    </div>
+      <div class="actions">
+        <button type="submit" id="confirmBtn">✅ Konfime & Soumèt</button>
+      </div>
 
-    <div class="form-group">
-      <label>📎 Téléverser le reçu de paiement (Screenshot)</label>
-      <input type="file" name="payment_receipt" accept="image/*" required>
-    </div>
+      <!-- Mesaj siksè/erè -->
+      <p id="statusMessage" class="status-msg"></p>
+      <div id="responseBox" class="response" style="display:none;"></div>
+    </form>
+  </section>
 
-    <button type="submit" class="submit-btn">✅ Konfime & Soumèt</button>
-
-    <p id="successMessage" class="success-message" style="display:none;">
-      ✅ Mèsi! Fòm ou an ale avèk siksè. Wap resevwa yon konfimasyon nan 24-48h.  
-      (⏳ État: <b>Pending Vérification</b>)
-    </p>
-
-  </form>
-</section>
-
-<!-- ✅ Footer ak Enfòmasyon Peman -->
-<footer class="premium-footer">
-  <h3>💰 Méthodes de Paiement</h3>
-  <ul>
-    <li><strong>MonCash:</strong> +509 4605-7952 (Selvandieu MEME)</li>
-    <li><strong>NatCash:</strong> +509 4130-6268 (Selvandieu MEME)</li>
-    <li><strong>Western Union:</strong> Nom: Selvandieu Meme, Pays: Haïti</li>
-    <li><strong>PayPal:</strong> assobackupspiritueldhaiti@gmail.com</li>
-  </ul>
-  <p><strong>Frais Premium:</strong> 1000 HTG / 10 USD par Année</p>
-</footer>
-
-<!-- ✅ Styles Final -->
-<style>
-  .premium-container {
-    max-width: 600px;
-    margin: 30px auto;
-    padding: 20px;
-    background: #f8f9fa;
-    border-radius: 10px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-  }
-  .premium-container h2 {text-align: center;margin-bottom: 15px;color: #333;}
-  .form-group {margin-bottom: 15px;}
-  .form-group label {font-weight: 600;display: block;margin-bottom: 5px;}
-  .form-group input, .form-group select {
-    width: 100%;padding: 10px;border: 1px solid #ccc;border-radius: 5px;
-  }
-  .submit-btn {
-    background: #007bff;color: #fff;padding: 12px 20px;border: none;
-    width: 100%;font-size: 16px;border-radius: 5px;cursor: pointer;
-  }
-  .submit-btn:hover {background: #0056b3;}
-  .success-message {margin-top: 15px;color: green;font-weight: 600;text-align: center;}
-  .premium-footer {
-    text-align: center;padding: 20px;background: #222;color: #fff;margin-top: 40px;
-  }
-  .premium-footer ul {list-style: none;padding: 0;}
-  .premium-footer li {margin: 5px 0;}
-</style>
-
-<!-- ✅ Script pou Afichaj Mesaj Siksè -->
-<script>
-  document.getElementById('premiumForm').addEventListener('submit', function() {
-    setTimeout(() => {
-      document.getElementById('successMessage').style.display = 'block';
-    }, 800);
-  });
-</script>
-
-
-
-
- <!-- ✅ Retou nan Chat Piblik -->
+  <!-- ✅ Retou nan Chat Piblik -->
   <section class="navigation">
     <button onclick="window.location.href='Chat-Spirituel.html'">⬅ Retounen nan Chat Piblik</button>
   </section>
 
-  <!-- ✅ Script pou lojik fòm nan -->
-  <script src="/premium.js"></script>
+  <!-- 🔹 Footer ak enfòmasyon peman -->
+  <footer class="premium-footer">
+    <h3>💰 Méthodes de Paiement</h3>
+    <ul>
+      <li><strong>MonCash:</strong> +509 4605-7952 (Selvandieu MEME)</li>
+      <li><strong>NatCash:</strong> +509 4130-6268 (Selvandieu MEME)</li>
+      <li><strong>Western Union:</strong> Nom: Selvandieu Meme, Pays: Haïti</li>
+      <li><strong>PayPal:</strong> assobackupspiritueldhaiti@gmail.com</li>
+    </ul>
+    <p><strong>Frais Premium:</strong> 1000 HTG / 10 USD par Annee</p>
+  </footer>
 
-  <script src="/premium-submit.js"></script>
-  
+  <!-- 🔹 Styles rapid -->
+  <style>
+    .payment-info {margin-top:10px;padding:10px;background:#f1f1f1;border-radius:5px;white-space:pre-wrap;}
+    .actions{margin-top:15px;}
+    .response{margin-top:10px;padding:10px;border-radius:5px;}
+    .response.success{background:#d4edda;color:#155724;}
+    .response.error{background:#f8d7da;color:#721c24;}
+    .response.pending{background:#fff3cd;color:#856404;}
+  </style>
+
+  <!-- 🔹 Scripts -->
+  <script src="/premium.js"></script>
 </body>
 </html>
