@@ -740,20 +740,40 @@ app.get('/Chatprive.html', (req, res) => {
 
 // ---------- PREMIUM / PAYMENTS SYSTEM (Nouvo konpatib premium.js + premium.html) ----------
 
-import { fileURLToPath } from 'url';
-import crypto from 'crypto';
-
-// --- Setup Express ---
+// ───────────────────────────────────────────
+// ⚙️ 1. Basic Setup
+// ───────────────────────────────────────────
 const app = express();
 const PORT = process.env.PORT || 3000;
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
-// --- MongoDB Connection ---
-const MONGO_URI = 'mongodb://127.0.0.1:27017/fobas';
-mongoose.connect(MONGO_URI)
-  .then(() => console.log('✅ MongoDB konekte'))
-  .catch(err => console.error('❌ Erè MongoDB:', err));
+app.use(cors());
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(express.static(path.join(__dirname, "public"))); // kote premium.html + premium.js + css ye
 
-// --- Schema MongoDB ---
+// ───────────────────────────────────────────
+// ⚙️ 2. MongoDB Connection
+// ───────────────────────────────────────────
+if (!process.env.MONGO_URI) {
+  console.error("❌ ERÈ: Pa jwenn 'MONGO_URI' nan anviwònman (.env / Render Config Vars)");
+  process.exit(1); // Sispann server la pou evite li mache san baz done
+}
+
+mongoose.connect(process.env.MONGO_URI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true
+})
+  .then(() => console.log("✅ MongoDB konekte avèk siksè ✅"))
+  .catch(err => {
+    console.error("❌ ERÈ koneksyon MongoDB:", err);
+    process.exit(1);
+  });
+
+// ───────────────────────────────────────────
+// 📦 3. MongoDB Schema
+// ───────────────────────────────────────────
 const premiumSchema = new mongoose.Schema({
   fullname: String,
   email: String,
@@ -764,52 +784,48 @@ const premiumSchema = new mongoose.Schema({
   amount: Number,
   txnId: String,
   screenshotPath: String,
-  status: { type: String, default: 'pending' },
+  status: { type: String, default: "pending" }, // pending / approved / rejected
   createdAt: { type: Date, default: Date.now }
 });
 
-const Premium = mongoose.model('Premium', premiumSchema);
+const Premium = mongoose.model("Premium", premiumSchema);
 
-// --- Middleware ---
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-
-// Serve static files (HTML/CSS/JS)
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-app.use(express.static(path.join(__dirname, 'public')));
-
-// --- Upload Config (Multer) ---
+// ───────────────────────────────────────────
+// 📁 4. Upload Screenshot Configuration (multer)
+// ───────────────────────────────────────────
 const storage = multer.diskStorage({
   destination: (req, file, cb) => cb(null, path.join(__dirname, 'uploads')),
   filename: (req, file, cb) => {
-    const uniqueSuffix = Date.now() + '-' + crypto.randomBytes(4).toString('hex');
-    cb(null, `${uniqueSuffix}-${file.originalname}`);
+    const unique = Date.now() + "-" + crypto.randomBytes(4).toString("hex");
+    cb(null, unique + "-" + file.originalname);
   }
 });
+
 const upload = multer({ storage });
+app.use("/uploads", express.static(path.join(__dirname, "uploads"))); // pou ka wè foto yo si bezwen
 
-// --- Nodemailer Setup ---
+// ───────────────────────────────────────────
+// 📧 5. Email Notification (Nodemailer Setup)
+// ───────────────────────────────────────────
 const transporter = nodemailer.createTransport({
-  service: 'gmail',
+  service: "gmail",
   auth: {
-    user: 'votreemail@gmail.com',        // <-- Mete imel ou la
-    pass: 'votremotdepasseappli'        // <-- Mete mot de pase aplikasyon Gmail
+    user: "votreemail@gmail.com",        // 👉 mete email admin
+    pass: "votre_motdepasse_application" // 👉 pa mete modpas nòmal (se app password)
   }
 });
 
-// --- API: Kreye Demann Premium ---
-app.post('/api/premium/create', upload.single('screenshot'), async (req, res) => {
+// ───────────────────────────────────────────
+// 📌 6. API – Créer Demande Premium
+// ───────────────────────────────────────────
+app.post("/api/premium/create", upload.single("screenshot"), async (req, res) => {
   try {
     const { fullname, email, emailRecovery, phone, password, method, amount, txnId } = req.body;
-    const screenshotPath = req.file ? req.file.filename : null;
 
-    // Validation debaz
     if (!fullname || !email || !phone || !method || !amount) {
-      return res.status(400).json({ error: 'Tout chan obligatwa yo dwe ranpli.' });
+      return res.status(400).json({ error: "Tanpri ranpli tout chan obligatwa yo." });
     }
 
-    // Kreye nouvo record
     const newPremium = new Premium({
       fullname,
       email,
@@ -818,44 +834,60 @@ app.post('/api/premium/create', upload.single('screenshot'), async (req, res) =>
       password,
       method,
       amount,
-      txnId,
-      screenshotPath
+      txnId: txnId || null,
+      screenshotPath: req.file ? req.file.filename : null
     });
+
     await newPremium.save();
 
-    // Voye imel notifikasyon admin
-    const mailOptions = {
-      from: '"FOBAS Premium" <votreemail@gmail.com>',
-      to: 'infos@fondationbackupspirituel.com',  // <-- mete imel ou pou resevwa notifikasyon
-      subject: `Nouvelle Demande Premium: ${fullname}`,
-      text: `
+
+	  // ✅ Email admin (koreksyon pou sekirite)  
+transporter.sendMail({
+  from: `"FOBAS Premium" <${process.env.MAIL_FROM}>`,  // ✅ soti nan .env
+  to: process.env.ADMIN_EMAIL,                        // ✅ admin resevwa notif pa .env
+  subject: `Nouvo demann Premium: ${fullname}`,
+  text: `
 Nou gen yon nouvo demann Premium:
 
-Nom: ${fullname}
-Email: ${email}
-Email Recovery: ${emailRecovery}
-Téléphone: ${phone}
-Méthode de paiement: ${method}
-Montant: ${amount}
-ID Tranzaksyon: ${txnId || 'N/A'}
-Status: Pending
+👤 Non: ${fullname}
+📧 Email: ${email}
+📱 Téléphone: ${phone}
+💰 Metòd peman: ${method}
+💵 Montant: ${amount}
+🆔 ID Tranzaksyon: ${txnId || "Pa antre"}
+📎 Screenshot: ${newPremium.screenshotPath || "N/A"}
 
-Screenshot: ${screenshotPath ? screenshotPath : 'Pa uploadé'}
-      `
-    };
-    transporter.sendMail(mailOptions, (err, info) => {
-      if (err) console.error('❌ Erè voye imel:', err);
-      else console.log('✅ Imel voye:', info.response);
-    });
-
-    // Retounen JSON pou frontend
-    res.json({ id: newPremium._id, status: newPremium.status });
-
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Erè sèvè pandan kreye demann.' });
-  }
+Status: pending
+  `
 });
+
+return res.json({ id: newPremium._id, status: "pending" });
+
+// ───────────────────────────────────────────
+// ✅ 7. API – Admin apwouve fichye Premium
+// ───────────────────────────────────────────
+app.post("/api/premium/approve", async (req, res) => {
+  const { id } = req.body;
+  const user = await Premium.findByIdAndUpdate(id, { status: "approved" }, { new: true });
+  if (!user) return res.status(404).json({ error: "Demann pa jwenn." });
+  res.json({ success: true, status: user.status });
+});
+
+// ❌ Rejete
+app.post("/api/premium/reject", async (req, res) => {
+  const { id } = req.body;
+  const user = await Premium.findByIdAndUpdate(id, { status: "rejected" }, { new: true });
+  if (!user) return res.status(404).json({ error: "Demann pa jwenn." });
+  res.json({ success: true, status: user.status });
+});
+
+// 📊 Verify status
+app.get("/api/premium/status/:id", async (req, res) => {
+  const user = await Premium.findById(req.params.id);
+  if (!user) return res.status(404).json({ error: "ID pa jwenn." });
+  res.json({ status: user.status });
+});
+
 
 // 🚀 DEMARRE SERVEUR
 // ---------------------------
