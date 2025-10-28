@@ -889,6 +889,135 @@ app.get("/api/premium/status/:id", async (req, res) => {
 });
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	  const app = express();
+app.use(cors());
+app.use(express.json());
+app.use(express.static('public')); // html/css/js
+
+// ------------------
+// MongoDB
+// ------------------
+mongoose.connect(process.env.MONGO_URI,{
+  useNewUrlParser:true,
+  useUnifiedTopology:true
+}).then(()=>console.log('MongoDB Connected')).catch(err=>console.error(err));
+
+// ------------------
+// SCHEMAS
+// ------------------
+const messageSchema = new mongoose.Schema({
+  from:String,
+  to:String,
+  message:String,
+  date:{type:Date,default:Date.now},
+  read:{type:Boolean,default:false}
+});
+const Message = mongoose.model('Message',messageSchema);
+
+const userSchema = new mongoose.Schema({
+  username:String,
+  role:String // teacher / student
+});
+const User = mongoose.model('User',userSchema);
+
+// ------------------
+// SOCKET.IO
+// ------------------
+const server = http.createServer(app);
+const io = new Server(server,{ cors:{ origin:'*', methods:['GET','POST'] } });
+
+const onlineUsers = new Map();
+
+function broadcastOnline(){
+  const arr=[];
+  for(const [id,info] of onlineUsers.entries()){
+    arr.push({id,user:info.user,role:info.role,connected:info.sockets.size>0});
+  }
+  io.emit('online-users',arr);
+}
+
+// MEME AI Inspector
+function MEME_inspect(msg){
+  // Ou kapab ajoute regle AI pou siveyans
+  console.log('[MEME AI Inspector]',msg);
+}
+
+io.on('connection',socket=>{
+  console.log('User connected:',socket.id);
+
+  socket.on('setUser',({username,role})=>{
+    const userId=username.trim().toLowerCase();
+    if(!onlineUsers.has(userId)) onlineUsers.set(userId,{user:username,sockets:new Set(),role:role});
+    const record=onlineUsers.get(userId);
+    record.sockets.add(socket.id);
+    socket.data.userId=userId;
+    socket.data.role=role;
+    broadcastOnline();
+  });
+
+  // Chat prive teacher ↔ elèv
+  socket.on('private-message',({from,to,message})=>{
+    if(!from||!to||!message) return;
+    const payload={from,to,message,date:new Date()};
+    MEME_inspect(payload);
+    const target=onlineUsers.get(to.toLowerCase());
+    if(target) target.sockets.forEach(sid=>io.to(sid).emit('private-message',payload));
+    const sender=onlineUsers.get(from.toLowerCase());
+    if(sender) sender.sockets.forEach(sid=>io.to(sid).emit('private-message',payload));
+  });
+
+  socket.on('chat-message',async({from,to,message})=>{
+    if(!from||!to||!message) return;
+    const msg=new Message({from,to,message,read:true});
+    await msg.save();
+    io.to(socket.id).emit('chat-message',{from,message,date:msg.date});
+  });
+
+  // Teacher controls
+  socket.on('mute-all',room=>io.to(room).emit('mute-mic'));
+  socket.on('stop-all-video',room=>io.to(room).emit('stop-video'));
+  socket.on('raise-hand',({user,room})=>io.to(room).emit('raised-hand',user));
+  socket.on('join-room',room=>socket.join(room));
+  socket.on('leave-room',room=>socket.leave(room));
+
+  socket.on('disconnect',()=>{
+    const userId=socket.data.userId;
+    if(userId&&onlineUsers.has(userId)){
+      const record=onlineUsers.get(userId);
+      record.sockets.delete(socket.id);
+      if(record.sockets.size===0) onlineUsers.delete(userId);
+      broadcastOnline();
+    }
+  });
+});
+
+// ------------------
+// FILE UPLOAD
+// ------------------
+const upload=multer({storage:multer.memoryStorage()});
+app.post('/upload-recording',upload.single('file'),(req,res)=>{res.json({success:true});});
+app.post('/upload-doc',upload.single('document'),(req,res)=>{res.json({success:true});});
+
+// ------------------
+// FRONT-END
+// ------------------
+app.get('/Ecole-en-ligne.html',(req,res)=>res.sendFile(path.join(__dirname,'public','Ecole-en-ligne.html')));
+
+
 // 🚀 DEMARRE SERVEUR
 // ---------------------------
 const PORT = process.env.PORT || 3000;
