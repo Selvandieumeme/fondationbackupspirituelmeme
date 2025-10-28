@@ -1,7 +1,10 @@
+// ✅ Koneksyon Socket.io avèk backend prensipal la
 const socket = io("https://examen-backend-ihlx.onrender.com");
 
+// ✅ Deklarasyon varyab prensipal yo
 let localStream, recorder, chunks = [];
 
+// ✅ Seleksyon tout eleman HTML yo
 const joinBtn = document.getElementById('join-room');
 const roomCodeInput = document.getElementById('room-code');
 const usernameInput = document.getElementById('username');
@@ -18,18 +21,23 @@ const messages = document.getElementById('messages');
 const msgInput = document.getElementById('msg');
 const sendBtn = document.getElementById('send');
 
-// ✅ Konekte nan sal la
+// ✅ Antre nan sal la
 joinBtn.onclick = async () => {
   const room = roomCodeInput.value.trim();
   const username = usernameInput.value.trim();
   const role = roleSelect.value;
 
-  if (!room || !username) return alert('Remplissez tous les champs');
+  if (!room || !username) {
+    alert('Remplissez tous les champs');
+    return;
+  }
 
   socket.emit('setUser', { username, role });
   socket.emit('join-room', room);
 
-  if (role === 'teacher') teacherControls.style.display = 'block';
+  if (role === 'teacher') {
+    teacherControls.style.display = 'block';
+  }
 
   try {
     localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
@@ -40,26 +48,46 @@ joinBtn.onclick = async () => {
 };
 
 // ✅ Bouton pwofesè yo
-muteAllBtn.onclick = () => socket.emit('mute-all', roomCodeInput.value.trim());
-stopAllBtn.onclick = () => socket.emit('stop-all-video', roomCodeInput.value.trim());
+muteAllBtn.onclick = () => {
+  const room = roomCodeInput.value.trim();
+  if (room) socket.emit('mute-all', room);
+};
 
-// ✅ Anrejistreman videyo
+stopAllBtn.onclick = () => {
+  const room = roomCodeInput.value.trim();
+  if (room) socket.emit('stop-all-video', room);
+};
+
+// ✅ Anrejistreman videyo sesyon an
 startRecBtn.onclick = () => {
-  if (!localStream) return alert('Activez la caméra d’abord');
+  if (!localStream) {
+    alert('Activez la caméra d’abord');
+    return;
+  }
   recorder = new MediaRecorder(localStream);
   recorder.ondataavailable = e => chunks.push(e.data);
   recorder.start(1000);
+
   startRecBtn.disabled = true;
   stopRecBtn.disabled = false;
 };
 
 stopRecBtn.onclick = async () => {
   if (!recorder) return;
+
   recorder.stop();
   const blob = new Blob(chunks, { type: 'video/webm' });
   const form = new FormData();
   form.append('file', blob, 'session.webm');
-  await fetch('./upload-recording', { method: 'POST', body: form });
+
+  try {
+    await fetch('/upload-recording', { method: 'POST', body: form });
+    alert('🎥 Enregistrement sauvegardé avec succès');
+  } catch (e) {
+    console.error(e);
+    alert('Erreur pendant le téléversement de la vidéo');
+  }
+
   chunks = [];
   startRecBtn.disabled = false;
   stopRecBtn.disabled = true;
@@ -69,20 +97,29 @@ stopRecBtn.onclick = async () => {
 uploadDoc.onchange = async () => {
   const file = uploadDoc.files[0];
   if (!file) return;
+
   const form = new FormData();
   form.append('document', file);
-  await fetch('./upload-doc', { method: 'POST', body: form });
-  alert('📄 Document téléversé avec succès');
+
+  try {
+    await fetch('/upload-doc', { method: 'POST', body: form });
+    alert('📄 Document téléversé avec succès');
+  } catch (err) {
+    console.error(err);
+    alert('Erreur pendant le téléversement du document');
+  }
 };
 
-// ✅ Chat
+// ✅ Chat — voye mesaj
 sendBtn.onclick = () => {
   const text = msgInput.value.trim();
   if (!text) return;
+
   const from = usernameInput.value.trim();
   socket.emit('chat-message', { from, message: text });
+
   const li = document.createElement('li');
-  li.textContent = 'Vous: ' + text;
+  li.textContent = `Vous: ${text}`;
   messages.appendChild(li);
   msgInput.value = '';
 };
@@ -94,10 +131,15 @@ socket.on('chat-message', data => {
   messages.appendChild(li);
 });
 
-// ✅ Kontwòl pwofesè yo
+// ✅ Kontwòl pwofesè yo (mute ak sispann videyo)
 socket.on('mute-mic', () => {
-  if (localStream) localStream.getAudioTracks().forEach(t => (t.enabled = false));
+  if (localStream) {
+    localStream.getAudioTracks().forEach(track => (track.enabled = false));
+  }
 });
+
 socket.on('stop-video', () => {
-  if (localStream) localStream.getVideoTracks().forEach(t => (t.enabled = false));
+  if (localStream) {
+    localStream.getVideoTracks().forEach(track => (track.enabled = false));
+  }
 });
