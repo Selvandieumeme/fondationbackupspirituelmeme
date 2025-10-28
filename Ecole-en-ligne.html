@@ -1,125 +1,134 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="UTF-8">
-<title>École en Ligne — Fondation Backup Spirituel</title>
-<link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <title>École en Ligne — Fondation Backup Spirituel</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="ecole-en-ligne.css">
 </head>
 <body>
-<h1>École en Ligne — Fondation Backup Spirituel</h1>
+  <h1>École en Ligne — Fondation Backup Spirituel</h1>
 
-<div id="room-controls">
-  <input type="text" id="room-code" placeholder="Code de salle">
-  <input type="text" id="username" placeholder="Votre nom">
-  <select id="role"><option value="teacher">Teacher</option><option value="student">Student</option></select>
-  <button id="join-room">Rejoindre</button>
-</div>
+  <div id="room-controls">
+    <input type="text" id="room-code" placeholder="Code de salle">
+    <input type="text" id="username" placeholder="Votre nom">
+    <select id="role">
+      <option value="teacher">Teacher</option>
+      <option value="student">Student</option>
+    </select>
+    <button id="join-room">Rejoindre</button>
+  </div>
 
-<div id="teacher-controls" style="display:none;">
-  <button id="mute-all">Mute All</button>
-  <button id="stop-all-video">Stop All Video</button>
-  <button id="start-rec">Start Recording</button>
-  <button id="stop-rec">Stop Recording</button>
-  <input type="file" id="upload-doc">
-</div>
+  <div id="teacher-controls" style="display:none;">
+    <button id="mute-all">Mute All</button>
+    <button id="stop-all-video">Stop All Video</button>
+    <button id="start-rec">Start Recording</button>
+    <button id="stop-rec">Stop Recording</button>
+    <input type="file" id="upload-doc">
+  </div>
 
-<div id="video-section">
-  <video id="teacher-video" autoplay muted></video>
-  <div id="student-videos"></div>
-</div>
+  <div id="video-section">
+    <video id="teacher-video" autoplay muted></video>
+    <div id="student-videos"></div>
+  </div>
 
-<div id="chat-section">
-  <ul id="messages"></ul>
-  <input id="msg" placeholder="Votre message"><button id="send">Envoyer</button>
-</div>
+  <div id="chat-section">
+    <ul id="messages"></ul>
+    <input id="msg" placeholder="Votre message">
+    <button id="send">Envoyer</button>
+  </div>
 
-<script src="/socket.io/socket.io.js"></script>
-<script>
-const socket=io();
-let localStream,recorder,chunks=[];
+  <!-- Socket.io & App Scripts -->
+  <script src="https://examen-backend-ihlx.onrender.com/socket.io/socket.io.js"></script>
+  <script>
+    const socket = io("https://examen-backend-ihlx.onrender.com");
+    let localStream, recorder, chunks = [];
 
-const joinBtn=document.getElementById('join-room');
-const roomCodeInput=document.getElementById('room-code');
-const usernameInput=document.getElementById('username');
-const roleSelect=document.getElementById('role');
-const teacherControls=document.getElementById('teacher-controls');
-const teacherVideo=document.getElementById('teacher-video');
-const studentVideos=document.getElementById('student-videos');
-const muteAllBtn=document.getElementById('mute-all');
-const stopAllBtn=document.getElementById('stop-all-video');
-const startRecBtn=document.getElementById('start-rec');
-const stopRecBtn=document.getElementById('stop-rec');
-const uploadDoc=document.getElementById('upload-doc');
-const messages=document.getElementById('messages');
-const msgInput=document.getElementById('msg');
-const sendBtn=document.getElementById('send');
+    const joinBtn = document.getElementById('join-room');
+    const roomCodeInput = document.getElementById('room-code');
+    const usernameInput = document.getElementById('username');
+    const roleSelect = document.getElementById('role');
+    const teacherControls = document.getElementById('teacher-controls');
+    const teacherVideo = document.getElementById('teacher-video');
+    const muteAllBtn = document.getElementById('mute-all');
+    const stopAllBtn = document.getElementById('stop-all-video');
+    const startRecBtn = document.getElementById('start-rec');
+    const stopRecBtn = document.getElementById('stop-rec');
+    const uploadDoc = document.getElementById('upload-doc');
+    const messages = document.getElementById('messages');
+    const msgInput = document.getElementById('msg');
+    const sendBtn = document.getElementById('send');
 
-joinBtn.onclick=async ()=>{
-  const room=roomCodeInput.value.trim();
-  const username=usernameInput.value.trim();
-  const role=roleSelect.value;
-  if(!room||!username) return alert('Remplissez tous les champs');
-  socket.emit('setUser',{username,role});
-  socket.emit('join-room',room);
-  if(role==='teacher') teacherControls.style.display='block';
-  localStream=await navigator.mediaDevices.getUserMedia({video:true,audio:true});
-  teacherVideo.srcObject=localStream;
-}
+    joinBtn.onclick = async () => {
+      const room = roomCodeInput.value.trim();
+      const username = usernameInput.value.trim();
+      const role = roleSelect.value;
+      if (!room || !username) return alert('Remplissez tous les champs');
+      socket.emit('setUser', { username, role });
+      socket.emit('join-room', room);
+      if (role === 'teacher') teacherControls.style.display = 'block';
+      localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+      teacherVideo.srcObject = localStream;
+    };
 
-// Teacher controls
-muteAllBtn.onclick=()=>socket.emit('mute-all',roomCodeInput.value.trim());
-stopAllBtn.onclick=()=>socket.emit('stop-all-video',roomCodeInput.value.trim());
-startRecBtn.onclick=()=>{
-  recorder=new MediaRecorder(localStream);
-  recorder.ondataavailable=e=>chunks.push(e.data);
-  recorder.start(1000);
-}
-stopRecBtn.onclick=async ()=>{
-  recorder.stop();
-  const blob=new Blob(chunks,{type:'video/webm'});
-  const form=new FormData();
-  form.append('file',blob,'session.webm');
-  await fetch('/upload-recording',{method:'POST',body:form});
-  chunks=[];
-}
+    // Contrôles enseignant
+    muteAllBtn.onclick = () => socket.emit('mute-all', roomCodeInput.value.trim());
+    stopAllBtn.onclick = () => socket.emit('stop-all-video', roomCodeInput.value.trim());
 
-uploadDoc.onchange=async ()=>{
-  const file=uploadDoc.files[0];
-  const form=new FormData();
-  form.append('document',file);
-  await fetch('/upload-doc',{method:'POST',body:form});
-}
+    startRecBtn.onclick = () => {
+      recorder = new MediaRecorder(localStream);
+      recorder.ondataavailable = e => chunks.push(e.data);
+      recorder.start(1000);
+    };
 
-// Chat
-sendBtn.onclick=()=>{
-  const text=msgInput.value.trim();
-  if(!text) return;
-  socket.emit('private-message',{from:usernameInput.value,to:'teacher',message:text});
-  const li=document.createElement('li');
-  li.textContent='You: '+text;
-  messages.appendChild(li);
-  msgInput.value='';
-}
+    stopRecBtn.onclick = async () => {
+      recorder.stop();
+      const blob = new Blob(chunks, { type: 'video/webm' });
+      const form = new FormData();
+      form.append('file', blob, 'session.webm');
+      await fetch('https://examen-backend-ihlx.onrender.com/upload-recording', { method: 'POST', body: form });
+      chunks = [];
+    };
 
-socket.on('private-message',data=>{
-  const li=document.createElement('li');
-  li.textContent=data.from+': '+data.message;
-  messages.appendChild(li);
-});
+    uploadDoc.onchange = async () => {
+      const file = uploadDoc.files[0];
+      const form = new FormData();
+      form.append('document', file);
+      await fetch('https://examen-backend-ihlx.onrender.com/upload-doc', { method: 'POST', body: form });
+    };
 
-socket.on('chat-message',data=>{
-  const li=document.createElement('li');
-  li.textContent=data.from+': '+data.message;
-  messages.appendChild(li);
-});
+    // Chat
+    sendBtn.onclick = () => {
+      const text = msgInput.value.trim();
+      if (!text) return;
+      socket.emit('private-message', { from: usernameInput.value, to: 'teacher', message: text });
+      const li = document.createElement('li');
+      li.textContent = 'Vous: ' + text;
+      messages.appendChild(li);
+      msgInput.value = '';
+    };
 
-// Mute / stop video
-socket.on('mute-mic',()=>{if(localStream)localStream.getAudioTracks().forEach(t=>t.enabled=false);});
-socket.on('stop-video',()=>{if(localStream)localStream.getVideoTracks().forEach(t=>t.enabled=false);});
-</script>
+    socket.on('private-message', data => {
+      const li = document.createElement('li');
+      li.textContent = data.from + ': ' + data.message;
+      messages.appendChild(li);
+    });
 
-<script src="https://examen-backend-ihlx.onrender.com/socket.io/socket.io.js"></script>
-<script src="ecole-en-ligne.js"></script>
-<script src="ecole-en-ligne.css"></script>
+    socket.on('chat-message', data => {
+      const li = document.createElement('li');
+      li.textContent = data.from + ': ' + data.message;
+      messages.appendChild(li);
+    });
+
+    // Mute / Stop vidéo
+    socket.on('mute-mic', () => {
+      if (localStream) localStream.getAudioTracks().forEach(t => t.enabled = false);
+    });
+    socket.on('stop-video', () => {
+      if (localStream) localStream.getVideoTracks().forEach(t => t.enabled = false);
+    });
+  </script>
+
+  <script src="ecole-en-ligne.js"></script>
 </body>
 </html>
