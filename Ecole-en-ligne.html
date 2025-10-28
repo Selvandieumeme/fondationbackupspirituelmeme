@@ -117,5 +117,9 @@ socket.on('chat-message',data=>{
 socket.on('mute-mic',()=>{if(localStream)localStream.getAudioTracks().forEach(t=>t.enabled=false);});
 socket.on('stop-video',()=>{if(localStream)localStream.getVideoTracks().forEach(t=>t.enabled=false);});
 </script>
+
+<script src="https://examen-backend-ihlx.onrender.com/socket.io/socket.io.js"></script>
+<script src="ecole-en-ligne.js"></script>
+<script src="ecole-en-ligne.css"></script>
 </body>
 </html>
