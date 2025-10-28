@@ -1,0 +1,13 @@
+body{font-family:Arial,sans-serif;background:#f0f8ff;margin:0;padding:20px;}
+h1{text-align:center;color:#0d6efd;}
+#room-controls{display:flex;justify-content:center;margin:10px;}
+#room-controls input,#room-controls select,#room-controls button{margin:5px;padding:5px;}
+#teacher-controls{display:flex;justify-content:center;margin:10px;}
+#teacher-controls button,#teacher-controls input{margin:5px;padding:5px;}
+#video-section{display:flex;flex-wrap:wrap;justify-content:center;margin:20px;}
+video{border:2px solid #0d6efd;border-radius:8px;margin:5px;max-width:300px;}
+#student-videos{display:flex;flex-wrap:wrap;justify-content:center;}
+#chat-section{border:1px solid #0d6efd;border-radius:8px;padding:10px;max-width:600px;margin:auto;}
+#messages{list-style:none;padding:0;height:200px;overflow-y:auto;}
+#messages li{padding:5px;border-bottom:1px solid #ccc;}
+input,button{padding:5px;margin:3px;}
