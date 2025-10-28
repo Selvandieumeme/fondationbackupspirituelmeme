@@ -1,13 +1,126 @@
-body{font-family:Arial,sans-serif;background:#f0f8ff;margin:0;padding:20px;}
-h1{text-align:center;color:#0d6efd;}
-#room-controls{display:flex;justify-content:center;margin:10px;}
-#room-controls input,#room-controls select,#room-controls button{margin:5px;padding:5px;}
-#teacher-controls{display:flex;justify-content:center;margin:10px;}
-#teacher-controls button,#teacher-controls input{margin:5px;padding:5px;}
-#video-section{display:flex;flex-wrap:wrap;justify-content:center;margin:20px;}
-video{border:2px solid #0d6efd;border-radius:8px;margin:5px;max-width:300px;}
-#student-videos{display:flex;flex-wrap:wrap;justify-content:center;}
-#chat-section{border:1px solid #0d6efd;border-radius:8px;padding:10px;max-width:600px;margin:auto;}
-#messages{list-style:none;padding:0;height:200px;overflow-y:auto;}
-#messages li{padding:5px;border-bottom:1px solid #ccc;}
-input,button{padding:5px;margin:3px;}
+/* === STYLE GLOBAL === */
+body {
+  font-family: Arial, sans-serif;
+  background: #f0f8ff;
+  margin: 0;
+  padding: 20px;
+}
+
+/* === TITRE PRINCIPAL === */
+h1 {
+  text-align: center;
+  color: #0d6efd;
+  margin-bottom: 20px;
+}
+
+/* === CONTROLES DE CONNEXION === */
+#room-controls {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin: 10px auto;
+}
+
+#room-controls input,
+#room-controls select,
+#room-controls button {
+  margin: 5px;
+  padding: 8px 10px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+/* === CONTROLES ENSEIGNANT === */
+#teacher-controls {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin: 10px auto;
+}
+
+#teacher-controls button,
+#teacher-controls input {
+  margin: 5px;
+  padding: 8px 12px;
+  border: none;
+  border-radius: 6px;
+  background: #0d6efd;
+  color: #fff;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+#teacher-controls button:hover {
+  background: #0b5ed7;
+}
+
+/* === SECTION VIDEO === */
+#video-section {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin: 20px auto;
+}
+
+video {
+  border: 2px solid #0d6efd;
+  border-radius: 8px;
+  margin: 5px;
+  max-width: 300px;
+  background: #000;
+}
+
+/* === VIDEOS ÉTUDIANTS === */
+#student-videos {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+/* === SECTION CHAT === */
+#chat-section {
+  border: 1px solid #0d6efd;
+  border-radius: 8px;
+  padding: 10px;
+  max-width: 600px;
+  margin: 20px auto;
+  background: #fff;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+#messages {
+  list-style: none;
+  padding: 0;
+  height: 200px;
+  overflow-y: auto;
+  margin-bottom: 10px;
+}
+
+#messages li {
+  padding: 6px 8px;
+  border-bottom: 1px solid #ccc;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+/* === INPUTS & BOUTONS GÉNÉRAUX === */
+input,
+button {
+  padding: 6px 10px;
+  margin: 3px;
+  font-size: 14px;
+  border-radius: 6px;
+}
+
+button {
+  background: #0d6efd;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+button:hover {
+  background: #0b5ed7;
+}
