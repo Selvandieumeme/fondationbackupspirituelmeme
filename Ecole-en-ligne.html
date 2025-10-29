@@ -350,6 +350,9 @@
   const teacherVideo = document.getElementById('teacher-video');
   const uploadDoc = document.getElementById('upload-doc');
 
+  const socket = io("https://examen-backend-ihlx.onrender.com");
+  let localStream;
+
   joinBtn.addEventListener('click', async () => {
     if (roleSelect.value !== 'teacher') return;
 
@@ -357,70 +360,94 @@
     const room = roomCodeInput.value.trim();
     if (!username || !room) return alert('Remplissez tous les champs');
 
-    const socket = io("https://examen-backend-ihlx.onrender.com");
     socket.emit('setUser', { username, role: 'teacher' });
     socket.emit('join-room', room);
 
     teacherControls.style.display = 'flex';
 
     try {
-      const localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+      // Mikwo + kamera pwofesè
+      localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
       teacherVideo.srcObject = localStream;
 
-      // Bouton mute mikwo pwòp
-      const muteMicBtn = document.createElement('button');
-      muteMicBtn.textContent = 'Mute Micro';
-      muteMicBtn.style.margin = '6px';
-      teacherControls.appendChild(muteMicBtn);
+      // === Kontwòl Pwofesè ===
+      const makeBtn = (txt, action) => {
+        const b = document.createElement('button');
+        b.textContent = txt;
+        b.style.margin = '6px';
+        b.style.padding = '10px 14px';
+        b.style.borderRadius = '8px';
+        b.style.background = '#ffd700';
+        b.style.color = '#0d6efd';
+        b.style.cursor = 'pointer';
+        b.onclick = action;
+        teacherControls.appendChild(b);
+      };
 
-      muteMicBtn.addEventListener('click', () => {
+      // Mute mikwo pwòp
+      makeBtn('Mute Micro', () => {
         localStream.getAudioTracks().forEach(t => t.enabled = !t.enabled);
       });
 
-      // Bouton mute kamera pwòp
-      const muteCamBtn = document.createElement('button');
-      muteCamBtn.textContent = 'Mute Camera';
-      muteCamBtn.style.margin = '6px';
-      teacherControls.appendChild(muteCamBtn);
-
-      muteCamBtn.addEventListener('click', () => {
+      // Mute kamera pwòp
+      makeBtn('Mute Caméra', () => {
         localStream.getVideoTracks().forEach(t => t.enabled = !t.enabled);
       });
 
       // Pataje ekran pwofesè
-      const shareScreenBtn = document.createElement('button');
-      shareScreenBtn.textContent = 'Partager Écran';
-      shareScreenBtn.style.margin = '6px';
-      teacherControls.appendChild(shareScreenBtn);
-
-      shareScreenBtn.addEventListener('click', async () => {
+      makeBtn('Partager Écran', async () => {
         try {
           const screenStream = await navigator.mediaDevices.getDisplayMedia({ video: true });
-          screenStream.getTracks().forEach(track => {
-            socket.emit('teacher-stream', { trackId: track.id, kind: track.kind });
-          });
+          const screenTrack = screenStream.getVideoTracks()[0];
+          socket.emit('teacher-screen', { room, kind: 'video' });
           alert('Écran partagé avec succès');
         } catch (err) {
           alert('Erreur partage écran: ' + err.message);
         }
       });
 
-      // Upload dokiman pwofesè
+      // Upload dokiman
       if (uploadDoc) {
         uploadDoc.addEventListener('change', async () => {
           const file = uploadDoc.files[0];
           if (!file) return;
           const form = new FormData();
           form.append('document', file);
-          await fetch('/upload-doc', { method: 'POST', body: form });
+          await fetch('https://examen-backend-ihlx.onrender.com/upload-doc', { method: 'POST', body: form });
           alert('📄 Document téléversé avec succès');
         });
       }
 
-      // Voye chak track videyo/mikwo pwofesè nan server
-      localStream.getTracks().forEach(track => {
-        socket.emit('teacher-stream', { trackId: track.id, kind: track.kind });
+      // === Envoi du flux audio/vidéo vers les étudiants ===
+      // Nou voye stream pwofesè a pou tout moun nan sal la
+      const peerConnections = {};
+      socket.emit("teacher-ready", { room });
+
+      socket.on("student-ready", async (studentId) => {
+        const pc = new RTCPeerConnection();
+        peerConnections[studentId] = pc;
+
+        localStream.getTracks().forEach(track => pc.addTrack(track, localStream));
+
+        pc.onicecandidate = (e) => {
+          if (e.candidate) socket.emit("ice-candidate", { to: studentId, candidate: e.candidate });
+        };
+
+        const offer = await pc.createOffer();
+        await pc.setLocalDescription(offer);
+        socket.emit("offer", { to: studentId, offer });
       });
+
+      socket.on("answer", async ({ from, answer }) => {
+        const pc = peerConnections[from];
+        if (pc) await pc.setRemoteDescription(new RTCSessionDescription(answer));
+      });
+
+      socket.on("ice-candidate", async ({ from, candidate }) => {
+        const pc = peerConnections[from];
+        if (pc && candidate) await pc.addIceCandidate(new RTCIceCandidate(candidate));
+      });
+
     } catch (err) {
       alert('Erreur accès caméra/micro professeur: ' + err.message);
     }
