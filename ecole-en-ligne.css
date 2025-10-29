@@ -1,16 +1,23 @@
 /* === STYLE GLOBAL === */
 body {
-  font-family: Arial, sans-serif;
-  background: #f0f8ff;
+  font-family: 'Poppins', Arial, sans-serif;
+  background: linear-gradient(135deg, #ffffff 0%, #eaf2ff 40%, #ffd700 100%);
   margin: 0;
   padding: 20px;
+  color: #1c1c1c;
+  min-height: 100vh;
+  background-attachment: fixed;
 }
 
 /* === TITRE PRINCIPAL === */
 h1 {
   text-align: center;
   color: #0d6efd;
-  margin-bottom: 20px;
+  margin-bottom: 25px;
+  font-size: 2.2em;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  text-shadow: 0 2px 4px rgba(13, 110, 253, 0.25);
 }
 
 /* === CONTROLES DE CONNEXION === */
@@ -18,17 +25,29 @@ h1 {
   display: flex;
   justify-content: center;
   flex-wrap: wrap;
-  margin: 10px auto;
+  margin: 15px auto;
+  background: rgba(255, 255, 255, 0.85);
+  border: 2px solid #ffd700;
+  border-radius: 12px;
+  padding: 15px;
+  box-shadow: 0 4px 10px rgba(13, 110, 253, 0.1);
 }
 
 #room-controls input,
 #room-controls select,
 #room-controls button {
-  margin: 5px;
-  padding: 8px 10px;
+  margin: 6px;
+  padding: 10px 12px;
   border: 1px solid #ccc;
-  border-radius: 6px;
-  font-size: 14px;
+  border-radius: 8px;
+  font-size: 15px;
+  transition: all 0.3s ease;
+}
+
+#room-controls input:focus,
+#room-controls select:focus {
+  border-color: #0d6efd;
+  box-shadow: 0 0 4px rgba(13, 110, 253, 0.4);
 }
 
 /* === CONTROLES ENSEIGNANT === */
@@ -36,23 +55,30 @@ h1 {
   display: flex;
   justify-content: center;
   flex-wrap: wrap;
-  margin: 10px auto;
+  margin: 20px auto;
+  background: linear-gradient(90deg, #0d6efd 0%, #0056b3 100%);
+  border-radius: 10px;
+  padding: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 #teacher-controls button,
 #teacher-controls input {
-  margin: 5px;
-  padding: 8px 12px;
+  margin: 6px;
+  padding: 10px 14px;
   border: none;
-  border-radius: 6px;
-  background: #0d6efd;
-  color: #fff;
+  border-radius: 8px;
+  background: #ffd700;
+  color: #0d6efd;
+  font-weight: bold;
   cursor: pointer;
-  transition: background 0.3s;
+  transition: transform 0.25s ease, background 0.3s ease;
 }
 
 #teacher-controls button:hover {
-  background: #0b5ed7;
+  background: #fff;
+  color: #0b5ed7;
+  transform: scale(1.05);
 }
 
 /* === SECTION VIDEO === */
@@ -60,15 +86,25 @@ h1 {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  margin: 20px auto;
+  margin: 25px auto;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 14px;
+  padding: 15px;
+  box-shadow: 0 4px 15px rgba(13, 110, 253, 0.15);
 }
 
 video {
-  border: 2px solid #0d6efd;
-  border-radius: 8px;
-  margin: 5px;
+  border: 3px solid #0d6efd;
+  border-radius: 10px;
+  margin: 6px;
   max-width: 300px;
   background: #000;
+  transition: transform 0.3s ease, border-color 0.3s ease;
+}
+
+video:hover {
+  transform: scale(1.03);
+  border-color: #ffd700;
 }
 
 /* === VIDEOS ÉTUDIANTS === */
@@ -80,47 +116,73 @@ video {
 
 /* === SECTION CHAT === */
 #chat-section {
-  border: 1px solid #0d6efd;
-  border-radius: 8px;
-  padding: 10px;
-  max-width: 600px;
-  margin: 20px auto;
-  background: #fff;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  border: 2px solid #0d6efd;
+  border-radius: 12px;
+  padding: 15px;
+  max-width: 650px;
+  margin: 25px auto;
+  background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+  box-shadow: 0 4px 15px rgba(13, 110, 253, 0.15);
 }
 
 #messages {
   list-style: none;
   padding: 0;
-  height: 200px;
+  height: 220px;
   overflow-y: auto;
-  margin-bottom: 10px;
+  margin-bottom: 12px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid #e1e1e1;
 }
 
 #messages li {
-  padding: 6px 8px;
-  border-bottom: 1px solid #ccc;
+  padding: 8px 10px;
+  border-bottom: 1px solid #dcdcdc;
   font-size: 14px;
-  line-height: 1.4;
+  line-height: 1.5;
+  color: #333;
+}
+
+#messages li:nth-child(odd) {
+  background: rgba(255, 215, 0, 0.08);
 }
 
 /* === INPUTS & BOUTONS GÉNÉRAUX === */
 input,
 button {
-  padding: 6px 10px;
-  margin: 3px;
-  font-size: 14px;
-  border-radius: 6px;
+  padding: 8px 12px;
+  margin: 4px;
+  font-size: 15px;
+  border-radius: 8px;
 }
 
 button {
-  background: #0d6efd;
+  background: linear-gradient(90deg, #0d6efd 0%, #0056b3 100%);
   color: #fff;
   border: none;
   cursor: pointer;
-  transition: background 0.3s;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  transition: all 0.3s ease;
 }
 
 button:hover {
-  background: #0b5ed7;
+  background: linear-gradient(90deg, #ffd700 0%, #fff 100%);
+  color: #0d6efd;
+  transform: translateY(-2px);
+}
+
+/* === SCROLLBAR PERSO === */
+#messages::-webkit-scrollbar {
+  width: 8px;
+}
+
+#messages::-webkit-scrollbar-thumb {
+  background: #0d6efd;
+  border-radius: 4px;
+}
+
+#messages::-webkit-scrollbar-thumb:hover {
+  background: #ffd700;
 }
