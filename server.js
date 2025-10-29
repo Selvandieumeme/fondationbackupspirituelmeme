@@ -1025,6 +1025,36 @@ io.on("connection", (socket) => {
 
 
 
+
+
+
+// ====== Trete stream pwofesè a ======
+socket.on("teacher-stream", ({ trackId, kind }) => {
+  const userId = socket.data.userId;
+  const room = Array.from(socket.rooms).find(r => r !== socket.id);
+  if (room) {
+    // Voye track pwofesè a pou tout elev nan sal la eksepte pwofesè a menm
+    socket.to(room).emit("new-teacher-stream", { userId, trackId, kind });
+  }
+});
+
+// Opsyonèl: si pwofesè mute mikwo oswa videyo, notifye elev yo
+socket.on("teacher-mic-toggled", ({ enabled }) => {
+  const room = Array.from(socket.rooms).find(r => r !== socket.id);
+  if (room) socket.to(room).emit("teacher-mic-toggled", { enabled });
+});
+
+socket.on("teacher-video-toggled", ({ enabled }) => {
+  const room = Array.from(socket.rooms).find(r => r !== socket.id);
+  if (room) socket.to(room).emit("teacher-video-toggled", { enabled });
+});
+
+
+
+
+
+
+	
 	
 
   // Chat prive Teacher ↔ Étudiant
