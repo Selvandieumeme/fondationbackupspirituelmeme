@@ -188,3 +188,83 @@ socket.on('screen-shared', streamData => {
     screenVideo.srcObject = mediaStream;
   }
 });
+
+
+
+
+
+
+
+// === SCRIPT ELEV ENDÉPANDAN ===
+(async () => {
+  const joinBtn = document.getElementById('join-room');
+  const usernameInput = document.getElementById('username');
+  const roomCodeInput = document.getElementById('room-code');
+  const roleSelect = document.getElementById('role');
+  const studentVideos = document.getElementById('student-videos');
+  const uploadDoc = document.getElementById('upload-doc');
+
+  joinBtn.addEventListener('click', async () => {
+    if (roleSelect.value !== 'student') return;
+
+    const username = usernameInput.value.trim();
+    const room = roomCodeInput.value.trim();
+    if (!username || !room) return alert('Remplissez tous les champs');
+
+    const socket = io("https://examen-backend-ihlx.onrender.com");
+    socket.emit('setUser', { username, role: 'student' });
+    socket.emit('join-room', room);
+
+    try {
+      const localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+
+      const videoEl = document.createElement('video');
+      videoEl.autoplay = true;
+      videoEl.muted = false;
+      videoEl.classList.add('student');
+      videoEl.srcObject = localStream;
+      studentVideos.appendChild(videoEl);
+
+      if (uploadDoc) {
+        uploadDoc.addEventListener('change', async () => {
+          const file = uploadDoc.files[0];
+          if (!file) return;
+          const form = new FormData();
+          form.append('document', file);
+          await fetch('/upload-doc', { method: 'POST', body: form });
+          alert('📄 Document téléversé avec succès');
+        });
+      }
+
+      // Bouton pataj ekran
+      const shareScreenBtn = document.createElement('button');
+      shareScreenBtn.textContent = 'Partager écran';
+      shareScreenBtn.classList.add('share-screen');
+      document.getElementById('room-controls').appendChild(shareScreenBtn);
+
+      shareScreenBtn.addEventListener('click', async () => {
+        try {
+          const screenStream = await navigator.mediaDevices.getDisplayMedia({ video: true });
+          const screenVideoEl = document.createElement('video');
+          screenVideoEl.autoplay = true;
+          screenVideoEl.muted = true;
+          screenVideoEl.classList.add('student');
+          screenVideoEl.srcObject = screenStream;
+          studentVideos.appendChild(screenVideoEl);
+
+          screenStream.getTracks().forEach(track => {
+            socket.emit('student-stream', { trackId: track.id, kind: track.kind });
+          });
+        } catch (err) {
+          alert('Erreur partage écran: ' + err.message);
+        }
+      });
+
+      localStream.getTracks().forEach(track => {
+        socket.emit('student-stream', { trackId: track.id, kind: track.kind });
+      });
+    } catch (err) {
+      alert('Erreur accès caméra/micro elev: ' + err.message);
+    }
+  });
+})();
