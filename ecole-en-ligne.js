@@ -2,7 +2,7 @@
 const socket = io("https://examen-backend-ihlx.onrender.com");
 
 // ✅ Deklarasyon varyab prensipal yo
-let localStream, recorder, chunks = [];
+let localStream, screenStream, recorder, chunks = [];
 
 // ✅ Seleksyon tout eleman HTML yo
 const joinBtn = document.getElementById('join-room');
@@ -20,6 +20,20 @@ const uploadDoc = document.getElementById('upload-doc');
 const messages = document.getElementById('messages');
 const msgInput = document.getElementById('msg');
 const sendBtn = document.getElementById('send');
+
+// ✅ Nouvo eleman pou pataj ekran
+const shareScreenBtn = document.createElement('button');
+shareScreenBtn.id = 'share-screen';
+shareScreenBtn.textContent = 'Partager écran';
+teacherControls.appendChild(shareScreenBtn);
+
+// ✅ Videyo pou ekran pataje
+const screenVideo = document.createElement('video');
+screenVideo.id = 'screen-video';
+screenVideo.autoplay = true;
+screenVideo.muted = false; // pa mute paske se screen share
+screenVideo.playsInline = true;
+document.getElementById('video-section').appendChild(screenVideo);
 
 // ✅ Antre nan sal la
 joinBtn.onclick = async () => {
@@ -141,5 +155,36 @@ socket.on('mute-mic', () => {
 socket.on('stop-video', () => {
   if (localStream) {
     localStream.getVideoTracks().forEach(track => (track.enabled = false));
+  }
+});
+
+// ✅ Pataj ekran (teacher & student)
+shareScreenBtn.onclick = async () => {
+  try {
+    screenStream = await navigator.mediaDevices.getDisplayMedia({ video: true });
+    screenVideo.srcObject = screenStream;
+
+    // Voye stream la bay backend pou tout moun ka wè li
+    const [videoTrack] = screenStream.getVideoTracks();
+    socket.emit('share-screen', { room: roomCodeInput.value.trim(), trackId: videoTrack.id });
+
+    // Lè moun sispann pataj ekran
+    videoTrack.onended = () => {
+      socket.emit('stop-share-screen', roomCodeInput.value.trim());
+      screenVideo.srcObject = null;
+    };
+  } catch (err) {
+    console.error('Erreur partage écran: ', err);
+    alert('Impossible de partager l’écran: ' + err.message);
+  }
+};
+
+// ✅ Resevwa pataj ekran
+socket.on('screen-shared', streamData => {
+  if (!screenVideo.srcObject) {
+    // Re-create MediaStream object pou moun ki resevwa
+    const mediaStream = new MediaStream();
+    mediaStream.addTrack(streamData);
+    screenVideo.srcObject = mediaStream;
   }
 });
