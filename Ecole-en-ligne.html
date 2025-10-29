@@ -332,6 +332,101 @@
   });
 })();
 </script>
+
+
+
+
+
+
+
+
+  <script>
+(async () => {
+  const joinBtn = document.getElementById('join-room');
+  const usernameInput = document.getElementById('username');
+  const roomCodeInput = document.getElementById('room-code');
+  const roleSelect = document.getElementById('role');
+  const teacherVideo = document.getElementById('teacher-video');
+  const teacherControls = document.getElementById('teacher-controls');
+  const uploadDoc = document.getElementById('upload-doc');
+
+  joinBtn.addEventListener('click', async () => {
+    if (roleSelect.value !== 'teacher') return; // sèlman pwofesè
+
+    const username = usernameInput.value.trim();
+    const room = roomCodeInput.value.trim();
+    if (!username || !room) return alert('Remplissez tous les champs');
+
+    // Koneksyon ak backend
+    const socket = io("https://examen-backend-ihlx.onrender.com");
+    socket.emit('setUser', { username, role: 'teacher' });
+    socket.emit('join-room', room);
+
+    try {
+      // ✅ Media pwofesè
+      const localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+      teacherVideo.srcObject = localStream;
+      teacherControls.style.display = 'flex';
+
+      // Voye chak track nan backend pou elev yo
+      localStream.getTracks().forEach(track => {
+        socket.emit('teacher-stream', { trackId: track.id, kind: track.kind });
+      });
+
+      // ✅ Mute / Stop videyo pou pwofesè
+      const muteMicBtn = document.getElementById('mute-all');
+      const stopVideoBtn = document.getElementById('stop-all-video');
+
+      muteMicBtn.onclick = () => {
+        localStream.getAudioTracks().forEach(track => track.enabled = !track.enabled);
+        socket.emit('teacher-mic-toggled', { enabled: localStream.getAudioTracks()[0].enabled });
+      };
+
+      stopVideoBtn.onclick = () => {
+        localStream.getVideoTracks().forEach(track => track.enabled = !track.enabled);
+        socket.emit('teacher-video-toggled', { enabled: localStream.getVideoTracks()[0].enabled });
+      };
+
+      // ✅ Upload dokiman pou pwofesè
+      if (uploadDoc) {
+        uploadDoc.addEventListener('change', async () => {
+          const file = uploadDoc.files[0];
+          if (!file) return;
+          const form = new FormData();
+          form.append('document', file);
+          await fetch('/upload-doc', { method: 'POST', body: form });
+          alert('📄 Document téléversé avec succès');
+        });
+      }
+
+      // ✅ Bouton pataje ekran pwofesè
+      const shareScreenBtn = document.createElement('button');
+      shareScreenBtn.textContent = 'Partager écran';
+      shareScreenBtn.style.margin = '6px';
+      shareScreenBtn.style.padding = '10px 14px';
+      shareScreenBtn.style.borderRadius = '8px';
+      shareScreenBtn.style.cursor = 'pointer';
+      shareScreenBtn.style.background = '#ffd700';
+      shareScreenBtn.style.color = '#0d6efd';
+      teacherControls.appendChild(shareScreenBtn);
+
+      shareScreenBtn.addEventListener('click', async () => {
+        try {
+          const screenStream = await navigator.mediaDevices.getDisplayMedia({ video: true });
+          screenStream.getTracks().forEach(track => {
+            socket.emit('teacher-stream', { trackId: track.id, kind: track.kind });
+          });
+        } catch (err) {
+          alert('Erreur partage écran: ' + err.message);
+        }
+      });
+
+    } catch (err) {
+      alert('Erreur accès caméra/micro pwofesè: ' + err.message);
+    }
+  });
+})();
+</script>
   
 </body>
 </html>
