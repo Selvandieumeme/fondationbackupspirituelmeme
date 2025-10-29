@@ -987,6 +987,126 @@ io.on("connection", (socket) => {
 
 
 
+
+
+
+// === MEME Inspector AI: MODELS, SOCKETS & REST (INSERT INSIDE io.on("connection", socket) scope) ===
+
+// Models (only create once in server.js outer scope ideally; if duplicate, ignore)
+try {
+  // If models already defined elsewhere this will not re-create them badly,
+  // but recommended to define these near the other Mongoose models.
+  const MemeQASchema = new mongoose.Schema({
+    question: { type: String, required: true, index: true },
+    answer: { type: String, required: true },
+    lang: { type: String, default: 'fr' },
+    tags: [String],
+    createdBy: { type: String, default: 'system' },
+    createdAt: { type: Date, default: Date.now }
+  });
+  mongoose.models.MemeQA || mongoose.model('MemeQA', MemeQASchema);
+} catch (err) {
+  console.warn('MemeQA model init warning', err);
+}
+
+try {
+  const MemeLogSchema = new mongoose.Schema({
+    type: String,
+    payload: mongoose.Schema.Types.Mixed,
+    ts: { type: Date, default: Date.now }
+  });
+  mongoose.models.MemeLog || mongoose.model('MemeLog', MemeLogSchema);
+} catch (e) {
+  console.warn('MemeLog model init warning', e);
+}
+
+const MemeQA = mongoose.models.MemeQA;
+const MemeLog = mongoose.models.MemeLog;
+
+// Helper: simple fuzzy search (safe RegExp)
+function buildSearchRegex(q){
+  const safe = (q||'').replace(/[.*+?^${}()|[\]\\]/g, ' ');
+  const parts = safe.split(/\s+/).filter(Boolean).slice(0,8);
+  if(parts.length === 0) return null;
+  const expr = parts.map(p => `(?=.*${p})`).join('') + '.*';
+  return new RegExp(expr, 'i');
+}
+
+// SOCKET HANDLERS (MEME)
+socket.on('meme-join-event', ({ username, room, role, ts }) => {
+  if(room) io.to(room).emit('meme-join-event', { username, room, role, ts });
+  else io.emit('meme-join-event', { username, room, role, ts });
+  // Log
+  new MemeLog({ type: 'join', payload: { username, room, role, ts } }).save().catch(()=>{});
+});
+
+socket.on('meme-query', async ({ text, lang, room }) => {
+  try {
+    const regex = buildSearchRegex(text);
+    let found = [];
+    if(regex) found = await MemeQA.find({ $or: [{ question: regex }, { tags: regex }] }).limit(1).lean();
+    let answer = null;
+    if(found && found.length) answer = found[0].answer;
+    if(!answer){
+      // no match: reply suggestion and log
+      answer = (lang === 'en') ? "I don't have a precise answer yet. Please ask the teacher or add this Q/A." :
+               (lang === 'es') ? "No tengo una respuesta precisa aún. Pregunta al profesor o añade esta Q/A." :
+               (lang === 'ht') ? "Mwen pa gen repons la ankò. Mande pwofesè a oswa ajoute kesyon sa a nan MEME." :
+               "Je n'ai pas de réponse précise pour l'instant. Demandez au professeur ou ajoutez cette Q/A.";
+      // Emit the fallback but also mark as not found
+      socket.emit('meme-query-result', { question:text, answer, lang, found:false });
+      await new MemeLog({ type:'query-miss', payload:{text, lang, room, socketId: socket.id} }).save().catch(()=>{});
+      return;
+    }
+    // Found answer: emit to requester
+    socket.emit('meme-query-result', { question:text, answer, lang, found:true });
+    // Broadcast to room optionally so everyone can hear MEME answer
+    if(room) io.to(room).emit('meme-speak', { text: answer, meta:{question:text, lang} });
+    else io.emit('meme-speak', { text: answer, meta:{question:text, lang} });
+    await new MemeLog({ type:'query', payload:{text, answer, lang, room} }).save().catch(()=>{});
+  } catch (err) {
+    console.error('MEME query error', err);
+    socket.emit('meme-query-result', { question:text, answer: "Erreur interne MEME", lang });
+  }
+});
+
+// Allow clients to request MEME to "learn" a new QA pair
+socket.on('meme-learn', async ({ question, answer, lang, createdBy, room }) => {
+  try {
+    if(!question || !answer) return socket.emit('meme-learn-result',{ success:false, msg:'question/answer manke' });
+    const doc = new MemeQA({ question, answer, lang: lang||'fr', createdBy: createdBy||'user' });
+    await doc.save();
+    // Broadcast new knowledge optionally to room
+    if(room) io.to(room).emit('meme-speak', { text: `Nouvo repons ajoute nan MEME: ${question}`, meta:{ learn:true }});
+    socket.emit('meme-learn-result',{ success:true, id:doc._id });
+  } catch (err) {
+    console.error('meme-learn err', err);
+    socket.emit('meme-learn-result',{ success:false, msg:err.message });
+  }
+});
+
+// Admin trigger: class start / end
+socket.on('meme-class-start', ({ room })=>{
+  if(room) io.to(room).emit('meme-class-start', { room });
+  else io.emit('meme-class-start', { room:'all' });
+});
+socket.on('meme-class-end', ({ room })=>{
+  if(room) io.to(room).emit('meme-class-end', { room });
+  else io.emit('meme-class-end', { room:'all' });
+});
+
+// Log help requests from clients (recognizer)
+socket.on('meme-help-request', async (payload)=>{
+  await new MemeLog({ type:'help', payload }).save().catch(()=>{});
+  // notify teachers in room if provided
+  if(payload && payload.room) io.to(payload.room).emit('meme-help-alert', payload);
+});
+
+	  
+	  
+
+
+
 	  
 	
   // Peer presence: announce self to room (others get peer-joined)
