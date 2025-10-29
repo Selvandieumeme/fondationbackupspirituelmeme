@@ -240,7 +240,7 @@ button:hover {
 
 
 
-/* === STYLE POU ELEV === */
+/* === STYLE POU VIDEYO ELEV === */
 #student-videos video.student {
   width: 250px;
   height: 180px;
@@ -256,8 +256,15 @@ button:hover {
   border-color: #ffd700;
 }
 
-/* Bouton pataj ekran pou elev */
-#room-controls button.share-screen {
+/* === BOUTON KONTWÒL PWÒP ELEV === */
+#room-controls .student-controls {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin: 10px auto;
+}
+
+#room-controls .student-controls button {
   margin: 6px;
   padding: 10px 14px;
   border-radius: 8px;
@@ -268,8 +275,44 @@ button:hover {
   transition: transform 0.25s ease, background 0.3s ease;
 }
 
-#room-controls button.share-screen:hover {
+#room-controls .student-controls button:hover {
   transform: scale(1.05);
   background: #fff;
   color: #0b5ed7;
+}
+
+/* === BOUTON PARTAGER EKRAN === */
+#room-controls .student-controls button.share-screen {
+  border: 3px solid #ff4500;
+}
+
+/* === BOUTON UPLOAD DOKIMAN === */
+#room-controls .student-controls button.upload-doc {
+  background: #0d6efd;
+  color: #fff;
+}
+
+#room-controls .student-controls button.upload-doc:hover {
+  background: #0056b3;
+}
+
+/* === BOUTON MUTE MICRO === */
+#room-controls .student-controls button.mute-mic {
+  background: #ffc107;
+  color: #1c1c1c;
+}
+
+#room-controls .student-controls button.mute-mic:hover {
+  background: #ffd700;
+  color: #0d6efd;
+}
+
+/* === BOUTON MUTE CAMERA === */
+#room-controls .student-controls button.mute-cam {
+  background: #17a2b8;
+  color: #fff;
+}
+
+#room-controls .student-controls button.mute-cam:hover {
+  background: #138496;
 }
