@@ -902,10 +902,7 @@ app.get("/api/premium/status/:id", async (req, res) => {
 
 
 
-
-// ------------------
-// IMPORTS
-// ------------------
+// server.js (Node.js ES module)
 import express from "express";
 import http from "http";
 import { Server } from "socket.io";
@@ -915,12 +912,8 @@ import multer from "multer";
 import path from "path";
 import { fileURLToPath } from "url";
 import dotenv from "dotenv";
-
 dotenv.config();
 
-// ------------------
-// CONFIG
-// ------------------
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -929,75 +922,42 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static(__dirname));
 
-// ------------------
-// MONGODB
-// ------------------
-mongoose
-  .connect(process.env.MONGO_URI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  })
-  .then(() => console.log("✅ MongoDB Connected"))
-  .catch((err) => console.error("❌ MongoDB Error:", err));
+// Mongo
+mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
+  .then(()=>console.log("✅ MongoDB Connected"))
+  .catch(err=>console.error("❌ MongoDB Error:",err));
 
-// ------------------
-// SCHEMAS
-// ------------------
+// Schemas
 const messageSchema = new mongoose.Schema({
-  from: String,
-  to: String,
-  message: String,
-  date: { type: Date, default: Date.now },
-  read: { type: Boolean, default: false },
+  from:String, to:String, message:String,
+  date:{type:Date,default:Date.now}, read:{type:Boolean,default:false}
 });
 const Message = mongoose.model("Message", messageSchema);
 
-const userSchema = new mongoose.Schema({
-  username: String,
-  role: String, // teacher / student
-});
+const userSchema = new mongoose.Schema({ username:String, role:String });
 const User = mongoose.model("User", userSchema);
 
-// ------------------
-// SOCKET.IO
-// ------------------
+// Server + Socket.IO
 const server = http.createServer(app);
-const io = new Server(server, {
-  cors: { origin: "*", methods: ["GET", "POST"] },
-});
+const io = new Server(server, { cors:{ origin: "*", methods: ["GET","POST"] } });
 
 const onlineUsers = new Map();
-
-function broadcastOnline() {
-  const arr = [];
-  for (const [id, info] of onlineUsers.entries()) {
-    arr.push({
-      id,
-      user: info.user,
-      role: info.role,
-      connected: info.sockets.size > 0,
-    });
+function broadcastOnline(){
+  const arr=[];
+  for(const [id,info] of onlineUsers.entries()){
+    arr.push({ id, user: info.user, role: info.role, connected: info.sockets.size>0 });
   }
   io.emit("online-users", arr);
 }
 
-// ------------------
-// MEME AI Inspector (logger / surveillance layer)
-// ------------------
-function MEME_inspect(msg) {
-  console.log("[MEME AI Inspector]", msg);
-}
+function MEME_inspect(msg){ console.log("[MEME AI Inspector]", msg); }
 
-// ------------------
-// SOCKET EVENTS
-// ------------------
 io.on("connection", (socket) => {
   console.log("👤 User connected:", socket.id);
 
   socket.on("setUser", ({ username, role }) => {
     const userId = username.trim().toLowerCase();
-    if (!onlineUsers.has(userId))
-      onlineUsers.set(userId, { user: username, sockets: new Set(), role });
+    if (!onlineUsers.has(userId)) onlineUsers.set(userId, { user: username, sockets: new Set(), role });
     const record = onlineUsers.get(userId);
     record.sockets.add(socket.id);
     socket.data.userId = userId;
@@ -1005,97 +965,78 @@ io.on("connection", (socket) => {
     broadcastOnline();
   });
 
-
-
-
-
-
-
-  // ✅ Resevwa stream elev la
-  socket.on("student-stream", ({ trackId, kind }) => {
-    const userId = socket.data.userId;
-    const room = Array.from(socket.rooms).find(r => r !== socket.id); // jwenn sal kote itilizate a ye
-
-    if (room) {
-      // Voye info track la pou tout moun nan sal la eksepte sender
-      socket.to(room).emit("new-student-stream", { userId, trackId, kind });
-    }
+  // Peer presence: announce self to room (others get peer-joined)
+  socket.on('announce-presence', ({ room }) => {
+    if (!room) return;
+    // send to other members that a new peer joined
+    socket.to(room).emit('peer-joined', { socketId: socket.id, userId: socket.data.userId, role: socket.data.role });
   });
 
+  socket.on('announce-leave', ({ room }) => {
+    if (!room) return;
+    socket.to(room).emit('peer-left', { socketId: socket.id, userId: socket.data.userId });
+  });
 
+  // WebRTC signaling relay
+  socket.on('webrtc-offer', ({ toSocketId, offer, fromRole }) => {
+    if (!toSocketId) return;
+    io.to(toSocketId).emit('webrtc-offer', { fromSocketId: socket.id, offer, fromRole: socket.data.role || fromRole });
+  });
 
+  socket.on('webrtc-answer', ({ toSocketId, answer }) => {
+    if (!toSocketId) return;
+    io.to(toSocketId).emit('webrtc-answer', { fromSocketId: socket.id, answer });
+  });
 
+  socket.on('webrtc-ice-candidate', ({ toSocketId, candidate }) => {
+    if (!toSocketId) return;
+    io.to(toSocketId).emit('webrtc-ice-candidate', { fromSocketId: socket.id, candidate });
+  });
 
+  // Student stream legacy event (kept for compat)
+  socket.on("student-stream", ({ trackId, kind }) => {
+    const room = Array.from(socket.rooms).find(r => r !== socket.id);
+    if (room) socket.to(room).emit("new-student-stream", { userId: socket.data.userId, trackId, kind });
+  });
 
-// === SOCKET POU PWOFÈ ===
-socket.on("teacher-stream", ({ trackId, kind }) => {
-  const userId = socket.data.userId;
-  const room = Array.from(socket.rooms).find(r => r !== socket.id);
-  if (room) {
-    // Voye track pwofesè a pou tout elev yo nan sal la
-    socket.to(room).emit("new-teacher-stream", { userId, trackId, kind });
-  }
-});
+  // Teacher stream legacy event (kept for compat)
+  socket.on("teacher-stream", ({ trackId, kind }) => {
+    const room = Array.from(socket.rooms).find(r => r !== socket.id);
+    if (room) socket.to(room).emit("new-teacher-stream", { userId: socket.data.userId, trackId, kind });
+  });
 
-
-
-
-
-
-	
-	
-
-  // Chat prive Teacher ↔ Étudiant
+  // Chat + messages
   socket.on("private-message", ({ from, to, message }) => {
-    if (!from || !to || !message) return;
+    if (!from||!to||!message) return;
     const payload = { from, to, message, date: new Date() };
     MEME_inspect(payload);
-
     const target = onlineUsers.get(to.toLowerCase());
-    if (target)
-      target.sockets.forEach((sid) =>
-        io.to(sid).emit("private-message", payload)
-      );
-
+    if (target) target.sockets.forEach(sid=>io.to(sid).emit("private-message", payload));
     const sender = onlineUsers.get(from.toLowerCase());
-    if (sender)
-      sender.sockets.forEach((sid) =>
-        io.to(sid).emit("private-message", payload)
-      );
+    if (sender) sender.sockets.forEach(sid=>io.to(sid).emit("private-message", payload));
   });
 
-  // Chat piblik / mesaj sove nan MongoDB
   socket.on("chat-message", async ({ from, to, message }) => {
-    if (!from || !to || !message) return;
-    const msg = new Message({ from, to, message, read: true });
+    if (!from||!to||!message) return;
+    const msg = new Message({ from, to, message, read:true });
     await msg.save();
-    io.to(socket.id).emit("chat-message", {
-      from,
-      message,
-      date: msg.date,
-    });
+    io.to(socket.id).emit("chat-message", { from, message, date: msg.date });
   });
 
-  // Kontwòl pwofesè
+  // Teacher controls
   socket.on("mute-all", (room) => io.to(room).emit("mute-mic"));
   socket.on("stop-all-video", (room) => io.to(room).emit("stop-video"));
-  socket.on("raise-hand", ({ user, room }) =>
-    io.to(room).emit("raised-hand", user)
-  );
+  socket.on("raise-hand", ({ user, room }) => io.to(room).emit("raised-hand", user) );
 
-  // ------------------
-  // PATAJ EKRAN
-  // ------------------
+  // Share screen notifications
   socket.on("share-screen", ({ room, trackId }) => {
-    // Voye notifikasyon bay tout moun nan menm sal la
     io.to(room).emit("screen-shared", { from: socket.data.userId, trackId });
   });
-
   socket.on("stop-share-screen", (room) => {
     io.to(room).emit("screen-stopped", { from: socket.data.userId });
   });
 
-  // Jesyon sal yo
+  // Rooms
   socket.on("join-room", (room) => socket.join(room));
   socket.on("leave-room", (room) => socket.leave(room));
 
@@ -1105,29 +1046,27 @@ socket.on("teacher-stream", ({ trackId, kind }) => {
       const record = onlineUsers.get(userId);
       record.sockets.delete(socket.id);
       if (record.sockets.size === 0) onlineUsers.delete(userId);
+      // let others know this peer left rooms
+      // broadcast peer-left for each room (best-effort)
+      // emit peer-left to all (room-specific is handled via announce-leave too)
+      io.emit('peer-left', { socketId: socket.id, userId });
       broadcastOnline();
     }
   });
 });
 
-// ------------------
-// FILE UPLOADS
-// ------------------
+// File uploads
 const upload = multer({ storage: multer.memoryStorage() });
-
 app.post("/upload-recording", upload.single("file"), (req, res) => {
   console.log("🎥 Recording uploaded:", req.file?.originalname);
   res.json({ success: true });
 });
-
 app.post("/upload-doc", upload.single("document"), (req, res) => {
   console.log("📄 Document uploaded:", req.file?.originalname);
   res.json({ success: true });
 });
 
-// ------------------
-// FRONT-END DELIVERY
-// ------------------
+// Front-end
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "Ecole-en-ligne.html"));
 });
