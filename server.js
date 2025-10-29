@@ -965,6 +965,30 @@ io.on("connection", (socket) => {
     broadcastOnline();
   });
 
+
+
+	
+	
+ // === OTORIZASYON ELEV ===
+  socket.on("student-join-request", ({ username, room }) => {
+    // Notify teacher(s) in that room
+    io.to(room).emit("join-request-pending", { username, room });
+  });
+
+
+  socket.on("join-request-accepted", ({ username, room }) => {
+    io.emit("join-request-result", { username, room, status: "accepted" });
+  });
+
+  socket.on("join-request-rejected", ({ username, room }) => {
+    io.emit("join-request-result", { username, room, status: "rejected" });
+  });
+});
+
+
+
+	  
+	
   // Peer presence: announce self to room (others get peer-joined)
   socket.on('announce-presence', ({ room }) => {
     if (!room) return;
