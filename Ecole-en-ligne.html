@@ -183,5 +183,108 @@
   </script>
 
   <script src="ecole-en-ligne.js"></script>
+
+
+
+
+
+
+
+  <script>
+  (async () => {
+    const joinBtn = document.getElementById('join-room');
+    const usernameInput = document.getElementById('username');
+    const roomCodeInput = document.getElementById('room-code');
+    const roleSelect = document.getElementById('role');
+    const studentVideos = document.getElementById('student-videos');
+    const uploadDoc = document.getElementById('upload-doc');
+
+    joinBtn.addEventListener('click', async () => {
+      if (roleSelect.value !== 'student') return; // sèlman elev
+
+      const username = usernameInput.value.trim();
+      const room = roomCodeInput.value.trim();
+      if (!username || !room) return alert('Remplissez tous les champs');
+
+      // ✅ Konekte ak Socket.io
+      const socket = io("https://examen-backend-ihlx.onrender.com");
+      socket.emit('setUser', { username, role: 'student' });
+      socket.emit('join-room', room);
+
+      try {
+        // ✅ Media elev
+        const localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+
+        // Videyo elev
+        const videoEl = document.createElement('video');
+        videoEl.autoplay = true;
+        videoEl.muted = false;
+        videoEl.srcObject = localStream;
+        videoEl.style.width = '250px';
+        videoEl.style.height = '180px';
+        videoEl.style.objectFit = 'cover';
+        videoEl.style.border = '3px solid #0d6efd';
+        videoEl.style.borderRadius = '10px';
+        videoEl.style.margin = '5px';
+        studentVideos.appendChild(videoEl);
+
+        // ✅ Upload dokiman pou elev si gen bouton
+        if (uploadDoc) {
+          uploadDoc.addEventListener('change', async () => {
+            const file = uploadDoc.files[0];
+            if (!file) return;
+            const form = new FormData();
+            form.append('document', file);
+            await fetch('/upload-doc', { method: 'POST', body: form });
+            alert('📄 Document téléversé avec succès');
+          });
+        }
+
+        // ✅ Pataje ekran elev
+        const shareScreenBtn = document.createElement('button');
+        shareScreenBtn.textContent = 'Partager écran';
+        shareScreenBtn.style.margin = '6px';
+        shareScreenBtn.style.padding = '10px 14px';
+        shareScreenBtn.style.borderRadius = '8px';
+        shareScreenBtn.style.cursor = 'pointer';
+        shareScreenBtn.style.background = '#ffd700';
+        shareScreenBtn.style.color = '#0d6efd';
+        document.getElementById('room-controls').appendChild(shareScreenBtn);
+
+        shareScreenBtn.addEventListener('click', async () => {
+          try {
+            const screenStream = await navigator.mediaDevices.getDisplayMedia({ video: true });
+            const screenVideoEl = document.createElement('video');
+            screenVideoEl.autoplay = true;
+            screenVideoEl.muted = true;
+            screenVideoEl.srcObject = screenStream;
+            screenVideoEl.style.width = '300px';
+            screenVideoEl.style.height = '200px';
+            screenVideoEl.style.objectFit = 'cover';
+            screenVideoEl.style.border = '3px solid #ff4500';
+            screenVideoEl.style.borderRadius = '10px';
+            screenVideoEl.style.margin = '5px';
+            studentVideos.appendChild(screenVideoEl);
+
+            // Envoye track yo nan Socket.io pou pwofesè ak lòt elev yo ka wè
+            screenStream.getTracks().forEach(track => {
+              socket.emit('student-stream', { trackId: track.id, kind: track.kind });
+            });
+          } catch (err) {
+            alert('Erreur partage écran: ' + err.message);
+          }
+        });
+
+        // ✅ Voye chak track videyo/mikwo nan server
+        localStream.getTracks().forEach(track => {
+          socket.emit('student-stream', { trackId: track.id, kind: track.kind });
+        });
+      } catch (err) {
+        alert('Erreur accès caméra/micro elev: ' + err.message);
+      }
+    });
+  })();
+</script>
+  
 </body>
 </html>
