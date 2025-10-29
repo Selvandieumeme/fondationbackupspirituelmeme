@@ -1010,18 +1010,17 @@ io.on("connection", (socket) => {
 
 
 
-	// === SOCKET.IO POU ELEV ===
-io.on("connection", (socket) => {
-  // Resevwa track elev yo
+
+  // ✅ Resevwa stream elev la
   socket.on("student-stream", ({ trackId, kind }) => {
     const userId = socket.data.userId;
-    const room = Array.from(socket.rooms).find(r => r !== socket.id);
+    const room = Array.from(socket.rooms).find(r => r !== socket.id); // jwenn sal kote itilizate a ye
+
     if (room) {
-      // Voye track sa pou tout moun nan sal la eksepte sender
+      // Voye info track la pou tout moun nan sal la eksepte sender
       socket.to(room).emit("new-student-stream", { userId, trackId, kind });
     }
   });
-});
 
 
 
