@@ -340,54 +340,72 @@
 
 
 
-  <script>
+<script>
 (async () => {
   const joinBtn = document.getElementById('join-room');
   const usernameInput = document.getElementById('username');
   const roomCodeInput = document.getElementById('room-code');
   const roleSelect = document.getElementById('role');
-  const teacherVideo = document.getElementById('teacher-video');
   const teacherControls = document.getElementById('teacher-controls');
+  const teacherVideo = document.getElementById('teacher-video');
   const uploadDoc = document.getElementById('upload-doc');
 
   joinBtn.addEventListener('click', async () => {
-    if (roleSelect.value !== 'teacher') return; // sèlman pwofesè
+    if (roleSelect.value !== 'teacher') return;
 
     const username = usernameInput.value.trim();
     const room = roomCodeInput.value.trim();
     if (!username || !room) return alert('Remplissez tous les champs');
 
-    // Koneksyon ak backend
     const socket = io("https://examen-backend-ihlx.onrender.com");
     socket.emit('setUser', { username, role: 'teacher' });
     socket.emit('join-room', room);
 
+    teacherControls.style.display = 'flex';
+
     try {
-      // ✅ Media pwofesè
       const localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
       teacherVideo.srcObject = localStream;
-      teacherControls.style.display = 'flex';
 
-      // Voye chak track nan backend pou elev yo
-      localStream.getTracks().forEach(track => {
-        socket.emit('teacher-stream', { trackId: track.id, kind: track.kind });
+      // Bouton mute mikwo pwòp
+      const muteMicBtn = document.createElement('button');
+      muteMicBtn.textContent = 'Mute Micro';
+      muteMicBtn.style.margin = '6px';
+      teacherControls.appendChild(muteMicBtn);
+
+      muteMicBtn.addEventListener('click', () => {
+        localStream.getAudioTracks().forEach(t => t.enabled = !t.enabled);
       });
 
-      // ✅ Mute / Stop videyo pou pwofesè
-      const muteMicBtn = document.getElementById('mute-all');
-      const stopVideoBtn = document.getElementById('stop-all-video');
+      // Bouton mute kamera pwòp
+      const muteCamBtn = document.createElement('button');
+      muteCamBtn.textContent = 'Mute Camera';
+      muteCamBtn.style.margin = '6px';
+      teacherControls.appendChild(muteCamBtn);
 
-      muteMicBtn.onclick = () => {
-        localStream.getAudioTracks().forEach(track => track.enabled = !track.enabled);
-        socket.emit('teacher-mic-toggled', { enabled: localStream.getAudioTracks()[0].enabled });
-      };
+      muteCamBtn.addEventListener('click', () => {
+        localStream.getVideoTracks().forEach(t => t.enabled = !t.enabled);
+      });
 
-      stopVideoBtn.onclick = () => {
-        localStream.getVideoTracks().forEach(track => track.enabled = !track.enabled);
-        socket.emit('teacher-video-toggled', { enabled: localStream.getVideoTracks()[0].enabled });
-      };
+      // Pataje ekran pwofesè
+      const shareScreenBtn = document.createElement('button');
+      shareScreenBtn.textContent = 'Partager Écran';
+      shareScreenBtn.style.margin = '6px';
+      teacherControls.appendChild(shareScreenBtn);
 
-      // ✅ Upload dokiman pou pwofesè
+      shareScreenBtn.addEventListener('click', async () => {
+        try {
+          const screenStream = await navigator.mediaDevices.getDisplayMedia({ video: true });
+          screenStream.getTracks().forEach(track => {
+            socket.emit('teacher-stream', { trackId: track.id, kind: track.kind });
+          });
+          alert('Écran partagé avec succès');
+        } catch (err) {
+          alert('Erreur partage écran: ' + err.message);
+        }
+      });
+
+      // Upload dokiman pwofesè
       if (uploadDoc) {
         uploadDoc.addEventListener('change', async () => {
           const file = uploadDoc.files[0];
@@ -399,30 +417,12 @@
         });
       }
 
-      // ✅ Bouton pataje ekran pwofesè
-      const shareScreenBtn = document.createElement('button');
-      shareScreenBtn.textContent = 'Partager écran';
-      shareScreenBtn.style.margin = '6px';
-      shareScreenBtn.style.padding = '10px 14px';
-      shareScreenBtn.style.borderRadius = '8px';
-      shareScreenBtn.style.cursor = 'pointer';
-      shareScreenBtn.style.background = '#ffd700';
-      shareScreenBtn.style.color = '#0d6efd';
-      teacherControls.appendChild(shareScreenBtn);
-
-      shareScreenBtn.addEventListener('click', async () => {
-        try {
-          const screenStream = await navigator.mediaDevices.getDisplayMedia({ video: true });
-          screenStream.getTracks().forEach(track => {
-            socket.emit('teacher-stream', { trackId: track.id, kind: track.kind });
-          });
-        } catch (err) {
-          alert('Erreur partage écran: ' + err.message);
-        }
+      // Voye chak track videyo/mikwo pwofesè nan server
+      localStream.getTracks().forEach(track => {
+        socket.emit('teacher-stream', { trackId: track.id, kind: track.kind });
       });
-
     } catch (err) {
-      alert('Erreur accès caméra/micro pwofesè: ' + err.message);
+      alert('Erreur accès caméra/micro professeur: ' + err.message);
     }
   });
 })();
