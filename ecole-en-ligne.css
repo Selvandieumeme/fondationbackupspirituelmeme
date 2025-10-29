@@ -86,34 +86,30 @@ h1 {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  margin: 25px auto;
-  background: rgba(255, 255, 255, 0.9);
-  border-radius: 14px;
-  padding: 20px;
-  box-shadow: 0 4px 15px rgba(13, 110, 253, 0.15);
-  max-width: 95vw;
-  min-height: 70vh;
-}
-
-/* Videyo prensipal (kamer pwofesè a) — KARE */
-#teacher-video {
-  flex: 1 1 80%;
-  width: 80vw; /* kenbe lajè orijinal la jan ou te renmen an */
-  height: 80vw; /* fè l vin egzakteman menm ak lajè pou kare */
-  max-width: 1280px;
-  max-height: 1280px; /* pou evite depase twòp sou gwo ekran */
-  object-fit: cover;
-  border: 4px solid #0d6efd;
-  border-radius: 12px;
+  margin: 0;
+  padding: 0;
   background: #000;
-  margin: 10px;
-  box-shadow: 0 4px 15px rgba(13, 110, 253, 0.2);
-  transition: transform 0.3s ease, border-color 0.3s ease;
+  border-radius: 0;
+  box-shadow: none;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
 }
 
-#teacher-video:hover {
-  transform: scale(1.01);
-  border-color: #ffd700;
+/* Videyo prensipal (kamer pwofesè a) — FULLSCREEN KARE */
+#teacher-video {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 100vmin;  /* fè li kare (100% nan pi piti dimansyon ant lajè ak wotè ekran an) */
+  height: 100vmin;
+  object-fit: cover;
+  border: none;
+  border-radius: 0;
+  background: #000;
+  box-shadow: none;
+  z-index: 999;
 }
 
 /* Videyo etidyan yo — pi piti men pwopòsyonèl */
@@ -123,6 +119,8 @@ h1 {
   justify-content: center;
   gap: 10px;
   margin-top: 10px;
+  position: relative;
+  z-index: 1000;
 }
 
 #student-videos video {
@@ -149,6 +147,8 @@ h1 {
   margin: 25px auto;
   background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
   box-shadow: 0 4px 15px rgba(13, 110, 253, 0.15);
+  position: relative;
+  z-index: 1000;
 }
 
 #messages {
