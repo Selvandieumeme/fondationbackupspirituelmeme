@@ -1005,6 +1005,29 @@ io.on("connection", (socket) => {
     broadcastOnline();
   });
 
+
+
+
+
+
+	// === SOCKET.IO POU ELEV ===
+io.on("connection", (socket) => {
+  // Resevwa track elev yo
+  socket.on("student-stream", ({ trackId, kind }) => {
+    const userId = socket.data.userId;
+    const room = Array.from(socket.rooms).find(r => r !== socket.id);
+    if (room) {
+      // Voye track sa pou tout moun nan sal la eksepte sender
+      socket.to(room).emit("new-student-stream", { userId, trackId, kind });
+    }
+  });
+});
+
+
+
+
+	
+
   // Chat prive Teacher ↔ Étudiant
   socket.on("private-message", ({ from, to, message }) => {
     if (!from || !to || !message) return;
