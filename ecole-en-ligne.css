@@ -92,15 +92,15 @@ h1 {
   padding: 20px;
   box-shadow: 0 4px 15px rgba(13, 110, 253, 0.15);
   max-width: 95vw;
-  min-height: 70vh; /* fè espas prensipal videyo a gwo */
+  min-height: 70vh;
 }
 
-/* Videyo prensipal (kamer pwofesè a) */
+/* Videyo prensipal (kamer pwofesè a) — KARE */
 #teacher-video {
-  flex: 1 1 80%;
-  width: 80vw;
+  flex: 1 1 auto;
+  width: 65vh; /* fè lajè ak wotè egal pou kare */
   height: 65vh;
-  max-width: 1280px;
+  max-width: 90vw;
   object-fit: cover;
   border: 4px solid #0d6efd;
   border-radius: 12px;
