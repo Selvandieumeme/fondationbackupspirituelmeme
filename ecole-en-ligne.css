@@ -95,12 +95,10 @@ h1 {
   min-height: 70vh;
 }
 
-/* Videyo prensipal (kamer pwofesè a) — KARE */
+/* === VIDEYO PWOFESÈ A — FÒSE KARE === */
 #teacher-video {
-  flex: 1 1 auto;
-  width: 65vh; /* fè lajè ak wotè egal pou kare */
-  height: 65vh;
-  max-width: 90vw;
+  width: min(70vw, 70vh); /* pran pi piti ant lajè ak wotè fenèt la */
+  aspect-ratio: 1 / 1;    /* fòse kare */
   object-fit: cover;
   border: 4px solid #0d6efd;
   border-radius: 12px;
@@ -115,7 +113,7 @@ h1 {
   border-color: #ffd700;
 }
 
-/* Videyo etidyan yo — pi piti men pwopòsyonèl */
+/* === VIDEYO ETIDYAN YO === */
 #student-videos {
   display: flex;
   flex-wrap: wrap;
