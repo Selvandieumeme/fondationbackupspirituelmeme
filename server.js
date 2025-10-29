@@ -927,9 +927,6 @@ const __dirname = path.dirname(__filename);
 const app = express();
 app.use(cors());
 app.use(express.json());
-
-// Servi fichye statik yo dirèk nan rasin pwojè a
-// (Pa bezwen folder “public” ankò)
 app.use(express.static(__dirname));
 
 // ------------------
@@ -1046,6 +1043,18 @@ io.on("connection", (socket) => {
     io.to(room).emit("raised-hand", user)
   );
 
+  // ------------------
+  // PATAJ EKRAN
+  // ------------------
+  socket.on("share-screen", ({ room, trackId }) => {
+    // Voye notifikasyon bay tout moun nan menm sal la
+    io.to(room).emit("screen-shared", { from: socket.data.userId, trackId });
+  });
+
+  socket.on("stop-share-screen", (room) => {
+    io.to(room).emit("screen-stopped", { from: socket.data.userId });
+  });
+
   // Jesyon sal yo
   socket.on("join-room", (room) => socket.join(room));
   socket.on("leave-room", (room) => socket.leave(room));
@@ -1082,6 +1091,8 @@ app.post("/upload-doc", upload.single("document"), (req, res) => {
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "Ecole-en-ligne.html"));
 });
+
+export default server;
 
 
 // 🚀 DEMARRE SERVEUR
