@@ -1210,6 +1210,45 @@ app.post("/upload-doc", upload.single("document"), (req, res) => {
   res.json({ success: true });
 });
 
+
+
+
+
+
+// === MEME REST API (MONGO-backed) ===
+
+// Add a new QA via POST (admin or teacher)
+app.post('/meme/qa', async (req, res) => {
+  try {
+    const { question, answer, lang, tags, createdBy } = req.body;
+    if(!question || !answer) return res.status(400).json({ success:false, msg:'question/answer required' });
+    const doc = new MemeQA({ question, answer, lang: lang||'fr', tags: tags||[], createdBy: createdBy||'api' });
+    await doc.save();
+    res.json({ success:true, id:doc._id });
+  } catch (err) {
+    console.error('POST /meme/qa err', err);
+    res.status(500).json({ success:false, msg:err.message });
+  }
+});
+
+// Simple search endpoint
+app.get('/meme/qa', async (req, res) => {
+  try {
+    const { q, lang, limit } = req.query;
+    if(!q) return res.status(400).json({ success:false, msg:'q query param required' });
+    const regex = buildSearchRegex(q) || new RegExp(q,'i');
+    const found = await MemeQA.find({ $or:[{ question: regex }, { tags: regex }] }).limit(parseInt(limit||10)).lean();
+    res.json({ success:true, results:found });
+  } catch (err) {
+    console.error('GET /meme/qa err', err);
+    res.status(500).json({ success:false, msg:err.message });
+  }
+});
+
+
+
+
+
 // Front-end
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "Ecole-en-ligne.html"));
