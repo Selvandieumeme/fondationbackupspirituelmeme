@@ -218,6 +218,7 @@ socket.on('screen-shared', streamData => {
     try {
       const localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
 
+      // === Videyo elev ===
       const videoEl = document.createElement('video');
       videoEl.autoplay = true;
       videoEl.muted = false;
@@ -225,22 +226,56 @@ socket.on('screen-shared', streamData => {
       videoEl.srcObject = localStream;
       studentVideos.appendChild(videoEl);
 
+      // === Bouton kontwòl pwòp elev yo ===
+      const controlsContainer = document.createElement('div');
+      controlsContainer.classList.add('student-controls');
+      document.getElementById('room-controls').appendChild(controlsContainer);
+
+      // Mute mikro
+      const muteMicBtn = document.createElement('button');
+      muteMicBtn.textContent = 'Mute Micro';
+      muteMicBtn.classList.add('mute-mic');
+      controlsContainer.appendChild(muteMicBtn);
+      muteMicBtn.addEventListener('click', () => {
+        localStream.getAudioTracks().forEach(track => track.enabled = !track.enabled);
+      });
+
+      // Mute kamera
+      const muteCamBtn = document.createElement('button');
+      muteCamBtn.textContent = 'Mute Caméra';
+      muteCamBtn.classList.add('mute-cam');
+      controlsContainer.appendChild(muteCamBtn);
+      muteCamBtn.addEventListener('click', () => {
+        localStream.getVideoTracks().forEach(track => track.enabled = !track.enabled);
+      });
+
+      // Upload dokiman
       if (uploadDoc) {
-        uploadDoc.addEventListener('change', async () => {
+        const uploadBtn = document.createElement('button');
+        uploadBtn.textContent = 'Téléverser Document';
+        uploadBtn.classList.add('upload-doc');
+        controlsContainer.appendChild(uploadBtn);
+
+        uploadBtn.addEventListener('click', async () => {
           const file = uploadDoc.files[0];
-          if (!file) return;
+          if (!file) return alert('Aucun fichier choisi');
           const form = new FormData();
           form.append('document', file);
-          await fetch('/upload-doc', { method: 'POST', body: form });
-          alert('📄 Document téléversé avec succès');
+          try {
+            await fetch('/upload-doc', { method: 'POST', body: form });
+            alert('📄 Document téléversé avec succès');
+          } catch (err) {
+            console.error(err);
+            alert('Erreur téléversement document');
+          }
         });
       }
 
-      // Bouton pataj ekran
+      // Partager écran
       const shareScreenBtn = document.createElement('button');
-      shareScreenBtn.textContent = 'Partager écran';
+      shareScreenBtn.textContent = 'Partager Écran';
       shareScreenBtn.classList.add('share-screen');
-      document.getElementById('room-controls').appendChild(shareScreenBtn);
+      controlsContainer.appendChild(shareScreenBtn);
 
       shareScreenBtn.addEventListener('click', async () => {
         try {
@@ -260,9 +295,11 @@ socket.on('screen-shared', streamData => {
         }
       });
 
+      // Voye chak track videyo/mikwo nan server
       localStream.getTracks().forEach(track => {
         socket.emit('student-stream', { trackId: track.id, kind: track.kind });
       });
+
     } catch (err) {
       alert('Erreur accès caméra/micro elev: ' + err.message);
     }
