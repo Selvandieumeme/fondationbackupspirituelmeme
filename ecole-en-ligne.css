@@ -95,7 +95,9 @@ h1 {
   min-height: 70vh; /* fè espas prensipal videyo a gwo */
 }
 
-#teacher-video {
+/* Vidéo teacher / screen share */
+#teacher-video,
+#screen-video {
   flex: 1 1 auto;
   width: 80vw;
   height: 80vw;
@@ -110,9 +112,16 @@ h1 {
   transition: transform 0.3s ease, border-color 0.3s ease;
 }
 
+#teacher-video:hover,
+#screen-video:hover {
+  transform: scale(1.01);
+  border-color: #ffd700;
+}
+
 /* ✅ Limite kamera a sou laptop ak gwo ekran pou l pa kouvri bouton yo */
 @media (min-width: 992px) {
-  #teacher-video {
+  #teacher-video,
+  #screen-video {
     width: 50vw;      /* mwens laj */
     height: 50vw;     /* kare toujou */
     max-height: 500px; /* limite an wotè */
@@ -120,15 +129,12 @@ h1 {
 }
 
 @media (min-width: 1400px) {
-  #teacher-video {
+  #teacher-video,
+  #screen-video {
     width: 45vw;
     height: 45vw;
     max-height: 480px;
   }
-}
-#teacher-video:hover {
-  transform: scale(1.01);
-  border-color: #ffd700;
 }
 
 /* Videyo etidyan yo — pi piti men pwopòsyonèl */
