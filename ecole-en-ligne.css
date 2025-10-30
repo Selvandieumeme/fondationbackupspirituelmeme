@@ -5,26 +5,25 @@
 
 /* Root variables */
 :root{
-  --bleu:#0b63ff;
-  --bleu-2:#1e8bff;
+  --bleu:#1e90ff; /* nouvo ble plis klere */
+  --bleu-2:#00bfff; /* nouvo ble vibrant */
   --jaune:#ffd43b;
   --blan:#ffffff;
-  --bg:#f0f4ff;
+  --bg:#f9fbff;
   --muted:#4a5568;
   --card-shadow:0 16px 60px rgba(11,18,32,0.2);
   --radius:20px;
   --gap:18px;
   --max-width:1500px;
-  --btn-glow:0 8px 36px rgba(255,212,59,0.5);
-  --hover-scale:1.1;
+  --btn-glow:0 6px 28px rgba(255,212,59,0.4);
+  --hover-scale:1.08;
   --transition:.35s ease-in-out;
 }
 
 /* Reset & base */
-*{box-sizing:border-box;}
+*{box-sizing:border-box;margin:0;padding:0;}
 html, body{height:100%;}
 body{
-  margin:0;
   font-family:'Inter',system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial;
   min-height:100vh;
   display:flex;
@@ -54,9 +53,10 @@ body{
   width:100%;
   display:block;
   margin:0 auto;
+  padding-bottom:60px;
 }
 
-/* Presenter / header big blue background */
+/* Presenter / header */
 .presenter-area{
   display:flex;
   flex-direction:column;
@@ -66,27 +66,27 @@ body{
   min-height:650px;
   padding:40px;
   border-radius:var(--radius);
-  background: linear-gradient(135deg, var(--bleu), var(--bleu-2));
+  background: linear-gradient(135deg, var(--bleu-2), var(--jaune), var(--blan));
   box-shadow:0 28px 100px rgba(11,18,32,0.3);
   text-align:center;
   position:relative;
 }
 
-/* Tit ak slogan nan mitan fon ble a */
+/* Tit ak slogan nan mitan fon */
 .presenter-area .header-title{
   font-size:clamp(3rem, 5vw, 6rem);
   font-weight:900;
-  color:#fff;
-  text-shadow:0 6px 25px rgba(0,0,0,0.45);
+  color:#0b1220;
+  text-shadow:0 3px 12px rgba(255,255,255,0.6);
   margin-bottom:20px;
   line-height:1.1;
 }
 .presenter-area .header-subtitle{
   font-size:clamp(1.5rem, 2.5vw, 2.5rem);
   font-weight:700;
-  color:#fff;
-  text-shadow:0 4px 15px rgba(0,0,0,0.35);
-  max-width:95%;
+  color:#0b1220;
+  text-shadow:0 2px 8px rgba(255,255,255,0.5);
+  max-width:90%;
   margin:0 auto 30px auto;
   line-height:1.3;
 }
@@ -104,18 +104,20 @@ body{
   aspect-ratio:16/9;
   object-fit:cover;
   border-radius:var(--radius);
-  border:5px solid rgba(255,255,255,0.25);
-  transition:transform var(--transition);
+  border:4px solid rgba(255,255,255,0.3);
+  box-shadow:0 14px 50px rgba(0,0,0,0.15);
+  transition:transform var(--transition), box-shadow var(--transition);
 }
 .presenter-video video:hover{
-  transform:scale(1.03);
+  transform:scale(1.02);
+  box-shadow:0 18px 60px rgba(0,0,0,0.2);
 }
 
 /* Classroom grid layout */
 .classroom-grid{
-  margin-top:28px;
+  margin-top:32px;
   display:grid;
-  grid-template-columns: 300px 1fr 280px;
+  grid-template-columns: 320px 1fr 300px;
   gap:var(--gap);
   align-items:start;
 }
@@ -131,37 +133,39 @@ body{
 .participants{
   display:flex;
   flex-direction:column;
-  gap:12px;
+  gap:14px;
 }
 .participants h3{
-  font-size:1.3rem;
+  font-size:1.45rem; /* pi gwo tit pou lis */
   font-weight:700;
   color:var(--bleu-2);
 }
 .participant-list{
   display:flex;
   flex-wrap:wrap;
-  gap:12px;
+  gap:14px;
 }
 .participant{
-  background:linear-gradient(135deg, var(--bleu), var(--jaune), var(--blan));
+  background:linear-gradient(135deg, var(--jaune), var(--bleu-2), var(--blan));
   color:#0b1220;
   font-weight:600;
-  padding:10px 16px;
+  padding:12px 18px; /* pi gwo espas pou non */
   border-radius:16px;
-  box-shadow:0 8px 24px rgba(11,18,32,0.18);
+  box-shadow:0 10px 28px rgba(11,18,32,0.18);
   transition:transform var(--transition);
+  font-size:1.05rem;
 }
 .participant:hover{
   transform:scale(var(--hover-scale));
+  box-shadow:0 16px 40px rgba(11,18,32,0.28);
 }
 
 /* Card styling */
 .card{
-  background:rgba(255,255,255,0.95);
+  background:rgba(255,255,255,0.98);
   border-radius:var(--radius);
   box-shadow:var(--card-shadow);
-  padding:24px;
+  padding:28px;
   transition:transform var(--transition), box-shadow var(--transition);
 }
 .card:hover{
@@ -173,54 +177,55 @@ body{
 .chat-area{
   display:flex;
   flex-direction:column;
-  gap:12px;
+  gap:14px;
 }
 .messages{
-  height:280px;
+  height:300px;
   overflow:auto;
   border-radius:18px;
   border:1px solid #e0e8ff;
-  padding:12px;
+  padding:14px;
   background:rgba(255,255,255,0.97);
 }
 
-/* Buttons all styled with 3-color gradient */
+/* Buttons rafine, klasik, pa two gwo */
 button, .primary, .secondary{
-  background:linear-gradient(135deg, var(--bleu), var(--jaune), var(--blan));
+  background:linear-gradient(135deg, var(--jaune), var(--bleu-2), var(--blan));
   color:#0b1220;
   border:none;
-  border-radius:20px;
-  font-weight:700;
-  font-size:1.3rem;
-  padding:16px 32px;
+  border-radius:16px;
+  font-weight:600;
+  font-size:1.15rem;
+  padding:10px 24px;
   cursor:pointer;
-  box-shadow:0 8px 36px rgba(255,212,59,0.5);
+  box-shadow:var(--btn-glow);
   transition:transform var(--transition), box-shadow var(--transition);
+  text-transform:none;
 }
 button:hover, .primary:hover, .secondary:hover{
-  transform:scale(var(--hover-scale));
-  box-shadow:0 12px 48px rgba(255,212,59,0.7);
+  transform:scale(1.05);
+  box-shadow:0 12px 36px rgba(255,212,59,0.6);
 }
 
-/* Topbar with subtle glow */
+/* Topbar */
 .topbar{
   display:flex;
   align-items:center;
   justify-content:space-between;
-  background: linear-gradient(90deg,var(--bleu),var(--bleu-2));
+  background: linear-gradient(90deg,var(--jaune),var(--bleu-2),var(--blan));
   color:var(--blan);
-  padding:22px 32px;
+  padding:20px 28px;
   border-radius:var(--radius);
-  box-shadow:0 16px 60px rgba(11,18,32,0.25);
+  box-shadow:0 14px 50px rgba(11,18,32,0.25);
   position:sticky;
   top:0;
   z-index:100;
   animation: topbarGlow 5s ease-in-out infinite alternate;
 }
 @keyframes topbarGlow{
-  0%{box-shadow:0 16px 60px rgba(11,18,32,0.25);}
-  50%{box-shadow:0 16px 80px rgba(11,18,32,0.38);}
-  100%{box-shadow:0 16px 60px rgba(11,18,32,0.25);}
+  0%{box-shadow:0 14px 50px rgba(11,18,32,0.25);}
+  50%{box-shadow:0 14px 70px rgba(11,18,32,0.38);}
+  100%{box-shadow:0 14px 50px rgba(11,18,32,0.25);}
 }
 
 /* Topbar title */
@@ -262,5 +267,6 @@ button:hover, .primary:hover, .secondary:hover{
   .presenter-area .header-title{font-size:2.5rem;}
   .presenter-area .header-subtitle{font-size:1.2rem;}
   .presenter-video video{max-width:100%;height:auto;}
-  .participant{font-size:1rem;padding:8px 12px;}
+  .participant{font-size:1rem;padding:10px 14px;}
+  button, .primary, .secondary{font-size:1rem;padding:8px 18px;}
 }
