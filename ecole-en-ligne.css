@@ -1,318 +1,139 @@
-/* === STYLE GLOBAL === */
-body {
-  font-family: 'Poppins', Arial, sans-serif;
-  background: linear-gradient(135deg, #ffffff 0%, #eaf2ff 40%, #ffd700 100%);
-  margin: 0;
-  padding: 20px;
-  color: #1c1c1c;
-  min-height: 100vh;
-  background-attachment: fixed;
+/* Palette: bleu, jaune, blan — pwofesyonèl, pwòp, atiran */
+:root{
+  --bleu:#0b63ff;
+  --bleu-2:#1e8bff;
+  --jaune:#ffd43b;
+  --blan:#ffffff;
+  --bg:#f4f8ff;
+  --muted:#6b7280;
+  --card-shadow: 0 8px 30px rgba(11,18,32,0.06);
+  --radius:14px;
+  --gap:12px;
+  --max-width:1200px;
 }
 
-/* === TITRE PRINCIPAL === */
-h1 {
-  text-align: center;
-  color: #0d6efd;
-  margin-bottom: 25px;
-  font-size: 2.2em;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  text-shadow: 0 2px 4px rgba(13, 110, 253, 0.25);
+/* Reset & base */
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;
+  font-family:Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  background: linear-gradient(180deg, var(--bg), #ffffff);
+  color:#0b1220;
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+  padding:18px;
 }
 
-/* === CONTROLES DE CONNEXION === */
-#room-controls {
-  display: flex;
-  justify-content: center;
-  flex-wrap: wrap;
-  margin: 15px auto;
-  background: rgba(255, 255, 255, 0.85);
-  border: 2px solid #ffd700;
-  border-radius: 12px;
-  padding: 15px;
-  box-shadow: 0 4px 10px rgba(13, 110, 253, 0.1);
+/* App container */
+.app{max-width:var(--max-width);margin:0 auto;display:block}
+
+/* Topbar */
+.topbar{
+  display:flex;align-items:center;justify-content:space-between;
+  background: linear-gradient(90deg,var(--bleu),var(--bleu-2));
+  color:var(--blan);
+  padding:14px 18px;border-radius:12px;box-shadow:var(--card-shadow);
+}
+.topbar .brand h1{margin:0;font-size:18px;letter-spacing:0.6px}
+.topbar .brand .tag{margin:2px 0 0;font-size:12px;opacity:0.95}
+
+/* Card */
+.card{
+  background:var(--blan);
+  border-radius:var(--radius);
+  box-shadow:var(--card-shadow);
+  padding:12px;
 }
 
-#room-controls input,
-#room-controls select,
-#room-controls button {
-  margin: 6px;
-  padding: 10px 12px;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  font-size: 15px;
-  transition: all 0.3s ease;
+/* Join form */
+.join-panel{margin-top:14px;padding:14px;border-radius:12px;display:flex;flex-direction:column;gap:10px}
+.join-form{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.field{display:flex;flex-direction:column;font-size:13px;color:var(--muted);min-width:160px}
+.join-form input, .join-form select{
+  padding:10px;border-radius:10px;border:1px solid #e7f0ff;background:#fbfdff;outline:none;
+}
+.primary{background:var(--jaune);border:none;padding:10px 14px;border-radius:10px;cursor:pointer}
+.secondary{background:transparent;border:1px solid #e6eefc;padding:8px 12px;border-radius:8px;cursor:pointer}
+.status{font-size:13px;color:var(--muted)}
+
+/* Classroom grid layout */
+.classroom-grid{
+  margin-top:14px;
+  display:grid;
+  grid-template-columns: 260px 1fr 240px;
+  grid-template-rows: auto;
+  gap:var(--gap);
+  align-items:start;
 }
 
-#room-controls input:focus,
-#room-controls select:focus {
-  border-color: #0d6efd;
-  box-shadow: 0 0 4px rgba(13, 110, 253, 0.4);
+/* mobile-first collapse */
+@media (max-width: 1000px){
+  .classroom-grid{grid-template-columns: 1fr; grid-template-areas: none;}
+  .left-col, .right-col{order:2}
+  .main-col{order:1}
+  .left-col, .right-col{width:100%}
 }
 
-/* === CONTROLES ENSEIGNANT === */
-#teacher-controls {
-  display: flex;
-  justify-content: center;
-  flex-wrap: wrap;
-  margin: 20px auto;
-  background: linear-gradient(90deg, #0d6efd 0%, #0056b3 100%);
-  border-radius: 10px;
-  padding: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+/* Columns */
+.left-col{display:flex;flex-direction:column;gap:10px}
+.right-col{display:flex;flex-direction:column;gap:10px}
+.main-col{display:flex;flex-direction:column;gap:10px}
+
+/* local preview */
+.local-video{position:relative;height:160px;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.local-video video{width:100%;height:100%;object-fit:cover;border-radius:10px}
+.local-video .you-label{position:absolute;left:8px;bottom:8px;background:rgba(0,0,0,0.45);color:#fff;padding:6px;border-radius:8px;font-size:12px}
+
+/* controls */
+.controls{display:flex;flex-direction:column;gap:8px}
+.controls button{padding:8px;border-radius:8px;border:1px solid #e6eefc;background:transparent;cursor:pointer}
+
+/* class header */
+.class-header{display:flex;justify-content:space-between;align-items:center;padding:12px}
+.class-header h2{margin:0;font-size:16px}
+.class-meta{display:flex;gap:8px}
+.meta-item{font-size:12px;color:var(--muted);padding:6px 8px;border-radius:8px;background:#fbfdff}
+
+/* presenter big square video */
+.presenter-area{display:flex;align-items:center;justify-content:center;min-height:320px;padding:12px;flex-direction:column}
+.presenter-video{width:100%;max-width:720px;display:flex;flex-direction:column;align-items:center;gap:8px}
+.presenter-video video{width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:10px;border:4px solid rgba(11,99,255,0.08)}
+.presenter-video .pname{font-weight:600;color:var(--muted)}
+
+/* participants grid (square tiles) */
+.videos-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px;padding:10px}
+.videos-grid .participant{display:flex;flex-direction:column;gap:6px;align-items:center}
+.videos-grid .participant video{
+  width:100%;
+  aspect-ratio:1/1; /* forces square */
+  object-fit:cover;
+  border-radius:8px;
+  min-width:80px; /* minimal size = 80px for both width & height */
+  min-height:80px;
+  border:2px solid #f1f6ff;
 }
 
-#teacher-controls button,
-#teacher-controls input {
-  margin: 6px;
-  padding: 10px 14px;
-  border: none;
-  border-radius: 8px;
-  background: #ffd700;
-  color: #0d6efd;
-  font-weight: bold;
-  cursor: pointer;
-  transition: transform 0.25s ease, background 0.3s ease;
+/* chat area */
+.chat-area{display:flex;flex-direction:column;gap:8px}
+.messages{height:220px;overflow:auto;border-radius:10px;border:1px solid #f0f4ff;padding:8px;background:#fbfdff}
+.chat-form{display:flex;gap:8px}
+.chat-form input{flex:1;padding:10px;border-radius:8px;border:1px solid #eef6ff}
+
+/* participants list */
+.participants-wrap{padding:0}
+.participants-head{padding:12px;border-bottom:1px solid #f0f6ff;font-weight:600}
+.participants{max-height:420px;overflow:auto;padding:10px}
+.participant-item{display:flex;justify-content:space-between;align-items:center;padding:8px;border-radius:8px;border-bottom:1px solid #f2f6ff}
+
+/* small screens optimizations */
+@media (max-width: 640px){
+  .presenter-area{min-height:220px}
+  .presenter-video{max-width:100%}
+  .videos-grid{grid-template-columns:repeat(auto-fill,minmax(100px,1fr))}
+  .local-video{height:120px}
+  .topbar .brand h1{font-size:16px}
 }
 
-#teacher-controls button:hover {
-  background: #fff;
-  color: #0b5ed7;
-  transform: scale(1.05);
-}
-
-/* === SECTION VIDEO === */
-#video-section {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  margin: 25px auto;
-  background: rgba(255, 255, 255, 0.9);
-  border-radius: 14px;
-  padding: 20px;
-  box-shadow: 0 4px 15px rgba(13, 110, 253, 0.15);
-  max-width: 95vw;
-  min-height: 70vh; /* fè espas prensipal videyo a gwo */
-}
-
-/* Vidéo teacher / screen share */
-#teacher-video,
-#screen-video {
-  flex: 1 1 auto;
-  width: 80vw;
-  height: 80vw;
-  max-width: 1280px;
-  max-height: 1280px;
-  object-fit: cover;
-  border: 4px solid #0d6efd;
-  border-radius: 12px;
-  background: #000;
-  margin: 10px auto;
-  box-shadow: 0 4px 15px rgba(13, 110, 253, 0.2);
-  transition: transform 0.3s ease, border-color 0.3s ease;
-}
-
-#teacher-video:hover,
-#screen-video:hover {
-  transform: scale(1.01);
-  border-color: #ffd700;
-}
-
-/* ✅ Limite kamera a sou laptop ak gwo ekran pou l pa kouvri bouton yo */
-@media (min-width: 992px) {
-  #teacher-video,
-  #screen-video {
-    width: 50vw;      /* mwens laj */
-    height: 50vw;     /* kare toujou */
-    max-height: 500px; /* limite an wotè */
-  }
-}
-
-@media (min-width: 1400px) {
-  #teacher-video,
-  #screen-video {
-    width: 45vw;
-    height: 45vw;
-    max-height: 480px;
-  }
-}
-
-/* Videyo etidyan yo — pi piti men pwopòsyonèl */
-#student-videos {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 10px;
-  margin-top: 10px;
-}
-
-#student-videos video {
-  width: 250px;
-  height: 180px;
-  object-fit: cover;
-  border: 3px solid #0d6efd;
-  border-radius: 10px;
-  background: #000;
-  transition: transform 0.3s ease, border-color 0.3s ease;
-}
-
-#student-videos video:hover {
-  transform: scale(1.05);
-  border-color: #ffd700;
-}
-
-/* === SECTION CHAT === */
-#chat-section {
-  border: 2px solid #0d6efd;
-  border-radius: 12px;
-  padding: 15px;
-  max-width: 650px;
-  margin: 25px auto;
-  background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
-  box-shadow: 0 4px 15px rgba(13, 110, 253, 0.15);
-}
-
-#messages {
-  list-style: none;
-  padding: 0;
-  height: 220px;
-  overflow-y: auto;
-  margin-bottom: 12px;
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.7);
-  border: 1px solid #e1e1e1;
-}
-
-#messages li {
-  padding: 8px 10px;
-  border-bottom: 1px solid #dcdcdc;
-  font-size: 14px;
-  line-height: 1.5;
-  color: #333;
-}
-
-#messages li:nth-child(odd) {
-  background: rgba(255, 215, 0, 0.08);
-}
-
-/* === INPUTS & BOUTONS GÉNÉRAUX === */
-input,
-button {
-  padding: 8px 12px;
-  margin: 4px;
-  font-size: 15px;
-  border-radius: 8px;
-}
-
-button {
-  background: linear-gradient(90deg, #0d6efd 0%, #0056b3 100%);
-  color: #fff;
-  border: none;
-  cursor: pointer;
-  font-weight: 600;
-  letter-spacing: 0.3px;
-  transition: all 0.3s ease;
-}
-
-button:hover {
-  background: linear-gradient(90deg, #ffd700 0%, #fff 100%);
-  color: #0d6efd;
-  transform: translateY(-2px);
-}
-
-/* === SCROLLBAR PERSO === */
-#messages::-webkit-scrollbar {
-  width: 8px;
-}
-
-#messages::-webkit-scrollbar-thumb {
-  background: #0d6efd;
-  border-radius: 4px;
-}
-
-#messages::-webkit-scrollbar-thumb:hover {
-  background: #ffd700;
-}
-
-
-
-
-
-
-
-/* === STYLE POU VIDEYO ELEV === */
-#student-videos video.student {
-  width: 250px;
-  height: 180px;
-  object-fit: cover;
-  border: 3px solid #0d6efd;
-  border-radius: 10px;
-  margin: 5px;
-  transition: transform 0.3s ease, border-color 0.3s ease;
-}
-
-#student-videos video.student:hover {
-  transform: scale(1.05);
-  border-color: #ffd700;
-}
-
-/* === BOUTON KONTWÒL PWÒP ELEV === */
-#room-controls .student-controls {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  margin: 10px auto;
-}
-
-#room-controls .student-controls button {
-  margin: 6px;
-  padding: 10px 14px;
-  border-radius: 8px;
-  cursor: pointer;
-  background: #ffd700;
-  color: #0d6efd;
-  font-weight: bold;
-  transition: transform 0.25s ease, background 0.3s ease;
-}
-
-#room-controls .student-controls button:hover {
-  transform: scale(1.05);
-  background: #fff;
-  color: #0b5ed7;
-}
-
-/* === BOUTON PARTAGER EKRAN === */
-#room-controls .student-controls button.share-screen {
-  border: 3px solid #ff4500;
-}
-
-/* === BOUTON UPLOAD DOKIMAN === */
-#room-controls .student-controls button.upload-doc {
-  background: #0d6efd;
-  color: #fff;
-}
-
-#room-controls .student-controls button.upload-doc:hover {
-  background: #0056b3;
-}
-
-/* === BOUTON MUTE MICRO === */
-#room-controls .student-controls button.mute-mic {
-  background: #ffc107;
-  color: #1c1c1c;
-}
-
-#room-controls .student-controls button.mute-mic:hover {
-  background: #ffd700;
-  color: #0d6efd;
-}
-
-/* === BOUTON MUTE CAMERA === */
-#room-controls .student-controls button.mute-cam {
-  background: #17a2b8;
-  color: #fff;
-}
-
-#room-controls .student-controls button.mute-cam:hover {
-  background: #138496;
-}
+/* accessibility focus */
+button:focus, input:focus, select:focus{outline:2px solid rgba(11,99,255,0.12);outline-offset:2px}
