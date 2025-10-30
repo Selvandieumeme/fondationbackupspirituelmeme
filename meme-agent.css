@@ -219,3 +219,181 @@
     bottom: 20px;
   }
 }
+
+
+
+
+
+
+/* ===========================================================
+   MEME-Agent UI fixer (minimal) - paste at the END of meme-agent.js
+   Purpose: wire existing HTML elements and ensure visibility
+=========================================================== */
+(function ensureMemeUI(){
+  // avoid collisions si deja inited
+  if (window.__MEME_UI_INITED) return;
+  window.__MEME_UI_INITED = true;
+
+  // helper: safe query
+  function $id(id){ return document.getElementById(id); }
+  function $sel(sel){ return document.querySelector(sel); }
+
+  // Wait until DOM ready (script already loaded defer)
+  function init() {
+    // Prefer existing markup (user-provided)
+    let wrapper = $sel('.meme-chat-wrapper');
+    let chatBox = $id('meme-chat');
+    let input = $id('meme-input');
+    let submit = $id('meme-submit');
+    let voice = $id('meme-voice');
+
+    // If wrapper doesn't exist (shouldn't happen because you added), create fallback
+    if (!wrapper) {
+      wrapper = document.createElement('div');
+      wrapper.className = 'meme-chat-wrapper card';
+      wrapper.style.position = 'fixed';
+      wrapper.style.right = '18px';
+      wrapper.style.bottom = '18px';
+      wrapper.style.zIndex = '100000';
+      wrapper.innerHTML = `
+        <div id="meme-chat" style="max-height:240px;overflow:auto;padding:8px;background:#f0f6ff;border-radius:10px;"></div>
+        <input id="meme-input" placeholder="Tape kesyon ou..." />
+        <div style="display:flex;gap:8px;margin-top:8px;">
+          <button id="meme-submit" class="primary">Voye</button>
+          <button id="meme-voice" class="primary">Mikwo</button>
+        </div>
+      `;
+      document.body.appendChild(wrapper);
+      chatBox = $id('meme-chat');
+      input = $id('meme-input');
+      submit = $id('meme-submit');
+      voice = $id('meme-voice');
+    }
+
+    // Ensure wrapper is visible (some previous CSS set display:none)
+    wrapper.style.display = 'flex';
+    wrapper.style.flexDirection = 'column';
+    wrapper.style.pointerEvents = 'auto';
+
+    // Ensure chat box exists
+    if (!chatBox) {
+      chatBox = document.createElement('div');
+      chatBox.id = 'meme-chat';
+      wrapper.insertBefore(chatBox, wrapper.firstChild);
+    }
+
+    // Hook up submit button to existing handleInteraction if present
+    function localHandle(text){
+      // prefer existing exported function names
+      if (!text) return;
+      // try several candidate functions (backwards compatible)
+      if (typeof handleInteraction === 'function') {
+        handleInteraction(text);
+        return;
+      }
+      if (typeof handleCommand === 'function') {
+        // some versions used handleCommand for voice commands
+        handleCommand(text);
+        return;
+      }
+      // fallback: simple echo into chat and TTS if available
+      pushLocalMessage('Vous', text);
+      const fallback = (typeof getAnswer === 'function') ? getAnswer(text) : "MEME: (pas de base) Je vais apprendre.";
+      pushLocalMessage('MEME', fallback);
+      if (window.speechSynthesis) {
+        const u = new SpeechSynthesisUtterance(fallback);
+        u.lang = 'fr-FR';
+        window.speechSynthesis.cancel();
+        window.speechSynthesis.speak(u);
+      }
+    }
+
+    // local push to chat area (safe, won't conflict)
+    function pushLocalMessage(who, msg){
+      if (!chatBox) return;
+      const d = document.createElement('div');
+      d.className = who === 'MEME' ? 'meme-msg-bubble meme' : 'meme-msg-bubble';
+      d.textContent = (who ? who + ': ' : '') + msg;
+      chatBox.appendChild(d);
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    // Click handler for submit
+    if (submit) {
+      submit.addEventListener('click', (ev)=>{
+        ev.preventDefault();
+        const v = input ? input.value.trim() : '';
+        if (!v) return;
+        // clear input
+        if (input) input.value = '';
+        localHandle(v);
+      });
+    }
+
+    // Enter key in input
+    if (input) {
+      input.addEventListener('keydown', (e)=>{
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          const v = input.value.trim();
+          if (!v) return;
+          input.value = '';
+          localHandle(v);
+        }
+      });
+    }
+
+    // Voice button: start recognition if available, otherwise toggle listening flag
+    if (voice) {
+      voice.addEventListener('click', (e)=>{
+        if (typeof startListening === 'function') {
+          try {
+            startListening();
+          } catch(err){
+            console.warn('startListening failed:', err);
+            // fallback: notify user
+            pushLocalMessage('MEME','La reconnaissance vocale n\'est pas disponible.');
+          }
+        } else {
+          // try webkitSpeechRecognition direct fallback
+          if (window.webkitSpeechRecognition) {
+            try {
+              const rec = new webkitSpeechRecognition();
+              rec.lang = 'fr-FR';
+              rec.interimResults = false;
+              rec.onresult = (ev) => {
+                const t = ev.results[0][0].transcript;
+                localHandle(t);
+              };
+              rec.onerror = (e)=> console.warn('speech error', e);
+              rec.start();
+            } catch(e){
+              console.warn('speech fallback failed', e);
+              pushLocalMessage('MEME','Reconnaissance vocale impossible dans ce navigateur.');
+            }
+          } else {
+            pushLocalMessage('MEME','La reconnaissance vocale n\'est pas supportée.');
+          }
+        }
+      });
+    }
+
+    // Expose safe helpers so other scripts can call
+    window.MEME_UI = window.MEME_UI || {};
+    window.MEME_UI.pushMessage = pushLocalMessage;
+    window.MEME_UI.element = {
+      wrapper, chatBox, input, submit, voice
+    };
+
+    // If you already have a seed dataset (seed_meme_qa.js exposes window.MEME_QA_DATA),
+    // show a small notice
+    if (window.MEME_QA_DATA && window.MEME_QA_DATA.questions) {
+      pushLocalMessage('MEME','Base Q/A chargée localement (' + (window.MEME_QA_DATA.questions.length || 0) + ' items).');
+    }
+  } // init
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else init();
+
+})(); /* end ensureMemeUI */
