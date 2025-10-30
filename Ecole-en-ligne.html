@@ -1,61 +1,47 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="UTF-8">
-<title>École en Ligne — FOBAS - 100 Elèves/Salle de Classe</title>
-<link rel="stylesheet" href="ecole-en-ligne.css">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<style>
-body{font-family:system-ui,Segoe UI,Roboto,Arial;margin:12px}
-#video-section{display:flex;flex-wrap:wrap;gap:8px}
-video{width:240px;height:160px;background:#000;border-radius:8px}
-#student-videos{display:flex;flex-wrap:wrap;gap:8px}
-.student-card{display:flex;flex-direction:column;align-items:center}
-.pending-request{margin:6px 0}
-#teacher-controls{display:flex;flex-wrap:wrap;gap:6px}
-</style>
+  <meta charset="UTF-8">
+  <title>École en Ligne — FOBAS</title>
+  <link rel="stylesheet" href="ecole-en-ligne.css">
 </head>
 <body>
-<h1>École en Ligne — FOBAS - jusqu'à 100 élèves / Salle</h1>
+  <h1>École en Ligne — FOBAS</h1>
 
+  <div id="room-controls">
+    <input type="text" id="room-code" placeholder="Code de salle">
+    <input type="text" id="username" placeholder="Votre nom">
+    <select id="role">
+      <option value="teacher">Teacher</option>
+      <option value="student">Student</option>
+    </select>
+    <button id="join-room">Rejoindre</button>
+  </div>
 
-<div id="room-controls">
-<input type="text" id="room-code" placeholder="Code de salle">
-<input type="text" id="username" placeholder="Votre nom">
-<select id="role">
-<option value="teacher">Enseignant</option>
-<option value="student">Élève</option>
-</select>
-<button id="join-room">Demander à rejoindre</button>
-</div>
+  <div id="teacher-controls" style="display:none;">
+    <button id="mute-all">Mute All</button>
+    <button id="stop-all-video">Stop All Video</button>
+    <button id="start-rec">Start Recording</button>
+    <button id="stop-rec">Stop Recording</button>
+    <input type="file" id="upload-doc">
+    <button id="share-screen">Partager Écran</button>
+    <div id="pending-students"></div> <!-- Elev k ap tann aksepte/rejte -->
+  </div>
 
+  <div id="video-section">
+    <video id="teacher-video" autoplay muted></video>
+    <div id="student-videos"></div>
+  </div>
 
-<div id="teacher-controls" style="display:none;">
-<div style="min-width:100%"><strong>Contrôles Enseignant</strong></div>
-<button id="mute-all">Mute All</button>
-<button id="unmute-all">Unmute All</button>
-<button id="stop-all-video">Stop All Video</button>
-<button id="start-rec">Start Recording</button>
-<button id="stop-rec">Stop Recording</button>
-<input type="file" id="upload-doc">
-<button id="share-screen">Partager Écran</button>
-<button id="toggle-permissions-panel">Voir Permissions / Participants</button>
-<div id="pending-requests" style="width:100%;margin-top:8px"></div>
-<div id="participants-panel" style="width:100%;margin-top:8px;display:none"></div>
-</div>
+  <div id="chat-section">
+    <ul id="messages"></ul>
+    <input id="msg" placeholder="Votre message">
+    <button id="send">Envoyer</button>
+  </div>
 
-
-<div id="video-section">
-<div style="flex:1;min-width:260px">
-<video id="teacher-video" autoplay playsinline muted></video>
-<div style="text-align:center">Enseignant</div>
-</div>
-<div id="student-videos"></div>
-</div>
-
-
-<div id="chat-section">
-<ul id="messages"></ul>
-<input id="msg" placeholder="Votre message">
-<button id="send">Envoyer</button>
+  <!-- Socket.io -->
+  <script src="https://examen-backend-ihlx.onrender.com/socket.io/socket.io.js"></script>
+  <!-- JS aplikasyon -->
+  <script src="ecole-en-ligne.js"></script>
+</body>
 </html>
