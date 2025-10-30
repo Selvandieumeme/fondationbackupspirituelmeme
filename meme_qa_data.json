@@ -1099,5 +1099,354 @@
     "tags": ["estudiante", "profesor", "en línea"]
   }.  
 
+{
+    "question": "Ki jan pou yon pwofesè kòmanse pataje ekran li?",
+    "answer": "Li klike sou bouton 'Partager Écran' nan kontwòl pwofesè a epi chwazi ekran li vle pataje a.",
+    "lang": "ht",
+    "tags": ["pwofesè", "pataje ekran", "kontwòl"]
+  },
+  {
+    "question": "Comment un professeur peut-il commencer à partager son écran ?",
+    "answer": "Il clique sur le bouton 'Partager Écran' dans les contrôles du professeur et choisit l’écran à partager.",
+    "lang": "fr",
+    "tags": ["professeur", "partager écran", "contrôle"]
+  },
+  {
+    "question": "How can a teacher start sharing their screen?",
+    "answer": "They click the 'Share Screen' button in the teacher controls and select the screen to share.",
+    "lang": "en",
+    "tags": ["teacher", "screen share", "controls"]
+  },
+  {
+    "question": "¿Cómo puede un profesor empezar a compartir su pantalla?",
+    "answer": "Hace clic en el botón 'Compartir Pantalla' en los controles del profesor y elige la pantalla a compartir.",
+    "lang": "es",
+    "tags": ["profesor", "compartir pantalla", "controles"]
+  },
+
+  {
+    "question": "Kijan yon elèv ka leve men li pandan yon klas?",
+    "answer": "Li klike sou bouton 'Raise Hand' nan entèfas klas la.",
+    "lang": "ht",
+    "tags": ["elèv", "leve men", "klas"]
+  },
+  {
+    "question": "Comment un élève peut-il lever la main pendant un cours ?",
+    "answer": "Il clique sur le bouton 'Lever la main' dans l’interface de la classe.",
+    "lang": "fr",
+    "tags": ["élève", "lever main", "classe"]
+  },
+  {
+    "question": "How can a student raise their hand during a class?",
+    "answer": "They click the 'Raise Hand' button in the class interface.",
+    "lang": "en",
+    "tags": ["student", "raise hand", "class"]
+  },
+  {
+    "question": "¿Cómo puede un estudiante levantar la mano durante una clase?",
+    "answer": "Hace clic en el botón 'Levantar Mano' en la interfaz de la clase.",
+    "lang": "es",
+    "tags": ["estudiante", "levantar mano", "clase"]
+  },
+
+  {
+    "question": "Ki sa ki fè MEME Inspecteur entèveni nan klas la?",
+    "answer": "Li entèveni lè li detekte yon elèv oswa pwofesè gen difikilte ak zouti oswa entèraksyon.",
+    "lang": "ht",
+    "tags": ["MEME", "inspecteur", "entèvensyon"]
+  },
+  {
+    "question": "Quand MEME Inspecteur intervient-il dans la classe ?",
+    "answer": "Il intervient lorsqu’il détecte qu’un élève ou un professeur rencontre des difficultés avec les outils ou l’interaction.",
+    "lang": "fr",
+    "tags": ["MEME", "inspecteur", "intervention"]
+  },
+  {
+    "question": "When does MEME Inspecteur intervene in the class?",
+    "answer": "It intervenes when it detects that a student or teacher is having trouble with tools or interaction.",
+    "lang": "en",
+    "tags": ["MEME", "inspector", "intervention"]
+  },
+  {
+    "question": "¿Cuándo interviene MEME Inspecteur en la clase?",
+    "answer": "Interviene cuando detecta que un estudiante o profesor tiene dificultades con las herramientas o la interacción.",
+    "lang": "es",
+    "tags": ["MEME", "inspecteur", "intervención"]
+  },
+
+  {
+    "question": "Ki jan pou pwofesè ka sispann videyo tout elèv yo?",
+    "answer": "Li klike sou bouton 'Stop All Video' nan kontwòl pwofesè a.",
+    "lang": "ht",
+    "tags": ["pwofesè", "videyo", "kontwòl"]
+  },
+  {
+    "question": "Comment un professeur peut-il arrêter la vidéo de tous les élèves ?",
+    "answer": "Il clique sur le bouton 'Stop All Video' dans les contrôles du professeur.",
+    "lang": "fr",
+    "tags": ["professeur", "vidéo", "contrôle"]
+  },
+  {
+    "question": "How can a teacher stop all students' videos?",
+    "answer": "They click the 'Stop All Video' button in the teacher controls.",
+    "lang": "en",
+    "tags": ["teacher", "video", "controls"]
+  },
+  {
+    "question": "¿Cómo puede un profesor detener el video de todos los estudiantes?",
+    "answer": "Hace clic en el botón 'Stop All Video' en los controles del profesor.",
+    "lang": "es",
+    "tags": ["profesor", "video", "controles"]
+  },
+
+  {
+    "question": "Kijan elèv ka konnen si pwofesè a aksepte li nan klas la?",
+    "answer": "Yo resevwa yon notifikasyon 'join-request-result' avèk estati 'accepted' si pwofesè a aksepte yo.",
+    "lang": "ht",
+    "tags": ["elèv", "notifikasyon", "akseptasyon"]
+  },
+  {
+    "question": "Comment un élève sait-il si le professeur l’accepte dans la classe ?",
+    "answer": "Il reçoit une notification 'join-request-result' avec le statut 'accepted' si le professeur l’accepte.",
+    "lang": "fr",
+    "tags": ["élève", "notification", "acceptation"]
+  },
+  {
+    "question": "How does a student know if the teacher accepts them into the class?",
+    "answer": "They receive a 'join-request-result' notification with status 'accepted' if the teacher accepts them.",
+    "lang": "en",
+    "tags": ["student", "notification", "acceptance"]
+  },
+  {
+    "question": "¿Cómo sabe un estudiante si el profesor lo acepta en la clase?",
+    "answer": "Recibe una notificación 'join-request-result' con el estado 'accepted' si el profesor lo acepta.",
+    "lang": "es",
+    "tags": ["estudiante", "notificación", "aceptación"]
+  },
+
+  {
+    "question": "Ki jan MEME Inspecteur salye elèv yo lè kou a kòmanse?",
+    "answer": "Li lanse mesaj 'BIENVENUE' nan lang itilizatè yo pou akeyi yo nan klas la.",
+    "lang": "ht",
+    "tags": ["MEME", "BIENVENUE", "kou"]
+  },
+  {
+    "question": "Comment MEME Inspecteur accueille-t-il les élèves au début du cours ?",
+    "answer": "Il envoie un message 'BIENVENUE' dans la langue des utilisateurs pour les accueillir en classe.",
+    "lang": "fr",
+    "tags": ["MEME", "BIENVENUE", "cours"]
+  },
+  {
+    "question": "How does MEME Inspecteur greet students at the beginning of the class?",
+    "answer": "It sends a 'BIENVENUE' message in the users' language to welcome them to the class.",
+    "lang": "en",
+    "tags": ["MEME", "BIENVENUE", "class"]
+  },
+  {
+    "question": "¿Cómo saluda MEME Inspecteur a los estudiantes al inicio de la clase?",
+    "answer": "Envía un mensaje 'BIENVENUE' en el idioma de los usuarios para darles la bienvenida a la clase.",
+    "lang": "es",
+    "tags": ["MEME", "BIENVENUE", "clase"]
+  },
+
+  {
+    "question": "Ki mesaj MEME Inspecteur voye lè kou a fini?",
+    "answer": "Li voye mesaj 'AUREVOIR A TOUS' pou di orevwa a tout moun.",
+    "lang": "ht",
+    "tags": ["MEME", "AUREVOIR", "kou"]
+  },
+  {
+    "question": "Quel message MEME Inspecteur envoie-t-il à la fin du cours ?",
+    "answer": "Il envoie le message 'AUREVOIR A TOUS' pour dire au revoir à tous.",
+    "lang": "fr",
+    "tags": ["MEME", "AUREVOIR", "cours"]
+  },
+  {
+    "question": "What message does MEME Inspecteur send at the end of the class?",
+    "answer": "It sends the 'AUREVOIR A TOUS' message to say goodbye to everyone.",
+    "lang": "en",
+    "tags": ["MEME", "AUREVOIR", "class"]
+  },
+  {
+    "question": "¿Qué mensaje envía MEME Inspecteur al final de la clase?",
+    "answer": "Envía el mensaje 'AUREVOIR A TOUS' para despedirse de todos.",
+    "lang": "es",
+    "tags": ["MEME", "AUREVOIR", "clase"]
+  },
   
+  {
+    "question": "Kijan elèv ka mute pwòp mikwo li pandan klas la?",
+    "answer": "Li klike sou bouton 'Mute Micro' nan kontwòl li oswa entèfas elèv la.",
+    "lang": "ht",
+    "tags": ["elèv", "mikwo", "mute"]
+  },
+  {
+    "question": "Comment un élève peut-il couper son propre micro pendant le cours ?",
+    "answer": "Il clique sur le bouton 'Mute Micro' dans ses contrôles ou l’interface élève.",
+    "lang": "fr",
+    "tags": ["élève", "micro", "mute"]
+  },
+  {
+    "question": "How can a student mute their own microphone during class?",
+    "answer": "They click the 'Mute Micro' button in their controls or student interface.",
+    "lang": "en",
+    "tags": ["student", "microphone", "mute"]
+  },
+  {
+    "question": "¿Cómo puede un estudiante silenciar su propio micrófono durante la clase?",
+    "answer": "Hace clic en el botón 'Mute Micro' en sus controles o interfaz de estudiante.",
+    "lang": "es",
+    "tags": ["estudiante", "micrófono", "silenciar"]
+  },
+
+  {
+    "question": "Ki jan yon pwofesè ka wè tout elèv ki konekte nan klas la?",
+    "answer": "Li ka wè lis itilizatè yo nan ti panel dwat entèfas klas la.",
+    "lang": "ht",
+    "tags": ["pwofesè", "elèv", "lis"]
+  },
+  {
+    "question": "Comment un professeur peut-il voir tous les élèves connectés dans la classe ?",
+    "answer": "Il peut voir la liste des utilisateurs dans le petit panneau à droite de l’interface de la classe.",
+    "lang": "fr",
+    "tags": ["professeur", "élèves", "liste"]
+  },
+  {
+    "question": "How can a teacher see all students connected in the class?",
+    "answer": "They can see the list of users in the right-hand panel of the class interface.",
+    "lang": "en",
+    "tags": ["teacher", "students", "list"]
+  },
+  {
+    "question": "¿Cómo puede un profesor ver a todos los estudiantes conectados en la clase?",
+    "answer": "Puede ver la lista de usuarios en el panel derecho de la interfaz de la clase.",
+    "lang": "es",
+    "tags": ["profesor", "estudiantes", "lista"]
+  },
+
+  {
+    "question": "Ki jan MEME Inspecteur ka ede yon elèv jwenn bouton ki bezwen an?",
+    "answer": "Li ka montre ak pale otomatikman sou bouton nan entèfas elèv la lè li detekte difikilte.",
+    "lang": "ht",
+    "tags": ["MEME", "gid", "elèv"]
+  },
+  {
+    "question": "Comment MEME Inspecteur peut-il aider un élève à trouver le bouton nécessaire ?",
+    "answer": "Il peut indiquer et parler automatiquement sur le bouton dans l’interface de l’élève lorsqu’il détecte des difficultés.",
+    "lang": "fr",
+    "tags": ["MEME", "guide", "élève"]
+  },
+  {
+    "question": "How can MEME Inspecteur help a student find the needed button?",
+    "answer": "It can automatically point and speak about the button in the student interface when it detects difficulties.",
+    "lang": "en",
+    "tags": ["MEME", "guide", "student"]
+  },
+  {
+    "question": "¿Cómo puede MEME Inspecteur ayudar a un estudiante a encontrar el botón que necesita?",
+    "answer": "Puede señalar y hablar automáticamente sobre el botón en la interfaz del estudiante cuando detecta dificultades.",
+    "lang": "es",
+    "tags": ["MEME", "guía", "estudiante"]
+  },
+
+  {
+    "question": "Kijan yon pwofesè ka mute tout mikwo elèv yo an menm tan?",
+    "answer": "Li klike sou bouton 'Mute All' nan kontwòl pwofesè a.",
+    "lang": "ht",
+    "tags": ["pwofesè", "mikwo", "mute"]
+  },
+  {
+    "question": "Comment un professeur peut-il couper le micro de tous les élèves en même temps ?",
+    "answer": "Il clique sur le bouton 'Mute All' dans les contrôles du professeur.",
+    "lang": "fr",
+    "tags": ["professeur", "micro", "mute"]
+  },
+  {
+    "question": "How can a teacher mute all students' microphones at once?",
+    "answer": "They click the 'Mute All' button in the teacher controls.",
+    "lang": "en",
+    "tags": ["teacher", "microphone", "mute"]
+  },
+  {
+    "question": "¿Cómo puede un profesor silenciar todos los micrófonos de los estudiantes a la vez?",
+    "answer": "Hace clic en el botón 'Mute All' en los controles del profesor.",
+    "lang": "es",
+    "tags": ["profesor", "micrófono", "silenciar"]
+  },
+
+  {
+    "question": "Ki jan yon elèv ka wè si pwofesè a pataje ekran li?",
+    "answer": "Yon videyo ap parèt nan entèfas elèv la ki montre ekran pwofesè a.",
+    "lang": "ht",
+    "tags": ["elèv", "pataje ekran", "entèfas"]
+  },
+  {
+    "question": "Comment un élève peut-il savoir si le professeur partage son écran ?",
+    "answer": "Une vidéo apparaît dans l’interface de l’élève montrant l’écran du professeur.",
+    "lang": "fr",
+    "tags": ["élève", "partager écran", "interface"]
+  },
+  {
+    "question": "How can a student know if the teacher is sharing their screen?",
+    "answer": "A video appears in the student interface showing the teacher’s screen.",
+    "lang": "en",
+    "tags": ["student", "screen share", "interface"]
+  },
+  {
+    "question": "¿Cómo puede un estudiante saber si el profesor está compartiendo su pantalla?",
+    "answer": "Un video aparece en la interfaz del estudiante mostrando la pantalla del profesor.",
+    "lang": "es",
+    "tags": ["estudiante", "compartir pantalla", "interfaz"]
+  },
+
+  {
+    "question": "Kijan MEME Inspecteur kominike ak tout moun nan klas la?",
+    "answer": "Li itilize vwa natirèl pou pale otomatikman epi voye mesaj nan chat la si sa nesesè.",
+    "lang": "ht",
+    "tags": ["MEME", "vwa", "chat"]
+  },
+  {
+    "question": "Comment MEME Inspecteur communique-t-il avec tout le monde dans la classe ?",
+    "answer": "Il utilise une voix naturelle pour parler automatiquement et envoie des messages dans le chat si nécessaire.",
+    "lang": "fr",
+    "tags": ["MEME", "voix", "chat"]
+  },
+  {
+    "question": "How does MEME Inspecteur communicate with everyone in the class?",
+    "answer": "It uses natural voice to speak automatically and sends messages in chat if necessary.",
+    "lang": "en",
+    "tags": ["MEME", "voice", "chat"]
+  },
+  {
+    "question": "¿Cómo se comunica MEME Inspecteur con todos en la clase?",
+    "answer": "Usa voz natural para hablar automáticamente y envía mensajes en el chat si es necesario.",
+    "lang": "es",
+    "tags": ["MEME", "voz", "chat"]
+  },
+
+  {
+    "question": "Ki jan elèv ka tande vwa MEME Inspecteur pandan klas la?",
+    "answer": "Vwa a ap pase atravè entèfas odyo elèv la epi li entegre otomatikman.",
+    "lang": "ht",
+    "tags": ["elèv", "MEME", "vwa"]
+  },
+  {
+    "question": "Comment un élève peut-il entendre la voix de MEME Inspecteur pendant la classe ?",
+    "answer": "La voix passe par l’interface audio de l’élève et s’intègre automatiquement.",
+    "lang": "fr",
+    "tags": ["élève", "MEME", "voix"]
+  },
+  {
+    "question": "How can a student hear MEME Inspecteur’s voice during class?",
+    "answer": "The voice goes through the student’s audio interface and integrates automatically.",
+    "lang": "en",
+    "tags": ["student", "MEME", "voice"]
+  },
+  {
+    "question": "¿Cómo puede un estudiante escuchar la voz de MEME Inspecteur durante la clase?",
+    "answer": "La voz pasa por la interfaz de audio del estudiante y se integra automáticamente.",
+    "lang": "es",
+    "tags": ["estudiante", "MEME", "voz"]
+  },
+
   
