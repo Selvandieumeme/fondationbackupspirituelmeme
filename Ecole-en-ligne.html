@@ -2,12 +2,17 @@
 <html lang="fr">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>ECOLE EN LIGNE - FOBAS</title>
+  
+  <!-- Style prensipal -->
   <link rel="stylesheet" href="./ecole-en-ligne.css">
 </head>
+
 <body>
   <main class="app">
+
+    <!-- En-tèt -->
     <header class="topbar">
       <div class="brand">
         <h1>ECOLE EN LIGNE - FOBAS</h1>
@@ -15,6 +20,7 @@
       </div>
     </header>
 
+    <!-- Pati koneksyon -->
     <section class="join-panel">
       <div class="join-form">
         <label class="field">Nom / Prénom
@@ -38,30 +44,24 @@
       <div id="status" class="status"></div>
     </section>
 
-    <!-- Classroom layout -->
+    <!-- Anviwònman klas la -->
     <section id="classroom" class="hidden classroom-grid">
 
-      <!-- Left column: Teacher / Student live video feed -->
-<aside class="left-col">
-  <div id="liveVideoWrapper" class="live-video card">
-    <!-- Video a pral monte dirèkteman depi stream backend / WebRTC -->
-    <video id="liveVideo" autoplay playsinline></video>
-    <div class="live-label">Pwofese / Elèv</div>
-  </div>
-</aside>
-
-        <div id="controls" class="controls card">
-          <!-- Controls injected by scripts -->
+      <!-- Kolòn agoch: videyo pwofesè / elèv -->
+      <aside class="left-col">
+        <div id="liveVideoWrapper" class="live-video card">
+          <video id="liveVideo" autoplay playsinline></video>
+          <div class="live-label">Pwofesè / Elèv</div>
         </div>
       </aside>
 
-      <!-- Main content: teacher large video + participants grid + chat -->
+      <!-- Kontwòl dinamik -->
+      <div id="controls" class="controls card"></div>
+
+      <!-- Kolòn prensipal -->
       <section class="main-col">
 
-
-      
-
-        <!-- Big square video for teacher/presenter -->
+        <!-- Videyo prensipal (pwofesè) -->
         <div id="presenterArea" class="presenter-area card">
           <div class="presenter-video">
             <video id="presenterVideo" autoplay playsinline></video>
@@ -69,10 +69,7 @@
           </div>
         </div>
 
-
-
-
-        <!-- chat area -->
+        <!-- Zòn chat -->
         <div class="chat-area card">
           <div id="chatMessages" class="messages" role="log" aria-live="polite"></div>
           <form id="chatForm" class="chat-form">
@@ -81,39 +78,37 @@
           </form>
         </div>
 
-
-        <!-- 5ème div: MEME-Agent chat panel -->
-  <div class="meme-chat-wrapper card">
-    <div id="meme-chat"></div>
-    <input id="meme-input" placeholder="Tape kesyon ou..." />
-    <button id="meme-submit" class="primary">Voye</button>
-    <button id="meme-voice" class="primary">Mikwo</button>
-  </div>
+      </section>
     </section>
 
-
+    <!-- Modèl patisipan -->
     <template id="participantTpl">
       <div class="participant" data-id="">
         <div class="video-box">
           <video autoplay playsinline></video>
         </div>
-        <div class="pinfo"><span class="pname"></span><span class="pstatus"></span></div>
+        <div class="pinfo">
+          <span class="pname"></span>
+          <span class="pstatus"></span>
+        </div>
       </div>
     </template>
 
   </main>
 
-  <!-- Socket.IO client from backend -->
-  <script src="https://examen-backend-ihlx.onrender.com/socket.io/socket.io.js"></script>
+  <!-- === MEME Inspecteur Intelligent === -->
+  <div id="meme-agent-container"></div>
+  <div class="meme-chat-wrapper"></div>
 
-<script src="./seed_meme_qa.js" defer></script>
-<script src="./meme-agent.js" defer></script>
+  <!-- Script MEME Agent -->
+  <script defer src="./meme-agent.js"></script>
+
+  <!-- Socket backend pou klas la -->
+  <script defer src="https://examen-backend-ihlx.onrender.com/socket.io/socket.io.js"></script>
   
-  <script src="teacher-controls.js" defer></script>
-  <script src="student-controls.js" defer></script>
- 
+  <!-- Script klas yo -->
+  <script defer src="./teacher-controls.js"></script>
+  <script defer src="./student-controls.js"></script>
 
-
-  
 </body>
 </html>
