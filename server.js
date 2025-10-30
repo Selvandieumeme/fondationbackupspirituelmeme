@@ -900,145 +900,186 @@ app.get("/api/premium/status/:id", async (req, res) => {
 
 
 
-// server.js - Express + Socket.IO + Mongoose (serve files from repo root)
-// NOTE: Put your sensitive vars on Render .env (DATABASE_URL, JWT_SECRET, TURN creds).
+// ------------------
+// IMPORTS
+// ------------------
+import express from "express";
+import http from "http";
+import { Server } from "socket.io";
+import mongoose from "mongoose";
+import cors from "cors";
+import multer from "multer";
+import path from "path";
+import { fileURLToPath } from "url";
+import dotenv from "dotenv";
+
+dotenv.config();
+
+// ------------------
+// CONFIG
+// ------------------
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
-const server = http.createServer(app);
-const io = new Server(server, {
-  cors: { origin: '*' }
-});
-
+app.use(cors());
 app.use(express.json());
-// Serve static files from repo root so HTML/CSS/JS are accessible at root
+
+// Servi fichye statik yo dirèk nan rasin pwojè a
+// (Pa bezwen folder “public” ankò)
 app.use(express.static(__dirname));
 
-const multer = require('multer');
-const upload = multer({ storage: multer.memoryStorage() });
-app.post('/upload', upload.single('file'), async (req, res) => {
-  console.log('Received upload:', req.file && req.file.originalname);
-  res.json({ ok: true, name: req.file ? req.file.originalname : null });
+// ------------------
+// MONGODB
+// ------------------
+mongoose
+  .connect(process.env.MONGO_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  })
+  .then(() => console.log("✅ MongoDB Connected"))
+  .catch((err) => console.error("❌ MongoDB Error:", err));
+
+// ------------------
+// SCHEMAS
+// ------------------
+const messageSchema = new mongoose.Schema({
+  from: String,
+  to: String,
+  message: String,
+  date: { type: Date, default: Date.now },
+  read: { type: Boolean, default: false },
+});
+const Message = mongoose.model("Message", messageSchema);
+
+const userSchema = new mongoose.Schema({
+  username: String,
+  role: String, // teacher / student
+});
+const User = mongoose.model("User", userSchema);
+
+// ------------------
+// SOCKET.IO
+// ------------------
+const server = http.createServer(app);
+const io = new Server(server, {
+  cors: { origin: "*", methods: ["GET", "POST"] },
 });
 
-if (!process.env.DATABASE_URL) {
-  console.error('DATABASE_URL not set! Render environment variable required.');
-  process.exit(1); // sispann server si env pa defini
+const onlineUsers = new Map();
+
+function broadcastOnline() {
+  const arr = [];
+  for (const [id, info] of onlineUsers.entries()) {
+    arr.push({
+      id,
+      user: info.user,
+      role: info.role,
+      connected: info.sockets.size > 0,
+    });
+  }
+  io.emit("online-users", arr);
 }
 
-mongoose.connect(process.env.DATABASE_URL, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true
-})
-.then(() => console.log('MongoDB connected via Render'))
-.catch(err => {
-  console.error('MongoDB connection error:', err);
-  process.exit(1);
-});
+// ------------------
+// MEME AI Inspector (logger / surveillance layer)
+// ------------------
+function MEME_inspect(msg) {
+  console.log("[MEME AI Inspector]", msg);
+}
 
-	  
-const ClassroomSchema = new mongoose.Schema({
-  code: { type: String, index: true },
-  title: String,
-  teacherId: String,
-  students: [{ socketId: String, name: String, joinedAt: Date }],
-  createdAt: Date
-});
-const Classroom = mongoose.model('Classroom', ClassroomSchema);
+// ------------------
+// SOCKET EVENTS
+// ------------------
+io.on("connection", (socket) => {
+  console.log("👤 User connected:", socket.id);
 
-io.on('connection', socket => {
-  console.log('conn', socket.id);
-
-  socket.on('join-room', async ({ room, role, name }) => {
-    socket.join(room);
-    let cls = await Classroom.findOneAndUpdate(
-      { code: room },
-      { $setOnInsert: { code: room, createdAt: new Date() }, $set: { title: room } },
-      { upsert: true, new: true }
-    );
-    if (role === 'teacher') {
-      cls.teacherId = socket.id;
-      await cls.save();
-      io.to(socket.id).emit('joined-as-teacher', { room });
-    }
-    console.log(`${name || 'user'} joined room ${room} as ${role}`);
+  socket.on("setUser", ({ username, role }) => {
+    const userId = username.trim().toLowerCase();
+    if (!onlineUsers.has(userId))
+      onlineUsers.set(userId, { user: username, sockets: new Set(), role });
+    const record = onlineUsers.get(userId);
+    record.sockets.add(socket.id);
+    socket.data.userId = userId;
+    socket.data.role = role;
+    broadcastOnline();
   });
 
-  socket.on('join-request', async ({ room, name, role }) => {
-    const cls = await Classroom.findOne({ code: room });
-    if (!cls || !cls.teacherId) {
-      socket.emit('join-response', { accepted: false, reason: 'No teacher online' });
-      return;
-    }
-    io.to(cls.teacherId).emit('join-request', { studentId: socket.id, studentName: name });
+  // Chat prive Teacher ↔ Étudiant
+  socket.on("private-message", ({ from, to, message }) => {
+    if (!from || !to || !message) return;
+    const payload = { from, to, message, date: new Date() };
+    MEME_inspect(payload);
+
+    const target = onlineUsers.get(to.toLowerCase());
+    if (target)
+      target.sockets.forEach((sid) =>
+        io.to(sid).emit("private-message", payload)
+      );
+
+    const sender = onlineUsers.get(from.toLowerCase());
+    if (sender)
+      sender.sockets.forEach((sid) =>
+        io.to(sid).emit("private-message", payload)
+      );
   });
 
-  socket.on('join-response', async ({ room, studentId, accepted }) => {
-    io.to(studentId).emit('join-response', { accepted });
-    if (accepted) {
-      await Classroom.findOneAndUpdate({ code: room }, {
-        $push: { students: { socketId: studentId, name: 'student', joinedAt: new Date() } }
-      });
-      io.to(room).emit('participant-joined', { id: studentId, name: 'student', role: 'student' });
-    }
-  });
-
-  socket.on('joined', ({ room, name, role }) => {
-    // notify room and share participants list to newcomer
-    const clients = Array.from(io.sockets.adapter.rooms.get(room) || []);
-    // send participants list to this socket (so newcomer can initiate offers to others)
-    socket.emit('participants', { ids: clients });
-    io.to(room).emit('participant-joined', { id: socket.id, name, role });
-  });
-
-  // signaling relay: offer / answer / ice
-  socket.on('webrtc-offer', ({ to, description })=>{
-    if(!to) return;
-    io.to(to).emit('webrtc-offer', { from: socket.id, description });
-  });
-  socket.on('webrtc-answer', ({ to, description })=>{
-    if(!to) return;
-    io.to(to).emit('webrtc-answer', { from: socket.id, description });
-  });
-  socket.on('ice-candidate', ({ to, candidate })=>{
-    if(!to) return;
-    io.to(to).emit('ice-candidate', { from: socket.id, candidate });
-  });
-
-  socket.on('chat-message', ({ room, text, fromName }) => {
-    const payload = { from: socket.id, fromName: fromName || socket.id, text, at: new Date() };
-    io.to(room).emit('chat-message', payload);
-  });
-
-  socket.on('teacher-mute-all', ({ room }) => {
-    io.to(room).emit('teacher-mute-all');
-  });
-
-  socket.on('block-student', ({ room, studentId }) => {
-    io.to(studentId).emit('blocked', { reason: 'Blocked by teacher' });
-    io.sockets.sockets.get(studentId)?.disconnect(true);
-  });
-
-  socket.on('start-screen-share', ({ room }) => {
-    io.to(room).emit('screen-share-started', { by: socket.id });
-  });
-
-  socket.on('make-presenter', ({ room, by })=>{
-    io.to(room).emit('presenter-made',{ by });
-  });
-
-  socket.on('end-class', ({ room }) => {
-    io.to(room).emit('class-ended');
-  });
-
-  socket.on('disconnect', async () => {
-    console.log('disc', socket.id);
-    await Classroom.updateMany({}, { $pull: { students: { socketId: socket.id } } });
-    // Optionally inform rooms that participant left
-    socket.rooms.forEach(r => {
-      io.to(r).emit('participant-left', { id: socket.id });
+  // Chat piblik / mesaj sove nan MongoDB
+  socket.on("chat-message", async ({ from, to, message }) => {
+    if (!from || !to || !message) return;
+    const msg = new Message({ from, to, message, read: true });
+    await msg.save();
+    io.to(socket.id).emit("chat-message", {
+      from,
+      message,
+      date: msg.date,
     });
   });
+
+  // Kontwòl pwofesè
+  socket.on("mute-all", (room) => io.to(room).emit("mute-mic"));
+  socket.on("stop-all-video", (room) => io.to(room).emit("stop-video"));
+  socket.on("raise-hand", ({ user, room }) =>
+    io.to(room).emit("raised-hand", user)
+  );
+
+  // Jesyon sal yo
+  socket.on("join-room", (room) => socket.join(room));
+  socket.on("leave-room", (room) => socket.leave(room));
+
+  socket.on("disconnect", () => {
+    const userId = socket.data.userId;
+    if (userId && onlineUsers.has(userId)) {
+      const record = onlineUsers.get(userId);
+      record.sockets.delete(socket.id);
+      if (record.sockets.size === 0) onlineUsers.delete(userId);
+      broadcastOnline();
+    }
+  });
 });
+
+// ------------------
+// FILE UPLOADS
+// ------------------
+const upload = multer({ storage: multer.memoryStorage() });
+
+app.post("/upload-recording", upload.single("file"), (req, res) => {
+  console.log("🎥 Recording uploaded:", req.file?.originalname);
+  res.json({ success: true });
+});
+
+app.post("/upload-doc", upload.single("document"), (req, res) => {
+  console.log("📄 Document uploaded:", req.file?.originalname);
+  res.json({ success: true });
+});
+
+// ------------------
+// FRONT-END DELIVERY
+// ------------------
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, "Ecole-en-ligne.html"));
+});
+
 
 
 // 🚀 DEMARRE SERVEUR
