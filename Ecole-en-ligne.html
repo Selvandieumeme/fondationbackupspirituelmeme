@@ -10,7 +10,7 @@
 <body>
   <h1>École en Ligne — FOBAS - 800 Eleves/Salle de Classe</h1>
 
-  <!-- Section room controls -->
+  <!-- Section room controls (common for join) -->
   <div id="room-controls">
     <input type="text" id="room-code" placeholder="Code de salle">
     <input type="text" id="username" placeholder="Votre nom">
@@ -21,10 +21,11 @@
     <button id="join-room">Rejoindre</button>
   </div>
 
-  <!-- Teacher controls (affiché seulement si role=teacher) -->
-  <div id="teacher-controls" style="display:none;">
-    <input type="file" id="upload-doc">
-  </div>
+  <!-- Teacher controls (dynamiquement générés par teacher-controls.js) -->
+  <div id="teacher-controls" style="display:none;"></div>
+
+  <!-- Student controls (dynamiquement générés par student-controls.js) -->
+  <div id="student-controls" style="display:none;"></div>
 
   <!-- Video section -->
   <div id="video-section">
@@ -42,12 +43,10 @@
   <!-- SOCKET.IO -->
   <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
 
-  
-
   <!-- Scripts modules -->
-  <script src="teacher-controls.js"></script>
-  <script src="student-controls.js"></script>
-  <script src="join-approval.js"></script>
-  <script src="meme-agent.js"></script>
+  <script type="module" src="teacher-controls.js"></script>
+  <script type="module" src="student-controls.js"></script>
+  <script type="module" src="join-approval.js"></script>
+  <script type="module" src="meme-agent.js"></script>
 </body>
 </html>
