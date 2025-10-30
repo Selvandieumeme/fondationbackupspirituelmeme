@@ -1,0 +1,876 @@
+[
+  {
+    "question": "Kisa yo rele Ecole-en-ligne?",
+    "answer": "Ecole-en-ligne se yon platfòm aprantisaj dijital ki konekte pwofesè ak elèv an tan reyèl.",
+    "lang": "ht",
+    "tags": ["entwodiksyon","platfòm"]
+  },
+  {
+    "question": "Qu'est-ce qu'on appelle Ecole-en-ligne ?",
+    "answer": "Ecole-en-ligne est une plateforme d'apprentissage numérique qui connecte professeurs et élèves en temps réel.",
+    "lang": "fr",
+    "tags": ["introduction","plateforme"]
+  },
+  {
+    "question": "What is Ecole-en-ligne?",
+    "answer": "Ecole-en-ligne is a digital learning platform that connects teachers and students in real time.",
+    "lang": "en",
+    "tags": ["introduction","platform"]
+  },
+  {
+    "question": "¿Qué es Ecole-en-ligne?",
+    "answer": "Ecole-en-ligne es una plataforma de aprendizaje digital que conecta profesores y estudiantes en tiempo real.",
+    "lang": "es",
+    "tags": ["introducción","plataforma"]
+  },
+
+  {
+    "question": "Ki jan pou m kreye yon kont sou Ecole-en-ligne?",
+    "answer": "Klike sou 'Inscrivez-vous' oswa 'Sign up', ranpli fòm nan epi konfime imel ou.",
+    "lang": "ht",
+    "tags": ["kont","inscription"]
+  },
+  {
+    "question": "Comment créer un compte sur Ecole-en-ligne ?",
+    "answer": "Cliquez sur 'Inscrivez-vous' ou 'Sign up', remplissez le formulaire et confirmez votre e-mail.",
+    "lang": "fr",
+    "tags": ["compte","inscription"]
+  },
+  {
+    "question": "How can I create an account on Ecole-en-ligne?",
+    "answer": "Click 'Sign up', complete the registration form and confirm your email address.",
+    "lang": "en",
+    "tags": ["account","signup"]
+  },
+  {
+    "question": "¿Cómo puedo crear una cuenta en Ecole-en-ligne?",
+    "answer": "Haga clic en 'Registrarse' o 'Sign up', complete el formulario y confirme su correo electrónico.",
+    "lang": "es",
+    "tags": ["cuenta","registro"]
+  },
+
+  {
+    "question": "Kijan pou m rantre nan yon klas vityèl?",
+    "answer": "Antre kòd sal la ak non ou, klike 'Rejoindre' pou w jwenn aksè nan klas la.",
+    "lang": "ht",
+    "tags": ["klas","join"]
+  },
+  {
+    "question": "Comment rejoindre une classe virtuelle ?",
+    "answer": "Entrez le code de la salle et votre nom, puis cliquez sur 'Rejoindre' pour accéder à la classe.",
+    "lang": "fr",
+    "tags": ["classe","rejoindre"]
+  },
+  {
+    "question": "How do I join a virtual class?",
+    "answer": "Enter the room code and your name, then click 'Join' to enter the class.",
+    "lang": "en",
+    "tags": ["class","join"]
+  },
+  {
+    "question": "¿Cómo me uno a una clase virtual?",
+    "answer": "Ingrese el código de la sala y su nombre, luego haga clic en 'Unirse' para entrar a la clase.",
+    "lang": "es",
+    "tags": ["clase","unirse"]
+  },
+
+  {
+    "question": "Ki jan pou m chanje modpas mwen?",
+    "answer": "Ale nan pwofil ou, chwazi 'Chanje modpas' epi swiv enstriksyon yo.",
+    "lang": "ht",
+    "tags": ["modpas","pwofil"]
+  },
+  {
+    "question": "Comment changer mon mot de passe ?",
+    "answer": "Allez dans votre profil, sélectionnez 'Changer le mot de passe' et suivez les instructions.",
+    "lang": "fr",
+    "tags": ["motdepasse","profil"]
+  },
+  {
+    "question": "How can I change my password?",
+    "answer": "Go to your profile, choose 'Change password' and follow the instructions.",
+    "lang": "en",
+    "tags": ["password","profile"]
+  },
+  {
+    "question": "¿Cómo puedo cambiar mi contraseña?",
+    "answer": "Vaya a su perfil, seleccione 'Cambiar contraseña' y siga las instrucciones.",
+    "lang": "es",
+    "tags": ["contraseña","perfil"]
+  },
+
+  {
+    "question": "Kijan pou m tounen pwofesè sou Ecole-en-ligne?",
+    "answer": "Kreye yon kont pwofesè epi kontakte administratè Nomade Digital pou verifikasyon.",
+    "lang": "ht",
+    "tags": ["pwofesè","validation"]
+  },
+  {
+    "question": "Comment devenir professeur sur Ecole-en-ligne ?",
+    "answer": "Créez un compte professeur et contactez l'administrateur Nomade Digital pour validation.",
+    "lang": "fr",
+    "tags": ["professeur","validation"]
+  },
+  {
+    "question": "How can I become a teacher on Ecole-en-ligne?",
+    "answer": "Create a teacher account and contact the administrator (Nomade Digital) for verification.",
+    "lang": "en",
+    "tags": ["teacher","validation"]
+  },
+  {
+    "question": "¿Cómo puedo ser profesor en Ecole-en-ligne?",
+    "answer": "Cree una cuenta de profesor y contacte al administrador Nomade Digital para validación.",
+    "lang": "es",
+    "tags": ["profesor","validación"]
+  },
+
+  {
+    "question": "Kisa MEME Inspecteur la ye?",
+    "answer": "MEME se yon ajan entèlijans atifisyèl ki ede, reponn kesyon epi asiste nan klas yo.",
+    "lang": "ht",
+    "tags": ["meme","inspecteur"]
+  },
+  {
+    "question": "Qu'est-ce que l'inspecteur MEME ?",
+    "answer": "MEME est un agent d'intelligence artificielle qui assiste, répond aux questions et aide en classe.",
+    "lang": "fr",
+    "tags": ["meme","inspecteur"]
+  },
+  {
+    "question": "What is the MEME Inspector?",
+    "answer": "MEME is an AI agent that assists, answers questions and helps in the classroom.",
+    "lang": "en",
+    "tags": ["meme","inspector"]
+  },
+  {
+    "question": "¿Qué es el inspector MEME?",
+    "answer": "MEME es un agente de IA que asiste, responde preguntas y ayuda en el aula.",
+    "lang": "es",
+    "tags": ["meme","inspector"]
+  },
+
+  {
+    "question": "Kouman bwat chat la travay?",
+    "answer": "Bwat chat pèmèt mesaj prive oswa piblik; ou ka voye mesaj pou pwofè oswa tout sal la.",
+    "lang": "ht",
+    "tags": ["chat","messagerie"]
+  },
+  {
+    "question": "Comment fonctionne la messagerie (chat) ?",
+    "answer": "Le chat permet des messages privés ou publics ; vous pouvez envoyer à l'enseignant ou à toute la classe.",
+    "lang": "fr",
+    "tags": ["chat","messagerie"]
+  },
+  {
+    "question": "How does the chat box work?",
+    "answer": "The chat allows private or public messages; you can send to the teacher or the whole class.",
+    "lang": "en",
+    "tags": ["chat","messaging"]
+  },
+  {
+    "question": "¿Cómo funciona el chat?",
+    "answer": "El chat permite mensajes privados o públicos; puedes enviar al profesor o a toda la clase.",
+    "lang": "es",
+    "tags": ["chat","mensajería"]
+  },
+
+  {
+    "question": "Ki jan kamera travay nan klas la?",
+    "answer": "Lè w pèmèt kamera, li pataje videyo w avèk sal la; pwofesè ak lòt elèv ka wè w si yo gen aksè.",
+    "lang": "ht",
+    "tags": ["kamera","video"]
+  },
+  {
+    "question": "Comment fonctionne la caméra en classe ?",
+    "answer": "En autorisant la caméra, vous partagez votre vidéo avec la salle ; professeurs et élèves peuvent vous voir si autorisés.",
+    "lang": "fr",
+    "tags": ["caméra","vidéo"]
+  },
+  {
+    "question": "How does the camera work in class?",
+    "answer": "By allowing the camera, you share your video with the room; teachers and students can see you if permitted.",
+    "lang": "en",
+    "tags": ["camera","video"]
+  },
+  {
+    "question": "¿Cómo funciona la cámara en clase?",
+    "answer": "Al permitir la cámara, comparte su video con la sala; profesores y alumnos pueden verlo si están autorizados.",
+    "lang": "es",
+    "tags": ["cámara","video"]
+  },
+
+  {
+    "question": "Kijan mikwo a fonksyone?",
+    "answer": "Mikwo pèmèt vwa w rive lòt moun; ou ka mute / unmute pou kontwòl prive.",
+    "lang": "ht",
+    "tags": ["mikwo","audio"]
+  },
+  {
+    "question": "Comment fonctionne le micro ?",
+    "answer": "Le micro permet d'envoyer votre voix aux autres ; vous pouvez couper / rétablir le son.",
+    "lang": "fr",
+    "tags": ["micro","audio"]
+  },
+  {
+    "question": "How does the microphone work?",
+    "answer": "The mic sends your voice to others; you can mute/unmute for private control.",
+    "lang": "en",
+    "tags": ["mic","audio"]
+  },
+  {
+    "question": "¿Cómo funciona el micrófono?",
+    "answer": "El micrófono envía su voz a los demás; puede silenciar / activar para control privado.",
+    "lang": "es",
+    "tags": ["micrófono","audio"]
+  },
+
+  {
+    "question": "Kijan pou m pataje ekran mwen?",
+    "answer": "Peze 'Partager Écran' epi chwazi fenèt oswa ekran pou pataje; lòt moun va wè li.",
+    "lang": "ht",
+    "tags": ["pataje","ekran"]
+  },
+  {
+    "question": "Comment partager votre écran ?",
+    "answer": "Cliquez sur 'Partager Écran' et choisissez la fenêtre ou l'écran à partager ; les autres la verront.",
+    "lang": "fr",
+    "tags": ["partage","écran"]
+  },
+  {
+    "question": "How do I share my screen?",
+    "answer": "Click 'Share Screen' and choose the window or screen to share; others will see it.",
+    "lang": "en",
+    "tags": ["share","screen"]
+  },
+  {
+    "question": "¿Cómo comparto mi pantalla?",
+    "answer": "Haga clic en 'Compartir Pantalla' y elija la ventana o pantalla a compartir; los demás la verán.",
+    "lang": "es",
+    "tags": ["compartir","pantalla"]
+  },
+
+  {
+    "question": "Kijan pou w telechaje dokiman?",
+    "answer": "Sèvi ak bouton 'Upload' pou chwazi fichye sou òdinatè w; li voye sou sèvè a epi disponib pou klas la.",
+    "lang": "ht",
+    "tags": ["upload","dokiman"]
+  },
+  {
+    "question": "Comment téléverser un document ?",
+    "answer": "Utilisez le bouton 'Upload' pour sélectionner un fichier depuis votre ordinateur ; il sera envoyé au serveur.",
+    "lang": "fr",
+    "tags": ["upload","document"]
+  },
+  {
+    "question": "How do I upload a document?",
+    "answer": "Use the 'Upload' button to pick a file from your computer; it will be sent to the server and available to the class.",
+    "lang": "en",
+    "tags": ["upload","document"]
+  },
+  {
+    "question": "¿Cómo subo un documento?",
+    "answer": "Use el botón 'Upload' para seleccionar un archivo desde su computadora; se enviará al servidor.",
+    "lang": "es",
+    "tags": ["subir","documento"]
+  },
+
+  {
+    "question": "Ki sa Nomade Digital ye kòm administratè?",
+    "answer": "Nomade Digital se administratè platfòm la, ki jere kont, peman ak validasyon pwofesè.",
+    "lang": "ht",
+    "tags": ["administrateur","Nomade Digital"]
+  },
+  {
+    "question": "Qui est Nomade Digital (administrateur) ?",
+    "answer": "Nomade Digital est l'administrateur de la plateforme, gérant comptes, paiements et validation des professeurs.",
+    "lang": "fr",
+    "tags": ["administrateur","Nomade Digital"]
+  },
+  {
+    "question": "Who is Nomade Digital (administrator)?",
+    "answer": "Nomade Digital is the platform administrator, handling accounts, payments and teacher validation.",
+    "lang": "en",
+    "tags": ["administrator","Nomade Digital"]
+  },
+  {
+    "question": "¿Quién es Nomade Digital (administrador)?",
+    "answer": "Nomade Digital es el administrador de la plataforma, gestionando cuentas, pagos y validación de profesores.",
+    "lang": "es",
+    "tags": ["administrador","Nomade Digital"]
+  },
+
+  {
+    "question": "Ki politik pou frè / peman pou pwofesè yo?",
+    "answer": "Chaj pou pwofesè anjeneral etabli pa administratè; peye via sistèm platfòm la pou aksè pwofesè yo.",
+    "lang": "ht",
+    "tags": ["frais","paiement"]
+  },
+  {
+    "question": "Quelle est la politique des frais pour les professeurs ?",
+    "answer": "Les frais sont définis par l'administrateur ; le paiement se fait via la plateforme pour l'accès professeur.",
+    "lang": "fr",
+    "tags": ["frais","paiement"]
+  },
+  {
+    "question": "What are the fee policies for teachers?",
+    "answer": "Fees are set by the administrator; payment is processed via the platform for teacher access.",
+    "lang": "en",
+    "tags": ["fees","payment"]
+  },
+  {
+    "question": "¿Cuál es la política de tarifas para profesores?",
+    "answer": "Las tarifas las establece el administrador; el pago se realiza a través de la plataforma para el acceso del profesor.",
+    "lang": "es",
+    "tags": ["tarifas","pago"]
+  },
+
+  {
+    "question": "Ki kapasite chak klas genyen?",
+    "answer": "Platfòm la sipòte jiska 800 elèv pa sal, chak klas opere endepandamman.",
+    "lang": "ht",
+    "tags": ["kapasite","scalabilité"]
+  },
+  {
+    "question": "Quelle est la capacité par salle ?",
+    "answer": "La plateforme supporte jusqu'à 800 élèves par salle, chaque salle fonctionne indépendamment.",
+    "lang": "fr",
+    "tags": ["capacité","scalabilité"]
+  },
+  {
+    "question": "What is the capacity per classroom?",
+    "answer": "The platform supports up to 800 students per room; each room runs independently.",
+    "lang": "en",
+    "tags": ["capacity","scalability"]
+  },
+  {
+    "question": "¿Cuál es la capacidad por aula?",
+    "answer": "La plataforma soporta hasta 800 alumnos por sala; cada sala opera de forma independiente.",
+    "lang": "es",
+    "tags": ["capacidad","escalabilidad"]
+  },
+
+  {
+    "question": "Kisa pou m fè si pa gen son lè m pale?",
+    "answer": "Tcheke mikwo lokal, verifye pèmisyon navigatè, ak asire mikwo pa mute sou aparèy la.",
+    "lang": "ht",
+    "tags": ["troubleshoot","audio"]
+  },
+  {
+    "question": "Que faire si il n'y a pas de son lorsque je parle ?",
+    "answer": "Vérifiez le micro local, les permissions du navigateur et assurez-vous que le micro n'est pas coupé.",
+    "lang": "fr",
+    "tags": ["dépannage","audio"]
+  },
+  {
+    "question": "What if there's no sound when I speak?",
+    "answer": "Check your local mic, browser permissions, and ensure the mic isn't muted on your device.",
+    "lang": "en",
+    "tags": ["troubleshoot","audio"]
+  },
+  {
+    "question": "¿Qué hago si no hay sonido al hablar?",
+    "answer": "Compruebe su micrófono local, los permisos del navegador y que el micrófono no esté silenciado.",
+    "lang": "es",
+    "tags": ["solución","audio"]
+  },
+
+  {
+    "question": "Kisa pou m fè si kamera mwen pa mache?",
+    "answer": "Verifye pèmisyon kamera nan navigatè a, tcheke ke okenn lòt aplikasyon pa itilize li.",
+    "lang": "ht",
+    "tags": ["troubleshoot","camera"]
+  },
+  {
+    "question": "Que faire si la caméra ne fonctionne pas ?",
+    "answer": "Vérifiez les permissions du navigateur et que aucune autre application n'utilise la caméra.",
+    "lang": "fr",
+    "tags": ["dépannage","caméra"]
+  },
+  {
+    "question": "What if my camera doesn't work?",
+    "answer": "Check browser permissions and ensure no other app is using the camera.",
+    "lang": "en",
+    "tags": ["troubleshoot","camera"]
+  },
+  {
+    "question": "¿Qué hago si mi cámara no funciona?",
+    "answer": "Revise los permisos del navegador y que ninguna otra aplicación esté usando la cámara.",
+    "lang": "es",
+    "tags": ["solución","cámara"]
+  },
+
+  {
+    "question": "Ki navigatè ki pi rekòmande pou Ecole-en-ligne?",
+    "answer": "Google Chrome oswa Microsoft Edge rekòmande pou pi bon sipò WebRTC ak pataj ekran.",
+    "lang": "ht",
+    "tags": ["browser","recommendation"]
+  },
+  {
+    "question": "Quel navigateur est recommandé ?",
+    "answer": "Google Chrome ou Microsoft Edge sont recommandés pour un meilleur support WebRTC.",
+    "lang": "fr",
+    "tags": ["navigateur","recommandation"]
+  },
+  {
+    "question": "Which browser is recommended?",
+    "answer": "Google Chrome or Microsoft Edge are recommended for best WebRTC and screen sharing support.",
+    "lang": "en",
+    "tags": ["browser","recommendation"]
+  },
+  {
+    "question": "¿Qué navegador se recomienda?",
+    "answer": "Se recomienda Google Chrome o Microsoft Edge para mejor soporte WebRTC.",
+    "lang": "es",
+    "tags": ["navegador","recomendación"]
+  },
+
+  {
+    "question": "Kijan anrejistreman sesyon travay?",
+    "answer": "Pwofesè ka klike 'Start Recording' epi 'Stop Recording' pou telechaje sesyon an sou sèvè a.",
+    "lang": "ht",
+    "tags": ["recording","session"]
+  },
+  {
+    "question": "Comment enregistrer une session ?",
+    "answer": "Le professeur clique sur 'Start Recording' puis 'Stop Recording' pour téléverser l'enregistrement.",
+    "lang": "fr",
+    "tags": ["enregistrement","session"]
+  },
+  {
+    "question": "How to record a session?",
+    "answer": "The teacher clicks 'Start Recording' then 'Stop Recording' to upload the recording to the server.",
+    "lang": "en",
+    "tags": ["recording","session"]
+  },
+  {
+    "question": "¿Cómo grabar una sesión?",
+    "answer": "El profesor hace clic en 'Start Recording' y luego en 'Stop Recording' para subir la grabación.",
+    "lang": "es",
+    "tags": ["grabación","sesión"]
+  },
+
+  {
+    "question": "Kijan pou m resevwa materyèl anrejistre apre kou a?",
+    "answer": "Anrejistreman yo telechaje sou sèvè; pwofesè oswa admin ka pibliye lyen pou elèv.",
+    "lang": "ht",
+    "tags": ["recording","access"]
+  },
+  {
+    "question": "Comment accéder aux enregistrements ?",
+    "answer": "Les enregistrements sont envoyés au serveur ; le professeur/administrateur peut les rendre disponibles.",
+    "lang": "fr",
+    "tags": ["enregistrement","accès"]
+  },
+  {
+    "question": "How do I access recordings after class?",
+    "answer": "Recordings are uploaded to the server; teacher/admin can publish links for students.",
+    "lang": "en",
+    "tags": ["recording","access"]
+  },
+  {
+    "question": "¿Cómo accedo a las grabaciones después de la clase?",
+    "answer": "Las grabaciones se suben al servidor; el profesor/administrador puede publicarlas para los alumnos.",
+    "lang": "es",
+    "tags": ["grabación","acceso"]
+  },
+
+  {
+    "question": "Ki jan MEME ap ede si yon elèv gen pwoblèm teknik?",
+    "answer": "MEME ofri repons otomatik, gid etap-pa-etap, epi ka voye alèt pou administratè a si bezwen plis èd.",
+    "lang": "ht",
+    "tags": ["meme","support"]
+  },
+  {
+    "question": "Comment MEME aide en cas de problème technique ?",
+    "answer": "MEME propose des réponses automatiques, des guides et peut alerter l'administrateur si besoin.",
+    "lang": "fr",
+    "tags": ["meme","support"]
+  },
+  {
+    "question": "How does MEME help with technical issues?",
+    "answer": "MEME offers automated answers, step-by-step guides, and can alert the administrator if needed.",
+    "lang": "en",
+    "tags": ["meme","support"]
+  },
+  {
+    "question": "¿Cómo ayuda MEME con problemas técnicos?",
+    "answer": "MEME ofrece respuestas automáticas, guías paso a paso y puede alertar al administrador si es necesario.",
+    "lang": "es",
+    "tags": ["meme","soporte"]
+  },
+
+  {
+    "question": "Kisa 'raise-hand' la fè?",
+    "answer": "Fonksyon 'raise-hand' pèmèt elèv fè pwofesè konnen yo gen yon kesyon san yo pa entèwonp.",
+    "lang": "ht",
+    "tags": ["raise-hand","interaction"]
+  },
+  {
+    "question": "Que fait la fonction 'raise-hand' ?",
+    "answer": "'Raise-hand' permet à un élève de signaler qu'il a une question sans interrompre.",
+    "lang": "fr",
+    "tags": ["raise-hand","interaction"]
+  },
+  {
+    "question": "What does 'raise-hand' do?",
+    "answer": "'Raise-hand' allows a student to signal they have a question without interrupting.",
+    "lang": "en",
+    "tags": ["raise-hand","interaction"]
+  },
+  {
+    "question": "¿Qué hace 'raise-hand' ?",
+    "answer": "'Raise-hand' permite a un alumno señalar que tiene una pregunta sin interrumpir.",
+    "lang": "es",
+    "tags": ["levantar-mano","interacción"]
+  },
+
+  {
+    "question": "Ki jan admin ka jere itilizatè ki pa respekte règ?",
+    "answer": "Admin ka revoke aksè, bloke itilizatè, oswa retire yo nan klas la selon règleman yo.",
+    "lang": "ht",
+    "tags": ["moderation","admin"]
+  },
+  {
+    "question": "Comment l'administrateur gère-t-il les utilisateurs indisciplinés ?",
+    "answer": "L'administrateur peut révoquer l'accès, bloquer un utilisateur ou le retirer de la salle.",
+    "lang": "fr",
+    "tags": ["modération","admin"]
+  },
+  {
+    "question": "How can admin handle disruptive users?",
+    "answer": "Admin can revoke access, block a user or remove them from the room per rules.",
+    "lang": "en",
+    "tags": ["moderation","admin"]
+  },
+  {
+    "question": "¿Cómo puede el administrador gestionar usuarios disruptivos?",
+    "answer": "El administrador puede revocar acceso, bloquear al usuario o expulsarlo de la sala.",
+    "lang": "es",
+    "tags": ["moderación","admin"]
+  },
+
+  {
+    "question": "Eske Ecole-en-ligne gen API pou entegrasyon?",
+    "answer": "Platfòm la ka ofri API selon bezwen; kontakte ekip teknik Nomade Digital pou bagay sa.",
+    "lang": "ht",
+    "tags": ["api","integration"]
+  },
+  {
+    "question": "La plateforme propose-t-elle une API ?",
+    "answer": "La plateforme peut fournir une API selon les besoins ; contactez l'équipe technique Nomade Digital.",
+    "lang": "fr",
+    "tags": ["api","intégration"]
+  },
+  {
+    "question": "Does Ecole-en-ligne offer an API?",
+    "answer": "The platform can provide an API on request; contact Nomade Digital technical team.",
+    "lang": "en",
+    "tags": ["api","integration"]
+  },
+  {
+    "question": "¿La plataforma ofrece API para integraciones?",
+    "answer": "La plataforma puede ofrecer una API bajo pedido; contacte al equipo técnico Nomade Digital.",
+    "lang": "es",
+    "tags": ["api","integración"]
+  },
+
+  {
+    "question": "Kouman sistèm sekirite / chifreman travay?",
+    "answer": "Kominikasyon medya fèt sou WebRTC; done sansib pwoteje sou sèvè ak règleman sekirite.",
+    "lang": "ht",
+    "tags": ["security","encryption"]
+  },
+  {
+    "question": "Comment la sécurité / chiffrement est-il géré ?",
+    "answer": "La communication media utilise WebRTC ; les données sensibles sont protégées côté serveur.",
+    "lang": "fr",
+    "tags": ["sécurité","chiffrement"]
+  },
+  {
+    "question": "How is security / encryption handled?",
+    "answer": "Media communication uses WebRTC; sensitive data is protected on the server side.",
+    "lang": "en",
+    "tags": ["security","encryption"]
+  },
+  {
+    "question": "¿Cómo se gestiona la seguridad / cifrado?",
+    "answer": "La comunicación media usa WebRTC; los datos sensibles están protegidos en el servidor.",
+    "lang": "es",
+    "tags": ["seguridad","cifrado"]
+  },
+
+  {
+    "question": "Kouman mwen jwenn sipò teknik?",
+    "answer": "Sèvi ak bouton 'Contact' oswa kontakte Nomade Digital pou sipò teknik dirèk.",
+    "lang": "ht",
+    "tags": ["support","contact"]
+  },
+  {
+    "question": "Comment obtenir un support technique ?",
+    "answer": "Utilisez le bouton 'Contact' ou contactez Nomade Digital pour support technique.",
+    "lang": "fr",
+    "tags": ["support","contact"]
+  },
+  {
+    "question": "How do I get technical support?",
+    "answer": "Use the 'Contact' button or reach out to Nomade Digital for technical support.",
+    "lang": "en",
+    "tags": ["support","contact"]
+  },
+  {
+    "question": "¿Cómo obtengo soporte técnico?",
+    "answer": "Use el botón 'Contact' o contacte a Nomade Digital para soporte técnico.",
+    "lang": "es",
+    "tags": ["soporte","contacto"]
+  },
+
+  {
+    "question": "Eske mwen ka itilize sit la sou mobil?",
+    "answer": "Wi, sistèm sipòte navigatè mobil; pi bon eksperyans sou Chrome mobile oswa Edge mobile.",
+    "lang": "ht",
+    "tags": ["mobile","compatibilité"]
+  },
+  {
+    "question": "Puis-je utiliser la plateforme sur mobile ?",
+    "answer": "Oui, la plateforme fonctionne sur navigateur mobile ; Chrome mobile ou Edge mobile offrent la meilleure expérience.",
+    "lang": "fr",
+    "tags": ["mobile","compatibilité"]
+  },
+  {
+    "question": "Can I use the platform on mobile?",
+    "answer": "Yes, it works on mobile browsers; Chrome mobile or Edge mobile provide the best experience.",
+    "lang": "en",
+    "tags": ["mobile","compatibility"]
+  },
+  {
+    "question": "¿Puedo usar la plataforma en móvil?",
+    "answer": "Sí, funciona en navegadores móviles; Chrome móvil o Edge móvil ofrecen la mejor experiencia.",
+    "lang": "es",
+    "tags": ["móvil","compatibilidad"]
+  },
+
+  {
+    "question": "Kisa 'Mute All' fè?",
+    "answer": "Pwofesè ka fè 'Mute All' pou mwatye elèv yo byen fasil lè bezwen kontwòl odyo.",
+    "lang": "ht",
+    "tags": ["mute-all","teacher-control"]
+  },
+  {
+    "question": "Que fait 'Mute All' ?",
+    "answer": "Le professeur peut activer 'Mute All' pour couper le son de tous les élèves si nécessaire.",
+    "lang": "fr",
+    "tags": ["mute-all","contrôle"]
+  },
+  {
+    "question": "What does 'Mute All' do?",
+    "answer": "The teacher can use 'Mute All' to silence all students when needed.",
+    "lang": "en",
+    "tags": ["mute-all","teacher-control"]
+  },
+  {
+    "question": "¿Qué hace 'Mute All' ?",
+    "answer": "El profesor puede usar 'Mute All' para silenciar a todos los alumnos si es necesario.",
+    "lang": "es",
+    "tags": ["mute-all","control"]
+  },
+
+  {
+    "question": "Kisa 'Stop All Video' fè?",
+    "answer": "Mete tout videyo sou 'stop' pou diminye debi rezo oswa konsantre sou prezantasyon.",
+    "lang": "ht",
+    "tags": ["stop-video","teacher-control"]
+  },
+  {
+    "question": "Que fait 'Stop All Video' ?",
+    "answer": "Permet d'arrêter toutes les vidéos pour réduire la bande passante ou se concentrer sur la présentation.",
+    "lang": "fr",
+    "tags": ["stop-video","contrôle"]
+  },
+  {
+    "question": "What does 'Stop All Video' do?",
+    "answer": "It stops all videos to reduce bandwidth or focus on the presentation.",
+    "lang": "en",
+    "tags": ["stop-video","teacher-control"]
+  },
+  {
+    "question": "¿Qué hace 'Stop All Video' ?",
+    "answer": "Detiene todos los videos para reducir ancho de banda o concentrarse en la presentación.",
+    "lang": "es",
+    "tags": ["stop-video","control"]
+  },
+
+  {
+    "question": "Kouman pou mwen chanje lang entèfas la?",
+    "answer": "Si gen switch lang, chwazi li nan paramèt; MEME ap detekte lang otomatikman tou.",
+    "lang": "ht",
+    "tags": ["lang","interface"]
+  },
+  {
+    "question": "Comment changer la langue de l'interface ?",
+    "answer": "Si l'option est disponible, sélectionnez la langue dans les paramètres ; MEME détecte aussi automatiquement.",
+    "lang": "fr",
+    "tags": ["langue","interface"]
+  },
+  {
+    "question": "How do I change the interface language?",
+    "answer": "If available, select language in settings; MEME also auto-detects language for assistance.",
+    "lang": "en",
+    "tags": ["language","interface"]
+  },
+  {
+    "question": "¿Cómo cambio el idioma de la interfaz?",
+    "answer": "Si está disponible, seleccione el idioma en la configuración; MEME también detecta el idioma automáticamente.",
+    "lang": "es",
+    "tags": ["idioma","interfaz"]
+  },
+
+  {
+    "question": "Ki resous mwen bezwen pou pi bon kalite odyo/videyo?",
+    "answer": "Bon koneksyon (Wi-Fi/filè), mikwo ak kamera bon kalite, ak navigatè rekòmande.",
+    "lang": "ht",
+    "tags": ["hardware","recommendation"]
+  },
+  {
+    "question": "Quelles ressources pour une bonne qualité audio/vidéo ?",
+    "answer": "Bonne connexion (Wi-Fi/fil), micro et caméra de qualité, et navigateur recommandé.",
+    "lang": "fr",
+    "tags": ["matériel","recommandation"]
+  },
+  {
+    "question": "What resources are needed for best audio/video?",
+    "answer": "Good connection (Wi-Fi/wired), quality mic and camera, and recommended browser.",
+    "lang": "en",
+    "tags": ["hardware","recommendation"]
+  },
+  {
+    "question": "¿Qué recursos necesito para mejor audio/video?",
+    "answer": "Buena conexión (Wi-Fi/por cable), micrófono y cámara de calidad y navegador recomendado.",
+    "lang": "es",
+    "tags": ["hardware","recomendación"]
+  },
+
+  {
+    "question": "Ki jan pou mwen telechaje sètifika oubyen rapò prezans?",
+    "answer": "Sèvis sètifikasyon disponib si pwofesè/oswa admin pibliye li; gade seksyon 'Transcripts' oswa 'Certificats'.",
+    "lang": "ht",
+    "tags": ["certificate","attendance"]
+  },
+  {
+    "question": "Comment télécharger certificats ou rapports de présence ?",
+    "answer": "Les certificats sont disponibles si publiés par le professeur/admin ; consultez 'Transcripts' ou 'Certificats'.",
+    "lang": "fr",
+    "tags": ["certificat","présence"]
+  },
+  {
+    "question": "How do I download certificates or attendance reports?",
+    "answer": "Certificates are available if published by teacher/admin; check 'Transcripts' or 'Certificates' section.",
+    "lang": "en",
+    "tags": ["certificate","attendance"]
+  },
+  {
+    "question": "¿Cómo descargo certificados o informes de asistencia?",
+    "answer": "Los certificados están disponibles si el profesor/administrador los publica; revise 'Transcripts' o 'Certificates'.",
+    "lang": "es",
+    "tags": ["certificado","asistencia"]
+  },
+
+  {
+    "question": "Kouman MEME aprann nouvo kesyon/repons?",
+    "answer": "Pwofesè oswa admin ka ajoute QA via REST / socket; MEME sove yo nan baz done pou aprantisaj otomatik.",
+    "lang": "ht",
+    "tags": ["meme","learning"]
+  },
+  {
+    "question": "Comment MEME apprend-il de nouvelles Q/R ?",
+    "answer": "Le professeur/admin peut ajouter des Q/A via REST/socket ; MEME les enregistre en base de données.",
+    "lang": "fr",
+    "tags": ["meme","apprentissage"]
+  },
+  {
+    "question": "How does MEME learn new Q/A?",
+    "answer": "Teacher/admin can add Q/A via REST/socket; MEME saves them to the database for automatic learning.",
+    "lang": "en",
+    "tags": ["meme","learning"]
+  },
+  {
+    "question": "¿Cómo aprende MEME nuevas Q/A?",
+    "answer": "El profesor/administrador puede agregar Q/A vía REST/socket; MEME las guarda en la base para aprender.",
+    "lang": "es",
+    "tags": ["meme","aprendizaje"]
+  },
+
+  {
+    "question": "Kouman mwen rapòte yon pwoblèm sekirite?",
+    "answer": "Kontakte Nomade Digital imedyatman atravè bouton Contact oswa imel administrasyon an.",
+    "lang": "ht",
+    "tags": ["security","report"]
+  },
+  {
+    "question": "Comment signaler un problème de sécurité ?",
+    "answer": "Contactez Nomade Digital immédiatement via le bouton Contact ou l'email de l'administration.",
+    "lang": "fr",
+    "tags": ["sécurité","signalement"]
+  },
+  {
+    "question": "How do I report a security issue?",
+    "answer": "Contact Nomade Digital immediately via the Contact button or admin email.",
+    "lang": "en",
+    "tags": ["security","report"]
+  },
+  {
+    "question": "¿Cómo informo de un problema de seguridad?",
+    "answer": "Contacte a Nomade Digital de inmediato a través del botón Contact o el correo del administrador.",
+    "lang": "es",
+    "tags": ["seguridad","informe"]
+  },
+
+  {
+    "question": "Ki règleman sou vi prive ak done?",
+    "answer": "Platfòm la kenbe done dapre règleman vi prive; kontakte admin pou detay sou GDPR/konfòmite.",
+    "lang": "ht",
+    "tags": ["privacy","data"]
+  },
+  {
+    "question": "Quelle est la politique de confidentialité ?",
+    "answer": "La plateforme respecte la confidentialité ; contactez l'administrateur pour détails GDPR/conformité.",
+    "lang": "fr",
+    "tags": ["confidentialité","données"]
+  },
+  {
+    "question": "What is the privacy/data policy?",
+    "answer": "The platform adheres to privacy rules; contact admin for GDPR/compliance details.",
+    "lang": "en",
+    "tags": ["privacy","data"]
+  },
+  {
+    "question": "¿Cuál es la política de privacidad y datos?",
+    "answer": "La plataforma cumple reglas de privacidad; contacte al administrador para detalles de GDPR/conformidad.",
+    "lang": "es",
+    "tags": ["privacidad","datos"]
+  },
+
+  {
+    "question": "Kouman mwen chanje non itilizatè oswa pwofile?",
+    "answer": "Ale nan paramèt pwofil ou; chanje non epi sove. Si limite, kontakte admin.",
+    "lang": "ht",
+    "tags": ["profile","settings"]
+  },
+  {
+    "question": "Comment changer mon nom d'utilisateur ?",
+    "answer": "Allez dans les paramètres de votre profil ; modifiez le nom et enregistrez. Sinon contactez l'admin.",
+    "lang": "fr",
+    "tags": ["profil","paramètres"]
+  },
+  {
+    "question": "How can I change my username/profile?",
+    "answer": "Go to profile settings, edit your name and save. If restricted, contact admin.",
+    "lang": "en",
+    "tags": ["profile","settings"]
+  },
+  {
+    "question": "¿Cómo cambio mi nombre de usuario o perfil?",
+    "answer": "Vaya a la configuración de su perfil, edite el nombre y guarde. Si está restringido, contacte al admin.",
+    "lang": "es",
+    "tags": ["perfil","configuración"]
+  }
+]
