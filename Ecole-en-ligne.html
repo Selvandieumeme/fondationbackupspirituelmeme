@@ -95,20 +95,8 @@
   <!-- Socket.IO client from backend -->
   <script src="https://examen-backend-ihlx.onrender.com/socket.io/socket.io.js"></script>
 
-<!-- Agent MEME styles -->
-<link rel="stylesheet" href="agent-meme.css">
-
-<!-- Agent MEME chatbot -->
-<script src="agent-meme.js"></script>
-
-<!-- JSON data file (si ou pa itilize MongoDB) -->
-<script>
-fetch('meme_qa_data.json')
-  .then(res => res.json())
-  .then(data => {
-    window.memeData = data; // dispo pou agent-meme.js
-  });
-</script>
+<script src="./seed_meme_qa.js" defer></script>
+<script src="./meme-agent.js" defer></script>
   
   <script src="teacher-controls.js" defer></script>
   <script src="student-controls.js" defer></script>
