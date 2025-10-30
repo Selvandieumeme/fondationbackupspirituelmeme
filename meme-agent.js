@@ -356,3 +356,102 @@ const MEME_BACKEND = "https://examen-backend-ihlx.onrender.com";
   }, 800);
 
 })();
+
+
+/* ===================================================
+   MEME-AGENT INTELLIGENT — Vokal + Chat Entèaktif
+   Pa modifye okenn lòt pati nan kòd prensipal la
+=================================================== */
+(function(){
+  // Sekirite: tcheke si browser sipòte API yo
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  const synth = window.speechSynthesis;
+  if (!SpeechRecognition || !synth) {
+    console.warn("Ce navigateur ne supporte pas la reconnaissance vocale ou la synthèse vocale.");
+    return;
+  }
+
+  // Kreyasyon sistèm tande
+  const recognition = new SpeechRecognition();
+  recognition.lang = 'fr-FR'; // ou ka mete 'ht-HT' si ou vle Kreyòl
+  recognition.continuous = true;
+  recognition.interimResults = false;
+
+  // Kreye ti chat bubble pou repons agent lan
+  const agentBox = document.createElement('div');
+  agentBox.id = 'meme-agent-box';
+  agentBox.style.cssText = `
+    position:fixed;bottom:30px;right:30px;z-index:9999;
+    max-width:380px;background:rgba(255,255,255,0.95);
+    border-radius:20px;box-shadow:0 10px 40px rgba(0,0,0,0.25);
+    padding:18px 22px;font-size:1rem;font-weight:600;
+    color:#0b1220;backdrop-filter:blur(6px);
+    border:2px solid #ffd43b;display:none;
+  `;
+  document.body.appendChild(agentBox);
+
+  // Fonksyon pou fè agent lan pale ak afiche repons
+  function memeSpeak(text) {
+    agentBox.innerText = "🤖 " + text;
+    agentBox.style.display = "block";
+
+    const utter = new SpeechSynthesisUtterance(text);
+    utter.lang = 'fr-FR';
+    utter.pitch = 1;
+    utter.rate = 1;
+    synth.speak(utter);
+
+    // Fè mesaj la disparèt dousman aprè kèk segond
+    setTimeout(()=>{
+      agentBox.style.opacity = "0";
+      setTimeout(()=>{ agentBox.style.display="none";agentBox.style.opacity="1"; },1000);
+    },7000);
+  }
+
+  // Repons entèlijan selon mo kle yo
+  function handleCommand(text){
+    const lower = text.toLowerCase();
+
+    if(lower.includes("bonjour") || lower.includes("salut")){
+      memeSpeak("Bonjour, je suis Mème Agent ! Comment puis-je vous aider ?");
+    }
+    else if(lower.includes("mème") && lower.includes("présent")){
+      memeSpeak("Toujours là, prêt à aider la classe !");
+    }
+    else if(lower.includes("explique") || lower.includes("aide moi")){
+      memeSpeak("D'accord ! Peux-tu préciser ce que tu veux que j'explique ?");
+    }
+    else if(lower.includes("merci")){
+      memeSpeak("Avec plaisir !");
+    }
+    else if(lower.includes("au revoir")){
+      memeSpeak("Au revoir, à très bientôt !");
+    }
+    else if(lower.includes("sécurité")){
+      memeSpeak("Toutes les connexions sont chiffrées et sécurisées.");
+    }
+    else if(lower.includes("agent") || lower.includes("assistant")){
+      memeSpeak("Oui, je t’écoute !");
+    }
+  }
+
+  // Kòmanse tande otomatikman
+  recognition.onresult = (event) => {
+    const transcript = event.results[event.results.length - 1][0].transcript.trim();
+    console.log("🎧 Mème-Agent a entendu :", transcript);
+    handleCommand(transcript);
+  };
+
+  recognition.onerror = (e) => {
+    console.error("Erreur de reconnaissance vocale:", e);
+  };
+
+  recognition.onend = () => {
+    // Rekòmanse otomatikman si li sispann
+    recognition.start();
+  };
+
+  // Lanse tande a apre 2 segond pou asire paj la chaje
+  setTimeout(()=> recognition.start(), 2000);
+
+})();
