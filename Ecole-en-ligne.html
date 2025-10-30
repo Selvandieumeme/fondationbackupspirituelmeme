@@ -1,51 +1,116 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
-  <title>École en Ligne — FOBAS - 800 Eleves/Salle de Classe</title>
-  <link rel="stylesheet" href="ecole-en-ligne.css">
-  <link rel="stylesheet" href="meme-agent.css">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>ECOLE EN LIGNE - FOBAS</title>
+  <link rel="stylesheet" href="./ecole-en-ligne.css">
 </head>
 <body>
-  <h1>École en Ligne — FOBAS - 800 Eleves/Salle de Classe</h1>
+  <main class="app">
+    <header class="topbar">
+      <div class="brand">
+        <h1>ECOLE EN LIGNE - FOBAS</h1>
+        <p class="tag">Apprentissage accessible • Temps réel • Sécurisé</p>
+      </div>
+    </header>
 
-  <!-- Section room controls (common for join) -->
-  <div id="room-controls">
-    <input type="text" id="room-code" placeholder="Code de salle">
-    <input type="text" id="username" placeholder="Votre nom">
-    <select id="role">
-      <option value="teacher">Teacher</option>
-      <option value="student">Student</option>
-    </select>
-    <button id="join-room">Rejoindre</button>
-  </div>
+    <section class="join-panel">
+      <div class="join-form">
+        <label class="field">Nom / Prénom
+          <input id="displayName" type="text" placeholder="Jan Jean" />
+        </label>
 
-  <!-- Teacher controls (dynamiquement générés par teacher-controls.js) -->
-  <div id="teacher-controls" style="display:none;"></div>
+        <label class="field">Kòd Klas
+          <input id="classCode" type="text" placeholder="EX: FOBAS-101" />
+        </label>
 
-  <!-- Student controls (dynamiquement générés par student-controls.js) -->
-  <div id="student-controls" style="display:none;"></div>
+        <label class="field select-wrap">
+          <select id="roleSelect">
+            <option value="student">Elèv</option>
+            <option value="teacher">Pwofesè</option>
+          </select>
+        </label>
 
-  <!-- Video section -->
-  <div id="video-section">
-    <video id="teacher-video" autoplay muted></video>
-    <div id="student-videos"></div>
-  </div>
+        <button id="joinBtn" class="primary">Rejoindre</button>
+      </div>
 
-  <!-- Chat section -->
-  <div id="chat-section">
-    <ul id="messages"></ul>
-    <input id="msg" placeholder="Votre message">
-    <button id="send">Envoyer</button>
-  </div>
+      <div id="status" class="status"></div>
+    </section>
 
-  <!-- SOCKET.IO -->
-  <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+    <!-- Classroom layout -->
+    <section id="classroom" class="hidden classroom-grid">
 
-  <!-- Scripts modules -->
-  <script type="module" src="teacher-controls.js"></script>
-  <script type="module" src="student-controls.js"></script>
-  <script type="module" src="join-approval.js"></script>
-  <script type="module" src="meme-agent.js"></script>
+      <!-- Left column: local preview & controls -->
+      <aside class="left-col">
+        <div id="localVideoWrapper" class="local-video card">
+          <video id="localVideo" autoplay muted playsinline></video>
+          <div class="you-label">Ou (preview)</div>
+        </div>
+
+        <div id="controls" class="controls card">
+          <!-- Controls injected by scripts -->
+        </div>
+      </aside>
+
+      <!-- Main content: teacher large video + participants grid + chat -->
+      <section class="main-col">
+
+        <div class="class-header card">
+          <div>
+            <h2 id="classTitle">Classe: -</h2>
+            <div id="presence" class="presence">Présent: <span id="presentCount">0</span> | Absent: <span id="absentCount">0</span></div>
+          </div>
+          <div class="class-meta">
+            <div class="meta-item">100 max par classe</div>
+            <div class="meta-item">Sessions enregistrées (option)</div>
+          </div>
+        </div>
+
+        <!-- Big square video for teacher/presenter -->
+        <div id="presenterArea" class="presenter-area card">
+          <div class="presenter-video">
+            <video id="presenterVideo" autoplay playsinline></video>
+            <div class="pname">Présentateur</div>
+          </div>
+        </div>
+
+        <!-- grid of participant squares -->
+        <div id="videosGrid" class="videos-grid card" aria-live="polite">
+          <!-- participant tiles inserted here (square tiles) -->
+        </div>
+
+        <!-- chat area -->
+        <div class="chat-area card">
+          <div id="chatMessages" class="messages" role="log" aria-live="polite"></div>
+          <form id="chatForm" class="chat-form">
+            <input id="chatInput" autocomplete="off" placeholder="Écrire un message..." />
+            <button type="submit" class="secondary">Envoyer</button>
+          </form>
+        </div>
+      </section>
+
+      <!-- Right column: participants list & actions -->
+      <aside class="right-col card participants-wrap">
+        <div class="participants-head">Participants</div>
+        <div id="participantsList" class="participants"></div>
+      </aside>
+    </section>
+
+    <template id="participantTpl">
+      <div class="participant" data-id="">
+        <div class="video-box">
+          <video autoplay playsinline></video>
+        </div>
+        <div class="pinfo"><span class="pname"></span><span class="pstatus"></span></div>
+      </div>
+    </template>
+
+  </main>
+
+  <!-- Socket.IO client from backend -->
+  <script src="https://examen-backend-ihlx.onrender.com/socket.io/socket.io.js"></script>
+  <script src="./teacher-controls.js" defer></script>
+  <script src="./student-controls.js" defer></script>
 </body>
 </html>
