@@ -900,9 +900,137 @@ app.get("/api/premium/status/:id", async (req, res) => {
 
 
 
+// server.js - Express + Socket.IO + Mongoose (serve files from repo root)
+// NOTE: Put your sensitive vars on Render .env (DATABASE_URL, JWT_SECRET, TURN creds).
 
+const app = express();
+const server = http.createServer(app);
+const io = new Server(server, {
+  cors: { origin: '*' }
+});
 
+app.use(express.json());
+// Serve static files from repo root so HTML/CSS/JS are accessible at root
+app.use(express.static(__dirname));
 
+const multer = require('multer');
+const upload = multer({ storage: multer.memoryStorage() });
+app.post('/upload', upload.single('file'), async (req, res) => {
+  console.log('Received upload:', req.file && req.file.originalname);
+  res.json({ ok: true, name: req.file ? req.file.originalname : null });
+});
+
+if (!process.env.DATABASE_URL) {
+  console.warn('DATABASE_URL not set. Connect to MongoDB via Render environment variables.');
+}
+mongoose.connect(process.env.DATABASE_URL || 'mongodb://localhost:27017/fo_bas', {
+  useNewUrlParser: true,
+  useUnifiedTopology: true
+}).then(()=>console.log('mongo ok')).catch(err=>console.warn('mongo err', err));
+
+const ClassroomSchema = new mongoose.Schema({
+  code: { type: String, index: true },
+  title: String,
+  teacherId: String,
+  students: [{ socketId: String, name: String, joinedAt: Date }],
+  createdAt: Date
+});
+const Classroom = mongoose.model('Classroom', ClassroomSchema);
+
+io.on('connection', socket => {
+  console.log('conn', socket.id);
+
+  socket.on('join-room', async ({ room, role, name }) => {
+    socket.join(room);
+    let cls = await Classroom.findOneAndUpdate(
+      { code: room },
+      { $setOnInsert: { code: room, createdAt: new Date() }, $set: { title: room } },
+      { upsert: true, new: true }
+    );
+    if (role === 'teacher') {
+      cls.teacherId = socket.id;
+      await cls.save();
+      io.to(socket.id).emit('joined-as-teacher', { room });
+    }
+    console.log(`${name || 'user'} joined room ${room} as ${role}`);
+  });
+
+  socket.on('join-request', async ({ room, name, role }) => {
+    const cls = await Classroom.findOne({ code: room });
+    if (!cls || !cls.teacherId) {
+      socket.emit('join-response', { accepted: false, reason: 'No teacher online' });
+      return;
+    }
+    io.to(cls.teacherId).emit('join-request', { studentId: socket.id, studentName: name });
+  });
+
+  socket.on('join-response', async ({ room, studentId, accepted }) => {
+    io.to(studentId).emit('join-response', { accepted });
+    if (accepted) {
+      await Classroom.findOneAndUpdate({ code: room }, {
+        $push: { students: { socketId: studentId, name: 'student', joinedAt: new Date() } }
+      });
+      io.to(room).emit('participant-joined', { id: studentId, name: 'student', role: 'student' });
+    }
+  });
+
+  socket.on('joined', ({ room, name, role }) => {
+    // notify room and share participants list to newcomer
+    const clients = Array.from(io.sockets.adapter.rooms.get(room) || []);
+    // send participants list to this socket (so newcomer can initiate offers to others)
+    socket.emit('participants', { ids: clients });
+    io.to(room).emit('participant-joined', { id: socket.id, name, role });
+  });
+
+  // signaling relay: offer / answer / ice
+  socket.on('webrtc-offer', ({ to, description })=>{
+    if(!to) return;
+    io.to(to).emit('webrtc-offer', { from: socket.id, description });
+  });
+  socket.on('webrtc-answer', ({ to, description })=>{
+    if(!to) return;
+    io.to(to).emit('webrtc-answer', { from: socket.id, description });
+  });
+  socket.on('ice-candidate', ({ to, candidate })=>{
+    if(!to) return;
+    io.to(to).emit('ice-candidate', { from: socket.id, candidate });
+  });
+
+  socket.on('chat-message', ({ room, text, fromName }) => {
+    const payload = { from: socket.id, fromName: fromName || socket.id, text, at: new Date() };
+    io.to(room).emit('chat-message', payload);
+  });
+
+  socket.on('teacher-mute-all', ({ room }) => {
+    io.to(room).emit('teacher-mute-all');
+  });
+
+  socket.on('block-student', ({ room, studentId }) => {
+    io.to(studentId).emit('blocked', { reason: 'Blocked by teacher' });
+    io.sockets.sockets.get(studentId)?.disconnect(true);
+  });
+
+  socket.on('start-screen-share', ({ room }) => {
+    io.to(room).emit('screen-share-started', { by: socket.id });
+  });
+
+  socket.on('make-presenter', ({ room, by })=>{
+    io.to(room).emit('presenter-made',{ by });
+  });
+
+  socket.on('end-class', ({ room }) => {
+    io.to(room).emit('class-ended');
+  });
+
+  socket.on('disconnect', async () => {
+    console.log('disc', socket.id);
+    await Classroom.updateMany({}, { $pull: { students: { socketId: socket.id } } });
+    // Optionally inform rooms that participant left
+    socket.rooms.forEach(r => {
+      io.to(r).emit('participant-left', { id: socket.id });
+    });
+  });
+});
 
 
 // 🚀 DEMARRE SERVEUR
