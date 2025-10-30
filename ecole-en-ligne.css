@@ -1,464 +1,126 @@
-/* ========================================
-   Palette: bleu, jaune, pale yellow
-   Style: High-tech, vibrant, moderne, attractif
-   Netwaye: retire participants & classe
-   Blan ranplase ak pale yellow (#fffacd)
-======================================== */
-
-/* Root variables */
-:root{
-  --bleu:#1e90ff;
-  --bleu-2:#00bfff;
-  --jaune:#ffd43b;
-  --blan:#fffacd; /* pale yellow pou ranplase blan solid */
-  --bg:#f9fbff;
-  --muted:#4a5568;
-  --card-shadow:0 16px 60px rgba(11,18,32,0.2);
-  --radius:20px;
-  --gap:18px;
-  --max-width:1500px;
-  --btn-glow:0 6px 28px rgba(255,212,59,0.4);
-  --hover-scale:1.08;
-  --transition:.35s ease-in-out;
+/* === STYLE GLOBAL === */
+body {
+  font-family: Arial, sans-serif;
+  background: #f0f8ff;
+  margin: 0;
+  padding: 20px;
 }
 
-/* Reset & base */
-*{box-sizing:border-box;margin:0;padding:0;}
-html, body{height:100%;}
-body{
-  font-family:'Inter',system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial;
-  min-height:100vh;
-  display:flex;
-  justify-content:center;
-  align-items:flex-start;
-  padding:40px;
-  background: radial-gradient(circle at top left, var(--bleu-2), var(--jaune), var(--blan));
-  background-size: 400% 400%;
-  animation: gradientMove 25s ease infinite;
-  color:#0b1220;
-  -webkit-font-smoothing:antialiased;
-  -moz-osx-font-smoothing:grayscale;
+/* === TITRE PRINCIPAL === */
+h1 {
+  text-align: center;
+  color: #0d6efd;
+  margin-bottom: 20px;
 }
 
-/* Gradient animation */
-@keyframes gradientMove {
-  0%{background-position:0% 0%;}
-  25%{background-position:100% 0%;}
-  50%{background-position:100% 100%;}
-  75%{background-position:0% 100%;}
-  100%{background-position:0% 0%;}
-}
-
-/* App container */
-.app{
-  max-width:var(--max-width);
-  width:100%;
-  display:block;
-  margin:0 auto;
-  padding-bottom:60px;
-}
-
-/* Topbar */
-.topbar{
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  background: linear-gradient(90deg,var(--jaune),var(--bleu-2),var(--blan));
-  color:#0b1220;
-  padding:20px 28px;
-  border-radius:var(--radius);
-  box-shadow:0 14px 50px rgba(11,18,32,0.25);
-  position:sticky;
-  top:0;
-  z-index:100;
-  animation: topbarGlow 5s ease-in-out infinite alternate;
-}
-@keyframes topbarGlow{
-  0%{box-shadow:0 14px 50px rgba(11,18,32,0.25);}
-  50%{box-shadow:0 14px 70px rgba(11,18,32,0.38);}
-  100%{box-shadow:0 14px 50px rgba(11,18,32,0.25);}
-}
-.topbar .brand{
-  display:flex;
-  flex-direction:column;
-  justify-content:center;
-  align-items:center;
-  text-align:center;
-}
-.topbar .brand h1{
-  font-size:2.8rem;
-  font-weight:900;
-  line-height:1.1;
-  margin-bottom:6px;
-}
-.topbar .brand .tag{
-  font-size:1.4rem;
-  font-weight:700;
-  opacity:0.95;
-}
-
-/* Presenter / header */
-.presenter-area{
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  justify-content:center;
-  text-align:center;
-  min-height:650px;
-  padding:40px 20px;
-  border-radius:var(--radius);
-  background: linear-gradient(135deg, var(--bleu-2), var(--jaune), var(--blan));
-  box-shadow:0 28px 100px rgba(11,18,32,0.3);
-}
-.presenter-area .header-title{
-  font-size:clamp(3rem,5vw,6rem);
-  line-height:1.1;
-  font-weight:900;
-  color:#0b1220;
-  text-shadow:0 3px 12px rgba(255,255,255,0.6);
-}
-.presenter-area .header-subtitle{
-  font-size:clamp(1.5rem,2.5vw,2.5rem);
-  line-height:1.3;
-  max-width:85%;
-  color:#0b1220;
-  text-shadow:0 2px 8px rgba(255,255,255,0.5);
-  margin-top:10px;
-}
-
-/* Presenter video */
-.presenter-video{
-  width:100%;
-  display:flex;
-  justify-content:center;
-  margin-top:30px;
-}
-.presenter-video video{
-  width:100%;
-  max-width:1200px;
-  aspect-ratio:16/9;
-  object-fit:cover;
-  border-radius:var(--radius);
-  border:4px solid rgba(255,250,205,0.3);
-  box-shadow:0 14px 50px rgba(0,0,0,0.15);
-  transition:transform var(--transition), box-shadow var(--transition);
-}
-.presenter-video video:hover{
-  transform:scale(1.02);
-  box-shadow:0 18px 60px rgba(0,0,0,0.2);
-}
-
-/* Classroom grid layout - plis klasik */
-.classroom-grid{
-  margin-top:32px;
-  display:grid;
-  grid-template-columns:1fr;
-  gap:var(--gap);
-  padding:0 20px;
-  align-items:start;
-}
-
-/* Main col sèlman */
-.main-col{
-  display:flex;
-  flex-direction:column;
-  gap:var(--gap);
-}
-
-/* Card styling */
-.card{
-  background:rgba(255,250,205,0.95); /* pale yellow fon */
-  border-radius:var(--radius);
-  box-shadow:var(--card-shadow);
-  padding:28px;
-  transition:transform var(--transition), box-shadow var(--transition);
-}
-.card:hover{
-  transform:scale(var(--hover-scale));
-  box-shadow:0 28px 100px rgba(11,18,32,0.28);
-}
-
-/* Form espas pou Nom / Prénom, Kòd Klas, Elèv */
-.form-group{
-  display:flex;
-  flex-direction:column;
-  gap:10px;
-  margin-bottom:16px;
-}
-.form-group input[type="text"], .form-group select{
-  width:100%;
-  padding:14px 16px;
-  font-size:1.1rem;
-  border-radius:var(--radius);
-  border:1px solid #ffd43b;
-  background:#fffacd;
-}
-
-/* Bouton rejoindre pi piti */
-button#joinBtn{
-  padding:8px 20px;
-  font-size:1rem;
-  border-radius:16px;
-  font-weight:600;
-  background:linear-gradient(135deg, var(--jaune), var(--bleu-2), var(--blan));
-  color:#0b1220;
-  box-shadow:var(--btn-glow);
-  cursor:pointer;
-  transition:transform var(--transition), box-shadow var(--transition);
-}
-button#joinBtn:hover{
-  transform:scale(1.05);
-  box-shadow:0 12px 36px rgba(255,212,59,0.6);
-}
-
-/* Chat area */
-.chat-area{
-  display:flex;
-  flex-direction:column;
-  gap:12px;
-}
-.chat-area .messages{
-  height:300px;
-  overflow:auto;
-  border-radius:18px;
-  border:1px solid #ffd43b;
-  padding:14px;
-  background:rgba(255,250,205,0.95);
-}
-.chat-area .message-input-container{
-  display:flex;
-  width:100%;
-  gap:10px;
-}
-.chat-area input[type="text"], .chat-area textarea{
-  flex:1;
-  padding:12px 16px;
-  font-size:1.05rem;
-  border-radius:var(--radius);
-  border:1px solid #ffd43b;
-  background:#fffacd;
-  min-height:120px;       /* espas pi gwo pou 5+ liy */
-  resize:vertical;
-  line-height:1.5;
-}
-.chat-area button{
-  flex:0 0 auto;
-  padding:10px 22px;
-  font-size:1rem;
-}
-
-/* Buttons rafine, klasik */
-button, .primary, .secondary{
-  background:linear-gradient(135deg, var(--jaune), var(--bleu-2), var(--blan));
-  color:#0b1220;
-  border:none;
-  border-radius:16px;
-  font-weight:600;
-  font-size:1.15rem;
-  padding:10px 24px;
-  cursor:pointer;
-  box-shadow:var(--btn-glow);
-  transition:transform var(--transition), box-shadow var(--transition);
-  text-transform:none;
-}
-button:hover, .primary:hover, .secondary:hover{
-  transform:scale(1.05);
-  box-shadow:0 12px 36px rgba(255,212,59,0.6);
-}
-
-/* Responsive tweaks */
-@media (max-width:1200px){
-  .presenter-area{min-height:500px;padding:30px;}
-  .presenter-video video{max-width:1000px;}
-}
-@media (max-width:1000px){
-  .chat-area .message-input-container{
-    flex-direction:column;
-  }
-  .chat-area button{
-    width:100%;
-  }
-}
-@media (max-width:640px){
-  .presenter-area{min-height:350px;padding:20px;}
-  .presenter-area .header-title{font-size:2.5rem;}
-  .presenter-area .header-subtitle{font-size:1.2rem;}
-  .presenter-video video{max-width:100%;height:auto;}
-  button, .primary, .secondary{font-size:1rem;padding:8px 18px;}
-  button#joinBtn{font-size:0.95rem;padding:6px 16px;}
-}
-
-
-/* ========================================
-   MEME Agent Wrapper - FIX: toujou vizib
-======================================== */
-#meme-agent-container {
-  position: fixed;       /* toujou sou ekran menm ak scroll */
-  right: 18px;           /* distans soti dwat */
-  bottom: 18px;          /* distans soti anba */
-  z-index: 99999;        /* pi wo pase tout eleman */
+/* === CONTROLES DE CONNEXION === */
+#room-controls {
   display: flex;
-  flex-direction: column;
-  gap: 12px;             /* espas ant cards si gen plis pase 1 */
-  pointer-events: auto;  /* bouton rete klikab */
-  max-width: 340px;      /* ajiste selon ekran */
+  justify-content: center;
+  flex-wrap: wrap;
+  margin: 10px auto;
 }
 
-.meme-agent-card {
-  width: 100%;           
-  background: rgba(255, 250, 205, 0.98); /* pale yellow fon */
-  border-radius: 14px;
-  box-shadow: 0 12px 40px rgba(3, 10, 60, 0.2);
-  overflow: hidden;
+#room-controls input,
+#room-controls select,
+#room-controls button {
+  margin: 5px;
+  padding: 8px 10px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+/* === CONTROLES ENSEIGNANT === */
+#teacher-controls {
   display: flex;
-  flex-direction: column;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin: 10px auto;
 }
 
-.meme-agent-card:hover {
-  transform: scale(1.02);
-  box-shadow: 0 18px 60px rgba(3, 10, 60, 0.3);
+#teacher-controls button,
+#teacher-controls input {
+  margin: 5px;
+  padding: 8px 12px;
+  border: none;
+  border-radius: 6px;
+  background: #0d6efd;
+  color: #fff;
+  cursor: pointer;
+  transition: background 0.3s;
 }
 
-.meme-agent-card .header {
-  padding: 12px 16px;
-  font-weight: 700;
-  font-size: 1.1rem;
-  background: linear-gradient(135deg, #ffd43b, #00bfff, #fffacd);
-  color: #0b1220;
+#teacher-controls button:hover {
+  background: #0b5ed7;
 }
 
-.meme-agent-card .content {
-  padding: 14px 16px;
-  font-size: 0.95rem;
+/* === SECTION VIDEO === */
+#video-section {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin: 20px auto;
+}
+
+video {
+  border: 2px solid #0d6efd;
+  border-radius: 8px;
+  margin: 5px;
+  max-width: 300px;
+  background: #000;
+}
+
+/* === VIDEOS ÉTUDIANTS === */
+#student-videos {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+/* === SECTION CHAT === */
+#chat-section {
+  border: 1px solid #0d6efd;
+  border-radius: 8px;
+  padding: 10px;
+  max-width: 600px;
+  margin: 20px auto;
+  background: #fff;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+#messages {
+  list-style: none;
+  padding: 0;
+  height: 200px;
+  overflow-y: auto;
+  margin-bottom: 10px;
+}
+
+#messages li {
+  padding: 6px 8px;
+  border-bottom: 1px solid #ccc;
+  font-size: 14px;
   line-height: 1.4;
-  color: #0b1220;
-  max-height: 300px;
-  overflow-y: auto;
 }
 
-.meme-agent-card .actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 8px;
-  padding: 10px 14px;
+/* === INPUTS & BOUTONS GÉNÉRAUX === */
+input,
+button {
+  padding: 6px 10px;
+  margin: 3px;
+  font-size: 14px;
+  border-radius: 6px;
 }
 
-.meme-agent-card .actions button {
-  padding: 6px 12px;
-  font-size: 0.95rem;
-  border-radius: 12px;
+button {
+  background: #0d6efd;
+  color: #fff;
   border: none;
   cursor: pointer;
-  background: linear-gradient(135deg, #ffd43b, #00bfff, #fffacd);
-  color: #0b1220;
-  box-shadow: 0 6px 20px rgba(255, 212, 59, 0.3);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  transition: background 0.3s;
 }
 
-.meme-agent-card .actions button:hover {
-  transform: scale(1.05);
-  box-shadow: 0 10px 28px rgba(255, 212, 59, 0.5);
-}
-
-/* Responsive */
-@media (max-width: 640px) {
-  #meme-agent-container {
-    right: 12px;
-    bottom: 12px;
-    max-width: 280px;
-  }
-
-  .meme-agent-card .header {
-    font-size: 1rem;
-  }
-
-  .meme-agent-card .content {
-    font-size: 0.9rem;
-  }
-
-  .meme-agent-card .actions button {
-    padding: 5px 10px;
-    font-size: 0.85rem;
-  }
-}
-
-
-
-
-/* ========== MEME-Agent (fix minimal pou .meme-chat-wrapper) ========== */
-/* Ajoute sa nan fen ecole-en-ligne.css (pa touche rès fichye a) */
-
-.meme-chat-wrapper {
-  position: fixed !important;
-  right: 18px;
-  bottom: 18px;
-  z-index: 100000; /* trè wo pou parèt sou tout */
-  width: 340px;
-  max-width: calc(100% - 36px);
-  background: linear-gradient(180deg, rgba(255,255,255,0.98), rgba(255,250,205,0.95));
-  border-radius: 14px;
-  box-shadow: 0 18px 60px rgba(3,10,60,0.18);
-  padding: 12px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  pointer-events: auto;
-}
-
-/* Chat content area */
-.meme-chat-wrapper #meme-chat {
-  max-height: 240px;
-  overflow-y: auto;
-  padding: 8px;
-  border-radius: 10px;
-  background: #f0f6ff;
-  border: 1px solid rgba(11,99,255,0.06);
-}
-
-/* Inputs / boutons */
-.meme-chat-wrapper input#meme-input{
-  width: 100%;
-  padding: 10px 12px;
-  border-radius: 10px;
-  border: 1px solid #e6eefc;
-  outline: none;
-  font-size: 1rem;
-}
-.meme-chat-wrapper button#(meme-submit), .meme-chat-wrapper button#(meme-voice) { /* legacy safe, below we target classes */
-  /* noop; keep for compatibility */
-}
-
-/* Buttons style (apliye sou klas oswa id) */
-.meme-chat-wrapper .primary,
-.meme-chat-wrapper button#(meme-submit),
-.meme-chat-wrapper button#(meme-voice) {
-  appearance: none;
-  -webkit-appearance: none;
-  padding: 10px 14px;
-  border-radius: 12px;
-  border: none;
-  cursor: pointer;
-  font-weight: 700;
-  background: linear-gradient(90deg, #ffd43b, #00bfff);
-  color: #071230;
-  box-shadow: 0 8px 28px rgba(255,212,59,0.28);
-}
-.meme-chat-wrapper .primary:hover,
-.meme-chat-wrapper button#(meme-submit):hover,
-.meme-chat-wrapper button#(meme-voice):hover {
-  transform: translateY(-2px);
-  box-shadow: 0 12px 36px rgba(255,212,59,0.4);
-}
-
-/* Small screens: reduce width, move up a little */
-@media (max-width: 640px) {
-  .meme-chat-wrapper {
-    right: 12px;
-    bottom: 12px;
-    width: 92%;
-    max-width: none;
-    padding: 10px;
-  }
-  .meme-chat-wrapper #meme-chat { max-height: 180px; }
+button:hover {
+  background: #0b5ed7;
 }
