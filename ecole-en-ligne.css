@@ -63,7 +63,7 @@ body{
   align-items:center;
   justify-content:center;
   width:100%;
-  min-height:600px; /* pi gwo espas pou kamera */
+  min-height:650px; /* ogmante espas sou laptop */
   padding:40px;
   border-radius:var(--radius);
   background: linear-gradient(135deg, var(--bleu), var(--bleu-2));
@@ -81,17 +81,19 @@ body{
   margin-bottom:16px;
 }
 .presenter-area .header-subtitle{
-  font-size:2rem;
+  font-size:2.2rem;
   font-weight:700;
   color:#fff;
   text-shadow:0 3px 12px rgba(0,0,0,0.3);
+  max-width:90%;
+  margin:0 auto;
 }
 
 /* Presenter video */
 .presenter-video video{
   width:100%;
-  max-width:1200px; /* ogmante gwosè videyo */
-  aspect-ratio:16/9; /* plis pwofesyonèl pou kamera */
+  max-width:1200px;
+  aspect-ratio:16/9;
   object-fit:cover;
   border-radius:var(--radius);
   border:5px solid rgba(255,255,255,0.2);
@@ -175,6 +177,12 @@ body{
 }
 
 /* Responsive tweaks */
+@media (max-width:1440px){
+  .presenter-area{min-height:600px;padding:35px;}
+  .presenter-area .header-title{font-size:4.5rem;}
+  .presenter-area .header-subtitle{font-size:2rem;}
+  .presenter-video video{max-width:1050px;}
+}
 @media (max-width:1200px){
   .presenter-area{min-height:500px;padding:30px;}
   .presenter-area .header-title{font-size:4rem;}
