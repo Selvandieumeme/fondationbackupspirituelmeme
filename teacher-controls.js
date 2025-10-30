@@ -1,153 +1,269 @@
-// teacher-controls.js
-import { io } from "https://cdn.socket.io/4.7.2/socket.io.esm.min.js";
+/* teacher-controls.js
+   Teacher-side controls + WebRTC mesh signaling.
+   Uses your backend at https://examen-backend-ihlx.onrender.com for Socket.IO signaling.
+   NOTE: This implementation uses a mesh (peer-per-peer). For very large classes (dozens/100),
+   consider switching to an SFU (mediasoup/Janus/Jitsi) server for scalability.
+*/
 
-const socket = io("https://examen-backend-ihlx.onrender.com");
+const BACKEND = "https://examen-backend-ihlx.onrender.com";
+const socket = io(BACKEND, { transports: ['websocket', 'polling'] });
 
-const joinBtn = document.getElementById("join-room");
-const usernameInput = document.getElementById("username");
-const roomCodeInput = document.getElementById("room-code");
-const roleSelect = document.getElementById("role");
-const teacherControls = document.getElementById("teacher-controls");
-const teacherVideo = document.getElementById("teacher-video");
-const studentVideos = document.getElementById("student-videos");
-const messages = document.getElementById("messages");
-const msgInput = document.getElementById("msg");
-const sendBtn = document.getElementById("send");
-const uploadDoc = document.getElementById("upload-doc");
+// UI refs
+const joinBtn = document.getElementById('joinBtn');
+const roleSelect = document.getElementById('roleSelect');
+const displayName = document.getElementById('displayName');
+const classCodeInput = document.getElementById('classCode');
+const statusDiv = document.getElementById('status');
+const classroom = document.getElementById('classroom');
+const controls = document.getElementById('controls');
+const videosGrid = document.getElementById('videosGrid');
+const participantsList = document.getElementById('participantsList');
+const presenterVideo = document.getElementById('presenterVideo');
 
-let localStream, screenStream, recorder, chunks = [];
+let localStream = null;
+let isTeacher = false;
+let room = null;
+let myId = null;
 
-joinBtn.addEventListener("click", async () => {
-  if (roleSelect.value !== "teacher") return;
+// WebRTC state
+const pcs = {}; // peerId -> RTCPeerConnection
+const remoteStreams = {}; // peerId -> MediaStream
 
-  const username = usernameInput.value.trim();
-  const room = roomCodeInput.value.trim();
-  if (!username || !room) return alert("Remplissez tous les champs");
+// STUN/TURN servers (add TURN in Render env if you have it)
+const RTC_CONFIG = {
+  iceServers: [
+    { urls: 'stun:stun.l.google.com:19302' },
+    // If you have TURN on Render, add: { urls: process.env.TURN_URL, username: process.env.TURN_USER, credential: process.env.TURN_PASS }
+  ]
+};
 
-  socket.emit("setUser", { username, role: "teacher" });
-  socket.emit("join-room", room);
-  teacherControls.style.display = "flex";
+async function startLocalMedia(){
+  try{
+    localStream = await navigator.mediaDevices.getUserMedia({video:true,audio:true});
+    const localVideo = document.getElementById('localVideo');
+    localVideo.srcObject = localStream;
+    // attach local to presenter by default for teacher
+    presenterVideo.srcObject = localStream;
+  }catch(err){
+    console.error('micro/cam denied',err);
+    statusDiv.textContent = 'Pa jwenn aksè kamera/mikwo. Tcheke pèmisyon.';
+  }
+}
 
-  try {
-    localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-    teacherVideo.srcObject = localStream;
+function buildTeacherControls(){
+  controls.innerHTML = '';
+  const buttons = [
+    ['toggleMic','Mikwo'],['toggleCam','Kamera'],['shareScreen','Pataje ekran'],['record','Rekòde'],
+    ['muteAll','Mute tout elèv'],['block','Bloke elèv'],['presenter','Fè prezantatè'],['endClass','Finir la classe']
+  ];
+  buttons.forEach(([id,label])=>{
+    const btn = document.createElement('button'); btn.id=id; btn.textContent=label; controls.appendChild(btn);
+  });
 
-    // ----------------- Mikwo -----------------
-    const muteMicBtn = document.createElement("button");
-    muteMicBtn.textContent = "Mute Micro";
-    teacherControls.appendChild(muteMicBtn);
-    muteMicBtn.onclick = () => {
-      localStream.getAudioTracks().forEach(t => t.enabled = !t.enabled);
-      muteMicBtn.textContent = localStream.getAudioTracks()[0].enabled ? "Mute Micro" : "Unmute Micro";
-    };
-
-    // ----------------- Kamera -----------------
-    const muteCamBtn = document.createElement("button");
-    muteCamBtn.textContent = "Mute Caméra";
-    teacherControls.appendChild(muteCamBtn);
-    muteCamBtn.onclick = () => {
-      localStream.getVideoTracks().forEach(t => t.enabled = !t.enabled);
-      muteCamBtn.textContent = localStream.getVideoTracks()[0].enabled ? "Mute Caméra" : "Unmute Caméra";
-    };
-
-    // ----------------- Pataje Ekran -----------------
-    const shareScreenBtn = document.createElement("button");
-    shareScreenBtn.textContent = "Partager Écran";
-    teacherControls.appendChild(shareScreenBtn);
-    shareScreenBtn.onclick = async () => {
-      try {
-        screenStream = await navigator.mediaDevices.getDisplayMedia({ video: true });
-        const preview = document.createElement("video");
-        preview.srcObject = screenStream;
-        preview.autoplay = true;
-        preview.muted = true;
-        preview.style.border = "3px solid gold";
-        preview.style.width = "70%";
-        studentVideos.appendChild(preview);
-
-        socket.emit("share-screen", { room, trackId: screenStream.id });
-
-        screenStream.getVideoTracks()[0].onended = () => {
-          preview.remove();
-          socket.emit("stop-share-screen", room);
-        };
-      } catch (err) {
-        alert("Erreur partage écran: " + err.message);
+  document.getElementById('toggleMic').onclick = ()=>{
+    if(!localStream) return; localStream.getAudioTracks().forEach(t=>t.enabled = !t.enabled);
+  };
+  document.getElementById('toggleCam').onclick = ()=>{
+    if(!localStream) return; localStream.getVideoTracks().forEach(t=>t.enabled = !t.enabled);
+  };
+  document.getElementById('shareScreen').onclick = async ()=>{
+    try{
+      const screen = await navigator.mediaDevices.getDisplayMedia({video:true,audio:true});
+      // replace tracks in each RTCPeerConnection with screen tracks
+      const screenTrack = screen.getVideoTracks()[0];
+      for(const pid of Object.keys(pcs)){
+        const pc = pcs[pid];
+        const senders = pc.getSenders();
+        const sender = senders.find(s => s.track && s.track.kind === 'video');
+        if(sender) sender.replaceTrack(screenTrack);
       }
-    };
+      // also show locally
+      presenterVideo.srcObject = screen;
+      socket.emit('start-screen-share',{room});
+    }catch(e){console.error(e)}
+  };
+  document.getElementById('muteAll').onclick = ()=>{ socket.emit('teacher-mute-all',{room}); };
+  document.getElementById('block').onclick = ()=>{ 
+    const sid = prompt('Entrez socket id ou non elèv la pou bloke:'); 
+    if(sid) socket.emit('block-student',{room,studentId:sid});
+  };
+  document.getElementById('record').onclick = ()=>{
+    if(!localStream) return alert('Pa gen stream lokal.');
+    if(!window._recorder){
+      const mediaRecorder = new MediaRecorder(localStream);
+      let chunks = [];
+      mediaRecorder.ondataavailable = e=>chunks.push(e.data);
+      mediaRecorder.onstop = async ()=>{
+        const blob = new Blob(chunks, {type: 'video/webm'});
+        const fd = new FormData();
+        fd.append('file', blob, `${room || 'session'}.webm`);
+        try{
+          await fetch(`${BACKEND}/upload`, { method:'POST', body: fd });
+          alert('Rekòd upload fini.');
+        }catch(e){console.error(e); alert('Erè upload');}
+        chunks = [];
+        window._recorder = null;
+      };
+      mediaRecorder.start();
+      window._recorder = mediaRecorder;
+      alert('Rekòd kòmanse.');
+    } else {
+      window._recorder.stop();
+      alert('Rekòd sispann. Ap upload...');
+    }
+  };
+  document.getElementById('presenter').onclick = ()=>{
+    // toggle presenter to local teacher stream
+    presenterVideo.srcObject = localStream;
+    socket.emit('make-presenter',{room,by:myId});
+  };
+  document.getElementById('endClass').onclick = ()=>{ socket.emit('end-class',{room}); classroom.classList.add('hidden'); };
+}
 
-    // ----------------- Mute All / Stop All -----------------
-    const muteAllBtn = document.createElement("button");
-    muteAllBtn.textContent = "Mute All";
-    teacherControls.appendChild(muteAllBtn);
-    muteAllBtn.onclick = () => socket.emit("mute-all", room);
+joinBtn.addEventListener('click', async ()=>{
+  const role = roleSelect.value; const name = displayName.value.trim(); const code = classCodeInput.value.trim();
+  if(!name||!code) { statusDiv.textContent='Ranpli non ak kòd klas...'; return; }
+  room = code; isTeacher = (role==='teacher');
+  await startLocalMedia();
+  socket.emit('join-room',{room,role,name});
+  classroom.classList.remove('hidden');
+  if(isTeacher) buildTeacherControls();
+});
 
-    const stopAllBtn = document.createElement("button");
-    stopAllBtn.textContent = "Stop Video All";
-    teacherControls.appendChild(stopAllBtn);
-    stopAllBtn.onclick = () => socket.emit("stop-all-video", room);
+socket.on('connect', ()=>{ myId = socket.id; console.log('connected',myId); });
 
-    // ----------------- Start / Stop Recording -----------------
-    const startRecBtn = document.createElement("button");
-    startRecBtn.textContent = "Start Recording";
-    teacherControls.appendChild(startRecBtn);
+// Once teacher or student is accepted and emits 'joined', server will send 'participants' list
+socket.on('participants', async ({ ids })=>{
+  // ids = array of socket ids already in room
+  // Newcomer should create offer to each existing participant
+  for(const pid of ids){
+    if(pid === myId) continue;
+    await createPeerConnection(pid, true);
+  }
+});
 
-    const stopRecBtn = document.createElement("button");
-    stopRecBtn.textContent = "Stop Recording";
-    stopRecBtn.disabled = true;
-    teacherControls.appendChild(stopRecBtn);
+// Handle incoming signaling
+socket.on('webrtc-offer', async ({ from, description })=>{
+  // create pc if not exists and set remote desc then answer
+  await createPeerConnection(from, false);
+  const pc = pcs[from];
+  await pc.setRemoteDescription(new RTCSessionDescription(description));
+  const answer = await pc.createAnswer();
+  await pc.setLocalDescription(answer);
+  socket.emit('webrtc-answer',{ to: from, description: pc.localDescription });
+});
 
-    startRecBtn.onclick = () => {
-      if (!localStream) return alert("Activez la caméra avant d’enregistrer");
-      recorder = new MediaRecorder(localStream);
-      recorder.ondataavailable = (e) => chunks.push(e.data);
-      recorder.start(1000);
-      startRecBtn.disabled = true;
-      stopRecBtn.disabled = false;
-    };
+socket.on('webrtc-answer', async ({ from, description })=>{
+  const pc = pcs[from];
+  if(!pc) return console.warn('no pc for answer from', from);
+  await pc.setRemoteDescription(new RTCSessionDescription(description));
+});
 
-    stopRecBtn.onclick = async () => {
-      if (!recorder) return;
-      recorder.stop();
-      const blob = new Blob(chunks, { type: "video/webm" });
-      const form = new FormData();
-      form.append("file", blob, "session.webm");
-      await fetch("https://examen-backend-ihlx.onrender.com/upload-recording", { method: "POST", body: form });
-      chunks = [];
-      startRecBtn.disabled = false;
-      stopRecBtn.disabled = true;
-      alert("Recording saved!");
-    };
+socket.on('ice-candidate', async ({ from, candidate })=>{
+  const pc = pcs[from];
+  if(!pc) return;
+  try{
+    await pc.addIceCandidate(new RTCIceCandidate(candidate));
+  }catch(e){ console.warn('bad ice', e); }
+});
 
-    // ----------------- Upload Document -----------------
-    const uploadBtn = document.createElement("button");
-    uploadBtn.textContent = "Upload Document";
-    teacherControls.appendChild(uploadBtn);
-    uploadBtn.onclick = () => uploadDoc.click();
+// helper to create pc
+async function createPeerConnection(peerId, isInitiator){
+  if(pcs[peerId]) return pcs[peerId];
+  const pc = new RTCPeerConnection(RTC_CONFIG);
+  pcs[peerId] = pc;
+  // create remote stream for this peer
+  const remoteStream = new MediaStream();
+  remoteStreams[peerId] = remoteStream;
 
-    uploadDoc.onchange = async () => {
-      const file = uploadDoc.files[0]; if (!file) return;
-      const form = new FormData(); form.append("document", file);
-      await fetch("https://examen-backend-ihlx.onrender.com/upload-doc", { method: "POST", body: form });
-      alert("Document uploaded!");
-    };
+  pc.onicecandidate = (e)=>{
+    if(e.candidate){
+      socket.emit('ice-candidate',{ to: peerId, candidate: e.candidate });
+    }
+  };
 
-    // ----------------- Chat -----------------
-    sendBtn.onclick = () => {
-      const text = msgInput.value.trim();
-      if (!text) return;
-      socket.emit("chat-message", { from: username, to: "all", message: text });
-      const li = document.createElement("li"); li.textContent = `Vous: ${text}`; messages.appendChild(li);
-      msgInput.value = "";
-    };
+  pc.ontrack = (e)=>{
+    // add track(s) to remoteStream and attach to UI
+    remoteStream.addTrack(e.track);
+    attachRemoteStreamToUI(peerId, remoteStream);
+  };
 
-    socket.on("chat-message", (data) => {
-      const li = document.createElement("li");
-      li.textContent = `${data.from}: ${data.message}`;
-      messages.appendChild(li);
-    });
+  // add local tracks
+  if(localStream){
+    localStream.getTracks().forEach(track => pc.addTrack(track, localStream));
+  }
 
-  } catch (err) {
-    alert("Erreur caméra/micro: " + err.message);
+  // if initiator, create offer
+  if(isInitiator){
+    const offer = await pc.createOffer();
+    await pc.setLocalDescription(offer);
+    socket.emit('webrtc-offer',{ to: peerId, description: pc.localDescription });
+  }
+
+  return pc;
+}
+
+function attachRemoteStreamToUI(peerId, stream){
+  // find existing participant tile by data-id, else create one
+  let tile = videosGrid.querySelector(`.participant[data-id="${peerId}"]`);
+  if(!tile){
+    const tpl = document.getElementById('participantTpl').content.cloneNode(true);
+    tile = tpl.querySelector('.participant');
+    tile.dataset.id = peerId;
+    tile.querySelector('.pname').textContent = peerId;
+    videosGrid.appendChild(tile);
+  }
+  const vid = tile.querySelector('video');
+  if(vid.srcObject !== stream) vid.srcObject = stream;
+  updateParticipantsList(peerId);
+}
+
+function updateParticipantsList(peerId){
+  // ensure participant list contains the peer
+  if(!participantsList.querySelector(`[data-id="${peerId}"]`)){
+    const div = document.createElement('div'); div.className='participant-item'; div.dataset.id = peerId;
+    div.textContent = peerId;
+    participantsList.appendChild(div);
+  }
+  document.getElementById('presentCount').textContent = participantsList.querySelectorAll('.participant-item').length;
+}
+
+// chat
+const chatForm = document.getElementById('chatForm');
+chatForm?.addEventListener('submit', e=>{
+  e.preventDefault();
+  const text = document.getElementById('chatInput').value.trim(); if(!text) return;
+  socket.emit('chat-message',{room,text,fromName:displayName.value.trim() || myId});
+  document.getElementById('chatInput').value='';
+});
+
+socket.on('chat-message', m=>{
+  const el = document.createElement('div'); el.textContent = `${m.fromName || m.from}: ${m.text}`; document.getElementById('chatMessages').appendChild(el);
+});
+
+// join request handling
+socket.on('join-request', data=>{
+  if(!isTeacher) return;
+  const {studentId, studentName} = data;
+  const el = document.createElement('div');
+  el.innerHTML = `<strong>${studentName}</strong> mande antre — <button class='accept'>Aksepte</button> <button class='reject'>Rejte</button>`;
+  statusDiv.appendChild(el);
+  el.querySelector('.accept').onclick = ()=> socket.emit('join-response',{room,studentId,accepted:true});
+  el.querySelector('.reject').onclick = ()=> socket.emit('join-response',{room,studentId,accepted:false});
+});
+
+// teacher mute all command (apply locally for teacher preview)
+socket.on('teacher-mute-all', ()=>{ if(localStream) localStream.getAudioTracks().forEach(t=>t.enabled=false); });
+
+// when someone is made presenter, attach their stream to presenterVideo if available
+socket.on('presenter-made', ({ by })=>{
+  // if by is me, ensure local stream is presenter
+  if(by === myId){
+    presenterVideo.srcObject = localStream;
+  } else if(remoteStreams[by]){
+    presenterVideo.srcObject = remoteStreams[by];
+  } else {
+    // wait until stream arrives
+    console.log('presenter made, waiting for stream', by);
   }
 });
