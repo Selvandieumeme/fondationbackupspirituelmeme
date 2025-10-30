@@ -872,5 +872,232 @@
     "answer": "Vaya a la configuración de su perfil, edite el nombre y guarde. Si está restringido, contacte al admin.",
     "lang": "es",
     "tags": ["perfil","configuración"]
-  }
-]
+  },
+
+  {
+    "question": "Ki sa yon elèv bezwen pou l patisipe nan yon klas sou Ecole-en-ligne?",
+    "answer": "Li bezwen yon aparèy ki gen kamera ak mikwo, yon koneksyon Entènèt, epi yon kont valide.",
+    "lang": "ht",
+    "tags": ["elèv", "ekipman", "klas"]
+  },
+  {
+    "question": "De quoi un élève a-t-il besoin pour participer à une classe sur Ecole-en-ligne ?",
+    "answer": "Il a besoin d’un appareil avec caméra et micro, d’une connexion Internet et d’un compte validé.",
+    "lang": "fr",
+    "tags": ["élève", "équipement", "classe"]
+  },
+  {
+    "question": "What does a student need to participate in a class on Ecole-en-ligne?",
+    "answer": "They need a device with a camera and microphone, an Internet connection, and a verified account.",
+    "lang": "en",
+    "tags": ["student", "equipment", "class"]
+  },
+  {
+    "question": "¿Qué necesita un estudiante para participar en una clase en Ecole-en-ligne?",
+    "answer": "Necesita un dispositivo con cámara y micrófono, una conexión a Internet y una cuenta verificada.",
+    "lang": "es",
+    "tags": ["estudiante", "equipo", "clase"]
+  },
+
+  {
+    "question": "Ki jan yon pwofesè ka ajoute yon nouvo kou sou platfòm nan?",
+    "answer": "Apre koneksyon, pwofesè a antre nan tablodbò li, chwazi 'Ajoute kou' epi ranpli detay yo.",
+    "lang": "ht",
+    "tags": ["pwofesè", "kou", "tablodbò"]
+  },
+  {
+    "question": "Comment un professeur peut-il ajouter un nouveau cours sur la plateforme ?",
+    "answer": "Après connexion, le professeur accède à son tableau de bord, clique sur 'Ajouter un cours' et remplit les détails.",
+    "lang": "fr",
+    "tags": ["professeur", "cours", "tableaudebord"]
+  },
+  {
+    "question": "How can a teacher add a new course on the platform?",
+    "answer": "After logging in, the teacher goes to their dashboard, selects 'Add course' and fills in the details.",
+    "lang": "en",
+    "tags": ["teacher", "course", "dashboard"]
+  },
+  {
+    "question": "¿Cómo puede un profesor añadir un nuevo curso en la plataforma?",
+    "answer": "Después de iniciar sesión, el profesor accede a su panel, selecciona 'Agregar curso' y completa los detalles.",
+    "lang": "es",
+    "tags": ["profesor", "curso", "panel"]
+  },
+
+  {
+    "question": "Ki jan pou m aktive kamera mwen pandan yon kou an dirèk?",
+    "answer": "Klike sou ikon kamera a anba ekran an epi bay pèmisyon aksè lè navigatè a mande.",
+    "lang": "ht",
+    "tags": ["kamera", "dirèk", "elèv"]
+  },
+  {
+    "question": "Comment activer ma caméra pendant un cours en direct ?",
+    "answer": "Cliquez sur l’icône de la caméra en bas de l’écran et autorisez l’accès lorsque le navigateur le demande.",
+    "lang": "fr",
+    "tags": ["caméra", "direct", "élève"]
+  },
+  {
+    "question": "How can I activate my camera during a live class?",
+    "answer": "Click on the camera icon at the bottom of the screen and allow access when prompted by the browser.",
+    "lang": "en",
+    "tags": ["camera", "live", "student"]
+  },
+  {
+    "question": "¿Cómo puedo activar mi cámara durante una clase en vivo?",
+    "answer": "Haga clic en el icono de la cámara en la parte inferior de la pantalla y permita el acceso cuando el navegador lo solicite.",
+    "lang": "es",
+    "tags": ["cámara", "en vivo", "estudiante"]
+  },
+
+  {
+    "question": "Kisa 'pataje ekran' vle di sou Ecole-en-ligne?",
+    "answer": "Li pèmèt ou montre pwofesè oswa elèv yo sa k ap parèt sou ekran ou an dirèk.",
+    "lang": "ht",
+    "tags": ["ekran", "pataje", "klas"]
+  },
+  {
+    "question": "Que signifie 'partager l’écran' sur Ecole-en-ligne ?",
+    "answer": "Cela permet de montrer en direct le contenu de votre écran aux professeurs ou aux élèves.",
+    "lang": "fr",
+    "tags": ["écran", "partage", "classe"]
+  },
+  {
+    "question": "What does 'screen sharing' mean on Ecole-en-ligne?",
+    "answer": "It allows you to show your screen live to teachers or students.",
+    "lang": "en",
+    "tags": ["screen", "sharing", "class"]
+  },
+  {
+    "question": "¿Qué significa 'compartir pantalla' en Ecole-en-ligne?",
+    "answer": "Permite mostrar en directo el contenido de tu pantalla a profesores o estudiantes.",
+    "lang": "es",
+    "tags": ["pantalla", "compartir", "clase"]
+  },
+
+  {
+    "question": "Kijan yon elev ka voye mesaj prive bay pwofesè a?",
+    "answer": "Nan bwat chat la, chwazi pwofesè a nan lis itilizatè epi ekri mesaj la.",
+    "lang": "ht",
+    "tags": ["chat", "prive", "elèv"]
+  },
+  {
+    "question": "Comment un élève peut-il envoyer un message privé à un professeur ?",
+    "answer": "Dans la boîte de chat, sélectionnez le professeur dans la liste et écrivez le message.",
+    "lang": "fr",
+    "tags": ["chat", "privé", "élève"]
+  },
+  {
+    "question": "How can a student send a private message to a teacher?",
+    "answer": "In the chat box, select the teacher from the list and type the message.",
+    "lang": "en",
+    "tags": ["chat", "private", "student"]
+  },
+  {
+    "question": "¿Cómo puede un estudiante enviar un mensaje privado a un profesor?",
+    "answer": "En la caja de chat, seleccione al profesor de la lista y escriba el mensaje.",
+    "lang": "es",
+    "tags": ["chat", "privado", "estudiante"]
+  },
+
+  {
+    "question": "Ki jan yon pwofesè ka mute tout elèv yo pandan yon klas?",
+    "answer": "Li klike sou bouton 'Mute All' nan kontwòl pwofesè yo.",
+    "lang": "ht",
+    "tags": ["pwofesè", "mute", "klas"]
+  },
+  {
+    "question": "Comment un professeur peut-il couper le son de tous les élèves pendant un cours ?",
+    "answer": "Il clique sur le bouton 'Mute All' dans les contrôles du professeur.",
+    "lang": "fr",
+    "tags": ["professeur", "mute", "classe"]
+  },
+  {
+    "question": "How can a teacher mute all students during a class?",
+    "answer": "They click the 'Mute All' button in the teacher controls.",
+    "lang": "en",
+    "tags": ["teacher", "mute", "class"]
+  },
+  {
+    "question": "¿Cómo puede un profesor silenciar a todos los estudiantes durante una clase?",
+    "answer": "Hace clic en el botón 'Mute All' en los controles del profesor.",
+    "lang": "es",
+    "tags": ["profesor", "silenciar", "clase"]
+  },
+
+  {
+    "question": "Kisa MEME Inspecteur fè lè li wè yon elèv gen difikilte?",
+    "answer": "Li kominike ak elèv la, ba li konsèy epi montre ki bouton oswa fonksyon pou itilize.",
+    "lang": "ht",
+    "tags": ["MEME", "inspecteur", "asistans"]
+  },
+  {
+    "question": "Que fait MEME Inspecteur lorsqu’il voit un élève en difficulté ?",
+    "answer": "Il communique avec l’élève, lui donne des conseils et indique quels boutons ou fonctions utiliser.",
+    "lang": "fr",
+    "tags": ["MEME", "inspecteur", "assistance"]
+  },
+  {
+    "question": "What does MEME Inspecteur do when it sees a student struggling?",
+    "answer": "It communicates with the student, provides guidance, and points out which buttons or functions to use.",
+    "lang": "en",
+    "tags": ["MEME", "inspector", "assistance"]
+  },
+  {
+    "question": "¿Qué hace MEME Inspecteur cuando ve a un estudiante con dificultades?",
+    "answer": "Se comunica con el estudiante, le da orientación y le indica qué botones o funciones usar.",
+    "lang": "es",
+    "tags": ["MEME", "inspecteur", "asistencia"]
+  },
+
+  {
+    "question": "Ki jan pwofesè ka telechaje dokiman pou elèv yo?",
+    "answer": "Li klike sou 'Upload Doc', chwazi fichye a, epi konfime telechajman an.",
+    "lang": "ht",
+    "tags": ["pwofesè", "dokiman", "upload"]
+  },
+  {
+    "question": "Comment un professeur peut-il télécharger un document pour les élèves ?",
+    "answer": "Il clique sur 'Upload Doc', sélectionne le fichier et confirme le téléchargement.",
+    "lang": "fr",
+    "tags": ["professeur", "document", "upload"]
+  },
+  {
+    "question": "How can a teacher upload a document for students?",
+    "answer": "They click 'Upload Doc', select the file, and confirm the upload.",
+    "lang": "en",
+    "tags": ["teacher", "document", "upload"]
+  },
+  {
+    "question": "¿Cómo puede un profesor subir un documento para los estudiantes?",
+    "answer": "Hace clic en 'Upload Doc', selecciona el archivo y confirma la carga.",
+    "lang": "es",
+    "tags": ["profesor", "documento", "subir"]
+  },
+
+  {
+    "question": "Kijan pou m rekonèt ki moun ki konekte nan klas la?",
+    "answer": "Gade nan panèl itilizatè sou bò dwat ekran an pou wè lis pwofesè ak elèv ki konekte.",
+    "lang": "ht",
+    "tags": ["elèv", "pwofesè", "online"]
+  },
+  {
+    "question": "Comment savoir qui est connecté dans la classe ?",
+    "answer": "Regardez le panneau des utilisateurs à droite pour voir la liste des professeurs et élèves connectés.",
+    "lang": "fr",
+    "tags": ["élève", "professeur", "en ligne"]
+  },
+  {
+    "question": "How can I see who is connected in the class?",
+    "answer": "Check the user panel on the right to see the list of connected teachers and students.",
+    "lang": "en",
+    "tags": ["student", "teacher", "online"]
+  },
+  {
+    "question": "¿Cómo puedo ver quién está conectado en la clase?",
+    "answer": "Mira el panel de usuarios a la derecha para ver la lista de profesores y estudiantes conectados.",
+    "lang": "es",
+    "tags": ["estudiante", "profesor", "en línea"]
+  }.  
+
+  
+  
