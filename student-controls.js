@@ -1,143 +1,164 @@
-// student-controls.js (vèsyon rafine)
-import { io } from "https://cdn.socket.io/4.7.2/socket.io.esm.min.js";
+/* student-controls.js
+   Student-side logic + WebRTC mesh signaling.
+   Connects to your backend on Render for signaling.
+*/
 
-const socket = io("https://examen-backend-ihlx.onrender.com");
+const BACKEND = "https://examen-backend-ihlx.onrender.com";
+const socket = io(BACKEND, { transports: ['websocket', 'polling'] });
 
-const joinBtn = document.getElementById("join-room");
-const usernameInput = document.getElementById("username");
-const roomCodeInput = document.getElementById("room-code");
-const roleSelect = document.getElementById("role");
-const studentVideos = document.getElementById("student-videos");
-const messages = document.getElementById("messages");
-const msgInput = document.getElementById("msg");
-const sendBtn = document.getElementById("send");
-const uploadDoc = document.getElementById("upload-doc");
-const studentControls = document.getElementById("student-controls");
+const joinBtn = document.getElementById('joinBtn');
+let localStream = null;
+let room = null;
+let myName = null;
+let myRole = null;
+let myId = null;
 
-joinBtn.addEventListener("click", async () => {
-  if (roleSelect.value !== "student") return;
+// WebRTC state
+const pcs = {};
+const remoteStreams = {};
 
-  const username = usernameInput.value.trim();
-  const room = roomCodeInput.value.trim();
-  if (!username || !room) return alert("Remplissez tous les champs");
+const RTC_CONFIG = {
+  iceServers: [
+    { urls: 'stun:stun.l.google.com:19302' }
+  ]
+};
 
-  socket.emit("setUser", { username, role: "student" });
-  socket.emit("join-room", room);
-
-  try {
-    const localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-
-    // === Video preview ===
-    const videoEl = document.createElement("video");
-    videoEl.autoplay = true;
-    videoEl.muted = false;
-    videoEl.srcObject = localStream;
-    videoEl.classList.add("student");
-    studentVideos.appendChild(videoEl);
-
-    // === Bouton Mute Micro ===
-    const muteMicBtn = document.createElement("button");
-    muteMicBtn.textContent = "Mute Micro";
-    studentControls.appendChild(muteMicBtn);
-    muteMicBtn.onclick = () => {
-      localStream.getAudioTracks().forEach(t => t.enabled = !t.enabled);
-      muteMicBtn.textContent = localStream.getAudioTracks()[0].enabled ? "Mute Micro" : "Unmute Micro";
-    };
-
-    // === Bouton Mute Caméra ===
-    const muteCamBtn = document.createElement("button");
-    muteCamBtn.textContent = "Mute Caméra";
-    studentControls.appendChild(muteCamBtn);
-    muteCamBtn.onclick = () => {
-      localStream.getVideoTracks().forEach(t => t.enabled = !t.enabled);
-      muteCamBtn.textContent = localStream.getVideoTracks()[0].enabled ? "Mute Caméra" : "Unmute Caméra";
-    };
-
-    // === Bouton Leve Men ===
-    const raiseHandBtn = document.createElement("button");
-    raiseHandBtn.textContent = "✋ Leve men";
-    studentControls.appendChild(raiseHandBtn);
-
-    let handUp = false;
-    raiseHandBtn.onclick = () => {
-      handUp = !handUp;
-      if (handUp) {
-        socket.emit("raise-hand", { user: username, room });
-        raiseHandBtn.textContent = "✋ Desann men";
-      } else {
-        socket.emit("lower-hand", { user: username, room });
-        raiseHandBtn.textContent = "✋ Leve men";
-      }
-    };
-
-    socket.on("raised-hand", (user) => {
-      console.log("Hand raised:", user);
-    });
-
-    socket.on("all-hands-lowered", () => {
-      handUp = false;
-      raiseHandBtn.textContent = "✋ Leve men";
-    });
-
-    // === Bouton Pataje Ekran ===
-    const shareScreenBtn = document.createElement("button");
-    shareScreenBtn.textContent = "Partager Écran";
-    studentControls.appendChild(shareScreenBtn);
-    shareScreenBtn.onclick = async () => {
-      try {
-        const screenStream = await navigator.mediaDevices.getDisplayMedia({ video: true });
-        const preview = document.createElement("video");
-        preview.srcObject = screenStream;
-        preview.autoplay = true;
-        preview.muted = true;
-        preview.style.border = "3px solid green";
-        preview.style.width = "70%";
-        studentVideos.appendChild(preview);
-
-        socket.emit("share-screen", { room, trackId: screenStream.id });
-
-        screenStream.getVideoTracks()[0].onended = () => {
-          preview.remove();
-          socket.emit("stop-share-screen", room);
-        };
-      } catch (err) {
-        alert("Erreur partage écran: " + err.message);
-      }
-    };
-
-    // === Upload Document ===
-    const uploadBtn = document.createElement("button");
-    uploadBtn.textContent = "Upload Document";
-    studentControls.appendChild(uploadBtn);
-    uploadBtn.onclick = () => uploadDoc.click();
-
-    uploadDoc.onchange = async () => {
-      const file = uploadDoc.files[0]; if (!file) return;
-      const form = new FormData(); form.append("document", file);
-      await fetch("https://examen-backend-ihlx.onrender.com/upload-doc", { method: "POST", body: form });
-      alert("Document uploaded!");
-    };
-
-    // === Chat ===
-    sendBtn.onclick = () => {
-      const text = msgInput.value.trim();
-      if (!text) return;
-      socket.emit("chat-message", { from: username, to: "all", message: text });
-      const li = document.createElement("li"); li.textContent = `Vous: ${text}`; messages.appendChild(li);
-      msgInput.value = "";
-    };
-
-    socket.on("chat-message", (data) => {
-      const li = document.createElement("li");
-      li.textContent = `${data.from}: ${data.message}`;
-      messages.appendChild(li);
-    });
-
-    // === Réception contrôles du prof ===
-    socket.on("mute-mic", () => localStream.getAudioTracks().forEach(t => t.enabled = false));
-    socket.on("stop-video", () => localStream.getVideoTracks().forEach(t => t.enabled = false));
-
-  } catch (err) {
-    alert("Erreur caméra/micro élève: " + err.message);
+async function startLocal(){
+  try{
+    localStream = await navigator.mediaDevices.getUserMedia({video:true,audio:true});
+    document.getElementById('localVideo').srcObject = localStream;
+  }catch(e){
+    console.warn('no media',e);
   }
+}
+
+joinBtn.addEventListener('click', async ()=>{
+  const role = document.getElementById('roleSelect').value;
+  const name = document.getElementById('displayName').value.trim();
+  const code = document.getElementById('classCode').value.trim();
+  if(!name||!code) return alert('Ranpli non ak kòd klas.');
+  room = code; myName = name; myRole = role;
+  await startLocal();
+  socket.emit('join-request',{room,name,role});
+  document.getElementById('status').textContent = 'Demann voye. Ap tann repons pwofese...';
+});
+
+socket.on('connect', ()=>{ myId = socket.id; console.log('student connected', myId); });
+
+socket.on('join-response', data=>{
+  if(data.accepted){
+    document.getElementById('status').textContent='Aksepte! Antre nan klas.';
+    socket.emit('joined',{room,name:myName,role:myRole});
+    document.getElementById('classroom').classList.remove('hidden');
+  } else {
+    document.getElementById('status').textContent='Rejete pa pwofese.';
+  }
+});
+
+// when server sends list of participants (ids), create peer connections to them (newcomer initiates)
+socket.on('participants', async ({ ids })=>{
+  for(const pid of ids){
+    if(pid === myId) continue;
+    await createPeerConnection(pid, true);
+  }
+});
+
+socket.on('webrtc-offer', async ({ from, description })=>{
+  await createPeerConnection(from, false);
+  const pc = pcs[from];
+  await pc.setRemoteDescription(new RTCSessionDescription(description));
+  const answer = await pc.createAnswer();
+  await pc.setLocalDescription(answer);
+  socket.emit('webrtc-answer',{ to: from, description: pc.localDescription });
+});
+
+socket.on('webrtc-answer', async ({ from, description })=>{
+  const pc = pcs[from];
+  if(!pc) return console.warn('no pc for answer from', from);
+  await pc.setRemoteDescription(new RTCSessionDescription(description));
+});
+
+socket.on('ice-candidate', async ({ from, candidate })=>{
+  const pc = pcs[from];
+  if(!pc) return;
+  try{
+    await pc.addIceCandidate(new RTCIceCandidate(candidate));
+  }catch(e){ console.warn('bad ice', e); }
+});
+
+async function createPeerConnection(peerId, isInitiator){
+  if(pcs[peerId]) return pcs[peerId];
+  const pc = new RTCPeerConnection(RTC_CONFIG);
+  pcs[peerId] = pc;
+  const remoteStream = new MediaStream();
+  remoteStreams[peerId] = remoteStream;
+
+  pc.onicecandidate = (e)=>{
+    if(e.candidate){
+      socket.emit('ice-candidate',{ to: peerId, candidate: e.candidate });
+    }
+  };
+
+  pc.ontrack = (e)=>{
+    remoteStream.addTrack(e.track);
+    attachRemoteStreamToUI(peerId, remoteStream);
+  };
+
+  if(localStream){
+    localStream.getTracks().forEach(track => pc.addTrack(track, localStream));
+  }
+
+  if(isInitiator){
+    const offer = await pc.createOffer();
+    await pc.setLocalDescription(offer);
+    socket.emit('webrtc-offer',{ to: peerId, description: pc.localDescription });
+  }
+
+  return pc;
+}
+
+function attachRemoteStreamToUI(peerId, stream){
+  let tile = document.getElementById('videosGrid')?.querySelector(`.participant[data-id="${peerId}"]`);
+  if(!tile){
+    const tpl = document.getElementById('participantTpl').content.cloneNode(true);
+    tile = tpl.querySelector('.participant');
+    tile.dataset.id = peerId;
+    tile.querySelector('.pname').textContent = peerId;
+    document.getElementById('videosGrid').appendChild(tile);
+  }
+  const vid = tile.querySelector('video');
+  if(vid.srcObject !== stream) vid.srcObject = stream;
+  updateParticipantsList(peerId);
+}
+
+function updateParticipantsList(peerId){
+  const participantsList = document.getElementById('participantsList');
+  if(!participantsList.querySelector(`[data-id="${peerId}"]`)){
+    const div = document.createElement('div'); div.className='participant-item'; div.dataset.id = peerId;
+    div.textContent = peerId;
+    participantsList.appendChild(div);
+  }
+  document.getElementById('presentCount').textContent = participantsList.querySelectorAll('.participant-item').length;
+}
+
+// chat
+const chatForm = document.getElementById('chatForm');
+chatForm?.addEventListener('submit', e=>{
+  e.preventDefault();
+  const text = document.getElementById('chatInput').value.trim(); if(!text) return;
+  socket.emit('chat-message',{room,text,fromName:myName});
+  document.getElementById('chatInput').value='';
+});
+
+socket.on('chat-message', m=>{
+  const el = document.createElement('div'); el.textContent = `${m.fromName || m.from}: ${m.text}`; document.getElementById('chatMessages').appendChild(el);
+});
+
+// teacher commands
+socket.on('teacher-mute-all', ()=>{ if(localStream) localStream.getAudioTracks().forEach(t=>t.enabled=false); });
+
+socket.on('blocked', ({ reason })=>{
+  alert('Ou bloke: ' + (reason || 'Motif pa disponib'));
+  // optional: disconnect socket or hide UI
+  socket.disconnect();
 });
