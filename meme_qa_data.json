@@ -1449,4 +1449,204 @@
     "tags": ["estudiante", "MEME", "voz"]
   },
 
-  
+  {
+    "question": "Kijan pwofesè ka sispann videyo tout elèv yo an menm tan?",
+    "answer": "Li klike sou bouton 'Stop All Video' nan kontwòl pwofesè a.",
+    "lang": "ht",
+    "tags": ["pwofesè", "videyo", "stop"]
+  },
+  {
+    "question": "Comment un professeur peut-il arrêter la vidéo de tous les élèves en même temps ?",
+    "answer": "Il clique sur le bouton 'Stop All Video' dans les contrôles du professeur.",
+    "lang": "fr",
+    "tags": ["professeur", "vidéo", "stop"]
+  },
+  {
+    "question": "How can a teacher stop all students’ video at once?",
+    "answer": "They click the 'Stop All Video' button in the teacher controls.",
+    "lang": "en",
+    "tags": ["teacher", "video", "stop"]
+  },
+  {
+    "question": "¿Cómo puede un profesor detener el video de todos los estudiantes a la vez?",
+    "answer": "Hace clic en el botón 'Stop All Video' en los controles del profesor.",
+    "lang": "es",
+    "tags": ["profesor", "video", "detener"]
+  },
+
+  {
+    "question": "Ki jan elèv ka itilize bouton 'Raise Hand'?",
+    "answer": "Yo klike sou bouton an pou fè pwofesè a konnen yo gen yon kesyon oswa demann.",
+    "lang": "ht",
+    "tags": ["elèv", "mande", "hand"]
+  },
+  {
+    "question": "Comment un élève peut-il utiliser le bouton 'Lever la main' ?",
+    "answer": "Ils cliquent sur le bouton pour informer le professeur qu’ils ont une question ou une demande.",
+    "lang": "fr",
+    "tags": ["élève", "demander", "main"]
+  },
+  {
+    "question": "How can a student use the 'Raise Hand' button?",
+    "answer": "They click the button to let the teacher know they have a question or request.",
+    "lang": "en",
+    "tags": ["student", "request", "hand"]
+  },
+  {
+    "question": "¿Cómo puede un estudiante usar el botón 'Levantar la mano'?",
+    "answer": "Hacen clic en el botón para informar al profesor que tienen una pregunta o solicitud.",
+    "lang": "es",
+    "tags": ["estudiante", "solicitar", "mano"]
+  },
+
+  {
+    "question": "Ki jan pwofesè ka pataje ekran li?",
+    "answer": "Li klike sou bouton 'Partager Écran' epi chwazi fenèt oswa aplikasyon pou pataje.",
+    "lang": "ht",
+    "tags": ["pwofesè", "pataje ekran", "screen"]
+  },
+  {
+    "question": "Comment un professeur peut-il partager son écran ?",
+    "answer": "Il clique sur le bouton 'Partager Écran' et choisit la fenêtre ou l’application à partager.",
+    "lang": "fr",
+    "tags": ["professeur", "partager écran", "screen"]
+  },
+  {
+    "question": "How can a teacher share their screen?",
+    "answer": "They click the 'Share Screen' button and choose the window or application to share.",
+    "lang": "en",
+    "tags": ["teacher", "screen share", "screen"]
+  },
+  {
+    "question": "¿Cómo puede un profesor compartir su pantalla?",
+    "answer": "Hace clic en el botón 'Compartir pantalla' y elige la ventana o aplicación a compartir.",
+    "lang": "es",
+    "tags": ["profesor", "compartir pantalla", "screen"]
+  },
+
+  {
+    "question": "Kijan yon elev ka telechaje dokiman nan Ecole-en-ligne?",
+    "answer": "Yo klike sou lyen oswa bouton 'Télécharger' epi dosye a telechaje sou aparèy yo.",
+    "lang": "ht",
+    "tags": ["elèv", "telechaje", "dokiman"]
+  },
+  {
+    "question": "Comment un élève peut-il télécharger un document sur Ecole-en-ligne ?",
+    "answer": "Ils cliquent sur le lien ou le bouton 'Télécharger' et le fichier est téléchargé sur leur appareil.",
+    "lang": "fr",
+    "tags": ["élève", "télécharger", "document"]
+  },
+  {
+    "question": "How can a student download a document on Ecole-en-ligne?",
+    "answer": "They click the link or 'Download' button, and the file is downloaded to their device.",
+    "lang": "en",
+    "tags": ["student", "download", "document"]
+  },
+  {
+    "question": "¿Cómo puede un estudiante descargar un documento en Ecole-en-ligne?",
+    "answer": "Hacen clic en el enlace o botón 'Descargar' y el archivo se descarga en su dispositivo.",
+    "lang": "es",
+    "tags": ["estudiante", "descargar", "documento"]
+  },
+
+  {
+    "question": "Ki jan pwofesè ka voye mesaj prive bay yon elèv?",
+    "answer": "Li chwazi non elèv la nan lis itilizatè a epi voye mesaj la nan chat prive.",
+    "lang": "ht",
+    "tags": ["pwofesè", "chat prive", "mesaj"]
+  },
+  {
+    "question": "Comment un professeur peut-il envoyer un message privé à un élève ?",
+    "answer": "Il sélectionne le nom de l’élève dans la liste des utilisateurs et envoie le message dans le chat privé.",
+    "lang": "fr",
+    "tags": ["professeur", "chat privé", "message"]
+  },
+  {
+    "question": "How can a teacher send a private message to a student?",
+    "answer": "They select the student’s name from the user list and send the message in private chat.",
+    "lang": "en",
+    "tags": ["teacher", "private chat", "message"]
+  },
+  {
+    "question": "¿Cómo puede un profesor enviar un mensaje privado a un estudiante?",
+    "answer": "Selecciona el nombre del estudiante de la lista de usuarios y envía el mensaje en el chat privado.",
+    "lang": "es",
+    "tags": ["profesor", "chat privado", "mensaje"]
+  },
+
+  {
+    "question": "Kijan MEME Inspecteur ka entèveni lè yon moun pa konprann platfòm nan?",
+    "answer": "Li itilize vwa klè epi montre kote pou klike sou ekran yo pou rezoud difikilte a.",
+    "lang": "ht",
+    "tags": ["MEME", "gid", "enteraksyon"]
+  },
+  {
+    "question": "Comment MEME Inspecteur peut-il intervenir lorsqu’une personne ne comprend pas la plateforme ?",
+    "answer": "Il utilise une voix claire et montre où cliquer sur leur écran pour résoudre la difficulté.",
+    "lang": "fr",
+    "tags": ["MEME", "guide", "interaction"]
+  },
+  {
+    "question": "How can MEME Inspecteur intervene when someone doesn’t understand the platform?",
+    "answer": "It uses a clear voice and points to where to click on their screen to resolve the difficulty.",
+    "lang": "en",
+    "tags": ["MEME", "guide", "interaction"]
+  },
+  {
+    "question": "¿Cómo puede MEME Inspecteur intervenir cuando alguien no entiende la plataforma?",
+    "answer": "Usa una voz clara y señala dónde hacer clic en su pantalla para resolver la dificultad.",
+    "lang": "es",
+    "tags": ["MEME", "guía", "interacción"]
+  },
+
+  {
+    "question": "Ki jan pwofesè ka wè istwa mesaj nan chat la?",
+    "answer": "Tout mesaj yo parèt nan fenèt chat la epi ka woule anlè pou wè istwa anvan yo.",
+    "lang": "ht",
+    "tags": ["pwofesè", "chat", "istwa"]
+  },
+  {
+    "question": "Comment un professeur peut-il voir l’historique des messages dans le chat ?",
+    "answer": "Tous les messages apparaissent dans la fenêtre de chat et on peut défiler vers le haut pour voir l’historique.",
+    "lang": "fr",
+    "tags": ["professeur", "chat", "historique"]
+  },
+  {
+    "question": "How can a teacher view chat message history?",
+    "answer": "All messages appear in the chat window and you can scroll up to see previous history.",
+    "lang": "en",
+    "tags": ["teacher", "chat", "history"]
+  },
+  {
+    "question": "¿Cómo puede un profesor ver el historial de mensajes en el chat?",
+    "answer": "Todos los mensajes aparecen en la ventana de chat y se puede desplazar hacia arriba para ver el historial.",
+    "lang": "es",
+    "tags": ["profesor", "chat", "historial"]
+  },
+
+  {
+    "question": "Ki jan yon pwofesè ka retire yon elèv nan klas la?",
+    "answer": "Li ka fè li sòti nan klas la atravè opsyon 'Kick' oswa 'Remove' nan entèfas pwofesè a.",
+    "lang": "ht",
+    "tags": ["pwofesè", "elèv", "remove"]
+  },
+  {
+    "question": "Comment un professeur peut-il retirer un élève de la classe ?",
+    "answer": "Il peut le faire sortir de la classe via l’option 'Kick' ou 'Remove' dans l’interface du professeur.",
+    "lang": "fr",
+    "tags": ["professeur", "élève", "remove"]
+  },
+  {
+    "question": "How can a teacher remove a student from the class?",
+    "answer": "They can kick them out of the class using the 'Kick' or 'Remove' option in the teacher interface.",
+    "lang": "en",
+    "tags": ["teacher", "student", "remove"]
+  },
+  {
+    "question": "¿Cómo puede un profesor sacar a un estudiante de la clase?",
+    "answer": "Puede expulsarlo de la clase usando la opción 'Kick' o 'Remove' en la interfaz del profesor.",
+    "lang": "es",
+    "tags": ["profesor", "estudiante", "remove"]
+  }
+]
+
