@@ -1,132 +1,143 @@
-// student-controls.js
-(async () => {
-  const joinBtn = document.getElementById('join-room');
-  const usernameInput = document.getElementById('username');
-  const roomCodeInput = document.getElementById('room-code');
-  const roleSelect = document.getElementById('role');
-  const studentVideos = document.getElementById('student-videos');
-  const uploadDoc = document.getElementById('upload-doc');
+// student-controls.js (vèsyon rafine)
+import { io } from "https://cdn.socket.io/4.7.2/socket.io.esm.min.js";
 
-  joinBtn.addEventListener('click', async () => {
-    if (roleSelect.value !== 'student') return;
+const socket = io("https://examen-backend-ihlx.onrender.com");
 
-    const username = usernameInput.value.trim();
-    const room = roomCodeInput.value.trim();
-    if (!username || !room) return alert('Remplissez tous les champs');
+const joinBtn = document.getElementById("join-room");
+const usernameInput = document.getElementById("username");
+const roomCodeInput = document.getElementById("room-code");
+const roleSelect = document.getElementById("role");
+const studentVideos = document.getElementById("student-videos");
+const messages = document.getElementById("messages");
+const msgInput = document.getElementById("msg");
+const sendBtn = document.getElementById("send");
+const uploadDoc = document.getElementById("upload-doc");
+const studentControls = document.getElementById("student-controls");
 
-    const socket = io("https://examen-backend-ihlx.onrender.com");
-    socket.emit('setUser', { username, role: 'student' });
-    socket.emit('join-room', room);
+joinBtn.addEventListener("click", async () => {
+  if (roleSelect.value !== "student") return;
 
-    try {
-      // Kreye preview videyo elev la (lokal sèlman pou elev la)
-      const previewVideo = document.createElement('video');
-      previewVideo.autoplay = true;
-      previewVideo.muted = true; // preview pa dwe emèt odyo nan navigatè elev
-      previewVideo.style.width = '250px';
-      previewVideo.style.height = '180px';
-      previewVideo.style.objectFit = 'cover';
-      previewVideo.style.border = '3px solid #0d6efd';
-      previewVideo.style.borderRadius = '10px';
-      previewVideo.style.margin = '5px';
-      studentVideos.appendChild(previewVideo);
+  const username = usernameInput.value.trim();
+  const room = roomCodeInput.value.trim();
+  if (!username || !room) return alert("Remplissez tous les champs");
 
-      // Kontwòl elev yo
-      const controlsContainer = document.createElement('div');
-      controlsContainer.style.display = 'flex';
-      controlsContainer.style.flexWrap = 'wrap';
-      controlsContainer.style.justifyContent = 'center';
-      controlsContainer.style.margin = '10px';
-      document.getElementById('room-controls').appendChild(controlsContainer);
+  socket.emit("setUser", { username, role: "student" });
+  socket.emit("join-room", room);
 
-      const makeBtn = (text, action) => {
-        const btn = document.createElement('button');
-        btn.textContent = text;
-        btn.style.margin = '6px';
-        btn.style.padding = '10px 14px';
-        btn.style.borderRadius = '8px';
-        btn.style.cursor = 'pointer';
-        btn.style.background = '#ffd700';
-        btn.style.color = '#0d6efd';
-        btn.onclick = action;
-        controlsContainer.appendChild(btn);
-        return btn;
-      };
+  try {
+    const localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
 
-      // Bouton Mute/Unmute mikwo
-      const muteMicBtn = makeBtn('Mute Micro', () => socket.emit('toggle-mic', { room, username }));
+    // === Video preview ===
+    const videoEl = document.createElement("video");
+    videoEl.autoplay = true;
+    videoEl.muted = false;
+    videoEl.srcObject = localStream;
+    videoEl.classList.add("student");
+    studentVideos.appendChild(videoEl);
 
-      // Bouton Mute/Unmute kamera
-      const muteCamBtn = makeBtn('Mute Caméra', () => socket.emit('toggle-cam', { room, username }));
+    // === Bouton Mute Micro ===
+    const muteMicBtn = document.createElement("button");
+    muteMicBtn.textContent = "Mute Micro";
+    studentControls.appendChild(muteMicBtn);
+    muteMicBtn.onclick = () => {
+      localStream.getAudioTracks().forEach(t => t.enabled = !t.enabled);
+      muteMicBtn.textContent = localStream.getAudioTracks()[0].enabled ? "Mute Micro" : "Unmute Micro";
+    };
 
-      // Bouton leve/desann men
-      const handBtn = makeBtn('Lever Main', () => socket.emit('toggle-hand', { room, username }));
+    // === Bouton Mute Caméra ===
+    const muteCamBtn = document.createElement("button");
+    muteCamBtn.textContent = "Mute Caméra";
+    studentControls.appendChild(muteCamBtn);
+    muteCamBtn.onclick = () => {
+      localStream.getVideoTracks().forEach(t => t.enabled = !t.enabled);
+      muteCamBtn.textContent = localStream.getVideoTracks()[0].enabled ? "Mute Caméra" : "Unmute Caméra";
+    };
 
-      // Upload dokiman
-      if (uploadDoc) {
-        const uploadBtn = makeBtn('Upload Document', () => uploadDoc.click());
-        uploadDoc.addEventListener('change', async () => {
-          const file = uploadDoc.files[0];
-          if (!file) return;
-          const form = new FormData();
-          form.append('document', file);
-          await fetch('https://examen-backend-ihlx.onrender.com/upload-doc', { method: 'POST', body: form });
-          socket.emit('document-uploaded', { room, username, filename: file.name });
-          alert('📄 Document uploaded');
-        });
+    // === Bouton Leve Men ===
+    const raiseHandBtn = document.createElement("button");
+    raiseHandBtn.textContent = "✋ Leve men";
+    studentControls.appendChild(raiseHandBtn);
+
+    let handUp = false;
+    raiseHandBtn.onclick = () => {
+      handUp = !handUp;
+      if (handUp) {
+        socket.emit("raise-hand", { user: username, room });
+        raiseHandBtn.textContent = "✋ Desann men";
+      } else {
+        socket.emit("lower-hand", { user: username, room });
+        raiseHandBtn.textContent = "✋ Leve men";
       }
+    };
 
-      // Pataje ekran
-      const shareScreenBtn = makeBtn('Partager Écran', async () => {
-        try {
-          const screenStream = await navigator.mediaDevices.getDisplayMedia({ video: true });
-          socket.emit('student-screen', { room, username });
-          screenStream.getTracks().forEach(track => {
-            // Emèt tout track dirèkteman sou backend
-            socket.emit('student-stream', { trackId: track.id, kind: track.kind });
-          });
-        } catch (err) {
-          alert('Erreur partage écran: ' + err.message);
-        }
-      });
+    socket.on("raised-hand", (user) => {
+      console.log("Hand raised:", user);
+    });
 
-      // Chat
-      const msgInput = document.getElementById('msg');
-      const sendBtn = document.getElementById('send');
-      const messages = document.getElementById('messages');
+    socket.on("all-hands-lowered", () => {
+      handUp = false;
+      raiseHandBtn.textContent = "✋ Leve men";
+    });
 
-      sendBtn.onclick = () => {
-        const text = msgInput.value.trim();
-        if (!text) return;
-        socket.emit('chat-message', { room, from: username, message: text });
-        const li = document.createElement('li');
-        li.textContent = 'Vous: ' + text;
-        messages.appendChild(li);
-        msgInput.value = '';
-      };
+    // === Bouton Pataje Ekran ===
+    const shareScreenBtn = document.createElement("button");
+    shareScreenBtn.textContent = "Partager Écran";
+    studentControls.appendChild(shareScreenBtn);
+    shareScreenBtn.onclick = async () => {
+      try {
+        const screenStream = await navigator.mediaDevices.getDisplayMedia({ video: true });
+        const preview = document.createElement("video");
+        preview.srcObject = screenStream;
+        preview.autoplay = true;
+        preview.muted = true;
+        preview.style.border = "3px solid green";
+        preview.style.width = "70%";
+        studentVideos.appendChild(preview);
 
-      socket.on('chat-message', data => {
-        const li = document.createElement('li');
-        li.textContent = data.from + ': ' + data.message;
-        messages.appendChild(li);
-      });
+        socket.emit("share-screen", { room, trackId: screenStream.id });
 
-      // Resevwa stream lòt elev (WebRTC si backend sipòte)
-      socket.on('remote-student-stream', data => {
-        const remoteVideo = document.createElement('video');
-        remoteVideo.autoplay = true;
-        remoteVideo.srcObject = data.stream; // stream soti backend
-        remoteVideo.style.width = '250px';
-        remoteVideo.style.height = '180px';
-        remoteVideo.style.objectFit = 'cover';
-        remoteVideo.style.border = '3px solid #28a745';
-        remoteVideo.style.borderRadius = '10px';
-        remoteVideo.style.margin = '5px';
-        studentVideos.appendChild(remoteVideo);
-      });
+        screenStream.getVideoTracks()[0].onended = () => {
+          preview.remove();
+          socket.emit("stop-share-screen", room);
+        };
+      } catch (err) {
+        alert("Erreur partage écran: " + err.message);
+      }
+    };
 
-    } catch (err) {
-      alert('Erreur initialisation elev: ' + err.message);
-    }
-  });
-})();
+    // === Upload Document ===
+    const uploadBtn = document.createElement("button");
+    uploadBtn.textContent = "Upload Document";
+    studentControls.appendChild(uploadBtn);
+    uploadBtn.onclick = () => uploadDoc.click();
+
+    uploadDoc.onchange = async () => {
+      const file = uploadDoc.files[0]; if (!file) return;
+      const form = new FormData(); form.append("document", file);
+      await fetch("https://examen-backend-ihlx.onrender.com/upload-doc", { method: "POST", body: form });
+      alert("Document uploaded!");
+    };
+
+    // === Chat ===
+    sendBtn.onclick = () => {
+      const text = msgInput.value.trim();
+      if (!text) return;
+      socket.emit("chat-message", { from: username, to: "all", message: text });
+      const li = document.createElement("li"); li.textContent = `Vous: ${text}`; messages.appendChild(li);
+      msgInput.value = "";
+    };
+
+    socket.on("chat-message", (data) => {
+      const li = document.createElement("li");
+      li.textContent = `${data.from}: ${data.message}`;
+      messages.appendChild(li);
+    });
+
+    // === Réception contrôles du prof ===
+    socket.on("mute-mic", () => localStream.getAudioTracks().forEach(t => t.enabled = false));
+    socket.on("stop-video", () => localStream.getVideoTracks().forEach(t => t.enabled = false));
+
+  } catch (err) {
+    alert("Erreur caméra/micro élève: " + err.message);
+  }
+});
