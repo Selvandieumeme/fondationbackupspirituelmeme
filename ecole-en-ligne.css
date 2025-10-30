@@ -1,6 +1,7 @@
 /* ========================================
    Palette: bleu, jaune, blan
    Style: High-tech, vibrant, moderne, attractif
+   Netwaye: retire participants & classe
 ======================================== */
 
 /* Root variables */
@@ -146,57 +147,21 @@ body{
   box-shadow:0 18px 60px rgba(0,0,0,0.2);
 }
 
-/* Classroom grid layout */
+/* Classroom grid layout - plis klasik san participants/klasse */
 .classroom-grid{
   margin-top:32px;
   display:grid;
-  grid-template-columns: 320px 1fr 300px;
+  grid-template-columns:1fr;
   gap:var(--gap);
   padding:0 20px;
   align-items:start;
 }
 
-/* Columns */
-.left-col, .right-col{
-  padding:10px;
-  max-height:80vh;
-  overflow-y:auto;
-}
+/* Main col sèlman */
 .main-col{
   display:flex;
   flex-direction:column;
   gap:var(--gap);
-}
-
-/* Participants area */
-.participants{
-  display:flex;
-  flex-direction:column;
-  gap:14px;
-}
-.participants h3{
-  font-size:1.45rem;
-  font-weight:700;
-  color:var(--bleu-2);
-}
-.participant-list{
-  display:flex;
-  flex-wrap:wrap;
-  gap:14px;
-}
-.participant{
-  background:linear-gradient(135deg, var(--jaune), var(--bleu-2), var(--blan));
-  color:#0b1220;
-  font-weight:600;
-  padding:12px 18px;
-  border-radius:16px;
-  box-shadow:0 10px 28px rgba(11,18,32,0.18);
-  font-size:1.05rem;
-  transition:transform var(--transition);
-}
-.participant:hover{
-  transform:scale(var(--hover-scale));
-  box-shadow:0 16px 40px rgba(11,18,32,0.28);
 }
 
 /* Card styling */
@@ -262,20 +227,11 @@ button:hover, .primary:hover, .secondary:hover{
 }
 
 /* Responsive tweaks */
-@media (max-width:1600px){
-  .presenter-area{min-height:600px;}
-  .presenter-video video{max-width:1100px;}
-}
-@media (max-width:1440px){
-  .presenter-area{min-height:550px;padding:35px;}
-  .presenter-video video{max-width:1050px;}
-}
 @media (max-width:1200px){
   .presenter-area{min-height:500px;padding:30px;}
   .presenter-video video{max-width:1000px;}
 }
 @media (max-width:1000px){
-  .classroom-grid{grid-template-columns:1fr;}
   .chat-area .message-input-container{
     flex-direction:column;
   }
@@ -288,6 +244,5 @@ button:hover, .primary:hover, .secondary:hover{
   .presenter-area .header-title{font-size:2.5rem;}
   .presenter-area .header-subtitle{font-size:1.2rem;}
   .presenter-video video{max-width:100%;height:auto;}
-  .participant{font-size:1rem;padding:10px 14px;}
   button, .primary, .secondary{font-size:1rem;padding:8px 18px;}
 }
