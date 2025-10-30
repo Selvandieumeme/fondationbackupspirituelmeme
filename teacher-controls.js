@@ -129,4 +129,4 @@
   socket.on('student-blocked', ({ student }) => {
     alert(`${student} bloqué(e) par l'enseignant.`);
   });
-
+})();
