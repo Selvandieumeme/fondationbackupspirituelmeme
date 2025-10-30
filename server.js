@@ -921,13 +921,21 @@ app.post('/upload', upload.single('file'), async (req, res) => {
 });
 
 if (!process.env.DATABASE_URL) {
-  console.warn('DATABASE_URL not set. Connect to MongoDB via Render environment variables.');
+  console.error('DATABASE_URL not set! Render environment variable required.');
+  process.exit(1); // sispann server si env pa defini
 }
-mongoose.connect(process.env.DATABASE_URL || 'mongodb://localhost:27017/fo_bas', {
+
+mongoose.connect(process.env.DATABASE_URL, {
   useNewUrlParser: true,
   useUnifiedTopology: true
-}).then(()=>console.log('mongo ok')).catch(err=>console.warn('mongo err', err));
+})
+.then(() => console.log('MongoDB connected via Render'))
+.catch(err => {
+  console.error('MongoDB connection error:', err);
+  process.exit(1);
+});
 
+	  
 const ClassroomSchema = new mongoose.Schema({
   code: { type: String, index: true },
   title: String,
