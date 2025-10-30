@@ -900,21 +900,8 @@ app.get("/api/premium/status/:id", async (req, res) => {
 
 
 
-// ------------------
-// IMPORTS
-// ------------------
-import express from "express";
-import http from "http";
-import { Server } from "socket.io";
-import mongoose from "mongoose";
-import cors from "cors";
-import multer from "multer";
-import path from "path";
-import { fileURLToPath } from "url";
-import dotenv from "dotenv";
-
-dotenv.config();
-
+/ server.js (ESM)
+// Korije & konplè pou Ecole-en-ligne
 // ------------------
 // CONFIG
 // ------------------
@@ -925,20 +912,31 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Servi fichye statik yo dirèk nan rasin pwojè a
-// (Pa bezwen folder “public” ankò)
+// Serve static files directly from project root (no "public" folder)
 app.use(express.static(__dirname));
+
+// Ensure uploads folder exists (root of repo)
+const UPLOADS_DIR = path.join(__dirname, "uploads");
+if (!fs.existsSync(UPLOADS_DIR)) fs.mkdirSync(UPLOADS_DIR, { recursive: true });
 
 // ------------------
 // MONGODB
 // ------------------
+const MONGO_URI = process.env.MONGO_URI;
+if (!MONGO_URI) {
+  console.error("❌ Missing MONGO_URI in .env");
+  process.exit(1);
+}
 mongoose
-  .connect(process.env.MONGO_URI, {
+  .connect(MONGO_URI, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
   })
   .then(() => console.log("✅ MongoDB Connected"))
-  .catch((err) => console.error("❌ MongoDB Error:", err));
+  .catch((err) => {
+    console.error("❌ MongoDB Error:", err);
+    process.exit(1);
+  });
 
 // ------------------
 // SCHEMAS
@@ -958,16 +956,32 @@ const userSchema = new mongoose.Schema({
 });
 const User = mongoose.model("User", userSchema);
 
+// Optional: room/student persistence (lightweight)
+const studentSchema = new mongoose.Schema({
+  username: String,
+  room: String,
+  joinedAt: { type: Date, default: Date.now },
+});
+const Student = mongoose.model("Student", studentSchema);
+
 // ------------------
-// SOCKET.IO
+// SERVER & SOCKET.IO
 // ------------------
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: { origin: "*", methods: ["GET", "POST"] },
 });
 
+const PORT = process.env.PORT || 3000;
+const MAX_STUDENTS = 100;
+
+// onlineUsers map: key = userId (lowercase username), value = { user: displayName, role, sockets: Set(socketId) }
 const onlineUsers = new Map();
 
+// rooms structure: roomCode -> { teacherSocketId: string|null, students: [{ username, socketId }] }
+const rooms = Object.create(null);
+
+// Helper: broadcast list of online users
 function broadcastOnline() {
   const arr = [];
   for (const [id, info] of onlineUsers.entries()) {
@@ -981,9 +995,7 @@ function broadcastOnline() {
   io.emit("online-users", arr);
 }
 
-// ------------------
-// MEME AI Inspector (logger / surveillance layer)
-// ------------------
+// Lightweight inspector logger (kept from orijinal la)
 function MEME_inspect(msg) {
   console.log("[MEME AI Inspector]", msg);
 }
@@ -994,60 +1006,251 @@ function MEME_inspect(msg) {
 io.on("connection", (socket) => {
   console.log("👤 User connected:", socket.id);
 
+  // setUser: called by client after open
   socket.on("setUser", ({ username, role }) => {
+    if (!username) return;
     const userId = username.trim().toLowerCase();
-    if (!onlineUsers.has(userId))
+    if (!onlineUsers.has(userId)) {
       onlineUsers.set(userId, { user: username, sockets: new Set(), role });
+    }
     const record = onlineUsers.get(userId);
     record.sockets.add(socket.id);
     socket.data.userId = userId;
-    socket.data.role = role;
+    socket.data.role = role || "student";
+    socket.data.username = username;
+    // send current online list to all
     broadcastOnline();
   });
 
-  // Chat prive Teacher ↔ Étudiant
+  // join-room: teacher uses this to join as teacher and claim room
+  socket.on("join-room", (data) => {
+    // Accept both forms: join-room(room) or join-room({ room, role, username })
+    let roomCode = null;
+    let role = socket.data.role || "student";
+    let username = socket.data.username || null;
+    if (typeof data === "string") roomCode = data;
+    else if (data && typeof data === "object") {
+      roomCode = data.room;
+      role = data.role || role;
+      username = data.username || username;
+    }
+    if (!roomCode) return;
+
+    if (!rooms[roomCode]) rooms[roomCode] = { teacherSocketId: null, students: [] };
+
+    if (role === "teacher") {
+      rooms[roomCode].teacherSocketId = socket.id;
+      socket.join(roomCode);
+      console.log(`🧑‍🏫 Teacher "${username || socket.id}" joined room ${roomCode}`);
+      // Optionally inform teacher of current student count
+      io.to(socket.id).emit("room-info", {
+        room: roomCode,
+        teacher: username || socket.id,
+        students: rooms[roomCode].students.length,
+      });
+    } else {
+      // student fallback: join directly (but in our flow students should request-join first)
+      socket.join(roomCode);
+      rooms[roomCode].students.push({ username: username || socket.id, socketId: socket.id });
+      console.log(`👩‍🎓 Student "${username || socket.id}" joined room ${roomCode}`);
+      // notify teacher if present
+      if (rooms[roomCode].teacherSocketId) {
+        io.to(rooms[roomCode].teacherSocketId).emit("student-joined", { username: username || socket.id });
+      }
+    }
+  });
+
+  // request-join: student requests to enter a room — teacher will receive 'student-pending'
+  socket.on("request-join", ({ room, username }) => {
+    if (!room || !username) return;
+    if (!rooms[room]) rooms[room] = { teacherSocketId: null, students: [] };
+
+    // If teacher isn't present, auto-reject (or queue)
+    const teacherId = rooms[room].teacherSocketId;
+    if (!teacherId) {
+      socket.emit("rejected", { reason: "No teacher present" });
+      return;
+    }
+
+    // Notify teacher with pending request
+    io.to(teacherId).emit("student-pending", { username });
+    MEME_inspect({ event: "request-join", room, username });
+  });
+
+  // teacher-accept: teacher accepts a pending student
+  socket.on("teacher-accept", async ({ room, username }) => {
+    if (!room || !username) return;
+    const teacherCheck = rooms[room] && rooms[room].teacherSocketId === socket.id;
+    if (!teacherCheck) return;
+
+    // find student socket by username
+    const candidate = Array.from(io.sockets.sockets.values()).find(
+      (s) => s.data && s.data.username && s.data.username.toLowerCase() === username.toLowerCase()
+    );
+    if (!candidate) {
+      // Could send back to teacher: student not connected
+      io.to(socket.id).emit("teacher-action-result", { success: false, message: "Student not connected" });
+      return;
+    }
+
+    // enforce MAX_STUDENTS
+    if (rooms[room].students.length >= MAX_STUDENTS) {
+      // inform teacher and reject student
+      io.to(socket.id).emit("teacher-action-result", { success: false, message: "Room is full" });
+      candidate.emit("rejected", { reason: "Room full" });
+      return;
+    }
+
+    // add student to room
+    candidate.join(room);
+    rooms[room].students.push({ username, socketId: candidate.id });
+
+    // send accepted to student
+    candidate.emit("accepted", { room });
+    // notify teacher & room participants
+    io.to(socket.id).emit("teacher-action-result", { success: true, message: `Accepted ${username}` });
+    io.to(room).emit("student-joined", { username });
+    MEME_inspect({ event: "teacher-accept", room, username });
+    // optionally store student in DB
+    try {
+      await Student.create({ username, room });
+    } catch (err) {
+      console.warn("Student save warning:", err.message);
+    }
+  });
+
+  // teacher-reject: teacher rejects a pending student
+  socket.on("teacher-reject", ({ room, username }) => {
+    if (!room || !username) return;
+    const teacherCheck = rooms[room] && rooms[room].teacherSocketId === socket.id;
+    if (!teacherCheck) return;
+
+    const candidate = Array.from(io.sockets.sockets.values()).find(
+      (s) => s.data && s.data.username && s.data.username.toLowerCase() === username.toLowerCase()
+    );
+    if (candidate) {
+      candidate.emit("teacher-block-student", { room, reason: "Rejected by teacher" });
+    }
+    io.to(socket.id).emit("teacher-action-result", { success: true, message: `Rejected ${username}` });
+    MEME_inspect({ event: "teacher-reject", room, username });
+  });
+
+  // teacher-mute-all
+  socket.on("teacher-mute-all", ({ room }) => {
+    if (!room || !rooms[room]) return;
+    // ensure only teacher can call
+    if (rooms[room].teacherSocketId !== socket.id) return;
+    rooms[room].students.forEach((s) => io.to(s.socketId).emit("teacher-mute-all"));
+    MEME_inspect({ event: "teacher-mute-all", room });
+  });
+
+  // teacher-stop-all-video
+  socket.on("teacher-stop-all-video", ({ room }) => {
+    if (!room || !rooms[room]) return;
+    if (rooms[room].teacherSocketId !== socket.id) return;
+    rooms[room].students.forEach((s) => io.to(s.socketId).emit("teacher-stop-all-video"));
+    MEME_inspect({ event: "teacher-stop-all-video", room });
+  });
+
+  // teacher-block-student: remove student from room and notify them
+  socket.on("teacher-block-student", ({ room, username }) => {
+    if (!room || !username || !rooms[room]) return;
+    if (rooms[room].teacherSocketId !== socket.id) return;
+
+    const idx = rooms[room].students.findIndex((s) => s.username.toLowerCase() === username.toLowerCase());
+    if (idx !== -1) {
+      const student = rooms[room].students[idx];
+      io.to(student.socketId).emit("teacher-block-student", { room, reason: "Blocked by teacher" });
+      // remove from room data
+      rooms[room].students.splice(idx, 1);
+      try {
+        const sock = io.sockets.sockets.get(student.socketId);
+        if (sock) sock.leave(room);
+      } catch (e) { /* ignore */ }
+      io.to(socket.id).emit("teacher-action-result", { success: true, message: `Blocked ${username}` });
+      MEME_inspect({ event: "teacher-block-student", room, username });
+    } else {
+      io.to(socket.id).emit("teacher-action-result", { success: false, message: "Student not found in room" });
+    }
+  });
+
+  // teacher-lower-hand
+  socket.on("teacher-lower-hand", ({ username }) => {
+    if (!username) return;
+    const candidate = Array.from(io.sockets.sockets.values()).find(
+      (s) => s.data && s.data.username && s.data.username.toLowerCase() === username.toLowerCase()
+    );
+    if (candidate) candidate.emit("teacher-lower-hand", { username });
+    MEME_inspect({ event: "teacher-lower-hand", username });
+  });
+
+  // Chat -> persist and broadcast to room
+  socket.on("chat-message", async (data) => {
+    // data expected: { room, from, message }
+    if (!data || !data.room || !data.from || !data.message) return;
+    try {
+      const msg = new Message({ from: data.from, to: data.room, message: data.message, read: true });
+      await msg.save();
+    } catch (err) {
+      console.warn("Chat save warning:", err.message);
+    }
+    io.to(data.room).emit("chat-message", { from: data.from, message: data.message, date: new Date() });
+  });
+
+  // teacher-share-screen / teacher-stop-screen
+  socket.on("teacher-share-screen", ({ room }) => {
+    if (!room || !rooms[room]) return;
+    if (rooms[room].teacherSocketId !== socket.id) return;
+    socket.to(room).emit("screen-shared", { id: socket.id });
+    MEME_inspect({ event: "teacher-share-screen", room });
+  });
+  socket.on("teacher-stop-screen", ({ room }) => {
+    if (!room || !rooms[room]) return;
+    if (rooms[room].teacherSocketId !== socket.id) return;
+    socket.to(room).emit("screen-stopped", { id: socket.id });
+    MEME_inspect({ event: "teacher-stop-screen", room });
+  });
+
+  // private-message (teacher <-> student)
   socket.on("private-message", ({ from, to, message }) => {
     if (!from || !to || !message) return;
     const payload = { from, to, message, date: new Date() };
     MEME_inspect(payload);
-
     const target = onlineUsers.get(to.toLowerCase());
-    if (target)
-      target.sockets.forEach((sid) =>
-        io.to(sid).emit("private-message", payload)
-      );
-
+    if (target) {
+      for (const sid of target.sockets) {
+        io.to(sid).emit("private-message", payload);
+      }
+    }
     const sender = onlineUsers.get(from.toLowerCase());
-    if (sender)
-      sender.sockets.forEach((sid) =>
-        io.to(sid).emit("private-message", payload)
-      );
+    if (sender) {
+      for (const sid of sender.sockets) {
+        io.to(sid).emit("private-message", payload);
+      }
+    }
   });
 
-  // Chat piblik / mesaj sove nan MongoDB
-  socket.on("chat-message", async ({ from, to, message }) => {
-    if (!from || !to || !message) return;
-    const msg = new Message({ from, to, message, read: true });
-    await msg.save();
-    io.to(socket.id).emit("chat-message", {
-      from,
-      message,
-      date: msg.date,
-    });
+  // join/leave room simple handlers (client might call)
+  socket.on("leave-room", (room) => {
+    if (!room) return;
+    try {
+      socket.leave(room);
+      // remove from rooms structure if present
+      if (rooms[room]) {
+        rooms[room].students = rooms[room].students.filter((s) => s.socketId !== socket.id);
+        // if was teacher, remove teacher
+        if (rooms[room].teacherSocketId === socket.id) {
+          // notify students teacher left
+          rooms[room].students.forEach((s) => io.to(s.socketId).emit("teacher-block-student", { room, reason: "Teacher left" }));
+          delete rooms[room];
+        }
+      }
+    } catch (e) { /* ignore */ }
   });
 
-  // Kontwòl pwofesè
-  socket.on("mute-all", (room) => io.to(room).emit("mute-mic"));
-  socket.on("stop-all-video", (room) => io.to(room).emit("stop-video"));
-  socket.on("raise-hand", ({ user, room }) =>
-    io.to(room).emit("raised-hand", user)
-  );
-
-  // Jesyon sal yo
-  socket.on("join-room", (room) => socket.join(room));
-  socket.on("leave-room", (room) => socket.leave(room));
-
+  // handle disconnect: cleanup onlineUsers and rooms
   socket.on("disconnect", () => {
+    console.log("🔌 User disconnected:", socket.id);
     const userId = socket.data.userId;
     if (userId && onlineUsers.has(userId)) {
       const record = onlineUsers.get(userId);
@@ -1055,31 +1258,67 @@ io.on("connection", (socket) => {
       if (record.sockets.size === 0) onlineUsers.delete(userId);
       broadcastOnline();
     }
+
+    // Remove from rooms students if present
+    for (const [roomCode, meta] of Object.entries(rooms)) {
+      if (meta.teacherSocketId === socket.id) {
+        // teacher disconnected -> notify students and remove room
+        meta.students.forEach((s) => io.to(s.socketId).emit("teacher-block-student", { room: roomCode, reason: "Teacher disconnected" }));
+        delete rooms[roomCode];
+      } else {
+        const before = meta.students.length;
+        meta.students = meta.students.filter((s) => s.socketId !== socket.id);
+        if (meta.students.length !== before) {
+          // optionally inform teacher of updated student list
+          if (meta.teacherSocketId) {
+            io.to(meta.teacherSocketId).emit("room-info", { room: roomCode, students: meta.students.length });
+          }
+        }
+      }
+    }
   });
 });
 
 // ------------------
-// FILE UPLOADS
+// UPLOAD ENDPOINTS
 // ------------------
 const upload = multer({ storage: multer.memoryStorage() });
 
 app.post("/upload-recording", upload.single("file"), (req, res) => {
-  console.log("🎥 Recording uploaded:", req.file?.originalname);
-  res.json({ success: true });
+  try {
+    if (!req.file) return res.status(400).json({ success: false, message: "No file uploaded" });
+    const filename = `${Date.now()}-${req.file.originalname}`;
+    const dest = path.join(UPLOADS_DIR, filename);
+    fs.writeFileSync(dest, req.file.buffer);
+    console.log("🎥 Recording saved:", dest);
+    return res.json({ success: true, path: `/uploads/${filename}` });
+  } catch (err) {
+    console.error("Upload error:", err);
+    return res.status(500).json({ success: false, message: "Upload failed" });
+  }
 });
 
 app.post("/upload-doc", upload.single("document"), (req, res) => {
-  console.log("📄 Document uploaded:", req.file?.originalname);
-  res.json({ success: true });
+  try {
+    if (!req.file) return res.status(400).json({ success: false, message: "No file uploaded" });
+    const filename = `${Date.now()}-${req.file.originalname}`;
+    const dest = path.join(UPLOADS_DIR, filename);
+    fs.writeFileSync(dest, req.file.buffer);
+    console.log("📄 Document saved:", dest);
+    return res.json({ success: true, path: `/uploads/${filename}` });
+  } catch (err) {
+    console.error("Upload error:", err);
+    return res.status(500).json({ success: false, message: "Upload failed" });
+  }
 });
 
-// ------------------
-// FRONT-END DELIVERY
-// ------------------
+// Serve the main front-end HTML from root
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "Ecole-en-ligne.html"));
 });
 
+// Expose uploads for download (only if you want; if not desired, remove this)
+app.use("/uploads", express.static(UPLOADS_DIR));
 
 
 // 🚀 DEMARRE SERVEUR
