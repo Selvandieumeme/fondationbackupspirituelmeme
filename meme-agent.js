@@ -221,4 +221,10 @@
 
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', init); else init();
 
+
+<script src="seed_meme_qa.js"></script>
+<script src="meme-agent.js"></script>
+  
 })();
+
+
