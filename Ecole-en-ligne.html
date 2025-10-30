@@ -1,114 +1,134 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>ECOLE EN LIGNE - FOBAS</title>
-  
-  <!-- Style prensipal -->
-  <link rel="stylesheet" href="./ecole-en-ligne.css">
+  <meta charset="UTF-8">
+  <title>École en Ligne — Fondation Backup Spirituel</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="ecole-en-ligne.css">
 </head>
-
 <body>
-  <main class="app">
+  <h1>École en Ligne — Fondation Backup Spirituel</h1>
 
-    <!-- En-tèt -->
-    <header class="topbar">
-      <div class="brand">
-        <h1>ECOLE EN LIGNE - FOBAS</h1>
-        <p class="tag">Apprentissage accessible • Temps réel • Sécurisé</p>
-      </div>
-    </header>
+  <div id="room-controls">
+    <input type="text" id="room-code" placeholder="Code de salle">
+    <input type="text" id="username" placeholder="Votre nom">
+    <select id="role">
+      <option value="teacher">Teacher</option>
+      <option value="student">Student</option>
+    </select>
+    <button id="join-room">Rejoindre</button>
+  </div>
 
-    <!-- Pati koneksyon -->
-    <section class="join-panel">
-      <div class="join-form">
-        <label class="field">Nom / Prénom
-          <input id="displayName" type="text" placeholder="Selvandieu MEME" />
-        </label>
+  <div id="teacher-controls" style="display:none;">
+    <button id="mute-all">Mute All</button>
+    <button id="stop-all-video">Stop All Video</button>
+    <button id="start-rec">Start Recording</button>
+    <button id="stop-rec">Stop Recording</button>
+    <input type="file" id="upload-doc">
+  </div>
 
-        <label class="field">Kòd Klas
-          <input id="classCode" type="text" placeholder="EX: FOBAS-101" />
-        </label>
+  <div id="video-section">
+    <video id="teacher-video" autoplay muted></video>
+    <div id="student-videos"></div>
+  </div>
 
-        <label class="field select-wrap">
-          <select id="roleSelect">
-            <option value="student">Elèv</option>
-            <option value="teacher">Pwofesè</option>
-          </select>
-        </label>
+  <div id="chat-section">
+    <ul id="messages"></ul>
+    <input id="msg" placeholder="Votre message">
+    <button id="send">Envoyer</button>
+  </div>
 
-        <button id="joinBtn" class="primary">Rejoindre</button>
-      </div>
+  <!-- Socket.io & App Scripts -->
+  <script src="https://examen-backend-ihlx.onrender.com/socket.io/socket.io.js"></script>
+  <script>
+    const socket = io("https://examen-backend-ihlx.onrender.com");
+    let localStream, recorder, chunks = [];
 
-      <div id="status" class="status"></div>
-    </section>
+    const joinBtn = document.getElementById('join-room');
+    const roomCodeInput = document.getElementById('room-code');
+    const usernameInput = document.getElementById('username');
+    const roleSelect = document.getElementById('role');
+    const teacherControls = document.getElementById('teacher-controls');
+    const teacherVideo = document.getElementById('teacher-video');
+    const muteAllBtn = document.getElementById('mute-all');
+    const stopAllBtn = document.getElementById('stop-all-video');
+    const startRecBtn = document.getElementById('start-rec');
+    const stopRecBtn = document.getElementById('stop-rec');
+    const uploadDoc = document.getElementById('upload-doc');
+    const messages = document.getElementById('messages');
+    const msgInput = document.getElementById('msg');
+    const sendBtn = document.getElementById('send');
 
-    <!-- Anviwònman klas la -->
-    <section id="classroom" class="hidden classroom-grid">
+    joinBtn.onclick = async () => {
+      const room = roomCodeInput.value.trim();
+      const username = usernameInput.value.trim();
+      const role = roleSelect.value;
+      if (!room || !username) return alert('Remplissez tous les champs');
+      socket.emit('setUser', { username, role });
+      socket.emit('join-room', room);
+      if (role === 'teacher') teacherControls.style.display = 'block';
+      localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+      teacherVideo.srcObject = localStream;
+    };
 
-      <!-- Kolòn agoch: videyo pwofesè / elèv -->
-      <aside class="left-col">
-        <div id="liveVideoWrapper" class="live-video card">
-          <video id="liveVideo" autoplay playsinline></video>
-          <div class="live-label">Pwofesè / Elèv</div>
-        </div>
-      </aside>
+    // Contrôles enseignant
+    muteAllBtn.onclick = () => socket.emit('mute-all', roomCodeInput.value.trim());
+    stopAllBtn.onclick = () => socket.emit('stop-all-video', roomCodeInput.value.trim());
 
-      <!-- Kontwòl dinamik -->
-      <div id="controls" class="controls card"></div>
+    startRecBtn.onclick = () => {
+      recorder = new MediaRecorder(localStream);
+      recorder.ondataavailable = e => chunks.push(e.data);
+      recorder.start(1000);
+    };
 
-      <!-- Kolòn prensipal -->
-      <section class="main-col">
+    stopRecBtn.onclick = async () => {
+      recorder.stop();
+      const blob = new Blob(chunks, { type: 'video/webm' });
+      const form = new FormData();
+      form.append('file', blob, 'session.webm');
+      await fetch('https://examen-backend-ihlx.onrender.com/upload-recording', { method: 'POST', body: form });
+      chunks = [];
+    };
 
-        <!-- Videyo prensipal (pwofesè) -->
-        <div id="presenterArea" class="presenter-area card">
-          <div class="presenter-video">
-            <video id="presenterVideo" autoplay playsinline></video>
-            <div class="pname">Présentateur</div>
-          </div>
-        </div>
+    uploadDoc.onchange = async () => {
+      const file = uploadDoc.files[0];
+      const form = new FormData();
+      form.append('document', file);
+      await fetch('https://examen-backend-ihlx.onrender.com/upload-doc', { method: 'POST', body: form });
+    };
 
-        <!-- Zòn chat -->
-        <div class="chat-area card">
-          <div id="chatMessages" class="messages" role="log" aria-live="polite"></div>
-          <form id="chatForm" class="chat-form">
-            <input id="chatInput" autocomplete="off" placeholder="Écrire un message..." />
-            <button type="submit" class="secondary">Envoyer</button>
-          </form>
-        </div>
+    // Chat
+    sendBtn.onclick = () => {
+      const text = msgInput.value.trim();
+      if (!text) return;
+      socket.emit('private-message', { from: usernameInput.value, to: 'teacher', message: text });
+      const li = document.createElement('li');
+      li.textContent = 'Vous: ' + text;
+      messages.appendChild(li);
+      msgInput.value = '';
+    };
 
-      </section>
-    </section>
+    socket.on('private-message', data => {
+      const li = document.createElement('li');
+      li.textContent = data.from + ': ' + data.message;
+      messages.appendChild(li);
+    });
 
-    <!-- Modèl patisipan -->
-    <template id="participantTpl">
-      <div class="participant" data-id="">
-        <div class="video-box">
-          <video autoplay playsinline></video>
-        </div>
-        <div class="pinfo">
-          <span class="pname"></span>
-          <span class="pstatus"></span>
-        </div>
-      </div>
-    </template>
+    socket.on('chat-message', data => {
+      const li = document.createElement('li');
+      li.textContent = data.from + ': ' + data.message;
+      messages.appendChild(li);
+    });
 
-  </main>
+    // Mute / Stop vidéo
+    socket.on('mute-mic', () => {
+      if (localStream) localStream.getAudioTracks().forEach(t => t.enabled = false);
+    });
+    socket.on('stop-video', () => {
+      if (localStream) localStream.getVideoTracks().forEach(t => t.enabled = false);
+    });
+  </script>
 
-  <!-- === MEME Inspecteur Intelligent === -->
-  <div id="meme-agent-container"></div>
-  <div class="meme-chat-wrapper"></div>
-
-  <!-- Script MEME Agent -->
-  <script defer src="./meme-agent.js"></script>
-
-  <!-- Socket backend pou klas la -->
-  <script defer src="https://examen-backend-ihlx.onrender.com/socket.io/socket.io.js"></script>
-  
-  <!-- Script klas yo -->
-  <script defer src="./teacher-controls.js"></script>
-  <script defer src="./student-controls.js"></script>
-
+  <script src="ecole-en-ligne.js"></script>
 </body>
 </html>
