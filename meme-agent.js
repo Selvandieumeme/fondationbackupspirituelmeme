@@ -223,8 +223,8 @@
 
 
 <script src="seed_meme_qa.js"></script>
-<script src="meme-agent.js"></script>
-  
+
+<script src="meme_qa_data.json"></script>  
 })();
 
 
