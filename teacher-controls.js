@@ -32,8 +32,7 @@ joinBtn.addEventListener("click", async () => {
     localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
     teacherVideo.srcObject = localStream;
 
-    // ========== Controls Buttons ==========
-    // Mute Mic
+    // ----------------- Mikwo -----------------
     const muteMicBtn = document.createElement("button");
     muteMicBtn.textContent = "Mute Micro";
     teacherControls.appendChild(muteMicBtn);
@@ -42,7 +41,7 @@ joinBtn.addEventListener("click", async () => {
       muteMicBtn.textContent = localStream.getAudioTracks()[0].enabled ? "Mute Micro" : "Unmute Micro";
     };
 
-    // Mute Cam
+    // ----------------- Kamera -----------------
     const muteCamBtn = document.createElement("button");
     muteCamBtn.textContent = "Mute Caméra";
     teacherControls.appendChild(muteCamBtn);
@@ -51,7 +50,7 @@ joinBtn.addEventListener("click", async () => {
       muteCamBtn.textContent = localStream.getVideoTracks()[0].enabled ? "Mute Caméra" : "Unmute Caméra";
     };
 
-    // Share Screen
+    // ----------------- Pataje Ekran -----------------
     const shareScreenBtn = document.createElement("button");
     shareScreenBtn.textContent = "Partager Écran";
     teacherControls.appendChild(shareScreenBtn);
@@ -72,10 +71,12 @@ joinBtn.addEventListener("click", async () => {
           preview.remove();
           socket.emit("stop-share-screen", room);
         };
-      } catch (err) { alert("Erreur partage écran: " + err.message); }
+      } catch (err) {
+        alert("Erreur partage écran: " + err.message);
+      }
     };
 
-    // Mute All / Stop All
+    // ----------------- Mute All / Stop All -----------------
     const muteAllBtn = document.createElement("button");
     muteAllBtn.textContent = "Mute All";
     teacherControls.appendChild(muteAllBtn);
@@ -86,7 +87,7 @@ joinBtn.addEventListener("click", async () => {
     teacherControls.appendChild(stopAllBtn);
     stopAllBtn.onclick = () => socket.emit("stop-all-video", room);
 
-    // Start / Stop Recording
+    // ----------------- Start / Stop Recording -----------------
     const startRecBtn = document.createElement("button");
     startRecBtn.textContent = "Start Recording";
     teacherControls.appendChild(startRecBtn);
@@ -101,7 +102,8 @@ joinBtn.addEventListener("click", async () => {
       recorder = new MediaRecorder(localStream);
       recorder.ondataavailable = (e) => chunks.push(e.data);
       recorder.start(1000);
-      startRecBtn.disabled = true; stopRecBtn.disabled = false;
+      startRecBtn.disabled = true;
+      stopRecBtn.disabled = false;
     };
 
     stopRecBtn.onclick = async () => {
@@ -111,11 +113,13 @@ joinBtn.addEventListener("click", async () => {
       const form = new FormData();
       form.append("file", blob, "session.webm");
       await fetch("https://examen-backend-ihlx.onrender.com/upload-recording", { method: "POST", body: form });
-      chunks = []; startRecBtn.disabled = false; stopRecBtn.disabled = true;
+      chunks = [];
+      startRecBtn.disabled = false;
+      stopRecBtn.disabled = true;
       alert("Recording saved!");
     };
 
-    // Upload Doc
+    // ----------------- Upload Document -----------------
     const uploadBtn = document.createElement("button");
     uploadBtn.textContent = "Upload Document";
     teacherControls.appendChild(uploadBtn);
@@ -128,7 +132,7 @@ joinBtn.addEventListener("click", async () => {
       alert("Document uploaded!");
     };
 
-    // Chat
+    // ----------------- Chat -----------------
     sendBtn.onclick = () => {
       const text = msgInput.value.trim();
       if (!text) return;
