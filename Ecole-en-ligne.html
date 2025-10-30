@@ -18,7 +18,7 @@
     <section class="join-panel">
       <div class="join-form">
         <label class="field">Nom / Prénom
-          <input id="displayName" type="text" placeholder="Jan Jean" />
+          <input id="displayName" type="text" placeholder="Selvandieu MEME" />
         </label>
 
         <label class="field">Kòd Klas
@@ -41,12 +41,14 @@
     <!-- Classroom layout -->
     <section id="classroom" class="hidden classroom-grid">
 
-      <!-- Left column: local preview & controls -->
-      <aside class="left-col">
-        <div id="localVideoWrapper" class="local-video card">
-          <video id="localVideo" autoplay muted playsinline></video>
-          <div class="you-label">Ou (preview)</div>
-        </div>
+      <!-- Left column: Teacher / Student live video feed -->
+<aside class="left-col">
+  <div id="liveVideoWrapper" class="live-video card">
+    <!-- Video a pral monte dirèkteman depi stream backend / WebRTC -->
+    <video id="liveVideo" autoplay playsinline></video>
+    <div class="live-label">Pwofese / Elèv</div>
+  </div>
+</aside>
 
         <div id="controls" class="controls card">
           <!-- Controls injected by scripts -->
