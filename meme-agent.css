@@ -1,274 +1,197 @@
-/* ================================
-   ECOLE EN LIGNE - FOBAS
-   Palette: Bleu, Jaune, Blanc
-   Style: Moderne, professionnel, vibrant
-================================ */
+/* ===========================================================
+   MEME-AGENT.CSS - Styles for MEME-Inspecteur UI
+   Compatible with meme-agent.js
+=========================================================== */
 
-/* Root Variables */
-:root {
-  --bleu: #0b63ff;
-  --bleu-2: #1e8bff;
-  --jaune: #ffd43b;
-  --blan: #ffffff;
-  --bg: #f0f4ff;
-  --muted: #4a5568;
-  --card-shadow: 0 16px 60px rgba(11, 18, 32, 0.2);
-  --radius: 18px;
-  --gap: 20px;
-  --max-width: 1500px;
-  --btn-glow: 0 8px 36px rgba(255, 212, 59, 0.5);
-  --hover-scale: 1.08;
-  --transition: 0.35s ease-in-out;
+/* Container global MEME-Agent */
+#meme-agent-container {
+  position: fixed;
+  bottom: 18px;
+  right: 18px;
+  z-index: 99999;
+  font-family: 'Inter', system-ui, -apple-system, "Segoe UI", Roboto, Arial;
 }
 
-/* Reset */
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
-
-html, body {
-  height: 100%;
-  background: radial-gradient(circle at top left, var(--bleu-2), var(--jaune), var(--blan));
-  background-size: 400% 400%;
-  animation: gradientMove 25s ease infinite;
-  font-family: 'Inter', system-ui, sans-serif;
-  color: #0b1220;
-}
-
-@keyframes gradientMove {
-  0% { background-position: 0% 0%; }
-  25% { background-position: 100% 0%; }
-  50% { background-position: 100% 100%; }
-  75% { background-position: 0% 100%; }
-  100% { background-position: 0% 0%; }
-}
-
-/* Layout Container */
-.app {
-  max-width: var(--max-width);
-  margin: auto;
-  padding: 40px;
-}
-
-/* Topbar */
-.topbar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  background: linear-gradient(90deg, var(--bleu), var(--bleu-2));
-  color: var(--blan);
-  padding: 22px 32px;
-  border-radius: var(--radius);
-  box-shadow: 0 16px 60px rgba(11, 18, 32, 0.25);
-  animation: topbarGlow 5s ease-in-out infinite alternate;
-  position: sticky;
-  top: 0;
-  z-index: 100;
-}
-
-@keyframes topbarGlow {
-  0% { box-shadow: 0 16px 60px rgba(11, 18, 32, 0.25); }
-  50% { box-shadow: 0 16px 80px rgba(11, 18, 32, 0.38); }
-  100% { box-shadow: 0 16px 60px rgba(11, 18, 32, 0.25); }
-}
-
-.topbar .brand h1 {
-  font-size: 2rem;
-  text-shadow: 0 3px 8px rgba(0, 0, 0, 0.25);
-  letter-spacing: 1px;
-}
-.topbar .brand .tag {
-  font-size: 1rem;
-  opacity: 0.9;
-}
-
-/* Grand titre & slogan */
-.presenter-area {
-  text-align: center;
-  background: linear-gradient(135deg, var(--bleu), var(--bleu-2));
-  color: #fff;
-  border-radius: var(--radius);
-  padding: 60px 20px;
-  box-shadow: 0 28px 100px rgba(11, 18, 32, 0.3);
-  margin-bottom: 40px;
-}
-
-.presenter-area h2 {
-  font-size: 5rem;
-  font-weight: 900;
-  text-shadow: 0 6px 25px rgba(0, 0, 0, 0.45);
-  margin-bottom: 20px;
-}
-
-.presenter-area p {
-  font-size: 1.8rem;
-  font-weight: 600;
-  text-shadow: 0 4px 15px rgba(0, 0, 0, 0.35);
-  margin-bottom: 35px;
-}
-
-/* Classroom Layout */
-.classroom {
-  display: grid;
-  grid-template-columns: 2fr 1fr;
-  gap: var(--gap);
-}
-
-/* Video Zone */
-.video-zone {
-  display: flex;
-  flex-direction: column;
-  background: var(--blan);
-  border-radius: var(--radius);
-  box-shadow: var(--card-shadow);
-  padding: 15px;
-}
-
-.video-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 15px;
-}
-
-.video-tile video {
-  width: 100%;
-  aspect-ratio: 1/1;
-  border-radius: 15px;
-  border: 4px solid var(--bleu);
-  object-fit: cover;
-  transition: transform var(--transition);
-}
-.video-tile video:hover {
-  transform: scale(1.03);
-}
-
-/* Participants & Chat */
-.sidebar {
-  display: flex;
-  flex-direction: column;
-  background: #fff;
-  border-radius: var(--radius);
-  box-shadow: var(--card-shadow);
-  padding: 20px;
-}
-
-.sidebar h3 {
-  color: var(--bleu);
-  font-weight: 800;
-  margin-bottom: 12px;
-}
-
-.participants-list {
-  flex: 1;
-  overflow-y: auto;
-  border: 2px solid var(--bleu-2);
-  border-radius: 12px;
-  padding: 10px;
-}
-
-.participant {
-  background: var(--bg);
-  border-radius: 10px;
-  padding: 10px;
-  margin-bottom: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  transition: background var(--transition);
-}
-.participant:hover {
-  background: var(--jaune);
-  color: #000;
-}
-
-/* Chat Section */
-.chat-box {
-  margin-top: 20px;
-  border: 2px solid var(--bleu);
-  border-radius: 12px;
-  display: flex;
-  flex-direction: column;
-  height: 350px;
-}
-
-.chat-messages {
-  flex: 1;
-  padding: 15px;
-  overflow-y: auto;
-  background: var(--bg);
-  border-bottom: 2px solid var(--bleu-2);
-}
-.chat-messages p {
-  background: var(--blan);
-  padding: 10px 14px;
+/* Main agent card */
+.meme-agent-card {
+  width: 320px;
   border-radius: 14px;
-  margin-bottom: 8px;
-  box-shadow: 0 2px 5px rgba(11, 18, 32, 0.1);
+  background: linear-gradient(180deg, rgba(255,255,255,0.98), rgba(250,250,255,0.9));
+  box-shadow: 0 12px 40px rgba(3,10,60,0.2);
+  overflow: hidden;
+  border: 1px solid rgba(11,99,255,0.06);
+  display: flex;
+  flex-direction: column;
 }
 
-.chat-input {
+/* Header */
+.meme-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  background: linear-gradient(90deg,#0b63ff,#1e8bff);
+  color: #fff;
+  cursor: pointer;
+}
+
+/* Avatar */
+.meme-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  background: radial-gradient(circle at 30% 30%, #ffd43b, #f6b700);
+  box-shadow: 0 4px 12px rgba(246,183,0,0.25) inset;
+}
+
+/* Titles */
+.meme-title {
+  font-weight: 700;
+  font-size: 14px;
+  line-height: 1;
+}
+.meme-sub {
+  font-size: 12px;
+  opacity: 0.95;
+}
+
+/* Body log */
+.meme-body {
+  padding: 12px;
+  max-height: 360px;
+  overflow-y: auto;
+  background: #fff;
+}
+.meme-log {
+  font-size: 13px;
+  color: #0b1220;
+  margin: 0 0 8px 0;
+  background: linear-gradient(90deg,#fbfdff,#f1f6ff);
+  padding: 8px;
+  border-radius: 8px;
+}
+
+/* Controls (buttons) */
+.meme-controls {
   display: flex;
   gap: 8px;
   padding: 10px;
+  border-top: 1px solid rgba(11,99,255,0.04);
+  background: rgba(250,250,255,0.95);
+}
+.meme-controls button {
+  flex: 1;
+  padding: 8px 10px;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.35s ease-in-out;
+}
+.meme-btn-voice {
+  background: linear-gradient(90deg,#ffd43b,#ffea8a);
+  color: #08122a;
+}
+.meme-btn-voice:hover {
+  filter: brightness(1.1);
+}
+.meme-btn-clear {
+  background: linear-gradient(90deg,#0b63ff,#1e8bff);
+  color: #fff;
+}
+.meme-btn-clear:hover {
+  filter: brightness(1.1);
+}
+
+/* Chat panel */
+.meme-chat-panel {
+  position: fixed;
+  right: 18px;
+  bottom: 80px;
+  width: 360px;
+  max-height: 60vh;
+  border-radius: 12px;
+  box-shadow: 0 18px 60px rgba(3,10,60,0.2);
+  overflow: hidden;
+  background: rgba(255,255,255,0.98);
+  display: none;
+  flex-direction: column;
+  z-index: 99999;
+}
+
+/* Chat header */
+.meme-chat-header {
+  padding: 12px 14px;
+  background: linear-gradient(90deg,#0b63ff,#1e8bff);
+  color: #fff;
+  font-weight: 700;
+}
+
+/* Messages area */
+.meme-chat-messages {
+  padding: 12px;
+  flex: 1;
+  overflow-y: auto;
+  max-height: 45vh;
+  font-size: 14px;
+}
+
+/* Input field */
+.meme-chat-input {
+  display: flex;
+  padding: 10px;
+  border-top: 1px solid #eef4ff;
+  gap: 8px;
   background: #fff;
 }
-
-.chat-input input {
+.meme-chat-input input {
   flex: 1;
-  border: 2px solid var(--bleu-2);
-  border-radius: 12px;
   padding: 10px;
-  font-size: 1rem;
+  border-radius: 10px;
+  border: 1px solid #e6eefc;
   outline: none;
 }
-
-.chat-input button {
-  background: var(--jaune);
-  color: #000;
+.meme-chat-input button {
+  padding: 10px 12px;
+  border-radius: 10px;
   border: none;
-  border-radius: 12px;
-  padding: 10px 20px;
+  background: linear-gradient(90deg,#ffd43b,#ffea8a);
   font-weight: 700;
   cursor: pointer;
-  transition: transform var(--transition);
 }
-.chat-input button:hover {
-  transform: scale(1.05);
-  background: var(--bleu);
-  color: #fff;
+.meme-chat-input button:hover {
+  filter: brightness(1.1);
 }
 
-/* Global Buttons */
-button.primary {
-  background: var(--jaune);
-  color: #000;
-  border: none;
-  border-radius: var(--radius);
-  padding: 16px 28px;
-  font-weight: 700;
-  font-size: 1.3rem;
-  box-shadow: var(--btn-glow);
-  transition: transform var(--transition);
+/* Chat bubbles */
+.meme-msg-bubble {
+  margin-bottom: 8px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: #f6f9ff;
+  color: #071230;
+  box-shadow: 0 6px 18px rgba(11,18,32,0.06);
 }
-button.primary:hover {
-  transform: scale(var(--hover-scale));
-  background: var(--bleu);
-  color: #fff;
+.meme-msg-bubble.meme {
+  background: linear-gradient(90deg,#ffd43b,#ffea8a);
+  color: #071230;
 }
 
-/* Responsive */
-@media (max-width: 1000px) {
-  .classroom {
-    grid-template-columns: 1fr;
-  }
-  .video-tile video {
-    aspect-ratio: 4/3;
-  }
-}
-@media (max-width: 640px) {
-  .presenter-area h2 { font-size: 2.8rem; }
-  .presenter-area p { font-size: 1.2rem; }
-  .chat-box { height: 280px; }
+/* Agent speech popup */
+#meme-agent-box {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  z-index: 9999;
+  max-width: 380px;
+  background: rgba(255,255,255,0.95);
+  border-radius: 20px;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.25);
+  padding: 18px 22px;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #0b1220;
+  backdrop-filter: blur(6px);
+  border: 2px solid #ffd43b;
+  display: none;
 }
