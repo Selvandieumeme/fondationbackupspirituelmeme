@@ -1,7 +1,8 @@
 /* ========================================
-   Palette: bleu, jaune, blan
+   Palette: bleu, jaune, pale yellow
    Style: High-tech, vibrant, moderne, attractif
    Netwaye: retire participants & classe
+   Blan ranplase ak pale yellow (#fffacd)
 ======================================== */
 
 /* Root variables */
@@ -9,7 +10,7 @@
   --bleu:#1e90ff;
   --bleu-2:#00bfff;
   --jaune:#ffd43b;
-  --blan:#ffffff;
+  --blan:#fffacd; /* pale yellow pou ranplase blan solid */
   --bg:#f9fbff;
   --muted:#4a5568;
   --card-shadow:0 16px 60px rgba(11,18,32,0.2);
@@ -63,7 +64,7 @@ body{
   align-items:center;
   justify-content:center;
   background: linear-gradient(90deg,var(--jaune),var(--bleu-2),var(--blan));
-  color:var(--blan);
+  color:#0b1220;
   padding:20px 28px;
   border-radius:var(--radius);
   box-shadow:0 14px 50px rgba(11,18,32,0.25);
@@ -138,7 +139,7 @@ body{
   aspect-ratio:16/9;
   object-fit:cover;
   border-radius:var(--radius);
-  border:4px solid rgba(255,255,255,0.3);
+  border:4px solid rgba(255,250,205,0.3); /* adapte ak nouvo blan */
   box-shadow:0 14px 50px rgba(0,0,0,0.15);
   transition:transform var(--transition), box-shadow var(--transition);
 }
@@ -147,7 +148,7 @@ body{
   box-shadow:0 18px 60px rgba(0,0,0,0.2);
 }
 
-/* Classroom grid layout - plis klasik san participants/klasse */
+/* Classroom grid layout - plis klasik */
 .classroom-grid{
   margin-top:32px;
   display:grid;
@@ -166,7 +167,7 @@ body{
 
 /* Card styling */
 .card{
-  background:rgba(255,255,255,0.98);
+  background:rgba(255,250,205,0.95); /* pale yellow fon */
   border-radius:var(--radius);
   box-shadow:var(--card-shadow);
   padding:28px;
@@ -187,9 +188,9 @@ body{
   height:300px;
   overflow:auto;
   border-radius:18px;
-  border:1px solid #e0e8ff;
+  border:1px solid #ffd43b; /* kontrast ak nouvo blan */
   padding:14px;
-  background:rgba(255,255,255,0.97);
+  background:rgba(255,250,205,0.95); /* pale yellow fon */
 }
 .chat-area .message-input-container{
   display:flex;
@@ -201,7 +202,8 @@ body{
   padding:12px 16px;
   font-size:1.05rem;
   border-radius:var(--radius);
-  border:1px solid #e0e8ff;
+  border:1px solid #ffd43b;
+  background:#fffacd; /* pale yellow */
 }
 .chat-area button{
   flex:0 0 auto;
