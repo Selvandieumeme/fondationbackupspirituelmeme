@@ -1,187 +1,55 @@
 <!DOCTYPE html>
-<html lang="fr">
-<head>
-  <meta charset="UTF-8">
-  <title>École en Ligne — FOBAS - 800 Eleves/Salle de Classe</title>
-  <link rel="stylesheet" href="style.css">
-  <link rel="stylesheet" href="ecole-en-ligne.css">
-</head>
-<body>
-  <h1>École en Ligne — FOBAS - 800 Eleves/Salle de Classe</h1>
+addMessage(`${data.username} a levé la main.`);
+});
 
-  <div id="room-controls">
-    <input type="text" id="room-code" placeholder="Code de salle">
-    <input type="text" id="username" placeholder="Votre nom">
-    <select id="role">
-      <option value="teacher">Teacher</option>
-      <option value="student">Student</option>
-    </select>
-    <button id="join-room">Rejoindre</button>
-  </div>
 
-  <div id="teacher-controls" style="display:none;">
-    <button id="mute-all">Mute All</button>
-    <button id="stop-all-video">Stop All Video</button>
-    <button id="start-rec">Start Recording</button>
-    <button id="stop-rec">Stop Recording</button>
-    <input type="file" id="upload-doc">
-    <!-- Nouveau bouton Pataje Ekran -->
-    <button id="share-screen">Partager Écran</button>
-  </div>
+// Server informs about permissions changes
+socket.on('permission-update', (data) => {
+// data = { id, allowedMic, allowedCam }
+const p = participants.get(data.id) || {};
+p.allowedMic = data.allowedMic;
+p.allowedCam = data.allowedCam;
+participants.set(data.id, p);
+renderParticipantsPanel();
+});
 
-  <div id="video-section">
-    <video id="teacher-video" autoplay muted></video>
-    <div id="student-videos"></div>
-  </div>
 
-  <div id="chat-section">
-    <ul id="messages"></ul>
-    <input id="msg" placeholder="Votre message">
-    <button id="send">Envoyer</button>
-  </div>
+// File: when someone uploads doc, server should broadcast doc link
+socket.on('document-uploaded', data => {
+addMessage('Document partagé: ' + (data.filename || 'document'));
+});
 
-  <!-- Socket.io & App Scripts -->
-  <script src="https://examen-backend-ihlx.onrender.com/socket.io/socket.io.js"></script>
-  <script>
-    const socket = io("https://examen-backend-ihlx.onrender.com");
-    let localStream, recorder, chunks = [];
 
-    const joinBtn = document.getElementById('join-room');
-    const roomCodeInput = document.getElementById('room-code');
-    const usernameInput = document.getElementById('username');
-    const roleSelect = document.getElementById('role');
-    const teacherControls = document.getElementById('teacher-controls');
-    const teacherVideo = document.getElementById('teacher-video');
-    const muteAllBtn = document.getElementById('mute-all');
-    const stopAllBtn = document.getElementById('stop-all-video');
-    const startRecBtn = document.getElementById('start-rec');
-    const stopRecBtn = document.getElementById('stop-rec');
-    const uploadDoc = document.getElementById('upload-doc');
-    const messages = document.getElementById('messages');
-    const msgInput = document.getElementById('msg');
-    const sendBtn = document.getElementById('send');
-    const shareScreenBtn = document.getElementById('share-screen');
+// Server may send updated participant list to sync state
+socket.on('participants-updated', (list) => {
+participants.clear();
+for (const p of list) participants.set(p.id, { username: p.username, role: p.role, allowedMic: p.allowedMic, allowedCam: p.allowedCam, raisedHand: p.raisedHand });
+renderParticipantsPanel();
+});
 
-    joinBtn.onclick = async () => {
-      const room = roomCodeInput.value.trim();
-      const username = usernameInput.value.trim();
-      const role = roleSelect.value;
-      if (!room || !username) return alert('Remplissez tous les champs');
-      socket.emit('setUser', { username, role });
-      socket.emit('join-room', room);
-      if (role === 'teacher') teacherControls.style.display = 'block';
-      localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-      teacherVideo.srcObject = localStream;
-    };
 
-    // Contrôles enseignant
-    muteAllBtn.onclick = () => socket.emit('mute-all', roomCodeInput.value.trim());
-    stopAllBtn.onclick = () => socket.emit('stop-all-video', roomCodeInput.value.trim());
+// Ask server for initial status after connect
+socket.on('connect', () => {
+addMessage('Connecté au serveur.');
+});
 
-    startRecBtn.onclick = () => {
-      recorder = new MediaRecorder(localStream);
-      recorder.ondataavailable = e => chunks.push(e.data);
-      recorder.start(1000);
-    };
 
-    stopRecBtn.onclick = async () => {
-      recorder.stop();
-      const blob = new Blob(chunks, { type: 'video/webm' });
-      const form = new FormData();
-      form.append('file', blob, 'session.webm');
-      await fetch('https://examen-backend-ihlx.onrender.com/upload-recording', { method: 'POST', body: form });
-      chunks = [];
-    };
+// Clean disconnect
+socket.on('disconnect', () => addMessage('Déconnecté du serveur.'));
 
-    uploadDoc.onchange = async () => {
-      const file = uploadDoc.files[0];
-      const form = new FormData();
-      form.append('document', file);
-      await fetch('https://examen-backend-ihlx.onrender.com/upload-doc', { method: 'POST', body: form });
-    };
 
-    // Chat
-    sendBtn.onclick = () => {
-      const text = msgInput.value.trim();
-      if (!text) return;
-      socket.emit('private-message', { from: usernameInput.value, to: 'teacher', message: text });
-      const li = document.createElement('li');
-      li.textContent = 'Vous: ' + text;
-      messages.appendChild(li);
-      msgInput.value = '';
-    };
+// NOTE for deployer:
+// - This client expects the server to implement signaling and routing of the following socket events:
+// 'join-request', 'join-approved', 'join-rejected', 'request-room-count' (ack), 'student-joined', 'student-left',
+// 'webrtc-offer','webrtc-answer','webrtc-ice-candidate', 'start-peer', 'mute-all','unmute-all','stop-all-video',
+// 'toggle-mic','toggle-cam','kick-student','share-screen','stop-screen','raise-hand','permission-update','participants-updated'
+// - For production the WebRTC mesh approach will not scale well to 100 peers. Consider implementing an SFU (e.g. mediasoup, Janus, Jitsi) on the server.
 
-    socket.on('private-message', data => {
-      const li = document.createElement('li');
-      li.textContent = data.from + ': ' + data.message;
-      messages.appendChild(li);
-    });
 
-    socket.on('chat-message', data => {
-      const li = document.createElement('li');
-      li.textContent = data.from + ': ' + data.message;
-      messages.appendChild(li);
-    });
+</script>
 
-    // Mute / Stop vidéo
-    socket.on('mute-mic', () => {
-      if (localStream) localStream.getAudioTracks().forEach(t => t.enabled = false);
-    });
-    socket.on('stop-video', () => {
-      if (localStream) localStream.getVideoTracks().forEach(t => t.enabled = false);
-    });
 
-    // ================== NOUVEAU: PARTAGE ECRAN ==================
-    shareScreenBtn.onclick = async () => {
-      try {
-        const screenStream = await navigator.mediaDevices.getDisplayMedia({ video: true });
-        const screenVideo = document.createElement('video');
-        screenVideo.id = 'screen-video';
-        screenVideo.srcObject = screenStream;
-        screenVideo.autoplay = true;
-        screenVideo.muted = true;
-        screenVideo.style.border = '4px solid #ffd700';
-        screenVideo.style.borderRadius = '12px';
-        screenVideo.style.width = '80vw';
-        screenVideo.style.height = '80vw'; // Kare
-        screenVideo.style.margin = '10px auto';
-        document.getElementById('video-section').appendChild(screenVideo);
-
-        // Emèt pou tout moun nan sal la
-        const track = screenStream.getVideoTracks()[0];
-        track.onended = () => {
-          screenVideo.remove();
-          socket.emit('stop-screen', { room: roomCodeInput.value });
-        };
-        socket.emit('share-screen', { room: roomCodeInput.value });
-
-      } catch(err) {
-        alert('Erreur de partage d’écran: ' + err.message);
-      }
-    };
-
-    // Resevwa ekran pataje lòt moun
-    socket.on('screen-shared', data => {
-      // Pou senplisite, chak moun ka kreye videyo pou chak pataj
-      const remoteScreen = document.createElement('video');
-      remoteScreen.id = 'remote-screen-' + data.id;
-      remoteScreen.autoplay = true;
-      remoteScreen.style.border = '4px solid #0d6efd';
-      remoteScreen.style.borderRadius = '12px';
-      remoteScreen.style.width = '80vw';
-      remoteScreen.style.height = '80vw';
-      remoteScreen.style.margin = '10px auto';
-      document.getElementById('video-section').appendChild(remoteScreen);
-      // TODO: konekte stream WebRTC remote si backend sipòte
-    });
-
-    socket.on('screen-stopped', data => {
-      const el = document.getElementById('remote-screen-' + data.id);
-      if(el) el.remove();
-    });
-
-  </script>
-
-  <script src="ecole-en-ligne.js"></script>
+<!-- Optional external app script loader kept (non-invasive) -->
+<script src="ecole-en-ligne.js"></script>
 </body>
 </html>
