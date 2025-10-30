@@ -7,6 +7,7 @@ body {
   color: #1c1c1c;
   min-height: 100vh;
   background-attachment: fixed;
+  box-sizing: border-box;
 }
 
 /* === TITRE PRINCIPAL === */
@@ -26,10 +27,11 @@ h1 {
   justify-content: center;
   flex-wrap: wrap;
   margin: 15px auto;
-  background: rgba(255, 255, 255, 0.85);
+  background: rgba(255, 255, 255, 0.9);
   border: 2px solid #ffd700;
   border-radius: 12px;
   padding: 15px;
+  max-width: 700px;
   box-shadow: 0 4px 10px rgba(13, 110, 253, 0.1);
 }
 
@@ -52,13 +54,14 @@ h1 {
 
 /* === CONTROLES ENSEIGNANT === */
 #teacher-controls {
-  display: flex;
+  display: none;
   justify-content: center;
   flex-wrap: wrap;
   margin: 20px auto;
   background: linear-gradient(90deg, #0d6efd 0%, #0056b3 100%);
   border-radius: 10px;
   padding: 12px;
+  max-width: 800px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
@@ -81,28 +84,53 @@ h1 {
   transform: scale(1.05);
 }
 
-/* === SECTION VIDEO === */
-#video-section {
+/* Liste des élèves en attente */
+#pending-students {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+#pending-students button {
+  background: #fff;
+  color: #0d6efd;
+  border: 1px solid #ffd700;
+  border-radius: 6px;
+  padding: 6px 10px;
+  cursor: pointer;
+  font-size: 13px;
+  transition: 0.3s;
+}
+
+#pending-students button:hover {
+  background: #ffd700;
+  color: #0056b3;
+}
+
+/* === SECTION VIDEO === */
+#video-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  flex-wrap: wrap;
   margin: 25px auto;
   background: rgba(255, 255, 255, 0.9);
   border-radius: 14px;
   padding: 20px;
   box-shadow: 0 4px 15px rgba(13, 110, 253, 0.15);
   max-width: 95vw;
-  min-height: 70vh; /* fè espas prensipal videyo a gwo */
+  min-height: 70vh;
 }
 
-/* Vidéo teacher / screen share */
 #teacher-video,
 #screen-video {
   flex: 1 1 auto;
-  width: 80vw;
-  height: 80vw;
-  max-width: 1280px;
-  max-height: 1280px;
+  width: 85vw;
+  height: auto;
+  max-width: 1000px;
   object-fit: cover;
   border: 4px solid #0d6efd;
   border-radius: 12px;
@@ -118,36 +146,34 @@ h1 {
   border-color: #ffd700;
 }
 
-/* ✅ Limite kamera a sou laptop ak gwo ekran pou l pa kouvri bouton yo */
+/* Ajustement écran large */
 @media (min-width: 992px) {
   #teacher-video,
   #screen-video {
-    width: 50vw;      /* mwens laj */
-    height: 50vw;     /* kare toujou */
-    max-height: 500px; /* limite an wotè */
+    width: 60vw;
+    max-height: 550px;
   }
 }
 
 @media (min-width: 1400px) {
   #teacher-video,
   #screen-video {
-    width: 45vw;
-    height: 45vw;
-    max-height: 480px;
+    width: 50vw;
+    max-height: 520px;
   }
 }
 
-/* Videyo etidyan yo — pi piti men pwopòsyonèl */
+/* Vidéos étudiants */
 #student-videos {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  gap: 10px;
-  margin-top: 10px;
+  gap: 12px;
+  margin-top: 20px;
 }
 
 #student-videos video {
-  width: 250px;
+  width: 240px;
   height: 180px;
   object-fit: cover;
   border: 3px solid #0d6efd;
@@ -167,7 +193,7 @@ h1 {
   border-radius: 12px;
   padding: 15px;
   max-width: 650px;
-  margin: 25px auto;
+  margin: 30px auto;
   background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
   box-shadow: 0 4px 15px rgba(13, 110, 253, 0.15);
 }
@@ -232,4 +258,23 @@ button:hover {
 
 #messages::-webkit-scrollbar-thumb:hover {
   background: #ffd700;
+}
+
+/* === RESPONSIVE === */
+@media (max-width: 768px) {
+  #room-controls,
+  #teacher-controls {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  #teacher-video {
+    width: 95vw;
+    height: auto;
+  }
+
+  #student-videos video {
+    width: 160px;
+    height: 120px;
+  }
 }
