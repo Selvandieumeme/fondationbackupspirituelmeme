@@ -455,3 +455,74 @@ const MEME_BACKEND = "https://examen-backend-ihlx.onrender.com";
   setTimeout(()=> recognition.start(), 2000);
 
 })();
+
+
+
+
+
+
+
+/* =====================================================
+   Q/A JSON MEMORY — Réintégration complète sans conflit
+===================================================== */
+
+// --- 1. Chaje done kesyon/repons yo ---
+let memeKnowledge = [];
+
+// Ou ka mete fichye w la konsa:
+fetch("meme-knowledge.json")
+  .then(res => res.json())
+  .then(data => {
+    memeKnowledge = data;
+    console.log("🧠 Mème-Agent a chargé", memeKnowledge.length, "entrées de connaissances !");
+  })
+  .catch(err => console.error("Erreur chargement JSON :", err));
+
+// --- 2. Fonksyon pou chèche repons ---
+function findMemeAnswer(userText) {
+  if (!memeKnowledge || memeKnowledge.length === 0) return null;
+
+  const lower = userText.toLowerCase();
+  // Rechèch entèlijan
+  const match = memeKnowledge.find(entry =>
+    lower.includes(entry.question.toLowerCase())
+  );
+
+  if (match) return match.answer;
+  else return null;
+}
+
+// --- 3. Modifye handleCommand() pou itilize baz JSON lan ---
+function handleCommand(text){
+  const lower = text.toLowerCase();
+
+  // Dabor, teste baz done kesyon/repons
+  const answer = findMemeAnswer(lower);
+  if (answer) {
+    memeSpeak(answer);
+    return; // pa kontinye ak lòt tès
+  }
+
+  // Si pa gen match nan JSON, repons vokal default yo
+  if(lower.includes("bonjour") || lower.includes("salut")){
+    memeSpeak("Bonjour, je suis Mème-Agent ! Comment puis-je t’aider ?");
+  }
+  else if(lower.includes("mème") && lower.includes("présent")){
+    memeSpeak("Toujours là, prêt à aider la classe !");
+  }
+  else if(lower.includes("explique") || lower.includes("aide moi")){
+    memeSpeak("D’accord ! Peux-tu préciser ta question ?");
+  }
+  else if(lower.includes("merci")){
+    memeSpeak("Avec plaisir !");
+  }
+  else if(lower.includes("au revoir")){
+    memeSpeak("Au revoir, à très bientôt !");
+  }
+  else if(lower.includes("sécurité")){
+    memeSpeak("Toutes les connexions sont chiffrées et sécurisées.");
+  }
+  else if(lower.includes("agent") || lower.includes("assistant")){
+    memeSpeak("Oui, je t’écoute !");
+  }
+}
