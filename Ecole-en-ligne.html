@@ -2,12 +2,12 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <title>École en Ligne — Fondation Backup Spirituel</title>
+  <title>École en Ligne — FOBAS - 800 Eleves/Salle de Classe</title>
   <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="ecole-en-ligne.css">
 </head>
 <body>
-  <h1>École en Ligne — Fondation Backup Spirituel</h1>
+  <h1>École en Ligne — FOBAS - 800 Eleves/Salle de Classe</h1>
 
   <div id="room-controls">
     <input type="text" id="room-code" placeholder="Code de salle">
@@ -25,6 +25,8 @@
     <button id="start-rec">Start Recording</button>
     <button id="stop-rec">Stop Recording</button>
     <input type="file" id="upload-doc">
+    <!-- Nouveau bouton Pataje Ekran -->
+    <button id="share-screen">Partager Écran</button>
   </div>
 
   <div id="video-section">
@@ -58,6 +60,7 @@
     const messages = document.getElementById('messages');
     const msgInput = document.getElementById('msg');
     const sendBtn = document.getElementById('send');
+    const shareScreenBtn = document.getElementById('share-screen');
 
     joinBtn.onclick = async () => {
       const room = roomCodeInput.value.trim();
@@ -127,6 +130,56 @@
     socket.on('stop-video', () => {
       if (localStream) localStream.getVideoTracks().forEach(t => t.enabled = false);
     });
+
+    // ================== NOUVEAU: PARTAGE ECRAN ==================
+    shareScreenBtn.onclick = async () => {
+      try {
+        const screenStream = await navigator.mediaDevices.getDisplayMedia({ video: true });
+        const screenVideo = document.createElement('video');
+        screenVideo.id = 'screen-video';
+        screenVideo.srcObject = screenStream;
+        screenVideo.autoplay = true;
+        screenVideo.muted = true;
+        screenVideo.style.border = '4px solid #ffd700';
+        screenVideo.style.borderRadius = '12px';
+        screenVideo.style.width = '80vw';
+        screenVideo.style.height = '80vw'; // Kare
+        screenVideo.style.margin = '10px auto';
+        document.getElementById('video-section').appendChild(screenVideo);
+
+        // Emèt pou tout moun nan sal la
+        const track = screenStream.getVideoTracks()[0];
+        track.onended = () => {
+          screenVideo.remove();
+          socket.emit('stop-screen', { room: roomCodeInput.value });
+        };
+        socket.emit('share-screen', { room: roomCodeInput.value });
+
+      } catch(err) {
+        alert('Erreur de partage d’écran: ' + err.message);
+      }
+    };
+
+    // Resevwa ekran pataje lòt moun
+    socket.on('screen-shared', data => {
+      // Pou senplisite, chak moun ka kreye videyo pou chak pataj
+      const remoteScreen = document.createElement('video');
+      remoteScreen.id = 'remote-screen-' + data.id;
+      remoteScreen.autoplay = true;
+      remoteScreen.style.border = '4px solid #0d6efd';
+      remoteScreen.style.borderRadius = '12px';
+      remoteScreen.style.width = '80vw';
+      remoteScreen.style.height = '80vw';
+      remoteScreen.style.margin = '10px auto';
+      document.getElementById('video-section').appendChild(remoteScreen);
+      // TODO: konekte stream WebRTC remote si backend sipòte
+    });
+
+    socket.on('screen-stopped', data => {
+      const el = document.getElementById('remote-screen-' + data.id);
+      if(el) el.remove();
+    });
+
   </script>
 
   <script src="ecole-en-ligne.js"></script>
