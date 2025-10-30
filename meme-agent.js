@@ -526,3 +526,137 @@ function handleCommand(text){
     memeSpeak("Oui, je t’écoute !");
   }
 }
+
+
+
+
+/* ============================================================
+   MEME-AGENT.JS - Version finale adaptée
+   Fonksyonalite: 
+   - Repons vokal (Web Speech API)
+   - Chat panel vizyèl
+   - Entèaksyon Q/A soti nan meme_qa_data.json
+   - Pa kraze okenn lòt pati nan sistèm
+============================================================ */
+
+// Variables globales
+let memeKnowledge = [];
+let synth = window.speechSynthesis;
+let recognition = null;
+
+// Charger la base de connaissances
+fetch("meme_qa_data.json")
+  .then(res => res.json())
+  .then(data => {
+    memeKnowledge = data;
+    console.log("🧠 Base de connaissances Mème-Agent :", memeKnowledge.length, "entrées.");
+  })
+  .catch(err => console.error("Erreur JSON:", err));
+
+// Fonction pour parler
+function speak(text) {
+  if (synth.speaking) synth.cancel(); // Stop any ongoing speech
+  let utterance = new SpeechSynthesisUtterance(text);
+  utterance.rate = 1;
+  utterance.pitch = 1;
+  synth.speak(utterance);
+}
+
+// Fonction pour trouver réponse Q/A
+function getAnswer(question) {
+  question = question.toLowerCase().trim();
+  for (let item of memeKnowledge) {
+    if (item.question.toLowerCase().includes(question)) {
+      return item.answer;
+    }
+  }
+  return "Désolé, je n'ai pas trouvé de réponse pour cette question.";
+}
+
+// Affichage dans le chat
+function displayMessage(sender, message) {
+  const chatContainer = document.getElementById("meme-chat");
+  if (!chatContainer) return;
+  
+  let msgDiv = document.createElement("div");
+  msgDiv.className = sender === "agent" ? "agent-msg" : "user-msg";
+  msgDiv.innerText = message;
+  chatContainer.appendChild(msgDiv);
+  chatContainer.scrollTop = chatContainer.scrollHeight;
+}
+
+// Fonction principale pour interagir avec Agent
+function handleInteraction(inputText) {
+  if (!inputText) return;
+  displayMessage("user", inputText);
+
+  // Trouver réponse
+  const answer = getAnswer(inputText);
+  displayMessage("agent", answer);
+  speak(answer);
+}
+
+// Web Speech API pour input vocal
+if ("webkitSpeechRecognition" in window) {
+  recognition = new webkitSpeechRecognition();
+  recognition.continuous = false;
+  recognition.interimResults = false;
+  recognition.lang = "fr-FR";
+
+  recognition.onresult = function(event) {
+    const transcript = event.results[0][0].transcript;
+    handleInteraction(transcript);
+  };
+
+  recognition.onerror = function(event) {
+    console.error("Speech recognition error:", event.error);
+  };
+}
+
+// Lancement reconnaissance vocale
+function startListening() {
+  if (recognition) recognition.start();
+}
+
+// Event listeners si vous avez un bouton ou champ input
+document.addEventListener("DOMContentLoaded", () => {
+  const inputField = document.getElementById("meme-input");
+  const submitBtn = document.getElementById("meme-submit");
+  const voiceBtn = document.getElementById("meme-voice");
+
+  if (submitBtn && inputField) {
+    submitBtn.addEventListener("click", () => {
+      handleInteraction(inputField.value);
+      inputField.value = "";
+    });
+  }
+
+  if (voiceBtn) {
+    voiceBtn.addEventListener("click", () => startListening());
+  }
+
+  if (inputField) {
+    inputField.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        handleInteraction(inputField.value);
+        inputField.value = "";
+      }
+    });
+  }
+});
+
+/* ============================================================
+   Styles de chat (peut être mis dans meme-agent.css)
+   - Agent et User messages
+============================================================ */
+const style = document.createElement("style");
+style.innerHTML = `
+#meme-chat {
+  max-height:300px; overflow-y:auto; padding:10px; background:#f0f4ff; border-radius:15px;
+}
+.agent-msg { background: #0b63ff; color:#fff; padding:10px 14px; margin:6px 0; border-radius:12px; text-align:left; }
+.user-msg  { background: #ffd43b; color:#0b1220; padding:10px 14px; margin:6px 0; border-radius:12px; text-align:right; }
+`;
+document.head.appendChild(style);
+
+
