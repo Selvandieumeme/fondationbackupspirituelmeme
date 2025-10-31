@@ -1,164 +1,214 @@
-/* student-controls.js
-   Student-side logic + WebRTC mesh signaling.
-   Connects to your backend on Render for signaling.
-*/
+// student-controls.js
+// Usage:
+//   Window.StudentControls.init({ socket, room, username, getLocalStream, ui: { videoSection, chatInputSelector } })
+//   - getLocalStream: function that returns current MediaStream (or null)
+//   - student controls will be injected under #video-section by default
+(function () {
+  const StudentControls = {};
 
-const BACKEND = "https://examen-backend-ihlx.onrender.com";
-const socket = io(BACKEND, { transports: ['websocket', 'polling'] });
-
-const joinBtn = document.getElementById('joinBtn');
-let localStream = null;
-let room = null;
-let myName = null;
-let myRole = null;
-let myId = null;
-
-// WebRTC state
-const pcs = {};
-const remoteStreams = {};
-
-const RTC_CONFIG = {
-  iceServers: [
-    { urls: 'stun:stun.l.google.com:19302' }
-  ]
-};
-
-async function startLocal(){
-  try{
-    localStream = await navigator.mediaDevices.getUserMedia({video:true,audio:true});
-    document.getElementById('localVideo').srcObject = localStream;
-  }catch(e){
-    console.warn('no media',e);
+  function $el(tag, props = {}) {
+    const e = document.createElement(tag);
+    Object.entries(props).forEach(([k, v]) => {
+      if (k === 'html') e.innerHTML = v;
+      else if (k === 'class') e.className = v;
+      else e.setAttribute(k, v);
+    });
+    return e;
   }
-}
 
-joinBtn.addEventListener('click', async ()=>{
-  const role = document.getElementById('roleSelect').value;
-  const name = document.getElementById('displayName').value.trim();
-  const code = document.getElementById('classCode').value.trim();
-  if(!name||!code) return alert('Ranpli non ak kòd klas.');
-  room = code; myName = name; myRole = role;
-  await startLocal();
-  socket.emit('join-request',{room,name,role});
-  document.getElementById('status').textContent = 'Demann voye. Ap tann repons pwofese...';
-});
+  StudentControls.init = function (opts = {}) {
+    if (!opts.socket) throw new Error('StudentControls requires socket');
+    const socket = opts.socket;
+    const room = opts.room;
+    const username = opts.username || 'student';
+    const getLocalStream = opts.getLocalStream || (() => null);
+    const ui = opts.ui || {};
+    const videoSection = document.querySelector(ui.videoSection || '#video-section') || document.body;
 
-socket.on('connect', ()=>{ myId = socket.id; console.log('student connected', myId); });
-
-socket.on('join-response', data=>{
-  if(data.accepted){
-    document.getElementById('status').textContent='Aksepte! Antre nan klas.';
-    socket.emit('joined',{room,name:myName,role:myRole});
-    document.getElementById('classroom').classList.remove('hidden');
-  } else {
-    document.getElementById('status').textContent='Rejete pa pwofese.';
-  }
-});
-
-// when server sends list of participants (ids), create peer connections to them (newcomer initiates)
-socket.on('participants', async ({ ids })=>{
-  for(const pid of ids){
-    if(pid === myId) continue;
-    await createPeerConnection(pid, true);
-  }
-});
-
-socket.on('webrtc-offer', async ({ from, description })=>{
-  await createPeerConnection(from, false);
-  const pc = pcs[from];
-  await pc.setRemoteDescription(new RTCSessionDescription(description));
-  const answer = await pc.createAnswer();
-  await pc.setLocalDescription(answer);
-  socket.emit('webrtc-answer',{ to: from, description: pc.localDescription });
-});
-
-socket.on('webrtc-answer', async ({ from, description })=>{
-  const pc = pcs[from];
-  if(!pc) return console.warn('no pc for answer from', from);
-  await pc.setRemoteDescription(new RTCSessionDescription(description));
-});
-
-socket.on('ice-candidate', async ({ from, candidate })=>{
-  const pc = pcs[from];
-  if(!pc) return;
-  try{
-    await pc.addIceCandidate(new RTCIceCandidate(candidate));
-  }catch(e){ console.warn('bad ice', e); }
-});
-
-async function createPeerConnection(peerId, isInitiator){
-  if(pcs[peerId]) return pcs[peerId];
-  const pc = new RTCPeerConnection(RTC_CONFIG);
-  pcs[peerId] = pc;
-  const remoteStream = new MediaStream();
-  remoteStreams[peerId] = remoteStream;
-
-  pc.onicecandidate = (e)=>{
-    if(e.candidate){
-      socket.emit('ice-candidate',{ to: peerId, candidate: e.candidate });
+    // control bar container
+    let bar = document.getElementById('student-control-bar');
+    if (!bar) {
+      bar = $el('div', { id: 'student-control-bar' });
+      bar.style.display = 'flex';
+      bar.style.gap = '8px';
+      bar.style.justifyContent = 'center';
+      bar.style.flexWrap = 'wrap';
+      bar.style.marginTop = '10px';
+      videoSection.appendChild(bar);
     }
+
+    // Buttons
+    const btnMute = $el('button', { html: '🎤 Mute/Unmute' });
+    const btnCam = $el('button', { html: '🎥 On/Off Cam' });
+    const btnRaise = $el('button', { html: '✋ Lever la main' });
+    const btnLower = $el('button', { html: '⬇️ Baisser main' });
+    const btnChat = $el('button', { html: '💬 Chat' });
+    const btnLeave = $el('button', { html: '🚪 Quitter' });
+    const btnShare = $el('button', { html: '🖥️ Partager écran' });
+    const btnDownload = $el('button', { html: '⬇️ Docs' });
+    const btnRecord = $el('button', { html: '🔴 Record' });
+
+    [btnMute, btnCam, btnRaise, btnLower, btnChat, btnLeave, btnShare, btnDownload, btnRecord].forEach(b => bar.appendChild(b));
+
+    // State
+    let recording = false;
+
+    // Handlers
+    btnMute.onclick = async () => {
+      const stream = await getLocalStream();
+      if (!stream) return alert('Aucun flux local');
+      const aTracks = stream.getAudioTracks();
+      if (!aTracks.length) return alert('Pas de micro détecté');
+      const enabled = aTracks[0].enabled;
+      aTracks.forEach(t => t.enabled = !enabled);
+      btnMute.textContent = enabled ? '🎤 Unmute' : '🎤 Mute';
+      socket.emit('private-message', { from: username, to: 'teacher', message: enabled ? 'Micro muté' : 'Micro activé' });
+    };
+
+    btnCam.onclick = async () => {
+      const stream = await getLocalStream();
+      if (!stream) return alert('Aucun flux local');
+      const vTracks = stream.getVideoTracks();
+      if (!vTracks.length) return alert('Pas de caméra détectée');
+      const enabled = vTracks[0].enabled;
+      vTracks.forEach(t => t.enabled = !enabled);
+      btnCam.textContent = enabled ? '🎥 Cam On' : '🎥 Cam Off';
+    };
+
+    btnRaise.onclick = () => {
+      socket.emit('raise-hand', { user: username, room });
+      btnRaise.disabled = true;
+      btnRaise.textContent = '✋ Levée';
+    };
+
+    btnLower.onclick = () => {
+      socket.emit('teacher-lower-hand', { username, room });
+      btnRaise.disabled = false;
+      btnRaise.textContent = '✋ Lever la main';
+    };
+
+    btnChat.onclick = () => {
+      const input = document.querySelector(ui.chatInputSelector || '#msg');
+      if (input) input.focus();
+      else alert('Aucun champ chat trouvé');
+    };
+
+    btnLeave.onclick = () => {
+      socket.emit('leave-room', room);
+      // stop local tracks
+      getLocalStream()?.getTracks().forEach(t => t.stop());
+      // reload to reset UI
+      location.reload();
+    };
+
+    btnShare.onclick = async () => {
+      try {
+        const s = await navigator.mediaDevices.getDisplayMedia({ video: true });
+        // small preview
+        const pv = document.createElement('video');
+        pv.autoplay = true;
+        pv.muted = true;
+        pv.style.maxWidth = '320px';
+        pv.style.marginTop = '8px';
+        pv.srcObject = s;
+        videoSection.appendChild(pv);
+        socket.emit('student-shared-screen', { room, username });
+        const t = s.getVideoTracks()[0];
+        t.onended = () => {
+          pv.remove();
+          socket.emit('student-stop-screen', { room, username });
+        };
+      } catch (err) {
+        console.error('share screen student', err);
+        alert('Erreur partage écran: ' + err.message);
+      }
+    };
+
+    btnDownload.onclick = () => {
+      // open uploads listing. Server exposes /uploads (if left enabled)
+      window.open('/uploads', '_blank');
+    };
+
+    btnRecord.onclick = async () => {
+      const stream = await getLocalStream();
+      if (!stream) return alert('Aucun flux local');
+      if (!recording) {
+        // start local recording
+        try {
+          const mr = new MediaRecorder(stream);
+          const parts = [];
+          mr.ondataavailable = (e) => { if (e.data && e.data.size) parts.push(e.data); };
+          mr.start(1000);
+          btnRecord.textContent = '⏹️ Stop';
+          recording = true;
+          // store on element for stop
+          btnRecord._recorder = mr;
+          btnRecord._chunks = parts;
+        } catch (err) {
+          console.error('rec start err', err);
+        }
+      } else {
+        // stop and upload
+        const mr = btnRecord._recorder;
+        const parts = btnRecord._chunks || [];
+        if (mr) {
+          mr.stop();
+          mr.onstop = async () => {
+            const blob = new Blob(parts, { type: 'video/webm' });
+            const fd = new FormData();
+            fd.append('file', blob, `${username}-${Date.now()}.webm`);
+            try {
+              const r = await fetch('/upload-recording', { method: 'POST', body: fd });
+              const j = await r.json();
+              if (j.success) alert('Enregistrement uploadé');
+              else alert('Echec upload');
+            } catch (err) {
+              console.error(err);
+              alert('Erreur upload');
+            }
+          };
+        }
+        btnRecord.textContent = '🔴 Record';
+        recording = false;
+      }
+    };
+
+    // Handle server commands (teacher actions)
+    socket.on('teacher-mute-all', () => {
+      getLocalStream()?.getAudioTracks().forEach(t => t.enabled = false);
+      alert('Le professeur a coupé les micros.');
+    });
+    socket.on('teacher-stop-all-video', () => {
+      getLocalStream()?.getVideoTracks().forEach(t => t.enabled = false);
+      alert('Le professeur a coupé les caméras.');
+    });
+    socket.on('teacher-block-student', ({ reason }) => {
+      alert('Vous avez été retiré de la classe. ' + (reason || ''));
+      location.reload();
+    });
+    socket.on('teacher-lower-hand', ({ username: name }) => {
+      if (name === username) {
+        alert('Votre main a été baissée par le professeur.');
+      }
+    });
+
+    // auto-focus chat input when chat message arrives
+    socket.on('chat-message', (data) => {
+      // Show message to student UI (server also stores)
+      const msgList = document.querySelector('#messages');
+      if (msgList) {
+        const li = document.createElement('li');
+        li.textContent = `${data.from}: ${data.message}`;
+        msgList.appendChild(li);
+        msgList.scrollTop = msgList.scrollHeight;
+      }
+    });
+
+    return {
+      container: bar,
+      buttons: { btnMute, btnCam, btnRaise, btnLower, btnChat, btnLeave, btnShare, btnDownload, btnRecord },
+    };
   };
 
-  pc.ontrack = (e)=>{
-    remoteStream.addTrack(e.track);
-    attachRemoteStreamToUI(peerId, remoteStream);
-  };
-
-  if(localStream){
-    localStream.getTracks().forEach(track => pc.addTrack(track, localStream));
-  }
-
-  if(isInitiator){
-    const offer = await pc.createOffer();
-    await pc.setLocalDescription(offer);
-    socket.emit('webrtc-offer',{ to: peerId, description: pc.localDescription });
-  }
-
-  return pc;
-}
-
-function attachRemoteStreamToUI(peerId, stream){
-  let tile = document.getElementById('videosGrid')?.querySelector(`.participant[data-id="${peerId}"]`);
-  if(!tile){
-    const tpl = document.getElementById('participantTpl').content.cloneNode(true);
-    tile = tpl.querySelector('.participant');
-    tile.dataset.id = peerId;
-    tile.querySelector('.pname').textContent = peerId;
-    document.getElementById('videosGrid').appendChild(tile);
-  }
-  const vid = tile.querySelector('video');
-  if(vid.srcObject !== stream) vid.srcObject = stream;
-  updateParticipantsList(peerId);
-}
-
-function updateParticipantsList(peerId){
-  const participantsList = document.getElementById('participantsList');
-  if(!participantsList.querySelector(`[data-id="${peerId}"]`)){
-    const div = document.createElement('div'); div.className='participant-item'; div.dataset.id = peerId;
-    div.textContent = peerId;
-    participantsList.appendChild(div);
-  }
-  document.getElementById('presentCount').textContent = participantsList.querySelectorAll('.participant-item').length;
-}
-
-// chat
-const chatForm = document.getElementById('chatForm');
-chatForm?.addEventListener('submit', e=>{
-  e.preventDefault();
-  const text = document.getElementById('chatInput').value.trim(); if(!text) return;
-  socket.emit('chat-message',{room,text,fromName:myName});
-  document.getElementById('chatInput').value='';
-});
-
-socket.on('chat-message', m=>{
-  const el = document.createElement('div'); el.textContent = `${m.fromName || m.from}: ${m.text}`; document.getElementById('chatMessages').appendChild(el);
-});
-
-// teacher commands
-socket.on('teacher-mute-all', ()=>{ if(localStream) localStream.getAudioTracks().forEach(t=>t.enabled=false); });
-
-socket.on('blocked', ({ reason })=>{
-  alert('Ou bloke: ' + (reason || 'Motif pa disponib'));
-  // optional: disconnect socket or hide UI
-  socket.disconnect();
-});
+  window.StudentControls = StudentControls;
+})();
