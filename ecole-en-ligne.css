@@ -252,18 +252,100 @@ button:hover {
   transform: translateY(-2px);
 }
 
-/* === SCROLLBAR PERSO === */
-#messages::-webkit-scrollbar {
+/* === PANEL BÒ DWAT === */
+#right-panel {
+  position: fixed;
+  top: 100px;
+  right: 20px;
+  width: 250px;
+  background: rgba(255, 255, 255, 0.95);
+  border: 2px solid #0d6efd;
+  border-radius: 12px;
+  padding: 10px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  z-index: 999;
+}
+
+/* MAIN LEVE */
+#main-raise-panel {
+  max-height: 180px;
+  overflow-y: auto;
+  border: 1px solid #0d6efd;
+  border-radius: 8px;
+  padding: 6px;
+  background: #f0f8ff;
+}
+
+#main-raise-panel h4 {
+  margin: 0 0 6px 0;
+  font-size: 14px;
+  color: #0d6efd;
+  text-align: center;
+}
+
+/* LISTE ELÈV CONNECTÉS */
+#connected-students-panel {
+  max-height: 220px;
+  overflow-y: auto;
+  border: 1px solid #0d6efd;
+  border-radius: 8px;
+  padding: 6px;
+  background: #f8faff;
+}
+
+#connected-students-panel h4 {
+  margin: 0 0 6px 0;
+  font-size: 14px;
+  color: #0d6efd;
+  text-align: center;
+}
+
+#students-count {
+  margin-top: 5px;
+  font-size: 13px;
+  font-weight: bold;
+  color: #0056b3;
+  text-align: center;
+}
+
+/* SCROLLBAR PANEL PERSO */
+#main-raise-panel::-webkit-scrollbar,
+#connected-students-panel::-webkit-scrollbar {
   width: 8px;
 }
 
-#messages::-webkit-scrollbar-thumb {
+#main-raise-panel::-webkit-scrollbar-thumb,
+#connected-students-panel::-webkit-scrollbar-thumb {
   background: #0d6efd;
   border-radius: 4px;
 }
 
-#messages::-webkit-scrollbar-thumb:hover {
+#main-raise-panel::-webkit-scrollbar-thumb:hover,
+#connected-students-panel::-webkit-scrollbar-thumb:hover {
   background: #ffd700;
+}
+
+/* BOUTONS SUPPLÉMENTAIRES */
+#return-btn, #change-bg-btn {
+  margin: 10px 6px;
+  padding: 8px 12px;
+  font-size: 14px;
+  border-radius: 8px;
+  border: 1px solid #0d6efd;
+  background: #ffd700;
+  color: #0d6efd;
+  cursor: pointer;
+  font-weight: bold;
+  transition: 0.3s;
+}
+
+#return-btn:hover, #change-bg-btn:hover {
+  background: #0d6efd;
+  color: #ffd700;
+  transform: scale(1.05);
 }
 
 /* === RESPONSIVE === */
@@ -283,5 +365,11 @@ button:hover {
   #student-videos video {
     width: 160px;
     height: 120px;
+  }
+
+  #right-panel {
+    width: 200px;
+    top: 80px;
+    right: 10px;
   }
 }
