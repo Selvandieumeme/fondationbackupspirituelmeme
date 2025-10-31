@@ -1,8 +1,16 @@
 // teacher-controls.js
+// =====================
 // Usage:
-//   Window.TeacherControls.init({ socket, room, username, getLocalStream, ui: { container selectors } })
-//   - getLocalStream: function returning current localMediaStream (may be async or null initially)
-//   - ui optional: { controlsContainer, pendingContainer, videoSection } DOM elements or selectors
+//   window.TeacherControls.init({
+//     socket,
+//     room,
+//     username,
+//     getLocalStream,
+//     ui: { controlsContainer, pendingContainer, videoSection }
+//   });
+//
+// getLocalStream: function returning current local MediaStream (async or null initially)
+
 (function () {
   const TeacherControls = {};
 
@@ -11,7 +19,17 @@
     b.type = 'button';
     b.textContent = text;
     Object.entries(attrs).forEach(([k, v]) => b.setAttribute(k, v));
-    b.style.cursor = 'pointer';
+    Object.assign(b.style, {
+      cursor: 'pointer',
+      background: '#1976d2',
+      color: '#fff',
+      border: 'none',
+      borderRadius: '6px',
+      padding: '6px 10px',
+      fontSize: '14px',
+    });
+    b.onmouseenter = () => (b.style.background = '#125ca0');
+    b.onmouseleave = () => (b.style.background = '#1976d2');
     return b;
   }
 
@@ -31,64 +49,67 @@
     if (!opts.socket) throw new Error('TeacherControls requires socket');
     const socket = opts.socket;
     const room = opts.room;
-    const username = opts.username || 'teacher';
+    const username = opts.username || 'Professeur';
     const getLocalStream = opts.getLocalStream || (() => null);
     const ui = opts.ui || {};
 
     const controlsContainer = ensureEl(ui.controlsContainer || '#teacher-controls', 'div');
-    controlsContainer.style.display = 'flex';
-    controlsContainer.style.flexWrap = 'wrap';
-    controlsContainer.style.gap = '8px';
-    controlsContainer.style.alignItems = 'center';
+    Object.assign(controlsContainer.style, {
+      display: 'flex',
+      flexWrap: 'wrap',
+      gap: '8px',
+      alignItems: 'center',
+      margin: '10px 0',
+    });
 
-    // ensure pending container
     const pendingContainer = ensureEl(ui.pendingContainer || '#pending-students', 'div');
-    pendingContainer.style.display = 'flex';
-    pendingContainer.style.flexWrap = 'wrap';
-    pendingContainer.style.gap = '6px';
+    Object.assign(pendingContainer.style, {
+      display: 'flex',
+      flexWrap: 'wrap',
+      gap: '6px',
+    });
 
-    // Buttons
-    const btnMuteAll = createBtn('Mute All');
-    const btnStopAllVideo = createBtn('Stop All Video');
-    const btnAcceptAll = createBtn('Accepter Tout'); // optional mass-accept (use carefully)
-    const btnLowerAllHands = createBtn('Desendre Toutes Mains');
-    const btnBlock = createBtn('Bloquer Élève'); // requires username prompt
-    const btnRecord = createBtn('Commencer Enregistrement');
-    const btnStopRecord = createBtn('Arrêter Enregistrement');
-    const btnShareScreen = createBtn('Partager Écran');
+    // --- Boutons Principaux ---
+    const btnMuteAll = createBtn('🔇 Mute Tout');
+    const btnStopAllVideo = createBtn('📷 Stop Tout Video');
+    const btnAcceptAll = createBtn('✅ Asepte Tout');
+    const btnLowerAllHands = createBtn('✋ Desann Tout Men');
+    const btnBlock = createBtn('🚫 Bloke Elèv');
+    const btnRecord = createBtn('🎥 Kòmanse Anrejistreman');
+    const btnStopRecord = createBtn('⏹ Sispann Anrejistreman');
+    const btnShareScreen = createBtn('🖥️ Pataje Ekran');
     const uploadInput = document.createElement('input');
     uploadInput.type = 'file';
-    uploadInput.style.display = 'inline-block';
     uploadInput.style.marginLeft = '6px';
+    const btnAnnouncement = createBtn('📢 Fè Anons');
 
-    const btnAnnouncement = createBtn('Diffuser Annonce');
+    // Ajoute yo nan UI
+    [
+      btnMuteAll,
+      btnStopAllVideo,
+      btnLowerAllHands,
+      btnBlock,
+      btnRecord,
+      btnStopRecord,
+      btnShareScreen,
+      uploadInput,
+      btnAnnouncement,
+      btnAcceptAll,
+    ].forEach((b) => controlsContainer.appendChild(b));
 
-    // Append UI
-    controlsContainer.appendChild(btnMuteAll);
-    controlsContainer.appendChild(btnStopAllVideo);
-    controlsContainer.appendChild(btnLowerAllHands);
-    controlsContainer.appendChild(btnBlock);
-    controlsContainer.appendChild(btnRecord);
-    controlsContainer.appendChild(btnStopRecord);
-    controlsContainer.appendChild(btnShareScreen);
-    controlsContainer.appendChild(uploadInput);
-    controlsContainer.appendChild(btnAnnouncement);
-    controlsContainer.appendChild(btnAcceptAll);
-    if (!document.body.contains(controlsContainer)) {
-      // If the container was not in DOM (created), append to top of body
+    if (!document.body.contains(controlsContainer))
       document.body.insertBefore(controlsContainer, document.body.firstChild);
-    }
-    if (!document.body.contains(pendingContainer)) {
+    if (!document.body.contains(pendingContainer))
       document.body.insertBefore(pendingContainer, controlsContainer.nextSibling);
-    }
 
-    // Recording helpers (teacher side)
+    // --- Fonksyon Anrejistreman ---
     let mediaRecorder = null;
     let recordedChunks = [];
 
     async function startRecording() {
+      if (!navigator.mediaDevices) return alert("Navigatè ou pa sipòte MediaRecorder.");
       const stream = await getLocalStream();
-      if (!stream) return alert('Aucun flux local pour enregistrer');
+      if (!stream) return alert('Pa gen videyo lokal pou anrejistre.');
       recordedChunks = [];
       mediaRecorder = new MediaRecorder(stream);
       mediaRecorder.ondataavailable = (e) => {
@@ -97,7 +118,11 @@
       mediaRecorder.start(1000);
       btnRecord.disabled = true;
       btnStopRecord.disabled = false;
-      socket.emit('chat-message', { room, from: username, message: 'Enregistrement démarré (professeur).' });
+      socket.emit('chat-message', {
+        room,
+        from: username,
+        message: '🎬 Anrejistreman kòmanse.',
+      });
     }
 
     async function stopRecording() {
@@ -109,47 +134,48 @@
         fd.append('file', blob, `${room || 'session'}-${Date.now()}.webm`);
         try {
           const res = await fetch('/upload-recording', { method: 'POST', body: fd });
-          const json = await res.json();
+          const json = await res.json().catch(() => ({}));
           if (json.success) {
-            alert('Enregistrement uploadé.');
-            socket.emit('chat-message', { room, from: username, message: 'Enregistrement disponible: ' + json.path });
-          } else {
-            alert('Echec upload enregistrement');
-          }
+            socket.emit('chat-message', {
+              room,
+              from: username,
+              message: `📁 Anrejistreman disponib: ${json.path}`,
+            });
+            alert('✅ Anrejistreman telechaje avèk siksè.');
+          } else alert('❌ Echec upload enregistrement.');
         } catch (err) {
           console.error(err);
-          alert('Erreur upload enregistrement');
+          alert('⚠️ Erè upload anrejistreman.');
         }
       };
       btnRecord.disabled = false;
       btnStopRecord.disabled = true;
     }
 
-    btnRecord.onclick = () => startRecording();
-    btnStopRecord.onclick = () => stopRecording();
+    btnRecord.onclick = startRecording;
+    btnStopRecord.onclick = stopRecording;
     btnStopRecord.disabled = true;
 
-    // Share screen: teacher shares and server notifies students
+    // --- Pataje Ekran ---
     btnShareScreen.onclick = async () => {
       try {
         const s = await navigator.mediaDevices.getDisplayMedia({ video: true });
-        // show a preview in video-section if present
-        const videoSection = document.querySelector(ui.videoSection || '#video-section') || document.body;
-        let screenEl = document.getElementById('teacher-screen-share-preview');
-        if (!screenEl) {
-          screenEl = document.createElement('video');
-          screenEl.id = 'teacher-screen-share-preview';
-          screenEl.autoplay = true;
-          screenEl.muted = true;
-          screenEl.style.maxWidth = '100%';
-          videoSection.insertBefore(screenEl, videoSection.firstChild);
+        const videoSection =
+          document.querySelector(ui.videoSection || '#video-section') || document.body;
+        let preview = document.getElementById('teacher-screen-share-preview');
+        if (!preview) {
+          preview = document.createElement('video');
+          preview.id = 'teacher-screen-share-preview';
+          Object.assign(preview, { autoplay: true, muted: true });
+          preview.style.maxWidth = '100%';
+          videoSection.prepend(preview);
         }
-        screenEl.srcObject = s;
+        preview.srcObject = s;
         socket.emit('teacher-share-screen', { room });
         const t = s.getVideoTracks()[0];
         t.onended = () => {
           socket.emit('teacher-stop-screen', { room });
-          if (screenEl) screenEl.remove();
+          preview.remove();
         };
       } catch (err) {
         console.error('Share screen fail', err);
@@ -157,7 +183,7 @@
       }
     };
 
-    // Upload doc and broadcast link via chat
+    // --- Upload Dokiman ---
     uploadInput.onchange = async () => {
       const file = uploadInput.files[0];
       if (!file) return;
@@ -165,67 +191,72 @@
       form.append('document', file);
       try {
         const res = await fetch('/upload-doc', { method: 'POST', body: form });
-        const rjson = await res.json();
+        const rjson = await res.json().catch(() => ({}));
         if (rjson.success) {
-          socket.emit('chat-message', { room, from: username, message: `Document partagé: ${rjson.path}` });
-          alert('Document uploadé et partagé en chat');
-        } else alert('Échec upload document');
+          socket.emit('chat-message', {
+            room,
+            from: username,
+            message: `📄 Nouvo dokiman pataje: ${rjson.path}`,
+          });
+          alert('✅ Dokiman telechaje ak pataje.');
+        } else alert('❌ Echec upload document.');
       } catch (err) {
         console.error(err);
-        alert('Erreur upload doc');
+        alert('⚠️ Erè upload dokiman.');
       }
     };
 
-    // Block single student by username
+    // --- Kontwòl Global ---
     btnBlock.onclick = () => {
-      const target = prompt('Nom itilizatè elev pou blòk (eg: jean):');
+      const target = prompt('Antre non elèv pou bloke:');
       if (!target) return;
       socket.emit('teacher-block-student', { room, username: target });
     };
 
-    // Lower all hands
     btnLowerAllHands.onclick = () => socket.emit('teacher-lower-hand', { room });
-
-    // Mute all / stop all video
     btnMuteAll.onclick = () => socket.emit('teacher-mute-all', { room });
     btnStopAllVideo.onclick = () => socket.emit('teacher-stop-all-video', { room });
 
-    // Accept all pending (helper) — use carefully (will attempt to accept only existing pending entries)
     btnAcceptAll.onclick = () => {
-      // try to accept all pending child nodes in pendingContainer
-      const pendingBtns = pendingContainer.querySelectorAll('div');
-      pendingBtns.forEach((wrap) => {
-        const nameEl = wrap.querySelector('span[data-pending-name]');
-        if (nameEl) {
-          const uname = nameEl.getAttribute('data-pending-name');
-          socket.emit('teacher-accept', { room, username: uname });
-          wrap.remove();
-        }
+      const entries = pendingContainer.querySelectorAll('[data-pending-name]');
+      entries.forEach((el) => {
+        const uname = el.getAttribute('data-pending-name');
+        socket.emit('teacher-accept', { room, username: uname });
+        el.parentElement?.remove();
       });
     };
 
-    // Announcement
     btnAnnouncement.onclick = () => {
-      const text = prompt('Texte de l\'annonce à diffuser:');
-      if (!text) return;
-      socket.emit('chat-message', { room, from: username, message: '[ANNONCE PROFESSEUR] ' + text });
+      const text = prompt('Tèks anons la:');
+      if (text)
+        socket.emit('chat-message', {
+          room,
+          from: username,
+          message: '📢 [ANONS]: ' + text,
+        });
     };
 
-    // Server events: pending student
+    // --- Evènman Socket ---
     socket.on('student-pending', (data) => {
-      // data: { username }
       const uname = data.username;
-      // create compact entry
+      if (pendingContainer.querySelector(`[data-pending-name="${uname}"]`)) return; // evite doublons
+
       const wrap = document.createElement('div');
-      wrap.style.display = 'flex';
-      wrap.style.alignItems = 'center';
-      wrap.style.gap = '6px';
+      Object.assign(wrap.style, {
+        display: 'flex',
+        alignItems: 'center',
+        gap: '6px',
+        background: '#333',
+        color: '#fff',
+        padding: '4px 8px',
+        borderRadius: '6px',
+      });
+
       const nameSpan = document.createElement('span');
       nameSpan.textContent = uname;
       nameSpan.setAttribute('data-pending-name', uname);
-      nameSpan.style.color = '#fff';
-      const aBtn = createBtn('Accepter');
-      const rBtn = createBtn('Rejeter');
+      const aBtn = createBtn('Asepte');
+      const rBtn = createBtn('Rejte');
       aBtn.onclick = () => {
         socket.emit('teacher-accept', { room, username: uname });
         wrap.remove();
@@ -234,55 +265,52 @@
         socket.emit('teacher-reject', { room, username: uname });
         wrap.remove();
       };
-      wrap.appendChild(nameSpan);
-      wrap.appendChild(aBtn);
-      wrap.appendChild(rBtn);
+      wrap.append(nameSpan, aBtn, rBtn);
       pendingContainer.appendChild(wrap);
     });
 
-    // handle notification when student joins (teacher may get socketId or not)
     socket.on('student-joined', (data) => {
-      // data can contain { username, socketId }
       const uname = data.username || data;
-      console.log('Student joined:', uname, data.socketId || data.id);
-      // Optionally create small control next to student video (e.g. block, mute single)
-      // Create a short UI indicator in pendingContainer or dedicated student list:
-      const listEl = document.getElementById('teacher-student-list') || document.createElement('div');
-      listEl.id = 'teacher-student-list';
+      console.log('Student joined:', uname);
+
+      const listEl =
+        document.getElementById('teacher-student-list') ||
+        Object.assign(document.createElement('div'), { id: 'teacher-student-list' });
+
       const item = document.createElement('div');
-      item.style.display = 'flex';
-      item.style.gap = '6px';
-      item.style.alignItems = 'center';
+      Object.assign(item.style, {
+        display: 'flex',
+        gap: '6px',
+        alignItems: 'center',
+        background: '#222',
+        color: '#fff',
+        padding: '4px 8px',
+        borderRadius: '6px',
+      });
       item.textContent = uname;
+
       const muteBtn = createBtn('Mute');
       const camBtn = createBtn('CamOff');
-      const blockBtn = createBtn('Block');
-      muteBtn.onclick = () => socket.emit('teacher-toggle-mic', { room, username: uname, enabled: false });
-      camBtn.onclick = () => socket.emit('teacher-toggle-video', { room, username: uname, enabled: false });
+      const blockBtn = createBtn('Bloke');
+
+      muteBtn.onclick = () =>
+        socket.emit('teacher-toggle-mic', { room, username: uname, enabled: false });
+      camBtn.onclick = () =>
+        socket.emit('teacher-toggle-video', { room, username: uname, enabled: false });
       blockBtn.onclick = () => socket.emit('teacher-block-student', { room, username: uname });
-      item.appendChild(muteBtn);
-      item.appendChild(camBtn);
-      item.appendChild(blockBtn);
+
+      item.append(muteBtn, camBtn, blockBtn);
       listEl.appendChild(item);
+
       if (!document.body.contains(listEl)) controlsContainer.appendChild(listEl);
     });
 
-    // reconnect handling: professor may leave and rejoin
     window.addEventListener('online', () => {
-      // attempt to rejoin room as teacher if disconnected
-      if (room && username) {
-        socket.emit('join-room', { room, role: 'teacher', username });
-      }
+      if (room && username) socket.emit('join-room', { room, role: 'teacher', username });
     });
 
-    return {
-      container: controlsContainer,
-      pendingContainer,
-      startRecording,
-      stopRecording,
-    };
+    return { container: controlsContainer, pendingContainer, startRecording, stopRecording };
   };
 
-  // expose
   window.TeacherControls = TeacherControls;
 })();
