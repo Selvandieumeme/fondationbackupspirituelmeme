@@ -30,6 +30,19 @@
     <div id="student-videos"></div>
   </div>
 
+  <!-- PANEL BÒ DWAT (Main leve + Lis elèv) -->
+  <div id="right-panel">
+    <div id="main-raise-panel">
+      <h4>Main Levée</h4>
+      <div id="main-raise-list" class="scrollable"></div>
+    </div>
+    <div id="connected-students-panel">
+      <h4>Élèves Connectés</h4>
+      <div id="connected-students-list" class="scrollable"></div>
+      <div id="students-count">Présents: 0</div>
+    </div>
+  </div>
+
   <!-- CHAT SECTION -->
   <div id="chat-section" style="display:none;">
     <ul id="messages"></ul>
@@ -38,6 +51,10 @@
       <button type="submit">Envoyer</button>
     </form>
   </div>
+
+  <!-- BOUTON ADDITIONNEL -->
+  <button id="return-btn" style="display:none;">Retourner dans la salle</button>
+  <button id="change-bg-btn" style="display:none;">Changer fond d'écran</button>
 
   <!-- SOCKET.IO CLIENT -->
   <script src="https://examen-backend-ihlx.onrender.com/socket.io/socket.io.js"></script>
@@ -50,8 +67,8 @@
   <script src="ecole-en-ligne.js"></script>
 
   <script>
-    // === INITIALISATION ===
-    const socket = io("https://examen-backend-ihlx.onrender.com"); // konekte ak backend render ou
+    const MEME_BACKEND = "https://examen-backend-ihlx.onrender.com";
+    const socket = io(MEME_BACKEND);
 
     const joinBtn = document.getElementById('join-btn');
     const roomInput = document.getElementById('room-code');
@@ -59,6 +76,11 @@
     const roleSelect = document.getElementById('role');
     const videoSection = document.getElementById('video-section');
     const chatSection = document.getElementById('chat-section');
+    const returnBtn = document.getElementById('return-btn');
+    const changeBgBtn = document.getElementById('change-bg-btn');
+    const mainRaiseList = document.getElementById('main-raise-list');
+    const connectedStudentsList = document.getElementById('connected-students-list');
+    const studentsCount = document.getElementById('students-count');
 
     let localStream = null;
 
@@ -66,7 +88,6 @@
       if (!localStream) {
         try {
           localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-          // mete stream sou teacher-video si teacher
           const teacherVideo = document.getElementById('teacher-video');
           teacherVideo.srcObject = localStream;
         } catch (err) {
@@ -76,6 +97,7 @@
       return localStream;
     }
 
+    // ===== JOIN ROOM =====
     joinBtn.onclick = async () => {
       const room = roomInput.value.trim();
       const username = usernameInput.value.trim();
@@ -83,14 +105,13 @@
 
       if (!room || !username) return alert("Veuillez remplir le code de salle et votre nom.");
 
-      // montre videyo ak chat
       videoSection.style.display = 'flex';
       chatSection.style.display = 'block';
+      returnBtn.style.display = 'inline-block';
+      changeBgBtn.style.display = 'inline-block';
 
-      // ajoute elèv/profesè nan room
       socket.emit('join-room', { room, username, role });
 
-      // initialize teacher/student controls
       if (role === 'teacher') {
         document.getElementById('teacher-controls').style.display = 'flex';
         window.TeacherControls.init({
@@ -101,7 +122,10 @@
           ui: {
             controlsContainer: '#teacher-controls',
             pendingContainer: '#pending-students',
-            videoSection: '#video-section'
+            videoSection: '#video-section',
+            mainRaiseList,
+            connectedStudentsList,
+            studentsCount
           }
         });
       } else {
@@ -112,7 +136,10 @@
           getLocalStream,
           ui: {
             videoSection: '#video-section',
-            chatInputSelector: '#msg'
+            chatInputSelector: '#msg',
+            mainRaiseList,
+            connectedStudentsList,
+            studentsCount
           }
         });
       }
@@ -123,7 +150,7 @@
       roleSelect.disabled = true;
     };
 
-    // === CHAT SEND ===
+    // ===== CHAT SEND =====
     const chatForm = document.getElementById('chat-form');
     chatForm.addEventListener('submit', (e) => {
       e.preventDefault();
@@ -138,7 +165,6 @@
       msgInput.value = '';
     });
 
-    // montre mesaj yo nan lis
     socket.on('chat-message', (data) => {
       const messages = document.getElementById('messages');
       const li = document.createElement('li');
@@ -146,6 +172,27 @@
       messages.appendChild(li);
       messages.scrollTop = messages.scrollHeight;
     });
+
+    // ===== RETURN TO CLASS =====
+    returnBtn.onclick = () => {
+      videoSection.style.display = 'flex';
+      chatSection.style.display = 'block';
+      returnBtn.style.display = 'none';
+    };
+
+    // ===== CHANGE BACKGROUND =====
+    changeBgBtn.onclick = async () => {
+      const file = document.createElement('input');
+      file.type = 'file';
+      file.accept = 'image/*';
+      file.onchange = async (e) => {
+        const selectedFile = e.target.files[0];
+        if (!selectedFile) return;
+        const imgUrl = URL.createObjectURL(selectedFile);
+        document.getElementById('teacher-video').style.backgroundImage = `url(${imgUrl})`;
+      };
+      file.click();
+    };
   </script>
 </body>
 </html>
