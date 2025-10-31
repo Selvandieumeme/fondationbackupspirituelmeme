@@ -1,8 +1,8 @@
 // student-controls.js
+// =====================
 // Usage:
-//   Window.StudentControls.init({ socket, room, username, getLocalStream, ui: { videoSection, chatInputSelector } })
-//   - getLocalStream: function that returns current MediaStream (or null)
-//   - student controls will be injected under #video-section by default
+//   window.StudentControls.init({ socket, room, username, getLocalStream, ui: { videoSection, chatInputSelector } })
+
 (function () {
   const StudentControls = {};
 
@@ -16,6 +16,21 @@
     return e;
   }
 
+  function styleBtn(btn) {
+    Object.assign(btn.style, {
+      cursor: 'pointer',
+      background: '#1976d2',
+      color: '#fff',
+      border: 'none',
+      borderRadius: '6px',
+      padding: '6px 10px',
+      fontSize: '14px',
+    });
+    btn.onmouseenter = () => (btn.style.background = '#125ca0');
+    btn.onmouseleave = () => (btn.style.background = '#1976d2');
+    return btn;
+  }
+
   StudentControls.init = function (opts = {}) {
     if (!opts.socket) throw new Error('StudentControls requires socket');
     const socket = opts.socket;
@@ -25,42 +40,44 @@
     const ui = opts.ui || {};
     const videoSection = document.querySelector(ui.videoSection || '#video-section') || document.body;
 
-    // control bar container
+    // --- Create control bar ---
     let bar = document.getElementById('student-control-bar');
     if (!bar) {
       bar = $el('div', { id: 'student-control-bar' });
-      bar.style.display = 'flex';
-      bar.style.gap = '8px';
-      bar.style.justifyContent = 'center';
-      bar.style.flexWrap = 'wrap';
-      bar.style.marginTop = '10px';
+      Object.assign(bar.style, {
+        display: 'flex',
+        gap: '8px',
+        justifyContent: 'center',
+        flexWrap: 'wrap',
+        marginTop: '10px',
+      });
       videoSection.appendChild(bar);
     }
 
-    // Buttons
-    const btnMute = $el('button', { html: '🎤 Mute/Unmute' });
-    const btnCam = $el('button', { html: '🎥 On/Off Cam' });
-    const btnRaise = $el('button', { html: '✋ Lever la main' });
-    const btnLower = $el('button', { html: '⬇️ Baisser main' });
-    const btnChat = $el('button', { html: '💬 Chat' });
-    const btnLeave = $el('button', { html: '🚪 Quitter' });
-    const btnShare = $el('button', { html: '🖥️ Partager écran' });
-    const btnDownload = $el('button', { html: '⬇️ Docs' });
-    const btnRecord = $el('button', { html: '🔴 Record' });
+    // --- Buttons ---
+    const btnMute = styleBtn($el('button', { html: '🎤 Mute/Unmute' }));
+    const btnCam = styleBtn($el('button', { html: '🎥 Cam On/Off' }));
+    const btnRaise = styleBtn($el('button', { html: '✋ Lever la main' }));
+    const btnLower = styleBtn($el('button', { html: '⬇️ Baisser main' }));
+    const btnChat = styleBtn($el('button', { html: '💬 Chat' }));
+    const btnLeave = styleBtn($el('button', { html: '🚪 Quitter' }));
+    const btnShare = styleBtn($el('button', { html: '🖥️ Partager écran' }));
+    const btnDownload = styleBtn($el('button', { html: '⬇️ Docs' }));
+    const btnRecord = styleBtn($el('button', { html: '🔴 Record' }));
 
     [btnMute, btnCam, btnRaise, btnLower, btnChat, btnLeave, btnShare, btnDownload, btnRecord].forEach(b => bar.appendChild(b));
 
-    // State
+    // --- State ---
     let recording = false;
 
-    // Handlers
+    // --- Handlers ---
     btnMute.onclick = async () => {
       const stream = await getLocalStream();
       if (!stream) return alert('Aucun flux local');
-      const aTracks = stream.getAudioTracks();
-      if (!aTracks.length) return alert('Pas de micro détecté');
-      const enabled = aTracks[0].enabled;
-      aTracks.forEach(t => t.enabled = !enabled);
+      const tracks = stream.getAudioTracks();
+      if (!tracks.length) return alert('Pas de micro détecté');
+      const enabled = tracks[0].enabled;
+      tracks.forEach(t => t.enabled = !enabled);
       btnMute.textContent = enabled ? '🎤 Unmute' : '🎤 Mute';
       socket.emit('private-message', { from: username, to: 'teacher', message: enabled ? 'Micro muté' : 'Micro activé' });
     };
@@ -68,10 +85,10 @@
     btnCam.onclick = async () => {
       const stream = await getLocalStream();
       if (!stream) return alert('Aucun flux local');
-      const vTracks = stream.getVideoTracks();
-      if (!vTracks.length) return alert('Pas de caméra détectée');
-      const enabled = vTracks[0].enabled;
-      vTracks.forEach(t => t.enabled = !enabled);
+      const tracks = stream.getVideoTracks();
+      if (!tracks.length) return alert('Pas de caméra détectée');
+      const enabled = tracks[0].enabled;
+      tracks.forEach(t => t.enabled = !enabled);
       btnCam.textContent = enabled ? '🎥 Cam On' : '🎥 Cam Off';
     };
 
@@ -95,21 +112,17 @@
 
     btnLeave.onclick = () => {
       socket.emit('leave-room', room);
-      // stop local tracks
       getLocalStream()?.getTracks().forEach(t => t.stop());
-      // reload to reset UI
       location.reload();
     };
 
     btnShare.onclick = async () => {
+      if (!navigator.mediaDevices) return alert("Navigatè ou pa sipòte screen share.");
       try {
         const s = await navigator.mediaDevices.getDisplayMedia({ video: true });
-        // small preview
         const pv = document.createElement('video');
-        pv.autoplay = true;
-        pv.muted = true;
-        pv.style.maxWidth = '320px';
-        pv.style.marginTop = '8px';
+        Object.assign(pv, { autoplay: true, muted: true });
+        Object.assign(pv.style, { maxWidth: '320px', marginTop: '8px' });
         pv.srcObject = s;
         videoSection.appendChild(pv);
         socket.emit('student-shared-screen', { room, username });
@@ -124,16 +137,12 @@
       }
     };
 
-    btnDownload.onclick = () => {
-      // open uploads listing. Server exposes /uploads (if left enabled)
-      window.open('/uploads', '_blank');
-    };
+    btnDownload.onclick = () => window.open('/uploads', '_blank');
 
     btnRecord.onclick = async () => {
       const stream = await getLocalStream();
       if (!stream) return alert('Aucun flux local');
       if (!recording) {
-        // start local recording
         try {
           const mr = new MediaRecorder(stream);
           const parts = [];
@@ -141,14 +150,12 @@
           mr.start(1000);
           btnRecord.textContent = '⏹️ Stop';
           recording = true;
-          // store on element for stop
           btnRecord._recorder = mr;
           btnRecord._chunks = parts;
         } catch (err) {
           console.error('rec start err', err);
         }
       } else {
-        // stop and upload
         const mr = btnRecord._recorder;
         const parts = btnRecord._chunks || [];
         if (mr) {
@@ -159,12 +166,12 @@
             fd.append('file', blob, `${username}-${Date.now()}.webm`);
             try {
               const r = await fetch('/upload-recording', { method: 'POST', body: fd });
-              const j = await r.json();
-              if (j.success) alert('Enregistrement uploadé');
-              else alert('Echec upload');
+              const j = await r.json().catch(() => ({}));
+              if (j.success) alert('✅ Enregistrement uploadé');
+              else alert('❌ Echec upload');
             } catch (err) {
               console.error(err);
-              alert('Erreur upload');
+              alert('⚠️ Erreur upload');
             }
           };
         }
@@ -173,7 +180,7 @@
       }
     };
 
-    // Handle server commands (teacher actions)
+    // --- Server commands ---
     socket.on('teacher-mute-all', () => {
       getLocalStream()?.getAudioTracks().forEach(t => t.enabled = false);
       alert('Le professeur a coupé les micros.');
@@ -187,14 +194,10 @@
       location.reload();
     });
     socket.on('teacher-lower-hand', ({ username: name }) => {
-      if (name === username) {
-        alert('Votre main a été baissée par le professeur.');
-      }
+      if (name === username) alert('Votre main a été baissée par le professeur.');
     });
 
-    // auto-focus chat input when chat message arrives
     socket.on('chat-message', (data) => {
-      // Show message to student UI (server also stores)
       const msgList = document.querySelector('#messages');
       if (msgList) {
         const li = document.createElement('li');
