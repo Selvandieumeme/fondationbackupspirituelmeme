@@ -52,21 +52,24 @@ h1 {
   box-shadow: 0 0 4px rgba(13, 110, 253, 0.4);
 }
 
-/* === CONTROLES ENSEIGNANT === */
-#teacher-controls {
-  display: none;
+/* === CONTROLES ENSEIGNANT & STUDENT === */
+.teacher-controls, #teacher-controls,
+.student-controls, #student-control-bar {
+  display: flex;
   justify-content: center;
   flex-wrap: wrap;
   margin: 20px auto;
-  background: linear-gradient(90deg, #0d6efd 0%, #0056b3 100%);
-  border-radius: 10px;
   padding: 12px;
+  border-radius: 10px;
   max-width: 800px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  background: linear-gradient(90deg, #0d6efd 0%, #0056b3 100%);
 }
 
+.teacher-controls button,
+.student-controls button,
 #teacher-controls button,
-#teacher-controls input {
+#student-control-bar button {
   margin: 6px;
   padding: 10px 14px;
   border: none;
@@ -78,7 +81,10 @@ h1 {
   transition: transform 0.25s ease, background 0.3s ease;
 }
 
-#teacher-controls button:hover {
+.teacher-controls button:hover,
+.student-controls button:hover,
+#teacher-controls button:hover,
+#student-control-bar button:hover {
   background: #fff;
   color: #0b5ed7;
   transform: scale(1.05);
@@ -263,7 +269,8 @@ button:hover {
 /* === RESPONSIVE === */
 @media (max-width: 768px) {
   #room-controls,
-  #teacher-controls {
+  #teacher-controls,
+  #student-control-bar {
     flex-direction: column;
     align-items: center;
   }
