@@ -23,8 +23,26 @@
 <div id="classroom" style="display:none;">
   
   <!-- Caméras -->
-  <div id="teacher-camera"></div>
-  <div id="students-camera"></div>
+<div id="video-section">
+
+  <!-- Vidéo du professeur -->
+  <div class="teacher-video-container">
+    <h3>Professeur</h3>
+    <video id="teacher-video" autoplay playsinline muted></video>
+  </div>
+
+  <!-- Vidéos des élèves -->
+  <div id="student-videos">
+    <!-- Les vidéos des élèves seront ajoutées ici dynamiquement -->
+  </div>
+
+  <!-- Écran partagé -->
+  <div id="screen-share-container" style="display:none;">
+    <h3>Partage d’écran</h3>
+    <video id="screen-video" autoplay playsinline></video>
+  </div>
+
+</div>
 
   <!-- Panel latéral -->
   <div id="side-panel">
