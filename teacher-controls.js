@@ -9,13 +9,17 @@ let teacherControlsInit = async (socket) => {
   const shareScreenBtn = document.getElementById('share-screen');
   const recordBtn = document.getElementById('record-video');
 
-  // Bouton chanje fond
-  const changeBgBtn = document.createElement('button');
-  changeBgBtn.id = 'change-bg';
-  changeBgBtn.textContent = 'Changer Fond';
-  changeBgBtn.style.margin = '6px';
-  document.getElementById('controls').appendChild(changeBgBtn);
+ // Bouton chanje fond (kreye sèlman si li pa deja egziste)
+let changeBgBtn = document.getElementById('change-bg');
+if (!changeBgBtn) {
+    changeBgBtn = document.createElement('button');
+    changeBgBtn.id = 'change-bg';
+    changeBgBtn.textContent = 'Changer Fond';
+    changeBgBtn.style.margin = '6px';
+    document.getElementById('controls').appendChild(changeBgBtn);
+}
 
+  
   let localStream;
   let micEnabled = true;
   let camEnabled = true;
