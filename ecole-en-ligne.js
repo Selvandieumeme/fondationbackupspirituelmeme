@@ -198,17 +198,18 @@ socket.on('chatMessage', data => {
 
 
 
-\// ====================================================
+// ====================================================
 // BOUTONS ADDITIONNELS (PA KREYE CHANGE-BG ANKÒ)
 // ====================================================
 const downloadBtn = document.getElementById('download-file');
 const shareScreenBtn = document.getElementById('share-screen');
 const recordBtn = document.getElementById('record-video');
 const mainHandBtn = document.getElementById('main-hand');
-// Ranplase ID pou evite konfli ak "joinBtn"
-const changeBgBtn = document.getElementById('change-background-btn'); // <- nouvo ID
+// Itilize bouton ki deja nan HTML pou evite konfli
+const changeBgBtn = document.getElementById('change-background-btn');
 
 downloadBtn.addEventListener('click', () => alert('Téléchargement activé (simulation).'));
+
 shareScreenBtn.addEventListener('click', async () => {
     try {
         await navigator.mediaDevices.getDisplayMedia({ video: true });
@@ -217,10 +218,13 @@ shareScreenBtn.addEventListener('click', async () => {
         console.error(err);
     }
 });
+
 recordBtn.addEventListener('click', () => alert('Enregistrement activé (simulation).'));
 
 // Main leve (simulation vizyèl)
-mainHandBtn.addEventListener('click', () => mainHandBtn.style.backgroundColor = 'green');
+mainHandBtn.addEventListener('click', () => {
+    mainHandBtn.style.backgroundColor = 'green';
+});
 
 // ====================================================
 // CHANGER FOND DE CLASSE
@@ -242,24 +246,26 @@ function changeBackgroundAI() {
     currentBgIndex = (currentBgIndex + 1) % aiBackgrounds.length;
 }
 
-// Listener bouton pou chwazi fon lokal
+// Listener bouton pou chwazi fon lokal sèlman si bouton egziste
 if (changeBgBtn) {
     changeBgBtn.addEventListener('click', () => {
         const input = document.createElement('input');
         input.type = 'file';
         input.accept = 'image/*';
-        input.onchange = (e) => {
+
+        input.addEventListener('change', (e) => {
             const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = (ev) => {
-                    classroom.style.backgroundImage = `url(${ev.target.result})`;
-                    classroom.style.backgroundSize = 'cover';
-                    classroom.style.backgroundPosition = 'center';
-                };
-                reader.readAsDataURL(file);
-            }
-        };
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+                classroom.style.backgroundImage = `url(${ev.target.result})`;
+                classroom.style.backgroundSize = 'cover';
+                classroom.style.backgroundPosition = 'center';
+            };
+            reader.readAsDataURL(file);
+        });
+
         input.click();
     });
 }
