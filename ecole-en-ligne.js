@@ -256,6 +256,18 @@ function changeBackgroundAI() {
     currentBgIndex = (currentBgIndex + 1) % aiBackgrounds.length;
 }
 
+// ====================================================
+// Bouton "Changer Fond" (kreye sèlman si li pa deja egziste)
+// ====================================================
+let changeBgBtn = document.getElementById('change-bg');
+if (!changeBgBtn) {
+    changeBgBtn = document.createElement('button');
+    changeBgBtn.id = 'change-bg';
+    changeBgBtn.textContent = 'Changer Fond';
+    changeBgBtn.style.margin = '6px';
+    document.getElementById('controls').appendChild(changeBgBtn);
+}
+
 // Bouton pou chwazi pwòp fon lokal
 changeBgBtn.addEventListener('click', () => {
     const input = document.createElement('input');
