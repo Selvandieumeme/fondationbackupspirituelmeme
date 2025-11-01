@@ -234,7 +234,32 @@ mainHandBtn.addEventListener('click', () => {
 });
 
 // ====================================================
-// CHANGER FOND DE CLASSE
+// BOUTON CHANGER FOND (pa kreye ankò, sèlman listener)
+// ====================================================
+const changeBgBtn = document.getElementById('change-bg');
+if (changeBgBtn) {
+    changeBgBtn.addEventListener('click', () => {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = 'image/*';
+        input.onchange = (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (ev) => {
+                    classroom.style.backgroundImage = `url(${ev.target.result})`;
+                    classroom.style.backgroundSize = 'cover';
+                    classroom.style.backgroundPosition = 'center';
+                };
+                reader.readAsDataURL(file);
+            }
+        };
+        input.click();
+    });
+}
+
+// ====================================================
+// Fonksyon chanje fon otomatik AI chak 20 segonn
 // ====================================================
 let aiBackgrounds = [
   'url("https://source.unsplash.com/600x400/?avion")',
@@ -243,12 +268,9 @@ let aiBackgrounds = [
   'url("https://source.unsplash.com/600x400/?ciel")',
   'url("https://source.unsplash.com/600x400/?lame")',
   'url("https://source.unsplash.com/600x400/?decoration")'
-  // Ajoute jiska 50 imaj diferan
 ];
-
 let currentBgIndex = 0;
 
-// Fonksyon chanje fon otomatik (AI)
 function changeBackgroundAI() {
     classroom.style.backgroundImage = aiBackgrounds[currentBgIndex];
     classroom.style.backgroundSize = 'cover';
@@ -256,37 +278,4 @@ function changeBackgroundAI() {
     currentBgIndex = (currentBgIndex + 1) % aiBackgrounds.length;
 }
 
-// ====================================================
-// Bouton "Changer Fond" (kreye sèlman si li pa deja egziste)
-// ====================================================
-let changeBgBtn = document.getElementById('change-bg');
-if (!changeBgBtn) {
-    changeBgBtn = document.createElement('button');
-    changeBgBtn.id = 'change-bg';
-    changeBgBtn.textContent = 'Changer Fond';
-    changeBgBtn.style.margin = '6px';
-    document.getElementById('controls').appendChild(changeBgBtn);
-}
-
-// Bouton pou chwazi pwòp fon lokal
-changeBgBtn.addEventListener('click', () => {
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = 'image/*';
-    input.onchange = (e) => {
-        const file = e.target.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = (ev) => {
-                classroom.style.backgroundImage = `url(${ev.target.result})`;
-                classroom.style.backgroundSize = 'cover';
-                classroom.style.backgroundPosition = 'center';
-            };
-            reader.readAsDataURL(file);
-        }
-    };
-    input.click();
-});
-
-// Chanje AI otomatik chak 20 segonn
 setInterval(changeBackgroundAI, 20000);
