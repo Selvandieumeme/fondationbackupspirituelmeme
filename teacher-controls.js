@@ -16,7 +16,7 @@ let teacherControlsInit = async (socket) => {
     teacherVideo.srcObject = localStream;
     teacherVideo.autoplay = true;
     teacherVideo.playsInline = true;
-    teacherVideo.muted = true; // mute video pwofesè pou li pa tande pwòp mikwo li
+    teacherVideo.muted = false; // mute video pwofesè pou li pa tande pwòp mikwo li
     
     // Enfòme backend ke pwofesè pare
     socket.emit('streamReady', { role: 'teacher' });
