@@ -118,7 +118,7 @@ h1 {
 /* === SECTION VIDEO === */
 #video-section {
   display: flex;
-  flex-direction: column;
+  flex-direction: column; /* kenbe column */
   align-items: center;
   justify-content: flex-start;
   flex-wrap: wrap;
@@ -129,6 +129,7 @@ h1 {
   box-shadow: 0 4px 15px rgba(13, 110, 253, 0.15);
   max-width: 95vw;
   min-height: 70vh;
+  position: relative; /* pou draggable videos ka absolute si bezwen */
 }
 
 #teacher-video,
@@ -152,24 +153,6 @@ h1 {
   border-color: #ffd700;
 }
 
-/* Ajustement écran large */
-@media (min-width: 992px) {
-  #teacher-video,
-  #screen-video {
-    width: 60vw;
-    max-height: 550px;
-  }
-}
-
-@media (min-width: 1400px) {
-  #teacher-video,
-  #screen-video {
-    width: 50vw;
-    max-height: 520px;
-  }
-}
-
-/* Vidéos étudiants */
 #student-videos {
   display: flex;
   flex-wrap: wrap;
@@ -202,6 +185,8 @@ h1 {
   margin: 30px auto;
   background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
   box-shadow: 0 4px 15px rgba(13, 110, 253, 0.15);
+  position: relative;
+  z-index: 1;
 }
 
 #messages {
@@ -227,31 +212,6 @@ h1 {
   background: rgba(255, 215, 0, 0.08);
 }
 
-/* === INPUTS & BOUTONS GÉNÉRAUX === */
-input,
-button {
-  padding: 8px 12px;
-  margin: 4px;
-  font-size: 15px;
-  border-radius: 8px;
-}
-
-button {
-  background: linear-gradient(90deg, #0d6efd 0%, #0056b3 100%);
-  color: #fff;
-  border: none;
-  cursor: pointer;
-  font-weight: 600;
-  letter-spacing: 0.3px;
-  transition: all 0.3s ease;
-}
-
-button:hover {
-  background: linear-gradient(90deg, #ffd700 0%, #fff 100%);
-  color: #0d6efd;
-  transform: translateY(-2px);
-}
-
 /* === PANEL BÒ DWAT === */
 #right-panel {
   position: fixed;
@@ -269,8 +229,8 @@ button:hover {
   z-index: 999;
 }
 
-/* MAIN LEVE */
-#main-raise-panel {
+#main-raise-panel,
+#connected-students-panel {
   max-height: 180px;
   overflow-y: auto;
   border: 1px solid #0d6efd;
@@ -279,23 +239,7 @@ button:hover {
   background: #f0f8ff;
 }
 
-#main-raise-panel h4 {
-  margin: 0 0 6px 0;
-  font-size: 14px;
-  color: #0d6efd;
-  text-align: center;
-}
-
-/* LISTE ELÈV CONNECTÉS */
-#connected-students-panel {
-  max-height: 220px;
-  overflow-y: auto;
-  border: 1px solid #0d6efd;
-  border-radius: 8px;
-  padding: 6px;
-  background: #f8faff;
-}
-
+#main-raise-panel h4,
 #connected-students-panel h4 {
   margin: 0 0 6px 0;
   font-size: 14px;
