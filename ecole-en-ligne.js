@@ -199,44 +199,49 @@ socket.on('chatMessage', data => {
 
 
 // ====================================================
-// BOUTONS ADDITIONNELS
+// BOUTONS ADDITIONNELS (PA KREYE CHANGE-BG ANKÒ)
 // ====================================================
 const downloadBtn = document.getElementById('download-file');
 const shareScreenBtn = document.getElementById('share-screen');
 const recordBtn = document.getElementById('record-video');
 const mainHandBtn = document.getElementById('main-hand');
-const changeBgBtn = document.createElement('button');
-changeBgBtn.id = 'change-bg';
-changeBgBtn.textContent = 'Changer Fond';
-changeBgBtn.style.margin = '6px';
-document.getElementById('controls').appendChild(changeBgBtn);
+const changeBgBtn = document.getElementById('change-bg'); // itilize bouton ki egziste deja
 
-downloadBtn.addEventListener('click', () => {
-    alert('Téléchargement activé (simulation).');
-});
-
+downloadBtn.addEventListener('click', () => alert('Téléchargement activé (simulation).'));
 shareScreenBtn.addEventListener('click', async () => {
     try {
-        const screenStream = await navigator.mediaDevices.getDisplayMedia({ video: true });
+        await navigator.mediaDevices.getDisplayMedia({ video: true });
         alert('Écran partagé activé (simulation).');
     } catch (err) {
         console.error(err);
     }
 });
+recordBtn.addEventListener('click', () => alert('Enregistrement activé (simulation).'));
 
-recordBtn.addEventListener('click', () => {
-    alert('Enregistrement activé (simulation).');
-});
-
-// Main leve deja gen listener, si bezwen simulation vizyèl:
-mainHandBtn.addEventListener('click', () => {
-    mainHandBtn.style.backgroundColor = 'green'; // chanje koulè pou montre li aktive
-});
+// Main leve (simulation vizyèl)
+mainHandBtn.addEventListener('click', () => mainHandBtn.style.backgroundColor = 'green');
 
 // ====================================================
-// BOUTON CHANGER FOND (pa kreye ankò, sèlman listener)
+// CHANGER FOND DE CLASSE
 // ====================================================
-const changeBgBtn = document.getElementById('change-bg');
+let aiBackgrounds = [
+    'url("https://source.unsplash.com/600x400/?avion")',
+    'url("https://source.unsplash.com/600x400/?robo")',
+    'url("https://source.unsplash.com/600x400/?maison")',
+    'url("https://source.unsplash.com/600x400/?ciel")',
+    'url("https://source.unsplash.com/600x400/?lame")',
+    'url("https://source.unsplash.com/600x400/?decoration")'
+];
+let currentBgIndex = 0;
+
+function changeBackgroundAI() {
+    classroom.style.backgroundImage = aiBackgrounds[currentBgIndex];
+    classroom.style.backgroundSize = 'cover';
+    classroom.style.backgroundPosition = 'center';
+    currentBgIndex = (currentBgIndex + 1) % aiBackgrounds.length;
+}
+
+// Listener bouton pou chwazi fon lokal
 if (changeBgBtn) {
     changeBgBtn.addEventListener('click', () => {
         const input = document.createElement('input');
@@ -258,24 +263,5 @@ if (changeBgBtn) {
     });
 }
 
-// ====================================================
-// Fonksyon chanje fon otomatik AI chak 20 segonn
-// ====================================================
-let aiBackgrounds = [
-  'url("https://source.unsplash.com/600x400/?avion")',
-  'url("https://source.unsplash.com/600x400/?robo")',
-  'url("https://source.unsplash.com/600x400/?maison")',
-  'url("https://source.unsplash.com/600x400/?ciel")',
-  'url("https://source.unsplash.com/600x400/?lame")',
-  'url("https://source.unsplash.com/600x400/?decoration")'
-];
-let currentBgIndex = 0;
-
-function changeBackgroundAI() {
-    classroom.style.backgroundImage = aiBackgrounds[currentBgIndex];
-    classroom.style.backgroundSize = 'cover';
-    classroom.style.backgroundPosition = 'center';
-    currentBgIndex = (currentBgIndex + 1) % aiBackgrounds.length;
-}
-
+// Chanje AI otomatik chak 20 segonn
 setInterval(changeBackgroundAI, 20000);
