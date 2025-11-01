@@ -24,10 +24,19 @@
   <div id="teacher-controls" style="display:none;"></div>
   <div id="pending-students"></div>
 
-  <!-- VIDEO SECTION -->
+  <!-- VIDEO SECTION (Restabli nan plas orijinal) -->
   <div id="video-section" style="display:none;">
     <video id="teacher-video" autoplay muted playsinline></video>
     <div id="student-videos"></div>
+  </div>
+
+  <!-- CHAT SECTION (Restabli nan plas orijinal) -->
+  <div id="chat-section" style="display:none;">
+    <ul id="messages"></ul>
+    <form id="chat-form">
+      <input id="msg" autocomplete="off" placeholder="Votre message" />
+      <button type="submit">Envoyer</button>
+    </form>
   </div>
 
   <!-- PANEL BÒ DWAT (Main leve + Lis elèv) -->
@@ -43,16 +52,7 @@
     </div>
   </div>
 
-  <!-- CHAT SECTION -->
-  <div id="chat-section" style="display:none;">
-    <ul id="messages"></ul>
-    <form id="chat-form">
-      <input id="msg" autocomplete="off" placeholder="Votre message" />
-      <button type="submit">Envoyer</button>
-    </form>
-  </div>
-
-  <!-- BOUTON ADDITIONNEL -->
+  <!-- BOUTONS SUPPLÉMENTAIRES -->
   <button id="return-btn" style="display:none;">Retourner dans la salle</button>
   <button id="change-bg-btn" style="display:none;">Changer fond d'écran</button>
 
@@ -105,6 +105,7 @@
 
       if (!room || !username) return alert("Veuillez remplir le code de salle et votre nom.");
 
+      // Retabli videyo ak chat nan plas orijinal
       videoSection.style.display = 'flex';
       chatSection.style.display = 'block';
       returnBtn.style.display = 'inline-block';
@@ -122,7 +123,7 @@
           ui: {
             controlsContainer: '#teacher-controls',
             pendingContainer: '#pending-students',
-            videoSection: '#video-section',
+            videoSection,
             mainRaiseList,
             connectedStudentsList,
             studentsCount
@@ -135,7 +136,7 @@
           username,
           getLocalStream,
           ui: {
-            videoSection: '#video-section',
+            videoSection,
             chatInputSelector: '#msg',
             mainRaiseList,
             connectedStudentsList,
