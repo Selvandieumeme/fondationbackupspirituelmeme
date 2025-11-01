@@ -1,199 +1,76 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8" />
-  <title>École en Ligne — FOBAS</title>
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <link rel="stylesheet" href="ecole-en-ligne.css" />
+<meta charset="UTF-8">
+<title>ÉCOLE EN LIGNE FOBAS - UNE AUTRE HAITI AVEC UNE NOULLE TECHNOLOGIE</title>
+<link rel="stylesheet" href="ecole-en-ligne.css">
+<script src="https://cdn.socket.io/4.6.1/socket.io.min.js"></script>
 </head>
 <body>
-  <h1>École en Ligne FOBAS - UNE AUTRE HAITI VERS LA TECHNOLOGIE</h1>
 
-  <!-- ROOM CONTROLS -->
-  <div id="room-controls">
-    <input id="room-code" type="text" placeholder="Code de salle" />
-    <input id="username" type="text" placeholder="Votre nom" />
-    <select id="role">
-      <option value="teacher">Teacher</option>
-      <option value="student">Student</option>
-    </select>
-    <button id="join-btn">Rejoindre</button>
-  </div>
+<!-- Panneau de connexion -->
+<div id="login-panel">
+  <input type="text" id="roomCode" placeholder="Code de la salle">
+  <input type="text" id="fullName" placeholder="Nom / Prénom">
+  <select id="roleSelect">
+    <option value="teacher">Teacher</option>
+    <option value="student">Student</option>
+  </select>
+  <button id="joinBtn">Rejoindre</button>
+</div>
 
-  <!-- TEACHER CONTROLS -->
-  <div id="teacher-controls" style="display:none;"></div>
-  <div id="pending-students"></div>
+<!-- Salle de classe -->
+<div id="classroom" style="display:none;">
+  
+  <!-- Caméras -->
+  <div id="teacher-camera"></div>
+  <div id="students-camera"></div>
 
-  <!-- VIDEO SECTION (Restabli nan plas orijinal) -->
-  <div id="video-section" style="display:none;">
-    <video id="teacher-video" autoplay playsinline></video>
-    <div id="student-videos"></div>
-  </div>
+  <!-- Panel latéral -->
+  <div id="side-panel">
 
-  <!-- CHAT SECTION (Restabli nan plas orijinal) -->
-  <div id="chat-section" style="display:none;">
-    <ul id="messages"></ul>
-    <form id="chat-form">
-      <input id="msg" autocomplete="off" placeholder="Votre message" />
-      <button type="submit">Envoyer</button>
-    </form>
-  </div>
-
-  <!-- PANEL BÒ DWAT (Main leve + Lis elèv) -->
-  <div id="right-panel">
-    <div id="main-raise-panel">
-      <h4>Main Levée</h4>
-      <div id="main-raise-list" class="scrollable"></div>
+    <!-- Mains levées -->
+    <div id="raised-hands">
+      <h3>Mains Levées</h3>
+      <div id="raised-hands-list"></div>
     </div>
-    <div id="connected-students-panel">
-      <h4>Élèves Connectés</h4>
-      <div id="connected-students-list" class="scrollable"></div>
-      <div id="students-count">Présents: 0</div>
+
+    <!-- Liste des élèves -->
+    <div id="student-list-container">
+      <h3>Élèves Connectés (<span id="student-count">0</span>/100)</h3>
+      <div id="student-list"></div>
     </div>
+
   </div>
 
-  <!-- BOUTONS SUPPLÉMENTAIRES -->
-  <button id="return-btn" style="display:none;">Retourner dans la salle</button>
-  <button id="change-bg-btn" style="display:none;">Changer fond d'écran</button>
+  <!-- Panel chat -->
+  <div id="chat-panel">
+    <div id="chat-messages"></div>
+    <input id="chat-input" placeholder="Écrire un message...">
+    <button id="send-chat">Envoyer</button>
+  </div>
 
-  <!-- SOCKET.IO CLIENT -->
-  <script src="https://examen-backend-ihlx.onrender.com/socket.io/socket.io.js"></script>
+  <!-- Panel annonces -->
+  <div id="announcement-panel"></div>
 
-  <!-- CONTROLS SCRIPTS -->
-  <script src="teacher-controls.js"></script>
-  <script src="student-controls.js"></script>
+  <!-- Contrôles -->
+  <div id="controls">
+    <button id="toggle-mic">Mic On/Off</button>
+    <button id="toggle-camera">Camera On/Off</button>
+    <button id="record-video">Record</button>
+    <button id="share-screen">Partager écran</button>
+    <button id="main-hand">Main Levée</button>
+    <button id="download-file">Télécharger</button>
+    <button id="leave-class">Quitter</button>
+    <button id="rejoin-class">Retourner dans la salle</button>
+  </div>
 
-  <!-- MAIN APP LOADER -->
-  <script src="ecole-en-ligne.js"></script>
+</div>
 
-  <script>
-    const MEME_BACKEND = "https://examen-backend-ihlx.onrender.com";
-    const socket = io(MEME_BACKEND);
+<!-- Scripts -->
+<script src="teacher-controls.js"></script>
+<script src="student-controls.js"></script>
+<script src="ecole-en-ligne.js"></script>
 
-    const joinBtn = document.getElementById('join-btn');
-    const roomInput = document.getElementById('room-code');
-    const usernameInput = document.getElementById('username');
-    const roleSelect = document.getElementById('role');
-    const videoSection = document.getElementById('video-section');
-    const chatSection = document.getElementById('chat-section');
-    const returnBtn = document.getElementById('return-btn');
-    const changeBgBtn = document.getElementById('change-bg-btn');
-    const mainRaiseList = document.getElementById('main-raise-list');
-    const connectedStudentsList = document.getElementById('connected-students-list');
-    const studentsCount = document.getElementById('students-count');
-
-    let localStream = null;
-
-    async function getLocalStream() {
-      if (!localStream) {
-        try {
-          localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-          const teacherVideo = document.getElementById('teacher-video');
-          teacherVideo.srcObject = localStream;
-        } catch (err) {
-          alert("Impossible d'accéder à la caméra ou au micro: " + err.message);
-        }
-      }
-      return localStream;
-    }
-
-    // ===== JOIN ROOM =====
-    joinBtn.onclick = async () => {
-      const room = roomInput.value.trim();
-      const username = usernameInput.value.trim();
-      const role = roleSelect.value;
-
-      if (!room || !username) return alert("Veuillez remplir le code de salle et votre nom.");
-
-      // Retabli videyo ak chat nan plas orijinal
-      videoSection.style.display = 'flex';
-      chatSection.style.display = 'block';
-      returnBtn.style.display = 'inline-block';
-      changeBgBtn.style.display = 'inline-block';
-
-      socket.emit('join-room', { room, username, role });
-
-      if (role === 'teacher') {
-        document.getElementById('teacher-controls').style.display = 'flex';
-        window.TeacherControls.init({
-          socket,
-          room,
-          username,
-          getLocalStream,
-          ui: {
-            controlsContainer: '#teacher-controls',
-            pendingContainer: '#pending-students',
-            videoSection,
-            mainRaiseList,
-            connectedStudentsList,
-            studentsCount
-          }
-        });
-      } else {
-        window.StudentControls.init({
-          socket,
-          room,
-          username,
-          getLocalStream,
-          ui: {
-            videoSection,
-            chatInputSelector: '#msg',
-            mainRaiseList,
-            connectedStudentsList,
-            studentsCount
-          }
-        });
-      }
-
-      joinBtn.disabled = true;
-      roomInput.disabled = true;
-      usernameInput.disabled = true;
-      roleSelect.disabled = true;
-    };
-
-    // ===== CHAT SEND =====
-    const chatForm = document.getElementById('chat-form');
-    chatForm.addEventListener('submit', (e) => {
-      e.preventDefault();
-      const msgInput = document.getElementById('msg');
-      const msg = msgInput.value.trim();
-      if (!msg) return;
-      socket.emit('chat-message', {
-        room: roomInput.value.trim(),
-        from: usernameInput.value.trim(),
-        message: msg
-      });
-      msgInput.value = '';
-    });
-
-    socket.on('chat-message', (data) => {
-      const messages = document.getElementById('messages');
-      const li = document.createElement('li');
-      li.textContent = `${data.from}: ${data.message}`;
-      messages.appendChild(li);
-      messages.scrollTop = messages.scrollHeight;
-    });
-
-    // ===== RETURN TO CLASS =====
-    returnBtn.onclick = () => {
-      videoSection.style.display = 'flex';
-      chatSection.style.display = 'block';
-      returnBtn.style.display = 'none';
-    };
-
-    // ===== CHANGE BACKGROUND =====
-    changeBgBtn.onclick = async () => {
-      const file = document.createElement('input');
-      file.type = 'file';
-      file.accept = 'image/*';
-      file.onchange = async (e) => {
-        const selectedFile = e.target.files[0];
-        if (!selectedFile) return;
-        const imgUrl = URL.createObjectURL(selectedFile);
-        document.getElementById('teacher-video').style.backgroundImage = `url(${imgUrl})`;
-      };
-      file.click();
-    };
-  </script>
 </body>
 </html>
