@@ -1,36 +1,67 @@
-let teacherControlsInit = (socket) => {
+let teacherControlsInit = async (socket) => { 
   const toggleMicBtn = document.getElementById('toggle-mic');
   const toggleCamBtn = document.getElementById('toggle-camera');
   const mainHandBtn = document.getElementById('main-hand');
   const leaveBtn = document.getElementById('leave-class');
+  const teacherVideo = document.getElementById('teacher-video');
 
-  // Mute/Unmute tout elèv
-  toggleMicBtn.addEventListener('click', ()=>{
+  let localStream;
+  let micEnabled = true;
+  let camEnabled = true;
+
+  // 🎥 OUVRI KAMERA + MIKWO OTOMATIKMAN
+  try {
+    localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+    teacherVideo.srcObject = localStream;
+    teacherVideo.play();
+
+    // Enfòme backend ke pwofesè pare
+    socket.emit('streamReady', { role: 'teacher' });
+
+  } catch (err) {
+    console.error("Erreur ouverture caméra/micro :", err);
+    alert("Impossible d'accéder à la caméra ou au micro. Vérifiez vos autorisations.");
+  }
+
+  // 🔇 Mute/Unmute tout elèv (kontwòl pwofesè)
+  toggleMicBtn.addEventListener('click', () => {
+    micEnabled = !micEnabled;
+    localStream.getAudioTracks().forEach(track => track.enabled = micEnabled);
+    toggleMicBtn.textContent = micEnabled ? "Mic Off" : "Mic On";
     socket.emit('toggleMic');
   });
 
-  toggleCamBtn.addEventListener('click', ()=>{
+  // 🎦 Kamera On/Off
+  toggleCamBtn.addEventListener('click', () => {
+    camEnabled = !camEnabled;
+    localStream.getVideoTracks().forEach(track => track.enabled = camEnabled);
+    toggleCamBtn.textContent = camEnabled ? "Camera Off" : "Camera On";
     socket.emit('toggleCamera');
   });
 
-  // Main leve / desann (pwofè ka leve/desann pwòp men)
-  mainHandBtn.addEventListener('click', ()=>{
+  // ✋ Main leve / desann (pwofesè ka leve men)
+  mainHandBtn.addEventListener('click', () => {
     socket.emit('raiseHand');
   });
 
-  // Kite klas la
-  leaveBtn.addEventListener('click', ()=>{
+  // 🚪 Kite klas la
+  leaveBtn.addEventListener('click', () => {
+    if (localStream) {
+      localStream.getTracks().forEach(track => track.stop());
+    }
     window.location.reload();
   });
 
-  // Evènman soti nan backend
-  socket.on('updateMic', ({id})=>{
+  // 📡 Evènman backend
+  socket.on('updateMic', ({ id }) => {
     console.log(`Mikwo toggled pou ${id}`);
   });
-  socket.on('updateCamera', ({id})=>{
+
+  socket.on('updateCamera', ({ id }) => {
     console.log(`Camera toggled pou ${id}`);
   });
-  socket.on('blockedStudent', ({id})=>{
-    alert(`Elève ${id} bloqué par le professeur`);
+
+  socket.on('blockedStudent', ({ id }) => {
+    alert(`Élève ${id} bloqué par le professeur`);
   });
 };
