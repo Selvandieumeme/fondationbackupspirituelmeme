@@ -1,4 +1,4 @@
-let teacherControlsInit = async (socket) => { 
+let teacherControlsInit = async (socket) => {  
   const toggleMicBtn = document.getElementById('toggle-mic');
   const toggleCamBtn = document.getElementById('toggle-camera');
   const mainHandBtn = document.getElementById('main-hand');
@@ -16,7 +16,7 @@ let teacherControlsInit = async (socket) => {
     teacherVideo.play();
 
     // Enfòme backend ke pwofesè pare
-    socket.emit('streamReady', { role: 'teacher' });
+    socket.emit('streamReady', { role: 'teacher', stream: localStream });
 
   } catch (err) {
     console.error("Erreur ouverture caméra/micro :", err);
@@ -28,7 +28,8 @@ let teacherControlsInit = async (socket) => {
     micEnabled = !micEnabled;
     localStream.getAudioTracks().forEach(track => track.enabled = micEnabled);
     toggleMicBtn.textContent = micEnabled ? "Mic Off" : "Mic On";
-    socket.emit('toggleMic');
+    // Enfòme tout elèv
+    socket.emit('toggleMic', { micEnabled });
   });
 
   // 🎦 Kamera On/Off
@@ -36,7 +37,7 @@ let teacherControlsInit = async (socket) => {
     camEnabled = !camEnabled;
     localStream.getVideoTracks().forEach(track => track.enabled = camEnabled);
     toggleCamBtn.textContent = camEnabled ? "Camera Off" : "Camera On";
-    socket.emit('toggleCamera');
+    socket.emit('toggleCamera', { camEnabled });
   });
 
   // ✋ Main leve / desann (pwofesè ka leve men)
@@ -53,12 +54,12 @@ let teacherControlsInit = async (socket) => {
   });
 
   // 📡 Evènman backend
-  socket.on('updateMic', ({ id }) => {
-    console.log(`Mikwo toggled pou ${id}`);
+  socket.on('updateMic', ({ id, micEnabled }) => {
+    console.log(`Mikwo toggled pou ${id}, micEnabled=${micEnabled}`);
   });
 
-  socket.on('updateCamera', ({ id }) => {
-    console.log(`Camera toggled pou ${id}`);
+  socket.on('updateCamera', ({ id, camEnabled }) => {
+    console.log(`Camera toggled pou ${id}, camEnabled=${camEnabled}`);
   });
 
   socket.on('blockedStudent', ({ id }) => {
