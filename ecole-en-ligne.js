@@ -25,32 +25,56 @@ joinBtn.addEventListener('click', async () => {
   const name = nameInput.value;
   role = roleSelect.value;
 
-  if(!room || !name) return alert('Veuillez remplir tous les champs.');
+  if (!room || !name) return alert('Veuillez remplir tous les champs.');
 
-  socket.emit('joinRoom', {room, name, role}, async (response) => {
-    if(response.status==='full'){
-      alert('Salle pleine (max 100 élèves)');
-      return;
+  let responded = false;
+
+  // Voye demann sou backend
+  try {
+    socket.timeout(3000).emit('joinRoom', { room, name, role }, async (response) => {
+      responded = true;
+
+      if (response.status === 'full') {
+        alert('Salle pleine (max 100 élèves)');
+        return;
+      }
+
+      loginPanel.style.display = 'none';
+      classroom.style.display = 'block';
+
+      try {
+        localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+        const videoEl = role === 'teacher' ? teacherCam : studentsCam;
+        videoEl.srcObject = localStream;
+        videoEl.play();
+        socket.emit('streamReady', { role });
+      } catch (err) {
+        console.error(err);
+      }
+
+      if (role === 'teacher') teacherControlsInit(socket);
+      else studentControlsInit(socket);
+    });
+  } catch (err) {
+    console.warn('Backend non disponible, simulation locale activée.');
+  }
+
+  // Si backend pa reponn apre 3s, antre lokalman
+  setTimeout(async () => {
+    if (!responded) {
+      console.warn('Aucune réponse du serveur, mode local activé.');
+      loginPanel.style.display = 'none';
+      classroom.style.display = 'block';
+      try {
+        localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+        const videoEl = role === 'teacher' ? teacherCam : studentsCam;
+        videoEl.srcObject = localStream;
+        videoEl.play();
+      } catch (err) {
+        console.error(err);
+      }
     }
-
-    loginPanel.style.display='none';
-    classroom.style.display='block';
-
-    // Stream audio/video
-    try {
-      localStream = await navigator.mediaDevices.getUserMedia({video:true,audio:true});
-      const videoEl = role==='teacher'?teacherCam:studentsCam;
-      videoEl.srcObject = localStream;
-      videoEl.play();
-      socket.emit('streamReady', {role});
-    } catch(err) {
-      console.error(err);
-    }
-
-    // Init controls
-    if(role==='teacher') teacherControlsInit(socket);
-    else studentControlsInit(socket);
-  });
+  }, 3500);
 });
 
 // Update student list
