@@ -9,7 +9,7 @@ let studentControlsInit = async (socket) => {
   let micEnabled = true;
   let camEnabled = true;
 
-  // 🎥 OUVRI KAMERA + MIKWO OTOMATIKMAN
+  // 🎥 OUVRI KAMERA + MIKWO OTOMATIKMAN san mute
   try {
     localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
 
@@ -17,7 +17,7 @@ let studentControlsInit = async (socket) => {
     const studentVideo = document.createElement('video');
     studentVideo.autoplay = true;
     studentVideo.playsInline = true;
-    studentVideo.muted = true; // mute pou pa fè echo sou pwòp mikwo
+    studentVideo.muted = false; // 🔊 mikwo pa mute pou lòt moun tande
     studentVideo.srcObject = localStream;
     studentVideoContainer.appendChild(studentVideo);
 
@@ -29,7 +29,7 @@ let studentControlsInit = async (socket) => {
     alert("Impossible d'accéder à la caméra ou au micro. Vérifiez vos autorisations.");
   }
 
-  // 🔇 Mute/Unmute pwòp mikwo
+  // 🔇 Mute/Unmute pwòp mikwo si elèv vle
   toggleMicBtn.addEventListener('click', () => {
     micEnabled = !micEnabled;
     localStream.getAudioTracks().forEach(track => track.enabled = micEnabled);
