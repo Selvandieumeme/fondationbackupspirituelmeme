@@ -67,54 +67,8 @@
 
     [btnMute, btnCam, btnRaise, btnLower, btnChat, btnLeave, btnShare, btnDownload, btnRecord].forEach(b => bar.appendChild(b));
 
-    // --- State ---
-    let recording = false;
-
-    // --- Handlers ---
-    btnMute.onclick = async () => {
-      const stream = await getLocalStream();
-      if (!stream) return alert('Aucun flux local');
-      const tracks = stream.getAudioTracks();
-      if (!tracks.length) return alert('Pas de micro détecté');
-      const enabled = tracks[0].enabled;
-      tracks.forEach(t => t.enabled = !enabled);
-      btnMute.textContent = enabled ? '🎤 Unmute' : '🎤 Mute';
-      socket.emit('private-message', { from: username, to: 'teacher', message: enabled ? 'Micro muté' : 'Micro activé' });
-    };
-
-    btnCam.onclick = async () => {
-      const stream = await getLocalStream();
-      if (!stream) return alert('Aucun flux local');
-      const tracks = stream.getVideoTracks();
-      if (!tracks.length) return alert('Pas de caméra détectée');
-      const enabled = tracks[0].enabled;
-      tracks.forEach(t => t.enabled = !enabled);
-      btnCam.textContent = enabled ? '🎥 Cam On' : '🎥 Cam Off';
-    };
-
-    btnRaise.onclick = () => {
-      socket.emit('raise-hand', { user: username, room });
-      btnRaise.disabled = true;
-      btnRaise.textContent = '✋ Levée';
-    };
-
-    btnLower.onclick = () => {
-      socket.emit('teacher-lower-hand', { username, room });
-      btnRaise.disabled = false;
-      btnRaise.textContent = '✋ Lever la main';
-    };
-
-    btnChat.onclick = () => {
-      const input = document.querySelector(ui.chatInputSelector || '#msg');
-      if (input) input.focus();
-      else alert('Aucun champ chat trouvé');
-    };
-
-    btnLeave.onclick = () => {
-      socket.emit('leave-room', room);
-      getLocalStream()?.getTracks().forEach(t => t.stop());
-      location.reload();
-    };
+    CC
+    
 
     btnShare.onclick = async () => {
       if (!navigator.mediaDevices) return alert("Navigatè ou pa sipòte screen share.");
