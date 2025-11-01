@@ -66,9 +66,22 @@ let studentControlsInit = async (socket) => {
   // ====================================================
   // BOUTONS ADDITIONNELS
   // ====================================================
-  downloadBtn.addEventListener('click', () => {
-    alert('Téléchargement activé (simulation).');
-  });
+ downloadBtn.addEventListener('click', () => {
+    // kreye yon fichye test (ou ka ranplase ak kontni reyèl pita)
+    const content = "Bienvenue sur Ecole-en-ligne !\nCeci est un fichier de démonstration téléchargé depuis la plateforme.";
+    const blob = new Blob([content], { type: "text/plain" });
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = "cours_ecole_en_ligne.txt"; // ou ka mete .pdf, .docx elatriye
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+});
+
+  
 
   shareScreenBtn.addEventListener('click', async () => {
     try {
