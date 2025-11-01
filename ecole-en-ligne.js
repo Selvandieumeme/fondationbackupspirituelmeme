@@ -208,21 +208,21 @@ const mainHandBtn = document.getElementById('main-hand');
 // Itilize bouton ki deja nan HTML pou evite konfli
 const changeBgBtn = document.getElementById('change-background-btn');
 
-downloadBtn.addEventListener('click', () => {
-    // kreye yon fichye test (ou ka ranplase ak kontni reyèl pita)
-    const content = "Bienvenue sur Ecole-en-ligne !\nCeci est un fichier de démonstration téléchargé depuis la plateforme.";
-    const blob = new Blob([content], { type: "text/plain" });
-    const url = URL.createObjectURL(blob);
+document.addEventListener("DOMContentLoaded", () => {
+  const downloadMenu = document.getElementById("download-menu");
 
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = "cours_ecole_en_ligne.txt"; // ou ka mete .pdf, .docx elatriye
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+  // Verifye si itilizatè a se pwofesè oswa elèv
+  const userRole = window.USER_ROLE || "student"; // default student
+
+  // Afiche meni dapre wòl
+  if (userRole === "teacher") {
+    document.querySelectorAll(".teacher-only").forEach(el => el.style.display = "block");
+    document.querySelectorAll(".student-only").forEach(el => el.style.display = "none");
+  } else {
+    document.querySelectorAll(".teacher-only").forEach(el => el.style.display = "none");
+    document.querySelectorAll(".student-only").forEach(el => el.style.display = "block");
+  }
 });
-
 
 shareScreenBtn.addEventListener('click', async () => {
     try {
