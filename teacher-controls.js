@@ -5,7 +5,7 @@ let teacherControlsInit = async (socket) => {
   const leaveBtn = document.getElementById('leave-class');
   const teacherVideo = document.getElementById('teacher-video');
 
-  const downloadBtn = document.getElementById('download-file');
+  const downloadBtn = document.getElementById('download-btn');
   const shareScreenBtn = document.getElementById('share-screen');
   const recordBtn = document.getElementById('record-video');
 
