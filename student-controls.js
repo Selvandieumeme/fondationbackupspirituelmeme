@@ -5,6 +5,17 @@ let studentControlsInit = async (socket) => {
   const leaveBtn = document.getElementById('leave-class');
   const studentVideoContainer = document.getElementById('student-videos');
 
+  const downloadBtn = document.getElementById('download-file');
+  const shareScreenBtn = document.getElementById('share-screen');
+  const recordBtn = document.getElementById('record-video');
+
+  // Bouton chanje fond
+  const changeBgBtn = document.createElement('button');
+  changeBgBtn.id = 'change-bg';
+  changeBgBtn.textContent = 'Changer Fond';
+  changeBgBtn.style.margin = '6px';
+  document.getElementById('controls').appendChild(changeBgBtn);
+
   let localStream;
   let micEnabled = true;
   let camEnabled = true;
@@ -17,19 +28,18 @@ let studentControlsInit = async (socket) => {
     const studentVideo = document.createElement('video');
     studentVideo.autoplay = true;
     studentVideo.playsInline = true;
-    studentVideo.muted = false; // 🔊 mikwo pa mute pou lòt moun tande
+    studentVideo.muted = false; // mikwo pa mute pou lòt moun tande
     studentVideo.srcObject = localStream;
     studentVideoContainer.appendChild(studentVideo);
 
     // Enfòme backend ke elèv pare
     socket.emit('streamReady', { role: 'student' });
-
   } catch (err) {
     console.error("Erreur ouverture caméra/micro :", err);
     alert("Impossible d'accéder à la caméra ou au micro. Vérifiez vos autorisations.");
   }
 
-  // 🔇 Mute/Unmute pwòp mikwo si elèv vle
+  // 🔇 Mute/Unmute pwòp mikwo
   toggleMicBtn.addEventListener('click', () => {
     micEnabled = !micEnabled;
     localStream.getAudioTracks().forEach(track => track.enabled = micEnabled);
@@ -46,6 +56,7 @@ let studentControlsInit = async (socket) => {
   // ✋ Main leve / desann
   mainHandBtn.addEventListener('click', () => {
     socket.emit('raiseHand');
+    mainHandBtn.style.backgroundColor = 'green';
   });
 
   // 🚪 Kite klas la
@@ -55,6 +66,70 @@ let studentControlsInit = async (socket) => {
     }
     window.location.reload();
   });
+
+  // ====================================================
+  // BOUTONS ADDITIONNELS
+  // ====================================================
+  downloadBtn.addEventListener('click', () => {
+    alert('Téléchargement activé (simulation).');
+  });
+
+  shareScreenBtn.addEventListener('click', async () => {
+    try {
+      const screenStream = await navigator.mediaDevices.getDisplayMedia({ video: true });
+      alert('Écran partagé activé (simulation).');
+    } catch (err) {
+      console.error(err);
+    }
+  });
+
+  recordBtn.addEventListener('click', () => {
+    alert('Enregistrement activé (simulation).');
+  });
+
+  // ====================================================
+  // CHANGER FOND DE CLASSE
+  // ====================================================
+  let aiBackgrounds = [
+    'url("https://source.unsplash.com/600x400/?avion")',
+    'url("https://source.unsplash.com/600x400/?robo")',
+    'url("https://source.unsplash.com/600x400/?maison")',
+    'url("https://source.unsplash.com/600x400/?ciel")',
+    'url("https://source.unsplash.com/600x400/?lame")',
+    'url("https://source.unsplash.com/600x400/?decoration")'
+    // Ajoute jiska 50 imaj diferan
+  ];
+
+  let currentBgIndex = 0;
+
+  function changeBackgroundAI() {
+    document.getElementById('classroom').style.backgroundImage = aiBackgrounds[currentBgIndex];
+    document.getElementById('classroom').style.backgroundSize = 'cover';
+    document.getElementById('classroom').style.backgroundPosition = 'center';
+    currentBgIndex = (currentBgIndex + 1) % aiBackgrounds.length;
+  }
+
+  changeBgBtn.addEventListener('click', () => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    input.onchange = (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          document.getElementById('classroom').style.backgroundImage = `url(${ev.target.result})`;
+          document.getElementById('classroom').style.backgroundSize = 'cover';
+          document.getElementById('classroom').style.backgroundPosition = 'center';
+        };
+        reader.readAsDataURL(file);
+      }
+    };
+    input.click();
+  });
+
+  // Chanje AI otomatik chak 20 segonn
+  setInterval(changeBackgroundAI, 20000);
 
   // 📡 Evènman backend
   socket.on('blockedStudent', ({ id }) => {
