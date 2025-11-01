@@ -198,14 +198,15 @@ socket.on('chatMessage', data => {
 
 
 
-// ====================================================
+\// ====================================================
 // BOUTONS ADDITIONNELS (PA KREYE CHANGE-BG ANKÒ)
 // ====================================================
 const downloadBtn = document.getElementById('download-file');
 const shareScreenBtn = document.getElementById('share-screen');
 const recordBtn = document.getElementById('record-video');
 const mainHandBtn = document.getElementById('main-hand');
-const changeBgBtn = document.getElementById('change-bg'); // itilize bouton ki egziste deja
+// Ranplase ID pou evite konfli ak "joinBtn"
+const changeBgBtn = document.getElementById('change-background-btn'); // <- nouvo ID
 
 downloadBtn.addEventListener('click', () => alert('Téléchargement activé (simulation).'));
 shareScreenBtn.addEventListener('click', async () => {
