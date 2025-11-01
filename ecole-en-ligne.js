@@ -201,7 +201,7 @@ socket.on('chatMessage', data => {
 // ====================================================
 // BOUTONS ADDITIONNELS (PA KREYE CHANGE-BG ANKÒ)
 // ====================================================
-const downloadBtn = document.getElementById('download-file');
+const downloadBtn = document.getElementById('download-btn');
 const shareScreenBtn = document.getElementById('share-screen');
 const recordBtn = document.getElementById('record-video');
 const mainHandBtn = document.getElementById('main-hand');
