@@ -6,10 +6,8 @@
 //     room,
 //     username,
 //     getLocalStream,
-//     ui: { controlsContainer, pendingContainer, videoSection }
+//     ui: { controlsContainer, pendingContainer, videoSection, mainRaiseList, connectedStudentsList, studentsCount }
 //   });
-//
-// getLocalStream: function returning current local MediaStream (async or null initially)
 
 (function () {
   const TeacherControls = {};
@@ -68,6 +66,10 @@
       flexWrap: 'wrap',
       gap: '6px',
     });
+
+    const mainRaiseList = ui.mainRaiseList || document.createElement('div');
+    const connectedStudentsList = ui.connectedStudentsList || document.createElement('div');
+    const studentsCount = ui.studentsCount || document.createElement('div');
 
     // --- Boutons Principaux ---
     const btnMuteAll = createBtn('🔇 Mute Tout');
@@ -236,10 +238,10 @@
         });
     };
 
-    // --- Evènman Socket ---
+    // --- Evènman Socket pou elèv pending ak joined ---
     socket.on('student-pending', (data) => {
       const uname = data.username;
-      if (pendingContainer.querySelector(`[data-pending-name="${uname}"]`)) return; // evite doublons
+      if (pendingContainer.querySelector(`[data-pending-name="${uname}"]`)) return;
 
       const wrap = document.createElement('div');
       Object.assign(wrap.style, {
@@ -271,8 +273,6 @@
 
     socket.on('student-joined', (data) => {
       const uname = data.username || data;
-      console.log('Student joined:', uname);
-
       const listEl =
         document.getElementById('teacher-student-list') ||
         Object.assign(document.createElement('div'), { id: 'teacher-student-list' });
