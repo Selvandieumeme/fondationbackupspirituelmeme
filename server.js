@@ -900,284 +900,125 @@ app.get("/api/premium/status/:id", async (req, res) => {
 
 
 
-// server.js (ESM)
-// ------------------
-// École-en-ligne Backend (version complète corrigée + REST /room/:room/members)
-// Supporte : MongoDB, Socket.io, WebRTC signaling, upload fichiers
-// ------------------
-
-import express from "express";
-import http from "http";
-import { Server } from "socket.io";
-import mongoose from "mongoose";
-import multer from "multer";
-import fs from "fs";
-import path from "path";
-import cors from "cors";
-import { fileURLToPath } from "url";
-
-// ------------------
-// CONFIG
-// ------------------
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+require('dotenv').config();
+const express = require('express');
+const http = require('http');
+const { Server } = require('socket.io');
+const mongoose = require('mongoose');
 
 const app = express();
-app.use(cors());
-app.use(express.json());
+const server = http.createServer(app);
+const io = new Server(server, { cors: { origin: '*' } });
 
-// Serve static files directly from project root
+// --- MongoDB ---
+mongoose.connect(process.env.MONGO_URI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true
+}).then(()=>console.log('MongoDB connecté'))
+  .catch(err=>console.error('Erreur MongoDB:', err));
+
+// --- Serve frontend ---
 app.use(express.static(__dirname));
 
-// Ensure uploads folder exists
-const UPLOADS_DIR = path.join(__dirname, "uploads");
-if (!fs.existsSync(UPLOADS_DIR)) fs.mkdirSync(UPLOADS_DIR, { recursive: true });
+// --- Done sal yo ---
+const roomsData = {}; 
+// roomsData = {
+//    roomId: { students: [{id,name,role,online}], raisedHands: [] }
+// }
 
-// ------------------
-// MONGODB
-// ------------------
-const MONGO_URI = process.env.MONGO_URI;
-if (!MONGO_URI) {
-  console.error("❌ Missing MONGO_URI in .env");
-  process.exit(1);
-}
+io.on('connection', socket => {
+  console.log('Nouvo koneksyon:', socket.id);
 
-mongoose
-  .connect(MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
-  .then(() => console.log("✅ MongoDB Connected"))
-  .catch((err) => {
-    console.error("❌ MongoDB Error:", err);
-    process.exit(1);
+  // --- Join Room ---
+  socket.on('joinRoom', ({room, name, role}, callback) => {
+    if(!roomsData[room]) roomsData[room] = {students: [], raisedHands: []};
+
+    const studentsInRoom = roomsData[room].students.filter(s=>s.role==='student' && s.online).length;
+
+    if(role==='student' && studentsInRoom>=100){
+      if(callback) callback({status:'full'});
+      return;
+    }
+
+    socket.join(room);
+    socket.data = {name, role, online:true};
+
+    roomsData[room].students.push({id: socket.id, name, role, online:true});
+
+    if(callback) callback({status:'ok'});
+
+    // Voye lis elèv ak mains levées pou tout moun an tan reyèl
+    io.to(room).emit('updateStudents', roomsData[room].students);
+    io.to(room).emit('updateRaisedHands', roomsData[room].raisedHands);
   });
 
-// ------------------
-// SCHEMAS
-// ------------------
-const messageSchema = new mongoose.Schema({
-  from: String,
-  to: String,
-  message: String,
-  date: { type: Date, default: Date.now },
-  read: { type: Boolean, default: false },
-});
-const Message = mongoose.model("Message", messageSchema);
+  // --- Mains levées ---
+  socket.on('raiseHand', () => {
+    const room = Array.from(socket.rooms).find(r=>r!==socket.id);
+    if(!room) return;
 
-const userSchema = new mongoose.Schema({
-  username: String,
-  role: String, // teacher / student
-});
-const User = mongoose.model("User", userSchema);
+    const student = roomsData[room].students.find(s=>s.id===socket.id);
+    if(student && !roomsData[room].raisedHands.some(s=>s.id===socket.id)){
+      roomsData[room].raisedHands.push(student);
+    }
 
-const studentSchema = new mongoose.Schema({
-  username: String,
-  room: String,
-  joinedAt: { type: Date, default: Date.now },
-});
-const Student = mongoose.model("Student", studentSchema);
+    io.to(room).emit('updateRaisedHands', roomsData[room].raisedHands);
+  });
 
-// ------------------
-// SERVER & SOCKET.IO
-// ------------------
-const server = http.createServer(app);
-const io = new Server(server, {
-  cors: { origin: "*", methods: ["GET", "POST"] },
-});
+  socket.on('lowerHand', studentId => {
+    const room = Array.from(socket.rooms).find(r=>r!==socket.id);
+    if(!room) return;
 
-const PORT = process.env.PORT || 3000;
-const MAX_STUDENTS = 100;
+    roomsData[room].raisedHands = roomsData[room].raisedHands.filter(s=>s.id!==studentId);
+    io.to(room).emit('updateRaisedHands', roomsData[room].raisedHands);
+  });
 
-const onlineUsers = new Map();
-const rooms = Object.create(null);
+  // --- Chat ---
+  socket.on('chatMessage', msg => {
+    const room = Array.from(socket.rooms).find(r=>r!==socket.id);
+    if(room){
+      io.to(room).emit('chatMessage', {name: socket.data.name, msg});
+    }
+  });
 
-// ------------------
-// HELPERS
-// ------------------
-function broadcastOnline() {
-  const arr = [];
-  for (const [id, info] of onlineUsers.entries()) {
-    arr.push({
-      id,
-      user: info.user,
-      role: info.role,
-      connected: info.sockets.size > 0,
+  // --- Toggle Mikwo / Kamera (tout moun) ---
+  socket.on('toggleMic', () => {
+    const room = Array.from(socket.rooms).find(r=>r!==socket.id);
+    if(room) io.to(room).emit('updateMic', {id: socket.id});
+  });
+
+  socket.on('toggleCamera', () => {
+    const room = Array.from(socket.rooms).find(r=>r!==socket.id);
+    if(room) io.to(room).emit('updateCamera', {id: socket.id});
+  });
+
+  // --- Bloke elev (pwofè) ---
+  socket.on('blockStudent', studentId => {
+    const room = Array.from(socket.rooms).find(r=>r!==socket.id);
+    if(room){
+      io.to(room).emit('blockedStudent', {id: studentId});
+    }
+  });
+
+  // --- Disconnect ---
+  socket.on('disconnect', () => {
+    const rooms = Array.from(socket.rooms).filter(r=>r!==socket.id);
+    rooms.forEach(room=>{
+      if(roomsData[room]){
+        const student = roomsData[room].students.find(s=>s.id===socket.id);
+        if(student) student.online=false;
+
+        roomsData[room].raisedHands = roomsData[room].raisedHands.filter(s=>s.id!==socket.id);
+
+        // Mete tout moun ajou an tan reyèl
+        io.to(room).emit('updateStudents', roomsData[room].students);
+        io.to(room).emit('updateRaisedHands', roomsData[room].raisedHands);
+      }
     });
-  }
-  io.emit("online-users", arr);
-}
-
-function MEME_inspect(msg) {
-  console.log("[MEME AI Inspector]", msg);
-}
-
-// Helper: find socket id by username (for signaling)
-function findSocketIdByUsername(username) {
-  if (!username) return null;
-  username = username.toLowerCase().trim();
-  for (const [id, s] of io.sockets.sockets) {
-    if (s.data && s.data.username && s.data.username.toLowerCase() === username)
-      return id;
-  }
-  return null;
-}
-
-// ------------------
-// SOCKET EVENTS
-// ------------------
-io.on("connection", (socket) => {
-  console.log("👤 User connected:", socket.id);
-
-  socket.on("setUser", ({ username, role }) => {
-    if (!username) return;
-    const userId = username.trim().toLowerCase();
-    if (!onlineUsers.has(userId)) {
-      onlineUsers.set(userId, { user: username, sockets: new Set(), role });
-    }
-    const record = onlineUsers.get(userId);
-    record.sockets.add(socket.id);
-    socket.data.userId = userId;
-    socket.data.role = role || "student";
-    socket.data.username = username;
-    broadcastOnline();
   });
 
-  socket.on("join-room", (data) => {
-    let roomCode = null;
-    let role = socket.data.role || "student";
-    let username = socket.data.username || null;
-
-    if (typeof data === "string") roomCode = data;
-    else if (data && typeof data === "object") {
-      roomCode = data.room;
-      role = data.role || role;
-      username = data.username || username;
-    }
-    if (!roomCode) return;
-
-    if (!rooms[roomCode]) rooms[roomCode] = { teacherSocketId: null, students: [] };
-
-    if (role === "teacher") {
-      rooms[roomCode].teacherSocketId = socket.id;
-      socket.join(roomCode);
-      console.log(`🧑‍🏫 Teacher "${username}" joined room ${roomCode}`);
-      io.to(socket.id).emit("room-info", {
-        room: roomCode,
-        teacher: username,
-        students: rooms[roomCode].students.length,
-      });
-    } else {
-      socket.join(roomCode);
-      rooms[roomCode].students.push({ username, socketId: socket.id });
-      console.log(`👩‍🎓 Student "${username}" joined room ${roomCode}`);
-      if (rooms[roomCode].teacherSocketId) {
-        io.to(rooms[roomCode].teacherSocketId).emit("student-joined", {
-          username,
-          socketId: socket.id,
-        });
-      }
-    }
-  });
-
-  // (...tout rès evenman socket.io rete san chanjman...)
-  // --- DISCONNECT CLEANUP ---
-  socket.on("disconnect", () => {
-    console.log("🔌 User disconnected:", socket.id);
-    const userId = socket.data.userId;
-    if (userId && onlineUsers.has(userId)) {
-      const record = onlineUsers.get(userId);
-      record.sockets.delete(socket.id);
-      if (record.sockets.size === 0) onlineUsers.delete(userId);
-      broadcastOnline();
-    }
-
-    for (const [roomCode, meta] of Object.entries(rooms)) {
-      if (meta.teacherSocketId === socket.id) {
-        meta.students.forEach((s) => io.to(s.socketId).emit("teacher-block-student", { room: roomCode, reason: "Teacher disconnected" }));
-        delete rooms[roomCode];
-      } else {
-        const before = meta.students.length;
-        meta.students = meta.students.filter((s) => s.socketId !== socket.id);
-        if (meta.students.length !== before && meta.teacherSocketId) {
-          io.to(meta.teacherSocketId).emit("room-info", { room: roomCode, students: meta.students.length });
-        }
-      }
-    }
-  });
 });
 
-// ------------------
-// UPLOAD ENDPOINTS
-// ------------------
-const upload = multer({ storage: multer.memoryStorage() });
-
-app.post("/upload-recording", upload.single("file"), (req, res) => {
-  try {
-    if (!req.file) return res.status(400).json({ success: false, message: "No file uploaded" });
-    const filename = `${Date.now()}-${req.file.originalname}`;
-    const dest = path.join(UPLOADS_DIR, filename);
-    fs.writeFileSync(dest, req.file.buffer);
-    return res.json({ success: true, path: `/uploads/${filename}` });
-  } catch (err) {
-    console.error("Upload error:", err);
-    return res.status(500).json({ success: false, message: "Upload failed" });
-  }
-});
-
-app.post("/upload-doc", upload.single("document"), (req, res) => {
-  try {
-    if (!req.file) return res.status(400).json({ success: false, message: "No file uploaded" });
-    const filename = `${Date.now()}-${req.file.originalname}`;
-    const dest = path.join(UPLOADS_DIR, filename);
-    fs.writeFileSync(dest, req.file.buffer);
-    return res.json({ success: true, path: `/uploads/${filename}` });
-  } catch (err) {
-    console.error("Upload error:", err);
-    return res.status(500).json({ success: false, message: "Upload failed" });
-  }
-});
-
-// ------------------
-// 🔥 NOUVO ENDPOINT REST: GET /room/:room/members
-// ------------------
-app.get("/room/:room/members", (req, res) => {
-  const room = req.params.room;
-  if (!room || !rooms[room]) {
-    return res.status(404).json({ success: false, message: "Room not found" });
-  }
-
-  const meta = rooms[room];
-  const teacher = meta.teacherSocketId
-    ? io.sockets.sockets.get(meta.teacherSocketId)
-    : null;
-
-  const students = meta.students.map((s) => ({
-    username: s.username,
-    socketId: s.socketId,
-    connected: io.sockets.sockets.has(s.socketId),
-  }));
-
-  res.json({
-    success: true,
-    room,
-    teacher: teacher
-      ? {
-          username: teacher.data?.username || "Unknown",
-          socketId: meta.teacherSocketId,
-          connected: true,
-        }
-      : null,
-    students,
-    total: students.length,
-  });
-});
-
-// ------------------
-// MAIN ROUTE
-// ------------------
-app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "Ecole-en-ligne.html"));
-});
-
-app.use("/uploads", express.static(UPLOADS_DIR));
 
 
 
