@@ -194,3 +194,87 @@ socket.on('chatMessage', data => {
   chatMessages.appendChild(div);
   chatMessages.scrollTop = chatMessages.scrollHeight;
 });
+
+
+
+
+// ====================================================
+// BOUTONS ADDITIONNELS
+// ====================================================
+const downloadBtn = document.getElementById('download-file');
+const shareScreenBtn = document.getElementById('share-screen');
+const recordBtn = document.getElementById('record-video');
+const mainHandBtn = document.getElementById('main-hand');
+const changeBgBtn = document.createElement('button');
+changeBgBtn.id = 'change-bg';
+changeBgBtn.textContent = 'Changer Fond';
+changeBgBtn.style.margin = '6px';
+document.getElementById('controls').appendChild(changeBgBtn);
+
+downloadBtn.addEventListener('click', () => {
+    alert('Téléchargement activé (simulation).');
+});
+
+shareScreenBtn.addEventListener('click', async () => {
+    try {
+        const screenStream = await navigator.mediaDevices.getDisplayMedia({ video: true });
+        alert('Écran partagé activé (simulation).');
+    } catch (err) {
+        console.error(err);
+    }
+});
+
+recordBtn.addEventListener('click', () => {
+    alert('Enregistrement activé (simulation).');
+});
+
+// Main leve deja gen listener, si bezwen simulation vizyèl:
+mainHandBtn.addEventListener('click', () => {
+    mainHandBtn.style.backgroundColor = 'green'; // chanje koulè pou montre li aktive
+});
+
+// ====================================================
+// CHANGER FOND DE CLASSE
+// ====================================================
+let aiBackgrounds = [
+  'url("https://source.unsplash.com/600x400/?avion")',
+  'url("https://source.unsplash.com/600x400/?robo")',
+  'url("https://source.unsplash.com/600x400/?maison")',
+  'url("https://source.unsplash.com/600x400/?ciel")',
+  'url("https://source.unsplash.com/600x400/?lame")',
+  'url("https://source.unsplash.com/600x400/?decoration")'
+  // Ajoute jiska 50 imaj diferan
+];
+
+let currentBgIndex = 0;
+
+// Fonksyon chanje fon otomatik (AI)
+function changeBackgroundAI() {
+    classroom.style.backgroundImage = aiBackgrounds[currentBgIndex];
+    classroom.style.backgroundSize = 'cover';
+    classroom.style.backgroundPosition = 'center';
+    currentBgIndex = (currentBgIndex + 1) % aiBackgrounds.length;
+}
+
+// Bouton pou chwazi pwòp fon lokal
+changeBgBtn.addEventListener('click', () => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    input.onchange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+                classroom.style.backgroundImage = `url(${ev.target.result})`;
+                classroom.style.backgroundSize = 'cover';
+                classroom.style.backgroundPosition = 'center';
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+    input.click();
+});
+
+// Chanje AI otomatik chak 20 segonn
+setInterval(changeBackgroundAI, 20000);
