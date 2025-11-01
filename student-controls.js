@@ -5,7 +5,7 @@ let studentControlsInit = async (socket) => {
   const leaveBtn = document.getElementById('leave-class');
   const studentVideoContainer = document.getElementById('student-videos');
 
-  const downloadBtn = document.getElementById('download-file');
+  const downloadBtn = document.getElementById('download-btn');
   const shareScreenBtn = document.getElementById('share-screen');
   const recordBtn = document.getElementById('record-video');
 
