@@ -65,23 +65,23 @@ const changeBgBtn = document.getElementById('change-background-btn'); // itilize
   // ====================================================
   // BOUTONS ADDITIONNELS
   // ====================================================
-// ====================================================
-// Pwofesè
-// ====================================================
-document.getElementById('download-class-files').addEventListener('click', () => {
-    downloadFile("documents_classe.zip", "Contenu réel des fichiers de la classe", "application/zip");
-});
+document.addEventListener('DOMContentLoaded', () => {
 
-document.getElementById('upload-to-class').addEventListener('click', () => {
-    uploadFileToClass(file => {
-        alert(`Fichier ${file.name} ajouté à la classe!`);
-        // upload sou server si gen backend
-    });
-});
+    const downloadBtn = document.getElementById('download-btn');
+    const downloadMenu = document.getElementById('download-menu');
 
-document.getElementById('download-session-video').addEventListener('click', () => {
-    downloadFile("session_video.mp4", "Contenu vidéo réel", "video/mp4");
-});
+    // Toggle dropdown
+    if(downloadBtn && downloadMenu){
+        downloadBtn.addEventListener('click', () => {
+            downloadMenu.style.display = downloadMenu.style.display === 'block' ? 'none' : 'block';
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!downloadBtn.contains(e.target) && !downloadMenu.contains(e.target)) {
+                downloadMenu.style.display = 'none';
+            }
+        });
+    }
 
   
   
