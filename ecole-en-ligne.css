@@ -343,3 +343,8 @@ h1 {
 .download-btn:hover .dropdown-icons {
   display: flex;
 }
+
+
+#stopRecord {
+  display: none; /* Li parèt sèlman lè w ap anrejistre */
+}
