@@ -8,7 +8,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // Elements HTML
     // ====================================================
     const joinBtn = document.getElementById('joinBtn');
-    const roomInput = document.getElementById('roomCode');
+    const roomInput = document.getElementById('roomCode'); // pou pwofesè
+    const studentRoomInputField = document.getElementById('studentRoomCode'); // pou elèv
     const nameInput = document.getElementById('fullName');
     const roleSelect = document.getElementById('roleSelect');
     const loginPanel = document.getElementById('login-panel');
@@ -39,12 +40,46 @@ document.addEventListener('DOMContentLoaded', () => {
     [classroom, chatPanel, sidePanel, controls, backgroundSelector].forEach(el => el.style.display = 'none');
 
     // ====================================================
+    // ===== Fonksyon pou jenere kòd inik =====
+    // ====================================================
+    function generateRoomCode(length = 6) {
+        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+        let code = '';
+        for (let i = 0; i < length; i++) {
+            code += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+        return code;
+    }
+
+    // ====================================================
+    // ===== Chanjman wòl pou montre chan kòd pwofesè/elèv =====
+    // ====================================================
+    roleSelect.addEventListener('change', () => {
+        if (roleSelect.value === 'teacher') {
+            document.getElementById('room-code-container').style.display = 'block';
+            if (studentRoomInputField) studentRoomInputField.parentElement.style.display = 'none';
+            roomInput.value = generateRoomCode();
+        } else {
+            document.getElementById('room-code-container').style.display = 'none';
+            if (studentRoomInputField) studentRoomInputField.parentElement.style.display = 'block';
+        }
+    });
+
+    if (roleSelect.value === 'teacher') {
+        document.getElementById('room-code-container').style.display = 'block';
+        if (studentRoomInputField) studentRoomInputField.parentElement.style.display = 'none';
+        roomInput.value = generateRoomCode();
+    }
+
+    // ====================================================
     // Rejoindre bouton
     // ====================================================
     joinBtn.addEventListener('click', async () => {
-        room = roomInput.value.trim();
         const name = nameInput.value.trim();
         role = roleSelect.value;
+
+        if (role === 'teacher') room = roomInput.value.trim();
+        else room = studentRoomInputField.value.trim();
 
         if (!room || !name) {
             alert('Veuillez remplir tous les champs.');
@@ -86,46 +121,36 @@ document.addEventListener('DOMContentLoaded', () => {
     // Initialisation local stream
     // ====================================================
     async function initLocalStream() {
-    try {
-        // ✅ Amelyorasyon son — elimine eko, bri, ajiste volim otomatikman
-        localStream = await navigator.mediaDevices.getUserMedia({
-            video: true,
-            audio: {
-                echoCancellation: true,
-                noiseSuppression: true,
-                autoGainControl: true
+        try {
+            localStream = await navigator.mediaDevices.getUserMedia({
+                video: true,
+                audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true }
+            });
+
+            if (role === 'teacher') {
+                teacherVideoEl.srcObject = localStream;
+                teacherVideoEl.autoplay = true;
+                teacherVideoEl.playsInline = true;
+                teacherVideoEl.muted = false;
+            } else {
+                const studentVideo = document.createElement('video');
+                studentVideo.srcObject = localStream;
+                studentVideo.autoplay = true;
+                studentVideo.playsInline = true;
+                studentVideo.muted = false;
+                studentVideosEl.appendChild(studentVideo);
             }
-        });
 
-        if (role === 'teacher') {
-            teacherVideoEl.srcObject = localStream;
-            teacherVideoEl.autoplay = true;
-            teacherVideoEl.playsInline = true;
+            localStream.getTracks().forEach(track => (track.enabled = true));
 
-            // ✅ Pwofese a tande tèt li (pou tcheke son) men san eko
-            teacherVideoEl.muted = false;
-        } else {
-            const studentVideo = document.createElement('video');
-            studentVideo.srcObject = localStream;
-            studentVideo.autoplay = true;
-            studentVideo.playsInline = true;
-
-            // ✅ Elèv la tande tèt li tou (men ak echo cancellation)
-            studentVideo.muted = false;
-
-            studentVideosEl.appendChild(studentVideo);
+            socket.emit('streamReady', { role });
+            socket.emit('readyForPeers');
+        } catch (err) {
+            console.error('Erreur accès média :', err);
+            alert("Impossible d'accéder à la caméra/micro : " + err.message);
         }
-
-        // ✅ Asire tout track aktif
-        localStream.getTracks().forEach(track => (track.enabled = true));
-
-        socket.emit('streamReady', { role });
-        socket.emit('readyForPeers');
-    } catch (err) {
-        console.error('Erreur accès média :', err);
-        alert("Impossible d'accéder à la caméra/micro : " + err.message);
     }
-}
+
     // ====================================================
     // WebRTC
     // ====================================================
@@ -230,11 +255,7 @@ document.addEventListener('DOMContentLoaded', () => {
             button.addEventListener('click', callback);
         }
 
-        // Fonksyon partage écran
-        toggleButton(shareScreenBtn, async () => {
-            await shareScreen();
-        });
-
+        toggleButton(shareScreenBtn, async () => await shareScreen());
         toggleButton(mainHandBtn, () => { mainHandBtn.style.backgroundColor = 'green'; socket.emit('raiseHand'); });
         toggleButton(changeBgBtn, () => selectLocalBackground());
         toggleButton(leaveBtn, () => { if(localStream)localStream.getTracks().forEach(track=>track.stop()); window.location.reload(); });
@@ -276,7 +297,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ====================================================
-    // Student controls init (ak partage écran reyèl)
+    // Student controls init
     // ====================================================
     function studentControlsInit() {
         let micEnabled = true;
@@ -290,10 +311,7 @@ document.addEventListener('DOMContentLoaded', () => {
         toggleButton(mainHandBtn, () => { mainHandBtn.style.backgroundColor = 'green'; socket.emit('raiseHand'); });
         toggleButton(changeBgBtn, () => selectLocalBackground());
         toggleButton(leaveBtn, () => { if(localStream)localStream.getTracks().forEach(track=>track.stop()); window.location.reload(); });
-
-        toggleButton(shareScreenBtn, async () => {
-            await shareScreen();
-        });
+        toggleButton(shareScreenBtn, async () => await shareScreen());
 
         function selectLocalBackground() {
             const input = document.createElement('input');
@@ -315,7 +333,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ====================================================
-    // Fonksyon partage ekran pou tout moun
+    // Fonksyon partage écran pou tout moun
     // ====================================================
     async function shareScreen() {
         try {
