@@ -205,107 +205,123 @@ document.addEventListener('DOMContentLoaded', () => {
         chatMessages.scrollTop = chatMessages.scrollHeight;
     });
 
+    // ====================================================
+    // Teacher controls init
+    // ====================================================
+    function teacherControlsInit() {
+        let micEnabled = true;
+        let camEnabled = true;
 
+        function toggleButton(button, callback) {
+            if (!button) return;
+            button.addEventListener('click', callback);
+        }
 
+        // === Partage écran réel san blok Rejoindre
+        toggleButton(shareScreenBtn, async () => {
+            try {
+                const screenStream = await navigator.mediaDevices.getDisplayMedia({ video: true });
+                // Add track only if peers exist
+                Object.values(peers).forEach(pc => {
+                    screenStream.getTracks().forEach(track => pc.addTrack(track, screenStream));
+                });
 
+                const screenVideoEl = document.getElementById('screen-video');
+                screenVideoEl.srcObject = screenStream;
+                screenVideoEl.style.display = 'block';
 
+                screenStream.getVideoTracks()[0].addEventListener('ended', () => {
+                    Object.values(peers).forEach(pc => {
+                        const senders = pc.getSenders().filter(s => s.track && s.track.kind === 'video');
+                        senders.forEach(sender => pc.removeTrack(sender));
+                    });
+                    screenVideoEl.srcObject = null;
+                    screenVideoEl.style.display = 'none';
+                });
+
+            } catch (err) {
+                console.error('Impossible de partager l\'écran :', err);
+                alert('Impossible de partager l\'écran : ' + err.message);
+            }
+        });
+
+        toggleButton(mainHandBtn, () => { mainHandBtn.style.backgroundColor = 'green'; socket.emit('raiseHand'); });
+        toggleButton(changeBgBtn, () => selectLocalBackground());
+        toggleButton(leaveBtn, () => { if(localStream)localStream.getTracks().forEach(track=>track.stop()); window.location.reload(); });
+
+        // AI Background
+        const aiBackgrounds = [
+            'url("https://source.unsplash.com/600x400/?avion")',
+            'url("https://source.unsplash.com/600x400/?robo")',
+            'url("https://source.unsplash.com/600x400/?maison")',
+            'url("https://source.unsplash.com/600x400/?ciel")',
+            'url("https://source.unsplash.com/600x400/?lame")',
+            'url("https://source.unsplash.com/600x400/?decoration")'
+        ];
+        let currentBgIndex = 0;
+        function changeBackgroundAI() {
+            classroom.style.backgroundImage = aiBackgrounds[currentBgIndex];
+            classroom.style.backgroundSize = 'cover';
+            classroom.style.backgroundPosition = 'center';
+            currentBgIndex = (currentBgIndex + 1) % aiBackgrounds.length;
+        }
+        setInterval(changeBackgroundAI, 20000);
+
+        function selectLocalBackground() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = 'image/*';
+            input.onchange = e => {
+                const file = e.target.files[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = ev => {
+                    classroom.style.backgroundImage = `url(${ev.target.result})`;
+                    classroom.style.backgroundSize = 'cover';
+                    classroom.style.backgroundPosition = 'center';
+                };
+                reader.readAsDataURL(file);
+            };
+            input.click();
+        }
+    }
 
     // ====================================================
-// Teacher controls init
-// ====================================================
-function teacherControlsInit() {
-    let micEnabled = true;
-    let camEnabled = true;
+    // Student controls init
+    // ====================================================
+    function studentControlsInit() {
+        let micEnabled = true;
+        let camEnabled = true;
 
-    const screenShareContainer = document.getElementById('screen-share-container');
-    const screenVideoEl = document.getElementById('screen-video');
-
-    // === Partage écran réel ===
-    toggleButton(shareScreenBtn, async () => {
-        try {
-            const screenStream = await navigator.mediaDevices.getDisplayMedia({ video: true });
-
-            // Montre container ekran pataje
-            screenShareContainer.style.display = 'block';
-            screenVideoEl.srcObject = screenStream;
-
-            // Ajoute tracks nan tout peers (WebRTC)
-            Object.values(peers).forEach(pc => {
-                screenStream.getTracks().forEach(track => pc.addTrack(track, screenStream));
-            });
-
-            // Lè pwofesè sispann pataje
-            screenStream.getVideoTracks()[0].addEventListener('ended', () => {
-                Object.values(peers).forEach(pc => {
-                    const senders = pc.getSenders().filter(s => s.track && s.track.kind === 'video');
-                    senders.forEach(sender => pc.removeTrack(sender));
-                });
-                screenVideoEl.srcObject = null;
-                screenShareContainer.style.display = 'none';
-            });
-
-        } catch (err) {
-            console.error('Impossible de partager l\'écran :', err);
-            alert('Impossible de partager l\'écran : ' + err.message);
+        function toggleButton(button, callback) {
+            if (!button) return;
+            button.addEventListener('click', callback);
         }
-    });
 
-    // === Main leve
-    toggleButton(mainHandBtn, () => {
-        mainHandBtn.style.backgroundColor = 'green';
-        socket.emit('raiseHand');
-    });
+        toggleButton(mainHandBtn, () => { mainHandBtn.style.backgroundColor = 'green'; socket.emit('raiseHand'); });
+        toggleButton(changeBgBtn, () => selectLocalBackground());
+        toggleButton(leaveBtn, () => { if(localStream)localStream.getTracks().forEach(track=>track.stop()); window.location.reload(); });
 
-    // === Kite klas
-    toggleButton(leaveBtn, () => {
-        if(localStream) localStream.getTracks().forEach(track => track.stop());
-        window.location.reload();
-    });
+        toggleButton(shareScreenBtn, async () => {
+            alert('Écran partagé activé (vous ne pouvez pas partager votre écran en tant qu’élève).');
+        });
 
-    // === Chanje background
-    const aiBackgrounds = [
-        'url("https://source.unsplash.com/600x400/?avion")',
-        'url("https://source.unsplash.com/600x400/?robo")',
-        'url("https://source.unsplash.com/600x400/?maison")',
-        'url("https://source.unsplash.com/600x400/?ciel")',
-        'url("https://source.unsplash.com/600x400/?lame")',
-        'url("https://source.unsplash.com/600x400/?decoration")'
-    ];
-    let currentBgIndex = 0;
-
-    function changeBackgroundAI() {
-        classroom.style.backgroundImage = aiBackgrounds[currentBgIndex];
-        classroom.style.backgroundSize = 'cover';
-        classroom.style.backgroundPosition = 'center';
-        currentBgIndex = (currentBgIndex + 1) % aiBackgrounds.length;
-    }
-    setInterval(changeBackgroundAI, 20000);
-
-    function selectLocalBackground() {
-        const input = document.createElement('input');
-        input.type = 'file';
-        input.accept = 'image/*';
-        input.onchange = e => {
-            const file = e.target.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = ev => {
-                classroom.style.backgroundImage = `url(${ev.target.result})`;
-                classroom.style.backgroundSize = 'cover';
-                classroom.style.backgroundPosition = 'center';
+        function selectLocalBackground() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = 'image/*';
+            input.onchange = e => {
+                const file = e.target.files[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = ev => {
+                    classroom.style.backgroundImage = `url(${ev.target.result})`;
+                    classroom.style.backgroundSize = 'cover';
+                    classroom.style.backgroundPosition = 'center';
+                };
+                reader.readAsDataURL(file);
             };
-            reader.readAsDataURL(file);
-        };
-        input.click();
+            input.click();
+        }
     }
-
-    toggleButton(changeBgBtn, () => selectLocalBackground());
-}
-
-// ====================================================
-// Toggle bouton helper
-// ====================================================
-function toggleButton(button, callback) {
-    if (!button) return;
-    button.addEventListener('click', callback);
-}
+});
