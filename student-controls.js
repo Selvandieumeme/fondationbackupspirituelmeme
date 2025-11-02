@@ -66,23 +66,22 @@ let studentControlsInit = async (socket) => {
   // ====================================================
   // BOUTONS ADDITIONNELS
   // ====================================================
-// ====================================================
-// Elèv
-// ====================================================
-document.getElementById('download-class-doc').addEventListener('click', () => {
-    downloadFile("document_du_cours.pdf", "Contenu du cours réel", "application/pdf");
-});
+document.addEventListener('DOMContentLoaded', () => {
 
-document.getElementById('upload-student-file').addEventListener('click', () => {
-    uploadFileToClass(file => {
-        alert(`Fichier ${file.name} ajouté à la classe!`);
-        // upload sou server si gen backend
-    });
-});
+    const downloadBtn = document.getElementById('download-btn');
+    const downloadMenu = document.getElementById('download-menu');
 
-document.getElementById('download-replay').addEventListener('click', () => {
-    downloadFile("replay_session.mp4", "Replay vidéo réel", "video/mp4");
-});
+    if(downloadBtn && downloadMenu){
+        downloadBtn.addEventListener('click', () => {
+            downloadMenu.style.display = downloadMenu.style.display === 'block' ? 'none' : 'block';
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!downloadBtn.contains(e.target) && !downloadMenu.contains(e.target)) {
+                downloadMenu.style.display = 'none';
+            }
+        });
+    }
 
   
 
