@@ -65,27 +65,26 @@ const changeBgBtn = document.getElementById('change-background-btn'); // itilize
   // ====================================================
   // BOUTONS ADDITIONNELS
   // ====================================================
-// === FONKSYONALITE TELECHARGER POU PROFESÈ ===
+// === UPLOAD DOKIMAN VERS SALLE ===
+document.getElementById('uploadFile')?.addEventListener('click', async () => {
+  const fileInput = document.createElement('input');
+  fileInput.type = 'file';
+  fileInput.accept = '*/*';
+  fileInput.onchange = async () => {
+    const file = fileInput.files[0];
+    if (!file) return;
+    const formData = new FormData();
+    formData.append('file', file);
 
-if (document.getElementById("uploadFile")) {
-  document.getElementById("uploadFile").addEventListener("click", () => {
-    console.log("Pwofesè ap telechaje fichye pou kou a...");
-    alert("Pwofesè: chwazi fichye pou upload nan salle de classe la.");
-  });
-}
-
-if (document.getElementById("recordClass")) {
-  document.getElementById("recordClass").addEventListener("click", () => {
-    console.log("Pwofesè demare anrejistreman kou a.");
-  });
-}
-
-if (document.getElementById("stopRecord")) {
-  document.getElementById("stopRecord").addEventListener("click", () => {
-    console.log("Pwofesè sispann anrejistreman kou a.");
-  });
-}
-
+    try {
+      await fetch('/upload', { method: 'POST', body: formData });
+      alert("✅ Fichye telechaje nan salle la avèk siksè !");
+    } catch (err) {
+      alert("❌ Erè pandan upload la !");
+    }
+  };
+  fileInput.click();
+});
   
 
 
