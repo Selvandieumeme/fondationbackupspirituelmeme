@@ -66,44 +66,25 @@ let studentControlsInit = async (socket) => {
   // ====================================================
   // BOUTONS ADDITIONNELS
   // ====================================================
-// Fonksyon telechaje fichye
-function downloadFile(filename, content, type = "text/plain") {
-    const blob = new Blob([content], { type });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = filename;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-}
-
-function uploadFileToClass(callback) {
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.onchange = (e) => {
-        const file = e.target.files[0];
-        if(file) callback(file);
-    };
-    input.click();
-}
-
-// Bouton elèv
+// ====================================================
+// Elèv
+// ====================================================
 document.getElementById('download-class-doc').addEventListener('click', () => {
-    downloadFile("document_du_cours.pdf", "Contenu du cours", "application/pdf");
+    downloadFile("document_du_cours.pdf", "Contenu du cours réel", "application/pdf");
 });
 
 document.getElementById('upload-student-file').addEventListener('click', () => {
     uploadFileToClass(file => {
         alert(`Fichier ${file.name} ajouté à la classe!`);
-        // Upload elèv sou server
+        // upload sou server si gen backend
     });
 });
 
 document.getElementById('download-replay').addEventListener('click', () => {
-    downloadFile("replay_session.mp4", "Simulation replay vidéo", "video/mp4");
+    downloadFile("replay_session.mp4", "Replay vidéo réel", "video/mp4");
 });
+
+  
 
   
 
