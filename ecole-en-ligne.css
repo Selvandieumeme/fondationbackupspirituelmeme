@@ -289,28 +289,38 @@ h1 {
 
 
 
-.student-only { display: inline-block; }
-.teacher-only { display: inline-block; }
-
-/* Egzanp pou kache elèv oswa pwofesè selon role */
-body.student .teacher-only { display: none; }
-body.teacher .student-only { display: none; }
-
-.dropdown-content {
-    display: none;
-    position: absolute;
-    background-color: #f9f9f9;
-    min-width: 60px;
-    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
-    z-index: 1;
+.download-container {
+  position: relative;
+  display: inline-block;
 }
-.dropdown-content a {
-    display: block;
-    padding: 5px 8px;
-    text-align: center;
-    text-decoration: none;
-    font-size: 18px;
+
+.download-btn {
+  padding: 10px 20px;
+  font-size: 16px;
+  cursor: pointer;
+  position: relative;
 }
-.dropdown-content a:hover {
-    background-color: #f1f1f1;
+
+.dropdown-icons {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background: #f0f0f0;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  padding: 5px;
+  z-index: 1000;
+}
+
+.dropdown-icons button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 20px;
+  margin: 5px;
+}
+
+.download-btn:hover .dropdown-icons {
+  display: flex;
 }
