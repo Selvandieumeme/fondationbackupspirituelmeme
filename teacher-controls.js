@@ -5,14 +5,9 @@ let teacherControlsInit = async (socket) => {
   const leaveBtn = document.getElementById('leave-class');
   const teacherVideo = document.getElementById('teacher-video');
 
-  
   const shareScreenBtn = document.getElementById('share-screen');
-  
+  const changeBgBtn = document.getElementById('change-background-btn'); // itilize bouton ki deja nan HTML
 
-const changeBgBtn = document.getElementById('change-background-btn'); // itilize bouton ki deja nan HTML
-
-  
-  
   let localStream;
   let micEnabled = true;
   let camEnabled = true;
@@ -65,10 +60,6 @@ const changeBgBtn = document.getElementById('change-background-btn'); // itilize
   // ====================================================
   // BOUTONS ADDITIONNELS
   // ====================================================
-
-
-  
-  
   shareScreenBtn.addEventListener('click', async () => {
       try {
           const screenStream = await navigator.mediaDevices.getDisplayMedia({ video: true });
@@ -78,7 +69,6 @@ const changeBgBtn = document.getElementById('change-background-btn'); // itilize
       }
   });
 
- 
   // ====================================================
   // CHANGER FOND DE CLASSE
   // ====================================================
