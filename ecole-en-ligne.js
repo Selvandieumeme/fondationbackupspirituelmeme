@@ -240,7 +240,7 @@ shareScreenBtn.addEventListener('click', async () => {
     }
 });
 
-recordBtn.addEventListener('click', () => alert('Enregistrement activé (simulation).'));
+
 
 // Main leve (simulation vizyèl)
 mainHandBtn.addEventListener('click', () => {
