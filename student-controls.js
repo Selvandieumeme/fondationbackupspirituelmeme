@@ -67,22 +67,25 @@ let studentControlsInit = async (socket) => {
   // BOUTONS ADDITIONNELS
   // ====================================================
 
- // === FONKSYONALITE TELECHARGER POU ELÈV ===
+// === DOWNLOAD DOKIMAN DEPI SALLE ===
+document.getElementById('downloadFile')?.addEventListener('click', async () => {
+  try {
+    const res = await fetch('/classroom/download-latest');
+    const blob = await res.blob();
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = 'document_classe.zip';
+    link.click();
+    alert("✅ Dokiman telechaje sou aparèy ou !");
+  } catch (err) {
+    alert("❌ Erè pandan telechajman an !");
+  }
+});
 
-// Elèv ka telechaje fichye kou a
-if (document.getElementById("downloadFile")) {
-  document.getElementById("downloadFile").addEventListener("click", () => {
-    console.log("Elèv ap telechaje fichye kou a...");
-    alert("Elèv: mete lyen fichye a pou telechaje nan salle de classe la.");
-  });
-}
 
-// (Opsyonèl) Si w vle elèv yo ka anrejistre kou a pou revizyon
-if (document.getElementById("recordClass")) {
-  document.getElementById("recordClass").addEventListener("click", () => {
-    console.log("Elèv demare anrejistreman pou revizyon pèsonèl.");
-  });
-}
+
+
+
 
 
   
