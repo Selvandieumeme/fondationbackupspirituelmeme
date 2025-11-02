@@ -11,31 +11,16 @@ let studentControlsInit = async (socket) => {
   let micEnabled = true;
   let camEnabled = true;
 
-  // ====================================================
-  // 🎧 Inisyalize stream elèv ak echoCancellation aktif
-  // ====================================================
+  // === Inisyalize stream elèv ===
   try {
-    localStream = await navigator.mediaDevices.getUserMedia({
-      video: true,
-      audio: {
-        echoCancellation: true,
-        noiseSuppression: true,
-        autoGainControl: true
-      }
-    });
+    localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
 
     const studentVideo = document.createElement('video');
     studentVideo.autoplay = true;
     studentVideo.playsInline = true;
-
-    // ✅ Elèv tande tèt li san eko
-    studentVideo.muted = false;
-
+    studentVideo.muted = true; // evite echo
     studentVideo.srcObject = localStream;
     studentVideoContainer.appendChild(studentVideo);
-
-    // Active tout track yo
-    localStream.getTracks().forEach(track => (track.enabled = true));
 
     socket.emit('streamReady', { role: 'student' });
   } catch (err) {
@@ -43,82 +28,63 @@ let studentControlsInit = async (socket) => {
     alert("Impossible d'accéder à la caméra ou au micro. Vérifiez vos autorisations.");
   }
 
-  // ====================================================
-  // 🔘 Fonksyon jeneral pou toggle bouton
-  // ====================================================
+  // === Fonksyon jeneral ===
   function toggleButton(button, callback) {
     if (!button) return;
     button.addEventListener('click', callback);
   }
 
-  // ====================================================
-  // 🎙️ Mikwo & Kamera
-  // ====================================================
+  // === Mikwo & Kamera ===
   toggleButton(toggleMicBtn, () => {
     micEnabled = !micEnabled;
-    localStream.getAudioTracks().forEach(track => (track.enabled = micEnabled));
+    localStream.getAudioTracks().forEach(track => track.enabled = micEnabled);
     toggleMicBtn.textContent = micEnabled ? "Mic Off" : "Mic On";
   });
 
   toggleButton(toggleCamBtn, () => {
     camEnabled = !camEnabled;
-    localStream.getVideoTracks().forEach(track => (track.enabled = camEnabled));
+    localStream.getVideoTracks().forEach(track => track.enabled = camEnabled);
     toggleCamBtn.textContent = camEnabled ? "Camera Off" : "Camera On";
   });
 
-  // ====================================================
-  // ✋ Main leve
-  // ====================================================
+  // === Main leve ===
   toggleButton(mainHandBtn, () => {
     mainHandBtn.style.backgroundColor = 'green';
     socket.emit('raiseHand');
   });
 
-  // ====================================================
-  // 🚪 Kite klas
-  // ====================================================
+  // === Kite klas ===
   toggleButton(leaveBtn, () => {
     if (localStream) localStream.getTracks().forEach(track => track.stop());
     window.location.reload();
   });
 
-  // ====================================================
-  // 🖥️ Share Screen (pou elèv)
-  // ====================================================
+  // === Share Screen (si elèv ka pataje) ===
   toggleButton(shareScreenBtn, async () => {
     try {
       const screenStream = await navigator.mediaDevices.getDisplayMedia({ video: true });
-
-      // Ajoute track nan tout peers
-      Object.values(peers).forEach(pc => {
+      Object.values(peers || {}).forEach(pc => {
         screenStream.getTracks().forEach(track => pc.addTrack(track, screenStream));
       });
 
-      // Kreye videyo lokal pou elèv
       const localScreenVideo = document.createElement('video');
       localScreenVideo.autoplay = true;
       localScreenVideo.playsInline = true;
-      localScreenVideo.muted = true; // ✅ pou evite doub-son pandan pataj
+      localScreenVideo.muted = true;
       localScreenVideo.srcObject = screenStream;
       studentVideoContainer.appendChild(localScreenVideo);
 
-      // Lè elèv la sispann pataje
       screenStream.getVideoTracks()[0].addEventListener('ended', () => {
-        Object.values(peers).forEach(pc => {
-          const senders = pc.getSenders().filter(s => s.track && s.track.kind === 'video');
-          senders.forEach(sender => pc.removeTrack(sender));
-        });
         localScreenVideo.remove();
       });
+
     } catch (err) {
-      console.error("Impossible de partager l'écran :", err);
-      alert("Impossible de partager l'écran : " + err.message);
+      console.error('Impossible de partager l\'écran :', err);
+      alert('Impossible de partager l\'écran : ' + err.message);
     }
   });
 
-  // ====================================================
-  // 🎨 Background AI dinamik + chanjman manyèl
-  // ====================================================
+  // === Chanje background ===
   const aiBackgrounds = [
     'url("https://source.unsplash.com/600x400/?avion")',
     'url("https://source.unsplash.com/600x400/?robo")',
@@ -158,26 +124,23 @@ let studentControlsInit = async (socket) => {
     input.click();
   });
 
-  // ====================================================
-  // 🚫 Blocage pa pwofese a
-  // ====================================================
-  socket.on('blockedStudent', ({ id }) => {
-    if (socket.id === id) {
-      alert('Vous avez été bloqué par le professeur');
-      window.location.reload();
-    }
+  // === Resevwa stream pwofesè oswa lòt elèv ===
+  socket.on('incomingStream', (streamData) => {
+    const video = document.createElement('video');
+    video.autoplay = true;
+    video.playsInline = true;
+    video.srcObject = streamData;
+    studentVideoContainer.appendChild(video);
   });
 
-  // ====================================================
-  // 🎥 Resevwa ekran pwofese a
-  // ====================================================
+  // === Ekran pwofesè ===
   socket.on('screen-share', (streamData) => {
     const videoEl = document.getElementById('teacher-screen-video') || (() => {
       const v = document.createElement('video');
       v.id = 'teacher-screen-video';
       v.autoplay = true;
       v.playsInline = true;
-      v.muted = true;
+      v.muted = false;
       studentVideoContainer.appendChild(v);
       return v;
     })();
