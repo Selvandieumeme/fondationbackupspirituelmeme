@@ -7,10 +7,9 @@ const http = require('http'); // ✅ TRÈ ENPÒTAN pou Socket.io mache
 const { Server } = require('socket.io');
 
 
-const bcrypt = require('bcrypt');
+
 const jwt = require('jsonwebtoken');
-const multer = require('multer');
-const nodemailer = require('nodemailer');
+
 
 const mongoose = require('mongoose');
 
