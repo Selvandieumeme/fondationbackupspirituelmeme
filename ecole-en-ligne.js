@@ -8,8 +8,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // Elements HTML
     // ====================================================
     const joinBtn = document.getElementById('joinBtn');
-    const roomInput = document.getElementById('roomCode'); // pou pwofesè
-    const studentRoomInputField = document.getElementById('studentRoomCode'); // pou elèv
+    const roomInput = document.getElementById('generatedRoomCode'); // chanje pou matche ak HTML
+   const studentRoomInputField = document.getElementById('studentRoomCode'); // pou elèv
     const nameInput = document.getElementById('fullName');
     const roleSelect = document.getElementById('roleSelect');
     const loginPanel = document.getElementById('login-panel');
