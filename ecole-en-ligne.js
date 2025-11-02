@@ -199,50 +199,145 @@ socket.on('chatMessage', data => {
 
 
 // ====================================================
-// BOUTONS ADDITIONNELS (PA KREYE CHANGE-BG ANKÒ)
+// BOUTONS ADDITIONNELS (Teacher / Student)
 // ====================================================
-const downloadBtn = document.getElementById('download-btn');
-const shareScreenBtn = document.getElementById('share-screen');
-const recordBtn = document.getElementById('record-video');
-const mainHandBtn = document.getElementById('main-hand');
+document.addEventListener('DOMContentLoaded', () => {
+
+    // === ELEMENTS HTML ===
+    const classroom = document.getElementById('classroom');
+    const teacherVideoEl = document.getElementById('teacher-video');
+    const studentVideosEl = document.getElementById('student-videos');
+
+    // Boutons
+    const shareScreenBtn = document.getElementById('share-screen');
+    const recordBtn = document.getElementById('record-video');
+    const mainHandBtn = document.getElementById('main-hand');
+    const downloadBtn = document.getElementById('download-btn');
+    const downloadMenu = document.getElementById('download-menu');
 
 
-const downloadBtn = document.getElementById('download-btn');
-const downloadMenu = document.getElementById('download-menu');
 
-downloadBtn.addEventListener('click', () => {
-    downloadMenu.style.display = downloadMenu.style.display === 'block' ? 'none' : 'block';
-});
+  
 
-document.addEventListener('click', (e) => {
-    if (!downloadBtn.contains(e.target) && !downloadMenu.contains(e.target)) {
-        downloadMenu.style.display = 'none';
+   // === DROPDOWN TELECHARGER ===
+    if(downloadBtn && downloadMenu){
+        downloadBtn.addEventListener('click', (e) => {
+            e.stopPropagation(); // pou evite click document an fèmen meni an imedyatman
+            downloadMenu.style.display = downloadMenu.style.display === 'block' ? 'none' : 'block';
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!downloadBtn.contains(e.target) && !downloadMenu.contains(e.target)) {
+                downloadMenu.style.display = 'none';
+            }
+        });
     }
+
+    // === FONKSYON TELECHARGE / UPLOAD ===
+    function downloadFile(filename, content, type="text/plain"){
+        const blob = new Blob([content], { type });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    }
+
+    function uploadFileToClass(callback){
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.onchange = (e) => {
+            const file = e.target.files[0];
+            if(file) callback(file);
+        };
+        input.click();
+    }
+
+    // === BOUTONS ADDITIONNELS ===
+    if(shareScreenBtn){
+        shareScreenBtn.addEventListener('click', async () => {
+            try {
+                await navigator.mediaDevices.getDisplayMedia({ video:true });
+                alert('Écran partagé activé.');
+            } catch(err) { console.error(err); }
+        });
+    }
+
+    if(recordBtn){
+        recordBtn.addEventListener('click', () => {
+            alert('Enregistrement activé.');
+        });
+    }
+
+    if(mainHandBtn){
+        mainHandBtn.addEventListener('click', () => {
+            mainHandBtn.style.backgroundColor = 'green';
+            // La ou ka ajoute emit socket pou mete main leve nan panel dwat la
+        });
+    }
+
+    // ====================================================
+    // TELECHARGER - PROFESSEUR
+    // ====================================================
+    const downloadClassFiles = document.getElementById('download-class-files');
+    const uploadToClass = document.getElementById('upload-to-class');
+    const downloadSessionVideo = document.getElementById('download-session-video');
+
+    if(downloadClassFiles){
+        downloadClassFiles.addEventListener('click', () => {
+            downloadFile("documents_classe.zip","Contenu réel des fichiers de la classe","application/zip");
+        });
+    }
+
+    if(uploadToClass){
+        uploadToClass.addEventListener('click', () => {
+            uploadFileToClass(file => {
+                alert(`Fichier ${file.name} ajouté à la classe!`);
+            });
+        });
+    }
+
+    if(downloadSessionVideo){
+        downloadSessionVideo.addEventListener('click', () => {
+            downloadFile("session_video.mp4","Contenu vidéo réel","video/mp4");
+        });
+    }
+
+    // ====================================================
+    // TELECHARGER - ELEVE
+    // ====================================================
+    const downloadClassDoc = document.getElementById('download-class-doc');
+    const uploadStudentFile = document.getElementById('upload-student-file');
+    const downloadReplay = document.getElementById('download-replay');
+
+    if(downloadClassDoc){
+        downloadClassDoc.addEventListener('click', () => {
+            downloadFile("document_du_cours.pdf","Contenu du cours réel","application/pdf");
+        });
+    }
+
+    if(uploadStudentFile){
+        uploadStudentFile.addEventListener('click', () => {
+            uploadFileToClass(file => {
+                alert(`Fichier ${file.name} ajouté à la classe!`);
+            });
+        });
+    }
+
+    if(downloadReplay){
+        downloadReplay.addEventListener('click', () => {
+            downloadFile("replay_session.mp4","Replay vidéo réel","video/mp4");
+        });
+    }
+
 });
 
-// Fonksyon telechaje fichye
-function downloadFile(filename, content, type = "text/plain") {
-    const blob = new Blob([content], { type });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = filename;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-}
 
-// Fonksyon upload fichye
-function uploadFileToClass(callback) {
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.onchange = (e) => {
-        const file = e.target.files[0];
-        if(file) callback(file);
-    };
-    input.click();
-}
+
+
 
 
 
