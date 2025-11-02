@@ -5,7 +5,7 @@ let studentControlsInit = async (socket) => {
   const leaveBtn = document.getElementById('leave-class');
   const studentVideoContainer = document.getElementById('student-videos');
 
-  const downloadBtn = document.getElementById('download-btn');
+  
   const shareScreenBtn = document.getElementById('share-screen');
  
 
@@ -67,20 +67,6 @@ let studentControlsInit = async (socket) => {
   // BOUTONS ADDITIONNELS
   // ====================================================
 
-// === DOWNLOAD DOKIMAN DEPI SALLE ===
-document.getElementById('downloadFile')?.addEventListener('click', async () => {
-  try {
-    const res = await fetch('/classroom/download-latest');
-    const blob = await res.blob();
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.download = 'document_classe.zip';
-    link.click();
-    alert("✅ Dokiman telechaje sou aparèy ou !");
-  } catch (err) {
-    alert("❌ Erè pandan telechajman an !");
-  }
-});
 
 
 
