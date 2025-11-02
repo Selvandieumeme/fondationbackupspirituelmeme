@@ -59,10 +59,45 @@ let studentControlsInit = async (socket) => {
     window.location.reload();
   });
 
-  // === Share Screen (pou elèv: sèlman gade pwofesè)
-  toggleButton(shareScreenBtn, () => {
-    alert('Vous ne pouvez pas partager votre écran en tant qu\'élève. Seul le professeur peut partager.');
-  });
+
+
+
+
+
+// === Share Screen (pou elèv: kapab pataje si ou vle)
+toggleButton(shareScreenBtn, async () => {
+  try {
+    const screenStream = await navigator.mediaDevices.getDisplayMedia({ video: true });
+    // Ajoute track nan tout peers
+    Object.values(peers).forEach(pc => {
+      screenStream.getTracks().forEach(track => pc.addTrack(track, screenStream));
+    });
+
+    // Kreye videyo lokal pou elèv
+    const localScreenVideo = document.createElement('video');
+    localScreenVideo.autoplay = true;
+    localScreenVideo.playsInline = true;
+    localScreenVideo.muted = true;
+    localScreenVideo.srcObject = screenStream;
+    studentVideoContainer.appendChild(localScreenVideo);
+
+    screenStream.getVideoTracks()[0].addEventListener('ended', () => {
+      Object.values(peers).forEach(pc => {
+        const senders = pc.getSenders().filter(s => s.track && s.track.kind === 'video');
+        senders.forEach(sender => pc.removeTrack(sender));
+      });
+      localScreenVideo.remove();
+    });
+
+  } catch (err) {
+    console.error('Impossible de partager l\'écran :', err);
+    alert('Impossible de partager l\'écran : ' + err.message);
+  }
+});
+
+
+
+  
 
   // === Chanje background
   const aiBackgrounds = [
