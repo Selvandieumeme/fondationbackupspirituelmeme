@@ -77,7 +77,7 @@ toggleButton(shareScreenBtn, async () => {
     const localScreenVideo = document.createElement('video');
     localScreenVideo.autoplay = true;
     localScreenVideo.playsInline = true;
-    localScreenVideo.muted = true;
+    localScreenVideo.muted = false;
     localScreenVideo.srcObject = screenStream;
     studentVideoContainer.appendChild(localScreenVideo);
 
