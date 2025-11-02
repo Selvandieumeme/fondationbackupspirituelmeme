@@ -24,85 +24,54 @@
 
   <!-- Section vidéos -->
   <div id="video-section">
-
-    <!-- Vidéo du professeur -->
     <div class="teacher-video-container">
       <h3>Professeur</h3>
       <video id="teacher-video" autoplay playsinline muted></video>
     </div>
+    <div id="student-videos"></div>
+  </div>
 
-    <!-- Vidéos des élèves -->
-    <div id="student-videos">
-      <!-- Les vidéos des élèves seront ajoutées ici dynamiquement -->
-    </div>
-
-
-
-</div>
-    
-    <!-- Écran partagé -->
-    <div id="screen-share-container" style="display:none;">
-      <h3>Partage d’écran</h3>
-      <video id="screen-video" autoplay playsinline></video>
-    </div>
-
+  <!-- Écran partagé -->
+  <div id="screen-share-container" style="display:none;">
+    <h3>Partage d’écran</h3>
+    <video id="screen-video" autoplay playsinline></video>
   </div>
 
   <!-- Panel latéral -->
-  <div id="side-panel">
-
-    <!-- Mains levées -->
+  <div id="side-panel" style="display:none;">
     <div id="raised-hands">
       <h3>Mains Levées</h3>
       <div id="raised-hands-list"></div>
     </div>
-
-    <!-- Liste des élèves -->
     <div id="student-list-container">
       <h3>Élèves Connectés (<span id="student-count">0</span>/100)</h3>
       <div id="student-list"></div>
     </div>
-
   </div>
 
   <!-- Panel chat -->
-  <div id="chat-panel">
+  <div id="chat-panel" style="display:none;">
     <div id="chat-messages"></div>
     <input id="chat-input" placeholder="Écrire un message...">
     <button id="send-chat">Envoyer</button>
   </div>
 
   <!-- Panel annonces -->
-  <div id="announcement-panel"></div>
+  <div id="announcement-panel" style="display:none;"></div>
 
   <!-- Contrôles -->
-  <div id="controls">
+  <div id="controls" style="display:none;">
     <button id="toggle-mic">Mic On/Off</button>
     <button id="toggle-camera">Camera On/Off</button>
-    
     <button id="share-screen">Partager écran</button>
     <button id="main-hand">Main Levée</button>
-
-
-
-    
- 
-
-
-
-
-
-
-    
     <button id="leave-class">Quitter</button>
     <button id="rejoin-class">Retourner dans la salle</button>
-   <button id="change-background-btn">Changer Fond</button>
+    <button id="change-background-btn">Changer Fond</button>
   </div>
 
   <!-- Div sipò pou fond AI / upload lokal -->
-  <div id="background-selector" style="display:none;">
-    <!-- Bouton chwa AI oswa Upload lokal ap jere nan JS -->
-  </div>
+  <div id="background-selector" style="display:none;"></div>
 
 </div>
 
