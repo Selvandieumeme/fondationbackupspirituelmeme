@@ -299,6 +299,14 @@ h1 {
   font-size: 16px;
   cursor: pointer;
   position: relative;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 5px;
+}
+
+.download-btn:hover {
+  background-color: #0056b3;
 }
 
 .dropdown-icons {
@@ -310,6 +318,8 @@ h1 {
   border: 1px solid #ccc;
   border-radius: 6px;
   padding: 5px;
+  flex-direction: row;
+  gap: 5px;
   z-index: 1000;
 }
 
@@ -318,7 +328,16 @@ h1 {
   border: none;
   cursor: pointer;
   font-size: 20px;
-  margin: 5px;
+  padding: 5px;
+  border-radius: 3px;
+}
+
+.dropdown-icons button:hover {
+  background-color: #ddd;
+}
+
+.download-btn:hover .dropdown-icons {
+  display: flex;
 }
 
 .download-btn:hover .dropdown-icons {
