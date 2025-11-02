@@ -212,7 +212,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const shareScreenBtn = document.getElementById('share-screen');
    
     const mainHandBtn = document.getElementById('main-hand');
-    const downloadBtn = document.getElementById('download-btn');
+    
     const downloadMenu = document.getElementById('download-menu');
 
 
@@ -221,59 +221,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
   
-// === TELECHARGER MENU ===
-document.addEventListener('DOMContentLoaded', () => {
-  const downloadBtn = document.getElementById('downloadBtn');
-  const dropdownIcons = document.querySelector('.dropdown-icons');
-
-  if (downloadBtn && dropdownIcons) {
-    downloadBtn.addEventListener('click', () => {
-      const isVisible = dropdownIcons.style.display === 'flex';
-      dropdownIcons.style.display = isVisible ? 'none' : 'flex';
-    });
-  }
-});
-
-
-
-  
-// === RECORD VIDEO COURS ===
-let mediaRecorder;
-let recordedChunks = [];
-
-const recordBtn = document.getElementById('recordClass');
-const stopRecordBtn = document.getElementById('stopRecord');
-
-recordBtn?.addEventListener('click', async () => {
-  const stream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
-  mediaRecorder = new MediaRecorder(stream);
-  recordedChunks = [];
-
-  mediaRecorder.ondataavailable = e => {
-    if (e.data.size > 0) recordedChunks.push(e.data);
-  };
-
-  mediaRecorder.onstop = () => {
-    const blob = new Blob(recordedChunks, { type: 'video/webm' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'cours_enregistree.webm';
-    a.click();
-  };
-
-  mediaRecorder.start();
-  recordBtn.style.display = 'none';
-  stopRecordBtn.style.display = 'inline-block';
-  alert("🎥 Enregistrement démarré !");
-});
-
-stopRecordBtn?.addEventListener('click', () => {
-  mediaRecorder?.stop();
-  recordBtn.style.display = 'inline-block';
-  stopRecordBtn.style.display = 'none';
-  alert("✅ Enregistrement terminé et téléchargé !");
-});
 
 
 
