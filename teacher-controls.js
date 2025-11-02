@@ -65,23 +65,104 @@ const changeBgBtn = document.getElementById('change-background-btn'); // itilize
   // ====================================================
   // BOUTONS ADDITIONNELS
   // ====================================================
-document.addEventListener('DOMContentLoaded', () => {
-
+// ======== DROPDOWN ========
     const downloadBtn = document.getElementById('download-btn');
     const downloadMenu = document.getElementById('download-menu');
 
-    // Toggle dropdown
-    if(downloadBtn && downloadMenu){
-        downloadBtn.addEventListener('click', () => {
-            downloadMenu.style.display = downloadMenu.style.display === 'block' ? 'none' : 'block';
-        });
+    downloadBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        downloadMenu.style.display = downloadMenu.style.display === 'block' ? 'none' : 'block';
+    });
 
-        document.addEventListener('click', (e) => {
-            if (!downloadBtn.contains(e.target) && !downloadMenu.contains(e.target)) {
-                downloadMenu.style.display = 'none';
+    document.addEventListener('click', () => {
+        downloadMenu.style.display = 'none';
+    });
+
+    // ======== FONKSYON DOWNLOAD ========
+    function downloadFile(filename, content, type = "text/plain") {
+        const blob = new Blob([content], { type });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    }
+
+    // ======== FONKSYON UPLOAD ========
+    function uploadFileToClass(callback) {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = ".pdf,.mp4,.docx,.pptx";
+        input.onchange = (e) => {
+            const file = e.target.files[0];
+            if(file) callback(file);
+        };
+        input.click();
+    }
+
+    // ======== ICON 📗 TELECHARGE DOCUMENT KOU ========
+    const downloadClassDoc = document.getElementById('download-class-doc');
+    if(downloadClassDoc){
+        downloadClassDoc.addEventListener('click', () => {
+            if(window.classFileContent){
+                downloadFile("document_du_cours.pdf", window.classFileContent, "application/pdf");
+            } else {
+                alert("Aucun document disponible pour l'instant.");
             }
         });
     }
+
+    // ======== ICON ⬆️ UPLOAD DOSYE ========
+    const uploadToClassBtn = document.getElementById('upload-to-class');
+    if(uploadToClassBtn){
+        uploadToClassBtn.addEventListener('click', () => {
+            uploadFileToClass(file => {
+                const reader = new FileReader();
+                reader.onload = (ev) => {
+                    window.classFileContent = ev.target.result;
+                    alert(`Fichier ${file.name} ajouté à la classe !`);
+                    // backend upload ka fèt isit la
+                };
+                reader.readAsArrayBuffer(file); // oubyen readAsDataURL si PDF/IMG
+            });
+        });
+    }
+
+    // ======== ICON 🎬 ENREGISTRE + TELECHARGE VIDEO ========
+    let mediaRecorder;
+    let recordedChunks = [];
+    const recordBtn = document.getElementById('record-video');
+
+    if(recordBtn){
+        recordBtn.addEventListener('click', async () => {
+            if(!mediaRecorder || mediaRecorder.state === "inactive"){
+                const stream = await navigator.mediaDevices.getUserMedia({ video:true, audio:true });
+                mediaRecorder = new MediaRecorder(stream);
+                recordedChunks = [];
+                mediaRecorder.ondataavailable = e => { if(e.data.size>0) recordedChunks.push(e.data); };
+                mediaRecorder.start();
+                alert("Enregistrement démarré !");
+            } else if(mediaRecorder.state === "recording"){
+                mediaRecorder.stop();
+                mediaRecorder.onstop = () => {
+                    const blob = new Blob(recordedChunks, { type: "video/mp4" });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = "session_cours.mp4";
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                    alert("Vidéo téléchargée !");
+                };
+            }
+        });
+    }
+});
 
   
   
