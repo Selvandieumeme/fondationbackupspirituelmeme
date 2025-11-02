@@ -65,11 +65,15 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // Inisyalizasyon lè paj la chaje
     if (roleSelect.value === 'teacher') {
         document.getElementById('room-code-container').style.display = 'block';
         if (studentRoomInputField) studentRoomInputField.parentElement.style.display = 'none';
         roomInput.value = generateRoomCode();
     }
+
+
+    
 
     // ====================================================
     // Rejoindre bouton
