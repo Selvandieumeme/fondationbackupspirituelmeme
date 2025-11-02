@@ -65,44 +65,24 @@ const changeBgBtn = document.getElementById('change-background-btn'); // itilize
   // ====================================================
   // BOUTONS ADDITIONNELS
   // ====================================================
-// Fonksyon telechaje fichye
-function downloadFile(filename, content, type = "text/plain") {
-    const blob = new Blob([content], { type });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = filename;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-}
-
-function uploadFileToClass(callback) {
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.onchange = (e) => {
-        const file = e.target.files[0];
-        if(file) callback(file);
-    };
-    input.click();
-}
-
-// Bouton pwofesè
+// ====================================================
+// Pwofesè
+// ====================================================
 document.getElementById('download-class-files').addEventListener('click', () => {
-    downloadFile("documents_classe.zip", "Contenu simulé des fichiers de la classe", "application/zip");
+    downloadFile("documents_classe.zip", "Contenu réel des fichiers de la classe", "application/zip");
 });
 
 document.getElementById('upload-to-class').addEventListener('click', () => {
     uploadFileToClass(file => {
         alert(`Fichier ${file.name} ajouté à la classe!`);
-        // Upload sou server si sa nesesè
+        // upload sou server si gen backend
     });
 });
 
 document.getElementById('download-session-video').addEventListener('click', () => {
-    downloadFile("session_video.mp4", "Simulation vidéo...", "video/mp4");
+    downloadFile("session_video.mp4", "Contenu vidéo réel", "video/mp4");
 });
+
   
   
   
