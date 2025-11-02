@@ -213,7 +213,7 @@ document.addEventListener('DOMContentLoaded', () => {
    
     const mainHandBtn = document.getElementById('main-hand');
     
-    const downloadMenu = document.getElementById('download-menu');
+    
 
 
 
