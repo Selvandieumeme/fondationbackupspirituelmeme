@@ -210,7 +210,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Boutons
     const shareScreenBtn = document.getElementById('share-screen');
-    const recordBtn = document.getElementById('record-video');
+   
     const mainHandBtn = document.getElementById('main-hand');
     const downloadBtn = document.getElementById('download-btn');
     const downloadMenu = document.getElementById('download-menu');
