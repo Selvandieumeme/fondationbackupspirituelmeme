@@ -99,7 +99,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 studentVideo.srcObject = localStream;
                 studentVideo.autoplay = true;
                 studentVideo.playsInline = true;
-                studentVideo.muted = true;
+                studentVideo.muted = false;
                 studentVideosEl.appendChild(studentVideo);
             }
 
