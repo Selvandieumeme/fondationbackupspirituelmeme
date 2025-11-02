@@ -202,17 +202,7 @@ socket.on('chatMessage', data => {
 // ====================================================
 // BOUTONS ADDITIONNELS (Teacher / Student)
 // ====================================================
-document.addEventListener('DOMContentLoaded', () => {
 
-    // === ELEMENTS HTML ===
-    const classroom = document.getElementById('classroom');
-    const teacherVideoEl = document.getElementById('teacher-video');
-    const studentVideosEl = document.getElementById('student-videos');
-
-    // Boutons
-    const shareScreenBtn = document.getElementById('share-screen');
-   
-    const mainHandBtn = document.getElementById('main-hand');
     
     
 
