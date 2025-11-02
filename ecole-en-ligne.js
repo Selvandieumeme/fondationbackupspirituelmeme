@@ -219,7 +219,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
   
 
- 
+
+  
     // ======== DROPDOWN ========
     const downloadBtn = document.getElementById('download-btn');
     const downloadMenu = document.getElementById('download-menu');
@@ -318,7 +319,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 });
-
 
 
 
