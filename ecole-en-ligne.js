@@ -205,24 +205,84 @@ const downloadBtn = document.getElementById('download-btn');
 const shareScreenBtn = document.getElementById('share-screen');
 const recordBtn = document.getElementById('record-video');
 const mainHandBtn = document.getElementById('main-hand');
-// Itilize bouton ki deja nan HTML pou evite konfli
-const changeBgBtn = document.getElementById('change-background-btn');
 
-document.addEventListener("DOMContentLoaded", () => {
-  const downloadMenu = document.getElementById("download-menu");
 
-  // Verifye si itilizatè a se pwofesè oswa elèv
-  const userRole = window.USER_ROLE || "student"; // default student
+// Toggle dropdown
+const downloadBtn = document.getElementById('download-btn');
+const downloadMenu = document.getElementById('download-menu');
 
-  // Afiche meni dapre wòl
-  if (userRole === "teacher") {
-    document.querySelectorAll(".teacher-only").forEach(el => el.style.display = "block");
-    document.querySelectorAll(".student-only").forEach(el => el.style.display = "none");
-  } else {
-    document.querySelectorAll(".teacher-only").forEach(el => el.style.display = "none");
-    document.querySelectorAll(".student-only").forEach(el => el.style.display = "block");
-  }
+downloadBtn.addEventListener('click', () => {
+    downloadMenu.style.display = downloadMenu.style.display === 'block' ? 'none' : 'block';
 });
+
+document.addEventListener('click', (e) => {
+    if (!downloadBtn.contains(e.target) && !downloadMenu.contains(e.target)) {
+        downloadMenu.style.display = 'none';
+    }
+});
+
+// Fonksyon telechaje fichye
+function downloadFile(filename, content, type = "text/plain") {
+    const blob = new Blob([content], { type });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+}
+
+// Fonksyon upload fichye soti nan aparèy
+function uploadFileToClass(callback) {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.onchange = (e) => {
+        const file = e.target.files[0];
+        if(file) callback(file);
+    };
+    input.click();
+}
+
+// ====================================================
+// Pwofesè
+// ====================================================
+document.getElementById('download-class-files').addEventListener('click', () => {
+    // Rale tout fichye klas yo (similasyon)
+    downloadFile("documents_classe.zip", "Contenu simulé des fichiers de la classe", "application/zip");
+});
+
+document.getElementById('upload-to-class').addEventListener('click', () => {
+    uploadFileToClass(file => {
+        alert(`Fichier ${file.name} ajouté à la classe!`);
+        // Isit ou ka mete kòd pou upload sou server
+    });
+});
+
+document.getElementById('download-session-video').addEventListener('click', () => {
+    downloadFile("session_video.mp4", "Simulation vidéo...", "video/mp4");
+});
+
+// ====================================================
+// Elèv
+// ====================================================
+document.getElementById('download-class-doc').addEventListener('click', () => {
+    downloadFile("document_du_cours.pdf", "Contenu du cours", "application/pdf");
+});
+
+document.getElementById('upload-student-file').addEventListener('click', () => {
+    uploadFileToClass(file => {
+        alert(`Fichier ${file.name} ajouté à la classe!`);
+        // Upload elèv la sou server
+    });
+});
+
+document.getElementById('download-replay').addEventListener('click', () => {
+    downloadFile("replay_session.mp4", "Simulation replay vidéo", "video/mp4");
+});
+
+
 
 shareScreenBtn.addEventListener('click', async () => {
     try {
