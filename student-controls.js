@@ -5,12 +5,8 @@ let studentControlsInit = async (socket) => {
   const leaveBtn = document.getElementById('leave-class');
   const studentVideoContainer = document.getElementById('student-videos');
 
-  
   const shareScreenBtn = document.getElementById('share-screen');
- 
-
- const changeBgBtn = document.getElementById('change-background-btn'); // itilize bouton ki deja nan HTML
-  
+  const changeBgBtn = document.getElementById('change-background-btn'); // itilize bouton ki deja nan HTML
 
   let localStream;
   let micEnabled = true;
@@ -66,16 +62,6 @@ let studentControlsInit = async (socket) => {
   // ====================================================
   // BOUTONS ADDITIONNELS
   // ====================================================
-
-
-
-
-
-
-
-
-  
-
   shareScreenBtn.addEventListener('click', async () => {
     try {
       const screenStream = await navigator.mediaDevices.getDisplayMedia({ video: true });
@@ -84,8 +70,6 @@ let studentControlsInit = async (socket) => {
       console.error(err);
     }
   });
-
- 
 
   // ====================================================
   // CHANGER FOND DE CLASSE
