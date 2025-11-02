@@ -61,7 +61,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     return;
                 }
 
-                // Montre panels apre login
                 loginPanel.style.display = 'none';
                 [classroom, chatPanel, sidePanel, controls, backgroundSelector].forEach(el => el.style.display = 'block');
 
@@ -96,13 +95,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 teacherVideoEl.playsInline = true;
                 teacherVideoEl.muted = false;
             } else {
-                const teacherPlaceholder = document.createElement('video');
-                teacherPlaceholder.id = 'teacher-video-local';
-                teacherPlaceholder.srcObject = localStream;
-                teacherPlaceholder.autoplay = true;
-                teacherPlaceholder.playsInline = true;
-                teacherPlaceholder.muted = true;
-                studentVideosEl.appendChild(teacherPlaceholder);
+                const studentVideo = document.createElement('video');
+                studentVideo.srcObject = localStream;
+                studentVideo.autoplay = true;
+                studentVideo.playsInline = true;
+                studentVideo.muted = true;
+                studentVideosEl.appendChild(studentVideo);
             }
 
             localStream.getTracks().forEach(track => track.enabled = true);
@@ -217,39 +215,15 @@ document.addEventListener('DOMContentLoaded', () => {
             button.addEventListener('click', callback);
         }
 
-        // === Partage écran réel san blok Rejoindre
+        // Fonksyon partage écran
         toggleButton(shareScreenBtn, async () => {
-            try {
-                const screenStream = await navigator.mediaDevices.getDisplayMedia({ video: true });
-                // Add track only if peers exist
-                Object.values(peers).forEach(pc => {
-                    screenStream.getTracks().forEach(track => pc.addTrack(track, screenStream));
-                });
-
-                const screenVideoEl = document.getElementById('screen-video');
-                screenVideoEl.srcObject = screenStream;
-                screenVideoEl.style.display = 'block';
-
-                screenStream.getVideoTracks()[0].addEventListener('ended', () => {
-                    Object.values(peers).forEach(pc => {
-                        const senders = pc.getSenders().filter(s => s.track && s.track.kind === 'video');
-                        senders.forEach(sender => pc.removeTrack(sender));
-                    });
-                    screenVideoEl.srcObject = null;
-                    screenVideoEl.style.display = 'none';
-                });
-
-            } catch (err) {
-                console.error('Impossible de partager l\'écran :', err);
-                alert('Impossible de partager l\'écran : ' + err.message);
-            }
+            await shareScreen();
         });
 
         toggleButton(mainHandBtn, () => { mainHandBtn.style.backgroundColor = 'green'; socket.emit('raiseHand'); });
         toggleButton(changeBgBtn, () => selectLocalBackground());
         toggleButton(leaveBtn, () => { if(localStream)localStream.getTracks().forEach(track=>track.stop()); window.location.reload(); });
 
-        // AI Background
         const aiBackgrounds = [
             'url("https://source.unsplash.com/600x400/?avion")',
             'url("https://source.unsplash.com/600x400/?robo")',
@@ -287,7 +261,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ====================================================
-    // Student controls init
+    // Student controls init (ak partage écran reyèl)
     // ====================================================
     function studentControlsInit() {
         let micEnabled = true;
@@ -303,7 +277,7 @@ document.addEventListener('DOMContentLoaded', () => {
         toggleButton(leaveBtn, () => { if(localStream)localStream.getTracks().forEach(track=>track.stop()); window.location.reload(); });
 
         toggleButton(shareScreenBtn, async () => {
-            alert('Écran partagé activé (vous ne pouvez pas partager votre écran en tant qu’élève).');
+            await shareScreen();
         });
 
         function selectLocalBackground() {
@@ -324,4 +298,33 @@ document.addEventListener('DOMContentLoaded', () => {
             input.click();
         }
     }
+
+    // ====================================================
+    // Fonksyon partage ekran pou tout moun
+    // ====================================================
+    async function shareScreen() {
+        try {
+            const screenStream = await navigator.mediaDevices.getDisplayMedia({ video: true });
+            Object.values(peers).forEach(pc => {
+                screenStream.getTracks().forEach(track => pc.addTrack(track, screenStream));
+            });
+
+            const screenVideoEl = document.getElementById('screen-video');
+            screenVideoEl.srcObject = screenStream;
+            screenVideoEl.style.display = 'block';
+
+            screenStream.getVideoTracks()[0].addEventListener('ended', () => {
+                Object.values(peers).forEach(pc => {
+                    const senders = pc.getSenders().filter(s => s.track && s.track.kind === 'video');
+                    senders.forEach(sender => pc.removeTrack(sender));
+                });
+                screenVideoEl.srcObject = null;
+                screenVideoEl.style.display = 'none';
+            });
+        } catch (err) {
+            console.error('Impossible de partager l\'écran :', err);
+            alert('Impossible de partager l\'écran : ' + err.message);
+        }
+    }
+
 });
