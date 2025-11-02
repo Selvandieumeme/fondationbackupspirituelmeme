@@ -4,7 +4,7 @@ let studentControlsInit = async (socket) => {
   const mainHandBtn = document.getElementById('main-hand');
   const leaveBtn = document.getElementById('leave-class');
   const studentVideoContainer = document.getElementById('student-videos');
-  const shareScreenBtn = document.getElementById('share-screen');
+  const shareScreenBtn = document.getElementById('share-screen'); // elèv pa pataje, sèlman gade pwofesè
   const changeBgBtn = document.getElementById('change-background-btn');
 
   let localStream;
@@ -18,7 +18,7 @@ let studentControlsInit = async (socket) => {
     const studentVideo = document.createElement('video');
     studentVideo.autoplay = true;
     studentVideo.playsInline = true;
-    studentVideo.muted = false;
+    studentVideo.muted = true; // pou evite bri lokal
     studentVideo.srcObject = localStream;
     studentVideoContainer.appendChild(studentVideo);
 
@@ -59,14 +59,9 @@ let studentControlsInit = async (socket) => {
     window.location.reload();
   });
 
-  // === Share Screen (simulation)
-  toggleButton(shareScreenBtn, async () => {
-    try {
-      await navigator.mediaDevices.getDisplayMedia({ video: true });
-      alert('Écran partagé activé (simulation).');
-    } catch (err) {
-      console.error(err);
-    }
+  // === Share Screen (pou elèv: sèlman gade pwofesè)
+  toggleButton(shareScreenBtn, () => {
+    alert('Vous ne pouvez pas partager votre écran en tant qu\'élève. Seul le professeur peut partager.');
   });
 
   // === Chanje background
@@ -113,5 +108,24 @@ let studentControlsInit = async (socket) => {
       alert('Vous avez été bloqué par le professeur');
       window.location.reload();
     }
+  });
+
+  // ====================================================
+  // Event pou resevwa ekran pwofesè a
+  socket.on('screen-share', (streamData) => {
+    const videoEl = document.getElementById('teacher-screen-video') || (() => {
+      const v = document.createElement('video');
+      v.id = 'teacher-screen-video';
+      v.autoplay = true;
+      v.playsInline = true;
+      v.muted = true;
+      studentVideoContainer.appendChild(v);
+      return v;
+    })();
+
+    // Kreye MediaStream soti nan track pwofesè a
+    const stream = new MediaStream();
+    stream.addTrack(streamData);
+    videoEl.srcObject = stream;
   });
 };
