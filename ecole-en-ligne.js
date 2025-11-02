@@ -207,21 +207,44 @@ const recordBtn = document.getElementById('record-video');
 const mainHandBtn = document.getElementById('main-hand');
 
 
-// Toggle dropdown (global)
 const downloadBtn = document.getElementById('download-btn');
 const downloadMenu = document.getElementById('download-menu');
 
-if (downloadBtn) {
-    downloadBtn.addEventListener('click', () => {
-        downloadMenu.style.display = downloadMenu.style.display === 'block' ? 'none' : 'block';
-    });
-}
+downloadBtn.addEventListener('click', () => {
+    downloadMenu.style.display = downloadMenu.style.display === 'block' ? 'none' : 'block';
+});
 
 document.addEventListener('click', (e) => {
-    if (downloadMenu && !downloadBtn.contains(e.target) && !downloadMenu.contains(e.target)) {
+    if (!downloadBtn.contains(e.target) && !downloadMenu.contains(e.target)) {
         downloadMenu.style.display = 'none';
     }
 });
+
+// Fonksyon telechaje fichye
+function downloadFile(filename, content, type = "text/plain") {
+    const blob = new Blob([content], { type });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+}
+
+// Fonksyon upload fichye
+function uploadFileToClass(callback) {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.onchange = (e) => {
+        const file = e.target.files[0];
+        if(file) callback(file);
+    };
+    input.click();
+}
+
+
 
 
 shareScreenBtn.addEventListener('click', async () => {
