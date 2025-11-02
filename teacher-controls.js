@@ -8,8 +8,10 @@ let teacherControlsInit = async (socket) => {
   const changeBgBtn = document.getElementById('change-background-btn');
 
   let localStream;
+  let screenStream;
   let micEnabled = true;
   let camEnabled = true;
+  const peers = {}; // pou WebRTC elèv
 
   // === Inisyalize stream pwofesè
   try {
@@ -54,16 +56,32 @@ let teacherControlsInit = async (socket) => {
   // === Kite klas
   toggleButton(leaveBtn, () => {
     if (localStream) localStream.getTracks().forEach(track => track.stop());
+    if (screenStream) screenStream.getTracks().forEach(track => track.stop());
     window.location.reload();
   });
 
-  // === Share Screen
+  // === Share Screen reyèl
   toggleButton(shareScreenBtn, async () => {
     try {
-      await navigator.mediaDevices.getDisplayMedia({ video: true });
-      alert('Écran partagé activé (simulation).');
+      screenStream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: false });
+
+      // Voye chak track nan backend pou elèv yo wè
+      screenStream.getTracks().forEach(track => {
+        socket.emit('screenShare', track);
+      });
+
+      // Ajoute videyo pwofesè lokal pou vizualizasyon li menm
+      teacherVideo.srcObject = screenStream;
+
+      // Lè pwofesè sispann pataje ekran
+      screenStream.getVideoTracks()[0].addEventListener('ended', () => {
+        teacherVideo.srcObject = localStream;
+        socket.emit('stopScreenShare');
+      });
+
     } catch (err) {
       console.error(err);
+      alert('Pataj ekran echwe. Eseye ankò.');
     }
   });
 
@@ -84,11 +102,8 @@ let teacherControlsInit = async (socket) => {
     document.getElementById('classroom').style.backgroundPosition = 'center';
     currentBgIndex = (currentBgIndex + 1) % aiBackgrounds.length;
   }
-
-  // AI otomatik chak 20 segonn
   setInterval(changeBackgroundAI, 20000);
 
-  // Chwazi fon lokal
   toggleButton(changeBgBtn, () => {
     const input = document.createElement('input');
     input.type = 'file';
