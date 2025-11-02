@@ -295,14 +295,13 @@ h1 {
 }
 
 .download-btn {
-  padding: 10px 20px;
-  font-size: 16px;
-  cursor: pointer;
-  position: relative;
   background-color: #007bff;
   color: white;
   border: none;
-  border-radius: 5px;
+  border-radius: 8px;
+  padding: 8px 16px;
+  cursor: pointer;
+  font-weight: 600;
 }
 
 .download-btn:hover {
@@ -310,41 +309,31 @@ h1 {
 }
 
 .dropdown-icons {
-  display: none;
   position: absolute;
-  top: 100%;
+  top: 45px;
   left: 0;
-  background: #f0f0f0;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  padding: 5px;
+  background: #f8f8f8;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  display: flex;
   flex-direction: row;
-  gap: 5px;
-  z-index: 1000;
+  gap: 8px;
+  padding: 8px;
+  z-index: 100;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
 }
 
 .dropdown-icons button {
-  background: none;
-  border: none;
+  background: white;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  padding: 6px 8px;
   cursor: pointer;
-  font-size: 20px;
-  padding: 5px;
-  border-radius: 3px;
+  font-size: 18px;
 }
 
 .dropdown-icons button:hover {
-  background-color: #ddd;
+  background: #007bff;
+  color: white;
 }
 
-.download-btn:hover .dropdown-icons {
-  display: flex;
-}
-
-.download-btn:hover .dropdown-icons {
-  display: flex;
-}
-
-
-#stopRecord {
-  display: none; /* Li parèt sèlman lè w ap anrejistre */
-}
