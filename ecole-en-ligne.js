@@ -83,7 +83,7 @@ socket.on('user-joined', async ({ socketId }) => {
   socket.emit('signal', { to: socketId, sdp: pc.localDescription });
 });
 
-// Join room
+// === BOUTON REJOINDRE ===
 joinBtn.addEventListener('click', async () => {
   room = roomInput.value;
   const name = nameInput.value;
@@ -100,15 +100,16 @@ joinBtn.addEventListener('click', async () => {
         return;
       }
 
+      // Montre klas la epi kache login
       loginPanel.style.display = 'none';
       classroom.style.display = 'block';
 
       try {
-        // Ouvri kamera + mikwo otomatikman
         localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+
         if (role === 'teacher') teacherVideoEl.srcObject = localStream;
         else {
-          // Elèv ka wè pwofesè
+          // Pou elèv, montre yon placeholder pwofesè
           const teacherPlaceholder = document.createElement('video');
           teacherPlaceholder.id = 'teacher-video-local';
           teacherPlaceholder.srcObject = localStream;
@@ -126,6 +127,7 @@ joinBtn.addEventListener('click', async () => {
         console.error(err);
       }
 
+      // Inisyalize kontwòl selon wòl
       if (role === 'teacher') teacherControlsInit(socket);
       else studentControlsInit(socket);
     });
@@ -194,7 +196,6 @@ socket.on('chatMessage', data => {
   chatMessages.appendChild(div);
   chatMessages.scrollTop = chatMessages.scrollHeight;
 });
-
 
 
 
