@@ -11,28 +11,27 @@ let teacherControlsInit = async (socket) => {
   let screenStream;
   let micEnabled = true;
   let camEnabled = true;
-  const peers = {}; // pou WebRTC elèv
 
-  // === Inisyalize stream pwofesè
+  // === Inisyalize stream pwofesè ===
   try {
     localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
     teacherVideo.srcObject = localStream;
     teacherVideo.autoplay = true;
     teacherVideo.playsInline = true;
-    teacherVideo.muted = false;
+    teacherVideo.muted = true; // evite echo pwòp vwa pwofesè a
     socket.emit('streamReady', { role: 'teacher' });
   } catch (err) {
     console.error("Erreur ouverture caméra/micro :", err);
     alert("Impossible d'accéder à la caméra ou au micro. Vérifiez vos autorisations.");
   }
 
-  // === Fonksyon jeneral pou toggle bouton
+  // === Fonksyon pou toggle bouton ===
   function toggleButton(button, callback) {
     if (!button) return;
     button.addEventListener('click', callback);
   }
 
-  // === Mikwo & Kamera
+  // === Mikwo & Kamera ===
   toggleButton(toggleMicBtn, () => {
     micEnabled = !micEnabled;
     localStream.getAudioTracks().forEach(track => track.enabled = micEnabled);
@@ -47,33 +46,27 @@ let teacherControlsInit = async (socket) => {
     socket.emit('toggleCamera');
   });
 
-  // === Main leve
+  // === Main leve ===
   toggleButton(mainHandBtn, () => {
     mainHandBtn.style.backgroundColor = 'green';
     socket.emit('raiseHand');
   });
 
-  // === Kite klas
+  // === Kite klas ===
   toggleButton(leaveBtn, () => {
     if (localStream) localStream.getTracks().forEach(track => track.stop());
     if (screenStream) screenStream.getTracks().forEach(track => track.stop());
     window.location.reload();
   });
 
-  // === Share Screen reyèl
+  // === Pataj ekran ===
   toggleButton(shareScreenBtn, async () => {
     try {
       screenStream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: false });
+      screenStream.getTracks().forEach(track => socket.emit('screenShare', track));
 
-      // Voye chak track nan backend pou elèv yo wè
-      screenStream.getTracks().forEach(track => {
-        socket.emit('screenShare', track);
-      });
-
-      // Ajoute videyo pwofesè lokal pou vizualizasyon li menm
       teacherVideo.srcObject = screenStream;
 
-      // Lè pwofesè sispann pataje ekran
       screenStream.getVideoTracks()[0].addEventListener('ended', () => {
         teacherVideo.srcObject = localStream;
         socket.emit('stopScreenShare');
@@ -85,7 +78,7 @@ let teacherControlsInit = async (socket) => {
     }
   });
 
-  // === Chanje background
+  // === Background AI ===
   const aiBackgrounds = [
     'url("https://source.unsplash.com/600x400/?avion")',
     'url("https://source.unsplash.com/600x400/?robo")',
@@ -97,9 +90,10 @@ let teacherControlsInit = async (socket) => {
   let currentBgIndex = 0;
 
   function changeBackgroundAI() {
-    document.getElementById('classroom').style.backgroundImage = aiBackgrounds[currentBgIndex];
-    document.getElementById('classroom').style.backgroundSize = 'cover';
-    document.getElementById('classroom').style.backgroundPosition = 'center';
+    const classroom = document.getElementById('classroom');
+    classroom.style.backgroundImage = aiBackgrounds[currentBgIndex];
+    classroom.style.backgroundSize = 'cover';
+    classroom.style.backgroundPosition = 'center';
     currentBgIndex = (currentBgIndex + 1) % aiBackgrounds.length;
   }
   setInterval(changeBackgroundAI, 20000);
@@ -113,16 +107,17 @@ let teacherControlsInit = async (socket) => {
       if (!file) return;
       const reader = new FileReader();
       reader.onload = (ev) => {
-        document.getElementById('classroom').style.backgroundImage = `url(${ev.target.result})`;
-        document.getElementById('classroom').style.backgroundSize = 'cover';
-        document.getElementById('classroom').style.backgroundPosition = 'center';
+        const classroom = document.getElementById('classroom');
+        classroom.style.backgroundImage = `url(${ev.target.result})`;
+        classroom.style.backgroundSize = 'cover';
+        classroom.style.backgroundPosition = 'center';
       };
       reader.readAsDataURL(file);
     };
     input.click();
   });
 
-  // === Backend events
+  // === Backend events ===
   socket.on('updateMic', ({ id }) => console.log(`Mikwo toggled pou ${id}`));
   socket.on('updateCamera', ({ id }) => console.log(`Camera toggled pou ${id}`));
   socket.on('blockedStudent', ({ id }) => alert(`Élève ${id} bloqué par le professeur`));
