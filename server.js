@@ -739,54 +739,71 @@ app.get('/Chatprive.html', (req, res) => {
 
 
 
-socket.on('joinRoom', ({room, name, role}, callback) => {
-    if(!roomsData[room]) roomsData[room] = {students: [], raisedHands: []};
+io.on('connection', socket => {
+    console.log('Nouvo koneksyon:', socket.id);
 
-    const studentsInRoom = roomsData[room].students.filter(s => s.role==='student' && s.online).length;
-    if(role==='student' && studentsInRoom >= 100){
-        return callback?.({status:'full'});
-    }
+    // --- Join Room ---
+    socket.on('joinRoom', ({ room, name, role }, callback) => {
+        if (!room || !name || !role) {
+            return callback?.({ status: 'error', message: 'Champs manquants' });
+        }
 
-    socket.join(room);
-    socket.data = {name, role, online:true, room};
-    roomsData[room].students.push({id: socket.id, name, role, online:true});
+        if (!roomsData[room]) roomsData[room] = { students: [], raisedHands: [] };
 
-    callback?.({status:'ok'});
+        const studentsInRoom = roomsData[room].students.filter(s => s.role === 'student' && s.online).length;
+        if (role === 'student' && studentsInRoom >= 100) {
+            return callback?.({ status: 'full' });
+        }
 
-    io.to(room).emit('updateStudents', roomsData[room].students);
-    io.to(room).emit('updateRaisedHands', roomsData[room].raisedHands);
+        socket.join(room);
+        socket.data = { name, role, online: true, room };
+
+        roomsData[room].students.push({ id: socket.id, name, role, online: true });
+
+        callback?.({ status: 'ok' });
+
+        // Voye mizajou elèv ak mains levées
+        io.to(room).emit('updateStudents', roomsData[room].students);
+        io.to(room).emit('updateRaisedHands', roomsData[room].raisedHands);
+    });
+
+    // --- Raise Hand ---
+    socket.on('raiseHand', () => {
+        const room = socket.data?.room;
+        if (!room || !roomsData[room]) return;
+
+        const student = roomsData[room].students.find(s => s.id === socket.id);
+        if (student && !roomsData[room].raisedHands.some(s => s.id === socket.id)) {
+            roomsData[room].raisedHands.push(student);
+        }
+
+        io.to(room).emit('updateRaisedHands', roomsData[room].raisedHands);
+    });
+
+    // --- Chat Message ---
+    socket.on('chatMessage', msg => {
+        const room = socket.data?.room;
+        if (!room || !roomsData[room]) return;
+        if (!msg || !msg.trim()) return;
+
+        io.to(room).emit('chatMessage', { name: socket.data.name, msg: msg.trim() });
+    });
+
+    // --- Disconnect ---
+    socket.on('disconnect', () => {
+        const room = socket.data?.room;
+        if (!room || !roomsData[room]) return;
+
+        const students = roomsData[room].students || [];
+        const student = students.find(s => s.id === socket.id);
+        if (student) student.online = false;
+
+        roomsData[room].raisedHands = roomsData[room].raisedHands.filter(s => s.id !== socket.id);
+
+        io.to(room).emit('updateStudents', students);
+        io.to(room).emit('updateRaisedHands', roomsData[room].raisedHands);
+    });
 });
-
-socket.on('raiseHand', () => {
-    const room = socket.data?.room;
-    if(!room) return;
-    const student = roomsData[room].students.find(s => s.id===socket.id);
-    if(student && !roomsData[room].raisedHands.some(s => s.id===socket.id)){
-        roomsData[room].raisedHands.push(student);
-    }
-    io.to(room).emit('updateRaisedHands', roomsData[room].raisedHands);
-});
-
-socket.on('chatMessage', msg => {
-    const room = socket.data?.room;
-    if(room){
-        io.to(room).emit('chatMessage', {name: socket.data.name, msg});
-    }
-});
-
-socket.on('disconnect', () => {
-    const room = socket.data?.room;
-    if(!room) return;
-    const students = roomsData[room]?.students || [];
-    const student = students.find(s=>s.id===socket.id);
-    if(student) student.online = false;
-
-    roomsData[room].raisedHands = roomsData[room].raisedHands.filter(s=>s.id!==socket.id);
-
-    io.to(room).emit('updateStudents', students);
-    io.to(room).emit('updateRaisedHands', roomsData[room].raisedHands);
-});
-
 
 
 
