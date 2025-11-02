@@ -78,10 +78,7 @@ const changeBgBtn = document.getElementById('change-background-btn'); // itilize
       }
   });
 
-  recordBtn.addEventListener('click', () => {
-      alert('Enregistrement activé (simulation).');
-  });
-
+ 
   // ====================================================
   // CHANGER FOND DE CLASSE
   // ====================================================
