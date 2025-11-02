@@ -85,9 +85,7 @@ let studentControlsInit = async (socket) => {
     }
   });
 
-  recordBtn.addEventListener('click', () => {
-    alert('Enregistrement activé (simulation).');
-  });
+ 
 
   // ====================================================
   // CHANGER FOND DE CLASSE
