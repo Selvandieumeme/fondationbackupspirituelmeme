@@ -740,116 +740,52 @@ app.get('/Chatprive.html', (req, res) => {
 
 
 
-const server = http.createServer(app);
-const io = new Server(server, { cors: { origin: '*' } });
-
-// --- MongoDB ---
-mongoose.connect(process.env.MONGO_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true
-}).then(()=>console.log('MongoDB connecté'))
-  .catch(err=>console.error('Erreur MongoDB:', err));
-
-// --- Serve frontend ---
-app.use(express.static(__dirname));
-
-// --- Done sal yo ---
-const roomsData = {}; 
-// roomsData = {
-//    roomId: { students: [{id,name,role,online}], raisedHands: [] }
-// }
-
-io.on('connection', socket => {
-  console.log('Nouvo koneksyon:', socket.id);
-
-  // --- Join Room ---
-  socket.on('joinRoom', ({room, name, role}, callback) => {
+socket.on('joinRoom', ({room, name, role}, callback) => {
     if(!roomsData[room]) roomsData[room] = {students: [], raisedHands: []};
 
-    const studentsInRoom = roomsData[room].students.filter(s=>s.role==='student' && s.online).length;
-
-    if(role==='student' && studentsInRoom>=100){
-      if(callback) callback({status:'full'});
-      return;
+    const studentsInRoom = roomsData[room].students.filter(s => s.role==='student' && s.online).length;
+    if(role==='student' && studentsInRoom >= 100){
+        return callback?.({status:'full'});
     }
 
     socket.join(room);
-    socket.data = {name, role, online:true};
-
+    socket.data = {name, role, online:true, room};
     roomsData[room].students.push({id: socket.id, name, role, online:true});
 
-    if(callback) callback({status:'ok'});
+    callback?.({status:'ok'});
 
-    // Voye lis elèv ak mains levées pou tout moun an tan reyèl
     io.to(room).emit('updateStudents', roomsData[room].students);
     io.to(room).emit('updateRaisedHands', roomsData[room].raisedHands);
-  });
+});
 
-  // --- Mains levées ---
-  socket.on('raiseHand', () => {
-    const room = Array.from(socket.rooms).find(r=>r!==socket.id);
+socket.on('raiseHand', () => {
+    const room = socket.data?.room;
     if(!room) return;
-
-    const student = roomsData[room].students.find(s=>s.id===socket.id);
-    if(student && !roomsData[room].raisedHands.some(s=>s.id===socket.id)){
-      roomsData[room].raisedHands.push(student);
+    const student = roomsData[room].students.find(s => s.id===socket.id);
+    if(student && !roomsData[room].raisedHands.some(s => s.id===socket.id)){
+        roomsData[room].raisedHands.push(student);
     }
-
     io.to(room).emit('updateRaisedHands', roomsData[room].raisedHands);
-  });
+});
 
-  socket.on('lowerHand', studentId => {
-    const room = Array.from(socket.rooms).find(r=>r!==socket.id);
+socket.on('chatMessage', msg => {
+    const room = socket.data?.room;
+    if(room){
+        io.to(room).emit('chatMessage', {name: socket.data.name, msg});
+    }
+});
+
+socket.on('disconnect', () => {
+    const room = socket.data?.room;
     if(!room) return;
+    const students = roomsData[room]?.students || [];
+    const student = students.find(s=>s.id===socket.id);
+    if(student) student.online = false;
 
-    roomsData[room].raisedHands = roomsData[room].raisedHands.filter(s=>s.id!==studentId);
+    roomsData[room].raisedHands = roomsData[room].raisedHands.filter(s=>s.id!==socket.id);
+
+    io.to(room).emit('updateStudents', students);
     io.to(room).emit('updateRaisedHands', roomsData[room].raisedHands);
-  });
-
-  // --- Chat ---
-  socket.on('chatMessage', msg => {
-    const room = Array.from(socket.rooms).find(r=>r!==socket.id);
-    if(room){
-      io.to(room).emit('chatMessage', {name: socket.data.name, msg});
-    }
-  });
-
-  // --- Toggle Mikwo / Kamera (tout moun) ---
-  socket.on('toggleMic', () => {
-    const room = Array.from(socket.rooms).find(r=>r!==socket.id);
-    if(room) io.to(room).emit('updateMic', {id: socket.id});
-  });
-
-  socket.on('toggleCamera', () => {
-    const room = Array.from(socket.rooms).find(r=>r!==socket.id);
-    if(room) io.to(room).emit('updateCamera', {id: socket.id});
-  });
-
-  // --- Bloke elev (pwofè) ---
-  socket.on('blockStudent', studentId => {
-    const room = Array.from(socket.rooms).find(r=>r!==socket.id);
-    if(room){
-      io.to(room).emit('blockedStudent', {id: studentId});
-    }
-  });
-
-  // --- Disconnect ---
-  socket.on('disconnect', () => {
-    const rooms = Array.from(socket.rooms).filter(r=>r!==socket.id);
-    rooms.forEach(room=>{
-      if(roomsData[room]){
-        const student = roomsData[room].students.find(s=>s.id===socket.id);
-        if(student) student.online=false;
-
-        roomsData[room].raisedHands = roomsData[room].raisedHands.filter(s=>s.id!==socket.id);
-
-        // Mete tout moun ajou an tan reyèl
-        io.to(room).emit('updateStudents', roomsData[room].students);
-        io.to(room).emit('updateRaisedHands', roomsData[room].raisedHands);
-      }
-    });
-  });
-
 });
 
 
