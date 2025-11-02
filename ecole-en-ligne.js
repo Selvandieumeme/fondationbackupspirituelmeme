@@ -86,31 +86,46 @@ document.addEventListener('DOMContentLoaded', () => {
     // Initialisation local stream
     // ====================================================
     async function initLocalStream() {
-        try {
-            localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-
-            if (role === 'teacher') {
-                teacherVideoEl.srcObject = localStream;
-                teacherVideoEl.autoplay = true;
-                teacherVideoEl.playsInline = true;
-                teacherVideoEl.muted = false;
-            } else {
-                const studentVideo = document.createElement('video');
-                studentVideo.srcObject = localStream;
-                studentVideo.autoplay = true;
-                studentVideo.playsInline = true;
-                studentVideo.muted = false;
-                studentVideosEl.appendChild(studentVideo);
+    try {
+        // ✅ Amelyorasyon son — elimine eko, bri, ajiste volim otomatikman
+        localStream = await navigator.mediaDevices.getUserMedia({
+            video: true,
+            audio: {
+                echoCancellation: true,
+                noiseSuppression: true,
+                autoGainControl: true
             }
+        });
 
-            localStream.getTracks().forEach(track => track.enabled = true);
-            socket.emit('streamReady', { role });
-            socket.emit('readyForPeers');
-        } catch (err) {
-            console.error(err);
+        if (role === 'teacher') {
+            teacherVideoEl.srcObject = localStream;
+            teacherVideoEl.autoplay = true;
+            teacherVideoEl.playsInline = true;
+
+            // ✅ Pwofese a tande tèt li (pou tcheke son) men san eko
+            teacherVideoEl.muted = false;
+        } else {
+            const studentVideo = document.createElement('video');
+            studentVideo.srcObject = localStream;
+            studentVideo.autoplay = true;
+            studentVideo.playsInline = true;
+
+            // ✅ Elèv la tande tèt li tou (men ak echo cancellation)
+            studentVideo.muted = false;
+
+            studentVideosEl.appendChild(studentVideo);
         }
-    }
 
+        // ✅ Asire tout track aktif
+        localStream.getTracks().forEach(track => (track.enabled = true));
+
+        socket.emit('streamReady', { role });
+        socket.emit('readyForPeers');
+    } catch (err) {
+        console.error('Erreur accès média :', err);
+        alert("Impossible d'accéder à la caméra/micro : " + err.message);
+    }
+}
     // ====================================================
     // WebRTC
     // ====================================================
