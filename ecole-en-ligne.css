@@ -315,12 +315,12 @@ h1 {
   background: #f8f8f8;
   border: 1px solid #ddd;
   border-radius: 8px;
-  display: flex;
+  display: none;
   flex-direction: row;
   gap: 8px;
   padding: 8px;
-  z-index: 100;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  z-index: 200;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
 .dropdown-icons button {
@@ -336,4 +336,3 @@ h1 {
   background: #007bff;
   color: white;
 }
-
