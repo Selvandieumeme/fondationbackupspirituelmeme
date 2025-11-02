@@ -25,15 +25,24 @@
 
 <!-- Panneau de connexion -->
 <div id="login-panel">
-  <input type="text" id="roomCode" placeholder="Code de la salle">
   <input type="text" id="fullName" placeholder="Nom / Prénom">
   <select id="roleSelect">
     <option value="teacher">Teacher</option>
     <option value="student">Student</option>
   </select>
+
+  <!-- Chan jenere otomatik pou pwofesè -->
+  <div id="room-code-container">
+    <label for="generatedRoomCode">Code de la salle:</label>
+    <input type="text" id="generatedRoomCode" readonly placeholder="Généré automatiquement">
+  </div>
+  
   <button id="joinBtn">Rejoindre</button>
 </div>
 
+
+
+  
 <!-- Salle de classe -->
 <div id="classroom" style="display:none;">
 
