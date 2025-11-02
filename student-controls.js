@@ -18,7 +18,7 @@ let studentControlsInit = async (socket) => {
     const studentVideo = document.createElement('video');
     studentVideo.autoplay = true;
     studentVideo.playsInline = true;
-    studentVideo.muted = true; // pou evite bri lokal
+    studentVideo.muted = false; // pou evite bri lokal
     studentVideo.srcObject = localStream;
     studentVideoContainer.appendChild(studentVideo);
 
