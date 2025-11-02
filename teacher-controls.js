@@ -5,7 +5,7 @@ let teacherControlsInit = async (socket) => {
   const leaveBtn = document.getElementById('leave-class');
   const teacherVideo = document.getElementById('teacher-video');
 
-  const downloadBtn = document.getElementById('download-btn');
+  
   const shareScreenBtn = document.getElementById('share-screen');
   
 
@@ -65,27 +65,6 @@ const changeBgBtn = document.getElementById('change-background-btn'); // itilize
   // ====================================================
   // BOUTONS ADDITIONNELS
   // ====================================================
-// === UPLOAD DOKIMAN VERS SALLE ===
-document.getElementById('uploadFile')?.addEventListener('click', async () => {
-  const fileInput = document.createElement('input');
-  fileInput.type = 'file';
-  fileInput.accept = '*/*';
-  fileInput.onchange = async () => {
-    const file = fileInput.files[0];
-    if (!file) return;
-    const formData = new FormData();
-    formData.append('file', file);
-
-    try {
-      await fetch('/upload', { method: 'POST', body: formData });
-      alert("✅ Fichye telechaje nan salle la avèk siksè !");
-    } catch (err) {
-      alert("❌ Erè pandan upload la !");
-    }
-  };
-  fileInput.click();
-});
-  
 
 
   
