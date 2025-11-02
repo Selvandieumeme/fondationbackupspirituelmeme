@@ -212,9 +212,40 @@ document.addEventListener('DOMContentLoaded', () => {
         let micEnabled = true;
         let camEnabled = true;
 
+        // === Partage écran réel ===
         toggleButton(shareScreenBtn, async () => {
-            try { await navigator.mediaDevices.getDisplayMedia({ video: true }); alert('Écran partagé activé (simulation).'); }
-            catch(err){ console.error(err); }
+            try {
+                const screenStream = await navigator.mediaDevices.getDisplayMedia({ video: true });
+
+                Object.values(peers).forEach(pc => {
+                    screenStream.getTracks().forEach(track => pc.addTrack(track, screenStream));
+                });
+
+                let screenVideoEl = document.getElementById('screen-share-video');
+                if (!screenVideoEl) {
+                    screenVideoEl = document.createElement('video');
+                    screenVideoEl.id = 'screen-share-video';
+                    screenVideoEl.autoplay = true;
+                    screenVideoEl.playsInline = true;
+                    screenVideoEl.muted = true;
+                    screenVideoEl.style.width = '480px';
+                    screenVideoEl.style.height = '360px';
+                    studentVideosEl.appendChild(screenVideoEl);
+                }
+                screenVideoEl.srcObject = screenStream;
+
+                screenStream.getVideoTracks()[0].addEventListener('ended', () => {
+                    Object.values(peers).forEach(pc => {
+                        const senders = pc.getSenders().filter(s => s.track && s.track.kind === 'video');
+                        senders.forEach(sender => pc.removeTrack(sender));
+                    });
+                    screenVideoEl.remove();
+                });
+
+            } catch (err) {
+                console.error('Impossible de partager l\'écran :', err);
+                alert('Impossible de partager l\'écran : ' + err.message);
+            }
         });
 
         toggleButton(mainHandBtn, () => { mainHandBtn.style.backgroundColor = 'green'; socket.emit('raiseHand'); });
