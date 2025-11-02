@@ -4,86 +4,80 @@ let studentControlsInit = async (socket) => {
   const mainHandBtn = document.getElementById('main-hand');
   const leaveBtn = document.getElementById('leave-class');
   const studentVideoContainer = document.getElementById('student-videos');
-
   const shareScreenBtn = document.getElementById('share-screen');
-  const changeBgBtn = document.getElementById('change-background-btn'); // itilize bouton ki deja nan HTML
+  const changeBgBtn = document.getElementById('change-background-btn');
 
   let localStream;
   let micEnabled = true;
   let camEnabled = true;
 
-  // 🎥 OUVRI KAMERA + MIKWO OTOMATIKMAN san mute
+  // === Inisyalize stream elèv
   try {
     localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
 
-    // Kreye videyo elèv la
     const studentVideo = document.createElement('video');
     studentVideo.autoplay = true;
     studentVideo.playsInline = true;
-    studentVideo.muted = false; // mikwo pa mute pou lòt moun tande
+    studentVideo.muted = false;
     studentVideo.srcObject = localStream;
     studentVideoContainer.appendChild(studentVideo);
 
-    // Enfòme backend ke elèv pare
     socket.emit('streamReady', { role: 'student' });
   } catch (err) {
     console.error("Erreur ouverture caméra/micro :", err);
     alert("Impossible d'accéder à la caméra ou au micro. Vérifiez vos autorisations.");
   }
 
-  // 🔇 Mute/Unmute pwòp mikwo
-  toggleMicBtn.addEventListener('click', () => {
+  // === Fonksyon jeneral pou toggle bouton
+  function toggleButton(button, callback) {
+    if (!button) return;
+    button.addEventListener('click', callback);
+  }
+
+  // === Mikwo & Kamera
+  toggleButton(toggleMicBtn, () => {
     micEnabled = !micEnabled;
     localStream.getAudioTracks().forEach(track => track.enabled = micEnabled);
     toggleMicBtn.textContent = micEnabled ? "Mic Off" : "Mic On";
   });
 
-  // 🎦 Kamera On/Off
-  toggleCamBtn.addEventListener('click', () => {
+  toggleButton(toggleCamBtn, () => {
     camEnabled = !camEnabled;
     localStream.getVideoTracks().forEach(track => track.enabled = camEnabled);
     toggleCamBtn.textContent = camEnabled ? "Camera Off" : "Camera On";
   });
 
-  // ✋ Main leve / desann
-  mainHandBtn.addEventListener('click', () => {
-    socket.emit('raiseHand');
+  // === Main leve
+  toggleButton(mainHandBtn, () => {
     mainHandBtn.style.backgroundColor = 'green';
+    socket.emit('raiseHand');
   });
 
-  // 🚪 Kite klas la
-  leaveBtn.addEventListener('click', () => {
-    if (localStream) {
-      localStream.getTracks().forEach(track => track.stop());
-    }
+  // === Kite klas
+  toggleButton(leaveBtn, () => {
+    if (localStream) localStream.getTracks().forEach(track => track.stop());
     window.location.reload();
   });
 
-  // ====================================================
-  // BOUTONS ADDITIONNELS
-  // ====================================================
-  shareScreenBtn.addEventListener('click', async () => {
+  // === Share Screen (simulation)
+  toggleButton(shareScreenBtn, async () => {
     try {
-      const screenStream = await navigator.mediaDevices.getDisplayMedia({ video: true });
+      await navigator.mediaDevices.getDisplayMedia({ video: true });
       alert('Écran partagé activé (simulation).');
     } catch (err) {
       console.error(err);
     }
   });
 
-  // ====================================================
-  // CHANGER FOND DE CLASSE
-  // ====================================================
-  let aiBackgrounds = [
+  // === Chanje background
+  const aiBackgrounds = [
     'url("https://source.unsplash.com/600x400/?avion")',
     'url("https://source.unsplash.com/600x400/?robo")',
     'url("https://source.unsplash.com/600x400/?maison")',
     'url("https://source.unsplash.com/600x400/?ciel")',
     'url("https://source.unsplash.com/600x400/?lame")',
     'url("https://source.unsplash.com/600x400/?decoration")'
-    // Ajoute jiska 50 imaj diferan
   ];
-
   let currentBgIndex = 0;
 
   function changeBackgroundAI() {
@@ -93,29 +87,27 @@ let studentControlsInit = async (socket) => {
     currentBgIndex = (currentBgIndex + 1) % aiBackgrounds.length;
   }
 
-  changeBgBtn.addEventListener('click', () => {
+  setInterval(changeBackgroundAI, 20000);
+
+  toggleButton(changeBgBtn, () => {
     const input = document.createElement('input');
     input.type = 'file';
     input.accept = 'image/*';
     input.onchange = (e) => {
       const file = e.target.files[0];
-      if (file) {
-        const reader = new FileReader();
-        reader.onload = (ev) => {
-          document.getElementById('classroom').style.backgroundImage = `url(${ev.target.result})`;
-          document.getElementById('classroom').style.backgroundSize = 'cover';
-          document.getElementById('classroom').style.backgroundPosition = 'center';
-        };
-        reader.readAsDataURL(file);
-      }
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        document.getElementById('classroom').style.backgroundImage = `url(${ev.target.result})`;
+        document.getElementById('classroom').style.backgroundSize = 'cover';
+        document.getElementById('classroom').style.backgroundPosition = 'center';
+      };
+      reader.readAsDataURL(file);
     };
     input.click();
   });
 
-  // Chanje AI otomatik chak 20 segonn
-  setInterval(changeBackgroundAI, 20000);
-
-  // 📡 Evènman backend
+  // === Backend events
   socket.on('blockedStudent', ({ id }) => {
     if (socket.id === id) {
       alert('Vous avez été bloqué par le professeur');
