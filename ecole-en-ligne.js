@@ -219,22 +219,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
   
 
-   // === DROPDOWN TELECHARGER ===
-    if(downloadBtn && downloadMenu){
-        downloadBtn.addEventListener('click', (e) => {
-            e.stopPropagation(); // pou evite click document an fèmen meni an imedyatman
-            downloadMenu.style.display = downloadMenu.style.display === 'block' ? 'none' : 'block';
-        });
+ 
+    // ======== DROPDOWN ========
+    const downloadBtn = document.getElementById('download-btn');
+    const downloadMenu = document.getElementById('download-menu');
 
-        document.addEventListener('click', (e) => {
-            if (!downloadBtn.contains(e.target) && !downloadMenu.contains(e.target)) {
-                downloadMenu.style.display = 'none';
-            }
-        });
-    }
+    downloadBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        downloadMenu.style.display = downloadMenu.style.display === 'block' ? 'none' : 'block';
+    });
 
-    // === FONKSYON TELECHARGE / UPLOAD ===
-    function downloadFile(filename, content, type="text/plain"){
+    document.addEventListener('click', () => {
+        downloadMenu.style.display = 'none';
+    });
+
+    // ======== FONKSYON DOWNLOAD ========
+    function downloadFile(filename, content, type = "text/plain") {
         const blob = new Blob([content], { type });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
@@ -246,9 +246,11 @@ document.addEventListener('DOMContentLoaded', () => {
         URL.revokeObjectURL(url);
     }
 
-    function uploadFileToClass(callback){
+    // ======== FONKSYON UPLOAD ========
+    function uploadFileToClass(callback) {
         const input = document.createElement('input');
         input.type = 'file';
+        input.accept = ".pdf,.mp4,.docx,.pptx";
         input.onchange = (e) => {
             const file = e.target.files[0];
             if(file) callback(file);
@@ -256,83 +258,65 @@ document.addEventListener('DOMContentLoaded', () => {
         input.click();
     }
 
-    // === BOUTONS ADDITIONNELS ===
-    if(shareScreenBtn){
-        shareScreenBtn.addEventListener('click', async () => {
-            try {
-                await navigator.mediaDevices.getDisplayMedia({ video:true });
-                alert('Écran partagé activé.');
-            } catch(err) { console.error(err); }
-        });
-    }
-
-    if(recordBtn){
-        recordBtn.addEventListener('click', () => {
-            alert('Enregistrement activé.');
-        });
-    }
-
-    if(mainHandBtn){
-        mainHandBtn.addEventListener('click', () => {
-            mainHandBtn.style.backgroundColor = 'green';
-            // La ou ka ajoute emit socket pou mete main leve nan panel dwat la
-        });
-    }
-
-    // ====================================================
-    // TELECHARGER - PROFESSEUR
-    // ====================================================
-    const downloadClassFiles = document.getElementById('download-class-files');
-    const uploadToClass = document.getElementById('upload-to-class');
-    const downloadSessionVideo = document.getElementById('download-session-video');
-
-    if(downloadClassFiles){
-        downloadClassFiles.addEventListener('click', () => {
-            downloadFile("documents_classe.zip","Contenu réel des fichiers de la classe","application/zip");
-        });
-    }
-
-    if(uploadToClass){
-        uploadToClass.addEventListener('click', () => {
-            uploadFileToClass(file => {
-                alert(`Fichier ${file.name} ajouté à la classe!`);
-            });
-        });
-    }
-
-    if(downloadSessionVideo){
-        downloadSessionVideo.addEventListener('click', () => {
-            downloadFile("session_video.mp4","Contenu vidéo réel","video/mp4");
-        });
-    }
-
-    // ====================================================
-    // TELECHARGER - ELEVE
-    // ====================================================
+    // ======== ICON 📗 TELECHARGE DOCUMENT KOU ========
     const downloadClassDoc = document.getElementById('download-class-doc');
-    const uploadStudentFile = document.getElementById('upload-student-file');
-    const downloadReplay = document.getElementById('download-replay');
-
     if(downloadClassDoc){
         downloadClassDoc.addEventListener('click', () => {
-            downloadFile("document_du_cours.pdf","Contenu du cours réel","application/pdf");
+            if(window.classFileContent){
+                downloadFile("document_du_cours.pdf", window.classFileContent, "application/pdf");
+            } else {
+                alert("Aucun document disponible pour l'instant.");
+            }
         });
     }
 
-    if(uploadStudentFile){
-        uploadStudentFile.addEventListener('click', () => {
+    // ======== ICON ⬆️ UPLOAD DOSYE ========
+    const uploadToClassBtn = document.getElementById('upload-to-class');
+    if(uploadToClassBtn){
+        uploadToClassBtn.addEventListener('click', () => {
             uploadFileToClass(file => {
-                alert(`Fichier ${file.name} ajouté à la classe!`);
+                const reader = new FileReader();
+                reader.onload = (ev) => {
+                    window.classFileContent = ev.target.result;
+                    alert(`Fichier ${file.name} ajouté à la classe !`);
+                    // backend upload ka fèt isit la
+                };
+                reader.readAsArrayBuffer(file); // oubyen readAsDataURL si PDF/IMG
             });
         });
     }
 
-    if(downloadReplay){
-        downloadReplay.addEventListener('click', () => {
-            downloadFile("replay_session.mp4","Replay vidéo réel","video/mp4");
+    // ======== ICON 🎬 ENREGISTRE + TELECHARGE VIDEO ========
+    let mediaRecorder;
+    let recordedChunks = [];
+    const recordBtn = document.getElementById('record-video');
+
+    if(recordBtn){
+        recordBtn.addEventListener('click', async () => {
+            if(!mediaRecorder || mediaRecorder.state === "inactive"){
+                const stream = await navigator.mediaDevices.getUserMedia({ video:true, audio:true });
+                mediaRecorder = new MediaRecorder(stream);
+                recordedChunks = [];
+                mediaRecorder.ondataavailable = e => { if(e.data.size>0) recordedChunks.push(e.data); };
+                mediaRecorder.start();
+                alert("Enregistrement démarré !");
+            } else if(mediaRecorder.state === "recording"){
+                mediaRecorder.stop();
+                mediaRecorder.onstop = () => {
+                    const blob = new Blob(recordedChunks, { type: "video/mp4" });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = "session_cours.mp4";
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                    alert("Vidéo téléchargée !");
+                };
+            }
         });
     }
-
 });
 
 
