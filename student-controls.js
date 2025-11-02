@@ -66,20 +66,43 @@ let studentControlsInit = async (socket) => {
   // ====================================================
   // BOUTONS ADDITIONNELS
   // ====================================================
- // === GESTION TÉLÉCHARGEMENT - ÉLÈV ===
-document.getElementById('download-doc').addEventListener('click', (e) => {
-  e.preventDefault();
-  window.open('/uploads/document_du_cours.pdf', '_blank');
+// Fonksyon telechaje fichye
+function downloadFile(filename, content, type = "text/plain") {
+    const blob = new Blob([content], { type });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+}
+
+function uploadFileToClass(callback) {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.onchange = (e) => {
+        const file = e.target.files[0];
+        if(file) callback(file);
+    };
+    input.click();
+}
+
+// Bouton elèv
+document.getElementById('download-class-doc').addEventListener('click', () => {
+    downloadFile("document_du_cours.pdf", "Contenu du cours", "application/pdf");
 });
 
-document.getElementById('download-travail').addEventListener('click', (e) => {
-  e.preventDefault();
-  window.open('/uploads/travail_personnel.pdf', '_blank');
+document.getElementById('upload-student-file').addEventListener('click', () => {
+    uploadFileToClass(file => {
+        alert(`Fichier ${file.name} ajouté à la classe!`);
+        // Upload elèv sou server
+    });
 });
 
-document.getElementById('download-replay').addEventListener('click', (e) => {
-  e.preventDefault();
-  window.open('/videos/replay_session.mp4', '_blank');
+document.getElementById('download-replay').addEventListener('click', () => {
+    downloadFile("replay_session.mp4", "Simulation replay vidéo", "video/mp4");
 });
 
   
