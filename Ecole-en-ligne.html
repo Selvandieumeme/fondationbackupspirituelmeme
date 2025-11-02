@@ -5,6 +5,21 @@
 <title>ÉCOLE EN LIGNE FOBAS - UNE AUTRE HAITI AVEC UNE NOULLE TECHNOLOGIE</title>
 <link rel="stylesheet" href="ecole-en-ligne.css">
 <script src="https://cdn.socket.io/4.6.1/socket.io.min.js"></script>
+<style>
+  /* Ajoute style pou videyo dinamik */
+  #student-videos video {
+    margin: 5px;
+    width: 240px;
+    height: 180px;
+    object-fit: cover;
+  }
+  #screen-video {
+    width: 480px;
+    height: 360px;
+    object-fit: cover;
+    display: none; /* JS ap kontwole vizibilite lè yon moun pataje ekran */
+  }
+</style>
 </head>
 <body>
 
@@ -32,7 +47,7 @@
   </div>
 
   <!-- Écran partagé -->
-  <div id="screen-share-container" style="display:none;">
+  <div id="screen-share-container">
     <h3>Partage d’écran</h3>
     <video id="screen-video" autoplay playsinline></video>
   </div>
