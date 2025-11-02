@@ -7,7 +7,7 @@ let teacherControlsInit = async (socket) => {
 
   const downloadBtn = document.getElementById('download-btn');
   const shareScreenBtn = document.getElementById('share-screen');
-  const recordBtn = document.getElementById('record-video');
+  
 
 const changeBgBtn = document.getElementById('change-background-btn'); // itilize bouton ki deja nan HTML
 
