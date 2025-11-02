@@ -221,103 +221,75 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
   
-    // ======== DROPDOWN ========
-    const downloadBtn = document.getElementById('download-btn');
-    const downloadMenu = document.getElementById('download-menu');
+   // === Gestion globale bouton "Télécharger" ===
 
-    downloadBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        downloadMenu.style.display = downloadMenu.style.display === 'block' ? 'none' : 'block';
+// GLOBAL recorder pou kontwole anrejistreman atravè tout platfòm lan
+let recorder;
+let chunks = [];
+
+// === 1. Upload: Telechaje fichye soti nan aparèy itilizatè a nan salle de classe
+document.getElementById("uploadFile").addEventListener("click", () => {
+  const input = document.createElement("input");
+  input.type = "file";
+  input.multiple = true;
+  input.onchange = async (e) => {
+    const files = e.target.files;
+    for (const file of files) {
+      // TODO: Ranplase seksyon sa a ak envoi sou server ou via Socket oswa API
+      console.log("Fichier uploadé:", file.name);
+      alert(`Fichier "${file.name}" uploadé vers salle de classe.`);
+    }
+  };
+  input.click();
+});
+
+// === 2. Download: Telechaje fichye depi salle de classe sou aparèy itilizatè
+document.getElementById("downloadFile").addEventListener("click", () => {
+  const fileUrl = prompt("Antre lyen fichye a pou telechaje depi salle de classe:");
+  if (fileUrl) {
+    const a = document.createElement("a");
+    a.href = fileUrl;
+    a.download = fileUrl.split("/").pop();
+    a.click();
+  }
+});
+
+// === 3. Record & Download: Demare anrejistreman videyo kou a
+document.getElementById("recordClass").addEventListener("click", async () => {
+  try {
+    const stream = await navigator.mediaDevices.getDisplayMedia({
+      video: true,
+      audio: true
     });
 
-    document.addEventListener('click', () => {
-        downloadMenu.style.display = 'none';
-    });
+    recorder = new MediaRecorder(stream);
+    chunks = [];
 
-    // ======== FONKSYON DOWNLOAD ========
-    function downloadFile(filename, content, type = "text/plain") {
-        const blob = new Blob([content], { type });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = filename;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-    }
+    recorder.ondataavailable = (e) => chunks.push(e.data);
+    recorder.onstop = () => {
+      const blob = new Blob(chunks, { type: "video/mp4" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "cours_enregistre.mp4";
+      a.click();
+      document.getElementById("stopRecord").style.display = "none";
+    };
 
-    // ======== FONKSYON UPLOAD ========
-    function uploadFileToClass(callback) {
-        const input = document.createElement('input');
-        input.type = 'file';
-        input.accept = ".pdf,.mp4,.docx,.pptx";
-        input.onchange = (e) => {
-            const file = e.target.files[0];
-            if(file) callback(file);
-        };
-        input.click();
-    }
+    recorder.start();
+    document.getElementById("stopRecord").style.display = "inline-block";
+  } catch (err) {
+    console.error("Erreur lors de l'enregistrement:", err);
+    alert("Pa kapab anrejistre kou a: " + err.message);
+  }
+});
 
-    // ======== ICON 📗 TELECHARGE DOCUMENT KOU ========
-    const downloadClassDoc = document.getElementById('download-class-doc');
-    if(downloadClassDoc){
-        downloadClassDoc.addEventListener('click', () => {
-            if(window.classFileContent){
-                downloadFile("document_du_cours.pdf", window.classFileContent, "application/pdf");
-            } else {
-                alert("Aucun document disponible pour l'instant.");
-            }
-        });
-    }
-
-    // ======== ICON ⬆️ UPLOAD DOSYE ========
-    const uploadToClassBtn = document.getElementById('upload-to-class');
-    if(uploadToClassBtn){
-        uploadToClassBtn.addEventListener('click', () => {
-            uploadFileToClass(file => {
-                const reader = new FileReader();
-                reader.onload = (ev) => {
-                    window.classFileContent = ev.target.result;
-                    alert(`Fichier ${file.name} ajouté à la classe !`);
-                    // backend upload ka fèt isit la
-                };
-                reader.readAsArrayBuffer(file); // oubyen readAsDataURL si PDF/IMG
-            });
-        });
-    }
-
-    // ======== ICON 🎬 ENREGISTRE + TELECHARGE VIDEO ========
-    let mediaRecorder;
-    let recordedChunks = [];
-    const recordBtn = document.getElementById('record-video');
-
-    if(recordBtn){
-        recordBtn.addEventListener('click', async () => {
-            if(!mediaRecorder || mediaRecorder.state === "inactive"){
-                const stream = await navigator.mediaDevices.getUserMedia({ video:true, audio:true });
-                mediaRecorder = new MediaRecorder(stream);
-                recordedChunks = [];
-                mediaRecorder.ondataavailable = e => { if(e.data.size>0) recordedChunks.push(e.data); };
-                mediaRecorder.start();
-                alert("Enregistrement démarré !");
-            } else if(mediaRecorder.state === "recording"){
-                mediaRecorder.stop();
-                mediaRecorder.onstop = () => {
-                    const blob = new Blob(recordedChunks, { type: "video/mp4" });
-                    const url = URL.createObjectURL(blob);
-                    const a = document.createElement('a');
-                    a.href = url;
-                    a.download = "session_cours.mp4";
-                    document.body.appendChild(a);
-                    a.click();
-                    document.body.removeChild(a);
-                    URL.revokeObjectURL(url);
-                    alert("Vidéo téléchargée !");
-                };
-            }
-        });
-    }
+// === 4. Stop Recording: Sispann anrejistreman videyo kou a
+document.getElementById("stopRecord").addEventListener("click", () => {
+  if (recorder && recorder.state !== "inactive") {
+    recorder.stop();
+    recorder.stream.getTracks().forEach(track => track.stop());
+  }
 });
 
 
