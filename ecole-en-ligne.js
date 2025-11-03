@@ -9,11 +9,16 @@ document.addEventListener('DOMContentLoaded', () => {
     // ====================================================
     const joinBtn = document.getElementById('joinBtn');
     const roomInput = document.getElementById('generatedRoomCode'); // chanje pou matche ak HTML
+
+
+    const rejoinRoomContainer = document.getElementById("rejoin-room-container");
+    const rejoinRoomInput = document.getElementById("rejoinRoomCode");
+    const rejoinRoomBtn = document.getElementById("rejoinRoomBtn");
+    
    const studentRoomInputField = document.getElementById('studentRoomCode'); // pou elèv
     const nameInput = document.getElementById('fullName');
     const roleSelect = document.getElementById('roleSelect');
     const loginPanel = document.getElementById('login-panel');
-    
     const classroom = document.getElementById('classroom');
     const teacherVideoEl = document.getElementById('teacher-video');
     const studentVideosEl = document.getElementById('student-videos');
@@ -36,25 +41,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const peers = {}; // WebRTC peers
 
     // ====================================================
-    // Panels initialement caches
-    // ====================================================
-    [classroom, chatPanel, sidePanel, controls, backgroundSelector].forEach(el => el.style.display = 'none');
-
-    // ====================================================
-    // ===== Fonksyon pou jenere kòd inik =====
-    // ====================================================
-    function generateRoomCode(length = 6) {
-        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-        let code = '';
-        for (let i = 0; i < length; i++) {
-            code += chars.charAt(Math.floor(Math.random() * chars.length));
-        }
-        return code;
-    }
-
-
-    
-// ====================================================
 // ===== Chanjman wòl pou montre chan kòd pwofesè/elèv =====
 // ====================================================
 roleSelect.addEventListener('change', () => {
@@ -74,25 +60,20 @@ roleSelect.addEventListener('change', () => {
   }
 });
 
-// Inisyalizasyon lè paj la chaje
+// ====================================================
+// === Initialisation au chargement ===
+// ====================================================
 if (roleSelect.value === 'teacher') {
     document.getElementById('room-code-container').style.display = 'block';
     if (studentRoomInputField) studentRoomInputField.parentElement.style.display = 'none';
     roomInput.value = generateRoomCode();
 
-    // 👉 Montrer bouton rejoin sal la
     if (rejoinRoomContainer) rejoinRoomContainer.style.display = 'block';
 }
-
-
 
 // ====================================================
 // === GESTION REJOINDRE ANCIENNE SALLE ===
 // ====================================================
-const rejoinRoomContainer = document.getElementById("rejoin-room-container");
-const rejoinRoomInput = document.getElementById("rejoinRoomCode");
-const rejoinRoomBtn = document.getElementById("rejoinRoomBtn");
-
 if (rejoinRoomBtn) {
   rejoinRoomBtn.addEventListener("click", () => {
     const oldCode = rejoinRoomInput.value.trim();
@@ -100,74 +81,62 @@ if (rejoinRoomBtn) {
       alert("Veuillez entrer un ancien code de salle !");
       return;
     }
-    document.getElementById("generatedRoomCode").value = oldCode;
+    roomInput.value = oldCode;
     joinBtn.click(); // itilize menm bouton 'Rejoindre' lan
   });
 }
 
+// ====================================================
+// === GESTION DU BOUTON REJOINDRE ===
+// ====================================================
+joinBtn.addEventListener('click', async () => {
+  const name = nameInput.value.trim();
+  const role = roleSelect.value;
+  const room = (role === 'teacher') ? roomInput.value.trim() : studentRoomInputField.value.trim();
 
-
-    
-// Lè pwofese a vle rejwen ansyen salle
-rejoinRoomBtn.addEventListener("click", () => {
-  const oldCode = rejoinRoomInput.value.trim();
-  if (!oldCode) {
-    alert("Veuillez entrer un ancien code de salle !");
-    return;
+  if (!room || !name) {
+      alert('Veuillez remplir tous les champs.');
+      return;
   }
-  document.getElementById("generatedRoomCode").value = oldCode;
-  joinBtn.click(); // sèvi ak menm bouton 'Rejoindre' la
+
+  let responded = false;
+
+  try {
+      socket.timeout(3000).emit('joinRoom', { room, name, role }, async (response) => {
+          responded = true;
+          if (response.status === 'full') {
+              alert('Salle pleine (max 100 élèves)');
+              return;
+          }
+
+          loginPanel.style.display = 'none';
+          [classroom, chatPanel, sidePanel, controls, backgroundSelector].forEach(el => el.style.display = 'block');
+
+          await initLocalStream();
+
+          if (role === 'teacher') teacherControlsInit();
+          else studentControlsInit();
+      });
+  } catch (err) {
+      console.warn('Backend non disponible, simulation locale activée.');
+  }
+
+  setTimeout(async () => {
+      if (!responded) {
+          loginPanel.style.display = 'none';
+          [classroom, chatPanel, sidePanel, controls, backgroundSelector].forEach(el => el.style.display = 'block');
+          await initLocalStream();
+      }
+  }, 3500);
 });
 
-    
+
 
     
-    // ====================================================
-    // Rejoindre bouton
-    // ====================================================
-    joinBtn.addEventListener('click', async () => {
-        const name = nameInput.value.trim();
-        role = roleSelect.value;
 
-        if (role === 'teacher') room = roomInput.value.trim();
-        else room = studentRoomInputField.value.trim();
 
-        if (!room || !name) {
-            alert('Veuillez remplir tous les champs.');
-            return;
-        }
 
-        let responded = false;
-
-        try {
-            socket.timeout(3000).emit('joinRoom', { room, name, role }, async (response) => {
-                responded = true;
-                if (response.status === 'full') {
-                    alert('Salle pleine (max 100 élèves)');
-                    return;
-                }
-
-                loginPanel.style.display = 'none';
-                [classroom, chatPanel, sidePanel, controls, backgroundSelector].forEach(el => el.style.display = 'block');
-
-                await initLocalStream();
-
-                if (role === 'teacher') teacherControlsInit();
-                else studentControlsInit();
-            });
-        } catch (err) {
-            console.warn('Backend non disponible, simulation locale activée.');
-        }
-
-        setTimeout(async () => {
-            if (!responded) {
-                loginPanel.style.display = 'none';
-                [classroom, chatPanel, sidePanel, controls, backgroundSelector].forEach(el => el.style.display = 'block');
-                await initLocalStream();
-            }
-        }, 3500);
-    });
-
+    
     // ====================================================
     // Initialisation local stream
     // ====================================================
