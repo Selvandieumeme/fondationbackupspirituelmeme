@@ -31,6 +31,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const changeBgBtn = document.getElementById('change-background-btn');
     const leaveBtn = document.getElementById('leave-class');
 
+    // Nouvo chan “rejwenn ansyen salle”
+    const rejoinRoomContainer = document.getElementById("rejoin-room-container");
+    const rejoinRoomInput = document.getElementById("rejoinRoomCode");
+    const rejoinRoomBtn = document.getElementById("rejoinRoomBtn");
+
     let role, room, localStream;
     const peers = {}; // WebRTC peers
 
@@ -59,17 +64,44 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('room-code-container').style.display = 'block';
             if (studentRoomInputField) studentRoomInputField.parentElement.style.display = 'none';
             roomInput.value = generateRoomCode();
+
+            // Montre bouton pou rejwenn ansyen salle
+            if (rejoinRoomContainer) rejoinRoomContainer.style.display = 'block';
         } else {
             document.getElementById('room-code-container').style.display = 'none';
             if (studentRoomInputField) studentRoomInputField.parentElement.style.display = 'block';
+
+            // Kache bouton pou rejwenn ansyen salle
+            if (rejoinRoomContainer) rejoinRoomContainer.style.display = 'none';
         }
     });
 
+    // ====================================================
     // Inisyalizasyon lè paj la chaje
+    // ====================================================
     if (roleSelect.value === 'teacher') {
         document.getElementById('room-code-container').style.display = 'block';
         if (studentRoomInputField) studentRoomInputField.parentElement.style.display = 'none';
         roomInput.value = generateRoomCode();
+
+        if (rejoinRoomContainer) rejoinRoomContainer.style.display = 'block';
+    }
+
+    // ====================================================
+    // Bouton pou rejwenn ansyen salle
+    // ====================================================
+    if (rejoinRoomBtn) {
+        rejoinRoomBtn.addEventListener("click", () => {
+            const oldCode = rejoinRoomInput.value.trim();
+            if (!oldCode) {
+                alert("Veuillez entrer un ancien code de salle !");
+                return;
+            }
+
+            // Mete ansyen kòd la nan chan kòd pwofesè a epi rele menm bouton join
+            roomInput.value = oldCode;
+            joinBtn.click();
+        });
     }
 
     // ====================================================
@@ -116,12 +148,14 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 3500);
     });
 });
-
     
 
 
 
-    
+
+
+
+
     // ====================================================
     // Initialisation local stream
     // ====================================================
