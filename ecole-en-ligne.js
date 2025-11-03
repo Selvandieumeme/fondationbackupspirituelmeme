@@ -54,7 +54,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // ====================================================
     // ===== Chanjman wòl pou montre chan kòd pwofesè/elèv =====
     // ====================================================
-    roleSelect.addEventListener('change', () => {
+    function updateRoleDisplay() {
         if (roleSelect.value === 'teacher') {
             document.getElementById('room-code-container').style.display = 'block';
             if (studentRoomInputField) studentRoomInputField.parentElement.style.display = 'none';
@@ -63,14 +63,16 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('room-code-container').style.display = 'none';
             if (studentRoomInputField) studentRoomInputField.parentElement.style.display = 'block';
         }
-    });
-
-    // Inisyalizasyon lè paj la chaje
-    if (roleSelect.value === 'teacher') {
-        document.getElementById('room-code-container').style.display = 'block';
-        if (studentRoomInputField) studentRoomInputField.parentElement.style.display = 'none';
-        roomInput.value = generateRoomCode();
     }
+
+    roleSelect.addEventListener('change', updateRoleDisplay);
+
+    // ====================================================
+    // Inisyalizasyon lè paj la chaje
+    // ====================================================
+    setTimeout(() => {
+        updateRoleDisplay(); // Fòse mete chan kòd pwofesè a vizib si teacher
+    }, 50); // ti delay pou asire DOM totalman chaje
 
     // ====================================================
     // Rejoindre bouton
@@ -116,6 +118,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 3500);
     });
 });
+
+
+
+
 
 
 
