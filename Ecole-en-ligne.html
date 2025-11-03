@@ -1,22 +1,86 @@
-<div id="login-panel">
-  <input type="text" id="fullName" placeholder="Nom / Prénom">
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>École en Ligne — FOBAS</title>
+    <link rel="stylesheet" href="ecole-en-ligne.css">
+</head>
+<body>
+    <h1>École en Ligne FOBAS</h1>
 
-  <select id="roleSelect">
-    <option value="teacher">Teacher</option>
-    <option value="student">Student</option>
-  </select>
+    <!-- PANEL LOGIN -->
+    <div id="login-panel">
+        <!-- Nom/Prenom -->
+        <input type="text" id="fullName" placeholder="Nom / Prénom">
 
-  <!-- Code de la salle -->
-  <div id="room-code-container">
-    <label for="roomCode">Code de la salle:</label>
-    <input type="text" id="roomCode" placeholder="Automatique pour Teacher / Entrer par Student">
-  </div>
+        <!-- Choix role -->
+        <select id="roleSelect">
+            <option value="student">Student</option>
+            <option value="teacher">Teacher</option>
+        </select>
 
-  <!-- Ansyen code de la salle (Teacher sèlman) -->
-  <div id="old-room-code-container" style="display:none;">
-    <label for="oldRoomCode">Ansyen code de la salle:</label>
-    <input type="text" id="oldRoomCode" placeholder="Si Teacher ta vle retounen nan menm salle">
-  </div>
+        <!-- Code de la salle (teacher code) -->
+        <div id="teacher-code-container">
+            <input type="text" id="generatedRoomCode" placeholder="Code de la salle (automatique)">
+        </div>
 
-  <button id="joinBtn">Rejoindre</button>
-</div>
+        <!-- Ancien code de la salle (teacher old code) -->
+        <div id="teacher-old-code-container">
+            <input type="text" id="oldRoomCode" placeholder="Ancien code de la salle">
+        </div>
+
+        <!-- Code de la salle pour student -->
+        <div id="student-code-container">
+            <input type="text" id="studentRoomCode" placeholder="Entrer le code de la salle">
+        </div>
+
+        <!-- Bouton Rejoindre -->
+        <button id="joinBtn">Rejoindre</button>
+    </div>
+
+    <!-- SALLE DE CLASSE -->
+    <div id="classroom">
+        <div id="teacher-camera">
+            <video id="teacher-video" autoplay playsinline muted></video>
+        </div>
+        <div id="students-camera"></div>
+    </div>
+
+    <!-- PANEL LATÉRAL -->
+    <div id="side-panel">
+        <div id="student-list-container">
+            <h3>Liste des élèves</h3>
+            <div id="student-list"></div>
+        </div>
+        <div id="raised-hands">
+            <h3>Mains levées</h3>
+            <div id="raised-hands-list"></div>
+        </div>
+    </div>
+
+    <!-- CHAT PANEL -->
+    <div id="chat-panel">
+        <div id="chat-messages"></div>
+        <input type="text" id="chat-input" placeholder="Écrire un message...">
+        <button id="send-chat">Envoyer</button>
+    </div>
+
+    <!-- CONTROLES -->
+    <div id="controls">
+        <button id="toggle-mic">Mic On</button>
+        <button id="toggle-camera">Camera On</button>
+        <button id="main-hand">Main Levée</button>
+        <button id="share-screen">Partager écran</button>
+        <button id="change-background-btn">Changer background</button>
+        <button id="leave-class">Quitter</button>
+    </div>
+
+    <!-- BACKGROUND SELECTOR -->
+    <div id="background-selector"></div>
+
+    <script src="https://cdn.socket.io/4.6.1/socket.io.min.js"></script>
+    <script src="teacher-controls.js"></script>
+    <script src="student-controls.js"></script>
+    <script src="ecole-en-ligne.js"></script>
+</body>
+</html>
