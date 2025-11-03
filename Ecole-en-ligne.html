@@ -18,7 +18,7 @@
       width: 480px;
       height: 360px;
       object-fit: cover;
-      display: none; /* JS ap kontwole vizibilite lè yon moun pataje ekran */
+      display: none;
     }
   </style>
 </head>
@@ -41,15 +41,13 @@
     </div>
 
     <!-- Chan kote elèv antre kòd pwofesè a -->
-    <!-- 🔧 Chanje id pou matche ak JS : studentRoomCode se "input", parent div la bezwen vin parant dirèk -->
-    <div style="display:none;">
+    <div id="student-room-input" style="display:none;">
       <label for="studentRoomCode">Entrer le code de la salle:</label>
       <input type="text" id="studentRoomCode" placeholder="Code donné par le prof">
     </div>
 
     <button id="joinBtn">Rejoindre</button>
   </div>
-
 
   <!-- ============ SALLE DE CLASSE ============ -->
   <div id="classroom" style="display:none;">
@@ -106,7 +104,6 @@
     <!-- DIV FOND / AI -->
     <div id="background-selector" style="display:none;"></div>
   </div>
-
 
   <!-- ============ SCRIPTS ============ -->
   <script src="teacher-controls.js"></script>
