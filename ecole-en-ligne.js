@@ -1,78 +1,196 @@
 // ====================================================
-// Connexion socket
+// Connexion Socket.io ak backend
 // ====================================================
 const socket = io('https://examen-backend-ihlx.onrender.com');
 
-document.addEventListener('DOMContentLoaded', () => {
-    // ====================================================
-    // Elements HTML
-    // ====================================================
-    const joinBtn = document.getElementById('joinBtn');
-    const nameInput = document.getElementById('fullName');
-    const roleSelect = document.getElementById('roleSelect');
-    const loginPanel = document.getElementById('login-panel');
-    const classroom = document.getElementById('classroom');
-    const teacherVideoEl = document.getElementById('teacher-video');
-    const studentVideosEl = document.getElementById('student-videos');
-    const studentListEl = document.getElementById('student-list');
-    const studentCountEl = document.getElementById('student-count');
-    const raisedHandsEl = document.getElementById('raised-hands-list');
-    const chatPanel = document.getElementById('chat-panel');
-    const chatMessages = document.getElementById('chat-messages');
-    const chatInput = document.getElementById('chat-input');
-    const sendChatBtn = document.getElementById('send-chat');
-    const sidePanel = document.getElementById('side-panel');
-    const controls = document.getElementById('controls');
-    const backgroundSelector = document.getElementById('background-selector');
-    const shareScreenBtn = document.getElementById('share-screen');
-    const mainHandBtn = document.getElementById('main-hand');
-    const changeBgBtn = document.getElementById('change-background-btn');
-    const leaveBtn = document.getElementById('leave-class');
+// ====================================================
+// Récupération des éléments HTML
+// ====================================================
+const joinBtn = document.getElementById('joinBtn');
+const nameInput = document.getElementById('fullName');
+const roleSelect = document.getElementById('roleSelect');
+const loginPanel = document.getElementById('login-panel');
+const classroom = document.getElementById('classroom');
+const teacherVideoEl = document.getElementById('teacher-video');
+const studentVideosEl = document.getElementById('student-videos');
+const studentListEl = document.getElementById('student-list');
+const studentCountEl = document.getElementById('student-count');
+const raisedHandsEl = document.getElementById('raised-hands-list');
+const chatMessages = document.getElementById('chat-messages');
+const chatInput = document.getElementById('chat-input');
+const sendChatBtn = document.getElementById('send-chat');
 
-    let role, room, localStream;
-    const peers = {}; // WebRTC peers
+let role, localStream;
+const peers = {}; // Gestion des connexions WebRTC
 
-    // ====================================================
-    // Panels initialement caches
-    // ====================================================
-    [classroom, chatPanel, sidePanel, controls, backgroundSelector].forEach(el => el.style.display = 'none');
+// ====================================================
+// Fonction de création d'une connexion peer WebRTC
+// ====================================================
+function createPeerConnection(socketId) {
+  const pc = new RTCPeerConnection({
+    iceServers: [{ urls: 'stun:stun.l.google.com:19302' }]
+  });
 
-    // ====================================================
-    // Rejoindre bouton
-    // ====================================================
-    joinBtn.addEventListener('click', async () => {
-        const name = nameInput.value.trim();
-        role = roleSelect.value;
+  // Ajout des pistes locales
+  if (localStream) {
+    localStream.getTracks().forEach(track => pc.addTrack(track, localStream));
+  }
 
-        // Pou kounye a, room pral antre dirèk nan nouvo mekanis kòd pwofesè/elèv ou pral mete pita
-        room = ''; // netwaye pou rekòmanse
+  // Réception de flux distant
+  pc.ontrack = (event) => {
+    const stream = event.streams[0];
+    if (!document.getElementById(socketId)) {
+      const videoEl = document.createElement('video');
+      videoEl.id = socketId;
+      videoEl.srcObject = stream;
+      videoEl.autoplay = true;
+      videoEl.playsInline = true;
+      videoEl.muted = false;
+      videoEl.style.width = '240px';
+      videoEl.style.height = '180px';
+      studentVideosEl.appendChild(videoEl);
+    }
+  };
 
-        if (!name) {
-            alert('Veuillez remplir votre nom.');
-            return;
-        }
+  // Gestion des ICE candidates
+  pc.onicecandidate = (event) => {
+    if (event.candidate) {
+      socket.emit('signal', { to: socketId, candidate: event.candidate });
+    }
+  };
 
-        try {
-            socket.timeout(3000).emit('joinRoom', { room, name, role }, async (response) => {
-                if (response && response.status === 'full') {
-                    alert('Salle pleine (max 100 élèves)');
-                    return;
-                }
+  return pc;
+}
 
-                // Montre panel klas la
-                loginPanel.style.display = 'none';
-                [classroom, chatPanel, sidePanel, controls, backgroundSelector].forEach(el => el.style.display = 'block');
+// ====================================================
+// Signaling - réception de SDP / ICE
+// ====================================================
+socket.on('signal', async ({ from, sdp, candidate }) => {
+  if (!peers[from]) peers[from] = createPeerConnection(from);
+  const pc = peers[from];
 
-                await initLocalStream();
+  if (sdp) {
+    await pc.setRemoteDescription(new RTCSessionDescription(sdp));
+    if (sdp.type === 'offer') {
+      const answer = await pc.createAnswer();
+      await pc.setLocalDescription(answer);
+      socket.emit('signal', { to: from, sdp: pc.localDescription });
+    }
+  }
 
-                if (role === 'teacher') teacherControlsInit();
-                else studentControlsInit();
-            });
-        } catch (err) {
-            console.warn('Backend non disponible.');
-        }
-    });
+  if (candidate) {
+    await pc.addIceCandidate(new RTCIceCandidate(candidate));
+  }
 });
+
+// ====================================================
+// Lorsqu’un nouvel utilisateur rejoint
+// ====================================================
+socket.on('user-joined', async ({ socketId }) => {
+  const pc = createPeerConnection(socketId);
+  peers[socketId] = pc;
+
+  const offer = await pc.createOffer();
+  await pc.setLocalDescription(offer);
+  socket.emit('signal', { to: socketId, sdp: pc.localDescription });
+});
+
+// ====================================================
+// BOUTON "REJOINDRE" (VERSION NETTOYÉE)
+// ====================================================
+joinBtn.addEventListener('click', async () => {
+  const name = nameInput.value.trim();
+  role = roleSelect.value;
+
+  if (!name) {
+    alert('Veuillez entrer votre nom.');
+    return;
+  }
+
+  let responded = false;
+
+  try {
+    socket.timeout(3000).emit('joinRoom', { name, role }, async (response) => {
+      responded = true;
+
+      if (response.status === 'full') {
+        alert('Salle pleine (max 100 élèves)');
+        return;
+      }
+
+      // Transition vers la salle de classe
+      loginPanel.style.display = 'none';
+      classroom.style.display = 'block';
+
+      try {
+        localStream = await navigator.mediaDevices.getUserMedia({
+          video: true,
+          audio: true
+        });
+
+        // Affichage vidéo local
+        if (role === 'teacher') {
+          teacherVideoEl.srcObject = localStream;
+        } else {
+          const studentLocal = document.createElement('video');
+          studentLocal.srcObject = localStream;
+          studentLocal.autoplay = true;
+          studentLocal.playsInline = true;
+          studentLocal.muted = true;
+          studentLocal.style.width = '240px';
+          studentLocal.style.height = '180px';
+          studentVideosEl.appendChild(studentLocal);
+        }
+
+        localStream.getTracks().forEach(track => (track.enabled = true));
+        socket.emit('streamReady', { role });
+        socket.emit('readyForPeers');
+      } catch (err) {
+        console.error(err);
+        alert('Erreur accès caméra/micro.');
+      }
+
+      // Initialiser les contrôles selon le rôle
+      if (role === 'teacher') teacherControlsInit(socket);
+      else studentControlsInit(socket);
+    });
+  } catch (err) {
+    console.warn('Backend non disponible, mode local activé.');
+  }
+
+  // Mode local fallback
+  setTimeout(async () => {
+    if (!responded) {
+      console.warn('Mode local activé.');
+      loginPanel.style.display = 'none';
+      classroom.style.display = 'block';
+
+      try {
+        localStream = await navigator.mediaDevices.getUserMedia({
+          video: true,
+          audio: true
+        });
+
+        if (role === 'teacher') teacherVideoEl.srcObject = localStream;
+        else {
+          const localPlaceholder = document.createElement('video');
+          localPlaceholder.srcObject = localStream;
+          localPlaceholder.autoplay = true;
+          localPlaceholder.playsInline = true;
+          localPlaceholder.muted = true;
+          studentVideosEl.appendChild(localPlaceholder);
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    }
+  }, 3500);
+});
+
+
+
+
+
 
 
 
