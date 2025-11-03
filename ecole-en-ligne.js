@@ -1,11 +1,7 @@
 // ====================================================
 // Connexion socket
 // ====================================================
-const socket = io('https://examen-backend-ihlx.onrender.com', {
-    reconnection: true,
-    reconnectionAttempts: 5,
-    reconnectionDelay: 1000
-});
+const socket = io('https://examen-backend-ihlx.onrender.com');
 
 document.addEventListener('DOMContentLoaded', () => {
     // ====================================================
@@ -35,11 +31,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const changeBgBtn = document.getElementById('change-background-btn');
     const leaveBtn = document.getElementById('leave-class');
 
-    // Nouvo chan “rejwenn ansyen salle”
-    const rejoinRoomContainer = document.getElementById("rejoin-room-container");
-    const rejoinRoomInput = document.getElementById("rejoinRoomCode");
-    const rejoinRoomBtn = document.getElementById("rejoinRoomBtn");
-
     let role, room, localStream;
     const peers = {}; // WebRTC peers
 
@@ -61,20 +52,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ====================================================
-    // ===== Netwayaj avan rejoin =====
-    // ====================================================
-    async function cleanupBeforeRejoin() {
-        if (localStream) {
-            localStream.getTracks().forEach(track => track.stop());
-            localStream = null;
-        }
-        for (let peerId in peers) {
-            peers[peerId].close();
-        }
-        Object.keys(peers).forEach(k => delete peers[k]);
-    }
-
-    // ====================================================
     // ===== Chanjman wòl pou montre chan kòd pwofesè/elèv =====
     // ====================================================
     roleSelect.addEventListener('change', () => {
@@ -82,46 +59,17 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('room-code-container').style.display = 'block';
             if (studentRoomInputField) studentRoomInputField.parentElement.style.display = 'none';
             roomInput.value = generateRoomCode();
-
-            // Montre bouton pou rejwenn ansyen salle
-            if (rejoinRoomContainer) rejoinRoomContainer.style.display = 'block';
         } else {
             document.getElementById('room-code-container').style.display = 'none';
             if (studentRoomInputField) studentRoomInputField.parentElement.style.display = 'block';
-
-            // Kache bouton pou rejwenn ansyen salle
-            if (rejoinRoomContainer) rejoinRoomContainer.style.display = 'none';
         }
     });
 
-    // ====================================================
     // Inisyalizasyon lè paj la chaje
-    // ====================================================
     if (roleSelect.value === 'teacher') {
         document.getElementById('room-code-container').style.display = 'block';
         if (studentRoomInputField) studentRoomInputField.parentElement.style.display = 'none';
         roomInput.value = generateRoomCode();
-
-        if (rejoinRoomContainer) rejoinRoomContainer.style.display = 'block';
-    }
-
-    // ====================================================
-    // Bouton pou rejwenn ansyen salle
-    // ====================================================
-    if (rejoinRoomBtn) {
-        rejoinRoomBtn.addEventListener("click", async () => {
-            const oldCode = rejoinRoomInput.value.trim();
-            if (!oldCode) {
-                alert("Veuillez entrer un ancien code de salle !");
-                return;
-            }
-
-            await cleanupBeforeRejoin();
-
-            // Mete ansyen kòd la nan chan kòd pwofesè a epi rele menm bouton join
-            roomInput.value = oldCode;
-            joinBtn.click();
-        });
     }
 
     // ====================================================
@@ -140,7 +88,7 @@ document.addEventListener('DOMContentLoaded', () => {
         let responded = false;
 
         try {
-            socket.timeout(5000).emit('joinRoom', { room, name, role }, async (response) => {
+            socket.timeout(3000).emit('joinRoom', { room, name, role }, async (response) => {
                 responded = true;
                 if (response.status === 'full') {
                     alert('Salle pleine (max 100 élèves)');
@@ -165,10 +113,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 [classroom, chatPanel, sidePanel, controls, backgroundSelector].forEach(el => el.style.display = 'block');
                 await initLocalStream();
             }
-        }, 4000);
+        }, 3500);
     });
 });
-
 
 
 
