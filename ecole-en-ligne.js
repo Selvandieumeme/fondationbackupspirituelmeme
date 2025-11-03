@@ -13,10 +13,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const nameInput = document.getElementById('fullName');
     const roleSelect = document.getElementById('roleSelect');
     const loginPanel = document.getElementById('login-panel');
-
-    const rejoinRoomContainer = document.getElementById("rejoin-room-container");
-    const rejoinRoomInput = document.getElementById("rejoinRoomCode");
-    const rejoinRoomBtn = document.getElementById("rejoinRoomBtn");
     
     const classroom = document.getElementById('classroom');
     const teacherVideoEl = document.getElementById('teacher-video');
