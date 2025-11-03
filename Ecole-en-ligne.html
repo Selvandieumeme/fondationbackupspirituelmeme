@@ -8,20 +8,59 @@
 </head>
 <body>
 
-  <!-- =================== LOGIN PANEL =================== -->
-  <div id="login-panel">
-    <h1>Connexion à la Salle de Classe</h1>
-    <input type="text" id="fullName" placeholder="Nom / Prénom">
-    <input type="text" id="roomCode" placeholder="Code de la salle">
-    <input type="text" id="oldRoomCode" placeholder="Ancien code (si applicable)">
-    <select id="roleSelect">
-      <option value="teacher">Professeur</option>
-      <option value="student">Élève</option>
-    </select>
-    <button id="joinBtn">Rejoindre</button>
-    <button id="rejoinBtn">Retourner dans la salle</button>
-  </div>
 
+
+
+  
+
+  <!-- =================== LOGIN PANEL =================== -->
+ <div id="login-panel">
+  <h1>Connexion à la Salle de Classe</h1>
+
+  <!-- Nom / Prénom -->
+  <input type="text" id="fullName" placeholder="Nom / Prénom" required>
+
+  <!-- Code de la salle -->
+  <input type="text" id="roomCode" placeholder="Code de la salle" required>
+
+  <!-- Ancien code (seulement pour professeur) -->
+  <input type="text" id="oldRoomCode" placeholder="Ancien code (si applicable)" style="display:none;">
+
+  <!-- Sélecteur de rôle -->
+  <select id="roleSelect">
+    <option value="teacher">Professeur</option>
+    <option value="student">Élève</option>
+  </select>
+
+  <!-- Boutons d’action -->
+  <button id="joinBtn">Rejoindre</button>
+  <button id="rejoinBtn">Retourner dans la salle</button>
+</div>
+
+<!-- Script pou montre/kache chan “Ancien code” la -->
+<script>
+  const roleSelect = document.getElementById('roleSelect');
+  const oldRoomCode = document.getElementById('oldRoomCode');
+
+  roleSelect.addEventListener('change', () => {
+    if (roleSelect.value === 'teacher') {
+      oldRoomCode.style.display = 'block';
+    } else {
+      oldRoomCode.style.display = 'none';
+    }
+  });
+</script>
+
+
+
+
+
+
+
+
+
+
+  
   <!-- =================== SALLE DE CLASSE =================== -->
   <div id="classroom" style="display:none;">
 
