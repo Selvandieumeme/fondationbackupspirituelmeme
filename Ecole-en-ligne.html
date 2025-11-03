@@ -18,7 +18,7 @@
       width: 480px;
       height: 360px;
       object-fit: cover;
-      display: none;
+      display: none; /* JS ap kontwole vizibilite lè yon moun pataje ekran */
     }
   </style>
 </head>
@@ -35,20 +35,20 @@
     </select>
 
     <!-- Chan kòd jenere otomatikman pou pwofesè -->
-  <div id="room-code-container" style="display:none;">
-    <label for="generatedRoomCode">Code de la salle (à partager aux élèves):</label>
-    <input type="text" id="generatedRoomCode" readonly placeholder="Généré automatiquement">
-  </div>
+    <div id="room-code-container" style="display:none;">
+      <label for="generatedRoomCode">Code de la salle (à partager aux élèves):</label>
+      <input type="text" id="generatedRoomCode" readonly placeholder="Généré automatiquement">
+    </div>
 
-  <!-- ✅ CORRIGÉ : ajoute id sou parent div elèv la -->
-  <div id="student-room-container" style="display:none;">
-    <label for="studentRoomCode">Entrer le code de la salle:</label>
-    <input type="text" id="studentRoomCode" placeholder="Code donné par le prof">
-  </div>
-
+    <!-- ✅ CORRIGÉ : ajoute id sou parent div elèv la -->
+    <div id="student-room-container" style="display:none;">
+      <label for="studentRoomCode">Entrer le code de la salle:</label>
+      <input type="text" id="studentRoomCode" placeholder="Code donné par le prof">
+    </div>
 
     <button id="joinBtn">Rejoindre</button>
   </div>
+
 
   <!-- ============ SALLE DE CLASSE ============ -->
   <div id="classroom" style="display:none;">
@@ -105,6 +105,7 @@
     <!-- DIV FOND / AI -->
     <div id="background-selector" style="display:none;"></div>
   </div>
+
 
   <!-- ============ SCRIPTS ============ -->
   <script src="teacher-controls.js"></script>
