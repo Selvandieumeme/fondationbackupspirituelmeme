@@ -2,25 +2,9 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <title>ÉCOLE EN LIGNE FOBAS - UNE AUTRE HAITI AVEC UNE NOUVELLE TECHNOLOGIE</title>
+  <title>ÉCOLE EN LIGNE FOBAS</title>
   <link rel="stylesheet" href="ecole-en-ligne.css">
   <script src="https://cdn.socket.io/4.6.1/socket.io.min.js"></script>
-
-  <style>
-    /* === Styles vidéos dynamiques === */
-    #student-videos video {
-      margin: 5px;
-      width: 240px;
-      height: 180px;
-      object-fit: cover;
-    }
-    #screen-video {
-      width: 480px;
-      height: 360px;
-      object-fit: cover;
-      display: none;
-    }
-  </style>
 </head>
 
 <body>
@@ -34,13 +18,17 @@
       <option value="student">Student</option>
     </select>
 
+    <!-- Chan Code de la Salle, tout moun ka antre li -->
+    <div id="room-code-container">
+      <label for="studentRoomCode">Code de la salle :</label>
+      <input type="text" id="studentRoomCode" placeholder="Entrez le code de la salle">
+    </div>
+
     <button id="joinBtn">Rejoindre</button>
   </div>
 
   <!-- ============ SALLE DE CLASSE ============ -->
   <div id="classroom" style="display:none;">
-
-    <!-- SECTION VIDÉOS -->
     <div id="video-section">
       <div class="teacher-video-container">
         <h3>Professeur</h3>
@@ -49,13 +37,11 @@
       <div id="student-videos"></div>
     </div>
 
-    <!-- ÉCRAN PARTAGÉ -->
     <div id="screen-share-container">
       <h3>Partage d’écran</h3>
       <video id="screen-video" autoplay playsinline></video>
     </div>
 
-    <!-- PANEL LATÉRAL -->
     <div id="side-panel" style="display:none;">
       <div id="raised-hands">
         <h3>Mains Levées</h3>
@@ -68,17 +54,12 @@
       </div>
     </div>
 
-    <!-- PANEL CHAT -->
     <div id="chat-panel" style="display:none;">
       <div id="chat-messages"></div>
       <input id="chat-input" placeholder="Écrire un message...">
       <button id="send-chat">Envoyer</button>
     </div>
 
-    <!-- PANEL ANNONCES -->
-    <div id="announcement-panel" style="display:none;"></div>
-
-    <!-- CONTRÔLES -->
     <div id="controls" style="display:none;">
       <button id="toggle-mic">Mic On/Off</button>
       <button id="toggle-camera">Camera On/Off</button>
@@ -89,7 +70,6 @@
       <button id="change-background-btn">Changer Fond</button>
     </div>
 
-    <!-- DIV FOND / AI -->
     <div id="background-selector" style="display:none;"></div>
   </div>
 
