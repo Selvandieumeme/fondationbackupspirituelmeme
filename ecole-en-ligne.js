@@ -51,44 +51,62 @@ document.addEventListener('DOMContentLoaded', () => {
         return code;
     }
 
-    // ====================================================
-    // ===== Chanjman wòl pou montre chan kòd pwofesè/elèv =====
-    // ====================================================
-    roleSelect.addEventListener('change', () => {
-        if (roleSelect.value === 'teacher') {
-            document.getElementById('room-code-container').style.display = 'block';
-            if (studentRoomInputField) studentRoomInputField.parentElement.style.display = 'none';
-            roomInput.value = generateRoomCode();
-        } else {
-            document.getElementById('room-code-container').style.display = 'none';
-            if (studentRoomInputField) studentRoomInputField.parentElement.style.display = 'block';
-        }
-    });
-
-    // Inisyalizasyon lè paj la chaje
-    if (roleSelect.value === 'teacher') {
-        document.getElementById('room-code-container').style.display = 'block';
-        if (studentRoomInputField) studentRoomInputField.parentElement.style.display = 'none';
-        roomInput.value = generateRoomCode();
-    }
 
     
+// ====================================================
+// ===== Chanjman wòl pou montre chan kòd pwofesè/elèv =====
+// ====================================================
+roleSelect.addEventListener('change', () => {
+  if (roleSelect.value === 'teacher') {
+      document.getElementById('room-code-container').style.display = 'block';
+      if (studentRoomInputField) studentRoomInputField.parentElement.style.display = 'none';
+      roomInput.value = generateRoomCode();
+
+      // 👉 Montrer bouton rejoin sal la
+      if (rejoinRoomContainer) rejoinRoomContainer.style.display = 'block';
+  } else {
+      document.getElementById('room-code-container').style.display = 'none';
+      if (studentRoomInputField) studentRoomInputField.parentElement.style.display = 'block';
+
+      // 👉 Kache bouton rejoin sal la
+      if (rejoinRoomContainer) rejoinRoomContainer.style.display = 'none';
+  }
+});
+
+// Inisyalizasyon lè paj la chaje
+if (roleSelect.value === 'teacher') {
+    document.getElementById('room-code-container').style.display = 'block';
+    if (studentRoomInputField) studentRoomInputField.parentElement.style.display = 'none';
+    roomInput.value = generateRoomCode();
+
+    // 👉 Montrer bouton rejoin sal la
+    if (rejoinRoomContainer) rejoinRoomContainer.style.display = 'block';
+}
 
 
+
+// ====================================================
 // === GESTION REJOINDRE ANCIENNE SALLE ===
+// ====================================================
 const rejoinRoomContainer = document.getElementById("rejoin-room-container");
 const rejoinRoomInput = document.getElementById("rejoinRoomCode");
 const rejoinRoomBtn = document.getElementById("rejoinRoomBtn");
 
-// Si se teacher, montre tou bouton pou rejwen ansyen salle
-roleSelect.addEventListener("change", () => {
-  if (roleSelect.value === "teacher") {
-    rejoinRoomContainer.style.display = "block";
-  } else {
-    rejoinRoomContainer.style.display = "none";
-  }
-});
+if (rejoinRoomBtn) {
+  rejoinRoomBtn.addEventListener("click", () => {
+    const oldCode = rejoinRoomInput.value.trim();
+    if (!oldCode) {
+      alert("Veuillez entrer un ancien code de salle !");
+      return;
+    }
+    document.getElementById("generatedRoomCode").value = oldCode;
+    joinBtn.click(); // itilize menm bouton 'Rejoindre' lan
+  });
+}
 
+
+
+    
 // Lè pwofese a vle rejwen ansyen salle
 rejoinRoomBtn.addEventListener("click", () => {
   const oldCode = rejoinRoomInput.value.trim();
