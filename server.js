@@ -739,72 +739,121 @@ app.get('/Chatprive.html', (req, res) => {
 
 
 
-io.on('connection', socket => {
-    console.log('Nouvo koneksyon:', socket.id);
+// Upload config
+const UPLOAD_DIR = process.env.UPLOAD_DIR || './uploads';
+if (!fs.existsSync(UPLOAD_DIR)) fs.mkdirSync(UPLOAD_DIR, { recursive: true });
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => cb(null, UPLOAD_DIR),
+  filename: (req, file, cb) => cb(null, Date.now() + '-' + file.originalname)
+});
+const upload = multer({ storage });
 
-    // --- Join Room ---
-    socket.on('joinRoom', ({ room, name, role }, callback) => {
-        if (!room || !name || !role) {
-            return callback?.({ status: 'error', message: 'Champs manquants' });
-        }
+const server = http.createServer(app);
+const io = new Server(server, { cors: { origin: '*', methods: ['GET','POST'] } });
 
-        if (!roomsData[room]) roomsData[room] = { students: [], raisedHands: [] };
+// MongoDB connection
+mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
+  .then(() => console.log('MongoDB connecté'))
+  .catch(err => console.error('MongoDB erreur:', err));
 
-        const studentsInRoom = roomsData[room].students.filter(s => s.role === 'student' && s.online).length;
-        if (role === 'student' && studentsInRoom >= 100) {
-            return callback?.({ status: 'full' });
-        }
+// Schemas
+const Schema = mongoose.Schema;
+const RoomSchema = new Schema({ code: { type: String, index: true, required: true }, createdAt: { type: Date, default: Date.now }, metadata: { type: Schema.Types.Mixed } });
+const Room = mongoose.model('Room', RoomSchema);
 
-        socket.join(room);
-        socket.data = { name, role, online: true, room };
+const ParticipantSchema = new Schema({ socketId: String, name: String, role: String, room: String, joinedAt: { type: Date, default: Date.now } });
+const Participant = mongoose.model('Participant', ParticipantSchema);
 
-        roomsData[room].students.push({ id: socket.id, name, role, online: true });
+const roomsState = {};
+const MAX_PER_ROOM = 100;
 
-        callback?.({ status: 'ok' });
-
-        // Voye mizajou elèv ak mains levées
-        io.to(room).emit('updateStudents', roomsData[room].students);
-        io.to(room).emit('updateRaisedHands', roomsData[room].raisedHands);
-    });
-
-    // --- Raise Hand ---
-    socket.on('raiseHand', () => {
-        const room = socket.data?.room;
-        if (!room || !roomsData[room]) return;
-
-        const student = roomsData[room].students.find(s => s.id === socket.id);
-        if (student && !roomsData[room].raisedHands.some(s => s.id === socket.id)) {
-            roomsData[room].raisedHands.push(student);
-        }
-
-        io.to(room).emit('updateRaisedHands', roomsData[room].raisedHands);
-    });
-
-    // --- Chat Message ---
-    socket.on('chatMessage', msg => {
-        const room = socket.data?.room;
-        if (!room || !roomsData[room]) return;
-        if (!msg || !msg.trim()) return;
-
-        io.to(room).emit('chatMessage', { name: socket.data.name, msg: msg.trim() });
-    });
-
-    // --- Disconnect ---
-    socket.on('disconnect', () => {
-        const room = socket.data?.room;
-        if (!room || !roomsData[room]) return;
-
-        const students = roomsData[room].students || [];
-        const student = students.find(s => s.id === socket.id);
-        if (student) student.online = false;
-
-        roomsData[room].raisedHands = roomsData[room].raisedHands.filter(s => s.id !== socket.id);
-
-        io.to(room).emit('updateStudents', students);
-        io.to(room).emit('updateRaisedHands', roomsData[room].raisedHands);
-    });
+// Upload endpoints
+app.post('/upload', upload.single('file'), (req, res) => {
+  if (!req.file) return res.status(400).json({ error: 'No file' });
+  res.json({ ok: true, filename: req.file.filename, path: `/files/${req.file.filename}` });
+});
+app.get('/files/:name', (req, res) => {
+  const filePath = path.join(UPLOAD_DIR, req.params.name);
+  if (!fs.existsSync(filePath)) return res.status(404).send('Not found');
+  res.sendFile(path.resolve(filePath));
 });
 
+// Socket.IO
+io.on('connection', (socket) => {
+  console.log('socket connected', socket.id);
+
+  socket.on('join-room-request', async ({ room, name, role, oldRoom }, ack) => {
+    try {
+      if (!roomsState[room]) roomsState[room] = { participants: [], teacherSocketId: null };
+      const state = roomsState[room];
+
+      if (role === 'teacher') state.teacherSocketId = socket.id;
+
+      const countStudents = state.participants.filter(p => p.role === 'student').length;
+      if (role === 'student' && countStudents >= MAX_PER_ROOM) {
+        if (ack) ack({ status: 'full', message: 'Salle pleine' });
+        socket.emit('join-error', { message: 'Salle pleine (max ' + MAX_PER_ROOM + ')' });
+        return;
+      }
+
+      if (role === 'student' && state.teacherSocketId) {
+        io.to(state.teacherSocketId).emit('request-join', { socketId: socket.id, name, room, role });
+        socket.join(`pending:${room}`);
+        if (ack) ack({ status: 'pending' });
+        return;
+      }
+
+      state.participants.push({ socketId: socket.id, name, role });
+      socket.join(room);
+      socket.room = room; socket.name = name; socket.role = role;
+      await Participant.create({ socketId: socket.id, name, role, room });
+
+      if (ack) ack({ status: 'ok' });
+      io.to(room).emit('participants', { list: state.participants.map(p => ({ name: p.name, role: p.role, socketId: p.socketId })) });
+      socket.to(room).emit('user-joined', { socketId: socket.id, name, role });
+
+    } catch (err) { console.error(err); if (ack) ack({ status: 'error', message: err.message }); }
+  });
+
+  socket.on('teacher-accept-join', async ({ pendingSocketId, accept }) => {
+    try {
+      const room = Object.keys(roomsState).find(r => roomsState[r].participants.some(p => p.socketId === socket.id) || roomsState[r].teacherSocketId === socket.id);
+      const state = roomsState[room];
+      const pendingSocket = io.sockets.sockets.get(pendingSocketId);
+      if (!pendingSocket) return io.to(socket.id).emit('notify', { message: 'Candidat introuvable' });
+
+      if (accept) {
+        state.participants.push({ socketId: pendingSocketId, name: pendingSocket.name || 'Etudiant', role: 'student' });
+        pendingSocket.join(room); pendingSocket.room = room;
+        pendingSocket.emit('join-accepted', { room });
+        io.to(room).emit('participants', { list: state.participants.map(p => ({ name: p.name, role: p.role, socketId: p.socketId })) });
+      } else pendingSocket.emit('join-rejected', { message: 'Rejeté par le professeur' });
+    } catch (err) { console.error(err); }
+  });
+
+  socket.on('signal', ({ to, sdp, candidate }) => { if (!to) return; io.to(to).emit('signal', { from: socket.id, sdp, candidate }); });
+  socket.on('chat', ({ room, text }) => { if (room) io.to(room).emit('chat', { fromName: socket.name || 'Anonyme', text }); });
+  socket.on('raise-hand', ({ room }) => { if (room) io.to(room).emit('raised-hand', { socketId: socket.id, name: socket.name || 'Anonyme' }); });
+  socket.on('teacher-mute-all', ({ room }) => { if (room) io.to(room).emit('mute-all'); });
+  socket.on('teacher-kick', ({ room, socketId }) => { io.to(socketId).emit('kicked', { reason: 'Expulsé par professeur' }); if (roomsState[room]) { roomsState[room].participants = roomsState[room].participants.filter(p => p.socketId !== socketId); io.to(room).emit('participants', { list: roomsState[room].participants.map(p => ({ name: p.name, role: p.role, socketId: p.socketId })) }); } });
+  socket.on('leave-room', ({ room }) => { if (room && roomsState[room]) { roomsState[room].participants = roomsState[room].participants.filter(p => p.socketId !== socket.id); socket.leave(room); io.to(room).emit('participants', { list: roomsState[room].participants.map(p => ({ name: p.name, role: p.role, socketId: p.socketId })) }); socket.to(room).emit('user-left', { socketId: socket.id }); } });
+
+  socket.on('disconnect', async () => {
+    try {
+      for (const r of Object.keys(roomsState)) {
+        const state = roomsState[r];
+        state.participants = state.participants.filter(p => p.socketId !== socket.id);
+        io.to(r).emit('participants', { list: state.participants.map(p => ({ name: p.name, role: p.role, socketId: p.socketId })) });
+        socket.to(r).emit('user-left', { socketId: socket.id });
+        if (state.teacherSocketId === socket.id) state.teacherSocketId = null;
+      }
+      await Participant.deleteOne({ socketId: socket.id });
+    } catch (err) { console.error(err); }
+  });
+});
+
+app.use('/files', express.static(path.resolve(UPLOAD_DIR)));
+app.get('/', (req, res) => res.send('Ecole-en-ligne signaling server'));
 
 
 // 🚀 DEMARRE SERVEUR
