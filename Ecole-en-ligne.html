@@ -35,16 +35,17 @@
     </select>
 
     <!-- Chan kòd jenere otomatikman pou pwofesè -->
-    <div id="room-code-container" style="display:none;">
-      <label for="generatedRoomCode">Code de la salle (à partager aux élèves):</label>
-      <input type="text" id="generatedRoomCode" readonly placeholder="Généré automatiquement">
-    </div>
+  <div id="room-code-container" style="display:none;">
+    <label for="generatedRoomCode">Code de la salle (à partager aux élèves):</label>
+    <input type="text" id="generatedRoomCode" readonly placeholder="Généré automatiquement">
+  </div>
 
-    <!-- Chan kote elèv antre kòd pwofesè a -->
-    <div id="student-room-input" style="display:none;">
-      <label for="studentRoomCode">Entrer le code de la salle:</label>
-      <input type="text" id="studentRoomCode" placeholder="Code donné par le prof">
-    </div>
+  <!-- ✅ CORRIGÉ : ajoute id sou parent div elèv la -->
+  <div id="student-room-container" style="display:none;">
+    <label for="studentRoomCode">Entrer le code de la salle:</label>
+    <input type="text" id="studentRoomCode" placeholder="Code donné par le prof">
+  </div>
+
 
     <button id="joinBtn">Rejoindre</button>
   </div>
