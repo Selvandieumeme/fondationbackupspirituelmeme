@@ -8,8 +8,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // Elements HTML
     // ====================================================
     const joinBtn = document.getElementById('joinBtn');
-    const roomInput = document.getElementById('generatedRoomCode'); // chanje pou matche ak HTML
-    const studentRoomInputField = document.getElementById('studentRoomCode'); // pou elèv
     const nameInput = document.getElementById('fullName');
     const roleSelect = document.getElementById('roleSelect');
     const loginPanel = document.getElementById('login-panel');
@@ -40,63 +38,28 @@ document.addEventListener('DOMContentLoaded', () => {
     [classroom, chatPanel, sidePanel, controls, backgroundSelector].forEach(el => el.style.display = 'none');
 
     // ====================================================
-    // ===== Fonksyon pou jenere kòd inik =====
-    // ====================================================
-    function generateRoomCode(length = 6) {
-        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-        let code = '';
-        for (let i = 0; i < length; i++) {
-            code += chars.charAt(Math.floor(Math.random() * chars.length));
-        }
-        return code;
-    }
-
-    // ====================================================
-    // ===== Chanjman wòl pou montre chan kòd pwofesè/elèv =====
-    // ====================================================
-    roleSelect.addEventListener('change', () => {
-        if (roleSelect.value === 'teacher') {
-            document.getElementById('room-code-container').style.display = 'block';
-            if (studentRoomInputField) studentRoomInputField.parentElement.style.display = 'none';
-            roomInput.value = generateRoomCode(); // mete kòd otomatikman
-        } else {
-            document.getElementById('room-code-container').style.display = 'none';
-            if (studentRoomInputField) studentRoomInputField.parentElement.style.display = 'block';
-        }
-    });
-
-    // inisyalizasyon lè paj chaje
-    if (roleSelect.value === 'teacher') {
-        document.getElementById('room-code-container').style.display = 'block';
-        if (studentRoomInputField) studentRoomInputField.parentElement.style.display = 'none';
-        roomInput.value = generateRoomCode();
-    }
-
-    // ====================================================
     // Rejoindre bouton
     // ====================================================
     joinBtn.addEventListener('click', async () => {
         const name = nameInput.value.trim();
         role = roleSelect.value;
 
-        if (role === 'teacher') room = roomInput.value.trim();
-        else room = studentRoomInputField.value.trim();
+        // Pou kounye a, room pral antre dirèk nan nouvo mekanis kòd pwofesè/elèv ou pral mete pita
+        room = ''; // netwaye pou rekòmanse
 
-        if (!room || !name) {
-            alert('Veuillez remplir tous les champs.');
+        if (!name) {
+            alert('Veuillez remplir votre nom.');
             return;
         }
 
-        let responded = false;
-
         try {
             socket.timeout(3000).emit('joinRoom', { room, name, role }, async (response) => {
-                responded = true;
-                if (response.status === 'full') {
+                if (response && response.status === 'full') {
                     alert('Salle pleine (max 100 élèves)');
                     return;
                 }
 
+                // Montre panel klas la
                 loginPanel.style.display = 'none';
                 [classroom, chatPanel, sidePanel, controls, backgroundSelector].forEach(el => el.style.display = 'block');
 
@@ -106,19 +69,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 else studentControlsInit();
             });
         } catch (err) {
-            console.warn('Backend non disponible, simulation locale activée.');
+            console.warn('Backend non disponible.');
         }
-
-        setTimeout(async () => {
-            if (!responded) {
-                loginPanel.style.display = 'none';
-                [classroom, chatPanel, sidePanel, controls, backgroundSelector].forEach(el => el.style.display = 'block');
-                await initLocalStream();
-            }
-        }, 3500);
     });
 });
-
 
 
 
