@@ -8,7 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Elements HTML
     // ====================================================
     const joinBtn = document.getElementById('joinBtn');
-    const roomInput = document.getElementById('generatedRoomCode'); // pou kòd pwofesè a
+    const roomInput = document.getElementById('roomCode'); // pou pwofesè
     const studentRoomInputField = document.getElementById('studentRoomCode'); // pou elèv
     const nameInput = document.getElementById('fullName');
     const roleSelect = document.getElementById('roleSelect');
@@ -54,7 +54,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // ====================================================
     // ===== Chanjman wòl pou montre chan kòd pwofesè/elèv =====
     // ====================================================
-    function updateRoleDisplay() {
+    roleSelect.addEventListener('change', () => {
         if (roleSelect.value === 'teacher') {
             document.getElementById('room-code-container').style.display = 'block';
             if (studentRoomInputField) studentRoomInputField.parentElement.style.display = 'none';
@@ -63,16 +63,14 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('room-code-container').style.display = 'none';
             if (studentRoomInputField) studentRoomInputField.parentElement.style.display = 'block';
         }
-    }
+    });
 
-    roleSelect.addEventListener('change', updateRoleDisplay);
-
-    // ====================================================
     // Inisyalizasyon lè paj la chaje
-    // ====================================================
-    setTimeout(() => {
-        updateRoleDisplay(); // Fòse mete chan kòd pwofesè a vizib si teacher
-    }, 50); // ti delay pou asire DOM totalman chaje
+    if (roleSelect.value === 'teacher') {
+        document.getElementById('room-code-container').style.display = 'block';
+        if (studentRoomInputField) studentRoomInputField.parentElement.style.display = 'none';
+        roomInput.value = generateRoomCode();
+    }
 
     // ====================================================
     // Rejoindre bouton
@@ -80,7 +78,9 @@ document.addEventListener('DOMContentLoaded', () => {
     joinBtn.addEventListener('click', async () => {
         const name = nameInput.value.trim();
         role = roleSelect.value;
-        room = (role === 'teacher') ? roomInput.value.trim() : studentRoomInputField.value.trim();
+
+        if (role === 'teacher') room = roomInput.value.trim();
+        else room = studentRoomInputField.value.trim();
 
         if (!room || !name) {
             alert('Veuillez remplir tous les champs.');
@@ -117,8 +117,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }, 3500);
     });
-});
-
 
 
 
