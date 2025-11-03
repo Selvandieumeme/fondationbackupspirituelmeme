@@ -5,13 +5,27 @@
   <title>ÉCOLE EN LIGNE FOBAS - UNE AUTRE HAITI AVEC UNE NOUVELLE TECHNOLOGIE</title>
   <link rel="stylesheet" href="ecole-en-ligne.css">
   <script src="https://cdn.socket.io/4.6.1/socket.io.min.js"></script>
+
+  <style>
+    /* === Styles vidéos dynamiques === */
+    #student-videos video {
+      margin: 5px;
+      width: 240px;
+      height: 180px;
+      object-fit: cover;
+    }
+    #screen-video {
+      width: 480px;
+      height: 360px;
+      object-fit: cover;
+      display: none;
+    }
+  </style>
 </head>
 
 <body>
 
-  <h1>École en Ligne FOBAS</h1>
-
-  <!-- === PANNEAU DE CONNEXION === -->
+  <!-- ============ PANNEAU DE CONNEXION ============ -->
   <div id="login-panel">
     <input type="text" id="fullName" placeholder="Nom / Prénom">
 
@@ -23,46 +37,45 @@
     <button id="joinBtn">Rejoindre</button>
   </div>
 
-  <!-- === SALLE DE CLASSE === -->
+  <!-- ============ SALLE DE CLASSE ============ -->
   <div id="classroom" style="display:none;">
 
-    <!-- SECTION CAMÉRAS -->
-    <div id="teacher-camera">
-      <h3>Professeur</h3>
-      <video id="teacher-video" autoplay playsinline muted></video>
-    </div>
-
-    <div id="students-camera">
-      <h3>Élèves</h3>
+    <!-- SECTION VIDÉOS -->
+    <div id="video-section">
+      <div class="teacher-video-container">
+        <h3>Professeur</h3>
+        <video id="teacher-video" autoplay playsinline muted></video>
+      </div>
       <div id="student-videos"></div>
     </div>
 
-    <!-- PARTAGE D'ÉCRAN -->
+    <!-- ÉCRAN PARTAGÉ -->
     <div id="screen-share-container">
       <h3>Partage d’écran</h3>
-      <video id="screen-video" autoplay playsinline style="display:none;"></video>
+      <video id="screen-video" autoplay playsinline></video>
     </div>
 
-    <!-- PANNEAU LATÉRAL -->
+    <!-- PANEL LATÉRAL -->
     <div id="side-panel" style="display:none;">
       <div id="raised-hands">
         <h3>Mains Levées</h3>
         <div id="raised-hands-list"></div>
       </div>
+
       <div id="student-list-container">
         <h3>Élèves Connectés (<span id="student-count">0</span>/100)</h3>
         <div id="student-list"></div>
       </div>
     </div>
 
-    <!-- CHAT -->
+    <!-- PANEL CHAT -->
     <div id="chat-panel" style="display:none;">
       <div id="chat-messages"></div>
       <input id="chat-input" placeholder="Écrire un message...">
       <button id="send-chat">Envoyer</button>
     </div>
 
-    <!-- ANNONCES -->
+    <!-- PANEL ANNONCES -->
     <div id="announcement-panel" style="display:none;"></div>
 
     <!-- CONTRÔLES -->
@@ -72,15 +85,18 @@
       <button id="share-screen">Partager écran</button>
       <button id="main-hand">Main Levée</button>
       <button id="leave-class">Quitter</button>
-      <button id="rejoin-class">Retourner</button>
+      <button id="rejoin-class">Retourner dans la salle</button>
       <button id="change-background-btn">Changer Fond</button>
     </div>
 
+    <!-- DIV FOND / AI -->
+    <div id="background-selector" style="display:none;"></div>
   </div>
 
-  <!-- === SCRIPTS === -->
+  <!-- ============ SCRIPTS ============ -->
   <script src="teacher-controls.js"></script>
   <script src="student-controls.js"></script>
   <script src="ecole-en-ligne.js"></script>
+
 </body>
 </html>
