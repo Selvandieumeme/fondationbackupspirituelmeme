@@ -143,5 +143,85 @@
   <script src="student-controls.js"></script>
   <script src="ecole-en-ligne.js"></script>
 
+
+
+  <!-- Script Socket.io -->
+<script src="https://cdn.socket.io/4.6.1/socket.io.min.js"></script>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const socket = io("https://examen-backend-ihlx.onrender.com", {
+    transports: ["websocket"],
+  });
+
+  const fullName = document.getElementById("inputFullName");
+  const roomCode = document.getElementById("inputRoomCode");
+  const oldCode = document.getElementById("inputOldCode");
+  const roleSelect = document.getElementById("selectRole");
+  const joinBtn = document.getElementById("joinBtn");
+
+  joinBtn.addEventListener("click", () => {
+    const name = fullName.value.trim();
+    const room = roomCode.value.trim();
+    const role = roleSelect.value;
+    const oldRoom = oldCode.value.trim();
+
+    // Vérifikasyon si tout chan obligatwa yo ranpli
+    if (!name || !room) {
+      alert("Veuillez remplir tous les champs requis (Nom / Prénom et Code de la salle).");
+      return;
+    }
+
+    // Envoi done koneksyon bay serveur la
+    socket.emit("join-room", { name, room, role, oldRoom });
+
+    // Message loading
+    joinBtn.disabled = true;
+    joinBtn.textContent = "Connexion en cours...";
+
+    // Lè serveu a konfime koneksyon an
+    socket.once("joined-room", (data) => {
+      console.log("Connecté avec succès à la salle :", data);
+      alert(`Bienvenue ${name} dans la salle ${room} !`);
+
+      // Kache panel login la epi montre entèfas salle de classe a
+      document.getElementById("login-panel").style.display = "none";
+      ouvrirSalleDeClasse(name, role, room);
+    });
+
+    // Si gen erè
+    socket.once("join-error", (err) => {
+      alert("Erreur : " + err.message);
+      joinBtn.disabled = false;
+      joinBtn.textContent = "Rejoindre";
+    });
+  });
+
+  // Fonksyon pou louvri entèfas salle de classe la
+  function ouvrirSalleDeClasse(name, role, room) {
+    const classroom = document.createElement("div");
+    classroom.id = "classroom";
+    classroom.innerHTML = `
+      <h2>Salle de classe : ${room}</h2>
+      <p>Connecté en tant que <strong>${role === 'teacher' ? 'Professeur' : 'Élève'}</strong> — ${name}</p>
+      <div id="video-area">
+        <p>(📹 Vidéo / 🎤 Audio / 💬 Chat / 📁 Partage ekran ap vini...)</p>
+      </div>
+      <button id="leaveBtn">Quitter la salle</button>
+    `;
+    document.body.appendChild(classroom);
+
+    // Bouton pou kite sal la
+    document.getElementById("leaveBtn").addEventListener("click", () => {
+      socket.emit("leave-room", { name, room });
+      document.body.removeChild(classroom);
+      document.getElementById("login-panel").style.display = "block";
+      joinBtn.disabled = false;
+      joinBtn.textContent = "Rejoindre";
+    });
+  }
+});
+</script>
+
 </body>
 </html>
