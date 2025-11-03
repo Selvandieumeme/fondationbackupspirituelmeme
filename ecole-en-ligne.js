@@ -1,12 +1,13 @@
-// ====================================================
-// Connexion Socket.io ak backend
-// ====================================================
+// ===============================
+// 🌐 Koneksyon Socket ak Backend
+// ===============================
 const socket = io('https://examen-backend-ihlx.onrender.com');
 
-// ====================================================
-// Récupération des éléments HTML
-// ====================================================
+// ===============================
+// 🎛️ Sélection éléments HTML
+// ===============================
 const joinBtn = document.getElementById('joinBtn');
+const roomInput = document.getElementById('roomCode'); // <--- Code de la salle
 const nameInput = document.getElementById('fullName');
 const roleSelect = document.getElementById('roleSelect');
 const loginPanel = document.getElementById('login-panel');
@@ -20,23 +21,21 @@ const chatMessages = document.getElementById('chat-messages');
 const chatInput = document.getElementById('chat-input');
 const sendChatBtn = document.getElementById('send-chat');
 
-let role, localStream;
-const peers = {}; // Gestion des connexions WebRTC
+let role, room, localStream;
+const peers = {}; // peer connections WebRTC
 
-// ====================================================
-// Fonction de création d'une connexion peer WebRTC
-// ====================================================
+// ===================================================
+// 🔧 FONKSYON: Kreye koneksyon WebRTC ant itilizatè yo
+// ===================================================
 function createPeerConnection(socketId) {
   const pc = new RTCPeerConnection({
     iceServers: [{ urls: 'stun:stun.l.google.com:19302' }]
   });
 
-  // Ajout des pistes locales
   if (localStream) {
     localStream.getTracks().forEach(track => pc.addTrack(track, localStream));
   }
 
-  // Réception de flux distant
   pc.ontrack = (event) => {
     const stream = event.streams[0];
     if (!document.getElementById(socketId)) {
@@ -52,7 +51,6 @@ function createPeerConnection(socketId) {
     }
   };
 
-  // Gestion des ICE candidates
   pc.onicecandidate = (event) => {
     if (event.candidate) {
       socket.emit('signal', { to: socketId, candidate: event.candidate });
@@ -62,9 +60,9 @@ function createPeerConnection(socketId) {
   return pc;
 }
 
-// ====================================================
-// Signaling - réception de SDP / ICE
-// ====================================================
+// ===================================================
+// 🔄 Resevwa signal (SDP / ICE) ant kliyan yo
+// ===================================================
 socket.on('signal', async ({ from, sdp, candidate }) => {
   if (!peers[from]) peers[from] = createPeerConnection(from);
   const pc = peers[from];
@@ -83,108 +81,104 @@ socket.on('signal', async ({ from, sdp, candidate }) => {
   }
 });
 
-// ====================================================
-// Lorsqu’un nouvel utilisateur rejoint
-// ====================================================
+// ===================================================
+// 👥 Lè yon nouvo itilizatè rantre nan sal la
+// ===================================================
 socket.on('user-joined', async ({ socketId }) => {
   const pc = createPeerConnection(socketId);
   peers[socketId] = pc;
-
   const offer = await pc.createOffer();
   await pc.setLocalDescription(offer);
   socket.emit('signal', { to: socketId, sdp: pc.localDescription });
 });
 
-// ====================================================
-// BOUTON "REJOINDRE" (VERSION NETTOYÉE)
-// ====================================================
+// ===================================================
+// 🚪 Bouton "Rejoindre la Classe"
+// ===================================================
 joinBtn.addEventListener('click', async () => {
   const name = nameInput.value.trim();
-  role = roleSelect.value;
+  const role = roleSelect.value;
+  room = roomInput.value.trim(); // <-- Récupère "Code de la salle"
 
-  if (!name) {
-    alert('Veuillez entrer votre nom.');
+  if (!name || !room) {
+    alert('Veuillez entrer votre nom et le Code de la Classe.');
     return;
   }
 
+  const payload = { name, role, room };
   let responded = false;
 
   try {
-    socket.timeout(3000).emit('joinRoom', { name, role }, async (response) => {
+    socket.timeout(4000).emit('joinRoom', payload, async (response) => {
       responded = true;
 
-      if (response.status === 'full') {
-        alert('Salle pleine (max 100 élèves)');
+      if (response?.status === 'full') {
+        alert('Salle pleine (maximum 100 élèves)');
         return;
       }
 
-      // Transition vers la salle de classe
+      // ✅ Transition vers l’espace de classe
       loginPanel.style.display = 'none';
       classroom.style.display = 'block';
 
       try {
-        localStream = await navigator.mediaDevices.getUserMedia({
-          video: true,
-          audio: true
-        });
+        localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
 
-        // Affichage vidéo local
         if (role === 'teacher') {
           teacherVideoEl.srcObject = localStream;
         } else {
-          const studentLocal = document.createElement('video');
-          studentLocal.srcObject = localStream;
-          studentLocal.autoplay = true;
-          studentLocal.playsInline = true;
-          studentLocal.muted = true;
-          studentLocal.style.width = '240px';
-          studentLocal.style.height = '180px';
-          studentVideosEl.appendChild(studentLocal);
+          const localVid = document.createElement('video');
+          localVid.srcObject = localStream;
+          localVid.autoplay = true;
+          localVid.playsInline = true;
+          localVid.muted = true;
+          localVid.style.width = '240px';
+          localVid.style.height = '180px';
+          studentVideosEl.appendChild(localVid);
         }
 
         localStream.getTracks().forEach(track => (track.enabled = true));
         socket.emit('streamReady', { role });
         socket.emit('readyForPeers');
       } catch (err) {
-        console.error(err);
-        alert('Erreur accès caméra/micro.');
+        console.error('Erreur caméra/micro :', err);
+        alert("Impossible d'accéder à la caméra/micro.");
       }
 
-      // Initialiser les contrôles selon le rôle
       if (role === 'teacher') teacherControlsInit(socket);
       else studentControlsInit(socket);
     });
   } catch (err) {
-    console.warn('Backend non disponible, mode local activé.');
+    console.warn('⚠️ Serveur non disponible, mode local activé.');
   }
 
-  // Mode local fallback
+  // 🔄 Mode local fallback (si backend pa reponn)
   setTimeout(async () => {
     if (!responded) {
-      console.warn('Mode local activé.');
+      console.warn('Mode local sans serveur.');
       loginPanel.style.display = 'none';
       classroom.style.display = 'block';
 
       try {
-        localStream = await navigator.mediaDevices.getUserMedia({
-          video: true,
-          audio: true
-        });
+        localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
 
-        if (role === 'teacher') teacherVideoEl.srcObject = localStream;
-        else {
-          const localPlaceholder = document.createElement('video');
-          localPlaceholder.srcObject = localStream;
-          localPlaceholder.autoplay = true;
-          localPlaceholder.playsInline = true;
-          localPlaceholder.muted = true;
-          studentVideosEl.appendChild(localPlaceholder);
+        if (role === 'teacher') {
+          teacherVideoEl.srcObject = localStream;
+        } else {
+          const fallbackVid = document.createElement('video');
+          fallbackVid.srcObject = localStream;
+          fallbackVid.autoplay = true;
+          fallbackVid.playsInline = true;
+          fallbackVid.muted = true;
+          fallbackVid.style.width = '240px';
+          fallbackVid.style.height = '180px';
+          studentVideosEl.appendChild(fallbackVid);
         }
       } catch (err) {
         console.error(err);
       }
     }
-  }, 3500);
+  }, 4000);
 });
 
 
