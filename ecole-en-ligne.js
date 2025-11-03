@@ -8,7 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Elements HTML
     // ====================================================
     const joinBtn = document.getElementById('joinBtn');
-    const roomInput = document.getElementById('generatedRoomCode'); // chanje pou matche ak HTML
+    const roomInput = document.getElementById('generatedRoomCode'); // pou kòd pwofesè a
     const studentRoomInputField = document.getElementById('studentRoomCode'); // pou elèv
     const nameInput = document.getElementById('fullName');
     const roleSelect = document.getElementById('roleSelect');
@@ -58,14 +58,14 @@ document.addEventListener('DOMContentLoaded', () => {
         if (roleSelect.value === 'teacher') {
             document.getElementById('room-code-container').style.display = 'block';
             if (studentRoomInputField) studentRoomInputField.parentElement.style.display = 'none';
-            roomInput.value = generateRoomCode(); // mete kòd otomatikman
+            roomInput.value = generateRoomCode();
         } else {
             document.getElementById('room-code-container').style.display = 'none';
             if (studentRoomInputField) studentRoomInputField.parentElement.style.display = 'block';
         }
     });
 
-    // inisyalizasyon lè paj chaje
+    // Inisyalizasyon lè paj la chaje
     if (roleSelect.value === 'teacher') {
         document.getElementById('room-code-container').style.display = 'block';
         if (studentRoomInputField) studentRoomInputField.parentElement.style.display = 'none';
@@ -78,9 +78,7 @@ document.addEventListener('DOMContentLoaded', () => {
     joinBtn.addEventListener('click', async () => {
         const name = nameInput.value.trim();
         role = roleSelect.value;
-
-        if (role === 'teacher') room = roomInput.value.trim();
-        else room = studentRoomInputField.value.trim();
+        room = (role === 'teacher') ? roomInput.value.trim() : studentRoomInputField.value.trim();
 
         if (!room || !name) {
             alert('Veuillez remplir tous les champs.');
@@ -117,7 +115,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }, 3500);
     });
-
+});
 
     
 
