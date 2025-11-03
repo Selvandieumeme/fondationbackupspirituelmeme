@@ -117,6 +117,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }, 3500);
     });
+    });
 
 
 
