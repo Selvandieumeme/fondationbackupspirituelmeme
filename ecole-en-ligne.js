@@ -8,7 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Elements HTML
     // ====================================================
     const joinBtn = document.getElementById('joinBtn');
-    const roomInput = document.getElementById('roomCode'); // pou pwofesè
+    const roomInput = document.getElementById('generatedRoomCode'); // chanje pou matche ak HTML
     const studentRoomInputField = document.getElementById('studentRoomCode'); // pou elèv
     const nameInput = document.getElementById('fullName');
     const roleSelect = document.getElementById('roleSelect');
@@ -58,14 +58,14 @@ document.addEventListener('DOMContentLoaded', () => {
         if (roleSelect.value === 'teacher') {
             document.getElementById('room-code-container').style.display = 'block';
             if (studentRoomInputField) studentRoomInputField.parentElement.style.display = 'none';
-            roomInput.value = generateRoomCode();
+            roomInput.value = generateRoomCode(); // mete kòd otomatikman
         } else {
             document.getElementById('room-code-container').style.display = 'none';
             if (studentRoomInputField) studentRoomInputField.parentElement.style.display = 'block';
         }
     });
 
-    // Inisyalizasyon lè paj la chaje
+    // inisyalizasyon lè paj chaje
     if (roleSelect.value === 'teacher') {
         document.getElementById('room-code-container').style.display = 'block';
         if (studentRoomInputField) studentRoomInputField.parentElement.style.display = 'none';
