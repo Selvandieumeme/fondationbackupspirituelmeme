@@ -72,9 +72,37 @@ document.addEventListener('DOMContentLoaded', () => {
         roomInput.value = generateRoomCode();
     }
 
+    
+
+
+// === GESTION REJOINDRE ANCIENNE SALLE ===
+const rejoinRoomContainer = document.getElementById("rejoin-room-container");
+const rejoinRoomInput = document.getElementById("rejoinRoomCode");
+const rejoinRoomBtn = document.getElementById("rejoinRoomBtn");
+
+// Si se teacher, montre tou bouton pou rejwen ansyen salle
+roleSelect.addEventListener("change", () => {
+  if (roleSelect.value === "teacher") {
+    rejoinRoomContainer.style.display = "block";
+  } else {
+    rejoinRoomContainer.style.display = "none";
+  }
+});
+
+// Lè pwofese a vle rejwen ansyen salle
+rejoinRoomBtn.addEventListener("click", () => {
+  const oldCode = rejoinRoomInput.value.trim();
+  if (!oldCode) {
+    alert("Veuillez entrer un ancien code de salle !");
+    return;
+  }
+  document.getElementById("generatedRoomCode").value = oldCode;
+  joinBtn.click(); // sèvi ak menm bouton 'Rejoindre' la
+});
 
     
 
+    
     // ====================================================
     // Rejoindre bouton
     // ====================================================
