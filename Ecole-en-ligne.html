@@ -1,28 +1,28 @@
 <div id="login-panel">
-  <!-- Nom / Prénom -->
   <input type="text" id="fullName" placeholder="Nom / Prénom">
 
-  <!-- Role -->
   <select id="roleSelect">
     <option value="teacher">Teacher</option>
     <option value="student">Student</option>
   </select>
 
-  <!-- Teacher: Code de la salle (généré automatiquement) -->
-  <div id="teacher-code-container" style="display:none;">
-    <label for="codeDeLaSalle">Code de la salle (à partager aux élèves):</label>
-    <input type="text" id="codeDeLaSalle" readonly placeholder="Généré automatiquement">
-
-    <label for="ancienCode">Ancien code de la salle (retour dans la salle):</label>
-    <input type="text" id="ancienCode" placeholder="Entrer ancien code si nécessaire">
+  <!-- Code de la salle -->
+  <div id="room-code-container">
+    <label for="generatedRoomCode">Code de la salle:</label>
+    <input type="text" id="generatedRoomCode" readonly placeholder="Généré automatiquement pour teacher">
   </div>
 
-  <!-- Student: Entrer le code de la salle du prof -->
-  <div id="student-code-container" style="display:none;">
+  <!-- Ansyen code de la salle (Teacher sèlman) -->
+  <div id="old-room-code-container">
+    <label for="oldRoomCode">Ansyen code de la salle:</label>
+    <input type="text" id="oldRoomCode" placeholder="Antre ansyen code si gen yon sèl">
+  </div>
+
+  <!-- Chan pou student antre code -->
+  <div id="student-room-container">
     <label for="studentRoomCode">Entrer le code de la salle:</label>
     <input type="text" id="studentRoomCode" placeholder="Code donné par le prof">
   </div>
 
-  <!-- Bouton Rejoindre -->
   <button id="joinBtn">Rejoindre</button>
 </div>
