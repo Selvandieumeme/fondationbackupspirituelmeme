@@ -18,16 +18,16 @@
   <h1>Connexion à la Salle de Classe</h1>
 
   <!-- Nom / Prénom -->
-  <input type="text" id="fullName" placeholder="Nom / Prénom" required>
+  <input type="text" id="inputFullName" placeholder="Nom / Prénom" required>
 
   <!-- Code de la salle -->
-  <input type="text" id="roomCode" placeholder="Code de la salle" required>
+  <input type="text" id="inputRoomCode" placeholder="Code de la salle" required>
 
   <!-- Ancien code (seulement pour professeur) -->
-  <input type="text" id="oldRoomCode" placeholder="Ancien code (si applicable)" style="display:none;">
+  <input type="text" id="inputOldCode" placeholder="Ancien code (si applicable)" style="display:none;">
 
   <!-- Sélecteur de rôle -->
-  <select id="roleSelect">
+  <select id="selectRole">
     <option value="teacher">Professeur</option>
     <option value="student">Élève</option>
   </select>
@@ -39,19 +39,28 @@
 
 <!-- Script pou montre/kache chan “Ancien code” la -->
 <script>
-  const roleSelect = document.getElementById('roleSelect');
-  const oldRoomCode = document.getElementById('oldRoomCode');
+  document.addEventListener("DOMContentLoaded", () => {
+    const roleSelect = document.getElementById('selectRole');
+    const oldCodeField = document.getElementById('inputOldCode');
 
-  // Afiche oubyen kache chan “Ancien code” selon wòl chwazi a
-  roleSelect.addEventListener('change', () => {
+    // Lè w chwazi "Professeur" → montre chan "Ancien code"
+    // Lè w chwazi "Élève" → kache li
+    roleSelect.addEventListener('change', () => {
+      if (roleSelect.value === 'teacher') {
+        oldCodeField.style.display = 'block';
+      } else {
+        oldCodeField.style.display = 'none';
+      }
+    });
+
+    // Mete eta inisyal selon wòl default la
     if (roleSelect.value === 'teacher') {
-      oldRoomCode.style.display = 'block';
+      oldCodeField.style.display = 'block';
     } else {
-      oldRoomCode.style.display = 'none';
+      oldCodeField.style.display = 'none';
     }
   });
 </script>
-
 
 
 
