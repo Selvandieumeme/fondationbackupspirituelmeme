@@ -2,105 +2,98 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <title>ÉCOLE EN LIGNE FOBAS - UNE AUTRE HAITI AVEC UNE NOUVELLE TECHNOLOGIE</title>
-  <link rel="stylesheet" href="ecole-en-ligne.css">
-  <script src="https://cdn.socket.io/4.6.1/socket.io.min.js"></script>
-
+  <title>Simulation — École en Ligne</title>
   <style>
-    /* === Styles vidéos dynamiques === */
-    #student-videos video {
-      margin: 5px;
-      width: 240px;
-      height: 180px;
-      object-fit: cover;
+    body {
+      font-family: Arial, sans-serif;
+      background: #f3f5f9;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
     }
-    #screen-video {
-      width: 480px;
-      height: 360px;
-      object-fit: cover;
+    #login-panel, #classroom {
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.2);
+      width: 320px;
+      text-align: center;
+    }
+    input, select, button {
+      display: block;
+      margin: 10px auto;
+      width: 90%;
+      padding: 8px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+    #classroom {
       display: none;
+      background: #e8f7ff;
+    }
+    video {
+      width: 100%;
+      border-radius: 10px;
+      margin-top: 10px;
     }
   </style>
 </head>
-
 <body>
 
-  <!-- ============ PANNEAU DE CONNEXION ============ -->
+  <!-- 🔹 PANNEAU DE CONNEXION -->
   <div id="login-panel">
-    <input type="text" id="fullName" placeholder="Nom / Prénom">
-
-    <!-- 🔹 Réintégration du Code de la Classe -->
+    <h2>Connexion à la classe</h2>
     <input type="text" id="roomCode" placeholder="Code de la salle">
-    
-
+    <input type="text" id="fullName" placeholder="Nom / Prénom">
     <select id="roleSelect">
-      <option value="teacher">Teacher</option>
-      <option value="student">Student</option>
+      <option value="teacher">Professeur</option>
+      <option value="student">Élève</option>
     </select>
-
     <button id="joinBtn">Rejoindre</button>
   </div>
 
-  <!-- ============ SALLE DE CLASSE ============ -->
-  <div id="classroom" style="display:none;">
-
-    <!-- SECTION VIDÉOS -->
-    <div id="video-section">
-      <div class="teacher-video-container">
-        <h3>Professeur</h3>
-        <video id="teacher-video" autoplay playsinline muted></video>
-      </div>
-      <div id="student-videos"></div>
-    </div>
-
-    <!-- ÉCRAN PARTAGÉ -->
-    <div id="screen-share-container">
-      <h3>Partage d’écran</h3>
-      <video id="screen-video" autoplay playsinline></video>
-    </div>
-
-    <!-- PANEL LATÉRAL -->
-    <div id="side-panel" style="display:none;">
-      <div id="raised-hands">
-        <h3>Mains Levées</h3>
-        <div id="raised-hands-list"></div>
-      </div>
-
-      <div id="student-list-container">
-        <h3>Élèves Connectés (<span id="student-count">0</span>/100)</h3>
-        <div id="student-list"></div>
-      </div>
-    </div>
-
-    <!-- PANEL CHAT -->
-    <div id="chat-panel" style="display:none;">
-      <div id="chat-messages"></div>
-      <input id="chat-input" placeholder="Écrire un message...">
-      <button id="send-chat">Envoyer</button>
-    </div>
-
-    <!-- PANEL ANNONCES -->
-    <div id="announcement-panel" style="display:none;"></div>
-
-    <!-- CONTRÔLES -->
-    <div id="controls" style="display:none;">
-      <button id="toggle-mic">Mic On/Off</button>
-      <button id="toggle-camera">Camera On/Off</button>
-      <button id="share-screen">Partager écran</button>
-      <button id="main-hand">Main Levée</button>
-      <button id="leave-class">Quitter</button>
-      <button id="rejoin-class">Retourner dans la salle</button>
-      <button id="change-background-btn">Changer Fond</button>
-    </div>
-
-    <!-- DIV FOND / AI -->
-    <div id="background-selector" style="display:none;"></div>
+  <!-- 🔹 SALLE DE CLASSE (SIMULATION) -->
+  <div id="classroom">
+    <h2>Bienvenue dans la salle de classe 🎓</h2>
+    <p id="class-info"></p>
+    <video id="fake-video" autoplay muted loop playsinline src="https://www.w3schools.com/html/mov_bbb.mp4"></video>
+    <button id="leaveBtn">Quitter la classe</button>
   </div>
 
-  <!-- ============ SCRIPTS ============ -->
-  <script src="teacher-controls.js"></script>
-  <script src="student-controls.js"></script>
-  <script src="ecole-en-ligne.js"></script>
+  <script>
+    const joinBtn = document.getElementById('joinBtn');
+    const roomInput = document.getElementById('roomCode');
+    const nameInput = document.getElementById('fullName');
+    const roleSelect = document.getElementById('roleSelect');
+    const loginPanel = document.getElementById('login-panel');
+    const classroom = document.getElementById('classroom');
+    const info = document.getElementById('class-info');
+    const leaveBtn = document.getElementById('leaveBtn');
+
+    joinBtn.addEventListener('click', () => {
+      const room = roomInput.value.trim();
+      const name = nameInput.value.trim();
+      const role = roleSelect.value;
+
+      if (!name || !room) {
+        alert("Veuillez entrer votre nom et le code de la salle !");
+        return;
+      }
+
+      loginPanel.style.display = 'none';
+      classroom.style.display = 'block';
+      info.innerHTML = `<strong>${name}</strong> (${role}) a rejoint la salle <strong>${room}</strong>`;
+    });
+
+    leaveBtn.addEventListener('click', () => {
+      classroom.style.display = 'none';
+      loginPanel.style.display = 'block';
+      roomInput.value = '';
+      nameInput.value = '';
+    });
+  </script>
 
 </body>
 </html>
