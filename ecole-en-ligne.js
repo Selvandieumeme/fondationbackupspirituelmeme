@@ -73,51 +73,53 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ====================================================
-    // Rejoindre bouton
-    // ====================================================
-    joinBtn.addEventListener('click', async () => {
-        const name = nameInput.value.trim();
-        role = roleSelect.value;
+// Rejoindre bouton
+// ====================================================
+joinBtn.addEventListener('click', async () => {
+    const name = nameInput.value.trim();
+    role = roleSelect.value;
 
-        if (role === 'teacher') room = roomInput.value.trim();
-        else room = studentRoomInputField.value.trim();
+    if (role === 'teacher') room = roomInput.value.trim();
+    else room = studentRoomInputField.value.trim();
 
-        if (!room || !name) {
-            alert('Veuillez remplir tous les champs.');
-            return;
-        }
+    if (!room || !name) {
+        alert('Veuillez remplir tous les champs.');
+        return;
+    }
 
-        let responded = false;
+    let responded = false;
 
-        try {
-            socket.timeout(3000).emit('joinRoom', { room, name, role }, async (response) => {
-                responded = true;
-                if (response.status === 'full') {
-                    alert('Salle pleine (max 100 élèves)');
-                    return;
-                }
-
-                loginPanel.style.display = 'none';
-                [classroom, chatPanel, sidePanel, controls, backgroundSelector].forEach(el => el.style.display = 'block');
-
-                await initLocalStream();
-
-                if (role === 'teacher') teacherControlsInit();
-                else studentControlsInit();
-            });
-        } catch (err) {
-            console.warn('Backend non disponible, simulation locale activée.');
-        }
-
-        setTimeout(async () => {
-            if (!responded) {
-                loginPanel.style.display = 'none';
-                [classroom, chatPanel, sidePanel, controls, backgroundSelector].forEach(el => el.style.display = 'block');
-                await initLocalStream();
+    try {
+        socket.timeout(3000).emit('joinRoom', { room, name, role }, async (response) => {
+            responded = true;
+            if (response.status === 'full') {
+                alert('Salle pleine (max 100 élèves)');
+                return;
             }
-        }, 3500);
-    });
-    });
+
+            loginPanel.style.display = 'none';
+            [classroom, chatPanel, sidePanel, controls, backgroundSelector].forEach(el => el.style.display = 'block');
+
+            await initLocalStream();
+
+            // ====== AJISTE ISIT LA ======
+            if (role === 'teacher') teacherControlsInit(socket);
+            else studentControlsInit(socket);
+        });
+    } catch (err) {
+        console.warn('Backend non disponible, simulation locale activée.');
+    }
+
+    setTimeout(async () => {
+        if (!responded) {
+            loginPanel.style.display = 'none';
+            [classroom, chatPanel, sidePanel, controls, backgroundSelector].forEach(el => el.style.display = 'block');
+            // ====== AJISTE ISIT LA TOU ======
+            if (role === 'teacher') teacherControlsInit(socket);
+            else studentControlsInit(socket);
+        }
+    }, 3500);
+});
 
 
 
