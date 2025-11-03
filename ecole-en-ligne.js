@@ -4,132 +4,141 @@
 const socket = io('https://examen-backend-ihlx.onrender.com');
 
 document.addEventListener('DOMContentLoaded', () => {
-    // ====================================================
-    // Elements HTML
-    // ====================================================
-    const joinBtn = document.getElementById('joinBtn');
-    const roomInput = document.getElementById('generatedRoomCode'); // chanje pou matche ak HTML
 
+  // ====================================================
+  // Elements HTML
+  // ====================================================
+  const joinBtn = document.getElementById('joinBtn');
+  const roomInput = document.getElementById('generatedRoomCode'); // pou kòd pwofesè a
+  const rejoinRoomContainer = document.getElementById("rejoin-room-container");
+  const rejoinRoomInput = document.getElementById("rejoinRoomCode");
+  const rejoinRoomBtn = document.getElementById("rejoinRoomBtn");
+  const studentRoomInputField = document.getElementById('studentRoomCode'); // pou elèv
+  const nameInput = document.getElementById('fullName');
+  const roleSelect = document.getElementById('roleSelect');
+  const loginPanel = document.getElementById('login-panel');
+  const classroom = document.getElementById('classroom');
+  const teacherVideoEl = document.getElementById('teacher-video');
+  const studentVideosEl = document.getElementById('student-videos');
+  const studentListEl = document.getElementById('student-list');
+  const studentCountEl = document.getElementById('student-count');
+  const raisedHandsEl = document.getElementById('raised-hands-list');
+  const chatPanel = document.getElementById('chat-panel');
+  const chatMessages = document.getElementById('chat-messages');
+  const chatInput = document.getElementById('chat-input');
+  const sendChatBtn = document.getElementById('send-chat');
+  const sidePanel = document.getElementById('side-panel');
+  const controls = document.getElementById('controls');
+  const backgroundSelector = document.getElementById('background-selector');
+  const shareScreenBtn = document.getElementById('share-screen');
+  const mainHandBtn = document.getElementById('main-hand');
+  const changeBgBtn = document.getElementById('change-background-btn');
+  const leaveBtn = document.getElementById('leave-class');
 
-    const rejoinRoomContainer = document.getElementById("rejoin-room-container");
-    const rejoinRoomInput = document.getElementById("rejoinRoomCode");
-    const rejoinRoomBtn = document.getElementById("rejoinRoomBtn");
-    
-   const studentRoomInputField = document.getElementById('studentRoomCode'); // pou elèv
-    const nameInput = document.getElementById('fullName');
-    const roleSelect = document.getElementById('roleSelect');
-    const loginPanel = document.getElementById('login-panel');
-    const classroom = document.getElementById('classroom');
-    const teacherVideoEl = document.getElementById('teacher-video');
-    const studentVideosEl = document.getElementById('student-videos');
-    const studentListEl = document.getElementById('student-list');
-    const studentCountEl = document.getElementById('student-count');
-    const raisedHandsEl = document.getElementById('raised-hands-list');
-    const chatPanel = document.getElementById('chat-panel');
-    const chatMessages = document.getElementById('chat-messages');
-    const chatInput = document.getElementById('chat-input');
-    const sendChatBtn = document.getElementById('send-chat');
-    const sidePanel = document.getElementById('side-panel');
-    const controls = document.getElementById('controls');
-    const backgroundSelector = document.getElementById('background-selector');
-    const shareScreenBtn = document.getElementById('share-screen');
-    const mainHandBtn = document.getElementById('main-hand');
-    const changeBgBtn = document.getElementById('change-background-btn');
-    const leaveBtn = document.getElementById('leave-class');
+  let role, room, localStream;
+  const peers = {}; // WebRTC peers
 
-    let role, room, localStream;
-    const peers = {}; // WebRTC peers
+  // ====================================================
+  // Fonction pour générer un code aléatoire
+  // ====================================================
+  function generateRoomCode() {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    let code = '';
+    for (let i = 0; i < 6; i++) code += chars.charAt(Math.floor(Math.random() * chars.length));
+    return code;
+  }
 
-    // ====================================================
-// ===== Chanjman wòl pou montre chan kòd pwofesè/elèv =====
-// ====================================================
-roleSelect.addEventListener('change', () => {
-  if (roleSelect.value === 'teacher') {
+  // ====================================================
+  // ===== Chanjman wòl pou montre chan kòd pwofesè/elèv =====
+  // ====================================================
+  roleSelect.addEventListener('change', () => {
+    if (roleSelect.value === 'teacher') {
       document.getElementById('room-code-container').style.display = 'block';
-      if (studentRoomInputField) studentRoomInputField.parentElement.style.display = 'none';
+      studentRoomInputField.parentElement.style.display = 'none';
       roomInput.value = generateRoomCode();
 
       // 👉 Montrer bouton rejoin sal la
-      if (rejoinRoomContainer) rejoinRoomContainer.style.display = 'block';
-  } else {
+      rejoinRoomContainer.style.display = 'block';
+    } else {
       document.getElementById('room-code-container').style.display = 'none';
-      if (studentRoomInputField) studentRoomInputField.parentElement.style.display = 'block';
+      studentRoomInputField.parentElement.style.display = 'block';
 
       // 👉 Kache bouton rejoin sal la
-      if (rejoinRoomContainer) rejoinRoomContainer.style.display = 'none';
-  }
-});
+      rejoinRoomContainer.style.display = 'none';
+    }
+  });
 
-// ====================================================
-// === Initialisation au chargement ===
-// ====================================================
-if (roleSelect.value === 'teacher') {
+  // ====================================================
+  // === Initialisation au chargement ===
+  // ====================================================
+  if (roleSelect.value === 'teacher') {
     document.getElementById('room-code-container').style.display = 'block';
-    if (studentRoomInputField) studentRoomInputField.parentElement.style.display = 'none';
+    studentRoomInputField.parentElement.style.display = 'none';
     roomInput.value = generateRoomCode();
+    rejoinRoomContainer.style.display = 'block';
+  }
 
-    if (rejoinRoomContainer) rejoinRoomContainer.style.display = 'block';
-}
-
-// ====================================================
-// === GESTION REJOINDRE ANCIENNE SALLE ===
-// ====================================================
-if (rejoinRoomBtn) {
+  // ====================================================
+  // === GESTION REJOINDRE ANCIENNE SALLE ===
+  // ====================================================
   rejoinRoomBtn.addEventListener("click", () => {
     const oldCode = rejoinRoomInput.value.trim();
     if (!oldCode) {
       alert("Veuillez entrer un ancien code de salle !");
       return;
     }
+
+    // Ranplase kòd jenere a ak ansyen kòd pwofesè a
     roomInput.value = oldCode;
-    joinBtn.click(); // itilize menm bouton 'Rejoindre' lan
+
+    // Klike otomatikman sou bouton "Rejoindre"
+    joinBtn.click();
   });
-}
 
-// ====================================================
-// === GESTION DU BOUTON REJOINDRE ===
-// ====================================================
-joinBtn.addEventListener('click', async () => {
-  const name = nameInput.value.trim();
-  const role = roleSelect.value;
-  const room = (role === 'teacher') ? roomInput.value.trim() : studentRoomInputField.value.trim();
+  // ====================================================
+  // === GESTION DU BOUTON REJOINDRE ===
+  // ====================================================
+  joinBtn.addEventListener('click', async () => {
+    const name = nameInput.value.trim();
+    const role = roleSelect.value;
+    const room = (role === 'teacher') ? roomInput.value.trim() : studentRoomInputField.value.trim();
 
-  if (!room || !name) {
+    if (!room || !name) {
       alert('Veuillez remplir tous les champs.');
       return;
-  }
+    }
 
-  let responded = false;
+    let responded = false;
 
-  try {
+    try {
       socket.timeout(3000).emit('joinRoom', { room, name, role }, async (response) => {
-          responded = true;
-          if (response.status === 'full') {
-              alert('Salle pleine (max 100 élèves)');
-              return;
-          }
+        responded = true;
+        if (response.status === 'full') {
+          alert('Salle pleine (max 100 élèves)');
+          return;
+        }
 
-          loginPanel.style.display = 'none';
-          [classroom, chatPanel, sidePanel, controls, backgroundSelector].forEach(el => el.style.display = 'block');
+        loginPanel.style.display = 'none';
+        [classroom, chatPanel, sidePanel, controls, backgroundSelector].forEach(el => el.style.display = 'block');
 
-          await initLocalStream();
+        await initLocalStream();
 
-          if (role === 'teacher') teacherControlsInit();
-          else studentControlsInit();
+        if (role === 'teacher') teacherControlsInit();
+        else studentControlsInit();
       });
-  } catch (err) {
+    } catch (err) {
       console.warn('Backend non disponible, simulation locale activée.');
-  }
+    }
 
-  setTimeout(async () => {
+    setTimeout(async () => {
       if (!responded) {
-          loginPanel.style.display = 'none';
-          [classroom, chatPanel, sidePanel, controls, backgroundSelector].forEach(el => el.style.display = 'block');
-          await initLocalStream();
+        loginPanel.style.display = 'none';
+        [classroom, chatPanel, sidePanel, controls, backgroundSelector].forEach(el => el.style.display = 'block');
+        await initLocalStream();
       }
-  }, 3500);
+    }, 3500);
+  });
 });
-
 
 
     
