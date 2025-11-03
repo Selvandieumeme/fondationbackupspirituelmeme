@@ -1,7 +1,11 @@
 // ====================================================
 // Connexion socket
 // ====================================================
-const socket = io('https://examen-backend-ihlx.onrender.com');
+const socket = io('https://examen-backend-ihlx.onrender.com', {
+    reconnection: true,
+    reconnectionAttempts: 5,
+    reconnectionDelay: 1000
+});
 
 document.addEventListener('DOMContentLoaded', () => {
     // ====================================================
@@ -57,6 +61,20 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ====================================================
+    // ===== Netwayaj avan rejoin =====
+    // ====================================================
+    async function cleanupBeforeRejoin() {
+        if (localStream) {
+            localStream.getTracks().forEach(track => track.stop());
+            localStream = null;
+        }
+        for (let peerId in peers) {
+            peers[peerId].close();
+        }
+        Object.keys(peers).forEach(k => delete peers[k]);
+    }
+
+    // ====================================================
     // ===== Chanjman wòl pou montre chan kòd pwofesè/elèv =====
     // ====================================================
     roleSelect.addEventListener('change', () => {
@@ -91,12 +109,14 @@ document.addEventListener('DOMContentLoaded', () => {
     // Bouton pou rejwenn ansyen salle
     // ====================================================
     if (rejoinRoomBtn) {
-        rejoinRoomBtn.addEventListener("click", () => {
+        rejoinRoomBtn.addEventListener("click", async () => {
             const oldCode = rejoinRoomInput.value.trim();
             if (!oldCode) {
                 alert("Veuillez entrer un ancien code de salle !");
                 return;
             }
+
+            await cleanupBeforeRejoin();
 
             // Mete ansyen kòd la nan chan kòd pwofesè a epi rele menm bouton join
             roomInput.value = oldCode;
@@ -120,7 +140,7 @@ document.addEventListener('DOMContentLoaded', () => {
         let responded = false;
 
         try {
-            socket.timeout(3000).emit('joinRoom', { room, name, role }, async (response) => {
+            socket.timeout(5000).emit('joinRoom', { room, name, role }, async (response) => {
                 responded = true;
                 if (response.status === 'full') {
                     alert('Salle pleine (max 100 élèves)');
@@ -145,10 +165,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 [classroom, chatPanel, sidePanel, controls, backgroundSelector].forEach(el => el.style.display = 'block');
                 await initLocalStream();
             }
-        }, 3500);
+        }, 4000);
     });
 });
-    
+
 
 
 
