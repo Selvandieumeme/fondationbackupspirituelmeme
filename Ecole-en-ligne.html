@@ -26,17 +26,36 @@
 <body>
 
   <!-- ============ PANNEAU DE CONNEXION ============ -->
-  <div id="login-panel">
-    <input type="text" id="fullName" placeholder="Nom / Prénom">
+  <!-- ============ PANNEAU DE CONNEXION ============ -->
+<div id="login-panel">
 
-    <select id="roleSelect">
-      <option value="teacher">Teacher</option>
-      <option value="student">Student</option>
-    </select>
+  <!-- Nom / Prénom -->
+  <input type="text" id="fullName" placeholder="Nom / Prénom">
 
+  <!-- Role -->
+  <select id="roleSelect">
+    <option value="teacher">Teacher</option>
+    <option value="student">Student</option>
+  </select>
 
-    <button id="joinBtn">Rejoindre</button>
+  <!-- Code de la salle pou teacher -->
+  <div id="teacher-code-container" style="display:none;">
+    <input type="text" id="generatedRoomCode" placeholder="Code de la salle (automatique)">
   </div>
+
+  <!-- Ancien code de la salle pou teacher -->
+  <div id="teacher-old-code-container" style="display:none;">
+    <input type="text" id="oldRoomCode" placeholder="Ancien code de la salle">
+  </div>
+
+  <!-- Code de la salle pou student -->
+  <div id="student-code-container" style="display:none;">
+    <input type="text" id="studentRoomCode" placeholder="Entrer le code de la salle">
+  </div>
+
+  <!-- Bouton Rejoindre -->
+  <button id="joinBtn">Rejoindre</button>
+</div>
 
 
   <!-- ============ SALLE DE CLASSE ============ -->
