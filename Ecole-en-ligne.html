@@ -8,20 +8,14 @@
 
   <!-- Code de la salle -->
   <div id="room-code-container">
-    <label for="generatedRoomCode">Code de la salle:</label>
-    <input type="text" id="generatedRoomCode" readonly placeholder="Généré automatiquement pour teacher">
+    <label for="roomCode">Code de la salle:</label>
+    <input type="text" id="roomCode" placeholder="Automatique pour Teacher / Entrer par Student">
   </div>
 
   <!-- Ansyen code de la salle (Teacher sèlman) -->
-  <div id="old-room-code-container">
+  <div id="old-room-code-container" style="display:none;">
     <label for="oldRoomCode">Ansyen code de la salle:</label>
-    <input type="text" id="oldRoomCode" placeholder="Antre ansyen code si gen yon sèl">
-  </div>
-
-  <!-- Chan pou student antre code -->
-  <div id="student-room-container">
-    <label for="studentRoomCode">Entrer le code de la salle:</label>
-    <input type="text" id="studentRoomCode" placeholder="Code donné par le prof">
+    <input type="text" id="oldRoomCode" placeholder="Si Teacher ta vle retounen nan menm salle">
   </div>
 
   <button id="joinBtn">Rejoindre</button>
