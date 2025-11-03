@@ -9,24 +9,37 @@
 
 <body>
 
+
+
+  
   <!-- ============ PANNEAU DE CONNEXION ============ -->
-  <div id="login-panel">
-    <input type="text" id="fullName" placeholder="Nom / Prénom">
+<div id="login-panel">
+  <input type="text" id="fullName" placeholder="Nom / Prénom">
 
-    <select id="roleSelect">
-      <option value="teacher">Teacher</option>
-      <option value="student">Student</option>
-    </select>
+  <select id="roleSelect">
+    <option value="teacher">Teacher</option>
+    <option value="student">Student</option>
+  </select>
 
-    <!-- Chan Code de la Salle, tout moun ka antre li -->
-    <div id="room-code-container">
-      <label for="studentRoomCode">Code de la salle :</label>
-      <input type="text" id="studentRoomCode" placeholder="Entrez le code de la salle">
-    </div>
-
-    <button id="joinBtn">Rejoindre</button>
+  <!-- Code de la salle (pou pwofesè ak elèv) -->
+  <div id="room-code-container">
+    <label for="roomCode">Code de la salle:</label>
+    <input type="text" id="roomCode" placeholder="Automatique pour Teacher / Entrer par Student">
   </div>
 
+  <!-- Ansyen code de la salle (Teacher sèlman) -->
+  <div id="old-room-code-container" style="display:none;">
+    <label for="oldRoomCode">Ansyen code de la salle:</label>
+    <input type="text" id="oldRoomCode" placeholder="Si Teacher ta vle retounen nan menm salle">
+  </div>
+
+  <button id="joinBtn">Rejoindre</button>
+</div>
+
+
+
+
+  
   <!-- ============ SALLE DE CLASSE ============ -->
   <div id="classroom" style="display:none;">
     <div id="video-section">
