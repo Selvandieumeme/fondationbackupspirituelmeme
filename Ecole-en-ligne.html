@@ -4,21 +4,21 @@
   <meta charset="UTF-8">
   <title>ÉCOLE EN LIGNE FOBAS</title>
   <link rel="stylesheet" href="ecole-en-ligne.css">
+  <!-- Script Socket.io lib sèlman yon fwa -->
   <script src="https://cdn.socket.io/4.6.1/socket.io.min.js"></script>
 
+  <!-- Script pou konekte Socket.io -->
+  <script>
+    // Mete URL server Socket.io w la
+    const SOCKET_URL = "https://examen-backend-ihlx.onrender.com";
 
- <!-- Script pou konekte Socket.io -->
-<script src="https://cdn.socket.io/4.6.1/socket.io.min.js"></script>
-<script>
-  // Mete URL server Socket.io w la
-  const SOCKET_URL = "https://examen-backend-ihlx.onrender.com";
+    // Kreye koneksyon socket
+    const socket = io(SOCKET_URL, { transports: ["websocket"] });
 
-  // Kreye koneksyon socket
-  const socket = io(SOCKET_URL, { transports: ["websocket"] });
+    // Fè socket disponib globalman pou lòt script yo
+    window.socket = socket;
+  </script>
 
-  // Fè socket disponib globalman pou lòt script yo
-  window.socket = socket;
-</script>
 
 
 
