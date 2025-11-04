@@ -37,31 +37,54 @@
   <button id="rejoinBtn">Retourner dans la salle</button>
 </div>
 
-<!-- Script pou montre/kache chan “Ancien code” la -->
+<!-- Script pou montre/kache chan “Ancien code” + jenere code otomatik -->
 <script>
   document.addEventListener("DOMContentLoaded", () => {
     const roleSelect = document.getElementById('selectRole');
     const oldCodeField = document.getElementById('inputOldCode');
+    const roomCodeField = document.getElementById('inputRoomCode');
 
-    // Lè w chwazi "Professeur" → montre chan "Ancien code"
-    // Lè w chwazi "Élève" → kache li
-    roleSelect.addEventListener('change', () => {
+    // ======================================================
+    // Fonksyon pou jenere kòd inik otomatik (ex: ABCD4821)
+    // ======================================================
+    function generateRoomCode() {
+      const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+      const digits = Math.floor(1000 + Math.random() * 9000); // eg: 4821
+      let randomLetters = '';
+      for (let i = 0; i < 4; i++) {
+        randomLetters += letters.charAt(Math.floor(Math.random() * letters.length));
+      }
+      return randomLetters + digits; // eg: ABCD4821
+    }
+
+    // ======================================================
+    // Fonksyon pou mete kòd otomatikman si se pwofesè
+    // ======================================================
+    function updateRoomCodeField() {
       if (roleSelect.value === 'teacher') {
         oldCodeField.style.display = 'block';
+        // Jenere nouvo kòd otomatikman pou pwofesè
+        const newCode = generateRoomCode();
+        roomCodeField.value = newCode;
+        roomCodeField.readOnly = true; // anpeche pwofese modifye kòd la
       } else {
         oldCodeField.style.display = 'none';
+        roomCodeField.value = ''; // elèv antre kòd pwofesè a manyèlman
+        roomCodeField.readOnly = false;
       }
-    });
-
-    // Mete eta inisyal selon wòl default la
-    if (roleSelect.value === 'teacher') {
-      oldCodeField.style.display = 'block';
-    } else {
-      oldCodeField.style.display = 'none';
     }
+
+    // ======================================================
+    // Lè w chwazi wòl la (Professeur/Élève)
+    // ======================================================
+    roleSelect.addEventListener('change', updateRoomCodeField);
+
+    // ======================================================
+    // Lè paj la fin chaje (eta inisyal)
+    // ======================================================
+    updateRoomCodeField();
   });
 </script>
-
 
 
 
