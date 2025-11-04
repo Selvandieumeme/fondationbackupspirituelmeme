@@ -784,33 +784,58 @@ app.get("/", (req, res) => {
 io.on('connection', (socket) => {
   console.log('🟢 Socket connecté:', socket.id);
 
+  // ====================================================
+  // 🔹 Join Room (professeur ou élève)
+  // ====================================================
   socket.on('join-room', async ({ room, name, role, oldRoom }, ack) => {
     try {
       if (!roomsState[room]) roomsState[room] = { participants: [], teacherSocketId: null };
       const state = roomsState[room];
 
-      if (role === 'teacher') state.teacherSocketId = socket.id;
+      // Si se pwofesè
+      if (role === 'teacher') {
+        state.teacherSocketId = socket.id;
+        state.participants.push({ socketId: socket.id, name, role });
+        socket.join(room);
+        socket.room = room; socket.name = name; socket.role = role;
+        await Participant.create({ socketId: socket.id, name, role, room });
 
+        // ✅ Repons pou UI pwofesè a (ack)
+        if (ack) ack({ status: 'ok', message: 'Professeur connecté' });
+
+        io.to(room).emit('participants', {
+          list: state.participants.map(p => ({ name: p.name, role: p.role, socketId: p.socketId }))
+        });
+        socket.to(room).emit('user-joined', { socketId: socket.id, name, role });
+        console.log(`👨‍🏫 Professeur ${name} connecté dans la salle ${room}`);
+        return;
+      }
+
+      // Si se elèv
       const countStudents = state.participants.filter(p => p.role === 'student').length;
-      if (role === 'student' && countStudents >= MAX_PER_ROOM) {
+      if (countStudents >= MAX_PER_ROOM) {
         if (ack) ack({ status: 'full', message: 'Salle pleine' });
         socket.emit('join-error', { message: 'Salle pleine (max ' + MAX_PER_ROOM + ')' });
         return;
       }
 
-      if (role === 'student' && state.teacherSocketId) {
+      // Si pwofesè a deja la
+      if (state.teacherSocketId) {
         io.to(state.teacherSocketId).emit('request-join', { socketId: socket.id, name, room, role });
         socket.join(`pending:${room}`);
-        if (ack) ack({ status: 'pending' });
+        socket.room = room; socket.name = name; socket.role = role;
+        if (ack) ack({ status: 'pending', message: 'Demande envoyée, en attente d’acceptation...' });
+        console.log(`🎓 Élève ${name} demande à rejoindre ${room}`);
         return;
       }
 
+      // Sinon pwofesè poko la → elèv rantre dirèk
       state.participants.push({ socketId: socket.id, name, role });
       socket.join(room);
       socket.room = room; socket.name = name; socket.role = role;
       await Participant.create({ socketId: socket.id, name, role, room });
+      if (ack) ack({ status: 'ok', message: 'Salle rejointe sans professeur' });
 
-      if (ack) ack({ status: 'ok' });
       io.to(room).emit('participants', {
         list: state.participants.map(p => ({ name: p.name, role: p.role, socketId: p.socketId }))
       });
@@ -822,6 +847,9 @@ io.on('connection', (socket) => {
     }
   });
 
+  // ====================================================
+  // 🔹 Acceptation / Rejet Elèv pa Pwofesè
+  // ====================================================
   socket.on('teacher-accept-join', async ({ pendingSocketId, accept }) => {
     try {
       const room = Object.keys(roomsState).find(r =>
@@ -833,44 +861,85 @@ io.on('connection', (socket) => {
       if (!pendingSocket) return io.to(socket.id).emit('notify', { message: 'Candidat introuvable' });
 
       if (accept) {
-        state.participants.push({ socketId: pendingSocketId, name: pendingSocket.name || 'Etudiant', role: 'student' });
-        pendingSocket.join(room); pendingSocket.room = room;
+        state.participants.push({ socketId: pendingSocketId, name: pendingSocket.name || 'Étudiant', role: 'student' });
+        pendingSocket.join(room);
         pendingSocket.emit('join-accepted', { room });
+        console.log(`✅ Élève accepté dans ${room}`);
+
         io.to(room).emit('participants', {
           list: state.participants.map(p => ({ name: p.name, role: p.role, socketId: p.socketId }))
         });
       } else {
         pendingSocket.emit('join-rejected', { message: 'Rejeté par le professeur' });
+        console.log(`❌ Élève rejeté par le professeur`);
       }
 
     } catch (err) { console.error(err); }
   });
 
-  socket.on('signal', ({ to, sdp, candidate }) => { if (!to) return; io.to(to).emit('signal', { from: socket.id, sdp, candidate }); });
-  socket.on('chat', ({ room, text }) => { if (room) io.to(room).emit('chat', { fromName: socket.name || 'Anonyme', text }); });
-  socket.on('raise-hand', ({ room }) => { if (room) io.to(room).emit('raised-hand', { socketId: socket.id, name: socket.name || 'Anonyme' }); });
-  socket.on('teacher-mute-all', ({ room }) => { if (room) io.to(room).emit('mute-all'); });
+  // ====================================================
+  // 🔹 Autres Events (WebRTC, Chat, Gestion Salle)
+  // ====================================================
+  socket.on('signal', ({ to, sdp, candidate }) => {
+    if (!to) return;
+    io.to(to).emit('signal', { from: socket.id, sdp, candidate });
+  });
+
+  socket.on('chat', ({ room, text }) => {
+    if (room)
+      io.to(room).emit('chat', { fromName: socket.name || 'Anonyme', text });
+  });
+
+  socket.on('raise-hand', ({ room }) => {
+    if (room)
+      io.to(room).emit('raised-hand', { socketId: socket.id, name: socket.name || 'Anonyme' });
+  });
+
+  socket.on('teacher-mute-all', ({ room }) => {
+    if (room) io.to(room).emit('mute-all');
+  });
+
   socket.on('teacher-kick', ({ room, socketId }) => {
     io.to(socketId).emit('kicked', { reason: 'Expulsé par professeur' });
     if (roomsState[room]) {
       roomsState[room].participants = roomsState[room].participants.filter(p => p.socketId !== socketId);
-      io.to(room).emit('participants', { list: roomsState[room].participants.map(p => ({ name: p.name, role: p.role, socketId: p.socketId })) });
+      io.to(room).emit('participants', {
+        list: roomsState[room].participants.map(p => ({
+          name: p.name,
+          role: p.role,
+          socketId: p.socketId
+        }))
+      });
     }
   });
+
   socket.on('leave-room', ({ room }) => {
     if (room && roomsState[room]) {
       roomsState[room].participants = roomsState[room].participants.filter(p => p.socketId !== socket.id);
       socket.leave(room);
-      io.to(room).emit('participants', { list: roomsState[room].participants.map(p => ({ name: p.name, role: p.role, socketId: p.socketId })) });
+      io.to(room).emit('participants', {
+        list: roomsState[room].participants.map(p => ({
+          name: p.name,
+          role: p.role,
+          socketId: p.socketId
+        }))
+      });
       socket.to(room).emit('user-left', { socketId: socket.id });
     }
   });
+
   socket.on('disconnect', async () => {
     try {
       for (const r of Object.keys(roomsState)) {
         const state = roomsState[r];
         state.participants = state.participants.filter(p => p.socketId !== socket.id);
-        io.to(r).emit('participants', { list: state.participants.map(p => ({ name: p.name, role: p.role, socketId: p.socketId })) });
+        io.to(r).emit('participants', {
+          list: state.participants.map(p => ({
+            name: p.name,
+            role: p.role,
+            socketId: p.socketId
+          }))
+        });
         socket.to(r).emit('user-left', { socketId: socket.id });
         if (state.teacherSocketId === socket.id) state.teacherSocketId = null;
       }
