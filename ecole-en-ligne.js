@@ -238,4 +238,56 @@ document.addEventListener('DOMContentLoaded', () => {
     alert('Votre accès a été refusé par le professeur.');
   });
 
+
+
+// ====================================================
+// 🔹 MODAL DEMANDE D'ACCÈS ÉLÈVE (Interface professeur)
+// ====================================================
+
+// Créer la structure du modal (invisible par défaut)
+const accessModal = document.createElement('div');
+accessModal.id = 'student-access-modal';
+accessModal.style.cssText = `
+  display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(0,0,0,0.6); z-index: 9999; justify-content: center; align-items: center;
+`;
+
+accessModal.innerHTML = `
+  <div style="
+    background: #fff; padding: 25px; border-radius: 12px; width: 320px; text-align: center;
+    box-shadow: 0 0 20px rgba(0,0,0,0.2); font-family: 'Poppins', sans-serif;">
+    <h3 id="studentNameTitle" style="margin-bottom: 20px;">Nouvel élève</h3>
+    <button id="acceptStudentBtn" style="background:#28a745;color:white;border:none;padding:10px 15px;margin-right:10px;border-radius:8px;cursor:pointer;">Accepter</button>
+    <button id="rejectStudentBtn" style="background:#dc3545;color:white;border:none;padding:10px 15px;border-radius:8px;cursor:pointer;">Refuser</button>
+  </div>
+`;
+document.body.appendChild(accessModal);
+
+const studentNameTitle = document.getElementById('studentNameTitle');
+const acceptStudentBtn = document.getElementById('acceptStudentBtn');
+const rejectStudentBtn = document.getElementById('rejectStudentBtn');
+
+let pendingStudent = null; // sauvegarde temporaire du nom + id
+
+// Quand le backend envoie une demande d'accès d'un élève
+socket.on('studentJoinRequest', ({ name, id }) => {
+  if(role !== 'teacher') return;
+  pendingStudent = { name, id };
+  studentNameTitle.textContent = `${name} demande à rejoindre la salle`;
+  accessModal.style.display = 'flex';
+});
+
+// Boutons de décision du professeur
+acceptStudentBtn.onclick = () => {
+  if (pendingStudent) socket.emit('acceptStudent', { id: pendingStudent.id });
+  accessModal.style.display = 'none';
+  pendingStudent = null;
+};
+
+rejectStudentBtn.onclick = () => {
+  if (pendingStudent) socket.emit('rejectStudent', { id: pendingStudent.id });
+  accessModal.style.display = 'none';
+  pendingStudent = null;
+};
+  
 });
