@@ -4,7 +4,8 @@
   <meta charset="UTF-8">
   <title>ÉCOLE EN LIGNE FOBAS</title>
   <link rel="stylesheet" href="ecole-en-ligne.css">
-  <!-- Script Socket.io lib sèlman yon fwa -->
+
+  <!-- Socket.io lib sèlman yon fwa -->
   <script src="https://cdn.socket.io/4.6.1/socket.io.min.js"></script>
 
   <!-- Script pou konekte Socket.io -->
@@ -19,196 +20,143 @@
     window.socket = socket;
   </script>
 
+  <!-- Scripts pwojè -->
+  <script src="teacher-controls.js"></script>
+  <script src="student-controls.js"></script>
+  <script src="ecole-en-ligne.js"></script>
+</head>
+<body>
 
-
-
-  
-
-  <!-- =================== LOGIN PANEL =================== -->
+<!-- =================== LOGIN PANEL =================== -->
 <div id="login-panel">
   <h1>Connexion à la Salle de Classe</h1>
 
-  <!-- Nom / Prénom -->
   <input type="text" id="inputFullName" placeholder="Nom / Prénom" required>
-
-  <!-- Code de la salle -->
   <input type="text" id="inputRoomCode" placeholder="Code de la salle" required>
 
-  <!-- Bouton pou regenere code (selon wòl) -->
   <button id="regenCodeBtn" style="display:none; margin-top:6px; background-color:#0078d7; color:white; border:none; padding:6px 10px; border-radius:5px; cursor:pointer;">
     🔄 Générer un nouveau code
   </button>
 
-  <!-- Ancien code (seulement pour professeur) -->
   <input type="text" id="inputOldCode" placeholder="Ancien code (si applicable)" style="display:none;">
-
-  <!-- Sélecteur de rôle -->
   <select id="selectRole">
     <option value="teacher">Professeur</option>
     <option value="student">Élève</option>
   </select>
 
-  <!-- Boutons d’action -->
   <button id="joinBtn">Rejoindre</button>
   <button id="rejoinBtn">Retourner dans la salle</button>
 </div>
 
-<!-- Script pou montre/kache chan “Ancien code” + jenere code otomatik -->
-<script>
-  document.addEventListener("DOMContentLoaded", () => {
-    const roleSelect = document.getElementById('selectRole');
-    const oldCodeField = document.getElementById('inputOldCode');
-    const roomCodeField = document.getElementById('inputRoomCode');
-    const regenBtn = document.getElementById('regenCodeBtn');
-
-    // ======================================================
-    // Fonksyon pou jenere kòd inik otomatik (ex: ABCD4821)
-    // ======================================================
-    function generateRoomCode() {
-      const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-      const digits = Math.floor(1000 + Math.random() * 9000); // eg: 4821
-      let randomLetters = '';
-      for (let i = 0; i < 4; i++) {
-        randomLetters += letters.charAt(Math.floor(Math.random() * letters.length));
-      }
-      return randomLetters + digits; // eg: ABCD4821
-    }
-
-    // ======================================================
-    // Fonksyon pou mete kòd otomatikman si se pwofesè
-    // ======================================================
-    function updateRoomCodeField() {
-      if (roleSelect.value === 'teacher') {
-        oldCodeField.style.display = 'block';
-        regenBtn.style.display = 'inline-block';
-        // Jenere nouvo kòd otomatikman pou pwofesè
-        const newCode = generateRoomCode();
-        roomCodeField.value = newCode;
-        roomCodeField.readOnly = true;
-      } else {
-        oldCodeField.style.display = 'none';
-        regenBtn.style.display = 'none';
-        roomCodeField.value = '';
-        roomCodeField.readOnly = false;
-      }
-    }
-
-    // ======================================================
-    // Bouton "🔄 Générer un nouveau code" (pwofesè sèlman)
-    // ======================================================
-    regenBtn.addEventListener('click', () => {
-      if (roleSelect.value === 'teacher') {
-        const newCode = generateRoomCode();
-        roomCodeField.value = newCode;
-        // Animasyon vizyèl senp pou montre ke kòd la chanje
-        roomCodeField.style.transition = 'background-color 0.4s';
-        roomCodeField.style.backgroundColor = '#d1ffd6';
-        setTimeout(() => roomCodeField.style.backgroundColor = '', 600);
-      }
-    });
-
-    // ======================================================
-    // Lè w chwazi wòl la (Professeur/Élève)
-    // ======================================================
-    roleSelect.addEventListener('change', updateRoomCodeField);
-
-    // ======================================================
-    // Lè paj la fin chaje (eta inisyal)
-    // ======================================================
-    updateRoomCodeField();
-  });
-</script>
-
-
-
-
-
-
-  
-  <!-- =================== SALLE DE CLASSE =================== -->
-  <div id="classroom" style="display:none;">
-
-    <!-- VIDEO SECTION -->
-    <div id="video-section">
-      <div id="teacher-camera" class="camera-panel">
-        <h3>Professeur</h3>
-        <video id="teacher-video" autoplay playsinline muted></video>
-      </div>
-      <div id="students-camera" class="camera-panel">
-        <h3>Élèves</h3>
-        <div id="student-videos"></div>
-      </div>
-    </div>
-
-    <!-- SCREEN SHARE -->
-    <div id="screen-share-container">
-      <h3>Partage d’écran</h3>
-      <video id="screen-video" autoplay playsinline></video>
-      <button id="share-screen">Partager écran</button>
-    </div>
-
-    <!-- RIGHT PANEL -->
-    <div id="side-panel">
-      <div id="raised-hands">
-        <h3>Mains Levées</h3>
-        <div id="raised-hands-list"></div>
-      </div>
-      <div id="student-list-container">
-        <h3>Participants (<span id="student-count">0</span>/100)</h3>
-        <div id="student-list"></div>
-      </div>
-    </div>
-
-    <!-- CHAT PANEL -->
-    <div id="chat-panel">
-      <h3>Chat</h3>
-      <div id="chat-messages"></div>
-      <input id="chat-input" placeholder="Écrire un message...">
-      <button id="send-chat">Envoyer</button>
-    </div>
-
-    <!-- CONTROLS -->
-    <div id="controls">
-      <button id="toggle-mic">Mic On/Off</button>
-      <button id="toggle-camera">Caméra On/Off</button>
-      <button id="main-hand">Lever la main</button>
-      <button id="mute-all">Mute All</button>
-      <button id="record-btn">Record</button>
-      <button id="download-btn">Télécharger</button>
-      <button id="change-background-btn">Changer Fond</button>
-      <button id="leave-class">Quitter</button>
-    </div>
-
-    <!-- BACKGROUND AI PANEL -->
-    <div id="background-selector" style="display:none;">
-      <h3>Choisir un fond d’écran</h3>
-      <div id="background-options">
-        <!-- Miniatures AI / Custom upload -->
-      </div>
-      <input type="file" id="upload-background" accept="image/*">
-    </div>
-
-    <!-- ANNOUNCEMENT PANEL -->
-    <div id="announcement-panel" style="display:none;"></div>
-
-  </div>
-
-  <!-- =================== SCRIPTS =================== -->
-  <script src="teacher-controls.js"></script>
-  <script src="student-controls.js"></script>
-  <script src="ecole-en-ligne.js"></script>
-
-
-
-  <!-- Script Socket.io -->
-<script src="https://cdn.socket.io/4.6.1/socket.io.min.js"></script>
-
+<!-- Script pou montre/kache chan “Ancien code” + jenere kòd otomatik -->
 <script>
 document.addEventListener("DOMContentLoaded", () => {
-  const socket = io("https://examen-backend-ihlx.onrender.com", {
-    transports: ["websocket"],
+  const roleSelect = document.getElementById('selectRole');
+  const oldCodeField = document.getElementById('inputOldCode');
+  const roomCodeField = document.getElementById('inputRoomCode');
+  const regenBtn = document.getElementById('regenCodeBtn');
+
+  function generateRoomCode() {
+    const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    const digits = Math.floor(1000 + Math.random() * 9000);
+    let randomLetters = '';
+    for (let i = 0; i < 4; i++) {
+      randomLetters += letters.charAt(Math.floor(Math.random() * letters.length));
+    }
+    return randomLetters + digits;
+  }
+
+  function updateRoomCodeField() {
+    if (roleSelect.value === 'teacher') {
+      oldCodeField.style.display = 'block';
+      regenBtn.style.display = 'inline-block';
+      const newCode = generateRoomCode();
+      roomCodeField.value = newCode;
+      roomCodeField.readOnly = true;
+    } else {
+      oldCodeField.style.display = 'none';
+      regenBtn.style.display = 'none';
+      roomCodeField.value = '';
+      roomCodeField.readOnly = false;
+    }
+  }
+
+  regenBtn.addEventListener('click', () => {
+    if (roleSelect.value === 'teacher') {
+      const newCode = generateRoomCode();
+      roomCodeField.value = newCode;
+      roomCodeField.style.transition = 'background-color 0.4s';
+      roomCodeField.style.backgroundColor = '#d1ffd6';
+      setTimeout(() => roomCodeField.style.backgroundColor = '', 600);
+    }
   });
 
+  roleSelect.addEventListener('change', updateRoomCodeField);
+  updateRoomCodeField();
+});
+</script>
+
+<!-- =================== SALLE DE CLASSE =================== -->
+<div id="classroom" style="display:none;">
+  <div id="video-section">
+    <div id="teacher-camera" class="camera-panel">
+      <h3>Professeur</h3>
+      <video id="teacher-video" autoplay playsinline muted></video>
+    </div>
+    <div id="students-camera" class="camera-panel">
+      <h3>Élèves</h3>
+      <div id="student-videos"></div>
+    </div>
+  </div>
+
+  <div id="screen-share-container">
+    <h3>Partage d’écran</h3>
+    <video id="screen-video" autoplay playsinline></video>
+    <button id="share-screen">Partager écran</button>
+  </div>
+
+  <div id="side-panel">
+    <div id="raised-hands">
+      <h3>Mains Levées</h3>
+      <div id="raised-hands-list"></div>
+    </div>
+    <div id="student-list-container">
+      <h3>Participants (<span id="student-count">0</span>/100)</h3>
+      <div id="student-list"></div>
+    </div>
+  </div>
+
+  <div id="chat-panel">
+    <h3>Chat</h3>
+    <div id="chat-messages"></div>
+    <input id="chat-input" placeholder="Écrire un message...">
+    <button id="send-chat">Envoyer</button>
+  </div>
+
+  <div id="controls">
+    <button id="toggle-mic">Mic On/Off</button>
+    <button id="toggle-camera">Caméra On/Off</button>
+    <button id="main-hand">Lever la main</button>
+    <button id="mute-all">Mute All</button>
+    <button id="record-btn">Record</button>
+    <button id="download-btn">Télécharger</button>
+    <button id="change-background-btn">Changer Fond</button>
+    <button id="leave-class">Quitter</button>
+  </div>
+
+  <div id="background-selector" style="display:none;">
+    <h3>Choisir un fond d’écran</h3>
+    <div id="background-options"></div>
+    <input type="file" id="upload-background" accept="image/*">
+  </div>
+
+  <div id="announcement-panel" style="display:none;"></div>
+</div>
+
+<!-- =================== SCRIPT LOGIN & JOIN =================== -->
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const socket = window.socket;
   const fullName = document.getElementById("inputFullName");
   const roomCode = document.getElementById("inputRoomCode");
   const oldCode = document.getElementById("inputOldCode");
@@ -221,30 +169,23 @@ document.addEventListener("DOMContentLoaded", () => {
     const role = roleSelect.value;
     const oldRoom = oldCode.value.trim();
 
-    // Vérifikasyon si tout chan obligatwa yo ranpli
     if (!name || !room) {
       alert("Veuillez remplir tous les champs requis (Nom / Prénom et Code de la salle).");
       return;
     }
 
-    // Envoi done koneksyon bay serveur la
-    socket.emit("join-room", { name, room, role, oldRoom });
-
-    // Message loading
     joinBtn.disabled = true;
     joinBtn.textContent = "Connexion en cours...";
 
-    // Lè serveu a konfime koneksyon an
+    socket.emit("join-room", { name, room, role, oldRoom });
+
     socket.once("joined-room", (data) => {
       console.log("Connecté avec succès à la salle :", data);
       alert(`Bienvenue ${name} dans la salle ${room} !`);
-
-      // Kache panel login la epi montre entèfas salle de classe a
       document.getElementById("login-panel").style.display = "none";
       ouvrirSalleDeClasse(name, role, room);
     });
 
-    // Si gen erè
     socket.once("join-error", (err) => {
       alert("Erreur : " + err.message);
       joinBtn.disabled = false;
@@ -252,7 +193,6 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
-  // Fonksyon pou louvri entèfas salle de classe la
   function ouvrirSalleDeClasse(name, role, room) {
     const classroom = document.createElement("div");
     classroom.id = "classroom";
@@ -266,7 +206,6 @@ document.addEventListener("DOMContentLoaded", () => {
     `;
     document.body.appendChild(classroom);
 
-    // Bouton pou kite sal la
     document.getElementById("leaveBtn").addEventListener("click", () => {
       socket.emit("leave-room", { name, room });
       document.body.removeChild(classroom);
