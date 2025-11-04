@@ -289,5 +289,83 @@ rejectStudentBtn.onclick = () => {
   accessModal.style.display = 'none';
   pendingStudent = null;
 };
-  
+
+
+
+
+
+  // ====================================================
+// 🎓 Gestion dynamique de la liste des élèves connectés
+// ====================================================
+
+// Conteneur de la liste des élèves (panel à droite)
+const studentPanel = document.getElementById('student-list');
+
+// Fonction pour créer un élément visuel d'élève
+function createStudentListItem(name, status = 'online') {
+  const studentItem = document.createElement('div');
+  studentItem.classList.add('student-item');
+  studentItem.innerHTML = `
+    <div class="student-entry">
+      <span class="student-name">${name}</span>
+      <span class="student-status ${status === 'online' ? 'online' : 'offline'}"></span>
+    </div>
+  `;
+  return studentItem;
+}
+
+// Mettre à jour l'état (online/offline) d'un élève existant
+function updateStudentStatus(name, status) {
+  const items = studentPanel.querySelectorAll('.student-name');
+  items.forEach(item => {
+    if (item.textContent === name) {
+      const statusDot = item.parentElement.querySelector('.student-status');
+      statusDot.className = `student-status ${status}`;
+    }
+  });
+}
+
+// Ajouter élève dans la liste quand accepté
+socket.on('studentAccepted', ({ name }) => {
+  const existing = [...studentPanel.querySelectorAll('.student-name')]
+    .some(item => item.textContent === name);
+
+  if (!existing) {
+    const newStudent = createStudentListItem(name, 'online');
+    studentPanel.appendChild(newStudent);
+  }
+
+  // Activer scroll automatique si >5 élèves
+  if (studentPanel.children.length > 5) {
+    studentPanel.style.overflowY = 'auto';
+    studentPanel.style.maxHeight = '200px';
+  }
+});
+
+// Mettre élève offline si déconnecté
+socket.on('studentDisconnected', ({ name }) => {
+  updateStudentStatus(name, 'offline');
+});
+
+// ====================================================
+// 🔗 Connexion entre bouton “Accepter” et affichage élève
+// ====================================================
+acceptStudentBtn.onclick = () => {
+  if (pendingStudent) {
+    socket.emit('acceptStudent', { id: pendingStudent.id, name: pendingStudent.name });
+
+    // Ajout direct à la liste (affichage instantané)
+    const newStudent = createStudentListItem(pendingStudent.name, 'online');
+    studentPanel.appendChild(newStudent);
+
+    if (studentPanel.children.length > 5) {
+      studentPanel.style.overflowY = 'auto';
+      studentPanel.style.maxHeight = '200px';
+    }
+  }
+
+  accessModal.style.display = 'none';
+  pendingStudent = null;
+};
+
 });
