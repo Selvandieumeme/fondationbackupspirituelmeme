@@ -380,26 +380,7 @@ socket.on('studentDisconnected', ({ name }) => {
   updateStudentStatus(name, 'offline');
 });
 
-// ====================================================
-// 🔗 Connexion entre bouton “Accepter” et affichage élève
-// ====================================================
-acceptStudentBtn.onclick = () => {
-  if (pendingStudent) {
-    socket.emit('acceptStudent', { id: pendingStudent.id, name: pendingStudent.name });
 
-    // Ajout direct à la liste (affichage instantané)
-    const newStudent = createStudentListItem(pendingStudent.name, 'online');
-    studentPanel.appendChild(newStudent);
-
-    if (studentPanel.children.length > 5) {
-      studentPanel.style.overflowY = 'auto';
-      studentPanel.style.maxHeight = '200px';
-    }
-  }
-
-  accessModal.style.display = 'none';
-  pendingStudent = null;
-};
 
 
 
