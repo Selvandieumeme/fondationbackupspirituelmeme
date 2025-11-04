@@ -103,11 +103,33 @@ document.addEventListener("DOMContentLoaded", () => {
       <h3>Professeur</h3>
       <video id="teacher-video" autoplay playsinline muted></video>
     </div>
+
+<div id="teacher-controls">
+  <button id="toggle-mic">🎤 Micro</button>
+  <button id="toggle-camera">🎥 Caméra</button>
+  <button id="share-screen">🖥️ Partager l’écran</button>
+  <button id="main-hand">✋ Main levée</button>
+  <button id="change-background-btn">🌄 Changer fond</button>
+</div>
+
+<div id="background-selector" style="display:none;"></div>
     <div id="students-camera" class="camera-panel">
       <h3>Élèves</h3>
       <div id="student-videos"></div>
     </div>
   </div>
+  
+  <div id="student-controls">
+    <button id="toggle-mic">🎤 Micro</button>
+    <button id="toggle-camera">🎥 Caméra</button>
+    <button id="share-screen">🖥️ Partager écran</button>
+    <button id="main-hand">✋ Lever la main</button>
+    <button id="change-background-btn">🌄 Changer fond</button>
+  </div>
+
+
+
+  
 
   <div id="screen-share-container">
     <h3>Partage d’écran</h3>
