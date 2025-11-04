@@ -14,7 +14,7 @@
   
 
   <!-- =================== LOGIN PANEL =================== -->
- <div id="login-panel">
+<div id="login-panel">
   <h1>Connexion à la Salle de Classe</h1>
 
   <!-- Nom / Prénom -->
@@ -22,6 +22,11 @@
 
   <!-- Code de la salle -->
   <input type="text" id="inputRoomCode" placeholder="Code de la salle" required>
+
+  <!-- Bouton pou regenere code (selon wòl) -->
+  <button id="regenCodeBtn" style="display:none; margin-top:6px; background-color:#0078d7; color:white; border:none; padding:6px 10px; border-radius:5px; cursor:pointer;">
+    🔄 Générer un nouveau code
+  </button>
 
   <!-- Ancien code (seulement pour professeur) -->
   <input type="text" id="inputOldCode" placeholder="Ancien code (si applicable)" style="display:none;">
@@ -43,6 +48,7 @@
     const roleSelect = document.getElementById('selectRole');
     const oldCodeField = document.getElementById('inputOldCode');
     const roomCodeField = document.getElementById('inputRoomCode');
+    const regenBtn = document.getElementById('regenCodeBtn');
 
     // ======================================================
     // Fonksyon pou jenere kòd inik otomatik (ex: ABCD4821)
@@ -63,16 +69,32 @@
     function updateRoomCodeField() {
       if (roleSelect.value === 'teacher') {
         oldCodeField.style.display = 'block';
+        regenBtn.style.display = 'inline-block';
         // Jenere nouvo kòd otomatikman pou pwofesè
         const newCode = generateRoomCode();
         roomCodeField.value = newCode;
-        roomCodeField.readOnly = true; // anpeche pwofese modifye kòd la
+        roomCodeField.readOnly = true;
       } else {
         oldCodeField.style.display = 'none';
-        roomCodeField.value = ''; // elèv antre kòd pwofesè a manyèlman
+        regenBtn.style.display = 'none';
+        roomCodeField.value = '';
         roomCodeField.readOnly = false;
       }
     }
+
+    // ======================================================
+    // Bouton "🔄 Générer un nouveau code" (pwofesè sèlman)
+    // ======================================================
+    regenBtn.addEventListener('click', () => {
+      if (roleSelect.value === 'teacher') {
+        const newCode = generateRoomCode();
+        roomCodeField.value = newCode;
+        // Animasyon vizyèl senp pou montre ke kòd la chanje
+        roomCodeField.style.transition = 'background-color 0.4s';
+        roomCodeField.style.backgroundColor = '#d1ffd6';
+        setTimeout(() => roomCodeField.style.backgroundColor = '', 600);
+      }
+    });
 
     // ======================================================
     // Lè w chwazi wòl la (Professeur/Élève)
@@ -85,7 +107,6 @@
     updateRoomCodeField();
   });
 </script>
-
 
 
 
