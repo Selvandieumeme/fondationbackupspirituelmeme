@@ -283,6 +283,43 @@ h1 {
 
 
 
+/* === Liste des élèves connectés (panel droit) === */
+.student-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #f9f9f9;
+  border-radius: 8px;
+  padding: 8px 10px;
+  margin-bottom: 6px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 14px;
+  color: #333;
+  transition: background 0.25s ease;
+}
+
+.student-item:hover {
+  background: #eef5ff;
+}
+
+.student-status {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.student-status.online {
+  background-color: #27ae60; /* Vert */
+  box-shadow: 0 0 6px #27ae60;
+}
+
+.student-status.offline {
+  background-color: #e74c3c; /* Wouj */
+  box-shadow: 0 0 6px #e74c3c;
+}
+
+
 
 
 
