@@ -325,3 +325,40 @@ h1 {
 
 
 
+/* === Notification Visuelle Elèv ki mande aksè === */
+.student-access-notif {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background: rgba(0, 123, 255, 0.9);
+  color: #fff;
+  font-size: 16px;
+  padding: 10px 18px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+  animation: fadeInOut 5s ease-in-out;
+  z-index: 9999;
+}
+@keyframes fadeInOut {
+  0% { opacity: 0; transform: translateY(-20px); }
+  10%, 90% { opacity: 1; transform: translateY(0); }
+  100% { opacity: 0; transform: translateY(-20px); }
+}
+
+/* === Dot Online / Offline === */
+.dot {
+  height: 10px;
+  width: 10px;
+  border-radius: 50%;
+  display: inline-block;
+  margin-right: 8px;
+}
+.dot.online { background-color: #28a745; }
+.dot.offline { background-color: #dc3545; }
+
+.student-online {
+  list-style: none;
+  padding: 4px 0;
+  font-size: 15px;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
