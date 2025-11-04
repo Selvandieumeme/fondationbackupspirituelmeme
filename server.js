@@ -740,6 +740,147 @@ app.get('/Chatprive.html', (req, res) => {
 
 
 
+// ============================
+// MongoDB connection
+// ============================
+mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
+  .then(() => console.log('✅ MongoDB konekte avèk siksè!'))
+  .catch(err => console.error('MongoDB erreur:', err));
+
+// ============================
+// Schemas
+// ============================
+const Schema = mongoose.Schema;
+const RoomSchema = new Schema({
+  code: { type: String, index: true, required: true },
+  createdAt: { type: Date, default: Date.now },
+  metadata: { type: Schema.Types.Mixed }
+});
+const Room = mongoose.model('Room', RoomSchema);
+
+const ParticipantSchema = new Schema({
+  socketId: String,
+  name: String,
+  role: String,
+  room: String,
+  joinedAt: { type: Date, default: Date.now }
+});
+const Participant = mongoose.model('Participant', ParticipantSchema);
+
+const roomsState = {};
+const MAX_PER_ROOM = 100;
+
+// ============================
+// Serve HTML/JS/CSS dirèkteman
+// ============================
+app.use(express.static(__dirname)); // tout fichye repo a
+
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, "Ecole-en-ligne.html"));
+});
+
+// ============================
+// Socket.IO
+// ============================
+io.on('connection', (socket) => {
+  console.log('🟢 Socket connecté:', socket.id);
+
+  socket.on('join-room', async ({ room, name, role, oldRoom }, ack) => {
+    try {
+      if (!roomsState[room]) roomsState[room] = { participants: [], teacherSocketId: null };
+      const state = roomsState[room];
+
+      if (role === 'teacher') state.teacherSocketId = socket.id;
+
+      const countStudents = state.participants.filter(p => p.role === 'student').length;
+      if (role === 'student' && countStudents >= MAX_PER_ROOM) {
+        if (ack) ack({ status: 'full', message: 'Salle pleine' });
+        socket.emit('join-error', { message: 'Salle pleine (max ' + MAX_PER_ROOM + ')' });
+        return;
+      }
+
+      if (role === 'student' && state.teacherSocketId) {
+        io.to(state.teacherSocketId).emit('request-join', { socketId: socket.id, name, room, role });
+        socket.join(`pending:${room}`);
+        if (ack) ack({ status: 'pending' });
+        return;
+      }
+
+      state.participants.push({ socketId: socket.id, name, role });
+      socket.join(room);
+      socket.room = room; socket.name = name; socket.role = role;
+      await Participant.create({ socketId: socket.id, name, role, room });
+
+      if (ack) ack({ status: 'ok' });
+      io.to(room).emit('participants', {
+        list: state.participants.map(p => ({ name: p.name, role: p.role, socketId: p.socketId }))
+      });
+      socket.to(room).emit('user-joined', { socketId: socket.id, name, role });
+
+    } catch (err) {
+      console.error(err);
+      if (ack) ack({ status: 'error', message: err.message });
+    }
+  });
+
+  socket.on('teacher-accept-join', async ({ pendingSocketId, accept }) => {
+    try {
+      const room = Object.keys(roomsState).find(r =>
+        roomsState[r].participants.some(p => p.socketId === socket.id) ||
+        roomsState[r].teacherSocketId === socket.id
+      );
+      const state = roomsState[room];
+      const pendingSocket = io.sockets.sockets.get(pendingSocketId);
+      if (!pendingSocket) return io.to(socket.id).emit('notify', { message: 'Candidat introuvable' });
+
+      if (accept) {
+        state.participants.push({ socketId: pendingSocketId, name: pendingSocket.name || 'Etudiant', role: 'student' });
+        pendingSocket.join(room); pendingSocket.room = room;
+        pendingSocket.emit('join-accepted', { room });
+        io.to(room).emit('participants', {
+          list: state.participants.map(p => ({ name: p.name, role: p.role, socketId: p.socketId }))
+        });
+      } else {
+        pendingSocket.emit('join-rejected', { message: 'Rejeté par le professeur' });
+      }
+
+    } catch (err) { console.error(err); }
+  });
+
+  socket.on('signal', ({ to, sdp, candidate }) => { if (!to) return; io.to(to).emit('signal', { from: socket.id, sdp, candidate }); });
+  socket.on('chat', ({ room, text }) => { if (room) io.to(room).emit('chat', { fromName: socket.name || 'Anonyme', text }); });
+  socket.on('raise-hand', ({ room }) => { if (room) io.to(room).emit('raised-hand', { socketId: socket.id, name: socket.name || 'Anonyme' }); });
+  socket.on('teacher-mute-all', ({ room }) => { if (room) io.to(room).emit('mute-all'); });
+  socket.on('teacher-kick', ({ room, socketId }) => {
+    io.to(socketId).emit('kicked', { reason: 'Expulsé par professeur' });
+    if (roomsState[room]) {
+      roomsState[room].participants = roomsState[room].participants.filter(p => p.socketId !== socketId);
+      io.to(room).emit('participants', { list: roomsState[room].participants.map(p => ({ name: p.name, role: p.role, socketId: p.socketId })) });
+    }
+  });
+
+  socket.on('leave-room', ({ room }) => {
+    if (room && roomsState[room]) {
+      roomsState[room].participants = roomsState[room].participants.filter(p => p.socketId !== socket.id);
+      socket.leave(room);
+      io.to(room).emit('participants', { list: roomsState[room].participants.map(p => ({ name: p.name, role: p.role, socketId: p.socketId })) });
+      socket.to(room).emit('user-left', { socketId: socket.id });
+    }
+  });
+
+  socket.on('disconnect', async () => {
+    try {
+      for (const r of Object.keys(roomsState)) {
+        const state = roomsState[r];
+        state.participants = state.participants.filter(p => p.socketId !== socket.id);
+        io.to(r).emit('participants', { list: state.participants.map(p => ({ name: p.name, role: p.role, socketId: p.socketId })) });
+        socket.to(r).emit('user-left', { socketId: socket.id });
+        if (state.teacherSocketId === socket.id) state.teacherSocketId = null;
+      }
+      await Participant.deleteOne({ socketId: socket.id });
+    } catch (err) { console.error(err); }
+  });
+});
 
 
 
