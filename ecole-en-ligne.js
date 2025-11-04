@@ -368,4 +368,66 @@ acceptStudentBtn.onclick = () => {
   pendingStudent = null;
 };
 
+
+
+
+
+
+
+  // ====================================================
+// 🔔 Notification & Sound System for New Student Requests
+// ====================================================
+
+// --- 1. Kreye son notifikasyon (beep le yon elèv mande aksè)
+const accessSound = new Audio('https://cdn.pixabay.com/download/audio/2022/03/15/audio_7b0e82adab.mp3?filename=notification-3-126517.mp3');
+
+// --- 2. Fonksyon pou montre notifikasyon vizyèl bèl
+function showAccessNotification(studentName) {
+  let notif = document.createElement('div');
+  notif.className = 'student-access-notif';
+  notif.innerHTML = `🎓 Nouvo elèv mande aksè: <strong>${studentName}</strong>`;
+  document.body.appendChild(notif);
+  setTimeout(() => notif.remove(), 5000);
+}
+
+// --- 3. Koute evènman socket pou nouvo elèv kap mande antre
+socket.on('student-request-access', (studentName) => {
+  accessSound.play().catch(() => {}); // jwe ti son an
+  showAccessNotification(studentName); // montre notifikasyon vizyèl la
+});
+
+// --- 4. Konekte bouton "Accepter" ak lis elèv ki konekte nan panel dwat la
+function acceptStudent(studentName, socketId) {
+  // Emit si pwofesè a aksepte elèv la
+  socket.emit('teacher-accept-student', { name: studentName, id: socketId });
+
+  // Ajoute elèv la nan lis "Online Students" nan 2èm seksyon panel dwat la
+  const studentListSection = document.querySelector('#student-list');
+  if (studentListSection) {
+    const li = document.createElement('li');
+    li.className = 'student-online';
+    li.innerHTML = `
+      <span class="dot online"></span> ${studentName}
+    `;
+    studentListSection.appendChild(li);
+  }
+
+  // Si gen plis pase 5 elèv, aktive scroll otomatik
+  if (studentListSection && studentListSection.children.length > 5) {
+    studentListSection.style.overflowY = 'auto';
+    studentListSection.style.maxHeight = '180px';
+  }
+}
+
+// --- 5. Koute repons bouton “Accepter” yo
+document.addEventListener('click', (e) => {
+  if (e.target.classList.contains('accept-btn')) {
+    const studentName = e.target.dataset.name;
+    const studentId = e.target.dataset.id;
+    acceptStudent(studentName, studentId);
+    e.target.disabled = true;
+    e.target.textContent = "✅ Accepté";
+  }
+});
+  
 });
