@@ -1,7 +1,7 @@
 // ====================================================
 // Connexion socket
 // ====================================================
-const socket = io('https://examen-backend-ihlx.onrender.com');
+const socket = io(SOCKET_URL);
 
 document.addEventListener('DOMContentLoaded', () => {
   // ====================================================
