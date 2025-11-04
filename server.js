@@ -774,13 +774,12 @@ const MAX_PER_ROOM = 100;
 // Serve HTML/JS/CSS dirèkteman
 // ============================
 app.use(express.static(__dirname)); // tout fichye repo a
-
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "Ecole-en-ligne.html"));
 });
 
 // ============================
-// Socket.IO
+// Socket.IO Events
 // ============================
 io.on('connection', (socket) => {
   console.log('🟢 Socket connecté:', socket.id);
@@ -858,7 +857,6 @@ io.on('connection', (socket) => {
       io.to(room).emit('participants', { list: roomsState[room].participants.map(p => ({ name: p.name, role: p.role, socketId: p.socketId })) });
     }
   });
-
   socket.on('leave-room', ({ room }) => {
     if (room && roomsState[room]) {
       roomsState[room].participants = roomsState[room].participants.filter(p => p.socketId !== socket.id);
@@ -867,7 +865,6 @@ io.on('connection', (socket) => {
       socket.to(room).emit('user-left', { socketId: socket.id });
     }
   });
-
   socket.on('disconnect', async () => {
     try {
       for (const r of Object.keys(roomsState)) {
