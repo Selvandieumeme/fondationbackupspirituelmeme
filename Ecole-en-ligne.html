@@ -7,14 +7,18 @@
   <script src="https://cdn.socket.io/4.6.1/socket.io.min.js"></script>
 
 
-  <!-- 🔹 INTEGRATION SOCKET_URL RENDER -->
-  <script>
-    // Render pral ranplase %SOCKET_URL% ak valè SOCKET_URL nan Environment Variables
-    const SOCKET_URL = "%SOCKET_URL%";
-  </script>
-</head>
-<body>
+ <!-- Script pou konekte Socket.io -->
+<script src="https://cdn.socket.io/4.6.1/socket.io.min.js"></script>
+<script>
+  // Mete URL server Socket.io w la
+  const SOCKET_URL = "https://examen-backend-ihlx.onrender.com";
 
+  // Kreye koneksyon socket
+  const socket = io(SOCKET_URL, { transports: ["websocket"] });
+
+  // Fè socket disponib globalman pou lòt script yo
+  window.socket = socket;
+</script>
 
 
 
