@@ -43,6 +43,12 @@ document.addEventListener('DOMContentLoaded', () => {
   // ====================================================
   roleSelect.addEventListener('change', () => {
     oldRoomCodeInput.style.display = (roleSelect.value === 'teacher') ? 'block' : 'none';
+    // Jenere nouvo code otomatikman pou pwofese chak fwa li chwazi wòl teacher
+    if(roleSelect.value === 'teacher') {
+      roomCodeInput.value = generateRoomCode();
+    } else {
+      roomCodeInput.value = '';
+    }
   });
 
   // ====================================================
@@ -86,7 +92,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // ====================================================
-  // Bouton "Rejoindre"
+  // Bouton "Rejoindre" avec accept/reject pour élève
   // ====================================================
   joinBtn.addEventListener('click', async () => {
     const name = fullNameInput.value.trim();
@@ -99,26 +105,30 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
+    // ====================================================
+    // Définir la salle
+    // ====================================================
     if(role === 'teacher') {
-      // Professeur: utiliser ancien code si fourni, sinon générer nouveau
-      room = oldRoom ? oldRoom : generateRoomCode();
+      room = oldRoom ? oldRoom : enteredRoom;
     } else {
-      // Élève: utiliser code du professeur
       room = enteredRoom;
     }
 
     try {
-      socket.timeout(5000).emit('joinRoom', { room, name, role }, async (response) => {
-        if(response && response.status === 'full') {
-          alert("Salle pleine (max 100 élèves).");
-          return;
-        }
-        await initLocalStream();
-        openClassroomUI();
-
-        if(role === 'teacher') teacherControlsInit(socket, localStream);
-        else studentControlsInit(socket, localStream);
-      });
+      if(role === 'teacher') {
+        // Teacher entre dirèkteman
+        socket.timeout(5000).emit('joinRoom', { room, name, role }, async () => {
+          await initLocalStream();
+          openClassroomUI();
+          teacherControlsInit(socket, localStream);
+        });
+      } else {
+        // Élève: demande accès
+        socket.timeout(5000).emit('requestJoinRoom', { room, name, role }, async (response) => {
+          await initLocalStream();
+          openClassroomUI(); // ap tann pwofese a aksepte
+        });
+      }
     } catch(err) {
       console.warn("Backend non disponible. Mode local activé.");
       await initLocalStream();
@@ -146,7 +156,7 @@ document.addEventListener('DOMContentLoaded', () => {
     room = oldRoom;
 
     try {
-      socket.timeout(5000).emit('joinRoom', { room, name, role }, async (response) => {
+      socket.timeout(5000).emit('joinRoom', { room, name, role }, async () => {
         await initLocalStream();
         openClassroomUI();
         teacherControlsInit(socket, localStream);
@@ -200,6 +210,32 @@ document.addEventListener('DOMContentLoaded', () => {
     a.download = `${fullNameInput.value}-cours.webm`;
     a.click();
     URL.revokeObjectURL(url);
+  });
+
+  // ====================================================
+  // Reception d'une demande d'élève pour professeur
+  // ====================================================
+  socket.on('studentJoinRequest', ({ name, id }) => {
+    if(role !== 'teacher') return;
+    const accept = confirm(`Accepter ${name} dans la salle ?`);
+    if(accept) socket.emit('acceptStudent', { id });
+    else socket.emit('rejectStudent', { id });
+  });
+
+  // ====================================================
+  // Reception d'une acceptation du professeur
+  // ====================================================
+  socket.on('studentAccepted', async () => {
+    await initLocalStream();
+    openClassroomUI();
+    studentControlsInit(socket, localStream);
+  });
+
+  // ====================================================
+  // Reception d'un refus du professeur
+  // ====================================================
+  socket.on('studentRejected', () => {
+    alert('Votre accès a été refusé par le professeur.');
   });
 
 });
