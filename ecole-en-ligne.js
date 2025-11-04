@@ -91,50 +91,91 @@ document.addEventListener('DOMContentLoaded', () => {
     backgroundSelector.style.display = 'block';
   }
 
+
+  
+ // ====================================================
+// Bouton "Rejoindre" avec gestion réelle de connexion
+// ====================================================
+joinBtn.addEventListener('click', async () => {
+  const name = fullNameInput.value.trim();
+  const enteredRoom = roomCodeInput.value.trim();
+  const oldRoom = oldRoomCodeInput.value.trim();
+  role = roleSelect.value;
+
+  if (!name || !enteredRoom) {
+    alert("Veuillez remplir tous les champs obligatoires.");
+    return;
+  }
+
+  // ✅ Bloque bouton pou evite double klik
+  joinBtn.disabled = true;
+  const originalText = joinBtn.textContent;
+  joinBtn.textContent = "Connexion en cours...";
+
   // ====================================================
-  // Bouton "Rejoindre" avec accept/reject pour élève
+  // Définir la salle selon rôle
   // ====================================================
-  joinBtn.addEventListener('click', async () => {
-    const name = fullNameInput.value.trim();
-    const enteredRoom = roomCodeInput.value.trim();
-    const oldRoom = oldRoomCodeInput.value.trim();
-    role = roleSelect.value;
+  if (role === 'teacher') {
+    room = oldRoom ? oldRoom : enteredRoom;
+  } else {
+    room = enteredRoom;
+  }
 
-    if(!name || !enteredRoom) {
-      alert("Veuillez remplir tous les champs obligatoires.");
-      return;
-    }
+  try {
+    if (role === 'teacher') {
+      // 👩‍🏫 Professeur: antre dirèkteman
+      socket.timeout(5000).emit('joinRoom', { room, name, role }, async (response) => {
+        joinBtn.disabled = false;
+        joinBtn.textContent = originalText;
 
-    // ====================================================
-    // Définir la salle
-    // ====================================================
-    if(role === 'teacher') {
-      room = oldRoom ? oldRoom : enteredRoom;
-    } else {
-      room = enteredRoom;
-    }
+        if (!response) {
+          alert("Aucune réponse du serveur.");
+          return;
+        }
 
-    try {
-      if(role === 'teacher') {
-        // Teacher entre dirèkteman
-        socket.timeout(5000).emit('joinRoom', { room, name, role }, async () => {
+        if (response.status === "ok") {
           await initLocalStream();
           openClassroomUI();
           teacherControlsInit(socket, localStream);
-        });
-      } else {
-        // Élève: demande accès
-        socket.timeout(5000).emit('requestJoinRoom', { room, name, role }, async (response) => {
+        } else {
+          alert("Erreur: " + (response.message || "Connexion échouée"));
+        }
+      });
+    } else {
+      // 🎓 Élève: demande d’accès, pwofesè dwe aksepte
+      socket.timeout(5000).emit('requestJoinRoom', { room, name, role }, async (response) => {
+        joinBtn.disabled = false;
+        joinBtn.textContent = originalText;
+
+        if (!response) {
+          alert("Aucune réponse du serveur.");
+          return;
+        }
+
+        if (response.status === "pending") {
+          alert("En attente d'approbation du professeur...");
+        } else if (response.status === "ok") {
           await initLocalStream();
-          openClassroomUI(); // ap tann pwofese a aksepte
-        });
-      }
-    } catch(err) {
-      console.warn("Backend non disponible. Mode local activé.");
-      await initLocalStream();
-      openClassroomUI();
+          openClassroomUI();
+          studentControlsInit(socket, localStream);
+        } else {
+          alert("Erreur: " + (response.message || "Connexion échouée"));
+        }
+      });
     }
-  });
+  } catch (err) {
+    console.warn("Backend non disponible. Mode local activé.");
+    joinBtn.disabled = false;
+    joinBtn.textContent = originalText;
+    await initLocalStream();
+    openClassroomUI();
+  }
+});
+
+
+
+
+  
 
   // ====================================================
   // Bouton "Retourner dans la salle" (professeurs uniquement)
@@ -212,15 +253,7 @@ document.addEventListener('DOMContentLoaded', () => {
     URL.revokeObjectURL(url);
   });
 
-  // ====================================================
-  // Reception d'une demande d'élève pour professeur
-  // ====================================================
-  socket.on('studentJoinRequest', ({ name, id }) => {
-    if(role !== 'teacher') return;
-    const accept = confirm(`Accepter ${name} dans la salle ?`);
-    if(accept) socket.emit('acceptStudent', { id });
-    else socket.emit('rejectStudent', { id });
-  });
+  
 
   // ====================================================
   // Reception d'une acceptation du professeur
