@@ -749,7 +749,7 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 
-const io = new Server(server, { cors: { origin: '*', methods: ['GET','POST'] } });
+
 
 // MongoDB connection
 mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
