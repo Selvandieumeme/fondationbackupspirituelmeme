@@ -748,7 +748,7 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage });
 
-const server = http.createServer(app);
+
 const io = new Server(server, { cors: { origin: '*', methods: ['GET','POST'] } });
 
 // MongoDB connection
