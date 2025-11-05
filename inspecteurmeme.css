@@ -218,23 +218,7 @@ h1, h2, h3, h4, h5, h6 {
 
 
 
-.meme-inspecteur {
-  position: absolute;
-  width: 120px;
-  height: 120px;
-  transition: top 0.5s, left 0.5s, right 0.5s, bottom 0.5s;
-  z-index: 9999;
-}
 
 
 
 
-
-.meme-inspecteur {
-  transition: all 0.5s ease-in-out;
-}
-
-.face-front, .face-happy, .face-angry, .face-sleep {
-  width: 150px;
-  height: 150px;
-}
