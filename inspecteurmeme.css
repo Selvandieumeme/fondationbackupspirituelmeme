@@ -1,0 +1,217 @@
+/* === STYLE GLOBAL === */
+body {
+  font-family: 'Poppins', Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: #f5f5f5;
+  color: #333;
+  overflow-x: hidden;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  margin: 0;
+}
+
+/* === CONTAINER PRINCIPAL === */
+.container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  width: 100vw;
+}
+
+/* === HEADER === */
+.header {
+  background-color: #004aad;
+  color: #fff;
+  padding: 1rem;
+  text-align: center;
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+/* === SALLE DE CLASSE === */
+.classroom {
+  flex: 1;
+  display: flex;
+  position: relative;
+  background-color: #e6f0ff;
+  overflow: hidden;
+}
+
+/* === PANEL ELÈV / CHAT === */
+.students-panel {
+  width: 250px;
+  background-color: #ffffff;
+  border-right: 1px solid #ccc;
+  display: flex;
+  flex-direction: column;
+  padding: 0.5rem;
+}
+
+.students-panel h3 {
+  margin-bottom: 0.5rem;
+  font-size: 1.1rem;
+}
+
+.student {
+  padding: 0.5rem;
+  margin-bottom: 0.3rem;
+  border-radius: 5px;
+  background-color: #f0f0f0;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.student:hover {
+  background-color: #d0e0ff;
+}
+
+/* === ENTÈFAS CHAT === */
+.chat-container {
+  position: absolute;
+  bottom: 10px;
+  left: 260px;
+  right: 10px;
+  max-height: 200px;
+  display: flex;
+  flex-direction: column;
+}
+
+.chat-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0.5rem;
+  background-color: #fff;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+}
+
+.chat-input {
+  display: flex;
+  margin-top: 0.5rem;
+}
+
+.chat-input input {
+  flex: 1;
+  padding: 0.5rem;
+  border-radius: 5px 0 0 5px;
+  border: 1px solid #ccc;
+  outline: none;
+}
+
+.chat-input button {
+  padding: 0.5rem 1rem;
+  border: none;
+  background-color: #004aad;
+  color: #fff;
+  border-radius: 0 5px 5px 0;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.chat-input button:hover {
+  background-color: #003080;
+}
+
+/* === ZÒN MEME INSPECTEUR === */
+.meme-inspecteur {
+  position: absolute;
+  width: 80px;
+  height: 120px;
+  bottom: 10px;
+  right: 50%;
+  transform: translateX(50%);
+  background-color: #ffd700;
+  border-radius: 50% / 10%;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  font-weight: bold;
+  color: #000;
+  cursor: pointer;
+  transition: all 0.5s ease;
+}
+
+/* Animasyon pou mache / leve / kouche */
+.meme-walking {
+  animation: walk 4s infinite alternate;
+}
+
+.meme-lying {
+  transform: rotate(90deg);
+}
+
+.meme-smile::after {
+  content: '😊';
+  display: block;
+  font-size: 1.5rem;
+  margin-bottom: 5px;
+}
+
+.meme-angry::after {
+  content: '😠';
+  display: block;
+  font-size: 1.5rem;
+  margin-bottom: 5px;
+}
+
+@keyframes walk {
+  0% { bottom: 10px; right: 10%; }
+  25% { bottom: 20px; right: 25%; }
+  50% { bottom: 10px; right: 50%; }
+  75% { bottom: 20px; right: 75%; }
+  100% { bottom: 10px; right: 90%; }
+}
+
+/* === BOUTON POU ENTÈAKSYON === */
+.button-group {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+}
+
+.button-group button {
+  margin-left: 0.5rem;
+  padding: 0.5rem 1rem;
+  border-radius: 5px;
+  border: none;
+  background-color: #004aad;
+  color: #fff;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.button-group button:hover {
+  background-color: #003080;
+}
+
+
+
+
+
+
+/* MEME Animasyon ak Reaksyon */
+#meme {
+  position: absolute;
+  width: 120px;
+  height: 120px;
+  transition: all 0.5s ease-in-out;
+}
+
+#meme.face-happy {
+  background-image: url('assets/meme_happy.png');
+}
+
+#meme.face-angry {
+  background-image: url('assets/meme_angry.png');
+}
+
+#meme.face-sleep {
+  background-image: url('assets/meme_sleep.png');
+  transform: rotate(90deg); /* sou do */
+}
+
+#meme.face-front {
+  background-image: url('assets/meme_front.png'); /* sou fas */
+}
