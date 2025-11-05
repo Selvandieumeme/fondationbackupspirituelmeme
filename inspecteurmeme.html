@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="ht">
+<head>
+<meta charset="UTF-8">
+<title>Inspecteur MEME</title>
+<script src="/socket.io/socket.io.js"></script>
+</head>
+<body>
+<h1>🕵️‍♂️ Inspecteur MEME</h1>
+<input id="message" placeholder="Ekri mesaj ou...">
+<button id="send">Voye</button>
+<div id="response"></div>
+
+<script>
+const socket = io();
+const messageInput = document.getElementById('message');
+const responseDiv = document.getElementById('response');
+
+document.getElementById('send').addEventListener('click', () => {
+  const text = messageInput.value;
+  socket.emit('user-message', { text, lang: 'ht' });
+});
+
+socket.on('meme-response', (answer) => {
+  responseDiv.innerHTML += `<p>${answer.ht}</p>`;
+});
+</script>
+</body>
+</html>
