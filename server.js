@@ -997,6 +997,78 @@ async function loadMEMEDataFromDB() {
 }
 loadMEMEDataFromDB();
 
+// ============================
+// Seed done inisyal si koleksyon an vid
+// ============================
+async function seedInitialMEMEData() {
+  try {
+    const count = await MemeQA.countDocuments();
+    if (count === 0) {
+      const initialData = [
+        {
+          question: {
+            ht: "Kisa ou ye?",
+            fr: "Qui es-tu?",
+            en: "Who are you?",
+            es: "¿Quién eres tú?"
+          },
+          answer: {
+            ht: "Mwen se Inspecteur MEME, asistan entelijan lekòl an liy lan!",
+            fr: "Je suis Inspecteur MEME, l’assistant intelligent de l’école en ligne !",
+            en: "I’m Inspector MEME, the intelligent assistant of the online school!",
+            es: "¡Soy el Inspector MEME, el asistente inteligente de la escuela en línea!",
+            tone: "happy"
+          },
+          lang: ["ht", "fr", "en", "es"],
+          tags: ["entwodiksyon", "identite"]
+        },
+        {
+          question: {
+            ht: "Ki misyon ou?",
+            fr: "Quelle est ta mission?",
+            en: "What is your mission?",
+            es: "¿Cuál es tu misión?"
+          },
+          answer: {
+            ht: "Misyon mwen se ede elèv ak pwofesè konprann pi byen, aprann pi vit, epi rete konekte.",
+            fr: "Ma mission est d’aider les élèves et professeurs à mieux comprendre, apprendre plus vite et rester connectés.",
+            en: "My mission is to help students and teachers understand better, learn faster, and stay connected.",
+            es: "Mi misión es ayudar a los estudiantes y profesores a comprender mejor, aprender más rápido y mantenerse conectados.",
+            tone: "calm"
+          },
+          lang: ["ht", "fr", "en", "es"],
+          tags: ["misyon", "aide", "ecole"]
+        },
+        {
+          question: {
+            ht: "Kijan ou fonksyone?",
+            fr: "Comment tu fonctionnes?",
+            en: "How do you work?",
+            es: "¿Cómo funcionas?"
+          },
+          answer: {
+            ht: "Mwen sèvi ak done ak entèlijans atifisyèl pou reponn kesyon w yo ak ede w nan aprantisaj ou.",
+            fr: "J’utilise des données et de l’intelligence artificielle pour répondre à vos questions et vous aider dans votre apprentissage.",
+            en: "I use data and artificial intelligence to answer your questions and assist your learning.",
+            es: "Utilizo datos e inteligencia artificial para responder a tus preguntas y ayudarte a aprender.",
+            tone: "informative"
+          },
+          lang: ["ht", "fr", "en", "es"],
+          tags: ["fonctionnement", "ia", "aide"]
+        }
+      ];
+
+      await MemeQA.insertMany(initialData);
+      console.log("🌱 MEME QA done inisyal yo te ajoute nan MongoDB!");
+    } else {
+      console.log(`ℹ️ ${count} dokiman deja egziste nan koleksyon MemeQA.`);
+    }
+  } catch (err) {
+    console.error('❌ Erè pandan enjeksyon done inisyal:', err);
+  }
+}
+seedInitialMEMEData();
+
 // Rechaje done otomatik chak 10 minit
 setInterval(loadMEMEDataFromDB, 10 * 60 * 1000);
 
@@ -1044,7 +1116,6 @@ app.use(express.static(__dirname));
 // ============================
 // SOCKET.IO - Kominikasyon an tan reyèl
 // ============================
-
 io.on('connection', (socket) => {
   console.log('🔵 Nouvo itilizatè konekte:', socket.id);
 
