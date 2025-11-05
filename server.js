@@ -963,15 +963,19 @@ io.on('connection', (socket) => {
 
 
 
+// ============================
+// MongoDB koneksyon
+// ============================
+mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
+  .then(() => console.log('✅ MongoDB konekte avèk siksè!'))
+  .catch(err => console.error('❌ Erè MongoDB:', err));
 
 // ============================
-// MongoDB
+// Schéma & Modèl MEME QA
 // ============================
-mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true });
-
 const MemeSchema = new mongoose.Schema({
-  question: String,
-  answer: Object,
+  question: Object,    // { ht:"", fr:"", en:"", es:"" }
+  answer: Object,      // { ht:"", fr:"", en:"", es:"", tone:"happy" }
   lang: [String],
   tags: [String]
 });
@@ -980,50 +984,117 @@ const MemeQA = mongoose.model('MemeQA', MemeSchema);
 
 let MEME_QA_DATA = [];
 
+// ============================
+// Chaje done depi MongoDB
+// ============================
 async function loadMEMEDataFromDB() {
-  MEME_QA_DATA = await MemeQA.find({});
-  console.log('✅ MEME QA data chaje depi MongoDB!');
+  try {
+    MEME_QA_DATA = await MemeQA.find({});
+    console.log(`✅ MEME QA data (${MEME_QA_DATA.length}) chaje depi MongoDB!`);
+  } catch (err) {
+    console.error('❌ Erè pandan chajman MEME QA data:', err);
+  }
 }
 loadMEMEDataFromDB();
 
+// Refè chajman chak 10 minit pou rete ajou
+setInterval(loadMEMEDataFromDB, 10 * 60 * 1000);
+
 // ============================
-// Sèvi HTML prensipal la
+// Endpoint API — pou front-end
+// ============================
+app.get('/api/memeqa', async (req, res) => {
+  try {
+    const data = await MemeQA.find({});
+    res.json(data);
+  } catch (err) {
+    console.error('❌ Erè /api/memeqa:', err);
+    res.status(500).json({ error: 'Erè chajman done MEME QA' });
+  }
+});
+
+// ============================
+// Serve fichye HTML prensipal la
 // ============================
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'inspecteurmeme.html'));
 });
 
+// Serve fichye estatik (CSS, JS, elatriye)
+app.use(express.static(__dirname));
+
 // ============================
-// Socket.io
+// SOCKET.IO - Kominikasyon an tan reyèl
 // ============================
 const server = http.createServer(app);
-const io = new Server(server);
+const io = new Server(server, {
+  cors: { origin: "*" }
+});
 
 io.on('connection', (socket) => {
-  console.log('Nouvo itilizatè konekte:', socket.id);
+  console.log('🔵 Nouvo itilizatè konekte:', socket.id);
 
+  // Lè yon elèv oswa pwofesè rantre
+  socket.on('joinClassroom', (userData) => {
+    socket.join('classroom');
+    console.log(`👥 ${userData.user} (${userData.lang}) rantre nan klas la.`);
+    io.to('classroom').emit('broadcast-message', { from: 'SYSTEM', text: `${userData.user} te rantre nan klas la.` });
+  });
+
+  // Lè yon elèv kite
+  socket.on('leaveClassroom', (userData) => {
+    socket.leave('classroom');
+    console.log(`🚪 ${userData.userId || socket.id} kite klas la.`);
+  });
+
+  // Mute tout lòt moun eksepte yon elèv espesifik
+  socket.on('muteAllExcept', (studentId) => {
+    console.log(`🔇 Mute tout moun eksepte ${studentId}`);
+    io.to('classroom').emit('broadcast-message', { from: 'SYSTEM', text: `Tout moun silans, ${studentId} ap pale.` });
+  });
+
+  // Resevwa mesaj itilizatè
   socket.on('user-message', (data) => {
-    const { text, lang } = data;
+    const { text, lang, user, userId } = data;
+    console.log(`💬 ${user} (${lang}): ${text}`);
 
-    // Chèche repons ki koresponn nan DB
-    let responseObj = MEME_QA_DATA.find(item =>
-      item.question[lang]?.toLowerCase() === text.toLowerCase()
-    );
+    // Fè broadcast pou tout moun
+    io.to('classroom').emit('broadcast-message', { from: user, text });
 
-    if (!responseObj) {
-      responseObj = {
-        answer: {
-          ht: 'Mwen pa genyen repons sa ankò, men mwen ka aprann li.',
-          fr: 'Je n’ai pas encore cette réponse, mais je peux l’apprendre.',
-          en: 'I don’t have this answer yet, but I can learn it.',
-          es: 'No tengo esta respuesta todavía, pero puedo aprenderla.'
+    // Rechèch repons nan MEME_QA_DATA
+    let found = null;
+    for (const item of MEME_QA_DATA) {
+      const qset = item.question || {};
+      for (const key of Object.keys(qset)) {
+        if (qset[key]?.toLowerCase() === text.toLowerCase()) {
+          found = item;
+          break;
         }
-      };
+      }
+      if (found) break;
     }
 
-    socket.emit('meme-response', responseObj.answer);
+    // Si pa jwenn, mete repons default
+    let response = found?.answer || {
+      ht: 'Mwen pa genyen repons sa ankò, men mwen ka aprann li.',
+      fr: 'Je n’ai pas encore cette réponse, mais je peux l’apprendre.',
+      en: 'I don’t have this answer yet, but I can learn it.',
+      es: 'No tengo esta respuesta todavía, pero puedo aprenderla.',
+      tone: 'front'
+    };
+
+    // Voye repons la tounen bay moun ki te voye mesaj la
+    socket.emit('meme-response', response);
+
+    // Epi broadcast tou pou tout moun tande MEME
+    io.to('classroom').emit('meme-response', response);
+  });
+
+  socket.on('disconnect', () => {
+    console.log('🔴 Itilizatè dekonekte:', socket.id);
   });
 });
+
 
 
 // 🚀 DEMARRE SERVEUR
