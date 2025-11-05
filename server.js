@@ -950,6 +950,82 @@ io.on('connection', (socket) => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// ============================
+// MongoDB
+// ============================
+mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true });
+
+const MemeSchema = new mongoose.Schema({
+  question: String,
+  answer: Object,
+  lang: [String],
+  tags: [String]
+});
+
+const MemeQA = mongoose.model('MemeQA', MemeSchema);
+
+let MEME_QA_DATA = [];
+
+async function loadMEMEDataFromDB() {
+  MEME_QA_DATA = await MemeQA.find({});
+  console.log('✅ MEME QA data chaje depi MongoDB!');
+}
+loadMEMEDataFromDB();
+
+// ============================
+// Sèvi HTML prensipal la
+// ============================
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'inspecteurmeme.html'));
+});
+
+// ============================
+// Socket.io
+// ============================
+const server = http.createServer(app);
+const io = new Server(server);
+
+io.on('connection', (socket) => {
+  console.log('Nouvo itilizatè konekte:', socket.id);
+
+  socket.on('user-message', (data) => {
+    const { text, lang } = data;
+
+    // Chèche repons ki koresponn nan DB
+    let responseObj = MEME_QA_DATA.find(item =>
+      item.question[lang]?.toLowerCase() === text.toLowerCase()
+    );
+
+    if (!responseObj) {
+      responseObj = {
+        answer: {
+          ht: 'Mwen pa genyen repons sa ankò, men mwen ka aprann li.',
+          fr: 'Je n’ai pas encore cette réponse, mais je peux l’apprendre.',
+          en: 'I don’t have this answer yet, but I can learn it.',
+          es: 'No tengo esta respuesta todavía, pero puedo aprenderla.'
+        }
+      };
+    }
+
+    socket.emit('meme-response', responseObj.answer);
+  });
+});
+
+
 // 🚀 DEMARRE SERVEUR
 // ---------------------------
 const PORT = process.env.PORT || 3000;
