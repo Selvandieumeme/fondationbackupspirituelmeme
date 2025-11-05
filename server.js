@@ -985,7 +985,7 @@ const MemeQA = mongoose.model('MemeQA', MemeSchema);
 let MEME_QA_DATA = [];
 
 // ============================
-// Chaje done depi MongoDB
+// Fonksyon chaje done MEME yo
 // ============================
 async function loadMEMEDataFromDB() {
   try {
@@ -997,11 +997,29 @@ async function loadMEMEDataFromDB() {
 }
 loadMEMEDataFromDB();
 
-// Refè chajman chak 10 minit pou rete ajou
+// Rechaje done otomatik chak 10 minit
 setInterval(loadMEMEDataFromDB, 10 * 60 * 1000);
 
 // ============================
-// Endpoint API — pou front-end
+// API: Rechajman manyèl ak sekirite
+// ============================
+app.post('/reload-memeqa', async (req, res) => {
+  try {
+    const key = req.query.key || req.body.key;
+    if (key !== process.env.MEME_SECRET_KEY) {
+      return res.status(403).json({ error: '⛔ Kle sekrè pa valab!' });
+    }
+
+    await loadMEMEDataFromDB();
+    res.json({ success: true, count: MEME_QA_DATA.length, message: '✅ Done MEME QA re-chaje avèk siksè!' });
+  } catch (err) {
+    console.error('❌ Erè /reload-memeqa:', err);
+    res.status(500).json({ error: 'Erè pandan rechajman done yo.' });
+  }
+});
+
+// ============================
+// API: Pèrmèt front-end chaje kesyon yo
 // ============================
 app.get('/api/memeqa', async (req, res) => {
   try {
@@ -1014,13 +1032,13 @@ app.get('/api/memeqa', async (req, res) => {
 });
 
 // ============================
-// Serve fichye HTML prensipal la
+// Serve fichye prensipal la
 // ============================
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'inspecteurmeme.html'));
 });
 
-// Serve fichye estatik (CSS, JS, elatriye)
+// Serve fichye estatik (CSS, JS, images…)
 app.use(express.static(__dirname));
 
 // ============================
@@ -1034,34 +1052,28 @@ const io = new Server(server, {
 io.on('connection', (socket) => {
   console.log('🔵 Nouvo itilizatè konekte:', socket.id);
 
-  // Lè yon elèv oswa pwofesè rantre
   socket.on('joinClassroom', (userData) => {
     socket.join('classroom');
     console.log(`👥 ${userData.user} (${userData.lang}) rantre nan klas la.`);
     io.to('classroom').emit('broadcast-message', { from: 'SYSTEM', text: `${userData.user} te rantre nan klas la.` });
   });
 
-  // Lè yon elèv kite
   socket.on('leaveClassroom', (userData) => {
     socket.leave('classroom');
     console.log(`🚪 ${userData.userId || socket.id} kite klas la.`);
   });
 
-  // Mute tout lòt moun eksepte yon elèv espesifik
   socket.on('muteAllExcept', (studentId) => {
     console.log(`🔇 Mute tout moun eksepte ${studentId}`);
     io.to('classroom').emit('broadcast-message', { from: 'SYSTEM', text: `Tout moun silans, ${studentId} ap pale.` });
   });
 
-  // Resevwa mesaj itilizatè
   socket.on('user-message', (data) => {
     const { text, lang, user, userId } = data;
     console.log(`💬 ${user} (${lang}): ${text}`);
 
-    // Fè broadcast pou tout moun
     io.to('classroom').emit('broadcast-message', { from: user, text });
 
-    // Rechèch repons nan MEME_QA_DATA
     let found = null;
     for (const item of MEME_QA_DATA) {
       const qset = item.question || {};
@@ -1074,19 +1086,15 @@ io.on('connection', (socket) => {
       if (found) break;
     }
 
-    // Si pa jwenn, mete repons default
     let response = found?.answer || {
       ht: 'Mwen pa genyen repons sa ankò, men mwen ka aprann li.',
       fr: 'Je n’ai pas encore cette réponse, mais je peux l’apprendre.',
       en: 'I don’t have this answer yet, but I can learn it.',
       es: 'No tengo esta respuesta todavía, pero puedo aprenderla.',
-      tone: 'front'
+      tone: 'neutral'
     };
 
-    // Voye repons la tounen bay moun ki te voye mesaj la
     socket.emit('meme-response', response);
-
-    // Epi broadcast tou pou tout moun tande MEME
     io.to('classroom').emit('meme-response', response);
   });
 
