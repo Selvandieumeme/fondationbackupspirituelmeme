@@ -1,29 +1,538 @@
 <!DOCTYPE html>
 <html lang="ht">
 <head>
-<meta charset="UTF-8">
-<title>Inspecteur MEME</title>
-<script src="/socket.io/socket.io.js"></script>
+  <meta charset="utf-8" />
+  <title>Inspecteur MEME — Ecole-en-ligne</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="inspecteurmeme.css">
+  <style>
+    /* Minimal embedded styles (mostly fallback) -- main styles in inspecteurmeme.css */
+    :root {
+      --accent:#004aad;
+      --bg:#f0f6ff;
+      --panel:#ffffff;
+      --meme-size:110px;
+    }
+    html,body{height:100%;margin:0;font-family:Poppins,Arial,sans-serif;background:var(--bg);color:#222;}
+    .wrap{display:flex;min-height:100vh;}
+    .left { width:380px; background:var(--panel); box-shadow:2px 0 12px rgba(0,0,0,0.06); padding:24px; box-sizing:border-box; }
+    .right { flex:1; position:relative; padding:18px; box-sizing:border-box; overflow:hidden; }
+
+    /* Login panel */
+    .brand { font-size:20px; font-weight:700; color:var(--accent); margin-bottom:8px; }
+    .subtitle { font-size:13px; color:#555; margin-bottom:18px; }
+    form { display:flex; flex-direction:column; gap:8px; }
+    input[type="text"]{padding:10px;border-radius:8px;border:1px solid #ddd;font-size:14px;}
+    button.primary{background:var(--accent);color:#fff;padding:10px;border-radius:8px;border:none;cursor:pointer;font-weight:600;}
+    button.secondary{background:#eee;color:#333;padding:8px;border-radius:8px;border:none;cursor:pointer;}
+
+    /* Classroom area */
+    .stage { width:100%; height:100vh; background:linear-gradient(180deg,#e6f0ff 0%, #d6e8ff 100%); position:relative; overflow:hidden; }
+    .meme-inspecteur {
+      position:absolute;
+      width:var(--meme-size);
+      height:var(--meme-size);
+      min-width:80px; min-height:80px;
+      border-radius:18px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-weight:700;
+      box-shadow:0 6px 18px rgba(0,0,0,0.15);
+      transition: all 0.9s cubic-bezier(.2,.9,.3,1);
+      background:linear-gradient(180deg,#ffd54d,#ffb300);
+      color:#111;
+      z-index:40;
+      padding:8px;
+      text-align:center;
+    }
+    /* faces */
+    .face-front{ background: linear-gradient(180deg,#ffd54d,#ffb300); }
+    .face-happy{ background: linear-gradient(180deg,#b2f5bf,#34d399); }
+    .face-angry{ background: linear-gradient(180deg,#ffb4b4,#ff5252); }
+    .face-sleep{ background: linear-gradient(180deg,#cfd8dc,#90a4ae); transform: rotate(90deg); }
+
+    /* walking small effect */
+    .meme-walking { transform: scale(1.02); box-shadow:0 10px 28px rgba(0,0,0,0.22); }
+
+    /* Chat UI inside stage bottom-left */
+    .chat-box {
+      position:absolute;
+      left:18px;
+      bottom:18px;
+      width:360px;
+      max-height:55vh;
+      background:var(--panel);
+      border-radius:12px;
+      box-shadow:0 6px 20px rgba(0,0,0,0.12);
+      overflow:hidden;
+      display:flex;
+      flex-direction:column;
+      z-index:30;
+    }
+    .chat-header { padding:10px 12px; font-weight:600; border-bottom:1px solid #eee; background:linear-gradient(90deg, rgba(0,74,173,0.05), transparent); }
+    .chat-messages { padding:10px; overflow-y:auto; flex:1; font-size:14px; }
+    .chat-message { margin-bottom:8px; padding:8px;border-radius:8px;background:#f7f9fc; }
+    .chat-input { display:flex; gap:8px; padding:10px; border-top:1px solid #eee; }
+    .chat-input input { flex:1; padding:8px 10px; border-radius:8px; border:1px solid #ddd; }
+    .chat-input button { padding:8px 12px; border-radius:8px; background:var(--accent); border:none; color:#fff; cursor:pointer; }
+
+    /* small controls top-right */
+    .controls { position:absolute; top:12px; right:12px; display:flex; gap:8px; z-index:50; }
+    .controls button{ padding:8px 10px; border-radius:8px; border:none; cursor:pointer; background:rgba(255,255,255,0.92); box-shadow:0 4px 12px rgba(0,0,0,0.08); }
+
+    /* responsive */
+    @media (max-width:900px){
+      .left{ display:none; }
+      .chat-box{ left:10px; width:92vw; }
+    }
+  </style>
 </head>
 <body>
-<h1>🕵️‍♂️ Inspecteur MEME</h1>
-<input id="message" placeholder="Ekri mesaj ou...">
-<button id="send">Voye</button>
-<div id="response"></div>
+  <div class="wrap">
+    <!-- LEFT: login panel -->
+    <div class="left">
+      <div class="brand">Ecole-en-ligne — FOBAS</div>
+      <div class="subtitle">Antre non w epi klike <strong>Rejoindre</strong> pou antre nan klas la. Inspecteur MEME la pou ede w.</div>
 
-<script>
-const socket = io();
-const messageInput = document.getElementById('message');
-const responseDiv = document.getElementById('response');
+      <form id="loginForm">
+        <input id="nameInput" type="text" placeholder="Non w / Nom / Name" required>
+        <select id="langSelect" aria-label="Chwazi lang">
+          <option value="ht">Kreyòl</option>
+          <option value="fr">Français</option>
+          <option value="en">English</option>
+          <option value="es">Español</option>
+        </select>
+        <button type="submit" class="primary">Rejoindre</button>
+        <button id="previewBtn" type="button" class="secondary">Gade preview MEME</button>
+      </form>
 
-document.getElementById('send').addEventListener('click', () => {
-  const text = messageInput.value;
-  socket.emit('user-message', { text, lang: 'ht' });
-});
+      <hr style="margin:18px 0;border:none;border-top:1px solid #eee;" />
 
-socket.on('meme-response', (answer) => {
-  responseDiv.innerHTML += `<p>${answer.ht}</p>`;
-});
-</script>
+      <div style="display:flex;gap:12px;align-items:center;">
+        <div style="flex:1">
+          <div style="font-size:13px;font-weight:600;margin-bottom:6px;">Inspecteur MEME</div>
+          <div style="font-size:13px;color:#555;">Ajan entèlijans pou ede elèv/profesè</div>
+        </div>
+        <!-- small MEME preview in left panel -->
+        <div style="width:80px;height:80px;position:relative;">
+          <div id="memePreview" class="meme-inspecteur face-front" style="width:80px;height:80px;right:0;bottom:0;font-size:13px;padding:6px;">MEME</div>
+        </div>
+      </div>
+
+      <div style="margin-top:18px;font-size:13px;color:#666;">
+        <strong>Remak:</strong> Pou repons vokal, bay pèmisyon mikro nan navigatè a lè w pare.
+      </div>
+    </div>
+
+    <!-- RIGHT: classroom / stage -->
+    <div class="right">
+      <div class="stage" id="stage">
+        <!-- MEME element (visible on login & inside class) -->
+        <div id="memeMain" class="meme-inspecteur face-front">MEME</div>
+
+        <!-- small control buttons -->
+        <div class="controls">
+          <button id="micToggle">Aktive Mikwo</button>
+          <button id="teachMode">Mòd Pwofesè</button>
+          <button id="forceJoin">Fòse MEME antre</button>
+        </div>
+
+        <!-- Chat -->
+        <div class="chat-box" id="chatBox" aria-live="polite">
+          <div class="chat-header">Chat — MEME Inspecteur</div>
+          <div class="chat-messages" id="chatMessages"></div>
+          <div class="chat-input">
+            <input id="chatInput" type="text" placeholder="Ekri mesaj ou la..." />
+            <button id="chatSend">Voye</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Socket.io client (sirve si server.js ap sèvi li) -->
+  <script src="/socket.io/socket.io.js"></script>
+
+  <script>
+  (function(){
+    // ==== KONEKSYON SOCKET.IO ====
+    const socket = (typeof io === 'function') ? io() : null;
+
+    // ==== DOM references ====
+    const loginForm = document.getElementById('loginForm');
+    const nameInput = document.getElementById('nameInput');
+    const langSelect = document.getElementById('langSelect');
+    const previewBtn = document.getElementById('previewBtn');
+
+    const memePreview = document.getElementById('memePreview');
+    const meme = document.getElementById('memeMain');
+
+    const chatBox = document.getElementById('chatBox');
+    const chatMessages = document.getElementById('chatMessages');
+    const chatInput = document.getElementById('chatInput');
+    const chatSend = document.getElementById('chatSend');
+
+    const micToggle = document.getElementById('micToggle');
+    const teachMode = document.getElementById('teachMode');
+    const forceJoin = document.getElementById('forceJoin');
+
+    // ==== State ====
+    let USER = { id: null, name: null, lang: 'ht' };
+    let MEME_QA_DATA = [];
+    let talking = false;
+    let idleTime = 0;
+    let currentCorner = 0;
+    let idleTimer = null;
+    let micStream = null;
+    let recognition = null;
+    let speechActive = false;
+
+    // ==== Utilities ====
+    function logChat(text, cls){
+      const d = document.createElement('div');
+      d.className = 'chat-message ' + (cls||'');
+      d.textContent = text;
+      chatMessages.appendChild(d);
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    // ==== Load MEME QA data from server endpoint ====
+    async function loadMEMEData(){
+      try {
+        const res = await fetch('/api/memeqa');
+        if(!res.ok) throw new Error('Fetch /api/memeqa failed: ' + res.status);
+        MEME_QA_DATA = await res.json();
+        console.log('✅ MEME QA data chaje!', MEME_QA_DATA.length);
+      } catch(err){
+        console.warn('Pa jwenn /api/memeqa (sa ok si serve pa bay li).', err);
+      }
+    }
+    loadMEMEData();
+
+    // ==== MEME visual helpers ====
+    function setMemeState(state){
+      meme.className = 'meme-inspecteur';
+      memePreview.className = 'meme-inspecteur';
+      switch(state){
+        case 'walking': meme.classList.add('meme-walking'); memePreview.classList.add('meme-walking'); break;
+        case 'lying': meme.classList.add('meme-lying'); memePreview.classList.add('meme-lying'); break;
+        case 'smile': meme.classList.add('face-happy'); memePreview.classList.add('face-happy'); break;
+        case 'angry': meme.classList.add('face-angry'); memePreview.classList.add('face-angry'); break;
+        case 'sleep': meme.classList.add('face-sleep'); memePreview.classList.add('face-sleep'); break;
+        default: meme.classList.add('face-front'); memePreview.classList.add('face-front'); break;
+      }
+    }
+
+    function resetIdleTimer(){
+      clearTimeout(idleTimer);
+      idleTimer = setTimeout(()=> {
+        if(!talking) {
+          setMemeState('lying');
+        }
+      }, 300000); // 5 min
+    }
+    resetIdleTimer();
+    setMemeState('walking');
+
+    // ==== Movement in 4 corners ====
+    const corners = [
+      { top:'12px', left:'12px' },
+      { top:'12px', right:'12px' },
+      { bottom:'12px', left:'12px' },
+      { bottom:'12px', right:'12px' }
+    ];
+    function moveMeme(){
+      try {
+        if(talking){
+          const pos = corners[currentCorner];
+          // clear positional styles first
+          meme.style.top = meme.style.left = meme.style.bottom = meme.style.right = '';
+          for(const k in pos) meme.style[k] = pos[k];
+          // small preview follows
+          memePreview.style.top = meme.style.top || '';
+          memePreview.style.left = meme.style.left || '';
+          memePreview.style.right = meme.style.right || '';
+          memePreview.style.bottom = meme.style.bottom || '';
+          currentCorner = (currentCorner + 1) % corners.length;
+        } else {
+          idleTime += 5;
+          if(idleTime >= 300) setMemeState('sleep');
+          else setMemeState('face-front');
+        }
+      } catch(e){
+        console.warn('moveMeme error', e);
+      } finally {
+        setTimeout(moveMeme, 5000);
+      }
+    }
+    moveMeme();
+
+    // ==== Chat handlers ====
+    chatSend.addEventListener('click', () => {
+      const txt = chatInput.value.trim();
+      if(!txt) return;
+      sendUserMessage(txt);
+      chatInput.value = '';
+    });
+    chatInput.addEventListener('keypress', e => { if(e.key==='Enter'){ chatSend.click(); } });
+
+    function sendUserMessage(text){
+      // local display
+      logChat((USER.name||'Anon') + ': ' + text);
+      // emit through socket so server / other clients can handle (if socket exists)
+      if(socket) socket.emit('user-message', { text, lang: USER.lang, user: USER.name, userId: USER.id });
+      // also simulate local handling by MEME (fallback)
+      handleIncoming({ studentId: USER.id || 'local', studentName: USER.name || 'Anon', msg: text, lang: USER.lang });
+    }
+
+    // ==== Incoming message processing (from socket or local) ====
+    async function handleIncoming(data){
+      try {
+        talking = true;
+        idleTime = 0;
+        resetIdleTimer();
+        setMemeState('walking');
+
+        // ask server to mute others (if server implements)
+        if(socket) socket.emit('muteAllExcept', data.studentId);
+
+        // show incoming message
+        logChat(data.studentName + ': ' + data.msg);
+
+        // find an answer
+        const answer = findAnswer(data.msg);
+        if(answer){
+          respond(answer, data.lang || 'en');
+        } else {
+          // fallback default multilingual reply
+          const fallback = {
+            ht: 'M pa genyen repons sa kounye a, men mwen ka aprann li.',
+            fr: 'Je n’ai pas encore cette réponse, mais je peux l’apprendre.',
+            en: 'I don’t have that answer yet, but I can learn it.',
+            es: 'No tengo esa respuesta todavía, pero puedo aprenderla.'
+          };
+          respond({ ht: fallback.ht, fr: fallback.fr, en: fallback.en, es: fallback.es, tone:'front' }, data.lang || 'en');
+        }
+      } finally {
+        // auto stop talking after a short delay (handled inside respond)
+      }
+    }
+
+    function findAnswer(text){
+      if(!MEME_QA_DATA || !MEME_QA_DATA.length) return null;
+      const t = text.toLowerCase();
+      // data might be array of {questions: {...}, responses: {...}} or {question: "...", answer: {...}}
+      for(const item of MEME_QA_DATA){
+        // check questions object for multilingual match
+        if(item.questions){
+          for(const k of Object.keys(item.questions||{})){
+            const q = (item.questions[k]||'').toLowerCase();
+            if(!q) continue;
+            // match full or contains common substring
+            if(q === t || q.includes(t) || t.includes(q)) return (item.responses || item.answer || item.responses);
+          }
+        }
+        // fallback single question property
+        if(item.question){
+          const q = (item.question||'').toLowerCase();
+          if(q === t || q.includes(t) || t.includes(q)) return (item.answer || item.responses);
+        }
+      }
+      return null;
+    }
+
+    function respond(answerObj, userLang){
+      // answerObj expected shape: { ht:..., fr:..., en:..., es:..., tone? }
+      idleTime = 0;
+      talking = true;
+
+      // choose tone if present
+      const tone = answerObj.tone || null;
+      if(tone === 'happy') setMemeState('smile');
+      else if(tone === 'angry') setMemeState('angry');
+      else setMemeState('face-front');
+
+      // display all 4 translations so everyone sees (per requirement)
+      const langs = ['ht','fr','en','es'];
+      for(const L of langs){
+        const txt = (answerObj[L] !== undefined) ? answerObj[L] : (answerObj.responses && answerObj.responses[L]) || '';
+        if(txt) logChat('MEME ('+L+'): ' + txt);
+      }
+
+      // speak aloud in user's language if possible
+      const speakLang = userLang || USER.lang || 'en';
+      const speakText = (answerObj[speakLang] || answerObj.en || answerObj.ht || '');
+      if(speakText) speakOutLoud(speakText, speakLang);
+
+      // after response delay, go idle
+      setTimeout(()=>{ talking=false; setMemeState('face-front'); }, 4500);
+    }
+
+    // ==== Speech synthesis helper ====
+    function speakOutLoud(text, lang){
+      try {
+        if('speechSynthesis' in window){
+          const utter = new SpeechSynthesisUtterance(text);
+          // set voice lang mapping best-effort
+          utter.lang = (lang === 'ht') ? 'fr-HT' : (lang||'en');
+          speechSynthesis.cancel();
+          speechSynthesis.speak(utter);
+        }
+      } catch(e){
+        console.warn('speak error', e);
+      }
+    }
+
+    // ==== Periodic question asking when idle ====
+    setInterval(()=>{
+      if(talking) return;
+      if(!MEME_QA_DATA || MEME_QA_DATA.length===0) return;
+      const idx = Math.floor(Math.random()*MEME_QA_DATA.length);
+      // choose a question text (prefer ht if available)
+      const item = MEME_QA_DATA[idx];
+      let qtext = '';
+      if(item.questions){
+        qtext = item.questions[USER.lang] || item.questions.ht || item.questions.en || Object.values(item.questions)[0];
+      } else if(item.question) qtext = item.question;
+      if(qtext) respond({ ht:qtext, fr:qtext, en:qtext, es:qtext, tone:'happy' }, USER.lang);
+    }, 15000);
+
+    // ==== Microphone (SpeechRecognition) - optional, start on user action ====
+    micToggle.addEventListener('click', async ()=>{
+      if(speechActive){
+        stopMicrophone();
+        micToggle.textContent = 'Aktive Mikwo';
+        return;
+      }
+      // request mic permission and start recognition
+      try {
+        // prefer Web Speech API recognition for live transcription
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if(SpeechRecognition){
+          recognition = new SpeechRecognition();
+          recognition.lang = USER.lang || 'ht';
+          recognition.interimResults = false;
+          recognition.continuous = true;
+          recognition.maxAlternatives = 1;
+
+          recognition.onresult = (ev) => {
+            const transcript = ev.results[ev.results.length-1][0].transcript.trim();
+            // propagate as incoming message
+            handleIncoming({ studentId: USER.id||'local', studentName: USER.name||'Anon', msg: transcript, lang: USER.lang });
+          };
+          recognition.onerror = (ev) => { console.warn('SpeechRecognition error', ev); };
+          recognition.onend = () => {
+            if(speechActive) {
+              // try restart for continuous
+              try { recognition.start(); } catch(e){ console.warn('re-start failed', e); }
+            }
+          };
+
+          recognition.start();
+          speechActive = true;
+          micToggle.textContent = 'Dezaktive Mikwo';
+        } else {
+          // fallback to getUserMedia + manual streaming (no recognition)
+          micStream = await navigator.mediaDevices.getUserMedia({ audio:true });
+          speechActive = true;
+          micToggle.textContent = 'Dezaktive Mikwo';
+          logChat('Mikwo aktive (pa gen rekonesans otomatik nan navigatè sa)');
+        }
+      } catch(err){
+        console.warn('Mikwo pa disponib', err);
+        alert('Mikwo pa disponib oswa pèmisyon refize.');
+      }
+    });
+
+    function stopMicrophone(){
+      speechActive = false;
+      if(recognition){
+        try{ recognition.stop(); }catch(e){}
+        recognition = null;
+      }
+      if(micStream){
+        micStream.getTracks().forEach(t=>t.stop());
+        micStream = null;
+      }
+    }
+
+    // ==== Login form handling: show MEME on login screen and join class ====
+    loginForm.addEventListener('submit', (ev)=>{
+      ev.preventDefault();
+      USER.name = nameInput.value.trim() || 'Anon';
+      USER.lang = langSelect.value || 'ht';
+      USER.id = 'user_' + Date.now();
+      // emit join event to server (if available)
+      if(socket) socket.emit('joinClassroom', { user: USER.name, userId: USER.id, lang: USER.lang });
+
+      // ensure MEME is present in the classroom too (server may also handle)
+      if(socket) socket.emit('joinClassroom', { user: 'MEME', userId: 'MEME_0', lang: 'ht' });
+
+      // visual feedback & small welcome
+      logChat('SYSTEM: ' + USER.name + ' joined the class.');
+      // show greeting from MEME
+      respond({ ht: 'BIENVENUE', fr: 'BIENVENUE', en: 'WELCOME', es: 'BIENVENUE', tone:'happy' }, USER.lang);
+
+      // move focus to chat input
+      chatInput.focus();
+    });
+
+    previewBtn.addEventListener('click', ()=>{
+      // play a short memepreview animation
+      setMemeState('smile');
+      setTimeout(()=> setMemeState('face-front'), 2000);
+    });
+
+    // optional "force join" control for testing
+    forceJoin.addEventListener('click', ()=>{
+      if(socket) socket.emit('joinClassroom', { user: 'MEME', userId: 'MEME_0', lang:'ht' });
+      logChat('SYSTEM: MEME forced to join (test).');
+      setMemeState('walking');
+    });
+
+    // teach mode toggles a different behavior (example: allow MEME to ask more frequent questions)
+    teachMode.addEventListener('click', ()=>{
+      // toggling simple effect for demo
+      if(teachMode.dataset.on === '1'){
+        teachMode.dataset.on = '0';
+        teachMode.textContent = 'Mòd Pwofesè';
+      } else {
+        teachMode.dataset.on = '1';
+        teachMode.textContent = 'Mòd Pwofesè (ON)';
+        // MEME ask one question immediately in class language
+        if(MEME_QA_DATA && MEME_QA_DATA.length){
+          const idx = Math.floor(Math.random()*MEME_QA_DATA.length);
+          const it = MEME_QA_DATA[idx];
+          const q = it.questions ? (it.questions[USER.lang]||Object.values(it.questions)[0]) : (it.question||'');
+          respond({ ht:q, fr:q, en:q, es:q, tone:'happy' }, USER.lang);
+        }
+      }
+    });
+
+    // ==== Socket fallback listeners (optional) ====
+    if(socket){
+      socket.on('meme-response', (data) => {
+        // server-sent responses to broadcast (if server sends structured answer)
+        if(data && (data.ht || data.en || data.responses)) {
+          respond(data, USER.lang);
+        }
+      });
+
+      // allow serverside to push incoming chat to client UI
+      socket.on('broadcast-message', (m) => {
+        logChat(m.from + ': ' + m.text);
+      });
+    }
+
+    // === On unload cleanup ===
+    window.addEventListener('beforeunload', ()=>{
+      stopMicrophone();
+      if(socket) socket.emit('leaveClassroom', { userId: USER.id });
+    });
+
+  })();
+  </script>
 </body>
 </html>
