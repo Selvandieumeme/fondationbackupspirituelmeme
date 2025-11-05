@@ -89,8 +89,7 @@
   </style>
 </head>
 <body>
-  <!-- Inspecteur MEME -->
-<img id="memeMain" src="images/meme-front.png" class="meme-inspecteur" style="position: fixed; width: 150px; height: 150px; z-index: 999;" />
+ 
   
   <div class="wrap">
     <!-- LEFT: login panel -->
@@ -254,12 +253,7 @@
     div.textContent = `${data.from}: ${data.text}`;
     chatMessages.appendChild(div);
     chatMessages.scrollTop = chatMessages.scrollHeight;
-  });
-
-  socket.on('meme-response', (answer)=>{ respond(answer); });
-
-})();
-
+  }
 
 
     
