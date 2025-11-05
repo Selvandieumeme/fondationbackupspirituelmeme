@@ -1,242 +1,412 @@
 [
   {
-    "questions": {
-      "ht": "Ki jan ou santi w jodi a Inspecteur MEME?",
-      "fr": "Comment vous sentez-vous aujourd'hui Inspecteur MEME ?",
-      "en": "How are you feeling today Inspector MEME?",
-      "es": "¿Cómo te sientes hoy Inspector MEME?"
-    },
-    "responses": {
-      "ht": "Mwen santi m byen, m pare pou ede tout moun nan klas la.",
-      "fr": "Je me sens bien, prêt à aider tout le monde dans la classe.",
-      "en": "I feel good, ready to assist everyone in the class.",
-      "es": "Me siento bien, listo para ayudar a todos en la clase."
-    }
+    "question": "Ki jan ou santi w jodi a Inspecteur MEME?",
+    "answer": "Mwen santi m byen, m pare pou ede tout moun nan klas la.",
+    "lang": "ht",
+    "tags": ["sentiman","entèaksyon"]
   },
   {
-    "questions": {
-      "ht": "Poukisa w renmen mache alantou nan klas la?",
-      "fr": "Pourquoi aimez-vous vous déplacer dans la classe ?",
-      "en": "Why do you like walking around the class?",
-      "es": "¿Por qué te gusta caminar por la clase?"
-    },
-    "responses": {
-      "ht": "Mwen mache pou ka obsève epi ede elèv yo pi vit lè yo bezwen mwen.",
-      "fr": "Je me déplace pour pouvoir observer et aider les élèves rapidement quand ils ont besoin de moi.",
-      "en": "I walk to observe and assist students quickly when they need me.",
-      "es": "Camino para observar y ayudar a los estudiantes rápidamente cuando me necesitan."
-    }
+    "question": "Comment vous sentez-vous aujourd'hui Inspecteur MEME ?",
+    "answer": "Je me sens bien, prêt à aider tout le monde dans la classe.",
+    "lang": "fr",
+    "tags": ["sentiment","interaction"]
   },
   {
-    "questions": {
-      "ht": "Inspecteur MEME, poukisa w kouche sou do pafwa?",
-      "fr": "Inspecteur MEME, pourquoi vous vous allongez parfois sur le dos ?",
-      "en": "Inspector MEME, why do you lie on your back sometimes?",
-      "es": "Inspector MEME, ¿por qué te acuestas de espaldas a veces?"
-    },
-    "responses": {
-      "ht": "Depi pa gen moun kap pale avek mwen, se toujou kouche mwen kouche wi, jis pou m ka pwofite repoze kò mwen",
-      "fr": "Depuis qu'il n'y a personne pour me parler, je reste allongé pour pouvoir reposer mon corps",
-      "en": "Since no one is speaking to me, I stay lying down to rest my body",
-      "es": "Como nadie me está hablando, me quedo acostado para descansar mi cuerpo"
-    }
+    "question": "How are you feeling today Inspector MEME?",
+    "answer": "I feel good, ready to assist everyone in the class.",
+    "lang": "en",
+    "tags": ["feeling","interaction"]
   },
   {
-    "questions": {
-      "ht": "Ki jan yon elèv ka leve men li?",
-      "fr": "Comment un élève peut-il lever la main ?",
-      "en": "How can a student raise their hand?",
-      "es": "¿Cómo puede un estudiante levantar la mano?"
-    },
-    "responses": {
-      "ht": "Yo klike sou bouton 'Raise Hand' nan entèfas klas la.",
-      "fr": "Ils cliquent sur le bouton 'Lever la main' dans l'interface de la classe.",
-      "en": "They click the 'Raise Hand' button in the class interface.",
-      "es": "Hacen clic en el botón 'Levantar Mano' en la interfaz de la clase."
-    }
+    "question": "¿Cómo te sientes hoy Inspector MEME?",
+    "answer": "Me siento bien, listo para ayudar a todos en la clase.",
+    "lang": "es",
+    "tags": ["sentimiento","interacción"]
   },
   {
-    "questions": {
-      "ht": "Ki jan MEME Inspecteur entèveni nan klas la?",
-      "fr": "Quand MEME Inspecteur intervient-il dans la classe ?",
-      "en": "When does MEME Inspecteur intervene in the class?",
-      "es": "¿Cuándo interviene MEME Inspecteur en la clase?"
-    },
-    "responses": {
-      "ht": "Li entèveni lè li detekte yon elèv oswa pwofesè gen difikilte ak zouti oswa entèraksyon.",
-      "fr": "Il intervient lorsqu’il détecte qu’un élève ou un professeur rencontre des difficultés avec les outils ou l’interaction.",
-      "en": "It intervenes when it detects that a student or teacher is having trouble with tools or interaction.",
-      "es": "Interviene cuando detecta que un estudiante o profesor tiene dificultades con las herramientas o la interacción."
-    }
+    "question": "Poukisa w renmen mache alantou nan klas la?",
+    "answer": "Mwen mache pou ka obsève epi ede elèv yo pi vit lè yo bezwen mwen.",
+    "lang": "ht",
+    "tags": ["observation","entèaksyon"]
   },
   {
-    "questions": {
-      "ht": "Ki jan pwofesè ka sispann videyo tout elèv yo?",
-      "fr": "Comment un professeur peut-il arrêter la vidéo de tous les élèves ?",
-      "en": "How can a teacher stop all students' videos?",
-      "es": "¿Cómo puede un profesor detener el video de todos los estudiantes?"
-    },
-    "responses": {
-      "ht": "Li klike sou bouton 'Stop All Video' nan kontwòl pwofesè a.",
-      "fr": "Il clique sur le bouton 'Stop All Video' dans les contrôles du professeur.",
-      "en": "They click the 'Stop All Video' button in the teacher controls.",
-      "es": "Hace clic en el botón 'Stop All Video' en los controles del profesor."
-    }
+    "question": "Pourquoi aimez-vous vous déplacer dans la classe ?",
+    "answer": "Je me déplace pour pouvoir observer et aider les élèves rapidement quand ils ont besoin de moi.",
+    "lang": "fr",
+    "tags": ["observation","interaction"]
   },
   {
-    "questions": {
-      "ht": "Kijan elèv ka konnen si pwofesè a aksepte li nan klas la?",
-      "fr": "Comment un élève sait-il si le professeur l’accepte dans la classe ?",
-      "en": "How does a student know if the teacher accepts them into the class?",
-      "es": "¿Cómo sabe un estudiante si el profesor lo acepta en la clase?"
-    },
-    "responses": {
-      "ht": "Yo resevwa yon notifikasyon 'join-request-result' avèk estati 'accepted' si pwofesè a aksepte yo.",
-      "fr": "Il reçoit une notification 'join-request-result' avec le statut 'accepted' si le professeur l’accepte.",
-      "en": "They receive a 'join-request-result' notification with status 'accepted' if the teacher accepts them.",
-      "es": "Recibe una notificación 'join-request-result' con el estado 'accepted' si el profesor lo acepta."
-    }
+    "question": "Why do you like walking around the class?",
+    "answer": "I walk to observe and assist students quickly when they need me.",
+    "lang": "en",
+    "tags": ["observation","interaction"]
   },
   {
-    "questions": {
-      "ht": "Ki jan MEME Inspecteur salye elèv yo lè kou a kòmanse?",
-      "fr": "Comment MEME Inspecteur accueille-t-il les élèves au début du cours ?",
-      "en": "How does MEME Inspecteur greet students at the beginning of the class?",
-      "es": "¿Cómo saluda MEME Inspecteur a los estudiantes al inicio de la clase?"
-    },
-    "responses": {
-      "ht": "Li lanse mesaj 'BIENVENUE' nan lang itilizatè yo pou akeyi yo nan klas la.",
-      "fr": "Il envoie un message 'BIENVENUE' dans la langue des utilisateurs pour les accueillir en classe.",
-      "en": "It sends a 'BIENVENUE' message in the users' language to welcome them to the class.",
-      "es": "Envía un mensaje 'BIENVENUE' en el idioma de los usuarios para darles la bienvenida a la clase."
-    }
+    "question": "¿Por qué te gusta caminar por la clase?",
+    "answer": "Camino para observar y ayudar a los estudiantes rápidamente cuando me necesitan.",
+    "lang": "es",
+    "tags": ["observación","interacción"]
   },
   {
-    "questions": {
-      "ht": "Ki mesaj MEME Inspecteur voye lè kou a fini?",
-      "fr": "Quel message MEME Inspecteur envoie-t-il à la fin du cours ?",
-      "en": "What message does MEME Inspecteur send at the end of the class?",
-      "es": "¿Qué mensaje envía MEME Inspecteur al final de la clase?"
-    },
-    "responses": {
-      "ht": "Li voye mesaj 'AUREVOIR A TOUS' pou di orevwa a tout moun.",
-      "fr": "Il envoie le message 'AUREVOIR A TOUS' pour dire au revoir à tous.",
-      "en": "It sends the 'AUREVOIR A TOUS' message to say goodbye to everyone.",
-      "es": "Envía el mensaje 'AUREVOIR A TOUS' para despedirse de todos."
-    }
+    "question": "Inspecteur MEME, poukisa w kouche sou do pafwa?",
+    "answer": "Depi pa gen moun kap pale avek mwen, se toujou kouche mwen kouche wi, jis pou m ka pwofite repoze kò mwen",
+    "lang": "ht",
+    "tags": ["repo","entèaksyon"]
   },
   {
-    "questions": {
-      "ht": "Kijan yon elèv ka mute pwòp mikwo li pandan klas la?",
-      "fr": "Comment un élève peut-il couper son propre micro pendant le cours ?",
-      "en": "How can a student mute their own microphone during class?",
-      "es": "¿Cómo puede un estudiante silenciar su propio micrófono durante la clase?"
-    },
-    "responses": {
-      "ht": "Li klike sou bouton 'Mute Micro' nan kontwòl li oswa entèfas elèv la.",
-      "fr": "Il clique sur le bouton 'Mute Micro' dans ses contrôles ou l’interface élève.",
-      "en": "They click the 'Mute Micro' button in their controls or student interface.",
-      "es": "Hace clic en el botón 'Mute Micro' en sus controles o interfaz de estudiante."
-    }
+    "question": "Inspecteur MEME, pourquoi vous vous allongez parfois sur le dos ?",
+    "answer": "Depuis qu'il n'y a personne pour me parler, je reste allongé pour pouvoir reposer mon corps",
+    "lang": "fr",
+    "tags": ["repos","interaction"]
   },
   {
-    "questions": {
-      "ht": "Kijan pwofesè ka mute tout mikwo elèv yo an menm tan?",
-      "fr": "Comment un professeur peut-il couper le micro de tous les élèves en même temps ?",
-      "en": "How can a teacher mute all students' microphones at once?",
-      "es": "¿Cómo puede un profesor silenciar todos los micrófonos de los estudiantes a la vez?"
-    },
-    "responses": {
-      "ht": "Li klike sou bouton 'Mute All' nan kontwòl pwofesè a.",
-      "fr": "Il clique sur le bouton 'Mute All' dans les contrôles du professeur.",
-      "en": "They click the 'Mute All' button in the teacher controls.",
-      "es": "Hace clic en el botón 'Mute All' en los controles del profesor."
-    }
+    "question": "Inspector MEME, why do you lie on your back sometimes?",
+    "answer": "Since no one is speaking to me, I stay lying down to rest my body",
+    "lang": "en",
+    "tags": ["rest","interaction"]
   },
   {
-    "questions": {
-      "ht": "Kijan yon elev ka telechaje dokiman nan Ecole-en-ligne?",
-      "fr": "Comment un élève peut-il télécharger un document sur Ecole-en-ligne ?",
-      "en": "How can a student download a document on Ecole-en-ligne?",
-      "es": "¿Cómo puede un estudiante descargar un documento en Ecole-en-ligne?"
-    },
-    "responses": {
-      "ht": "Yo klike sou lyen oswa bouton 'Télécharger' epi dosye a telechaje sou aparèy yo.",
-      "fr": "Ils cliquent sur le lien ou le bouton 'Télécharger' et le fichier est téléchargé sur leur appareil.",
-      "en": "They click the link or 'Download' button, and the file is downloaded to their device.",
-      "es": "Hacen clic en el enlace o botón 'Descargar' y el archivo se descarga en su dispositivo."
-    }
+    "question": "Inspector MEME, ¿por qué te acuestas de espaldas a veces?",
+    "answer": "Como nadie me está hablando, me quedo acostado para descansar mi cuerpo",
+    "lang": "es",
+    "tags": ["descanso","interacción"]
   },
   {
-    "questions": {
-      "ht": "Ki jan pwofesè ka voye mesaj prive bay yon elèv?",
-      "fr": "Comment un professeur peut-il envoyer un message privé à un élève ?",
-      "en": "How can a teacher send a private message to a student?",
-      "es": "¿Cómo puede un profesor enviar un mensaje privado a un estudiante?"
-    },
-    "responses": {
-      "ht": "Li chwazi non elèv la nan lis itilizatè a epi voye mesaj la nan chat prive.",
-      "fr": "Il sélectionne le nom de l’élève dans la liste des utilisateurs et envoie le message dans le chat privé.",
-      "en": "They select the student’s name from the user list and send the message in private chat.",
-      "es": "Selecciona el nombre del estudiante de la lista de usuarios y envía el mensaje en el chat privado."
-    }
+    "question": "Ki jan yon elèv ka leve men li?",
+    "answer": "Yo klike sou bouton 'Raise Hand' nan entèfas klas la.",
+    "lang": "ht",
+    "tags": ["kontwòl","elèv"]
   },
   {
-    "questions": {
-      "ht": "Kijan MEME Inspecteur ka entèveni lè yon moun pa konprann platfòm nan?",
-      "fr": "Comment MEME Inspecteur peut-il intervenir lorsqu’une personne ne comprend pas la plateforme ?",
-      "en": "How can MEME Inspecteur intervene when someone doesn’t understand the platform?",
-      "es": "¿Cómo puede MEME Inspecteur intervenir cuando alguien no entiende la plataforma?"
-    },
-    "responses": {
-      "ht": "Li itilize vwa klè epi montre kote pou klike sou ekran yo pou rezoud difikilte a.",
-      "fr": "Il utilise une voix claire et montre où cliquer sur leur écran pour résoudre la difficulté.",
-      "en": "It uses a clear voice and points to where to click on their screen to resolve the difficulty.",
-      "es": "Usa una voz clara y señala dónde hacer clic en su pantalla para resolver la dificultad."
-    }
+    "question": "Comment un élève peut-il lever la main ?",
+    "answer": "Ils cliquent sur le bouton 'Lever la main' dans l'interface de la classe.",
+    "lang": "fr",
+    "tags": ["contrôle","élève"]
   },
   {
-    "questions": {
-      "ht": "Kijan pwofesè ka wè istwa mesaj nan chat la?",
-      "fr": "Comment un professeur peut-il voir l’historique des messages dans le chat ?",
-      "en": "How can a teacher view chat message history?",
-      "es": "¿Cómo puede un profesor ver el historial de mensajes en el chat?"
-    },
-    "responses": {
-      "ht": "Tout mesaj yo parèt nan fenèt chat la epi ka woule anlè pou wè istwa anvan yo.",
-      "fr": "Tous les messages apparaissent dans la fenêtre de chat et on peut défiler vers le haut pour voir l’historique.",
-      "en": "All messages appear in the chat window and you can scroll up to see previous history.",
-      "es": "Todos los mensajes aparecen en la ventana de chat y se puede desplazar hacia arriba para ver el historial."
-    }
+    "question": "How can a student raise their hand?",
+    "answer": "They click the 'Raise Hand' button in the class interface.",
+    "lang": "en",
+    "tags": ["control","student"]
   },
   {
-    "questions": {
-      "ht": "Kijan yon pwofesè ka retire yon elèv nan klas la?",
-      "fr": "Comment un professeur peut-il retirer un élève de la classe ?",
-      "en": "How can a teacher remove a student from the class?",
-      "es": "¿Cómo puede un profesor sacar a un estudiante de la clase?"
-    },
-    "responses": {
-      "ht": "Li ka fè li sòti nan klas la atravè opsyon 'Kick' oswa 'Remove' nan entèfas pwofesè a.",
-      "fr": "Il peut le faire sortir de la classe via l’option 'Kick' ou 'Remove' dans l’interface du professeur.",
-      "en": "They can kick them out of the class using the 'Kick' or 'Remove' option in the teacher interface.",
-      "es": "Puede expulsarlo de la clase usando la opción 'Kick' o 'Remove' en la interfaz del profesor."
-    }
+    "question": "¿Cómo puede un estudiante levantar la mano?",
+    "answer": "Hacen clic en el botón 'Levantar Mano' en la interfaz de la clase.",
+    "lang": "es",
+    "tags": ["control","estudiante"]
   },
   {
-    "questions": {
-      "ht": "Inspecteur MEME, tande plizyè moun ap pale an menm tan?",
-      "fr": "Inspecteur MEME, entendez-vous plusieurs personnes parler en même temps ?",
-      "en": "Inspecteur MEME, are you hearing multiple people talking at the same time?",
-      "es": "Inspector MEME, ¿estás escuchando a varias personas hablar al mismo tiempo?"
-    },
-    "responses": {
-      "ht": "Wi, men nan klas sa a se toujou yon sèl moun ki dwe pale. Lè yon moun ap pale, tout lòt moun otomatikman fèmen mikwo yo.",
-      "fr": "Oui, mais dans cette classe, une seule personne doit parler à la fois. Quand quelqu'un parle, tous les autres microphones sont automatiquement désactivés.",
-      "en": "Yes, but in this class, only one person should speak at a time. When someone speaks, all other microphones are automatically muted.",
-      "es": "Sí, pero en esta clase solo debe hablar una persona a la vez. Cuando alguien habla, todos los demás micrófonos se silencian automáticamente."
-    },
-
+    "question": "Ki jan MEME Inspecteur entèveni nan klas la?",
+    "answer": "Li entèveni lè li detekte yon elèv oswa pwofesè gen difikilte ak zouti oswa entèraksyon.",
+    "lang": "ht",
+    "tags": ["entèveni","entèaksyon"]
+  },
+  {
+    "question": "Quand MEME Inspecteur intervient-il dans la classe ?",
+    "answer": "Il intervient lorsqu’il détecte qu’un élève ou un professeur rencontre des difficultés avec les outils ou l’interaction.",
+    "lang": "fr",
+    "tags": ["intervenir","interaction"]
+  },
+  {
+    "question": "When does MEME Inspecteur intervene in the class?",
+    "answer": "It intervenes when it detects that a student or teacher is having trouble with tools or interaction.",
+    "lang": "en",
+    "tags": ["intervene","interaction"]
+  },
+  {
+    "question": "¿Cuándo interviene MEME Inspecteur en la clase?",
+    "answer": "Interviene cuando detecta que un estudiante o profesor tiene dificultades con las herramientas o la interacción.",
+    "lang": "es",
+    "tags": ["intervenir","interacción"]
+  },
+  {
+    "question": "Ki jan pwofesè ka sispann videyo tout elèv yo?",
+    "answer": "Li klike sou bouton 'Stop All Video' nan kontwòl pwofesè a.",
+    "lang": "ht",
+    "tags": ["kontwòl","pwofesè"]
+  },
+  {
+    "question": "Comment un professeur peut-il arrêter la vidéo de tous les élèves ?",
+    "answer": "Il clique sur le bouton 'Stop All Video' dans les contrôles du professeur.",
+    "lang": "fr",
+    "tags": ["contrôle","professeur"]
+  },
+  {
+    "question": "How can a teacher stop all students' videos?",
+    "answer": "They click the 'Stop All Video' button in the teacher controls.",
+    "lang": "en",
+    "tags": ["control","teacher"]
+  },
+  {
+    "question": "¿Cómo puede un profesor detener el video de todos los estudiantes?",
+    "answer": "Hace clic en el botón 'Stop All Video' en los controles del profesor.",
+    "lang": "es",
+    "tags": ["control","profesor"]
+  },
+  {
+    "question": "Kijan elèv ka konnen si pwofesè a aksepte li nan klas la?",
+    "answer": "Yo resevwa yon notifikasyon 'join-request-result' avèk estati 'accepted' si pwofesè a aksepte yo.",
+    "lang": "ht",
+    "tags": ["notifikasyon","elèv"]
+  },
+  {
+    "question": "Comment un élève sait-il si le professeur l’accepte dans la classe ?",
+    "answer": "Il reçoit une notification 'join-request-result' avec le statut 'accepted' si le professeur l’accepte.",
+    "lang": "fr",
+    "tags": ["notification","élève"]
+  },
+  {
+    "question": "How does a student know if the teacher accepts them into the class?",
+    "answer": "They receive a 'join-request-result' notification with status 'accepted' if the teacher accepts them.",
+    "lang": "en",
+    "tags": ["notification","student"]
+  },
+  {
+    "question": "¿Cómo sabe un estudiante si el profesor lo acepta en la clase?",
+    "answer": "Recibe una notificación 'join-request-result' con el estado 'accepted' si el profesor lo acepta.",
+    "lang": "es",
+    "tags": ["notificación","estudiante"]
+  },
+  {
+    "question": "Ki jan MEME Inspecteur salye elèv yo lè kou a kòmanse?",
+    "answer": "Li lanse mesaj 'BIENVENUE' nan lang itilizatè yo pou akeyi yo nan klas la.",
+    "lang": "ht",
+    "tags": ["entèaksyon","byenveni"]
+  },
+  {
+    "question": "Comment MEME Inspecteur accueille-t-il les élèves au début du cours ?",
+    "answer": "Il envoie un message 'BIENVENUE' dans la langue des utilisateurs pour les accueillir en classe.",
+    "lang": "fr",
+    "tags": ["interaction","bienvenue"]
+  },
+  {
+    "question": "How does MEME Inspecteur greet students at the beginning of the class?",
+    "answer": "It sends a 'BIENVENUE' message in the users' language to welcome them to the class.",
+    "lang": "en",
+    "tags": ["interaction","welcome"]
+  },
+  {
+    "question": "¿Cómo saluda MEME Inspecteur a los estudiantes al inicio de la clase?",
+    "answer": "Envía un mensaje 'BIENVENUE' en el idioma de los usuarios para darles la bienvenida a la clase.",
+    "lang": "es",
+    "tags": ["interacción","bienvenida"]
+  },
+  {
+    "question": "Ki mesaj MEME Inspecteur voye lè kou a fini?",
+    "answer": "Li voye mesaj 'AUREVOIR A TOUS' pou di orevwa a tout moun.",
+    "lang": "ht",
+    "tags": ["entèaksyon","orevwa"]
+  },
+  {
+    "question": "Quel message MEME Inspecteur envoie-t-il à la fin du cours ?",
+    "answer": "Il envoie le message 'AUREVOIR A TOUS' pour dire au revoir à tous.",
+    "lang": "fr",
+    "tags": ["interaction","au revoir"]
+  },
+  {
+    "question": "What message does MEME Inspecteur send at the end of the class?",
+    "answer": "It sends the 'AUREVOIR A TOUS' message to say goodbye to everyone.",
+    "lang": "en",
+    "tags": ["interaction","goodbye"]
+  },
+  {
+    "question": "¿Qué mensaje envía MEME Inspecteur al final de la clase?",
+    "answer": "Envía el mensaje 'AUREVOIR A TOUS' para despedirse de todos.",
+    "lang": "es",
+    "tags": ["interacción","despedida"]
+  },
+  {
+    "question": "Kijan yon elèv ka mute pwòp mikwo li pandan klas la?",
+    "answer": "Li klike sou bouton 'Mute Micro' nan kontwòl li oswa entèfas elèv la.",
+    "lang": "ht",
+    "tags": ["kontwòl","mikwo"]
+  },
+  {
+    "question": "Comment un élève peut-il couper son propre micro pendant le cours ?",
+    "answer": "Il clique sur le bouton 'Mute Micro' dans ses contrôles ou l’interface élève.",
+    "lang": "fr",
+    "tags": ["contrôle","micro"]
+  },
+  {
+    "question": "How can a student mute their own microphone during class?",
+    "answer": "They click the 'Mute Micro' button in their controls or student interface.",
+    "lang": "en",
+    "tags": ["control","microphone"]
+  },
+  {
+    "question": "¿Cómo puede un estudiante silenciar su propio micrófono durante la clase?",
+    "answer": "Hace clic en el botón 'Mute Micro' en sus controles o interfaz de estudiante.",
+    "lang": "es",
+    "tags": ["control","micrófono"]
+  },
+  {
+    "question": "Kijan pwofesè ka mute tout mikwo elèv yo an menm tan?",
+    "answer": "Li klike sou bouton 'Mute All' nan kontwòl pwofesè a.",
+    "lang": "ht",
+    "tags": ["kontwòl","mikwo"]
+  },
+  {
+    "question": "Comment un professeur peut-il couper le micro de tous les élèves en même temps ?",
+    "answer": "Il clique sur le bouton 'Mute All' dans les contrôles du professeur.",
+    "lang": "fr",
+    "tags": ["contrôle","micro"]
+  },
+  {
+    "question": "How can a teacher mute all students' microphones at once?",
+    "answer": "They click the 'Mute All' button in the teacher controls.",
+    "lang": "en",
+    "tags": ["control","microphones"]
+  },
+  {
+    "question": "¿Cómo puede un profesor silenciar todos los micrófonos de los estudiantes a la vez?",
+    "answer": "Hace clic en el botón 'Mute All' en los controles del profesor.",
+    "lang": "es",
+    "tags": ["control","micrófonos"]
+  },
+  {
+    "question": "Kijan yon elev ka telechaje dokiman nan Ecole-en-ligne?",
+    "answer": "Yo klike sou lyen oswa bouton 'Télécharger' epi dosye a telechaje sou aparèy yo.",
+    "lang": "ht",
+    "tags": ["telechajman","elèv"]
+  },
+  {
+    "question": "Comment un élève peut-il télécharger un document sur Ecole-en-ligne ?",
+    "answer": "Ils cliquent sur le lien ou le bouton 'Télécharger' et le fichier est téléchargé sur leur appareil.",
+    "lang": "fr",
+    "tags": ["téléchargement","élève"]
+  },
+  {
+    "question": "How can a student download a document on Ecole-en-ligne?",
+    "answer": "They click the link or 'Download' button, and the file is downloaded to their device.",
+    "lang": "en",
+    "tags": ["download","student"]
+  },
+  {
+    "question": "¿Cómo puede un estudiante descargar un documento en Ecole-en-ligne?",
+    "answer": "Hacen clic en el enlace o botón 'Descargar' y el archivo se descarga en su dispositivo.",
+    "lang": "es",
+    "tags": ["descarga","estudiante"]
+  },
+  {
+    "question": "Ki jan pwofesè ka voye mesaj prive bay yon elèv?",
+    "answer": "Li chwazi non elèv la nan lis itilizatè a epi voye mesaj la nan chat prive.",
+    "lang": "ht",
+    "tags": ["kontwòl","chat"]
+  },
+  {
+    "question": "Comment un professeur peut-il envoyer un message privé à un élève ?",
+    "answer": "Il sélectionne le nom de l’élève dans la liste des utilisateurs et envoie le message dans le chat privé.",
+    "lang": "fr",
+    "tags": ["contrôle","chat"]
+  },
+  {
+    "question": "How can a teacher send a private message to a student?",
+    "answer": "They select the student’s name from the user list and send the message in private chat.",
+    "lang": "en",
+    "tags": ["control","chat"]
+  },
+  {
+    "question": "¿Cómo puede un profesor enviar un mensaje privado a un estudiante?",
+    "answer": "Selecciona el nombre del estudiante de la lista de usuarios y envía el mensaje en el chat privado.",
+    "lang": "es",
+    "tags": ["control","chat"]
+  },
+  {
+    "question": "Kijan MEME Inspecteur ka entèveni lè yon moun pa konprann platfòm nan?",
+    "answer": "Li itilize vwa klè epi montre kote pou klike sou ekran yo pou rezoud difikilte a.",
+    "lang": "ht",
+    "tags": ["entèaksyon","sikse"]
+  },
+  {
+    "question": "Comment MEME Inspecteur peut-il intervenir lorsqu’une personne ne comprend pas la plateforme ?",
+    "answer": "Il utilise une voix claire et montre où cliquer sur leur écran pour résoudre la difficulté.",
+    "lang": "fr",
+    "tags": ["interaction","succès"]
+  },
+  {
+    "question": "How can MEME Inspecteur intervene when someone doesn’t understand the platform?",
+    "answer": "It uses a clear voice and points to where to click on their screen to resolve the difficulty.",
+    "lang": "en",
+    "tags": ["interaction","success"]
+  },
+  {
+    "question": "¿Cómo puede MEME Inspecteur intervenir cuando alguien no entiende la plataforma?",
+    "answer": "Usa una voz clara y señala dónde hacer clic en su pantalla para resolver la dificultad.",
+    "lang": "es",
+    "tags": ["interacción","éxito"]
+  },
+  {
+    "question": "Kijan pwofesè ka wè istwa mesaj nan chat la?",
+    "answer": "Tout mesaj yo parèt nan fenèt chat la epi ka woule anlè pou wè istwa anvan yo.",
+    "lang": "ht",
+    "tags": ["kontwòl","chat"]
+  },
+  {
+    "question": "Comment un professeur peut-il voir l’historique des messages dans le chat ?",
+    "answer": "Tous les messages apparaissent dans la fenêtre de chat et on peut défiler vers le haut pour voir l’historique.",
+    "lang": "fr",
+    "tags": ["contrôle","chat"]
+  },
+  {
+    "question": "How can a teacher view chat message history?",
+    "answer": "All messages appear in the chat window and you can scroll up to see previous history.",
+    "lang": "en",
+    "tags": ["control","chat"]
+  },
+  {
+    "question": "¿Cómo puede un profesor ver el historial de mensajes en el chat?",
+    "answer": "Todos los mensajes aparecen en la ventana de chat y se puede desplazar hacia arriba para ver el historial.",
+    "lang": "es",
+    "tags": ["control","chat"]
+  },
+  {
+    "question": "Kijan yon pwofesè ka retire yon elèv nan klas la?",
+    "answer": "Li ka fè li sòti nan klas la atravè opsyon 'Kick' oswa 'Remove' nan entèfas pwofesè a.",
+    "lang": "ht",
+    "tags": ["kontwòl","elèv"]
+  },
+  {
+    "question": "Comment un professeur peut-il retirer un élève de la classe ?",
+    "answer": "Il peut le faire sortir de la classe via l’option 'Kick' ou 'Remove' dans l’interface du professeur.",
+    "lang": "fr",
+    "tags": ["contrôle","élève"]
+  },
+  {
+    "question": "How can a teacher remove a student from the class?",
+    "answer": "They can kick them out of the class using the 'Kick' or 'Remove' option in the teacher interface.",
+    "lang": "en",
+    "tags": ["control","student"]
+  },
+  {
+    "question": "¿Cómo puede un profesor sacar a un estudiante de la clase?",
+    "answer": "Puede expulsarlo de la clase usando la opción 'Kick' o 'Remove' en la interfaz del profesor.",
+    "lang": "es",
+    "tags": ["control","estudiante"]
+  },
+  {
+    "question": "Inspecteur MEME, tande plizyè moun ap pale an menm tan?",
+    "answer": "Wi, men nan klas sa a se toujou yon sèl moun ki dwe pale. Lè yon moun ap pale, tout lòt moun otomatikman fèmen mikwo yo.",
+    "lang": "ht",
+    "tags": ["entèaksyon","mikwo"]
+  },
+  {
+    "question": "Inspecteur MEME, entendez-vous plusieurs personnes parler en même temps ?",
+    "answer": "Oui, mais dans cette classe, une seule personne doit parler à la fois. Quand quelqu'un parle, tous les autres microphones sont automatiquement désactivés.",
+    "lang": "fr",
+    "tags": ["interaction","micro"]
+  },
+  {
+    "question": "Inspecteur MEME, are you hearing multiple people talking at the same time?",
+    "answer": "Yes, but in this class, only one person should speak at a time. When someone speaks, all other microphones are automatically muted.",
+    "lang": "en",
+    "tags": ["interaction","microphones"]
+  },
+  {
+    "question": "Inspector MEME, ¿estás escuchando a varias personas hablar al mismo tiempo?",
+    "answer": "Sí, pero en esta clase solo debe hablar una persona a la vez. Cuando alguien habla, todos los demás micrófonos se silencian automáticamente.",
+    "lang": "es",
+    "tags": ["interacción","micrófonos"]
+  },
   {
     "question": "Kisa yo rele Ecole-en-ligne?",
     "answer": "Ecole-en-ligne se yon platfòm aprantisaj dijital ki konekte pwofesè ak elèv an tan reyèl.",
