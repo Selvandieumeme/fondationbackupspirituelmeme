@@ -89,6 +89,9 @@
   </style>
 </head>
 <body>
+  <!-- Inspecteur MEME -->
+<img id="memeMain" src="images/meme-front.png" class="meme-inspecteur" style="position: fixed; width: 150px; height: 150px; z-index: 999;" />
+  
   <div class="wrap">
     <!-- LEFT: login panel -->
     <div class="left">
@@ -155,48 +158,111 @@
   <!-- Socket.io client (sirve si server.js ap sèvi li) -->
   <script src="/socket.io/socket.io.js"></script>
 
-  <script>
-  (function(){
-    // ==== KONEKSYON SOCKET.IO ====
-    const socket = (typeof io === 'function') ? io() : null;
+ <script>
+(function() {
+  const socket = (typeof io === 'function') ? io() : null;
+  const meme = document.getElementById('memeMain');
+  const chatMessages = document.getElementById('chatMessages');
+  const chatInput = document.getElementById('chatInput');
+  const chatSend = document.getElementById('chatSend');
 
-    // ==== DOM references ====
-    const loginForm = document.getElementById('loginForm');
-    const nameInput = document.getElementById('nameInput');
-    const langSelect = document.getElementById('langSelect');
-    const previewBtn = document.getElementById('previewBtn');
+  let MEME_QA_DATA = [];
+  let talking = false;
+  let idleTime = 0;
+  let currentCorner = 0;
 
-    const memePreview = document.getElementById('memePreview');
-    const meme = document.getElementById('memeMain');
-
-    const chatBox = document.getElementById('chatBox');
-    const chatMessages = document.getElementById('chatMessages');
-    const chatInput = document.getElementById('chatInput');
-    const chatSend = document.getElementById('chatSend');
-
-    const micToggle = document.getElementById('micToggle');
-    const teachMode = document.getElementById('teachMode');
-    const forceJoin = document.getElementById('forceJoin');
-
-    // ==== State ====
-    let USER = { id: null, name: null, lang: 'ht' };
-    let MEME_QA_DATA = [];
-    let talking = false;
-    let idleTime = 0;
-    let currentCorner = 0;
-    let idleTimer = null;
-    let micStream = null;
-    let recognition = null;
-    let speechActive = false;
-
-    // ==== Utilities ====
-    function logChat(text, cls){
-      const d = document.createElement('div');
-      d.className = 'chat-message ' + (cls||'');
-      d.textContent = text;
-      chatMessages.appendChild(d);
-      chatMessages.scrollTop = chatMessages.scrollHeight;
+  // ==== Fonksyon ekspresyon MEME ====
+  function setMemeFace(face) {
+    switch(face) {
+      case 'face-front': meme.src = 'images/meme-front.png'; break;
+      case 'face-happy': meme.src = 'images/meme-happy.png'; break;
+      case 'face-angry': meme.src = 'images/meme-angry.png'; break;
+      case 'face-sleep': meme.src = 'images/meme-sleep.png'; break;
     }
+  }
+
+  // ==== Mouvman MEME nan kwen ekran ====
+  const corners = [
+    { top: '10px', left: '10px' },
+    { top: '10px', right: '10px' },
+    { bottom: '10px', left: '10px' },
+    { bottom: '10px', right: '10px' }
+  ];
+
+  function moveMeme() {
+    if(talking) {
+      const pos = corners[currentCorner];
+      for(const key in pos) meme.style[key] = pos[key];
+      currentCorner = (currentCorner + 1) % corners.length;
+    } else {
+      idleTime += 5;
+      if(idleTime >= 300) setMemeFace('face-sleep');
+      else setMemeFace('face-front');
+    }
+    setTimeout(moveMeme, 5000);
+  }
+  moveMeme();
+
+  // ==== Repons MEME ====
+  function respond({ht, fr, en, es, tone}) {
+    idleTime = 0;
+    talking = true;
+    if(tone==='happy') setMemeFace('face-happy');
+    else if(tone==='angry') setMemeFace('face-angry');
+
+    ['ht','fr','en','es'].forEach(lang => {
+      const div = document.createElement('div');
+      div.textContent = `MEME (${lang}): ${eval(lang)}`;
+      chatMessages.appendChild(div);
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+    });
+
+    setTimeout(() => {
+      talking = false;
+      setMemeFace('face-front');
+    }, 5000);
+  }
+
+  // ==== Poze kesyon otomatik chak 15 segonn ====
+  setInterval(() => {
+    if(talking || MEME_QA_DATA.length===0) return;
+    const idx = Math.floor(Math.random() * MEME_QA_DATA.length);
+    const q = MEME_QA_DATA[idx].question;
+    respond({ht:q, fr:q, en:q, es:q, tone:'happy'});
+  }, 15000);
+
+  // ==== Chaj done MEME QA depi server ====
+  async function loadMEMEData() {
+    const res = await fetch('/api/memeqa');
+    MEME_QA_DATA = await res.json();
+  }
+  loadMEMEData();
+
+  // ==== Chat ====
+  chatSend.addEventListener('click', sendMessage);
+  chatInput.addEventListener('keypress', (e)=>{ if(e.key==='Enter') sendMessage(); });
+
+  function sendMessage() {
+    const msg = chatInput.value.trim();
+    if(!msg) return;
+    socket.emit('user-message', { text: msg });
+    chatInput.value = '';
+  }
+
+  socket.on('broadcast-message', (data)=>{
+    const div = document.createElement('div');
+    div.textContent = `${data.from}: ${data.text}`;
+    chatMessages.appendChild(div);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+  });
+
+  socket.on('meme-response', (answer)=>{ respond(answer); });
+
+})();
+
+
+
+    
 
     // ==== Load MEME QA data from server endpoint ====
     async function loadMEMEData(){
