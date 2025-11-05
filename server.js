@@ -1044,10 +1044,6 @@ app.use(express.static(__dirname));
 // ============================
 // SOCKET.IO - Kominikasyon an tan reyèl
 // ============================
-const server = http.createServer(app);
-const io = new Server(server, {
-  cors: { origin: "*" }
-});
 
 io.on('connection', (socket) => {
   console.log('🔵 Nouvo itilizatè konekte:', socket.id);
