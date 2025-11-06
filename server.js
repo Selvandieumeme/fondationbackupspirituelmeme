@@ -21,7 +21,6 @@ const upload = multer({ dest: 'uploads/' }); // default folder pou fichye upload
 const sharp = require('sharp');
 
 const fs = require('fs');           // pou sove fichye video yo
-const { Server } = require('socket.io'); // kominikasyon an tan reyèl (streaming)
 
 const ffmpeg = require('fluent-ffmpeg');
 
