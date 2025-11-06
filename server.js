@@ -10,6 +10,26 @@ const mongoose = require('mongoose');
 
 const app = express();
 
+const axios = require('axios');
+
+const morgan = require('morgan');
+app.use(morgan('dev')); // mete li kòm middleware
+
+const multer = require('multer');
+const upload = multer({ dest: 'uploads/' }); // default folder pou fichye upload
+
+const sharp = require('sharp');
+
+const fs = require('fs');           // pou sove fichye video yo
+const { Server } = require('socket.io'); // kominikasyon an tan reyèl (streaming)
+
+const ffmpeg = require('fluent-ffmpeg');
+
+const multer = require('multer');  // jere upload
+
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+
 app.use(cors());
 app.use(express.json());
 
