@@ -305,20 +305,28 @@ if(socket){
     setMemeState('walking');
   });
 
+
+
+  
   // ==== Teach mode ====
-  if(teachMode) teachMode.addEventListener('click', ()=>{
-    if(teachMode.dataset.on==='1'){
-      teachMode.dataset.on='0'; teachMode.textContent='Mòd Pwofesè';
-    } else {
-      teachMode.dataset.on='1'; teachMode.textContent='Mòd Pwofesè (ON)';
-      if(MEME_QA_DATA && MEME_QA_DATA.length){
-        const idx=Math.floor(Math.random()*MEME_QA_DATA.length);
-        const it=MEME_QA_DATA[idx];
-        const q=it.questions?(it.questions[USER.lang]||Object.values(it.questions)[0]):(it.question||'');
-        respond({ ht:q, fr:q, en:q, es:q, tone:'happy' }, USER.lang);
-      }
+if(teachMode) teachMode.addEventListener('click', ()=>{
+  if(teachMode.dataset.on==='1'){
+    teachMode.dataset.on='0'; 
+    teachMode.textContent='Mòd Pwofesè';
+  } else {
+    teachMode.dataset.on='1'; 
+    teachMode.textContent='Mòd Pwofesè (ON)';
+    if(MEME_QA_DATA && MEME_QA_DATA.length){
+      const idx = Math.floor(Math.random() * MEME_QA_DATA.length);
+      const it = MEME_QA_DATA[idx];
+      const q = it.question ? (it.question[USER.lang] || it.question.ht || it.question.en || Object.values(it.question)[0]) : '';
+      respond({ ht:q, fr:q, en:q, es:q, tone:'happy' }, USER.lang);
     }
-  });
+  }
+});
+
+
+  
 
   // ==== Socket events ====
   if(socket){
