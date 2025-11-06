@@ -176,14 +176,24 @@
 
   function sendMessage(){
     const msg = chatInput && chatInput.value.trim();
-    if(!msg || !socket) return;
-    socket.emit('user-message',{ text: msg, lang: USER.lang, user: USER.name||'Visitor', userId: USER.id });
-    if(chatInput) chatInput.value='';
-    logChat((USER.name||'Visitor')+': '+msg);
-    const ans = findAnswer(msg);
-    if(ans) respond(ans, USER.lang);
-  }
+    if(!msg) return;
 
+    // montre mesaj nan chat lokal
+    logChat((USER.name||'Visitor') + ': ' + msg);
+
+    // trete mesaj nan MEME menm si socket pa la
+    handleIncoming({ studentId: USER.id||'local', studentName: USER.name||'Visitor', msg, lang: USER.lang });
+
+    // si socket egziste, voye li tou
+    if(socket) socket.emit('user-message', { text: msg, lang: USER.lang, user: USER.name||'Visitor', userId: USER.id });
+
+    // netwaye chat input
+    chatInput.value = '';
+}
+
+
+
+  
   // ==== Find answer locally ====
   function findAnswer(text){
     if(!MEME_QA_DATA || MEME_QA_DATA.length===0) return null;
