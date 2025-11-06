@@ -19,6 +19,17 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+// kreye HTTP server sou Express app
+const server = http.createServer(app);
+
+// inisyalize Socket.io sou server la
+const io = new Server(server, {
+  cors: { origin: '*' } // swa limite ak domèn w ap itilize
+});
+
+
+
+
 /**
  * ---------- MONGODB CONNECTION ----------
  */
