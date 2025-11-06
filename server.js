@@ -963,6 +963,16 @@ io.on('connection', (socket) => {
 
 
 
+
+
+
+
+
+
+
+
+
+
 // ============================
 // MongoDB koneksyon
 // ============================
@@ -985,23 +995,6 @@ const MemeQA = mongoose.model('MemeQA', MemeSchema);
 let MEME_QA_DATA = [];
 
 
-// ==== Socket.io espesyal pou Inspecteur MEME ====
-// Le yon client mande MEME QA data, li pral voye tout dokiman otomatikman
-io.on('connection', (socket) => {
-  console.log('🟢 Nouvo koneksyon MEME oswa itilizatè:', socket.id);
-
-  // Demande done MEME QA
-  socket.on('request-memeqa', async () => {
-    try {
-      const docs = await MemeQA.find({});
-      socket.emit('load-memeqa', docs);
-      console.log(`✅ ${docs.length} dokiman MEME QA voye bay socket ${socket.id}`);
-    } catch(err) {
-      console.error('❌ Erè lè w ap chaje MEME QA:', err);
-      socket.emit('load-memeqa', []);
-    }
-  });
-});
 
 
 
@@ -1162,23 +1155,24 @@ app.use(express.static(__dirname));
 // SOCKET.IO - Kominikasyon an tan reyèl
 // ============================
 io.on('connection', (socket) => {
-  console.log('🔵 Nouvo itilizatè konekte:', socket.id);
+  console.log('🟢 Nouvo itilizatè oswa MEME konekte:', socket.id);
 
+  // ========== 1️⃣ Inspecteur MEME mande done MEME QA ==========
+  socket.on('request-memeqa', async () => {
+    try {
+      if (!MEME_QA_DATA.length) {
+        MEME_QA_DATA = await MemeQA.find({});
+        console.log("📦 Done MEME QA re-chaje otomatikman paske li te vid.");
+      }
+      socket.emit('load-memeqa', MEME_QA_DATA);
+      console.log(`📤 MEME QA (${MEME_QA_DATA.length}) voye bay ${socket.id}`);
+    } catch (err) {
+      console.error('❌ Erè pandan voye MEME QA:', err);
+      socket.emit('load-memeqa', []);
+    }
+  });
 
-// Reponn lè front-end mande tout MEME QA
-socket.on('request-memeqa', async () => {
-  try {
-    // voye tout dokiman MEME QA bay front-end
-    socket.emit('load-memeqa', MEME_QA_DATA);
-    console.log(`📤 MEME QA (${MEME_QA_DATA.length}) voye bay ${socket.id}`);
-  } catch (err) {
-    console.error('❌ Erè pandan voye MEME QA:', err);
-  }
-});
-
-
-
-	
+  // ========== 2️⃣ Fonksyonalite klas (join, leave, mute, message) ==========
   socket.on('joinClassroom', (userData) => {
     socket.join('classroom');
     console.log(`👥 ${userData.user} (${userData.lang}) rantre nan klas la.`);
@@ -1195,12 +1189,14 @@ socket.on('request-memeqa', async () => {
     io.to('classroom').emit('broadcast-message', { from: 'SYSTEM', text: `Tout moun silans, ${studentId} ap pale.` });
   });
 
+  // ========== 3️⃣ Chat itilizatè ak repons MEME QA ==========
   socket.on('user-message', (data) => {
     const { text, lang, user, userId } = data;
     console.log(`💬 ${user} (${lang}): ${text}`);
 
     io.to('classroom').emit('broadcast-message', { from: user, text });
 
+    // Chèche kesyon nan MEME_QA_DATA
     let found = null;
     for (const item of MEME_QA_DATA) {
       const qset = item.question || {};
