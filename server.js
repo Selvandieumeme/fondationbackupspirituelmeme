@@ -15,10 +15,6 @@ app.use(express.json());
 
 
 
-// inisyalize Socket.io sou server la
-const io = new Server(server, {
-  cors: { origin: '*' } // swa limite ak domèn w ap itilize
-});
 
 
 
