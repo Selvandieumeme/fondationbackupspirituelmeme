@@ -984,6 +984,30 @@ const MemeQA = mongoose.model('MemeQA', MemeSchema);
 
 let MEME_QA_DATA = [];
 
+
+// ==== Socket.io espesyal pou Inspecteur MEME ====
+// Le yon client mande MEME QA data, li pral voye tout dokiman otomatikman
+io.on('connection', (socket) => {
+  console.log('🟢 Nouvo koneksyon MEME oswa itilizatè:', socket.id);
+
+  // Demande done MEME QA
+  socket.on('request-memeqa', async () => {
+    try {
+      const docs = await MemeQA.find({});
+      socket.emit('load-memeqa', docs);
+      console.log(`✅ ${docs.length} dokiman MEME QA voye bay socket ${socket.id}`);
+    } catch(err) {
+      console.error('❌ Erè lè w ap chaje MEME QA:', err);
+      socket.emit('load-memeqa', []);
+    }
+  });
+});
+
+
+
+
+
+
 // ============================
 // Fonksyon chaje done MEME yo
 // ============================
