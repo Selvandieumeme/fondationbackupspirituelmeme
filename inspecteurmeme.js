@@ -5,6 +5,22 @@
   // ==== Socket.io ====
   const socket = (typeof io === 'function') ? io() : null;
 
+
+
+if(socket){
+  // mande otomatikman tout MEME QA nan MongoDB
+  socket.emit('request-memeqa');
+
+  // resevwa dokiman yo
+  socket.on('load-memeqa', (docs)=>{
+    MEME_QA_DATA = docs.map(d => ({ question: d.question, answer: d.answer }));
+    console.log('✅ MEME QA data chaje:', MEME_QA_DATA.length);
+  });
+}
+
+
+  
+
   // ==== DOM References ====
   const loginForm = document.getElementById('loginForm');
   const nameInput = document.getElementById('nameInput');
