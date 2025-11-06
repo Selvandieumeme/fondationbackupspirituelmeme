@@ -1090,6 +1090,27 @@ app.post('/reload-memeqa', async (req, res) => {
   }
 });
 
+
+
+
+
+
+// ==== GET endpoint pou teste nan navigatè ====
+app.get('/reload-memeqa', async (req, res) => {
+  const key = req.query.key;
+  if (key !== process.env.MEME_SECRET_KEY) {
+    return res.status(403).json({ error: '⛔ Kle sekrè pa valab!' });
+  }
+  await loadMEMEDataFromDB();
+  res.json({ success: true, count: MEME_QA_DATA.length, message: '✅ Done MEME QA re-chaje avèk siksè!' });
+});
+
+
+
+
+
+			
+
 // ============================
 // API: Pèrmèt front-end chaje kesyon yo
 // ============================
