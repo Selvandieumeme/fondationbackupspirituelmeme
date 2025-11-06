@@ -5,8 +5,6 @@
   // ==== Socket.io ====
   const socket = (typeof io === 'function') ? io() : null;
 
-
-
 if(socket){
   // mande otomatikman tout MEME QA nan MongoDB
   socket.emit('request-memeqa');
@@ -17,6 +15,7 @@ if(socket){
     console.log('✅ MEME QA data chaje:', MEME_QA_DATA.length);
   });
 }
+
 
 
   
