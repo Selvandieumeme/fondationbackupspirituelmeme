@@ -1128,18 +1128,19 @@ app.get('/reload-memeqa', async (req, res) => {
 
 			
 
-// ============================
-// API: Pèrmèt front-end chaje kesyon yo
-// ============================
 app.get('/api/memeqa', async (req, res) => {
-  try {
-    const data = await MemeQA.find({});
-    res.json(data);
-  } catch (err) {
-    console.error('❌ Erè /api/memeqa:', err);
-    res.status(500).json({ error: 'Erè chajman done MEME QA' });
-  }
+    try {
+        res.json(MEME_QA_DATA); // voye done ki deja nan memwa
+    } catch (err) {
+        console.error('❌ Erè /api/memeqa:', err);
+        res.status(500).json({ error: 'Erè pandan voye MEME QA ki nan memwa' });
+    }
 });
+
+
+
+
+
 
 // ============================
 // Serve fichye prensipal la
