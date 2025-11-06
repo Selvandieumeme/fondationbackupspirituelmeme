@@ -24,8 +24,6 @@ const fs = require('fs');           // pou sove fichye video yo
 
 const ffmpeg = require('fluent-ffmpeg');
 
-const multer = require('multer');  // jere upload
-
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
