@@ -6,12 +6,6 @@ const path = require('path');
 const http = require('http'); // ✅ TRÈ ENPÒTAN pou Socket.io mache
 const { Server } = require('socket.io');
 
-
-
-
-
-
-
 const mongoose = require('mongoose');
 
 const app = express();
@@ -62,6 +56,7 @@ const eleveSchema = new mongoose.Schema({
 });
 
 const Eleve = mongoose.model('Eleve', eleveSchema, 'eleves'); // koleksyon: "eleves"
+
 
 /**
  * ---------- ROUTES ELEVE ----------
