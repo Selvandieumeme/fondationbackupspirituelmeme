@@ -2,23 +2,34 @@
 (function(){
   console.log("👀 Inspecteur MEME client init...");
 
+  // ==== State ====
+  let USER = { id:null, name:null, lang:'ht' };
+  let MEME_QA_DATA = [];
+  let talking = false;
+  let idleTime = 0;
+  let currentCorner = 0;
+  let idleTimer = null;
+  let micStream = null;
+  let recognition = null;
+  let speechActive = false;
+
   // ==== Socket.io ====
   const socket = (typeof io === 'function') ? io() : null;
 
-if(socket){
-  // mande otomatikman tout MEME QA nan MongoDB
-  socket.emit('request-memeqa');
+  if(socket){
+    // mande otomatikman tout MEME QA nan MongoDB
+    socket.emit('request-memeqas');
 
-  // resevwa dokiman yo
-  socket.on('load-memeqa', (docs)=>{
-    MEME_QA_DATA = docs.map(d => ({ question: d.question, answer: d.answer }));
-    console.log('✅ MEME QA data chaje:', MEME_QA_DATA.length);
-  });
-}
+    // resevwa dokiman yo
+    socket.on('load-memeqa', (docs)=>{
+      MEME_QA_DATA = docs.map(d => ({ question: d.question, answer: d.answer }));
+      console.log('✅ MEME QA loaded in memory:', MEME_QA_DATA.length);
+    });
 
-
-
-  
+    // lòt events
+    socket.on('meme-response', data=>{ respond(data, USER.lang); });
+    socket.on('broadcast-message', m=>{ logChat(m.from+': '+m.text); });
+  }
 
   // ==== DOM References ====
   const loginForm = document.getElementById('loginForm');
@@ -34,17 +45,6 @@ if(socket){
   const micToggle = document.getElementById('micToggle');
   const teachMode = document.getElementById('teachMode');
   const forceJoin = document.getElementById('forceJoin');
-
-  // ==== State ====
-  let USER = { id:null, name:null, lang:'ht' };
-  let MEME_QA_DATA = [];
-  let talking = false;
-  let idleTime = 0;
-  let currentCorner = 0;
-  let idleTimer = null;
-  let micStream = null;
-  let recognition = null;
-  let speechActive = false;
 
   // ==== Utilities ====
   function logChat(text, cls){
@@ -122,20 +122,17 @@ if(socket){
     idleTime = 0;
     talking = true;
 
-    // tone
     const tone = answerObj.tone || null;
     if(tone==='happy') setMemeState('smile');
     else if(tone==='angry') setMemeState('angry');
     else setMemeState('face-front');
 
-    // show in chat
     const langs = ['ht','fr','en','es'];
     langs.forEach(L=>{
       const txt = answerObj[L] || (answerObj.responses && answerObj.responses[L]) || '';
       if(txt) logChat('MEME ('+L+'): '+txt);
     });
 
-    // speak
     const speakText = (answerObj[userLang] || answerObj.en || answerObj.ht || '');
     if(speakText) speakOutLoud(speakText, userLang);
 
@@ -152,23 +149,6 @@ if(socket){
       }
     } catch(e){ console.warn('speak error', e); }
   }
-
-  // ==== Load MEME QA data ====
-  async function loadMEMEData(){
-    try{
-      const res = await fetch('/api/memeqa');
-      if(!res.ok) throw new Error('Fetch /api/memeqa failed');
-      const data = await res.json();
-      MEME_QA_DATA = data.map(item=>{
-        return { question: item.question, answer: item.answer };
-      });
-      console.log('✅ MEME QA data loaded:', MEME_QA_DATA.length);
-    } catch(err){
-      console.warn('MEME QA load error', err);
-    }
-  }
-
-  loadMEMEData();
 
   // ==== Idle auto-question ====
   setInterval(()=>{
@@ -193,22 +173,13 @@ if(socket){
     const msg = chatInput && chatInput.value.trim();
     if(!msg) return;
 
-    // montre mesaj nan chat lokal
     logChat((USER.name||'Visitor') + ': ' + msg);
-
-    // trete mesaj nan MEME menm si socket pa la
     handleIncoming({ studentId: USER.id||'local', studentName: USER.name||'Visitor', msg, lang: USER.lang });
 
-    // si socket egziste, voye li tou
     if(socket) socket.emit('user-message', { text: msg, lang: USER.lang, user: USER.name||'Visitor', userId: USER.id });
-
-    // netwaye chat input
     chatInput.value = '';
-}
+  }
 
-
-
-  
   // ==== Find answer locally ====
   function findAnswer(text){
     if(!MEME_QA_DATA || MEME_QA_DATA.length===0) return null;
@@ -220,7 +191,6 @@ if(socket){
           if(!q) continue;
           if(q===t || q.includes(t) || t.includes(q)) return (item.answer||item.responses);
         }
-        // fallback string question
         if(typeof item.question==='string'){
           if(item.question.toLowerCase()===t || item.question.toLowerCase().includes(t)) return item.answer||item.responses;
         }
@@ -305,34 +275,22 @@ if(socket){
     setMemeState('walking');
   });
 
-
-
-  
   // ==== Teach mode ====
-if(teachMode) teachMode.addEventListener('click', ()=>{
-  if(teachMode.dataset.on==='1'){
-    teachMode.dataset.on='0'; 
-    teachMode.textContent='Mòd Pwofesè';
-  } else {
-    teachMode.dataset.on='1'; 
-    teachMode.textContent='Mòd Pwofesè (ON)';
-    if(MEME_QA_DATA && MEME_QA_DATA.length){
-      const idx = Math.floor(Math.random() * MEME_QA_DATA.length);
-      const it = MEME_QA_DATA[idx];
-      const q = it.question ? (it.question[USER.lang] || it.question.ht || it.question.en || Object.values(it.question)[0]) : '';
-      respond({ ht:q, fr:q, en:q, es:q, tone:'happy' }, USER.lang);
+  if(teachMode) teachMode.addEventListener('click', ()=>{
+    if(teachMode.dataset.on==='1'){
+      teachMode.dataset.on='0'; 
+      teachMode.textContent='Mòd Pwofesè';
+    } else {
+      teachMode.dataset.on='1'; 
+      teachMode.textContent='Mòd Pwofesè (ON)';
+      if(MEME_QA_DATA && MEME_QA_DATA.length){
+        const idx = Math.floor(Math.random() * MEME_QA_DATA.length);
+        const it = MEME_QA_DATA[idx];
+        const q = it.question ? (it.question[USER.lang] || it.question.ht || it.question.en || Object.values(it.question)[0]) : '';
+        respond({ ht:q, fr:q, en:q, es:q, tone:'happy' }, USER.lang);
+      }
     }
-  }
-});
-
-
-  
-
-  // ==== Socket events ====
-  if(socket){
-    socket.on('meme-response', data=>{ respond(data, USER.lang); });
-    socket.on('broadcast-message', m=>{ logChat(m.from+': '+m.text); });
-  }
+  });
 
   // ==== On unload ====
   window.addEventListener('beforeunload', ()=>{
@@ -341,5 +299,5 @@ if(teachMode) teachMode.addEventListener('click', ()=>{
   });
 
   // ==== expose ====
-  window.MEME = { respond, setMemeState, loadMEMEData, handleIncoming };
+  window.MEME = { respond, setMemeState, handleIncoming };
 })();
