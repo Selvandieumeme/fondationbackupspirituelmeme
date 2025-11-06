@@ -1164,6 +1164,21 @@ app.use(express.static(__dirname));
 io.on('connection', (socket) => {
   console.log('🔵 Nouvo itilizatè konekte:', socket.id);
 
+
+// Reponn lè front-end mande tout MEME QA
+socket.on('request-memeqa', async () => {
+  try {
+    // voye tout dokiman MEME QA bay front-end
+    socket.emit('load-memeqa', MEME_QA_DATA);
+    console.log(`📤 MEME QA (${MEME_QA_DATA.length}) voye bay ${socket.id}`);
+  } catch (err) {
+    console.error('❌ Erè pandan voye MEME QA:', err);
+  }
+});
+
+
+
+	
   socket.on('joinClassroom', (userData) => {
     socket.join('classroom');
     console.log(`👥 ${userData.user} (${userData.lang}) rantre nan klas la.`);
