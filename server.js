@@ -1061,41 +1061,57 @@ io.on('connection', (socket) => {
     }
   });
 
-  // 2️⃣ — Repons pou yon kesyon espesifik
-  socket.on('ask-meme', (msgData) => {
-    const { question, lang } = msgData;
-    if (!question || !lang) return;
+ socket.on('ask-meme', (msgData) => {
+  const { question, lang } = msgData;
+  if (!question || !lang) return;
 
-    const qNorm = question.trim().toLowerCase();
-    const found = MEME_QA_DATA.find(item =>
+  const qNorm = question.trim().toLowerCase();
+
+  // Chèche nan done yo pa kesyon
+  let found = MEME_QA_DATA.find(item =>
+    item.lang === lang &&
+    item.question.trim().toLowerCase() === qNorm
+  );
+
+
+
+
+	 
+  // Si pa jwenn, chèche nan tags
+  if (!found) {
+    found = MEME_QA_DATA.find(item => 
       item.lang === lang &&
-      item.question.trim().toLowerCase() === qNorm
+      item.tags &&
+      item.tags.some(tag => tag.toLowerCase() === qNorm)
     );
+  }
 
-    if (found) {
-      socket.emit('meme-answer', {
-        lang: lang,
-        answer: found.answer,
-        known: true
-      });
-      console.log(`💬 MEME reponn kesyon (${lang}): "${question}"`);
-    } else {
-      const defaultResponses = {
-        ht: "M pa genyen repons sa kounye a, men mwen ka aprann li.",
-        fr: "Je n’ai pas encore cette réponse, mais je peux l’apprendre.",
-        en: "I don’t have that answer yet, but I can learn it.",
-        es: "No tengo esa respuesta todavía, pero puedo aprenderla."
-      };
+  if (found) {
+    socket.emit('meme-answer', { 
+      lang: lang, 
+      answer: found.answer,
+      known: true 
+    });
+    console.log(`💬 MEME reponn kesyon (${lang}): "${question}"`);
+  } else {
+    const defaultResponses = {
+      ht: "M pa genyen repons sa kounye a, men mwen ka aprann li.",
+      fr: "Je n’ai pas encore cette réponse, mais je peux l’apprendre.",
+      en: "I don’t have that answer yet, but I can learn it.",
+      es: "No tengo esa respuesta todavía, pero puedo aprenderla."
+    };
 
-      socket.emit('meme-answer', {
-        lang: lang,
-        answer: defaultResponses[lang] || defaultResponses.en,
-        known: false
-      });
+    socket.emit('meme-answer', { 
+      lang: lang, 
+      answer: defaultResponses[lang] || defaultResponses.en,
+      known: false 
+    });
 
-      console.log(`🤔 MEME pa konnen kesyon (${lang}): "${question}"`);
-    }
-  });
+	  
+
+    console.log(`🤔 MEME pa konnen kesyon (${lang}): "${question}"`);
+  }
+});
 
   // 3️⃣ — Mizajou fichye si gen nouvo done (pa obligatwa si ou pa modifye soti front-end)
   socket.on('update-memeqa', (newData) => {
