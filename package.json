@@ -1,7 +1,7 @@
 {
   "name": "fondation-backup-spirituel-chat",
   "version": "1.0.0",
-HEAD
+
   "description": "Backend for Fondation Backup Spirituel Chat",
   "main": "server.js",
   "scripts": {
