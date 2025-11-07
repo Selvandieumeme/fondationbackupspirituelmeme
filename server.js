@@ -1015,8 +1015,6 @@ app.use(express.static(path.join(__dirname, 'public'))); // rete konsa, se pou d
 // ============================
 // MEME QA JSON MANAGEMENT
 // ============================
-const fs = require('fs');  // ← sa te manke sou Render, li obligatwa
-const path = require('path');
 
 // Asire nou itilize chemen rasin pwojè a, pa 'public'
 const MEME_QA_PATH = path.join(__dirname, 'meme_qa_data.json');
