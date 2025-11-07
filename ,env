@@ -1,2 +1,1 @@
-MONGO_URI=mongodb+srv://<user>:<motdepasse>@<cluster>.mongodb.net/<database>
-PORT=4000
+
