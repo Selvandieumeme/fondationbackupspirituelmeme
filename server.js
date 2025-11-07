@@ -3,68 +3,32 @@
 // ============================
 require('dotenv').config(); // ✅ Kenbe sa nan tèt
 
-// ============================
-// Core & Express
-// ============================
+require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
-const http = require('http'); // Trè enpòtan pou Socket.io
+const http = require('http');
 const { Server } = require('socket.io');
-
-// ============================
-// MongoDB & Mongoose
-// ============================
 const mongoose = require('mongoose');
-const connectMongo = require('connect-mongo');
-
-// ============================
-// Middleware & Utils
-// ============================
-const session = require('express-session');
-const rateLimit = require('express-rate-limit');
-const { body, validationResult } = require('express-validator');
-const morgan = require('morgan');
-const multer = require('multer');
 const axios = require('axios');
 const bcryptjs = require('bcryptjs');
+const connectMongo = require('connect-mongo');
+const rateLimit = require('express-rate-limit');
+const session = require('express-session');
+const { body, validationResult } = require('express-validator');
+const ffmpeg = require('fluent-ffmpeg');
+const { parse } = require('json2csv');
 const jwt = require('jsonwebtoken');
+const morgan = require('morgan');
+const multer = require('multer');
 const nodemailer = require('nodemailer');
 const Pusher = require('pusher');
 const sharp = require('sharp');
-const ffmpeg = require('fluent-ffmpeg');
-const { parse } = require('json2csv');
 
-// ============================
-// App Initialization
-// ============================
-const app = express();
 
-// ============================
-// Middleware
-// ============================
-app.use(cors());
+const app = express(); 
+app.use(cors()); 
 app.use(express.json());
-app.use(morgan('dev'));
-
-// ============================
-// Server & Socket.io
-// ============================
-const server = http.createServer(app);
-const io = new Server(server, {
-  cors: {
-    origin: '*',
-  }
-});
-
-// ============================
-// Export app & server si bezwen
-// ============================
-module.exports = { app, server, io };
-
-
-
-
 
 
 /**
