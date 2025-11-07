@@ -192,26 +192,33 @@ socket.on('load-memeqa', (docs) => {
 
 
   
- // ==== Find answer locally ====
-function findAnswer(text, userLang) {
-  if(!MEME_QA_DATA || MEME_QA_DATA.length === 0) return null;
+function findAnswer(text){
+  if(!MEME_QA_DATA || MEME_QA_DATA.length===0) return null;
   const t = text.toLowerCase();
-
   for(const item of MEME_QA_DATA){
-    // sèlman kesyon ki nan menm lang ak itilizatè a
-    if(item.lang !== userLang) continue;
+    // Chèche pa question
+    if(item.question){
+      if(typeof item.question==='string'){
+        if(item.question.toLowerCase()===t || item.question.toLowerCase().includes(t)) 
+          return item.answer || item.responses;
+      } else {
+        for(const k of Object.keys(item.question)){
+          const q = (item.question[k]||'').toLowerCase();
+          if(!q) continue;
+          if(q===t || q.includes(t) || t.includes(q)) 
+            return item.answer || item.responses;
+        }
+      }
+    }
 
-    const q = (item.question || '').toLowerCase();
-    if(!q) continue;
-
-    // konpare kesyon an ak sa itilizatè a te ekri
-    if(q === t || q.includes(t) || t.includes(q)){
-      return item.answer || null;
+    // Chèche pa tags
+    if(item.tags && item.tags.some(tag => tag.toLowerCase() === t)){
+      return item.answer || item.responses;
     }
   }
-
   return null;
 }
+
 
 
   
