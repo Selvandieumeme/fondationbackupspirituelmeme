@@ -1,19 +1,66 @@
-// server.js
-require('dotenv').config();
+// ============================
+// Environment Variables
+// ============================
+require('dotenv').config(); // ✅ Kenbe sa nan tèt
+
+// ============================
+// Core & Express
+// ============================
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
-const http = require('http'); // ✅ TRÈ ENPÒTAN pou Socket.io mache
+const http = require('http'); // Trè enpòtan pou Socket.io
 const { Server } = require('socket.io');
 
+// ============================
+// MongoDB & Mongoose
+// ============================
 const mongoose = require('mongoose');
+const connectMongo = require('connect-mongo');
 
+// ============================
+// Middleware & Utils
+// ============================
+const session = require('express-session');
+const rateLimit = require('express-rate-limit');
+const { body, validationResult } = require('express-validator');
+const morgan = require('morgan');
+const multer = require('multer');
+const axios = require('axios');
+const bcryptjs = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+const nodemailer = require('nodemailer');
+const Pusher = require('pusher');
+const sharp = require('sharp');
+const ffmpeg = require('fluent-ffmpeg');
+const { parse } = require('json2csv');
+
+// ============================
+// App Initialization
+// ============================
 const app = express();
 
-
+// ============================
+// Middleware
+// ============================
 app.use(cors());
 app.use(express.json());
+app.use(morgan('dev'));
 
+// ============================
+// Server & Socket.io
+// ============================
+const server = http.createServer(app);
+const io = new Server(server, {
+  cors: {
+    origin: '*',
+  }
+});
+
+// ============================
+// Export app & server si bezwen
+// ============================
+module.exports = { app, server, io };
 
 
 
