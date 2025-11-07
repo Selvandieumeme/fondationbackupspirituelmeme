@@ -1009,14 +1009,14 @@ const MemeSchema = new mongoose.Schema({
   answer: Object,      // { ht:"", fr:"", en:"", es:"", tone:"happy" }
   lang: [String],
   tags: [String]
-}, { collection: 'memeqas' }); // itilize koleksyon memeqas
+}, { collection: 'memeqas' });
 
 const MemeQA = mongoose.model('MemeQA', MemeSchema);
 
 let MEME_QA_DATA = [];
 
 // ============================
-// Fonksyon chaje done MEME yo ak normalize
+// Chaje MEME QA nan memwa ak normalize
 // ============================
 async function loadMEMEDataFromDB() {
   try {
@@ -1025,7 +1025,7 @@ async function loadMEMEDataFromDB() {
       // Normalize repons
       let ansObj = {};
       if(typeof d.answer === 'string') {
-        ansObj = { ht: d.answer, fr: d.answer, en: d.answer, es: d.answer, tone: 'neutral' };
+        ansObj = { ht:d.answer, fr:d.answer, en:d.answer, es:d.answer, tone:'neutral' };
       } else {
         ansObj = { 
           ht: d.answer.ht || '', 
@@ -1039,7 +1039,7 @@ async function loadMEMEDataFromDB() {
       // Normalize kesyon
       let qObj = {};
       if(typeof d.question === 'string'){
-        qObj = { ht: d.question, fr: d.question, en: d.question, es: d.question };
+        qObj = { ht:d.question, fr:d.question, en:d.question, es:d.question };
       } else {
         qObj = d.question;
       }
@@ -1060,78 +1060,6 @@ loadMEMEDataFromDB();
 
 // Rechaje done otomatik chak 10 minit
 setInterval(loadMEMEDataFromDB, 10 * 60 * 1000);
-
-// ============================
-// Seed done inisyal si koleksyon an vid
-// ============================
-async function seedInitialMEMEData() {
-  try {
-    const count = await MemeQA.countDocuments();
-    if (count === 0) {
-      const initialData = [
-        {
-          question: {
-            ht: "Kisa ou ye?",
-            fr: "Qui es-tu?",
-            en: "Who are you?",
-            es: "¿Quién eres tú?"
-          },
-          answer: {
-            ht: "Mwen se Inspecteur MEME, asistan entelijan lekòl an liy lan!",
-            fr: "Je suis Inspecteur MEME, l’assistant intelligent de l’école en ligne !",
-            en: "I’m Inspector MEME, the intelligent assistant of the online school!",
-            es: "¡Soy el Inspector MEME, el asistente inteligente de la escuela en línea!",
-            tone: "happy"
-          },
-          lang: ["ht", "fr", "en", "es"],
-          tags: ["entwodiksyon", "identite"]
-        },
-        {
-          question: {
-            ht: "Ki misyon ou?",
-            fr: "Quelle est ta mission?",
-            en: "What is your mission?",
-            es: "¿Cuál es tu misión?"
-          },
-          answer: {
-            ht: "Misyon mwen se ede elèv ak pwofesè konprann pi byen, aprann pi vit, epi rete konekte.",
-            fr: "Ma mission est d’aider les élèves et professeurs à mieux comprendre, apprendre plus vite et rester connectés.",
-            en: "My mission is to help students and teachers understand better, learn faster, and stay connected.",
-            es: "Mi misión es ayudar a los estudiantes y profesores a comprender mejor, aprender más rápido y mantenerse conectados.",
-            tone: "calm"
-          },
-          lang: ["ht", "fr", "en", "es"],
-          tags: ["misyon", "aide", "ecole"]
-        },
-        {
-          question: {
-            ht: "Kijan ou fonksyone?",
-            fr: "Comment tu fonctionnes?",
-            en: "How do you work?",
-            es: "¿Cómo funcionas?"
-          },
-          answer: {
-            ht: "Mwen sèvi ak done ak entèlijans atifisyèl pou reponn kesyon w yo ak ede w nan aprantisaj ou.",
-            fr: "J’utilise des données et de l’intelligence artificielle pour répondre à vos questions et vous aider dans votre apprentissage.",
-            en: "I use data and artificial intelligence to answer your questions and assist your learning.",
-            es: "Utilizo datos e inteligencia artificial para responder a tus preguntas y ayudarte a aprender.",
-            tone: "informative"
-          },
-          lang: ["ht", "fr", "en", "es"],
-          tags: ["fonctionnement", "ia", "aide"]
-        }
-      ];
-
-      await MemeQA.insertMany(initialData);
-      console.log("🌱 MEME QA done inisyal yo te ajoute nan MongoDB!");
-    } else {
-      console.log(`ℹ️ ${count} dokiman deja egziste nan koleksyon MemeQA.`);
-    }
-  } catch (err) {
-    console.error('❌ Erè pandan enjeksyon done inisyal:', err);
-  }
-}
-seedInitialMEMEData();
 
 // ============================
 // API: Rechajman manyèl ak sekirite
@@ -1160,9 +1088,6 @@ app.get('/reload-memeqa', async (req, res) => {
   res.json({ success: true, count: MEME_QA_DATA.length, message: '✅ Done MEME QA re-chaje avèk siksè!' });
 });
 
-// ============================
-// Endpoint pou teste nan navigatè oswa app
-// ============================
 app.get('/api/memeqa', async (req, res) => {
     try {
         res.json(MEME_QA_DATA); // voye done ki deja nan memwa
@@ -1179,7 +1104,6 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'inspecteurmeme.html'));
 });
 
-// Serve fichye estatik (CSS, JS, images…)
 app.use(express.static(__dirname));
 
 // ============================
@@ -1188,12 +1112,11 @@ app.use(express.static(__dirname));
 io.on('connection', (socket) => {
   console.log('🟢 Nouvo itilizatè oswa MEME konekte:', socket.id);
 
-  // ========== 1️⃣ Inspecteur MEME mande done MEME QA ==========
+  // ========== Inspecteur MEME mande done MEME QA ==========
   socket.on('request-memeqa', async () => { 
     try {
       if (!MEME_QA_DATA.length) {
         await loadMEMEDataFromDB();
-        console.log("📦 Done MEME QA re-chaje otomatikman paske li te vid.");
       }
       socket.emit('load-memeqa', MEME_QA_DATA);
       console.log(`📤 MEME QA (${MEME_QA_DATA.length}) voye bay ${socket.id}`);
@@ -1203,7 +1126,7 @@ io.on('connection', (socket) => {
     }
   });
 
-  // ========== 2️⃣ Fonksyonalite klas (join, leave, mute, message) ==========
+  // ========== Fonksyonalite klas (join, leave, mute, message) ==========
   socket.on('joinClassroom', (userData) => {
     socket.join('classroom');
     console.log(`👥 ${userData.user} (${userData.lang}) rantre nan klas la.`);
@@ -1220,7 +1143,7 @@ io.on('connection', (socket) => {
     io.to('classroom').emit('broadcast-message', { from: 'SYSTEM', text: `Tout moun silans, ${studentId} ap pale.` });
   });
 
-  // ========== 3️⃣ Chat itilizatè ak repons MEME QA ==========
+  // ========== Chat itilizatè ak repons MEME QA ==========
   socket.on('user-message', (data) => {
     const { text, lang, user, userId } = data;
     console.log(`💬 ${user} (${lang}): ${text}`);
@@ -1256,7 +1179,6 @@ io.on('connection', (socket) => {
     console.log('🔴 Itilizatè dekonekte:', socket.id);
   });
 });
-
 
 // 🚀 DEMARRE SERVEUR
 // ---------------------------
