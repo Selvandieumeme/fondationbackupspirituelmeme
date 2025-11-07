@@ -985,6 +985,15 @@ io.on('connection', (socket) => {
 
 
 
+
+
+
+
+
+
+
+
+
 // ============================
 // MongoDB koneksyon
 // ============================
@@ -993,38 +1002,64 @@ mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopol
   .catch(err => console.error('❌ Erè MongoDB:', err));
 
 // ============================
-// Schéma & Modèl MEME QA
+// Schéma & Modèl MEME QA (koleksyon memeqas)
 // ============================
 const MemeSchema = new mongoose.Schema({
   question: Object,    // { ht:"", fr:"", en:"", es:"" }
   answer: Object,      // { ht:"", fr:"", en:"", es:"", tone:"happy" }
   lang: [String],
   tags: [String]
-});
+}, { collection: 'memeqas' }); // itilize koleksyon memeqas
 
 const MemeQA = mongoose.model('MemeQA', MemeSchema);
 
 let MEME_QA_DATA = [];
 
-
-
-
-
-
-
-
 // ============================
-// Fonksyon chaje done MEME yo
+// Fonksyon chaje done MEME yo ak normalize
 // ============================
 async function loadMEMEDataFromDB() {
   try {
-    MEME_QA_DATA = await MemeQA.find({});
+    const rawData = await MemeQA.find({});
+    MEME_QA_DATA = rawData.map(d => {
+      // Normalize repons
+      let ansObj = {};
+      if(typeof d.answer === 'string') {
+        ansObj = { ht: d.answer, fr: d.answer, en: d.answer, es: d.answer, tone: 'neutral' };
+      } else {
+        ansObj = { 
+          ht: d.answer.ht || '', 
+          fr: d.answer.fr || '', 
+          en: d.answer.en || '', 
+          es: d.answer.es || '', 
+          tone: d.answer.tone || 'neutral' 
+        };
+      }
+
+      // Normalize kesyon
+      let qObj = {};
+      if(typeof d.question === 'string'){
+        qObj = { ht: d.question, fr: d.question, en: d.question, es: d.question };
+      } else {
+        qObj = d.question;
+      }
+
+      return {
+        ...d.toObject(),
+        answer: ansObj,
+        question: qObj
+      };
+    });
+
     console.log(`✅ MEME QA data (${MEME_QA_DATA.length}) chaje depi MongoDB!`);
   } catch (err) {
     console.error('❌ Erè pandan chajman MEME QA data:', err);
   }
 }
 loadMEMEDataFromDB();
+
+// Rechaje done otomatik chak 10 minit
+setInterval(loadMEMEDataFromDB, 10 * 60 * 1000);
 
 // ============================
 // Seed done inisyal si koleksyon an vid
@@ -1098,9 +1133,6 @@ async function seedInitialMEMEData() {
 }
 seedInitialMEMEData();
 
-// Rechaje done otomatik chak 10 minit
-setInterval(loadMEMEDataFromDB, 10 * 60 * 1000);
-
 // ============================
 // API: Rechajman manyèl ak sekirite
 // ============================
@@ -1119,12 +1151,6 @@ app.post('/reload-memeqa', async (req, res) => {
   }
 });
 
-
-
-
-
-
-// ==== GET endpoint pou teste nan navigatè ====
 app.get('/reload-memeqa', async (req, res) => {
   const key = req.query.key;
   if (key !== process.env.MEME_SECRET_KEY) {
@@ -1134,12 +1160,9 @@ app.get('/reload-memeqa', async (req, res) => {
   res.json({ success: true, count: MEME_QA_DATA.length, message: '✅ Done MEME QA re-chaje avèk siksè!' });
 });
 
-
-
-
-
-			
-
+// ============================
+// Endpoint pou teste nan navigatè oswa app
+// ============================
 app.get('/api/memeqa', async (req, res) => {
     try {
         res.json(MEME_QA_DATA); // voye done ki deja nan memwa
@@ -1148,11 +1171,6 @@ app.get('/api/memeqa', async (req, res) => {
         res.status(500).json({ error: 'Erè pandan voye MEME QA ki nan memwa' });
     }
 });
-
-
-
-
-
 
 // ============================
 // Serve fichye prensipal la
@@ -1171,10 +1189,10 @@ io.on('connection', (socket) => {
   console.log('🟢 Nouvo itilizatè oswa MEME konekte:', socket.id);
 
   // ========== 1️⃣ Inspecteur MEME mande done MEME QA ==========
-  socket.on('request-memeqa', async () => {
+  socket.on('request-memeqa', async () => { 
     try {
       if (!MEME_QA_DATA.length) {
-        MEME_QA_DATA = await MemeQA.find({});
+        await loadMEMEDataFromDB();
         console.log("📦 Done MEME QA re-chaje otomatikman paske li te vid.");
       }
       socket.emit('load-memeqa', MEME_QA_DATA);
@@ -1238,7 +1256,6 @@ io.on('connection', (socket) => {
     console.log('🔴 Itilizatè dekonekte:', socket.id);
   });
 });
-
 
 
 // 🚀 DEMARRE SERVEUR
