@@ -993,131 +993,59 @@ io.on('connection', (socket) => {
 
 
 
+// ============================
+// MONGODB CONNECTION
+// ============================
+mongoose.connect(process.env.MONGO_URI, { 
+  useNewUrlParser: true, 
+  useUnifiedTopology: true 
+})
+.then(() => console.log('✅ MongoDB konekte avèk siksè!'))
+.catch(err => console.error('❌ Erè MongoDB:', err));
 
 // ============================
-// MongoDB koneksyon
+// ROUTES / MIDDLEWARE
 // ============================
-mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
-  .then(() => console.log('✅ MongoDB konekte avèk siksè!'))
-  .catch(err => console.error('❌ Erè MongoDB:', err));
+app.use(express.json());
+app.use(express.static('public'));
 
 // ============================
-// Schéma & Modèl MEME QA (koleksyon memeqas)
+// MEME QA JSON MANAGEMENT
 // ============================
-const MemeSchema = new mongoose.Schema({
-  question: Object,    // { ht:"", fr:"", en:"", es:"" }
-  answer: Object,      // { ht:"", fr:"", en:"", es:"", tone:"happy" }
-  lang: [String],
-  tags: [String]
-}, { collection: 'memeqas' });
-
-const MemeQA = mongoose.model('MemeQA', MemeSchema);
-
+const MEME_QA_PATH = path.join(__dirname, 'meme_qa_data.json');
 let MEME_QA_DATA = [];
 
-// ============================
-// Chaje MEME QA nan memwa ak normalize
-// ============================
-async function loadMEMEDataFromDB() {
+// Fonksyon pou chaje fichye a
+function loadMEMEDataFromFile() {
   try {
-    const rawData = await MemeQA.find({});
-    MEME_QA_DATA = rawData.map(d => {
-      // Normalize repons
-      let ansObj = {};
-      if(typeof d.answer === 'string') {
-        ansObj = { ht:d.answer, fr:d.answer, en:d.answer, es:d.answer, tone:'neutral' };
-      } else {
-        ansObj = { 
-          ht: d.answer.ht || '', 
-          fr: d.answer.fr || '', 
-          en: d.answer.en || '', 
-          es: d.answer.es || '', 
-          tone: d.answer.tone || 'neutral' 
-        };
-      }
-
-      // Normalize kesyon
-      let qObj = {};
-      if(typeof d.question === 'string'){
-        qObj = { ht:d.question, fr:d.question, en:d.question, es:d.question };
-      } else {
-        qObj = d.question;
-      }
-
-      return {
-        ...d.toObject(),
-        answer: ansObj,
-        question: qObj
-      };
-    });
-
-    console.log(`✅ MEME QA data (${MEME_QA_DATA.length}) chaje depi MongoDB!`);
+    const raw = fs.readFileSync(MEME_QA_PATH, 'utf-8');
+    MEME_QA_DATA = JSON.parse(raw);
+    console.log(`✅ MEME QA data (${MEME_QA_DATA.length}) chaje depi ${MEME_QA_PATH}`);
   } catch (err) {
-    console.error('❌ Erè pandan chajman MEME QA data:', err);
+    console.error('❌ Erè pandan lekti meme_qa_data.json:', err);
   }
 }
-loadMEMEDataFromDB();
 
-// Rechaje done otomatik chak 10 minit
-setInterval(loadMEMEDataFromDB, 10 * 60 * 1000);
+// Premye chajman
+loadMEMEDataFromFile();
 
-// ============================
-// API: Rechajman manyèl ak sekirite
-// ============================
-app.post('/reload-memeqa', async (req, res) => {
-  try {
-    const key = req.query.key || req.body.key;
-    if (key !== process.env.MEME_SECRET_KEY) {
-      return res.status(403).json({ error: '⛔ Kle sekrè pa valab!' });
-    }
-
-    await loadMEMEDataFromDB();
-    res.json({ success: true, count: MEME_QA_DATA.length, message: '✅ Done MEME QA re-chaje avèk siksè!' });
-  } catch (err) {
-    console.error('❌ Erè /reload-memeqa:', err);
-    res.status(500).json({ error: 'Erè pandan rechajman done yo.' });
-  }
-});
-
-app.get('/reload-memeqa', async (req, res) => {
-  const key = req.query.key;
-  if (key !== process.env.MEME_SECRET_KEY) {
-    return res.status(403).json({ error: '⛔ Kle sekrè pa valab!' });
-  }
-  await loadMEMEDataFromDB();
-  res.json({ success: true, count: MEME_QA_DATA.length, message: '✅ Done MEME QA re-chaje avèk siksè!' });
-});
-
-app.get('/api/memeqa', async (req, res) => {
-    try {
-        res.json(MEME_QA_DATA); // voye done ki deja nan memwa
-    } catch (err) {
-        console.error('❌ Erè /api/memeqa:', err);
-        res.status(500).json({ error: 'Erè pandan voye MEME QA ki nan memwa' });
-    }
+// Rekòmanse otomatikman lè fichye a chanje
+fs.watchFile(MEME_QA_PATH, (curr, prev) => {
+  console.log('🔄 Chanjman detekte nan meme_qa_data.json — rechaje done yo...');
+  loadMEMEDataFromFile();
 });
 
 // ============================
-// Serve fichye prensipal la
-// ============================
-app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'inspecteurmeme.html'));
-});
-
-app.use(express.static(__dirname));
-
-// ============================
-// SOCKET.IO - Kominikasyon an tan reyèl
+// SOCKET.IO HANDLERS
 // ============================
 io.on('connection', (socket) => {
-  console.log('🟢 Nouvo itilizatè oswa MEME konekte:', socket.id);
+  console.log(`🟢 Nouvo koneksyon: ${socket.id}`);
 
-  // ========== Inspecteur MEME mande done MEME QA ==========
-  socket.on('request-memeqa', async () => { 
+  // ----------------------------
+  // 1️⃣ Mande tout Q/A
+  // ----------------------------
+  socket.on('request-memeqa', async () => {
     try {
-      if (!MEME_QA_DATA.length) {
-        await loadMEMEDataFromDB();
-      }
       socket.emit('load-memeqa', MEME_QA_DATA);
       console.log(`📤 MEME QA (${MEME_QA_DATA.length}) voye bay ${socket.id}`);
     } catch (err) {
@@ -1126,59 +1054,69 @@ io.on('connection', (socket) => {
     }
   });
 
-  // ========== Fonksyonalite klas (join, leave, mute, message) ==========
-  socket.on('joinClassroom', (userData) => {
-    socket.join('classroom');
-    console.log(`👥 ${userData.user} (${userData.lang}) rantre nan klas la.`);
-    io.to('classroom').emit('broadcast-message', { from: 'SYSTEM', text: `${userData.user} te rantre nan klas la.` });
-  });
+  // ----------------------------
+  // 2️⃣ Repons a kesyon espesifik (CHAT)
+  // ----------------------------
+  socket.on('ask-meme', (msgData) => {
+    const { question, lang } = msgData;
+    if (!question || !lang) return;
 
-  socket.on('leaveClassroom', (userData) => {
-    socket.leave('classroom');
-    console.log(`🚪 ${userData.userId || socket.id} kite klas la.`);
-  });
+    // Normalize kesyon an pou fasil rechèch
+    const qNorm = question.trim().toLowerCase();
 
-  socket.on('muteAllExcept', (studentId) => {
-    console.log(`🔇 Mute tout moun eksepte ${studentId}`);
-    io.to('classroom').emit('broadcast-message', { from: 'SYSTEM', text: `Tout moun silans, ${studentId} ap pale.` });
-  });
+    // Chèche nan done yo
+    const found = MEME_QA_DATA.find(item => 
+      item.lang === lang && 
+      item.question.trim().toLowerCase() === qNorm
+    );
 
-  // ========== Chat itilizatè ak repons MEME QA ==========
-  socket.on('user-message', (data) => {
-    const { text, lang, user, userId } = data;
-    console.log(`💬 ${user} (${lang}): ${text}`);
+    if (found) {
+      // Voye repons ki soti nan JSON lan
+      socket.emit('meme-answer', { 
+        lang: lang, 
+        answer: found.answer,
+        known: true 
+      });
+      console.log(`💬 MEME reponn kesyon (${lang}): "${question}"`);
+    } 
+    else {
+      // Si kesyon pa egziste — voye mesaj ofisyèl
+      const defaultResponses = {
+        ht: "M pa genyen repons sa kounye a, men mwen ka aprann li.",
+        fr: "Je n’ai pas encore cette réponse, mais je peux l’apprendre.",
+        en: "I don’t have that answer yet, but I can learn it.",
+        es: "No tengo esa respuesta todavía, pero puedo aprenderla."
+      };
 
-    io.to('classroom').emit('broadcast-message', { from: user, text });
+      socket.emit('meme-answer', { 
+        lang: lang, 
+        answer: defaultResponses[lang] || defaultResponses.en,
+        known: false 
+      });
 
-    // Chèche kesyon nan MEME_QA_DATA
-    let found = null;
-    for (const item of MEME_QA_DATA) {
-      const qset = item.question || {};
-      for (const key of Object.keys(qset)) {
-        if (qset[key]?.toLowerCase() === text.toLowerCase()) {
-          found = item;
-          break;
-        }
-      }
-      if (found) break;
+      console.log(`🤔 MEME pa konnen kesyon (${lang}): "${question}"`);
     }
+  });
 
-    let response = found?.answer || {
-      ht: 'Mwen pa genyen repons sa ankò, men mwen ka aprann li.',
-      fr: 'Je n’ai pas encore cette réponse, mais je peux l’apprendre.',
-      en: 'I don’t have this answer yet, but I can learn it.',
-      es: 'No tengo esta respuesta todavía, pero puedo aprenderla.',
-      tone: 'neutral'
-    };
-
-    socket.emit('meme-response', response);
-    io.to('classroom').emit('meme-response', response);
+  // ----------------------------
+  // 3️⃣ Mizajou fichye si gen nouvo done
+  // ----------------------------
+  socket.on('update-memeqa', (newData) => {
+    try {
+      fs.writeFileSync(MEME_QA_PATH, JSON.stringify(newData, null, 2));
+      MEME_QA_DATA = newData;
+      io.emit('load-memeqa', MEME_QA_DATA);
+      console.log('📝 MEME QA mizajou avèk siksè & voye bay tout kliyan.');
+    } catch (err) {
+      console.error('❌ Erè pandan ekriti meme_qa_data.json:', err);
+    }
   });
 
   socket.on('disconnect', () => {
-    console.log('🔴 Itilizatè dekonekte:', socket.id);
+    console.log(`🔴 Itilizatè dekonekte: ${socket.id}`);
   });
 });
+
 
 // 🚀 DEMARRE SERVEUR
 // ---------------------------
