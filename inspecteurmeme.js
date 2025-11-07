@@ -18,14 +18,22 @@
 
   if(socket){
     // mande otomatikman tout MEME QA nan MongoDB
-    socket.emit('request-memeqas');
+    socket.emit('request-memeqa');
+
 
     // resevwa dokiman yo
-    socket.on('load-memeqa', (docs)=>{
-      MEME_QA_DATA = docs.map(d => ({ question: d.question, answer: d.answer }));
-      console.log('✅ MEME QA loaded in memory:', MEME_QA_DATA.length);
-    });
+socket.on('load-memeqa', (docs) => {
+  MEME_QA_DATA = docs.map(d => ({
+    question: d.question,
+    answer: d.answer,
+    lang: d.lang
+  }));
+  console.log('✅ MEME QA loaded in memory:', MEME_QA_DATA.length);
+});
 
+
+
+    
     // lòt events
     socket.on('meme-response', data=>{ respond(data, USER.lang); });
     socket.on('broadcast-message', m=>{ logChat(m.from+': '+m.text); });
@@ -180,24 +188,33 @@
     chatInput.value = '';
   }
 
-  // ==== Find answer locally ====
-  function findAnswer(text){
-    if(!MEME_QA_DATA || MEME_QA_DATA.length===0) return null;
-    const t = text.toLowerCase();
-    for(const item of MEME_QA_DATA){
-      if(item.question){
-        for(const k of Object.keys(item.question||{})){
-          const q = (item.question[k]||'').toLowerCase();
-          if(!q) continue;
-          if(q===t || q.includes(t) || t.includes(q)) return (item.answer||item.responses);
-        }
-        if(typeof item.question==='string'){
-          if(item.question.toLowerCase()===t || item.question.toLowerCase().includes(t)) return item.answer||item.responses;
-        }
-      }
+
+
+
+  
+ // ==== Find answer locally ====
+function findAnswer(text, userLang) {
+  if(!MEME_QA_DATA || MEME_QA_DATA.length === 0) return null;
+  const t = text.toLowerCase();
+
+  for(const item of MEME_QA_DATA){
+    // sèlman kesyon ki nan menm lang ak itilizatè a
+    if(item.lang !== userLang) continue;
+
+    const q = (item.question || '').toLowerCase();
+    if(!q) continue;
+
+    // konpare kesyon an ak sa itilizatè a te ekri
+    if(q === t || q.includes(t) || t.includes(q)){
+      return item.answer || null;
     }
-    return null;
   }
+
+  return null;
+}
+
+
+  
 
   // ==== Microphone ====
   if(micToggle) micToggle.addEventListener('click', async ()=>{
