@@ -1,5 +1,30 @@
 [
   {
+    "question": "Bonjou",
+    "answer": "Bonjou! Kijan ou ye?",
+    "lang": "ht",
+    "tags": ["salutation"]
+  },
+  {
+    "question": "Bonjour",
+    "answer": "Bonjour! Comment ça va?",
+    "lang": "fr",
+    "tags": ["salutation"]
+  },
+  {
+    "question": "Hello",
+    "answer": "Hello! How are you?",
+    "lang": "en",
+    "tags": ["salutation"]
+  },
+  {
+    "question": "Hola",
+    "answer": "¡Hola! ¿Cómo estás?",
+    "lang": "es",
+    "tags": ["salutation"]
+  },
+  
+  {
     "question": "Ki jan ou santi w jodi a Inspecteur MEME?",
     "answer": "Mwen santi m byen, m pare pou ede tout moun nan klas la.",
     "lang": "ht",
