@@ -117,38 +117,39 @@
 </head>
 <body>
 
-  <!-- =============================== -->
-  <!-- Agentmeme Interface (rasin sit la) -->
-  <!-- =============================== -->
-  <div id="agentmeme-root">
-    <!-- Boul avatar -->
-    <div id="agentmeme-bubble" title="Klike pou pale ak Agentmeme">
-      <img id="agentmeme-img" src="meme-front.png" alt="Agentmeme">
-    </div>
-
-    <!-- Panel login + chat -->
-    <div id="agentmeme-panel" aria-live="polite">
-      <h4>Agentmeme — Asistan Espirityèl</h4>
-
-      <input id="agentmeme-name" type="text" placeholder="Nom / Prénom">
-      <select id="agentmeme-lang">
-        <option value="ht">🇭🇹 Kreyòl</option>
-        <option value="fr">🇫🇷 Français</option>
-        <option value="en">🇬🇧 English</option>
-        <option value="es">🇪🇸 Español</option>
-      </select>
-
-      <div id="agentmeme-chatbox"></div>
-      <textarea id="agentmeme-msg" placeholder="Ekri mesaj ou..."></textarea>
-
-      <div class="agentmeme-row">
-        <button id="agentmeme-mic" class="agentmeme-btn secondary">🎤 Vokal</button>
-        <button id="agentmeme-send" class="agentmeme-btn primary">📨 Voye</button>
-      </div>
-
-      <div id="agentmeme-status">Koneksyon: ...</div>
-    </div>
+<div id="agentmeme-root">
+  <!-- Avatar -->
+  <div id="agentmeme-bubble" title="Klike pou pale ak Agentmeme">
+    <img id="agentmeme-img" src="meme-front.png" alt="Agentmeme">
   </div>
+
+  <!-- Panel login + chat -->
+  <div id="agentmeme-panel">
+    <h4>Agentmeme — Asistan</h4>
+
+    <!-- Login -->
+    <input id="agentmeme-name" type="text" placeholder="Nom / Prénom">
+    <select id="agentmeme-lang">
+      <option value="ht">🇭🇹 Kreyòl</option>
+      <option value="fr">🇫🇷 Français</option>
+      <option value="en">🇬🇧 English</option>
+      <option value="es">🇪🇸 Español</option>
+    </select>
+
+    <!-- Chat -->
+    <div id="agentmeme-chatbox"></div>
+    <textarea id="agentmeme-msg" placeholder="Ekri mesaj ou..."></textarea>
+
+    <!-- Boutons -->
+    <div class="agentmeme-row">
+      <button id="agentmeme-mic" class="agentmeme-btn secondary">🎤 Vokal</button>
+      <button id="agentmeme-send" class="agentmeme-btn primary">📨 Voye</button>
+    </div>
+
+    <div id="agentmeme-status">Koneksyon: ...</div>
+  </div>
+</div>
+
 
   <!-- Scripts obligatwa -->
   <script src="https://cdn.socket.io/4.6.1/socket.io.min.js"></script>
