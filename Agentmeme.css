@@ -1,0 +1,65 @@
+/* Agentmeme.css - widget styles */
+#agentmeme-root {
+  position: fixed;
+  z-index: 999999;
+  font-family: "Segoe UI", Roboto, Arial, sans-serif;
+  user-select: none;
+  pointer-events: auto;
+}
+
+#agentmeme-bubble {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  overflow: hidden;
+  box-shadow: 0 12px 30px rgba(0,0,0,0.2);
+  cursor: pointer;
+  transition: transform .25s ease, box-shadow .25s ease;
+  background: #fff;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+}
+
+#agentmeme-bubble img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+#agentmeme-bubble.talking { transform: scale(1.06); box-shadow: 0 18px 38px rgba(0,0,0,0.28); }
+#agentmeme-bubble.happy { transform: scale(1.08) rotate(-4deg); }
+#agentmeme-bubble.angry { transform: scale(1.00) translateY(-6px) rotate(2deg); filter: saturate(1.05) contrast(1.05); }
+#agentmeme-bubble.sleep { opacity: 0.6; transform: scale(0.98) rotate(0deg); }
+
+#agentmeme-panel {
+  width: 320px;
+  max-width: calc(100vw - 40px);
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 14px 40px rgba(0,0,0,0.25);
+  padding: 12px;
+  display: none;
+  position: fixed;
+  right: 20px;
+  bottom: 160px;
+  z-index: 999999;
+}
+
+#agentmeme-panel h4 { margin: 0 0 8px 0; font-size: 16px; color:#222; text-align:center; }
+#agentmeme-panel input, #agentmeme-panel textarea, #agentmeme-panel select {
+  width: 100%; box-sizing: border-box; margin: 6px 0; padding: 8px; border-radius: 8px; border: 1px solid #ddd; font-size: 14px;
+}
+#agentmeme-chatbox { height: 180px; overflow-y: auto; border: 1px solid #efefef; padding: 8px; border-radius: 8px; background: #fafafa; margin-bottom: 6px; font-size: 13px; }
+.agentmeme-row { display:flex; gap:8px; }
+.agentmeme-btn { flex: 1; padding: 8px; border-radius: 8px; border: none; cursor: pointer; font-size: 14px; }
+.agentmeme-btn.primary { background:#0B76EF; color:white; }
+.agentmeme-btn.secondary { background:#efefef; color:#333; }
+#agentmeme-status { font-size:12px; color:#666; margin-top:6px; text-align:center; }
+
+@media (max-width: 520px) {
+  #agentmeme-panel { right: 12px; left: 12px; bottom: 140px; width: auto; }
+}
