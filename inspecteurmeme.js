@@ -1,349 +1,296 @@
-// inspecteurmeme-fusion.js
+/* inspecteurmeme.js
+   Inspecteurmeme widget:
+   - Connects to https://examen-backend-ihlx.onrender.com via socket.io
+   - Loads memeqas into local memory (MEME_QA)
+   - Re-requests memos when server emits memeqa-update
+   - Handles text input and voice input, replies via TTS in same language
+   - Changes avatar images for emotions and goes to sleep after 10 minutes idle
+*/
+
+/* CONFIG */
 (function(){
-  console.log("👀 Inspecteur MEME client init...");
+  const SOCKET_SERVER = "https://examen-backend-ihlx.onrender.com";
+  const IMG_BASE = ""; // images in repo root; change if images in subfolder
+  const IMAGES = {
+    normal: IMG_BASE + "meme-front.png",
+    happy: IMAGES_SAFE("meme-happy.png"),
+    angry: IMAGES_SAFE("meme-angry.png"),
+    sleep: IMAGES_SAFE("meme-sleep.png")
+  };
 
-  // ==== State ====
-  let USER = { id:null, name:null, lang:'ht' };
-  let MEME_QA_DATA = [];
-  let talking = false;
-  let idleTime = 0;
-  let currentCorner = 0;
+  /** helper to avoid ReferenceError if images not present */
+  function IMAGES_SAFE(name){ return IMG_BASE + name; }
+
+  const IDLE_MS = 10 * 60 * 1000; // 10 minutes
+  const LANG_MAP = { ht: "ht-HT", fr: "fr-FR", en: "en-US", es: "es-ES" };
+
+  // local memory
+  let MEME_QA = [];
   let idleTimer = null;
-  let micStream = null;
-  let recognition = null;
-  let speechActive = false;
+  let isSleeping = false;
 
-  // ==== Socket.io ====
-  const socket = (typeof io === 'function') ? io() : null;
+  // socket.io (make sure socket.io client script is loaded on page)
+  if(typeof io === 'undefined'){
+    console.error("inspecteurmeme.js: socket.io client missing. Include <script src=\"https://cdn.socket.io/4.6.1/socket.io.min.js\"></script>");
+  }
+  const socket = io(SOCKET_SERVER, { transports: ['websocket'] });
 
-  if(socket){
-    // mande otomatikman tout MEME QA nan MongoDB
+  /* --- Build DOM if not present --- */
+  let root = document.getElementById('inspecteurmeme-root');
+  if(!root){
+    root = document.createElement('div');
+    root.id = 'inspecteurmeme-root';
+    document.body.appendChild(root);
+  }
+
+  root.innerHTML = `
+    <div id="inspecteurmeme-bubble" title="Klike pou louvri Inspecteurmeme">
+      <img id="inspecteurmeme-img" src="${IMAGES.normal}" alt="Inspecteurmeme">
+    </div>
+
+    <div id="inspecteurmeme-panel" role="dialog" aria-label="Inspecteurmeme Panel">
+      <h4>Inspecteurmeme</h4>
+      <input id="inspecteurmeme-name" type="text" placeholder="Nom / Prénom" />
+      <select id="inspecteurmeme-lang">
+        <option value="ht">🇭🇹 Kreyòl</option>
+        <option value="fr">🇫🇷 Français</option>
+        <option value="en">🇬🇧 English</option>
+        <option value="es">🇪🇸 Español</option>
+      </select>
+      <div id="inspecteurmeme-chatbox"></div>
+      <textarea id="inspecteurmeme-msg" placeholder="Ekri mesaj ou..."></textarea>
+      <div class="inspecteurmeme-row" style="margin-top:8px">
+        <button id="inspecteurmeme-mic" class="inspecteurmeme-btn secondary">🎤 Akse Mikro</button>
+        <button id="inspecteurmeme-send" class="inspecteurmeme-btn primary">📨 Voye</button>
+      </div>
+      <div id="inspecteurmeme-status">Koneksyon: ...</div>
+    </div>
+  `;
+
+  // elements
+  const bubble = document.getElementById('inspecteurmeme-bubble');
+  const imgEl = document.getElementById('inspecteurmeme-img');
+  const panel = document.getElementById('inspecteurmeme-panel');
+  const nameInput = document.getElementById('inspecteurmeme-name');
+  const langSelect = document.getElementById('inspecteurmeme-lang');
+  const chatbox = document.getElementById('inspecteurmeme-chatbox');
+  const msgBox = document.getElementById('inspecteurmeme-msg');
+  const micBtn = document.getElementById('inspecteurmeme-mic');
+  const sendBtn = document.getElementById('inspecteurmeme-send');
+  const statusEl = document.getElementById('inspecteurmeme-status');
+
+  /* --- UI helpers --- */
+  function addSystem(msg){
+    const d = document.createElement('div');
+    d.style.fontSize = '13px';
+    d.style.color = '#666';
+    d.style.marginBottom = '6px';
+    d.textContent = msg;
+    chatbox.appendChild(d); chatbox.scrollTop = chatbox.scrollHeight;
+  }
+  function addUser(msg){
+    const d = document.createElement('div');
+    d.style.textAlign = 'right'; d.style.marginBottom='6px';
+    d.innerHTML = `<div style="display:inline-block;background:#e6f0ff;padding:6px;border-radius:8px;">${escapeHtml(msg)}</div>`;
+    chatbox.appendChild(d); chatbox.scrollTop = chatbox.scrollHeight;
+  }
+  function addAgent(msg){
+    const d = document.createElement('div');
+    d.style.textAlign = 'left'; d.style.marginBottom='6px';
+    d.innerHTML = `<div style="display:inline-block;background:#fff;padding:6px;border-radius:8px;border:1px solid #efefef;">${escapeHtml(msg)}</div>`;
+    chatbox.appendChild(d); chatbox.scrollTop = chatbox.scrollHeight;
+  }
+  function escapeHtml(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+  /* --- Socket events --- */
+  socket.on('connect', () => {
+    statusEl.textContent = 'Konekte (socket)';
+    socket.emit('request-memeqa'); // request full memory
+  });
+
+  socket.on('disconnect', () => { statusEl.textContent = 'Dekonekte'; });
+
+  socket.on('memeqa-data', (data) => {
+    MEME_QA = Array.isArray(data) ? data : [];
+    addSystem(`Memwa chaje: ${MEME_QA.length} antre`);
+  });
+
+  socket.on('memeqa-update', (payload) => {
+    addSystem('Memwa sou servèr modifye — rechaje...');
     socket.emit('request-memeqa');
+  });
 
+  socket.on('answer', (payload) => {
+    const text = payload?.answer || "M pa jwenn repons lan.";
+    const lang = payload?.lang || langSelect.value || detectLangFromText(text) || 'ht';
+    addAgent(text);
+    speakText(text, lang);
+    animateFromText(text);
+  });
 
-    // resevwa dokiman yo
-socket.on('load-memeqa', (docs) => {
-  MEME_QA_DATA = docs.map(d => ({
-    question: d.question,
-    answer: d.answer,
-    lang: d.lang
-  }));
-  console.log('✅ MEME QA loaded in memory:', MEME_QA_DATA.length);
-});
+  /* --- TTS / voice --- */
+  let voices = [];
+  function loadVoices(){ return new Promise(res => {
+    voices = speechSynthesis.getVoices();
+    if(voices.length) return res(voices);
+    speechSynthesis.onvoiceschanged = () => { voices = speechSynthesis.getVoices(); res(voices); };
+    setTimeout(()=>{ voices = speechSynthesis.getVoices(); res(voices); }, 1200);
+  }); }
 
-
-
-    
-    // lòt events
-    socket.on('meme-response', data=>{ respond(data, USER.lang); });
-    socket.on('broadcast-message', m=>{ logChat(m.from+': '+m.text); });
+  function pickVoiceForLang(code){
+    if(!voices.length) voices = speechSynthesis.getVoices();
+    const short = (code||'').split('-')[0];
+    const cand = voices.filter(v => (v.lang||'').toLowerCase().startsWith(short));
+    return cand[0] || voices[0] || null;
   }
 
-  // ==== DOM References ====
-  const loginForm = document.getElementById('loginForm');
-  const nameInput = document.getElementById('nameInput');
-  const langSelect = document.getElementById('langSelect');
-  const previewBtn = document.getElementById('previewBtn');
-  const memePreview = document.getElementById('memePreview');
-  const meme = document.getElementById('memeMain');
-  const chatBox = document.getElementById('chatBox');
-  const chatMessages = document.getElementById('chatMessages');
-  const chatInput = document.getElementById('chatInput');
-  const chatSend = document.getElementById('chatSend');
-  const micToggle = document.getElementById('micToggle');
-  const teachMode = document.getElementById('teachMode');
-  const forceJoin = document.getElementById('forceJoin');
-
-  // ==== Utilities ====
-  function logChat(text, cls){
-    if(chatMessages){
-      const d = document.createElement('div');
-      d.className = 'chat-message ' + (cls||'');
-      d.textContent = text;
-      chatMessages.appendChild(d);
-      chatMessages.scrollTop = chatMessages.scrollHeight;
-    } else console.log('CHAT:', text);
+  async function speakText(text, langKey='ht'){
+    if(isSleeping) wakeUp();
+    await loadVoices();
+    const utter = new SpeechSynthesisUtterance(text);
+    const code = LANG_MAP[langKey] || LANG_MAP['ht'];
+    utter.lang = code;
+    const v = pickVoiceForLang(code);
+    if(v) utter.voice = v;
+    imgEl.classList.add('talking');
+    speechSynthesis.cancel();
+    speechSynthesis.speak(utter);
+    utter.onend = () => imgEl.classList.remove('talking');
   }
 
-  function setMemeState(state){
-    if(!meme) return;
-    meme.className = 'meme-inspecteur';
-    if(memePreview) memePreview.className = 'meme-inspecteur';
-    switch(state){
-      case 'walking': meme.classList.add('meme-walking'); if(memePreview) memePreview.classList.add('meme-walking'); break;
-      case 'lying': meme.classList.add('meme-lying'); if(memePreview) memePreview.classList.add('meme-lying'); break;
-      case 'smile': meme.classList.add('face-happy'); if(memePreview) memePreview.classList.add('face-happy'); break;
-      case 'angry': meme.classList.add('face-angry'); if(memePreview) memePreview.classList.add('face-angry'); break;
-      case 'sleep': meme.classList.add('face-sleep'); if(memePreview) memePreview.classList.add('face-sleep'); break;
-      default: meme.classList.add('face-front'); if(memePreview) memePreview.classList.add('face-front'); break;
+  /* --- STT (SpeechRecognition) --- */
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  const recognition = SpeechRecognition ? new SpeechRecognition() : null;
+  if(recognition){
+    recognition.interimResults = false;
+    recognition.maxAlternatives = 1;
+  }
+
+  micBtn.addEventListener('click', () => {
+    if(!recognition){ alert("Navigatè pa sipòte rekonesans vwa."); return; }
+    const langCode = LANG_MAP[langSelect.value] || LANG_MAP['ht'];
+    recognition.lang = langCode;
+    recognition.start();
+    addSystem("M ap tande...");
+  });
+
+  if(recognition){
+    recognition.onresult = (ev) => {
+      const txt = ev.results[0][0].transcript;
+      addUser(txt);
+      handleQuestion(txt);
+    };
+    recognition.onerror = (e) => addSystem("STT erè: " + (e.error || e.message || 'unknown'));
+  }
+
+  /* --- send button --- */
+  sendBtn.addEventListener('click', () => {
+    const txt = msgBox.value.trim();
+    if(!txt) return;
+    addUser(txt);
+    msgBox.value = '';
+    handleQuestion(txt);
+  });
+
+  msgBox.addEventListener('keydown', (e) => {
+    if(e.key === 'Enter' && !e.shiftKey){ e.preventDefault(); sendBtn.click(); }
+  });
+
+  /* --- main logic: handle incoming questions --- */
+  function handleQuestion(text){
+    resetIdleTimer();
+    let chosenLang = langSelect.value || detectLangFromText(text) || 'ht';
+
+    // 1) exact lang + exact match
+    let found = MEME_QA.find(d => d && d.lang === chosenLang && d.question && d.question.trim().toLowerCase() === text.trim().toLowerCase());
+    if(found){ addAgent(found.answer); speakText(found.answer, found.lang); animateFromText(found.answer); return; }
+
+    // 2) contains match in chosen lang
+    found = MEME_QA.find(d => d && d.lang === chosenLang && d.question && text.toLowerCase().includes(d.question.toLowerCase()));
+    if(found){ addAgent(found.answer); speakText(found.answer, found.lang); animateFromText(found.answer); return; }
+
+    // 3) any-lang contains
+    found = MEME_QA.find(d => d && d.question && text.toLowerCase().includes(d.question.toLowerCase()));
+    if(found){ addAgent(found.answer); speakText(found.answer, found.lang || chosenLang); animateFromText(found.answer); return; }
+
+    // 4) fallback ask server (server will emit 'answer')
+    addSystem('M ap mande servèr pou repons...');
+    socket.emit('ask', { question: text, lang: chosenLang });
+  }
+
+  /* --- small heuristics for emotion from text --- */
+  function animateFromText(ans){
+    const a = (ans||'').toLowerCase();
+    if(a.includes('m pa') || a.includes('pa') || a.includes('désolé') || a.includes('sorry') || a.includes('erè')){
+      setEmotion('angry'); setTimeout(()=> setEmotion('normal'), 3000);
+    } else if(a.length < 80 && (a.includes('!') || a.includes('😀') || a.includes('ha') || a.includes('bonjou') || a.includes('merci'))){
+      setEmotion('happy'); setTimeout(()=> setEmotion('normal'), 3000);
+    } else {
+      setEmotion('normal');
     }
   }
 
+  function setEmotion(e){
+    imgEl.classList.remove('happy','angry','sleep','talking');
+    imgEl.src = IMAGES.normal;
+    if(e === 'happy'){ imgEl.classList.add('happy'); imgEl.src = IMAGES.happy; }
+    else if(e === 'angry'){ imgEl.classList.add('angry'); imgEl.src = IMAGES.angry; }
+    else if(e === 'sleep'){ imgEl.classList.add('sleep'); imgEl.src = IMAGES.sleep; }
+    else { imgEl.src = IMAGES.normal; }
+  }
+
+  /* --- language detection helper --- */
+  function detectLangFromText(text){
+    if(!text) return null;
+    const t = text.toLowerCase();
+    const creoleTokens = ["bonjou","mwen","kijan","mesi","sispann","lapriye","ou"];
+    const frTokens = ["bonjour","merci","comment","vous","s'il","svp","monsieur"];
+    const enTokens = ["hello","hi","how","please","thanks","you"];
+    const esTokens = ["hola","como","gracias","por favor","buenos"];
+    let scores = { ht:0, fr:0, en:0, es:0 };
+    t.split(/\W+/).forEach(w => {
+      if(creoleTokens.includes(w)) scores.ht++;
+      if(frTokens.includes(w)) scores.fr++;
+      if(enTokens.includes(w)) scores.en++;
+      if(esTokens.includes(w)) scores.es++;
+    });
+    let best = 'ht', max = -1;
+    for(const k of Object.keys(scores)){ if(scores[k] > max){ max = scores[k]; best = k; } }
+    return max === 0 ? null : best;
+  }
+
+  /* --- Idle timer (sleep after 10 minutes inactivity) --- */
   function resetIdleTimer(){
     clearTimeout(idleTimer);
+    if(isSleeping) wakeUp();
     idleTimer = setTimeout(()=> {
-      if(!talking) setMemeState('lying');
-    }, 300000);
+      isSleeping = true;
+      setEmotion('sleep');
+      addSystem('Agentmeme dòmi (pa gen entèraksyon depi 10 min).');
+    }, IDLE_MS);
   }
-
+  function wakeUp(){
+    if(!isSleeping) return;
+    isSleeping = false;
+    setEmotion('normal');
+    addSystem('Agentmeme reveye!');
+    resetIdleTimer();
+  }
+  // reset idle on user interactions
+  ['click','mousemove','keydown','touchstart'].forEach(ev => window.addEventListener(ev, resetIdleTimer, {passive:true}));
   resetIdleTimer();
-  setMemeState('walking');
 
-  // ==== Movement corners ====
-  const corners = [
-    { top:'12px', left:'12px' },
-    { top:'12px', right:'12px' },
-    { bottom:'12px', left:'12px' },
-    { bottom:'12px', right:'12px' }
-  ];
-
-  function moveMeme(){
-    try{
-      if(talking){
-        const pos = corners[currentCorner];
-        meme.style.top = meme.style.left = meme.style.bottom = meme.style.right = '';
-        for(const k in pos) meme.style[k] = pos[k];
-        if(memePreview){
-          memePreview.style.top = meme.style.top || '';
-          memePreview.style.left = meme.style.left || '';
-          memePreview.style.right = meme.style.right || '';
-          memePreview.style.bottom = meme.style.bottom || '';
-        }
-        currentCorner = (currentCorner+1) % corners.length;
-      } else {
-        idleTime += 5;
-        if(idleTime>=300) setMemeState('sleep');
-        else setMemeState('face-front');
-      }
-    } catch(e){
-      console.warn('moveMeme error', e);
-    } finally {
-      setTimeout(moveMeme, 5000);
-    }
-  }
-
-  moveMeme();
-
-  // ==== MEME Response ====
-  function respond(answerObj, userLang){
-    if(!answerObj) return;
-    idleTime = 0;
-    talking = true;
-
-    const tone = answerObj.tone || null;
-    if(tone==='happy') setMemeState('smile');
-    else if(tone==='angry') setMemeState('angry');
-    else setMemeState('face-front');
-
-    const langs = ['ht','fr','en','es'];
-    langs.forEach(L=>{
-      const txt = answerObj[L] || (answerObj.responses && answerObj.responses[L]) || '';
-      if(txt) logChat('MEME ('+L+'): '+txt);
-    });
-
-    const speakText = (answerObj[userLang] || answerObj.en || answerObj.ht || '');
-    if(speakText) speakOutLoud(speakText, userLang);
-
-    setTimeout(()=>{ talking=false; setMemeState('face-front'); }, 4500);
-  }
-
-  function speakOutLoud(text, lang){
-    try{
-      if('speechSynthesis' in window){
-        const utter = new SpeechSynthesisUtterance(text);
-        utter.lang = (lang==='ht')?'fr-HT':(lang||'en');
-        speechSynthesis.cancel();
-        speechSynthesis.speak(utter);
-      }
-    } catch(e){ console.warn('speak error', e); }
-  }
-
-  // ==== Idle auto-question ====
-  setInterval(()=>{
-    if(talking || MEME_QA_DATA.length===0) return;
-    const idx = Math.floor(Math.random()*MEME_QA_DATA.length);
-    const item = MEME_QA_DATA[idx];
-    let qtext = '';
-    if(item.question){
-      if(typeof item.question==='string') qtext=item.question;
-      else qtext=item.question[USER.lang]||item.question.ht||item.question.en||item.question.es||Object.values(item.question)[0];
-    }
-    if(qtext) respond({ ht:qtext, fr:qtext, en:qtext, es:qtext, tone:'happy' }, USER.lang);
-  }, 15000);
-
-  // ==== Chat send ====
-  if(chatSend && chatInput){
-    chatSend.addEventListener('click', sendMessage);
-    chatInput.addEventListener('keypress', e=>{ if(e.key==='Enter') sendMessage(); });
-  }
-
-  function sendMessage(){
-    const msg = chatInput && chatInput.value.trim();
-    if(!msg) return;
-
-    logChat((USER.name||'Visitor') + ': ' + msg);
-    handleIncoming({ studentId: USER.id||'local', studentName: USER.name||'Visitor', msg, lang: USER.lang });
-
-    if(socket) socket.emit('user-message', { text: msg, lang: USER.lang, user: USER.name||'Visitor', userId: USER.id });
-    chatInput.value = '';
-  }
-
-
-
-
-  
-function findAnswer(text){
-  if(!MEME_QA_DATA || MEME_QA_DATA.length===0) return null;
-  const t = text.toLowerCase();
-  for(const item of MEME_QA_DATA){
-    // Chèche pa question
-    if(item.question){
-      if(typeof item.question==='string'){
-        if(item.question.toLowerCase()===t || item.question.toLowerCase().includes(t)) 
-          return item.answer || item.responses;
-      } else {
-        for(const k of Object.keys(item.question)){
-          const q = (item.question[k]||'').toLowerCase();
-          if(!q) continue;
-          if(q===t || q.includes(t) || t.includes(q)) 
-            return item.answer || item.responses;
-        }
-      }
-    }
-
-    // Chèche pa tags
-    if(item.tags && item.tags.some(tag => tag.toLowerCase() === t)){
-      return item.answer || item.responses;
-    }
-  }
-  return null;
-}
-
-
-
-  
-
-  // ==== Microphone ====
-  if(micToggle) micToggle.addEventListener('click', async ()=>{
-    if(speechActive){ stopMicrophone(); micToggle.textContent='Aktive Mikwo'; return; }
-    try{
-      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-      if(SpeechRecognition){
-        recognition = new SpeechRecognition();
-        recognition.lang = USER.lang || 'ht';
-        recognition.interimResults = false;
-        recognition.continuous = true;
-        recognition.maxAlternatives = 1;
-        recognition.onresult = ev=>{
-          const transcript = ev.results[ev.results.length-1][0].transcript.trim();
-          handleIncoming({ studentId: USER.id||'local', studentName: USER.name||'Anon', msg: transcript, lang: USER.lang });
-        };
-        recognition.onerror = ev=>{ console.warn('SpeechRecognition error', ev); };
-        recognition.onend = ()=>{ if(speechActive) try{ recognition.start(); }catch(e){console.warn(e);} };
-        recognition.start();
-        speechActive=true;
-        micToggle.textContent='Dezaktive Mikwo';
-      } else {
-        micStream = await navigator.mediaDevices.getUserMedia({ audio:true });
-        speechActive=true;
-        micToggle.textContent='Dezaktive Mikwo';
-        logChat('Mikwo aktive (pa gen rekonesans otomatik nan navigatè sa)');
-      }
-    } catch(err){
-      console.warn('Mikwo pa disponib', err);
-      alert('Mikwo pa disponib oswa pèmisyon refize.');
-    }
+  /* --- bubble click toggles panel --- */
+  bubble.addEventListener('click', () => {
+    if(panel.style.display === 'block'){ panel.style.display = 'none'; }
+    else { panel.style.display = 'block'; msgBox.focus(); resetIdleTimer(); }
   });
 
-  function stopMicrophone(){
-    speechActive=false;
-    if(recognition){ try{ recognition.stop(); }catch(e){} recognition=null; }
-    if(micStream){ micStream.getTracks().forEach(t=>t.stop()); micStream=null; }
-  }
+  /* --- expose small API --- */
+  window.inspecteurmeme = {
+    getMemoryCount: () => MEME_QA.length,
+    reloadMemory: () => socket.emit('request-memeqa'),
+    speak: (text, lang) => speakText(text, lang)
+  };
 
-
-
-
-
-
-  
-
-
-
-  
-  function handleIncoming(data){
-    talking=true; idleTime=0; resetIdleTimer(); setMemeState('walking');
-    if(socket) socket.emit('muteAllExcept', data.studentId);
-    logChat(data.studentName+': '+data.msg);
-    const ans=findAnswer(data.msg);
-    if(ans) respond(ans,data.lang||USER.lang);
-    else respond({
-      ht:'M pa genyen repons sa kounye a, men mwen ka aprann li.',
-      fr:'Je n’ai pas encore cette réponse, mais je peux l’apprendre.',
-      en:'I don’t have that answer yet, but I can learn it.',
-      es:'No tengo esa respuesta todavía, pero puedo aprenderla.',
-      tone:'front'
-    }, data.lang||USER.lang);
-  }
-
-
-
-
-
-
-
-
-
-
-
-  
-
-  // ==== Login ====
-  if(loginForm) loginForm.addEventListener('submit', ev=>{
-    ev.preventDefault();
-    USER.name=nameInput.value.trim()||'Anon';
-    USER.lang=langSelect.value||'ht';
-    USER.id='user_'+Date.now();
-    if(socket) socket.emit('joinClassroom',{ user: USER.name, userId: USER.id, lang: USER.lang });
-    if(socket) socket.emit('joinClassroom',{ user:'MEME', userId:'MEME_0', lang:'ht' });
-    logChat('SYSTEM: '+USER.name+' joined the class.');
-    respond({ ht:'BIENVENUE', fr:'BIENVENUE', en:'WELCOME', es:'BIENVENUE', tone:'happy' }, USER.lang);
-    chatInput && chatInput.focus();
-  });
-
-  // ==== Preview button ====
-  if(previewBtn) previewBtn.addEventListener('click', ()=>{ setMemeState('smile'); setTimeout(()=>setMemeState('face-front'),2000); });
-
-  // ==== Force join ====
-  if(forceJoin) forceJoin.addEventListener('click', ()=>{
-    if(socket) socket.emit('joinClassroom',{ user:'MEME', userId:'MEME_0', lang:'ht' });
-    logChat('SYSTEM: MEME forced to join (test).');
-    setMemeState('walking');
-  });
-
-  // ==== Teach mode ====
-  if(teachMode) teachMode.addEventListener('click', ()=>{
-    if(teachMode.dataset.on==='1'){
-      teachMode.dataset.on='0'; 
-      teachMode.textContent='Mòd Pwofesè';
-    } else {
-      teachMode.dataset.on='1'; 
-      teachMode.textContent='Mòd Pwofesè (ON)';
-      if(MEME_QA_DATA && MEME_QA_DATA.length){
-        const idx = Math.floor(Math.random() * MEME_QA_DATA.length);
-        const it = MEME_QA_DATA[idx];
-        const q = it.question ? (it.question[USER.lang] || it.question.ht || it.question.en || Object.values(it.question)[0]) : '';
-        respond({ ht:q, fr:q, en:q, es:q, tone:'happy' }, USER.lang);
-      }
-    }
-  });
-
-  // ==== On unload ====
-  window.addEventListener('beforeunload', ()=>{
-    stopMicrophone();
-    if(socket) socket.emit('leaveClassroom',{ userId: USER.id });
-  });
-
-  // ==== expose ====
-  window.MEME = { respond, setMemeState, handleIncoming };
 })();
