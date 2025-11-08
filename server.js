@@ -994,142 +994,66 @@ io.on('connection', (socket) => {
 
 
 
-
 // ============================
-// MONGODB CONNECTION
+// MongoDB koneksyon
 // ============================
-mongoose.connect(process.env.MONGO_URI, { 
-  useNewUrlParser: true, 
-  useUnifiedTopology: true 
-})
-.then(() => console.log('✅ MongoDB konekte avèk siksè!'))
-.catch(err => console.error('❌ Erè MongoDB:', err));
+mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
+  .then(()=>console.log('✅ MongoDB konekte avèk siksè!'))
+  .catch(err=>console.error('MongoDB erreur:', err));
 
-
-// ============================
-// ROUTES / MIDDLEWARE
-// ============================
-app.use(express.json());
-app.use(express.static(path.join(__dirname, 'public'))); // rete konsa, se pou dosye front-end yo sèlman
-
-// ============================
-// MEME QA JSON MANAGEMENT
-// ============================
-
-// Asire nou itilize chemen rasin pwojè a, pa 'public'
-const MEME_QA_PATH = path.join(__dirname, 'meme_qa_data.json');
-let MEME_QA_DATA = [];
-
-// Fonksyon pou chaje done yo depi fichye JSON lan
-function loadMEMEDataFromFile() {
-  try {
-    if (fs.existsSync(MEME_QA_PATH)) {
-      const raw = fs.readFileSync(MEME_QA_PATH, 'utf-8');
-      MEME_QA_DATA = JSON.parse(raw);
-      console.log(`✅ MEME QA data (${MEME_QA_DATA.length}) chaje depi ${MEME_QA_PATH}`);
-    } else {
-      console.warn(`⚠️  Fichye ${MEME_QA_PATH} pa jwenn — asire li egziste nan rasin pwojè a.`);
-    }
-  } catch (err) {
-    console.error('❌ Erè pandan lekti meme_qa_data.json:', err);
-  }
-}
-
-// Premye chajman lè server lanse
-loadMEMEDataFromFile();
-
-// Siveye fichye a — re-chaje otomatikman si modifye
-fs.watchFile(MEME_QA_PATH, (curr, prev) => {
-  console.log('🔄 Chanjman detekte nan meme_qa_data.json — rechaje done yo...');
-  loadMEMEDataFromFile();
+const memeQaSchema = new mongoose.Schema({
+  question: String,
+  answer: String,
+  lang: { type: String, enum: ['ht','fr','en','es'], default: 'ht' },
+  tags: { type: [String], default: ['salutation'] }
 });
+const MemeQA = mongoose.model('MemeQA', memeQaSchema);
 
 // ============================
-// SOCKET.IO HANDLERS
+// Serve tout fichye nan rasin sit lan
 // ============================
-io.on('connection', (socket) => {
-  console.log(`🟢 Nouvo koneksyon: ${socket.id}`);
+app.use(express.static(path.join(__dirname)));
 
-  // 1️⃣ — Mande tout Q/A
-  socket.on('request-memeqa', () => {
+// ============================
+// Socket.IO
+// ============================
+
+io.on('connection', socket => {
+  console.log('Nouvo client konekte:', socket.id);
+
+  // Mandè memwa
+  socket.on('request-memeqa', async () => {
     try {
-      socket.emit('load-memeqa', MEME_QA_DATA);
-      console.log(`📤 MEME QA (${MEME_QA_DATA.length}) voye bay ${socket.id}`);
+      const allQA = await MemeQA.find({});
+      socket.emit('receive-memeqa', allQA);
     } catch (err) {
-      console.error('❌ Erè pandan voye MEME QA:', err);
-      socket.emit('load-memeqa', []);
+      console.error(err);
+      socket.emit('receive-memeqa', []);
     }
   });
 
- socket.on('ask-meme', (msgData) => {
-  const { question, lang } = msgData;
-  if (!question || !lang) return;
-
-  const qNorm = question.trim().toLowerCase();
-
-  // Chèche nan done yo pa kesyon
-  let found = MEME_QA_DATA.find(item =>
-    item.lang === lang &&
-    item.question.trim().toLowerCase() === qNorm
-  );
-
-
-
-
-	 
-  // Si pa jwenn, chèche nan tags
-  if (!found) {
-    found = MEME_QA_DATA.find(item => 
-      item.lang === lang &&
-      item.tags &&
-      item.tags.some(tag => tag.toLowerCase() === qNorm)
-    );
-  }
-
-  if (found) {
-    socket.emit('meme-answer', { 
-      lang: lang, 
-      answer: found.answer,
-      known: true 
-    });
-    console.log(`💬 MEME reponn kesyon (${lang}): "${question}"`);
-  } else {
-    const defaultResponses = {
-      ht: "M pa genyen repons sa kounye a, men mwen ka aprann li.",
-      fr: "Je n’ai pas encore cette réponse, mais je peux l’apprendre.",
-      en: "I don’t have that answer yet, but I can learn it.",
-      es: "No tengo esa respuesta todavía, pero puedo aprenderla."
-    };
-
-    socket.emit('meme-answer', { 
-      lang: lang, 
-      answer: defaultResponses[lang] || defaultResponses.en,
-      known: false 
-    });
-
-	  
-
-    console.log(`🤔 MEME pa konnen kesyon (${lang}): "${question}"`);
-  }
-});
-
-  // 3️⃣ — Mizajou fichye si gen nouvo done (pa obligatwa si ou pa modifye soti front-end)
-  socket.on('update-memeqa', (newData) => {
+  // Lè Agentmeme pa konnen repons lan
+  socket.on('ask', async (data) => {
+    if(!data || !data.question || !data.answer || !data.lang) return;
     try {
-      fs.writeFileSync(MEME_QA_PATH, JSON.stringify(newData, null, 2));
-      MEME_QA_DATA = newData;
-      io.emit('load-memeqa', MEME_QA_DATA);
-      console.log('📝 MEME QA mizajou avèk siksè & voye bay tout kliyan.');
-    } catch (err) {
-      console.error('❌ Erè pandan ekriti meme_qa_data.json:', err);
-    }
+      const exist = await MemeQA.findOne({ question: data.question, lang: data.lang });
+      if(!exist){
+        const newQA = new MemeQA({
+          question: data.question,
+          answer: data.answer,
+          lang: data.lang,
+          tags: data.tags || ['salutation']
+        });
+        await newQA.save();
+        // Avize tout kliyan yo ke memwa modifye
+        io.emit('memeqa-update');
+        console.log('Nouvo Q/A ajoute:', data.question, data.lang);
+      }
+    } catch(err){ console.error('Error add Q/A:', err); }
   });
 
-  socket.on('disconnect', () => {
-    console.log(`🔴 Itilizatè dekonekte: ${socket.id}`);
-  });
+  socket.on('disconnect', () => console.log('Client dekonekte:', socket.id));
 });
-
 
 
 // 🚀 DEMARRE SERVEUR
