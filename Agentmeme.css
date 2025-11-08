@@ -128,3 +128,30 @@
   #agentmeme-panel select { font-size: 12px; padding: 5px; }
   .agentmeme-btn { font-size: 12px; padding: 5px; }
 }
+
+
+
+
+
+
+
+/* --- Fix bouton vokal & voye ki pa reponn --- */
+#agentmeme-panel,
+#agentmeme-panel * {
+  pointer-events: auto !important;
+}
+
+#agentmeme-panel {
+  position: fixed;
+  z-index: 999999 !important;
+}
+
+/* Asire ke zòn panel la anvan pa bloke klik sou bouton yo */
+#agentmeme-root {
+  pointer-events: none;
+}
+
+#agentmeme-bubble,
+#agentmeme-panel {
+  pointer-events: auto;
+}
