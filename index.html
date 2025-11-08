@@ -731,20 +731,7 @@ button.submit:hover {
 
 
 
-  <!--Start of Tawk.to Script-->
-<script type="text/javascript">
-var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
-(function(){
-var s1=document.createElement("script"),s0=document.getElementsByTagName("script")[0];
-s1.async=true;
-s1.src='https://embed.tawk.to/68aa531ffcd547192dded79e/default';
-s1.charset='UTF-8';
-s1.setAttribute('crossorigin','*');
-s0.parentNode.insertBefore(s1,s0);
-})();
-</script>
-<!--End of Tawk.to Script-->
-
+  
 
 
 <!-- STYLE KONTEUR -->
@@ -1294,23 +1281,9 @@ userInput2.addEventListener("keypress", function(e){
 
 
 
-  <!-- === Agentmeme Integration Start === -->
-<link rel="stylesheet" href="/Agentmeme.css">
-
-<div id="agentmeme-container"></div>
-
-<script src="https://cdn.socket.io/4.6.1/socket.io.min.js"></script>
-<script src="/Agentmeme.js"></script>
-<script>
-  // Chaje otomatikman entèfas Agentmeme soti nan fichye prensipal la
-  fetch('/Agentmeme.html')
-    .then(res => res.text())
-    .then(html => {
-      document.getElementById('agentmeme-container').innerHTML = html;
-    })
-    .catch(err => console.error("Ere chajman Agentmeme:", err));
-</script>
-<!-- === Agentmeme Integration End === -->
+  <!-- Scripts obligatwa Agentmeme -->
+  <script src="https://cdn.socket.io/4.6.1/socket.io.min.js"></script>
+  <script src="Agentmeme.js"></script>
 
 
 
@@ -1537,6 +1510,7 @@ fetch('https://api.ipify.org?format=json')
   
 </body>
 </html>
+
 
 
 
