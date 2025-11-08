@@ -1099,6 +1099,9 @@ io.on('connection', socket => {
 
 
 
+// ============================
+// MongoDB koneksyon
+// ============================
 mongoose.connect(MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => console.log('✅ MongoDB connected'))
   .catch(err => {
@@ -1106,60 +1109,36 @@ mongoose.connect(MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
     process.exit(1);
   });
 
-// --- Schema / Model ---
-
-const MemeQaSchema = new Schema({
-  question: { type: String, required: true },
-  answer: { type: String, required: true },
-  lang: { type: String, default: 'ht' },
-  tags: { type: [String], default: [] }
-}, { timestamps: true });
-
-// text index for full-text search
-MemeQaSchema.index({ question: 'text', answer: 'text' });
-
-const MemeQA = mongoose.model('MemeQA', MemeQaSchema, 'memeqas');
-
-// --- Helper: escape RegExp ---
+// ============================
+// Helper: escape RegExp
+// ============================
 function escapeRegExp(s) {
   return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
-// --- Find answer logic (same heuristics as frontend expects) ---
+// ============================
+// Find answer logic
+// ============================
 async function findAnswerInDB(question, lang) {
   if (!question) return null;
   const q = question.trim();
-  // 1) exact match (case-insensitive) in same lang
   try {
+    // exact match
     let doc = await MemeQA.findOne({
       question: { $regex: `^${escapeRegExp(q)}$`, $options: 'i' },
       ...(lang ? { lang } : {})
     });
     if (doc) return doc;
 
-    // 2) contains match in same lang
+    // contains match
     doc = await MemeQA.findOne({
       question: { $regex: escapeRegExp(q), $options: 'i' },
       ...(lang ? { lang } : {})
     });
     if (doc) return doc;
 
-    // 3) text search (if index exists)
-    try {
-      const hits = await MemeQA.find({ $text: { $search: q }, ...(lang ? { lang } : {}) }).limit(5);
-      if (hits && hits.length) return hits[0];
-    } catch (err) {
-      // ignore if text search unsupported
-      // console.warn('text search failed', err.message);
-    }
-
-    // 4) fallback: try looser contains (stored question included in input)
-    const list = await MemeQA.find({
-      ...(lang ? { lang } : {}),
-      question: { $exists: true, $ne: '' }
-    }).limit(1000);
-
-    // local JS-level contains matching (cheap for <= few thousands)
+    // fallback: search all locally if needed
+    const list = await MemeQA.find({ ...(lang ? { lang } : {}), question: { $exists: true, $ne: '' } }).limit(1000);
     const lower = q.toLowerCase();
     const match = list.find(d => lower.includes((d.question || '').toLowerCase()) || (d.question || '').toLowerCase().includes(lower));
     if (match) return match;
@@ -1171,11 +1150,12 @@ async function findAnswerInDB(question, lang) {
   }
 }
 
-// --- Socket.IO handlers ---
+// ============================
+// Socket.IO handlers
+// ============================
 io.on('connection', (socket) => {
   console.log('🔌 socket connected:', socket.id);
 
-  // When client requests full memoire
   socket.on('request-memeqa', async () => {
     try {
       const all = await MemeQA.find({}).lean();
@@ -1186,14 +1166,12 @@ io.on('connection', (socket) => {
     }
   });
 
-  // Client asks a question
   socket.on('ask', async ({ question, lang } = {}) => {
     try {
       const doc = await findAnswerInDB(question || '', lang);
       if (doc) {
         socket.emit('answer', { answer: doc.answer, lang: doc.lang || (lang || 'ht') });
       } else {
-        // fallback reply
         socket.emit('answer', {
           answer: "M pa jwenn repons sa nan memwa mwen. Eske ou vle m anrejistre kesyon sa pou pwochen fwa?",
           lang: lang || 'ht'
@@ -1210,9 +1188,9 @@ io.on('connection', (socket) => {
   });
 });
 
-// --- HTTP Admin & Fallback endpoints ---
-
-// list memeqas (optional lang filter)
+// ============================
+// HTTP Admin & Fallback endpoints
+// ============================
 app.get('/api/memeqas', async (req, res) => {
   try {
     const q = {};
@@ -1224,13 +1202,11 @@ app.get('/api/memeqas', async (req, res) => {
   }
 });
 
-// add QA (admin) — consider securing this endpoint (API key/auth) in production
 app.post('/api/memeqa', async (req, res) => {
   try {
     const payload = req.body;
     if (!payload || !payload.question || !payload.answer) return res.status(400).json({ error: 'question & answer required' });
     const doc = await MemeQA.create(payload);
-    // notify clients to reload memoire
     io.emit('memeqa-update', { action: 'create', doc });
     res.json({ ok: true, doc });
   } catch (err) {
@@ -1238,7 +1214,6 @@ app.post('/api/memeqa', async (req, res) => {
   }
 });
 
-// delete QA by id
 app.delete('/api/memeqa/:id', async (req, res) => {
   try {
     const id = req.params.id;
@@ -1250,7 +1225,6 @@ app.delete('/api/memeqa/:id', async (req, res) => {
   }
 });
 
-// fallback HTTP ask endpoint (same as socket ask)
 app.post('/ask', async (req, res) => {
   try {
     const { question, lang } = req.body || {};
@@ -1265,12 +1239,13 @@ app.post('/ask', async (req, res) => {
   }
 });
 
-// --- Optional: Watch change stream to broadcast updates (if supported) ---
+// ============================
+// Optional: Watch change stream
+// ============================
 mongoose.connection.once('open', () => {
   try {
     const changeStream = MemeQA.watch();
     changeStream.on('change', (change) => {
-      // broadcast that memeqas changed; clients will request fresh data
       io.emit('memeqa-update', { change });
     });
     changeStream.on('error', (err) => {
@@ -1280,7 +1255,6 @@ mongoose.connection.once('open', () => {
     console.warn('Change stream not available (replica set required).', err && err.message);
   }
 });
-
 
 // 🚀 DEMARRE SERVEUR
 // ---------------------------
