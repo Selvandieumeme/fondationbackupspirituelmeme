@@ -927,18 +927,51 @@ io.on('connection', (socket) => {
     }
   });
 
-  // Client asks a question
-  socket.on('ask', async ({ question, lang } = {}) => {
-    try {
-      const doc = await findAnswerInDB(question || '', lang);
-      if (doc) {
-        socket.emit('answer', { answer: doc.answer, lang: doc.lang || (lang || 'ht') });
-      } else {
-        // fallback reply
-        socket.emit('answer', {
-          answer: "M pa jwenn repons sa nan memwa mwen. Eske ou vle m anrejistre kesyon sa pou pwochen fwa?",
-          lang: lang || 'ht'
-        });
+
+
+
+	
+
+// Client asks a question
+socket.on('ask', async ({ question, lang } = {}) => {
+  try {
+    const doc = await findAnswerInDB(question || '', lang);
+
+    if (doc) {
+      socket.emit('answer', { 
+        answer: doc.answer, 
+        lang: doc.lang || lang || 'ht' // ✅ sa a pi klè
+      });
+    } else {
+      // ✅ fallback multilingual answer (ordered keys: ht, fr, en, es)
+      const DEFAULT_ANSWERS = {
+        ht: "M pa jwenn repons sa nan memwa mwen. Eske ou vle m anrejistre kesyon sa pou pwochen fwa?",
+        fr: "Je n’ai pas trouvé cette réponse dans ma mémoire. Voulez-vous que je sauvegarde cette question pour la prochaine fois ?",
+        en: "I couldn’t find this answer in my memory. Would you like me to save this question for next time?",
+        es: "No encontré esta respuesta en mi memoria. ¿Quieres que guarde esta pregunta para la próxima vez?"
+      };
+
+      // ✅ verify lang valab sinon mete 'ht'
+      const chosenLang = (lang && ['ht', 'fr', 'en', 'es'].includes(lang)) ? lang : 'ht';
+
+      // ✅ voye repons fallback la
+      console.debug('[MemeQA] emitting fallback answer, lang=', chosenLang);
+      socket.emit('answer', {
+        answer: DEFAULT_ANSWERS[chosenLang],
+        lang: chosenLang
+      });
+    }
+  } catch (err) {
+    console.error('❌ Erè pandan ask handler:', err);
+    socket.emit('answer', { 
+      answer: "Erè sèvè. Eseye ankò.", 
+      lang: lang || 'ht' 
+    });
+  }
+});
+
+
+		  
       }
     } catch (err) {
       console.error('ask handler error:', err);
