@@ -1,224 +1,118 @@
-/* === STYLE GLOBAL === */
-body {
-  font-family: 'Poppins', Arial, sans-serif;
-  margin: 0;
-  padding: 0;
-  background-color: #f5f5f5;
-  color: #333;
-  overflow-x: hidden;
+/* Style jeneral */
+#inspecteurmeme-root {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 9999;
+  font-family: "Segoe UI", sans-serif;
 }
 
-h1, h2, h3, h4, h5, h6 {
-  margin: 0;
-}
-
-/* === CONTAINER PRINCIPAL === */
-.container {
+/* Bouton bul anba dwat */
+#inspecteurmeme-bubble {
+  width: 80px;
+  height: 80px;
+  cursor: pointer;
+  border-radius: 50%;
+  overflow: hidden;
+  box-shadow: 0 0 10px rgba(0,0,0,0.25);
+  background: #fff;
   display: flex;
-  flex-direction: column;
-  height: 100vh;
-  width: 100vw;
+  justify-content: center;
+  align-items: center;
 }
 
-/* === HEADER === */
-.header {
-  background-color: #004aad;
-  color: #fff;
-  padding: 1rem;
-  text-align: center;
-  font-size: 1.5rem;
-  font-weight: bold;
+#inspecteurmeme-bubble img {
+  width: 100%;
+  height: auto;
+  border-radius: 50%;
+  transition: transform 0.3s ease;
 }
+#inspecteurmeme-bubble:hover img { transform: scale(1.05); }
 
-/* === SALLE DE CLASSE === */
-.classroom {
-  flex: 1;
-  display: flex;
-  position: relative;
-  background-color: #e6f0ff;
+/* Panel chat */
+#inspecteurmeme-panel {
+  display: none;
+  position: absolute;
+  bottom: 100px;
+  right: 0;
+  width: 320px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 0 15px rgba(0,0,0,0.3);
+  padding: 10px;
   overflow: hidden;
 }
 
-/* === PANEL ELÈV / CHAT === */
-.students-panel {
-  width: 250px;
-  background-color: #ffffff;
-  border-right: 1px solid #ccc;
-  display: flex;
-  flex-direction: column;
-  padding: 0.5rem;
+#inspecteurmeme-panel h4 {
+  margin: 5px 0 10px;
+  text-align: center;
+  color: #007bff;
 }
 
-.students-panel h3 {
-  margin-bottom: 0.5rem;
-  font-size: 1.1rem;
+#inspecteurmeme-panel input,
+#inspecteurmeme-panel select,
+#inspecteurmeme-panel textarea {
+  width: 100%;
+  margin-bottom: 6px;
+  padding: 6px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  font-size: 14px;
 }
 
-.student {
-  padding: 0.5rem;
-  margin-bottom: 0.3rem;
-  border-radius: 5px;
-  background-color: #f0f0f0;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.student:hover {
-  background-color: #d0e0ff;
-}
-
-/* === ENTÈFAS CHAT === */
-.chat-container {
-  position: absolute;
-  bottom: 10px;
-  left: 260px;
-  right: 10px;
-  max-height: 200px;
-  display: flex;
-  flex-direction: column;
-}
-
-.chat-messages {
-  flex: 1;
+#inspecteurmeme-chatbox {
+  background: #fafafa;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  height: 200px;
   overflow-y: auto;
-  padding: 0.5rem;
-  background-color: #fff;
-  border-radius: 5px;
-  border: 1px solid #ccc;
+  padding: 8px;
+  margin-bottom: 8px;
 }
 
-.chat-input {
-  display: flex;
-  margin-top: 0.5rem;
-}
-
-.chat-input input {
-  flex: 1;
-  padding: 0.5rem;
-  border-radius: 5px 0 0 5px;
-  border: 1px solid #ccc;
-  outline: none;
-}
-
-.chat-input button {
-  padding: 0.5rem 1rem;
+.inspecteurmeme-btn {
+  padding: 8px 10px;
   border: none;
-  background-color: #004aad;
-  color: #fff;
-  border-radius: 0 5px 5px 0;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.chat-input button:hover {
-  background-color: #003080;
-}
-
-/* === ZÒN MEME INSPECTEUR === */
-.meme-inspecteur {
-  position: absolute;
-  width: 80px;
-  height: 120px;
-  bottom: 10px;
-  right: 50%;
-  transform: translateX(50%);
-  background-color: #ffd700;
-  border-radius: 50% / 10%;
-  display: flex;
-  justify-content: center;
-  align-items: flex-end;
+  border-radius: 6px;
   font-weight: bold;
-  color: #000;
   cursor: pointer;
-  transition: all 0.5s ease;
 }
-
-/* Animasyon pou mache / leve / kouche */
-.meme-walking {
-  animation: walk 4s infinite alternate;
-}
-
-.meme-lying {
-  transform: rotate(90deg);
-}
-
-.meme-smile::after {
-  content: '😊';
-  display: block;
-  font-size: 1.5rem;
-  margin-bottom: 5px;
-}
-
-.meme-angry::after {
-  content: '😠';
-  display: block;
-  font-size: 1.5rem;
-  margin-bottom: 5px;
-}
-
-@keyframes walk {
-  0% { bottom: 10px; right: 10%; }
-  25% { bottom: 20px; right: 25%; }
-  50% { bottom: 10px; right: 50%; }
-  75% { bottom: 20px; right: 75%; }
-  100% { bottom: 10px; right: 90%; }
-}
-
-/* === BOUTON POU ENTÈAKSYON === */
-.button-group {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-}
-
-.button-group button {
-  margin-left: 0.5rem;
-  padding: 0.5rem 1rem;
-  border-radius: 5px;
-  border: none;
-  background-color: #004aad;
+.inspecteurmeme-btn.primary {
+  background: #007bff;
   color: #fff;
-  cursor: pointer;
-  transition: all 0.2s ease;
+}
+.inspecteurmeme-btn.secondary {
+  background: #eee;
+  color: #333;
+}
+.inspecteurmeme-btn:hover {
+  opacity: 0.9;
 }
 
-.button-group button:hover {
-  background-color: #003080;
+/* Estati koneksyon */
+#inspecteurmeme-status {
+  font-size: 12px;
+  color: #666;
+  text-align: center;
+  margin-top: 6px;
 }
 
+/* Animasyon emosyon */
+#inspecteurmeme-img.happy { animation: bounce 0.4s ease-in-out 2; }
+#inspecteurmeme-img.angry { animation: shake 0.3s ease-in-out 2; }
+#inspecteurmeme-img.sleep { filter: brightness(0.7); opacity: 0.8; }
+#inspecteurmeme-img.talking { animation: talkBlink 1s ease-in-out infinite; }
 
-
-
-
-
-/* MEME Animasyon ak Reaksyon */
-#meme {
-  position: absolute;
-  width: 120px;
-  height: 120px;
-  transition: all 0.5s ease-in-out;
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
 }
-
-#meme.face-happy {
-  background-image: url('assets/meme_happy.png');
+@keyframes shake {
+  0%,100% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  75% { transform: translateX(5px); }
 }
-
-#meme.face-angry {
-  background-image: url('assets/meme_angry.png');
+@keyframes talkBlink {
+  0%,100% { opacity: 1; }
+  50% { opacity: 0.6; }
 }
-
-#meme.face-sleep {
-  background-image: url('assets/meme_sleep.png');
-  transform: rotate(90deg); /* sou do */
-}
-
-#meme.face-front {
-  background-image: url('assets/meme_front.png'); /* sou fas */
-}
-
-
-
-
-
-
-
