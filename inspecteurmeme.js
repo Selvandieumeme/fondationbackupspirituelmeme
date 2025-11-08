@@ -1,41 +1,33 @@
-/* inspecteurmeme.js
-   Inspecteurmeme widget:
-   - Connects to https://examen-backend-ihlx.onrender.com via socket.io
-   - Loads memeqas into local memory (MEME_QA)
-   - Re-requests memos when server emits memeqa-update
-   - Handles text input and voice input, replies via TTS in same language
-   - Changes avatar images for emotions and goes to sleep after 10 minutes idle
+/* inspecteurmeme.js — patched version
+   Fixes: more reliable TTS voices, language fallback, fetch fallback for memeqa-data,
+   better logs, and safer speak invocation.
 */
-
-/* CONFIG */
 (function(){
   const SOCKET_SERVER = "https://examen-backend-ihlx.onrender.com";
-  const IMG_BASE = ""; // images in repo root; change if images in subfolder
+  const IMG_BASE = ""; // set if images live in subfolder e.g. "/assets/"
   const IMAGES = {
     normal: IMG_BASE + "meme-front.png",
     happy: IMAGES_SAFE("meme-happy.png"),
     angry: IMAGES_SAFE("meme-angry.png"),
     sleep: IMAGES_SAFE("meme-sleep.png")
   };
-
-  /** helper to avoid ReferenceError if images not present */
   function IMAGES_SAFE(name){ return IMG_BASE + name; }
 
   const IDLE_MS = 10 * 60 * 1000; // 10 minutes
+  // Map of short lang keys (used in DB) to speech code fallbacks.
+  // NOTE: browsers may not have native 'ht-HT' voices — creole will fallback to a sensible voice.
   const LANG_MAP = { ht: "ht-HT", fr: "fr-FR", en: "en-US", es: "es-ES" };
 
-  // local memory
   let MEME_QA = [];
   let idleTimer = null;
   let isSleeping = false;
 
-  // socket.io (make sure socket.io client script is loaded on page)
   if(typeof io === 'undefined'){
     console.error("inspecteurmeme.js: socket.io client missing. Include <script src=\"https://cdn.socket.io/4.6.1/socket.io.min.js\"></script>");
   }
-  const socket = io(SOCKET_SERVER, { transports: ['websocket'] });
+  const socket = io ? io(SOCKET_SERVER, { transports: ['websocket'], autoConnect:true, reconnection:true }) : null;
 
-  /* --- Build DOM if not present --- */
+  // DOM build (unchanged)
   let root = document.getElementById('inspecteurmeme-root');
   if(!root){
     root = document.createElement('div');
@@ -48,7 +40,7 @@
       <img id="inspecteurmeme-img" src="${IMAGES.normal}" alt="Inspecteurmeme">
     </div>
 
-    <div id="inspecteurmeme-panel" role="dialog" aria-label="Inspecteurmeme Panel">
+    <div id="inspecteurmeme-panel" role="dialog" aria-label="Inspecteurmeme Panel" style="display:none">
       <h4>Inspecteurmeme</h4>
       <input id="inspecteurmeme-name" type="text" placeholder="Nom / Prénom" />
       <select id="inspecteurmeme-lang">
@@ -57,8 +49,8 @@
         <option value="en">🇬🇧 English</option>
         <option value="es">🇪🇸 Español</option>
       </select>
-      <div id="inspecteurmeme-chatbox"></div>
-      <textarea id="inspecteurmeme-msg" placeholder="Ekri mesaj ou..."></textarea>
+      <div id="inspecteurmeme-chatbox" style="max-height:240px;overflow:auto;padding:6px;border:1px solid #eee;background:#fafafa"></div>
+      <textarea id="inspecteurmeme-msg" placeholder="Ekri mesaj ou..." rows="2" style="width:100%;"></textarea>
       <div class="inspecteurmeme-row" style="margin-top:8px">
         <button id="inspecteurmeme-mic" class="inspecteurmeme-btn secondary">🎤 Akse Mikro</button>
         <button id="inspecteurmeme-send" class="inspecteurmeme-btn primary">📨 Voye</button>
@@ -79,7 +71,6 @@
   const sendBtn = document.getElementById('inspecteurmeme-send');
   const statusEl = document.getElementById('inspecteurmeme-status');
 
-  /* --- UI helpers --- */
   function addSystem(msg){
     const d = document.createElement('div');
     d.style.fontSize = '13px';
@@ -87,6 +78,7 @@
     d.style.marginBottom = '6px';
     d.textContent = msg;
     chatbox.appendChild(d); chatbox.scrollTop = chatbox.scrollHeight;
+    console.debug('[IM SYSTEM]', msg);
   }
   function addUser(msg){
     const d = document.createElement('div');
@@ -102,63 +94,137 @@
   }
   function escapeHtml(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
-  /* --- Socket events --- */
-  socket.on('connect', () => {
-    statusEl.textContent = 'Konekte (socket)';
-    socket.emit('request-memeqa'); // request full memory
-  });
+  // Socket handlers + fetch fallback
+  if(socket){
+    socket.on('connect', () => {
+      statusEl.textContent = 'Konekte (socket)';
+      console.debug('[IM] socket connected, requesting memoire...');
+      socket.emit('request-memeqa');
 
-  socket.on('disconnect', () => { statusEl.textContent = 'Dekonekte'; });
+      // Also proactively try to load voices once user interacts or on connect
+      // (we call loadVoices lazy later too)
+    });
 
-  socket.on('memeqa-data', (data) => {
-    MEME_QA = Array.isArray(data) ? data : [];
-    addSystem(`Memwa chaje: ${MEME_QA.length} antre`);
-  });
+    socket.on('disconnect', () => { statusEl.textContent = 'Dekonekte'; });
 
-  socket.on('memeqa-update', (payload) => {
-    addSystem('Memwa sou servèr modifye — rechaje...');
-    socket.emit('request-memeqa');
-  });
+    socket.on('memeqa-data', (data) => {
+      MEME_QA = Array.isArray(data) ? data : [];
+      addSystem(`Memwa chaje: ${MEME_QA.length} antre`);
+      console.debug('[IM] memeqa-data received count=', MEME_QA.length);
+    });
 
-  socket.on('answer', (payload) => {
-    const text = payload?.answer || "M pa jwenn repons lan.";
-    const lang = payload?.lang || langSelect.value || detectLangFromText(text) || 'ht';
-    addAgent(text);
-    speakText(text, lang);
-    animateFromText(text);
-  });
+    socket.on('memeqa-update', (payload) => {
+      addSystem('Memwa sou servèr modifye — rechaje...');
+      console.debug('[IM] memeqa-update payload', payload);
+      socket.emit('request-memeqa');
+      // as backup, also fetch /api/memeqas after short delay
+      setTimeout(fetchMemoryFallback, 800);
+    });
 
-  /* --- TTS / voice --- */
+    socket.on('answer', (payload) => {
+      const text = payload?.answer || "M pa jwenn repons lan.";
+      const lang = payload?.lang || langSelect.value || detectLangFromText(text) || 'ht';
+      addAgent(text);
+      // speak only if user previously interacted (some browsers block TTS until user gesture)
+      speakText(text, lang).catch(e=>{ console.warn('TTS failed:', e); });
+      animateFromText(text);
+    });
+  } else {
+    // no socket: fetch memory once as fallback
+    setTimeout(fetchMemoryFallback, 300);
+  }
+
+  // fallback fetch if socket didn't supply memos
+  let fetchTried = false;
+  async function fetchMemoryFallback(){
+    if(fetchTried) return;
+    fetchTried = true;
+    try{
+      const url = SOCKET_SERVER + '/api/memeqas';
+      console.debug('[IM] fetch fallback to', url);
+      const resp = await fetch(url, { method: 'GET' });
+      if(!resp.ok) throw new Error('HTTP ' + resp.status);
+      const data = await resp.json();
+      MEME_QA = Array.isArray(data) ? data : [];
+      addSystem(`(HTTP) Memwa chaje: ${MEME_QA.length} antre`);
+      console.debug('[IM] HTTP memeqas count=', MEME_QA.length);
+    }catch(err){
+      console.warn('[IM] fetchMemoryFallback failed', err);
+      addSystem('Pa t ka telechaje memwa via HTTP.');
+    }
+  }
+
+  /* --- TTS / voice: more robust loading & better matching --- */
   let voices = [];
-  function loadVoices(){ return new Promise(res => {
-    voices = speechSynthesis.getVoices();
-    if(voices.length) return res(voices);
-    speechSynthesis.onvoiceschanged = () => { voices = speechSynthesis.getVoices(); res(voices); };
-    setTimeout(()=>{ voices = speechSynthesis.getVoices(); res(voices); }, 1200);
-  }); }
+  function timeout(ms){ return new Promise(r=>setTimeout(r,ms)); }
+
+  async function loadVoices(){ 
+    // try multiple times with small delays to handle browsers that lazy-load voices
+    for(let attempt=0; attempt<6; attempt++){
+      voices = speechSynthesis.getVoices() || [];
+      if(voices.length) break;
+      // attach onvoiceschanged only on first attempt
+      if(attempt===0){
+        speechSynthesis.onvoiceschanged = () => { voices = speechSynthesis.getVoices() || []; console.debug('[IM] onvoiceschanged fired, voices=', voices.length); };
+      }
+      await timeout(250);
+    }
+    // final read
+    voices = speechSynthesis.getVoices() || voices || [];
+    console.debug('[IM] loadVoices finished, voices count=', voices.length);
+    return voices;
+  }
 
   function pickVoiceForLang(code){
-    if(!voices.length) voices = speechSynthesis.getVoices();
-    const short = (code||'').split('-')[0];
-    const cand = voices.filter(v => (v.lang||'').toLowerCase().startsWith(short));
-    return cand[0] || voices[0] || null;
+    if(!voices.length) voices = speechSynthesis.getVoices() || [];
+    const short = (code||'').split('-')[0].toLowerCase();
+    // prefer exact startsWith, then contains, then default
+    let cand = voices.filter(v => (v.lang||'').toLowerCase().startsWith(short));
+    if(!cand.length){
+      cand = voices.filter(v => (v.lang||'').toLowerCase().includes(short));
+    }
+    if(!cand.length){
+      // try to pick by voice name hints (common)
+      const hints = { fr:['fr'], en:['en'], es:['es','spanish'], ht:['creole','haiti'] };
+      const h = hints[short] || [];
+      for(const hstr of h){
+        const c2 = voices.filter(v => (v.name||'').toLowerCase().includes(hstr));
+        if(c2.length) { cand = c2; break; }
+      }
+    }
+    const chosen = cand[0] || voices[0] || null;
+    console.debug('[IM] pickVoiceForLang', code, '=>', chosen ? chosen.name + '|' + chosen.lang : 'null');
+    return chosen;
   }
 
+  // speakText returns Promise that resolves on end
   async function speakText(text, langKey='ht'){
     if(isSleeping) wakeUp();
-    await loadVoices();
-    const utter = new SpeechSynthesisUtterance(text);
-    const code = LANG_MAP[langKey] || LANG_MAP['ht'];
-    utter.lang = code;
-    const v = pickVoiceForLang(code);
-    if(v) utter.voice = v;
-    imgEl.classList.add('talking');
-    speechSynthesis.cancel();
-    speechSynthesis.speak(utter);
-    utter.onend = () => imgEl.classList.remove('talking');
+    try{
+      await loadVoices();
+      const utter = new SpeechSynthesisUtterance(text);
+      const code = LANG_MAP[langKey] || LANG_MAP['ht'];
+      utter.lang = code;
+      const v = pickVoiceForLang(code);
+      if(v) utter.voice = v;
+      imgEl.classList.add('talking');
+      // cancel ongoing and speak
+      try { speechSynthesis.cancel(); } catch(e){}
+      const speakPromise = new Promise((res, rej) => {
+        utter.onend = () => { imgEl.classList.remove('talking'); res(); };
+        utter.onerror = (e) => { imgEl.classList.remove('talking'); rej(e); };
+      });
+      speechSynthesis.speak(utter);
+      // return after end (or error)
+      return speakPromise;
+    }catch(err){
+      imgEl.classList.remove('talking');
+      console.warn('[IM] speakText error', err);
+      throw err;
+    }
   }
 
-  /* --- STT (SpeechRecognition) --- */
+  /* --- STT (SpeechRecognition) unchanged except ensure correct lang codes --- */
   const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
   const recognition = SpeechRecognition ? new SpeechRecognition() : null;
   if(recognition){
@@ -170,8 +236,13 @@
     if(!recognition){ alert("Navigatè pa sipòte rekonesans vwa."); return; }
     const langCode = LANG_MAP[langSelect.value] || LANG_MAP['ht'];
     recognition.lang = langCode;
-    recognition.start();
-    addSystem("M ap tande...");
+    try {
+      recognition.start();
+      addSystem("M ap tande...");
+    } catch(e){
+      console.warn('[IM] recognition.start error', e);
+      addSystem("Pa kapab demare rekonesans vwa: " + (e.message||e));
+    }
   });
 
   if(recognition){
@@ -183,7 +254,7 @@
     recognition.onerror = (e) => addSystem("STT erè: " + (e.error || e.message || 'unknown'));
   }
 
-  /* --- send button --- */
+  // send button + keyboard
   sendBtn.addEventListener('click', () => {
     const txt = msgBox.value.trim();
     if(!txt) return;
@@ -191,34 +262,50 @@
     msgBox.value = '';
     handleQuestion(txt);
   });
-
   msgBox.addEventListener('keydown', (e) => {
     if(e.key === 'Enter' && !e.shiftKey){ e.preventDefault(); sendBtn.click(); }
   });
 
-  /* --- main logic: handle incoming questions --- */
+  // improved handleQuestion: try same exact (any-lang) fallback if chosen-lang misses
   function handleQuestion(text){
     resetIdleTimer();
     let chosenLang = langSelect.value || detectLangFromText(text) || 'ht';
 
     // 1) exact lang + exact match
     let found = MEME_QA.find(d => d && d.lang === chosenLang && d.question && d.question.trim().toLowerCase() === text.trim().toLowerCase());
-    if(found){ addAgent(found.answer); speakText(found.answer, found.lang); animateFromText(found.answer); return; }
+    if(found){ addAgent(found.answer); speakText(found.answer, found.lang).catch(()=>{}); animateFromText(found.answer); return; }
 
     // 2) contains match in chosen lang
     found = MEME_QA.find(d => d && d.lang === chosenLang && d.question && text.toLowerCase().includes(d.question.toLowerCase()));
-    if(found){ addAgent(found.answer); speakText(found.answer, found.lang); animateFromText(found.answer); return; }
+    if(found){ addAgent(found.answer); speakText(found.answer, found.lang).catch(()=>{}); animateFromText(found.answer); return; }
 
-    // 3) any-lang contains
+    // 3) exact or contains match ANY LANG (fallback)
+    found = MEME_QA.find(d => d && d.question && d.question.trim().toLowerCase() === text.trim().toLowerCase());
+    if(found){ addAgent(found.answer); speakText(found.answer, found.lang||chosenLang).catch(()=>{}); animateFromText(found.answer); return; }
     found = MEME_QA.find(d => d && d.question && text.toLowerCase().includes(d.question.toLowerCase()));
-    if(found){ addAgent(found.answer); speakText(found.answer, found.lang || chosenLang); animateFromText(found.answer); return; }
+    if(found){ addAgent(found.answer); speakText(found.answer, found.lang||chosenLang).catch(()=>{}); animateFromText(found.answer); return; }
 
-    // 4) fallback ask server (server will emit 'answer')
+    // 4) server
     addSystem('M ap mande servèr pou repons...');
-    socket.emit('ask', { question: text, lang: chosenLang });
+    if(socket && socket.connected){
+      socket.emit('ask', { question: text, lang: chosenLang });
+    } else {
+      // fallback to HTTP ask endpoint
+      fetch(SOCKET_SERVER + '/ask', {
+        method:'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ question: text, lang: chosenLang })
+      }).then(r=>r.json()).then(payload=>{
+        const textResp = payload?.answer || "M pa jwenn repons lan.";
+        addAgent(textResp);
+        speakText(textResp, payload?.lang || chosenLang).catch(()=>{});
+        animateFromText(textResp);
+      }).catch(err=>{
+        console.warn('[IM] HTTP ask failed', err);
+        addSystem('Sèvè pa reponn kounye a.');
+      });
+    }
   }
 
-  /* --- small heuristics for emotion from text --- */
+  // emotion helpers unchanged
   function animateFromText(ans){
     const a = (ans||'').toLowerCase();
     if(a.includes('m pa') || a.includes('pa') || a.includes('désolé') || a.includes('sorry') || a.includes('erè')){
@@ -229,7 +316,6 @@
       setEmotion('normal');
     }
   }
-
   function setEmotion(e){
     imgEl.classList.remove('happy','angry','sleep','talking');
     imgEl.src = IMAGES.normal;
@@ -239,14 +325,14 @@
     else { imgEl.src = IMAGES.normal; }
   }
 
-  /* --- language detection helper --- */
+  // improved detectLangFromText: return null if no strong signal
   function detectLangFromText(text){
     if(!text) return null;
     const t = text.toLowerCase();
-    const creoleTokens = ["bonjou","mwen","kijan","mesi","sispann","lapriye","ou"];
-    const frTokens = ["bonjour","merci","comment","vous","s'il","svp","monsieur"];
-    const enTokens = ["hello","hi","how","please","thanks","you"];
-    const esTokens = ["hola","como","gracias","por favor","buenos"];
+    const creoleTokens = ["bonjou","mwen","kijan","mesi","sispann","lapriye","ou","m'ap","m ap"];
+    const frTokens = ["bonjour","merci","comment","vous","s'il","svp","monsieur","tu","merci"];
+    const enTokens = ["hello","hi","how","please","thanks","you","what"];
+    const esTokens = ["hola","como","gracias","por","favor","buenos","buenas"];
     let scores = { ht:0, fr:0, en:0, es:0 };
     t.split(/\W+/).forEach(w => {
       if(creoleTokens.includes(w)) scores.ht++;
@@ -254,12 +340,18 @@
       if(enTokens.includes(w)) scores.en++;
       if(esTokens.includes(w)) scores.es++;
     });
-    let best = 'ht', max = -1;
-    for(const k of Object.keys(scores)){ if(scores[k] > max){ max = scores[k]; best = k; } }
-    return max === 0 ? null : best;
+    // require at least 1 token and clear winner
+    let keys = Object.keys(scores);
+    let best = null, max = 0;
+    for(const k of keys){ if(scores[k] > max){ max = scores[k]; best = k; } }
+    if(max <= 0) return null;
+    // ensure winner is distinct enough (>=1 lead)
+    const sorted = keys.map(k=>scores[k]).sort((a,b)=>b-a);
+    if(sorted[0] === sorted[1]) return null;
+    return best;
   }
 
-  /* --- Idle timer (sleep after 10 minutes inactivity) --- */
+  // idle timer
   function resetIdleTimer(){
     clearTimeout(idleTimer);
     if(isSleeping) wakeUp();
@@ -276,21 +368,22 @@
     addSystem('Agentmeme reveye!');
     resetIdleTimer();
   }
-  // reset idle on user interactions
   ['click','mousemove','keydown','touchstart'].forEach(ev => window.addEventListener(ev, resetIdleTimer, {passive:true}));
   resetIdleTimer();
 
-  /* --- bubble click toggles panel --- */
   bubble.addEventListener('click', () => {
     if(panel.style.display === 'block'){ panel.style.display = 'none'; }
     else { panel.style.display = 'block'; msgBox.focus(); resetIdleTimer(); }
   });
 
-  /* --- expose small API --- */
+  // small API
   window.inspecteurmeme = {
     getMemoryCount: () => MEME_QA.length,
-    reloadMemory: () => socket.emit('request-memeqa'),
+    reloadMemory: () => { if(socket) socket.emit('request-memeqa'); fetchMemoryFallback(); },
     speak: (text, lang) => speakText(text, lang)
   };
+
+  // ensure we try to fetch memos automatically once if socket didn't deliver
+  setTimeout(()=>{ if(!MEME_QA.length) fetchMemoryFallback(); }, 1200);
 
 })();
