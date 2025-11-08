@@ -3,46 +3,53 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Fondation Backup Spirituel — Agentmeme Demo</title>
+  <title>Fondation Backup Spirituel — Agentmeme</title>
   <link rel="stylesheet" href="Agentmeme.css">
 </head>
 <body>
-  <!-- === Paj ou a === -->
-  <h1>Accueil — Fondation Backup Spirituel</h1>
-  <p>Sa a se yon paj demo; Agentmeme ap parèt sou chak paj kote ou ajoute script la.</p>
+  <!-- === Paj prensipal ou a === -->
+  <h1>Fondation Backup Spirituel</h1>
+  <p>Agentmeme disponib pou kominike avèk ou sou tout paj sit la.</p>
 
-
-
-  
-  <!-- Agentmeme.html - Widget HTML, toujou nan rasin sit web -->
-<div id="agentmeme-root">
-  <div id="agentmeme-bubble" title="Klike pou louvri Agentmeme">
-    <img id="agentmeme-img" src="meme-front.png" alt="Agentmeme">
-  </div>
-
-  <div id="agentmeme-panel" aria-live="polite">
-    <h4>Agentmeme — Asistan</h4>
-    <input id="agentmeme-name" type="text" placeholder="Nom / Prénom">
-    <select id="agentmeme-lang">
-      <option value="ht">🇭🇹 Kreyòl</option>
-      <option value="fr">🇫🇷 Français</option>
-      <option value="en">🇬🇧 English</option>
-      <option value="es">🇪🇸 Español</option>
-    </select>
-    <div id="agentmeme-chatbox"></div>
-    <textarea id="agentmeme-msg" placeholder="Ekri mesaj ou..."></textarea>
-    <div class="agentmeme-row" style="margin-top:8px">
-      <button id="agentmeme-mic" class="agentmeme-btn secondary">🎤 Aktive Vokal</button>
-      <button id="agentmeme-send" class="agentmeme-btn primary">📨 Voye</button>
+  <!-- =============================== -->
+  <!-- Agentmeme Interface (nan rasin) -->
+  <!-- =============================== -->
+  <div id="agentmeme-root">
+    <!-- Boul avatar mobil -->
+    <div id="agentmeme-bubble" title="Klike pou pale ak Agentmeme">
+      <img id="agentmeme-img" src="meme-front.png" alt="Agentmeme">
     </div>
-    <div id="agentmeme-status" style="margin-top:8px">Koneksyon: ...</div>
+
+    <!-- Ti panel login + chat -->
+    <div id="agentmeme-panel" aria-live="polite">
+      <h4>Agentmeme — Asistan Espirityèl</h4>
+
+      <!-- Login -->
+      <input id="agentmeme-name" type="text" placeholder="Nom / Prénom">
+      <select id="agentmeme-lang">
+        <option value="ht">🇭🇹 Kreyòl</option>
+        <option value="fr">🇫🇷 Français</option>
+        <option value="en">🇬🇧 English</option>
+        <option value="es">🇪🇸 Español</option>
+      </select>
+
+      <!-- Chat -->
+      <div id="agentmeme-chatbox"></div>
+      <textarea id="agentmeme-msg" placeholder="Ekri mesaj ou..."></textarea>
+
+      <!-- Bouton -->
+      <div class="agentmeme-row" style="margin-top:8px">
+        <button id="agentmeme-mic" class="agentmeme-btn secondary">🎤 Aktive Vokal</button>
+        <button id="agentmeme-send" class="agentmeme-btn primary">📨 Voye</button>
+      </div>
+
+      <div id="agentmeme-status" style="margin-top:8px">Koneksyon: ...</div>
+    </div>
   </div>
-</div>
 
-
-  
-
-  <!-- Agentmeme Scripts -->
+  <!-- ========================= -->
+  <!-- Scripts obligatwa -->
+  <!-- ========================= -->
   <script src="https://cdn.socket.io/4.6.1/socket.io.min.js"></script>
   <script src="Agentmeme.js"></script>
 </body>
