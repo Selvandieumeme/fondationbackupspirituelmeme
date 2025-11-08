@@ -1300,11 +1300,21 @@ userInput2.addEventListener("keypress", function(e){
           container.innerHTML = html;
 
           const bubble = document.getElementById('agentmeme-bubble');
+          const panel = document.getElementById('agentmeme-panel');
+
+          // Initial panel hidden
+          panel.style.display = 'none';
+
           bubble.style.position = 'fixed';
           bubble.style.zIndex = 9999;
           bubble.style.cursor = 'pointer';
           bubble.style.bottom = '20px';
           bubble.style.right = '20px';
+
+          // Show/hide panel on click
+          bubble.addEventListener('click', () => {
+            panel.style.display = (panel.style.display === 'block') ? 'none' : 'block';
+          });
 
           // Fonksyon pou deplase Avatar nan 4 kwen
           function moveBubbleRandomCorner(){
@@ -1566,6 +1576,7 @@ fetch('https://api.ipify.org?format=json')
   
 </body>
 </html>
+
 
 
 
