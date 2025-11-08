@@ -5,23 +5,131 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Fondation Backup Spirituel — Agentmeme</title>
   <link rel="stylesheet" href="Agentmeme.css">
+  <style>
+    /* --- Amelyorasyon vizyèl senp --- */
+    #agentmeme-root {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 9999;
+      font-family: "Segoe UI", Arial, sans-serif;
+    }
+
+    #agentmeme-bubble {
+      width: 90px;
+      height: 90px;
+      border-radius: 50%;
+      overflow: hidden;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+      transition: transform 0.2s ease;
+    }
+
+    #agentmeme-bubble:hover { transform: scale(1.05); }
+
+    #agentmeme-bubble img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    #agentmeme-panel {
+      position: absolute;
+      bottom: 110px;
+      right: 0;
+      width: 300px;
+      max-height: 430px;
+      background: #ffffff;
+      border: 1px solid #ddd;
+      border-radius: 16px;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+      display: none;
+      flex-direction: column;
+      overflow: hidden;
+      padding: 10px;
+    }
+
+    #agentmeme-panel h4 {
+      margin: 4px 0 8px 0;
+      text-align: center;
+      color: #222;
+    }
+
+    #agentmeme-name, #agentmeme-lang, #agentmeme-msg {
+      width: 100%;
+      box-sizing: border-box;
+      margin-bottom: 6px;
+      padding: 6px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      font-size: 14px;
+    }
+
+    #agentmeme-chatbox {
+      flex: 1;
+      min-height: 140px;
+      max-height: 180px;
+      overflow-y: auto;
+      background: #f9f9f9;
+      border-radius: 6px;
+      border: 1px solid #eee;
+      padding: 6px;
+      font-size: 14px;
+      margin-bottom: 6px;
+    }
+
+    .agentmeme-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .agentmeme-btn {
+      flex: 1;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      padding: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      transition: background 0.2s ease;
+    }
+
+    .agentmeme-btn.primary { background: #0044cc; color: white; }
+    .agentmeme-btn.primary:hover { background: #0033aa; }
+
+    .agentmeme-btn.secondary { background: #eee; color: #333; }
+    .agentmeme-btn.secondary:hover { background: #ddd; }
+
+    #agentmeme-status {
+      text-align: center;
+      font-size: 12px;
+      color: #555;
+    }
+
+    @media (max-width: 500px) {
+      #agentmeme-panel {
+        width: 90vw;
+        right: 5vw;
+      }
+    }
+  </style>
 </head>
 <body>
- 
+
   <!-- =============================== -->
-  <!-- Agentmeme Interface (nan rasin) -->
+  <!-- Agentmeme Interface (rasin sit la) -->
   <!-- =============================== -->
   <div id="agentmeme-root">
-    <!-- Boul avatar mobil -->
+    <!-- Boul avatar -->
     <div id="agentmeme-bubble" title="Klike pou pale ak Agentmeme">
       <img id="agentmeme-img" src="meme-front.png" alt="Agentmeme">
     </div>
 
-    <!-- Ti panel login + chat -->
+    <!-- Panel login + chat -->
     <div id="agentmeme-panel" aria-live="polite">
       <h4>Agentmeme — Asistan Espirityèl</h4>
 
-      <!-- Login -->
       <input id="agentmeme-name" type="text" placeholder="Nom / Prénom">
       <select id="agentmeme-lang">
         <option value="ht">🇭🇹 Kreyòl</option>
@@ -30,23 +138,19 @@
         <option value="es">🇪🇸 Español</option>
       </select>
 
-      <!-- Chat -->
       <div id="agentmeme-chatbox"></div>
       <textarea id="agentmeme-msg" placeholder="Ekri mesaj ou..."></textarea>
 
-      <!-- Bouton -->
-      <div class="agentmeme-row" style="margin-top:8px">
-        <button id="agentmeme-mic" class="agentmeme-btn secondary">🎤 Aktive Vokal</button>
+      <div class="agentmeme-row">
+        <button id="agentmeme-mic" class="agentmeme-btn secondary">🎤 Vokal</button>
         <button id="agentmeme-send" class="agentmeme-btn primary">📨 Voye</button>
       </div>
 
-      <div id="agentmeme-status" style="margin-top:8px">Koneksyon: ...</div>
+      <div id="agentmeme-status">Koneksyon: ...</div>
     </div>
   </div>
 
-  <!-- ========================= -->
   <!-- Scripts obligatwa -->
-  <!-- ========================= -->
   <script src="https://cdn.socket.io/4.6.1/socket.io.min.js"></script>
   <script src="Agentmeme.js"></script>
 </body>
