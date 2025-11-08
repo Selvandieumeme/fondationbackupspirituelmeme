@@ -1107,7 +1107,7 @@ mongoose.connect(MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
   });
 
 // --- Schema / Model ---
-const { Schema } = mongoose;
+
 const MemeQaSchema = new Schema({
   question: { type: String, required: true },
   answer: { type: String, required: true },
