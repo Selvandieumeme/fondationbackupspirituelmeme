@@ -35,31 +35,96 @@
 #agentmeme-bubble.angry { transform: scale(1.00) translateY(-6px) rotate(2deg); filter: saturate(1.05) contrast(1.05); }
 #agentmeme-bubble.sleep { opacity: 0.6; transform: scale(0.98) rotate(0deg); }
 
+/* Ti panel login + chat */
 #agentmeme-panel {
-  width: 320px;
-  max-width: calc(100vw - 40px);
+  width: 260px;                /* Pi piti pou tout ko parèt */
+  max-width: calc(100vw - 16px);
   background: #fff;
   border-radius: 12px;
   box-shadow: 0 14px 40px rgba(0,0,0,0.25);
-  padding: 12px;
+  padding: 10px;
   display: none;
   position: fixed;
   right: 20px;
   bottom: 160px;
   z-index: 999999;
+  overflow: hidden;
 }
 
-#agentmeme-panel h4 { margin: 0 0 8px 0; font-size: 16px; color:#222; text-align:center; }
-#agentmeme-panel input, #agentmeme-panel textarea, #agentmeme-panel select {
-  width: 100%; box-sizing: border-box; margin: 6px 0; padding: 8px; border-radius: 8px; border: 1px solid #ddd; font-size: 14px;
+#agentmeme-panel h4 {
+  margin: 0 0 6px 0;
+  font-size: 15px;
+  color: #222;
+  text-align: center;
 }
-#agentmeme-chatbox { height: 180px; overflow-y: auto; border: 1px solid #efefef; padding: 8px; border-radius: 8px; background: #fafafa; margin-bottom: 6px; font-size: 13px; }
-.agentmeme-row { display:flex; gap:8px; }
-.agentmeme-btn { flex: 1; padding: 8px; border-radius: 8px; border: none; cursor: pointer; font-size: 14px; }
-.agentmeme-btn.primary { background:#0B76EF; color:white; }
-.agentmeme-btn.secondary { background:#efefef; color:#333; }
-#agentmeme-status { font-size:12px; color:#666; margin-top:6px; text-align:center; }
 
-@media (max-width: 520px) {
-  #agentmeme-panel { right: 12px; left: 12px; bottom: 140px; width: auto; }
+#agentmeme-panel input,
+#agentmeme-panel textarea,
+#agentmeme-panel select {
+  width: 100%;
+  box-sizing: border-box;
+  margin: 4px 0;
+  padding: 6px;
+  border-radius: 6px;
+  border: 1px solid #ddd;
+  font-size: 13px;
+}
+
+#agentmeme-chatbox {
+  height: 140px;              /* Pi piti men toujou vizib */
+  overflow-y: auto;
+  border: 1px solid #efefef;
+  padding: 6px;
+  border-radius: 8px;
+  background: #fafafa;
+  margin-bottom: 6px;
+  font-size: 13px;
+}
+
+.agentmeme-row {
+  display: flex;
+  gap: 6px;
+}
+
+.agentmeme-btn {
+  flex: 1;
+  padding: 6px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.agentmeme-btn.primary {
+  background: #0B76EF;
+  color: white;
+}
+
+.agentmeme-btn.secondary {
+  background: #efefef;
+  color: #333;
+}
+
+#agentmeme-status {
+  font-size: 12px;
+  color: #666;
+  margin-top: 4px;
+  text-align: center;
+}
+
+/* ===== Responsivite mobil/tablet ===== */
+@media (max-width: 600px) {
+  #agentmeme-panel {
+    right: 8px;
+    left: 8px;
+    bottom: 120px;
+    width: auto;
+    padding: 8px;
+  }
+
+  #agentmeme-chatbox { height: 120px; }
+  #agentmeme-panel input,
+  #agentmeme-panel textarea,
+  #agentmeme-panel select { font-size: 12px; padding: 5px; }
+  .agentmeme-btn { font-size: 12px; padding: 5px; }
 }
