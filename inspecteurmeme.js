@@ -271,95 +271,20 @@ function findAnswer(text){
 
 
   
-  // ==== Find answer locally (refòme pou tout lang ak tags) ====
-function findAnswer(text, tagFilter = null) {
-  if (!MEME_QA_DATA || MEME_QA_DATA.length === 0) return null;
-  const t = text.trim().toLowerCase();
-
-  for (const item of MEME_QA_DATA) {
-    if (!item.question) continue;
-
-    // Si tagFilter egziste, verifye si item.tags genyen li
-    if (tagFilter && Array.isArray(item.tags) && !item.tags.includes(tagFilter)) continue;
-
-    // ==== Matche question si se string ====
-    if (typeof item.question === 'string') {
-      const qStr = item.question.toLowerCase();
-      if (qStr === t || qStr.includes(t) || t.includes(qStr)) {
-        return formatAnswer(item);
-      }
-    }
-
-    // ==== Matche question si se object ak lang yo ====
-    if (typeof item.question === 'object') {
-      for (const langKey of Object.keys(item.question)) {
-        const qLang = (item.question[langKey] || '').toLowerCase();
-        if (!qLang) continue;
-        if (qLang === t || qLang.includes(t) || t.includes(qLang)) {
-          return formatAnswer(item);
-        }
-      }
-    }
+  function handleIncoming(data){
+    talking=true; idleTime=0; resetIdleTimer(); setMemeState('walking');
+    if(socket) socket.emit('muteAllExcept', data.studentId);
+    logChat(data.studentName+': '+data.msg);
+    const ans=findAnswer(data.msg);
+    if(ans) respond(ans,data.lang||USER.lang);
+    else respond({
+      ht:'M pa genyen repons sa kounye a, men mwen ka aprann li.',
+      fr:'Je n’ai pas encore cette réponse, mais je peux l’apprendre.',
+      en:'I don’t have that answer yet, but I can learn it.',
+      es:'No tengo esa respuesta todavía, pero puedo aprenderla.',
+      tone:'front'
+    }, data.lang||USER.lang);
   }
-
-  return null;
-
-  // ==== Fonksyon pou asire repons retounen nan tout lang yo ====
-  function formatAnswer(item) {
-    const langs = ['ht','fr','en','es'];
-    const ans = {};
-    langs.forEach(L => {
-      if (typeof item.answer === 'string') ans[L] = item.answer;
-      else if (typeof item.answer === 'object') ans[L] = item.answer[L] || item.answer.ht || item.answer.en || item.answer.fr || item.answer.es || '';
-      else ans[L] = '';
-    });
-    return ans;
-  }
-}
-
-
-  // ==== Blok test Q/A pou verifye findAnswer ====
-// Nou ajoute kèk Q/A dirèkteman nan MEME_QA_DATA pou teste
-MEME_QA_DATA.push(
-  {
-    question: {
-      ht: "Bonjou",
-      fr: "Bonjour",
-      en: "Hello",
-      es: "Hola"
-    },
-    answer: {
-      ht: "Bonjou! Kijan ou ye?",
-      fr: "Bonjour! Comment ça va?",
-      en: "Hello! How are you?",
-      es: "¡Hola! ¿Cómo estás?"
-    },
-    tags: ["santiman", "entèaksyon"]
-  },
-  {
-    question: {
-      ht: "Kijan ou santi w jodi a?",
-      fr: "Comment te sens-tu aujourd'hui?",
-      en: "How are you feeling today?",
-      es: "¿Cómo te sientes hoy?"
-    },
-    answer: {
-      ht: "Mwen santi m byen, m pare pou ede tout moun nan klas la.",
-      fr: "Je me sens bien, prêt à aider tout le monde en classe.",
-      en: "I'm feeling good, ready to help everyone in class.",
-      es: "Me siento bien, listo para ayudar a todos en la clase."
-    },
-    tags: ["santiman","entèaksyon"]
-  }
-);
-
-// ==== Test rapid pou verifye ====
-// Ou ka itilize sa nan console browser la
-console.log("TEST Bonjou:", findAnswer("Bonjou"));
-console.log("TEST Hello:", findAnswer("Hello"));
-console.log("TEST Hola:", findAnswer("Hola"));
-console.log("TEST Kijan ou santi w jodi a:", findAnswer("Kijan ou santi w jodi a?"));
-
 
 
 
