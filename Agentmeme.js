@@ -52,9 +52,43 @@
   const sendBtn=document.getElementById('agentmeme-send');
   const statusEl=document.getElementById('agentmeme-status');
 
-  // show/hide panel
-  bubble.addEventListener('click',()=>{panel.style.display=(panel.style.display==='block')?'none':'block'; resetIdleTimer();});
+ 
+ 
+  
+  // show/hide panel - toujou sou kwen anba dwat, responsive
+bubble.addEventListener('click', () => {
+  if(panel.style.display === 'block') {
+    panel.style.display = 'none';
+  } else {
+    panel.style.display = 'block';
 
+    // Ajoute styling pou panel toujou vizib sou tout aparèy
+    panel.style.position = 'fixed';
+    panel.style.right = '20px';
+    panel.style.bottom = '160px';
+    panel.style.width = '260px';
+    panel.style.maxWidth = 'calc(100vw - 16px)';
+    panel.style.zIndex = '999999';
+
+    // Mobil & ti ekran
+    if(window.innerWidth <= 600){
+      panel.style.right = '8px';
+      panel.style.left = '8px';
+      panel.style.bottom = '120px';
+      panel.style.width = 'auto';
+      panel.style.padding = '8px';
+    }
+  }
+  resetIdleTimer();
+});
+  
+  
+  
+  
+  
+  
+  
+  
   // Socket.IO events
   socket.on('connect',()=>{statusEl.textContent='Konekte'; socket.emit('request-memeqa');});
   socket.on('disconnect',()=>{statusEl.textContent='Deconnecte';});
