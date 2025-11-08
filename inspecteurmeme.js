@@ -197,32 +197,54 @@
     return chosen;
   }
 
-  // speakText returns Promise that resolves on end
-  async function speakText(text, langKey='ht'){
-    if(isSleeping) wakeUp();
-    try{
-      await loadVoices();
-      const utter = new SpeechSynthesisUtterance(text);
-      const code = LANG_MAP[langKey] || LANG_MAP['ht'];
-      utter.lang = code;
-      const v = pickVoiceForLang(code);
-      if(v) utter.voice = v;
-      imgEl.classList.add('talking');
-      // cancel ongoing and speak
-      try { speechSynthesis.cancel(); } catch(e){}
-      const speakPromise = new Promise((res, rej) => {
-        utter.onend = () => { imgEl.classList.remove('talking'); res(); };
-        utter.onerror = (e) => { imgEl.classList.remove('talking'); rej(e); };
-      });
-      speechSynthesis.speak(utter);
-      // return after end (or error)
-      return speakPromise;
-    }catch(err){
-      imgEl.classList.remove('talking');
-      console.warn('[IM] speakText error', err);
-      throw err;
-    }
+
+
+
+
+async function speakText(text, langKey='ht'){
+  if(isSleeping) wakeUp();
+  try{
+    await loadVoices();
+    const utter = new SpeechSynthesisUtterance(text);
+
+    // ✅ map langKey nan LANG_MAP
+    const code = LANG_MAP[langKey] || LANG_MAP['ht'];
+    utter.lang = code;
+
+    // ✅ toujou itilize menm vwa fi fransè a pou tout lang
+    const v = voices.find(v =>
+      v.lang.toLowerCase().startsWith('fr') &&
+      /female|femme|amelie|marie|google français/i.test(v.name)
+    );
+    if(v) utter.voice = v;
+
+    imgEl.classList.add('talking');
+
+    // cancel ongoing speech
+    try { speechSynthesis.cancel(); } catch(e){}
+
+    // create promise that resolves on end
+    const speakPromise = new Promise((res, rej) => {
+      utter.onend = () => { imgEl.classList.remove('talking'); res(); };
+      utter.onerror = (e) => { imgEl.classList.remove('talking'); rej(e); };
+    });
+
+    speechSynthesis.speak(utter);
+    return speakPromise;
+
+  } catch(err){
+    imgEl.classList.remove('talking');
+    console.warn('[IM] speakText error', err);
+    throw err;
   }
+}
+
+
+
+
+
+
+   
 
   /* --- STT (SpeechRecognition) unchanged except ensure correct lang codes --- */
   const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
