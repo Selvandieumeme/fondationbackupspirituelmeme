@@ -67,25 +67,62 @@
   function showAgent(text){const d=document.createElement('div');d.style.textAlign='left';d.style.marginBottom='6px';d.innerHTML=`<small style="color:#555">Agentmeme:</small><div style="display:inline-block;background:#fff;padding:6px;border-radius:8px;border:1px solid #efefef;margin-top:2px;">${escapeHtml(text)}</div>`; chatbox.appendChild(d); chatbox.scrollTop=chatbox.scrollHeight;}
   function escapeHtml(s){return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 
-  // TTS
-  let voicesCache=[]; async function loadVoices(){return new Promise(res=>{voicesCache=speechSynthesis.getVoices(); if(voicesCache.length) return res(voicesCache); speechSynthesis.onvoiceschanged=()=>{voicesCache=speechSynthesis.getVoices(); res(voicesCache);}; setTimeout(()=>{voicesCache=speechSynthesis.getVoices(); res(voicesCache);},1200);});}
-  function selectVoiceForLang(lang){if(!voicesCache.length) voicesCache=speechSynthesis.getVoices(); const candidates=voicesCache.filter(v=>(v.lang||'').toLowerCase().includes(lang.split('-')[0])); return candidates[0]||voicesCache[0]||null;}
-  async function speak(text,langKey){if(isSleeping) wakeUp(); await loadVoices(); const utter=new SpeechSynthesisUtterance(text); const code=LANG_CODES[langKey]||LANG_CODES['ht']; utter.lang=code; const v=selectVoiceForLang(code); if(v)utter.voice=v; imgEl.classList.add('talking'); speechSynthesis.cancel(); speechSynthesis.speak(utter); utter.onend=()=>imgEl.classList.remove('talking');}
 
-  // STT
-  const SpeechRecognition=window.SpeechRecognition||window.webkitSpeechRecognition;
-  const recognition=SpeechRecognition?new SpeechRecognition():null;
-  if(recognition){recognition.interimResults=false;recognition.maxAlternatives=1;}
-  micBtn.addEventListener('click',()=>{if(!recognition){alert("Navigatè pa sipòte vwa");return;} recognition.lang=LANG_CODES[langSelect.value]||LANG_CODES['ht']; recognition.start(); addSystemMessage("M ap tande...");});
-  if(recognition){recognition.onresult=(ev)=>{const text=ev.results[0][0].transcript; showUser(text); handleIncomingQuestion(text);}; recognition.onerror=(e)=>{addSystemMessage("Erè rekonesans vwa: "+(e.error||e.message));}}
 
-  sendBtn.addEventListener('click',()=>{const text=msgBox.value.trim(); if(!text)return; showUser(text); msgBox.value=''; handleIncomingQuestion(text);});
-  msgBox.addEventListener('keydown',(e)=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendBtn.click();}});
 
-  function handleIncomingQuestion(text){
-    resetIdleTimer();
-    const chosenLang=langSelect.value||detectLangFromText(text)||'ht';
 
+// TTS
+let voicesCache=[]; 
+async function loadVoices(){
+  return new Promise(res=>{
+    voicesCache = speechSynthesis.getVoices();
+    if(voicesCache.length) return res(voicesCache);
+    speechSynthesis.onvoiceschanged = () => {
+      voicesCache = speechSynthesis.getVoices();
+      res(voicesCache);
+    };
+    setTimeout(()=>{voicesCache = speechSynthesis.getVoices(); res(voicesCache);}, 1200);
+  });
+}
+
+function selectVoiceForLang(lang){
+  if(!voicesCache.length) voicesCache = speechSynthesis.getVoices();
+  const candidates = voicesCache.filter(v => (v.lang||'').toLowerCase().includes(lang.split('-')[0]));
+  return candidates[0] || voicesCache[0] || null;
+}
+
+async function speak(text, langKey){
+  if(isSleeping) wakeUp();
+  await loadVoices();
+
+  const utter = new SpeechSynthesisUtterance(text);
+
+  // Chwazi lang
+  const code = LANG_CODES[langKey] || LANG_CODES['ht'];
+  utter.lang = code;
+
+  // Chwazi vwa ki pi natirèl pou lang lan
+  const v = selectVoiceForLang(code);
+  if(v) utter.voice = v;
+
+  // --- AJOUTE KLARITE VWA ---
+  utter.pitch = 1.2;    // pitch >1 fè vwa pi klè, natirèl
+  utter.rate = 1.0;     // vitès pale nòmal, chak mo pwononse byen
+
+  // Efè vizyèl lè Agentmeme ap pale
+  imgEl.classList.add('talking');
+
+  // Anile tout pale ki rete nan queue a
+  speechSynthesis.cancel();
+  speechSynthesis.speak(utter);
+
+  utter.onend = () => imgEl.classList.remove('talking');
+}
+
+  
+
+
+  
     // 1️⃣ Chèche repons nan memwa lokal avèk tags entak
     const match=MEME_QA.find(doc=>
       doc.question &&
