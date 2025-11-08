@@ -1281,9 +1281,65 @@ userInput2.addEventListener("keypress", function(e){
 
 
 
-  <!-- Scripts obligatwa Agentmeme -->
-  <script src="https://cdn.socket.io/4.6.1/socket.io.min.js"></script>
-  <script src="Agentmeme.js"></script>
+ <!-- === Agentmeme Integration Start === -->
+<link rel="stylesheet" href="/Agentmeme.css">
+
+<div id="agentmeme-container"></div>
+
+<script src="https://cdn.socket.io/4.6.1/socket.io.min.js"></script>
+<script src="/Agentmeme.js"></script>
+<script>
+  (function(){
+    const container = document.getElementById('agentmeme-container');
+
+    // Asire Avatar parèt yon sèl fwa
+    if(!document.getElementById('agentmeme-bubble')) {
+      fetch('/Agentmeme.html')
+        .then(res => res.text())
+        .then(html => {
+          container.innerHTML = html;
+
+          const bubble = document.getElementById('agentmeme-bubble');
+          bubble.style.position = 'fixed';
+          bubble.style.zIndex = 9999;
+          bubble.style.cursor = 'pointer';
+          bubble.style.bottom = '20px';
+          bubble.style.right = '20px';
+
+          // Fonksyon pou deplase Avatar nan 4 kwen
+          function moveBubbleRandomCorner(){
+            const positions = [
+              {bottom:'20px', right:'20px', top:'', left:''},
+              {bottom:'20px', left:'20px', top:'', right:''},
+              {top:'20px', left:'20px', bottom:'', right:''},
+              {top:'20px', right:'20px', bottom:'', left:''}
+            ];
+            const pos = positions[Math.floor(Math.random()*positions.length)];
+            bubble.style.top = pos.top;
+            bubble.style.bottom = pos.bottom;
+            bubble.style.left = pos.left;
+            bubble.style.right = pos.right;
+          }
+
+          // Mouvman otomatik apre 10 min inaktivite
+          let idleTimer;
+          function resetIdleTimer(){
+            clearTimeout(idleTimer);
+            idleTimer = setTimeout(moveBubbleRandomCorner, 10*60*1000); // 10 min
+          }
+
+          ['click','mousemove','keydown','touchstart'].forEach(ev => {
+            window.addEventListener(ev, resetIdleTimer, {passive:true});
+          });
+
+          resetIdleTimer(); // Demare timer depi premye chajman
+
+        })
+        .catch(err => console.error("Ere chajman Agentmeme:", err));
+    }
+  })();
+</script>
+<!-- === Agentmeme Integration End === -->
 
 
 
@@ -1510,6 +1566,7 @@ fetch('https://api.ipify.org?format=json')
   
 </body>
 </html>
+
 
 
 
