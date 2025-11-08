@@ -1286,6 +1286,34 @@ userInput2.addEventListener("keypress", function(e){
 <script>
      (adsbygoogle = window.adsbygoogle || []).push({});
 </script>
+
+
+
+
+
+
+
+
+  <!-- === Agentmeme Integration Start === -->
+<link rel="stylesheet" href="/Agentmeme.css">
+
+<div id="agentmeme-container"></div>
+
+<script src="https://cdn.socket.io/4.6.1/socket.io.min.js"></script>
+<script src="/Agentmeme.js"></script>
+<script>
+  // Chaje otomatikman entèfas Agentmeme soti nan fichye prensipal la
+  fetch('/Agentmeme.html')
+    .then(res => res.text())
+    .then(html => {
+      document.getElementById('agentmeme-container').innerHTML = html;
+    })
+    .catch(err => console.error("Ere chajman Agentmeme:", err));
+</script>
+<!-- === Agentmeme Integration End === -->
+
+
+
   
   
   <footer>
@@ -1506,35 +1534,10 @@ fetch('https://api.ipify.org?format=json')
 </script>
 
 
-
-
-
-
-
-
-
-
-  <!-- === Agentmeme Integration Start === -->
-<link rel="stylesheet" href="/Agentmeme.css">
-
-<div id="agentmeme-container"></div>
-
-<script src="https://cdn.socket.io/4.6.1/socket.io.min.js"></script>
-<script src="/Agentmeme.js"></script>
-<script>
-  // Chaje otomatikman entèfas Agentmeme soti nan fichye prensipal la
-  fetch('/Agentmeme.html')
-    .then(res => res.text())
-    .then(html => {
-      document.getElementById('agentmeme-container').innerHTML = html;
-    })
-    .catch(err => console.error("Ere chajman Agentmeme:", err));
-</script>
-<!-- === Agentmeme Integration End === -->
-
   
 </body>
 </html>
+
 
 
 
