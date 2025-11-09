@@ -40,5 +40,4 @@ function startLocalREPL() {
   });
 }
 
-// Egzanp: rele li apre MEME_QA fin chaje
-// startLocalREPL();
+
