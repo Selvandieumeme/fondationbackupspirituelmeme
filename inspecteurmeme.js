@@ -345,78 +345,68 @@ function handleQuestion(text) {
   console.log(`🧠 [handleQuestion] Rele ak teks: "${text}" (lang=${chosenLang})`);
   console.log("📚 MEME_QA total:", MEME_QA.length);
 
-  // 1️⃣ — Premye etap: eseye jwenn repons lokal ak normalize()
-  const localAnswer = findAnswer(text);
-  console.log("🔍 [1] findAnswer() retounen:", localAnswer);
-  if (localAnswer && !/Mwen pa sèten/i.test(localAnswer)) {
-    addAgent(localAnswer);
-    speakText(localAnswer, chosenLang).catch(() => {});
-    animateFromText(localAnswer);
-    console.log("✅ [1] Repons jwenn lokalman via findAnswer()");
+  // 1️⃣ — Eseye jwenn repons lokal via findAnswer()
+  let answer = findAnswer(text);
+  if (answer && !/Mwen pa sèten/i.test(answer)) {
+    console.log("✅ [1] Repons jwenn lokal:", answer);
+    addAgent(answer);
+    speakText(answer, chosenLang).catch(() => {});
+    animateFromText(answer);
     return;
   }
 
-  // 2️⃣ — Tès egzak ak normalize() nan lang chwazi a
+  // 2️⃣ — Match egzak nan lang chwazi a
   let found = MEME_QA.find(d =>
     d && d.lang === chosenLang &&
     normalize(d.question) === normalize(text)
   );
-  console.log("🔍 [2] Match egzak nan lang chwazi a:", found ? found.question : "Pa jwenn");
   if (found) {
+    console.log("✅ [2] Match egzak nan lang chwazi:", found.question);
     addAgent(found.answer);
     speakText(found.answer, found.lang).catch(() => {});
     animateFromText(found.answer);
-    console.log("✅ [2] Repons jwenn nan lang", found.lang);
     return;
   }
 
-  // 3️⃣ — Tès si tèks ou tape a gen kesyon ki sanble nan lang chwazi a
+  // 3️⃣ — Match contains nan lang chwazi a
   found = MEME_QA.find(d =>
     d && d.lang === chosenLang &&
     normalize(text).includes(normalize(d.question))
   );
-  console.log("🔍 [3] Match 'includes' nan lang chwazi a:", found ? found.question : "Pa jwenn");
   if (found) {
+    console.log("✅ [3] Match 'includes' nan lang chwazi:", found.question);
     addAgent(found.answer);
     speakText(found.answer, found.lang).catch(() => {});
     animateFromText(found.answer);
-    console.log("✅ [3] Repons jwenn (similè nan lang)", found.lang);
     return;
   }
 
-  // 4️⃣ — Tès atravè tout lang (fallback)
-  found = MEME_QA.find(d =>
-    d && normalize(d.question) === normalize(text)
-  );
-  console.log("🔍 [4a] Match egzak tout lang:", found ? found.question : "Pa jwenn");
+  // 4️⃣ — Match atravè tout lang
+  found = MEME_QA.find(d => d && normalize(d.question) === normalize(text));
   if (found) {
+    console.log("✅ [4a] Match egzak tout lang:", found.question);
     addAgent(found.answer);
     speakText(found.answer, found.lang || chosenLang).catch(() => {});
     animateFromText(found.answer);
-    console.log("✅ [4a] Repons jwenn atravè tout lang:", found.lang || chosenLang);
     return;
   }
 
-  found = MEME_QA.find(d =>
-    d && normalize(text).includes(normalize(d.question))
-  );
-  console.log("🔍 [4b] Match 'includes' tout lang:", found ? found.question : "Pa jwenn");
+  found = MEME_QA.find(d => d && normalize(text).includes(normalize(d.question)));
   if (found) {
+    console.log("✅ [4b] Match 'includes' tout lang:", found.question);
     addAgent(found.answer);
     speakText(found.answer, found.lang || chosenLang).catch(() => {});
     animateFromText(found.answer);
-    console.log("✅ [4b] Repons jwenn atravè tout lang (similè)");
     return;
   }
 
-  // 5️⃣ — Dènye etap: si pa jwenn okenn repons lokal, kontakte sèvè
-  console.log("🌐 [5] Pa jwenn lokal, m ap eseye mande sèvè...");
+  // 5️⃣ — Pa jwenn lokal: voye kesyon bay sèvè
+  console.log("🌐 [5] Pa jwenn lokal, m ap mande sèvè...");
   addSystem('M ap mande sèvè pou repons...');
   if (socket && socket.connected) {
     socket.emit('ask', { question: text, lang: chosenLang });
     console.log("📡 [5a] Demann voye sou socket");
   } else {
-    // ✅ backup: HTTP POST sou API /ask
     fetch(SOCKET_SERVER + '/ask', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -432,7 +422,7 @@ function handleQuestion(text) {
           es: "No encontré la respuesta."
         };
         const langKey =
-          (payload?.lang && ['ht', 'fr', 'en', 'es'].includes(payload.lang))
+          (payload?.lang && ['ht','fr','en','es'].includes(payload.lang))
             ? payload.lang
             : chosenLang;
         const textResp = payload?.answer || DEFAULT_ANSWERS[langKey];
@@ -449,7 +439,6 @@ function handleQuestion(text) {
   }
 }
 
-
 // ===============================================
 // 🔹 Fonksyon pou netwaye tèks
 // ===============================================
@@ -460,7 +449,6 @@ function normalize(str) {
     .replace(/\s+/g, ' ') // retire espas doub
     .trim();
 }
-
 
 // ===============================================
 // 🔹 Fonksyon pou chèche repons lokal
@@ -477,9 +465,8 @@ function findAnswer(text) {
   }
 
   console.log("⚠️ [findAnswer] pa jwenn matche pou:", normalized);
-  return "Mwen pa sèten, ou vle m eseye reponn sa ?";
+  return null; // 🔹 Retounen null olye tèks default pou TTS toujou rele nan handleQuestion
 }
-
 
 
 
