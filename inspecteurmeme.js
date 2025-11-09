@@ -94,66 +94,84 @@
   }
   function escapeHtml(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
-  // Socket handlers + fetch fallback
-  if(socket){
-    socket.on('connect', () => {
-      statusEl.textContent = 'Konekte (socket)';
-      console.debug('[IM] socket connected, requesting memoire...');
-      socket.emit('request-memeqa');
 
-      // Also proactively try to load voices once user interacts or on connect
-      // (we call loadVoices lazy later too)
-    });
 
-    socket.on('disconnect', () => { statusEl.textContent = 'Dekonekte'; });
 
-    socket.on('memeqa-data', (data) => {
-      MEME_QA = Array.isArray(data) ? data : [];
-      addSystem(`Memwa chaje: ${MEME_QA.length} antre`);
-      console.debug('[IM] memeqa-data received count=', MEME_QA.length);
-    });
 
-    socket.on('memeqa-update', (payload) => {
-      addSystem('Memwa sou servèr modifye — rechaje...');
-      console.debug('[IM] memeqa-update payload', payload);
-      socket.emit('request-memeqa');
-      // as backup, also fetch /api/memeqas after short delay
-      setTimeout(fetchMemoryFallback, 800);
-    });
+   // --- Socket handlers + fetch fallback
+if(socket){
+  socket.on('connect', () => {
+    statusEl.textContent = 'Konekte (socket)';
+    console.debug('[IM] socket connected, requesting memoire...');
+    socket.emit('request-memeqa');
+  });
 
-    socket.on('answer', (payload) => {
-      const text = payload?.answer || "M pa jwenn repons lan.";
-      const lang = payload?.lang || langSelect.value || detectLangFromText(text) || 'ht';
-      addAgent(text);
-      // speak only if user previously interacted (some browsers block TTS until user gesture)
-      speakText(text, lang).catch(e=>{ console.warn('TTS failed:', e); });
-      animateFromText(text);
-    });
-  } else {
-    // no socket: fetch memory once as fallback
-    setTimeout(fetchMemoryFallback, 300);
+  socket.on('disconnect', () => { statusEl.textContent = 'Dekonekte'; });
+
+  // socket received memoire
+  socket.on('memeqa-data', (data) => {
+    MEME_QA = Array.isArray(data) ? data : [];
+    logMEME_QAStatus('socket');           // DEBUG log
+    addSystem(`Memwa chaje: ${MEME_QA.length} antre`);
+    console.debug('[IM] memeqa-data received count=', MEME_QA.length);
+  });
+
+  socket.on('memeqa-update', (payload) => {
+    addSystem('Memwa sou servèr modifye — rechaje...');
+    console.debug('[IM] memeqa-update payload', payload);
+    socket.emit('request-memeqa');
+    setTimeout(fetchMemoryFallback, 800);
+  });
+
+  socket.on('answer', (payload) => {
+    const text = payload?.answer || "M pa jwenn repons lan.";
+    const lang = payload?.lang || langSelect.value || detectLangFromText(text) || 'ht';
+    addAgent(text);
+    speakText(text, lang).catch(e=>{ console.warn('TTS failed:', e); });
+    animateFromText(text);
+  });
+} else {
+  // no socket: fetch memory once as fallback
+  setTimeout(fetchMemoryFallback, 300);
+}
+
+// --- Debug log MEME_QA ---
+function logMEME_QAStatus(source){
+  console.log(`>>> [DEBUG] MEME_QA loaded via ${source}, count=`, MEME_QA.length);
+}
+
+// fallback HTTP memoire
+let fetchTried = false;
+async function fetchMemoryFallback(){
+  if(fetchTried) return;
+  fetchTried = true;
+  try{
+    const url = SOCKET_SERVER + '/api/memeqas';
+    console.debug('[IM] fetch fallback to', url);
+    const resp = await fetch(url, { method: 'GET' });
+    if(!resp.ok) throw new Error('HTTP ' + resp.status);
+    const data = await resp.json();
+    MEME_QA = Array.isArray(data) ? data : [];
+    logMEME_QAStatus('HTTP fallback'); // DEBUG log
+    addSystem(`(HTTP) Memwa chaje: ${MEME_QA.length} antre`);
+  }catch(err){
+    console.warn('[IM] fetchMemoryFallback failed', err);
+    addSystem('Pa t ka telechaje memwa via HTTP.');
   }
+}
 
-  // fallback fetch if socket didn't supply memos
-  let fetchTried = false;
-  async function fetchMemoryFallback(){
-    if(fetchTried) return;
-    fetchTried = true;
-    try{
-      const url = SOCKET_SERVER + '/api/memeqas';
-      console.debug('[IM] fetch fallback to', url);
-      const resp = await fetch(url, { method: 'GET' });
-      if(!resp.ok) throw new Error('HTTP ' + resp.status);
-      const data = await resp.json();
-      MEME_QA = Array.isArray(data) ? data : [];
-      addSystem(`(HTTP) Memwa chaje: ${MEME_QA.length} antre`);
-      console.debug('[IM] HTTP memeqas count=', MEME_QA.length);
-    }catch(err){
-      console.warn('[IM] fetchMemoryFallback failed', err);
-      addSystem('Pa t ka telechaje memwa via HTTP.');
-    }
-  }
+// handleQuestion debogaj
+const _old_handleQuestion = handleQuestion;
+handleQuestion = function(text){
+  console.log(`>>> [DEBUG] handleQuestion called with text: "${text}"`);
+  console.log('>>> [DEBUG] MEME_QA currently has', MEME_QA.length, 'entries');
+  _old_handleQuestion(text);
+};
 
+   
+
+
+   
   /* --- TTS / voice: more robust loading & better matching --- */
   let voices = [];
   function timeout(ms){ return new Promise(r=>setTimeout(r,ms)); }
