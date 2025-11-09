@@ -22,6 +22,29 @@
   let idleTimer = null;
   let isSleeping = false;
 
+
+
+function testLocalQuery(question) {
+  if (!MEME_QA || MEME_QA.length === 0) {
+    console.log("MEME_QA pa chaje toujou!");
+    return;
+  }
+
+  const answer = MEME_QA.find(entry => 
+    entry.question.toLowerCase().includes(question.toLowerCase())
+  );
+
+  if (answer) {
+    console.log(">>> Repons jwenn:", answer.answer);
+  } else {
+    console.log(">>> Pa gen repons ki koresponn ak:", question);
+  }
+}
+
+
+
+   
+
   if(typeof io === 'undefined'){
     console.error("inspecteurmeme.js: socket.io client missing. Include <script src=\"https://cdn.socket.io/4.6.1/socket.io.min.js\"></script>");
   }
