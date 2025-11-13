@@ -1055,6 +1055,78 @@ mongoose.connection.once('open', () => {
   }
 });
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// ---------- ROUTE INSCRIPTION VIP ----------
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => cb(null, 'uploads/screenshots'),
+  filename: (req, file, cb) => cb(null, Date.now() + '-' + file.originalname)
+});
+const upload = multer({ storage });
+
+app.post('/api/vip/register', upload.single('preuvePaiement'), async (req, res) => {
+  try {
+    const passwordHash = await bcryptjs.hash(req.body.password, 12);
+
+    const vip = new VipSession({
+      nom: req.body.nom,
+      dateNaissance: req.body.dateNaissance,
+      ville: req.body.ville,
+      pays: req.body.pays,
+      whatsapp: req.body.whatsapp,
+      email: req.body.email,
+      passwordHash,
+      emailRecup: req.body.emailRecup,
+      methodePaiement: req.body.methodePaiement,
+      montant: req.body.montant,
+      preuvePath: req.file ? req.file.path : null
+    });
+
+    await vip.save();
+
+    // Voye email pending
+    const transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: { 
+        user: "fondationbackupspirituel@gmail.com", 
+        pass: process.env.GMAIL_APP_PASSWORD 
+      }
+    });
+
+    await transporter.sendMail({
+      from: '"Inspecteur MEME" <fondationbackupspirituel@gmail.com>',
+      to: vip.email,
+      subject: "Inscription VIP en attente",
+      html: `<h3>Bonjour ${vip.nom},</h3><p>Votre inscription VIP est en attente de validation.</p>`
+    });
+
+    res.json({ success: true });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, message: "Erreur serveur" });
+  }
+});
+
+
 // 🚀 DEMARRE SERVEUR
 // ---------------------------
 const PORT = process.env.PORT || 3000;
