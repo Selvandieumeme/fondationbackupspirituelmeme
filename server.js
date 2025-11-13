@@ -27,8 +27,8 @@ const fs = require('fs'); // <-- AJOUTE LIG SA A LA OUVÈTI BLOK LA
 
 
 
-const VipSession = require('./models/VipSession.js');
-const User = require('./models/User.js');
+import VipSession from './models/VipSession.js'; // pou Inscription VIP
+import User from './models/User.js';             // pou Connexion VIP
 
 
 
