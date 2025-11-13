@@ -1082,17 +1082,20 @@ mongoose.connection.once('open', () => {
 
 
 // ---------- ROUTE INSCRIPTION VIP ----------
+
 const storage = multer.diskStorage({
-  destination: (req, file, cb) => cb(null, 'uploads/screenshots'),
+  destination: (req, file, cb) => cb(null, 'uploads/screenshots'), // folder pou fichye yo
   filename: (req, file, cb) => cb(null, Date.now() + '-' + file.originalname)
 });
 const upload = multer({ storage });
 
-app.post('/api/vip/register', upload.single('preuvePaiement'), async (req, res) => {
+app.post('/api/sessions', upload.single('preuvePaiement'), async (req, res) => {
   try {
+    // Hash password
     const passwordHash = await bcryptjs.hash(req.body.password, 12);
 
-    const vip = new VipSession({
+    // Kreye nouvo dokiman nan koleksyon "sessions"
+    const session = new Session({
       nom: req.body.nom,
       dateNaissance: req.body.dateNaissance,
       ville: req.body.ville,
@@ -1103,12 +1106,12 @@ app.post('/api/vip/register', upload.single('preuvePaiement'), async (req, res) 
       emailRecup: req.body.emailRecup,
       methodePaiement: req.body.methodePaiement,
       montant: req.body.montant,
-      preuvePath: req.file ? req.file.path : null
+      preuvePaiement: req.file ? `/uploads/screenshots/${req.file.filename}` : null
     });
 
-    await vip.save();
+    await session.save();
 
-    // Voye email pending
+    // Voye email notification
     const transporter = nodemailer.createTransport({
       service: "gmail",
       auth: { 
@@ -1119,12 +1122,13 @@ app.post('/api/vip/register', upload.single('preuvePaiement'), async (req, res) 
 
     await transporter.sendMail({
       from: '"Inspecteur MEME" <fondationbackupspirituel@gmail.com>',
-      to: vip.email,
+      to: session.email,
       subject: "Inscription VIP en attente",
-      html: `<h3>Bonjour ${vip.nom},</h3><p>Votre inscription VIP est en attente de validation.</p>`
+      html: `<h3>Bonjour ${session.nom},</h3><p>Votre inscription VIP est en attente de validation.</p>`
     });
 
-    res.json({ success: true });
+    res.json({ success: true, message: "Inscription VIP réussie ! En attente de validation." });
+
   } catch (err) {
     console.error(err);
     res.status(500).json({ success: false, message: "Erreur serveur" });
