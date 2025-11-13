@@ -27,6 +27,11 @@ const fs = require('fs'); // <-- AJOUTE LIG SA A LA OUVÈTI BLOK LA
 
 
 
+const VipSession = require('./models/VipSession.js');
+const User = require('./models/User.js');
+
+
+
 const app = express(); 
 app.use(cors()); 
 app.use(express.json());
