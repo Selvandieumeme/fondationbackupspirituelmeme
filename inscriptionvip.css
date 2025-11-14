@@ -7,19 +7,17 @@
 }
 
 /* ======== BACKGROUND PROFESSIONNEL ========= */
-/* Dégradé bleu → blanc → jaune */
 body {
   min-height: 100vh;
   display: flex;
   justify-content: center;
-  align-items: center;
-  padding: 20px; /* pou fòm pa kole ak kwen ekran */
   background: linear-gradient(
     135deg,
     #0033cc 0%,   /* Bleu fonse pro */
     #ffffff 50%,  /* Blanc pwòp */
     #ffcc00 100%  /* Jaune gold */
   );
+  padding: 10px;
 }
 
 /* ======== CONTAINER PRINCIPAL ========= */
@@ -27,15 +25,16 @@ body {
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(12px);
 
-  padding: 35px 40px;
+  padding: 20px 25px;
   border-radius: 18px;
 
   width: 100%;
-  max-width: 420px;
+  max-width: 400px;
+  max-height: 90vh; /* pou evite koupe fòm nan */
+  overflow-y: auto; /* scroll si twò long */
 
-  /* margin an tèt ak anba pou vizibilite sou tout aparèy */
-  margin-top: 40px;
-  margin-bottom: 40px;
+  margin-top: 20px;
+  margin-bottom: 20px;
 
   box-shadow:
     0 8px 25px rgba(0, 0, 0, 0.25),
@@ -54,9 +53,9 @@ body {
 h2 {
   text-align: center;
   color: #0033cc;
-  font-size: 26px;
+  font-size: 22px;
   font-weight: bold;
-  margin-bottom: 25px; /* plis espas ant tit ak fòm */
+  margin-bottom: 15px;
 }
 
 /* ======== STIL CHAMP FÒM ========= */
@@ -64,20 +63,20 @@ form input,
 form select,
 form button {
   width: 100%;
-  padding: 12px;
-  margin: 10px 0;
+  padding: 10px;
+  margin: 8px 0;
 
-  border-radius: 10px;
+  border-radius: 8px;
   border: 1px solid #d1d1d1;
 
-  font-size: 14px;
+  font-size: 13px;
   transition: all 0.3s ease;
 }
 
 form input:focus,
 form select:focus {
   border-color: #0033cc;
-  box-shadow: 0 0 8px rgba(0, 80, 255, 0.3);
+  box-shadow: 0 0 6px rgba(0, 80, 255, 0.3);
   outline: none;
 }
 
@@ -88,7 +87,7 @@ form button {
   font-weight: bold;
   border: none;
   cursor: pointer;
-  margin-top: 12px;
+  margin-top: 10px;
 }
 
 form button:hover {
@@ -100,37 +99,51 @@ form button:hover {
 .alert-email {
   color: #cc0000;
   font-weight: bold;
-  font-size: 14px;
-  margin-top: 10px;
-  margin-bottom: 10px;
+  font-size: 13px;
+  margin-top: 8px;
+  margin-bottom: 8px;
   text-align: center;
 }
 
 /* ======== ZÒN STATUS MESAJ ========= */
 #status {
-  margin-top: 15px;
+  margin-top: 12px;
   text-align: center;
   font-weight: bold;
   color: #0033cc;
 }
 
 /* ======== RESPONSIVE DESIGN ========= */
-@media (max-width: 480px) {
+@media (max-width: 768px) {
   .container {
-    padding: 25px 20px;
-    max-width: 100%;
-    margin-top: 20px;
-    margin-bottom: 20px;
+    padding: 18px 20px;
   }
 
   h2 {
-    font-size: 22px;
+    font-size: 20px;
   }
 
   form input,
   form select,
   form button {
-    font-size: 13px;
-    padding: 10px;
+    font-size: 12px;
+    padding: 8px;
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding: 15px 15px;
+  }
+
+  h2 {
+    font-size: 18px;
+  }
+
+  form input,
+  form select,
+  form button {
+    font-size: 11px;
+    padding: 6px;
   }
 }
