@@ -5,14 +5,19 @@ document.getElementById('vip-register-form').addEventListener('submit', async fu
 
     const status = document.getElementById('status');
 
-    // Ranmase done yo ak JSON
+    // Ranmase done yo nan fòm nan
     const dataToSend = {
-        fullname: document.querySelector('input[name="fullname"]').value.trim(),
+        nom: document.querySelector('input[name="nom"]').value.trim(),
+        dateNaissance: document.querySelector('input[name="dateNaissance"]').value,
+        ville: document.querySelector('input[name="ville"]').value.trim(),
+        pays: document.querySelector('input[name="pays"]').value.trim(),
+        whatsapp: document.querySelector('input[name="whatsapp"]').value.trim(),
         email: document.querySelector('input[name="email"]').value.trim(),
         password: document.querySelector('input[name="password"]').value,
         confirmPassword: document.querySelector('input[name="confirmPassword"]').value,
-        phone: document.querySelector('input[name="phone"]').value.trim(),
-        country: document.querySelector('input[name="country"]').value.trim()
+        emailRecup: document.querySelector('input[name="emailRecup"]').value.trim(),
+        methodePaiement: document.querySelector('select[name="methodePaiement"]').value,
+        montant: document.querySelector('input[name="montant"]').value
     };
 
     // Verifye mot de passe
