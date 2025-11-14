@@ -9,15 +9,19 @@
 <body>
 <div class="container">
   <h2>Inscription VIP</h2>
-  <form id="vip-register-form" enctype="multipart/form-data">
+
+  <form id="vip-register-form">
+
     <input type="text" name="nom" placeholder="Nom / Prénom" required />
     <input type="date" name="dateNaissance" required />
     <input type="text" name="ville" placeholder="Ville" required />
     <input type="text" name="pays" placeholder="Pays" required />
     <input type="text" name="whatsapp" placeholder="WhatsApp" required />
     <input type="email" name="email" placeholder="Email Gmail" required />
+
     <input type="password" name="password" placeholder="Mot de passe" required />
     <input type="password" name="confirmPassword" placeholder="Confirmation mot de passe" required />
+
     <input type="email" name="emailRecup" placeholder="E-mail de récupération" required />
 
     <select name="methodePaiement" required>
@@ -30,13 +34,20 @@
     </select>
 
     <input type="number" name="montant" placeholder="Montant versé (USD)" required />
-    <label>Télécharger screenshot paiement :</label>
-    <input type="file" name="preuvePaiement" accept="image/*" required />
+
+    <!-- 🔥 Nouvo mesaj pou screenshot -->
+    <p style="color:red; font-weight:bold; margin-top:10px;">
+      ⚠️ Après paiement, veuillez envoyer votre screenshot / preuve directement à :
+      <br>
+      📧 <strong>infos@fondationbackupspirituel.com</strong>
+    </p>
 
     <button type="submit">S'inscrire VIP</button>
   </form>
+
   <div id="status"></div>
 </div>
+
 <script src="inscriptionvip.js"></script>
 </body>
 </html>
