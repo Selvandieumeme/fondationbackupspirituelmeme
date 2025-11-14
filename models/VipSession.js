@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+const mongoose = require("mongoose");
 
 const VipSessionSchema = new mongoose.Schema({
   nom: { type: String, required: true },
@@ -15,4 +15,4 @@ const VipSessionSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now }
 });
 
-export default mongoose.model("VipSession", VipSessionSchema, "sessions");
+module.exports = mongoose.model("VipSession", VipSessionSchema, "sessions");
