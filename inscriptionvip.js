@@ -1,36 +1,46 @@
 // inscriptionvip.js
 
 document.getElementById('vip-register-form').addEventListener('submit', async function(e){
-  e.preventDefault();
-  const form = e.target;
-  const formData = new FormData(form);
+    e.preventDefault();
 
-  // simple client-side check: mot de passe confirmé
-  if(formData.get('password') !== formData.get('confirmPassword')){
-    document.getElementById('status').textContent = "Mot de passe non confirmé!";
-    return;
-  }
+    const status = document.getElementById('status');
 
-  document.getElementById('status').textContent = "Envoi en cours...";
+    // Ranmase done yo ak JSON
+    const dataToSend = {
+        fullname: document.querySelector('input[name="fullname"]').value.trim(),
+        email: document.querySelector('input[name="email"]').value.trim(),
+        password: document.querySelector('input[name="password"]').value,
+        confirmPassword: document.querySelector('input[name="confirmPassword"]').value,
+        phone: document.querySelector('input[name="phone"]').value.trim(),
+        country: document.querySelector('input[name="country"]').value.trim()
+    };
 
-  try {
-    // Voye fòm nan sou API ki egziste deja (sessions)
-    const res = await fetch('/api/sessions', {
-      method: 'POST',
-      body: formData // Pa mete headers, FormData ap otomatikman gen multipart/form-data
-    });
-
-    const data = await res.json();
-
-    if(data.success){
-      document.getElementById('status').textContent = "Inscription reçue ! En attente de validation.";
-      form.reset();
-    } else {
-      document.getElementById('status').textContent = data.message || "Erreur d'inscription";
+    // Verifye mot de passe
+    if(dataToSend.password !== dataToSend.confirmPassword){
+        status.textContent = "Mot de passe non confirmé !";
+        return;
     }
 
-  } catch(err){
-    console.error(err);
-    document.getElementById('status').textContent = "Erreur serveur";
-  }
+    status.textContent = "Envoi en cours...";
+
+    try {
+        const res = await fetch('/api/sessions', {
+            method: 'POST',
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(dataToSend)
+        });
+
+        const result = await res.json();
+
+        if(result.success){
+            status.textContent = "Inscription reçue ! En attente de validation.";
+            document.getElementById('vip-register-form').reset();
+        } else {
+            status.textContent = result.message || "Erreur d'inscription";
+        }
+    }
+    catch(err){
+        console.error(err);
+        status.textContent = "Erreur serveur";
+    }
 });
