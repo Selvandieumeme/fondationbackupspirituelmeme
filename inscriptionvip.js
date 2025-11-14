@@ -1,26 +1,26 @@
 // inscriptionvip.js
-
 document.getElementById('vip-register-form').addEventListener('submit', async function(e){
     e.preventDefault();
-
     const status = document.getElementById('status');
 
-    // Ranmase done yo nan fòm nan
+    const form = e.target;
+
+    // Ranmase done yo
     const dataToSend = {
-        nom: document.querySelector('input[name="nom"]').value.trim(),
-        dateNaissance: document.querySelector('input[name="dateNaissance"]').value,
-        ville: document.querySelector('input[name="ville"]').value.trim(),
-        pays: document.querySelector('input[name="pays"]').value.trim(),
-        whatsapp: document.querySelector('input[name="whatsapp"]').value.trim(),
-        email: document.querySelector('input[name="email"]').value.trim(),
-        password: document.querySelector('input[name="password"]').value,
-        confirmPassword: document.querySelector('input[name="confirmPassword"]').value,
-        emailRecup: document.querySelector('input[name="emailRecup"]').value.trim(),
-        methodePaiement: document.querySelector('select[name="methodePaiement"]').value,
-        montant: document.querySelector('input[name="montant"]').value
+        nom: form.nom.value.trim(),
+        dateNaissance: form.dateNaissance.value,
+        ville: form.ville.value.trim(),
+        pays: form.pays.value.trim(),
+        whatsapp: form.whatsapp.value.trim(),
+        email: form.email.value.trim(),
+        password: form.password.value,
+        confirmPassword: form.confirmPassword.value,
+        emailRecup: form.emailRecup.value.trim(),
+        methodePaiement: form.methodePaiement.value,
+        montant: Number(form.montant.value)
     };
 
-    // Verifye mot de passe
+    // Verifye password
     if(dataToSend.password !== dataToSend.confirmPassword){
         status.textContent = "Mot de passe non confirmé !";
         return;
@@ -38,13 +38,13 @@ document.getElementById('vip-register-form').addEventListener('submit', async fu
         const result = await res.json();
 
         if(result.success){
-            status.textContent = "Inscription reçue ! En attente de validation.";
-            document.getElementById('vip-register-form').reset();
+            status.textContent = result.message;
+            form.reset();
         } else {
             status.textContent = result.message || "Erreur d'inscription";
         }
-    }
-    catch(err){
+
+    } catch(err){
         console.error(err);
         status.textContent = "Erreur serveur";
     }
