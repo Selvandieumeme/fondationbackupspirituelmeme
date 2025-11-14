@@ -9,15 +9,15 @@
 /* ======== BACKGROUND PROFESSIONNEL ========= */
 /* Dégradé bleu → blanc → jaune */
 body {
-  height: 100vh;
+  min-height: 100vh;
   display: flex;
   justify-content: center;
   align-items: center;
-
+  padding: 20px; /* pou fòm pa kole ak kwen ekran */
   background: linear-gradient(
     135deg,
-    #0033cc 0%,   /* Ble fonse pro */
-    #ffffff 50%, /* Blan pwòp */
+    #0033cc 0%,   /* Bleu fonse pro */
+    #ffffff 50%,  /* Blanc pwòp */
     #ffcc00 100%  /* Jaune gold */
   );
 }
@@ -32,6 +32,10 @@ body {
 
   width: 100%;
   max-width: 420px;
+
+  /* margin an tèt ak anba pou vizibilite sou tout aparèy */
+  margin-top: 40px;
+  margin-bottom: 40px;
 
   box-shadow:
     0 8px 25px rgba(0, 0, 0, 0.25),
@@ -52,7 +56,7 @@ h2 {
   color: #0033cc;
   font-size: 26px;
   font-weight: bold;
-  margin-bottom: 20px;
+  margin-bottom: 25px; /* plis espas ant tit ak fòm */
 }
 
 /* ======== STIL CHAMP FÒM ========= */
@@ -84,6 +88,7 @@ form button {
   font-weight: bold;
   border: none;
   cursor: pointer;
+  margin-top: 12px;
 }
 
 form button:hover {
@@ -96,7 +101,7 @@ form button:hover {
   color: #cc0000;
   font-weight: bold;
   font-size: 14px;
-  margin-top: 5px;
+  margin-top: 10px;
   margin-bottom: 10px;
   text-align: center;
 }
@@ -107,4 +112,25 @@ form button:hover {
   text-align: center;
   font-weight: bold;
   color: #0033cc;
+}
+
+/* ======== RESPONSIVE DESIGN ========= */
+@media (max-width: 480px) {
+  .container {
+    padding: 25px 20px;
+    max-width: 100%;
+    margin-top: 20px;
+    margin-bottom: 20px;
+  }
+
+  h2 {
+    font-size: 22px;
+  }
+
+  form input,
+  form select,
+  form button {
+    font-size: 13px;
+    padding: 10px;
+  }
 }
