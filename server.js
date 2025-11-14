@@ -1082,9 +1082,9 @@ mongoose.connection.once('open', () => {
 
 
 // ---------- ROUTE INSCRIPTION VIP SANS UPLOAD ----------
-
 app.post('/api/sessions', async (req, res) => {
   try {
+    // Dekonpoze body JSON la
     const {
       nom,
       dateNaissance,
@@ -1093,12 +1093,21 @@ app.post('/api/sessions', async (req, res) => {
       whatsapp,
       email,
       password,
+      confirmPassword,
       emailRecup,
       methodePaiement,
       montant
     } = req.body;
 
-    // Hash pasword
+    // Verifye mot de passe konfimasyon
+    if (password !== confirmPassword) {
+      return res.status(400).json({
+        success: false,
+        message: "Mot de passe non confirmé !"
+      });
+    }
+
+    // Hash password
     const passwordHash = await bcryptjs.hash(password, 12);
 
     // Kreye dokiman nan koleksyon "sessions"
@@ -1113,7 +1122,7 @@ app.post('/api/sessions', async (req, res) => {
       methodePaiement,
       montant,
       passwordHash,
-      preuvePaiement: null,  // pa gen upload ankò
+      preuvePaiement: null, // pa gen upload ankò
       createdAt: new Date()
     });
 
@@ -1141,6 +1150,7 @@ app.post('/api/sessions', async (req, res) => {
       `
     });
 
+    // Retounen repons JSON
     res.json({
       success: true,
       message: "Inscription reçue ! Envoyez votre screenshot par email pour validation."
