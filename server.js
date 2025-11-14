@@ -27,8 +27,9 @@ const fs = require('fs'); // <-- AJOUTE LIG SA A LA OUVÈTI BLOK LA
 
 
 
-import VipSession from './models/VipSession.js'; // pou Inscription VIP
-import User from './models/User.js';             // pou Connexion VIP
+// ----------------------- MODELS -----------------------
+const VipSession = require('./models/VipSession.js');   // CommonJS
+const User = require('./models/User.js');               // CommonJSP
 
 
 
@@ -1083,8 +1084,9 @@ mongoose.connection.once('open', () => {
 
 
 
-import VipSession from "./models/VipSession.js";
-app.post("/api/sessions", async (req, res) => {
+
+// ----------------------- ROUTE INSCRIPTION VIP -----------------------
+app.post('/api/sessions', async (req, res) => {
   try {
     const {
       nom,
@@ -1099,13 +1101,10 @@ app.post("/api/sessions", async (req, res) => {
       montant
     } = req.body;
 
-    // verifye si password egziste
     if (!password) return res.status(400).json({ success: false, message: "Password requis" });
 
-    // Hash password
     const passwordHash = await bcryptjs.hash(password, 12);
 
-    // Kreye nouvo dokiman
     const session = new VipSession({
       nom,
       dateNaissance,
@@ -1116,7 +1115,9 @@ app.post("/api/sessions", async (req, res) => {
       emailRecup,
       methodePaiement,
       montant,
-      passwordHash
+      passwordHash,
+      statut: "pending",
+      createdAt: new Date()
     });
 
     await session.save();
@@ -1124,7 +1125,7 @@ app.post("/api/sessions", async (req, res) => {
     // Voye email konfimasyon
     const transporter = nodemailer.createTransport({
       service: "gmail",
-      auth: {
+      auth: { 
         user: "fondationbackupspirituel@gmail.com",
         pass: process.env.GMAIL_APP_PASSWORD
       }
