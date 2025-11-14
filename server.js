@@ -1081,37 +1081,45 @@ mongoose.connection.once('open', () => {
 
 
 
-// ---------- ROUTE INSCRIPTION VIP ----------
+// ---------- ROUTE INSCRIPTION VIP SANS UPLOAD ----------
 
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => cb(null, 'uploads/screenshots'), // folder pou fichye yo
-  filename: (req, file, cb) => cb(null, Date.now() + '-' + file.originalname)
-});
-const upload = multer({ storage });
-
-app.post('/api/sessions', upload.single('preuvePaiement'), async (req, res) => {
+app.post('/api/sessions', async (req, res) => {
   try {
-    // Hash password
-    const passwordHash = await bcryptjs.hash(req.body.password, 12);
+    const {
+      nom,
+      dateNaissance,
+      ville,
+      pays,
+      whatsapp,
+      email,
+      password,
+      emailRecup,
+      methodePaiement,
+      montant
+    } = req.body;
 
-    // Kreye nouvo dokiman nan koleksyon "sessions"
+    // Hash pasword
+    const passwordHash = await bcryptjs.hash(password, 12);
+
+    // Kreye dokiman nan koleksyon "sessions"
     const session = new Session({
-      nom: req.body.nom,
-      dateNaissance: req.body.dateNaissance,
-      ville: req.body.ville,
-      pays: req.body.pays,
-      whatsapp: req.body.whatsapp,
-      email: req.body.email,
+      nom,
+      dateNaissance,
+      ville,
+      pays,
+      whatsapp,
+      email,
+      emailRecup,
+      methodePaiement,
+      montant,
       passwordHash,
-      emailRecup: req.body.emailRecup,
-      methodePaiement: req.body.methodePaiement,
-      montant: req.body.montant,
-      preuvePaiement: req.file ? `/uploads/screenshots/${req.file.filename}` : null
+      preuvePaiement: null,  // pa gen upload ankò
+      createdAt: new Date()
     });
 
     await session.save();
 
-    // Voye email notification
+    // Voye email konfimasyon
     const transporter = nodemailer.createTransport({
       service: "gmail",
       auth: { 
@@ -1122,19 +1130,27 @@ app.post('/api/sessions', upload.single('preuvePaiement'), async (req, res) => {
 
     await transporter.sendMail({
       from: '"Inspecteur MEME" <fondationbackupspirituel@gmail.com>',
-      to: session.email,
-      subject: "Inscription VIP en attente",
-      html: `<h3>Bonjour ${session.nom},</h3><p>Votre inscription VIP est en attente de validation.</p>`
+      to: email,
+      subject: "Inscription VIP reçue",
+      html: `
+        <h3>Bonjour ${nom},</h3>
+        <p>Votre inscription VIP a été reçue.</p>
+        <p>Veuillez maintenant envoyer votre screenshot de paiement à :</p>
+        <b>infos@fondationbackupspirituel.com</b>
+        <p>Votre compte sera validé après vérification.</p>
+      `
     });
 
-    res.json({ success: true, message: "Inscription VIP réussie ! En attente de validation." });
+    res.json({
+      success: true,
+      message: "Inscription reçue ! Envoyez votre screenshot par email pour validation."
+    });
 
   } catch (err) {
     console.error(err);
     res.status(500).json({ success: false, message: "Erreur serveur" });
   }
 });
-
 
 // 🚀 DEMARRE SERVEUR
 // ---------------------------
