@@ -11,9 +11,8 @@ const VipSessionSchema = new mongoose.Schema({
   emailRecup: { type: String, required: true },
   methodePaiement: { type: String, required: true },
   montant: { type: Number, required: true },
-  statut: { type: String, default: "pending" }, // pending = nouvo enskripsyon
+  statut: { type: String, default: "pending" },
   createdAt: { type: Date, default: Date.now }
 });
 
-// Koleksyon rete "sessions" pou matche ak backend la
 export default mongoose.model("VipSession", VipSessionSchema, "sessions");
