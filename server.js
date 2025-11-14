@@ -1081,10 +1081,11 @@ mongoose.connection.once('open', () => {
 
 
 
-// ---------- ROUTE INSCRIPTION VIP SANS UPLOAD ----------
-app.post('/api/sessions', async (req, res) => {
+
+
+import VipSession from "./models/VipSession.js";
+app.post("/api/sessions", async (req, res) => {
   try {
-    // Dekonpoze body JSON la
     const {
       nom,
       dateNaissance,
@@ -1093,25 +1094,19 @@ app.post('/api/sessions', async (req, res) => {
       whatsapp,
       email,
       password,
-      confirmPassword,
       emailRecup,
       methodePaiement,
       montant
     } = req.body;
 
-    // Verifye mot de passe konfimasyon
-    if (password !== confirmPassword) {
-      return res.status(400).json({
-        success: false,
-        message: "Mot de passe non confirmé !"
-      });
-    }
+    // verifye si password egziste
+    if (!password) return res.status(400).json({ success: false, message: "Password requis" });
 
     // Hash password
     const passwordHash = await bcryptjs.hash(password, 12);
 
-    // Kreye dokiman nan koleksyon "sessions"
-    const session = new Session({
+    // Kreye nouvo dokiman
+    const session = new VipSession({
       nom,
       dateNaissance,
       ville,
@@ -1121,9 +1116,7 @@ app.post('/api/sessions', async (req, res) => {
       emailRecup,
       methodePaiement,
       montant,
-      passwordHash,
-      preuvePaiement: null, // pa gen upload ankò
-      createdAt: new Date()
+      passwordHash
     });
 
     await session.save();
@@ -1131,9 +1124,9 @@ app.post('/api/sessions', async (req, res) => {
     // Voye email konfimasyon
     const transporter = nodemailer.createTransport({
       service: "gmail",
-      auth: { 
-        user: "fondationbackupspirituel@gmail.com", 
-        pass: process.env.GMAIL_APP_PASSWORD 
+      auth: {
+        user: "fondationbackupspirituel@gmail.com",
+        pass: process.env.GMAIL_APP_PASSWORD
       }
     });
 
@@ -1144,17 +1137,13 @@ app.post('/api/sessions', async (req, res) => {
       html: `
         <h3>Bonjour ${nom},</h3>
         <p>Votre inscription VIP a été reçue.</p>
-        <p>Veuillez maintenant envoyer votre screenshot de paiement à :</p>
+        <p>Veuillez envoyer votre screenshot de paiement à :</p>
         <b>infos@fondationbackupspirituel.com</b>
         <p>Votre compte sera validé après vérification.</p>
       `
     });
 
-    // Retounen repons JSON
-    res.json({
-      success: true,
-      message: "Inscription reçue ! Envoyez votre screenshot par email pour validation."
-    });
+    res.json({ success: true, message: "Inscription reçue ! Envoyez votre screenshot par email." });
 
   } catch (err) {
     console.error(err);
