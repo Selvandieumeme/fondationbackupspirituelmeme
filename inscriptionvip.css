@@ -1,47 +1,110 @@
+/* ======== RESET BASE ========= */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Arial", sans-serif;
+}
+
+/* ======== BACKGROUND PROFESSIONNEL ========= */
+/* Dégradé bleu → blanc → jaune */
 body {
-  font-family: Arial, sans-serif;
-  background-color: #f4f4f4;
+  height: 100vh;
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 100vh;
+
+  background: linear-gradient(
+    135deg,
+    #0033cc 0%,   /* Ble fonse pro */
+    #ffffff 50%, /* Blan pwòp */
+    #ffcc00 100%  /* Jaune gold */
+  );
 }
 
+/* ======== CONTAINER PRINCIPAL ========= */
 .container {
-  background: #fff;
-  padding: 25px 30px;
-  border-radius: 12px;
-  box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(12px);
+
+  padding: 35px 40px;
+  border-radius: 18px;
+
   width: 100%;
-  max-width: 400px;
+  max-width: 420px;
+
+  box-shadow:
+    0 8px 25px rgba(0, 0, 0, 0.25),
+    0 0 15px rgba(0, 0, 0, 0.10);
+  
+  animation: fadeIn 0.6s ease-in-out;
 }
 
+/* ======== ANIMASYON DOU ANTRE ======== */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(15px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ======== TITRE ========= */
 h2 {
   text-align: center;
+  color: #0033cc;
+  font-size: 26px;
+  font-weight: bold;
   margin-bottom: 20px;
 }
 
-form input, form select, form button {
+/* ======== STIL CHAMP FÒM ========= */
+form input,
+form select,
+form button {
   width: 100%;
-  margin: 8px 0;
-  padding: 10px;
-  border-radius: 8px;
-  border: 1px solid #ccc;
+  padding: 12px;
+  margin: 10px 0;
+
+  border-radius: 10px;
+  border: 1px solid #d1d1d1;
+
+  font-size: 14px;
+  transition: all 0.3s ease;
 }
 
+form input:focus,
+form select:focus {
+  border-color: #0033cc;
+  box-shadow: 0 0 8px rgba(0, 80, 255, 0.3);
+  outline: none;
+}
+
+/* ======== BOUTON SUBMIT ========= */
 form button {
-  background-color: #007bff;
-  color: #fff;
+  background: linear-gradient(90deg, #0033cc, #005fff);
+  color: white;
+  font-weight: bold;
   border: none;
   cursor: pointer;
 }
 
 form button:hover {
-  background-color: #0056b3;
+  background: linear-gradient(90deg, #00249c, #0044cc);
+  transform: scale(1.02);
 }
 
+/* ======== MESAJ SOU SCREENSHOT POU EMAIL ========= */
+.alert-email {
+  color: #cc0000;
+  font-weight: bold;
+  font-size: 14px;
+  margin-top: 5px;
+  margin-bottom: 10px;
+  text-align: center;
+}
+
+/* ======== ZÒN STATUS MESAJ ========= */
 #status {
-  margin-top: 10px;
+  margin-top: 15px;
   text-align: center;
   font-weight: bold;
+  color: #0033cc;
 }
