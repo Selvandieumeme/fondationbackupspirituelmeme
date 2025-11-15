@@ -1,51 +1,36 @@
 const { MongoClient } = require("mongodb");
 
 const uri = process.env.MONGODB_URI;
-let client;
-let clientPromise;
-
-if (!global._mongoClientPromise) {
-    client = new MongoClient(uri);
-    global._mongoClientPromise = client.connect();
-}
-
-clientPromise = global._mongoClientPromise;
+const client = new MongoClient(uri);
 
 module.exports = async (req, res) => {
-    // --- CORS ---
-    res.setHeader("Access-Control-Allow-Origin", "*");
-    res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
-    res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+  // --- CORS ---
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
 
-    if (req.method === "OPTIONS") {
-        return res.status(200).end();
-    }
+  if (req.method === "OPTIONS") {
+    return res.status(200).end();
+  }
 
-    if (req.method !== "POST") {
-        return res.status(405).json({ success: false, message: "Méthode non autorisée" });
-    }
+  if (req.method !== "POST") {
+    return res.status(405).json({ error: "Method Not Allowed" });
+  }
 
-    try {
-        const data = req.body;
+  try {
+    const db = client.db("fobas-chat");
+    const sessions = db.collection("sessions");
 
-        if (!data.nom || !data.email || !data.password) {
-            return res.status(400).json({ success: false, message: "Champs requis manquants" });
-        }
+    const userData = req.body;
 
-        const client = await clientPromise;
-        const db = client.db("fobas-chat");
-        const collection = db.collection("sessions");
+    await sessions.insertOne({
+      ...userData,
+      createdAt: new Date()
+    });
 
-        const result = await collection.insertOne(data);
-
-        res.status(200).json({
-            success: true,
-            message: "Inscription réussie",
-            insertedId: result.insertedId
-        });
-
-    } catch (err) {
-        console.error("🔥 SERVER ERROR:", err);
-        res.status(500).json({ success: false, message: "Erreur serveur" });
-    }
+    return res.status(200).json({ message: "Enregistré avec succès !" });
+  } catch (err) {
+    console.error("Erreur:", err);
+    return res.status(500).json({ error: "Erreur serveur" });
+  }
 };
