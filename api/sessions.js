@@ -1,17 +1,19 @@
-const mongoose = require("mongoose");
-const VipSession = require("../models/VipSession");
+// api/sessions.js
+const { MongoClient } = require("mongodb");
 
-const MONGODB_URI = process.env.MONGODB_URI;
+const uri = process.env.MONGODB_URI;
+let client;
 
-// Koneksyon san repete
-if (!mongoose.connection.readyState) {
-  mongoose.connect(MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true })
-    .then(() => console.log("✅ MongoDB konekte avèk siksè!"))
-    .catch(err => console.error("❌ Erè koneksyon MongoDB:", err));
+async function connectToMongo() {
+  if (!client) {
+    client = new MongoClient(uri);
+    await client.connect();
+  }
+  return client.db("fobas-chat").collection("sessions");
 }
 
 module.exports = async (req, res) => {
-  // CORS
+  // ✅ CORS headers toujou nan tout repons
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
@@ -22,20 +24,18 @@ module.exports = async (req, res) => {
   }
 
   try {
+    const sessions = await connectToMongo();
     const data = req.body;
 
-    // Kreye nouvo VIP session
-    const newSession = new VipSession(data);
-    await newSession.save();
+    // Insert san okenn chifreman, jan ou vle
+    await sessions.insertOne({ ...data, createdAt: new Date() });
 
     return res.status(200).json({
       success: true,
       message: "Données enregistrées avec succès !"
     });
-
   } catch (err) {
     console.error("Erreur MongoDB:", err);
     return res.status(500).json({ success: false, message: "Erreur serveur" });
   }
 };
-
