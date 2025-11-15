@@ -18,19 +18,20 @@ module.exports = async (req, res) => {
   }
 
   try {
-    const db = client.db("fobas-chat");
-    const sessions = db.collection("sessions");
+    const db = client.db("fobas-chat");        // <== DB ou vle a
+    const sessions = db.collection("sessions"); // <== Koleksyon an
 
-    const userData = req.body;
+    const data = req.body;
 
     await sessions.insertOne({
-      ...userData,
+      ...data,
       createdAt: new Date()
     });
 
-    return res.status(200).json({ message: "Enregistré avec succès !" });
+    res.status(200).json({ message: "Données enregistrées avec succès !" });
+
   } catch (err) {
-    console.error("Erreur:", err);
+    console.error("Erreur MongoDB:", err);
     return res.status(500).json({ error: "Erreur serveur" });
   }
 };
