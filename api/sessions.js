@@ -1,18 +1,23 @@
 const { MongoClient } = require("mongodb");
 
 const uri = process.env.MONGODB_URI;
-const client = new MongoClient(uri);
-const dbName = "fobas-chat";
-const collectionName = "sessions";
+let client;
+let clientPromise;
+
+if (!global._mongoClientPromise) {
+    client = new MongoClient(uri);
+    global._mongoClientPromise = client.connect();
+}
+
+clientPromise = global._mongoClientPromise;
 
 module.exports = async (req, res) => {
-    // --- Ajoute CORS headers ---
-    res.setHeader("Access-Control-Allow-Origin", "*"); // pèmèt tout domèn
+    // --- CORS ---
+    res.setHeader("Access-Control-Allow-Origin", "*");
     res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
     res.setHeader("Access-Control-Allow-Headers", "Content-Type");
 
     if (req.method === "OPTIONS") {
-        // reponn rapid pou preflight requests
         return res.status(200).end();
     }
 
@@ -27,16 +32,20 @@ module.exports = async (req, res) => {
             return res.status(400).json({ success: false, message: "Champs requis manquants" });
         }
 
-        await client.connect();
-        const db = client.db(dbName);
-        const collection = db.collection(collectionName);
+        const client = await clientPromise;
+        const db = client.db("fobas-chat");
+        const collection = db.collection("sessions");
+
         const result = await collection.insertOne(data);
 
-        res.status(200).json({ success: true, message: "Inscription réussie", insertedId: result.insertedId });
+        res.status(200).json({
+            success: true,
+            message: "Inscription réussie",
+            insertedId: result.insertedId
+        });
+
     } catch (err) {
-        console.error(err);
+        console.error("🔥 SERVER ERROR:", err);
         res.status(500).json({ success: false, message: "Erreur serveur" });
-    } finally {
-        await client.close();
     }
 };
