@@ -29,11 +29,13 @@ document.getElementById('vip-register-form').addEventListener('submit', async fu
     status.textContent = "Envoi en cours...";
 
     try {
+        // Chanje URL sa pou li konekte ak backend lokal ou a
         const res = await fetch('http://localhost:4000/api/sessions', {
-    method: 'POST',
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(dataToSend)
-});
+            method: 'POST',
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(dataToSend)
+        });
+
         const result = await res.json();
 
         if(result.success){
