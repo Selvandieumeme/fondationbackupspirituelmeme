@@ -1,11 +1,21 @@
 const { MongoClient } = require("mongodb");
 
-const uri = process.env.MONGODB_URI; // pran URI depi Vercel env
+const uri = process.env.MONGODB_URI;
 const client = new MongoClient(uri);
 const dbName = "fobas-chat";
 const collectionName = "sessions";
 
 module.exports = async (req, res) => {
+    // --- Ajoute CORS headers ---
+    res.setHeader("Access-Control-Allow-Origin", "*"); // pèmèt tout domèn
+    res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
+    res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+
+    if (req.method === "OPTIONS") {
+        // reponn rapid pou preflight requests
+        return res.status(200).end();
+    }
+
     if (req.method !== "POST") {
         return res.status(405).json({ success: false, message: "Méthode non autorisée" });
     }
