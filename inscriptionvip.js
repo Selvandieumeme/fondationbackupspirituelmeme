@@ -28,13 +28,29 @@ document.getElementById('vip-register-form').addEventListener('submit', async fu
 
     status.textContent = "Envoi en cours...";
 
-    try {
-        // Chanje URL sa pou li konekte ak backend lokal ou a
-        const res = await fetch('https://unconscionably-hexameral-margot.ngrok-free.dev/api/sessions', {
-            method: 'POST',
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(dataToSend)
-        });
+   try {
+    const response = await fetch(
+      "https://unconscionably-hexameral-margot.ngrok-free.dev/api/sessions",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData)
+      }
+    );
+
+    const result = await response.json();
+
+    if (result.success) {
+      alert(result.message); // Inscription reussie 🎉
+      form.reset();
+    } else {
+      alert("Erreur: " + result.message);
+    }
+  } catch (err) {
+    console.error("❌ Fetch error:", err);
+    alert("Erreur serveur, réessayez plus tard.");
+  }
+});
 
         const result = await res.json();
 
