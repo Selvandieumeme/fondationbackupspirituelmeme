@@ -1,8 +1,8 @@
 // inscriptionvip.js
-document.getElementById('vip-register-form').addEventListener('submit', async function(e){
-    e.preventDefault();
-    const status = document.getElementById('status');
 
+document.getElementById("vip-register-form").addEventListener("submit", async function (e) {
+    e.preventDefault();
+    const status = document.getElementById("status");
     const form = e.target;
 
     // Ranmase done yo
@@ -20,49 +20,36 @@ document.getElementById('vip-register-form').addEventListener('submit', async fu
         montant: Number(form.montant.value)
     };
 
-    // Verifye password
-    if(dataToSend.password !== dataToSend.confirmPassword){
+    // Confirm password
+    if (dataToSend.password !== dataToSend.confirmPassword) {
         status.textContent = "Mot de passe non confirmé !";
         return;
     }
 
     status.textContent = "Envoi en cours...";
 
-   try {
-    const response = await fetch(
-      "https://unconscionably-hexameral-margot.ngrok-free.dev/api/sessions",
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData)
-      }
-    );
+    try {
+        const response = await fetch(
+            "https://unconscionably-hexameral-margot.ngrok-free.dev/api/sessions",
+            {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(dataToSend)
+            }
+        );
 
-    const result = await response.json();
+        const result = await response.json();
 
-    if (result.success) {
-      alert(result.message); // Inscription reussie 🎉
-      form.reset();
-    } else {
-      alert("Erreur: " + result.message);
-    }
-  } catch (err) {
-    console.error("❌ Fetch error:", err);
-    alert("Erreur serveur, réessayez plus tard.");
-  }
-});
-
-        const result = await res.json();
-
-        if(result.success){
-            status.textContent = result.message;
+        if (result.success) {
+            alert(result.message);
             form.reset();
+            status.textContent = "Inscription réussie 🎉";
         } else {
             status.textContent = result.message || "Erreur d'inscription";
         }
 
-    } catch(err){
-        console.error(err);
+    } catch (err) {
+        console.error("❌ Fetch error:", err);
         status.textContent = "Erreur serveur";
     }
 });
