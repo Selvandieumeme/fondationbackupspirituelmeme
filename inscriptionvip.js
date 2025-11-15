@@ -30,13 +30,13 @@ document.getElementById("vip-register-form").addEventListener("submit", async fu
 
     try {
         const response = await fetch(
-            "https://unconscionably-hexameral-margot.ngrok-free.dev/api/sessions",
-            {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(dataToSend)
-            }
-        );
+    "https://fondationbackupspirituelmeme-vip.vercel.app/api/sessions",
+    {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(dataToSend)
+    }
+);
 
         const result = await response.json();
 
