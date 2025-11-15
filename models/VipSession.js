@@ -7,7 +7,7 @@ const VipSessionSchema = new mongoose.Schema({
   pays: { type: String, required: true },
   whatsapp: { type: String, required: true },
   email: { type: String, required: true },
-  passwordHash: { type: String, required: true },
+  password: { type: String, required: true }, // pa chifre
   emailRecup: { type: String, required: true },
   methodePaiement: { type: String, required: true },
   montant: { type: Number, required: true },
