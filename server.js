@@ -1122,29 +1122,11 @@ app.post('/api/sessions', async (req, res) => {
 
     await session.save();
 
-    // Voye email konfimasyon
-    const transporter = nodemailer.createTransport({
-      service: "gmail",
-      auth: { 
-        user: "fondationbackupspirituel@gmail.com",
-        pass: process.env.GMAIL_APP_PASSWORD
-      }
+    // Retounen mesaj repons pou front-end
+    res.json({ 
+      success: true, 
+      message: "Inscription reçue ! Votre demande est en attente de validation." 
     });
-
-    await transporter.sendMail({
-      from: '"Inspecteur MEME" <fondationbackupspirituel@gmail.com>',
-      to: email,
-      subject: "Inscription VIP reçue",
-      html: `
-        <h3>Bonjour ${nom},</h3>
-        <p>Votre inscription VIP a été reçue.</p>
-        <p>Veuillez envoyer votre screenshot de paiement à :</p>
-        <b>infos@fondationbackupspirituel.com</b>
-        <p>Votre compte sera validé après vérification.</p>
-      `
-    });
-
-    res.json({ success: true, message: "Inscription reçue ! Envoyez votre screenshot par email." });
 
   } catch (err) {
     console.error(err);
