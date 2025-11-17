@@ -8,6 +8,7 @@
   --white: #ffffff;
   --muted: #6b7280;
   --soft-bg: #f7fbff;
+  --glass: rgba(255,255,255,0.85);
 }
 
 /* ===========================
@@ -21,7 +22,7 @@ html, body {
   margin: 0;
   height: 100%;
   font-family: Inter, Arial, sans-serif;
-  background: linear-gradient(180deg, #f7fbff 0%, #ffffff 100%);
+  background: linear-gradient(180deg, var(--soft-bg) 0%, var(--white) 100%);
   color: #0f172a;
 }
 
@@ -113,9 +114,86 @@ html, body {
 }
 
 /* ===========================
+   STORE FOBAS SPECIAL
+   =========================== */
+.special-store {
+  max-width: 1200px;
+  margin: 30px auto;
+  padding: 20px;
+  background: linear-gradient(90deg, #f0f5ff, #fffbe6);
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(11,15,30,0.08);
+}
+
+.special-store h2 {
+  text-align: center;
+  color: var(--deep-blue);
+}
+
+.special-store p {
+  text-align: center;
+  color: var(--muted);
+  margin-bottom: 20px;
+}
+
+/* ===========================
+   PRODUCT GRID
+   =========================== */
+.product-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+}
+
+.product-card {
+  background: var(--white);
+  border-radius: 16px;
+  padding: 12px;
+  text-align: center;
+  box-shadow: 0 6px 22px rgba(11, 15, 30, 0.06);
+  transition: transform .22s ease, box-shadow .22s ease;
+  border: 1px solid rgba(30,111,255,0.06);
+}
+
+.product-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 16px 36px rgba(14,30,60,0.12);
+}
+
+.product-card img {
+  width: 100%;
+  border-radius: 8px;
+}
+
+.product-card h3 {
+  margin: 10px 0 4px;
+  font-size: 16px;
+  color: var(--deep-blue);
+}
+
+.product-card .price {
+  margin: 0 0 8px;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.product-card button {
+  padding: 8px 12px;
+  font-size: 14px;
+}
+
+/* ===========================
+   PAYPAL BUTTON CONTAINER
+   =========================== */
+#paypal-button-container {
+  margin-top: 20px;
+  text-align: center;
+}
+
+/* ===========================
    RESPONSIVE MOBILE
    =========================== */
-@media (max-width: 720px) {
+@media (max-width:720px) {
   .header {
     padding: 30px 12px;
   }
@@ -124,12 +202,12 @@ html, body {
     font-size: 24px;
   }
 
-  .stores-container {
+  .stores-container, .special-store {
     padding: 12px;
     gap: 14px;
   }
 
-  .store-card {
-    padding: 16px;
+  .store-card, .product-card {
+    padding: 14px;
   }
 }
