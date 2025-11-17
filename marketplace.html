@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Marketplace</title>
+<link rel="stylesheet" href="marketplace.css" />
+</head>
+<body>
+<header class="header">
+<h1>Marketplace</h1>
+<p>Chwazi Store ou vle achte ladan l</p>
+</header>
+
+
+<section id="stores-container" class="stores-container">
+<!-- Stores ap chaje otomatikman isit la -->
+</section>
+
+
+<script>
+const API_BASE = "https://fondationbackupspirituelmeme-vip.vercel.app";
+
+
+// Chaje lis stores yo
+async function loadStores() {
+try {
+const res = await fetch(`${API_BASE}/api/merchants`);
+const data = await res.json();
+
+
+const container = document.getElementById("stores-container");
+container.innerHTML = "";
+
+
+data.merchants.forEach(store => {
+const card = document.createElement("div");
+card.className = "store-card";
+
+
+card.innerHTML = `
+<h2>${store.storeName}</h2>
+<p>${store.description || "Aucun descriptif"}</p>
+<button onclick="openStore('${store._id}')">Antre nan Store</button>
+`;
+
+
+container.appendChild(card);
+});
+
+
+} catch (error) {
+console.error("Erreur chargement stores:", error);
+}
+}
+
+
+function openStore(id) {
+window.location.href = `store.html?store=${id}`;
+}
+
+
+loadStores();
+</script>
+</body>
+</html>
