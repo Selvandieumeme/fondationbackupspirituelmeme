@@ -14,10 +14,7 @@
 /* ===========================
    GLOBAL
    =========================== */
-* {
-  box-sizing: border-box;
-}
-
+* { box-sizing: border-box; }
 html, body {
   margin: 0;
   height: 100%;
@@ -51,74 +48,87 @@ html, body {
 }
 
 /* ===========================
-   CONTAINER STORES
+   MARKETPLACE WRAPPER
    =========================== */
-.stores-container {
-  max-width: 1200px;
+.marketplace-wrapper {
+  display: flex;
+  max-width: 1300px;
   margin: 30px auto;
-  padding: 20px;
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
   gap: 20px;
+  padding: 0 20px;
 }
 
 /* ===========================
-   STORE CARD
+   SIDEBAR STORES
    =========================== */
-.store-card {
+.stores-sidebar {
+  width: 250px;
   background: var(--white);
-  border-radius: 16px;
   padding: 20px;
-  box-shadow: 0 6px 25px rgba(11, 15, 30, 0.10);
-  border: 1px solid rgba(30, 111, 255, 0.10);
-  transition: transform .25s ease, box-shadow .25s ease;
+  border-radius: 16px;
+  box-shadow: 0 6px 25px rgba(11,15,30,0.10);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
 
-.store-card:hover {
-  transform: translateY(-6px);
-  box-shadow: 0 18px 40px rgba(14, 30, 60, 0.15);
-}
-
-.store-card h2 {
-  margin: 0;
-  font-size: 20px;
+.stores-sidebar h3 {
+  margin-top: 0;
+  font-size: 18px;
   color: var(--deep-blue);
 }
 
-.store-card p {
-  margin: 8px 0 14px;
-  font-size: 14px;
-  color: var(--muted);
+.stores-sidebar ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
-/* ===========================
-   BUTTON
-   =========================== */
-.store-card button {
-  padding: 12px 16px;
-  width: fit-content;
+.stores-sidebar ul li {
+  padding: 8px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background .22s ease;
+}
+
+.stores-sidebar ul li:hover {
+  background: linear-gradient(90deg, var(--blue), var(--yellow));
+  color: var(--white);
+}
+
+.btn-add-store {
+  margin-top: auto;
+  padding: 10px 14px;
   border-radius: 10px;
   border: none;
+  font-weight: 700;
   cursor: pointer;
   background: linear-gradient(90deg, var(--deep-blue), var(--blue));
   color: var(--white);
-  font-weight: 700;
-  font-size: 14px;
-  transition: opacity .22s ease, transform .22s ease;
-  box-shadow: 0 6px 20px rgba(30, 111, 255, 0.20);
+  transition: transform .22s ease;
 }
 
-.store-card button:hover {
-  opacity: 0.85;
+.btn-add-store:hover {
   transform: scale(1.03);
 }
 
 /* ===========================
-   STORE FOBAS SPECIAL
+   STORE CONTENT
+   =========================== */
+.store-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+
+/* ===========================
+   SPECIAL STORE (FOBAS)
    =========================== */
 .special-store {
-  max-width: 1200px;
-  margin: 30px auto;
   padding: 20px;
   background: linear-gradient(90deg, #f0f5ff, #fffbe6);
   border-radius: 20px;
@@ -141,8 +151,9 @@ html, body {
    =========================== */
 .product-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   gap: 16px;
+  justify-content: start;
 }
 
 .product-card {
@@ -150,7 +161,7 @@ html, body {
   border-radius: 16px;
   padding: 12px;
   text-align: center;
-  box-shadow: 0 6px 22px rgba(11, 15, 30, 0.06);
+  box-shadow: 0 6px 22px rgba(11,15,30,0.06);
   transition: transform .22s ease, box-shadow .22s ease;
   border: 1px solid rgba(30,111,255,0.06);
 }
@@ -193,21 +204,25 @@ html, body {
 /* ===========================
    RESPONSIVE MOBILE
    =========================== */
-@media (max-width:720px) {
-  .header {
-    padding: 30px 12px;
+@media (max-width: 720px) {
+  .marketplace-wrapper {
+    flex-direction: column;
   }
-
+  .stores-sidebar {
+    width: 100%;
+    order: 2;
+  }
+  .store-content {
+    order: 1;
+  }
   .header h1 {
     font-size: 24px;
   }
-
-  .stores-container, .special-store {
+  .special-store, .product-card, .stores-sidebar {
     padding: 12px;
-    gap: 14px;
   }
-
-  .store-card, .product-card {
-    padding: 14px;
+  .product-grid {
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 12px;
   }
 }
