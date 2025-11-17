@@ -6,61 +6,152 @@
 <title>Marketplace</title>
 <link rel="stylesheet" href="marketplace.css" />
 </head>
+
 <body>
+
 <header class="header">
-<h1>Marketplace</h1>
-<p>Chwazi Store ou vle achte ladan l</p>
+    <h1>Marketplace</h1>
+    <p>Chwazi Store ou vle achte ladan l</p>
 </header>
 
+<section id="fobas-store" class="stores-container special-store">
+    <h2>⭐ STORE FOBAS (Officiel) ⭐</h2>
+    <p>Modèl prensipal ki montre kijan tout lòt stores yo ap parèt.</p>
 
-<section id="stores-container" class="stores-container">
-<!-- Stores ap chaje otomatikman isit la -->
+    <div class="product-grid">
+
+        <div class="product-card">
+            <img src="https://i.imgur.com/WMGqfIh.jpeg" />
+            <h3>T-shirt Fobas</h3>
+            <p class="price">1500 Gdes</p>
+            <button onclick="buyProduct('T-shirt Fobas', 1500)">Achte kounya</button>
+        </div>
+
+        <div class="product-card">
+            <img src="https://i.imgur.com/J5vPW5C.jpeg" />
+            <h3>Casquette Fobas</h3>
+            <p class="price">1200 Gdes</p>
+            <button onclick="buyProduct('Casquette Fobas', 1200)">Achte kounya</button>
+        </div>
+
+        <div class="product-card">
+            <img src="https://i.imgur.com/fn8m8c3.jpeg" />
+            <h3>Sac Fobas Premium</h3>
+            <p class="price">3200 Gdes</p>
+            <button onclick="buyProduct('Sac Fobas Premium', 3200)">Achte kounya</button>
+        </div>
+
+    </div>
+
+    <div id="paypal-button-container"></div>
 </section>
 
+<hr />
+
+<section id="stores-container" class="stores-container">
+    <!-- Lis stores yo ap vini otomatikman -->
+</section>
 
 <script>
 const API_BASE = "https://fondationbackupspirituelmeme-vip.vercel.app";
 
+// ⭐ PRI AN USD pou PayPal (konvèsyon senp)
+function gdesToUSD(gdes) {
+    return (gdes / 135).toFixed(2); // Ajiste si ou vle
+}
 
-// Chaje lis stores yo
+let selectedProduct = null;
+let selectedAmount = null;
+
+// -----------------------------------------------
+//              PAYPAL CHECKOUT
+// -----------------------------------------------
+function loadPayPal() {
+    if (!window.paypal) {
+        console.error("PayPal SDK pa chaje!");
+        return;
+    }
+
+    paypal.Buttons({
+        createOrder: function (data, actions) {
+            return actions.order.create({
+                purchase_units: [{
+                    description: selectedProduct,
+                    amount: {
+                        value: selectedAmount
+                    }
+                }]
+            });
+        },
+
+        onApprove: function (data, actions) {
+            return actions.order.capture().then(function (details) {
+                alert("Peman reyisi! Mèsi " + details.payer.name.given_name);
+            });
+        },
+
+        onError: function (err) {
+            console.error(err);
+            alert("Erè pandan peman an!");
+        }
+    }).render("#paypal-button-container");
+}
+
+// -----------------------------------------------
+//              ACHTE PRODUIT
+// -----------------------------------------------
+function buyProduct(name, priceGdes) {
+    selectedProduct = name;
+    selectedAmount = gdesToUSD(priceGdes);
+
+    alert(
+        "Produi: " + name +
+        "\nPri: " + priceGdes + " Gdes" +
+        "\nUSD: " + selectedAmount
+    );
+
+    document.getElementById("paypal-button-container").innerHTML = "";
+    loadPayPal();
+}
+
+// -----------------------------------------------
+//              CHARGE STORES REAL API
+// -----------------------------------------------
 async function loadStores() {
-try {
-const res = await fetch(`${API_BASE}/api/merchants`);
-const data = await res.json();
+    try {
+        const res = await fetch(`${API_BASE}/api/merchants`);
+        const data = await res.json();
 
+        const container = document.getElementById("stores-container");
+        container.innerHTML = "";
 
-const container = document.getElementById("stores-container");
-container.innerHTML = "";
+        data.merchants.forEach(store => {
+            const card = document.createElement("div");
+            card.className = "store-card";
 
+            card.innerHTML = `
+                <h2>${store.storeName}</h2>
+                <p>${store.description || "Aucun descriptif"}</p>
+                <button onclick="openStore('${store._id}')">Antre nan Store</button>
+            `;
 
-data.merchants.forEach(store => {
-const card = document.createElement("div");
-card.className = "store-card";
+            container.appendChild(card);
+        });
 
-
-card.innerHTML = `
-<h2>${store.storeName}</h2>
-<p>${store.description || "Aucun descriptif"}</p>
-<button onclick="openStore('${store._id}')">Antre nan Store</button>
-`;
-
-
-container.appendChild(card);
-});
-
-
-} catch (error) {
-console.error("Erreur chargement stores:", error);
+    } catch (error) {
+        console.error("Erreur chargement stores:", error);
+    }
 }
-}
-
 
 function openStore(id) {
-window.location.href = `store.html?store=${id}`;
+    window.location.href = `store.html?store=${id}`;
 }
-
 
 loadStores();
 </script>
+
+<!-- 🚨 OU DWE RANPLASE CLIENT-ID-A-ISIT AK VRÈ CLIENT ID PAYPAL OU -->
+<script src="https://www.paypal.com/sdk/js?client-id=CLIENT-ID-A-ISIT&currency=USD"></script>
+
 </body>
 </html>
