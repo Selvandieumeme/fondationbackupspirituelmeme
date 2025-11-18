@@ -371,3 +371,32 @@ textarea {
   to   { opacity: 1; transform: translateY(0); }
 }
 
+
+
+
+
+
+
+
+
+
+.modal {
+    position: fixed;
+    top:0; left:0;
+    width:100%; height:100%;
+    background: rgba(0,0,0,0.5);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    z-index:999;
+}
+.modal-content {
+    background:#fff;
+    border-radius:16px;
+    padding:20px;
+    width:90%;
+    max-width:500px;
+    box-shadow:0 10px 30px rgba(0,0,0,0.2);
+}
+.step-page { display:none; }
+.step-page.active { display:block; }
