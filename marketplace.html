@@ -198,6 +198,14 @@ function openStore(id) {
     window.location.href = `store.html?store=${id}`;
 }
 
+
+    
+    
+    
+    
+    
+
+
 // --------------------------
 // MODAL AJOUT STORE
 // --------------------------
@@ -208,6 +216,7 @@ function closeAddStoreModal() {
     document.getElementById('add-store-modal').style.display = 'none';
 }
 
+// Form submit pou anrejistreman store (backend pa enkli)
 document.getElementById('add-store-form').addEventListener('submit', function(e){
     e.preventDefault();
     const formData = new FormData(this);
@@ -223,11 +232,9 @@ document.getElementById('add-store-form').addEventListener('submit', function(e)
 
 loadStores();
 
-
-
-
-
-
+// --------------------------
+// MULTI-STEP NAVIGATION
+// --------------------------
 function goToStep(step) {
     const steps = document.querySelectorAll(".step-page");
     const indicators = document.querySelectorAll(".step-indicator .step");
@@ -245,16 +252,18 @@ function goToStep(step) {
     }
 }
 
-
-
-
-
-  // Mete event listener la lè DOM la fin chaje
+// --------------------------
+// BOUTON PEYE & ENSKRI
+// --------------------------
 document.addEventListener("DOMContentLoaded", function() {
-    // Ranpli bouton la nan modal multi-step
+    // Chwazi bouton la
     const btnSubmit = document.querySelector(".btn-submit");
 
     if (btnSubmit) {
+        // Mete bouton an kòm type="button" nan HTML si li pa deja
+        btnSubmit.setAttribute("type", "button");
+
+        // Event listener pou ouvri PayPal nan nouvo tab
         btnSubmit.addEventListener("click", function() {
             const paypalURL = "https://www.paypal.com/donate?business=assobackupspiritueldhaiti@gmail.com&amount=20&currency_code=USD&item_name=Frai%20Enskripsyon%20Nouvo%20Store%20-%20FOBAS";
 
