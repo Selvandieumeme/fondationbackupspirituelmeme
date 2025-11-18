@@ -55,20 +55,55 @@
     </main>
 </div>
 
-<!-- Modal Ajoute Store -->
-<div id="add-store-modal" class="modal" style="display:none;">
-    <div class="modal-content">
-        <span class="close" onclick="closeAddStoreModal()">&times;</span>
-        <h2>Enskri nouvo Store</h2>
-        <form id="add-store-form">
-            <label>Non Store:</label>
-            <input type="text" name="storeName" required />
-            <label>Deskripsyon:</label>
-            <textarea name="description" required></textarea>
-            <label>Email pou peman frai $20 US:</label>
-            <input type="email" name="email" required />
-            <button type="submit">Peye Frai & Enskri</button>
-        </form>
+<div class="multi-step-modal">
+    <span class="close" onclick="closeAddStoreModal()">&times;</span>
+
+    <!-- Progress Bar -->
+    <div class="progress-container">
+        <div class="progress-step active"></div>
+        <div class="progress-step"></div>
+        <div class="progress-step"></div>
+    </div>
+
+    <!-- STEP 1 -->
+    <div class="step step-active" id="step1">
+        <h2>1. Enfòmasyon sou Store ou</h2>
+        <label>Non Store:</label>
+        <input type="text" id="storeName" required />
+
+        <label>Deskripsyon Store:</label>
+        <textarea id="description" required></textarea>
+
+        <button class="next-btn" onclick="goToStep(2)">Suivant</button>
+    </div>
+
+    <!-- STEP 2 -->
+    <div class="step" id="step2">
+        <h2>2. Enfòmasyon Peman</h2>
+        <label>Email PayPal pou peye $20 US:</label>
+        <input type="email" id="email" required />
+
+        <div class="buttons-row">
+            <button class="prev-btn" onclick="goToStep(1)">Retour</button>
+            <button class="next-btn" onclick="goToStep(3)">Suivant</button>
+        </div>
+    </div>
+
+    <!-- STEP 3 -->
+    <div class="step" id="step3">
+        <h2>3. Konfimasyon</h2>
+        <p>Verifye si tout enfòmasyon yo kòrèk avan ou valide.</p>
+
+        <div class="review-box">
+            <p><strong>Store:</strong> <span id="revName"></span></p>
+            <p><strong>Deskripsyon:</strong> <span id="revDesc"></span></p>
+            <p><strong>Email PayPal:</strong> <span id="revEmail"></span></p>
+        </div>
+
+        <div class="buttons-row">
+            <button class="prev-btn" onclick="goToStep(2)">Retour</button>
+            <button class="submit-btn" onclick="submitNewStore()">Peye & Enskri</button>
+        </div>
     </div>
 </div>
 
