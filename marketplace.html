@@ -206,9 +206,7 @@ function openStore(id) {
     
     
     
-    
-
-// --------------------------
+   // --------------------------
 // MODAL AJOUT STORE
 // --------------------------
 function openAddStoreModal() {
@@ -218,25 +216,7 @@ function closeAddStoreModal() {
     document.getElementById('add-store-modal').style.display = 'none';
 }
 
-// Form submit pou anrejistreman store (backend pa enkli)
-document.getElementById('add-store-form').addEventListener('submit', function(e){
-    e.preventDefault();
-    const formData = new FormData(this);
-    const data = {
-        storeName: formData.get('storeName'),
-        description: formData.get('description'),
-        email: formData.get('email')
-    };
-    console.log("Nouvo Store:", data);
-    alert("Store enskri avèk siksè (backend pou peman toujou bezwen)");
-    closeAddStoreModal();
-});
-
-loadStores();
-
-// --------------------------
 // MULTI-STEP NAVIGATION
-// --------------------------
 function goToStep(step) {
     const steps = document.querySelectorAll(".step-page");
     const indicators = document.querySelectorAll(".step-indicator .step");
@@ -258,15 +238,18 @@ function goToStep(step) {
 // BOUTON PEYE & ENSKRI
 // --------------------------
 document.addEventListener("DOMContentLoaded", function() {
-    // Chwazi bouton la
-    const btnSubmit = document.querySelector(".btn-submit");
+    const btnSubmit = document.querySelector(".btn-submit"); // bouton sèl nan Step 3
 
     if (btnSubmit) {
-        // Mete bouton an kòm type="button" nan HTML si li pa deja
-        btnSubmit.setAttribute("type", "button");
-
-        // Event listener pou ouvri PayPal nan nouvo tab
         btnSubmit.addEventListener("click", function() {
+            const storeName = document.getElementById("storeName").value;
+            const storeDesc = document.getElementById("storeDesc").value;
+            const paypalEmail = document.getElementById("paypalEmail").value;
+
+            // Ou ka itilize sa pou backend si w vle anrejistre
+            console.log("Nouvo Store:", { storeName, storeDesc, paypalEmail });
+
+            // URL PayPal pou peye $20
             const paypalURL = "https://www.paypal.com/donate?business=assobackupspiritueldhaiti@gmail.com&amount=20&currency_code=USD&item_name=Frai%20Enskripsyon%20Nouvo%20Store%20-%20FOBAS";
 
             // Louvri PayPal nan nouvo tab
@@ -275,7 +258,6 @@ document.addEventListener("DOMContentLoaded", function() {
             // Fè modal la fèmen
             closeAddStoreModal();
 
-            // Alèt kout pou itilizatè a
             alert("Ou pral redireksyonne sou PayPal pou peye $20 US kòm Frai Enskripsyon Store.");
         });
     }
