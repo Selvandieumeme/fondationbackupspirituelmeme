@@ -41,45 +41,121 @@ function addStoreButton() {
             const desc = document.getElementById("store-desc").value;
             if (!name) { alert("Veuillez entrer le nom du store."); return; }
             alert(`Store "${name}" enregisté! Vous pouvez maintenant ajouter vos produits.`);
-            // ICI: Ajouter integration API pour enregistrer store
+            // TODO: API integration pou sove store
         };
     };
 }
 
 // -----------------------------
-// Load Products for a Store
+// ADMIN MODE Dinamik pou Market FOBAS
+// -----------------------------
+document.getElementById("adminModeBtn").onclick = async () => {
+    const key = prompt("Antre modpas admin la :");
+    if (!key) return;
+
+    try {
+        const res = await fetch("/api/admin/check", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ key })
+        });
+
+        const data = await res.json();
+        if (data.success) {
+            localStorage.setItem("fobas_admin", "1");
+            alert("Mode Admin aktive !");
+            location.reload();
+        } else {
+            alert("Modpas incorect.");
+        }
+    } catch (err) {
+        alert("Erè sou sèvè. Eseye ankò.");
+        console.error(err);
+    }
+};
+
+const isAdmin = localStorage.getItem("fobas_admin") === "1";
+if (isAdmin) {
+    const adminPanel = document.getElementById("admin-panel");
+    if (adminPanel) adminPanel.style.display = "block";
+}
+
+// -----------------------------
+// Chaje Products soti nan MongoDB
 // -----------------------------
 async function loadStoreProducts(storeId, storeName) {
     const storeContent = document.querySelector(".store-content");
-    storeContent.innerHTML = `<h2>${storeName}</h2><div class="product-grid" id="product-grid"></div><div id="paypal-button-container"></div>`;
+    storeContent.innerHTML = `
+        <h2>⭐ ${storeName} ⭐</h2>
+        <div class="product-grid" id="product-grid"></div>
+        <div id="paypal-button-container"></div>
+    `;
+
+    const grid = document.getElementById("product-grid");
+    grid.innerHTML = "";
 
     try {
-        // Simule products si API pa disponib
-        const products = [
-            { name: "T-shirt Fobas", price: 1500, img: "https://i.imgur.com/WMGqfIh.jpeg" },
-            { name: "Casquette Fobas", price: 1200, img: "https://i.imgur.com/J5vPW5C.jpeg" },
-            { name: "Sac Fobas Premium", price: 3200, img: "https://i.imgur.com/fn8m8c3.jpeg" },
-            { name: "Hoodie Fobas", price: 2800, img: "https://i.imgur.com/1Y2kIhT.jpeg" },
-            { name: "Mug Fobas", price: 800, img: "https://i.imgur.com/2H3dFjh.jpeg" }
-        ];
-
-        const grid = document.getElementById("product-grid");
-        grid.innerHTML = "";
+        const res = await fetch("/api/products");
+        if (!res.ok) throw new Error("Pa ka chaje pwodwi nan sèvè a");
+        const products = await res.json();
 
         products.forEach(prod => {
             const card = document.createElement("div");
             card.className = "product-card";
             card.innerHTML = `
-                <img src="${prod.img}" />
+                <img src="${prod.image}" />
                 <h3>${prod.name}</h3>
                 <p class="price">${prod.price} Gdes</p>
                 <button onclick="buyProduct('${prod.name}', ${prod.price})">Achte kounya</button>
+                ${isAdmin ? `<button class="delete-btn" onclick="deleteProduct('${prod._id}', this)">❌ Efase</button>` : ""}
             `;
             grid.appendChild(card);
         });
-
     } catch (err) {
         console.error("Erreur chargement produits:", err);
+        grid.innerHTML = "<p>Pa gen pwodwi pou kounye a.</p>";
+    }
+}
+
+// -----------------------------
+// Ajoute Nouvo Produit (ADMIN) soti nan Modal HTML
+// -----------------------------
+async function addNewProduct() {
+    const name = document.getElementById("newName").value;
+    const price = parseFloat(document.getElementById("newPrice").value);
+    const imageFile = document.getElementById("newImage").files[0];
+
+    if (!name || !price || !imageFile) return alert("Tout chan yo obligatwa.");
+
+    const formData = new FormData();
+    formData.append("name", name);
+    formData.append("price", price);
+    formData.append("image", imageFile);
+
+    try {
+        const res = await fetch("/api/products", { method: "POST", body: formData });
+        if (res.ok) {
+            alert("Pwodwi ajoute avèk siksè!");
+            document.getElementById('addProductModal').style.display = 'none';
+            loadStoreProducts();
+        }
+    } catch (err) {
+        console.error(err);
+        alert("Erè pandan ajoute pwodwi.");
+    }
+}
+
+// -----------------------------
+// Efase Produit (ADMIN)
+// -----------------------------
+async function deleteProduct(id, btn) {
+    if (!confirm("Ou vle efase pwodui sa ?")) return;
+    try {
+        const res = await fetch(`/api/products/${id}`, { method: "DELETE" });
+        if (res.ok) btn.closest(".product-card").remove();
+    } catch (err) {
+        console.error(err);
+        alert("Erè pandan efase pwodwi.");
     }
 }
 
@@ -90,7 +166,7 @@ let selectedProduct = null;
 let selectedAmount = null;
 
 function gdesToUSD(gdes) {
-    return (gdes / 135).toFixed(2); // konvèsyon Gdes -> USD
+    return (gdes / 135).toFixed(2);
 }
 
 function buyProduct(name, priceGdes) {
