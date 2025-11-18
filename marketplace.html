@@ -23,75 +23,161 @@
         <button class="btn-add-store" onclick="openAddStoreModal()">Ajoutez votre Store</button>
     </aside>
 
-    <!-- Kontni store -->
-    <main class="store-content">
-        <section id="fobas-store" class="special-store">
-            <h2>⭐ STORE FOBAS (Officiel) ⭐</h2>
-            <p>Modèl prensipal ki montre kijan tout lòt stores yo ap parèt.</p>
 
 
 
 
 
-<!-- Bouton admin yo (kache pa default) -->
-<div id="admin-panel" style="display:none; margin-bottom:20px;">
-    <button onclick="document.getElementById('addProductModal').style.display='block'" class="admin-btn">
-        ➕ Ajouter un nouveau produit
-    </button>
-</div>            
 
+<!-- ================== STORE FOBAS ================== -->
+<main class="store-content">
+    <section id="fobas-store" class="special-store">
+        <h2>⭐ STORE FOBAS (Officiel) ⭐</h2>
+        <p>Modèl prensipal ki montre kijan tout lòt stores yo ap parèt.</p>
 
+        <!-- Bouton Mode Admin -->
+        <button id="adminModeBtn" class="admin-btn" style="margin-bottom: 15px;">
+            Mode Admin
+        </button>
 
-            
+        <!-- Panel admin (kache pa default) -->
+        <div id="admin-panel" style="display:none; margin-bottom:20px;">
+            <button onclick="document.getElementById('addProductModal').style.display='block'" class="admin-btn">
+                ➕ Ajouter un nouveau produit
+            </button>
+        </div>
 
-            <div class="product-grid">
-                <div class="product-card">
-                    <img src="T-shirtmeme.jfif" />
-                    <h3>T-shirt Fobas</h3>
-                    <p class="price">1500 Gdes</p>
-                    <button onclick="buyProduct('T-shirt Fobas', 1500)">Achte kounya</button>
-                </div>
-                <div class="product-card">
-                    <img src="Casquettememe.jfif" />
-                    <h3>Casquette Fobas</h3>
-                    <p class="price">1200 Gdes</p>
-                    <button onclick="buyProduct('Casquette Fobas', 1200)">Achte kounya</button>
-                </div>
-                <div class="product-card">
-                    <img src="Sacmeme.jfif" />
-                    <h3>Sac Fobas Premium</h3>
-                    <p class="price">3200 Gdes</p>
-                    <button onclick="buyProduct('Sac Fobas Premium', 3200)">Achte kounya</button>
-                </div>
-            </div>
+        <!-- Grid pwodwi (dinamik) -->
+        <div class="product-grid" id="productGrid"></div>
 
-            <div id="paypal-button-container"></div>
-        </section>
-
-
-
-
+        <div id="paypal-button-container"></div>
+    </section>
 
     <!-- Modal Ajoute Pwodwi -->
-<div id="addProductModal" class="modal" style="display:none;">
-    <div class="modal-content">
-        <h3>Ajouter un produit</h3>
-
-        <label>Nom du produit :</label>
-        <input type="text" id="newName">
-
-        <label>Prix :</label>
-        <input type="number" id="newPrice">
-
-        <label>Image (upload) :</label>
-        <input type="file" id="newImage">
-
-        <button onclick="addNewProduct()">Enregistrer</button>
-        <button onclick="document.getElementById('addProductModal').style.display='none'">Fermer</button>
+    <div id="addProductModal" class="modal" style="display:none;">
+        <div class="modal-content">
+            <h3>Ajouter un produit</h3>
+            <label>Nom du produit :</label>
+            <input type="text" id="newName">
+            <label>Prix :</label>
+            <input type="number" id="newPrice">
+            <label>Image (upload) :</label>
+            <input type="file" id="newImage">
+            <button onclick="addNewProduct()">Enregistrer</button>
+            <button onclick="document.getElementById('addProductModal').style.display='none'">Fermer</button>
+        </div>
     </div>
-</div>
-    </main>
-</div>
+</main>
+
+<script>
+// ======== MODE ADMIN (SANS MODPAS NAN FRONTEND) ========
+document.getElementById("adminModeBtn").onclick = async () => {
+    const key = prompt("Antre modpas admin la :");
+    if (!key) return;
+
+    try {
+        const res = await fetch("/api/admin/check", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ key })
+        });
+
+        const data = await res.json();
+        if (data.success) {
+            localStorage.setItem("fobas_admin", "1");
+            alert("Mode Admin aktive !");
+            location.reload();
+        } else {
+            alert("Modpas incorect.");
+        }
+    } catch (err) {
+        alert("Erè sou sèvè. Eseye ankò.");
+        console.error(err);
+    }
+};
+
+const isAdmin = localStorage.getItem("fobas_admin") === "1";
+
+// Montre panel admin si admin
+if (isAdmin) {
+    document.getElementById("admin-panel").style.display = "block";
+}
+
+// ======== Chaje pwodwi yo soti nan backend ========
+async function loadProducts() {
+    try {
+        const res = await fetch("/api/products");
+        const products = await res.json();
+        const grid = document.getElementById("productGrid");
+        grid.innerHTML = "";
+
+        products.forEach(p => {
+            const div = document.createElement("div");
+            div.className = "product-card";
+            div.innerHTML = `
+                <img src="${p.image}" />
+                <h3>${p.name}</h3>
+                <p class="price">${p.price} Gdes</p>
+                <button onclick="buyProduct('${p.name}', ${p.price})">Achte kounya</button>
+                ${isAdmin ? `<button class="delete-btn" onclick="deleteProduct('${p._id}', this)">❌ Efase</button>` : ""}
+            `;
+            grid.appendChild(div);
+        });
+    } catch (err) {
+        console.error("Erè pandan chajman pwodwi yo:", err);
+    }
+}
+
+// ======== Ajoute nouvo pwodwi ========
+async function addNewProduct() {
+    const name = document.getElementById("newName").value;
+    const price = parseFloat(document.getElementById("newPrice").value);
+    const imageFile = document.getElementById("newImage").files[0];
+
+    if (!name || !price || !imageFile) return alert("Tout chan yo obligatwa.");
+
+    const formData = new FormData();
+    formData.append("name", name);
+    formData.append("price", price);
+    formData.append("image", imageFile);
+
+    try {
+        const res = await fetch("/api/products", { method: "POST", body: formData });
+        if (res.ok) {
+            alert("Pwodwi ajoute avèk siksè!");
+            document.getElementById('addProductModal').style.display='none';
+            loadProducts();
+        }
+    } catch (err) {
+        alert("Erè pandan ajoute pwodwi a.");
+        console.error(err);
+    }
+}
+
+// ======== Efase pwodwi ========
+async function deleteProduct(id, btn) {
+    if (!confirm("Ou vle efase pwodui sa ?")) return;
+
+    try {
+        const res = await fetch(`/api/products/${id}`, { method: "DELETE" });
+        if (res.ok) btn.closest(".product-card").remove();
+    } catch (err) {
+        alert("Erè pandan efase pwodwi a.");
+        console.error(err);
+    }
+}
+
+// ======== Inisyalizasyon ========
+loadProducts();
+</script>
+
+
+
+
+
+
+
+    
 
 <!-- MODAL MULTI-STEPS STORE ENREGISTREMENT -->
 <div id="add-store-modal" class="modal" style="display:none;">
