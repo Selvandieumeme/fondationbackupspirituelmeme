@@ -206,87 +206,86 @@ function openStore(id) {
     
 
 
-// --------------------------
-// MODAL AJOUT STORE
-// --------------------------
-function openAddStoreModal() {
-    document.getElementById('add-store-modal').style.display = 'flex';
-}
-function closeAddStoreModal() {
-    document.getElementById('add-store-modal').style.display = 'none';
-}
+<!-- Modal Ajoute Store Multi-Step -->
+<div id="add-store-modal" class="modal" style="display:none;">
+    <div class="modal-content">
+        <span class="close" onclick="closeAddStoreModal()">&times;</span>
 
-// Form submit pou anrejistreman store (backend pa enkli)
-document.getElementById('add-store-form').addEventListener('submit', function(e){
-    e.preventDefault();
-    const formData = new FormData(this);
-    const data = {
-        storeName: formData.get('storeName'),
-        description: formData.get('description'),
-        email: formData.get('email')
-    };
-    console.log("Nouvo Store:", data);
-    alert("Store enskri avèk siksè (backend pou peman toujou bezwen)");
-    closeAddStoreModal();
-});
+        <!-- Step Indicator -->
+        <div class="step-indicator" style="display:flex; justify-content:space-between; margin-bottom:20px;">
+            <div class="step active" style="flex:1; text-align:center;">1</div>
+            <div class="step" style="flex:1; text-align:center;">2</div>
+            <div class="step" style="flex:1; text-align:center;">3</div>
+        </div>
 
-loadStores();
+        <!-- Step 1: Enfòmasyon Store -->
+        <div class="step-page active">
+            <h2 style="color:#1e6fff;">Enfòmasyon sou Store ou</h2>
+            <label>Non Store:</label>
+            <input type="text" id="storeName" required placeholder="Ex: Appolon Store" />
+            <label>Deskripsyon Store:</label>
+            <textarea id="storeDesc" required placeholder="Ex: Tout soti Pwodwyi"></textarea>
+            <button type="button" onclick="goToStep(2)" style="background:linear-gradient(90deg,#ffd54a,#1e6fff); color:#fff;">Suivant</button>
+        </div>
 
-// --------------------------
-// MULTI-STEP NAVIGATION
-// --------------------------
+        <!-- Step 2: Enfòmasyon Peman -->
+        <div class="step-page">
+            <h2 style="color:#1e6fff;">Enfòmasyon Peman</h2>
+            <label>Email PayPal pou peye $20 US:</label>
+            <input type="email" id="paypalEmail" required value="assobackupspiritueldhaiti@gmail.com" />
+            <button type="button" onclick="goToStep(1)" style="background:#f0f0f0; margin-right:10px;">Retour</button>
+            <button type="button" onclick="goToStep(3)" style="background:linear-gradient(90deg,#ffd54a,#1e6fff); color:#fff;">Suivant</button>
+        </div>
+
+        <!-- Step 3: Konfimasyon -->
+        <div class="step-page">
+            <h2 style="color:#1e6fff;">Konfimasyon</h2>
+            <p>Verifye si tout enfòmasyon yo kòrèk avan ou valide.</p>
+            <p><strong>Store:</strong> <span id="reviewName"></span></p>
+            <p><strong>Deskripsyon:</strong> <span id="reviewDesc"></span></p>
+            <p><strong>Email PayPal:</strong> <span id="reviewEmail"></span></p>
+            <button type="button" onclick="goToStep(2)" style="background:#f0f0f0; margin-right:10px;">Retour</button>
+            <button class="btn-submit" type="button" style="background:linear-gradient(90deg,#ffd54a,#1e6fff); color:#fff;">Peye & Enskri</button>
+        </div>
+    </div>
+</div>
+
+
+function openAddStoreModal() { document.getElementById('add-store-modal').style.display='flex'; }
+function closeAddStoreModal() { document.getElementById('add-store-modal').style.display='none'; }
+
 function goToStep(step) {
     const steps = document.querySelectorAll(".step-page");
     const indicators = document.querySelectorAll(".step-indicator .step");
-
     steps.forEach(p => p.classList.remove("active"));
     indicators.forEach(i => i.classList.remove("active"));
+    steps[step-1].classList.add("active");
+    indicators[step-1].classList.add("active");
 
-    steps[step - 1].classList.add("active");
-    indicators[step - 1].classList.add("active");
-
-    if (step === 3) {
-        document.getElementById("reviewName").textContent = document.getElementById("storeName").value;
-        document.getElementById("reviewDesc").textContent = document.getElementById("storeDesc").value;
-        document.getElementById("reviewEmail").textContent = document.getElementById("paypalEmail").value;
+    if(step===3){
+        document.getElementById("reviewName").textContent=document.getElementById("storeName").value;
+        document.getElementById("reviewDesc").textContent=document.getElementById("storeDesc").value;
+        document.getElementById("reviewEmail").textContent=document.getElementById("paypalEmail").value;
     }
 }
 
-// --------------------------
-// BOUTON PEYE & ENSKRI
-// --------------------------
+// Bouton Peye & Enskri
 document.addEventListener("DOMContentLoaded", function() {
-    // Chwazi bouton la
     const btnSubmit = document.querySelector(".btn-submit");
-
-    if (btnSubmit) {
-        // Mete bouton an kòm type="button" nan HTML si li pa deja
-        btnSubmit.setAttribute("type", "button");
-
-        // Event listener pou ouvri PayPal nan nouvo tab
-        btnSubmit.addEventListener("click", function() {
+    if(btnSubmit){
+        btnSubmit.addEventListener("click", function(){
             const paypalURL = "https://www.paypal.com/donate?business=assobackupspiritueldhaiti@gmail.com&amount=20&currency_code=USD&item_name=Frai%20Enskripsyon%20Nouvo%20Store%20-%20FOBAS";
-
-            // Louvri PayPal nan nouvo tab
-            window.open(paypalURL, "_blank");
-
-            // Fè modal la fèmen
+            window.open(paypalURL,"_blank");
             closeAddStoreModal();
-
-            // Alèt kout pou itilizatè a
             alert("Ou pral redireksyonne sou PayPal pou peye $20 US kòm Frai Enskripsyon Store.");
         });
     }
 });
+    
 </script>
 
 
 
-
-
-
-<!-- 🚨 Ranplase ak Client ID PayPal ou -->
-<script src="https://www.paypal.com/sdk/js?client-id=CLIENT-ID-A-ISIT&currency=USD"></script>
 
 
 
