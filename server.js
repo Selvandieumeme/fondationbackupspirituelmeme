@@ -1251,6 +1251,20 @@ app.delete("/api/products/:id", async (req, res) => {
     }
 });
 
+// --- API: Verifye Modpas Admin (backend only) ---
+app.post("/api/admin/check", (req, res) => {
+    const { key } = req.body;
+    const adminPassword = process.env.FOBAS_ADMIN_KEY; // Mete modpas nan .env sèlman
+
+    if (!key) return res.status(400).json({ success: false, message: "Modpas obligatwa" });
+    if (key === adminPassword) {
+        return res.json({ success: true });
+    } else {
+        return res.json({ success: false });
+    }
+});
+
+
 
 // 🚀 DEMARRE SERVEUR
 // ---------------------------
