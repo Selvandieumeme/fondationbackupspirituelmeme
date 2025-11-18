@@ -244,7 +244,18 @@ function goToStep(step) {
         document.getElementById("reviewEmail").textContent = document.getElementById("paypalEmail").value;
     }
 }
-    
+
+
+
+
+    document.querySelector(".btn-submit").onclick = function () {
+    window.open("https://www.paypal.com/paypalme/assobackupspiritueldhaiti/20", "_blank");
+
+    // SI OU VLE FERME MODAL LA APRÈ YO KLIKE
+    closeAddStoreModal();
+
+    alert("Ou pral redireksyonne sou PayPal pou peye $20 US. Apre peman an, Store ou ap aktive!");
+};
 </script>
 
 
