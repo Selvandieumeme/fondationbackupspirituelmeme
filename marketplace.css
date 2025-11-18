@@ -226,3 +226,127 @@ html, body {
     gap: 12px;
   }
 }
+
+
+
+
+
+
+
+
+
+/* ===========================
+   ULTRA PREMIUM MULTI-STEP MODAL
+   =========================== */
+.multi-step-modal {
+  width: 420px;
+  background: var(--glass);
+  backdrop-filter: blur(18px);
+  border-radius: 20px;
+  padding: 30px;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+  position: relative;
+  animation: popIn .35s ease-out;
+}
+
+@keyframes popIn {
+  from {transform: scale(0.8); opacity: 0;}
+  to {transform: scale(1); opacity: 1;}
+}
+
+.multi-step-modal .close {
+  position: absolute;
+  top: 12px;
+  right: 18px;
+  font-size: 28px;
+  cursor: pointer;
+  color: var(--deep-blue);
+}
+
+/* Progress Bar */
+.progress-container {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 25px;
+}
+
+.progress-step {
+  width: 28%;
+  height: 6px;
+  background: #dbe4ff;
+  border-radius: 20px;
+  transition: background .3s;
+}
+
+.progress-step.active {
+  background: linear-gradient(90deg, var(--deep-blue), var(--blue));
+}
+
+/* Steps */
+.step {
+  display: none;
+}
+
+.step-active {
+  display: block;
+}
+
+.multi-step-modal h2 {
+  margin-top: 0;
+  color: var(--deep-blue);
+  font-size: 20px;
+  margin-bottom: 12px;
+}
+
+.multi-step-modal label {
+  font-weight: 600;
+  margin-top: 10px;
+  display: block;
+}
+
+.multi-step-modal input,
+.multi-step-modal textarea {
+  width: 100%;
+  padding: 10px;
+  margin-top: 4px;
+  border-radius: 10px;
+  border: 1px solid #cbd5e1;
+  background: var(--white);
+  font-size: 15px;
+}
+
+.multi-step-modal textarea {
+  height: 80px;
+}
+
+.next-btn, .prev-btn, .submit-btn {
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+  font-weight: 700;
+  margin-top: 20px;
+}
+
+.next-btn, .submit-btn {
+  background: linear-gradient(90deg, var(--deep-blue), var(--blue));
+  color: white;
+}
+
+.prev-btn {
+  background: #e2e8f0;
+  color: #1e293b;
+}
+
+.buttons-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.review-box {
+  background: #f8fafc;
+  padding: 14px;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+}
