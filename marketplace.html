@@ -271,8 +271,26 @@ function goToStep(step) {
 
 
 
+    
 
 
+
+<!-- STYLE POU POZISYON KONTEUR -->
+<style>
+  #wau-counter {
+    position: fixed;   /* Toujou vizib */
+    top: 10px;         /* Anlè */
+    left: 10px;        /* Agoch */
+    z-index: 9999;
+    pointer-events: none; /* Bloke klik, anpeche redireksyon */
+  }
+
+  #wau-counter iframe,
+  #wau-counter canvas {
+    pointer-events: none !important; /* Asire pa gen klik ditou */
+  }
+</style>
+    
 <!-- KONTEUR (afiche anlè a goch) -->
 <div id="wau-counter">
   <script id="_wauxwz">
