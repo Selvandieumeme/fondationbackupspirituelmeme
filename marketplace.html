@@ -55,39 +55,65 @@
     </main>
 </div>
 
-<div class="multi-step-modal">
-    <span class="close" onclick="closeAddStoreModal()">&times;</span>
+<!-- MODAL MULTI-STEPS STORE ENREGISTREMENT -->
+<div id="add-store-modal" class="modal" style="display:none;">
+    <div class="modal-content">
 
-    <!-- Progress Bar -->
-    <div class="progress-container">
-        <div class="progress-step active"></div>
-        <div class="progress-step"></div>
-        <div class="progress-step"></div>
-    </div>
+        <span class="close" onclick="closeAddStoreModal()">&times;</span>
 
-    <!-- STEP 1 -->
-    <div class="step step-active" id="step1">
-        <h2>1. Enfòmasyon sou Store ou</h2>
-        <label>Non Store:</label>
-        <input type="text" id="storeName" required />
-
-        <label>Deskripsyon Store:</label>
-        <textarea id="description" required></textarea>
-
-        <button class="next-btn" onclick="goToStep(2)">Suivant</button>
-    </div>
-
-    <!-- STEP 2 -->
-    <div class="step" id="step2">
-        <h2>2. Enfòmasyon Peman</h2>
-        <label>Email PayPal pou peye $20 US:</label>
-        <input type="email" id="email" required />
-
-        <div class="buttons-row">
-            <button class="prev-btn" onclick="goToStep(1)">Retour</button>
-            <button class="next-btn" onclick="goToStep(3)">Suivant</button>
+        <!-- STEP INDICATOR -->
+        <div class="step-indicator">
+            <div class="step active">1</div>
+            <div class="step">2</div>
+            <div class="step">3</div>
         </div>
+
+        <!-- STEP 1 -->
+        <div class="step-page active">
+            <h2>Enfòmasyon sou Store ou</h2>
+
+            <label>Non Store:</label>
+            <input type="text" id="storeName" required />
+
+            <label>Deskripsyon Store:</label>
+            <textarea id="storeDesc" required></textarea>
+
+            <button class="btn-next" onclick="goToStep(2)">Suivant</button>
+        </div>
+
+        <!-- STEP 2 -->
+        <div class="step-page">
+            <h2>Enfòmasyon Peman</h2>
+
+            <label>Email PayPal pou peye $20 US:</label>
+            <input type="email" id="paypalEmail" required />
+
+            <div class="dual-buttons">
+                <button class="btn-back" onclick="goToStep(1)">Retour</button>
+                <button class="btn-next" onclick="goToStep(3)">Suivant</button>
+            </div>
+        </div>
+
+        <!-- STEP 3 -->
+        <div class="step-page">
+            <h2>Konfimasyon</h2>
+
+            <p>Verifye si tout enfòmasyon yo kòrèk avan ou valide.</p>
+
+            <div class="review-box">
+                <p><strong>Store:</strong> <span id="reviewName"></span></p>
+                <p><strong>Deskripsyon:</strong> <span id="reviewDesc"></span></p>
+                <p><strong>Email PayPal:</strong> <span id="reviewEmail"></span></p>
+            </div>
+
+            <div class="dual-buttons">
+                <button class="btn-back" onclick="goToStep(2)">Retour</button>
+                <button class="btn-submit">Peye & Enskri</button>
+            </div>
+        </div>
+
     </div>
+</div>
 
     <!-- STEP 3 -->
     <div class="step" id="step3">
