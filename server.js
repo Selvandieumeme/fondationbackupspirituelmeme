@@ -1167,7 +1167,92 @@ app.post('/api/sessions', async (req, res) => {
   }
 });
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// ============================
+// BLOK MARKET FOBAS
+// ============================
+
+const collectionName = "produits"; // Koleksyon pou Market FOBAS
+
+// Fè folder uploads piblik pou web
+app.use("/uploads", express.static(path.join(__dirname, "uploads"))); 
+
+// Konfigirasyon Multer pou upload fichye
+const storage = multer.diskStorage({
+    destination: function(req, file, cb) {
+        cb(null, "uploads/");
+    },
+    filename: function(req, file, cb) {
+        const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+        cb(null, uniqueSuffix + path.extname(file.originalname));
+    }
+});
+const upload = multer({ storage: storage });
+
+// --- API: Chaje tout pwodwi ---
+app.get("/api/products", async (req, res) => {
+    try {
+        const db = mongoose.connection.db;
+        const produits = await db.collection(collectionName).find().toArray();
+        res.json(produits);
+    } catch (err) {
+        console.error(err);
+        res.status(500).send("Erè nan chaje pwodwi");
+    }
+});
+
+// --- API: Ajoute nouvo pwodwi ---
+app.post("/api/products", upload.single("image"), async (req, res) => {
+    try {
+        const { name, price } = req.body;
+        if (!req.file) return res.status(400).send("Image obligatwa");
+
+        const newProduct = {
+            name,
+            price: parseFloat(price),
+            image: "uploads/" + req.file.filename
+        };
+
+        const db = mongoose.connection.db;
+        const result = await db.collection(collectionName).insertOne(newProduct);
+        res.status(200).json(result);
+    } catch (err) {
+        console.error(err);
+        res.status(500).send("Erè nan ajoute pwodwi");
+    }
+});
+
+// --- API: Efase pwodwi ---
+app.delete("/api/products/:id", async (req, res) => {
+    try {
+        const { id } = req.params;
+        const db = mongoose.connection.db;
+        await db.collection(collectionName).deleteOne({ _id: new mongoose.Types.ObjectId(id) });
+        res.status(200).send("Pwodwi efase");
+    } catch (err) {
+        console.error(err);
+        res.status(500).send("Erè nan efase pwodwi");
+    }
+});
+
+
 // 🚀 DEMARRE SERVEUR
 // ---------------------------
 const PORT = process.env.PORT || 3000;
-server.listen(PORT, '0.0.0.0' ()=> console.log(`🚀 Server running on port ${PORT}`));
+server.listen(PORT, ()=> console.log(`🚀 Server running on port ${PORT}`));
