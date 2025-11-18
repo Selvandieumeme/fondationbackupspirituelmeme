@@ -67,6 +67,29 @@
 
             <div id="paypal-button-container"></div>
         </section>
+
+
+
+
+
+    <!-- Modal Ajoute Pwodwi -->
+<div id="addProductModal" class="modal" style="display:none;">
+    <div class="modal-content">
+        <h3>Ajouter un produit</h3>
+
+        <label>Nom du produit :</label>
+        <input type="text" id="newName">
+
+        <label>Prix :</label>
+        <input type="number" id="newPrice">
+
+        <label>Image (upload) :</label>
+        <input type="file" id="newImage">
+
+        <button onclick="addNewProduct()">Enregistrer</button>
+        <button onclick="document.getElementById('addProductModal').style.display='none'">Fermer</button>
+    </div>
+</div>
     </main>
 </div>
 
