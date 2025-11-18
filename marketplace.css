@@ -235,118 +235,139 @@ html, body {
 
 
 
-/* ===========================
-   ULTRA PREMIUM MULTI-STEP MODAL
-   =========================== */
-.multi-step-modal {
-  width: 420px;
-  background: var(--glass);
-  backdrop-filter: blur(18px);
+/* -------------------------------
+   MODAL MULTI-STEP PREMIUM
+--------------------------------*/
+.modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+}
+
+.modal-content {
+  background: var(--white);
+  width: 95%;
+  max-width: 430px;
+  padding: 25px;
   border-radius: 20px;
-  padding: 30px;
-  box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+  box-shadow: 0 10px 45px rgba(0,0,0,0.15);
+  animation: fadeIn .4s ease;
   position: relative;
-  animation: popIn .35s ease-out;
+  border-top: 6px solid var(--blue);
 }
 
-@keyframes popIn {
-  from {transform: scale(0.8); opacity: 0;}
-  to {transform: scale(1); opacity: 1;}
-}
-
-.multi-step-modal .close {
+.close {
   position: absolute;
-  top: 12px;
-  right: 18px;
-  font-size: 28px;
+  top: 14px;
+  right: 16px;
+  font-size: 26px;
   cursor: pointer;
   color: var(--deep-blue);
 }
 
-/* Progress Bar */
-.progress-container {
+/* STEP INDICATOR */
+.step-indicator {
   display: flex;
-  justify-content: space-between;
-  margin-bottom: 25px;
+  justify-content: center;
+  gap: 15px;
+  margin-bottom: 20px;
 }
 
-.progress-step {
-  width: 28%;
-  height: 6px;
-  background: #dbe4ff;
-  border-radius: 20px;
-  transition: background .3s;
+.step-indicator .step {
+  width: 38px;
+  height: 38px;
+  background: var(--soft-bg);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  border: 3px solid var(--muted);
+  color: var(--muted);
 }
 
-.progress-step.active {
-  background: linear-gradient(90deg, var(--deep-blue), var(--blue));
+.step-indicator .active {
+  border-color: var(--yellow);
+  background: var(--yellow);
+  color: #000;
 }
 
-/* Steps */
-.step {
+/* STEP PAGES */
+.step-page {
   display: none;
 }
 
-.step-active {
+.step-page.active {
   display: block;
 }
 
-.multi-step-modal h2 {
-  margin-top: 0;
+.modal-content h2 {
   color: var(--deep-blue);
-  font-size: 20px;
-  margin-bottom: 12px;
+  text-align: center;
+  margin-bottom: 15px;
 }
 
-.multi-step-modal label {
-  font-weight: 600;
-  margin-top: 10px;
-  display: block;
-}
-
-.multi-step-modal input,
-.multi-step-modal textarea {
+.modal-content input,
+.modal-content textarea {
   width: 100%;
   padding: 10px;
-  margin-top: 4px;
+  margin: 8px 0 15px;
   border-radius: 10px;
-  border: 1px solid #cbd5e1;
-  background: var(--white);
+  border: 1px solid #d0d7e0;
   font-size: 15px;
+  background: var(--soft-bg);
 }
 
-.multi-step-modal textarea {
-  height: 80px;
+textarea {
+  resize: none;
+  height: 70px;
 }
 
-.next-btn, .prev-btn, .submit-btn {
-  padding: 10px 14px;
-  border-radius: 10px;
+/* BUTTONS */
+.btn-next, .btn-back, .btn-submit {
+  padding: 12px 20px;
   border: none;
+  border-radius: 12px;
   cursor: pointer;
   font-weight: 700;
-  margin-top: 20px;
+  width: 100%;
+  margin-top: 10px;
 }
 
-.next-btn, .submit-btn {
+.btn-next {
+  background: linear-gradient(90deg, var(--blue), var(--yellow));
+  color: #fff;
+}
+
+.btn-back {
+  background: #e3e7ef;
+  color: #000;
+}
+
+.btn-submit {
   background: linear-gradient(90deg, var(--deep-blue), var(--blue));
   color: white;
 }
 
-.prev-btn {
-  background: #e2e8f0;
-  color: #1e293b;
-}
-
-.buttons-row {
+.dual-buttons {
   display: flex;
-  justify-content: space-between;
   gap: 10px;
 }
 
 .review-box {
-  background: #f8fafc;
-  padding: 14px;
+  background: var(--soft-bg);
+  padding: 10px 14px;
   border-radius: 12px;
-  border: 1px solid #e2e8f0;
+  margin-bottom: 15px;
+  border: 1px solid #d6d7dc;
 }
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
