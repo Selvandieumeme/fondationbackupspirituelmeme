@@ -249,19 +249,26 @@ function goToStep(step) {
 
 
 
-    document.querySelector(".btn-submit").onclick = function () {
-    // URL PayPal pou $20 US
-    const paypalURL = "https://www.paypal.com/donate?business=assobackupspiritueldhaiti@gmail.com&amount=20&currency_code=USD&item_name=Frai%20Enskripsyon%20Nouvo%20Store%20-%20FOBAS";
+  // Mete event listener la lè DOM la fin chaje
+document.addEventListener("DOMContentLoaded", function() {
+    // Ranpli bouton la nan modal multi-step
+    const btnSubmit = document.querySelector(".btn-submit");
 
-    // Louvri URL la nan yon nouvo tab
-    window.open(paypalURL, "_blank");
+    if (btnSubmit) {
+        btnSubmit.addEventListener("click", function() {
+            const paypalURL = "https://www.paypal.com/donate?business=assobackupspiritueldhaiti@gmail.com&amount=20&currency_code=USD&item_name=Frai%20Enskripsyon%20Nouvo%20Store%20-%20FOBAS";
 
-    // Fè modal la fèmen
-    closeAddStoreModal();
+            // Louvri PayPal nan nouvo tab
+            window.open(paypalURL, "_blank");
 
-    // Alèt kout pou itilizatè a
-    alert("Ou pral redireksyonne sou PayPal pou peye $20 US kòm Frai Enskripsyon Store.");
-};
+            // Fè modal la fèmen
+            closeAddStoreModal();
+
+            // Alèt kout pou itilizatè a
+            alert("Ou pral redireksyonne sou PayPal pou peye $20 US kòm Frai Enskripsyon Store.");
+        });
+    }
+});
 </script>
 
 
