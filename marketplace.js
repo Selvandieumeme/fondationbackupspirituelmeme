@@ -1,4 +1,4 @@
-const API_BASE = "https://fondationbackupspirituelmeme-vip.vercel.app";
+const res = await fetch(`${API_BASE}/api/products`);
 
 // -----------------------------
 // Sidebar & Ajout Store
