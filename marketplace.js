@@ -7,6 +7,21 @@ async function loadStoresSidebar() {
     const sidebar = document.querySelector(".stores-sidebar ul");
     sidebar.innerHTML = "";
 
+
+
+
+ // ---------- Ajoute Store FOBAS kòm premye ---------- 
+    const liFOBAS = document.createElement("li");
+    liFOBAS.textContent = "Store FOBAS";
+    liFOBAS.onclick = () => loadStoreProducts("fobas-store-id", "Store FOBAS"); 
+    sidebar.appendChild(liFOBAS);
+
+
+
+
+    
+
+    
     try {
         const res = await fetch(`${API_BASE}/api/merchants`);
         const data = await res.json();
