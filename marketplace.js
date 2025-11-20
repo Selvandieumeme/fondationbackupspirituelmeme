@@ -132,10 +132,15 @@ async function loadStoreProducts(storeId, storeName) {
     }
 }
 
+
+
+
+
+
 // -----------------------------
 // Ajoute Nouvo Produit (ADMIN) soti nan Modal HTML
 // -----------------------------
-async function addNewProduct() {
+async function addNewProduct(storeId) {  // ajoute storeId kòm paramèt
     const name = document.getElementById("newName").value;
     const price = parseFloat(document.getElementById("newPrice").value);
     const imageFile = document.getElementById("newImage").files[0];
@@ -146,19 +151,21 @@ async function addNewProduct() {
     formData.append("name", name);
     formData.append("price", price);
     formData.append("image", imageFile);
+    formData.append("storeId", storeId);  // voye storeId ansanm
 
     try {
         const res = await fetch("/api/products", { method: "POST", body: formData });
         if (res.ok) {
             alert("Pwodwi ajoute avèk siksè!");
             document.getElementById('addProductModal').style.display = 'none';
-            loadStoreProducts();
+            loadStoreProducts(storeId); // chaje pwodwi pou store sa sèlman
         }
     } catch (err) {
         console.error(err);
         alert("Erè pandan ajoute pwodwi.");
     }
 }
+
 
 // -----------------------------
 // Efase Produit (ADMIN)
