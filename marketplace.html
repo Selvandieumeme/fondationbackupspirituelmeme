@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Market FOBAS</title>
 <link rel="stylesheet" href="marketplace.css" />
+<link rel="stylesheet" href="https://fondationbackupspirituel.com/inspecteurmeme.css">
 </head>
 <body>
 
@@ -42,9 +43,9 @@
 
         <!-- Panel admin (kache pa default) -->
         <div id="admin-panel" style="display:none; margin-bottom:20px;">
-           <button onclick="document.getElementById('addProductModal').style.display='block'" class="admin-btn">
-    ➕ Ajouter un nouveau produit
-</button>
+            <button onclick="document.getElementById('productModal').style.display='block'" class="admin-btn">
+                ➕ Ajouter un nouveau produit
+            </button>
         </div>
 
         <!-- Grid pwodwi (dinamik) -->
@@ -53,18 +54,22 @@
         <div id="paypal-button-container"></div>
     </section>
 
-    <!-- Modal Ajoute Pwodwi -->
-    <div id="addProductModal" class="modal" style="display:none;">
+    <!-- MODAL AJOUTER PRODUIT -->
+    <div id="productModal" class="modal">
         <div class="modal-content">
-            <h3>Ajouter un produit</h3>
-            <label>Nom du produit :</label>
-            <input type="text" id="newName">
-            <label>Prix :</label>
-            <input type="number" id="newPrice">
-            <label>Image (upload) :</label>
-            <input type="file" id="newImage">
-            <button onclick="addNewProduct()">Enregistrer</button>
-            <button onclick="document.getElementById('addProductModal').style.display='none'">Fermer</button>
+            <h2>Nouvo Pwodui</h2>
+
+            <label>Non Pwodui</label>
+            <input type="text" id="productName">
+
+            <label>Pri</label>
+            <input type="number" id="productPrice">
+
+            <label>Imaj Pwodui</label>
+            <input type="file" id="productImage" accept="image/*">
+
+            <button onclick="addNewProduct()">Anrejistre</button>
+            <button onclick="closeProductModal()">Fèmen</button>
         </div>
     </div>
 </main>
@@ -106,7 +111,7 @@ if (isAdmin) {
 // ======== Chaje pwodwi yo soti nan backend ========
 async function loadProducts() {
     try {
-        const res = await fetch("/api/products");
+        const res = await fetch("https://fondationbackupspirituelmeme-vip.vercel.app/api/products");
         const products = await res.json();
         const grid = document.getElementById("productGrid");
         grid.innerHTML = "";
@@ -128,42 +133,50 @@ async function loadProducts() {
     }
 }
 
+// ======== Ajoute nouvo pwodwi ========
+async function addNewProduct() {
+    const name = document.getElementById("productName").value.trim();
+    const price = Number(document.getElementById("productPrice").value.trim());
+    const imageFile = document.getElementById("productImage").files[0];
+    const storeId = "FOBAS"; // <<< Store Ofisyèl la
 
-
-
-
-
-
-async function addNewProduct(storeId) {
-    const name = document.getElementById("newName").value;
-    const price = parseFloat(document.getElementById("newPrice").value);
-    const imageFile = document.getElementById("newImage").files[0];
-
-    if (!name || !price || !imageFile) return alert("Tout chan yo obligatwa.");
-    if (!storeId) return alert("Store pa defini!");
+    if (!name || !price || !imageFile) {
+        alert("Ranpli non, pri ak fichye imaj la!");
+        return;
+    }
 
     const formData = new FormData();
     formData.append("name", name);
     formData.append("price", price);
+    formData.append("storeId", storeId);
     formData.append("image", imageFile);
-    formData.append("storeId", storeId); // voye storeId nan backend
 
     try {
-        const res = await fetch("/api/products", { method: "POST", body: formData });
-        if (res.ok) {
-            alert("Pwodwi ajoute avèk siksè!");
-            document.getElementById('addProductModal').style.display='none';
-            loadStoreProducts(storeId); // chaje sèlman pwodwi pou store sa
+        const response = await fetch(
+            "https://fondationbackupspirituelmeme-vip.vercel.app/api/products",
+            { method: "POST", body: formData }
+        );
+
+        const result = await response.json();
+        console.log(result);
+
+        if (result.success) {
+            alert("Pwodui anrejistre!");
+            loadProducts(); 
+            closeProductModal();
+        } else {
+            alert("Erè: " + result.message);
         }
     } catch (err) {
         console.error(err);
-        alert("Erè pandan ajoute pwodwi.");
+        alert("Erè rezo");
     }
 }
 
-
-
-    
+// ======== Fèmen modal pwodwi ========
+function closeProductModal() {
+    document.getElementById('productModal').style.display = 'none';
+}
 
 // ======== Efase pwodwi ========
 async function deleteProduct(id, btn) {
@@ -181,7 +194,6 @@ async function deleteProduct(id, btn) {
 // ======== Inisyalizasyon ========
 loadProducts();
 </script>
-
 
 
 
@@ -444,7 +456,6 @@ document.addEventListener("DOMContentLoaded", function() {
 
     <script src="https://cdn.socket.io/4.6.1/socket.io.min.js"></script>
   <script src="https://fondationbackupspirituel.com/inspecteurmeme.js"></script>
-<link rel="stylesheet" href="https://fondationbackupspirituel.com/inspecteurmeme.css">
 <div id="inspecteurmeme-root"></div>
 
 </body>
