@@ -42,11 +42,11 @@
         </button>
 
         <!-- Panel admin (kache pa default) -->
-        <div id="admin-panel" style="display:none; margin-bottom:20px;">
-            <button onclick="document.getElementById('productModal').style.display='block'" class="admin-btn">
-                ➕ Ajouter un nouveau produit
-            </button>
-        </div>
+<div id="admin-panel" style="display:none; margin-bottom:20px;">
+    <button onclick="openProductModal()" class="admin-btn">
+        ➕ Ajouter un nouveau produit
+    </button>
+</div>
 
         <!-- Grid pwodwi (dinamik) -->
         <div class="product-grid" id="productGrid"></div>
@@ -55,7 +55,7 @@
     </section>
 
     <!-- MODAL AJOUTER PRODUIT -->
-    <div id="productModal" class="modal">
+    <div id="productModal" class="modal" style="display:none;">
         <div class="modal-content">
             <h2>Nouvo Pwodui</h2>
 
@@ -108,6 +108,20 @@ if (isAdmin) {
     document.getElementById("admin-panel").style.display = "block";
 }
 
+
+
+function openProductModal() {
+    const isAdmin = localStorage.getItem("fobas_admin") === "1";
+    if (!isAdmin) {
+        alert("Ou pa gen aksè pou ajoute nouvo pwodwi!");
+        return;
+    }
+    document.getElementById('productModal').style.display = 'block';
+}
+
+
+
+    
 // ======== Chaje pwodwi yo soti nan backend ========
 async function loadProducts() {
     try {
@@ -133,6 +147,7 @@ async function loadProducts() {
     }
 }
 
+                            
 // ======== Ajoute nouvo pwodwi ========
 async function addNewProduct() {
     const name = document.getElementById("productName").value.trim();
