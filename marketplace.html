@@ -337,7 +337,7 @@ function buyProduct(name, priceGdes) {
 }
 
 // --------------------------
-// CHARGE STORES REAL API
+// CHARGE STORES REAL API AVEC STORE FOBAS
 // --------------------------
 async function loadStores() {
     try {
@@ -347,7 +347,17 @@ async function loadStores() {
         const sidebar = document.getElementById("sidebar-stores");
         sidebar.innerHTML = "";
 
+        // Ajoute STORE FOBAS manyèlman an premye
+        const fobasLi = document.createElement("li");
+        fobasLi.textContent = "⭐ STORE FOBAS (Officiel) ⭐";
+        fobasLi.onclick = () => openStore("FOBAS"); // ID espesyal pou STORE FOBAS
+        sidebar.appendChild(fobasLi);
+
+        // Apre sa ajoute tout lòt stores soti nan API a
         data.merchants.forEach(store => {
+            // Pa ajoute Store FOBAS si li egziste deja nan API
+            if (store._id === "FOBAS") return;
+
             const li = document.createElement("li");
             li.textContent = store.storeName;
             li.onclick = () => openStore(store._id);
@@ -360,9 +370,14 @@ async function loadStores() {
 }
 
 function openStore(id) {
-    window.location.href = `store.html?store=${id}`;
+    if (id === "FOBAS") {
+        // Louvri Store FOBAS sou menm paj la
+        document.getElementById("fobas-store").scrollIntoView({ behavior: "smooth" });
+    } else {
+        // Lòt stores ale nan store.html
+        window.location.href = `store.html?store=${id}`;
+    }
 }
-
 
     
     
