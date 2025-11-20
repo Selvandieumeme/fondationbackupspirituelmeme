@@ -1,5 +1,3 @@
-const res = await fetch(`${API_BASE}/api/products`);
-
 // -----------------------------
 // Sidebar & Ajout Store
 // -----------------------------
@@ -110,7 +108,7 @@ async function loadStoreProducts(storeId, storeName) {
     grid.innerHTML = "";
 
     try {
-        const res = await fetch("/api/products");
+        const res = await fetch(`/api/products?storeId=${storeId}`);
         if (!res.ok) throw new Error("Pa ka chaje pwodwi nan sèvè a");
         const products = await res.json();
 
@@ -141,9 +139,9 @@ async function loadStoreProducts(storeId, storeName) {
 // Ajoute Nouvo Produit (ADMIN) soti nan Modal HTML
 // -----------------------------
 async function addNewProduct(storeId) {  // ajoute storeId kòm paramèt
-    const name = document.getElementById("newName").value;
-    const price = parseFloat(document.getElementById("newPrice").value);
-    const imageFile = document.getElementById("newImage").files[0];
+const name = document.getElementById("productName").value;
+const price = parseFloat(document.getElementById("productPrice").value);
+const imageFile = document.getElementById("productImage").files[0];
 
     if (!name || !price || !imageFile) return alert("Tout chan yo obligatwa.");
 
