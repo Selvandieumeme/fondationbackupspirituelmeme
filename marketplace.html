@@ -336,65 +336,11 @@ function buyProduct(name, priceGdes) {
     loadPayPal();
 }
 
-// --------------------------
-// CHARGE STORES REAL API AVEC STORE FOBAS
-// --------------------------
-async function loadStores() {
-    try {
-        const res = await fetch(`${API_BASE}/api/merchants`);
-        const data = await res.json();
 
-        const sidebar = document.getElementById("sidebar-stores");
-        sidebar.innerHTML = "";
 
-        // Ajoute STORE FOBAS manyèlman an premye
-        const fobasLi = document.createElement("li");
-        fobasLi.textContent = "⭐ STORE FOBAS (Officiel) ⭐";
-        fobasLi.onclick = () => openStore("FOBAS"); // ID espesyal pou STORE FOBAS
-        sidebar.appendChild(fobasLi);
-
-        // Apre sa ajoute tout lòt stores soti nan API a
-        data.merchants.forEach(store => {
-            // Pa ajoute Store FOBAS si li egziste deja nan API
-            if (store._id === "FOBAS") return;
-
-            const li = document.createElement("li");
-            li.textContent = store.storeName;
-            li.onclick = () => openStore(store._id);
-            sidebar.appendChild(li);
-        });
-
-    } catch (error) {
-        console.error("Erreur chargement stores:", error);
-    }
-}
-
-function openStore(id) {
-    if (id === "FOBAS") {
-        // Louvri Store FOBAS sou menm paj la
-        document.getElementById("fobas-store").scrollIntoView({ behavior: "smooth" });
-    } else {
-        // Lòt stores ale nan store.html
-        window.location.href = `store.html?store=${id}`;
-    }
-}
 
     
-    
 
-
-// --------------------------
-// MODAL AJOUT STORE
-// --------------------------
-function openAddStoreModal() {
-    document.getElementById('add-store-modal').style.display = 'flex';
-}
-function closeAddStoreModal() {
-    document.getElementById('add-store-modal').style.display = 'none';
-}
-
-// Chaje sidebar stores
-loadStores();
 
 
     
@@ -452,13 +398,91 @@ document.addEventListener("DOMContentLoaded", function() {
 
 
 
+<script>
+const API_BASE = "https://fondationbackupspirituelmeme-vip.vercel.app";
 
+// --------------------------
+// CHARGE STORES REAL API AVEC STORE FOBAS
+// --------------------------
+async function loadStores() {
+    try {
+        const res = await fetch(`${API_BASE}/api/merchants`);
+        const data = await res.json();
+
+        const sidebar = document.getElementById("sidebar-stores");
+        if (!sidebar) return; // si sidebar pa egziste, pa fè anyen
+        sidebar.innerHTML = "";
+
+        // Ajoute STORE FOBAS manyèlman an premye
+        const fobasLi = document.createElement("li");
+        fobasLi.textContent = "⭐ STORE FOBAS (Officiel) ⭐";
+        fobasLi.style.cursor = "pointer";
+        fobasLi.onclick = () => openStore("FOBAS"); // ID espesyal pou STORE FOBAS
+        sidebar.appendChild(fobasLi);
+
+        // Apre sa ajoute tout lòt stores soti nan API a
+        data.merchants.forEach(store => {
+            if (store._id === "FOBAS") return; // pa double
+            const li = document.createElement("li");
+            li.textContent = store.storeName;
+            li.style.cursor = "pointer";
+            li.onclick = () => openStore(store._id);
+            sidebar.appendChild(li);
+        });
+
+    } catch (error) {
+        console.error("Erreur chargement stores:", error);
+    }
+}
+
+// --------------------------
+// OUVRI STORE
+// --------------------------
+function openStore(id) {
+    if (id === "FOBAS") {
+        const fobasSection = document.getElementById("fobas-store");
+        if (fobasSection) {
+            fobasSection.scrollIntoView({ behavior: "smooth" });
+        }
+    } else {
+        window.location.href = `store.html?store=${id}`;
+    }
+}
+
+// --------------------------
+// MODAL AJOUT STORE
+// --------------------------
+function openAddStoreModal() {
+    const modal = document.getElementById('add-store-modal');
+    if (modal) modal.style.display = 'flex';
+}
+function closeAddStoreModal() {
+    const modal = document.getElementById('add-store-modal');
+    if (modal) modal.style.display = 'none';
+}
+
+// --------------------------
+// CHARGE SIDEBAR STORE APRE DOM FIN CHAGE
+// --------------------------
+document.addEventListener("DOMContentLoaded", function() {
+    loadStores();
+});
+</script>
 
 
     
 
 
 
+
+
+
+
+
+
+
+
+    
 <!-- STYLE POU POZISYON KONTEUR -->
 <style>
   #wau-counter {
