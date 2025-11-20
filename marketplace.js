@@ -14,7 +14,7 @@ async function loadStoresSidebar() {
     const liFOBAS = document.createElement("li");
     liFOBAS.textContent = "Store FOBAS";
     liFOBAS.onclick = () => loadStoreProducts("fobas-store-id", "Store FOBAS"); 
-    sidebar.appendChild(liFOBAS);
+    sidebar.prepend(liFOBAS);
 
 
 
