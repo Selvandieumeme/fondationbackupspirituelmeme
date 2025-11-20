@@ -128,31 +128,42 @@ async function loadProducts() {
     }
 }
 
-// ======== Ajoute nouvo pwodwi ========
-async function addNewProduct() {
+
+
+
+
+
+
+async function addNewProduct(storeId) {
     const name = document.getElementById("newName").value;
     const price = parseFloat(document.getElementById("newPrice").value);
     const imageFile = document.getElementById("newImage").files[0];
 
     if (!name || !price || !imageFile) return alert("Tout chan yo obligatwa.");
+    if (!storeId) return alert("Store pa defini!");
 
     const formData = new FormData();
     formData.append("name", name);
     formData.append("price", price);
     formData.append("image", imageFile);
+    formData.append("storeId", storeId); // voye storeId nan backend
 
     try {
         const res = await fetch("/api/products", { method: "POST", body: formData });
         if (res.ok) {
             alert("Pwodwi ajoute avèk siksè!");
             document.getElementById('addProductModal').style.display='none';
-            loadProducts();
+            loadStoreProducts(storeId); // chaje sèlman pwodwi pou store sa
         }
     } catch (err) {
-        alert("Erè pandan ajoute pwodwi a.");
         console.error(err);
+        alert("Erè pandan ajoute pwodwi.");
     }
 }
+
+
+
+    
 
 // ======== Efase pwodwi ========
 async function deleteProduct(id, btn) {
