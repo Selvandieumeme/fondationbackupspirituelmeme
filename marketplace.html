@@ -153,7 +153,7 @@ async function addNewProduct() {
     const name = document.getElementById("productName").value.trim();
     const price = Number(document.getElementById("productPrice").value.trim());
     const imageFile = document.getElementById("productImage").files[0];
-    const storeId = "FOBAS"; // <<< Store Ofisyèl la
+    const storeId = "fobas-store-id"; // <<< Store Ofisyèl la
 
     if (!name || !price || !imageFile) {
         alert("Ranpli non, pri ak fichye imaj la!");
@@ -400,58 +400,90 @@ document.addEventListener("DOMContentLoaded", function() {
 
 <script>
 const API_BASE = "https://fondationbackupspirituelmeme-vip.vercel.app";
+const FOBAS_STORE_ID = "fobas-store-id"; // ID kòrèk pou Store FOBAS
+const FOBAS_STORE_NAME = "⭐ STORE FOBAS (Officiel) ⭐";
 
-// --------------------------
-// CHARGE STORES REAL API AVEC STORE FOBAS
-// --------------------------
-async function loadStores() {
+async function loadStoresSidebar() {
+    const sidebar = document.getElementById("sidebar-stores");
+    if (!sidebar) return;
+    sidebar.innerHTML = "";
+
+    // Ajoute Store FOBAS an premye
+    const liFOBAS = document.createElement("li");
+    liFOBAS.textContent = FOBAS_STORE_NAME;
+    liFOBAS.style.cursor = "pointer";
+    liFOBAS.onclick = () => loadStoreProducts(FOBAS_STORE_ID, FOBAS_STORE_NAME);
+    sidebar.appendChild(liFOBAS);
+
+    // Ajoute tout lòt stores soti nan API
     try {
         const res = await fetch(`${API_BASE}/api/merchants`);
         const data = await res.json();
+        if (!data.merchants) return;
 
-        const sidebar = document.getElementById("sidebar-stores");
-        if (!sidebar) return; // si sidebar pa egziste, pa fè anyen
-        sidebar.innerHTML = "";
-
-        // Ajoute STORE FOBAS manyèlman an premye
-        const fobasLi = document.createElement("li");
-        fobasLi.textContent = "⭐ STORE FOBAS (Officiel) ⭐";
-        fobasLi.style.cursor = "pointer";
-        fobasLi.onclick = () => openStore("FOBAS"); // ID espesyal pou STORE FOBAS
-        sidebar.appendChild(fobasLi);
-
-        // Apre sa ajoute tout lòt stores soti nan API a
         data.merchants.forEach(store => {
-            if (store._id === "FOBAS") return; // pa double
+            if (store._id === FOBAS_STORE_ID) return;
             const li = document.createElement("li");
             li.textContent = store.storeName;
             li.style.cursor = "pointer";
-            li.onclick = () => openStore(store._id);
+            li.onclick = () => loadStoreProducts(store._id, store.storeName);
             sidebar.appendChild(li);
         });
-
-    } catch (error) {
-        console.error("Erreur chargement stores:", error);
+    } catch (err) {
+        console.error("Erreur chaje stores:", err);
     }
 }
 
-// --------------------------
-// OUVRI STORE
-// --------------------------
-function openStore(id) {
-    if (id === "FOBAS") {
-        const fobasSection = document.getElementById("fobas-store");
-        if (fobasSection) {
-            fobasSection.scrollIntoView({ behavior: "smooth" });
+// Chaje pwodwi pou store
+async function loadStoreProducts(storeId, storeName) {
+    const storeContent = document.querySelector(".store-content");
+    if (!storeContent) return;
+
+    storeContent.innerHTML = `
+        <h2>⭐ ${storeName} ⭐</h2>
+        <div class="product-grid" id="product-grid"></div>
+        <div id="paypal-button-container"></div>
+    `;
+
+    const grid = document.getElementById("product-grid");
+    grid.innerHTML = "";
+
+    try {
+        const res = await fetch(`${API_BASE}/api/products?storeId=${storeId}`);
+        if (!res.ok) throw new Error("Pa ka chaje pwodwi nan sèvè a");
+        const products = await res.json();
+
+        if (!products.length) {
+            grid.innerHTML = "<p>Pa gen pwodwi pou kounye a.</p>";
+            return;
         }
-    } else {
-        window.location.href = `store.html?store=${id}`;
+
+        products.forEach(prod => {
+            const card = document.createElement("div");
+            card.className = "product-card";
+            card.innerHTML = `
+                <img src="${prod.image}" />
+                <h3>${prod.name}</h3>
+                <p class="price">${prod.price} Gdes</p>
+                <button onclick="buyProduct('${prod.name}', ${prod.price})">Achte kounya</button>
+                ${isAdmin ? `<button class="delete-btn" onclick="deleteProduct('${prod._id}', this)">❌ Efase</button>` : ""}
+            `;
+            grid.appendChild(card);
+        });
+    } catch (err) {
+        console.error("Erreur chaje produits:", err);
+        grid.innerHTML = "<p>Pa gen pwodwi pou kounye a.</p>";
     }
 }
 
-// --------------------------
-// MODAL AJOUT STORE
-// --------------------------
+// Bouton Ajoute Store
+function addStoreButton() {
+    const btn = document.querySelector(".btn-add-store");
+    if (!btn) return;
+    btn.onclick = () => openAddStoreModal();
+}
+
+// Modal
 function openAddStoreModal() {
     const modal = document.getElementById('add-store-modal');
     if (modal) modal.style.display = 'flex';
@@ -461,14 +493,11 @@ function closeAddStoreModal() {
     if (modal) modal.style.display = 'none';
 }
 
-// --------------------------
-// CHARGE SIDEBAR STORE APRE DOM FIN CHAGE
-// --------------------------
-document.addEventListener("DOMContentLoaded", function() {
-    loadStores();
+document.addEventListener("DOMContentLoaded", () => {
+    loadStoresSidebar();
+    addStoreButton();
 });
 </script>
-
 
     
 
