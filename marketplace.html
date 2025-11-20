@@ -381,9 +381,9 @@ function openStore(id) {
 
     
     
-    
-    
-   // --------------------------
+
+
+// --------------------------
 // MODAL AJOUT STORE
 // --------------------------
 function openAddStoreModal() {
@@ -393,6 +393,12 @@ function closeAddStoreModal() {
     document.getElementById('add-store-modal').style.display = 'none';
 }
 
+// Chaje sidebar stores
+loadStores();
+
+
+    
+    
 // MULTI-STEP NAVIGATION
 function goToStep(step) {
     const steps = document.querySelectorAll(".step-page");
