@@ -14,7 +14,9 @@ module.exports = async (req, res) => {
     // GET → Retounen lis pwodwi yo
     // -----------------------------
     if (req.method === "GET") {
-        const data = await produits.find({}).toArray();
+        const storeId = req.query.storeId; // Nouvo: chaje sèlman pwodwi ki pou store sa si gen storeId
+        const query = storeId ? { storeId } : {};
+        const data = await produits.find(query).toArray();
         return res.status(200).json(data);
     }
 
@@ -29,10 +31,11 @@ module.exports = async (req, res) => {
 
             const name = fields.name?.[0];
             const price = parseFloat(fields.price?.[0]);
+            const storeId = fields.storeId?.[0]; // Nouvo: id store
             const imageFile = files.image?.[0];
 
-            if (!name || !price || !imageFile) {
-                return res.status(400).json({ error: "Missing fields" });
+            if (!name || !price || !imageFile || !storeId) {
+                return res.status(400).json({ error: "Tout chan yo obligatwa" });
             }
 
             // Li imaj la an Base64
@@ -42,6 +45,7 @@ module.exports = async (req, res) => {
             const produit = {
                 name,
                 price,
+                storeId,        // mete storeId la
                 image: base64Image,
                 createdAt: new Date()
             };
