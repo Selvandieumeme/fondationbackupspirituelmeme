@@ -304,6 +304,50 @@ handleQuestion = function(text){
    
 
 
+
+
+
+
+
+// =========================================================
+// PATCH : Rechèch fuzzy lokal anvan mande sèvè
+// =========================================================
+const local = searchLocal(text, 5);
+if (local.length > 0) {
+  const top = local[0];
+
+  // 🔹 Repons trè konfyans
+  if (top.score < 0.18) {
+    addAgent(top.item.answer);
+    speakText(top.item.answer, top.item.lang || chosenLang);
+    return;
+  }
+
+  // 🔹 Repons pre, men mande konfimasyon itilizatè
+  if (top.score < 0.45) {
+    addAgent(top.item.answer);
+    speakText(top.item.answer, top.item.lang || chosenLang);
+    askFeedbackFor(text, top.item.answer, top.item.lang || chosenLang);
+    return;
+  }
+}
+// =========================================================
+
+
+
+
+
+
+
+   
+
+
+
+
+
+
+   
+
    
   /* --- TTS / voice: more robust loading & better matching --- */
   let voices = [];
