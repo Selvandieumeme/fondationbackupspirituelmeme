@@ -151,46 +151,6 @@
       </div>
     </div>
   </div>
-
-
-
-
-
-
-
-<!-- MEME JS prensipal -->
-<script src="inspecteurmeme.js"></script>
-
-<!-- Script mizik endepandan -->
-<script>
-(function(){
-  const MEME_DEFAULT_AUDIO = "https://fondationbackupspirituel.com/AudiofinalBilove";
-
-  function playMemeAudio(url){
-    if(!url) return;
-    const audio = new Audio(url);
-    audio.volume = 0.8;
-    audio.play().catch(e => console.warn("Pa kapab jwe mizik:", e));
-  }
-
-  const chatBox = document.getElementById("chatMessages");
-  if(chatBox){
-    const observer = new MutationObserver(mutations => {
-      mutations.forEach(mutation => {
-        mutation.addedNodes.forEach(node => {
-          if(node.textContent && node.textContent.toLowerCase().includes("mizik pa defo")){
-            playMemeAudio(MEME_DEFAULT_AUDIO);
-          }
-        });
-      });
-    });
-
-    observer.observe(chatBox, { childList: true });
-  }
-})();
-</script>
-
-
   
 
   <!-- Socket.io client (sirve si server.js ap sèvi li) -->
@@ -200,6 +160,55 @@
 <script src="inspecteurmeme.js"></script>
 
 
-  
+
+
+
+
+
+
+
+
+
+  <!-- Script prensipal MEME -->
+<script src="inspecteurmeme.js"></script>
+
+<!-- Script otomatik mizik (TOUJOU apre inspecteurmeme.js) -->
+<script>
+(function(){
+    const MEME_DEFAULT_AUDIO = "https://fondationbackupspirituel.com/AudiofinalBilove";
+
+    let memeReady = false;
+    let audioPlayed = false;
+
+    function playMemeAudio(url){
+        try {
+            const audio = new Audio(url);
+            audio.volume = 0.85;
+            audio.play().catch(() => {});
+        } catch(e){
+            console.warn("Erè mizik:", e);
+        }
+    }
+
+    // OBSÈVÈ pou detekte si MEME parèt oswa aktive
+    const checkMemeInterval = setInterval(() => {
+        const memeAvatar = document.getElementById("inspecteurmeme");
+
+        if(memeAvatar && !memeReady){
+            memeReady = true;
+
+            // JWE MIZIK OTOMATIK YON SÈL FWA
+            if(!audioPlayed){
+                audioPlayed = true;
+                playMemeAudio(MEME_DEFAULT_AUDIO);
+            }
+
+            clearInterval(checkMemeInterval);
+        }
+    }, 800);
+
+})();
+</script>
+
 </body>
 </html>
