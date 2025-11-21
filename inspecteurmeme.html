@@ -152,6 +152,47 @@
     </div>
   </div>
 
+
+
+
+
+
+
+<!-- MEME JS prensipal -->
+<script src="inspecteurmeme.js"></script>
+
+<!-- Script mizik endepandan -->
+<script>
+(function(){
+  const MEME_DEFAULT_AUDIO = "https://fondationbackupspirituel.com/AudiofinalBilove";
+
+  function playMemeAudio(url){
+    if(!url) return;
+    const audio = new Audio(url);
+    audio.volume = 0.8;
+    audio.play().catch(e => console.warn("Pa kapab jwe mizik:", e));
+  }
+
+  const chatBox = document.getElementById("chatMessages");
+  if(chatBox){
+    const observer = new MutationObserver(mutations => {
+      mutations.forEach(mutation => {
+        mutation.addedNodes.forEach(node => {
+          if(node.textContent && node.textContent.toLowerCase().includes("mizik pa defo")){
+            playMemeAudio(MEME_DEFAULT_AUDIO);
+          }
+        });
+      });
+    });
+
+    observer.observe(chatBox, { childList: true });
+  }
+})();
+</script>
+
+
+  
+
   <!-- Socket.io client (sirve si server.js ap sèvi li) -->
   <script src="/socket.io/socket.io.js"></script>
 
