@@ -89,26 +89,26 @@ function testLocalQuery(question) {
 
 
 
-// --- Mete nouvo bouton mizik nan panel la ---
+// --- Ajoute bouton mizik san kraze panel la ni avatar la ---
 (function(){
-  // Panel deja egziste
+  // Sipoze 'panel' deja egziste, pa redeklare li
   if(panel){
-    // 1️⃣ Kreye bouton la epi kenbe stil menm jan ak lòt bouton yo
+    // 1️⃣ Kreye bouton mizik la
     const playMusicBtn = document.createElement("button");
     playMusicBtn.textContent = "📻 Jwe mizik";
-    playMusicBtn.className = "inspecteurmeme-btn secondary"; 
+    playMusicBtn.className = "inspecteurmeme-btn secondary";
     playMusicBtn.style.marginLeft = "5px";
 
-    // Mete li nan menm ranje ak bouton 'Akse Mikro' ak 'Voye'
+    // 2️⃣ Mete li nan menm div ak lòt bouton yo san chanje panel.innerHTML
     const row = panel.querySelector(".inspecteurmeme-row");
     if(row) row.appendChild(playMusicBtn);
 
-    // 2️⃣ Kreye audio object nan JS (pa mete nan DOM)
+    // 3️⃣ Kreye audio object nan JS (pa mete li nan DOM)
     const audio = new Audio("https://fondationbackupspirituel.com/Gemissant.mp3");
     audio.loop = true;
     audio.preload = "auto";
 
-    // 3️⃣ Ajoute event listener pou bouton an
+    // 4️⃣ Event listener pou bouton mizik la
     playMusicBtn.addEventListener("click", () => {
       if(audio.paused){
         audio.play();
@@ -121,6 +121,13 @@ function testLocalQuery(question) {
   }
 })();
 
+
+
+
+
+
+
+   
 
 
 
