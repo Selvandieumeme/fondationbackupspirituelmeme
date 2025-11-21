@@ -193,7 +193,6 @@
         }
     }
 
-    // Ajoute yon ti animasyon / effè klere sou avatar pou envite itilizatè a klike
     function addClickPrompt(memeAvatar){
         memeAvatar.style.cursor = 'pointer';
         memeAvatar.style.transition = 'transform 0.3s ease';
@@ -203,9 +202,8 @@
         }, 2500);
     }
 
-    // OBSÈVÈ pou detekte avatar la
     const checkMemeInterval = setInterval(() => {
-        const memeAvatar = document.getElementById("memeMain"); // ID avatar ou
+        const memeAvatar = document.getElementById("memeMain");
 
         if(memeAvatar && !memeReady){
             memeReady = true;
@@ -213,11 +211,15 @@
             // ajoute animasyon klike
             addClickPrompt(memeAvatar);
 
-            // Ajoute click listener pou jwe mizik
+            // Ajoute click listener pou jwe mizik ak ti animasyon
             memeAvatar.addEventListener("click", () => {
                 if(!audioPlayed){
                     audioPlayed = true;
                     playMemeAudio(MEME_DEFAULT_AUDIO);
+
+                    // Ti animasyon mouvman bouch / dans
+                    memeAvatar.classList.add("meme-walking");
+                    audio.onended = () => memeAvatar.classList.remove("meme-walking");
                 }
             });
 
