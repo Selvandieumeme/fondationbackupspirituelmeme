@@ -177,27 +177,30 @@
 
     let memeReady = false;
     let audioPlayed = false;
+    let audio = null;
 
     function playMemeAudio(url){
         try {
-            const audio = new Audio(url);
-            audio.volume = 0.85;
+            if(!audio) {
+                audio = new Audio(url);
+                audio.volume = 0.85;
+            }
             audio.play().catch(() => {
-                console.warn("Navigatè a bloke mizik otomatik. Mizik ap jwe lè yo klike sou MEME.");
+                console.warn("Pa kapab jwe mizik la. Li pral sèlman jwe lè yo klike sou MEME.");
             });
         } catch(e){
             console.warn("Erè mizik:", e);
         }
     }
 
-    // DETEKTE AVATAR OU AN (memeMain se ID reyèl avatar la!)
+    // OBSÈVÈ pou detekte avatar la
     const checkMemeInterval = setInterval(() => {
-        const memeAvatar = document.getElementById("memeMain");
+        const memeAvatar = document.getElementById("memeMain"); // ID avatar ou
 
         if(memeAvatar && !memeReady){
             memeReady = true;
 
-            // Si autoplay pa mache, mizik lanse lè yo klike sou avatar la
+            // Ajoute click listener pou jwe mizik
             memeAvatar.addEventListener("click", () => {
                 if(!audioPlayed){
                     audioPlayed = true;
@@ -205,17 +208,10 @@
                 }
             });
 
-            // Eseye ekzekite otomatik yon premye fwa
-            if(!audioPlayed){
-                playMemeAudio(MEME_DEFAULT_AUDIO);
-            }
-
             clearInterval(checkMemeInterval);
         }
-    }, 800);
-
+    }, 500);
 })();
 </script>
-
 </body>
 </html>
