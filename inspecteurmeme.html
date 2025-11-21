@@ -193,12 +193,25 @@
         }
     }
 
+    // Ajoute yon ti animasyon / effè klere sou avatar pou envite itilizatè a klike
+    function addClickPrompt(memeAvatar){
+        memeAvatar.style.cursor = 'pointer';
+        memeAvatar.style.transition = 'transform 0.3s ease';
+        setInterval(() => {
+            memeAvatar.style.transform = 'scale(1.05)';
+            setTimeout(()=> { memeAvatar.style.transform = 'scale(1)'; }, 300);
+        }, 2500);
+    }
+
     // OBSÈVÈ pou detekte avatar la
     const checkMemeInterval = setInterval(() => {
         const memeAvatar = document.getElementById("memeMain"); // ID avatar ou
 
         if(memeAvatar && !memeReady){
             memeReady = true;
+
+            // ajoute animasyon klike
+            addClickPrompt(memeAvatar);
 
             // Ajoute click listener pou jwe mizik
             memeAvatar.addEventListener("click", () => {
