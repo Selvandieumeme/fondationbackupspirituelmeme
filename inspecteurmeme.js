@@ -89,32 +89,37 @@ function testLocalQuery(question) {
 
 
 
-// 1️⃣ Chèche kote panel la ye
-const panel = document.getElementById("inspecteurmeme-panel");
+// --- Mete nouvo bouton mizik nan panel la ---
+(function(){
+  // Panel deja egziste
+  if(panel){
+    // 1️⃣ Kreye bouton la epi kenbe stil menm jan ak lòt bouton yo
+    const playMusicBtn = document.createElement("button");
+    playMusicBtn.textContent = "📻 Jwe mizik";
+    playMusicBtn.className = "inspecteurmeme-btn secondary"; 
+    playMusicBtn.style.marginLeft = "5px";
 
-// 2️⃣ Kreye nouvo bouton "Jwe mizik"
-const playMusicBtn = document.createElement("button");
-playMusicBtn.textContent = "📻 Jwe mizik";
-playMusicBtn.style.margin = "5px"; // Ajoute yon ti espas si ou vle
-panel.appendChild(playMusicBtn);
+    // Mete li nan menm ranje ak bouton 'Akse Mikro' ak 'Voye'
+    const row = panel.querySelector(".inspecteurmeme-row");
+    if(row) row.appendChild(playMusicBtn);
 
-// 3️⃣ Kreye yon eleman audio pou mizik la
-const audio = document.createElement("audio");
-audio.src = "https://fondationbackupspirituel.com/Gemissant.mp3";
-audio.loop = true; // Pou mizik la jwe kontinyèlman
-audio.preload = "auto"; // Prechaje mizik la pou li pa reta
-document.body.appendChild(audio); // Mete li nan body a
+    // 2️⃣ Kreye audio object nan JS (pa mete nan DOM)
+    const audio = new Audio("https://fondationbackupspirituel.com/Gemissant.mp3");
+    audio.loop = true;
+    audio.preload = "auto";
 
-// 4️⃣ Ajoute event listener pou bouton an
-playMusicBtn.addEventListener("click", () => {
-    if (audio.paused) {
+    // 3️⃣ Ajoute event listener pou bouton an
+    playMusicBtn.addEventListener("click", () => {
+      if(audio.paused){
         audio.play();
-        playMusicBtn.textContent = "⏸️ Sispann mizik"; // Chanje tèks bouton an si mizik ap jwe
-    } else {
+        playMusicBtn.textContent = "⏸️ Sispann mizik";
+      } else {
         audio.pause();
-        playMusicBtn.textContent = "📻 Jwe mizik"; // Rekòmanse tèks original la
-    }
-});
+        playMusicBtn.textContent = "📻 Jwe mizik";
+      }
+    });
+  }
+})();
 
 
 
