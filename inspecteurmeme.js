@@ -26,9 +26,6 @@
 
 
 
-
-
-
 /* ===================================================================
    PATCH : Fuse.js Search + Feedback UI + saveNewQALocally
    =================================================================== */
@@ -119,6 +116,8 @@ function askFeedbackFor(question, answer, lang="ht") {
     fbDiv.remove();
   };
 }
+
+
 
 
 
@@ -290,6 +289,10 @@ if(socket){
     addAgent(text);
     speakText(text, lang).catch(e=>{ console.warn('TTS failed:', e); });
     animateFromText(text);
+
+
+    // 🔹 Ajoute feedback UI tou
+  askFeedbackFor(payload?.question || 'Kesyon ou?', text, lang);
   });
 } else {
   // no socket: fetch memory once as fallback
