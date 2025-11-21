@@ -1,8 +1,14 @@
 (function(){
+  // -----------------------------
+  // 🔹 Lis mizik
+  // -----------------------------
   const MUSIC_LIST = [
     { name: "Gemissant", url: "https://fondationbackupspirituel.com/Gemissant.mp3", keywords: ["happy", "gemissant", "mizik", "son"] }
   ];
 
+  // -----------------------------
+  // 🔹 Kreye eleman <audio> ak bouton
+  // -----------------------------
   const audioEl = document.createElement('audio');
   audioEl.controls = true;
   audioEl.style.width = '100%';
@@ -18,7 +24,7 @@
   musicBtn.className = 'inspecteurmeme-btn secondary';
   panel.appendChild(musicBtn);
 
-  // Dropdown seleksyon (pou ka elaji plis mizik pita)
+  // Dropdown seleksyon mizik
   const selectEl = document.createElement('select');
   selectEl.style.width = '100%';
   selectEl.style.marginTop = '6px';
@@ -38,6 +44,9 @@
     audioEl.src = MUSIC_LIST[savedIndex].url;
   }
 
+  // -----------------------------
+  // 🔹 Fonksyon jwe mizik
+  // -----------------------------
   function playSelectedMusic(){
     const idx = parseInt(selectEl.value,10);
     if(MUSIC_LIST[idx]){
@@ -50,13 +59,15 @@
   musicBtn.addEventListener('click', playSelectedMusic);
   selectEl.addEventListener('change', ()=>playSelectedMusic());
 
-  // 🔹 Obsevatè sou chat MEME nan stage la
-  const chatMessages = document.getElementById('chatMessages'); 
-  if(chatMessages){
+  // -----------------------------
+  // 🔹 Obsèvatè mesaj nan chat MEME
+  // -----------------------------
+  const chatBox = document.getElementById('chatBox'); 
+  if(chatBox){
     const observer = new MutationObserver(mutations=>{
       for(const m of mutations){
         for(const node of m.addedNodes){
-          if(node.nodeType===1 && node.classList.contains('chat-message')){
+          if(node.nodeType===1){ // tout div ki ajoute nan chatBox
             const text = node.textContent.toLowerCase();
             for(const [i, track] of MUSIC_LIST.entries()){
               if(track.keywords.some(k=>text.includes(k.toLowerCase()))){
@@ -70,7 +81,7 @@
         }
       }
     });
-    observer.observe(chatMessages, { childList:true });
+    observer.observe(chatBox, { childList:true });
   }
 
 })();
