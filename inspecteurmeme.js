@@ -24,6 +24,116 @@
 
 
 
+
+
+
+
+
+/* ===================================================================
+   PATCH : Fuse.js Search + Feedback UI + saveNewQALocally
+   =================================================================== */
+
+let fuse = null;
+
+// 🔹 Rekonstrui endèks Fuse chak fwa MEME_QA chanje
+function buildFuseIndex() {
+  if (!Array.isArray(MEME_QA) || MEME_QA.length === 0) {
+    fuse = null;
+    return;
+  }
+
+  fuse = new Fuse(MEME_QA, {
+    keys: ['question', 'answer', 'tags'],
+    threshold: 0.35,
+    ignoreLocation: true,
+    minMatchCharLength: 2
+  });
+
+  console.debug('[IM][PATCH] Fuse index rebuilt:', MEME_QA.length);
+}
+
+// 🔹 Fonksyon pou fè rechèch fuzzy lokal
+function searchLocal(text, maxResults = 5) {
+  if (!fuse) return [];
+  const res = fuse.search(text, { limit: maxResults });
+  return res.map(r => ({ item: r.item, score: r.score }));
+}
+
+// 🔹 Sove nouvo QA lokal + voye sou sèvè (san kraze anyen)
+async function saveNewQALocally(question, answer, lang = "ht", meta = {}) {
+  const entry = Object.assign(
+    {
+      question,
+      answer,
+      lang,
+      createdAt: new Date().toISOString(),
+      source: "user"
+    },
+    meta
+  );
+
+  MEME_QA.unshift(entry); // mete nan tèt lis la
+  buildFuseIndex();       // rebati endèks la
+
+  // 🔹 Pouse sou sèvè si disponib
+  try {
+    await fetch(SOCKET_SERVER + "/api/memeqas", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(entry)
+    });
+    addSystem("Repons sove nan memwa sèvè a ✔️");
+  } catch (e) {
+    console.warn("Save QA failed:", e);
+    addSystem("⚠️ Pa t ka sove sou sèvè, men li sove lokalman.");
+  }
+}
+
+// 🔹 Ajoute bouton feedback UI aprè repons
+function askFeedbackFor(question, answer, lang="ht") {
+  const fbDiv = document.createElement("div");
+  fbDiv.style.marginTop = "4px";
+  fbDiv.innerHTML = `
+    <div style="font-size:12px; opacity:0.9">
+      Repons sa itil? 
+      <button id="fb-yes">👍 Wi</button> 
+      <button id="fb-no">👎 Non</button>
+    </div>
+  `;
+
+  chatbox.appendChild(fbDiv);
+
+  document.getElementById("fb-yes").onclick = () => {
+    saveNewQALocally(question, answer, lang);
+    fbDiv.remove();
+  };
+
+  document.getElementById("fb-no").onclick = () => {
+    // Simples feedback to server
+    fetch(SOCKET_SERVER + "/api/feedback", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ question, answer, lang })
+    });
+    addSystem("Mèsi pou fidbak la 🙏");
+    fbDiv.remove();
+  };
+}
+
+
+
+
+
+
+
+
+
+
+
+
+   
+   
+
 function testLocalQuery(question) {
   if (!MEME_QA || MEME_QA.length === 0) {
     console.log("MEME_QA pa chaje toujou!");
