@@ -1,91 +1,46 @@
 (function(){
-  // -----------------------------
-  // 🔹 Lis mizik
-  // -----------------------------
+  // 🔹 Lis mizik ak URL reyèl ou bay
   const MUSIC_LIST = [
     { name: "Gemissant", url: "https://fondationbackupspirituel.com/Gemissant.mp3", keywords: ["happy", "gemissant", "mizik", "son"] }
   ];
 
-  const panel = document.getElementById('inspecteurmeme-panel');
-  if(!panel) return; // si panel pa egziste, sispann
-
-  // -----------------------------
-  // 🔹 Kreye bouton ak dropdown mizik
-  // -----------------------------
-  const musicRow = document.createElement('div');
-  musicRow.style.marginTop = '8px';
-
-  const musicBtn = document.createElement('button');
-  musicBtn.textContent = '📻 Jwe mizik';
-  musicBtn.className = 'inspecteurmeme-btn secondary';
-  musicBtn.style.marginRight = '6px';
-
-  const selectEl = document.createElement('select');
-  selectEl.style.width = 'calc(100% - 90px)'; // adapte ak bouton
-  MUSIC_LIST.forEach((m,i)=>{
-    const opt = document.createElement('option');
-    opt.value = i;
-    opt.textContent = m.name;
-    selectEl.appendChild(opt);
-  });
-
+  // 🔹 Kreye eleman audio
   const audioEl = document.createElement('audio');
   audioEl.controls = true;
   audioEl.style.width = '100%';
   audioEl.style.marginTop = '6px';
 
-  musicRow.appendChild(musicBtn);
-  musicRow.appendChild(selectEl);
-  panel.appendChild(musicRow);
-  panel.appendChild(audioEl);
+  // 🔹 Kreye bouton
+  const musicBtn = document.createElement('button');
+  musicBtn.textContent = '📻 Jwe mizik';
+  musicBtn.className = 'secondary'; // menm style ak lòt bouton
+  musicBtn.style.marginTop = '6px';
+  musicBtn.style.width = '100%';
+  musicBtn.style.padding = '8px';
 
-  // -----------------------------
-  // 🔹 Chaje mizik nan localStorage si genyen
-  // -----------------------------
-  const savedIndex = localStorage.getItem('meme_music_index');
-  if(savedIndex !== null && MUSIC_LIST[savedIndex]){
-    selectEl.value = savedIndex;
-    audioEl.src = MUSIC_LIST[savedIndex].url;
-  }
+  // 🔹 Ajoute bouton ak audio nan login panel (.left)
+  const leftPanel = document.querySelector('.left');
+  if(!leftPanel) return;
+  leftPanel.appendChild(musicBtn);
+  leftPanel.appendChild(audioEl);
 
-  // -----------------------------
   // 🔹 Fonksyon jwe mizik
-  // -----------------------------
-  function playSelectedMusic(){
-    const idx = parseInt(selectEl.value,10);
-    if(MUSIC_LIST[idx]){
-      audioEl.src = MUSIC_LIST[idx].url;
-      audioEl.play().catch(e=>console.warn('[MEME Music] Play failed:', e));
-      localStorage.setItem('meme_music_index', idx);
-    }
+  function playMusic(){
+    const track = MUSIC_LIST[0]; // pou kounye a nou jwe premye mizik la
+    audioEl.src = track.url;
+    audioEl.play().catch(e=>console.warn('[MEME Music] Play failed:', e));
   }
 
-  musicBtn.addEventListener('click', playSelectedMusic);
-  selectEl.addEventListener('change', ()=>playSelectedMusic());
+  musicBtn.addEventListener('click', playMusic);
 
-  // -----------------------------
-  // 🔹 Obsèvatè mesaj nan chat MEME
-  // -----------------------------
-  const chatBox = document.getElementById('chatBox'); 
-  if(chatBox){
-    const observer = new MutationObserver(mutations=>{
-      for(const m of mutations){
-        for(const node of m.addedNodes){
-          if(node.nodeType===1){ // tout div ki ajoute nan chatBox
-            const text = node.textContent.toLowerCase();
-            for(const [i, track] of MUSIC_LIST.entries()){
-              if(track.keywords.some(k=>text.includes(k.toLowerCase()))){
-                selectEl.value = i;
-                playSelectedMusic();
-                console.debug('[MEME Music] Jwe mizik otomatik:', track.name);
-                return;
-              }
-            }
-          }
-        }
-      }
-    });
-    observer.observe(chatBox, { childList:true });
+  // 🔹 Optional: kenbe mizik chwazi nan localStorage
+  const savedMusic = localStorage.getItem('meme_music_url');
+  if(savedMusic){
+    audioEl.src = savedMusic;
   }
+
+  audioEl.addEventListener('play', ()=>{
+    localStorage.setItem('meme_music_url', audioEl.src);
+  });
 
 })();
