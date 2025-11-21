@@ -6,38 +6,42 @@
     { name: "Gemissant", url: "https://fondationbackupspirituel.com/Gemissant.mp3", keywords: ["happy", "gemissant", "mizik", "son"] }
   ];
 
-  // -----------------------------
-  // 🔹 Kreye eleman <audio> ak bouton
-  // -----------------------------
-  const audioEl = document.createElement('audio');
-  audioEl.controls = true;
-  audioEl.style.width = '100%';
-  audioEl.style.marginTop = '6px';
-
   const panel = document.getElementById('inspecteurmeme-panel');
-  if(!panel) return;
+  if(!panel) return; // si panel pa egziste, sispann
 
-  // Bouton jwe mizik
+  // -----------------------------
+  // 🔹 Kreye bouton ak dropdown mizik
+  // -----------------------------
+  const musicRow = document.createElement('div');
+  musicRow.style.marginTop = '8px';
+
   const musicBtn = document.createElement('button');
   musicBtn.textContent = '📻 Jwe mizik';
-  musicBtn.style.marginTop = '6px';
   musicBtn.className = 'inspecteurmeme-btn secondary';
-  panel.appendChild(musicBtn);
+  musicBtn.style.marginRight = '6px';
 
-  // Dropdown seleksyon mizik
   const selectEl = document.createElement('select');
-  selectEl.style.width = '100%';
-  selectEl.style.marginTop = '6px';
+  selectEl.style.width = 'calc(100% - 90px)'; // adapte ak bouton
   MUSIC_LIST.forEach((m,i)=>{
     const opt = document.createElement('option');
     opt.value = i;
     opt.textContent = m.name;
     selectEl.appendChild(opt);
   });
-  panel.appendChild(selectEl);
+
+  const audioEl = document.createElement('audio');
+  audioEl.controls = true;
+  audioEl.style.width = '100%';
+  audioEl.style.marginTop = '6px';
+
+  musicRow.appendChild(musicBtn);
+  musicRow.appendChild(selectEl);
+  panel.appendChild(musicRow);
   panel.appendChild(audioEl);
 
-  // Chaje mizik nan localStorage si genyen
+  // -----------------------------
+  // 🔹 Chaje mizik nan localStorage si genyen
+  // -----------------------------
   const savedIndex = localStorage.getItem('meme_music_index');
   if(savedIndex !== null && MUSIC_LIST[savedIndex]){
     selectEl.value = savedIndex;
