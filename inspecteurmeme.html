@@ -171,7 +171,6 @@
 
 
 
-<!-- Script otomatik mizik (TOUJOU apre inspecteurmeme.js) -->
 <script>
 (function(){
     const MEME_DEFAULT_AUDIO = "https://fondationbackupspirituel.com/AudiofinalBilove";
@@ -183,22 +182,31 @@
         try {
             const audio = new Audio(url);
             audio.volume = 0.85;
-            audio.play().catch(() => {});
+            audio.play().catch(() => {
+                console.warn("Navigatè a bloke mizik otomatik. Mizik ap jwe lè yo klike sou MEME.");
+            });
         } catch(e){
             console.warn("Erè mizik:", e);
         }
     }
 
-    // OBSÈVÈ pou detekte si MEME parèt oswa aktive
+    // DETEKTE AVATAR OU AN (memeMain se ID reyèl avatar la!)
     const checkMemeInterval = setInterval(() => {
-        const memeAvatar = document.getElementById("inspecteurmeme");
+        const memeAvatar = document.getElementById("memeMain");
 
         if(memeAvatar && !memeReady){
             memeReady = true;
 
-            // JWE MIZIK OTOMATIK YON SÈL FWA
+            // Si autoplay pa mache, mizik lanse lè yo klike sou avatar la
+            memeAvatar.addEventListener("click", () => {
+                if(!audioPlayed){
+                    audioPlayed = true;
+                    playMemeAudio(MEME_DEFAULT_AUDIO);
+                }
+            });
+
+            // Eseye ekzekite otomatik yon premye fwa
             if(!audioPlayed){
-                audioPlayed = true;
                 playMemeAudio(MEME_DEFAULT_AUDIO);
             }
 
