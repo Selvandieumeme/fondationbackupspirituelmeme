@@ -171,62 +171,6 @@
 
 
 
-<script>
-(function(){
-    const MEME_DEFAULT_AUDIO = "https://fondationbackupspirituel.com/Gemissant.mp3";
 
-    let memeReady = false;
-    let audioPlayed = false;
-    let audio = null;
-
-    function playMemeAudio(url){
-        try {
-            if(!audio) {
-                audio = new Audio(url);
-                audio.volume = 0.85;
-            }
-            audio.play().catch(() => {
-                console.warn("Pa kapab jwe mizik la. Li pral sèlman jwe lè yo klike sou MEME.");
-            });
-        } catch(e){
-            console.warn("Erè mizik:", e);
-        }
-    }
-
-    function addClickPrompt(memeAvatar){
-        memeAvatar.style.cursor = 'pointer';
-        memeAvatar.style.transition = 'transform 0.3s ease';
-        setInterval(() => {
-            memeAvatar.style.transform = 'scale(1.05)';
-            setTimeout(()=> { memeAvatar.style.transform = 'scale(1)'; }, 300);
-        }, 2500);
-    }
-
-    const checkMemeInterval = setInterval(() => {
-        const memeAvatar = document.getElementById("memeMain");
-
-        if(memeAvatar && !memeReady){
-            memeReady = true;
-
-            // ajoute animasyon klike
-            addClickPrompt(memeAvatar);
-
-            // Ajoute click listener pou jwe mizik ak ti animasyon
-            memeAvatar.addEventListener("click", () => {
-                if(!audioPlayed){
-                    audioPlayed = true;
-                    playMemeAudio(MEME_DEFAULT_AUDIO);
-
-                    // Ti animasyon mouvman bouch / dans
-                    memeAvatar.classList.add("meme-walking");
-                    audio.onended = () => memeAvatar.classList.remove("meme-walking");
-                }
-            });
-
-            clearInterval(checkMemeInterval);
-        }
-    }, 500);
-})();
-</script>
 </body>
 </html>
