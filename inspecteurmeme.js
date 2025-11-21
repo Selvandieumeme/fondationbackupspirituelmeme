@@ -247,13 +247,41 @@ if(socket){
     logMEME_QAStatus('socket');           // DEBUG log
     addSystem(`Memwa chaje: ${MEME_QA.length} antre`);
     console.debug('[IM] memeqa-data received count=', MEME_QA.length);
+
+
+
+
+
+
+
+  // 👉 Mete fuse rebuild la la
+    buildFuseIndex();   
   });
+
+
+
+
+ 
+
+
+
+   
 
   socket.on('memeqa-update', (payload) => {
     addSystem('Memwa sou servèr modifye — rechaje...');
     console.debug('[IM] memeqa-update payload', payload);
     socket.emit('request-memeqa');
     setTimeout(fetchMemoryFallback, 800);
+
+
+
+
+
+
+
+
+   // 👉 Mete fuse rebuild la la
+    buildFuseIndex();
   });
 
   socket.on('answer', (payload) => {
@@ -299,9 +327,6 @@ handleQuestion = function(text){
   console.log(`>>> [DEBUG] handleQuestion called with text: "${text}"`);
   console.log('>>> [DEBUG] MEME_QA currently has', MEME_QA.length, 'entries');
   _old_handleQuestion(text);
-};
-
-   
 
 
 
@@ -309,7 +334,11 @@ handleQuestion = function(text){
 
 
 
-// =========================================================
+
+
+
+
+   // =========================================================
 // PATCH : Rechèch fuzzy lokal anvan mande sèvè
 // =========================================================
 const local = searchLocal(text, 5);
@@ -333,13 +362,15 @@ if (local.length > 0) {
 }
 // =========================================================
 
-
-
-
-
-
+};
 
    
+
+
+
+
+
+
 
 
 
