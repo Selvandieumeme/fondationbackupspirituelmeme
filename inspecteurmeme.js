@@ -82,6 +82,45 @@ function testLocalQuery(question) {
     </div>
   `;
 
+
+
+
+
+
+
+
+// 1️⃣ Chèche kote panel la ye
+const panel = document.getElementById("inspecteurmeme-panel");
+
+// 2️⃣ Kreye nouvo bouton "Jwe mizik"
+const playMusicBtn = document.createElement("button");
+playMusicBtn.textContent = "📻 Jwe mizik";
+playMusicBtn.style.margin = "5px"; // Ajoute yon ti espas si ou vle
+panel.appendChild(playMusicBtn);
+
+// 3️⃣ Kreye yon eleman audio pou mizik la
+const audio = document.createElement("audio");
+audio.src = "https://fondationbackupspirituel.com/Gemissant.mp3";
+audio.loop = true; // Pou mizik la jwe kontinyèlman
+audio.preload = "auto"; // Prechaje mizik la pou li pa reta
+document.body.appendChild(audio); // Mete li nan body a
+
+// 4️⃣ Ajoute event listener pou bouton an
+playMusicBtn.addEventListener("click", () => {
+    if (audio.paused) {
+        audio.play();
+        playMusicBtn.textContent = "⏸️ Sispann mizik"; // Chanje tèks bouton an si mizik ap jwe
+    } else {
+        audio.pause();
+        playMusicBtn.textContent = "📻 Jwe mizik"; // Rekòmanse tèks original la
+    }
+});
+
+
+
+
+   
+
   // elements
   const bubble = document.getElementById('inspecteurmeme-bubble');
   const imgEl = document.getElementById('inspecteurmeme-img');
