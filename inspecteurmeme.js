@@ -82,57 +82,6 @@ function testLocalQuery(question) {
     </div>
   `;
 
-
-
-
-
-
-
-
-// --- Ajoute bouton mizik san kraze panel la ni avatar la ---
-(function(){
-  // Sipoze 'panel' deja egziste nan DOM, pa redeklarasyon
-  const existingPanel = document.getElementById('inspecteurmeme-panel');
-  if(existingPanel){
-    // 1️⃣ Kreye bouton mizik la
-    const playMusicBtn = document.createElement("button");
-    playMusicBtn.textContent = "📻 Jwe mizik";
-    playMusicBtn.className = "inspecteurmeme-btn secondary"; // Kenbe menm stil
-    playMusicBtn.style.marginLeft = "5px";
-
-    // 2️⃣ Mete li nan menm div ak lòt bouton yo (pa modifye innerHTML)
-    const row = existingPanel.querySelector(".inspecteurmeme-row");
-    if(row) row.appendChild(playMusicBtn);
-
-    // 3️⃣ Kreye audio object nan JS (pa mete nan DOM)
-    const audio = new Audio("https://fondationbackupspirituel.com/Gemissant.mp3");
-    audio.loop = true;
-    audio.preload = "auto";
-
-    // 4️⃣ Event listener pou bouton mizik la
-    playMusicBtn.addEventListener("click", () => {
-      if(audio.paused){
-        audio.play();
-        playMusicBtn.textContent = "⏸️ Sispann mizik";
-      } else {
-        audio.pause();
-        playMusicBtn.textContent = "📻 Jwe mizik";
-      }
-    });
-  }
-})();
-
-
-
-
-
-
-   
-
-
-
-   
-
   // elements
   const bubble = document.getElementById('inspecteurmeme-bubble');
   const imgEl = document.getElementById('inspecteurmeme-img');
