@@ -183,14 +183,6 @@ async function fetchMemoryFallback(){
   }
 }
 
-// handleQuestion debogaj
-const _old_handleQuestion = handleQuestion;
-handleQuestion = function(text){
-  console.log(`>>> [DEBUG] handleQuestion called with text: "${text}"`);
-  console.log('>>> [DEBUG] MEME_QA currently has', MEME_QA.length, 'entries');
-  _old_handleQuestion(text);
-};
-
    
 
 
