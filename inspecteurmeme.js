@@ -333,7 +333,9 @@ async function speakText(text, langKey='ht'){
 // ===============================================
 function handleQuestion(text) {
   resetIdleTimer();
+  console.log("[IM HANDLE]", text);
   const chosenLang = langSelect.value || detectLangFromText(text) || 'ht';
+
 
 
 
