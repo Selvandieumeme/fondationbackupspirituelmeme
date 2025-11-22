@@ -382,20 +382,15 @@ function handleMovementCommand(text, lang){
 
 
 
- // ===============================================
-// 🔹 Fonksyon prensipal pou jere kesyon yo
-// ===============================================
 function handleQuestion(text) {
   resetIdleTimer();
-console.log("[IM HANDLE]", text);
+  console.log("[IM HANDLE]", text);
   const chosenLang = langSelect.value || detectLangFromText(text) || 'ht';
 
+  // ✅ Tcheke mouvman an premye
+  if(handleMovementCommand(text, chosenLang)) return;
 
-
-
-
-
-// 🔹 CHECK REPEAT MODE
+  // 🔹 CHECK REPEAT MODE
   const t = text.toLowerCase();
   const isRepeat = (
     // Kreyòl
@@ -431,7 +426,6 @@ console.log("[IM HANDLE]", text);
 
   // 🔹 Mete mesaj sa kòm dènye mesaj itilizatè pou repeat mode
   lastUserMessage = text;
-
 
 
 
