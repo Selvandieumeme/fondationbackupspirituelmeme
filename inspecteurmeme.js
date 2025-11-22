@@ -361,16 +361,18 @@ function animateMovement(movementId){
   // TODO: ranplase console.log ak animasyon vizyèl sou imgEl si ou vle
 }
 
-// Egzanp entegre nan handleQuestion
 function handleMovementCommand(text, lang){
   const map = MOVEMENT_MAP[lang] || MOVEMENT_MAP['ht'];
-  const key = Object.keys(map).find(k => k.toLowerCase() === text.toLowerCase());
-  if(key !== undefined){
-    const id = map[key];
-    animateMovement(id);
-    return true; // endiktè ke mouvman trete
+  const t = text.toLowerCase();
+
+  for(const key of Object.keys(map)){
+    if(t.includes(key.toLowerCase())){ 
+      const id = map[key];
+      animateMovement(id);
+      return true;
+    }
   }
-  return false; // pa yon mouvman
+  return false;
 }
 
 
