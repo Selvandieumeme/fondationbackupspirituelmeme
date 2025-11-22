@@ -343,6 +343,47 @@ function handleQuestion(text) {
   resetIdleTimer();
   const chosenLang = langSelect.value || detectLangFromText(text) || 'ht';
 
+
+
+
+
+// 🔥🔥🔥 MÒD KONFYANS / REPEAT MODE — MULTI-LANG
+  const t = text.toLowerCase();
+
+  if (
+    // Kreyòl
+    t.includes("repete sa m di a") ||
+    t.includes("repete sa mwen di a") ||
+    t.includes("repete sa m te di") ||
+
+    // Français
+    t.includes("répète ce que j'ai dit") ||
+    t.includes("répète ce que je viens de dire") ||
+    t.includes("répéter ce que j'ai dit") ||
+
+    // English
+    t.includes("repeat what i said") ||
+    t.includes("repeat after me") ||
+    t.includes("repeat this") ||
+
+    // Español
+    t.includes("repite lo que dije") ||
+    t.includes("repite lo que acabo de decir") ||
+    t.includes("repítelo")
+  ) {
+
+    const reply = `Dako, men sa ou te di: "${text}"`;
+
+    addAgent(reply);
+    speakText(reply, chosenLang).catch(()=>{});
+    animateFromText(reply);
+
+    return; // 🔥 pa kite okenn lòt pati kouri
+  }
+
+
+   
+
   // 1️⃣ — Eseye jwenn repons lokal via exact match nan lang chwazi
   let found = MEME_QA.find(d =>
     d && d.lang === chosenLang &&
