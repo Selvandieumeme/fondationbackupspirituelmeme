@@ -341,38 +341,33 @@ function handleQuestion(text) {
 
 
 
-// 🔥🔥🔥 MÒD KONFYANS / REPEAT MODE — MULTI-LANG
-  const t = text.toLowerCase();
+// 🔥 store last user message (skip if repeat command)
+    const repeatCommands = [
+        "repete sa m di a",
+        "repete sa mwen di a",
+        "repete sa m te di",
+        "répète ce que j'ai dit",
+        "répète ce que je viens de dire",
+        "répéter ce que j'ai dit",
+        "repeat what i said",
+        "repeat after me",
+        "repeat this",
+        "repite lo que dije",
+        "repite lo que acabo de decir",
+        "repítelo"
+    ];
+    const t = text.toLowerCase();
+    const isRepeat = repeatCommands.some(cmd => t.includes(cmd));
 
-  if (
-    // Kreyòl
-    t.includes("repete sa m di a") ||
-    t.includes("repete sa mwen di a") ||
-    t.includes("repete sa m te di") ||
+    if(!isRepeat) lastUserMessage = text;
 
-    // Français
-    t.includes("répète ce que j'ai dit") ||
-    t.includes("répète ce que je viens de dire") ||
-    t.includes("répéter ce que j'ai dit") ||
-
-    // English
-    t.includes("repeat what i said") ||
-    t.includes("repeat after me") ||
-    t.includes("repeat this") ||
-
-    // Español
-    t.includes("repite lo que dije") ||
-    t.includes("repite lo que acabo de decir") ||
-    t.includes("repítelo")
-  ) {
-
-    const reply = `Dako, men sa ou te di: "${text}"`;
-
-    addAgent(reply);
-    speakText(reply, chosenLang).catch(()=>{});
-    animateFromText(reply);
-
-    return; // 🔥 pa kite okenn lòt pati kouri
+    // 🔥 REPEAT MODE
+    if(isRepeat){
+        const reply = `Dako, men sa ou te di: "${lastUserMessage}"`;
+        addAgent(reply);
+        speakText(reply, chosenLang).catch(()=>{});
+        animateFromText(reply);
+        return;
   }
 
 
