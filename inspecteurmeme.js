@@ -19,119 +19,10 @@
   const LANG_MAP = { ht: "ht-HT", fr: "fr-FR", en: "en-US", es: "es-ES" };
 
   let MEME_QA = [];
-  let idleTimer = null;
+  let idleTimer = null;	
   let isSleeping = false;
 
 
-
-
-
-/* ===================================================================
-   PATCH : Fuse.js Search + Feedback UI + saveNewQALocally
-   =================================================================== */
-
-let fuse = null;
-
-// 🔹 Rekonstrui endèks Fuse chak fwa MEME_QA chanje
-function buildFuseIndex() {
-  if (!Array.isArray(MEME_QA) || MEME_QA.length === 0) {
-    fuse = null;
-    return;
-  }
-
-  fuse = new Fuse(MEME_QA, {
-    keys: ['question', 'answer', 'tags'],
-    threshold: 0.35,
-    ignoreLocation: true,
-    minMatchCharLength: 2
-  });
-
-  console.debug('[IM][PATCH] Fuse index rebuilt:', MEME_QA.length);
-}
-
-// 🔹 Fonksyon pou fè rechèch fuzzy lokal
-function searchLocal(text, maxResults = 5) {
-  if (!fuse) return [];
-  const res = fuse.search(text, { limit: maxResults });
-  return res.map(r => ({ item: r.item, score: r.score }));
-}
-
-// 🔹 Sove nouvo QA lokal + voye sou sèvè (san kraze anyen)
-async function saveNewQALocally(question, answer, lang = "ht", meta = {}) {
-  const entry = Object.assign(
-    {
-      question,
-      answer,
-      lang,
-      createdAt: new Date().toISOString(),
-      source: "user"
-    },
-    meta
-  );
-
-  MEME_QA.unshift(entry); // mete nan tèt lis la
-  buildFuseIndex();       // rebati endèks la
-
-  // 🔹 Pouse sou sèvè si disponib
-  try {
-    await fetch(SOCKET_SERVER + "/api/memeqas", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(entry)
-    });
-    addSystem("Repons sove nan memwa sèvè a ✔️");
-  } catch (e) {
-    console.warn("Save QA failed:", e);
-    addSystem("⚠️ Pa t ka sove sou sèvè, men li sove lokalman.");
-  }
-}
-
-// 🔹 Ajoute bouton feedback UI aprè repons
-function askFeedbackFor(question, answer, lang="ht") {
-  const fbDiv = document.createElement("div");
-  fbDiv.style.marginTop = "4px";
-  fbDiv.innerHTML = `
-    <div style="font-size:12px; opacity:0.9">
-      Repons sa itil? 
-      <button id="fb-yes">👍 Wi</button> 
-      <button id="fb-no">👎 Non</button>
-    </div>
-  `;
-
-  chatbox.appendChild(fbDiv);
-
-  document.getElementById("fb-yes").onclick = () => {
-    saveNewQALocally(question, answer, lang);
-    fbDiv.remove();
-  };
-
-  document.getElementById("fb-no").onclick = () => {
-    // Simples feedback to server
-    fetch(SOCKET_SERVER + "/api/feedback", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ question, answer, lang })
-    });
-    addSystem("Mèsi pou fidbak la 🙏");
-    fbDiv.remove();
-  };
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-   
-   
 
 function testLocalQuery(question) {
   if (!MEME_QA || MEME_QA.length === 0) {
@@ -246,41 +137,13 @@ if(socket){
     logMEME_QAStatus('socket');           // DEBUG log
     addSystem(`Memwa chaje: ${MEME_QA.length} antre`);
     console.debug('[IM] memeqa-data received count=', MEME_QA.length);
-
-
-
-
-
-
-
-  // 👉 Mete fuse rebuild la la
-    buildFuseIndex();   
   });
-
-
-
-
- 
-
-
-
-   
 
   socket.on('memeqa-update', (payload) => {
     addSystem('Memwa sou servèr modifye — rechaje...');
     console.debug('[IM] memeqa-update payload', payload);
     socket.emit('request-memeqa');
     setTimeout(fetchMemoryFallback, 800);
-
-
-
-
-
-
-
-
-   // 👉 Mete fuse rebuild la la
-    buildFuseIndex();
   });
 
   socket.on('answer', (payload) => {
@@ -289,10 +152,6 @@ if(socket){
     addAgent(text);
     speakText(text, lang).catch(e=>{ console.warn('TTS failed:', e); });
     animateFromText(text);
-
-
-    // 🔹 Ajoute feedback UI tou
-  askFeedbackFor(payload?.question || 'Kesyon ou?', text, lang);
   });
 } else {
   // no socket: fetch memory once as fallback
@@ -330,57 +189,10 @@ handleQuestion = function(text){
   console.log(`>>> [DEBUG] handleQuestion called with text: "${text}"`);
   console.log('>>> [DEBUG] MEME_QA currently has', MEME_QA.length, 'entries');
   _old_handleQuestion(text);
-
-
-
-
-
-
-
-
-
-
-
-   // =========================================================
-// PATCH : Rechèch fuzzy lokal anvan mande sèvè
-// =========================================================
-const local = searchLocal(text, 5);
-if (local.length > 0) {
-  const top = local[0];
-
-  // 🔹 Repons trè konfyans
-  if (top.score < 0.18) {
-    addAgent(top.item.answer);
-    speakText(top.item.answer, top.item.lang || chosenLang);
-    return;
-  }
-
-  // 🔹 Repons pre, men mande konfimasyon itilizatè
-  if (top.score < 0.45) {
-    addAgent(top.item.answer);
-    speakText(top.item.answer, top.item.lang || chosenLang);
-    askFeedbackFor(text, top.item.answer, top.item.lang || chosenLang);
-    return;
-  }
-}
-// =========================================================
-
 };
 
    
 
-
-
-
-
-
-
-
-
-
-
-
-   
 
    
   /* --- TTS / voice: more robust loading & better matching --- */
@@ -743,5 +555,3 @@ function findAnswer(text) {
   setTimeout(()=>{ if(!MEME_QA.length) fetchMemoryFallback(); }, 1200);
 
 })();
-
-
