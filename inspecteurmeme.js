@@ -285,6 +285,74 @@ async function speakText(text, langKey='ht'){
 
 
 
+// ===========================
+// 🔹 11 MOUVMAN AVATAR (ANIMATIONS)
+// ===========================
+const ANIMATIONS = [
+  () => imgEl.style.transform = "scale(1.05)",                // 1. ti grandi
+  () => imgEl.style.transform = "scale(0.95)",                // 2. ti piti
+  () => imgEl.style.transform = "rotate(5deg)",               // 3. vire dwat
+  () => imgEl.style.transform = "rotate(-5deg)",              // 4. vire agoch
+  () => imgEl.style.transform = "translateX(5px)",            // 5. deplase dwat
+  () => imgEl.style.transform = "translateX(-5px)",           // 6. deplase agoch
+  () => imgEl.style.transform = "translateY(5px)",            // 7. desann
+  () => imgEl.style.transform = "translateY(-5px)",           // 8. monte
+  () => imgEl.style.transform = "scale(1.1) rotate(5deg)",    // 9. grandi + vire dwat
+  () => imgEl.style.transform = "scale(1.1) rotate(-5deg)",   // 10. grandi + vire agoch
+  () => imgEl.style.transform = "scale(1) rotate(0deg) translate(0,0)" // 15. reset
+];
+
+// 🔹 Fonksyon ki chwazi mouvman o aza
+function randomAnimation() {
+  const anim = ANIMATIONS[Math.floor(Math.random() * ANIMATIONS.length)];
+  resetAnimations(); // retire tout transform / klas anvan
+  anim();
+  setTimeout(resetAnimations, 600); // retounen nan eta nòmal apre 0.6s
+}
+
+function resetAnimations() {
+  imgEl.style.transform = "";
+  imgEl.classList.remove('happy','angry','sleep','talking');
+}
+
+// 🔹 Entègasyon ak speakText
+async function speakText(text, langKey='ht'){
+  if(isSleeping) wakeUp();
+  try{
+    await loadVoices();
+    const utter = new SpeechSynthesisUtterance(text);
+    utter.lang = LANG_MAP[langKey] || LANG_MAP['ht'];
+
+    const v = voices.find(v =>
+      v.lang.toLowerCase().startsWith('fr') &&
+      /female|femme|amelie|marie|google français/i.test(v.name)
+    );
+    if(v) utter.voice = v;
+
+    imgEl.classList.add('talking');
+    randomAnimation(); // 🔥 ajoute mouvman o aza
+
+    speechSynthesis.cancel(); // cancel ongoing
+    const speakPromise = new Promise((res, rej) => {
+      utter.onend = () => { imgEl.classList.remove('talking'); resetAnimations(); res(); };
+      utter.onerror = (e) => { imgEl.classList.remove('talking'); resetAnimations(); rej(e); };
+    });
+
+    speechSynthesis.speak(utter);
+    return speakPromise;
+
+  } catch(err){
+    imgEl.classList.remove('talking');
+    console.warn('[IM] speakText error', err);
+    throw err;
+  }
+}
+
+
+   
+
+
+
    
 
   /* --- STT (SpeechRecognition) unchanged except ensure correct lang codes --- */
