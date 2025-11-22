@@ -242,80 +242,6 @@ handleQuestion = function(text){
 
 
 
-
-const MOVEMENT_MAP = {
-  ht: { 
-    grandi: 0,     // ti grandi
-    piti: 1,       // ti piti
-    'vire dwat': 2,// vire dwat
-    'vire agoch': 3,// vire agoch
-    desann: 6,     // deplase desann
-    monte: 7,      // deplase monte
-    'grandi + vire dwat': 8,  // combo grandi + vire dwat
-    'grandi + vire agoch': 9  // combo grandi + vire agoch
-  },
-  fr: { 
-    grandir: 0,
-    petit: 1,
-    'tourner à droite': 2,
-    'tourner à gauche': 3,
-    descendre: 6,
-    monter: 7,
-    'grandir + tourner à droite': 8,
-    'grandir + tourner à gauche': 9
-  },
-  en: { 
-    grow: 0,
-    shrink: 1,
-    'turn right': 2,
-    'turn left': 3,
-    down: 6,
-    up: 7,
-    'grow + turn right': 8,
-    'grow + turn left': 9
-  },
-  es: { 
-    crecer: 0,
-    pequeño: 1,
-    'girar derecha': 2,
-    'girar izquierda': 3,
-    bajar: 6,
-    subir: 7,
-    'crecer + girar derecha': 8,
-    'crecer + girar izquierda': 9
-  }
-};
-
-   
-
-
-const chosenLang = langSelect.value || detectLangFromText(text) || 'ht';
-
-// fè mouvman si gen mo mouvman
-animateFromCommand(text, chosenLang);
-
-
-
-
-function animateFromCommand(text, lang='ht'){
-  const words = text.toLowerCase().split(/\W+/);
-  for(const w of words){
-    const moveIdx = MOVEMENT_MAP[lang]?.[w];
-    if(moveIdx !== undefined){
-      resetAnimations();       // retire tout mouvman anvan
-      ANIMATIONS[moveIdx]();   // fè mouvman espesifik
-      setTimeout(resetAnimations, 600); // retounen nan nòmal
-      break;                   // sèlman premye mouvman koresponn ak mo
-    }
-  }
-}
-
-
-
-   
-
-   
-
 async function speakText(text, langKey='ht'){
   if(isSleeping) wakeUp();
   try{
@@ -358,26 +284,6 @@ async function speakText(text, langKey='ht'){
 
 
 
-// ===========================
-// 🔹 11 MOUVMAN AVATAR (ANIMATIONS)
-// ===========================
-const ANIMATIONS = [
-  () => imgEl.style.transform = "scale(1.05)",                // 1. ti grandi
-  () => imgEl.style.transform = "scale(0.95)",                // 2. ti piti
-  () => imgEl.style.transform = "rotate(5deg)",               // 3. vire dwat
-  () => imgEl.style.transform = "rotate(-5deg)",              // 4. vire agoch
-  () => imgEl.style.transform = "translateX(5px)",            // 5. deplase dwat
-  () => imgEl.style.transform = "translateX(-5px)",           // 6. deplase agoch
-  () => imgEl.style.transform = "translateY(5px)",            // 7. desann
-  () => imgEl.style.transform = "translateY(-5px)",           // 8. monte
-  () => imgEl.style.transform = "scale(1.1) rotate(5deg)",    // 9. grandi + vire dwat
-  () => imgEl.style.transform = "scale(1.1) rotate(-5deg)",   // 10. grandi + vire agoch
-  () => imgEl.style.transform = "scale(1) rotate(0deg) translate(0,0)" // 11. reset
-];
-
-
-   
-  
 
    
 
