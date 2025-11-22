@@ -330,6 +330,52 @@ async function speakText(text, langKey='ht'){
   });
 
  
+
+
+
+
+
+
+
+
+const MOVEMENT_MAP = {
+  ht: { grandi:0, piti:1, 'vire dwat':2, 'vire agoch':3, desann:6, monte:7, 'grandi + vire dwat':8, 'grandi + vire agoch':9 },
+  fr: { grandir:0, petit:1, 'tourner à droite':2, 'tourner à gauche':3, descendre:6, monter:7, 'grandir + tourner à droite':8, 'grandir + tourner à gauche':9 },
+  en: { grow:0, shrink:1, 'turn right':2, 'turn left':3, down:6, up:7, 'grow + turn right':8, 'grow + turn left':9 },
+  es: { crecer:0, pequeño:1, 'girar derecha':2, 'girar izquierda':3, bajar:6, subir:7, 'crecer + girar derecha':8, 'crecer + girar izquierda':9 }
+};
+
+// Fonksyon jeneral pou jere mouvman avatar la
+function animateMovement(movementId){
+  switch(movementId){
+    case 0: console.log("Grandi"); break;
+    case 1: console.log("Ti piti"); break;
+    case 2: console.log("Vire dwat"); break;
+    case 3: console.log("Vire agoch"); break;
+    case 6: console.log("Desann"); break;
+    case 7: console.log("Monte"); break;
+    case 8: console.log("Grandi + Vire dwat"); break;
+    case 9: console.log("Grandi + Vire agoch"); break;
+    default: console.log("Mouvman enkoni"); break;
+  }
+  // TODO: ranplase console.log ak animasyon vizyèl sou imgEl si ou vle
+}
+
+// Egzanp entegre nan handleQuestion
+function handleMovementCommand(text, lang){
+  const map = MOVEMENT_MAP[lang] || MOVEMENT_MAP['ht'];
+  const key = Object.keys(map).find(k => k.toLowerCase() === text.toLowerCase());
+  if(key !== undefined){
+    const id = map[key];
+    animateMovement(id);
+    return true; // endiktè ke mouvman trete
+  }
+  return false; // pa yon mouvman
+}
+
+
+
+
    
    
    
