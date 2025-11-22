@@ -183,6 +183,14 @@ async function fetchMemoryFallback(){
   }
 }
 
+// handleQuestion debogaj
+const _old_handleQuestion = handleQuestion;
+handleQuestion = function(text){
+  console.log(`>>> [DEBUG] handleQuestion called with text: "${text}"`);
+  console.log('>>> [DEBUG] MEME_QA currently has', MEME_QA.length, 'entries');
+  _old_handleQuestion(text);
+};
+
    
 
 
@@ -333,7 +341,7 @@ async function speakText(text, langKey='ht'){
 // ===============================================
 function handleQuestion(text) {
   resetIdleTimer();
-  console.log("[IM HANDLE]", text);
+console.log("[IM HANDLE]", text);
   const chosenLang = langSelect.value || detectLangFromText(text) || 'ht';
 
 
@@ -341,34 +349,52 @@ function handleQuestion(text) {
 
 
 
-// 🔥 store last user message (skip if repeat command)
-    const repeatCommands = [
-        "repete sa m di a",
-        "repete sa mwen di a",
-        "repete sa m te di",
-        "répète ce que j'ai dit",
-        "répète ce que je viens de dire",
-        "répéter ce que j'ai dit",
-        "repeat what i said",
-        "repeat after me",
-        "repeat this",
-        "repite lo que dije",
-        "repite lo que acabo de decir",
-        "repítelo"
-    ];
-    const t = text.toLowerCase();
-    const isRepeat = repeatCommands.some(cmd => t.includes(cmd));
+// 🔹 CHECK REPEAT MODE
+  const t = text.toLowerCase();
+  const isRepeat = (
+    // Kreyòl
+    t.includes("repete sa m di a") ||
+    t.includes("repete sa mwen di a") ||
+    t.includes("repete sa m te di") ||
 
-    if(!isRepeat) lastUserMessage = text;
+    // Français
+    t.includes("répète ce que j'ai dit") ||
+    t.includes("répète ce que je viens de dire") ||
+    t.includes("répéter ce que j'ai dit") ||
 
-    // 🔥 REPEAT MODE
-    if(isRepeat){
-        const reply = `Dako, men sa ou te di: "${lastUserMessage}"`;
-        addAgent(reply);
-        speakText(reply, chosenLang).catch(()=>{});
-        animateFromText(reply);
-        return;
+    // English
+    t.includes("repeat what i said") ||
+    t.includes("repeat after me") ||
+    t.includes("repeat this") ||
+
+    // Español
+    t.includes("repite lo que dije") ||
+    t.includes("repite lo que acabo de decir") ||
+    t.includes("repítelo")
+  );
+
+  if (isRepeat) {
+    const reply = lastUserMessage ? 
+      `Dako, men sa ou te di: "${lastUserMessage}"` : 
+      "M pa gen anyen pou repete ankò.";
+    addAgent(reply);
+    speakText(reply, chosenLang).catch(()=>{});
+    animateFromText(reply);
+    return; // pa kite lòt pati kouri
   }
+
+  // 🔹 Mete mesaj sa kòm dènye mesaj itilizatè pou repeat mode
+  lastUserMessage = text;
+
+
+
+
+
+
+
+
+
+
 
 
    
