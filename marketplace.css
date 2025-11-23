@@ -377,3 +377,55 @@ textarea {
 
 
 
+
+
+
+/* ======== GRID PWODWI (3 pa liy) ======== */
+.product-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 18px;
+    margin-top: 20px;
+}
+
+/* ======== KAT PWODWI ======== */
+.product-card {
+    background: #ffffff;
+    padding: 12px;
+    border-radius: 14px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.09);
+    text-align: center;
+    transition: transform .2s;
+}
+
+.product-card:hover {
+    transform: translateY(-4px);
+}
+
+/* ======== IMAJ MEDIUM ======== */
+.product-card img {
+    width: 100%;
+    max-width: 180px;
+    height: 180px;
+    object-fit: contain;
+    cursor: zoom-in;
+    border-radius: 10px;
+}
+
+/* ======== Pri + Bouton ======== */
+.product-card .price {
+    font-weight: bold;
+    color: #0b3b8c;
+    margin: 8px 0;
+}
+
+.product-card button {
+    background: linear-gradient(90deg, #0b3b8c, #1e6fff);
+    padding: 10px 14px;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: 700;
+    margin-top: 6px;
+}
