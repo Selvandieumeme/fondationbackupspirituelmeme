@@ -380,52 +380,50 @@ textarea {
 
 
 
-/* ======== GRID PWODWI (3 pa liy) ======== */
-.product-grid {
+.fobas-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
     gap: 18px;
-    margin-top: 20px;
+    margin-top: 10px;
 }
 
-/* ======== KAT PWODWI ======== */
-.product-card {
-    background: #ffffff;
-    padding: 12px;
+.fobas-card {
+    background: white;
     border-radius: 14px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.09);
+    padding: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
     text-align: center;
-    transition: transform .2s;
+    transition: 0.3s;
 }
 
-.product-card:hover {
-    transform: translateY(-4px);
+.fobas-card:hover {
+    transform: translateY(-5px);
 }
 
-/* ======== IMAJ MEDIUM ======== */
-.product-card img {
+.fobas-card img {
     width: 100%;
-    max-width: 180px;
-    height: 180px;
-    object-fit: contain;
+    border-radius: 10px;
     cursor: zoom-in;
-    border-radius: 10px;
+    transition: 0.4s;
 }
 
-/* ======== Pri + Bouton ======== */
-.product-card .price {
-    font-weight: bold;
-    color: #0b3b8c;
-    margin: 8px 0;
+.fobas-card img:hover {
+    transform: scale(1.07);
 }
 
-.product-card button {
-    background: linear-gradient(90deg, #0b3b8c, #1e6fff);
-    padding: 10px 14px;
-    color: white;
-    border: none;
-    border-radius: 10px;
-    cursor: pointer;
-    font-weight: 700;
-    margin-top: 6px;
+/* Popup aperçu */
+.fobas-popup {
+    position: fixed;
+    top:0; left:0; right:0; bottom:0;
+    background: rgba(0,0,0,0.75);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    z-index: 999999;
+}
+
+.fobas-popup img {
+    width: 90%;
+    max-width: 500px;
+    border-radius: 15px;
 }
