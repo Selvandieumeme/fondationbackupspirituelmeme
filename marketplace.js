@@ -2,7 +2,7 @@
 // Sidebar & Ajout Store
 // -----------------------------
 async function loadStoresSidebar() {
-    const sidebar = document.querySelector(".stores-sidebar ul");
+    const storeContent = document.querySelector("#fobas-store");
     sidebar.innerHTML = "";
 
 
@@ -179,6 +179,47 @@ async function deleteProduct(id, btn) {
     }
 }
 
+
+
+
+
+
+
+
+// ======== AJOUTE 6 PWODWI FIKS ANBA FOBAS STORE ========
+function loadExtraStaticProducts() {
+    const grid = document.getElementById("productGrid");
+    if (!grid) return;
+
+    const extraProducts = [
+        { name: "Chaudière Savon", price: "4999 Gdes", image: "chaudieresavon.png" },
+        { name: "FOBAS Mini Pump", price: "3500 Gdes", image: "produit2.png" },
+        { name: "Solar Drip Kit", price: "9500 Gdes", image: "produit3.png" },
+        { name: "Pompe à Eau 12V", price: "4200 Gdes", image: "produit4.png" },
+        { name: "Capteur Température", price: "1800 Gdes", image: "produit5.png" },
+        { name: "Mini Kit Solaire", price: "6200 Gdes", image: "produit6.png" }
+    ];
+
+    extraProducts.forEach(p => {
+        const div = document.createElement("div");
+        div.className = "product-card";
+        div.innerHTML = `
+            <img src="${p.image}" />
+            <h3>${p.name}</h3>
+            <p class="price">${p.price}</p>
+            <button onclick="buyProduct('${p.name}', 0)">Achte kounya</button>
+        `;
+        grid.appendChild(div);
+    });
+}
+
+// 👉 Ajoute 6 pwodwi statik yo sèlman pou Store FOBAS
+if (storeName === "Store FOBAS") {
+    loadExtraStaticProducts();
+}
+
+
+
 // -----------------------------
 // PAYPAL CHECKOUT
 // -----------------------------
@@ -226,3 +267,25 @@ document.addEventListener("DOMContentLoaded", () => {
     loadStoresSidebar();
     addStoreButton();
 });
+
+
+
+
+
+
+
+
+
+// =========================
+// ZOOM IMAJ PWODWI
+// =========================
+document.addEventListener("click", function(e) {
+    if (e.target.matches(".product-card img")) {
+        document.getElementById("zoomedImg").src = e.target.src;
+        document.getElementById("imgZoomModal").style.display = "flex";
+    }
+});
+
+document.getElementById("imgZoomModal").onclick = function() {
+    this.style.display = "none";
+};
