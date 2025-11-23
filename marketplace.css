@@ -376,6 +376,65 @@ textarea {
 
 
 
+.fobas-independent-products {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 22px;
+    margin: 30px auto;
+    width: 95%;
+}
 
+.fobas-product {
+    background: white;
+    padding: 15px;
+    border-radius: 12px;
+    box-shadow: 0 0 10px #0001;
+    text-align: center;
+    transition: 0.2s;
+}
+
+.fobas-product img {
+    width: 100%;
+    height: 180px;
+    object-fit: cover;
+    border-radius: 10px;
+}
+
+.fobas-product h3 {
+    margin-top: 10px;
+}
+
+.fobas-product .price {
+    font-weight: bold;
+    margin: 7px 0;
+    color: #1e6fff;
+    font-size: 18px;
+}
+
+.fobas-product .buy-btn {
+    display: block;
+    background: #1e6fff;
+    color: white;
+    padding: 10px;
+    margin-top: 10px;
+    border-radius: 8px;
+    text-decoration: none;
+}
+
+.fobas-product .whatsapp {
+    display: block;
+    background: #25d366;
+    color: white;
+    padding: 9px;
+    margin-top: 7px;
+    border-radius: 8px;
+    text-decoration: none;
+}
+
+@media (max-width: 768px) {
+    .fobas-independent-products {
+        grid-template-columns: repeat(1, 1fr);
+    }
+}
 
 
