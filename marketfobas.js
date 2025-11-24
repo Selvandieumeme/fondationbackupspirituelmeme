@@ -2,7 +2,7 @@
 // Chak pwodwi separe, modifye name, price, img manyèlman
 const products = [
   {
-    name: "Caustic Soda",
+    name: "Caustic Soda", // <- korije senktaks la
     price: "120.00 USD",
     img: "100%CausticSoda.jpg"
   },
