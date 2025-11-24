@@ -6,7 +6,7 @@ const products = [
   { name: "Kit System Solar", price: "120.00 USD", img: "./SolarDripSystem.jfif" },
   { name: "Moules Savons", price: "70.00 USD", img: "./Moulessavons.jpg" },
   { name: "Chaudiere Savons", price: "100.00 USD", img: "./chaudieresavon.jpg" },
-  { name: "Produit 5", price: "12.00 USD", img: "./produit5.jpg" },
+  { name: "Laptop HP", price: "650.00 USD", img: "./Laptop_HP.jpg" },
 
   { name: "Produit 6", price: "20.00 USD", img: "./produit6.jpg" },
   { name: "Produit 7", price: "25.00 USD", img: "./produit7.jpg" },
