@@ -5,7 +5,7 @@ const products = [
   {
     name: "Caustic Soda",
     price: "120.00 USD",
-    img: "100%CausticSoda.jpg" // <- rename pou evite % ki ka kreye pwoblèm sou GitHub Pages
+    img: "CausticSoda.jpg" // <- rename pou evite % ki ka kreye pwoblèm sou GitHub Pages
   },
   {
     name: "Produit 2",
