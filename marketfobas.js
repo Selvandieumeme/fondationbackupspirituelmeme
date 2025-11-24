@@ -16,15 +16,15 @@ const products = [
 
   { name: "Camera Espion Montre", price: "250.00 USD", img: "./cameramontre_espion.jpg" },
   { name: "Chemise femme", price: "110.00 USD", img: "./Chemise_femme.jpg" },
-  { name: "Maillot Femme", price: "19.00 USD", img: "./Maillot_femme12.jpg" },
-  { name: "Pantalon Femme", price: "28.00 USD", img: "./Pantalon_femme1.jpg" },
-  { name: "Pantalon Femme", price: "45.00 USD", img: "./Pantalon_femme2.jpg" },
+  { name: "Maillot Femme", price: "70.00 USD", img: "./Maillot_femme12.jpg" },
+  { name: "Pantalon Femme", price: "90.00 USD", img: "./Pantalon_femme1.jpg" },
+  { name: "Pantalon Femme", price: "120.00 USD", img: "./Pantalon_femme2.jpg" },
 
   { name: "Habiment femme ", price: "150.00 USD", img: "./habiment complet_femme1.jpg" },
   { name: "Habiment femme", price: "150.00 USD", img: "./habiment complet_femme3.jpg" },
   { name: "Habiment femme", price: "170.00 USD", img: "./habimentcomplet_femme.jpg" },
-  { name: "Maillot homme", price: "36.00 USD", img: "./maillot.jpg" },
-  { name: "Maillot femme", price: "50.00 USD", img: "./maillot_femme.jpg" }
+  { name: "Maillot homme", price: "70.00 USD", img: "./maillot.jpg" },
+  { name: "Maillot femme", price: "70.00 USD", img: "./maillot_femme.jpg" }
 ];
 
 // ==== AFICHE PRODUIT NAN HTML ====
