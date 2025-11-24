@@ -15,9 +15,9 @@ products.forEach((prod, index)=>{
   card.className = "product-card";
 
   card.innerHTML = `
-    <img src="${prod.img}" alt="${prod.name}">
+    <img src="${100%CausticSoda.jpg}" alt="${Caustic Soda}">
     <h3>${prod.name}</h3>
-    <p>${prod.price}</p>
+    <p>${120.00}</p>
     <button data-product="${index}">Acheter</button>
   `;
 
