@@ -23,11 +23,12 @@ header {
   padding: 20px;
 }
 
+/* PRODUCT CARD */
 .product-card {
   background: white;
   border-radius: 12px;
   box-shadow: 0px 4px 10px rgba(0,0,0,0.1);
-  overflow: hidden;
+  overflow: visible; /* chanje soti nan hidden pou evite koupe imaj */
   text-align: center;
   transition: transform 0.2s;
 }
@@ -36,12 +37,17 @@ header {
   transform: translateY(-5px);
 }
 
+/* IMAGE */
 .product-card img {
   width: 100%;
-  height: 150px;
-  object-fit: cover;
+  height: 150px;  /* Kenbe gwosè aktyèl ou renmen an */
+  object-fit: contain; /* Pa koupe imaj, montre li antye */
+  background-color: #f9f9f9; /* Limyè background pou transparans */
+  display: block;
+  margin: 0 auto;
 }
 
+/* TIT & PRIX */
 .product-card h3 {
   margin: 10px 0 5px;
   font-size: 1.1rem;
@@ -52,6 +58,7 @@ header {
   color: #555;
 }
 
+/* BOUTON ACHETER */
 .product-card button {
   background: #007BFF;
   color: white;
@@ -102,6 +109,7 @@ header {
   color: #000;
 }
 
+/* BOUTON PAYPAL */
 #paypal-btn {
   background: #003087;
   color: white;
@@ -110,6 +118,7 @@ header {
   border: none;
   cursor: pointer;
 }
+
 #paypal-btn:hover {
   background: #001f5b;
 }
