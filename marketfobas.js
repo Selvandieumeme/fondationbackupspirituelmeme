@@ -10,17 +10,17 @@ const products = [
 
   { name: "Camera Espion", price: "250.00 USD", img: "./Cameraprise_espion.jpg" },
   { name: "Camera Espion Pince", price: "250.00 USD", img: "./camera_espion.jpg" },
-  { name: "Produit 8", price: "18.00 USD", img: "./produit8.jpg" },
-  { name: "Produit 9", price: "22.00 USD", img: "./produit9.jpg" },
-  { name: "Produit 10", price: "35.00 USD", img: "./produit10.jpg" },
+  { name: "Camera Espion Chargeur", price: "250.00 USD", img: "./camerachargeur_espion.jpg" },
+  { name: "Camera Espion Horloge", price: "250.00 USD", img: "./camerahorloge_espion.jpg" },
+  { name: "Camera Espion miroir", price: "250.00 USD", img: "./cameramirroir_espion.jpg" },
 
-  { name: "Produit 11", price: "27.00 USD", img: "./produit11.jpg" },
-  { name: "Produit 12", price: "33.00 USD", img: "./produit12.jpg" },
+  { name: "Camera Espion Montre", price: "250.00 USD", img: "./cameramontre_espion.jpg" },
+  { name: "Chemise femme", price: "33.00 USD", img: "./Chemise_femme.jpg" },
   { name: "Produit 13", price: "19.00 USD", img: "./produit13.jpg" },
   { name: "Produit 14", price: "28.00 USD", img: "./produit14.jpg" },
   { name: "Produit 15", price: "45.00 USD", img: "./produit15.jpg" },
 
-  { name: "Produit 16", price: "23.00 USD", img: "./produit16.jpg" },
+  { name: "Camera ", price: "250.00 USD", img: "./cameramontre_espion.jpg" },
   { name: "Produit 17", price: "31.00 USD", img: "./produit17.jpg" },
   { name: "Produit 18", price: "29.00 USD", img: "./produit18.jpg" },
   { name: "Produit 19", price: "36.00 USD", img: "./produit19.jpg" },
