@@ -80,24 +80,6 @@
 
 
 
-<!-- 🟦 ZONE PRODUITS INDEPANDAN FOBAS -->
-<section id="fobas-extra-products" style="margin-top: 25px;">
-    <h2 style="text-align:center;">🛒 Nouvo Pwodwi FOBAS</h2>
-
-    <!-- Rechèch + Filtre -->
-    <div style="display:flex; gap:15px; margin-bottom:15px; flex-wrap:wrap;">
-        <input id="searchProducts" type="text" placeholder="Rechèch pwodwi..." style="flex:1; padding:10px;">
-        <select id="priceFilter" style="padding:10px;">
-            <option value="">Filtre Pri</option>
-            <option value="low">Pi ba → Pi wo</option>
-            <option value="high">Pi wo → Pi ba</option>
-        </select>
-    </div>
-
-    <!-- GRID PWODWI YO -->
-    <div id="fobasProductGrid" class="fobas-grid"></div>
-</section>
-
 
     
 <script>
@@ -243,87 +225,7 @@ loadProducts();
 
 
 
-<script>
-// ==========================
-//  LIST PWODWI OU VLE METE
-// ==========================
-const fobasProducts = [
-    { name: "Chaudière Savon", price: 4999, img: "chaudieresavon.png" },
-    { name: "FOBAS Mini Pump", price: 3500, img: "produit2.png" },
-    { name: "Solar Drip Kit", price: 9500, img: "produit3.png" },
-    { name: "Pompe à Eau 12V", price: 4200, img: "produit4.png" },
-    { name: "Capteur Température", price: 1800, img: "produit5.png" },
-    { name: "Mini Kit Solaire", price: 6200, img: "produit6.png" }
-];
 
-// ==========================
-//  FONKSYON KI CHARGE TOUT PWODWI YO
-// ==========================
-function renderFobasProducts(list = fobasProducts) {
-    const grid = document.getElementById("fobasProductGrid");
-    grid.innerHTML = "";
-
-    list.forEach(p => {
-        const card = document.createElement("div");
-        card.className = "fobas-card";
-
-        card.innerHTML = `
-            <img src="${p.img}" onclick="openFobasPopup('${p.img}')">
-            <h3>${p.name}</h3>
-            <p style="font-size:18px; font-weight:bold;">${p.price} Gdes</p>
-            <button onclick="buyFobas('${p.name}', ${p.price})"
-                style="padding:10px 15px; border:none; background:#1e6fff; color:white; border-radius:8px;">
-                Achte Kounya
-            </button>
-        `;
-
-        grid.appendChild(card);
-    });
-}
-
-// ==========================
-//  ACHTE — REDIREKSYON PAYPAL
-// ==========================
-function buyFobas(name, price) {
-    const email = "assobackupspirituelshaiti@paypal.com";
-    const url = `https://www.paypal.com/paypalme/${email}/${price}`;
-    window.open(url, "_blank");
-}
-
-// ==========================
-//  POPUP APERÇU IMAGES
-// ==========================
-function openFobasPopup(img) {
-    const popup = document.createElement("div");
-    popup.className = "fobas-popup";
-    popup.onclick = () => popup.remove();
-    popup.innerHTML = `<img src="${img}">`;
-    document.body.appendChild(popup);
-}
-
-// ==========================
-//  RECHÈCH + FILTRE PRI
-// ==========================
-document.getElementById("searchProducts").oninput = () => {
-    const q = searchProducts.value.toLowerCase();
-    const filtered = fobasProducts.filter(p =>
-        p.name.toLowerCase().includes(q)
-    );
-    renderFobasProducts(filtered);
-};
-
-document.getElementById("priceFilter").onchange = () => {
-    let sorted = [...fobasProducts];
-    if (priceFilter.value === "low") sorted.sort((a,b)=>a.price-b.price);
-    if (priceFilter.value === "high") sorted.sort((a,b)=>b.price-a.price);
-    renderFobasProducts(sorted);
-};
-
-
-// CHARGEMENT INIT
-renderFobasProducts();
-
-</script>
 
 
 
