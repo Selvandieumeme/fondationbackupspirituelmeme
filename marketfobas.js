@@ -1,28 +1,39 @@
 // ==== LIS PRODUITS MANYÈL ====
 // Chak pwodwi separe, modifye name, price, img manyèlman
+// Asire tout fichye imaj yo nan menm folder ak HTML la (rasin repo a)
 const products = [
   {
-    name: "Caustic Soda", // <- korije senktaks la
+    name: "Caustic Soda",
     price: "120.00 USD",
-    img: "100%CausticSoda.jpg"
+    img: "100_CausticSoda.jpg" // <- rename pou evite % ki ka kreye pwoblèm sou GitHub Pages
   },
   {
     name: "Produit 2",
     price: "15.00 USD",
-    img: "images/produit2.jpg"
+    img: "produit2.jpg"
   },
   {
     name: "Produit 3",
     price: "30.00 USD",
-    img: "images/produit3.jpg"
+    img: "produit3.jpg"
   },
-  // Ajoute plis pwodwi jan ou vle
+  {
+    name: "Produit 4",
+    price: "40.00 USD",
+    img: "produit4.jpg"
+  },
+  {
+    name: "Produit 5",
+    price: "12.00 USD",
+    img: "produit5.jpg"
+  }
+  // Ou ka kontinye ajoute nenpòt kantite pwodwi
 ];
 
 // ==== AFICHE PRODUIT NAN HTML ====
 const container = document.getElementById("product-container");
 
-products.forEach((prod, index)=>{
+products.forEach((prod, index) => {
   const card = document.createElement("div");
   card.className = "product-card";
 
@@ -43,7 +54,7 @@ const paypalBtn = document.getElementById("paypal-btn");
 
 // Louvri modal lè yo klike sou bouton "Acheter"
 document.querySelectorAll(".buy-btn").forEach(btn => {
-  btn.addEventListener("click", (e)=>{
+  btn.addEventListener("click", (e) => {
     const index = e.target.dataset.index;
     const prod = products[index];
     modal.style.display = "block";
@@ -53,9 +64,11 @@ document.querySelectorAll(".buy-btn").forEach(btn => {
   });
 });
 
-// Fè modal fèmen
+// Fè modal fèmen lè yo klike sou "x" oswa deyò modal
 closeBtn.onclick = () => modal.style.display = "none";
-window.onclick = (e) => { if(e.target==modal) modal.style.display = "none"; }
+window.onclick = (e) => {
+  if (e.target == modal) modal.style.display = "none";
+}
 
 // Paypal redireksyon otomatik
 paypalBtn.onclick = () => {
