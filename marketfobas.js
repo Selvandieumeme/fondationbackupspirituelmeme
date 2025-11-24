@@ -9,7 +9,7 @@ const products = [
   { name: "Laptop HP", price: "650.00 USD", img: "./Laptop_HP.jpg" },
 
   { name: "Camera Espion", price: "250.00 USD", img: "./Cameraprise_espion.jpg" },
-  { name: "Produit 7", price: "25.00 USD", img: "./produit7.jpg" },
+  { name: "Camera Espion Pince", price: "250.00 USD", img: "./camera_espion.jpg" },
   { name: "Produit 8", price: "18.00 USD", img: "./produit8.jpg" },
   { name: "Produit 9", price: "22.00 USD", img: "./produit9.jpg" },
   { name: "Produit 10", price: "35.00 USD", img: "./produit10.jpg" },
