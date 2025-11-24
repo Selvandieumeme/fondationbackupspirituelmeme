@@ -2,8 +2,8 @@
 // Chak pwodwi separe, modifye name, price, img manyèlman
 // Tout fichye imaj yo nan menm folder ak HTML la (rasin repo)
 const products = [
-  { name: "Caustic Soda", price: "120.00 USD", img: "./CausticSoda.jpg" },
-  { name: "Produit 2", price: "15.00 USD", img: "./produit2.jpg" },
+  { name: "Caustic Soda", price: "150.00 USD", img: "./CausticSoda.jpg" },
+  { name: "Kit System Solar irrigation", price: "120.00 USD", img: "./IrrigationKitforSolaIrrigation System.jfif" },
   { name: "Produit 3", price: "30.00 USD", img: "./produit3.jpg" },
   { name: "Produit 4", price: "40.00 USD", img: "./produit4.jpg" },
   { name: "Produit 5", price: "12.00 USD", img: "./produit5.jpg" },
