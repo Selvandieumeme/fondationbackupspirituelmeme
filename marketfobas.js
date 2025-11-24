@@ -15,8 +15,8 @@ const products = [
   { name: "Camera Espion miroir", price: "250.00 USD", img: "./cameramirroir_espion.jpg" },
 
   { name: "Camera Espion Montre", price: "250.00 USD", img: "./cameramontre_espion.jpg" },
-  { name: "Chemise femme", price: "33.00 USD", img: "./Chemise_femme.jpg" },
-  { name: "Produit 13", price: "19.00 USD", img: "./produit13.jpg" },
+  { name: "Chemise femme", price: "110.00 USD", img: "./Chemise_femme.jpg" },
+  { name: "Maillot Femme", price: "19.00 USD", img: "./Maillot_femme12.jpg" },
   { name: "Produit 14", price: "28.00 USD", img: "./produit14.jpg" },
   { name: "Produit 15", price: "45.00 USD", img: "./produit15.jpg" },
 
