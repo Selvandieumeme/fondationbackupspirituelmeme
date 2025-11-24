@@ -8,7 +8,7 @@ const products = [
   { name: "Chaudiere Savons", price: "100.00 USD", img: "./chaudieresavon.jpg" },
   { name: "Laptop HP", price: "650.00 USD", img: "./Laptop_HP.jpg" },
 
-  { name: "Produit 6", price: "20.00 USD", img: "./produit6.jpg" },
+  { name: "Camera Espion", price: "250.00 USD", img: "./Cameraprise_espion.jpg" },
   { name: "Produit 7", price: "25.00 USD", img: "./produit7.jpg" },
   { name: "Produit 8", price: "18.00 USD", img: "./produit8.jpg" },
   { name: "Produit 9", price: "22.00 USD", img: "./produit9.jpg" },
