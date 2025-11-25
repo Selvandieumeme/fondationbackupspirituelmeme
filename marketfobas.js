@@ -32,11 +32,23 @@ const products = [
   { name: "Camera Espion", price: "200.00 USD", img: "./Cameraplume_espion.jpg" },
   { name: "Camera Espion", price: "350.00 USD", img: "./Cameraprise_espion1.jpg" },
 
-   { name: "Camare Espion ", price: "270.00 USD", img: "./Camerareveil_espion.jpg" },
+  { name: "Camare Espion ", price: "270.00 USD", img: "./Camerareveil_espion.jpg" },
   { name: "Camera Espion", price: "250.00 USD", img: "./camera_espion1.jpg" },
   { name: "Camera Espion", price: "270.00 USD", img: "./camerabouteille_espion.jpg" },
   { name: "Camera Espion", price: "250.00 USD", img: "./camerabrete;_espion.jpg" },
-  { name: "Camera Espion", price: "200.00 USD", img: "./cameraplafonye_espion.jpg" }
+  { name: "Camera Espion", price: "200.00 USD", img: "./cameraplafonye_espion.jpg" },
+
+  { name: "Casques ", price: "250.00 USD", img: "./Casque250.jpg" },
+  { name: "Laptop", price: "650.00 USD", img: "./Laoptop650.jpg" },
+  { name: "Laptop", price: "400.00 USD", img: "./Laptop400.jpg" },
+  { name: "Laptop", price: "450.00 USD", img: "./Laptop450.jpg" },
+  { name: "Laptop", price: "450.00 USD", img: "./Laptop_HP.jpg" },
+
+  { name: "Laptop ", price: "400.00 USD", img: "./Laptopco400.jpg" },
+  { name: "Laptop", price: "400.00 USD", img: "./Laptopcom400.jpg" },
+  { name: "Laptop", price: "650.00 USD", img: "./Laptopcomp650.jpg" },
+  { name: "Laptop", price: "450.00 USD", img: "./Laptopcomputer450.jpg" },
+  { name: "Laptop", price: "400.00 USD", img: "./Laptopcump400.jpg" }
 ];
 
 // ==== AFICHE PRODUIT NAN HTML ====
