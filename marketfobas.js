@@ -24,7 +24,19 @@ const products = [
   { name: "Habiment femme", price: "150.00 USD", img: "./habiment complet_femme3.jpg" },
   { name: "Habiment femme", price: "170.00 USD", img: "./habimentcomplet_femme.jpg" },
   { name: "Maillot homme", price: "70.00 USD", img: "./maillot.jpg" },
-  { name: "Maillot femme", price: "70.00 USD", img: "./maillot_femme.jpg" }
+  { name: "Maillot femme", price: "70.00 USD", img: "./maillot_femme.jpg" },
+
+   { name: "Camera Espion ", price: "200.00 USD", img: "./Cameraboudachargeur_espion.jpg" },
+  { name: "Came Espion", price: "270.00 USD", img: "./Cameralunette_espion.jpg" },
+  { name: "Camera Espion", price: "250.00 USD", img: "./Cameranontre_espion.jpg" },
+  { name: "Camera Espion", price: "200.00 USD", img: "./Cameraplume_espion.jpg" },
+  { name: "Camera Espion", price: "350.00 USD", img: "./Cameraprise_espion1.jpg" },
+
+   { name: "Camare Espion ", price: "270.00 USD", img: "./Camerareveil_espion.jpg" },
+  { name: "Camera Espion", price: "250.00 USD", img: "./camera_espion1.jpg" },
+  { name: "Camera Espion", price: "270.00 USD", img: "./camerabouteille_espion.jpg" },
+  { name: "Camera Espion", price: "250.00 USD", img: "./camerabrete;_espion.jpg" },
+  { name: "Camera Espion", price: "200.00 USD", img: "./cameraplafonye_espion.jpg" }
 ];
 
 // ==== AFICHE PRODUIT NAN HTML ====
