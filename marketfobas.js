@@ -66,7 +66,13 @@ const products = [
   { name: "Trompette", price: "320.00 USD", img: "./trompettee_320.jpg" },
   { name: "Trombone", price: "320.00 USD", img: "./trombonne320.jpg" },
   { name: "Trombone", price: "350.00 USD", img: "./trombonne350.jpg" },
-  { name: "Trombone", price: "320.00 USD", img: "./trombonne_320.jpg" }
+  { name: "Trombone", price: "320.00 USD", img: "./trombonne_320.jpg" },
+
+  { name: "Machine a coudre ", price: "300.00 USD", img: "./machineacoudre3000.jpg" },
+  { name: "Machine a coudre", price: "400.00 USD", img: "./machineacoudre400.jpg" },
+  { name: "Machine a coudre", price: "450.00 USD", img: "./machineacoudre450.jpg" },
+  { name: "Machine a coudre", price: "750.00 USD", img: "./machineacoudre750.jpg" },
+  { name: "Machine a coudre", price: "150.00 USD", img: "./machineacoudre_protable.jpg" }
 ];
 
 // ==== AFICHE PRODUIT NAN HTML ====
