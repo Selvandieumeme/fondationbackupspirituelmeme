@@ -35,7 +35,7 @@ const products = [
   { name: "Camare Espion ", price: "270.00 USD", img: "./Camerareveil_espion.jpg" },
   { name: "Camera Espion", price: "250.00 USD", img: "./camera_espion1.jpg" },
   { name: "Camera Espion", price: "270.00 USD", img: "./camerabouteille_espion.jpg" },
-  { name: "Camera Espion", price: "250.00 USD", img: "./camerabrete_espion.jpg" },
+  { name: "Camera Espion", price: "250.00 USD", img: "./camerabreteespion.jpg" },
   { name: "Camera Espion", price: "200.00 USD", img: "./cameraplafonye_espion.jpg" },
 
   { name: "Casques ", price: "250.00 USD", img: "./Casque250.jpg" },
