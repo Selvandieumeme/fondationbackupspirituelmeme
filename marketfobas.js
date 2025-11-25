@@ -35,7 +35,7 @@ const products = [
   { name: "Camare Espion ", price: "270.00 USD", img: "./Camerareveil_espion.jpg" },
   { name: "Camera Espion", price: "250.00 USD", img: "./camera_espion1.jpg" },
   { name: "Camera Espion", price: "270.00 USD", img: "./camerabouteille_espion.jpg" },
-  { name: "Camera Espion", price: "250.00 USD", img: "./camerabrete;_espion.jpg" },
+  { name: "Camera Espion", price: "250.00 USD", img: "./camerabrete_espion.jpg" },
   { name: "Camera Espion", price: "200.00 USD", img: "./cameraplafonye_espion.jpg" },
 
   { name: "Casques ", price: "250.00 USD", img: "./Casque250.jpg" },
@@ -48,7 +48,7 @@ const products = [
   { name: "Saxophone", price: "450.00 USD", img: "./Saxophone450.jpg" },
   { name: "Trompette", price: "650.00 USD", img: "./Trompette650.jpg" },
   { name: "Trompette", price: "320.00 USD", img: "./Trompette_320.jpg" },
-  { name: "Trompette", price: "150.00 USD", img: "./trompette150.jpg" }.
+  { name: "Trompette", price: "150.00 USD", img: "./trompette150.jpg" },
 
   { name: "Trompette ", price: "200.00 USD", img: "./trompette200.jpg" },
   { name: "Trompette", price: "220.00 USD", img: "./trompette220.jpg" },
