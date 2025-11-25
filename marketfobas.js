@@ -54,15 +54,15 @@ const products = [
   { name: "Trompette", price: "220.00 USD", img: "./trompette220.jpg" },
   { name: "Trompette", price: "230.00 USD", img: "./trompette230.jpg" },
   { name: "Trompette", price: "270.00 USD", img: "./trompette270.jpg" },
-  { name: "Trompette", price: "400.00 USD", img: "./trompette400.jpg" }.
+  { name: "Trompette", price: "400.00 USD", img: "./trompette400.jpg" },
 
-{ name: "Trompette ", price: "140.00 USD", img: "./trompette_140.jpg" },
+  { name: "Trompette ", price: "140.00 USD", img: "./trompette_140.jpg" },
   { name: "Trompette", price: "220.00 USD", img: "./trompette_220.jpg" },
   { name: "Trompette", price: "250.00 USD", img: "./trompette_250.jpg" },
   { name: "Trompette", price: "350.00 USD", img: "./trompette_350.jpg" },
   { name: "Trompette", price: "400.00 USD", img: "./trompette_400.jpg" },
 
-{ name: "Trompette ", price: "230.00 USD", img: "./trompettea230.jpg" },
+  { name: "Trompette ", price: "230.00 USD", img: "./trompettea230.jpg" },
   { name: "Trompette", price: "320.00 USD", img: "./trompettee_320.jpg" },
   { name: "Trombone", price: "320.00 USD", img: "./trombonne320.jpg" },
   { name: "Trombone", price: "350.00 USD", img: "./trombonne350.jpg" },
