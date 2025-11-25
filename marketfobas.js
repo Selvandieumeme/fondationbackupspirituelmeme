@@ -48,7 +48,7 @@ const products = [
   { name: "Saxophone", price: "450.00 USD", img: "./Saxophone450.jpg" },
   { name: "Trompette", price: "650.00 USD", img: "./Trompette650.jpg" },
   { name: "Trompette", price: "320.00 USD", img: "./Trompette_320.jpg" },
-  { name: "Trompette", price: 1500.00 USD", img: "./trompette150.jpg" }.
+  { name: "Trompette", price: "150.00 USD", img: "./trompette150.jpg" }.
 
   { name: "Trompette ", price: "200.00 USD", img: "./trompette200.jpg" },
   { name: "Trompette", price: "220.00 USD", img: "./trompette220.jpg" },
