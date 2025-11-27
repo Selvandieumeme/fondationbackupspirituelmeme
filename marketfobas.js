@@ -72,7 +72,53 @@ const products = [
   { name: "Machine a coudre", price: "400.00 USD", img: "./machineacoudre400.jpg" },
   { name: "Machine a coudre", price: "450.00 USD", img: "./machineacoudre450.jpg" },
   { name: "Machine a coudre", price: "750.00 USD", img: "./machineacoudre750.jpg" },
-  { name: "Machine a coudre", price: "150.00 USD", img: "./machineacoudre_protable.jpg" }
+  { name: "Machine a coudre", price: "150.00 USD", img: "./machineacoudre_protable.jpg" },
+
+  { name: "2 bouches tuyaux ", price: "80.00 USD", img: "./2bouchetuyaux80.jpg" },
+  { name: "4 bouches tuyaux", price: "100.00 USD", img: "./4bouchestuyaux100.jpg" },
+  { name: "AED Trainer XFT", price: "210.00 USD", img: "./AEDTrainerXFT210.jpg" },
+  { name: "Appareil utile hospital", price: "200.00 USD", img: "./Appareilutilhospital.jpg" },
+  { name: "Defibrillateur", price: "460.00 USD", img: "./DefibrillatorCarryBag460.jpg" },
+
+  { name: "Fleurs apres arrosage ", price: "0.00 USD", img: "./Fleursapresarosagesolar.jpg" },
+  { name: "Brasrobots restaurant", price: "350.00 USD", img: "./brasrobotrestaurant350.jpg" },
+  { name: "Cardia Mobile", price: "80.00 USD", img: "./cardiamobile_80.jpg" },
+  { name: "LabInfrared Sterilizer", price: "220.00 USD", img: "./LabInfraredSterilizer220.jpg" },
+  { name: "kitpot plant moderne", price: "250.00 USD", img: "./kitpotplantmoderne250.jpg" },
+
+  { name: "model solar plant ", price: "0.00 USD", img: "./modelessistemsolarplant.jpg" },
+  { name: "Model Solar Plant", price: "0.00 USD", img: "./modelssistemsolarplant.jpg" },
+  { name: "model tube jardin", price: "0.00 USD", img: "./modelstubesjardin.jpg" },
+  { name: "model tube plante", price: "0.00 USD", img: "./modelstubesplants.jpg" },
+  { name: "model tube plante", price: "0.00 USD", img: "./modelstubesplantssolar.jpg" },
+
+  { name: "Nasal cannula", price: "75.00 USD", img: "./Nasalcannula_75.jpg" },
+  { name: "Nasal cannula model", price: "0.00 USD", img: "./Nasalcannulamodel.jpg" },
+  { name: "Nebulizer Machine", price: "150.00 USD", img: "./NebulizerMachine150.jpg" },
+  { name: "Negative Pressure", price: "220.00 USD", img: "./NegativePressure220.jpg" },
+  { name: "Pro Dental Surgical", price: "320.00 USD", img: "./PRODental_Surgical320.jpg" },
+
+  { name: "Portable Nebulizer", price: "150.00 USD", img: "./PortableNebulizer150.jpg" },
+  { name: "Robot restaurant", price: "14 000.00 USD", img: "./Robotrestaurant14000.jpg" },
+  { name: "Model tube", price: "0.00 USD", img: "./modelstubessistemsolarplants.jpg" },
+  { name: "model tuyaux", price: "0.00 USD", img: "./modeltuyauxjardin.jpg" },
+  { name: "resultat solar plant", price: "0.00 USD", img: "./resultatsolarplant.jpg" },
+
+  { name: "robot chien", price: "650.00 USD", img: "./robotchien650.jpg" },
+  { name: "robot chien", price: "7 000.00 USD", img: "./robotchienintelligent7000.jpg" },
+  { name: "robot cuisine", price: "3 000.00 USD", img: "./robotcuisine3000.jpg" },
+  { name: "robot hotel", price: "14 000.00 USD", img: "./robothotel_14000.jpg" },
+  { name: "robot intelligent", price: "4 000.00 USD", img: "./robotintelligent4000.jpg" },
+
+  { name: "sistem solar plant", price: "170.00 USD", img: "./sistemsolarplant170.jpg" },
+  { name: "tubes", price: "50.00 USD", img: "./tubes50.jpg" },
+  { name: "Model tube", price: "0.00 USD", img: "./tubesistemsolarplant.png" },
+  { name: "model tube", price: "0.00 USD", img: "./tubesolarplant.jpg" },
+  { name: "Tube solar plant", price: "100.00 USD", img: "./tubesplants100.jpg" },
+
+  { name: "tube plante", price: "160.00 USD", img: "./tubessistemplant160.jpg" },
+  { name: "model tube", price: "0.00 USD", img: "./tubessistemsolarplant.jpg" },
+  { name: "Tube solar plant", price: "100.00 USD", img: "./tubesspecialejardin.png" }
 ];
 
 // ==== AFICHE PRODUIT NAN HTML ====
