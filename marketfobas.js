@@ -118,7 +118,76 @@ const products = [
 
   { name: "tube plante", price: "160.00 USD", img: "./tubessistemplant160.jpg" },
   { name: "model tube", price: "0.00 USD", img: "./tubessistemsolarplant.jpg" },
-  { name: "Tube solar plant", price: "100.00 USD", img: "./tubesspecialejardin.png" }
+  { name: "Tube solar plant", price: "100.00 USD", img: "./tubesspecialejardin.png" },
+  { name: "2 babydolls", price: "120.00 USD", img: "./2babydolls120.jpg" },
+  { name: "2 pieces babydolls", price: "110.00 USD", img: "./2piecesbabydoll110.jpg" },
+
+  { name: "2 pieces babydolls", price: "120.00 USD", img: "./2piecesbabydoll120.jpg" },
+  { name: "2 pieces chemise denuit", price: "110.00 USD", img: "./2pieceschemisedenuit110.jpg" },
+  { name: "2 pieces chemise denuit", price: "150.00 USD", img: "./2pieceschemisedenuit150.jp" },
+  { name: "2 pieces fille", price: "80.00 USD", img: "./2piecesfille80.jpg" },
+  { name: "2 pieces robekimono", price: "120.00 USD", img: "./2piecesrobekimono120.jpg" },
+
+  { name: "2 pieces robeskimono", price: "110.00 USD", img: "./2piecesrobeskimono110.jpg" },
+  { name: "3 pieces babydoll", price: "110.00 USD", img: "./3piecesbabydoll110.jpg" },
+  { name: "3 pieces babydoll", price: "130.00 USD", img: "./3piecesbabydoll130.jpg" },
+  { name: "3 pieces lacebabydoll", price: "110.00 USD", img: "./3pieceslacebabydoll110.jpg" },
+  { name: "3 pieces robeskimono", price: "110.00 USD", img: "./3piecesrobeskimono110.jpg" },
+
+  { name: "3 pieces sexyfuzzy", price: "110.00 USD", img: "./3piecessecyfuzzy110.jpg" },
+  { name: "4 pices babydoll", price: "120.00 USD", img: "./4picesbabydoll120.jpg" },
+  { name: "4 pieces chemise denuit", price: "130.00 USD", img: "./4pieceschemisedenuit130.jpg" },
+  { name: "Chemise de nuit", price: "120.00 USD", img: "./Chemisedenuit120.jpg" },
+  { name: "Robe Babydoll Sexy", price: "110.00 USD", img: "./RobeBabydollSexy110.jpg" },
+
+  { name: "babydoll", price: "120.00 USD", img: "./babydoll120.jpg" },
+  { name: "babydoll", price: "150.00 USD", img: "./babydoll150.jpg" },
+  { name: "babydoll", price: "170.00 USD", img: "./babydoll170.jpg" },
+  { name: "babydoll", price: "80.00 USD", img: "./babydoll80.jpg" },
+  { name: "babydoll", price: "100.00 USD", img: "./babydollbe100.jpg" },
+
+  { name: "babydoll", price: "130.00 USD", img: "./babydollclassic130.jpg" },
+  { name: "babydoll", price: "80.00 USD", img: "./babydolle80.jpg" },
+  { name: "babydoll", price: "80.00 USD", img: "./babydolleee80.jpg" },
+  { name: "babydoll", price: "120.00 USD", img: "./babydolll120.jpg" },
+  { name: "babydoll", price: "100.00 USD", img: "./babydolllle100.jpg" },
+
+  { name: "babydoll", price: "80.00 USD", img: "./babydolllle80.jpg" },
+  { name: "babydoll", price: "120.00 USD", img: "./babydollllle120.jpg" },
+  { name: "babydoll", price: "120.00 USD", img: "./babydollllll120.jpg" },
+  { name: "babydoll", price: "100.00 USD", img: "./babydollmigonne100.jpg" },
+  { name: "babydoll", price: "100.00 USD", img: "./babydollmosaic100.jpg" },
+
+  { name: "babydoll", price: "100.00 USD", img: "./babydollsexy100.jpg" },
+  { name: "babydoll", price: "100.00 USD", img: "./babydollsexybelle100.jpg" },
+  { name: "babydoll", price: "190.00 USD", img: "./babydollsexybellle100.jpg" },
+  { name: "babydoll", price: "100.00 USD", img: "./babydolsbelles100.jpg" },
+  { name: "babydoll", price: "100.00 USD", img: "./babydouce100.jpg" },
+
+  { name: "chemise de nuit", price: "100.00 USD", img: "./chemisedenuit100.jpg" },
+  { name: "chemise de nuit", price: "100.00 USD", img: "./chemisedenuitbel100.jpg" },
+  { name: "chemise de nuit", price: "100.00 USD", img: "./chemisedenuitbelle100.jpg" },
+  { name: "chemise de nuit", price: "100.00 USD", img: "./chemisedenuitmoderne100.jpg" },
+  { name: "Chemise de nuit", price: "100.00 USD", img: "./chemiseracerback100.jpg" },
+
+  { name: "habiment complet femme", price: "170.00 USD", img: "./habimentscomplescouple170.jpg" },
+  { name: "Jacket complet", price: "170.00 USD", img: "./kacketcomplet170.jpg" },
+  { name: "Robe moderne", price: "100.00 USD", img: "./modernerobe100.jpg" },
+  { name: "Robe moderne", price: "120.00 USD", img: "./modernerobe120.jpg" },
+  { name: "Robe", price: "80.00 USD", img: "./robe80.jpg" },
+
+  { name: "Robe babydoll", price: "110.00 USD", img: "./robebabydoll110.jpg" },
+  { name: "Robe babydoll", price: "120.00 USD", img: "./robebabydoll120.jpg" },
+  { name: "Robe", price: "90.00 USD", img: "./robebelllee90.jpg" },
+  { name: "Robe", price: "250.00 USD", img: "./robelingerie250.jpg" },
+  { name: "Robe longue", price: "150.00 USD", img: "./robelongue150.jpg" },
+
+  { name: "Robe longue", price: "170.00 USD", img: "./robelongue170.jpg" },
+  { name: "Robe longue", price: "150.00 USD", img: "./robelongues150.jpg" },
+  { name: "Robe", price: "100.00 USD", img: "./robes100.jpg" },
+  { name: "Robe", price: "100.00 USD", img: "./robesatin100.jpg" },
+  { name: "Robe", price: "130.00 USD", img: "./robeslongue130.jpg" }
+
 ];
 
 // ==== AFICHE PRODUIT NAN HTML ====
