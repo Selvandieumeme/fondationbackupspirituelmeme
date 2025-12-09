@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<label class="service">
+<input type="radio" name="serviceType" value="virtual" checked />
+Demande carte virtuelle (orientation pou patnè)
+</label>
+<label class="service">
+<input type="radio" name="serviceType" value="assisted" />
+Achat assisté (nou achte pou ou)
+</label>
+</div>
+</fieldset>
+
+
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+<label class="block">
+<span>Non konplè</span>
+<input type="text" name="fullName" placeholder="Jan Pèsonn" />
+</label>
+<label class="block">
+<span>Email</span>
+<input type="email" name="email" placeholder="ou@email.com" />
+</label>
+<label class="block">
+<span>Peyi</span>
+<input type="text" name="country" placeholder="Haiti" />
+</label>
+<label class="block">
+<span>Montant / Estimation (USD)</span>
+<input type="number" name="amount" placeholder="50" />
+</label>
+</div>
+
+
+<label class="block mb-4">
+<span>Deskripsyon oswa objektif demann (opsyonèl)</span>
+<textarea name="purpose" rows="4" placeholder="Eg: Mwen bezwen kat vityèl pou achte sou Amazon..."></textarea>
+</label>
+
+
+<label class="flex items-start gap-3 mb-4">
+<input type="checkbox" name="acceptTerms" />
+<span>Mwen li e mwen dakò ak <a href="/terms" class="underline">tèm ak kondisyon</a> ak <a href="/privacy" class="underline">politik vi prive</a>.</span>
+</label>
+
+
+<p id="errorMsg" class="text-red-600 mb-3"></p>
+<button type="submit" class="submit-btn">Kontinye via WhatsApp</button>
+</form>
+
+
+<div class="warning-box">
+Remak: Paj sa a sèvi pou demann ak oryantasyon sèlman. Pa janm pataje enfòmasyon kat (PAN/CVV) sou fòm sa a.
+</div>
+
+
+<section class="payment-info mt-6">
+<h2 class="section-title">Mwayen Peman Disponib</h2>
+<ul>
+<li>MonCash: +50946057952</li>
+<li>NatCash: +50941306268</li>
+<li>Western Union: MEME Selvandieu</li>
+</ul>
+</section>
+</main>
+</div>
+
+
+<script src="creation-cartevirtuelle-assistance.js"></script>
+</body>
+</html>
