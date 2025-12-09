@@ -1,6 +1,3 @@
-// creation-cartevirtuelle-assistance.js
-
-
 document.addEventListener('DOMContentLoaded', () => {
 const form = document.getElementById('cardForm');
 const errorMsg = document.getElementById('errorMsg');
