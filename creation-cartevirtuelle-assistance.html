@@ -1,80 +1,131 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Création Carte Virtuelle / Assistance</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Demande Carte Virtuelle | Achat Assisté Sécurisé</title>
+
+  <!-- SEO BASE -->
+  <meta name="description" content="Demande de carte de crédit virtuelle (orientation partenaire) ou service d'achat assisté sécurisé. Paiement MonCash, NatCash, Western Union."/>
+  <meta name="robots" content="index, follow"/>
+
   <link rel="stylesheet" href="creation-cartevirtuelle-assistance.css">
 </head>
+
 <body>
-  <div class="page-container">
-    <header class="hero">
-      <h1>Demande carte de Credit virtuelle / Service d'achat assisté</h1>
-      <p>Chwazi "Demande carte de Credit virtuelle" si ou vle oryantasyon ak patnè. Chwazi "Achat assisté" si ou bezwen ekip la achte pou ou.</p>
-    </header>
 
-    <main class="card">
-      <form id="cardForm">
-        <fieldset class="mb-4">
-          <legend class="section-title">Tip sèvis</legend>
-          <label class="service">
-            <input type="radio" name="serviceType" value="virtual" checked />
-            Demande carte de Credit virtuelle (orientation pou patnè)
-          </label>
-          <label class="service">
-            <input type="radio" name="serviceType" value="assisted" />
-            Achat assisté (nou achte pou ou)
-          </label>
-        </fieldset>
+<div class="page-container">
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-          <label class="block">
-            <span>Non konplè</span>
-            <input type="text" name="fullName" placeholder="Jan Pèsonn" />
-          </label>
-          <label class="block">
-            <span>Email</span>
-            <input type="email" name="email" placeholder="ou@email.com" />
-          </label>
-          <label class="block">
-            <span>Peyi</span>
-            <input type="text" name="country" placeholder="Haiti" />
-          </label>
-          <label class="block">
-            <span>Montant / Estimation (USD)</span>
-            <input type="number" name="amount" placeholder="50" />
-          </label>
-        </div>
+  <!-- HERO -->
+  <header class="hero">
+    <h1>Carte Virtuelle & Achat Assisté</h1>
+    <p>
+      Service professionnel d’assistance en ligne.  
+      Choisissez l’orientation vers un partenaire agréé ou notre service d’achat pour payer vos services en toute simplicité.
+    </p>
+  </header>
 
-        <label class="block mb-4">
-          <span>Deskripsyon oswa objektif demann (opsyonèl)</span>
-          <textarea name="purpose" rows="4" placeholder="Eg: Mwen bezwen kat vityèl pou achte sou Amazon..."></textarea>
+  <!-- MAIN CARD -->
+  <main class="card">
+
+    <form id="cardForm" novalidate>
+
+      <!-- TYPE DE SERVICE -->
+      <fieldset class="mb-4">
+        <legend class="section-title">Type de service</legend>
+
+        <label class="service">
+          <input type="radio" name="serviceType" value="virtual" checked />
+          <strong>Demande de carte virtuelle</strong><br>
+          <small>Orientation vers un partenaire (aucune carte émise ici)</small>
         </label>
 
-        <label class="flex items-start gap-3 mb-4">
-          <input type="checkbox" name="acceptTerms" />
-          <span>Mwen li e mwen dakò ak <a href="/terms" class="underline">tèm ak kondisyon</a> ak <a href="/privacy" class="underline">politik vi prive</a>.</span>
+        <label class="service">
+          <input type="radio" name="serviceType" value="assisted" />
+          <strong>Achat assisté</strong><br>
+          <small>Notre équipe effectue l’achat pour vous</small>
+        </label>
+      </fieldset>
+
+      <!-- INFORMATIONS CLIENT -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+
+        <label class="block">
+          <span>Nom complet</span>
+          <input type="text" name="fullName" placeholder="Jan Pèsonn" required>
         </label>
 
-        <p id="errorMsg" class="text-red-600 mb-3"></p>
-        <button type="submit" class="submit-btn">Kontinye via WhatsApp</button>
-      </form>
+        <label class="block">
+          <span>Email</span>
+          <input type="email" name="email" placeholder="ou@email.com" required>
+        </label>
 
-      <div class="warning-box">
-        Remak: Paj sa a sèvi pou demann ak oryantasyon sèlman. Pa janm pataje enfòmasyon kat (PAN/CVV) sou fòm sa a.
+        <label class="block">
+          <span>Pays</span>
+          <input type="text" name="country" placeholder="Haiti" required>
+        </label>
+
+        <label class="block">
+          <span>Montant / Estimation (USD)</span>
+          <input type="number" name="amount" placeholder="50" min="1" required>
+        </label>
+
       </div>
 
-      <section class="payment-info mt-6">
-        <h2 class="section-title">Mwayen Peman Disponib</h2>
-        <ul>
-          <li>MonCash: +50946057952</li>
-          <li>NatCash: +50941306268</li>
-          <li>Western Union: MEME Selvandieu</li>
-        </ul>
-      </section>
-    </main>
-  </div>
+      <!-- DESCRIPTION -->
+      <label class="block mb-4">
+        <span>Description ou objectif de la demande (optionnel)</span>
+        <textarea name="purpose" rows="4" placeholder="Ex : Achat sur Amazon, abonnement, paiement de service..."></textarea>
+      </label>
 
-  <script src="creation-cartevirtuelle-assistance.js"></script>
+      <!-- CONDITIONS -->
+      <label class="flex items-start gap-3 mb-4 terms">
+        <input type="checkbox" name="acceptTerms" required>
+        <span>
+          Je confirme avoir lu et accepté les
+          <a href="/terms" class="underline">conditions générales</a>
+          et la
+          <a href="/privacy" class="underline">politique de confidentialité</a>.
+        </span>
+      </label>
+
+      <!-- ERREUR -->
+      <p id="errorMsg" class="error-text"></p>
+
+      <!-- SUBMIT -->
+      <button type="submit" class="submit-btn">
+        Continuer via WhatsApp
+      </button>
+
+    </form>
+
+    <!-- DISCLAIMER -->
+    <div class="warning-box">
+      ⚠️ Cette page sert uniquement à la demande et à l’orientation.  
+      Ne partagez jamais d’informations sensibles de carte bancaire (PAN, CVV).
+    </div>
+
+    <!-- PAIEMENTS -->
+    <section class="payment-info mt-6">
+      <h2 class="section-title">Moyens de paiement disponibles</h2>
+      <ul>
+        <li><strong>MonCash :</strong> +50946057952</li>
+        <li><strong>NatCash :</strong> +50941306268</li>
+        <li><strong>Western Union :</strong> MEME Selvandieu</li>
+      </ul>
+    </section>
+
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <p>
+      © 2025 — Service d’assistance numérique • Orientation uniquement • Support WhatsApp
+    </p>
+  </footer>
+
+</div>
+
+<script src="creation-cartevirtuelle-assistance.js"></script>
 </body>
 </html>
