@@ -118,9 +118,9 @@ C<!DOCTYPE html>
   </main>
 
 
-   <!-- BLOC OFFICIEL : Assistance Carte Virtuelle -->
+  <!-- BLOC OFFICIEL : Assistance Carte Virtuelle -->
 <script>
-(function(){
+(function () {
   if (document.getElementById('assist-cbv-officiel')) return;
 
   const box = document.createElement('section');
@@ -179,7 +179,13 @@ C<!DOCTYPE html>
     </div>
   `;
 
-  document.body.appendChild(box);
+  const footer = document.querySelector('footer');
+
+  if (footer && footer.parentNode) {
+    footer.parentNode.insertBefore(box, footer);
+  } else {
+    document.body.appendChild(box);
+  }
 })();
 </script>
 <!-- FIN BLOC OFFICIEL -->
