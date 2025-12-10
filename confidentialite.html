@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Politique de confidentialité</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    :root {
+      --blue-main: #0b5ed7;
+      --blue-dark: #1e3a8a;
+      --blue-light: #e7f0ff;
+      --yellow-main: #fbbf24;
+      --yellow-light: #fff7da;
+      --white-main: #ffffff;
+      --text-dark: #1f2937;
+      --text-muted: #6b7280;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+      background: linear-gradient(135deg, var(--blue-light), var(--white-main));
+      color: var(--text-dark);
+      margin: 0;
+      padding: 0;
+    }
+
+    .page-container {
+      max-width: 900px;
+      margin: 40px auto;
+      padding: 20px;
+    }
+
+    .card {
+      background: var(--white-main);
+      border-radius: 20px;
+      padding: 30px;
+      box-shadow: 0 18px 45px rgba(0,0,0,0.08);
+      border-top: 6px solid var(--blue-main);
+    }
+
+    h1.section-title {
+      font-size: 2rem;
+      color: var(--blue-main);
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    h3 {
+      color: var(--blue-dark);
+      margin-top: 20px;
+      margin-bottom: 8px;
+    }
+
+    p {
+      margin-bottom: 15px;
+      line-height: 1.6;
+    }
+
+    .confirm-section {
+      background: var(--yellow-light);
+      border-left: 6px solid var(--yellow-main);
+      padding: 18px;
+      border-radius: 16px;
+      margin-top: 25px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .confirm-section input[type="checkbox"] {
+      transform: scale(1.2);
+      cursor: pointer;
+    }
+
+    .confirm-section label {
+      font-size: 1rem;
+      cursor: pointer;
+      color: var(--text-dark);
+    }
+
+    .back-btn {
+      display: inline-block;
+      margin-top: 25px;
+      background: linear-gradient(90deg, var(--blue-main), var(--blue-dark));
+      color: white;
+      padding: 14px 24px;
+      border-radius: 14px;
+      font-weight: 700;
+      text-decoration: none;
+      transition: all 0.25s ease;
+    }
+
+    .back-btn:hover {
+      opacity: 0.95;
+      transform: translateY(-2px);
+    }
+
+    @media (max-width: 650px) {
+      .page-container { padding: 15px; }
+      h1.section-title { font-size: 1.6rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="page-container">
+    <div class="card">
+      <h1 class="section-title">Politique de confidentialité</h1>
+
+      <p>
+        Nous respectons la confidentialité des informations fournies par les utilisateurs.
+      </p>
+
+      <h3>1. Données collectées</h3>
+      <p>
+        Nom, adresse e-mail, pays et informations liées à la demande de service.
+      </p>
+
+      <h3>2. Utilisation des données</h3>
+      <p>
+        Les données sont utilisées uniquement pour traiter votre demande
+        et vous contacter via WhatsApp ou e-mail.
+      </p>
+
+      <h3>3. Sécurité</h3>
+      <p>
+        Aucune donnée bancaire sensible n’est conservée ni demandée sur ce site.
+      </p>
+
+      <h3>4. Partage des données</h3>
+      <p>
+        Vos données ne sont ni vendues ni partagées avec des tiers non autorisés.
+      </p>
+
+      <div class="confirm-section">
+        <input type="checkbox" id="acceptPrivacy">
+        <label for="acceptPrivacy">Je confirme avoir lu et accepté la politique de confidentialité.</label>
+      </div>
+
+      <a href="creation-cartevirtuelle-assistance.html" class="back-btn">Retour au formulaire</a>
+    </div>
+  </div>
+
+</body>
+</html>
