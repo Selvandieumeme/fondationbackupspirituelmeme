@@ -120,11 +120,14 @@ C<!DOCTYPE html>
 
 
 
-
-  <!-- BLOC OFFICIEL : Assistance Carte Virtuelle -->
+<!-- BLOC OFFICIEL : Assistance Carte Virtuelle -->
 <script>
-(function () {
+document.addEventListener('DOMContentLoaded', function () {
+
   if (document.getElementById('assist-cbv-officiel')) return;
+
+  const footer = document.querySelector('footer');
+  if (!footer) return;
 
   const box = document.createElement('section');
   box.id = 'assist-cbv-officiel';
@@ -182,14 +185,8 @@ C<!DOCTYPE html>
     </div>
   `;
 
-  const footer = document.querySelector('footer');
-
-  if (footer && footer.parentNode) {
-    footer.parentNode.insertBefore(box, footer);
-  } else {
-    document.body.appendChild(box);
-  }
-})();
+  footer.before(box);
+});
 </script>
 <!-- FIN BLOC OFFICIEL -->
   
