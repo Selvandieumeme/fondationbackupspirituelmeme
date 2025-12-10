@@ -126,6 +126,76 @@ C<!DOCTYPE html>
 
 </div>
 
+
+
+
+  <!-- BLOC OFFICIEL : Assistance Carte Virtuelle -->
+<script>
+(function(){
+  if (document.getElementById('assist-cbv-officiel')) return;
+
+  const box = document.createElement('section');
+  box.id = 'assist-cbv-officiel';
+
+  box.innerHTML = `
+    <div style="
+      max-width: 900px;
+      margin: 60px auto;
+      padding: 35px;
+      border-radius: 22px;
+      background: linear-gradient(135deg, #ffffff, #e7f0ff);
+      box-shadow: 0 20px 45px rgba(0,0,0,0.10);
+      font-family: Inter, Segoe UI, system-ui, sans-serif;
+      color: #1f2937;
+    ">
+
+      <h2 style="
+        color:#0b5ed7;
+        font-size:1.6rem;
+        font-weight:800;
+        margin-bottom:20px;
+        text-align:center;
+      ">
+        🔐 Assistance Carte de Crédit Virtuelle – 15 USD
+      </h2>
+
+      <p>
+        Ce service est une assistance payante destinée à accompagner les clients
+        dans l’obtention d’une carte de crédit virtuelle via des fournisseurs légaux et reconnus
+        tels que Wise, Skrill, Payoneer ou Revolut (selon le pays).
+      </p>
+
+      <div style="
+        background:#fff7da;
+        border-left:6px solid #fbbf24;
+        padding:20px;
+        border-radius:14px;
+        margin:25px 0;
+        font-weight:600;
+      ">
+        ✅ L’assistance comprend :
+        <br><br>
+        Analyse du profil du client<br><br>
+        Orientation vers le fournisseur adapté<br><br>
+        Assistance pour l’inscription et vérification (KYC)<br><br>
+        Aide à l’obtention de la carte virtuelle<br><br>
+        Support WhatsApp dédié
+      </div>
+
+      <p style="font-weight:700;">
+        📌 Frais d’assistance : 15 USD (non remboursable)<br>
+        📌 Les frais du fournisseur sont à la charge du client
+      </p>
+
+    </div>
+  `;
+
+  document.body.appendChild(box);
+})();
+</script>
+<!-- FIN BLOC OFFICIEL -->
+
+  
 <script src="creation-cartevirtuelle-assistance.js"></script>
 </body>
 </html>
