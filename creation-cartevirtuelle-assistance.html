@@ -31,51 +31,6 @@
     <form id="cardForm" novalidate>
 
 
-
-
-<div id="wallet-fobas-section" style="max-width:900px; margin:30px auto; padding:30px; border-radius:25px; background:linear-gradient(135deg,#fffbea,#e0f7ff); text-align:center; box-shadow:0 15px 35px rgba(0,0,0,0.1); font-family:'Inter', sans-serif;">
-  <h2 style="color:#16a34a; font-weight:800; font-size:1.8rem; margin-bottom:15px;">🟢 Wallet FOBAS – Sans Carte (Modèle Ledger)</h2>
-  <p style="font-size:1.05rem; color:#1f2937;">Obtenez un compte wallet interne avec solde, dépôt et retrait manuel. 100% légal, sécurisé et simple à utiliser.</p>
-
-  <!-- Formulaire Création Wallet -->
-  <form id="createWalletForm" style="margin-top:25px;">
-    <input type="text" name="fullName" placeholder="Nom complet" required style="padding:10px; width:80%; border-radius:8px; border:1px solid #cbd5e1; margin-bottom:12px;"><br>
-    <input type="email" name="email" placeholder="Email" required style="padding:10px; width:80%; border-radius:8px; border:1px solid #cbd5e1; margin-bottom:12px;"><br>
-    <input type="text" name="country" placeholder="Pays" required style="padding:10px; width:80%; border-radius:8px; border:1px solid #cbd5e1; margin-bottom:12px;"><br>
-    <button type="submit" style="padding:12px 25px; background:#16a34a; color:#fff; border:none; border-radius:12px; font-weight:700; cursor:pointer;">Créer mon Wallet FOBAS</button>
-  </form>
-
-  <div id="wallet-msg" style="margin-top:20px; font-weight:600; color:#1f2937;"></div>
-
-  <!-- Dashboard Utilisateur -->
-  <div id="wallet-dashboard" style="display:none; margin-top:30px; padding:20px; background:#ffffff; border-radius:20px; box-shadow:0 10px 25px rgba(0,0,0,0.08);">
-    <h3 style="color:#0d6efd; font-weight:800; margin-bottom:10px;">📊 Mon Wallet FOBAS</h3>
-    <p id="wallet-balance" style="font-size:1.2rem; font-weight:700; color:#1f2937;">Solde: 0 USD</p>
-
-    <div id="wallet-transactions" style="text-align:left; margin-top:20px;">
-      <h4 style="font-weight:700; color:#16a34a;">Historique des Transactions</h4>
-      <ul id="transaction-list" style="padding-left:20px;">
-        <li>Aucune transaction pour le moment.</li>
-      </ul>
-    </div>
-
-    <div style="margin-top:25px;">
-      <input type="number" id="deposit-amount" placeholder="Montant à déposer" min="1" style="padding:8px; border-radius:6px; border:1px solid #cbd5e1;">
-      <button id="deposit-btn" style="padding:8px 15px; background:#16a34a; color:#fff; border:none; border-radius:8px; font-weight:600; margin-left:5px;">Déposer</button>
-    </div>
-
-    <div style="margin-top:15px;">
-      <input type="number" id="withdraw-amount" placeholder="Montant à retirer" min="1" style="padding:8px; border-radius:6px; border:1px solid #cbd5e1;">
-      <button id="withdraw-btn" style="padding:8px 15px; background:#f59e0b; color:#fff; border:none; border-radius:8px; font-weight:600; margin-left:5px;">Retirer</button>
-    </div>
-
-    <div id="wallet-action-msg" style="margin-top:20px; font-weight:700; color:#1f2937;"></div>
-  </div>
-</div>
-
-
-      
-
       <!-- TYPE DE SERVICE -->
       <fieldset class="mb-4">
         <legend class="section-title">Type de service</legend>
@@ -175,6 +130,52 @@
       </ul>
     </section>
 
+
+
+
+
+
+
+    <!-- === BLOK WALLET FOBAS === -->
+<div id="wallet-fobas-section" style="max-width:900px; margin:30px auto; padding:30px; border-radius:25px; background:linear-gradient(135deg,#fffbea,#e0f7ff); text-align:center; box-shadow:0 15px 35px rgba(0,0,0,0.1); font-family:'Inter', sans-serif;">
+  <h2 style="color:#16a34a; font-weight:800; font-size:1.8rem; margin-bottom:15px;">🟢 Wallet FOBAS – Sans Carte (Modèle Ledger)</h2>
+  <p style="font-size:1.05rem; color:#1f2937;">Obtenez un compte wallet interne avec solde, dépôt et retrait manuel. 100% légal, sécurisé et simple à utiliser.</p>
+
+  <!-- Formulaire Création Wallet (fòm endepandan) -->
+  <form id="createWalletForm" style="margin-top:25px;">
+    <input type="text" name="walletFullName" placeholder="Nom complet" required style="padding:10px; width:80%; border-radius:8px; border:1px solid #cbd5e1; margin-bottom:12px;"><br>
+    <input type="email" name="walletEmail" placeholder="Email" required style="padding:10px; width:80%; border-radius:8px; border:1px solid #cbd5e1; margin-bottom:12px;"><br>
+    <input type="text" name="walletCountry" placeholder="Pays" required style="padding:10px; width:80%; border-radius:8px; border:1px solid #cbd5e1; margin-bottom:12px;"><br>
+    <button type="submit" style="padding:12px 25px; background:#16a34a; color:#fff; border:none; border-radius:12px; font-weight:700; cursor:pointer;">Créer mon Wallet FOBAS</button>
+  </form>
+
+  <div id="wallet-msg" style="margin-top:20px; font-weight:600; color:#1f2937;"></div>
+
+  <!-- Dashboard Utilisateur -->
+  <div id="wallet-dashboard" style="display:none; margin-top:30px; padding:20px; background:#ffffff; border-radius:20px; box-shadow:0 10px 25px rgba(0,0,0,0.08);">
+    <h3 style="color:#0d6efd; font-weight:800; margin-bottom:10px;">📊 Mon Wallet FOBAS</h3>
+    <p id="wallet-balance" style="font-size:1.2rem; font-weight:700; color:#1f2937;">Solde: 0 USD</p>
+
+    <div id="wallet-transactions" style="text-align:left; margin-top:20px;">
+      <h4 style="font-weight:700; color:#16a34a;">Historique des Transactions</h4>
+      <ul id="transaction-list" style="padding-left:20px;">
+        <li>Aucune transaction pour le moment.</li>
+      </ul>
+    </div>
+
+    <div style="margin-top:25px;">
+      <input type="number" id="deposit-amount" placeholder="Montant à déposer" min="1" style="padding:8px; border-radius:6px; border:1px solid #cbd5e1;">
+      <button id="deposit-btn" style="padding:8px 15px; background:#16a34a; color:#fff; border:none; border-radius:8px; font-weight:600; margin-left:5px;">Déposer</button>
+    </div>
+
+    <div style="margin-top:15px;">
+      <input type="number" id="withdraw-amount" placeholder="Montant à retirer" min="1" style="padding:8px; border-radius:6px; border:1px solid #cbd5e1;">
+      <button id="withdraw-btn" style="padding:8px 15px; background:#f59e0b; color:#fff; border:none; border-radius:8px; font-weight:600; margin-left:5px;">Retirer</button>
+    </div>
+
+    <div id="wallet-action-msg" style="margin-top:20px; font-weight:700; color:#1f2937;"></div>
+  </div>
+</div>
   </main>
 
 
