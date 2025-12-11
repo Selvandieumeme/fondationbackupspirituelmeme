@@ -1181,7 +1181,44 @@ app.post('/api/sessions', async (req, res) => {
 
 
 
+// =====================================================
+//  WALLET FOBAS SYSTEM → API Route
+// =====================================================
 
+// 👉 Kreye Schema si li pa deja egziste
+const WalletRequestSchema = new mongoose.Schema({
+  fullName: String,
+  email: String,
+  country: String,
+  createdAt: { type: Date, default: Date.now }
+});
+
+// 👉 Model (evite erè “OverwriteModelError”)
+const WalletRequest = mongoose.models.WalletRequest || mongoose.model("WalletRequest", WalletRequestSchema);
+
+// 👉 Route pou resevwa demann WALLET la
+app.post("/api/wallet/create", async (req, res) => {
+  try {
+    const { fullName, email, country } = req.body;
+
+    if (!fullName || !email || !country) {
+      return res.status(400).json({ success: false, message: "Tout chan yo obligatwa." });
+    }
+
+    // 👉 Sove nan baz done a
+    await WalletRequest.create({ fullName, email, country });
+
+    // 👉 Repons bay frontend la
+    res.json({
+      success: true,
+      message: "Demande Wallet la anrejistre avèk siksè."
+    });
+
+  } catch (err) {
+    console.error("❌ Erè nan kreasyon Wallet:", err);
+    res.status(500).json({ success: false, message: "Erè Serveur." });
+  }
+});
 
 
 
