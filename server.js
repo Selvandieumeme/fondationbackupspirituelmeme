@@ -976,18 +976,8 @@ socket.on('ask', async ({ question, lang } = {}) => {
   }
 });
 
-
-		  
-      }
-    } catch (err) {
-      console.error('ask handler error:', err);
-      socket.emit('answer', { answer: 'Erè sèvè. Eseye ankò.', lang: lang || 'ht' });
-    }
-  });
-
-  socket.on('disconnect', (reason) => {
-    console.log('🔌 socket disconnected:', socket.id, reason);
-  });
+socket.on('disconnect', (reason) => {
+  console.log('🔌 socket disconnected:', socket.id, reason);
 });
 
 // --- HTTP Admin & Fallback endpoints ---
@@ -1060,8 +1050,6 @@ mongoose.connection.once('open', () => {
     console.warn('Change stream not available (replica set required).', err && err.message);
   }
 });
-
-
 
 
 
