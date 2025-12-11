@@ -198,9 +198,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
 
-  <!-- BLOC OFFICIEL : WALLET NUMÉRIQUE (MODÈL 2) -->
+ <!-- BLOC OFFICIEL : WALLET NUMÉRIQUE (MODÈL 2) -->
 <script>
-(function () {
+document.addEventListener('DOMContentLoaded', function () {
+
   if (document.getElementById('wallet-numerique-officiel')) return;
 
   const box = document.createElement('section');
@@ -217,7 +218,6 @@ document.addEventListener('DOMContentLoaded', function () {
       font-family: Inter, Segoe UI, system-ui, sans-serif;
       color: #1f2937;
     ">
-
       <h2 style="
         color:#16a34a;
         font-size:1.6rem;
@@ -229,9 +229,9 @@ document.addEventListener('DOMContentLoaded', function () {
       </h2>
 
       <p>
-        Ce service permet au client d'obtenir un <b>compte wallet numérique</b> 
-        avec solde interne, dépôt manuel et retrait manuel. 
-        Ce système NE fournit pas de carte VISA et ne permet pas les paiements internet directs.
+        Ce service permet au client d'obtenir un <b>compte wallet numérique</b>
+        avec solde interne, dépôt manuel et retrait manuel.
+        Ce système ne fournit pas de carte VISA et ne permet pas les paiements internet directs.
       </p>
 
       <div style="
@@ -253,6 +253,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
       <p style="font-weight:700;">
         💰 Monetisation (pour l'admin) :<br><br>
+        • Frais sur dépôts<br>
         • Frais sur retraits<br><br>
         📌 Modèle 100% légal (aucune carte, aucun paiement international)
       </p>
@@ -266,11 +267,10 @@ document.addEventListener('DOMContentLoaded', function () {
   } else {
     document.body.appendChild(box);
   }
-})();
+
+});
 </script>
 <!-- FIN BLOC OFFICIEL WALLET NUMÉRIQUE -->
-
-
 
 
   
