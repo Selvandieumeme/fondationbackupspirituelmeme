@@ -76,3 +76,58 @@ document.addEventListener('DOMContentLoaded', () => {
     window.open(waUrl, '_blank');
   });
 });
+
+
+
+
+
+
+
+
+
+
+// === WALLET FOBAS SYSTEM === //
+document.addEventListener("DOMContentLoaded", () => {
+
+  const form = document.getElementById("createWalletForm");
+  const msgBox = document.getElementById("wallet-msg");
+
+  if (!form) return; // sekirite si seksyon an pa chaje
+
+  form.addEventListener("submit", function (e) {
+    e.preventDefault();
+
+    const fullName = form.walletFullName.value.trim();
+    const email = form.walletEmail.value.trim();
+    const country = form.walletCountry.value.trim();
+
+    if (!fullName || !email || !country) {
+      msgBox.textContent = "⚠️ Tout chan yo obligatwa.";
+      msgBox.style.color = "red";
+      return;
+    }
+
+    // --- Mesaj ki pral voye bay WhatsApp admin nan ---
+    const message =
+      "🟢 *Nouvo Demande Compte WALLET FOBAS*" +
+      "\n\n👤 *Nom complet:* " + fullName +
+      "\n📧 *Email:* " + email +
+      "\n🌍 *Pays:* " + country +
+      "\n\n📌 *Tanpri verifye epi apwouve konto a manuellement.*";
+
+    const encodedMsg = encodeURIComponent(message);
+
+    // WhatsApp Admin
+    const adminNumber = "50946057952";
+
+    const waLink = "https://wa.me/" + adminNumber + "?text=" + encodedMsg;
+
+    // Voye moun nan sou WhatsApp admin nan
+    window.open(waLink, "_blank");
+
+    msgBox.textContent = "✅ Votre demande a été envoyée à l’administrateur.";
+    msgBox.style.color = "#16a34a";
+
+    form.reset();
+  });
+});
