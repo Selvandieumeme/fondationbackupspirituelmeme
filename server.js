@@ -793,7 +793,7 @@ app.get('/Chatprive.html', (req, res) => {
 
 // ----------------------- MIDDLEWARE -----------------------
 app.use(cors({
-  origin: ['https://fondationbackupspirituel.com'], // Page GitHub ou
+  origin: ['https://fondationbackupspirituel.com'], 
   methods: ['POST'],
   allowedHeaders: ['Content-Type']
 }));
@@ -803,8 +803,9 @@ app.use(express.json());
 mongoose.connect(process.env.MONGODB_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true
-}).then(() => console.log('MongoDB connecté'))
-  .catch(err => console.error('Erreur MongoDB:', err));
+})
+.then(() => console.log('✅ MongoDB connecté'))
+.catch(err => console.error('❌ Erreur MongoDB:', err));
 
 // ----------------------- VIP SESSION SCHEMA -----------------------
 const vipSessionSchema = new mongoose.Schema({
@@ -822,7 +823,8 @@ const vipSessionSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now }
 });
 
-
+// 👉 VERY IMPORTANT: Declare model **exactly once**
+const VipSession = mongoose.model('VipSession', vipSessionSchema);
 
 // ----------------------- ROUTE INSCRIPTION VIP -----------------------
 app.post('/api/sessions', async (req, res) => {
@@ -840,7 +842,8 @@ app.post('/api/sessions', async (req, res) => {
       montant
     } = req.body;
 
-    if (!password) return res.status(400).json({ success: false, message: "Password requis" });
+    if (!password)
+      return res.status(400).json({ success: false, message: "Password requis" });
 
     const passwordHash = await bcryptjs.hash(password, 12);
 
@@ -861,18 +864,16 @@ app.post('/api/sessions', async (req, res) => {
 
     await session.save();
 
-    // Repons pou front-end
-    res.json({ 
-      success: true, 
-      message: "Inscription reçue ! Votre demande est en attente de validation." 
+    return res.json({
+      success: true,
+      message: "Inscription reçue ! Votre demande est en attente de validation."
     });
 
   } catch (err) {
     console.error(err);
-    res.status(500).json({ success: false, message: "Erreur serveur" });
+    return res.status(500).json({ success: false, message: "Erreur serveur" });
   }
 });
-
 
 
 
