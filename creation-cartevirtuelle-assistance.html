@@ -189,15 +189,101 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 </script>
 <!-- FIN BLOC OFFICIEL -->
+
+
+
+
+
+
+
+
+
+  <!-- BLOC OFFICIEL : WALLET NUMÉRIQUE (MODÈL 2) -->
+<script>
+(function () {
+  if (document.getElementById('wallet-numerique-officiel')) return;
+
+  const box = document.createElement('section');
+  box.id = 'wallet-numerique-officiel';
+
+  box.innerHTML = `
+    <div style="
+      max-width: 900px;
+      margin: 60px auto;
+      padding: 35px;
+      border-radius: 22px;
+      background: linear-gradient(135deg,#f3fff4,#e0ffe8);
+      box-shadow: 0 20px 45px rgba(0,0,0,0.10);
+      font-family: Inter, Segoe UI, system-ui, sans-serif;
+      color: #1f2937;
+    ">
+
+      <h2 style="
+        color:#16a34a;
+        font-size:1.6rem;
+        font-weight:800;
+        margin-bottom:20px;
+        text-align:center;
+      ">
+        🟢 Wallet Numérique – Sans Carte (Modèle Ledger)
+      </h2>
+
+      <p>
+        Ce service permet au client d'obtenir un <b>compte wallet numérique</b> 
+        avec solde interne, dépôt manuel et retrait manuel. 
+        Ce système NE fournit pas de carte VISA et ne permet pas les paiements internet directs.
+      </p>
+
+      <div style="
+        background:#eaffea;
+        border-left:6px solid #16a34a;
+        padding:20px;
+        border-radius:14px;
+        margin:25px 0;
+        font-weight:600;
+      ">
+        ✅ Fonctionnalités du Wallet :<br><br>
+        • Compte utilisateur personnel<br><br>
+        • Solde interne (ledger sécurisé)<br><br>
+        • Historique complet des paiements<br><br>
+        • Dépôt manuel : MonCash, NatCash, WU<br><br>
+        • Retrait manuel vers MonCash ou Bank<br><br>
+        • Support WhatsApp 24/7
+      </div>
+
+      <p style="font-weight:700;">
+        💰 Monetisation (pour l'admin) :<br><br>
+        • Frais sur dépôts<br>
+        • Frais sur retraits<br>
+        • Frais mensuel optionnel<br><br>
+        📌 Modèle 100% légal (aucune carte, aucun paiement international)
+      </p>
+    </div>
+  `;
+
+  const footer = document.querySelector('footer');
+
+  if (footer && footer.parentNode) {
+    footer.parentNode.insertBefore(box, footer);
+  } else {
+    document.body.appendChild(box);
+  }
+})();
+</script>
+<!-- FIN BLOC OFFICIEL WALLET NUMÉRIQUE -->
+
+
+
+
   
   <!-- FOOTER -->
   <footer class="footer">
     <p>
-      © 2025 — Service d’assistance numérique • Orientation uniquement • Support WhatsApp
+      © 2025 — Service d’assistance numérique • Orientation uniquement • Support WhatsApp • FOBAS
     </p>
   </footer>
 
-</div>
+
 
   
 <script src="creation-cartevirtuelle-assistance.js"></script>
