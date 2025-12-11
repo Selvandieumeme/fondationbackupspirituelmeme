@@ -791,99 +791,93 @@ app.get('/Chatprive.html', (req, res) => {
 
 
 
-// ----------------------- MIDDLEWARE -----------------------
-app.use(cors({
-  origin: ['https://fondationbackupspirituel.com'],
-  methods: ['POST'],
-  allowedHeaders: ['Content-Type']
-}));
-app.use(express.json());
+// --- SOCKET.IO Handlers ---
 
-// ----------------------- MONGO CONNECTION -----------------------
-mongoose.connect(process.env.MONGODB_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true
-})
-.then(() => console.log('✅ MongoDB connecté'))
-.catch(err => console.error('❌ Erreur MongoDB:', err));
-
-// ----------------------- VIP SESSION SCHEMA -----------------------
-const vipSessionSchema = new mongoose.Schema({
-  nom: String,
-  dateNaissance: String,
-  ville: String,
-  pays: String,
-  whatsapp: String,
-  email: String,
-  emailRecup: String,
-  methodePaiement: String,
-  montant: Number,
-  passwordHash: String,
-  statut: { type: String, default: "pending" },
-  createdAt: { type: Date, default: Date.now }
-});
-
-// 👉 FIX 100% OBLIGATWA: PA JANM redeklare model la
-const VipSession =
-  mongoose.models.VipSession ||
-  mongoose.model('VipSession', vipSessionSchema);
-
-// ----------------------- ROUTE INSCRIPTION VIP -----------------------
-app.post('/api/sessions', async (req, res) => {
+socket.on('ask', async ({ question, lang } = {}) => {
   try {
-    const {
-      nom,
-      dateNaissance,
-      ville,
-      pays,
-      whatsapp,
-      email,
-      password,
-      emailRecup,
-      methodePaiement,
-      montant
-    } = req.body;
+    const doc = await findAnswerInDB(question || '', lang);
 
-    if (!password) {
-      return res.status(400).json({
-        success: false,
-        message: "Password requis"
+    if (doc) {
+      socket.emit('answer', { 
+        answer: doc.answer, 
+        lang: doc.lang || lang || 'ht'
+      });
+    } else {
+      const DEFAULT_ANSWERS = {
+        ht: "M pa jwenn repons sa nan memwa mwen. Eske ou vle m anrejistre kesyon sa pou pwochen fwa?",
+        fr: "Je n’ai pas trouvé cette réponse dans ma mémoire. Voulez-vous que je sauvegarde cette question pour la prochaine fois ?",
+        en: "I couldn’t find this answer in my memory. Would you like me to save this question for next time?",
+        es: "No encontré esta respuesta en mi memoria. ¿Quieres que guarde esta pregunta para la próxima vez?"
+      };
+
+      const chosenLang = (lang && ['ht','fr','en','es'].includes(lang)) ? lang : 'ht';
+
+      console.debug('[MemeQA] emitting fallback answer, lang=', chosenLang);
+      socket.emit('answer', {
+        answer: DEFAULT_ANSWERS[chosenLang],
+        lang: chosenLang
       });
     }
-
-    const passwordHash = await bcryptjs.hash(password, 12);
-
-    const session = new VipSession({
-      nom,
-      dateNaissance,
-      ville,
-      pays,
-      whatsapp,
-      email,
-      emailRecup,
-      methodePaiement,
-      montant,
-      passwordHash,
-      statut: "pending",
-      createdAt: new Date()
-    });
-
-    await session.save();
-
-    return res.json({
-      success: true,
-      message: "Inscription reçue ! Votre demande est en attente de validation."
-    });
-
   } catch (err) {
-    console.error(err);
-    return res.status(500).json({
-      success: false,
-      message: "Erreur serveur"
-    });
+    console.error('❌ Erè pandan ask handler:', err);
+    socket.emit('answer', { answer: "Erè sèvè. Eseye ankò.", lang: lang || 'ht' });
   }
 });
 
+socket.on('disconnect', (reason) => {
+  console.log('🔌 socket disconnected:', socket.id, reason);
+});
+
+// --- HTTP Endpoints ---
+
+app.get('/api/memeqas', async (req,res) => {
+  try {
+    const q = {};
+    if(req.query.lang) q.lang = req.query.lang;
+    const list = await MemeQA.find(q).sort({createdAt:-1}).limit(5000);
+    res.json(list);
+  } catch(err) { res.status(500).json({error:err.message}); }
+});
+
+app.post('/api/memeqa', async (req,res) => {
+  try {
+    const payload = req.body;
+    if(!payload || !payload.question || !payload.answer) return res.status(400).json({error:'question & answer required'});
+    const doc = await MemeQA.create(payload);
+    io.emit('memeqa-update', { action:'create', doc });
+    res.json({ok:true, doc});
+  } catch(err) { res.status(500).json({error:err.message}); }
+});
+
+app.delete('/api/memeqa/:id', async (req,res) => {
+  try {
+    const id = req.params.id;
+    const doc = await MemeQA.findByIdAndDelete(id);
+    io.emit('memeqa-update', { action:'delete', id });
+    res.json({ok:true, doc});
+  } catch(err) { res.status(500).json({error:err.message}); }
+});
+
+app.post('/ask', async (req,res) => {
+  try {
+    const { question, lang } = req.body || {};
+    const doc = await findAnswerInDB(question || '', lang);
+    if(doc) res.json({ answer: doc.answer, lang: doc.lang || (lang||'ht') });
+    else res.json({ answer:"M pa jwenn repons sa nan memwa mwen. Eske ou vle m anrejistre kesyon sa pou pwochen fwa?", lang:lang||'ht' });
+  } catch(err) { res.status(500).json({error:err.message}); }
+});
+
+// --- MongoDB Change Stream ---
+
+mongoose.connection.once('open', () => {
+  try {
+    const changeStream = MemeQA.watch();
+    changeStream.on('change', (change) => { io.emit('memeqa-update',{change}); });
+    changeStream.on('error', (err) => { console.warn('changeStream error', err && err.message); });
+  } catch(err) {
+    console.warn('Change stream not available (replica set required).', err && err.message);
+  }
+});
 
 
 
