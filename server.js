@@ -793,7 +793,7 @@ app.get('/Chatprive.html', (req, res) => {
 
 // ----------------------- MIDDLEWARE -----------------------
 app.use(cors({
-  origin: ['https://fondationbackupspirituel.com'], 
+  origin: ['https://fondationbackupspirituel.com'],
   methods: ['POST'],
   allowedHeaders: ['Content-Type']
 }));
@@ -823,8 +823,10 @@ const vipSessionSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now }
 });
 
-// 👉 VERY IMPORTANT: Declare model **exactly once**
-const VipSession = mongoose.model('VipSession', vipSessionSchema);
+// 👉 FIX 100% OBLIGATWA: PA JANM redeklare model la
+const VipSession =
+  mongoose.models.VipSession ||
+  mongoose.model('VipSession', vipSessionSchema);
 
 // ----------------------- ROUTE INSCRIPTION VIP -----------------------
 app.post('/api/sessions', async (req, res) => {
@@ -842,8 +844,12 @@ app.post('/api/sessions', async (req, res) => {
       montant
     } = req.body;
 
-    if (!password)
-      return res.status(400).json({ success: false, message: "Password requis" });
+    if (!password) {
+      return res.status(400).json({
+        success: false,
+        message: "Password requis"
+      });
+    }
 
     const passwordHash = await bcryptjs.hash(password, 12);
 
@@ -871,10 +877,12 @@ app.post('/api/sessions', async (req, res) => {
 
   } catch (err) {
     console.error(err);
-    return res.status(500).json({ success: false, message: "Erreur serveur" });
+    return res.status(500).json({
+      success: false,
+      message: "Erreur serveur"
+    });
   }
 });
-
 
 
 
