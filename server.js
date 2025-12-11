@@ -822,7 +822,7 @@ const vipSessionSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now }
 });
 
-const VipSession = mongoose.model('VipSession', vipSessionSchema);
+
 
 // ----------------------- ROUTE INSCRIPTION VIP -----------------------
 app.post('/api/sessions', async (req, res) => {
