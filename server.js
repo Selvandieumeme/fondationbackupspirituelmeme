@@ -791,6 +791,87 @@ app.get('/Chatprive.html', (req, res) => {
 
 
 
+// ----------------------- MIDDLEWARE -----------------------
+app.use(cors({
+  origin: ['https://fondationbackupspirituel.com'], // Page GitHub ou
+  methods: ['POST'],
+  allowedHeaders: ['Content-Type']
+}));
+app.use(express.json());
+
+// ----------------------- MONGO CONNECTION -----------------------
+mongoose.connect(process.env.MONGODB_URI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true
+}).then(() => console.log('MongoDB connecté'))
+  .catch(err => console.error('Erreur MongoDB:', err));
+
+// ----------------------- VIP SESSION SCHEMA -----------------------
+const vipSessionSchema = new mongoose.Schema({
+  nom: String,
+  dateNaissance: String,
+  ville: String,
+  pays: String,
+  whatsapp: String,
+  email: String,
+  emailRecup: String,
+  methodePaiement: String,
+  montant: Number,
+  passwordHash: String,
+  statut: { type: String, default: "pending" },
+  createdAt: { type: Date, default: Date.now }
+});
+
+const VipSession = mongoose.model('VipSession', vipSessionSchema);
+
+// ----------------------- ROUTE INSCRIPTION VIP -----------------------
+app.post('/api/sessions', async (req, res) => {
+  try {
+    const {
+      nom,
+      dateNaissance,
+      ville,
+      pays,
+      whatsapp,
+      email,
+      password,
+      emailRecup,
+      methodePaiement,
+      montant
+    } = req.body;
+
+    if (!password) return res.status(400).json({ success: false, message: "Password requis" });
+
+    const passwordHash = await bcryptjs.hash(password, 12);
+
+    const session = new VipSession({
+      nom,
+      dateNaissance,
+      ville,
+      pays,
+      whatsapp,
+      email,
+      emailRecup,
+      methodePaiement,
+      montant,
+      passwordHash,
+      statut: "pending",
+      createdAt: new Date()
+    });
+
+    await session.save();
+
+    // Repons pou front-end
+    res.json({ 
+      success: true, 
+      message: "Inscription reçue ! Votre demande est en attente de validation." 
+    });
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, message: "Erreur serveur" });
+  }
+});
 
 
 
