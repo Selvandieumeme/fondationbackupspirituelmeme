@@ -958,13 +958,11 @@ const vipSessionSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now }
 });
 
-// ⚡ Fason san erè pou Render
-let VipSession;
-if (mongoose.models.VipSession) {
-  VipSession = mongoose.models.VipSession;
-} else {
-  VipSession = mongoose.model('VipSession', vipSessionSchema);
+// ⚡ Pa janm deklare model la doub — direktèman tcheke si li deja egziste
+if (!mongoose.models.VipSession) {
+  mongoose.model('VipSession', vipSessionSchema);
 }
+const VipSession = mongoose.models.VipSession;
 
 // ----------------------- ROUTE INSCRIPTION VIP -----------------------
 app.post('/api/sessions', async (req, res) => {
@@ -1003,6 +1001,7 @@ app.post('/api/sessions', async (req, res) => {
 
     await session.save();
 
+    // Repons pou front-end
     res.json({ 
       success: true, 
       message: "Inscription reçue ! Votre demande est en attente de validation." 
@@ -1013,7 +1012,6 @@ app.post('/api/sessions', async (req, res) => {
     res.status(500).json({ success: false, message: "Erreur serveur" });
   }
 });
-
 
 
 
