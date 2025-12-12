@@ -942,40 +942,39 @@ mongoose.connection.once('open', () => {
 
 
 
-// ----------------------------
-//  WALLET USER SCHEMA & MODEL
-// ----------------------------
-const walletUserSchema = new mongoose.Schema({
-  fullName: { type: String, required: true },
-  email:    { type: String, required: true },
-  country:  { type: String, required: true },
-  dateCreated: { type: Date, default: Date.now }
+// ----------------------- WALLET FOBAS SCHEMA -----------------------
+const walletSchema = new mongoose.Schema({
+  fullName: String,
+  email: String,
+  country: String,
+  createdAt: { type: Date, default: Date.now }
 });
 
-// Kreye model san redeklarasyon
-mongoose.model("WalletUser", walletUserSchema);
+const WalletUser = mongoose.models.WalletUser || mongoose.model("WalletUser", walletSchema);
 
-// ----------------------------
-//  API ROUTE: CREATE WALLET
-// ----------------------------
+
+// ----------------------- API ROUTE -----------------------
 app.post("/api/wallet/create", async (req, res) => {
   try {
     const { fullName, email, country } = req.body;
 
     if (!fullName || !email || !country) {
-      return res.status(400).json({ error: "Tout chan yo oblije ranpli." });
+      return res.status(400).json({ success: false, message: "Tout chan obligatwa." });
     }
 
-    const WalletUser = mongoose.models.WalletUser;
-    await new WalletUser({ fullName, email, country }).save();
+    await WalletUser.create({ fullName, email, country });
 
-    res.json({ message: "Demande WALLET la anrejistre avèk siksè!" });
+    return res.json({
+      success: true,
+      message: "Demande Wallet FOBAS anrejistre avèk siksè!"
+    });
 
-  } catch (error) {
-    console.error("Erreur API:", error);
-    res.status(500).json({ error: "Ere interne serveur." });
+  } catch (err) {
+    console.error("Erreur API:", err);
+    res.status(500).json({ success: false, message: "Erreur serveur" });
   }
 });
+
 
 
 
