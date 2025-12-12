@@ -933,6 +933,15 @@ mongoose.connection.once('open', () => {
 
 
 
+
+
+
+
+
+
+
+
+
 // ----------------------- MIDDLEWARE -----------------------
 app.use(cors({
   origin: ['https://fondationbackupspirituel.com'], // Page GitHub ou
@@ -945,8 +954,9 @@ app.use(express.json());
 mongoose.connect(process.env.MONGODB_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true
-}).then(() => console.log('MongoDB connecté'))
-  .catch(err => console.error('Erreur MongoDB:', err));
+})
+.then(() => console.log('MongoDB connecté'))
+.catch(err => console.error('Erreur MongoDB:', err));
 
 // ----------------------- VIP SESSION SCHEMA -----------------------
 const vipSessionSchema = new mongoose.Schema({
@@ -964,7 +974,8 @@ const vipSessionSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now }
 });
 
-const VipSession = mongoose.model('VipSession', vipSessionSchema);
+// ⚡ Pa janm deklare model la de fwa
+const VipSession = mongoose.models.VipSession || mongoose.model('VipSession', vipSessionSchema);
 
 // ----------------------- ROUTE INSCRIPTION VIP -----------------------
 app.post('/api/sessions', async (req, res) => {
@@ -1014,16 +1025,6 @@ app.post('/api/sessions', async (req, res) => {
     res.status(500).json({ success: false, message: "Erreur serveur" });
   }
 });
-
-
-
-
-
-
-
-
-
-
 
 
 
