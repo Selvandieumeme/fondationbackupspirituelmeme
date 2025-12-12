@@ -122,7 +122,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     try {
       // --- POST request nan server.js ---
-      const response = await fetch("/api/wallet/create", {
+      const response = await fetch("https://examen-backend-ihlx.onrender.com/api/wallet/create", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
