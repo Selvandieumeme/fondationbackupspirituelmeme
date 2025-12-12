@@ -17,13 +17,15 @@ const User = mongoose.models.User || mongoose.model("User", UserSchema, "users")
 const WalletUserSchema = new mongoose.Schema({
   fullName: String,
   email: String,
-  country: String,
-  phone: String,
-  dob: String,
-  city: String,
-  paymentMethod: String,
-  depositAmount: String,
-  password: String,
+  recoveryEmail: String,
+  whatsapp: String,
+  birthDate: String,
+  birthPlace: String,
+  passwordHash: String,
+  status: {
+    type: String,
+    default: "pending"
+  },
   createdAt: {
     type: Date,
     default: Date.now
