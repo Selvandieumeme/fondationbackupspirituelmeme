@@ -10,3 +10,32 @@ const UserSchema = new mongoose.Schema({
 });
 
 module.exports = mongoose.model("User", UserSchema, "users");
+
+
+
+
+
+
+
+
+
+
+
+
+const userSchema = new mongoose.Schema({
+  fullName: String,
+  email: String,
+  country: String,
+  phone: String,
+  dob: String,
+  city: String,
+  paymentMethod: String,
+  depositAmount: String,
+  password: String,
+  createdAt: {
+    type: Date,
+    default: Date.now
+  }
+});
+
+module.exports = mongoose.model("User", userSchema);
