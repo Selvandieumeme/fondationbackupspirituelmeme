@@ -944,25 +944,70 @@ mongoose.connection.once('open', () => {
 
 // ----------------------- WALLET FOBAS SCHEMA -----------------------
 const walletSchema = new mongoose.Schema({
-  fullName: String,
-  email: String,
-  country: String,
+  // Enfòmasyon itilizatè
+  fullName: { type: String, required: true },
+  email: { type: String, required: true },
+  country: { type: String, required: true },
+
+  // Opsyonèl / si ou gen lòt chan nan fòm lan
+  phone: String,
+  dateOfBirth: String,
+  city: String,
+  paymentMethod: String,
+  depositAmount: Number,
+
+  // Sekirite / password si gen kont lokal
+  passwordHash: String,
+
+  // Estatistik ak log
+  status: { type: String, default: "pending" },
   createdAt: { type: Date, default: Date.now }
 });
 
+// ⚡ Fason san erè pou Render
 const WalletUser = mongoose.models.WalletUser || mongoose.model("WalletUser", walletSchema);
 
 
-// ----------------------- API ROUTE -----------------------
+// ----------------------- ROUTE API POU ENREGISTRE -----------------------
 app.post("/api/wallet/create", async (req, res) => {
   try {
-    const { fullName, email, country } = req.body;
+    const {
+      fullName,
+      email,
+      country,
+      phone,
+      dateOfBirth,
+      city,
+      paymentMethod,
+      depositAmount,
+      password
+    } = req.body;
 
     if (!fullName || !email || !country) {
       return res.status(400).json({ success: false, message: "Tout chan obligatwa." });
     }
 
-    await WalletUser.create({ fullName, email, country });
+    let passwordHash;
+    if (password) {
+      const bcrypt = require("bcryptjs");
+      passwordHash = await bcrypt.hash(password, 12);
+    }
+
+    const newWalletUser = new WalletUser({
+      fullName,
+      email,
+      country,
+      phone,
+      dateOfBirth,
+      city,
+      paymentMethod,
+      depositAmount,
+      passwordHash,
+      status: "pending",
+      createdAt: new Date()
+    });
+
+    await newWalletUser.save();
 
     return res.json({
       success: true,
@@ -974,8 +1019,6 @@ app.post("/api/wallet/create", async (req, res) => {
     res.status(500).json({ success: false, message: "Erreur serveur" });
   }
 });
-
-
 
 
 
