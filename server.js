@@ -942,77 +942,40 @@ mongoose.connection.once('open', () => {
 
 
 
-// ----------------------- VIP SESSION SCHEMA -----------------------
-const vipSessionSchema = new mongoose.Schema({
-  nom: String,
-  dateNaissance: String,
-  ville: String,
-  pays: String,
-  whatsapp: String,
-  email: String,
-  emailRecup: String,
-  methodePaiement: String,
-  montant: Number,
-  passwordHash: String,
-  statut: { type: String, default: "pending" },
-  createdAt: { type: Date, default: Date.now }
+// ----------------------------
+//  WALLET USER SCHEMA & MODEL
+// ----------------------------
+const walletUserSchema = new mongoose.Schema({
+  fullName: { type: String, required: true },
+  email:    { type: String, required: true },
+  country:  { type: String, required: true },
+  dateCreated: { type: Date, default: Date.now }
 });
 
-// ⚡ Pa janm deklare model la doub — direktèman tcheke si li deja egziste
-if (!mongoose.models.VipSession) {
-  mongoose.model('VipSession', vipSessionSchema);
-}
-const VipSession = mongoose.models.VipSession;
+// Kreye model san redeklarasyon
+mongoose.model("WalletUser", walletUserSchema);
 
-// ----------------------- ROUTE INSCRIPTION VIP -----------------------
-app.post('/api/sessions', async (req, res) => {
+// ----------------------------
+//  API ROUTE: CREATE WALLET
+// ----------------------------
+app.post("/api/wallet/create", async (req, res) => {
   try {
-    const {
-      nom,
-      dateNaissance,
-      ville,
-      pays,
-      whatsapp,
-      email,
-      password,
-      emailRecup,
-      methodePaiement,
-      montant
-    } = req.body;
+    const { fullName, email, country } = req.body;
 
-    if (!password) return res.status(400).json({ success: false, message: "Password requis" });
+    if (!fullName || !email || !country) {
+      return res.status(400).json({ error: "Tout chan yo oblije ranpli." });
+    }
 
-    const passwordHash = await bcryptjs.hash(password, 12);
+    const WalletUser = mongoose.models.WalletUser;
+    await new WalletUser({ fullName, email, country }).save();
 
-    const session = new VipSession({
-      nom,
-      dateNaissance,
-      ville,
-      pays,
-      whatsapp,
-      email,
-      emailRecup,
-      methodePaiement,
-      montant,
-      passwordHash,
-      statut: "pending",
-      createdAt: new Date()
-    });
+    res.json({ message: "Demande WALLET la anrejistre avèk siksè!" });
 
-    await session.save();
-
-    // Repons pou front-end
-    res.json({ 
-      success: true, 
-      message: "Inscription reçue ! Votre demande est en attente de validation." 
-    });
-
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ success: false, message: "Erreur serveur" });
+  } catch (error) {
+    console.error("Erreur API:", error);
+    res.status(500).json({ error: "Ere interne serveur." });
   }
 });
-
 
 
 
