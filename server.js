@@ -1009,6 +1009,19 @@ app.post("/api/wallet/create", async (req, res) => {
 
     await newWalletUser.save();
 
+
+
+
+	// --- WhatsApp notification ---
+    await axios.post("https://api.callmebot.com/whatsapp.php", null, {
+      params: {
+        phone: "YOUR_WHATSAPP_NUMBER",
+        apikey: "YOUR_API_KEY",
+        text: `📥 NOUVO ENREGISTREMAN WALLET FOBAS\n\n👤 Non: ${fullName}\n📧 Email: ${email}\n📱 Tel: ${phone}\n🌍 Peyi: ${country}\n🏙️ Vil: ${city}\n💳 Peman: ${paymentMethod}\n💰 Depo: ${depositAmount}`
+      }
+    });
+
+	  
     return res.json({
       success: true,
       message: "Demande Wallet FOBAS anrejistre avèk siksè!"
@@ -1019,6 +1032,11 @@ app.post("/api/wallet/create", async (req, res) => {
     res.status(500).json({ success: false, message: "Erreur serveur" });
   }
 });
+
+
+
+
+
 
 
 
