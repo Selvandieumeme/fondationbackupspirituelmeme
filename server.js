@@ -792,93 +792,132 @@ app.get('/Chatprive.html', (req, res) => {
 
 
 // --- SOCKET.IO Handlers ---
+io.on("connection", (socket) => {
+  console.log("🟢 Nouvo itilizatè konekte:", socket.id);
 
-socket.on('ask', async ({ question, lang } = {}) => {
-  try {
-    const doc = await findAnswerInDB(question || '', lang);
+  socket.on('ask', async ({ question, lang } = {}) => {
+    try {
+      const doc = await findAnswerInDB(question || '', lang);
 
-    if (doc) {
-      socket.emit('answer', { 
-        answer: doc.answer, 
-        lang: doc.lang || lang || 'ht'
-      });
-    } else {
-      const DEFAULT_ANSWERS = {
-        ht: "M pa jwenn repons sa nan memwa mwen. Eske ou vle m anrejistre kesyon sa pou pwochen fwa?",
-        fr: "Je n’ai pas trouvé cette réponse dans ma mémoire. Voulez-vous que je sauvegarde cette question pour la prochaine fois ?",
-        en: "I couldn’t find this answer in my memory. Would you like me to save this question for next time?",
-        es: "No encontré esta respuesta en mi memoria. ¿Quieres que guarde esta pregunta para la próxima vez?"
-      };
+      if (doc) {
+        socket.emit('answer', { 
+          answer: doc.answer, 
+          lang: doc.lang || lang || 'ht'
+        });
+      } else {
+        const DEFAULT_ANSWERS = {
+          ht: "M pa jwenn repons sa nan memwa mwen. Eske ou vle m anrejistre kesyon sa pou pwochen fwa?",
+          fr: "Je n’ai pas trouvé cette réponse dans ma mémoire. Voulez-vous que je sauvegarde cette question pour la prochaine fois ?",
+          en: "I couldn’t find this answer in my memory. Would you like me to save this question for next time?",
+          es: "No encontré esta respuesta en mi memoria. ¿Quieres que guarde esta pregunta para la próxima vez?"
+        };
 
-      const chosenLang = (lang && ['ht','fr','en','es'].includes(lang)) ? lang : 'ht';
+        const chosenLang = (lang && ['ht','fr','en','es'].includes(lang)) ? lang : 'ht';
 
-      console.debug('[MemeQA] emitting fallback answer, lang=', chosenLang);
-      socket.emit('answer', {
-        answer: DEFAULT_ANSWERS[chosenLang],
-        lang: chosenLang
-      });
+        console.debug('[MemeQA] emitting fallback answer, lang=', chosenLang);
+        socket.emit('answer', {
+          answer: DEFAULT_ANSWERS[chosenLang],
+          lang: chosenLang
+        });
+      }
+    } catch (err) {
+      console.error('❌ Erè pandan ask handler:', err);
+      socket.emit('answer', { answer: "Erè sèvè. Eseye ankò.", lang: lang || 'ht' });
     }
-  } catch (err) {
-    console.error('❌ Erè pandan ask handler:', err);
-    socket.emit('answer', { answer: "Erè sèvè. Eseye ankò.", lang: lang || 'ht' });
+  });
+
+  socket.on('disconnect', (reason) => {
+    console.log('🔌 socket disconnected:', socket.id, reason);
+  });
+});
+
+
+// --- HTTP Endpoints ---
+app.get('/api/memeqas', async (req, res) => {
+  try {
+    const q = {};
+    if (req.query.lang) q.lang = req.query.lang;
+
+    const list = await MemeQA.find(q)
+      .sort({ createdAt: -1 })
+      .limit(5000);
+
+    res.json(list);
+  } catch(err) { 
+    res.status(500).json({ error: err.message }); 
   }
 });
 
-socket.on('disconnect', (reason) => {
-  console.log('🔌 socket disconnected:', socket.id, reason);
-});
-
-// --- HTTP Endpoints ---
-
-app.get('/api/memeqas', async (req,res) => {
-  try {
-    const q = {};
-    if(req.query.lang) q.lang = req.query.lang;
-    const list = await MemeQA.find(q).sort({createdAt:-1}).limit(5000);
-    res.json(list);
-  } catch(err) { res.status(500).json({error:err.message}); }
-});
-
-app.post('/api/memeqa', async (req,res) => {
+app.post('/api/memeqa', async (req, res) => {
   try {
     const payload = req.body;
-    if(!payload || !payload.question || !payload.answer) return res.status(400).json({error:'question & answer required'});
+    if(!payload || !payload.question || !payload.answer) {
+      return res.status(400).json({ error:'question & answer required' });
+    }
+
     const doc = await MemeQA.create(payload);
     io.emit('memeqa-update', { action:'create', doc });
-    res.json({ok:true, doc});
-  } catch(err) { res.status(500).json({error:err.message}); }
+
+    res.json({ ok:true, doc });
+
+  } catch(err) { 
+    res.status(500).json({ error: err.message }); 
+  }
 });
 
-app.delete('/api/memeqa/:id', async (req,res) => {
+app.delete('/api/memeqa/:id', async (req, res) => {
   try {
     const id = req.params.id;
     const doc = await MemeQA.findByIdAndDelete(id);
+
     io.emit('memeqa-update', { action:'delete', id });
-    res.json({ok:true, doc});
-  } catch(err) { res.status(500).json({error:err.message}); }
+
+    res.json({ ok:true, doc });
+  } catch(err) { 
+    res.status(500).json({ error: err.message }); 
+  }
 });
 
-app.post('/ask', async (req,res) => {
+app.post('/ask', async (req, res) => {
   try {
     const { question, lang } = req.body || {};
     const doc = await findAnswerInDB(question || '', lang);
-    if(doc) res.json({ answer: doc.answer, lang: doc.lang || (lang||'ht') });
-    else res.json({ answer:"M pa jwenn repons sa nan memwa mwen. Eske ou vle m anrejistre kesyon sa pou pwochen fwa?", lang:lang||'ht' });
-  } catch(err) { res.status(500).json({error:err.message}); }
+
+    if (doc) {
+      return res.json({ 
+        answer: doc.answer, 
+        lang: doc.lang || lang || 'ht' 
+      });
+    }
+
+    return res.json({ 
+      answer: "M pa jwenn repons sa nan memwa mwen. Eske ou vle m anrejistre kesyon sa pou pwochen fwa?", 
+      lang: lang || 'ht' 
+    });
+
+  } catch(err) { 
+    res.status(500).json({ error: err.message }); 
+  }
 });
 
-// --- MongoDB Change Stream ---
 
+// --- MongoDB Change Stream ---
 mongoose.connection.once('open', () => {
   try {
     const changeStream = MemeQA.watch();
-    changeStream.on('change', (change) => { io.emit('memeqa-update',{change}); });
-    changeStream.on('error', (err) => { console.warn('changeStream error', err && err.message); });
+
+    changeStream.on('change', (change) => {
+      io.emit('memeqa-update', { change });
+    });
+
+    changeStream.on('error', (err) => {
+      console.warn('changeStream error:', err && err.message);
+    });
+
   } catch(err) {
     console.warn('Change stream not available (replica set required).', err && err.message);
   }
 });
-
 
 
 
