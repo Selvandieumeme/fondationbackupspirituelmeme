@@ -942,22 +942,6 @@ mongoose.connection.once('open', () => {
 
 
 
-// ----------------------- MIDDLEWARE -----------------------
-app.use(cors({
-  origin: ['https://fondationbackupspirituel.com'], // Page GitHub ou
-  methods: ['POST'],
-  allowedHeaders: ['Content-Type']
-}));
-app.use(express.json());
-
-// ----------------------- MONGO CONNECTION -----------------------
-mongoose.connect(process.env.MONGODB_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true
-})
-.then(() => console.log('MongoDB connecté'))
-.catch(err => console.error('Erreur MongoDB:', err));
-
 // ----------------------- VIP SESSION SCHEMA -----------------------
 const vipSessionSchema = new mongoose.Schema({
   nom: String,
@@ -974,8 +958,13 @@ const vipSessionSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now }
 });
 
-// ⚡ Pa janm deklare model la de fwa
-const VipSession = mongoose.models.VipSession || mongoose.model('VipSession', vipSessionSchema);
+// ⚡ Fason san erè pou Render
+let VipSession;
+if (mongoose.models.VipSession) {
+  VipSession = mongoose.models.VipSession;
+} else {
+  VipSession = mongoose.model('VipSession', vipSessionSchema);
+}
 
 // ----------------------- ROUTE INSCRIPTION VIP -----------------------
 app.post('/api/sessions', async (req, res) => {
@@ -1014,7 +1003,6 @@ app.post('/api/sessions', async (req, res) => {
 
     await session.save();
 
-    // Repons pou front-end
     res.json({ 
       success: true, 
       message: "Inscription reçue ! Votre demande est en attente de validation." 
@@ -1025,6 +1013,7 @@ app.post('/api/sessions', async (req, res) => {
     res.status(500).json({ success: false, message: "Erreur serveur" });
   }
 });
+
 
 
 
