@@ -396,78 +396,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
 
-  <!-- FORM WALLET FOBAS -->
-<form id="createWalletForm">
-  <label>Nom complet: <input type="text" name="walletFullName" required></label><br>
-  <label>Email: <input type="email" name="walletEmail" required></label><br>
-  <label>Pays: <input type="text" name="walletCountry" required></label><br>
-  <label>Phone: <input type="text" name="walletPhone"></label><br>
-  <label>Date de naissance: <input type="date" name="walletDOB"></label><br>
-  <label>Ville: <input type="text" name="walletCity"></label><br>
-  <label>Méthode de paiement: <input type="text" name="walletPaymentMethod"></label><br>
-  <label>Montant dépôt: <input type="number" name="walletDepositAmount" step="0.01"></label><br>
-  <label>Password (optionnel): <input type="password" name="walletPassword"></label><br>
-  <button type="submit">Créer Wallet</button>
-  <p id="wallet-msg"></p>
-</form>
 
-<script>
-document.addEventListener("DOMContentLoaded", () => {
-  const form = document.getElementById("createWalletForm");
-  const msgBox = document.getElementById("wallet-msg");
-
-  if (!form) return;
-
-  form.addEventListener("submit", async (e) => {
-    e.preventDefault();
-
-    const fullName = form.walletFullName.value.trim();
-    const email = form.walletEmail.value.trim();
-    const country = form.walletCountry.value.trim();
-    const phone = form.walletPhone.value.trim();
-    const dateOfBirth = form.walletDOB.value.trim();
-    const city = form.walletCity.value.trim();
-    const paymentMethod = form.walletPaymentMethod.value.trim();
-    const depositAmount = form.walletDepositAmount.value.trim();
-    const password = form.walletPassword.value.trim();
-
-    if (!fullName || !email || !country) {
-      msgBox.textContent = "⚠️ Tout chan obligatwa.";
-      msgBox.style.color = "red";
-      return;
-    }
-
-    try {
-      const res = await fetch("https://examen-backend-ihlx.onrender.com/api/wallet/create", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          fullName,
-          email,
-          country,
-          phone,
-          dateOfBirth,
-          city,
-          paymentMethod,
-          depositAmount: depositAmount ? parseFloat(depositAmount) : undefined,
-          password
-        })
-      });
-
-      const data = await res.json();
-      msgBox.textContent = data.message;
-      msgBox.style.color = data.success ? "#16a34a" : "red";
-
-      if (data.success) form.reset();
-
-    } catch (err) {
-      console.error("Erreur fetch:", err);
-      msgBox.textContent = "❌ Erreur serveur, essayez plus tard.";
-      msgBox.style.color = "red";
-    }
-  });
-});
-</script>
 
   
   <!-- FOOTER -->
