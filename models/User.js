@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 
+// ----------------------- MODÈL VIP USER -----------------------
 const UserSchema = new mongoose.Schema({
   name: { type: String, required: true },
   email: { type: String, required: true, unique: true },
@@ -9,20 +10,11 @@ const UserSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now }
 });
 
-module.exports = mongoose.model("User", UserSchema, "users");
+// ⚡ Evite OverwriteModelError
+const User = mongoose.models.User || mongoose.model("User", UserSchema, "users");
 
-
-
-
-
-
-
-
-
-
-
-
-const userSchema = new mongoose.Schema({
+// ----------------------- MODÈL WALLET USER -----------------------
+const WalletUserSchema = new mongoose.Schema({
   fullName: String,
   email: String,
   country: String,
@@ -38,4 +30,7 @@ const userSchema = new mongoose.Schema({
   }
 });
 
-module.exports = mongoose.model("User", userSchema);
+const WalletUser = mongoose.models.WalletUser || mongoose.model("WalletUser", WalletUserSchema);
+
+// ----------------------- EXPORT -----------------------
+module.exports = { User, WalletUser };
