@@ -944,22 +944,13 @@ mongoose.connection.once('open', () => {
 
 // ----------------------- WALLET FOBAS SCHEMA -----------------------
 const walletSchema = new mongoose.Schema({
-  // Enfòmasyon itilizatè
   fullName: { type: String, required: true },
   email: { type: String, required: true },
-  country: { type: String, required: true },
-
-  // Opsyonèl / si ou gen lòt chan nan fòm lan
-  phone: String,
-  dateOfBirth: String,
-  city: String,
-  paymentMethod: String,
-  depositAmount: Number,
-
-  // Sekirite / password si gen kont lokal
+  recoveryEmail: String,
+  whatsapp: String,
+  birthDate: String,
+  birthPlace: String,
   passwordHash: String,
-
-  // Estatistik ak log
   status: { type: String, default: "pending" },
   createdAt: { type: Date, default: Date.now }
 });
@@ -972,36 +963,32 @@ const WalletUser = mongoose.models.WalletUser || mongoose.model("WalletUser", wa
 app.post("/api/wallet/create", async (req, res) => {
   try {
     const {
-      fullName,
-      email,
-      country,
-      phone,
-      dateOfBirth,
-      city,
-      paymentMethod,
-      depositAmount,
-      password
+      walletFullName,
+      walletEmail,
+      walletRecoveryEmail,
+      walletWhatsApp,
+      walletBirthDate,
+      walletBirthPlace,
+      walletPassword
     } = req.body;
 
-    if (!fullName || !email || !country) {
+    if (!walletFullName || !walletEmail) {
       return res.status(400).json({ success: false, message: "Tout chan obligatwa." });
     }
 
     let passwordHash;
-    if (password) {
+    if (walletPassword) {
       const bcrypt = require("bcryptjs");
-      passwordHash = await bcrypt.hash(password, 12);
+      passwordHash = await bcrypt.hash(walletPassword, 12);
     }
 
     const newWalletUser = new WalletUser({
-      fullName,
-      email,
-      country,
-      phone,
-      dateOfBirth,
-      city,
-      paymentMethod,
-      depositAmount,
+      fullName: walletFullName,
+      email: walletEmail,
+      recoveryEmail: walletRecoveryEmail,
+      whatsapp: walletWhatsApp,
+      birthDate: walletBirthDate,
+      birthPlace: walletBirthPlace,
       passwordHash,
       status: "pending",
       createdAt: new Date()
@@ -1009,19 +996,15 @@ app.post("/api/wallet/create", async (req, res) => {
 
     await newWalletUser.save();
 
-
-
-
-	// --- WhatsApp notification ---
+    // --- WhatsApp notification ---
     await axios.post("https://api.callmebot.com/whatsapp.php", null, {
       params: {
         phone: "YOUR_WHATSAPP_NUMBER",
         apikey: "YOUR_API_KEY",
-        text: `📥 NOUVO ENREGISTREMAN WALLET FOBAS\n\n👤 Non: ${fullName}\n📧 Email: ${email}\n📱 Tel: ${phone}\n🌍 Peyi: ${country}\n🏙️ Vil: ${city}\n💳 Peman: ${paymentMethod}\n💰 Depo: ${depositAmount}`
+        text: `📥 NOUVO ENREGISTREMAN WALLET FOBAS\n\n👤 Non: ${walletFullName}\n📧 Email: ${walletEmail}\n📱 Tel: ${walletWhatsApp}\n🌍 Email sekou: ${walletRecoveryEmail}\n🏙️ Lye Nésans: ${walletBirthPlace}\n📅 Dat Nésans: ${walletBirthDate}`
       }
     });
 
-	  
     return res.json({
       success: true,
       message: "Demande Wallet FOBAS anrejistre avèk siksè!"
@@ -1032,7 +1015,6 @@ app.post("/api/wallet/create", async (req, res) => {
     res.status(500).json({ success: false, message: "Erreur serveur" });
   }
 });
-
 
 
 
