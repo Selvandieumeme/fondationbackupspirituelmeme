@@ -942,11 +942,26 @@ mongoose.connection.once('open', () => {
 
 
 
-// ----------------------- IMPORTS NESSESÈ -----------------------
-const { WalletUser } = require("./models");   // <-- USE MODEL FROM models.js
 
 
-// ----------------------- ROUTE API POU KREYE WALLET FOBAS -----------------------
+
+// ----------------------- WALLET FOBAS SCHEMA -----------------------
+const walletSchema = new mongoose.Schema({
+  fullName: { type: String, required: true },
+  email: { type: String, required: true },
+  recoveryEmail: String,
+  whatsapp: String,
+  birthDate: String,
+  birthPlace: String,
+  passwordHash: String,
+  status: { type: String, default: "pending" },
+  createdAt: { type: Date, default: Date.now }
+});
+
+// ⚡ Fason san erè pou Render
+const WalletUser = mongoose.models.WalletUser || mongoose.model("WalletUser", walletSchema);
+
+// ----------------------- ROUTE API POU ENREGISTRE -----------------------
 app.post("/api/wallet/create", async (req, res) => {
   try {
     const {
@@ -959,24 +974,16 @@ app.post("/api/wallet/create", async (req, res) => {
       walletPassword
     } = req.body;
 
-    // ----------------------- VALIDASYON -----------------------
-    if (
-      !walletFullName ||
-      !walletEmail ||
-      !walletWhatsApp ||
-      !walletBirthDate ||
-      !walletBirthPlace ||
-      !walletPassword
-    ) {
-      return res
-        .status(400)
-        .json({ success: false, message: "Tout chan obligatwa." });
+    if (!walletFullName || !walletEmail) {
+      return res.status(400).json({ success: false, message: "Tout chan obligatwa." });
     }
 
-    // ----------------------- HASH PASSWORD -----------------------
-    const passwordHash = await bcrypt.hash(walletPassword, 12);
+    let passwordHash;
+    if (walletPassword) {
+      const bcrypt = require("bcryptjs");
+      passwordHash = await bcrypt.hash(walletPassword, 12);
+    }
 
-    // ----------------------- SAVE USER -----------------------
     const newWalletUser = new WalletUser({
       fullName: walletFullName,
       email: walletEmail,
@@ -991,31 +998,29 @@ app.post("/api/wallet/create", async (req, res) => {
 
     await newWalletUser.save();
 
-    // ----------------------- ENVOYE NOTIF WHATSAPP ADMIN -----------------------
-    try {
-      await axios.post("https://api.callmebot.com/whatsapp.php", null, {
-        params: {
-          phone: process.env.ADMIN_WHATSAPP,   // <--- OBLIGE mete nan Render !
-          apikey: process.env.CALLMEBOT_KEY,  // <--- OBLIGE mete nan Render !
-          text: `📥 NOUVO ENREGISTREMAN WALLET FOBAS\n\n👤 Non: ${walletFullName}\n📧 Email: ${walletEmail}\n📱 Tel: ${walletWhatsApp}\n🌍 Email sekou: ${walletRecoveryEmail}\n🏙️ Lye Nésans: ${walletBirthPlace}\n📅 Dat Nésans: ${walletBirthDate}`
-        }
-      });
-    } catch (waErr) {
-      console.log("⚠ WhatsApp notification failed:", waErr.message);
-    }
+    // --- WhatsApp notification ---
+    await axios.post("https://api.callmebot.com/whatsapp.php", null, {
+      params: {
+        phone: "YOUR_WHATSAPP_NUMBER",
+        apikey: "YOUR_API_KEY",
+        text: `📥 NOUVO ENREGISTREMAN WALLET FOBAS
+👤 Non: ${walletFullName}
+📧 Email: ${walletEmail}
+📱 Tel: ${walletWhatsApp}
+🌍 Email sekou: ${walletRecoveryEmail}
+🏙️ Lye Nésans: ${walletBirthPlace}
+📅 Dat Nésans: ${walletBirthDate}`
+      }
+    });
 
-    // ----------------------- RETOUNE BAY FRONTEND -----------------------
     return res.json({
       success: true,
       message: "Demande Wallet FOBAS anrejistre avèk siksè!"
     });
 
   } catch (err) {
-    console.error("❌ ERÈ NAN /api/wallet/create :", err);
-    return res.status(500).json({
-      success: false,
-      message: "Erreur serveur"
-    });
+    console.error("Erreur API:", err);
+    res.status(500).json({ success: false, message: "Erreur serveur" });
   }
 });
 
