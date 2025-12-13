@@ -113,19 +113,7 @@ document.getElementById("logoutBtn").addEventListener("click", () => {
     window.location.href = "connexionwalletfobas.html";
 });
 
-// Bouton aksyon (depo, retrait, transfert, change password)
-document.getElementById("depositBtn").addEventListener("click", () => {
-    actionArea.innerHTML = "<p>Fonction dépôt sera implémentée ici.</p>";
-});
-document.getElementById("withdrawBtn").addEventListener("click", () => {
-    actionArea.innerHTML = "<p>Fonction retrait sera implémentée ici.</p>";
-});
-document.getElementById("transferBtn").addEventListener("click", () => {
-    actionArea.innerHTML = "<p>Fonction transfert sera implémentée ici.</p>";
-});
-document.getElementById("changePasswordBtn").addEventListener("click", () => {
-    actionArea.innerHTML = "<p>Fonction changer le mot de passe sera implémentée ici.</p>";
-});
+
 
 
 
