@@ -106,9 +106,11 @@ document.addEventListener("DOMContentLoaded", () => {
     const birthPlace = form.walletBirthPlace.value.trim();
     const password = form.walletPassword.value;
     const passwordConfirm = form.walletPasswordConfirm.value;
+    const sponsorName = form.walletSponsorName.value.trim();
 
     // --- Validation ---
-    if (!fullName || !email || !recoveryEmail || !whatsapp || !birthDate || !birthPlace || !password || !passwordConfirm) {
+    if (!fullName || !email || !recoveryEmail || !whatsapp || !birthDate || !birthPlace || !password || !passwordConfirm ||
+  !sponsorName) {
       msgBox.textContent = "⚠️ Tout chan yo obligatwa.";
       msgBox.style.color = "red";
       return;
@@ -132,7 +134,8 @@ document.addEventListener("DOMContentLoaded", () => {
           walletWhatsApp: whatsapp,
           walletBirthDate: birthDate,
           walletBirthPlace: birthPlace,
-          walletPassword: password
+          walletPassword: password,
+          walletSponsorName: sponsorName
         })
       });
 
