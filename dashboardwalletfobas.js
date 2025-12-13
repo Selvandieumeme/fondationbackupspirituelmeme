@@ -20,6 +20,7 @@ if (!userEmail) {
 userNameEl.textContent = userName;
 userEmailEl.textContent = userEmail;
 userStatusEl.textContent = userStatus;
+walletBalanceEl.textContent = "0.00 Gourdes";
 
 // Logout
 document.getElementById("logoutBtn").addEventListener("click", () => {
