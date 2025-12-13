@@ -25,7 +25,7 @@ document.getElementById("loginBtn").addEventListener("click", async () => {
             if(data.token) localStorage.setItem("authToken", data.token);
 
             // Redireksyon sou dashboard
-            window.location.href = "dashboardwalletfobas.html";
+            window.location.href = "https://fondationbackupspirituel.com/dashboardwalletfobas.html";
         } else {
             errorMsg.textContent = data.message;
         }
