@@ -22,6 +22,91 @@ userEmailEl.textContent = userEmail;
 userStatusEl.textContent = userStatus;
 walletBalanceEl.textContent = "0.00 Gourdes";
 
+
+
+
+
+// Bouton aksyon (depo, retrait, transfert, change password)
+document.getElementById("depositBtn").addEventListener("click", () => {
+    actionArea.innerHTML = `
+        <h3>Déposer de l'argent</h3>
+        <form id="depositForm">
+            <label>Nom / Prénom :</label>
+            <input type="text" id="depositFullName" value="${userName}" readonly style="width:100%;padding:8px;margin-bottom:8px;">
+
+            <label>Email :</label>
+            <input type="email" id="depositEmail" value="${userEmail}" readonly style="width:100%;padding:8px;margin-bottom:8px;">
+
+            <label>WhatsApp :</label>
+            <input type="text" id="depositWhatsapp" value="" placeholder="+509XXXXXXXX" required style="width:100%;padding:8px;margin-bottom:8px;">
+
+            <label>Montant :</label>
+            <input type="number" id="depositAmount" placeholder="Ex: 500" required style="width:100%;padding:8px;margin-bottom:8px;">
+
+            <label>Méthode :</label>
+            <select id="depositMethod" required style="width:100%;padding:8px;margin-bottom:12px;">
+                <option value="">Choisir méthode</option>
+                <option value="Moncash">Moncash</option>
+                <option value="Natcash">Natcash</option>
+                <option value="WU">WU</option>
+                <option value="Zelle">Zelle</option>
+                <option value="Carte de Credit">Carte de Credit</option>
+            </select>
+
+            <button type="submit" style="padding:10px 20px; background:#16a34a;color:#fff;border:none;border-radius:8px;cursor:pointer;">
+                Déposer
+            </button>
+        </form>
+        <p id="depositMsg" style="margin-top:10px;"></p>
+    `;
+
+    const depositForm = document.getElementById("depositForm");
+    const depositMsg = document.getElementById("depositMsg");
+
+    depositForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        const email = document.getElementById("depositEmail").value.trim();
+        const whatsapp = document.getElementById("depositWhatsapp").value.trim();
+        const amount = parseFloat(document.getElementById("depositAmount").value);
+        const method = document.getElementById("depositMethod").value;
+
+        if (!email || !whatsapp || !amount || !method) {
+            depositMsg.textContent = "⚠️ Tout chan obligatwa.";
+            depositMsg.style.color = "red";
+            return;
+        }
+
+        depositMsg.textContent = "⏳ Dépôt en cours...";
+        depositMsg.style.color = "blue";
+
+        try {
+            const response = await fetch("https://examen-backend-ihlx.onrender.com/api/wallet/deposit", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email, amount, method })
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                depositMsg.textContent = "✅ Dépôt enregistré en Pending. L'administrateur validera bientôt.";
+                depositMsg.style.color = "#16a34a";
+                depositForm.reset();
+            } else {
+                depositMsg.textContent = "⚠️ " + data.message;
+                depositMsg.style.color = "red";
+            }
+        } catch (err) {
+            console.error(err);
+            depositMsg.textContent = "⚠️ Erreur serveur, réessayez plus tard.";
+            depositMsg.style.color = "red";
+        }
+    });
+});
+
+
+
 // Logout
 document.getElementById("logoutBtn").addEventListener("click", () => {
     localStorage.clear();
