@@ -1076,15 +1076,16 @@ app.post("/api/wallet/login", async (req, res) => {
 
         // Retounen enfòmasyon itilizate + token (si w itilize JWT)
         return res.json({
-            success: true,
-            message: "Connexion reyalize avèk siksè!",
-            data: {
-                fullName: user.fullName,
-                email: user.email,
-                status: user.status,
-                createdAt: user.createdAt
-            }
-        });
+    success: true,
+    message: "Connexion reyalize avèk siksè!",
+    data: {
+        fullName: user.fullName,
+        email: user.email,
+        status: user.status,
+        solde: user.solde,       // ajoute solde itilizatè
+        createdAt: user.createdAt
+    }
+});
 
     } catch (err) {
         console.error("Erreur login:", err);
