@@ -41,3 +41,25 @@ document.getElementById("transferBtn").addEventListener("click", () => {
 document.getElementById("changePasswordBtn").addEventListener("click", () => {
     actionArea.innerHTML = "<p>Fonction changer le mot de passe sera implémentée ici.</p>";
 });
+
+
+
+
+
+// --- Nouvo bouton Bonus ---
+const walletBonusEl = document.getElementById("walletBonus");
+if(walletBonusEl) walletBonusEl.textContent = "0.00 Gourdes"; // default bonus
+
+const bonusBtn = document.getElementById("bonusBtn");
+if(bonusBtn) {
+    bonusBtn.addEventListener("click", () => {
+        actionArea.innerHTML = `<p>Votre solde Bonus actuel : <strong>${walletBonusEl.textContent}</strong></p>
+                                <button id="withdrawBonusBtn">Retirer Bonus</button>`;
+
+        // Bouton pou retire bonus
+        document.getElementById("withdrawBonusBtn").addEventListener("click", () => {
+            alert("Demande de retrait du Bonus envoyée à l'administrateur via WhatsApp.");
+            // Isi nap ka ajoute kòd pou voye notif WhatsApp ak backend aprè
+        });
+    });
+    }
