@@ -2,6 +2,7 @@
 const userNameEl = document.getElementById("userName");
 const userEmailEl = document.getElementById("userEmail");
 const userStatusEl = document.getElementById("userStatus");
+const walletBalanceEl = document.getElementById("walletBalance");
 const actionArea = document.getElementById("actionArea");
 
 // Récupère enfòmasyon itilizate nan localStorage
