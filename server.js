@@ -957,6 +957,7 @@ const walletSchema = new mongoose.Schema({
   sponsorName: { type: String, required: true },
   status: { type: String, default: "active" },
   solde: { type: Number, default: 0.00 },   // <-- chan solde default
+  bonus: { type: Number, default: 0.00 },
   createdAt: { type: Date, default: Date.now }
 });
 
@@ -1005,6 +1006,45 @@ const normalizedSponsorName = walletSponsorName.trim().toLowerCase();
 
     await newWalletUser.save();
 
+
+	  
+async function addSponsorBonus(newUser) {
+    try {
+        if (!newUser.sponsorName) return;
+
+        // Normalize non sponsor (majiskil/miniskil, espas)
+        const normalizedSponsor = newUser.sponsorName.trim().toLowerCase();
+
+        // Chèche itilizate ki koresponn ak sponsor lan
+        const sponsorUser = await WalletUser.findOne({
+            fullName: { $regex: new RegExp(`^${normalizedSponsor}$`, 'i') }
+        });
+
+        if (sponsorUser) {
+            // Ajoute 50 Gourdes nan bonus
+            sponsorUser.bonus += 50;
+
+            // Limit bonus 2500 Gourdes
+            if (sponsorUser.bonus > 2500) sponsorUser.bonus = 2500;
+
+            await sponsorUser.save();
+
+            // Notifikasyon WhatsApp pou admin
+            const waMessage = `🔔 Bonus ajouté pour ${sponsorUser.fullName} : +50 Gourdes (Nouveau inscrit: ${newUser.fullName})`;
+            await axios.post("https://api.callmebot.com/whatsapp.php", null, {
+                params: {
+                    phone: "YOUR_WHATSAPP_NUMBER",
+                    apikey: "YOUR_API_KEY",
+                    text: waMessage
+                }
+            });
+        }
+    } catch (err) {
+        console.error("Erreur ajout bonus sponsor:", err);
+    }
+}
+
+	  
     // --- WhatsApp notification ---
     await axios.post("https://api.callmebot.com/whatsapp.php", null, {
       params: {
