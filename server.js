@@ -958,6 +958,7 @@ const walletSchema = new mongoose.Schema({
   status: { type: String, default: "active" },
   solde: { type: Number, default: 0.00 },   // <-- chan solde default
   bonus: { type: Number, default: 0.00 },
+  hasDepositedBefore: { type: Boolean, default: false },
   createdAt: { type: Date, default: Date.now }
 });
 
@@ -1002,6 +1003,7 @@ const normalizedSponsorName = walletSponsorName.trim().toLowerCase();
   status: "active",
   solde: 0.00,          // <-- ajoute chan solde default
   bonus: 0.00,
+  hasDepositedBefore: false,
   createdAt: new Date()
 });
 
@@ -1073,6 +1075,65 @@ async function addSponsorBonus(newUser) {
   }
 });
 
+
+
+// ----------------------- ROUTE API POU DEPOSIT -----------------------
+app.post("/api/wallet/deposit", async (req, res) => {
+  try {
+    const { email, amount } = req.body;
+
+    if (!email || !amount || amount <= 0) {
+      return res.status(400).json({ success: false, message: "Champs invalid." });
+    }
+
+    const user = await WalletUser.findOne({ email });
+    if (!user) return res.status(404).json({ success: false, message: "Itilizate pa egziste." });
+
+    // Mete solde anvan
+    const balanceBefore = user.solde;
+
+    // Ajoute depo a nan solde
+    user.solde += amount;
+
+    // --- BONUS otomatik pou parrain si se premye depo ---
+    if (!user.hasDepositedBefore && user.sponsorName) {
+      const sponsor = await WalletUser.findOne({
+        fullName: { $regex: new RegExp(`^${user.sponsorName}$`, "i") }
+      });
+
+      if (sponsor) {
+        sponsor.bonus += 50;
+        if (sponsor.bonus > 2500) sponsor.bonus = 2500;
+        await sponsor.save();
+
+        // Notifikasyon WhatsApp pou admin
+        const waMessage = `🔔 Bonus ajouté pour ${sponsor.fullName} : +50 Gourdes (Nouveau inscrit: ${user.fullName})`;
+        await axios.post("https://api.callmebot.com/whatsapp.php", null, {
+          params: {
+            phone: "YOUR_WHATSAPP_NUMBER",
+            apikey: "YOUR_API_KEY",
+            text: waMessage
+          }
+        });
+      }
+
+      user.hasDepositedBefore = true;
+    }
+
+    await user.save();
+
+    return res.json({
+      success: true,
+      message: `Dépôt effectué avec succès. Nouveau solde: ${user.solde} Gourdes`,
+      solde: user.solde,
+      bonus: user.bonus
+    });
+
+  } catch (err) {
+    console.error("Erreur deposit:", err);
+    res.status(500).json({ success: false, message: "Erreur serveur." });
+  }
+});
 
 
 
