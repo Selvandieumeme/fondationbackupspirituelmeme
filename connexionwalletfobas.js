@@ -25,7 +25,7 @@ document.getElementById("loginBtn").addEventListener("click", async () => {
             if(data.token) localStorage.setItem("authToken", data.token);
 
             // Redireksyon sou dashboard
-            window.location.href = "dashboard.html";
+            window.location.href = "dashboardwalletfobas.html";
         } else {
             errorMsg.textContent = data.message;
         }
