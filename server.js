@@ -955,6 +955,7 @@ const walletSchema = new mongoose.Schema({
   birthPlace: String,
   passwordHash: String,
   status: { type: String, default: "active" },
+  solde: { type: Number, default: 0.00 },   // <-- chan solde default
   createdAt: { type: Date, default: Date.now }
 });
 
@@ -984,17 +985,17 @@ app.post("/api/wallet/create", async (req, res) => {
       passwordHash = await bcrypt.hash(walletPassword, 12);
     }
 
-    const walletSchema = new mongoose.Schema({
-  fullName: { type: String, required: true },
-  email: { type: String, required: true },
-  recoveryEmail: String,
-  whatsapp: String,
-  birthDate: String,
-  birthPlace: String,
-  passwordHash: String,
-  status: { type: String, default: "active" }, // default active
-  solde: { type: Number, default: 0.00 },       // <-- Nouvo chan pou solde
-  createdAt: { type: Date, default: Date.now }
+    const newWalletUser = new WalletUser({
+  fullName: walletFullName,
+  email: walletEmail,
+  recoveryEmail: walletRecoveryEmail,
+  whatsapp: walletWhatsApp,
+  birthDate: walletBirthDate,
+  birthPlace: walletBirthPlace,
+  passwordHash,
+  status: "active",
+  solde: 0.00,          // <-- ajoute chan solde default
+  createdAt: new Date()
 });
 
     await newWalletUser.save();
