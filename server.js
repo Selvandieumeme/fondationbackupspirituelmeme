@@ -1053,6 +1053,53 @@ app.post("/api/wallet/create", async (req, res) => {
 
 
 
+// ----------------------- ROUTE API POU LOGIN -----------------------
+app.post("/api/wallet/login", async (req, res) => {
+    try {
+        const { email, password } = req.body;
+        if (!email || !password) {
+            return res.status(400).json({ success: false, message: "Tout chan obligatwa." });
+        }
+
+        const user = await WalletUser.findOne({ email });
+        if (!user) {
+            return res.status(404).json({ success: false, message: "Itilizate pa egziste." });
+        }
+
+        const bcrypt = require("bcryptjs");
+        const isMatch = await bcrypt.compare(password, user.passwordHash);
+        if (!isMatch) {
+            return res.status(401).json({ success: false, message: "Mot de pase pa kòrèk." });
+        }
+
+        // Retounen enfòmasyon itilizate + token (si w itilize JWT)
+        return res.json({
+            success: true,
+            message: "Connexion reyalize avèk siksè!",
+            data: {
+                fullName: user.fullName,
+                email: user.email,
+                status: user.status,
+                createdAt: user.createdAt
+            }
+        });
+
+    } catch (err) {
+        console.error("Erreur login:", err);
+        res.status(500).json({ success: false, message: "Erreur serveur" });
+    }
+});
+
+
+
+
+
+
+
+
+
+
+
 
 
 
