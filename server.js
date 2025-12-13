@@ -954,7 +954,7 @@ const walletSchema = new mongoose.Schema({
   birthDate: String,
   birthPlace: String,
   passwordHash: String,
-  status: { type: String, default: "pending" },
+  status: { type: String, default: "active" },
   createdAt: { type: Date, default: Date.now }
 });
 
@@ -992,7 +992,7 @@ app.post("/api/wallet/create", async (req, res) => {
       birthDate: walletBirthDate,
       birthPlace: walletBirthPlace,
       passwordHash,
-      status: "pending",
+      status: "active",
       createdAt: new Date()
     });
 
