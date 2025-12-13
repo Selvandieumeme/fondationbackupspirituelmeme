@@ -993,7 +993,7 @@ app.post("/api/wallet/create", async (req, res) => {
   birthPlace: String,
   passwordHash: String,
   status: { type: String, default: "active" }, // default active
-  solde: { type: Number, default: 0.0 },       // <-- Nouvo chan pou solde
+  solde: { type: Number, default: 0.00 },       // <-- Nouvo chan pou solde
   createdAt: { type: Date, default: Date.now }
 });
 
