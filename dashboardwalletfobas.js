@@ -26,85 +26,61 @@ walletBalanceEl.textContent = "0.00 Gourdes";
 
 
 
-// ----------------------- ROUTE API POU DEPOSIT (Pending + Historique) -----------------------
+// ----------------------- ROUTE API POU DEPOSIT -----------------------
 app.post("/api/wallet/deposit", async (req, res) => {
-    try {
-        const { email, amount, method } = req.body;
+  try {
+    const { email, amount, method } = req.body;
 
-        if (!email || !amount || amount <= 0 || !method) {
-            return res.status(400).json({ success: false, message: "Champs invalid." });
-        }
-
-        const user = await WalletUser.findOne({ email });
-        if (!user) {
-            return res.status(404).json({ success: false, message: "Itilizate pa egziste." });
-        }
-
-        // ✅ SÉCURITÉ ABSOLUE : forcer solde numérique
-        const safeBalance = Number(user.solde) || 0;
-
-        // ---------------- TRANSACTION SCHEMA SAFE ----------------
-        const Transaction =
-            mongoose.models.Transaction ||
-            mongoose.model(
-                "Transaction",
-                new mongoose.Schema({
-                    userId: { type: mongoose.Schema.Types.ObjectId, ref: "WalletUser", required: true },
-                    type: { type: String, enum: ["deposit"], required: true },
-                    amount: { type: Number, required: true },
-                    balanceBefore: { type: Number, required: true },
-                    balanceAfter: { type: Number, required: true },
-                    method: String,
-                    status: { type: String, default: "Pending" },
-                    createdAt: { type: Date, default: Date.now }
-                })
-            );
-
-        // ---------------- CREATE PENDING TRANSACTION ----------------
-        const transaction = new Transaction({
-            userId: user._id,
-            type: "deposit",
-            amount,
-            balanceBefore: safeBalance, // ✅ JAMAIS undefined
-            balanceAfter: safeBalance,  // ✅ JAMAIS undefined
-            method,
-            status: "Pending"
-        });
-
-        await transaction.save();
-
-        // ---------------- WHATSAPP ADMIN NOTIFICATION ----------------
-        const adminName = "MEME Selvandieu";
-
-        let adminNumber = "+50946057952"; // default
-        if (method === "Natcash") adminNumber = "+50941306268";
-
-        const waMessage = `📥 DEMANDE DÉPÔT (PENDING)
-👤 Client: ${user.fullName}
-📧 Email: ${user.email}
-📱 WhatsApp: ${user.whatsapp || "Non fourni"}
-💰 Montant: ${amount} HTG
-💳 Méthode: ${method}
-👨‍💼 Admin: ${adminName}`;
-
-        await axios.post("https://api.callmebot.com/whatsapp.php", null, {
-            params: {
-                phone: adminNumber,
-                apikey: "YOUR_API_KEY",
-                text: waMessage
-            }
-        });
-
-        return res.json({
-            success: true,
-            message: "Dépôt enregistré en Pending. L'administrateur validera bientôt.",
-            transactionId: transaction._id
-        });
-
-    } catch (err) {
-        console.error("Erreur deposit API:", err);
-        return res.status(500).json({ success: false, message: "Erreur serveur." });
+    if (!email || !amount || amount <= 0 || !method) {
+      return res.status(400).json({ success: false, message: "Champs invalid." });
     }
+
+    const user = await WalletUser.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ success: false, message: "Itilizate pa egziste." });
+    }
+
+    const balanceBefore = Number(user.solde);
+
+    const transaction = new Transaction({
+      userId: user._id,
+      type: "deposit",
+      amount: Number(amount),
+      balanceBefore: balanceBefore,
+      balanceAfter: balanceBefore, // pending
+      method,
+      status: "Pending"
+    });
+
+    await transaction.save();
+
+    // 📲 WhatsApp Admin
+    const adminNumber = "+50946057952";
+    const waMessage = `📥 NOUVELLE DEMANDE DEPOT
+👤 ${user.fullName}
+📧 ${user.email}
+💰 Montant: ${amount} G
+💳 Méthode: ${method}
+📱 WhatsApp client: ${user.whatsapp}
+Statut: PENDING`;
+
+    await axios.post("https://api.callmebot.com/whatsapp.php", null, {
+      params: {
+        phone: adminNumber,
+        apikey: "YOUR_API_KEY",
+        text: waMessage
+      }
+    });
+
+    return res.json({
+      success: true,
+      message: "Dépôt enregistré en Pending."
+    });
+
+  } catch (err) {
+    console.error("Erreur deposit API:", err);
+    return res.status(500).json({ success: false, message: "Erreur serveur." });
+  }
 });
 
 
