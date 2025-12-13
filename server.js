@@ -984,17 +984,18 @@ app.post("/api/wallet/create", async (req, res) => {
       passwordHash = await bcrypt.hash(walletPassword, 12);
     }
 
-    const newWalletUser = new WalletUser({
-      fullName: walletFullName,
-      email: walletEmail,
-      recoveryEmail: walletRecoveryEmail,
-      whatsapp: walletWhatsApp,
-      birthDate: walletBirthDate,
-      birthPlace: walletBirthPlace,
-      passwordHash,
-      status: "active",
-      createdAt: new Date()
-    });
+    const walletSchema = new mongoose.Schema({
+  fullName: { type: String, required: true },
+  email: { type: String, required: true },
+  recoveryEmail: String,
+  whatsapp: String,
+  birthDate: String,
+  birthPlace: String,
+  passwordHash: String,
+  status: { type: String, default: "active" }, // default active
+  solde: { type: Number, default: 0.0 },       // <-- Nouvo chan pou solde
+  createdAt: { type: Date, default: Date.now }
+});
 
     await newWalletUser.save();
 
