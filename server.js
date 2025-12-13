@@ -954,6 +954,7 @@ const walletSchema = new mongoose.Schema({
   birthDate: String,
   birthPlace: String,
   passwordHash: String,
+  sponsorName: { type: String, required: true },
   status: { type: String, default: "active" },
   solde: { type: Number, default: 0.00 },   // <-- chan solde default
   createdAt: { type: Date, default: Date.now }
@@ -972,8 +973,11 @@ app.post("/api/wallet/create", async (req, res) => {
       walletWhatsApp,
       walletBirthDate,
       walletBirthPlace,
-      walletPassword
+      walletPassword,
+	  walletSponsorName
     } = req.body;
+	  
+const normalizedSponsorName = walletSponsorName.trim().toLowerCase();
 
     if (!walletFullName || !walletEmail) {
       return res.status(400).json({ success: false, message: "Tout chan obligatwa." });
@@ -993,6 +997,7 @@ app.post("/api/wallet/create", async (req, res) => {
   birthDate: walletBirthDate,
   birthPlace: walletBirthPlace,
   passwordHash,
+  sponsorName: normalizedSponsorName,
   status: "active",
   solde: 0.00,          // <-- ajoute chan solde default
   createdAt: new Date()
