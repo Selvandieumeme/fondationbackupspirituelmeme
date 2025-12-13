@@ -1001,6 +1001,7 @@ const normalizedSponsorName = walletSponsorName.trim().toLowerCase();
   sponsorName: normalizedSponsorName,
   status: "active",
   solde: 0.00,          // <-- ajoute chan solde default
+  bonus: 0.00,
   createdAt: new Date()
 });
 
@@ -1056,7 +1057,8 @@ async function addSponsorBonus(newUser) {
 📱 Tel: ${walletWhatsApp}
 🌍 Email sekou: ${walletRecoveryEmail}
 🏙️ Lye Nésans: ${walletBirthPlace}
-📅 Dat Nésans: ${walletBirthDate}`
+📅 Dat Nésans: ${walletBirthDate}
+🧑‍🤝‍🧑 Parrain/Marraine: ${walletSponsorName}`
       }
     });
 
