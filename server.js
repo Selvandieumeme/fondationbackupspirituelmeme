@@ -1076,65 +1076,80 @@ async function addSponsorBonus(newUser) {
 });
 
 
-
-// ----------------------- ROUTE API POU DEPOSIT -----------------------
+// ----------------------- ROUTE API POU DEPOSIT (Pending ak istorik) -----------------------
 app.post("/api/wallet/deposit", async (req, res) => {
-  try {
-    const { email, amount } = req.body;
+    try {
+        const { email, amount, method } = req.body;
 
-    if (!email || !amount || amount <= 0) {
-      return res.status(400).json({ success: false, message: "Champs invalid." });
-    }
+        if (!email || !amount || amount <= 0 || !method) {
+            return res.status(400).json({ success: false, message: "Champs invalid." });
+        }
 
-    const user = await WalletUser.findOne({ email });
-    if (!user) return res.status(404).json({ success: false, message: "Itilizate pa egziste." });
+        const user = await WalletUser.findOne({ email });
+        if (!user) {
+            return res.status(404).json({ success: false, message: "Itilizate pa egziste." });
+        }
 
-    // Mete solde anvan
-    const balanceBefore = user.solde;
+        // Kreye dokiman tranzaksyon depo pending
+        const Transaction = mongoose.models.Transaction || mongoose.model(
+            "Transaction",
+            new mongoose.Schema({
+                userId: { type: mongoose.Schema.Types.ObjectId, ref: "WalletUser", required: true },
+                type: { type: String, enum: ["deposit"], required: true },
+                amount: { type: Number, required: true },
+                balanceBefore: { type: Number, required: true },
+                balanceAfter: { type: Number, required: true },
+                method: { type: String },
+                status: { type: String, default: "Pending" },
+                createdAt: { type: Date, default: Date.now }
+            })
+        );
 
-    // Ajoute depo a nan solde
-    user.solde += amount;
+        const transaction = new Transaction({
+            userId: user._id,
+            type: "deposit",
+            amount,
+            balanceBefore: user.solde,
+            balanceAfter: user.solde, // Poko ajoute montan jiskaske admin valide
+            method,
+            status: "Pending"
+        });
 
-    // --- BONUS otomatik pou parrain si se premye depo ---
-    if (!user.hasDepositedBefore && user.sponsorName) {
-      const sponsor = await WalletUser.findOne({
-        fullName: { $regex: new RegExp(`^${user.sponsorName}$`, "i") }
-      });
+        await transaction.save();
 
-      if (sponsor) {
-        sponsor.bonus += 50;
-        if (sponsor.bonus > 2500) sponsor.bonus = 2500;
-        await sponsor.save();
+        // --- Determiner admin selon metode depo ---
+        let adminNumber;
+        if (method.toLowerCase() === "moncash") adminNumber = "+50946057952";
+        else if (method.toLowerCase() === "natcash") adminNumber = "+50941306268";
+        else adminNumber = "+50946057952"; // Default pou WU, Zelle, Carte
+
+        const adminName = "MEME Selvandieu";
 
         // Notifikasyon WhatsApp pou admin
-        const waMessage = `🔔 Bonus ajouté pour ${sponsor.fullName} : +50 Gourdes (Nouveau inscrit: ${user.fullName})`;
+        const waMessage = `📥 Dépôt demandé par ${user.fullName} (${user.email})
+Montant: ${amount} Gourdes
+Méthode: ${method}
+WhatsApp: ${user.whatsapp}
+Admin: ${adminName}`;
         await axios.post("https://api.callmebot.com/whatsapp.php", null, {
-          params: {
-            phone: "YOUR_WHATSAPP_NUMBER",
-            apikey: "YOUR_API_KEY",
-            text: waMessage
-          }
+            params: {
+                phone: adminNumber,
+                apikey: "YOUR_API_KEY",
+                text: waMessage
+            }
         });
-      }
 
-      user.hasDepositedBefore = true;
+        return res.json({
+            success: true,
+            message: "Dépôt enregistré en Pending. L'administrateur validera bientôt.",
+            transactionId: transaction._id
+        });
+
+    } catch (err) {
+        console.error("Erreur deposit API:", err);
+        res.status(500).json({ success: false, message: "Erreur serveur." });
     }
-
-    await user.save();
-
-    return res.json({
-      success: true,
-      message: `Dépôt effectué avec succès. Nouveau solde: ${user.solde} Gourdes`,
-      solde: user.solde,
-      bonus: user.bonus
-    });
-
-  } catch (err) {
-    console.error("Erreur deposit:", err);
-    res.status(500).json({ success: false, message: "Erreur serveur." });
-  }
 });
-
 
 
 
