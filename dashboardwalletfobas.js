@@ -122,7 +122,6 @@ document.getElementById("depositBtn").addEventListener("click", () => {
     });
 });
 
-
 // Logout
 document.getElementById("logoutBtn").addEventListener("click", () => {
     localStorage.clear();
