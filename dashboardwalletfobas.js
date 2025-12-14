@@ -20,7 +20,8 @@ if (!userEmail) {
 userNameEl.textContent = userName;
 userEmailEl.textContent = userEmail;
 userStatusEl.textContent = userStatus;
-walletBalanceEl.textContent = "0.00 Gourdes";
+let solde = parseFloat(walletBalanceEl.textContent) || 0;
+walletBalanceEl.textContent = solde.toFixed(2) + " Gourdes";
 
 
 
@@ -71,10 +72,10 @@ document.getElementById("depositBtn").addEventListener("click", () => {
         const amount = parseFloat(document.getElementById("depositAmount").value);
         const method = document.getElementById("depositMethod").value;
 
-        if (!email || !whatsapp || !amount || !method) {
-            depositMsg.textContent = "⚠️ Tout chan obligatwa.";
-            depositMsg.style.color = "red";
-            return;
+        if (!email || !whatsapp || isNaN(amount) || amount <= 0 || !method) {
+    depositMsg.textContent = "⚠️ Tout chan obligatwa ak kantite valab (>0).";
+    depositMsg.style.color = "red";
+    return;
         }
 
         depositMsg.textContent = "⏳ Dépôt en cours...";
@@ -120,7 +121,7 @@ document.getElementById("logoutBtn").addEventListener("click", () => {
 
 // --- Nouvo bouton Bonus ---
 const walletBonusEl = document.getElementById("walletBonus");
-if(walletBonusEl) walletBonusEl.textContent = "0.00 Gourdes"; // default bonus
+if(walletBonusEl) walletBonusEl.textContent = (0).toFixed(2) + " Gourdes"; // default bonus
 
 const bonusBtn = document.getElementById("bonusBtn");
 if(bonusBtn) {
