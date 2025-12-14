@@ -1105,12 +1105,16 @@ app.post("/api/wallet/deposit", async (req, res) => {
             })
         );
 
+		// Garanti default 0 si undefined
+		const balanceBefore = user.solde ?? 0;
+		const balanceAfter = balanceBefore; // Poko ajoute montan jiskaske admin valide
+		
         const transaction = new Transaction({
             userId: user._id,
             type: "deposit",
             amount,
-            balanceBefore: user.solde,
-            balanceAfter: user.solde, // Poko ajoute montan jiskaske admin valide
+            balanceBefore,
+            balanceAfter, 
             method,
             status: "Pending"
         });
