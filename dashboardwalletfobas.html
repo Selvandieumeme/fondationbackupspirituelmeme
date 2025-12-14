@@ -36,5 +36,66 @@
 </section>
 </div>
 <script src="dashboardwalletfobas.js"></script>
+
+
+
+
+
+
+
+
+
+<!-- STYLE KONTEUR -->
+<style>
+  #fbs-counter {
+    position: absolute; 
+    top: 10px; 
+    left: 10px; 
+    display: flex; 
+    align-items: center; 
+    gap: 8px;
+    background: #ffffffdd; 
+    padding: 3px 8px; 
+    border-radius: 12px;
+    font-family: Arial, sans-serif;
+    font-size: 12px;
+    font-weight: bold;
+    color: #222;
+    box-shadow: 0 0 5px rgba(0,0,0,0.2);
+    z-index: 9999;
+  }
+  #fbs-counter iframe, 
+  #fbs-counter div {
+    display: inline-block;
+    vertical-align: middle;
+  }
+</style>
+
+
+<!-- STYLE POU POZISYON KONTEUR -->
+<style>
+  #wau-counter {
+    position: fixed;   /* Toujou vizib */
+    top: 10px;         /* Anlè */
+    left: 10px;        /* Agoch */
+    z-index: 9999;
+    pointer-events: none; /* Bloke klik, anpeche redireksyon */
+  }
+
+  #wau-counter iframe,
+  #wau-counter canvas {
+    pointer-events: none !important; /* Asire pa gen klik ditou */
+  }
+</style>
+
+<!-- KONTEUR (afiche anlè a goch) -->
+<div id="wau-counter">
+  <script id="_wauxwz">
+    var _wau = _wau || []; 
+    _wau.push(["dynamic", "45b8ju9ecv", "xwz", "c4302bffffff", "small"]);
+  </script>
+  <script async src="//waust.at/d.js"></script>
+</div>
+
 </body>
 </html>
