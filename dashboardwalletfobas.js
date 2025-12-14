@@ -27,7 +27,7 @@ walletBalanceEl.textContent = solde.toFixed(2) + " Gourdes";
 
 
 
-// Bouton aksyon (depo, retrait, transfert, change password) 
+// Bouton aksyon (depo)
 document.getElementById("depositBtn").addEventListener("click", () => {
     actionArea.innerHTML = `
         <h3>Déposer de l'argent</h3>
@@ -39,7 +39,7 @@ document.getElementById("depositBtn").addEventListener("click", () => {
             <input type="email" id="depositEmail" value="${userEmail}" readonly style="width:100%;padding:8px;margin-bottom:8px;">
 
             <label>WhatsApp :</label>
-            <input type="text" id="depositWhatsapp" value="" placeholder="+509XXXXXXXX" required style="width:100%;padding:8px;margin-bottom:8px;">
+            <input type="text" id="depositWhatsapp" placeholder="+509XXXXXXXX" required style="width:100%;padding:8px;margin-bottom:8px;">
 
             <label>Montant :</label>
             <input type="number" id="depositAmount" placeholder="Ex: 500" required style="width:100%;padding:8px;margin-bottom:8px;">
@@ -54,7 +54,7 @@ document.getElementById("depositBtn").addEventListener("click", () => {
                 <option value="Carte de Credit">Carte de Credit</option>
             </select>
 
-            <button type="submit" style="padding:10px 20px; background:#16a34a;color:#fff;border:none;border-radius:8px;cursor:pointer;">
+            <button type="submit" style="padding:10px 20px; background:#16a34a;color:#fff;border:none;border-radius:8px;">
                 Déposer
             </button>
         </form>
@@ -73,9 +73,9 @@ document.getElementById("depositBtn").addEventListener("click", () => {
         const method = document.getElementById("depositMethod").value;
 
         if (!email || !whatsapp || isNaN(amount) || amount <= 0 || !method) {
-    depositMsg.textContent = "⚠️ Tout chan obligatwa ak kantite valab (>0).";
-    depositMsg.style.color = "red";
-    return;
+            depositMsg.textContent = "⚠️ Tout chan obligatwa ak kantite valab (>0).";
+            depositMsg.style.color = "red";
+            return;
         }
 
         depositMsg.textContent = "⏳ Dépôt en cours...";
@@ -94,12 +94,9 @@ document.getElementById("depositBtn").addEventListener("click", () => {
                 depositMsg.textContent = "✅ Dépôt enregistré en Pending. L'administrateur validera bientôt.";
                 depositMsg.style.color = "#16a34a";
 
-
-                
-
                 // 🔔 NOTIF ADMIN WHATSAPP
-    const adminNumber = "50946057952";
-    const waMessage = `📥 NOUVO DÉPÔT WALLET FOBAS
+                const adminNumber = "50946057952";
+                const waMessage = `📥 NOUVO DÉPÔT WALLET FOBAS
 
 👤 ${userName}
 📧 Email: ${email}
@@ -109,14 +106,9 @@ document.getElementById("depositBtn").addEventListener("click", () => {
 
 ⏳ Statut: Pending (à valider)`;
 
-    const waLink = "https://wa.me/" + adminNumber + "?text=" + encodeURIComponent(waMessage);
-    window.open(waLink, "_blank");
+                const waLink = "https://wa.me/" + adminNumber + "?text=" + encodeURIComponent(waMessage);
+                window.open(waLink, "_blank");
 
-
-                
-
-    depositForm.reset();
-}
                 depositForm.reset();
             } else {
                 depositMsg.textContent = "⚠️ " + data.message;
