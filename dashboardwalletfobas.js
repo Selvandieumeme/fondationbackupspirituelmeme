@@ -93,6 +93,30 @@ document.getElementById("depositBtn").addEventListener("click", () => {
             if (data.success) {
                 depositMsg.textContent = "✅ Dépôt enregistré en Pending. L'administrateur validera bientôt.";
                 depositMsg.style.color = "#16a34a";
+
+
+                
+
+                // 🔔 NOTIF ADMIN WHATSAPP
+    const adminNumber = "50946057952";
+    const waMessage = `📥 NOUVO DÉPÔT WALLET FOBAS
+
+👤 ${userName}
+📧 Email: ${email}
+📱 WhatsApp client: ${whatsapp}
+💰 Montant: ${amount} Gourdes
+💳 Méthode: ${method}
+
+⏳ Statut: Pending (à valider)`;
+
+    const waLink = "https://wa.me/" + adminNumber + "?text=" + encodeURIComponent(waMessage);
+    window.open(waLink, "_blank");
+
+
+                
+
+    depositForm.reset();
+}
                 depositForm.reset();
             } else {
                 depositMsg.textContent = "⚠️ " + data.message;
