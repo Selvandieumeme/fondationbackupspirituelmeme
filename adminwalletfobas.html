@@ -112,19 +112,29 @@ document.getElementById('executeBtn').addEventListener('click', async () => {
   msgEl.textContent = "⏳ Execution en cours...";
 
   try {
-    const res = await fetch(https://examen-backend-ihlx.onrender.com/api/admin/action-transaction', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ adminPassword, type, userFullName, amount })
-    });
+    const res = await fetch(
+      "https://examen-backend-ihlx.onrender.com/api/admin/action-transaction",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          adminPassword: adminPassword,
+          type: type,
+          userFullName: userFullName,
+          amount: amount
+        })
+      }
+    );
 
     const data = await res.json();
 
     if (data.success) {
-      msgEl.textContent = `✅ Aksyon egzekite. Solde: ${data.solde}, Bonus: ${data.bonus}`;
+      msgEl.textContent =
+        "✅ Aksyon egzekite. Solde: " + data.solde + ", Bonus: " + data.bonus;
     } else {
-      msgEl.textContent = `⚠️ ${data.message}`;
+      msgEl.textContent = "⚠️ " + data.message;
     }
+
   } catch (err) {
     console.error(err);
     msgEl.textContent = "⚠️ Erreur serveur";
