@@ -25,7 +25,7 @@ userStatusEl.textContent = userStatus;
 // --- Fonksyon pou chaje solde ak bonus ---
 async function loadWallet() {
     try {
-        const response = await fetch(`https://examen-backend-ihlx.onrender.com/api/wallet/me?fullName=${encodeURIComponent(userName)}`);
+        const response = await fetch(`https://examen-backend-ihlx.onrender.com/api/wallet/me?email=${encodeURIComponent(userEmail)}`);
         const data = await response.json();
 
         if (data.success) {
