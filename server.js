@@ -948,6 +948,7 @@ mongoose.connection.once('open', () => {
 // ----------------------- WALLET FOBAS SCHEMA -----------------------
 const transactionSchema = new mongoose.Schema({
   userId: { type: mongoose.Schema.Types.ObjectId, ref: "WalletUser", required: true },
+  fullName: { type: String, required: true }, // <-- ajoute chan fullName
   type: { type: String, enum: ["deposit", "withdraw", "bonus"], required: true },
   amount: { type: Number, required: true },
   balanceBefore: { type: Number, required: true },
@@ -957,8 +958,7 @@ const transactionSchema = new mongoose.Schema({
   status: { type: String, default: "Pending" },
   createdAt: { type: Date, default: Date.now }
 });
-const Transaction = mongoose.models.Transaction || mongoose.model("Transaction", transactionSchema);
-
+const Transaction = mongoose.models.transactions || mongoose.model("transactions", transactionSchema);
 
 // ----------------------- LISTE WALLET USERS -----------------------
 app.get("/api/wallet/users", async (req, res) => {
@@ -1096,20 +1096,7 @@ app.post("/api/wallet/deposit", async (req, res) => {
             return res.status(404).json({ success: false, message: "Itilizate pa egziste." });
         }
 
-        // Kreye dokiman tranzaksyon depo pending
-        const Transaction = mongoose.models.Transaction || mongoose.model(
-            "Transaction",
-            new mongoose.Schema({
-                userId: { type: mongoose.Schema.Types.ObjectId, ref: "WalletUser", required: true },
-                type: { type: String, enum: ["deposit"], required: true },
-                amount: { type: Number, required: true },
-                balanceBefore: { type: Number, required: true },
-                balanceAfter: { type: Number, required: true },
-                method: { type: String },
-                status: { type: String, default: "Pending" },
-                createdAt: { type: Date, default: Date.now }
-            })
-        );
+        
 
 		// Garanti default 0 si undefined
 		const balanceBefore = user.solde ?? 0;
@@ -1117,7 +1104,8 @@ app.post("/api/wallet/deposit", async (req, res) => {
 		
         const transaction = new Transaction({
             userId: user._id,
-            type: "deposit",
+            fullName: user.fullName,
+			type: "deposit",
             amount,
             balanceBefore,
             balanceAfter, 
@@ -1184,7 +1172,8 @@ app.post("/api/admin/action-transaction", async (req, res) => {
       return res.status(400).json({ success: false, message: "Type transaction pa valide" });
     }
 
-    // Jwenn itilizatè a
+    // --------------------- Jwenn itilizatè a via transactions ---------------------
+    // Nou itilize WalletUser pou jwenn itilizatè ekzak
     const user = await WalletUser.findOne({ fullName: userFullName });
     if (!user) {
       return res.status(404).json({ success: false, message: "Itilizatè pa jwenn" });
@@ -1220,7 +1209,20 @@ app.post("/api/admin/action-transaction", async (req, res) => {
         break;
     }
 
-    // Kreye nouvo tranzaksyon nan collection "transactions"
+    // --------------------- Kreye nouvo tranzaksyon nan collection "transactions" ---------------------
+    // Asire li itilize collection ki kòrèk: "transactions"
+    const Transaction = mongoose.models.transactions || mongoose.model("transactions", new mongoose.Schema({
+      userId: { type: mongoose.Schema.Types.ObjectId, ref: "WalletUser", required: true },
+      type: { type: String, enum: ["deposit", "withdraw", "bonus"], required: true },
+      amount: { type: Number, required: true },
+      balanceBefore: { type: Number, required: true },
+      balanceAfter: { type: Number, required: true },
+      bonusBefore: { type: Number, default: 0 },
+      bonusAfter: { type: Number, default: 0 },
+      status: { type: String, default: "active" },
+      createdAt: { type: Date, default: Date.now }
+    }));
+
     const transaction = new Transaction({
       userId: user._id,
       type,
@@ -1247,7 +1249,6 @@ app.post("/api/admin/action-transaction", async (req, res) => {
     res.status(500).json({ success: false, message: "Erreur serveur" });
   }
 });
-
 
 
 
