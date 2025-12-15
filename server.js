@@ -983,6 +983,30 @@ const transactionSchema = new mongoose.Schema({
 
 const Transaction = mongoose.models.transactions || mongoose.model("transactions", transactionSchema);
 
+
+
+
+
+app.get("/api/wallet/me", async (req, res) => {
+  try {
+    const email = req.query.email; // email itilizate soti nan localStorage
+    if (!email) return res.status(400).json({ success: false, message: "Email obligatwa" });
+
+    const user = await WalletUser.findOne({ email });
+    if (!user) return res.status(404).json({ success: false, message: "Itilizate pa jwenn" });
+
+    res.json({
+      success: true,
+      solde: user.solde,
+      bonus: user.bonus || 0
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, message: "Erreur serveur" });
+  }
+});
+
+
 // ----------------------- LISTE WALLET USERS -----------------------
 app.get("/api/wallet/users", async (req, res) => {
   try {
