@@ -1,14 +1,15 @@
-// dashboardwalletfobas.js
+// ================= DASHBOARD WALLET FOBAS =================
 const userNameEl = document.getElementById("userName");
 const userEmailEl = document.getElementById("userEmail");
 const userStatusEl = document.getElementById("userStatus");
 const walletBalanceEl = document.getElementById("walletBalance");
+const walletBonusEl = document.getElementById("walletBonus");
 const actionArea = document.getElementById("actionArea");
 
 // Récupère enfòmasyon itilizate nan localStorage
-const userName = localStorage.getItem("userName"); // pran non ki sòti nan login
+const userName = localStorage.getItem("userName");
 const userEmail = localStorage.getItem("userEmail");
-const userStatus = localStorage.getItem("userStatus") || "active"; // si pa gen status, default active
+const userStatus = localStorage.getItem("userStatus") || "active";
 
 // Si itilizate pa konekte, redireksyon sou login
 if (!userEmail) {
@@ -20,174 +21,137 @@ if (!userEmail) {
 userNameEl.textContent = userName;
 userEmailEl.textContent = userEmail;
 userStatusEl.textContent = userStatus;
-let solde = parseFloat(walletBalanceEl.textContent) || 0;
-walletBalanceEl.textContent = solde.toFixed(2) + " Gourdes";
 
-
-
-
-
-
+// --- Fonksyon pou chaje solde ak bonus ---
 async function loadWallet() {
     try {
         const response = await fetch(`https://examen-backend-ihlx.onrender.com/api/wallet/me?email=${userEmail}`);
         const data = await response.json();
+
         if (data.success) {
             walletBalanceEl.textContent = parseFloat(data.solde || 0).toFixed(2) + " Gourdes";
             if(walletBonusEl) walletBonusEl.textContent = parseFloat(data.bonus || 0).toFixed(2) + " Gourdes";
+        } else {
+            walletBalanceEl.textContent = (0).toFixed(2) + " Gourdes";
+            if(walletBonusEl) walletBonusEl.textContent = (0).toFixed(2) + " Gourdes";
         }
     } catch(err) {
         console.error("Erreur loading wallet:", err);
-        walletBalanceEl.textContent = parseFloat(solde).toFixed(2) + " Gourdes"; // fallback
+        walletBalanceEl.textContent = (0).toFixed(2) + " Gourdes";
         if(walletBonusEl) walletBonusEl.textContent = (0).toFixed(2) + " Gourdes";
     }
 }
+loadWallet(); // rele imedyatman sou load paj
 
+// =================== DEPO ===================
+const depositBtn = document.getElementById("depositBtn");
+if(depositBtn) {
+    depositBtn.addEventListener("click", () => {
+        actionArea.innerHTML = `
+            <h3>Déposer de l'argent</h3>
+            <form id="depositForm">
+                <label>Nom / Prénom :</label>
+                <input type="text" id="depositFullName" value="${userName}" readonly style="width:100%;padding:8px;margin-bottom:8px;">
+                <label>Email :</label>
+                <input type="email" id="depositEmail" value="${userEmail}" readonly style="width:100%;padding:8px;margin-bottom:8px;">
+                <label>WhatsApp :</label>
+                <input type="text" id="depositWhatsapp" placeholder="+509XXXXXXXX" required style="width:100%;padding:8px;margin-bottom:8px;">
+                <label>Montant :</label>
+                <input type="number" id="depositAmount" placeholder="Ex: 500" required style="width:100%;padding:8px;margin-bottom:8px;">
+                <label>Méthode :</label>
+                <select id="depositMethod" required style="width:100%;padding:8px;margin-bottom:12px;">
+                    <option value="">Choisir méthode</option>
+                    <option value="Moncash">Moncash</option>
+                    <option value="Natcash">Natcash</option>
+                    <option value="WU">WU</option>
+                    <option value="Zelle">Zelle</option>
+                    <option value="Carte de Credit">Carte de Credit</option>
+                </select>
+                <button type="submit" style="padding:10px 20px; background:#16a34a;color:#fff;border:none;border-radius:8px;">Déposer</button>
+            </form>
+            <p id="depositMsg" style="margin-top:10px;"></p>
+        `;
 
+        const depositForm = document.getElementById("depositForm");
+        const depositMsg = document.getElementById("depositMsg");
 
+        depositForm.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const email = document.getElementById("depositEmail").value.trim();
+            const whatsapp = document.getElementById("depositWhatsapp").value.trim();
+            const amount = parseFloat(document.getElementById("depositAmount").value);
+            const method = document.getElementById("depositMethod").value;
 
+            if (!email || !whatsapp || isNaN(amount) || amount <= 0 || !method) {
+                depositMsg.textContent = "⚠️ Tout chan obligatwa ak kantite valab (>0).";
+                depositMsg.style.color = "red";
+                return;
+            }
 
-// Bouton aksyon (depo)
-document.getElementById("depositBtn").addEventListener("click", () => {
-    actionArea.innerHTML = `
-        <h3>Déposer de l'argent</h3>
-        <form id="depositForm">
-            <label>Nom / Prénom :</label>
-            <input type="text" id="depositFullName" value="${userName}" readonly style="width:100%;padding:8px;margin-bottom:8px;">
+            depositMsg.textContent = "⏳ Dépôt en cours...";
+            depositMsg.style.color = "blue";
 
-            <label>Email :</label>
-            <input type="email" id="depositEmail" value="${userEmail}" readonly style="width:100%;padding:8px;margin-bottom:8px;">
+            try {
+                const response = await fetch("https://examen-backend-ihlx.onrender.com/api/wallet/deposit", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ email, amount, method })
+                });
 
-            <label>WhatsApp :</label>
-            <input type="text" id="depositWhatsapp" placeholder="+509XXXXXXXX" required style="width:100%;padding:8px;margin-bottom:8px;">
+                const data = await response.json();
 
-            <label>Montant :</label>
-            <input type="number" id="depositAmount" placeholder="Ex: 500" required style="width:100%;padding:8px;margin-bottom:8px;">
+                if (data.success) {
+                    depositMsg.textContent = "✅ Dépôt enregistré en Pending. L'administrateur validera bientôt.";
+                    depositMsg.style.color = "#16a34a";
 
-            <label>Méthode :</label>
-            <select id="depositMethod" required style="width:100%;padding:8px;margin-bottom:12px;">
-                <option value="">Choisir méthode</option>
-                <option value="Moncash">Moncash</option>
-                <option value="Natcash">Natcash</option>
-                <option value="WU">WU</option>
-                <option value="Zelle">Zelle</option>
-                <option value="Carte de Credit">Carte de Credit</option>
-            </select>
+                    loadWallet(); // refresh solde + bonus
 
-            <button type="submit" style="padding:10px 20px; background:#16a34a;color:#fff;border:none;border-radius:8px;">
-                Déposer
-            </button>
-        </form>
-        <p id="depositMsg" style="margin-top:10px;"></p>
-    `;
-
-    const depositForm = document.getElementById("depositForm");
-    const depositMsg = document.getElementById("depositMsg");
-
-    depositForm.addEventListener("submit", async (e) => {
-        e.preventDefault();
-
-        const email = document.getElementById("depositEmail").value.trim();
-        const whatsapp = document.getElementById("depositWhatsapp").value.trim();
-        const amount = parseFloat(document.getElementById("depositAmount").value);
-        const method = document.getElementById("depositMethod").value;
-
-        if (!email || !whatsapp || isNaN(amount) || amount <= 0 || !method) {
-            depositMsg.textContent = "⚠️ Tout chan obligatwa ak kantite valab (>0).";
-            depositMsg.style.color = "red";
-            return;
-        }
-
-        depositMsg.textContent = "⏳ Dépôt en cours...";
-        depositMsg.style.color = "blue";
-
-        try {
-            const response = await fetch("https://examen-backend-ihlx.onrender.com/api/wallet/deposit", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ email, amount, method })
-            });
-
-            const data = await response.json();
-
-            if (data.success) {
-    depositMsg.textContent = "✅ Dépôt enregistré en Pending. L'administrateur validera bientôt.";
-    depositMsg.style.color = "#16a34a";
-
-    // 🔄 Refresh solde aktyèl itilizate a pou montre li imedyatman
-    loadWallet();
-
-    // 🔔 NOTIF ADMIN WHATSAPP
-    const adminNumber = "50946057952";
-    const waMessage = `📥 NOUVO DÉPÔT WALLET FOBAS
+                    const adminNumber = "50946057952";
+                    const waMessage = `📥 NOUVO DÉPÔT WALLET FOBAS
 
 👤 ${userName}
 📧 Email: ${email}
 📱 WhatsApp client: ${whatsapp}
 💰 Montant: ${amount} Gourdes
 💳 Méthode: ${method}
-
 ⏳ Statut: Pending (à valider)`;
+                    window.open("https://wa.me/" + adminNumber + "?text=" + encodeURIComponent(waMessage), "_blank");
 
-    const waLink = "https://wa.me/" + adminNumber + "?text=" + encodeURIComponent(waMessage);
-    window.open(waLink, "_blank");
-
-    depositForm.reset();
-} else {
-    depositMsg.textContent = "⚠️ " + data.message;
-    depositMsg.style.color = "red";
-}
-} catch (err) {
-    console.error(err);
-    depositMsg.textContent = "⚠️ Erreur serveur, réessayez plus tard.";
-    depositMsg.style.color = "red";
-}
-});
-
-
-
-    
-// Logout
-document.getElementById("logoutBtn").addEventListener("click", () => {
-    localStorage.clear();
-    window.location.href = "connexionwalletfobas.html";
-
-
-
-
-
-// --- Nouvo bouton Bonus ---
-const walletBonusEl = document.getElementById("walletBonus");
-
-// Fè li chaje valè bonus soti nan backend si li egziste
-if(walletBonusEl) {
-    async function loadBonus() {
-        try {
-            const response = await fetch(`https://examen-backend-ihlx.onrender.com/api/wallet/me?email=${userEmail}`);
-            const data = await response.json();
-            if (data.success) {
-                walletBonusEl.textContent = parseFloat(data.bonus || 0).toFixed(2) + " Gourdes";
-            } else {
-                walletBonusEl.textContent = (0).toFixed(2) + " Gourdes";
+                    depositForm.reset();
+                } else {
+                    depositMsg.textContent = "⚠️ " + data.message;
+                    depositMsg.style.color = "red";
+                }
+            } catch(err) {
+                console.error(err);
+                depositMsg.textContent = "⚠️ Erreur serveur, réessayez plus tard.";
+                depositMsg.style.color = "red";
             }
-        } catch(err) {
-            console.error("Erreur loading bonus:", err);
-            walletBonusEl.textContent = (0).toFixed(2) + " Gourdes";
-        }
-    }
-    loadBonus();
+        });
+    });
 }
 
+// =================== LOGOUT ===================
+const logoutBtn = document.getElementById("logoutBtn");
+if(logoutBtn) {
+    logoutBtn.addEventListener("click", () => {
+        localStorage.clear();
+        window.location.href = "connexionwalletfobas.html";
+    });
+}
+
+// =================== BONUS ===================
 const bonusBtn = document.getElementById("bonusBtn");
-if(bonusBtn) {
+if(bonusBtn && walletBonusEl) {
     bonusBtn.addEventListener("click", () => {
         actionArea.innerHTML = `<p>Votre solde Bonus actuel : <strong>${walletBonusEl.textContent}</strong></p>
                                 <button id="withdrawBonusBtn">Retirer Bonus</button>`;
 
-        // Bouton pou retire bonus
-        document.getElementById("withdrawBonusBtn").addEventListener("click", () => {
-            alert("Demande de retrait du Bonus envoyée à l'administrateur via WhatsApp.");
-            // Isi nap ka ajoute kòd pou voye notif WhatsApp ak backend aprè
-        });
+        const withdrawBonusBtn = document.getElementById("withdrawBonusBtn");
+        if(withdrawBonusBtn) {
+            withdrawBonusBtn.addEventListener("click", () => {
+                alert("Demande de retrait du Bonus envoyée à l'administrateur via WhatsApp.");
+            });
+        }
     });
 }
