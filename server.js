@@ -946,24 +946,18 @@ mongoose.connection.once('open', () => {
 
 
 // ----------------------- WALLET FOBAS SCHEMA -----------------------
-const walletSchema = new mongoose.Schema({
-  fullName: { type: String, required: true },
-  email: { type: String, required: true },
-  recoveryEmail: String,
-  whatsapp: String,
-  birthDate: String,
-  birthPlace: String,
-  passwordHash: String,
-  sponsorName: { type: String, required: true },
-  status: { type: String, default: "active" },
-  solde: { type: Number, default: 0.00 },   // <-- chan solde default
-  bonus: { type: Number, default: 0.00 },
-  hasDepositedBefore: { type: Boolean, default: false },
+const transactionSchema = new mongoose.Schema({
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: "WalletUser", required: true },
+  type: { type: String, enum: ["deposit", "withdraw", "bonus"], required: true },
+  amount: { type: Number, required: true },
+  balanceBefore: { type: Number, required: true },
+  balanceAfter: { type: Number, required: true },
+  bonusBefore: { type: Number, default: 0 },
+  bonusAfter: { type: Number, default: 0 },
+  status: { type: String, default: "Pending" },
   createdAt: { type: Date, default: Date.now }
 });
-
-// ⚡ Fason san erè pou Render
-const WalletUser = mongoose.models.WalletUser || mongoose.model("WalletUser", walletSchema);
+const Transaction = mongoose.models.Transaction || mongoose.model("Transaction", transactionSchema);
 
 // ----------------------- ROUTE API POU ENREGISTRE -----------------------
 app.post("/api/wallet/create", async (req, res) => {
@@ -1155,6 +1149,92 @@ Admin: ${adminName}`;
     }
 });
 
+
+
+
+
+
+
+
+
+
+// ----------------------- ADMIN ACTION ROUTE -----------------------
+app.post("/api/admin/action-transaction", async (req, res) => {
+  try {
+    const { adminPassword, type, userFullName, amount } = req.body;
+
+    // 🔐 Sécurité admin
+    if (adminPassword !== process.env.ADMIN_SECRET_PASSWORD) {
+      return res.status(403).json({ success: false, message: "Aksè refize" });
+    }
+
+    if (!["deposit", "withdraw", "bonus"].includes(type)) {
+      return res.status(400).json({ success: false, message: "Type transaction pa valide" });
+    }
+
+    // Jwenn itilizatè a
+    const user = await WalletUser.findOne({ fullName: userFullName });
+    if (!user) {
+      return res.status(404).json({ success: false, message: "Itilizatè pa jwenn" });
+    }
+
+    // Verifye montan
+    const amt = parseFloat(amount);
+    if (isNaN(amt) || amt <= 0) {
+      return res.status(400).json({ success: false, message: "Montant pa valab" });
+    }
+
+    // Valeurs avan
+    const balanceBefore = user.solde ?? 0;
+    const bonusBefore = user.bonus ?? 0;
+    let balanceAfter = balanceBefore;
+    let bonusAfter = bonusBefore;
+
+    // LOGIK selon type
+    switch (type) {
+      case "deposit":
+        balanceAfter += amt;
+        user.solde = balanceAfter;
+        break;
+      case "withdraw":
+        if (balanceBefore < amt)
+          return res.status(400).json({ success: false, message: "Solde pa sifi" });
+        balanceAfter -= amt;
+        user.solde = balanceAfter;
+        break;
+      case "bonus":
+        bonusAfter += amt;
+        user.bonus = bonusAfter;
+        break;
+    }
+
+    // Kreye nouvo tranzaksyon nan collection "transactions"
+    const transaction = new Transaction({
+      userId: user._id,
+      type,
+      amount: amt,
+      balanceBefore,
+      balanceAfter,
+      bonusBefore,
+      bonusAfter,
+      status: "active"
+    });
+
+    await transaction.save();
+    await user.save();
+
+    res.json({
+      success: true,
+      message: "Aksyon admin egzekite avèk siksè",
+      solde: user.solde,
+      bonus: user.bonus
+    });
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, message: "Erreur serveur" });
+  }
+});
 
 
 
