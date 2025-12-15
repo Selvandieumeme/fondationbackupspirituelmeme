@@ -1213,7 +1213,8 @@ app.post("/api/admin/action-transaction", async (req, res) => {
     // Asire li itilize collection ki kòrèk: "transactions"
     const Transaction = mongoose.models.transactions || mongoose.model("transactions", new mongoose.Schema({
       userId: { type: mongoose.Schema.Types.ObjectId, ref: "WalletUser", required: true },
-      type: { type: String, enum: ["deposit", "withdraw", "bonus"], required: true },
+	  fullName: { type: String, required: true },
+	  type: { type: String, enum: ["deposit", "withdraw", "bonus"], required: true },
       amount: { type: Number, required: true },
       balanceBefore: { type: Number, required: true },
       balanceAfter: { type: Number, required: true },
@@ -1225,7 +1226,8 @@ app.post("/api/admin/action-transaction", async (req, res) => {
 
     const transaction = new Transaction({
       userId: user._id,
-      type,
+      fullName: user.fullName,
+	  type,
       amount: amt,
       balanceBefore,
       balanceAfter,
