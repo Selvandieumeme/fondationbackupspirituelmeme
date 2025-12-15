@@ -977,7 +977,7 @@ const transactionSchema = new mongoose.Schema({
   bonusBefore: { type: Number, default: 0 },
   bonusAfter: { type: Number, default: 0 },
   method: { type: String }, // si depo, pou metòd MonCash/NatCash elatriye
-  status: { type: String, default: "Pending" },
+  status: { type: String, default: "active" },
   createdAt: { type: Date, default: Date.now }
 });
 
