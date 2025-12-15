@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Admin Wallet FOBAS</title>
+<style>
+  body {
+    font-family: 'Arial', sans-serif;
+    margin: 0;
+    padding: 0;
+    background: #e6f0ff; /* ble klè background */
+    color: #1a1a1a;
+  }
+
+  h2 {
+    text-align: center;
+    background: #ffcc00; /* jaune */
+    color: #003366; /* ble fonse */
+    padding: 20px;
+    margin: 0;
+    font-size: 28px;
+    border-bottom: 4px solid #003366;
+  }
+
+  .form-container {
+    max-width: 500px;
+    margin: 30px auto;
+    background: #ffffff; /* blanc */
+    padding: 25px;
+    border-radius: 12px;
+    box-shadow: 0 6px 15px rgba(0,0,0,0.1);
+    border-top: 4px solid #ffcc00; /* yellow top border */
+  }
+
+  label {
+    display: block;
+    margin: 12px 0 4px;
+    font-weight: bold;
+    color: #003366;
+  }
+
+  select, input[type="number"], input[type="password"] {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 12px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    box-sizing: border-box;
+    font-size: 16px;
+  }
+
+  button {
+    width: 100%;
+    padding: 12px;
+    background: #003366; /* ble fonse */
+    color: #ffcc00; /* jaune */
+    font-size: 16px;
+    font-weight: bold;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+
+  button:hover {
+    background: #0059b3;
+    color: #ffffff;
+  }
+
+  #msg {
+    margin-top: 20px;
+    font-weight: bold;
+    text-align: center;
+  }
+
+</style>
+</head>
+<body>
+
+<h2>Admin Wallet FOBAS</h2>
+
+<div class="form-container">
+  <label>Mot de passe admin:</label>
+  <input type="password" id="adminPassword" placeholder="Mot de passe">
+
+  <label>Type transaction:</label>
+  <select id="txType">
+    <option value="deposit">Deposit</option>
+    <option value="withdraw">Withdraw</option>
+    <option value="bonus">Bonus</option>
+  </select>
+
+  <label>Nom utilisateur:</label>
+  <select id="userList"></select>
+
+  <label>Montant:</label>
+  <input type="number" id="txAmount" placeholder="Ex: 500">
+
+  <button id="executeBtn">EXECUTER ACTION</button>
+</div>
+
+<p id="msg"></p>
+
+<script>
+async function loadUsers() {
+  try {
+    const res = await fetch('/api/wallet/users');
+    const data = await res.json();
+    if (data.success) {
+      const select = document.getElementById('userList');
+      data.users.forEach(u => {
+        const opt = document.createElement('option');
+        opt.value = u.fullName;
+        opt.textContent = u.fullName;
+        select.appendChild(opt);
+      });
+    }
+  } catch(e) {
+    console.error(e);
+  }
+}
+
+document.getElementById('executeBtn').addEventListener('click', async () => {
+  const adminPassword = document.getElementById('adminPassword').value.trim();
+  const type = document.getElementById('txType').value;
+  const userFullName = document.getElementById('userList').value;
+  const amount = document.getElementById('txAmount').value.trim();
+
+  const msgEl = document.getElementById('msg');
+  msgEl.textContent = "⏳ Execution en cours...";
+
+  try {
+    const res = await fetch('/api/admin/action-transaction', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ adminPassword, type, userFullName, amount })
+    });
+    const data = await res.json();
+    if (data.success) {
+      msgEl.textContent = `✅ Aksyon egzekite. Solde: ${data.solde}, Bonus: ${data.bonus}`;
+    } else {
+      msgEl.textContent = `⚠️ ${data.message}`;
+    }
+  } catch(err) {
+    console.error(err);
+    msgEl.textContent = "⚠️ Erreur serveur";
+  }
+});
+
+loadUsers();
+</script>
+
+</body>
+</html>
