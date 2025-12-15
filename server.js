@@ -957,7 +957,7 @@ const walletUserSchema = new mongoose.Schema({
   sponsorName: { type: String },
   hasDepositedBefore: { type: Boolean, default: false },
   createdAt: { type: Date, default: Date.now },
-  status: { type: String, default: "active" }
+  status: { type: String, default: "pending" }
   // ajoute nenpòt lòt chan ou bezwen
 });
 
@@ -989,10 +989,10 @@ const Transaction = mongoose.models.transactions || mongoose.model("transactions
 
 app.get("/api/wallet/me", async (req, res) => {
   try {
-    const fullName = req.query.fullName; // chanje soti nan email --> fullName
-    if (!fullName) return res.status(400).json({ success: false, message: "fullName obligatwa" });
+    const email = req.query.email; // <-- chanje soti nan fullName --> email
+    if (!email) return res.status(400).json({ success: false, message: "Email obligatwa" });
 
-    const user = await WalletUser.findOne({ fullName }); // rechèch itilizate pa fullName
+    const user = await WalletUser.findOne({ email }); // <-- rechèch pa email
     if (!user) return res.status(404).json({ success: false, message: "Itilizate pa jwenn" });
 
     res.json({
@@ -1006,10 +1006,11 @@ app.get("/api/wallet/me", async (req, res) => {
   }
 });
 
+
 // ----------------------- LISTE WALLET USERS -----------------------
 app.get("/api/wallet/users", async (req, res) => {
   try {
-    const users = await WalletUser.find({}, "fullName").sort({ fullName: 1 }); // sèlman fullName
+    const users = await WalletUser.find({}, "fullName email").sort({ fullName: 1 });
     res.json({ success: true, users });
   } catch (err) {
     console.error("Erreur chaje itilizatè yo:", err);
@@ -1204,10 +1205,11 @@ Admin: ${adminName}`;
 
 
 
-// ----------------------- ADMIN ACTION ROUTE -----------------------
+
+// ----------------------- ADMIN ACTION ROUTE (via Email) -----------------------
 app.post("/api/admin/action-transaction", async (req, res) => {
   try {
-    const { adminPassword, type, userFullName, amount } = req.body;
+    const { adminPassword, type, userEmail, amount } = req.body;
 
     // 🔐 Sécurité admin
     if (adminPassword !== process.env.ADMIN_SECRET_PASSWORD) {
@@ -1218,9 +1220,8 @@ app.post("/api/admin/action-transaction", async (req, res) => {
       return res.status(400).json({ success: false, message: "Type transaction pa valide" });
     }
 
-    // --------------------- Jwenn itilizatè a via transactions ---------------------
-    // Nou itilize WalletUser pou jwenn itilizatè ekzak
-    const user = await WalletUser.findOne({ fullName: userFullName });
+    // --------------------- Jwenn itilizatè a via email ---------------------
+    const user = await WalletUser.findOne({ email: userEmail.trim().toLowerCase() });
     if (!user) {
       return res.status(404).json({ success: false, message: "Itilizatè pa jwenn" });
     }
@@ -1259,7 +1260,7 @@ app.post("/api/admin/action-transaction", async (req, res) => {
     const transaction = new Transaction({
       userId: user._id,
       fullName: user.fullName,
-	  type,
+      type,
       amount: amt,
       balanceBefore,
       balanceAfter,
@@ -1283,7 +1284,6 @@ app.post("/api/admin/action-transaction", async (req, res) => {
     res.status(500).json({ success: false, message: "Erreur serveur" });
   }
 });
-
 
 
 
