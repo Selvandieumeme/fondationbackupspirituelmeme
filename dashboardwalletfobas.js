@@ -27,6 +27,26 @@ walletBalanceEl.textContent = solde.toFixed(2) + " Gourdes";
 
 
 
+
+async function loadWallet() {
+    try {
+        const response = await fetch(`https://examen-backend-ihlx.onrender.com/api/wallet/me?email=${userEmail}`);
+        const data = await response.json();
+        if (data.success) {
+            walletBalanceEl.textContent = parseFloat(data.solde || 0).toFixed(2) + " Gourdes";
+            if(walletBonusEl) walletBonusEl.textContent = parseFloat(data.bonus || 0).toFixed(2) + " Gourdes";
+        }
+    } catch(err) {
+        console.error("Erreur loading wallet:", err);
+        walletBalanceEl.textContent = parseFloat(solde).toFixed(2) + " Gourdes"; // fallback
+        if(walletBonusEl) walletBonusEl.textContent = (0).toFixed(2) + " Gourdes";
+    }
+}
+
+
+
+
+
 // Bouton aksyon (depo)
 document.getElementById("depositBtn").addEventListener("click", () => {
     actionArea.innerHTML = `
@@ -122,14 +142,15 @@ document.getElementById("depositBtn").addEventListener("click", () => {
     depositMsg.textContent = "⚠️ Erreur serveur, réessayez plus tard.";
     depositMsg.style.color = "red";
 }
+});
 
+
+
+    
 // Logout
 document.getElementById("logoutBtn").addEventListener("click", () => {
     localStorage.clear();
     window.location.href = "connexionwalletfobas.html";
-});
-
-
 
 
 
