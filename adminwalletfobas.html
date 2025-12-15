@@ -90,8 +90,8 @@
     <option value="bonus">Bonus</option>
   </select>
 
-  <label>Nom utilisateur:</label>
-<input type="text" id="userFullName" placeholder="Tape non itilizate egzakteman">
+  <label>Email utilisateur :</label>
+<input type="email" id="userEmail" placeholder="Tape email itilizate egzakteman">
 
   <label>Montant:</label>
   <input type="number" id="txAmount" placeholder="Ex: 500">
@@ -105,7 +105,7 @@
 document.getElementById('executeBtn').addEventListener('click', async () => {
   const adminPassword = document.getElementById('adminPassword').value.trim();
   const type = document.getElementById('txType').value;
-  const userFullName = document.getElementById('userFullName').value.trim();
+  const userEmail = document.getElementById('userEmail').value.trim();
   const amount = document.getElementById('txAmount').value.trim();
 
   const msgEl = document.getElementById('msg');
@@ -120,7 +120,7 @@ document.getElementById('executeBtn').addEventListener('click', async () => {
         body: JSON.stringify({
           adminPassword: adminPassword,
           type: type,
-          userFullName: userFullName,
+          userEmail: userEmail,
           amount: amount
         })
       }
@@ -141,6 +141,6 @@ document.getElementById('executeBtn').addEventListener('click', async () => {
   }
 });
 </script>
-
+✅ REZIME
 </body>
 </html>
