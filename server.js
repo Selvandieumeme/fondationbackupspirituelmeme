@@ -989,10 +989,10 @@ const Transaction = mongoose.models.transactions || mongoose.model("transactions
 
 app.get("/api/wallet/me", async (req, res) => {
   try {
-    const email = req.query.email; // email itilizate soti nan localStorage
-    if (!email) return res.status(400).json({ success: false, message: "Email obligatwa" });
+    const fullName = req.query.fullName; // chanje soti nan email --> fullName
+    if (!fullName) return res.status(400).json({ success: false, message: "fullName obligatwa" });
 
-    const user = await WalletUser.findOne({ email });
+    const user = await WalletUser.findOne({ fullName }); // rechèch itilizate pa fullName
     if (!user) return res.status(404).json({ success: false, message: "Itilizate pa jwenn" });
 
     res.json({
@@ -1005,7 +1005,6 @@ app.get("/api/wallet/me", async (req, res) => {
     res.status(500).json({ success: false, message: "Erreur serveur" });
   }
 });
-
 
 // ----------------------- LISTE WALLET USERS -----------------------
 app.get("/api/wallet/users", async (req, res) => {
@@ -1157,7 +1156,7 @@ app.post("/api/wallet/deposit", async (req, res) => {
             balanceBefore,
             balanceAfter, 
             method,
-            status: "Pending"
+            status: "active"
         });
 
         await transaction.save();
