@@ -41,7 +41,15 @@ async function loadWallet() {
         if(walletBonusEl) walletBonusEl.textContent = (0).toFixed(2) + " Gourdes";
     }
 }
-loadWallet(); // rele imedyatman sou load paj
+
+
+
+// --- Rafrechi otomatik chak 10 segond ---
+setInterval(loadWallet, 10000);
+
+
+
+
 
 // =================== DEPO ===================
 const depositBtn = document.getElementById("depositBtn");
@@ -104,8 +112,10 @@ if(depositBtn) {
                     depositMsg.textContent = "✅ Dépôt enregistré en Pending. L'administrateur validera bientôt.";
                     depositMsg.style.color = "#16a34a";
 
-                    loadWallet(); // refresh solde + bonus
+                    // Rafrechi solde imedyatman
+                    loadWallet();
 
+                    // Voye mesaj WhatsApp admin
                     const adminNumber = "50946057952";
                     const waMessage = `📥 NOUVO DÉPÔT WALLET FOBAS
 
@@ -130,6 +140,22 @@ if(depositBtn) {
         });
     });
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 // =================== LOGOUT ===================
 const logoutBtn = document.getElementById("logoutBtn");
