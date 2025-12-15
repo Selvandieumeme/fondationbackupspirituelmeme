@@ -91,12 +91,15 @@ document.getElementById("depositBtn").addEventListener("click", () => {
             const data = await response.json();
 
             if (data.success) {
-                depositMsg.textContent = "✅ Dépôt enregistré en Pending. L'administrateur validera bientôt.";
-                depositMsg.style.color = "#16a34a";
+    depositMsg.textContent = "✅ Dépôt enregistré en Pending. L'administrateur validera bientôt.";
+    depositMsg.style.color = "#16a34a";
 
-                // 🔔 NOTIF ADMIN WHATSAPP
-                const adminNumber = "50946057952";
-                const waMessage = `📥 NOUVO DÉPÔT WALLET FOBAS
+    // 🔄 Refresh solde aktyèl itilizate a pou montre li imedyatman
+    loadWallet();
+
+    // 🔔 NOTIF ADMIN WHATSAPP
+    const adminNumber = "50946057952";
+    const waMessage = `📥 NOUVO DÉPÔT WALLET FOBAS
 
 👤 ${userName}
 📧 Email: ${email}
@@ -106,21 +109,19 @@ document.getElementById("depositBtn").addEventListener("click", () => {
 
 ⏳ Statut: Pending (à valider)`;
 
-                const waLink = "https://wa.me/" + adminNumber + "?text=" + encodeURIComponent(waMessage);
-                window.open(waLink, "_blank");
+    const waLink = "https://wa.me/" + adminNumber + "?text=" + encodeURIComponent(waMessage);
+    window.open(waLink, "_blank");
 
-                depositForm.reset();
-            } else {
-                depositMsg.textContent = "⚠️ " + data.message;
-                depositMsg.style.color = "red";
-            }
-        } catch (err) {
-            console.error(err);
-            depositMsg.textContent = "⚠️ Erreur serveur, réessayez plus tard.";
-            depositMsg.style.color = "red";
-        }
-    });
-});
+    depositForm.reset();
+} else {
+    depositMsg.textContent = "⚠️ " + data.message;
+    depositMsg.style.color = "red";
+}
+} catch (err) {
+    console.error(err);
+    depositMsg.textContent = "⚠️ Erreur serveur, réessayez plus tard.";
+    depositMsg.style.color = "red";
+}
 
 // Logout
 document.getElementById("logoutBtn").addEventListener("click", () => {
@@ -136,7 +137,25 @@ document.getElementById("logoutBtn").addEventListener("click", () => {
 
 // --- Nouvo bouton Bonus ---
 const walletBonusEl = document.getElementById("walletBonus");
-if(walletBonusEl) walletBonusEl.textContent = (0).toFixed(2) + " Gourdes"; // default bonus
+
+// Fè li chaje valè bonus soti nan backend si li egziste
+if(walletBonusEl) {
+    async function loadBonus() {
+        try {
+            const response = await fetch(`https://examen-backend-ihlx.onrender.com/api/wallet/me?email=${userEmail}`);
+            const data = await response.json();
+            if (data.success) {
+                walletBonusEl.textContent = parseFloat(data.bonus || 0).toFixed(2) + " Gourdes";
+            } else {
+                walletBonusEl.textContent = (0).toFixed(2) + " Gourdes";
+            }
+        } catch(err) {
+            console.error("Erreur loading bonus:", err);
+            walletBonusEl.textContent = (0).toFixed(2) + " Gourdes";
+        }
+    }
+    loadBonus();
+}
 
 const bonusBtn = document.getElementById("bonusBtn");
 if(bonusBtn) {
@@ -150,4 +169,4 @@ if(bonusBtn) {
             // Isi nap ka ajoute kòd pou voye notif WhatsApp ak backend aprè
         });
     });
-    }
+}
