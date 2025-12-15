@@ -946,18 +946,41 @@ mongoose.connection.once('open', () => {
 
 
 // ----------------------- WALLET FOBAS SCHEMA -----------------------
+const walletUserSchema = new mongoose.Schema({
+  fullName: { type: String, required: true },
+  email: { type: String, required: true, unique: true },
+  passwordHash: { type: String },
+  solde: { type: Number, default: 0 },
+  bonus: { type: Number, default: 0 },
+  whatsapp: { type: String },
+  recoveryEmail: { type: String },
+  sponsorName: { type: String },
+  hasDepositedBefore: { type: Boolean, default: false },
+  createdAt: { type: Date, default: Date.now },
+  status: { type: String, default: "active" }
+  // ajoute nenpòt lòt chan ou bezwen
+});
+
+const WalletUser = mongoose.models.WalletUser || mongoose.model("WalletUser", walletUserSchema);
+
+
+
+
+// ----------------------- TRANSACTION SCHEMA -----------------------
 const transactionSchema = new mongoose.Schema({
   userId: { type: mongoose.Schema.Types.ObjectId, ref: "WalletUser", required: true },
-  fullName: { type: String, required: true }, // <-- ajoute chan fullName
+  fullName: { type: String, required: true }, // pran fullName itilizatè a
   type: { type: String, enum: ["deposit", "withdraw", "bonus"], required: true },
   amount: { type: Number, required: true },
   balanceBefore: { type: Number, required: true },
   balanceAfter: { type: Number, required: true },
   bonusBefore: { type: Number, default: 0 },
   bonusAfter: { type: Number, default: 0 },
+  method: { type: String }, // si depo, pou metòd MonCash/NatCash elatriye
   status: { type: String, default: "Pending" },
   createdAt: { type: Date, default: Date.now }
 });
+
 const Transaction = mongoose.models.transactions || mongoose.model("transactions", transactionSchema);
 
 // ----------------------- LISTE WALLET USERS -----------------------
@@ -1210,20 +1233,6 @@ app.post("/api/admin/action-transaction", async (req, res) => {
     }
 
     // --------------------- Kreye nouvo tranzaksyon nan collection "transactions" ---------------------
-    // Asire li itilize collection ki kòrèk: "transactions"
-    const Transaction = mongoose.models.transactions || mongoose.model("transactions", new mongoose.Schema({
-      userId: { type: mongoose.Schema.Types.ObjectId, ref: "WalletUser", required: true },
-	  fullName: { type: String, required: true },
-	  type: { type: String, enum: ["deposit", "withdraw", "bonus"], required: true },
-      amount: { type: Number, required: true },
-      balanceBefore: { type: Number, required: true },
-      balanceAfter: { type: Number, required: true },
-      bonusBefore: { type: Number, default: 0 },
-      bonusAfter: { type: Number, default: 0 },
-      status: { type: String, default: "active" },
-      createdAt: { type: Date, default: Date.now }
-    }));
-
     const transaction = new Transaction({
       userId: user._id,
       fullName: user.fullName,
