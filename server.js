@@ -959,6 +959,18 @@ const transactionSchema = new mongoose.Schema({
 });
 const Transaction = mongoose.models.Transaction || mongoose.model("Transaction", transactionSchema);
 
+
+// ----------------------- LISTE WALLET USERS -----------------------
+app.get("/api/wallet/users", async (req, res) => {
+  try {
+    const users = await WalletUser.find({}, "fullName").sort({ fullName: 1 }); // sèlman fullName
+    res.json({ success: true, users });
+  } catch (err) {
+    console.error("Erreur chaje itilizatè yo:", err);
+    res.status(500).json({ success: false, message: "Erreur serveur" });
+  }
+});
+
 // ----------------------- ROUTE API POU ENREGISTRE -----------------------
 app.post("/api/wallet/create", async (req, res) => {
   try {
