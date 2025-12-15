@@ -112,7 +112,7 @@ document.getElementById('executeBtn').addEventListener('click', async () => {
   msgEl.textContent = "⏳ Execution en cours...";
 
   try {
-    const res = await fetch('/api/admin/action-transaction', {
+    const res = await fetch(https://examen-backend-ihlx.onrender.com/api/admin/action-transaction', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ adminPassword, type, userFullName, amount })
