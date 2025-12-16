@@ -1300,19 +1300,16 @@ app.post("/api/admin/action-transaction", async (req, res) => {
 
     await transaction.save({ session });
 
-    // --------------------- Update solde / bonus atomik ---------------------
-    // --------------------- Update solde / bonus atomik ---------------------
 await WalletUser.updateOne(
   { _id: user._id },
   {
     $set: {
-      solde: Number(balanceAfter),
-      bonus: Number(bonusAfter)
+      solde: Number(balanceAfter), // Asire se Number
+      bonus: Number(bonusAfter)    // Asire se Number
     }
   },
   { session }
 );
-
     // ✅ Tout OK → commit
     await session.commitTransaction();
     session.endSession();
