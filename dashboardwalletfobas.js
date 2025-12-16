@@ -182,3 +182,38 @@ if(bonusBtn && walletBonusEl) {
 }
 
 
+
+
+
+
+
+
+
+
+
+
+
+// ================= SOCKET.IO – WALLET BALANCE =================
+if (typeof io !== "undefined") {
+  const socket = io();
+
+  socket.on("walletBalanceUpdate", (data) => {
+    if (!data || !data.email) return;
+
+    const userEmail = document.getElementById("userEmail")?.textContent?.trim();
+    if (!userEmail) return;
+
+    if (data.email === userEmail && data.status === "active") {
+      const balanceSpan = document.getElementById("balanceActuel");
+      if (!balanceSpan) return;
+
+      // Asire balance rete NUMBER, pa string
+      const balanceNumber = Number(data.balance);
+      if (isNaN(balanceNumber)) return;
+
+      balanceSpan.textContent = balanceNumber.toLocaleString("fr-FR");
+    }
+  });
+}
+// ================= FIN SOCKET.IO =================
+
