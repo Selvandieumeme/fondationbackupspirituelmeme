@@ -1305,13 +1305,11 @@ await WalletUser.updateOne(
   { _id: user._id },
   {
     $set: {
-      solde: Number(balanceAfter), // Asire se Number
-      bonus: Number(bonusAfter)    // Asire se Number
+      solde: Number(balanceAfter),
+      bonus: Number(bonusAfter)
     }
-  },
-  { session }
+  }
 );
-
 	  
     // ✅ Tout OK → commit
     await session.commitTransaction();
