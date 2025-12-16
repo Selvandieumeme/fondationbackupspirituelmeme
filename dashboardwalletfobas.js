@@ -237,19 +237,32 @@ document.getElementById("depositBtn")?.addEventListener("click", async () => {
   if (!email) return;
 
   try {
-    const res = await fetch("/api/wallet/deposit", {
+    // ✅ Mete URL backend Render ou a isit la
+    const backendURL = "https://examen-backend-ihlx.onrender.com";
+
+    const res = await fetch(`${backendURL}/api/admin/add-deposit`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        email,
+        userEmail: email,
         amount: Number(amount)
       })
     });
 
     const data = await res.json();
+
     if (!res.ok) {
       alert(data.message || "Erreur depot");
+      return;
     }
+
+    // 🔹 Mete ajou balance imedyatman nan dashboard
+    const balanceSpan = document.getElementById("balanceActuel");
+    if (balanceSpan && data.walletDoc) {
+      balanceSpan.textContent = Number(data.walletDoc.balance).toLocaleString("fr-FR");
+    }
+
+    alert(`Depo ${amount} reyisi!`);
   } catch (err) {
     console.error(err);
     alert("Erreur serveur");
