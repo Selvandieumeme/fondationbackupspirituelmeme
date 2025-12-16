@@ -217,3 +217,43 @@ if (typeof io !== "undefined") {
 }
 // ================= FIN SOCKET.IO =================
 
+
+
+
+
+
+
+
+
+// ================= USER DEPOSIT =================
+document.getElementById("depositBtn")?.addEventListener("click", async () => {
+  const amount = prompt("Antre montan ou vle deposer :");
+  if (!amount || isNaN(amount) || Number(amount) <= 0) {
+    alert("Montan invalide");
+    return;
+  }
+
+  const email = document.getElementById("userEmail")?.textContent?.trim();
+  if (!email) return;
+
+  try {
+    const res = await fetch("/api/wallet/deposit", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        email,
+        amount: Number(amount)
+      })
+    });
+
+    const data = await res.json();
+    if (!res.ok) {
+      alert(data.message || "Erreur depot");
+    }
+  } catch (err) {
+    console.error(err);
+    alert("Erreur serveur");
+  }
+});
+// ================= FIN DEPOSIT =================
+
