@@ -44,7 +44,7 @@ async function loadWallet() {
 
 
 loadWallet();
-setInterval(loadWallet, 500);
+setInterval(loadWallet, 5000);
 
 
 
