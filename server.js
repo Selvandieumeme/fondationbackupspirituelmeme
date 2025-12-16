@@ -1216,27 +1216,43 @@ Admin: ${adminName}`;
 
 // ----------------------- ADMIN ACTION ROUTE (via Email) -----------------------
 app.post("/api/admin/action-transaction", async (req, res) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
   try {
     const { adminPassword, type, userEmail, amount } = req.body;
 
     // 🔐 Sekirite admin
     if (adminPassword !== process.env.ADMIN_SECRET_PASSWORD) {
+      await session.abortTransaction();
+      session.endSession();
       return res.status(403).json({ success: false, message: "Aksè refize" });
     }
 
     if (!["deposit", "withdraw", "bonus"].includes(type)) {
+      await session.abortTransaction();
+      session.endSession();
       return res.status(400).json({ success: false, message: "Type transaction pa valide" });
     }
 
     // --------------------- Jwenn itilizatè a via email ---------------------
-    const user = await WalletUser.findOne({ email: userEmail.trim().toLowerCase() });
+    const user = await WalletUser.findOne(
+      { email: userEmail.trim().toLowerCase() },
+      null,
+      { session }
+    );
+
     if (!user) {
+      await session.abortTransaction();
+      session.endSession();
       return res.status(404).json({ success: false, message: "Itilizatè pa jwenn" });
     }
 
     // Verifye montan
     const amt = parseFloat(amount);
     if (isNaN(amt) || amt <= 0) {
+      await session.abortTransaction();
+      session.endSession();
       return res.status(400).json({ success: false, message: "Montant pa valab" });
     }
 
@@ -1247,29 +1263,31 @@ app.post("/api/admin/action-transaction", async (req, res) => {
     let balanceAfter = balanceBefore;
     let bonusAfter = bonusBefore;
 
-    // LOGIK selon type
+    // --------------------- LOGIK selon type ---------------------
     switch (type) {
       case "deposit":
         balanceAfter += amt;
-        user.solde = balanceAfter; // **Ajoute montan nan solde itilizatè a**
         break;
+
       case "withdraw":
-        if (balanceBefore < amt)
+        if (balanceBefore < amt) {
+          await session.abortTransaction();
+          session.endSession();
           return res.status(400).json({ success: false, message: "Solde pa sifi" });
+        }
         balanceAfter -= amt;
-        user.solde = balanceAfter;
         break;
+
       case "bonus":
         bonusAfter += amt;
-        user.bonus = bonusAfter;
         break;
     }
 
-    // --------------------- Kreye nouvo tranzaksyon ---------------------
+    // --------------------- Kreye tranzaksyon ---------------------
     const transaction = new Transaction({
       userId: user._id,
       fullName: user.fullName,
-      email: user.email,        // **Ajoute email itilizatè a nan tranzaksyon**
+      email: user.email,
       type,
       amount: amt,
       balanceBefore,
@@ -1280,30 +1298,39 @@ app.post("/api/admin/action-transaction", async (req, res) => {
       createdAt: new Date()
     });
 
-    await transaction.save();
-    await WalletUser.updateOne(
-  { _id: user._id },
-  { 
-    $set: {
-      solde: balanceAfter,
-      bonus: bonusAfter
-    }
-  }
-); // **Asire solde itilizatè a ajou nan DB**
+    await transaction.save({ session });
 
-    res.json({
+    // --------------------- Update solde / bonus atomik ---------------------
+    await WalletUser.updateOne(
+      { _id: user._id },
+      {
+        $set: {
+          solde: balanceAfter,
+          bonus: bonusAfter
+        }
+      },
+      { session }
+    );
+
+    // ✅ Tout OK → commit
+    await session.commitTransaction();
+    session.endSession();
+
+    return res.json({
       success: true,
       message: "Aksyon admin egzekite avèk siksè",
-      solde: user.solde,
-      bonus: user.bonus
+      solde: balanceAfter,
+      bonus: bonusAfter
     });
 
   } catch (err) {
+    // ❌ Nenpòt erè → rollback total
+    await session.abortTransaction();
+    session.endSession();
     console.error(err);
-    res.status(500).json({ success: false, message: "Erreur serveur" });
+    return res.status(500).json({ success: false, message: "Erreur serveur" });
   }
 });
-
 
 
 
