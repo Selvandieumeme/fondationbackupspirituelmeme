@@ -1410,18 +1410,26 @@ app.post("/api/wallet/login", async (req, res) => {
 
 
 // ----------------------- WALLET BALANCE (ENDIPANDAN) -----------------------
-const WalletBalance = require('./models/walletBalance'); // Fichye modèl nou kreye
+const WalletBalance = require('./models/walletBalance'); // Nouvo schema "walletBalance"
 
-// Stream MongoDB pou detekte chanjman nan walletBalance
-const changeStream = WalletBalance.watch();
+// 🔹 Kreye yon stream pou swiv chanjman nan collection walletBalance
+const walletChangeStream = WalletBalance.watch();
 
-changeStream.on('change', (change) => {
-  // Lè yon dokiman modifye oswa insert
-  if (change.operationType === 'update' || change.operationType === 'insert') {
-    // Full document si insert, oswa fields modifye si update
-    const updatedDoc = change.fullDocument || change.updateDescription?.updatedFields;
+walletChangeStream.on('change', (change) => {
+  // Nou enterese sèlman nan update oswa insert
+  if (change.operationType === 'insert' || change.operationType === 'update') {
+    let updatedDoc;
 
-    // Voye update a frontend atravè Socket.io
+    if (change.operationType === 'insert') {
+      updatedDoc = change.fullDocument;
+    } else if (change.operationType === 'update') {
+      // Sa ap kenbe sèlman chan ki chanje yo
+      updatedDoc = change.updateDescription.updatedFields;
+      // Mete id itilizate a tou pou frontend ka idantifye dokiman
+      updatedDoc._id = change.documentKey._id;
+    }
+
+    // 🔹 Voye update bay tout itilizate via Socket.io
     io.emit('walletBalanceUpdate', updatedDoc);
   }
 });
