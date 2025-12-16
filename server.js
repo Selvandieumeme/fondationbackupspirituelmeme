@@ -1442,6 +1442,54 @@ walletChangeStream.on('change', (change) => {
 
 
 
+// ----------------------- WALLETBALANCE MODEL -----------------------
+const WalletBalance = require('./models/walletBalance'); // Asire ou kreye walletBalance.js nan folder models
+
+// ----------------------- ROUTE ADMIN POU AJOUTE DEPO -----------------------
+app.post('/api/admin/add-deposit', async (req, res) => {
+  try {
+    const { userEmail, amount } = req.body;
+
+    if (!userEmail || !amount) {
+      return res.status(400).json({ message: "Email ak montan obligatwa" });
+    }
+
+    // Jwenn dokiman itilizate nan walletBalance
+    let walletDoc = await WalletBalance.findOne({ email: userEmail });
+
+    // Si dokiman pa egziste, kreye li ak status "pending"
+    if (!walletDoc) {
+      walletDoc = new WalletBalance({
+        email: userEmail,
+        balance: parseFloat(amount),
+        currency: "Gourdes",
+        status: "pending"
+      });
+    } else {
+      // Si dokiman egziste, ajoute montan sou balance deja genyen
+      walletDoc.balance = parseFloat(walletDoc.balance) + parseFloat(amount);
+      // Ret tann admin chanje status 'pending' → 'active' pou li parèt nan dashboard itilizate
+    }
+
+    await walletDoc.save();
+
+    // Voye update imedyatman atravè Socket.io
+    io.emit('walletBalanceUpdate', walletDoc);
+
+    res.json({ message: `Montan ${amount} ajoute pou ${userEmail}`, walletDoc });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Erè serveurs, tcheke log la" });
+  }
+});
+
+
+
+
+
+
+
+
 
 
 
