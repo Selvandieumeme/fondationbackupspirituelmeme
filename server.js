@@ -1406,8 +1406,10 @@ app.post("/api/wallet/login", async (req, res) => {
 
 
 
+// ----------------------- WALLETBALANCE MODEL -----------------------
+const WalletBalance = require('./models/walletBalance'); // <-- SÈLMAN YON FWA NAN TÈT SERVER.JS
+
 // ----------------------- WALLET BALANCE (ENDIPANDAN) -----------------------
-const WalletBalance = require('./models/walletBalance'); // Nouvo schema "walletBalance"
 
 // 🔹 Kreye yon stream pou swiv chanjman nan collection walletBalance
 const walletChangeStream = WalletBalance.watch();
@@ -1430,17 +1432,6 @@ walletChangeStream.on('change', (change) => {
     io.emit('walletBalanceUpdate', updatedDoc);
   }
 });
-
-// ----------------------- FIN WALLET BALANCE -----------------------
-
-
-
-
-
-
-
-// ----------------------- WALLETBALANCE MODEL -----------------------
-const WalletBalance = require('./models/walletBalance'); // Asire ou kreye walletBalance.js nan folder models
 
 // ----------------------- ROUTE ADMIN POU AJOUTE DEPO -----------------------
 app.post('/api/admin/add-deposit', async (req, res) => {
@@ -1479,14 +1470,6 @@ app.post('/api/admin/add-deposit', async (req, res) => {
     res.status(500).json({ message: "Erè serveurs, tcheke log la" });
   }
 });
-
-
-
-
-
-
-
-
 
 // ----------------------- ROUTE ADMIN POU ACTIVE DEPO -----------------------
 app.post('/api/admin/activate-deposit', async (req, res) => {
