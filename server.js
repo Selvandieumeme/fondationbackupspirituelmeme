@@ -1340,53 +1340,6 @@ await WalletUser.updateOne(
 
 
 
-// ================= BULK QUICK DEPOSIT (SAFE & INDEPENDENT) =================
-app.post("/api/admin/bulk-deposit", async (req, res) => {
-  try {
-    const { adminPassword, deposits } = req.body;
-
-    if (adminPassword !== process.env.ADMIN_SECRET_PASSWORD) {
-      return res.status(403).json({ success: false, message: "Aksè refize" });
-    }
-
-    if (!Array.isArray(deposits) || deposits.length === 0) {
-      return res.status(400).json({ success: false, message: "Pa gen okenn depo" });
-    }
-
-    const results = [];
-
-    for (const dep of deposits) {
-      const email = dep.email?.trim().toLowerCase();
-      const amount = Number(dep.amount);
-
-      if (!email || isNaN(amount) || amount <= 0) {
-        results.push({ email, success: false, reason: "Done pa valab" });
-        continue;
-      }
-
-      const update = await WalletUser.updateOne(
-        { email },
-        { $inc: { solde: amount } }
-      );
-
-      if (update.modifiedCount === 0) {
-        results.push({ email, success: false, reason: "Itilizatè pa jwenn" });
-      } else {
-        results.push({ email, success: true, amount });
-      }
-    }
-
-    return res.json({
-      success: true,
-      message: "Bulk depo fini",
-      results
-    });
-
-  } catch (err) {
-    console.error(err);
-    return res.status(500).json({ success: false, message: "Erreur serveur" });
-  }
-});
 
 
 
