@@ -1281,7 +1281,15 @@ app.post("/api/admin/action-transaction", async (req, res) => {
     });
 
     await transaction.save();
-    await user.save(); // **Asire solde itilizatè a ajou nan DB**
+    await WalletUser.updateOne(
+  { _id: user._id },
+  { 
+    $set: {
+      solde: balanceAfter,
+      bonus: bonusAfter
+    }
+  }
+); // **Asire solde itilizatè a ajou nan DB**
 
     res.json({
       success: true,
