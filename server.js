@@ -1409,30 +1409,31 @@ app.post("/api/wallet/login", async (req, res) => {
 // ----------------------- WALLETBALANCE MODEL -----------------------
 const WalletBalance = require('./models/walletBalance'); // <-- SÈLMAN YON FWA NAN TÈT SERVER.JS
 
-// ----------------------- WALLET BALANCE (ENDIPANDAN) -----------------------
 
-// 🔹 Kreye yon stream pou swiv chanjman nan collection walletBalance
-const walletChangeStream = WalletBalance.watch();
+
+// ----------------------- WALLET BALANCE CHANGE STREAM -----------------------
+const walletChangeStream = WalletBalance.watch(
+  [],
+  { fullDocument: 'updateLookup' }
+);
 
 walletChangeStream.on('change', (change) => {
-  // Nou enterese sèlman nan update oswa insert
-  if (change.operationType === 'insert' || change.operationType === 'update') {
-    let updatedDoc;
+  if (
+    change.operationType === 'insert' ||
+    change.operationType === 'update' ||
+    change.operationType === 'replace'
+  ) {
+    const fullDoc = change.fullDocument;
+    if (!fullDoc) return;
 
-    if (change.operationType === 'insert') {
-      updatedDoc = change.fullDocument;
-    } else if (change.operationType === 'update') {
-      // Sa ap kenbe sèlman chan ki chanje yo
-      updatedDoc = change.updateDescription.updatedFields;
-      // Mete id itilizate a tou pou frontend ka idantifye dokiman
-      updatedDoc._id = change.documentKey._id;
-    }
-
-    // 🔹 Voye update bay tout itilizate via Socket.io
-    io.emit('walletBalanceUpdate', updatedDoc);
+    io.emit('walletBalanceUpdate', {
+      email: fullDoc.email,
+      balance: fullDoc.balance,
+      status: fullDoc.status
+    });
   }
 });
-
+// ----------------------- FIN WALLET BALANCE CHANGE STREAM -----------------------
 // ----------------------- ROUTE ADMIN POU AJOUTE DEPO -----------------------
 app.post('/api/admin/add-deposit', async (req, res) => {
   try {
