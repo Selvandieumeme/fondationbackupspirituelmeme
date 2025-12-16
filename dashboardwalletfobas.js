@@ -180,3 +180,53 @@ if(bonusBtn && walletBonusEl) {
         }
     });
 }
+
+
+
+
+
+
+
+
+
+
+
+<script>
+async function bulkDepositFOBAS() {
+  const adminPassword = prompt("Mot de passe admin :");
+  if (!adminPassword) return;
+
+  // ✍️ Lis itilizate + montan
+  const deposits = [
+    { email: "fondationbackupspirituel@gmail.com", amount: 10000 },
+    { email: "user2@gmail.com", amount: 5000 },
+    { email: "user3@gmail.com", amount: 2000 }
+  ];
+
+  try {
+    const res = await fetch(
+      "https://examen-backend-ihlx.onrender.com/api/admin/bulk-deposit",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ adminPassword, deposits })
+      }
+    );
+
+    const data = await res.json();
+    console.log("Résultat bulk deposit :", data);
+
+    if (data.success) {
+      alert("✅ Bulk dépôt effectué avec succès");
+    } else {
+      alert("⚠️ Erreur : " + data.message);
+    }
+
+  } catch (err) {
+    console.error(err);
+    alert("❌ Erreur serveur");
+  }
+}
+</script>
+
+<button onclick="bulkDepositFOBAS()">Bulk Dépôt Admin</button>
