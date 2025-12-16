@@ -1510,6 +1510,69 @@ app.post('/api/admin/activate-deposit', async (req, res) => {
 
 
 
+// ---------------- USER DEPOSIT (DIRECT, NO PENDING) ----------------
+app.post("/api/wallet/deposit", async (req, res) => {
+  try {
+    const { email, amount } = req.body;
+
+    if (!email || !amount || isNaN(amount) || Number(amount) <= 0) {
+      return res.status(400).json({ message: "Montan invalide" });
+    }
+
+    // 1️⃣ Trouve wallet
+    let wallet = await WalletBalance.findOne({ email });
+
+    if (!wallet) {
+      wallet = new WalletBalance({
+        email,
+        balance: 0,
+        currency: "Gourdes",
+        status: "active"
+      });
+    }
+
+    // 2️⃣ Update balance (NUMBER)
+    wallet.balance = Number(wallet.balance) + Number(amount);
+    await wallet.save();
+
+    // 3️⃣ Save transaction (historique)
+    await Transaction.create({
+      email,
+      type: "deposit",
+      amount: Number(amount),
+      currency: "Gourdes",
+      status: "success",
+      createdAt: new Date()
+    });
+
+    // 4️⃣ Real-time update
+    io.emit("walletBalanceUpdate", {
+      email: wallet.email,
+      balance: wallet.balance,
+      status: wallet.status
+    });
+
+    res.json({
+      message: "Depot reussi",
+      balance: wallet.balance
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Erreur serveur" });
+  }
+});
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
