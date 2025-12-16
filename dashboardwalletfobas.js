@@ -43,7 +43,7 @@ async function loadWallet() {
 }
 
 
-
+loadWallet();
 // --- Rafrechi otomatik chak 10 segond ---
 setInterval(loadWallet, 10000);
 
