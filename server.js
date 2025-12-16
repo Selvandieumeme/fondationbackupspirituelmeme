@@ -1491,6 +1491,45 @@ app.post('/api/admin/add-deposit', async (req, res) => {
 
 
 
+// ----------------------- ROUTE ADMIN POU ACTIVE DEPO -----------------------
+app.post('/api/admin/activate-deposit', async (req, res) => {
+  try {
+    const { userEmail } = req.body;
+
+    if (!userEmail) {
+      return res.status(400).json({ message: "Email itilizate obligatwa" });
+    }
+
+    // Jwenn dokiman itilizate nan walletBalance
+    const walletDoc = await WalletBalance.findOne({ email: userEmail });
+
+    if (!walletDoc) {
+      return res.status(404).json({ message: "Dokiman itilizate pa jwenn" });
+    }
+
+    // Chanje status soti pending → active
+    walletDoc.status = "active";
+    await walletDoc.save();
+
+    // Voye update imedyatman bay itilizate atravè Socket.io
+    io.emit('walletBalanceUpdate', walletDoc);
+
+    res.json({ message: `Status depo pou ${userEmail} vin active`, walletDoc });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Erè serveurs, tcheke log la" });
+  }
+});
+
+
+
+
+
+
+
+
+
+
 
 
 
