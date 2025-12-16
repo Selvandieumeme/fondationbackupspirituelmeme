@@ -37,7 +37,24 @@
 </div>
 <script src="dashboardwalletfobas.js"></script>
 
+<!-- Socket.io pou Balance Actuel -->
+<script src="/socket.io/socket.io.js"></script>
+<script>
+  // Konekte ak Socket.io
+  const socket = io();
 
+  // Koute event 'walletBalanceUpdate' soti nan backend
+  socket.on('walletBalanceUpdate', (data) => {
+    // Asire se dokiman itilizate ki konekte a
+    const userEmail = document.getElementById('userEmail').textContent;
+
+    if(data.email === userEmail && data.status === 'active') {
+      // Mete ajou Balance Actuel an tan reyèl
+      const balanceSpan = document.getElementById('walletBalance');
+      balanceSpan.textContent = parseFloat(data.balance).toFixed(2) + " Gourdes";
+    }
+  });
+</script>
 
 
 
