@@ -1211,7 +1211,7 @@ app.post("/api/admin/action-transaction", async (req, res) => {
   try {
     const { adminPassword, type, userEmail, amount } = req.body;
 
-    // 🔐 Sécurité admin
+    // 🔐 Sekirite admin
     if (adminPassword !== process.env.ADMIN_SECRET_PASSWORD) {
       return res.status(403).json({ success: false, message: "Aksè refize" });
     }
@@ -1235,6 +1235,7 @@ app.post("/api/admin/action-transaction", async (req, res) => {
     // Valeurs avan
     const balanceBefore = user.solde ?? 0;
     const bonusBefore = user.bonus ?? 0;
+
     let balanceAfter = balanceBefore;
     let bonusAfter = bonusBefore;
 
@@ -1242,7 +1243,7 @@ app.post("/api/admin/action-transaction", async (req, res) => {
     switch (type) {
       case "deposit":
         balanceAfter += amt;
-        user.solde = balanceAfter;
+        user.solde = balanceAfter; // **Ajoute montan nan solde itilizatè a**
         break;
       case "withdraw":
         if (balanceBefore < amt)
@@ -1256,23 +1257,23 @@ app.post("/api/admin/action-transaction", async (req, res) => {
         break;
     }
 
-    // --------------------- Kreye nouvo tranzaksyon nan collection "transactions" ---------------------
+    // --------------------- Kreye nouvo tranzaksyon ---------------------
     const transaction = new Transaction({
-  userId: user._id,
-  fullName: user.fullName,
-  email: user.email,   // ajoute sa
-  type,
-  amount: amt,
-  balanceBefore,
-  balanceAfter,
-  bonusBefore,
-  bonusAfter,
-  status: "active"
-	});
-
+      userId: user._id,
+      fullName: user.fullName,
+      email: user.email,        // **Ajoute email itilizatè a nan tranzaksyon**
+      type,
+      amount: amt,
+      balanceBefore,
+      balanceAfter,
+      bonusBefore,
+      bonusAfter,
+      status: "active",
+      createdAt: new Date()
+    });
 
     await transaction.save();
-    await user.save();
+    await user.save(); // **Asire solde itilizatè a ajou nan DB**
 
     res.json({
       success: true,
@@ -1286,7 +1287,6 @@ app.post("/api/admin/action-transaction", async (req, res) => {
     res.status(500).json({ success: false, message: "Erreur serveur" });
   }
 });
-
 
 
 
