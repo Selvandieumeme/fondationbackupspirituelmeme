@@ -1402,6 +1402,34 @@ app.post("/api/wallet/login", async (req, res) => {
 
 
 
+// ----------------------- WALLET BALANCE (ENDIPANDAN) -----------------------
+const WalletBalance = require('./models/walletBalance'); // Fichye modèl nou kreye
+
+// Stream MongoDB pou detekte chanjman nan walletBalance
+const changeStream = WalletBalance.watch();
+
+changeStream.on('change', (change) => {
+  // Lè yon dokiman modifye oswa insert
+  if (change.operationType === 'update' || change.operationType === 'insert') {
+    // Full document si insert, oswa fields modifye si update
+    const updatedDoc = change.fullDocument || change.updateDescription?.updatedFields;
+
+    // Voye update a frontend atravè Socket.io
+    io.emit('walletBalanceUpdate', updatedDoc);
+  }
+});
+
+// ----------------------- FIN WALLET BALANCE -----------------------
+
+
+
+
+
+
+
+
+
+
 
 
 // 🚀 DEMARRE SERVEUR
