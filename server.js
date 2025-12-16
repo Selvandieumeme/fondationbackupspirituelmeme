@@ -1258,16 +1258,18 @@ app.post("/api/admin/action-transaction", async (req, res) => {
 
     // --------------------- Kreye nouvo tranzaksyon nan collection "transactions" ---------------------
     const transaction = new Transaction({
-      userId: user._id,
-      fullName: user.fullName,
-      type,
-      amount: amt,
-      balanceBefore,
-      balanceAfter,
-      bonusBefore,
-      bonusAfter,
-      status: "active"
-    });
+  userId: user._id,
+  fullName: user.fullName,
+  email: user.email,   // ajoute sa
+  type,
+  amount: amt,
+  balanceBefore,
+  balanceAfter,
+  bonusBefore,
+  bonusAfter,
+  status: "active"
+	});
+
 
     await transaction.save();
     await user.save();
