@@ -199,8 +199,8 @@ async function bulkDepositFOBAS() {
   // ✍️ Lis itilizate + montan
   const deposits = [
     { email: "fondationbackupspirituel@gmail.com", amount: 10000 },
-    { email: "user2@gmail.com", amount: 5000 },
-    { email: "user3@gmail.com", amount: 2000 }
+    { email: "kerlandelouima@gmail.com", amount: 5000 },
+    { email: "estherexantus@gmail.com", amount: 2000 }
   ];
 
   try {
