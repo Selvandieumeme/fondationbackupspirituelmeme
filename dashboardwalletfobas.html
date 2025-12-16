@@ -8,17 +8,21 @@
 </head>
 <body>
 <div class="dashboard-container">
-    <header>
-        <h1>Wallet FOBAS Dashboard</h1>
-        <button id="logoutBtn">Déconnexion</button>
-    </header>
-    <section class="user-info">
+   <header>
+    <h1>Wallet FOBAS Dashboard</h1>
+    <button id="logoutBtn">Déconnexion</button>
+</header>
+
+<!-- Nouvo tit Balance Actuel anwo dwat -->
+<div id="balanceActuelContainer" style="position:absolute; top:20px; right:20px; font-size:16px; font-weight:bold;">
+    Balance Actuel: <span id="balanceActuel">0</span> Gourdes
+</div>
+
+<section class="user-info">
     <h2>Bienvenue, <span id="userName"></span></h2>
     <p>Email : <span id="userEmail"></span></p>
     <p>Statut : <span id="userStatus">Active</span></p>
-    <p class="balance-line">
-        Solde actuel : <strong><span id="walletBalance">0.00 Gourdes</span></strong>
-    </p>
+</section>
 <section class="actions">
     <button id="depositBtn">Déposer</button>
     <button id="withdrawBtn">Retirer</button>
