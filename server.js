@@ -968,17 +968,18 @@ const WalletUser = mongoose.models.WalletUser || mongoose.model("WalletUser", wa
 
 // ----------------------- TRANSACTION SCHEMA -----------------------
 const transactionSchema = new mongoose.Schema({
-  userId: { type: mongoose.Schema.Types.ObjectId, ref: "WalletUser", required: true },
-  fullName: { type: String, required: true }, // pran fullName itilizatè a
-  type: { type: String, enum: ["deposit", "withdraw", "bonus"], required: true },
-  amount: { type: Number, required: true },
-  balanceBefore: { type: Number, required: true },
-  balanceAfter: { type: Number, required: true },
-  bonusBefore: { type: Number, default: 0 },
-  bonusAfter: { type: Number, default: 0 },
-  method: { type: String }, // si depo, pou metòd MonCash/NatCash elatriye
-  status: { type: String, default: "active" },
-  createdAt: { type: Date, default: Date.now }
+    userId: { type: mongoose.Schema.Types.ObjectId, ref: "WalletUser", required: true },
+    fullName: { type: String, required: true },
+    email: { type: String, required: true }, // <- ajoute sa
+    type: { type: String, enum: ["deposit", "withdraw", "bonus"], required: true },
+    amount: { type: Number, required: true },
+    balanceBefore: { type: Number, required: true },
+    balanceAfter: { type: Number, required: true },
+    bonusBefore: { type: Number, default: 0 },
+    bonusAfter: { type: Number, default: 0 },
+    method: { type: String },
+    status: { type: String, default: "active" },
+    createdAt: { type: Date, default: Date.now }
 });
 
 const Transaction = mongoose.models.transactions || mongoose.model("transactions", transactionSchema);
