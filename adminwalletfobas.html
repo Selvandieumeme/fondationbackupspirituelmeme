@@ -130,7 +130,7 @@ document.getElementById('executeBtn').addEventListener('click', async () => {
 
     if (data.success) {
       msgEl.textContent =
-        "✅ Aksyon egzekite. Solde: " + data.solde + ", Bonus: " + data.bonus;
+  "✅ Aksyon egzekite. Solde: " + Number(data.solde).toFixed(2) + ", Bonus: " + Number(data.bonus).toFixed(2);
     } else {
       msgEl.textContent = "⚠️ " + data.message;
     }
