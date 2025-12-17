@@ -1514,14 +1514,12 @@ app.post('/api/admin/activate-deposit', async (req, res) => {
 app.post("/api/wallet/deposit", async (req, res) => {
   try {
     const { email, amount } = req.body;
-
     if (!email || !amount || isNaN(amount) || Number(amount) <= 0) {
       return res.status(400).json({ message: "Montan invalide" });
     }
 
     // 1️⃣ Trouve wallet
     let wallet = await WalletBalance.findOne({ email });
-
     if (!wallet) {
       wallet = new WalletBalance({
         email,
@@ -1531,7 +1529,7 @@ app.post("/api/wallet/deposit", async (req, res) => {
       });
     }
 
-    // 2️⃣ Update balance (NUMBER)
+    // 2️⃣ Update balance
     wallet.balance = Number(wallet.balance) + Number(amount);
     await wallet.save();
 
@@ -1545,23 +1543,19 @@ app.post("/api/wallet/deposit", async (req, res) => {
       createdAt: new Date()
     });
 
-    // 4️⃣ Real-time update
+    // 4️⃣ Emit real-time update via Socket.io
     io.emit("walletBalanceUpdate", {
       email: wallet.email,
       balance: wallet.balance,
       status: wallet.status
     });
 
-    res.json({
-      message: "Depot reussi",
-      balance: wallet.balance
-    });
+    res.json({ message: "Depot reussi", balance: wallet.balance, walletDoc: wallet });
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Erreur serveur" });
   }
 });
-
 
 
 
