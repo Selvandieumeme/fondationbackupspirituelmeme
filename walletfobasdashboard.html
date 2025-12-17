@@ -11,7 +11,7 @@
 <header class="top">
   <div class="user-info">
     <h2 id="userName">Nom Prénom</h2>
-    <p id="userEmail">email@gmail.com</p>
+    <p id="userEmail">email@walletfobas.com</p>
     <span class="status">ACTIF</span>
   </div>
   <div class="balance">
@@ -32,6 +32,7 @@
   <button onclick="showForm('transfer')">Transférer</button>
   <button onclick="showForm('bonus')">Bonus</button>
   <button onclick="showForm('changepass')">Changer mot de passe</button>
+  <button onclick="logout()" style="background:#dc3545;">Déconnexion</button>
 </nav>
 
 <!-- 4️⃣ Form Area: fòm dinamik selon aksyon -->
@@ -39,6 +40,25 @@
 
 <script src="/socket.io/socket.io.js"></script>
 <script src="walletfobasdashboard.js"></script>
+
+<script>
+// ✅ Fonksyon Déconnexion
+function logout() {
+  fetch('/api/wallet/logout', { method: 'POST' })
+    .then(res => res.json())
+    .then(data => {
+      if(data.success){
+        window.location.href = '/login'; // redirige sou paj login
+      } else {
+        alert('Erreur lors de la déconnexion.');
+      }
+    })
+    .catch(err => console.error('Erreur logout:', err));
+}
+</script>
+
+
+
 
 
 
