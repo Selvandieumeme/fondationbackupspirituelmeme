@@ -225,63 +225,71 @@ if (typeof io !== "undefined") {
 
 
 
-// ================= USER DEPOSIT + REAL-TIME UPDATE =================
-if (typeof io !== "undefined") {
-  const socket = io();
+document.addEventListener("DOMContentLoaded", () => {
+  // ================= SOCKET REAL-TIME UPDATE =================
+  if (typeof io !== "undefined") {
+    const socket = io();
 
-  // 🔹 Koute event pou ajou balance soti nan backend
-  socket.on("walletBalanceUpdate", (data) => {
-    if (!data || !data.email) return;
+    socket.on("walletBalanceUpdate", (data) => {
+      if (!data || !data.email) return;
 
-    const userEmail = document.getElementById("userEmail")?.textContent?.trim();
-    if (!userEmail) return;
+      const userEmail = document.getElementById("userEmail")?.textContent?.trim();
+      if (!userEmail) return;
 
-    if (data.email === userEmail && data.status === "active") {
-      const balanceSpan = document.getElementById("balanceActuel");
-      if (balanceSpan && data.balance !== undefined) {
-        balanceSpan.textContent = Number(data.balance).toLocaleString("fr-FR");
+      if (data.email === userEmail && data.status === "active") {
+        const balanceSpan = document.getElementById("balanceActuel");
+        if (balanceSpan && data.balance !== undefined) {
+          balanceSpan.textContent = Number(data.balance).toLocaleString("fr-FR");
+        }
       }
-    }
-  });
-}
-
-// 🔹 Bouton deposer
-document.getElementById("depositBtn")?.addEventListener("click", async () => {
-  const amount = prompt("Antre montan ou vle deposer :");
-  if (!amount || isNaN(amount) || Number(amount) <= 0) {
-    alert("Montan invalide");
-    return;
-  }
-
-  const email = document.getElementById("userEmail")?.textContent?.trim();
-  if (!email) return;
-
-  try {
-    const backendURL = "https://examen-backend-ihlx.onrender.com"; // URL backend Render ou
-
-    const res = await fetch(`${backendURL}/api/wallet/deposit`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, amount: Number(amount) })
     });
-
-    const data = await res.json();
-    if (!res.ok) {
-      alert(data.message || "Erreur depot");
-      return;
-    }
-
-    // 🔹 Mete ajou instant balance si li retounen
-    const balanceSpan = document.getElementById("balanceActuel");
-    if (balanceSpan && data.balance !== undefined) {
-      balanceSpan.textContent = Number(data.balance).toLocaleString("fr-FR");
-    }
-
-    alert(`Depo ${amount} reyisi!`);
-  } catch (err) {
-    console.error(err);
-    alert("Erreur serveur");
   }
+
+  // ================= USER DEPOSIT =================
+  const depositBtn = document.getElementById("depositBtn");
+  if (depositBtn) {
+    depositBtn.addEventListener("click", async () => {
+      const amount = prompt("Antre montan ou vle deposer :");
+      if (!amount || isNaN(amount) || Number(amount) <= 0) {
+        alert("Montan invalide");
+        return;
+      }
+
+      const emailElem = document.getElementById("userEmail");
+      const email = emailElem?.textContent?.trim();
+      if (!email) {
+        alert("Email itilizate pa jwenn");
+        return;
+      }
+
+      try {
+        const backendURL = "https://examen-backend-ihlx.onrender.com"; // URL backend Render ou
+        const res = await fetch(`${backendURL}/api/wallet/deposit`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, amount: Number(amount) })
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          alert(data.message || "Erreur depot");
+          return;
+        }
+
+        // Mete ajou balance instant
+        const balanceSpan = document.getElementById("balanceActuel");
+        if (balanceSpan && data.balance !== undefined) {
+          balanceSpan.textContent = Number(data.balance).toLocaleString("fr-FR");
+        }
+
+        alert(`Depo ${amount} reyisi!`);
+      } catch (err) {
+        console.error(err);
+        alert("Erreur serveur");
+      }
+    });
+  }
+  // ================= FIN USER DEPOSIT =================
 });
-// ================= FIN USER DEPOSIT =================
 
