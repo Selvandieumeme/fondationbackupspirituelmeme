@@ -218,6 +218,33 @@ document.addEventListener("submit", async (e) => {
 
 
 
+function addDepositToHistory(tx) {
+    const tbody = document.getElementById("depositHistory");
+
+    const tr = document.createElement("tr");
+
+    tr.innerHTML = `
+        <td>${new Date(tx.createdAt).toLocaleString()}</td>
+        <td>${tx.amount.toFixed(2)} G</td>
+        <td>${tx.method}</td>
+        <td>${tx.whatsapp}</td>
+        <td style="color:#f59e0b;font-weight:600;">${tx.status}</td>
+    `;
+
+    tbody.prepend(tr);
+}
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -250,24 +277,3 @@ if(bonusBtn && walletBonusEl) {
         }
     });
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
