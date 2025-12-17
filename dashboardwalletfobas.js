@@ -145,7 +145,35 @@ if(depositBtn) {
 
 
 
+document.getElementById("depositBtn").addEventListener("click", () => {
+    actionArea.innerHTML = `
+        <h3>Déposer de l'argent</h3>
 
+        <form id="depositForm">
+            <label>Nom / Prénom :</label>
+            <input type="text" id="depName" placeholder="Nom complet" required />
+
+            <label>Email :</label>
+            <input type="email" id="depEmail" placeholder="Email" required />
+
+            <label>WhatsApp :</label>
+            <input type="text" id="depWhatsapp" placeholder="+509XXXXXXXX" required />
+
+            <label>Montant :</label>
+            <input type="number" id="depAmount" placeholder="Ex: 500" min="1" required />
+
+            <label>Méthode :</label>
+            <select id="depMethod" required>
+                <option value="">Choisir méthode</option>
+                <option value="MonCash">MonCash</option>
+                <option value="NatCash">NatCash</option>
+                <option value="Carte Bancaire">Carte Bancaire</option>
+            </select>
+
+            <button type="submit">Déposer</button>
+        </form>
+    `;
+});
 
 
 
@@ -193,29 +221,6 @@ if(bonusBtn && walletBonusEl) {
 
 
 
-// ================= SOCKET.IO – WALLET BALANCE =================
-if (typeof io !== "undefined") {
-  const socket = io();
-
-  socket.on("walletBalanceUpdate", (data) => {
-    if (!data || !data.email) return;
-
-    const userEmail = document.getElementById("userEmail")?.textContent?.trim();
-    if (!userEmail) return;
-
-    if (data.email === userEmail && data.status === "active") {
-      const balanceSpan = document.getElementById("balanceActuel");
-      if (!balanceSpan) return;
-
-      // Asire balance rete NUMBER, pa string
-      const balanceNumber = Number(data.balance);
-      if (isNaN(balanceNumber)) return;
-
-      balanceSpan.textContent = balanceNumber.toLocaleString("fr-FR");
-    }
-  });
-}
-// ================= FIN SOCKET.IO =================
 
 
 
@@ -223,73 +228,4 @@ if (typeof io !== "undefined") {
 
 
 
-
-
-document.addEventListener("DOMContentLoaded", () => {
-  // ================= SOCKET REAL-TIME UPDATE =================
-  if (typeof io !== "undefined") {
-    const socket = io();
-
-    socket.on("walletBalanceUpdate", (data) => {
-      if (!data || !data.email) return;
-
-      const userEmail = document.getElementById("userEmail")?.textContent?.trim();
-      if (!userEmail) return;
-
-      if (data.email === userEmail && data.status === "active") {
-        const balanceSpan = document.getElementById("balanceActuel");
-        if (balanceSpan && data.balance !== undefined) {
-          balanceSpan.textContent = Number(data.balance).toLocaleString("fr-FR");
-        }
-      }
-    });
-  }
-
-  // ================= USER DEPOSIT =================
-  const depositBtn = document.getElementById("depositBtn");
-  if (depositBtn) {
-    depositBtn.addEventListener("click", async () => {
-      const amount = prompt("Antre montan ou vle deposer :");
-      if (!amount || isNaN(amount) || Number(amount) <= 0) {
-        alert("Montan invalide");
-        return;
-      }
-
-      const emailElem = document.getElementById("userEmail");
-      const email = emailElem?.textContent?.trim();
-      if (!email) {
-        alert("Email itilizate pa jwenn");
-        return;
-      }
-
-      try {
-        const backendURL = "https://examen-backend-ihlx.onrender.com"; // URL backend Render ou
-        const res = await fetch(`${backendURL}/api/wallet/deposit`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email, amount: Number(amount) })
-        });
-
-        const data = await res.json();
-
-        if (!res.ok) {
-          alert(data.message || "Erreur depot");
-          return;
-        }
-
-        // Mete ajou balance instant
-        const balanceSpan = document.getElementById("balanceActuel");
-        if (balanceSpan && data.balance !== undefined) {
-          balanceSpan.textContent = Number(data.balance).toLocaleString("fr-FR");
-        }
-
-        alert(`Depo ${amount} reyisi!`);
-      } catch (err) {
-        console.error(err);
-        alert("Erreur serveur");
-      }
-    });
-  }
-  // ================= FIN USER DEPOSIT =================
-});
 
