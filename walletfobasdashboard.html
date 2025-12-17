@@ -7,23 +7,25 @@
 </head>
 <body>
 
+<!-- 1️⃣ Header: info itilizate + balance + bonus -->
 <header class="top">
-  <div>
+  <div class="user-info">
     <h2 id="userName">Nom Prénom</h2>
-    <p id="userEmail">email@gmail.com</p>
+    <p id="userEmail">email@walletfobas.com</p>
     <span class="status">ACTIF</span>
   </div>
-  
   <div class="balance">
     <p>Balance Actuel:</p>
     <strong><span id="balanceActuel">0</span> Gourdes</strong>
     <p>Bonus:</p>
     <strong><span id="bonusActuel">0</span> Gourdes</strong>
-</div>
+  </div>
 </header>
 
+<!-- 2️⃣ History: tout tranzaksyon itilizate + admin -->
 <section class="history" id="history"></section>
 
+<!-- 3️⃣ Menu bouton aksyon -->
 <nav class="menu">
   <button onclick="showForm('deposit')">Déposer</button>
   <button onclick="showForm('withdraw')">Retirer</button>
@@ -32,6 +34,7 @@
   <button onclick="showForm('changepass')">Changer mot de passe</button>
 </nav>
 
+<!-- 4️⃣ Form Area: fòm dinamik selon aksyon -->
 <section class="form-area" id="formArea"></section>
 
 <script src="/socket.io/socket.io.js"></script>
