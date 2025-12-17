@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <title>Wallet FOBAS – Dashboard</title>
+  <link rel="stylesheet" href="walletfobasdashboard.css" />
+</head>
+<body>
+
+<header class="top">
+  <div>
+    <h2 id="userName">Nom Prénom</h2>
+    <p id="userEmail">email@gmail.com</p>
+    <span class="status">ACTIF</span>
+  </div>
+  
+  <div class="balance">
+    <p>Balance Actuel:</p>
+    <strong><span id="balanceActuel">0</span> Gourdes</strong>
+    <p>Bonus:</p>
+    <strong><span id="bonusActuel">0</span> Gourdes</strong>
+</div>
+</header>
+
+<section class="history" id="history"></section>
+
+<nav class="menu">
+  <button onclick="showForm('deposit')">Déposer</button>
+  <button onclick="showForm('withdraw')">Retirer</button>
+  <button onclick="showForm('transfer')">Transférer</button>
+  <button onclick="showForm('bonus')">Bonus</button>
+  <button onclick="showForm('changepass')">Changer mot de passe</button>
+</nav>
+
+<section class="form-area" id="formArea"></section>
+
+<script src="/socket.io/socket.io.js"></script>
+<script src="walletfobasdashboard.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  <!-- STYLE KONTEUR -->
+<style>
+  #fbs-counter {
+    position: absolute; 
+    top: 10px; 
+    left: 10px; 
+    display: flex; 
+    align-items: center; 
+    gap: 8px;
+    background: #ffffffdd; 
+    padding: 3px 8px; 
+    border-radius: 12px;
+    font-family: Arial, sans-serif;
+    font-size: 12px;
+    font-weight: bold;
+    color: #222;
+    box-shadow: 0 0 5px rgba(0,0,0,0.2);
+    z-index: 9999;
+  }
+  #fbs-counter iframe, 
+  #fbs-counter div {
+    display: inline-block;
+    vertical-align: middle;
+  }
+</style>
+
+
+<!-- STYLE POU POZISYON KONTEUR -->
+<style>
+  #wau-counter {
+    position: fixed;   /* Toujou vizib */
+    top: 10px;         /* Anlè */
+    left: 10px;        /* Agoch */
+    z-index: 9999;
+    pointer-events: none; /* Bloke klik, anpeche redireksyon */
+  }
+
+  #wau-counter iframe,
+  #wau-counter canvas {
+    pointer-events: none !important; /* Asire pa gen klik ditou */
+  }
+</style>
+
+<!-- KONTEUR (afiche anlè a goch) -->
+<div id="wau-counter">
+  <script id="_wauxwz">
+    var _wau = _wau || []; 
+    _wau.push(["dynamic", "45b8ju9ecv", "xwz", "c4302bffffff", "small"]);
+  </script>
+  <script async src="//waust.at/d.js"></script>
+</div>
+
+</body>
+</html>
