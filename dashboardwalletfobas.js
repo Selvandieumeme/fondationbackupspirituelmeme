@@ -225,7 +225,27 @@ if (typeof io !== "undefined") {
 
 
 
-// ================= USER DEPOSIT =================
+// ================= USER DEPOSIT + REAL-TIME UPDATE =================
+if (typeof io !== "undefined") {
+  const socket = io();
+
+  // 🔹 Koute event pou ajou balance soti nan backend
+  socket.on("walletBalanceUpdate", (data) => {
+    if (!data || !data.email) return;
+
+    const userEmail = document.getElementById("userEmail")?.textContent?.trim();
+    if (!userEmail) return;
+
+    if (data.email === userEmail && data.status === "active") {
+      const balanceSpan = document.getElementById("balanceActuel");
+      if (balanceSpan && data.balance !== undefined) {
+        balanceSpan.textContent = Number(data.balance).toLocaleString("fr-FR");
+      }
+    }
+  });
+}
+
+// 🔹 Bouton deposer
 document.getElementById("depositBtn")?.addEventListener("click", async () => {
   const amount = prompt("Antre montan ou vle deposer :");
   if (!amount || isNaN(amount) || Number(amount) <= 0) {
@@ -237,29 +257,24 @@ document.getElementById("depositBtn")?.addEventListener("click", async () => {
   if (!email) return;
 
   try {
-    // ✅ Mete URL backend Render ou a isit la
-    const backendURL = "https://examen-backend-ihlx.onrender.com";
+    const backendURL = "https://examen-backend-ihlx.onrender.com"; // URL backend Render ou
 
-    const res = await fetch(`${backendURL}/api/admin/add-deposit`, {
+    const res = await fetch(`${backendURL}/api/wallet/deposit`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        userEmail: email,
-        amount: Number(amount)
-      })
+      body: JSON.stringify({ email, amount: Number(amount) })
     });
 
     const data = await res.json();
-
     if (!res.ok) {
       alert(data.message || "Erreur depot");
       return;
     }
 
-    // 🔹 Mete ajou balance imedyatman nan dashboard
+    // 🔹 Mete ajou instant balance si li retounen
     const balanceSpan = document.getElementById("balanceActuel");
-    if (balanceSpan && data.walletDoc) {
-      balanceSpan.textContent = Number(data.walletDoc.balance).toLocaleString("fr-FR");
+    if (balanceSpan && data.balance !== undefined) {
+      balanceSpan.textContent = Number(data.balance).toLocaleString("fr-FR");
     }
 
     alert(`Depo ${amount} reyisi!`);
@@ -268,5 +283,5 @@ document.getElementById("depositBtn")?.addEventListener("click", async () => {
     alert("Erreur serveur");
   }
 });
-// ================= FIN DEPOSIT =================
+// ================= FIN USER DEPOSIT =================
 
