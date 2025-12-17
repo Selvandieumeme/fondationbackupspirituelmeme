@@ -180,6 +180,48 @@ document.getElementById("depositBtn").addEventListener("click", () => {
 
 
 
+document.addEventListener("submit", async (e) => {
+    if (e.target.id !== "depositForm") return;
+
+    e.preventDefault();
+
+    const tx = {
+        name: document.getElementById("depName").value.trim(),
+        email: document.getElementById("depEmail").value.trim(),
+        whatsapp: document.getElementById("depWhatsapp").value.trim(),
+        amount: Number(document.getElementById("depAmount").value),
+        method: document.getElementById("depMethod").value,
+        status: "pending",
+        createdAt: new Date().toISOString()
+    };
+
+    // 🟠 AFFICHAGE IMMÉDIAT (Optimistic UI)
+    addDepositToHistory(tx);
+
+    // 📡 ENVOI AU BACKEND
+    try {
+        await fetch("/api/wallet/deposit", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(tx)
+        });
+    } catch (err) {
+        console.error("Erreur dépôt :", err);
+    }
+
+    e.target.reset();
+});
+
+
+
+
+
+
+
+
+
+
+
 
 
 
