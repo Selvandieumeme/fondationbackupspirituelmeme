@@ -229,8 +229,7 @@ function logout() {
   window.location.href = "connexionwalletfobas.html";
 }
 
-// ---------- INIT ----------
-loadDashboard();
+
 
 
 
@@ -257,3 +256,7 @@ document.getElementById("bonusBtn")?.addEventListener("click", () => {
 document.getElementById("changePassBtn")?.addEventListener("click", () => {
   showForm("changepass");
 });
+
+
+// ---------- INIT ----------
+loadDashboard();
