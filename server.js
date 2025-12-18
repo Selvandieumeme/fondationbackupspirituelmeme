@@ -39,6 +39,10 @@ app.use(express.json());
 
 
 
+const io = new Server(server, {
+cors: { origin: '*', methods: ['GET', 'POST'] }
+});
+
 
 
 
@@ -973,28 +977,213 @@ const WalletUser = mongoose.models.WalletUser || mongoose.model(
 );
 
 
-// ----------------------- TRANSACTION SCHEMA -----------------------
-const transactionSchema = new mongoose.Schema({
-  userId: { type: mongoose.Schema.Types.ObjectId, required: true },
+
+// ----------------------- SCHEMAS -----------------------
+const walletBalanceSchema = new mongoose.Schema({
+  email: { type: String, unique: true },
   fullName: String,
+  balance: { type: Number, default: 0 },
+  bonus: { type: Number, default: 0 }
+}, { timestamps: true });
+
+
+
+
+const transactionSchema = new mongoose.Schema({
   email: String,
-  type: { type: String, enum: ["deposit", "withdraw", "bonus"], required: true },
-  amount: { type: Number, required: true },
-  balanceBefore: Number,
-  balanceAfter: Number,
-  bonusBefore: Number,
-  bonusAfter: Number,
+  fullName: String,
+  type: String, // deposit, withdraw, transfer, bonus
+  amount: Number,
+  fee: { type: Number, default: 0 },
   method: String,
-  status: { type: String, default: "pending" },
-  createdAt: { type: Date, default: Date.now }
+  whatsapp: String,
+  country: String,
+  receiverEmail: String,
+  status: { type: String, default: 'PENDING' }
+}, { timestamps: true });
+
+const WalletBalance = mongoose.model('walletbalances', walletBalanceSchema);
+const Transaction = mongoose.model('transactions', transactionSchema);
+
+// ----------------------- SOCKET -----------------------
+io.on('connection', socket => {
+  console.log('🔌 Socket connecté');
 });
 
-// 🔥 Model Transaction pou collection "transactions"
-const Transaction = mongoose.models.Transaction || mongoose.model(
-  "Transaction",
-  transactionSchema,
-  "transactions"
-);
+const notifyUpdate = () => io.emit('wallet-update');
+
+// ======================= USER DASHBOARD =======================
+
+// 📥 Charger dashboard utilisateur
+app.get('/api/wallet/dashboard', async (req, res) => {
+  try {
+    const email = req.headers['x-user-email'];
+    if (!email) return res.status(400).json({ message: 'Email manquant' });
+
+    let wallet = await WalletBalance.findOne({ email });
+    if (!wallet) {
+      wallet = await WalletBalance.create({ email, fullName: email });
+    }
+
+    const tx = await Transaction.find({ email }).sort({ createdAt: -1 });
+    res.json({ wallet, tx });
+  } catch (e) {
+    res.status(500).json({ message: 'Erreur dashboard' });
+  }
+});
+
+// 📥 Dépôt
+app.post('/api/wallet/deposit', async (req, res) => {
+  try {
+    const email = req.headers['x-user-email'];
+    const { amount, method, whatsapp, country } = req.body;
+
+    await Transaction.create({
+      email,
+      type: 'deposit',
+      amount,
+      method,
+      whatsapp,
+      country,
+      status: 'PENDING'
+    });
+
+    notifyUpdate();
+    res.json({ message: 'Dépôt envoyé (PENDING)' });
+  } catch (e) {
+    res.status(500).json({ message: 'Erreur dépôt' });
+  }
+});
+
+// 📤 Retrait (5%)
+app.post('/api/wallet/withdraw', async (req, res) => {
+  try {
+    const email = req.headers['x-user-email'];
+    const { amount, method, whatsapp, country } = req.body;
+    const fee = amount * 0.05;
+
+    await Transaction.create({
+      email,
+      type: 'withdraw',
+      amount,
+      fee,
+      method,
+      whatsapp,
+      country,
+      status: 'PENDING'
+    });
+
+    notifyUpdate();
+    res.json({ message: 'Retrait envoyé (PENDING)' });
+  } catch (e) {
+    res.status(500).json({ message: 'Erreur retrait' });
+  }
+});
+
+// 🔄 Transfert instantané
+app.post('/api/wallet/transfer', async (req, res) => {
+  try {
+    const email = req.headers['x-user-email'];
+    const { receiverEmail, amount } = req.body;
+
+    const sender = await WalletBalance.findOne({ email });
+    const receiver = await WalletBalance.findOne({ email: receiverEmail });
+
+    if (!sender || sender.balance < amount)
+      return res.status(400).json({ message: 'Solde insuffisant' });
+
+    if (!receiver)
+      return res.status(404).json({ message: 'Destinataire introuvable' });
+
+    sender.balance -= amount;
+    receiver.balance += amount;
+
+    await sender.save();
+    await receiver.save();
+
+    await Transaction.create({
+      email,
+      type: 'transfer',
+      amount,
+      receiverEmail,
+      status: 'ACTIVE'
+    });
+
+    await Transaction.create({
+      email: receiverEmail,
+      type: 'transfer',
+      amount,
+      status: 'ACTIVE'
+    });
+
+    notifyUpdate();
+    res.json({ message: 'Transfert réussi' });
+  } catch (e) {
+    res.status(500).json({ message: 'Erreur transfert' });
+  }
+});
+
+// 🎁 Bonus (pending)
+app.post('/api/wallet/bonus', async (req, res) => {
+  try {
+    const email = req.headers['x-user-email'];
+    const { amount } = req.body;
+
+    await Transaction.create({
+      email,
+      type: 'bonus',
+      amount,
+      status: 'PENDING'
+    });
+
+    notifyUpdate();
+    res.json({ message: 'Bonus envoyé (PENDING)' });
+  } catch (e) {
+    res.status(500).json({ message: 'Erreur bonus' });
+  }
+});
+
+// ======================= ADMIN PANEL =======================
+
+// 📋 Voir transactions pending
+app.get('/api/admin/transactions', async (req, res) => {
+  const tx = await Transaction.find({ status: 'PENDING' }).sort({ createdAt: -1 });
+  res.json(tx);
+});
+
+// ✅ Valider transaction
+app.post('/api/admin/validate', async (req, res) => {
+  try {
+    const { transactionId } = req.body;
+    const tx = await Transaction.findById(transactionId);
+    if (!tx) return res.status(404).json({ message: 'Transaction introuvable' });
+
+    const wallet = await WalletBalance.findOne({ email: tx.email });
+    if (!wallet) return res.status(404).json({ message: 'Wallet introuvable' });
+
+    if (tx.type === 'deposit') wallet.balance += tx.amount;
+    if (tx.type === 'withdraw') wallet.balance -= (tx.amount + tx.fee);
+    if (tx.type === 'bonus') wallet.bonus += tx.amount;
+
+    tx.status = 'ACTIVE';
+    await wallet.save();
+    await tx.save();
+
+    notifyUpdate();
+    res.json({ message: 'Transaction validée' });
+  } catch (e) {
+    res.status(500).json({ message: 'Erreur validation' });
+  }
+});
+
+
+
+
+
+
+
+
+
 
 
 
