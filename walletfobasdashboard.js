@@ -1,44 +1,44 @@
+// ------------------- Dashboard JS Final Konpatib -------------------
 const historyBox = document.getElementById('history');
 const formArea = document.getElementById('formArea');
 const socket = io('https://examen-backend-ihlx.onrender.com'); // Socket.io backend
 
-// ✅ Formatter montant en Gourdes
+// Formatter montant en Gourdes
 function formatGourdes(amount) {
   return Number(amount).toFixed(2);
 }
 
-// ✅ WhatsApp notification admin
+// WhatsApp notification admin
 function sendWhatsAppNotification(message) {
   const adminNumber = "50946057952";
   const url = "https://wa.me/" + adminNumber + "?text=" + encodeURIComponent(message);
   window.open(url, "_blank");
 }
 
-// ✅ Charger dashboard
+// Charger dashboard
 async function loadDashboard() {
   try {
-    const res = await fetch('https://examen-backend-ihlx.onrender.com/api/wallet/dashboard', {
-      credentials: 'include'
-    });
+    // Chaje done itilizate a depi localStorage
+    const user = JSON.parse(localStorage.getItem('walletUser'));
+    if (!user) throw new Error("Itilizate pa defini nan localStorage");
+
+    // Mete done nan dashboard
+    document.getElementById('userName').textContent = user.fullName;
+    document.getElementById('userEmail').textContent = user.email;
+    document.getElementById('balanceActuel').textContent = formatGourdes(user.balance || 0);
+    document.getElementById('bonusActuel').textContent = formatGourdes(user.bonus || 0);
+
+    // Chaje istwa si gen nan backend
+    const res = await fetch(`https://examen-backend-ihlx.onrender.com/api/wallet/history?email=${encodeURIComponent(user.email)}`);
     const data = await res.json();
-
-    const balanceValue = Number(data.wallet.balance) || 0;
-    const bonusValue = Number(data.wallet.bonus) || 0;
-
-    document.getElementById('userName').textContent = data.wallet.fullName;
-    document.getElementById('userEmail').textContent = data.wallet.email;
-    document.getElementById('balanceActuel').textContent = formatGourdes(balanceValue);
-    document.getElementById('bonusActuel').textContent = formatGourdes(bonusValue);
-
     historyBox.innerHTML = '';
-    data.tx.forEach(t => addHistory(t));
-
+    data.tx?.forEach(t => addHistory(t));
   } catch (e) {
     console.error('Erreur chargement dashboard:', e);
   }
 }
 
-// ✅ Ajouter un historique
+// Ajouter un historique
 function addHistory(t) {
   const div = document.createElement('div');
   div.className = 'item';
@@ -47,13 +47,17 @@ function addHistory(t) {
   historyBox.prepend(div);
 }
 
-// ✅ Afficher foms selon bouton menu
+// Afficher foms selon bouton menu
 function showForm(type) {
+  formArea.innerHTML = '';
+  const user = JSON.parse(localStorage.getItem('walletUser'));
+  if (!user) return;
+
   if (type === 'deposit' || type === 'withdraw' || type === 'bonus') {
     let label = type === 'deposit' ? 'Dépôt' : type === 'withdraw' ? 'Retrait' : 'Bonus';
     formArea.innerHTML = `
       <h3>${label} Wallet</h3>
-      <input placeholder="WhatsApp" id="whatsapp" />
+      <input placeholder="WhatsApp" id="whatsapp" value="${user.whatsapp || ''}" />
       <input placeholder="Pays" id="country" />
       <input type="number" placeholder="Montant" id="amount" />
       <select id="method">
@@ -81,37 +85,34 @@ function showForm(type) {
   }
 }
 
-// ✅ Soumettre Déposer / Retirer / Bonus
+// Soumettre Déposer / Retirer / Bonus
 async function submitAction(type) {
+  const whatsappInput = document.getElementById('whatsapp');
+  const countryInput = document.getElementById('country');
+  const amountInput = document.getElementById('amount');
+  const methodSelect = document.getElementById('method');
+
   const body = {
-    whatsapp: whatsapp.value || '',
-    country: country.value || '',
-    amount: Number(amount.value),
-    method: type === 'bonus' ? 'Bonus' : method.value
+    whatsapp: whatsappInput?.value || '',
+    country: countryInput?.value || '',
+    amount: Number(amountInput?.value),
+    method: type === 'bonus' ? 'Bonus' : methodSelect?.value
   };
+
   try {
+    const user = JSON.parse(localStorage.getItem('walletUser'));
     const res = await fetch(`https://examen-backend-ihlx.onrender.com/api/wallet/${type}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body),
-      credentials: 'include'
+      body: JSON.stringify({ ...body, email: user.email })
     });
     const data = await res.json();
     if (res.ok) {
       loadDashboard();
-
       const actionLabel = type === 'deposit' ? 'DEPOT' : type === 'withdraw' ? 'RETRAIT' : 'BONUS';
       const message =
-        "🔔 WALLET FOBAS - " + actionLabel + "\n\n" +
-        "Nom: " + document.getElementById('userName').textContent + "\n" +
-        "Email: " + document.getElementById('userEmail').textContent + "\n" +
-        "Montant: " + Number(amount.value).toFixed(2) + " Gourdes\n" +
-        "WhatsApp: " + whatsapp.value + "\n" +
-        "Pays: " + country.value + "\n" +
-        "Statut: PENDING";
-
+        `🔔 WALLET FOBAS - ${actionLabel}\n\nNom: ${user.fullName}\nEmail: ${user.email}\nMontant: ${Number(amountInput.value).toFixed(2)} Gourdes\nWhatsApp: ${body.whatsapp}\nPays: ${body.country}\nStatut: PENDING`;
       sendWhatsAppNotification(message);
-
       alert(data.message || 'Action envoyée');
     } else alert(data.message);
   } catch (e) {
@@ -119,30 +120,29 @@ async function submitAction(type) {
   }
 }
 
-// ✅ Soumettre Transfert
+// Soumettre Transfert
 async function submitTransfer() {
+  const receiverInput = document.getElementById('receiver');
+  const amountInput = document.getElementById('amount');
+  const user = JSON.parse(localStorage.getItem('walletUser'));
+
   const body = {
-    receiverEmail: receiver.value,
-    amount: Number(amount.value)
+    receiverEmail: receiverInput?.value,
+    amount: Number(amountInput?.value),
+    senderEmail: user.email
   };
+
   try {
     const res = await fetch('https://examen-backend-ihlx.onrender.com/api/wallet/transfer', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body),
-      credentials: 'include'
+      body: JSON.stringify(body)
     });
     const data = await res.json();
     if (res.ok) {
       loadDashboard();
-
       const message =
-        "🔔 WALLET FOBAS - TRANSFERT\n\n" +
-        "Expéditeur: " + document.getElementById('userEmail').textContent + "\n" +
-        "Destinataire: " + receiver.value + "\n" +
-        "Montant: " + Number(amount.value).toFixed(2) + " Gourdes\n" +
-        "Statut: ACTIVE";
-
+        `🔔 WALLET FOBAS - TRANSFERT\n\nExpéditeur: ${user.email}\nDestinataire: ${receiverInput.value}\nMontant: ${Number(amountInput.value).toFixed(2)} Gourdes\nStatut: ACTIVE`;
       sendWhatsAppNotification(message);
       alert(data.message);
     } else alert(data.message);
@@ -151,24 +151,25 @@ async function submitTransfer() {
   }
 }
 
-// ✅ Soumettre Changer mot de passe
+// Soumettre Changer mot de passe
 async function submitChangePass() {
-  const newPassVal = newPass.value;
-  const confirmPassVal = confirmPass.value;
-  if (!newPassVal || !confirmPassVal) {
+  const newPassInput = document.getElementById('newPass');
+  const confirmPassInput = document.getElementById('confirmPass');
+
+  if (!newPassInput?.value || !confirmPassInput?.value) {
     alert('Veuillez remplir tous les champs.');
     return;
   }
-  if (newPassVal !== confirmPassVal) {
+  if (newPassInput.value !== confirmPassInput.value) {
     alert('Les mots de passe ne correspondent pas.');
     return;
   }
+
   try {
     const res = await fetch('https://examen-backend-ihlx.onrender.com/api/wallet/changepassword', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ newPassword: newPassVal }),
-      credentials: 'include'
+      body: JSON.stringify({ newPassword: newPassInput.value })
     });
     const data = await res.json();
     if (res.ok) {
@@ -180,19 +181,14 @@ async function submitChangePass() {
   }
 }
 
-// ✅ Logout
+// Logout
 function logout() {
-  fetch('https://examen-backend-ihlx.onrender.com/api/wallet/logout', { method: 'POST', credentials: 'include' })
-    .then(res => res.json())
-    .then(data => {
-      if (data.success) window.location.href = '/login';
-      else alert('Erreur lors de la déconnexion.');
-    })
-    .catch(err => console.error('Erreur logout:', err));
+  localStorage.removeItem('walletUser');
+  window.location.href = '/login';
 }
 
-// ✅ Socket.io updates realtime
+// Socket.io updates realtime
 socket.on('wallet-update', () => loadDashboard());
 
-// ✅ Initial dashboard load
+// Initial dashboard load
 loadDashboard();
