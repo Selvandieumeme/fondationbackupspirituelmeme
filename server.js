@@ -39,9 +39,7 @@ app.use(express.json());
 
 
 
-const io = new Server(server, {
-cors: { origin: '*', methods: ['GET', 'POST'] }
-});
+
 
 
 
