@@ -192,3 +192,15 @@ socket.on('wallet-update', () => loadDashboard());
 
 // Initial dashboard load
 loadDashboard();
+
+
+
+
+
+
+
+document.getElementById("depositBtn").onclick = () => showForm("deposit");
+document.getElementById("withdrawBtn").onclick = () => showForm("withdraw");
+document.getElementById("transferBtn").onclick = () => showForm("transfer");
+document.getElementById("bonusBtn").onclick = () => showForm("bonus");
+document.getElementById("changePassBtn").onclick = () => showForm("changepass");
