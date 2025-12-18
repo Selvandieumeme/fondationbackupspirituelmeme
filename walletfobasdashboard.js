@@ -231,3 +231,29 @@ function logout() {
 
 // ---------- INIT ----------
 loadDashboard();
+
+
+
+
+
+
+// ---------- MENU BUTTONS BINDING (OBLIGATOIRE) ----------
+document.getElementById("depositBtn")?.addEventListener("click", () => {
+  showForm("deposit");
+});
+
+document.getElementById("withdrawBtn")?.addEventListener("click", () => {
+  showForm("withdraw");
+});
+
+document.getElementById("transferBtn")?.addEventListener("click", () => {
+  showForm("transfer");
+});
+
+document.getElementById("bonusBtn")?.addEventListener("click", () => {
+  showForm("bonus");
+});
+
+document.getElementById("changePassBtn")?.addEventListener("click", () => {
+  showForm("changepass");
+});
