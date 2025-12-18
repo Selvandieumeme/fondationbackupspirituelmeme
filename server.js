@@ -982,9 +982,6 @@ const walletBalanceSchema = new mongoose.Schema({
   bonus: { type: Number, default: 0 }
 }, { timestamps: true });
 
-
-
-
 // ----------------------- SCHEMAS TRANSACTIONS -----------------------
 const transactionSchema = new mongoose.Schema({
   email: String,
@@ -1014,7 +1011,7 @@ const notifyUpdate = () => io.emit('wallet-update');
 // 📥 Charger dashboard utilisateur
 app.get('/api/wallet/dashboard', async (req, res) => {
   try {
-    const email = req.headers['x-user-email'];
+    const email = req.headers['x-user-email']; // email soti nan headers
     if (!email) return res.status(400).json({ message: 'Email manquant' });
 
     let wallet = await WalletBalance.findOne({ email });
@@ -1172,6 +1169,7 @@ app.post('/api/admin/validate', async (req, res) => {
     res.status(500).json({ message: 'Erreur validation' });
   }
 });
+
 
 
 
