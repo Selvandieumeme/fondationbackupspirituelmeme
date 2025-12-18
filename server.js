@@ -1340,7 +1340,7 @@ app.post("/api/wallet/login", async (req, res) => {
         fullName: user.fullName,
         email: user.email,
         status: user.status,
-        balance: wallet.balance || 0,       // ajoute balance itilizatè
+        solde: user.solde || 0,       
         createdAt: user.createdAt
     }
 });
