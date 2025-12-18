@@ -1181,36 +1181,6 @@ app.post('/api/admin/validate', async (req, res) => {
 
 
 
-app.get("/api/wallet/me", async (req, res) => {
-  try {
-    const email = req.query.email; // <-- chanje soti nan fullName --> email
-    if (!email) return res.status(400).json({ success: false, message: "Email obligatwa" });
-
-    const user = await WalletUser.findOne({ email }); // <-- rechèch pa email
-    if (!user) return res.status(404).json({ success: false, message: "Itilizate pa jwenn" });
-
-    res.json({
-      success: true,
-      solde: user.solde,
-      bonus: user.bonus || 0
-    });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ success: false, message: "Erreur serveur" });
-  }
-});
-
-
-// ----------------------- LISTE WALLET USERS -----------------------
-app.get("/api/wallet/users", async (req, res) => {
-  try {
-    const users = await WalletUser.find({}, "fullName email").sort({ fullName: 1 });
-    res.json({ success: true, users });
-  } catch (err) {
-    console.error("Erreur chaje itilizatè yo:", err);
-    res.status(500).json({ success: false, message: "Erreur serveur" });
-  }
-});
 
 // ----------------------- ROUTE API POU ENREGISTRE -----------------------
 app.post("/api/wallet/create", async (req, res) => {
@@ -1248,7 +1218,7 @@ const normalizedSponsorName = walletSponsorName.trim().toLowerCase();
   passwordHash,
   sponsorName: normalizedSponsorName,
   status: "active",
-  solde: 0.00,          // <-- ajoute chan solde default
+  balance: 0.00,          // <-- ajoute chan solde default
   bonus: 0.00,
   hasDepositedBefore: false,
   createdAt: new Date()
@@ -1372,7 +1342,7 @@ app.post("/api/wallet/login", async (req, res) => {
         fullName: user.fullName,
         email: user.email,
         status: user.status,
-        solde: user.solde,       // ajoute solde itilizatè
+        balance: wallet.balance || 0,       // ajoute balance itilizatè
         createdAt: user.createdAt
     }
 });
