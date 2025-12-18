@@ -41,21 +41,7 @@
 <script src="/socket.io/socket.io.js"></script>
 <script src="walletfobasdashboard.js"></script>
 
-<script>
-// ✅ Fonksyon Déconnexion
-function logout() {
-  fetch('/api/wallet/logout', { method: 'POST' })
-    .then(res => res.json())
-    .then(data => {
-      if(data.success){
-        window.location.href = '/login'; // redirige sou paj login
-      } else {
-        alert('Erreur lors de la déconnexion.');
-      }
-    })
-    .catch(err => console.error('Erreur logout:', err));
-}
-</script>
+
 
 
 
