@@ -4,7 +4,7 @@ const userEmailEl = document.getElementById("userEmail");
 const userStatusEl = document.getElementById("userStatus");
 const walletBalanceEl = document.getElementById("walletBalance");
 const walletBonusEl = document.getElementById("walletBonus");
-const actionArea = document.getElementById("actionArea");
+const actionArea = document.getElementById("formArea");
 const historyBox = document.getElementById("history");
 
 // ---------- Données utilisateur depuis ANCIEN système ----------
