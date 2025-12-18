@@ -259,4 +259,12 @@ document.getElementById("changePassBtn")?.addEventListener("click", () => {
 
 
 // ---------- INIT ----------
-loadDashboard();
+// ⏳ Attendre que MongoDB écrive la transaction
+setTimeout(() => {
+  loadDashboard(); // recharge historique + balance
+}, 800);
+
+// Nettoyage formulaire
+setTimeout(() => {
+  actionArea.innerHTML = "";
+}, 1000);
