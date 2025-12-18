@@ -2,8 +2,8 @@
 const userNameEl = document.getElementById("userName");
 const userEmailEl = document.getElementById("userEmail");
 const userStatusEl = document.getElementById("userStatus");
-const walletBalanceEl = document.getElementById("walletBalance");
-const walletBonusEl = document.getElementById("walletBonus");
+const walletBalanceEl = document.getElementById("balanceActuel");
+const walletBonusEl = document.getElementById("bonusActuel");
 const actionArea = document.getElementById("formArea");
 const historyBox = document.getElementById("history");
 
