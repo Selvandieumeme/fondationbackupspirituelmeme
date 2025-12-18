@@ -23,15 +23,23 @@ header.top {
   align-items: center;
   padding: 20px 40px;
   background: linear-gradient(90deg, #FFD700, #1E90FF); /* Jaune → Bleu */
-  color: #fff;
   border-radius: 8px;
   margin: 20px;
   box-shadow: 0 4px 12px rgba(0,0,0,0.1);
 }
 
 header .user-info h2 {
-  font-size: 24px;
+  font-size: 32px; /* Plus grand */
+  font-weight: bold;
+  color: #000; /* Noir */
+  text-transform: uppercase; /* MAJISKIL */
   margin-bottom: 5px;
+}
+
+header .user-info p,
+header .user-info .status {
+  font-weight: bold; /* Tout texte gras */
+  color: #000; /* Noir */
 }
 
 header .user-info p {
@@ -44,14 +52,18 @@ header .user-info .status {
   padding: 3px 10px;
   margin-top: 5px;
   background: #32CD32; /* Green for Actif */
-  color: #fff;
   border-radius: 12px;
-  font-weight: bold;
   font-size: 12px;
 }
 
 header .balance {
   text-align: right;
+}
+
+header .balance p,
+header .balance strong {
+  font-weight: bold;
+  color: #000; /* Noir */
 }
 
 header .balance p {
@@ -63,7 +75,6 @@ header .balance strong {
   font-size: 22px;
   display: block;
   margin-bottom: 5px;
-  color: #fff;
 }
 
 /* ----------------- HISTORY SECTION ----------------- */
