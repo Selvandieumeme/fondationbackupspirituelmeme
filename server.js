@@ -1011,17 +1011,21 @@ const notifyUpdate = () => io.emit('wallet-update');
 // 📥 Charger dashboard utilisateur
 app.get('/api/wallet/dashboard', async (req, res) => {
   try {
-    const email = req.headers['x-user-email']; // email soti nan headers
+    const email = req.headers['x-user-email'] || req.body.email;
     if (!email) return res.status(400).json({ message: 'Email manquant' });
 
     let wallet = await WalletBalance.findOne({ email });
     if (!wallet) {
-      wallet = await WalletBalance.create({ email, fullName: email });
+      wallet = await WalletBalance.create({
+        email,
+        fullName: email
+      });
     }
 
     const tx = await Transaction.find({ email }).sort({ createdAt: -1 });
     res.json({ wallet, tx });
   } catch (e) {
+    console.error(e);
     res.status(500).json({ message: 'Erreur dashboard' });
   }
 });
@@ -1029,8 +1033,11 @@ app.get('/api/wallet/dashboard', async (req, res) => {
 // 📥 Dépôt
 app.post('/api/wallet/deposit', async (req, res) => {
   try {
-    const email = req.headers['x-user-email'];
+    const email = req.headers['x-user-email'] || req.body.email;
     const { amount, method, whatsapp, country } = req.body;
+
+    if (!email || !amount)
+      return res.status(400).json({ message: 'Données manquantes' });
 
     await Transaction.create({
       email,
@@ -1045,15 +1052,18 @@ app.post('/api/wallet/deposit', async (req, res) => {
     notifyUpdate();
     res.json({ message: 'Dépôt envoyé (PENDING)' });
   } catch (e) {
+    console.error(e);
     res.status(500).json({ message: 'Erreur dépôt' });
   }
 });
 
+
 // 📤 Retrait (5%)
 app.post('/api/wallet/withdraw', async (req, res) => {
   try {
-    const email = req.headers['x-user-email'];
+    const email = req.headers['x-user-email'] || req.body.email;
     const { amount, method, whatsapp, country } = req.body;
+
     const fee = amount * 0.05;
 
     await Transaction.create({
@@ -1070,14 +1080,16 @@ app.post('/api/wallet/withdraw', async (req, res) => {
     notifyUpdate();
     res.json({ message: 'Retrait envoyé (PENDING)' });
   } catch (e) {
+    console.error(e);
     res.status(500).json({ message: 'Erreur retrait' });
   }
 });
 
+
 // 🔄 Transfert instantané
 app.post('/api/wallet/transfer', async (req, res) => {
   try {
-    const email = req.headers['x-user-email'];
+    const email = req.headers['x-user-email'] || req.body.senderEmail;
     const { receiverEmail, amount } = req.body;
 
     const sender = await WalletBalance.findOne({ email });
@@ -1113,14 +1125,16 @@ app.post('/api/wallet/transfer', async (req, res) => {
     notifyUpdate();
     res.json({ message: 'Transfert réussi' });
   } catch (e) {
+    console.error(e);
     res.status(500).json({ message: 'Erreur transfert' });
   }
 });
 
+
 // 🎁 Bonus (pending)
 app.post('/api/wallet/bonus', async (req, res) => {
   try {
-    const email = req.headers['x-user-email'];
+    const email = req.headers['x-user-email'] || req.body.email;
     const { amount } = req.body;
 
     await Transaction.create({
@@ -1133,9 +1147,11 @@ app.post('/api/wallet/bonus', async (req, res) => {
     notifyUpdate();
     res.json({ message: 'Bonus envoyé (PENDING)' });
   } catch (e) {
+    console.error(e);
     res.status(500).json({ message: 'Erreur bonus' });
   }
 });
+
 
 // ======================= ADMIN PANEL =======================
 
