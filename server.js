@@ -958,27 +958,19 @@ const walletUserSchema = new mongoose.Schema({
   fullName: { type: String, required: true },
   email: { type: String, required: true, unique: true },
   passwordHash: { type: String },
-  solde: { type: Number, default: 0 },
+  balance: { type: Number, default: 0 },
   bonus: { type: Number, default: 0 },
   whatsapp: { type: String },
   recoveryEmail: { type: String },
   sponsorName: { type: String },
   hasDepositedBefore: { type: Boolean, default: false },
   createdAt: { type: Date, default: Date.now },
-  status: { type: String, default: "pending" }
+  status: { type: String, default: "ACTIVE" }
   // ajoute nenpòt lòt chan ou bezwen
 });
 
-// 🔥 Koreksyon pou fè l konpatib ak koleksyon reyèl MongoDB ou
-const WalletUser = mongoose.models.WalletUser || mongoose.model(
-  "WalletUser",      // Non model nan JS
-  walletUserSchema,  // Schema
-  "walletusers"      // Non collection reyèl nan MongoDB
-);
 
-
-
-// ----------------------- SCHEMAS -----------------------
+// ----------------------- SCHEMAS BALANCE WALLET -----------------------
 const walletBalanceSchema = new mongoose.Schema({
   email: { type: String, unique: true },
   fullName: String,
@@ -989,6 +981,7 @@ const walletBalanceSchema = new mongoose.Schema({
 
 
 
+// ----------------------- SCHEMAS TRANSACTIONS -----------------------
 const transactionSchema = new mongoose.Schema({
   email: String,
   fullName: String,
