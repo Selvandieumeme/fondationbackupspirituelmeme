@@ -163,3 +163,105 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// ====== BLOK JS ENDÉPANDAN POU SECURITE DOUBLE SUBMIT + LOADER ======
+document.addEventListener("DOMContentLoaded", () => {
+  const createWalletForm = document.getElementById("createWalletForm");
+  const msgBox = document.getElementById("wallet-msg");
+
+  if (!createWalletForm) return;
+
+  createWalletForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const submitBtn = createWalletForm.querySelector("button[type='submit']");
+    if (!submitBtn) return;
+
+    // Evite double submit
+    if (submitBtn.disabled) return;
+    submitBtn.disabled = true;
+
+    // Sove tèks orijinal bouton an
+    const originalText = submitBtn.textContent;
+
+    // Ajoute loader animé sou bouton an
+    submitBtn.innerHTML = `<span style="display:inline-block;width:16px;height:16px;border:2px solid #fff;border-top:2px solid transparent;border-radius:50%;margin-right:8px;animation:spin 1s linear infinite;"></span>Création en cours...`;
+
+    // Montre mesaj loading nan bwat mesaj la
+    if (msgBox) {
+      msgBox.textContent = "⏳ Nap trete demann ou, tanpri rete tann...";
+      msgBox.style.color = "#0ea5e9";
+    }
+
+    // Récupération done fòmilè
+    const formData = {
+      walletFullName: createWalletForm.walletFullName.value.trim(),
+      walletEmail: createWalletForm.walletEmail.value.trim(),
+      walletRecoveryEmail: createWalletForm.walletRecoveryEmail.value.trim(),
+      walletWhatsApp: createWalletForm.walletWhatsApp.value.trim(),
+      walletBirthDate: createWalletForm.walletBirthDate.value,
+      walletBirthPlace: createWalletForm.walletBirthPlace.value.trim(),
+      walletPassword: createWalletForm.walletPassword.value,
+      walletSponsorName: createWalletForm.walletSponsorName.value.trim(),
+    };
+
+    try {
+      const response = await fetch("https://examen-backend-ihlx.onrender.com/api/wallet/create", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData)
+      });
+
+      const data = await response.json();
+
+      if (msgBox) {
+        if (data.success) {
+          msgBox.textContent = "✅ " + data.message;
+          msgBox.style.color = "#16a34a";
+          createWalletForm.reset();
+        } else {
+          msgBox.textContent = "⚠️ " + data.message;
+          msgBox.style.color = "red";
+        }
+      }
+    } catch (err) {
+      console.error("Erreur fetch:", err);
+      if (msgBox) {
+        msgBox.textContent = "⚠️ Erreur serveur, réessayez plus tard.";
+        msgBox.style.color = "red";
+      }
+    } finally {
+      // Reaktive bouton la
+      submitBtn.disabled = false;
+      submitBtn.textContent = originalText;
+    }
+  });
+});
+
+// ====== ANIMATION CSS POUR LOADER ======
+const style = document.createElement('style');
+style.innerHTML = `
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}`;
+document.head.appendChild(style);
