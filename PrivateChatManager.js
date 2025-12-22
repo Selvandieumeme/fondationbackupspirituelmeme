@@ -3,7 +3,7 @@
 // =======================
 
 // --- SOCKET.IO CONNECT
-const socket = window.socket || io('https://examen-backend-ihlx.onrender.com');
+const socket = window.socket || io('https://fondationbackupspirituel.com');
 window.socket = socket;
 
 const CURRENT_USER = window.CURRENT_USER || new URLSearchParams(window.location.search).get('from') || 'Anonyme';

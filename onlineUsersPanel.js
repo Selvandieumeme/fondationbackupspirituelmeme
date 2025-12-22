@@ -6,7 +6,7 @@
 let user = localStorage.getItem('user');
 
 // 2️⃣ — Konekte ak Socket.io
-const socket = io('https://examen-backend-ihlx.onrender.com');
+const socket = io('https://fondationbackupspirituel.com');
 window.socket = socket; // Pou Chatprive.js kapab itilize li
 
 // 3️⃣ — Lè paj la chaje

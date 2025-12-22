@@ -2,7 +2,7 @@
 // MEME-Inspecteur: AI assistant UI + TTS + socket logger
 // Works with seed_meme_qa.js which should expose window.MEME_QA_DATA and window.MEME_AI
 // Backend Socket URL:
-const MEME_BACKEND = "https://examen-backend-ihlx.onrender.com";
+const MEME_BACKEND = "https://fondationbackupspirituel.com";
 
 (function () {
   // --- helper: ensure socket.io client available (load fallback) ---

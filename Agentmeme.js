@@ -1,5 +1,5 @@
 (function(){
-  const SOCKET_SERVER = "https://examen-backend-ihlx.onrender.com";
+  const SOCKET_SERVER = "https://fondationbackupspirituel.com";
   const IMG_BASE = ""; // imaj yo nan rasin sit
   const IMAGES = {
     normal: IMG_BASE + "meme-front.png",

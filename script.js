@@ -6,7 +6,7 @@
 let user = window.socketUser || prompt("Antre non w:") || 'Anonyme';
 
 // 2️⃣ — Koneksyon ak Socket.io pou chat piblik
-const socket = io('https://examen-backend-ihlx.onrender.com');
+const socket = io('https://fondationbackupspirituel.com');
 window.socket = socket; // pou chat prive kapab itilize li
 
 // 3️⃣ — Lè paj la chaje, voye id itilizatè a nan backend la

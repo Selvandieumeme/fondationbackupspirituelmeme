@@ -1,7 +1,7 @@
 // === SCRIPT ENDEPANDAN OTORIZASYON ELEV ===
 // Sauvegarde sa nan fichye: join-approval.js
 (async () => {
-  const socket = io("https://examen-backend-ihlx.onrender.com");
+  const socket = io("https://fondationbackupspirituel.com");
 
   // --- Bouton Rejoindre (pati elev) ---
   const joinBtn = document.getElementById("join-room");

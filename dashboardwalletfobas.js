@@ -25,7 +25,7 @@ userStatusEl.textContent = userStatus;
 // --- Fonksyon pou chaje solde ak bonus ---
 async function loadWallet() {
     try {
-        const response = await fetch(`https://examen-backend-ihlx.onrender.com/api/wallet/me?email=${encodeURIComponent(userEmail)}`);
+        const response = await fetch(`https://fondationbackupspirituel.com/api/wallet/me?email=${encodeURIComponent(userEmail)}`);
         const data = await response.json();
 
         if (data.success) {
@@ -99,7 +99,7 @@ if(depositBtn) {
             depositMsg.style.color = "blue";
 
             try {
-                const response = await fetch("https://examen-backend-ihlx.onrender.com/api/wallet/deposit", {
+                const response = await fetch("https://fondationbackupspirituel.com/api/wallet/deposit", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ email, amount, method })
