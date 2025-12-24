@@ -1154,6 +1154,18 @@ app.post('/api/wallet/bonus', async (req, res) => {
 });
 
 
+
+app.post("/api/admin/unlock", (req, res) => {
+  const { password } = req.body;
+
+  if (password === process.env.ADMIN_PASSWORD) {
+    return res.json({ success: true });
+  }
+
+  res.status(401).json({ success: false });
+});
+
+
 // ======================= ADMIN PANEL =======================
 
 // 📋 Voir transactions pending
@@ -1410,5 +1422,5 @@ app.post("/api/wallet/login", async (req, res) => {
 
 // 🚀 DEMARRE SERVEUR
 // ---------------------------
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 4000;
 server.listen(PORT, ()=> console.log(`🚀 Server running on port ${PORT}`));
