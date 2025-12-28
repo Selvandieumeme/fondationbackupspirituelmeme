@@ -124,7 +124,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     try {
       // --- POST request nan server.js ---
-      const response = await fetch("https://fondationbackupspirituel.com/api/wallet/create", {
+      const response = await fetch("https://api.fondationbackupspirituel.com/api/wallet/create", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -225,7 +225,7 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     try {
-      const response = await fetch("https://fondationbackupspirituel.com/api/wallet/create", {
+      const response = await fetch("https://api.fondationbackupspirituel.com/api/wallet/create", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData)
