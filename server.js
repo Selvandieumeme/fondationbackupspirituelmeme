@@ -1,4 +1,3 @@
-
 // ============================
 // Environment Variables
 // ============================
@@ -60,6 +59,7 @@ mongoose.connect(MONGO_URI)
   .catch(err => {
     console.error('❌ Erè koneksyon MongoDB:', err.message);
   });
+
 
 /**
  * ---------- MONGODB SCHEMAS ----------
