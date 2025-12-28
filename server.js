@@ -957,7 +957,7 @@ const walletUserSchema = new mongoose.Schema({
   fullName: { type: String, required: true },
   email: { type: String, required: true, unique: true },
   passwordHash: { type: String },
-  solde: { type: Number, default: 0 },
+  balance: { type: Number, default: 0 },
   bonus: { type: Number, default: 0 },
   whatsapp: { type: String },
   recoveryEmail: { type: String },
