@@ -1224,102 +1224,52 @@ app.post("/api/wallet/create", async (req, res) => {
       walletBirthDate,
       walletBirthPlace,
       walletPassword,
-	  walletSponsorName
+      walletSponsorName
     } = req.body;
-	  
-const normalizedSponsorName = walletSponsorName.trim().toLowerCase();
 
-    if (!walletFullName || !walletEmail) {
+    if (!walletFullName || !walletEmail || !walletPassword) {
       return res.status(400).json({ success: false, message: "Tout chan obligatwa." });
     }
 
-    let passwordHash;
-    if (walletPassword) {
-      const bcrypt = require("bcryptjs");
-      passwordHash = await bcrypt.hash(walletPassword, 12);
-    }
+    // --- Hash password ---
+    const bcrypt = require("bcryptjs");
+    const passwordHash = await bcrypt.hash(walletPassword, 12);
 
+    // --- Kreye nouvo itilizatè ---
     const newWalletUser = new WalletUser({
-  fullName: walletFullName,
-  email: walletEmail,
-  recoveryEmail: walletRecoveryEmail,
-  whatsapp: walletWhatsApp,
-  birthDate: walletBirthDate,
-  birthPlace: walletBirthPlace,
-  passwordHash,
-  sponsorName: normalizedSponsorName,
-  status: "active",
-  balance: 0.00,          // <-- ajoute chan solde default
-  bonus: 0.00,
-  hasDepositedBefore: false,
-  createdAt: new Date()
-});
-
-    await newWalletUser.save();
-
-
-	  
-async function addSponsorBonus(newUser) {
-    try {
-        if (!newUser.sponsorName) return;
-
-        // Normalize non sponsor (majiskil/miniskil, espas)
-        const normalizedSponsor = newUser.sponsorName.trim().toLowerCase();
-
-        // Chèche itilizate ki koresponn ak sponsor lan
-        const sponsorUser = await WalletUser.findOne({
-            fullName: { $regex: new RegExp(`^${normalizedSponsor}$`, 'i') }
-        });
-
-        if (sponsorUser) {
-            // Ajoute 50 Gourdes nan bonus
-            sponsorUser.bonus += 50;
-
-            // Limit bonus 2500 Gourdes
-            if (sponsorUser.bonus > 2500) sponsorUser.bonus = 2500;
-
-            await sponsorUser.save();
-
-            // Notifikasyon WhatsApp pou admin
-            const waMessage = `🔔 Bonus ajouté pour ${sponsorUser.fullName} : +50 Gourdes (Nouveau inscrit: ${newUser.fullName})`;
-            await axios.post("https://api.callmebot.com/whatsapp.php", null, {
-                params: {
-                    phone: "YOUR_WHATSAPP_NUMBER",
-                    apikey: "YOUR_API_KEY",
-                    text: waMessage
-                }
-            });
-        }
-    } catch (err) {
-        console.error("Erreur ajout bonus sponsor:", err);
-    }
-}
-
-	  
-    // --- WhatsApp notification ---
-    await axios.post("https://api.callmebot.com/whatsapp.php", null, {
-      params: {
-        phone: "YOUR_WHATSAPP_NUMBER",
-        apikey: "YOUR_API_KEY",
-        text: `📥 NOUVO ENREGISTREMAN WALLET FOBAS
-👤 Non: ${walletFullName}
-📧 Email: ${walletEmail}
-📱 Tel: ${walletWhatsApp}
-🌍 Email sekou: ${walletRecoveryEmail}
-🏙️ Lye Nésans: ${walletBirthPlace}
-📅 Dat Nésans: ${walletBirthDate}
-🧑‍🤝‍🧑 Parrain/Marraine: ${walletSponsorName}`
-      }
+      fullName: walletFullName,
+      email: walletEmail,
+      recoveryEmail: walletRecoveryEmail,
+      whatsapp: walletWhatsApp,
+      birthDate: walletBirthDate,
+      birthPlace: walletBirthPlace,
+      passwordHash,
+      sponsorName: walletSponsorName ? walletSponsorName.trim().toLowerCase() : null,
+      status: "active",
+      balance: 0.00,
+      bonus: 0.00,
+      hasDepositedBefore: false,
+      createdAt: new Date()
     });
 
+    await newWalletUser.save(); // <-- Sa a ap kreye dokiman nan MongoDB
+
+    // --- Prepare lyen WhatsApp pou admin (one-click send) ---
+    const adminNumber = "+50946057952";
+    const waMessage = `🟢 Nouvo Demande Compte WALLET FOBAS\n\n👤 Non: ${walletFullName}\n📧 Email: ${walletEmail}\n📱 Tel: ${walletWhatsApp}\n🌍 Email sekou: ${walletRecoveryEmail}\n🏙️ Lye Nésans: ${walletBirthPlace}\n📅 Dat Nésans: ${walletBirthDate}\n🧑‍🤝‍🧑 Parrain: ${walletSponsorName || 'Pa gen'}`;
+
+    const waLink = `https://wa.me/${adminNumber.replace(/\+/g,'')}?text=${encodeURIComponent(waMessage)}`;
+
+    // --- Retounen repons ak lyen WhatsApp ---
     return res.json({
       success: true,
-      message: "Demande Wallet FOBAS anrejistre avèk siksè!"
+      message: "Demande Wallet FOBAS anrejistre avèk siksè!",
+      whatsappLink: waLink
     });
 
   } catch (err) {
     console.error("Erreur API:", err);
-    res.status(500).json({ success: false, message: "Erreur serveur" });
+    return res.status(500).json({ success: false, message: "Erreur serveur" });
   }
 });
 
