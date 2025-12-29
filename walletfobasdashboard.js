@@ -48,28 +48,24 @@ function sendWhatsAppNotification(message) {
 
 // ---------- Charger wallet (balance + bonus + historique) ----------
 async function loadDashboard() {
-  const safeEmail = getSafeUserEmail();
-  if (!safeEmail) return;
-
   try {
     const res = await fetch(
       "https://api.fondationbackupspirituel.com/api/wallet/dashboard",
       {
         headers: {
-          "x-user-email": safeEmail
+          "x-user-email": userEmail
         }
       }
     );
 
     const data = await res.json();
 
-    // Balance & Bonus
     walletBalanceEl.textContent = formatGourdes(data.wallet?.balance || 0);
     if (walletBonusEl) {
       walletBonusEl.textContent = formatGourdes(data.wallet?.bonus || 0);
     }
 
-    // Historique transactions
+    // 🔒 PWOTEKSYON ISTORIK (SA KI TE MANKE A)
     historyBox.innerHTML = "";
 
     if (Array.isArray(data.tx) && data.tx.length > 0) {
@@ -83,9 +79,12 @@ async function loadDashboard() {
 
   } catch (err) {
     console.error("Erreur dashboard:", err);
+    walletBalanceEl.textContent = "0.00 Gourdes";
+    if (walletBonusEl) {
+      walletBonusEl.textContent = "0.00 Gourdes";
+    }
   }
 }
-
 
 
 
