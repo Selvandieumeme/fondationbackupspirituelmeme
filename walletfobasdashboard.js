@@ -270,3 +270,13 @@ document.getElementById("changePassBtn")?.addEventListener("click", () => {
 
 
 
+
+
+
+// ⚡ INIT DASHBOARD AUTOMATIKMAN LÈ PAG LA CHARGE
+window.addEventListener("DOMContentLoaded", () => {
+  loadDashboard(); // sa ap fetch wallet + tout tras transactions
+});
+
+
+
