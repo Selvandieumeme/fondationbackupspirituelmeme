@@ -41,15 +41,6 @@ function sendWhatsAppNotification(message) {
 
 
 
-function getSafeUserEmail() {
-  if (!email || !email.includes("@")) {
-    const userEmail = localStorage.getItem("userEmail");
-    console.warn("User email invalide, redirection login");
-    window.location.href = "connexionwalletfobas.html";
-    return null;
-  }
-  return email;
-}
 
 
 
@@ -72,18 +63,22 @@ async function loadDashboard() {
 
     const data = await res.json();
 
+    // Balance & Bonus
     walletBalanceEl.textContent = formatGourdes(data.wallet?.balance || 0);
-    if (walletBonusEl)
+    if (walletBonusEl) {
       walletBonusEl.textContent = formatGourdes(data.wallet?.bonus || 0);
+    }
 
+    // Historique transactions
     historyBox.innerHTML = "";
 
-    if (Array.isArray(data.tx) && data.tx.length) {
+    if (Array.isArray(data.tx) && data.tx.length > 0) {
       data.tx
-        .sort((a,b)=>new Date(b.createdAt)-new Date(a.createdAt))
+        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
         .forEach(addHistory);
     } else {
-      historyBox.innerHTML = "<p style='opacity:.6'>Aucune transaction</p>";
+      historyBox.innerHTML =
+        "<p style='opacity:.6'>Aucune transaction</p>";
     }
 
   } catch (err) {
