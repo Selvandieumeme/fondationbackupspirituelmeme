@@ -37,14 +37,35 @@ function sendWhatsAppNotification(message) {
   );
 }
 
+
+
+
+
+function getSafeUserEmail() {
+  const email = localStorage.getItem("userEmail");
+  if (!email || !email.includes("@")) {
+    console.warn("User email invalide, redirection login");
+    window.location.href = "connexionwalletfobas.html";
+    return null;
+  }
+  return email;
+}
+
+
+
+
+
 // ---------- Charger wallet (balance + bonus + historique) ----------
 async function loadDashboard() {
+  const safeEmail = getSafeUserEmail();
+  if (!safeEmail) return;
+
   try {
     const res = await fetch(
       "https://api.fondationbackupspirituel.com/api/wallet/dashboard",
       {
         headers: {
-          "x-user-email": userEmail
+          "x-user-email": safeEmail
         }
       }
     );
@@ -55,12 +76,11 @@ async function loadDashboard() {
     if (walletBonusEl)
       walletBonusEl.textContent = formatGourdes(data.wallet?.bonus || 0);
 
-    // 🔒 PWOTEKSYON ISTORIK (SA KI TE MANKE A)
     historyBox.innerHTML = "";
 
-    if (Array.isArray(data.tx) && data.tx.length > 0) {
+    if (Array.isArray(data.tx) && data.tx.length) {
       data.tx
-        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+        .sort((a,b)=>new Date(b.createdAt)-new Date(a.createdAt))
         .forEach(addHistory);
     } else {
       historyBox.innerHTML = "<p style='opacity:.6'>Aucune transaction</p>";
@@ -68,10 +88,13 @@ async function loadDashboard() {
 
   } catch (err) {
     console.error("Erreur dashboard:", err);
-    walletBalanceEl.textContent = "0.00 Gourdes";
-    if (walletBonusEl) walletBonusEl.textContent = "0.00 Gourdes";
   }
 }
+
+
+
+
+
 function addHistory(t) {
   const div = document.createElement("div");
   div.className = "item";
