@@ -9,7 +9,7 @@ document.getElementById("loginBtn").addEventListener("click", async () => {
     }
 
     try {
-        const res = await fetch("https://fondationbackupspirituel.com/api/wallet/login", {
+        const res = await fetch("https://api.fondationbackupspirituel.com/api/wallet/login", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ email, password })
