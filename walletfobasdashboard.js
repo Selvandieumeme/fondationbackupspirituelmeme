@@ -42,8 +42,8 @@ function sendWhatsAppNotification(message) {
 
 
 function getSafeUserEmail() {
-  const email = localStorage.getItem("userEmail");
   if (!email || !email.includes("@")) {
+    const userEmail = localStorage.getItem("userEmail");
     console.warn("User email invalide, redirection login");
     window.location.href = "connexionwalletfobas.html";
     return null;
