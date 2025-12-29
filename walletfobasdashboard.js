@@ -51,12 +51,20 @@ async function loadDashboard() {
 
     const data = await res.json();
 
-    walletBalanceEl.textContent = formatGourdes(data.wallet?.balance);
+    walletBalanceEl.textContent = formatGourdes(data.wallet?.balance || 0);
     if (walletBonusEl)
-      walletBonusEl.textContent = formatGourdes(data.wallet?.bonus);
+      walletBonusEl.textContent = formatGourdes(data.wallet?.bonus || 0);
 
+    // 🔒 PWOTEKSYON ISTORIK (SA KI TE MANKE A)
     historyBox.innerHTML = "";
-    data.tx?.forEach(addHistory);
+
+    if (Array.isArray(data.tx) && data.tx.length > 0) {
+      data.tx
+        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+        .forEach(addHistory);
+    } else {
+      historyBox.innerHTML = "<p style='opacity:.6'>Aucune transaction</p>";
+    }
 
   } catch (err) {
     console.error("Erreur dashboard:", err);
@@ -64,7 +72,6 @@ async function loadDashboard() {
     if (walletBonusEl) walletBonusEl.textContent = "0.00 Gourdes";
   }
 }
-
 function addHistory(t) {
   const div = document.createElement("div");
   div.className = "item";
@@ -267,16 +274,3 @@ document.getElementById("bonusBtn")?.addEventListener("click", () => {
 document.getElementById("changePassBtn")?.addEventListener("click", () => {
   showForm("changepass");
 });
-
-
-
-
-
-
-// ⚡ INIT DASHBOARD AUTOMATIKMAN LÈ PAG LA CHARGE
-window.addEventListener("DOMContentLoaded", () => {
-  loadDashboard(); // sa ap fetch wallet + tout tras transactions
-});
-
-
-
