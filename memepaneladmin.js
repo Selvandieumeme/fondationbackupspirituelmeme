@@ -4,13 +4,17 @@ async function unlockAdmin() {
   const input = document.getElementById("adminPassword").value;
   const error = document.getElementById("adminError");
 
-  const res = await fetch("/api/admin/unlock", {
+  error.style.display = "none";
+
+  const res = await fetch("https://api.fondationbackupspirituel.com/api/admin/unlock", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ password: input })
   });
 
-  if (res.ok) {
+  const data = await res.json();
+
+  if (data.ok) {
     adminUnlocked = true;
     document.getElementById("adminLock").style.display = "none";
     loadTransactions(currentStatus);
@@ -18,7 +22,6 @@ async function unlockAdmin() {
     error.style.display = "block";
   }
 }
-
 
 
 
