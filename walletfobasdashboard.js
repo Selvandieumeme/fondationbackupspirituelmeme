@@ -274,3 +274,10 @@ document.getElementById("bonusBtn")?.addEventListener("click", () => {
 document.getElementById("changePassBtn")?.addEventListener("click", () => {
   showForm("changepass");
 });
+
+
+
+// ✅ AUTO-LOAD SANS DOUBLON
+if (typeof loadDashboard === "function") {
+  document.addEventListener("DOMContentLoaded", loadDashboard);
+}
