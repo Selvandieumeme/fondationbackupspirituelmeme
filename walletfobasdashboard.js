@@ -41,7 +41,7 @@ function sendWhatsAppNotification(message) {
 async function loadDashboard() {
   try {
     const res = await fetch(
-      "https://fondationbackupspirituel.com/api/wallet/dashboard",
+      "https://api.fondationbackupspirituel.com/api/wallet/dashboard",
       {
         headers: {
           "x-user-email": userEmail
@@ -134,7 +134,7 @@ async function submitAction(type) {
 
   try {
     const res = await fetch(
-      `https://fondationbackupspirituel.com/api/wallet/${type}`,
+      `https://api.fondationbackupspirituel.com/api/wallet/${type}`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -179,7 +179,7 @@ async function submitTransfer() {
 
   try {
     const res = await fetch(
-      "https://fondationbackupspirituel.com/api/wallet/transfer",
+      "https://api.fondationbackupspirituel.com/api/wallet/transfer",
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -217,7 +217,7 @@ async function submitChangePass() {
 
   try {
     const res = await fetch(
-      "https://fondationbackupspirituel.com/api/wallet/changepassword",
+      "https://api.fondationbackupspirituel.com/api/wallet/changepassword",
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
