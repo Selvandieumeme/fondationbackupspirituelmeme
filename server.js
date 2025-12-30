@@ -1225,7 +1225,7 @@ app.post("/api/wallet/changepassword", async (req, res) => {
     }
 
     // 🔐 HASH NOUVEAU MOT DE PASSE
-    user.password = await bcrypt.hash(newPassword, 10);
+    user.password = await bcrypt.hash(newPassword, 12);
     await user.save();
 
     // 🧾 COLLECTION changepassword (LOG SÉCURITÉ)
