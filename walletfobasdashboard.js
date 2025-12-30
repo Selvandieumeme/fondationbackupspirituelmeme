@@ -324,34 +324,87 @@ document.getElementById("changePassBtn")?.addEventListener("click", () => {
 function exportHistoryCSV() {
   const rows = [];
 
-  // Ajoute balance actuel ak bonus
+  // ===============================
+  // HEADER WALLET
+  // ===============================
   rows.push(["Balance Actuel", walletBalanceEl.textContent]);
   rows.push(["Bonus Actuel", walletBonusEl.textContent]);
-  rows.push([]); // Liy vid
+  rows.push([]);
 
-  // Ajoute header kolòn historique
+  // ===============================
+  // HEADER TRANSACTIONS
+  // ===============================
   rows.push(["Type", "Montant", "Statut", "Date"]);
 
-  // Ranpli tout transactions istorik yo
-  const txItems = historyBox.querySelectorAll(".item");
-  txItems.forEach(item => {
-    const typeMatch = item.querySelector("b")?.textContent || "";
-    const amountMatch = item.querySelector("b")?.nextSibling?.textContent?.trim() || "";
-    const statusMatch = item.querySelector("span")?.textContent || "";
-    const dateMatch = item.dataset.date || ""; // Si ou gen date nan dataset sinon kite vid
+  let hasData = false;
 
-    rows.push([typeMatch, amountMatch, statusMatch, dateMatch]);
+  // ==================================================
+  // PRIORITÉ 1 : TRANSACTIONS API (FINTECH PRO)
+  // ==================================================
+  if (Array.isArray(window.allTransactions) && window.allTransactions.length) {
+    window.allTransactions.forEach(tx => {
+      rows.push([
+        tx.type || "",
+        (tx.amount ?? "") + " Gourdes",
+        tx.status || "",
+        tx.createdAt
+          ? new Date(tx.createdAt).toLocaleString()
+          : ""
+      ]);
+    });
+    hasData = true;
+  }
+
+  // ==================================================
+  // FALLBACK : HTML (SI API PA DISPONIB)
+  // ==================================================
+  if (!hasData) {
+    const txItems = historyBox?.querySelectorAll(".item") || [];
+
+    txItems.forEach(item => {
+      const type = item.querySelector("b")?.textContent?.trim() || "";
+      const amount =
+        item.querySelector("b")?.nextSibling?.textContent?.trim() || "";
+      const status = item.querySelector("span")?.textContent?.trim() || "";
+      const date = item.dataset?.date || "";
+
+      if (type || amount || status) {
+        rows.push([type, amount, status, date]);
+        hasData = true;
+      }
+    });
+  }
+
+  // ===============================
+  // AUCUNE DONNÉE
+  // ===============================
+  if (!hasData) {
+    alert("Aucune transaction disponible pour export CSV");
+    return;
+  }
+
+  // ===============================
+  // CSV FINAL
+  // ===============================
+  const csvContent = rows
+    .map(r =>
+      r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(",")
+    )
+    .join("\n");
+
+  const blob = new Blob([csvContent], {
+    type: "text/csv;charset=utf-8;"
   });
 
-  // Kreye CSV content
-  const csvContent = rows.map(r => r.join(",")).join("\n");
-  const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
   const url = URL.createObjectURL(blob);
 
-  // Kreye link tanporè pou telechaje
   const link = document.createElement("a");
   link.href = url;
-  link.setAttribute("download", `Historique_Wallet_${userEmail}.csv`);
+  link.setAttribute(
+    "download",
+    `Historique_Wallet_${userEmail}_${Date.now()}.csv`
+  );
+
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
