@@ -336,16 +336,15 @@ function exportHistoryCSV() {
   const txItems = historyBox.querySelectorAll(".item");
   txItems.forEach(item => {
     const typeMatch = item.querySelector("b")?.textContent || "";
-    const amountNode = item.querySelector("b")?.nextSibling;
-    const amountMatch = amountNode ? amountNode.textContent.trim() : "";
+    const amountMatch = item.querySelector("b")?.nextSibling?.textContent?.trim() || "";
     const statusMatch = item.querySelector("span")?.textContent || "";
-    const dateMatch = item.dataset.date || ""; // Si ou gen date nan dataset, sinon rete vid
+    const dateMatch = item.dataset.date || ""; // Si ou gen date nan dataset sinon kite vid
 
     rows.push([typeMatch, amountMatch, statusMatch, dateMatch]);
   });
 
   // Kreye CSV content
-  const csvContent = rows.map(r => r.map(cell => `"${cell}"`).join(",")).join("\n"); // Mete quotes pou evite erè ak virgule nan teks
+  const csvContent = rows.map(r => r.join(",")).join("\n");
   const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
   const url = URL.createObjectURL(blob);
 
@@ -358,15 +357,21 @@ function exportHistoryCSV() {
   document.body.removeChild(link);
 }
 
-// ----------------- Kreye bouton dinamik -----------------
+// ----------------- Kreye bouton CSV -----------------
 const exportBtn = document.createElement("button");
 exportBtn.textContent = "Historique export CSV";
 exportBtn.style.marginLeft = "10px";
 exportBtn.style.cursor = "pointer";
 exportBtn.onclick = exportHistoryCSV;
 
-// Ajoute li nan menm espas meni bouton yo (pre formArea)
-document.getElementById("formArea").parentNode.insertBefore(exportBtn, document.getElementById("formArea"));
+// Ajoute li nan menm nav meni bouton yo, avan bouton Déconnexion
+const menuNav = document.querySelector("nav.menu");
+if (menuNav) {
+  const logoutBtn = menuNav.querySelector("button[onclick='logout()']");
+  menuNav.insertBefore(exportBtn, logoutBtn);
+}
+
+
 
 
 // ✅ AUTO-LOAD SANS DOUBLON
