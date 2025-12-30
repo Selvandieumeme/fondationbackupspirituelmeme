@@ -323,7 +323,7 @@ document.getElementById("changePassBtn")?.addEventListener("click", () => {
 // ================= EXPORT HISTORIQUE CSV =================
 function exportHistoryCSV() {
   const rows = [];
-  
+
   // Ajoute balance actuel ak bonus
   rows.push(["Balance Actuel", walletBalanceEl.textContent]);
   rows.push(["Bonus Actuel", walletBonusEl.textContent]);
@@ -336,15 +336,16 @@ function exportHistoryCSV() {
   const txItems = historyBox.querySelectorAll(".item");
   txItems.forEach(item => {
     const typeMatch = item.querySelector("b")?.textContent || "";
-    const amountMatch = item.querySelector("b")?.nextSibling?.textContent?.trim() || "";
+    const amountNode = item.querySelector("b")?.nextSibling;
+    const amountMatch = amountNode ? amountNode.textContent.trim() : "";
     const statusMatch = item.querySelector("span")?.textContent || "";
-    const dateMatch = item.dataset.date || ""; // Si ou gen date nan dataset sinon ou ka ajoute date nan item HTML
+    const dateMatch = item.dataset.date || ""; // Si ou gen date nan dataset, sinon rete vid
 
     rows.push([typeMatch, amountMatch, statusMatch, dateMatch]);
   });
 
   // Kreye CSV content
-  const csvContent = rows.map(r => r.join(",")).join("\n");
+  const csvContent = rows.map(r => r.map(cell => `"${cell}"`).join(",")).join("\n"); // Mete quotes pou evite erè ak virgule nan teks
   const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
   const url = URL.createObjectURL(blob);
 
@@ -364,11 +365,8 @@ exportBtn.style.marginLeft = "10px";
 exportBtn.style.cursor = "pointer";
 exportBtn.onclick = exportHistoryCSV;
 
-// Ajoute li nan menm espas meni bouton yo (ex: actionArea anwo oswa yon div meni)
+// Ajoute li nan menm espas meni bouton yo (pre formArea)
 document.getElementById("formArea").parentNode.insertBefore(exportBtn, document.getElementById("formArea"));
-
-
-
 
 
 // ✅ AUTO-LOAD SANS DOUBLON
