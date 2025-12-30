@@ -172,7 +172,6 @@ async function exportHistoryCSV() {
 // ---------- AFFICHAGE DES FORMULAIRES ----------
 function showForm(type) {
   actionArea.innerHTML = "";
-
   if (type === "deposit" || type === "withdraw" || type === "bonus") {
     const label =
       type === "deposit" ? "Dépôt" :
@@ -205,14 +204,15 @@ function showForm(type) {
   }
 
   if (type === "changepass") {
-    actionArea.innerHTML = `
-      <h3>Changer mot de passe</h3>
-      <input id="newPass" type="password" placeholder="Nouveau mot de passe" />
-      <input id="confirmPass" type="password" placeholder="Confirmation" />
-      <button onclick="submitChangePass()">Modifier</button>
-    `;
-  }
+  actionArea.innerHTML = `
+    <h3>Changer mot de passe</h3>
+    <input id="oldPass" type="password" placeholder="Ancien mot de passe" />
+    <input id="newPass" type="password" placeholder="Nouveau mot de passe" />
+    <input id="confirmPass" type="password" placeholder="Confirmation" />
+    <button onclick="submitChangePass()">Modifier</button>
+  `;
 }
+
 
 // ---------- ACTIONS ----------
 async function submitAction(type) {
@@ -324,10 +324,13 @@ Montant: ${amount} Gourdes`
 
 
 
+// ---------- CHANGER MOT DE PASSE ----------
 async function submitChangePass() {
+  const oldPass = document.getElementById("oldPass").value;
   const newPass = document.getElementById("newPass").value;
   const confirm = document.getElementById("confirmPass").value;
-  if (!newPass || newPass !== confirm) {
+
+  if (!oldPass || !newPass || newPass !== confirm) {
     return alert("Mot de passe invalide");
   }
 
@@ -337,13 +340,18 @@ async function submitChangePass() {
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: userEmail, newPassword: newPass })
+        body: JSON.stringify({
+          email: userEmail,
+          oldPassword: oldPass,
+          newPassword: newPass
+        })
       }
     );
 
     const data = await res.json();
     alert(data.message);
     actionArea.innerHTML = "";
+    loadDashboard(); // rafraîchir historique + message succes
 
   } catch (err) {
     console.error(err);
