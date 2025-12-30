@@ -197,16 +197,30 @@ setTimeout(() => {
   }
 }
 
+
+
+
+
+
+
+
 async function submitTransfer() {
   const receiverEmail = document.getElementById("receiver").value;
   const amount = Number(document.getElementById("amount").value);
+
+  if (receiverEmail === userEmail) {
+    return alert("Vous ne pouvez pas vous transférer de l'argent à vous-même");
+  }
 
   try {
     const res = await fetch(
       "https://api.fondationbackupspirituel.com/api/wallet/transfer",
       {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "x-user-email": userEmail
+        },
         body: JSON.stringify({
           senderEmail: userEmail,
           receiverEmail,
@@ -218,19 +232,29 @@ async function submitTransfer() {
     const data = await res.json();
     if (!res.ok) return alert(data.message);
 
-    loadDashboard();
+    setTimeout(() => {
+      loadDashboard();
+    }, 800);
+
     sendWhatsAppNotification(
       `🔁 TRANSFERT WALLET FOBAS
 De: ${userEmail}
 Vers: ${receiverEmail}
 Montant: ${amount} Gourdes`
     );
+
     alert(data.message);
 
   } catch (err) {
     console.error(err);
   }
 }
+
+
+
+
+
+
 
 async function submitChangePass() {
   const newPass = document.getElementById("newPass").value;
