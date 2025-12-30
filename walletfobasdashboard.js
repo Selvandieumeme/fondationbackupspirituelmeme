@@ -389,7 +389,7 @@ function exportHistoryCSV() {
   // ===============================
   rows.push(["Balance Actuel", walletBalanceEl.textContent]);
   rows.push(["Bonus Actuel", walletBonusEl.textContent]);
-  rows.push([]);
+  rows.push([]); // Liy vid
 
   // ===============================
   // HEADER TRANSACTIONS
@@ -399,32 +399,40 @@ function exportHistoryCSV() {
   let hasData = false;
 
   // ==================================================
-  // PRIORITÉ 1 : TRANSACTIONS API (FINTECH PRO)
+  // PRIORITÉ 1 : DONE DEJA NAN DASHBOARD (window.allTransactions)
   // ==================================================
   if (Array.isArray(window.allTransactions) && window.allTransactions.length) {
     window.allTransactions.forEach(tx => {
+      // Pran dat ki soti nan transactions.createdAt, menm jan ak dashboard
+      const dateStr = tx.createdAt
+        ? new Date(tx.createdAt).toLocaleString("fr-HT", {
+            year: "numeric",
+            month: "2-digit",
+            day: "2-digit",
+            hour: "2-digit",
+            minute: "2-digit",
+            second: "2-digit",
+          })
+        : "";
+
       rows.push([
-        tx.type || "",
-        (tx.amount ?? "") + " Gourdes",
+        tx.type?.toUpperCase() || "",
+        tx.amount != null ? formatGourdes(tx.amount) : "",
         tx.status || "",
-        tx.createdAt
-          ? new Date(tx.createdAt).toLocaleString()
-          : ""
+        dateStr
       ]);
     });
     hasData = true;
   }
 
   // ==================================================
-  // FALLBACK : HTML (SI API PA DISPONIB)
+  // FALLBACK : HTML si done pa disponib
   // ==================================================
   if (!hasData) {
     const txItems = historyBox?.querySelectorAll(".item") || [];
-
     txItems.forEach(item => {
       const type = item.querySelector("b")?.textContent?.trim() || "";
-      const amount =
-        item.querySelector("b")?.nextSibling?.textContent?.trim() || "";
+      const amount = item.querySelector("b")?.nextSibling?.textContent?.trim() || "";
       const status = item.querySelector("span")?.textContent?.trim() || "";
       const date = item.dataset?.date || "";
 
@@ -436,7 +444,7 @@ function exportHistoryCSV() {
   }
 
   // ===============================
-  // AUCUNE DONNÉE
+  // Aucune donnée
   // ===============================
   if (!hasData) {
     alert("Aucune transaction disponible pour export CSV");
@@ -444,18 +452,13 @@ function exportHistoryCSV() {
   }
 
   // ===============================
-  // CSV FINAL
+  // CREATION FINAL CSV
   // ===============================
   const csvContent = rows
-    .map(r =>
-      r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(",")
-    )
+    .map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(","))
     .join("\n");
 
-  const blob = new Blob([csvContent], {
-    type: "text/csv;charset=utf-8;"
-  });
-
+  const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
   const url = URL.createObjectURL(blob);
 
   const link = document.createElement("a");
@@ -469,7 +472,6 @@ function exportHistoryCSV() {
   link.click();
   document.body.removeChild(link);
 }
-
 
 
 
