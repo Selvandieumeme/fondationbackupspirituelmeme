@@ -1087,49 +1087,92 @@ app.post('/api/wallet/withdraw', async (req, res) => {
 });
 
 
-// 🔄 Transfert instantané
+
+
+
+
+
+
+
+// 🔄 Transfert instantané (CORRIGÉ SANS REFACTOR)
 app.post('/api/wallet/transfer', async (req, res) => {
   try {
-    const email = req.headers['x-user-email'] || req.body.senderEmail;
+    const senderEmail = req.headers['x-user-email'] || req.body.senderEmail;
     const { receiverEmail, amount } = req.body;
 
-    const sender = await WalletBalance.findOne({ email });
-    const receiver = await WalletBalance.findOne({ email: receiverEmail });
+    // 🔒 Interdire self-transfer (CRITIQUE)
+    if (senderEmail === receiverEmail) {
+      return res.status(400).json({ message: "Transfert vers soi-même interdit" });
+    }
 
-    if (!sender || sender.balance < amount)
-      return res.status(400).json({ message: 'Solde insuffisant' });
+    // ✅ Vérifier existence des utilisateurs (walletusers)
+    const senderUser = await WalletUser.findOne({ email: senderEmail });
+    const receiverUser = await WalletUser.findOne({ email: receiverEmail });
 
-    if (!receiver)
-      return res.status(404).json({ message: 'Destinataire introuvable' });
+    if (!receiverUser) {
+      return res.status(404).json({ message: "Destinataire introuvable" });
+    }
 
+    // ✅ Charger ou créer wallets
+    const sender = await WalletBalance.findOne({ email: senderEmail });
+    let receiver = await WalletBalance.findOne({ email: receiverEmail });
+
+    if (!sender || sender.balance < amount) {
+      return res.status(400).json({ message: "Solde insuffisant" });
+    }
+
+    if (!receiver) {
+      receiver = await WalletBalance.create({
+        email: receiverEmail,
+        balance: 0,
+        bonus: 0
+      });
+    }
+
+    // 💸 Mouvement financier réel
     sender.balance -= amount;
     receiver.balance += amount;
 
     await sender.save();
     await receiver.save();
 
+    // 🧾 Historique sender
     await Transaction.create({
-      email,
-      type: 'transfer',
+      email: senderEmail,
+      type: "transfer",
       amount,
       receiverEmail,
-      status: 'ACTIVE'
+      status: "ACTIVE"
     });
 
+    // 🧾 Historique receiver
     await Transaction.create({
       email: receiverEmail,
-      type: 'transfer',
+      type: "transfer",
       amount,
-      status: 'ACTIVE'
+      senderEmail,
+      status: "ACTIVE"
     });
 
     notifyUpdate();
-    res.json({ message: 'Transfert réussi' });
+    res.json({ message: "Transfert réussi" });
+
   } catch (e) {
     console.error(e);
-    res.status(500).json({ message: 'Erreur transfert' });
+    res.status(500).json({ message: "Erreur transfert" });
   }
 });
+
+
+
+
+
+
+
+
+
+
+
 
 
 // 🎁 Bonus (pending)
