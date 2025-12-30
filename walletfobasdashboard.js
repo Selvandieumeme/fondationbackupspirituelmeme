@@ -384,27 +384,57 @@ document.getElementById("changePassBtn")?.addEventListener("click", () => {
 function exportHistoryCSV() {
   const rows = [];
 
-  rows.push(["Balance Actuel", walletBalanceEl.textContent]);
-  rows.push(["Bonus Actuel", walletBonusEl.textContent]);
+  // Header wallet
+  rows.push(["Balance Actuel", walletBalanceEl?.textContent || ""]);
+  rows.push(["Bonus Actuel", walletBonusEl?.textContent || ""]);
   rows.push([]);
 
+  // Header transactions
   rows.push(["Type", "Montant", "Statut", "Date"]);
 
-  if (!allTransactions.length) {
+  let transactionsToExport = [];
+
+  // Si allTransactions egziste ak gen done, itilize li
+  if (Array.isArray(window.allTransactions) && window.allTransactions.length) {
+    transactionsToExport = window.allTransactions;
+  } else {
+    // Sinon li done nan vizyèl dashboard la
+    const txItems = historyBox?.querySelectorAll(".item") || [];
+    txItems.forEach(item => {
+      const type = item.querySelector("b")?.textContent?.trim() || "";
+      const amount = item.querySelector("b")?.nextSibling?.textContent?.trim() || "";
+      const status = item.querySelector("span")?.textContent?.trim() || "";
+      const date = item.dataset?.date || "";
+      if (type || amount || status) {
+        transactionsToExport.push({ type, amount, status, createdAt: date });
+      }
+    });
+  }
+
+  if (!transactionsToExport.length) {
     alert("Aucune transaction à exporter");
     return;
   }
 
-  allTransactions.forEach(tx => {
-    rows.push([
-      tx.type,
-      tx.amount,
-      tx.status,
-      new Date(tx.createdAt).toLocaleString()
-    ]);
+  // Ajoute chak tranzaksyon nan CSV
+  transactionsToExport.forEach(tx => {
+    const date = tx.createdAt
+      ? new Date(tx.createdAt).toLocaleString("fr-HT", {
+          year: "numeric",
+          month: "2-digit",
+          day: "2-digit",
+          hour: "2-digit",
+          minute: "2-digit",
+          second: "2-digit"
+        })
+      : "";
+    rows.push([tx.type.toUpperCase(), tx.amount, tx.status, date]);
   });
 
-  const csvContent = rows.map(r => r.join(",")).join("\n");
+  const csvContent = rows
+    .map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(","))
+    .join("\n");
+
   const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
   const url = URL.createObjectURL(blob);
 
@@ -412,8 +442,9 @@ function exportHistoryCSV() {
   link.href = url;
   link.setAttribute(
     "download",
-    `Historique_Wallet_${userEmail}.csv`
+    `Historique_Wallet_${userEmail}_${Date.now()}.csv`
   );
+
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
