@@ -92,6 +92,7 @@ async function loadDashboard() {
 function addHistory(t) {
   const div = document.createElement("div");
   div.className = "item";
+  div.dataset.date = t.createdAt || "";
   div.innerHTML = `
     <b>${t.type.toUpperCase()}</b> | ${formatGourdes(t.amount)}<br>
     Statut: <span class="${t.status === "PENDING" ? "pending" : "active"}">
