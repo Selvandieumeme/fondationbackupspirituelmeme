@@ -1047,7 +1047,8 @@ app.post('/api/wallet/deposit', async (req, res) => {
       method,
       whatsapp,
       country,
-      status: 'PENDING'
+      status: 'PENDING',
+	  createdAt: new Date()
     });
 
     notifyUpdate();
@@ -1075,7 +1076,8 @@ app.post('/api/wallet/withdraw', async (req, res) => {
       method,
       whatsapp,
       country,
-      status: 'PENDING'
+      status: 'PENDING',
+	  createdAt: new Date()
     });
 
     notifyUpdate();
@@ -1142,7 +1144,9 @@ app.post('/api/wallet/transfer', async (req, res) => {
       type: "transfer",
       amount,
       receiverEmail,
-      status: "ACTIVE"
+      status: "ACTIVE",
+	  createdAt: new Date()
+
     });
 
     // 🧾 Historique receiver
@@ -1151,7 +1155,8 @@ app.post('/api/wallet/transfer', async (req, res) => {
       type: "transfer",
       amount,
       senderEmail,
-      status: "ACTIVE"
+      status: "ACTIVE",
+	  createdAt: new Date()
     });
 
     notifyUpdate();
@@ -1185,7 +1190,8 @@ app.post('/api/wallet/bonus', async (req, res) => {
       email,
       type: 'bonus',
       amount,
-      status: 'PENDING'
+      status: 'PENDING',
+	  createdAt: new Date()
     });
 
     notifyUpdate();
