@@ -1204,6 +1204,66 @@ app.post('/api/wallet/bonus', async (req, res) => {
 
 
 
+
+app.post("/api/wallet/changepassword", async (req, res) => {
+  try {
+    const email = req.headers["x-user-email"];
+    const { oldPassword, newPassword } = req.body;
+
+    if (!email || !oldPassword || !newPassword) {
+      return res.status(400).json({ message: "Champs requis manquants" });
+    }
+
+    const user = await WalletUser.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ message: "Utilisateur introuvable" });
+    }
+
+    const valid = await bcrypt.compare(oldPassword, user.password);
+    if (!valid) {
+      return res.status(401).json({ message: "Ancien mot de passe incorrect" });
+    }
+
+    // 🔐 HASH NOUVEAU MOT DE PASSE
+    user.password = await bcrypt.hash(newPassword, 10);
+    await user.save();
+
+    // 🧾 COLLECTION changepassword (LOG SÉCURITÉ)
+    await ChangePassword.create({
+      email: user.email,
+      userId: user._id,
+      ipAddress: req.ip,
+      userAgent: req.headers["user-agent"]
+    });
+
+    // 🧠 HISTORIQUE UTILISATEUR (COMME TRANSACTION)
+    await Transaction.create({
+      email: user.email,
+      type: "SECURITY",
+      amount: 0,
+      status: "SUCCESS",
+      message: "Votre mot de passe a été changé avec succès",
+      createdAt: new Date()
+    });
+
+    res.json({ message: "Mot de passe modifié avec succès" });
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Erreur serveur" });
+  }
+});
+
+
+
+
+
+
+
+
+
+
+
 app.post("/api/admin/unlock", (req, res) => {
   console.log("ADMIN PASSWORD REÇU :", req.body.password);
 
