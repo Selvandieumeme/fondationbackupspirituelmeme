@@ -89,10 +89,11 @@ async function loadDashboard() {
 
 
 
+// ---------- ADD HISTORY VISUAL ---------- 
 function addHistory(t) {
   const div = document.createElement("div");
   div.className = "item";
-  div.dataset.date = t.createdAt || "";
+  div.dataset.date = t.createdAt || ""; // Kenbe dat orijinal, pa new Date()
   div.innerHTML = `
     <b>${t.type.toUpperCase()}</b> | ${formatGourdes(t.amount)}<br>
     Statut: <span class="${t.status === "PENDING" ? "pending" : "active"}">
@@ -100,6 +101,56 @@ function addHistory(t) {
     </span>
   `;
   historyBox.prepend(div);
+}
+
+// ---------- EXPORT CSV FINAL ---------- 
+async function exportHistoryCSV() {
+  try {
+    // Chaje done itilizatè depi backend
+    const res = await fetch("https://api.fondationbackupspirituel.com/api/wallet/dashboard", {
+      headers: { "x-user-email": userEmail }
+    });
+    const data = await res.json();
+
+    const rows = [];
+    rows.push(["Balance Actuel", formatGourdes(data.wallet.balance)]);
+    rows.push(["Bonus Actuel", formatGourdes(data.wallet.bonus)]);
+    rows.push([]); // Liy vid
+    rows.push(["Type", "Montant", "Statut", "Date"]);
+
+    data.tx.forEach(t => {
+      // Fòmate dat pou CSV lisib
+      const date = t.createdAt ? new Date(t.createdAt).toLocaleString("fr-HT", {
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit"
+      }) : "";
+      rows.push([
+        t.type.toUpperCase(),
+        formatGourdes(t.amount),
+        t.status,
+        date
+      ]);
+    });
+
+    const csvContent = rows.map(r => r.join(",")).join("\n");
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", `Historique_Wallet_${userEmail}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+  } catch (err) {
+    console.error(err);
+    alert("Erreur lors de l'export CSV");
+  }
 }
 
 // ---------- AFFICHAGE DES FORMULAIRES ----------
