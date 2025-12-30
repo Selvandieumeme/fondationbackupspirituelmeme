@@ -144,7 +144,15 @@ async function exportHistoryCSV() {
       ]);
     });
 
-    const csvContent = rows.map(r => r.join(",")).join("\n");
+    const csvContent = rows
+  .map(row =>
+    row
+      .map(value =>
+        `"${String(value).replace(/"/g, '""')}"`
+      )
+      .join(",")
+  )
+  .join("\n");
     const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
 
