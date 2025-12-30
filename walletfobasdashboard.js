@@ -357,26 +357,7 @@ function exportHistoryCSV() {
   document.body.removeChild(link);
 }
 
-// ----------------- Kreye bouton CSV -----------------
-document.addEventListener("DOMContentLoaded", () => {
 
-  const exportBtn = document.createElement("button");
-  exportBtn.textContent = "Historique export CSV";
-  exportBtn.style.marginLeft = "10px";
-  exportBtn.style.cursor = "pointer";
-  exportBtn.onclick = exportHistoryCSV;
-
-  const menuNav = document.querySelector("nav.menu");
-  if (!menuNav) return;
-
-  const logoutBtn = menuNav.querySelector("button[onclick='logout()']");
-  if (logoutBtn) {
-    menuNav.insertBefore(exportBtn, logoutBtn);
-  } else {
-    menuNav.appendChild(exportBtn);
-  }
-
-});
 
 
 
