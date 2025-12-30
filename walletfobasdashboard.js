@@ -93,12 +93,20 @@ async function loadDashboard() {
 function addHistory(t) {
   const div = document.createElement("div");
   div.className = "item";
-  div.dataset.date = t.createdAt || ""; // Kenbe dat orijinal, pa new Date()
+  const dateStr = t.createdAt ? new Date(t.createdAt).toLocaleString("fr-HT", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit"
+  }) : "";
   div.innerHTML = `
     <b>${t.type.toUpperCase()}</b> | ${formatGourdes(t.amount)}<br>
     Statut: <span class="${t.status === "PENDING" ? "pending" : "active"}">
       ${t.status}
-    </span>
+    </span><br>
+    Date: ${dateStr}
   `;
   historyBox.prepend(div);
 }
