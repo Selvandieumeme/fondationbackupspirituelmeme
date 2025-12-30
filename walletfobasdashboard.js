@@ -318,6 +318,59 @@ document.getElementById("changePassBtn")?.addEventListener("click", () => {
 
 
 
+
+
+// ================= EXPORT HISTORIQUE CSV =================
+function exportHistoryCSV() {
+  const rows = [];
+  
+  // Ajoute balance actuel ak bonus
+  rows.push(["Balance Actuel", walletBalanceEl.textContent]);
+  rows.push(["Bonus Actuel", walletBonusEl.textContent]);
+  rows.push([]); // Liy vid
+
+  // Ajoute header kolòn historique
+  rows.push(["Type", "Montant", "Statut", "Date"]);
+
+  // Ranpli tout transactions istorik yo
+  const txItems = historyBox.querySelectorAll(".item");
+  txItems.forEach(item => {
+    const typeMatch = item.querySelector("b")?.textContent || "";
+    const amountMatch = item.querySelector("b")?.nextSibling?.textContent?.trim() || "";
+    const statusMatch = item.querySelector("span")?.textContent || "";
+    const dateMatch = item.dataset.date || ""; // Si ou gen date nan dataset sinon ou ka ajoute date nan item HTML
+
+    rows.push([typeMatch, amountMatch, statusMatch, dateMatch]);
+  });
+
+  // Kreye CSV content
+  const csvContent = rows.map(r => r.join(",")).join("\n");
+  const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+
+  // Kreye link tanporè pou telechaje
+  const link = document.createElement("a");
+  link.href = url;
+  link.setAttribute("download", `Historique_Wallet_${userEmail}.csv`);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}
+
+// ----------------- Kreye bouton dinamik -----------------
+const exportBtn = document.createElement("button");
+exportBtn.textContent = "Historique export CSV";
+exportBtn.style.marginLeft = "10px";
+exportBtn.style.cursor = "pointer";
+exportBtn.onclick = exportHistoryCSV;
+
+// Ajoute li nan menm espas meni bouton yo (ex: actionArea anwo oswa yon div meni)
+document.getElementById("formArea").parentNode.insertBefore(exportBtn, document.getElementById("formArea"));
+
+
+
+
+
 // ✅ AUTO-LOAD SANS DOUBLON
 if (typeof loadDashboard === "function") {
   document.addEventListener("DOMContentLoaded", loadDashboard);
