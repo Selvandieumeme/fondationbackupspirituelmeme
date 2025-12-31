@@ -1207,30 +1207,57 @@ app.post('/api/wallet/bonus', async (req, res) => {
 
 app.post("/api/change-password", async (req, res) => {
   try {
-    const { email, oldPassword, newPassword } = req.body;
-    if (!email || !oldPassword || !newPassword)
-      return res.status(400).json({ message: "Champs manquants" });
+    const { email, oldPassword, newPassword } = req.body || {};
 
+    // 1️⃣ Validation stricte (évite 500 bcrypt)
+    if (
+      typeof email !== "string" ||
+      typeof oldPassword !== "string" ||
+      typeof newPassword !== "string" ||
+      !email.trim() ||
+      !oldPassword.trim() ||
+      !newPassword.trim()
+    ) {
+      return res.status(400).json({ message: "Champs manquants ou invalides" });
+    }
+
+    // 2️⃣ Récupération utilisateur
     const user = await db.collection("walletusers").findOne({ email });
-    if (!user) return res.status(404).json({ message: "Utilisateur introuvable" });
+    if (!user) {
+      return res.status(404).json({ message: "Utilisateur introuvable" });
+    }
 
+    // 3️⃣ Vérification hash existant
+    if (typeof user.passwordHash !== "string" || !user.passwordHash) {
+      return res.status(400).json({ message: "Mot de passe non configuré" });
+    }
+
+    // 4️⃣ Comparaison bcrypt (sécurisée)
     const ok = await bcrypt.compare(oldPassword, user.passwordHash);
-    if (!ok) return res.status(400).json({ message: "Ancien mot de passe incorrect" });
+    if (!ok) {
+      return res.status(400).json({ message: "Ancien mot de passe incorrect" });
+    }
 
+    // 5️⃣ Hash nouveau mot de passe (bcrypt 12)
     const newHash = await bcrypt.hash(newPassword, 12);
 
+    // 6️⃣ Mise à jour atomique
     await db.collection("walletusers").updateOne(
       { email },
-      { $set: { passwordHash: newHash } }
+      { $set: { passwordHash: newHash, updatedAt: new Date() } }
     );
 
-    res.json({ message: "Mot de passe modifié avec succès" });
+    // 7️⃣ Réponse JSON propre
+    return res.json({
+      success: true,
+      message: "Mot de passe modifié avec succès"
+    });
+
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: "Erreur serveur" });
+    console.error("CHANGE PASSWORD ERROR:", err);
+    return res.status(500).json({ message: "Erreur serveur" });
   }
 });
-
 
 
 
