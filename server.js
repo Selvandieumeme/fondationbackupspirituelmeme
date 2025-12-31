@@ -42,39 +42,6 @@ app.use(express.json());
 
 
 
-// ROUTE CHANGE PASSWORD
-app.post("/api/change-password", async (req, res) => { 
-  try {
-    const { email, oldPassword, newPassword } = req.body || {};
-
-    if (!email || !oldPassword || !newPassword) {
-      return res.status(400).json({ message: "Tous les champs sont obligatoires" });
-    }
-
-    const user = await db.collection("walletusers").findOne({ email });
-    if (!user) {
-      return res.status(404).json({ message: "Utilisateur introuvable" });
-    }
-
-    const isMatch = await bcrypt.compare(oldPassword, user.passwordHash);
-    if (!isMatch) {
-      return res.status(400).json({ message: "Ancien mot de passe incorrect" });
-    }
-
-    const newHash = await bcrypt.hash(newPassword, 12);
-
-    await db.collection("walletusers").updateOne(
-      { email },
-      { $set: { passwordHash: newHash, updatedAt: new Date() } }
-    );
-
-    return res.json({ success: true, message: "Mot de passe modifié avec succès" });
-
-  } catch (err) {
-    console.error("CHANGE PASSWORD ERROR:", err);
-    return res.status(500).json({ message: "Erreur serveur" });
-  }
-});
 
 
 
@@ -1242,6 +1209,41 @@ app.post('/api/wallet/bonus', async (req, res) => {
 
 
 
+
+
+// ROUTE CHANGE PASSWORD
+app.post("/api/change-password", async (req, res) => { 
+  try {
+    const { email, oldPassword, newPassword } = req.body || {};
+
+    if (!email || !oldPassword || !newPassword) {
+      return res.status(400).json({ message: "Tous les champs sont obligatoires" });
+    }
+
+    const user = await db.collection("walletusers").findOne({ email });
+    if (!user) {
+      return res.status(404).json({ message: "Utilisateur introuvable" });
+    }
+
+    const isMatch = await bcrypt.compare(oldPassword, user.passwordHash);
+    if (!isMatch) {
+      return res.status(400).json({ message: "Ancien mot de passe incorrect" });
+    }
+
+    const newHash = await bcrypt.hash(newPassword, 12);
+
+    await db.collection("walletusers").updateOne(
+      { email },
+      { $set: { passwordHash: newHash, updatedAt: new Date() } }
+    );
+
+    return res.json({ success: true, message: "Mot de passe modifié avec succès" });
+
+  } catch (err) {
+    console.error("CHANGE PASSWORD ERROR:", err);
+    return res.status(500).json({ message: "Erreur serveur" });
+  }
+});
 
 
 
