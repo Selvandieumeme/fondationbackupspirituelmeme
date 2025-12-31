@@ -327,45 +327,49 @@ Montant: ${amount} Gourdes`
 
 // ---------- CHANGER MOT DE PASSE ----------
 async function submitChangePass() {
-  const oldPass = document.getElementById("oldPass").value;
-  const newPass = document.getElementById("newPass").value;
-  const confirm = document.getElementById("confirmPass").value;
+  const oldPassword = document.getElementById("oldPass").value;
+  const newPassword = document.getElementById("newPass").value;
+  const confirmPassword = document.getElementById("confirmPass").value;
 
-  if (!oldPass || !newPass || newPass !== confirm) {
-    return alert("Mot de passe invalide");
+  const email = document.getElementById("userEmail").value; 
+  // 👉 ou te deja di "userEmail" egziste lakay ou
+
+  if (!oldPassword || !newPassword || !confirmPassword) {
+    alert("Tous les champs sont obligatoires");
+    return;
+  }
+
+  if (newPassword !== confirmPassword) {
+    alert("La confirmation ne correspond pas");
+    return;
   }
 
   try {
-    const res = await fetch(
-      "https://api.fondationbackupspirituel.com/api/wallet/changepassword",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-user-email": userEmail  // <-- korije sa: voye email nan headers jan backend la ap tann li
-        },
-        body: JSON.stringify({
-          oldPassword: oldPass,
-          newPassword: newPass
-        })
-      }
-    );
+    const res = await fetch("api.fondationbackupspirituel.com/api/change-password", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        email,
+        oldPassword,
+        newPassword
+      })
+    });
 
     const data = await res.json();
-
-    if (res.ok) {
-      alert(data.message || "Votre mot de passe a été changé avec succès");
-      actionArea.innerHTML = "";
-      loadDashboard(); // rafraîchir historique + message succes
-    } else {
-      alert(data.message || "Erreur lors du changement de mot de passe");
-    }
+    alert(data.message);
 
   } catch (err) {
-    console.error(err);
-    alert("Erreur serveur, veuillez réessayer");
+    alert("Erreur serveur");
   }
 }
+
+
+
+
+
+
+
+
 
 // ---------- LOGOUT ----------
 function logout() {
