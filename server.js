@@ -1205,42 +1205,32 @@ app.post('/api/wallet/bonus', async (req, res) => {
 
 
 
-app.post("api.fondationbackupspirituel.com/api/change-password", async (req, res) => {
+app.post("/api/change-password", async (req, res) => {
   try {
     const { email, oldPassword, newPassword } = req.body;
-
     if (!email || !oldPassword || !newPassword) {
-      return res.json({ message: "Champs manquants" });
+      return res.status(400).json({ message: "Champs manquants" });
     }
 
     const user = await db.collection("walletusers").findOne({ email });
-    if (!user) {
-      return res.json({ message: "Utilisateur introuvable" });
-    }
+    if (!user) return res.status(404).json({ message: "Utilisateur introuvable" });
 
-    // 🔐 Vérification ANCIEN mot de passe
     const ok = await bcrypt.compare(oldPassword, user.passwordHash);
-    if (!ok) {
-      return res.json({ message: "Ancien mot de passe incorrect" });
-    }
+    if (!ok) return res.status(400).json({ message: "Ancien mot de passe incorrect" });
 
-    // 🔒 Nouveau hash bcrypt 12
     const newHash = await bcrypt.hash(newPassword, 12);
 
-    // 💾 Mise à jour IMMÉDIATE
     await db.collection("walletusers").updateOne(
       { email },
       { $set: { passwordHash: newHash } }
     );
 
-    return res.json({ message: "Mot de passe modifié avec succès" });
-
+    res.json({ message: "Mot de passe modifié avec succès" });
   } catch (err) {
     console.error(err);
-    res.json({ message: "Erreur serveur" });
+    res.status(500).json({ message: "Erreur serveur" });
   }
 });
-
 
 
 
