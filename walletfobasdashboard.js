@@ -340,9 +340,11 @@ async function submitChangePass() {
       "https://api.fondationbackupspirituel.com/api/wallet/changepassword",
       {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "x-user-email": userEmail  // <-- korije sa: voye email nan headers jan backend la ap tann li
+        },
         body: JSON.stringify({
-          email: userEmail,
           oldPassword: oldPass,
           newPassword: newPass
         })
@@ -350,12 +352,18 @@ async function submitChangePass() {
     );
 
     const data = await res.json();
-    alert(data.message);
-    actionArea.innerHTML = "";
-    loadDashboard(); // rafraîchir historique + message succes
+
+    if (res.ok) {
+      alert(data.message || "Votre mot de passe a été changé avec succès");
+      actionArea.innerHTML = "";
+      loadDashboard(); // rafraîchir historique + message succes
+    } else {
+      alert(data.message || "Erreur lors du changement de mot de passe");
+    }
 
   } catch (err) {
     console.error(err);
+    alert("Erreur serveur, veuillez réessayer");
   }
 }
 
