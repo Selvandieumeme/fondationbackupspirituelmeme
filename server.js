@@ -1208,9 +1208,8 @@ app.post('/api/wallet/bonus', async (req, res) => {
 app.post("/api/change-password", async (req, res) => {
   try {
     const { email, oldPassword, newPassword } = req.body;
-    if (!email || !oldPassword || !newPassword) {
+    if (!email || !oldPassword || !newPassword)
       return res.status(400).json({ message: "Champs manquants" });
-    }
 
     const user = await db.collection("walletusers").findOne({ email });
     if (!user) return res.status(404).json({ message: "Utilisateur introuvable" });
@@ -1231,7 +1230,6 @@ app.post("/api/change-password", async (req, res) => {
     res.status(500).json({ message: "Erreur serveur" });
   }
 });
-
 
 
 
