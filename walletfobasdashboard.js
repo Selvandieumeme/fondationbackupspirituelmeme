@@ -203,20 +203,21 @@ function showForm(type) {
     `;
   }
 
-  if (type === "changepass") {
-  const email = document.getElementById("userEmail").textContent; // sòti nan header
-  actionArea.innerHTML = `
-    <h3>Changer mot de passe</h3>
-    <input type="hidden" id="userEmail" value="${email}" />
-    <input id="oldPass" type="password" placeholder="Ancien mot de passe" />
-    <input id="newPass" type="password" placeholder="Nouveau mot de passe" />
-    <input id="confirmPass" type="password" placeholder="Confirmation" />
-    <button onclick="submitChangePass()">Modifier</button>
-    <p id="passwordMsg"></p>
-  `;
-}
-}
+ function showForm(type, userEmail) {
+  const actionArea = document.getElementById("formArea");
 
+  if (type === "changepass") {
+    actionArea.innerHTML = `
+      <h3>Changer mot de passe</h3>
+      <input type="hidden" id="userEmailHidden" value="${userEmail}" />
+      <input id="oldPass" type="password" placeholder="Ancien mot de passe" />
+      <input id="newPass" type="password" placeholder="Nouveau mot de passe" />
+      <input id="confirmPass" type="password" placeholder="Confirmation" />
+      <button onclick="submitChangePass()">Modifier</button>
+      <p id="passwordMsg"></p>
+    `;
+  }
+}
 
 // ---------- ACTIONS ----------
 async function submitAction(type) {
@@ -333,45 +334,31 @@ async function submitChangePass() {
   const oldPassword = document.getElementById("oldPass").value;
   const newPassword = document.getElementById("newPass").value;
   const confirmPassword = document.getElementById("confirmPass").value;
-  const emailInput = document.getElementById("userEmail");
-  const msg = document.getElementById("passwordMsg");
+  const email = document.getElementById("userEmailHidden").value; 
+  const msgEl = document.getElementById("passwordMsg");
 
-  if (!msg) return console.error("#passwordMsg introuvable");
-
-  const email = emailInput ? emailInput.value : null;
-
-  if (!oldPassword || !newPassword || !confirmPassword || !email) {
-    msg.textContent = "❌ Tous les champs sont obligatoires";
+  if (!oldPassword || !newPassword || !confirmPassword) {
+    msgEl.textContent = "❌ Tous les champs sont obligatoires";
     return;
   }
 
   if (newPassword !== confirmPassword) {
-    msg.textContent = "❌ La confirmation du mot de passe ne correspond pas";
+    msgEl.textContent = "❌ Confirmation incorrecte";
     return;
   }
 
   try {
-    const res = await fetch("api.fondationbackupspirituel.com/api/change-password", {
+    const res = await fetch("/api/change-password", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, oldPassword, newPassword })
     });
 
-    let data;
-    try { data = await res.json(); } 
-    catch { msg.textContent = "❌ Erreur serveur inattendue"; return; }
-
-    if (!res.ok) msg.textContent = "❌ " + (data.message || "Erreur serveur");
-    else {
-      msg.textContent = "✅ " + (data.message || "Mot de passe modifié avec succès");
-      document.getElementById("oldPass").value = "";
-      document.getElementById("newPass").value = "";
-      document.getElementById("confirmPass").value = "";
-    }
-
+    const data = await res.json();
+    msgEl.textContent = data.message;
   } catch (err) {
-    console.error("Fetch error:", err);
-    msg.textContent = "❌ Impossible de contacter le serveur";
+    msgEl.textContent = "❌ Erreur serveur";
+    console.error(err);
   }
 }
 
