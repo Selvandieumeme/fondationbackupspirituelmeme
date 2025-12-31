@@ -218,6 +218,9 @@ function showForm(type) {
     `;
   }
 }
+}
+
+
 
 // ---------- ACTIONS ----------
 async function submitAction(type) {
