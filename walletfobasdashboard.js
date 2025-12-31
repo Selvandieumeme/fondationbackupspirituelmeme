@@ -210,6 +210,7 @@ function showForm(type) {
     <input id="newPass" type="password" placeholder="Nouveau mot de passe" />
     <input id="confirmPass" type="password" placeholder="Confirmation" />
     <button onclick="submitChangePass()">Modifier</button>
+    <p id="passwordMsg"></p>
   `;
 }
 }
