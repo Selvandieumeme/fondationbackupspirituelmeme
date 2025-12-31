@@ -328,31 +328,65 @@ Montant: ${amount} Gourdes`
 
 // ---------- CHANGER MOT DE PASSE ----------
 async function submitChangePass() {
+  // Récupération des valeurs depuis le form
   const oldPassword = document.getElementById("oldPass").value;
   const newPassword = document.getElementById("newPass").value;
   const confirmPassword = document.getElementById("confirmPass").value;
-  const email = document.getElementById("userEmail").value; // déjà existant
+  const emailInput = document.getElementById("userEmail"); // doit exister dans ton HTML
+  const msg = document.getElementById("passwordMsg"); // p id pour afficher message
 
-  if (!oldPassword || !newPassword || !confirmPassword) {
-    alert("Tous les champs sont obligatoires");
+  if (!msg) {
+    console.error("Element #passwordMsg introuvable dans le DOM");
+    return;
+  }
+
+  const email = emailInput ? emailInput.value : null;
+
+  // Vérifications basiques
+  if (!oldPassword || !newPassword || !confirmPassword || !email) {
+    msg.textContent = "❌ Tous les champs sont obligatoires";
     return;
   }
 
   if (newPassword !== confirmPassword) {
-    alert("Confirmation incorrecte");
+    msg.textContent = "❌ La confirmation du mot de passe ne correspond pas";
     return;
   }
 
-  const res = await fetch("api.fondationbackupspirituel.com/api/change-password", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email, oldPassword, newPassword })
-  });
+  try {
+    // Fetch POST vers backend — assure-toi que route server.js est exactement /api/change-password
+    const res = await fetch("api.fondationbackupspirituel.com/api/change-password", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, oldPassword, newPassword })
+    });
 
-  const data = await res.json();
-  alert(data.message);
+    // Gestion de réponse JSON sécurisée
+    let data;
+    try {
+      data = await res.json();
+    } catch (jsonErr) {
+      console.error("Erreur JSON:", jsonErr);
+      msg.textContent = "❌ Erreur serveur inattendue";
+      return;
+    }
+
+    // Vérification code HTTP
+    if (!res.ok) {
+      msg.textContent = "❌ " + (data.message || "Erreur serveur");
+    } else {
+      msg.textContent = "✅ " + (data.message || "Mot de passe modifié avec succès");
+      // Optionnel: clear form après succès
+      document.getElementById("oldPass").value = "";
+      document.getElementById("newPass").value = "";
+      document.getElementById("confirmPass").value = "";
+    }
+
+  } catch (err) {
+    console.error("Fetch error:", err);
+    msg.textContent = "❌ Impossible de contacter le serveur";
+  }
 }
-
 
 
 
