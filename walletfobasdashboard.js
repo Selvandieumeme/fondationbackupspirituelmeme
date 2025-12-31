@@ -330,9 +330,7 @@ async function submitChangePass() {
   const oldPassword = document.getElementById("oldPass").value;
   const newPassword = document.getElementById("newPass").value;
   const confirmPassword = document.getElementById("confirmPass").value;
-
-  const email = document.getElementById("userEmail").value; 
-  // 👉 ou te deja di "userEmail" egziste lakay ou
+  const email = document.getElementById("userEmail").value; // déjà existant
 
   if (!oldPassword || !newPassword || !confirmPassword) {
     alert("Tous les champs sont obligatoires");
@@ -340,30 +338,19 @@ async function submitChangePass() {
   }
 
   if (newPassword !== confirmPassword) {
-    alert("La confirmation ne correspond pas");
+    alert("Confirmation incorrecte");
     return;
   }
 
-  try {
-    const res = await fetch("api.fondationbackupspirituel.com/api/change-password", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        email,
-        oldPassword,
-        newPassword
-      })
-    });
+  const res = await fetch("api.fondationbackupspirituel.com/api/change-password", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email, oldPassword, newPassword })
+  });
 
-    const data = await res.json();
-    alert(data.message);
-
-  } catch (err) {
-    alert("Erreur serveur");
-  }
+  const data = await res.json();
+  alert(data.message);
 }
-
-
 
 
 
