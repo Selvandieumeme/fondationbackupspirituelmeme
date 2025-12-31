@@ -1211,7 +1211,7 @@ app.post('/api/wallet/bonus', async (req, res) => {
 
 
 
-// ROUTE CHANGE PASSWORD
+// 1️⃣ ROUTE CHANGE PASSWORD – METE AN PREMIER
 app.post("/api/change-password", async (req, res) => { 
   try {
     const { email, oldPassword, newPassword } = req.body || {};
@@ -1244,6 +1244,63 @@ app.post("/api/change-password", async (req, res) => {
     return res.status(500).json({ message: "Erreur serveur" });
   }
 });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
