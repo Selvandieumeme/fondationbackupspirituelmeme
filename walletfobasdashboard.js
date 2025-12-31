@@ -204,8 +204,10 @@ function showForm(type) {
   }
 
   if (type === "changepass") {
+  const email = document.getElementById("userEmail").textContent; // sòti nan header
   actionArea.innerHTML = `
     <h3>Changer mot de passe</h3>
+    <input type="hidden" id="userEmail" value="${email}" />
     <input id="oldPass" type="password" placeholder="Ancien mot de passe" />
     <input id="newPass" type="password" placeholder="Nouveau mot de passe" />
     <input id="confirmPass" type="password" placeholder="Confirmation" />
