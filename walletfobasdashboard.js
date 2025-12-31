@@ -333,11 +333,16 @@ Montant: ${amount} Gourdes`
 
 // ---------- CHANGER MOT DE PASSE ----------
 async function submitChangePass() {
-  const oldPassword = document.getElementById("oldPass").value;
-  const newPassword = document.getElementById("newPass").value;
-  const confirmPassword = document.getElementById("confirmPass").value;
-  const email = document.getElementById("userEmailHidden").value; 
+  const oldPassword = document.getElementById("oldPass")?.value || "";
+  const newPassword = document.getElementById("newPass")?.value || "";
+  const confirmPassword = document.getElementById("confirmPass")?.value || "";
+  const email = document.getElementById("userEmailHidden")?.value || "";
   const msgEl = document.getElementById("passwordMsg");
+
+  if (!msgEl) {
+    alert("Erreur interface: message container manquant");
+    return;
+  }
 
   if (!oldPassword || !newPassword || !confirmPassword) {
     msgEl.textContent = "❌ Tous les champs sont obligatoires";
@@ -350,20 +355,23 @@ async function submitChangePass() {
   }
 
   try {
-    const res = await fetch("/api/change-password", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, oldPassword, newPassword })
-    });
+    const res = await fetch(
+      "https://api.fondationbackupspirituel.com/api/change-password",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, oldPassword, newPassword })
+      }
+    );
 
     const data = await res.json();
-    msgEl.textContent = data.message;
+    msgEl.textContent = data.message || "Action terminée";
+
   } catch (err) {
-    msgEl.textContent = "❌ Erreur serveur";
     console.error(err);
+    msgEl.textContent = "❌ Erreur serveur";
   }
 }
-
 
 
 
