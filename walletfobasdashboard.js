@@ -21,7 +21,14 @@ if (!userEmail) {
 // Injection header dashboard
 userNameEl.textContent = userName;
 userEmailEl.textContent = userEmail;
-userStatusEl.textContent = userStatus;
+if (userStatusEl) {
+  userStatusEl.textContent = userStatus;
+}
+
+
+
+
+
 
 // ---------- Utils ----------
 function formatGourdes(amount) {
