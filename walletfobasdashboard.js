@@ -203,8 +203,7 @@ function showForm(type) {
     `;
   }
 
- function showForm(type, userEmail) {
-  const actionArea = document.getElementById("formArea");
+
 
   if (type === "changepass") {
     actionArea.innerHTML = `
@@ -218,7 +217,7 @@ function showForm(type) {
     `;
   }
 }
-}
+
 
 
 
