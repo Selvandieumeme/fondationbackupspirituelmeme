@@ -1205,7 +1205,7 @@ app.post('/api/wallet/bonus', async (req, res) => {
 
 
 
-app.post("api.fondationbackupspirituel.com/api/change-password", async (req, res) => {
+app.post("/api/change-password", async (req, res) => {
   try {
     const { email, oldPassword, newPassword } = req.body;
     if (!email || !oldPassword || !newPassword)
