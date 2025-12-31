@@ -212,6 +212,7 @@ function showForm(type) {
     <button onclick="submitChangePass()">Modifier</button>
   `;
 }
+}
 
 
 // ---------- ACTIONS ----------
