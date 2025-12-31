@@ -356,13 +356,13 @@ async function submitChangePass() {
 
   try {
     const res = await fetch(
-      "https://api.fondationbackupspirituel.com/api/change-password",
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, oldPassword, newPassword })
-      }
-    );
+  "https://api.fondationbackupspirituel.com/api/change-password",
+  {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email, oldPassword, newPassword })
+  }
+);
 
     const data = await res.json();
     msgEl.textContent = data.message || "Action terminée";
