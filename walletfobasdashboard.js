@@ -369,7 +369,6 @@ function showForm(type) {
       </div>
     `;
 
-    // Asire bouton lan pa fè GET default
     document.getElementById("changepassSubmit").onclick = (e) => {
       e.preventDefault();
       changePassword();
@@ -387,7 +386,6 @@ async function changePassword() {
   msg.textContent = "";
   msg.style.color = "red";
 
-  // Verifikasyon chan
   if (!oldPassword || !newPassword || !confirmPassword) {
     msg.textContent = "Tous les champs sont obligatoires";
     return;
@@ -398,7 +396,6 @@ async function changePassword() {
     return;
   }
 
-  // Email soti nan localStorage (dinamik)
   const email = localStorage.getItem("userEmail");
   if (!email) {
     msg.textContent = "Erreur: utilisateur non identifié";
@@ -419,24 +416,28 @@ async function changePassword() {
 
     if (!response.ok) {
       msg.textContent = data.message || "Erreur serveur";
+      resetFields();
       return;
     }
 
-    // Siksè
     msg.style.color = "green";
-    msg.textContent = "Mot de passe changé avec succès ✅";
+    msg.textContent = data.message;
 
-    // Reset fòm
-    document.getElementById("oldPassword").value = "";
-    document.getElementById("walletPassword").value = "";
-    document.getElementById("walletPasswordConfirm").value = "";
+    resetFields();
 
   } catch (err) {
     console.error(err);
     msg.textContent = "Erreur serveur";
+    resetFields();
   }
 }
 
+// 🔹 Fonksyon pou reset chan fòm yo
+function resetFields() {
+  document.getElementById("oldPassword").value = "";
+  document.getElementById("walletPassword").value = "";
+  document.getElementById("walletPasswordConfirm").value = "";
+}
 
 
 
