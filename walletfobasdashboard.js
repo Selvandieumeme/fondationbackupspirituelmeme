@@ -342,39 +342,45 @@ Montant: ${amount} Gourdes`
 // ================================
 // 1️⃣ Montre fòm selon bouton
 // ================================
+// Montre fòm selon bouton klike
 function showForm(type) {
   const formArea = document.getElementById("formArea");
-  formArea.innerHTML = ""; // reset form area
+  formArea.innerHTML = ""; // reset
 
   if (type === "changepass") {
     formArea.innerHTML = `
       <div class="changepassForm">
         <h3>Changer mot de passe</h3>
         <div id="passwordMessage"></div>
-        <input type="password" id="oldPassword" placeholder="Ancien mot de passe" />
-        <input type="password" id="newPassword" placeholder="Nouveau mot de passe" />
-        <input type="password" id="confirmPassword" placeholder="Confirmer nouveau mot de passe" />
+
+        <label><strong>Ancien mot de passe :</strong></label>
+        <input type="password" id="oldPassword" placeholder="Ancien mot de passe" required
+          style="padding:10px; width:100%; border-radius:8px; border:1px solid #cbd5e1; margin-bottom:12px;">
+
+        <label><strong>Nouveau mot de passe :</strong></label>
+        <input type="password" id="walletPassword" placeholder="Créer un mot de passe" required
+          style="padding:10px; width:100%; border-radius:8px; border:1px solid #cbd5e1; margin-bottom:12px;">
+
+        <label><strong>Confirmer mot de passe :</strong></label>
+        <input type="password" id="walletPasswordConfirm" placeholder="Retapez mot de passe" required
+          style="padding:10px; width:100%; border-radius:8px; border:1px solid #cbd5e1; margin-bottom:18px;">
+
         <button id="changepassSubmit" type="button">Modifier</button>
       </div>
     `;
 
-    // Asosye bouton Modifier ak fonksyon changePassword
     document.getElementById("changepassSubmit").onclick = (e) => {
       e.preventDefault();
       changePassword();
     };
   }
-
-  // Si gen lòt fòm dinamik (deposit, withdraw, transfer, bonus), ou ka ajoute menm lojik la
 }
 
-// ================================
-// 2️⃣ Fonksyon changePassword
-// ================================
+// Fonksyon chanje mot de passe
 async function changePassword() {
   const oldPassword = document.getElementById("oldPassword").value;
-  const newPassword = document.getElementById("newPassword").value;
-  const confirmPassword = document.getElementById("confirmPassword").value;
+  const newPassword = document.getElementById("walletPassword").value;
+  const confirmPassword = document.getElementById("walletPasswordConfirm").value;
   const msg = document.getElementById("passwordMessage");
 
   msg.textContent = "";
@@ -390,15 +396,18 @@ async function changePassword() {
     return;
   }
 
+  // Email itilizatè a soti nan localStorage/session (dinamik)
+  const email = localStorage.getItem("userEmail");
+  if (!email) {
+    msg.textContent = "Erreur: utilisateur non identifié";
+    return;
+  }
+
   try {
-    const response = await fetch("https://api.fondationbackupspirituel.com/api/wallet/change-password", {
+    const response = await fetch("/api/wallet/change-password", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        userId: localStorage.getItem("userId"),
-        oldPassword,
-        newPassword
-      })
+      body: JSON.stringify({ email, oldPassword, newPassword })
     });
 
     const data = await response.json();
@@ -411,18 +420,16 @@ async function changePassword() {
     msg.style.color = "green";
     msg.textContent = "Mot de passe changé avec succès ✅";
 
-    // Reset formulaire
+    // Reset fòm
     document.getElementById("oldPassword").value = "";
-    document.getElementById("newPassword").value = "";
-    document.getElementById("confirmPassword").value = "";
+    document.getElementById("walletPassword").value = "";
+    document.getElementById("walletPasswordConfirm").value = "";
 
   } catch (err) {
     console.error(err);
     msg.textContent = "Erreur serveur";
   }
 }
-
-
 
 
 
