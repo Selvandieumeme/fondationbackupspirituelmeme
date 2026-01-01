@@ -339,59 +339,66 @@ Montant: ${amount} Gourdes`
 
 
 // ---------- CHANGER MOT DE PASSE ----------
-async function submitChangePass() {
-  // Récupération des valeurs
-  const oldPassword = document.getElementById("oldPass")?.value.trim() || "";
-  const newPassword = document.getElementById("newPass")?.value.trim() || "";
-  const confirmPassword = document.getElementById("confirmPass")?.value.trim() || "";
-  const email = document.getElementById("userEmailHidden")?.value.trim() || "";
-  const msgEl = document.getElementById("passwordMsg");
+async function changePassword() {
+  const oldPassword = document.getElementById("oldPassword").value;
+  const newPassword = document.getElementById("newPassword").value;
+  const confirmPassword = document.getElementById("confirmPassword").value;
+  const msg = document.getElementById("passwordMessage");
 
-  if (!msgEl) {
-    alert("Erreur interface: message container manquant");
-    return;
-  }
-
-  // Vérification frontend rapide
   if (!oldPassword || !newPassword || !confirmPassword) {
-    msgEl.textContent = "❌ Tous les champs sont obligatoires";
+    msg.textContent = "Tous les champs sont obligatoires";
     return;
   }
 
   if (newPassword !== confirmPassword) {
-    msgEl.textContent = "❌ Confirmation incorrecte";
+    msg.textContent = "Les mots de passe ne correspondent pas";
     return;
   }
 
   try {
-    // Envoi request POST vers backend
-    const res = await fetch("/api/change-password", {
+    const response = await fetch("/api/user/change-password", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, oldPassword, newPassword })
+      body: JSON.stringify({
+        userId: localStorage.getItem("userId"), // Ou id itilizatè k ap fè login la
+        oldPassword,
+        newPassword
+      })
     });
 
-    // Lecture réponse JSON
-    const data = await res.json();
+    const data = await response.json();
 
-    if (res.ok) {
-      msgEl.style.color = "green";
-      msgEl.textContent = data.message || "✅ Mot de passe modifié avec succès";
-      // Nettoyer les champs après succès
-      document.getElementById("oldPass").value = "";
-      document.getElementById("newPass").value = "";
-      document.getElementById("confirmPass").value = "";
-    } else {
-      msgEl.style.color = "red";
-      msgEl.textContent = data.message || "❌ Erreur serveur";
+    if (!response.ok) {
+      msg.textContent = data.message;
+      return;
     }
 
+    msg.style.color = "green";
+    msg.textContent = "Mot de passe changé avec succès ✅";
+
+    // Reset formulaire
+    document.getElementById("oldPassword").value = "";
+    document.getElementById("newPassword").value = "";
+    document.getElementById("confirmPassword").value = "";
+
   } catch (err) {
-    console.error("Erreur JS submitChangePass:", err);
-    msgEl.style.color = "red";
-    msgEl.textContent = "❌ Erreur serveur";
+    console.error(err);
+    msg.textContent = "Erreur serveur";
   }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
