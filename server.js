@@ -1245,24 +1245,27 @@ app.post("/api/wallet/change-password", async (req, res) => {
     }
 
     const user = await User.findOne({ email });
-    if (!user) return res.status(404).json({ message: "Utilisateur introuvable" });
+    if (!user) {
+      return res.status(404).json({ message: "Utilisateur introuvable" });
+    }
 
     const isMatch = await bcrypt.compare(oldPassword, user.passwordHash);
-    if (!isMatch) return res.status(401).json({ message: "Ancien mot de passe incorrect" });
+    if (!isMatch) {
+      return res.status(401).json({ message: "Ancien mot de passe incorrect" });
+    }
 
     const salt = await bcrypt.genSalt(12);
     user.passwordHash = await bcrypt.hash(newPassword, salt);
-    user.updatedAt = new Date();
-
     await user.save();
 
     return res.json({ success: true, message: "Mot de passe changé avec succès ✅" });
 
   } catch (err) {
-    console.error("Erreur serveur change-password:", err);
+    console.error("CHANGE PASSWORD ERROR:", err);
     return res.status(500).json({ message: "Erreur serveur" });
   }
 });
+
 
 
 
