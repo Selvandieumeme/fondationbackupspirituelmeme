@@ -342,40 +342,6 @@ Montant: ${amount} Gourdes`
 // ================================
 // 1️⃣ Montre fòm selon bouton
 // ================================
-// Montre fòm Changer mot de passe
-function showForm(type) {
-  const formArea = document.getElementById("formArea");
-  formArea.innerHTML = ""; // reset fòm
-
-  if (type === "changepass") {
-    formArea.innerHTML = `
-      <div class="changepassForm">
-        <h3>Changer mot de passe</h3>
-        <div id="passwordMessage" style="color:red; margin-bottom:10px;"></div>
-
-        <label><strong>Ancien mot de passe :</strong></label>
-        <input type="password" id="oldPassword" placeholder="Ancien mot de passe" required
-          style="padding:10px; width:100%; border-radius:8px; border:1px solid #cbd5e1; margin-bottom:12px;">
-
-        <label><strong>Nouveau mot de passe :</strong></label>
-        <input type="password" id="walletPassword" placeholder="Créer un mot de passe" required
-          style="padding:10px; width:100%; border-radius:8px; border:1px solid #cbd5e1; margin-bottom:12px;">
-
-        <label><strong>Confirmer mot de passe :</strong></label>
-        <input type="password" id="walletPasswordConfirm" placeholder="Retapez mot de passe" required
-          style="padding:10px; width:100%; border-radius:8px; border:1px solid #cbd5e1; margin-bottom:18px;">
-
-        <button id="changepassSubmit" type="button">Modifier</button>
-      </div>
-    `;
-
-    document.getElementById("changepassSubmit").onclick = (e) => {
-      e.preventDefault();
-      changePassword();
-    };
-  }
-}
-
 // Fonksyon chanje mot de passe
 async function changePassword() {
   const oldPassword = document.getElementById("oldPassword").value;
