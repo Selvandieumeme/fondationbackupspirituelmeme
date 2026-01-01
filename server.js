@@ -1225,19 +1225,6 @@ app.post('/api/wallet/bonus', async (req, res) => {
 
 
 
-/ ============================
-// WALLET FOBAS USER MODEL (ISOLÉ)
-// ============================
-const walletUserSchema = new mongoose.Schema({
-  fullName: String,
-  email: String,
-  passwordHash: String,
-  status: String
-}, { collection: "walletusers" });
-
-const WalletUser = mongoose.model("WalletUser", walletUserSchema);
-
-
 
 
 
