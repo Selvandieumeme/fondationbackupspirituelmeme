@@ -342,16 +342,15 @@ Montant: ${amount} Gourdes`
 // ================================
 // 1️⃣ Montre fòm selon bouton
 // ================================
-// Montre fòm selon bouton klike
 function showForm(type) {
   const formArea = document.getElementById("formArea");
-  formArea.innerHTML = ""; // reset
+  formArea.innerHTML = ""; // reset fòm
 
   if (type === "changepass") {
     formArea.innerHTML = `
       <div class="changepassForm">
         <h3>Changer mot de passe</h3>
-        <div id="passwordMessage"></div>
+        <div id="passwordMessage" style="color:red; margin-bottom:10px;"></div>
 
         <label><strong>Ancien mot de passe :</strong></label>
         <input type="password" id="oldPassword" placeholder="Ancien mot de passe" required
@@ -386,6 +385,7 @@ async function changePassword() {
   msg.textContent = "";
   msg.style.color = "red";
 
+  // Verifikasyon chan
   if (!oldPassword || !newPassword || !confirmPassword) {
     msg.textContent = "Tous les champs sont obligatoires";
     return;
@@ -396,7 +396,7 @@ async function changePassword() {
     return;
   }
 
-  // Email itilizatè a soti nan localStorage/session (dinamik)
+  // Email itilizatè soti nan localStorage (dinamik)
   const email = localStorage.getItem("userEmail");
   if (!email) {
     msg.textContent = "Erreur: utilisateur non identifié";
@@ -417,6 +417,7 @@ async function changePassword() {
       return;
     }
 
+    // Siksè
     msg.style.color = "green";
     msg.textContent = "Mot de passe changé avec succès ✅";
 
