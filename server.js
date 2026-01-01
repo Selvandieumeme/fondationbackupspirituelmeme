@@ -1233,7 +1233,7 @@ app.post('/api/wallet/bonus', async (req, res) => {
 
 
 
-// ================================
+/// ================================
 // 🔐 CHANGER MOT DE PASSE UTILISATEUR
 // ================================
 app.post("/api/wallet/change-password", async (req, res) => {
@@ -1242,50 +1242,37 @@ app.post("/api/wallet/change-password", async (req, res) => {
 
     // 🔎 Vérification champs
     if (!userId || !oldPassword || !newPassword) {
-      return res.status(400).json({
-        message: "Tous les champs sont obligatoires"
-      });
+      return res.status(400).json({ message: "Tous les champs sont obligatoires" });
     }
 
-    // 🔎 Récupérer utilisateur
+    // 🔎 Récupérer utilisateur nan walletusers (dinamik)
     const user = await User.findById(userId);
     if (!user) {
-      return res.status(404).json({
-        message: "Utilisateur introuvable"
-      });
+      return res.status(404).json({ message: "Utilisateur introuvable" });
     }
 
     // 🔐 Vérifier ancien mot de passe
-    const isMatch = await bcrypt.compare(oldPassword, user.password);
+    const isMatch = await bcrypt.compare(oldPassword, user.passwordHash); // itilize passwordHash ki deja nan collection
     if (!isMatch) {
-      return res.status(401).json({
-        message: "Ancien mot de passe incorrect"
-      });
+      return res.status(401).json({ message: "Ancien mot de passe incorrect" });
     }
 
     // 🔒 Hasher nouveau mot de passe
-    const salt = await bcrypt.genSalt(10);
+    const salt = await bcrypt.genSalt(12); // mete 12 pou plis sekirite
     const hashedPassword = await bcrypt.hash(newPassword, salt);
 
-    // 💾 Sauvegarde
-    user.password = hashedPassword;
+    // 💾 Sauvegarde nan menm dokiman itilizatè a
+    user.passwordHash = hashedPassword;
     user.updatedAt = new Date();
     await user.save();
 
-    return res.json({
-      success: true,
-      message: "Mot de passe changé avec succès"
-    });
+    return res.json({ success: true, message: "Mot de passe changé avec succès ✅" });
 
   } catch (error) {
     console.error("Erreur change-password:", error);
-    return res.status(500).json({
-      message: "Erreur serveur"
-    });
+    return res.status(500).json({ message: "Erreur serveur" });
   }
 });
-
-
 
 
 
