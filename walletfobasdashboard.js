@@ -342,6 +342,7 @@ Montant: ${amount} Gourdes`
 // ================================
 // 1️⃣ Montre fòm selon bouton
 // ================================
+// Montre fòm Changer mot de passe
 function showForm(type) {
   const formArea = document.getElementById("formArea");
   formArea.innerHTML = ""; // reset fòm
@@ -368,6 +369,7 @@ function showForm(type) {
       </div>
     `;
 
+    // Asire bouton lan pa fè GET default
     document.getElementById("changepassSubmit").onclick = (e) => {
       e.preventDefault();
       changePassword();
@@ -396,7 +398,7 @@ async function changePassword() {
     return;
   }
 
-  // Email itilizatè soti nan localStorage (dinamik)
+  // Email soti nan localStorage (dinamik)
   const email = localStorage.getItem("userEmail");
   if (!email) {
     msg.textContent = "Erreur: utilisateur non identifié";
@@ -404,11 +406,14 @@ async function changePassword() {
   }
 
   try {
-    const response = await fetch("api.fondationbackupspirituel.com/api/wallet/change-password", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, oldPassword, newPassword })
-    });
+    const response = await fetch(
+      "https://api.fondationbackupspirituel.com/api/wallet/change-password",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, oldPassword, newPassword })
+      }
+    );
 
     const data = await response.json();
 
@@ -431,6 +436,7 @@ async function changePassword() {
     msg.textContent = "Erreur serveur";
   }
 }
+
 
 
 
