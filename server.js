@@ -1225,7 +1225,17 @@ app.post('/api/wallet/bonus', async (req, res) => {
 
 
 
+/ ============================
+// WALLET FOBAS USER MODEL (ISOLÉ)
+// ============================
+const walletUserSchema = new mongoose.Schema({
+  fullName: String,
+  email: String,
+  passwordHash: String,
+  status: String
+}, { collection: "walletusers" });
 
+const WalletUser = mongoose.model("WalletUser", walletUserSchema);
 
 
 
@@ -1244,28 +1254,30 @@ app.post("/api/wallet/change-password", async (req, res) => {
       return res.status(400).json({ message: "Tous les champs sont obligatoires" });
     }
 
-    const user = await User.findOne({ email });
+    const user = await WalletUser.findOne({ email });
     if (!user) {
       return res.status(404).json({ message: "Utilisateur introuvable" });
     }
 
-    const isMatch = await bcrypt.compare(oldPassword, user.passwordHash);
+    const isMatch = await bcryptjs.compare(oldPassword, user.passwordHash);
     if (!isMatch) {
       return res.status(401).json({ message: "Ancien mot de passe incorrect" });
     }
 
-    const salt = await bcrypt.genSalt(12);
-    user.passwordHash = await bcrypt.hash(newPassword, salt);
+    const salt = await bcryptjs.genSalt(12);
+    user.passwordHash = await bcryptjs.hash(newPassword, salt);
     await user.save();
 
-    return res.json({ success: true, message: "Mot de passe changé avec succès ✅" });
+    return res.json({
+      success: true,
+      message: "Mot de passe changé avec succès ✅"
+    });
 
   } catch (err) {
-    console.error("CHANGE PASSWORD ERROR:", err);
+    console.error("WALLET CHANGE PASSWORD ERROR:", err);
     return res.status(500).json({ message: "Erreur serveur" });
   }
 });
-
 
 
 
