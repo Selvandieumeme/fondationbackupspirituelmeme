@@ -404,7 +404,7 @@ async function changePassword() {
   }
 
   try {
-    const response = await fetch("/api/wallet/change-password", {
+    const response = await fetch("api.fondationbackupspirituel.com/api/wallet/change-password", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, oldPassword, newPassword })
