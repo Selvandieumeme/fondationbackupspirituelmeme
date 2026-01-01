@@ -1015,39 +1015,6 @@ const notifyUpdate = () => io.emit('wallet-update');
 
 
 
-// POST /api/user/change-password
-router.post("/change-password", async (req, res) => {
-  try {
-    const { userId, oldPassword, newPassword } = req.body;
-
-    if (!userId || !oldPassword || !newPassword) {
-      return res.status(400).json({ message: "Champs manquants" });
-    }
-
-    // Cherche utilisateur pa _id
-    const user = await db.collection("walletusers").findOne({ _id: new ObjectId(userId) });
-    if (!user) return res.status(404).json({ message: "Utilisateur introuvable" });
-
-    // Vérifie mot de passe ansyen an ak passwordHash
-    const isMatch = await bcrypt.compare(oldPassword, user.passwordHash);
-    if (!isMatch) return res.status(401).json({ message: "Ancien mot de passe incorrect" });
-
-    // Hash nouvo mot de passe ak bcrypt 12
-    const hashedPassword = await bcrypt.hash(newPassword, 12);
-
-    // Mete ajou MongoDB
-    await db.collection("walletusers").updateOne(
-      { _id: user._id },
-      { $set: { passwordHash: hashedPassword, updatedAt: new Date() } }
-    );
-
-    return res.json({ success: true, message: "Mot de passe modifié avec succès" });
-
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: "Erreur serveur" });
-  }
-});
 
 
 // ======================= USER DASHBOARD =======================
@@ -1251,6 +1218,39 @@ app.post('/api/wallet/bonus', async (req, res) => {
 
 
 
+// POST /api/user/change-password
+router.post("/change-password", async (req, res) => {
+  try {
+    const { userId, oldPassword, newPassword } = req.body;
+
+    if (!userId || !oldPassword || !newPassword) {
+      return res.status(400).json({ message: "Champs manquants" });
+    }
+
+    // Cherche utilisateur pa _id
+    const user = await db.collection("walletusers").findOne({ _id: new ObjectId(userId) });
+    if (!user) return res.status(404).json({ message: "Utilisateur introuvable" });
+
+    // Vérifie mot de passe ansyen an ak passwordHash
+    const isMatch = await bcrypt.compare(oldPassword, user.passwordHash);
+    if (!isMatch) return res.status(401).json({ message: "Ancien mot de passe incorrect" });
+
+    // Hash nouvo mot de passe ak bcrypt 12
+    const hashedPassword = await bcrypt.hash(newPassword, 12);
+
+    // Mete ajou MongoDB
+    await db.collection("walletusers").updateOne(
+      { _id: user._id },
+      { $set: { passwordHash: hashedPassword, updatedAt: new Date() } }
+    );
+
+    return res.json({ success: true, message: "Mot de passe modifié avec succès" });
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Erreur serveur" });
+  }
+});
 
 
 
