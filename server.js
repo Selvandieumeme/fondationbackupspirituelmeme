@@ -1015,40 +1015,39 @@ const notifyUpdate = () => io.emit('wallet-update');
 
 
 
-// 1️⃣ ROUTE CHANGE PASSWORD – METE AN PREMIER
-app.post("/api/change-password", async (req, res) => { 
+// POST /api/user/change-password
+router.post("/change-password", async (req, res) => {
   try {
-    const { email, oldPassword, newPassword } = req.body || {};
+    const { userId, oldPassword, newPassword } = req.body;
 
-    if (!email || !oldPassword || !newPassword) {
-      return res.status(400).json({ message: "Tous les champs sont obligatoires" });
+    if (!userId || !oldPassword || !newPassword) {
+      return res.status(400).json({ message: "Champs manquants" });
     }
 
-    const user = await db.collection("walletusers").findOne({ email });
-    if (!user) {
-      return res.status(404).json({ message: "Utilisateur introuvable" });
-    }
+    // Cherche utilisateur pa _id
+    const user = await db.collection("walletusers").findOne({ _id: new ObjectId(userId) });
+    if (!user) return res.status(404).json({ message: "Utilisateur introuvable" });
 
+    // Vérifie mot de passe ansyen an ak passwordHash
     const isMatch = await bcrypt.compare(oldPassword, user.passwordHash);
-    if (!isMatch) {
-      return res.status(400).json({ message: "Ancien mot de passe incorrect" });
-    }
+    if (!isMatch) return res.status(401).json({ message: "Ancien mot de passe incorrect" });
 
-    const newHash = await bcrypt.hash(newPassword, 12);
+    // Hash nouvo mot de passe ak bcrypt 12
+    const hashedPassword = await bcrypt.hash(newPassword, 12);
 
+    // Mete ajou MongoDB
     await db.collection("walletusers").updateOne(
-      { email },
-      { $set: { passwordHash: newHash, updatedAt: new Date() } }
+      { _id: user._id },
+      { $set: { passwordHash: hashedPassword, updatedAt: new Date() } }
     );
 
     return res.json({ success: true, message: "Mot de passe modifié avec succès" });
 
   } catch (err) {
-    console.error("CHANGE PASSWORD ERROR:", err);
-    return res.status(500).json({ message: "Erreur serveur" });
+    console.error(err);
+    res.status(500).json({ message: "Erreur serveur" });
   }
 });
-
 
 
 // ======================= USER DASHBOARD =======================
