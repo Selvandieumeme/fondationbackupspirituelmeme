@@ -1238,42 +1238,34 @@ app.post('/api/wallet/bonus', async (req, res) => {
 // ================================
 app.post("/api/wallet/change-password", async (req, res) => {
   try {
-    const { userId, oldPassword, newPassword } = req.body;
+    const { email, oldPassword, newPassword } = req.body;
 
-    // 🔎 Vérification champs
-    if (!userId || !oldPassword || !newPassword) {
+    if (!email || !oldPassword || !newPassword) {
       return res.status(400).json({ message: "Tous les champs sont obligatoires" });
     }
 
-    // 🔎 Récupérer utilisateur nan walletusers (dinamik)
-    const user = await User.findById(userId);
-    if (!user) {
-      return res.status(404).json({ message: "Utilisateur introuvable" });
-    }
+    // 🔎 Chache dokiman itilizatè a dinamikman nan walletusers
+    const user = await User.findOne({ email });
+    if (!user) return res.status(404).json({ message: "Utilisateur introuvable" });
 
-    // 🔐 Vérifier ancien mot de passe
-    const isMatch = await bcrypt.compare(oldPassword, user.passwordHash); // itilize passwordHash ki deja nan collection
-    if (!isMatch) {
-      return res.status(401).json({ message: "Ancien mot de passe incorrect" });
-    }
+    // 🔐 Verifye ansyen modpas kont passwordHash ki nan dokiman an
+    const isMatch = await bcrypt.compare(oldPassword, user.passwordHash);
+    if (!isMatch) return res.status(401).json({ message: "Ancien mot de passe incorrect" });
 
-    // 🔒 Hasher nouveau mot de passe
-    const salt = await bcrypt.genSalt(12); // mete 12 pou plis sekirite
-    const hashedPassword = await bcrypt.hash(newPassword, salt);
+    // 🔒 Hash nouvo modpas
+    const salt = await bcrypt.genSalt(12);
+    user.passwordHash = await bcrypt.hash(newPassword, salt);
 
-    // 💾 Sauvegarde nan menm dokiman itilizatè a
-    user.passwordHash = hashedPassword;
-    user.updatedAt = new Date();
+    // 💾 Sove nouvo modpas nan dokiman itilizatè a
     await user.save();
 
     return res.json({ success: true, message: "Mot de passe changé avec succès ✅" });
 
-  } catch (error) {
-    console.error("Erreur change-password:", error);
+  } catch (err) {
+    console.error(err);
     return res.status(500).json({ message: "Erreur serveur" });
   }
 });
-
 
 
 
