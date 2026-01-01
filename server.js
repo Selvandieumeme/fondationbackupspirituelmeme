@@ -1244,25 +1244,22 @@ app.post("/api/wallet/change-password", async (req, res) => {
       return res.status(400).json({ message: "Tous les champs sont obligatoires" });
     }
 
-    // 🔎 Chache dokiman itilizatè a dinamikman nan walletusers
     const user = await User.findOne({ email });
     if (!user) return res.status(404).json({ message: "Utilisateur introuvable" });
 
-    // 🔐 Verifye ansyen modpas kont passwordHash ki nan dokiman an
     const isMatch = await bcrypt.compare(oldPassword, user.passwordHash);
     if (!isMatch) return res.status(401).json({ message: "Ancien mot de passe incorrect" });
 
-    // 🔒 Hash nouvo modpas
     const salt = await bcrypt.genSalt(12);
     user.passwordHash = await bcrypt.hash(newPassword, salt);
+    user.updatedAt = new Date();
 
-    // 💾 Sove nouvo modpas nan dokiman itilizatè a
     await user.save();
 
     return res.json({ success: true, message: "Mot de passe changé avec succès ✅" });
 
   } catch (err) {
-    console.error(err);
+    console.error("Erreur serveur change-password:", err);
     return res.status(500).json({ message: "Erreur serveur" });
   }
 });
