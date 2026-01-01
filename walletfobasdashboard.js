@@ -338,12 +338,47 @@ Montant: ${amount} Gourdes`
 
 
 
-// ---------- CHANGER MOT DE PASSE ----------
+
+// ================================
+// 1️⃣ Montre fòm selon bouton
+// ================================
+function showForm(type) {
+  const formArea = document.getElementById("formArea");
+  formArea.innerHTML = ""; // reset form area
+
+  if (type === "changepass") {
+    formArea.innerHTML = `
+      <div class="changepassForm">
+        <h3>Changer mot de passe</h3>
+        <div id="passwordMessage"></div>
+        <input type="password" id="oldPassword" placeholder="Ancien mot de passe" />
+        <input type="password" id="newPassword" placeholder="Nouveau mot de passe" />
+        <input type="password" id="confirmPassword" placeholder="Confirmer nouveau mot de passe" />
+        <button id="changepassSubmit" type="button">Modifier</button>
+      </div>
+    `;
+
+    // Asosye bouton Modifier ak fonksyon changePassword
+    document.getElementById("changepassSubmit").onclick = (e) => {
+      e.preventDefault();
+      changePassword();
+    };
+  }
+
+  // Si gen lòt fòm dinamik (deposit, withdraw, transfer, bonus), ou ka ajoute menm lojik la
+}
+
+// ================================
+// 2️⃣ Fonksyon changePassword
+// ================================
 async function changePassword() {
   const oldPassword = document.getElementById("oldPassword").value;
   const newPassword = document.getElementById("newPassword").value;
   const confirmPassword = document.getElementById("confirmPassword").value;
   const msg = document.getElementById("passwordMessage");
+
+  msg.textContent = "";
+  msg.style.color = "red";
 
   if (!oldPassword || !newPassword || !confirmPassword) {
     msg.textContent = "Tous les champs sont obligatoires";
@@ -356,11 +391,11 @@ async function changePassword() {
   }
 
   try {
-    const response = await fetch("/api/wallet/change-password", {
+    const response = await fetch("https://api.fondationbackupspirituel.com/api/wallet/change-password", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        userId: localStorage.getItem("userId"), // Ou id itilizatè k ap fè login la
+        userId: localStorage.getItem("userId"),
         oldPassword,
         newPassword
       })
@@ -369,7 +404,7 @@ async function changePassword() {
     const data = await response.json();
 
     if (!response.ok) {
-      msg.textContent = data.message;
+      msg.textContent = data.message || "Erreur serveur";
       return;
     }
 
@@ -386,6 +421,7 @@ async function changePassword() {
     msg.textContent = "Erreur serveur";
   }
 }
+
 
 
 
