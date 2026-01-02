@@ -342,12 +342,11 @@ Montant: ${amount} Gourdes`
 // ================================
 // 1️⃣ Montre fòm selon bouton
 // ================================
-// Fonksyon chanje mot de passe
-async function changePassword() {
-  const oldPassword = document.getElementById("oldPassword").value;
-  const newPassword = document.getElementById("walletPassword").value;
-  const confirmPassword = document.getElementById("walletPasswordConfirm").value;
-  const msg = document.getElementById("passwordMessage");
+async function submitChangePass() {
+  const oldPassword = document.getElementById("oldPass").value;
+  const newPassword = document.getElementById("newPass").value;
+  const confirmPassword = document.getElementById("confirmPass").value;
+  const msg = document.getElementById("passwordMsg");
 
   msg.textContent = "";
   msg.style.color = "red";
@@ -382,29 +381,21 @@ async function changePassword() {
 
     if (!response.ok) {
       msg.textContent = data.message || "Erreur serveur";
-      resetFields();
       return;
     }
 
     msg.style.color = "green";
     msg.textContent = data.message;
 
-    resetFields();
+    document.getElementById("oldPass").value = "";
+    document.getElementById("newPass").value = "";
+    document.getElementById("confirmPass").value = "";
 
   } catch (err) {
     console.error(err);
     msg.textContent = "Erreur serveur";
-    resetFields();
   }
 }
-
-// 🔹 Fonksyon pou reset chan fòm yo
-function resetFields() {
-  document.getElementById("oldPassword").value = "";
-  document.getElementById("walletPassword").value = "";
-  document.getElementById("walletPasswordConfirm").value = "";
-}
-
 
 
 
