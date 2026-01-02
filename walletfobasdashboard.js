@@ -223,6 +223,7 @@ function showForm(type) {
     <p id="passwordMsg"></p>
   `;
 }
+}
 
 
 
