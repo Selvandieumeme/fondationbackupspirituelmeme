@@ -222,6 +222,9 @@ function showForm(type) {
 
     <button type="button" onclick="changePassword()">Modifier</button>
     <p id="passwordMes
+    ; 
+    } 
+    }
 
 
 
