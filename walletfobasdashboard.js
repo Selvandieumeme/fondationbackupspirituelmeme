@@ -213,18 +213,15 @@ function showForm(type) {
 
 
   if (type === "changepass") {
-    actionArea.innerHTML = `
-      <h3>Changer mot de passe</h3>
-      <input type="hidden" id="userEmailHidden" value="${userEmail}" />
-      <input id="oldPass" type="password" placeholder="Ancien mot de passe" />
-      <input id="newPass" type="password" placeholder="Nouveau mot de passe" />
-      <input id="confirmPass" type="password" placeholder="Confirmation" />
-      <button onclick="submitChangePass()">Modifier</button>
-      <p id="passwordMsg"></p>
-    `;
-  }
-}
+  actionArea.innerHTML = `
+    <h3>Changer mot de passe</h3>
 
+    <input type="password" id="oldPassword" placeholder="Ancien mot de passe" />
+    <input type="password" id="walletPassword" placeholder="Nouveau mot de passe" />
+    <input type="password" id="walletPasswordConfirm" placeholder="Confirmation" />
+
+    <button type="button" onclick="changePassword()">Modifier</button>
+    <p id="passwordMes
 
 
 
