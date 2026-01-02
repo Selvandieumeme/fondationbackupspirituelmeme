@@ -236,7 +236,9 @@
    - Scroll lè >5 itilizatè
 ===================================================== */
 
-const socket = window.__fbsp_shared_socket || io('https://fondationbackupspirituel.com');
+const socket = window.__fbsp_shared_socket || io('https://api.fondationbackupspirituel.com', {
+  transports: ['websocket', 'polling']
+});
 window.__fbsp_shared_socket = socket;
 
 const sendBtn = document.getElementById('send');
