@@ -212,7 +212,7 @@ function showForm(type) {
 
 
 
-  if (type === "changepass") {
+ if (type === "changepass") {
   actionArea.innerHTML = `
     <h3>Changer mot de passe</h3>
 
@@ -221,13 +221,13 @@ function showForm(type) {
     <input type="password" id="walletPasswordConfirm" placeholder="Confirmation" />
 
     <button type="button" onclick="changePassword()">Modifier</button>
-    <p id="passwordMes
-    ; 
-    } 
-    }
+    <p id="passwordMessage"></p>
+  `;
+}
 
 
 
+  
 // ---------- ACTIONS ----------
 async function submitAction(type) {
   const body = {
