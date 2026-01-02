@@ -215,6 +215,7 @@ function showForm(type) {
  if (type === "changepass") {
   actionArea.innerHTML = `
     <h3>Changer mot de passe</h3>
+
     <input type="hidden" id="userEmailHidden" value="${userEmail}" />
 
     <input id="oldPass" type="password" placeholder="Ancien mot de passe" />
@@ -225,6 +226,7 @@ function showForm(type) {
     <p id="passwordMsg"></p>
   `;
 }
+
 
 
 
