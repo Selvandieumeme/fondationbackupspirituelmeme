@@ -1380,6 +1380,27 @@ app.post("/api/wallet/create", async (req, res) => {
       return res.status(400).json({ success: false, message: "Tout chan obligatwa." });
     }
 
+
+
+	  
+
+
+	 // 🔐 BLOKAJ EMAIL DOUBLON (AJOUT SANS MODIFICATION)
+    const emailExist = await WalletUser.findOne({
+      email: walletEmail.toLowerCase()
+    });
+
+    if (emailExist) {
+      return res.status(409).json({
+        success: false,
+        message: "⛔ Email sa deja anrejistre sou Wallet FOBAS."
+      });
+    }
+
+
+
+	  
+
     // --- Hash password ---
     const bcrypt = require("bcryptjs");
     const passwordHash = await bcrypt.hash(walletPassword, 12);
