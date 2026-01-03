@@ -177,7 +177,8 @@ document.addEventListener("DOMContentLoaded", () => {
           walletBirthDate: birthDate,
           walletBirthPlace: birthPlace,
           walletPassword: password,
-          walletSponsorName: sponsorName
+          walletSponsorName: sponsorName,
+          walletAccountType: accountType
         })
       });
 
