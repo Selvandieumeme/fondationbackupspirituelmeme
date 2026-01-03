@@ -7,7 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
   form.addEventListener('submit', (e) => {
     e.preventDefault();
     errorMsg.textContent = '';
-
+    
     // Récupération des champs
     const fullName = form.fullName.value.trim();
     const email = form.email.value.trim();
@@ -92,14 +92,49 @@ document.addEventListener("DOMContentLoaded", () => {
   const form = document.getElementById("createWalletForm");
   const msgBox = document.getElementById("wallet-msg");
 
-  if (!form) return; // Sekirite si seksyon an pa chaje
+  if (!form) return;
 
   form.addEventListener("submit", async function (e) {
     e.preventDefault();
 
-    // --- Récupération des champs ---
+    // --- Récupération champs obligatwa ---
     const fullName = form.walletFullName.value.trim();
     const email = form.walletEmail.value.trim();
+
+    if (!fullName || !email) {
+      msgBox.textContent = "⚠️ Non ak Email obligatwa.";
+      msgBox.style.color = "red";
+      return;
+    }
+
+    // 🔐 Vérification email déjà existant
+    try {
+      const checkResponse = await fetch(
+        "https://api.fondationbackupspirituel.com/api/wallet/check-email",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email })
+        }
+      );
+
+      const checkData = await checkResponse.json();
+
+      if (!checkData.success) {
+        msgBox.textContent = "⚠️ " + checkData.message;
+        msgBox.style.color = "red";
+        return; // ⛔ BLOKAJ TOTAL
+      }
+    } catch (err) {
+      console.error("Erreur check email:", err);
+      msgBox.textContent = "⚠️ Erreur vérification email, réessayez.";
+      msgBox.style.color = "red";
+      return;
+    }
+
+
+
+    
     const recoveryEmail = form.walletRecoveryEmail.value.trim();
     const whatsapp = form.walletWhatsApp.value.trim();
     const birthDate = form.walletBirthDate.value;
