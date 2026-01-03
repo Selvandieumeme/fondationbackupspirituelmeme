@@ -72,6 +72,16 @@ async function loadDashboard() {
       walletBonusEl.textContent = formatGourdes(data.wallet?.bonus || 0);
     }
 
+
+
+// Montre Tit / Statut itilizate a
+const userAccountTypeEl = document.getElementById("userAccountType");
+if (userAccountTypeEl) {
+  userAccountTypeEl.textContent = `Tit / Statut: ${data.wallet?.walletAccountType || 'Utilisateur'}`;
+}
+
+    
+
     // 🔒 PWOTEKSYON ISTORIK (SA KI TE MANKE A)
     historyBox.innerHTML = "";
 
