@@ -26,19 +26,16 @@ const WalletUserSchema = new mongoose.Schema({
     type: String,
     default: "pending"
   },
-  walletAccountType: {
-    type: String,
-    enum: ["Agent Autorise", "Etudiant", "ONG", "Entreprise", "Ecole", "Eglise", "Membre"],
-    default: "Utilisateur",
-    required: true
-  },
   createdAt: {
     type: Date,
     default: Date.now
   }
 });
 
-const WalletUser = mongoose.models.WalletUser || mongoose.model("WalletUser", WalletUserSchema);
+const WalletUser = mongoose.models.WalletUser || mongoose.model(
+  "WalletUser",
+  WalletUserSchema
+);
 
 // ----------------------- EXPORT -----------------------
 module.exports = { User, WalletUser };
