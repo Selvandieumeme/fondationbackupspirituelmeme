@@ -142,6 +142,13 @@ document.addEventListener("DOMContentLoaded", () => {
     const password = form.walletPassword.value;
     const passwordConfirm = form.walletPasswordConfirm.value;
     const sponsorName = form.walletSponsorName.value.trim();
+    const accountType = form.walletAccountType.value;
+
+    if (!accountType) {
+  msgBox.textContent = "⚠️ Ou dwe chwazi yon tit / statut pou kont ou.";
+  msgBox.style.color = "red";
+  return;
+}
 
     // --- Validation ---
     if (!fullName || !email || !recoveryEmail || !whatsapp || !birthDate || !birthPlace || !password || !passwordConfirm ||
