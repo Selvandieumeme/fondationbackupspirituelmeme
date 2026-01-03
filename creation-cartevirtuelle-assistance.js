@@ -190,7 +190,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         // --- WhatsApp notification admin toujou mache ---
         const adminNumber = "50946057952";
-        const waMessage = `🟢 Nouvo Demande Compte WALLET FOBAS\n\n👤 ${fullName}\n📧 ${email}\n📱 ${whatsapp}\n🌍 Email sekou: ${recoveryEmail}\n🏙️ Lye Nésans: ${birthPlace}\n📅 Dat Nésans: ${birthDate}`;
+        const waMessage = `🟢 Nouvo Demande Compte WALLET FOBAS\n\n👤 ${fullName}\n📧 ${email}\n📱 ${whatsapp}\n🌍 Email sekou: ${recoveryEmail}\n🏙️ Lye Nésans: ${birthPlace}\n📅 Dat Nésans: ${birthDate}\🏷️ Statut: ${accountType}`;
         const waLink = "https://wa.me/" + adminNumber + "?text=" + encodeURIComponent(waMessage);
         window.open(waLink, "_blank");
 
