@@ -44,6 +44,110 @@
 <!-- 4️⃣ Form Area: fòm dinamik selon aksyon -->
 <section class="form-area" id="formArea"></section>
 
+
+
+
+
+
+
+
+
+
+
+
+
+  <!-- ================== FRAIS RETRAIT WALLET FOBAS ================== -->
+<style>
+  .fobas-withdrawal-box {
+    max-width: 600px;
+    margin: 40px auto;
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+    overflow: hidden;
+    font-family: Arial, sans-serif;
+  }
+
+  .fobas-withdrawal-header {
+    background: linear-gradient(135deg, #0a3cff, #f7c600);
+    color: #ffffff;
+    text-align: center;
+    padding: 16px;
+    font-size: 18px;
+    font-weight: bold;
+  }
+
+  .fobas-withdrawal-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0 10px;
+    padding: 15px;
+  }
+
+  .fobas-withdrawal-table th {
+    text-align: left;
+    color: #0a3cff;
+    font-size: 14px;
+    padding-bottom: 8px;
+  }
+
+  .fobas-withdrawal-table td {
+    background: #f4f8ff;
+    padding: 12px 14px;
+    border-radius: 8px;
+    font-size: 14px;
+    color: #222;
+  }
+
+  .fobas-withdrawal-table td.fee {
+    text-align: right;
+    font-weight: bold;
+    color: #f7a600;
+  }
+
+  .fobas-note {
+    text-align: center;
+    font-size: 12px;
+    color: #555;
+    padding: 12px 15px 18px;
+  }
+</style>
+
+<div class="fobas-withdrawal-box">
+  <div class="fobas-withdrawal-header">
+    💰 Grille Frais Retrait – Wallet FOBAS
+  </div>
+
+  <table class="fobas-withdrawal-table">
+    <thead>
+      <tr>
+        <th>Montant Retrait (Gdes)</th>
+        <th style="text-align:right;">Frais (Gdes)</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td>20 – 99</td><td class="fee">10</td></tr>
+      <tr><td>100 – 249</td><td class="fee">10</td></tr>
+      <tr><td>250 – 499</td><td class="fee">10</td></tr>
+      <tr><td>500 – 999</td><td class="fee">10</td></tr>
+      <tr><td>1 000 – 1 999</td><td class="fee">15</td></tr>
+      <tr><td>2 000 – 3 999</td><td class="fee">25</td></tr>
+      <tr><td>4 000 – 7 999</td><td class="fee">50</td></tr>
+      <tr><td>8 000 – 11 999</td><td class="fee">100</td></tr>
+      <tr><td>12 000 – 19 999</td><td class="fee">150</td></tr>
+      <tr><td>20 000 – 39 999</td><td class="fee">300</td></tr>
+      <tr><td>40 000 – 59 999</td><td class="fee">500</td></tr>
+      <tr><td>60 000 – 74 999</td><td class="fee">600</td></tr>
+      <tr><td>75 000 – 100 000</td><td class="fee">1 000</td></tr>
+    </tbody>
+  </table>
+
+  <div class="fobas-note">
+    Frais sa yo aplike manyelman selon montan kliyan an chwazi retire, e se Agent Autorise yo ki chaje pou fe sa.
+  </div>
+</div>
+<!-- ================== FIN FRAIS RETRAIT ================== -->
+
 <script src="/socket.io/socket.io.js"></script>
 <script src="walletfobasdashboard.js" defer></script>
 
