@@ -992,7 +992,7 @@ const walletBalanceSchema = new mongoose.Schema({
 
   accountStatus: {
     type: String,
-    default: "ACTIF - 1 Wallet Vaut 1 Gourde"
+    default: "ACTIF"
   },
 
   balance: { type: Number, default: 0 },
