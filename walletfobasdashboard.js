@@ -10,7 +10,7 @@ const historyBox = document.getElementById("history");
 // ---------- Données utilisateur depuis ANCIEN système ----------
 const userName = localStorage.getItem("userName");
 const userEmail = localStorage.getItem("userEmail");
-const userStatus = localStorage.getItem("userStatus") || "ACTIF";
+const userStatus = localStorage.getItem("userStatus") || "ACTIF - 1 Wallet = 1 Gourde";
 
 // Sécurité
 if (!userEmail) {
@@ -32,7 +32,7 @@ if (userStatusEl) {
 
 // ---------- Utils ----------
 function formatGourdes(amount) {
-  return Number(amount || 0).toFixed(2) + " Gourdes";
+  return Number(amount || 0).toFixed(2) + " Wallet";
 }
 
 // WhatsApp admin
@@ -67,9 +67,9 @@ async function loadDashboard() {
 
     const data = await res.json();
 
-    walletBalanceEl.textContent = formatGourdes(data.wallet?.balance || 0);
+    walletBalanceEl.textContent = formatWallets(data.wallet?.balance || 0);
     if (walletBonusEl) {
-      walletBonusEl.textContent = formatGourdes(data.wallet?.bonus || 0);
+      walletBonusEl.textContent = formatWallets(data.wallet?.bonus || 0);
     }
 
 
@@ -96,9 +96,9 @@ if (userAccountTypeEl) {
 
   } catch (err) {
     console.error("Erreur dashboard:", err);
-    walletBalanceEl.textContent = "0.00 Gourdes";
+    walletBalanceEl.textContent = "0.00 Wallets";
     if (walletBonusEl) {
-      walletBonusEl.textContent = "0.00 Gourdes";
+      walletBonusEl.textContent = "0.00 Wallets";
     }
   }
 }
@@ -294,7 +294,7 @@ async function submitAction(type) {
       `🔔 WALLET FOBAS - ${type.toUpperCase()}
 Nom: ${userName}
 Email: ${userEmail}
-Montant: ${body.amount} Gourdes
+Montant: ${body.amount} Wallets
 Statut: PENDING`
     );
 
@@ -328,7 +328,7 @@ async function submitTransfer() {
   const amount = Number(document.getElementById("amount").value);
 
   if (receiverEmail === userEmail) {
-    return alert("Vous ne pouvez pas vous transférer de l'argent à vous-même");
+    return alert("Vous ne pouvez pas vous transférer de Wallets à vous-même");
   }
 
   try {
@@ -359,7 +359,7 @@ async function submitTransfer() {
       `🔁 TRANSFERT WALLET FOBAS
 De: ${userEmail}
 Vers: ${receiverEmail}
-Montant: ${amount} Gourdes`
+Montant: ${amount} Wallet`
     );
 
     alert(data.message);
