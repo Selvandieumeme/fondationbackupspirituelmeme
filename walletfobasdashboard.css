@@ -227,3 +227,42 @@ nav.menu button[onclick*="logout"]:hover {
     margin: 20px 20px;
   }
 }
+
+
+
+
+
+
+
+
+
+
+
+/* ================= HISTORIQUE WALLET FOBAS ================= */
+
+#historyBox {
+  max-height: 420px;          /* ≈ 5 transactions */
+  overflow-y: auto;           /* scrollbar vertical */
+  padding-right: 6px;
+}
+
+/* Amélioration visuelle (optionnel mais pro) */
+#historyBox::-webkit-scrollbar {
+  width: 6px;
+}
+
+#historyBox::-webkit-scrollbar-thumb {
+  background: #bbb;
+  border-radius: 6px;
+}
+
+#historyBox::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* Chaque transaction reste lisible */
+#historyBox .item {
+  margin-bottom: 10px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #eee;
+}
