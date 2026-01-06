@@ -110,6 +110,7 @@ if (userAccountTypeEl) {
 function addHistory(t) {
   const div = document.createElement("div");
   div.className = "item";
+
   const dateStr = t.createdAt ? new Date(t.createdAt).toLocaleString("fr-HT", {
     year: "numeric",
     month: "2-digit",
@@ -118,13 +119,39 @@ function addHistory(t) {
     minute: "2-digit",
     second: "2-digit"
   }) : "";
+
+  // ================= AJOUT SÉCURISÉ (SANS IMPACT) =================
+  let transferDetails = "";
+
+  if (t.type === "transfer") {
+    const isReceiver = t.senderEmail && t.email !== t.senderEmail;
+    const isSender = t.receiverEmail && t.email !== t.receiverEmail;
+
+    if (isReceiver && t.senderEmail) {
+      transferDetails = `
+        De : <b>${t.senderName || "—"}</b> (${t.senderEmail})<br>
+        Vers : <b>${t.receiverName || "—"}</b> (${t.email})
+      `;
+    }
+
+    if (isSender && t.receiverEmail) {
+      transferDetails = `
+        De : <b>${t.senderName || "—"}</b> (${t.email})<br>
+        Vers : <b>${t.receiverName || "—"}</b> (${t.receiverEmail})
+      `;
+    }
+  }
+  // ===============================================================
+
   div.innerHTML = `
     <b>${t.type.toUpperCase()}</b> | ${formatGourdes(t.amount)}<br>
+    ${transferDetails}
     Statut: <span class="${t.status === "PENDING" ? "pending" : "active"}">
       ${t.status}
     </span><br>
     Date: ${dateStr}
   `;
+
   historyBox.prepend(div);
 }
 
