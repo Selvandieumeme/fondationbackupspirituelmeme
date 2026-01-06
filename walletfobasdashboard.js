@@ -10,7 +10,7 @@ const historyBox = document.getElementById("history");
 // ---------- Données utilisateur depuis ANCIEN système ----------
 const userName = localStorage.getItem("userName");
 const userEmail = localStorage.getItem("userEmail");
-const userStatus = localStorage.getItem("userStatus") || "ACTIF 1 Wallet Vaut 1 Gourde";
+const userStatus = localStorage.getItem("userStatus") || "ACTIF";
 
 // Sécurité
 if (!userEmail) {
