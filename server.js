@@ -984,9 +984,25 @@ const WalletUser = mongoose.models.WalletUser || mongoose.model(
 const walletBalanceSchema = new mongoose.Schema({
   email: { type: String, unique: true },
   fullName: String,
+
+  walletAccountType: {
+    type: String,
+    default: "Utilisateur"
+  },
+
+  accountStatus: {
+    type: String,
+    default: "ACTIF"
+  },
+
   balance: { type: Number, default: 0 },
   bonus: { type: Number, default: 0 }
 }, { timestamps: true });
+
+
+
+
+
 
 // ----------------------- SCHEMAS TRANSACTIONS -----------------------
 const transactionSchema = new mongoose.Schema({
