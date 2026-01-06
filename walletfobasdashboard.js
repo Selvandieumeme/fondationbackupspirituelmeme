@@ -10,7 +10,7 @@ const historyBox = document.getElementById("history");
 // ---------- Données utilisateur depuis ANCIEN système ----------
 const userName = localStorage.getItem("userName");
 const userEmail = localStorage.getItem("userEmail");
-const userStatus = localStorage.getItem("userStatus") || "ACTIF - 1 Wallet = 1 Gourde";
+const userStatus = localStorage.getItem("userStatus") || "ACTIF 1 Wallet Vaut 1 Gourde";
 
 // Sécurité
 if (!userEmail) {
@@ -32,7 +32,7 @@ if (userStatusEl) {
 
 // ---------- Utils ----------
 function formatGourdes(amount) {
-  return Number(amount || 0).toFixed(2) + " Wallet";
+  return Number(amount || 0).toFixed(2) + " Gourdes";
 }
 
 // WhatsApp admin
@@ -67,9 +67,9 @@ async function loadDashboard() {
 
     const data = await res.json();
 
-    walletBalanceEl.textContent = formatWallets(data.wallet?.balance || 0);
+    walletBalanceEl.textContent = formatWallets(data.Gourde?.balance || 0);
     if (walletBonusEl) {
-      walletBonusEl.textContent = formatWallets(data.wallet?.bonus || 0);
+      walletBonusEl.textContent = formatWallets(data.Gourde?.bonus || 0);
     }
 
 
