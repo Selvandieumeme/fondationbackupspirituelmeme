@@ -67,9 +67,9 @@ async function loadDashboard() {
 
     const data = await res.json();
 
-    walletBalanceEl.textContent = formatWallets(data.Gourde?.balance || 0);
+    walletBalanceEl.textContent = formatGourdes(data.Gourde?.balance || 0);
     if (walletBonusEl) {
-      walletBonusEl.textContent = formatWallets(data.Gourde?.bonus || 0);
+      walletBonusEl.textContent = formatGourdes(data.Gourde?.bonus || 0);
     }
 
 
