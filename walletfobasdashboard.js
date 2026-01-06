@@ -96,9 +96,9 @@ if (userAccountTypeEl) {
 
   } catch (err) {
     console.error("Erreur dashboard:", err);
-    walletBalanceEl.textContent = "0.00 Wallets";
+    walletBalanceEl.textContent = "0.00 Gourdes";
     if (walletBonusEl) {
-      walletBonusEl.textContent = "0.00 Wallets";
+      walletBonusEl.textContent = "0.00 Gourdes";
     }
   }
 }
