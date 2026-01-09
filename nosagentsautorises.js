@@ -24,14 +24,20 @@ function openDeptFOBAS(departement) {
     .then(html => {
       container.innerHTML = html;
 
-      // Apre paj la fin chaje, rele fonksyon loadDept nan nosagentsfobas.js pou montre agents yo
       setTimeout(() => {
-        if (typeof loadDept === "function") {
-          loadDept(departement);
-        } else {
-          console.error("Fonksyon loadDept pa defini nan nosagentsfobas.js");
-        }
-      }, 100); // 100ms pou garanti paj la fin chaje
+    const agentsContainer = container.querySelector("#agentsContainer");
+    if (!agentsContainer) {
+        console.error("Erreur: element #agentsContainer pa jwenn apre chargement HTML.");
+        return;
+    }
+
+    if (typeof loadDept === "function") {
+        loadDept(departement, agentsContainer); // <- pase container a
+    } else {
+        console.error("Fonksyon loadDept pa defini nan nosagentsfobas.js");
+    }
+}, 100ms);
+      
     })
     .catch(err => {
       container.innerHTML = "<p>Erreur lors du chargement des agents.</p>";
