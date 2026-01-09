@@ -23,3 +23,13 @@
   <div id="agentsStatus" class="agents-status"></div>
 
 </section>
+
+<!-- ====================== SCRIPT POUR LOAD DYNAMIQUE ====================== -->
+<script>
+  // Si loadDept egziste nan JS parent (nosagentsautorises.js), li ka rele li dirèkteman
+  // Sinon, pa fè anyen → evite erè
+  if (typeof loadDept === "function") {
+    // Egzanp: chaje yon depatman default si ou vle
+    // loadDept("Ouest", document.getElementById("agentsContainer"));
+  }
+</script>
