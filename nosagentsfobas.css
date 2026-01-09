@@ -5,9 +5,9 @@
 }
 
 .agents-block {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr); /* 5 agents exact */
   gap: 20px;
-  flex-wrap: wrap;
   margin-bottom: 35px;
 }
 
