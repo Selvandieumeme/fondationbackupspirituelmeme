@@ -3,8 +3,8 @@
 .agents-grid {
   display: grid;
   grid-template-columns: repeat(5, 1fr); /* 5 agents par ligne */
-  gap: 20px;
-  padding: 30px;
+  gap: 15px;          /* espas ant chak card */
+  padding: 0;          /* retire padding ki kraze layout */
 }
 
 .agents-block {
@@ -19,8 +19,9 @@
   box-shadow: 0 6px 18px rgba(0,0,0,0.12);
   padding: 12px;
   text-align: center;
+  width: 100%;          /* trè enpòtan pou grid respekte 5 kolòn */
+  box-sizing: border-box;
 }
-
 /* Photo agent */
 .agent-card img {
   width: 100%;
