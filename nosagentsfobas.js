@@ -233,3 +233,4 @@ function loadDept(dept, container) {
 
   container.appendChild(blockDiv);
 });
+} // <-- Fèmen fonksyon loadDept
