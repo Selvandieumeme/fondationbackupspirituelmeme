@@ -44,8 +44,7 @@ const agentsFOBAS = {
 
 
 
-function loadDept(dept) {
-  const container = document.getElementById("agentsContainer");
+function loadDept(dept, container) {
   container.innerHTML = "";
 
   if (!agentsFOBAS[dept] || agentsFOBAS[dept].length === 0) {
@@ -53,7 +52,6 @@ function loadDept(dept) {
     return;
   }
 
-  // Chak blok
   agentsFOBAS[dept].forEach((blocAgents, indexBloc) => {
     const blockDiv = document.createElement("div");
     blockDiv.className = "agents-block";
@@ -76,5 +74,3 @@ function loadDept(dept) {
     container.appendChild(blockDiv);
   });
 }
-  // Ajouter tous lòt 8 depatman menm jan ak 5 blok
-};
