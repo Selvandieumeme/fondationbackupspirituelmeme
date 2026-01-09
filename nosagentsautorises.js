@@ -36,7 +36,7 @@ function openDeptFOBAS(departement) {
     } else {
         console.error("Fonksyon loadDept pa defini nan nosagentsfobas.js");
     }
-}, 100ms);
+}, 100);
       
     })
     .catch(err => {
