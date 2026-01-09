@@ -19,8 +19,7 @@ const agentsFOBAS = {
       { nom: "Agent O2-3", email: "o2-3@walletfobas.com", adresse: "Ouest 8", whatsapp: "5090000012", services: ["Transfert"], photos:["agents/o8-1.jpg","agents/o8-2.jpg","agents/o8-3.jpg","agents/o8-4.jpg","agents/o8-5.jpg"] },
       { nom: "Agent O2-4", email: "o2-4@walletfobas.com", adresse: "Ouest 9", whatsapp: "5090000013", services: ["Dépôt","Retrait"], photos:["agents/o9-1.jpg","agents/o9-2.jpg","agents/o9-3.jpg","agents/o9-4.jpg","agents/o9-5.jpg"] },
       { nom: "Agent O2-5", email: "o2-5@walletfobas.com", adresse: "Ouest 10", whatsapp: "5090000014", services: ["Transfert","Retrait"], photos:["agents/o10-1.jpg","agents/o10-2.jpg","agents/o10-3.jpg","agents/o10-4.jpg","agents/o10-5.jpg"] }
-    ],
-    // Bloc 3,4,5 ... ajouter selon besoin
+    ]
   ],
 
   "Nord-Ouest": [
@@ -31,20 +30,20 @@ const agentsFOBAS = {
       { nom: "Agent N1-3", email: "n1-3@walletfobas.com", adresse: "Nord-Ouest 3", whatsapp: "5091000003", services: ["Transfert"], photos:["agents/n3-1.jpg","agents/n3-2.jpg","agents/n3-3.jpg","agents/n3-4.jpg","agents/n3-5.jpg"] },
       { nom: "Agent N1-4", email: "n1-4@walletfobas.com", adresse: "Nord-Ouest 4", whatsapp: "5091000004", services: ["Dépôt","Retrait"], photos:["agents/n4-1.jpg","agents/n4-2.jpg","agents/n4-3.jpg","agents/n4-4.jpg","agents/n4-5.jpg"] },
       { nom: "Agent N1-5", email: "n1-5@walletfobas.com", adresse: "Nord-Ouest 5", whatsapp: "5091000005", services: ["Transfert","Retrait"], photos:["agents/n5-1.jpg","agents/n5-2.jpg","agents/n5-3.jpg","agents/n5-4.jpg","agents/n5-5.jpg"] }
-    ],
-    // Bloc 2,3,4,5 ...
-  ],
+    ]
+  ]
+};
 
-
-
-
-
-
-
-
-
+// =======================
+// FONKSYON POU CHAJÉ AGENTS NAN DOM
+// =======================
 
 function loadDept(dept, container) {
+  if (!container) {
+    console.error("Erreur: container pa defini pou loadDept");
+    return;
+  }
+
   container.innerHTML = "";
 
   if (!agentsFOBAS[dept] || agentsFOBAS[dept].length === 0) {
