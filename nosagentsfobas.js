@@ -25,7 +25,7 @@ const agentsFOBAS = {
   "Nord-Ouest": [
     // Bloc 1
     [
-      { nom: "Agent O1-1", email: "o1-1@walletfobas.com", adresse: "Nord-Ouest 1", whatsapp: "5090000001", services: ["Dépôt"], photos:["agents/o1-1.jpg","agents/o1-2.jpg","agents/o1-3.jpg","agents/o1-4.jpg","agents/o1-5.jpg"] },
+      { nom: "M. MEME Selvandieu", email: "memeselvandieu@fobas.com", adresse: "Rue la Paix, Mare-Rouge", whatsapp: "50946057952", services: ["Dépôt"], photos:["MEMESEL.jpg"] },
       { nom: "Agent O1-2", email: "o1-2@walletfobas.com", adresse: "Nord-Ouest 2", whatsapp: "5090000002", services: ["Retrait"], photos:["agents/o2-1.jpg","agents/o2-2.jpg","agents/o2-3.jpg","agents/o2-4.jpg","agents/o2-5.jpg"] },
       { nom: "Agent O1-3", email: "o1-3@walletfobas.com", adresse: "Nord-Ouest 3", whatsapp: "5090000003", services: ["Transfert"], photos:["agents/o3-1.jpg","agents/o3-2.jpg","agents/o3-3.jpg","agents/o3-4.jpg","agents/o3-5.jpg"] },
       { nom: "Agent O1-4", email: "o1-4@walletfobas.com", adresse: "Nord-Ouest 4", whatsapp: "5090000004", services: ["Dépôt","Retrait"], photos:["agents/o4-1.jpg","agents/o4-2.jpg","agents/o4-3.jpg","agents/o4-4.jpg","agents/o4-5.jpg"] },
