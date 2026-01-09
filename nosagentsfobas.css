@@ -85,3 +85,31 @@ body {
   border-radius: 20px;
   text-decoration: none;
 }
+
+
+
+
+
+
+
+.agents-block {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap; /* si ekran piti yo desann nan nouvo liy */
+}
+
+.agent-card {
+  max-width: 180px; /* gwosè blòk pwofesyonèl */
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 10px;
+  text-align: center;
+  background-color: #f9f9f9;
+}
+
+.agent-card img {
+  width: 100%;
+  height: auto;
+  border-radius: 5px;
+  margin-bottom: 8px;
+}
