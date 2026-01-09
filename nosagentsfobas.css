@@ -1,25 +1,20 @@
 /* ===== ZONE AGENTS ===== */
 
-.agents-grid {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr); /* 5 agents par ligne */
-  gap: 15px;          /* espas ant chak card */
-  padding: 0;          /* retire padding ki kraze layout */
-}
-
 .agents-block {
   margin-bottom: 35px;
+  max-width: 1000px; /* limite lajè total kad la pou 5 cards */
 }
 
-/* ===== CARD AGENT ===== */
+.agents-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr); /* 5 foto pa liy */
+  gap: 15px;
+  justify-content: start; /* fòse yo rete sou bo gòch */
+  padding: 0; /* retire padding ki fè grid la pran plis espas */
+}
 
 .agent-card {
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 6px 18px rgba(0,0,0,0.12);
-  padding: 12px;
-  text-align: center;
-  width: 100%;          /* trè enpòtan pou grid respekte 5 kolòn */
+  width: 100%; /* pran tout width nan kolòn li men pa depase kad la */
   box-sizing: border-box;
 }
 /* Photo agent */
