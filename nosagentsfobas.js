@@ -208,7 +208,9 @@ function loadDept(dept, container) {
 
     blocAgents.forEach(agent => {
   // pran sèlman premye foto chak agent
-  const photo = agent.photos[0] || "default.jpg"; // default si pa gen foto
+  let photo = agent.photos && agent.photos.length
+  ? agent.photos[0]
+  : "agents/placeholder.jpg";
 
   blockDiv.innerHTML += `
     <div class="agent-card">
