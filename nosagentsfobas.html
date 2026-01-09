@@ -1,37 +1,25 @@
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-  <meta charset="UTF-8">
-  <title>Agents Autorisés | Wallet FOBAS</title>
-  <link rel="stylesheet" href="nosagentsfobas.css">
-</head>
-<body>
+<!-- ======================================================
+     NOS AGENTS FOBAS — VUE DYNAMIQUE (PARTIAL)
+     Cette page est chargée dynamiquement dans
+     nosagentsautorises.html — AUCUNE REDIRECTION
+====================================================== -->
 
-<header class="header">
-  <h1>Agents Autorisés Wallet FOBAS</h1>
-  <p>Réseau officiel d’agents sur tout le territoire haïtien</p>
-</header>
+<section class="agents-fobas-wrapper">
 
-<section class="departements">
-  <h2>Choisissez votre département</h2>
-  <div class="dept-buttons">
-    <button onclick="loadDept('Ouest')">Ouest</button>
-    <button onclick="loadDept('Nord-Ouest')">Nord-Ouest</button>
-    <button onclick="loadDept('Nord')">Nord</button>
-    <button onclick="loadDept('Artibonite')">Artibonite</button>
-    <button onclick="loadDept('Centre')">Centre</button>
-    <button onclick="loadDept('Nord-Est')">Nord-Est</button>
-    <button onclick="loadDept('Sud')">Sud</button>
-    <button onclick="loadDept('Sud-Est')">Sud-Est</button>
-    <button onclick="loadDept('Nippes')">Nippes</button>
-    <button onclick="loadDept('Grand-Anse')">Grand-Anse</button>
+  <!-- Titre dynamique du département -->
+  <div class="agents-header">
+    <h2 id="agentsDeptTitle">Agents Autorisés</h2>
+    <p class="agents-subtitle">
+      Liste officielle des agents Wallet FOBAS pour ce département
+    </p>
   </div>
-</section>
 
-<section id="agentsContainer" class="agents-container">
-  <!-- Agents chargés dynamiquement -->
-</section>
+  <!-- Grille des agents -->
+  <div id="agentsContainer" class="agents-grid">
+    <!-- Les cartes agents sont injectées ici via JS -->
+  </div>
 
-<script src="nosagentsfobas.js"></script>
-</body>
-</html>
+  <!-- Message état (vide / chargement / erreur) -->
+  <div id="agentsStatus" class="agents-status"></div>
+
+</section>
