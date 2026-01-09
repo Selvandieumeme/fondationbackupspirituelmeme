@@ -189,12 +189,9 @@ const agentsFOBAS = {
 // =======================
 
 function loadDept(dept, container) {
-  if (!container) {
-    console.error("Erreur: container pa defini pou loadDept");
-    return;
-  }
+  if (!container) return console.error("Container pa defini");
 
-  container.innerHTML = "";
+  container.innerHTML = ""; // reset container
 
   if (!agentsFOBAS[dept] || agentsFOBAS[dept].length === 0) {
     container.innerHTML = `<p>Aucun agent disponible pour ${dept}</p>`;
@@ -205,32 +202,35 @@ function loadDept(dept, container) {
     const blockDiv = document.createElement("div");
     blockDiv.className = "agents-block";
 
-    blockDiv.innerHTML = `
-      <h3 class="bloc-title">Bloc ${indexBloc + 1}</h3>
-      <div class="agents-grid">
-      </div>
-    `;
-
-    const grid = blockDiv.querySelector(".agents-grid");
+    // kreye grid pou chak bloc
+    const gridDiv = document.createElement("div");
+    gridDiv.className = "agents-grid";
 
     blocAgents.forEach(agent => {
       let photo = agent.photos && agent.photos.length
         ? agent.photos[0]
-        : "agents/placeholder.jpg";
+        : "agents/placeholder.jpg"; // fallback si pa gen imaj
 
-      grid.innerHTML += `
+      const cardHTML = `
         <div class="agent-card">
-          <img src="${photo}" alt="${agent.nom}">
-          <h4>${agent.nom}</h4>
-          <p>${agent.adresse}</p>
-          <small>${agent.services.join(" • ")}</small>
+          <img src="${photo}" alt="${agent.nom}" onerror="this.src='agents/placeholder.jpg';">
+          <div class="agent-name">${agent.nom}</div>
+          <div class="agent-address">${agent.adresse}</div>
+          <div class="services">Services: ${agent.services.join(" • ")}</div>
           <a class="whatsapp" href="https://wa.me/${agent.whatsapp}" target="_blank">
             WhatsApp
           </a>
         </div>
       `;
+
+      gridDiv.innerHTML += cardHTML;
     });
 
+    blockDiv.appendChild(gridDiv);
     container.appendChild(blockDiv);
   });
-} // <-- ISI NOU FÈMEN loadDept
+}
+
+// Egzanp: chaje li nan container ki deja egziste nan HTML
+const container = document.getElementById("agentsContainer");
+loadDept("Ouest", container);
