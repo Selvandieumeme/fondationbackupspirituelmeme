@@ -65,19 +65,20 @@ function loadDept(dept, container) {
     blockDiv.innerHTML = `<h3>Bloc ${indexBloc + 1}</h3>`;
 
     blocAgents.forEach(agent => {
-      const photosHTML = agent.photos.map(p => `<img src="${p}" alt="${agent.nom}">`).join("");
-      blockDiv.innerHTML += `
-        <div class="agent-card">
-          <div class="agent-name">${agent.nom}</div>
-          <div class="agent-email">📧 <a href="mailto:${agent.email}">${agent.email}</a></div>
-          <div class="agent-address">${agent.adresse}</div>
-          <div class="photos">${photosHTML}</div>
-          <div class="services">Services : ${agent.services.join(" • ")}</div>
-          <a class="whatsapp" href="https://wa.me/${agent.whatsapp}" target="_blank">Contacter via WhatsApp</a>
-        </div>
-      `;
-    });
+  // pran sèlman premye foto chak agent
+  const photo = agent.photos[0] || "default.jpg"; // default si pa gen foto
 
+  blockDiv.innerHTML += `
+    <div class="agent-card">
+      <img src="${photo}" alt="${agent.nom}">
+      <div class="agent-name">${agent.nom}</div>
+      <div class="agent-email">📧 <a href="mailto:${agent.email}">${agent.email}</a></div>
+      <div class="agent-address">${agent.adresse}</div>
+      <div class="services">Services : ${agent.services.join(" • ")}</div>
+      <a class="whatsapp" href="https://wa.me/${agent.whatsapp}" target="_blank">Contacter via WhatsApp</a>
+    </div>
+  `;
+});
     container.appendChild(blockDiv);
   });
 }
