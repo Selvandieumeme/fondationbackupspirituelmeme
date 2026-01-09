@@ -3,43 +3,185 @@
 // =======================
 
 const agentsFOBAS = {
-  "Ouest": [
-    // Bloc 1
-    [
-      { nom: "Agent O1-1", email: "o1-1@walletfobas.com", adresse: "Ouest 1", whatsapp: "5090000001", services: ["Dépôt"], photos:["agents/o1-1.jpg","agents/o1-2.jpg","agents/o1-3.jpg","agents/o1-4.jpg","agents/o1-5.jpg"] },
-      { nom: "Agent O1-2", email: "o1-2@walletfobas.com", adresse: "Ouest 2", whatsapp: "5090000002", services: ["Retrait"], photos:["agents/o2-1.jpg","agents/o2-2.jpg","agents/o2-3.jpg","agents/o2-4.jpg","agents/o2-5.jpg"] },
-      { nom: "Agent O1-3", email: "o1-3@walletfobas.com", adresse: "Ouest 3", whatsapp: "5090000003", services: ["Transfert"], photos:["agents/o3-1.jpg","agents/o3-2.jpg","agents/o3-3.jpg","agents/o3-4.jpg","agents/o3-5.jpg"] },
-      { nom: "Agent O1-4", email: "o1-4@walletfobas.com", adresse: "Ouest 4", whatsapp: "5090000004", services: ["Dépôt","Retrait"], photos:["agents/o4-1.jpg","agents/o4-2.jpg","agents/o4-3.jpg","agents/o4-4.jpg","agents/o4-5.jpg"] },
-      { nom: "Agent O1-5", email: "o1-5@walletfobas.com", adresse: "Ouest 5", whatsapp: "5090000005", services: ["Transfert","Retrait"], photos:["agents/o5-1.jpg","agents/o5-2.jpg","agents/o5-3.jpg","agents/o5-4.jpg","agents/o5-5.jpg"] }
-    ],
-    // Bloc 2
-    [
-      { nom: "Agent O2-1", email: "o2-1@walletfobas.com", adresse: "Ouest 6", whatsapp: "5090000010", services: ["Dépôt"], photos:["agents/o6-1.jpg","agents/o6-2.jpg","agents/o6-3.jpg","agents/o6-4.jpg","agents/o6-5.jpg"] },
-      { nom: "Agent O2-2", email: "o2-2@walletfobas.com", adresse: "Ouest 7", whatsapp: "5090000011", services: ["Retrait"], photos:["agents/o7-1.jpg","agents/o7-2.jpg","agents/o7-3.jpg","agents/o7-4.jpg","agents/o7-5.jpg"] },
-      { nom: "Agent O2-3", email: "o2-3@walletfobas.com", adresse: "Ouest 8", whatsapp: "5090000012", services: ["Transfert"], photos:["agents/o8-1.jpg","agents/o8-2.jpg","agents/o8-3.jpg","agents/o8-4.jpg","agents/o8-5.jpg"] },
-      { nom: "Agent O2-4", email: "o2-4@walletfobas.com", adresse: "Ouest 9", whatsapp: "5090000013", services: ["Dépôt","Retrait"], photos:["agents/o9-1.jpg","agents/o9-2.jpg","agents/o9-3.jpg","agents/o9-4.jpg","agents/o9-5.jpg"] },
-      { nom: "Agent O2-5", email: "o2-5@walletfobas.com", adresse: "Ouest 10", whatsapp: "5090000014", services: ["Transfert","Retrait"], photos:["agents/o10-1.jpg","agents/o10-2.jpg","agents/o10-3.jpg","agents/o10-4.jpg","agents/o10-5.jpg"] }
-    ]
+  "Nord-Ouest": [
+  // Bloc 1
+  [
+    {
+      nom: "M. MEME Selvandieu",
+      email: "memeselvandieu@fobas.com",
+      adresse: "Rue la Paix, Mare-Rouge",
+      whatsapp: "50946057952",
+      services: ["Dépôt"],
+      photos: ["MEMESEL.jpg"]
+    },
+    {
+      nom: "Agent O1-2",
+      email: "o1-2@walletfobas.com",
+      adresse: "Nord-Ouest 2",
+      whatsapp: "5090000002",
+      services: ["Retrait"],
+      photos: ["agents/o2-1.jpg"]
+    },
+    {
+      nom: "Agent O1-3",
+      email: "o1-3@walletfobas.com",
+      adresse: "Nord-Ouest 3",
+      whatsapp: "5090000003",
+      services: ["Transfert"],
+      photos: ["agents/o3-1.jpg"]
+    },
+    {
+      nom: "Agent O1-4",
+      email: "o1-4@walletfobas.com",
+      adresse: "Nord-Ouest 4",
+      whatsapp: "5090000004",
+      services: ["Dépôt", "Retrait"],
+      photos: ["agents/o4-1.jpg"]
+    },
+    {
+      nom: "Agent O1-5",
+      email: "o1-5@walletfobas.com",
+      adresse: "Nord-Ouest 5",
+      whatsapp: "5090000005",
+      services: ["Transfert", "Retrait"],
+      photos: ["agents/o5-1.jpg"]
+    }
   ],
 
+  // Bloc 2
+  [
+    {
+      nom: "Agent O2-1",
+      email: "o2-1@walletfobas.com",
+      adresse: "Nord-Ouest 6",
+      whatsapp: "5090000010",
+      services: ["Dépôt"],
+      photos: ["agents/o6-1.jpg"]
+    },
+    {
+      nom: "Agent O2-2",
+      email: "o2-2@walletfobas.com",
+      adresse: "Nord-Ouest 7",
+      whatsapp: "5090000011",
+      services: ["Retrait"],
+      photos: ["agents/o7-1.jpg"]
+    },
+    {
+      nom: "Agent O2-3",
+      email: "o2-3@walletfobas.com",
+      adresse: "Nord-Ouest 8",
+      whatsapp: "5090000012",
+      services: ["Transfert"],
+      photos: ["agents/o8-1.jpg"]
+    },
+    {
+      nom: "Agent O2-4",
+      email: "o2-4@walletfobas.com",
+      adresse: "Nord-Ouest 9",
+      whatsapp: "5090000013",
+      services: ["Dépôt", "Retrait"],
+      photos: ["agents/o9-1.jpg"]
+    },
+    {
+      nom: "Agent O2-5",
+      email: "o2-5@walletfobas.com",
+      adresse: "Nord-Ouest 10",
+      whatsapp: "5090000014",
+      services: ["Transfert", "Retrait"],
+      photos: ["agents/o10-1.jpg"]
+    }
+  ]
+],
+
   "Nord-Ouest": [
-    // Bloc 1
-    [
-      { nom: "M. MEME Selvandieu", email: "memeselvandieu@fobas.com", adresse: "Rue la Paix, Mare-Rouge", whatsapp: "50946057952", services: ["Dépôt"], photos:["MEMESEL.jpg"] },
-      { nom: "Agent O1-2", email: "o1-2@walletfobas.com", adresse: "Nord-Ouest 2", whatsapp: "5090000002", services: ["Retrait"], photos:["agents/o2-1.jpg","agents/o2-2.jpg","agents/o2-3.jpg","agents/o2-4.jpg","agents/o2-5.jpg"] },
-      { nom: "Agent O1-3", email: "o1-3@walletfobas.com", adresse: "Nord-Ouest 3", whatsapp: "5090000003", services: ["Transfert"], photos:["agents/o3-1.jpg","agents/o3-2.jpg","agents/o3-3.jpg","agents/o3-4.jpg","agents/o3-5.jpg"] },
-      { nom: "Agent O1-4", email: "o1-4@walletfobas.com", adresse: "Nord-Ouest 4", whatsapp: "5090000004", services: ["Dépôt","Retrait"], photos:["agents/o4-1.jpg","agents/o4-2.jpg","agents/o4-3.jpg","agents/o4-4.jpg","agents/o4-5.jpg"] },
-      { nom: "Agent O1-5", email: "o1-5@walletfobas.com", adresse: "Nord-Ouest 5", whatsapp: "5090000005", services: ["Transfert","Retrait"], photos:["agents/o5-1.jpg","agents/o5-2.jpg","agents/o5-3.jpg","agents/o5-4.jpg","agents/o5-5.jpg"] }
-    ],
-    // Bloc 2
-    [
-      { nom: "Agent O2-1", email: "o2-1@walletfobas.com", adresse: "Nord-Ouest 6", whatsapp: "5090000010", services: ["Dépôt"], photos:["agents/o6-1.jpg","agents/o6-2.jpg","agents/o6-3.jpg","agents/o6-4.jpg","agents/o6-5.jpg"] },
-      { nom: "Agent O2-2", email: "o2-2@walletfobas.com", adresse: "Nord-Ouest 7", whatsapp: "5090000011", services: ["Retrait"], photos:["agents/o7-1.jpg","agents/o7-2.jpg","agents/o7-3.jpg","agents/o7-4.jpg","agents/o7-5.jpg"] },
-      { nom: "Agent O2-3", email: "o2-3@walletfobas.com", adresse: "Nord-Ouest 8", whatsapp: "5090000012", services: ["Transfert"], photos:["agents/o8-1.jpg","agents/o8-2.jpg","agents/o8-3.jpg","agents/o8-4.jpg","agents/o8-5.jpg"] },
-      { nom: "Agent O2-4", email: "o2-4@walletfobas.com", adresse: "Nord-Ouest 9", whatsapp: "5090000013", services: ["Dépôt","Retrait"], photos:["agents/o9-1.jpg","agents/o9-2.jpg","agents/o9-3.jpg","agents/o9-4.jpg","agents/o9-5.jpg"] },
-      { nom: "Agent O2-5", email: "o2-5@walletfobas.com", adresse: "Nord-Ouest 10", whatsapp: "5090000014", services: ["Transfert","Retrait"], photos:["agents/o10-1.jpg","agents/o10-2.jpg","agents/o10-3.jpg","agents/o10-4.jpg","agents/o10-5.jpg"] }
-    ]
+  // Bloc 1
+  [
+    {
+      nom: "M. MEME Selvandieu",
+      email: "memeselvandieu@fobas.com",
+      adresse: "Rue la Paix, Mare-Rouge",
+      whatsapp: "50946057952",
+      services: ["Dépôt"],
+      photos: ["MEMESEL.jpg"]
+    },
+    {
+      nom: "Agent O1-2",
+      email: "o1-2@walletfobas.com",
+      adresse: "Nord-Ouest 2",
+      whatsapp: "5090000002",
+      services: ["Retrait"],
+      photos: ["agents/o2-1.jpg"]
+    },
+    {
+      nom: "Agent O1-3",
+      email: "o1-3@walletfobas.com",
+      adresse: "Nord-Ouest 3",
+      whatsapp: "5090000003",
+      services: ["Transfert"],
+      photos: ["agents/o3-1.jpg"]
+    },
+    {
+      nom: "Agent O1-4",
+      email: "o1-4@walletfobas.com",
+      adresse: "Nord-Ouest 4",
+      whatsapp: "5090000004",
+      services: ["Dépôt", "Retrait"],
+      photos: ["agents/o4-1.jpg"]
+    },
+    {
+      nom: "Agent O1-5",
+      email: "o1-5@walletfobas.com",
+      adresse: "Nord-Ouest 5",
+      whatsapp: "5090000005",
+      services: ["Transfert", "Retrait"],
+      photos: ["agents/o5-1.jpg"]
+    }
   ],
+
+  // Bloc 2
+  [
+    {
+      nom: "Agent O2-1",
+      email: "o2-1@walletfobas.com",
+      adresse: "Nord-Ouest 6",
+      whatsapp: "5090000010",
+      services: ["Dépôt"],
+      photos: ["agents/o6-1.jpg"]
+    },
+    {
+      nom: "Agent O2-2",
+      email: "o2-2@walletfobas.com",
+      adresse: "Nord-Ouest 7",
+      whatsapp: "5090000011",
+      services: ["Retrait"],
+      photos: ["agents/o7-1.jpg"]
+    },
+    {
+      nom: "Agent O2-3",
+      email: "o2-3@walletfobas.com",
+      adresse: "Nord-Ouest 8",
+      whatsapp: "5090000012",
+      services: ["Transfert"],
+      photos: ["agents/o8-1.jpg"]
+    },
+    {
+      nom: "Agent O2-4",
+      email: "o2-4@walletfobas.com",
+      adresse: "Nord-Ouest 9",
+      whatsapp: "5090000013",
+      services: ["Dépôt", "Retrait"],
+      photos: ["agents/o9-1.jpg"]
+    },
+    {
+      nom: "Agent O2-5",
+      email: "o2-5@walletfobas.com",
+      adresse: "Nord-Ouest 10",
+      whatsapp: "5090000014",
+      services: ["Transfert", "Retrait"],
+      photos: ["agents/o10-1.jpg"]
+    }
+  ]
+],
 };
 
 // =======================
