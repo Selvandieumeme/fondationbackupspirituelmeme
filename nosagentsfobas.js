@@ -202,35 +202,35 @@ function loadDept(dept, container) {
   }
 
   agentsFOBAS[dept].forEach((blocAgents, indexBloc) => {
-  const blockDiv = document.createElement("div");
-  blockDiv.className = "agents-block";
+    const blockDiv = document.createElement("div");
+    blockDiv.className = "agents-block";
 
-  blockDiv.innerHTML = `
-    <h3 class="bloc-title">Bloc ${indexBloc + 1}</h3>
-    <div class="agents-grid">
-    </div>
-  `;
-
-  const grid = blockDiv.querySelector(".agents-grid");
-
-  blocAgents.forEach(agent => {
-    let photo = agent.photos && agent.photos.length
-      ? agent.photos[0]
-      : "agents/placeholder.jpg";
-
-    grid.innerHTML += `
-      <div class="agent-card">
-        <img src="${photo}" alt="${agent.nom}">
-        <h4>${agent.nom}</h4>
-        <p>${agent.adresse}</p>
-        <small>${agent.services.join(" • ")}</small>
-        <a class="whatsapp" href="https://wa.me/${agent.whatsapp}" target="_blank">
-          WhatsApp
-        </a>
+    blockDiv.innerHTML = `
+      <h3 class="bloc-title">Bloc ${indexBloc + 1}</h3>
+      <div class="agents-grid">
       </div>
     `;
-  });
 
-  container.appendChild(blockDiv);
-});
-} // <-- Fèmen fonksyon loadDept
+    const grid = blockDiv.querySelector(".agents-grid");
+
+    blocAgents.forEach(agent => {
+      let photo = agent.photos && agent.photos.length
+        ? agent.photos[0]
+        : "agents/placeholder.jpg";
+
+      grid.innerHTML += `
+        <div class="agent-card">
+          <img src="${photo}" alt="${agent.nom}">
+          <h4>${agent.nom}</h4>
+          <p>${agent.adresse}</p>
+          <small>${agent.services.join(" • ")}</small>
+          <a class="whatsapp" href="https://wa.me/${agent.whatsapp}" target="_blank">
+            WhatsApp
+          </a>
+        </div>
+      `;
+    });
+
+    container.appendChild(blockDiv);
+  });
+} // <-- ISI NOU FÈMEN loadDept
