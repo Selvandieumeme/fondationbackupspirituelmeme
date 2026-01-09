@@ -1,115 +1,63 @@
-body {
-  margin: 0;
-  font-family: "Segoe UI", Arial, sans-serif;
-  background: #f4f6f9;
-}
+/* ===== ZONE AGENTS ===== */
 
-.header {
-  background: linear-gradient(90deg, #0056ff, #ffd700);
-  color: white;
-  text-align: center;
-  padding: 35px 20px;
-}
-
-.departements {
-  background: white;
-  padding: 25px;
-  text-align: center;
-}
-
-.dept-buttons button {
-  margin: 6px;
-  padding: 10px 18px;
-  border-radius: 25px;
-  border: none;
-  background: #0056ff;
-  color: white;
-  cursor: pointer;
-}
-
-.dept-buttons button:hover {
-  background: #ffd700;
-  color: black;
-}
-
-.agents-container {
+.agents-grid {
   padding: 30px;
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
-  gap: 25px;
 }
-
-.agent-card {
-  background: white;
-  border-radius: 18px;
-  box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-  padding: 18px;
-}
-
-.agent-name {
-  font-size: 20px;
-  font-weight: bold;
-  color: #0056ff;
-}
-
-.agent-address {
-  font-size: 14px;
-  color: #555;
-}
-
-.photos {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 6px;
-  margin: 12px 0;
-}
-
-.photos img {
-  width: 100%;
-  height: 90px;
-  object-fit: cover;
-  border-radius: 10px;
-}
-
-.services {
-  font-size: 14px;
-  margin-top: 10px;
-}
-
-.whatsapp {
-  display: inline-block;
-  margin-top: 12px;
-  background: #25d366;
-  color: white;
-  padding: 8px 14px;
-  border-radius: 20px;
-  text-decoration: none;
-}
-
-
-
-
-
-
 
 .agents-block {
   display: flex;
   gap: 20px;
-  flex-wrap: wrap; /* si ekran piti yo desann nan nouvo liy */
+  flex-wrap: wrap;
+  margin-bottom: 35px;
 }
+
+/* ===== CARD AGENT ===== */
 
 .agent-card {
-  max-width: 180px; /* gwosè blòk pwofesyonèl */
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  padding: 10px;
+  width: 180px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.12);
+  padding: 12px;
   text-align: center;
-  background-color: #f9f9f9;
 }
 
+/* Photo agent */
 .agent-card img {
   width: 100%;
-  height: auto;
-  border-radius: 5px;
-  margin-bottom: 8px;
+  height: 130px;
+  object-fit: cover;
+  border-radius: 8px;
+  margin-bottom: 10px;
+}
+
+/* Infos agent */
+.agent-name {
+  font-size: 15px;
+  font-weight: bold;
+  color: #0056ff;
+}
+
+.agent-email,
+.agent-address {
+  font-size: 13px;
+  color: #555;
+  margin-top: 4px;
+}
+
+.services {
+  font-size: 13px;
+  margin-top: 6px;
+}
+
+/* Bouton WhatsApp */
+.whatsapp {
+  display: inline-block;
+  margin-top: 10px;
+  background: #25d366;
+  color: white;
+  padding: 6px 12px;
+  border-radius: 18px;
+  font-size: 13px;
+  text-decoration: none;
 }
