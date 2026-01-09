@@ -202,9 +202,15 @@ function loadDept(dept, container) {
     const blockDiv = document.createElement("div");
     blockDiv.className = "agents-block";
 
-    // kreye grid pou chak bloc
+    // Tit blòk (opsyonèl)
+    const title = document.createElement("h3");
+    title.textContent = `Bloc ${indexBloc + 1}`;
+    blockDiv.appendChild(title);
+
+    // Kreye grid pou chak blòk (5 kolòn fiks)
     const gridDiv = document.createElement("div");
     gridDiv.className = "agents-grid";
+    gridDiv.style.gridTemplateColumns = "repeat(5, 1fr)"; // fòse 5 kolòn pa liy
 
     blocAgents.forEach(agent => {
       let photo = agent.photos && agent.photos.length
