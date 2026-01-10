@@ -426,12 +426,12 @@ const faqData = [
 {
   category: "securite",
   question: "Èske mwen ka itilize kont mwen sou plizyè telefòn ?",
-  answer: "Non. Yon sèl aparèy aktif otorize pou ranfòse sekirite."
+  answer: "Wi. Ou kapab itilize l sou nenpot aparey ki branch sou Entenet men pou plis sekirite nou konseye w itilize l sou yon sèl aparèy aktif otorize pou ranfòse sekirite."
 },
 {
   category: "securite",
   question: "Kisa pou m fè si gen koneksyon sispèk sou kont mwen ?",
-  answer: "Sistèm nan bloke aksè a epi li voye alèt imedyatman."
+  answer: "Avize assitantance nou an sa imedyatman konsa Sistèm nan ap bloke aksè a epi lap voye yon alèt imedyatman ba ou."
 },
 {
   category: "securite",
@@ -465,7 +465,7 @@ const faqData = [
 },
 {
   category: "securite",
-  question: "Kisa pou m fè si yo vòlè telefòn mwen ?",
+  question: "Kisa pou m fè si yo vòlè telefòn oubyen aparey mwen konn itilize platfom nan pou m monte sou Dashboard mwen an?",
   answer: "Kontakte support FOBAS imedyatman pou sekirize kont la."
 },
 {
