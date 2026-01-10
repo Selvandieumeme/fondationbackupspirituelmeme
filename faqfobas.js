@@ -1912,12 +1912,12 @@ const faqData = [
 {
   category: "conseiller_officiel",
   question: "Ki moun ki okipe post sa ?",
-  answer: "M. ERnson Appolon se sèl Conseiller Officiel Wallet FOBAS la."
+  answer: "M. Ernson Appolon se sèl Conseiller Officiel Wallet FOBAS la."
 },
 {
   category: "conseiller_officiel",
   question: "Ki wòl prensipal Conseiller Officiel la ?",
-  answer: "Bay konsèy fondateur yo, revize tout desizyon estratejik, ak siveye aplikasyon règleman sou tout post yo."
+  answer: "Bay konsèy a fondateur yo, revize tout desizyon estratejik, ak siveye aplikasyon règleman sou tout post yo."
 },
 {
   category: "conseiller_officiel",
@@ -1927,7 +1927,7 @@ const faqData = [
 {
   category: "conseiller_officiel",
   question: "Ki privilèj Conseiller Officiel genyen sou lòt post yo ?",
-  answer: "Li ka jwi privilèj nenpòt post tankou Manager National oswa lòt post espesyal, dapre bezwen konseye yo."
+  answer: "Li ka jwi privilèj nenpòt post tankou Manager National oswa lòt post espesyal, daprè bezwen konseye yo."
 },
 {
   category: "conseiller_officiel",
@@ -1942,7 +1942,7 @@ const faqData = [
 {
   category: "conseiller_officiel",
   question: "Ki relasyon li ak Superviseurs yo ?",
-  answer: "Li sipèvize yo konsèy estratejik, men li pa ka revoke yo, sa sèlman fondateurs ka fè."
+  answer: "Li sipèvize yo konsèy estratejik, men li pa ka revoke yo, sa sèlman fondateurs ka fè l'."
 },
 {
   category: "conseiller_officiel",
@@ -1987,7 +1987,7 @@ const faqData = [
 {
   category: "conseiller_officiel",
   question: "Kisa ki ka mennen li pèdi post sa ?",
-  answer: "Mank etik, move jere konsèy, oswa vyolasyon règleman platfòm la dapre desizyon fondateurs yo."
+  answer: "Mank etik, move konsèy, oswa vyolasyon règleman platfòm nan daprè desizyon fondateurs yo."
 },
 {
   category: "conseiller_officiel",
@@ -2149,7 +2149,7 @@ const faqData = [
 {
   category: "manager_national",
   question: "Kisa ki ka mennen Manager National pèdi post li ?",
-  answer: "Vyolasyon règleman, move jere operasyon, oswa aksyon kont entèè fondateurs yo."
+  answer: "Vyolasyon règleman, move jesyon operasyon, oswa aksyon kont enterè fondateurs yo."
 },
 {
   category: "manager_national",
@@ -2159,7 +2159,7 @@ const faqData = [
 {
   category: "manager_national",
   question: "Ki responsablite li nan rapò piblik ?",
-  answer: "Li ka prepare rapò pou Fondateurs yo men li pa fè deklarasyon ofisyèl san apwobasyon yo."
+  answer: "Li ka prepare rapò pou Fondateurs yo men li pa ka fè okenn deklarasyon ofisyèl san apwobasyon yo."
 },
 {
   category: "manager_national",
@@ -2208,7 +2208,7 @@ const faqData = [
 },
 {
   category: "manager_national",
-  question: "Ki limit li sou aksè sekre nan platfòm nan ?",
+  question: "Ki limit li sou aksè sekrè nan platfòm nan ?",
   answer: "Li ka wè done kritik pou analize, men li pa ka chanje règleman fondamantal oswa pran desizyon final."
 },
 {
