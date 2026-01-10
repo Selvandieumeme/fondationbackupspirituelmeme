@@ -1382,7 +1382,7 @@ const faqData = [
 {
   category: "utilisateurs",
   question: "Kijan pou m kreye yon kont itilizatè Wallet FOBAS ?",
-  answer: "Ale sou app oswa sit web, klike sou (Creer Compte Wallet FOBAS), apresa glise dwet jis nou rive sou gran fomile ki ekri an koule "vert", epi ranpli fom nan, chan apre chan, (Nom/Prenom), antre nan chan (Parrain/Marraine) ekzateman nom konple moun ki te envite w enskri a, antre (nimewo Whatsapp ou), (E-mail ou), re tape menm (E-mail la) nan 2em chan ki se (E-mail de recuperation), antre date de Naissance, (Lieu de Naissance), non (statut ou) vle a tankou Agent Autorise, epi byen antre (Mot de Passe ou), re tape l anko nan chan (confirmer mot de passe) e pou fini klike sou vouton (Creer mon compte Wallet FOBAS) tann kek segond epi wap resevwa yon mesaj ki d "Compte Wallet FOBAS ou a rive kreye avek siksè, li an koule vert."
+  answer: "Ale sou app oswa sit web, klike sou (Creer Compte Wallet FOBAS), apresa glise dwet jis nou rive sou gran fomile ki ekri an koule \"vert\", epi ranpli fom nan, chan apre chan, (Nom/Prenom), antre nan chan (Parrain/Marraine) ekzateman nom konple moun ki te envite w enskri a, antre (nimewo Whatsapp ou), (E-mail ou), re tape menm (E-mail la) nan 2em chan ki se (E-mail de recuperation), antre date de Naissance, (Lieu de Naissance), non (statut ou) vle a tankou Agent Autorise, epi byen antre (Mot de Passe ou), re tape l anko nan chan (confirmer mot de passe) e pou fini klike sou vouton (Creer mon compte Wallet FOBAS) tann kek segond epi wap resevwa yon mesaj ki d \"Compte Wallet FOBAS ou a rive kreye avek siksè, li an koule vert.\""
 },
 {
   category: "utilisateurs",
@@ -1442,7 +1442,7 @@ const faqData = [
 {
   category: "utilisateurs",
   question: "Kisa pou m fè si mwen bliye modpas mwen ?",
-  answer: " San pedi tan kontakte sistem asistan platfom nan pa Whatsapp kise +50946057952 pou w fe sin de sa oubyen itilize Email ofisyel Fondation FOBAS kise (infos@fondationbackupspirituel.com) pou w ka fe ekip la konn sa, konsa nap jis jenere yon nouvo mot de passe tanpore pou w ka gen akse anko avek Dashboard ou a, e de kew fin antre sou li, ale direkteman san pedi tan sou bouton (Changer mot de Passe), antre nouvo mot de passe tanpore nou sot jenere pou ou a, apresa antre nouvo mot de passe ou konnen w pap janm ka rive bliye nan vi w, apresa konfime nouvo mot de passe la apresa klike sou bouton (Modifier) epi nan kek segond wap jwenn yon mesaj ki di w mot de passe ou a rive chanje avek sikse."
+  answer: "San pedi tan kontakte sistem asistan platfom nan pa Whatsapp kise +50946057952 pou w fe sin de sa oubyen itilize Email ofisyel Fondation FOBAS kise (infos@fondationbackupspirituel.com) pou w ka fe ekip la konn sa, konsa nap jis jenere yon nouvo mot de passe tanpore pou w ka gen akse anko avek Dashboard ou a, e de kew fin antre sou li, ale direkteman san pedi tan sou bouton (Changer mot de Passe), antre nouvo mot de passe tanpore nou sot jenere pou ou a, apresa antre nouvo mot de passe ou konnen w pap janm ka rive bliye nan vi w, apresa konfime nouvo mot de passe la apresa klike sou bouton (Modifier) epi nan kek segond wap jwenn yon mesaj ki di w mot de passe ou a rive chanje avek sikse."
 },
 {
   category: "utilisateurs",
@@ -1533,7 +1533,7 @@ const faqData = [
   category: "utilisateurs",
   question: "Èske gen limit laj pou jwi sèvis yo ?",
   answer: "Wi. Itilizatè dwe gen omwen 18 an pou sèvi ak Wallet FOBAS."
-},  
+},
 
 // ================= MANB FONDATE YO (1–30) =================
 {
