@@ -1539,7 +1539,7 @@ const faqData = [
 {
   category: "fondateurs",
   question: "Ki moun ki fonde Wallet FOBAS ?",
-  answer: "Wallet FOBAS te fonde pa M. MEME Selvandieu ak Mme. MOISE Ranise."
+  answer: "Wallet FOBAS fonde pa M. MEME Selvandieu ak Mme. MOISE Ranise, an kolaborasyon ak plizye lot konpani komesyal entenasyonal depi an Ewop."
 },
 {
   category: "fondateurs",
@@ -1569,7 +1569,7 @@ const faqData = [
 {
   category: "fondateurs",
   question: "Ki wòl fondateur nan desizyon finansyè ?",
-  answer: "Yo apwouve tout tranzaksyon enpòtan, depans, ak distribisyon bonus."
+  answer: "Yo apwouve tout tranzaksyon enpòtan, depans, ak distribisyon Wallets epi bonus."
 },
 {
   category: "fondateurs",
