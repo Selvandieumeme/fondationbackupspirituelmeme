@@ -717,7 +717,7 @@ const faqData = [
 {
   category: "legalconformite",
   question: "Eske Wallet FOBAS legal nan peyi Ayiti ?",
-  answer: "Wi. Wallet FOBAS respekte tout règleman lokal yo epi opere avèk lisans finansye apwopriye."
+  answer: "Wi. Wallet FOBAS respekte tout règleman lokal yo epi opere avèk certificat finansye apwopriye."
 },
 {
   category: "legalconformite",
@@ -742,7 +742,7 @@ const faqData = [
 {
   category: "legalconformite",
   question: "Kijan Wallet FOBAS asire konfòmite ?",
-  answer: "Nou itilize kontwòl entènen, rapò regilye, ak siveyans aktivite itilizatè."
+  answer: "Nou itilize kontwòl entèn, rapò regilye, ak siveyans aktivite itilizatè."
 },
 {
   category: "legalconformite",
@@ -777,7 +777,7 @@ const faqData = [
 {
   category: "legalconformite",
   question: "Kijan itilizatè ka rapòte vyolasyon legal ?",
-  answer: "Sèvi ak bouton 'Rapòte' sou dashboard oswa kontakte support legal."
+  answer: "Sèvi ak bouton (Assistance 24/7) sou dashboard."
 },
 {
   category: "legalconformite",
