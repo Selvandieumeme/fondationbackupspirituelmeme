@@ -309,7 +309,7 @@ const faqData = [
   {
   category: "bonus",
   question: "Kisa bonus Wallet FOBAS ye ?",
-  answer: "Se rekonpans Wallet FOBAS bay itilizatè selon aktivite yo."
+  answer: "Se rekonpans Wallet FOBAS bay itilizatè ak tout manb kap travay anndan platfom nan selon aktivite yo."
 },
 {
   category: "bonus",
@@ -328,8 +328,8 @@ const faqData = [
 },
 {
   category: "bonus",
-  question: "Eske bonus transfèrable bay lòt moun ?",
-  answer: "Non. Bonus yo pa transfèrable."
+  question: "Eske bonus transfèrab bay lòt moun ?",
+  answer: "Non. Bonus yo pa transfèrab."
 },
 {
   category: "bonus",
@@ -364,7 +364,7 @@ const faqData = [
 {
   category: "general",
   question: "Kisa FAQ auto-apprenante ye ?",
-  answer: "Se FAQ ki evolye selon kestyon itilizatè yo."
+  answer: "Se FAQ ki evolye selon kesyon itilizatè yo."
 },
 {
   category: "general",
@@ -379,17 +379,17 @@ const faqData = [
 {
   category: "general",
   question: "Kijan pou kontakte support Wallet FOBAS ?",
-  answer: "Atravè WhatsApp oswa Email ofisyèl FOBAS."
+  answer: "Atravè WhatsApp oswa Email ofisyèl FOBAS kise (infos@fondationbackupspirituel.com) ak espas Assistance 24/7 depi Dashboard ou."
 },
 {
   category: "general",
   question: "Eske Wallet FOBAS legal ?",
-  answer: "Wi. Wallet FOBAS respekte règleman lokal yo."
+  answer: "Wi. Wallet FOBAS respekte règleman lokal yo e li se yon antite anndan Fondation Backup Spirituel (FOBAS) ki fe pati de tout (Services Intermediaires) nou yo."
 },
 {
   category: "general",
   question: "Eske Wallet FOBAS disponib nan tout Ayiti ?",
-  answer: "Wi. Atravè rezo agents autorisés."
+  answer: "Wi. Atravè rezo agents autorisés sou tout 10 depatman Haiti."
 },
 {
   category: "general",
@@ -399,7 +399,7 @@ const faqData = [
 {
   category: "general",
   question: "Kijan pou rapòte yon bug sou platfòm lan ?",
-  answer: "Kontakte support ak detay pwoblèm nan."
+  answer: "Kontakte support ak detay pwoblèm nan espas (Assistance 24/7) nou an."
 },
 {
   category: "general",
