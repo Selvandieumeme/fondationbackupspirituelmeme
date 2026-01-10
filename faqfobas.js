@@ -814,6 +814,878 @@ const faqData = [
   question: "Kisa itilizatè dwe konnen sou règleman sou done pèsonèl ?",
   answer: "Tout done pèsonèl yo trete selon lwa sou pwoteksyon done ak règleman konfidansyalite."
 },
+  
+// ================= ASSISTANCE 24/7 (1–20) =================
+{
+  category: "assistance",
+  question: "Kijan pou kontakte ekip support ?",
+  answer: "Sèvi ak bouton 'Assistance 24/7' sou dashboard ou oswa rele / WhatsApp ekip support."
+},
+{
+  category: "assistance",
+  question: "Èske support disponib tout lè ?",
+  answer: "Wi. Ekip support FOBAS disponib 24 sou 24, 7 jou sou 7."
+},
+{
+  category: "assistance",
+  question: "Kijan pou rapòte yon pwoblèm teknik ?",
+  answer: "Chwazi kategori pwoblèm nan dashboard, eksplike detay la, epi voye demann lan bay ekip support."
+},
+{
+  category: "assistance",
+  question: "Konbyen tan li pran pou jwenn repons ?",
+  answer: "Majorite demann yo reponn nan kèk minit. Ka pi konplike ka pran plis tan."
+},
+{
+  category: "assistance",
+  question: "Èske mwen ka voye dokiman pou verifye yon tranzaksyon ?",
+  answer: "Wi. Ou ka voye dokiman dirèkteman nan chat asistans pou konfimasyon."
+},
+{
+  category: "assistance",
+  question: "Kijan pou fè reklamasyon sou yon agent ?",
+  answer: "Sèvi ak bouton 'Rapòte agent' nan dashboard epi eksplike pwoblèm nan."
+},
+{
+  category: "assistance",
+  question: "Èske mwen ka pale ak menm ajan support la toujou ?",
+  answer: "Wi, sistèm ka konekte ou ak menm ajan si li disponib."
+},
+{
+  category: "assistance",
+  question: "Kisa pou m fè si mwen pa jwenn aksè nan kont mwen ?",
+  answer: "Klike sou 'Assistance 24/7', eksplike sitiyasyon an, epi ekip support ap ede ou rekipere kont la."
+},
+{
+  category: "assistance",
+  question: "Èske chat la an sekirite ?",
+  answer: "Wi. Tout mesaj yo chifreman epi konfidansyèl."
+},
+{
+  category: "assistance",
+  question: "Kijan pou m swiv demann mwen te voye ?",
+  answer: "Ou ka swiv tout demann ou yo nan seksyon 'Historique Support' sou dashboard la."
+},
+{
+  category: "assistance",
+  question: "Èske mwen ka fè plizyè demann an menm tan ?",
+  answer: "Wi, sistèm nan pèmèt plizyè demann, chak ap resevwa repons endepandan."
+},
+{
+  category: "assistance",
+  question: "Kijan pou m fè sijesyon pou platfòm nan ?",
+  answer: "Chwazi opsyon 'Sijesyon' nan chat epi voye ide ou a ekip support."
+},
+{
+  category: "assistance",
+  question: "Èske mwen ka mande asistans pou tranzaksyon echwe ?",
+  answer: "Wi, eksplike tranzaksyon an, nimewo agent, ak montan pou nou verifye."
+},
+{
+  category: "assistance",
+  question: "Ki jan yo jere kriz oswa pwoblèm imedyat ?",
+  answer: "Ekip central resevwa alèt imedyat epi pran aksyon pou rezoud pwoblèm nan rapidman."
+},
+{
+  category: "assistance",
+  question: "Èske gen limit pou kantite kesyon mwen ka poze ?",
+  answer: "Non, ou ka poze tout kesyon ou bezwen. Sistèm nan ap swiv chak demann."
+},
+{
+  category: "assistance",
+  question: "Kijan mwen ka jwenn repons pi rapid ?",
+  answer: "Bay detay egzak sou pwoblèm nan, bay nimewo kont oswa tranzaksyon si nesesè."
+},
+{
+  category: "assistance",
+  question: "Èske gen opsyon pou apèl vwa oswa videyo ?",
+  answer: "Wi, pou ka ijan, ekip support ka itilize apèl vwa oswa videyo sou demann itilizatè."
+},
+{
+  category: "assistance",
+  question: "Kisa pou m fè si gen erè sou balans mwen ?",
+  answer: "Voye demann atravè 'Assistance 24/7', bay tout detay, ekip ap verifye rapidman."
+},
+{
+  category: "assistance",
+  question: "Èske mwen ka fè demann soti nan mobil ak desktop ?",
+  answer: "Wi, chat asistans disponib sou tout aparèy konekte nan kont ou."
+},
+{
+  category: "assistance",
+  question: "Ki kalite sipò mwen ka jwenn ?",
+  answer: "Sipò teknik, finansye, kesyon sou sèvis, reklamasyon agent, ak sijesyon sou platfòm nan."
+},
+
+// ================= NOS 10 MANAGERS REGIONAUX (1–30) =================
+{
+  category: "managers",
+  question: "Kiyès ki yon Manager Régional nan Wallet FOBAS ?",
+  answer: "Se yon reprezantan ki jere operasyon nan yon depatman espesifik, sipèvize agent yo, epi asire sèvis yo kòrèk."
+},
+{
+  category: "managers",
+  question: "Konbyen Managers Régionaux genyen ?",
+  answer: "Gen 10 Managers, youn pou chak depatman prensipal nan peyi a."
+},
+{
+  category: "managers",
+  question: "Kisa ki tach prensipal yon Manager Régional ?",
+  answer: "Sipèvize agent yo, verifye tranzaksyon, rapòte pwoblèm, ak asire bon jan sèvis nan depatman an."
+},
+{
+  category: "managers",
+  question: "Èske yo jere tranzaksyon dirèkteman ?",
+  answer: "Non. Yo pa jere lajan itilizatè, men yo kontwole epi sipèvize agent yo."
+},
+{
+  category: "managers",
+  question: "Kijan nou chwazi yon Manager Régional ?",
+  answer: "Seleksyon fèt sou baz eksperyans, konpetans nan sèvis finansye, ak kredibilite."
+},
+{
+  category: "managers",
+  question: "Ki kritè pou yon moun ka vin Manager ?",
+  answer: "Fòk li gen eksperyans nan jesyon, konpreyansyon sèvis fintech, ak etik pwofesyonèl."
+},
+{
+  category: "managers",
+  question: "Èske yon Manager ka revoke ?",
+  answer: "Wi. Revokasyon fèt si gen vyolasyon règleman, fwod oswa pèfòmans ensifizan."
+},
+{
+  category: "managers",
+  question: "Kisa ki ka lakòz yon revokasyon ?",
+  answer: "Mank siveyans, abi pozisyon, fwod, oswa aksyon ki mete repitasyon FOBAS an danje."
+},
+{
+  category: "managers",
+  question: "Ki privilej yon Manager genyen ?",
+  answer: "Aksè a rapò depatman, sipèvizyon agent, validasyon operasyon, epi kowòdone ekip la."
+},
+{
+  category: "managers",
+  question: "Èske yon Manager ka modifye kont itilizatè ?",
+  answer: "Non, yo pa gen aksè sou kont itilizatè. Yo jere sèlman agent ak operasyon."
+},
+{
+  category: "managers",
+  question: "Ki jan yo rapòte bay siperyè yo ?",
+  answer: "Pa rapò regilye, rankont ak administrasyon santral, ak rapò dijital atravè dashboard."
+},
+{
+  category: "managers",
+  question: "Èske yo gen aksè a lajan nan depatman yo ?",
+  answer: "Non, tout lajan itilizatè rete anba kontwòl agent ak sistèm."
+},
+{
+  category: "managers",
+  question: "Ki jan yo verifye agent yo ?",
+  answer: "Atravè rapò tranzaksyon, vizit fizik, ak siveyans dijital."
+},
+{
+  category: "managers",
+  question: "Èske yo ka chanje politik platfòm nan ?",
+  answer: "Non. Yo suiv direktiv administrasyon santral la."
+},
+{
+  category: "managers",
+  question: "Kijan yo kolabore ak agent yo ?",
+  answer: "Pa rankont regilye, fòmasyon, ak sipèvizyon operasyonèl."
+},
+{
+  category: "managers",
+  question: "Èske yo ka pran desizyon finansye ?",
+  answer: "Se sèlman nan kad siveyans, pa pou desizyon sou lajan itilizatè."
+},
+{
+  category: "managers",
+  question: "Kisa yo dwe fè an ka fwod oswa erè agent ?",
+  answer: "Rapòte imedyatman bay administrasyon santral ak ekip legal."
+},
+{
+  category: "managers",
+  question: "Ki rapò yo dwe soumèt ?",
+  answer: "Rapò sou tranzaksyon, pèfòmans agent, ak pwoblèm operasyon."
+},
+{
+  category: "managers",
+  question: "Èske yo ka fè fòmasyon agent ?",
+  answer: "Wi. Yo òganize sesyon fòmasyon regilye pou ogmante efikasite ak konfòmite."
+},
+{
+  category: "managers",
+  question: "Èske yo ka jere konfli ant agent ?",
+  answer: "Wi. Yo medye nan konfli epi rapòte si nesesè."
+},
+{
+  category: "managers",
+  question: "Ki jan yo kontwole kalite sèvis ?",
+  answer: "Pa siveyans, analiz rapò, ak feedback kliyan yo."
+},
+{
+  category: "managers",
+  question: "Èske yo ka fè chanjman nan lis agent ?",
+  answer: "Non. Lis agent yo jere pa administrasyon santral."
+},
+{
+  category: "managers",
+  question: "Ki responsabilite legal yo genyen ?",
+  answer: "Asire tout operasyon nan depatman yo konfòm ak règleman FOBAS."
+},
+{
+  category: "managers",
+  question: "Ki kalite sipò yo bay administrasyon santral ?",
+  answer: "Rapò sou operasyon, fwod, pwogrè, ak bezwen depatman an."
+},
+{
+  category: "managers",
+  question: "Kijan yo swiv KPI ak objektif depatman ?",
+  answer: "Atravè dashboard espesyal ki montre pèfòmans agent ak tranzaksyon."
+},
+{
+  category: "managers",
+  question: "Èske yo ka delegue travay yo ?",
+  answer: "Wi, yo ka delegue nan agent otorize men rete responsab final."
+},
+{
+  category: "managers",
+  question: "Kijan yo jere kriz nan depatman ?",
+  answer: "Pran aksyon rapid, rapòte santral, ak kolabore ak ekip asistans."
+},
+{
+  category: "managers",
+  question: "Ki limit aksyon yo ?",
+  answer: "Yo pa gen aksè finansye, pa ka modifye kont itilizatè, epi pa ka chanje règleman platfòm."
+},
+{
+  category: "managers",
+  question: "Èske yo ka resevwa rekonpans oswa bonus ?",
+  answer: "Wi, sou pèfòmans depatman yo, dapre règleman administrasyon."
+},
+{
+  category: "managers",
+  question: "Ki jan yo kominike ak lòt Managers ?",
+  answer: "Pa rankont regilye, chat entèn, ak rapò dijital."
+},
+{
+  category: "managers",
+  question: "Kijan yo fè rapò sou ensidan kritik ?",
+  answer: "Imedyatman bay administrasyon santral atravè sistèm rapò dijital."
+},
+{
+  category: "managers",
+  question: "Kisa ki ka mete yo an danje nan pozisyon sa ?",
+  answer: "Vyolasyon règleman, fwod, abi pozisyon, oswa mank siveyans sou agent yo."
+},
+
+// ================= NOS 10 SUPERVISEURS (1–30) =================
+{
+  category: "superviseurs",
+  question: "Kiyès ki yon Superviseur nan Wallet FOBAS ?",
+  answer: "Se yon manm ki sipèvize tout operasyon nan depatman yo epi rapòte dirèkteman bay fondatè yo."
+},
+{
+  category: "superviseurs",
+  question: "Konbyen Superviseurs genyen ?",
+  answer: "Gen 10 Superviseurs, youn pou chak depatman prensipal nan peyi a."
+},
+{
+  category: "superviseurs",
+  question: "Kisa ki tach prensipal yon Superviseur ?",
+  answer: "Sipèvize Managers Régionaux, agent yo, verifye tranzaksyon kritik, epi asire konfòmite total ak règleman."
+},
+{
+  category: "superviseurs",
+  question: "Ki diferans ant Superviseur ak Manager Régional ?",
+  answer: "Superviseur domine tout lòt post, li rapòte sèlman bay fondatè yo, pandan Manager sipèvize agent yo nan depatman an."
+},
+{
+  category: "superviseurs",
+  question: "Kijan nou chwazi yon Superviseur ?",
+  answer: "Seleksyon fèt sou baz eksperyans, kredibilite, etik pwofesyonèl, ak konfyans fondatè yo."
+},
+{
+  category: "superviseurs",
+  question: "Ki kritè pou yon moun ka vin Superviseur ?",
+  answer: "Eksperyans nan jesyon fintech, kapasite sipèvizyon gwo echèl, ak etik enpeccab."
+},
+{
+  category: "superviseurs",
+  question: "Èske yon Superviseur ka revoke ?",
+  answer: "Wi, sèlman fondatè yo ka revoke yon Superviseur pou vyolasyon grav oswa pèfòmans ensifizan."
+},
+{
+  category: "superviseurs",
+  question: "Kisa ki ka lakòz yon revokasyon ?",
+  answer: "Fwod, abi pozisyon, vyolasyon règleman, oswa neglijans grav."
+},
+{
+  category: "superviseurs",
+  question: "Ki privilej yon Superviseur genyen ?",
+  answer: "Sipèvize tout Managers ak agent, aksè a rapò konplè depatman, ak otorizasyon nan pwosesis kritik."
+},
+{
+  category: "superviseurs",
+  question: "Èske yo ka jere lajan itilizatè ?",
+  answer: "Non, yo kontwole sèlman operasyon epi verifye tranzaksyon kritik, pa jere kont itilizatè dirèkteman."
+},
+{
+  category: "superviseurs",
+  question: "Ki jan yo rapòte bay fondatè yo ?",
+  answer: "Atravè rapò dijital, rankont espesyal, ak kominikasyon dirèk pou aksyon kritik."
+},
+{
+  category: "superviseurs",
+  question: "Èske yo ka modifye kont itilizatè ?",
+  answer: "Non, aksè yo limite a siveyans ak sipèvizyon operasyon."
+},
+{
+  category: "superviseurs",
+  question: "Ki jan yo verifye Managers Régionaux ?",
+  answer: "Pa analiz rapò tranzaksyon, vizit fizik, ak siveyans dijital nan tout depatman yo."
+},
+{
+  category: "superviseurs",
+  question: "Èske yo ka chanje règleman platfòm nan ?",
+  answer: "Non, sèlman fondatè yo ka chanje règleman oswa politik platfòm."
+},
+{
+  category: "superviseurs",
+  question: "Kijan yo kolabore ak Managers ak agent ?",
+  answer: "Pa fòmasyon, siveyans operasyon, ak rankont regilye pou rapòte pwogrè ak pwoblèm."
+},
+{
+  category: "superviseurs",
+  question: "Kisa yo dwe fè si yo dekouvri fwod oswa erè ?",
+  answer: "Rapòte imedyatman bay fondatè yo epi pran aksyon korektif."
+},
+{
+  category: "superviseurs",
+  question: "Ki kalite rapò yo dwe soumèt ?",
+  answer: "Rapò sou tranzaksyon kritik, pèfòmans Managers, fwod oswa ensidan espesyal."
+},
+{
+  category: "superviseurs",
+  question: "Èske yo ka fè fòmasyon pou Managers ak agent ?",
+  answer: "Wi, yo òganize fòmasyon pou asire konfòmite ak bon jan sèvis."
+},
+{
+  category: "superviseurs",
+  question: "Ki responsabilite legal yo genyen ?",
+  answer: "Asire tout operasyon nan depatman yo konfòm ak règleman FOBAS epi rapòte bay fondatè yo."
+},
+{
+  category: "superviseurs",
+  question: "Èske yo ka delegue travay ?",
+  answer: "Wi, men yo rete responsab final sou tout operasyon nan depatman yo."
+},
+{
+  category: "superviseurs",
+  question: "Kijan yo jere kriz oswa ensidan kritik ?",
+  answer: "Pran aksyon rapid, kolabore ak ekip sipò, epi rapòte imedyatman bay fondatè yo."
+},
+{
+  category: "superviseurs",
+  question: "Ki limit aksyon yo ?",
+  answer: "Yo pa ka chanje kont itilizatè, pa jere lajan, epi pa modifye règleman san otorizasyon fondatè yo."
+},
+{
+  category: "superviseurs",
+  question: "Kijan yo swiv pèfòmans Managers ?",
+  answer: "Atravè dashboard espesyal ki montre rapò chak depatman ak analiz tranzaksyon."
+},
+{
+  category: "superviseurs",
+  question: "Èske yo ka entèvni dirèkteman nan tranzaksyon ?",
+  answer: "Non, yo sipèvize sèlman, pa egzekite tranzaksyon."
+},
+{
+  category: "superviseurs",
+  question: "Ki rapò yo dwe bay nan ka fwod oswa abiz ?",
+  answer: "Rapò detaye bay fondatè yo pou aksyon imedyat."
+},
+{
+  category: "superviseurs",
+  question: "Kijan yo garanti konfòmite tout depatman ?",
+  answer: "Pa siveyans, rapò regilye, ak kolaborasyon ak ekip legal."
+},
+{
+  category: "superviseurs",
+  question: "Èske yo gen aksè espesyal nan sistèm ?",
+  answer: "Wi, aksè limite pou siveyans ak rapò, men pa jere kont itilizatè."
+},
+{
+  category: "superviseurs",
+  question: "Ki jan yo kominike ak lòt Superviseurs ?",
+  answer: "Pa rankont regilye, chat entèn, ak rapò dijital bay fondatè yo."
+},
+{
+  category: "superviseurs",
+  question: "Kijan yo resevwa rekonesans oswa bonis ?",
+  answer: "Sou baz pèfòmans depatman yo epi ak otorizasyon fondatè yo."
+},
+{
+  category: "superviseurs",
+  question: "Kisa ki ka mete yo an danje nan pozisyon sa ?",
+  answer: "Vyolasyon règleman, fwod, abi pozisyon, oswa neglijans nan siveyans."
+},
+  
+// ================= NOS REPRESENTANTS COMMUNAUX (1–30) =================
+{
+  category: "representants",
+  question: "Kiyès ki yon Représentant Communal nan Wallet FOBAS ?",
+  answer: "Se yon responsab ofisyèl FOBAS nan yon komin ki travay dirèkteman ak Agents Autorisés yo."
+},
+{
+  category: "representants",
+  question: "Konbyen Représentants Communaux FOBAS genyen ?",
+  answer: "Gen yon Représentant Communal pou chak komin sou tout teritwa peyi a."
+},
+{
+  category: "representants",
+  question: "Ki wòl prensipal yon Représentant Communal ?",
+  answer: "Kowòdone, sipèvize, epi sipòte tout Agents Autorisés FOBAS nan komin li a."
+},
+{
+  category: "representants",
+  question: "Èske Représentant Communal la ka vann wallets ?",
+  answer: "Wi. Youn nan pi gwo wòl li se vann ak distribye wallets FOBAS bay Agents yo."
+},
+{
+  category: "representants",
+  question: "Konbyen wallets yon Représentant ka vann pa jou ?",
+  answer: "Pa gen limit fiks, sa depann de demann ak kapasite Agents yo."
+},
+{
+  category: "representants",
+  question: "Èske Représentant Communal la ka vin Agent Autorisé tou ?",
+  answer: "Wi. Li ka jwe 2 wòl an menm tan : Agent Autorisé ak Représentant Communal."
+},
+{
+  category: "representants",
+  question: "Kiyès Représentant Communal la rapòte ?",
+  answer: "Li rapòte bay Manager Régional la epi anba siveyans Superviseur depatman an."
+},
+{
+  category: "representants",
+  question: "Kisa li pa gen dwa fè kòm Représentant ?",
+  answer: "Li pa gen dwa modifye kont itilizatè, ni jere lajan itilizatè dirèkteman."
+},
+{
+  category: "representants",
+  question: "Èske li gen aksè a solde itilizatè yo ?",
+  answer: "Non. Aksè li limite sèlman a siveyans operasyon Agents yo."
+},
+{
+  category: "representants",
+  question: "Kijan nou chwazi yon Représentant Communal ?",
+  answer: "Sou baz konfyans, repitasyon lokal, eksperyans, ak validasyon pa ekip FOBAS."
+},
+{
+  category: "representants",
+  question: "Ki kalite moun ki ka vin Représentant Communal ?",
+  answer: "Moun serye, onèt, aktif nan komin nan, epi ki konprann sèvis finans dijital."
+},
+{
+  category: "representants",
+  question: "Èske post Représentant Communal la ofisyèl ?",
+  answer: "Wi. Se yon post ofisyèl ki rekonèt pa Wallet FOBAS."
+},
+{
+  category: "representants",
+  question: "Èske Représentant Communal la ka revoke ?",
+  answer: "Wi. FOBAS ka revoke li nenpòt ki lè si gen mank etik oswa vyolasyon règleman."
+},
+{
+  category: "representants",
+  question: "Ki rezon ki ka lakòz revokasyon ?",
+  answer: "Fwod, abi pouvwa, kolaborasyon ak agent fo, oswa move konpòtman."
+},
+{
+  category: "representants",
+  question: "Èske Représentant Communal la touche komisyon ?",
+  answer: "Wi. Li ka touche komisyon sou kantite wallets li vann ak pèfòmans li."
+},
+{
+  category: "representants",
+  question: "Èske li ka rekrite nouvo Agents Autorisés ?",
+  answer: "Wi. Li ka pwopoze nouvo Agents men validasyon final se FOBAS ki bay li."
+},
+{
+  category: "representants",
+  question: "Kijan li travay ak Agents yo ?",
+  answer: "Li sipòte yo, fòme yo, verifye travay yo, epi ede rezoud pwoblèm lokal."
+},
+{
+  category: "representants",
+  question: "Èske li ka regle konfli ant Agents ak itilizatè ?",
+  answer: "Li ka ede medyatè, men ka grav yo monte bay Manager oswa Support."
+},
+{
+  category: "representants",
+  question: "Èske li gen dwa kreye règ pa li ?",
+  answer: "Non. Li dwe aplike règ ofisyèl FOBAS yo sèlman."
+},
+{
+  category: "representants",
+  question: "Èske li ka itilize non FOBAS pou enterè pèsonèl ?",
+  answer: "Non. Sa entèdi totalman epi ka mennen revokasyon imedyat."
+},
+{
+  category: "representants",
+  question: "Kijan li rapòte aktivite li ?",
+  answer: "Atravè rapò regilye bay Manager Régional ak ekip santral FOBAS."
+},
+{
+  category: "representants",
+  question: "Èske li ka ede itilizatè dirèkteman ?",
+  answer: "Wi. Li ka oryante itilizatè yo epi voye yo lakay Agents Autorisés."
+},
+{
+  category: "representants",
+  question: "Èske li ka valide tranzaksyon ?",
+  answer: "Non. Se Agents ak sistèm FOBAS sèlman ki valide tranzaksyon."
+},
+{
+  category: "representants",
+  question: "Ki responsabilite li genyen anvè komin nan ?",
+  answer: "Asire sèvis FOBAS yo disponib, serye, epi byen reprezante nan komin nan."
+},
+{
+  category: "representants",
+  question: "Èske li anba siveyans ?",
+  answer: "Wi. Travay li suiv pa Managers Régionaux ak Superviseurs."
+},
+{
+  category: "representants",
+  question: "Èske li ka fè pwomosyon FOBAS ?",
+  answer: "Wi. Li gen dwa fè pwomosyon ofisyèl sèvis FOBAS nan komin li."
+},
+{
+  category: "representants",
+  question: "Èske li ka itilize logo FOBAS ?",
+  answer: "Wi, sèlman pou aktivite ofisyèl ak akò FOBAS."
+},
+{
+  category: "representants",
+  question: "Èske Représentant Communal la gen zòn limite ?",
+  answer: "Wi. Li responsab sèlman komin li a."
+},
+{
+  category: "representants",
+  question: "Poukisa Représentant Communal enpòtan pou FOBAS ?",
+  answer: "Paske li se lyen dirèk ant FOBAS, Agents yo, ak popilasyon lokal la."
+},
+
+// ================= UTILISATEURS / KLIYAN (1–30) =================
+{
+  category: "utilisateurs",
+  question: "Kijan pou m kreye yon kont itilizatè Wallet FOBAS ?",
+  answer: "Ale sou app oswa sit web, antre nimewo telefòn ou, resevwa kòd OTP, epi kreye modpas sekirize."
+},
+{
+  category: "utilisateurs",
+  question: "Ki sèvis mwen ka itilize kòm itilizatè ?",
+  answer: "Dépôt, retrait, transfè, ak jwenn bonus selon kanpay yo."
+},
+{
+  category: "utilisateurs",
+  question: "Èske mwen bezwen nenpòt dokiman pou enskri ?",
+  answer: "Ou sèlman bezwen nimewo telefòn aktif ak kèk enfòmasyon debaz."
+},
+{
+  category: "utilisateurs",
+  question: "Kijan pou m fè yon dépôt ?",
+  answer: "Ale lakay agent autorisé oswa sèvi ak metòd dijital disponib nan platfòm nan."
+},
+{
+  category: "utilisateurs",
+  question: "Konbyen tan yon dépôt pran ?",
+  answer: "Anjeneral imedyat oswa kèk minit selon metòd ou chwazi a."
+},
+{
+  category: "utilisateurs",
+  question: "Kijan pou m fè yon retrait ?",
+  answer: "Ale lakay agent autorisé ou, verifye ak OTP, epi resevwa lajan ou."
+},
+{
+  category: "utilisateurs",
+  question: "Èske mwen ka transfere lajan bay lòt moun ?",
+  answer: "Wi. Antre nimewo benefisyè a epi konfime tranzaksyon an ak OTP."
+},
+{
+  category: "utilisateurs",
+  question: "Èske gen limit pou dépôt oswa transfè ?",
+  answer: "Wi, pou sekirite. Limit yo varye selon règleman platfòm nan."
+},
+{
+  category: "utilisateurs",
+  question: "Kijan pou m jwenn bonus ?",
+  answer: "Pa fè dépôt, patisipe nan promo oswa pwogram fidélité."
+},
+{
+  category: "utilisateurs",
+  question: "Èske mwen ka fè retrè nan nenpòt lè ?",
+  answer: "Wi, selon disponiblite agent ou oswa sèvis dijital la."
+},
+{
+  category: "utilisateurs",
+  question: "Kijan pou verifye tranzaksyon mwen yo ?",
+  answer: "Tcheke nan historique tranzaksyon sou app oswa dashboard sou sit web la."
+},
+{
+  category: "utilisateurs",
+  question: "Èske mwen ka sèvi ak menm kont la sou plizyè aparèy ?",
+  answer: "Wi, men pou sekirite li rekòmande itilize yon aparèy prensipal."
+},
+{
+  category: "utilisateurs",
+  question: "Kisa pou m fè si mwen bliye modpas mwen ?",
+  answer: "Klike 'Mot de passe oublié', resevwa OTP, epi kreye nouvo modpas."
+},
+{
+  category: "utilisateurs",
+  question: "Èske mwen ka chanje nimewo telefòn mwen sou kont la ?",
+  answer: "Wi, apre yon pwosesis verifikasyon idantite avèk support FOBAS."
+},
+{
+  category: "utilisateurs",
+  question: "Ki avantaj mwen jwenn kòm itilizatè ?",
+  answer: "Sekirite, rapidite nan tranzaksyon, aksè a bonus ak sèvis dijital."
+},
+{
+  category: "utilisateurs",
+  question: "Èske mwen ka suiv tranzaksyon mwen an tan reyèl ?",
+  answer: "Wi. Dashboard ak app la montre tout tranzaksyon an tan reyèl."
+},
+{
+  category: "utilisateurs",
+  question: "Kijan pou m rapòte yon pwoblèm oswa yon erè ?",
+  answer: "Sèvi ak bouton 'Assistance 24/7' pou kontakte support."
+},
+{
+  category: "utilisateurs",
+  question: "Èske mwen ka fè transfè entènasyonal ?",
+  answer: "Pa pou kounye a. Sèvis transfè entènasyonal poko disponib."
+},
+{
+  category: "utilisateurs",
+  question: "Kijan mwen ka anile yon tranzaksyon ?",
+  answer: "Sistèm nan pa pèmèt anilasyon apre validasyon, men kontakte support si gen pwoblèm."
+},
+{
+  category: "utilisateurs",
+  question: "Ki lajan Wallet FOBAS sipòte ?",
+  answer: "Pouvwa itilize HTG (Gourdes)."
+},
+{
+  category: "utilisateurs",
+  question: "Èske gen frè sou sèvis yo ?",
+  answer: "Wi, kèk sèvis gen ti frè, selon règleman platfòm nan."
+},
+{
+  category: "utilisateurs",
+  question: "Kijan pou m verifye kont mwen ?",
+  answer: "Sèvi ak pwosesis KYC nan app oswa dashboard pou idantifikasyon."
+},
+{
+  category: "utilisateurs",
+  question: "Èske mwen ka fè depo pou yon lòt moun ?",
+  answer: "Wi. Antre nimewo benefisyè a epi konfime avèk OTP."
+},
+{
+  category: "utilisateurs",
+  question: "Kijan pou m wè resi tranzaksyon mwen yo ?",
+  answer: "Resi yo disponib nan historique sou app oswa dashboard."
+},
+{
+  category: "utilisateurs",
+  question: "Èske mwen ka jwi promo ak kanpay espesyal ?",
+  answer: "Wi, tout itilizatè ki respekte règleman yo ka patisipe."
+},
+{
+  category: "utilisateurs",
+  question: "Kijan pou m kontakte support an ijans ?",
+  answer: "Sèvi ak bouton 'Assistance 24/7', WhatsApp oswa Email."
+},
+{
+  category: "utilisateurs",
+  question: "Èske mwen ka transfere lajan nan men yon agent fo ?",
+  answer: "Non. Sèl Agents autorisés ki ka resevwa tranzaksyon legal."
+},
+{
+  category: "utilisateurs",
+  question: "Kijan mwen ka retire yon bonus ?",
+  answer: "Si kondisyon règleman yo satisfè, retire a disponib atravè agent oswa platfòm dijital."
+},
+{
+  category: "utilisateurs",
+  question: "Kijan pou m verifye balans mwen ?",
+  answer: "Balans la disponib nan dashboard itilizatè sou app oswa sit web la."
+},
+{
+  category: "utilisateurs",
+  question: "Kijan mwen ka fè depo si gen pwoblèm teknik ?",
+  answer: "Sèvi ak 'Assistance 24/7' pou jwenn èd rapid nan men support."
+},
+{
+  category: "utilisateurs",
+  question: "Èske gen limit laj pou jwi sèvis yo ?",
+  answer: "Wi. Itilizatè dwe gen omwen 18 an pou sèvi ak Wallet FOBAS."
+},  
+
+// ================= MANB FONDATE YO (1–30) =================
+{
+  category: "fondateurs",
+  question: "Ki moun ki fonde Wallet FOBAS ?",
+  answer: "Wallet FOBAS te fonde pa M. MEME Selvandieu ak Mme. MOISE Ranise."
+},
+{
+  category: "fondateurs",
+  question: "Ki wòl manb fondateur yo ?",
+  answer: "Yo se tèt platfòm nan, deside sou tout règleman, sèvis, ak devlopman li."
+},
+{
+  category: "fondateurs",
+  question: "Èske fondateurs yo gen limit pouvwa ?",
+  answer: "Non. Yo gen kontwòl total sou platfòm nan ak tout post ki sou li."
+},
+{
+  category: "fondateurs",
+  question: "Ki privilèj fondateurs yo genyen ?",
+  answer: "Tout aksè administratif, finans, teknik, ak sou estrikti operasyonèl platfòm nan."
+},
+{
+  category: "fondateurs",
+  question: "Èske manb fondateur ka revoke yon manb sipèvizè oswa manadjè ?",
+  answer: "Wi, sèlman fondateurs yo ka revoke nenpòt manm nan estrikti a."
+},
+{
+  category: "fondateurs",
+  question: "Ki kritè pou revoke yon manb pa fondateur ?",
+  answer: "Vyolasyon règleman, fwod, oswa move konpòtman nan fonksyon li."
+},
+{
+  category: "fondateurs",
+  question: "Ki wòl fondateur nan desizyon finansyè ?",
+  answer: "Yo apwouve tout tranzaksyon enpòtan, depans, ak distribisyon bonus."
+},
+{
+  category: "fondateurs",
+  question: "Ki wòl yo nan desizyon teknik ?",
+  answer: "Deside sou devlopman nouvo fonctionnalités, entegrasyon sistèm, ak sekirite platfòm."
+},
+{
+  category: "fondateurs",
+  question: "Ki wòl yo nan relasyon ak itilizatè ?",
+  answer: "Asire sèvis yo fonksyone, rezoud pwoblèm kritik, epi verifye satisfaksyon itilizatè."
+},
+{
+  category: "fondateurs",
+  question: "Ki wòl yo nan relasyon ak Agents autorisés ?",
+  answer: "Siveye operasyon agents, valide pwosesis, epi kenbe kontwòl sou kantite wallets distribye."
+},
+{
+  category: "fondateurs",
+  question: "Ki pouvwa yo genyen sou Superviseurs ?",
+  answer: "Yo ka sipèvize, revize aksyon, ak revoke nenpòt superviseur nan nenpòt depatman."
+},
+{
+  category: "fondateurs",
+  question: "Èske fondateurs ka chanje règleman platfòm nan ?",
+  answer: "Wi, yo deside sou tout règleman ki gouvène itilizatè, agents, ak manm estriktirèl yo."
+},
+{
+  category: "fondateurs",
+  question: "Ki wòl fondateurs nan sekirite platfòm nan ?",
+  answer: "Yo deside sou pwotokòl sekirite, siveyans fwod, ak sistèm anti-piratage."
+},
+{
+  category: "fondateurs",
+  question: "Ki wòl fondateurs nan kanpay ak promos ?",
+  answer: "Yo apwouve, planifye, epi lanse tout promos ak kanpay pou itilizatè yo."
+},
+{
+  category: "fondateurs",
+  question: "Èske yo ka ajoute nouvo depatman oswa pozisyon ?",
+  answer: "Wi, sèlman yo ka kreye nouvo pozisyon oswa estrikti nan platfòm nan."
+},
+{
+  category: "fondateurs",
+  question: "Ki wòl yo nan jesyon bonus ?",
+  answer: "Deside sou kantite, kondisyon, ak distribisyon tout bonus platfòm nan."
+},
+{
+  category: "fondateurs",
+  question: "Ki relasyon yo ak manm manadjè ?",
+  answer: "Fondateurs sipèvize, konseye, ak revize tout aksyon manadjè yo."
+},
+{
+  category: "fondateurs",
+  question: "Ki relasyon yo ak Representants Communaux ?",
+  answer: "Fondateurs siveye tout representants, verifye distribisyon wallets, epi valide aksyon yo."
+},
+{
+  category: "fondateurs",
+  question: "Ki pouvwa yo sou Agents autorisés ?",
+  answer: "Yo gen aksè final sou tout agents, ka revoke oswa valide operasyon yo."
+},
+{
+  category: "fondateurs",
+  question: "Èske fondateurs ka modifye app oswa dashboard ?",
+  answer: "Wi, yo kontwole tout devlopman teknik ak fonksyonèl nan platfòm nan."
+},
+{
+  category: "fondateurs",
+  question: "Ki wòl yo nan sipò itilizatè ?",
+  answer: "Yo ka entèvni nan ka ijans, rezoud pwoblèm grav, ak siveye ekip support."
+},
+{
+  category: "fondateurs",
+  question: "Èske yo ka chanje règleman legal ?",
+  answer: "Wi, yo apwouve tout règleman ak konfòmite legal platfòm nan."
+},
+{
+  category: "fondateurs",
+  question: "Kijan fondateurs pran desizyon ?",
+  answer: "Yo pran desizyon ansanm, konsilte done ak rapò, epi aplike chanjman nesesè yo."
+},
+{
+  category: "fondateurs",
+  question: "Èske yo gen aksè nan tout rapò finansye ?",
+  answer: "Wi, yo wè tout tranzaksyon, balans, ak resi platfòm nan."
+},
+{
+  category: "fondateurs",
+  question: "Ki pouvwa yo sou tout kont itilizatè ?",
+  answer: "Yo ka verifye, sispann oswa fè chanjman teknik nan kont itilizatè yo si nesesè."
+},
+{
+  category: "fondateurs",
+  question: "Èske yo ka revize tout mesaj oswa konvèsasyon ?",
+  answer: "Wi, sèlman pou sekirite platfòm nan ak rezolisyon pwoblèm grav."
+},
+{
+  category: "fondateurs",
+  question: "Ki responsabilite yo sou tout sistèm teknik ?",
+  answer: "Yo asire tout sistèm fonksyone byen, san erè, epi an sekirite."
+},
+{
+  category: "fondateurs",
+  question: "Ki responsabilite yo sou tout tranzaksyon finansye ?",
+  answer: "Yo verifye tout tranzaksyon, asire transparans, epi rezoud nenpòt diskrepans."
+},
+{
+  category: "fondateurs",
+  question: "Èske yo ka kreye nouvo pwodwi oswa sèvis ?",
+  answer: "Wi, sèlman fondateurs yo ka deside sou nouvo pwodwi oswa sèvis sou platfòm nan."
+},
+{
+  category: "fondateurs",
+  question: "Ki wòl yo nan evolisyon platfòm nan ?",
+  answer: "Yo dirije devlopman, nouvo fonctionnalités, ak plan estratejik pou kwasans Wallet FOBAS."
+},
 
 
   // ================= COMPTE (91–100) =================
