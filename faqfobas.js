@@ -1087,18 +1087,18 @@ const faqData = [
 },
 {
   category: "superviseurs",
-  question: "Konbyen Superviseurs genyen ?",
+  question: "Konbyen Superviseurs ki genyen ?",
   answer: "Gen 10 Superviseurs, youn pou chak depatman prensipal nan peyi a."
 },
 {
   category: "superviseurs",
   question: "Kisa ki tach prensipal yon Superviseur ?",
-  answer: "Sipèvize Managers Régionaux, agent yo, verifye tranzaksyon kritik, epi asire konfòmite total ak règleman."
+  answer: "Sipèvize Managers Régionaux, agent yo, reprezantan kominal yo, Asistan vityèl, tout lot ouvriye platfo sof manb fondatè yo, yo la pou yo verifye tranzaksyon kritik, epi asire konfòmite total ak règleman."
 },
 {
   category: "superviseurs",
   question: "Ki diferans ant Superviseur ak Manager Régional ?",
-  answer: "Superviseur domine tout lòt post, li rapòte sèlman bay fondatè yo, pandan Manager sipèvize agent yo nan depatman an."
+  answer: "Superviseur domine tout lòt post, li rapòte sèlman bay fondatè yo, pandan Manager sipèvize agent ak reprezantan kominal li yo ki anndan depatman pa l la."
 },
 {
   category: "superviseurs",
@@ -1108,7 +1108,7 @@ const faqData = [
 {
   category: "superviseurs",
   question: "Ki kritè pou yon moun ka vin Superviseur ?",
-  answer: "Eksperyans nan jesyon fintech, kapasite sipèvizyon gwo echèl, ak etik enpeccab."
+  answer: "Eksperyans nan jesyon fintech, kapasite sipèvizyon gwo echèl, ak etik enpekab."
 },
 {
   category: "superviseurs",
@@ -1152,7 +1152,7 @@ const faqData = [
 },
 {
   category: "superviseurs",
-  question: "Kijan yo kolabore ak Managers ak agent ?",
+  question: "Kijan yo kolabore ak Managers ak agent, ak reprezantan kominal yo ?",
   answer: "Pa fòmasyon, siveyans operasyon, ak rankont regilye pou rapòte pwogrè ak pwoblèm."
 },
 {
@@ -1163,11 +1163,11 @@ const faqData = [
 {
   category: "superviseurs",
   question: "Ki kalite rapò yo dwe soumèt ?",
-  answer: "Rapò sou tranzaksyon kritik, pèfòmans Managers, fwod oswa ensidan espesyal."
+  answer: "Rapò sou tranzaksyon kritik, pèfòmans Managers, Reprezantan kominal yo ak agent yo, fwod oswa ensidan espesyal."
 },
 {
   category: "superviseurs",
-  question: "Èske yo ka fè fòmasyon pou Managers ak agent ?",
+  question: "Èske yo ka fè fòmasyon pou Managers, reprezantan kominal yo ak agent yo ?",
   answer: "Wi, yo òganize fòmasyon pou asire konfòmite ak bon jan sèvis."
 },
 {
@@ -1178,7 +1178,7 @@ const faqData = [
 {
   category: "superviseurs",
   question: "Èske yo ka delegue travay ?",
-  answer: "Wi, men yo rete responsab final sou tout operasyon nan depatman yo."
+  answer: "Non, nan okenn ka yo paka delege okenn lot moun nan plas yo pou tach Sipevizè sof revokasyon, malad grav ou aksidan epi sap fet avek manb fondatè yo le sa."
 },
 {
   category: "superviseurs",
@@ -1192,8 +1192,8 @@ const faqData = [
 },
 {
   category: "superviseurs",
-  question: "Kijan yo swiv pèfòmans Managers ?",
-  answer: "Atravè dashboard espesyal ki montre rapò chak depatman ak analiz tranzaksyon."
+  question: "Kijan yo swiv pèfòmans Managers, agents ak reprezantan kominal yo, asistan vityèl la ?",
+  answer: "Atravè dashboard espesyal ki montre rapò chak depatman ak analiz tranzaksyon, ak deplasman fizik"
 },
 {
   category: "superviseurs",
@@ -1208,12 +1208,12 @@ const faqData = [
 {
   category: "superviseurs",
   question: "Kijan yo garanti konfòmite tout depatman ?",
-  answer: "Pa siveyans, rapò regilye, ak kolaborasyon ak ekip legal."
+  answer: "Pa siveyans, rapò regilye, ak kolaborasyon ak ekip legal FOBAS yo."
 },
 {
   category: "superviseurs",
   question: "Èske yo gen aksè espesyal nan sistèm ?",
-  answer: "Wi, aksè limite pou siveyans ak rapò, men pa jere kont itilizatè."
+  answer: "non, yo pa gen okenn aksè nan sistèm teknoloji platfom FOBAS la."
 },
 {
   category: "superviseurs",
