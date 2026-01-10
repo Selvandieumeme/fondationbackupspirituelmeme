@@ -844,7 +844,7 @@ const faqData = [
 {
   category: "assistance",
   question: "Kijan pou fè reklamasyon sou yon agent ?",
-  answer: "Sèvi ak bouton 'Rapòte agent' nan dashboard epi eksplike pwoblèm nan."
+  answer: "Sèvi ak bouton 'Assistance 24/7' nan dashboard epi eksplike pwoblèm nan."
 },
 {
   category: "assistance",
@@ -874,12 +874,12 @@ const faqData = [
 {
   category: "assistance",
   question: "Kijan pou m fè sijesyon pou platfòm nan ?",
-  answer: "Chwazi opsyon 'Sijesyon' nan chat epi voye ide ou a ekip support."
+  answer: "Chwazi opsyon 'Assistance 24/7' nan chat epi voye ide ou a ekip support."
 },
 {
   category: "assistance",
   question: "Èske mwen ka mande asistans pou tranzaksyon echwe ?",
-  answer: "Wi, eksplike tranzaksyon an, nimewo agent, ak montan pou nou verifye."
+  answer: "Wi, eksplike tranzaksyon an, nimewo ak E-mail agent, ak montan pou nou verifye."
 },
 {
   category: "assistance",
@@ -894,12 +894,12 @@ const faqData = [
 {
   category: "assistance",
   question: "Kijan mwen ka jwenn repons pi rapid ?",
-  answer: "Bay detay egzak sou pwoblèm nan, bay nimewo kont oswa tranzaksyon si nesesè."
+  answer: "Bay detay egzak sou pwoblèm nan, bay Email, Non konple met kont lan oswa tranzaksyon si nesesè."
 },
 {
   category: "assistance",
   question: "Èske gen opsyon pou apèl vwa oswa videyo ?",
-  answer: "Wi, pou ka ijan, ekip support ka itilize apèl vwa oswa videyo sou demann itilizatè."
+  answer: "Wi, pou ka ijan, ekip support ka itilize apèl vwa oswa videyo sou demann itilizatè men pifo ka se toujou teks selman pou w itilize."
 },
 {
   category: "assistance",
