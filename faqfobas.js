@@ -1687,6 +1687,221 @@ const faqData = [
   answer: "Yo dirije devlopman, nouvo fonctionnalités, ak plan estratejik pou kwasans Wallet FOBAS."
 },
 
+// ================= MICRO SOUTIEN (1–20) =================
+// FAZ 1: Micro Soutien pou Agents Autorisés
+{
+  category: "micro_soutien_agents",
+  question: "Ki sa Micro Soutien pou Agents Autorisés ye ?",
+  answer: "Se yon avans operasyonèl founi pa platfòm nan pou ede agents yo kòmanse aktivite yo ak distribye wallets sou tout teritwa a."
+},
+{
+  category: "micro_soutien_agents",
+  question: "Ki objektif Micro Soutien nan pou agents ?",
+  answer: "Fasilite operasyon, asire yo gen resous inisyal pou fè depo, retrait, ak transfè pou kliyan yo."
+},
+{
+  category: "micro_soutien_agents",
+  question: "Ki kantite Micro Soutien yon agent ka resevwa ?",
+  answer: "Kantite a varye selon desizyon manb fondateurs yo ak nivo aktivite agent la."
+},
+{
+  category: "micro_soutien_agents",
+  question: "Ki kritè pou jwenn Micro Soutien ?",
+  answer: "Aktivite, kantite wallets distribye, ak angajman agent nan platfòm nan."
+},
+{
+  category: "micro_soutien_agents",
+  question: "Èske Micro Soutien obligatwa pou agents ?",
+  answer: "Non, li se yon avantaj pou ede operasyon yo pi fasil nan faz lansman."
+},
+{
+  category: "micro_soutien_agents",
+  question: "Kijan agents resevwa Micro Soutien ?",
+  answer: "Li kredite otomatikman nan kont agent la sou dashboard yo."
+},
+{
+  category: "micro_soutien_agents",
+  question: "Èske Micro Soutien kapab retounen si agent pa itilize li ?",
+  answer: "Wi, fondateurs ka retire oswa ajiste kantite lajan si li pa itilize kòrèkteman."
+},
+{
+  category: "micro_soutien_agents",
+  question: "Ki wòl fondateurs nan Micro Soutien ?",
+  answer: "Yo defini kantite, distribisyon, ak kondisyon itilizasyon pou tout agents."
+},
+{
+  category: "micro_soutien_agents",
+  question: "Èske tout agents gen menm kantite Micro Soutien ?",
+  answer: "Non, li baze sou nivo aktivite ak bezwen chak agent."
+},
+{
+  category: "micro_soutien_agents",
+  question: "Èske Micro Soutien ka itilize pou depans pèsonèl ?",
+  answer: "Non, li dwe itilize sèlman pou tranzaksyon ak operasyon platfòm nan."
+},
+{
+  category: "micro_soutien_agents",
+  question: "Kijan pou verifye kantite Micro Soutien mwen resevwa ?",
+  answer: "Via dashboard agent la anba seksyon Micro Soutien."
+},
+{
+  category: "micro_soutien_agents",
+  question: "Èske gen rapò oswa istorik Micro Soutien ?",
+  answer: "Wi, tout avans ak itilize yo anrejistre pou transparans."
+},
+{
+  category: "micro_soutien_agents",
+  question: "Ki konsekans si yon agent itilize Micro Soutien mal ?",
+  answer: "Fondateurs ka revoke Micro Soutien oswa pran lòt mezi disiplinè."
+},
+{
+  category: "micro_soutien_agents",
+  question: "Èske gen limit sou kantite Micro Soutien nan yon peryòd ?",
+  answer: "Wi, chak avans defini pa fondateurs epi ajiste selon operasyon."
+},
+{
+  category: "micro_soutien_agents",
+  question: "Ki kalite sipò Micro Soutien ofri ?",
+  answer: "Sipò finansye pou depo, retrait, transfè, ak operasyon inisyal pou agents yo."
+},
+{
+  category: "micro_soutien_agents",
+  question: "Èske Micro Soutien ede agents grandi finansyèman ?",
+  answer: "Wi, li bay yo kapasite pou ogmante kantite wallets yo distribye ak pwofi yo."
+},
+{
+  category: "micro_soutien_agents",
+  question: "Ki responsabilite agent lè li resevwa Micro Soutien ?",
+  answer: "Sèvi ak lajan an pou objektif platfòm, rapòte aktivite yo, epi rete konfyab."
+},
+{
+  category: "micro_soutien_agents",
+  question: "Ki limit tan pou itilize Micro Soutien ?",
+  answer: "Tan itilizasyon defini pa fondateurs selon bezwen operasyonèl."
+},
+{
+  category: "micro_soutien_agents",
+  question: "Èske Micro Soutien ka itilize pou kouvri frè tranzaksyon ?",
+  answer: "Wi, sèlman pou tranzaksyon ofisyèl platfòm nan."
+},
+{
+  category: "micro_soutien_agents",
+  question: "Kijan fondateurs kontwole Micro Soutien ?",
+  answer: "Yo suiv itilizasyon, verifye rapò, epi ajiste kantite avans selon aktivite agent yo."
+},
+
+// ================= MICRO SOUTIEN (21–40) =================
+// FAZ 2: Micro Soutien pou Kliyan / Itilizate Platfòm nan
+{
+  category: "micro_soutien_clients",
+  question: "Ki sa Micro Soutien pou itilizatè platfòm nan ye ?",
+  answer: "Se yon fòm sipò finansye pou itilizatè yo kòmanse itilize Wallet FOBAS avèk plis fasilite."
+},
+{
+  category: "micro_soutien_clients",
+  question: "Ki objektif Micro Soutien pou itilizatè yo ?",
+  answer: "Pou ede yo aksede sèvis tankou depo, retrait, transfè, epi ankouraje endepandans finansye."
+},
+{
+  category: "micro_soutien_clients",
+  question: "Kijan itilizatè resevwa Micro Soutien ?",
+  answer: "Avans la kredite otomatikman sou kont yo selon desizyon manb fondateurs yo."
+},
+{
+  category: "micro_soutien_clients",
+  question: "Ki kritè pou jwenn Micro Soutien ?",
+  answer: "Aktivite sou platfòm nan, kantite tranzaksyon, ak angajman itilizatè a."
+},
+{
+  category: "micro_soutien_clients",
+  question: "Èske tout itilizatè ka resevwa Micro Soutien ?",
+  answer: "Non, li baze sou nivo aktivite, fidèlite, ak desizyon fondateurs yo."
+},
+{
+  category: "micro_soutien_clients",
+  question: "Ki kantite Micro Soutien yon itilizatè ka resevwa ?",
+  answer: "Kantite a varye selon nivo aktivite ak angajman yo sou platfòm nan."
+},
+{
+  category: "micro_soutien_clients",
+  question: "Èske Micro Soutien ka itilize pou lòt sèvis pase Wallet FOBAS ?",
+  answer: "Non, li dwe itilize sèlman nan sèvis ofisyèl platfòm nan."
+},
+{
+  category: "micro_soutien_clients",
+  question: "Ki wòl fondateurs nan Micro Soutien itilizatè ?",
+  answer: "Yo detèmine kantite, kondisyon, ak benefis Micro Soutien pou chak itilizatè."
+},
+{
+  category: "micro_soutien_clients",
+  question: "Èske itilizatè ka chwazi kantite Micro Soutien yo resevwa ?",
+  answer: "Non, fondateurs fikse kantite ak kritè distribisyon."
+},
+{
+  category: "micro_soutien_clients",
+  question: "Kijan itilizatè ka verifye Micro Soutien yo ?",
+  answer: "Via dashboard yo, nan seksyon Micro Soutien."
+},
+{
+  category: "micro_soutien_clients",
+  question: "Èske gen rapò itilizasyon Micro Soutien ?",
+  answer: "Wi, tout avans ak tranzaksyon yo anrejistre pou transparans."
+},
+{
+  category: "micro_soutien_clients",
+  question: "Ki konsekans si Micro Soutien itilize mal ?",
+  answer: "Fondateurs ka revoke avans lan oswa pran mezi disiplinè."
+},
+{
+  category: "micro_soutien_clients",
+  question: "Èske gen limit sou Micro Soutien pou chak itilizatè ?",
+  answer: "Wi, fondateurs fikse limit dapre plan finansye platfòm nan."
+},
+{
+  category: "micro_soutien_clients",
+  question: "Ki avantaj Micro Soutien pou itilizatè ?",
+  answer: "Bay yo opòtinite pou ogmante tranzaksyon yo, pwofi, ak eksperyans sou platfòm nan."
+},
+{
+  category: "micro_soutien_clients",
+  question: "Èske itilizatè ka itilize Micro Soutien pou kouvri frè tranzaksyon ?",
+  answer: "Wi, sèlman pou tranzaksyon ofisyèl sou platfòm nan."
+},
+{
+  category: "micro_soutien_clients",
+  question: "Èske Micro Soutien ede itilizatè vin endepandan finansyèman ?",
+  answer: "Wi, li fèt pou ankouraje itilizatè yo ogmante pwofi ak jesyon finans."
+},
+{
+  category: "micro_soutien_clients",
+  question: "Kijan fondateurs kontwole Micro Soutien pou itilizatè ?",
+  answer: "Yo swiv itilizasyon, verifye rapò, epi ajiste avans selon angajman ak aktivite itilizatè yo."
+},
+{
+  category: "micro_soutien_clients",
+  question: "Ki responsabilite itilizatè lè yo resevwa Micro Soutien ?",
+  answer: "Sèvi ak lajan an sèlman pou sèvis platfòm, rapòte aktivite yo, epi respekte règleman."
+},
+{
+  category: "micro_soutien_clients",
+  question: "Èske itilizatè ka revandike plis Micro Soutien si yo depase aktivite ?",
+  answer: "Wi, fondateurs ka ajiste kantite pou itilizatè aktif yo."
+},
+{
+  category: "micro_soutien_clients",
+  question: "Ki tan pou itilize Micro Soutien pou itilizatè ?",
+  answer: "Tan itilizasyon defini pa fondateurs dapre plan operasyon ak bezwen itilizatè a."
+},
+{
+  category: "micro_soutien_clients",
+  question: "Ki wòl Micro Soutien nan devlopman finans itilizatè ?",
+  answer: "Li ede itilizatè konprann tranzaksyon, ogmante pwofi, epi amelyore jesyon finans yo."
+},
+{
+  category: "micro_soutien_clients",
+  question: "Èske gen sipò teknik ak fondateur pandan faz Micro Soutien ?",
+  answer: "Wi, itilizatè ka kontakte ekip support oswa fondateurs pou nenpòt kesyon oswa ijans."
+},
 
   // ================= COMPTE (91–100) =================
   {
