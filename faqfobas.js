@@ -508,6 +508,313 @@ const faqData = [
   question: "Èske sekirite Wallet FOBAS ap evolye ak tan ?",
   answer: "Wi. Sistèm yo mete ajou regilyèman pou konbat nouvo menas."
 },
+  
+// ================= AGENTS AUTORISES (1–20) =================
+{
+  category: "agentsautorises",
+  question: "Kijan pou m jwenn lis agents otorize nan zòn mwen ?",
+  answer: "Ale nan dashboard ou a, chwazi seksyon 'Nos Agents Autorisés', epi filtre pa depatman oswa vil."
+},
+{
+  category: "agentsautorises",
+  question: "Èske tout agents ki parèt sou platfòm lan otorize ?",
+  answer: "Wi. Tout agents ki nan lis la verifye epi apwouve pa Wallet FOBAS."
+},
+{
+  category: "agentsautorises",
+  question: "Kijan pou verifye si yon agent se reyèl ?",
+  answer: "Ou ka tcheke ID agent la, foto, ak nimewo kontak ki disponib nan dashboard la."
+},
+{
+  category: "agentsautorises",
+  question: "Eske mwen ka kontakte agent dirèkteman ?",
+  answer: "Wi. Chak agent gen nimewo WhatsApp oswa telefòn pou kontakte yo dirèkteman."
+},
+{
+  category: "agentsautorises",
+  question: "Ki sèvis agents otorize yo ka bay ?",
+  answer: "Yo ka fè dépôt, retrait, transfè, epi verifye tranzaksyon selon règleman FOBAS."
+},
+{
+  category: "agentsautorises",
+  question: "Èske agent ka fè erè pandan tranzaksyon ?",
+  answer: "Li ra, men tout tranzaksyon sipèvize pa sistèm FOBAS."
+},
+{
+  category: "agentsautorises",
+  question: "Kijan pou m rapòte yon agent ki pa konfòm ?",
+  answer: "Itilize bouton 'Rapòte' nan lis agent yo oswa kontakte support FOBAS."
+},
+{
+  category: "agentsautorises",
+  question: "Èske mwen ka fè tranzaksyon avèk agent san kont Wallet FOBAS ?",
+  answer: "Non. Ou dwe gen kont verifye pou fè tranzaksyon avèk agent."
+},
+{
+  category: "agentsautorises",
+  question: "Èske agent yo disponib 24/7 ?",
+  answer: "Sa depann de orè agent la, men kèk sèvis dijital toujou disponib."
+},
+{
+  category: "agentsautorises",
+  question: "Kijan pou m jwenn direksyon pou ale jwenn agent ?",
+  answer: "Lis agent yo gen adrès egzak yo, ou ka itilize Google Maps pou jwenn wout la."
+},
+{
+  category: "agentsautorises",
+  question: "Èske agent ka pran komisyon ?",
+  answer: "Wi, men sa depann de règleman sèvis la, tout frè yo dwe klè."
+},
+{
+  category: "agentsautorises",
+  question: "Ki dokiman mwen bezwen pou fè tranzaksyon avèk agent ?",
+  answer: "Nimewo kont Wallet FOBAS ou, ID pèsonèl, epi enfòmasyon tranzaksyon an."
+},
+{
+  category: "agentsautorises",
+  question: "Èske agent ka fè sèvis pou lòt moun ?",
+  answer: "Wi, ak nimewo kont moun nan ak verifikasyon idantite li."
+},
+{
+  category: "agentsautorises",
+  question: "Ki kantite tranzaksyon agent ka fè nan yon jounen ?",
+  answer: "Pa gen limit fiks, men sistèm kontwole aktivite yo pou sekirite."
+},
+{
+  category: "agentsautorises",
+  question: "Eske agent ka ede si gen pwoblèm teknik sou kont mwen ?",
+  answer: "Wi, men sèlman pou tranzaksyon li sipèvize, lòt sipò teknik fèt atravè support."
+},
+{
+  category: "agentsautorises",
+  question: "Kijan pou m konnen agent yo toujou aktif ?",
+  answer: "Lis agent yo mete ajou regilyèman nan dashboard pou montre ki agent aktif."
+},
+{
+  category: "agentsautorises",
+  question: "Eske agent ka retire lajan san verifye kont mwen ?",
+  answer: "Non. Tout tranzaksyon mande validasyon sou kont Wallet FOBAS ou."
+},
+{
+  category: "agentsautorises",
+  question: "Èske gen fòmasyon pou agents yo ?",
+  answer: "Wi, tout agent otorize resevwa fòmasyon sou pwosedi FOBAS yo."
+},
+{
+  category: "agentsautorises",
+  question: "Kijan pou m kontakte support si agent fè erè ?",
+  answer: "Ou ka voye rapò atravè dashboard oswa kontakte WhatsApp/Email support la."
+},
+{
+  category: "agentsautorises",
+  question: "Èske agent yo gen obligasyon respekte règleman legal ?",
+  answer: "Wi, tout agents oblije swiv règleman lokal ak règleman FOBAS."
+},
+
+// ================= ERREURS TECHNIQUES (1–20) =================
+{
+  category: "erreurstechniques",
+  question: "Kisa pou m fè si paj la pa chaje ?",
+  answer: "Rafrechi paj la, tcheke koneksyon entènèt ou, oswa eseye nan yon lòt navigatè."
+},
+{
+  category: "erreurstechniques",
+  question: "Kisa pou m fè si tranzaksyon pa parèt nan istorik ?",
+  answer: "Tcheke tan rezo a, rafrechi dashboard la, epi kontakte support si pwoblèm la pèsiste."
+},
+{
+  category: "erreurstechniques",
+  question: "Kijan pou m rezoud erè 'Server Error' ?",
+  answer: "Sòti epi relouvri platfòm nan, verifye koneksyon entènèt, oswa kontakte support teknik."
+},
+{
+  category: "erreurstechniques",
+  question: "Kisa pou m fè si bouton pa klike ?",
+  answer: "Rafrechi paj la, tcheke si navigatè ou sipòte script, oswa eseye yon lòt navigatè."
+},
+{
+  category: "erreurstechniques",
+  question: "Kijan pou m evite erè nan depo oswa retrait ?",
+  answer: "Toujou verifye nimewo kont, kantite lajan, epi swiv enstriksyon agent oswa dashboard."
+},
+{
+  category: "erreurstechniques",
+  question: "Kisa pou m fè si imaj agent yo pa parèt ?",
+  answer: "Tcheke koneksyon entènèt, rafrechi paj la, oswa kontakte support si foto toujou pa chaje."
+},
+{
+  category: "erreurstechniques",
+  question: "Poukisa kòd OTP mwen pa rive ?",
+  answer: "Tcheke nimewo telefòn ou, resepsyon SMS oswa WhatsApp, epi mande nouvo OTP si nesesè."
+},
+{
+  category: "erreurstechniques",
+  question: "Kisa pou m fè si paj dashboard la ralanti ?",
+  answer: "Fè yon rafrechisman, fèmen lòt aplikasyon ki itilize entènèt, epi eseye ankò."
+},
+{
+  category: "erreurstechniques",
+  question: "Kijan pou m rapòte yon bug sou platfòm nan ?",
+  answer: "Sèvi ak bouton 'Rapòte Bug' nan dashboard oswa voye detay sou support WhatsApp/Email."
+},
+{
+  category: "erreurstechniques",
+  question: "Kisa pou m fè si paj la montre erè 404 ?",
+  answer: "Sa vle di resous la pa jwenn. Rafrechi paj la, oswa kontakte support si li repete."
+},
+{
+  category: "erreurstechniques",
+  question: "Kijan pou m rezoud erè pandan transfè ?",
+  answer: "Verifye nimewo benefisyè, solde kont, epi kontakte agent oswa support si pwoblèm la pèsiste."
+},
+{
+  category: "erreurstechniques",
+  question: "Kisa pou m fè si modpas mwen pa aksepte ?",
+  answer: "Tcheke si ou swiv règleman fòs modpas la, oswa itilize 'Mot de passe oublié'."
+},
+{
+  category: "erreurstechniques",
+  question: "Kijan pou m evite erè pandan verifikasyon KYC ?",
+  answer: "Chwazi foto klè, dokiman aktyèl, epi swiv egzakteman enstriksyon yo sou dashboard la."
+},
+{
+  category: "erreurstechniques",
+  question: "Kisa pou m fè si notifikasyon pa rive ?",
+  answer: "Tcheke paramèt notifikasyon nan kont ou, koneksyon entènèt, epi relanse app oswa paj la."
+},
+{
+  category: "erreurstechniques",
+  question: "Kijan pou m evite doublé tranzaksyon ?",
+  answer: "Toujou tann konfimasyon anvan ou rekòmanse operasyon an, epi swiv dashboard la."
+},
+{
+  category: "erreurstechniques",
+  question: "Kisa pou m fè si app a fèmen san avètisman ?",
+  answer: "Rdemare app a, rafrechi navigatè a, epi asire sistèm ou a mete ajou."
+},
+{
+  category: "erreurstechniques",
+  question: "Kijan pou m tcheke si pwoblèm nan soti nan rezo oswa platfòm ?",
+  answer: "Eseye lòt aparèy oswa navigatè; si pwoblèm la toujou la, kontakte support."
+},
+{
+  category: "erreurstechniques",
+  question: "Kisa pou m fè si imèl verifikasyon pa rive ?",
+  answer: "Tcheke bwat spam, asire ou mete imèl kòrèk, epi mande voye imèl ankò."
+},
+{
+  category: "erreurstechniques",
+  question: "Kijan pou m evite erè pandan retrait dijital ?",
+  answer: "Verifye detay kont ak kantite lajan, epi swiv etap sou dashboard ak agent."
+},
+{
+  category: "erreurstechniques",
+  question: "Kisa pou m fè si erè teknik repete anpil fwa ?",
+  answer: "Rapòte pwoblèm nan bay support teknik, enkli detay sou aparèy, navigatè, ak moman erè a."
+},
+
+// ================= LÉGAL & CONFORMITÉ (1–20) =================
+{
+  category: "legalconformite",
+  question: "Eske Wallet FOBAS legal nan peyi Ayiti ?",
+  answer: "Wi. Wallet FOBAS respekte tout règleman lokal yo epi opere avèk lisans finansye apwopriye."
+},
+{
+  category: "legalconformite",
+  question: "Kisa KYC ye ?",
+  answer: "KYC se pwosesis pou verifye idantite itilizatè yo pou konfòmite ak lwa anti-fwod."
+},
+{
+  category: "legalconformite",
+  question: "Eske verifye KYC obligatwa ?",
+  answer: "Wi. Tout itilizatè dwe konplete KYC pou itilize sèvis depo, retrait, ak transfè."
+},
+{
+  category: "legalconformite",
+  question: "Ki lwa finansye Wallet FOBAS suiv ?",
+  answer: "Wallet FOBAS suiv lwa finansye Ayiti, règleman bankè, ak estanda anti-blanchiment."
+},
+{
+  category: "legalconformite",
+  question: "Eske gen limit legal pou tranzaksyon ?",
+  answer: "Wi. Gen limit dapre règleman lokal ak nivo KYC itilizatè a."
+},
+{
+  category: "legalconformite",
+  question: "Kijan Wallet FOBAS asire konfòmite ?",
+  answer: "Nou itilize kontwòl entènen, rapò regilye, ak siveyans aktivite itilizatè."
+},
+{
+  category: "legalconformite",
+  question: "Eske done itilizatè yo pataje ak twazyèm pati ?",
+  answer: "Non. Done yo rete konfidansyèl epi chifreman selon lwa lokal ak entènasyonal."
+},
+{
+  category: "legalconformite",
+  question: "Ki sa itilizatè dwe konnen sou règleman sou fwod ?",
+  answer: "Tout itilizatè dwe respekte règleman platfòm pou evite fwod, penalite, oswa sispansyon kont."
+},
+{
+  category: "legalconformite",
+  question: "Eske Wallet FOBAS ka sispann kont yon itilizatè ?",
+  answer: "Wi, si gen aktivite sispèk oswa vyolasyon règleman legal yo."
+},
+{
+  category: "legalconformite",
+  question: "Kisa itilizatè dwe fè pou konfòme ak règleman ?",
+  answer: "Founi enfòmasyon kòrèk, pa itilize kont pou fwod, epi swiv règleman platfòm nan."
+},
+{
+  category: "legalconformite",
+  question: "Eske Wallet FOBAS konpatib ak lwa anti-blanchiment ?",
+  answer: "Wi, tout tranzaksyon yo kontwole pou anpeche blanchiman lajan."
+},
+{
+  category: "legalconformite",
+  question: "Eske gen règleman pou itilizasyon minè ?",
+  answer: "Wi. Itilizatè dwe gen omwen 18 an pou itilize platfòm nan."
+},
+{
+  category: "legalconformite",
+  question: "Kijan itilizatè ka rapòte vyolasyon legal ?",
+  answer: "Sèvi ak bouton 'Rapòte' sou dashboard oswa kontakte support legal."
+},
+{
+  category: "legalconformite",
+  question: "Eske FOBAS suiv estanda entènasyonal ?",
+  answer: "Wi. Nou suiv règleman entènasyonal sou dijital finance ak sekirite."
+},
+{
+  category: "legalconformite",
+  question: "Kijan Wallet FOBAS verifye idantite itilizatè yo ?",
+  answer: "Nou itilize dokiman ofisyèl, selfie, ak lòt metòd KYC pou verifye itilizatè yo."
+},
+{
+  category: "legalconformite",
+  question: "Eske gen restriksyon pou transfè entènasyonal ?",
+  answer: "Pou kounya, transfè entènasyonal limite dapre règleman ak kapasite platfòm nan."
+},
+{
+  category: "legalconformite",
+  question: "Eske itilizatè ka fè reklamasyon legal ?",
+  answer: "Wi. Tout itilizatè ka kontakte support legal pou reklamasyon oswa kesyon sou konfòmite."
+},
+{
+  category: "legalconformite",
+  question: "Ki responsablite itilizatè yo ?",
+  answer: "Itilizatè dwe sèvi ak kont la responsab, respekte lwa, epi verifye tout tranzaksyon."
+},
+{
+  category: "legalconformite",
+  question: "Eske Wallet FOBAS peye taks legal ?",
+  answer: "Wi. Platfòm nan respekte obligasyon fiskal nan peyi Ayiti."
+},
+{
+  category: "legalconformite",
+  question: "Kisa itilizatè dwe konnen sou règleman sou done pèsonèl ?",
+  answer: "Tout done pèsonèl yo trete selon lwa sou pwoteksyon done ak règleman konfidansyalite."
+},
+
 
   // ================= COMPTE (91–100) =================
   {
