@@ -13,12 +13,12 @@ const faqData = [
 {
   category: "depot",
   question: "Eske dépôt gen frè ?",
-  answer: "Wi, frè yo depann de sèvis ak agent ki fè operasyon an."
+  answer: "non, kèlkeswa metod la nou pap janm fè w' peye okenn frè pou depo."
 },
 {
   category: "depot",
   question: "Ki dépôt minimòm ki otorize ?",
-  answer: "Dépôt minimòm lan defini pa règleman aktyèl Wallet FOBAS."
+  answer: "Dépôt minimòm aktyèl Wallet FOBAS se 20 Goudes e, maksimom nan se 100 000 Gourdes."
 },
 {
   category: "depot",
@@ -38,12 +38,12 @@ const faqData = [
 {
   category: "depot",
   question: "Eske mwen ka fè dépôt pou yon lòt moun ?",
-  answer: "Wi, ou ka fè dépôt pou nenpòt itilizatè ak nimewo li."
+  answer: "Wi, ou ka fè dépôt pou nenpòt itilizatè ak E-mail  li men, le sa wap itilize bouton (Transferer) nou an depi Dashboard ou a."
 },
 {
   category: "depot",
   question: "Ki lajan Wallet FOBAS sipòte pou dépôt ?",
-  answer: "Pou kounya, Wallet FOBAS sipòte sèlman HTG (Gourdes)."
+  answer: "Pou kounya, Wallet FOBAS sipòte sèlman HTG (Gourdes), men selon Fondate yo, nan avni nap genyen US$ avek Euros, e vale nimerik nou itilize a rele (Wallet)"
 },
 {
   category: "depot",
@@ -88,17 +88,17 @@ const faqData = [
 {
   category: "depot",
   question: "Kijan pou verifye si yon agent otorize ?",
-  answer: "Verifye non agent lan nan lis agents autorisés FOBAS."
+  answer: "Verifye non ak E-mail agent lan nan lis agents autorisés FOBAS."
 },
 {
   category: "depot",
-  question: "Kisa k rive si dépôt fèt pa yon agent fo ?",
-  answer: "Wallet FOBAS pa responsab pou tranzaksyon fèt ak agent pa otorize."
+  question: "Kisa k rive si dépôt fèt pa yon fo agent ?",
+  answer: "Wallet FOBAS pa responsab pou tranzaksyon ki fèt ak yon fo agent ki pa otorize."
 },
 {
   category: "depot",
   question: "Eske dépôt entènasyonal posib ?",
-  answer: "Non. Dépôt entènasyonal pa disponib pou kounya."
+  answer: "Wi. Men, pou konnya Dépôt entènasyonal poko disponib sou platfom Wallet FOBAS."
 },
   // ================= RETRAIT (21–40) =================
   {
