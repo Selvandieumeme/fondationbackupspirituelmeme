@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>FAQ Wallet FOBAS</title>
+  <link rel="stylesheet" href="faqfobas.css">
+</head>
+<body>
+
+<header class="header">
+  <h1>❓ FAQ – Wallet FOBAS</h1>
+  <p>Toutes les réponses pour comprendre et utiliser Wallet FOBAS</p>
+</header>
+
+<!-- 🎯 Boutons Services -->
+<div class="faq-buttons">
+  <button onclick="filterFAQ('all')">Tout</button>
+  <button onclick="filterFAQ('depot')">💰 Dépôt</button>
+  <button onclick="filterFAQ('retrait')">💸 Retrait</button>
+  <button onclick="filterFAQ('transfert')">🔁 Transfert</button>
+  <button onclick="filterFAQ('bonus')">🎁 Bonus</button>
+  <button onclick="filterFAQ('securite')">🔐 Sécurité</button>
+  <button onclick="filterFAQ('compte')">👤 Compte</button>
+</div>
+
+<!-- 📘 FAQ LIST -->
+<div id="faqContainer" class="faq-container"></div>
+
+<!-- 🤖 CHATBOT -->
+<div class="chatbot">
+  <h3>🤖 Assistant FOBAS</h3>
+  <div id="chatMessages" class="chat-messages"></div>
+  <input type="text" id="chatInput" placeholder="Posez votre question…">
+  <button onclick="sendChat()">Envoyer</button>
+</div>
+
+<script src="faqfobas.js"></script>
+</body>
+</html>
