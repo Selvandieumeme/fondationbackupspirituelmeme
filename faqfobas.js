@@ -1696,13 +1696,13 @@ const faqData = [
 },
 {
   category: "micro_soutien_agents",
-  question: "Ki objektif Micro Soutien nan pou agents ?",
-  answer: "Fasilite operasyon, asire yo gen resous inisyal pou fè depo, retrait, ak transfè pou kliyan yo."
+  question: "Ki objektif Micro Soutien an pou agents yo?",
+  answer: "Fasilite operasyon, asire yo gen resous inisyal pou fè depo, retrait, ak transfè pou kliyan yo direkteman sou fom Wallets direkteman sou Compte Wallet FOBAS yo a."
 },
 {
   category: "micro_soutien_agents",
   question: "Ki kantite Micro Soutien yon agent ka resevwa ?",
-  answer: "Kantite a varye selon desizyon manb fondateurs yo ak nivo aktivite agent la."
+  answer: "Kantite a varye selon desizyon manb fondateurs yo ak nivo aktivite agent an."
 },
 {
   category: "micro_soutien_agents",
@@ -1737,7 +1737,7 @@ const faqData = [
 {
   category: "micro_soutien_agents",
   question: "Èske Micro Soutien ka itilize pou depans pèsonèl ?",
-  answer: "Non, li dwe itilize sèlman pou tranzaksyon ak operasyon platfòm nan."
+  answer: "Non, li dwe itilize sèlman pou tranzaksyon ak operasyon platfòm nan. Li repati sou 3 pati : 1) 15 000 Wallets sou 7 jou a pati de moman nou komanse avek lansman tout sevis platfom nan sou tout teritwa Haiti e ke l komanse bay sevis nan biznis li tankou retrait, depot ak transfert avek kliyante l li a, montan sa dwe retounen nanbiwo santral platfom direkteman kise Mare-Rouge, commune Mole Saint-Nicolas, oubyen remet direkteman reprezantan kominal ki sou tet yo a. 2) 15 000 Wallets pral la pou achte penti epi pentire mi biznis agent an kote li dwe mete logo Fondation FOBAS kise yon Soleil, ak slogan nou an kise WALLET FOBAS nan mi biznis kom viziblite ak fon Jaune, Bleu, Blanc. 3) 20 000 Wallets, ki pral gen kom misyon pou pemet ak Agent an komanse reseve retrait, depot ak transfert depi compte Wallet li a ki vin fe an total yon kantite de 50 000 Wallets ki se yon Avans operasyonel entèn pou sipote tout agent nan lasnman platfom nan sou tout teritwa Haiti."
 },
 {
   category: "micro_soutien_agents",
@@ -1762,17 +1762,17 @@ const faqData = [
 {
   category: "micro_soutien_agents",
   question: "Ki kalite sipò Micro Soutien ofri ?",
-  answer: "Sipò finansye pou depo, retrait, transfè, ak operasyon inisyal pou agents yo."
+  answer: "Sipò finansye pou depo, retrait, transfè, pou achte penti. pou peye teknisyen pou ki pentire mi biznis yo, pou pemet platfom nan rive peye fem tout biwo yo ak achte ekipman nesese pou biwo a men spesyalman nan demaraj sevis platfom nan sou tout teritwa peyi a, ak operasyon inisyal pou agents yo."
 },
 {
   category: "micro_soutien_agents",
   question: "Èske Micro Soutien ede agents grandi finansyèman ?",
-  answer: "Wi, li bay yo kapasite pou ogmante kantite wallets yo distribye ak pwofi yo."
+  answer: "Wi, li ba yo kapasite pou ogmante kantite wallets yo distribye ak pwofi yo."
 },
 {
   category: "micro_soutien_agents",
   question: "Ki responsabilite agent lè li resevwa Micro Soutien ?",
-  answer: "Sèvi ak lajan an pou objektif platfòm, rapòte aktivite yo, epi rete konfyab."
+  answer: "konvèti kantite Wallets sa yo sou fom lajan kach lè yap bay sèvis ak kliyan yo nan objektif platfòm, rapòte aktivite yo, epi rete konfyab."
 },
 {
   category: "micro_soutien_agents",
@@ -1800,12 +1800,12 @@ const faqData = [
 {
   category: "micro_soutien_clients",
   question: "Ki objektif Micro Soutien pou itilizatè yo ?",
-  answer: "Pou ede yo aksede sèvis tankou depo, retrait, transfè, epi ankouraje endepandans finansye."
+  answer: "Pou ede yo jwenn libete finansye yo, nan sipote yo pou yo kapab vin genyen yon bon biznis pou yo kapab soti nan eta povrete ou nan eta depandans finansye, men dabo platfom nan ki misyon pou fome yo avek ton fomasyon (Education Financiere) epi ankouraje endepandans finansye."
 },
 {
   category: "micro_soutien_clients",
   question: "Kijan itilizatè resevwa Micro Soutien ?",
-  answer: "Avans la kredite otomatikman sou kont yo selon desizyon manb fondateurs yo."
+  answer: "Avans la ajoute otomatikman sou kont yo sou fom Wallets epi yap fil al chanje l sou fom kash nan nenpot biwo agent autorise ki pi pre lakay yo, selon desizyon manb fondateurs yo, e yo gen pou yo remet montant sa avek yon ti kras entere jis yo fin ranbouse tout montan nou te sipote yo a."
 },
 {
   category: "micro_soutien_clients",
@@ -1825,7 +1825,7 @@ const faqData = [
 {
   category: "micro_soutien_clients",
   question: "Èske Micro Soutien ka itilize pou lòt sèvis pase Wallet FOBAS ?",
-  answer: "Non, li dwe itilize sèlman nan sèvis ofisyèl platfòm nan."
+  answer: "Wi, se pou itilizatè nou yo kapab rive mete yon bon biznis sou pye ki pral pemet yo vin atenn ak libète finansye yo, jis pou yo ka sispann depann sou lajan lot moun."
 },
 {
   category: "micro_soutien_clients",
@@ -1840,7 +1840,7 @@ const faqData = [
 {
   category: "micro_soutien_clients",
   question: "Kijan itilizatè ka verifye Micro Soutien yo ?",
-  answer: "Via dashboard yo, nan seksyon Micro Soutien."
+  answer: "Via dashboard yo, nan seksyon Micro Soutien ak direkteman nan balans aktyèl yo de ke yo fin apwouve pa manb Fondatè yo."
 },
 {
   category: "micro_soutien_clients",
@@ -1849,8 +1849,8 @@ const faqData = [
 },
 {
   category: "micro_soutien_clients",
-  question: "Ki konsekans si Micro Soutien itilize mal ?",
-  answer: "Fondateurs ka revoke avans lan oswa pran mezi disiplinè."
+  question: "Ki konsekans si Micro Soutien mal itilize ?",
+  answer: "Fondateurs ka revoke avans lan oswa pran mezi disiplinè e, si lajistis dwe antre ladan l' nap fè sa."
 },
 {
   category: "micro_soutien_clients",
@@ -1860,12 +1860,12 @@ const faqData = [
 {
   category: "micro_soutien_clients",
   question: "Ki avantaj Micro Soutien pou itilizatè ?",
-  answer: "Bay yo opòtinite pou ogmante tranzaksyon yo, pwofi, ak eksperyans sou platfòm nan."
+  answer: "Bay yo opòtinite pou ogmante tranzaksyon yo, pwofi, ak eksperyans sou platfòm nan ak nan vi chak jou yo."
 },
 {
   category: "micro_soutien_clients",
   question: "Èske itilizatè ka itilize Micro Soutien pou kouvri frè tranzaksyon ?",
-  answer: "Wi, sèlman pou tranzaksyon ofisyèl sou platfòm nan."
+  answer: "Wi, sèlman pou tranzaksyon ofisyèl sou platfòm nan, men pi gwo objektif la se rive mete yon bon biznis sou pye pou yo pa depann de okenn lot moun."
 },
 {
   category: "micro_soutien_clients",
@@ -1880,12 +1880,12 @@ const faqData = [
 {
   category: "micro_soutien_clients",
   question: "Ki responsabilite itilizatè lè yo resevwa Micro Soutien ?",
-  answer: "Sèvi ak lajan an sèlman pou sèvis platfòm, rapòte aktivite yo, epi respekte règleman."
+  answer: "Sèvi ak lajan an sèlman pou sèvis platfòm, mete yon bon biznis ki kapab rapote yo sou pye, rapòte aktivite yo, epi respekte règleman."
 },
 {
   category: "micro_soutien_clients",
   question: "Èske itilizatè ka revandike plis Micro Soutien si yo depase aktivite ?",
-  answer: "Wi, fondateurs ka ajiste kantite pou itilizatè aktif yo."
+  answer: "Wi, fondateurs ka ajiste kantite pou itilizatè aktif yo men sa konsène inikman manb Fondatè platfom nan."
 },
 {
   category: "micro_soutien_clients",
