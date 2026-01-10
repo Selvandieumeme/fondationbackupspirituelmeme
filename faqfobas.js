@@ -206,17 +206,17 @@ const faqData = [
   {
   category: "transfert",
   question: "Kijan pou transfere lajan sou Wallet FOBAS ?",
-  answer: "Antre nimewo benefisyè a epi valide tranzaksyon an."
+  answer: "Antre E-mail ekzat, ak montan wap transfere bay benefisyè a epi valide tranzaksyon an."
 },
 {
   category: "transfert",
   question: "Eske transfè fèt imedyatman ?",
-  answer: "Wi. Transfè yo fèt imedyat apre validasyon."
+  answer: "Wi. Transfè yo fèt imedyat apre validasyon. Le se sou fom Retrait kay yon Agent Autorise, li pran fom Retrait le se wap peye yon fre ki se 1%, le se itilizate ak itilizate, transfert la 100% gratis depi Dashboard ou a"
 },
 {
   category: "transfert",
   question: "Eske transfè gen frè ?",
-  answer: "Wi, gen ti frè selon montan an."
+  answer: "Non, transfert gratis sou platfom nan pou konnya, men le w itilize l sou fom Retait li gen yon fre kise 1% kay nenpot Agent Autorise"
 },
 {
   category: "transfert",
@@ -226,7 +226,7 @@ const faqData = [
 {
   category: "transfert",
   question: "Eske mwen ka transfere lajan bay tèt mwen ?",
-  answer: "Wi, si ou gen plizyè kont oswa nimewo valide."
+  answer: "Wi, si ou gen plizyè kont oswa E-mail valide, men le sa wap rele sa (Depot) li pap rele trasnfert anko, men an jeneral okenn moun paka fe transfert depi Dashboard yo bay pwop tet yo."
 },
 {
   category: "transfert",
@@ -235,13 +235,13 @@ const faqData = [
 },
 {
   category: "transfert",
-  question: "Kisa k rive si mwen fè erè nan nimewo benefisyè a ?",
-  answer: "Transfè a pa ka ranvèse. Toujou verifye nimewo a."
+  question: "Kisa k rive si mwen fè erè nan E-mail benefisyè a ?",
+  answer: "Transfè a pa ka ranvèse. Toujou verifye E-mail la, epi kontakte assistance 24/7 depi ashboard ou a imedyatman yon aksyon konsa ta rive fet."
 },
 {
   category: "transfert",
   question: "Eske transfè entènasyonal sipòte ?",
-  answer: "Non. Transfè entènasyonal pa disponib pou kounya."
+  answer: "Wi, men pou konnya Transfè entènasyonal pa disponib sou platfom nan."
 },
 {
   category: "transfert",
@@ -256,7 +256,7 @@ const faqData = [
 {
   category: "transfert",
   question: "Eske transfè ka bay bonus ?",
-  answer: "Wi, selon pwomosyon ak kanpay aktif."
+  answer: "Wi, selon pwomosyon ak kanpay aktif platfom nan."
 },
 {
   category: "transfert",
@@ -271,7 +271,7 @@ const faqData = [
 {
   category: "transfert",
   question: "Eske yon transfè ka an atant ?",
-  answer: "Rèd. Nan ka teknik espesyal, li ka pran kèk segond."
+  answer: "Pou konnya repons lan se non,  tout transfert yo fet apre validasyon agent ou itilizate a otomatikman san apwobasyon Admin, li pran kèk segond."
 },
 {
   category: "transfert",
@@ -281,7 +281,7 @@ const faqData = [
 {
   category: "transfert",
   question: "Ki transfè maksimòm pa jou ?",
-  answer: "Limit maksimòm lan defini pa règleman Wallet FOBAS."
+  answer: "Limit maksimòm pou yon itilizate pa jou se (100 000 Gourdes)."
 },
 {
   category: "transfert",
