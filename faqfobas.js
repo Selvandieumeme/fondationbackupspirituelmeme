@@ -925,7 +925,7 @@ const faqData = [
 },
 {
   category: "managers",
-  question: "Konbyen Managers Régionaux genyen ?",
+  question: "Konbyen Managers Régionaux ki genyen ?",
   answer: "Gen 10 Managers, youn pou chak depatman prensipal nan peyi a."
 },
 {
@@ -941,7 +941,7 @@ const faqData = [
 {
   category: "managers",
   question: "Kijan nou chwazi yon Manager Régional ?",
-  answer: "Seleksyon fèt sou baz eksperyans, konpetans nan sèvis finansye, ak kredibilite."
+  answer: "Seleksyon fèt sou baz eksperyans, konpetans nan sèvis finansye, ak kredibilite dirèkteman pa manb Fondatè FOBAS yo."
 },
 {
   category: "managers",
@@ -961,12 +961,12 @@ const faqData = [
 {
   category: "managers",
   question: "Ki privilej yon Manager genyen ?",
-  answer: "Aksè a rapò depatman, sipèvizyon agent, validasyon operasyon, epi kowòdone ekip la."
+  answer: "Aksè a rapò depatman, sipèvizyon agent, Reprezantan kominal, validasyon operasyon, epi kowòdone ekip la, se li k distribiye kantite wallets sou tout depatman l lan bay tout Reprezantan zonn yo."
 },
 {
   category: "managers",
   question: "Èske yon Manager ka modifye kont itilizatè ?",
-  answer: "Non, yo pa gen aksè sou kont itilizatè. Yo jere sèlman agent ak operasyon."
+  answer: "Non, yo pa gen aksè sou kont itilizatè. Yo jere sèlman agent, Reprezantan kominal yo ak operasyon sou tout depatman pa l la."
 },
 {
   category: "managers",
@@ -1001,21 +1001,21 @@ const faqData = [
 {
   category: "managers",
   question: "Kisa yo dwe fè an ka fwod oswa erè agent ?",
-  answer: "Rapòte imedyatman bay administrasyon santral ak ekip legal."
+  answer: "Rapòte imedyatman bay administrasyon santral ak ekip legal platfom nan."
 },
 {
   category: "managers",
   question: "Ki rapò yo dwe soumèt ?",
-  answer: "Rapò sou tranzaksyon, pèfòmans agent, ak pwoblèm operasyon."
+  answer: "Rapò sou tranzaksyon, pèfòmans agent, pefomans reprezantan kominal yo ak pwoblèm operasyon."
 },
 {
   category: "managers",
-  question: "Èske yo ka fè fòmasyon agent ?",
+  question: "Èske yo ka fè fòmasyon agent, reprezantan kominal yo ?",
   answer: "Wi. Yo òganize sesyon fòmasyon regilye pou ogmante efikasite ak konfòmite."
 },
 {
   category: "managers",
-  question: "Èske yo ka jere konfli ant agent ?",
+  question: "Èske yo ka jere konfli ant agent ak reprezantan kominal yo ?",
   answer: "Wi. Yo medye nan konfli epi rapòte si nesesè."
 },
 {
@@ -1025,8 +1025,8 @@ const faqData = [
 },
 {
   category: "managers",
-  question: "Èske yo ka fè chanjman nan lis agent ?",
-  answer: "Non. Lis agent yo jere pa administrasyon santral."
+  question: "Èske yo ka fè chanjman nan lis agent ak reprezantan kominal yo ?",
+  answer: "Non. Lis agent ak reprezantan kominal yo jere pa administrasyon santral."
 },
 {
   category: "managers",
@@ -1040,13 +1040,13 @@ const faqData = [
 },
 {
   category: "managers",
-  question: "Kijan yo swiv KPI ak objektif depatman ?",
+  question: "Kijan yo swiv KPI ak objektif depatman (Key Performance Indicator) oubyen an kreyol (Endikatè Kle Pèfòmans) ?",
   answer: "Atravè dashboard espesyal ki montre pèfòmans agent ak tranzaksyon."
 },
 {
   category: "managers",
   question: "Èske yo ka delegue travay yo ?",
-  answer: "Wi, yo ka delegue nan agent otorize men rete responsab final."
+  answer: "non, yo paka delege okenn lot moun nan plas yo, se travay yap travay pou tèt yo dirèkteman anndan platfom FOBAS la, lot moun paka ranplase yo plas yo sof si se revoke yo revoke oubyen selon planifikasyon ekip fondatè yo an ka malad ou aksidan."
 },
 {
   category: "managers",
@@ -1076,7 +1076,7 @@ const faqData = [
 {
   category: "managers",
   question: "Kisa ki ka mete yo an danje nan pozisyon sa ?",
-  answer: "Vyolasyon règleman, fwod, abi pozisyon, oswa mank siveyans sou agent yo."
+  answer: "Vyolasyon règleman, fwod, abi pozisyon, oswa mank siveyans sou agent ak reprezantan kominal yo."
 },
 
 // ================= NOS 10 SUPERVISEURS (1–30) =================
