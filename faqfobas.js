@@ -635,7 +635,7 @@ const faqData = [
 {
   category: "erreurstechniques",
   question: "Kijan pou m evite erè nan depo oswa retrait ?",
-  answer: "Toujou verifye nimewo kont, kantite lajan, epi swiv enstriksyon agent oswa dashboard."
+  answer: "Toujou verifye E-mail kont ou an ak E-mail swa Agent kap sevi w la oubyen E-mail itilizate wap fe depo pou li a, kantite lajan, epi swiv enstriksyon agent oswa dashboard."
 },
 {
   category: "erreurstechniques",
@@ -645,7 +645,7 @@ const faqData = [
 {
   category: "erreurstechniques",
   question: "Poukisa kòd OTP mwen pa rive ?",
-  answer: "Tcheke nimewo telefòn ou, resepsyon SMS oswa WhatsApp, epi mande nouvo OTP si nesesè."
+  answer: "Tcheke telefonn ou, resepsyon SMS oswa WhatsApp, epi mande nouvo OTP si nesesè."
 },
 {
   category: "erreurstechniques",
@@ -655,7 +655,7 @@ const faqData = [
 {
   category: "erreurstechniques",
   question: "Kijan pou m rapòte yon bug sou platfòm nan ?",
-  answer: "Sèvi ak bouton 'Rapòte Bug' nan dashboard oswa voye detay sou support WhatsApp/Email."
+  answer: "Sèvi ak bouton (Assistance 24/7) depi nan dashboard oswa voye detay sou support pa Email platfom nan kise (infos@fondationbackupspirituel.com)."
 },
 {
   category: "erreurstechniques",
@@ -665,12 +665,12 @@ const faqData = [
 {
   category: "erreurstechniques",
   question: "Kijan pou m rezoud erè pandan transfè ?",
-  answer: "Verifye nimewo benefisyè, solde kont, epi kontakte agent oswa support si pwoblèm la pèsiste."
+  answer: "Verifye E-mail benefisyè, solde kont, epi kontakte agent oswa support si pwoblèm la pèsiste."
 },
 {
   category: "erreurstechniques",
   question: "Kisa pou m fè si modpas mwen pa aksepte ?",
-  answer: "Tcheke si ou swiv règleman fòs modpas la, oswa itilize 'Mot de passe oublié'."
+  answer: "Tcheke si ou swiv règleman fòs modpas la, oswa itilize 'Mot de passe oublié', oubyen kontakte direkteman (Assistance 24/7) pou sipo Admin ka jenere yon nouvo mot de passe tanpore pou w kapab tounen jwenn akse avek kont Wallet FOBAS ou a."
 },
 {
   category: "erreurstechniques",
@@ -690,7 +690,7 @@ const faqData = [
 {
   category: "erreurstechniques",
   question: "Kisa pou m fè si app a fèmen san avètisman ?",
-  answer: "Rdemare app a, rafrechi navigatè a, epi asire sistèm ou a mete ajou."
+  answer: "Rdemare app la, rafrechi navigatè a, epi asire sistèm ou a mete ajou."
 },
 {
   category: "erreurstechniques",
