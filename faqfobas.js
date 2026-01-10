@@ -1382,12 +1382,12 @@ const faqData = [
 {
   category: "utilisateurs",
   question: "Kijan pou m kreye yon kont itilizatè Wallet FOBAS ?",
-  answer: "Ale sou app oswa sit web, antre nimewo telefòn ou, resevwa kòd OTP, epi kreye modpas sekirize."
+  answer: "Ale sou app oswa sit web, klike sou (Creer Compte Wallet FOBAS), apresa glise dwet jis nou rive sou gran fomile ki ekri an koule "vert", epi ranpli fom nan, chan apre chan, (Nom/Prenom), antre nan chan (Parrain/Marraine) ekzateman nom konple moun ki te envite w enskri a, antre (nimewo Whatsapp ou), (E-mail ou), re tape menm (E-mail la) nan 2em chan ki se (E-mail de recuperation), antre date de Naissance, (Lieu de Naissance), non (statut ou) vle a tankou Agent Autorise, epi byen antre (Mot de Passe ou), re tape l anko nan chan (confirmer mot de passe) e pou fini klike sou vouton (Creer mon compte Wallet FOBAS) tann kek segond epi wap resevwa yon mesaj ki d "Compte Wallet FOBAS ou a rive kreye avek siksè, li an koule vert."
 },
 {
   category: "utilisateurs",
   question: "Ki sèvis mwen ka itilize kòm itilizatè ?",
-  answer: "Dépôt, retrait, transfè, ak jwenn bonus selon kanpay yo."
+  answer: "Dépôt, retrait, transfè, ak jwenn bonus selon kanpay yo, ak tout lot sevis nou gen pou n afiche depi tout Dashboard nou yo dinamikman nasyonal ak entènasyonal."
 },
 {
   category: "utilisateurs",
@@ -1407,7 +1407,7 @@ const faqData = [
 {
   category: "utilisateurs",
   question: "Kijan pou m fè yon retrait ?",
-  answer: "Ale lakay agent autorisé ou, verifye ak OTP, epi resevwa lajan ou."
+  answer: "Ale lakay agent autorisé ou, itilize Dashbaord ou, antre E-mail Agent autorise kap sevi w la san okenn erè, epi resevwa lajan ou."
 },
 {
   category: "utilisateurs",
@@ -1422,7 +1422,7 @@ const faqData = [
 {
   category: "utilisateurs",
   question: "Kijan pou m jwenn bonus ?",
-  answer: "Pa fè dépôt, patisipe nan promo oswa pwogram fidélité."
+  answer: "Pa fè dépôt, patisipe nan promo oswa pwogram fidélité tankou, pemet platfom nan jwenn yon nouvo Agent autorise, aksyon sa vo (25 Wallets ki egal ak 25 Goudes), pemet yon nouvo moun enskri menm jan avew, aksyon sa vo (10 Wallets ki egal ak 10 Gourdes) e lè Bonus ou rive (2500 Wallets ki egal 25000 Gourdes) peze bouton (Retirer Bonus) pou montan sa kapab ale dirèkteman nan balans aktyèl ou epi ou kal pran lajan sa nan nenpot biwo Agent Autorisé ki pi pre lakay ou."
 },
 {
   category: "utilisateurs",
@@ -1442,17 +1442,17 @@ const faqData = [
 {
   category: "utilisateurs",
   question: "Kisa pou m fè si mwen bliye modpas mwen ?",
-  answer: "Klike 'Mot de passe oublié', resevwa OTP, epi kreye nouvo modpas."
+  answer: " San pedi tan kontakte sistem asistan platfom nan pa Whatsapp kise +50946057952 pou w fe sin de sa oubyen itilize Email ofisyel Fondation FOBAS kise (infos@fondationbackupspirituel.com) pou w ka fe ekip la konn sa, konsa nap jis jenere yon nouvo mot de passe tanpore pou w ka gen akse anko avek Dashboard ou a, e de kew fin antre sou li, ale direkteman san pedi tan sou bouton (Changer mot de Passe), antre nouvo mot de passe tanpore nou sot jenere pou ou a, apresa antre nouvo mot de passe ou konnen w pap janm ka rive bliye nan vi w, apresa konfime nouvo mot de passe la apresa klike sou bouton (Modifier) epi nan kek segond wap jwenn yon mesaj ki di w mot de passe ou a rive chanje avek sikse."
 },
 {
   category: "utilisateurs",
-  question: "Èske mwen ka chanje nimewo telefòn mwen sou kont la ?",
+  question: "Èske mwen ka chanje nimewo telefòn mwen sou kont la men kanta E-mail ou a ou pap janm ka chanje l, depi w kreye kont ou an avek yon E-mail ou kreye l net e pap janm ka gen plizye moun ki genyen menm E-mail, chak itilizate genyen pwop E-mail idantik li sou platfom nan pou plis sekirite ?",
   answer: "Wi, apre yon pwosesis verifikasyon idantite avèk support FOBAS."
 },
 {
   category: "utilisateurs",
   question: "Ki avantaj mwen jwenn kòm itilizatè ?",
-  answer: "Sekirite, rapidite nan tranzaksyon, aksè a bonus ak sèvis dijital."
+  answer: "Sekirite, rapidite nan tranzaksyon, aksè ak bonus ak sèvis dijital."
 },
 {
   category: "utilisateurs",
@@ -1477,7 +1477,7 @@ const faqData = [
 {
   category: "utilisateurs",
   question: "Ki lajan Wallet FOBAS sipòte ?",
-  answer: "Pouvwa itilize HTG (Gourdes)."
+  answer: "Pouvwa itilize HTG (Gourdes), men a nenpot moman ekip Fondateurs yo kapab ajoute nenpot lot deviz sou platfom nan tankou US $ ak Euros."
 },
 {
   category: "utilisateurs",
@@ -1487,12 +1487,12 @@ const faqData = [
 {
   category: "utilisateurs",
   question: "Kijan pou m verifye kont mwen ?",
-  answer: "Sèvi ak pwosesis KYC nan app oswa dashboard pou idantifikasyon."
+  answer: "Sèvi ak dashboard ou direkteman pou idantifikasyon."
 },
 {
   category: "utilisateurs",
   question: "Èske mwen ka fè depo pou yon lòt moun ?",
-  answer: "Wi. Antre nimewo benefisyè a epi konfime avèk OTP."
+  answer: "Wi. Antre Email benefisyè a epi montant an wap voye pou li a depi Dashboard ou pou konnya se ak bouton (Transferer) wap ka fe sa selman san okenn fre anplis."
 },
 {
   category: "utilisateurs",
@@ -1511,18 +1511,18 @@ const faqData = [
 },
 {
   category: "utilisateurs",
-  question: "Èske mwen ka transfere lajan nan men yon agent fo ?",
+  question: "Èske mwen ka transfere lajan nan men yon fo agent ?",
   answer: "Non. Sèl Agents autorisés ki ka resevwa tranzaksyon legal."
 },
 {
   category: "utilisateurs",
   question: "Kijan mwen ka retire yon bonus ?",
-  answer: "Si kondisyon règleman yo satisfè, retire a disponib atravè agent oswa platfòm dijital."
+  answer: "De ke solde Bonus an rive nan sey minimom platfom nan kise (2500 Wallets ki egal ak 2500 Gourdes), retire a disponib depi bouton Bonus) la, antre montan bonis wap retire a, epi peze sou bouton (retire) depi Dashboard ou, yon notifikasyon pral jwenn santral apre validasyon kew reyelman genyen lajan bonis sa sou kont ou, montan sa ap ajoute sou balans aktyel ou e ou kapab al retire lajan sa nan nenpot biwo Agent autorisé FOBAS ki pi pre lakay ou."
 },
 {
   category: "utilisateurs",
   question: "Kijan pou m verifye balans mwen ?",
-  answer: "Balans la disponib nan dashboard itilizatè sou app oswa sit web la."
+  answer: "Balans la disponib nan dashboard itilizatè a, anwo, a dwat sou app oswa sit web la."
 },
 {
   category: "utilisateurs",
