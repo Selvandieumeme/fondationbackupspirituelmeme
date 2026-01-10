@@ -1903,6 +1903,487 @@ const faqData = [
   answer: "Wi, itilizatè ka kontakte ekip support oswa fondateurs pou nenpòt kesyon oswa ijans."
 },
 
+// ================= CONSEILLER OFFICIEL (1–30) =================
+{
+  category: "conseiller_officiel",
+  question: "Ki sa post Conseiller Officiel nan Wallet FOBAS ye ?",
+  answer: "Se yon post konseye ofisyèl pou fondateurs yo, ki bay direktiv sou tout aspè operasyonèl, estratejik, ak jesyon platfòm nan."
+},
+{
+  category: "conseiller_officiel",
+  question: "Ki moun ki okipe post sa ?",
+  answer: "M. ERnson Appolon se sèl Conseiller Officiel Wallet FOBAS la."
+},
+{
+  category: "conseiller_officiel",
+  question: "Ki wòl prensipal Conseiller Officiel la ?",
+  answer: "Bay konsèy fondateur yo, revize tout desizyon estratejik, ak siveye aplikasyon règleman sou tout post yo."
+},
+{
+  category: "conseiller_officiel",
+  question: "Èske Conseiller Officiel ka ranplase fondateurs yo ?",
+  answer: "Non. Sèlman fondateurs yo gen pouvwa pou chanje estrikti final platfòm nan."
+},
+{
+  category: "conseiller_officiel",
+  question: "Ki privilèj Conseiller Officiel genyen sou lòt post yo ?",
+  answer: "Li ka jwi privilèj nenpòt post tankou Manager National oswa lòt post espesyal, dapre bezwen konseye yo."
+},
+{
+  category: "conseiller_officiel",
+  question: "Èske gen limit sou privilèj li ?",
+  answer: "Wi, li pa ka ranplase oswa pran desizyon fondateur yo san konsantman yo."
+},
+{
+  category: "conseiller_officiel",
+  question: "Ki relasyon li ak Managers Regional yo ?",
+  answer: "Li ka revize aksyon yo, bay konsèy, epi ede amelyore pèfòmans yo."
+},
+{
+  category: "conseiller_officiel",
+  question: "Ki relasyon li ak Superviseurs yo ?",
+  answer: "Li sipèvize yo konsèy estratejik, men li pa ka revoke yo, sa sèlman fondateurs ka fè."
+},
+{
+  category: "conseiller_officiel",
+  question: "Èske li gen aksè sou tout rapò ak done platfòm nan ?",
+  answer: "Wi, li gen aksè total pou analiz ak konseye fondateurs yo sou desizyon."
+},
+{
+  category: "conseiller_officiel",
+  question: "Ki limit responsablite li ?",
+  answer: "Li konseye sèlman; li pa gen pouvwa final pou revokasyon oswa chanjman estriktirèl san fondateurs yo."
+},
+{
+  category: "conseiller_officiel",
+  question: "Ki benefis li jwenn nan post sa ?",
+  answer: "Privilèj administratif, aksè rapid sou tout post, konsèy dirèk ak fondateurs, ak vizibilite total sou platfòm nan."
+},
+{
+  category: "conseiller_officiel",
+  question: "Ki responsabilite li pou Agents Autorisés ?",
+  answer: "Li ka evalye aktivite yo epi bay rekomandasyon sou amelyorasyon, men pa dirèkteman kontwole yo."
+},
+{
+  category: "conseiller_officiel",
+  question: "Ki responsabilite li pou Kliyan/Itlizatè yo ?",
+  answer: "Siveye operasyon pou asire sèvis kòrèk, men li pa jere kont kliyan yo dirèkteman."
+},
+{
+  category: "conseiller_officiel",
+  question: "Ki limit li sou sipèvizyon Managers National ?",
+  answer: "Li ka konseye yo ak revize desizyon yo, men li pa ka revoke oswa ranplase yo."
+},
+{
+  category: "conseiller_officiel",
+  question: "Ki limit li sou Superviseurs ?",
+  answer: "Li ka bay konsèy, rapò, ak analiz sou aktivite yo, men pa gen pouvwa final."
+},
+{
+  category: "conseiller_officiel",
+  question: "Ki limit li sou Representants Communaux ?",
+  answer: "Li ka revize aksyon yo epi konseye, men pa jere operasyon yo dirèkteman."
+},
+{
+  category: "conseiller_officiel",
+  question: "Kisa ki ka mennen li pèdi post sa ?",
+  answer: "Mank etik, move jere konsèy, oswa vyolasyon règleman platfòm la dapre desizyon fondateurs yo."
+},
+{
+  category: "conseiller_officiel",
+  question: "Èske li ka revoke yon agent oswa itilizatè ?",
+  answer: "Non, sèlman fondateurs yo gen pouvwa sa."
+},
+{
+  category: "conseiller_officiel",
+  question: "Ki fason li ka ede optimize platfòm nan ?",
+  answer: "Analiz rapò, konseye sou operasyon, devlopman estrateji, ak amelyore efikasite post yo."
+},
+{
+  category: "conseiller_officiel",
+  question: "Èske li ka patisipe nan desizyon finansye platfòm nan ?",
+  answer: "Wi, li ka konseye sou desizyon finansye men fondateurs gen desizyon final la."
+},
+{
+  category: "conseiller_officiel",
+  question: "Ki avantaj li genyen nan kolaborasyon ak fondateurs yo ?",
+  answer: "Li ka bay konsèy dirèk, amelyore estrateji, epi gen aksè sou tout dosye kritik platfòm nan."
+},
+{
+  category: "conseiller_officiel",
+  question: "Ki limit nan aksè li nan operasyon chak jou ?",
+  answer: "Li ka wè tout done epi bay konsèy, men li pa ka fè chanjman san apwobasyon fondateurs yo."
+},
+{
+  category: "conseiller_officiel",
+  question: "Ki responsabilite li pou mentni konfidansyalite ?",
+  answer: "Li dwe kenbe tout done ak rapò platfòm nan konfidansyèl epi itilize sèlman pou konsèy."
+},
+{
+  category: "conseiller_officiel",
+  question: "Èske li ka jwe post Manager National san limit ?",
+  answer: "Wi, li ka pran privilèj Manager National nenpòt moman, toujou anba sipèvizyon fondateurs."
+},
+{
+  category: "conseiller_officiel",
+  question: "Ki responsabilite li pou respekte règleman ?",
+  answer: "Li dwe suiv tout règleman platfòm nan epi konseye lòt post yo sou konfòmite."
+},
+{
+  category: "conseiller_officiel",
+  question: "Kijan li ka patisipe nan devlopman nouvo post ?",
+  answer: "Li konseye fondateurs sou bezwen, avantaj, ak règleman nouvo post yo."
+},
+{
+  category: "conseiller_officiel",
+  question: "Èske li ka kreye règleman nouvo sou platfòm nan ?",
+  answer: "Non, li konseye sèlman; desizyon final rete ak fondateurs yo."
+},
+{
+  category: "conseiller_officiel",
+  question: "Ki relasyon li ak Micro Soutien ?",
+  answer: "Li ka analize itilizasyon ak distribisyon Micro Soutien epi bay fondateurs rekòmandasyon."
+},
+{
+  category: "conseiller_officiel",
+  question: "Èske li ka bay konsèy sou privilèj post lòt manb ?",
+  answer: "Wi, li ka evalye privilèj ak aksè lòt post yo epi fè rekòmandasyon."
+},
+{
+  category: "conseiller_officiel",
+  question: "Ki limit li sou relasyon ak Kliyan ?",
+  answer: "Li ka konseye sou sèvis ak opsyon pou kliyan, men pa gen aksè dirèk sou kont yo."
+},
+{
+  category: "conseiller_officiel",
+  question: "Èske li ka ede rezoud konfli ant post ?",
+  answer: "Wi, li konseye pou rezoud konfli, men desizyon final toujou nan men fondateurs."
+},
+{
+  category: "conseiller_officiel",
+  question: "Ki benefis li jwenn nan aksè total sou post yo ?",
+  answer: "Li ka jere analiz, evalyasyon, konseye sou estrateji, epi amelyore efikasite operasyon platfòm nan."
+},
+{
+  category: "conseiller_officiel",
+  question: "Ki limit li sou rapò piblik oswa kominikasyon eksteryè ?",
+  answer: "Li dwe itilize tout done sèlman pou konsèy, pa ka fè deklarasyon ofisyèl san apwobasyon fondateurs."
+},
+  
+// ================= MANAGER NATIONAL (1–30) =================
+{
+  category: "manager_national",
+  question: "Ki sa post Manager National nan Wallet FOBAS ye ?",
+  answer: "Se post ki pi sansib ak estratejik, ki kouvri tout operasyon platfòm nan atravè 10 depatman peyi a."
+},
+{
+  category: "manager_national",
+  question: "Ki moun ki ka nonme yon Manager National ?",
+  answer: "Sèlman Fondateurs Wallet FOBAS yo ka nonme yon Manager National."
+},
+{
+  category: "manager_national",
+  question: "Ki wòl prensipal Manager National la ?",
+  answer: "Li sipèvize tout post atravè peyi a, kolabore ak Superviseur National, Conseiller Officiel, Sekretè Platfòm, ak Assistante Virtuelle."
+},
+{
+  category: "manager_national",
+  question: "Èske Manager National ka revoke lòt post ?",
+  answer: "Li ka sijere oswa rapòte pwoblèm, men sèlman Fondateurs yo ka fè revokasyon final la."
+},
+{
+  category: "manager_national",
+  question: "Ki privilèj Manager National genyen ?",
+  answer: "Aksè total nan operasyon, rapò sou tout depatman, kolaborasyon ak post kle, ak kapasite pou evalye pèfòmans."
+},
+{
+  category: "manager_national",
+  question: "Èske Manager National ka pran desizyon finansye ?",
+  answer: "Li ka konseye ak pwopoze plan finansye, men desizyon final rete ak Fondateurs yo."
+},
+{
+  category: "manager_national",
+  question: "Ki limit responsablite Manager National ?",
+  answer: "Li pa ka ranplase Fondateurs yo ni chanje règ estriktirèl san apwobasyon yo."
+},
+{
+  category: "manager_national",
+  question: "Ki relasyon li ak Superviseur National ?",
+  answer: "Li travay ansanm pou asire tout operasyon santral yo byen egzekite."
+},
+{
+  category: "manager_national",
+  question: "Ki relasyon li ak Conseiller Officiel ?",
+  answer: "Li swiv konsèy Conseiller Officiel la sou estrateji ak operasyon, pandan li rapòte bay Fondateurs yo."
+},
+{
+  category: "manager_national",
+  question: "Ki relasyon li ak Sekretè Platfòm ?",
+  answer: "Sekretè Platfòm sipòte li nan dokimantasyon, planifikasyon ak swiv operasyon."
+},
+{
+  category: "manager_national",
+  question: "Ki relasyon li ak Assistante Virtuelle ?",
+  answer: "Assistante Virtuelle la ede li nan workflow dijital, rapò ak notifikasyon an tan reyèl."
+},
+{
+  category: "manager_national",
+  question: "Ki benefis Manager National jwenn ?",
+  answer: "Aksè total sou operasyon, sipèvizyon post kle, vizibilite estratejik, ak kapasite pou konseye Fondateurs yo."
+},
+{
+  category: "manager_national",
+  question: "Ki limit li sou entèvansyon nan depatman yo ?",
+  answer: "Li ka revize aksyon, bay rekòmandasyon, men pa ka revoke ni chanje règleman lokal san apwobasyon Fondateurs yo."
+},
+{
+  category: "manager_national",
+  question: "Ki limit li sou relasyon ak Agents Autorisés ?",
+  answer: "Li ka analize pèfòmans yo epi bay rekòmandasyon, men pa jere kont oswa tranzaksyon yo dirèkteman."
+},
+{
+  category: "manager_national",
+  question: "Ki limit li sou relasyon ak Representants Communaux ?",
+  answer: "Li sipèvize aktivite yo atravè rapò, men pa ka chanje operasyon yo dirèkteman."
+},
+{
+  category: "manager_national",
+  question: "Kisa ki ka mennen Manager National pèdi post li ?",
+  answer: "Vyolasyon règleman, move jere operasyon, oswa aksyon kont entèè fondateurs yo."
+},
+{
+  category: "manager_national",
+  question: "Èske Manager National ka revokasyon pa lòt post ?",
+  answer: "Non, sèlman Fondateurs yo ka revoke yon Manager National."
+},
+{
+  category: "manager_national",
+  question: "Ki responsablite li nan rapò piblik ?",
+  answer: "Li ka prepare rapò pou Fondateurs yo men li pa fè deklarasyon ofisyèl san apwobasyon yo."
+},
+{
+  category: "manager_national",
+  question: "Ki responsabilite li pou siveyans dijital ?",
+  answer: "Li analize tout rapò sou itilizasyon platfòm, Micro Soutien, ak tranzaksyon kritik atravè peyi a."
+},
+{
+  category: "manager_national",
+  question: "Ki limit li sou tranzaksyon finansye ?",
+  answer: "Li ka wè tout done, analize epi konseye sou tranzaksyon, men pa gen pouvwa final sou lajan."
+},
+{
+  category: "manager_national",
+  question: "Kijan li kolabore ak Micro Soutien ?",
+  answer: "Li analize distribisyon Micro Soutien epi bay rekòmandasyon sou optimize pou itilizatè ak Agents Autorisés."
+},
+{
+  category: "manager_national",
+  question: "Èske li ka pran privilèj Manager Regional oswa Superviseur ?",
+  answer: "Wi, li ka jwi privilèj nenpòt post siperyè, toujou anba sipèvizyon Fondateurs."
+},
+{
+  category: "manager_national",
+  question: "Ki responsablite li pou asire konfòmite ?",
+  answer: "Li dwe rapòte tout aktivite ki pa konfòm, epi konseye Fondateurs sou règleman ak legalite."
+},
+{
+  category: "manager_national",
+  question: "Ki responsabilite li pou sekirite platfòm nan ?",
+  answer: "Li kolabore ak Conseiller Officiel ak Fondateurs pou idantifye risk epi rapòte tout ensidan."
+},
+{
+  category: "manager_national",
+  question: "Ki limit li sou itilizatè yo ?",
+  answer: "Li ka konseye sou sèvis ak amelyorasyon, men pa gen aksè dirèk sou kont itilizatè yo."
+},
+{
+  category: "manager_national",
+  question: "Èske li ka ede rezoud konfli ant post ?",
+  answer: "Wi, li ka medye epi bay rekòmandasyon, men desizyon final rete ak Fondateurs."
+},
+{
+  category: "manager_national",
+  question: "Ki responsabilite li pou optimizasyon sèvis ?",
+  answer: "Li evalye pèfòmans tout post, analize done, epi pwopoze solisyon pou amelyorasyon."
+},
+{
+  category: "manager_national",
+  question: "Ki limit li sou aksè sekre nan platfòm nan ?",
+  answer: "Li ka wè done kritik pou analize, men li pa ka chanje règleman fondamantal oswa pran desizyon final."
+},
+{
+  category: "manager_national",
+  question: "Èske li ka kolabore ak tout post yo an menm tan ?",
+  answer: "Wi, li kolabore ak tout manm kle: Superviseurs, Managers Regional, Conseiller, Sekretè, Assistante Virtuelle, ak Fondateurs."
+},
+{
+  category: "manager_national",
+  question: "Ki limit li sou pwopriyete ak privilèj Fondateurs yo ?",
+  answer: "Li pa gen dwa modifye privilèj ni pwopriyete Fondateurs yo, sèlman konseye ak rapòte."
+},
+{
+  category: "manager_national",
+  question: "Ki responsabilite li pou siveyans global platfòm nan ?",
+  answer: "Li dwe analize tout operasyon atravè 10 depatman, rapòte pwoblèm, epi pwopoze solisyon pou efikasite ak transparans."
+},
+
+// ================= ASSISTANTE VIRTUELLE (1–30) =================
+{
+  category: "assistante_virtuelle",
+  question: "Ki sa post Assistante Virtuelle nan Wallet FOBAS ye ?",
+  answer: "Se sistèm entelijan ki ede itilizatè yo ak tout kesyon, pwoblèm, ak demann sou platfòm nan an tan reyèl."
+},
+{
+  category: "assistante_virtuelle",
+  question: "Ki wòl prensipal li ?",
+  answer: "Li bay sipò imedyat pou itilizatè, ede nan tranzaksyon, Micro Soutien, FAQ, ak asistans nan tout sèvis platfòm nan."
+},
+{
+  category: "assistante_virtuelle",
+  question: "Èske li ka jere tout post yo sou platfòm nan ?",
+  answer: "Non, li ede nan travay administratif ak sipò itilizatè, men li pa ranplase Fondateurs oswa Managers."
+},
+{
+  category: "assistante_virtuelle",
+  question: "Ki avantaj itilizatè jwenn ak Assistante Virtuelle ?",
+  answer: "Sipò 24/7, repons rapid, gid sou sèvis yo, ak solisyon pou pwoblèm teknik oswa kesyon sou platfòm nan."
+},
+{
+  category: "assistante_virtuelle",
+  question: "Ki limit li sou aksè nan platfòm nan ?",
+  answer: "Li gen aksè pou reponn kesyon ak sipò, men li pa gen pouvwa sou tranzaksyon oswa revokasyon post."
+},
+{
+  category: "assistante_virtuelle",
+  question: "Èske li ka reponn kesyon teknik ?",
+  answer: "Wi, li bay gid teknik, rapò sou erè, ak solisyon dijital pou itilizatè yo."
+},
+{
+  category: "assistante_virtuelle",
+  question: "Èske li ka modifye done itilizatè yo ?",
+  answer: "Non, li pa ka fè chanjman nan kont oswa balans itilizatè yo."
+},
+{
+  category: "assistante_virtuelle",
+  question: "Ki relasyon li ak Fondateurs yo ?",
+  answer: "Li rapòte done itilizatè, erè, ak demann kritik dirèkteman bay Fondateurs pou sipèvizyon."
+},
+{
+  category: "assistante_virtuelle",
+  question: "Ki relasyon li ak Manager National ?",
+  answer: "Li sipòte Manager National ak rapò, done ak siveyans itilizatè sou tout depatman yo."
+},
+{
+  category: "assistante_virtuelle",
+  question: "Ki relasyon li ak Conseiller Officiel ?",
+  answer: "Li ede ak rapò analiz, done itilizatè, epi bay rekòmandasyon pou amelyorasyon sèvis."
+},
+{
+  category: "assistante_virtuelle",
+  question: "Ki relasyon li ak Superviseurs ak Managers Regional ?",
+  answer: "Li ede nan workflow, rapò, ak done sou pèfòmans agents autorisés ak representants communaux."
+},
+{
+  category: "assistante_virtuelle",
+  question: "Èske li ka reponn kesyon sou Micro Soutien ?",
+  answer: "Wi, li bay detay sou fason distribisyon fèt, kondisyon, ak estatistik pou itilizatè ak agents."
+},
+{
+  category: "assistante_virtuelle",
+  question: "Ki avantaj li pou sèvis Assistance 24/7 ?",
+  answer: "Repons rapid, disponiblite san rete, gid etap-pa-etap, ak asirans ke tout itilizatè jwenn èd."
+},
+{
+  category: "assistante_virtuelle",
+  question: "Èske li ka ede nan rezoud pwoblèm tranzaksyon ?",
+  answer: "Wi, li bay gid sou etap koreksyon ak rapò pou sipò teknik si nesesè."
+},
+{
+  category: "assistante_virtuelle",
+  question: "Ki limit li pou entèvansyon sou lòt post ?",
+  answer: "Li pa gen aksè pou revoke, modifye oswa pran desizyon estratejik sou lòt post."
+},
+{
+  category: "assistante_virtuelle",
+  question: "Ki responsablite li pou itilizatè ?",
+  answer: "Li dwe reponn kesyon, gid sou sèvis, rapòte erè, ak ede nan tout pwoblèm yo rankontre sou platfòm nan."
+},
+{
+  category: "assistante_virtuelle",
+  question: "Èske li ka ede nan FAQ ?",
+  answer: "Wi, li itilize FAQ entèaktif pou reponn kesyon epi evolye ak nouvo demann itilizatè yo."
+},
+{
+  category: "assistante_virtuelle",
+  question: "Kisa ki ka fè li pèdi post la ?",
+  answer: "Si li echwe nan bay repons kòrèk, bay enfòmasyon fo, oswa pa suiv direktiv Fondateurs yo."
+},
+{
+  category: "assistante_virtuelle",
+  question: "Ki limit li sou aksè finansye ?",
+  answer: "Li pa gen aksè sou lajan oswa tranzaksyon, sèlman bay rapò ak gid sou operasyon finansye."
+},
+{
+  category: "assistante_virtuelle",
+  question: "Ki kapasite li pou ede agents autorisés ?",
+  answer: "Li bay gid sou operasyon, Micro Soutien, ak repons sou kondisyon ak règleman platfòm nan."
+},
+{
+  category: "assistante_virtuelle",
+  question: "Ki kapasite li pou ede representants communaux ?",
+  answer: "Li ede nan workflow, rapò sou vant agents, ak analiz pèfòmans pou optimize distribisyon Wallets."
+},
+{
+  category: "assistante_virtuelle",
+  question: "Èske li ka bay rapò ak Fondateurs sou itilizatè ak agents ?",
+  answer: "Wi, li kolekte done an tan reyèl epi voye rapò bay Fondateurs ak lòt post estratejik."
+},
+{
+  category: "assistante_virtuelle",
+  question: "Ki limit li pou travay ak Conseiller Officiel ?",
+  answer: "Li ede nan analiz, rapò, ak gid operasyon, men li pa pran desizyon final sou aksyon platfòm nan."
+},
+{
+  category: "assistante_virtuelle",
+  question: "Ki limit li sou revokasyon ?",
+  answer: "Li pa ka revoke okenn post, sèlman Fondateurs gen pouvwa sa."
+},
+{
+  category: "assistante_virtuelle",
+  question: "Èske li ka jere Micro Soutien dirèkteman ?",
+  answer: "Li ka bay gid ak rapò sou Micro Soutien, men li pa ka distribye lajan oswa pran desizyon final sou distribisyon an."
+},
+{
+  category: "assistante_virtuelle",
+  question: "Ki limit li sou itilizatè final ?",
+  answer: "Li pa ka modifye kont, balans oswa tranzaksyon itilizatè yo; li bay sèlman èd ak gid."
+},
+{
+  category: "assistante_virtuelle",
+  question: "Kijan li kolabore ak tout post sou platfòm nan ?",
+  answer: "Li sipòte Managers, Superviseurs, Representants, Conseiller, ak Fondateurs ak rapò, done ak gid nan workflow dijital."
+},
+{
+  category: "assistante_virtuelle",
+  question: "Èske li ka ede nan pwoblèm sekirite ?",
+  answer: "Li ka rapòte ensidan, bay gid, men li pa pran desizyon sekirite final; sa rete Fondateurs yo."
+},
+{
+  category: "assistante_virtuelle",
+  question: "Ki limit li pou entèvansyon nan operasyon finansye ?",
+  answer: "Li ka ede itilizatè ak rapò, men li pa ka valide, modifye, oswa anile tranzaksyon."
+},
+{
+  category: "assistante_virtuelle",
+  question: "Ki benefis pou platfòm nan ?",
+  answer: "Disponiblite 24/7, repons rapid, diminye chaj sou ekip fondateurs, ogmante satisfaksyon itilizatè."
+},
+{
+  category: "assistante_virtuelle",
+  question: "Ki responsabilite pou garanti sèvis efikas ?",
+  answer: "Li dwe toujou reponn kesyon itilizatè yo, swiv workflow, epi rapòte tout pwoblèm kritik imedyat bay Fondateurs."
+},
+
   // ================= COMPTE (91–100) =================
   {
   category: "compte",
