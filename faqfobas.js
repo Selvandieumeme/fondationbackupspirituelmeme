@@ -114,17 +114,17 @@ const faqData = [
 {
   category: "retrait",
   question: "Eske retrait gen frè ?",
-  answer: "Wi, frè yo depann de montan w ap retire a."
+  answer: "Wi, frè yo depann de montan w ap retire a men pou konnya fre retrait a se selman 1%."
 },
 {
   category: "retrait",
   question: "Kisa pou m fè si yon agent refize fè retrait la ?",
-  answer: "Rapòte agent lan imedyatman bay support Wallet FOBAS."
+  answer: "Rapòte agent lan imedyatman bay support Wallet FOBAS nan espas (Assistance 24/7)."
 },
 {
   category: "retrait",
   question: "Ki retrait minimòm ki otorize ?",
-  answer: "Retrait minimòm lan defini pa règleman aktyèl Wallet FOBAS."
+  answer: "Retrait minimòm aktyèl Wallet FOBAS la se (20 Gourdes) e, maksimom nan se (100 000 Gourdes)."
 },
 {
   category: "retrait",
@@ -144,7 +144,7 @@ const faqData = [
 {
   category: "retrait",
   question: "Eske yon retrait ka echwe ?",
-  answer: "Wi, si gen enfòmasyon ki pa kòrèk oswa pwoblèm sekirite."
+  answer: "Wi, si gen enfòmasyon ki pa kòrèk oswa pwoblèm sekirite, oswa ou pa gen ase montan sa sou kont aktyel ou."
 },
 {
   category: "retrait",
@@ -179,7 +179,7 @@ const faqData = [
 {
   category: "retrait",
   question: "Eske retrait ka fèt pa transfè ?",
-  answer: "Non. Retrait fèt sèlman fas-a-fas ak agent."
+  answer: "Wi, Retrait kapab fèt avek boutou (Transferer) a tou, fas-a-fas ak yon agent otorize."
 },
 {
   category: "retrait",
