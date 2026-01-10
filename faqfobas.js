@@ -523,12 +523,12 @@ const faqData = [
 {
   category: "agentsautorises",
   question: "Kijan pou verifye si yon agent se reyèl ?",
-  answer: "Ou ka tcheke ID agent la, foto, ak nimewo kontak ki disponib nan dashboard la."
+  answer: "Ou ka tcheke E-mail agent an, foto, ak nimewo kontak ki disponib nan dashboard la."
 },
 {
   category: "agentsautorises",
   question: "Eske mwen ka kontakte agent dirèkteman ?",
-  answer: "Wi. Chak agent gen nimewo WhatsApp oswa telefòn pou kontakte yo dirèkteman."
+  answer: "Wi. Chak agent gen nimewo WhatsApp pou kontakte yo dirèkteman."
 },
 {
   category: "agentsautorises",
@@ -543,7 +543,7 @@ const faqData = [
 {
   category: "agentsautorises",
   question: "Kijan pou m rapòte yon agent ki pa konfòm ?",
-  answer: "Itilize bouton 'Rapòte' nan lis agent yo oswa kontakte support FOBAS."
+  answer: "Itilize bouton (Assistance 24/7) nan espas ashboard ou a direkteman."
 },
 {
   category: "agentsautorises",
@@ -568,22 +568,22 @@ const faqData = [
 {
   category: "agentsautorises",
   question: "Ki dokiman mwen bezwen pou fè tranzaksyon avèk agent ?",
-  answer: "Nimewo kont Wallet FOBAS ou, ID pèsonèl, epi enfòmasyon tranzaksyon an."
+  answer: "E-mail kont Wallet FOBAS ou, epi enfòmasyon tranzaksyon an."
 },
 {
   category: "agentsautorises",
   question: "Èske agent ka fè sèvis pou lòt moun ?",
-  answer: "Wi, ak nimewo kont moun nan ak verifikasyon idantite li."
+  answer: "Wi, ak E-mail kont moun nan epi avek verifikasyon idantite li."
 },
 {
   category: "agentsautorises",
   question: "Ki kantite tranzaksyon agent ka fè nan yon jounen ?",
-  answer: "Pa gen limit fiks, men sistèm kontwole aktivite yo pou sekirite."
+  answer: "Pa gen limit fiks, men sistèm nan kontwole aktivite yo pou sekirite."
 },
 {
   category: "agentsautorises",
   question: "Eske agent ka ede si gen pwoblèm teknik sou kont mwen ?",
-  answer: "Wi, men sèlman pou tranzaksyon li sipèvize, lòt sipò teknik fèt atravè support."
+  answer: "Wi, men sèlman pou tranzaksyon li sipèvize, lòt sipò teknik fèt atravè Assistance 24/7 platfom nan direkteman."
 },
 {
   category: "agentsautorises",
@@ -608,7 +608,7 @@ const faqData = [
 {
   category: "agentsautorises",
   question: "Èske agent yo gen obligasyon respekte règleman legal ?",
-  answer: "Wi, tout agents oblije swiv règleman lokal ak règleman FOBAS."
+  answer: "Wi, tout agents oblije swiv règleman lokal, Entenasyonal ak règleman entenn FOBAS yo."
 },
 
 // ================= ERREURS TECHNIQUES (1–20) =================
