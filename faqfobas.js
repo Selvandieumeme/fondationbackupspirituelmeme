@@ -1245,12 +1245,12 @@ const faqData = [
 {
   category: "representants",
   question: "Ki wòl prensipal yon Représentant Communal ?",
-  answer: "Kowòdone, sipèvize, epi sipòte tout Agents Autorisés FOBAS nan komin li a."
+  answer: "Kowòdone, sipèvize, epi sipòte tout Agents Autorisés FOBAS nan komin li a nans sans vann yo kantite Wallets yo bezwen pou yal vann ak itilizate platfom nan direkteman depi espas biznis yo a,."
 },
 {
   category: "representants",
   question: "Èske Représentant Communal la ka vann wallets ?",
-  answer: "Wi. Youn nan pi gwo wòl li se vann ak distribye wallets FOBAS bay Agents yo."
+  answer: "Wi. Youn nan pi gwo wòl li se vann ak distribye wallets FOBAS bay tout Agents ki anndan komin pa l la."
 },
 {
   category: "representants",
