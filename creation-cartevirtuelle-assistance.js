@@ -265,6 +265,7 @@ document.addEventListener("DOMContentLoaded", () => {
       walletBirthPlace: createWalletForm.walletBirthPlace.value.trim(),
       walletPassword: createWalletForm.walletPassword.value,
       walletSponsorName: createWalletForm.walletSponsorName.value.trim(),
+      walletAccountType: createWalletForm.walletAccountType.value
     };
 
     try {
