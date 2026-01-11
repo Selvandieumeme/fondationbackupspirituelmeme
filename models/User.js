@@ -22,6 +22,9 @@ const WalletUserSchema = new mongoose.Schema({
   birthDate: String,
   birthPlace: String,
   passwordHash: String,
+  sponsorName: { type: String },
+  accountType: { type: String, required: true },
+  hasDepositedBefore: { type: Boolean, default: false },
   status: {
     type: String,
     default: "pending"
