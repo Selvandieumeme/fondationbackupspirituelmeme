@@ -2316,7 +2316,7 @@ const faqData = [
 {
   category: "assistante_virtuelle",
   question: "Kisa ki ka fè li pèdi post la ?",
-  answer: "Si li echwe nan bay repons kòrèk, bay enfòmasyon fo, oswa pa suiv direktiv Fondateurs yo."
+  answer: "Si li echwe nan bay repons kòrèk, bay fo enfòmasyon, oswa pa suiv direktiv Fondateurs yo."
 },
 {
   category: "assistante_virtuelle",
@@ -2351,7 +2351,7 @@ const faqData = [
 {
   category: "assistante_virtuelle",
   question: "Èske li ka jere Micro Soutien dirèkteman ?",
-  answer: "Li ka bay gid ak rapò sou Micro Soutien, men li pa ka distribye lajan oswa pran desizyon final sou distribisyon an."
+  answer: "Li ka bay gid ak rapò sou Micro Soutien, men li pa ka distribye lajan, ni Wallets oswa pran desizyon final sou distribisyon yo."
 },
 {
   category: "assistante_virtuelle",
@@ -2388,7 +2388,7 @@ const faqData = [
   {
   category: "compte",
   question: "Kijan pou m kreye yon kont Wallet FOBAS ?",
-  answer: "Enskri ak nimewo telefòn ou, ranpli enfòmasyon yo, epi valide enskripsyon an."
+  answer: "Enskri ak E-mail ou. nimewo Whatsapp ou, ranpli enfòmasyon yo, epi valide enskripsyon an."
 },
 {
   category: "compte",
@@ -2483,7 +2483,7 @@ const faqData = [
 {
   category: "compte",
   question: "Kijan pou m kontakte support Wallet FOBAS pou pwoblèm kont ?",
-  answer: "Ou ka kontakte support dirèkteman depi aplikasyon an oswa sit ofisyèl la."
+  answer: "Ou ka kontakte support dirèkteman depi aplikasyon an oswa sit ofisyèl la nan espas (Assistance 24/7) la depi dashboard ou a."
 }
 ];
 
