@@ -967,6 +967,7 @@ const walletUserSchema = new mongoose.Schema({
   whatsapp: { type: String },
   recoveryEmail: { type: String },
   sponsorName: { type: String },
+  accountType: { type: String, required: true },
   hasDepositedBefore: { type: Boolean, default: false },
   createdAt: { type: Date, default: Date.now },
   status: { type: String, default: "pending" }
@@ -1389,7 +1390,8 @@ app.post("/api/wallet/create", async (req, res) => {
       walletBirthDate,
       walletBirthPlace,
       walletPassword,
-      walletSponsorName
+      walletSponsorName,
+	  walletAccountType 
     } = req.body;
 
     if (!walletFullName || !walletEmail || !walletPassword) {
@@ -1431,7 +1433,8 @@ app.post("/api/wallet/create", async (req, res) => {
       birthPlace: walletBirthPlace,
       passwordHash,
       sponsorName: walletSponsorName ? walletSponsorName.trim().toLowerCase() : null,
-      status: "active",
+      accountType: walletAccountType,
+	  status: "active",
       balance: 0.00,
       bonus: 0.00,
       hasDepositedBefore: false,
