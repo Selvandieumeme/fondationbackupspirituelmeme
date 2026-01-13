@@ -74,14 +74,16 @@
 <script>
 // ------------------- CASHBACK FRONTEND AVÈK API -------------------
 async function activateCashback() {
-  const userEmail = document.getElementById("userEmail").innerText.trim(); // pran email itilizate
+  const userEmailElem = document.getElementById("userEmail");
+  if (!userEmailElem) return alert("Email introuvable.");
+  const userEmail = userEmailElem.innerText.trim();
   if (!userEmail) return alert("Email introuvable.");
 
   try {
     const res = await fetch("https://api.fondationbackupspirituel.com/subscribeCashback", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ userEmail }) // api server.js bezwen userEmail
+      body: JSON.stringify({ userEmail }) // koresponn ak server.js
     });
 
     const data = await res.json();
@@ -91,10 +93,12 @@ async function activateCashback() {
 
       // Mete bouton nan eta aktive menm jan ak lòt bouton
       const btn = document.getElementById("cashbackBtn");
-      btn.innerText = "💸 Cashback Active ✅";
-      btn.disabled = true;
-      btn.style.background = "#6c757d";
-      btn.style.cursor = "default";
+      if(btn){
+        btn.innerText = "💸 Cashback Active ✅";
+        btn.disabled = true;
+        btn.style.background = "#6c757d";
+        btn.style.cursor = "default";
+      }
     } else if (data.error) {
       alert("Erreur: " + data.error);
     }
@@ -107,6 +111,9 @@ async function activateCashback() {
 // ------------------- SHOW CASHBACK FORM -------------------
 function showCashbackInfo() {
   const area = document.getElementById("formArea");
+  if (!area) return;
+  
+  // Pa delete lòt div nan dashboard, mete bouton nan li sèlman
   area.innerHTML = `
     <h3>💸 Cashback Rewards</h3>
     <p>
@@ -114,7 +121,7 @@ function showCashbackInfo() {
       à chaque dépôt, retrait ou transfert.
     </p>
     <p><strong>Abonnement:</strong> 250 Gourdes / mois</p>
-    <button onclick="activateCashback()" 
+    <button id="activateCashbackBtn" onclick="activateCashback()" 
             style="padding:12px 25px; background:#16a34a; color:#fff; border:none; border-radius:12px; font-weight:700; cursor:pointer;">
       Activer maintenant
     </button>
