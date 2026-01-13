@@ -1237,162 +1237,155 @@ app.post('/api/wallet/bonus', async (req, res) => {
 // 💸 MODULE CASHBACK FOBAS – PROD SAFE / DROP-IN
 // =====================================================
 
-// ---- CONFIG CASHBACK ----
-const CASHBACK_AMOUNT = 25; // 25 Gourdes fixes
+// -------------------- CONSTANTS --------------------
+const CASHBACK_AMOUNT = 25;   // Cashback pou parrain/marraine
+const SUBSCRIPTION_FEE = 250; // Frais abonnman pou parrain/marraine
+const ADMIN_WHATSAPP = "50946057552";
 
-// =====================================================
-// 🔐 FONCTION CENTRALE CASHBACK (ANTI-DOUBLE + ANTI-FRAUDE)
-// =====================================================
-async function processCashback({
-  userId,
-  transactionType, // "deposit" | "withdraw" | "transfer"
-  transactionId
-}) {
+// -------------------- COLLECTION REFERENCES --------------------
+const walletUsersCollection = db.collection("walletusers");
+const walletBalancesCollection = db.collection("walletbalances");
+const transactionsCollection = db.collection("transactions");
+
+
+// -------------------- WHATSAPP NOTIFICATION --------------------
+function sendWhatsAppNotification(message) {
+  const url = `https://wa.me/${ADMIN_WHATSAPP}?text=${encodeURIComponent(message)}`;
+  console.log("WhatsApp admin link:", url);
+}
+
+// -------------------- CASHBACK SUBSCRIPTION --------------------
+app.post("/subscribeCashback", async (req, res) => {
   try {
-    // 1️⃣ Sécurité paramètres
-    if (!userId || !transactionType || !transactionId) return;
+    const { email } = req.body;
+    if (!email) return res.status(400).json({ success: false, message: "Email manquant" });
 
-    // 2️⃣ Génération clé unique anti-double
-    const cashbackKey = require("crypto")
-      .createHash("sha256")
-      .update(`${userId}-${transactionType}-${transactionId}`)
-      .digest("hex");
+    const user = await walletUsersCollection.findOne({ email });
+    if (!user) return res.status(404).json({ success: false, message: "Utilisateur non trouvé" });
 
-    // 3️⃣ Vérifie si cashback déjà exécuté
-    const alreadyExists = await transactions.findOne({
+    if (!user.subscriptions) user.subscriptions = [];
+    if (user.subscriptions.includes("cashback")) {
+      return res.json({ success: true, message: "Cashback deja active" });
+    }
+
+    user.subscriptions.push("cashback");
+    await walletUsersCollection.updateOne({ email }, { $set: { subscriptions: user.subscriptions } });
+
+    sendWhatsAppNotification(`Utilisateur ${user.fullName} a activé Cashback Rewards (250 Gourdes / mois)`);
+    res.json({ success: true, message: "Cashback activé avec succès" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, message: "Erreur serveur" });
+  }
+});
+
+// -------------------- APPLY CASHBACK --------------------
+async function applyCashback(fiyelEmail, type) {
+  try {
+    const fiyel = await walletUsersCollection.findOne({ email: fiyelEmail });
+    if (!fiyel || !fiyel.sponsorName) return;
+
+    // SponsorName = email sponsor nan collection walletusers
+    const sponsor = await walletUsersCollection.findOne({ email: fiyel.sponsorName });
+    if (!sponsor || !sponsor.subscriptions?.includes("cashback")) return;
+
+    const sponsorWallet = await walletBalancesCollection.findOne({ email: sponsor.email });
+    if (!sponsorWallet) return;
+
+    // Ajoute cashback nan balans sponsor
+    const newBalance = sponsorWallet.balance + CASHBACK_AMOUNT;
+    await walletBalancesCollection.updateOne({ email: sponsor.email }, { $set: { balance: newBalance } });
+
+    // Kreye tranzaksyon cashback pou sponsor
+    await transactionsCollection.insertOne({
+      email: sponsor.email,
       type: "cashback",
-      cashbackKey
+      amount: CASHBACK_AMOUNT,
+      description: `Cashback de ${fiyel.fullName} (${type})`,
+      createdAt: new Date()
     });
 
-    if (alreadyExists) return; // ⛔ STOP DOUBLE CASHBACK
-
-    // 4️⃣ Récupère utilisateur actif
-    const user = await walletbalances.findOne({ userId });
-    if (!user) return;
-
-    // 5️⃣ Vérifie abonnement cashback
-    if (!user.subscriptions || !user.subscriptions.includes("cashback")) return;
-
-    // 6️⃣ Vérifie parrain/marraine
-    if (!user.sponsorName) return;
-
-    // 7️⃣ Récupère sponsor
-    const sponsor = await walletbalances.findOne({
-      fullName: user.sponsorName
-    });
-    if (!sponsor) return;
-
-    const now = new Date();
-
-    // 8️⃣ Crédit balance sponsor
-    await walletbalances.updateOne(
-      { userId: sponsor.userId },
-      { $inc: { balance: CASHBACK_AMOUNT } }
+    // Notifikasyon WhatsApp admin
+    sendWhatsAppNotification(
+      `Cashback ${CASHBACK_AMOUNT} Gourdes ajoute pou ${sponsor.fullName} pou ${type} de ${fiyel.fullName}`
     );
 
-    // 9️⃣ Historique SPONSOR
-    await transactions.insertOne({
-      userId: sponsor.userId,
-      relatedUserId: user.userId,
-      type: "cashback",
-      transactionType,
-      amount: CASHBACK_AMOUNT,
-      cashbackKey,
-      description: `Cashback reçu (${transactionType})`,
-      createdAt: now
-    });
-
-    // 🔟 Historique UTILISATEUR
-    await transactions.insertOne({
-      userId: user.userId,
-      relatedUserId: sponsor.userId,
-      type: "cashback",
-      transactionType,
-      amount: CASHBACK_AMOUNT,
-      cashbackKey,
-      description: `Cashback attribué à ${sponsor.fullName}`,
-      createdAt: now
-    });
-
-    // 1️⃣1️⃣ Notification WhatsApp ADMIN
-    await sendCashbackAdminNotification({
-      user: user.fullName,
-      sponsor: sponsor.fullName,
-      transactionType
-    });
-
   } catch (err) {
-    console.error("❌ ERREUR CASHBACK:", err.message);
+    console.error("Erreur applyCashback:", err);
   }
 }
 
-// =====================================================
-// 📲 NOTIFICATION WHATSAPP ADMIN
-// =====================================================
-async function sendCashbackAdminNotification({ user, sponsor, transactionType }) {
-  const message = `
-💸 CASHBACK FOBAS
+// -------------------- TRANSACTIONS --------------------
+app.post("/depot", async (req, res) => {
+  const { email, amount } = req.body;
 
-👤 Utilisateur : ${user}
-🤝 Parrain/Marraine : ${sponsor}
-🔁 Action : ${transactionType}
-💰 Montant : 25 Gdes
-🕒 ${new Date().toLocaleString()}
-`;
-
-  try {
-    await fetch("https://api.whatsapp-provider.com/send", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        to: "+50946057552",
-        message
-      })
+  // Logik depo platfòm deja genyen (san touche sponsor)
+  // Egzanp: mete nan walletbalances
+  const userWallet = await walletBalancesCollection.findOne({ email });
+  if (userWallet) {
+    const newBalance = userWallet.balance + amount;
+    await walletBalancesCollection.updateOne({ email }, { $set: { balance: newBalance } });
+    await transactionsCollection.insertOne({
+      email,
+      type: "deposit",
+      amount,
+      description: "Dépôt utilisateur",
+      createdAt: new Date()
     });
-  } catch (e) {
-    console.error("⚠️ WhatsApp notif échouée");
   }
-}
 
-// =====================================================
-// 🔌 FONCTIONS À APPELER APRÈ TRANSACTION RÉUSSIE
-// =====================================================
+  // Apèl cashback pou sponsor
+  await applyCashback(email, "Dépot");
 
-// APRÈ DÉPÔT
-async function cashbackAfterDeposit(userId, depositId) {
-  await processCashback({
-    userId,
-    transactionType: "deposit",
-    transactionId: depositId
-  });
-}
+  res.json({ success: true });
+});
 
-// APRÈ RETRAIT
-async function cashbackAfterWithdraw(userId, withdrawId) {
-  await processCashback({
-    userId,
-    transactionType: "withdraw",
-    transactionId: withdrawId
-  });
-}
+app.post("/retrait", async (req, res) => {
+  const { email, amount } = req.body;
 
-// APRÈ TRANSFERT
-async function cashbackAfterTransfer(userId, transferId) {
-  await processCashback({
-    userId,
-    transactionType: "transfer",
-    transactionId: transferId
-  });
-}
+  // Logik retrait platfòm deja genyen
+  const userWallet = await walletBalancesCollection.findOne({ email });
+  if (userWallet) {
+    const newBalance = userWallet.balance - amount;
+    await walletBalancesCollection.updateOne({ email }, { $set: { balance: newBalance } });
+    await transactionsCollection.insertOne({
+      email,
+      type: "withdraw",
+      amount,
+      description: "Retrait utilisateur",
+      createdAt: new Date()
+    });
+  }
 
-// =====================================================
-// ✅ FIN MODULE CASHBACK
-// =====================================================
+  // Apèl cashback pou sponsor
+  await applyCashback(email, "Retrait");
 
+  res.json({ success: true });
+});
 
+app.post("/transfert", async (req, res) => {
+  const { email, amount, toEmail } = req.body;
 
+  // Logik transfè platfòm deja genyen
+  const userWallet = await walletBalancesCollection.findOne({ email });
+  if (userWallet) {
+    const newBalance = userWallet.balance - amount;
+    await walletBalancesCollection.updateOne({ email }, { $set: { balance: newBalance } });
+    await transactionsCollection.insertOne({
+      email,
+      type: "transfer",
+      amount,
+      to: toEmail,
+      description: "Transfert utilisateur",
+      createdAt: new Date()
+    });
+  }
 
+  // Apèl cashback pou sponsor
+  await applyCashback(email, "Transfert");
 
+  res.json({ success: true });
+});
 
 
 
