@@ -23,6 +23,7 @@ const WalletUserSchema = new mongoose.Schema({
   birthPlace: String,
   passwordHash: String,
   sponsorName: { type: String },
+  sponsorEmail: { type: String },
   accountType: { type: String, required: true },
   hasDepositedBefore: { type: Boolean, default: false },
   status: {
