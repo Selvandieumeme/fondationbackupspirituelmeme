@@ -142,6 +142,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const password = form.walletPassword.value;
     const passwordConfirm = form.walletPasswordConfirm.value;
     const sponsorName = form.walletSponsorName.value.trim();
+    const sponsorEmail = form.walletSponsorEmail.value.trim();
     const accountType = form.walletAccountType.value;
 
     if (!accountType) {
@@ -178,6 +179,7 @@ document.addEventListener("DOMContentLoaded", () => {
           walletBirthPlace: birthPlace,
           walletPassword: password,
           walletSponsorName: sponsorName,
+          walletSponsorEmail: sponsorEmail,
           walletAccountType: accountType
         })
       });
@@ -265,6 +267,7 @@ document.addEventListener("DOMContentLoaded", () => {
       walletBirthPlace: createWalletForm.walletBirthPlace.value.trim(),
       walletPassword: createWalletForm.walletPassword.value,
       walletSponsorName: createWalletForm.walletSponsorName.value.trim(),
+      walletSponsorEmail: createWalletForm.walletSponsorEmail.value.trim(),
       walletAccountType: createWalletForm.walletAccountType.value
     };
 
