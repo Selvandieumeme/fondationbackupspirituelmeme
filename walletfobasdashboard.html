@@ -68,7 +68,48 @@
 <section class="form-area" id="formArea"></section>
 
 
+  
+ <script>
+async function loadCashbackStatus() {
+  const res = await fetch(`${API_BASE}/user/profile`);
+  const user = await res.json();
 
+  const btn = document.getElementById("cashbackBtn");
+
+  if (!user.subscriptions || !user.subscriptions.includes("cashback")) {
+    btn.style.display = "block";
+    btn.innerHTML = "💸 Activer Cashback Rewards";
+    btn.style.background = "#198754";
+  } else {
+    btn.style.display = "block";
+    btn.innerHTML = "💸 Cashback Active ✅";
+    btn.disabled = true;
+    btn.style.background = "#6c757d";
+  }
+}
+
+function showCashbackInfo() {
+  const area = document.getElementById("formArea");
+
+  area.innerHTML = `
+    <h3>💸 Cashback Rewards</h3>
+    <p>
+      Gagnez <strong>25 Gourdes</strong> pour votre parrain/marraine
+      à chaque dépôt, retrait ou transfert.
+    </p>
+    <p><strong>Abonnement:</strong> 250 Gourdes / mois</p>
+    <button onclick="subscribeCashback()">Activer maintenant</button>
+  `;
+}
+
+async function subscribeCashback() {
+  const res = await fetch(`${API_BASE}/subscribeCashback`, { method: "POST" });
+  if (res.ok) {
+    alert("Cashback Rewards activé avec succès ✅");
+    loadCashbackStatus();
+  }
+}
+</script>
 
 
 
@@ -171,47 +212,7 @@
 </div>
 <!-- ================== FIN FRAIS RETRAIT ================== -->
 
-    <script>
-async function loadCashbackStatus() {
-  const res = await fetch(`${API_BASE}/user/profile`);
-  const user = await res.json();
-
-  const btn = document.getElementById("cashbackBtn");
-
-  if (!user.subscriptions || !user.subscriptions.includes("cashback")) {
-    btn.style.display = "block";
-    btn.innerHTML = "💸 Activer Cashback Rewards";
-    btn.style.background = "#198754";
-  } else {
-    btn.style.display = "block";
-    btn.innerHTML = "💸 Cashback Active ✅";
-    btn.disabled = true;
-    btn.style.background = "#6c757d";
-  }
-}
-
-function showCashbackInfo() {
-  const area = document.getElementById("formArea");
-
-  area.innerHTML = `
-    <h3>💸 Cashback Rewards</h3>
-    <p>
-      Gagnez <strong>25 Gourdes</strong> pour votre parrain/marraine
-      à chaque dépôt, retrait ou transfert.
-    </p>
-    <p><strong>Abonnement:</strong> 250 Gourdes / mois</p>
-    <button onclick="subscribeCashback()">Activer maintenant</button>
-  `;
-}
-
-async function subscribeCashback() {
-  const res = await fetch(`${API_BASE}/subscribeCashback`, { method: "POST" });
-  if (res.ok) {
-    alert("Cashback Rewards activé avec succès ✅");
-    loadCashbackStatus();
-  }
-}
-</script>
+   
 
 <script src="/socket.io/socket.io.js"></script>
 <script src="walletfobasdashboard.js" defer></script>
