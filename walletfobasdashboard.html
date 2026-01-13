@@ -72,13 +72,13 @@
 
 
 <script>
-// ------------------- CASHBACK FRONTEND -------------------
+// ------------------- CASHBACK FRONTEND AVÈK API -------------------
 async function activateCashback() {
   const userEmail = document.getElementById("userEmail").innerText.trim(); // pran email itilizate
   if (!userEmail) return alert("Email introuvable.");
 
   try {
-    const res = await fetch("/subscribeCashback", {
+    const res = await fetch("https://api.fondationbackupspirituel.com/subscribeCashback", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email: userEmail })
@@ -118,7 +118,6 @@ function showCashbackInfo() {
 // ------------------- LOAD CASHBACK BUTTON -------------------
 document.addEventListener("DOMContentLoaded", async () => {
   const btn = document.getElementById("cashbackBtn");
-  // montre bouton toujou menm jan ak lòt bouton
   btn.style.display = "inline-block";
 });
 </script>
