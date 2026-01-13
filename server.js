@@ -1245,23 +1245,6 @@ const CASHBACK_AMOUNT = 25;
 const SUBSCRIPTION_FEE = 250;
 
 
-// ------------------ WalletUser Schema ------------------
-const walletUserSchema = new mongoose.Schema({
-  fullName: String,
-  email: { type:String, unique:true },
-  recoveryEmail: String,
-  whatsapp: String,
-  birthDate: String,
-  birthPlace: String,
-  passwordHash: String,
-  sponsorName: String,
-  sponsorEmail: String,
-  accountType: { type:String, required:true },
-  hasDepositedBefore: { type:Boolean, default:false },
-  status: { type:String, default:"active" },
-  createdAt: { type:Date, default:Date.now }
-});
-const WalletUser = mongoose.models.WalletUser || mongoose.model("WalletUser", walletUserSchema);
 
 // ------------------ WhatsApp Notification ------------------
 function sendWhatsAppNotification(message){
