@@ -1238,102 +1238,121 @@ app.post('/api/wallet/bonus', async (req, res) => {
 // 💸 MODULE CASHBACK FOBAS – PROD SAFE / DROP-IN
 // =====================================================
 
-// -------------------- CONSTANTS --------------------
-const CASHBACK_AMOUNT = 25;   // Cashback pou parrain/marraine
-const SUBSCRIPTION_FEE = 250; // Frais abonnman pou parrain/marraine
-const ADMIN_WHATSAPP = "50946057552";
-
-
-
-
-
-// ------------------- CASHBACK SUBSCRIBE -------------------
-// Admin email (sèl sous lajan pou cashback ak frais abonnman)
-const ADMIN_EMAIL = "memeselvandieu@fobas.com";
+// ------------------ CONFIG ------------------
+const ADMIN_EMAIL = process.env.ADMIN_WALLET_EMAIL;
+if(!ADMIN_EMAIL) throw new Error("ADMIN_WALLET_EMAIL manquant dans .env");
 const CASHBACK_AMOUNT = 25;
 const SUBSCRIPTION_FEE = 250;
 
-// ---------------------- ROUTE: Activate Abonnement ----------------------
-router.post("/subscribeCashback", async (req, res) => {
-  try {
-    const { userEmail } = req.body; // email fiyèl la ki vle aktive
 
-    // Récupere itilizate a nan DB
-    const user = await WalletUser.findOne({ email: userEmail });
-    if (!user) return res.status(404).json({ error: "Utilisateur non trouvé" });
+// ------------------ WalletUser Schema ------------------
+const walletUserSchema = new mongoose.Schema({
+  fullName: String,
+  email: { type:String, unique:true },
+  recoveryEmail: String,
+  whatsapp: String,
+  birthDate: String,
+  birthPlace: String,
+  passwordHash: String,
+  sponsorName: String,
+  sponsorEmail: String,
+  accountType: { type:String, required:true },
+  hasDepositedBefore: { type:Boolean, default:false },
+  status: { type:String, default:"active" },
+  createdAt: { type:Date, default:Date.now }
+});
+const WalletUser = mongoose.models.WalletUser || mongoose.model("WalletUser", walletUserSchema);
 
-    // Récupere admin balance
-    const adminBalance = await WalletBalance.findOne({ email: ADMIN_EMAIL });
-    if (!adminBalance) return res.status(404).json({ error: "Admin balance introuvable" });
+// ------------------ WhatsApp Notification ------------------
+function sendWhatsAppNotification(message){
+  const adminNumber = "50946057552";
+  // Nou itilize window.open nan front-end sèlman
+  console.log("Notification WhatsApp:", message);
+}
 
-    // Verifye sponsor email nan
-    const sponsor = await WalletUser.findOne({ email: user.sponsorEmail });
-    if (!sponsor) return res.status(404).json({ error: "Sponsor non trouvé" });
+// ------------------ Subscribe Cashback Route ------------------
+app.post("/subscribeCashback", async (req,res)=>{
+  try{
+    const { userEmail } = req.body;
 
-    // Verifye si user deja abonne
-    const userWallet = await WalletBalance.findOne({ email: user.email });
-    if (userWallet.isCashbackActive) {
-      return res.status(400).json({ error: "Abonnement déjà actif" });
-    }
+    const user = await WalletUser.findOne({ email:userEmail });
+    if(!user) return res.status(404).json({ error:"Utilisateur non trouvé" });
 
-    // ---------------------- Deduct abonnement fee ----------------------
-    // Retire 250 Gourdes nan balance actuel admin epi make user abonne
-    adminBalance.balance += SUBSCRIPTION_FEE; // admin resevwa frais
-    await adminBalance.save();
+    const walletColl = db.collection("walletbalances");
+    const userWallet = await walletColl.findOne({ email:user.email });
+    if(!userWallet) return res.status(404).json({ error:"Wallet utilisateur introuvable" });
+    if(userWallet.isCashbackActive) return res.status(400).json({ error:"Abonnement déjà actif" });
 
-    // Make user active
-    userWallet.isCashbackActive = true;
-    userWallet.subscriptionDate = new Date();
-    await userWallet.save();
+    // Verify sponsor email
+    const sponsor = await WalletUser.findOne({ email:user.sponsorEmail });
+    if(!sponsor) return res.status(404).json({ error:"Sponsor non trouvé" });
 
-    return res.json({ message: "Cashback abonnement activé ✅" });
-  } catch (err) {
-    console.error("Erreur Subscribe Cashback:", err);
-    return res.status(500).json({ error: "Erreur serveur, veuillez réessayer." });
+    // Admin balance
+    const adminWallet = await walletColl.findOne({ email:ADMIN_EMAIL });
+    if(!adminWallet) return res.status(404).json({ error:"Admin wallet introuvable" });
+
+    // ------------------- Retire 250G sou user -------------------
+    if(userWallet.balance < SUBSCRIPTION_FEE) return res.status(400).json({ error:"Solde insuffisant" });
+    await walletColl.updateOne({ email:user.email }, { $inc:{ balance:-SUBSCRIPTION_FEE }, $set:{ isCashbackActive:true } });
+
+    // ------------------- Ajoute 250G sou admin -------------------
+    await walletColl.updateOne({ email:ADMIN_EMAIL }, { $inc:{ balance:SUBSCRIPTION_FEE } });
+
+    res.json({ message:"Cashback Rewards activé ✅" });
+
+  }catch(err){
+    console.error(err);
+    res.status(500).json({ error:"Erreur serveur, veuillez réessayer." });
   }
 });
 
-// ---------------------- FUNCTION: Apply Cashback on Transaction ----------------------
-async function applyCashback(fiyelEmail, actionType, amount) {
-  try {
-    const fiyelWallet = await WalletBalance.findOne({ email: fiyelEmail });
-    if (!fiyelWallet) return;
+// ------------------ Apply Cashback Function ------------------
+async function applyCashback(userEmail){
+  const user = await WalletUser.findOne({ email:userEmail });
+  if(!user) return;
 
-    // Récupere sponsor
-    const sponsor = await WalletUser.findOne({ email: fiyelWallet.sponsorEmail });
-    if (!sponsor) return;
+  const walletColl = db.collection("walletbalances");
+  const userWallet = await walletColl.findOne({ email:user.email });
+  if(!userWallet || !userWallet.isCashbackActive) return;
 
-    // Récupere sponsor balance
-    const sponsorBalance = await WalletBalance.findOne({ email: sponsor.email });
-    const adminBalance = await WalletBalance.findOne({ email: ADMIN_EMAIL });
-    if (!sponsorBalance || !adminBalance) return;
+  const sponsor = await WalletUser.findOne({ email:user.sponsorEmail });
+  if(!sponsor) return;
+  const sponsorWallet = await walletColl.findOne({ email:sponsor.email });
+  const adminWallet = await walletColl.findOne({ email:ADMIN_EMAIL });
+  if(!sponsorWallet || !adminWallet) return;
 
-    // Si user abonne
-    if (fiyelWallet.isCashbackActive) {
-      sponsorBalance.balance += CASHBACK_AMOUNT;
-      adminBalance.balance -= CASHBACK_AMOUNT;
+  if(adminWallet.balance >= CASHBACK_AMOUNT){
+    await walletColl.updateOne({ email:ADMIN_EMAIL }, { $inc:{ balance:-CASHBACK_AMOUNT } });
+    await walletColl.updateOne({ email:sponsor.email }, { $inc:{ balance:CASHBACK_AMOUNT } });
 
-      // Save tout chanjman
-      await sponsorBalance.save();
-      await adminBalance.save();
-
-      // Optional: log history
-      console.log(
-        `Cashback ${CASHBACK_AMOUNT} Gourdes ajoute a ${sponsor.email} pou ${actionType} de ${fiyelEmail}`
-      );
-    }
-  } catch (err) {
-    console.error("Erreur applyCashback:", err);
+    sendWhatsAppNotification(`${CASHBACK_AMOUNT} Gourdes ajouté automatiquement au compte de ${sponsor.fullName} pour ${user.fullName}`);
   }
 }
 
-// ---------------------- EXAMPLES USAGE ----------------------
-// Chak fwa ou fè depo / retrait / transfer:
-// await applyCashback("fiyel@email.com", "deposit", 500);
-// await applyCashback("fiyel@email.com", "withdraw", 200);
-// await applyCashback("fiyel@email.com", "transfer", 100);
+// ------------------ Cron: Frais Abonnement chak 30 jou ------------------
+cron.schedule("0 0 30 * *", async ()=>{
+  try{
+    const walletColl = db.collection("walletbalances");
+    const users = await walletColl.find({ isCashbackActive:true }).toArray();
+    const adminWallet = await walletColl.findOne({ email:ADMIN_EMAIL });
+    if(!adminWallet) return;
 
-module.exports = { router, applyCashback };
+    for(const u of users){
+      if(u.balance >= SUBSCRIPTION_FEE){
+        await walletColl.updateOne({ email:u.email }, { $inc:{ balance:-SUBSCRIPTION_FEE } });
+        await walletColl.updateOne({ email:ADMIN_EMAIL }, { $inc:{ balance:SUBSCRIPTION_FEE } });
+      }else{
+        await walletColl.updateOne({ email:u.email }, { $set:{ isCashbackActive:false } });
+      }
+    }
+  }catch(err){ console.error("Cron abonnnement:", err); }
+});
+
+// ------------------ Transaction Hook ------------------
+// Rele applyCashback(fiyelEmail) apre chak dépôt/retrait/transfert
+// Egzanp:
+// await applyCashback("fiyel@gmail.com");
+
 
 
 
