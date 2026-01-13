@@ -1242,10 +1242,7 @@ const CASHBACK_AMOUNT = 25;   // Cashback pou parrain/marraine
 const SUBSCRIPTION_FEE = 250; // Frais abonnman pou parrain/marraine
 const ADMIN_WHATSAPP = "50946057552";
 
-// -------------------- COLLECTION REFERENCES --------------------
-const walletUsersCollection = db.collection("walletusers");
-const walletBalancesCollection = db.collection("walletbalances");
-const transactionsCollection = db.collection("transactions");
+
 
 
 // -------------------- WHATSAPP NOTIFICATION --------------------
