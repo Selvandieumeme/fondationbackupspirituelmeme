@@ -1233,6 +1233,164 @@ app.post('/api/wallet/bonus', async (req, res) => {
 
 
 
+// =====================================================
+// 💸 MODULE CASHBACK FOBAS – PROD SAFE / DROP-IN
+// =====================================================
+
+// ---- CONFIG CASHBACK ----
+const CASHBACK_AMOUNT = 25; // 25 Gourdes fixes
+
+// =====================================================
+// 🔐 FONCTION CENTRALE CASHBACK (ANTI-DOUBLE + ANTI-FRAUDE)
+// =====================================================
+async function processCashback({
+  userId,
+  transactionType, // "deposit" | "withdraw" | "transfer"
+  transactionId
+}) {
+  try {
+    // 1️⃣ Sécurité paramètres
+    if (!userId || !transactionType || !transactionId) return;
+
+    // 2️⃣ Génération clé unique anti-double
+    const cashbackKey = require("crypto")
+      .createHash("sha256")
+      .update(`${userId}-${transactionType}-${transactionId}`)
+      .digest("hex");
+
+    // 3️⃣ Vérifie si cashback déjà exécuté
+    const alreadyExists = await transactions.findOne({
+      type: "cashback",
+      cashbackKey
+    });
+
+    if (alreadyExists) return; // ⛔ STOP DOUBLE CASHBACK
+
+    // 4️⃣ Récupère utilisateur actif
+    const user = await walletbalances.findOne({ userId });
+    if (!user) return;
+
+    // 5️⃣ Vérifie abonnement cashback
+    if (!user.subscriptions || !user.subscriptions.includes("cashback")) return;
+
+    // 6️⃣ Vérifie parrain/marraine
+    if (!user.sponsorName) return;
+
+    // 7️⃣ Récupère sponsor
+    const sponsor = await walletbalances.findOne({
+      fullName: user.sponsorName
+    });
+    if (!sponsor) return;
+
+    const now = new Date();
+
+    // 8️⃣ Crédit balance sponsor
+    await walletbalances.updateOne(
+      { userId: sponsor.userId },
+      { $inc: { balance: CASHBACK_AMOUNT } }
+    );
+
+    // 9️⃣ Historique SPONSOR
+    await transactions.insertOne({
+      userId: sponsor.userId,
+      relatedUserId: user.userId,
+      type: "cashback",
+      transactionType,
+      amount: CASHBACK_AMOUNT,
+      cashbackKey,
+      description: `Cashback reçu (${transactionType})`,
+      createdAt: now
+    });
+
+    // 🔟 Historique UTILISATEUR
+    await transactions.insertOne({
+      userId: user.userId,
+      relatedUserId: sponsor.userId,
+      type: "cashback",
+      transactionType,
+      amount: CASHBACK_AMOUNT,
+      cashbackKey,
+      description: `Cashback attribué à ${sponsor.fullName}`,
+      createdAt: now
+    });
+
+    // 1️⃣1️⃣ Notification WhatsApp ADMIN
+    await sendCashbackAdminNotification({
+      user: user.fullName,
+      sponsor: sponsor.fullName,
+      transactionType
+    });
+
+  } catch (err) {
+    console.error("❌ ERREUR CASHBACK:", err.message);
+  }
+}
+
+// =====================================================
+// 📲 NOTIFICATION WHATSAPP ADMIN
+// =====================================================
+async function sendCashbackAdminNotification({ user, sponsor, transactionType }) {
+  const message = `
+💸 CASHBACK FOBAS
+
+👤 Utilisateur : ${user}
+🤝 Parrain/Marraine : ${sponsor}
+🔁 Action : ${transactionType}
+💰 Montant : 25 Gdes
+🕒 ${new Date().toLocaleString()}
+`;
+
+  try {
+    await fetch("https://api.whatsapp-provider.com/send", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        to: "+50946057552",
+        message
+      })
+    });
+  } catch (e) {
+    console.error("⚠️ WhatsApp notif échouée");
+  }
+}
+
+// =====================================================
+// 🔌 FONCTIONS À APPELER APRÈ TRANSACTION RÉUSSIE
+// =====================================================
+
+// APRÈ DÉPÔT
+async function cashbackAfterDeposit(userId, depositId) {
+  await processCashback({
+    userId,
+    transactionType: "deposit",
+    transactionId: depositId
+  });
+}
+
+// APRÈ RETRAIT
+async function cashbackAfterWithdraw(userId, withdrawId) {
+  await processCashback({
+    userId,
+    transactionType: "withdraw",
+    transactionId: withdrawId
+  });
+}
+
+// APRÈ TRANSFERT
+async function cashbackAfterTransfer(userId, transferId) {
+  await processCashback({
+    userId,
+    transactionType: "transfer",
+    transactionId: transferId
+  });
+}
+
+// =====================================================
+// ✅ FIN MODULE CASHBACK
+// =====================================================
+
+
+
 
 
 
