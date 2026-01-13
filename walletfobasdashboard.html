@@ -81,19 +81,22 @@ async function activateCashback() {
     const res = await fetch("https://api.fondationbackupspirituel.com/subscribeCashback", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email: userEmail })
+      body: JSON.stringify({ userEmail }) // api server.js bezwen userEmail
     });
 
     const data = await res.json();
-    if (data.success) {
-      alert("💸 Cashback Rewards activé ✅");
-      // Mete bouton nan eta aktive
+
+    if (data.message) {
+      alert(data.message);
+
+      // Mete bouton nan eta aktive menm jan ak lòt bouton
       const btn = document.getElementById("cashbackBtn");
       btn.innerText = "💸 Cashback Active ✅";
       btn.disabled = true;
       btn.style.background = "#6c757d";
-    } else {
-      alert("Erreur: " + data.message);
+      btn.style.cursor = "default";
+    } else if (data.error) {
+      alert("Erreur: " + data.error);
     }
   } catch (err) {
     console.error(err);
@@ -111,17 +114,19 @@ function showCashbackInfo() {
       à chaque dépôt, retrait ou transfert.
     </p>
     <p><strong>Abonnement:</strong> 250 Gourdes / mois</p>
-    <button id="activateCashbackBtn" onclick="activateCashback()">Activer maintenant</button>
+    <button onclick="activateCashback()" 
+            style="padding:12px 25px; background:#16a34a; color:#fff; border:none; border-radius:12px; font-weight:700; cursor:pointer;">
+      Activer maintenant
+    </button>
   `;
 }
 
 // ------------------- LOAD CASHBACK BUTTON -------------------
-document.addEventListener("DOMContentLoaded", async () => {
+document.addEventListener("DOMContentLoaded", () => {
   const btn = document.getElementById("cashbackBtn");
-  btn.style.display = "inline-block";
+  if (btn) btn.style.display = "inline-block";
 });
 </script>
-
 
 
 
