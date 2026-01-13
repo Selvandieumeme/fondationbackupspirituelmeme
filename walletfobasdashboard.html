@@ -69,43 +69,65 @@
 
 
 
-  <script>
-  // Fonksyon pou montre info cashback
-  function showCashbackInfo() {
-    const area = document.getElementById("formArea");
-    area.innerHTML = `
-      <h3>💸 Cashback Rewards</h3>
-      <p>
-        Gagnez <strong>25 Gourdes</strong> pour votre parrain/marraine
-        à chaque dépôt, retrait ou transfert.
-      </p>
-      <p><strong>Abonnement:</strong> 250 Gourdes / mois</p>
-      <button onclick="subscribeCashback()">Activer maintenant</button>
-    `;
-  }
 
-  // Fonksyon fake subscribe (pa bezwen API_BASE pou frontend)
-  function subscribeCashback() {
-    alert("Cashback Rewards activé ✅");
-    const btn = document.getElementById("cashbackBtn");
-    if(btn){
+
+<script>
+// ------------------- CASHBACK FRONTEND -------------------
+async function activateCashback() {
+  const userEmail = document.getElementById("userEmail").innerText.trim(); // pran email itilizate
+  if (!userEmail) return alert("Email introuvable.");
+
+  try {
+    const res = await fetch("/subscribeCashback", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: userEmail })
+    });
+
+    const data = await res.json();
+    if (data.success) {
+      alert("💸 Cashback Rewards activé ✅");
+      // Mete bouton nan eta aktive
+      const btn = document.getElementById("cashbackBtn");
       btn.innerText = "💸 Cashback Active ✅";
       btn.disabled = true;
+      btn.style.background = "#6c757d";
+    } else {
+      alert("Erreur: " + data.message);
     }
+  } catch (err) {
+    console.error(err);
+    alert("Erreur serveur, veuillez réessayer.");
   }
+}
 
-  // Fè bouton parèt san kraze anything
-  document.addEventListener("DOMContentLoaded", function () {
-    const btn = document.getElementById("cashbackBtn");
-    if(btn){
-      btn.style.display = "block"; // montre bouton nan menm estil
-      btn.disabled = false;
-      btn.innerText = "💸 Cashback Rewards"; // menm flow ak lòt bouton
-    }
-  });
+// ------------------- SHOW CASHBACK FORM -------------------
+function showCashbackInfo() {
+  const area = document.getElementById("formArea");
+  area.innerHTML = `
+    <h3>💸 Cashback Rewards</h3>
+    <p>
+      Gagnez <strong>25 Gourdes</strong> pour votre parrain/marraine
+      à chaque dépôt, retrait ou transfert.
+    </p>
+    <p><strong>Abonnement:</strong> 250 Gourdes / mois</p>
+    <button id="activateCashbackBtn" onclick="activateCashback()">Activer maintenant</button>
+  `;
+}
+
+// ------------------- LOAD CASHBACK BUTTON -------------------
+document.addEventListener("DOMContentLoaded", async () => {
+  const btn = document.getElementById("cashbackBtn");
+  // montre bouton toujou menm jan ak lòt bouton
+  btn.style.display = "inline-block";
+});
 </script>
 
 
+
+
+  
+  
 
 
 
