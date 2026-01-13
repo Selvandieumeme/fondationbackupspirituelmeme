@@ -58,7 +58,7 @@
   ❓ FAQ FOBAS
 </button>
 <!-- 🆕 Cashback Rewards -->
-<button onclick="showCashbackInfo()" id="cashbackBtn" style="display:none">
+<button id="cashbackBtn" onclick="showCashbackInfo()" style="display:none;">
   💸 Cashback Rewards
 </button>
   <button onclick="logout()" style="background:#dc3545;">Déconnexion</button>
@@ -68,7 +68,42 @@
 <section class="form-area" id="formArea"></section>
 
 
-  
+
+  <script>
+  // Fonksyon pou montre info cashback
+  function showCashbackInfo() {
+    const area = document.getElementById("formArea");
+    area.innerHTML = `
+      <h3>💸 Cashback Rewards</h3>
+      <p>
+        Gagnez <strong>3 Gourdes</strong> pour votre parrain/marraine
+        à chaque dépôt, retrait ou transfert.
+      </p>
+      <p><strong>Abonnement:</strong> 50 Gourdes / mois</p>
+      <button onclick="subscribeCashback()">Activer maintenant</button>
+    `;
+  }
+
+  // Fonksyon fake subscribe (pa bezwen API_BASE pou frontend)
+  function subscribeCashback() {
+    alert("Cashback Rewards activé ✅");
+    const btn = document.getElementById("cashbackBtn");
+    if(btn){
+      btn.innerText = "💸 Cashback Active ✅";
+      btn.disabled = true;
+    }
+  }
+
+  // Fè bouton parèt san kraze anything
+  document.addEventListener("DOMContentLoaded", function () {
+    const btn = document.getElementById("cashbackBtn");
+    if(btn){
+      btn.style.display = "block"; // montre bouton nan menm estil
+      btn.disabled = false;
+      btn.innerText = "💸 Cashback Rewards"; // menm flow ak lòt bouton
+    }
+  });
+</script>
 
 
 
