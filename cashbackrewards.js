@@ -1,4 +1,4 @@
-// cashbackrewards.js
+// cashbackrewards.js 
 document.addEventListener("DOMContentLoaded", () => {
 
   // Chwazi bouton "Activer maintenant" sou dashboard
@@ -6,6 +6,24 @@ document.addEventListener("DOMContentLoaded", () => {
   const msgBox = document.getElementById("cashbackMsg");
 
   if (!activateBtn) return;
+
+  // --- Nou verifye si itilizatè deja aktive cashback
+  const userEmail = activateBtn.dataset.userEmail;
+  if (userEmail) {
+    fetch(`/api/wallet/checkCashbackStatus?userEmail=${encodeURIComponent(userEmail)}`)
+      .then(res => res.json())
+      .then(data => {
+        if (data.alreadyActive) {
+          activateBtn.disabled = true;
+          activateBtn.textContent = "✅ Cashback déjà activé";
+          if (msgBox) {
+            msgBox.textContent = "Cashback deja aktive pou ou.";
+            msgBox.style.color = "#16a34a";
+          }
+        }
+      })
+      .catch(err => console.error("Erreur fetch status cashback:", err));
+  }
 
   activateBtn.addEventListener("click", async () => {
     // Evite double klik
@@ -18,18 +36,6 @@ document.addEventListener("DOMContentLoaded", () => {
     if (msgBox) {
       msgBox.textContent = "Nap aktive cashback, tanpri rete tann...";
       msgBox.style.color = "#0ea5e9";
-    }
-
-    // Récupère email itilizate a sou dashboard (modifye selon HTML ou)
-    const userEmail = activateBtn.dataset.userEmail;
-    if (!userEmail) {
-      if (msgBox) {
-        msgBox.textContent = "⚠️ Pa jwenn email itilizate a.";
-        msgBox.style.color = "red";
-      }
-      activateBtn.disabled = false;
-      activateBtn.textContent = originalText;
-      return;
     }
 
     try {
@@ -45,6 +51,9 @@ document.addEventListener("DOMContentLoaded", () => {
         if (data.success) {
           msgBox.textContent = "✅ Cashback aktive avèk siksè!";
           msgBox.style.color = "#16a34a";
+          // Disable bouton pou evite double activation
+          activateBtn.disabled = true;
+          activateBtn.textContent = "✅ Cashback déjà activé";
         } else {
           msgBox.textContent = "⚠️ " + data.message;
           msgBox.style.color = "red";
@@ -58,8 +67,8 @@ document.addEventListener("DOMContentLoaded", () => {
         msgBox.style.color = "red";
       }
     } finally {
-      activateBtn.disabled = false;
-      activateBtn.textContent = originalText;
+      if (!activateBtn.disabled) activateBtn.disabled = false;
+      if (!activateBtn.disabled) activateBtn.textContent = originalText;
     }
   });
 
