@@ -101,23 +101,23 @@ const agentsFOBAS = {
       email: "memeselvandieu@fobas.com",
       adresse: "Rue la Paix, Mare-Rouge",
       whatsapp: "50946057952",
-      services: ["Central"],
+      services: ["Central"], ["FONDATEUR FOBAS"],
       photos: ["MEMESEL.jpg"]
     },
     {
-      nom: "Agent O1-2",
+      nom: "Dupre Hilsaint",
       email: "o1-2@walletfobas.com",
-      adresse: "Nord-Ouest 2",
-      whatsapp: "5090000002",
-      services: ["Retrait"],
-      photos: ["agents/o2-1.jpg"]
+      adresse: "Suprendre, Mare-Rouge",
+      whatsapp: "50932303047",
+      services: ["MANAGER NORD-OUEST"],
+      photos: ["Hilsaintdupre.jpg"]
     },
     {
       nom: "Agent O1-3",
       email: "o1-3@walletfobas.com",
-      adresse: "Nord-Ouest 3",
-      whatsapp: "5090000003",
-      services: ["Transfert"],
+      adresse: "Surprendre, Mare-Rouge",
+      whatsapp: "50932303047",
+      services: ["MANAGER NORD-OUEST"],
       photos: ["agents/o3-1.jpg"]
     },
     {
