@@ -11,7 +11,7 @@ const agentsFOBAS = {
       email: "memeselvandieu@fobas.com",
       adresse: "Rue la Paix, Mare-Rouge",
       whatsapp: "50946057952",
-      services: ["Depot"], ["Retrait"], ["Transfert"],
+      services: ["Depot"],
       photos: ["MEMESEL.jpg"]
     },
     {
@@ -101,7 +101,7 @@ const agentsFOBAS = {
       email: "memeselvandieu@fobas.com",
       adresse: "Rue la Paix, Mare-Rouge",
       whatsapp: "50946057952",
-      services: ["Central"], ["FONDATEUR FOBAS"],
+      services: ["Central"], 
       photos: ["MEMESEL.jpg"]
     },
     {
