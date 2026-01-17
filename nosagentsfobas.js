@@ -226,6 +226,7 @@ const agentsFOBAS = {
     photos: ["agents/o15-1.jpg"]
   }
 ]
+],
 };
 
 // =======================
