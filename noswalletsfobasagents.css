@@ -52,40 +52,51 @@ body {
   max-width: 1300px;
   margin: 30px auto;
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 15px;
+  grid-template-columns: repeat(5, 1fr); /* 5 agents pa liy */
+  gap: 20px; /* ti espas ant chak card */
   padding: 20px;
 }
 
 .agent-card {
   background: white;
   border-radius: 12px;
-  padding: 15px;
+  padding: 10px;            /* mwens padding pou pi kompakte */
   text-align: center;
-  box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08); /* pi lejè pou pi elegant */
   display: flex;
   flex-direction: column;
   align-items: center;
+  transition: transform 0.2s;
+}
+
+.agent-card:hover {
+  transform: translateY(-4px);
 }
 
 .agent-card img {
-  width: 100%;          /* pran tout lajè espas disponib nan card la */
-  max-width: 70px;      /* limite foto a pou li pa twò gwo */
-  height: auto;         /* kenbe pwopòsyon kare orijinal la */
-  border-radius: 0;     /* retire wonn */
-  object-fit: contain;  /* kenbe tout figi moun nan vizib */
-  display: block;
-  margin-bottom: 10px;  /* ti espas anba foto pou tèks */
-  background: none;     /* retire nenpòt background ki fè wonn */
+  width: 80px;              /* foto kare, pi gwo */
+  height: 80px;             /* kare pou pran fòm orijinal */
+  object-fit: contain;      /* kenbe figi konplè */
+  border-radius: 0;         /* pa gen wonn */
+  margin-bottom: 8px;       /* espas ant foto ak tèks */
 }
 
 .agent-card h4 {
-  margin: 10px 0 5px;
+  font-size: 14px;
+  margin: 4px 0 2px;
+  font-weight: bold;
+}
+
+.agent-card p {
+  font-size: 12px;
+  margin: 2px 0;
+  color: #555;
 }
 
 .agent-card a {
   display: inline-block;
-  margin-top: 8px;
+  margin-top: 6px;
+  font-size: 12px;
   color: #25D366;
   font-weight: bold;
   text-decoration: none;
