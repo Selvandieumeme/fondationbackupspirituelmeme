@@ -13,7 +13,7 @@ document.getElementById("verifyBtn").addEventListener("click", async () => {
   }
 
   try {
-    const res = await fetch("http://localhost:3000/api/verify-identity", {
+    const res = await fetch("https://api.fondationbackupspirituel.com/api/wallet/verify-identity", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email })
