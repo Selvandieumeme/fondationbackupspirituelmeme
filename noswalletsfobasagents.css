@@ -63,17 +63,20 @@ body {
   padding: 15px;
   text-align: center;
   box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .agent-card img {
-  width: auto;           /* pa fòse lajè */
-  height: auto;          /* pa fòse wotè */
-  max-width: 100%;       /* pou pa depase blòk la */
-  border-radius: 0;      /* retire wonn */
-  object-fit: none;      /* pa fè koupe oswa stretching */
-  background: none;      /* retire background ki kreye efè wonn */
-  display: block;        /* pou pa gen ti espas anba foto */
-  margin: 0 auto;        /* centre foto nan card la si ou vle */
+  width: 100%;          /* pran tout lajè espas disponib nan card la */
+  max-width: 70px;      /* limite foto a pou li pa twò gwo */
+  height: auto;         /* kenbe pwopòsyon kare orijinal la */
+  border-radius: 0;     /* retire wonn */
+  object-fit: contain;  /* kenbe tout figi moun nan vizib */
+  display: block;
+  margin-bottom: 10px;  /* ti espas anba foto pou tèks */
+  background: none;     /* retire nenpòt background ki fè wonn */
 }
 
 .agent-card h4 {
