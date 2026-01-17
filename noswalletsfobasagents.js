@@ -6,11 +6,11 @@ const departments = [
 const agentsData = {
   "Ouest": [
     {
-      name: "Jean Paul Louis",
-      zone: "Delmas 33",
-      services: "Dépôt, Retrait, Transfert",
-      phone: "509xxxxxxxx",
-      photo: "assets/agents/agent1.jpg"
+      name: "Marie Ange Noe",
+      zone: "Petion-Ville",
+      services: "REPRESENTANTE COMMUNALE P.V.",
+      phone: "50949451734",
+      photo: "MarieNoePV.jpg"
     }
     // ajoute jiska ou vle
   ],
