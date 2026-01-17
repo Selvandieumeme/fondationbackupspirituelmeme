@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Vérifier Identité</title>
+  <link rel="stylesheet" href="walletverification.css">
+</head>
+<body>
+
+<div class="verify-container">
+  <h2>Vérification d'identité</h2>
+
+  <!-- Email destinataire -->
+  <label>Email du destinataire</label>
+  <input type="email" id="emailInput" placeholder="ex: client@email.com">
+
+  <!-- Nom / Prénom affiché -->
+  <label>Nom & Prénom</label>
+  <input type="text" id="fullnameOutput" placeholder="---" readonly>
+
+  <!-- Bouton verifier -->
+  <button id="verifyBtn">Vérifier</button>
+
+  <p id="verifyMsg"></p>
+</div>
+
+<script src="walletverification.js"></script>
+</body>
+</html>
