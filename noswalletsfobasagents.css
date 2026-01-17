@@ -1,0 +1,85 @@
+body {
+  font-family: 'Segoe UI', sans-serif;
+  margin: 0;
+  background: #f5f7fb;
+  color: #1a1a1a;
+}
+
+.hero {
+  background: linear-gradient(135deg, #0033a0, #ffd700);
+  color: white;
+  padding: 40px;
+  text-align: center;
+}
+
+.organisation, .rules, .departments {
+  padding: 30px;
+  max-width: 1200px;
+  margin: auto;
+}
+
+.org-block {
+  background: white;
+  padding: 15px;
+  margin-bottom: 10px;
+  border-left: 5px solid #0033a0;
+}
+
+.dept-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.dept-buttons button {
+  flex: 1;
+  min-width: 150px;
+  padding: 12px;
+  background: #0033a0;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.dept-buttons button:hover {
+  background: #ffd700;
+  color: #0033a0;
+}
+
+.agents-grid {
+  max-width: 1300px;
+  margin: 30px auto;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 15px;
+  padding: 20px;
+}
+
+.agent-card {
+  background: white;
+  border-radius: 12px;
+  padding: 15px;
+  text-align: center;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+}
+
+.agent-card img {
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.agent-card h4 {
+  margin: 10px 0 5px;
+}
+
+.agent-card a {
+  display: inline-block;
+  margin-top: 8px;
+  color: #25D366;
+  font-weight: bold;
+  text-decoration: none;
+}
