@@ -180,8 +180,7 @@ const agentsFOBAS = {
       services: ["Transfert", "Retrait"],
       photos: ["agents/o10-1.jpg"]
     }
-  ]
-],
+  ],
 
 // Bloc 3 — Done inik pou evite doublons
 [
