@@ -8,7 +8,7 @@ const agentsData = {
     {
       name: "Marie Ange Noe",
       zone: "Petion-Ville",
-      services: "REPRESENTANTE COMMUNALE P.V.",
+      services: "Representante Communale Petion-Ville",
       phone: "50949451734",
       photo: "MarieNoePV.jpg"
     }
