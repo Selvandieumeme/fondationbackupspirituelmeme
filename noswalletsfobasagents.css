@@ -74,11 +74,13 @@ body {
 }
 
 .agent-card img {
-  width: 80px;              /* foto kare, pi gwo */
-  height: 80px;             /* kare pou pran fòm orijinal */
-  object-fit: contain;      /* kenbe figi konplè */
-  border-radius: 0;         /* pa gen wonn */
-  margin-bottom: 8px;       /* espas ant foto ak tèks */
+  width: 120px;           /* ogmante lajè pou pi gwo vizibilite */
+  height: 120px;          /* ogmante wotè pou kare */
+  object-fit: contain;    /* kenbe tout figi san koupe */
+  border-radius: 0;       /* pa gen wonn */
+  display: block;
+  margin-bottom: 10px;    /* espas ant foto ak tèks */
+  background: none;       /* retire background */
 }
 
 .agent-card h4 {
