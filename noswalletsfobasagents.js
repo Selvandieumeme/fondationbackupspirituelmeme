@@ -76,7 +76,6 @@ const agentsData = {
     phone: "50999999999",
     photo: "JeanMarie.jpg"
   }
-]
 ],
     
   "Nord": []
