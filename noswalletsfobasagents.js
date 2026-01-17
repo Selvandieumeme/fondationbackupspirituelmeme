@@ -96,7 +96,7 @@ const agentsData = {
 ],
 
 "Nord-Ouest": [
-  { name:"Fabrice Jean", zone:"Port-de-Paix", services:"Agent Autorisé", phone:"50940707001", photo:"FabriceNO.jpg" },
+  { name:"DUPRE Hilsaint", zone:"Temps Perdu, Mare Rouge", services:"Manager Nord-Ouest", phone:"50932303047", photo:"Hilsaintdupre.jpg" },
   { name:"Caroline Pierre", zone:"Saint-Louis-du-Nord", services:"Agent Autorisé", phone:"50940707002", photo:"CarolineNO.jpg" },
   { name:"Ronald Noel", zone:"Jean-Rabel", services:"Agent Autorisé", phone:"50940707003", photo:"RonaldNO.jpg" },
   { name:"Elsa Michel", zone:"Port-de-Paix", services:"Agent Autorisé", phone:"50940707004", photo:"ElsaNO.jpg" },
