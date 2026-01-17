@@ -55,5 +55,20 @@ body {
   color: #003366;
 }
 
+
+/* ===== ISOLATION AGENTS FOBAS (ANTI-CONFLIT) ===== */
+
+#agentsFOBASContainer,
+#agentsFOBASContainer * {
+  all: unset;
+  box-sizing: border-box;
+}
+
+#agentsFOBASContainer {
+  all: revert;
+  width: 100%;
+  display: block;
+}
+
 /* ===== TOUT LÒT KOD RELATIF A GRID/AGENT-CARD RETIRE ===== */
 /* Sa ki rete nan nosagentsfobas.css ap jere tout layout agents yo */
