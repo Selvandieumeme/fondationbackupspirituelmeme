@@ -10,7 +10,7 @@ const agentsData = {
       zone: "Petion-Ville",
       services: "Representante Communale Petion-Ville",
       phone: "50949451734",
-      photo: "MarieNoePV.jpg"
+      photo: "Marieangenoe.jpg"
     }
     // ajoute jiska ou vle
   ],
