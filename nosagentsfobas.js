@@ -186,7 +186,7 @@ const agentsFOBAS = {
 // Bloc 3
   [
     {
-      nom: "Agent O2-1",
+      nom: "Agent O3-1",
       email: "o2-1@walletfobas.com",
       adresse: "Nord-Ouest 6",
       whatsapp: "5090000010",
@@ -194,7 +194,7 @@ const agentsFOBAS = {
       photos: ["agents/o6-1.jpg"]
     },
     {
-      nom: "Agent O2-2",
+      nom: "Agent O3-2",
       email: "o2-2@walletfobas.com",
       adresse: "Nord-Ouest 7",
       whatsapp: "5090000011",
@@ -202,7 +202,7 @@ const agentsFOBAS = {
       photos: ["agents/o7-1.jpg"]
     },
     {
-      nom: "Agent O2-3",
+      nom: "Agent O3-3",
       email: "o2-3@walletfobas.com",
       adresse: "Nord-Ouest 8",
       whatsapp: "5090000012",
@@ -210,7 +210,7 @@ const agentsFOBAS = {
       photos: ["agents/o8-1.jpg"]
     },
     {
-      nom: "Agent O2-4",
+      nom: "Agent O3-4",
       email: "o2-4@walletfobas.com",
       adresse: "Nord-Ouest 9",
       whatsapp: "5090000013",
@@ -218,7 +218,7 @@ const agentsFOBAS = {
       photos: ["agents/o9-1.jpg"]
     },
     {
-      nom: "Agent O2-5",
+      nom: "Agent O3-5",
       email: "o2-5@walletfobas.com",
       adresse: "Nord-Ouest 10",
       whatsapp: "5090000014",
