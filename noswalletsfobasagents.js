@@ -4,81 +4,80 @@ const departments = [
 ];
 
 const agentsData = {
-  "Ouest": [
-    // Blòk 1 - premye 5 agents
-    {
-      name: "Marie Ange Noe",
-      zone: "Petion-Ville",
-      services: "Representante Communale Petion-Ville",
-      phone: "50949451734",
-      photo: "MarieNoePV.jpg"
-    },
-    {
-      name: "Jean Paul Louis",
-      zone: "Delmas 33",
-      services: "Agent Autorisé Dépôt/Retrait/Transfert",
-      phone: "509xxxxxxxx",
-      photo: "JeanPaulDelmas.jpg"
-    },
-    {
-      name: "Claudine Pierre",
-      zone: "Tabarre",
-      services: "Agent Autorisé Dépôt/Transfert",
-      phone: "509xxxxxxxx",
-      photo: "ClaudineTabarre.jpg"
-    },
-    {
-      name: "Michel Joseph",
-      zone: "Pétion-Ville",
-      services: "Agent Autorisé Retrait/Transfert",
-      phone: "509xxxxxxxx",
-      photo: "MichelPV.jpg"
-    },
-    {
-      name: "Sophie Laurent",
-      zone: "Delmas 29",
-      services: "Agent Autorisé Dépôt/Transfert",
-      phone: "509xxxxxxxx",
-      photo: "SophieDelmas.jpg"
-    },
+ "Ouest": [
+  {
+    name: "Marie Ange Noe",
+    zone: "Petion-Ville",
+    services: "Representante Communale Petion-Ville",
+    phone: "50949451734",
+    photo: "MarieNoePV.jpg"
+  },
+  {
+    name: "Jean Paul Louis",
+    zone: "Delmas",
+    services: "Agent Autorisé",
+    phone: "50911111111",
+    photo: "JeanPaul.jpg"
+  },
+  {
+    name: "Claudine Pierre",
+    zone: "Tabarre",
+    services: "Agent Autorisé",
+    phone: "50922222222",
+    photo: "Claudine.jpg"
+  },
+  {
+    name: "Michel Joseph",
+    zone: "Carrefour",
+    services: "Agent Autorisé",
+    phone: "50933333333",
+    photo: "Michel.jpg"
+  },
+  {
+    name: "Sophie Laurent",
+    zone: "Pétion-Ville",
+    services: "Agent Autorisé",
+    phone: "50944444444",
+    photo: "Sophie.jpg"
+  },
 
-    // Blòk 2 - pwochen 5 agents
-    {
-      name: "Jean-Marie Pierre",
-      zone: "Tabarre",
-      services: "Agent Autorisé Dépôt/Retrait",
-      phone: "509xxxxxxxx",
-      photo: "JeanMarieTabarre.jpg"
-    },
-    {
-      name: "Carla Dupont",
-      zone: "Pétion-Ville",
-      services: "Agent Autorisé Transfert",
-      phone: "509xxxxxxxx",
-      photo: "CarlaPV.jpg"
-    },
-    {
-      name: "Patrick Simon",
-      zone: "Delmas 30",
-      services: "Agent Autorisé Dépôt/Retrait/Transfert",
-      phone: "509xxxxxxxx",
-      photo: "PatrickDelmas.jpg"
-    },
-    {
-      name: "Isabelle François",
-      zone: "Tabarre",
-      services: "Agent Autorisé Dépôt/Transfert",
-      phone: "509xxxxxxxx",
-      photo: "IsabelleTabarre.jpg"
-    },
-    {
-      name: "Louis Bernard",
-      zone: "Pétion-Ville",
-      services: "Agent Autorisé Retrait/Transfert",
-      phone: "509xxxxxxxx",
-      photo: "LouisPV.jpg"
-    }
-  ]
+  {
+    name: "Patrick Simon",
+    zone: "Delmas",
+    services: "Agent Autorisé",
+    phone: "50955555555",
+    photo: "Patrick.jpg"
+  },
+  {
+    name: "Isabelle François",
+    zone: "Tabarre",
+    services: "Agent Autorisé",
+    phone: "50966666666",
+    photo: "Isabelle.jpg"
+  },
+  {
+    name: "Louis Bernard",
+    zone: "Croix-des-Bouquets",
+    services: "Agent Autorisé",
+    phone: "50977777777",
+    photo: "Louis.jpg"
+  },
+  {
+    name: "Carla Dupont",
+    zone: "Carrefour",
+    services: "Agent Autorisé",
+    phone: "50988888888",
+    photo: "Carla.jpg"
+  },
+  {
+    name: "Jean-Marie Pierre",
+    zone: "Delmas",
+    services: "Agent Autorisé",
+    phone: "50999999999",
+    photo: "JeanMarie.jpg"
+  }
+]
+],
     
   "Nord": []
 };
