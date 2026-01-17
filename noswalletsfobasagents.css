@@ -66,12 +66,14 @@ body {
 }
 
 .agent-card img {
-  width: 70px;
-  height: 70px;
-  object-fit: contain;      
-  background: #f5f7fb;      
-  padding: 0;               
-  border-radius: 0;         
+  width: auto;           /* pa fòse lajè */
+  height: auto;          /* pa fòse wotè */
+  max-width: 100%;       /* pou pa depase blòk la */
+  border-radius: 0;      /* retire wonn */
+  object-fit: none;      /* pa fè koupe oswa stretching */
+  background: none;      /* retire background ki kreye efè wonn */
+  display: block;        /* pou pa gen ti espas anba foto */
+  margin: 0 auto;        /* centre foto nan card la si ou vle */
 }
 
 .agent-card h4 {
