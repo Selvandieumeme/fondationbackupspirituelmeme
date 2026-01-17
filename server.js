@@ -1023,6 +1023,48 @@ const transactionSchema = new mongoose.Schema({
 const WalletBalance = mongoose.model('walletbalances', walletBalanceSchema);
 const Transaction = mongoose.model('transactions', transactionSchema);
 
+
+
+
+// =======================
+// 🔎 VERIFIER IDENTITÉ WALLET (EMAIL -> NOM/PRENOM)
+// =======================
+app.post("/api/wallet/verify-identity", async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({
+        success: false,
+        message: "Email manquant"
+      });
+    }
+
+    const user = await WalletUser.findOne({
+      email: email.trim().toLowerCase()
+    }).select("fullName email");
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "Aucun compte Wallet FOBAS associé à cet email"
+      });
+    }
+
+    return res.json({
+      success: true,
+      fullName: user.fullName
+    });
+
+  } catch (err) {
+    console.error("VERIFY IDENTITY ERROR:", err);
+    return res.status(500).json({
+      success: false,
+      message: "Erreur serveur"
+    });
+  }
+});
+
 // ----------------------- SOCKET -----------------------
 io.on('connection', socket => {
   console.log('🔌 Socket connecté');
