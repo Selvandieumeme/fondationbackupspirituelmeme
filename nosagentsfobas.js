@@ -183,50 +183,49 @@ const agentsFOBAS = {
   ]
 ],
 
-// Bloc 3
-  [
-    {
-      nom: "Agent O3-1",
-      email: "o2-1@walletfobas.com",
-      adresse: "Nord-Ouest 6",
-      whatsapp: "5090000010",
-      services: ["Dépôt"],
-      photos: ["agents/o6-1.jpg"]
-    },
-    {
-      nom: "Agent O3-2",
-      email: "o2-2@walletfobas.com",
-      adresse: "Nord-Ouest 7",
-      whatsapp: "5090000011",
-      services: ["Retrait"],
-      photos: ["agents/o7-1.jpg"]
-    },
-    {
-      nom: "Agent O3-3",
-      email: "o2-3@walletfobas.com",
-      adresse: "Nord-Ouest 8",
-      whatsapp: "5090000012",
-      services: ["Transfert"],
-      photos: ["agents/o8-1.jpg"]
-    },
-    {
-      nom: "Agent O3-4",
-      email: "o2-4@walletfobas.com",
-      adresse: "Nord-Ouest 9",
-      whatsapp: "5090000013",
-      services: ["Dépôt", "Retrait"],
-      photos: ["agents/o9-1.jpg"]
-    },
-    {
-      nom: "Agent O3-5",
-      email: "o2-5@walletfobas.com",
-      adresse: "Nord-Ouest 10",
-      whatsapp: "5090000014",
-      services: ["Transfert", "Retrait"],
-      photos: ["agents/o10-1.jpg"]
-    }
-  ]
-],
+// Bloc 3 — Done inik pou evite doublons
+[
+  {
+    nom: "Agent O3-1",
+    email: "o3-1@walletfobas.com",
+    adresse: "Nord-Ouest 11",
+    whatsapp: "5090000020",
+    services: ["Dépôt"],
+    photos: ["agents/o11-1.jpg"]
+  },
+  {
+    nom: "Agent O3-2",
+    email: "o3-2@walletfobas.com",
+    adresse: "Nord-Ouest 12",
+    whatsapp: "5090000021",
+    services: ["Retrait"],
+    photos: ["agents/o12-1.jpg"]
+  },
+  {
+    nom: "Agent O3-3",
+    email: "o3-3@walletfobas.com",
+    adresse: "Nord-Ouest 13",
+    whatsapp: "5090000022",
+    services: ["Transfert"],
+    photos: ["agents/o13-1.jpg"]
+  },
+  {
+    nom: "Agent O3-4",
+    email: "o3-4@walletfobas.com",
+    adresse: "Nord-Ouest 14",
+    whatsapp: "5090000023",
+    services: ["Dépôt", "Retrait"],
+    photos: ["agents/o14-1.jpg"]
+  },
+  {
+    nom: "Agent O3-5",
+    email: "o3-5@walletfobas.com",
+    adresse: "Nord-Ouest 15",
+    whatsapp: "5090000024",
+    services: ["Transfert", "Retrait"],
+    photos: ["agents/o15-1.jpg"]
+  }
+]
 };
 
 // =======================
