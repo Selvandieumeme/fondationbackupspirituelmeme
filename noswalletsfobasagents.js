@@ -78,7 +78,79 @@ const agentsData = {
   }
 ],
     
-  "Nord": []
+  "Nord": [
+  {
+    name: "Wilner Desrosiers",
+    zone: "Cap-Haïtien",
+    services: "Agent Autorisé",
+    phone: "50940101001",
+    photo: "Wilner.jpg"
+  },
+  {
+    name: "Nadia Joseph",
+    zone: "Limonade",
+    services: "Agent Autorisé",
+    phone: "50940101002",
+    photo: "Nadia.jpg"
+  },
+  {
+    name: "Frantz Pierre",
+    zone: "Quartier-Morin",
+    services: "Agent Autorisé",
+    phone: "50940101003",
+    photo: "Frantz.jpg"
+  },
+  {
+    name: "Esther Louis",
+    zone: "Milot",
+    services: "Agent Autorisé",
+    phone: "50940101004",
+    photo: "Esther.jpg"
+  },
+  {
+    name: "Ronald Jean",
+    zone: "Cap-Haïtien",
+    services: "Agent Autorisé",
+    phone: "50940101005",
+    photo: "Ronald.jpg"
+  },
+
+  {
+    name: "Sophia Bernard",
+    zone: "Limonade",
+    services: "Agent Autorisé",
+    phone: "50940101006",
+    photo: "Sophia.jpg"
+  },
+  {
+    name: "David Charles",
+    zone: "Milot",
+    services: "Agent Autorisé",
+    phone: "50940101007",
+    photo: "David.jpg"
+  },
+  {
+    name: "Carine Paul",
+    zone: "Quartier-Morin",
+    services: "Agent Autorisé",
+    phone: "50940101008",
+    photo: "Carine.jpg"
+  },
+  {
+    name: "Junior Michel",
+    zone: "Cap-Haïtien",
+    services: "Agent Autorisé",
+    phone: "50940101009",
+    photo: "Junior.jpg"
+  },
+  {
+    name: "Elodie Simon",
+    zone: "Limonade",
+    services: "Agent Autorisé",
+    phone: "50940101010",
+    photo: "Elodie.jpg"
+  }
+]
 };
 
 const deptButtons = document.getElementById("deptButtons");
