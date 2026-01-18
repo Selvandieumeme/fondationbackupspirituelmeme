@@ -5,7 +5,7 @@ const departments = [
 
 const agentsData = {
  "Ouest": [
-  { name:"Marie Ange Noe", zone:"Petion-Ville", services:"Representante Communale Petion-Ville", phone:"50949451734", photo:"MarieNoePV.jpg" },
+  { name:"Marie Ange Noe", zone:"Petion-Ville", services:"Representante Commune Petion-Ville", phone:"50949451734", photo:"MarieNoePV.jpg" },
   { name:"Chery Sterline", zone:"Delmas", services:"Representante Commune Delmas", phone:"509111111111", photo:"Sterlinechery.jpg" },
   { name:"Delvas Joel", zone:"Santo 19, Croix-des-Bouquets", services:"Manager Ouest", phone:"50922222222", photo:"Delvasjoel.jpg" },
   { name:"Michel Joseph", zone:"Carrefour", services:"Agent Autorisé", phone:"50933333333", photo:"Michel.jpg" },
