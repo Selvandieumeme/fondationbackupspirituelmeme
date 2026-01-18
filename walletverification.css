@@ -58,3 +58,32 @@ button:hover {
   text-align: center;
   font-size: 14px;
 }
+
+
+
+
+
+
+
+/* 🔙 Bouton Back endepandan, anba kadran verifye a */
+.back-btn-container {
+  display: flex;
+  justify-content: center;  /* mete bouton nan sant kadran */
+  margin-top: 10px;         /* ti espas ant fòm ak bouton */
+}
+
+#backBtn {
+  padding: 6px 12px;        /* piti, elegant */
+  font-size: 13px;
+  background-color: #0033a0;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+#backBtn:hover {
+  background-color: #ffd700;
+  color: #0033a0;
+}
