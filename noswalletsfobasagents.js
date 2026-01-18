@@ -98,7 +98,7 @@ const agentsData = {
 "Nord-Ouest": [
   { name:"DUPRE Hilsaint", zone:"Temps Perdu, Mare Rouge", services:"Manager Nord-Ouest", phone:"50932303047", photo:"Hilsaintdupre.jpg" },
   { name:"Petide Weetbency", zone:"Bombardopolis", services:"Agent Autorisé", phone:"50943294137", photo:"Petitdewensbenleyagentbonbad.jpg" },
-  { name:"Ronald Noel", zone:"Jean-Rabel", services:"Agent Autorisé", phone:"50940707003", photo:"RonaldNO.jpg" },
+  { name:"Mentor Kerlin", zone:"Clenette, Bombardopolis", services:"Agent Autorisé", phone:"50932299183", photo:"MentorKerlinbonbad.jpg" },
   { name:"Elsa Michel", zone:"Port-de-Paix", services:"Agent Autorisé", phone:"50940707004", photo:"ElsaNO.jpg" },
   { name:"Patrick Jean", zone:"Saint-Louis-du-Nord", services:"Agent Autorisé", phone:"50940707005", photo:"PatrickNO.jpg" },
   { name:"Sonia Pierre", zone:"Jean-Rabel", services:"Agent Autorisé", phone:"50940707006", photo:"SoniaNO.jpg" },
