@@ -7,7 +7,7 @@ const agentsData = {
  "Ouest": [
   { name:"Marie Ange Noe", zone:"Petion-Ville", services:"Representante Commune Petion-Ville", phone:"50949451734", photo:"MarieNoePV.jpg" },
   { name:"Chery Sterline", zone:"Delmas", services:"Representante Commune Delmas", phone:"509111111111", photo:"Sterlinechery.jpg" },
-  { name:"Delvas Joel", zone:"Santo 19, Croix-des-Bouquets", services:"Manager Ouest", phone:"50922222222", photo:"Delvasjoel.jpg" },
+  { name:"Delvas Joel", zone:"Santo 19, Croix-des-Bouquets", services:"Manager Ouest", phone:"5093402-0695", photo:"Delvasjoel.jpg" },
   { name:"Exantus Kensley", zone:"Rue Crajadelle, Bon Repos, Ouest", services:"Agent Autorisé", phone:"50944349285", photo:"Exantuskensley.jpg" },
   { name:"Sophie Laurent", zone:"Pétion-Ville", services:"Agent Autorisé", phone:"50944444444", photo:"Sophie.jpg" },
   { name:"Patrick Simon", zone:"Delmas", services:"Agent Autorisé", phone:"50955555555", photo:"Patrick.jpg" },
@@ -103,7 +103,7 @@ const agentsData = {
   { name:"Sereste Gabelus", zone:"Mare-Rouge", services:"Superviseur Nord-Ouest", phone:"50942586437", photo:"Serestegabelus.jpg" },
   { name:"Branchedor Dieuben", zone:"Rue Santrain, Mare-Rouge", services:"Agent Autorisé", phone:"50938098072", photo:"Branchedordieuben.jpg" },
   { name:"Valbrun John Leader", zone:"Clenette, Bombardopolis", services:"Agent Autorisé", phone:"50955959299", photo:"Valbrunjohnleader.jpg" },
-  { name:"Carla Louis", zone:"Saint-Louis-du-Nord", services:"Agent Autorisé", phone:"50940707008", photo:"CarlaNO.jpg" },
+  { name:"Fenicien Mekency", zone:"Rue Ti Port de Paix, Clenette, Bombarde", services:"Agent Autorisé", phone:"50932741550", photo:"Fenicienmekency.jpg" },
   { name:"Wilson Michel", zone:"Jean-Rabel", services:"Agent Autorisé", phone:"50940707009", photo:"WilsonNO.jpg" },
   { name:"Nadine Pierre", zone:"Port-de-Paix", services:"Agent Autorisé", phone:"50940707010", photo:"NadineNO.jpg" }
 ],
