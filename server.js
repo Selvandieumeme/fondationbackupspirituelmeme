@@ -1027,7 +1027,7 @@ const Transaction = mongoose.model('transactions', transactionSchema);
 
 
 // =======================
-// 🔎 VERIFIER IDENTITÉ WALLET (EMAIL -> NOM/PRENOM)
+// 🔎 VERIFIER IDENTITÉ WALLET (EMAIL EXACT)
 // =======================
 app.post("/api/wallet/verify-identity", async (req, res) => {
   try {
@@ -1041,13 +1041,13 @@ app.post("/api/wallet/verify-identity", async (req, res) => {
     }
 
     const user = await WalletUser.findOne({
-      email: email.trim().toLowerCase()
+      email: email
     }).select("fullName email");
 
     if (!user) {
       return res.status(404).json({
         success: false,
-        message: "Aucun compte Wallet FOBAS associé à cet email"
+        message: "Aucun compte Wallet FOBAS ne correspond à cet email"
       });
     }
 
@@ -1064,6 +1064,9 @@ app.post("/api/wallet/verify-identity", async (req, res) => {
     });
   }
 });
+
+
+
 
 // ----------------------- SOCKET -----------------------
 io.on('connection', socket => {
