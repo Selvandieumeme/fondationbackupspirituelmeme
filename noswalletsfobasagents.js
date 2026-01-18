@@ -102,7 +102,7 @@ const agentsData = {
   { name:"Sanon Pierre-Andre", zone:"Rue Bouco, Clenette", services:"Representant Commune Bombardopolis", phone:"50943428235", photo:"Sanonpierreandre.jpg" },
   { name:"Sereste Gabelus", zone:"Mare-Rouge", services:"Superviseur Nord-Ouest", phone:"50942586437", photo:"Serestegabelus.jpg" },
   { name:"Branchedor Dieuben", zone:"Rue Santrain, Mare-Rouge", services:"Agent Autorisé", phone:"50938098072", photo:"Branchedordieuben.jpg" },
-  { name:"Junior Noel", zone:"Port-de-Paix", services:"Agent Autorisé", phone:"50940707007", photo:"JuniorNO.jpg" },
+  { name:"Valbrun John Leader", zone:"Clenette, Bombardopolis", services:"Agent Autorisé", phone:"50955959299", photo:"Valbrunjohnleader.jpg" },
   { name:"Carla Louis", zone:"Saint-Louis-du-Nord", services:"Agent Autorisé", phone:"50940707008", photo:"CarlaNO.jpg" },
   { name:"Wilson Michel", zone:"Jean-Rabel", services:"Agent Autorisé", phone:"50940707009", photo:"WilsonNO.jpg" },
   { name:"Nadine Pierre", zone:"Port-de-Paix", services:"Agent Autorisé", phone:"50940707010", photo:"NadineNO.jpg" }
