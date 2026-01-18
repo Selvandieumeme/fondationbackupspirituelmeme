@@ -36,3 +36,16 @@ document.getElementById("verifyBtn").addEventListener("click", async () => {
     msg.style.color = "red";
   }
 });
+
+
+
+
+
+
+
+// =======================
+// 🔙 Bouton Back endepandan
+// =======================
+document.getElementById("backBtn").addEventListener("click", () => {
+  window.history.back(); // retounen nan paj anvan itilizatè a
+});
