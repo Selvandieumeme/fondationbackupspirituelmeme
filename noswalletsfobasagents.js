@@ -18,7 +18,7 @@ const agentsData = {
 ],
 
 "Nord": [
-  { name:"Wilner Desrosiers", zone:"Cap-Haïtien", services:"Agent Autorisé", phone:"50940101001", photo:"Wilner.jpg" },
+  { name:"Petit-Homme Sabrina", zone:"Cap-Haïtien", services:"Manager Nord", phone:"50934403401", photo:"Sabrinapetithommecap.jpg" },
   { name:"Nadia Joseph", zone:"Limonade", services:"Agent Autorisé", phone:"50940101002", photo:"Nadia.jpg" },
   { name:"Frantz Pierre", zone:"Quartier-Morin", services:"Agent Autorisé", phone:"50940101003", photo:"Frantz.jpg" },
   { name:"Esther Louis", zone:"Milot", services:"Agent Autorisé", phone:"50940101004", photo:"Esther.jpg" },
