@@ -1225,26 +1225,29 @@ app.post('/api/wallet/transfer', async (req, res) => {
     await receiver.save();
     if(admin) await admin.save();
 
-    // 🧾 Historique sender
-    await Transaction.create({
-      email: senderEmail,
-      type: "transfer",
-      amount,
-      receiverEmail,
-      status: "ACTIVE",
-      createdAt: new Date()
-    });
+    // 🧾 Historique sender ak komisyon
+await Transaction.create({
+  email: senderEmail,
+  type: "transfer",
+  amount,
+  receiverEmail,
+  status: "ACTIVE",
+  agentBonus: 0.006 * amount,       // 0.60% pou agent
+  platformBonus: 0.004 * amount,    // 0.40% pou platfòm
+  createdAt: new Date()
+});
 
-    // 🧾 Historique receiver
-    await Transaction.create({
-      email: receiverEmail,
-      type: "transfer",
-      amount,
-      senderEmail,
-      status: "ACTIVE",
-      createdAt: new Date()
-    });
-
+// 🧾 Historique receiver ak komisyon
+await Transaction.create({
+  email: receiverEmail,
+  type: "transfer",
+  amount,
+  senderEmail,
+  status: "ACTIVE",
+  agentBonus: 0.006 * amount,       // menm jan
+  platformBonus: 0.004 * amount,
+  createdAt: new Date()
+});
     notifyUpdate();
     res.json({ message: "Transfert réussi" });
 
