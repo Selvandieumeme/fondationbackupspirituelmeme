@@ -1175,12 +1175,10 @@ app.post('/api/wallet/transfer', async (req, res) => {
     const senderEmail = req.headers['x-user-email'] || req.body.senderEmail;
     const { receiverEmail, amount } = req.body;
 
-    // 🔒 Interdire self-transfer (CRITIQUE)
     if (senderEmail === receiverEmail) {
       return res.status(400).json({ message: "Transfert vers soi-même interdit" });
     }
 
-    // ✅ Vérifier existence des utilisateurs (walletusers)
     const senderUser = await WalletUser.findOne({ email: senderEmail });
     const receiverUser = await WalletUser.findOne({ email: receiverEmail });
 
@@ -1188,9 +1186,9 @@ app.post('/api/wallet/transfer', async (req, res) => {
       return res.status(404).json({ message: "Destinataire introuvable" });
     }
 
-    // ✅ Charger ou créer wallets
     const sender = await WalletBalance.findOne({ email: senderEmail });
     let receiver = await WalletBalance.findOne({ email: receiverEmail });
+    const admin = await WalletBalance.findOne({ email: "memeselvandieu@fobas.com" }); // wallet admin
 
     if (!sender || sender.balance < amount) {
       return res.status(400).json({ message: "Solde insuffisant" });
@@ -1204,12 +1202,28 @@ app.post('/api/wallet/transfer', async (req, res) => {
       });
     }
 
-    // 💸 Mouvement financier réel
+    // 🔒 Bloque Agent → Agent
+    if(sender.walletAccountType === "Agent Autorise" && receiver.walletAccountType === "Agent Autorise"){
+      return res.status(403).json({ message: "Agent Autorise pa ka voye lajan bay lòt agent." });
+    }
+
+    // 💸 Mouvement financier
     sender.balance -= amount;
     receiver.balance += amount;
 
+    // ✅ Distribisyon komisyon si moun resevwa se Agent
+    if(receiver.walletAccountType === "Agent Autorise"){
+      const commission = amount * 0.01;         // 1% total
+      const agentShare = amount * 0.006;        // 0.60%
+      const platformShare = amount * 0.004;     // 0.40%
+
+      receiver.bonus += agentShare;
+      if(admin) admin.balance += platformShare;
+    }
+
     await sender.save();
     await receiver.save();
+    if(admin) await admin.save();
 
     // 🧾 Historique sender
     await Transaction.create({
@@ -1218,8 +1232,7 @@ app.post('/api/wallet/transfer', async (req, res) => {
       amount,
       receiverEmail,
       status: "ACTIVE",
-	  createdAt: new Date()
-
+      createdAt: new Date()
     });
 
     // 🧾 Historique receiver
@@ -1229,7 +1242,7 @@ app.post('/api/wallet/transfer', async (req, res) => {
       amount,
       senderEmail,
       status: "ACTIVE",
-	  createdAt: new Date()
+      createdAt: new Date()
     });
 
     notifyUpdate();
