@@ -24,55 +24,25 @@
   <tbody id="agentsTable">
     <!-- Egzanp agent 1 -->
     <tr>
-      <td>agent1@example.com</td>
+      <td>pierreyves@fobas.com</td>
       <td>ACTIF</td>
-      <td>5000 G</td>
-      <td>100 G</td>
-      <td>2026-01-19 10:30</td>
+      <td>0 G</td>
+      <td>0 G</td>
+      <td>2026-01-19 07:26</td>
       <td>
-        <button class="btn-block" onclick="bloquerAgent('agent1@example.com')">Bloque</button>
+        <button class="btn-block" onclick="bloquerAgent('696ddca2d3e3c0bdeddb72ad')">Bloque</button>
+        <button class="btn-active" onclick="activerAgent('696ddca2d3e3c0bdeddb72ad')">Debloque</button>
+        <button class="btn-block-bonus" onclick="blockBonus('696ddca2d3e3c0bdeddb72ad')">Bloque Bonus</button>
+        <button class="btn-unblock-bonus" onclick="unblockBonus('696ddca2d3e3c0bdeddb72ad')">Debloque Bonus</button>
       </td>
       <td>
-        <button class="btn-freeze" onclick="freezeBalance('agent1@example.com')">Freeze</button>
-      </td>
-    </tr>
-
-    <!-- Egzanp agent 2 -->
-    <tr>
-      <td>agent2@example.com</td>
-      <td>INACTIF</td>
-      <td>3000 G</td>
-      <td>50 G</td>
-      <td>2026-01-18 16:20</td>
-      <td>
-        <button class="btn-active" onclick="activerAgent('agent2@example.com')">Aktive</button>
-      </td>
-      <td>
-        <button class="btn-unfreeze" onclick="unfreezeBalance('agent2@example.com')">Unfreeze</button>
+        <button class="btn-freeze" onclick="freezeBalance('696ddca2d3e3c0bdeddb72ad')">Freeze</button>
+        <button class="btn-unfreeze" onclick="unfreezeBalance('696ddca2d3e3c0bdeddb72ad')">Unfreeze</button>
       </td>
     </tr>
   </tbody>
 </table>
 
-<script>
-  // Egzanp fonksyon admin deja egziste (rele backend ou deja genyen)
-  function bloquerAgent(agentEmail) {
-    alert("Bloque agent: " + agentEmail);
-    // API admin ou a ka rele la
-  }
-
-  function activerAgent(agentEmail) {
-    alert("Aktive agent: " + agentEmail);
-  }
-
-  function freezeBalance(agentEmail) {
-    alert("Freeze balance: " + agentEmail);
-  }
-
-  function unfreezeBalance(agentEmail) {
-    alert("Unfreeze balance: " + agentEmail);
-  }
-</script>
-
+<script src="surveillanceagentdashboard.js"></script>
 </body>
 </html>
