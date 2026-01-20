@@ -1,7 +1,7 @@
 // ===================== SURVEILLANCE AGENT JS =====================
 async function chargerAgents() {
   try {
-    const res = await fetch("/api/admin/agents");
+    const res = await fetch("https://api.fondationbackupspirituel.com/api/admin/agents");
     const agents = await res.json();
 
     const table = document.getElementById("agentsTable");
@@ -57,7 +57,7 @@ async function chargerAgents() {
 // ------------------- BLOQUE / ACTIVER AGENT -------------------
 async function bloquerAgent(id) {
   try {
-    await fetch("/api/admin/agent/block", {
+    await fetch("https://api.fondationbackupspirituel.com/api/admin/agent/block", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ agentId: id })
@@ -71,7 +71,7 @@ async function bloquerAgent(id) {
 
 async function activerAgent(id) {
   try {
-    await fetch("/api/admin/agent/activate", {
+    await fetch("https://api.fondationbackupspirituel.com/api/admin/agent/activate", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ agentId: id })
@@ -86,7 +86,7 @@ async function activerAgent(id) {
 // ------------------- FREEZE / UNFREEZE BALANCE -------------------
 async function freezeBalance(id) {
   try {
-    await fetch("/api/admin/agent/freeze-balance", {
+    await fetch("https://api.fondationbackupspirituel.com/api/admin/agent/freeze-balance", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ agentId: id })
@@ -100,7 +100,7 @@ async function freezeBalance(id) {
 
 async function unfreezeBalance(id) {
   try {
-    await fetch("/api/admin/agent/unfreeze-balance", {
+    await fetch("https://api.fondationbackupspirituel.com/api/admin/agent/unfreeze-balance", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ agentId: id })
