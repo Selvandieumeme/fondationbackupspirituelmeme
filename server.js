@@ -1001,6 +1001,9 @@ const walletBalanceSchema = new mongoose.Schema({
   bonus: { type: Number, default: 0 }
 }, { timestamps: true });
 
+// ----------------- NOUVO CHANJMAN -----------------
+  balanceFrozen: { type: Boolean, default: false }
+}, { timestamps: true });
 
 
 
