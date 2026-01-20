@@ -1434,7 +1434,79 @@ app.post('/api/admin/validate', async (req, res) => {
 
 
 
+// ===================== SURVEILLANCE AGENT - WALLET FOBAS =====================
 
+// API : Récupérer tous les Agents Autorisés
+app.get("/api/admin/agents", async (req, res) => {
+  try {
+    const agents = await walletBalance.find({
+      walletAccountType: "Agent Autorise"
+    }).sort({ updatedAt: -1 });
+
+    res.json(agents);
+  } catch (err) {
+    console.error("Erreur chargement agents:", err);
+    res.status(500).json({ message: "Erreur serveur agents" });
+  }
+});
+
+// API : Bloquer un agent
+app.post("/api/admin/agent/block", async (req, res) => {
+  const { agentId } = req.body;
+
+  try {
+    await walletBalance.findByIdAndUpdate(agentId, {
+      accountStatus: "BLOQUE"
+    });
+    res.json({ success: true });
+  } catch (err) {
+    console.error("Erreur blocage agent:", err);
+    res.status(500).json({ message: "Erreur blocage" });
+  }
+});
+
+// API : Activer un agent
+app.post("/api/admin/agent/activate", async (req, res) => {
+  const { agentId } = req.body;
+
+  try {
+    await walletBalance.findByIdAndUpdate(agentId, {
+      accountStatus: "ACTIF"
+    });
+    res.json({ success: true });
+  } catch (err) {
+    console.error("Erreur activation agent:", err);
+    res.status(500).json({ message: "Erreur activation" });
+  }
+});
+
+// ------------------- FREEZE / UNFREEZE BALANCE -------------------
+
+// API : Freeze balance agent
+app.post("/api/admin/agent/freeze-balance", async (req, res) => {
+  const { agentId } = req.body;
+
+  try {
+    await walletBalance.findByIdAndUpdate(agentId, { balanceFrozen: true });
+    res.json({ success: true, message: "Balance agent gelée." });
+  } catch (err) {
+    console.error("Erreur freeze balance:", err);
+    res.status(500).json({ message: "Erreur freeze balance" });
+  }
+});
+
+// API : Unfreeze balance agent
+app.post("/api/admin/agent/unfreeze-balance", async (req, res) => {
+  const { agentId } = req.body;
+
+  try {
+    await walletBalance.findByIdAndUpdate(agentId, { balanceFrozen: false });
+    res.json({ success: true, message: "Balance agent débloquée." });
+  } catch (err) {
+    console.error("Erreur unfreeze balance:", err);
+    res.status(500).json({ message: "Erreur unfreeze balance" });
+  }
+});
 
 
 
