@@ -982,6 +982,13 @@ const WalletUser = mongoose.models.WalletUser || mongoose.model(
   "walletusers"      // Non collection reyèl nan MongoDB
 );
 
+// ===================== MODEL WALLET BALANCE =====================
+const walletBalance = mongoose.models.WalletBalance || mongoose.model(
+  "WalletBalance",       // Non model JS
+  walletBalanceSchema,   // Schema
+  "walletbalances"       // Non collection reyèl nan MongoDB
+);
+
 // ----------------------- SCHEMAS BALANCE WALLET -----------------------
 const walletBalanceSchema = new mongoose.Schema({
   email: { type: String, unique: true },
