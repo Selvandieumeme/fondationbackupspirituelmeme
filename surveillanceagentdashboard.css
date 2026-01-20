@@ -131,3 +131,10 @@ tr td:nth-child(2):contains("BLOQUE") {
     font-size: 11px;
   }
 }
+
+
+.btn-block-bonus { background:#6f42c1; color:#fff; }
+.btn-unblock-bonus { background:#20c997; color:#fff; }
+
+.btn-block-bonus:hover { background:#59339d; }
+.btn-unblock-bonus:hover { background:#168f6c; }
