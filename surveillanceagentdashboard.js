@@ -1,21 +1,19 @@
-// ===================== SURVEILLANCE AGENT JS =====================
-
 document.addEventListener("DOMContentLoaded", chargerAgents);
 
 async function chargerAgents() {
   try {
     const res = await fetch("https://api.fondationbackupspirituel.com/api/admin/agents");
-    const data = await res.json();
+    const agents = await res.json();
 
-    if (!Array.isArray(data)) {
-      console.error("Réponse API invalide :", data);
+    if (!Array.isArray(agents)) {
+      console.error("Réponse API invalide :", agents);
       return;
     }
 
     const table = document.getElementById("agentsTable");
     table.innerHTML = "";
 
-    data.forEach(agent => {
+    agents.forEach(agent => {
       const tr = document.createElement("tr");
 
       tr.innerHTML = `
@@ -31,13 +29,16 @@ async function chargerAgents() {
               ? `<button class="btn-block" onclick="bloquerAgent('${agent._id}')">Bloque</button>`
               : `<button class="btn-active" onclick="activerAgent('${agent._id}')">Débloque</button>`
           }
+          <button class="btn-block-bonus" onclick="blockBonus('${agent._id}')">Bloque Bonus</button>
+          <button class="btn-unblock-bonus" onclick="unblockBonus('${agent._id}')">Débloque Bonus</button>
         </td>
 
         <td>
-          <button class="btn-freeze" onclick="freezeBalance('${agent._id}')">Freeze</button>
-          <button class="btn-unfreeze" onclick="unfreezeBalance('${agent._id}')">Unfreeze</button>
-          <button class="btn-block-bonus" onclick="blockBonus('${agent._id}')">Bloque Bonus</button>
-          <button class="btn-unblock-bonus" onclick="unblockBonus('${agent._id}')">Débloque Bonus</button>
+          ${
+            agent.balanceFrozen
+              ? `<button class="btn-unfreeze" onclick="unfreezeBalance('${agent._id}')">Unfreeze</button>`
+              : `<button class="btn-freeze" onclick="freezeBalance('${agent._id}')">Freeze</button>`
+          }
         </td>
       `;
 
@@ -46,44 +47,36 @@ async function chargerAgents() {
 
   } catch (err) {
     console.error("Erreur chargement agents :", err);
-    alert("Erreur chargement agents");
   }
 }
 
-/* ===================== ACTIONS ADMIN ===================== */
+// ===================== ACTIONS ADMIN =====================
 
-function postAction(url, agentId, message) {
-  fetch(url, {
+async function postAction(url, agentId) {
+  await fetch(url, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ agentId })
-  })
-  .then(() => {
-    alert(message);
-    chargerAgents(); // refresh état
   });
+
+  chargerAgents(); // refresh auto
 }
 
 function bloquerAgent(id) {
-  postAction("https://api.fondationbackupspirituel.com/api/admin/agent/block", id, "Agent bloqué");
+  postAction("/api/admin/agent/block", id);
 }
-
 function activerAgent(id) {
-  postAction("https://api.fondationbackupspirituel.com/api/admin/agent/activate", id, "Agent débloqué");
+  postAction("/api/admin/agent/activate", id);
 }
-
 function freezeBalance(id) {
-  postAction("https://api.fondationbackupspirituel.com/api/admin/agent/freeze-balance", id, "Balance gelée");
+  postAction("/api/admin/agent/freeze-balance", id);
 }
-
 function unfreezeBalance(id) {
-  postAction("https://api.fondationbackupspirituel.com/api/admin/agent/unfreeze-balance", id, "Balance dégelée");
+  postAction("/api/admin/agent/unfreeze-balance", id);
 }
-
 function blockBonus(id) {
-  postAction("https://api.fondationbackupspirituel.com/api/admin/agent/block-bonus", id, "Bonus bloqué");
+  postAction("/api/admin/agent/block-bonus", id);
 }
-
 function unblockBonus(id) {
-  postAction("https://api.fondationbackupspirituel.com/api/admin/agent/unblock-bonus", id, "Bonus débloqué");
+  postAction("/api/admin/agent/unblock-bonus", id);
 }
