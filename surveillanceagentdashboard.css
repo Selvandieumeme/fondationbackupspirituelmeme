@@ -1,3 +1,4 @@
+/* ====== BODY & TABLE ====== */
 body {
   font-family: Arial, sans-serif;
   background: #f2f4f8;
@@ -26,20 +27,33 @@ th {
   color: white;
 }
 
+/* ====== BUTTONS ====== */
 button {
   padding: 6px 12px;
   border-radius: 4px;
   border: none;
   cursor: pointer;
   font-weight: bold;
+  transition: background-color 0.2s, transform 0.1s;
 }
 
-.btn-block {
-  background: #d40000;
-  color: white;
+/* Hover & click efekt pou tout bouton */
+button:hover:not(:disabled) {
+  transform: scale(1.05);
+}
+button:disabled {
+  background-color: #ccc !important;
+  cursor: not-allowed;
 }
 
-.btn-active {
-  background: #1f9d00;
-  color: white;
-}
+/* Bouton spesifik selon aksyon */
+.btn-block { background-color: #d40000; color: white; }    /* Rouge pou Bloque */
+.btn-active { background-color: #1f9d00; color: white; }   /* Vèt pou Aktive */
+.btn-freeze { background-color: #ffc107; color: black; }   /* Jòn pou Freeze */
+.btn-unfreeze { background-color: #17a2b8; color: white; } /* Ble pou Unfreeze */
+
+/* Hover efekt pou klas spesifik */
+.btn-block:hover { background-color: #a80000; }
+.btn-active:hover { background-color: #157500; }
+.btn-freeze:hover { background-color: #e6b800; }
+.btn-unfreeze:hover { background-color: #1383a1; }
