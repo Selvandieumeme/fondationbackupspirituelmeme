@@ -1,82 +1,44 @@
-document.addEventListener("DOMContentLoaded", chargerAgents);
+const socket = io();
+const agentSelect = document.getElementById("agentSelect");
 
-async function chargerAgents() {
-  try {
-    const res = await fetch("https://api.fondationbackupspirituel.com/api/admin/agents");
-    const agents = await res.json();
-
-    if (!Array.isArray(agents)) {
-      console.error("Réponse API invalide :", agents);
-      return;
-    }
-
-    const table = document.getElementById("agentsTable");
-    table.innerHTML = "";
-
+// Chaje lis agent dinamikman depi serve
+fetch('/agents')
+  .then(res => res.json())
+  .then(agents => {
     agents.forEach(agent => {
-      const tr = document.createElement("tr");
-
-      tr.innerHTML = `
-        <td>${agent.email}</td>
-        <td>${agent.accountStatus}</td>
-        <td>${agent.balance} G</td>
-        <td>${agent.bonus} G</td>
-        <td>${new Date(agent.updatedAt).toLocaleString()}</td>
-
-        <td>
-          ${
-            agent.accountStatus === "ACTIF"
-              ? `<button class="btn-block" onclick="bloquerAgent('${agent._id}')">Bloque</button>`
-              : `<button class="btn-active" onclick="activerAgent('${agent._id}')">Débloque</button>`
-          }
-          <button class="btn-block-bonus" onclick="blockBonus('${agent._id}')">Bloque Bonus</button>
-          <button class="btn-unblock-bonus" onclick="unblockBonus('${agent._id}')">Débloque Bonus</button>
-        </td>
-
-        <td>
-          ${
-            agent.balanceFrozen
-              ? `<button class="btn-unfreeze" onclick="unfreezeBalance('${agent._id}')">Unfreeze</button>`
-              : `<button class="btn-freeze" onclick="freezeBalance('${agent._id}')">Freeze</button>`
-          }
-        </td>
-      `;
-
-      table.appendChild(tr);
+      const option = document.createElement('option');
+      option.value = agent.email;
+      option.text = agent.fullName || agent.email;
+      agentSelect.appendChild(option);
     });
 
-  } catch (err) {
-    console.error("Erreur chargement agents :", err);
-  }
-}
-
-// ===================== ACTIONS ADMIN =====================
-
-async function postAction(url, agentId) {
-  await fetch(url, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ agentId })
+    // Chwazi premye agent default
+    if(agents[0]) watchAgent(agents[0].email);
   });
 
-  chargerAgents(); // refresh auto
+// Fonksyon pou chanje agent
+agentSelect.addEventListener('change', () => {
+  watchAgent(agentSelect.value);
+});
+
+function watchAgent(email) {
+  socket.emit("watchAgent", email);
 }
 
-function bloquerAgent(id) {
-  postAction("/api/admin/agent/block", id);
-}
-function activerAgent(id) {
-  postAction("/api/admin/agent/activate", id);
-}
-function freezeBalance(id) {
-  postAction("/api/admin/agent/freeze-balance", id);
-}
-function unfreezeBalance(id) {
-  postAction("/api/admin/agent/unfreeze-balance", id);
-}
-function blockBonus(id) {
-  postAction("/api/admin/agent/block-bonus", id);
-}
-function unblockBonus(id) {
-  postAction("/api/admin/agent/unblock-bonus", id);
+socket.on("agentUpdate", (agent) => {
+  document.getElementById("agentEmail").innerText = agent.email;
+  document.getElementById("agentStatus").innerText = agent.accountStatus;
+  document.getElementById("agentBalance").innerText = agent.balance;
+  document.getElementById("agentBonus").innerText = agent.bonus;
+  document.getElementById("lastAction").innerText = agent.lastAction || "—";
+});
+
+// Aksyon buttons yo
+function action(type) {
+  const email = agentSelect.value;
+  fetch(`/agent-action`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email, type })
+  });
 }
