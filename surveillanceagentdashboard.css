@@ -1,3 +1,8 @@
+/* =====================================================
+   SURVEILLANCE AGENT DASHBOARD – WALLET FOBAS
+   Compatible 100% HTML + JS
+   ===================================================== */
+
 /* ====== BODY & TABLE ====== */
 body {
   font-family: Arial, sans-serif;
@@ -8,6 +13,7 @@ body {
 h1 {
   text-align: center;
   color: #002b5c;
+  margin-bottom: 25px;
 }
 
 table {
@@ -17,23 +23,28 @@ table {
 }
 
 th, td {
-  padding: 10px;
+  padding: 12px;
   border-bottom: 1px solid #ddd;
   text-align: center;
+  vertical-align: middle;
 }
 
 th {
   background-color: #0047ff;
   color: white;
+  font-size: 14px;
+  letter-spacing: 0.3px;
 }
 
-/* ====== BUTTONS ====== */
+/* ====== BUTTONS – GLOBAL ====== */
 button {
   padding: 6px 12px;
+  margin: 3px;
   border-radius: 4px;
   border: none;
   cursor: pointer;
   font-weight: bold;
+  font-size: 12px;
   transition: background-color 0.2s, transform 0.1s;
 }
 
@@ -41,19 +52,82 @@ button {
 button:hover:not(:disabled) {
   transform: scale(1.05);
 }
+
 button:disabled {
   background-color: #ccc !important;
+  color: #666 !important;
   cursor: not-allowed;
 }
 
-/* Bouton spesifik selon aksyon */
-.btn-block { background-color: #d40000; color: white; }    /* Rouge pou Bloque */
-.btn-active { background-color: #1f9d00; color: white; }   /* Vèt pou Aktive */
-.btn-freeze { background-color: #ffc107; color: black; }   /* Jòn pou Freeze */
-.btn-unfreeze { background-color: #17a2b8; color: white; } /* Ble pou Unfreeze */
+/* ====== ACTION BUTTONS ====== */
 
-/* Hover efekt pou klas spesifik */
-.btn-block:hover { background-color: #a80000; }
-.btn-active:hover { background-color: #157500; }
-.btn-freeze:hover { background-color: #e6b800; }
-.btn-unfreeze:hover { background-color: #1383a1; }
+/* Status agent */
+.btn-block {
+  background-color: #d40000;
+  color: white;
+}
+.btn-block:hover {
+  background-color: #a80000;
+}
+
+.btn-active {
+  background-color: #1f9d00;
+  color: white;
+}
+.btn-active:hover {
+  background-color: #157500;
+}
+
+/* Balance */
+.btn-freeze {
+  background-color: #ffc107;
+  color: #000;
+}
+.btn-freeze:hover {
+  background-color: #e6b800;
+}
+
+.btn-unfreeze {
+  background-color: #17a2b8;
+  color: white;
+}
+.btn-unfreeze:hover {
+  background-color: #1383a1;
+}
+
+/* Bonus */
+.btn-block-bonus {
+  background-color: #6f42c1;
+  color: white;
+}
+.btn-block-bonus:hover {
+  background-color: #59339d;
+}
+
+.btn-unblock-bonus {
+  background-color: #20c997;
+  color: white;
+}
+.btn-unblock-bonus:hover {
+  background-color: #17a37b;
+}
+
+/* ====== VISUAL SECURITY (ADMIN UX) ====== */
+
+/* Agent bloqué */
+tr td:nth-child(2):contains("BLOQUE") {
+  color: #d40000;
+  font-weight: bold;
+}
+
+/* ====== RESPONSIVE (MINIMAL, SAFE) ====== */
+@media (max-width: 900px) {
+  table {
+    font-size: 12px;
+  }
+
+  button {
+    padding: 5px 8px;
+    font-size: 11px;
+  }
+}
