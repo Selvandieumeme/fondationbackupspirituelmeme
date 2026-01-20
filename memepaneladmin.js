@@ -158,6 +158,39 @@ tabs.forEach(tab => {
   });
 });
 
+
+
+
+
+
+// ==================================================
+// AJOUT WALLET FOBAS — SURVEILLANCE AGENTS
+// ==================================================
+const surveillanceTab = document.getElementById("tab-surveillance-agents");
+const transactionsDiv = document.getElementById("transactions");
+
+if (surveillanceTab && transactionsDiv) {
+  surveillanceTab.addEventListener("click", () => {
+
+    // Retire active sou tout tabs
+    document.querySelectorAll(".tabs .tab").forEach(tab => {
+      tab.classList.remove("active");
+    });
+
+    // Mete surveillance tab active
+    surveillanceTab.classList.add("active");
+
+    // Chaje dashboard surveillance agent la NAN MENM ESPAS transactions
+    transactionsDiv.innerHTML = `
+      <iframe
+        src="surveillanceagentdashboard.html"
+        style="width:100%; height:80vh; border:none;"
+      ></iframe>
+    `;
+  });
+}
+
+
 // ========== SEARCH FUNCTIONALITY ==========
 searchBox.addEventListener("input", () => {
   renderTransactions(filterTransactions());
