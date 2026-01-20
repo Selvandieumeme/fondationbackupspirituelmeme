@@ -21,12 +21,20 @@ async function chargerAgents() {
             : `<button class="btn-active" onclick="activerAgent('${agent._id}')">Aktive</button>`
         }
       </td>
+      <td>
+        ${
+          agent.balanceFrozen
+            ? `<button class="btn-unfreeze" onclick="unfreezeBalance('${agent._id}')">Unfreeze</button>`
+            : `<button class="btn-freeze" onclick="freezeBalance('${agent._id}')">Freeze</button>`
+        }
+      </td>
     `;
 
     table.appendChild(row);
   });
 }
 
+// ------------------- BLOQUE / ACTIVER AGENT -------------------
 async function bloquerAgent(id) {
   await fetch("/api/admin/agent/block", {
     method: "POST",
@@ -45,4 +53,24 @@ async function activerAgent(id) {
   chargerAgents();
 }
 
+// ------------------- FREEZE / UNFREEZE BALANCE -------------------
+async function freezeBalance(id) {
+  await fetch("/api/admin/agent/freeze-balance", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ agentId: id })
+  });
+  chargerAgents();
+}
+
+async function unfreezeBalance(id) {
+  await fetch("/api/admin/agent/unfreeze-balance", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ agentId: id })
+  });
+  chargerAgents();
+}
+
+// ------------------- INITIAL LOAD -------------------
 chargerAgents();
