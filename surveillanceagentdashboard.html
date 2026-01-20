@@ -1,31 +1,40 @@
 <!DOCTYPE html>
-<html lang="ht">
+<html lang="fr">
 <head>
-  <meta charset="UTF-8">
-  <title>Surveillance Agent | Wallet FOBAS</title>
-  <link rel="stylesheet" href="surveillanceagentdashboard.css">
+<meta charset="UTF-8" />
+<title>FOBAS – Surveillance Agent Autorisé</title>
+<link rel="stylesheet" href="surveillanceagentdashboard.css" />
 </head>
 <body>
+<header class="topbar">FOBAS • Surveillance Agent Autorisé</header>
 
-<h1>Dashboard Surveillance Agent – Wallet FOBAS</h1>
 
-<table>
-  <thead>
-    <tr>
-      <th>Email Agent</th>
-      <th>Status</th>
-      <th>Balance</th>
-      <th>Bonus</th>
-      <th>Dènye Aktivite</th>
-      <th>Aksyon</th>
-      <th>Freeze / Unfreeze</th>
-    </tr>
-  </thead>
+<main class="container">
+<section class="agent-info">
+<h2>Informations Agent</h2>
+<p><strong>Email :</strong> <span id="agentEmail">—</span></p>
+<p><strong>Statut :</strong> <span id="agentStatus">—</span></p>
+<p><strong>Balance :</strong> <span id="agentBalance">0</span></p>
+<p><strong>Bonus :</strong> <span id="agentBonus">0</span></p>
+<p><strong>Dernière action :</strong> <span id="lastAction">—</span></p>
+</section>
 
-  <!-- ⚠️ OBLIGATWA: VID -->
-  <tbody id="agentsTable"></tbody>
-</table>
 
+<section class="actions">
+<h2>Actions Administrateur</h2>
+<div class="buttons">
+<button onclick="blockAccount()">Bloquer Compte</button>
+<button onclick="unblockAccount()">Débloquer Compte</button>
+<button onclick="freezeBalance()">Freeze Balance</button>
+<button onclick="unfreezeBalance()">Unfreeze Balance</button>
+<button onclick="blockBonus()">Bloquer Bonus</button>
+<button onclick="unblockBonus()">Débloquer Bonus</button>
+</div>
+</section>
+</main>
+
+
+<script src="/socket.io/socket.io.js"></script>
 <script src="surveillanceagentdashboard.js"></script>
 </body>
 </html>
