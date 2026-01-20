@@ -1442,76 +1442,142 @@ app.post('/api/admin/validate', async (req, res) => {
 // API : Récupérer tous les Agents Autorisés
 app.get("/api/admin/agents", async (req, res) => {
   try {
-    const agents = await walletBalance.find({
-      walletAccountType: "Agent Autorise"
-    }).sort({ updatedAt: -1 });
+    const agents = await walletBalance
+      .find({ walletAccountType: "Agent Autorise" })
+      .sort({ updatedAt: -1 });
 
-    res.json(agents);
+    res.json(agents); // TOUJOURS un array
   } catch (err) {
     console.error("Erreur chargement agents:", err);
     res.status(500).json({ message: "Erreur serveur agents" });
   }
 });
 
-// API : Bloquer un agent
+/* ===================== STATUS AGENT ===================== */
+
+// Bloquer un agent
 app.post("/api/admin/agent/block", async (req, res) => {
   const { agentId } = req.body;
+
+  if (!agentId) {
+    return res.status(400).json({ message: "agentId requis" });
+  }
 
   try {
     await walletBalance.findByIdAndUpdate(agentId, {
       accountStatus: "BLOQUE"
     });
+
     res.json({ success: true });
   } catch (err) {
     console.error("Erreur blocage agent:", err);
-    res.status(500).json({ message: "Erreur blocage" });
+    res.status(500).json({ message: "Erreur blocage agent" });
   }
 });
 
-// API : Activer un agent
+// Activer (Débloquer) un agent
 app.post("/api/admin/agent/activate", async (req, res) => {
   const { agentId } = req.body;
+
+  if (!agentId) {
+    return res.status(400).json({ message: "agentId requis" });
+  }
 
   try {
     await walletBalance.findByIdAndUpdate(agentId, {
       accountStatus: "ACTIF"
     });
+
     res.json({ success: true });
   } catch (err) {
     console.error("Erreur activation agent:", err);
-    res.status(500).json({ message: "Erreur activation" });
+    res.status(500).json({ message: "Erreur activation agent" });
   }
 });
 
-// ------------------- FREEZE / UNFREEZE BALANCE -------------------
+/* ===================== BALANCE ===================== */
 
-// API : Freeze balance agent
+// Freeze balance agent
 app.post("/api/admin/agent/freeze-balance", async (req, res) => {
   const { agentId } = req.body;
 
+  if (!agentId) {
+    return res.status(400).json({ message: "agentId requis" });
+  }
+
   try {
-    await walletBalance.findByIdAndUpdate(agentId, { balanceFrozen: true });
-    res.json({ success: true, message: "Balance agent gelée." });
+    await walletBalance.findByIdAndUpdate(agentId, {
+      balanceFrozen: true
+    });
+
+    res.json({ success: true });
   } catch (err) {
     console.error("Erreur freeze balance:", err);
     res.status(500).json({ message: "Erreur freeze balance" });
   }
 });
 
-// API : Unfreeze balance agent
+// Unfreeze balance agent
 app.post("/api/admin/agent/unfreeze-balance", async (req, res) => {
   const { agentId } = req.body;
 
+  if (!agentId) {
+    return res.status(400).json({ message: "agentId requis" });
+  }
+
   try {
-    await walletBalance.findByIdAndUpdate(agentId, { balanceFrozen: false });
-    res.json({ success: true, message: "Balance agent débloquée." });
+    await walletBalance.findByIdAndUpdate(agentId, {
+      balanceFrozen: false
+    });
+
+    res.json({ success: true });
   } catch (err) {
     console.error("Erreur unfreeze balance:", err);
     res.status(500).json({ message: "Erreur unfreeze balance" });
   }
 });
 
+/* ===================== BONUS ===================== */
 
+// Bloquer bonus agent
+app.post("/api/admin/agent/block-bonus", async (req, res) => {
+  const { agentId } = req.body;
+
+  if (!agentId) {
+    return res.status(400).json({ message: "agentId requis" });
+  }
+
+  try {
+    await walletBalance.findByIdAndUpdate(agentId, {
+      bonusFrozen: true
+    });
+
+    res.json({ success: true });
+  } catch (err) {
+    console.error("Erreur blocage bonus:", err);
+    res.status(500).json({ message: "Erreur blocage bonus" });
+  }
+});
+
+// Débloquer bonus agent
+app.post("/api/admin/agent/unblock-bonus", async (req, res) => {
+  const { agentId } = req.body;
+
+  if (!agentId) {
+    return res.status(400).json({ message: "agentId requis" });
+  }
+
+  try {
+    await walletBalance.findByIdAndUpdate(agentId, {
+      bonusFrozen: false
+    });
+
+    res.json({ success: true });
+  } catch (err) {
+    console.error("Erreur déblocage bonus:", err);
+    res.status(500).json({ message: "Erreur déblocage bonus" });
+  }
+});
 
 
 
