@@ -7,42 +7,32 @@
 </head>
 <body>
 
-<h1>Dashboard Surveillance Agent – Wallet FOBAS</h1>
+  <h1>Dashboard Surveillance Agent – Wallet FOBAS</h1>
 
-<table>
-  <thead>
-    <tr>
-      <th>Email Agent</th>
-      <th>Status</th>
-      <th>Balance</th>
-      <th>Bonus</th>
-      <th>Dènye Aktivite</th>
-      <th>Aksyon</th>
-      <th>Freeze / Unfreeze</th>
-    </tr>
-  </thead>
-  <tbody id="agentsTable">
-    <!-- Egzanp agent 1 -->
-    <tr>
-      <td>pierreyves@fobas.com</td>
-      <td>ACTIF</td>
-      <td>0 G</td>
-      <td>0 G</td>
-      <td>2026-01-19 07:26</td>
-      <td>
-        <button class="btn-block" onclick="bloquerAgent('696ddca2d3e3c0bdeddb72ad')">Bloque</button>
-        <button class="btn-active" onclick="activerAgent('696ddca2d3e3c0bdeddb72ad')">Debloque</button>
-        <button class="btn-block-bonus" onclick="blockBonus('696ddca2d3e3c0bdeddb72ad')">Bloque Bonus</button>
-        <button class="btn-unblock-bonus" onclick="unblockBonus('696ddca2d3e3c0bdeddb72ad')">Debloque Bonus</button>
-      </td>
-      <td>
-        <button class="btn-freeze" onclick="freezeBalance('696ddca2d3e3c0bdeddb72ad')">Freeze</button>
-        <button class="btn-unfreeze" onclick="unfreezeBalance('696ddca2d3e3c0bdeddb72ad')">Unfreeze</button>
-      </td>
-    </tr>
-  </tbody>
-</table>
+  <table>
+    <thead>
+      <tr>
+        <th>Email Agent</th>
+        <th>Status</th>
+        <th>Balance</th>
+        <th>Bonus</th>
+        <th>Dènye Aktivite</th>
+        <th>Aksyon</th>
+        <th>Freeze / Unfreeze</th>
+      </tr>
+    </thead>
 
-<script src="surveillanceagentdashboard.js"></script>
+    <!-- ⚠️ IMPORTANT :
+         Tbody a rete VID.
+         JS la SEUL ki ranpli l dinamikman
+    -->
+    <tbody id="agentsTable">
+      <!-- Rempli automatiquement par surveillanceagentdashboard.js -->
+    </tbody>
+  </table>
+
+  <!-- JS chaje A LA FIN pou evite race condition -->
+  <script src="surveillanceagentdashboard.js"></script>
+
 </body>
 </html>
