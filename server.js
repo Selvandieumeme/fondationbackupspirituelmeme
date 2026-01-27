@@ -1042,7 +1042,7 @@ app.post("/api/wallet/verify-identity", async (req, res) => {
     if (!user) {
       return res.status(404).json({
         success: false,
-        message: "Aucun compte Wallet FOBAS ne correspond à cet email"
+        message: "Aucun compte FOBAS ne correspond à cet email"
       });
     }
 
@@ -1538,7 +1538,7 @@ app.post("/api/wallet/create", async (req, res) => {
     if (emailExist) {
       return res.status(409).json({
         success: false,
-        message: "⛔ Email sa deja anrejistre sou Wallet FOBAS."
+        message: "⛔ Email sa deja anrejistre sou FOBAS."
       });
     }
 
@@ -1580,7 +1580,7 @@ app.post("/api/wallet/create", async (req, res) => {
     // --- Retounen repons ak lyen WhatsApp ---
     return res.json({
       success: true,
-      message: "Demande Wallet FOBAS anrejistre avèk siksè!",
+      message: "Demande FOBAS anrejistre avèk siksè!",
       whatsappLink: waLink
     });
 
