@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
-  <title>Wallet FOBAS – Dashboard</title>
+  <title>FOBAS – Dashboard</title>
   <link rel="stylesheet" href="walletfobasdashboard.css" />
 </head>
 <body>
@@ -19,7 +19,7 @@
     <p>Balance Actuel:</p>
     <strong><span id="balanceActuel">0</span> Gourde</strong>
     <p>Bonus:</p>
-    <strong><span id="bonusActuel">0</span> Gourde</strong>
+    <strong><span id="bonusActuel">0</span> Fobas</strong>
   </div>
 </header>
 
@@ -35,10 +35,10 @@
 
 <!-- 3️⃣ Menu bouton aksyon -->
 <nav class="menu">
-  <button onclick="showForm('deposit')">Déposer</button>
-  <button onclick="showForm('withdraw')">Retirer</button>
-  <button onclick="showForm('transfer')">Transférer</button>
-  <button onclick="showForm('bonus')">Bonus</button>
+  <button onclick="showForm('deposit')">Déposer Fobas</button>
+  <button onclick="showForm('withdraw')">Retirer Fobas</button>
+  <button onclick="showForm('transfer')">Transférer Fobas</button>
+  <button onclick="showForm('bonus')">Bonus Fobas</button>
   <button onclick="showForm('changepass')">Changer mot de passe</button>
   <button onclick="exportHistoryCSV()">Historique export CSV</button>
   <!-- 🆕 Assistance 24/7 -->
@@ -145,13 +145,13 @@
 
 <div class="fobas-withdrawal-box">
   <div class="fobas-withdrawal-header">
-    💰 Grille Frais Retrait – Wallet FOBAS PRODUIT ENTREPRISE ALTINANCE SYNERGIE
+    💰 Grille Frais Retrait – FOBAS PRODUIT ALTINANCE SYNERGIE COOP
   </div>
 
   <table class="fobas-withdrawal-table">
     <thead>
       <tr>
-        <th>Montant Retrait (Gdes) 1 Wallet Vaut 1 Gourde</th>
+        <th>Montant Retrait (Gdes) 1 Fobas Vaut 1 Gourde</th>
         <th style="text-align:right;">Frais (Gdes)</th>
       </tr>
     </thead>
