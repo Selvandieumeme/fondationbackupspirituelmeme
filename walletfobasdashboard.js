@@ -328,7 +328,7 @@ async function submitTransfer() {
   const amount = Number(document.getElementById("amount").value);
 
   if (receiverEmail === userEmail) {
-    return alert("Vous ne pouvez pas vous transférer de Wallets à vous-même");
+    return alert("Vous ne pouvez pas vous transférer d'Unites Fobas à vous-même");
   }
 
   try {
@@ -356,10 +356,10 @@ async function submitTransfer() {
     }, 800);
 
     sendWhatsAppNotification(
-      `🔁 TRANSFERT WALLET FOBAS
+      `🔁 TRANSFERT FOBAS
 De: ${userEmail}
 Vers: ${receiverEmail}
-Montant: ${amount} Wallet`
+Montant: ${amount} Unites Fobas`
     );
 
     alert(data.message);
