@@ -359,7 +359,7 @@ async function submitTransfer() {
       `🔁 TRANSFERT FOBAS
 De: ${userEmail}
 Vers: ${receiverEmail}
-Montant: ${amount} Gourdes (Equivalent avec meme montant Fobas)`
+Montant: ${amount} Gourdes (Montant Interne 1 Gourde vaut 1 Fobas)`
     );
 
     alert(data.message);
