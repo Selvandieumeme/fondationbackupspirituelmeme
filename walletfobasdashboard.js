@@ -328,7 +328,7 @@ async function submitTransfer() {
   const amount = Number(document.getElementById("amount").value);
 
   if (receiverEmail === userEmail) {
-    return alert("Vous ne pouvez pas vous transférer d'Unites Fobas à vous-même");
+    return alert("Vous ne pouvez pas vous transférer de Fobas à vous-même");
   }
 
   try {
@@ -359,7 +359,7 @@ async function submitTransfer() {
       `🔁 TRANSFERT FOBAS
 De: ${userEmail}
 Vers: ${receiverEmail}
-Montant: ${amount} Unites Fobas`
+Montant: ${amount} Gourdes (Equivalent avec meme montant Fobas)`
     );
 
     alert(data.message);
