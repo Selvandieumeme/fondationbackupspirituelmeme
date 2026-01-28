@@ -3,443 +3,95 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Demande Carte de Credit Virtuelle | Achat Assisté Sécurisé</title>
 
-  <!-- SEO BASE -->
-  <meta name="description" content="Demande de carte de crédit virtuelle (orientation partenaire) ou service d'achat assisté sécurisé. Paiement MonCash, NatCash, Western Union."/>
+  <title>Création de compte | FOBAS</title>
+
+  <meta name="description" content="Création de compte FOBAS sécurisé. Dépôt et retrait manuel avec vérification WhatsApp."/>
   <meta name="robots" content="index, follow"/>
 
-  <link rel="stylesheet" href="creation-cartevirtuelle-assistance.css">
 </head>
 
 <body>
 
-<div class="page-container">
+<main>
 
-  <!-- HERO -->
-  <header class="hero">
-    <h1>Carte de Credit Virtuelle & Achat Assisté</h1>
-    <p>
-      Service professionnel d’assistance en ligne.  
-      Choisissez l’orientation vers un partenaire agréé ou notre service d’achat pour payer vos services en toute simplicité.
-    </p>
-  </header>
-
-  <!-- MAIN CARD -->
-  <main class="card">
-
-    <form id="cardForm" novalidate>
-
-
-      <!-- TYPE DE SERVICE -->
-      <fieldset class="mb-4">
-        <legend class="section-title">Type de service</legend>
-
-        <label class="service">
-          <input type="radio" name="serviceType" value="virtual" checked />
-          <strong>Demande carte de Credit virtuelle</strong><br>
-          <small>Orientation vers un partenaire (aucune carte émise ici)</small>
-        </label>
-
-        <label class="service">
-          <input type="radio" name="serviceType" value="assisted" />
-          <strong>Achat assisté</strong><br>
-          <small>Notre équipe effectue l’achat pour vous</small>
-        </label>
-
-
-        <label class="service">
-  <input type="radio" name="serviceType" value="wallet" />
-  <strong>Wallet FOBAS – Sans Carte (Modèle Ledger)</strong><br>
-  <small>Compte interne avec solde, dépôt et retrait manuel. 100% légal et sécurisé.</small>
-</label>
-      </fieldset>
-
-
-
-
-
-
-  
-     
-      <!-- INFORMATIONS CLIENT -->
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-
-        <label class="block">
-          <span>Nom complet</span>
-          <input type="text" name="fullName" placeholder="Jan Pèsonn" required>
-        </label>
-
-        <label class="block">
-          <span>Email</span>
-          <input type="email" name="email" placeholder="ou@email.com" required>
-        </label>
-
-        <label class="block">
-          <span>Pays</span>
-          <input type="text" name="country" placeholder="Haiti" required>
-        </label>
-
-        <label class="block">
-          <span>Montant / Estimation (USD)</span>
-          <input type="number" name="amount" placeholder="50" min="1" required>
-        </label>
-
-      </div>
-
-      <!-- DESCRIPTION -->
-      <label class="block mb-4">
-        <span>Description ou objectif de la demande (optionnel)</span>
-        <textarea name="purpose" rows="4" placeholder="Ex : Achat sur Amazon, abonnement, paiement de service..."></textarea>
-      </label>
-
-      <!-- CONDITIONS -->
-      <label class="flex items-start gap-3 mb-4 terms">
-        <input type="checkbox" name="acceptTerms" required>
-        <span>
-          Je confirme avoir lu et accepté les
-          <a href="./conditions.html" class="underline">conditions générales</a>
-          et la
-          <a href="./confidentialite.html" class="underline">politique de confidentialité</a>.
-        </span>
-      </label>
-
-      <!-- ERREUR -->
-      <p id="errorMsg" class="error-text"></p>
-
-      <!-- SUBMIT -->
-      <button type="submit" class="submit-btn">
-        Continuer via WhatsApp
-      </button>
-
-    </form>
-
-    <!-- DISCLAIMER -->
-    <div class="warning-box">
-      ⚠️ Cette page sert uniquement à la demande et à l’orientation.  
-      Ne partagez jamais d’informations sensibles de carte bancaire (PAN, CVV).
-    </div>
-
-    <!-- PAIEMENTS -->
-    <section class="payment-info mt-6">
-      <h2 class="section-title">Moyens de paiement disponibles</h2>
-      <ul>
-        <li><strong>MonCash :</strong> +50946057952</li>
-        <li><strong>NatCash :</strong> +50941306268</li>
-        <li><strong>Western Union :</strong> MEME Selvandieu</li>
-      </ul>
-    </section>
-
-
-
-
-
-
-
-    <!-- === BLOK WALLET FOBAS === -->
+<!-- === BLOK FOBAS === -->
 <div id="wallet-fobas-section" style="max-width:900px; margin:30px auto; padding:30px; border-radius:25px; background:linear-gradient(135deg,#fffbea,#e0f7ff); text-align:center; box-shadow:0 15px 35px rgba(0,0,0,0.1); font-family:'Inter', sans-serif;">
-  <h2 style="color:#16a34a; font-weight:800; font-size:1.8rem; margin-bottom:15px;">🟢 Wallet FOBAS – Sans Carte (Modèle Ledger)</h2>
-  <p style="font-size:1.05rem; color:#1f2937;">Créez votre compte Wallet FOBAS sécurisé. Dépôt et retrait manuel – vérification par WhatsApp.</p>
+  <h2 style="color:#16a34a; font-weight:800; font-size:1.8rem; margin-bottom:15px;">🟢 FOBAS – Sans Carte (Modèle Ledger)</h2>
+  <p style="font-size:1.05rem; color:#1f2937;">Créez votre compte FOBAS sécurisé. Dépôt et retrait manuel – vérification par WhatsApp.</p>
 
-  <!-- FORMULAIRE CREATION WALLET COMPLET -->
+  <!-- FORMULAIRE CREATION FOBAS COMPLET -->
   <form id="createWalletForm" style="margin-top:25px; text-align:left; max-width:600px; margin-left:auto; margin-right:auto;">
 
-    <!-- Nom complet -->
     <label><strong>Nom complet :</strong></label>
     <input type="text" name="walletFullName" placeholder="Ex : Jean Dupont" required
       style="padding:10px; width:100%; border-radius:8px; border:1px solid #cbd5e1; margin-bottom:12px;">
 
-    <!-- Nom du Parrain / Marraine -->
-<label><strong>Nom du Parrain / Marraine :</strong></label>
-<input type="text" name="walletSponsorName"
-  placeholder="Ex : Meme Selvandieu"
-  required
-  style="padding:10px; width:100%; border-radius:8px; border:1px solid #cbd5e1; margin-bottom:12px;">
+    <label><strong>Nom du Parrain / Marraine :</strong></label>
+    <input type="text" name="walletSponsorName" placeholder="Ex : Meme Selvandieu" required
+      style="padding:10px; width:100%; border-radius:8px; border:1px solid #cbd5e1; margin-bottom:12px;">
 
+    <label><strong>Email du Parrain / Marraine :</strong></label>
+    <input type="email" name="walletSponsorEmail" placeholder="exemple@sponsor.com" required
+      style="padding:10px; width:100%; border-radius:8px; border:1px solid #cbd5e1; margin-bottom:12px;">
 
-<!-- Email Parrain / Marraine -->
-<label><strong>Email du Parrain / Marraine :</strong></label>
-<input type="email" name="walletSponsorEmail"
-  placeholder="exemple@sponsor.com"
-  required
-  style="padding:10px; width:100%; border-radius:8px; border:1px solid #cbd5e1; margin-bottom:12px;">
+    <label><strong>Vous êtes :</strong></label>
+    <select name="walletAccountType" required
+      style="padding:10px; width:100%; border-radius:8px; border:1px solid #cbd5e1; margin-bottom:12px;">
+      <option value="">-- Sélectionnez votre statut --</option>
+      <option value="Agent Autorise">Agent Autorisé</option>
+      <option value="Etudiant">Étudiant</option>
+      <option value="ONG">ONG</option>
+      <option value="Entreprise">Entreprise</option>
+      <option value="Ecole">École</option>
+      <option value="Eglise">Église</option>
+      <option value="Membre">Membre</option>
+    </select>
 
-
-<!-- Statut / Profil utilisateur -->
-<label><strong>Vous êtes :</strong></label>
-<select name="walletAccountType" required
-  style="padding:10px; width:100%; border-radius:8px; border:1px solid #cbd5e1; margin-bottom:12px;">
-  <option value="">-- Sélectionnez votre statut --</option>
-  <option value="Agent Autorise">Agent Autorisé</option>
-  <option value="Etudiant">Étudiant</option>
-  <option value="ONG">ONG</option>
-  <option value="Entreprise">Entreprise</option>
-  <option value="Ecole">École</option>
-  <option value="Eglise">Église</option>
-  <option value="Membre">Membre</option>
-</select>
-
-    
-    <!-- Email (Gmail obligatwa) -->
     <label><strong>Email (Gmail) :</strong></label>
     <input type="email" name="walletEmail" placeholder="votremail@gmail.com" required
       style="padding:10px; width:100%; border-radius:8px; border:1px solid #cbd5e1; margin-bottom:12px;">
 
-    <!-- Email récupération -->
     <label><strong>Email de récupération :</strong></label>
     <input type="email" name="walletRecoveryEmail" placeholder="Email secondaire"
       style="padding:10px; width:100%; border-radius:8px; border:1px solid #cbd5e1; margin-bottom:12px;">
 
-    <!-- WhatsApp -->
     <label><strong>Numéro WhatsApp :</strong></label>
-    <input type="text" name="walletWhatsApp" placeholder="+509XXXXXXXX"
-      required style="padding:10px; width:100%; border-radius:8px; border:1px solid #cbd5e1; margin-bottom:12px;">
+    <input type="text" name="walletWhatsApp" placeholder="+509XXXXXXXX" required
+      style="padding:10px; width:100%; border-radius:8px; border:1px solid #cbd5e1; margin-bottom:12px;">
 
-    <!-- Date de naissance -->
     <label><strong>Date de naissance :</strong></label>
     <input type="date" name="walletBirthDate" required
       style="padding:10px; width:100%; border-radius:8px; border:1px solid #cbd5e1; margin-bottom:12px;">
 
-    <!-- Lieu de naissance -->
     <label><strong>Lieu de naissance :</strong></label>
-    <input type="text" name="walletBirthPlace" placeholder="Ex : Port-au-Prince"
-      required style="padding:10px; width:100%; border-radius:8px; border:1px solid #cbd5e1; margin-bottom:12px;">
+    <input type="text" name="walletBirthPlace" placeholder="Ex : Port-au-Prince" required
+      style="padding:10px; width:100%; border-radius:8px; border:1px solid #cbd5e1; margin-bottom:12px;">
 
-    <!-- Mot de passe -->
     <label><strong>Mot de passe :</strong></label>
     <input type="password" name="walletPassword" placeholder="Créer un mot de passe" required
       style="padding:10px; width:100%; border-radius:8px; border:1px solid #cbd5e1; margin-bottom:12px;">
 
-    <!-- Confirmation -->
     <label><strong>Confirmer mot de passe :</strong></label>
     <input type="password" name="walletPasswordConfirm" placeholder="Retapez mot de passe" required
       style="padding:10px; width:100%; border-radius:8px; border:1px solid #cbd5e1; margin-bottom:18px;">
 
-    <!-- Button -->
     <button type="submit"
       style="padding:12px 25px; background:#16a34a; color:#fff; border:none; width:100%; border-radius:12px; font-weight:700; cursor:pointer;">
-      Créer mon compte Wallet FOBAS
+      Créer mon compte FOBAS
     </button>
   </form>
 
-  <!-- Message réponse -->
   <div id="wallet-msg" style="margin-top:20px; font-weight:600; color:#1f2937;"></div>
 
-
-  <!-- DASHBOARD (ap parèt sèlman APRÈ validasyon WhatsApp) -->
-  <div id="wallet-dashboard" style="display:none; margin-top:30px; padding:20px; background:#ffffff; border-radius:20px; box-shadow:0 10px 25px rgba(0,0,0,0.08);">
-    <h3 style="color:#0d6efd; font-weight:800; margin-bottom:10px;">📊 Mon Wallet FOBAS</h3>
-    <p id="wallet-balance" style="font-size:1.2rem; font-weight:700; color:#1f2937;">Solde: 0 USD</p>
-
-    <div id="wallet-transactions" style="text-align:left; margin-top:20px;">
-      <h4 style="font-weight:700; color:#16a34a;">Historique des Transactions</h4>
-      <ul id="transaction-list" style="padding-left:20px;">
-        <li>Aucune transaction pour le moment.</li>
-      </ul>
-    </div>
-
-    <div style="margin-top:25px;">
-      <input type="number" id="deposit-amount" placeholder="Montant à déposer" min="1"
-        style="padding:8px; border-radius:6px; border:1px solid #cbd5e1;">
-      <button id="deposit-btn"
-        style="padding:8px 15px; background:#16a34a; color:#fff; border:none; border-radius:8px; font-weight:600; margin-left:5px;">Déposer</button>
-    </div>
-
-    <div style="margin-top:15px;">
-      <input type="number" id="withdraw-amount" placeholder="Montant à retirer" min="1"
-        style="padding:8px; border-radius:6px; border:1px solid #cbd5e1;">
-      <button id="withdraw-btn"
-        style="padding:8px 15px; background:#f59e0b; color:#fff; border:none; border-radius:8px; font-weight:600; margin-left:5px;">Retirer</button>
-    </div>
-
-    <div id="wallet-action-msg" style="margin-top:20px; font-weight:700; color:#1f2937;"></div>
-  </div>
+  <div id="wallet-dashboard" style="display:none;"></div>
 </div>
-  </main>
 
+</main>
 
+<footer style="text-align:center; margin-top:40px; color:#6b7280;">
+  © 2026 —  FOBAS • Support WhatsApp : +50946057952
+</footer>
 
-
-<!-- BLOC OFFICIEL : Assistance Carte Virtuelle -->
-<script>
-document.addEventListener('DOMContentLoaded', function () {
-
-  if (document.getElementById('assist-cbv-officiel')) return;
-
-  const footer = document.querySelector('footer');
-  if (!footer) return;
-
-  const box = document.createElement('section');
-  box.id = 'assist-cbv-officiel';
-
-  box.innerHTML = `
-    <div style="
-      max-width: 900px;
-      margin: 60px auto;
-      padding: 35px;
-      border-radius: 22px;
-      background: linear-gradient(135deg, #ffffff, #e7f0ff);
-      box-shadow: 0 20px 45px rgba(0,0,0,0.10);
-      font-family: Inter, Segoe UI, system-ui, sans-serif;
-      color: #1f2937;
-    ">
-
-      <h2 style="
-        color:#0b5ed7;
-        font-size:1.6rem;
-        font-weight:800;
-        margin-bottom:20px;
-        text-align:center;
-      ">
-        🔐 Assistance Carte de Crédit Virtuelle – 15 USD
-      </h2>
-
-      <p>
-        Ce service est une assistance payante destinée à accompagner les clients
-        dans l’obtention d’une carte de crédit virtuelle via des fournisseurs légaux et reconnus
-        tels que Wise, Skrill, Payoneer ou Revolut (selon le pays).
-      </p>
-
-      <div style="
-        background:#fff7da;
-        border-left:6px solid #fbbf24;
-        padding:20px;
-        border-radius:14px;
-        margin:25px 0;
-        font-weight:600;
-      ">
-        ✅ L’assistance comprend :
-        <br><br>
-        Analyse du profil du client<br><br>
-        Orientation vers le fournisseur adapté<br><br>
-        Assistance pour l’inscription et vérification (KYC)<br><br>
-        Aide à l’obtention de la carte virtuelle<br><br>
-        Support WhatsApp dédié
-      </div>
-
-      <p style="font-weight:700;">
-        📌 Frais d’assistance : 15 USD (non remboursable)<br>
-        📌 Les frais du fournisseur sont à la charge du client
-      </p>
-
-    </div>
-  `;
-
-  footer.before(box);
-});
-</script>
-<!-- FIN BLOC OFFICIEL -->
-
-
-
-
-
-
-
-
-
-<!-- BLOC OFFICIEL : WALLET NUMÉRIQUE (MODÈL 2) -->
-<script>
-document.addEventListener('DOMContentLoaded', function () {
-
-  if (document.getElementById('wallet-numerique-officiel')) return;
-
-  const box = document.createElement('section');
-  box.id = 'wallet-numerique-officiel';
-
-  box.innerHTML = `
-    <div style="
-      max-width: 900px;
-      margin: 60px auto;
-      padding: 35px;
-      border-radius: 22px;
-      background: linear-gradient(135deg,#f3fff4,#e0ffe8);
-      box-shadow: 0 20px 45px rgba(0,0,0,0.10);
-      font-family: Inter, Segoe UI, system-ui, sans-serif;
-      color: #1f2937;
-    ">
-      
-      <!-- HEADER: Wallet FOBAS -->
-      <section id="wallet-fobas-header" style="
-        max-width: 900px;
-        margin: 30px auto 40px auto;
-        padding: 25px;
-        background:#e0f7e9;
-        border-radius:20px;
-        text-align:center;
-      ">
-        <h2 style="color:#16a34a; font-weight:800;">🟢 Wallet FOBAS – Sans Carte (Modèle Ledger)</h2>
-        <p>Obtenez un compte wallet interne avec solde, dépôt et retrait manuel. 100% légal, sécurisé et simple à utiliser.</p>
-      </section>
-
-      <!-- BODY CONTENT -->
-      <p>
-        Ce service permet au client d'obtenir un <b>compte wallet numérique</b>
-        avec solde interne, dépôt manuel et retrait manuel.
-        Ce système ne fournit pas de carte VISA et ne permet pas les paiements internet directs.
-      </p>
-
-      <div style="
-        background:#eaffea;
-        border-left:6px solid #16a34a;
-        padding:20px;
-        border-radius:14px;
-        margin:25px 0;
-        font-weight:600;
-      ">
-        ✅ Fonctionnalités du Wallet :<br><br>
-        • Compte utilisateur personnel<br><br>
-        • Solde interne (ledger sécurisé)<br><br>
-        • Historique complet des paiements<br><br>
-        • Dépôt manuel : MonCash, NatCash, WU<br><br>
-        • Retrait manuel vers MonCash ou Bank<br><br>
-        • Support WhatsApp 24/7
-      </div>
-
-      <p style="font-weight:700;">
-        💰 Monetisation (pour l'admin) :<br><br>
-        • Frais sur retraits 5% <br><br>
-        📌 Modèle 100% légal (aucune carte, aucun paiement international)
-      </p>
-    </div>
-  `;
-
-  const footer = document.querySelector('footer');
-
-  if (footer && footer.parentNode) {
-    footer.parentNode.insertBefore(box, footer);
-  } else {
-    document.body.appendChild(box);
-  }
-
-});
-</script>
-<!-- FIN BLOC OFFICIEL WALLET NUMÉRIQUE -->
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  
-  <!-- FOOTER -->
-  <footer class="footer">
-    <p>
-      © 2026 — Service d’assistance numérique • Orientation uniquement • Support WhatsApp • FOBAS
-    </p>
-  </footer>
-
-
-
-  
-<script src="creation-cartevirtuelle-assistance.js"></script>
 </body>
 </html>
