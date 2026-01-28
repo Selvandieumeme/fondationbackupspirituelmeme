@@ -2,7 +2,7 @@ const faqData = [
   // ================= DEPOT (1–20) =================
   {
   category: "depot",
-  question: "Kijan pou m fè yon dépôt Wallet FOBAS ?",
+  question: "Kijan pou m fè yon dépôt FOBAS ?",
   answer: "Ale lakay yon agent FOBAS otorize oswa itilize metòd dijital ki disponib."
 },
 {
@@ -18,7 +18,7 @@ const faqData = [
 {
   category: "depot",
   question: "Ki dépôt minimòm ki otorize ?",
-  answer: "Dépôt minimòm aktyèl Wallet FOBAS se 20 Goudes e, maksimom nan se 100 000 Gourdes."
+  answer: "Dépôt minimòm aktyèl FOBAS se 20 Goudes e, maksimom nan se 100 000 Gourdes."
 },
 {
   category: "depot",
@@ -42,8 +42,8 @@ const faqData = [
 },
 {
   category: "depot",
-  question: "Ki lajan Wallet FOBAS sipòte pou dépôt ?",
-  answer: "Pou kounya, Wallet FOBAS sipòte sèlman HTG (Gourdes), men selon Fondate yo, nan avni nap genyen US$ avek Euros, e vale nimerik nou itilize a rele (Wallet)"
+  question: "Ki lajan FOBAS sipòte pou dépôt ?",
+  answer: "Pou kounya, FOBAS sipòte sèlman HTG (Gourdes), men selon Fondate yo, nan avni nap genyen US$ avek Euros, e vale nimerik nou itilize a rele (Wallet)"
 },
 {
   category: "depot",
@@ -58,7 +58,7 @@ const faqData = [
 {
   category: "depot",
   question: "Eske dépôt an doub posib ?",
-  answer: "Non. Sistèm Wallet FOBAS anpeche dépôt an doub."
+  answer: "Non. Sistèm FOBAS anpeche dépôt an doub."
 },
 {
   category: "depot",
@@ -78,7 +78,7 @@ const faqData = [
 {
   category: "depot",
   question: "Kijan pou rapòte yon faux dépôt ?",
-  answer: "Kontakte support Wallet FOBAS imedyatman."
+  answer: "Kontakte support FOBAS imedyatman."
 },
 {
   category: "depot",
@@ -93,18 +93,18 @@ const faqData = [
 {
   category: "depot",
   question: "Kisa k rive si dépôt fèt pa yon fo agent ?",
-  answer: "Wallet FOBAS pa responsab pou tranzaksyon ki fèt ak yon fo agent ki pa otorize."
+  answer: "FOBAS pa responsab pou tranzaksyon ki fèt ak yon fo agent ki pa otorize."
 },
 {
   category: "depot",
   question: "Eske dépôt entènasyonal posib ?",
-  answer: "Wi. Men, pou konnya Dépôt entènasyonal poko disponib sou platfom Wallet FOBAS."
+  answer: "Wi. Men, pou konnya Dépôt entènasyonal poko disponib sou platfom FOBAS."
 },
   // ================= RETRAIT (21–40) =================
   {
   category: "retrait",
-  question: "Kijan pou m fè yon retrait Wallet FOBAS ?",
-  answer: "Ale lakay yon agent Wallet FOBAS ki otorize."
+  question: "Kijan pou m fè yon retrait FOBAS ?",
+  answer: "Ale lakay yon agent FOBAS ki otorize."
 },
 {
   category: "retrait",
@@ -119,12 +119,12 @@ const faqData = [
 {
   category: "retrait",
   question: "Kisa pou m fè si yon agent refize fè retrait la ?",
-  answer: "Rapòte agent lan imedyatman bay support Wallet FOBAS nan espas (Assistance 24/7)."
+  answer: "Rapòte agent lan imedyatman bay support FOBAS nan espas (Assistance 24/7)."
 },
 {
   category: "retrait",
   question: "Ki retrait minimòm ki otorize ?",
-  answer: "Retrait minimòm aktyèl Wallet FOBAS la se (20 Gourdes) e, maksimom nan se (100 000 Gourdes)."
+  answer: "Retrait minimòm aktyèl FOBAS la se (20 Gourdes) e, maksimom nan se (100 000 Gourdes)."
 },
 {
   category: "retrait",
@@ -139,7 +139,7 @@ const faqData = [
 {
   category: "retrait",
   question: "Kijan pou debloque yon retrait ?",
-  answer: "Kontakte support Wallet FOBAS pou verifikasyon idantite."
+  answer: "Kontakte support FOBAS pou verifikasyon idantite."
 },
 {
   category: "retrait",
@@ -169,7 +169,7 @@ const faqData = [
 {
   category: "retrait",
   question: "Kisa pou m fè si yon agent pran lajan san valide retrait la ?",
-  answer: "Rapòte sa kòm fwod bay support Wallet FOBAS imedyatman."
+  answer: "Rapòte sa kòm fwod bay support FOBAS imedyatman."
 },
 {
   category: "retrait",
@@ -188,7 +188,7 @@ const faqData = [
 },
 {
   category: "retrait",
-  question: "Eske Wallet FOBAS ranbouse erè retrait ?",
+  question: "Eske FOBAS ranbouse erè retrait ?",
   answer: "Chak ka etidye endividyèlman selon sitiyasyon an."
 },
 {
@@ -205,7 +205,7 @@ const faqData = [
   // ================= TRANSFERT (41–60) =================
   {
   category: "transfert",
-  question: "Kijan pou transfere lajan sou Wallet FOBAS ?",
+  question: "Kijan pou transfere lajan sou FOBAS ?",
   answer: "Antre E-mail ekzat, ak montan wap transfere bay benefisyè a epi valide tranzaksyon an."
 },
 {
@@ -308,8 +308,8 @@ const faqData = [
   // ================= BONUS (61–75) =================
   {
   category: "bonus",
-  question: "Kisa bonus Wallet FOBAS ye ?",
-  answer: "Se rekonpans Wallet FOBAS bay itilizatè ak tout manb kap travay anndan platfom nan selon aktivite yo."
+  question: "Kisa bonus FOBAS ye ?",
+  answer: "Se rekonpans FOBAS bay itilizatè ak tout manb kap travay anndan platfom nan selon aktivite yo."
 },
 {
   category: "bonus",
@@ -338,7 +338,7 @@ const faqData = [
 },
 {
   category: "bonus",
-  question: "Eske gen fo bonus sou Wallet FOBAS ?",
+  question: "Eske gen fo bonus sou FOBAS ?",
   answer: "Jamè. Sèlman bonus ofisyèl FOBAS ki valab."
 },
 {
@@ -358,7 +358,7 @@ const faqData = [
 },
 {
   category: "general",
-  question: "Kisa FAQ Wallet FOBAS ye ?",
+  question: "Kisa FAQ FOBAS ye ?",
   answer: "Se sant asistans ki reponn kestyon itilizatè yo."
 },
 {
@@ -368,7 +368,7 @@ const faqData = [
 },
 {
   category: "general",
-  question: "Kijan chatbot Wallet FOBAS mache ?",
+  question: "Kijan chatbot FOBAS mache ?",
   answer: "Li itilize AI ansanm ak FAQ pou reponn kestyon yo."
 },
 {
@@ -378,22 +378,22 @@ const faqData = [
 },
 {
   category: "general",
-  question: "Kijan pou kontakte support Wallet FOBAS ?",
+  question: "Kijan pou kontakte support FOBAS ?",
   answer: "Atravè WhatsApp oswa Email ofisyèl FOBAS kise (infos@fondationbackupspirituel.com) ak espas Assistance 24/7 depi Dashboard ou."
 },
 {
   category: "general",
-  question: "Eske Wallet FOBAS legal ?",
-  answer: "Wi. Wallet FOBAS respekte règleman lokal yo e li se yon antite anndan Fondation Backup Spirituel (FOBAS) ki fe pati de tout (Services Intermediaires) nou yo."
+  question: "Eske FOBAS legal ?",
+  answer: "Wi. FOBAS respekte règleman lokal yo e li se yon antite anndan Fondation Backup Spirituel (FOBAS) ki fe pati de tout (Services Intermediaires) nou yo."
 },
 {
   category: "general",
-  question: "Eske Wallet FOBAS disponib nan tout Ayiti ?",
+  question: "Eske FOBAS disponib nan tout Ayiti ?",
   answer: "Wi. Atravè rezo agents autorisés sou tout 10 depatman Haiti."
 },
 {
   category: "general",
-  question: "Eske Wallet FOBAS gen app mobile ?",
+  question: "Eske FOBAS gen app mobile ?",
   answer: "Wi. App mobile la aktyèlman an devlopman."
 },
 {
@@ -403,14 +403,14 @@ const faqData = [
 },
 {
   category: "general",
-  question: "Poukisa chwazi Wallet FOBAS ?",
+  question: "Poukisa chwazi FOBAS ?",
   answer: "Pou sekirite, rapidite, transparans, ak konfyans."
 },
 
   // ================= SECURITE (76–90) =================
   {
   category: "securite",
-  question: "Èske Wallet FOBAS an sekirite ?",
+  question: "Èske FOBAS an sekirite ?",
   answer: "Wi. Nou itilize chifreman avanse, plizyè nivo kontwòl, ak siveyans anti-fwod 24/7."
 },
 {
@@ -435,7 +435,7 @@ const faqData = [
 },
 {
   category: "securite",
-  question: "Èske Wallet FOBAS detekte fwod ?",
+  question: "Èske FOBAS detekte fwod ?",
   answer: "Wi. Algoritm entèlijan analize konpòtman ki pa nòmal an tan reyèl."
 },
 {
@@ -470,7 +470,7 @@ const faqData = [
 },
 {
   category: "securite",
-  question: "Èske Wallet FOBAS fè kontwòl sekirite regilyèman ?",
+  question: "Èske FOBAS fè kontwòl sekirite regilyèman ?",
   answer: "Wi. Nou fè odit sekirite souvan pou evite fay teknik."
 },
 {
@@ -500,12 +500,12 @@ const faqData = [
 },
 {
   category: "securite",
-  question: "Èske Wallet FOBAS respekte estanda sekirite modèn ?",
+  question: "Èske FOBAS respekte estanda sekirite modèn ?",
   answer: "Wi. Nou swiv estanda entènasyonal sekirite dijital."
 },
 {
   category: "securite",
-  question: "Èske sekirite Wallet FOBAS ap evolye ak tan ?",
+  question: "Èske sekirite FOBAS ap evolye ak tan ?",
   answer: "Wi. Sistèm yo mete ajou regilyèman pou konbat nouvo menas."
 },
   
@@ -518,7 +518,7 @@ const faqData = [
 {
   category: "agentsautorises",
   question: "Èske tout agents ki parèt sou platfòm lan otorize ?",
-  answer: "Wi. Tout agents ki nan lis la verifye epi apwouve pa Wallet FOBAS."
+  answer: "Wi. Tout agents ki nan lis la verifye epi apwouve pa FOBAS."
 },
 {
   category: "agentsautorises",
@@ -547,7 +547,7 @@ const faqData = [
 },
 {
   category: "agentsautorises",
-  question: "Èske mwen ka fè tranzaksyon avèk agent san kont Wallet FOBAS ?",
+  question: "Èske mwen ka fè tranzaksyon avèk agent san kont FOBAS ?",
   answer: "Non. Ou dwe gen kont verifye pou fè tranzaksyon avèk agent."
 },
 {
@@ -568,7 +568,7 @@ const faqData = [
 {
   category: "agentsautorises",
   question: "Ki dokiman mwen bezwen pou fè tranzaksyon avèk agent ?",
-  answer: "E-mail kont Wallet FOBAS ou, epi enfòmasyon tranzaksyon an."
+  answer: "E-mail kont FOBAS ou, epi enfòmasyon tranzaksyon an."
 },
 {
   category: "agentsautorises",
@@ -593,7 +593,7 @@ const faqData = [
 {
   category: "agentsautorises",
   question: "Eske agent ka retire lajan san verifye kont mwen ?",
-  answer: "Non. Tout tranzaksyon mande validasyon sou kont Wallet FOBAS ou."
+  answer: "Non. Tout tranzaksyon mande validasyon sou kont FOBAS ou."
 },
 {
   category: "agentsautorises",
@@ -716,8 +716,8 @@ const faqData = [
 // ================= LÉGAL & CONFORMITÉ (1–20) =================
 {
   category: "legalconformite",
-  question: "Eske Wallet FOBAS legal nan peyi Ayiti ?",
-  answer: "Wi. Wallet FOBAS respekte tout règleman lokal yo epi opere avèk certificat finansye apwopriye."
+  question: "Eske FOBAS legal nan peyi Ayiti ?",
+  answer: "Wi. FOBAS respekte tout règleman lokal yo epi opere avèk certificat finansye apwopriye."
 },
 {
   category: "legalconformite",
@@ -731,8 +731,8 @@ const faqData = [
 },
 {
   category: "legalconformite",
-  question: "Ki lwa finansye Wallet FOBAS suiv ?",
-  answer: "Wallet FOBAS suiv lwa finansye Ayiti, règleman bankè, ak estanda anti-blanchiment."
+  question: "Ki lwa finansye FOBAS suiv ?",
+  answer: "FOBAS suiv lwa finansye Ayiti, règleman bankè, ak estanda anti-blanchiment."
 },
 {
   category: "legalconformite",
@@ -741,7 +741,7 @@ const faqData = [
 },
 {
   category: "legalconformite",
-  question: "Kijan Wallet FOBAS asire konfòmite ?",
+  question: "Kijan FOBAS asire konfòmite ?",
   answer: "Nou itilize kontwòl entèn, rapò regilye, ak siveyans aktivite itilizatè."
 },
 {
@@ -756,7 +756,7 @@ const faqData = [
 },
 {
   category: "legalconformite",
-  question: "Eske Wallet FOBAS ka sispann kont yon itilizatè ?",
+  question: "Eske FOBAS ka sispann kont yon itilizatè ?",
   answer: "Wi, si gen aktivite sispèk oswa vyolasyon règleman legal yo."
 },
 {
@@ -766,7 +766,7 @@ const faqData = [
 },
 {
   category: "legalconformite",
-  question: "Eske Wallet FOBAS konpatib ak lwa anti-blanchiment ?",
+  question: "Eske FOBAS konpatib ak lwa anti-blanchiment ?",
   answer: "Wi, tout tranzaksyon yo kontwole pou anpeche blanchiman lajan."
 },
 {
@@ -786,7 +786,7 @@ const faqData = [
 },
 {
   category: "legalconformite",
-  question: "Kijan Wallet FOBAS verifye idantite itilizatè yo ?",
+  question: "Kijan FOBAS verifye idantite itilizatè yo ?",
   answer: "Nou itilize dokiman ofisyèl, selfie, ak lòt metòd KYC pou verifye itilizatè yo."
 },
 {
@@ -806,7 +806,7 @@ const faqData = [
 },
 {
   category: "legalconformite",
-  question: "Eske Wallet FOBAS peye taks legal ?",
+  question: "Eske FOBAS peye taks legal ?",
   answer: "Wi. Platfòm nan respekte obligasyon fiskal nan peyi Ayiti."
 },
 {
