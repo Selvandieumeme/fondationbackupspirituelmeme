@@ -1,7 +1,7 @@
 const fobasPoints = [
 
 /* 1–10 : Fondasyon & Konfyans */
-["🌍 Poukisa Wallet FOBAS ?", "Wallet FOBAS se yon solisyon finansye dijital ki fèt pou reyalite Ayiti."],
+["🌍 Poukisa FOBAS ?", "FOBAS se yon solisyon finansye dijital ki fèt pou reyalite Ayiti."],
 ["🇭🇹 Fèt pou Ayiti", "Platfòm nan adapte ak kondisyon lokal, san obligasyon bank."],
 ["🔐 Sekirite total", "Tout tranzaksyon pwoteje ak sistèm modèn chifreman."],
 ["📱 Aksesib tout kote", "Fonksyone sou telefòn, tablèt ak òdinatè."],
@@ -37,7 +37,7 @@ const fobasPoints = [
 ["🏆 Ajan performan", "Ajan serye resevwa avantaj."],
 
 /* 31–40 : Avni & Teknoloji */
-["🌐 Dijitalizasyon", "Wallet FOBAS konekte Ayiti ak mond dijital la."],
+["🌐 Dijitalizasyon", "FOBAS konekte Ayiti ak mond dijital la."],
 ["⚙️ Teknoloji modèn", "Sistèm toujou ajou."],
 ["📡 Disponibilite 24/7", "Platfòm la fonksyone tout tan."],
 ["🧩 Evolutif", "Nou ajoute nouvo fonksyon regilyèman."],
@@ -46,7 +46,7 @@ const fobasPoints = [
 ["📜 Konfòmite", "Règleman respekte."],
 ["🤍 Konfyans", "Bati sou kredibilite & disiplin."],
 ["🚀 Avni finans Ayiti", "Nou konstwi solisyon dirab."],
-["✅ Angajman total", "Wallet FOBAS la pou pèp la."]
+["✅ Angajman total", "FOBAS la pou pèp la."]
 
 ];
 
