@@ -1222,6 +1222,41 @@ if (
       return res.status(403).json({ message: "Agent Autorise pa ka voye lajan bay lòt agent." });
     }
 
+
+
+
+// 🔒 ALERT STRIK SI MONTAN AN PA KONVNI
+const MIN_TRANSFER = 1;      // Pi piti montan ki akseptab (ou ka modifye)
+const MAX_TRANSFER = 75000;  // Pi gwo montan ki akseptab
+
+if(amount < MIN_TRANSFER || amount > MAX_TRANSFER) {
+  // Freeze kont moun k ap voye a
+  sender.balanceFrozen = true;
+  await sender.save();
+
+  // Kreye alèt nan tranzaksyon pou admin dashboard
+  await Transaction.create({
+    email: senderEmail,
+    type: 'SECURITY_ALERT',
+    amount,
+    receiverEmail,
+    status: 'PENDING',
+    createdAt: new Date()
+  });
+
+  // Notifye dashboard admin imedyatman
+  notifyUpdate();
+
+  // Reponn itilizatè a
+  return res.status(403).json({
+    message: "⛔ Montant invalide. Compte gelé et alert admin envoyé."
+  });
+}
+
+
+
+	  
+	
     // 💸 Mouvement financier
     sender.balance -= amount;
     receiver.balance += amount;
