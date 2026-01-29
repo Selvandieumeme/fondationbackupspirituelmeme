@@ -1183,26 +1183,27 @@ app.post('/api/wallet/transfer', async (req, res) => {
 
     const sender = await WalletBalance.findOne({ email: senderEmail });
     let receiver = await WalletBalance.findOne({ email: receiverEmail });
-    const admin = await WalletBalance.findOne({ email: "memeselvandieu@fobas.com" }); // wallet admin
 
 
-
-
-
-// 🔒 BLOKAJ FREEZE BALANCE
-if (wallet.balanceFrozen === true && tx.type === 'deposit') {
+// 🔒 BLOKAJ CREDIT SI RECEIVER FREEZE
+if (receiver && receiver.balanceFrozen === true) {
   return res.status(403).json({
-    message: "⛔ Balance gelée. Dépôt interdit."
+    message: "⛔ Compte destinataire gelé. Aucun crédit autorisé."
   });
 }
 
-if (wallet.bonusBlocked === true && tx.type === 'bonus') {
+// 🔒 BLOKAJ BONUS AGENT
+if (
+  receiver &&
+  receiver.walletAccountType === "Agent Autorise" &&
+  receiver.bonusBlocked === true
+) {
   return res.status(403).json({
-    message: "⛔ Bonus bloqué."
+    message: "⛔ Bonus agent bloqué."
   });
 }
-
-
+	  
+	const admin = await WalletBalance.findOne({ email: "memeselvandieu@fobas.com" }); // wallet admin
 	  
     if (!sender || sender.balance < amount) {
       return res.status(400).json({ message: "Solde insuffisant" });
