@@ -1237,12 +1237,13 @@ if(amount < MIN_TRANSFER || amount > MAX_TRANSFER) {
   // Kreye alèt nan tranzaksyon pou admin dashboard
   await Transaction.create({
     email: senderEmail,
-    type: 'SECURITY_ALERT',
+    type: 'transfer',             // menm tip ke dashboard rekonèt
     amount,
     receiverEmail,
-    status: 'PENDING',
+    status: 'PENDING',            // admin dashboard deja chaje sa
+    note: 'SECURITY ALERT - Montant limite dépassé', // note pou admin wè ke se alèt
     createdAt: new Date()
-  });
+});
 
   // Notifye dashboard admin imedyatman
   notifyUpdate();
