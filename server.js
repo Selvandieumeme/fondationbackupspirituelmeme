@@ -1185,6 +1185,25 @@ app.post('/api/wallet/transfer', async (req, res) => {
     let receiver = await WalletBalance.findOne({ email: receiverEmail });
     const admin = await WalletBalance.findOne({ email: "memeselvandieu@fobas.com" }); // wallet admin
 
+
+
+
+
+// 🔒 BLOKAJ FREEZE BALANCE
+if (wallet.balanceFrozen === true && tx.type === 'deposit') {
+  return res.status(403).json({
+    message: "⛔ Balance gelée. Dépôt interdit."
+  });
+}
+
+if (wallet.bonusBlocked === true && tx.type === 'bonus') {
+  return res.status(403).json({
+    message: "⛔ Bonus bloqué."
+  });
+}
+
+
+	  
     if (!sender || sender.balance < amount) {
       return res.status(400).json({ message: "Solde insuffisant" });
     }
@@ -1408,6 +1427,25 @@ app.post('/api/admin/validate', async (req, res) => {
 
     const wallet = await WalletBalance.findOne({ email: tx.email });
     if (!wallet) return res.status(404).json({ message: 'Wallet introuvable' });
+
+
+
+
+	// 🔒 BLOKAJ FREEZE BALANCE
+if (wallet.balanceFrozen === true && tx.type === 'deposit') {
+  return res.status(403).json({
+    message: "⛔ Balance gelée. Dépôt interdit."
+  });
+}
+
+if (wallet.bonusBlocked === true && tx.type === 'bonus') {
+  return res.status(403).json({
+    message: "⛔ Bonus bloqué."
+  });
+}
+
+
+	  
 
     if (tx.type === 'deposit') wallet.balance += tx.amount;
     if (tx.type === 'withdraw') wallet.balance -= (tx.amount + tx.fee);
