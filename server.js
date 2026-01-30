@@ -1700,6 +1700,7 @@ if (wallet.bonusBlocked === true && tx.type === 'bonus') {
 
 // ===================== SURVEILLANCE AGENT - WALLET FOBAS =====================
 
+// 📋 Get all Agents
 app.get("/agents", async (req, res) => {
   try {
     const agents = await WalletBalance.find({ walletAccountType: "Agent Autorise" })
@@ -1716,24 +1717,41 @@ app.get("/agents", async (req, res) => {
 // ---------------------------
 app.post("/agent-action", async (req, res) => {
   const { email, type } = req.body;
+
   try {
     const agent = await WalletBalance.findOne({ email });
-    if (!agent) return res.sendStatus(404);
+    if (!agent) return res.status(404).json({ message: "Agent introuvable" });
 
     switch (type) {
-      case "BLOCK_ACCOUNT": agent.accountStatus = "BLOQUE"; break;
-      case "UNBLOCK_ACCOUNT": agent.accountStatus = "ACTIF"; break;
-      case "FREEZE_BALANCE": agent.balanceFrozen = true; break;
-      case "UNFREEZE_BALANCE": agent.balanceFrozen = false; break;
-      case "BLOCK_BONUS": agent.bonusBlocked = true; break;
-      case "UNBLOCK_BONUS": agent.bonusBlocked = false; break;
+      case "BLOCK_ACCOUNT":
+        agent.accountStatus = "BLOQUE";
+        break;
+      case "UNBLOCK_ACCOUNT":
+        agent.accountStatus = "ACTIF";
+        break;
+      case "FREEZE_BALANCE":
+        agent.balanceFrozen = true;
+        break;
+      case "UNFREEZE_BALANCE":
+        agent.balanceFrozen = false;
+        break;
+      case "BLOCK_BONUS":
+        agent.bonusBlocked = true;
+        break;
+      case "UNBLOCK_BONUS":
+        agent.bonusBlocked = false;
+        break;
+      default:
+        return res.status(400).json({ message: "Type d'action inconnu" });
     }
 
     agent.lastAction = type;
     await agent.save();
 
+    // Notify tout client ki ap swiv agent la
     io.emit("agentUpdate", agent);
-    res.sendStatus(200);
+
+    res.json({ message: "Action exécutée", agent });
   } catch (err) {
     console.error("❌ Agent action error:", err);
     res.status(500).json({ message: "Erreur serveur" });
@@ -1762,6 +1780,7 @@ io.on("connection", (socket) => {
 
       socket.on("disconnect", () => {
         changeStream.close();
+        console.log("🔌 Socket dekonekte, changeStream fèmen:", socket.id);
       });
 
     } catch (err) {
