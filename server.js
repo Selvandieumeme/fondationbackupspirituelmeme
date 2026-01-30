@@ -1488,6 +1488,37 @@ if (wallet.bonusBlocked === true && tx.type === 'bonus') {
     if (tx.type === 'withdraw') wallet.balance -= (tx.amount + tx.fee);
     if (tx.type === 'bonus') wallet.bonus += tx.amount;
 
+	  // 🔁 VALIDATION TRANSFERT PAR ADMIN
+if (tx.type === 'transfer') {
+
+  const sender = await WalletBalance.findOne({ email: tx.email });
+  const receiver = await WalletBalance.findOne({ email: tx.receiverEmail });
+
+  if (!sender || !receiver) {
+    return res.status(404).json({ message: "Wallet introuvable" });
+  }
+
+  // Sécurité finale
+  if (sender.balanceFrozen === true) {
+    return res.status(403).json({
+      message: "Compte expéditeur toujours gelé"
+    });
+  }
+
+  if (sender.balance < tx.amount) {
+    return res.status(400).json({
+      message: "Solde insuffisant pour valider le transfert"
+    });
+  }
+
+  // 💸 Mouvement financier réel
+  sender.balance -= tx.amount;
+  receiver.balance += tx.amount;
+
+  await sender.save();
+  await receiver.save();
+}
+
     tx.status = 'ACTIVE';
     await wallet.save();
     await tx.save();
