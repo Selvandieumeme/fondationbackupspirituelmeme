@@ -1404,6 +1404,24 @@ if (receiver.walletAccountType === "Agent Autorise") {
     await receiver.save();
     if(admin) await admin.save();
 
+
+
+
+// 🧾 FRAIS – traçabilité utilisateur (SANS impact financier)
+await Transaction.create({
+  email: senderEmail,
+  type: "fees",
+  amount: amount * 0.01,
+  relatedTransfer: amount,
+  status: "ACTIVE",
+  note: "Frais transfert 1%",
+  createdAt: new Date()
+});
+
+
+
+
+	  
     // 🧾 Historique sender ak komisyon
 await Transaction.create({
   email: senderEmail,
