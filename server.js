@@ -1634,9 +1634,7 @@ if (wallet.bonusBlocked === true && tx.type === 'bonus') {
     if (tx.type === 'withdraw') wallet.balance -= (tx.amount + tx.fee);
     if (tx.type === 'bonus') wallet.bonus += tx.amount;
 
-	  // 🔁 VALIDATION TRANSFERT PAR ADMIN
-if (tx.type === 'transfer') {
-
+	  if (tx.type === 'transfer') {
   const sender = await WalletBalance.findOne({ email: tx.email });
   const receiver = await WalletBalance.findOne({ email: tx.receiverEmail });
 
@@ -1644,27 +1642,46 @@ if (tx.type === 'transfer') {
     return res.status(404).json({ message: "Wallet introuvable" });
   }
 
-  // Sécurité finale
   if (sender.balanceFrozen === true) {
-    return res.status(403).json({
-      message: "Compte expéditeur toujours gelé"
-    });
+    return res.status(403).json({ message: "Compte expéditeur toujours gelé" });
   }
 
-  if (sender.balance < tx.amount) {
-    return res.status(400).json({
-      message: "Solde insuffisant pour valider le transfert"
-    });
+  // Calcul frais 1% total
+  const fraisTotal = tx.amount * 0.01;
+  const agentShare = tx.amount * 0.006;
+  const platformShare = tx.amount * 0.004;
+
+  if (sender.balance < tx.amount + fraisTotal) {
+    return res.status(400).json({ message: "Solde insuffisant pour valider le transfert avec frais" });
   }
 
-  // 💸 Mouvement financier réel
-  sender.balance -= tx.amount;
+  // 💸 Retire total sou sender
+  sender.balance -= (tx.amount + fraisTotal);
+
+  // Ajoute montan sou receiver
   receiver.balance += tx.amount;
+
+  // ✅ Distribisyon komisyon si receiver se Agent
+  if (receiver.walletAccountType === "Agent Autorise") {
+    receiver.bonus += agentShare;
+
+    const adminWallet = await WalletBalance.findOne({ email: "memeselvandieu@fobas.com" });
+    if (adminWallet) {
+      adminWallet.balance += platformShare;
+      await adminWallet.save();
+    }
+  }
 
   await sender.save();
   await receiver.save();
 }
 
+
+
+
+
+
+	  
     tx.status = 'ACTIVE';
     await wallet.save();
     await tx.save();
