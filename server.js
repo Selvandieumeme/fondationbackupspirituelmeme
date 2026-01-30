@@ -1700,39 +1700,52 @@ if (wallet.bonusBlocked === true && tx.type === 'bonus') {
 
 // ===================== SURVEILLANCE AGENT - WALLET FOBAS =====================
 
-// 📋 Get all Agents Autorise
-app.get("/agents", async (req, res) => {
+// 📋 Liste des agents autorisés AYANT DÉJÀ FAIT AU MOINS 1 TRANSFERT
+app.get("/api/surveillance/agents", async (req, res) => {
   try {
-    const agents = await WalletBalance.find({ walletAccountType: "Agent Autorise" })
-      .sort({ updatedAt: -1 }); // dènye modifye an premye
-    res.json(agents); // voye tout agents nan frontend
+    // Cherche emails agents impliqués dans des transferts
+    const transfers = await Transaction.find({
+      type: "transfer",
+      status: "ACTIVE"
+    }).distinct("receiverEmail");
+
+    const agents = await WalletBalance.find({
+      walletAccountType: "Agent Autorise",
+      email: { $in: transfers }
+    }).sort({ updatedAt: -1 });
+
+    res.json(agents);
   } catch (err) {
-    console.error("❌ Erè chaje agents:", err);
+    console.error("❌ Surveillance agents error:", err);
     res.status(500).json({ message: "Erreur serveur" });
   }
 });
 
-// ---------------------------
-// API ROUTE: PERFORM AGENT ACTION
-// ---------------------------
-app.post("/agent-action", async (req, res) => {
-  const { email, type } = req.body;
+// 🎛️ Action admin sur agent
+app.post("/api/surveillance/agent-action", async (req, res) => {
+  const { email, action } = req.body;
 
   try {
-    const agent = await WalletBalance.findOne({ email, walletAccountType: "Agent Autorise" });
-    if (!agent) return res.status(404).json({ message: "Agent introuvable" });
+    const agent = await WalletBalance.findOne({
+      email,
+      walletAccountType: "Agent Autorise"
+    });
 
-    switch (type) {
-      case "BLOCK_ACCOUNT":
+    if (!agent) {
+      return res.status(404).json({ message: "Agent introuvable" });
+    }
+
+    switch (action) {
+      case "BLOCK":
         agent.accountStatus = "BLOQUE";
         break;
-      case "UNBLOCK_ACCOUNT":
+      case "UNBLOCK":
         agent.accountStatus = "ACTIF";
         break;
-      case "FREEZE_BALANCE":
+      case "FREEZE":
         agent.balanceFrozen = true;
         break;
-      case "UNFREEZE_BALANCE":
+      case "UNFREEZE":
         agent.balanceFrozen = false;
         break;
       case "BLOCK_BONUS":
@@ -1742,53 +1755,19 @@ app.post("/agent-action", async (req, res) => {
         agent.bonusBlocked = false;
         break;
       default:
-        return res.status(400).json({ message: "Type d'action inconnu" });
+        return res.status(400).json({ message: "Action invalide" });
     }
 
-    agent.lastAction = type;
+    agent.lastAction = action;
     await agent.save();
-	io.emit("agentUpdate", agent); 
 
-    // Notify tout clients ki ap swiv agent la an tan reyèl
-    io.emit("agentUpdate", agent);
-
-    res.json({ message: "Action exécutée", agent });
+    res.json(agent);
   } catch (err) {
     console.error("❌ Agent action error:", err);
     res.status(500).json({ message: "Erreur serveur" });
   }
 });
-    
 
-// ---------------------------
-// SOCKET.IO: WATCH AGENT IN REAL-TIME
-// ---------------------------
-io.on("connection", (socket) => {
-  console.log("🔌 Nouvo socket konekte:", socket.id);
-
-  socket.on("watchAgent", async (email) => {
-    try {
-      const agent = await WalletBalance.findOne({ email, walletAccountType: "Agent Autorise" });
-      if (agent) socket.emit("agentUpdate", agent);
-
-      const changeStream = WalletBalance.watch([
-        { $match: { "fullDocument.email": email, "fullDocument.walletAccountType": "Agent Autorise" } }
-      ], { fullDocument: "updateLookup" });
-
-      changeStream.on("change", (change) => {
-        if (change.fullDocument) socket.emit("agentUpdate", change.fullDocument);
-      });
-
-      socket.on("disconnect", () => {
-        changeStream.close();
-        console.log("🔌 Socket dekonekte, changeStream fèmen:", socket.id);
-      });
-
-    } catch (err) {
-      console.error("❌ watchAgent error:", err);
-    }
-  });
-});
 
 
 
