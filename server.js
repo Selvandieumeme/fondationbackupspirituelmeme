@@ -1117,6 +1117,47 @@ setInterval(async () => {
 
 
 
+// =======================
+// ⏱️ AUTO TRANSFERT BONUS → BALANCE (UTILISATEURS ≥ 2500)
+// =======================
+
+const USER_BONUS_FLUSH_INTERVAL = 60 * 1000; // 1 minute pou test, apre retounen 1h si ou vle
+
+setInterval(async () => {
+  try {
+    // Chèche tout Utilisateurs ki gen bonus ≥ 2500
+    const users = await WalletBalance.find({
+      walletAccountType: "Utilisateur",
+      bonus: { $gte: 2500 },
+      balanceFrozen: false // sekirite
+    });
+
+    if (users.length === 0) return;
+
+    for (const user of users) {
+      const bonusAmount = user.bonus;
+
+      // 💰 Ajoute bonus nan balance
+      user.balance += bonusAmount;
+
+      // ♻️ Reset bonus
+      user.bonus = 0;
+
+
+      await user.save();
+    }
+
+    // 🔔 Notify admin dashboard an tan réel
+    notifyUpdate();
+
+    console.log(`✅ AUTO BONUS USER FLUSH: ${users.length} utilisateur(s) mis à jour`);
+
+  } catch (err) {
+    console.error("❌ ERREUR AUTO BONUS USER FLUSH:", err);
+  }
+}, USER_BONUS_FLUSH_INTERVAL);
+
+
 
 
 
