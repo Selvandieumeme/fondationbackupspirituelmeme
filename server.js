@@ -1074,6 +1074,51 @@ const notifyUpdate = () => io.emit('wallet-update');
 
 
 
+// =======================
+// ⏱️ AUTO TRANSFERT BONUS → BALANCE (AGENT AUTORISÉ)
+// =======================
+
+const BONUS_FLUSH_INTERVAL = 60 * 1000; // 1 minute = 60,000 ms
+
+setInterval(async () => {
+  try {
+    // Chèche tout Agents Autorisés ki gen bonus > 0
+    const agents = await WalletBalance.find({
+      walletAccountType: "Agent Autorise",
+      bonus: { $gt: 0 },
+      balanceFrozen: false // sekirite
+    });
+
+    if (agents.length === 0) return;
+
+    for (const agent of agents) {
+      const bonusAmount = agent.bonus;
+
+      // 💰 Ajoute bonus nan balance
+      agent.balance += bonusAmount;
+
+      // ♻️ Reset bonus
+      agent.bonus = 0;
+
+      await agent.save();
+    }
+
+    // 🔔 Notify admin dashboard an tan réel
+    notifyUpdate();
+
+    console.log(`✅ AUTO BONUS FLUSH: ${agents.length} agent(s) mis à jour`);
+
+  } catch (err) {
+    console.error("❌ ERREUR AUTO BONUS FLUSH:", err);
+  }
+}, BONUS_FLUSH_INTERVAL);
+
+
+
+
+
+
+
 
 // ======================= USER DASHBOARD =======================
 
