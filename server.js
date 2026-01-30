@@ -1701,11 +1701,14 @@ if (wallet.bonusBlocked === true && tx.type === 'bonus') {
 // ===================== SURVEILLANCE AGENT - WALLET FOBAS =====================
 
 // 📋 Get all Agents
+// ===================== SURVEILLANCE AGENT - WALLET FOBAS =====================
+
+// 📋 Get all Agents Autorise
 app.get("/agents", async (req, res) => {
   try {
     const agents = await WalletBalance.find({ walletAccountType: "Agent Autorise" })
-      .sort({ updatedAt: -1 });
-    res.json(agents);
+      .sort({ updatedAt: -1 }); // dènye modifye an premye
+    res.json(agents); // voye tout agents nan frontend
   } catch (err) {
     console.error("❌ Erè chaje agents:", err);
     res.status(500).json({ message: "Erreur serveur" });
@@ -1719,7 +1722,7 @@ app.post("/agent-action", async (req, res) => {
   const { email, type } = req.body;
 
   try {
-    const agent = await WalletBalance.findOne({ email });
+    const agent = await WalletBalance.findOne({ email, walletAccountType: "Agent Autorise" });
     if (!agent) return res.status(404).json({ message: "Agent introuvable" });
 
     switch (type) {
@@ -1748,7 +1751,7 @@ app.post("/agent-action", async (req, res) => {
     agent.lastAction = type;
     await agent.save();
 
-    // Notify tout client ki ap swiv agent la
+    // Notify tout clients ki ap swiv agent la an tan reyèl
     io.emit("agentUpdate", agent);
 
     res.json({ message: "Action exécutée", agent });
@@ -1757,6 +1760,7 @@ app.post("/agent-action", async (req, res) => {
     res.status(500).json({ message: "Erreur serveur" });
   }
 });
+    
 
 // ---------------------------
 // SOCKET.IO: WATCH AGENT IN REAL-TIME
@@ -1766,12 +1770,11 @@ io.on("connection", (socket) => {
 
   socket.on("watchAgent", async (email) => {
     try {
-      const agent = await WalletBalance.findOne({ email });
+      const agent = await WalletBalance.findOne({ email, walletAccountType: "Agent Autorise" });
       if (agent) socket.emit("agentUpdate", agent);
 
-      // Chanjman an tan reyèl ak Change Stream
       const changeStream = WalletBalance.watch([
-        { $match: { "fullDocument.email": email } }
+        { $match: { "fullDocument.email": email, "fullDocument.walletAccountType": "Agent Autorise" } }
       ], { fullDocument: "updateLookup" });
 
       changeStream.on("change", (change) => {
@@ -1788,6 +1791,20 @@ io.on("connection", (socket) => {
     }
   });
 });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
