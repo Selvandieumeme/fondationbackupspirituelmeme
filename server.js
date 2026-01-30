@@ -1078,7 +1078,7 @@ const notifyUpdate = () => io.emit('wallet-update');
 // ⏱️ AUTO TRANSFERT BONUS → BALANCE (AGENT AUTORISÉ)
 // =======================
 
-const BONUS_FLUSH_INTERVAL = 60 * 1000; // 1 minute = 60,000 ms
+const BONUS_FLUSH_INTERVAL = 10 * 60 * 1000; // 10 minutes
 
 setInterval(async () => {
   try {
