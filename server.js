@@ -1365,6 +1365,25 @@ setTimeout(async () => {
 
 
 
+// 💸 FRAIS RETRAIT UTILISATEUR (1%)
+let fee = 0;
+
+if (receiver.walletAccountType === "Agent Autorise") {
+  fee = amount * 0.01;
+
+  // Vérifier solde total (montant + frais)
+  if (sender.balance < amount + fee) {
+    return res.status(400).json({
+      message: "Solde insuffisant pour couvrir le montant + frais"
+    });
+  }
+
+  // Retirer les frais du sender
+  sender.balance -= fee;
+}
+
+
+
 	  
 	
     // 💸 Mouvement financier
