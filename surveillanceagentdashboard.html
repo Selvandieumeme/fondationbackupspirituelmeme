@@ -1,42 +1,34 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="UTF-8" />
-<title>FOBAS – Surveillance Agent Autorisé</title>
-<link rel="stylesheet" href="surveillanceagentdashboard.css" />
+  <meta charset="UTF-8" />
+  <title>FOBAS – Surveillance Agents</title>
+  <link rel="stylesheet" href="surveillanceagentdashboard.css">
 </head>
 <body>
-<header class="topbar">FOBAS • Surveillance Agent Autorisé</header>
 
+<h2>Surveillance Agents Autorisés</h2>
 
-<main class="container">
-<section class="agent-info">
-<h2>Informations Agent</h2>
-<label for="agentSelect">Choisissez Agent:</label>
+<label>Choisissez Agent :</label>
 <select id="agentSelect"></select>
-<p><strong>Email :</strong> <span id="agentEmail">—</span></p>
-<p><strong>Statut :</strong> <span id="agentStatus">—</span></p>
-<p><strong>Balance :</strong> <span id="agentBalance">0</span></p>
-<p><strong>Bonus :</strong> <span id="agentBonus">0</span></p>
-<p><strong>Dernière action :</strong> <span id="lastAction">—</span></p>
-</section>
 
-
-<section class="actions">
-<h2>Actions Administrateur</h2>
-<div class="buttons">
-<button onclick="blockAccount()">Bloquer Compte</button>
-<button onclick="unblockAccount()">Débloquer Compte</button>
-<button onclick="freezeBalance()">Freeze Balance</button>
-<button onclick="unfreezeBalance()">Unfreeze Balance</button>
-<button onclick="blockBonus()">Bloquer Bonus</button>
-<button onclick="unblockBonus()">Débloquer Bonus</button>
+<div class="info">
+  <p>Email : <span id="email">—</span></p>
+  <p>Statut : <span id="status">—</span></p>
+  <p>Balance : <span id="balance">0</span></p>
+  <p>Bonus : <span id="bonus">0</span></p>
+  <p>Dernière action : <span id="lastAction">—</span></p>
 </div>
-</section>
-</main>
 
+<div class="actions">
+  <button onclick="sendAction('BLOCK_ACCOUNT')">Bloquer Compte</button>
+  <button onclick="sendAction('UNBLOCK_ACCOUNT')">Débloquer Compte</button>
+  <button onclick="sendAction('FREEZE_BALANCE')">Freeze Balance</button>
+  <button onclick="sendAction('UNFREEZE_BALANCE')">Unfreeze Balance</button>
+  <button onclick="sendAction('BLOCK_BONUS')">Bloquer Bonus</button>
+  <button onclick="sendAction('UNBLOCK_BONUS')">Débloquer Bonus</button>
+</div>
 
-<script src="/socket.io/socket.io.js"></script>
 <script src="surveillanceagentdashboard.js"></script>
 </body>
 </html>
