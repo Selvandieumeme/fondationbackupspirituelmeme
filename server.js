@@ -1700,18 +1700,24 @@ if (wallet.bonusBlocked === true && tx.type === 'bonus') {
 
 // ===================== SURVEILLANCE AGENT - WALLET FOBAS =====================
 
-// 📋 Liste des agents autorisés AYANT DÉJÀ FAIT AU MOINS 1 TRANSFERT
-app.get("/api/surveillance/agents", async (req, res) => {
+// 🔎 Récupérer agents autorisés impliqués dans des transferts
+app.get("/api/admin/surveillance-agents", async (req, res) => {
   try {
-    // Cherche emails agents impliqués dans des transferts
-    const transfers = await Transaction.find({
-      type: "transfer",
-      status: "ACTIVE"
-    }).distinct("receiverEmail");
+    // 1. Trouver tous les emails impliqués dans des transferts
+    const transfers = await Transaction.find({ type: "transfer", status: "ACTIVE" })
+      .select("email receiverEmail");
 
+    const emails = new Set();
+
+    transfers.forEach(tx => {
+      if (tx.email) emails.add(tx.email);
+      if (tx.receiverEmail) emails.add(tx.receiverEmail);
+    });
+
+    // 2. Charger uniquement les Agents Autorisés concernés
     const agents = await WalletBalance.find({
-      walletAccountType: "Agent Autorise",
-      email: { $in: transfers }
+      email: { $in: Array.from(emails) },
+      walletAccountType: "Agent Autorise"
     }).sort({ updatedAt: -1 });
 
     res.json(agents);
@@ -1721,11 +1727,11 @@ app.get("/api/surveillance/agents", async (req, res) => {
   }
 });
 
-// 🎛️ Action admin sur agent
-app.post("/api/surveillance/agent-action", async (req, res) => {
-  const { email, action } = req.body;
-
+// ⚙️ Action admin sur agent
+app.post("/api/admin/agent-action", async (req, res) => {
   try {
+    const { email, action } = req.body;
+
     const agent = await WalletBalance.findOne({
       email,
       walletAccountType: "Agent Autorise"
@@ -1736,16 +1742,16 @@ app.post("/api/surveillance/agent-action", async (req, res) => {
     }
 
     switch (action) {
-      case "BLOCK":
+      case "BLOCK_ACCOUNT":
         agent.accountStatus = "BLOQUE";
         break;
-      case "UNBLOCK":
+      case "UNBLOCK_ACCOUNT":
         agent.accountStatus = "ACTIF";
         break;
-      case "FREEZE":
+      case "FREEZE_BALANCE":
         agent.balanceFrozen = true;
         break;
-      case "UNFREEZE":
+      case "UNFREEZE_BALANCE":
         agent.balanceFrozen = false;
         break;
       case "BLOCK_BONUS":
@@ -1761,13 +1767,12 @@ app.post("/api/surveillance/agent-action", async (req, res) => {
     agent.lastAction = action;
     await agent.save();
 
-    res.json(agent);
+    res.json({ success: true });
   } catch (err) {
     console.error("❌ Agent action error:", err);
     res.status(500).json({ message: "Erreur serveur" });
   }
 });
-
 
 
 
