@@ -1312,13 +1312,36 @@ if (
 
 
 // 🔒 ALERT STRIK SI MONTAN AN PA KONVNI
-const MIN_TRANSFER = 1;      // Pi piti montan ki akseptab (ou ka modifye)
+const MIN_TRANSFER = 20;      // Pi piti montan ki akseptab (ou ka modifye)
 const MAX_TRANSFER = 75000;  // Pi gwo montan ki akseptab
 
 if(amount < MIN_TRANSFER || amount > MAX_TRANSFER) {
   // Freeze kont moun k ap voye a
   sender.balanceFrozen = true;
   await sender.save();
+
+
+
+// ⏳ AUTO UNFREEZE APRÈ 5 MINUTES (UTILISATEUR)
+setTimeout(async () => {
+  try {
+    const refreshedSender = await WalletBalance.findOne({ email: senderEmail });
+
+    if (refreshedSender && refreshedSender.balanceFrozen === true) {
+      refreshedSender.balanceFrozen = false;
+      refreshedSender.lastAction = "AUTO_UNFREEZE_AFTER_LIMIT";
+      await refreshedSender.save();
+
+      notifyUpdate();
+      console.log(`🔓 AUTO UNFREEZE effectué pour ${senderEmail}`);
+    }
+  } catch (err) {
+    console.error("❌ ERREUR AUTO UNFREEZE:", err);
+  }
+}, 5 * 60 * 1000); // 5 minutes
+
+
+
 
   // Kreye alèt nan tranzaksyon pou admin dashboard
   await Transaction.create({
