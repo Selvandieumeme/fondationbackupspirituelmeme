@@ -1,55 +1,61 @@
-const socket = io("https://api.fondationbackupspirituel.com"); // konekte Socket.io ak serve api
+const API = "https://api.fondationbackupspirituel.com";
 
-const agentSelect = document.getElementById("agentSelect");
+const select = document.getElementById("agentSelect");
+const emailEl = document.getElementById("email");
+const statusEl = document.getElementById("status");
+const balanceEl = document.getElementById("balance");
+const bonusEl = document.getElementById("bonus");
+const lastActionEl = document.getElementById("lastAction");
 
-// Chaje lis agent dinamikman depi API ou a
-fetch('https://api.fondationbackupspirituel.com/agents')
-  .then(res => res.json())
-  .then(agents => {
-    agents.forEach(agent => {
-      const option = document.createElement('option');
-      option.value = agent.email;
-      option.text = agent.fullName || agent.email;
-      agentSelect.appendChild(option);
-    });
+let agentsCache = [];
 
-    // Chwazi premye agent default
-    if(agents[0]) watchAgent(agents[0].email);
-  })
-  .catch(err => console.error("❌ Erè chaje agents:", err));
+// Charger agents surveillés
+async function loadAgents() {
+  const res = await fetch(`${API}/api/admin/surveillance-agents`);
+  agentsCache = await res.json();
 
-// Fonksyon pou chanje agent
-agentSelect.addEventListener('change', () => {
-  watchAgent(agentSelect.value);
-});
+  select.innerHTML = "";
 
-function watchAgent(email) {
-  socket.emit("watchAgent", email);
+  agentsCache.forEach(agent => {
+    const opt = document.createElement("option");
+    opt.value = agent.email;
+    opt.textContent = agent.email;
+    select.appendChild(opt);
+  });
+
+  if (agentsCache[0]) {
+    displayAgent(agentsCache[0].email);
+  }
 }
 
-socket.on("agentUpdate", (agent) => {
-  document.getElementById("agentEmail").innerText = agent.email;
-  document.getElementById("agentStatus").innerText = agent.accountStatus;
-  document.getElementById("agentBalance").innerText = agent.balance;
-  document.getElementById("agentBonus").innerText = agent.bonus;
-  document.getElementById("lastAction").innerText = agent.lastAction || "—";
+function displayAgent(email) {
+  const agent = agentsCache.find(a => a.email === email);
+  if (!agent) return;
+
+  emailEl.textContent = agent.email;
+  statusEl.textContent = agent.accountStatus;
+  balanceEl.textContent = agent.balance;
+  bonusEl.textContent = agent.bonus;
+  lastActionEl.textContent = agent.lastAction || "—";
+}
+
+select.addEventListener("change", () => {
+  displayAgent(select.value);
 });
 
-// Aksyon buttons yo
-function action(type) {
-  const email = agentSelect.value;
-  fetch(`https://api.fondationbackupspirituel.com/agent-action`, {
+async function sendAction(action) {
+  const email = select.value;
+  if (!email) return;
+
+  await fetch(`${API}/api/admin/agent-action`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email, type })
-  })
-  .catch(err => console.error("❌ Agent action error:", err));
+    body: JSON.stringify({ email, action })
+  });
+
+  await loadAgents(); // refresh immédiat
 }
 
-// Shortcut fonksyon pou chak bouton
-function blockAccount() { action("BLOCK_ACCOUNT"); }
-function unblockAccount() { action("UNBLOCK_ACCOUNT"); }
-function freezeBalance() { action("FREEZE_BALANCE"); }
-function unfreezeBalance() { action("UNFREEZE_BALANCE"); }
-function blockBonus() { action("BLOCK_BONUS"); }
-function unblockBonus() { action("UNBLOCK_BONUS"); }
+// Auto refresh toutes les 5 secondes
+setInterval(loadAgents, 5000);
+loadAgents();
