@@ -1700,9 +1700,6 @@ if (wallet.bonusBlocked === true && tx.type === 'bonus') {
 
 // ===================== SURVEILLANCE AGENT - WALLET FOBAS =====================
 
-// 📋 Get all Agents
-// ===================== SURVEILLANCE AGENT - WALLET FOBAS =====================
-
 // 📋 Get all Agents Autorise
 app.get("/agents", async (req, res) => {
   try {
@@ -1750,6 +1747,7 @@ app.post("/agent-action", async (req, res) => {
 
     agent.lastAction = type;
     await agent.save();
+	io.emit("agentUpdate", agent); 
 
     // Notify tout clients ki ap swiv agent la an tan reyèl
     io.emit("agentUpdate", agent);
