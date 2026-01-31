@@ -111,27 +111,42 @@ function addHistory(t) {
   const div = document.createElement("div");
   div.className = "item";
 
-  const dateStr = t.createdAt ? new Date(t.createdAt).toLocaleString("fr-HT", {
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit"
-  }) : "";
+  // ------------------------- Date formatting -------------------------
+  const dateStr = t.createdAt
+    ? new Date(t.createdAt).toLocaleString("fr-HT", {
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit"
+      })
+    : "";
 
-  // ------------------------- DEFINE transferDetails -------------------------
+  // ------------------------- Transfer details -------------------------
   let transferDetails = "";
 
   if (t.type === "transfer") {
-    if (t.senderEmail && t.receiverEmail) {
+    const isReceiver = t.senderEmail && t.email !== t.senderEmail;
+    const isSender = t.receiverEmail && t.email !== t.receiverEmail;
+
+    // Afichaj pou moun k ap resevwa
+    if (isReceiver && t.senderEmail) {
       transferDetails = `
         De : <b>${t.senderName || "—"}</b> (${t.senderEmail})<br>
+        Vers : <b>${t.receiverName || "—"}</b> (${t.email})
+      `;
+    }
+
+    // Afichaj pou moun k ap voye
+    if (isSender && t.receiverEmail) {
+      transferDetails = `
+        De : <b>${t.senderName || "—"}</b> (${t.email})<br>
         Vers : <b>${t.receiverName || "—"}</b> (${t.receiverEmail})
       `;
     }
 
-    // ✅ Ajoute komisyon Agent ak Frais Platfòm nan transferDetails
+    // ✅ Ajoute komisyon Agent ak Frais Platfòm si gen nan UI
     if (t.agentBonus) {
       transferDetails += `<br>✅ Bonus Agent: <b>${formatGourdes(t.agentBonus)}</b>`;
     }
@@ -140,15 +155,11 @@ function addHistory(t) {
     }
   }
 
-  // ------------------------- Afichaj frais 1% pou transfert -------------------------
+  // ------------------------- Frais 1% pou transfert -------------------------
   if (t.type === "fees") {
     transferDetails = `💸 Frais 1% sou transfert: <b>${formatGourdes(t.amount)}</b>`;
   }
 
-  // ------------------------- Autres transactions (deposit, bonus, withdraw) -------------------------
-  if (t.type === "deposit" || t.type === "withdraw" || t.type === "bonus") {
-    if (t.note) transferDetails = t.note;
-  }
   
   // ===============================================================
 
