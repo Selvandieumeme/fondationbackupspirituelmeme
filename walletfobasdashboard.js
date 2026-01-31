@@ -120,41 +120,30 @@ function addHistory(t) {
     second: "2-digit"
   }) : "";
 
-  // ================= AJOUT SÉCURISÉ (SANS IMPACT) =================
-  let transferDetails = "";
+  let details = "";
 
   if (t.type === "transfer") {
-    const isReceiver = t.senderEmail && t.email !== t.senderEmail;
-    const isSender = t.receiverEmail && t.email !== t.receiverEmail;
-
-    if (isReceiver && t.senderEmail) {
-      transferDetails = `
+    // Afichaj moun k ap voye ak moun k ap resevwa
+    if (t.senderEmail && t.receiverEmail) {
+      details = `
         De : <b>${t.senderName || "—"}</b> (${t.senderEmail})<br>
-        Vers : <b>${t.receiverName || "—"}</b> (${t.email})
-      `;
-    }
-
-    if (isSender && t.receiverEmail) {
-      transferDetails = `
-        De : <b>${t.senderName || "—"}</b> (${t.email})<br>
         Vers : <b>${t.receiverName || "—"}</b> (${t.receiverEmail})
       `;
     }
 
-    // ✅ Ajoute komisyon Agent ak Frais Platfòm si egziste
+    // ✅ Ajoute komisyon Agent ak Frais Platfòm nan UI sèlman
     if (t.agentBonus) {
-      transferDetails += `<br>✅ Bonus Agent: <b>${formatGourdes(t.agentBonus)}</b>`;
+      details += `<br>✅ Bonus Agent: <b>${formatGourdes(t.agentBonus)}</b>`;
     }
     if (t.platformBonus) {
-      transferDetails += `<br>💰 Frais Platfòm: <b>${formatGourdes(t.platformBonus)}</b>`;
+      details += `<br>💰 Frais Platfòm: <b>${formatGourdes(t.platformBonus)}</b>`;
     }
   }
 
-  // Afichaj pou frais 1%
+  // Afichaj frais 1% nan UI sèlman si t.type === "fees"
   if (t.type === "fees") {
-    transferDetails = `💸 Frais 1% sou transfert: <b>${formatGourdes(t.amount)}</b>`;
+    details = `💸 Frais 1% sou transfert: <b>${formatGourdes(t.amount)}</b>`;
   }
-
   
   // ===============================================================
 
