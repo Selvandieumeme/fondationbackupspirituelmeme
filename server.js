@@ -1418,10 +1418,6 @@ await Transaction.create({
   createdAt: new Date()
 });
 
-// 🔔 Notify UI pou frais
-notifyUpdate(feesTransaction);  // Ou ka modifye notifyUpdate pou li pran param spesifik si li bezwen
-
-
 
 
 	  
