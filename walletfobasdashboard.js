@@ -111,6 +111,7 @@ function addHistory(t) {
   const div = document.createElement("div");
   div.className = "item";
 
+  // ------------------------- Date formatting -------------------------
   const dateStr = t.createdAt
     ? new Date(t.createdAt).toLocaleString("fr-HT", {
         year: "numeric",
@@ -122,13 +123,14 @@ function addHistory(t) {
       })
     : "";
 
-  // ================= AJOUT SÉCURISÉ (SANS IMPACT) =================
+  // ------------------------- Transfer details -------------------------
   let transferDetails = "";
 
   if (t.type === "transfer") {
     const isReceiver = t.senderEmail && t.email !== t.senderEmail;
     const isSender = t.receiverEmail && t.email !== t.receiverEmail;
 
+    // Afichaj pou moun k ap resevwa
     if (isReceiver && t.senderEmail) {
       transferDetails = `
         De : <b>${t.senderName || "—"}</b> (${t.senderEmail})<br>
@@ -136,12 +138,26 @@ function addHistory(t) {
       `;
     }
 
+    // Afichaj pou moun k ap voye
     if (isSender && t.receiverEmail) {
       transferDetails = `
         De : <b>${t.senderName || "—"}</b> (${t.email})<br>
         Vers : <b>${t.receiverName || "—"}</b> (${t.receiverEmail})
       `;
     }
+
+    // ✅ Ajoute komisyon Agent ak Frais Platfòm si gen nan UI
+    if (t.agentBonus) {
+      transferDetails += `<br>✅ Bonus Agent: <b>${formatGourdes(t.agentBonus)}</b>`;
+    }
+    if (t.platformBonus) {
+      transferDetails += `<br>💰 Frais Platfòm: <b>${formatGourdes(t.platformBonus)}</b>`;
+    }
+  }
+
+  // ------------------------- Frais 1% pou transfert -------------------------
+  if (t.type === "fees") {
+    transferDetails = `💸 Frais 1% sou transfert: <b>${formatGourdes(t.amount)}</b>`;
   }
 
   
