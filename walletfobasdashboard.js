@@ -120,29 +120,34 @@ function addHistory(t) {
     second: "2-digit"
   }) : "";
 
-  let details = "";
+  // ------------------------- DEFINE transferDetails -------------------------
+  let transferDetails = "";
 
   if (t.type === "transfer") {
-    // Afichaj moun k ap voye ak moun k ap resevwa
     if (t.senderEmail && t.receiverEmail) {
-      details = `
+      transferDetails = `
         De : <b>${t.senderName || "—"}</b> (${t.senderEmail})<br>
         Vers : <b>${t.receiverName || "—"}</b> (${t.receiverEmail})
       `;
     }
 
-    // ✅ Ajoute komisyon Agent ak Frais Platfòm nan UI sèlman
+    // ✅ Ajoute komisyon Agent ak Frais Platfòm nan transferDetails
     if (t.agentBonus) {
-      details += `<br>✅ Bonus Agent: <b>${formatGourdes(t.agentBonus)}</b>`;
+      transferDetails += `<br>✅ Bonus Agent: <b>${formatGourdes(t.agentBonus)}</b>`;
     }
     if (t.platformBonus) {
-      details += `<br>💰 Frais Platfòm: <b>${formatGourdes(t.platformBonus)}</b>`;
+      transferDetails += `<br>💰 Frais Platfòm: <b>${formatGourdes(t.platformBonus)}</b>`;
     }
   }
 
-  // Afichaj frais 1% nan UI sèlman si t.type === "fees"
+  // ------------------------- Afichaj frais 1% pou transfert -------------------------
   if (t.type === "fees") {
-    details = `💸 Frais 1% sou transfert: <b>${formatGourdes(t.amount)}</b>`;
+    transferDetails = `💸 Frais 1% sou transfert: <b>${formatGourdes(t.amount)}</b>`;
+  }
+
+  // ------------------------- Autres transactions (deposit, bonus, withdraw) -------------------------
+  if (t.type === "deposit" || t.type === "withdraw" || t.type === "bonus") {
+    if (t.note) transferDetails = t.note;
   }
   
   // ===============================================================
