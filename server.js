@@ -1439,8 +1439,9 @@ await Transaction.create({
   type: "transfer",
   amount,
   senderEmail,
+  receiverEmail, // ✅ CHAMP KI MANKE A
   status: "ACTIVE",
-  agentBonus: 0.006 * amount,       // menm jan
+  agentBonus: 0.006 * amount,
   platformBonus: 0.004 * amount,
   createdAt: new Date()
 });
