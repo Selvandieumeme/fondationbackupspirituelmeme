@@ -1426,10 +1426,13 @@ await Transaction.create({
   email: senderEmail,
   type: "transfer",
   amount,
+  senderEmail,
   receiverEmail,
+  senderName: senderUser?.fullName || senderEmail,
+  receiverName: receiverUser?.fullName || receiverEmail,
   status: "ACTIVE",
-  agentBonus: 0.006 * amount,       // 0.60% pou agent
-  platformBonus: 0.004 * amount,    // 0.40% pou platfòm
+  agentBonus: 0.006 * amount,
+  platformBonus: 0.004 * amount,
   createdAt: new Date()
 });
 
