@@ -140,7 +140,22 @@ function addHistory(t) {
         Vers : <b>${t.receiverName || "—"}</b> (${t.receiverEmail})
       `;
     }
+
+    // ✅ Ajoute komisyon Agent ak Frais Platfòm si egziste
+    if (t.agentBonus) {
+      transferDetails += `<br>✅ Bonus Agent: <b>${formatGourdes(t.agentBonus)}</b>`;
+    }
+    if (t.platformBonus) {
+      transferDetails += `<br>💰 Frais Platfòm: <b>${formatGourdes(t.platformBonus)}</b>`;
+    }
   }
+
+  // Afichaj pou frais 1%
+  if (t.type === "fees") {
+    transferDetails = `💸 Frais 1% sou transfert: <b>${formatGourdes(t.amount)}</b>`;
+  }
+
+  
   // ===============================================================
 
   div.innerHTML = `
