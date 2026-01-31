@@ -1439,7 +1439,9 @@ await Transaction.create({
   type: "transfer",
   amount,
   senderEmail,
-  receiverEmail, // ✅ CHAMP KI MANKE A
+  receiverEmail,
+  senderName: senderUser?.fullName || senderEmail,
+  receiverName: receiverUser?.fullName || receiverEmail,
   status: "ACTIVE",
   agentBonus: 0.006 * amount,
   platformBonus: 0.004 * amount,
