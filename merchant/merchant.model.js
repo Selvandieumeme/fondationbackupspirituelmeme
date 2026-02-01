@@ -1,13 +1,20 @@
 const mongoose = require('mongoose');
 
 const merchantSchema = new mongoose.Schema({
-  businessName: String,
-  ownerName: String,
-  email: { type: String, unique: true },
-  phone: String,
+  fullName: { type: String, required: true },       // Non pwopriyetè a
+  email: { type: String, required: true, unique: true },
+  passwordHash: { type: String, required: true },   // Hashe password
 
-  merchantId: { type: String, unique: true },
-  apiKey: { type: String, unique: true },
+  business: { type: String, required: true },      // Non biznis
+  address: { type: String, required: true },
+  whatsapp: { type: String, required: true },
+  businessType: { type: String, required: true },  // Commerce / Service / Autre
+  birthDate: { type: Date, required: true },
+  cin: { type: String, required: true },           // Nimewo CIN
+  cinFilePath: { type: String },                   // Path fichye CIN si upload
+
+  merchantId: { type: String, unique: true },      // Si w vle jenere ID otomatik
+  apiKey: { type: String, unique: true },          // Si w bezwen API key
 
   subscriptionStatus: {
     type: String,
@@ -26,4 +33,4 @@ const merchantSchema = new mongoose.Schema({
   }
 });
 
-module.exports = mongoose.model('merchants', merchantSchema);
+module.exports = mongoose.model('merchantusers', merchantSchema);
