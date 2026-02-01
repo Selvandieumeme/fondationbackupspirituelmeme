@@ -1,0 +1,135 @@
+/* ===== GLOBAL ===== */
+* {
+  box-sizing: border-box;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+body {
+  margin: 0;
+  background: linear-gradient(135deg, #0056b3, #ffffff);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+}
+
+/* ===== CONTAINER ===== */
+.box {
+  background: #ffffff;
+  padding: 30px;
+  width: 360px;
+  border-radius: 16px;
+  text-align: center;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+  transition: transform 0.3s ease;
+}
+
+.box:hover {
+  transform: translateY(-5px);
+}
+
+/* ===== HEADINGS ===== */
+h1 {
+  color: #f4c300; /* Jaune FOBAS */
+  font-size: 38px;
+  margin: 0 0 8px 0;
+}
+
+h2 {
+  color: #0056b3; /* Bleue FOBAS */
+  font-size: 20px;
+  margin-bottom: 20px;
+}
+
+/* ===== FORM CHAMPS ===== */
+form input, form select, form button, form label {
+  width: 100%;
+  display: block;
+  margin-bottom: 14px;
+  font-size: 15px;
+}
+
+input, select {
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  transition: border 0.2s ease, box-shadow 0.2s ease;
+}
+
+input:focus, select:focus {
+  outline: none;
+  border-color: #0056b3;
+  box-shadow: 0 0 5px rgba(0, 86, 179, 0.3);
+}
+
+/* ===== LABELS ===== */
+label {
+  font-size: 13px;
+  color: #333;
+  margin-bottom: 4px;
+  text-align: left;
+  display: block;
+}
+
+/* ===== BUTTONS ===== */
+button {
+  padding: 12px;
+  background: linear-gradient(135deg, #f4c300, #ffd84d); /* Jaune FOBAS */
+  border: none;
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
+  color: #003366;
+  transition: transform 0.2s ease, background 0.3s ease;
+}
+
+button:hover {
+  transform: scale(1.03);
+  background: linear-gradient(135deg, #ffd84d, #f4c300);
+}
+
+/* ===== MESSAGE ===== */
+#msg {
+  margin-top: 12px;
+  font-weight: bold;
+  font-size: 14px;
+}
+
+/* ===== FILE INPUT ===== */
+input[type="file"] {
+  padding: 6px;
+  border: 1px dashed #0056b3;
+  background: #fefefe;
+  cursor: pointer;
+}
+
+input[type="file"]:hover {
+  border-color: #f4c300;
+}
+
+/* ===== SELECT ===== */
+select {
+  background: #fff;
+  color: #333;
+}
+
+/* ===== RESPONSIVE ===== */
+@media screen and (max-width: 400px) {
+  .box {
+    width: 90%;
+    padding: 20px;
+  }
+  h1 { font-size: 32px; }
+  h2 { font-size: 18px; }
+  input, select, button { font-size: 14px; padding: 10px; }
+}
+
+/* ===== FOCUS STATES ===== */
+input:focus, select:focus, button:focus {
+  outline: none;
+}
+
+/* ===== SUBTLE SHADOWS ===== */
+input, select {
+  box-shadow: inset 0 2px 5px rgba(0,0,0,0.05);
+}
