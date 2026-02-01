@@ -4,6 +4,20 @@
 <meta charset="UTF-8">
 <title>Devenir Commerçant FOBAS</title>
 <link rel="stylesheet" href="devenircommercantfobas.css">
+<style>
+  /* Style senp pou ti zye toggle yo */
+  .password-field {
+    position: relative;
+  }
+  .password-field .toggle-password {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    font-size: 1.2em;
+  }
+</style>
 </head>
 <body>
 
@@ -15,9 +29,20 @@
     <input type="text" id="business" placeholder="Nom du business" required>
     <input type="text" id="ownerName" placeholder="Nom / Prénom du propriétaire" required>
     <input type="email" id="email" placeholder="Email professionnel" required>
-    <input type="password" id="password" placeholder="Mot de passe simple" required>
 
-    <!-- Nouvo champs -->
+    <!-- Password avec toggle -->
+    <div class="password-field">
+      <input type="password" id="password" placeholder="Mot de passe" required>
+      <span class="toggle-password">👁️</span>
+    </div>
+
+    <!-- Confirm password -->
+    <div class="password-field">
+      <input type="password" id="confirmPassword" placeholder="Confirmer Mot de passe" required>
+      <span class="toggle-password">👁️</span>
+    </div>
+
+    <!-- Nouvo champs deja egziste yo -->
     <input type="text" id="cin" placeholder="Numéro CIN" required>
     <input type="text" id="whatsapp" placeholder="WhatsApp du business" required>
     <input type="text" id="address" placeholder="Adresse du business" required>
@@ -41,6 +66,83 @@
   <p id="msg"></p>
 </div>
 
-<script src="devenircommercantfobas.js"></script>
+<script>
+  // Toggle pour tous les champs password
+  document.querySelectorAll(".toggle-password").forEach(span => {
+    span.addEventListener("click", () => {
+      const input = span.previousElementSibling;
+      input.type = input.type === "password" ? "text" : "password";
+    });
+  });
+
+  // Gestion submit
+  document.getElementById("registerForm").addEventListener("submit", async e => {
+    e.preventDefault();
+
+    const ownerName = document.getElementById("ownerName").value;
+    const business = document.getElementById("business").value;
+    const email = document.getElementById("email").value;
+    const password = document.getElementById("password").value;
+    const confirmPassword = document.getElementById("confirmPassword").value;
+    const cin = document.getElementById("cin").value;
+    const cinFile = document.getElementById("cinFile").files[0];
+    const whatsapp = document.getElementById("whatsapp").value;
+    const address = document.getElementById("address").value;
+    const businessType = document.getElementById("businessType").value;
+    const birthDate = document.getElementById("birthDate").value;
+
+    const msg = document.getElementById("msg");
+    msg.style.color = "#0056b3";
+    msg.innerText = "Traitement en cours...";
+
+    if(!cinFile){
+      msg.style.color="red";
+      msg.innerText="Veuillez uploader votre carte CIN.";
+      return;
+    }
+
+    if(password !== confirmPassword){
+      msg.style.color="red";
+      msg.innerText="Mot de passe et confirmation ne correspondent pas.";
+      return;
+    }
+
+    try {
+      const formData = {
+        fullName: ownerName,
+        email,
+        password,
+        business,
+        address,
+        whatsapp,
+        businessType,
+        birthDate,
+        cin
+      };
+
+      const response = await fetch("https://api.fondationbackupspirituel.com/merchant/register", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify(formData)
+      });
+
+      const result = await response.json();
+
+      if(result.success){
+        msg.style.color="green";
+        msg.innerText="Compte créé avec succès ✔️";
+        setTimeout(()=> window.location.href="merchantloginfobas.html", 1200);
+      } else {
+        msg.style.color="red";
+        msg.innerText=result.message || "Erreur création compte";
+      }
+    } catch(err){
+      msg.style.color="red";
+      msg.innerText="Erreur serveur, réessayez plus tard.";
+      console.error(err);
+    }
+  });
+</script>
+
 </body>
 </html>
