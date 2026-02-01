@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Devenir Commerçant FOBAS</title>
+<link rel="stylesheet" href="devenircommercantfobas.css">
+</head>
+<body>
+
+<div class="box">
+  <h1>FOBAS</h1>
+  <h2>Devenir Commerçant</h2>
+
+  <form id="registerForm">
+    <input type="text" id="business" placeholder="Nom du business" required>
+    <input type="text" id="ownerName" placeholder="Nom / Prénom du propriétaire" required>
+    <input type="email" id="email" placeholder="Email professionnel" required>
+    <input type="password" id="password" placeholder="Mot de passe simple" required>
+
+    <!-- Nouvo champs -->
+    <input type="text" id="cin" placeholder="Numéro CIN" required>
+    <input type="text" id="whatsapp" placeholder="WhatsApp du business" required>
+    <input type="text" id="address" placeholder="Adresse du business" required>
+    
+    <select id="businessType" required>
+      <option value="">-- Type de business --</option>
+      <option value="commerce">Commerce</option>
+      <option value="service">Service</option>
+      <option value="autre">Autre</option>
+    </select>
+
+    <input type="date" id="birthDate" placeholder="Date de naissance propriétaire" required>
+    
+    <!-- Upload CIN -->
+    <label for="cinFile">Upload Carte d'identité (CIN)</label>
+    <input type="file" id="cinFile" accept="image/*" required>
+
+    <button type="submit">Créer mon compte</button>
+  </form>
+
+  <p id="msg"></p>
+</div>
+
+<script src="devenircommercantfobas.js"></script>
+</body>
+</html>
