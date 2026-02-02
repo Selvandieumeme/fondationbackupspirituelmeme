@@ -142,4 +142,39 @@ router.post('/login', async (req, res) => {
 
 
 
+
+
+
+
+// nan merchant.routes.js
+router.get('/dashboard', async (req, res) => {
+  try {
+    const { email } = req.query;
+    if (!email) {
+      return res.status(400).json({ success: false, message: "Email manke" });
+    }
+
+    const merchant = await MerchantUser.findOne({ email });
+    if (!merchant) {
+      return res.status(404).json({ success: false, message: "Commerçant pa egziste" });
+    }
+
+    // Si balance/payments pa egziste, kreye default
+    const balance = merchant.balance !== undefined ? merchant.balance : 0;
+    const payments = Array.isArray(merchant.payments) ? merchant.payments : [];
+
+    return res.json({
+      success: true,
+      balance,
+      payments,
+      fullName: merchant.fullName
+    });
+
+  } catch (err) {
+    console.error("DASHBOARD MERCHANT ERROR:", err);
+    return res.status(500).json({ success: false, message: "Erreur serveur dashboard" });
+  }
+});
+
+
 module.exports = router;
