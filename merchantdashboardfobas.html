@@ -17,10 +17,17 @@
   <div class="card">📥 Paiements<br><strong id="payments">0</strong></div>
 </div>
 
+<!-- Blòk pou jenere QR kòrèk, san doub -->
 <div class="actions">
   <input type="number" id="amountInput" placeholder="Antre montant HTG" min="0.01" step="0.01">
+  
+  <!-- Input kache pou email merchant -->
+  <input type="hidden" id="merchantEmail" value="">
+  
   <button onclick="generateQR()">Recevoir Paiement</button>
 </div>
+
+<div id="qr"></div>
 
 <div id="transferSection">
   <h3>Transfert Lajan sou Merchant</h3>
@@ -28,8 +35,6 @@
   <button id="transferBtn">Transfere lajan</button>
   <div id="transferMsg"></div>
 </div>
-
-<div id="qr"></div>
 
 <p id="msg"></p>
 
@@ -74,10 +79,19 @@ loadDashboard();
 async function generateQR() {
   const qrDiv = document.getElementById("qr");
   const amountInput = document.getElementById("amountInput");
-  const amount = parseFloat(amountInput.value);
+  const merchantEmail = document.getElementById("merchantEmail").value;
+
+  const amount = parseFloat((amountInput.value || "").trim().replace(",", "."));
+
+  if (!merchantEmail) {
+    alert("Tanpri antre email merchant la.");
+    qrDiv.innerHTML = "";
+    return;
+  }
 
   if (isNaN(amount) || amount <= 0) {
     alert("Montant invalide. Tanpri antre yon kantite valab.");
+    qrDiv.innerHTML = "";
     return;
   }
 
@@ -85,9 +99,11 @@ async function generateQR() {
 
   try {
     const res = await fetch(
-      `/merchant/generate-qr?email=${merchantEmail}&amount=${amount}`
+      `/merchant/generate-qr?email=${encodeURIComponent(merchantEmail)}&amount=${amount}`
     );
     const data = await res.json();
+
+    console.log("QR Data Received:", data);
 
     if (data.success) {
       qrDiv.innerHTML = `<h3>QR Paiement HTG</h3><img src="${data.qrUrl}" alt="QR Code HTG">`;
