@@ -1,21 +1,24 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="UTF-8">
-<title>Login Commerçant FOBAS</title>
-<link rel="stylesheet" href="devenircommercantfobas.css">
+  <meta charset="UTF-8">
+  <title>Connexion Commerçant FOBAS</title>
+  <link rel="stylesheet" href="devenircommercantfobas.css">
 </head>
 <body>
 
 <div class="box">
   <h1>FOBAS</h1>
-  <h2>Connexion</h2>
+  <h2>Connexion Commerçant</h2>
 
   <input id="email" type="email" placeholder="Email" required>
-  
+
   <div style="position:relative;">
     <input id="password" type="password" placeholder="Mot de passe" required>
-    <span class="toggle-password" style="position:absolute;right:10px;top:10px;cursor:pointer;">👁️</span>
+    <span id="togglePassword"
+          style="position:absolute;right:10px;top:10px;cursor:pointer;">
+      👁️
+    </span>
   </div>
 
   <button id="loginBtn">Connexion</button>
@@ -23,60 +26,7 @@
   <p id="msg"></p>
 </div>
 
-<script>
-const toggle = document.querySelector(".toggle-password");
-const passwordInput = document.getElementById("password");
-
-toggle.addEventListener("click", () => {
-  passwordInput.type = passwordInput.type === "password" ? "text" : "password";
-});
-
-document.getElementById("loginBtn").addEventListener("click", async () => {
-  const email = document.getElementById("email").value.trim();
-  const password = document.getElementById("password").value;
-  const msg = document.getElementById("msg");
-
-  if (!email || !password) {
-    msg.style.color = "red";
-    msg.innerText = "Veuillez remplir tous les champs.";
-    return;
-  }
-
-  msg.style.color = "#0056b3";
-  msg.innerText = "Connexion en cours...";
-
-  try {
-    const response = await fetch("/merchant/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password })
-    });
-
-    const result = await response.json();
-
-    if (result.success) {
-      localStorage.setItem("merchantLogged", "true");
-      localStorage.setItem("merchantEmail", email);
-
-      msg.style.color = "green";
-      msg.innerText = "Connexion réussie ✔️";
-
-      setTimeout(() => {
-        window.location.href = "merchantdashboardfobas.html";
-      }, 800);
-
-    } else {
-      msg.style.color = "red";
-      msg.innerText = result.message || "Identifiants incorrects";
-    }
-
-  } catch (err) {
-    console.error("LOGIN MERCHANT ERROR:", err);
-    msg.style.color = "red";
-    msg.innerText = "Erreur serveur, réessayez plus tard.";
-  }
-});
-</script>
-
+<!-- JS SEPARÉ -->
+<script src="merchantloginfobas.js"></script>
 </body>
 </html>
