@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Dashboard Commerçant FOBAS</title>
+<link rel="stylesheet" href="merchantdashboardfobas.css">
+</head>
+<body>
+
+<header>
+  <h1>FOBAS</h1>
+  <button onclick="logout()">Déconnexion</button>
+</header>
+
+<div class="stats">
+  <div class="card">💰 Solde<br><strong>0.00 FOBAS</strong></div>
+  <div class="card">📥 Paiements<br><strong>0</strong></div>
+</div>
+
+<div class="actions">
+  <button onclick="generateQR()">Recevoir Paiement</button>
+</div>
+
+<div id="qr"></div>
+
+<script src="merchantdashboardfobas.js"></script>
+</body>
+</html>
