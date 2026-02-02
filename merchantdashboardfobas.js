@@ -20,7 +20,7 @@ async function loadDashboard() {
 
     if (data.success) {
       document.getElementById("balance").innerText =
-        Number(data.balance || 0).toFixed(2) + " FOBAS";
+        Number(data.balance || 0).toFixed(2) + " HTG";
 
       document.getElementById("payments").innerText =
         Array.isArray(data.payments) ? data.payments.length : 0;
