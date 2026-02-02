@@ -79,7 +79,16 @@ app.use('/merchant', merchantRoutes);
 
 
 
+// ----------------------- ROUTE TRANSFERT WALLET ➜ MERCHANT -----------------------
 const walletToMerchantRoutes = require("./routes/walletToMerchant");
+app.use('/wallet', walletToMerchantRoutes);   // <-- sa pèmèt POST /wallet/transfer-to-merchant
+
+
+
+
+
+
+
 
 
 /**
