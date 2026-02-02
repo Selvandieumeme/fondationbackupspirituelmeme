@@ -185,12 +185,12 @@ router.get('/dashboard', async (req, res) => {
 // ========================
 router.get('/generate-qr', async (req, res) => {
   try {
-    const { email } = req.query;
+    const { email, amount } = req.query;
 
-    if (!email) {
+    if (!email || !amount || Number(amount) <= 0) {
       return res.status(400).json({
         success: false,
-        message: "Email manke"
+        message: "Email ou montant invalide"
       });
     }
 
@@ -202,9 +202,15 @@ router.get('/generate-qr', async (req, res) => {
       });
     }
 
-    // ⚠️ Pou kounye a: QR statik / mock (pa kraze sistèm nan)
-    // Ou ka ranplase pita ak vrai QR (qrcode, paiement, elatriye)
-    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=FOBAS-MERCHANT-${merchant.email}`;
+    const payload = JSON.stringify({
+      merchantEmail: merchant.email,
+      amount: Number(amount),
+      currency: "HTG", // ✅ GOURDES
+      reference: "TX-" + Date.now()
+    });
+
+    const qrUrl =
+      `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(payload)}`;
 
     return res.json({
       success: true,
