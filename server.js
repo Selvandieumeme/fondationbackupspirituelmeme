@@ -1961,6 +1961,65 @@ app.post("/api/wallet/login", async (req, res) => {
 
 
 
+// ----------------------- LOGIN MERCHANT FOBAS -----------------------
+app.post("/merchant/login", async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    if (!email || !password) {
+      return res.status(400).json({
+        success: false,
+        message: "Tout chan obligatwa."
+      });
+    }
+
+    const merchant = await MerchantUser.findOne({ email });
+    if (!merchant) {
+      return res.status(404).json({
+        success: false,
+        message: "Commerçant pa egziste."
+      });
+    }
+
+    if (merchant.status !== "ACTIVE") {
+      return res.status(403).json({
+        success: false,
+        message: "Compte commerçant non actif."
+      });
+    }
+
+    const isMatch = await bcryptjs.compare(password, merchant.passwordHash);
+    if (!isMatch) {
+      return res.status(401).json({
+        success: false,
+        message: "Mot de passe incorrect."
+      });
+    }
+
+    return res.json({
+      success: true,
+      message: "Connexion commerçant réussie ✔️",
+      data: {
+        fullName: merchant.fullName,
+        email: merchant.email,
+        status: merchant.status,
+        createdAt: merchant.createdAt
+      }
+    });
+
+  } catch (err) {
+    console.error("MERCHANT LOGIN ERROR:", err);
+    res.status(500).json({
+      success: false,
+      message: "Erreur serveur connexion commerçant"
+    });
+  }
+});
+
+
+
+
+
 
 
 
