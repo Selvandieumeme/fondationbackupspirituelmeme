@@ -32,6 +32,17 @@ const merchantUserSchema = new mongoose.Schema({
     type: String,
     trim: true
   },
+  
+  balance: {
+    type: Number,
+    default: 0
+  },
+
+  payments: {
+    type: Array,
+    default: []
+  },
+
   createdAt: {
     type: Date,
     default: Date.now
