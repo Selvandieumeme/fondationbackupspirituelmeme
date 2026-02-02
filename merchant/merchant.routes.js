@@ -111,9 +111,12 @@ router.post('/login', async (req, res) => {
       return res.status(404).json({ success: false, message: "Commerçant pa egziste." });
     }
 
-    if (merchant.status !== "ACTIVE") {
-      return res.status(403).json({ success: false, message: "Compte commerçant non actif." });
-    }
+    if (merchant.status !== "active") {
+  return res.status(403).json({
+    success: false,
+    message: "Compte commerçant non actif."
+  });
+}
 
     const isMatch = await bcryptjs.compare(password, merchant.passwordHash);
     if (!isMatch) {
