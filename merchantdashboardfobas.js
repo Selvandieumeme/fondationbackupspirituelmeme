@@ -45,7 +45,15 @@ loadDashboard();
 async function generateQR() {
   const qrDiv = document.getElementById("qr");
   const amountInput = document.getElementById("amountInput");
+  const merchantEmailInput = document.getElementById("merchantEmail");
+
+  const merchantEmail = merchantEmailInput.value; // Pran email soti nan input hidden
   const amount = parseFloat(amountInput.value);
+
+  if (!merchantEmail) {
+    alert("Tanpri antre email merchant la.");
+    return;
+  }
 
   if (isNaN(amount) || amount <= 0) {
     alert("Montant invalide. Tanpri antre yon kantite valab.");
@@ -56,7 +64,7 @@ async function generateQR() {
 
   try {
     const res = await fetch(
-      `https://api.fondationbackupspirituel.com/merchant/generate-qr?email=${merchantEmail}&amount=${amount}`
+      `https://api.fondationbackupspirituel.com/merchant/generate-qr?email=${encodeURIComponent(merchantEmail)}&amount=${amount}`
     );
 
     const data = await res.json();
