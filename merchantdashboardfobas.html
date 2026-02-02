@@ -243,10 +243,13 @@ async function generateAbonnementQR(){
   }
 }
 
-
-
-
-
+// 🔹 LOGOUT
+function logout(){
+  localStorage.removeItem("merchantConnected");
+  localStorage.removeItem("merchantEmail");
+  window.location.href = "merchantloginfobas.html";
+}
+</script>
 
 
 
@@ -311,18 +314,5 @@ async function generateProductQR(productNum) {
   }
 }
 </script>
-
-   
-
-
-   
-// 🔹 LOGOUT
-function logout(){
-  localStorage.removeItem("merchantConnected");
-  localStorage.removeItem("merchantEmail");
-  window.location.href = "merchantloginfobas.html";
-}
-</script>
-
 </body>
 </html>
