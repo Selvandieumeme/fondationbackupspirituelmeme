@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Login Commerçant FOBAS</title>
+<link rel="stylesheet" href="devenircommercantfobas.css">
+</head>
+<body>
+
+<div class="box">
+<h1>FOBAS</h1>
+<h2>Connexion</h2>
+
+<input id="email" placeholder="Email">
+<input id="password" type="password" placeholder="Mot de passe">
+<button onclick="login()">Connexion</button>
+
+<p id="msg"></p>
+</div>
+
+<script>
+function login(){
+  const saved=JSON.parse(localStorage.getItem("merchantAuth"));
+  if(!saved){msg.innerText="Aucun compte";return;}
+
+  if(email.value===saved.email && password.value===saved.password){
+    localStorage.setItem("merchantLogged", "true");
+    window.location.href="merchantdashboardfobas.html";
+  }else{
+    msg.innerText="Identifiants incorrects";
+  }
+}
+</script>
+
+</body>
+</html>
