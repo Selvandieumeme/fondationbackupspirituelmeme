@@ -243,18 +243,8 @@ async function generateAbonnementQR(){
   }
 }
 
-// 🔹 LOGOUT
-function logout(){
-  localStorage.removeItem("merchantConnected");
-  localStorage.removeItem("merchantEmail");
-  window.location.href = "merchantloginfobas.html";
-}
-</script>
 
 
-
-
-<script>
 // 🔹 GENERATE PRODUIT QR DYNAMIQUE AVEC TOUS LES CHAMPS
 async function generateProductQR(productNum) {
   const email = localStorage.getItem("merchantEmail");
@@ -313,6 +303,19 @@ async function generateProductQR(productNum) {
     qrDiv.innerText = "Erreur serveur QR Produit";
   }
 }
+
+       
+// 🔹 LOGOUT
+function logout(){
+  localStorage.removeItem("merchantConnected");
+  localStorage.removeItem("merchantEmail");
+  window.location.href = "merchantloginfobas.html";
+}
 </script>
+
+
+
+
+
 </body>
 </html>
