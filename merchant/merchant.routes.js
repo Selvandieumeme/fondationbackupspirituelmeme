@@ -66,18 +66,17 @@ router.post('/register', upload.single('cinFile'), async (req, res) => {
     const passwordHash = await bcryptjs.hash(password, 12);
 
     const merchant = new MerchantUser({
-      fullName,
-      email,
-      passwordHash,
-      business,
-      address,
-      whatsapp,
-      businessType,
-      birthDate,
-      cin,
-      cinFilePath: req.file ? req.file.path : null,
-      status: "ACTIVE"
-    });
+  fullName,
+  email,
+  passwordHash,
+
+  phone: whatsapp,        // whatsapp ➜ phone
+  storeName: business,    // business ➜ storeName
+  storeAddress: address, // address ➜ storeAddress
+
+  status: "active",
+  createdAt: new Date()
+});
 
     await merchant.save();
 
