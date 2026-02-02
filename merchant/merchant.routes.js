@@ -185,10 +185,11 @@ router.get('/dashboard', async (req, res) => {
 // ========================
 // 📷 GENERATE QR PAIEMENT
 // ========================
-router.get('/generate-qr', async (req, res) => {
+router.get("/generate-qr", async (req, res) => {
   try {
-    const userEmail = email;
+    const { email, amount } = req.query;
 
+    // ✅ Vérification paramètres
     if (!email || !amount || Number(amount) <= 0) {
       return res.status(400).json({
         success: false,
@@ -196,18 +197,27 @@ router.get('/generate-qr', async (req, res) => {
       });
     }
 
-    const walletUser = await WalletBalance.findOne({ email: userEmail });
-   
+    // ✅ Vérifier que le merchant existe
+    const merchant = await MerchantUser.findOne({ email });
+    if (!merchant) {
+      return res.status(404).json({
+        success: false,
+        message: "Commerçant introuvable"
+      });
+    }
 
+    // ✅ Payload QR (simple & valide)
     const payload = JSON.stringify({
       merchantEmail: merchant.email,
       amount: Number(amount),
-      currency: "HTG", // ✅ GOURDES
+      currency: "HTG",
       reference: "TX-" + Date.now()
     });
 
+    // ✅ Génération QR
     const qrUrl =
-      `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(payload)}`;
+      "https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=" +
+      encodeURIComponent(payload);
 
     return res.json({
       success: true,
