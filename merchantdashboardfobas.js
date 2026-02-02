@@ -1,10 +1,10 @@
 // ==========================
 // 🔐 Vérification accès dashboard
 // ==========================
-const merchantLogged = localStorage.getItem("merchantLogged");
-const merchantEmail  = localStorage.getItem("merchantEmail");
+const merchantConnected = localStorage.getItem("merchantConnected");
+const merchantEmail     = localStorage.getItem("merchantEmail");
 
-if (merchantLogged !== "true" || !merchantEmail) {
+if (!merchantConnected || merchantConnected !== "true" || !merchantEmail) {
   window.location.href = "merchantloginfobas.html";
 }
 
@@ -20,7 +20,7 @@ async function loadDashboard() {
 
     if (data.success) {
       document.getElementById("balance").innerText =
-        Number(data.balance).toFixed(2) + " FOBAS";
+        Number(data.balance || 0).toFixed(2) + " FOBAS";
 
       document.getElementById("payments").innerText =
         Array.isArray(data.payments) ? data.payments.length : 0;
@@ -71,7 +71,7 @@ async function generateQR() {
 // 🚪 Déconnexion
 // ==========================
 function logout() {
-  localStorage.removeItem("merchantLogged");
+  localStorage.removeItem("merchantConnected");
   localStorage.removeItem("merchantEmail");
   window.location.href = "merchantloginfobas.html";
 }
