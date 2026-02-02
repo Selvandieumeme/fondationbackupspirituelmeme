@@ -27,10 +27,15 @@ const merchantSchema = new mongoose.Schema({
     default: 0.02 // 2% par transaction
   },
 
+  // ✅ Chan pou dashboard (rezoud mesaj "Erreur serveur")
+  balance: { type: Number, default: 0 },
+  payments: { type: Array, default: [] },
+
   createdAt: {
     type: Date,
     default: Date.now
   }
 });
 
+// 🔹 Export model la san kraze okenn chan ki egziste deja
 module.exports = mongoose.model('merchantusers', merchantSchema);
