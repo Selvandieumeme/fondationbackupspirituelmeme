@@ -1,3 +1,4 @@
+// ----------------------- MERCHANT USERS SCHEMA -----------------------
 const mongoose = require('mongoose');
 
 const merchantSchema = new mongoose.Schema({
@@ -13,8 +14,8 @@ const merchantSchema = new mongoose.Schema({
   cin: { type: String, required: true },           // Nimewo CIN
   cinFilePath: { type: String },                   // Path fichye CIN si upload
 
-  merchantId: { type: String, unique: true },      // Si w vle jenere ID otomatik
-  apiKey: { type: String, unique: true },          // Si w bezwen API key
+  merchantId: { type: String, unique: true },      // ID otomatik si bezwen
+  apiKey: { type: String, unique: true },          // API key si bezwen
 
   subscriptionStatus: {
     type: String,
@@ -38,4 +39,47 @@ const merchantSchema = new mongoose.Schema({
 });
 
 // 🔹 Export model la san kraze okenn chan ki egziste deja
-module.exports = mongoose.model('merchantusers', merchantSchema);
+const MerchantUser = mongoose.models.MerchantUser || mongoose.model('merchantusers', merchantSchema);
+
+// ========================
+// 🔄 Migrasyon dokiman ki deja egziste
+// ========================
+// Fason pou mete default balance/payments pou dokiman ki pa gen yo
+async function migrateMerchantDefaults() {
+  try {
+    await mongoose.connect('mongodb://localhost:27017/walletfobas', {
+      useNewUrlParser: true,
+      useUnifiedTopology: true
+    });
+
+    const merchants = await MerchantUser.find({});
+    for (let merchant of merchants) {
+      let changed = false;
+
+      if (merchant.balance === undefined) {
+        merchant.balance = 0;
+        changed = true;
+      }
+
+      if (!Array.isArray(merchant.payments)) {
+        merchant.payments = [];
+        changed = true;
+      }
+
+      if (changed) {
+        await merchant.save();
+        console.log(`Dokiman ${merchant.email} mete default balance/payments`);
+      }
+    }
+
+    console.log("Migrate fini ✅");
+    mongoose.disconnect();
+  } catch (err) {
+    console.error("Migrasyon ERROR:", err);
+  }
+}
+
+// ✅ Opsyon: dekomante pou lanse migrasyon an
+// migrateMerchantDefaults();
+
+module.exports = MerchantUser;
