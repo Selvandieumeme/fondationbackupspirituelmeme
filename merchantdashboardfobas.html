@@ -1,6 +1,7 @@
 <!DOCTYPE html>
-<html>
+<html lang="fr">
 <head>
+<meta charset="UTF-8">
 <title>Dashboard Commerçant FOBAS</title>
 <link rel="stylesheet" href="merchantdashboardfobas.css">
 </head>
@@ -12,8 +13,8 @@
 </header>
 
 <div class="stats">
-  <div class="card">💰 Solde<br><strong>0.00 FOBAS</strong></div>
-  <div class="card">📥 Paiements<br><strong>0</strong></div>
+  <div class="card">💰 Solde<br><strong id="balance">0.00 FOBAS</strong></div>
+  <div class="card">📥 Paiements<br><strong id="payments">0</strong></div>
 </div>
 
 <div class="actions">
@@ -22,6 +23,73 @@
 
 <div id="qr"></div>
 
-<script src="merchantdashboardfobas.js"></script>
+<p id="msg"></p>
+
+<script>
+// ==========================
+// 🔹 Vérification login
+// ==========================
+const email = localStorage.getItem("merchantEmail");
+const logged = localStorage.getItem("merchantLogged");
+
+if(!logged || logged !== "true" || !email){
+  window.location.href = "merchantloginfobas.html";
+}
+
+// ==========================
+// 🔹 Charger les données du dashboard
+// ==========================
+async function loadDashboard(){
+  try {
+    const res = await fetch(`https://api.fondationbackupspirituel.com/merchant/dashboard?email=${email}`);
+    const data = await res.json();
+
+    if(data.success){
+      document.getElementById("balance").innerText = parseFloat(data.balance).toFixed(2) + " FOBAS";
+      document.getElementById("payments").innerText = data.payments.length;
+    } else {
+      document.getElementById("msg").innerText = data.message || "Erreur lors du chargement du dashboard";
+    }
+  } catch(err){
+    console.error("Erreur API dashboard:", err);
+    document.getElementById("msg").innerText = "Erreur serveur, réessayez plus tard.";
+  }
+}
+
+// Appel lè paj la chaje
+loadDashboard();
+
+// ==========================
+// 🔹 Génération QR Code
+// ==========================
+async function generateQR(){
+  const qrDiv = document.getElementById("qr");
+  qrDiv.innerHTML = "Génération en cours...";
+
+  try {
+    const res = await fetch(`https://api.fondationbackupspirituel.com/merchant/generate-qr?email=${email}`);
+    const data = await res.json();
+
+    if(data.success){
+      qrDiv.innerHTML = `<img src="${data.qrUrl}" alt="QR Code">`;
+    } else {
+      qrDiv.innerText = data.message || "Erreur génération QR Code";
+    }
+  } catch(err){
+    console.error("Erreur API QR:", err);
+    qrDiv.innerText = "Erreur serveur, réessayez plus tard.";
+  }
+}
+
+// ==========================
+// 🔹 Déconnexion
+// ==========================
+function logout(){
+  localStorage.removeItem("merchantLogged");
+  localStorage.removeItem("merchantEmail");
+  window.location.href = "merchantloginfobas.html";
+}
+</script>
+
 </body>
 </html>
