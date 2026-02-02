@@ -72,6 +72,67 @@ async function generateQR() {
   }
 }
 
+
+
+
+
+
+
+// ==========================
+// 💸 Transfert Wallet ➜ Merchant
+// ==========================
+document.getElementById("transferBtn").addEventListener("click", async () => {
+  const amountInput = document.getElementById("transferAmount");
+  const amount = parseFloat(amountInput.value);
+  const msgDiv = document.getElementById("transferMsg");
+
+  if (isNaN(amount) || amount <= 0) {
+    msgDiv.innerText = "Montant invalide. Tanpri antre yon kantite valab.";
+    return;
+  }
+
+  msgDiv.innerText = "Transfert en cours...";
+
+  try {
+    const res = await fetch(
+      `https://api.fondationbackupspirituel.com/wallet/transfer-to-merchant`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          email: merchantEmail, // kont merchant ou vle ajoute lajan
+          amount: amount
+        })
+      }
+    );
+
+    const data = await res.json();
+
+    if (data.success) {
+      msgDiv.innerText = `Transfert fini! Nouvo solde: ${data.newMerchantBalance.toFixed(2)} HTG`;
+      // Update solde dashboard imedyatman
+      document.getElementById("balance").innerText = data.newMerchantBalance.toFixed(2) + " HTG";
+      amountInput.value = "";
+    } else {
+      msgDiv.innerText = data.message || "Erè transfert";
+    }
+
+  } catch (err) {
+    console.error("TRANSFER ERROR:", err);
+    msgDiv.innerText = "Erè serveur, tanpri reessayez.";
+  }
+});
+
+
+
+
+
+
+
+
+
 // ==========================
 // 🚪 Déconnexion
 // ==========================
