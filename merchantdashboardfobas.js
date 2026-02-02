@@ -139,6 +139,30 @@ document.getElementById("transferBtn").addEventListener("click", async () => {
 
 
 
+  async function loadAbonnementQR() {
+  const email = localStorage.getItem("merchantEmail");
+  if (!email) {
+    alert("Email merchant pa jwenn nan localStorage");
+    return;
+  }
+
+  try {
+    const res = await fetch(`/merchant/generate-abonnement-qr?email=${encodeURIComponent(email)}`);
+    const data = await res.json();
+
+    if (data.success && data.qrs) {
+      document.getElementById("qrMonth").src = data.qrs.month;
+      document.getElementById("qrYear").src  = data.qrs.year;
+    } else {
+      alert(data.message || "Erreur génération QR abonnement");
+    }
+  } catch (err) {
+    console.error("LOAD ABONNEMENT QR ERROR:", err);
+    alert("Erreur serveur, réessayez plus tard.");
+  }
+}
+
+
 
 
 // ==========================
