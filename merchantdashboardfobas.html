@@ -4,6 +4,102 @@
 <meta charset="UTF-8">
 <title>Dashboard Commerçant FOBAS</title>
 <link rel="stylesheet" href="merchantdashboardfobas.css">
+<style>
+/* ======================
+   STYLING PROFESSIONNEL
+====================== */
+body {
+  font-family: 'Arial', sans-serif;
+  background: #f4f8fb;
+  color: #333;
+  margin: 0;
+  padding: 0;
+}
+header {
+  background: linear-gradient(90deg, #FFD700, #0033A0, #FFFFFF);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 30px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+header h1 {
+  margin: 0;
+  color: #0033A0;
+}
+header button {
+  padding: 8px 15px;
+  background: #FFD700;
+  border: none;
+  border-radius: 5px;
+  font-weight: bold;
+  cursor: pointer;
+  color: #0033A0;
+}
+.stats {
+  display: flex;
+  justify-content: space-around;
+  margin: 20px 0;
+}
+.card {
+  background: #fff;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  text-align: center;
+  width: 200px;
+  font-size: 18px;
+}
+.actions, #transferSection, #abonnementQRSection, #productsSection {
+  background: #fff;
+  margin: 15px auto;
+  padding: 20px;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 500px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+.actions input, .productCard input {
+  width: calc(100% - 12px);
+  padding: 6px;
+  margin: 5px 0 10px 0;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+}
+button {
+  padding: 8px 15px;
+  border: none;
+  border-radius: 6px;
+  background: #0033A0;
+  color: #fff;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.3s;
+}
+button:hover {
+  background: #FFD700;
+  color: #0033A0;
+}
+#qr img, #productQR1 img, #productQR2 img, #qrMonth, #qrYear {
+  margin-top: 10px;
+  max-width: 250px;
+  display: block;
+}
+.productCard {
+  background: #f9f9f9;
+  padding: 15px;
+  border-radius: 10px;
+  margin: 10px 0;
+  box-shadow: 0 1px 5px rgba(0,0,0,0.1);
+}
+.productCard p {
+  font-weight: bold;
+  color: #0033A0;
+}
+.productCard div {
+  margin-top: 5px;
+}
+</style>
 </head>
 <body>
 
@@ -17,16 +113,16 @@
   <div class="card">📥 Paiements<br><strong id="payments">0</strong></div>
 </div>
 
-<!-- Blòk pou jenere QR kòrèk, san doub -->
+<!-- GENERATE QR PAIEMENT -->
 <div class="actions">
+  <h3>Recevoir Paiement</h3>
   <input type="number" id="amountInput" placeholder="Antre montant HTG" min="0.01" step="0.01">
-  
-  <!-- Input kache pou email merchant -->
   <input type="hidden" id="merchantEmail" value="">
+  <button onclick="generateQR()">Générer QR Paiement</button>
+  <div id="qr"></div>
 </div>
 
-<div id="qr"></div>
-
+<!-- TRANSFERT WALLET -->
 <div id="transferSection">
   <h3>Transfert Lajan sou Merchant</h3>
   <input type="number" id="transferAmount" placeholder="Antre kantite HTG">
@@ -34,14 +130,9 @@
   <div id="transferMsg"></div>
 </div>
 
-
-
-<button onclick="loadAbonnementQR()">Chaje QR Abonnement</button>
-
-  
+<!-- ABONNEMENT QR -->
 <div id="abonnementQRSection">
   <h3>QR Abonnement Merchant</h3>
-  <button onclick="loadAbonnementQR()">Chaje QR</button>
   <div id="abonnementQRs">
     <div>
       <p>Abonnement /Mois (1000 HTG)</p>
@@ -52,31 +143,46 @@
       <img id="qrYear" src="" alt="QR Annee">
     </div>
   </div>
+  <button onclick="loadAbonnementQR()">Chaje QR Abonnement</button>
 </div>
 
-  
+<!-- PRODUITS DINAMIK -->
+<div id="productsSection">
+  <h3>Produits Merchant</h3>
+
+  <div class="productCard">
+    <p>Produit 1</p>
+    Nom: <input type="text" id="productName1" placeholder="Nom du produit"><br>
+    Prix HTG: <input type="number" id="productAmount1" placeholder="Prix HTG"><br>
+    <button onclick="generateProductQR(1)">Générer QR Produit 1</button>
+    <div id="productQR1"></div>
+  </div>
+
+  <div class="productCard">
+    <p>Produit 2</p>
+    Nom: <input type="text" id="productName2" placeholder="Nom du produit"><br>
+    Prix HTG: <input type="number" id="productAmount2" placeholder="Prix HTG"><br>
+    <button onclick="generateProductQR(2)">Générer QR Produit 2</button>
+    <div id="productQR2"></div>
+  </div>
+</div>
+
 <p id="msg"></p>
 
 <script>
-// ==========================
-// 🔹 Vérification login
-// ==========================
-  
+// 🔹 LOGIN CHECK
 const email = localStorage.getItem("merchantEmail");
-const connected = localStorage.getItem("merchantConnected"); // Sèl clé ki mete nan login
-
+const connected = localStorage.getItem("merchantConnected");
 if(!connected || connected !== "true" || !email){
   window.location.href = "merchantloginfobas.html";
 }
+document.getElementById("merchantEmail").value = email;
 
-// ==========================
-// 🔹 Charger les données du dashboard
-// ==========================
+// 🔹 LOAD DASHBOARD
 async function loadDashboard(){
   try {
     const res = await fetch(`https://api.fondationbackupspirituel.com/merchant/dashboard?email=${email}`);
     const data = await res.json();
-
     if(data.success){
       document.getElementById("balance").innerText = parseFloat(data.balance).toFixed(2) + " HTG";
       document.getElementById("payments").innerText = data.payments.length;
@@ -88,72 +194,80 @@ async function loadDashboard(){
     document.getElementById("msg").innerText = "Erreur serveur, réessayez plus tard.";
   }
 }
-
-// Appel lè paj la chaje
 loadDashboard();
 
-// ==========================
-// 🔹 Génération QR Code
-// ==========================
+// 🔹 GENERATE QR PAIEMENT
 async function generateQR() {
   const qrDiv = document.getElementById("qr");
   const amountInput = document.getElementById("amountInput");
   const merchantEmail = document.getElementById("merchantEmail").value;
-
   const amount = parseFloat((amountInput.value || "").trim().replace(",", "."));
-
-  if (!merchantEmail) {
-    alert("Tanpri antre email merchant la.");
+  if (!merchantEmail || isNaN(amount) || amount <= 0){
+    alert("Tanpri antre email ak kantite valab.");
     qrDiv.innerHTML = "";
     return;
   }
-
-  if (isNaN(amount) || amount <= 0) {
-    alert("Montant invalide. Tanpri antre yon kantite valab.");
-    qrDiv.innerHTML = "";
-    return;
-  }
-
   qrDiv.innerHTML = "Génération du QR en cours...";
-
   try {
-    const res = await fetch(
-      `https://api.fondationbackupspirituel.com/merchant/generate-qr?email=${encodeURIComponent(merchantEmail)}&amount=${amount}`
-    );
-
-    if (!res.ok) {
-      throw new Error("HTTP " + res.status);
-    }
-
+    const res = await fetch(`https://api.fondationbackupspirituel.com/merchant/generate-qr?email=${encodeURIComponent(merchantEmail)}&amount=${amount}`);
+    if(!res.ok) throw new Error("HTTP " + res.status);
     const data = await res.json();
-
-    if (data.success) {
-      qrDiv.innerHTML = `
-        <h3>QR Paiement HTG</h3>
-        <img src="${data.qrUrl}" alt="QR Code Paiement">
-      `;
-    } else {
-      qrDiv.innerText = data.message || "Erreur génération QR";
-    }
-
-  } catch (err) {
+    if(data.success) qrDiv.innerHTML = `<h3>QR Paiement HTG</h3><img src="${data.qrUrl}" alt="QR Code Paiement">`;
+    else qrDiv.innerText = data.message || "Erreur génération QR";
+  } catch(err){
     console.error("QR ERROR:", err);
     qrDiv.innerText = "Erreur serveur QR Code.";
   }
 }
 
-// ==========================
-// 🔹 Déconnexion
-// ==========================
+// 🔹 LOAD ABONNEMENT QR
+async function loadAbonnementQR() {
+  const email = localStorage.getItem("merchantEmail");
+  if(!email){ alert("Email merchant pa jwenn."); return; }
+  try {
+    const res = await fetch(`/merchant/generate-abonnement-qr?email=${encodeURIComponent(email)}`);
+    const data = await res.json();
+    if(data.success && data.qrs){
+      document.getElementById("qrMonth").src = data.qrs.month;
+      document.getElementById("qrYear").src = data.qrs.year;
+    } else alert(data.message || "Erreur génération QR abonnement");
+  } catch(err){
+    console.error("LOAD ABONNEMENT QR ERROR:", err);
+    alert("Erreur serveur, réessayez plus tard.");
+  }
+}
+
+// 🔹 GENERATE PRODUIT QR DYNAMIQUE
+async function generateProductQR(productNum){
+  const email = localStorage.getItem("merchantEmail");
+  const nameInput = document.getElementById("productName" + productNum);
+  const amountInput = document.getElementById("productAmount" + productNum);
+  const qrDiv = document.getElementById("productQR" + productNum);
+  const productName = nameInput.value.trim();
+  const amount = parseFloat(amountInput.value);
+  if(!productName || isNaN(amount) || amount <= 0){
+    alert("Tanpri antre non pwodwi ak pri valab.");
+    return;
+  }
+  qrDiv.innerHTML = "Génération du QR en cours...";
+  try{
+    const res = await fetch(`/merchant/generate-product-qr?email=${encodeURIComponent(email)}&productId=PROD-${productNum}&productName=${encodeURIComponent(productName)}&amount=${amount}`);
+    if(!res.ok) throw new Error("HTTP " + res.status);
+    const data = await res.json();
+    if(data.success) qrDiv.innerHTML = `<img src="${data.qrUrl}" alt="QR Produit">`;
+    else qrDiv.innerText = data.message || "Erreur génération QR Produit";
+  } catch(err){
+    console.error("PRODUCT QR ERROR:", err);
+    qrDiv.innerText = "Erreur serveur QR Produit";
+  }
+}
+
+// 🔹 LOGOUT
 function logout(){
   localStorage.removeItem("merchantConnected");
   localStorage.removeItem("merchantEmail");
   window.location.href = "merchantloginfobas.html";
 }
-
-
-// Mete email nan input hidden
-document.getElementById("merchantEmail").value = email;
 </script>
 
 </body>
