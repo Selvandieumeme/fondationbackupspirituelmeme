@@ -1,0 +1,26 @@
+// nan merchant.routes.js
+router.get('/dashboard', async (req, res) => {
+  try {
+    const { email } = req.query;
+    if(!email){
+      return res.status(400).json({ success: false, message: "Email manke" });
+    }
+
+    const merchant = await MerchantUser.findOne({ email });
+    if(!merchant){
+      return res.status(404).json({ success: false, message: "Commerçant pa egziste" });
+    }
+
+    // Retounen done dashboard
+    return res.json({
+      success: true,
+      balance: merchant.balance || 0,     // Si ou gen yon chan balance
+      payments: merchant.payments || [], // Si ou gen yon chan payments
+      fullName: merchant.fullName
+    });
+
+  } catch(err){
+    console.error("DASHBOARD MERCHANT ERROR:", err);
+    return res.status(500).json({ success: false, message: "Erreur serveur dashboard" });
+  }
+});
