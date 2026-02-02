@@ -99,8 +99,7 @@ async function generateQR() {
 
   try {
     const res = await fetch(
-      `/merchant/generate-qr?email=${encodeURIComponent(merchantEmail)}&amount=${amount}`
-    );
+      `https://api.fondationbackupspirituel.com/merchant/generate-qr);
     const data = await res.json();
 
     console.log("QR Data Received:", data);
