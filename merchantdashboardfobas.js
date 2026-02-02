@@ -139,40 +139,6 @@ document.getElementById("transferBtn").addEventListener("click", async () => {
 
 
 
-async function generateProductQR(productNum) {
-  const email = localStorage.getItem("merchantEmail");
-  if (!email) { alert("Email merchant pa jwenn."); return; }
-
-  const nameInput = document.getElementById("productName" + productNum);
-  const amountInput = document.getElementById("productAmount" + productNum);
-  const qrDiv = document.getElementById("productQR" + productNum);
-
-  const productName = nameInput.value.trim();
-  const amount = parseFloat(amountInput.value);
-
-  if (!productName || isNaN(amount) || amount <= 0) {
-    alert("Tanpri antre non pwodwi ak pri valab.");
-    return;
-  }
-
-  qrDiv.innerHTML = "Génération du QR en cours...";
-
-  try {
-    const res = await fetch(`/merchant/generate-product-qr?email=${encodeURIComponent(email)}&productId=PROD-${productNum}&productName=${encodeURIComponent(productName)}&amount=${amount}`);
-    if (!res.ok) throw new Error("HTTP " + res.status);
-    const data = await res.json();
-
-    if (data.success) {
-      qrDiv.innerHTML = `<img src="${data.qrUrl}" alt="QR Produit" style="margin-top:5px;">`;
-    } else {
-      qrDiv.innerText = data.message || "Erreur génération QR Produit";
-    }
-
-  } catch(err) {
-    console.error("PRODUCT QR ERROR:", err);
-    qrDiv.innerText = "Erreur serveur QR Produit";
-  }
-}
 
 
 
