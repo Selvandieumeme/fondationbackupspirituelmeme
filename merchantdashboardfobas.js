@@ -62,7 +62,7 @@ async function generateQR() {
     const data = await res.json();
 
     if (data.success) {
-      qrDiv.innerHTML = `<h3>QR Paiement FOBAS</h3><img src="${data.qrUrl}" alt="QR Code FOBAS">`;
+      qrDiv.innerHTML = `<h3>QR Paiement HTG</h3><img src="${data.qrUrl}" alt="QR Code HTG">`;
     } else {
       qrDiv.innerText = data.message || "Erreur génération QR";
     }
