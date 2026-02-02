@@ -98,28 +98,29 @@ async function generateQR() {
   qrDiv.innerHTML = "Génération du QR en cours...";
 
   try {
-  const res = await fetch(
-    `https://api.fondationbackupspirituel.com/merchant/generate-qr?email=${encodeURIComponent(merchantEmail)}&amount=${amount}`
-  );
+    const res = await fetch(
+      `https://api.fondationbackupspirituel.com/merchant/generate-qr?email=${encodeURIComponent(merchantEmail)}&amount=${amount}`
+    );
 
-  if (!res.ok) {
-    throw new Error("HTTP " + res.status);
+    if (!res.ok) {
+      throw new Error("HTTP " + res.status);
+    }
+
+    const data = await res.json();
+
+    if (data.success) {
+      qrDiv.innerHTML = `
+        <h3>QR Paiement HTG</h3>
+        <img src="${data.qrUrl}" alt="QR Code Paiement">
+      `;
+    } else {
+      qrDiv.innerText = data.message || "Erreur génération QR";
+    }
+
+  } catch (err) {
+    console.error("QR ERROR:", err);
+    qrDiv.innerText = "Erreur serveur QR Code.";
   }
-
-  const data = await res.json();
-
-  if (data.success) {
-    qrDiv.innerHTML = `
-      <h3>QR Paiement HTG</h3>
-      <img src="${data.qrUrl}" alt="QR Code Paiement">
-    `;
-  } else {
-    qrDiv.innerText = data.message || "Erreur génération QR";
-  }
-
-} catch (err) {
-  console.error("QR ERROR:", err);
-  qrDiv.innerText = "Erreur serveur QR Code.";
 }
 
 // ==========================
