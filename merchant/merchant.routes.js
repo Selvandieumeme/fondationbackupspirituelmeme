@@ -187,42 +187,34 @@ router.get('/dashboard', async (req, res) => {
 // ========================
 router.get("/generate-qr", async (req, res) => {
   try {
-    const { email, amount } = req.query;
+    const email = req.query.email || req.body.email;
+    const amount = parseFloat(req.query.amount || req.body.amount);
 
-    // ✅ Vérification paramètres
-    if (!email || !amount || Number(amount) <= 0) {
+    if (!email || !amount || isNaN(amount) || amount <= 0) {
       return res.status(400).json({
         success: false,
         message: "Email ou montant invalide"
       });
     }
 
-    // ✅ Vérifier que le merchant existe
     const merchant = await MerchantUser.findOne({ email });
     if (!merchant) {
       return res.status(404).json({
         success: false,
-        message: "Commerçant introuvable"
+        message: "Commerçant pa egziste"
       });
     }
 
-    // ✅ Payload QR (simple & valide)
     const payload = JSON.stringify({
       merchantEmail: merchant.email,
-      amount: Number(amount),
+      amount,
       currency: "HTG",
       reference: "TX-" + Date.now()
     });
 
-    // ✅ Génération QR
-    const qrUrl =
-      "https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=" +
-      encodeURIComponent(payload);
+    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(payload)}`;
 
-    return res.json({
-      success: true,
-      qrUrl
-    });
+    return res.json({ success: true, qrUrl });
 
   } catch (err) {
     console.error("GENERATE QR ERROR:", err);
@@ -232,4 +224,6 @@ router.get("/generate-qr", async (req, res) => {
     });
   }
 });
+
+
 module.exports = router;
