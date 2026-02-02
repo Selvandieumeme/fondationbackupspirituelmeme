@@ -187,7 +187,7 @@ router.get('/dashboard', async (req, res) => {
 // ========================
 router.get('/generate-qr', async (req, res) => {
   try {
-    const { email, amount } = req.query;
+    const userEmail = email;
 
     if (!email || !amount || Number(amount) <= 0) {
       return res.status(400).json({
@@ -196,13 +196,8 @@ router.get('/generate-qr', async (req, res) => {
       });
     }
 
-    const merchant = await MerchantUser.findOne({ email });
-    if (!merchant) {
-      return res.status(404).json({
-        success: false,
-        message: "Commerçant pa egziste"
-      });
-    }
+    const walletUser = await WalletBalance.findOne({ email: userEmail });
+   
 
     const payload = JSON.stringify({
       merchantEmail: merchant.email,
