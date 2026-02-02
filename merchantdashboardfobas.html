@@ -59,7 +59,7 @@ header button {
   max-width: 500px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
-.actions input, .productCard input {
+.actions input, .productCard input, .abonnementCard input {
   width: calc(100% - 12px);
   padding: 6px;
   margin: 5px 0 10px 0;
@@ -85,18 +85,18 @@ button:hover {
   max-width: 250px;
   display: block;
 }
-.productCard {
+.productCard, .abonnementCard {
   background: #f9f9f9;
   padding: 15px;
   border-radius: 10px;
   margin: 10px 0;
   box-shadow: 0 1px 5px rgba(0,0,0,0.1);
 }
-.productCard p {
+.productCard p, .abonnementCard p {
   font-weight: bold;
   color: #0033A0;
 }
-.productCard div {
+.productCard div, .abonnementCard div {
   margin-top: 5px;
 }
 </style>
@@ -130,40 +130,19 @@ button:hover {
   <div id="transferMsg"></div>
 </div>
 
+
+</div>
+
 <!-- ABONNEMENT QR -->
 <div id="abonnementQRSection">
   <h3>QR Abonnement Merchant</h3>
-  <div id="abonnementQRs">
-    <div>
-      <p>Abonnement /Mois (1000 HTG)</p>
-      <img id="qrMonth" src="" alt="QR Mois">
-    </div>
-    <div>
-      <p>Abonnement /Annee (5000 HTG)</p>
-      <img id="qrYear" src="" alt="QR Annee">
-    </div>
-  </div>
-  <button onclick="loadAbonnementQR()">Chaje QR Abonnement</button>
-</div>
-
-<!-- PRODUITS DINAMIK -->
-<div id="productsSection">
-  <h3>Produits Merchant</h3>
-
-  <div class="productCard">
-    <p>Produit 1</p>
-    Nom: <input type="text" id="productName1" placeholder="Nom du produit"><br>
-    Prix HTG: <input type="number" id="productAmount1" placeholder="Prix HTG"><br>
-    <button onclick="generateProductQR(1)">Générer QR Produit 1</button>
-    <div id="productQR1"></div>
-  </div>
-
-  <div class="productCard">
-    <p>Produit 2</p>
-    Nom: <input type="text" id="productName2" placeholder="Nom du produit"><br>
-    Prix HTG: <input type="number" id="productAmount2" placeholder="Prix HTG"><br>
-    <button onclick="generateProductQR(2)">Générer QR Produit 2</button>
-    <div id="productQR2"></div>
+  <div class="abonnementCard">
+    <input type="radio" name="abonnementType" value="month" id="abonnementMonth" checked>
+    <label for="abonnementMonth">Mois (1000 HTG)</label><br>
+    <input type="radio" name="abonnementType" value="year" id="abonnementYear">
+    <label for="abonnementYear">Année (5000 HTG)</label><br>
+    <button onclick="generateAbonnementQR()">Générer QR Abonnement</button>
+    <div id="abonnementQR"></div>
   </div>
 </div>
 
@@ -220,23 +199,6 @@ async function generateQR() {
   }
 }
 
-// 🔹 LOAD ABONNEMENT QR
-async function loadAbonnementQR() {
-  const email = localStorage.getItem("merchantEmail");
-  if(!email){ alert("Email merchant pa jwenn."); return; }
-  try {
-    const res = await fetch(`/merchant/generate-abonnement-qr?email=${encodeURIComponent(email)}`);
-    const data = await res.json();
-    if(data.success && data.qrs){
-      document.getElementById("qrMonth").src = data.qrs.month;
-      document.getElementById("qrYear").src = data.qrs.year;
-    } else alert(data.message || "Erreur génération QR abonnement");
-  } catch(err){
-    console.error("LOAD ABONNEMENT QR ERROR:", err);
-    alert("Erreur serveur, réessayez plus tard.");
-  }
-}
-
 // 🔹 GENERATE PRODUIT QR DYNAMIQUE
 async function generateProductQR(productNum){
   const email = localStorage.getItem("merchantEmail");
@@ -262,6 +224,98 @@ async function generateProductQR(productNum){
   }
 }
 
+// 🔹 GENERER QR ABONNEMENT
+async function generateAbonnementQR(){
+  const email = localStorage.getItem("merchantEmail");
+  const type = document.querySelector('input[name="abonnementType"]:checked').value;
+  const qrDiv = document.getElementById("abonnementQR");
+  let amount = type === "month" ? 1000 : 5000;
+  qrDiv.innerHTML = "Génération du QR en cours...";
+  try{
+    const res = await fetch(`/merchant/generate-product-qr?email=${encodeURIComponent(email)}&productId=ABONNEMENT-${type.toUpperCase()}&productName=Produit_FOBAS&amount=${amount}`);
+    if(!res.ok) throw new Error("HTTP " + res.status);
+    const data = await res.json();
+    if(data.success) qrDiv.innerHTML = `<img src="${data.qrUrl}" alt="QR Abonnement">`;
+    else qrDiv.innerText = data.message || "Erreur génération QR Abonnement";
+  } catch(err){
+    console.error("ABONNEMENT QR ERROR:", err);
+    qrDiv.innerText = "Erreur serveur QR Abonnement";
+  }
+}
+
+
+
+
+
+
+
+
+
+<script>
+// 🔹 GENERATE PRODUIT QR DYNAMIQUE AVEC TOUS LES CHAMPS
+async function generateProductQR(productNum) {
+  const email = localStorage.getItem("merchantEmail");
+  const qrDiv = document.getElementById("productQR" + productNum);
+
+  // Récupérer tous les champs
+  const fullName = document.getElementById("fullName" + productNum).value.trim();
+  const companyName = document.getElementById("companyName" + productNum).value.trim();
+  const productName = document.getElementById("productName" + productNum).value.trim();
+  const quantity = parseFloat(document.getElementById("quantity" + productNum).value) || 0;
+  const whatsapp = document.getElementById("whatsapp" + productNum).value.trim();
+  const clientName = document.getElementById("clientName" + productNum).value.trim();
+  const receiptNum = document.getElementById("receiptNum" + productNum).value.trim();
+  const unitPrice = parseFloat(document.getElementById("unitPrice" + productNum).value) || 0;
+  const total = parseFloat(document.getElementById("total" + productNum).value) || 0;
+  const signature = document.getElementById("signature" + productNum).value.trim();
+
+  // Validation minimale
+  if(!fullName || !companyName || !productName || quantity <= 0 || unitPrice <=0){
+    alert("Tanpri ranpli tout chan obligatwa avèk valè valab.");
+    return;
+  }
+
+  qrDiv.innerHTML = "Génération du QR en cours...";
+
+  try {
+    // Payload complet
+    const payload = new URLSearchParams({
+      email: email,
+      productId: "PROD-" + productNum,
+      type: "FOBAS_PRODUCT",
+      fullName,
+      companyName,
+      productName,
+      quantity,
+      whatsapp,
+      clientName,
+      receiptNum,
+      unitPrice,
+      total,
+      signature
+    });
+
+    const res = await fetch(`/merchant/generate-product-qr?${payload.toString()}`);
+    if(!res.ok) throw new Error("HTTP " + res.status);
+
+    const data = await res.json();
+
+    if(data.success){
+      qrDiv.innerHTML = `<img src="${data.qrUrl}" alt="QR Produit" style="max-width:200px;">`;
+    } else {
+      qrDiv.innerText = data.message || "Erreur génération QR Produit";
+    }
+  } catch(err) {
+    console.error("PRODUCT QR ERROR:", err);
+    qrDiv.innerText = "Erreur serveur QR Produit";
+  }
+}
+</script>
+
+   
+
+
+   
 // 🔹 LOGOUT
 function logout(){
   localStorage.removeItem("merchantConnected");
