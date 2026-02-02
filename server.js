@@ -78,6 +78,10 @@ app.use('/merchant', merchantRoutes);
 
 
 
+
+const walletToMerchantRoutes = require("./routes/walletToMerchant");
+
+
 /**
  * ---------- MONGODB SCHEMAS ----------
  */
