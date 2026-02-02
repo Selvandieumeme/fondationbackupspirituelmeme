@@ -1,0 +1,28 @@
+body{font-family:Segoe UI;margin:0;background:#f4f6f8;}
+header{
+  background:#0056b3;
+  color:#fff;
+  padding:15px;
+  display:flex;
+  justify-content:space-between;
+}
+.stats{
+  display:flex;
+  gap:15px;
+  padding:20px;
+}
+.card{
+  flex:1;
+  background:#fff;
+  padding:20px;
+  border-radius:12px;
+  text-align:center;
+}
+.actions{padding:20px;}
+button{
+  background:#f4c300;
+  padding:12px 20px;
+  border:none;
+  border-radius:8px;
+  font-weight:bold;
+}
