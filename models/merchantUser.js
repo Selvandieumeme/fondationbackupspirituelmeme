@@ -32,14 +32,16 @@ const merchantUserSchema = new mongoose.Schema({
     type: String,
     trim: true
   },
-  
+
+  // ========================
+  // 💰 Balance ak tranzaksyon
+  // ========================
   balance: {
     type: Number,
     default: 0
   },
-
-  payments: {
-    type: Array,
+  transactions: {
+    type: Array, // chak tranzaksyon: { type: 'credit'|'debit', amount, from, to, createdAt }
     default: []
   },
 
