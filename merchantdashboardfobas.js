@@ -44,23 +44,28 @@ loadDashboard();
 // ==========================
 async function generateQR() {
   const qrDiv = document.getElementById("qr");
+  const amountInput = document.getElementById("amountInput");
+  const amount = parseFloat(amountInput.value);
+
+  if (isNaN(amount) || amount <= 0) {
+    alert("Montant invalide. Tanpri antre yon kantite valab.");
+    return;
+  }
+
   qrDiv.innerHTML = "Génération du QR en cours...";
 
   try {
     const res = await fetch(
-      `https://api.fondationbackupspirituel.com/merchant/generate-qr?email=${merchantEmail}`
+      `https://api.fondationbackupspirituel.com/merchant/generate-qr?email=${merchantEmail}&amount=${amount}`
     );
+
     const data = await res.json();
 
     if (data.success) {
-      qrDiv.innerHTML = `
-        <h3>QR Paiement FOBAS</h3>
-        <img src="${data.qrUrl}" alt="QR Code FOBAS">
-      `;
+      qrDiv.innerHTML = `<h3>QR Paiement FOBAS</h3><img src="${data.qrUrl}" alt="QR Code FOBAS">`;
     } else {
       qrDiv.innerText = data.message || "Erreur génération QR";
     }
-
   } catch (err) {
     console.error("QR ERROR:", err);
     qrDiv.innerText = "Erreur serveur QR Code.";
