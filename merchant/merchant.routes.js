@@ -187,16 +187,18 @@ router.get('/dashboard', async (req, res) => {
 // ========================
 router.get("/generate-qr", async (req, res) => {
   try {
-    const email = req.query.email || req.body.email;
-    const amount = parseFloat(req.query.amount || req.body.amount);
+    const email = (req.query.email || req.body.email || "").trim();
+    let amount = parseFloat((req.query.amount || req.body.amount || "").toString().trim().replace(",", "."));
 
-    if (!email || !amount || isNaN(amount) || amount <= 0) {
+    // Validation email ak montan
+    if (!email || isNaN(amount) || amount <= 0) {
       return res.status(400).json({
         success: false,
-        message: "Email ou montant invalide"
+        message: "Email oswa montant invalide"
       });
     }
 
+    // Chèche merchant nan baz done
     const merchant = await MerchantUser.findOne({ email });
     if (!merchant) {
       return res.status(404).json({
@@ -205,6 +207,7 @@ router.get("/generate-qr", async (req, res) => {
       });
     }
 
+    // Payload QR (pa chanje, menm jan ak ou te genyen)
     const payload = JSON.stringify({
       merchantEmail: merchant.email,
       amount,
@@ -212,8 +215,10 @@ router.get("/generate-qr", async (req, res) => {
       reference: "TX-" + Date.now()
     });
 
+    // Jenere URL QR
     const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(payload)}`;
 
+    // Retounen QR
     return res.json({ success: true, qrUrl });
 
   } catch (err) {
@@ -224,6 +229,5 @@ router.get("/generate-qr", async (req, res) => {
     });
   }
 });
-
 
 module.exports = router;
