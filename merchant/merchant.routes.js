@@ -176,4 +176,47 @@ router.get('/dashboard', async (req, res) => {
   }
 });
 
+
+
+
+
+// ========================
+// 📷 GENERATE QR PAIEMENT
+// ========================
+router.get('/generate-qr', async (req, res) => {
+  try {
+    const { email } = req.query;
+
+    if (!email) {
+      return res.status(400).json({
+        success: false,
+        message: "Email manke"
+      });
+    }
+
+    const merchant = await MerchantUser.findOne({ email });
+    if (!merchant) {
+      return res.status(404).json({
+        success: false,
+        message: "Commerçant pa egziste"
+      });
+    }
+
+    // ⚠️ Pou kounye a: QR statik / mock (pa kraze sistèm nan)
+    // Ou ka ranplase pita ak vrai QR (qrcode, paiement, elatriye)
+    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=FOBAS-MERCHANT-${merchant.email}`;
+
+    return res.json({
+      success: true,
+      qrUrl
+    });
+
+  } catch (err) {
+    console.error("GENERATE QR ERROR:", err);
+    return res.status(500).json({
+      success: false,
+      message: "Erreur serveur génération QR"
+    });
+  }
+});
 module.exports = router;
