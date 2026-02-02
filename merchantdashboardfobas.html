@@ -131,23 +131,8 @@ button:hover {
 </div>
 
 
-<div class="productCard">
-  <p>Produit 1</p>
-  <input type="text" id="fullName1" placeholder="Nom complet Merchant">
-  <input type="text" id="companyName1" placeholder="Nom Entreprise">
-  <input type="text" id="productName1" placeholder="Nom Produit">
-  <input type="number" id="quantity1" placeholder="Quantité">
-  <input type="text" id="whatsapp1" placeholder="Whatsapp Entreprise">
-  <input type="text" id="clientName1" placeholder="Nom Clients">
-  <input type="text" id="receiptNum1" placeholder="Num. Recu">
-  <input type="number" id="unitPrice1" placeholder="Prix Uni.">
-  <input type="number" id="total1" placeholder="Total">
-  <input type="text" id="signature1" placeholder="Signature">
-  <button onclick="generateProductQR(1)">Générer QR Produit 1</button>
-  <div id="productQR1"></div>
-</div>
 
-</div>
+
 
 <!-- ABONNEMENT QR -->
 <div id="abonnementQRSection">
@@ -160,6 +145,35 @@ button:hover {
     <button onclick="generateAbonnementQR()">Générer QR Abonnement</button>
     <div id="abonnementQR"></div>
   </div>
+
+
+
+<!-- PRODUITS DINAMIK (10) -->
+<div id="productsSection">
+  <h3>Produits Merchant</h3>
+
+  <!-- Produit 1 à 10 -->
+  ${Array.from({length: 10}, (_, i) => `
+    <div class="productCard">
+      <p>Produit ${i + 1}</p>
+
+      Nom complet Merchant: <input type="text" id="fullName${i+1}" placeholder="Nom complet Merchant"><br>
+      Nom Entreprise: <input type="text" id="companyName${i+1}" placeholder="Nom Entreprise"><br>
+      Nom Produit: <input type="text" id="productName${i+1}" placeholder="Nom Produit"><br>
+      Quantite: <input type="number" id="quantity${i+1}" placeholder="Quantite"><br>
+      Whatsapp Entreprise: <input type="text" id="whatsapp${i+1}" placeholder="Whatsapp Entreprise"><br>
+      Nom Clients: <input type="text" id="clientName${i+1}" placeholder="Nom Clients"><br>
+      Num. Recu: <input type="text" id="receiptNum${i+1}" placeholder="Num. Recu"><br>
+      Prix Uni.: <input type="number" id="unitPrice${i+1}" placeholder="Prix Uni."><br>
+      Total: <input type="number" id="total${i+1}" placeholder="Total"><br>
+      Signature: <input type="text" id="signature${i+1}" placeholder="Signature"><br>
+
+      <button onclick="generateProductQR(${i+1})">Générer QR CODE</button>
+      <div id="productQR${i+1}"></div>
+    </div>
+  `).join('')}
+</div>
+   
 </div>
 
 <p id="msg"></p>
@@ -267,67 +281,5 @@ function logout(){
 }
 </script>
    
-<script>
-// 🔹 GENERATE PRODUIT QR DYNAMIQUE AVEC TOUS LES CHAMPS
-async function generateProductQR(productNum) {
-  const email = localStorage.getItem("merchantEmail");
-  const qrDiv = document.getElementById("productQR" + productNum);
-
-  // Récupérer tous les champs
-  const fullName = document.getElementById("fullName" + productNum).value.trim();
-  const companyName = document.getElementById("companyName" + productNum).value.trim();
-  const productName = document.getElementById("productName" + productNum).value.trim();
-  const quantity = parseFloat(document.getElementById("quantity" + productNum).value) || 0;
-  const whatsapp = document.getElementById("whatsapp" + productNum).value.trim();
-  const clientName = document.getElementById("clientName" + productNum).value.trim();
-  const receiptNum = document.getElementById("receiptNum" + productNum).value.trim();
-  const unitPrice = parseFloat(document.getElementById("unitPrice" + productNum).value) || 0;
-  const total = parseFloat(document.getElementById("total" + productNum).value) || 0;
-  const signature = document.getElementById("signature" + productNum).value.trim();
-
-  // Validation minimale
-  if(!fullName || !companyName || !productName || quantity <= 0 || unitPrice <=0){
-    alert("Tanpri ranpli tout chan obligatwa avèk valè valab.");
-    return;
-  }
-
-  qrDiv.innerHTML = "Génération du QR en cours...";
-
-  try {
-    // Payload complet
-    const payload = new URLSearchParams({
-      email: email,
-      productId: "PROD-" + productNum,
-      type: "FOBAS_PRODUCT",
-      fullName,
-      companyName,
-      productName,
-      quantity,
-      whatsapp,
-      clientName,
-      receiptNum,
-      unitPrice,
-      total,
-      signature
-    });
-
-    const res = await fetch(`/merchant/generate-product-qr?${payload.toString()}`);
-    if(!res.ok) throw new Error("HTTP " + res.status);
-
-    const data = await res.json();
-
-    if(data.success){
-      qrDiv.innerHTML = `<img src="${data.qrUrl}" alt="QR Produit" style="max-width:200px;">`;
-    } else {
-      qrDiv.innerText = data.message || "Erreur génération QR Produit";
-    }
-  } catch(err) {
-    console.error("PRODUCT QR ERROR:", err);
-    qrDiv.innerText = "Erreur serveur QR Produit";
-  }
-}
-</script>
-
-
 </body>
 </html>
