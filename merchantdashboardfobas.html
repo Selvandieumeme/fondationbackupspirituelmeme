@@ -71,22 +71,32 @@ loadDashboard();
 // ==========================
 // 🔹 Génération QR Code
 // ==========================
-async function generateQR(){
+async function generateQR() {
   const qrDiv = document.getElementById("qr");
-  qrDiv.innerHTML = "Génération en cours...";
+  const amountInput = document.getElementById("amountInput");
+  const amount = parseFloat(amountInput.value);
+
+  if (isNaN(amount) || amount <= 0) {
+    alert("Montant invalide. Tanpri antre yon kantite valab.");
+    return;
+  }
+
+  qrDiv.innerHTML = "Génération du QR en cours...";
 
   try {
-    const res = await fetch(`https://api.fondationbackupspirituel.com/merchant/generate-qr?email=${email}`);
+    const res = await fetch(
+      `/merchant/generate-qr?email=${merchantEmail}&amount=${amount}`
+    );
     const data = await res.json();
 
-    if(data.success){
-      qrDiv.innerHTML = `<img src="${data.qrUrl}" alt="QR Code">`;
+    if (data.success) {
+      qrDiv.innerHTML = `<h3>QR Paiement HTG</h3><img src="${data.qrUrl}" alt="QR Code HTG">`;
     } else {
-      qrDiv.innerText = data.message || "Erreur génération QR Code";
+      qrDiv.innerText = data.message || "Erreur génération QR";
     }
-  } catch(err){
-    console.error("Erreur API QR:", err);
-    qrDiv.innerText = "Erreur serveur, réessayez plus tard.";
+  } catch (err) {
+    console.error("QR ERROR:", err);
+    qrDiv.innerText = "Erreur serveur QR Code.";
   }
 }
 
