@@ -29,10 +29,11 @@
 // ==========================
 // 🔹 Vérification login
 // ==========================
+  
 const email = localStorage.getItem("merchantEmail");
-const logged = localStorage.getItem("merchantLogged");
+const connected = localStorage.getItem("merchantConnected"); // Sèl clé ki mete nan login
 
-if(!logged || logged !== "true" || !email){
+if(!connected || connected !== "true" || !email){
   window.location.href = "merchantloginfobas.html";
 }
 
@@ -85,7 +86,7 @@ async function generateQR(){
 // 🔹 Déconnexion
 // ==========================
 function logout(){
-  localStorage.removeItem("merchantLogged");
+  localStorage.removeItem("merchantConnected");
   localStorage.removeItem("merchantEmail");
   window.location.href = "merchantloginfobas.html";
 }
