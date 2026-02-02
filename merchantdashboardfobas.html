@@ -124,6 +124,10 @@ function logout(){
   localStorage.removeItem("merchantEmail");
   window.location.href = "merchantloginfobas.html";
 }
+
+
+// Mete email nan input hidden
+document.getElementById("merchantEmail").value = email;
 </script>
 
 </body>
