@@ -139,26 +139,38 @@ document.getElementById("transferBtn").addEventListener("click", async () => {
 
 
 
-  async function loadAbonnementQR() {
+async function generateProductQR(productNum) {
   const email = localStorage.getItem("merchantEmail");
-  if (!email) {
-    alert("Email merchant pa jwenn nan localStorage");
+  if (!email) { alert("Email merchant pa jwenn."); return; }
+
+  const nameInput = document.getElementById("productName" + productNum);
+  const amountInput = document.getElementById("productAmount" + productNum);
+  const qrDiv = document.getElementById("productQR" + productNum);
+
+  const productName = nameInput.value.trim();
+  const amount = parseFloat(amountInput.value);
+
+  if (!productName || isNaN(amount) || amount <= 0) {
+    alert("Tanpri antre non pwodwi ak pri valab.");
     return;
   }
 
+  qrDiv.innerHTML = "Génération du QR en cours...";
+
   try {
-    const res = await fetch(`/merchant/generate-abonnement-qr?email=${encodeURIComponent(email)}`);
+    const res = await fetch(`/merchant/generate-product-qr?email=${encodeURIComponent(email)}&productId=PROD-${productNum}&productName=${encodeURIComponent(productName)}&amount=${amount}`);
+    if (!res.ok) throw new Error("HTTP " + res.status);
     const data = await res.json();
 
-    if (data.success && data.qrs) {
-      document.getElementById("qrMonth").src = data.qrs.month;
-      document.getElementById("qrYear").src  = data.qrs.year;
+    if (data.success) {
+      qrDiv.innerHTML = `<img src="${data.qrUrl}" alt="QR Produit" style="margin-top:5px;">`;
     } else {
-      alert(data.message || "Erreur génération QR abonnement");
+      qrDiv.innerText = data.message || "Erreur génération QR Produit";
     }
-  } catch (err) {
-    console.error("LOAD ABONNEMENT QR ERROR:", err);
-    alert("Erreur serveur, réessayez plus tard.");
+
+  } catch(err) {
+    console.error("PRODUCT QR ERROR:", err);
+    qrDiv.innerText = "Erreur serveur QR Produit";
   }
 }
 
