@@ -13,7 +13,7 @@
 </header>
 
 <div class="stats">
-  <div class="card">💰 Solde<br><strong id="balance">0.00 FOBAS</strong></div>
+  <div class="card">💰 Solde<br><strong id="balance">0.00 HTG</strong></div>
   <div class="card">📥 Paiements<br><strong id="payments">0</strong></div>
 </div>
 
@@ -46,7 +46,7 @@ async function loadDashboard(){
     const data = await res.json();
 
     if(data.success){
-      document.getElementById("balance").innerText = parseFloat(data.balance).toFixed(2) + " FOBAS";
+      document.getElementById("balance").innerText = parseFloat(data.balance).toFixed(2) + " HTG";
       document.getElementById("payments").innerText = data.payments.length;
     } else {
       document.getElementById("msg").innerText = data.message || "Erreur lors du chargement du dashboard";
