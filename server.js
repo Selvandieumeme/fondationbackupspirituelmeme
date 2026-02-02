@@ -66,6 +66,18 @@ mongoose.connect(MONGO_URI)
   });
 
 
+
+
+
+
+// ----------------------- ROUTES MERCHANT -----------------------
+// Mete sa apre tout middleware tankou express.json() 
+// epi anvan app.listen pou li ka koute requests
+const merchantRoutes = require('./merchant/merchant.routes');
+app.use('/merchant', merchantRoutes);
+
+
+
 /**
  * ---------- MONGODB SCHEMAS ----------
  */
