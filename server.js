@@ -1004,7 +1004,7 @@ const walletUserSchema = new mongoose.Schema({
   lastActionBy: { type: String, default: "SYSTEM" },        // SYSTEM kòm default
   adminIp: { type: String, default: "0.0.0.0" },            // default trace IP
 
-  createdBy: { type: String, enum: ["Self", "Agent Autorise", "Utilisateur", "FONDATEUR FOBAS"], default: "self" },
+  createdBy: { type: String, enum: ["Self",  "Agent Terrain", "Agent Autorise", "Utilisateur", "FONDATEUR FOBAS"], default: "self" },
   registrationChannel: { type: String, enum: ["app", "Utilisateur", "Agent Terrain", "Agent Autorise", "FONDATEUR FOBAS"], default: "app" },
   geoZone: { type: String, default: "undefined" },          // default aktif pou trace zòn
   deviceId: { type: String, default: "unknown" },           // default aktif
@@ -1039,57 +1039,56 @@ const walletBalanceSchema = new mongoose.Schema({
   lastAction: String,
 
   // ===============================
-  // 🔐 TRACE & SÉCURITÉ / NOUVO CHAMPS
-  // ===============================
-  createdBy: {
-    type: String,
-    enum: ["self", "agent", "admin"],
-    default: "self"
-  },
-  agentId: {
-    type: mongoose.Schema.Types.ObjectId,
-    default: null
-  },
-  registrationChannel: {
-    type: String,
-    enum: ["app", "terrain"],
-    default: "app"
-  },
-  geoZone: {
-    type: String,
-    default: null
-  },
-  kycLevel: {
-    type: Number,
-    default: 0
-  },
-  deviceId: {
-    type: String,
-    default: null
-  },
-  createdFromDevice: {
-    type: String,
-    default: null
-  },
-  ipAddress: {
-    type: String,
-    default: null
-  },
-  riskScore: {
-    type: Number,
-    default: 0
-  },
-  riskFlags: {
-    type: [String],
-    default: []
-  },
-  lastActionAt: { type: Date, default: null },
-  lastActionBy: { type: String, default: null },
-  adminIp: { type: String, default: null },
-  auditVersion: { type: Number, default: 1 }
+// 🔐 TRACE & SÉCURITÉ / NOUVO CHAMPS - ACTIVE DEFAULTS
+// ===============================
+createdBy: {
+  type: String,
+  enum: ["Self",  "Agent Terrain", "Agent Autorise", "Utilisateur", "FONDATEUR FOBAS"],
+  default: "Self"
+},
+agentId: {
+  type: mongoose.Schema.Types.ObjectId,
+  default: null
+},
+registrationChannel: {
+  type: String,
+  enum: ["app", "Utilisateur", "Agent Terrain", "Agent Autorise", "FONDATEUR FOBAS"],
+  default: "app"
+},
+geoZone: {
+  type: String,
+  default: "undefined"          // ACTIVE default pou trace
+},
+kycLevel: {
+  type: Number,
+  default: 0
+},
+deviceId: {
+  type: String,
+  default: "unknown"            // ACTIVE default pou device trace
+},
+createdFromDevice: {
+  type: String,
+  default: "unknown"            // ACTIVE default
+},
+ipAddress: {
+  type: String,
+  default: "0.0.0.0"            // ACTIVE default IP
+},
+riskScore: {
+  type: Number,
+  default: 0
+},
+riskFlags: {
+  type: [String],
+  default: []
+},
+lastActionAt: { type: Date, default: Date.now },   // ACTIVE depi premye kreasyon
+lastActionBy: { type: String, default: "SYSTEM" }, // ACTIVE default
+adminIp: { type: String, default: "0.0.0.0" },     // ACTIVE default
+auditVersion: { type: Number, default: 1 }
 
 }, { timestamps: true });
-
 
 
 
