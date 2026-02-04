@@ -368,6 +368,16 @@ async function submitTransfer() {
   // 🔄 Capture geoZone pou backend
   const geoZone = await getGeoZone(); // ✅ AJOUT SAFE
 
+  // 🔄 Capture IP aparèy pou backend (pridan)
+  let userIP = "0.0.0.0";
+  try {
+    const ipRes = await fetch("https://api.ipify.org?format=json");
+    const ipData = await ipRes.json();
+    if (ipData && ipData.ip) userIP = ipData.ip;
+  } catch (ipErr) {
+    console.warn("Impossible de récupérer l'IP publique, valeur par défaut utilisée:", ipErr);
+  }
+
   try {
     const res = await fetch(
       "https://api.fondationbackupspirituel.com/api/wallet/transfer",
@@ -381,7 +391,8 @@ async function submitTransfer() {
         body: JSON.stringify({
           senderEmail: userEmail,
           receiverEmail,
-          amount
+          amount,
+          ipAddress: userIP // ✅ Entègrasyon IP san risk
         })
       }
     );
@@ -402,7 +413,8 @@ async function submitTransfer() {
       `🔁 TRANSFERT FOBAS
 De: ${userEmail}
 Vers: ${receiverEmail}
-Montant: ${amount} Gourdes`
+Montant: ${amount} Gourdes
+IP: ${userIP}`
     );
 
     alert(data.message || "Transfert effectué avec succès");
@@ -412,7 +424,6 @@ Montant: ${amount} Gourdes`
     alert("Erreur serveur. Veuillez réessayer plus tard.");
   }
 }
-
 
 
 
