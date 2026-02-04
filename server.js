@@ -998,24 +998,24 @@ const walletUserSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now },
   status: { type: String, default: "pending" },
 
-  // 🔐 NOUVO CHAN TRACE / AUDIT / RISK (SAFE)
-  lastAction: { type: String, default: null },
-  lastActionAt: { type: Date, default: null },
-  lastActionBy: { type: String, default: null },
-  adminIp: { type: String, default: null },
+  // 🔐 CHAN TRACE / AUDIT / RISK (ACTIVE DEFAULTS)
+  lastAction: { type: String, default: "CREATION" },       // default premye aksyon
+  lastActionAt: { type: Date, default: Date.now },          // aktive depi premye kreasyon
+  lastActionBy: { type: String, default: "SYSTEM" },        // SYSTEM kòm default
+  adminIp: { type: String, default: "0.0.0.0" },            // default trace IP
 
-  createdBy: { type: String, enum: ["self", "agent", "admin"], default: "self" },
-  registrationChannel: { type: String, enum: ["app", "terrain"], default: "app" },
-  geoZone: { type: String, default: null },
-  deviceId: { type: String, default: null },
-  createdFromDevice: { type: String, default: null },
+  createdBy: { type: String, enum: ["self", "Agent Autorise", "Utilisateur", "Admin"], default: "self" },
+  registrationChannel: { type: String, enum: ["app", "Utilisateur", "Agent Terrain"], default: "app" },
+  geoZone: { type: String, default: "undefined" },          // default aktif pou trace zòn
+  deviceId: { type: String, default: "unknown" },           // default aktif
+  createdFromDevice: { type: String, default: "unknown" },  // default aktif
+  ipAddress: { type: String, default: "0.0.0.0" },          // default trace IP
 
-  kycLevel: { type: Number, default: 0 },
-  riskScore: { type: Number, default: 0 },
-  riskFlags: { type: [String], default: [] },
+  kycLevel: { type: Number, default: 0 },                   // nivo KYC debaz
+  riskScore: { type: Number, default: 0 },                  // debaz riskScore
+  riskFlags: { type: [String], default: [] },               // lis alert risk
 
-  auditVersion: { type: Number, default: 1 }
-
+  auditVersion: { type: Number, default: 1 }                // vèsyon audit
 }, { timestamps: true });
 
 // 🔥 Koreksyon pou fè l konpatib ak koleksyon reyèl MongoDB ou
