@@ -2203,6 +2203,27 @@ app.post("/api/wallet/login", async (req, res) => {
 
 
 
+<script>
+function detectAppEnvironment() {
+  const ua = navigator.userAgent || "";
+
+  const isAndroid = /Android/i.test(ua);
+  const isWebView = /(wv|FBAN|FBAV|Instagram|Line)/i.test(ua);
+
+  return {
+    isAndroid,
+    isWebView,
+    userAgent: ua
+  };
+}
+</script>
+
+
+
+
+
+
+
 
 
 
