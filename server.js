@@ -1356,6 +1356,14 @@ app.post('/api/wallet/transfer', async (req, res) => {
     const senderUser = await WalletUser.findOne({ email: senderEmail });
     const receiverUser = await WalletUser.findOne({ email: receiverEmail });
 
+
+    // ✅ CE QUE TU DEMANDES (SANS REFACTOR)
+    const geoZone = req.headers["x-geo-zone"] || "unknown";
+    const senderKycLevel = senderUser?.kycLevel || 0;
+    const receiverKycLevel = receiverUser?.kycLevel || 0;
+
+
+	  
     if (!receiverUser) {
       return res.status(404).json({ message: "Destinataire introuvable" });
     }
