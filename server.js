@@ -1004,8 +1004,8 @@ const walletUserSchema = new mongoose.Schema({
   lastActionBy: { type: String, default: "SYSTEM" },        // SYSTEM kòm default
   adminIp: { type: String, default: "0.0.0.0" },            // default trace IP
 
-  createdBy: { type: String, enum: ["self", "Agent Autorise", "Utilisateur", "Admin"], default: "self" },
-  registrationChannel: { type: String, enum: ["app", "Utilisateur", "Agent Terrain"], default: "app" },
+  createdBy: { type: String, enum: ["Self", "Agent Autorise", "Utilisateur", "FONDATEUR FOBAS"], default: "self" },
+  registrationChannel: { type: String, enum: ["app", "Utilisateur", "Agent Terrain", "Agent Autorise", "FONDATEUR FOBAS"], default: "app" },
   geoZone: { type: String, default: "undefined" },          // default aktif pou trace zòn
   deviceId: { type: String, default: "unknown" },           // default aktif
   createdFromDevice: { type: String, default: "unknown" },  // default aktif
