@@ -37,7 +37,7 @@ const WalletUserSchema = new mongoose.Schema({
   adminIp: { type: String, default: "0.0.0.0" },            // placeholder pou trace
   ipAddress: { type: String, default: "0.0.0.0" },
 
-  createdBy: { type: String, enum: ["Self", "Agent Autorise", "Utilisateur", "FONDATEUR FOBAS"], default: "Self" },
+  createdBy: { type: String, enum: ["Self",  "Agent Terrain", "Agent Autorise", "Utilisateur", "FONDATEUR FOBAS"], default: "Self" },
   registrationChannel: { type: String, enum: ["app", "Utilisateur", "Agent Terrain", "Agent Autorise", "FONDATEUR FOBAS"], default: "app" },
   geoZone: { type: String, default: "undefined" },
   deviceId: { type: String, default: "unknown" },
