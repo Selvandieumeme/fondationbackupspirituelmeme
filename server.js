@@ -2056,20 +2056,15 @@ app.post("/api/wallet/create", async (req, res) => {
       walletBirthPlace,
       walletPassword,
       walletSponsorName,
-	  walletSponsorEmail,
-	  walletAccountType 
+      walletSponsorEmail,
+      walletAccountType 
     } = req.body;
 
     if (!walletFullName || !walletEmail || !walletPassword) {
       return res.status(400).json({ success: false, message: "Tout chan obligatwa." });
     }
 
-
-
-	  
-
-
-	 // 🔐 BLOKAJ EMAIL DOUBLON (AJOUT SANS MODIFICATION)
+    // 🔐 BLOKAJ EMAIL DOUBLON (AJOUT SANS MODIFICATION)
     const emailExist = await WalletUser.findOne({
       email: walletEmail.toLowerCase()
     });
@@ -2081,13 +2076,19 @@ app.post("/api/wallet/create", async (req, res) => {
       });
     }
 
-
-
-	  
-
     // --- Hash password ---
     const bcrypt = require("bcryptjs");
     const passwordHash = await bcrypt.hash(walletPassword, 12);
+
+    // --- Kapt IP moun nan (trust proxy si dèyè proxy) ---
+    let userIp = req.ip || req.headers['x-forwarded-for'] || "0.0.0.0";
+    if (Array.isArray(userIp)) userIp = userIp[0];
+    
+    // --- Kreye agentId otomatik pou Agent Autorise sèlman ---
+    let agentId = null;
+    if (walletAccountType === "Agent Autorise") {
+      agentId = "AGT-" + Date.now() + "-" + Math.floor(Math.random() * 1000);
+    }
 
     // --- Kreye nouvo itilizatè ---
     const newWalletUser = new WalletUser({
@@ -2099,12 +2100,14 @@ app.post("/api/wallet/create", async (req, res) => {
       birthPlace: walletBirthPlace,
       passwordHash,
       sponsorName: walletSponsorName ? walletSponsorName.trim().toLowerCase() : null,
-	  sponsorEmail: walletSponsorEmail ? walletSponsorEmail.trim().toLowerCase() : null,
+      sponsorEmail: walletSponsorEmail ? walletSponsorEmail.trim().toLowerCase() : null,
       accountType: walletAccountType,
-	  status: "active",
+      status: "active",
       balance: 0.00,
       bonus: 0.00,
       hasDepositedBefore: false,
+      agentId: agentId,           // ✅ Ajoute agentId otomatik
+      ipAddress: userIp,          // ✅ Capture IP vrè moun nan
       createdAt: new Date()
     });
 
@@ -2112,7 +2115,7 @@ app.post("/api/wallet/create", async (req, res) => {
 
     // --- Prepare lyen WhatsApp pou admin (one-click send) ---
     const adminNumber = "+50946057952";
-    const waMessage = `🟢 Nouvo Demande Compte WALLET FOBAS\n\n👤 Non: ${walletFullName}\n📧 Email: ${walletEmail}\n📱 Tel: ${walletWhatsApp}\n🌍 Email sekou: ${walletRecoveryEmail}\n🏙️ Lye Nésans: ${walletBirthPlace}\n📅 Dat Nésans: ${walletBirthDate}\n🧑‍🤝‍🧑 Parrain: ${walletSponsorName || 'Pa gen'}`;
+    const waMessage = `🟢 Nouvo Demande Compte WALLET FOBAS\n\n👤 Non: ${walletFullName}\n📧 Email: ${walletEmail}\n📱 Tel: ${walletWhatsApp}\n🌍 Email sekou: ${walletRecoveryEmail}\n🏙️ Lye Nésans: ${walletBirthPlace}\n📅 Dat Nésans: ${walletBirthDate}\n🧑‍🤝‍🧑 Parrain: ${walletSponsorName || 'Pa gen'}\n💳 Agent ID: ${agentId || 'Pa aplikab'}\n🌐 IP: ${userIp}`;
 
     const waLink = `https://wa.me/${adminNumber.replace(/\+/g,'')}?text=${encodeURIComponent(waMessage)}`;
 
