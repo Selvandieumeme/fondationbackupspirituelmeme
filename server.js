@@ -996,9 +996,27 @@ const walletUserSchema = new mongoose.Schema({
   accountType: { type: String, required: true },
   hasDepositedBefore: { type: Boolean, default: false },
   createdAt: { type: Date, default: Date.now },
-  status: { type: String, default: "pending" }
-  // ajoute nenpòt lòt chan ou bezwen
-});
+  status: { type: String, default: "pending" },
+
+  // 🔐 NOUVO CHAN TRACE / AUDIT / RISK (SAFE)
+  lastAction: { type: String, default: null },
+  lastActionAt: { type: Date, default: null },
+  lastActionBy: { type: String, default: null },
+  adminIp: { type: String, default: null },
+
+  createdBy: { type: String, enum: ["self", "agent", "admin"], default: "self" },
+  registrationChannel: { type: String, enum: ["app", "terrain"], default: "app" },
+  geoZone: { type: String, default: null },
+  deviceId: { type: String, default: null },
+  createdFromDevice: { type: String, default: null },
+
+  kycLevel: { type: Number, default: 0 },
+  riskScore: { type: Number, default: 0 },
+  riskFlags: { type: [String], default: [] },
+
+  auditVersion: { type: Number, default: 1 }
+
+}, { timestamps: true });
 
 // 🔥 Koreksyon pou fè l konpatib ak koleksyon reyèl MongoDB ou
 const WalletUser = mongoose.models.WalletUser || mongoose.model(
@@ -1021,65 +1039,54 @@ const walletBalanceSchema = new mongoose.Schema({
   lastAction: String,
 
   // ===============================
-  // 🔐 TRACE & SECURITÉ (SAFE)
+  // 🔐 TRACE & SÉCURITÉ / NOUVO CHAMPS
   // ===============================
-
   createdBy: {
     type: String,
-    enum: ["self", "agent"],
+    enum: ["self", "agent", "admin"],
     default: "self"
   },
-
   agentId: {
     type: mongoose.Schema.Types.ObjectId,
     default: null
   },
-
   registrationChannel: {
     type: String,
     enum: ["app", "terrain"],
     default: "app"
   },
-
   geoZone: {
     type: String,
     default: null
   },
-
   kycLevel: {
     type: Number,
     default: 0
   },
-
   deviceId: {
     type: String,
     default: null
   },
-
   createdFromDevice: {
     type: String,
     default: null
   },
-
   ipAddress: {
     type: String,
     default: null
   },
-
   riskScore: {
     type: Number,
     default: 0
   },
-
   riskFlags: {
     type: [String],
     default: []
   },
-
-  auditVersion: {
-    type: Number,
-    default: 1
-  }
+  lastActionAt: { type: Date, default: null },
+  lastActionBy: { type: String, default: null },
+  adminIp: { type: String, default: null },
+  auditVersion: { type: Number, default: 1 }
 
 }, { timestamps: true });
 
@@ -1433,12 +1440,17 @@ setTimeout(async () => {
   // Kreye alèt nan tranzaksyon pou admin dashboard
   await Transaction.create({
     email: senderEmail,
-    type: 'transfer',             // menm tip ke dashboard rekonèt
+    type: 'transfer',
     amount,
     receiverEmail,
-    status: 'PENDING',            // admin dashboard deja chaje sa
-    note: 'SECURITY ALERT - Montant limite dépassé', // note pou admin wè ke se alèt
-    createdAt: new Date()
+    status: 'PENDING',
+    note: 'SECURITY ALERT - Montant limite dépassé',
+    createdAt: new Date(),
+    
+    // 🔐 champs audit safe
+    alertBy: 'SYSTEM',
+    alertAt: new Date(),
+    geoZone: geoZone || null
 });
 
   // Notifye dashboard admin imedyatman
@@ -1796,8 +1808,10 @@ if (wallet.bonusBlocked === true && tx.type === 'bonus') {
 app.get("/api/admin/surveillance-agents", async (req, res) => {
   try {
     // 1. Trouver tous les emails impliqués dans des transferts
-    const transfers = await Transaction.find({ type: "transfer", status: "ACTIVE" })
-      .select("email receiverEmail");
+    const transfers = await Transaction.find({
+      type: "transfer",
+      status: "ACTIVE"
+    }).select("email receiverEmail");
 
     const emails = new Set();
 
@@ -1810,7 +1824,24 @@ app.get("/api/admin/surveillance-agents", async (req, res) => {
     const agents = await WalletBalance.find({
       email: { $in: Array.from(emails) },
       walletAccountType: "Agent Autorise"
-    }).sort({ updatedAt: -1 });
+    })
+    .select(`
+      email
+      fullName
+      balance
+      bonus
+      accountStatus
+      balanceFrozen
+      bonusBlocked
+      lastAction
+      createdBy
+      registrationChannel
+      geoZone
+      riskScore
+      riskFlags
+      updatedAt
+    `)
+    .sort({ updatedAt: -1 });
 
     res.json(agents);
   } catch (err) {
@@ -1819,7 +1850,7 @@ app.get("/api/admin/surveillance-agents", async (req, res) => {
   }
 });
 
-// ⚙️ Action admin sur agent
+// ----------------------- ACTION ADMIN SUR AGENT -----------------------
 app.post("/api/admin/agent-action", async (req, res) => {
   try {
     const { email, action } = req.body;
@@ -1833,6 +1864,9 @@ app.post("/api/admin/agent-action", async (req, res) => {
       return res.status(404).json({ message: "Agent introuvable" });
     }
 
+    // ========================
+    // ✅ SWITCH EXISTANT (NE RIEN TOUCHER)
+    // ========================
     switch (action) {
       case "BLOCK_ACCOUNT":
         agent.accountStatus = "BLOQUE";
@@ -1856,7 +1890,14 @@ app.post("/api/admin/agent-action", async (req, res) => {
         return res.status(400).json({ message: "Action invalide" });
     }
 
-    agent.lastAction = action;
+    // ========================
+    // ➕ AJOUT CHAMPS AUDIT / SURVEILLANCE (SAFE)
+    // ========================
+    agent.lastAction = action;               // deja la, pa touche
+    agent.lastActionAt = new Date();         // nouvo
+    agent.lastActionBy = "ADMIN";            // nouvo
+    agent.adminIp = req.ip || null;          // nouvo (optionnel)
+
     await agent.save();
 
     res.json({ success: true });
@@ -1865,7 +1906,6 @@ app.post("/api/admin/agent-action", async (req, res) => {
     res.status(500).json({ message: "Erreur serveur" });
   }
 });
-
 
 
 
