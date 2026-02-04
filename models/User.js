@@ -37,8 +37,8 @@ const WalletUserSchema = new mongoose.Schema({
   adminIp: { type: String, default: "0.0.0.0" },            // placeholder pou trace
   ipAddress: { type: String, default: "0.0.0.0" },
 
-  createdBy: { type: String, enum: ["self", "agent", "admin"], default: "self" },
-  registrationChannel: { type: String, enum: ["app", "terrain"], default: "app" },
+  createdBy: { type: String, enum: ["self", "Agent Autorise", "Admin"], default: "self" },
+  registrationChannel: { type: String, enum: ["app", "Agent Terrain"], default: "app" },
   geoZone: { type: String, default: "undefined" },
   deviceId: { type: String, default: "unknown" },
   createdFromDevice: { type: String, default: "unknown" },
