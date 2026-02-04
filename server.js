@@ -1018,7 +1018,69 @@ const walletBalanceSchema = new mongoose.Schema({
   bonus: { type: Number, default: 0 },
   balanceFrozen: { type: Boolean, default: false },
   bonusBlocked: { type: Boolean, default: false },
-  lastAction: String
+  lastAction: String,
+
+  // ===============================
+  // 🔐 TRACE & SECURITÉ (SAFE)
+  // ===============================
+
+  createdBy: {
+    type: String,
+    enum: ["self", "agent"],
+    default: "self"
+  },
+
+  agentId: {
+    type: mongoose.Schema.Types.ObjectId,
+    default: null
+  },
+
+  registrationChannel: {
+    type: String,
+    enum: ["app", "terrain"],
+    default: "app"
+  },
+
+  geoZone: {
+    type: String,
+    default: null
+  },
+
+  kycLevel: {
+    type: Number,
+    default: 0
+  },
+
+  deviceId: {
+    type: String,
+    default: null
+  },
+
+  createdFromDevice: {
+    type: String,
+    default: null
+  },
+
+  ipAddress: {
+    type: String,
+    default: null
+  },
+
+  riskScore: {
+    type: Number,
+    default: 0
+  },
+
+  riskFlags: {
+    type: [String],
+    default: []
+  },
+
+  auditVersion: {
+    type: Number,
+    default: 1
+  }
+
 }, { timestamps: true });
 
 
