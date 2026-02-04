@@ -35,6 +35,19 @@ function formatGourdes(amount) {
   return Number(amount || 0).toFixed(2) + " Gourdes";
 }
 
+
+// ---------- GEO ZONE (SAFE FRONTEND) ----------
+async function getGeoZone() {
+  try {
+    const res = await fetch("https://ipapi.co/json/");
+    const data = await res.json();
+    return `${data.country_code || "HT"}-${data.region || "UNK"}`;
+  } catch (e) {
+    return "unknown";
+  }
+}
+
+
 // WhatsApp admin
 function sendWhatsAppNotification(message) {
   const adminNumber = "50946057952";
@@ -347,9 +360,13 @@ async function submitTransfer() {
   const receiverEmail = document.getElementById("receiver").value;
   const amount = Number(document.getElementById("amount").value);
 
+  // 🔒 Sekirite: pa ka transfere bay tèt ou
   if (receiverEmail === userEmail) {
     return alert("Vous ne pouvez pas effectuer un transfert à vous-même");
   }
+
+  // 🔄 Capture geoZone pou backend
+  const geoZone = await getGeoZone(); // ✅ AJOUT SAFE
 
   try {
     const res = await fetch(
@@ -358,7 +375,8 @@ async function submitTransfer() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "x-user-email": userEmail
+          "x-user-email": userEmail,
+          "x-geo-zone": geoZone // ✅ AJOUT SAFE
         },
         body: JSON.stringify({
           senderEmail: userEmail,
@@ -369,12 +387,17 @@ async function submitTransfer() {
     );
 
     const data = await res.json();
-    if (!res.ok) return alert(data.message);
 
+    if (!res.ok) {
+      return alert(data.message || "Erreur lors du transfert");
+    }
+
+    // 🔄 Reload dashboard aprè tranzaksyon
     setTimeout(() => {
       loadDashboard();
     }, 800);
 
+    // 📲 Notifikasyon WhatsApp
     sendWhatsAppNotification(
       `🔁 TRANSFERT FOBAS
 De: ${userEmail}
@@ -382,13 +405,13 @@ Vers: ${receiverEmail}
 Montant: ${amount} Gourdes`
     );
 
-    alert(data.message);
+    alert(data.message || "Transfert effectué avec succès");
 
   } catch (err) {
-    console.error(err);
+    console.error("Erreur submitTransfer:", err);
+    alert("Erreur serveur. Veuillez réessayer plus tard.");
   }
 }
-
 
 
 
