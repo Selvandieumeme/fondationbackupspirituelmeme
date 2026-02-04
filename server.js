@@ -1438,18 +1438,32 @@ setTimeout(async () => {
 
   // Kreye alèt nan tranzaksyon pou admin dashboard
   await Transaction.create({
-    email: senderEmail,
-    type: 'transfer',
-    amount,
-    receiverEmail,
-    status: 'PENDING',
-    note: 'SECURITY ALERT - Montant limite dépassé',
-    createdAt: new Date(),
-    
-    // 🔐 champs audit safe
-    alertBy: 'SYSTEM',
-    alertAt: new Date(),
-    geoZone: geoZone || null
+  // =========================
+  // CHAMPS EXISTANTS (PA TOUCHE)
+  // =========================
+  email: senderEmail,
+  type: 'transfer',
+  amount,
+  receiverEmail,
+  status: 'PENDING',
+  note: 'SECURITY ALERT - Montant limite dépassé',
+  createdAt: new Date(),
+
+  // =========================
+  // 🔐 CHAMPS AUDIT / TRACE (ACTIVE DEFAULTS)
+  // =========================
+  alertBy: 'SYSTEM',                     // deja la, ok
+  alertAt: new Date(),                   // deja la, ok
+
+  // Evite null → active monitoring
+  geoZone: geoZone || 'undefined',
+
+  // ➕ NOUVO TRACE SAFE (san kraze anyen)
+  ipAddress: req.ip || '0.0.0.0',         // trace IP itilizatè
+  deviceId: req.headers['user-agent'] || 'unknown', // trace device
+  riskScore: 1,                           // alèt = risk minimal
+  riskFlags: ['LIMIT_EXCEEDED'],          // tag risk klè
+  auditVersion: 1                         // version audit
 });
 
   // Notifye dashboard admin imedyatman
@@ -1505,22 +1519,52 @@ if (receiver.walletAccountType === "Agent Autorise") {
 
 
 
+
 // 🧾 FRAIS – traçabilité utilisateur (SANS impact financier)
 await Transaction.create({
+  // =========================
+  // CHAMPS EXISTANTS (PA TOUCHE)
+  // =========================
   email: senderEmail,
   type: "fees",
   amount: amount * 0.01,
   relatedTransfer: amount,
   status: "ACTIVE",
   note: "Frais transfert 1%",
-  createdAt: new Date()
+  createdAt: new Date(),
+
+  // =========================
+  // 🔐 TRACE / AUDIT / ADMIN (ACTIVE DEFAULTS)
+  // =========================
+  createdBy: "SYSTEM",                    // frais généré automatiquement
+  feeType: "TRANSFER_FEE",                // typage clair pour audit
+  feeRate: 0.01,                          // taux exact (preuve comptable)
+
+  // --- Trace utilisateur ---
+  ipAddress: req.ip || "0.0.0.0",
+  deviceId: req.headers["user-agent"] || "unknown",
+  geoZone: geoZone || "undefined",
+
+  // --- Risk & conformité ---
+  riskScore: 0,                           // frais normal = pas de risque
+  riskFlags: [],                          // aucun flag par défaut
+  kycSnapshot: senderKycLevel || 0,       // état KYC au moment exact
+
+  // --- Audit & historique ---
+  lastAction: "FEE_APPLIED",
+  lastActionAt: new Date(),
+  lastActionBy: "SYSTEM",
+  auditVersion: 1
 });
 
 
 
 	  
     // 🧾 Historique sender ak komisyon
-await Transaction.create({
+  await Transaction.create({
+  // =========================
+  // CHAMPS EXISTANTS (PA TOUCHE)
+  // =========================
   email: senderEmail,
   type: "transfer",
   amount,
@@ -1531,11 +1575,31 @@ await Transaction.create({
   status: "ACTIVE",
   agentBonus: 0.006 * amount,
   platformBonus: 0.004 * amount,
-  createdAt: new Date()
-});
+  createdAt: new Date(),
 
+  // =========================
+  // 🔐 TRACE / AUDIT / ADMIN (ACTIVE DEFAULTS)
+  // =========================
+  createdBy: "SYSTEM",                    // transaction générée automatiquement
+  geoZone: geoZone || "undefined",        // trace zone
+  deviceId: req.headers["user-agent"] || "unknown", // device trace
+  ipAddress: req.ip || "0.0.0.0",         // IP trace
+  kycLevel: senderKycLevel || 0,          // KYC snapshot
+  riskScore: 0,                            // default = pas de risque
+  riskFlags: [],                           // aucun flag par défaut
+  lastAction: "TRANSFER_SENT",             // trace action sender
+  lastActionAt: new Date(),                // horodatage
+  lastActionBy: "SYSTEM",                  // SYSTEM par défaut
+  auditVersion: 1                          // version audit initiale
+});
+	  
+	    
+	
 // 🧾 Historique receiver ak komisyon
 await Transaction.create({
+  // =========================
+  // CHAMPS EXISTANTS (PA TOUCHE)
+  // =========================
   email: receiverEmail,
   type: "transfer",
   amount,
@@ -1546,7 +1610,22 @@ await Transaction.create({
   status: "ACTIVE",
   agentBonus: 0.006 * amount,
   platformBonus: 0.004 * amount,
-  createdAt: new Date()
+  createdAt: new Date(),
+
+  // =========================
+  // 🔐 TRACE / AUDIT / ADMIN (ACTIVE DEFAULTS)
+  // =========================
+  createdBy: "SYSTEM",                     // transaction générée automatiquement
+  geoZone: geoZone || "undefined",         // trace zone
+  deviceId: req.headers["user-agent"] || "unknown", // device trace
+  ipAddress: req.ip || "0.0.0.0",          // IP trace
+  kycLevel: receiverKycLevel || 0,         // KYC snapshot
+  riskScore: 0,                             // default = pas de risque
+  riskFlags: [],                            // aucun flag par défaut
+  lastAction: "TRANSFER_RECEIVED",          // trace action receiver
+  lastActionAt: new Date(),                 // horodatage
+  lastActionBy: "SYSTEM",                   // SYSTEM par défaut
+  auditVersion: 1                           // version audit initiale
 });
     notifyUpdate();
     res.json({ message: "Transfert réussi" });
@@ -1820,27 +1899,50 @@ app.get("/api/admin/surveillance-agents", async (req, res) => {
     });
 
     // 2. Charger uniquement les Agents Autorisés concernés
-    const agents = await WalletBalance.find({
-      email: { $in: Array.from(emails) },
-      walletAccountType: "Agent Autorise"
-    })
-    .select(`
-      email
-      fullName
-      balance
-      bonus
-      accountStatus
-      balanceFrozen
-      bonusBlocked
-      lastAction
-      createdBy
-      registrationChannel
-      geoZone
-      riskScore
-      riskFlags
-      updatedAt
-    `)
-    .sort({ updatedAt: -1 });
+   const agents = await WalletBalance.find({
+  email: { $in: Array.from(emails) },
+  walletAccountType: "Agent Autorise"
+})
+.select(`
+  email
+  fullName
+  balance
+  bonus
+  accountStatus
+  balanceFrozen
+  bonusBlocked
+  lastAction
+  createdBy
+  registrationChannel
+  geoZone
+  riskScore
+  riskFlags
+  lastActionAt
+  lastActionBy
+  adminIp
+  deviceId
+  createdFromDevice
+  kycLevel
+  auditVersion
+  updatedAt
+`)
+.sort({ updatedAt: -1 })
+.lean(); // lean() pou optimize read-only si ou pa modifye agent yo dirèkteman
+
+// ➕ Pou chak agent, nou asire chan default pa null (active monitoring)
+agents.forEach(agent => {
+  agent.lastActionAt = agent.lastActionAt || new Date();
+  agent.lastActionBy = agent.lastActionBy || "SYSTEM";
+  agent.adminIp = agent.adminIp || "0.0.0.0";
+  agent.deviceId = agent.deviceId || "unknown";
+  agent.createdFromDevice = agent.createdFromDevice || "unknown";
+  agent.kycLevel = agent.kycLevel || 0;
+  agent.auditVersion = agent.auditVersion || 1;
+  agent.riskScore = agent.riskScore || 0;
+  agent.riskFlags = agent.riskFlags || [];
+});
+
+res.json(agents);
 
     res.json(agents);
   } catch (err) {
@@ -1892,10 +1994,21 @@ app.post("/api/admin/agent-action", async (req, res) => {
     // ========================
     // ➕ AJOUT CHAMPS AUDIT / SURVEILLANCE (SAFE)
     // ========================
-    agent.lastAction = action;               // deja la, pa touche
-    agent.lastActionAt = new Date();         // nouvo
-    agent.lastActionBy = "ADMIN";            // nouvo
-    agent.adminIp = req.ip || null;          // nouvo (optionnel)
+    agent.lastAction = action;                   // deja la, pa touche
+agent.lastActionAt = new Date();             // nouvo, horodatage
+agent.lastActionBy = "ADMIN";                // nouvo, admin qui a fait action
+agent.adminIp = req.ip || "0.0.0.0";        // nouvo, IP admin
+
+// ➕ Asire tout chan trace / audit / risk default pa null (ACTIVE)
+agent.deviceId = agent.deviceId || "unknown";
+agent.createdFromDevice = agent.createdFromDevice || "unknown";
+agent.geoZone = agent.geoZone || "undefined";
+agent.kycLevel = agent.kycLevel || 0;
+agent.riskScore = agent.riskScore || 0;
+agent.riskFlags = agent.riskFlags || [];
+agent.auditVersion = agent.auditVersion || 1;
+agent.createdBy = agent.createdBy || "ADMIN";
+agent.registrationChannel = agent.registrationChannel || "app";
 
     await agent.save();
 
