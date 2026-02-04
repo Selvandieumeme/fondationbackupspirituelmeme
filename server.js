@@ -2157,41 +2157,92 @@ app.post("/api/wallet/create", async (req, res) => {
 
 // ----------------------- ROUTE API POU LOGIN -----------------------
 app.post("/api/wallet/login", async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    // 🔒 Validation minimale (EXISTANT)
+    if (!email || !password) {
+      return res.status(400).json({
+        success: false,
+        message: "Tout chan obligatwa."
+      });
+    }
+
+    // 🔍 Rechèch itilizatè
+    const user = await WalletUser.findOne({ email });
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "Itilizate pa egziste."
+      });
+    }
+
+    // 🔐 Vérification mot de passe
+    const bcrypt = require("bcryptjs");
+    const isMatch = await bcrypt.compare(password, user.passwordHash);
+    if (!isMatch) {
+      return res.status(401).json({
+        success: false,
+        message: "Mot de pase pa kòrèk."
+      });
+    }
+
+    // ================================
+    // 🔐 AJOUT SAFE CONTEXT (NON BLOQUANT)
+    // ================================
+
+    // IP réelle (proxy safe)
+    const clientIp =
+      req.headers["x-forwarded-for"]?.split(",")[0] ||
+      req.socket?.remoteAddress ||
+      "0.0.0.0";
+
+    // Headers envoyés par frontend (OPTIONNELS)
+    const deviceId = req.headers["x-device-id"] || "unknown";
+    const geoZone = req.headers["x-geo-zone"] || "unknown";
+    const appEnv = req.headers["x-app-env"] || "WEB";
+
+    // ⚠️ Aucun blocage, uniquement traçage
+    user.lastAction = "LOGIN";
+    user.lastActionBy = "SYSTEM";
+    user.ipAddress = clientIp;
+    user.deviceId = user.deviceId || deviceId;
+    user.geoZone = user.geoZone || geoZone;
+    user.createdFromDevice = appEnv;
+
+    // ❗ Save protégé (pas bloquant login)
     try {
-        const { email, password } = req.body;
-        if (!email || !password) {
-            return res.status(400).json({ success: false, message: "Tout chan obligatwa." });
-        }
+      await user.save();
+    } catch (e) {
+      console.warn("⚠️ Login context non sauvegardé:", e.message);
+    }
 
-        const user = await WalletUser.findOne({ email });
-        if (!user) {
-            return res.status(404).json({ success: false, message: "Itilizate pa egziste." });
-        }
-
-        const bcrypt = require("bcryptjs");
-        const isMatch = await bcrypt.compare(password, user.passwordHash);
-        if (!isMatch) {
-            return res.status(401).json({ success: false, message: "Mot de pase pa kòrèk." });
-        }
-
-        // Retounen enfòmasyon itilizate + token (si w itilize JWT)
-        return res.json({
-    success: true,
-    message: "Connexion reyalize avèk siksè!",
-    data: {
+    // ================================
+    // ✅ RÉPONSE LOGIN (INCHANGÉE)
+    // ================================
+    return res.json({
+      success: true,
+      message: "Connexion reyalize avèk siksè!",
+      data: {
         fullName: user.fullName,
         email: user.email,
         status: user.status,
-        solde: user.solde || 0,       
+        solde: user.solde || 0,
         createdAt: user.createdAt
-    }
+      }
+    });
+
+  } catch (err) {
+    console.error("❌ Erreur login:", err);
+    return res.status(500).json({
+      success: false,
+      message: "Erreur serveur"
+    });
+  }
 });
 
-    } catch (err) {
-        console.error("Erreur login:", err);
-        res.status(500).json({ success: false, message: "Erreur serveur" });
-    }
-});
+
+    
 
 
 
@@ -2218,6 +2269,34 @@ function detectAppEnvironment() {
 }
 </script>
 
+<script>
+function getDeviceId() {
+  let deviceId = localStorage.getItem("FOBAS_DEVICE_ID");
+
+  if (!deviceId) {
+    deviceId = "FOBAS-" + crypto.randomUUID();
+    localStorage.setItem("FOBAS_DEVICE_ID", deviceId);
+  }
+
+  return deviceId;
+}
+</script>
+
+
+<script>
+async function getClientContext() {
+  const geoZone = await getGeoZone();
+  const deviceId = getDeviceId();
+  const env = detectAppEnvironment();
+
+  return {
+    geoZone,
+    deviceId,
+    isAndroid: env.isAndroid,
+    isWebView: env.isWebView
+  };
+}
+</script>
 
 
 
