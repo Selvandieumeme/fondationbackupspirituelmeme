@@ -18,23 +18,22 @@
   </div>
 
   <div class="secondary-actions">
-  <!-- Bouton Inscription deja egziste -->
-  <a href="https://fondationbackupspirituel.com/creation-cartevirtuelle-assistance.html"
-     class="btn-inscription">
-    Inscrivez-vous maintenant
-  </a>
+  <div class="top-buttons">
+    <!-- 2 premye bouton yo sou menm ranje -->
+    <a href="creation-cartevirtuelle-assistance.html"
+       class="btn-inscription">
+      Inscrivez-vous maintenant
+    </a>
 
-  <!-- Nouvo bouton Politique de Confidentialité -->
-  <a href="privacypolicyfobas.html"
-     class="btn-inscription"
-     style="margin-left:10px;">
-    Politique de Confidentialité
-  </a>
+    <a href="privacypolicyfobas.html"
+       class="btn-inscription">
+      Politique de Confidentialité
+    </a>
+  </div>
 
-  <!-- 3èm bouton Nos Conditions d'Utilisation -->
+  <!-- 3èm bouton tonbe anba 2 premye -->
   <a href="conditiondutilisationfobas.html"
-     class="btn-inscription"
-     style="margin-top:8px; display:block;">
+     class="btn-conditions">
     Nos Conditions d'Utilisation
   </a>
 </div>
@@ -49,8 +48,14 @@
   .secondary-actions {
     margin-top: 8px;
     display: flex;
-    justify-content: flex-start; /* a goch */
-    flex-wrap: wrap; /* pèmèt bouton tonbe sou nouvo liy si bezwen */
+    flex-direction: column; /* Pou pèmèt 3èm bouton tonbe anba */
+    align-items: flex-start; /* a goch */
+  }
+
+  .secondary-actions .top-buttons {
+    display: flex;           /* 2 premye bouton yo sou menm ranje */
+    gap: 10px;               /* ti espas ant yo */
+    margin-bottom: 8px;      /* ti espas anba 2 premye bouton yo pou 3èm bouton */
   }
 
   .btn-inscription {
@@ -71,8 +76,6 @@
 
   /* Nouvo stil pou 3èm bouton (Nos Conditions d'Utilisation) */
   .btn-conditions {
-    display: block;       /* tonbe anba premye bouton yo */
-    margin-top: 8px;      /* ti espas vizyèl ant bouton yo */
     background-color: #1fa64b; /* menm koulè vert */
     color: #ffffff;
     padding: 4px 10px;    /* menm padding */
@@ -81,6 +84,7 @@
     text-decoration: none;
     cursor: pointer;
     opacity: 0.85;
+    display: inline-block;
   }
 
   .btn-conditions:hover {
