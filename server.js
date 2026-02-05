@@ -2160,7 +2160,6 @@ app.post("/api/wallet/login", async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    // 🔒 Validation minimale (EXISTANT)
     if (!email || !password) {
       return res.status(400).json({
         success: false,
@@ -2168,7 +2167,6 @@ app.post("/api/wallet/login", async (req, res) => {
       });
     }
 
-    // 🔍 Rechèch itilizatè
     const user = await WalletUser.findOne({ email });
     if (!user) {
       return res.status(404).json({
@@ -2177,7 +2175,6 @@ app.post("/api/wallet/login", async (req, res) => {
       });
     }
 
-    // 🔐 Vérification mot de passe
     const bcrypt = require("bcryptjs");
     const isMatch = await bcrypt.compare(password, user.passwordHash);
     if (!isMatch) {
@@ -2187,39 +2184,7 @@ app.post("/api/wallet/login", async (req, res) => {
       });
     }
 
-    // ================================
-    // 🔐 AJOUT SAFE CONTEXT (NON BLOQUANT)
-    // ================================
-
-    // IP réelle (proxy safe)
-    const clientIp =
-      req.headers["x-forwarded-for"]?.split(",")[0] ||
-      req.socket?.remoteAddress ||
-      "0.0.0.0";
-
-    // Headers envoyés par frontend (OPTIONNELS)
-    const deviceId = req.headers["x-device-id"] || "unknown";
-    const geoZone = req.headers["x-geo-zone"] || "unknown";
-    const appEnv = req.headers["x-app-env"] || "WEB";
-
-    // ⚠️ Aucun blocage, uniquement traçage
-    user.lastAction = "LOGIN";
-    user.lastActionBy = "SYSTEM";
-    user.ipAddress = clientIp;
-    user.deviceId = user.deviceId || deviceId;
-    user.geoZone = user.geoZone || geoZone;
-    user.createdFromDevice = appEnv;
-
-    // ❗ Save protégé (pas bloquant login)
-    try {
-      await user.save();
-    } catch (e) {
-      console.warn("⚠️ Login context non sauvegardé:", e.message);
-    }
-
-    // ================================
-    // ✅ RÉPONSE LOGIN (INCHANGÉE)
-    // ================================
+    // Retounen enfòmasyon itilizate + token (si w itilize JWT)
     return res.json({
       success: true,
       message: "Connexion reyalize avèk siksè!",
@@ -2233,102 +2198,13 @@ app.post("/api/wallet/login", async (req, res) => {
     });
 
   } catch (err) {
-    console.error("❌ Erreur login:", err);
+    console.error("Erreur login:", err);
     return res.status(500).json({
       success: false,
       message: "Erreur serveur"
     });
   }
 });
-
-
-    
-
-
-
-
-
-
-
-
-
-
-
-<script>
-function detectAppEnvironment() {
-  const ua = navigator.userAgent || "";
-
-  const isAndroid = /Android/i.test(ua);
-  const isWebView = /(wv|FBAN|FBAV|Instagram|Line)/i.test(ua);
-
-  return {
-    isAndroid,
-    isWebView,
-    userAgent: ua
-  };
-}
-</script>
-
-<script>
-function getDeviceId() {
-  let deviceId = localStorage.getItem("FOBAS_DEVICE_ID");
-
-  if (!deviceId) {
-    deviceId = "FOBAS-" + crypto.randomUUID();
-    localStorage.setItem("FOBAS_DEVICE_ID", deviceId);
-  }
-
-  return deviceId;
-}
-</script>
-
-
-<script>
-async function getClientContext() {
-  const geoZone = await getGeoZone();
-  const deviceId = getDeviceId();
-  const env = detectAppEnvironment();
-
-  return {
-    geoZone,
-    deviceId,
-    isAndroid: env.isAndroid,
-    isWebView: env.isWebView
-  };
-}
-</script>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
