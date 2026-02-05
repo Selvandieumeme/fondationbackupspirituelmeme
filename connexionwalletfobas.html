@@ -15,11 +15,45 @@
 
   <div class="btn-row">
     <button id="loginBtn">Se connecter</button>
-    <button id="registerBtn" type="button">Inscrivez-vous maintenant</button>
   </div>
+
+    <div class="secondary-actions">
+  <a href="https://fondationbackupspirituel.com/creation-cartevirtuelle-assistance.html"
+     class="btn-inscription">
+    Inscrivez-vous maintenant
+  </a>
+</div>
 
   <p id="errorMsg"></p>
 </div>
+
+
+
+
+  <style>
+  .secondary-actions {
+    margin-top: 8px;
+    display: flex;
+    justify-content: flex-start; /* a goch */
+  }
+
+  .btn-inscription {
+    background-color: #1fa64b; /* vert */
+    color: #ffffff;
+    padding: 4px 10px;
+    font-size: 12px;
+    border-radius: 4px;
+    text-decoration: none;
+    cursor: pointer;
+    opacity: 0.85;
+    display: inline-block;
+  }
+
+  .btn-inscription:hover {
+    opacity: 1;
+  }
+</style>
+
   <script src="connexionwalletfobas.js"></script>
 </body>
 </html>
