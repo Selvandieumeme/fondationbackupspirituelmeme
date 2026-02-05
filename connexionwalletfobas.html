@@ -17,7 +17,7 @@
     <button id="loginBtn">Se connecter</button>
   </div>
 
-    <div class="secondary-actions">
+  <div class="secondary-actions">
   <!-- Bouton Inscription deja egziste -->
   <a href="https://fondationbackupspirituel.com/creation-cartevirtuelle-assistance.html"
      class="btn-inscription">
@@ -30,7 +30,15 @@
      style="margin-left:10px;">
     Politique de Confidentialité
   </a>
+
+  <!-- 3èm bouton Nos Conditions d'Utilisation -->
+  <a href="conditiondutilisationfobas.html"
+     class="btn-inscription"
+     style="margin-top:8px; display:block;">
+    Nos Conditions d'Utilisation
+  </a>
 </div>
+
   <p id="errorMsg"></p>
 </div>
 
@@ -42,6 +50,7 @@
     margin-top: 8px;
     display: flex;
     justify-content: flex-start; /* a goch */
+    flex-wrap: wrap; /* pèmèt bouton tonbe sou nouvo liy si bezwen */
   }
 
   .btn-inscription {
@@ -59,7 +68,26 @@
   .btn-inscription:hover {
     opacity: 1;
   }
+
+  /* Nouvo stil pou 3èm bouton (Nos Conditions d'Utilisation) */
+  .btn-conditions {
+    display: block;       /* tonbe anba premye bouton yo */
+    margin-top: 8px;      /* ti espas vizyèl ant bouton yo */
+    background-color: #1fa64b; /* menm koulè vert */
+    color: #ffffff;
+    padding: 4px 10px;    /* menm padding */
+    font-size: 12px;      /* menm font */
+    border-radius: 4px;   /* menm radius */
+    text-decoration: none;
+    cursor: pointer;
+    opacity: 0.85;
+  }
+
+  .btn-conditions:hover {
+    opacity: 1;
+  }
 </style>
+
 
   <script src="connexionwalletfobas.js"></script>
 </body>
