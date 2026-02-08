@@ -1542,7 +1542,7 @@ try {
     receiver.walletAccountType === "Agent Autorise" &&
     Number(amount) === 50000
   ) {
-    const BONUS_AMOUNT = 2500;
+    const BONUS_AMOUNT = 2200;
     const BONUS_DELAY_MS = 10 * 60 * 1000; // 10 minutes
 
     // ===================================================
@@ -1568,7 +1568,7 @@ try {
       senderEmail: sender.email,
       receiverEmail: receiver.email,
       status: "PENDING",
-      note: "Bonus 2,500 Gdes - crédit différé 10 min (Representant FOBAS)",
+      note: "Bonus 2,200 Gdes - crédit différé 10 min (Representant FOBAS)",
       createdAt: new Date(),
 
       // 🔐 Audit / traçabilité
