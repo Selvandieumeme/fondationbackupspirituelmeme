@@ -1528,6 +1528,131 @@ if (receiver.walletAccountType === "Agent Autorise") {
 
 
 
+
+
+
+// ===================================================
+// 🎁 BONUS SPÉCIAL DEPOT REPRESENTANT → AGENT (SAFE FINAL)
+// 👉 Bonus 2,500 Gdes
+// 👉 Auto-crédit vers balance après 10 minutes
+// ===================================================
+try {
+  if (
+    sender.walletAccountType === "Representant FOBAS" &&
+    receiver.walletAccountType === "Agent Autorise" &&
+    Number(amount) === 50000
+  ) {
+    const BONUS_AMOUNT = 2500;
+    const BONUS_DELAY_MS = 10 * 60 * 1000; // 10 minutes
+
+    // ===================================================
+    // 🟢 1. AJOUT BONUS (walletbalances - ETAT ACTUEL)
+    // ===================================================
+    receiver.bonus = (receiver.bonus || 0) + BONUS_AMOUNT;
+
+    receiver.lastAction = "BONUS_PENDING_REPRESENTANT_50K";
+    receiver.lastActionAt = new Date();
+    receiver.lastActionBy = "SYSTEM";
+    receiver.riskScore = receiver.riskScore || 0;
+    receiver.auditVersion = receiver.auditVersion || 1;
+
+    await receiver.save();
+
+    // ===================================================
+    // 🧾 2. TRACE BONUS (transactions)
+    // ===================================================
+    await Transaction.create({
+      email: receiver.email,
+      type: "bonus",
+      amount: BONUS_AMOUNT,
+      senderEmail: sender.email,
+      receiverEmail: receiver.email,
+      status: "PENDING",
+      note: "Bonus 2,500 Gdes - crédit différé 10 min (Representant FOBAS)",
+      createdAt: new Date(),
+
+      // 🔐 Audit / traçabilité
+      createdBy: "SYSTEM",
+      bonusType: "REPRESENTANT_AGENT_DEPOSIT_DELAYED",
+      relatedAmount: amount,
+
+      geoZone: geoZone || "undefined",
+      ipAddress: req.ip || "0.0.0.0",
+      deviceId: req.headers["user-agent"] || "unknown",
+
+      riskScore: 0,
+      riskFlags: [],
+      auditVersion: 1
+    });
+
+    // ===================================================
+    // ⏳ 3. AUTO-CRÉDIT BONUS → BALANCE APRÈ 10 MINUTES
+    // ===================================================
+    setTimeout(async () => {
+      try {
+        const agentWallet = await WalletBalance.findOne({
+          email: receiver.email
+        });
+
+        if (
+          agentWallet &&
+          agentWallet.bonus >= BONUS_AMOUNT &&
+          agentWallet.accountStatus === "ACTIF" &&
+          agentWallet.balanceFrozen !== true
+        ) {
+          // ➖ Retirer du bonus
+          agentWallet.bonus -= BONUS_AMOUNT;
+
+          // ➕ Ajouter au balance (utilisable)
+          agentWallet.balance += BONUS_AMOUNT;
+
+          agentWallet.lastAction = "BONUS_CONVERTED_TO_BALANCE";
+          agentWallet.lastActionAt = new Date();
+          agentWallet.lastActionBy = "SYSTEM";
+
+          await agentWallet.save();
+
+          // 🧾 Trace conversion bonus → balance
+          await Transaction.create({
+            email: agentWallet.email,
+            type: "bonus_conversion",
+            amount: BONUS_AMOUNT,
+            status: "ACTIVE",
+            note: "Conversion automatique bonus → balance après 10 min",
+            createdAt: new Date(),
+
+            createdBy: "SYSTEM",
+            relatedBonusType: "REPRESENTANT_AGENT_DEPOSIT_DELAYED",
+
+            geoZone: geoZone || "undefined",
+            ipAddress: "0.0.0.0",
+            deviceId: "SYSTEM",
+
+            riskScore: 0,
+            riskFlags: [],
+            auditVersion: 1
+          });
+
+          notifyUpdate();
+          console.log(`✅ BONUS 2,500 converti en balance pour ${agentWallet.email}`);
+        }
+      } catch (autoBonusErr) {
+        console.error("❌ ERREUR AUTO-CONVERSION BONUS:", autoBonusErr);
+      }
+    }, BONUS_DELAY_MS);
+  }
+} catch (bonusErr) {
+  console.error("❌ ERREUR BONUS AGENT:", bonusErr);
+}
+
+
+
+
+
+	  
+
+
+
 // 🧾 FRAIS – traçabilité utilisateur (SANS impact financier)
 await Transaction.create({
   // =========================
