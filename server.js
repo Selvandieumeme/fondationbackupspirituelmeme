@@ -1485,10 +1485,17 @@ setTimeout(async () => {
 
 
 
+// ===================================================
 // 💸 FRAIS RETRAIT UTILISATEUR (1%)
+// ===================================================
 let fee = 0;
 
-if (receiver.walletAccountType === "Agent Autorise") {
+// 🔹 Bloque frais pou transfert internal Representant → Agent
+const isInternalRepToAgent =
+  sender.walletAccountType === "Representant FOBAS" &&
+  receiver.walletAccountType === "Agent Autorise";
+
+if (receiver.walletAccountType === "Agent Autorise" && !isInternalRepToAgent) {
   fee = amount * 0.01;
 
   // Vérifier solde total (montant + frais)
@@ -1502,18 +1509,16 @@ if (receiver.walletAccountType === "Agent Autorise") {
   sender.balance -= fee;
 }
 
+// ===================================================
+// 💸 MOUVEMENT FINANCIER PRINCIPAL
+// ===================================================
+sender.balance -= amount;
+receiver.balance += amount;
 
-
-const isInternalRepToAgent =
-  sender.walletAccountType === "Representant FOBAS" &&
-  receiver.walletAccountType === "Agent Autorise";
-
-
-// ✅ Distribisyon komisyon si moun resevwa se Agent
-if (
-  receiver.walletAccountType === "Agent Autorise" &&
-  !isInternalRepToAgent // 🔹 Bloque komisyon pou transfert internal
-) {
+// ===================================================
+// ✅ DISTRIBUTION KOMISYON (Client → Agent, Agent → Agent autorize si autorize)
+// ===================================================
+if (receiver.walletAccountType === "Agent Autorise" && !isInternalRepToAgent) {
   const commission = amount * 0.01;         // 1% total
   const agentShare = amount * 0.006;        // 0.60%
   const platformShare = amount * 0.004;     // 0.40%
@@ -1522,44 +1527,10 @@ if (
   if (admin) admin.balance += platformShare;
 }
 
-// 🔹 SAVE FINALE (toujou san chanje)
+// 🔹 SAVE FINAL (TOUJOU SAN TOUCHÉ EXISTING CODE)
 await sender.save();
 await receiver.save();
 if (admin) await admin.save();
-
-
-
-
-
-
-
-
-	  
-	  
-    // 💸 Mouvement financier
-    sender.balance -= amount;
-    receiver.balance += amount;
-
-    // ✅ Distribisyon komisyon si moun resevwa se Agent
-    if(receiver.walletAccountType === "Agent Autorise"){
-      const commission = amount * 0.01;         // 1% total
-      const agentShare = amount * 0.006;        // 0.60%
-      const platformShare = amount * 0.004;     // 0.40%
-
-      receiver.bonus += agentShare;
-      if(admin) admin.balance += platformShare;
-    }
-
-    await sender.save();
-    await receiver.save();
-    if(admin) await admin.save();
-
-
-
-
-
-
-
 
 // ===================================================
 // 🎁 BONUS SPÉCIAL DEPOT REPRESENTANT → AGENT (SAFE FINAL)
@@ -1567,19 +1538,12 @@ if (admin) await admin.save();
 // 👉 Auto-crédit vers balance après 10 minutes
 // ===================================================
 try {
-  if (
-    sender.walletAccountType === "Representant FOBAS" &&
-    receiver.walletAccountType === "Agent Autorise" &&
-    Number(amount) === 50000
-  ) {
+  if (isInternalRepToAgent && Number(amount) === 50000) {
     const BONUS_AMOUNT = 2500;
     const BONUS_DELAY_MS = 10 * 60 * 1000; // 10 minutes
 
-    // ===================================================
-    // 🟢 1. AJOUT BONUS (walletbalances - ETAT ACTUEL)
-    // ===================================================
+    // ➕ Ajoute bonus imedyat pou trace, men li rete nan bonus
     receiver.bonus = (receiver.bonus || 0) + BONUS_AMOUNT;
-
     receiver.lastAction = "BONUS_PENDING_REPRESENTANT_50K";
     receiver.lastActionAt = new Date();
     receiver.lastActionBy = "SYSTEM";
@@ -1588,9 +1552,7 @@ try {
 
     await receiver.save();
 
-    // ===================================================
-    // 🧾 2. TRACE BONUS (transactions)
-    // ===================================================
+    // 🧾 TRACE obligatwa nan transactions
     await Transaction.create({
       email: receiver.email,
       type: "bonus",
@@ -1615,14 +1577,10 @@ try {
       auditVersion: 1
     });
 
-    // ===================================================
-    // ⏳ 3. AUTO-CRÉDIT BONUS → BALANCE APRÈ 10 MINUTES
-    // ===================================================
+    // ⏳ AUTO-CRÉDIT BONUS → BALANCE APRÈ 10 MINUTES
     setTimeout(async () => {
       try {
-        const agentWallet = await WalletBalance.findOne({
-          email: receiver.email
-        });
+        const agentWallet = await WalletBalance.findOne({ email: receiver.email });
 
         if (
           agentWallet &&
