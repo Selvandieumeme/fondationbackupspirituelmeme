@@ -1504,8 +1504,38 @@ if (receiver.walletAccountType === "Agent Autorise") {
 
 
 
+const isInternalRepToAgent =
+  sender.walletAccountType === "Representant FOBAS" &&
+  receiver.walletAccountType === "Agent Autorise";
+
+
+// ✅ Distribisyon komisyon si moun resevwa se Agent
+if (
+  receiver.walletAccountType === "Agent Autorise" &&
+  !isInternalRepToAgent // 🔹 Bloque komisyon pou transfert internal
+) {
+  const commission = amount * 0.01;         // 1% total
+  const agentShare = amount * 0.006;        // 0.60%
+  const platformShare = amount * 0.004;     // 0.40%
+
+  receiver.bonus += agentShare;
+  if (admin) admin.balance += platformShare;
+}
+
+// 🔹 SAVE FINALE (toujou san chanje)
+await sender.save();
+await receiver.save();
+if (admin) await admin.save();
+
+
+
+
+
+
+
+
 	  
-	
+	  
     // 💸 Mouvement financier
     sender.balance -= amount;
     receiver.balance += amount;
@@ -1542,7 +1572,7 @@ try {
     receiver.walletAccountType === "Agent Autorise" &&
     Number(amount) === 50000
   ) {
-    const BONUS_AMOUNT = 2200;
+    const BONUS_AMOUNT = 2500;
     const BONUS_DELAY_MS = 10 * 60 * 1000; // 10 minutes
 
     // ===================================================
@@ -1568,7 +1598,7 @@ try {
       senderEmail: sender.email,
       receiverEmail: receiver.email,
       status: "PENDING",
-      note: "Bonus 2,200 Gdes - crédit différé 10 min (Representant FOBAS)",
+      note: "Bonus 2,500 Gdes - crédit différé 10 min (Representant FOBAS)",
       createdAt: new Date(),
 
       // 🔐 Audit / traçabilité
