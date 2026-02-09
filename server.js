@@ -1651,9 +1651,7 @@ try {
   if (isOfficialPartnerToAgent) {
     console.log(`🔒 Transfert Partenaire Officiel FOBAS → Agent: pas de frais, pas de bonus, pas de commission`);
 
-    // 🔹 Mouvman finansye imedyat
-    sender.balance -= amount;
-    receiver.balance += amount;
+   
 
     // 🔹 Save san okenn frais/bonus/commission
     await sender.save();
