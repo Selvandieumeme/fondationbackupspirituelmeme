@@ -1485,6 +1485,12 @@ setTimeout(async () => {
 
 
 
+
+
+
+
+
+	  
 // ===================================================
 // 💸 FRAIS RETRAIT UTILISATEUR (1%)
 // ===================================================
@@ -1495,17 +1501,23 @@ const isInternalRepToAgent =
   sender.walletAccountType === "Representant FOBAS" &&
   receiver.walletAccountType === "Agent Autorise";
 
-if (receiver.walletAccountType === "Agent Autorise" && !isInternalRepToAgent) {
+// 🔹 Bloque frais pou transfert Partenaire Officiel FOBAS → Agent
+const isOfficialPartnerToAgent =
+  sender.walletAccountType === "Partenaire Officiel FOBAS" &&
+  receiver.walletAccountType === "Agent Autorise";
+
+// ---------------------------------------------------
+// 1️⃣ Frais normal (Client → Agent Autorise)
+// ---------------------------------------------------
+if (receiver.walletAccountType === "Agent Autorise" && !isInternalRepToAgent && !isOfficialPartnerToAgent) {
   fee = amount * 0.01;
 
-  // Vérifier solde total (montant + frais)
   if (sender.balance < amount + fee) {
     return res.status(400).json({
       message: "Solde insuffisant pour couvrir le montant + frais"
     });
   }
 
-  // Retirer les frais du sender
   sender.balance -= fee;
 }
 
@@ -1516,9 +1528,13 @@ sender.balance -= amount;
 receiver.balance += amount;
 
 // ===================================================
-// ✅ DISTRIBUTION KOMISYON (Client → Agent, Agent → Agent autorize si autorize)
+// ✅ DISTRIBUTION KOMISYON (Client → Agent)
 // ===================================================
-if (receiver.walletAccountType === "Agent Autorise" && !isInternalRepToAgent) {
+if (
+  receiver.walletAccountType === "Agent Autorise" &&
+  !isInternalRepToAgent &&
+  !isOfficialPartnerToAgent
+) {
   const commission = amount * 0.01;         // 1% total
   const agentShare = amount * 0.006;        // 0.60%
   const platformShare = amount * 0.004;     // 0.40%
@@ -1527,7 +1543,7 @@ if (receiver.walletAccountType === "Agent Autorise" && !isInternalRepToAgent) {
   if (admin) admin.balance += platformShare;
 }
 
-// 🔹 SAVE FINAL (TOUJOU SAN TOUCHÉ EXISTING CODE)
+// 🔹 SAVE FINAL (toujou san touche existing code)
 await sender.save();
 await receiver.save();
 if (admin) await admin.save();
@@ -1563,7 +1579,6 @@ try {
       note: "Bonus 2,500 Gdes - crédit différé 10 min (Representant FOBAS)",
       createdAt: new Date(),
 
-      // 🔐 Audit / traçabilité
       createdBy: "SYSTEM",
       bonusType: "REPRESENTANT_AGENT_DEPOSIT_DELAYED",
       relatedAmount: amount,
@@ -1588,10 +1603,7 @@ try {
           agentWallet.accountStatus === "ACTIF" &&
           agentWallet.balanceFrozen !== true
         ) {
-          // ➖ Retirer du bonus
           agentWallet.bonus -= BONUS_AMOUNT;
-
-          // ➕ Ajouter au balance (utilisable)
           agentWallet.balance += BONUS_AMOUNT;
 
           agentWallet.lastAction = "BONUS_CONVERTED_TO_BALANCE";
@@ -1600,7 +1612,6 @@ try {
 
           await agentWallet.save();
 
-          // 🧾 Trace conversion bonus → balance
           await Transaction.create({
             email: agentWallet.email,
             type: "bonus_conversion",
@@ -1633,6 +1644,55 @@ try {
   console.error("❌ ERREUR BONUS AGENT:", bonusErr);
 }
 
+// ===================================================
+// 🔹 TRANSFERT SPECIAUX PARTENAIRE OFFICIEL → AGENT
+// ===================================================
+try {
+  if (isOfficialPartnerToAgent) {
+    console.log(`🔒 Transfert Partenaire Officiel FOBAS → Agent: pas de frais, pas de bonus, pas de commission`);
+
+    // 🔹 Mouvman finansye imedyat
+    sender.balance -= amount;
+    receiver.balance += amount;
+
+    // 🔹 Save san okenn frais/bonus/commission
+    await sender.save();
+    await receiver.save();
+
+    // 🔹 Trace nan transactions
+    await Transaction.create({
+      email: receiver.email,
+      type: "transfer",
+      amount: amount,
+      senderEmail: sender.email,
+      receiverEmail: receiver.email,
+      status: "ACTIVE",
+      note: "Transfert Partenaire Officiel FOBAS → Agent Autorise (sans frais/bonus/commission)",
+      createdAt: new Date(),
+
+      createdBy: "SYSTEM",
+      geoZone: geoZone || "undefined",
+      ipAddress: req.ip || "0.0.0.0",
+      deviceId: req.headers["user-agent"] || "unknown",
+      riskScore: 0,
+      riskFlags: [],
+      auditVersion: 1
+    });
+
+    notifyUpdate();
+
+    return res.json({
+      message: "Transfert effectué pour Partenaire Officiel FOBAS sans frais/bonus."
+    });
+  }
+} catch (partnerErr) {
+  console.error("❌ ERREUR TRANSFERT PARTENAIRE OFFICIEL:", partnerErr);
+}
+
+
+
+
+	  
 
 
 
