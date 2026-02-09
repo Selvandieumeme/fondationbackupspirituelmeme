@@ -1649,21 +1649,23 @@ try {
 // ===================================================
 try {
   if (isOfficialPartnerToAgent) {
-    console.log(`🔒 Transfert Partenaire Officiel FOBAS → Agent: pas de frais, pas de bonus, pas de commission`);
-
-   
+    console.log(
+      `🔒 Transfert Partenaire Officiel FOBAS → Agent: pas de frais, pas de bonus, pas de commission`
+    );
 
     // 🔹 Save san okenn frais/bonus/commission
     await sender.save();
     await receiver.save();
 
-    // 🔹 Trace nan transactions
+    // 🔹 TRACE UNIQUE (sender = propriétaire de la transaction)
     await Transaction.create({
-      email: receiver.email,
+      email: sender.email,              // ✅ TRES IMPORTANT
       type: "transfer",
       amount: amount,
+
       senderEmail: sender.email,
       receiverEmail: receiver.email,
+
       status: "ACTIVE",
       note: "Transfert Partenaire Officiel FOBAS → Agent Autorise (sans frais/bonus/commission)",
       createdAt: new Date(),
@@ -1672,11 +1674,13 @@ try {
       geoZone: geoZone || "undefined",
       ipAddress: req.ip || "0.0.0.0",
       deviceId: req.headers["user-agent"] || "unknown",
+
       riskScore: 0,
       riskFlags: [],
       auditVersion: 1
     });
 
+    // 🔔 Déclenche tous les listeners existants (WhatsApp, socket, dashboard)
     notifyUpdate();
 
     return res.json({
