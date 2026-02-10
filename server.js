@@ -2139,8 +2139,6 @@ agents.forEach(agent => {
   agent.riskFlags = agent.riskFlags || [];
 });
 
-res.json(agents);
-
     res.json(agents);
   } catch (err) {
     console.error("❌ Surveillance agents error:", err);
@@ -2151,11 +2149,22 @@ res.json(agents);
 // ----------------------- ACTION ADMIN SUR AGENT -----------------------
 app.post("/api/admin/agent-action", async (req, res) => {
   try {
-    const { email, action } = req.body;
+    const { email, action } = req.body; // ⬅️ OBLIGATWA
+
+	if (!action) {
+  return res.status(400).json({ message: "Action manquante" });
+}
+	  
 
     const agent = await WalletBalance.findOne({
       email,
-      walletAccountType: "Agent Autorise"
+      walletAccountType: {
+        $in: [
+          "Agent Autorise",
+          "Representant FOBAS",
+          "Partenaire Officiel FOBAS"
+        ]
+      }
     });
 
     if (!agent) {
@@ -2165,9 +2174,7 @@ app.post("/api/admin/agent-action", async (req, res) => {
 
 
 
-
-
-
+	  
 // ===================================================
 // 🔐 CONTROLE ROLE SENSIBLE (SAFE – AJOUT SEULEMENT)
 // ===================================================
@@ -2251,6 +2258,83 @@ agent.registrationChannel = agent.registrationChannel || "app";
 
 
 
+// =======================
+// 🔐 ADMIN CREDIT WALLET (SAFE)
+// =======================
+app.post("/api/admin/wallet-credit", async (req, res) => {
+  try {
+    const { email, amount, target } = req.body; 
+    // target = "balance" | "bonus"
+
+    if (!email || !amount || amount <= 0) {
+      return res.status(400).json({ message: "Paramètres invalides" });
+    }
+
+    const wallet = await WalletBalance.findOne({ email });
+
+    if (!wallet) {
+      return res.status(404).json({ message: "Wallet introuvable" });
+    }
+
+    // 🔒 Sécurité minimale
+    if (wallet.accountStatus !== "ACTIF") {
+      return res.status(403).json({ message: "Compte non actif" });
+    }
+
+    // =======================
+    // ➕ CREDIT ADMIN
+    // =======================
+    if (target === "bonus") {
+      wallet.bonus += Number(amount);
+    } else {
+      wallet.balance += Number(amount);
+    }
+
+    // =======================
+    // 🔐 AUDIT
+    // =======================
+    wallet.lastAction = "ADMIN_CREDIT";
+    wallet.lastActionAt = new Date();
+    wallet.lastActionBy = "ADMIN";
+    wallet.adminIp = req.ip || "0.0.0.0";
+    wallet.auditVersion = wallet.auditVersion || 1;
+
+    await wallet.save();
+
+    // =======================
+    // 🧾 TRACE TRANSACTION
+    // =======================
+    await Transaction.create({
+      email: wallet.email,
+      type: "admin_credit",
+      amount: Number(amount),
+      status: "ACTIVE",
+      note: `Crédit admin vers ${target}`,
+      createdAt: new Date(),
+
+      createdBy: "ADMIN",
+      target,
+      geoZone: wallet.geoZone || "undefined",
+      ipAddress: req.ip || "0.0.0.0",
+      deviceId: req.headers["user-agent"] || "ADMIN_PANEL",
+
+      riskScore: 0,
+      riskFlags: [],
+      auditVersion: 1
+    });
+
+    notifyUpdate(); // 🔔 temps réel + WhatsApp admin
+
+    res.json({
+      success: true,
+      newBalance: wallet.balance,
+      newBonus: wallet.bonus
+    });
+  } catch (err) {
+    console.error("❌ ADMIN CREDIT ERROR:", err);
+    res.status(500).json({ message: "Erreur serveur" });
+  }
+});
 
 
 
