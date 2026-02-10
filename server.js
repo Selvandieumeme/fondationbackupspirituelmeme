@@ -2084,11 +2084,18 @@ app.get("/api/admin/surveillance-agents", async (req, res) => {
     // 2. Charger uniquement les Agents Autorisés concernés
    const agents = await WalletBalance.find({
   email: { $in: Array.from(emails) },
-  walletAccountType: "Agent Autorise"
+  walletAccountType: {
+    $in: [
+      "Agent Autorise",
+      "Representant FOBAS",
+      "Partenaire Officiel FOBAS"
+    ]
+  }
 })
 .select(`
   email
   fullName
+  walletAccountType
   balance
   bonus
   accountStatus
@@ -2112,6 +2119,13 @@ app.get("/api/admin/surveillance-agents", async (req, res) => {
 .sort({ updatedAt: -1 })
 .lean(); // lean() pou optimize read-only si ou pa modifye agent yo dirèkteman
 
+
+// ➕ AJOUT SAFE — label rôle pour surveillance admin (LECTURE SEULEMENT)
+agents.forEach(agent => {
+  agent.roleLabel = agent.walletAccountType; // 🟢 PURE INFO ADMIN
+});
+	  
+	  
 // ➕ Pou chak agent, nou asire chan default pa null (active monitoring)
 agents.forEach(agent => {
   agent.lastActionAt = agent.lastActionAt || new Date();
@@ -2147,6 +2161,35 @@ app.post("/api/admin/agent-action", async (req, res) => {
     if (!agent) {
       return res.status(404).json({ message: "Agent introuvable" });
     }
+
+
+
+
+
+
+
+// ===================================================
+// 🔐 CONTROLE ROLE SENSIBLE (SAFE – AJOUT SEULEMENT)
+// ===================================================
+if (
+  ["Representant FOBAS", "Partenaire Officiel FOBAS"].includes(agent.walletAccountType)
+) {
+  const forbiddenActions = [
+    "BLOCK_BONUS",
+    "UNBLOCK_BONUS"
+  ];
+
+  if (forbiddenActions.includes(action)) {
+    return res.status(403).json({
+      message: "Action non autorisée pour ce type de compte"
+    });
+  }
+}
+
+
+
+
+	  
 
     // ========================
     // ✅ SWITCH EXISTANT (NE RIEN TOUCHER)
