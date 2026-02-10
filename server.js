@@ -2343,6 +2343,77 @@ app.post("/api/admin/wallet-credit", async (req, res) => {
 
 
 
+// =======================
+// 🔐 ADMIN RETRAIT WALLET
+// =======================
+app.post("/api/admin/wallet-withdraw", async (req, res) => {
+  try {
+    const { email, amount, target } = req.body;
+
+    if (!email || !amount || amount <= 0) {
+      return res.status(400).json({ message: "Paramètres invalides" });
+    }
+
+    const wallet = await WalletBalance.findOne({ email });
+    if (!wallet) {
+      return res.status(404).json({ message: "Wallet introuvable" });
+    }
+
+    if (wallet.accountStatus !== "ACTIF") {
+      return res.status(403).json({ message: "Compte non actif" });
+    }
+
+    // 🔒 Vérification fonds
+    if (target === "bonus") {
+      if (wallet.bonus < amount) {
+        return res.status(400).json({ message: "Bonus insuffisant" });
+      }
+      wallet.bonus -= amount;
+    } else {
+      if (wallet.balance < amount) {
+        return res.status(400).json({ message: "Balance insuffisante" });
+      }
+      wallet.balance -= amount;
+    }
+
+    // 🔐 AUDIT
+    wallet.lastAction = "ADMIN_RETRAIT";
+    wallet.lastActionAt = new Date();
+    wallet.lastActionBy = "ADMIN";
+    wallet.adminIp = req.ip || "0.0.0.0";
+
+    await wallet.save();
+
+    // 🧾 TRACE TRANSACTION
+    await Transaction.create({
+      email: wallet.email,
+      type: "admin_withdraw",
+      amount: Number(amount),
+      status: "ACTIVE",
+      note: `Retrait admin depuis ${target}`,
+      createdAt: new Date(),
+      createdBy: "ADMIN",
+      target,
+      ipAddress: req.ip || "0.0.0.0",
+      auditVersion: 1
+    });
+
+    notifyUpdate(); // 🔔 temps réel
+
+    res.json({ message: "Retrait effectué avec succès" });
+
+  } catch (err) {
+    console.error("❌ ADMIN RETRAIT ERROR:", err);
+    res.status(500).json({ message: "Erreur serveur" });
+  }
+});
+
+
+
+
+
+
+
 
 
 
