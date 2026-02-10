@@ -93,6 +93,54 @@ async function transferer() {
 
 
 
+
+
+
+
+// ======================================
+// 🔐 ADMIN RETRAIT WALLET (SAFE)
+// ======================================
+async function retirer() {
+  const email = select.value;
+  if (!email) return alert("Veuillez sélectionner un agent");
+
+  const amount = prompt("Montant à retirer :");
+  if (!amount || isNaN(amount) || Number(amount) <= 0) {
+    return alert("Montant invalide");
+  }
+
+  const target = prompt("Retirer depuis balance ou bonus ? (balance/bonus)").toLowerCase();
+  if (target !== "balance" && target !== "bonus") {
+    return alert("Cible invalide");
+  }
+
+  try {
+    const res = await fetch(`${API}/api/admin/wallet-withdraw`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        email,
+        amount: Number(amount),
+        target
+      })
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      return alert(data.message || "Erreur retrait");
+    }
+
+    alert(data.message || "Retrait effectué avec succès");
+    await loadAgents(); // 🔄 rafraichi infos agent
+  } catch (err) {
+    console.error("❌ RETRAIT ERROR:", err);
+    alert("Erreur serveur lors du retrait");
+  }
+}
+
+
+
 // Auto refresh toutes les 5 secondes
 setInterval(loadAgents, 5000);
 loadAgents();
