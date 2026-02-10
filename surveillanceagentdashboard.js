@@ -56,6 +56,43 @@ async function sendAction(action) {
   await loadAgents(); // refresh immédiat
 }
 
+
+
+
+
+
+
+async function transferer() {
+  const email = select.value;
+  if (!email) return alert("Veuillez sélectionner un agent");
+
+  const amount = prompt("Montant à transférer :");
+  if (!amount || isNaN(amount) || Number(amount) <= 0) {
+    return alert("Montant invalide");
+  }
+
+  const target = prompt("Vers balance ou bonus ? (balance/bonus)").toLowerCase();
+  if (target !== "balance" && target !== "bonus") {
+    return alert("Cible invalide");
+  }
+
+  try {
+    const res = await fetch(`${API}/api/admin/wallet-credit`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, amount: Number(amount), target })
+    });
+    const data = await res.json();
+    alert(data.message || "Transfert effectué !");
+    await loadAgents(); // rafrechi detay agent
+  } catch (err) {
+    console.error(err);
+    alert("Erreur lors du transfert");
+  }
+}
+
+
+
 // Auto refresh toutes les 5 secondes
 setInterval(loadAgents, 5000);
 loadAgents();
