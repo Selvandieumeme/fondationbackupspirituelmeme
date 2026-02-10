@@ -123,6 +123,44 @@
   </div>
 </div>
 
+
+
+
+
+
+
+
+
+
+ 
+ <div id="transferModal" style="
+  display:none;
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,0.6);
+  align-items:center;
+  justify-content:center;
+  z-index:10000;
+">
+  <div style="
+    background:white;
+    padding:20px;
+    border-radius:12px;
+    width:320px;
+  ">
+    <h3>💸 Transfert Admin</h3>
+    <input id="transferReceiver" placeholder="Email bénéficiaire" style="width:100%;margin:8px 0;padding:8px">
+    <input id="transferAmount" type="number" placeholder="Montant" style="width:100%;margin:8px 0;padding:8px">
+    <button class="validate-btn" onclick="submitTransfer()">Valider</button>
+    <button onclick="closeTransferModal()">Annuler</button>
+  </div>
+</div>
+
+
+
+
+
+
  
 
 <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
