@@ -198,9 +198,33 @@ if (t.type === "admin_note" && typeof t.note === "string") {
 
 
 
+
+// ---------- ADMIN NOTE BADGE (SAFE, VISUEL SEULEMENT) ----------
+let adminBadge = "";
+
+if (t.type === "admin_note") {
+  adminBadge = `
+    <span style="
+      display:inline-block;
+      margin-left:6px;
+      padding:2px 6px;
+      background:#f1c40f;
+      color:#000;
+      font-size:11px;
+      font-weight:bold;
+      border-radius:4px;
+    ">
+      🛡️ MESSAGE ADMIN
+    </span>
+  `;
+}
+
+
+  
+
 // ===============================================================
  div.innerHTML = `
-  <b>${t.type.toUpperCase()}</b> | ${formatGourdes(t.amount)}<br>
+  <b>${t.type.toUpperCase()}</b>${adminBadge} | ${formatGourdes(t.amount)}<br>
   ${transferDetails}
   ${adminNoteHtml}
   Statut: <span class="${t.status === "PENDING" ? "pending" : "active"}">
