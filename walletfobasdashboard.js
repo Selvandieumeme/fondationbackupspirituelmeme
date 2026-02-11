@@ -194,7 +194,7 @@ function addHistory(t) {
 `;
 
 historyBox.prepend(div);
-
+}
 
 
 
