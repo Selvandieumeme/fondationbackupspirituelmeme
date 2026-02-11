@@ -1101,6 +1101,7 @@ const transactionSchema = new mongoose.Schema({
   type: String, // deposit, withdraw, transfer, bonus
   amount: Number,
   fee: { type: Number, default: 0 },
+  note: String, // ✅ ADMIN NOTE (SAFE)
   method: String,
   whatsapp: String,
   country: String,
