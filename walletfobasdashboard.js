@@ -176,24 +176,7 @@ function addHistory(t) {
 
 
 
-// ------------------------- ADMIN NOTE -------------------------
-let adminNoteHtml = "";
 
-if (t.type === "admin_note" && t.note) {
-  adminNoteHtml = `
-    <div class="admin-note" style="
-      margin-top:6px;
-      padding:6px 8px;
-      background:#fff7d6;
-      border-left:4px solid #f1c40f;
-      font-size:13px;
-    ">
-      📝 <b>Note Admin :</b><br>
-      ${t.note}
-    </div>
-  `;
-}
-  
   
 
 
