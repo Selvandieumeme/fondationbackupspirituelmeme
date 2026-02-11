@@ -233,7 +233,11 @@ if (t.type === "admin_note") {
   Date: ${dateStr}
 `;
 
-historyBox.prepend(div);
+// ---------- PRIORITÉ AFFICHAGE ADMIN NOTE (SAFE) ----------
+if (t.type === "admin_note") {
+  historyBox.prepend(div); // toujours en haut
+} else {
+  historyBox.append(div); // comportement normal
 }
 
 
