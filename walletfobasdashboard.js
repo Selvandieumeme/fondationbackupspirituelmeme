@@ -239,7 +239,7 @@ if (t.type === "admin_note") {
 } else {
   historyBox.append(div); // comportement normal
 }
-
+}
 
 
 
