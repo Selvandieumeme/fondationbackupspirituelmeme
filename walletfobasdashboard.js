@@ -195,7 +195,7 @@ if (t.type === "admin_note" && t.note) {
 }
   
   
-  // ===============================================================
+
 
   // ------------------------- ADMIN NOTE -------------------------
 let adminNoteHtml = "";
@@ -217,17 +217,18 @@ if (t.type === "admin_note" && t.note) {
 
 // ===============================================================
 
-div.innerHTML = `
-  <b>${t.type.toUpperCase()}</b> | ${formatGourdes(t.amount)}<br>
-  ${transferDetails}
-  ${adminNoteHtml}
-  Statut: <span class="${t.status === "PENDING" ? "pending" : "active"}">
-    ${t.status}
-  </span><br>
-  Date: ${dateStr}
-`;
+  div.innerHTML = `
+    <b>${t.type.toUpperCase()}</b> | ${formatGourdes(t.amount || 0)}<br>
+    ${transferDetails}
+    ${adminNoteHtml}   <!-- admin note ajoute opsyonèlman -->
+    Statut: <span class="${t.status === "PENDING" ? "pending" : "active"}">
+      ${t.status || 'ACTIVE'}
+    </span><br>
+    Date: ${dateStr}
+  `;
 
-historyBox.prepend(div);
+  historyBox.prepend(div);
+}
 
 
 
