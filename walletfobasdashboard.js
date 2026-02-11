@@ -197,18 +197,41 @@ if (t.type === "admin_note" && t.note) {
   
   // ===============================================================
 
-  div.innerHTML = `
-    <b>${t.type.toUpperCase()}</b> | ${formatGourdes(t.amount)}<br>
-    ${transferDetails}
-    ${adminNoteHtml}
-    Statut: <span class="${t.status === "PENDING" ? "pending" : "active"}">
-      ${t.status}
-    </span><br>
-    Date: ${dateStr}
-  `;
+  // ------------------------- ADMIN NOTE -------------------------
+let adminNoteHtml = "";
 
-  historyBox.prepend(div);
+if (t.type === "admin_note" && t.note) {
+  adminNoteHtml = `
+    <div class="admin-note" style="
+      margin-top:6px;
+      padding:6px 8px;
+      background:#fff7d6;
+      border-left:4px solid #f1c40f;
+      font-size:13px;
+    ">
+      📝 <b>Note Admin :</b><br>
+      ${t.note}
+    </div>
+  `;
 }
+
+// ===============================================================
+
+div.innerHTML = `
+  <b>${t.type.toUpperCase()}</b> | ${formatGourdes(t.amount)}<br>
+  ${transferDetails}
+  ${adminNoteHtml}
+  Statut: <span class="${t.status === "PENDING" ? "pending" : "active"}">
+    ${t.status}
+  </span><br>
+  Date: ${dateStr}
+`;
+
+historyBox.prepend(div);
+
+
+
+
 
 // ---------- EXPORT CSV FINAL ---------- 
 async function exportHistoryCSV() {
