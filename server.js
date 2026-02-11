@@ -2089,7 +2089,9 @@ app.get("/api/admin/surveillance-agents", async (req, res) => {
     $in: [
       "Agent Autorise",
       "Representant FOBAS",
-      "Partenaire Officiel FOBAS"
+      "Partenaire Officiel FOBAS",
+	  "Utilisateu",
+	  "Agent Terrain"
     ]
   }
 })
@@ -2163,7 +2165,9 @@ app.post("/api/admin/agent-action", async (req, res) => {
         $in: [
           "Agent Autorise",
           "Representant FOBAS",
-          "Partenaire Officiel FOBAS"
+          "Partenaire Officiel FOBAS",
+		  "Utilisateu",
+	      "Agent Terrain"
         ]
       }
     });
