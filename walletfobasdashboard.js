@@ -176,17 +176,33 @@ function addHistory(t) {
 
 
 
+// ------------------------- ADMIN NOTE (SAFE) -------------------------
+let adminNoteHtml = "";
 
+if (t.type === "admin_note" && typeof t.note === "string") {
+  adminNoteHtml = `
+    <div style="
+      margin-top:6px;
+      padding:6px 8px;
+      background:#fff7d6;
+      border-left:4px solid #f1c40f;
+      font-size:13px;
+    ">
+      📝 <b>Note Admin :</b><br>
+      ${t.note}
+    </div>
+  `;
+}
   
 
 
 
 
 // ===============================================================
-
  div.innerHTML = `
   <b>${t.type.toUpperCase()}</b> | ${formatGourdes(t.amount)}<br>
   ${transferDetails}
+  ${adminNoteHtml}
   Statut: <span class="${t.status === "PENDING" ? "pending" : "active"}">
     ${t.status}
   </span><br>
