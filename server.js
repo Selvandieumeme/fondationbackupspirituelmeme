@@ -2412,6 +2412,57 @@ app.post("/api/admin/wallet-withdraw", async (req, res) => {
 
 
 
+// =======================
+// 📝 ADMIN NOTE UTILISATEUR (SAFE)
+// =======================
+app.post("/api/admin/note", async (req, res) => {
+  try {
+    const { email, message } = req.body;
+
+    if (!email || !message || message.trim().length < 2) {
+      return res.status(400).json({ message: "Message invalide" });
+    }
+
+    const wallet = await WalletBalance.findOne({ email });
+    if (!wallet) {
+      return res.status(404).json({ message: "Utilisateur introuvable" });
+    }
+
+    // 🧾 TRACE SOUS FORME DE TRANSACTION
+    await Transaction.create({
+      email,
+      type: "admin_note",
+      amount: 0,
+      status: "ACTIVE",
+      note: message,
+      createdAt: new Date(),
+
+      createdBy: "ADMIN",
+      adminIp: req.ip || "0.0.0.0",
+
+      riskScore: 0,
+      riskFlags: [],
+      auditVersion: 1
+    });
+
+    notifyUpdate(); // 🔔 temps réel
+
+    res.json({ success: true, message: "Note envoyée avec succès" });
+
+  } catch (err) {
+    console.error("❌ ADMIN NOTE ERROR:", err);
+    res.status(500).json({ message: "Erreur serveur" });
+  }
+});
+
+
+
+
+
+
+
+
+
 
 
 
