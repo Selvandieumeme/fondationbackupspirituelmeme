@@ -141,6 +141,38 @@ async function retirer() {
 
 
 
+
+
+
+
+async function adminNote() {
+  const email = select.value;
+  if (!email) return alert("Veuillez sélectionner un agent");
+
+  const message = prompt("Message admin à envoyer :");
+  if (!message || message.trim().length < 2) {
+    return alert("Message invalide");
+  }
+
+  try {
+    const res = await fetch(`${API}/api/admin/note`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, message })
+    });
+
+    const data = await res.json();
+    alert(data.message || "Note envoyée");
+
+  } catch (err) {
+    console.error(err);
+    alert("Erreur lors de l'envoi de la note");
+  }
+}
+
+
+
+
 // Auto refresh toutes les 5 secondes
 setInterval(loadAgents, 5000);
 loadAgents();
