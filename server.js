@@ -1157,6 +1157,35 @@ app.post("/api/wallet/verify-identity", async (req, res) => {
 
 
 
+
+
+// =======================
+// 📩 SCHEMA ADMIN MESSAGES (SAFE, ISOLE)
+// =======================
+const adminMessageSchema = new mongoose.Schema({
+  userEmail: { type: String, required: true },
+  userFullName: { type: String, default: "" },
+
+  messageFromUser: { type: String, default: "" },
+  messageFromAdmin: { type: String, default: "" },
+
+  status: { type: String, default: "UNREAD" }, // UNREAD | READ
+  sender: { type: String, enum: ["USER", "ADMIN"], required: true },
+
+  adminReadAt: Date,
+  userReadAt: Date,
+
+  createdAt: { type: Date, default: Date.now }
+});
+
+const AdminMessage = mongoose.model("admin_messages", adminMessageSchema);
+
+
+
+
+
+
+
 // ----------------------- SOCKET -----------------------
 io.on('connection', socket => {
   console.log('🔌 Socket connecté');
