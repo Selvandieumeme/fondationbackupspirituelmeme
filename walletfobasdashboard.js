@@ -668,6 +668,92 @@ function exportHistoryCSV() {
 
 
 
+
+
+
+
+
+// =======================================
+// 📨 ESPAS CHAT ITILIZATE - ADMIN MESSAGE
+// =======================================
+
+const API = "https://api.fondationbackupspirituel.com";
+
+// Ouvri/ferme espas mesaj
+document.getElementById("btnMessageAdmin").onclick = () => {
+  const box = document.getElementById("adminMessageBox");
+  box.style.display = box.style.display === "block" ? "none" : "block";
+};
+
+// Voye mesaj admin
+document.getElementById("sendAdminMessage").onclick = async () => {
+  const message = document.getElementById("adminMessageText").value;
+
+  if (!message || message.trim().length < 2) return alert("Message trop court");
+
+  try {
+    const res = await fetch(`${API}/api/user/message-admin`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        email: currentUser.email,
+        fullName: currentUser.fullName,
+        message
+      })
+    });
+
+    const data = await res.json();
+    if (!res.ok) return alert(data.message || "Erreur serveur");
+
+    document.getElementById("adminMessageText").value = "";
+    alert(data.message || "Message envoyé à l’admin");
+
+    loadUserMessages(); // rafrechi lis mesaj la
+  } catch (err) {
+    console.error("Erreur envoi message:", err);
+    alert("Erreur serveur lors de l'envoi du message");
+  }
+};
+
+// Chaje tout mesaj itilizatè ak admin
+async function loadUserMessages() {
+  try {
+    const res = await fetch(`${API}/api/user/messages?email=${encodeURIComponent(currentUser.email)}`);
+    const messages = await res.json();
+
+    const list = document.getElementById("messagesListUser");
+    list.innerHTML = "";
+
+    if (!messages.length) {
+      list.innerHTML = "<li style='opacity:0.6;'>Aucun message</li>";
+      return;
+    }
+
+    messages.forEach(m => {
+      const li = document.createElement("li");
+      li.style.padding = "4px 6px";
+      li.style.borderBottom = "1px solid #eee";
+
+      li.innerHTML = `
+        <b>${m.senderName === "admin" ? "Admin" : currentUser.fullName}</b>: 
+        ${m.message}
+        <br><small style="opacity:.6">${new Date(m.createdAt).toLocaleString("fr-HT")}</small>
+      `;
+
+      list.appendChild(li);
+    });
+
+    list.scrollTop = list.scrollHeight;
+  } catch (err) {
+    console.error("Erreur loadUserMessages:", err);
+  }
+}
+
+
+
+
+
+
 // ✅ AUTO-LOAD SANS DOUBLON
 if (typeof loadDashboard === "function") {
   document.addEventListener("DOMContentLoaded", loadDashboard);
