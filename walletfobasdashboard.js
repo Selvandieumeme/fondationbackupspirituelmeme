@@ -673,13 +673,20 @@ function exportHistoryCSV() {
 
 
 
-// =======================================
-// 📨 ESPAS CHAT ITILIZATE - ADMIN MESSAGE
-// =======================================
+// ==========================
+// 📨 MESSAGES ITILIZATE & ADMIN
+// ==========================
 
 const API = "https://api.fondationbackupspirituel.com";
+const socket = io(API); // socket.io koneksyon
 
-// Ouvri/ferme espas mesaj
+// ─── DEFINISYON CURRENT USER ───
+const currentUser = {
+  email: userEmail,
+  fullName: userName
+};
+
+// ─── ESPAS ITILIZATE ───
 document.getElementById("btnMessageAdmin").onclick = () => {
   const box = document.getElementById("adminMessageBox");
   box.style.display = box.style.display === "block" ? "none" : "block";
@@ -688,7 +695,6 @@ document.getElementById("btnMessageAdmin").onclick = () => {
 // Voye mesaj admin
 document.getElementById("sendAdminMessage").onclick = async () => {
   const message = document.getElementById("adminMessageText").value;
-
   if (!message || message.trim().length < 2) return alert("Message trop court");
 
   try {
@@ -701,26 +707,26 @@ document.getElementById("sendAdminMessage").onclick = async () => {
         message
       })
     });
-
     const data = await res.json();
     if (!res.ok) return alert(data.message || "Erreur serveur");
 
     document.getElementById("adminMessageText").value = "";
     alert(data.message || "Message envoyé à l’admin");
+    loadUserMessages();
 
-    loadUserMessages(); // rafrechi lis mesaj la
+    // Emit instant socket
+    socket.emit("user_message", { email: currentUser.email, message });
   } catch (err) {
     console.error("Erreur envoi message:", err);
     alert("Erreur serveur lors de l'envoi du message");
   }
 };
 
-// Chaje tout mesaj itilizatè ak admin
+// ─── LOAD USER MESSAGES ───
 async function loadUserMessages() {
   try {
     const res = await fetch(`${API}/api/user/messages?email=${encodeURIComponent(currentUser.email)}`);
     const messages = await res.json();
-
     const list = document.getElementById("messagesListUser");
     list.innerHTML = "";
 
@@ -739,7 +745,6 @@ async function loadUserMessages() {
         ${m.message}
         <br><small style="opacity:.6">${new Date(m.createdAt).toLocaleString("fr-HT")}</small>
       `;
-
       list.appendChild(li);
     });
 
@@ -749,10 +754,74 @@ async function loadUserMessages() {
   }
 }
 
-// Refresh otomatik chak 5 segonn
+// Auto refresh chak 5 segonn
 setInterval(loadUserMessages, 5000);
 loadUserMessages();
 
+// ─── SOCKET ITILIZATE RECEIVE MESSAGE INSTANT ───
+socket.on("admin_reply", data => {
+  if (data.email === currentUser.email) {
+    loadUserMessages();
+  }
+});
+
+// ====================
+// 🛡️ ADMIN DASHBOARD
+// ====================
+
+async function loadAdminMessages() {
+  try {
+    const res = await fetch(`${API}/api/admin/messages`);
+    const messages = await res.json();
+    const box = document.getElementById("adminMessagesBox");
+    box.innerHTML = "";
+
+    messages.forEach(m => {
+      const div = document.createElement("div");
+      div.style.border = "1px solid #ddd";
+      div.style.padding = "8px";
+      div.style.marginBottom = "6px";
+
+      div.innerHTML = `
+        <b>${m.userFullName || m.userEmail}</b><br>
+        📨 ${m.messageFromUser || ""}
+        <br><textarea data-id="${m._id}" placeholder="Répondre..."></textarea>
+        <button onclick="replyAdminMessage('${m._id}', '${m.userEmail}')">Répondre</button>
+      `;
+      box.appendChild(div);
+    });
+  } catch (err) {
+    console.error("Erreur loadAdminMessages:", err);
+  }
+}
+
+async function replyAdminMessage(id, userEmailTarget) {
+  const textarea = document.querySelector(`textarea[data-id="${id}"]`);
+  const reply = textarea.value;
+  if (!reply) return;
+
+  try {
+    const res = await fetch(`${API}/api/admin/reply-message`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ messageId: id, reply })
+    });
+    const data = await res.json();
+    if (!res.ok) return alert(data.message || "Erreur serveur");
+
+    textarea.value = "";
+    loadAdminMessages();
+
+    // Emit socket pou itilizatè a resevwa instant
+    socket.emit("admin_reply", { email: userEmailTarget, reply });
+  } catch (err) {
+    console.error("Erreur replyAdminMessage:", err);
+  }
+}
+
+// Refresh admin chak 5 segonn
+setInterval(loadAdminMessages, 5000);
+loadAdminMessages();
 
 
 
