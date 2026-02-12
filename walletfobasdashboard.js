@@ -674,69 +674,86 @@ function exportHistoryCSV() {
 
 
 // ==========================
-// 📨 CHAT ITILIZATE ↔ ADMIN (SAFE PATCH)
+// 📨 CHAT UTILISATEUR ↔ ADMIN
+// 🔐 VERSION SAFE – ISOLÉ – SANS SOCKET.IO
 // ==========================
 
 const API = "https://api.fondationbackupspirituel.com";
 
-// ⛔ PROTECTION ABSOLUE
+/* =====================================================
+   🛡️ PROTECTION ABSOLUE – NE JAMAIS EXECUTER SANS USER
+   ===================================================== */
 if (typeof userEmail === "undefined" || typeof userName === "undefined") {
-  console.warn("Chat admin ignoré : user non chargé");
+  console.warn("⛔ Chat utilisateur bloqué : contexte user absent");
 } else {
 
+  /* =====================================================
+     👤 CONTEXTE UTILISATEUR
+     ===================================================== */
   const currentUser = {
     email: userEmail,
     fullName: userName
   };
 
+  /* =====================================================
+     📦 ELEMENTS DOM (ISOLÉS)
+     ===================================================== */
   const btnChat = document.getElementById("btnMessageAdmin");
   const adminBox = document.getElementById("adminMessageBox");
   const btnSend = document.getElementById("sendAdminMessage");
   const txtMessage = document.getElementById("adminMessageText");
   const messagesList = document.getElementById("messagesListUser");
 
-  if (btnChat && adminBox) {
-    btnChat.onclick = () => {
-      adminBox.style.display =
-        adminBox.style.display === "block" ? "none" : "block";
-    };
+  /* =====================================================
+     🔐 STOP TOTAL SI ESPACE CHAT ABSENT
+     ===================================================== */
+  if (!btnChat || !adminBox || !btnSend || !txtMessage || !messagesList) {
+    console.warn("⛔ Chat utilisateur non monté (DOM incomplet)");
+    return;
   }
 
-  if (btnSend && txtMessage) {
-    btnSend.onclick = async () => {
-      const message = txtMessage.value.trim();
-      if (message.length < 2) return alert("Message trop court");
+  /* =====================================================
+     👁️ TOGGLE ESPACE CHAT
+     ===================================================== */
+  btnChat.onclick = () => {
+    adminBox.style.display =
+      adminBox.style.display === "block" ? "none" : "block";
+  };
 
-      try {
-        const res = await fetch(`${API}/api/user/message-admin`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            email: currentUser.email,
-            fullName: currentUser.fullName,
-            message
-          })
-        });
-
-        if (!res.ok) throw new Error("Erreur serveur");
-
-        txtMessage.value = "";
-        loadUserMessages();
-
-      } catch (err) {
-        console.error("CHAT ADMIN ERROR:", err);
-      }
-    };
-  }
-
-  async function loadUserMessages() {
-    if (!messagesList) return;
+  /* =====================================================
+     📤 ENVOYER MESSAGE À L’ADMIN
+     ===================================================== */
+  btnSend.onclick = async () => {
+    const message = txtMessage.value.trim();
+    if (message.length < 2) return alert("Message trop court");
 
     try {
-      const res = await fetch(
-        `${API}/api/admin/messages?email=${encodeURIComponent(currentUser.email)}`
-      );
+      const res = await fetch(`${API}/api/user/message-admin`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: currentUser.email,
+          fullName: currentUser.fullName,
+          message
+        })
+      });
 
+      if (!res.ok) throw new Error("Erreur serveur message");
+
+      txtMessage.value = "";
+      loadUserMessages();
+
+    } catch (err) {
+      console.error("❌ CHAT USER SEND ERROR:", err);
+    }
+  };
+
+  /* =====================================================
+     📥 CHARGER HISTORIQUE MESSAGES (USER UNIQUEMENT)
+     ===================================================== */
+  async function loadUserMessages() {
+    try {
+      const res = await fetch(`${API}/api/admin/messages`);
       if (!res.ok) return;
 
       const messages = await res.json();
@@ -744,21 +761,34 @@ if (typeof userEmail === "undefined" || typeof userName === "undefined") {
 
       messages
         .filter(m => m.userEmail === currentUser.email)
-        .slice(0, 20)
+        .slice(0, 30)
         .forEach(m => {
           const li = document.createElement("li");
+          li.style.padding = "4px 6px";
+          li.style.borderBottom = "1px solid #eee";
+
           li.innerHTML = `
             <b>${m.sender === "ADMIN" ? "Admin" : currentUser.fullName}</b> :
-            ${m.messageFromUser || m.messageFromAdmin || ""}
+            ${m.sender === "ADMIN" ? m.messageFromAdmin : m.messageFromUser}
+            <br><small style="opacity:.6">
+              ${new Date(m.createdAt).toLocaleString("fr-HT")}
+            </small>
           `;
+
           messagesList.appendChild(li);
         });
 
+      messagesList.scrollTop = messagesList.scrollHeight;
+
     } catch (err) {
-      console.error("LOAD CHAT ERROR:", err);
+      console.error("❌ CHAT USER LOAD ERROR:", err);
     }
   }
 
+  /* =====================================================
+     🔄 AUTO-REFRESH SAFE
+     ===================================================== */
+  loadUserMessages();
   setInterval(loadUserMessages, 5000);
 }
 
