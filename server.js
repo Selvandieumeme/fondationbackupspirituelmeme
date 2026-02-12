@@ -1159,26 +1159,6 @@ app.post("/api/wallet/verify-identity", async (req, res) => {
 
 
 
-// =======================
-// 📩 SCHEMA ADMIN MESSAGES (SAFE, ISOLE)
-// =======================
-const adminMessageSchema = new mongoose.Schema({
-  userEmail: { type: String, required: true },
-  userFullName: { type: String, default: "" },
-
-  messageFromUser: { type: String, default: "" },
-  messageFromAdmin: { type: String, default: "" },
-
-  status: { type: String, default: "UNREAD" }, // UNREAD | READ
-  sender: { type: String, enum: ["USER", "ADMIN"], required: true },
-
-  adminReadAt: Date,
-  userReadAt: Date,
-
-  createdAt: { type: Date, default: Date.now }
-});
-
-const AdminMessage = mongoose.model("admin_messages", adminMessageSchema);
 
 
 
@@ -2496,88 +2476,7 @@ app.post("/api/admin/note", async (req, res) => {
 
 
 
-// =======================
-// 📩 UTILISATEUR → MESSAGE ADMIN (SAFE)
-// =======================
-app.post("/api/user/message-admin", async (req, res) => {
-  try {
-    const { email, fullName, message } = req.body;
 
-    if (!email || !message || message.trim().length < 2) {
-      return res.status(400).json({ message: "Message invalide" });
-    }
-
-    await AdminMessage.create({
-      userEmail: email,
-      userFullName: fullName || "",
-      messageFromUser: message,
-      sender: "USER",
-      status: "UNREAD"
-    });
-
-    notifyUpdate(); // 🔔 temps réel admin
-
-    res.json({ success: true });
-  } catch (err) {
-    console.error("❌ USER MESSAGE ADMIN ERROR:", err);
-    res.status(500).json({ message: "Erreur serveur" });
-  }
-});
-
-
-
-
-// =======================
-// 📥 ADMIN - LISTER MESSAGES UTILISATEURS
-// =======================
-app.get("/api/admin/messages", async (req, res) => {
-  try {
-    const messages = await AdminMessage.find()
-      .sort({ createdAt: -1 })
-      .lean();
-
-    res.json(messages);
-  } catch (err) {
-    console.error("❌ ADMIN GET MESSAGES ERROR:", err);
-    res.status(500).json({ message: "Erreur serveur" });
-  }
-});
-
-
-
-
-
-// =======================
-// 📤 ADMIN → REPONDRE UTILISATEUR
-// =======================
-app.post("/api/admin/reply-message", async (req, res) => {
-  try {
-    const { messageId, reply } = req.body;
-
-    if (!messageId || !reply) {
-      return res.status(400).json({ message: "Paramètres invalides" });
-    }
-
-    const msg = await AdminMessage.findById(messageId);
-    if (!msg) {
-      return res.status(404).json({ message: "Message introuvable" });
-    }
-
-    msg.messageFromAdmin = reply;
-    msg.sender = "ADMIN";
-    msg.status = "READ";
-    msg.adminReadAt = new Date();
-
-    await msg.save();
-
-    notifyUpdate(); // 🔔 temps réel utilisateur
-
-    res.json({ success: true });
-  } catch (err) {
-    console.error("❌ ADMIN REPLY ERROR:", err);
-    res.status(500).json({ message: "Erreur serveur" });
-  }
-});
 
 
 
