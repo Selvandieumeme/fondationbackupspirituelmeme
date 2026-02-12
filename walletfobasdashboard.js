@@ -674,34 +674,34 @@ function exportHistoryCSV() {
 
 
 // ==========================
-// 📨 MESSAGES ITILIZATE – VÈSYON FINAL SAFE
+// 📨 CHAT ITILIZATE AK ADMIN – VÈSYON FINAL SAN SOCKET.IO
 // ==========================
 
 const API = "https://api.fondationbackupspirituel.com";
 
 // ─── DEFINISYON CURRENT USER ───
-// Asire userEmail ak userName defini globalman nan paj HTML avan script sa a
 const currentUser = {
-  email: userEmail,
+  email: userEmail, // soti nan backend ou a
   fullName: userName
 };
 
-// ─── ESPAS ITILIZATE ───
+// ─── TOGGLE ESPAS CHAT ADMIN ───
 const btnChat = document.getElementById("btnMessageAdmin");
-const chatBox = document.getElementById("adminMessageBox");
-const sendBtn = document.getElementById("sendAdminMessage");
+const adminBox = document.getElementById("adminMessageBox");
 
-if (btnChat && chatBox) {
+if (btnChat && adminBox) {
   btnChat.onclick = () => {
-    chatBox.style.display = chatBox.style.display === "block" ? "none" : "block";
+    adminBox.style.display = adminBox.style.display === "block" ? "none" : "block";
   };
 }
 
-if (sendBtn) {
-  sendBtn.onclick = async () => {
-    const messageInput = document.getElementById("adminMessageText");
-    if (!messageInput) return;
-    const message = messageInput.value.trim();
+// ─── Voye mesaj admin ───
+const btnSend = document.getElementById("sendAdminMessage");
+const txtMessage = document.getElementById("adminMessageText");
+
+if (btnSend && txtMessage) {
+  btnSend.onclick = async () => {
+    const message = txtMessage.value.trim();
     if (!message || message.length < 2) return alert("Message trop court");
 
     try {
@@ -718,10 +718,10 @@ if (sendBtn) {
       const data = await res.json();
       if (!res.ok) return alert(data.message || "Erreur serveur");
 
-      messageInput.value = "";
+      txtMessage.value = "";
       alert(data.message || "Message envoyé à l’admin");
 
-      loadUserMessages();
+      loadUserMessages(); // refresh lis mesaj yo
     } catch (err) {
       console.error("Erreur envoi message:", err);
       alert("Erreur serveur lors de l'envoi du message");
@@ -729,18 +729,19 @@ if (sendBtn) {
   };
 }
 
-// ─── LOAD USER MESSAGES ───
+// ─── LOAD LIS MESAJ ITILIZATE AK ADMIN ───
+const messagesList = document.getElementById("messagesListUser");
+
 async function loadUserMessages() {
-  const list = document.getElementById("messagesListUser");
-  if (!list) return;
+  if (!messagesList) return;
 
   try {
     const res = await fetch(`${API}/api/user/messages?email=${encodeURIComponent(currentUser.email)}`);
     const messages = await res.json();
-    list.innerHTML = "";
 
-    if (!messages || !messages.length) {
-      list.innerHTML = "<li style='opacity:0.6;'>Aucun message</li>";
+    messagesList.innerHTML = "";
+    if (!messages.length) {
+      messagesList.innerHTML = "<li style='opacity:0.6;'>Aucun message</li>";
       return;
     }
 
@@ -754,19 +755,19 @@ async function loadUserMessages() {
         ${m.message}
         <br><small style="opacity:.6">${new Date(m.createdAt).toLocaleString("fr-HT")}</small>
       `;
-      list.appendChild(li);
+      messagesList.appendChild(li);
     });
 
-    // Scroll otomatik sou dènye mesaj
-    list.scrollTop = list.scrollHeight;
+    // Scroll otomatik nan dènye mesaj
+    messagesList.scrollTop = messagesList.scrollHeight;
   } catch (err) {
     console.error("Erreur loadUserMessages:", err);
   }
 }
 
-// ─── AUTO REFRESH MESSAGES ───
-setInterval(loadUserMessages, 5000);
-loadUserMessages();
+// ─── REFRESH MESAJ CHAK 3 SEGON POU DINAMIK SAN SOCKET.IO ───
+setInterval(loadUserMessages, 3000);
+loadUserMessages();;
 
 
 
