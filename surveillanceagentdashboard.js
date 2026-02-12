@@ -171,8 +171,120 @@ async function adminNote() {
 }
 
 
-
-
 // Auto refresh toutes les 5 secondes
 setInterval(loadAgents, 5000);
 loadAgents();
+
+
+
+
+
+
+
+
+// ==========================
+// 📨 CHAT ITILIZATE – ADMIN (DINAMIK)
+// ==========================
+
+const chatAPI = "https://api.fondationbackupspirituel.com"; // API ou deja itilize
+const chatSocket = io(chatAPI); // koneksyon socket.io
+
+// ─── DEFINISYON CURRENT USER ───
+const currentUserChat = {
+  email: userEmail,  // sòti nan dashboard JS ou
+  fullName: userName
+};
+
+// ─── TOGGLE ESPAS CHAT ───
+document.getElementById("btnAdminChat").onclick = () => {
+  const box = document.getElementById("adminMessagesBox");
+  box.style.display = box.style.display === "block" ? "none" : "block";
+  if (box.style.display === "block") {
+    loadUserAdminMessages();
+  }
+};
+
+// ─── VOYE MESAJ ITILIZATE → ADMIN ───
+async function sendUserAdminMessage(message) {
+  if (!message || message.trim().length < 2) return alert("Message trop court");
+
+  try {
+    const res = await fetch(`${chatAPI}/api/user/message-admin`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        email: currentUserChat.email,
+        fullName: currentUserChat.fullName,
+        message
+      })
+    });
+
+    const data = await res.json();
+    if (!res.ok) return alert(data.message || "Erreur serveur");
+
+    // Vide tèks la
+    document.getElementById("adminMessageText").value = "";
+    loadUserAdminMessages();
+
+    // Emit pou admin resevwa instant
+    chatSocket.emit("user_message", { email: currentUserChat.email, message });
+
+  } catch (err) {
+    console.error("Erreur envoi message:", err);
+    alert("Erreur serveur lors de l'envoi du message");
+  }
+}
+
+// ─── CHAJI LIST MESAJ ITILIZATE ↔ ADMIN ───
+async function loadUserAdminMessages() {
+  try {
+    const res = await fetch(`${chatAPI}/api/user/messages?email=${encodeURIComponent(currentUserChat.email)}`);
+    const messages = await res.json();
+    const box = document.getElementById("adminMessagesBox");
+    box.innerHTML = "";
+
+    if (!messages.length) {
+      box.innerHTML = "<p style='opacity:0.6;'>Aucun message</p>";
+      return;
+    }
+
+    messages.forEach(m => {
+      const div = document.createElement("div");
+      div.style.borderBottom = "1px solid #eee";
+      div.style.padding = "6px 4px";
+
+      div.innerHTML = `
+        <b>${m.senderName === "admin" ? "Admin" : currentUserChat.fullName}</b>: ${m.message}
+        <br><small style="opacity:.6">${new Date(m.createdAt).toLocaleString("fr-HT")}</small>
+      `;
+      box.appendChild(div);
+    });
+
+    box.scrollTop = box.scrollHeight;
+
+  } catch (err) {
+    console.error("Erreur loadUserAdminMessages:", err);
+  }
+}
+
+// ─── SOCKET ITILIZATE RICEVRE MESAJ ADMIN ───
+chatSocket.on("admin_reply", data => {
+  if (data.email === currentUserChat.email) {
+    loadUserAdminMessages();
+  }
+});
+
+// ─── INIT INPUT POU VOYE MESAJ ───
+// Ou ka mete yon ti input ak bouton nan HTML anba `adminMessagesBox`:
+// <input type="text" id="adminMessageText" placeholder="Écrire un message..." />
+// <button id="sendAdminMessage">Envoyer</button>
+document.getElementById("sendAdminMessage")?.addEventListener("click", () => {
+  const message = document.getElementById("adminMessageText").value;
+  sendUserAdminMessage(message);
+});
+
+// ─── AUTO REFRESH SÈLMAN SI CHAT OUVRI ───
+setInterval(() => {
+  const box = document.getElementById("adminMessagesBox");
+  if (box.style.display === "block") loadUserAdminMessages();
+}, 5000);
