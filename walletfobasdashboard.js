@@ -674,100 +674,99 @@ function exportHistoryCSV() {
 
 
 // ==========================
-// 📨 CHAT ITILIZATE AK ADMIN – VÈSYON FINAL SAN SOCKET.IO
+// 📨 CHAT ITILIZATE ↔ ADMIN (SAFE PATCH)
 // ==========================
 
 const API = "https://api.fondationbackupspirituel.com";
 
-// ─── DEFINISYON CURRENT USER ───
-const currentUser = {
-  email: userEmail, // soti nan backend ou a
-  fullName: userName
-};
+// ⛔ PROTECTION ABSOLUE
+if (typeof userEmail === "undefined" || typeof userName === "undefined") {
+  console.warn("Chat admin ignoré : user non chargé");
+} else {
 
-// ─── TOGGLE ESPAS CHAT ADMIN ───
-const btnChat = document.getElementById("btnMessageAdmin");
-const adminBox = document.getElementById("adminMessageBox");
-
-if (btnChat && adminBox) {
-  btnChat.onclick = () => {
-    adminBox.style.display = adminBox.style.display === "block" ? "none" : "block";
+  const currentUser = {
+    email: userEmail,
+    fullName: userName
   };
-}
 
-// ─── Voye mesaj admin ───
-const btnSend = document.getElementById("sendAdminMessage");
-const txtMessage = document.getElementById("adminMessageText");
+  const btnChat = document.getElementById("btnMessageAdmin");
+  const adminBox = document.getElementById("adminMessageBox");
+  const btnSend = document.getElementById("sendAdminMessage");
+  const txtMessage = document.getElementById("adminMessageText");
+  const messagesList = document.getElementById("messagesListUser");
 
-if (btnSend && txtMessage) {
-  btnSend.onclick = async () => {
-    const message = txtMessage.value.trim();
-    if (!message || message.length < 2) return alert("Message trop court");
+  if (btnChat && adminBox) {
+    btnChat.onclick = () => {
+      adminBox.style.display =
+        adminBox.style.display === "block" ? "none" : "block";
+    };
+  }
+
+  if (btnSend && txtMessage) {
+    btnSend.onclick = async () => {
+      const message = txtMessage.value.trim();
+      if (message.length < 2) return alert("Message trop court");
+
+      try {
+        const res = await fetch(`${API}/api/user/message-admin`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            email: currentUser.email,
+            fullName: currentUser.fullName,
+            message
+          })
+        });
+
+        if (!res.ok) throw new Error("Erreur serveur");
+
+        txtMessage.value = "";
+        loadUserMessages();
+
+      } catch (err) {
+        console.error("CHAT ADMIN ERROR:", err);
+      }
+    };
+  }
+
+  async function loadUserMessages() {
+    if (!messagesList) return;
 
     try {
-      const res = await fetch(`${API}/api/user/message-admin`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email: currentUser.email,
-          fullName: currentUser.fullName,
-          message
-        })
-      });
+      const res = await fetch(
+        `${API}/api/admin/messages?email=${encodeURIComponent(currentUser.email)}`
+      );
 
-      const data = await res.json();
-      if (!res.ok) return alert(data.message || "Erreur serveur");
+      if (!res.ok) return;
 
-      txtMessage.value = "";
-      alert(data.message || "Message envoyé à l’admin");
+      const messages = await res.json();
+      messagesList.innerHTML = "";
 
-      loadUserMessages(); // refresh lis mesaj yo
+      messages
+        .filter(m => m.userEmail === currentUser.email)
+        .slice(0, 20)
+        .forEach(m => {
+          const li = document.createElement("li");
+          li.innerHTML = `
+            <b>${m.sender === "ADMIN" ? "Admin" : currentUser.fullName}</b> :
+            ${m.messageFromUser || m.messageFromAdmin || ""}
+          `;
+          messagesList.appendChild(li);
+        });
+
     } catch (err) {
-      console.error("Erreur envoi message:", err);
-      alert("Erreur serveur lors de l'envoi du message");
+      console.error("LOAD CHAT ERROR:", err);
     }
-  };
-}
-
-// ─── LOAD LIS MESAJ ITILIZATE AK ADMIN ───
-const messagesList = document.getElementById("messagesListUser");
-
-async function loadUserMessages() {
-  if (!messagesList) return;
-
-  try {
-    const res = await fetch(`${API}/api/user/messages?email=${encodeURIComponent(currentUser.email)}`);
-    const messages = await res.json();
-
-    messagesList.innerHTML = "";
-    if (!messages.length) {
-      messagesList.innerHTML = "<li style='opacity:0.6;'>Aucun message</li>";
-      return;
-    }
-
-    messages.forEach(m => {
-      const li = document.createElement("li");
-      li.style.padding = "4px 6px";
-      li.style.borderBottom = "1px solid #eee";
-
-      li.innerHTML = `
-        <b>${m.senderName === "admin" ? "Admin" : currentUser.fullName}</b>: 
-        ${m.message}
-        <br><small style="opacity:.6">${new Date(m.createdAt).toLocaleString("fr-HT")}</small>
-      `;
-      messagesList.appendChild(li);
-    });
-
-    // Scroll otomatik nan dènye mesaj
-    messagesList.scrollTop = messagesList.scrollHeight;
-  } catch (err) {
-    console.error("Erreur loadUserMessages:", err);
   }
+
+  setInterval(loadUserMessages, 5000);
 }
 
-// ─── REFRESH MESAJ CHAK 3 SEGON POU DINAMIK SAN SOCKET.IO ───
-setInterval(loadUserMessages, 3000);
-loadUserMessages();;
+
+
+
+
+
 
 
 
