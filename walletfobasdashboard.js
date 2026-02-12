@@ -749,7 +749,9 @@ async function loadUserMessages() {
   }
 }
 
-
+// Refresh otomatik chak 5 segonn
+setInterval(loadUserMessages, 5000);
+loadUserMessages();
 
 
 
