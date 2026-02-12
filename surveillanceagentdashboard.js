@@ -183,147 +183,100 @@ loadAgents();
 
 
 // ==========================
-// 📨 CHAT ADMIN DINAMIK
+// 🔐 CHAT ADMIN – VERSION SAFE (SANS SOCKET.IO)
 // ==========================
 
 const API = "https://api.fondationbackupspirituel.com";
-const socket = io(API); // koneksyon socket.io
 
-// ─── FONKSYON DISPLAY CHAT ───
-document.getElementById("btnAdminChat").onclick = () => {
-  const box = document.getElementById("adminMessagesBox");
-  box.style.display = box.style.display === "block" ? "none" : "block";
-};
+/* =====================================================
+   🛡️ PROTECTION ABSOLUE – PA JANM EXECUTE HORS ADMIN
+   ===================================================== */
+const adminBox = document.getElementById("adminMessagesBox");
 
-// ─── VOYE MESAJ ITILIZATE VERS ADMIN ───
-document.getElementById("sendAdminMessage").onclick = async () => {
-  const message = document.getElementById("adminMessageText").value;
-  if (!message || message.trim().length < 2) return alert("Message trop court");
+if (!adminBox) {
+  console.warn("⛔ Chat admin chargé hors dashboard admin – STOP");
+  throw new Error("ADMIN CHAT JS STOPPED (SAFE)");
+}
 
+/* =====================================================
+   📥 CHARGER MESSAGES UTILISATEURS
+   ===================================================== */
+async function loadAdminMessages() {
   try {
-    const res = await fetch(`${API}/api/user/message-admin`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        email: currentUser.email,
-        fullName: currentUser.fullName,
-        message
-      })
-    });
-    const data = await res.json();
-    if (!res.ok) return alert(data.message || "Erreur serveur");
+    const res = await fetch(`${API}/api/admin/messages`);
+    if (!res.ok) throw new Error("Erreur chargement messages admin");
 
-    document.getElementById("adminMessageText").value = "";
-    loadUserMessages();
-
-    // Emit instant socket pou admin resevwa
-    socket.emit("user_message", { email: currentUser.email, fullName: currentUser.fullName, message });
-  } catch (err) {
-    console.error("Erreur envoi message:", err);
-    alert("Erreur serveur lors de l'envoi du message");
-  }
-};
-
-// ─── CHARGE MESAJ ITILIZATE YO ───
-async function loadUserMessages() {
-  try {
-    const res = await fetch(`${API}/api/user/messages?email=${encodeURIComponent(currentUser.email)}`);
     const messages = await res.json();
+    adminBox.innerHTML = "";
 
-    const list = document.getElementById("messagesListUser") || document.createElement("ul");
-    list.id = "messagesListUser";
-    if (!document.getElementById("messagesListUser")) {
-      document.getElementById("adminMessagesBox").prepend(list);
-    }
-    list.innerHTML = "";
-
-    if (!messages.length) {
-      list.innerHTML = "<li style='opacity:0.6;'>Aucun message</li>";
+    if (!Array.isArray(messages) || messages.length === 0) {
+      adminBox.innerHTML = "<p style='opacity:.6'>Aucun message</p>";
       return;
     }
 
     messages.forEach(m => {
-      const li = document.createElement("li");
-      li.style.padding = "4px 6px";
-      li.style.borderBottom = "1px solid #eee";
+      const bloc = document.createElement("div");
+      bloc.style.border = "1px solid #ddd";
+      bloc.style.padding = "10px";
+      bloc.style.marginBottom = "8px";
+      bloc.style.borderRadius = "6px";
 
-      li.innerHTML = `
-        <b>${m.senderName === "admin" ? "Admin" : currentUser.fullName}</b>: 
-        ${m.message}
-        <br><small style="opacity:.6">${new Date(m.createdAt).toLocaleString("fr-HT")}</small>
-      `;
-      list.appendChild(li);
-    });
-
-    list.scrollTop = list.scrollHeight;
-  } catch (err) {
-    console.error("Erreur loadUserMessages:", err);
-  }
-}
-
-// Auto refresh chak 5 segonn
-setInterval(loadUserMessages, 5000);
-loadUserMessages();
-
-// ─── SOCKET RECEIVE ADMIN REPLY POU ITILIZATE INSTANT ───
-socket.on("admin_reply", data => {
-  if (data.email === currentUser.email) {
-    loadUserMessages();
-  }
-});
-
-// ─── CHARGE MESAJ ADMIN POU ADMIN DASHBOARD ───
-async function loadAdminMessages() {
-  try {
-    const res = await fetch(`${API}/api/admin/messages`);
-    const messages = await res.json();
-    const box = document.getElementById("adminMessagesBox");
-    box.innerHTML = "";
-
-    messages.forEach(m => {
-      const div = document.createElement("div");
-      div.style.border = "1px solid #ddd";
-      div.style.padding = "8px";
-      div.style.marginBottom = "6px";
-
-      div.innerHTML = `
+      bloc.innerHTML = `
         <b>${m.userFullName || m.userEmail}</b><br>
-        📨 ${m.messageFromUser || ""}
-        <br><textarea data-id="${m._id}" placeholder="Répondre..."></textarea>
-        <button onclick="replyAdminMessage('${m._id}', '${m.userEmail}')">Répondre</button>
+        <div style="margin:6px 0;">📩 ${m.messageFromUser || ""}</div>
+        <textarea
+          data-id="${m._id}"
+          rows="2"
+          placeholder="Répondre..."
+          style="width:100%; padding:6px;"
+        ></textarea>
+        <button
+          data-reply="${m._id}"
+          style="margin-top:6px;"
+        >Répondre</button>
       `;
-      box.appendChild(div);
+
+      adminBox.appendChild(bloc);
     });
+
   } catch (err) {
-    console.error("Erreur loadAdminMessages:", err);
+    console.error("❌ ADMIN CHAT LOAD ERROR:", err);
   }
 }
 
-// ─── REPLY ADMIN POU ITILIZATE ───
-async function replyAdminMessage(id, userEmailTarget) {
-  const textarea = document.querySelector(`textarea[data-id="${id}"]`);
-  const reply = textarea.value;
-  if (!reply) return;
+/* =====================================================
+   📤 REPONDRE A UN UTILISATEUR
+   ===================================================== */
+adminBox.addEventListener("click", async (e) => {
+  if (!e.target.dataset.reply) return;
+
+  const messageId = e.target.dataset.reply;
+  const textarea = adminBox.querySelector(`textarea[data-id="${messageId}"]`);
+
+  if (!textarea || textarea.value.trim().length < 1) return;
 
   try {
     const res = await fetch(`${API}/api/admin/reply-message`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ messageId: id, reply })
+      body: JSON.stringify({
+        messageId,
+        reply: textarea.value.trim()
+      })
     });
-    const data = await res.json();
-    if (!res.ok) return alert(data.message || "Erreur serveur");
+
+    if (!res.ok) throw new Error("Erreur réponse admin");
 
     textarea.value = "";
     loadAdminMessages();
 
-    // Emit socket pou itilizatè resevwa instant
-    socket.emit("admin_reply", { email: userEmailTarget, reply });
   } catch (err) {
-    console.error("Erreur replyAdminMessage:", err);
+    console.error("❌ ADMIN REPLY ERROR:", err);
   }
-}
+});
 
-// Auto refresh admin chak 5 segonn
-setInterval(loadAdminMessages, 5000);
+/* =====================================================
+   🔄 AUTO-REFRESH SAFE (SANS SOCKET)
+   ===================================================== */
 loadAdminMessages();
+setInterval(loadAdminMessages, 5000);
