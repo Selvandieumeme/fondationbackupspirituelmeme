@@ -31,15 +31,19 @@
   <button onclick="transferer()">Transferer</button>
   <button onclick="retirer()">Retrait</button>
   <button onclick="adminNote()">Note Admin</button>
-  <!-- ✅ NOUVO BOUTON CHAT ADMIN -->
+  </div>
+
+<!-- 🔹 Nouvo Bouton Chat Admin pou tout itilizatè -->
+<div class="admin-chat" style="margin-top:15px;">
   <button id="btnAdminChat">📝 Chat Admin</button>
+  <div id="adminMessagesBox" style="display:none; border:1px solid #ccc; padding:10px; margin-top:10px; max-height:300px; overflow-y:auto;">
+    <!-- Lis mesaj itilizatè ak admin ap parèt la -->
+    <div style="margin-top:5px;">
+      <input type="text" id="adminMessageText" placeholder="Écrire un message..." style="width:70%;" />
+      <button id="sendAdminMessage">Envoyer</button>
+    </div>
+  </div>
 </div>
-
-<!-- 🔹 ESPAS CHAT ADMIN (pa gen bouton ladan l) -->
-<div id="adminMessagesBox" style="display:none; border:1px solid #ccc; padding:10px; margin-top:10px; max-height:300px; overflow-y:auto;">
-  <!-- Lis mesaj itilizatè ak admin ap parèt la -->
-</div>
-
 
   
 <script src="surveillanceagentdashboard.js"></script>
