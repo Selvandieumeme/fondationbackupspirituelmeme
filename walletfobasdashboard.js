@@ -342,21 +342,52 @@ if (type === "expressTransfer") {
   actionArea.innerHTML = `
     <h3>Transfert Express Haiti</h3>
     <form id="expressTransferForm">
-      <input name="sender_name" placeholder="Nom de l'expéditeur" required />
-      <input name="sender_id" placeholder="ID de l'expéditeur" required />
-      <input name="sender_department" placeholder="Département de l'expéditeur" required />
-      <input name="sender_whatsapp" placeholder="WhatsApp de l'expéditeur" required />
-      
-      <input name="receiver_name" placeholder="Nom du destinataire" required />
-      <input name="receiver_id" placeholder="ID du destinataire" required />
-      <input name="receiver_department" placeholder="Département du destinataire" required />
-      <input name="receiver_whatsapp" placeholder="WhatsApp du destinataire" required />
-      
-      <input name="amount" type="number" placeholder="Montant" required />
-      <button type="submit">Envoyer Transfert</button>
+      ...
     </form>
-    <p id="expressMsg" style="margin-top:10px;color:green;"></p>
+    <p id="expressMsg"></p>
   `;
+
+  const form = document.getElementById("expressTransferForm");
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const data = {
+      sender_name: form.sender_name.value,
+      sender_id: form.sender_id.value,
+      sender_department: form.sender_department.value,
+      sender_whatsapp: form.sender_whatsapp.value,
+      receiver_name: form.receiver_name.value,
+      receiver_id: form.receiver_id.value,
+      receiver_department: form.receiver_department.value,
+      receiver_whatsapp: form.receiver_whatsapp.value,
+      amount: parseFloat(form.amount.value)
+    };
+
+    try {
+      const response = await fetch(
+        'https://api.fondationbackupspirituel.com/api/express/create',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-user-email': userEmail
+          },
+          body: JSON.stringify(data)
+        }
+      );
+
+      const result = await response.json();
+      document.getElementById('expressMsg').innerText =
+        response.ok ? "Transfert créé avec succès !" : result.message;
+
+      if (response.ok) form.reset();
+
+    } catch (err) {
+      document.getElementById('expressMsg').innerText =
+        "Erreur: " + err.message;
+    }
+  });
 }
 
   
