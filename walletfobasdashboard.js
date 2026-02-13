@@ -341,66 +341,83 @@ function showForm(type) {
 
 
 if (type === "expressTransfer") {
+  // Mete fòm nan nan actionArea
   actionArea.innerHTML = `
     <h3>Transfert Express Haiti</h3>
     <form id="expressTransferForm">
-      <input name="sender_name" placeholder="Nom émetteur" />
-      <input name="sender_id" placeholder="ID émetteur" />
+      <input name="sender_name" placeholder="Nom émetteur" required />
+      <input name="sender_id" placeholder="ID émetteur" required />
       <input name="sender_department" placeholder="Département émetteur" />
       <input name="sender_whatsapp" placeholder="WhatsApp émetteur" />
 
-      <input name="receiver_name" placeholder="Nom destinataire" />
-      <input name="receiver_id" placeholder="ID destinataire" />
+      <input name="receiver_name" placeholder="Nom destinataire" required />
+      <input name="receiver_id" placeholder="ID destinataire" required />
       <input name="receiver_department" placeholder="Département destinataire" />
       <input name="receiver_whatsapp" placeholder="WhatsApp destinataire" />
 
-      <input name="amount" type="number" placeholder="Montant" />
+      <input name="amount" type="number" placeholder="Montant" required />
       <button type="submit">Transférer</button>
     </form>
     <p id="expressMsg"></p>
   `;
 
+  // Chèche fòm nan nan DOM la
   const form = document.getElementById("expressTransferForm");
+  const msg = document.getElementById("expressMsg");
 
-  form.addEventListener("submit", async (e) => {
-    e.preventDefault();
+  if (!form) {
+    console.error("Formulaire Transfert Express non trouvé !");
+  } else {
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
 
-    const data = {
-      sender_name: form.sender_name.value,
-      sender_id: form.sender_id.value,
-      sender_department: form.sender_department.value,
-      sender_whatsapp: form.sender_whatsapp.value,
-      receiver_name: form.receiver_name.value,
-      receiver_id: form.receiver_id.value,
-      receiver_department: form.receiver_department.value,
-      receiver_whatsapp: form.receiver_whatsapp.value,
-      amount: parseFloat(form.amount.value)
-    };
+      // Kolekte done
+      const data = {
+        sender_name: form.sender_name.value.trim(),
+        sender_id: form.sender_id.value.trim(),
+        sender_department: form.sender_department.value.trim(),
+        sender_whatsapp: form.sender_whatsapp.value.trim(),
+        receiver_name: form.receiver_name.value.trim(),
+        receiver_id: form.receiver_id.value.trim(),
+        receiver_department: form.receiver_department.value.trim(),
+        receiver_whatsapp: form.receiver_whatsapp.value.trim(),
+        amount: parseFloat(form.amount.value)
+      };
 
-    try {
-      const response = await fetch(
-        'https://api.fondationbackupspirituel.com/api/express/create',
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'x-user-email': userEmail
-          },
-          body: JSON.stringify(data)
+      // Tcheke si chif yo valide
+      if (!data.sender_name || !data.receiver_name || isNaN(data.amount)) {
+        msg.innerText = "Tout chan obligatwa, epi Montant dwe yon nimewo!";
+        return;
+      }
+
+      // Fe request la
+      try {
+        const response = await fetch(
+          'https://api.fondationbackupspirituel.com/api/express/create',
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+          }
+        );
+
+        const result = await response.json();
+
+        if (response.ok) {
+          msg.innerText = "Transfert créé avec succès !";
+          form.reset();
+        } else {
+          msg.innerText = result.message || "Erreur: impossible de créer le transfert";
         }
-      );
 
-      const result = await response.json();
-      document.getElementById('expressMsg').innerText =
-        response.ok ? "Transfert créé avec succès !" : result.message;
-
-      if (response.ok) form.reset();
-
-    } catch (err) {
-      document.getElementById('expressMsg').innerText =
-        "Erreur: " + err.message;
-    }
-  });
+      } catch (err) {
+        console.error("Erreur fetch Transfert Express:", err);
+        msg.innerText = "Erreur serveur: " + err.message;
+      }
+    });
+  }
 }
 
 
