@@ -1957,7 +1957,11 @@ app.post("/api/express/create", async (req, res) => {
       return res.status(400).json({ message: "Tous les champs obligatoires ne sont pas remplis." });
     }
 
-    // 🔹 Tout moun ka itilize fòm nan → retire tout verifikasyon Agent Autorisé
+    // 🔹 Tout moun ka itilize fòm nan, retire verifikasyon Agent Autorisé
+    // const wallet = await WalletBalance.findOne({ email: agent_email });
+    // if (!wallet || wallet.walletAccountType !== "Agent Autorise") {
+    //   return res.status(403).json({ message: "Accès refusé" });
+    // }
 
     // 🔹 GENERATE TRANSFER CODE
     const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
@@ -2003,7 +2007,6 @@ app.post("/api/express/create", async (req, res) => {
     res.status(500).json({ message: "Erreur serveur." });
   }
 });
-
 
 
 
