@@ -350,14 +350,15 @@ if (type === "expressTransfer") {
   const agentName = data.wallet?.fullName || "";
   const agentEmail = data.wallet?.email || "";
 
-  // Fòm nan ap toujou afiche, san okenn blokaj
+  // 🔹 Fòm nan ap toujou afiche, men nou retire tout kòd ki ta ka fè li "mal afiche" 
+  // (pa egzanp: readonly pou tout jaden agent, kenbe li pwòp san obstak)
   actionArea.innerHTML = `
     <h3>Transfert Express Haiti</h3>
     <form id="expressTransferForm">
 
       <h4>Informations Agent Autorisé</h4>
-      <input name="agent_name" value="${agentName}" placeholder="Nom/Prenom Agent Autorisé" readonly />
-      <input name="agent_email" value="${agentEmail}" type="email" placeholder="Email Agent Autorisé" readonly />
+      <input name="agent_name" value="${agentName}" placeholder="Nom/Prenom Agent Autorisé" />
+      <input name="agent_email" value="${agentEmail}" type="email" placeholder="Email Agent Autorisé" />
 
       <h4>Informations Émetteur</h4>
       <input name="sender_name" placeholder="Nom émetteur" required />
