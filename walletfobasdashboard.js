@@ -348,10 +348,11 @@ function showForm(type) {
 
 if (type === "expressTransfer") {
 
+  // 🔹 Ranmase done agent la ki soti nan dashboard itilizatè a
   const agentName = data.wallet?.fullName || "";
   const agentEmail = data.wallet?.email || "";
 
-  // 🔹 Fòm totalman libere pou tout moun
+  // 🔹 Fòm nan libere totalman pou tout moun
   actionArea.innerHTML = `
     <h3>Transfert Express Haiti</h3>
     <form id="expressTransferForm">
@@ -412,16 +413,19 @@ if (type === "expressTransfer") {
     const transferData = {
       agent_name: agentName,
       agent_email: agentEmail,
+
       sender_name: form.sender_name.value.trim(),
       sender_cin: form.sender_cin.value.trim(),
       sender_address: form.sender_address.value.trim(),
       sender_id: senderIDInput.value,
       sender_department: form.sender_department.value.trim(),
       sender_whatsapp: form.sender_whatsapp.value.trim(),
+
       receiver_name: form.receiver_name.value.trim(),
       receiver_id: receiverIDInput.value,
       receiver_department: form.receiver_department.value.trim(),
       receiver_whatsapp: form.receiver_whatsapp.value.trim(),
+
       amount,
       fee,
       netAmount
@@ -463,7 +467,6 @@ if (type === "expressTransfer") {
 
   });
 }
-
 
 
 
