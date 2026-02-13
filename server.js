@@ -1957,10 +1957,10 @@ app.post("/api/express/create", async (req, res) => {
       return res.status(400).json({ message: "Tous les champs obligatoires ne sont pas remplis." });
     }
 
-    // 🔹 Retire verifikasyon Agent Autorise pou pa bloke fòm nan
+    // 🔹 Tout moun ka itilize fòm nan, retire verifikasyon Agent Autorisé
     // const wallet = await WalletBalance.findOne({ email: agent_email });
     // if (!wallet || wallet.walletAccountType !== "Agent Autorise") {
-    //   return res.status(403).json({ message: "Accès refusé: Se sèlman Agent Autorise ki ka faire Transfert Express." });
+    //   return res.status(403).json({ message: "Accès refusé" });
     // }
 
     // 🔹 GENERATE TRANSFER CODE
@@ -1996,7 +1996,7 @@ app.post("/api/express/create", async (req, res) => {
       createdAt: new Date()
     };
 
-    // 🔹 REPONSE SENP
+    // 🔹 REPONSE SENP POU TOUT MOUN
     res.status(200).json({
       message: "Transfert créé avec succès.",
       transaction
@@ -2007,7 +2007,6 @@ app.post("/api/express/create", async (req, res) => {
     res.status(500).json({ message: "Erreur serveur." });
   }
 });
-
 
 
 
