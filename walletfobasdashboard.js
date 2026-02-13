@@ -414,6 +414,7 @@ if (type === "expressTransfer") {
     const fee = (amount * 1.5) / 100;
     const netAmount = amount - fee;
 
+    // 🔑 TRANSFER DATA AK walletAccountType POU VERIFYE AGENT
     const transferData = {
       agent_name: form.agent_name.value.trim(),
       agent_email: form.agent_email.value.trim(),
@@ -432,7 +433,10 @@ if (type === "expressTransfer") {
 
       amount,
       fee,
-      netAmount
+      netAmount,
+
+      // 🔒 AJOUT POU BACKEND verifye Agent Autorise
+      walletAccountType: data.wallet?.walletAccountType || "Utilisateur"
     };
 
     try {
