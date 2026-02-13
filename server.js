@@ -41,7 +41,6 @@ app.use(express.json());
 
 
 
-app.use("/api/express", require("./routes/expressTransfer"));
 
 
 
