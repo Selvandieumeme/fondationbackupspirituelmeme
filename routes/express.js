@@ -2,8 +2,6 @@ const express = require("express");
 const router = express.Router();
 const Transaction = require("../models/ExpressTransaction");
 const History = require("../models/ExpressHistory");
-const WalletBalance = require("../models/WalletBalance"); // Nou itilize pou verifye Agent Autorise
-const authMiddleware = require("../middlewares/authMiddleware");
 
 // ------------------ GENERATE TRANSFER CODE ------------------
 function generateTransferCode() {
@@ -16,17 +14,15 @@ function generateTransferCode() {
 }
 
 // ------------------ CREATE EXPRESS TRANSFER ------------------
-router.post("/create", authMiddleware, async (req, res) => {
+router.post("/create", async (req, res) => {
   try {
-    // ------------------ VERIFY USER ROLE ------------------
-    if (!req.user) {
-      return res.status(401).json({ message: "Utilisateur non identifié." });
-    }
+    // ------------------ VERIFY AGENT AUTORISE ------------------
+    const { walletAccountType } = req.body;
 
-    // Fetch wallet balance pou verifye si se yon Agent Autorise
-    const wallet = await WalletBalance.findOne({ userId: req.user._id });
-    if (!wallet || wallet.walletAccountType !== "Agent Autorise") {
-      return res.status(403).json({ message: "Accès refusé: Agent Autorise uniquement." });
+    if (walletAccountType !== "Agent Autorise") {
+      return res.status(403).json({
+        message: "Accès refusé: Se sèlman yon Agent Autorise ki ka effectuer ce transfert."
+      });
     }
 
     // ------------------ VALIDATE REQUIRED FIELDS ------------------
@@ -41,7 +37,9 @@ router.post("/create", authMiddleware, async (req, res) => {
     } = req.body;
 
     if (!sender_name || !sender_cin || !sender_address || !receiver_name || !agent_name || !agent_email || !amount) {
-      return res.status(400).json({ message: "Tous les champs obligatoires ne sont pas remplis." });
+      return res.status(400).json({
+        message: "Tous les champs obligatoires ne sont pas remplis."
+      });
     }
 
     // ------------------ GENERATE TRANSFER CODE ------------------
@@ -51,7 +49,6 @@ router.post("/create", authMiddleware, async (req, res) => {
     const transaction = new Transaction({
       ...req.body,
       transferCode,
-      createdBy: req.user._id,
       status: "pending",
       createdAt: new Date()
     });
@@ -62,7 +59,7 @@ router.post("/create", authMiddleware, async (req, res) => {
     await History.create({
       transactionId: transaction._id,
       action: "created",
-      performedBy: req.user._id,
+      performedBy: agent_email, // nou itilize email agent pou istwa
       timestamp: new Date()
     });
 
