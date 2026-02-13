@@ -1,0 +1,29 @@
+<div class="transfert-form">
+  <h2 style="color:#007BFF">Transfert Express Haiti</h2>
+  <form id="formTransfert">
+    <fieldset>
+      <legend>Expéditeur</legend>
+      <input type="text" id="senderName" placeholder="Nom et Prénom" required>
+      <input type="text" id="senderCIN" placeholder="No. CIN" required>
+      <input type="text" id="senderCountry" placeholder="Pays" required>
+      <input type="text" id="senderAddress" placeholder="Adresse complète" required>
+      <input type="text" id="senderWhatsapp" placeholder="WhatsApp" required>
+    </fieldset>
+
+    <fieldset>
+      <legend>Bénéficiaire</legend>
+      <input type="text" id="receiverName" placeholder="Nom et Prénom" required>
+      <input type="text" id="receiverCountry" placeholder="Pays" required>
+      <input type="text" id="receiverAddress" placeholder="Adresse complète" required>
+      <input type="text" id="receiverWhatsapp" placeholder="WhatsApp" required>
+    </fieldset>
+
+    <fieldset>
+      <legend>Montant</legend>
+      <input type="number" id="transferAmount" placeholder="Montant à transférer" required>
+    </fieldset>
+
+    <button type="submit" class="btn-primary">TRANSFERER</button>
+    <p id="transfertMessage"></p>
+  </form>
+</div>
