@@ -346,24 +346,16 @@ function showForm(type) {
 
 if (type === "expressTransfer") {
 
-  // 🔹 Ranmase done agent la ki soti nan dashboard itilizatè a
-  // Egzanp ou te bay:
-  // Jean Dupont, jeandupont@gmail.com, Tit: Agent Autorise, Balance: 55000.40
+  // 🔹 Ranmase done itilizatè a soti nan dashboard dinamikman
   const agentName = data.wallet?.fullName || "";
   const agentEmail = data.wallet?.email || "";
   const agentRole = data.wallet?.walletAccountType || "";
 
-  // 🔒 VERIFYE SI SE YON AGENT AUTORISE
-  if (agentRole !== "Agent Autorise") {
-    actionArea.innerHTML = `
-      <p style="color:red; font-weight:bold;">
-        Accès refusé: Se sèlman Agent Autorise ki ka faire Transfert Express.
-      </p>
-    `;
-    return; // blokaj fòm nan si li pa Agent Autorise
-  }
+  // ------------------ NETWAYE BLOKAJ FRONTEND ------------------
+  // Nou pa mete okenn blokaj ki ka bloke fòm nan pou Agent Autorise
+  // Fòm nan ap toujou chaje, backend pral verifye wòl la
 
-  // Si agent la se Agent Autorise → kontinye chaje fòm nan
+  // ------------------ CHARGE FOM NAN ------------------
   actionArea.innerHTML = `
     <h3>Transfert Express Haiti</h3>
     <form id="expressTransferForm">
