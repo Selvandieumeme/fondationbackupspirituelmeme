@@ -340,117 +340,140 @@ function showForm(type) {
 
 
 
+
+
+
+
 if (type === "expressTransfer") {
-  // Mete fòm nan nan actionArea
+
   actionArea.innerHTML = `
     <h3>Transfert Express Haiti</h3>
     <form id="expressTransferForm">
+
+      <h4>Informations Agent Autorisé</h4>
+      <input name="agent_name" placeholder="Nom/Prenom Agent Autorisé" required />
+      <input name="agent_email" type="email" placeholder="Email Agent Autorisé" required />
+
+      <h4>Informations Émetteur</h4>
       <input name="sender_name" placeholder="Nom émetteur" required />
+      <input name="sender_cin" placeholder="No. CIN émetteur" required />
+      <input name="sender_address" placeholder="Adresse complète émetteur" required />
       <input name="sender_id" placeholder="ID émetteur" disabled />
       <input name="sender_department" placeholder="Département émetteur" />
       <input name="sender_whatsapp" placeholder="WhatsApp émetteur" />
 
+      <h4>Informations Destinataire</h4>
       <input name="receiver_name" placeholder="Nom destinataire" required />
       <input name="receiver_id" placeholder="ID destinataire" disabled />
       <input name="receiver_department" placeholder="Département destinataire" />
       <input name="receiver_whatsapp" placeholder="WhatsApp destinataire" />
 
-      <input name="amount" type="number" placeholder="Montant" required />
+      <input name="amount" type="number" placeholder="Montant (HTG)" required />
       <button type="submit">Transférer</button>
     </form>
     <p id="expressMsg"></p>
   `;
 
-  // Chèche fòm nan nan DOM la
   const form = document.getElementById("expressTransferForm");
   const msg = document.getElementById("expressMsg");
 
-  if (!form) {
-    console.error("Formulaire Transfert Express non trouvé !");
-  } else {
+  function generateUniqueID() {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    let id = '';
+    for (let i = 0; i < 8; i++) {
+      id += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return id;
+  }
 
-    // --- Fonksyon pou jenere ID inik otomatik ---
-    function generateUniqueID() {
-      const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-      let id = '';
-      for (let i = 0; i < 6; i++) {
-        id += chars.charAt(Math.floor(Math.random() * chars.length));
-      }
-      return id;
+  const senderIDInput = form.sender_id;
+  const receiverIDInput = form.receiver_id;
+  senderIDInput.value = generateUniqueID();
+  receiverIDInput.value = generateUniqueID();
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const amount = parseFloat(form.amount.value);
+
+    if (isNaN(amount) || amount <= 0) {
+      msg.innerText = "Montant invalide.";
+      return;
     }
 
-    // Jenere ID pou sender & receiver otomatikman
-    const senderIDInput = form.sender_id;
-    const receiverIDInput = form.receiver_id;
-    senderIDInput.value = generateUniqueID();
-    receiverIDInput.value = generateUniqueID();
+    const fee = (amount * 1.5) / 100;
+    const netAmount = amount - fee;
 
-    form.addEventListener("submit", async (e) => {
-      e.preventDefault();
+    const data = {
+      agent_name: form.agent_name.value.trim(),
+      agent_email: form.agent_email.value.trim(),
 
-      // Kolekte done
-      const data = {
-        sender_name: form.sender_name.value.trim(),
-        sender_id: senderIDInput.value.trim(),         // ID otomatik
-        sender_department: form.sender_department.value.trim(),
-        sender_whatsapp: form.sender_whatsapp.value.trim(),
-        receiver_name: form.receiver_name.value.trim(),
-        receiver_id: receiverIDInput.value.trim(),     // ID otomatik
-        receiver_department: form.receiver_department.value.trim(),
-        receiver_whatsapp: form.receiver_whatsapp.value.trim(),
-        amount: parseFloat(form.amount.value)
-      };
+      sender_name: form.sender_name.value.trim(),
+      sender_cin: form.sender_cin.value.trim(),
+      sender_address: form.sender_address.value.trim(),
+      sender_id: senderIDInput.value,
+      sender_department: form.sender_department.value.trim(),
+      sender_whatsapp: form.sender_whatsapp.value.trim(),
 
-      // Tcheke si chif yo valide
-      if (!data.sender_name || !data.receiver_name || isNaN(data.amount)) {
-        msg.innerText = "Tout chan obligatwa, epi Montant dwe yon nimewo!";
+      receiver_name: form.receiver_name.value.trim(),
+      receiver_id: receiverIDInput.value,
+      receiver_department: form.receiver_department.value.trim(),
+      receiver_whatsapp: form.receiver_whatsapp.value.trim(),
+
+      amount,
+      fee,
+      netAmount
+    };
+
+    try {
+
+      const response = await fetch(
+        "https://api.fondationbackupspirituel.com/api/express/create",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data)
+        }
+      );
+
+      const contentType = response.headers.get("content-type");
+
+      if (!contentType || !contentType.includes("application/json")) {
+        const text = await response.text();
+        console.error("Serveur HTML:", text);
+        msg.innerText = "Erreur serveur critique.";
         return;
       }
 
-      try {
-        const response = await fetch('https://api.fondationbackupspirituel.com/api/express/create', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(data)
-        });
+      const result = await response.json();
 
-        // Verifye tip content anvan JSON.parse
-        const contentType = response.headers.get("content-type");
-
-        let result;
-        if (contentType && contentType.includes("application/json")) {
-          result = await response.json();
-        } else {
-          const text = await response.text();
-          console.error("Serveur pa voye JSON, li voye sa:", text);
-          msg.innerText = "Erreur serveur: Serveur pa retounen JSON.";
-          return;
-        }
-
-        if (response.ok) {
-          msg.innerText = "Transfert créé avec succès !";
-          form.reset();
-          // Reyajiste ID otomatik aprè reset fòm nan
-          senderIDInput.value = generateUniqueID();
-          receiverIDInput.value = generateUniqueID();
-        } else {
-          msg.innerText = result.message || "Erreur: impossible de créer le transfert";
-        }
-
-      } catch (err) {
-        console.error("Erreur fetch Transfert Express:", err);
-        msg.innerText = "Erreur fetch: " + err.message;
+      if (response.ok) {
+        msg.innerText = "Transfert créé avec succès.";
+        form.reset();
+        senderIDInput.value = generateUniqueID();
+        receiverIDInput.value = generateUniqueID();
+      } else {
+        msg.innerText = result.message || "Erreur création transfert.";
       }
 
-    }); // Fèmen event listener submit
+    } catch (err) {
+      console.error("Erreur:", err);
+      msg.innerText = "Erreur serveur.";
+    }
 
-  } // Fèmen else si form egziste
-} // Fèmen if (type === "expressTransfer")
+  });
+}
        
 
   
 
 
+
+
+
+
+
+  
  if (type === "changepass") {
   actionArea.innerHTML = `
     <h3>Changer mot de passe</h3>
