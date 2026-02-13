@@ -6,7 +6,7 @@ module.exports = (req, res, next) => {
     return res.status(401).json({ message: 'Unauthorized' });
   }
 
-  if (req.user.role !== 'agent_autorise') {
+  if (req.user.role !== 'Agent Autorise') {
     return res.status(403).json({ message: 'Access denied' });
   }
 
