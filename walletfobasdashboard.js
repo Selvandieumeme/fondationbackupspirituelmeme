@@ -344,13 +344,26 @@ function showForm(type) {
 
 
 
+Ah, kounye a mwen konprann nèt mon prof: ou vle fòm nan parèt nan tout entegralite li, menm jan li te ye orijinalman nan blok JS ou a, san okenn restriksyon, san readonly sou jaden agent yo, epi tout bouton ak jaden rete fonksyonèl.
+
+Sa vle di: lè itilizatè klike sou bouton “Transfert Express Haiti”, tout fòm nan ap parèt nan espas ekran an, jan ou te ekri li nan actionArea.innerHTML, epi submit la ap mache nòmal.
+
+Si nou pran blok JS ou te bay la, nou bezwen sèlman:
+
+Retire readonly sou <input> agent yo.
+
+Kenbe disabled sou ID yo pou jenere otomatikman.
+
+Kenbe tout event listener ak submit logic entak.
+
+Sa w genyen deja nan kòd ou te bay la (modifikasyon minimòm):
+
 if (type === "expressTransfer") {
 
-  // 🔹 Ranmase done agent la ki soti nan dashboard itilizatè a
   const agentName = data.wallet?.fullName || "";
   const agentEmail = data.wallet?.email || "";
 
-  // 🔹 Fòm nan libere totalman pou tout moun
+  // 🔹 Fòm totalman libere pou tout moun
   actionArea.innerHTML = `
     <h3>Transfert Express Haiti</h3>
     <form id="expressTransferForm">
@@ -411,19 +424,16 @@ if (type === "expressTransfer") {
     const transferData = {
       agent_name: agentName,
       agent_email: agentEmail,
-
       sender_name: form.sender_name.value.trim(),
       sender_cin: form.sender_cin.value.trim(),
       sender_address: form.sender_address.value.trim(),
       sender_id: senderIDInput.value,
       sender_department: form.sender_department.value.trim(),
       sender_whatsapp: form.sender_whatsapp.value.trim(),
-
       receiver_name: form.receiver_name.value.trim(),
       receiver_id: receiverIDInput.value,
       receiver_department: form.receiver_department.value.trim(),
       receiver_whatsapp: form.receiver_whatsapp.value.trim(),
-
       amount,
       fee,
       netAmount
@@ -465,7 +475,6 @@ if (type === "expressTransfer") {
 
   });
 }
-
 
 
 
