@@ -1933,24 +1933,9 @@ app.post("/api/wallet/change-password", async (req, res) => {
 
 
 
-// ------------------ EXPRESS TRANSFER SIMPLE ------------------
-const expressTransferRouter = require("express").Router();
-const Transaction = require("./models/ExpressTransaction");
-const History = require("./models/ExpressHistory");
-const WalletBalance = require("./models/WalletBalance");
 
-// ------------------ GENERATE TRANSFER CODE ------------------
-function generateTransferCode() {
-  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-  let code = "";
-  for (let i = 0; i < 10; i++) {
-    code += chars.charAt(Math.floor(Math.random() * chars.length));
-  }
-  return code;
-}
-
-// ------------------ CREATE TRANSFER ------------------
-expressTransferRouter.post("/create", async (req, res) => {
+// ------------------ TRANSFERT EXPRESS SIMPLE INLINE ------------------
+app.post("/api/express/create", async (req, res) => {
   try {
     const {
       sender_name,
@@ -1960,31 +1945,38 @@ expressTransferRouter.post("/create", async (req, res) => {
       agent_name,
       agent_email,
       amount,
-      walletAccountType,
+      walletAccountType, // soti nan frontend, verifye Agent Autorise
       sender_department,
       sender_whatsapp,
       receiver_department,
       receiver_whatsapp,
       sender_id,
-      receiver_id,
-      netAmount,
-      fee
+      receiver_id
     } = req.body;
 
     // 🔒 VERIFYE SI SE YON AGENT AUTORISE
     if (walletAccountType !== "Agent Autorise") {
-      return res.status(403).json({ message: "Accès refusé: Agent Autorise uniquement." });
+      return res.status(403).json({ message: "Accès refusé: Se sèlman Agent Autorise ki ka faire Transfert Express." });
     }
 
-    // 🔹 VALIDATE CHAMPS OBLIGATWA
+    // 🔹 VALIDATION CHAMPS OBLIGATWA
     if (!sender_name || !sender_cin || !sender_address || !receiver_name || !agent_name || !agent_email || !amount) {
       return res.status(400).json({ message: "Tous les champs obligatoires ne sont pas remplis." });
     }
 
-    const transferCode = generateTransferCode();
+    // 🔹 GENERATE TRANSFER CODE
+    const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    let transferCode = "";
+    for (let i = 0; i < 10; i++) {
+      transferCode += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
 
-    // 🔹 CREATE TRANSACTION
-    const transaction = new Transaction({
+    // 🔹 CALCULE FEE AK NET AMOUNT
+    const fee = (amount * 1.5) / 100;
+    const netAmount = amount - fee;
+
+    // 🔹 KREYE TRANSACTION INLINE (san DB si ou vle, sinon ou ka ajoute MongoDB)
+    const transaction = {
       sender_name,
       sender_cin,
       sender_address,
@@ -2003,21 +1995,12 @@ expressTransferRouter.post("/create", async (req, res) => {
       transferCode,
       status: "pending",
       createdAt: new Date()
-    });
+    };
 
-    await transaction.save();
-
-    // 🔹 CREATE HISTORY
-    await History.create({
-      transactionId: transaction._id,
-      action: "created",
-      performedBy: agent_email, // senp, san req.user
-      timestamp: new Date()
-    });
-
+    // 🔹 REPONSE SENP
     res.status(200).json({
       message: "Transfert créé avec succès.",
-      transferCode
+      transaction
     });
 
   } catch (error) {
@@ -2026,8 +2009,8 @@ expressTransferRouter.post("/create", async (req, res) => {
   }
 });
 
-// ------------------ ENTÈGRE ROUTE NAN SERVER ------------------
-app.use("/api/express", expressTransferRouter);
+
+
 
 
 
