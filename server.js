@@ -1933,6 +1933,114 @@ app.post("/api/wallet/change-password", async (req, res) => {
 
 
 
+// ------------------ EXPRESS TRANSFER SIMPLE ------------------
+const expressTransferRouter = require("express").Router();
+const Transaction = require("./models/ExpressTransaction");
+const History = require("./models/ExpressHistory");
+const WalletBalance = require("./models/WalletBalance");
+
+// ------------------ GENERATE TRANSFER CODE ------------------
+function generateTransferCode() {
+  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+  let code = "";
+  for (let i = 0; i < 10; i++) {
+    code += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return code;
+}
+
+// ------------------ CREATE TRANSFER ------------------
+expressTransferRouter.post("/create", async (req, res) => {
+  try {
+    const {
+      sender_name,
+      sender_cin,
+      sender_address,
+      receiver_name,
+      agent_name,
+      agent_email,
+      amount,
+      walletAccountType,
+      sender_department,
+      sender_whatsapp,
+      receiver_department,
+      receiver_whatsapp,
+      sender_id,
+      receiver_id,
+      netAmount,
+      fee
+    } = req.body;
+
+    // 🔒 VERIFYE SI SE YON AGENT AUTORISE
+    if (walletAccountType !== "Agent Autorise") {
+      return res.status(403).json({ message: "Accès refusé: Agent Autorise uniquement." });
+    }
+
+    // 🔹 VALIDATE CHAMPS OBLIGATWA
+    if (!sender_name || !sender_cin || !sender_address || !receiver_name || !agent_name || !agent_email || !amount) {
+      return res.status(400).json({ message: "Tous les champs obligatoires ne sont pas remplis." });
+    }
+
+    const transferCode = generateTransferCode();
+
+    // 🔹 CREATE TRANSACTION
+    const transaction = new Transaction({
+      sender_name,
+      sender_cin,
+      sender_address,
+      receiver_name,
+      agent_name,
+      agent_email,
+      amount,
+      fee,
+      netAmount,
+      sender_department,
+      sender_whatsapp,
+      receiver_department,
+      receiver_whatsapp,
+      sender_id,
+      receiver_id,
+      transferCode,
+      status: "pending",
+      createdAt: new Date()
+    });
+
+    await transaction.save();
+
+    // 🔹 CREATE HISTORY
+    await History.create({
+      transactionId: transaction._id,
+      action: "created",
+      performedBy: agent_email, // senp, san req.user
+      timestamp: new Date()
+    });
+
+    res.status(200).json({
+      message: "Transfert créé avec succès.",
+      transferCode
+    });
+
+  } catch (error) {
+    console.error("Erreur create transfer:", error);
+    res.status(500).json({ message: "Erreur serveur." });
+  }
+});
+
+// ------------------ ENTÈGRE ROUTE NAN SERVER ------------------
+app.use("/api/express", expressTransferRouter);
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
