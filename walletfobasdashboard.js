@@ -346,12 +346,12 @@ if (type === "expressTransfer") {
     <h3>Transfert Express Haiti</h3>
     <form id="expressTransferForm">
       <input name="sender_name" placeholder="Nom émetteur" required />
-      <input name="sender_id" placeholder="ID émetteur" required />
+      <input name="sender_id" placeholder="ID émetteur" disabled />
       <input name="sender_department" placeholder="Département émetteur" />
       <input name="sender_whatsapp" placeholder="WhatsApp émetteur" />
 
       <input name="receiver_name" placeholder="Nom destinataire" required />
-      <input name="receiver_id" placeholder="ID destinataire" required />
+      <input name="receiver_id" placeholder="ID destinataire" disabled />
       <input name="receiver_department" placeholder="Département destinataire" />
       <input name="receiver_whatsapp" placeholder="WhatsApp destinataire" />
 
@@ -368,17 +368,34 @@ if (type === "expressTransfer") {
   if (!form) {
     console.error("Formulaire Transfert Express non trouvé !");
   } else {
+
+    // --- Fonksyon pou jenere ID inik otomatik ---
+    function generateUniqueID() {
+      const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+      let id = '';
+      for (let i = 0; i < 6; i++) {
+        id += chars.charAt(Math.floor(Math.random() * chars.length));
+      }
+      return id;
+    }
+
+    // Jenere ID pou sender & receiver otomatikman
+    const senderIDInput = form.sender_id;
+    const receiverIDInput = form.receiver_id;
+    senderIDInput.value = generateUniqueID();
+    receiverIDInput.value = generateUniqueID();
+
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
 
       // Kolekte done
       const data = {
         sender_name: form.sender_name.value.trim(),
-        sender_id: form.sender_id.value.trim(),
+        sender_id: senderIDInput.value.trim(),         // ID otomatik
         sender_department: form.sender_department.value.trim(),
         sender_whatsapp: form.sender_whatsapp.value.trim(),
         receiver_name: form.receiver_name.value.trim(),
-        receiver_id: form.receiver_id.value.trim(),
+        receiver_id: receiverIDInput.value.trim(),     // ID otomatik
         receiver_department: form.receiver_department.value.trim(),
         receiver_whatsapp: form.receiver_whatsapp.value.trim(),
         amount: parseFloat(form.amount.value)
@@ -408,6 +425,11 @@ if (type === "expressTransfer") {
         if (response.ok) {
           msg.innerText = "Transfert créé avec succès !";
           form.reset();
+
+          // Reyajiste ID otomatik aprè reset fòm nan
+          senderIDInput.value = generateUniqueID();
+          receiverIDInput.value = generateUniqueID();
+
         } else {
           msg.innerText = result.message || "Erreur: impossible de créer le transfert";
         }
@@ -419,7 +441,6 @@ if (type === "expressTransfer") {
     });
   }
 }
-
 
   
 
