@@ -346,16 +346,11 @@ function showForm(type) {
 
 if (type === "expressTransfer") {
 
-  // 🔹 Ranmase done itilizatè a soti nan dashboard dinamikman
+  // 🔹 Ranmase done agent la ki soti nan dashboard itilizatè a
   const agentName = data.wallet?.fullName || "";
   const agentEmail = data.wallet?.email || "";
-  const agentRole = data.wallet?.walletAccountType || "";
 
-  // ------------------ NETWAYE BLOKAJ FRONTEND ------------------
-  // Nou pa mete okenn blokaj ki ka bloke fòm nan pou Agent Autorise
-  // Fòm nan ap toujou chaje, backend pral verifye wòl la
-
-  // ------------------ CHARGE FOM NAN ------------------
+  // Fòm nan ap toujou afiche, san okenn blokaj
   actionArea.innerHTML = `
     <h3>Transfert Express Haiti</h3>
     <form id="expressTransferForm">
@@ -470,6 +465,13 @@ if (type === "expressTransfer") {
 
   });
 }
+
+
+
+
+
+
+  
        
 
   
