@@ -1934,7 +1934,6 @@ app.post("/api/wallet/change-password", async (req, res) => {
 
 
 
-// ------------------ TRANSFERT EXPRESS SIMPLE INLINE ------------------
 app.post("/api/express/create", async (req, res) => {
   try {
     const {
@@ -1945,7 +1944,6 @@ app.post("/api/express/create", async (req, res) => {
       agent_name,
       agent_email,
       amount,
-      walletAccountType, // soti nan frontend, verifye Agent Autorise
       sender_department,
       sender_whatsapp,
       receiver_department,
@@ -1954,14 +1952,15 @@ app.post("/api/express/create", async (req, res) => {
       receiver_id
     } = req.body;
 
-    // 🔒 VERIFYE SI SE YON AGENT AUTORISE
-    if (walletAccountType !== "Agent Autorise") {
-      return res.status(403).json({ message: "Accès refusé: Se sèlman Agent Autorise ki ka faire Transfert Express." });
-    }
-
     // 🔹 VALIDATION CHAMPS OBLIGATWA
     if (!sender_name || !sender_cin || !sender_address || !receiver_name || !agent_name || !agent_email || !amount) {
       return res.status(400).json({ message: "Tous les champs obligatoires ne sont pas remplis." });
+    }
+
+    // 🔒 VERIFYE SI EMAIL SE YON AGENT AUTORISE
+    const wallet = await WalletBalance.findOne({ email: agent_email });
+    if (!wallet || wallet.walletAccountType !== "Agent Autorise") {
+      return res.status(403).json({ message: "Accès refusé: Se sèlman Agent Autorise ki ka faire Transfert Express." });
     }
 
     // 🔹 GENERATE TRANSFER CODE
@@ -1975,7 +1974,7 @@ app.post("/api/express/create", async (req, res) => {
     const fee = (amount * 1.5) / 100;
     const netAmount = amount - fee;
 
-    // 🔹 KREYE TRANSACTION INLINE (san DB si ou vle, sinon ou ka ajoute MongoDB)
+    // 🔹 KREYE TRANSACTION INLINE
     const transaction = {
       sender_name,
       sender_cin,
@@ -2008,7 +2007,6 @@ app.post("/api/express/create", async (req, res) => {
     res.status(500).json({ message: "Erreur serveur." });
   }
 });
-
 
 
 
