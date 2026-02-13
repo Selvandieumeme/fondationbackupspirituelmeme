@@ -1,0 +1,10 @@
+// /express/express.config.js
+
+module.exports = {
+  MAX_AMOUNT: 50000,
+  DAILY_LIMIT: 200000,
+  OTP_EXPIRATION_MINUTES: 5,
+  TRANSFER_EXPIRATION_HOURS: 48,
+  OTP_LENGTH: 6,
+  MAX_OTP_ATTEMPTS: 3
+};
