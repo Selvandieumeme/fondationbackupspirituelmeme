@@ -346,24 +346,31 @@ function showForm(type) {
 
 if (type === "expressTransfer") {
 
-  // 🔒 VERIFIKASYON OTOMATIK AGENT AUTORISE
-  if (data.wallet?.walletAccountType !== "Agent Autorise") {
+  // 🔹 Ranmase done agent la ki soti nan dashboard itilizatè a
+  // Egzanp ou te bay:
+  // Jean Dupont, jeandupont@gmail.com, Tit: Agent Autorise, Balance: 55000.40
+  const agentName = data.wallet?.fullName || "";
+  const agentEmail = data.wallet?.email || "";
+  const agentRole = data.wallet?.walletAccountType || "";
+
+  // 🔒 VERIFYE SI SE YON AGENT AUTORISE
+  if (agentRole !== "Agent Autorise") {
     actionArea.innerHTML = `
       <p style="color:red; font-weight:bold;">
-        Accès refusé: Se sèlman Agent Autorise ki ka fè Transfert Express.
+        Accès refusé: Se sèlman Agent Autorise ki ka faire Transfert Express.
       </p>
     `;
-    return; // blokaj fòm nan
+    return; // blokaj fòm nan si li pa Agent Autorise
   }
 
-  // Si itilizatè a se Agent Autorise → kontinye chaje fòm nan
+  // Si agent la se Agent Autorise → kontinye chaje fòm nan
   actionArea.innerHTML = `
     <h3>Transfert Express Haiti</h3>
     <form id="expressTransferForm">
 
       <h4>Informations Agent Autorisé</h4>
-      <input name="agent_name" placeholder="Nom/Prenom Agent Autorisé" required />
-      <input name="agent_email" type="email" placeholder="Email Agent Autorisé" required />
+      <input name="agent_name" value="${agentName}" placeholder="Nom/Prenom Agent Autorisé" readonly />
+      <input name="agent_email" value="${agentEmail}" type="email" placeholder="Email Agent Autorisé" readonly />
 
       <h4>Informations Émetteur</h4>
       <input name="sender_name" placeholder="Nom émetteur" required />
@@ -414,10 +421,9 @@ if (type === "expressTransfer") {
     const fee = (amount * 1.5) / 100;
     const netAmount = amount - fee;
 
-    // 🔑 TRANSFER DATA AK walletAccountType POU VERIFYE AGENT
     const transferData = {
-      agent_name: form.agent_name.value.trim(),
-      agent_email: form.agent_email.value.trim(),
+      agent_name: agentName,
+      agent_email: agentEmail,
 
       sender_name: form.sender_name.value.trim(),
       sender_cin: form.sender_cin.value.trim(),
@@ -433,10 +439,7 @@ if (type === "expressTransfer") {
 
       amount,
       fee,
-      netAmount,
-
-      // 🔒 AJOUT POU BACKEND verifye Agent Autorise
-      walletAccountType: data.wallet?.walletAccountType || "Utilisateur"
+      netAmount
     };
 
     try {
