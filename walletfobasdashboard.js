@@ -346,6 +346,17 @@ function showForm(type) {
 
 if (type === "expressTransfer") {
 
+  // 🔒 VERIFIKASYON OTOMATIK AGENT AUTORISE
+  if (data.wallet?.walletAccountType !== "Agent Autorise") {
+    actionArea.innerHTML = `
+      <p style="color:red; font-weight:bold;">
+        Accès refusé: Se sèlman Agent Autorise ki ka fè Transfert Express.
+      </p>
+    `;
+    return; // blokaj fòm nan
+  }
+
+  // Si itilizatè a se Agent Autorise → kontinye chaje fòm nan
   actionArea.innerHTML = `
     <h3>Transfert Express Haiti</h3>
     <form id="expressTransferForm">
@@ -395,7 +406,6 @@ if (type === "expressTransfer") {
     e.preventDefault();
 
     const amount = parseFloat(form.amount.value);
-
     if (isNaN(amount) || amount <= 0) {
       msg.innerText = "Montant invalide.";
       return;
@@ -404,7 +414,7 @@ if (type === "expressTransfer") {
     const fee = (amount * 1.5) / 100;
     const netAmount = amount - fee;
 
-    const data = {
+    const transferData = {
       agent_name: form.agent_name.value.trim(),
       agent_email: form.agent_email.value.trim(),
 
@@ -426,18 +436,16 @@ if (type === "expressTransfer") {
     };
 
     try {
-
       const response = await fetch(
         "https://api.fondationbackupspirituel.com/api/express/create",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(data)
+          body: JSON.stringify(transferData)
         }
       );
 
       const contentType = response.headers.get("content-type");
-
       if (!contentType || !contentType.includes("application/json")) {
         const text = await response.text();
         console.error("Serveur HTML:", text);
