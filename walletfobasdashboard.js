@@ -407,40 +407,46 @@ if (type === "expressTransfer") {
         return;
       }
 
-      // Fe request la
       try {
-        const response = await fetch(
-          'https://api.fondationbackupspirituel.com/api/express/create',
-          {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(data)
-          }
-        );
+        const response = await fetch('https://api.fondationbackupspirituel.com/api/express/create', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        });
 
-        const result = await response.json();
+        // Verifye tip content anvan JSON.parse
+        const contentType = response.headers.get("content-type");
+
+        let result;
+        if (contentType && contentType.includes("application/json")) {
+          result = await response.json();
+        } else {
+          const text = await response.text();
+          console.error("Serveur pa voye JSON, li voye sa:", text);
+          msg.innerText = "Erreur serveur: Serveur pa retounen JSON.";
+          return;
+        }
 
         if (response.ok) {
           msg.innerText = "Transfert créé avec succès !";
           form.reset();
-
           // Reyajiste ID otomatik aprè reset fòm nan
           senderIDInput.value = generateUniqueID();
           receiverIDInput.value = generateUniqueID();
-
         } else {
           msg.innerText = result.message || "Erreur: impossible de créer le transfert";
         }
 
       } catch (err) {
         console.error("Erreur fetch Transfert Express:", err);
-        msg.innerText = "Erreur serveur: " + err.message;
+        msg.innerText = "Erreur fetch: " + err.message;
       }
-    });
-  }
-}
+
+    }); // Fèmen event listener submit
+
+  } // Fèmen else si form egziste
+} // Fèmen if (type === "expressTransfer")
+       
 
   
 
