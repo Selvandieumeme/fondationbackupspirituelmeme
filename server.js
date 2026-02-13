@@ -41,7 +41,7 @@ app.use(express.json());
 
 
 
-
+app.use("/api/express", require("./routes/expressTransfer"));
 
 
 
@@ -87,7 +87,7 @@ app.use('/wallet', walletToMerchantRoutes);   // <-- sa pèmèt POST /wallet/tra
 
 
 
-app.use("/api/express", require("./routes/expressTransfer"));
+
 
 
 
