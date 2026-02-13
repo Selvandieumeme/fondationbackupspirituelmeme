@@ -350,8 +350,7 @@ if (type === "expressTransfer") {
   const agentName = data.wallet?.fullName || "";
   const agentEmail = data.wallet?.email || "";
 
-  // 🔹 Fòm nan ap toujou afiche, men nou retire tout kòd ki ta ka fè li "mal afiche" 
-  // (pa egzanp: readonly pou tout jaden agent, kenbe li pwòp san obstak)
+  // 🔹 Fòm nan libere totalman pou tout moun
   actionArea.innerHTML = `
     <h3>Transfert Express Haiti</h3>
     <form id="expressTransferForm">
@@ -466,7 +465,6 @@ if (type === "expressTransfer") {
 
   });
 }
-
 
 
 
