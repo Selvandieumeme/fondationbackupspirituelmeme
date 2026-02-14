@@ -1,27 +1,89 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Dashboard Agent Transfert Express Haiti - FOBAS</title>
-<link rel="stylesheet" href="transfert-express.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard Agent Transfert Express Haiti - FOBAS</title>
+  <link rel="stylesheet" href="transfert-express.css">
+  <style>
+    /* Design pro FOBAS: Bleue, Jaune, Blanc */
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f8ff;
+      margin: 0;
+      padding: 0;
+    }
+
+    .dashboard-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    .dashboard-header h1 {
+      text-align: center;
+      font-size: 28px;
+      font-weight: bold;
+      color: #007BFF; /* Bleue FOBAS */
+    }
+
+    .dashboard-main {
+      margin-top: 30px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #0a3cff, #f7c600); /* Bleue → Jaune */
+      color: #fff;
+      padding: 12px 24px;
+      border: none;
+      border-radius: 10px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .btn-primary:hover {
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+      transform: translateY(-2px);
+    }
+
+    /* Container pou fòm transfè */
+    #transfertExpressContainer {
+      width: 100%;
+      max-width: 900px;
+      margin-top: 30px;
+      background: #fff; /* Blanc */
+      border-radius: 12px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+      padding: 20px;
+      overflow: hidden;
+    }
+  </style>
 </head>
 <body>
   <div class="dashboard-container">
     <header class="dashboard-header">
-      <h1 style="color:#007BFF">FOBAS - Dashboard Agent</h1>
+      <h1>FOBAS - Dashboard Agent</h1>
     </header>
 
     <main class="dashboard-main">
-      <button id="btnTransfertExpress" class="btn-primary">Transfert Express Haiti</button>
+      <!-- 🆕 Bouton Transfert Express Haiti -->
+      <button id="btnTransfertExpress" class="btn-primary">
+        Transfert Express Haiti
+      </button>
 
-      <!-- Container pou inject modal verification / formulaire transfè -->
+      <!-- 🆕 Container pou inject modal verification / formulaire transfè -->
       <div id="transfertExpressContainer"></div>
     </main>
   </div>
 
-<script src="transfert-express-api.js"></script>
-<script src="agent-verification.js"></script>
-<script src="dashboardagentexpresshaiti.js"></script>
+  <!-- ==================== SCRIPTS ==================== -->
+  <script src="transfert-express-api.js"></script>
+  <script src="agent-verification.js" defer></script>
+  <script src="dashboardagentexpresshaiti.js" defer></script>
 </body>
 </html>
