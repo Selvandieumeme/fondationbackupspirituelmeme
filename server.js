@@ -87,7 +87,7 @@ app.use('/wallet', walletToMerchantRoutes);   // <-- sa pèmèt POST /wallet/tra
 
 
 // ===============================
-// 🔐 Vérification Agent Autorisé FOBAS
+// VERIFY AGENT AUTORISÉ - FOBAS
 // ===============================
 app.post("/api/verify-agent", async (req, res) => {
   try {
@@ -96,40 +96,41 @@ app.post("/api/verify-agent", async (req, res) => {
     if (!email) {
       return res.status(400).json({
         success: false,
-        message: "Email requis"
+        message: "Email manquant"
       });
     }
 
-    // 🔎 Rechèch Agent Autorisé nan MongoDB
-    const agent = await db
-      .collection("users")
-      .findOne({
-        email: email.toLowerCase(),
-        walletAccountType: "Agent Autorise",
-        status: "ACTIF"
-      });
+    // 🔒 Collection MongoDB agents autorisés
+    const agent = await db.collection("agentsAutorises").findOne({
+      email: email.toLowerCase(),
+      status: "active"
+    });
 
     if (!agent) {
-      return res.status(403).json({
-        success: false,
-        message: "Email non autorisé"
+      return res.json({
+        success: false
       });
     }
 
     return res.json({
       success: true,
-      message: "Agent autorisé validé",
-      agentName: agent.fullName || agent.name || "Agent FOBAS"
+      agentName: agent.nom || agent.email
     });
 
   } catch (err) {
-    console.error("Erreur vérification agent:", err);
+    console.error("Erreur verify-agent:", err);
     res.status(500).json({
       success: false,
       message: "Erreur serveur"
     });
   }
 });
+
+
+
+
+
+
 
 
 
