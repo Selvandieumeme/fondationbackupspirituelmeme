@@ -86,44 +86,6 @@ app.use('/wallet', walletToMerchantRoutes);   // <-- sa pèmèt POST /wallet/tra
 
 
 
-// =======================================
-// VERIFY AGENT AUTORISÉ VIA walletbalances
-// =======================================
-app.post("/api/verify-agent", async (req, res) => {
-  try {
-    const { email } = req.body;
-
-    if (!email) {
-      return res.json({
-        success: false,
-        message: "Email manquant"
-      });
-    }
-
-    const agent = await db.collection("walletbalances").findOne({
-      email: email.toLowerCase()
-    });
-
-    if (!agent) {
-      return res.json({
-        success: false,
-        message: "Agent non autorisé"
-      });
-    }
-
-    return res.json({
-      success: true,
-      agentName: agent.nom || agent.email
-    });
-
-  } catch (err) {
-    console.error("VERIFY AGENT ERROR:", err);
-    return res.status(500).json({
-      success: false,
-      message: "Erreur serveur"
-    });
-  }
-});
 
 
 
