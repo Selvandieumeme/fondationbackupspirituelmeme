@@ -1,14 +1,14 @@
 // expressTransferRoutes.js
-// =======================================
-// Routes Transfert Express Haiti
-// =======================================
 const express = require("express");
 const router = express.Router();
-const { v4: uuidv4 } = require("uuid"); // pou jenere uniqueCode
+const { ObjectId } = require("mongodb");
+const { v4: uuidv4 } = require("uuid");
 
-// POST /api/express-transfer → kreye nouvo transfert
+// POST /api/express-transfer
+// Kreye nouvo transfè express
 router.post("/api/express-transfer", async (req, res) => {
   try {
+    const db = req.app.locals.db;
     const {
       senderName,
       senderCIN,
@@ -20,11 +20,12 @@ router.post("/api/express-transfer", async (req, res) => {
       receiverCountry,
       receiverAddress,
       amount,
+      devise, // HTG, USD, Euro
       senderAgentName,
       senderAgentEmail
     } = req.body;
 
-    // Validasyon minimal
+    // Verifye tout chan obligatwa
     if (
       !senderName ||
       !senderCIN ||
@@ -37,21 +38,26 @@ router.post("/api/express-transfer", async (req, res) => {
       !receiverAddress ||
       !amount ||
       !senderAgentName ||
-      !senderAgentEmail
+      !senderAgentEmail ||
+      !devise
     ) {
       return res.status(400).json({ success: false, message: "Champs manquants" });
     }
 
-    // Kalkil fre 1.5%
-    const fee = (parseFloat(amount) * 1.5) / 100;
-    const agentBonus = (fee * 0.7);  // 0.7% pou Agent
-    const adminShare = (fee * 0.8);  // 0.8% pou Admin
-    const totalAmount = parseFloat(amount);
+    // Verifye Agent nan walletbalances pou garanti
+    const agent = await db.collection("walletbalances").findOne({
+      email: senderAgentEmail.toLowerCase()
+    });
 
-    const uniqueCode = uuidv4(); // jenere unique code
+    if (!agent) {
+      return res.status(400).json({ success: false, message: "Agent Autorisé non trouvé" });
+    }
 
-    // Dokiman pou koleksyon expressTransfers
-    const transfertDoc = {
+    // Kreye unique code pou transfè a
+    const uniqueCode = uuidv4();
+
+    // Kreye dokiman transfè
+    const newTransfer = {
       senderName,
       senderCIN,
       senderPhone,
@@ -61,107 +67,106 @@ router.post("/api/express-transfer", async (req, res) => {
       receiverPhone,
       receiverCountry,
       receiverAddress,
-      amount: totalAmount,
-      fee: fee,
-      agentBonus: agentBonus,
-      adminShare: adminShare,
+      amount,
+      devise,
       senderAgentName,
       senderAgentEmail,
+      status: "pending",
       uniqueCode,
-      status: "En attente", // default
-      createdAt: new Date(),
-      expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // 7 jou
+      createdAt: new Date()
     };
 
-    const result = await req.app.locals.db
-      .collection("expressTransfers")
-      .insertOne(transfertDoc);
+    // Mete li nan MongoDB
+    await db.collection("expressTransfers").insertOne(newTransfer);
 
-    // Tou depan de audit, ou ka tou ajoute nan istorik (historique) si vle
-    await req.app.locals.db
-      .collection("expressTransfersHistory")
-      .insertOne({ ...transfertDoc, recordedAt: new Date() });
-
-    res.json({
-      success: true,
-      message: "Transfert créé avec succès",
-      uniqueCode
-    });
-
+    return res.json({ success: true, message: "Transfert créé avec succès", uniqueCode });
   } catch (err) {
-    console.error("ERROR /api/express-transfer:", err);
-    res.status(500).json({ success: false, message: "Erreur serveur" });
+    console.error("EXPRESS TRANSFER ERROR:", err);
+    return res.status(500).json({ success: false, message: "Erreur serveur" });
   }
 });
 
-// POST /api/validate-withdrawal → verifye uniqueCode e chanje statut
+// POST /api/validate-withdrawal
+// Verifye uniqueCode epi chanje statut + kalkil fre
 router.post("/api/validate-withdrawal", async (req, res) => {
   try {
+    const db = req.app.locals.db;
     const { uniqueCode } = req.body;
 
     if (!uniqueCode) {
       return res.status(400).json({ success: false, message: "Code manquant" });
     }
 
-    const transfert = await req.app.locals.db
-      .collection("expressTransfers")
-      .findOne({ uniqueCode });
+    // Chèche transfè nan collection
+    const transfer = await db.collection("expressTransfers").findOne({ uniqueCode });
 
-    if (!transfert) {
-      return res.status(404).json({ success: false, message: "Transfert introuvable" });
+    if (!transfer) {
+      return res.status(404).json({ success: false, message: "Transfert non trouvé" });
     }
 
-    if (transfert.status !== "En attente") {
-      return res.status(400).json({ success: false, message: "Transfert déjà validé" });
+    if (transfer.status !== "pending") {
+      return res.status(400).json({ success: false, message: `Transfert deja ${transfer.status}` });
     }
 
-    // Chanje statut → Retirer
-    const updateResult = await req.app.locals.db
-      .collection("expressTransfers")
-      .updateOne(
-        { uniqueCode },
-        { $set: { status: "Retirer", retraitAt: new Date() } }
-      );
+    // Kalkil fre
+    const fraisTotal = transfer.amount * 0.015;
+    const bonusAgent = transfer.amount * 0.007; // 0.70%
+    const adminFee = transfer.amount * 0.008; // 0.80%
+    const montantNet = transfer.amount - fraisTotal;
 
-    // Distribisyon fre otomatik
-    // Agent Bonus
-    await req.app.locals.db
-      .collection("walletbalances")
-      .updateOne(
-        { email: transfert.senderAgentEmail },
-        { $inc: { bonus: transfert.agentBonus } }
-      );
+    // Update transfè
+    await db.collection("expressTransfers").updateOne(
+      { uniqueCode },
+      {
+        $set: {
+          status: "Retire",
+          retraitAt: new Date(),
+          montantNet,
+          fraisTotal,
+          bonusAgent,
+          adminFee
+        }
+      }
+    );
 
-    // Admin share
-    await req.app.locals.db
-      .collection("walletbalances")
-      .updateOne(
-        { email: "memeselvandieu@fobas.com" },
-        { $inc: { balance: transfert.adminShare } }
-      );
+    // Mete bonus Agent nan walletbalances li
+    await db.collection("walletbalances").updateOne(
+      { email: transfer.senderAgentEmail.toLowerCase() },
+      {
+        $inc: { balance: montantNet, bonus: bonusAgent } // Net transfè + bonus
+      }
+    );
 
-    res.json({ success: true, message: "Retrait validé avec succès" });
+    // Mete admin fee nan kont admin (imajine yon email admin)
+    await db.collection("walletbalances").updateOne(
+      { email: "memeselvandieu@fobas.com" },
+      { $inc: { balance: adminFee } }
+    );
 
+    return res.json({ success: true, message: "Retrait validé", montantNet, fraisTotal });
   } catch (err) {
-    console.error("ERROR /api/validate-withdrawal:", err);
-    res.status(500).json({ success: false, message: "Erreur serveur" });
+    console.error("VALIDATE WITHDRAWAL ERROR:", err);
+    return res.status(500).json({ success: false, message: "Erreur serveur" });
   }
 });
 
-// GET /api/express-transfers/:email → liste transferts selon email
+// GET /api/express-transfers/:email
+// Retounen tout transfè pou yon agent
 router.get("/api/express-transfers/:email", async (req, res) => {
   try {
-    const email = req.params.email.toLowerCase();
-    const transfers = await req.app.locals.db
+    const db = req.app.locals.db;
+    const { email } = req.params;
+
+    const transfers = await db
       .collection("expressTransfers")
-      .find({ senderAgentEmail: email })
+      .find({ senderAgentEmail: email.toLowerCase() })
       .sort({ createdAt: -1 })
       .toArray();
 
-    res.json({ success: true, transfers });
+    return res.json({ success: true, transfers });
   } catch (err) {
-    console.error("ERROR /api/express-transfers/:email", err);
-    res.status(500).json({ success: false, message: "Erreur serveur" });
+    console.error("GET EXPRESS TRANSFERS ERROR:", err);
+    return res.status(500).json({ success: false, message: "Erreur serveur" });
   }
 });
 
