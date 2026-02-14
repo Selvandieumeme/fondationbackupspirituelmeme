@@ -354,7 +354,26 @@ function showForm(type) {
 
   
 
+// ================= TRANSFERT EXPRESS HAITI =================
+document.addEventListener("DOMContentLoaded", () => {
+  const btnTransfert = document.getElementById("btnTransfertExpress");
+  const container = document.getElementById("transfertExpressContainer");
 
+  btnTransfert?.addEventListener("click", () => {
+    // Clear previous content
+    container.innerHTML = "";
+
+    // Inject agent verification modal
+    fetch("agent-verification.html")
+      .then(res => res.text())
+      .then(html => {
+        container.innerHTML = html;
+        // Initialize verification avec formType 'expressTransfer'
+        initAgentVerification(container, "expressTransfer");
+      })
+      .catch(err => console.error("Erreur chargement modal:", err));
+  });
+});
 
 
 
