@@ -1,7 +1,13 @@
-<div class="modal-verification">
-  <h2 style="color:#007BFF">Vérification Agent Autorisé</h2>
-  <p>Entrez l'email de l'Agent Autorisé FOBAS pour continuer :</p>
-  <input type="email" id="agentEmail" placeholder="email agent" required>
-  <button id="btnValidateAgent" class="btn-primary">Valider</button>
-  <p id="verificationMessage" class="verification-message"></p>
-</div>
+<!-- agent-verification.html -->
+
+<!-- Container dinamik pou verification + transfert form -->
+<div id="agentVerificationContainer"></div>
+
+<!-- JS pou verifye Agent Autorisé -->
+<script src="agent-verification.js"></script>
+<script>
+  // Initialisation
+  const container = document.getElementById("agentVerificationContainer");
+  // 'expressTransfer' vle di JS pral chaje fòm transfert express apre verification
+  initAgentVerification(container, "expressTransfer");
+</script>
