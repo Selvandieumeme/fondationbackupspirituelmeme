@@ -1934,80 +1934,9 @@ app.post("/api/wallet/change-password", async (req, res) => {
 
 
 
-app.post("/api/express/create", async (req, res) => {
-  try {
-    const {
-      sender_name,
-      sender_cin,
-      sender_address,
-      receiver_name,
-      agent_name,
-      agent_email,
-      amount,
-      sender_department,
-      sender_whatsapp,
-      receiver_department,
-      receiver_whatsapp,
-      sender_id,
-      receiver_id
-    } = req.body;
 
-    // 🔹 VALIDATION CHAMPS OBLIGATWA
-    if (!sender_name || !sender_cin || !sender_address || !receiver_name || !agent_name || !agent_email || !amount) {
-      return res.status(400).json({ message: "Tous les champs obligatoires ne sont pas remplis." });
-    }
 
-    // 🔹 Tout moun ka itilize fòm nan, retire verifikasyon Agent Autorisé
-    // const wallet = await WalletBalance.findOne({ email: agent_email });
-    // if (!wallet || wallet.walletAccountType !== "Agent Autorise") {
-    //   return res.status(403).json({ message: "Accès refusé" });
-    // }
-
-    // 🔹 GENERATE TRANSFER CODE
-    const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-    let transferCode = "";
-    for (let i = 0; i < 10; i++) {
-      transferCode += chars.charAt(Math.floor(Math.random() * chars.length));
-    }
-
-    // 🔹 CALCULE FEE AK NET AMOUNT
-    const fee = (amount * 1.5) / 100;
-    const netAmount = amount - fee;
-
-    // 🔹 KREYE TRANSACTION INLINE
-    const transaction = {
-      sender_name,
-      sender_cin,
-      sender_address,
-      receiver_name,
-      agent_name,
-      agent_email,
-      amount,
-      fee,
-      netAmount,
-      sender_department,
-      sender_whatsapp,
-      receiver_department,
-      receiver_whatsapp,
-      sender_id,
-      receiver_id,
-      transferCode,
-      status: "pending",
-      createdAt: new Date()
-    };
-
-    // 🔹 REPONSE SENP POU TOUT MOUN
-    res.status(200).json({
-      message: "Transfert créé avec succès.",
-      transaction
-    });
-
-  } catch (error) {
-    console.error("Erreur create transfer:", error);
-    res.status(500).json({ message: "Erreur serveur." });
-  }
-});
-
+  
 
 
 
