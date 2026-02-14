@@ -3,33 +3,32 @@
  * container: div kote modal la injecte
  * formType: string ('expressTransfer')
  *
- * ⚠️ Aucun appel API
- * ⚠️ Aucune vérification serveur
- * ✅ Basé uniquement sur les données du dashboard (walletbalances)
+ * ✔ 100% dynamique
+ * ✔ aucune donnée en dur
+ * ✔ basé sur walletbalances (dashboard déjà chargé)
  */
 function initAgentVerification(container, formType) {
   const btnValidate = container.querySelector("#btnValidateAgent");
   const emailInput = container.querySelector("#agentEmail");
   const msg = container.querySelector("#verificationMessage");
 
-  // Sécurité DOM
   if (!btnValidate || !emailInput || !msg) {
-    console.error("Éléments DOM manquants pour la vérification Agent");
+    console.error("DOM manquant pour vérification Agent");
     return;
   }
 
-  // 🔐 Données réelles venant du dashboard (injectées depuis MongoDB)
+  // 🔐 Données déjà affichées dynamiquement sur le dashboard
   const dashboardEmailEl = document.getElementById("userEmail");
-  const dashboardRoleEl = document.getElementById("userRole");
+  const dashboardTypeEl = document.getElementById("userAccountType");
 
-  if (!dashboardEmailEl || !dashboardRoleEl) {
+  if (!dashboardEmailEl || !dashboardTypeEl) {
     msg.textContent = "Erreur interne dashboard.";
     msg.style.color = "red";
     return;
   }
 
   const dashboardEmail = dashboardEmailEl.textContent.trim().toLowerCase();
-  const dashboardRole = dashboardRoleEl.textContent.trim();
+  const isAgentAutorise = dashboardTypeEl.textContent.includes("Agent");
 
   btnValidate.addEventListener("click", () => {
     const enteredEmail = emailInput.value.trim().toLowerCase();
@@ -44,29 +43,27 @@ function initAgentVerification(container, formType) {
     msg.style.color = "#007BFF";
 
     // ❌ Pas Agent Autorisé
-    if (dashboardRole !== "Agent Autorise") {
+    if (!isAgentAutorise) {
       msg.textContent = "Accès refusé. Vous n'êtes pas Agent Autorisé.";
       msg.style.color = "red";
       return;
     }
 
-    // ❌ Email non compatible avec le compte connecté
+    // ❌ Email ne correspond pas au compte connecté
     if (enteredEmail !== dashboardEmail) {
       msg.textContent = "Email non compatible avec votre compte.";
       msg.style.color = "red";
       return;
     }
 
-    // ✅ ACCÈS AUTORISÉ
+    // ✅ SUCCÈS
     msg.textContent = "Accès autorisé.";
     msg.style.color = "#28a745";
 
     if (formType === "expressTransfer") {
       fetch("transfertexpresshaiti.html")
         .then(res => {
-          if (!res.ok) {
-            throw new Error("Formulaire introuvable");
-          }
+          if (!res.ok) throw new Error("Formulaire introuvable");
           return res.text();
         })
         .then(html => {
@@ -74,12 +71,9 @@ function initAgentVerification(container, formType) {
 
           if (typeof initTransfertExpress === "function") {
             initTransfertExpress(container, dashboardEmail);
-          } else {
-            console.error("initTransfertExpress non défini");
           }
         })
-        .catch(err => {
-          console.error(err);
+        .catch(() => {
           msg.textContent = "Erreur chargement formulaire transfert.";
           msg.style.color = "red";
         });
