@@ -86,8 +86,7 @@ app.use('/wallet', walletToMerchantRoutes);   // <-- sa pèmèt POST /wallet/tra
 
 
 
-const expressTransferRoutes = require("./routes/expressTransferRoutes");
-app.use("/api", expressTransferRoutes);
+
 
 
 
@@ -129,6 +128,12 @@ app.post("/api/verify-agent", async (req, res) => {
     });
   }
 });
+
+
+
+const expressTransferRoutes = require("./routes/expressTransferRoutes");
+app.use("/api", expressTransferRoutes);
+
 
 
 
