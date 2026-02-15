@@ -1,29 +1,94 @@
 <div class="transfert-form">
   <h2 style="color:#007BFF">Transfert Express Haiti</h2>
+
   <form id="formTransfert">
+
+    <!-- ================= AGENT AUTORISE ================= -->
+    <fieldset>
+      <legend>Agent Autorisé FOBAS</legend>
+
+      <input type="text"
+             id="agentName"
+             placeholder="Nom & Prénom Agent"
+             readonly
+             required>
+
+      <input type="email"
+             id="agentEmail"
+             placeholder="Email Agent Autorisé"
+             readonly
+             required>
+    </fieldset>
+
+    <!-- ================= EXPEDITEUR ================= -->
     <fieldset>
       <legend>Expéditeur</legend>
+
       <input type="text" id="senderName" placeholder="Nom et Prénom" required>
-      <input type="text" id="senderCIN" placeholder="No. CIN" required>
-      <input type="text" id="senderCountry" placeholder="Pays" required>
+      <input type="text" id="senderCIN" placeholder="No. CIN / NIF / Passport" required>
+
+      <select id="senderCountry" required>
+        <option value="">Pays d'origine</option>
+        <option value="Haiti">Haïti</option>
+        <option value="USA">États-Unis</option>
+        <option value="France">France</option>
+        <option value="Canada">Canada</option>
+        <option value="Autre">Autre</option>
+      </select>
+
       <input type="text" id="senderAddress" placeholder="Adresse complète" required>
-      <input type="text" id="senderWhatsapp" placeholder="WhatsApp" required>
+      <input type="text" id="senderWhatsapp" placeholder="WhatsApp / Téléphone" required>
     </fieldset>
 
+    <!-- ================= BENEFICIAIRE ================= -->
     <fieldset>
       <legend>Bénéficiaire</legend>
+
       <input type="text" id="receiverName" placeholder="Nom et Prénom" required>
-      <input type="text" id="receiverCountry" placeholder="Pays" required>
+
+      <select id="receiverCountry" required>
+        <option value="">Pays de destination</option>
+        <option value="Haiti">Haïti</option>
+        <option value="USA">États-Unis</option>
+        <option value="France">France</option>
+        <option value="Canada">Canada</option>
+        <option value="Autre">Autre</option>
+      </select>
+
       <input type="text" id="receiverAddress" placeholder="Adresse complète" required>
-      <input type="text" id="receiverWhatsapp" placeholder="WhatsApp" required>
+      <input type="text" id="receiverWhatsapp" placeholder="WhatsApp / Téléphone" required>
     </fieldset>
 
+    <!-- ================= MONTANT & DEVISE ================= -->
     <fieldset>
-      <legend>Montant</legend>
-      <input type="number" id="transferAmount" placeholder="Montant à transférer" required>
+      <legend>Détails du Transfert</legend>
+
+      <input type="number"
+             id="transferAmount"
+             placeholder="Montant à transférer"
+             min="1"
+             step="0.01"
+             required>
+
+      <select id="transferCurrency" required>
+        <option value="">Devise</option>
+        <option value="HTG">HTG – Gourde Haïtienne</option>
+        <option value="USD">$ US – Dollar Américain</option>
+        <option value="EUR">€ Euro</option>
+      </select>
+
+      <!-- Champs système -->
+      <input type="text" id="transferCode" placeholder="Code unique" readonly>
+      <input type="text" id="transferStatus" value="PENDING" readonly>
+      <input type="text" id="transferExpiration" placeholder="Expiration : 7 jours" readonly>
     </fieldset>
 
-    <button type="submit" class="btn-primary">TRANSFERER</button>
+    <!-- ================= ACTION ================= -->
+    <button type="submit" class="btn-primary">
+      TRANSFERER
+    </button>
+
     <p id="transfertMessage"></p>
+
   </form>
 </div>
