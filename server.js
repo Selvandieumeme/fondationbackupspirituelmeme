@@ -1201,7 +1201,9 @@ const transfertSchema = new mongoose.Schema({
 // ============================
 // 2️⃣ MODELS (2 COLLECTIONS)
 // ============================
-const Transfert = mongoose.model('Transfert', transfertSchema);
+const Transfert =
+  mongoose.models.Transfert ||
+  mongoose.model('Transfert', transfertSchema);
 const TransfertHistory = mongoose.model(
   'TransfertHistory',
   transfertSchema,
