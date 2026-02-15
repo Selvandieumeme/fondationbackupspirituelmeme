@@ -1,5 +1,5 @@
 // ========================================
-// JS – Transfert Express Haiti (AUTO REMPLISSAGE via verification)
+// JS – Transfert Express Haiti (AUTO REMPLISSAGE via verification + intégration agent-verification)
 // ========================================
 
 // 1️⃣ Sélection du formulaire et du message
@@ -12,68 +12,135 @@ btnValider.type = 'button';
 btnValider.textContent = 'Valider';
 btnValider.className = 'btn-primary';
 btnValider.style.display = 'none';
-if (formTransfert) formTransfert.appendChild(btnValider);
-
-// ========================================
-// 3️⃣ Fonction pour remplir automatiquement les champs agent
-// ========================================
-function prefillAgentFields(agentEmail) {
-  const agentNameField = document.getElementById('agentName');
-  const agentEmailField = document.getElementById('agentEmail');
-
-  // Ranpli ak data ki egziste sou dashboard
-  const agentName = document.getElementById('userName')?.textContent || '';
-  const agentEmailText = agentEmail || document.getElementById('userEmail')?.textContent || '';
-
-  if (agentNameField) {
-    agentNameField.value = agentName;
-    agentNameField.readOnly = true; // empêche modification
-  }
-  if (agentEmailField) {
-    agentEmailField.value = agentEmailText;
-    agentEmailField.readOnly = true; // empêche modification
-  }
-
-  if (messageEl) {
-    messageEl.style.color = 'green';
-    messageEl.textContent = `Agent autorisé confirmé ✅\nNom: ${agentName}\nEmail: ${agentEmailText}`;
-  }
-
-  // Reset champs client (toujou san kraze lòt chan)
-  [
-    'senderName', 'senderCIN', 'senderCountry', 'senderAddress', 'senderWhatsapp',
-    'receiverName', 'receiverCountry', 'receiverAddress', 'receiverWhatsapp',
-    'transferAmount', 'transferCurrency'
-  ].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.value = '';
-  });
+if (formTransfert && !formTransfert.contains(btnValider)) {
+  formTransfert.appendChild(btnValider);
 }
 
 // ========================================
-// 4️⃣ Trigger: bouton Transfert Express Haiti
+// 3️⃣ Agent Verification + Prefill
+// ========================================
+function verifyCurrentAgent() {
+    const userEmailEl = document.getElementById("userEmail");
+    const userNameEl = document.getElementById("userName");
+    const msg = document.getElementById("verificationMessage");
+    const container = document.getElementById("transfertExpressContainer");
+
+    if (!userEmailEl || !userNameEl || !msg || !container) {
+        console.error("Éléments DOM manquants pour la vérification Agent");
+        return;
+    }
+
+    const email = userEmailEl.textContent.trim();
+    const fullName = userNameEl.textContent.trim();
+
+    msg.textContent = "Vérification en cours...";
+    msg.style.color = "#007BFF";
+
+    // Chaje fòm la
+    fetch("transfertexpresshaiti.html")
+        .then(res => {
+            if (!res.ok) throw new Error("Formulaire introuvable");
+            return res.text();
+        })
+        .then(html => {
+            container.innerHTML = html;
+
+            // Inisyalizasyon fòm ak done agent la
+            if (typeof initTransfertExpress === "function") {
+                initTransfertExpress(container, fullName, email);
+
+                // Ranpli chan agent yo ak prefillAgentFields
+                if (typeof prefillAgentFields === "function") {
+                    setTimeout(() => {
+                        prefillAgentFields(email);
+                    }, 50); // ti delè pou asire DOM fin chaje
+                }
+
+                msg.textContent = "Agent autorisé confirmé ✅";
+                msg.style.color = "green";
+            } else {
+                console.error("initTransfertExpress non défini");
+                msg.textContent = "Erreur initialisation formulaire";
+                msg.style.color = "red";
+            }
+        })
+        .catch(err => {
+            console.error("Erreur chargement formulaire:", err);
+            msg.textContent = "Erreur chargement formulaire.";
+            msg.style.color = "red";
+        });
+}
+
+function initTransfertExpress(container, fullName, email) {
+    try {
+        const nomPrenomField = container.querySelector("#agentName");
+        const emailField = container.querySelector("#agentEmail");
+
+        if (!nomPrenomField || !emailField) {
+            console.error("Chan Agent pa jwenn nan fòm lan");
+            return;
+        }
+
+        nomPrenomField.value = fullName;
+        emailField.value = email;
+    } catch (err) {
+        console.error("Erreur initTransfertExpress:", err);
+    }
+}
+
+function prefillAgentFields(agentEmail) {
+    try {
+        const agentNameField = document.getElementById('agentName');
+        const agentEmailField = document.getElementById('agentEmail');
+
+        const agentName = document.getElementById('userName')?.textContent?.trim() || '';
+        const agentEmailText = agentEmail?.trim() || document.getElementById('userEmail')?.textContent?.trim() || '';
+
+        if (agentNameField) {
+            agentNameField.value = agentName;
+            agentNameField.readOnly = true;
+        }
+        if (agentEmailField) {
+            agentEmailField.value = agentEmailText;
+            agentEmailField.readOnly = true;
+        }
+
+        if (messageEl) {
+            messageEl.style.color = 'green';
+            messageEl.textContent = `Agent autorisé confirmé ✅\nNom: ${agentName}\nEmail: ${agentEmailText}`;
+        }
+
+        // Reset chan client san kraze lòt chan
+        [
+            'senderName', 'senderCIN', 'senderCountry', 'senderAddress', 'senderWhatsapp',
+            'receiverName', 'receiverCountry', 'receiverAddress', 'receiverWhatsapp',
+            'transferAmount', 'transferCurrency'
+        ].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.value = '';
+        });
+
+    } catch (err) {
+        console.error("Erreur dans prefillAgentFields:", err);
+    }
+}
+
+// ========================================
+// 4️⃣ Trigger bouton Transfert Express Haiti
 // ========================================
 document.addEventListener('DOMContentLoaded', () => {
   const btnTransfertExpress = document.getElementById('btnTransfertExpress');
   if (btnTransfertExpress) {
     btnTransfertExpress.addEventListener('click', () => {
-      // Verify si agent valab, chaje fòm si verifyCurrentAgent deja defini
       if (typeof verifyCurrentAgent === 'function') {
-        verifyCurrentAgent(); // sa chaje fòm la deja
-
-        // Apre fòm la chaje, ranpli chan agent yo
-        setTimeout(() => {
-          const agentEmail = document.getElementById('userEmail')?.textContent;
-          prefillAgentFields(agentEmail);
-        }, 100); // ti delè pou asire fòm lan fin chaje
+        verifyCurrentAgent();
       } else {
         console.warn("verifyCurrentAgent non défini, fallback prefill");
-        prefillAgentFields(); // fallback san crash
+        prefillAgentFields();
       }
     });
   }
 });
-
 // ========================================
 // 5️⃣ Submit FORMULAIRE = TRANSFERER
 // ========================================
