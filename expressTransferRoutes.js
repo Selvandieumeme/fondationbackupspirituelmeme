@@ -1,112 +1,91 @@
-// expressTransferRoutes.js
 const express = require("express");
 const router = express.Router();
 const { ObjectId } = require("mongodb");
 const { v4: uuidv4 } = require("uuid");
 
+// -----------------------------
 // POST /api/express-transfer
 // Kreye nouvo transfè express
+// -----------------------------
 router.post("/api/express-transfer", async (req, res) => {
   try {
     const db = req.app.locals.db;
     const {
-      senderName,
-      senderCIN,
-      senderPhone,
-      senderCountry,
-      senderAddress,
-      receiverName,
-      receiverPhone,
-      receiverCountry,
-      receiverAddress,
+      agentEmail,
+      agentName,
+      sender,
+      receiver,
       amount,
-      devise, // HTG, USD, Euro
-      senderAgentName,
-      senderAgentEmail
+      devise,
+      withdrawCode,
+      createdAt,
+      expireAt
     } = req.body;
 
-    // Verifye tout chan obligatwa
+    // Verifye chan obligatwa
     if (
-      !senderName ||
-      !senderCIN ||
-      !senderPhone ||
-      !senderCountry ||
-      !senderAddress ||
-      !receiverName ||
-      !receiverPhone ||
-      !receiverCountry ||
-      !receiverAddress ||
-      !amount ||
-      !senderAgentName ||
-      !senderAgentEmail ||
-      !devise
+      !agentEmail ||
+      !agentName ||
+      !sender?.name || !sender?.cin || !sender?.country || !sender?.address || !sender?.whatsapp ||
+      !receiver?.name || !receiver?.country || !receiver?.address || !receiver?.whatsapp ||
+      !amount || !devise || !withdrawCode
     ) {
       return res.status(400).json({ success: false, message: "Champs manquants" });
     }
 
-    // Verifye Agent nan walletbalances pou garanti
+    // Verifye Agent nan walletbalances
     const agent = await db.collection("walletbalances").findOne({
-      email: senderAgentEmail.toLowerCase()
+      email: agentEmail.toLowerCase()
     });
 
     if (!agent) {
       return res.status(400).json({ success: false, message: "Agent Autorisé non trouvé" });
     }
 
-    // Kreye unique code pou transfè a
-    const uniqueCode = uuidv4();
-
     // Kreye dokiman transfè
     const newTransfer = {
-      senderName,
-      senderCIN,
-      senderPhone,
-      senderCountry,
-      senderAddress,
-      receiverName,
-      receiverPhone,
-      receiverCountry,
-      receiverAddress,
+      agentEmail,
+      agentName,
+      sender,
+      receiver,
       amount,
       devise,
-      senderAgentName,
-      senderAgentEmail,
+      withdrawCode,
       status: "pending",
-      uniqueCode,
-      createdAt: new Date()
+      createdAt: createdAt || new Date(),
+      expireAt: expireAt || new Date(Date.now() + 7*24*60*60*1000), // 7 jou
+      fraisTotal: 0,
+      bonusAgent: 0,
+      adminFee: 0,
+      montantNet: 0
     };
 
-    // Mete li nan MongoDB
     await db.collection("expressTransfers").insertOne(newTransfer);
 
-    return res.json({ success: true, message: "Transfert créé avec succès", uniqueCode });
+    return res.json({ success: true, message: "Transfert créé avec succès", withdrawCode });
+
   } catch (err) {
     console.error("EXPRESS TRANSFER ERROR:", err);
     return res.status(500).json({ success: false, message: "Erreur serveur" });
   }
 });
 
+// -----------------------------------
 // POST /api/validate-withdrawal
-// Verifye uniqueCode epi chanje statut + kalkil fre
+// Verifye uniqueCode + kalkil fre + bonus + admin
+// -----------------------------------
 router.post("/api/validate-withdrawal", async (req, res) => {
   try {
     const db = req.app.locals.db;
-    const { uniqueCode } = req.body;
+    const { withdrawCode } = req.body;
 
-    if (!uniqueCode) {
-      return res.status(400).json({ success: false, message: "Code manquant" });
-    }
+    if (!withdrawCode) return res.status(400).json({ success: false, message: "Code manquant" });
 
-    // Chèche transfè nan collection
-    const transfer = await db.collection("expressTransfers").findOne({ uniqueCode });
+    // Chèche transfè
+    const transfer = await db.collection("expressTransfers").findOne({ withdrawCode });
 
-    if (!transfer) {
-      return res.status(404).json({ success: false, message: "Transfert non trouvé" });
-    }
-
-    if (transfer.status !== "pending") {
-      return res.status(400).json({ success: false, message: `Transfert deja ${transfer.status}` });
-    }
+    if (!transfer) return res.status(404).json({ success: false, message: "Transfert non trouvé" });
+    if (transfer.status !== "pending") return res.status(400).json({ success: false, message: `Transfert deja ${transfer.status}` });
 
     // Kalkil fre
     const fraisTotal = transfer.amount * 0.015;
@@ -116,28 +95,26 @@ router.post("/api/validate-withdrawal", async (req, res) => {
 
     // Update transfè
     await db.collection("expressTransfers").updateOne(
-      { uniqueCode },
+      { withdrawCode },
       {
         $set: {
           status: "Retire",
           retraitAt: new Date(),
-          montantNet,
           fraisTotal,
           bonusAgent,
-          adminFee
+          adminFee,
+          montantNet
         }
       }
     );
 
     // Mete bonus Agent nan walletbalances li
     await db.collection("walletbalances").updateOne(
-      { email: transfer.senderAgentEmail.toLowerCase() },
-      {
-        $inc: { balance: montantNet, bonus: bonusAgent } // Net transfè + bonus
-      }
+      { email: transfer.agentEmail.toLowerCase() },
+      { $inc: { balance: montantNet, bonus: bonusAgent } }
     );
 
-    // Mete admin fee nan kont admin (imajine yon email admin)
+    // Mete admin fee nan kont admin
     await db.collection("walletbalances").updateOne(
       { email: "memeselvandieu@fobas.com" },
       { $inc: { balance: adminFee } }
@@ -150,16 +127,17 @@ router.post("/api/validate-withdrawal", async (req, res) => {
   }
 });
 
-// GET /api/express-transfers/:email
-// Retounen tout transfè pou yon agent
-router.get("/api/express-transfers/:email", async (req, res) => {
+// -----------------------------------
+// GET /api/express-transfers/:agentEmail
+// Retounen tout transfè pou agent
+// -----------------------------------
+router.get("/api/express-transfers/:agentEmail", async (req, res) => {
   try {
     const db = req.app.locals.db;
-    const { email } = req.params;
+    const { agentEmail } = req.params;
 
-    const transfers = await db
-      .collection("expressTransfers")
-      .find({ senderAgentEmail: email.toLowerCase() })
+    const transfers = await db.collection("expressTransfers")
+      .find({ agentEmail: agentEmail.toLowerCase() })
       .sort({ createdAt: -1 })
       .toArray();
 
