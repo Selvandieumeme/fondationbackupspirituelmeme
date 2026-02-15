@@ -1,9 +1,9 @@
-function initTransfertExpress(container, agentEmail) {
+function initTransfertExpress(container, agentEmail, agentName) {
   const form = container.querySelector("#formTransfert");
   const msg = container.querySelector("#transfertMessage");
 
-  if (!form || !msg || !agentEmail) {
-    console.error("Formulaire ou agentEmail manquant !");
+  if (!form || !msg || !agentEmail || !agentName) {
+    console.error("Formulaire ou informations Agent manquants !");
     return;
   }
 
@@ -16,24 +16,26 @@ function initTransfertExpress(container, agentEmail) {
     // Récupérer inputs avèk fallback vide
     const payload = {
       agentEmail,
+      agentName,
       sender: {
         name: form.senderName?.value?.trim() || "",
         cin: form.senderCIN?.value?.trim() || "",
         country: form.senderCountry?.value?.trim() || "",
         address: form.senderAddress?.value?.trim() || "",
-        whatsapp: form.senderWhatsapp?.value?.trim() || "",
-        tempId: generateTempId()
+        whatsapp: form.senderWhatsapp?.value?.trim() || ""
       },
       receiver: {
         name: form.receiverName?.value?.trim() || "",
         country: form.receiverCountry?.value?.trim() || "",
         address: form.receiverAddress?.value?.trim() || "",
-        whatsapp: form.receiverWhatsapp?.value?.trim() || "",
-        tempId: generateTempId()
+        whatsapp: form.receiverWhatsapp?.value?.trim() || ""
       },
       amount: parseFloat(form.transferAmount?.value),
       devise: form.devise?.value || "HTG",
-      withdrawCode: generateWithdrawCode()
+      withdrawCode: generateWithdrawCode(),
+      createdAt: new Date(),
+      status: "pending",
+      expireAt: new Date(Date.now() + 7*24*60*60*1000) // 7 jours
     };
 
     // Vérification de base
@@ -44,7 +46,6 @@ function initTransfertExpress(container, agentEmail) {
     }
 
     try {
-      // ⚠️ Assurez-vous que createTransfert est bien défini dans un autre fichier JS et importé
       if (typeof createTransfert !== "function") {
         throw new Error("createTransfert non défini !");
       }
@@ -54,8 +55,8 @@ function initTransfertExpress(container, agentEmail) {
       if (result?.success) {
         msg.innerHTML = `
           ✅ Transfert créé avec succès!<br>
-          Statut: Attente Retrait<br>
-          <strong>Code unique:</strong> ${result.uniqueCode || payload.withdrawCode}<br>
+          Statut: ${payload.status}<br>
+          <strong>Code unique:</strong> ${payload.withdrawCode}<br>
           ⏳ Expiration : 7 jours
         `;
         msg.style.color = "#28a745";
@@ -73,9 +74,6 @@ function initTransfertExpress(container, agentEmail) {
 }
 
 // Helpers
-function generateTempId() {
-  return 'TID-' + Math.random().toString(36).substr(2, 9).toUpperCase();
-}
 function generateWithdrawCode() {
   return 'WR-' + Math.random().toString(36).substr(2, 9).toUpperCase();
 }
