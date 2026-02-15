@@ -179,6 +179,12 @@ document.addEventListener('DOMContentLoaded', () => {
 if(formTransfert){
   formTransfert.addEventListener('submit', async (e) => {
     e.preventDefault();
+  // ✅ AJOUTE BLOC SA A ICI (POSITION EXACTE)
+    const statusEl = document.getElementById("transfertStatus");
+    if (statusEl) {
+      statusEl.textContent = "⏳ Transfert en cours d'envoi...";
+      statusEl.style.color = "#0d6efd"; // bleu
+    }
     messageEl.textContent = '';
     messageEl.style.color = '';
 
