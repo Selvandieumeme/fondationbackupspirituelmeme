@@ -131,8 +131,6 @@ app.post("/api/verify-agent", async (req, res) => {
 
 
 
-const expressTransferRoutes = require("./routes/expressTransferRoutes");
-app.use("/api", expressTransferRoutes);
 
 
 
