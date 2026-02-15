@@ -1163,62 +1163,212 @@ const Transaction = mongoose.model('transactions', transactionSchema);
 
 
 
+// ============================
+// TRANSFERT EXPRESS HAITI (FINAL – SAFE)
+// ============================
+
+const cron = require('node-cron');
 
 // ============================
-// TRANSFERT EXPRESS HAITI
+// 1️⃣ SCHEMA MONGODB
 // ============================
-
-// 1️⃣ Schema MongoDB pou Transfert
 const transfertSchema = new mongoose.Schema({
   agentName: String,
-  agentEmail: String,
+  agentEmail: { type: String, index: true },
+
   senderName: String,
   senderCIN: String,
   senderCountry: String,
   senderAddress: String,
   senderWhatsapp: String,
+
   receiverName: String,
   receiverCountry: String,
   receiverAddress: String,
   receiverWhatsapp: String,
+
   transferAmount: Number,
   transferCurrency: String,
-  transferCode: String,
-  transferStatus: String,
+  transferCode: { type: String, unique: true },
+  transferStatus: { type: String, default: 'PENDING' },
   transferExpiration: String,
-  createdAt: { type: Date, default: Date.now }
+
+  note: String,
+  createdAt: { type: Date, default: Date.now },
+  updatedAt: Date
 });
 
-// 2️⃣ Model pou Transfert
+// ============================
+// 2️⃣ MODELS (2 COLLECTIONS)
+// ============================
 const Transfert = mongoose.model('Transfert', transfertSchema);
+const TransfertHistory = mongoose.model(
+  'TransfertHistory',
+  transfertSchema,
+  'TransfertHistory'
+);
 
-// 3️⃣ Route POST pou fòm "Transfert Express Haiti"
-app.post('/api/transfert', async (req, res) => {
+// ============================
+// 3️⃣ ROUTE TRANSFERER
+// Vérifie balance + génère code
+// ============================
+app.post('/api/transfert/check', async (req, res) => {
+  try {
+    const { agentEmail, transferAmount } = req.body;
+
+    if (!agentEmail || !transferAmount || transferAmount <= 0) {
+      return res.status(400).json({
+        ok: false,
+        message: 'Email agent ou montant invalide.'
+      });
+    }
+
+    const wallet = await mongoose.connection
+      .collection('walletbalances')
+      .findOne({ email: agentEmail });
+
+    if (!wallet) {
+      return res.status(404).json({
+        ok: false,
+        message: 'Agent non trouvé.'
+      });
+    }
+
+    if (wallet.balance < transferAmount) {
+      return res.status(400).json({
+        ok: false,
+        message: 'Balance insuffisante pour effectuer ce transfert.'
+      });
+    }
+
+    const code = 'TX-' + Math.random().toString(36).substring(2, 10).toUpperCase();
+    const exp = new Date();
+    exp.setDate(exp.getDate() + 7);
+
+    return res.json({
+      ok: true,
+      code,
+      expiration: exp.toISOString().split('T')[0]
+    });
+
+  } catch (err) {
+    console.error('TRANSFERT CHECK ERROR:', err.message);
+    res.status(500).json({ ok: false, message: 'Erreur serveur.' });
+  }
+});
+
+// ============================
+// 4️⃣ ROUTE VALIDER
+// Retire balance + sauvegarde
+// ============================
+app.post('/api/transfert/validate', async (req, res) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
   try {
     const data = req.body;
 
-    // Si transferCode pa egziste, jenere li
-    if (!data.transferCode) {
-      data.transferCode = 'TX-' + Math.random().toString(36).substring(2, 10).toUpperCase();
+    const walletCol = mongoose.connection.collection('walletbalances');
+
+    const wallet = await walletCol.findOne(
+      { email: data.agentEmail },
+      { session }
+    );
+
+    if (!wallet || wallet.balance < data.transferAmount) {
+      await session.abortTransaction();
+      return res.status(400).json({
+        ok: false,
+        message: 'Balance insuffisante. Validation impossible.'
+      });
     }
 
-    // Si transferExpiration pa egziste, mete 7 jou nan lavni
-    if (!data.transferExpiration) {
-      const date = new Date();
-      date.setDate(date.getDate() + 7);
-      data.transferExpiration = date.toISOString().split('T')[0]; // YYYY-MM-DD
-    }
+    // Débit balance agent
+    await walletCol.updateOne(
+      { email: data.agentEmail },
+      { $inc: { balance: -data.transferAmount } },
+      { session }
+    );
 
-    const newTransfert = new Transfert(data);
-    await newTransfert.save();
+    // Sauvegarde transfert
+    const transfert = new Transfert({
+      ...data,
+      transferStatus: 'PENDING',
+      createdAt: new Date()
+    });
 
-    return res.status(201).json({ message: 'Transfert enregistré avec succès ✅' });
+    const history = new TransfertHistory({
+      ...data,
+      transferStatus: 'PENDING',
+      note: 'Transfert validé par agent – en attente de retrait.',
+      createdAt: new Date()
+    });
+
+    await transfert.save({ session });
+    await history.save({ session });
+
+    await session.commitTransaction();
+    session.endSession();
+
+    res.json({
+      ok: true,
+      message: 'Transfert réussi avec succès et il est en attente de retrait ✅'
+    });
 
   } catch (err) {
-    console.error('Erreur Transfert Express Haiti:', err.message);
-    return res.status(500).json({ message: 'Erreur serveur : ' + err.message });
+    await session.abortTransaction();
+    session.endSession();
+    console.error('TRANSFERT VALIDATE ERROR:', err.message);
+    res.status(500).json({ ok: false, message: 'Erreur serveur.' });
   }
 });
+
+// ============================
+// 5️⃣ CRON JOB – ANNULATION 7 JOURS
+// ============================
+cron.schedule('0 * * * *', async () => {
+  try {
+    const today = new Date().toISOString().split('T')[0];
+
+    const expired = await Transfert.find({
+      transferStatus: 'PENDING',
+      transferExpiration: { $lt: today }
+    });
+
+    for (const t of expired) {
+
+      // Retour balance agent
+      await mongoose.connection.collection('walletbalances').updateOne(
+        { email: t.agentEmail },
+        { $inc: { balance: t.transferAmount } }
+      );
+
+      // Update statut
+      t.transferStatus = 'Transfert Annulé';
+      t.note = 'Expiration 7 jours. Montant retourné automatiquement.';
+      t.updatedAt = new Date();
+      await t.save();
+
+      // Historique / preuve
+      await TransfertHistory.create({
+        ...t.toObject(),
+        transferStatus: 'Transfert Annulé',
+        note: '⚠️ Transfert annulé automatiquement après expiration.',
+        createdAt: new Date()
+      });
+    }
+
+  } catch (err) {
+    console.error('CRON TRANSFERT ERROR:', err.message);
+  }
+});
+
+
+
+
+
+
+
 
 
 
