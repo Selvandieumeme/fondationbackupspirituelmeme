@@ -46,11 +46,14 @@ function initTransfertExpress(container, agentEmail, agentName) {
     }
 
     try {
-      if (typeof createTransfert !== "function") {
-        throw new Error("createTransfert non défini !");
-      }
+      // --- KONEKSYON AK VRE API FOBAS ---
+      const response = await fetch("https://api.fondationbackupspirituel.com/api/express-transfer", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
 
-      const result = await createTransfert(payload);
+      const result = await response.json();
 
       if (result?.success) {
         msg.innerHTML = `
