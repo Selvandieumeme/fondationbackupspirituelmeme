@@ -192,7 +192,7 @@ if(formTransfert){
     }
 
     try {
-      const response = await fetch('/api/transfert/create', {
+      const response = await fetch('https://api.fondationbackupspirituel.com/api/transfert/create', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -263,7 +263,7 @@ if(btnValider){
     };
 
     try {
-      const response = await fetch('/api/transfert/validate', {
+      const response = await fetch('https://api.fondationbackupspirituel.com/api/transfert/validate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(transfertData)
