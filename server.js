@@ -132,9 +132,7 @@ app.post("/api/verify-agent", async (req, res) => {
 
 
 
-router.post("/express-transfer")
-router.post("/validate-withdrawal")
-router.get("/transfers/:email")
+
 
 
 
