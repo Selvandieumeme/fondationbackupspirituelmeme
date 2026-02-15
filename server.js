@@ -1987,140 +1987,7 @@ app.post("/api/wallet/change-password", async (req, res) => {
 
 
 
-// ----------------------- TRANSFERT EXPRESS HAITI -----------------------
-// Mete sa apre tout middleware tankou express.json(), express.urlencoded(), cors, elatriye
-// Menm anvan app.listen
 
-const { v4: uuidv4 } = require("uuid");
-
-// POST: Kreye nouvo transfert express
-app.post("/api/express-transfer", async (req, res) => {
-  try {
-    const db = req.app.locals.db;
-    const {
-      agentEmail,
-      agentName,
-      sender,
-      receiver,
-      amount,
-      devise,
-    } = req.body;
-
-    // Verifikasyon chan obligatwa
-    if (
-      !agentEmail || !agentName ||
-      !sender?.name || !sender?.cin || !sender?.country || !sender?.address || !sender?.whatsapp ||
-      !receiver?.name || !receiver?.country || !receiver?.address || !receiver?.whatsapp ||
-      !amount || !devise
-    ) {
-      return res.status(400).json({ success: false, message: "Champs manquants" });
-    }
-
-    // Verifye Agent nan walletbalances
-    const agent = await db.collection("walletbalances").findOne({ email: agentEmail.toLowerCase() });
-    if (!agent) return res.status(400).json({ success: false, message: "Agent Autorisé non trouvé" });
-
-    // Kreye unique withdraw code
-    const withdrawCode = 'WR-' + uuidv4();
-
-    // Kreye dokiman transfert
-    const newTransfer = {
-      agentEmail,
-      agentName,
-      sender,
-      receiver,
-      amount,
-      devise,
-      withdrawCode,
-      status: "pending",
-      createdAt: new Date(),
-      expireAt: new Date(Date.now() + 7*24*60*60*1000), // 7 jou
-      fraisTotal: 0,
-      bonusAgent: 0,
-      adminFee: 0,
-      montantNet: 0
-    };
-
-    await db.collection("expressTransfers").insertOne(newTransfer);
-
-    return res.json({ success: true, message: "Transfert créé avec succès", withdrawCode });
-
-  } catch (err) {
-    console.error("EXPRESS TRANSFER ERROR:", err);
-    return res.status(500).json({ success: false, message: "Erreur serveur" });
-  }
-});
-
-// POST: Validate retrait
-app.post("/api/validate-withdrawal", async (req, res) => {
-  try {
-    const db = req.app.locals.db;
-    const { withdrawCode } = req.body;
-
-    if (!withdrawCode) return res.status(400).json({ success: false, message: "Code manquant" });
-
-    const transfer = await db.collection("expressTransfers").findOne({ withdrawCode });
-    if (!transfer) return res.status(404).json({ success: false, message: "Transfert non trouvé" });
-    if (transfer.status !== "pending") return res.status(400).json({ success: false, message: `Transfert deja ${transfer.status}` });
-
-    // Kalkil fre
-    const fraisTotal = transfer.amount * 0.015;
-    const bonusAgent = transfer.amount * 0.007;
-    const adminFee = transfer.amount * 0.008;
-    const montantNet = transfer.amount - fraisTotal;
-
-    // Update transfè
-    await db.collection("expressTransfers").updateOne(
-      { withdrawCode },
-      {
-        $set: {
-          status: "Retire",
-          retraitAt: new Date(),
-          fraisTotal,
-          bonusAgent,
-          adminFee,
-          montantNet
-        }
-      }
-    );
-
-    // Mete bonus Agent nan walletbalances li
-    await db.collection("walletbalances").updateOne(
-      { email: transfer.agentEmail.toLowerCase() },
-      { $inc: { balance: montantNet, bonus: bonusAgent } }
-    );
-
-    // Mete admin fee nan kont admin
-    await db.collection("walletbalances").updateOne(
-      { email: "memeselvandieu@fobas.com" },
-      { $inc: { balance: adminFee } }
-    );
-
-    return res.json({ success: true, message: "Retrait validé", montantNet, fraisTotal });
-
-  } catch (err) {
-    console.error("VALIDATE WITHDRAWAL ERROR:", err);
-    return res.status(500).json({ success: false, message: "Erreur serveur" });
-  }
-});
-
-// GET: Tout transfert pou agent
-app.get("/api/express-transfers/:agentEmail", async (req, res) => {
-  try {
-    const db = req.app.locals.db;
-    const { agentEmail } = req.params;
-
-    const transfers = await db.collection("expressTransfers")
-      .find({ agentEmail: agentEmail.toLowerCase() })
-      .sort({ createdAt: -1 })
-      .toArray();
-
-    return res.json({ success: true, transfers });
-  } catch (err) {
-    console.error("GET EXPRESS TRANSFERS ERROR:", err);
-    return res.status(500).json({ success: false, message: "Erreur serveur" });
-  }
-});
 
 
 
@@ -2673,6 +2540,106 @@ app.post("/api/admin/note", async (req, res) => {
 
 
 
+// ----------------------- TRANSFERT EXPRESS HAITI -----------------------
+// Mete apre tout middleware + tout route wallet, men anvan app.listen
+const { v4: uuidv4 } = require("uuid");
+
+// POST: Kreye nouvo transfert express
+app.post("/api/express-transfer", async (req, res) => {
+  try {
+    const db = req.app.locals.db;
+    const { agentEmail, agentName, sender, receiver, amount, devise } = req.body;
+
+    if (!agentEmail || !agentName || !sender?.name || !receiver?.name || !amount || !devise) {
+      return res.status(400).json({ success: false, message: "Champs manquants" });
+    }
+
+    // Verifye Agent nan walletbalances
+    const agent = await db.collection("walletbalances").findOne({ email: agentEmail.toLowerCase() });
+    if (!agent) return res.status(400).json({ success: false, message: "Agent Autorisé non trouvé" });
+
+    // Kreye unique withdraw code
+    const withdrawCode = 'WR-' + uuidv4();
+
+    const newTransfer = {
+      agentEmail,
+      agentName,
+      sender,
+      receiver,
+      amount,
+      devise,
+      withdrawCode,
+      status: "pending",
+      createdAt: new Date(),
+      expireAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+      fraisTotal: 0,
+      bonusAgent: 0,
+      adminFee: 0,
+      montantNet: 0
+    };
+
+    await db.collection("expressTransfers").insertOne(newTransfer);
+
+    return res.json({ success: true, message: "Transfert créé avec succès", withdrawCode });
+  } catch (err) {
+    console.error("EXPRESS TRANSFER ERROR:", err);
+    return res.status(500).json({ success: false, message: "Erreur serveur" });
+  }
+});
+
+// POST: Validate retrait
+app.post("/api/validate-withdrawal", async (req, res) => {
+  try {
+    const db = req.app.locals.db;
+    const { withdrawCode } = req.body;
+    if (!withdrawCode) return res.status(400).json({ success: false, message: "Code manquant" });
+
+    const transfer = await db.collection("expressTransfers").findOne({ withdrawCode });
+    if (!transfer) return res.status(404).json({ success: false, message: "Transfert non trouvé" });
+    if (transfer.status !== "pending") return res.status(400).json({ success: false, message: `Transfert deja ${transfer.status}` });
+
+    const fraisTotal = transfer.amount * 0.015;
+    const bonusAgent = transfer.amount * 0.007;
+    const adminFee = transfer.amount * 0.008;
+    const montantNet = transfer.amount - fraisTotal;
+
+    await db.collection("expressTransfers").updateOne(
+      { withdrawCode },
+      { $set: { status: "Retire", retraitAt: new Date(), fraisTotal, bonusAgent, adminFee, montantNet } }
+    );
+
+    await db.collection("walletbalances").updateOne(
+      { email: transfer.agentEmail.toLowerCase() },
+      { $inc: { balance: montantNet, bonus: bonusAgent } }
+    );
+
+    await db.collection("walletbalances").updateOne(
+      { email: "memeselvandieu@fobas.com" },
+      { $inc: { balance: adminFee } }
+    );
+
+    return res.json({ success: true, message: "Retrait validé", montantNet, fraisTotal });
+  } catch (err) {
+    console.error("VALIDATE WITHDRAWAL ERROR:", err);
+    return res.status(500).json({ success: false, message: "Erreur serveur" });
+  }
+});
+
+// GET: Tout transfert pou agent
+app.get("/api/express-transfers/:agentEmail", async (req, res) => {
+  try {
+    const db = req.app.locals.db;
+    const { agentEmail } = req.params;
+    const transfers = await db.collection("expressTransfers")
+      .find({ agentEmail: agentEmail.toLowerCase() })
+      .sort({ createdAt: -1 })
+      .toArray();
+    return res.json({ success: true, transfers });
+  } catch (err) {
+    console.error("GET EXPRESS TRANSFERS ERROR:", err);
+    return res.status(500).json({ success: false, message: "Erreur serveur" });
+  }
+});
 
 
 
