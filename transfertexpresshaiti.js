@@ -12,7 +12,7 @@ btnValider.type = 'button';
 btnValider.textContent = 'Valider';
 btnValider.className = 'btn-primary';
 btnValider.style.display = 'none';
-if(formTransfert) formTransfert.appendChild(btnValider);
+if (formTransfert) formTransfert.appendChild(btnValider);
 
 // ========================================
 // 3️⃣ Fonction pour remplir automatiquement les champs agent
@@ -21,29 +21,32 @@ function prefillAgentFields(agentEmail) {
   const agentNameField = document.getElementById('agentName');
   const agentEmailField = document.getElementById('agentEmail');
 
+  // Ranpli ak data ki egziste sou dashboard
   const agentName = document.getElementById('userName')?.textContent || '';
   const agentEmailText = agentEmail || document.getElementById('userEmail')?.textContent || '';
 
-  if(agentNameField){
+  if (agentNameField) {
     agentNameField.value = agentName;
-    agentNameField.readOnly = true;
+    agentNameField.readOnly = true; // empêche modification
   }
-  if(agentEmailField){
+  if (agentEmailField) {
     agentEmailField.value = agentEmailText;
-    agentEmailField.readOnly = true;
+    agentEmailField.readOnly = true; // empêche modification
   }
 
-  messageEl.style.color = 'green';
-  messageEl.textContent = `Agent autorisé confirmé ✅\nNom: ${agentName}\nEmail: ${agentEmailText}`;
+  if (messageEl) {
+    messageEl.style.color = 'green';
+    messageEl.textContent = `Agent autorisé confirmé ✅\nNom: ${agentName}\nEmail: ${agentEmailText}`;
+  }
 
-  // Reset champs client
+  // Reset champs client (toujou san kraze lòt chan)
   [
     'senderName', 'senderCIN', 'senderCountry', 'senderAddress', 'senderWhatsapp',
     'receiverName', 'receiverCountry', 'receiverAddress', 'receiverWhatsapp',
     'transferAmount', 'transferCurrency'
   ].forEach(id => {
     const el = document.getElementById(id);
-    if(el) el.value = '';
+    if (el) el.value = '';
   });
 }
 
@@ -52,17 +55,20 @@ function prefillAgentFields(agentEmail) {
 // ========================================
 document.addEventListener('DOMContentLoaded', () => {
   const btnTransfertExpress = document.getElementById('btnTransfertExpress');
-  if(btnTransfertExpress){
+  if (btnTransfertExpress) {
     btnTransfertExpress.addEventListener('click', () => {
-      // Reutilise verifyCurrentAgent system
-      if(typeof verifyCurrentAgent === 'function'){
+      // Verify si agent valab, chaje fòm si verifyCurrentAgent deja defini
+      if (typeof verifyCurrentAgent === 'function') {
         verifyCurrentAgent(); // sa chaje fòm la deja
-        // apre verifyCurrentAgent fin chaje fòm lan, ranpli agent fields
-        const agentEmail = document.getElementById('userEmail')?.textContent;
-        prefillAgentFields(agentEmail);
+
+        // Apre fòm la chaje, ranpli chan agent yo
+        setTimeout(() => {
+          const agentEmail = document.getElementById('userEmail')?.textContent;
+          prefillAgentFields(agentEmail);
+        }, 100); // ti delè pou asire fòm lan fin chaje
       } else {
-        console.warn("verifyCurrentAgent non défini");
-        prefillAgentFields(); // fallback
+        console.warn("verifyCurrentAgent non défini, fallback prefill");
+        prefillAgentFields(); // fallback san crash
       }
     });
   }
