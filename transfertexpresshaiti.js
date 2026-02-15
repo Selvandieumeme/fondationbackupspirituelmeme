@@ -88,6 +88,9 @@ function initTransfertExpress(container, fullName, email) {
     }
 }
 
+
+
+
 function prefillAgentFields(agentEmail) {
     try {
         const agentNameField = document.getElementById('agentName');
@@ -144,6 +147,13 @@ function prefillAgentFields(agentEmail) {
         console.error("Erreur dans prefillAgentFields:", err);
     }
 }
+
+
+
+
+
+
+
 
 // ========================================
 // 4️⃣ Trigger bouton Transfert Express Haiti
