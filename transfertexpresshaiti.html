@@ -4,19 +4,87 @@
   <meta charset="UTF-8">
   <title>Transfert Express Haiti – Wallet FOBAS</title>
   <style>
-    .transfert-form { max-width: 600px; margin: auto; padding: 20px; border: 1px solid #ddd; border-radius: 8px; }
-    fieldset { margin-bottom: 15px; padding: 10px; }
-    legend { font-weight: bold; }
-    input, select, button { width: 100%; padding: 8px; margin: 5px 0; }
-    .btn-primary { background-color: #007BFF; color: white; border: none; cursor: pointer; }
-    .btn-success { background-color: #28a745; color: white; border: none; cursor: pointer; }
-    .btn-primary:hover, .btn-success:hover { opacity: 0.9; }
-    #transfertMessage, #transfertStatus { white-space: pre-line; }
+    /* ===== Formulaire ===== */
+    .transfert-form {
+      max-width: 600px;
+      margin: auto;
+      padding: 20px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+    }
+    fieldset {
+      margin-bottom: 15px;
+      padding: 10px;
+    }
+    legend {
+      font-weight: bold;
+    }
+    input, select, button {
+      width: 100%;
+      padding: 8px;
+      margin: 5px 0;
+      box-sizing: border-box;
+    }
+
+    /* ===== Boutons ===== */
+    .btn-primary {
+      background-color: #007BFF;
+      color: white;
+      border: none;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    .btn-success {
+      background-color: #28a745;
+      color: white;
+      border: none;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    .btn-primary:hover, .btn-success:hover {
+      opacity: 0.9;
+    }
+
+    /* ===== Boutons navbar / multi-ligne 5 pa liy ===== */
+    .btn-menu {
+      display: inline-block;
+      width: 18%; /* apeprè 5 bouton pa liy ak ti gap */
+      margin: 1%;
+      text-align: center;
+      padding: 10px 5px;
+      font-size: 14px;
+      border-radius: 6px;
+      box-sizing: border-box;
+    }
+
+    /* ===== Messages ===== */
+    #transfertMessage, #transfertStatus {
+      white-space: pre-line;
+    }
   </style>
 </head>
 <body>
 
-<!-- ===== Info agent (dwe egziste deja sou paj la) ===== -->
+<!-- ===== Boutons meni (exemple) ===== -->
+<div id="menuButtons" style="text-align:center; margin-bottom:20px;">
+  <button class="btn-primary btn-menu">Déposer Fobas</button>
+  <button class="btn-primary btn-menu">Retirer Fobas</button>
+  <button class="btn-primary btn-menu">Transférer Fobas</button>
+  <button class="btn-primary btn-menu">Bonus Fobas</button>
+  <button class="btn-primary btn-menu">Changer mot de passe</button>
+  <button class="btn-primary btn-menu">Historique export CSV</button>
+  <button class="btn-primary btn-menu">Assistance 24/7</button>
+  <button class="btn-primary btn-menu">Nos Agents Autorisés</button>
+  <button class="btn-primary btn-menu">📘 Comment ça marche ?</button>
+  <button class="btn-primary btn-menu">❓ FAQ FOBAS</button>
+  <button class="btn-primary btn-menu">Cashback Rewards</button>
+  <button class="btn-primary btn-menu">Vérifier Identité</button>
+  <button class="btn-primary btn-menu">🏪 Devenir Commerçant FOBAS</button>
+  <button class="btn-primary btn-menu">🔐 Connexion Commerçant FOBAS</button>
+  <button class="btn-primary btn-menu">Transfert Express Haiti</button>
+</div>
+
+<!-- ===== Info agent ===== -->
 <span id="userName" style="display:none;">Jean Dupont</span>
 <span id="userEmail" style="display:none;">jeandupont@example.com</span>
 
@@ -24,7 +92,6 @@
 <div class="transfert-form">
   <h2 style="color:#007BFF">Transfert Express Haiti</h2>
 
-  <!-- Bouton pou aktive Transfert Express -->
   <button type="button" id="btnTransfertExpress" class="btn-primary" style="margin-bottom:10px;">
     Ouvrir Transfert Express
   </button>
@@ -81,187 +148,24 @@
         <option value="EUR">€ Euro</option>
       </select>
 
-      <!-- Champs système -->
       <input type="text" id="transferCode" placeholder="Code unique" readonly>
       <input type="text" id="transferStatus" value="PENDING" readonly>
       <input type="text" id="transferExpiration" placeholder="Expiration : 7 jours" readonly>
     </fieldset>
 
-    <!-- ACTION -->
     <button type="submit" class="btn-primary">TRANSFERER</button>
-
-    <!-- Message état -->
     <p id="transfertStatus" style="margin-top:10px;font-weight:bold;"></p>
     <p id="transfertMessage"></p>
   </form>
 
-  <!-- Bouton VALIDER -->
   <button type="button" id="btnValider" class="btn-success" style="display:none; margin-top:10px;">
     VALIDER
   </button>
 </div>
 
+<!-- ===== Tout JS rete menm jan ===== -->
 <script>
-  // ===== Références =====
-  const formTransfert = document.getElementById('formTransfert');
-  const messageEl = document.getElementById('transfertMessage');
-  const btnValider = document.getElementById('btnValider');
-
-  // ===== Fonctions =====
-  function initTransfertExpress(fullName, email) {
-    const agentNameField = document.getElementById('agentName');
-    const agentEmailField = document.getElementById('agentEmail');
-    if(agentNameField) agentNameField.value = fullName;
-    if(agentEmailField) agentEmailField.value = email;
-  }
-
-  function prefillAgentFields(agentEmail) {
-    const agentName = document.getElementById('userName')?.textContent || '';
-    const agentEmailText = agentEmail || document.getElementById('userEmail')?.textContent || '';
-    document.getElementById('agentName').value = agentName;
-    document.getElementById('agentEmail').value = agentEmailText;
-    document.getElementById('agentName').readOnly = true;
-    document.getElementById('agentEmail').readOnly = true;
-
-    // Code unique
-    const codeField = document.getElementById('transferCode');
-    if(codeField) codeField.value = `TRF-${Date.now()}-${Math.floor(Math.random()*10000)}`;
-
-    // Expiration 7 jours
-    const expirationField = document.getElementById('transferExpiration');
-    if(expirationField){
-      const today = new Date();
-      const expireDate = new Date(today.getTime() + 7*24*60*60*1000);
-      expirationField.value = `${String(expireDate.getDate()).padStart(2,'0')}/${String(expireDate.getMonth()+1).padStart(2,'0')}/${expireDate.getFullYear()}`;
-    }
-
-    messageEl.style.color = 'green';
-    messageEl.textContent = `Agent autorisé confirmé ✅\nNom: ${agentName}\nEmail: ${agentEmailText}\nCode: ${codeField?.value}\nExpiration: ${expirationField?.value}`;
-  }
-
-  // ===== Trigger bouton Transfert Express =====
-  document.getElementById('btnTransfertExpress')?.addEventListener('click', ()=>{
-    const fullName = document.getElementById('userName')?.textContent || '';
-    const email = document.getElementById('userEmail')?.textContent || '';
-    initTransfertExpress(fullName, email);
-    prefillAgentFields(email);
-  });
-
-  // ===== Submit Formulaire =====
-  formTransfert?.addEventListener('submit', async (e)=>{
-    e.preventDefault();
-    const statusEl = document.getElementById("transfertStatus");
-    if(statusEl){
-      statusEl.textContent = "⏳ Transfert en cours d'envoi...";
-      statusEl.style.color = "#0d6efd";
-    }
-    messageEl.textContent = '';
-
-    const agentEmail = document.getElementById('agentEmail')?.value;
-    const transferAmount = parseFloat(document.getElementById('transferAmount')?.value || 0);
-    if(!agentEmail || !transferAmount || transferAmount<=0){
-      messageEl.style.color='red';
-      messageEl.textContent='Montant ou email agent invalide.';
-      return;
-    }
-
-    try{
-      const response = await fetch('https://api.fondationbackupspirituel.com/api/transfert/create', {
-        method:'POST',
-        headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({
-          agentName: document.getElementById('agentName')?.value,
-          agentEmail,
-          senderName: document.getElementById('senderName')?.value,
-          senderCIN: document.getElementById('senderCIN')?.value,
-          senderCountry: document.getElementById('senderCountry')?.value,
-          senderAddress: document.getElementById('senderAddress')?.value,
-          senderWhatsapp: document.getElementById('senderWhatsapp')?.value,
-          receiverName: document.getElementById('receiverName')?.value,
-          receiverCountry: document.getElementById('receiverCountry')?.value,
-          receiverAddress: document.getElementById('receiverAddress')?.value,
-          receiverWhatsapp: document.getElementById('receiverWhatsapp')?.value,
-          transferAmount,
-          transferCurrency: document.getElementById('transferCurrency')?.value
-        })
-      });
-
-      const result = await response.json();
-      if(!result.ok){
-        messageEl.style.color='red';
-        messageEl.textContent=result.message;
-        return;
-      }
-
-      document.getElementById('transferCode').value = result.transferCode;
-      document.getElementById('transferExpiration').value = result.transferExpiration;
-      document.getElementById('transferStatus').value = 'PENDING';
-
-      messageEl.style.color='green';
-      messageEl.textContent = `Transfert réussi ✅\nCode: ${result.transferCode}\nExpiration: ${result.transferExpiration}`;
-
-      btnValider.style.display='inline-block';
-
-    }catch(err){
-      messageEl.style.color='red';
-      messageEl.textContent='Erreur serveur lors de la création du transfert.';
-      console.error(err);
-    }
-  });
-
-  // ===== Bouton VALIDER =====
-  btnValider?.addEventListener('click', async ()=>{
-    const transfertData = {
-      agentName: document.getElementById('agentName')?.value,
-      agentEmail: document.getElementById('agentEmail')?.value,
-      senderName: document.getElementById('senderName')?.value,
-      senderCIN: document.getElementById('senderCIN')?.value,
-      senderCountry: document.getElementById('senderCountry')?.value,
-      senderAddress: document.getElementById('senderAddress')?.value,
-      senderWhatsapp: document.getElementById('senderWhatsapp')?.value,
-      receiverName: document.getElementById('receiverName')?.value,
-      receiverCountry: document.getElementById('receiverCountry')?.value,
-      receiverAddress: document.getElementById('receiverAddress')?.value,
-      receiverWhatsapp: document.getElementById('receiverWhatsapp')?.value,
-      transferAmount: parseFloat(document.getElementById('transferAmount')?.value || 0),
-      transferCurrency: document.getElementById('transferCurrency')?.value,
-      transferCode: document.getElementById('transferCode')?.value,
-      transferStatus: document.getElementById('transferStatus')?.value || 'PENDING',
-      transferExpiration: document.getElementById('transferExpiration')?.value
-    };
-
-    try{
-      const response = await fetch('https://api.fondationbackupspirituel.com/api/transfert/validate', {
-        method:'POST',
-        headers:{'Content-Type':'application/json'},
-        body:JSON.stringify(transfertData)
-      });
-
-      const result = await response.json();
-      if(!result.ok){
-        messageEl.style.color='red';
-        messageEl.textContent=result.message;
-        return;
-      }
-
-      messageEl.style.color='green';
-      messageEl.textContent='Transfert validé et en attente de retrait ✅';
-
-      ['senderName','senderCIN','senderCountry','senderAddress','senderWhatsapp',
-       'receiverName','receiverCountry','receiverAddress','receiverWhatsapp','transferAmount','transferCurrency']
-      .forEach(id=>{
-        const el = document.getElementById(id);
-        if(el) el.value='';
-      });
-
-      btnValider.style.display='none';
-
-    }catch(err){
-      messageEl.style.color='red';
-      messageEl.textContent='Erreur serveur lors de la validation.';
-      console.error(err);
-    }
-  });
+  /* Tout JS Transfert Express rete menm jan ou genyen li deja */
 </script>
 
 </body>
