@@ -1,5 +1,5 @@
 // ========================================
-// JS – Transfert Express Haiti (AUTO REMPLISSAGE via verification + intégration agent-verification)
+// JS – Transfert Express Haiti (AUTO REMPLISSAGE via verification + intégration agent-verification + code unique + expiration)
 // ========================================
 
 // 1️⃣ Sélection du formulaire et du message
@@ -17,7 +17,7 @@ if (formTransfert && !formTransfert.contains(btnValider)) {
 }
 
 // ========================================
-// 3️⃣ Agent Verification + Prefill
+// 3️⃣ Agent Verification + Prefill + Code Unique + Expiration
 // ========================================
 function verifyCurrentAgent() {
     const userEmailEl = document.getElementById("userEmail");
@@ -45,11 +45,11 @@ function verifyCurrentAgent() {
         .then(html => {
             container.innerHTML = html;
 
-            // Inisyalizasyon fòm ak done agent la
+            // Initialiser fòm ak done agent la
             if (typeof initTransfertExpress === "function") {
                 initTransfertExpress(container, fullName, email);
 
-                // Ranpli chan agent yo ak prefillAgentFields
+                // Ranpli chan agent yo + code unique + expiration
                 if (typeof prefillAgentFields === "function") {
                     setTimeout(() => {
                         prefillAgentFields(email);
@@ -92,7 +92,10 @@ function prefillAgentFields(agentEmail) {
     try {
         const agentNameField = document.getElementById('agentName');
         const agentEmailField = document.getElementById('agentEmail');
+        const codeField = document.getElementById('transferCode');
+        const expirationField = document.getElementById('transferExpiration');
 
+        // Récupération done agent sou dashboard
         const agentName = document.getElementById('userName')?.textContent?.trim() || '';
         const agentEmailText = agentEmail?.trim() || document.getElementById('userEmail')?.textContent?.trim() || '';
 
@@ -105,9 +108,26 @@ function prefillAgentFields(agentEmail) {
             agentEmailField.readOnly = true;
         }
 
+        // ✅ Generate code unique otomatik
+        if (codeField) {
+            const uniqueCode = `TRF-${Date.now()}-${Math.floor(Math.random() * 10000)}`;
+            codeField.value = uniqueCode;
+        }
+
+        // ✅ Mete expiration 7 jou depi kounye a
+        if (expirationField) {
+            const today = new Date();
+            const expireDate = new Date(today.getTime() + 7*24*60*60*1000);
+            const dd = String(expireDate.getDate()).padStart(2, '0');
+            const mm = String(expireDate.getMonth() + 1).padStart(2, '0');
+            const yyyy = expireDate.getFullYear();
+            expirationField.value = `${dd}/${mm}/${yyyy}`;
+        }
+
+        // Mete mesaj konfimasyon agent
         if (messageEl) {
             messageEl.style.color = 'green';
-            messageEl.textContent = `Agent autorisé confirmé ✅\nNom: ${agentName}\nEmail: ${agentEmailText}`;
+            messageEl.textContent = `Agent autorisé confirmé ✅\nNom: ${agentName}\nEmail: ${agentEmailText}\nCode: ${codeField?.value}\nExpiration: ${expirationField?.value}`;
         }
 
         // Reset chan client san kraze lòt chan
@@ -141,6 +161,8 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 });
+
+
 // ========================================
 // 5️⃣ Submit FORMULAIRE = TRANSFERER
 // ========================================
