@@ -1,32 +1,25 @@
 <div class="transfert-form">
   <h2 style="color:#007BFF">Transfert Express Haiti</h2>
 
+  <!-- Bouton pou aktive Transfert Express -->
+  <button type="button" id="btnTransfertExpress" class="btn-primary" style="margin-bottom:10px;">
+    Ouvrir Transfert Express
+  </button>
+
   <form id="formTransfert">
 
     <!-- ================= AGENT AUTORISE ================= -->
     <fieldset>
       <legend>Agent Autorisé FOBAS</legend>
-
-      <input type="text"
-             id="agentName"
-             placeholder="Nom & Prénom Agent"
-             readonly
-             required>
-
-      <input type="email"
-             id="agentEmail"
-             placeholder="Email Agent Autorisé"
-             readonly
-             required>
+      <input type="text" id="agentName" placeholder="Nom & Prénom Agent" readonly required>
+      <input type="email" id="agentEmail" placeholder="Email Agent Autorisé" readonly required>
     </fieldset>
 
     <!-- ================= EXPEDITEUR ================= -->
     <fieldset>
       <legend>Expéditeur</legend>
-
       <input type="text" id="senderName" placeholder="Nom et Prénom" required>
       <input type="text" id="senderCIN" placeholder="No. CIN / NIF / Passport" required>
-
       <select id="senderCountry" required>
         <option value="">Pays d'origine</option>
         <option value="Haiti">Haïti</option>
@@ -35,7 +28,6 @@
         <option value="Canada">Canada</option>
         <option value="Autre">Autre</option>
       </select>
-
       <input type="text" id="senderAddress" placeholder="Adresse complète" required>
       <input type="text" id="senderWhatsapp" placeholder="WhatsApp / Téléphone" required>
     </fieldset>
@@ -43,9 +35,7 @@
     <!-- ================= BENEFICIAIRE ================= -->
     <fieldset>
       <legend>Bénéficiaire</legend>
-
       <input type="text" id="receiverName" placeholder="Nom et Prénom" required>
-
       <select id="receiverCountry" required>
         <option value="">Pays de destination</option>
         <option value="Haiti">Haïti</option>
@@ -54,7 +44,6 @@
         <option value="Canada">Canada</option>
         <option value="Autre">Autre</option>
       </select>
-
       <input type="text" id="receiverAddress" placeholder="Adresse complète" required>
       <input type="text" id="receiverWhatsapp" placeholder="WhatsApp / Téléphone" required>
     </fieldset>
@@ -62,14 +51,7 @@
     <!-- ================= MONTANT & DEVISE ================= -->
     <fieldset>
       <legend>Détails du Transfert</legend>
-
-      <input type="number"
-             id="transferAmount"
-             placeholder="Montant à transférer"
-             min="1"
-             step="0.01"
-             required>
-
+      <input type="number" id="transferAmount" placeholder="Montant à transférer" min="1" step="0.01" required>
       <select id="transferCurrency" required>
         <option value="">Devise</option>
         <option value="HTG">HTG – Gourde Haïtienne</option>
@@ -83,17 +65,178 @@
       <input type="text" id="transferExpiration" placeholder="Expiration : 7 jours" readonly>
     </fieldset>
 
+    <!-- ================= ACTION ================= -->
+    <button type="submit" class="btn-primary">TRANSFERER</button>
 
-<!-- ================= ACTION ================= -->
-<button type="submit" class="btn-primary">
-  TRANSFERER
-</button>
-
-<!-- ✅ Message état envoi (AJOUTE ICI) -->
-<p id="transfertStatus" style="margin-top:10px;font-weight:bold;"></p>
-
-<p id="transfertMessage"></p>
-    
-    
+    <!-- ✅ Message état envoi -->
+    <p id="transfertStatus" style="margin-top:10px;font-weight:bold;"></p>
+    <p id="transfertMessage"></p>
   </form>
+
+  <!-- Bouton VALIDER -->
+  <button type="button" id="btnValider" class="btn-success" style="display:none; margin-top:10px;">
+    VALIDER
+  </button>
 </div>
+
+<script>
+  const formTransfert = document.getElementById('formTransfert');
+  const messageEl = document.getElementById('transfertMessage');
+  const btnValider = document.getElementById('btnValider');
+
+  // ====================== Agent Verification + Prefill ======================
+  function initTransfertExpress(fullName, email) {
+    const agentNameField = document.getElementById('agentName');
+    const agentEmailField = document.getElementById('agentEmail');
+    if(agentNameField) agentNameField.value = fullName;
+    if(agentEmailField) agentEmailField.value = email;
+  }
+
+  function prefillAgentFields(agentEmail) {
+    const agentName = document.getElementById('userName')?.textContent || '';
+    const agentEmailText = agentEmail || document.getElementById('userEmail')?.textContent || '';
+    document.getElementById('agentName').value = agentName;
+    document.getElementById('agentEmail').value = agentEmailText;
+    document.getElementById('agentName').readOnly = true;
+    document.getElementById('agentEmail').readOnly = true;
+
+    // Code unique
+    const codeField = document.getElementById('transferCode');
+    if(codeField) codeField.value = `TRF-${Date.now()}-${Math.floor(Math.random()*10000)}`;
+
+    // Expiration 7 jours
+    const expirationField = document.getElementById('transferExpiration');
+    if(expirationField){
+      const today = new Date();
+      const expireDate = new Date(today.getTime() + 7*24*60*60*1000);
+      expirationField.value = `${String(expireDate.getDate()).padStart(2,'0')}/${String(expireDate.getMonth()+1).padStart(2,'0')}/${expireDate.getFullYear()}`;
+    }
+
+    messageEl.style.color = 'green';
+    messageEl.textContent = `Agent autorisé confirmé ✅\nNom: ${agentName}\nEmail: ${agentEmailText}\nCode: ${codeField?.value}\nExpiration: ${expirationField?.value}`;
+  }
+
+  // ====================== Trigger bouton Transfert Express ======================
+  document.getElementById('btnTransfertExpress')?.addEventListener('click', ()=>{
+    const fullName = document.getElementById('userName')?.textContent || '';
+    const email = document.getElementById('userEmail')?.textContent || '';
+    initTransfertExpress(fullName, email);
+    prefillAgentFields(email);
+  });
+
+  // ====================== Submit Formulaire ======================
+  formTransfert?.addEventListener('submit', async (e)=>{
+    e.preventDefault();
+    const statusEl = document.getElementById("transfertStatus");
+    if(statusEl){
+      statusEl.textContent = "⏳ Transfert en cours d'envoi...";
+      statusEl.style.color = "#0d6efd";
+    }
+    messageEl.textContent = '';
+
+    const agentEmail = document.getElementById('agentEmail')?.value;
+    const transferAmount = parseFloat(document.getElementById('transferAmount')?.value || 0);
+    if(!agentEmail || !transferAmount || transferAmount<=0){
+      messageEl.style.color='red';
+      messageEl.textContent='Montant ou email agent invalide.';
+      return;
+    }
+
+    try{
+      const response = await fetch('https://api.fondationbackupspirituel.com/api/transfert/create', {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({
+          agentName: document.getElementById('agentName')?.value,
+          agentEmail,
+          senderName: document.getElementById('senderName')?.value,
+          senderCIN: document.getElementById('senderCIN')?.value,
+          senderCountry: document.getElementById('senderCountry')?.value,
+          senderAddress: document.getElementById('senderAddress')?.value,
+          senderWhatsapp: document.getElementById('senderWhatsapp')?.value,
+          receiverName: document.getElementById('receiverName')?.value,
+          receiverCountry: document.getElementById('receiverCountry')?.value,
+          receiverAddress: document.getElementById('receiverAddress')?.value,
+          receiverWhatsapp: document.getElementById('receiverWhatsapp')?.value,
+          transferAmount,
+          transferCurrency: document.getElementById('transferCurrency')?.value
+        })
+      });
+
+      const result = await response.json();
+      if(!result.ok){
+        messageEl.style.color='red';
+        messageEl.textContent=result.message;
+        return;
+      }
+
+      document.getElementById('transferCode').value = result.transferCode;
+      document.getElementById('transferExpiration').value = result.transferExpiration;
+      document.getElementById('transferStatus').value = 'PENDING';
+
+      messageEl.style.color='green';
+      messageEl.textContent = `Transfert réussi ✅\nCode: ${result.transferCode}\nExpiration: ${result.transferExpiration}`;
+
+      btnValider.style.display='inline-block';
+
+    }catch(err){
+      messageEl.style.color='red';
+      messageEl.textContent='Erreur serveur lors de la création du transfert.';
+      console.error(err);
+    }
+  });
+
+  // ====================== Bouton VALIDER ======================
+  btnValider?.addEventListener('click', async ()=>{
+    const transfertData = {
+      agentName: document.getElementById('agentName')?.value,
+      agentEmail: document.getElementById('agentEmail')?.value,
+      senderName: document.getElementById('senderName')?.value,
+      senderCIN: document.getElementById('senderCIN')?.value,
+      senderCountry: document.getElementById('senderCountry')?.value,
+      senderAddress: document.getElementById('senderAddress')?.value,
+      senderWhatsapp: document.getElementById('senderWhatsapp')?.value,
+      receiverName: document.getElementById('receiverName')?.value,
+      receiverCountry: document.getElementById('receiverCountry')?.value,
+      receiverAddress: document.getElementById('receiverAddress')?.value,
+      receiverWhatsapp: document.getElementById('receiverWhatsapp')?.value,
+      transferAmount: parseFloat(document.getElementById('transferAmount')?.value || 0),
+      transferCurrency: document.getElementById('transferCurrency')?.value,
+      transferCode: document.getElementById('transferCode')?.value,
+      transferStatus: document.getElementById('transferStatus')?.value || 'PENDING',
+      transferExpiration: document.getElementById('transferExpiration')?.value
+    };
+
+    try{
+      const response = await fetch('https://api.fondationbackupspirituel.com/api/transfert/validate', {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify(transfertData)
+      });
+
+      const result = await response.json();
+      if(!result.ok){
+        messageEl.style.color='red';
+        messageEl.textContent=result.message;
+        return;
+      }
+
+      messageEl.style.color='green';
+      messageEl.textContent='Transfert validé et en attente de retrait ✅';
+
+      // Reset champs client
+      ['senderName','senderCIN','senderCountry','senderAddress','senderWhatsapp',
+      'receiverName','receiverCountry','receiverAddress','receiverWhatsapp','transferAmount','transferCurrency'].forEach(id=>{
+        const el = document.getElementById(id);
+        if(el) el.value='';
+      });
+
+      btnValider.style.display='none';
+
+    }catch(err){
+      messageEl.style.color='red';
+      messageEl.textContent='Erreur serveur lors de la validation.';
+      console.error(err);
+    }
+  });
+</script>
