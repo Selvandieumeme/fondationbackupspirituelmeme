@@ -172,104 +172,121 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 
-
-
-
-
-
-
-
 // ========================================
 // 5️⃣ Submit FORMULAIRE = TRANSFERER
 // ========================================
 if(formTransfert){
   formTransfert.addEventListener('submit', async (e) => {
     e.preventDefault();
-  // ✅ AJOUTE BLOC SA A ICI (POSITION EXACTE)
+
     const statusEl = document.getElementById("transfertStatus");
     if (statusEl) {
       statusEl.textContent = "⏳ Transfert en cours d'envoi...";
       statusEl.style.color = "#0d6efd"; // bleu
     }
-    messageEl.textContent = '';
-    messageEl.style.color = '';
 
-    const agentEmail = document.getElementById('agentEmail')?.value;
-    const transferAmount = parseFloat(document.getElementById('transferAmount')?.value || 0);
+    if(messageEl){
+      messageEl.textContent = '';
+      messageEl.style.color = '';
+    }
 
+    // 🔹 Récupération données sécurisée
+    const agentNameField = document.getElementById('agentName');
+    const agentEmailField = document.getElementById('agentEmail');
+    const transferAmountField = document.getElementById('transferAmount');
+    const transferCurrencyField = document.getElementById('transferCurrency');
 
+    const agentName = agentNameField?.value || '';
+    const agentEmail = agentEmailField?.value || '';
+    const transferAmount = parseFloat(transferAmountField?.value || 0);
+    const transferCurrency = transferCurrencyField?.value || '';
 
-console.log("💡 Données envoyées vers /api/transfert/create:", {
-  agentName: document.getElementById('agentName')?.value,
-  agentEmail,
-  senderName: document.getElementById('senderName')?.value,
-  senderCIN: document.getElementById('senderCIN')?.value,
-  senderCountry: document.getElementById('senderCountry')?.value,
-  senderAddress: document.getElementById('senderAddress')?.value,
-  senderWhatsapp: document.getElementById('senderWhatsapp')?.value,
-  receiverName: document.getElementById('receiverName')?.value,
-  receiverCountry: document.getElementById('receiverCountry')?.value,
-  receiverAddress: document.getElementById('receiverAddress')?.value,
-  receiverWhatsapp: document.getElementById('receiverWhatsapp')?.value,
-  transferAmount,
-  transferCurrency: document.getElementById('transferCurrency')?.value
-});
-
-
-    
+    // 🔹 Vérification minimale
     if (!agentEmail || !transferAmount || transferAmount <= 0) {
-      messageEl.style.color = 'red';
-      messageEl.textContent = 'Montant ou email agent invalide.';
+      if(messageEl){
+        messageEl.style.color = 'red';
+        messageEl.textContent = 'Montant ou email agent invalide.';
+      }
       return;
     }
+
+    // 🔹 Console debug avant fetch
+    console.log("💡 Données envoyées vers /api/transfert/create:", {
+      agentName,
+      agentEmail,
+      senderName: document.getElementById('senderName')?.value || '',
+      senderCIN: document.getElementById('senderCIN')?.value || '',
+      senderCountry: document.getElementById('senderCountry')?.value || '',
+      senderAddress: document.getElementById('senderAddress')?.value || '',
+      senderWhatsapp: document.getElementById('senderWhatsapp')?.value || '',
+      receiverName: document.getElementById('receiverName')?.value || '',
+      receiverCountry: document.getElementById('receiverCountry')?.value || '',
+      receiverAddress: document.getElementById('receiverAddress')?.value || '',
+      receiverWhatsapp: document.getElementById('receiverWhatsapp')?.value || '',
+      transferAmount,
+      transferCurrency
+    });
 
     try {
       const response = await fetch('https://api.fondationbackupspirituel.com/api/transfert/create', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          agentName: document.getElementById('agentName')?.value,
+          agentName,
           agentEmail,
-          senderName: document.getElementById('senderName')?.value,
-          senderCIN: document.getElementById('senderCIN')?.value,
-          senderCountry: document.getElementById('senderCountry')?.value,
-          senderAddress: document.getElementById('senderAddress')?.value,
-          senderWhatsapp: document.getElementById('senderWhatsapp')?.value,
-          receiverName: document.getElementById('receiverName')?.value,
-          receiverCountry: document.getElementById('receiverCountry')?.value,
-          receiverAddress: document.getElementById('receiverAddress')?.value,
-          receiverWhatsapp: document.getElementById('receiverWhatsapp')?.value,
+          senderName: document.getElementById('senderName')?.value || '',
+          senderCIN: document.getElementById('senderCIN')?.value || '',
+          senderCountry: document.getElementById('senderCountry')?.value || '',
+          senderAddress: document.getElementById('senderAddress')?.value || '',
+          senderWhatsapp: document.getElementById('senderWhatsapp')?.value || '',
+          receiverName: document.getElementById('receiverName')?.value || '',
+          receiverCountry: document.getElementById('receiverCountry')?.value || '',
+          receiverAddress: document.getElementById('receiverAddress')?.value || '',
+          receiverWhatsapp: document.getElementById('receiverWhatsapp')?.value || '',
           transferAmount,
-          transferCurrency: document.getElementById('transferCurrency')?.value
+          transferCurrency
         })
       });
 
       const result = await response.json();
 
+      // 🔹 Console debug après réponse serveur
+      console.log("💡 Réponse serveur /api/transfert/create:", result);
+
       if (!result.ok) {
-        messageEl.style.color = 'red';
-        messageEl.textContent = result.message;
+        if(messageEl){
+          messageEl.style.color = 'red';
+          messageEl.textContent = result.message || 'Erreur création transfert';
+        }
         return;
       }
 
-      // Remplissage code + expiration + status
-      document.getElementById('transferCode').value = result.transferCode;
-      document.getElementById('transferExpiration').value = result.transferExpiration;
-      document.getElementById('transferStatus').value = 'PENDING';
+      // 🔹 Remplissage code + expiration + status (prudence)
+      const codeField = document.getElementById('transferCode');
+      const expirationField = document.getElementById('transferExpiration');
+      const statusField = document.getElementById('transferStatus');
 
-      messageEl.style.color = 'green';
-      messageEl.textContent = `Transfert réussi ✅\nCode: ${result.transferCode}\nExpiration: ${result.transferExpiration}`;
+      if(codeField) codeField.value = result.transferCode || '';
+      if(expirationField) expirationField.value = result.transferExpiration || '';
+      if(statusField) statusField.value = 'PENDING';
 
-      // Afficher bouton VALIDER
-      btnValider.style.display = 'inline-block';
+      if(messageEl){
+        messageEl.style.color = 'green';
+        messageEl.textContent = `Transfert réussi ✅\nCode: ${result.transferCode || ''}\nExpiration: ${result.transferExpiration || ''}`;
+      }
+
+      // 🔹 Afficher bouton VALIDER si existe
+      if(btnValider) btnValider.style.display = 'inline-block';
 
     } catch(err){
-      messageEl.style.color = 'red';
-      messageEl.textContent = 'Erreur serveur lors de la création du transfert.';
+      console.error("❌ Erreur fetch /api/transfert/create:", err);
+      if(messageEl){
+        messageEl.style.color = 'red';
+        messageEl.textContent = 'Erreur serveur lors de la création du transfert.';
+      }
     }
   });
 }
-
 // ========================================
 // 6️⃣ BOUTON VALIDER = VALIDATION DEFINITIVE
 // ========================================
