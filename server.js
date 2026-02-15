@@ -1161,6 +1161,68 @@ const Transaction = mongoose.model('transactions', transactionSchema);
 
 
 
+
+
+
+// ============================
+// TRANSFERT EXPRESS HAITI
+// ============================
+
+// 1️⃣ Schema MongoDB pou Transfert
+const transfertSchema = new mongoose.Schema({
+  agentName: String,
+  agentEmail: String,
+  senderName: String,
+  senderCIN: String,
+  senderCountry: String,
+  senderAddress: String,
+  senderWhatsapp: String,
+  receiverName: String,
+  receiverCountry: String,
+  receiverAddress: String,
+  receiverWhatsapp: String,
+  transferAmount: Number,
+  transferCurrency: String,
+  transferCode: String,
+  transferStatus: String,
+  transferExpiration: String,
+  createdAt: { type: Date, default: Date.now }
+});
+
+// 2️⃣ Model pou Transfert
+const Transfert = mongoose.model('Transfert', transfertSchema);
+
+// 3️⃣ Route POST pou fòm "Transfert Express Haiti"
+app.post('/api/transfert', async (req, res) => {
+  try {
+    const data = req.body;
+
+    // Si transferCode pa egziste, jenere li
+    if (!data.transferCode) {
+      data.transferCode = 'TX-' + Math.random().toString(36).substring(2, 10).toUpperCase();
+    }
+
+    // Si transferExpiration pa egziste, mete 7 jou nan lavni
+    if (!data.transferExpiration) {
+      const date = new Date();
+      date.setDate(date.getDate() + 7);
+      data.transferExpiration = date.toISOString().split('T')[0]; // YYYY-MM-DD
+    }
+
+    const newTransfert = new Transfert(data);
+    await newTransfert.save();
+
+    return res.status(201).json({ message: 'Transfert enregistré avec succès ✅' });
+
+  } catch (err) {
+    console.error('Erreur Transfert Express Haiti:', err.message);
+    return res.status(500).json({ message: 'Erreur serveur : ' + err.message });
+  }
+});
+
+
+
+
 // =======================
 // 🔎 VERIFIER IDENTITÉ WALLET (EMAIL EXACT)
 // =======================
