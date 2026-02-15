@@ -1163,11 +1163,14 @@ const Transaction = mongoose.model('transactions', transactionSchema);
 
 
 
+
+
+
 // ============================
 // TRANSFERT EXPRESS HAITI (SAFE & DASHBOARD SAFE)
 // ============================
 
-// ⚠️ On suppose que WalletBalance model EXISTE déjà ailleurs
+// ⚠️ WalletBalance model deja defini ailleurs
 // const WalletBalance = mongoose.model('WalletBalance');
 
 // ============================
@@ -1204,15 +1207,28 @@ const transfertSchema = new mongoose.Schema({
 // ============================
 const Transfert =
   mongoose.models.Transfert ||
-  mongoose.model('Transfert', transfertSchema, 'transferts'); // <-- collection correcte
+  mongoose.model('Transfert', transfertSchema, 'transferts');
 
 // ============================
-// 3️⃣ ROUTE CHECK (AUCUN DÉBIT)
-// Vérifie balance + génère code unique + expiration
+// 3️⃣ ROUTE CREATE (CHECK + GENERATE CODE)
 // ============================
-app.post('/api/transfert/check', async (req, res) => {
+app.post('/api/transfert/create', async (req, res) => {
   try {
-    const { agentEmail, transferAmount } = req.body;
+    const {
+      agentName,
+      agentEmail,
+      senderName,
+      senderCIN,
+      senderCountry,
+      senderAddress,
+      senderWhatsapp,
+      receiverName,
+      receiverCountry,
+      receiverAddress,
+      receiverWhatsapp,
+      transferAmount,
+      transferCurrency
+    } = req.body;
 
     if (!agentEmail || !transferAmount || transferAmount <= 0) {
       return res.status(400).json({
@@ -1221,42 +1237,58 @@ app.post('/api/transfert/check', async (req, res) => {
       });
     }
 
+    // 🔐 Vérifier balance agent
     const wallet = await WalletBalance.findOne({ email: agentEmail });
-
     if (!wallet) {
-      return res.status(404).json({
-        ok: false,
-        message: 'Agent non trouvé.'
-      });
+      return res.status(404).json({ ok: false, message: 'Agent non trouvé.' });
     }
-
     if (wallet.balance < transferAmount) {
-      return res.status(400).json({
-        ok: false,
-        message: 'Balance insuffisante pour effectuer ce transfert.'
-      });
+      return res.status(400).json({ ok: false, message: 'Balance insuffisante.' });
     }
 
-    // 🔹 Code unique + expiration 7 jours
-    const code = 'TX-' + Math.random().toString(36).substring(2, 10).toUpperCase();
-    const exp = new Date();
-    exp.setDate(exp.getDate() + 7);
+    // 🔹 Générer code unique et expiration 7 jours
+    const transferCode = 'TX-' + Math.random().toString(36).substring(2, 10).toUpperCase();
+    const transferExpirationDate = new Date();
+    transferExpirationDate.setDate(transferExpirationDate.getDate() + 7);
+    const transferExpiration = transferExpirationDate.toISOString().split('T')[0];
+
+    // 💾 Créer transfert PENDING dans 'transferts' (sans débiter encore)
+    const transfert = new Transfert({
+      agentName,
+      agentEmail,
+      senderName,
+      senderCIN,
+      senderCountry,
+      senderAddress,
+      senderWhatsapp,
+      receiverName,
+      receiverCountry,
+      receiverAddress,
+      receiverWhatsapp,
+      transferAmount,
+      transferCurrency,
+      transferCode,
+      transferStatus: 'PENDING',
+      transferExpiration,
+      note: 'Transfert créé et en attente de validation.'
+    });
+
+    await transfert.save();
 
     return res.json({
       ok: true,
-      transferCode: code,
-      transferExpiration: exp.toISOString().split('T')[0]
+      transferCode,
+      transferExpiration
     });
 
   } catch (err) {
-    console.error('TRANSFERT CHECK ERROR:', err.message);
-    res.status(500).json({ ok: false, message: 'Erreur serveur.' });
+    console.error('TRANSFERT CREATE ERROR:', err.message);
+    return res.status(500).json({ ok: false, message: 'Erreur serveur.' });
   }
 });
 
 // ============================
 // 4️⃣ ROUTE VALIDATE (TRANSACTION SAFE)
-// Débite balance agent + sauvegarde transfert PENDING
 // ============================
 app.post('/api/transfert/validate', async (req, res) => {
   const session = await mongoose.startSession();
@@ -1284,22 +1316,25 @@ app.post('/api/transfert/validate', async (req, res) => {
     wallet.balance -= data.transferAmount;
     await wallet.save({ session });
 
-    // 💾 Sauvegarde transfert PENDING dans collection 'transferts'
-    const transfert = new Transfert({
-      ...data,
-      transferStatus: 'PENDING',
-      note: 'Transfert validé par agent – en attente de retrait.',
-      createdAt: new Date()
-    });
-
-    await transfert.save({ session });
+    // 💾 Mettre transfert à jour (PENDING)
+    await Transfert.updateOne(
+      { transferCode: data.transferCode },
+      {
+        $set: {
+          transferStatus: 'PENDING',
+          note: 'Transfert validé par agent – en attente de retrait.',
+          updatedAt: new Date()
+        }
+      },
+      { session }
+    );
 
     await session.commitTransaction();
     session.endSession();
 
-    res.json({
+    return res.json({
       ok: true,
-      message: 'Transfert réussi avec succès et il est en attente de retrait ✅',
+      message: 'Transfert validé et en attente de retrait ✅',
       transferCode: data.transferCode,
       transferExpiration: data.transferExpiration
     });
@@ -1308,9 +1343,20 @@ app.post('/api/transfert/validate', async (req, res) => {
     await session.abortTransaction();
     session.endSession();
     console.error('TRANSFERT VALIDATE ERROR:', err.message);
-    res.status(500).json({ ok: false, message: 'Erreur serveur.' });
+    return res.status(500).json({ ok: false, message: 'Erreur serveur.' });
   }
 });
+
+
+
+
+
+
+
+
+
+
+
 
 
 
