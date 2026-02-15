@@ -173,6 +173,12 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 
+
+
+
+
+
+
 // ========================================
 // 5️⃣ Submit FORMULAIRE = TRANSFERER
 // ========================================
@@ -191,6 +197,26 @@ if(formTransfert){
     const agentEmail = document.getElementById('agentEmail')?.value;
     const transferAmount = parseFloat(document.getElementById('transferAmount')?.value || 0);
 
+
+
+console.log("💡 Données envoyées vers /api/transfert/create:", {
+  agentName: document.getElementById('agentName')?.value,
+  agentEmail,
+  senderName: document.getElementById('senderName')?.value,
+  senderCIN: document.getElementById('senderCIN')?.value,
+  senderCountry: document.getElementById('senderCountry')?.value,
+  senderAddress: document.getElementById('senderAddress')?.value,
+  senderWhatsapp: document.getElementById('senderWhatsapp')?.value,
+  receiverName: document.getElementById('receiverName')?.value,
+  receiverCountry: document.getElementById('receiverCountry')?.value,
+  receiverAddress: document.getElementById('receiverAddress')?.value,
+  receiverWhatsapp: document.getElementById('receiverWhatsapp')?.value,
+  transferAmount,
+  transferCurrency: document.getElementById('transferCurrency')?.value
+});
+
+
+    
     if (!agentEmail || !transferAmount || transferAmount <= 0) {
       messageEl.style.color = 'red';
       messageEl.textContent = 'Montant ou email agent invalide.';
