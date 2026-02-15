@@ -1,82 +1,69 @@
-function initTransfertExpress(container, agentEmail, agentName) {
-  const form = container.querySelector("#formTransfert");
-  const msg = container.querySelector("#transfertMessage");
+// Fichier JS pou "Transfert Express Haiti"
 
-  if (!form || !msg || !agentEmail || !agentName) {
-    console.error("Formulaire ou informations Agent manquants !");
-    return;
+// 1️⃣ Chwazi fòm ak mesaj
+const formTransfert = document.getElementById('formTransfert');
+const messageEl = document.getElementById('transfertMessage');
+
+// 2️⃣ Evènman sou submit fòm nan
+formTransfert.addEventListener('submit', async (e) => {
+  e.preventDefault(); // anpeche reload paj la
+
+  // 3️⃣ Pran tout done yo
+  const transfertData = {
+    agentName: document.getElementById('agentName').value,
+    agentEmail: document.getElementById('agentEmail').value,
+    
+    senderName: document.getElementById('senderName').value,
+    senderCIN: document.getElementById('senderCIN').value,
+    senderCountry: document.getElementById('senderCountry').value,
+    senderAddress: document.getElementById('senderAddress').value,
+    senderWhatsapp: document.getElementById('senderWhatsapp').value,
+    
+    receiverName: document.getElementById('receiverName').value,
+    receiverCountry: document.getElementById('receiverCountry').value,
+    receiverAddress: document.getElementById('receiverAddress').value,
+    receiverWhatsapp: document.getElementById('receiverWhatsapp').value,
+    
+    transferAmount: parseFloat(document.getElementById('transferAmount').value),
+    transferCurrency: document.getElementById('transferCurrency').value,
+    transferCode: document.getElementById('transferCode').value || generateUniqueCode(),
+    transferStatus: document.getElementById('transferStatus').value,
+    transferExpiration: document.getElementById('transferExpiration').value || calculateExpiration()
+  };
+
+  // 4️⃣ Voye done yo nan backend san kraze dashboard
+  try {
+    const response = await fetch('/api/transfert', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(transfertData)
+    });
+
+    const result = await response.json();
+
+    if (response.ok) {
+      messageEl.style.color = 'green';
+      messageEl.textContent = 'Transfert effectué avec succès ✅';
+      formTransfert.reset(); // reset fòm nan pou nouvo antre
+    } else {
+      messageEl.style.color = 'red';
+      messageEl.textContent = `Erreur : ${result.message}`;
+    }
+
+  } catch (err) {
+    messageEl.style.color = 'red';
+    messageEl.textContent = `Erreur serveur : ${err.message}`;
   }
+});
 
-  form.addEventListener("submit", async (e) => {
-    e.preventDefault();
-
-    msg.textContent = "Traitement en cours...";
-    msg.style.color = "#007BFF";
-
-    // Récupérer inputs avèk fallback vide
-    const payload = {
-      agentEmail,
-      agentName,
-      sender: {
-        name: form.senderName?.value?.trim() || "",
-        cin: form.senderCIN?.value?.trim() || "",
-        country: form.senderCountry?.value?.trim() || "",
-        address: form.senderAddress?.value?.trim() || "",
-        whatsapp: form.senderWhatsapp?.value?.trim() || ""
-      },
-      receiver: {
-        name: form.receiverName?.value?.trim() || "",
-        country: form.receiverCountry?.value?.trim() || "",
-        address: form.receiverAddress?.value?.trim() || "",
-        whatsapp: form.receiverWhatsapp?.value?.trim() || ""
-      },
-      amount: parseFloat(form.transferAmount?.value),
-      devise: form.devise?.value || "HTG",
-      withdrawCode: generateWithdrawCode(),
-      createdAt: new Date(),
-      status: "pending",
-      expireAt: new Date(Date.now() + 7*24*60*60*1000) // 7 jours
-    };
-
-    // Vérification de base
-    if (!payload.sender.name || !payload.receiver.name || !payload.amount || payload.amount <= 0) {
-      msg.textContent = "Veuillez remplir tous les champs obligatoires avec des valeurs valides.";
-      msg.style.color = "red";
-      return;
-    }
-
-    try {
-      // --- KONEKSYON AK VRE API FOBAS ---
-      const response = await fetch("https://api.fondationbackupspirituel.com/api/express-transfer", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload)
-      });
-
-      const result = await response.json();
-
-      if (result?.success) {
-        msg.innerHTML = `
-          ✅ Transfert créé avec succès!<br>
-          Statut: ${payload.status}<br>
-          <strong>Code unique:</strong> ${payload.withdrawCode}<br>
-          ⏳ Expiration : 7 jours
-        `;
-        msg.style.color = "#28a745";
-        form.reset();
-      } else {
-        msg.textContent = result?.message || "Erreur création transfert.";
-        msg.style.color = "red";
-      }
-    } catch (err) {
-      console.error("Erreur TRANSFERT EXPRESS:", err);
-      msg.textContent = "Erreur connexion API FOBAS.";
-      msg.style.color = "red";
-    }
-  });
+// 5️⃣ Fonksyon pou jenere code inik
+function generateUniqueCode() {
+  return 'TX-' + Math.random().toString(36).substring(2, 10).toUpperCase();
 }
 
-// Helpers
-function generateWithdrawCode() {
-  return 'WR-' + Math.random().toString(36).substr(2, 9).toUpperCase();
+// 6️⃣ Fonksyon pou kalkile dat ekspirasyon 7 jou
+function calculateExpiration() {
+  const date = new Date();
+  date.setDate(date.getDate() + 7);
+  return date.toISOString().split('T')[0]; // fòm YYYY-MM-DD
 }
