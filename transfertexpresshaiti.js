@@ -1,5 +1,5 @@
 // ========================================
-// Fichier JS FINAL – Transfert Express Haiti
+// JS – Transfert Express Haiti (AUTO REMPLISSAGE via verification)
 // ========================================
 
 // 1️⃣ Sélection du formulaire et du message
@@ -12,157 +12,184 @@ btnValider.type = 'button';
 btnValider.textContent = 'Valider';
 btnValider.className = 'btn-primary';
 btnValider.style.display = 'none';
-formTransfert.appendChild(btnValider);
+if(formTransfert) formTransfert.appendChild(btnValider);
 
 // ========================================
-// 3️⃣ Pré-remplir les champs Agent depuis dashboard
+// 3️⃣ Fonction pour remplir automatiquement les champs agent
 // ========================================
-window.addEventListener('DOMContentLoaded', () => {
-  // On suppose que dashboard la affiche nom/email dans ces éléments
-  const agentName = document.getElementById('userName')?.textContent.trim() || '';
-  const agentEmail = document.getElementById('userEmail')?.textContent.trim() || '';
+function prefillAgentFields(agentEmail) {
+  const agentNameField = document.getElementById('agentName');
+  const agentEmailField = document.getElementById('agentEmail');
 
-  const agentNameInput = document.getElementById('agentName');
-  const agentEmailInput = document.getElementById('agentEmail');
+  const agentName = document.getElementById('userName')?.textContent || '';
+  const agentEmailText = agentEmail || document.getElementById('userEmail')?.textContent || '';
 
-  if (agentNameInput) {
-    agentNameInput.value = agentName;
-    agentNameInput.readOnly = true; // Empêche modification
+  if(agentNameField){
+    agentNameField.value = agentName;
+    agentNameField.readOnly = true;
+  }
+  if(agentEmailField){
+    agentEmailField.value = agentEmailText;
+    agentEmailField.readOnly = true;
   }
 
-  if (agentEmailInput) {
-    agentEmailInput.value = agentEmail;
-    agentEmailInput.readOnly = true; // Empêche modification
+  messageEl.style.color = 'green';
+  messageEl.textContent = `Agent autorisé confirmé ✅\nNom: ${agentName}\nEmail: ${agentEmailText}`;
+
+  // Reset champs client
+  [
+    'senderName', 'senderCIN', 'senderCountry', 'senderAddress', 'senderWhatsapp',
+    'receiverName', 'receiverCountry', 'receiverAddress', 'receiverWhatsapp',
+    'transferAmount', 'transferCurrency'
+  ].forEach(id => {
+    const el = document.getElementById(id);
+    if(el) el.value = '';
+  });
+}
+
+// ========================================
+// 4️⃣ Trigger: bouton Transfert Express Haiti
+// ========================================
+document.addEventListener('DOMContentLoaded', () => {
+  const btnTransfertExpress = document.getElementById('btnTransfertExpress');
+  if(btnTransfertExpress){
+    btnTransfertExpress.addEventListener('click', () => {
+      // Reutilise verifyCurrentAgent system
+      if(typeof verifyCurrentAgent === 'function'){
+        verifyCurrentAgent(); // sa chaje fòm la deja
+        // apre verifyCurrentAgent fin chaje fòm lan, ranpli agent fields
+        const agentEmail = document.getElementById('userEmail')?.textContent;
+        prefillAgentFields(agentEmail);
+      } else {
+        console.warn("verifyCurrentAgent non défini");
+        prefillAgentFields(); // fallback
+      }
+    });
   }
 });
 
 // ========================================
-// 4️⃣ SUBMIT FORMULAIRE = BOUTON TRANSFERER
+// 5️⃣ Submit FORMULAIRE = TRANSFERER
 // ========================================
-formTransfert.addEventListener('submit', async (e) => {
-  e.preventDefault(); // Empêche le reload
+if(formTransfert){
+  formTransfert.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    messageEl.textContent = '';
+    messageEl.style.color = '';
 
-  messageEl.textContent = '';
-  messageEl.style.color = '';
+    const agentEmail = document.getElementById('agentEmail')?.value;
+    const transferAmount = parseFloat(document.getElementById('transferAmount')?.value || 0);
 
-  const agentEmail = document.getElementById('agentEmail').value;
-  const transferAmount = parseFloat(document.getElementById('transferAmount').value);
-
-  if (!agentEmail || !transferAmount || transferAmount <= 0) {
-    messageEl.style.color = 'red';
-    messageEl.textContent = 'Montant ou email agent invalide.';
-    return;
-  }
-
-  try {
-    // 🔐 Étape 1 : Vérifier balance et créer transfert côté serveur
-    const response = await fetch('/api/transfert/create', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        agentName: document.getElementById('agentName').value,
-        agentEmail,
-        senderName: document.getElementById('senderName').value,
-        senderCIN: document.getElementById('senderCIN').value,
-        senderCountry: document.getElementById('senderCountry').value,
-        senderAddress: document.getElementById('senderAddress').value,
-        senderWhatsapp: document.getElementById('senderWhatsapp').value,
-        receiverName: document.getElementById('receiverName').value,
-        receiverCountry: document.getElementById('receiverCountry').value,
-        receiverAddress: document.getElementById('receiverAddress').value,
-        receiverWhatsapp: document.getElementById('receiverWhatsapp').value,
-        transferAmount: transferAmount,
-        transferCurrency: document.getElementById('transferCurrency').value
-      })
-    });
-
-    const result = await response.json();
-
-    if (!result.ok) {
+    if (!agentEmail || !transferAmount || transferAmount <= 0) {
       messageEl.style.color = 'red';
-      messageEl.textContent = result.message;
+      messageEl.textContent = 'Montant ou email agent invalide.';
       return;
     }
 
-    // ✅ Code unique + expiration généré côté serveur
-    document.getElementById('transferCode').value = result.transferCode;
-    document.getElementById('transferExpiration').value = result.transferExpiration;
-    document.getElementById('transferStatus').value = 'PENDING';
+    try {
+      const response = await fetch('/api/transfert/create', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          agentName: document.getElementById('agentName')?.value,
+          agentEmail,
+          senderName: document.getElementById('senderName')?.value,
+          senderCIN: document.getElementById('senderCIN')?.value,
+          senderCountry: document.getElementById('senderCountry')?.value,
+          senderAddress: document.getElementById('senderAddress')?.value,
+          senderWhatsapp: document.getElementById('senderWhatsapp')?.value,
+          receiverName: document.getElementById('receiverName')?.value,
+          receiverCountry: document.getElementById('receiverCountry')?.value,
+          receiverAddress: document.getElementById('receiverAddress')?.value,
+          receiverWhatsapp: document.getElementById('receiverWhatsapp')?.value,
+          transferAmount,
+          transferCurrency: document.getElementById('transferCurrency')?.value
+        })
+      });
 
-    messageEl.style.color = 'green';
-    messageEl.textContent = `Transfert réussi avec succès et il est en attente de retrait ✅
-Code de transfert : ${result.transferCode}
-Expiration : ${result.transferExpiration}`;
+      const result = await response.json();
 
-    // 🔄 Reset uniquement les champs client
-    [
-      'senderName', 'senderCIN', 'senderCountry', 'senderAddress', 'senderWhatsapp',
-      'receiverName', 'receiverCountry', 'receiverAddress', 'receiverWhatsapp',
-      'transferAmount', 'transferCurrency'
-    ].forEach(id => document.getElementById(id).value = '');
+      if (!result.ok) {
+        messageEl.style.color = 'red';
+        messageEl.textContent = result.message;
+        return;
+      }
 
-  } catch (err) {
-    messageEl.style.color = 'red';
-    messageEl.textContent = 'Erreur serveur lors de la création du transfert.';
-  }
-});
+      // Remplissage code + expiration + status
+      document.getElementById('transferCode').value = result.transferCode;
+      document.getElementById('transferExpiration').value = result.transferExpiration;
+      document.getElementById('transferStatus').value = 'PENDING';
 
-// ========================================
-// 5️⃣ BOUTON VALIDER = CONFIRMATION FINALE
-// ========================================
-btnValider.addEventListener('click', async () => {
-  const transfertData = {
-    agentName: document.getElementById('agentName').value,
-    agentEmail: document.getElementById('agentEmail').value,
+      messageEl.style.color = 'green';
+      messageEl.textContent = `Transfert réussi ✅\nCode: ${result.transferCode}\nExpiration: ${result.transferExpiration}`;
 
-    senderName: document.getElementById('senderName').value,
-    senderCIN: document.getElementById('senderCIN').value,
-    senderCountry: document.getElementById('senderCountry').value,
-    senderAddress: document.getElementById('senderAddress').value,
-    senderWhatsapp: document.getElementById('senderWhatsapp').value,
+      // Afficher bouton VALIDER
+      btnValider.style.display = 'inline-block';
 
-    receiverName: document.getElementById('receiverName').value,
-    receiverCountry: document.getElementById('receiverCountry').value,
-    receiverAddress: document.getElementById('receiverAddress').value,
-    receiverWhatsapp: document.getElementById('receiverWhatsapp').value,
-
-    transferAmount: parseFloat(document.getElementById('transferAmount').value),
-    transferCurrency: document.getElementById('transferCurrency').value,
-    transferCode: document.getElementById('transferCode').value,
-    transferStatus: document.getElementById('transferStatus').value || 'PENDING',
-    transferExpiration: document.getElementById('transferExpiration').value
-  };
-
-  try {
-    const response = await fetch('/api/transfert/validate', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(transfertData)
-    });
-
-    const result = await response.json();
-
-    if (!result.ok) {
+    } catch(err){
       messageEl.style.color = 'red';
-      messageEl.textContent = result.message;
-      return;
+      messageEl.textContent = 'Erreur serveur lors de la création du transfert.';
     }
+  });
+}
 
-    messageEl.style.color = 'green';
-    messageEl.textContent =
-      'Transfert validé avec succès et il est en attente de retrait ✅';
+// ========================================
+// 6️⃣ BOUTON VALIDER = VALIDATION DEFINITIVE
+// ========================================
+if(btnValider){
+  btnValider.addEventListener('click', async () => {
+    const transfertData = {
+      agentName: document.getElementById('agentName')?.value,
+      agentEmail: document.getElementById('agentEmail')?.value,
+      senderName: document.getElementById('senderName')?.value,
+      senderCIN: document.getElementById('senderCIN')?.value,
+      senderCountry: document.getElementById('senderCountry')?.value,
+      senderAddress: document.getElementById('senderAddress')?.value,
+      senderWhatsapp: document.getElementById('senderWhatsapp')?.value,
+      receiverName: document.getElementById('receiverName')?.value,
+      receiverCountry: document.getElementById('receiverCountry')?.value,
+      receiverAddress: document.getElementById('receiverAddress')?.value,
+      receiverWhatsapp: document.getElementById('receiverWhatsapp')?.value,
+      transferAmount: parseFloat(document.getElementById('transferAmount')?.value || 0),
+      transferCurrency: document.getElementById('transferCurrency')?.value,
+      transferCode: document.getElementById('transferCode')?.value,
+      transferStatus: document.getElementById('transferStatus')?.value || 'PENDING',
+      transferExpiration: document.getElementById('transferExpiration')?.value
+    };
 
-    // 🔄 Reset uniquement les champs client
-    [
-      'senderName', 'senderCIN', 'senderCountry', 'senderAddress', 'senderWhatsapp',
-      'receiverName', 'receiverCountry', 'receiverAddress', 'receiverWhatsapp',
-      'transferAmount', 'transferCurrency'
-    ].forEach(id => document.getElementById(id).value = '');
+    try {
+      const response = await fetch('/api/transfert/validate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(transfertData)
+      });
 
-    btnValider.style.display = 'none';
+      const result = await response.json();
 
-  } catch (err) {
-    messageEl.style.color = 'red';
-    messageEl.textContent = 'Erreur serveur lors de la validation.';
-  }
-});
+      if (!result.ok) {
+        messageEl.style.color = 'red';
+        messageEl.textContent = result.message;
+        return;
+      }
+
+      messageEl.style.color = 'green';
+      messageEl.textContent = 'Transfert validé et en attente de retrait ✅';
+
+      // Reset champs client
+      [
+        'senderName', 'senderCIN', 'senderCountry', 'senderAddress', 'senderWhatsapp',
+        'receiverName', 'receiverCountry', 'receiverAddress', 'receiverWhatsapp',
+        'transferAmount', 'transferCurrency'
+      ].forEach(id => {
+        const el = document.getElementById(id);
+        if(el) el.value = '';
+      });
+
+      btnValider.style.display = 'none';
+
+    } catch(err){
+      messageEl.style.color = 'red';
+      messageEl.textContent = 'Erreur serveur lors de la validation.';
+    }
+  });
+}
