@@ -1164,13 +1164,15 @@ const Transaction = mongoose.model('transactions', transactionSchema);
 
 
 // ============================
-// TRANSFERT EXPRESS HAITI (FINAL – SAFE)
+// TRANSFERT EXPRESS HAITI (FINAL – SAFE & DASHBOARD SAFE)
 // ============================
 
-const cron = require('node-cron');
+// ⚠️ On suppose que WalletBalance model EXISTE déjà ailleurs
+// const WalletBalance = mongoose.model('WalletBalance');
+
 
 // ============================
-// 1️⃣ SCHEMA MONGODB
+// 1️⃣ SCHEMA MONGODB TRANSFERT
 // ============================
 const transfertSchema = new mongoose.Schema({
   agentName: String,
@@ -1199,19 +1201,14 @@ const transfertSchema = new mongoose.Schema({
 });
 
 // ============================
-// 2️⃣ MODELS (2 COLLECTIONS)
+// 2️⃣ MODEL UNIQUE (SAFE)
 // ============================
 const Transfert =
   mongoose.models.Transfert ||
   mongoose.model('Transfert', transfertSchema);
-const TransfertHistory = mongoose.model(
-  'TransfertHistory',
-  transfertSchema,
-  'TransfertHistory'
-);
 
 // ============================
-// 3️⃣ ROUTE TRANSFERER
+// 3️⃣ ROUTE CHECK (AUCUN DÉBIT)
 // Vérifie balance + génère code
 // ============================
 app.post('/api/transfert/check', async (req, res) => {
@@ -1225,9 +1222,7 @@ app.post('/api/transfert/check', async (req, res) => {
       });
     }
 
-    const wallet = await mongoose.connection
-      .collection('walletbalances')
-      .findOne({ email: agentEmail });
+    const wallet = await WalletBalance.findOne({ email: agentEmail });
 
     if (!wallet) {
       return res.status(404).json({
@@ -1260,8 +1255,8 @@ app.post('/api/transfert/check', async (req, res) => {
 });
 
 // ============================
-// 4️⃣ ROUTE VALIDER
-// Retire balance + sauvegarde
+// 4️⃣ ROUTE VALIDER (TRANSACTION SAFE)
+// Débite balance + enregistre transfert
 // ============================
 app.post('/api/transfert/validate', async (req, res) => {
   const session = await mongoose.startSession();
@@ -1270,36 +1265,27 @@ app.post('/api/transfert/validate', async (req, res) => {
   try {
     const data = req.body;
 
-    const walletCol = mongoose.connection.collection('walletbalances');
-
-    const wallet = await walletCol.findOne(
+    const wallet = await WalletBalance.findOne(
       { email: data.agentEmail },
+      null,
       { session }
     );
 
     if (!wallet || wallet.balance < data.transferAmount) {
       await session.abortTransaction();
+      session.endSession();
       return res.status(400).json({
         ok: false,
         message: 'Balance insuffisante. Validation impossible.'
       });
     }
 
-    // Débit balance agent
-    await walletCol.updateOne(
-      { email: data.agentEmail },
-      { $inc: { balance: -data.transferAmount } },
-      { session }
-    );
+    // 🔻 Débit balance agent
+    wallet.balance -= data.transferAmount;
+    await wallet.save({ session });
 
-    // Sauvegarde transfert
+    // 💾 Sauvegarde transfert (PENDING)
     const transfert = new Transfert({
-      ...data,
-      transferStatus: 'PENDING',
-      createdAt: new Date()
-    });
-
-    const history = new TransfertHistory({
       ...data,
       transferStatus: 'PENDING',
       note: 'Transfert validé par agent – en attente de retrait.',
@@ -1307,7 +1293,6 @@ app.post('/api/transfert/validate', async (req, res) => {
     });
 
     await transfert.save({ session });
-    await history.save({ session });
 
     await session.commitTransaction();
     session.endSession();
@@ -1325,45 +1310,10 @@ app.post('/api/transfert/validate', async (req, res) => {
   }
 });
 
-// ============================
-// 5️⃣ CRON JOB – ANNULATION 7 JOURS
-// ============================
-cron.schedule('0 * * * *', async () => {
-  try {
-    const today = new Date().toISOString().split('T')[0];
 
-    const expired = await Transfert.find({
-      transferStatus: 'PENDING',
-      transferExpiration: { $lt: today }
-    });
 
-    for (const t of expired) {
 
-      // Retour balance agent
-      await mongoose.connection.collection('walletbalances').updateOne(
-        { email: t.agentEmail },
-        { $inc: { balance: t.transferAmount } }
-      );
 
-      // Update statut
-      t.transferStatus = 'Transfert Annulé';
-      t.note = 'Expiration 7 jours. Montant retourné automatiquement.';
-      t.updatedAt = new Date();
-      await t.save();
-
-      // Historique / preuve
-      await TransfertHistory.create({
-        ...t.toObject(),
-        transferStatus: 'Transfert Annulé',
-        note: '⚠️ Transfert annulé automatiquement après expiration.',
-        createdAt: new Date()
-      });
-    }
-
-  } catch (err) {
-    console.error('CRON TRANSFERT ERROR:', err.message);
-  }
-});
 
 
 
