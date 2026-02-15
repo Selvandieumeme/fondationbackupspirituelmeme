@@ -1164,12 +1164,11 @@ const Transaction = mongoose.model('transactions', transactionSchema);
 
 
 // ============================
-// TRANSFERT EXPRESS HAITI (FINAL – SAFE & DASHBOARD SAFE)
+// TRANSFERT EXPRESS HAITI (SAFE & DASHBOARD SAFE)
 // ============================
 
 // ⚠️ On suppose que WalletBalance model EXISTE déjà ailleurs
 // const WalletBalance = mongoose.model('WalletBalance');
-
 
 // ============================
 // 1️⃣ SCHEMA MONGODB TRANSFERT
@@ -1201,15 +1200,15 @@ const transfertSchema = new mongoose.Schema({
 });
 
 // ============================
-// 2️⃣ MODEL UNIQUE (SAFE)
+// 2️⃣ MODEL UNIQUE (SAFE) — collection 'transferts'
 // ============================
 const Transfert =
   mongoose.models.Transfert ||
-  mongoose.model('Transfert', transfertSchema);
+  mongoose.model('Transfert', transfertSchema, 'transferts'); // <-- collection correcte
 
 // ============================
 // 3️⃣ ROUTE CHECK (AUCUN DÉBIT)
-// Vérifie balance + génère code
+// Vérifie balance + génère code unique + expiration
 // ============================
 app.post('/api/transfert/check', async (req, res) => {
   try {
@@ -1238,14 +1237,15 @@ app.post('/api/transfert/check', async (req, res) => {
       });
     }
 
+    // 🔹 Code unique + expiration 7 jours
     const code = 'TX-' + Math.random().toString(36).substring(2, 10).toUpperCase();
     const exp = new Date();
     exp.setDate(exp.getDate() + 7);
 
     return res.json({
       ok: true,
-      code,
-      expiration: exp.toISOString().split('T')[0]
+      transferCode: code,
+      transferExpiration: exp.toISOString().split('T')[0]
     });
 
   } catch (err) {
@@ -1255,8 +1255,8 @@ app.post('/api/transfert/check', async (req, res) => {
 });
 
 // ============================
-// 4️⃣ ROUTE VALIDER (TRANSACTION SAFE)
-// Débite balance + enregistre transfert
+// 4️⃣ ROUTE VALIDATE (TRANSACTION SAFE)
+// Débite balance agent + sauvegarde transfert PENDING
 // ============================
 app.post('/api/transfert/validate', async (req, res) => {
   const session = await mongoose.startSession();
@@ -1284,7 +1284,7 @@ app.post('/api/transfert/validate', async (req, res) => {
     wallet.balance -= data.transferAmount;
     await wallet.save({ session });
 
-    // 💾 Sauvegarde transfert (PENDING)
+    // 💾 Sauvegarde transfert PENDING dans collection 'transferts'
     const transfert = new Transfert({
       ...data,
       transferStatus: 'PENDING',
@@ -1299,7 +1299,9 @@ app.post('/api/transfert/validate', async (req, res) => {
 
     res.json({
       ok: true,
-      message: 'Transfert réussi avec succès et il est en attente de retrait ✅'
+      message: 'Transfert réussi avec succès et il est en attente de retrait ✅',
+      transferCode: data.transferCode,
+      transferExpiration: data.transferExpiration
     });
 
   } catch (err) {
@@ -1309,6 +1311,7 @@ app.post('/api/transfert/validate', async (req, res) => {
     res.status(500).json({ ok: false, message: 'Erreur serveur.' });
   }
 });
+
 
 
 
