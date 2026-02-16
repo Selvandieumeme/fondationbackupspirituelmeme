@@ -2,83 +2,207 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <title>Transfert Express Haiti – FOBAS</title>
-  <link rel="stylesheet" href="walletfobasdashboard.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Transfert Express FOBAS</title>
+  <style>
+    /* GLOBAL RESET */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      background-color: #f2f7fb; /* blanc doux */
+      color: #333;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 30px;
+      min-height: 100vh;
+    }
+
+    .container {
+      background: linear-gradient(145deg, #0050c8, #ffcc00, #ffffff); /* ble, jaune, blanc */
+      padding: 30px;
+      border-radius: 12px;
+      width: 100%;
+      max-width: 900px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 25px;
+      color: #004080;
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+    }
+
+    fieldset {
+      border: 2px solid #004080;
+      padding: 20px;
+      margin-bottom: 20px;
+      border-radius: 8px;
+      background-color: rgba(255,255,255,0.9);
+    }
+
+    legend {
+      font-weight: bold;
+      font-size: 1.1em;
+      color: #004080;
+      padding: 0 10px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: 600;
+      color: #004080;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 15px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      font-size: 1em;
+    }
+
+    input[readonly] {
+      background-color: #e6f0ff;
+      color: #333;
+    }
+
+    button {
+      padding: 12px 25px;
+      margin-right: 10px;
+      border: none;
+      border-radius: 8px;
+      font-size: 1em;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    #btn-transferer {
+      background-color: #0050c8; /* ble FOBAS */
+      color: #fff;
+    }
+
+    #btn-transferer:hover {
+      background-color: #003d99;
+    }
+
+    #btn-retrait {
+      background-color: #ffcc00; /* jaune FOBAS */
+      color: #004080;
+      cursor: not-allowed; /* pa aktive kounye a */
+      opacity: 0.7;
+    }
+
+    #btn-retrait:hover {
+      opacity: 0.8;
+    }
+
+    .buttons {
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    @media (max-width: 768px) {
+      .buttons {
+        flex-direction: column;
+      }
+      .buttons button {
+        width: 100%;
+        margin-bottom: 10px;
+      }
+    }
+  </style>
 </head>
 <body>
+  <div class="container">
+    <h1>Transfert Express FOBAS</h1>
 
-<!-- Container Fòm Transfert Express -->
-<div id="transfertExpressContainer">
-  <h2>Transfert Express Haiti</h2>
-  <p>Agent Autorisé FOBAS</p>
+    <!-- AGENT AUTORISE -->
+    <fieldset>
+      <legend>Agent Autorisé FOBAS</legend>
+      <label for="agent_nom">Nom & Prénom</label>
+      <input type="text" id="agent_nom" placeholder="Nom & Prénom Agent" readonly>
 
-  <form id="formTransfert">
+      <label for="agent_email">Email</label>
+      <input type="email" id="agent_email" placeholder="Email Agent" readonly>
+    </fieldset>
 
-    <!-- 🔹 Agent (auto-filled) -->
-    <label for="agentName">Nom & Prénom Agent</label>
-    <input type="text" id="agentName" name="agentName" readonly>
+    <!-- EXPEDITEUR -->
+    <fieldset>
+      <legend>Expéditeur</legend>
+      <label for="exp_nom">Nom & Prénom</label>
+      <input type="text" id="exp_nom" placeholder="Nom & Prénom">
 
-    <label for="agentEmail">Email Agent Autorisé</label>
-    <input type="email" id="agentEmail" name="agentEmail" readonly>
+      <label for="exp_document">CIN / NIF / Passport</label>
+      <input type="text" id="exp_document" placeholder="Numéro du document">
 
-    <!-- 🔹 Expéditeur -->
-    <h3>Expéditeur</h3>
-    <label for="senderName">Nom et Prénom</label>
-    <input type="text" id="senderName" name="senderName" required>
+      <label for="exp_pays">Pays d'origine</label>
+      <input type="text" id="exp_pays" placeholder="Pays d'origine">
 
-    <label for="senderCIN">No. CIN / NIF / Passport</label>
-    <input type="text" id="senderCIN" name="senderCIN" required>
+      <label for="exp_ville">Ville / Département</label>
+      <input type="text" id="exp_ville" placeholder="Ville ou Département">
 
-    <label for="senderCountry">Pays d'origine</label>
-    <input type="text" id="senderCountry" name="senderCountry" required>
+      <label for="exp_adresse">Adresse complète</label>
+      <input type="text" id="exp_adresse" placeholder="Adresse complète">
 
-    <label for="senderAddress">Adresse complète</label>
-    <input type="text" id="senderAddress" name="senderAddress" required>
+      <label for="exp_whatsapp">WhatsApp / Téléphone</label>
+      <input type="text" id="exp_whatsapp" placeholder="WhatsApp / Téléphone">
+    </fieldset>
 
-    <label for="senderWhatsapp">WhatsApp / Téléphone</label>
-    <input type="text" id="senderWhatsapp" name="senderWhatsapp" required>
+    <!-- BENEFICIAIRE -->
+    <fieldset>
+      <legend>Bénéficiaire</legend>
+      <label for="ben_nom">Nom & Prénom</label>
+      <input type="text" id="ben_nom" placeholder="Nom & Prénom">
 
-    <!-- 🔹 Bénéficiaire -->
-    <h3>Bénéficiaire</h3>
-    <label for="receiverName">Nom et Prénom</label>
-    <input type="text" id="receiverName" name="receiverName" required>
+      <label for="ben_pays">Pays</label>
+      <input type="text" id="ben_pays" value="Haïti" readonly>
 
-    <label for="receiverCountry">Pays de destination</label>
-    <input type="text" id="receiverCountry" name="receiverCountry" required>
+      <label for="ben_ville">Ville</label>
+      <input type="text" id="ben_ville" placeholder="Ville">
 
-    <label for="receiverAddress">Adresse complète</label>
-    <input type="text" id="receiverAddress" name="receiverAddress" required>
+      <label for="ben_adresse">Adresse complète</label>
+      <input type="text" id="ben_adresse" placeholder="Adresse complète">
 
-    <label for="receiverWhatsapp">WhatsApp / Téléphone</label>
-    <input type="text" id="receiverWhatsapp" name="receiverWhatsapp" required>
+      <label for="ben_whatsapp">WhatsApp / Téléphone</label>
+      <input type="text" id="ben_whatsapp" placeholder="WhatsApp / Téléphone">
+    </fieldset>
 
-    <!-- 🔹 Détails du Transfert -->
-    <h3>Détails du Transfert</h3>
-    <label for="transferAmount">Montant à transférer</label>
-    <input type="number" id="transferAmount" name="transferAmount" min="1" required>
+    <!-- TRANSFERT -->
+    <fieldset>
+      <legend>Détails du transfert</legend>
+      <label for="montant">Montant à transférer</label>
+      <input type="number" id="montant" placeholder="Montant à transférer">
 
-    <label for="transferCurrency">Devise</label>
-    <select id="transferCurrency" name="transferCurrency" required>
-      <option value="HTG">Gourdes</option>
-      <option value="USD">USD</option>
-    </select>
+      <label for="devise">Devise</label>
+      <select id="devise">
+        <option value="">Choisir devise</option>
+        <option value="USD">USD</option>
+        <option value="EUR">EUR</option>
+        <option value="HTG">HTG</option> <!-- Devise kle pou Haiti -->
+      </select>
 
-    <label for="transferCode">Code unique</label>
-    <input type="text" id="transferCode" name="transferCode" readonly>
+      <label for="code_unique">Code unique</label>
+      <input type="text" id="code_unique" placeholder="Code unique" readonly>
 
-    <label for="transferStatus">Status</label>
-    <input type="text" id="transferStatus" name="transferStatus" value="PENDING" readonly>
+      <label for="statut">Statut</label>
+      <input type="text" id="statut" value="PENDING" readonly>
+    </fieldset>
 
-    <label for="transferExpiration">Expiration : 7 jours</label>
-    <input type="text" id="transferExpiration" name="transferExpiration" readonly>
-
-    <br><br>
-    <button type="submit" id="btnTransferer">TRANSFERER</button>
-    <p id="transfertMessage"></p>
-
-    <p>Agent autorisé confirmé ✅</p>
-  </form>
-</div>
-
+    <!-- BOUTONS -->
+    <div class="buttons">
+      <button id="btn-transferer">TRANSFERER</button>
+      <button id="btn-retrait">RETRAIT</button>
+    </div>
+  </div>
 </body>
 </html>
