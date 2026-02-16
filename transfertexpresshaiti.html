@@ -6,120 +6,24 @@
   <title>Transfert Express FOBAS</title>
   <style>
     /* GLOBAL RESET */
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    }
-
-    body {
-      background-color: #f2f7fb; /* blanc doux */
-      color: #333;
-      display: flex;
-      justify-content: center;
-      align-items: flex-start;
-      padding: 30px;
-      min-height: 100vh;
-    }
-
-    .container {
-      background: linear-gradient(145deg, #0050c8, #ffcc00, #ffffff); /* ble, jaune, blanc */
-      padding: 30px;
-      border-radius: 12px;
-      width: 100%;
-      max-width: 900px;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.15);
-    }
-
-    h1 {
-      text-align: center;
-      margin-bottom: 25px;
-      color: #004080;
-      text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
-    }
-
-    fieldset {
-      border: 2px solid #004080;
-      padding: 20px;
-      margin-bottom: 20px;
-      border-radius: 8px;
-      background-color: rgba(255,255,255,0.9);
-    }
-
-    legend {
-      font-weight: bold;
-      font-size: 1.1em;
-      color: #004080;
-      padding: 0 10px;
-    }
-
-    label {
-      display: block;
-      margin-bottom: 5px;
-      font-weight: 600;
-      color: #004080;
-    }
-
-    input, select {
-      width: 100%;
-      padding: 10px;
-      margin-bottom: 15px;
-      border-radius: 6px;
-      border: 1px solid #ccc;
-      font-size: 1em;
-    }
-
-    input[readonly] {
-      background-color: #e6f0ff;
-      color: #333;
-    }
-
-    button {
-      padding: 12px 25px;
-      margin-right: 10px;
-      border: none;
-      border-radius: 8px;
-      font-size: 1em;
-      font-weight: bold;
-      cursor: pointer;
-      transition: all 0.3s ease;
-    }
-
-    #btn-transferer {
-      background-color: #0050c8; /* ble FOBAS */
-      color: #fff;
-    }
-
-    #btn-transferer:hover {
-      background-color: #003d99;
-    }
-
-    #btn-retrait {
-      background-color: #ffcc00; /* jaune FOBAS */
-      color: #004080;
-      cursor: not-allowed; /* pa aktive kounye a */
-      opacity: 0.7;
-    }
-
-    #btn-retrait:hover {
-      opacity: 0.8;
-    }
-
-    .buttons {
-      display: flex;
-      justify-content: flex-end;
-    }
-
-    @media (max-width: 768px) {
-      .buttons {
-        flex-direction: column;
-      }
-      .buttons button {
-        width: 100%;
-        margin-bottom: 10px;
-      }
-    }
+    * { box-sizing: border-box; margin:0; padding:0; font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    body { background-color:#f2f7fb; color:#333; display:flex; justify-content:center; align-items:flex-start; padding:30px; min-height:100vh; }
+    .container { background:linear-gradient(145deg,#0050c8,#ffcc00,#ffffff); padding:30px; border-radius:12px; width:100%; max-width:900px; box-shadow:0 10px 25px rgba(0,0,0,0.15); }
+    h1 { text-align:center; margin-bottom:25px; color:#004080; text-shadow:1px 1px 2px rgba(0,0,0,0.2); }
+    fieldset { border:2px solid #004080; padding:20px; margin-bottom:20px; border-radius:8px; background-color:rgba(255,255,255,0.9); }
+    legend { font-weight:bold; font-size:1.1em; color:#004080; padding:0 10px; }
+    label { display:block; margin-bottom:5px; font-weight:600; color:#004080; }
+    input, select { width:100%; padding:10px; margin-bottom:15px; border-radius:6px; border:1px solid #ccc; font-size:1em; }
+    input[readonly] { background-color:#e6f0ff; color:#333; }
+    button { padding:12px 25px; margin-right:10px; border:none; border-radius:8px; font-size:1em; font-weight:bold; cursor:pointer; transition:all 0.3s ease; }
+    #btn-transferer { background-color:#0050c8; color:#fff; }
+    #btn-transferer:hover { background-color:#003d99; }
+    #btn-retrait { background-color:#ffcc00; color:#004080; cursor:not-allowed; opacity:0.7; }
+    #btn-retrait:hover { opacity:0.8; }
+    #btn-back { background-color:#ffffff; color:#004080; border:2px solid #004080; margin-right:auto; }
+    #btn-back:hover { background-color:#e6f0ff; }
+    .buttons { display:flex; justify-content:flex-end; align-items:center; margin-top:15px; }
+    @media(max-width:768px){ .buttons{flex-direction:column;} .buttons button{width:100%; margin-bottom:10px;} }
   </style>
 </head>
 <body>
@@ -131,7 +35,6 @@
       <legend>Agent Autorisé FOBAS</legend>
       <label for="agent_nom">Nom & Prénom</label>
       <input type="text" id="agent_nom" placeholder="Nom & Prénom Agent" readonly>
-
       <label for="agent_email">Email</label>
       <input type="email" id="agent_email" placeholder="Email Agent" readonly>
     </fieldset>
@@ -141,19 +44,14 @@
       <legend>Expéditeur</legend>
       <label for="exp_nom">Nom & Prénom</label>
       <input type="text" id="exp_nom" placeholder="Nom & Prénom">
-
       <label for="exp_document">CIN / NIF / Passport</label>
       <input type="text" id="exp_document" placeholder="Numéro du document">
-
       <label for="exp_pays">Pays d'origine</label>
       <input type="text" id="exp_pays" placeholder="Pays d'origine">
-
       <label for="exp_ville">Ville / Département</label>
       <input type="text" id="exp_ville" placeholder="Ville ou Département">
-
       <label for="exp_adresse">Adresse complète</label>
       <input type="text" id="exp_adresse" placeholder="Adresse complète">
-
       <label for="exp_whatsapp">WhatsApp / Téléphone</label>
       <input type="text" id="exp_whatsapp" placeholder="WhatsApp / Téléphone">
     </fieldset>
@@ -163,16 +61,12 @@
       <legend>Bénéficiaire</legend>
       <label for="ben_nom">Nom & Prénom</label>
       <input type="text" id="ben_nom" placeholder="Nom & Prénom">
-
       <label for="ben_pays">Pays</label>
       <input type="text" id="ben_pays" value="Haïti" readonly>
-
       <label for="ben_ville">Ville</label>
       <input type="text" id="ben_ville" placeholder="Ville">
-
       <label for="ben_adresse">Adresse complète</label>
       <input type="text" id="ben_adresse" placeholder="Adresse complète">
-
       <label for="ben_whatsapp">WhatsApp / Téléphone</label>
       <input type="text" id="ben_whatsapp" placeholder="WhatsApp / Téléphone">
     </fieldset>
@@ -182,27 +76,27 @@
       <legend>Détails du transfert</legend>
       <label for="montant">Montant à transférer</label>
       <input type="number" id="montant" placeholder="Montant à transférer">
-
       <label for="devise">Devise</label>
       <select id="devise">
         <option value="">Choisir devise</option>
         <option value="USD">USD</option>
         <option value="EUR">EUR</option>
-        <option value="HTG">HTG</option> <!-- Devise kle pou Haiti -->
+        <option value="HTG">HTG</option>
       </select>
-
       <label for="code_unique">Code unique</label>
       <input type="text" id="code_unique" placeholder="Code unique" readonly>
-
       <label for="statut">Statut</label>
       <input type="text" id="statut" value="PENDING" readonly>
     </fieldset>
 
     <!-- BOUTONS -->
     <div class="buttons">
+      <button id="btn-back" onclick="window.location.href='/dashboard';">BACK</button>
       <button id="btn-transferer">TRANSFERER</button>
       <button id="btn-retrait">RETRAIT</button>
     </div>
   </div>
+
+  <script src="transfertexpresshaiti.js"></script>
 </body>
 </html>
