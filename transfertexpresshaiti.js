@@ -32,7 +32,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // -----------------------------
   // FONCTION GENERER CODE UNIQUE
   // -----------------------------
-  function genererCodeUnique(length = 10) {
+  function genererCodeUnique(length = 12) {
     const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
     let result = "";
     for (let i = 0; i < length; i++) {
@@ -46,20 +46,17 @@ document.addEventListener("DOMContentLoaded", () => {
   // -----------------------------
   async function obtenirTauxDuJour() {
     // Ici on peut remplacer par une API ou collection serveur
-    // Pour l'exemple, taux fixe
-    return 132; // Exemple USD -> HTG
+    return 132; // Exemple USD -> HTG pour phase 1
   }
 
   // -----------------------------
   // REMPLIR CHAN AGENT (SIMULATION)
   // -----------------------------
-  // Dans production, récupérer info agent via serveur/session
   function remplirAgent() {
-    // Exemple statique, remplacer par info session serveur
+    // À remplacer par info session serveur réel
     agentNom.value = "Jean Pierre";
     agentEmail.value = "agent@fobas.com";
   }
-
   remplirAgent();
 
   // -----------------------------
@@ -80,7 +77,6 @@ document.addEventListener("DOMContentLoaded", () => {
       montantInput.value,
       deviseSelect.value
     ];
-
     return champsObligatoires.every(champ => champ !== "");
   }
 
@@ -91,7 +87,6 @@ document.addEventListener("DOMContentLoaded", () => {
     btnTransferer.disabled = !validerFormulaire();
   }
 
-  // Event listeners sur tous les inputs obligatoires
   const inputsObligatoires = [
     expNom, expDocument, expPays, expVille, expAdresse, expWhatsapp,
     benNom, benVille, benAdresse, benWhatsapp,
@@ -102,8 +97,7 @@ document.addEventListener("DOMContentLoaded", () => {
     input.addEventListener("input", majBouton);
     input.addEventListener("change", majBouton);
   });
-
-  majBouton(); // Initial check
+  majBouton();
 
   // -----------------------------
   // BOUTON TRANSFERER CLICK
@@ -115,7 +109,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // Génération code unique
-    const codeUnique = genererCodeUnique(12);
+    const codeUnique = genererCodeUnique();
     codeUniqueInput.value = codeUnique;
 
     // Calcul frais et montant HTG
@@ -191,7 +185,7 @@ document.addEventListener("DOMContentLoaded", () => {
         statutInput.value = "PENDING";
         majBouton();
       } else {
-        alert("Erreur lors de l'enregistrement du transfert: " + result.message);
+        alert("Erreur lors de l'enregistrement: " + result.message);
       }
     } catch (err) {
       console.error(err);
