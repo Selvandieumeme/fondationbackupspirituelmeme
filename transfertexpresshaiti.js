@@ -1,251 +1,201 @@
-// ========================================
-// JS – Transfert Express Haiti (SAFE + AUTO PREFILL + INTEGRATION DASHBOARD)
-// ========================================
+// transfertexpresshaiti.js
 
-// 1️⃣ Sélection du formulaire et du message
-const formTransfert = document.getElementById('formTransfert');
-const messageEl = document.getElementById('transfertMessage');
+// -----------------------------
+// CONFIGURATION INITIALE
+// -----------------------------
+document.addEventListener("DOMContentLoaded", () => {
+  // Récupération des éléments du DOM
+  const agentNom = document.getElementById("agent_nom");
+  const agentEmail = document.getElementById("agent_email");
 
-// 2️⃣ Création dynamique du bouton VALIDER
-const btnValider = document.createElement('button');
-btnValider.type = 'button';
-btnValider.textContent = 'Valider';
-btnValider.className = 'btn-primary';
-btnValider.style.display = 'none';
-if (formTransfert && !formTransfert.contains(btnValider)) {
-  formTransfert.appendChild(btnValider);
-}
+  const expNom = document.getElementById("exp_nom");
+  const expDocument = document.getElementById("exp_document");
+  const expPays = document.getElementById("exp_pays");
+  const expVille = document.getElementById("exp_ville");
+  const expAdresse = document.getElementById("exp_adresse");
+  const expWhatsapp = document.getElementById("exp_whatsapp");
 
-// ========================================
-// 3️⃣ Agent Verification + Prefill + Code Unique + Expiration
-// ========================================
-function verifyCurrentAgent() {
-  const userEmailEl = document.getElementById("userEmail");
-  const userNameEl = document.getElementById("userName");
-  const msg = document.getElementById("verificationMessage");
-  const container = document.getElementById("transfertExpressContainer");
+  const benNom = document.getElementById("ben_nom");
+  const benPays = document.getElementById("ben_pays");
+  const benVille = document.getElementById("ben_ville");
+  const benAdresse = document.getElementById("ben_adresse");
+  const benWhatsapp = document.getElementById("ben_whatsapp");
 
-  if (!userEmailEl || !userNameEl || !msg || !container) {
-      console.error("Éléments DOM manquants pour la vérification Agent");
-      return;
+  const montantInput = document.getElementById("montant");
+  const deviseSelect = document.getElementById("devise");
+  const codeUniqueInput = document.getElementById("code_unique");
+  const statutInput = document.getElementById("statut");
+
+  const btnTransferer = document.getElementById("btn-transferer");
+  const btnRetrait = document.getElementById("btn-retrait");
+
+  // -----------------------------
+  // FONCTION GENERER CODE UNIQUE
+  // -----------------------------
+  function genererCodeUnique(length = 10) {
+    const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    let result = "";
+    for (let i = 0; i < length; i++) {
+      result += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return result;
   }
 
-  const email = userEmailEl.textContent.trim();
-  const fullName = userNameEl.textContent.trim();
-
-  msg.textContent = "Vérification en cours...";
-  msg.style.color = "#007BFF";
-
-  // ✅ Chaje fòm sèlman nan pwòp container, pa touche lòt fòm
-  fetch("transfertexpresshaiti.html")
-    .then(res => {
-      if (!res.ok) throw new Error("Formulaire introuvable");
-      return res.text();
-    })
-    .then(html => {
-      container.innerHTML = html; // ONLY this container
-
-      // Initialiser fòm ak done agent la
-      initTransfertExpress(container, fullName, email);
-      prefillAgentFields(email);
-
-      msg.textContent = "Agent autorisé confirmé ✅";
-      msg.style.color = "green";
-
-    }).catch(err => {
-      console.error("Erreur chargement formulaire:", err);
-      msg.textContent = "Erreur chargement formulaire.";
-      msg.style.color = "red";
-    });
-}
-
-function initTransfertExpress(container, fullName, email) {
-  const nomPrenomField = container.querySelector("#agentName");
-  const emailField = container.querySelector("#agentEmail");
-
-  if (nomPrenomField) {
-    nomPrenomField.value = fullName;
-    nomPrenomField.readOnly = true;
-  }
-  if (emailField) {
-    emailField.value = email;
-    emailField.readOnly = true;
-  }
-}
-
-function prefillAgentFields(agentEmail) {
-  const agentName = document.getElementById('userName')?.textContent?.trim() || '';
-  const agentEmailText = agentEmail?.trim() || document.getElementById('userEmail')?.textContent?.trim() || '';
-
-  const agentNameField = document.getElementById('agentName');
-  const agentEmailField = document.getElementById('agentEmail');
-  const codeField = document.getElementById('transferCode');
-  const expirationField = document.getElementById('transferExpiration');
-
-  if (agentNameField) agentNameField.value = agentName;
-  if (agentEmailField) agentEmailField.value = agentEmailText;
-
-  // ✅ Générer code unique
-  if (codeField) codeField.value = `TRF-${Date.now()}-${Math.floor(Math.random()*10000)}`;
-
-  // ✅ Expiration 7 jours
-  if (expirationField){
-    const expire = new Date(Date.now() + 7*24*60*60*1000);
-    expirationField.value = `${String(expire.getDate()).padStart(2,'0')}/${String(expire.getMonth()+1).padStart(2,'0')}/${expire.getFullYear()}`;
+  // -----------------------------
+  // FONCTION POUR OBTENIR TAUX DU JOUR
+  // -----------------------------
+  async function obtenirTauxDuJour() {
+    // Ici on peut remplacer par une API ou collection serveur
+    // Pour l'exemple, taux fixe
+    return 132; // Exemple USD -> HTG
   }
 
-  if(messageEl){
-    messageEl.style.color = 'green';
-    messageEl.textContent = `Agent autorisé confirmé ✅\nNom: ${agentName}\nEmail: ${agentEmailText}\nCode: ${codeField?.value}\nExpiration: ${expirationField?.value}`;
+  // -----------------------------
+  // REMPLIR CHAN AGENT (SIMULATION)
+  // -----------------------------
+  // Dans production, récupérer info agent via serveur/session
+  function remplirAgent() {
+    // Exemple statique, remplacer par info session serveur
+    agentNom.value = "Jean Pierre";
+    agentEmail.value = "agent@fobas.com";
   }
 
-  // Reset sèlman chan kliyan, pa touche agent
-  [
-    'senderName','senderCIN','senderCountry','senderAddress','senderWhatsapp',
-    'receiverName','receiverCountry','receiverAddress','receiverWhatsapp',
-    'transferAmount','transferCurrency'
-  ].forEach(id => {
-    const el = document.getElementById(id);
-    if(el) el.value = '';
+  remplirAgent();
+
+  // -----------------------------
+  // VALIDATION FORMULAIRE
+  // -----------------------------
+  function validerFormulaire() {
+    const champsObligatoires = [
+      expNom.value.trim(),
+      expDocument.value.trim(),
+      expPays.value.trim(),
+      expVille.value.trim(),
+      expAdresse.value.trim(),
+      expWhatsapp.value.trim(),
+      benNom.value.trim(),
+      benVille.value.trim(),
+      benAdresse.value.trim(),
+      benWhatsapp.value.trim(),
+      montantInput.value,
+      deviseSelect.value
+    ];
+
+    return champsObligatoires.every(champ => champ !== "");
+  }
+
+  // -----------------------------
+  // ACTIVER/DESACTIVER BOUTON TRANSFERER
+  // -----------------------------
+  function majBouton() {
+    btnTransferer.disabled = !validerFormulaire();
+  }
+
+  // Event listeners sur tous les inputs obligatoires
+  const inputsObligatoires = [
+    expNom, expDocument, expPays, expVille, expAdresse, expWhatsapp,
+    benNom, benVille, benAdresse, benWhatsapp,
+    montantInput, deviseSelect
+  ];
+
+  inputsObligatoires.forEach(input => {
+    input.addEventListener("input", majBouton);
+    input.addEventListener("change", majBouton);
   });
-}
 
-// ========================================
-// 4️⃣ Trigger bouton Transfert Express Haiti
-// ========================================
-document.addEventListener('DOMContentLoaded', () => {
-  const btnTransfertExpress = document.getElementById('btnTransfertExpress');
-  if(btnTransfertExpress){
-    btnTransfertExpress.addEventListener('click', verifyCurrentAgent);
-  }
-});
+  majBouton(); // Initial check
 
-// ========================================
-// 5️⃣ Submit FORMULAIRE = TRANSFERER
-// ========================================
-if(formTransfert){
-  formTransfert.addEventListener('submit', async (e)=>{
-    e.preventDefault();
-
-    if(messageEl){ messageEl.textContent=''; messageEl.style.color=''; }
-
-    const agentNameField = document.getElementById('agentName');
-    const agentEmailField = document.getElementById('agentEmail');
-    const transferAmount = parseFloat(document.getElementById('transferAmount')?.value || 0);
-    const transferCurrency = document.getElementById('transferCurrency')?.value || '';
-
-    if(!agentEmailField?.value || !transferAmount || transferAmount<=0){
-      if(messageEl){
-        messageEl.style.color='red';
-        messageEl.textContent='Montant ou email agent invalide.';
-      }
+  // -----------------------------
+  // BOUTON TRANSFERER CLICK
+  // -----------------------------
+  btnTransferer.addEventListener("click", async () => {
+    if (!validerFormulaire()) {
+      alert("Veuillez remplir tous les champs obligatoires.");
       return;
     }
 
-    // 🔹 Submit data
-    try {
-      const response = await fetch('https://api.fondationbackupspirituel.com/api/transfert/create',{
-        method:'POST',
-        headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({
-          agentName:agentNameField.value,
-          agentEmail:agentEmailField.value,
-          senderName:document.getElementById('senderName')?.value||'',
-          senderCIN:document.getElementById('senderCIN')?.value||'',
-          senderCountry:document.getElementById('senderCountry')?.value||'',
-          senderAddress:document.getElementById('senderAddress')?.value||'',
-          senderWhatsapp:document.getElementById('senderWhatsapp')?.value||'',
-          receiverName:document.getElementById('receiverName')?.value||'',
-          receiverCountry:document.getElementById('receiverCountry')?.value||'',
-          receiverAddress:document.getElementById('receiverAddress')?.value||'',
-          receiverWhatsapp:document.getElementById('receiverWhatsapp')?.value||'',
-          transferAmount,
-          transferCurrency
-        })
-      });
+    // Génération code unique
+    const codeUnique = genererCodeUnique(12);
+    codeUniqueInput.value = codeUnique;
 
-      const result = await response.json();
+    // Calcul frais et montant HTG
+    const montant = parseFloat(montantInput.value);
+    const devise = deviseSelect.value;
+    const taux = await obtenirTauxDuJour();
+    let montantHTG = montant;
 
-      if(!result.ok){
-        if(messageEl){ messageEl.style.color='red'; messageEl.textContent=result.message||'Erreur création transfert'; }
-        return;
-      }
-
-      // Remplissage code + expiration
-      const codeField = document.getElementById('transferCode');
-      const expirationField = document.getElementById('transferExpiration');
-      const statusField = document.getElementById('transferStatus');
-      if(codeField) codeField.value = result.transferCode||'';
-      if(expirationField) expirationField.value = result.transferExpiration||'';
-      if(statusField) statusField.value = 'PENDING';
-      if(messageEl) messageEl.style.color='green';
-      if(messageEl) messageEl.textContent=`Transfert réussi ✅\nCode: ${result.transferCode||''}\nExpiration: ${result.transferExpiration||''}`;
-
-      if(btnValider) btnValider.style.display='inline-block';
-
-    } catch(err){
-      console.error('❌ Erreur fetch /api/transfert/create:', err);
-      if(messageEl){ messageEl.style.color='red'; messageEl.textContent='Erreur serveur lors de la création du transfert.'; }
+    if (devise === "USD" || devise === "EUR") {
+      montantHTG = montant * taux;
     }
-  });
-}
 
-// ========================================
-// 6️⃣ BOUTON VALIDER = VALIDATION DEFINITIVE
-// ========================================
-if(btnValider){
-  btnValider.addEventListener('click', async ()=>{
+    const fraisHTG = Math.round(montantHTG * 0.08); // 8% frais retrait
+    const totalHTG = montantHTG + fraisHTG;
+
+    // Préparer objet transfert
     const transfertData = {
-      agentName:document.getElementById('agentName')?.value,
-      agentEmail:document.getElementById('agentEmail')?.value,
-      senderName:document.getElementById('senderName')?.value,
-      senderCIN:document.getElementById('senderCIN')?.value,
-      senderCountry:document.getElementById('senderCountry')?.value,
-      senderAddress:document.getElementById('senderAddress')?.value,
-      senderWhatsapp:document.getElementById('senderWhatsapp')?.value,
-      receiverName:document.getElementById('receiverName')?.value,
-      receiverCountry:document.getElementById('receiverCountry')?.value,
-      receiverAddress:document.getElementById('receiverAddress')?.value,
-      receiverWhatsapp:document.getElementById('receiverWhatsapp')?.value,
-      transferAmount:parseFloat(document.getElementById('transferAmount')?.value||0),
-      transferCurrency:document.getElementById('transferCurrency')?.value,
-      transferCode:document.getElementById('transferCode')?.value,
-      transferStatus:document.getElementById('transferStatus')?.value||'PENDING',
-      transferExpiration:document.getElementById('transferExpiration')?.value
+      agent: {
+        nom_prenom: agentNom.value,
+        email: agentEmail.value
+      },
+      expediteur: {
+        nom_prenom: expNom.value,
+        document: expDocument.value,
+        pays: expPays.value,
+        ville: expVille.value,
+        adresse: expAdresse.value,
+        whatsapp: expWhatsapp.value
+      },
+      beneficiaire: {
+        nom_prenom: benNom.value,
+        pays: benPays.value,
+        ville: benVille.value,
+        adresse: benAdresse.value,
+        whatsapp: benWhatsapp.value
+      },
+      transfert: {
+        montant_original: montant,
+        devise_originale: devise,
+        taux_du_jour: taux,
+        montant_htg: montantHTG,
+        frais_htg: fraisHTG,
+        total_htg: totalHTG,
+        code_unique: codeUnique,
+        statut: "PENDING",
+        expiration: new Date(Date.now() + 21*24*60*60*1000) // 21 jours
+      }
     };
 
-    try{
-      const response = await fetch('https://api.fondationbackupspirituel.com/api/transfert/validate',{
-        method:'POST',
-        headers:{'Content-Type':'application/json'},
-        body:JSON.stringify(transfertData)
+    try {
+      // -----------------------------
+      // APPEL AU SERVER (API)
+      // -----------------------------
+      const response = await fetch("/api/transfert-express", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(transfertData)
       });
+
       const result = await response.json();
 
-      if(!result.ok){
-        messageEl.style.color='red';
-        messageEl.textContent=result.message;
-        return;
+      if (response.ok) {
+        alert("Transfert enregistré avec succès ! Code unique: " + codeUnique);
+        // Reset formulaire sauf agent
+        expNom.value = expDocument.value = expPays.value = "";
+        expVille.value = expAdresse.value = expWhatsapp.value = "";
+        benNom.value = benVille.value = benAdresse.value = benWhatsapp.value = "";
+        montantInput.value = "";
+        deviseSelect.value = "";
+        codeUniqueInput.value = "";
+        statutInput.value = "PENDING";
+        majBouton();
+      } else {
+        alert("Erreur lors de l'enregistrement du transfert: " + result.message);
       }
-
-      messageEl.style.color='green';
-      messageEl.textContent='Transfert validé et en attente de retrait ✅';
-
-      // Reset chan client
-      [
-        'senderName','senderCIN','senderCountry','senderAddress','senderWhatsapp',
-        'receiverName','receiverCountry','receiverAddress','receiverWhatsapp',
-        'transferAmount','transferCurrency'
-      ].forEach(id=>{
-        const el=document.getElementById(id);
-        if(el) el.value='';
-      });
-
-      if(btnValider) btnValider.style.display='none';
-
-    }catch(err){
-      messageEl.style.color='red';
-      messageEl.textContent='Erreur serveur lors de la validation.';
+    } catch (err) {
+      console.error(err);
+      alert("Erreur réseau ou serveur, veuillez réessayer.");
     }
   });
-}
+});
