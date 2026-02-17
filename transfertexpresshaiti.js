@@ -33,6 +33,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const codeUniqueInput = document.getElementById("code_unique");
   const statutInput = document.getElementById("statut");
+  const dateDuJourInput = document.getElementById("date_du_jour");
   const expirationInput = document.getElementById("expiration");
 
   const btnTransferer = document.getElementById("btn-transferer");
@@ -75,6 +76,20 @@ document.addEventListener("DOMContentLoaded", () => {
     return champs.every(c => c && c.value.trim() !== "");
   }
 
+
+const today = new Date();
+
+if (dateDuJourInput) {
+  dateDuJourInput.value = today.toISOString().split("T")[0];
+}
+
+if (expirationInput) {
+  const exp = new Date(today);
+  exp.setDate(exp.getDate() + 21);
+  expirationInput.value = exp.toISOString().split("T")[0];
+}
+
+  
   function majBouton() {
     if (btnTransferer) {
       btnTransferer.disabled = !validerFormulaire();
