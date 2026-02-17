@@ -3,29 +3,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const btnTransfertExpress = document.getElementById("btnTransfertExpress");
   const loaderDiv = document.getElementById("transfertLoader");
 
-  if (!btnTransfertExpress) return;
-
-  btnTransfertExpress.addEventListener("click", (e) => {
-    e.preventDefault();
-
-    // Montre loader pandan 0.8s
-    if (loaderDiv) loaderDiv.style.display = "flex";
-
-    setTimeout(() => {
-      if (loaderDiv) loaderDiv.style.display = "none";
-      alert("Acces Transfert Express FOBAS autorise avec succes");
-      window.location.href = "transfertexpresshaiti.html";
-    }, 800);
-  });
-});
-
-// -----------------------------
-// 3️⃣ Récupération info utilisateur
-// -----------------------------
-document.addEventListener("DOMContentLoaded", () => {
-  const btnTransfertExpress = document.getElementById("btnTransfertExpress");
-  const loaderDiv = document.getElementById("transfertLoader");
-
   const userNameEl = document.getElementById("userName");
   const userEmailEl = document.getElementById("userEmail");
   const userAccountTypeEl = document.getElementById("userAccountType");
@@ -34,20 +11,26 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const titresAutorises = ["Agent Autorise", "FONDATEUR FOBAS"];
 
-  btnTransfertExpress.addEventListener("click", async (e) => {
+  btnTransfertExpress.addEventListener("click", (e) => {
     e.preventDefault();
-    if (loaderDiv) loaderDiv.style.display = "flex";
 
-    await new Promise((resolve) => setTimeout(resolve, 800));
-
-    const titreUtilisateur = userAccountTypeEl?.innerText?.trim() || "";
+    const titreUtilisateur = userAccountTypeEl?.innerText?.replace("Tit / Statut:", "").trim() || "";
     const userNomPrenom = userNameEl?.innerText?.trim() || "";
     const userEmail = userEmailEl?.innerText?.trim() || "";
 
-    if (titresAutorises.includes(titreUtilisateur)) {
+    if (!titresAutorises.includes(titreUtilisateur)) {
+      alert("Ou pa gen otorizasyon pou antre nan espas sa");
+      return; // bloke itilizatè a
+    }
+
+    // Montre loader
+    if (loaderDiv) loaderDiv.style.display = "flex";
+
+    setTimeout(() => {
       if (loaderDiv) loaderDiv.style.display = "none";
       alert("Acces Transfert Express FOBAS autorise avec succes");
 
+      // Ranpli fòm input pou transfertexpresshaiti.html
       const agentNomInput = document.getElementById("agent_nom");
       const agentEmailInput = document.getElementById("agent_email");
       const codeUniqueInput = document.getElementById("code_unique");
@@ -56,21 +39,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
       if (agentNomInput) agentNomInput.value = userNomPrenom;
       if (agentEmailInput) agentEmailInput.value = userEmail;
-      if (codeUniqueInput) codeUniqueInput.value = genererCodeUnique();
+      if (codeUniqueInput && typeof genererCodeUnique === "function") codeUniqueInput.value = genererCodeUnique();
       if (statutInput) statutInput.value = "PENDING";
 
       const expiration = new Date(Date.now() + 21 * 24 * 60 * 60 * 1000);
       if (expirationInput) expirationInput.value = expiration.toISOString().split("T")[0];
 
+      // Redirije itilizatè a
       window.location.href = "transfertexpresshaiti.html";
-    } else {
-      if (loaderDiv) loaderDiv.style.display = "none";
-      alert("Ou pa gen otorizasyon pou w antre nan espas sa");
-      btnTransfertExpress.disabled = true;
-    }
+    }, 800);
   });
 });
-
 
 // -----------------------------
 // TRANSFERT EXPRESS FONCTIONS EXISTANTES
