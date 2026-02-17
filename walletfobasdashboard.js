@@ -358,24 +358,32 @@ function showForm(type) {
 document.addEventListener("DOMContentLoaded", () => {
   const btnTransfertExpress = document.getElementById("btnTransfertExpress");
   const loaderDiv = document.getElementById("transfertLoader");
+  const userAccountTypeEl = document.getElementById("userAccountType"); // Tit / Statut
 
   if (!btnTransfertExpress) return;
 
   btnTransfertExpress.addEventListener("click", (e) => {
     e.preventDefault();
 
-    // Montre loader
+    // Récupérer tit itilizatè a
+    const titreUtilisateur = userAccountTypeEl?.innerText?.replace("Tit / Statut:", "").trim();
+
+    // Lis tit ki otorize
+    const titresAutorises = ["Agent Autorise", "FONDATEUR FOBAS"];
+
+    if (!titresAutorises.includes(titreUtilisateur)) {
+      alert("Ou pa gen otorizasyon pou antre nan espas sa");
+      return; // bloke itilizatè ki pa otorize
+    }
+
+    // Montre loader pou itilizatè ki otorize
     if (loaderDiv) loaderDiv.style.display = "flex";
 
     setTimeout(() => {
       if (loaderDiv) loaderDiv.style.display = "none";
-
-      // Mesaj siksè
       alert("Acces Transfert Express FOBAS autorise avec succes");
-
-      // Redirije itilizatè
       window.location.href = "transfertexpresshaiti.html";
-    }, 800); // loader 0.8s pou feedback
+    }, 800);
   });
 });
 
