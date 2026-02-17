@@ -1,68 +1,40 @@
-// ================= TRANSFERT EXPRESS - FINAL KORIJE =================
+// ================= TRANSFERT EXPRESS FINAL =================
 document.addEventListener("DOMContentLoaded", () => {
+
+  // -------------------- Elements fòm yo --------------------
   const btnTransfertExpress = document.getElementById("btnTransfertExpress");
   const loaderDiv = document.getElementById("transfertLoader");
-  const userAccountTypeEl = document.getElementById("userAccountType");
-  const userNameEl = document.getElementById("userName");
-  const userEmailEl = document.getElementById("userEmail");
 
-  if (!btnTransfertExpress) return;
+  const agentNomInput = document.getElementById("agent_nom");
+  const agentEmailInput = document.getElementById("agent_email");
 
-  const titresAutorises = ["Agent Autorise", "FONDATEUR FOBAS"];
-
-  btnTransfertExpress.addEventListener("click", (e) => {
-    e.preventDefault();
-
-    const titreUtilisateur = userAccountTypeEl?.innerText?.replace("Tit / Statut:", "").trim() || "";
-
-    // ⚠ Itilizatè pa otorize → montre sèlman alèt epi rete sou dashboard
-    if (!titresAutorises.includes(titreUtilisateur)) {
-      alert("Ou pa gen otorizasyon pou antre nan espas sa");
-      return;
-    }
-
-    // Montre loader pou itilizatè ki otorize
-    if (loaderDiv) loaderDiv.style.display = "flex";
-
-    setTimeout(() => {
-      if (loaderDiv) loaderDiv.style.display = "none";
-
-      // Sèlman itilizatè otorize ap resevwa mesaj siksè
-      alert("Acces Transfert Express FOBAS autorise avec succes");
-
-      // Mete done itilizatè nan sessionStorage pou fòm la nan paj transfè a
-      sessionStorage.setItem("fobas_agent_nom", userNameEl?.innerText?.trim() || "");
-      sessionStorage.setItem("fobas_agent_email", userEmailEl?.innerText?.trim() || "");
-
-      // Redirije itilizatè nan paj transfè a
-      window.location.href = "transfertexpresshaiti.html";
-    }, 800);
-  });
-});
-
-// -----------------------------
-// TRANSFERT EXPRESS FONCTIONS EXISTANTES
-// -----------------------------
-document.addEventListener("DOMContentLoaded", () => {
-  const agentNom = document.getElementById("agent_nom");
-  const agentEmail = document.getElementById("agent_email");
   const expNom = document.getElementById("exp_nom");
   const expDocument = document.getElementById("exp_document");
   const expPays = document.getElementById("exp_pays");
   const expVille = document.getElementById("exp_ville");
   const expAdresse = document.getElementById("exp_adresse");
   const expWhatsapp = document.getElementById("exp_whatsapp");
+
   const benNom = document.getElementById("ben_nom");
   const benPays = document.getElementById("ben_pays");
   const benVille = document.getElementById("ben_ville");
   const benAdresse = document.getElementById("ben_adresse");
   const benWhatsapp = document.getElementById("ben_whatsapp");
+
   const montantInput = document.getElementById("montant");
   const deviseSelect = document.getElementById("devise");
   const codeUniqueInput = document.getElementById("code_unique");
   const statutInput = document.getElementById("statut");
+  const expirationInput = document.getElementById("expiration");
   const btnTransferer = document.getElementById("btn-transferer");
 
+  const userNameEl = document.getElementById("userName");
+  const userEmailEl = document.getElementById("userEmail");
+  const userAccountTypeEl = document.getElementById("userAccountType");
+
+  const titresAutorises = ["Agent Autorise", "FONDATEUR FOBAS"];
+
+  // -------------------- Fonksyon utilitaires --------------------
   function genererCodeUnique(length = 12) {
     const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
     let result = "";
@@ -73,18 +45,16 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   async function obtenirTauxDuJour() {
-    return 132;
+    return 132; // taux fiks pou konvèsyon
   }
 
-  function remplirAgent() {
-    const nom = sessionStorage.getItem("fobas_agent_nom");
-    const email = sessionStorage.getItem("fobas_agent_email");
+  function remplirAgentAutomatique() {
+    const userName = userNameEl?.innerText?.trim() || "";
+    const userEmail = userEmailEl?.innerText?.trim() || "";
 
-    if (agentNom && nom) agentNom.value = nom;
-    if (agentEmail && email) agentEmail.value = email;
+    if (agentNomInput) agentNomInput.value = userName;
+    if (agentEmailInput) agentEmailInput.value = userEmail;
   }
-
-  remplirAgent();
 
   function validerFormulaire() {
     const champs = [
@@ -110,15 +80,51 @@ document.addEventListener("DOMContentLoaded", () => {
 
   majBouton();
 
-  btnTransferer.addEventListener("click", async () => {
+  // -------------------- Bouton Transfert Express --------------------
+  btnTransfertExpress?.addEventListener("click", (e) => {
+    e.preventDefault();
+
+    const titreUtilisateur = userAccountTypeEl?.innerText?.replace("Tit / Statut:", "").trim() || "";
+
+    if (!titresAutorises.includes(titreUtilisateur)) {
+      alert("Ou pa gen otorizasyon pou antre nan espas sa");
+      return; // blokaj total, rete sou dashboard
+    }
+
+    // Loader vizib pandan ranpli otomatik
+    if (loaderDiv) loaderDiv.style.display = "flex";
+
+    setTimeout(() => {
+      if (loaderDiv) loaderDiv.style.display = "none";
+
+      // Ranpli otomatik agent + code + dat
+      remplirAgentAutomatique();
+      if (codeUniqueInput) codeUniqueInput.value = genererCodeUnique();
+      if (statutInput) statutInput.value = "PENDING";
+
+      const datAktyel = new Date();
+      if (expirationInput) {
+        const datExp = new Date(datAktyel.getTime() + 21 * 24 * 60 * 60 * 1000);
+        expirationInput.value = datExp.toISOString().split("T")[0];
+      }
+
+      alert("Acces Transfert Express FOBAS autorise avec succes");
+
+      // Redirije nan paj fòm final la
+      window.location.href = "transfertexpresshaiti.html";
+    }, 800);
+  });
+
+  // -------------------- Bouton Transferer --------------------
+  btnTransferer?.addEventListener("click", async () => {
     if (!validerFormulaire()) {
       alert("Veuillez remplir tous les champs obligatoires.");
       return;
     }
 
     const codeUnique = genererCodeUnique();
-    codeUniqueInput.value = codeUnique;
-    statutInput.value = "PENDING";
+    if (codeUniqueInput) codeUniqueInput.value = codeUnique;
+    if (statutInput) statutInput.value = "PENDING";
 
     const montant = parseFloat(montantInput.value);
     const devise = deviseSelect.value;
@@ -128,7 +134,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const totalHTG = montantHTG + fraisHTG;
 
     const transfertData = {
-      agent: { nom_prenom: agentNom.value, email: agentEmail.value },
+      agent: { nom_prenom: agentNomInput.value, email: agentEmailInput.value },
       expediteur: {
         nom_prenom: expNom.value,
         document: expDocument.value,
