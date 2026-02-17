@@ -1,16 +1,17 @@
 // ================= TRANSFERT EXPRESS - NOUVO SYSTEM =================
 document.addEventListener("DOMContentLoaded", () => {
-  const btnTransfert = document.getElementById("btnTransfertExpress");
+  const btnTransfert = document.getElementById("btnTransfertExpress"); // ID matche ak HTML
   if (!btnTransfert) return;
 
   btnTransfert.addEventListener("click", async (e) => {
     e.preventDefault();
 
+    // Récupérer email itilizatè a dinamikman, selon sistèm ou a
     const userEmail = document.getElementById("userEmail")?.innerText.trim();
     if (!userEmail) return alert("Email manke. Tanpri konekte.");
 
     try {
-      // Requete backend pou verifye user nan walletbalances
+      // Requête backend pou verifye itilizatè a
       const res = await fetch("https://api.fondationbackupspirituel.com/api/wallet/get-user", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -42,7 +43,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 });
-
 
 // -----------------------------
 // 3️⃣ Récupération info utilisateur
