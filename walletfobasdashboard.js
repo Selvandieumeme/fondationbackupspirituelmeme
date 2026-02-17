@@ -354,27 +354,70 @@ function showForm(type) {
 
   
 
-// ================= TRANSFERT EXPRESS HAITI =================
+// ================= TRANSFERT EXPRESS HAITI (NOUVO) =================
 document.addEventListener("DOMContentLoaded", () => {
   const btnTransfert = document.getElementById("btnTransfertExpress");
   const container = document.getElementById("transfertExpressContainer");
 
-  btnTransfert?.addEventListener("click", () => {
-    // Clear previous content
-    container.innerHTML = "";
+  btnTransfert?.addEventListener("click", async (e) => {
+    e.preventDefault();
 
-    // Inject agent verification modal
-    fetch("agent-verification.html")
-      .then(res => res.text())
-      .then(html => {
-        container.innerHTML = html;
-        // Initialize verification avec formType 'expressTransfer'
-        initAgentVerification(container, "expressTransfer");
-      })
-      .catch(err => console.error("Erreur chargement modal:", err));
+    // Clear previous content (si gen anyen nan container)
+    if (container) container.innerHTML = "";
+
+    // Récupérer email itilizatè ki konekte a
+    const userEmail = document.getElementById("userEmail")?.innerText.trim();
+    if (!userEmail) return alert("Email manke. Tanpri konekte.");
+
+    try {
+      // ✅ Query backend pou verifye agent / FONDATEUR
+      const res = await fetch("/api/wallet/get-user", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: userEmail })
+      });
+
+      const user = await res.json();
+
+      if (!res.ok || !user) {
+        return alert("Itilizatè pa jwenn nan baz la.");
+      }
+
+      const titresAutorises = ["Agent Autorise", "FONDATEUR FOBAS"];
+      if (!titresAutorises.includes(user.walletAccountType)) {
+        return alert("Ou pa gen otorizasyon pou antre nan Transfert Express FOBAS.");
+      }
+
+      // ✅ Mete done agent nan sessionStorage pou paj transfert la ka itilize yo
+      sessionStorage.setItem("fobas_agent_nom", user.fullName);
+      sessionStorage.setItem("fobas_agent_email", user.email);
+
+      // Optional: montre mesaj siksè nan container la
+      if (container) {
+        container.innerHTML = `
+          <p style="color:green; font-weight:bold;">
+            Otorizasyon verifye ✅. Ou pral redirije nan Transfert Express...
+          </p>
+        `;
+      }
+
+      // ✅ Redirije itilizatè apre 800ms pou mesaz la vizib
+      setTimeout(() => {
+        window.location.href = "transfertexpresshaiti.html";
+      }, 800);
+
+    } catch (err) {
+      console.error("Erè verifye user:", err);
+      alert("Yon erè rive, tanpri eseye ankò.");
+    }
   });
 });
 
+
+
+
+
+  
 
 
 
