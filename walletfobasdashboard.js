@@ -339,34 +339,6 @@ function showForm(type) {
 
 
 
-document.addEventListener("DOMContentLoaded", () => {
-  const btnTransfertExpress = document.getElementById("btnTransfertExpress");
-  const loaderDiv = document.getElementById("transfertLoader");
-  const userAccountTypeEl = document.getElementById("userAccountType");
-
-  if (!btnTransfertExpress) return;
-
-  const titresAutorises = ["Agent Autorise", "FONDATEUR FOBAS"];
-
-  btnTransfertExpress.addEventListener("click", (e) => {
-    e.preventDefault();
-
-    const titreUtilisateur = userAccountTypeEl?.innerText?.replace("Tit / Statut:", "").trim() || "";
-
-    if (!titresAutorises.includes(titreUtilisateur)) {
-      alert("Ou pa gen otorizasyon pou antre nan espas sa");
-      return; // bloke itilizatè a epi rete sou dashboard
-    }
-
-    if (loaderDiv) loaderDiv.style.display = "flex";
-
-    setTimeout(() => {
-      if (loaderDiv) loaderDiv.style.display = "none";
-      alert("Acces Transfert Express FOBAS autorise avec succes");
-      window.location.href = "transfertexpresshaiti.html";
-    }, 800);
-  });
-});
 
 
 
