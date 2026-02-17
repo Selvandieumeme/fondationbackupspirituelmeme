@@ -1,36 +1,45 @@
-// --------------------------------------------------
-// ACCES TRANSFERT EXPRESS FOBAS (DASHBOARD)
-// --------------------------------------------------
+// ================= TRANSFERT EXPRESS - NOUVO SYSTEM =================
 document.addEventListener("DOMContentLoaded", () => {
-  const btn = document.getElementById("btnTransfertExpress");
-  const loader = document.getElementById("transfertLoader");
+  const btnTransfert = document.getElementById("btnTransfertExpress");
+  if (!btnTransfert) return;
 
-  if (!btn) return;
-
-  const titresAutorisesDashboard = ["Agent Autorise", "FONDATEUR FOBAS"];
-
-  btn.addEventListener("click", (e) => {
+  btnTransfert.addEventListener("click", async (e) => {
     e.preventDefault();
-    if (loader) loader.style.display = "flex";
 
-    const nom = document.getElementById("userName")?.innerText.trim() || "";
-    const email = document.getElementById("userEmail")?.innerText.trim() || "";
-    const titre = document.getElementById("userAccountType")?.innerText.trim() || "";
+    const userEmail = document.getElementById("userEmail")?.innerText.trim();
+    if (!userEmail) return alert("Email manke. Tanpri konekte.");
 
-    setTimeout(() => {
-      if (!titresAutorisesDashboard.includes(titre)) {
-        if (loader) loader.style.display = "none";
-        alert("Ou pa gen otorizasyon pou w antre nan Transfert Express FOBAS.");
-        btn.disabled = true;
-        return;
+    try {
+      // Requete backend pou verifye user nan walletbalances
+      const res = await fetch("/api/wallet/get-user", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: userEmail })
+      });
+
+      const user = await res.json();
+
+      if (!res.ok || !user) {
+        return alert("Itilizatè pa jwenn nan baz la.");
       }
 
-      sessionStorage.setItem("fobas_agent_nom", nom);
-      sessionStorage.setItem("fobas_agent_email", email);
+      // Verifye tit itilizatè a
+      const titresAutorises = ["Agent Autorise", "FONDATEUR FOBAS"];
+      if (!titresAutorises.includes(user.walletAccountType)) {
+        return alert("Ou pa gen otorizasyon pou antre nan Transfert Express FOBAS.");
+      }
 
-      if (loader) loader.style.display = "none";
+      // Mete nan sessionStorage pou paj transfert la ka li yo
+      sessionStorage.setItem("fobas_agent_nom", user.fullName);
+      sessionStorage.setItem("fobas_agent_email", user.email);
+
+      // Redirije itilizatè sèlman si verification pase
       window.location.href = "transfertexpresshaiti.html";
-    }, 500);
+
+    } catch (err) {
+      console.error("Erè verifye user:", err);
+      alert("Yon erè rive, tanpri eseye ankò.");
+    }
   });
 });
 
