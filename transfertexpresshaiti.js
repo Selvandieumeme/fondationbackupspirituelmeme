@@ -77,16 +77,33 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
 
-const today = new Date();
+function initialiserDonneesSysteme() {
+  const today = new Date();
 
-if (dateDuJourInput) {
-  dateDuJourInput.value = today.toISOString().split("T")[0];
-}
+  // ===== Date du jour (FORMAT HTML5) =====
+  const todayISO = today.toISOString().split("T")[0];
 
-if (expirationInput) {
-  const exp = new Date(today);
-  exp.setDate(exp.getDate() + 21);
-  expirationInput.value = exp.toISOString().split("T")[0];
+  const dateDuJourInput = document.getElementById("date_du_jour");
+  if (dateDuJourInput) {
+    dateDuJourInput.value = todayISO;
+  }
+
+  // ===== Code unique =====
+  if (codeUniqueInput) {
+    codeUniqueInput.value = genererCodeUnique();
+  }
+
+  // ===== Statut =====
+  if (statutInput) {
+    statutInput.value = "PENDING";
+  }
+
+  // ===== Date expiration +21 jours =====
+  if (expirationInput) {
+    const exp = new Date(today);
+    exp.setDate(exp.getDate() + 21);
+    expirationInput.value = exp.toISOString().split("T")[0];
+  }
 }
 
   
