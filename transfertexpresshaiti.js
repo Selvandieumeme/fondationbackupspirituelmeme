@@ -1,91 +1,70 @@
-// ================= TRANSFERT EXPRESS - FINAL KORIJE =================
+// ================= TRANSFERT EXPRESS FINAL (FRONTEND ONLY) =================
 document.addEventListener("DOMContentLoaded", () => {
+
+  // ===================== ELEMENTS DASHBOARD =====================
   const btnTransfertExpress = document.getElementById("btnTransfertExpress");
   const loaderDiv = document.getElementById("transfertLoader");
-  const userAccountTypeEl = document.getElementById("userAccountType");
+
   const userNameEl = document.getElementById("userName");
   const userEmailEl = document.getElementById("userEmail");
-
-  if (!btnTransfertExpress) return;
+  const userAccountTypeEl = document.getElementById("userAccountType");
 
   const titresAutorises = ["Agent Autorise", "FONDATEUR FOBAS"];
 
-  btnTransfertExpress.addEventListener("click", (e) => {
-    e.preventDefault();
+  // ===================== ELEMENTS FORMULAIRE =====================
+  const agentNomInput = document.getElementById("agent_nom");
+  const agentEmailInput = document.getElementById("agent_email");
 
-    const titreUtilisateur = userAccountTypeEl?.innerText?.replace("Tit / Statut:", "").trim() || "";
-
-    // ⚠ Itilizatè pa otorize → montre sèlman alèt epi rete sou dashboard
-    if (!titresAutorises.includes(titreUtilisateur)) {
-      alert("Ou pa gen otorizasyon pou antre nan espas sa");
-      return;
-    }
-
-    // Montre loader pou itilizatè ki otorize
-    if (loaderDiv) loaderDiv.style.display = "flex";
-
-    setTimeout(() => {
-      if (loaderDiv) loaderDiv.style.display = "none";
-
-      // Sèlman itilizatè otorize ap resevwa mesaj siksè
-      alert("Acces Transfert Express FOBAS autorise avec succes");
-
-      // Mete done itilizatè nan sessionStorage pou fòm la nan paj transfè a
-      sessionStorage.setItem("fobas_agent_nom", userNameEl?.innerText?.trim() || "");
-      sessionStorage.setItem("fobas_agent_email", userEmailEl?.innerText?.trim() || "");
-
-      // Redirije itilizatè nan paj transfè a
-      window.location.href = "transfertexpresshaiti.html";
-    }, 800);
-  });
-});
-
-// -----------------------------
-// TRANSFERT EXPRESS FONCTIONS EXISTANTES
-// -----------------------------
-document.addEventListener("DOMContentLoaded", () => {
-  const agentNom = document.getElementById("agent_nom");
-  const agentEmail = document.getElementById("agent_email");
   const expNom = document.getElementById("exp_nom");
   const expDocument = document.getElementById("exp_document");
   const expPays = document.getElementById("exp_pays");
   const expVille = document.getElementById("exp_ville");
   const expAdresse = document.getElementById("exp_adresse");
   const expWhatsapp = document.getElementById("exp_whatsapp");
+
   const benNom = document.getElementById("ben_nom");
   const benPays = document.getElementById("ben_pays");
   const benVille = document.getElementById("ben_ville");
   const benAdresse = document.getElementById("ben_adresse");
   const benWhatsapp = document.getElementById("ben_whatsapp");
+
   const montantInput = document.getElementById("montant");
   const deviseSelect = document.getElementById("devise");
+
   const codeUniqueInput = document.getElementById("code_unique");
   const statutInput = document.getElementById("statut");
   const expirationInput = document.getElementById("expiration");
+
   const btnTransferer = document.getElementById("btn-transferer");
 
+  // ===================== OUTILS =====================
   function genererCodeUnique(length = 12) {
     const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
     let result = "";
     for (let i = 0; i < length; i++) {
-      result += chars.charAt(Math.floor(Math.random() * chars.length));
+      result += chars[Math.floor(Math.random() * chars.length)];
     }
     return result;
   }
 
-  async function obtenirTauxDuJour() {
-    return 132;
+  function remplirAgentDepuisSession() {
+    const nom = sessionStorage.getItem("fobas_agent_nom") || "";
+    const email = sessionStorage.getItem("fobas_agent_email") || "";
+
+    if (agentNomInput) agentNomInput.value = nom;
+    if (agentEmailInput) agentEmailInput.value = email;
   }
 
-  function remplirAgent() {
-    const nom = sessionStorage.getItem("fobas_agent_nom");
-    const email = sessionStorage.getItem("fobas_agent_email");
+  function initialiserDonneesSysteme() {
+    if (codeUniqueInput) codeUniqueInput.value = genererCodeUnique();
+    if (statutInput) statutInput.value = "PENDING";
 
-    if (agentNom && nom) agentNom.value = nom;
-    if (agentEmail && email) agentEmail.value = email;
+    if (expirationInput) {
+      const exp = new Date();
+      exp.setDate(exp.getDate() + 21);
+      expirationInput.value = exp.toISOString().split("T")[0];
+    }
   }
-
-  remplirAgent();
 
   function validerFormulaire() {
     const champs = [
@@ -97,7 +76,9 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function majBouton() {
-    btnTransferer.disabled = !validerFormulaire();
+    if (btnTransferer) {
+      btnTransferer.disabled = !validerFormulaire();
+    }
   }
 
   [
@@ -111,73 +92,44 @@ document.addEventListener("DOMContentLoaded", () => {
 
   majBouton();
 
-  btnTransferer.addEventListener("click", async () => {
-    if (!validerFormulaire()) {
-      alert("Veuillez remplir tous les champs obligatoires.");
-      return;
-    }
+  // ===================== BOUTON TRANSFERT EXPRESS (VERIF TIT) =====================
+  if (btnTransfertExpress) {
+    btnTransfertExpress.addEventListener("click", (e) => {
+      e.preventDefault();
 
-    const codeUnique = genererCodeUnique();
-    if (codeUniqueInput) codeUniqueInput.value = codeUnique;
-    if (statutInput) statutInput.value = "PENDING";
+      const titreUtilisateur =
+        userAccountTypeEl?.innerText.replace("Tit / Statut:", "").trim() || "";
 
-    const montant = parseFloat(montantInput.value);
-    const devise = deviseSelect.value;
-    const taux = await obtenirTauxDuJour();
-    const montantHTG = (devise === "USD" || devise === "EUR") ? montant * taux : montant;
-    const fraisHTG = Math.round(montantHTG * 0.08);
-    const totalHTG = montantHTG + fraisHTG;
-
-    const transfertData = {
-      agent: { nom_prenom: agentNom.value, email: agentEmail.value },
-      expediteur: {
-        nom_prenom: expNom.value,
-        document: expDocument.value,
-        pays: expPays.value,
-        ville: expVille.value,
-        adresse: expAdresse.value,
-        whatsapp: expWhatsapp.value
-      },
-      beneficiaire: {
-        nom_prenom: benNom.value,
-        pays: benPays.value,
-        ville: benVille.value,
-        adresse: benAdresse.value,
-        whatsapp: benWhatsapp.value
-      },
-      transfert: {
-        montant_original: montant,
-        devise_originale: devise,
-        taux_du_jour: taux,
-        montant_htg: montantHTG,
-        frais_htg: fraisHTG,
-        total_htg: totalHTG,
-        code_unique: codeUnique,
-        statut: "PENDING",
-        expiration: new Date(Date.now() + 21 * 24 * 60 * 60 * 1000)
+      // ⛔ BLOKAJ TOTAL SI PA OTORIZE
+      if (!titresAutorises.includes(titreUtilisateur)) {
+        alert("Ou pa gen otorizasyon pou antre nan espas sa");
+        return;
       }
-    };
 
-    try {
-      const response = await fetch("https://api.fondationbackupspirituel.com/api/transfert-express", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(transfertData)
-      });
+      // ✅ OTORIZE
+      if (loaderDiv) loaderDiv.style.display = "flex";
 
-      const result = await response.json();
+      setTimeout(() => {
+        if (loaderDiv) loaderDiv.style.display = "none";
 
-      if (response.ok) {
-        alert("Transfert enregistré avec succès ! Code unique: " + codeUnique);
-        document.querySelector("form")?.reset();
-        if (statutInput) statutInput.value = "PENDING";
-        majBouton();
-      } else {
-        alert("Erreur lors de l'enregistrement: " + result.message);
-      }
-    } catch (err) {
-      console.error(err);
-      alert("Erreur réseau ou serveur.");
-    }
-  });
+        // Stockage frontend seulement
+        sessionStorage.setItem(
+          "fobas_agent_nom",
+          userNameEl?.innerText.trim() || ""
+        );
+        sessionStorage.setItem(
+          "fobas_agent_email",
+          userEmailEl?.innerText.trim() || ""
+        );
+
+        alert("Acces Transfert Express FOBAS autorise avec succes");
+
+        window.location.href = "transfertexpresshaiti.html";
+      }, 800);
+    });
+  }
+
+  // ===================== INITIALISATION PAGE TRANSFERT =====================
+  remplirAgentDepuisSession();
+  initialiserDonneesSysteme();
 });
