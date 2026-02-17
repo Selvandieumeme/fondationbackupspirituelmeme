@@ -1,7 +1,62 @@
-// transfertexpresshaiti.js
+// -----------------------------
+// ACCES TRANSFERT EXPRESS FOBAS + INTEGRATION FORMULAIRE
+// -----------------------------
+document.addEventListener("DOMContentLoaded", () => {
+  // -----------------------------
+  // 1️⃣ Bouton Transfert Express FOBAS sou dashboard
+  // -----------------------------
+  const btnTransfertExpress = document.querySelector(
+    "button[onclick=\"window.location.href='transfertexpresshaiti.html'\"]"
+  );
+  if (!btnTransfertExpress) return;
+
+  // -----------------------------
+  // 2️⃣ Récupération info utilisateur
+  // -----------------------------
+  const userNameEl = document.getElementById("userName");
+  const userEmailEl = document.getElementById("userEmail");
+  const userAccountTypeEl = document.getElementById("userAccountType");
+
+  const titresAutorises = ["Agent Autorise", "FONDATEUR FOBAS"];
+
+  btnTransfertExpress.addEventListener("click", (e) => {
+    const titreUtilisateur = userAccountTypeEl?.innerText?.trim() || "";
+    const userNomPrenom = userNameEl?.innerText?.trim() || "";
+    const userEmail = userEmailEl?.innerText?.trim() || "";
+
+    if (titresAutorises.includes(titreUtilisateur)) {
+      // ✅ Acces autorise
+      alert("Acces Transfert Express FOBAS autorise avec succes");
+
+      // -----------------------------
+      // 3️⃣ Remplissage automatique formulaire
+      // -----------------------------
+      const agentNomInput = document.getElementById("agent_nom");
+      const agentEmailInput = document.getElementById("agent_email");
+      const codeUniqueInput = document.getElementById("code_unique");
+      const statutInput = document.getElementById("statut");
+
+      if (agentNomInput) agentNomInput.value = userNomPrenom;
+      if (agentEmailInput) agentEmailInput.value = userEmail;
+      if (codeUniqueInput) codeUniqueInput.value = genererCodeUnique(); // fonksyon deja nan JS
+      if (statutInput) statutInput.value = "PENDING";
+
+      // Dat ekspirasyon 21 jou
+      const expiration = new Date(Date.now() + 21 * 24 * 60 * 60 * 1000);
+      const expirationInput = document.getElementById("expiration");
+      if (expirationInput) expirationInput.value = expiration.toISOString().split("T")[0]; // YYYY-MM-DD
+      console.log("Date d'expiration du transfert:", expiration.toISOString());
+    } else {
+      // ❌ Aksè refize
+      e.preventDefault();
+      alert("Ou pa gen otorizasyon pou w antre nan espas sa");
+      btnTransfertExpress.disabled = true;
+    }
+  });
+});
 
 // -----------------------------
-// CONFIGURATION INITIALE
+// TRANSFERT EXPRESS FONCTIONS EXISTANTES
 // -----------------------------
 document.addEventListener("DOMContentLoaded", () => {
   // Récupération des éléments du DOM
@@ -45,15 +100,13 @@ document.addEventListener("DOMContentLoaded", () => {
   // FONCTION POUR OBTENIR TAUX DU JOUR
   // -----------------------------
   async function obtenirTauxDuJour() {
-    // Ici on peut remplacer par une API ou collection serveur
-    return 132; // Exemple USD -> HTG pour phase 1
+    return 132; // Exemple USD -> HTG
   }
 
   // -----------------------------
   // REMPLIR CHAN AGENT (SIMULATION)
   // -----------------------------
   function remplirAgent() {
-    // À remplacer par info session serveur réel
     agentNom.value = "Jean Pierre";
     agentEmail.value = "agent@fobas.com";
   }
@@ -77,7 +130,7 @@ document.addEventListener("DOMContentLoaded", () => {
       montantInput.value,
       deviseSelect.value
     ];
-    return champsObligatoires.every(champ => champ !== "");
+    return champsObligatoires.every((champ) => champ !== "");
   }
 
   // -----------------------------
@@ -88,12 +141,21 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   const inputsObligatoires = [
-    expNom, expDocument, expPays, expVille, expAdresse, expWhatsapp,
-    benNom, benVille, benAdresse, benWhatsapp,
-    montantInput, deviseSelect
+    expNom,
+    expDocument,
+    expPays,
+    expVille,
+    expAdresse,
+    expWhatsapp,
+    benNom,
+    benVille,
+    benAdresse,
+    benWhatsapp,
+    montantInput,
+    deviseSelect,
   ];
 
-  inputsObligatoires.forEach(input => {
+  inputsObligatoires.forEach((input) => {
     input.addEventListener("input", majBouton);
     input.addEventListener("change", majBouton);
   });
@@ -129,7 +191,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const transfertData = {
       agent: {
         nom_prenom: agentNom.value,
-        email: agentEmail.value
+        email: agentEmail.value,
       },
       expediteur: {
         nom_prenom: expNom.value,
@@ -137,14 +199,14 @@ document.addEventListener("DOMContentLoaded", () => {
         pays: expPays.value,
         ville: expVille.value,
         adresse: expAdresse.value,
-        whatsapp: expWhatsapp.value
+        whatsapp: expWhatsapp.value,
       },
       beneficiaire: {
         nom_prenom: benNom.value,
         pays: benPays.value,
         ville: benVille.value,
         adresse: benAdresse.value,
-        whatsapp: benWhatsapp.value
+        whatsapp: benWhatsapp.value,
       },
       transfert: {
         montant_original: montant,
@@ -155,8 +217,8 @@ document.addEventListener("DOMContentLoaded", () => {
         total_htg: totalHTG,
         code_unique: codeUnique,
         statut: "PENDING",
-        expiration: new Date(Date.now() + 21*24*60*60*1000) // 21 jours
-      }
+        expiration: new Date(Date.now() + 21 * 24 * 60 * 60 * 1000), // 21 jours
+      },
     };
 
     try {
@@ -166,9 +228,9 @@ document.addEventListener("DOMContentLoaded", () => {
       const response = await fetch("/api/transfert-express", {
         method: "POST",
         headers: {
-          "Content-Type": "application/json"
+          "Content-Type": "application/json",
         },
-        body: JSON.stringify(transfertData)
+        body: JSON.stringify(transfertData),
       });
 
       const result = await response.json();
