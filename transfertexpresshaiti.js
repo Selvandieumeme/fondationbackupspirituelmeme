@@ -1,5 +1,5 @@
 // -----------------------------
-// ACCES TRANSFERT EXPRESS FOBAS + INTEGRATION FORMULAIRE
+// ACCES TRANSFERT EXPRESS FOBAS + VERIFICATION + FORMULAIRE
 // -----------------------------
 document.addEventListener("DOMContentLoaded", () => {
   // -----------------------------
@@ -11,44 +11,102 @@ document.addEventListener("DOMContentLoaded", () => {
   if (!btnTransfertExpress) return;
 
   // -----------------------------
-  // 2️⃣ Récupération info utilisateur
+  // 2️⃣ Créer div loader/verif si li pa deja egziste
+  // -----------------------------
+  let loaderDiv = document.getElementById("transfertLoader");
+  if (!loaderDiv) {
+    loaderDiv = document.createElement("div");
+    loaderDiv.id = "transfertLoader";
+    loaderDiv.style.cssText = `
+      display: none;
+      position: absolute;
+      top: 100%;
+      left: 0;
+      margin-top: 5px;
+      padding: 5px 10px;
+      background: #f0f8ff;
+      border: 1px solid #004080;
+      border-radius: 5px;
+      font-size: 0.9em;
+      color: #004080;
+      white-space: nowrap;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    `;
+    loaderDiv.innerHTML = `
+      <span class="loader" style="
+        width: 12px;
+        height: 12px;
+        border: 2px solid #004080;
+        border-top: 2px solid transparent;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+      "></span>
+      <span>Utilisateur en cours de verification...</span>
+    `;
+    btnTransfertExpress.parentNode.style.position = "relative";
+    btnTransfertExpress.parentNode.appendChild(loaderDiv);
+
+    // Animation spinner
+    const style = document.createElement("style");
+    style.innerHTML = `
+      @keyframes spin {
+        0% { transform: rotate(0deg);}
+        100% { transform: rotate(360deg);}
+      }
+    `;
+    document.head.appendChild(style);
+  }
+
+  // -----------------------------
+  // 3️⃣ Récupération info utilisateur
   // -----------------------------
   const userNameEl = document.getElementById("userName");
   const userEmailEl = document.getElementById("userEmail");
   const userAccountTypeEl = document.getElementById("userAccountType");
-
   const titresAutorises = ["Agent Autorise", "FONDATEUR FOBAS"];
 
-  btnTransfertExpress.addEventListener("click", (e) => {
+  btnTransfertExpress.addEventListener("click", async (e) => {
+    e.preventDefault();
+    loaderDiv.style.display = "flex"; // montre loader
+
+    // Simuler petite attente verif (si gen API verification ou db)
+    await new Promise((resolve) => setTimeout(resolve, 800));
+
     const titreUtilisateur = userAccountTypeEl?.innerText?.trim() || "";
     const userNomPrenom = userNameEl?.innerText?.trim() || "";
     const userEmail = userEmailEl?.innerText?.trim() || "";
 
     if (titresAutorises.includes(titreUtilisateur)) {
       // ✅ Acces autorise
+      loaderDiv.style.display = "none";
       alert("Acces Transfert Express FOBAS autorise avec succes");
 
       // -----------------------------
-      // 3️⃣ Remplissage automatique formulaire
+      // Remplissage automatique formulaire si fòm deja chaje
       // -----------------------------
       const agentNomInput = document.getElementById("agent_nom");
       const agentEmailInput = document.getElementById("agent_email");
       const codeUniqueInput = document.getElementById("code_unique");
       const statutInput = document.getElementById("statut");
+      const expirationInput = document.getElementById("expiration");
 
       if (agentNomInput) agentNomInput.value = userNomPrenom;
       if (agentEmailInput) agentEmailInput.value = userEmail;
-      if (codeUniqueInput) codeUniqueInput.value = genererCodeUnique(); // fonksyon deja nan JS
+      if (codeUniqueInput) codeUniqueInput.value = genererCodeUnique();
       if (statutInput) statutInput.value = "PENDING";
 
       // Dat ekspirasyon 21 jou
       const expiration = new Date(Date.now() + 21 * 24 * 60 * 60 * 1000);
-      const expirationInput = document.getElementById("expiration");
-      if (expirationInput) expirationInput.value = expiration.toISOString().split("T")[0]; // YYYY-MM-DD
-      console.log("Date d'expiration du transfert:", expiration.toISOString());
+      if (expirationInput) expirationInput.value = expiration.toISOString().split("T")[0];
+
+      // Final: ouvri paj transfert la
+      window.location.href = "transfertexpresshaiti.html";
     } else {
-      // ❌ Aksè refize
-      e.preventDefault();
+      // ❌ Acces refize
+      loaderDiv.style.display = "none";
       alert("Ou pa gen otorizasyon pou w antre nan espas sa");
       btnTransfertExpress.disabled = true;
     }
@@ -62,25 +120,21 @@ document.addEventListener("DOMContentLoaded", () => {
   // Récupération des éléments du DOM
   const agentNom = document.getElementById("agent_nom");
   const agentEmail = document.getElementById("agent_email");
-
   const expNom = document.getElementById("exp_nom");
   const expDocument = document.getElementById("exp_document");
   const expPays = document.getElementById("exp_pays");
   const expVille = document.getElementById("exp_ville");
   const expAdresse = document.getElementById("exp_adresse");
   const expWhatsapp = document.getElementById("exp_whatsapp");
-
   const benNom = document.getElementById("ben_nom");
   const benPays = document.getElementById("ben_pays");
   const benVille = document.getElementById("ben_ville");
   const benAdresse = document.getElementById("ben_adresse");
   const benWhatsapp = document.getElementById("ben_whatsapp");
-
   const montantInput = document.getElementById("montant");
   const deviseSelect = document.getElementById("devise");
   const codeUniqueInput = document.getElementById("code_unique");
   const statutInput = document.getElementById("statut");
-
   const btnTransferer = document.getElementById("btn-transferer");
   const btnRetrait = document.getElementById("btn-retrait");
 
@@ -104,13 +158,19 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // -----------------------------
-  // REMPLIR CHAN AGENT (SIMULATION)
-  // -----------------------------
-  function remplirAgent() {
-    agentNom.value = "Jean Pierre";
-    agentEmail.value = "agent@fobas.com";
-  }
-  remplirAgent();
+// REMPLIR CHAN AGENT (DINAMIK)
+// -----------------------------
+function remplirAgent() {
+  // Sèvi ak done ki deja sou dashboard la
+  const userNameEl = document.getElementById("userName");
+  const userEmailEl = document.getElementById("userEmail");
+
+  if (agentNom && userNameEl) agentNom.value = userNameEl.innerText.trim();
+  if (agentEmail && userEmailEl) agentEmail.value = userEmailEl.innerText.trim();
+}
+
+// Lè paj la chaje, ranpli chan agent otomatikman
+remplirAgent();
 
   // -----------------------------
   // VALIDATION FORMULAIRE
@@ -128,7 +188,7 @@ document.addEventListener("DOMContentLoaded", () => {
       benAdresse.value.trim(),
       benWhatsapp.value.trim(),
       montantInput.value,
-      deviseSelect.value
+      deviseSelect.value,
     ];
     return champsObligatoires.every((champ) => champ !== "");
   }
@@ -170,24 +230,20 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    // Génération code unique
     const codeUnique = genererCodeUnique();
     codeUniqueInput.value = codeUnique;
 
-    // Calcul frais et montant HTG
     const montant = parseFloat(montantInput.value);
     const devise = deviseSelect.value;
     const taux = await obtenirTauxDuJour();
     let montantHTG = montant;
-
     if (devise === "USD" || devise === "EUR") {
       montantHTG = montant * taux;
     }
 
-    const fraisHTG = Math.round(montantHTG * 0.08); // 8% frais retrait
+    const fraisHTG = Math.round(montantHTG * 0.08);
     const totalHTG = montantHTG + fraisHTG;
 
-    // Préparer objet transfert
     const transfertData = {
       agent: {
         nom_prenom: agentNom.value,
@@ -217,19 +273,14 @@ document.addEventListener("DOMContentLoaded", () => {
         total_htg: totalHTG,
         code_unique: codeUnique,
         statut: "PENDING",
-        expiration: new Date(Date.now() + 21 * 24 * 60 * 60 * 1000), // 21 jours
+        expiration: new Date(Date.now() + 21 * 24 * 60 * 60 * 1000),
       },
     };
 
     try {
-      // -----------------------------
-      // APPEL AU SERVER (API)
-      // -----------------------------
       const response = await fetch("/api/transfert-express", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(transfertData),
       });
 
@@ -237,7 +288,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
       if (response.ok) {
         alert("Transfert enregistré avec succès ! Code unique: " + codeUnique);
-        // Reset formulaire sauf agent
         expNom.value = expDocument.value = expPays.value = "";
         expVille.value = expAdresse.value = expWhatsapp.value = "";
         benNom.value = benVille.value = benAdresse.value = benWhatsapp.value = "";
