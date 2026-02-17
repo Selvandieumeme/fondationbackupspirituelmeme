@@ -75,7 +75,7 @@
   <button id="btnTransfertExpress">
   Transfert Express FOBAS
 </button>
- <!-- Loader verification utilisateur -->
+
 <div id="transfertLoader" style="
   display:none;
   position:fixed;
@@ -91,6 +91,26 @@
   Vérification utilisateur en cours...
 </div>
 
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const btnTransfertExpress = document.getElementById("btnTransfertExpress");
+  const loaderDiv = document.getElementById("transfertLoader");
+
+  if (!btnTransfertExpress) return;
+
+  btnTransfertExpress.addEventListener("click", (e) => {
+    e.preventDefault();
+
+    if (loaderDiv) loaderDiv.style.display = "flex"; // montre loader
+
+    setTimeout(() => {
+      if (loaderDiv) loaderDiv.style.display = "none";
+      alert("Acces Transfert Express FOBAS autorise avec succes");
+      window.location.href = "transfertexpresshaiti.html";
+    }, 800); // loader 0.8s pou feedback
+  });
+});
+</script>
   
   <button onclick="logout()" style="background:#dc3545;">Déconnexion</button>
 </nav>
