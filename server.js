@@ -97,35 +97,21 @@ app.post("/api/verify-agent", async (req, res) => {
   try {
     const { email } = req.body;
 
-    if (!email) {
-      return res.json({
-        success: false,
-        message: "Email manquant"
-      });
-    }
+    if (!email) return res.json({ success: false, message: "Email manquant" });
 
-    const agent = await db.collection("walletbalances").findOne({
-      email: email.toLowerCase()
-    });
+    const agent = await db.collection("walletbalances").findOne({ email: email.toLowerCase() });
 
-    if (!agent) {
-      return res.json({
-        success: false,
-        message: "Agent non autorisé"
-      });
-    }
+    if (!agent) return res.json({ success: false, message: "Agent non autorisé" });
 
     return res.json({
       success: true,
-      agentName: agent.nom || agent.email
+      agentName: agent.nom || agent.email,
+      walletAccountType: agent.walletAccountType // ajoute tit itilizatè a
     });
 
   } catch (err) {
     console.error("VERIFY AGENT ERROR:", err);
-    return res.status(500).json({
-      success: false,
-      message: "Erreur serveur"
-    });
+    return res.status(500).json({ success: false, message: "Erreur serveur" });
   }
 });
 
