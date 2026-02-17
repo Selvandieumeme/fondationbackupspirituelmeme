@@ -1,8 +1,10 @@
-// ================= TRANSFERT EXPRESS - NOUVO SYSTEM =================
+// ================= TRANSFERT EXPRESS - FINAL KORIJE =================
 document.addEventListener("DOMContentLoaded", () => {
   const btnTransfertExpress = document.getElementById("btnTransfertExpress");
   const loaderDiv = document.getElementById("transfertLoader");
   const userAccountTypeEl = document.getElementById("userAccountType");
+  const userNameEl = document.getElementById("userName");
+  const userEmailEl = document.getElementById("userEmail");
 
   if (!btnTransfertExpress) return;
 
@@ -13,20 +15,26 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const titreUtilisateur = userAccountTypeEl?.innerText?.replace("Tit / Statut:", "").trim() || "";
 
+    // ⚠ Itilizatè pa otorize → montre sèlman alèt epi rete sou dashboard
     if (!titresAutorises.includes(titreUtilisateur)) {
-      // ⚠ Itilizatè pa otorize → sèlman montre alèt epi rete sou dashboard
       alert("Ou pa gen otorizasyon pou antre nan espas sa");
       return;
     }
 
-    // Si itilizatè otorize → montre loader, mesaj siksè, epi redirije
+    // Montre loader pou itilizatè ki otorize
     if (loaderDiv) loaderDiv.style.display = "flex";
 
     setTimeout(() => {
       if (loaderDiv) loaderDiv.style.display = "none";
+
+      // Sèlman itilizatè otorize ap resevwa mesaj siksè
       alert("Acces Transfert Express FOBAS autorise avec succes");
 
-      // Redirije sèlman
+      // Mete done itilizatè nan sessionStorage pou fòm la nan paj transfè a
+      sessionStorage.setItem("fobas_agent_nom", userNameEl?.innerText?.trim() || "");
+      sessionStorage.setItem("fobas_agent_email", userEmailEl?.innerText?.trim() || "");
+
+      // Redirije itilizatè nan paj transfè a
       window.location.href = "transfertexpresshaiti.html";
     }, 800);
   });
@@ -36,7 +44,6 @@ document.addEventListener("DOMContentLoaded", () => {
 // TRANSFERT EXPRESS FONCTIONS EXISTANTES
 // -----------------------------
 document.addEventListener("DOMContentLoaded", () => {
-
   const agentNom = document.getElementById("agent_nom");
   const agentEmail = document.getElementById("agent_email");
   const expNom = document.getElementById("exp_nom");
@@ -55,7 +62,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const codeUniqueInput = document.getElementById("code_unique");
   const statutInput = document.getElementById("statut");
   const btnTransferer = document.getElementById("btn-transferer");
-  const btnRetrait = document.getElementById("btn-retrait");
 
   function genererCodeUnique(length = 12) {
     const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
@@ -118,7 +124,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const devise = deviseSelect.value;
     const taux = await obtenirTauxDuJour();
     const montantHTG = (devise === "USD" || devise === "EUR") ? montant * taux : montant;
-
     const fraisHTG = Math.round(montantHTG * 0.08);
     const totalHTG = montantHTG + fraisHTG;
 
