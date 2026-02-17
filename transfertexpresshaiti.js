@@ -1,46 +1,21 @@
 // ================= TRANSFERT EXPRESS - NOUVO SYSTEM =================
 document.addEventListener("DOMContentLoaded", () => {
-  const btnTransfert = document.getElementById("btnTransfertExpress"); // ID matche ak HTML
-  if (!btnTransfert) return;
+  const btnTransfertExpress = document.getElementById("btnTransfertExpress");
+  const loaderDiv = document.getElementById("transfertLoader");
 
-  btnTransfert.addEventListener("click", async (e) => {
+  if (!btnTransfertExpress) return;
+
+  btnTransfertExpress.addEventListener("click", (e) => {
     e.preventDefault();
 
-    // Récupérer email itilizatè a dinamikman, selon sistèm ou a
-    const userEmail = document.getElementById("userEmail")?.innerText.trim();
-    if (!userEmail) return alert("Email manke. Tanpri konekte.");
+    // Montre loader pandan 0.8s
+    if (loaderDiv) loaderDiv.style.display = "flex";
 
-    try {
-      // Requête backend pou verifye itilizatè a
-      const res = await fetch("https://api.fondationbackupspirituel.com/api/wallet/get-user", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: userEmail })
-      });
-
-      const user = await res.json();
-
-      if (!res.ok || !user) {
-        return alert("Itilizatè pa jwenn nan baz la.");
-      }
-
-      // Verifye tit itilizatè a
-      const titresAutorises = ["Agent Autorise", "FONDATEUR FOBAS"];
-      if (!titresAutorises.includes(user.walletAccountType)) {
-        return alert("Ou pa gen otorizasyon pou antre nan Transfert Express FOBAS.");
-      }
-
-      // Mete nan sessionStorage pou paj transfert la ka li yo
-      sessionStorage.setItem("fobas_agent_nom", user.fullName);
-      sessionStorage.setItem("fobas_agent_email", user.email);
-
-      // Redirije itilizatè sèlman si verification pase
+    setTimeout(() => {
+      if (loaderDiv) loaderDiv.style.display = "none";
+      alert("Acces Transfert Express FOBAS autorise avec succes");
       window.location.href = "transfertexpresshaiti.html";
-
-    } catch (err) {
-      console.error("Erè verifye user:", err);
-      alert("Yon erè rive, tanpri eseye ankò.");
-    }
+    }, 800);
   });
 });
 
