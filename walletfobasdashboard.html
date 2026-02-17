@@ -71,9 +71,47 @@
 <button onclick="window.location.href='merchantloginfobas.html'">
   🔐 Connexion Commerçant FOBAS
 </button>
-<button onclick="window.location.href='transfertexpresshaiti.html'">
-  Transfert Express FOBAS
-</button>
+<div style="position: relative; display: inline-block;">
+  <button id="btnTransfertExpress" onclick="window.location.href='transfertexpresshaiti.html'">
+    Transfert Express FOBAS
+  </button>
+  <!-- Div loader/verifikasyon ajoute dinamikman -->
+  <div id="transfertLoader" style="
+        display: none;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        margin-top: 5px;
+        padding: 5px 10px;
+        background: #f0f8ff;
+        border: 1px solid #004080;
+        border-radius: 5px;
+        font-size: 0.9em;
+        color: #004080;
+        white-space: nowrap;
+        z-index: 100;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+      ">
+    <span class="loader" style="
+        width: 12px;
+        height: 12px;
+        border: 2px solid #004080;
+        border-top: 2px solid transparent;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    "></span>
+    <span>Utilisateur en cours de verification...</span>
+  </div>
+</div>
+
+<style>
+@keyframes spin {
+  0% { transform: rotate(0deg);}
+  100% { transform: rotate(360deg);}
+}
+</style>
 
   
   <button onclick="logout()" style="background:#dc3545;">Déconnexion</button>
