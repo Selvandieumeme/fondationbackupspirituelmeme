@@ -2,9 +2,6 @@
 document.addEventListener("DOMContentLoaded", () => {
   const btnTransfertExpress = document.getElementById("btnTransfertExpress");
   const loaderDiv = document.getElementById("transfertLoader");
-
-  const userNameEl = document.getElementById("userName");
-  const userEmailEl = document.getElementById("userEmail");
   const userAccountTypeEl = document.getElementById("userAccountType");
 
   if (!btnTransfertExpress) return;
@@ -15,37 +12,21 @@ document.addEventListener("DOMContentLoaded", () => {
     e.preventDefault();
 
     const titreUtilisateur = userAccountTypeEl?.innerText?.replace("Tit / Statut:", "").trim() || "";
-    const userNomPrenom = userNameEl?.innerText?.trim() || "";
-    const userEmail = userEmailEl?.innerText?.trim() || "";
 
     if (!titresAutorises.includes(titreUtilisateur)) {
+      // ⚠ Itilizatè pa otorize → sèlman montre alèt epi rete sou dashboard
       alert("Ou pa gen otorizasyon pou antre nan espas sa");
-      return; // bloke itilizatè a
+      return;
     }
 
-    // Montre loader
+    // Si itilizatè otorize → montre loader, mesaj siksè, epi redirije
     if (loaderDiv) loaderDiv.style.display = "flex";
 
     setTimeout(() => {
       if (loaderDiv) loaderDiv.style.display = "none";
       alert("Acces Transfert Express FOBAS autorise avec succes");
 
-      // Ranpli fòm input pou transfertexpresshaiti.html
-      const agentNomInput = document.getElementById("agent_nom");
-      const agentEmailInput = document.getElementById("agent_email");
-      const codeUniqueInput = document.getElementById("code_unique");
-      const statutInput = document.getElementById("statut");
-      const expirationInput = document.getElementById("expiration");
-
-      if (agentNomInput) agentNomInput.value = userNomPrenom;
-      if (agentEmailInput) agentEmailInput.value = userEmail;
-      if (codeUniqueInput && typeof genererCodeUnique === "function") codeUniqueInput.value = genererCodeUnique();
-      if (statutInput) statutInput.value = "PENDING";
-
-      const expiration = new Date(Date.now() + 21 * 24 * 60 * 60 * 1000);
-      if (expirationInput) expirationInput.value = expiration.toISOString().split("T")[0];
-
-      // Redirije itilizatè a
+      // Redirije sèlman
       window.location.href = "transfertexpresshaiti.html";
     }, 800);
   });
