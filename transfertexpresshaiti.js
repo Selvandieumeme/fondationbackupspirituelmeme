@@ -11,7 +11,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     try {
       // Requete backend pou verifye user nan walletbalances
-      const res = await fetch("/api/wallet/get-user", {
+      const res = await fetch("https://api.fondationbackupspirituel.com/api/wallet/get-user", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: userEmail })
