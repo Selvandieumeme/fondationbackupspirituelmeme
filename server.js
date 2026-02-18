@@ -1218,10 +1218,7 @@ app.post("/api/transferts", async (req, res) => {
 
     const wallet = await walletCol.findOne({ email: data.agentEmail });
     if (!wallet) {
-      return res.status(400).json({
-        success: false,
-        message: "Wallet agent pa jwenn"
-      });
+      return res.status(400).json({ success: false, message: "Wallet agent pa jwenn" });
     }
 
     if (wallet.balance < montant) {
@@ -1231,64 +1228,54 @@ app.post("/api/transferts", async (req, res) => {
       });
     }
 
-    // ===== Debi balans agent avan kreye dokiman transfè =====
-    const debitResult = await walletCol.updateOne(
-      { email: data.agentEmail, balance: { $gte: montant } },
-      { $inc: { balance: -montant } }
-    );
-
-    if (debitResult.modifiedCount === 0) {
-      return res.status(400).json({
-        success: false,
-        message: "Debi échoué: ou pa gen ase fon oswa wallet pa jwenn"
-      });
-    }
-
-    // ===== Kreye dokiman transfè avèk pi gwo prudence =====
+    // ===== Generate unique code on server =====
     const crypto = require("crypto");
-    let codeUnique = "FOBAS-" + crypto.randomBytes(6).toString("hex").toUpperCase();
-
-    const transfertDoc = new Transfert({
-      agentNom: data.agentNom || "",
-      agentEmail: data.agentEmail || "",
-
-      expediteurNom: data.expediteur?.nom || "",
-      expediteurDocumentType: data.expediteur?.documentType || "",
-      expediteurDocumentNumero: data.expediteur?.document || "",
-      expediteurPays: data.expediteur?.pays || "",
-      expediteurVille: data.expediteur?.ville || "",
-      expediteurAdresse: data.expediteur?.adresse || "",
-      expediteurTelephone: data.expediteur?.whatsapp || "",
-
-      beneficiaireNom: data.beneficiaire?.nom || "",
-      beneficiairePays: data.beneficiaire?.pays || "",
-      beneficiaireVille: data.beneficiaire?.ville || "",
-      beneficiaireAdresse: data.beneficiaire?.adresse || "",
-      beneficiaireTelephone: data.beneficiaire?.whatsapp || "",
-
-      montant,
-      devise: data.devise || "",
-      codeUnique,
-      statut: "PENDING",
-      dateCreation,
-      dateExpiration,
-      source: "TRANSFERER",
-      createdAt: dateCreation
-    });
-
-    // ===== Retry loop pou codeUnique si gen duplicate key (très rare) =====
-    let saved = false;
+    let codeUnique;
     let attempts = 0;
-    while (!saved && attempts < 3) {
+    let transfertDoc;
+    let saved = false;
+
+    while (!saved && attempts < 5) { // retry max 5 fwa pou unique code
       try {
+        codeUnique = "FOBAS-" + crypto.randomBytes(6).toString("hex").toUpperCase();
+
+        // ===== Kreye dokiman transfè (pa sove toujou) =====
+        transfertDoc = new Transfert({
+          agentNom: data.agentNom || "",
+          agentEmail: data.agentEmail || "",
+
+          expediteurNom: data.expediteur?.nom || "",
+          expediteurDocumentType: data.expediteur?.documentType || "",
+          expediteurDocumentNumero: data.expediteur?.document || "",
+          expediteurPays: data.expediteur?.pays || "",
+          expediteurVille: data.expediteur?.ville || "",
+          expediteurAdresse: data.expediteur?.adresse || "",
+          expediteurTelephone: data.expediteur?.whatsapp || "",
+
+          beneficiaireNom: data.beneficiaire?.nom || "",
+          beneficiairePays: data.beneficiaire?.pays || "",
+          beneficiaireVille: data.beneficiaire?.ville || "",
+          beneficiaireAdresse: data.beneficiaire?.adresse || "",
+          beneficiaireTelephone: data.beneficiaire?.whatsapp || "",
+
+          montant,
+          devise: data.devise || "",
+          codeUnique,
+          statut: "PENDING",
+          dateCreation,
+          dateExpiration,
+          source: "TRANSFERER",
+          createdAt: dateCreation
+        });
+
+        // ===== Eseye sove dokiman transfè a =====
         await transfertDoc.save();
         saved = true;
+
       } catch (err) {
         if (err.code === 11000 && err.keyPattern?.codeUnique) {
-          // Regenerer codeUnique sou server
-          transfertDoc.codeUnique =
-            "FOBAS-" + crypto.randomBytes(6).toString("hex").toUpperCase();
           attempts++;
+          console.warn("Duplicate codeUnique detected, retrying...", attempts);
         } else {
           throw err;
         }
@@ -1296,14 +1283,30 @@ app.post("/api/transferts", async (req, res) => {
     }
 
     if (!saved) {
-      // Si li pa mache apre 3 eseye
-      // Retounen siksè a, men avè avètisman pou admin
       console.error("Impossible de générer un code unique pou transfè");
       return res.status(500).json({
         success: false,
         message: "Erreur serveur: pwoblèm codeUnique"
       });
     }
+
+    // ===== Debite balans agent apre kreye dokiman transfè =====
+    const debitResult = await walletCol.updateOne(
+      { email: data.agentEmail, balance: { $gte: montant } },
+      { $inc: { balance: -montant } }
+    );
+
+    if (debitResult.modifiedCount === 0) {
+      console.error("Debi échoué pou agent:", data.agentEmail);
+      return res.status(400).json({
+        success: false,
+        message: "Debi échoué: ou pa gen ase fon oswa wallet pa jwenn"
+      });
+    }
+
+    // ===== Log klè pou debug =====
+    console.log("Transfert créé:", transfertDoc.codeUnique);
+    console.log("Agent email:", data.agentEmail, "Montant:", montant, "Wallet avant debi:", wallet.balance);
 
     // ===== Repons siksè =====
     return res.status(200).json({
@@ -1317,7 +1320,6 @@ app.post("/api/transferts", async (req, res) => {
     return res.status(500).json({ success: false, message: "Erreur serveur" });
   }
 });
-
 
 
 
