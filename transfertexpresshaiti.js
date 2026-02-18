@@ -165,3 +165,106 @@ function initialiserDonneesSysteme() {
   remplirAgentDepuisSession();
   initialiserDonneesSysteme();
 });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// ===================== TRANSFERER SAFE FRONTEND (ISOLÉ) =====================
+// ⚠️ CE BLOC NE TOUCHE A AUCUN CODE EXISTANT
+// ⚠️ IL SE CONTENTE D'ECOUTER LE BOUTON "TRANSFERER"
+// ⚠️ COMPATIBLE AVEC /api/transferer-safe (server.js)
+// ===========================================================================
+
+(function () {
+  const btnTransferer = document.getElementById("btn-transferer");
+  if (!btnTransferer) return;
+
+  btnTransferer.addEventListener("click", async function (e) {
+    e.preventDefault();
+
+    try {
+      // ===================== RECUPERATION DONNEES FORMULAIRE =====================
+      const data = {
+        agentNom: document.getElementById("agent_nom")?.value || "",
+        agentEmail: document.getElementById("agent_email")?.value || "",
+
+        expediteur: {
+          nom: document.getElementById("exp_nom")?.value || "",
+          document: document.getElementById("exp_document")?.value || "",
+          pays: document.getElementById("exp_pays")?.value || "",
+          ville: document.getElementById("exp_ville")?.value || "",
+          adresse: document.getElementById("exp_adresse")?.value || "",
+          whatsapp: document.getElementById("exp_whatsapp")?.value || ""
+        },
+
+        beneficiaire: {
+          nom: document.getElementById("ben_nom")?.value || "",
+          pays: document.getElementById("ben_pays")?.value || "",
+          ville: document.getElementById("ben_ville")?.value || "",
+          adresse: document.getElementById("ben_adresse")?.value || "",
+          whatsapp: document.getElementById("ben_whatsapp")?.value || ""
+        },
+
+        montant: Number(document.getElementById("montant")?.value || 0),
+        devise: document.getElementById("devise")?.value || "",
+
+        codeUnique: document.getElementById("code_unique")?.value || "",
+        statut: document.getElementById("statut")?.value || "PENDING"
+      };
+
+      // ===================== VALIDATION MINIMALE =====================
+      if (!data.agentEmail || !data.montant || data.montant <= 0) {
+        alert("Données invalides ou montant incorrect");
+        return;
+      }
+
+      // ===================== APPEL API SECURISE =====================
+      btnTransferer.disabled = true;
+      btnTransferer.innerText = "TRAITEMENT...";
+
+      const response = await fetch("/api/transferer-safe", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(data)
+      });
+
+      const result = await response.json();
+
+      // ===================== RESULTAT =====================
+      if (!response.ok || !result.success) {
+        throw new Error(result.message || "Erreur transfert");
+      }
+
+      alert("✅ Transfert effectué avec succès");
+
+      // RESET FORMULAIRE (SANS TOUCHER AU RESTE)
+      document.querySelectorAll("input, select").forEach(el => {
+        if (!el.hasAttribute("readonly")) el.value = "";
+      });
+
+      btnTransferer.disabled = false;
+      btnTransferer.innerText = "TRANSFERER";
+
+    } catch (err) {
+      console.error("TRANSFERER FRONTEND ERROR:", err);
+      alert(err.message || "Erreur lors du transfert");
+
+      btnTransferer.disabled = false;
+      btnTransferer.innerText = "TRANSFERER";
+    }
+  });
+})();
