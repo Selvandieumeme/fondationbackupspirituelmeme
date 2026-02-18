@@ -1183,7 +1183,7 @@ const transfertSchema = new mongoose.Schema({
 
   montant: { type: Number, required: true, min: 0 },
   devise: { type: String, default: "" },
-  codeUnique: { type: String, required: true, unique: true },
+  codeUnique: { type: String, required: true, unique: true }, // code soti frontend
   statut: { type: String, default: "PENDING" },
 
   dateCreation: { type: Date, default: Date.now },
@@ -1193,7 +1193,6 @@ const transfertSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now }
 });
 
-// ⚠️ Model refere koleksyon deja egziste
 const Transfert = mongoose.model("Transfert", transfertSchema, "transferts");
 
 // ==================== ROUTE SAFE TRANSFERER ====================
@@ -1203,8 +1202,8 @@ app.post("/api/transferts", async (req, res) => {
     const montant = Number(data.montant);
 
     // ===== Validation minimòm =====
-    if (!data || !data.agentEmail || !montant || montant <= 0) {
-      return res.status(400).json({ success: false, message: "Données invalides" });
+    if (!data || !data.agentEmail || !montant || montant <= 0 || !data.codeUnique) {
+      return res.status(400).json({ success: false, message: "Données invalides ou codeUnique manke" });
     }
 
     // ===== Dates =====
@@ -1220,93 +1219,60 @@ app.post("/api/transferts", async (req, res) => {
     if (!wallet) {
       return res.status(400).json({ success: false, message: "Wallet agent pa jwenn" });
     }
-
     if (wallet.balance < montant) {
-      return res.status(400).json({
-        success: false,
-        message: "Ou pa gen ase fon pou fe transfert sa, ale rechaje compte FOBAS ou"
-      });
+      return res.status(400).json({ success: false, message: "Ou pa gen ase fon pou fe transfert sa" });
     }
 
-    // ===== Generate unique code on server =====
-    const crypto = require("crypto");
-    let codeUnique;
-    let attempts = 0;
-    let transfertDoc;
-    let saved = false;
-
-    while (!saved && attempts < 5) { // retry max 5 fwa pou unique code
-      try {
-        codeUnique = "FOBAS-" + crypto.randomBytes(6).toString("hex").toUpperCase();
-
-        // ===== Kreye dokiman transfè (pa sove toujou) =====
-        transfertDoc = new Transfert({
-          agentNom: data.agentNom || "",
-          agentEmail: data.agentEmail || "",
-
-          expediteurNom: data.expediteur?.nom || "",
-          expediteurDocumentType: data.expediteur?.documentType || "",
-          expediteurDocumentNumero: data.expediteur?.document || "",
-          expediteurPays: data.expediteur?.pays || "",
-          expediteurVille: data.expediteur?.ville || "",
-          expediteurAdresse: data.expediteur?.adresse || "",
-          expediteurTelephone: data.expediteur?.whatsapp || "",
-
-          beneficiaireNom: data.beneficiaire?.nom || "",
-          beneficiairePays: data.beneficiaire?.pays || "",
-          beneficiaireVille: data.beneficiaire?.ville || "",
-          beneficiaireAdresse: data.beneficiaire?.adresse || "",
-          beneficiaireTelephone: data.beneficiaire?.whatsapp || "",
-
-          montant,
-          devise: data.devise || "",
-          codeUnique,
-          statut: "PENDING",
-          dateCreation,
-          dateExpiration,
-          source: "TRANSFERER",
-          createdAt: dateCreation
-        });
-
-        // ===== Eseye sove dokiman transfè a =====
-        await transfertDoc.save();
-        saved = true;
-
-      } catch (err) {
-        if (err.code === 11000 && err.keyPattern?.codeUnique) {
-          attempts++;
-          console.warn("Duplicate codeUnique detected, retrying...", attempts);
-        } else {
-          throw err;
-        }
-      }
-    }
-
-    if (!saved) {
-      console.error("Impossible de générer un code unique pou transfè");
-      return res.status(500).json({
-        success: false,
-        message: "Erreur serveur: pwoblèm codeUnique"
-      });
-    }
-
-    // ===== Debite balans agent apre kreye dokiman transfè =====
+    // ===== Debi balans agent =====
     const debitResult = await walletCol.updateOne(
       { email: data.agentEmail, balance: { $gte: montant } },
       { $inc: { balance: -montant } }
     );
-
     if (debitResult.modifiedCount === 0) {
-      console.error("Debi échoué pou agent:", data.agentEmail);
-      return res.status(400).json({
-        success: false,
-        message: "Debi échoué: ou pa gen ase fon oswa wallet pa jwenn"
-      });
+      return res.status(400).json({ success: false, message: "Debi échoué: ou pa gen ase fon oswa wallet pa jwenn" });
     }
 
-    // ===== Log klè pou debug =====
-    console.log("Transfert créé:", transfertDoc.codeUnique);
-    console.log("Agent email:", data.agentEmail, "Montant:", montant, "Wallet avant debi:", wallet.balance);
+    // ===== Kreye dokiman transfè avèk codeUnique soti frontend =====
+    const transfertDoc = new Transfert({
+      agentNom: data.agentNom || "",
+      agentEmail: data.agentEmail || "",
+      expediteurNom: data.expediteur?.nom || "",
+      expediteurDocumentType: data.expediteur?.documentType || "",
+      expediteurDocumentNumero: data.expediteur?.document || "",
+      expediteurPays: data.expediteur?.pays || "",
+      expediteurVille: data.expediteur?.ville || "",
+      expediteurAdresse: data.expediteur?.adresse || "",
+      expediteurTelephone: data.expediteur?.whatsapp || "",
+      beneficiaireNom: data.beneficiaire?.nom || "",
+      beneficiairePays: data.beneficiaire?.pays || "",
+      beneficiaireVille: data.beneficiaire?.ville || "",
+      beneficiaireAdresse: data.beneficiaire?.adresse || "",
+      beneficiaireTelephone: data.beneficiaire?.whatsapp || "",
+      montant,
+      devise: data.devise || "",
+      codeUnique: data.codeUnique,
+      statut: "PENDING",
+      dateCreation,
+      dateExpiration,
+      source: "TRANSFERER",
+      createdAt: dateCreation
+    });
+
+    // ===== Save dokiman, si doublon kòd front-end rive (ra) =====
+    try {
+      await transfertDoc.save();
+    } catch (err) {
+      if (err.code === 11000 && err.keyPattern?.codeUnique) {
+        // Retounen erè klè pou frontend refè kòd
+        return res.status(400).json({
+          success: false,
+          message: "CodeUnique deja egziste. Tanpri refè kòd la sou frontend."
+        });
+      } else {
+        console.error("TRANSFER SAFE ERROR:", err);
+        return res.status(500).json({ success: false, message: "Erreur serveur pandan sove transfè" });
+      }
+    }
 
     // ===== Repons siksè =====
     return res.status(200).json({
@@ -1320,7 +1286,6 @@ app.post("/api/transferts", async (req, res) => {
     return res.status(500).json({ success: false, message: "Erreur serveur" });
   }
 });
-
 
 
 
