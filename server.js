@@ -1242,10 +1242,6 @@ app.post("/api/transferts", async (req, res) => {
       createdAt: dateCreation
     });
 
-	
-
-
-
     // ===== Retry loop pou codeUnique si gen duplicate key =====
     let saved = false;
     let attempts = 0;
@@ -1286,7 +1282,6 @@ app.post("/api/transferts", async (req, res) => {
     return res.status(500).json({ success: false, message: "Erreur serveur" });
   }
 });
-
 
 
 
