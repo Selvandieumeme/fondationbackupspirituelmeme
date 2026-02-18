@@ -1150,6 +1150,15 @@ const Transaction = mongoose.model('transactions', transactionSchema);
 
 
 
+
+
+
+
+
+
+
+
+
 // ==================== MONGOOSE SCHEMA TRANSFERT SAFE ====================
 // ⚠️ Schema pou bouton "Transferer" - VALIDATION TIP DONE OFISYÈL
 // ⚠️ Pa manyen okenn route oswa dashboard ki egziste deja
@@ -1233,17 +1242,7 @@ app.post("/api/transferts", async (req, res) => {
       createdAt: dateCreation
     });
 
-	// ===== Verification wallet agent =====
-const db = client.db(process.env.DB_NAME);
-const walletCol = db.collection("walletbalances");
-
-const wallet = await walletCol.findOne({ email: data.agentEmail });
-if (!wallet || wallet.balance < montant) {
-  return res.status(400).json({
-    success: false,
-    message: "Ou pa gen ase fon pou fe transfert sa, ale rechaje compte FOBAS ou"
-  });
-}
+	
 
 
 
