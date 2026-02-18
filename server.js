@@ -1190,7 +1190,7 @@ const transfertSchema = new mongoose.Schema({
 const Transfert = mongoose.model("Transfert", transfertSchema, "transferts");
 
 // ==================== ROUTE SAFE TRANSFERER ====================
-app.post("/api/transferer-safe", async (req, res) => {
+app.post("/api/transferts", async (req, res) => {
   try {
     const data = req.body;
     const montant = Number(data.montant);
