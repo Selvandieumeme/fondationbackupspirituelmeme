@@ -117,86 +117,73 @@ app.post("/api/verify-agent", async (req, res) => {
 
 
 
-// ==================== TRANSFERT EXPRESS - SAFE FINAL BLOCK ====================
-// ⚠️ BLOK SA A IZOLE TOTALEMENT
-// ⚠️ LI PA MANYEN AUCUN KOD EXISTANT
-// ⚠️ PRE POUR PRODUCTION - TEST OK
+// ==================== TRANSFERT EXPRESS FOBAS - FINAL SAFE ====================
+// ⚠️ BLOC UNIQUE - IZOLE - SANS IMPACT SUR CODE EXISTANT
+// ⚠️ GERE : CREATION + EXPIRATION 21 JOURS + REMBOURSEMENT AUTO
+// ⚠️ PRE PRODUCTION - TEST SAFE
 // ============================================================================
 
+// ==================== 1️⃣ CREATION TRANSFERT (BOUTON TRANSFERER) ====================
 app.post('/api/transferer-safe', async (req, res) => {
   const session = client.startSession();
 
   try {
     const data = req.body;
-
-    if (!data || !data.agentEmail || !data.montant) {
-      return res.status(400).json({
-        success: false,
-        message: "Données invalides ou incomplètes"
-      });
-    }
-
     const montant = Number(data.montant);
-    if (isNaN(montant) || montant <= 0) {
-      return res.status(400).json({
-        success: false,
-        message: "Montant invalide"
-      });
+
+    if (!data || !data.agentEmail || !montant || montant <= 0) {
+      return res.status(400).json({ success: false, message: "Données invalides" });
     }
 
     const db = client.db(process.env.DB_NAME);
-
     const walletCol = db.collection('walletbalances');
     const transfertsCol = db.collection('transferts');
     const auditCol = db.collection('transferts_audit');
 
     await session.withTransaction(async () => {
 
-      // ===================== 1️⃣ VERIFICATION BALANCE AGENT =====================
-      const walletAgent = await walletCol.findOne(
+      // 🔐 VERIFICATION BALANCE AGENT
+      const wallet = await walletCol.findOne(
         { userEmail: data.agentEmail },
         { session }
       );
 
-      if (!walletAgent || typeof walletAgent.balance !== 'number') {
-        throw new Error("Compte agent introuvable");
-      }
-
-      if (walletAgent.balance < montant) {
+      if (!wallet || wallet.balance < montant) {
         throw new Error("FONDS_INSUFFISANTS");
       }
 
-      // ===================== 2️⃣ DEBIT BALANCE AGENT =====================
+      // 💰 DEBIT BALANCE
       await walletCol.updateOne(
         { userEmail: data.agentEmail },
         { $inc: { balance: -montant } },
         { session }
       );
 
-      // ===================== 3️⃣ CREATION TRANSFERT =====================
+      // 📆 DATES SYSTEME
+      const dateCreation = new Date();
+      const dateExpiration = new Date();
+      dateExpiration.setDate(dateExpiration.getDate() + 21);
+
+      // 📦 DOCUMENT TRANSFERT
       const transfertDoc = {
         ...data,
         montant,
         statut: "PENDING",
-        createdAt: new Date(),
-        system: "FOBAS",
-        source: "TRANSFERER_BUTTON"
+        dateCreation,
+        dateExpiration,
+        createdAt: dateCreation
       };
 
-      const transfertResult = await transfertsCol.insertOne(
-        transfertDoc,
-        { session }
-      );
+      const result = await transfertsCol.insertOne(transfertDoc, { session });
 
-      // ===================== 4️⃣ AUDIT LOG =====================
+      // 🧾 AUDIT
       await auditCol.insertOne({
-        transfertId: transfertResult.insertedId,
-        action: "CREATION_TRANSFERT",
+        transfertId: result.insertedId,
+        action: "CREATION",
         agentEmail: data.agentEmail,
         montant,
         statut: "PENDING",
-        auditDate: new Date(),
-        snapshot: transfertDoc
+        dateAudit: new Date()
       }, { session });
 
     });
@@ -205,29 +192,70 @@ app.post('/api/transferer-safe', async (req, res) => {
 
     return res.status(200).json({
       success: true,
-      message: "Transfert effectué avec succès (statut PENDING)"
+      message: "Transfert créé avec succès"
     });
 
-  } catch (error) {
+  } catch (err) {
     await session.abortTransaction();
     await session.endSession();
 
-    if (error.message === "FONDS_INSUFFISANTS") {
+    if (err.message === "FONDS_INSUFFISANTS") {
       return res.status(400).json({
         success: false,
         message: "Ou pa gen ase fon pou fe transfert sa, ale rechaje compte FOBAS ou"
       });
     }
 
-    console.error("TRANSFERER SAFE ERROR:", error);
-
-    return res.status(500).json({
-      success: false,
-      message: "Erreur serveur sans impact sur dashboard"
-    });
+    console.error("TRANSFER ERROR:", err);
+    return res.status(500).json({ success: false, message: "Erreur serveur" });
   }
 });
 
+// ==================== 2️⃣ CRON EXPIRATION 21 JOURS ====================
+// ⚠️ AUTO - PAS DE BOUTON - PAS DE FRONTEND
+setInterval(async () => {
+  try {
+    const db = client.db(process.env.DB_NAME);
+    const transfertsCol = db.collection('transferts');
+    const walletCol = db.collection('walletbalances');
+    const auditCol = db.collection('transferts_audit');
+
+    const now = new Date();
+
+    const expirés = await transfertsCol.find({
+      statut: "PENDING",
+      dateExpiration: { $lte: now }
+    }).toArray();
+
+    for (const t of expirés) {
+
+      // 🔁 REMBOURSEMENT AGENT
+      await walletCol.updateOne(
+        { userEmail: t.agentEmail },
+        { $inc: { balance: t.montant } }
+      );
+
+      // ❌ ANNULATION TRANSFERT
+      await transfertsCol.updateOne(
+        { _id: t._id },
+        { $set: { statut: "Transfert Annule", dateAnnulation: new Date() } }
+      );
+
+      // 🧾 AUDIT
+      await auditCol.insertOne({
+        transfertId: t._id,
+        action: "EXPIRATION_21_JOURS",
+        agentEmail: t.agentEmail,
+        montant: t.montant,
+        statut: "Transfert Annule",
+        dateAudit: new Date()
+      });
+    }
+
+  } catch (err) {
+    console.error("CRON EXPIRATION ERROR:", err);
+  }
+}, 1000 * 60 * 60); // ⏱️ toutes les 1 heure
 
 
 
