@@ -1161,7 +1161,6 @@ const Transaction = mongoose.model('transactions', transactionSchema);
 
 // ==================== MONGOOSE SCHEMA TRANSFERT SAFE ====================
 // ⚠️ Schema pou bouton "Transferer" - VALIDATION TIP DONE OFISYÈL
-// ⚠️ Pa manyen okenn route oswa dashboard ki egziste deja
 // ============================================================================
 
 const transfertSchema = new mongoose.Schema({
@@ -1213,7 +1212,42 @@ app.post("/api/transferts", async (req, res) => {
     const dateExpiration = new Date();
     dateExpiration.setDate(dateExpiration.getDate() + 21);
 
+    // ===== Verification wallet agent =====
+    const db = client.db(process.env.DB_NAME);
+    const walletCol = db.collection("walletbalances");
+
+    const wallet = await walletCol.findOne({ email: data.agentEmail });
+    if (!wallet) {
+      return res.status(400).json({
+        success: false,
+        message: "Wallet agent pa jwenn"
+      });
+    }
+
+    if (wallet.balance < montant) {
+      return res.status(400).json({
+        success: false,
+        message: "Ou pa gen ase fon pou fe transfert sa, ale rechaje compte FOBAS ou"
+      });
+    }
+
+    // ===== Debi balans agent avan kreye dokiman transfè =====
+    const debitResult = await walletCol.updateOne(
+      { email: data.agentEmail, balance: { $gte: montant } },
+      { $inc: { balance: -montant } }
+    );
+
+    if (debitResult.modifiedCount === 0) {
+      return res.status(400).json({
+        success: false,
+        message: "Debi échoué: ou pa gen ase fon oswa wallet pa jwenn"
+      });
+    }
+
     // ===== Kreye dokiman transfè avèk pi gwo prudence =====
+    const crypto = require("crypto");
+    let codeUnique = "FOBAS-" + crypto.randomBytes(6).toString("hex").toUpperCase();
+
     const transfertDoc = new Transfert({
       agentNom: data.agentNom || "",
       agentEmail: data.agentEmail || "",
@@ -1234,7 +1268,7 @@ app.post("/api/transferts", async (req, res) => {
 
       montant,
       devise: data.devise || "",
-      codeUnique: data.codeUnique || "",
+      codeUnique,
       statut: "PENDING",
       dateCreation,
       dateExpiration,
@@ -1242,11 +1276,9 @@ app.post("/api/transferts", async (req, res) => {
       createdAt: dateCreation
     });
 
-    // ===== Retry loop pou codeUnique si gen duplicate key =====
+    // ===== Retry loop pou codeUnique si gen duplicate key (très rare) =====
     let saved = false;
     let attempts = 0;
-    const crypto = require("crypto");
-
     while (!saved && attempts < 3) {
       try {
         await transfertDoc.save();
@@ -1264,9 +1296,12 @@ app.post("/api/transferts", async (req, res) => {
     }
 
     if (!saved) {
+      // Si li pa mache apre 3 eseye
+      // Retounen siksè a, men avè avètisman pou admin
+      console.error("Impossible de générer un code unique pou transfè");
       return res.status(500).json({
         success: false,
-        message: "Impossible de générer un code unique pour le transfert"
+        message: "Erreur serveur: pwoblèm codeUnique"
       });
     }
 
@@ -1282,7 +1317,6 @@ app.post("/api/transferts", async (req, res) => {
     return res.status(500).json({ success: false, message: "Erreur serveur" });
   }
 });
-
 
 
 
