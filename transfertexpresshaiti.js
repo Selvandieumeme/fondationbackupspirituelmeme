@@ -31,11 +31,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const montantInput = document.getElementById("montant");
   const deviseSelect = document.getElementById("devise");
 
-  const codeUniqueInput = document.getElementById("code_unique");
-  const statutInput = document.getElementById("statut");
-  const dateDuJourInput = document.getElementById("date_du_jour");
-  const expirationInput = document.getElementById("expiration");
-
   const btnTransferer = document.getElementById("btn-transferer");
 
   // ===================== OUTILS =====================
@@ -45,27 +40,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (agentNomInput) agentNomInput.value = nom;
     if (agentEmailInput) agentEmailInput.value = email;
-  }
-
-  function initialiserDonneesSysteme() {
-    const today = new Date();
-
-    // ===== Date du jour (FORMAT HTML5) =====
-    const todayISO = today.toISOString().split("T")[0];
-    if (dateDuJourInput) dateDuJourInput.value = todayISO;
-
-    // ===== Statut =====
-    if (statutInput) statutInput.value = "PENDING";
-
-    // ===== Date expiration +21 jours =====
-    if (expirationInput) {
-      const exp = new Date(today);
-      exp.setDate(exp.getDate() + 21);
-      expirationInput.value = exp.toISOString().split("T")[0];
-    }
-
-    // ❌ Pa mete codeUnique nan frontend, backend ap jere li
-    if (codeUniqueInput) codeUniqueInput.value = "";
   }
 
   function validerFormulaire() {
@@ -83,6 +57,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
+  // ===================== ECOUTEURS CHAMP =====================
   [
     expNom, expDocument, expPays, expVille, expAdresse, expWhatsapp,
     benNom, benVille, benAdresse, benWhatsapp,
@@ -133,7 +108,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // ===================== INITIALISATION PAGE TRANSFERT =====================
   remplirAgentDepuisSession();
-  initialiserDonneesSysteme();
+
+  // ✅ Pa mete `statut`, `dateDuJour`, ni `expiration`, backend ap jere yo
 });
 
 
@@ -174,9 +150,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const montantInput = document.getElementById("montant");
   const deviseSelect = document.getElementById("devise");
 
-  const statutInput = document.getElementById("statut");
-  const expirationInput = document.getElementById("expiration");
-
   const btnTransferer = document.getElementById("btn-transferer");
 
   // ===================== FONKSYON VALIDASYON =====================
@@ -196,6 +169,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
+  // ===================== ECOUTEURS CHAMP =====================
   [
     agentNomInput, agentEmailInput,
     expNom, expDocument, expPays, expVille, expAdresse, expWhatsapp,
@@ -225,29 +199,23 @@ document.addEventListener("DOMContentLoaded", () => {
         agentNom: agentNomInput.value.trim(),
         agentEmail: agentEmailInput.value.trim(),
 
-        expediteur: {
-          nom: expNom.value.trim(),
-          documentType: "", // si ou bezwen, ou ka ranpli
-          document: expDocument.value.trim(),
-          pays: expPays.value.trim(),
-          ville: expVille.value.trim(),
-          adresse: expAdresse.value.trim(),
-          whatsapp: expWhatsapp.value.trim()
-        },
+        expediteurNom: expNom.value.trim(),
+        expediteurDocumentType: "", // backend ka jere si bezwen
+        expediteurDocumentNumero: expDocument.value.trim(),
+        expediteurPays: expPays.value.trim(),
+        expediteurVille: expVille.value.trim(),
+        expediteurAdresse: expAdresse.value.trim(),
+        expediteurTelephone: expWhatsapp.value.trim(),
 
-        beneficiaire: {
-          nom: benNom.value.trim(),
-          pays: benPays.value.trim(),
-          ville: benVille.value.trim(),
-          adresse: benAdresse.value.trim(),
-          whatsapp: benWhatsapp.value.trim()
-        },
+        beneficiaireNom: benNom.value.trim(),
+        beneficiairePays: benPays.value.trim(),
+        beneficiaireVille: benVille.value.trim(),
+        beneficiaireAdresse: benAdresse.value.trim(),
+        beneficiaireTelephone: benWhatsapp.value.trim(),
 
         montant: Number(montantInput.value),
-        devise: deviseSelect.value.trim(),
-
-        statut: statutInput?.value || "PENDING",
-        dateExpiration: expirationInput?.value ? new Date(expirationInput.value) : undefined
+        devise: deviseSelect.value.trim()
+        // ❌ Pa voye statut, dateExpiration, ni codeUnique
       };
 
       try {
@@ -263,7 +231,7 @@ document.addEventListener("DOMContentLoaded", () => {
           throw new Error(result.message || "Erreur transfert");
         }
 
-        alert("✅ Transfert effectué avec succès. CodeUnique ap jenere otomatikman nan backend.");
+        alert("✅ Transfert effectué avec succès. CodeUnique ak dat ap jenere otomatikman nan backend.");
 
         // Reset fòm
         document.querySelectorAll("input, select").forEach(el => {
