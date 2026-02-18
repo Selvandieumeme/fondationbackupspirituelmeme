@@ -1151,62 +1151,7 @@ const Transaction = mongoose.model('transactions', transactionSchema);
 
 
 
-// ============================
-// TRANSFERT EXPRESS HAITI (SAFE & DASHBOARD SAFE)
-// ============================
 
-{
-  // ================= AGENT =================
-  agentId: String,
-  agentNom: String,
-  agentEmail: String,
-
-  // ================= EXPÉDITEUR =================
-  expediteurNom: String,
-  expediteurDocumentType: String,
-  expediteurDocumentNumero: String,
-  expediteurPays: String,
-  expediteurVille: String,
-  expediteurAdresse: String,
-  expediteurTelephone: String,
-
-  // ================= BÉNÉFICIAIRE =================
-  beneficiaireNom: String,
-  beneficiairePays: String,
-  beneficiaireVille: String,
-  beneficiaireAdresse: String,
-  beneficiaireTelephone: String,
-
-  // ================= TRANSFERT =================
-  montant: Number,
-  devise: String,
-  codeUnique: String,
-
-  statut: {
-    type: String,
-    default: "PENDING"
-  },
-
-  // ================= DATES =================
-  dateCreation: {
-    type: Date,
-    required: true
-  },
-  dateExpiration: {
-    type: Date,
-    required: true
-  },
-
-  source: {
-    type: String,
-    default: "TRANSFERER"
-  },
-
-  createdAt: {
-    type: Date,
-    default: Date.now
-  }
-}
 
 
 
