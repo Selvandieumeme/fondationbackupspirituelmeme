@@ -217,10 +217,9 @@ function initialiserDonneesSysteme() {
         },
 
         montant: Number(document.getElementById("montant")?.value || 0),
-        devise: document.getElementById("devise")?.value || "",
+        devise: document.getElementById("devise")?.value || ""
 
-        codeUnique: document.getElementById("code_unique")?.value || "",
-        statut: document.getElementById("statut")?.value || "PENDING"
+        // ❌ Pa voye codeUnique frontend, backend ap jenere li otomatikman
       };
 
       // ===================== VALIDATION MINIMALE =====================
@@ -245,7 +244,8 @@ function initialiserDonneesSysteme() {
         throw new Error(result.message || "Erreur transfert");
       }
 
-      alert("✅ Transfert effectué avec succès");
+      // ✅ Afichaj kòd inik ki sòti backend
+      alert(`✅ Transfert effectué avec succès. Code unique: ${result.codeUnique}`);
 
       // ===================== RESET FORMULAIRE (IZOLE) =====================
       document.querySelectorAll("input, select").forEach(el => {
