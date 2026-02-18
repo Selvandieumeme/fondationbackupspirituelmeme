@@ -1150,10 +1150,12 @@ const Transaction = mongoose.model('transactions', transactionSchema);
 
 
 
-// ==================== MONGOOSE SCHEMA TRANSFERT SAFE ====================
-// ⚠️ Schema pou bouton "Transferer" - VALIDATION TIP DONE OFISYÈL
-// ⚠️ Pa manyen okenn route oswa dashboard ki egziste deja
+// ==================== TRANSFERT EXPRESS SERVER FINAL SAFE ====================
+// ⚠️ BLOC TOTALMAN IZOLE
+// ⚠️ PA MANYEN AUCUNE AUTRE ROUTE / DASHBOARD
 // ============================================================================
+
+// ⛔ crypto & mongoose DEJA DECLARES EN HAUT DU SERVER.JS
 
 // ==================== SCHEMA TRANSFERT ====================
 const transfertSchema = new mongoose.Schema({
@@ -1176,6 +1178,7 @@ const transfertSchema = new mongoose.Schema({
 
   montant: { type: Number, required: true, min: 0 },
   devise: { type: String, default: "" },
+
   codeUnique: { type: String, required: true, unique: true },
   statut: { type: String, default: "PENDING" },
 
@@ -1186,48 +1189,44 @@ const transfertSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now }
 });
 
-// ⚠️ Model refere koleksyon deja egziste
+// ⚠️ Model lié à la collection EXISTANTE
 const Transfert = mongoose.model("Transfert", transfertSchema, "transferts");
 
-// ==================== ROUTE SAFE TRANSFERER ====================
+// ==================== ROUTE TRANSFERER SAFE ====================
 app.post("/api/transferts", async (req, res) => {
   try {
-    const data = req.body;
+    const data = req.body || {};
     const montant = Number(data.montant);
 
-    if (!data || !data.agentEmail || !montant || montant <= 0) {
+    if (!data.agentEmail || !montant || montant <= 0) {
       return res.status(400).json({ success: false, message: "Données invalides" });
     }
+
+    // 🔐 Code unique avec autorité server
+    const safeCodeUnique =
+      typeof data.codeUnique === "string" && data.codeUnique.trim() !== ""
+        ? data.codeUnique.trim()
+        : "FOBAS-" + crypto.randomBytes(6).toString("hex").toUpperCase();
+
+    const dateCreation = new Date();
+    const dateExpiration = new Date();
+    dateExpiration.setDate(dateExpiration.getDate() + 21);
 
     const db = client.db(process.env.DB_NAME);
     const walletCol = db.collection("walletbalances");
     const auditCol = db.collection("transferts_audit");
 
-    // 🔐 Verification balance agent
     const wallet = await walletCol.findOne({ userEmail: data.agentEmail });
     if (!wallet || wallet.balance < montant) {
       return res.status(400).json({
         success: false,
-        message: "Ou pa gen ase fon pou fe transfert sa, ale rechaje compte FOBAS ou"
+        message: "Ou pa gen ase fon pou fe transfert sa"
       });
     }
 
-    // 💰 Debite balance agent
-    await walletCol.updateOne(
-      { userEmail: data.agentEmail },
-      { $inc: { balance: -montant } }
-    );
-
-    // 📆 Dates
-    const dateCreation = new Date();
-    const dateExpiration = new Date();
-    dateExpiration.setDate(dateExpiration.getDate() + 21);
-
-    // 📦 Kreye dokiman transfert
     const transfertDoc = new Transfert({
       agentNom: data.agentNom || "",
       agentEmail: data.agentEmail || "",
-
       expediteurNom: data.expediteur?.nom || "",
       expediteurDocumentType: data.expediteur?.documentType || "",
       expediteurDocumentNumero: data.expediteur?.document || "",
@@ -1235,16 +1234,14 @@ app.post("/api/transferts", async (req, res) => {
       expediteurVille: data.expediteur?.ville || "",
       expediteurAdresse: data.expediteur?.adresse || "",
       expediteurTelephone: data.expediteur?.whatsapp || "",
-
       beneficiaireNom: data.beneficiaire?.nom || "",
       beneficiairePays: data.beneficiaire?.pays || "",
       beneficiaireVille: data.beneficiaire?.ville || "",
       beneficiaireAdresse: data.beneficiaire?.adresse || "",
       beneficiaireTelephone: data.beneficiaire?.whatsapp || "",
-
       montant,
       devise: data.devise || "",
-      codeUnique: data.codeUnique || "",
+      codeUnique: safeCodeUnique,
       statut: "PENDING",
       dateCreation,
       dateExpiration,
@@ -1254,7 +1251,11 @@ app.post("/api/transferts", async (req, res) => {
 
     await transfertDoc.save();
 
-    // 🧾 Insert audit
+    await walletCol.updateOne(
+      { userEmail: data.agentEmail },
+      { $inc: { balance: -montant } }
+    );
+
     await auditCol.insertOne({
       transfertId: transfertDoc._id,
       action: "CREATION",
@@ -1270,7 +1271,7 @@ app.post("/api/transferts", async (req, res) => {
     });
 
   } catch (err) {
-    console.error("TRANSFER SAFE ERROR:", err);
+    console.error("TRANSFERER SERVER ERROR:", err);
     return res.status(500).json({ success: false, message: "Erreur serveur" });
   }
 });
