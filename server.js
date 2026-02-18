@@ -1183,7 +1183,7 @@ const transfertSchema = new mongoose.Schema({
 
   montant: { type: Number, required: true, min: 0 },
   devise: { type: String, default: "" },
-  codeUnique: { type: String, required: true, unique: true }, // code soti frontend
+  codeUnique: { type: String, required: true }, // code soti frontend
   statut: { type: String, default: "PENDING" },
 
   dateCreation: { type: Date, default: Date.now },
