@@ -1159,51 +1159,66 @@ const Transaction = mongoose.model('transactions', transactionSchema);
 
 
 
-// ==================== MONGOOSE SCHEMA TRANSFERT SAFE ====================
-// ⚠️ Schema pou bouton "Transferer" - VALIDATION TIP DONE OFISYÈL
-// ============================================================================
+// ===== WALLET COLLECTION (example) =====
+const walletSchema = new mongoose.Schema({
+  email: { type: String, required: true },
+  balance: { type: Number, required: true, default: 0 }
+}, { timestamps: true });
 
-const transfertSchema = new mongoose.Schema({
+const Wallet = mongoose.model("Wallet", walletSchema, "walletbalances");
+
+// ===== TRANSFERT SCHEMA SAFE =====
+const TransfertSchema = new mongoose.Schema({
   agentNom: { type: String, required: true },
   agentEmail: { type: String, required: true },
 
-  expediteurNom: { type: String, default: "" },
-  expediteurDocumentType: { type: String, default: "" },
-  expediteurDocumentNumero: { type: String, default: "" },
-  expediteurPays: { type: String, default: "" },
-  expediteurVille: { type: String, default: "" },
-  expediteurAdresse: { type: String, default: "" },
-  expediteurTelephone: { type: String, default: "" },
+  expediteurNom: { type: String, required: true },
+  expediteurDocumentType: { type: String },
+  expediteurDocumentNumero: { type: String },
+  expediteurPays: { type: String, required: true },
+  expediteurVille: { type: String, required: true },
+  expediteurAdresse: { type: String, required: true },
+  expediteurTelephone: { type: String, required: true },
 
-  beneficiaireNom: { type: String, default: "" },
-  beneficiairePays: { type: String, default: "" },
-  beneficiaireVille: { type: String, default: "" },
-  beneficiaireAdresse: { type: String, default: "" },
-  beneficiaireTelephone: { type: String, default: "" },
+  beneficiaireNom: { type: String, required: true },
+  beneficiairePays: { type: String, required: true },
+  beneficiaireVille: { type: String, required: true },
+  beneficiaireAdresse: { type: String, required: true },
+  beneficiaireTelephone: { type: String, required: true },
 
-  montant: { type: Number, required: true, min: 0 },
-  devise: { type: String, default: "" },
-  codeUnique: { type: String, required: true }, // code soti frontend
+  montant: { type: Number, required: true },
+  devise: { type: String, required: true },
+
+  codeUnique: { 
+    type: String, 
+    required: true, 
+    default: function() {
+      // MongoDB ap jenere kòd inik otomatikman
+      return Math.random().toString(36).substring(2, 12).toUpperCase();
+    }
+  },
+
   statut: { type: String, default: "PENDING" },
-
   dateCreation: { type: Date, default: Date.now },
-  dateExpiration: { type: Date, required: true },
+  dateExpiration: { type: Date },
+  source: { type: String, default: "TRANSFERER" }
+}, { timestamps: true });
 
-  source: { type: String, default: "TRANSFERER" },
-  createdAt: { type: Date, default: Date.now }
-});
+const Transfert = mongoose.model("Transfert", TransfertSchema, "transferts");
 
-const Transfert = mongoose.model("Transfert", transfertSchema, "transferts");
-
-// ==================== ROUTE SAFE TRANSFERER ====================
+// ===== ROUTE SAFE TRANSFERT =====
 app.post("/api/transferts", async (req, res) => {
   try {
     const data = req.body;
     const montant = Number(data.montant);
 
     // ===== Validation minimòm =====
-    if (!data || !data.agentEmail || !montant || montant <= 0 || !data.codeUnique) {
-      return res.status(400).json({ success: false, message: "Données invalides ou codeUnique manke" });
+    if (!data || !data.agentEmail || !montant || montant <= 0 ||
+        !data.agentNom || !data.expediteurNom || !data.expediteurPays || !data.expediteurVille || !data.expediteurAdresse || !data.expediteurTelephone ||
+        !data.beneficiaireNom || !data.beneficiairePays || !data.beneficiaireVille || !data.beneficiaireAdresse || !data.beneficiaireTelephone ||
+        !data.devise
+    ) {
+      return res.status(400).json({ success: false, message: "Données invalides" });
     }
 
     // ===== Dates =====
@@ -1212,10 +1227,7 @@ app.post("/api/transferts", async (req, res) => {
     dateExpiration.setDate(dateExpiration.getDate() + 21);
 
     // ===== Verification wallet agent =====
-    const db = client.db(process.env.DB_NAME);
-    const walletCol = db.collection("walletbalances");
-
-    const wallet = await walletCol.findOne({ email: data.agentEmail });
+    const wallet = await Wallet.findOne({ email: data.agentEmail });
     if (!wallet) {
       return res.status(400).json({ success: false, message: "Wallet agent pa jwenn" });
     }
@@ -1224,57 +1236,39 @@ app.post("/api/transferts", async (req, res) => {
     }
 
     // ===== Debi balans agent =====
-    const debitResult = await walletCol.updateOne(
+    const debitResult = await Wallet.updateOne(
       { email: data.agentEmail, balance: { $gte: montant } },
       { $inc: { balance: -montant } }
     );
     if (debitResult.modifiedCount === 0) {
-      return res.status(400).json({ success: false, message: "Debi échoué: ou pa gen ase fon oswa wallet pa jwenn" });
+      return res.status(400).json({ success: false, message: "Debi échoué" });
     }
 
-    // ===== Kreye dokiman transfè avèk codeUnique soti frontend =====
+    // ===== Kreye dokiman transfè, codeUnique ap otomatik =====
     const transfertDoc = new Transfert({
-      agentNom: data.agentNom || "",
-      agentEmail: data.agentEmail || "",
-      expediteurNom: data.expediteur?.nom || "",
-      expediteurDocumentType: data.expediteur?.documentType || "",
-      expediteurDocumentNumero: data.expediteur?.document || "",
-      expediteurPays: data.expediteur?.pays || "",
-      expediteurVille: data.expediteur?.ville || "",
-      expediteurAdresse: data.expediteur?.adresse || "",
-      expediteurTelephone: data.expediteur?.whatsapp || "",
-      beneficiaireNom: data.beneficiaire?.nom || "",
-      beneficiairePays: data.beneficiaire?.pays || "",
-      beneficiaireVille: data.beneficiaire?.ville || "",
-      beneficiaireAdresse: data.beneficiaire?.adresse || "",
-      beneficiaireTelephone: data.beneficiaire?.whatsapp || "",
+      agentNom: data.agentNom,
+      agentEmail: data.agentEmail,
+      expediteurNom: data.expediteurNom,
+      expediteurDocumentType: data.expediteurDocumentType || "",
+      expediteurDocumentNumero: data.expediteurDocumentNumero || "",
+      expediteurPays: data.expediteurPays,
+      expediteurVille: data.expediteurVille,
+      expediteurAdresse: data.expediteurAdresse,
+      expediteurTelephone: data.expediteurTelephone,
+      beneficiaireNom: data.beneficiaireNom,
+      beneficiairePays: data.beneficiairePays,
+      beneficiaireVille: data.beneficiaireVille,
+      beneficiaireAdresse: data.beneficiaireAdresse,
+      beneficiaireTelephone: data.beneficiaireTelephone,
       montant,
-      devise: data.devise || "",
-      codeUnique: data.codeUnique,
-      statut: "PENDING",
+      devise: data.devise,
       dateCreation,
       dateExpiration,
-      source: "TRANSFERER",
-      createdAt: dateCreation
+      source: "TRANSFERER"
     });
 
-    // ===== Save dokiman, si doublon kòd front-end rive (ra) =====
-    try {
-      await transfertDoc.save();
-    } catch (err) {
-      if (err.code === 11000 && err.keyPattern?.codeUnique) {
-        // Retounen erè klè pou frontend refè kòd
-        return res.status(400).json({
-          success: false,
-          message: "CodeUnique deja egziste. Tanpri refè kòd la sou frontend."
-        });
-      } else {
-        console.error("TRANSFER SAFE ERROR:", err);
-        return res.status(500).json({ success: false, message: "Erreur serveur pandan sove transfè" });
-      }
-    }
+    await transfertDoc.save();
 
-    // ===== Repons siksè =====
     return res.status(200).json({
       success: true,
       message: "Transfert créé avec succès",
@@ -1286,8 +1280,6 @@ app.post("/api/transferts", async (req, res) => {
     return res.status(500).json({ success: false, message: "Erreur serveur" });
   }
 });
-
-
 
 
 
