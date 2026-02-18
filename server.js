@@ -1259,6 +1259,19 @@ if (debitResult.modifiedCount === 0) {
 }
 
 
+
+// ===== ICI: Ajoute log pou debug =====
+console.log("Agent Email:", data.agentEmail);
+console.log("Montant transfert:", montant);
+console.log("Wallet actuel:", wallet);
+
+const debitResult = await walletCol.updateOne(
+  { email: data.agentEmail, balance: { $gte: montant } },
+  { $inc: { balance: -montant } }
+);
+
+console.log("Debit result:", debitResult);
+
     // ===== Retry loop pou codeUnique si gen duplicate key =====
     let saved = false;
     let attempts = 0;
