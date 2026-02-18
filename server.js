@@ -1233,6 +1233,32 @@ app.post("/api/transferts", async (req, res) => {
       createdAt: dateCreation
     });
 
+	// ===== Verification wallet agent =====
+const db = client.db(process.env.DB_NAME);
+const walletCol = db.collection("walletbalances");
+
+const wallet = await walletCol.findOne({ email: data.agentEmail });
+if (!wallet || wallet.balance < montant) {
+  return res.status(400).json({
+    success: false,
+    message: "Ou pa gen ase fon pou fe transfert sa, ale rechaje compte FOBAS ou"
+  });
+}
+
+// ===== Debi balans agent =====
+const debitResult = await walletCol.updateOne(
+  { email: data.agentEmail, balance: { $gte: montant } },
+  { $inc: { balance: -montant } }
+);
+
+if (debitResult.modifiedCount === 0) {
+  return res.status(400).json({
+    success: false,
+    message: "Debi échoué: ou pa gen ase fon oswa wallet pa jwenn"
+  });
+}
+
+
     // ===== Retry loop pou codeUnique si gen duplicate key =====
     let saved = false;
     let attempts = 0;
