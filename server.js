@@ -1150,7 +1150,142 @@ const Transaction = mongoose.model('transactions', transactionSchema);
 
 
 
+// ==================== TRANSFERT SAFE ROUTE - SERVER.JS ====================
+// ⚠️ BLOK TOTALMAN IZOLE - PA TOUCHE DASHBOARD NI OTHER ROUTES
+// ============================================================================
 
+app.post('/api/transferer-safe', async (req, res) => {
+  const session = client.startSession();
+
+  try {
+    const data = req.body;
+    const montant = Number(data.montant);
+
+    if (!data || !data.agentEmail || !montant || montant <= 0) {
+      return res.status(400).json({ success: false, message: "Données invalides" });
+    }
+
+    const db = client.db(process.env.DB_NAME);
+    const walletCol = db.collection('walletbalances');
+    const transfertsCol = db.collection('transferts');
+    const auditCol = db.collection('transferts_audit');
+
+    await session.withTransaction(async () => {
+      // 🔐 Vérifier balance agent
+      const wallet = await walletCol.findOne({ userEmail: data.agentEmail }, { session });
+      if (!wallet || wallet.balance < montant) {
+        throw new Error("FONDS_INSUFFISANTS");
+      }
+
+      // 💰 Débit balance
+      await walletCol.updateOne(
+        { userEmail: data.agentEmail },
+        { $inc: { balance: -montant } },
+        { session }
+      );
+
+      // 📆 Dates
+      const dateCreation = new Date();
+      const dateExpiration = new Date();
+      dateExpiration.setDate(dateExpiration.getDate() + 21);
+
+      // 📦 Document transfert
+      const transfertDoc = {
+        agentNom: data.agentNom || "",
+        agentEmail: data.agentEmail || "",
+
+        expediteurNom: data.expediteur?.nom || "",
+        expediteurDocumentType: data.expediteur?.documentType || "",
+        expediteurDocumentNumero: data.expediteur?.document || "",
+        expediteurPays: data.expediteur?.pays || "",
+        expediteurVille: data.expediteur?.ville || "",
+        expediteurAdresse: data.expediteur?.adresse || "",
+        expediteurTelephone: data.expediteur?.whatsapp || "",
+
+        beneficiaireNom: data.beneficiaire?.nom || "",
+        beneficiairePays: data.beneficiaire?.pays || "",
+        beneficiaireVille: data.beneficiaire?.ville || "",
+        beneficiaireAdresse: data.beneficiaire?.adresse || "",
+        beneficiaireTelephone: data.beneficiaire?.whatsapp || "",
+
+        montant,
+        devise: data.devise || "",
+        codeUnique: data.codeUnique || "",
+        statut: "PENDING",
+        dateCreation,
+        dateExpiration,
+        source: "TRANSFERER",
+        createdAt: dateCreation
+      };
+
+      // 📥 Insert transferts
+      const result = await transfertsCol.insertOne(transfertDoc, { session });
+
+      // 🧾 Insert audit
+      await auditCol.insertOne({
+        transfertId: result.insertedId,
+        action: "CREATION",
+        agentEmail: data.agentEmail,
+        montant,
+        statut: "PENDING",
+        dateAudit: new Date()
+      }, { session });
+    });
+
+    await session.endSession();
+
+    return res.status(200).json({
+      success: true,
+      message: "Transfert créé avec succès"
+    });
+
+  } catch (err) {
+    await session.abortTransaction();
+    await session.endSession();
+
+    if (err.message === "FONDS_INSUFFISANTS") {
+      return res.status(400).json({
+        success: false,
+        message: "Ou pa gen ase fon pou fe transfert sa, ale rechaje compte FOBAS ou"
+      });
+    }
+
+    console.error("TRANSFER SAFE ERROR:", err);
+    return res.status(500).json({ success: false, message: "Erreur serveur" });
+  }
+});
+
+// ==================== SCHEMA BOUTON TRANSFERER (REFERENCE) ====================
+// ⚠️ Pa execute, sèlman referans pou JS + DB
+const transfertSchemaReference = {
+  agentNom: String,
+  agentEmail: String,
+
+  expediteurNom: String,
+  expediteurDocumentType: String,
+  expediteurDocumentNumero: String,
+  expediteurPays: String,
+  expediteurVille: String,
+  expediteurAdresse: String,
+  expediteurTelephone: String,
+
+  beneficiaireNom: String,
+  beneficiairePays: String,
+  beneficiaireVille: String,
+  beneficiaireAdresse: String,
+  beneficiaireTelephone: String,
+
+  montant: Number,
+  devise: String,
+  codeUnique: String,
+  statut: { type: String, default: "PENDING" },
+
+  dateCreation: { type: Date, required: true },
+  dateExpiration: { type: Date, required: true },
+
+  source: { type: String, default: "TRANSFERER" },
+  createdAt: { type: Date, default: Date.now }
+};
 
 
 
