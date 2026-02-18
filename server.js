@@ -1159,133 +1159,166 @@ const Transaction = mongoose.model('transactions', transactionSchema);
 
 
 
-// ================= TRANSFERT EXPRESS FINAL (FRONTEND ONLY) =================
-document.addEventListener("DOMContentLoaded", () => {
+// ================= WALLET COLLECTION =================
+const walletSchema = new mongoose.Schema(
+  {
+    email: { type: String, required: true },
+    balance: { type: Number, required: true, default: 0 }
+  },
+  { timestamps: true }
+);
 
-  // ===================== ELEMENTS FORMULAIRE =====================
-  const agentNomInput = document.getElementById("agent_nom");
-  const agentEmailInput = document.getElementById("agent_email");
+const Wallet = mongoose.model("Wallet", walletSchema, "walletbalances");
 
-  const expNom = document.getElementById("exp_nom");
-  const expDocument = document.getElementById("exp_document");
-  const expPays = document.getElementById("exp_pays");
-  const expVille = document.getElementById("exp_ville");
-  const expAdresse = document.getElementById("exp_adresse");
-  const expWhatsapp = document.getElementById("exp_whatsapp");
 
-  const benNom = document.getElementById("ben_nom");
-  const benPays = document.getElementById("ben_pays");
-  const benVille = document.getElementById("ben_ville");
-  const benAdresse = document.getElementById("ben_adresse");
-  const benWhatsapp = document.getElementById("ben_whatsapp");
+// ================= TRANSFERT SCHEMA =================
+const TransfertSchema = new mongoose.Schema(
+  {
+    agentNom: { type: String, required: true },
+    agentEmail: { type: String, required: true },
 
-  const montantInput = document.getElementById("montant");
-  const deviseSelect = document.getElementById("devise");
+    expediteurNom: { type: String, required: true },
+    expediteurDocumentType: { type: String, default: "" },
+    expediteurDocumentNumero: { type: String, default: "" },
+    expediteurPays: { type: String, required: true },
+    expediteurVille: { type: String, required: true },
+    expediteurAdresse: { type: String, required: true },
+    expediteurTelephone: { type: String, required: true },
 
-  const btnTransferer = document.getElementById("btn-transferer");
+    beneficiaireNom: { type: String, required: true },
+    beneficiairePays: { type: String, required: true },
+    beneficiaireVille: { type: String, required: true },
+    beneficiaireAdresse: { type: String, required: true },
+    beneficiaireTelephone: { type: String, required: true },
 
-  // ===================== FONKSYON VALIDASYON =====================
-  function validerFormulaire() {
-    const champs = [
-      agentNomInput, agentEmailInput,
-      expNom, expDocument, expPays, expVille, expAdresse, expWhatsapp,
-      benNom, benPays, benVille, benAdresse, benWhatsapp,
-      montantInput, deviseSelect
-    ];
-    return champs.every(c => c && c.value.trim() !== "");
-  }
+    montant: { type: Number, required: true },
+    devise: { type: String, required: true },
 
-  function majBouton() {
-    if (btnTransferer) {
-      btnTransferer.disabled = !validerFormulaire();
+    codeUnique: {
+      type: String,
+      required: true,
+      default: () =>
+        Math.random().toString(36).substring(2, 12).toUpperCase()
+    },
+
+    statut: { type: String, default: "PENDING" },
+    dateCreation: { type: Date, default: Date.now },
+    dateExpiration: { type: Date },
+    source: { type: String, default: "TRANSFERER" }
+  },
+  { timestamps: true }
+);
+
+const Transfert = mongoose.model("Transfert", TransfertSchema, "transferts");
+
+
+// ================= ROUTE TRANSFERT =================
+app.post("/api/transferts", async (req, res) => {
+  try {
+    const data = req.body;
+    const montant = Number(data.montant);
+
+    // ===== VALIDATION STRICT =====
+    if (
+      !data ||
+      !data.agentNom ||
+      !data.agentEmail ||
+      !montant ||
+      montant <= 0 ||
+      !data.expediteurNom ||
+      !data.expediteurPays ||
+      !data.expediteurVille ||
+      !data.expediteurAdresse ||
+      !data.expediteurTelephone ||
+      !data.beneficiaireNom ||
+      !data.beneficiairePays ||
+      !data.beneficiaireVille ||
+      !data.beneficiaireAdresse ||
+      !data.beneficiaireTelephone ||
+      !data.devise
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: "Données invalides"
+      });
     }
-  }
 
-  // ===================== ECOUTEURS CHAMP =====================
-  [
-    agentNomInput, agentEmailInput,
-    expNom, expDocument, expPays, expVille, expAdresse, expWhatsapp,
-    benNom, benPays, benVille, benAdresse, benWhatsapp,
-    montantInput, deviseSelect
-  ].forEach(el => {
-    el?.addEventListener("input", majBouton);
-    el?.addEventListener("change", majBouton);
-  });
+    // ===== WALLET AGENT =====
+    const wallet = await Wallet.findOne({ email: data.agentEmail });
+    if (!wallet) {
+      return res.status(400).json({
+        success: false,
+        message: "Wallet agent pa jwenn"
+      });
+    }
 
-  majBouton();
+    if (wallet.balance < montant) {
+      return res.status(400).json({
+        success: false,
+        message: "Solde insuffisant"
+      });
+    }
 
-  // ===================== BOUTON TRANSFERER =====================
-  if (btnTransferer) {
-    btnTransferer.addEventListener("click", async (e) => {
-      e.preventDefault();
+    // ===== DEBIT WALLET =====
+    const debit = await Wallet.updateOne(
+      { email: data.agentEmail, balance: { $gte: montant } },
+      { $inc: { balance: -montant } }
+    );
 
-      if (!validerFormulaire()) {
-        alert("Tanpri ranpli tout chan obligatwa yo.");
-        return;
-      }
+    if (debit.modifiedCount === 0) {
+      return res.status(400).json({
+        success: false,
+        message: "Debi echwe"
+      });
+    }
 
-      btnTransferer.disabled = true;
-      btnTransferer.innerText = "TRAITEMENT...";
+    // ===== DATES AUTOMATIQUES =====
+    const dateCreation = new Date();
+    const dateExpiration = new Date();
+    dateExpiration.setDate(dateExpiration.getDate() + 21);
 
-      // ===================== DATA SOTI NAN FRONTEND =====================
-      const data = {
-        agentNom: agentNomInput.value.trim(),
-        agentEmail: agentEmailInput.value.trim(),
+    // ===== CREATION TRANSFERT =====
+    const transfert = new Transfert({
+      agentNom: data.agentNom,
+      agentEmail: data.agentEmail,
 
-        expediteurNom: expNom.value.trim(),
-        expediteurDocumentType: "", // backend ap ranpli si nesesè
-        expediteurDocumentNumero: expDocument.value.trim(),
-        expediteurPays: expPays.value.trim(),
-        expediteurVille: expVille.value.trim(),
-        expediteurAdresse: expAdresse.value.trim(),
-        expediteurTelephone: expWhatsapp.value.trim(),
+      expediteurNom: data.expediteurNom,
+      expediteurDocumentType: data.expediteurDocumentType || "",
+      expediteurDocumentNumero: data.expediteurDocumentNumero || "",
+      expediteurPays: data.expediteurPays,
+      expediteurVille: data.expediteurVille,
+      expediteurAdresse: data.expediteurAdresse,
+      expediteurTelephone: data.expediteurTelephone,
 
-        beneficiaireNom: benNom.value.trim(),
-        beneficiairePays: benPays.value.trim(),
-        beneficiaireVille: benVille.value.trim(),
-        beneficiaireAdresse: benAdresse.value.trim(),
-        beneficiaireTelephone: benWhatsapp.value.trim(),
+      beneficiaireNom: data.beneficiaireNom,
+      beneficiairePays: data.beneficiairePays,
+      beneficiaireVille: data.beneficiaireVille,
+      beneficiaireAdresse: data.beneficiaireAdresse,
+      beneficiaireTelephone: data.beneficiaireTelephone,
 
-        montant: Number(montantInput.value),
-        devise: deviseSelect.value.trim()
-        // ❌ Pa voye codeUnique, statut, ni dat, backend ap jere yo
-      };
+      montant,
+      devise: data.devise,
 
-      try {
-        const response = await fetch("/api/transferts", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(data)
-        });
+      dateCreation,
+      dateExpiration
+    });
 
-        const result = await response.json();
+    await transfert.save();
 
-        if (!response.ok || !result.success) {
-          throw new Error(result.message || "Erreur transfert");
-        }
+    return res.status(200).json({
+      success: true,
+      message: "Transfert créé avec succès",
+      codeUnique: transfert.codeUnique
+    });
 
-        alert("✅ Transfert effectué avec succès. Tout kalkil otomatik fèt nan backend.");
-
-        // Reset fòm itilizatè ka modifye sèlman
-        [
-          expNom, expDocument, expPays, expVille, expAdresse, expWhatsapp,
-          benNom, benPays, benVille, benAdresse, benWhatsapp,
-          montantInput, deviseSelect
-        ].forEach(el => {
-          if (el) el.value = "";
-        });
-
-      } catch (err) {
-        console.error("TRANSFERER FRONTEND ERROR:", err);
-        alert(err.message || "Erreur lors du transfert");
-      } finally {
-        btnTransferer.disabled = false;
-        btnTransferer.innerText = "TRANSFERER";
-      }
+  } catch (err) {
+    console.error("TRANSFERT ERROR:", err);
+    return res.status(500).json({
+      success: false,
+      message: "Erreur serveur"
     });
   }
 });
-
 
 
 
