@@ -1150,10 +1150,21 @@ const Transaction = mongoose.model('transactions', transactionSchema);
 
 
 
-// ==================== TRANSFERT SAFE ROUTE - SERVER.JS ====================
-// ⚠️ BLOK TOTALMAN IZOLE - PA TOUCHE DASHBOARD NI OTHER ROUTES
+// ==================== TRANSFERT EXPRESS FOBAS - FINAL SAFE ====================
+// ⚠️ BLOC UNIQUE - IZOLE - PA TOUCHE DASHBOARD NI ROUTES EXISTANT
+// ⚠️ GERE : CREATION TRANSFERT + AUDIT + BALANCE AGENT + 21 JOURS EXPIRATION
 // ============================================================================
 
+const cors = require("cors");
+
+// ⚠️ Si server ou poko gen CORS, ajoute sa
+app.use(cors({
+  origin: ["https://www.fondationbackupspirituel.com"], // frontend
+  methods: ["GET","POST","PUT","DELETE"],
+  allowedHeaders: ["Content-Type"]
+}));
+
+// ==================== 1️⃣ ROUTE TRANSFERER ====================
 app.post('/api/transferer-safe', async (req, res) => {
   const session = client.startSession();
 
@@ -1171,7 +1182,8 @@ app.post('/api/transferer-safe', async (req, res) => {
     const auditCol = db.collection('transferts_audit');
 
     await session.withTransaction(async () => {
-      // 🔐 Vérifier balance agent
+
+      // 🔐 Vérification balance agent
       const wallet = await walletCol.findOne({ userEmail: data.agentEmail }, { session });
       if (!wallet || wallet.balance < montant) {
         throw new Error("FONDS_INSUFFISANTS");
@@ -1230,6 +1242,7 @@ app.post('/api/transferer-safe', async (req, res) => {
         statut: "PENDING",
         dateAudit: new Date()
       }, { session });
+
     });
 
     await session.endSession();
@@ -1255,38 +1268,49 @@ app.post('/api/transferer-safe', async (req, res) => {
   }
 });
 
-// ==================== SCHEMA BOUTON TRANSFERER (REFERENCE) ====================
-// ⚠️ Pa execute, sèlman referans pou JS + DB
-const transfertSchemaReference = {
-  agentNom: String,
-  agentEmail: String,
+// ==================== 2️⃣ CRON EXPIRATION 21 JOURS ====================
+setInterval(async () => {
+  try {
+    const db = client.db(process.env.DB_NAME);
+    const transfertsCol = db.collection('transferts');
+    const walletCol = db.collection('walletbalances');
+    const auditCol = db.collection('transferts_audit');
 
-  expediteurNom: String,
-  expediteurDocumentType: String,
-  expediteurDocumentNumero: String,
-  expediteurPays: String,
-  expediteurVille: String,
-  expediteurAdresse: String,
-  expediteurTelephone: String,
+    const now = new Date();
 
-  beneficiaireNom: String,
-  beneficiairePays: String,
-  beneficiaireVille: String,
-  beneficiaireAdresse: String,
-  beneficiaireTelephone: String,
+    const expirés = await transfertsCol.find({
+      statut: "PENDING",
+      dateExpiration: { $lte: now }
+    }).toArray();
 
-  montant: Number,
-  devise: String,
-  codeUnique: String,
-  statut: { type: String, default: "PENDING" },
+    for (const t of expirés) {
+      // 🔁 Remboursement agent
+      await walletCol.updateOne(
+        { userEmail: t.agentEmail },
+        { $inc: { balance: t.montant } }
+      );
 
-  dateCreation: { type: Date, required: true },
-  dateExpiration: { type: Date, required: true },
+      // ❌ Annulation transfert
+      await transfertsCol.updateOne(
+        { _id: t._id },
+        { $set: { statut: "Transfert Annule", dateAnnulation: new Date() } }
+      );
 
-  source: { type: String, default: "TRANSFERER" },
-  createdAt: { type: Date, default: Date.now }
-};
+      // 🧾 Audit
+      await auditCol.insertOne({
+        transfertId: t._id,
+        action: "EXPIRATION_21_JOURS",
+        agentEmail: t.agentEmail,
+        montant: t.montant,
+        statut: "Transfert Annule",
+        dateAudit: new Date()
+      });
+    }
 
+  } catch (err) {
+    console.error("CRON EXPIRATION ERROR:", err);
+  }
+}, 1000 * 60 * 60); // ⏱️ toutes les 1 heure
 
 
 
