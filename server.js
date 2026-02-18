@@ -1150,17 +1150,47 @@ const Transaction = mongoose.model('transactions', transactionSchema);
 
 
 
-// ==================== TRANSFERT EXPRESS FOBAS - FINAL SAFE ====================
-// ⚠️ BLOC UNIQUE - IZOLE - PA TOUCHE DASHBOARD NI ROUTES EXISTANT
-// ⚠️ GERE : CREATION TRANSFERT + AUDIT + BALANCE AGENT + 21 JOURS EXPIRATION
+// ==================== MONGOOSE SCHEMA TRANSFERT SAFE ====================
+// ⚠️ Schema pou bouton "Transferer" - VALIDATION TIP DONE OFISYÈL
+// ⚠️ Pa manyen okenn route oswa dashboard ki egziste deja
 // ============================================================================
 
+// ==================== SCHEMA TRANSFERT ====================
+const transfertSchema = new mongoose.Schema({
+  agentNom: { type: String, required: true },
+  agentEmail: { type: String, required: true },
 
+  expediteurNom: { type: String, default: "" },
+  expediteurDocumentType: { type: String, default: "" },
+  expediteurDocumentNumero: { type: String, default: "" },
+  expediteurPays: { type: String, default: "" },
+  expediteurVille: { type: String, default: "" },
+  expediteurAdresse: { type: String, default: "" },
+  expediteurTelephone: { type: String, default: "" },
 
-// ==================== 1️⃣ ROUTE TRANSFERER ====================
-app.post('/api/transferer-safe', async (req, res) => {
-  const session = client.startSession();
+  beneficiaireNom: { type: String, default: "" },
+  beneficiairePays: { type: String, default: "" },
+  beneficiaireVille: { type: String, default: "" },
+  beneficiaireAdresse: { type: String, default: "" },
+  beneficiaireTelephone: { type: String, default: "" },
 
+  montant: { type: Number, required: true, min: 0 },
+  devise: { type: String, default: "" },
+  codeUnique: { type: String, required: true, unique: true },
+  statut: { type: String, default: "PENDING" },
+
+  dateCreation: { type: Date, default: Date.now },
+  dateExpiration: { type: Date, required: true },
+
+  source: { type: String, default: "TRANSFERER" },
+  createdAt: { type: Date, default: Date.now }
+});
+
+// ⚠️ Model refere koleksyon deja egziste
+const Transfert = mongoose.model("Transfert", transfertSchema, "transferts");
+
+// ==================== ROUTE SAFE TRANSFERER ====================
+app.post("/api/transferer-safe", async (req, res) => {
   try {
     const data = req.body;
     const montant = Number(data.montant);
@@ -1170,75 +1200,69 @@ app.post('/api/transferer-safe', async (req, res) => {
     }
 
     const db = client.db(process.env.DB_NAME);
-    const walletCol = db.collection('walletbalances');
-    const transfertsCol = db.collection('transferts');
-    const auditCol = db.collection('transferts_audit');
+    const walletCol = db.collection("walletbalances");
+    const auditCol = db.collection("transferts_audit");
 
-    await session.withTransaction(async () => {
+    // 🔐 Verification balance agent
+    const wallet = await walletCol.findOne({ userEmail: data.agentEmail });
+    if (!wallet || wallet.balance < montant) {
+      return res.status(400).json({
+        success: false,
+        message: "Ou pa gen ase fon pou fe transfert sa, ale rechaje compte FOBAS ou"
+      });
+    }
 
-      // 🔐 Vérification balance agent
-      const wallet = await walletCol.findOne({ userEmail: data.agentEmail }, { session });
-      if (!wallet || wallet.balance < montant) {
-        throw new Error("FONDS_INSUFFISANTS");
-      }
+    // 💰 Debite balance agent
+    await walletCol.updateOne(
+      { userEmail: data.agentEmail },
+      { $inc: { balance: -montant } }
+    );
 
-      // 💰 Débit balance
-      await walletCol.updateOne(
-        { userEmail: data.agentEmail },
-        { $inc: { balance: -montant } },
-        { session }
-      );
+    // 📆 Dates
+    const dateCreation = new Date();
+    const dateExpiration = new Date();
+    dateExpiration.setDate(dateExpiration.getDate() + 21);
 
-      // 📆 Dates
-      const dateCreation = new Date();
-      const dateExpiration = new Date();
-      dateExpiration.setDate(dateExpiration.getDate() + 21);
+    // 📦 Kreye dokiman transfert
+    const transfertDoc = new Transfert({
+      agentNom: data.agentNom || "",
+      agentEmail: data.agentEmail || "",
 
-      // 📦 Document transfert
-      const transfertDoc = {
-        agentNom: data.agentNom || "",
-        agentEmail: data.agentEmail || "",
+      expediteurNom: data.expediteur?.nom || "",
+      expediteurDocumentType: data.expediteur?.documentType || "",
+      expediteurDocumentNumero: data.expediteur?.document || "",
+      expediteurPays: data.expediteur?.pays || "",
+      expediteurVille: data.expediteur?.ville || "",
+      expediteurAdresse: data.expediteur?.adresse || "",
+      expediteurTelephone: data.expediteur?.whatsapp || "",
 
-        expediteurNom: data.expediteur?.nom || "",
-        expediteurDocumentType: data.expediteur?.documentType || "",
-        expediteurDocumentNumero: data.expediteur?.document || "",
-        expediteurPays: data.expediteur?.pays || "",
-        expediteurVille: data.expediteur?.ville || "",
-        expediteurAdresse: data.expediteur?.adresse || "",
-        expediteurTelephone: data.expediteur?.whatsapp || "",
+      beneficiaireNom: data.beneficiaire?.nom || "",
+      beneficiairePays: data.beneficiaire?.pays || "",
+      beneficiaireVille: data.beneficiaire?.ville || "",
+      beneficiaireAdresse: data.beneficiaire?.adresse || "",
+      beneficiaireTelephone: data.beneficiaire?.whatsapp || "",
 
-        beneficiaireNom: data.beneficiaire?.nom || "",
-        beneficiairePays: data.beneficiaire?.pays || "",
-        beneficiaireVille: data.beneficiaire?.ville || "",
-        beneficiaireAdresse: data.beneficiaire?.adresse || "",
-        beneficiaireTelephone: data.beneficiaire?.whatsapp || "",
-
-        montant,
-        devise: data.devise || "",
-        codeUnique: data.codeUnique || "",
-        statut: "PENDING",
-        dateCreation,
-        dateExpiration,
-        source: "TRANSFERER",
-        createdAt: dateCreation
-      };
-
-      // 📥 Insert transferts
-      const result = await transfertsCol.insertOne(transfertDoc, { session });
-
-      // 🧾 Insert audit
-      await auditCol.insertOne({
-        transfertId: result.insertedId,
-        action: "CREATION",
-        agentEmail: data.agentEmail,
-        montant,
-        statut: "PENDING",
-        dateAudit: new Date()
-      }, { session });
-
+      montant,
+      devise: data.devise || "",
+      codeUnique: data.codeUnique || "",
+      statut: "PENDING",
+      dateCreation,
+      dateExpiration,
+      source: "TRANSFERER",
+      createdAt: dateCreation
     });
 
-    await session.endSession();
+    await transfertDoc.save();
+
+    // 🧾 Insert audit
+    await auditCol.insertOne({
+      transfertId: transfertDoc._id,
+      action: "CREATION",
+      agentEmail: data.agentEmail,
+      montant,
+      statut: "PENDING",
+      dateAudit: new Date()
+    });
 
     return res.status(200).json({
       success: true,
@@ -1246,64 +1270,10 @@ app.post('/api/transferer-safe', async (req, res) => {
     });
 
   } catch (err) {
-    await session.abortTransaction();
-    await session.endSession();
-
-    if (err.message === "FONDS_INSUFFISANTS") {
-      return res.status(400).json({
-        success: false,
-        message: "Ou pa gen ase fon pou fe transfert sa, ale rechaje compte FOBAS ou"
-      });
-    }
-
     console.error("TRANSFER SAFE ERROR:", err);
     return res.status(500).json({ success: false, message: "Erreur serveur" });
   }
 });
-
-// ==================== 2️⃣ CRON EXPIRATION 21 JOURS ====================
-setInterval(async () => {
-  try {
-    const db = client.db(process.env.DB_NAME);
-    const transfertsCol = db.collection('transferts');
-    const walletCol = db.collection('walletbalances');
-    const auditCol = db.collection('transferts_audit');
-
-    const now = new Date();
-
-    const expirés = await transfertsCol.find({
-      statut: "PENDING",
-      dateExpiration: { $lte: now }
-    }).toArray();
-
-    for (const t of expirés) {
-      // 🔁 Remboursement agent
-      await walletCol.updateOne(
-        { userEmail: t.agentEmail },
-        { $inc: { balance: t.montant } }
-      );
-
-      // ❌ Annulation transfert
-      await transfertsCol.updateOne(
-        { _id: t._id },
-        { $set: { statut: "Transfert Annule", dateAnnulation: new Date() } }
-      );
-
-      // 🧾 Audit
-      await auditCol.insertOne({
-        transfertId: t._id,
-        action: "EXPIRATION_21_JOURS",
-        agentEmail: t.agentEmail,
-        montant: t.montant,
-        statut: "Transfert Annule",
-        dateAudit: new Date()
-      });
-    }
-
-  } catch (err) {
-    console.error("CRON EXPIRATION ERROR:", err);
-  }
-}, 1000 * 60 * 60); // ⏱️ toutes les 1 heure
 
 
 
