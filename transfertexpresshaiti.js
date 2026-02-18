@@ -39,15 +39,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const btnTransferer = document.getElementById("btn-transferer");
 
   // ===================== OUTILS =====================
-  function genererCodeUnique(length = 12) {
-    const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-    let result = "";
-    for (let i = 0; i < length; i++) {
-      result += chars[Math.floor(Math.random() * chars.length)];
-    }
-    return result;
-  }
-
   function remplirAgentDepuisSession() {
     const nom = sessionStorage.getItem("fobas_agent_nom") || "";
     const email = sessionStorage.getItem("fobas_agent_email") || "";
@@ -57,14 +48,24 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function initialiserDonneesSysteme() {
-    if (codeUniqueInput) codeUniqueInput.value = genererCodeUnique();
+    const today = new Date();
+
+    // ===== Date du jour (FORMAT HTML5) =====
+    const todayISO = today.toISOString().split("T")[0];
+    if (dateDuJourInput) dateDuJourInput.value = todayISO;
+
+    // ===== Statut =====
     if (statutInput) statutInput.value = "PENDING";
 
+    // ===== Date expiration +21 jours =====
     if (expirationInput) {
-      const exp = new Date();
+      const exp = new Date(today);
       exp.setDate(exp.getDate() + 21);
       expirationInput.value = exp.toISOString().split("T")[0];
     }
+
+    // ❌ Pa mete codeUnique nan frontend, backend ap jere li
+    if (codeUniqueInput) codeUniqueInput.value = "";
   }
 
   function validerFormulaire() {
@@ -76,37 +77,6 @@ document.addEventListener("DOMContentLoaded", () => {
     return champs.every(c => c && c.value.trim() !== "");
   }
 
-
-function initialiserDonneesSysteme() {
-  const today = new Date();
-
-  // ===== Date du jour (FORMAT HTML5) =====
-  const todayISO = today.toISOString().split("T")[0];
-
-  const dateDuJourInput = document.getElementById("date_du_jour");
-  if (dateDuJourInput) {
-    dateDuJourInput.value = todayISO;
-  }
-
-  // ===== Code unique =====
-  if (codeUniqueInput) {
-    codeUniqueInput.value = genererCodeUnique();
-  }
-
-  // ===== Statut =====
-  if (statutInput) {
-    statutInput.value = "PENDING";
-  }
-
-  // ===== Date expiration +21 jours =====
-  if (expirationInput) {
-    const exp = new Date(today);
-    exp.setDate(exp.getDate() + 21);
-    expirationInput.value = exp.toISOString().split("T")[0];
-  }
-}
-
-  
   function majBouton() {
     if (btnTransferer) {
       btnTransferer.disabled = !validerFormulaire();
