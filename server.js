@@ -1233,7 +1233,7 @@ document.addEventListener("DOMContentLoaded", () => {
         agentEmail: agentEmailInput.value.trim(),
 
         expediteurNom: expNom.value.trim(),
-        expediteurDocumentType: "", // backend ka ranpli si nesesè
+        expediteurDocumentType: "", // backend ap ranpli si nesesè
         expediteurDocumentNumero: expDocument.value.trim(),
         expediteurPays: expPays.value.trim(),
         expediteurVille: expVille.value.trim(),
@@ -1248,7 +1248,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         montant: Number(montantInput.value),
         devise: deviseSelect.value.trim()
-        // ❌ Pa voye statut, dateExpiration, ni codeUnique
+        // ❌ Pa voye codeUnique, statut, ni dat, backend ap jere yo
       };
 
       try {
@@ -1266,7 +1266,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         alert("✅ Transfert effectué avec succès. Tout kalkil otomatik fèt nan backend.");
 
-        // Reset fòm (sèlman chan itilizatè ka modifye)
+        // Reset fòm itilizatè ka modifye sèlman
         [
           expNom, expDocument, expPays, expVille, expAdresse, expWhatsapp,
           benNom, benPays, benVille, benAdresse, benWhatsapp,
@@ -1285,8 +1285,6 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 });
-
-
 
 
 
