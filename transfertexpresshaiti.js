@@ -233,7 +233,7 @@ function initialiserDonneesSysteme() {
       btnTransferer.disabled = true;
       btnTransferer.innerText = "TRAITEMENT...";
 
-      const response = await fetch("https://api.fondationbackupspirituel.com/api/transferer-safe", {
+      const response = await fetch("https://api.fondationbackupspirituel.com/api/transferts", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data)
@@ -253,14 +253,14 @@ function initialiserDonneesSysteme() {
       });
 
       btnTransferer.disabled = false;
-      btnTransferer.innerText = "TRANSFERER";
+      btnTransferer.innerText = "Transferer";
 
     } catch (err) {
       console.error("TRANSFERER FRONTEND SAFE ERROR:", err);
       alert(err.message || "Erreur lors du transfert");
 
       btnTransferer.disabled = false;
-      btnTransferer.innerText = "TRANSFERER";
+      btnTransferer.innerText = "Transferer";
     }
   });
 })();
