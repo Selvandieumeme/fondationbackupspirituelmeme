@@ -1155,14 +1155,7 @@ const Transaction = mongoose.model('transactions', transactionSchema);
 // ⚠️ GERE : CREATION TRANSFERT + AUDIT + BALANCE AGENT + 21 JOURS EXPIRATION
 // ============================================================================
 
-const cors = require("cors");
 
-// ⚠️ Si server ou poko gen CORS, ajoute sa
-app.use(cors({
-  origin: ["https://www.fondationbackupspirituel.com"], // frontend
-  methods: ["GET","POST","PUT","DELETE"],
-  allowedHeaders: ["Content-Type"]
-}));
 
 // ==================== 1️⃣ ROUTE TRANSFERER ====================
 app.post('/api/transferer-safe', async (req, res) => {
