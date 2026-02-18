@@ -253,14 +253,14 @@ function initialiserDonneesSysteme() {
       });
 
       btnTransferer.disabled = false;
-      btnTransferer.innerText = "Transferer";
+      btnTransferer.innerText = "TRANSFERER";
 
     } catch (err) {
       console.error("TRANSFERER FRONTEND SAFE ERROR:", err);
       alert(err.message || "Erreur lors du transfert");
 
       btnTransferer.disabled = false;
-      btnTransferer.innerText = "Transferer";
+      btnTransferer.innerText = "TRANSFERER";
     }
   });
 })();
