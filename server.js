@@ -1193,7 +1193,7 @@ const TransfertSchema = new mongoose.Schema({
     type: String, 
     required: true, 
     default: function() {
-      // MongoDB ap jenere kòd inik otomatikman
+      // MongoDB ap jenere kòd inik otomatikman, san okenn frontend
       return Math.random().toString(36).substring(2, 12).toUpperCase();
     }
   },
@@ -1213,10 +1213,11 @@ app.post("/api/transferts", async (req, res) => {
     const montant = Number(data.montant);
 
     // ===== Validation minimòm =====
-    if (!data || !data.agentEmail || !montant || montant <= 0 ||
-        !data.agentNom || !data.expediteurNom || !data.expediteurPays || !data.expediteurVille || !data.expediteurAdresse || !data.expediteurTelephone ||
-        !data.beneficiaireNom || !data.beneficiairePays || !data.beneficiaireVille || !data.beneficiaireAdresse || !data.beneficiaireTelephone ||
-        !data.devise
+    if (
+      !data || !data.agentEmail || !montant || montant <= 0 ||
+      !data.agentNom || !data.expediteurNom || !data.expediteurPays || !data.expediteurVille || !data.expediteurAdresse || !data.expediteurTelephone ||
+      !data.beneficiaireNom || !data.beneficiairePays || !data.beneficiaireVille || !data.beneficiaireAdresse || !data.beneficiaireTelephone ||
+      !data.devise
     ) {
       return res.status(400).json({ success: false, message: "Données invalides" });
     }
@@ -1269,6 +1270,7 @@ app.post("/api/transferts", async (req, res) => {
 
     await transfertDoc.save();
 
+    // ===== Repons siksè =====
     return res.status(200).json({
       success: true,
       message: "Transfert créé avec succès",
