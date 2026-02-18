@@ -1245,32 +1245,7 @@ if (!wallet || wallet.balance < montant) {
   });
 }
 
-// ===== Debi balans agent =====
-const debitResult = await walletCol.updateOne(
-  { email: data.agentEmail, balance: { $gte: montant } },
-  { $inc: { balance: -montant } }
-);
 
-if (debitResult.modifiedCount === 0) {
-  return res.status(400).json({
-    success: false,
-    message: "Debi échoué: ou pa gen ase fon oswa wallet pa jwenn"
-  });
-}
-
-
-
-// ===== ICI: Ajoute log pou debug =====
-console.log("Agent Email:", data.agentEmail);
-console.log("Montant transfert:", montant);
-console.log("Wallet actuel:", wallet);
-
-const debitResult = await walletCol.updateOne(
-  { email: data.agentEmail, balance: { $gte: montant } },
-  { $inc: { balance: -montant } }
-);
-
-console.log("Debit result:", debitResult);
 
     // ===== Retry loop pou codeUnique si gen duplicate key =====
     let saved = false;
