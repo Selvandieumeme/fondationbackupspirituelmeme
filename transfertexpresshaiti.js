@@ -234,7 +234,7 @@ function initialiserDonneesSysteme() {
       btnTransferer.disabled = true;
       btnTransferer.innerText = "TRAITEMENT...";
 
-      const response = await fetch("/api/transferer-safe", {
+      const response = await fetch("https://api.fondationbackupspirituel.com/api/transferer-safe", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
