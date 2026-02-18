@@ -151,86 +151,132 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 
-// ==================== TRANSFERT EXPRESS FRONTEND SAFE ====================
-// ⚠️ BLOC UNIQUE, IZOLE, PA TOUCHE ANYEN KI EXISTE
-// ============================================================================
+// ================= TRANSFERT EXPRESS FINAL (FRONTEND ONLY) =================
+document.addEventListener("DOMContentLoaded", () => {
 
-(function () {
+  // ===================== ELEMENTS FORMULAIRE =====================
+  const agentNomInput = document.getElementById("agent_nom");
+  const agentEmailInput = document.getElementById("agent_email");
+
+  const expNom = document.getElementById("exp_nom");
+  const expDocument = document.getElementById("exp_document");
+  const expPays = document.getElementById("exp_pays");
+  const expVille = document.getElementById("exp_ville");
+  const expAdresse = document.getElementById("exp_adresse");
+  const expWhatsapp = document.getElementById("exp_whatsapp");
+
+  const benNom = document.getElementById("ben_nom");
+  const benPays = document.getElementById("ben_pays");
+  const benVille = document.getElementById("ben_ville");
+  const benAdresse = document.getElementById("ben_adresse");
+  const benWhatsapp = document.getElementById("ben_whatsapp");
+
+  const montantInput = document.getElementById("montant");
+  const deviseSelect = document.getElementById("devise");
+
+  const statutInput = document.getElementById("statut");
+  const expirationInput = document.getElementById("expiration");
+
   const btnTransferer = document.getElementById("btn-transferer");
-  if (!btnTransferer) return;
 
-  btnTransferer.addEventListener("click", async function (e) {
-    e.preventDefault();
+  // ===================== FONKSYON VALIDASYON =====================
+  function validerFormulaire() {
+    const champs = [
+      agentNomInput, agentEmailInput,
+      expNom, expDocument, expPays, expVille, expAdresse, expWhatsapp,
+      benNom, benPays, benVille, benAdresse, benWhatsapp,
+      montantInput, deviseSelect
+    ];
+    return champs.every(c => c && c.value.trim() !== "");
+  }
 
-    try {
-      // ===================== RECUPERATION DES DONNEES FORMULAIRE =====================
-      const data = {
-        agentNom: document.getElementById("agent_nom")?.value || "",
-        agentEmail: document.getElementById("agent_email")?.value || "",
+  function majBouton() {
+    if (btnTransferer) {
+      btnTransferer.disabled = !validerFormulaire();
+    }
+  }
 
-        expediteur: {
-          nom: document.getElementById("exp_nom")?.value || "",
-          documentType: "", // à remplir selon besoin
-          document: document.getElementById("exp_document")?.value || "",
-          pays: document.getElementById("exp_pays")?.value || "",
-          ville: document.getElementById("exp_ville")?.value || "",
-          adresse: document.getElementById("exp_adresse")?.value || "",
-          whatsapp: document.getElementById("exp_whatsapp")?.value || ""
-        },
+  [
+    agentNomInput, agentEmailInput,
+    expNom, expDocument, expPays, expVille, expAdresse, expWhatsapp,
+    benNom, benPays, benVille, benAdresse, benWhatsapp,
+    montantInput, deviseSelect
+  ].forEach(el => {
+    el?.addEventListener("input", majBouton);
+    el?.addEventListener("change", majBouton);
+  });
 
-        beneficiaire: {
-          nom: document.getElementById("ben_nom")?.value || "",
-          pays: document.getElementById("ben_pays")?.value || "",
-          ville: document.getElementById("ben_ville")?.value || "",
-          adresse: document.getElementById("ben_adresse")?.value || "",
-          whatsapp: document.getElementById("ben_whatsapp")?.value || ""
-        },
+  majBouton();
 
-        montant: Number(document.getElementById("montant")?.value || 0),
-        devise: document.getElementById("devise")?.value || ""
+  // ===================== BOUTON TRANSFERER =====================
+  if (btnTransferer) {
+    btnTransferer.addEventListener("click", async (e) => {
+      e.preventDefault();
 
-        // ❌ Pa voye codeUnique frontend, backend ap jenere li otomatikman
-      };
-
-      // ===================== VALIDATION MINIMALE =====================
-      if (!data.agentEmail || !data.montant || data.montant <= 0) {
-        alert("Données invalides ou montant incorrect");
+      if (!validerFormulaire()) {
+        alert("Tanpri ranpli tout chan obligatwa yo.");
         return;
       }
 
-      // ===================== APPEL API SECURISE =====================
       btnTransferer.disabled = true;
       btnTransferer.innerText = "TRAITEMENT...";
 
-      const response = await fetch("https://api.fondationbackupspirituel.com/api/transferts", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data)
-      });
+      const data = {
+        agentNom: agentNomInput.value.trim(),
+        agentEmail: agentEmailInput.value.trim(),
 
-      const result = await response.json();
+        expediteur: {
+          nom: expNom.value.trim(),
+          documentType: "", // si ou bezwen, ou ka ranpli
+          document: expDocument.value.trim(),
+          pays: expPays.value.trim(),
+          ville: expVille.value.trim(),
+          adresse: expAdresse.value.trim(),
+          whatsapp: expWhatsapp.value.trim()
+        },
 
-      if (!response.ok || !result.success) {
-        throw new Error(result.message || "Erreur transfert");
+        beneficiaire: {
+          nom: benNom.value.trim(),
+          pays: benPays.value.trim(),
+          ville: benVille.value.trim(),
+          adresse: benAdresse.value.trim(),
+          whatsapp: benWhatsapp.value.trim()
+        },
+
+        montant: Number(montantInput.value),
+        devise: deviseSelect.value.trim(),
+
+        statut: statutInput?.value || "PENDING",
+        dateExpiration: expirationInput?.value ? new Date(expirationInput.value) : undefined
+      };
+
+      try {
+        const response = await fetch("https://api.fondationbackupspirituel.com/api/transferts", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data)
+        });
+
+        const result = await response.json();
+
+        if (!response.ok || !result.success) {
+          throw new Error(result.message || "Erreur transfert");
+        }
+
+        alert("✅ Transfert effectué avec succès. CodeUnique ap jenere otomatikman nan backend.");
+
+        // Reset fòm
+        document.querySelectorAll("input, select").forEach(el => {
+          if (!el.hasAttribute("readonly")) el.value = "";
+        });
+
+      } catch (err) {
+        console.error("TRANSFERER FRONTEND ERROR:", err);
+        alert(err.message || "Erreur lors du transfert");
+      } finally {
+        btnTransferer.disabled = false;
+        btnTransferer.innerText = "TRANSFERER";
       }
-
-      // ✅ Afichaj kòd inik ki sòti backend
-      alert(`✅ Transfert effectué avec succès. Code unique: ${result.codeUnique}`);
-
-      // ===================== RESET FORMULAIRE (IZOLE) =====================
-      document.querySelectorAll("input, select").forEach(el => {
-        if (!el.hasAttribute("readonly")) el.value = "";
-      });
-
-      btnTransferer.disabled = false;
-      btnTransferer.innerText = "TRANSFERER";
-
-    } catch (err) {
-      console.error("TRANSFERER FRONTEND SAFE ERROR:", err);
-      alert(err.message || "Erreur lors du transfert");
-
-      btnTransferer.disabled = false;
-      btnTransferer.innerText = "TRANSFERER";
-    }
-  });
-})();
+    });
+  }
+});
