@@ -1150,14 +1150,11 @@ const Transaction = mongoose.model('transactions', transactionSchema);
 
 
 
-// ==================== TRANSFERT EXPRESS SERVER FINAL SAFE ====================
-// ⚠️ BLOC TOTALMAN IZOLE
-// ⚠️ PA MANYEN AUCUNE AUTRE ROUTE / DASHBOARD
+// ==================== MONGOOSE SCHEMA TRANSFERT SAFE ====================
+// ⚠️ Schema pou bouton "Transferer" - VALIDATION TIP DONE OFISYÈL
+// ⚠️ Pa manyen okenn route oswa dashboard ki egziste deja
 // ============================================================================
 
-// ⛔ crypto & mongoose DEJA DECLARES EN HAUT DU SERVER.JS
-
-// ==================== SCHEMA TRANSFERT ====================
 const transfertSchema = new mongoose.Schema({
   agentNom: { type: String, required: true },
   agentEmail: { type: String, required: true },
@@ -1178,7 +1175,6 @@ const transfertSchema = new mongoose.Schema({
 
   montant: { type: Number, required: true, min: 0 },
   devise: { type: String, default: "" },
-
   codeUnique: { type: String, required: true, unique: true },
   statut: { type: String, default: "PENDING" },
 
@@ -1189,44 +1185,30 @@ const transfertSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now }
 });
 
-// ⚠️ Model lié à la collection EXISTANTE
+// ⚠️ Model refere koleksyon deja egziste
 const Transfert = mongoose.model("Transfert", transfertSchema, "transferts");
 
-// ==================== ROUTE TRANSFERER SAFE ====================
+// ==================== ROUTE SAFE TRANSFERER ====================
 app.post("/api/transferts", async (req, res) => {
   try {
-    const data = req.body || {};
+    const data = req.body;
     const montant = Number(data.montant);
 
-    if (!data.agentEmail || !montant || montant <= 0) {
+    // ===== Validation minimòm =====
+    if (!data || !data.agentEmail || !montant || montant <= 0) {
       return res.status(400).json({ success: false, message: "Données invalides" });
     }
 
-    // 🔐 Code unique avec autorité server
-    const safeCodeUnique =
-      typeof data.codeUnique === "string" && data.codeUnique.trim() !== ""
-        ? data.codeUnique.trim()
-        : "FOBAS-" + crypto.randomBytes(6).toString("hex").toUpperCase();
-
+    // ===== Dates =====
     const dateCreation = new Date();
     const dateExpiration = new Date();
     dateExpiration.setDate(dateExpiration.getDate() + 21);
 
-    const db = client.db(process.env.DB_NAME);
-    const walletCol = db.collection("walletbalances");
-    const auditCol = db.collection("transferts_audit");
-
-    const wallet = await walletCol.findOne({ userEmail: data.agentEmail });
-    if (!wallet || wallet.balance < montant) {
-      return res.status(400).json({
-        success: false,
-        message: "Ou pa gen ase fon pou fe transfert sa"
-      });
-    }
-
+    // ===== Kreye dokiman transfè avèk pi gwo prudence =====
     const transfertDoc = new Transfert({
       agentNom: data.agentNom || "",
       agentEmail: data.agentEmail || "",
+
       expediteurNom: data.expediteur?.nom || "",
       expediteurDocumentType: data.expediteur?.documentType || "",
       expediteurDocumentNumero: data.expediteur?.document || "",
@@ -1234,14 +1216,16 @@ app.post("/api/transferts", async (req, res) => {
       expediteurVille: data.expediteur?.ville || "",
       expediteurAdresse: data.expediteur?.adresse || "",
       expediteurTelephone: data.expediteur?.whatsapp || "",
+
       beneficiaireNom: data.beneficiaire?.nom || "",
       beneficiairePays: data.beneficiaire?.pays || "",
       beneficiaireVille: data.beneficiaire?.ville || "",
       beneficiaireAdresse: data.beneficiaire?.adresse || "",
       beneficiaireTelephone: data.beneficiaire?.whatsapp || "",
+
       montant,
       devise: data.devise || "",
-      codeUnique: safeCodeUnique,
+      codeUnique: data.codeUnique || "",
       statut: "PENDING",
       dateCreation,
       dateExpiration,
@@ -1249,33 +1233,46 @@ app.post("/api/transferts", async (req, res) => {
       createdAt: dateCreation
     });
 
-    await transfertDoc.save();
+    // ===== Retry loop pou codeUnique si gen duplicate key =====
+    let saved = false;
+    let attempts = 0;
+    const crypto = require("crypto");
 
-    await walletCol.updateOne(
-      { userEmail: data.agentEmail },
-      { $inc: { balance: -montant } }
-    );
+    while (!saved && attempts < 3) {
+      try {
+        await transfertDoc.save();
+        saved = true;
+      } catch (err) {
+        if (err.code === 11000 && err.keyPattern?.codeUnique) {
+          // Regenerer codeUnique sou server
+          transfertDoc.codeUnique =
+            "FOBAS-" + crypto.randomBytes(6).toString("hex").toUpperCase();
+          attempts++;
+        } else {
+          throw err;
+        }
+      }
+    }
 
-    await auditCol.insertOne({
-      transfertId: transfertDoc._id,
-      action: "CREATION",
-      agentEmail: data.agentEmail,
-      montant,
-      statut: "PENDING",
-      dateAudit: new Date()
-    });
+    if (!saved) {
+      return res.status(500).json({
+        success: false,
+        message: "Impossible de générer un code unique pour le transfert"
+      });
+    }
 
+    // ===== Repons siksè =====
     return res.status(200).json({
       success: true,
-      message: "Transfert créé avec succès"
+      message: "Transfert créé avec succès",
+      codeUnique: transfertDoc.codeUnique
     });
 
   } catch (err) {
-    console.error("TRANSFERER SERVER ERROR:", err);
+    console.error("TRANSFER SAFE ERROR:", err);
     return res.status(500).json({ success: false, message: "Erreur serveur" });
   }
 });
-
 
 
 
