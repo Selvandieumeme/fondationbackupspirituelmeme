@@ -107,30 +107,38 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    // 🔐 Vérification email déjà existant
-    try {
-      const checkResponse = await fetch(
-        "https://api.fondationbackupspirituel.com/api/wallet/check-email",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email })
-        }
-      );
-
-      const checkData = await checkResponse.json();
-
-      if (!checkData.success) {
-        msgBox.textContent = "⚠️ " + checkData.message;
-        msgBox.style.color = "red";
-        return; // ⛔ BLOKAJ TOTAL
-      }
-    } catch (err) {
-      console.error("Erreur check email:", err);
-      msgBox.textContent = "⚠️ Erreur vérification email, réessayez.";
-      msgBox.style.color = "red";
-      return;
+  // 🔐 Vérification email déjà existant
+try {
+  const checkResponse = await fetch(
+    "https://api.fondationbackupspirituel.com/api/wallet/check-email",
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email })
     }
+  );
+
+  const checkData = await checkResponse.json();
+
+  if (!checkData.success) {
+    msgBox.textContent = "⚠️ " + checkData.message;
+    msgBox.style.color = "red";
+    return; // ⛔ BLOKAJ TOTAL
+  }
+
+  // ✅ NOUVO ETAP SEKIRITE — EMAIL CODE VERIFICATION
+  // 👉 Affiche champ code SANS soumettre le formulaire
+  showEmailCodeBox();
+
+  // ⛔ BLOKE TOUTE SUITE tant ke code email la pa valide
+  return;
+
+} catch (err) {
+  console.error("Erreur check email:", err);
+  msgBox.textContent = "⚠️ Erreur vérification email, réessayez.";
+  msgBox.style.color = "red";
+  return;
+}
 
 
 
