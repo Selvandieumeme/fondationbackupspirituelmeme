@@ -105,6 +105,20 @@
 
 </main>
 
+<script>
+  function togglePassword(inputId, icon) {
+    const input = document.getElementById(inputId);
+
+    if (input.type === "password") {
+      input.type = "text";
+      icon.textContent = "🙈";
+    } else {
+      input.type = "password";
+      icon.textContent = "👁️";
+    }
+  }
+</script>
+
 <footer style="text-align:center; margin-top:40px; color:#6b7280;">
   © 2026 —  FOBAS • Support WhatsApp : +50946057952
 </footer>
