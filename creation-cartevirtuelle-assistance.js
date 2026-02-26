@@ -85,6 +85,66 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 
+function showEmailCodeBox() {
+  const form = document.getElementById("createWalletForm");
+  const msgBox = document.getElementById("wallet-msg");
+
+  if(document.getElementById("emailCodeDiv")) return;
+  const codeDiv = document.createElement("div");
+  codeDiv.id = "emailCodeDiv";
+  codeDiv.innerHTML = `
+    <label><strong>Code de vérification:</strong></label>
+    <input type="text" id="emailCodeInput" placeholder="Entrez code reçu sur Gmail" style="padding:10px; width:100%; border-radius:8px; border:1px solid #cbd5e1; margin-bottom:12px;">
+    <button type="button" id="verifyEmailCodeBtn" style="padding:10px 20px; background:#16a34a; color:#fff; border:none; border-radius:8px; cursor:pointer;">Valider le code</button>
+  `;
+  form.prepend(codeDiv);
+
+  document.getElementById("verifyEmailCodeBtn").addEventListener("click", async () => {
+    const code = document.getElementById("emailCodeInput").value.trim();
+    const email = form.walletEmail.value.trim();
+    if (!code) {
+      msgBox.textContent = "⚠️ Tanpri antre kòd la.";
+      msgBox.style.color = "red";
+      return;
+    }
+
+    try {
+      const response = await fetch("https://api.fondationbackupspirituel.com/api/wallet/verify-email-code", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, code })
+      });
+      const data = await response.json();
+
+      if (data.success) {
+        msgBox.textContent = "✅ Code validé! Ou ka kounye a kreye kont lan.";
+        msgBox.style.color = "#16a34a";
+        document.getElementById("emailCodeDiv").remove();
+        document.getElementById("createWalletForm").submit();
+      } else {
+        msgBox.textContent = "⚠️ " + data.message;
+        msgBox.style.color = "red";
+      }
+    } catch (err) {
+      console.error(err);
+      msgBox.textContent = "⚠️ Erreur serveur, réessayez plus tard.";
+      msgBox.style.color = "red";
+    }
+  });
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 // === WALLET FOBAS SYSTEM === //
 document.addEventListener("DOMContentLoaded", () => {
