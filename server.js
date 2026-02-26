@@ -2721,6 +2721,124 @@ app.post("/api/admin/note", async (req, res) => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// ⚡ Store tanporè (prod: itilize Redis oswa TTL DB)
+let emailCodeStore = {}; // { "user@mail.com": { code: 123456, expires: Date } }
+
+// --- Fonksyon voye email ---
+async function sendEmailCode(email, code) {
+  const transporter = nodemailer.createTransport({
+    service: "gmail",
+    auth: {
+      user: process.env.FOBAS_EMAIL,       // eg: fobas.platform@gmail.com
+      pass: process.env.FOBAS_EMAIL_PASS   // App password Gmail
+    }
+  });
+
+  const mailOptions = {
+    from: `"FOBAS" <${process.env.FOBAS_EMAIL}>`,
+    to: email,
+    subject: "Code de vérification FOBAS",
+    text: `Bonjour,\n\nVotre code de vérification pour votre compte FOBAS est : ${code}\n\nNe partagez jamais ce code !`
+  };
+
+  await transporter.sendMail(mailOptions);
+  console.log(`✅ Code envoyé à ${email}: ${code}`);
+}
+
+// --- Route 1: voye kòd email ---
+router.post("/api/wallet/send-email-code", async (req, res) => {
+  const { email } = req.body;
+  if (!email) return res.status(400).json({ success: false, message: "Email manquant." });
+
+  const code = crypto.randomInt(100000, 999999);
+  emailCodeStore[email] = { code, expires: Date.now() + 5*60*1000 }; // 5 min ekspire
+
+  try {
+    await sendEmailCode(email, code);
+    res.json({ success: true, message: "Code envoyé avec succès." });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, message: "Erreur serveur." });
+  }
+});
+
+// --- Route 2: verifye kòd email ---
+router.post("/api/wallet/verify-email-code", (req, res) => {
+  const { email, code } = req.body;
+  if (!email || !code) return res.status(400).json({ success: false, message: "Email ou code manquant." });
+
+  const record = emailCodeStore[email];
+  if (!record) return res.status(400).json({ success: false, message: "Aucun code trouvé pour cet email." });
+
+  if (Date.now() > record.expires) {
+    delete emailCodeStore[email];
+    return res.status(400).json({ success: false, message: "Code expiré." });
+  }
+
+  if (Number(code) !== record.code) {
+    return res.status(400).json({ success: false, message: "Code incorrect." });
+  }
+
+  delete emailCodeStore[email]; // retire kòd apre verification
+  res.json({ success: true, message: "Code validé avec succès." });
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 // ----------------------- ROUTE API POU ENREGISTRE -----------------------
 app.post("/api/wallet/create", async (req, res) => {
   try {
