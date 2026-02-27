@@ -2779,7 +2779,7 @@ app.post("/api/admin/note", async (req, res) => {
 
 
 // ----------------------- ROUTE API POU ENREGISTRE -----------------------
-app.post("/api/wallet/create", async (req, res) => {
+app.post("/api/wallet/create", upload.single("walletSelfie"), async (req, res) => {
   try {
     const {
       walletFullName,
