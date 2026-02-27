@@ -22,7 +22,6 @@ const WalletUserSchema = new mongoose.Schema({
   whatsapp: String,
   birthDate: String,
   birthPlace: String,  
- selfiePath: { type: String, default: null },
   passwordHash: String,
   sponsorName: { type: String },
   sponsorEmail: { type: String },
