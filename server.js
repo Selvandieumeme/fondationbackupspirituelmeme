@@ -2824,6 +2824,14 @@ app.post("/api/wallet/create", async (req, res) => {
       agentId = "AGT-" + Date.now() + "-" + Math.floor(Math.random() * 1000);
     }
 
+
+
+// --- Chemen selfie si gen fichye ---
+let selfiePath = null;
+if (req.file) {
+  selfiePath = path.join("uploads/selfies", req.file.filename); // sove chemen relativ
+}
+	  
     // --- Kreye nouvo itilizatè ---
     const newWalletUser = new WalletUser({
       fullName: walletFullName,
@@ -2842,6 +2850,7 @@ app.post("/api/wallet/create", async (req, res) => {
       hasDepositedBefore: false,
       agentId: agentId,           // ✅ Ajoute agentId otomatik
       ipAddress: userIp,          // ✅ Capture IP vrè moun nan
+      selfiePath: selfiePath, // ✅ Chemen selfie la
       createdAt: new Date()
     });
 
@@ -2857,6 +2866,7 @@ app.post("/api/wallet/create", async (req, res) => {
     return res.json({
       success: true,
       message: "Demande FOBAS anrejistre avèk siksè!",
+	  selfiePath: selfiePath || 'Pa Upload', // ✅ kle valab
       whatsappLink: waLink
     });
 
