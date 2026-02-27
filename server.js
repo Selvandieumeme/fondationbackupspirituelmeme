@@ -1026,6 +1026,7 @@ const walletUserSchema = new mongoose.Schema({
   sponsorEmail: { type: String },
   accountType: { type: String, required: true },
   hasDepositedBefore: { type: Boolean, default: false },
+  selfiePath: { type: String, default: null },
   createdAt: { type: Date, default: Date.now },
   status: { type: String, default: "pending" },
 
