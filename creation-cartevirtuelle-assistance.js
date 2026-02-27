@@ -272,53 +272,61 @@ document.addEventListener("DOMContentLoaded", () => {
       msgBox.style.color = "#0ea5e9";
     }
 
-    // Récupération done fòmilè
-    const formData = {
-      walletFullName: createWalletForm.walletFullName.value.trim(),
-      walletEmail: createWalletForm.walletEmail.value.trim(),
-      walletRecoveryEmail: createWalletForm.walletRecoveryEmail.value.trim(),
-      walletWhatsApp: createWalletForm.walletWhatsApp.value.trim(),
-      walletBirthDate: createWalletForm.walletBirthDate.value,
-      walletBirthPlace: createWalletForm.walletBirthPlace.value.trim(),
-      walletPassword: createWalletForm.walletPassword.value,
-      walletSponsorName: createWalletForm.walletSponsorName.value.trim(),
-      walletSponsorEmail: createWalletForm.walletSponsorEmail.value.trim(),
-      walletAccountType: createWalletForm.walletAccountType.value
-    };
+   // Récupération done fòmilè
+const formData = new FormData();
+formData.append("walletFullName", createWalletForm.walletFullName.value.trim());
+formData.append("walletEmail", createWalletForm.walletEmail.value.trim());
+formData.append("walletRecoveryEmail", createWalletForm.walletRecoveryEmail.value.trim());
+formData.append("walletWhatsApp", createWalletForm.walletWhatsApp.value.trim());
+formData.append("walletBirthDate", createWalletForm.walletBirthDate.value);
+formData.append("walletBirthPlace", createWalletForm.walletBirthPlace.value.trim());
+formData.append("walletPassword", createWalletForm.walletPassword.value);
+formData.append("walletSponsorName", createWalletForm.walletSponsorName.value.trim());
+formData.append("walletSponsorEmail", createWalletForm.walletSponsorEmail.value.trim());
+formData.append("walletAccountType", createWalletForm.walletAccountType.value);
 
-    try {
-      const response = await fetch("https://api.fondationbackupspirituel.com/api/wallet/create", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData)
-      });
+// --- Ajoute selfie ---
+const selfieInput = createWalletForm.walletSelfie;
+if (selfieInput && selfieInput.files.length > 0) {
+  formData.append("walletSelfie", selfieInput.files[0]);
+}
 
-      const data = await response.json();
-
-      if (msgBox) {
-        if (data.success) {
-          msgBox.textContent = "✅ " + data.message;
-          msgBox.style.color = "#16a34a";
-          createWalletForm.reset();
-        } else {
-          msgBox.textContent = "⚠️ " + data.message;
-          msgBox.style.color = "red";
-        }
-      }
-    } catch (err) {
-      console.error("Erreur fetch:", err);
-      if (msgBox) {
-        msgBox.textContent = "⚠️ Erreur serveur, réessayez plus tard.";
-        msgBox.style.color = "red";
-      }
-    } finally {
-      // Reaktive bouton la
-      submitBtn.disabled = false;
-      submitBtn.textContent = originalText;
-    }
+try {
+  const response = await fetch("https://api.fondationbackupspirituel.com/api/wallet/create", {
+    method: "POST",
+    body: formData // pa mete Content-Type, browser ap mete li otomatikman pou multipart/form-data
   });
+
+  const data = await response.json();
+
+  if (msgBox) {
+    if (data.success) {
+      msgBox.textContent = "✅ " + data.message;
+      msgBox.style.color = "#16a34a";
+      createWalletForm.reset();
+    } else {
+      msgBox.textContent = "⚠️ " + data.message;
+      msgBox.style.color = "red";
+    }
+  }
+} catch (err) {
+  console.error("Erreur fetch:", err);
+  if (msgBox) {
+    msgBox.textContent = "⚠️ Erreur serveur, réessayez plus tard.";
+    msgBox.style.color = "red";
+  }
+} finally {
+  // Reaktive bouton la
+  submitBtn.disabled = false;
+  submitBtn.textContent = originalText;
+}
+}); 
 });
 
+
+
+
+    
 // ====== ANIMATION CSS POUR LOADER ======
 const style = document.createElement('style');
 style.innerHTML = `
