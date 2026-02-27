@@ -26,6 +26,8 @@ const sharp = require('sharp');
 const fs = require('fs'); // <-- AJOUTE LIG SA A LA OUVÈTI BLOK LA
 
 
+// --- AJOUT FILEUPLOAD APRE TOUT REQUIRE
+const fileUpload = require("express-fileupload");
 
 // ----------------------- MODELS -----------------------
 const VipSession = require('./models/VipSession.js');   // CommonJS
@@ -37,7 +39,12 @@ const app = express();
 app.use(cors()); 
 app.use(express.json());
 
-
+// --- EXPRESS-FILEUPLOAD GLOBAL MIDDLEWARE
+app.use(fileUpload({
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB max
+  abortOnLimit: true,
+  createParentPath: true
+}));
 
 
 
@@ -2780,7 +2787,7 @@ app.post("/api/admin/note", async (req, res) => {
 
 
 // ----------------------- ROUTE API POU ENREGISTRE -----------------------
-app.post("/api/wallet/create", upload.single("walletSelfie"), async (req, res) => {
+app.post("/api/wallet/create", async (req, res) => {
   try {
     const {
       walletFullName,
@@ -2828,10 +2835,23 @@ app.post("/api/wallet/create", upload.single("walletSelfie"), async (req, res) =
 
 
 
-// --- Chemen selfie si gen fichye ---
+// --- Gestion selfie SANS multer ---
 let selfiePath = null;
-if (req.file) {
-  selfiePath = path.join("uploads/selfies", req.file.filename); // sove chemen relativ
+
+if (req.files && req.files.walletSelfie) {
+  const selfieFile = req.files.walletSelfie;
+
+  // Verifye si se imaj
+  if (!selfieFile.mimetype.startsWith("image/")) {
+    return res.status(400).json({ success:false, message:"Selfie doit être une image" });
+  }
+
+  const fileName = Date.now() + "-" + selfieFile.name;
+  const uploadPath = path.join(__dirname, "uploads", "selfies", fileName);
+
+  await selfieFile.mv(uploadPath);
+
+  selfiePath = path.join("uploads/selfies", fileName);
 }
 	  
     // --- Kreye nouvo itilizatè ---
