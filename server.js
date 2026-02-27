@@ -26,8 +26,7 @@ const sharp = require('sharp');
 const fs = require('fs'); // <-- AJOUTE LIG SA A LA OUVÈTI BLOK LA
 
 
-// --- AJOUT FILEUPLOAD APRE TOUT REQUIRE
-const fileUpload = require("express-fileupload");
+
 
 // ----------------------- MODELS -----------------------
 const VipSession = require('./models/VipSession.js');   // CommonJS
@@ -39,12 +38,7 @@ const app = express();
 app.use(cors()); 
 app.use(express.json());
 
-// --- EXPRESS-FILEUPLOAD GLOBAL MIDDLEWARE
-app.use(fileUpload({
-  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB max
-  abortOnLimit: true,
-  createParentPath: true
-}));
+
 
 
 
@@ -1033,7 +1027,6 @@ const walletUserSchema = new mongoose.Schema({
   sponsorEmail: { type: String },
   accountType: { type: String, required: true },
   hasDepositedBefore: { type: Boolean, default: false },
-  selfiePath: { type: String, default: null },
   createdAt: { type: Date, default: Date.now },
   status: { type: String, default: "pending" },
 
@@ -2833,26 +2826,7 @@ app.post("/api/wallet/create", async (req, res) => {
       agentId = "AGT-" + Date.now() + "-" + Math.floor(Math.random() * 1000);
     }
 
-
-
-// --- Gestion selfie SANS multer ---
-let selfiePath = null;
-
-if (req.files && req.files.walletSelfie) {
-  const selfieFile = req.files.walletSelfie;
-
-  // Verifye si se imaj
-  if (!selfieFile.mimetype.startsWith("image/")) {
-    return res.status(400).json({ success:false, message:"Selfie doit être une image" });
-  }
-
-  const fileName = Date.now() + "-" + selfieFile.name;
-  const uploadPath = path.join(__dirname, "uploads", "selfies", fileName);
-
-  await selfieFile.mv(uploadPath);
-
-  selfiePath = path.join("uploads/selfies", fileName);
-}
+	  
 	  
     // --- Kreye nouvo itilizatè ---
     const newWalletUser = new WalletUser({
@@ -2872,7 +2846,6 @@ if (req.files && req.files.walletSelfie) {
       hasDepositedBefore: false,
       agentId: agentId,           // ✅ Ajoute agentId otomatik
       ipAddress: userIp,          // ✅ Capture IP vrè moun nan
-      selfiePath: selfiePath, // ✅ Chemen selfie la
       createdAt: new Date()
     });
 
@@ -2888,7 +2861,6 @@ if (req.files && req.files.walletSelfie) {
     return res.json({
       success: true,
       message: "Demande FOBAS anrejistre avèk siksè!",
-	  selfiePath: selfiePath || 'Pa Upload', // ✅ kle valab
       whatsappLink: waLink
     });
 
