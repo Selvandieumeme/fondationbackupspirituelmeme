@@ -2798,11 +2798,6 @@ app.post("/api/wallet/create", upload.single("walletSelfie"), async (req, res) =
       return res.status(400).json({ success: false, message: "Tout chan obligatwa." });
     }
 	  
-	// ✅ ICI EXACTEMENT (NOUVO AJOUT — PA TOUCHE LOT KOD)
-    let selfiePath = null;
-    if (req.file) {
-      selfiePath = "uploads/selfies/" + req.file.filename;
-    }
 	  
     // 🔐 BLOKAJ EMAIL DOUBLON (AJOUT SANS MODIFICATION)
     const emailExist = await WalletUser.findOne({
