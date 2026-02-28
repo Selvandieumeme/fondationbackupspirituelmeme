@@ -1,0 +1,22 @@
+---
+- hosts: vps3
+  become: yes
+  tasks:
+    - name: Update apt packages
+      apt:
+        update_cache: yes
+    - name: Install Node.js
+      apt:
+        name: nodejs
+        state: present
+    - name: Install npm
+      apt:
+        name: npm
+        state: present
+    - name: Deploy FOBAS workers code
+      copy:
+        src: ../../../fondationbackupspirituelmeme/
+        dest: /home/ubuntu/fobas-workers
+        owner: ubuntu
+        group: ubuntu
+        mode: 0755
