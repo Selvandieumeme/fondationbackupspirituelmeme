@@ -1,0 +1,9 @@
+---
+- name: Configure FOBAS VPS3
+  hosts: vps3
+  become: yes
+  tasks:
+    - name: Update packages
+      apt:
+        update_cache: yes
+        upgrade: dist
