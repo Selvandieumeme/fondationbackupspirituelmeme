@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Suppression de compte - FOBAS</title>
+<style>
+    /* Body and main colors */
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background: #ffffff; /* blan */
+        margin: 0;
+        padding: 0;
+        color: #1A1A1A;
+    }
+
+    header {
+        background: linear-gradient(90deg, #FFD700, #1E90FF); /* jòn + ble */
+        color: #ffffff;
+        padding: 40px 20px;
+        text-align: center;
+        font-size: 2em;
+        font-weight: bold;
+        letter-spacing: 1px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+
+    main {
+        max-width: 900px;
+        margin: 40px auto;
+        padding: 20px;
+    }
+
+    h2 {
+        color: #1E90FF; /* ble */
+        margin-bottom: 15px;
+        font-size: 1.5em;
+    }
+
+    p {
+        font-size: 1em;
+        line-height: 1.6;
+        margin-bottom: 20px;
+    }
+
+    ul {
+        margin-left: 20px;
+        margin-bottom: 20px;
+    }
+
+    .contact-links a {
+        display: inline-block;
+        text-decoration: none;
+        margin: 10px 10px 10px 0;
+        padding: 12px 20px;
+        border-radius: 8px;
+        font-weight: bold;
+        color: #ffffff;
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .whatsapp {
+        background-color: #25D366; /* WhatsApp green */
+    }
+
+    .email {
+        background-color: #1E90FF; /* blue */
+    }
+
+    .contact-links a:hover {
+        transform: scale(1.05);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+
+    .section {
+        margin-bottom: 40px;
+        padding: 20px;
+        border-left: 6px solid #FFD700; /* jòn */
+        background: #f9f9f9;
+        border-radius: 8px;
+    }
+
+    footer {
+        text-align: center;
+        padding: 20px;
+        font-size: 0.9em;
+        color: #555555;
+        background: #ffffff;
+        border-top: 1px solid #e0e0e0;
+    }
+
+</style>
+</head>
+<body>
+
+<header>
+    Suppression de compte - FOBAS
+</header>
+
+<main>
+    <div class="section">
+        <h2>Quels types de données seront effacés ?</h2>
+        <p>Toutes les informations personnelles associées à votre compte FOBAS seront supprimées, y compris :</p>
+        <ul>
+            <li>Nom d'utilisateur et email</li>
+            <li>Données de profil et préférences</li>
+            <li>Contenus interactifs et historiques d'utilisation</li>
+        </ul>
+    </div>
+
+    <div class="section">
+        <h2>Durée de conservation des données</h2>
+        <p>Les données utilisateur sont conservées temporairement afin d'assurer le bon fonctionnement du service. Toutes les données seront automatiquement supprimées dans un délai maximum de <strong>90 jours</strong> après réception de la demande.</p>
+    </div>
+
+    <div class="section">
+        <h2>Comment demander la suppression de votre compte</h2>
+        <p>Pour demander la suppression complète de votre compte et de toutes vos données, veuillez nous contacter via l'un des moyens suivants :</p>
+        <div class="contact-links">
+            <a class="whatsapp" href="https://wa.me/50943706706" target="_blank">WhatsApp: +509 43 70 67 06</a>
+            <a class="email" href="mailto:fobas614@gmail.com">Email: fobas614@gmail.com</a>
+        </div>
+        <p>Notre équipe traitera votre demande rapidement et vous informera lorsque vos données auront été entièrement supprimées.</p>
+    </div>
+</main>
+
+<footer>
+    &copy; 2026 FOBAS - Plateforme Digitale Tous Services en Ligne
+</footer>
+
+</body>
+</html>
