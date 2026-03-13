@@ -369,3 +369,47 @@ font-size:28px;
 }
 
 }
+
+
+
+
+
+
+
+/* ==============================
+   MOLHA BANNER (CODE ISOLE)
+   ============================== */
+
+.molha-banner-wrapper{
+
+width:100%;
+display:flex;
+justify-content:center;
+align-items:center;
+
+padding:15px 0;
+
+background:linear-gradient(90deg,#000000,#b30000);
+
+}
+
+.molha-banner-img{
+
+width:92%;
+max-width:1250px;
+
+border-radius:8px;
+
+box-shadow:0px 6px 18px rgba(0,0,0,0.4);
+
+transition:transform 0.3s ease;
+
+}
+
+/* Effet léger */
+
+.molha-banner-img:hover{
+
+transform:scale(1.01);
+
+}
