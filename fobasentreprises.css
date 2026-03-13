@@ -3,13 +3,13 @@
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    font-family: Arial, sans-serif;
+    font-family: 'Arial', sans-serif;
 }
 
 /* Header */
 header {
-    background: #0d1b2a;
-    color: white;
+    background: #023e8a; /* ble FOBAS fonse */
+    color: #fff;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -17,226 +17,252 @@ header {
     position: sticky;
     top: 0;
     z-index: 1000;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
 }
 
 header .logo h1 {
-    font-size: 26px;
-    color: #00b4d8;
+    font-size: 28px;
+    color: #ffd60a; /* jòn FOBAS */
 }
 
 header .logo p {
     font-size: 14px;
-    color: white;
+    color: #ffffff;
 }
 
 nav a {
-    color: white;
-    margin-left: 20px;
+    color: #ffffff;
+    margin-left: 25px;
     text-decoration: none;
-    font-weight: bold;
+    font-weight: 600;
     transition: color 0.3s ease;
 }
 
 nav a:hover {
-    color: #00b4d8;
+    color: #ffd60a; /* jòn pou hover */
 }
 
 /* Hero Section */
 .hero {
-    background: #1b263b url('hero-bg.jpg') center/cover no-repeat;
-    color: white;
+    background: linear-gradient(rgba(2,62,138,0.8), rgba(2,62,138,0.8)), url('hero-bg.jpg') center/cover no-repeat;
+    color: #ffffff;
     text-align: center;
-    padding: 100px 20px;
+    padding: 120px 20px;
+    border-bottom: 5px solid #ffd60a;
 }
 
 .hero h2 {
-    font-size: 38px;
+    font-size: 42px;
     margin-bottom: 20px;
+    color: #ffd60a;
+    text-shadow: 2px 2px 5px rgba(0,0,0,0.4);
 }
 
 .hero p {
-    font-size: 18px;
-    max-width: 600px;
-    margin: 0 auto 30px;
+    font-size: 20px;
+    max-width: 650px;
+    margin: 0 auto 35px;
+    line-height: 1.6;
 }
 
 .hero button {
-    padding: 15px 35px;
+    padding: 18px 40px;
     font-size: 18px;
-    color: white;
-    background: #00b4d8;
+    color: #023e8a;
+    background: #ffd60a;
     border: none;
     cursor: pointer;
-    border-radius: 5px;
-    transition: background 0.3s ease;
+    border-radius: 8px;
+    font-weight: bold;
+    transition: background 0.3s ease, transform 0.3s ease;
 }
 
 .hero button:hover {
-    background: #0077b6;
+    background: #ffea00;
+    transform: translateY(-3px);
 }
 
 /* Services Section */
 .services {
-    padding: 60px 20px;
+    padding: 70px 20px;
     text-align: center;
-    background: #f5f5f5;
+    background: #ffffff;
 }
 
 .services h2 {
-    font-size: 32px;
-    margin-bottom: 40px;
+    font-size: 36px;
+    margin-bottom: 45px;
+    color: #023e8a;
 }
 
 .cards {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
-    gap: 25px;
+    gap: 30px;
 }
 
 .card {
-    background: white;
-    padding: 30px;
-    width: 250px;
-    border-radius: 8px;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-    transition: transform 0.3s ease;
+    background: #f9f9f9;
+    padding: 35px;
+    width: 270px;
+    border-radius: 12px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .card:hover {
-    transform: translateY(-5px);
+    transform: translateY(-7px);
+    box-shadow: 0 12px 25px rgba(0,0,0,0.18);
 }
 
 /* Pricing Section */
 .pricing {
-    padding: 60px 20px;
+    padding: 70px 20px;
     text-align: center;
+    background: #e0f7fa;
 }
 
 .pricing h2 {
-    font-size: 32px;
-    margin-bottom: 40px;
+    font-size: 36px;
+    margin-bottom: 45px;
+    color: #023e8a;
 }
 
 .pricing-container {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
-    gap: 25px;
+    gap: 30px;
 }
 
 .price-card {
-    background: white;
-    padding: 30px;
-    width: 220px;
-    border-radius: 8px;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-    transition: transform 0.3s ease;
+    background: #ffffff;
+    padding: 35px;
+    width: 240px;
+    border-radius: 12px;
+    border-top: 5px solid #ffd60a;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .price-card:hover {
-    transform: translateY(-5px);
+    transform: translateY(-7px);
+    box-shadow: 0 12px 25px rgba(0,0,0,0.18);
 }
 
 .price-card h3 {
-    font-size: 20px;
+    font-size: 22px;
     margin-bottom: 15px;
+    color: #023e8a;
 }
 
 .price-card p {
-    font-size: 22px;
-    color: #0077b6;
+    font-size: 24px;
+    color: #ffd60a;
 }
 
 /* Entreprises Section */
 .entreprises {
-    padding: 60px 20px;
+    padding: 70px 20px;
     text-align: center;
-    background: #f5f5f5;
+    background: #ffffff;
 }
 
 .entreprises h2 {
-    font-size: 32px;
-    margin-bottom: 25px;
+    font-size: 34px;
+    margin-bottom: 30px;
+    color: #023e8a;
 }
 
 .entreprise-list {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
-    gap: 15px;
+    gap: 20px;
 }
 
 .entreprise-card {
     display: block;
-    padding: 15px 25px;
-    background: #0077b6;
-    color: white;
-    border-radius: 5px;
+    padding: 18px 28px;
+    background: #023e8a;
+    color: #ffd60a;
+    border-radius: 8px;
     text-decoration: none;
     font-weight: bold;
-    transition: background 0.3s ease;
+    transition: background 0.3s ease, transform 0.3s ease;
 }
 
 .entreprise-card:hover {
-    background: #00b4d8;
+    background: #0077b6;
+    transform: translateY(-3px);
 }
 
 /* Register Section */
 .register {
-    padding: 60px 20px;
+    padding: 70px 20px;
     text-align: center;
+    background: #f9f9f9;
 }
 
 .register h2 {
-    font-size: 32px;
-    margin-bottom: 30px;
+    font-size: 34px;
+    margin-bottom: 35px;
+    color: #023e8a;
 }
 
 form {
     display: flex;
     flex-direction: column;
-    gap: 15px;
-    max-width: 400px;
+    gap: 18px;
+    max-width: 450px;
     margin: 0 auto;
 }
 
 input, select, button {
-    padding: 12px;
-    font-size: 16px;
-    border-radius: 5px;
+    padding: 14px;
+    font-size: 17px;
+    border-radius: 8px;
     border: 1px solid #ccc;
 }
 
+input:focus, select:focus {
+    outline: none;
+    border: 2px solid #ffd60a;
+}
+
 button {
-    background: #00b4d8;
-    color: white;
+    background: #ffd60a;
+    color: #023e8a;
+    font-weight: bold;
     border: none;
     cursor: pointer;
-    font-weight: bold;
+    transition: background 0.3s ease, transform 0.3s ease;
 }
 
 button:hover {
-    background: #0077b6;
+    background: #ffea00;
+    transform: translateY(-3px);
 }
 
 /* Footer */
 footer {
-    background: #0d1b2a;
+    background: #023e8a;
     color: white;
     text-align: center;
-    padding: 25px 20px;
+    padding: 30px 20px;
 }
 
 .footer-links a {
-    color: #00b4d8;
-    margin: 0 10px;
+    color: #ffd60a;
+    margin: 0 12px;
     text-decoration: none;
     font-weight: bold;
+    transition: color 0.3s ease;
 }
 
 .footer-links a:hover {
-    color: white;
+    color: #ffffff;
 }
 
 /* Responsive */
@@ -244,5 +270,8 @@ footer {
     .cards, .pricing-container, .entreprise-list {
         flex-direction: column;
         align-items: center;
+    }
+    .hero h2 {
+        font-size: 32px;
     }
 }
