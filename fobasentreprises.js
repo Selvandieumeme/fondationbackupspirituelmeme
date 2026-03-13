@@ -11,7 +11,7 @@ const categories = [
     "E-Clinique","E-Pharmacie","E-Banque","E-AgenceVoyage","E-Immobilier",
     "E-Universite","E-Media","E-Transport","E-Construction","E-Assurance",
     "E-Consulting","E-Association","E-Industrie","E-Agriculture","E-Startup",
-    "E-Entreprise","E-Freelance","E-Technologie","E-Marketing","E-Evenementiel",
+    "E-Entreprise","E-Freelance","E-Technologie","E-Marketing","E-Politique",
     "E-Securite","E-Formation","E-Logistique","E-ServiceJuridique","E-Finance"
 ];
 
