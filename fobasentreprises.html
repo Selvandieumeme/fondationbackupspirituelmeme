@@ -186,6 +186,62 @@ N.B: Bonis espesyal pou 10 premye antrepriz ki chwazi opsyon <strong>Créer Prop
 <p>© 2026 FOBAS-ENTREPRISES</p>
 </footer>
 
+
+
+
+
+
+
+
+
+
+<script>
+
+// Script pou voye done fòm enskripsyon antrepriz sou email san CAPTCHA
+document.getElementById("formEntreprise").addEventListener("submit", function(event) {
+
+event.preventDefault(); // bloke redireksyon paj la
+
+const form = document.getElementById("formEntreprise");
+
+// URL FormSubmit
+const formSubmitURL = "https://formsubmit.co/ajax/fobas614@gmail.com";
+
+// Kreye FormData ak tout chan fòm yo
+const formData = new FormData(form);
+
+// Ajoute subject email la
+formData.append("_subject", "Nouvo Enskripsyon Antrepriz sou FOBAS-ENTREPRISES");
+
+// Asire pa gen captcha
+formData.append("_captcha", "false");
+
+// Voye done yo ak AJAX
+fetch(formSubmitURL, {
+method: "POST",
+body: formData
+})
+.then(response => response.json())
+.then(data => {
+
+alert("Enskripsyon w lan ale avèk siksè jwenn Fondateur Platfom nan.");
+
+form.reset(); // vide fòm nan apre voye
+
+})
+.catch(error => {
+
+alert("Gen yon ti erè pandan voye enskripsyon an. Tanpri eseye ankò.");
+
+console.error("Erreur:", error);
+
+});
+
+});
+
+</script>
+  
+  
 <script src="fobasentreprises.js"></script>
 
 </body>
