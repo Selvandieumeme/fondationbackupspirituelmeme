@@ -84,3 +84,21 @@ heroButton.addEventListener("mouseout", function(){
 heroButton.style.transform = "scale(1)";
 
 });
+
+
+
+/* ==========================
+   MOLHA BANNER SCRIPT
+   ========================== */
+
+document.addEventListener("DOMContentLoaded", function(){
+
+const banner = document.querySelector(".molha-banner-img");
+
+if(banner){
+
+console.log("Banner MOLHA chargé avec succès.");
+
+}
+
+});
