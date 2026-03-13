@@ -1,0 +1,248 @@
+/* Reset baz */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
+}
+
+/* Header */
+header {
+    background: #0d1b2a;
+    color: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 40px;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+header .logo h1 {
+    font-size: 26px;
+    color: #00b4d8;
+}
+
+header .logo p {
+    font-size: 14px;
+    color: white;
+}
+
+nav a {
+    color: white;
+    margin-left: 20px;
+    text-decoration: none;
+    font-weight: bold;
+    transition: color 0.3s ease;
+}
+
+nav a:hover {
+    color: #00b4d8;
+}
+
+/* Hero Section */
+.hero {
+    background: #1b263b url('hero-bg.jpg') center/cover no-repeat;
+    color: white;
+    text-align: center;
+    padding: 100px 20px;
+}
+
+.hero h2 {
+    font-size: 38px;
+    margin-bottom: 20px;
+}
+
+.hero p {
+    font-size: 18px;
+    max-width: 600px;
+    margin: 0 auto 30px;
+}
+
+.hero button {
+    padding: 15px 35px;
+    font-size: 18px;
+    color: white;
+    background: #00b4d8;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;
+    transition: background 0.3s ease;
+}
+
+.hero button:hover {
+    background: #0077b6;
+}
+
+/* Services Section */
+.services {
+    padding: 60px 20px;
+    text-align: center;
+    background: #f5f5f5;
+}
+
+.services h2 {
+    font-size: 32px;
+    margin-bottom: 40px;
+}
+
+.cards {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 25px;
+}
+
+.card {
+    background: white;
+    padding: 30px;
+    width: 250px;
+    border-radius: 8px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    transition: transform 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+}
+
+/* Pricing Section */
+.pricing {
+    padding: 60px 20px;
+    text-align: center;
+}
+
+.pricing h2 {
+    font-size: 32px;
+    margin-bottom: 40px;
+}
+
+.pricing-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 25px;
+}
+
+.price-card {
+    background: white;
+    padding: 30px;
+    width: 220px;
+    border-radius: 8px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    transition: transform 0.3s ease;
+}
+
+.price-card:hover {
+    transform: translateY(-5px);
+}
+
+.price-card h3 {
+    font-size: 20px;
+    margin-bottom: 15px;
+}
+
+.price-card p {
+    font-size: 22px;
+    color: #0077b6;
+}
+
+/* Entreprises Section */
+.entreprises {
+    padding: 60px 20px;
+    text-align: center;
+    background: #f5f5f5;
+}
+
+.entreprises h2 {
+    font-size: 32px;
+    margin-bottom: 25px;
+}
+
+.entreprise-list {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 15px;
+}
+
+.entreprise-card {
+    display: block;
+    padding: 15px 25px;
+    background: #0077b6;
+    color: white;
+    border-radius: 5px;
+    text-decoration: none;
+    font-weight: bold;
+    transition: background 0.3s ease;
+}
+
+.entreprise-card:hover {
+    background: #00b4d8;
+}
+
+/* Register Section */
+.register {
+    padding: 60px 20px;
+    text-align: center;
+}
+
+.register h2 {
+    font-size: 32px;
+    margin-bottom: 30px;
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    max-width: 400px;
+    margin: 0 auto;
+}
+
+input, select, button {
+    padding: 12px;
+    font-size: 16px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+}
+
+button {
+    background: #00b4d8;
+    color: white;
+    border: none;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+button:hover {
+    background: #0077b6;
+}
+
+/* Footer */
+footer {
+    background: #0d1b2a;
+    color: white;
+    text-align: center;
+    padding: 25px 20px;
+}
+
+.footer-links a {
+    color: #00b4d8;
+    margin: 0 10px;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.footer-links a:hover {
+    color: white;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .cards, .pricing-container, .entreprise-list {
+        flex-direction: column;
+        align-items: center;
+    }
+}
