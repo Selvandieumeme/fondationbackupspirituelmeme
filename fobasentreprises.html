@@ -13,7 +13,7 @@
 <header>
 <div class="logo">
 <h1>FOBAS-ENTREPRISES</h1>
-<p>Espas Digital pou Antrepriz an Haiti ak Entènasyonal</p>
+<p>Espas Digital pou Antrepriz an Haiti ak Entènasyonal, Enskropsyon 2500 Gourdes</p>
 </div>
 
 <nav>
@@ -102,6 +102,96 @@ N.B: Bonis espesyal pou 10 premye antrepriz ki chwazi opsyon <strong>Créer Prop
 </div>
 </section>
 
+
+
+
+
+
+
+<!-- ============================= -->
+<!-- SERVICE CREATION SITE WEB -->
+<!-- ============================= -->
+
+<section id="web-service-fobas" class="web-service-fobas">
+
+<h2>💻 Sèvis Kreyasyon Site Web – FOBAS-ENTREPRISES</h2>
+
+<div class="web-service-grid">
+
+<!-- PME -->
+<div class="web-service-card">
+
+<h3>1️⃣ Pou Piti ak Mwayen Antrepriz (PME)</h3>
+
+<h4>Pri Devlopman Inisyal</h4>
+<p class="price">💰 300 000 HTG (yon sèl fwa)</p>
+
+<h4>Pri Jesyon Teknik Chak Mwa</h4>
+<p class="price">💰 30 000 HTG / mwa</p>
+
+<h4>Sa sèvis sa a gen ladan li</h4>
+
+<ul>
+<li>Konsepsyon site web pwofesyonèl</li>
+<li>Devlopman frontend + backend</li>
+<li>Entèfas administrasyon antrepriz la</li>
+<li>Optimizasyon sekirite sistèm</li>
+<li>Entègrasyon fòm kontak ak sèvis kliyan</li>
+<li>Estrikti pou SEO ak vizibilite entènèt</li>
+</ul>
+
+<h4>Sa ki pa enkli nan pri sa</h4>
+
+<ul class="not-included">
+<li>Acha non domèn</li>
+<li>Abònman email pwofesyonèl</li>
+<li>Abònman serveur / VPS</li>
+<li>Depo baz done</li>
+<li>Lòt sèvis espesyal</li>
+</ul>
+
+</div>
+
+<!-- GWO ENTREPRIZ -->
+
+<div class="web-service-card">
+
+<h3>2️⃣ Pou Gwo Antrepriz</h3>
+
+<h4>Pri Devlopman Inisyal</h4>
+<p class="price">💰 500 000 HTG (yon sèl fwa)</p>
+
+<h4>Pri Jesyon Teknik Chak Mwa</h4>
+<p class="price">💰 50 000 HTG / mwa</p>
+
+<h4>Sa sèvis sa a gen ladan li</h4>
+
+<ul>
+<li>Achitekti site web nivo antrepriz</li>
+<li>Devlopman sistèm digital avanse</li>
+<li>Dashboard jesyon biznis</li>
+<li>Entègrasyon API ak lòt sistèm</li>
+<li>Pwoteksyon sekirite nivo pwofesyonèl</li>
+<li>Optimizasyon pèfòmans ak trafik</li>
+</ul>
+
+<h4>Sa ki pa enkli</h4>
+
+<ul class="not-included">
+<li>Non domèn</li>
+<li>Serveur</li>
+<li>Email pwofesyonèl</li>
+<li>Baz done</li>
+<li>Lòt sèvis ekstèn</li>
+</ul>
+
+</div>
+
+</div>
+
+</section>
+
+  
 <section id="entreprises" class="entreprises">
 <h2>Entreprises Déjà Inscrites</h2>
 <div class="entreprise-list">
@@ -284,6 +374,55 @@ console.error("Erreur:", error);
 });
 
 });
+
+</script>
+
+
+
+
+<script>
+
+/* =============================== */
+/* FOBAS WEB SERVICE SCRIPT */
+/* TOTALMAN ENDEPANDAN */
+/* =============================== */
+
+(function(){
+
+const serviceSection = document.getElementById("web-service-fobas");
+
+if(!serviceSection) return;
+
+/* Animation aparisyon */
+
+const observer = new IntersectionObserver(entries => {
+
+entries.forEach(entry => {
+
+if(entry.isIntersecting){
+
+entry.target.style.opacity = "1";
+entry.target.style.transform = "translateY(0px)";
+
+}
+
+});
+
+},{threshold:0.2});
+
+const cards = serviceSection.querySelectorAll(".web-service-card");
+
+cards.forEach(card=>{
+
+card.style.opacity="0";
+card.style.transform="translateY(40px)";
+card.style.transition="all 0.6s ease";
+
+observer.observe(card);
+
+});
+
+})();
 
 </script>
   
