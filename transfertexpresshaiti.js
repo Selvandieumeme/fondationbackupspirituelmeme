@@ -219,7 +219,7 @@ document.addEventListener("DOMContentLoaded", () => {
       };
 
       try {
-        const response = await fetch("https://api.fondationbackupspirituel.com/api/transferts", {
+        const response = await fetch("/api/transferer", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(data)
