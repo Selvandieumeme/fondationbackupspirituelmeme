@@ -6,15 +6,15 @@ async function createTransfer(data) {
   try {
 
     // ================= MONTANT =================
-    const montant_htg = Number(data.montant);
+    const montant = Number(data.montant);
 
-    if (!montant_htg || montant_htg <= 0) {
+    if (!montant || montant <= 0) {
       return { error: "Montant invalide" };
     }
 
     // ================= CALCUL FRAIS =================
-    const frais = calculateFee(montant_htg);
-    const total_client = montant_htg + frais;
+    const frais = calculateFee(montant);
+    const total_expediteur = montant + frais;
 
     // ================= GENERATION CODE UNIQUE =================
     const code = generateCode();
@@ -38,11 +38,11 @@ async function createTransfer(data) {
       beneficiaire_adresse: data.beneficiaireAdresse,
       beneficiaire_telephone: data.beneficiaireTelephone,
 
-      montant_htg: montant_htg,
+      montant: montant,
       devise: data.devise,
 
       frais_transfert: frais,
-      total_client: total_client,
+      total_expediteur: total_expediteur,
       code: code
 
       // statut, dateCreation, dateExpiration ap jere pa API FOBAS
@@ -68,9 +68,9 @@ async function createTransfer(data) {
     return {
       success: true,
       code: code,
-      montant_reception: montant_htg,
+      montant_beneficiaire: montant,
       frais: frais,
-      total_client: total_client
+      total_expediteur: total_expediteur
     };
 
   } catch (err) {
