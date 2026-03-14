@@ -69,7 +69,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   majBouton();
 
-  // ===================== BOUTON TRANSFERT EXPRESS (VERIF TIT) =====================
+  // ===================== BOUTON TRANSFERT EXPRESS =====================
   if (btnTransfertExpress) {
     btnTransfertExpress.addEventListener("click", (e) => {
       e.preventDefault();
@@ -77,23 +77,22 @@ document.addEventListener("DOMContentLoaded", () => {
       const titreUtilisateur =
         userAccountTypeEl?.innerText.replace("Tit / Statut:", "").trim() || "";
 
-      // ⛔ BLOKAJ TOTAL SI PA OTORIZE
       if (!titresAutorises.includes(titreUtilisateur)) {
         alert("Ou pa gen otorizasyon pou antre nan espas sa");
         return;
       }
 
-      // ✅ OTORIZE
       if (loaderDiv) loaderDiv.style.display = "flex";
 
       setTimeout(() => {
+
         if (loaderDiv) loaderDiv.style.display = "none";
 
-        // Stockage frontend seulement
         sessionStorage.setItem(
           "fobas_agent_nom",
           userNameEl?.innerText.trim() || ""
         );
+
         sessionStorage.setItem(
           "fobas_agent_email",
           userEmailEl?.innerText.trim() || ""
@@ -102,93 +101,27 @@ document.addEventListener("DOMContentLoaded", () => {
         alert("Acces Transfert Express FOBAS autorise avec succes");
 
         window.location.href = "transfertexpresshaiti.html";
+
       }, 800);
     });
   }
 
-  // ===================== INITIALISATION PAGE TRANSFERT =====================
+  // ===================== INITIALISATION =====================
   remplirAgentDepuisSession();
-
-  // ✅ Pa mete `statut`, `dateDuJour`, ni `expiration`, backend ap jere yo
-});
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// ================= TRANSFERT EXPRESS FINAL (FRONTEND ONLY) =================
-document.addEventListener("DOMContentLoaded", () => {
-
-  // ===================== ELEMENTS FORMULAIRE =====================
-  const agentNomInput = document.getElementById("agent_nom");
-  const agentEmailInput = document.getElementById("agent_email");
-
-  const expNom = document.getElementById("exp_nom");
-  const expDocument = document.getElementById("exp_document");
-  const expPays = document.getElementById("exp_pays");
-  const expVille = document.getElementById("exp_ville");
-  const expAdresse = document.getElementById("exp_adresse");
-  const expWhatsapp = document.getElementById("exp_whatsapp");
-
-  const benNom = document.getElementById("ben_nom");
-  const benPays = document.getElementById("ben_pays");
-  const benVille = document.getElementById("ben_ville");
-  const benAdresse = document.getElementById("ben_adresse");
-  const benWhatsapp = document.getElementById("ben_whatsapp");
-
-  const montantInput = document.getElementById("montant");
-  const deviseSelect = document.getElementById("devise");
-
-  const btnTransferer = document.getElementById("btn-transferer");
-
-  // ===================== FONKSYON VALIDASYON =====================
-  function validerFormulaire() {
-    const champs = [
-      agentNomInput, agentEmailInput,
-      expNom, expDocument, expPays, expVille, expAdresse, expWhatsapp,
-      benNom, benPays, benVille, benAdresse, benWhatsapp,
-      montantInput, deviseSelect
-    ];
-    return champs.every(c => c && c.value.trim() !== "");
-  }
-
-  function majBouton() {
-    if (btnTransferer) {
-      btnTransferer.disabled = !validerFormulaire();
-    }
-  }
-
-  // ===================== ECOUTEURS CHAMP =====================
-  [
-    agentNomInput, agentEmailInput,
-    expNom, expDocument, expPays, expVille, expAdresse, expWhatsapp,
-    benNom, benPays, benVille, benAdresse, benWhatsapp,
-    montantInput, deviseSelect
-  ].forEach(el => {
-    el?.addEventListener("input", majBouton);
-    el?.addEventListener("change", majBouton);
-  });
-
-  majBouton();
 
   // ===================== BOUTON TRANSFERER =====================
   if (btnTransferer) {
     btnTransferer.addEventListener("click", async (e) => {
+
       e.preventDefault();
+
+      // 🔒 BLOKAJ DOUBLE TRANSFERT
+      if (window.transfertEnCours) return;
+      window.transfertEnCours = true;
 
       if (!validerFormulaire()) {
         alert("Tanpri ranpli tout chan obligatwa yo.");
+        window.transfertEnCours = false;
         return;
       }
 
@@ -200,7 +133,7 @@ document.addEventListener("DOMContentLoaded", () => {
         agentEmail: agentEmailInput.value.trim(),
 
         expediteurNom: expNom.value.trim(),
-        expediteurDocumentType: "", // backend ka jere si bezwen
+        expediteurDocumentType: "",
         expediteurDocumentNumero: expDocument.value.trim(),
         expediteurPays: expPays.value.trim(),
         expediteurVille: expVille.value.trim(),
@@ -215,10 +148,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
         montant: Number(montantInput.value),
         devise: deviseSelect.value.trim()
-        // ❌ Pa voye statut, dateExpiration, ni codeUnique
       };
 
       try {
+
         const response = await fetch("/api/transferer", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -231,20 +164,27 @@ document.addEventListener("DOMContentLoaded", () => {
           throw new Error(result.message || "Erreur transfert");
         }
 
-        alert("✅ Transfert effectué avec succès. CodeUnique ak dat ap jenere otomatikman nan backend.");
+        alert("✅ Transfert effectué avec succès.");
 
-        // Reset fòm
         document.querySelectorAll("input, select").forEach(el => {
           if (!el.hasAttribute("readonly")) el.value = "";
         });
 
       } catch (err) {
+
         console.error("TRANSFERER FRONTEND ERROR:", err);
         alert(err.message || "Erreur lors du transfert");
+
       } finally {
+
         btnTransferer.disabled = false;
         btnTransferer.innerText = "TRANSFERER";
+
+        // 🔓 LIBERE BLOKAJ
+        window.transfertEnCours = false;
       }
+
     });
   }
+
 });
