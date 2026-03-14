@@ -4,36 +4,59 @@ const { generateCode, calculateFee } = require("./transfer.utils");
 
 async function createTransfer(data) {
   try {
-    // Montant deja an HTG
-    const montant_htg = Number(data.montant_htg);
 
-    // Kalkile frais
+    // ================= MONTANT =================
+    const montant_htg = Number(data.montant);
+
+    if (!montant_htg || montant_htg <= 0) {
+      return { error: "Montant invalide" };
+    }
+
+    // ================= CALCUL FRAIS =================
     const frais = calculateFee(montant_htg);
-
     const total_client = montant_htg + frais;
 
-    // Jenere yon kòd inik pou transfè a
+    // ================= GENERATION CODE UNIQUE =================
     const code = generateCode();
 
-    // Prepare payload pou API FOBAS
+    // ================= PAYLOAD POUR API FOBAS =================
     const payload = {
-  agent_email: data.agent_email,
-  expediteur_nom: data.expediteur_nom,
-  recepteur_nom: data.ben_nom,               // <-- Chanje non reseptè
-  telephone_recepteur: data.ben_whatsapp,    // <-- Sèvi ak beneficiaire WhatsApp
-  montant_htg: montant_htg,
-  frais_transfert: frais,
-  total_client: total_client,
-  code: code
-      // Status, date_creation, expiration ap jere pa API FOBAS otomatikman
+
+      agent_nom: data.agentNom,
+      agent_email: data.agentEmail,
+
+      expediteur_nom: data.expediteurNom,
+      expediteur_document_numero: data.expediteurDocumentNumero,
+      expediteur_pays: data.expediteurPays,
+      expediteur_ville: data.expediteurVille,
+      expediteur_adresse: data.expediteurAdresse,
+      expediteur_telephone: data.expediteurTelephone,
+
+      beneficiaire_nom: data.beneficiaireNom,
+      beneficiaire_pays: data.beneficiairePays,
+      beneficiaire_ville: data.beneficiaireVille,
+      beneficiaire_adresse: data.beneficiaireAdresse,
+      beneficiaire_telephone: data.beneficiaireTelephone,
+
+      montant_htg: montant_htg,
+      devise: data.devise,
+
+      frais_transfert: frais,
+      total_client: total_client,
+      code: code
+
+      // statut, dateCreation, dateExpiration ap jere pa API FOBAS
     };
 
-    // Voye request POST sou API FOBAS reyèl la
-    const response = await fetch("https://api.fondationbackupspirituel.com/api/transferts", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload)
-    });
+    // ================= APPEL API FOBAS =================
+    const response = await fetch(
+      "https://api.fondationbackupspirituel.com/api/transferts",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      }
+    );
 
     const result = await response.json();
 
@@ -41,6 +64,7 @@ async function createTransfer(data) {
       return { error: result.message || "Erreur transfert API FOBAS" };
     }
 
+    // ================= RETOUR FRONTEND =================
     return {
       success: true,
       code: code,
