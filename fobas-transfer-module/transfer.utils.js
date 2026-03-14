@@ -1,20 +1,18 @@
-// ==================== FONKSYON UTILITAIRES ====================
+// ==================== FONKSYON UTILITAIRES FOBAS ====================
+
+// Jenere yon kòd inik pou transfè a
 function generateCode() {
   const a = Math.floor(1000 + Math.random() * 9000);
   const b = Math.floor(1000 + Math.random() * 9000);
   return `FBS-${a}-${b}`;
 }
 
-function convertUsdToHtg(usd, taux) {
-  return Math.round(usd * taux);
-}
-
-function calculateFee(htg) {
-  return Math.round(htg * 0.15);
+// Kalkile frais transfè a (HTG sèlman)
+function calculateFee(montant) {
+  return Math.round(montant * 0.15); // 15% frais sou montant
 }
 
 module.exports = {
   generateCode,
-  convertUsdToHtg,
   calculateFee
 };
