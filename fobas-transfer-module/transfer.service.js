@@ -1,55 +1,58 @@
-const mongoose = require("mongoose");
-const { generateCode, convertUsdToHtg, calculateFee } = require("./transfer.utils");
-
-const Transferts = mongoose.model("transferts");
-const WalletBalances = mongoose.model("walletbalances");
+// ================= TRANSFERT SERVICE (API FOBAS REYEL, HTG SELMAN) =================
+const fetch = require("node-fetch"); // si Node v18+, fetch deja disponib
+const { generateCode, calculateFee } = require("./transfer.utils");
 
 async function createTransfer(data) {
-  const taux = 132; // to di jou, ou ka modifye si bezwen dinamik
+  try {
+    // Montant deja an HTG
+    const montant_htg = Number(data.montant_htg);
 
-  // Montant HTG + frais + total
-  const montant_htg = convertUsdToHtg(Number(data.montant_usd), taux);
-  const frais = calculateFee(montant_htg);
-  const total_client = montant_htg + frais;
+    // Kalkile frais
+    const frais = calculateFee(montant_htg);
 
-  // Jere balans agent via email
-  const agent = await WalletBalances.findOne({ email: data.agent_email });
+    const total_client = montant_htg + frais;
 
-  if (!agent) return { error: "Agent introuvable" };
+    // Jenere yon kòd inik pou transfè a
+    const code = generateCode();
 
-  if (agent.balance < montant_htg) return { error: "Fonds insuffisants" };
+    // Prepare payload pou API FOBAS
+    const payload = {
+      agent_email: data.agent_email,
+      expediteur_nom: data.expediteur_nom,
+      recepteur_nom: data.recepteur_nom,
+      telephone_recepteur: data.telephone_recepteur,
+      montant_htg: montant_htg,
+      frais_transfert: frais,
+      total_client: total_client,
+      code: code
+      // Status, date_creation, expiration ap jere pa API FOBAS otomatikman
+    };
 
-  const code = generateCode();
-  const balance_avant = agent.balance;
+    // Voye request POST sou API FOBAS reyèl la
+    const response = await fetch("https://api.fondationbackupspirituel.com/api/transferts", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
 
-  // Soustraksyon sou balans agent
-  agent.balance -= montant_htg;
-  await agent.save();
+    const result = await response.json();
 
-  // Kreye tranzaksyon nan collection transferts
-  const transfert = await Transferts.create({
-    code: code,
-    agent_email: data.agent_email,
-    expediteur_nom: data.expediteur_nom,
-    recepteur_nom: data.recepteur_nom,
-    telephone_recepteur: data.telephone_recepteur,
-    montant_usd: Number(data.montant_usd),
-    taux: taux,
-    montant_htg: montant_htg,
-    frais_transfert: frais,
-    total_client: total_client,
-    status: "Pending",
-    date_creation: new Date(),
-    expiration: new Date(Date.now() + 21 * 24 * 60 * 60 * 1000) // 21 jou
-  });
+    if (!response.ok || !result.success) {
+      return { error: result.message || "Erreur transfert API FOBAS" };
+    }
 
-  return {
-    success: true,
-    code: code,
-    montant_reception: montant_htg,
-    frais: frais,
-    total_client: total_client
-  };
+    return {
+      success: true,
+      code: code,
+      montant_reception: montant_htg,
+      frais: frais,
+      total_client: total_client
+    };
+
+  } catch (err) {
+    console.error("CREATE TRANSFER ERROR:", err);
+    return { error: "Erreur serveur API FOBAS" };
+  }
 }
 
 module.exports = { createTransfer };
