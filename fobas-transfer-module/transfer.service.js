@@ -17,14 +17,14 @@ async function createTransfer(data) {
 
     // Prepare payload pou API FOBAS
     const payload = {
-      agent_email: data.agent_email,
-      expediteur_nom: data.expediteur_nom,
-      recepteur_nom: data.recepteur_nom,
-      telephone_recepteur: data.telephone_recepteur,
-      montant_htg: montant_htg,
-      frais_transfert: frais,
-      total_client: total_client,
-      code: code
+  agent_email: data.agent_email,
+  expediteur_nom: data.expediteur_nom,
+  recepteur_nom: data.ben_nom,               // <-- Chanje non reseptè
+  telephone_recepteur: data.ben_whatsapp,    // <-- Sèvi ak beneficiaire WhatsApp
+  montant_htg: montant_htg,
+  frais_transfert: frais,
+  total_client: total_client,
+  code: code
       // Status, date_creation, expiration ap jere pa API FOBAS otomatikman
     };
 
