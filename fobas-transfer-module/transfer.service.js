@@ -1,82 +1,43 @@
-// ================= TRANSFERT SERVICE (API FOBAS REYEL, HTG SELMAN) =================
-const fetch = require("node-fetch"); // si Node v18+, fetch deja disponib
-const { generateCode, calculateFee } = require("./transfer.utils");
+const mongoose = require("mongoose");
+const { generateCodeUnique } = require("./transfer.utils");
+
+const Wallet = mongoose.model("walletbalances");
+const Transfert = mongoose.model("transferts", new mongoose.Schema({}, { strict:false }), "transferts");
 
 async function createTransfer(data) {
-  try {
 
-    // ================= MONTANT =================
-    const montant = Number(data.montant);
+  const agentEmail = data.agentEmail;
+  const montant = Number(data.montant);
 
-    if (!montant || montant <= 0) {
-      return { error: "Montant invalide" };
-    }
+  const wallet = await Wallet.findOne({ email: agentEmail });
 
-    // ================= CALCUL FRAIS =================
-    const frais = calculateFee(montant);
-    const total_expediteur = montant + frais;
-
-    // ================= GENERATION CODE UNIQUE =================
-    const code = generateCode();
-
-    // ================= PAYLOAD POUR API FOBAS =================
-    const payload = {
-
-      agent_nom: data.agentNom,
-      agent_email: data.agentEmail,
-
-      expediteur_nom: data.expediteurNom,
-      expediteur_document_numero: data.expediteurDocumentNumero,
-      expediteur_pays: data.expediteurPays,
-      expediteur_ville: data.expediteurVille,
-      expediteur_adresse: data.expediteurAdresse,
-      expediteur_telephone: data.expediteurTelephone,
-
-      beneficiaire_nom: data.beneficiaireNom,
-      beneficiaire_pays: data.beneficiairePays,
-      beneficiaire_ville: data.beneficiaireVille,
-      beneficiaire_adresse: data.beneficiaireAdresse,
-      beneficiaire_telephone: data.beneficiaireTelephone,
-
-      montant: montant,
-      devise: data.devise,
-
-      frais_transfert: frais,
-      total_expediteur: total_expediteur,
-      code: code
-
-      // statut, dateCreation, dateExpiration ap jere pa API FOBAS
-    };
-
-    // ================= APPEL API FOBAS =================
-    const response = await fetch(
-      "https://api.fondationbackupspirituel.com/api/transferts",
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload)
-      }
-    );
-
-    const result = await response.json();
-
-    if (!response.ok || !result.success) {
-      return { error: result.message || "Erreur transfert API FOBAS" };
-    }
-
-    // ================= RETOUR FRONTEND =================
-    return {
-      success: true,
-      code: code,
-      montant_beneficiaire: montant,
-      frais: frais,
-      total_expediteur: total_expediteur
-    };
-
-  } catch (err) {
-    console.error("CREATE TRANSFER ERROR:", err);
-    return { error: "Erreur serveur API FOBAS" };
+  if (!wallet) {
+    throw new Error("Wallet agent introuvable");
   }
+
+  if (wallet.balance < montant) {
+    throw new Error("INSUFFICIENT_FUNDS");
+  }
+
+  // soustre lajan
+  wallet.balance = wallet.balance - montant;
+  await wallet.save();
+
+  // ajoute code + dat
+  data.codeUnique = generateCodeUnique();
+  data.statut = "PENDING";
+  data.dateCreation = new Date();
+
+  const expiration = new Date();
+  expiration.setDate(expiration.getDate() + 21);
+  data.dateExpiration = expiration;
+
+  // sove tout champs fòm nan jan yo ye a
+  const transfert = new Transfert(data);
+
+  await transfert.save();
+
+  return transfert;
 }
 
 module.exports = { createTransfer };
