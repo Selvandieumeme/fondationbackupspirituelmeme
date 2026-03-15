@@ -1,5 +1,128 @@
 document.addEventListener("DOMContentLoaded", () => {
 
+  // ======= Nouvo Bouton Express FOBAS 2em Fòm =======
+  const btnExpress = document.getElementById("expressfobastransfert");
+  const loader = document.getElementById("transfertLoader"); // loader nouvo paj
+
+  if (btnExpress && loader) {
+    btnExpress.addEventListener("click", () => {
+
+      // Montre loader vizyèl
+      loader.style.display = "flex";
+      btnExpress.disabled = true;
+
+      // Rekipere enfòmasyon itilizatè nan dashboard
+      const userRoleEl = document.getElementById("userAccountType");
+      const userNameEl = document.getElementById("userName");
+      const userEmailEl = document.getElementById("userEmail");
+
+      if (!userRoleEl || !userNameEl || !userEmailEl) {
+        alert("Erreur: impossible de récupérer les informations utilisateur.");
+        loader.style.display = "none";
+        btnExpress.disabled = false;
+        return;
+      }
+
+      const roleText = userRoleEl.textContent.trim();
+      const userName = userNameEl.textContent.trim();
+      const userEmail = userEmailEl.textContent.trim();
+
+      // Delè ti tan pou loader parèt
+      setTimeout(() => {
+
+        if (roleText === "Agent Autorise" || roleText === "FONDATEUR FOBAS") {
+
+          // Redireksyon nan nouvo paj fòm la avèk done itilizatè yo
+          window.location.href =
+            "expressfobas/expressfobas.html" +
+            "?name=" + encodeURIComponent(userName) +
+            "&email=" + encodeURIComponent(userEmail) +
+            "&role=" + encodeURIComponent(roleText);
+
+        } else {
+          loader.style.display = "none";
+          btnExpress.disabled = false;
+          alert("Vous n'avez aucun accès pour entrer dans cette page.");
+        }
+
+      }, 800);
+
+    });
+  }
+
+  // ======= Paj expressfobas.html: Ranpli nouvo chan yo =======
+  if (window.location.pathname.includes("expressfobas/expressfobas.html")) {
+
+    const params = new URLSearchParams(window.location.search);
+    const name = params.get("name");
+    const email = params.get("email");
+    const role = params.get("role");
+
+    // Sekirite: verifye wòl itilizatè a
+    if (!name || !email || (role !== "Agent Autorise" && role !== "FONDATEUR FOBAS")) {
+      alert("Vous n'avez pas accès à cette page.");
+      window.location.href = "https://fondationbackupspirituel.com/walletfobasdashboard.html";
+      return;
+    }
+
+    // Ranpli nouvo chan ki egziste nan nouvo fòm lan
+    const agentNameInput = document.getElementById("agentName");
+    const agentEmailInput = document.getElementById("agentEmail");
+
+    if (agentNameInput) {
+      agentNameInput.value = name;
+      agentNameInput.readOnly = true;
+    }
+
+    if (agentEmailInput) {
+      agentEmailInput.value = email;
+      agentEmailInput.readOnly = true;
+    }
+
+  }
+
+  // ===================== INITIALISATION =====================
+  if (typeof remplirAgentDepuisSession === "function") {
+    remplirAgentDepuisSession();
+  }
+
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+document.addEventListener("DOMContentLoaded", () => {
+
   // ======= Bouton Express FOBAS Transfert =======
   const btnExpress = document.getElementById("expressfobastransfert");
   const loader = document.getElementById("transfertLoader"); // loader ou te deja mete nan HTML
