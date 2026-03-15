@@ -1,5 +1,55 @@
 document.addEventListener("DOMContentLoaded", () => {
 
+    // ===================== ELEMENTS DASHBOARD =====================
+    const btnTransfertExpress = document.getElementById("expressfobastransfert"); // Nouvo bouton
+    const loaderDiv = document.getElementById("transfertLoader");
+
+    const userNameEl = document.getElementById("userName");
+    const userEmailEl = document.getElementById("userEmail");
+    const userAccountTypeEl = document.getElementById("userAccountType");
+
+    const titresAutorises = ["Agent Autorise", "FONDATEUR FOBAS"];
+
+    // ===================== LOGIQUE BOUTON =====================
+    if(btnTransfertExpress) {
+        btnTransfertExpress.addEventListener("click", async () => {
+            loaderDiv.style.display = "flex";
+
+            try {
+                // Fetch info itilizatè konekte a
+                const res = await fetch("/api/currentUser", {
+                    method: "GET",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": "Bearer " + localStorage.getItem("token")
+                    }
+                });
+
+                const user = await res.json();
+
+                // Verifye aksè sèlman pou Agent Autorisé ak Fondateur FOBAS
+                if (!user || !user.role || !titresAutorises.includes(user.role)) {
+                    alert("Ou pa gen aksè pou Express FOBAS Transfert.");
+                    loaderDiv.style.display = "none";
+                    return;
+                }
+
+                // Si aksè OK → ouvri paj fòm ExpressFOBAS
+                window.location.href = "/expressfobas.html";
+
+            } catch (err) {
+                console.error("Erreur vérification utilisateur:", err);
+                alert("Erè sistèm, eseye ankò.");
+            } finally {
+                loaderDiv.style.display = "none";
+            }
+        });
+    }
+});
+
+
+
+
     const form = document.getElementById("expressForm");
     const transferResult = document.getElementById("transferResult");
     const transferCodeInput = document.getElementById("transferCode");
