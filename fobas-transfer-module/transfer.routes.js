@@ -1,20 +1,38 @@
 const express = require("express");
 const router = express.Router();
+
 const { createTransfer } = require("./transfer.service");
 
 router.post("/transferer", async (req, res) => {
-  try {
-    const result = await createTransfer(req.body);
 
-    if (result.error) {
-      return res.json({ success: false, message: result.error });
+  try {
+
+    const transfert = await createTransfer(req.body);
+
+    res.json({
+      success:true,
+      codeUnique: transfert.codeUnique,
+      message:"Transfert créé avec succès"
+    });
+
+  } catch(err) {
+
+    if (err.message === "INSUFFICIENT_FUNDS") {
+      return res.json({
+        success:false,
+        message:"Ou pa gen ase fon pou w fè transfè sa. Rechaje kont ou dabò."
+      });
     }
 
-    res.json(result);
-  } catch (e) {
-    console.error("TRANSFER SERVICE ERROR:", e);
-    res.status(500).json({ success: false, message: "Erreur serveur" });
+    console.error(err);
+
+    res.status(500).json({
+      success:false,
+      message:"Erreur serveur"
+    });
+
   }
+
 });
 
 module.exports = router;
