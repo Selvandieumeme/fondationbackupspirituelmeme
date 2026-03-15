@@ -10,42 +10,42 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const titresAutorises = ["Agent Autorise", "FONDATEUR FOBAS"];
 
-    // ===================== LOGIQUE BOUTON =====================
-    if(btnTransfertExpress) {
-        btnTransfertExpress.addEventListener("click", async () => {
-            loaderDiv.style.display = "flex";
+   // ===================== BOUTON TRANSFERT EXPRESS =====================
+  if (btnexpressfobastransfert) {
+    btnexpressfobastransfert.addEventListener("click", (e) => {
+      e.preventDefault();
 
-            try {
-                // Fetch info itilizatè konekte a
-                const res = await fetch("/api/currentUser", {
-                    method: "GET",
-                    headers: {
-                        "Content-Type": "application/json",
-                        "Authorization": "Bearer " + localStorage.getItem("token")
-                    }
-                });
+      const titreUtilisateur =
+        userAccountTypeEl?.innerText.replace("Tit / Statut:", "").trim() || "";
 
-                const user = await res.json();
+      if (!titresAutorises.includes(titreUtilisateur)) {
+        alert("Ou pa gen otorizasyon pou antre nan espas sa");
+        return;
+      }
 
-                // Verifye aksè sèlman pou Agent Autorisé ak Fondateur FOBAS
-                if (!user || !user.role || !titresAutorises.includes(user.role)) {
-                    alert("Ou pa gen aksè pou Express FOBAS Transfert.");
-                    loaderDiv.style.display = "none";
-                    return;
-                }
+      if (loaderDiv) loaderDiv.style.display = "flex";
 
-                // Si aksè OK → ouvri paj fòm ExpressFOBAS
-                window.location.href = "/expressfobas.html";
+      setTimeout(() => {
 
-            } catch (err) {
-                console.error("Erreur vérification utilisateur:", err);
-                alert("Erè sistèm, eseye ankò.");
-            } finally {
-                loaderDiv.style.display = "none";
-            }
-        });
-    }
-});
+        if (loaderDiv) loaderDiv.style.display = "none";
+
+        sessionStorage.setItem(
+          "fobas_agent_nom",
+          userNameEl?.innerText.trim() || ""
+        );
+
+        sessionStorage.setItem(
+          "fobas_agent_email",
+          userEmailEl?.innerText.trim() || ""
+        );
+
+        alert("Acces Transfert Express FOBAS autorise avec succes");
+
+        window.location.href = "transfertexpresshaiti.html";
+
+      }, 800);
+    });
+  }
 
 
 
