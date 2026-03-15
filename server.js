@@ -86,8 +86,7 @@ app.use('/wallet', walletToMerchantRoutes);   // <-- sa pèmèt POST /wallet/tra
 
 
 
-const transferRoutes = require("./fobas-transfer-module/transfer.routes");
-app.use("/api", transferRoutes);
+
 
 
 
