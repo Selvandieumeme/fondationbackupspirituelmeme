@@ -85,6 +85,20 @@ app.use('/wallet', walletToMerchantRoutes);   // <-- sa pèmèt POST /wallet/tra
 
 
 
+// -----------------
+// Transfert Module
+// -----------------
+const transferRoutes = require("./fobas-transfer-module/transfer.routes");
+
+// Nou mete route sa a sou /api/transfers pou li pa entèfere ak login/dashboard
+app.use("/api/transfers", transferRoutes);
+
+// -----------------
+// Login / Dashboard routes deja egziste
+// egzanp:
+// app.use("/auth", authRoutes);
+// app.use("/dashboard", dashboardRoutes);
+// -----------------
 
 
 
