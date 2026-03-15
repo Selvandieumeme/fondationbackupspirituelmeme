@@ -1,11 +1,15 @@
 document.addEventListener("DOMContentLoaded", () => {
 
+  // ======= Bouton Express FOBAS Transfert =======
   const btnExpress = document.getElementById("expressfobastransfert");
+  const loader = document.getElementById("transfertLoader"); // loader ou te deja mete nan HTML
 
-  if (btnExpress) {
+  if (btnExpress && loader) {
     btnExpress.addEventListener("click", () => {
 
-      alert("verification en cours...");
+      // Montre loader vizyèl
+      loader.style.display = "flex";
+      btnExpress.disabled = true;
 
       // Rekipere enfòmasyon itilizatè nan dashboard
       const userRoleEl = document.getElementById("userAccountType");
@@ -14,6 +18,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
       if (!userRoleEl || !userNameEl || !userEmailEl) {
         alert("Erreur: impossible de récupérer les informations utilisateur.");
+        loader.style.display = "none";
+        btnExpress.disabled = false;
         return;
       }
 
@@ -21,48 +27,45 @@ document.addEventListener("DOMContentLoaded", () => {
       const userName = userNameEl.textContent.trim();
       const userEmail = userEmailEl.textContent.trim();
 
-      // Verifye aksè
-      if (roleText === "Agent Autorise" || roleText === "FONDATEUR FOBAS") {
+      // Delè ti tan pou loader parèt
+      setTimeout(() => {
 
-        alert("Accès autorisé pour la page Express FOBAS");
+        if (roleText === "Agent Autorise" || roleText === "FONDATEUR FOBAS") {
 
-        // Pase done yo nan URL la
-        const url =
-          "expressfobas/expressfobas.html" +
-          "?name=" + encodeURIComponent(userName) +
-          "&email=" + encodeURIComponent(userEmail) +
-          "&role=" + encodeURIComponent(roleText);
+          // Redireksyon nan paj expressfobas.html avèk done itilizatè yo
+          window.location.href =
+            "expressfobas/expressfobas.html" +
+            "?name=" + encodeURIComponent(userName) +
+            "&email=" + encodeURIComponent(userEmail) +
+            "&role=" + encodeURIComponent(roleText);
 
-        window.location.href = url;
+        } else {
+          loader.style.display = "none";
+          btnExpress.disabled = false;
+          alert("Vous n'avez aucun accès pour entrer dans cette page.");
+        }
 
-      } else {
-
-        alert("Vous n'avez aucun accès pour entrer dans cette page.");
-
-      }
+      }, 800);
 
     });
   }
 
-  // ---------- Paj expressfobas.html ----------
-  if (window.location.pathname.includes("expressfobas.html")) {
+  // ======= Paj expressfobas.html: Ranpli chan yo =======
+  if (window.location.pathname.includes("expressfobas/expressfobas.html")) {
 
     const params = new URLSearchParams(window.location.search);
-
     const name = params.get("name");
     const email = params.get("email");
     const role = params.get("role");
 
-    // Vérification sécurité
+    // Sekirite: verifye wòl itilizatè a
     if (!name || !email || (role !== "Agent Autorise" && role !== "FONDATEUR FOBAS")) {
-
       alert("Vous n'avez pas accès à cette page.");
       window.location.href = "https://fondationbackupspirituel.com/walletfobasdashboard.html";
       return;
-
     }
 
-    // Ranpli champs ki deja egziste nan fòm ou a
+    // Ranpli chan ki deja egziste nan fòm lan
     const agentNameInput = document.getElementById("agentName");
     const agentEmailInput = document.getElementById("agentEmail");
 
@@ -79,7 +82,6 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
 });
-
 
     // ===================== INITIALISATION =====================
     remplirAgentDepuisSession();
