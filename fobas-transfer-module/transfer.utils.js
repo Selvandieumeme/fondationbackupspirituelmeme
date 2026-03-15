@@ -1,4 +1,4 @@
-// transfer.utils.js
+// Fonksyon pou jenere yon kòd inik pou transfert
 function generateCodeUnique(length = 10) {
   const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
   let code = "";
