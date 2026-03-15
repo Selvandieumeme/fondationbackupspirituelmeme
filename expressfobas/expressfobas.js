@@ -1,55 +1,85 @@
 document.addEventListener("DOMContentLoaded", () => {
 
-    // ===================== ELEMENTS DASHBOARD =====================
-    const btnTransfertExpress = document.getElementById("expressfobastransfert"); // Non bouton kòrèk
-    const loaderDiv = document.getElementById("transfertLoader");
+  const btnExpress = document.getElementById("expressfobastransfert");
 
-    const userNameEl = document.getElementById("userName");
-    const userEmailEl = document.getElementById("userEmail");
-    const userAccountTypeEl = document.getElementById("userAccountType");
+  if (btnExpress) {
+    btnExpress.addEventListener("click", () => {
 
-    const titresAutorises = ["Agent Autorise", "FONDATEUR FOBAS"];
+      alert("verification en cours...");
 
-    // ===================== BOUTON TRANSFERT EXPRESS =====================
-    if (btnTransfertExpress) {
-        btnTransfertExpress.addEventListener("click", (e) => {
-            e.preventDefault();
+      // Rekipere enfòmasyon itilizatè nan dashboard
+      const userRoleEl = document.getElementById("userAccountType");
+      const userNameEl = document.getElementById("userName");
+      const userEmailEl = document.getElementById("userEmail");
 
-            const titreUtilisateur =
-                userAccountTypeEl?.innerText.replace("Tit / Statut:", "").trim() || "";
+      if (!userRoleEl || !userNameEl || !userEmailEl) {
+        alert("Erreur: impossible de récupérer les informations utilisateur.");
+        return;
+      }
 
-            // Verifye aksè itilizatè
-            if (!titresAutorises.includes(titreUtilisateur)) {
-                alert("Ou pa gen otorizasyon pou antre nan espas sa");
-                return;
-            }
+      const roleText = userRoleEl.textContent.trim();
+      const userName = userNameEl.textContent.trim();
+      const userEmail = userEmailEl.textContent.trim();
 
-            // Montre loader pandan verification
-            if (loaderDiv) loaderDiv.style.display = "flex";
+      // Verifye aksè
+      if (roleText === "Agent Autorise" || roleText === "FONDATEUR FOBAS") {
 
-            setTimeout(() => {
+        alert("Accès autorisé pour la page Express FOBAS");
 
-                if (loaderDiv) loaderDiv.style.display = "none";
+        // Pase done yo nan URL la
+        const url =
+          "expressfobas/expressfobas.html" +
+          "?name=" + encodeURIComponent(userName) +
+          "&email=" + encodeURIComponent(userEmail) +
+          "&role=" + encodeURIComponent(roleText);
 
-                // Sove nom/email agent nan sessionStorage
-                sessionStorage.setItem(
-                    "fobas_agent_nom",
-                    userNameEl?.innerText.trim() || ""
-                );
+        window.location.href = url;
 
-                sessionStorage.setItem(
-                    "fobas_agent_email",
-                    userEmailEl?.innerText.trim() || ""
-                );
+      } else {
 
-                alert("Acces Transfert Express FOBAS autorise avec succes");
+        alert("Vous n'avez aucun accès pour entrer dans cette page.");
 
-                // ===================== REDIRECTION FINAL =====================
-                window.location.href = "expressfobas/expressfobas.html"; // Paj final pou fòm ExpressFOBAS
+      }
 
-            }, 800);
-        });
+    });
+  }
+
+  // ---------- Paj expressfobas.html ----------
+  if (window.location.pathname.includes("expressfobas.html")) {
+
+    const params = new URLSearchParams(window.location.search);
+
+    const name = params.get("name");
+    const email = params.get("email");
+    const role = params.get("role");
+
+    // Vérification sécurité
+    if (!name || !email || (role !== "Agent Autorise" && role !== "FONDATEUR FOBAS")) {
+
+      alert("Vous n'avez pas accès à cette page.");
+      window.location.href = "https://fondationbackupspirituel.com/walletfobasdashboard.html";
+      return;
+
     }
+
+    // Ranpli champs ki deja egziste nan fòm ou a
+    const agentNameInput = document.getElementById("agentName");
+    const agentEmailInput = document.getElementById("agentEmail");
+
+    if (agentNameInput) {
+      agentNameInput.value = name;
+      agentNameInput.readOnly = true;
+    }
+
+    if (agentEmailInput) {
+      agentEmailInput.value = email;
+      agentEmailInput.readOnly = true;
+    }
+
+  }
+
+});
+
 
     // ===================== INITIALISATION =====================
     remplirAgentDepuisSession();
