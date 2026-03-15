@@ -87,12 +87,6 @@ app.use('/wallet', walletToMerchantRoutes);   // <-- sa pèmèt POST /wallet/tra
 
 
 
-// ----------------------------
-// Transfert Express FOBAS (bouton "TRANSFERER")
-// ----------------------------
-const transferRoutes = require("./fobas-transfer-module/transfer.routes");
-app.use(transferRoutes);
-
 
 
 
