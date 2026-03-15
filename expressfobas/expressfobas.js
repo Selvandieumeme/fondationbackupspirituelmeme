@@ -48,7 +48,8 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
 
-
+// ===================== INITIALISATION =====================
+  remplirAgentDepuisSession();
 
     const form = document.getElementById("expressForm");
     const transferResult = document.getElementById("transferResult");
