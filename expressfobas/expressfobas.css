@@ -1,0 +1,165 @@
+:root {
+    --fobas-jaune: #FFD400;
+    --fobas-bleue: #0B3C91;
+    --fobas-blanc: #FFFFFF;
+    --fobas-grey-light: #f4f6fa;
+    --fobas-grey-dark: #333333;
+}
+
+* {
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+    background-color: var(--fobas-grey-light);
+    margin: 0;
+    padding: 0;
+}
+
+.container {
+    max-width: 800px;
+    margin: 40px auto;
+    padding: 20px;
+}
+
+.title {
+    text-align: center;
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--fobas-bleue);
+    margin-bottom: 30px;
+}
+
+form {
+    background-color: var(--fobas-blanc);
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: 0 15px 40px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+}
+
+form:hover {
+    box-shadow: 0 20px 50px rgba(0,0,0,0.15);
+}
+
+.card {
+    background-color: #fefefe;
+    border-left: 8px solid var(--fobas-jaune);
+    margin-bottom: 25px;
+    padding: 20px;
+    border-radius: 10px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+}
+
+.card h2 {
+    color: var(--fobas-bleue);
+    margin-bottom: 15px;
+    font-size: 1.5rem;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 5px;
+    color: var(--fobas-grey-dark);
+}
+
+.form-group input {
+    width: 100%;
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    font-size: 1rem;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.form-group input:focus {
+    outline: none;
+    border-color: var(--fobas-jaune);
+    box-shadow: 0 0 5px var(--fobas-jaune);
+}
+
+.result-box {
+    margin-top: 20px;
+    text-align: center;
+    font-size: 1.3rem;
+    font-weight: bold;
+    color: var(--fobas-bleue);
+}
+
+.button-group {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.button-group button {
+    flex: 1 1 30%;
+    padding: 15px 20px;
+    font-size: 1.1rem;
+    font-weight: 700;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-back {
+    background-color: var(--fobas-grey-dark);
+    color: var(--fobas-blanc);
+}
+
+.btn-back:hover {
+    background-color: #222;
+}
+
+.btn-express {
+    background-color: var(--fobas-jaune);
+    color: var(--fobas-bleue);
+}
+
+.btn-express:hover {
+    background-color: #e6c300;
+    transform: translateY(-3px);
+}
+
+.btn-retrait {
+    background-color: var(--fobas-bleue);
+    color: var(--fobas-blanc);
+}
+
+.btn-retrait:hover {
+    background-color: #092c6b;
+    transform: translateY(-3px);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .button-group {
+        flex-direction: column;
+    }
+    
+    .button-group button {
+        flex: 1 1 100%;
+    }
+    
+    .title {
+        font-size: 2rem;
+    }
+    
+    .card h2 {
+        font-size: 1.3rem;
+    }
+}
