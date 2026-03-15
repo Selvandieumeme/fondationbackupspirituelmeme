@@ -1,7 +1,7 @@
 document.addEventListener("DOMContentLoaded", () => {
 
     // ===================== ELEMENTS DASHBOARD =====================
-    const btnTransfertExpress = document.getElementById("expressfobastransfert"); // Nouvo bouton
+    const btnTransfertExpress = document.getElementById("expressfobastransfert"); // Non bouton kòrèk
     const loaderDiv = document.getElementById("transfertLoader");
 
     const userNameEl = document.getElementById("userName");
@@ -10,46 +10,48 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const titresAutorises = ["Agent Autorise", "FONDATEUR FOBAS"];
 
-   // ===================== BOUTON TRANSFERT EXPRESS =====================
-  if (btnexpressfobastransfert) {
-    btnexpressfobastransfert.addEventListener("click", (e) => {
-      e.preventDefault();
+    // ===================== BOUTON TRANSFERT EXPRESS =====================
+    if (btnTransfertExpress) {  // Kounya non bouton matche
+        btnTransfertExpress.addEventListener("click", (e) => {
+            e.preventDefault();
 
-      const titreUtilisateur =
-        userAccountTypeEl?.innerText.replace("Tit / Statut:", "").trim() || "";
+            const titreUtilisateur =
+                userAccountTypeEl?.innerText.replace("Tit / Statut:", "").trim() || "";
 
-      if (!titresAutorises.includes(titreUtilisateur)) {
-        alert("Ou pa gen otorizasyon pou antre nan espas sa");
-        return;
-      }
+            if (!titresAutorises.includes(titreUtilisateur)) {
+                alert("Ou pa gen otorizasyon pou antre nan espas sa");
+                return;
+            }
 
-      if (loaderDiv) loaderDiv.style.display = "flex";
+            if (loaderDiv) loaderDiv.style.display = "flex";
 
-      setTimeout(() => {
+            setTimeout(() => {
 
-        if (loaderDiv) loaderDiv.style.display = "none";
+                if (loaderDiv) loaderDiv.style.display = "none";
 
-        sessionStorage.setItem(
-          "fobas_agent_nom",
-          userNameEl?.innerText.trim() || ""
-        );
+                sessionStorage.setItem(
+                    "fobas_agent_nom",
+                    userNameEl?.innerText.trim() || ""
+                );
 
-        sessionStorage.setItem(
-          "fobas_agent_email",
-          userEmailEl?.innerText.trim() || ""
-        );
+                sessionStorage.setItem(
+                    "fobas_agent_email",
+                    userEmailEl?.innerText.trim() || ""
+                );
 
-        alert("Acces Transfert Express FOBAS autorise avec succes");
+                alert("Acces Transfert Express FOBAS autorise avec succes");
 
-        window.location.href = "transfertexpresshaiti.html";
+                // URL final paj fòm ExpressFOBAS
+                window.location.href = "expressfobas/expressfobas.html";
 
-      }, 800);
-    });
-  }
+            }, 800);
+        });
+    }
 
+    // ===================== INITIALISATION =====================
+    remplirAgentDepuisSession();
+});
 
-// ===================== INITIALISATION =====================
-  remplirAgentDepuisSession();
 
     const form = document.getElementById("expressForm");
     const transferResult = document.getElementById("transferResult");
