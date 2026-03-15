@@ -11,24 +11,27 @@ document.addEventListener("DOMContentLoaded", () => {
     const titresAutorises = ["Agent Autorise", "FONDATEUR FOBAS"];
 
     // ===================== BOUTON TRANSFERT EXPRESS =====================
-    if (btnTransfertExpress) {  // Kounya non bouton matche
+    if (btnTransfertExpress) {
         btnTransfertExpress.addEventListener("click", (e) => {
             e.preventDefault();
 
             const titreUtilisateur =
                 userAccountTypeEl?.innerText.replace("Tit / Statut:", "").trim() || "";
 
+            // Verifye aksè itilizatè
             if (!titresAutorises.includes(titreUtilisateur)) {
                 alert("Ou pa gen otorizasyon pou antre nan espas sa");
                 return;
             }
 
+            // Montre loader pandan verification
             if (loaderDiv) loaderDiv.style.display = "flex";
 
             setTimeout(() => {
 
                 if (loaderDiv) loaderDiv.style.display = "none";
 
+                // Sove nom/email agent nan sessionStorage
                 sessionStorage.setItem(
                     "fobas_agent_nom",
                     userNameEl?.innerText.trim() || ""
@@ -41,8 +44,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 alert("Acces Transfert Express FOBAS autorise avec succes");
 
-                // URL final paj fòm ExpressFOBAS
-                window.location.href = "expressfobas/expressfobas.html";
+                // ===================== REDIRECTION FINAL =====================
+                window.location.href = "expressfobas/expressfobas.html"; // Paj final pou fòm ExpressFOBAS
 
             }, 800);
         });
