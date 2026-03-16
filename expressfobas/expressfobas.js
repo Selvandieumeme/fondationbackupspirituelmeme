@@ -274,5 +274,44 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 
+// ===============================
+// SCRIPT IZOLÉ: RANPLI FÒM EXPRESSFOBAS SOTI NAN LOCALSTORAGE
+// ===============================
+document.addEventListener("DOMContentLoaded", () => {
+  try {
+    // ==== Sèlman sou paj ExpressFOBAS ====
+    if (!window.location.pathname.includes("expressfobas/expressfobas.html")) return;
 
+    // Chaje done itilizatè depi localStorage
+    const nom = localStorage.getItem("userName") || "";
+    const email = localStorage.getItem("userEmail") || "";
+    const role = localStorage.getItem("userRole") || "";
+
+    const titresAutorises = ["Agent Autorise", "FONDATEUR FOBAS"];
+
+    if (!titresAutorises.includes(role)) {
+      alert("Accès refusé : vous n'avez pas l'autorisation pour remplir ce formulaire.");
+      window.location.href = "/walletfobasdashboard.html";
+      return;
+    }
+
+    // Récupère eleman fòm
+    const agentNameInput = document.getElementById("agentName");
+    const agentEmailInput = document.getElementById("agentEmail");
+
+    if (agentNameInput) {
+      agentNameInput.value = nom;
+      agentNameInput.readOnly = true;
+    }
+
+    if (agentEmailInput) {
+      agentEmailInput.value = email;
+      agentEmailInput.readOnly = true;
+    }
+
+    console.log("Fòm ExpressFOBAS ranpli otomatikman soti nan localStorage:", nom, email, role);
+  } catch (err) {
+    console.error("Erreur script isolé ExpressFOBAS:", err);
+  }
+});
 
