@@ -81,7 +81,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // =========================
   // PAGE EXPRESSFOBAS.HTML
   // =========================
-  if (window.location.pathname.includes("expressfobas/expressfobas.html")) {
+  if (window.location.search.includes("name=")) {
 
     const params = new URLSearchParams(window.location.search);
 
