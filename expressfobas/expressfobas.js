@@ -13,7 +13,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const rolesAutorises = ["Agent Autorise", "FONDATEUR FOBAS"];
 
   // =========================
-  // VERIFIKASYON EXISTANS ELEMAN YO
+  // VERIFIKASYON EXISTANS
   // =========================
   if (!btnExpress) {
     console.error("Bouton expressfobastransfert introuvable.");
@@ -32,11 +32,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
       e.preventDefault();
 
-      // Montre loader
       loader.style.display = "flex";
       btnExpress.disabled = true;
 
-      // Verifye done dashboard
       if (!userRoleEl || !userNameEl || !userEmailEl) {
 
         loader.style.display = "none";
@@ -46,7 +44,6 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
 
-      // Rekipere done itilizatè
       let roleText = userRoleEl.textContent.trim();
 
       if (roleText.includes(":")) {
@@ -56,15 +53,10 @@ document.addEventListener("DOMContentLoaded", () => {
       const userName = userNameEl.textContent.trim();
       const userEmail = userEmailEl.textContent.trim();
 
-      // Ti delay pou loader vizib
       setTimeout(() => {
 
-        // =========================
-        // VERIFIKASYON OTORIZASYON
-        // =========================
         if (rolesAutorises.includes(roleText)) {
 
-          // Redirection paj fòm
           window.location.href =
             "expressfobas/expressfobas.html" +
             "?name=" + encodeURIComponent(userName) +
@@ -97,7 +89,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const email = params.get("email");
     const role = params.get("role");
 
-    // Sekirite paj
     if (!name || !email || !rolesAutorises.includes(role)) {
 
       alert("Accès refusé.");
@@ -108,7 +99,6 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    // Ranpli chan fòm yo
     const agentNameInput = document.getElementById("agentName");
     const agentEmailInput = document.getElementById("agentEmail");
 
@@ -122,132 +112,9 @@ document.addEventListener("DOMContentLoaded", () => {
       agentEmailInput.readOnly = true;
     }
 
-  }
-
-});
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-document.addEventListener("DOMContentLoaded", () => {
-
-  // ======= Bouton Express FOBAS Transfert =======
-  const btnExpress = document.getElementById("expressfobastransfert");
-  const loader = document.getElementById("transfertLoader"); // loader ou te deja mete nan HTML
-
-  if (btnExpress && loader) {
-    btnExpress.addEventListener("click", () => {
-
-      // Montre loader vizyèl
-      loader.style.display = "flex";
-      btnExpress.disabled = true;
-
-      // Rekipere enfòmasyon itilizatè nan dashboard
-      const userRoleEl = document.getElementById("userAccountType");
-      const userNameEl = document.getElementById("userName");
-      const userEmailEl = document.getElementById("userEmail");
-
-      if (!userRoleEl || !userNameEl || !userEmailEl) {
-        alert("Erreur: impossible de récupérer les informations utilisateur.");
-        loader.style.display = "none";
-        btnExpress.disabled = false;
-        return;
-      }
-
-      const roleText = userRoleEl.textContent.trim();
-      const userName = userNameEl.textContent.trim();
-      const userEmail = userEmailEl.textContent.trim();
-
-      // Delè ti tan pou loader parèt
-      setTimeout(() => {
-
-        if (roleText === "Agent Autorise" || roleText === "FONDATEUR FOBAS") {
-
-          // Redireksyon nan paj expressfobas.html avèk done itilizatè yo
-          window.location.href =
-            "expressfobas/expressfobas.html" +
-            "?name=" + encodeURIComponent(userName) +
-            "&email=" + encodeURIComponent(userEmail) +
-            "&role=" + encodeURIComponent(roleText);
-
-        } else {
-          loader.style.display = "none";
-          btnExpress.disabled = false;
-          alert("Vous n'avez aucun accès pour entrer dans cette page.");
-        }
-
-      }, 800);
-
-    });
-  }
-
-  // ======= Paj expressfobas.html: Ranpli chan yo =======
-  if (window.location.pathname.includes("expressfobas/expressfobas.html")) {
-
-    const params = new URLSearchParams(window.location.search);
-    const name = params.get("name");
-    const email = params.get("email");
-    const role = params.get("role");
-
-    // Sekirite: verifye wòl itilizatè a
-    if (!name || !email || (role !== "Agent Autorise" && role !== "FONDATEUR FOBAS")) {
-      alert("Vous n'avez pas accès à cette page.");
-      window.location.href = "https://fondationbackupspirituel.com/walletfobasdashboard.html";
-      return;
-    }
-
-    // Ranpli chan ki deja egziste nan fòm lan
-    const agentNameInput = document.getElementById("agentName");
-    const agentEmailInput = document.getElementById("agentEmail");
-
-    if (agentNameInput) {
-      agentNameInput.value = name;
-      agentNameInput.readOnly = true;
-    }
-
-    if (agentEmailInput) {
-      agentEmailInput.value = email;
-      agentEmailInput.readOnly = true;
-    }
-
-  }
-
-});
-
-    // ===================== INITIALISATION =====================
-    remplirAgentDepuisSession();
-});
-
+    // =========================
+    // FORMULAIRE EXPRESSFOBAS
+    // =========================
 
     const form = document.getElementById("expressForm");
     const transferResult = document.getElementById("transferResult");
@@ -257,104 +124,138 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (!form) return;
 
-    // Fonksyon pou jenere code unique (FOB + timestamp)
+    // =========================
+    // GENERATE CODE
+    // =========================
     function generateTransferCode() {
-        return "FOB-" + Date.now().toString().slice(-7);
+      return "FOB-" + Date.now().toString().slice(-7);
     }
 
-    // Fonksyon pou kalkile dat expiration (+21 jou)
+    // =========================
+    // CALCUL EXPIRATION
+    // =========================
     function calculateExpiration() {
-        const today = new Date();
-        const expiration = new Date();
-        expiration.setDate(today.getDate() + 21);
-        return expiration.toISOString().split("T")[0]; // YYYY-MM-DD
+      const today = new Date();
+      const expiration = new Date();
+      expiration.setDate(today.getDate() + 21);
+      return expiration.toISOString().split("T")[0];
     }
 
+    // =========================
+    // SUBMIT FORM
+    // =========================
     form.addEventListener("submit", async (e) => {
-        e.preventDefault();
-        transferResult.innerHTML = "";
 
-        // Récupération des champs
-        const data = {
-            agentName: document.getElementById("agentName").value.trim(),
-            agentEmail: document.getElementById("agentEmail").value.trim(),
-            senderName: document.getElementById("senderName").value.trim(),
-            senderId: document.getElementById("senderId").value.trim(),
-            senderCountry: document.getElementById("senderCountry").value.trim(),
-            senderCity: document.getElementById("senderCity").value.trim(),
-            senderAddress: document.getElementById("senderAddress").value.trim(),
-            senderWhatsapp: document.getElementById("senderWhatsapp").value.trim(),
-            receiverName: document.getElementById("receiverName").value.trim(),
-            receiverCountry: document.getElementById("receiverCountry").value.trim(),
-            receiverCity: document.getElementById("receiverCity").value.trim(),
-            receiverAddress: document.getElementById("receiverAddress").value.trim(),
-            receiverWhatsapp: document.getElementById("receiverWhatsapp").value.trim(),
-            amountHTG: Number(document.getElementById("amountHTG").value)
-        };
+      e.preventDefault();
+      transferResult.innerHTML = "";
 
-        if (data.amountHTG <= 0) {
-            alert("Montant doit être supérieur à 0");
-            return;
+      const data = {
+
+        agentName: document.getElementById("agentName").value.trim(),
+        agentEmail: document.getElementById("agentEmail").value.trim(),
+
+        senderName: document.getElementById("senderName").value.trim(),
+        senderId: document.getElementById("senderId").value.trim(),
+        senderCountry: document.getElementById("senderCountry").value.trim(),
+        senderCity: document.getElementById("senderCity").value.trim(),
+        senderAddress: document.getElementById("senderAddress").value.trim(),
+        senderWhatsapp: document.getElementById("senderWhatsapp").value.trim(),
+
+        receiverName: document.getElementById("receiverName").value.trim(),
+        receiverCountry: document.getElementById("receiverCountry").value.trim(),
+        receiverCity: document.getElementById("receiverCity").value.trim(),
+        receiverAddress: document.getElementById("receiverAddress").value.trim(),
+        receiverWhatsapp: document.getElementById("receiverWhatsapp").value.trim(),
+
+        amountHTG: Number(document.getElementById("amountHTG").value)
+
+      };
+
+      if (data.amountHTG <= 0) {
+        alert("Montant doit être supérieur à 0");
+        return;
+      }
+
+      const fees = data.amountHTG * 0.15;
+      const totalDebit = data.amountHTG + fees;
+
+      const transferCode = generateTransferCode();
+      const today = new Date().toISOString().split("T")[0];
+      const expiration = calculateExpiration();
+
+      transferCodeInput.value = transferCode;
+      createdDateInput.value = today;
+      expirationDateInput.value = expiration;
+
+      const payload = {
+        ...data,
+        feesHTG: fees,
+        totalDebitHTG: totalDebit,
+        transferCode: transferCode,
+        createdAt: today,
+        expirationDate: expiration,
+        status: "Pending"
+      };
+
+      try {
+
+        const res = await fetch("https://api.fondationbackupspirituel.com/expressfobas", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+
+        const result = await res.json();
+
+        if (result.error) {
+
+          transferResult.innerHTML =
+            `<span style="color:red;font-weight:bold">${result.error}</span>`;
+
+        } else {
+
+          transferResult.innerHTML =
+            `<span style="color:green;font-weight:bold">
+            Transfert créé avec succès ! Code ExpressFOBAS : ${result.transferCode}
+            </span>`;
+
         }
 
-        // Calcul frais 15%
-        const fees = data.amountHTG * 0.15;
-        const totalDebit = data.amountHTG + fees;
+      } catch (err) {
 
-        // Ajoute code, dat kreasyon ak expiration nan fòm
-        const transferCode = generateTransferCode();
-        const today = new Date().toISOString().split("T")[0];
-        const expiration = calculateExpiration();
+        console.error("Erreur API ExpressFOBAS :", err);
 
-        transferCodeInput.value = transferCode;
-        createdDateInput.value = today;
-        expirationDateInput.value = expiration;
+        transferResult.innerHTML =
+          `<span style="color:red;font-weight:bold">
+          Erreur de communication avec le serveur. Veuillez réessayer.
+          </span>`;
 
-        // Ajoute infos detaye pou API
-        const payload = {
-            ...data,
-            feesHTG: fees,
-            totalDebitHTG: totalDebit,
-            transferCode: transferCode,
-            createdAt: today,
-            expirationDate: expiration,
-            status: "Pending"
-        };
+      }
 
-        try {
-            const res = await fetch("https://api.fondationbackupspirituel.com/expressfobas", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(payload)
-            });
-
-            const result = await res.json();
-
-            if (result.error) {
-                transferResult.innerHTML = `<span style="color:red;font-weight:bold">${result.error}</span>`;
-            } else {
-                transferResult.innerHTML = `<span style="color:green;font-weight:bold">Transfert créé avec succès ! Code ExpressFOBAS : ${result.transferCode}</span>`;
-            }
-        } catch (err) {
-            console.error("Erreur API ExpressFOBAS :", err);
-            transferResult.innerHTML = `<span style="color:red;font-weight:bold">Erreur de communication avec le serveur. Veuillez réessayer.</span>`;
-        }
     });
 
-    // Bouton Back
+    // =========================
+    // BOUTON BACK
+    // =========================
     const backBtn = document.getElementById("backBtn");
+
     if (backBtn) {
-        backBtn.addEventListener("click", () => {
-            window.history.back();
-        });
+      backBtn.addEventListener("click", () => {
+        window.history.back();
+      });
     }
 
-    // Bouton ExpressRetrait (prepare pou nouvo paj)
+    // =========================
+    // BOUTON EXPRESS RETRAIT
+    // =========================
     const retraitBtn = document.getElementById("retraitBtn");
+
     if (retraitBtn) {
-        retraitBtn.addEventListener("click", () => {
-            window.location.href = "expressretrait.html";
-        });
+      retraitBtn.addEventListener("click", () => {
+        window.location.href = "expressretrait.html";
+      });
     }
+
+  }
 
 });
