@@ -1,5 +1,37 @@
 document.addEventListener("DOMContentLoaded", () => {
 
+
+
+btnExpress.addEventListener("click", (e) => {
+  e.preventDefault();
+  loader.style.display = "flex";
+  btnExpress.disabled = true;
+
+  const roleText = userRoleEl.textContent.split(":")[1]?.trim() || "";
+  const userName = userNameEl.textContent.trim();
+  const userEmail = userEmailEl.textContent.trim();
+
+  setTimeout(() => {
+    if (roleText === "Agent Autorise" || roleText === "FONDATEUR FOBAS") {
+      // Redireksyon fè pati JS sèlman
+      window.location.href =
+        "expressfobas/expressfobas.html" +
+        "?name=" + encodeURIComponent(userName) +
+        "&email=" + encodeURIComponent(userEmail) +
+        "&role=" + encodeURIComponent(roleText);
+    } else {
+      loader.style.display = "none";
+      btnExpress.disabled = false;
+      alert("Vous n'avez aucun accès pour entrer dans cette page.");
+    }
+  }, 800);
+});
+
+
+
+
+  
+
   // ======= Nouvo Bouton Express FOBAS 2em Fòm =======
   const btnExpress = document.getElementById("expressfobastransfert");
   const loader = document.getElementById("transfertLoader"); // loader nouvo paj
