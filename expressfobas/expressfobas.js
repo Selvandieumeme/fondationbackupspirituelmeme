@@ -300,8 +300,8 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         // Mete done itilizatè yo nan sessionStorage
-        sessionStorage.setItem("fobas_agent_nom", userNameEl.textContent.trim());
-        sessionStorage.setItem("fobas_agent_email", userEmailEl.textContent.trim());
+        sessionStorage.setItem("agent_nom", userNameEl.textContent.trim());
+        sessionStorage.setItem("agent_email", userEmailEl.textContent.trim());
 
         // Loader si egziste
         const loader = document.getElementById("transfertLoader");
@@ -320,8 +320,8 @@ document.addEventListener("DOMContentLoaded", () => {
       const agentNameInput = document.getElementById("agentName");
       const agentEmailInput = document.getElementById("agentEmail");
 
-      const nom = sessionStorage.getItem("fobas_agent_nom") || "";
-      const email = sessionStorage.getItem("fobas_agent_email") || "";
+      const nom = sessionStorage.getItem("agent_nom") || "";
+      const email = sessionStorage.getItem("agent_email") || "";
 
       if (agentNameInput) {
         agentNameInput.value = nom;
