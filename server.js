@@ -92,30 +92,109 @@ app.use('/wallet', walletToMerchantRoutes);   // <-- sa pèmèt POST /wallet/tra
 
 
 
-// =======================================
-// VERIFY AGENT AUTORISÉ VIA walletbalances
-// =======================================
-app.post("/api/verify-agent", async (req, res) => {
+// ======================================
+// EXPRESSFOBAS API
+// CREATION TRANSFERT
+// ======================================
+
+app.post("/expressfobas", async (req, res) => {
   try {
-    const { email } = req.body;
 
-    if (!email) return res.json({ success: false, message: "Email manquant" });
+    // =============================
+    // RECUPERATION DES DONNEES
+    // =============================
+    const data = req.body;
 
-    const agent = await db.collection("walletbalances").findOne({ email: email.toLowerCase() });
+    // =============================
+    // VALIDATION MINIMALE
+    // =============================
+    if (
+      !data.agentName ||
+      !data.agentEmail ||
+      !data.senderName ||
+      !data.receiverName ||
+      !data.amountHTG
+    ) {
+      return res.json({
+        error: "Informations obligatoires manquantes."
+      });
+    }
 
-    if (!agent) return res.json({ success: false, message: "Agent non autorisé" });
+    // =============================
+    // COLLECTION MONGODB
+    // =============================
+    const collection = db.collection("expressfobas");
 
-    return res.json({
+    // =============================
+    // OBJET TRANSFERT
+    // =============================
+    const transfert = {
+
+      // ----- AGENT -----
+      agentName: data.agentName,
+      agentEmail: data.agentEmail,
+
+      // ----- SENDER -----
+      senderName: data.senderName,
+      senderId: data.senderId,
+      senderCountry: data.senderCountry,
+      senderCity: data.senderCity,
+      senderAddress: data.senderAddress,
+      senderWhatsapp: data.senderWhatsapp,
+
+      // ----- RECEIVER -----
+      receiverName: data.receiverName,
+      receiverCountry: data.receiverCountry,
+      receiverCity: data.receiverCity,
+      receiverAddress: data.receiverAddress,
+      receiverWhatsapp: data.receiverWhatsapp,
+
+      // ----- FINANCE -----
+      amountHTG: data.amountHTG,
+      feesHTG: data.feesHTG,
+      totalDebitHTG: data.totalDebitHTG,
+
+      // ----- SYSTEM -----
+      transferCode: data.transferCode,
+      createdAt: data.createdAt,
+      expirationDate: data.expirationDate,
+      status: data.status,
+
+      // ----- TIMESTAMP -----
+      createdTimestamp: new Date()
+
+    };
+
+    // =============================
+    // INSERT DATABASE
+    // =============================
+    await collection.insertOne(transfert);
+
+    // =============================
+    // REPONSE SUCCESS
+    // =============================
+    res.json({
       success: true,
-      agentName: agent.nom || agent.email,
-      walletAccountType: agent.walletAccountType // ajoute tit itilizatè a
+      transferCode: data.transferCode
     });
 
   } catch (err) {
-    console.error("VERIFY AGENT ERROR:", err);
-    return res.status(500).json({ success: false, message: "Erreur serveur" });
+
+    // =============================
+    // ERREUR SERVEUR
+    // =============================
+    console.error("ExpressFOBAS API error:", err);
+
+    res.json({
+      error: "Erreur serveur."
+    });
+
   }
 });
+
+
+
+
 
 
 
