@@ -284,11 +284,11 @@ document.addEventListener("DOMContentLoaded", () => {
     const btnExpress = document.getElementById("expressfobastransfert");
     if (btnExpress) {
       btnExpress.addEventListener("click", () => {
-        const userNameEl = document.getElementById("userName");
-        const userEmailEl = document.getElementById("userEmail");
-        const userRoleEl = document.getElementById("userAccountType");
+        const userName = document.getElementById("userName");
+        const userEmail = document.getElementById("userEmail");
+        const userRole = document.getElementById("userAccountType");
 
-        if (!userNameEl || !userEmailEl || !userRoleEl) return;
+        if (!userName || !userEmail || !userRole) return;
 
         let userRole = userRoleEl.textContent.trim();
         if (userRole.includes(":")) userRole = userRole.split(":")[1].trim();
