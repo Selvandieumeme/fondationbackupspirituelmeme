@@ -24,7 +24,7 @@ const nodemailer = require('nodemailer');
 const Pusher = require('pusher');
 const sharp = require('sharp');
 const fs = require('fs'); // <-- AJOUTE LIG SA A LA OUVÈTI BLOK LA
-const cron = require('node-cron');
+
 
 
 
