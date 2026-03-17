@@ -24,7 +24,7 @@ const nodemailer = require('nodemailer');
 const Pusher = require('pusher');
 const sharp = require('sharp');
 const fs = require('fs'); // <-- AJOUTE LIG SA A LA OUVÈTI BLOK LA
-
+const cron = require('node-cron');
 
 
 
@@ -90,107 +90,147 @@ app.use('/wallet', walletToMerchantRoutes);   // <-- sa pèmèt POST /wallet/tra
 
 
 
+// =========================
+// EXPRESS FOBAS - SERVER.JS
+// =========================
 
+// =========================
+// COLLECTIONS
+// =========================
+const WalletBalance = mongoose.model("walletbalances", new mongoose.Schema({}, { strict: false }));
+const Transfert = mongoose.model("transferts", new mongoose.Schema({}, { strict: false }));
 
-// ======================================
-// EXPRESSFOBAS API
-// CREATION TRANSFERT
-// ======================================
+// =========================
+// UTIL FUNCTIONS
+// =========================
+function generateTransferCode() {
+  return "FOB-" + Date.now().toString().slice(-7);
+}
 
-app.post("/expressfobas", async (req, res) => {
+function calculateExpiration() {
+  const today = new Date();
+  const expiration = new Date();
+  expiration.setDate(today.getDate() + 21);
+  return expiration.toISOString().split("T")[0]; // YYYY-MM-DD
+}
+
+// =========================
+// POST /expressfobas
+// =========================
+router.post("/expressfobas", async (req, res) => {
   try {
+    const {
+      agentName,
+      agentEmail,
+      senderName,
+      senderId,
+      senderCountry,
+      senderCity,
+      senderAddress,
+      senderWhatsapp,
+      receiverName,
+      receiverCountry,
+      receiverCity,
+      receiverAddress,
+      receiverWhatsapp,
+      amountHTG
+    } = req.body;
 
-    // =============================
-    // RECUPERATION DES DONNEES
-    // =============================
-    const data = req.body;
-
-    // =============================
-    // VALIDATION MINIMALE
-    // =============================
-    if (
-      !data.agentName ||
-      !data.agentEmail ||
-      !data.senderName ||
-      !data.receiverName ||
-      !data.amountHTG
-    ) {
-      return res.json({
-        error: "Informations obligatoires manquantes."
-      });
+    if (!amountHTG || amountHTG <= 0) {
+      return res.status(400).json({ error: "Montant doit être supérieur à 0" });
     }
 
-    // =============================
-    // COLLECTION MONGODB
-    // =============================
-    const collection = db.collection("expressfobas");
+    // Rechèch agent nan walletbalances selon email
+    const agent = await WalletBalance.findOne({ email: agentEmail });
 
-    // =============================
-    // OBJET TRANSFERT
-    // =============================
-    const transfert = {
+    if (!agent) {
+      return res.status(404).json({ error: "Agent non trouvé dans walletbalances" });
+    }
 
-      // ----- AGENT -----
-      agentName: data.agentName,
-      agentEmail: data.agentEmail,
+    const fees = amountHTG * 0.15;
+    const totalDebit = amountHTG + fees;
 
-      // ----- SENDER -----
-      senderName: data.senderName,
-      senderId: data.senderId,
-      senderCountry: data.senderCountry,
-      senderCity: data.senderCity,
-      senderAddress: data.senderAddress,
-      senderWhatsapp: data.senderWhatsapp,
+    // Verifye balans agent
+    if ((agent.balance || 0) < totalDebit) {
+      return res.status(400).json({ error: "Pas assez de fonds dans le compte de l'agent" });
+    }
 
-      // ----- RECEIVER -----
-      receiverName: data.receiverName,
-      receiverCountry: data.receiverCountry,
-      receiverCity: data.receiverCity,
-      receiverAddress: data.receiverAddress,
-      receiverWhatsapp: data.receiverWhatsapp,
+    // Debi agent la
+    agent.balance -= totalDebit;
+    await agent.save();
 
-      // ----- FINANCE -----
-      amountHTG: data.amountHTG,
-      feesHTG: data.feesHTG,
-      totalDebitHTG: data.totalDebitHTG,
+    // Kreye dokiman nan transferts
+    const transferCode = generateTransferCode();
+    const today = new Date().toISOString().split("T")[0];
+    const expirationDate = calculateExpiration();
 
-      // ----- SYSTEM -----
-      transferCode: data.transferCode,
-      createdAt: data.createdAt,
-      expirationDate: data.expirationDate,
-      status: data.status,
-
-      // ----- TIMESTAMP -----
-      createdTimestamp: new Date()
-
-    };
-
-    // =============================
-    // INSERT DATABASE
-    // =============================
-    await collection.insertOne(transfert);
-
-    // =============================
-    // REPONSE SUCCESS
-    // =============================
-    res.json({
-      success: true,
-      transferCode: data.transferCode
+    const transfert = new Transfert({
+      agentName,
+      agentEmail,
+      senderName,
+      senderId,
+      senderCountry,
+      senderCity,
+      senderAddress,
+      senderWhatsapp,
+      receiverName,
+      receiverCountry,
+      receiverCity,
+      receiverAddress,
+      receiverWhatsapp,
+      amountHTG,
+      feesHTG: fees,
+      totalDebitHTG: totalDebit,
+      transferCode,
+      createdAt: today,
+      expirationDate,
+      status: "Pending"
     });
+
+    await transfert.save();
+
+    return res.status(201).json({ transferCode });
 
   } catch (err) {
-
-    // =============================
-    // ERREUR SERVEUR
-    // =============================
-    console.error("ExpressFOBAS API error:", err);
-
-    res.json({
-      error: "Erreur serveur."
-    });
-
+    console.error("Erreur serveur Express FOBAS:", err);
+    return res.status(500).json({ error: "Erreur serveur, veuillez réessayer." });
   }
 });
+
+// =========================
+// CRON JOB - 1x / JOUR
+// =========================
+cron.schedule("0 0 * * *", async () => { // chak jou minit 0, èdtan 0
+  try {
+    const today = new Date().toISOString().split("T")[0];
+
+    // Chèche tout transfè Pending ki depase expirationDate
+    const expiredTransfers = await Transfert.find({
+      status: "Pending",
+      expirationDate: { $lt: today }
+    });
+
+    for (const t of expiredTransfers) {
+      // Retounen fon sou balans agent
+      const agent = await WalletBalance.findOne({ email: t.agentEmail });
+      if (agent) {
+        agent.balance += t.totalDebitHTG;
+        await agent.save();
+      }
+
+      // Mete status "Express Fobas Annule"
+      t.status = "Express Fobas Annule";
+      await t.save();
+    }
+
+    console.log(`[CRON EXPRESS FOBAS] ${expiredTransfers.length} transferts annulés et fonds retournés.`);
+
+  } catch (err) {
+    console.error("Erreur cron job Express FOBAS:", err);
+  }
+});
+
+module.exports = router;
 
 
 
