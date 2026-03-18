@@ -1,8 +1,8 @@
 // =========================
 // COLLECTIONS
 // =========================
-const WalletBalance = mongoose.model("walletbalances", new mongoose.Schema({}, { strict: false }));
-const Transfert = mongoose.model("transferts", new mongoose.Schema({}, { strict: false }));
+const WalletBalance = mongoose.models.walletbalances || mongoose.model("walletbalances", new mongoose.Schema({}, { strict: false }));
+const Transfert = mongoose.models.transferts || mongoose.model("transferts", new mongoose.Schema({}, { strict: false }));
 
 // =========================
 // UTIL FUNCTIONS
