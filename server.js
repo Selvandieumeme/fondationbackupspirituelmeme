@@ -87,8 +87,13 @@ app.use('/wallet', walletToMerchantRoutes);   // <-- sa pèmèt POST /wallet/tra
 
 
 
+// =========================
+// ROUTER EXPRESS FOBAS
+// =========================
+const expressFobasRouter = require("./routes/fobasexpress.js");
 
-
+// PREFIX API GLOBAL
+app.use("/api", expressFobasRouter);
 
 
 
