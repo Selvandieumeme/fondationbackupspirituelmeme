@@ -1,8 +1,21 @@
 // =========================
-// COLLECTIONS
+// DEPENDENCIES (OBLIGATWA NAN ROUTES)
 // =========================
-const WalletBalance = mongoose.models.walletbalances || mongoose.model("walletbalances", new mongoose.Schema({}, { strict: false }));
-const Transfert = mongoose.models.transferts || mongoose.model("transferts", new mongoose.Schema({}, { strict: false }));
+const express = require('express');
+const router = express.Router();
+const mongoose = require('mongoose');
+const cron = require('node-cron');
+
+// =========================
+// COLLECTIONS (SAFE MODE)
+// =========================
+const WalletBalance =
+  mongoose.models.walletbalances ||
+  mongoose.model("walletbalances", new mongoose.Schema({}, { strict: false }));
+
+const Transfert =
+  mongoose.models.transferts ||
+  mongoose.model("transferts", new mongoose.Schema({}, { strict: false }));
 
 // =========================
 // UTIL FUNCTIONS
@@ -40,25 +53,40 @@ router.post("/expressfobas", async (req, res) => {
       amountHTG
     } = req.body;
 
+    // =========================
+    // VALIDATION MINIMALE
+    // =========================
+    if (!agentEmail || !receiverName || !amountHTG) {
+      return res.status(400).json({ error: "Champs obligatoires manquants" });
+    }
+
     if (!amountHTG || amountHTG <= 0) {
       return res.status(400).json({ error: "Montant doit être supérieur à 0" });
     }
 
     const agent = await WalletBalance.findOne({ email: agentEmail });
-    if (!agent) return res.status(404).json({ error: "Agent non trouvé" });
+    if (!agent) {
+      return res.status(404).json({ error: "Agent non trouvé" });
+    }
 
     const fees = amountHTG * 0.15;
     const totalDebit = amountHTG + fees;
 
     if ((agent.balance || 0) < totalDebit) {
-      return res.status(400).json({ error: "Pas assez de fonds dans le compte de l'agent" });
+      return res.status(400).json({
+        error: "Pas assez de fonds dans le compte de l'agent"
+      });
     }
 
-    // Debi agent la
+    // =========================
+    // DEBIT AGENT
+    // =========================
     agent.balance -= totalDebit;
     await agent.save();
 
-    // Kreye dokiman nan transferts
+    // =========================
+    // CREATION TRANSFERT
+    // =========================
     const transferCode = generateTransferCode();
     const today = new Date().toISOString().split("T")[0];
     const expirationDate = calculateExpiration();
@@ -92,38 +120,52 @@ router.post("/expressfobas", async (req, res) => {
 
   } catch (err) {
     console.error("Erreur serveur Express FOBAS:", err);
-    return res.status(500).json({ error: "Erreur serveur, veuillez réessayer." });
+    return res.status(500).json({
+      error: "Erreur serveur, veuillez réessayer."
+    });
   }
 });
 
 // =========================
-// CRON JOB - Retounen fon apre 21 jou
+// CRON JOB - RETOUR FONDS (SAFE)
 // =========================
-cron.schedule("0 0 * * *", async () => { // chak jou 00:00
-  try {
-    const today = new Date().toISOString().split("T")[0];
+let cronStarted = false;
 
-    const expiredTransfers = await Transfert.find({
-      status: "Pending",
-      expirationDate: { $lt: today }
-    });
+if (!cronStarted) {
+  cron.schedule("0 0 * * *", async () => {
+    try {
+      const today = new Date().toISOString().split("T")[0];
 
-    for (const t of expiredTransfers) {
-      const agent = await WalletBalance.findOne({ email: t.agentEmail });
-      if (agent) {
-        agent.balance += t.totalDebitHTG;
-        await agent.save();
+      const expiredTransfers = await Transfert.find({
+        status: "Pending",
+        expirationDate: { $lt: today }
+      });
+
+      for (const t of expiredTransfers) {
+        const agent = await WalletBalance.findOne({ email: t.agentEmail });
+
+        if (agent) {
+          agent.balance += t.totalDebitHTG;
+          await agent.save();
+        }
+
+        t.status = "Express Fobas Annule";
+        await t.save();
       }
 
-      t.status = "Express Fobas Annule";
-      await t.save();
+      console.log(
+        `[CRON EXPRESS FOBAS] ${expiredTransfers.length} transferts annulés et fonds retournés.`
+      );
+
+    } catch (err) {
+      console.error("Erreur cron job Express FOBAS:", err);
     }
+  });
 
-    console.log(`[CRON EXPRESS FOBAS] ${expiredTransfers.length} transferts annulés et fonds retournés.`);
+  cronStarted = true;
+}
 
-  } catch (err) {
-    console.error("Erreur cron job Express FOBAS:", err);
-  }
-});
-
+// =========================
+// EXPORT ROUTER
+// =========================
 module.exports = router;
