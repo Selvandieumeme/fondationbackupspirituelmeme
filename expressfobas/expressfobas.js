@@ -124,16 +124,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (!form) return;
 
-    // =========================
-    // GENERATE CODE
-    // =========================
     function generateTransferCode() {
       return "FOB-" + Date.now().toString().slice(-7);
     }
 
-    // =========================
-    // CALCUL EXPIRATION
-    // =========================
     function calculateExpiration() {
       const today = new Date();
       const expiration = new Date();
@@ -168,7 +162,6 @@ document.addEventListener("DOMContentLoaded", () => {
         receiverWhatsapp: document.getElementById("receiverWhatsapp").value.trim(),
 
         amountHTG: Number(document.getElementById("amountHTG").value)
-
       };
 
       if (data.amountHTG <= 0) {
@@ -187,19 +180,33 @@ document.addEventListener("DOMContentLoaded", () => {
       createdDateInput.value = today;
       expirationDateInput.value = expiration;
 
+      // ✅ PAYLOAD ADAPTE POU BACKEND OU
       const payload = {
-        ...data,
-        feesHTG: fees,
-        totalDebitHTG: totalDebit,
-        transferCode: transferCode,
-        createdAt: today,
-        expirationDate: expiration,
-        status: "Pending"
+        agentNom: data.agentName,
+        agentEmail: data.agentEmail,
+
+        expediteurNom: data.senderName,
+        expediteurDocumentType: "",
+        expediteurDocumentNumero: data.senderId,
+        expediteurPays: data.senderCountry,
+        expediteurVille: data.senderCity,
+        expediteurAdresse: data.senderAddress,
+        expediteurTelephone: data.senderWhatsapp,
+
+        beneficiaireNom: data.receiverName,
+        beneficiairePays: data.receiverCountry,
+        beneficiaireVille: data.receiverCity,
+        beneficiaireAdresse: data.receiverAddress,
+        beneficiaireTelephone: data.receiverWhatsapp,
+
+        montant: data.amountHTG,
+        devise: "HTG"
       };
 
       try {
 
-        const res = await fetch("https://api.fondationbackupspirituel.com/expressfobas", {
+        // ✅ NOUVO ROUTE (ANSYEN METOD OU)
+        const res = await fetch("https://api.fondationbackupspirituel.com/api/transferts", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload)
@@ -207,18 +214,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const result = await res.json();
 
-        if (result.error) {
-
+        if (!res.ok) {
           transferResult.innerHTML =
-            `<span style="color:red;font-weight:bold">${result.error}</span>`;
-
+            `<span style="color:red;font-weight:bold">${result.message || "Erreur serveur"}</span>`;
         } else {
-
           transferResult.innerHTML =
             `<span style="color:green;font-weight:bold">
-            Transfert créé avec succès ! Code ExpressFOBAS : ${result.transferCode}
+            Transfert créé avec succès ! Code : ${result.codeUnique}
             </span>`;
-
         }
 
       } catch (err) {
@@ -229,7 +232,6 @@ document.addEventListener("DOMContentLoaded", () => {
           `<span style="color:red;font-weight:bold">
           Erreur de communication avec le serveur. Veuillez réessayer.
           </span>`;
-
       }
 
     });
@@ -280,7 +282,7 @@ document.addEventListener("DOMContentLoaded", () => {
 document.addEventListener("DOMContentLoaded", () => {
   try {
     // ==== Sèlman sou paj ExpressFOBAS ====
-    if (!window.location.pathname.includes("expressfobas/expressfobas.html")) return;
+    if (!window.location.pathname.includes("expressfobas.html")) return;
 
     // Récupère done itilizatè depi localStorage
     const nom = localStorage.getItem("userName") || "";
