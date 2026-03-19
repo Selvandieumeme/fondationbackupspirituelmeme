@@ -88,6 +88,23 @@ app.use('/wallet', walletToMerchantRoutes);   // <-- sa pèmèt POST /wallet/tra
 
 
 // =========================
+// MONGO CONNECTION (SAFE)
+// =========================
+if (!process.env.MONGO_URI) {
+  console.error("❌ MONGO_URI manquant dans .env");
+  process.exit(1); // bloke app la pou evite erè grav
+}
+
+mongoose.connect(process.env.MONGO_URI)
+  .then(() => {
+    console.log("✅ MongoDB connecté");
+  })
+  .catch(err => {
+    console.error("❌ Erreur connexion MongoDB:", err);
+    process.exit(1); // pi bon pou prod
+  });
+
+// =========================
 // ROUTER EXPRESS FOBAS
 // =========================
 const expressFobasRouter = require("./routes/fobasexpress.js");
