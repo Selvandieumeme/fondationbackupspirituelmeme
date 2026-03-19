@@ -1332,9 +1332,9 @@ app.post("/api/transferts", async (req, res) => {
 
 
 
-// ================= EXPRESSFOBAS SCHEMA =================
-const mongoose = require('mongoose');
+// ================= EXPRESSFOBAS INTERNATIONAL =================
 
+// ----------------------- SCHEMA -----------------------
 const expressFobasSchema = new mongoose.Schema({
   agentNom: { type: String, required: true },
   agentEmail: { type: String, required: true },
@@ -1359,7 +1359,7 @@ const expressFobasSchema = new mongoose.Schema({
   codeUnique: {
     type: String,
     required: true,
-    default: () => "FOB-" + Date.now().toString().slice(-7)
+    default: () => "FOB-EX" + Date.now().toString().slice(-7)
   },
 
   statut: { type: String, default: "Pending" },
@@ -1373,39 +1373,39 @@ const expressFobasSchema = new mongoose.Schema({
   source: { type: String, default: "EXPRESSFOBAS" }
 }, { timestamps: true });
 
-// Non model JS = ExpressFobas
-// Koleksyon MongoDB = transferts (pou konsistans ak backend ou vle)
-const ExpressFobas = mongoose.model("ExpressFobas", expressFobasSchema, "transferts");
+// ----------------------- MODEL -----------------------
+const ExpressFobas = mongoose.model(
+  "ExpressFobas",           // Non model JS
+  expressFobasSchema,        // Schema
+  "fobasinternational"       // Koleksyon MongoDB nouvo
+);
 
 module.exports = ExpressFobas;
 
-// ================= EXPRESSFOBAS ROUTE =================
+// ----------------------- ROUTE -----------------------
 app.post("/api/expressfobas", async (req, res) => {
   try {
     const data = req.body;
 
     // Validasyon minimòm
-    if (
-      !data.agentNom ||
-      !data.agentEmail ||
-      !data.expediteurNom ||
-      !data.expediteurPays ||
-      !data.expediteurVille ||
-      !data.expediteurAdresse ||
-      !data.expediteurTelephone ||
-      !data.beneficiaireNom ||
-      !data.beneficiairePays ||
-      !data.beneficiaireVille ||
-      !data.beneficiaireAdresse ||
-      !data.beneficiaireTelephone ||
-      !data.montant ||
-      data.montant <= 0 ||
-      !data.devise
-    ) {
-      return res.status(400).json({ success: false, message: "Données invalides" });
+    const requiredFields = [
+      "agentNom", "agentEmail",
+      "expediteurNom", "expediteurPays", "expediteurVille", "expediteurAdresse", "expediteurTelephone",
+      "beneficiaireNom", "beneficiairePays", "beneficiaireVille", "beneficiaireAdresse", "beneficiaireTelephone",
+      "montant", "devise"
+    ];
+
+    for (const field of requiredFields) {
+      if (!data[field] || (typeof data[field] === "string" && !data[field].trim())) {
+        return res.status(400).json({ success: false, message: `Champ manquant: ${field}` });
+      }
     }
 
-    // Kreye nouvo dokiman nan schema ExpressFobas la
+    if (data.montant <= 0) {
+      return res.status(400).json({ success: false, message: "Montant doit être supérieur à 0" });
+    }
+
+    // Kreye nouvo dokiman nan koleksyon fobasinternational
     const expressFobas = new ExpressFobas({
       agentNom: data.agentNom,
       agentEmail: data.agentEmail,
@@ -1430,15 +1430,15 @@ app.post("/api/expressfobas", async (req, res) => {
 
     return res.status(200).json({
       success: true,
-      message: "Transfert ExpressFOBAS créé avec succès",
+      message: "ExpressFOBAS créé avec succès",
       codeUnique: expressFobas.codeUnique
     });
+
   } catch (err) {
     console.error("EXPRESSFOBAS ERROR:", err);
     return res.status(500).json({ success: false, message: "Erreur serveur" });
   }
 });
-
 
 
 
