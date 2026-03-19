@@ -1315,6 +1315,104 @@ app.post("/api/transferts", async (req, res) => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// ================= EXPRESSFOBAS SCHEMA =================
+const mongoose = require('mongoose');
+
+const expressFobasSchema = new mongoose.Schema({
+  agentNom: { type: String, required: true },
+  agentEmail: { type: String, required: true },
+
+  expediteurNom: { type: String, required: true },
+  expediteurDocumentType: { type: String, default: "" },
+  expediteurDocumentNumero: { type: String, default: "" },
+  expediteurPays: { type: String, required: true },
+  expediteurVille: { type: String, required: true },
+  expediteurAdresse: { type: String, required: true },
+  expediteurTelephone: { type: String, required: true },
+
+  beneficiaireNom: { type: String, required: true },
+  beneficiairePays: { type: String, required: true },
+  beneficiaireVille: { type: String, required: true },
+  beneficiaireAdresse: { type: String, required: true },
+  beneficiaireTelephone: { type: String, required: true },
+
+  montant: { type: Number, required: true },
+  devise: { type: String, required: true },
+
+  codeUnique: {
+    type: String,
+    required: true,
+    default: () => "FOB-" + Date.now().toString().slice(-7)
+  },
+
+  statut: { type: String, default: "Pending" },
+  dateCreation: { type: Date, default: Date.now },
+  dateExpiration: { type: Date, default: () => {
+    const d = new Date();
+    d.setDate(d.getDate() + 21);
+    return d;
+  }},
+
+  source: { type: String, default: "EXPRESSFOBAS" }
+}, { timestamps: true });
+
+// Non model JS = ExpressFobas
+// Koleksyon MongoDB = transferts (pou konsistans ak backend ou vle)
+const ExpressFobas = mongoose.model("ExpressFobas", expressFobasSchema, "transferts");
+
+module.exports = ExpressFobas;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 // =======================
 // 🔎 VERIFIER IDENTITÉ WALLET (EMAIL EXACT)
 // =======================
