@@ -1379,7 +1379,65 @@ const ExpressFobas = mongoose.model("ExpressFobas", expressFobasSchema, "transfe
 
 module.exports = ExpressFobas;
 
+// ================= EXPRESSFOBAS ROUTE =================
+app.post("/api/expressfobas", async (req, res) => {
+  try {
+    const data = req.body;
 
+    // Validasyon minimòm
+    if (
+      !data.agentNom ||
+      !data.agentEmail ||
+      !data.expediteurNom ||
+      !data.expediteurPays ||
+      !data.expediteurVille ||
+      !data.expediteurAdresse ||
+      !data.expediteurTelephone ||
+      !data.beneficiaireNom ||
+      !data.beneficiairePays ||
+      !data.beneficiaireVille ||
+      !data.beneficiaireAdresse ||
+      !data.beneficiaireTelephone ||
+      !data.montant ||
+      data.montant <= 0 ||
+      !data.devise
+    ) {
+      return res.status(400).json({ success: false, message: "Données invalides" });
+    }
+
+    // Kreye nouvo dokiman nan schema ExpressFobas la
+    const expressFobas = new ExpressFobas({
+      agentNom: data.agentNom,
+      agentEmail: data.agentEmail,
+      expediteurNom: data.expediteurNom,
+      expediteurDocumentType: data.expediteurDocumentType || "",
+      expediteurDocumentNumero: data.expediteurDocumentNumero || "",
+      expediteurPays: data.expediteurPays,
+      expediteurVille: data.expediteurVille,
+      expediteurAdresse: data.expediteurAdresse,
+      expediteurTelephone: data.expediteurTelephone,
+      beneficiaireNom: data.beneficiaireNom,
+      beneficiairePays: data.beneficiairePays,
+      beneficiaireVille: data.beneficiaireVille,
+      beneficiaireAdresse: data.beneficiaireAdresse,
+      beneficiaireTelephone: data.beneficiaireTelephone,
+      montant: data.montant,
+      devise: data.devise,
+      // codeUnique, statut, dateCreation, dateExpiration, source otomatik
+    });
+
+    await expressFobas.save();
+
+    return res.status(200).json({
+      success: true,
+      message: "Transfert ExpressFOBAS créé avec succès",
+      codeUnique: expressFobas.codeUnique
+    });
+  } catch (err) {
+    console.error("EXPRESSFOBAS ERROR:", err);
+    return res.status(500).json({ success: false, message: "Erreur serveur" });
+  }
+});
 
 
 
@@ -2281,36 +2339,6 @@ app.post("/api/wallet/change-password", async (req, res) => {
 
 
 
-const ExpressFobas = require('./models/ExpressFobas'); // adapte path si li nan folder models
-
-app.post("/api/expressfobas", async (req, res) => {
-  try {
-    const data = req.body;
-    const montant = Number(data.montant);
-
-    // VALIDATION MINIMAL
-    if (!data.agentNom || !data.agentEmail || !data.expediteurNom || !data.beneficiaireNom || !montant || montant <= 0) {
-      return res.status(400).json({ success: false, message: "Données invalides" });
-    }
-
-    const transfert = new ExpressFobas({
-      ...data
-      // codeUnique, dateCreation, dateExpiration, statut deja default nan schema
-    });
-
-    await transfert.save();
-
-    res.status(201).json({
-      success: true,
-      message: "ExpressFOBAS créé avec succès",
-      codeUnique: transfert.codeUnique
-    });
-
-  } catch (err) {
-    console.error("EXPRESSFOBAS ERROR:", err);
-    res.status(500).json({ success: false, message: "Erreur serveur" });
-  }
-});
 
 
 
