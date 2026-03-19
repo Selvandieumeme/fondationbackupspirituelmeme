@@ -56,28 +56,29 @@ document.addEventListener("DOMContentLoaded", () => {
 
       setTimeout(() => {
 
-        if (rolesAutorises.includes(roleText)) {
+  if (rolesAutorises.includes(roleText)) {
 
-          window.location.href =
-            "expressfobas.html" +
-            "?name=" + encodeURIComponent(userName) +
-            "&email=" + encodeURIComponent(userEmail) +
-            "&role=" + encodeURIComponent(roleText);
+    // 🔥 AJOUT SA (KRITIK)
+    loader.style.display = "none";
+    btnExpress.disabled = false;
 
-        } else {
+    window.location.href =
+      "/expressfobas/expressfobas.html" +
+      "?name=" + encodeURIComponent(userName) +
+      "&email=" + encodeURIComponent(userEmail) +
+      "&role=" + encodeURIComponent(roleText);
 
-          loader.style.display = "none";
-          btnExpress.disabled = false;
+  } else {
 
-          alert("Vous n'avez aucun accès pour entrer dans cette page.");
+    loader.style.display = "none";
+    btnExpress.disabled = false;
 
-        }
-
-      }, 800);
-
-    });
+    alert("Vous n'avez aucun accès pour entrer dans cette page.");
 
   }
+
+}, 800);
+}
 
   // =========================
   // PAGE EXPRESSFOBAS.HTML
