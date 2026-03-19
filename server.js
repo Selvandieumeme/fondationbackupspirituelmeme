@@ -2270,6 +2270,68 @@ app.post("/api/wallet/change-password", async (req, res) => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+const ExpressFobas = require('./models/ExpressFobas'); // adapte path si li nan folder models
+
+app.post("/api/expressfobas", async (req, res) => {
+  try {
+    const data = req.body;
+    const montant = Number(data.montant);
+
+    // VALIDATION MINIMAL
+    if (!data.agentNom || !data.agentEmail || !data.expediteurNom || !data.beneficiaireNom || !montant || montant <= 0) {
+      return res.status(400).json({ success: false, message: "Données invalides" });
+    }
+
+    const transfert = new ExpressFobas({
+      ...data
+      // codeUnique, dateCreation, dateExpiration, statut deja default nan schema
+    });
+
+    await transfert.save();
+
+    res.status(201).json({
+      success: true,
+      message: "ExpressFOBAS créé avec succès",
+      codeUnique: transfert.codeUnique
+    });
+
+  } catch (err) {
+    console.error("EXPRESSFOBAS ERROR:", err);
+    res.status(500).json({ success: false, message: "Erreur serveur" });
+  }
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 app.post("/api/admin/unlock", (req, res) => {
   console.log("ADMIN PASSWORD REÇU :", req.body.password);
 
