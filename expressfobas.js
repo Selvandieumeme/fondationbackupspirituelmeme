@@ -59,7 +59,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (rolesAutorises.includes(roleText)) {
 
           window.location.href =
-            "/expressfobas/expressfobas.html" +
+            "expressfobas.html" +
             "?name=" + encodeURIComponent(userName) +
             "&email=" + encodeURIComponent(userEmail) +
             "&role=" + encodeURIComponent(roleText);
