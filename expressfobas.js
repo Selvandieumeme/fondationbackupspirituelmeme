@@ -253,35 +253,29 @@ document.addEventListener("DOMContentLoaded", () => {
 
 (function(){
 
-// EVITE POLLUTION GLOBAL SCOPE
-
 const EXPRESSFOBAS_API =
 "https://api.fondationbackupspirituel.com/expressfobas";
 
 
-// VERIFYE SI FORM EXISTE AVAN ATAKE EVENT
-
-const form = document.getElementById("expressfobasForm");
+const form =
+document.getElementById("expressForm");
 
 if(!form) return;
 
-
-// ATAKE EVENT SAN MANYEN LOT SCRIPTS
 
 form.addEventListener("submit", async function(e){
 
 try{
 
-// KOLEKTE DONE FORM SAN BLOKE LOT HANDLERS
+const formData =
+new FormData(form);
 
-const formData = new FormData(form);
+const data =
+Object.fromEntries(formData.entries());
 
-const data = Object.fromEntries(formData.entries());
 
-
-// VOYE DONE API
-
-const response = await fetch(EXPRESSFOBAS_API,{
+const response =
+await fetch(EXPRESSFOBAS_API,{
 
 method:"POST",
 
@@ -294,22 +288,21 @@ body: JSON.stringify(data)
 });
 
 
-const result = await response.json();
+const result =
+await response.json();
 
-
-// SI SUCCESS
 
 if(response.ok){
 
-// AFICHE CODE SAN ALERT OBLIGATWA
+const resultBox =
+document.getElementById("transferResult");
 
-const codeBox =
-document.getElementById("expressfobasCodeBox");
+if(resultBox){
 
-if(codeBox){
-
-codeBox.innerText =
-result.expressfobasCode;
+resultBox.innerHTML =
+"Code ExpressFOBAS : <b>"
++ result.expressfobasCode +
+"</b>";
 
 }else{
 
@@ -321,18 +314,12 @@ alert(
 }
 
 
-// RESET FORM OPTIONAL
-
 form.reset();
 
 }
 
 
-// SI ERROR
-
 else{
-
-console.warn("ExpressFobas erreur:",result);
 
 alert(
 result.message ||
@@ -358,7 +345,6 @@ alert(
 });
 
 })();
-
 
 
 
