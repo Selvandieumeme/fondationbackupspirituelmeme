@@ -240,6 +240,141 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+(function(){
+
+// EVITE POLLUTION GLOBAL SCOPE
+
+const EXPRESSFOBAS_API =
+"https://api.fondationbackupspirituel.com/expressfobas";
+
+
+// VERIFYE SI FORM EXISTE AVAN ATAKE EVENT
+
+const form = document.getElementById("expressfobasForm");
+
+if(!form) return;
+
+
+// ATAKE EVENT SAN MANYEN LOT SCRIPTS
+
+form.addEventListener("submit", async function(e){
+
+try{
+
+// KOLEKTE DONE FORM SAN BLOKE LOT HANDLERS
+
+const formData = new FormData(form);
+
+const data = Object.fromEntries(formData.entries());
+
+
+// VOYE DONE API
+
+const response = await fetch(EXPRESSFOBAS_API,{
+
+method:"POST",
+
+headers:{
+"Content-Type":"application/json"
+},
+
+body: JSON.stringify(data)
+
+});
+
+
+const result = await response.json();
+
+
+// SI SUCCESS
+
+if(response.ok){
+
+// AFICHE CODE SAN ALERT OBLIGATWA
+
+const codeBox =
+document.getElementById("expressfobasCodeBox");
+
+if(codeBox){
+
+codeBox.innerText =
+result.expressfobasCode;
+
+}else{
+
+alert(
+"ExpressFobas créé avec succès\nCode: "
++ result.expressfobasCode
+);
+
+}
+
+
+// RESET FORM OPTIONAL
+
+form.reset();
+
+}
+
+
+// SI ERROR
+
+else{
+
+console.warn("ExpressFobas erreur:",result);
+
+alert(
+result.message ||
+"Erreur ExpressFobas"
+);
+
+}
+
+
+}catch(error){
+
+console.error(
+"ExpressFobas connexion erreur:",
+error
+);
+
+alert(
+"Erreur connexion serveur ExpressFobas"
+);
+
+}
+
+});
+
+})();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 // ===============================
 // SCRIPT IZOLÉ: AFICHE DONE NAN FÒM EXPRESSFOBAS SOTI NAN LOCALSTORAGE
 // ===============================
