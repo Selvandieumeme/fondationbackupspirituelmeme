@@ -28,11 +28,14 @@ document.addEventListener("DOMContentLoaded", () => {
 if (btnExpress && loader) {
   btnExpress.addEventListener("click", (e) => {
     e.preventDefault();
-    loader.style.display = "flex";
+
+    // itilize loader sèlman si li egziste
+    if (loader) loader.style.display = "flex";
+
     btnExpress.disabled = true;
 
     if (!userRoleEl || !userNameEl || !userEmailEl) {
-      loader.style.display = "none";
+      if (loader) loader.style.display = "none";
       btnExpress.disabled = false;
       alert("Erreur récupération informations utilisateur.");
       return;
@@ -52,7 +55,7 @@ if (btnExpress && loader) {
           "&email=" + encodeURIComponent(userEmail) +
           "&role=" + encodeURIComponent(roleText);
       } else {
-        loader.style.display = "none";
+        if (loader) loader.style.display = "none";
         btnExpress.disabled = false;
         alert("Vous n'avez aucun accès pour entrer dans cette page.");
       }
