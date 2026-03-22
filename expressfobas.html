@@ -155,7 +155,36 @@
   <button type="button" id="printBtn" class="btn-imprimer">
     ExpressImprimer
   </button>
-  
+
+  <style>
+  /* =========================
+     STYLE PWOFESYONÈL POU EXPRESSIMPRIMER
+     ========================= */
+  .btn-imprimer {
+    display: none;              /* kache okòmansman, JS ap montre li apre siksè */
+    background-color: #007BFF;  /* ble pwofesyonèl */
+    color: #fff;                 /* tèks blan */
+    font-weight: bold;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;          /* kwen awondi */
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  }
+
+  .btn-imprimer:hover {
+    background-color: #0056b3;  /* ble pi fonse lè souri sou li */
+    transform: translateY(-2px); /* ti mouvman lè souri */
+  }
+
+  .btn-imprimer:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  }
+</style>
+
 
   <button type="button" id="retraitBtn" class="btn-retrait">
     ExpressRetrait
