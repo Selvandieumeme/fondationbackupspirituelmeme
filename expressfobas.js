@@ -245,6 +245,43 @@ if (!res.ok) {
 
 
 
+// =========================
+// BOUTON EXPRESSIMPRIMER
+// =========================
+document.addEventListener("DOMContentLoaded", () => {
+  const printBtn = document.getElementById("printBtn");
+
+  // bouton rete kache okòmansman
+  if (printBtn) printBtn.style.display = "none";
+
+  // montre bouton sèlman apre fòm fin reyisi
+  const observer = new MutationObserver(() => {
+    const transferResult = document.getElementById("transferResult");
+    if (transferResult && transferResult.textContent.includes("Transfert créé avec succès")) {
+      printBtn.style.display = "inline-block";
+    }
+  });
+
+  const transferResultEl = document.getElementById("transferResult");
+  if (transferResultEl) {
+    observer.observe(transferResultEl, { childList: true, subtree: true });
+  }
+
+  // ajoute fonksyon print
+  if (printBtn) {
+    printBtn.addEventListener("click", () => {
+      window.print(); // enprime tout paj la jan li ye
+    });
+  }
+});
+
+
+
+
+
+
+
+
 
 
 
