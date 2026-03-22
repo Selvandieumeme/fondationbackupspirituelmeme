@@ -146,8 +146,7 @@ if (btnExpress && loader) {
         beneficiaireVille: data.receiverCity,
         beneficiaireAdresse: data.receiverAddress,
         beneficiaireTelephone: data.receiverWhatsapp,
-        montant: data.amountHTG,
-        devise: "HTG"
+        montant: data.amountHTG
       };
 
       try {
