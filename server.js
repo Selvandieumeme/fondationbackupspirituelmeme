@@ -1176,7 +1176,8 @@ const Transaction = mongoose.model('transactions', transactionSchema);
 
 
 
-// ================= EXPRESSFOBAS INTERNATIONAL (CLEAN VERSION) =================
+// ================= EXPRESSFOBAS INTERNATIONAL (PHASE 1 SIMPLE) =================
+
 // ----------------------- SCHEMA -----------------------
 const expressFobasSchema = new mongoose.Schema({
   agentNom: { type: String, required: true },
@@ -1197,13 +1198,11 @@ const expressFobasSchema = new mongoose.Schema({
   beneficiaireTelephone: { type: String, required: true },
 
   montant: { type: Number, required: true },
+
   codeUnique: {
     type: String,
     default: () => "EFB-" + crypto.randomBytes(5).toString("hex").toUpperCase()
   },
-
-  frais: { type: Number, default: 0 },
-  totalDebit: { type: Number, default: 0 },
 
   statut: { type: String, default: "Pending" },
 
@@ -1227,10 +1226,7 @@ const ExpressFobas = mongoose.model(
   "fobasinternational"
 );
 
-module.exports = ExpressFobas;
-
-
-// ----------------------- ROUTE UNIQUE -----------------------
+// ----------------------- ROUTE SIMPLE -----------------------
 app.post("/api/expressfobas", async (req, res) => {
   try {
     const data = req.body;
@@ -1245,44 +1241,25 @@ app.post("/api/expressfobas", async (req, res) => {
 
     for (const field of requiredFields) {
       if (!data[field] || (typeof data[field] === "string" && !data[field].trim())) {
-        return res.status(400).json({ success: false, message: `Champ manquant: ${field}` });
+        return res.status(400).json({
+          success: false,
+          message: `Champ manquant: ${field}`
+        });
       }
     }
 
     const montant = Number(data.montant);
     if (montant <= 0) {
-      return res.status(400).json({ success: false, message: "Montant invalide" });
+      return res.status(400).json({
+        success: false,
+        message: "Montant invalide"
+      });
     }
 
-    // ---------------- FRAIS ----------------
-    const frais = montant * 0.15;
-    const totalDebit = montant + frais;
-
-    // ---------------- CHECK WALLET ----------------
-    const agentWallet = await db.collection("walletbalances").findOne({
-      email: data.agentEmail,
-    });
-
-    if (!agentWallet) {
-      return res.status(404).json({ success: false, message: "Wallet agent introuvable" });
-    }
-
-    if (agentWallet.balance < totalDebit) {
-      return res.status(400).json({ success: false, message: "Balance insuffisante" });
-    }
-
-    // ---------------- DEBIT WALLET ----------------
-    await db.collection("walletbalances").updateOne(
-      { email: data.agentEmail },
-      { $inc: { balance: -totalDebit } }
-    );
-
-    // ---------------- CREATE DOCUMENT ----------------
+    // ---------------- CREATE DOCUMENT (SAN WALLET) ----------------
     const expressFobas = new ExpressFobas({
       ...data,
-      montant,
-      frais,
-      totalDebit
+      montant
     });
 
     await expressFobas.save();
@@ -1290,48 +1267,18 @@ app.post("/api/expressfobas", async (req, res) => {
     // ---------------- RESPONSE ----------------
     return res.status(200).json({
       success: true,
-      message: "ExpressFOBAS créé avec succès",
+      message: "ExpressFOBAS enregistré avec succès",
       codeUnique: expressFobas.codeUnique
     });
 
   } catch (err) {
     console.error("EXPRESSFOBAS ERROR:", err);
-    return res.status(500).json({ success: false, message: "Erreur serveur" });
+    return res.status(500).json({
+      success: false,
+      message: "Erreur serveur"
+    });
   }
 });
-
-
-// ----------------------- AUTO EXPIRATION SYSTEM -----------------------
-setInterval(async () => {
-  try {
-    const maintenant = new Date();
-
-    const expiredList = await db.collection("fobasinternational").find({
-      statut: "Pending",
-      totalDebit: { $exists: true },
-      dateExpiration: { $lte: maintenant }
-    }).toArray();
-
-    for (const item of expiredList) {
-
-      // REMBOURSEMENT
-      await db.collection("walletbalances").updateOne(
-        { email: item.agentEmail },
-        { $inc: { balance: item.totalDebit } }
-      );
-
-      // UPDATE STATUT
-      await db.collection("fobasinternational").updateOne(
-        { _id: item._id },
-        { $set: { statut: "ExpressFobas Annule" } }
-      );
-    }
-
-  } catch (error) {
-    console.error("Erreur expiration ExpressFobas:", error);
-  }
-}, 86400000); // chak 24h
-
 
 
 
