@@ -1178,6 +1178,9 @@ const Transaction = mongoose.model('transactions', transactionSchema);
 
 // ================= EXPRESSFOBAS INTERNATIONAL (PHASE 1 SIMPLE) =================
 
+// ⚠️ OBLIGATWA (mete l yon sèl fwa nan server.js si li pa deja la)
+app.use(express.json());
+
 // ----------------------- SCHEMA -----------------------
 const expressFobasSchema = new mongoose.Schema({
   agentNom: { type: String, required: true },
@@ -1201,7 +1204,7 @@ const expressFobasSchema = new mongoose.Schema({
 
   codeUnique: {
     type: String,
-    default: () => "EFB-" + crypto.randomBytes(5).toString("hex").toUpperCase()
+    default: () => "EFB-" + require("crypto").randomBytes(5).toString("hex").toUpperCase()
   },
 
   statut: { type: String, default: "Pending" },
@@ -1228,7 +1231,20 @@ const ExpressFobas = mongoose.model(
 
 // ----------------------- ROUTE SIMPLE -----------------------
 app.post("/api/expressfobas", async (req, res) => {
+
+  console.log("📥 DATA RESEVWA:", req.body); // 🔥 DEBUG ENPÒTAN
+
   try {
+
+    // ⚠️ sekirite si body pa vini
+    if (!req.body || Object.keys(req.body).length === 0) {
+      console.log("❌ req.body vid");
+      return res.status(400).json({
+        success: false,
+        message: "Aucune donnée reçue"
+      });
+    }
+
     const data = req.body;
 
     // ---------------- VALIDATION ----------------
@@ -1241,6 +1257,7 @@ app.post("/api/expressfobas", async (req, res) => {
 
     for (const field of requiredFields) {
       if (!data[field] || (typeof data[field] === "string" && !data[field].trim())) {
+        console.log("❌ Champ manquant:", field);
         return res.status(400).json({
           success: false,
           message: `Champ manquant: ${field}`
@@ -1249,20 +1266,26 @@ app.post("/api/expressfobas", async (req, res) => {
     }
 
     const montant = Number(data.montant);
-    if (montant <= 0) {
+
+    if (isNaN(montant) || montant <= 0) {
+      console.log("❌ Montant invalide:", data.montant);
       return res.status(400).json({
         success: false,
         message: "Montant invalide"
       });
     }
 
-    // ---------------- CREATE DOCUMENT (SAN WALLET) ----------------
+    console.log("✅ Tout bon, on ap kreye dokiman...");
+
+    // ---------------- CREATE DOCUMENT ----------------
     const expressFobas = new ExpressFobas({
       ...data,
       montant
     });
 
     await expressFobas.save();
+
+    console.log("✅ SAUVE OK:", expressFobas.codeUnique);
 
     // ---------------- RESPONSE ----------------
     return res.status(200).json({
@@ -1272,13 +1295,96 @@ app.post("/api/expressfobas", async (req, res) => {
     });
 
   } catch (err) {
-    console.error("EXPRESSFOBAS ERROR:", err);
+
+    console.error("🔥 EXPRESSFOBAS ERROR:", err);
+
     return res.status(500).json({
       success: false,
       message: "Erreur serveur"
     });
   }
 });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
