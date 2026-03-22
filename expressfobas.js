@@ -96,17 +96,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const expirationDateInput = document.getElementById("expirationDate");
     if (!form) return;
 
-    function generateTransferCode() {
-      return "FOB-" + Date.now().toString().slice(-7);
-    }
-
-    function calculateExpiration() {
-      const today = new Date();
-      const expiration = new Date();
-      expiration.setDate(today.getDate() + 21);
-      return expiration.toISOString().split("T")[0];
-    }
-
     // =========================
     // SUBMIT FORM
     // =========================
@@ -139,13 +128,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const fees = data.amountHTG * 0.15;
       const totalDebit = data.amountHTG + fees;
-      const transferCode = generateTransferCode();
-      const today = new Date().toISOString().split("T")[0];
-      const expiration = calculateExpiration();
-
-      transferCodeInput.value = transferCode;
-      createdDateInput.value = today;
-      expirationDateInput.value = expiration;
 
       // =========================
       // FETCH ANSYEN METOD (RESTAURE)
@@ -172,7 +154,7 @@ document.addEventListener("DOMContentLoaded", () => {
       try {
 
         const res = await fetch(
-          "https://api.fondationbackupspirituel.com/api/fobasinternational",
+          "https://api.fondationbackupspirituel.com/api/expressfobas",
           {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -182,15 +164,19 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const result = await res.json();
 
-        if (!res.ok) {
-          transferResult.innerHTML =
-            `<span style="color:red;font-weight:bold">${result.message || "Erreur serveur"}</span>`;
-        } else {
-          transferResult.innerHTML =
-            `<span style="color:green;font-weight:bold">
-            Transfert créé avec succès ! Code : ${result.codeUnique}
-            </span>`;
-        }
+if (!res.ok) {
+  transferResult.innerHTML =
+    `<span style="color:red;font-weight:bold">${result.message || "Erreur serveur"}</span>`;
+} else {
+
+  // mete code ki soti server
+  transferCodeInput.value = result.codeUnique;
+
+  transferResult.innerHTML =
+    `<span style="color:green;font-weight:bold">
+    Transfert créé avec succès ! Code : ${result.codeUnique}
+    </span>`;
+}
 
       } catch (err) {
         console.error("Erreur API ExpressFOBAS :", err);
@@ -251,100 +237,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 
-(function(){
-
-const EXPRESSFOBAS_API =
-"https://api.fondationbackupspirituel.com/expressfobas";
-
-
-const form =
-document.getElementById("expressForm");
-
-if(!form) return;
-
-
-form.addEventListener("submit", async function(e){
-
-try{
-
-const formData =
-new FormData(form);
-
-const data =
-Object.fromEntries(formData.entries());
-
-
-const response =
-await fetch(EXPRESSFOBAS_API,{
-
-method:"POST",
-
-headers:{
-"Content-Type":"application/json"
-},
-
-body: JSON.stringify(data)
-
-});
-
-
-const result =
-await response.json();
-
-
-if(response.ok){
-
-const resultBox =
-document.getElementById("transferResult");
-
-if(resultBox){
-
-resultBox.innerHTML =
-"Code ExpressFOBAS : <b>"
-+ result.expressfobasCode +
-"</b>";
-
-}else{
-
-alert(
-"ExpressFobas créé avec succès\nCode: "
-+ result.expressfobasCode
-);
-
-}
-
-
-form.reset();
-
-}
-
-
-else{
-
-alert(
-result.message ||
-"Erreur ExpressFobas"
-);
-
-}
-
-
-}catch(error){
-
-console.error(
-"ExpressFobas connexion erreur:",
-error
-);
-
-alert(
-"Erreur connexion serveur ExpressFobas"
-);
-
-}
-
-});
-
-})();
 
 
 
