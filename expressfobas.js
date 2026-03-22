@@ -14,13 +14,20 @@ document.addEventListener("DOMContentLoaded", () => {
   // =========================
   // VERIFIKASYON EXISTANS
   // =========================
-  if (!btnExpress) {
-    console.error("Bouton expressfobastransfert introuvable.");
-  }
+  // pa fè bri si nou pa sou dashboard
+if (!btnExpress || !loader) {
+  // nou pa sou paj dashboard, pa fè anyen
+} else {
 
-  if (!loader) {
-    console.error("Loader transfertLoader introuvable.");
-  }
+  btnExpress.addEventListener("click", (e) => {
+    e.preventDefault();
+
+    loader.style.display = "flex";
+    btnExpress.disabled = true;
+
+  });
+
+}
 
  // =========================
 // BOUTON EXPRESS FOBAS
