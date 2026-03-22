@@ -1141,166 +1141,6 @@ const Transaction = mongoose.model('transactions', transactionSchema);
 
 
 
-// ================= WALLET COLLECTION =================
-const walletSchema = new mongoose.Schema(
-  {
-    email: { type: String, required: true },
-    balance: { type: Number, required: true, default: 0 }
-  },
-  { timestamps: true }
-);
-
-const Wallet = mongoose.model("Wallet", walletSchema, "walletbalances");
-
-
-// ================= TRANSFERT SCHEMA =================
-const TransfertSchema = new mongoose.Schema(
-  {
-    agentNom: { type: String, required: true },
-    agentEmail: { type: String, required: true },
-
-    expediteurNom: { type: String, required: true },
-    expediteurDocumentType: { type: String, default: "" },
-    expediteurDocumentNumero: { type: String, default: "" },
-    expediteurPays: { type: String, required: true },
-    expediteurVille: { type: String, required: true },
-    expediteurAdresse: { type: String, required: true },
-    expediteurTelephone: { type: String, required: true },
-
-    beneficiaireNom: { type: String, required: true },
-    beneficiairePays: { type: String, required: true },
-    beneficiaireVille: { type: String, required: true },
-    beneficiaireAdresse: { type: String, required: true },
-    beneficiaireTelephone: { type: String, required: true },
-
-    montant: { type: Number, required: true },
-    devise: { type: String, required: true },
-
-    codeUnique: {
-      type: String,
-      required: true,
-      default: () =>
-        Math.random().toString(36).substring(2, 12).toUpperCase()
-    },
-
-    statut: { type: String, default: "PENDING" },
-    dateCreation: { type: Date, default: Date.now },
-    dateExpiration: { type: Date },
-    source: { type: String, default: "TRANSFERER" }
-  },
-  { timestamps: true }
-);
-
-const Transfert = mongoose.model("Transfert", TransfertSchema, "transferts");
-
-
-// ================= ROUTE TRANSFERT =================
-app.post("/api/transferts", async (req, res) => {
-  try {
-    const data = req.body;
-    const montant = Number(data.montant);
-
-    // ===== VALIDATION STRICT =====
-    if (
-      !data ||
-      !data.agentNom ||
-      !data.agentEmail ||
-      !montant ||
-      montant <= 0 ||
-      !data.expediteurNom ||
-      !data.expediteurPays ||
-      !data.expediteurVille ||
-      !data.expediteurAdresse ||
-      !data.expediteurTelephone ||
-      !data.beneficiaireNom ||
-      !data.beneficiairePays ||
-      !data.beneficiaireVille ||
-      !data.beneficiaireAdresse ||
-      !data.beneficiaireTelephone ||
-      !data.devise
-    ) {
-      return res.status(400).json({
-        success: false,
-        message: "Données invalides"
-      });
-    }
-
-    // ===== WALLET AGENT =====
-    const wallet = await Wallet.findOne({ email: data.agentEmail });
-    if (!wallet) {
-      return res.status(400).json({
-        success: false,
-        message: "Wallet agent pa jwenn"
-      });
-    }
-
-    if (wallet.balance < montant) {
-      return res.status(400).json({
-        success: false,
-        message: "Solde insuffisant"
-      });
-    }
-
-    // ===== DEBIT WALLET =====
-    const debit = await Wallet.updateOne(
-      { email: data.agentEmail, balance: { $gte: montant } },
-      { $inc: { balance: -montant } }
-    );
-
-    if (debit.modifiedCount === 0) {
-      return res.status(400).json({
-        success: false,
-        message: "Debi echwe"
-      });
-    }
-
-    // ===== DATES AUTOMATIQUES =====
-    const dateCreation = new Date();
-    const dateExpiration = new Date();
-    dateExpiration.setDate(dateExpiration.getDate() + 21);
-
-    // ===== CREATION TRANSFERT =====
-    const transfert = new Transfert({
-      agentNom: data.agentNom,
-      agentEmail: data.agentEmail,
-
-      expediteurNom: data.expediteurNom,
-      expediteurDocumentType: data.expediteurDocumentType || "",
-      expediteurDocumentNumero: data.expediteurDocumentNumero || "",
-      expediteurPays: data.expediteurPays,
-      expediteurVille: data.expediteurVille,
-      expediteurAdresse: data.expediteurAdresse,
-      expediteurTelephone: data.expediteurTelephone,
-
-      beneficiaireNom: data.beneficiaireNom,
-      beneficiairePays: data.beneficiairePays,
-      beneficiaireVille: data.beneficiaireVille,
-      beneficiaireAdresse: data.beneficiaireAdresse,
-      beneficiaireTelephone: data.beneficiaireTelephone,
-
-      montant,
-      devise: data.devise,
-
-      dateCreation,
-      dateExpiration
-    });
-
-    await transfert.save();
-
-    return res.status(200).json({
-      success: true,
-      message: "Transfert créé avec succès",
-      codeUnique: transfert.codeUnique
-    });
-
-  } catch (err) {
-    console.error("TRANSFERT ERROR:", err);
-    return res.status(500).json({
-      success: false,
-      message: "Erreur serveur"
-    });
-  }
-});
 
 
 
@@ -1357,8 +1197,6 @@ const expressFobasSchema = new mongoose.Schema({
   beneficiaireTelephone: { type: String, required: true },
 
   montant: { type: Number, required: true },
-  devise: { type: String, required: true },
-
   codeUnique: {
     type: String,
     default: () => "EFB-" + crypto.randomBytes(5).toString("hex").toUpperCase()
@@ -1402,7 +1240,7 @@ app.post("/api/expressfobas", async (req, res) => {
       "agentNom", "agentEmail",
       "expediteurNom", "expediteurPays", "expediteurVille", "expediteurAdresse", "expediteurTelephone",
       "beneficiaireNom", "beneficiairePays", "beneficiaireVille", "beneficiaireAdresse", "beneficiaireTelephone",
-      "montant", "devise"
+      "montant"
     ];
 
     for (const field of requiredFields) {
