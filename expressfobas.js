@@ -11,24 +11,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const rolesAutorises = ["Agent Autorise", "FONDATEUR FOBAS"];
 
-  // =========================
-  // VERIFIKASYON EXISTANS
-  // =========================
-  // pa fè bri si nou pa sou dashboard
-if (!btnExpress || !loader) {
-  // nou pa sou paj dashboard, pa fè anyen
-} else {
-
-  btnExpress.addEventListener("click", (e) => {
-    e.preventDefault();
-
-    loader.style.display = "flex";
-    btnExpress.disabled = true;
-
-  });
-
-}
-
+  
  // =========================
 // BOUTON EXPRESS FOBAS
 // =========================
@@ -100,15 +83,48 @@ if (btnExpress && loader) {
     const transferCodeInput = document.getElementById("transferCode");
     const createdDateInput = document.getElementById("createdDate");
     const expirationDateInput = document.getElementById("expirationDate");
+    const btnSubmit = form.querySelector("button[type='submit']");
     if (!form) return;
 
+
+
+// =========================
+// AUTO DATE DU JOUR
+// =========================
+const now = new Date();
+
+// fòma bèl: 22/03/2026
+const formattedDate = now.toLocaleDateString("fr-FR");
+
+if (createdDateInput) {
+  createdDateInput.value = formattedDate;
+}
+
+// =========================
+// AUTO DATE EXPIRATION (+21 jours)
+// =========================
+const expiration = new Date();
+expiration.setDate(expiration.getDate() + 21);
+
+const formattedExpiration = expiration.toLocaleDateString("fr-FR");
+
+if (expirationDateInput) {
+  expirationDateInput.value = formattedExpiration;
+}
+
+
+    
     // =========================
     // SUBMIT FORM
     // =========================
     form.addEventListener("submit", async (e) => {
 
-      e.preventDefault();
-      transferResult.innerHTML = "";
+  e.preventDefault();
+
+  if (btnSubmit) btnSubmit.disabled = true; // 🔒 bloke rapid
+
+  transferResult.innerHTML = "";
+     
 
       const data = {
         agentName: document.getElementById("agentName").value.trim(),
@@ -174,13 +190,20 @@ if (!res.ok) {
     `<span style="color:red;font-weight:bold">${result.message || "Erreur serveur"}</span>`;
 } else {
 
-  // mete code ki soti server
-  transferCodeInput.value = result.codeUnique;
+  if (transferCodeInput) {
+    transferCodeInput.value = result.codeUnique;
+  }
 
   transferResult.innerHTML =
     `<span style="color:green;font-weight:bold">
     Transfert créé avec succès ! Code : ${result.codeUnique}
     </span>`;
+
+  // 🔒 BLOKE BOUTON AN APRE SIKSÈ
+  if (btnSubmit) {
+    btnSubmit.disabled = true;
+  }
+
 }
 
       } catch (err) {
