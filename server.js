@@ -1287,6 +1287,37 @@ app.post("/api/expressfobas", async (req, res) => {
 
     console.log("✅ SAUVE OK:", expressFobas.codeUnique);
 
+
+
+
+	// ---------------- FAZ 2: DEBIT AUTOMATIK ----------------
+const frais = montant * 0.15;
+const totalDebit = montant + frais;
+
+const agentWallet = await db.collection("walletbalances").findOne({
+  email: data.agentEmail
+});
+
+if (agentWallet) {
+  if (agentWallet.balance >= totalDebit) {
+    await db.collection("walletbalances").updateOne(
+      { email: data.agentEmail },
+      { $inc: { balance: -totalDebit } }
+    );
+    console.log(`✅ Wallet ${data.agentEmail} débité: montant ${montant}, frais ${frais}`);
+  } else {
+    console.warn(`⚠️ Balance insuffisante pou ${data.agentEmail}, debit skipped`);
+  }
+} else {
+  console.warn(`⚠️ Wallet agent ${data.agentEmail} pa jwenn, debit skipped`);
+}
+
+
+
+
+
+	  
+
     // ---------------- RESPONSE ----------------
     return res.status(200).json({
       success: true,
