@@ -1332,6 +1332,8 @@ app.post("/api/transferts", async (req, res) => {
 
 
 
+
+
 // ================= EXPRESSFOBAS INTERNATIONAL =================
 
 // ----------------------- SCHEMA -----------------------
@@ -1439,6 +1441,198 @@ app.post("/api/expressfobas", async (req, res) => {
     return res.status(500).json({ success: false, message: "Erreur serveur" });
   }
 });
+
+
+
+
+
+
+
+
+// ---------------------------
+// ROUTE EXPRESSFOBAS
+// ---------------------------
+app.post("/expressfobas", async (req, res) => {
+  try {
+    const expressfobasData = req.body;
+
+    // ---------------------------
+    // EXTRACTION & VALIDATION MINIMUM
+    // ---------------------------
+    const montant = Number(expressfobasData.montant);
+    const agentEmail = expressfobasData.agentEmail;
+
+    if (!montant || !agentEmail) {
+      return res.status(400).json({
+        message: "Champs ExpressFobas invalides",
+      });
+    }
+
+    // ---------------------------
+    // GENERATE CODE UNIQUE
+    // ---------------------------
+    const expressfobasCode =
+      "EFB-" + crypto.randomBytes(5).toString("hex").toUpperCase();
+
+    // ---------------------------
+    // DATE CREATION & EXPIRATION
+    // ---------------------------
+    const dateCreation = new Date();
+    const dateExpiration = new Date();
+    dateExpiration.setDate(dateExpiration.getDate() + 21); // +21 jours
+
+    // ---------------------------
+    // FRAIS 15% & TOTAL DEBIT
+    // ---------------------------
+    const frais = montant * 0.15;
+    const totalDebit = montant + frais;
+
+    // ---------------------------
+    // CHECK WALLET AGENT
+    // ---------------------------
+    const agentWallet = await db.collection("walletbalances").findOne({
+      email: agentEmail,
+    });
+
+    if (!agentWallet) {
+      return res.status(404).json({
+        message: "Wallet agent introuvable",
+      });
+    }
+
+    // ---------------------------
+    // CHECK BALANCE
+    // ---------------------------
+    if (agentWallet.balance < totalDebit) {
+      return res.status(400).json({
+        message: "Balance insuffisante",
+      });
+    }
+
+    // ---------------------------
+    // DEBIT BALANCE AGENT
+    // ---------------------------
+    await db.collection("walletbalances").updateOne(
+      { email: agentEmail },
+      { $inc: { balance: -totalDebit } }
+    );
+
+    // ---------------------------
+    // CREATION DOCUMENT EXPRESSFOBAS
+    // ---------------------------
+    const newExpressFobas = {
+      ...expressfobasData,
+      expressfobasCode,
+      statut: "Pending",
+      dateCreation,
+      dateExpiration,
+      frais,
+      totalDebit,
+    };
+
+    // ---------------------------
+    // INSERT DATABASE
+    // ---------------------------
+    await db.collection("fobasinternational").insertOne(newExpressFobas);
+
+    // ---------------------------
+    // SUCCESS RESPONSE
+    // ---------------------------
+    res.json({
+      message: "ExpressFobas enregistré avec succès",
+      expressfobasCode,
+    });
+  } catch (error) {
+    console.error("Erreur serveur ExpressFobas:", error);
+    res.status(500).json({
+      message: "Erreur serveur ExpressFobas",
+    });
+  }
+});
+
+
+
+
+
+
+
+
+setInterval(async () => {
+
+try {
+
+const maintenant = new Date();
+
+const expiredExpressFobas = await db.collection("fobasinternational").find({
+
+statut: "Pending",
+totalDebit: { $exists: true }
+
+dateExpiration: { $lte: maintenant }
+
+}).toArray();
+
+
+for (const expressfobas of expiredExpressFobas) {
+
+
+await db.collection("walletbalances").updateOne(
+
+{ email: expressfobas.agentEmail },
+
+{
+
+$inc: {
+
+balance: expressfobas.totalDebit
+
+}
+
+}
+
+);
+
+
+await db.collection("fobasinternational").updateOne(
+
+{ _id: expressfobas._id },
+
+{
+
+$set: {
+
+statut: "ExpressFobas Annule"
+
+}
+
+}
+
+);
+
+}
+
+
+} catch (error) {
+
+console.error("Erreur expiration ExpressFobas:", error);
+
+}
+
+}, 86400000);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
