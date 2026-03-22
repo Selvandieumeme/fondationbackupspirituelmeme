@@ -22,48 +22,44 @@ document.addEventListener("DOMContentLoaded", () => {
     console.error("Loader transfertLoader introuvable.");
   }
 
-  // =========================
-  // BOUTON EXPRESS FOBAS
-  // =========================
-  if (btnExpress && loader) {
+ // =========================
+// BOUTON EXPRESS FOBAS
+// =========================
+if (btnExpress && loader) {
+  btnExpress.addEventListener("click", (e) => {
+    e.preventDefault();
+    loader.style.display = "flex";
+    btnExpress.disabled = true;
 
-    btnExpress.addEventListener("click", (e) => {
+    if (!userRoleEl || !userNameEl || !userEmailEl) {
+      loader.style.display = "none";
+      btnExpress.disabled = false;
+      alert("Erreur récupération informations utilisateur.");
+      return;
+    }
 
-      e.preventDefault();
-      loader.style.display = "flex";
-      btnExpress.disabled = true;
+    let roleText = userRoleEl.textContent.trim();
+    if (roleText.includes(":")) roleText = roleText.split(":")[1].trim();
 
-      if (!userRoleEl || !userNameEl || !userEmailEl) {
+    const userName = userNameEl.textContent.trim();
+    const userEmail = userEmailEl.textContent.trim();
+
+    setTimeout(() => {
+      if (rolesAutorises.includes(roleText)) {
+        window.location.href =
+          "expressfobas.html" +
+          "?name=" + encodeURIComponent(userName) +
+          "&email=" + encodeURIComponent(userEmail) +
+          "&role=" + encodeURIComponent(roleText);
+      } else {
         loader.style.display = "none";
         btnExpress.disabled = false;
-        alert("Erreur récupération informations utilisateur.");
-        return;
+        alert("Vous n'avez aucun accès pour entrer dans cette page.");
       }
-
-      let roleText = userRoleEl.textContent.trim();
-      if (roleText.includes(":")) roleText = roleText.split(":")[1].trim();
-
-      const userName = userNameEl.textContent.trim();
-      const userEmail = userEmailEl.textContent.trim();
-
-      setTimeout(() => {
-        if (rolesAutorises.includes(roleText)) {
-          window.location.href =
-            "expressfobas.html" +
-            "?name=" + encodeURIComponent(userName) +
-            "&email=" + encodeURIComponent(userEmail) +
-            "&role=" + encodeURIComponent(roleText);
-        } else {
-          loader.style.display = "none";
-          btnExpress.disabled = false;
-          alert("Vous n'avez aucun accès pour entrer dans cette page.");
-        }
-      }, 800);
-
-    });
-
-  }
-
+    }, 800);
+  });
+}
+  
   // =========================
   // PAGE EXPRESSFOBAS.HTML
   // =========================
