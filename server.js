@@ -1367,6 +1367,111 @@ try {
 });
 
 
+
+
+
+
+
+// ================= FAZ 4: EXPRESSFOBAS VERIFICATION =================
+app.post("/api/expressfobas/verify", async (req, res) => {
+
+  try {
+
+    const { code } = req.body;
+
+    if (!code || !code.trim()) {
+      return res.status(400).json({
+        success: false,
+        message: "Code manquant"
+      });
+    }
+
+    const cleanCode = code.trim().toUpperCase();
+
+    console.log("🔍 Vérification code:", cleanCode);
+
+    // 🔎 CHERCHE TRANSFERT
+    const transfer = await ExpressFobas.findOne({
+      codeUnique: cleanCode
+    });
+
+    // ❌ CODE PA EXISTE
+    if (!transfer) {
+      return res.status(404).json({
+        success: false,
+        message: "Code invalide"
+      });
+    }
+
+    // 🔎 VERIFYE EXPIRATION
+    const now = new Date();
+    const isExpired = transfer.dateExpiration <= now;
+
+    // 🔎 VERIFYE STATUT
+    const statut = transfer.statut;
+
+    // ❌ SI EXPIRE
+    if (isExpired) {
+      return res.status(400).json({
+        success: false,
+        message: "ExpressFOBAS expiré",
+        statut: statut
+      });
+    }
+
+    // ❌ SI PA PENDING
+    if (statut !== "Pending") {
+      return res.status(400).json({
+        success: false,
+        message: `Statut invalide: ${statut}`,
+        statut: statut
+      });
+    }
+
+    // ✅ SI TOUT BON → RETOURNE DONE
+    return res.status(200).json({
+      success: true,
+      data: {
+        code: transfer.codeUnique,
+
+        expediteurNom: transfer.expediteurNom,
+        expediteurPays: transfer.expediteurPays,
+
+        beneficiaireNom: transfer.beneficiaireNom,
+        beneficiairePays: transfer.beneficiairePays,
+
+        agentNom: transfer.agentNom,
+        agentEmail: transfer.agentEmail,
+
+        montant: transfer.montant,
+        frais: transfer.frais,
+        totalDebit: transfer.totalDebit,
+
+        statut: transfer.statut,
+
+        dateCreation: transfer.createdAt,
+        dateExpiration: transfer.dateExpiration
+      }
+    });
+
+  } catch (err) {
+
+    console.error("🔥 ERREUR VERIFICATION:", err);
+
+    return res.status(500).json({
+      success: false,
+      message: "Erreur serveur"
+    });
+  }
+});
+
+
+
+
+
+
+
+
 // ================= FAZ 3: REFUND AUTOMATIK APRE 21 JOURS =================
 setInterval(async () => {
 
