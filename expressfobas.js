@@ -140,7 +140,9 @@ if (expirationDateInput) {
         receiverCity: document.getElementById("receiverCity").value.trim(),
         receiverAddress: document.getElementById("receiverAddress").value.trim(),
         receiverWhatsapp: document.getElementById("receiverWhatsapp").value.trim(),
-        amountHTG: Number(document.getElementById("amountHTG").value)
+        amountHTG: Number(document.getElementById("amountHTG").value),
+        frais: { type: Number, default: 0 },
+        totalDebit: { type: Number, default: 0 }
       };
 
       if (data.amountHTG <= 0) {
