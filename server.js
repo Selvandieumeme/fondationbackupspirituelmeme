@@ -1301,44 +1301,59 @@ const expressFobas = new ExpressFobas({
 // ================= FAZ 2: DEBIT AUTOMATIK (VERSION FINAL SÉCURISÉ) =================
 try {
 
-  // 🔢 kalkil otomatik
   const frais = Number((montant * 0.15).toFixed(2));
   const totalDebit = Number((montant + frais).toFixed(2));
 
   console.log("💰 Calcul:", { montant, frais, totalDebit });
 
-  // 🔍 verifye wallet agent
+  // ⚠️ netwaye email (ENPÒTAN)
+  const cleanEmail = String(data.agentEmail).trim().toLowerCase();
+
+  console.log("🔍 Recherche wallet pou:", cleanEmail);
+
+  // 🔍 chèche wallet la
   const agentWallet = await db.collection("walletbalances").findOne({
-    email: data.agentEmail
+    email: cleanEmail
   });
 
   if (!agentWallet) {
-    console.warn("⚠️ Wallet pa jwenn:", data.agentEmail);
-  } else if (agentWallet.balance < totalDebit) {
-    console.warn("⚠️ Balance insuffisante:", {
-      balance: agentWallet.balance,
-      totalDebit
-    });
+    console.warn("❌ Wallet pa jwenn pou:", cleanEmail);
   } else {
 
-    // 💸 debit wallet
-    const debitResult = await db.collection("walletbalances").updateOne(
-      { email: data.agentEmail },
-      { $inc: { balance: -totalDebit } }
-    );
+    console.log("✅ Wallet jwenn:", agentWallet.balance);
 
-    if (debitResult.modifiedCount === 1) {
-      console.log(`✅ Debit réussi: ${totalDebit} HTG pour ${data.agentEmail}`);
+    // ⚠️ verifye si balance se number
+    const currentBalance = Number(agentWallet.balance);
+
+    if (isNaN(currentBalance)) {
+      console.error("❌ Balance pa valid:", agentWallet.balance);
+    } else if (currentBalance < totalDebit) {
+
+      console.warn("⚠️ Balance insuffisante:", {
+        currentBalance,
+        totalDebit
+      });
+
     } else {
-      console.warn("⚠️ Debit echwe (modifiedCount = 0)");
+
+      // 💸 DEBIT REYÈL
+      const resultUpdate = await db.collection("walletbalances").updateOne(
+        { email: cleanEmail },
+        { $inc: { balance: -totalDebit } }
+      );
+
+      if (resultUpdate.modifiedCount === 1) {
+        console.log(`✅ Debit OK: -${totalDebit} HTG pou ${cleanEmail}`);
+      } else {
+        console.warn("⚠️ Update pa modifye anyen (verifye email)");
+      }
+
     }
   }
 
-} catch (debitError) {
-  console.error("🔥 ERREUR FAZ 2 (DEBIT):", debitError);
-  // ⚠️ Pa bloke Faz 1 si debit echwe
+} catch (error) {
+  console.error("🔥 ERREUR DEBIT:", error);
 }
-
 
 
 
