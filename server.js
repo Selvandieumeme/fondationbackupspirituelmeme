@@ -1290,34 +1290,57 @@ app.post("/api/expressfobas", async (req, res) => {
 
 
 
-	// ---------------- FAZ 2: DEBIT AUTOMATIK ----------------
-const frais = montant * 0.15;
-const totalDebit = montant + frais;
+// ================= FAZ 2: DEBIT AUTOMATIK (VERSION FINAL SÉCURISÉ) =================
+try {
 
-const agentWallet = await db.collection("walletbalances").findOne({
-  email: data.agentEmail
-});
+  // 🔢 kalkil otomatik
+  const frais = Number((montant * 0.15).toFixed(2));
+  const totalDebit = Number((montant + frais).toFixed(2));
 
-if (agentWallet) {
-  if (agentWallet.balance >= totalDebit) {
-    await db.collection("walletbalances").updateOne(
+  console.log("💰 Calcul:", { montant, frais, totalDebit });
+
+  // 🔍 verifye wallet agent
+  const agentWallet = await db.collection("walletbalances").findOne({
+    email: data.agentEmail
+  });
+
+  if (!agentWallet) {
+    console.warn("⚠️ Wallet pa jwenn:", data.agentEmail);
+  } else if (agentWallet.balance < totalDebit) {
+    console.warn("⚠️ Balance insuffisante:", {
+      balance: agentWallet.balance,
+      totalDebit
+    });
+  } else {
+
+    // 💸 debit wallet
+    const debitResult = await db.collection("walletbalances").updateOne(
       { email: data.agentEmail },
       { $inc: { balance: -totalDebit } }
     );
-    console.log(`✅ Wallet ${data.agentEmail} débité: montant ${montant}, frais ${frais}`);
-  } else {
-    console.warn(`⚠️ Balance insuffisante pou ${data.agentEmail}, debit skipped`);
-  }
-} else {
-  console.warn(`⚠️ Wallet agent ${data.agentEmail} pa jwenn, debit skipped`);
-}
 
+    if (debitResult.modifiedCount === 1) {
+      console.log(`✅ Debit réussi: ${totalDebit} HTG pour ${data.agentEmail}`);
+    } else {
+      console.warn("⚠️ Debit echwe (modifiedCount = 0)");
+    }
+  }
+
+} catch (debitError) {
+  console.error("🔥 ERREUR FAZ 2 (DEBIT):", debitError);
+  // ⚠️ Pa bloke Faz 1 si debit echwe
+}
 
 
 
 
 	  
 
+
+
+
+
+	  
     // ---------------- RESPONSE ----------------
     return res.status(200).json({
       success: true,
@@ -1335,6 +1358,49 @@ if (agentWallet) {
     });
   }
 });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
