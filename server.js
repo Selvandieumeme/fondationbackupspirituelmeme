@@ -1278,10 +1278,16 @@ app.post("/api/expressfobas", async (req, res) => {
     console.log("✅ Tout bon, on ap kreye dokiman...");
 
     // ---------------- CREATE DOCUMENT ----------------
-    const expressFobas = new ExpressFobas({
-      ...data,
-      montant
-    });
+const frais = Number((montant * 0.15).toFixed(2));
+const totalDebit = Number((montant + frais).toFixed(2));
+
+const expressFobas = new ExpressFobas({
+  ...data,
+  montant,
+  frais,
+  totalDebit,
+  statut: "Pending"
+});
 
     await expressFobas.save();
 
@@ -1342,11 +1348,15 @@ try {
 
 	  
     // ---------------- RESPONSE ----------------
-    return res.status(200).json({
-      success: true,
-      message: "ExpressFOBAS enregistré avec succès",
-      codeUnique: expressFobas.codeUnique
-    });
+  return res.status(200).json({
+  success: true,
+  message: "ExpressFOBAS enregistré avec succès",
+  codeUnique: expressFobas.codeUnique,
+  montant,
+  frais,
+  totalDebit,
+  dateExpiration: expressFobas.dateExpiration
+});
 
   } catch (err) {
 
