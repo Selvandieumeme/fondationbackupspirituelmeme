@@ -4,20 +4,29 @@ document.addEventListener("DOMContentLoaded", () => {
   const codeInput = document.getElementById("codeInput");
   const resultBox = document.getElementById("resultBox");
 
-  if (!verifyBtn) return;
+  if (!verifyBtn) {
+    console.error("❌ Bouton verifyBtn pa jwenn");
+    return;
+  }
 
   verifyBtn.addEventListener("click", async () => {
+
+    console.log("🟢 CLICK DETECTED");
 
     const code = codeInput.value.trim();
 
     if (!code) {
-      resultBox.innerHTML = `<span style="color:red">Veuillez entrer un code</span>`;
+      resultBox.innerHTML = "<span style='color:red'>Antre yon code</span>";
       return;
     }
 
-    resultBox.innerHTML = "⏳ Vérification en cours...";
+    // 🔄 LOADER
+    verifyBtn.disabled = true;
+    verifyBtn.innerText = "⏳ Verification en cours...";
 
     try {
+
+      console.log("📡 Envoi requête API...");
 
       const res = await fetch("https://api.fondationbackupspirituel.com/api/expressfobas/verify", {
         method: "POST",
@@ -27,43 +36,42 @@ document.addEventListener("DOMContentLoaded", () => {
         body: JSON.stringify({ code })
       });
 
+      console.log("📥 Réponse reçue");
+
       const result = await res.json();
 
-      // ❌ ERREUR
+      console.log("📊 DATA:", result);
+
       if (!res.ok) {
-        resultBox.innerHTML = `<span style="color:red;font-weight:bold">${result.message}</span>`;
+        resultBox.innerHTML =
+          `<span style="color:red;font-weight:bold">${result.message}</span>`;
         return;
       }
 
-      const data = result.data;
+      const d = result.data;
 
-      // ✅ SUCCESS → AFFICHAGE COMPLET
       resultBox.innerHTML = `
-        <div style="background:#f9f9f9;padding:15px;border-radius:10px">
-
-          <b>Code:</b> ${data.code}<br><br>
-
-          <b>Expéditeur:</b> ${data.expediteurNom} (${data.expediteurPays})<br>
-          <b>Bénéficiaire:</b> ${data.beneficiaireNom} (${data.beneficiairePays})<br><br>
-
-          <b>Agent:</b> ${data.agentNom}<br>
-          <b>Email:</b> ${data.agentEmail}<br><br>
-
-          <b>Montant:</b> ${data.montant} HTG<br>
-          <b>Frais:</b> ${data.frais} HTG<br>
-          <b>Total:</b> ${data.totalDebit} HTG<br><br>
-
-          <b>Statut:</b> ${data.statut}<br>
-          <b>Date:</b> ${new Date(data.dateCreation).toLocaleDateString()}<br>
-          <b>Expiration:</b> ${new Date(data.dateExpiration).toLocaleDateString()}<br>
-
+        <div style="text-align:left">
+          <p><b>Code:</b> ${d.code}</p>
+          <p><b>Expéditeur:</b> ${d.expediteurNom}</p>
+          <p><b>Bénéficiaire:</b> ${d.beneficiaireNom}</p>
+          <p><b>Montant:</b> ${d.montant} HTG</p>
+          <p><b>Statut:</b> ${d.statut}</p>
         </div>
       ";
 
     } catch (err) {
-      console.error(err);
+
+      console.error("🔥 ERREUR FETCH:", err);
+
       resultBox.innerHTML =
-        `<span style="color:red">Erreur serveur</span>`;
+        "<span style='color:red'>Erreur connexion serveur</span>";
+
+    } finally {
+
+      // 🔓 REACTIVATE BUTTON
+      verifyBtn.disabled = false;
+      verifyBtn.innerText = "Vérifier";
     }
 
   });
