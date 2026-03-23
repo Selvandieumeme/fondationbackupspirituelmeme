@@ -1367,7 +1367,68 @@ try {
 });
 
 
+// ================= FAZ 3: REFUND AUTOMATIK APRE 21 JOURS =================
+setInterval(async () => {
 
+  try {
+
+    const now = new Date();
+
+    console.log("⏳ Vérification expiration ExpressFOBAS...");
+
+    // 🔍 chèche tout ki ekspire
+    const expiredTransfers = await ExpressFobas.find({
+      statut: "Pending",
+      dateExpiration: { $lte: now }
+    });
+
+    if (expiredTransfers.length === 0) {
+      console.log("✅ Aucun transfert expiré");
+      return;
+    }
+
+    console.log(`⚠️ ${expiredTransfers.length} transfert(s) expiré(s)`);
+
+    for (const transfer of expiredTransfers) {
+
+      try {
+
+        const cleanEmail = transfer.agentEmail.trim().toLowerCase();
+        const totalDebit = Number(transfer.totalDebit || 0);
+
+        console.log("🔄 Traitement:", transfer.codeUnique);
+
+        // 🔍 jwenn wallet agent lan
+        const agentWallet = await Wallet.findOne({ email: cleanEmail });
+
+        if (!agentWallet) {
+          console.log("❌ Wallet introuvable:", cleanEmail);
+          continue;
+        }
+
+        // 💸 REMBOURSEMENT
+        agentWallet.balance += totalDebit;
+        await agentWallet.save();
+
+        console.log(`💰 Remboursement OK: +${totalDebit} HTG → ${cleanEmail}`);
+
+        // 🔄 UPDATE STATUT (EVITE DOUBLON)
+        transfer.statut = "ExpressFobas Annule";
+        await transfer.save();
+
+        console.log(`🔁 Statut mis à jour: ${transfer.codeUnique}`);
+
+      } catch (innerError) {
+        console.error("❌ Erreur traitement transfert:", innerError);
+      }
+
+    }
+
+  } catch (err) {
+    console.error("🔥 ERREUR FAZ 3:", err);
+  }
+
+}, 60 * 60 * 1000); // ⏱️ chak 1 heure
 
 
 
