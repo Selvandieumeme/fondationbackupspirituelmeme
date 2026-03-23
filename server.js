@@ -89,7 +89,12 @@ app.use('/wallet', walletToMerchantRoutes);   // <-- sa pèmèt POST /wallet/tra
 
 
 
+const walletSchema = new mongoose.Schema({
+  email: String,
+  balance: Number
+}, { collection: "walletbalances" });
 
+const Wallet = mongoose.model("Wallet", walletSchema);
 
 
 
@@ -1304,55 +1309,30 @@ try {
   const frais = Number((montant * 0.15).toFixed(2));
   const totalDebit = Number((montant + frais).toFixed(2));
 
-  console.log("💰 Calcul:", { montant, frais, totalDebit });
+  const cleanEmail = data.agentEmail.trim().toLowerCase();
 
-  // ⚠️ netwaye email (ENPÒTAN)
-  const cleanEmail = String(data.agentEmail).trim().toLowerCase();
+  console.log("🔍 Recherche wallet:", cleanEmail);
 
-  console.log("🔍 Recherche wallet pou:", cleanEmail);
-
-  // 🔍 chèche wallet la
-  const agentWallet = await db.collection("walletbalances").findOne({
-    email: cleanEmail
-  });
+  const agentWallet = await Wallet.findOne({ email: cleanEmail });
 
   if (!agentWallet) {
-    console.warn("❌ Wallet pa jwenn pou:", cleanEmail);
+    console.log("❌ Wallet introuvable");
   } else {
 
-    console.log("✅ Wallet jwenn:", agentWallet.balance);
-
-    // ⚠️ verifye si balance se number
-    const currentBalance = Number(agentWallet.balance);
-
-    if (isNaN(currentBalance)) {
-      console.error("❌ Balance pa valid:", agentWallet.balance);
-    } else if (currentBalance < totalDebit) {
-
-      console.warn("⚠️ Balance insuffisante:", {
-        currentBalance,
-        totalDebit
-      });
-
+    if (agentWallet.balance < totalDebit) {
+      console.log("⚠️ Balance insuffisante");
     } else {
 
-      // 💸 DEBIT REYÈL
-      const resultUpdate = await db.collection("walletbalances").updateOne(
-        { email: cleanEmail },
-        { $inc: { balance: -totalDebit } }
-      );
+      agentWallet.balance -= totalDebit;
 
-      if (resultUpdate.modifiedCount === 1) {
-        console.log(`✅ Debit OK: -${totalDebit} HTG pou ${cleanEmail}`);
-      } else {
-        console.warn("⚠️ Update pa modifye anyen (verifye email)");
-      }
+      await agentWallet.save();
 
+      console.log("✅ Debit OK:", totalDebit);
     }
   }
 
-} catch (error) {
-  console.error("🔥 ERREUR DEBIT:", error);
+} catch (err) {
+  console.error("🔥 ERREUR DEBIT:", err);
 }
 
 
