@@ -1201,6 +1201,8 @@ const expressFobasSchema = new mongoose.Schema({
   beneficiaireTelephone: { type: String, required: true },
 
   montant: { type: Number, required: true },
+  frais: { type: Number, default: 0 },
+  totalDebit: { type: Number, default: 0 },
 
   codeUnique: {
     type: String,
