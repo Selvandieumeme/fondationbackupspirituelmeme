@@ -50,15 +50,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const d = result.data;
 
-      resultBox.innerHTML = `
-        <div style="text-align:left">
-          <p><b>Code:</b> ${d.code}</p>
-          <p><b>Expéditeur:</b> ${d.expediteurNom}</p>
-          <p><b>Bénéficiaire:</b> ${d.beneficiaireNom}</p>
-          <p><b>Montant:</b> ${d.montant} HTG</p>
-          <p><b>Statut:</b> ${d.statut}</p>
-        </div>
-      ";
+    resultBox.innerHTML = `
+    <div style="text-align:left">
+    <p><b>Code:</b> ${d.code}</p>
+    <p><b>Expéditeur:</b> ${d.expediteurNom}</p>
+    <p><b>Bénéficiaire:</b> ${d.beneficiaireNom}</p>
+    <p><b>Montant:</b> ${d.montant} HTG</p>
+    <p><b>Statut:</b> ${d.statut}</p>
+  </div>
+`;
 
     } catch (err) {
 
