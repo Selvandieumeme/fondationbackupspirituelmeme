@@ -199,6 +199,20 @@ if (!res.ok) {
     Transfert créé avec succès ! Code : ${result.codeUnique}
     </span>`;
 
+
+  // =========================
+  // AFFICHAGE FRAIS + TOTAL (FAZ 2)
+  // =========================
+  if (result.frais && result.totalDebit) {
+
+    const fraisInput = document.getElementById("frais");
+    const totalInput = document.getElementById("totalDebit");
+
+    if (fraisInput) fraisInput.value = result.frais + " HTG";
+    if (totalInput) totalInput.value = result.totalDebit + " HTG";
+
+  }
+
   // 🔒 BLOKE BOUTON AN APRE SIKSÈ
   if (btnSubmit) {
     btnSubmit.disabled = true;
