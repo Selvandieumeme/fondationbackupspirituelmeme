@@ -105,6 +105,32 @@ const Wallet = mongoose.model("Wallet", walletSchema);
 
 
 
+// ================= MODÈL RETRAIT INTERNATIONAL =================
+const retraitInternationalSchema = new mongoose.Schema({
+  code: { type: String, required: true },
+  expediteurNom: { type: String, required: true },
+  beneficiaireNom: { type: String, required: true },
+  montant: { type: Number, required: true },
+  agentNom: { type: String, required: true },
+  agentEmail: { type: String, required: true },
+  fraisAgent: { type: Number, required: true },
+  fraisAdmin: { type: Number, required: true },
+  dateRetrait: { type: Date, default: Date.now },
+  statut: { type: String, default: "Retrait Validé" }
+}, { timestamps: true });
+
+// ----------------------- MODEL -----------------------
+const retraitinternational = mongoose.model(
+  "retraitinternational",
+  retraitInternationalSchema,
+  "retraitinternational"
+);
+
+
+
+
+
+
 
 
 
