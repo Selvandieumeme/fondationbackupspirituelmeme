@@ -196,6 +196,19 @@
     ExpressRetrait
   </button>
 
+  <script>
+document.addEventListener("DOMContentLoaded", () => {
+  const retraitBtn = document.getElementById("retraitBtn");
+
+  if (!retraitBtn) return;
+
+  retraitBtn.addEventListener("click", () => {
+    // Ouvri nouvo paj expressretraitfobas.html
+    window.location.href = "/expressretraitfobas.html";
+  });
+});
+</script>
+
 </div>
 
 </form>
