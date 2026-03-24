@@ -1467,6 +1467,93 @@ app.post("/api/expressfobas/verify", async (req, res) => {
 
 
 
+// ================================================
+// 🔥 FAZ 5 - EXPRESS RETRAIT FINAL PRO MAX
+// POST /api/expressfobas/expressretrait
+// ================================================
+
+app.post("/api/expressfobas/expressretrait", async (req, res) => {
+  try {
+    const { code, agentNom, agentEmail } = req.body;
+
+    if (!code || !agentNom || !agentEmail) {
+      return res.status(400).json({
+        message: "Champs obligatoires manquants"
+      });
+    }
+
+    // 1️⃣ RECHERCHE EXPRESSFOBAS
+    const express = await fobasinternational.findOne({ code });
+
+    if (!express) {
+      return res.status(404).json({ message: "Code introuvable" });
+    }
+
+    // 2️⃣ VÉRIFICATION STATUT
+    if (express.statut !== "Pending") {
+      return res.status(400).json({
+        message: "Ce code ne peut plus être retiré"
+      });
+    }
+
+    // 3️⃣ FRACTION FRAIS
+    const fraisTotal = express.frais;        // 15%
+    const fraisAgent = fraisTotal * 0.3333;  // ~5%
+    const fraisAdmin = fraisTotal * 0.6666;  // ~10%
+
+    // 4️⃣ AJOUTER 5% SUR WALLET AGENT
+    await walletbalances.findOneAndUpdate(
+      { email: agentEmail },
+      { $inc: { balance: fraisAgent } },
+      { upsert: true }
+    );
+
+    // 5️⃣ AJOUTER 10% SUR WALLET ADMIN
+    await walletbalances.findOneAndUpdate(
+      { email: "memeselvandieu@fobas.com" },
+      { $inc: { balance: fraisAdmin } },
+      { upsert: true }
+    );
+
+    // 6️⃣ MISE À JOUR EXPRESSFOBAS → RETIRÉ
+    express.statut = "ExpressFobas Retire";
+    express.totalDebit = 0.00;
+    express.agentRetraitNom = agentNom;
+    express.agentRetraitEmail = agentEmail;
+    express.dateRetrait = new Date();
+    await express.save();
+
+    // 7️⃣ AJOUTER DANS retraitinternational
+    await retraitinternational.create({
+      code: express.code,
+      expediteurNom: express.expediteurNom,
+      beneficiaireNom: express.beneficiaireNom,
+      montant: express.montant,
+      agentNom,
+      agentEmail,
+      fraisAgent,
+      fraisAdmin,
+      dateRetrait: new Date(),
+      statut: "Retrait Validé"
+    });
+
+    // 8️⃣ REPONSE FINAL
+    return res.status(200).json({
+      message: "Retrait validé avec succès",
+      data: {
+        code: express.code,
+        statut: express.statut,
+        totalDebit: express.totalDebit,
+        fraisAgent,
+        fraisAdmin
+      }
+    });
+
+  } catch (err) {
+    console.error("🔥 ERREUR RETRAIT:", err);
+    return res.status(500).json({ message: "Erreur serveur" });
+  }
+});
 
 
 
