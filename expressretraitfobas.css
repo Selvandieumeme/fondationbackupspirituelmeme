@@ -1,0 +1,148 @@
+/* ============================ */
+/*  EXPRESS RETRAIT FOBAS CSS   */
+/*   Ultra Pro • Glassmorphism  */
+/* ============================ */
+
+/* ----- GLOBAL RESET ----- */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Poppins", sans-serif;
+}
+
+body {
+  background: linear-gradient(135deg, #004aad, #f6c90e);
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+}
+
+/* ----- CONTAINER ----- */
+.container {
+  width: 100%;
+  max-width: 480px;
+  padding: 25px;
+  border-radius: 20px;
+  backdrop-filter: blur(12px);
+  background: rgba(255, 255, 255, 0.18);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  animation: fadeIn 0.7s ease;
+}
+
+/* ----- TITLES ----- */
+.title {
+  text-align: center;
+  color: white;
+  font-size: 26px;
+  font-weight: 700;
+  margin-bottom: 20px;
+  text-shadow: 0 3px 8px rgba(0,0,0,0.3);
+}
+
+.subtitle {
+  text-align: center;
+  color: #f6c90e;
+  font-size: 16px;
+  margin-bottom: 18px;
+}
+
+/* ----- FORM ZONE ----- */
+.form-box {
+  padding: 18px;
+  border-radius: 15px;
+  background: rgba(255,255,255,0.22);
+  box-shadow: 0 5px 18px rgba(0,0,0,0.2);
+  border: 1px solid rgba(255,255,255,0.3);
+}
+
+label {
+  color: white;
+  font-size: 14px;
+  margin-bottom: 6px;
+  display: block;
+}
+
+input {
+  width: 100%;
+  padding: 12px;
+  margin-bottom: 15px;
+  border-radius: 8px;
+  border: none;
+  outline: none;
+  font-size: 15px;
+  background: rgba(255,255,255,0.65);
+}
+
+/* ----- BUTTONS ----- */
+.btn {
+  width: 100%;
+  padding: 13px;
+  border-radius: 10px;
+  font-size: 17px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  margin-top: 5px;
+  transition: 0.25s;
+}
+
+.btn-primary {
+  background: #004aad;
+  color: white;
+  box-shadow: 0 5px 12px rgba(0,0,0,0.25);
+}
+.btn-primary:hover {
+  transform: scale(1.03);
+  background: #003b8a;
+}
+
+.btn-validate {
+  background: #f6c90e;
+  color: black;
+  box-shadow: 0 5px 12px rgba(0,0,0,0.25);
+}
+.btn-validate:hover {
+  transform: scale(1.03);
+  background: #ddb208;
+}
+
+/* ----- RESULT SECTION ----- */
+.result-box {
+  margin-top: 20px;
+  padding: 20px;
+  background: rgba(255,255,255,0.25);
+  border-radius: 15px;
+  border: 1px solid rgba(255,255,255,0.35);
+  box-shadow: 0 5px 18px rgba(0,0,0,0.2);
+  color: black;
+  font-size: 15px;
+}
+
+/* ----- ANIMATION ----- */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px);} 
+  to { opacity: 1; transform: translateY(0);} 
+}
+
+/* ----- MOBILE OPTIMIZED ----- */
+@media (max-width: 480px) {
+  .container {
+    padding: 20px;
+  }
+
+  .title {
+    font-size: 22px;
+  }
+
+  input {
+    font-size: 14px;
+  }
+
+  .btn {
+    font-size: 16px;
+  }
+}
