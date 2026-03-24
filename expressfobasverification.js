@@ -50,13 +50,49 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const d = result.data;
 
-    resultBox.innerHTML = `
-    <div style="text-align:left">
-    <p><b>Code:</b> ${d.code}</p>
-    <p><b>Expéditeur:</b> ${d.expediteurNom}</p>
-    <p><b>Bénéficiaire:</b> ${d.beneficiaireNom}</p>
-    <p><b>Montant:</b> ${d.montant} HTG</p>
-    <p><b>Statut:</b> ${d.statut}</p>
+   resultBox.innerHTML = `
+  <div style="
+    text-align:left;
+    background:#f9f9f9;
+    padding:15px;
+    border-radius:10px;
+    box-shadow:0 2px 8px rgba(0,0,0,0.1);
+    font-size:14px;
+    line-height:1.6;
+  ">
+
+    <p><b>📌 Code:</b> ${d.code}</p>
+
+    <hr>
+
+    <p><b>👤 Expéditeur:</b> ${d.expediteurNom} (${d.expediteurPays})</p>
+    <p><b>👥 Bénéficiaire:</b> ${d.beneficiaireNom} (${d.beneficiairePays})</p>
+
+    <hr>
+
+    <p><b>🧑‍💼 Agent:</b> ${d.agentNom}</p>
+    <p><b>📧 Email:</b> ${d.agentEmail}</p>
+
+    <hr>
+
+    <p><b>💰 Montant:</b> ${d.montant} HTG</p>
+    <p><b>💸 Frais (15%):</b> ${d.frais} HTG</p>
+    <p><b>🧾 Total débité:</b> ${d.totalDebit} HTG</p>
+
+    <hr>
+
+    <p><b>📊 Statut:</b> 
+      <span style="
+        color:${d.statut === "Pending" ? "orange" : (d.statut.includes("Annule") ? "red" : "green")};
+        font-weight:bold;
+      ">
+        ${d.statut}
+      </span>
+    </p>
+
+    <p><b>📅 Date création:</b> ${new Date(d.dateCreation).toLocaleDateString()}</p>
+    <p><b>⏳ Date expiration:</b> ${new Date(d.dateExpiration).toLocaleDateString()}</p>
+
   </div>
 `;
 
