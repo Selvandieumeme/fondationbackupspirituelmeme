@@ -12,19 +12,20 @@ document.addEventListener("DOMContentLoaded", () => {
   let expressData = null; // done final yo apre verification
 
   // ============================================================
-  // 1) AUTO-FILL AGENT INFO (TRÈ ENPÒTAN)
+  // 1) AUTO-FILL AGENT INFO (TRÈ TRÈ ENPÒTAN)
   // ============================================================
 
   try {
-    const savedNom = localStorage.getItem("f_agentNom");
-    const savedEmail = localStorage.getItem("f_agentEmail");
+    const savedNom = localStorage.getItem("fobas_agent_nom");
+    const savedEmail = localStorage.getItem("fobas_agent_email");
 
     if (savedNom) agentNom.value = savedNom;
     if (savedEmail) agentEmail.value = savedEmail;
 
   } catch (err) {
-    console.warn("⚠️ Impossible de charger agent info");
+    console.warn("⚠️ Impossible de charger agent info", err);
   }
+
 
 
   // ============================================================
