@@ -3,28 +3,36 @@ document.addEventListener("DOMContentLoaded", () => {
   const agentNom = document.getElementById("agentNom");
   const agentEmail = document.getElementById("agentEmail");
 
-  const codeInput = document.getElementById("codeInput");
-  const verifyBtn = document.getElementById("verifyBtn");
-  const verifyResult = document.getElementById("verifyResult");
-
-  const validateBtn = document.getElementById("validateBtn");
-
-  let expressData = null; // done final yo apre verification
-
   // ============================================================
-  // 1) AUTO-FILL AGENT INFO (TRÈ TRÈ ENPÒTAN)
+  // AUTO-FILL AGENT INFO VIA URL (METÒD KI DEJA MACHE POU OU)
   // ============================================================
+  if (window.location.search.includes("name=")) {
 
-  try {
-    const savedNom = localStorage.getItem("fobas_agent_nom");
-    const savedEmail = localStorage.getItem("fobas_agent_email");
+    const params = new URLSearchParams(window.location.search);
 
-    if (savedNom) agentNom.value = savedNom;
-    if (savedEmail) agentEmail.value = savedEmail;
+    const name = params.get("name");
+    const email = params.get("email");
+    const role = params.get("role");
 
-  } catch (err) {
-    console.warn("⚠️ Impossible de charger agent info", err);
+    if (!name || !email) {
+      alert("Accès refusé.");
+      window.location.href =
+        "https://fondationbackupspirituel.com/walletfobasdashboard.html";
+      return;
+    }
+
+    // Ranpli chan yo dinamikman
+    if (agentNom) {
+      agentNom.value = name;
+      agentNom.readOnly = true;
+    }
+
+    if (agentEmail) {
+      agentEmail.value = email;
+      agentEmail.readOnly = true;
+    }
   }
+});
 
 
 
