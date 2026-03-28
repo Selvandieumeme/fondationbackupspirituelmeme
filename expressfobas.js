@@ -246,25 +246,31 @@ if (!res.ok) {
 // =========================
 // BOUTON EXPRESS RETRAIT
 // =========================
-const retraitBtn = document.getElementById("retraitBtn");
-if (retraitBtn) {
-  retraitBtn.addEventListener("click", () => {
+document.addEventListener("DOMContentLoaded", () => {
+  // Chèche bouton ki deja ouvri paj retrè a
+  const btnExpressRetrait = document.querySelector(
+    "button[onclick*='expressretraitfobas.html']"
+  );
 
-    // Rekipere Nom & Email agent yo
-    const agentName = document.getElementById("agentName")?.value.trim();
-    const agentEmail = document.getElementById("agentEmail")?.value.trim();
+  if (!btnExpressRetrait) return;
 
-    if (!agentName || !agentEmail) {
-      alert("Veuillez remplir le Nom et Email de l'agent avant de continuer.");
-      return;
-    }
+  btnExpressRetrait.addEventListener("click", () => {
+    // Pran done agent ki deja ranpli nan fòm la
+    const agentNameInput = document.getElementById("agentName");
+    const agentEmailInput = document.getElementById("agentEmail");
 
-    // Sove yo nan localStorage pou paj expressretraitfobas.html ka li yo
-    localStorage.setItem("agentName", agentName);
-    localStorage.setItem("agentEmail", agentEmail);
+    if (agentNameInput && agentEmailInput) {
+      const agentName = agentNameInput.value.trim();
+      const agentEmail = agentEmailInput.value.trim();
 
-    // Redireksyon nan paj retrè
-    window.location.href = "expressretraitfobas.html";
+      if (!agentName || !agentEmail) {
+        alert("Veuillez remplir le Nom et Email de l'agent avant de continuer.");
+        return;
+      }
+
+      // Sove yo nan localStorage pou nouvo paj la ka li yo
+      localStorage.setItem("agentName", agentName);
+      localStorage.setItem("agentEmail", agentEmail);
   });
 }
 }
