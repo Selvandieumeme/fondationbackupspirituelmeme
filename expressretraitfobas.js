@@ -1,29 +1,18 @@
 document.addEventListener("DOMContentLoaded", () => {
-
-  const agentNom = document.getElementById("agentNom");
+  const agentName = document.getElementById("agentName");
   const agentEmail = document.getElementById("agentEmail");
 
-  // ============================================================
-  // AUTO-FILL AGENT INFO VIA LOCALSTORAGE (FINAL, SÈL METÒD)
-  // ============================================================
-  try {
-    const savedNom = localStorage.getItem("fobas_agent_nom");
-    const savedEmail = localStorage.getItem("fobas_agent_email");
+  const savedName = localStorage.getItem("fobas_agent_name");
+  const savedEmail = localStorage.getItem("fobas_agent_email");
 
-    if (savedNom && agentNom) {
-      agentNom.value = savedNom;
-      agentNom.readOnly = true;
-    }
-
-    if (savedEmail && agentEmail) {
-      agentEmail.value = savedEmail;
-      agentEmail.readOnly = true;
-    }
-
-  } catch (err) {
-    console.warn("⚠️ Impossible de charger les informations de l'agent depuis localStorage", err);
+  if (savedName && agentName) {
+    agentName.value = savedName;
+    agentName.readOnly = true;
   }
-
+  if (savedEmail && agentEmail) {
+    agentEmail.value = savedEmail;
+    agentEmail.readOnly = true;
+  }
 });
 
 
