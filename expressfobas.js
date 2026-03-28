@@ -245,16 +245,16 @@ if (!res.ok) {
     // =========================
     // BOUTON EXPRESS RETRAIT
     // =========================
-    const retraitBtn = document.getElementById("retraitBtn");
-    if (retraitBtn) {
-      retraitBtn.addEventListener("click", () => {
-        window.location.href = "expressretrait.html";
-      });
-    }
+   retraitBtn.addEventListener("click", () => {
+  const agentNameVal = document.getElementById("agentName").value.trim();
+  const agentEmailVal = document.getElementById("agentEmail").value.trim();
 
-  }
+  localStorage.setItem("fobas_agent_name", agentNameVal);
+  localStorage.setItem("fobas_agent_email", agentEmailVal);
 
+  window.location.href = "expressretraitfobas.html";
 });
+
 
 
 
