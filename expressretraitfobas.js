@@ -1,31 +1,30 @@
 document.addEventListener("DOMContentLoaded", () => {
 
-  // =========================
-  // CHARGEMENT INFO AGENT
-  // =========================
-  const agentName = document.getElementById("agentName"); // ID ki nan HTML ou
+  const agentName = document.getElementById("agentName");
   const agentEmail = document.getElementById("agentEmail");
 
+  const codeInput = document.getElementById("codeInput");
+  const verifyBtn = document.getElementById("verifyBtn");
+  const verifyResult = document.getElementById("verifyResult");
+
+  const validateBtn = document.getElementById("validateBtn");
+
+  let expressData = null; // done final yo apre verification
+
+  // ============================================================
+  // 1) AUTO-FILL AGENT INFO (TRÈ ENPÒTAN)
+  // ============================================================
+
   try {
-    // Li done ki soti nan bouton ExpressRetrait (expressfobas.js)
-    const savedName = localStorage.getItem("fobas_agent_name");
-    const savedEmail = localStorage.getItem("fobas_agent_email");
+    const savedName = localStorage.getItem("f_agentName");
+    const savedEmail = localStorage.getItem("f_agentEmail");
 
-    if (savedName && agentName) {
-      agentName.value = savedName;
-      agentName.readOnly = true;
-    }
-
-    if (savedEmail && agentEmail) {
-      agentEmail.value = savedEmail;
-      agentEmail.readOnly = true;
-    }
+    if (savedName) agentName.value = savedName;
+    if (savedEmail) agentEmail.value = savedEmail;
 
   } catch (err) {
-    console.warn("⚠️ Erè pandan chajman done agent nan localStorage", err);
+    console.warn("⚠️ Impossible de charger agent info");
   }
-
-});
 
   // ============================================================
   // 2) VERIFY EXPRESSFOBAS CODE
