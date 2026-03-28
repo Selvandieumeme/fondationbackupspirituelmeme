@@ -242,27 +242,28 @@ if (!res.ok) {
       });
     }
 
-    // =========================
-    // BOUTON EXPRESS RETRAIT
-    // =========================
+    
+// =========================
+// BOUTON EXPRESS RETRAIT
+// =========================
 const retraitBtn = document.getElementById("retraitBtn");
 if (retraitBtn) {
   retraitBtn.addEventListener("click", () => {
 
-    // Rekipere Nom & Email agent yo
+    // Rekipere Nom & Email agent ki deja otomatikman entegre nan DOM
     const agentName = document.getElementById("agentName")?.value.trim();
     const agentEmail = document.getElementById("agentEmail")?.value.trim();
 
     if (!agentName || !agentEmail) {
-      alert("Veuillez remplir le Nom et Email de l'agent avant de continuer.");
+      alert("Erreur : Nom & Email agent introuvables.");
       return;
     }
 
-    // Sove yo nan localStorage pou paj expressretraitfobas.html ka li yo
+    // Mete done nan localStorage pou paj retrè a ka li yo
     localStorage.setItem("agentName", agentName);
     localStorage.setItem("agentEmail", agentEmail);
 
-    // Redireksyon nan paj retrè
+    // Redireksyon nan paj expressretraitfobas.html
     window.location.href = "expressretraitfobas.html";
   });
 }
