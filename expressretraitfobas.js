@@ -4,36 +4,27 @@ document.addEventListener("DOMContentLoaded", () => {
   const agentEmail = document.getElementById("agentEmail");
 
   // ============================================================
-  // AUTO-FILL AGENT INFO VIA URL (METÒD KI DEJA MACHE POU OU)
+  // AUTO-FILL AGENT INFO VIA LOCALSTORAGE (FINAL, SÈL METÒD)
   // ============================================================
-  if (window.location.search.includes("name=")) {
+  try {
+    const savedNom = localStorage.getItem("fobas_agent_nom");
+    const savedEmail = localStorage.getItem("fobas_agent_email");
 
-    const params = new URLSearchParams(window.location.search);
-
-    const name = params.get("name");
-    const email = params.get("email");
-    const role = params.get("role");
-
-    if (!name || !email) {
-      alert("Accès refusé.");
-      window.location.href =
-        "https://fondationbackupspirituel.com/walletfobasdashboard.html";
-      return;
-    }
-
-    // Ranpli chan yo dinamikman
-    if (agentNom) {
-      agentNom.value = name;
+    if (savedNom && agentNom) {
+      agentNom.value = savedNom;
       agentNom.readOnly = true;
     }
 
-    if (agentEmail) {
-      agentEmail.value = email;
+    if (savedEmail && agentEmail) {
+      agentEmail.value = savedEmail;
       agentEmail.readOnly = true;
     }
-  }
-});
 
+  } catch (err) {
+    console.warn("⚠️ Impossible de charger les informations de l'agent depuis localStorage", err);
+  }
+
+});
 
 
   // ============================================================
