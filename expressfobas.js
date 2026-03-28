@@ -246,32 +246,24 @@ if (!res.ok) {
 // =========================
 // BOUTON EXPRESS RETRAIT
 // =========================
-const btnExpressRetrait = document.getElementById("expressRetrait");
+const retraitBtn = document.getElementById("retraitBtn");
+if (retraitBtn) {
+  retraitBtn.addEventListener("click", () => {
 
-if (btnExpressRetrait) {
-  btnExpressRetrait.addEventListener("click", () => {
-    // Pran done agent ki deja ranpli nan fòm nan
-    const agentNameInput = document.getElementById("agentName");
-    const agentEmailInput = document.getElementById("agentEmail");
-
-    if (!agentNameInput || !agentEmailInput) {
-      alert("Erreur: Données agent introuvables dans la page.");
-      return;
-    }
-
-    const agentName = agentNameInput.value.trim();
-    const agentEmail = agentEmailInput.value.trim();
+    // Pran done agent ki deja afiche dinamikman
+    const agentName = document.getElementById("agentName")?.value.trim();
+    const agentEmail = document.getElementById("agentEmail")?.value.trim();
 
     if (!agentName || !agentEmail) {
-      alert("Erreur: Les champs agent sont vides.");
+      alert("Erreur : Nom & Email agent introuvables.");
       return;
     }
 
-    // Mete done nan localStorage pou paj retrè yo
+    // Mete done nan localStorage
     localStorage.setItem("agentName", agentName);
     localStorage.setItem("agentEmail", agentEmail);
 
-    // Louvri nouvo paj la
+    // Ale nan paj retrè a
     window.location.href = "expressretraitfobas.html";
   });
 }
