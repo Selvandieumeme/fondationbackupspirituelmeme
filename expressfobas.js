@@ -250,20 +250,20 @@ const retraitBtn = document.getElementById("retraitBtn");
 if (retraitBtn) {
   retraitBtn.addEventListener("click", () => {
 
-    // Pran done agent ki deja afiche dinamikman
+    // Rekipere Nom & Email agent yo
     const agentName = document.getElementById("agentName")?.value.trim();
     const agentEmail = document.getElementById("agentEmail")?.value.trim();
 
     if (!agentName || !agentEmail) {
-      alert("Erreur : Nom & Email agent introuvables.");
+      alert("Veuillez remplir le Nom et Email de l'agent avant de continuer.");
       return;
     }
 
-    // Mete done nan localStorage
+    // Sove yo nan localStorage pou paj expressretraitfobas.html ka li yo
     localStorage.setItem("agentName", agentName);
     localStorage.setItem("agentEmail", agentEmail);
 
-    // Ale nan paj retrè a
+    // Redireksyon nan paj retrè
     window.location.href = "expressretraitfobas.html";
   });
 }
