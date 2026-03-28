@@ -248,7 +248,22 @@ if (!res.ok) {
 const retraitBtn = document.getElementById("retraitBtn");
 if (retraitBtn) {
   retraitBtn.addEventListener("click", () => {
-    window.location.href = "expressretrait.html";
+
+    // Rekipere Nom & Email agent yo
+    const agentName = document.getElementById("agentName")?.value.trim();
+    const agentEmail = document.getElementById("agentEmail")?.value.trim();
+
+    if (!agentName || !agentEmail) {
+      alert("Veuillez remplir le Nom et Email de l'agent avant de continuer.");
+      return;
+    }
+
+    // Sove yo nan localStorage pou paj expressretraitfobas.html ka li yo
+    localStorage.setItem("agentName", agentName);
+    localStorage.setItem("agentEmail", agentEmail);
+
+    // Redireksyon nan paj retrè
+    window.location.href = "expressretraitfobas.html";
   });
 }
 }
