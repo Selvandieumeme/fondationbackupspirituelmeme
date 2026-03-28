@@ -70,29 +70,7 @@
   </div>
 
 
-<!-- SCRIPT POU RANPLI CHAN AGENT AUTOMATIKMAN -->
-<script>
-document.addEventListener("DOMContentLoaded", () => {
-  // Rekipere eleman yo nan paj la
-  const agentNameInput = document.getElementById("agentName");
-  const agentEmailInput = document.getElementById("agentEmail");
 
-  // Pran done agent nan localStorage
-  const agentName = localStorage.getItem("agentName") || "";
-  const agentEmail = localStorage.getItem("agentEmail") || "";
-
-  // Mete done yo nan chan yo
-  if (agentNameInput) {
-    agentNameInput.value = agentName;
-    agentNameInput.readOnly = true; // pou itilizatè pa ka modifye
-  }
-
-  if (agentEmailInput) {
-    agentEmailInput.value = agentEmail;
-    agentEmailInput.readOnly = true; // pou itilizatè pa ka modifye
-  }
-});
-</script>
 
   
   <!-- JS -->
