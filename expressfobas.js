@@ -246,13 +246,11 @@ if (!res.ok) {
 // =========================
 // BOUTON EXPRESS RETRAIT
 // =========================
-const btnExpressRetrait = document.querySelector("button#expressRetrait"); // asire bouton gen id="expressRetrait"
+const btnExpressRetrait = document.getElementById("expressRetrait");
 
 if (btnExpressRetrait) {
-  btnExpressRetrait.addEventListener("click", (e) => {
-    e.preventDefault();
-
-    // 1️⃣ Pran done agent ki deja ranpli nan fòm expressfobas.html
+  btnExpressRetrait.addEventListener("click", () => {
+    // Pran done agent ki deja ranpli nan fòm nan
     const agentNameInput = document.getElementById("agentName");
     const agentEmailInput = document.getElementById("agentEmail");
 
@@ -269,11 +267,11 @@ if (btnExpressRetrait) {
       return;
     }
 
-    // 2️⃣ Mete yo nan localStorage pou expressretraitfobas.html li
+    // Mete done nan localStorage pou paj retrè yo
     localStorage.setItem("agentName", agentName);
     localStorage.setItem("agentEmail", agentEmail);
 
-    // 3️⃣ Louvri paj expressretraitfobas.html
+    // Louvri nouvo paj la
     window.location.href = "expressretraitfobas.html";
   });
 }
