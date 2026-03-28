@@ -3,17 +3,17 @@ document.addEventListener("DOMContentLoaded", () => {
   // =========================
   // CHARGEMENT INFO AGENT
   // =========================
-  const agentNom = document.getElementById("agentNom");   // ID paj expressretraitfobas.html
+  const agentName = document.getElementById("agentName"); // ID ki nan HTML ou
   const agentEmail = document.getElementById("agentEmail");
 
   try {
-    // Rekipere done agent ki soti nan expressfobas.html
+    // Li done ki soti nan bouton ExpressRetrait (expressfobas.js)
     const savedName = localStorage.getItem("fobas_agent_name");
     const savedEmail = localStorage.getItem("fobas_agent_email");
 
-    if (savedName && agentNom) {
-      agentNom.value = savedName;
-      agentNom.readOnly = true;
+    if (savedName && agentName) {
+      agentName.value = savedName;
+      agentName.readOnly = true;
     }
 
     if (savedEmail && agentEmail) {
@@ -26,7 +26,6 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
 });
-
 
   // ============================================================
   // 2) VERIFY EXPRESSFOBAS CODE
