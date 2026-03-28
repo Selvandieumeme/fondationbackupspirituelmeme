@@ -246,7 +246,6 @@ if (!res.ok) {
 // =========================
 // BOUTON EXPRESS RETRAIT
 // =========================
-document.addEventListener("DOMContentLoaded", () => {
 
   const expressRetraitBtn = document.getElementById("expressRetraitBtn");
 
