@@ -1,18 +1,30 @@
 document.addEventListener("DOMContentLoaded", () => {
-  const agentName = document.getElementById("agentName");
+
+  // =========================
+  // CHARGEMENT INFO AGENT
+  // =========================
+  const agentNom = document.getElementById("agentNom");   // ID paj expressretraitfobas.html
   const agentEmail = document.getElementById("agentEmail");
 
-  const savedName = localStorage.getItem("fobas_agent_name");
-  const savedEmail = localStorage.getItem("fobas_agent_email");
+  try {
+    // Rekipere done agent ki soti nan expressfobas.html
+    const savedName = localStorage.getItem("fobas_agent_name");
+    const savedEmail = localStorage.getItem("fobas_agent_email");
 
-  if (savedName && agentName) {
-    agentName.value = savedName;
-    agentName.readOnly = true;
+    if (savedName && agentNom) {
+      agentNom.value = savedName;
+      agentNom.readOnly = true;
+    }
+
+    if (savedEmail && agentEmail) {
+      agentEmail.value = savedEmail;
+      agentEmail.readOnly = true;
+    }
+
+  } catch (err) {
+    console.warn("⚠️ Erè pandan chajman done agent nan localStorage", err);
   }
-  if (savedEmail && agentEmail) {
-    agentEmail.value = savedEmail;
-    agentEmail.readOnly = true;
-  }
+
 });
 
 
