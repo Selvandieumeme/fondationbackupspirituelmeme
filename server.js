@@ -1762,6 +1762,111 @@ setInterval(async () => {
 
 
 
+// ========================
+// ROUTES CARTE DEBIT VIRTUELLE FOBAS
+// ========================
+
+// Get all cards for a user
+app.get("/cards/:userId", async (req, res) => {
+  const { userId } = req.params;
+  try {
+    const response = await axios.get(`${BASE_API}/cards/${userId}`);
+    res.json(response.data);
+  } catch (err) {
+    res.status(500).json({ error: "Impossible chaje kat yo", details: err.message });
+  }
+});
+
+// Create new virtual card
+app.post("/cards/:userId/create", async (req, res) => {
+  const { userId } = req.params;
+  try {
+    const response = await axios.post(`${BASE_API}/cards/${userId}/create`, req.body);
+    res.json(response.data);
+  } catch (err) {
+    res.status(500).json({ error: "Impossible kreye kat la", details: err.message });
+  }
+});
+
+// Load / Top up card
+app.post("/cards/:cardId/load", async (req, res) => {
+  const { cardId } = req.params;
+  const { amount } = req.body;
+  try {
+    const response = await axios.post(`${BASE_API}/cards/${cardId}/load`, { amount });
+    res.json(response.data);
+  } catch (err) {
+    res.status(500).json({ error: "Impossible chaje kat la", details: err.message });
+  }
+});
+
+// Freeze / Unfreeze card
+app.post("/cards/:cardId/freeze", async (req, res) => {
+  const { cardId } = req.params;
+  const { status } = req.body; // "active" / "frozen"
+  try {
+    const response = await axios.post(`${BASE_API}/cards/${cardId}/freeze`, { status });
+    res.json(response.data);
+  } catch (err) {
+    res.status(500).json({ error: "Impossible modifye kat la", details: err.message });
+  }
+});
+
+// Get fobas_card_tx
+app.get("/cards/:cardId/fobas_card_tx", async (req, res) => {
+  const { cardId } = req.params;
+  try {
+    const response = await axios.get(`${BASE_API}/cards/${cardId}/fobas_card_tx`);
+    res.json(response.data);
+  } catch (err) {
+    res.status(500).json({ error: "Impossible chaje tranzaksyon yo", details: err.message });
+  }
+});
+
+// ========================
+// START SERVER
+// ========================
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`FOBAS Virtual Card server k ap koute nan port ${PORT}`);
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
