@@ -1763,7 +1763,7 @@ setInterval(async () => {
 
 
 // ========================
-// ROUTES CARTE DEBIT VIRTUELLE FOBAS
+// ROUTESCARTEVIRTUELLEDEBIT
 // ========================
 
 // Get all cards for a user
@@ -1823,7 +1823,6 @@ app.get("/cards/:cardId/fobas_card_tx", async (req, res) => {
   }
 });
 
-});
 
 
 
