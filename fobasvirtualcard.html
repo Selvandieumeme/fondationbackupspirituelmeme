@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FOBAS Virtual Debit Card</title>
+  <link rel="stylesheet" href="fobasvirtualcard.css">
+</head>
+<body>
+  <div class="card-dashboard">
+    <h1>FOBAS Virtual Debit Card</h1>
+
+    <div class="card" id="card-display">
+      <div class="card-number" id="card-number">XXXX XXXX XXXX XXXX</div>
+      <div class="card-balance" id="card-balance">Balance: 0 HTG</div>
+      <div class="card-status" id="card-status">Status: Active</div>
+    </div>
+
+    <div class="card-actions">
+      <input type="number" id="load-amount" placeholder="Montant à charger">
+      <button id="load-btn">Chaje Kat</button>
+      <button id="freeze-btn">Freeze / Unfreeze</button>
+      <button id="refresh-btn">Refresh</button>
+    </div>
+
+    <div class="transactions">
+      <h2>Tranzaksyon yo</h2>
+      <ul id="transaction-list"></ul>
+    </div>
+  </div>
+
+  <script src="fobasvirtualcard.js"></script>
+</body>
+</html>
