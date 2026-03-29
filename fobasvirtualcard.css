@@ -1,0 +1,83 @@
+/* fobasvirtualcard.css */
+body {
+  font-family: Arial, sans-serif;
+  background-color: #fff;
+  color: #333;
+  margin: 0;
+  padding: 0;
+}
+
+.card-dashboard {
+  max-width: 600px;
+  margin: 50px auto;
+  padding: 20px;
+  border: 2px solid #0d6efd; /* bleue */
+  border-radius: 15px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+  background: linear-gradient(135deg, #ffe500, #0d6efd, #ffffff); /* jaune, bleue, blanc */
+}
+
+h1, h2 {
+  text-align: center;
+}
+
+.card {
+  padding: 20px;
+  margin-bottom: 20px;
+  border-radius: 10px;
+  background-color: rgba(255,255,255,0.8);
+  text-align: center;
+}
+
+.card-number {
+  font-size: 1.5em;
+  letter-spacing: 2px;
+  margin-bottom: 10px;
+}
+
+.card-balance, .card-status {
+  font-size: 1.2em;
+  margin-bottom: 5px;
+}
+
+.card-actions {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.card-actions input {
+  padding: 8px;
+  width: 120px;
+  margin-right: 10px;
+}
+
+.card-actions button {
+  padding: 8px 12px;
+  margin: 5px;
+  border: none;
+  border-radius: 5px;
+  background-color: #0d6efd;
+  color: #fff;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.card-actions button:hover {
+  background-color: #0056b3;
+}
+
+.transactions {
+  background-color: rgba(255,255,255,0.9);
+  padding: 15px;
+  border-radius: 10px;
+}
+
+.transactions ul {
+  list-style: none;
+  padding: 0;
+}
+
+.transactions li {
+  padding: 5px 0;
+  border-bottom: 1px solid #ccc;
+}
