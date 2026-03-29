@@ -1823,12 +1823,6 @@ app.get("/cards/:cardId/fobas_card_tx", async (req, res) => {
   }
 });
 
-// ========================
-// START SERVER
-// ========================
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`FOBAS Virtual Card server k ap koute nan port ${PORT}`);
 });
 
 
