@@ -40,6 +40,27 @@ h1, h2 {
   margin-bottom: 5px;
 }
 
+/* Nouvo chan dinamik pou kat la */
+.card-details {
+  margin-top: 10px;
+  font-size: 1em;
+  line-height: 1.5;
+  text-align: center;
+}
+
+.card-details div {
+  margin-bottom: 3px;
+}
+
+/* Nom & Email itilizatè yo */
+.user-info {
+  text-align: center;
+  margin-bottom: 15px;
+  font-size: 1em;
+  font-weight: bold;
+}
+
+/* Aksyon kat la */
 .card-actions {
   text-align: center;
   margin-bottom: 20px;
@@ -66,6 +87,7 @@ h1, h2 {
   background-color: #0056b3;
 }
 
+/* Tranzaksyon yo */
 .transactions {
   background-color: rgba(255,255,255,0.9);
   padding: 15px;
@@ -80,4 +102,29 @@ h1, h2 {
 .transactions li {
   padding: 5px 0;
   border-bottom: 1px solid #ccc;
+}
+
+/* Responsif pou telefòn */
+@media (max-width: 480px) {
+  .card-dashboard {
+    margin: 20px;
+    padding: 15px;
+  }
+
+  .card-number {
+    font-size: 1.2em;
+  }
+
+  .card-balance, .card-status {
+    font-size: 1em;
+  }
+
+  .card-actions input {
+    width: 100px;
+  }
+
+  .card-actions button {
+    padding: 6px 10px;
+    margin: 3px;
+  }
 }
