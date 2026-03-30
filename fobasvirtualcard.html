@@ -10,12 +10,27 @@
   <div class="card-dashboard">
     <h1>FOBAS Virtual Debit Card</h1>
 
+    <!-- Info itilizatè -->
+    <div class="card-user-info">
+      <div id="userName">Nom & Prénom: --</div>
+      <div id="userEmail">Email: --</div>
+    </div>
+
+    <!-- Kat Virtuel -->
     <div class="card" id="card-display">
       <div class="card-number" id="card-number">XXXX XXXX XXXX XXXX</div>
       <div class="card-balance" id="card-balance">Balance: 0 HTG</div>
       <div class="card-status" id="card-status">Status: Active</div>
+
+      <div class="card-details">
+        <div id="emi-date">EmiDate: --/----</div>
+        <div id="exp-date">ExpDate: --/----</div>
+        <div id="cvv">CVV: ---</div>
+        <div id="billing-address">Billing: Ville, Code Postal, Pays</div>
+      </div>
     </div>
 
+    <!-- Aksyon sou kat la -->
     <div class="card-actions">
       <input type="number" id="load-amount" placeholder="Montant à charger">
       <button id="load-btn">Chaje Kat</button>
@@ -23,12 +38,14 @@
       <button id="refresh-btn">Refresh</button>
     </div>
 
+    <!-- Lis tranzaksyon yo -->
     <div class="transactions">
       <h2>Tranzaksyon yo</h2>
       <ul id="transaction-list"></ul>
     </div>
   </div>
 
+  <!-- Script JS dinamik la pou tout fonksyonalite -->
   <script src="fobasvirtualcard.js"></script>
 </body>
 </html>
