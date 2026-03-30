@@ -1772,14 +1772,6 @@ const BASE_API = "https://api.fondationbackupspirituel.com";
 // 2️⃣  SCHEMAS MONGO DB — WALLET + CARDS + TRANSACTIONS
 // ======================================================
 
-// ------ WALLET BALANCE ------
-const WalletBalanceSchema = new mongoose.Schema({
-  email: String,
-  balance: Number,
-  lastUpdate: Date
-});
-const WalletBalance = mongoose.model("walletbalances", WalletBalanceSchema);
-
 // ------ VIRTUAL CARD ------
 const CardSchema = new mongoose.Schema({
   email: String,
