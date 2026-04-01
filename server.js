@@ -1666,6 +1666,109 @@ setInterval(async () => {
 
 
 
+// =====================================================
+//  SERVER.JS FINAL — FOBAS WALLET + VIRTUAL DEBIT CARD
+//  + BSICards Integration
+// =====================================================
+
+
+// ================================
+// API KEY BSICards
+// ================================
+const BSICARDS_API_KEY = process.env.BSICARDS_API_KEY; // Secret Key
+
+// ================================
+// Recharge Card Endpoint
+// ================================
+app.post("/cards/:cardId/recharge", async (req, res) => {
+  const { cardId } = req.params;
+  const { email, amountHTG } = req.body;
+
+  try {
+    // 1️⃣ Chèche wallet itilizate a
+    const wallet = await WalletBalance.findOne({ email });
+    if (!wallet) return res.status(400).json({ error: "Wallet pa jwenn" });
+
+    // 2️⃣ Kalkile frais 1%
+    const frais = amountHTG * 0.01;
+    const netHTG = amountHTG - frais;
+
+    if (wallet.balance < amountHTG) {
+      return res.status(400).json({ error: "Pa gen ase lajan nan wallet" });
+    }
+
+    // 3️⃣ Retire montan + frais nan wallet
+    wallet.balance -= amountHTG;
+    wallet.lastUpdate = new Date();
+    await wallet.save();
+
+    // 4️⃣ Mete frais nan admin account
+    const adminWallet = await WalletBalance.findOne({ email: "memeselvandieu@fobas.com" });
+    if (adminWallet) {
+      adminWallet.balance += frais;
+      await adminWallet.save();
+    }
+
+    // 5️⃣ Konvèti HTG → USD an tan reyèl
+    const rateResp = await axios.get('https://api.exchangerate.host/convert', {
+      params: { from: 'HTG', to: 'USD', amount: netHTG }
+    });
+    const amountUSD = rateResp.data.result;
+
+    // 6️⃣ Poste fund request BSICards
+    await axios.post('https://cards.fobas.tech/api/fund-card', {
+      cardId,
+      amount: amountUSD
+    }, {
+      headers: { Authorization: `Bearer ${BSICARDS_API_KEY}` }
+    });
+
+    // 7️⃣ Sove tranzaksyon
+    await CardTx.create({
+      cardId,
+      email,
+      amount: netHTG,
+      type: "credit",
+      description: "Recharge carte virtuelle FOBAS"
+    });
+
+    res.json({ success: true, message: "Kat la chaje avèk siksè", amountUSD });
+
+  } catch (err) {
+    console.error("Recharge error:", err);
+    res.status(500).json({ error: "Echèj recharge kat la", details: err.message });
+  }
+});
+
+// ================================
+// Webhook BSICards
+// ================================
+app.post("/webhook", express.json(), async (req, res) => {
+  try {
+    const payload = req.body;
+    console.log("Webhook BSICards received:", payload);
+
+    // TODO: Update card balances if needed
+    // Egzanp: si webhook di gen fund/tranzaksyon, update CardTx / Cards
+
+    res.status(200).json({ received: true });
+  } catch (err) {
+    console.error("Webhook error:", err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+// ✅ Webhook URL to configure in BSICards:
+// https://fondationbackupspirituel.com/webhook
+
+
+
+
+
+
+
+
+
 
 
 
