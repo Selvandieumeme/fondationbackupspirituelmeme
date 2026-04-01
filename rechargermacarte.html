@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Recharger ma Carte FOBAS</title>
+  <link rel="stylesheet" href="rechargermacarte.css">
+</head>
+<body>
+  <div class="container">
+    <h1>Recharger ma Carte Virtuelle FOBAS</h1>
+
+    <form id="formRecharge" class="recharge-form">
+      <!-- Email itilizatè a -->
+      <label for="email">Email :</label>
+      <input type="email" id="email" placeholder="Ex: utilisateur@fobas.com" required>
+
+      <!-- Card ID manyèl -->
+      <label for="cardId">Card ID :</label>
+      <input type="text" id="cardId" placeholder="Ex: 4598 **** 1234" required>
+
+      <!-- Montant HTG -->
+      <label for="amountHTG">Montant HTG :</label>
+      <input type="number" id="amountHTG" placeholder="Ex: 5000" min="1" required>
+
+      <!-- Conversion dinamik -->
+      <div id="conversionUSD" class="conversion"></div>
+
+      <!-- Bouton recharge -->
+      <button type="submit" id="btnRecharge">Recharger ma Carte</button>
+
+      <!-- Loader -->
+      <div id="loader" class="loader" style="display:none;"></div>
+    </form>
+
+    <!-- Toast container -->
+    <div id="toastContainer" class="toast-container"></div>
+  </div>
+
+  <!-- JS Script -->
+  <script src="rechargermacarte.js"></script>
+</body>
+</html>
