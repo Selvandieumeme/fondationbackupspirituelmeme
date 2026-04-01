@@ -1677,9 +1677,35 @@ setInterval(async () => {
 // ================================
 const BSICARDS_API_KEY = process.env.BSICARDS_API_KEY; // Secret Key
 
-// ================================
-// Recharge Card Endpoint
-// ================================
+// ======================================================
+// 2️⃣  SCHEMAS MONGO DB — WALLET + CARDS + TRANSACTIONS
+// ======================================================
+
+// ------ VIRTUAL CARD ------
+const CardSchema = new mongoose.Schema({
+  email: String,             // Itilizatè ki posede kat la
+  maskedNumber: String,      // Nimewo maské pou UI (eg: 4598 **** **** 1234)
+  cardId: String,            // BSICards internal ID pou recharge API
+  balance: { type: Number, default: 0 }, // USD
+  status: { type: String, default: "active" }, 
+  createdAt: { type: Date, default: Date.now }
+});
+const Cards = mongoose.model("cards", CardSchema);
+
+// ------ CARD TRANSACTIONS ------
+const CardTxSchema = new mongoose.Schema({
+  cardId: String,            // ID kat la (BSICards)
+  email: String,
+  amount: Number,            // Montan net HTG
+  type: String,              // "credit" / "debit"
+  description: String,
+  createdAt: { type: Date, default: Date.now }
+});
+const CardTx = mongoose.model("fobas_card_tx", CardTxSchema);
+
+// ======================================================
+// 4️⃣  RECHARGE CARD ENDPOINT
+// ======================================================
 app.post("/cards/:cardId/recharge", async (req, res) => {
   const { cardId } = req.params;
   const { email, amountHTG } = req.body;
@@ -1723,7 +1749,14 @@ app.post("/cards/:cardId/recharge", async (req, res) => {
       headers: { Authorization: `Bearer ${BSICARDS_API_KEY}` }
     });
 
-    // 7️⃣ Sove tranzaksyon
+    // 7️⃣ Mete ajou balans lokal kat la
+    const card = await Cards.findOne({ cardId, email });
+    if (card) {
+      card.balance += amountUSD;
+      await card.save();
+    }
+
+    // 8️⃣ Sove tranzaksyon
     await CardTx.create({
       cardId,
       email,
@@ -1740,9 +1773,40 @@ app.post("/cards/:cardId/recharge", async (req, res) => {
   }
 });
 
-// ================================
-// Webhook BSICards
-// ================================
+// ======================================================
+// 5️⃣  GET CARD INFO + BALANCE (dinamik via BSICards API)
+// ======================================================
+app.get("/cards/:email", async (req, res) => {
+  const { email } = req.params;
+  try {
+    const cards = await Cards.find({ email });
+    const cardsWithBalance = [];
+
+    for (const card of cards) {
+      // Rale balans aktyèl BSICards si ou vle sync realtime
+      const apiResp = await axios.get(`https://cards.fobas.tech/api/cards/${card.cardId}/balance`, {
+        headers: { Authorization: `Bearer ${BSICARDS_API_KEY}` }
+      });
+      cardsWithBalance.push({
+        email: card.email,
+        maskedNumber: card.maskedNumber,
+        cardId: card.cardId,
+        balance: apiResp.data.balance, // USD
+        status: card.status,
+        createdAt: card.createdAt
+      });
+    }
+
+    res.json(cardsWithBalance);
+  } catch (err) {
+    console.error("Get cards error:", err);
+    res.status(500).json({ error: "Impossible chaje kat yo", details: err.message });
+  }
+});
+
+// ======================================================
+// 6️⃣  Webhook BSICards
+// ======================================================
 app.post("/webhook", express.json(), async (req, res) => {
   try {
     const payload = req.body;
