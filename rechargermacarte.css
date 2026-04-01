@@ -1,0 +1,148 @@
+/* ==============================
+   rechargermacarte.css — FOBAS UI
+   Couleurs: Jaune (#FFC107), Bleu (#007BFF), Blanc (#FFFFFF)
+============================== */
+
+/* Reset */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+  background-color: #f9f9f9;
+  color: #333;
+}
+
+.container {
+  max-width: 480px;
+  margin: 50px auto;
+  padding: 30px 25px;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+  text-align: center;
+}
+
+h1 {
+  color: #007BFF; /* Bleu principal */
+  margin-bottom: 25px;
+  font-size: 1.8rem;
+}
+
+.recharge-form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  text-align: left;
+}
+
+.recharge-form label {
+  font-weight: 600;
+  margin-bottom: 5px;
+  color: #007BFF;
+}
+
+.recharge-form input {
+  padding: 12px 15px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: border 0.3s;
+}
+
+.recharge-form input:focus {
+  border-color: #FFC107; /* Jaune */
+  outline: none;
+}
+
+#btnRecharge {
+  margin-top: 15px;
+  padding: 12px;
+  background: linear-gradient(90deg, #007BFF, #FFC107);
+  color: #fff;
+  font-weight: bold;
+  border: none;
+  border-radius: 10px;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+#btnRecharge:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 15px rgba(0,0,0,0.15);
+}
+
+.conversion {
+  font-size: 1rem;
+  color: #007BFF;
+  font-weight: 600;
+  margin-top: -5px;
+  margin-bottom: 10px;
+}
+
+.loader {
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #007BFF;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  margin: 15px auto;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.toast-container {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.toast {
+  padding: 12px 20px;
+  border-radius: 8px;
+  color: #fff;
+  font-weight: 600;
+  min-width: 250px;
+  text-align: center;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  animation: slideIn 0.3s ease-out;
+}
+
+.toast.success {
+  background: #28a745; /* Vert success */
+}
+
+.toast.error {
+  background: #dc3545; /* Rouge erreur */
+}
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateX(100%); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+/* Responsive */
+@media (max-width: 520px) {
+  .container {
+    margin: 30px 15px;
+    padding: 25px 20px;
+  }
+  h1 {
+    font-size: 1.5rem;
+  }
+  #btnRecharge {
+    font-size: 1rem;
+  }
+}
