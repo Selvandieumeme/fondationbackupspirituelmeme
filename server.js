@@ -45,6 +45,56 @@ app.use(express.json());
 
 
 
+
+
+
+// 🔥 ensure folder exists (IMPORTANT)
+fs.mkdirSync(
+  path.join(__dirname, 'fobas_uploads/exchanges'),
+  { recursive: true }
+);
+
+
+// 👉 static files
+app.use('/fobas_uploads', express.static(
+  path.join(__dirname, 'fobas_uploads')
+));
+
+
+// ============================
+// MULTER CONFIG (SAFE)
+// ============================
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, 'fobas_uploads/exchanges');
+  },
+  filename: (req, file, cb) => {
+  const name = file.originalname.replace(/\s+/g, '-');
+  cb(null, Date.now() + '-' + name);
+}
+});
+
+const upload = multer({
+  storage,
+  limits: { fileSize: 5 * 1024 * 1024 }, // 🔥 5MB max
+  fileFilter: (req, file, cb) => {
+    const allowed = ['image/jpeg', 'image/png', 'image/webp'];
+
+    if (!allowed.includes(file.mimetype)) {
+      return cb(new Error('Se selman imaj ki aksepte'));
+    }
+
+    cb(null, true);
+  }
+});
+
+
+
+
+
+
+
+
 // ============================
 // ROUTE: UPLOAD IMAGE (OBLIGATWA)
 // ============================
@@ -74,38 +124,12 @@ app.post('/api/upload-image', upload.single('image'), (req, res) => {
 
 
 
-// 🔥 ensure folder exists (IMPORTANT)
-fs.mkdirSync(
-  path.join(__dirname, 'fobas_uploads/exchanges'),
-  { recursive: true }
-);
-
-
-// 👉 static files
-app.use('/fobas_uploads', express.static(
-  path.join(__dirname, 'fobas_uploads')
-));
 
 
 // ============================
-// MULTER CONFIG (SAFE)
+// ROUTE: CREATE EXCHANGE (FINAL)
 // ============================
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, 'fobas_uploads/exchanges');
-  },
-  filename: (req, file, cb) => {
-    cb(null, Date.now() + '-' + file.originalname);
-  }
-});
-
-const upload = multer({ storage });
-
-
-// ============================
-// ROUTE: CREATE EXCHANGE
-// ============================
-app.post('/api/exchanges/create', upload.single('image'), async (req, res) => {
+app.post('/api/exchanges/create', async (req, res) => {
   try {
 
     const userId = req.body.user;
@@ -123,7 +147,7 @@ app.post('/api/exchanges/create', upload.single('image'), async (req, res) => {
     // 🔹 safe posts check
     let mustPay = (userData.posts || 0) >= 3;
 
-    // 🔹 payment check (Natcash manual system)
+    // 🔹 payment check
     if (mustPay && !req.body.paid) {
       return res.status(403).json({
         success: false,
@@ -131,8 +155,8 @@ app.post('/api/exchanges/create', upload.single('image'), async (req, res) => {
       });
     }
 
-    // 🔹 verify image
-    if (!req.file) {
+    // 🔹 verify image URL (IMPORTANT)
+    if (!req.body.image) {
       return res.status(400).json({
         success: false,
         message: "Image obligatwa"
@@ -144,7 +168,7 @@ app.post('/api/exchanges/create', upload.single('image'), async (req, res) => {
       user: userId,
       title: req.body.title,
       description: req.body.description,
-      image: `/fobas_uploads/exchanges/${req.file.filename}`,
+      image: req.body.image,
       priceRequired: mustPay ? 250 : 0,
       createdAt: new Date()
     });
@@ -154,7 +178,6 @@ app.post('/api/exchanges/create', upload.single('image'), async (req, res) => {
       $inc: { posts: 1 }
     });
 
-    // 🔹 response
     return res.json({
       success: true,
       item
@@ -168,7 +191,6 @@ app.post('/api/exchanges/create', upload.single('image'), async (req, res) => {
     });
   }
 });
-
 
 
 
