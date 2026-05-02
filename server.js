@@ -67,39 +67,66 @@ const upload = multer({ storage });
 
 
 
-// 👉 ROUTES
+// 👉 ROUTES (FOBAS ECHANGES - FINAL VERSION)
 app.post('/api/exchanges/create', upload.single('image'), async (req, res) => {
-  const user = req.body.user;
+  try {
 
-  const userData = await db.collection('users').findOne({ _id: user });
+    const userId = req.body.user;
 
-  let mustPay = userData.posts >= 3;
+    // 🔹 verifye user
+    const userData = await User.findById(userId);
 
-  if (mustPay && !req.body.paid) {
-    return res.status(403).json({
-      message: "Ou dwe peye 250 Gdes pou poste"
+    if (!userData) {
+      return res.status(404).json({
+        message: "User pa egziste"
+      });
+    }
+
+    // 🔹 safe check posts
+    let mustPay = (userData.posts || 0) >= 3;
+
+    // 🔹 payment check
+    if (mustPay && !req.body.paid) {
+      return res.status(403).json({
+        message: "Ou dwe peye 250 Gdes pou poste"
+      });
+    }
+
+    // 🔹 verify image
+    if (!req.file) {
+      return res.status(400).json({
+        message: "Image obligatwa"
+      });
+    }
+
+    // 🔹 kreye anons
+    const item = await Exchange.create({
+      user: userId,
+      title: req.body.title,
+      description: req.body.description,
+      image: `/fobas_uploads/exchanges/${req.file.filename}`,
+      priceRequired: mustPay ? 250 : 0,
+      createdAt: new Date()
+    });
+
+    // 🔹 update user posts count
+    await User.findByIdAndUpdate(userId, {
+      $inc: { posts: 1 }
+    });
+
+    // 🔹 response
+    res.json({
+      success: true,
+      item
+    });
+
+  } catch (error) {
+    console.error("Exchange Error:", error);
+    res.status(500).json({
+      message: "Server error"
     });
   }
-
-  const item = {
-    user,
-    title: req.body.title,
-    description: req.body.description,
-    image: `/fobas_uploads/exchanges/${req.file.filename}`,
-    priceRequired: mustPay ? 250 : 0,
-    createdAt: new Date()
-  };
-
-  await db.collection('exchanges').insertOne(item);
-
-  await db.collection('users').updateOne(
-    { _id: user },
-    { $inc: { posts: 1 } }
-  );
-
-  res.json({ success: true });
 });
-
 
 
 
