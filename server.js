@@ -52,6 +52,55 @@ app.use('/fobas_uploads', express.static(
 
 
 
+// 4. MULTER (👉 LA LI ALE)
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, 'fobas_uploads/exchanges');
+  },
+  filename: (req, file, cb) => {
+    cb(null, Date.now() + '-' + file.originalname);
+  }
+});
+
+const upload = multer({ storage });
+
+
+
+
+// 👉 ROUTES
+app.post('/api/exchanges/create', upload.single('image'), async (req, res) => {
+  const user = req.body.user;
+
+  const userData = await db.collection('users').findOne({ _id: user });
+
+  let mustPay = userData.posts >= 3;
+
+  if (mustPay && !req.body.paid) {
+    return res.status(403).json({
+      message: "Ou dwe peye 250 Gdes pou poste"
+    });
+  }
+
+  const item = {
+    user,
+    title: req.body.title,
+    description: req.body.description,
+    image: `/fobas_uploads/exchanges/${req.file.filename}`,
+    priceRequired: mustPay ? 250 : 0,
+    createdAt: new Date()
+  };
+
+  await db.collection('exchanges').insertOne(item);
+
+  await db.collection('users').updateOne(
+    { _id: user },
+    { $inc: { posts: 1 } }
+  );
+
+  res.json({ success: true });
+});
+
+
 
 
 
