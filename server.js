@@ -46,7 +46,10 @@ app.use(express.json());
 
 
 // 👉 static files
-app.use('/fobas_uploads', express.static('fobas_uploads'));
+app.use('/fobas_uploads', express.static(
+  path.join(__dirname, 'fobas_uploads')
+));
+
 
 
 
