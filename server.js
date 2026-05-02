@@ -42,6 +42,12 @@ app.use(express.json());
 
 
 
+// 🔥 ensure folder exists (IMPORTANT)
+fs.mkdirSync(
+  path.join(__dirname, 'fobas_uploads/exchanges'),
+  { recursive: true }
+);
+
 
 
 
@@ -127,6 +133,12 @@ app.post('/api/exchanges/create', upload.single('image'), async (req, res) => {
     });
   }
 });
+
+
+
+
+
+
 
 
 
