@@ -98,8 +98,16 @@ const upload = multer({
 // ============================
 // ROUTE: UPLOAD IMAGE (OBLIGATWA)
 // ============================
-app.post('/api/upload-image', upload.single('image'), (req, res) => {
-  try {
+app.post('/api/upload-image', (req, res) => {
+
+  upload.single('image')(req, res, function (err) {
+
+    if (err) {
+      return res.status(400).json({
+        success: false,
+        message: err.message
+      });
+    }
 
     if (!req.file) {
       return res.status(400).json({
@@ -113,15 +121,9 @@ app.post('/api/upload-image', upload.single('image'), (req, res) => {
       url: `/fobas_uploads/exchanges/${req.file.filename}`
     });
 
-  } catch (error) {
-    console.error("Upload Error:", error);
-    return res.status(500).json({
-      success: false,
-      message: "Upload error"
-    });
-  }
-});
+  });
 
+});
 
 
 
@@ -132,30 +134,17 @@ app.post('/api/upload-image', upload.single('image'), (req, res) => {
 app.post('/api/exchanges/create', async (req, res) => {
   try {
 
-    const userId = req.body.user;
+    // 🔹 NEW SYSTEM: NO USER ID — just name
+    const fullName = req.body.fullName;
 
-    // 🔹 verify user
-    const userData = await User.findById(userId);
-
-    if (!userData) {
-      return res.status(404).json({
+    if (!fullName) {
+      return res.status(400).json({
         success: false,
-        message: "User pa egziste"
+        message: "Non konplè obligatwa"
       });
     }
 
-    // 🔹 safe posts check
-    let mustPay = (userData.posts || 0) >= 3;
-
-    // 🔹 payment check
-    if (mustPay && !req.body.paid) {
-      return res.status(403).json({
-        success: false,
-        message: "Ou dwe peye 250 Gdes (Natcash: +50943706706 - MEME Selvandieu)"
-      });
-    }
-
-    // 🔹 verify image URL (IMPORTANT)
+    // 🔹 verify image URL
     if (!req.body.image) {
       return res.status(400).json({
         success: false,
@@ -163,19 +152,13 @@ app.post('/api/exchanges/create', async (req, res) => {
       });
     }
 
-    // 🔹 create item
+    // 🔹 create item (PUBLIC SYSTEM)
     const item = await Exchange.create({
-      user: userId,
+      ownerName: fullName,
       title: req.body.title,
       description: req.body.description,
       image: req.body.image,
-      priceRequired: mustPay ? 250 : 0,
       createdAt: new Date()
-    });
-
-    // 🔹 update user posts
-    await User.findByIdAndUpdate(userId, {
-      $inc: { posts: 1 }
     });
 
     return res.json({
