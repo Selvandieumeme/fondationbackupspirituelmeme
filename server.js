@@ -42,13 +42,12 @@ app.use(express.json());
 
 
 
+
 // 🔥 ensure folder exists (IMPORTANT)
 fs.mkdirSync(
   path.join(__dirname, 'fobas_uploads/exchanges'),
   { recursive: true }
 );
-
-
 
 
 // 👉 static files
@@ -57,8 +56,9 @@ app.use('/fobas_uploads', express.static(
 ));
 
 
-
-// 4. MULTER (👉 LA LI ALE)
+// ============================
+// MULTER CONFIG (SAFE)
+// ============================
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     cb(null, 'fobas_uploads/exchanges');
@@ -71,41 +71,44 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 
-
-
-// 👉 ROUTES (FOBAS ECHANGES - FINAL VERSION)
+// ============================
+// ROUTE: CREATE EXCHANGE
+// ============================
 app.post('/api/exchanges/create', upload.single('image'), async (req, res) => {
   try {
 
     const userId = req.body.user;
 
-    // 🔹 verifye user
+    // 🔹 verify user
     const userData = await User.findById(userId);
 
     if (!userData) {
       return res.status(404).json({
+        success: false,
         message: "User pa egziste"
       });
     }
 
-    // 🔹 safe check posts
+    // 🔹 safe posts check
     let mustPay = (userData.posts || 0) >= 3;
 
-    // 🔹 payment check
+    // 🔹 payment check (Natcash manual system)
     if (mustPay && !req.body.paid) {
       return res.status(403).json({
-        message: "Ou dwe peye 250 Gdes pou poste"
+        success: false,
+        message: "Ou dwe peye 250 Gdes (Natcash: +50943706706 - MEME Selvandieu)"
       });
     }
 
     // 🔹 verify image
     if (!req.file) {
       return res.status(400).json({
+        success: false,
         message: "Image obligatwa"
       });
     }
 
-    // 🔹 kreye anons
+    // 🔹 create item
     const item = await Exchange.create({
       user: userId,
       title: req.body.title,
@@ -115,25 +118,25 @@ app.post('/api/exchanges/create', upload.single('image'), async (req, res) => {
       createdAt: new Date()
     });
 
-    // 🔹 update user posts count
+    // 🔹 update user posts
     await User.findByIdAndUpdate(userId, {
       $inc: { posts: 1 }
     });
 
     // 🔹 response
-    res.json({
+    return res.json({
       success: true,
       item
     });
 
   } catch (error) {
     console.error("Exchange Error:", error);
-    res.status(500).json({
+    return res.status(500).json({
+      success: false,
       message: "Server error"
     });
   }
 });
-
 
 
 
