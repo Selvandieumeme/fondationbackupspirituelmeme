@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>FOBAS Echanges</title>
+  <link rel="stylesheet" href="fobas.echanges.css">
+</head>
+
+<body>
+
+<header>
+  <h1>FOBAS ECHANGES</h1>
+  <p>Marketplace byen kont byen</p>
+</header>
+
+<!-- 🟡 POST FORM -->
+<section class="form-card">
+
+  <input id="userId" placeholder="User ID">
+
+  <input id="title" placeholder="Tit anons">
+  <textarea id="desc" placeholder="Deskripsyon"></textarea>
+
+  <input id="category" placeholder="Kategori">
+
+  <input type="file" id="image">
+
+  <button onclick="createItem()">Pibliye anons</button>
+
+  <p class="info">
+    ✔ 3 anons gratis<br>
+    💰 Apre sa: 250 HT (Natcash only)
+  </p>
+
+</section>
+
+<!-- 💳 PAYMENT SECTION -->
+<section class="payment-card">
+
+  <h2>Peman Natcash</h2>
+
+  <p>
+    Voye 250 HT sou:<br>
+    <b>+50943706706 (MEME Selvandieu)</b>
+  </p>
+
+  <input type="file" id="proof">
+
+  <button onclick="sendProof()">Voye prèv peman</button>
+
+</section>
+
+<hr>
+
+<!-- 📦 ITEMS -->
+<section id="items"></section>
+
+<script src="fobas.echanges.js"></script>
+</body>
+</html>
