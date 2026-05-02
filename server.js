@@ -43,6 +43,37 @@ app.use(express.json());
 
 
 
+
+
+// ============================
+// ROUTE: UPLOAD IMAGE (OBLIGATWA)
+// ============================
+app.post('/api/upload-image', upload.single('image'), (req, res) => {
+  try {
+
+    if (!req.file) {
+      return res.status(400).json({
+        success: false,
+        message: "Image obligatwa"
+      });
+    }
+
+    return res.json({
+      success: true,
+      url: `/fobas_uploads/exchanges/${req.file.filename}`
+    });
+
+  } catch (error) {
+    console.error("Upload Error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Upload error"
+    });
+  }
+});
+
+
+
 // 🔥 ensure folder exists (IMPORTANT)
 fs.mkdirSync(
   path.join(__dirname, 'fobas_uploads/exchanges'),
