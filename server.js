@@ -66,17 +66,14 @@ const Exchange = mongoose.model("Exchange", exchangeSchema);
 
 
 
-const chatSchema = new mongoose.Schema({
+const commentSchema = new mongoose.Schema({
   itemId: String,
-  senderName: String,
+  name: String,
   message: String,
-  createdAt: {
-    type: Date,
-    default: Date.now
-  }
+  createdAt: { type: Date, default: Date.now }
 });
 
-const Chat = mongoose.model("Chat", chatSchema);
+const Comment = mongoose.model("Comment", commentSchema);
 
 
 
@@ -235,27 +232,15 @@ app.post('/api/exchanges/create', async (req, res) => {
 
 
 
-app.post('/api/chat/send', async (req, res) => {
+app.post('/api/comments', async (req, res) => {
   try {
-    const { itemId, senderName, message } = req.body;
-
-    if (!itemId || !senderName || !message) {
-      return res.status(400).json({ success: false, message: "Champs obligatwa" });
-    }
-
-    const chat = await Chat.create({
-      itemId,
-      senderName,
-      message
-    });
-
-    res.json({ success: true, chat });
-
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ success: false, message: "Server error" });
+    const comment = await Comment.create(req.body);
+    res.json({ success: true, comment });
+  } catch (err) {
+    res.status(500).json({ success: false });
   }
 });
+
 
 
 app.get('/api/items', async (req, res) => {
@@ -270,11 +255,13 @@ app.get('/api/items', async (req, res) => {
 
 
 
-app.get('/api/chat/:itemId', async (req, res) => {
+app.get('/api/comments/:itemId', async (req, res) => {
   try {
-    const chats = await Chat.find({ itemId: req.params.itemId }).sort({ createdAt: 1 });
-    res.json(chats);
-  } catch (error) {
+    const comments = await Comment.find({ itemId: req.params.itemId })
+      .sort({ createdAt: -1 });
+
+    res.json(comments);
+  } catch (err) {
     res.status(500).json([]);
   }
 });
