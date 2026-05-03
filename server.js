@@ -155,15 +155,16 @@ app.post('/api/upload-image', (req, res) => {
 
 
 // ============================
-// ROUTE: CREATE EXCHANGE (FINAL)
+// ROUTE: CREATE EXCHANGE (FINAL CLEAN)
 // ============================
 app.post('/api/exchanges/create', async (req, res) => {
   try {
-	  console.log("BODY:", req.body);
-      console.log("FILE:", req.file);
 
-    // 🔹 NEW SYSTEM: NO USER ID — just name
-    const fullName = req.body.fullName;
+    // 🔍 DEBUG (safe - retire nan production si ou vle)
+    console.log("EXCHANGE BODY:", req.body);
+
+    // 🔹 NEW SYSTEM: NO USER ID — just full name
+    const fullName = req.body.fullName?.trim();
 
     if (!fullName) {
       return res.status(400).json({
@@ -172,38 +173,51 @@ app.post('/api/exchanges/create', async (req, res) => {
       });
     }
 
-    // 🔹 verify image URL
-    if (!req.body.image) {
+    // 🔹 title check (ENPÒTAN pou evite empty posts)
+    const title = req.body.title?.trim();
+    const description = req.body.description?.trim();
+
+    if (!title || !description) {
+      return res.status(400).json({
+        success: false,
+        message: "Tit ak deskripsyon obligatwa"
+      });
+    }
+
+    // 🔹 image check
+    const image = req.body.image;
+
+    if (!image) {
       return res.status(400).json({
         success: false,
         message: "Image obligatwa"
       });
     }
 
-    // 🔹 create item (PUBLIC SYSTEM)
+    // 🔥 CREATE ITEM (CLEAN & SAFE)
     const item = await Exchange.create({
       ownerName: fullName,
-      title: req.body.title,
-      description: req.body.description,
-      image: req.body.image,
+      title,
+      description,
+      image,
       createdAt: new Date()
     });
 
     return res.json({
       success: true,
+      message: "Anons pibliye avèk siksè",
       item
     });
 
   } catch (error) {
-    console.error("Exchange Error:", error);
+    console.error("❌ Exchange Error:", error);
+
     return res.status(500).json({
       success: false,
       message: "Server error"
-
     });
   }
 });
-
 
 
 
