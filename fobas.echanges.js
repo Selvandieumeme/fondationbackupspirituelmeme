@@ -1,5 +1,6 @@
 const API = "https://api.fondationbackupspirituel.com";
 
+
 // ============================
 // LOAD ITEMS
 // ============================
@@ -18,6 +19,7 @@ async function loadItems() {
           <h3>${item.title}</h3>
           <p>${item.description}</p>
           <small>${item.category || ''}</small>
+          <small>Par: ${item.ownerName || ''}</small>
         </div>
       `;
     });
@@ -29,17 +31,17 @@ async function loadItems() {
 
 
 // ============================
-// CREATE ITEM
+// CREATE ITEM (UPDATED)
 // ============================
 async function createItem() {
 
-  const user = document.getElementById('userId').value;
+  const fullName = document.getElementById('fullName').value;
   const title = document.getElementById('title').value;
   const desc = document.getElementById('desc').value;
   const category = document.getElementById('category').value;
   const file = document.getElementById('image').files[0];
 
-  if (!user || !title || !desc) {
+  if (!fullName || !title || !desc) {
     alert("Ranpli tout chan yo");
     return;
   }
@@ -52,7 +54,7 @@ async function createItem() {
   try {
 
     // ============================
-    // UPLOAD IMAGE VIA OFFICIAL API
+    // UPLOAD IMAGE
     // ============================
     const formData = new FormData();
     formData.append("image", file);
@@ -65,15 +67,15 @@ async function createItem() {
     const uploadData = await uploadRes.json();
 
     if (!uploadData.url) {
-      alert("Upload echwe");
+      alert(uploadData.message || "Upload echwe");
       return;
     }
 
     // ============================
-    // CREATE EXCHANGE ITEM
+    // CREATE ITEM
     // ============================
     const item = {
-      user,
+      fullName,
       title,
       description: desc,
       category,
@@ -107,7 +109,7 @@ async function createItem() {
 
 
 // ============================
-// PAYMENT PROOF (MANUAL NATCASH)
+// PAYMENT PROOF (UNCHANGED)
 // ============================
 function sendProof() {
 
