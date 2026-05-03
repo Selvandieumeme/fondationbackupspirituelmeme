@@ -15,7 +15,7 @@ async function loadItems() {
     data.forEach(item => {
       box.innerHTML += `
         <div class="card">
-          <img src="${item.image || ''}">
+          <img src="${API}${item.image}" onerror="this.style.display='none'">
           <h3>${item.title || ''}</h3>
           <p>${item.description || ''}</p>
           <small>Par: ${item.ownerName || ''}</small>
@@ -98,6 +98,29 @@ async function createItem() {
     alert("Server error");
   }
 }
+
+
+
+
+
+// ============================
+// IMAGE PREVIEW
+// ============================
+document.getElementById('image').addEventListener('change', function () {
+
+  const file = this.files[0];
+
+  if (!file) return;
+
+  const preview = document.getElementById('preview');
+
+  preview.src = URL.createObjectURL(file);
+  preview.style.display = "block";
+
+});
+
+
+
 
 
 // ============================
