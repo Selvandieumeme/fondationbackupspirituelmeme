@@ -126,6 +126,53 @@ document.getElementById('image').addEventListener('change', function () {
 
 
 
+let currentItemId = null;
+
+// ouvri chat
+async function openChat(itemId) {
+  currentItemId = itemId;
+  document.getElementById('chatBox').style.display = "block";
+
+  loadChat();
+}
+
+// load messages
+async function loadChat() {
+  const res = await fetch(`${API}/api/chat/${currentItemId}`);
+  const data = await res.json();
+
+  const box = document.getElementById('chatMessages');
+  box.innerHTML = "";
+
+  data.forEach(c => {
+    box.innerHTML += `
+      <p><b>${c.senderName}:</b> ${c.message}</p>
+    `;
+  });
+}
+
+// send message
+async function sendMessage() {
+  const senderName = document.getElementById('chatName').value;
+  const message = document.getElementById('chatText').value;
+
+  if (!senderName || !message) return alert("Ranpli tout chan yo");
+
+  await fetch(`${API}/api/chat/send`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      itemId: currentItemId,
+      senderName,
+      message
+    })
+  });
+
+  document.getElementById('chatText').value = "";
+  loadChat();
+}
+
+
 
 // ============================
 // INIT
