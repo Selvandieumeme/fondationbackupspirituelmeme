@@ -109,8 +109,8 @@ async function createItem() {
       return;
     }
 
-    
-    
+    alert("Anons pibliye!");
+    resetForm(); // ✅ mete li LA SELMAN
     loadItems();
     
 
@@ -247,8 +247,6 @@ async function loadComments(itemId) {
 // ============================
 // INIT
 // ============================
-alert("Anons pibliye!");
-resetForm(); // ✅ mete li LA SELMAN
 loadItems();
 
 // 🔥 VIDE FÒM NAN
