@@ -66,6 +66,18 @@ const Exchange = mongoose.model("Exchange", exchangeSchema);
 
 
 
+const chatSchema = new mongoose.Schema({
+  itemId: String,
+  senderName: String,
+  message: String,
+  createdAt: {
+    type: Date,
+    default: Date.now
+  }
+});
+
+const Chat = mongoose.model("Chat", chatSchema);
+
 
 
 // 🔥 ensure folder exists (IMPORTANT)
@@ -222,6 +234,30 @@ app.post('/api/exchanges/create', async (req, res) => {
 
 
 
+
+app.post('/api/chat/send', async (req, res) => {
+  try {
+    const { itemId, senderName, message } = req.body;
+
+    if (!itemId || !senderName || !message) {
+      return res.status(400).json({ success: false, message: "Champs obligatwa" });
+    }
+
+    const chat = await Chat.create({
+      itemId,
+      senderName,
+      message
+    });
+
+    res.json({ success: true, chat });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+});
+
+
 app.get('/api/items', async (req, res) => {
   try {
     const items = await Exchange.find().sort({ createdAt: -1 });
@@ -234,7 +270,14 @@ app.get('/api/items', async (req, res) => {
 
 
 
-
+app.get('/api/chat/:itemId', async (req, res) => {
+  try {
+    const chats = await Chat.find({ itemId: req.params.itemId }).sort({ createdAt: 1 });
+    res.json(chats);
+  } catch (error) {
+    res.status(500).json([]);
+  }
+});
 
 
 
