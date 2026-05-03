@@ -16,9 +16,8 @@ async function loadItems() {
       box.innerHTML += `
         <div class="card">
           <img src="${item.image || ''}">
-          <h3>${item.title}</h3>
-          <p>${item.description}</p>
-          <small>${item.category || ''}</small>
+          <h3>${item.title || ''}</h3>
+          <p>${item.description || ''}</p>
           <small>Par: ${item.ownerName || ''}</small>
         </div>
       `;
@@ -31,14 +30,13 @@ async function loadItems() {
 
 
 // ============================
-// CREATE ITEM (UPDATED)
+// CREATE ITEM (FIXED)
 // ============================
 async function createItem() {
 
   const fullName = document.getElementById('fullName').value;
   const title = document.getElementById('title').value;
   const desc = document.getElementById('desc').value;
-  const category = document.getElementById('category').value;
   const file = document.getElementById('image').files[0];
 
   if (!fullName || !title || !desc) {
@@ -53,9 +51,7 @@ async function createItem() {
 
   try {
 
-    // ============================
     // UPLOAD IMAGE
-    // ============================
     const formData = new FormData();
     formData.append("image", file);
 
@@ -66,21 +62,17 @@ async function createItem() {
 
     const uploadData = await uploadRes.json();
 
-    if (!uploadData.url) {
+    if (!uploadData.success) {
       alert(uploadData.message || "Upload echwe");
       return;
     }
 
-    // ============================
-    // CREATE ITEM
-    // ============================
+    // SEND TO SERVER (MATCH SERVER FORMAT EXACT)
     const item = {
       fullName,
       title,
       description: desc,
-      category,
-      image: uploadData.url,
-      paid: false
+      image: uploadData.url
     };
 
     const res = await fetch(`${API}/api/exchanges/create`, {
@@ -105,26 +97,6 @@ async function createItem() {
     console.log("Create error:", err);
     alert("Server error");
   }
-}
-
-
-// ============================
-// PAYMENT PROOF (UNCHANGED)
-// ============================
-function sendProof() {
-
-  const proof = document.getElementById('proof').files[0];
-
-  if (!proof) {
-    alert("Chwazi screenshot peman");
-    return;
-  }
-
-  alert(
-    "Prèv peman voye bay admin ✔\n" +
-    "MEME Selvandieu\n" +
-    "+50943706706"
-  );
 }
 
 
