@@ -110,8 +110,7 @@ async function createItem() {
     }
 
     
-    alert("Anons pibliye!");
-    resetForm(); // ✅ mete li LA SELMAN
+    
     loadItems();
     
 
@@ -146,7 +145,8 @@ document.getElementById('image').addEventListener('change', function () {
 
 
 
-async function sendComment(itemId) {
+
+  async function sendComment(itemId) {
   const name = document.getElementById(`name-${itemId}`).value;
   const message = document.getElementById(`msg-${itemId}`).value;
 
@@ -156,34 +156,35 @@ async function sendComment(itemId) {
   }
 
   const res = await fetch(`${API}/api/comments`, {
-  method: "POST",
-  headers: {
-    "Content-Type": "application/json"
-  },
-  body: JSON.stringify({
-    itemId,
-    name,
-    message
-  })
-});
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      itemId,
+      name,
+      message
+    })
+  });
 
-const data = await res.json();
+  const data = await res.json();
 
-if (!data.success) {
-  alert("Comment pa voye");
-  return;
+  if (!data.success) {
+    alert("Comment pa voye");
+    return;
+  }
+
+  document.getElementById(`msg-${itemId}`).value = "";
+
+  loadComments(itemId);
 }
 
-document.getElementById(`msg-${itemId}`).value = "";
-
-loadComments(itemId);
 
 
 
 
 
-
-  // ============================
+// ============================
 // LOAD COMMENTS
 // ============================
 async function loadComments(itemId) {
@@ -211,8 +212,9 @@ async function loadComments(itemId) {
 // ============================
 // INIT
 // ============================
+alert("Anons pibliye!");
+resetForm(); // ✅ mete li LA SELMAN
 loadItems();
-
 
 // 🔥 VIDE FÒM NAN
 function resetForm() {
