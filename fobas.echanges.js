@@ -13,16 +13,20 @@ async function loadItems() {
     box.innerHTML = "";
 
     data.forEach(item => {
-      box.innerHTML += `
-        <div class="card">
-          <img src="${item.image.startsWith('http') ? item.image : API + item.image}" alt="image">
-          <h3>${item.title || ''}</h3>
-          <p>${item.description || ''}</p>
-          <small>Par: ${item.ownerName || ''}</small>
-        </div>
-      `;
-    });
+  box.innerHTML += `
+    <div class="card">
 
+      <div class="image-box">
+      <img src="${item.image ? (item.image.startsWith('http') ? item.image : API + item.image) : ''}" alt="image">
+      </div>
+
+      <h3>${item.title || ''}</h3>
+      <p>${item.description || ''}</p>
+      <small>Par: ${item.ownerName || ''}</small>
+
+    </div>
+  `;
+});
   } catch (err) {
     console.log("Load error:", err);
   }
