@@ -133,13 +133,21 @@ document.getElementById('image').addEventListener('change', function () {
 
   if (!file) return;
 
+  // 🔴 VALIDATION FORMAT
+  const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
+
+  if (!allowedTypes.includes(file.type)) {
+    alert("❌ Foto sa pa sipòte sou sit la.\nTanpri chwazi JPG, PNG oswa WEBP.");
+    this.value = ""; // reset input
+    return;
+  }
+
   const preview = document.getElementById('preview');
 
   preview.src = URL.createObjectURL(file);
   preview.style.display = "block";
 
 });
-
 
 
 
