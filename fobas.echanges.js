@@ -13,25 +13,40 @@ async function loadItems() {
     box.innerHTML = "";
 
     data.forEach(item => {
-  box.innerHTML += `
-    <div class="card">
 
-      <div class="image-box">
-      <img src="${item.image ? (item.image.startsWith('http') ? item.image : API + item.image) : ''}" alt="image">
-      </div>
+      box.innerHTML += `
+        <div class="card">
 
-      <h3>${item.title || ''}</h3>
-      <p>${item.description || ''}</p>
-      <small>Par: ${item.ownerName || ''}</small>
+          <div class="image-box">
+            <img src="${item.image ? (item.image.startsWith('http') ? item.image : API + item.image) : ''}" alt="image">
+          </div>
 
-    </div>
-  `;
-});
+          <h3>${item.title || ''}</h3>
+          <p>${item.description || ''}</p>
+          <small>Par: ${item.ownerName || ''}</small>
+
+          <!-- 💬 COMMENT BOX -->
+          <div class="comment-box">
+
+            <input id="name-${item._id}" placeholder="Non ou">
+            <input id="msg-${item._id}" placeholder="Poze kestyon...">
+            <button onclick="sendComment('${item._id}')">Voye</button>
+
+            <div id="comments-${item._id}"></div>
+
+          </div>
+
+        </div>
+      `;
+
+      // ✅ SA DWE LA (DEYÒ HTML)
+      loadComments(item._id);
+    });
+
   } catch (err) {
     console.log("Load error:", err);
   }
 }
-
 
 // ============================
 // CREATE ITEM (FIXED)
@@ -94,8 +109,11 @@ async function createItem() {
       return;
     }
 
+    
     alert("Anons pibliye!");
+    resetForm(); // ✅ mete li LA SELMAN
     loadItems();
+    
 
   } catch (err) {
     console.log("Create error:", err);
@@ -126,60 +144,40 @@ document.getElementById('image').addEventListener('change', function () {
 
 
 
-let currentItemId = null;
 
-// ouvri chat
-async function openChat(itemId) {
-  currentItemId = itemId;
-  document.getElementById('chatBox').style.display = "block";
 
-  loadChat();
-}
+async function sendComment(itemId) {
+  const name = document.getElementById(`name-${itemId}`).value;
+  const message = document.getElementById(`msg-${itemId}`).value;
 
-// load messages
-async function loadChat() {
-  const res = await fetch(`${API}/api/chat/${currentItemId}`);
-  const data = await res.json();
+  if (!name || !message) {
+    alert("Ranpli chan yo");
+    return;
+  }
 
-  const box = document.getElementById('chatMessages');
-  box.innerHTML = "";
-
-  data.forEach(c => {
-    box.innerHTML += `
-      <p><b>${c.senderName}:</b> ${c.message}</p>
-    `;
-  });
-}
-
-// send message
-async function sendMessage() {
-  const senderName = document.getElementById('chatName').value;
-  const message = document.getElementById('chatText').value;
-
-  if (!senderName || !message) return alert("Ranpli tout chan yo");
-
-  await fetch(`${API}/api/chat/send`, {
+  await fetch(`${API}/api/comments`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json"
+    },
     body: JSON.stringify({
-      itemId: currentItemId,
-      senderName,
+      itemId,
+      name,
       message
     })
   });
 
-  document.getElementById('chatText').value = "";
-  loadChat();
-}
+  document.getElementById(`msg-${itemId}`).value = "";
 
+  loadComments(itemId);
+}
 
 
 // ============================
 // INIT
 // ============================
-alert("Anons pibliye!");
 loadItems();
-resetForm();
+
 
 // 🔥 VIDE FÒM NAN
 function resetForm() {
