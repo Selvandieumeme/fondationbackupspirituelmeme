@@ -48,6 +48,26 @@ app.use(express.json());
 
 
 
+
+
+
+
+const exchangeSchema = new mongoose.Schema({
+  ownerName: String,
+  title: String,
+  description: String,
+  image: String,
+  createdAt: Date
+});
+
+const Exchange = mongoose.model("Exchange", exchangeSchema);
+
+
+
+
+
+
+
 // 🔥 ensure folder exists (IMPORTANT)
 fs.mkdirSync(
   path.join(__dirname, 'fobas_uploads/exchanges'),
@@ -103,6 +123,7 @@ app.post('/api/upload-image', (req, res) => {
   upload.single('image')(req, res, function (err) {
 
     if (err) {
+      console.error("UPLOAD ERROR:", err);
       return res.status(400).json({
         success: false,
         message: err.message
@@ -128,11 +149,18 @@ app.post('/api/upload-image', (req, res) => {
 
 
 
+
+
+
+
+
 // ============================
 // ROUTE: CREATE EXCHANGE (FINAL)
 // ============================
 app.post('/api/exchanges/create', async (req, res) => {
   try {
+	  console.log("BODY:", req.body);
+      console.log("FILE:", req.file);
 
     // 🔹 NEW SYSTEM: NO USER ID — just name
     const fullName = req.body.fullName;
@@ -171,9 +199,29 @@ app.post('/api/exchanges/create', async (req, res) => {
     return res.status(500).json({
       success: false,
       message: "Server error"
+
     });
   }
 });
+
+
+
+
+
+app.get('/api/items', async (req, res) => {
+  try {
+    const items = await Exchange.find().sort({ createdAt: -1 });
+    return res.json(items);
+  } catch (error) {
+    console.error("ITEMS ERROR:", error);
+    return res.status(500).json([]);
+  }
+});
+
+
+
+
+
 
 
 
