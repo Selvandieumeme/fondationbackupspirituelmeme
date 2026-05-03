@@ -234,9 +234,26 @@ app.post('/api/exchanges/create', async (req, res) => {
 
 app.post('/api/comments', async (req, res) => {
   try {
-    const comment = await Comment.create(req.body);
+
+    const { itemId, name, message } = req.body;
+
+    if (!itemId || !name || !message) {
+      return res.status(400).json({
+        success: false,
+        message: "Done manke"
+      });
+    }
+
+    const comment = await Comment.create({
+      itemId,
+      name,
+      message
+    });
+
     res.json({ success: true, comment });
+
   } catch (err) {
+    console.error("COMMENT ERROR:", err);
     res.status(500).json({ success: false });
   }
 });
