@@ -127,28 +127,55 @@ async function createItem() {
 // ============================
 // IMAGE PREVIEW
 // ============================
-document.getElementById('image').addEventListener('change', function () {
+document.getElementById('image').addEventListener('change', async function () {
 
-  const file = this.files[0];
-
+  let file = this.files[0];
   if (!file) return;
-
-  // 🔴 VALIDATION FORMAT
-  const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
-
-  if (!allowedTypes.includes(file.type)) {
-    alert("❌ Foto sa pa sipòte sou sit la.\nTanpri chwazi JPG, PNG oswa WEBP.");
-    this.value = ""; // reset input
-    return;
-  }
 
   const preview = document.getElementById('preview');
 
+  // 🔴 SI SE HEIC / HEIF → KONVÈTI LI
+  if (file.type === 'image/heic' || file.type === 'image/heif') {
+
+    try {
+
+      const convertedBlob = await heic2any({
+        blob: file,
+        toType: "image/jpeg",
+        quality: 0.8
+      });
+
+      file = new File(
+        [convertedBlob],
+        file.name.replace(/\.(heic|heif)$/i, ".jpg"),
+        { type: "image/jpeg" }
+      );
+
+      console.log("✅ HEIC converted to JPG");
+
+    } catch (err) {
+      alert("❌ Erè pandan konvèsyon imaj la");
+      console.error(err);
+      this.value = "";
+      return;
+    }
+  }
+
+  // 🔵 PREVIEW (ap mache pou JPG/PNG/WEBP + converted HEIC)
   preview.src = URL.createObjectURL(file);
   preview.style.display = "block";
 
+  // 🔥 SA ENPÒTAN: mete file la sou input la pou uploadItem itilize li
+  this.files = createFileList(file);
+
 });
 
+// 🔧 helper pou ranplase FileList (trick browser)
+function createFileList(file) {
+  const dt = new DataTransfer();
+  dt.items.add(file);
+  return dt.files;
+}
 
 
 
