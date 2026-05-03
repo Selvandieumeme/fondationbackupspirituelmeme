@@ -155,21 +155,56 @@ async function sendComment(itemId) {
     return;
   }
 
-  await fetch(`${API}/api/comments`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      itemId,
-      name,
-      message
-    })
-  });
+  const res = await fetch(`${API}/api/comments`, {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json"
+  },
+  body: JSON.stringify({
+    itemId,
+    name,
+    message
+  })
+});
 
-  document.getElementById(`msg-${itemId}`).value = "";
+const data = await res.json();
 
-  loadComments(itemId);
+if (!data.success) {
+  alert("Comment pa voye");
+  return;
+}
+
+document.getElementById(`msg-${itemId}`).value = "";
+
+loadComments(itemId);
+
+
+
+
+
+
+  // ============================
+// LOAD COMMENTS
+// ============================
+async function loadComments(itemId) {
+  try {
+    const res = await fetch(`${API}/api/comments/${itemId}`);
+    const data = await res.json();
+
+    const box = document.getElementById(`comments-${itemId}`);
+    if (!box) return;
+
+    box.innerHTML = "";
+
+    data.forEach(c => {
+      box.innerHTML += `
+        <div><b>${c.name}:</b> ${c.message}</div>
+      `;
+    });
+
+  } catch (err) {
+    console.log("Comment load error:", err);
+  }
 }
 
 
