@@ -103,4 +103,14 @@ async function createItem() {
 // ============================
 // INIT
 // ============================
+alert("Anons pibliye!");
 loadItems();
+resetForm();
+
+// 🔥 VIDE FÒM NAN
+function resetForm() {
+  document.getElementById('fullName').value = "";
+  document.getElementById('title').value = "";
+  document.getElementById('desc').value = "";
+  document.getElementById('image').value = "";
+}
