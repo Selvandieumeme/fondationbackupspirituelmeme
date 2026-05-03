@@ -15,7 +15,7 @@ async function loadItems() {
     data.forEach(item => {
       box.innerHTML += `
         <div class="card">
-          <img src="${API}${item.image}" onerror="this.style.display='none'">
+          <img src="${item.image.startsWith('http') ? item.image : API + item.image}" alt="image">
           <h3>${item.title || ''}</h3>
           <p>${item.description || ''}</p>
           <small>Par: ${item.ownerName || ''}</small>
