@@ -102,7 +102,7 @@ socket.on("ice-candidate", async ({ candidate }) => {
 // ============================
 // 🔑 GENERATE ID + PASSWORD (ORIGINAL)
 // ============================
-document.getElementById("generateBtn").onclick = () => {
+window.onload = () => {
   const id = Math.floor(100000000 + Math.random() * 900000000);
   const pass = Math.random().toString(36).substring(2, 8).toUpperCase();
 
@@ -112,11 +112,7 @@ document.getElementById("generateBtn").onclick = () => {
   currentSession = id;
 
   socket.emit("create-session", { id, pass });
-
-  // 🔥 AUTO START SCREEN SHARE
-  startScreenShare();
 };
-
 // ============================
 // 🔗 CONNECT
 // ============================
