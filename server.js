@@ -351,7 +351,32 @@ io.on("connection", (socket) => {
     }
   });
 
+  // ============================
+  // 🎥 WEBRTC VIDEO / SCREEN SHARE (AJOUT NOUVO)
+  // ============================
+
+  socket.on("offer", (data) => {
+    socket.to(data.session).emit("offer", data);
+  });
+
+  socket.on("answer", (data) => {
+    socket.to(data.session).emit("answer", data);
+  });
+
+  socket.on("ice-candidate", (data) => {
+    socket.to(data.session).emit("ice-candidate", data);
+  });
+
 });
+
+
+
+
+
+
+
+
+
 
 
 
