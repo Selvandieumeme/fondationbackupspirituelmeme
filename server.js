@@ -291,6 +291,71 @@ app.get('/api/comments/:itemId', async (req, res) => {
 
 
 
+
+
+
+
+
+
+
+
+const sessions = {};
+
+io.on("connection", (socket) => {
+
+  // CREATE SESSION
+  socket.on("create-session", ({ id, pass }) => {
+    sessions[id] = {
+      pass,
+      client: socket.id
+    };
+
+    socket.join(id);
+    socket.sessionId = id;
+  });
+
+  // JOIN SESSION
+  socket.on("join-session", ({ id, pass }) => {
+    if (sessions[id] && sessions[id].pass === pass) {
+      socket.join(id);
+      socket.sessionId = id;
+
+      io.to(id).emit("session-started");
+    } else {
+      socket.emit("error", "Accès refusé");
+    }
+  });
+
+  // CHAT
+  socket.on("chat", ({ session, msg }) => {
+    io.to(session).emit("chat", msg);
+  });
+
+  // LEAVE
+  socket.on("leave-session", () => {
+    const id = socket.sessionId;
+
+    if (sessions[id]) {
+      io.to(id).emit("session-ended");
+      delete sessions[id];
+    }
+  });
+
+  // DISCONNECT
+  socket.on("disconnect", () => {
+    const id = socket.sessionId;
+
+    if (sessions[id]) {
+      io.to(id).emit("session-ended");
+      delete sessions[id];
+    }
+  });
+
+});
+
+
+
+
 /**
  * ---------- MONGODB CONNECTION ----------
  */
