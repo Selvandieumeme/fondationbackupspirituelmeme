@@ -303,7 +303,10 @@ const sessions = {};
 
 io.on("connection", (socket) => {
 
-  // CREATE SESSION
+  // ============================
+  // 🔑 SESSION SYSTEM
+  // ============================
+
   socket.on("create-session", ({ id, pass }) => {
     sessions[id] = {
       pass,
@@ -314,7 +317,6 @@ io.on("connection", (socket) => {
     socket.sessionId = id;
   });
 
-  // JOIN SESSION
   socket.on("join-session", ({ id, pass }) => {
     if (sessions[id] && sessions[id].pass === pass) {
       socket.join(id);
@@ -326,12 +328,6 @@ io.on("connection", (socket) => {
     }
   });
 
-  // CHAT
-  socket.on("chat", ({ session, msg }) => {
-    io.to(session).emit("chat", msg);
-  });
-
-  // LEAVE
   socket.on("leave-session", () => {
     const id = socket.sessionId;
 
@@ -341,7 +337,6 @@ io.on("connection", (socket) => {
     }
   });
 
-  // DISCONNECT
   socket.on("disconnect", () => {
     const id = socket.sessionId;
 
@@ -352,7 +347,7 @@ io.on("connection", (socket) => {
   });
 
   // ============================
-  // 🎥 WEBRTC VIDEO / SCREEN SHARE (AJOUT NOUVO)
+  // 🎥 SCREEN SHARE (WEBRTC)
   // ============================
 
   socket.on("offer", (data) => {
@@ -367,13 +362,6 @@ io.on("connection", (socket) => {
     socket.to(data.session).emit("ice-candidate", data);
   });
 
-});
-
-
-
-
-  
-
   // ============================
   // 🧑‍💻 AGENT SYSTEM
   // ============================
@@ -387,7 +375,7 @@ io.on("connection", (socket) => {
   });
 
   // ============================
-  // 🖥️ WEBRTC / CONTROL RELAY
+  // 🖱️ CONTROL SYSTEM
   // ============================
 
   socket.on("mouse-move", (data) => {
@@ -402,26 +390,26 @@ io.on("connection", (socket) => {
     socket.to(data.session).emit("key-press", data);
   });
 
-});
+  // ============================
+  // 📁 FILE SYSTEM
+  // ============================
 
-
-
-
-
-  socket.to(data.session).emit("file-receive", {
-    name: data.name,
-    type: data.type,
-    file: data.file
+  socket.on("file-send", (data) => {
+    socket.to(data.session).emit("file-receive", {
+      name: data.name,
+      type: data.type,
+      file: data.file
+    });
   });
-});
 
-socket.on("file-install", (data) => {
-  socket.to(data.session).emit("file-install", {
-    name: data.name,
-    file: data.file
+  socket.on("file-install", (data) => {
+    socket.to(data.session).emit("file-install", {
+      name: data.name,
+      file: data.file
+    });
   });
-});
 
+});
 
 
 
