@@ -372,6 +372,29 @@ io.on("connection", (socket) => {
 
 
 
+  // ============================
+  // 🖱️ KEYBOARD + MOUSE CONTROL (FOBAS REMOTE)
+  // ============================
+
+  socket.on("mouse-move", (data) => {
+    socket.to(data.session).emit("mouse-move", data);
+  });
+
+  socket.on("mouse-click", (data) => {
+    socket.to(data.session).emit("mouse-click", data);
+  });
+
+  socket.on("key-press", (data) => {
+    socket.to(data.session).emit("key-press", data);
+  });
+
+
+
+
+
+
+
+
 
 
 
