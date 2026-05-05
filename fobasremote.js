@@ -102,17 +102,24 @@ socket.on("ice-candidate", async ({ candidate }) => {
 // ============================
 // 🔑 GENERATE ID + PASSWORD (ORIGINAL)
 // ============================
-window.onload = () => {
+socket.on("connect", () => {
   const id = Math.floor(100000000 + Math.random() * 900000000);
   const pass = Math.random().toString(36).substring(2, 8).toUpperCase();
 
-  document.getElementById("sessionId").innerText = id;
-  document.getElementById("sessionPass").innerText = pass;
+  const idEl = document.getElementById("sessionId");
+  const passEl = document.getElementById("sessionPass");
+
+  if (idEl && passEl) {
+    idEl.innerText = id;
+    passEl.innerText = pass;
+  }
 
   currentSession = id;
 
   socket.emit("create-session", { id, pass });
-};
+});
+
+
 // ============================
 // 🔗 CONNECT
 // ============================
