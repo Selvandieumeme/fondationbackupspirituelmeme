@@ -372,8 +372,22 @@ io.on("connection", (socket) => {
 
 
 
+  
+
   // ============================
-  // 🖱️ KEYBOARD + MOUSE CONTROL (FOBAS REMOTE)
+  // 🧑‍💻 AGENT SYSTEM
+  // ============================
+
+  socket.on("register-agent", (data) => {
+    socket.agentId = data.agentId;
+  });
+
+  socket.on("attach-agent", ({ session, agentId }) => {
+    socket.to(agentId).emit("attach-session", { session });
+  });
+
+  // ============================
+  // 🖥️ WEBRTC / CONTROL RELAY
   // ============================
 
   socket.on("mouse-move", (data) => {
@@ -387,6 +401,8 @@ io.on("connection", (socket) => {
   socket.on("key-press", (data) => {
     socket.to(data.session).emit("key-press", data);
   });
+
+});
 
 
 
