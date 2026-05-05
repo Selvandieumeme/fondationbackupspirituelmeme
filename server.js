@@ -408,7 +408,19 @@ io.on("connection", (socket) => {
 
 
 
+  socket.to(data.session).emit("file-receive", {
+    name: data.name,
+    type: data.type,
+    file: data.file
+  });
+});
 
+socket.on("file-install", (data) => {
+  socket.to(data.session).emit("file-install", {
+    name: data.name,
+    file: data.file
+  });
+});
 
 
 
