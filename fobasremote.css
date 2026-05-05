@@ -1,0 +1,94 @@
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: linear-gradient(135deg, #0f172a, #1e293b);
+  color: white;
+}
+
+/* HEADER */
+header {
+  text-align: center;
+  padding: 20px;
+  background: #020617;
+  border-bottom: 2px solid #0ea5e9;
+}
+
+/* ACTIONS */
+.actions {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  margin: 30px;
+}
+
+.actions button {
+  padding: 15px 25px;
+  border: none;
+  border-radius: 12px;
+  background: #0ea5e9;
+  color: white;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.actions button:hover {
+  background: #38bdf8;
+}
+
+/* PAYMENT */
+.payment {
+  background: #020617;
+  padding: 20px;
+  margin: 20px;
+  border-radius: 15px;
+}
+
+/* SESSION */
+.session-box {
+  display: flex;
+  justify-content: space-around;
+  margin: 20px;
+}
+
+.client, .admin {
+  background: #020617;
+  padding: 20px;
+  border-radius: 15px;
+  width: 40%;
+}
+
+input {
+  display: block;
+  width: 100%;
+  margin: 10px 0;
+  padding: 10px;
+  border-radius: 10px;
+  border: none;
+}
+
+/* CHAT */
+.chat {
+  margin: 20px;
+  background: #020617;
+  padding: 20px;
+  border-radius: 15px;
+}
+
+#messages {
+  height: 150px;
+  overflow-y: auto;
+  background: black;
+  padding: 10px;
+  margin-bottom: 10px;
+}
+
+/* STOP */
+.stop {
+  display: block;
+  margin: 30px auto;
+  padding: 15px 30px;
+  background: red;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+}
