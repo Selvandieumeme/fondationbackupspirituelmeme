@@ -299,9 +299,7 @@ app.get('/api/comments/:itemId', async (req, res) => {
 
 
 
-const sessions = {};
 
-io.on("connection", (socket) => {
 
   // ============================
   // 🔑 SESSION SYSTEM
