@@ -141,6 +141,15 @@ socket.on("chat", (msg) => {
   document.getElementById("messages").appendChild(div);
 });
 
+
+
+function connectAgent(agentId) {
+  socket.emit("attach-agent", {
+    session: currentSession,
+    agentId: agentId
+  });
+}
+
 // ============================
 // ⛔ STOP SESSION
 // ============================
