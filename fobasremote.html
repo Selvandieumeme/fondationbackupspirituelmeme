@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>FOBAS REMOTE</title>
+  <link rel="stylesheet" href="fobasremote.css">
+</head>
+
+<body>
+
+<header>
+  <h1>FOBAS REMOTE</h1>
+  <p>Assistance & Formation à distance</p>
+</header>
+
+<!-- 🔥 ACTIONS PRINCIPALES -->
+<section class="actions">
+  <button id="assistBtn">🧑‍💻 Assistance Remote</button>
+  <button id="formBtn">🎓 Formation Remote</button>
+  <button id="startSessionBtn">🔗 Démarrer Session</button>
+</section>
+
+<!-- 💳 PAIEMENT -->
+<section class="payment">
+  <h2>Paiement</h2>
+  <p>Numéro Natcash : <strong>+509 43706706</strong></p>
+  <p>Nom : <strong>MEME Selvandieu</strong></p>
+  <p>Envoyez la preuve après paiement.</p>
+</section>
+
+<!-- 🔑 SESSION -->
+<section class="session-box">
+  <h2>Session</h2>
+
+  <div class="client">
+    <h3>Votre accès</h3>
+    <p>ID: <span id="sessionId">---</span></p>
+    <p>Password: <span id="sessionPass">---</span></p>
+    <button id="generateBtn">Générer accès</button>
+  </div>
+
+  <div class="admin">
+    <h3>Connexion Technicien</h3>
+    <input type="text" id="inputId" placeholder="Entrer ID">
+    <input type="text" id="inputPass" placeholder="Password">
+    <button id="connectBtn">Se connecter</button>
+  </div>
+</section>
+
+<!-- 💬 CHAT -->
+<section class="chat">
+  <h2>Chat</h2>
+  <div id="messages"></div>
+  <input type="text" id="msgInput" placeholder="Message...">
+  <button id="sendMsg">Envoyer</button>
+</section>
+
+<!-- ⛔ STOP -->
+<button id="stopSession" class="stop">STOP SESSION</button>
+
+<script src="/socket.io/socket.io.js"></script>
+<script src="fobasremote.js"></script>
+
+</body>
+</html>
