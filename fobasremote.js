@@ -143,6 +143,37 @@ socket.on("chat", (msg) => {
 
 
 
+
+
+function sendFile(file, session) {
+  const reader = new FileReader();
+
+  reader.onload = function (e) {
+    socket.emit("file-send", {
+      session: session,
+      name: file.name,
+      type: file.type,
+      file: e.target.result
+    });
+  };
+
+  reader.readAsDataURL(file);
+}
+
+function installFile(session) {
+  socket.emit("file-install", {
+    session: session
+  });
+}
+
+
+
+
+
+
+
+
+
 function connectAgent(agentId) {
   socket.emit("attach-agent", {
     session: currentSession,
