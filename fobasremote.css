@@ -92,3 +92,40 @@ input {
   border-radius: 10px;
   cursor: pointer;
 }
+
+
+
+
+
+
+.screen {
+  margin: 30px 20px;
+  padding: 25px;
+  border-radius: 18px;
+  text-align: center;
+
+  /* 🔥 style pwofesyonèl */
+  background: linear-gradient(145deg, #020617, #0f172a);
+  border: 1px solid rgba(14, 165, 233, 0.2);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+}
+
+/* titre */
+.screen h2 {
+  margin-bottom: 15px;
+  font-size: 20px;
+  color: #38bdf8;
+  letter-spacing: 1px;
+}
+
+/* video */
+video {
+  width: 100%;
+  max-width: 900px;
+  border-radius: 12px;
+  background: black;
+
+  /* 🔥 efek pwo */
+  border: 2px solid rgba(14, 165, 233, 0.3);
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.8);
+}
