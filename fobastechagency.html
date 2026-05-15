@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FOBAS TECH AGENCY</title>
+
+  <link rel="stylesheet" href="fobastechagency.css">
+
+  <link rel="stylesheet"
+  href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+
+<body>
+
+<!-- ================= HEADER ================= -->
+<header class="navbar">
+
+  <div class="logo">
+    <h1>FOBAS TECH</h1>
+  </div>
+
+  <nav>
+    <a href="#accueil">Accueil</a>
+    <a href="#services">Services</a>
+    <a href="#portfolio">Portfolio</a>
+    <a href="#contact">Contact</a>
+  </nav>
+
+  <button class="btn-contact" onclick="scrollToContact()">
+    Demander un devis
+  </button>
+
+</header>
+
+
+<!-- ================= HERO ================= -->
+<section class="hero" id="accueil">
+
+  <div class="overlay">
+
+    <div class="hero-left">
+
+      <h2>
+        FOBAS TECH AGENCY
+      </h2>
+
+      <h1>
+        Création de Sites Web,
+        Applications Web,
+        APIs & Hébergement VPS
+      </h1>
+
+      <p>
+        Nous développons des plateformes modernes,
+        rapides et sécurisées pour entreprises,
+        organisations, écoles, ONG et médias.
+      </p>
+
+      <div class="hero-buttons">
+        <button class="btn-green" onclick="scrollToContact()">
+          Commencer un projet
+        </button>
+
+        <button class="btn-dark">
+          Voir nos services
+        </button>
+      </div>
+
+    </div>
+
+    <div class="hero-right">
+      <img src="LogoFOBAS.jpg" alt="FOBAS TECH">
+    </div>
+
+  </div>
+
+</section>
+
+
+<!-- ================= SERVICES ================= -->
+<section class="services" id="services">
+
+  <h2>Nos Services</h2>
+
+  <div class="services-grid">
+
+    <div class="service-card">
+      <i class="fa-solid fa-code"></i>
+      <h3>Création Site Web</h3>
+      <p>
+        Sites modernes, responsives et professionnels.
+      </p>
+    </div>
+
+    <div class="service-card">
+      <i class="fa-solid fa-laptop-code"></i>
+      <h3>Applications Web</h3>
+      <p>
+        Dashboards, systèmes membres et plateformes dynamiques.
+      </p>
+    </div>
+
+    <div class="service-card">
+      <i class="fa-solid fa-server"></i>
+      <h3>API Backend</h3>
+      <p>
+        Développement Node.js, MongoDB et APIs sécurisées.
+      </p>
+    </div>
+
+    <div class="service-card">
+      <i class="fa-solid fa-cloud"></i>
+      <h3>Hébergement VPS</h3>
+      <p>
+        Déploiement, sécurité et maintenance serveur.
+      </p>
+    </div>
+
+    <div class="service-card">
+      <i class="fa-solid fa-mobile-screen-button"></i>
+      <h3>Applications PWA</h3>
+      <p>
+        Applications installables sur Android et ordinateur.
+      </p>
+    </div>
+
+    <div class="service-card">
+      <i class="fa-solid fa-shield-halved"></i>
+      <h3>Maintenance & Sécurité</h3>
+      <p>
+        Sauvegardes, optimisation et protection systèmes.
+      </p>
+    </div>
+
+  </div>
+
+</section>
+
+
+<!-- ================= PORTFOLIO ================= -->
+<section class="portfolio" id="portfolio">
+
+  <h2>Nos Réalisations</h2>
+
+  <div class="portfolio-grid">
+
+    <div class="portfolio-card">
+      <h3>FOBAS TECH SYSTEMS</h3>
+      <p>
+        Plateformes professionnelles avec dashboards,
+        systèmes membres, APIs et notifications temps réel.
+      </p>
+    </div>
+
+    <div class="portfolio-card">
+      <h3>FOBAS DIGITAL SYSTEMS</h3>
+      <p>
+        Infrastructure fintech moderne avec gestion utilisateurs.
+      </p>
+    </div>
+
+    <div class="portfolio-card">
+      <h3>Applications VPS</h3>
+      <p>
+        Déploiement sécurisé de plateformes Node.js & MongoDB.
+      </p>
+    </div>
+
+  </div>
+
+</section>
+
+
+<!-- ================= CONTACT ================= -->
+<section class="contact" id="contact">
+
+  <h2>Contactez-nous</h2>
+
+  <form id="contactForm">
+
+    <input type="text" id="nom" placeholder="Nom" required>
+
+    <input type="email" id="email" placeholder="Email" required>
+
+    <input type="text" id="service" placeholder="Service recherché" required>
+
+    <textarea id="message" placeholder="Décrivez votre projet" required></textarea>
+
+    <button type="submit">
+      Envoyer la demande
+    </button>
+
+  </form>
+
+</section>
+
+
+<!-- ================= FOOTER ================= -->
+<footer>
+
+  <h3>FOBAS TECH AGENCY</h3>
+
+  <p>
+    Développement Web • Applications • APIs • VPS
+  </p>
+
+  <div class="socials">
+    <i class="fa-brands fa-facebook"></i>
+    <i class="fa-brands fa-youtube"></i>
+    <i class="fa-brands fa-whatsapp"></i>
+  </div>
+
+  <p class="copyright">
+    © 2026 FOBAS TECH AGENCY
+  </p>
+
+</footer>
+
+<script src="fobastechagency.js"></script>
+
+</body>
+</html>
