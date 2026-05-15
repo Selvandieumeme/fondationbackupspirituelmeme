@@ -1,0 +1,312 @@
+/* ================= GLOBAL ================= */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: Arial, sans-serif;
+}
+
+body {
+  background: #0d0d0d;
+  color: white;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+
+/* ================= NAVBAR ================= */
+.navbar {
+  width: 100%;
+  background: #000;
+  padding: 18px 40px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
+.logo h1 {
+  color: #00ff66;
+  font-size: 32px;
+}
+
+nav a {
+  color: white;
+  text-decoration: none;
+  margin: 0 15px;
+  font-weight: bold;
+  transition: 0.3s;
+}
+
+nav a:hover {
+  color: #00ff66;
+}
+
+.btn-contact {
+  background: #00cc44;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 8px;
+  color: black;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+
+/* ================= HERO ================= */
+.hero {
+  min-height: 100vh;
+  background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 50px;
+}
+
+.overlay {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 40px;
+}
+
+.hero-left {
+  flex: 1;
+}
+
+.hero-left h2 {
+  color: #00ff66;
+  margin-bottom: 15px;
+}
+
+.hero-left h1 {
+  font-size: 58px;
+  line-height: 1.2;
+  margin-bottom: 20px;
+}
+
+.hero-left p {
+  font-size: 22px;
+  color: #cccccc;
+  margin-bottom: 25px;
+}
+
+.hero-buttons {
+  display: flex;
+  gap: 20px;
+}
+
+.btn-green,
+.btn-dark {
+  padding: 15px 25px;
+  border-radius: 10px;
+  border: none;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.btn-green {
+  background: #00ff66;
+  color: black;
+}
+
+.btn-dark {
+  background: #222;
+  color: white;
+}
+
+.hero-right {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+}
+
+.hero-right img {
+  width: 350px;
+  border-radius: 20px;
+  box-shadow: 0 0 25px #00ff66;
+}
+
+
+/* ================= SERVICES ================= */
+.services {
+  padding: 80px 40px;
+  background: #111;
+}
+
+.services h2 {
+  text-align: center;
+  font-size: 42px;
+  margin-bottom: 50px;
+}
+
+.services-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 25px;
+}
+
+.service-card {
+  background: #1b1b1b;
+  padding: 30px;
+  border-radius: 15px;
+  text-align: center;
+  transition: 0.3s;
+}
+
+.service-card:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 0 20px #00ff66;
+}
+
+.service-card i {
+  font-size: 50px;
+  color: #00ff66;
+  margin-bottom: 20px;
+}
+
+.service-card h3 {
+  margin-bottom: 15px;
+}
+
+
+/* ================= PORTFOLIO ================= */
+.portfolio {
+  padding: 80px 40px;
+}
+
+.portfolio h2 {
+  text-align: center;
+  font-size: 42px;
+  margin-bottom: 50px;
+}
+
+.portfolio-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 25px;
+}
+
+.portfolio-card {
+  background: #1c1c1c;
+  padding: 30px;
+  border-radius: 15px;
+  border: 1px solid #333;
+}
+
+.portfolio-card h3 {
+  color: #00ff66;
+  margin-bottom: 15px;
+}
+
+
+/* ================= CONTACT ================= */
+.contact {
+  padding: 80px 40px;
+  background: #111;
+}
+
+.contact h2 {
+  text-align: center;
+  margin-bottom: 40px;
+  font-size: 42px;
+}
+
+#contactForm {
+  max-width: 700px;
+  margin: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+#contactForm input,
+#contactForm textarea {
+  padding: 15px;
+  border-radius: 10px;
+  border: none;
+  font-size: 18px;
+}
+
+#contactForm textarea {
+  min-height: 150px;
+}
+
+#contactForm button {
+  background: #00ff66;
+  border: none;
+  padding: 15px;
+  border-radius: 10px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+
+/* ================= FOOTER ================= */
+footer {
+  background: black;
+  padding: 40px;
+  text-align: center;
+}
+
+footer h3 {
+  color: #00ff66;
+  margin-bottom: 15px;
+}
+
+.socials {
+  margin: 20px 0;
+}
+
+.socials i {
+  margin: 0 10px;
+  font-size: 28px;
+  color: #00ff66;
+}
+
+.copyright {
+  color: #999;
+}
+
+
+/* ================= RESPONSIVE ================= */
+@media(max-width: 900px) {
+
+  .navbar {
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  nav {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .overlay {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .hero-left h1 {
+    font-size: 38px;
+  }
+
+  .hero-left p {
+    font-size: 18px;
+  }
+
+  .hero-buttons {
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .hero-right img {
+    width: 250px;
+  }
+}
