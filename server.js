@@ -332,8 +332,7 @@ app.post("/contact", async (req, res) => {
             service,
             message
         } = req.body;
-
-
+		
         // =============================
         // VALIDATION
         // =============================
@@ -353,6 +352,22 @@ app.post("/contact", async (req, res) => {
         console.log("📩 Nouveau contact FOBAS AGENCY :", req.body);
 
 
+
+// =============================
+// SAVE CONTACT MONGODB
+// =============================
+const nouveauContact = new Contact({
+
+    nom,
+    email,
+    telephone: "N/A",
+    service,
+    message
+});
+
+await nouveauContact.save();
+
+		
         // =============================
         // EMAIL NOTIFICATION
         // =============================
