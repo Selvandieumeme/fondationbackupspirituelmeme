@@ -7,8 +7,8 @@
 }
 
 body {
-  background: #0d0d0d;
-  color: white;
+  background: #0b1633;
+  color: #ffffff;
 }
 
 html {
@@ -19,7 +19,7 @@ html {
 /* ================= NAVBAR ================= */
 .navbar {
   width: 100%;
-  background: #000;
+  background: #08101f;
   padding: 18px 40px;
   display: flex;
   justify-content: space-between;
@@ -27,15 +27,17 @@ html {
   position: sticky;
   top: 0;
   z-index: 1000;
+  border-bottom: 2px solid #ffd000;
 }
 
 .logo h1 {
-  color: #00ff66;
+  color: #ffd000;
   font-size: 32px;
+  letter-spacing: 1px;
 }
 
 nav a {
-  color: white;
+  color: #ffffff;
   text-decoration: none;
   margin: 0 15px;
   font-weight: bold;
@@ -43,24 +45,30 @@ nav a {
 }
 
 nav a:hover {
-  color: #00ff66;
+  color: #ffd000;
 }
 
 .btn-contact {
-  background: #00cc44;
+  background: #ffd000;
   border: none;
   padding: 12px 20px;
   border-radius: 8px;
-  color: black;
+  color: #0b1633;
   font-weight: bold;
   cursor: pointer;
+  transition: 0.3s;
+}
+
+.btn-contact:hover {
+  background: #ffffff;
 }
 
 
 /* ================= HERO ================= */
 .hero {
   min-height: 100vh;
-  background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7));
+  background:
+  linear-gradient(rgba(7,20,48,0.85), rgba(7,20,48,0.88));
   display: flex;
   align-items: center;
   justify-content: center;
@@ -80,20 +88,23 @@ nav a:hover {
 }
 
 .hero-left h2 {
-  color: #00ff66;
+  color: #ffd000;
   margin-bottom: 15px;
+  font-size: 28px;
 }
 
 .hero-left h1 {
   font-size: 58px;
   line-height: 1.2;
   margin-bottom: 20px;
+  color: #ffffff;
 }
 
 .hero-left p {
   font-size: 22px;
-  color: #cccccc;
+  color: #d9d9d9;
   margin-bottom: 25px;
+  line-height: 1.7;
 }
 
 .hero-buttons {
@@ -108,16 +119,25 @@ nav a:hover {
   border: none;
   font-weight: bold;
   cursor: pointer;
+  transition: 0.3s;
 }
 
 .btn-green {
-  background: #00ff66;
-  color: black;
+  background: #ffd000;
+  color: #0b1633;
+}
+
+.btn-green:hover {
+  background: #ffffff;
 }
 
 .btn-dark {
-  background: #222;
+  background: #16356f;
   color: white;
+}
+
+.btn-dark:hover {
+  background: #224b96;
 }
 
 .hero-right {
@@ -129,20 +149,22 @@ nav a:hover {
 .hero-right img {
   width: 350px;
   border-radius: 20px;
-  box-shadow: 0 0 25px #00ff66;
+  box-shadow: 0 0 30px rgba(255, 208, 0, 0.6);
+  border: 3px solid #ffd000;
 }
 
 
 /* ================= SERVICES ================= */
 .services {
   padding: 80px 40px;
-  background: #111;
+  background: #102347;
 }
 
 .services h2 {
   text-align: center;
   font-size: 42px;
   margin-bottom: 50px;
+  color: #ffd000;
 }
 
 .services-grid {
@@ -152,38 +174,48 @@ nav a:hover {
 }
 
 .service-card {
-  background: #1b1b1b;
+  background: #16356f;
   padding: 30px;
   border-radius: 15px;
   text-align: center;
   transition: 0.3s;
+  border: 2px solid transparent;
 }
 
 .service-card:hover {
   transform: translateY(-10px);
-  box-shadow: 0 0 20px #00ff66;
+  box-shadow: 0 0 25px rgba(255, 208, 0, 0.5);
+  border-color: #ffd000;
 }
 
 .service-card i {
   font-size: 50px;
-  color: #00ff66;
+  color: #ffd000;
   margin-bottom: 20px;
 }
 
 .service-card h3 {
   margin-bottom: 15px;
+  color: #ffffff;
+}
+
+.service-card p {
+  color: #dcdcdc;
+  line-height: 1.6;
 }
 
 
 /* ================= PORTFOLIO ================= */
 .portfolio {
   padding: 80px 40px;
+  background: #0b1633;
 }
 
 .portfolio h2 {
   text-align: center;
   font-size: 42px;
   margin-bottom: 50px;
+  color: #ffd000;
 }
 
 .portfolio-grid {
@@ -193,28 +225,40 @@ nav a:hover {
 }
 
 .portfolio-card {
-  background: #1c1c1c;
+  background: #16356f;
   padding: 30px;
   border-radius: 15px;
-  border: 1px solid #333;
+  border: 1px solid #2e58a8;
+  transition: 0.3s;
+}
+
+.portfolio-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 0 20px rgba(255, 208, 0, 0.4);
 }
 
 .portfolio-card h3 {
-  color: #00ff66;
+  color: #ffd000;
   margin-bottom: 15px;
+}
+
+.portfolio-card p {
+  color: #e8e8e8;
+  line-height: 1.6;
 }
 
 
 /* ================= CONTACT ================= */
 .contact {
   padding: 80px 40px;
-  background: #111;
+  background: #102347;
 }
 
 .contact h2 {
   text-align: center;
   margin-bottom: 40px;
   font-size: 42px;
+  color: #ffd000;
 }
 
 #contactForm {
@@ -229,8 +273,16 @@ nav a:hover {
 #contactForm textarea {
   padding: 15px;
   border-radius: 10px;
-  border: none;
+  border: 2px solid transparent;
   font-size: 18px;
+  background: #ffffff;
+  color: #0b1633;
+}
+
+#contactForm input:focus,
+#contactForm textarea:focus {
+  outline: none;
+  border-color: #ffd000;
 }
 
 #contactForm textarea {
@@ -238,25 +290,36 @@ nav a:hover {
 }
 
 #contactForm button {
-  background: #00ff66;
+  background: #ffd000;
   border: none;
   padding: 15px;
   border-radius: 10px;
   font-weight: bold;
   cursor: pointer;
+  color: #0b1633;
+  transition: 0.3s;
+}
+
+#contactForm button:hover {
+  background: #ffffff;
 }
 
 
 /* ================= FOOTER ================= */
 footer {
-  background: black;
+  background: #08101f;
   padding: 40px;
   text-align: center;
+  border-top: 2px solid #ffd000;
 }
 
 footer h3 {
-  color: #00ff66;
+  color: #ffd000;
   margin-bottom: 15px;
+}
+
+footer p {
+  color: #d8d8d8;
 }
 
 .socials {
@@ -266,11 +329,17 @@ footer h3 {
 .socials i {
   margin: 0 10px;
   font-size: 28px;
-  color: #00ff66;
+  color: #ffd000;
+  transition: 0.3s;
+}
+
+.socials i:hover {
+  color: #ffffff;
+  transform: scale(1.1);
 }
 
 .copyright {
-  color: #999;
+  color: #cccccc;
 }
 
 
@@ -308,5 +377,17 @@ footer h3 {
 
   .hero-right img {
     width: 250px;
+  }
+
+  .services,
+  .portfolio,
+  .contact {
+    padding: 60px 20px;
+  }
+
+  .services h2,
+  .portfolio h2,
+  .contact h2 {
+    font-size: 32px;
   }
 }
