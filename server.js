@@ -47,7 +47,7 @@ app.use(express.json());
 // =====================================
 // 📤 MULTER STORAGE
 // =====================================
-const storage = multer.diskStorage({
+const mediaStorage = multer.diskStorage({
 
     destination: function(req, file, cb) {
 
@@ -78,7 +78,9 @@ const storage = multer.diskStorage({
     }
 });
 
-const upload = multer({ storage });
+const mediaUpload = multer({
+  storage: mediaStorage
+});
 
 
 
@@ -558,7 +560,7 @@ app.post(
 
 "/upload-media",
 
-upload.fields([
+mediaUpload.fields([
 
   { name: "media", maxCount: 1 },
 
