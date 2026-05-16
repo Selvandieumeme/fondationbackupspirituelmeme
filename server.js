@@ -705,6 +705,216 @@ async(req,res)=>{
 
 
 
+
+
+// ==========================
+// FOBAS DIGITAL AGENTS - SAFE ADD-ON MODULE
+// DO NOT MODIFY EXISTING CODE
+// ONLY APPEND THIS BLOCK
+// ==========================
+
+const bcrypt = require("bcryptjs");
+
+
+// ==========================
+// AGENTS COLLECTION (SAFE ACCESS)
+// ==========================
+const Agents = mongoose.connection.collection("agents");
+const Businesses = mongoose.connection.collection("businesses");
+const Commissions = mongoose.connection.collection("commissions");
+
+
+// ==========================
+// AGENT REGISTER (NEW SAFE ROUTE)
+// ==========================
+app.post("/agents/register", async (req, res) => {
+  try {
+
+    const { name, email, password } = req.body;
+
+    const exist = await Agents.findOne({ email });
+    if (exist) return res.json({ message: "Agent already exists" });
+
+    const hashedPassword = await bcrypt.hash(password, 12);
+
+    const referralCode =
+      "AGT_" + Math.random().toString(36).substring(2, 8).toUpperCase();
+
+    await Agents.insertOne({
+      name,
+      email,
+      password: hashedPassword,
+      referralCode,
+      level: "Bronze",
+      createdAt: new Date()
+    });
+
+    res.json({
+      message: "Agent created",
+      referralCode
+    });
+
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+
+// ==========================
+// AGENT LOGIN (SAFE ROUTE)
+// ==========================
+app.post("/agents/login", async (req, res) => {
+  try {
+
+    const { email, password } = req.body;
+
+    const agent = await Agents.findOne({ email });
+    if (!agent) return res.json({ message: "Agent not found" });
+
+    const match = await bcrypt.compare(password, agent.password);
+    if (!match) return res.json({ message: "Wrong password" });
+
+    res.json({
+      message: "Login success",
+      email: agent.email,
+      referralCode: agent.referralCode
+    });
+
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+
+// ==========================
+// AGENT DASHBOARD (API FOR JS)
+// ==========================
+app.get("/agents/dashboard", async (req, res) => {
+  try {
+
+    const email = req.query.email;
+
+    const agent = await Agents.findOne({ email });
+    if (!agent) return res.json({ message: "Agent not found" });
+
+    const businesses = await Businesses.find({
+      referredBy: agent.referralCode
+    }).toArray();
+
+    const commissions = await Commissions.find({
+      agentCode: agent.referralCode
+    }).toArray();
+
+    const totalCommission = commissions.reduce(
+      (sum, c) => sum + (c.amount || 0),
+      0
+    );
+
+    // SIMPLE PROGRESS LOGIC
+    const progress = Math.min(businesses.length * 20, 100);
+
+    res.json({
+      referralLink: `https://fondationbackupspirituel.com/register?ref=${agent.referralCode}`,
+      totalUsers: 0, // optional (safe fallback)
+      totalBusinesses: businesses.length,
+      totalCommission,
+      level: agent.level,
+      progress
+    });
+
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+
+// ==========================
+// BUSINESS REGISTER (WITH REFERRAL)
+// ==========================
+app.post("/business/register", async (req, res) => {
+  try {
+
+    const { name, email, ref } = req.body;
+
+    await Businesses.insertOne({
+      name,
+      email,
+      referredBy: ref || null,
+      createdAt: new Date()
+    });
+
+    // COMMISSION SYSTEM (SIMPLE)
+    if (ref) {
+      await Commissions.insertOne({
+        agentCode: ref,
+        amount: 1000,
+        type: "business_signup",
+        createdAt: new Date()
+      });
+    }
+
+    res.json({ message: "Business registered" });
+
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+
+// ==========================
+// WEBHOOK (FIXED & CLEAN)
+// ==========================
+app.post("/webhook", express.json(), async (req, res) => {
+  try {
+
+    const { event, data } = req.body;
+
+    if (event === "commission.added") {
+      await Commissions.insertOne({
+        agentCode: data.agentCode,
+        amount: data.amount,
+        type: "webhook",
+        createdAt: new Date()
+      });
+    }
+
+    res.json({ success: true });
+
+  } catch (err) {
+    res.status(500).json({ error: "Webhook error" });
+  }
+});
+
+
+// ==========================
+// DEBUG
+// ==========================
+console.log("FOBAS DIGITAL AGENTS MODULE LOADED SUCCESSFULLY");
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 /**
  * ---------- MONGODB CONNECTION ----------
  */
