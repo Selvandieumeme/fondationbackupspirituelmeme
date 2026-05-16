@@ -44,7 +44,41 @@ app.use(express.json());
 
 
 
+// =====================================
+// 📤 MULTER STORAGE
+// =====================================
+const storage = multer.diskStorage({
 
+    destination: function(req, file, cb) {
+
+        if(file.fieldname === "thumbnail") {
+
+            cb(
+              null,
+              "fobas_uploads/thumbnails/"
+            );
+
+        } else {
+
+            cb(
+              null,
+              "fobas_uploads/media/"
+            );
+        }
+    },
+
+    filename: function(req, file, cb) {
+
+        cb(
+          null,
+          Date.now() +
+          "-" +
+          file.originalname
+        );
+    }
+});
+
+const upload = multer({ storage });
 
 
 
@@ -77,6 +111,72 @@ const Comment = mongoose.model("Comment", commentSchema);
 
 
 
+
+
+// =====================================
+// 🎬 FOBAS MEDIA SCHEMA
+// =====================================
+const mediaSchema = new mongoose.Schema({
+
+    title: String,
+
+    description: String,
+
+    type: String,
+
+    mediaUrl: String,
+
+    thumbnail: String,
+
+    premium: {
+        type: Boolean,
+        default: false
+    },
+
+    dateCreated: {
+        type: Date,
+        default: Date.now
+    }
+});
+
+const Media =
+mongoose.model("media", mediaSchema);
+
+
+
+
+
+// =====================================
+// 📩 MEDIA CONTACT SCHEMA
+// =====================================
+const mediaContactSchema =
+new mongoose.Schema({
+
+    nom: String,
+
+    email: String,
+
+    message: String,
+
+    dateCreated: {
+        type: Date,
+        default: Date.now
+    }
+});
+
+const MediaContact =
+mongoose.model(
+  "mediacontacts",
+  mediaContactSchema
+);
+
+
+
+
+
+
+
+
 // 🔥 ensure folder exists (IMPORTANT)
 fs.mkdirSync(
   path.join(__dirname, 'fobas_uploads/exchanges'),
@@ -88,6 +188,28 @@ fs.mkdirSync(
 app.use('/fobas_uploads', express.static(
   path.join(__dirname, 'fobas_uploads')
 ));
+
+
+
+// =====================================
+// 📁 CREATE MEDIA FOLDERS
+// =====================================
+fs.mkdirSync(
+  path.join(__dirname, "fobas_uploads/media"),
+  { recursive: true }
+);
+
+fs.mkdirSync(
+  path.join(__dirname, "fobas_uploads/thumbnails"),
+  { recursive: true }
+);
+
+
+
+
+
+
+
 
 
 // ============================
@@ -116,6 +238,13 @@ const upload = multer({
     cb(null, true);
   }
 });
+
+
+
+
+
+
+
 
 
 
@@ -406,6 +535,159 @@ await nouveauContact.save();
 });
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// =====================================
+// 📤 UPLOAD MEDIA
+// =====================================
+app.post(
+
+"/upload-media",
+
+upload.fields([
+
+  { name: "media", maxCount: 1 },
+
+  { name: "thumbnail", maxCount: 1 }
+
+]),
+
+async(req,res)=>{
+
+    try {
+
+        const mediaFile =
+        req.files.media[0];
+
+        const thumbnailFile =
+        req.files.thumbnail[0];
+
+        const nouveauMedia =
+        new Media({
+
+            title:
+            req.body.title,
+
+            description:
+            req.body.description,
+
+            type:
+            req.body.type,
+
+            mediaUrl:
+            "/fobas_uploads/media/" +
+            mediaFile.filename,
+
+            thumbnail:
+            "/fobas_uploads/thumbnails/" +
+            thumbnailFile.filename,
+
+            premium:
+            req.body.premium === "true"
+        });
+
+        await nouveauMedia.save();
+
+        res.status(200).json({
+
+            success: true,
+
+            message:
+            "Media uploaded successfully"
+        });
+
+    } catch(error){
+
+        console.error(error);
+
+        res.status(500).json({
+
+            success: false,
+
+            message:
+            "Erreur upload media"
+        });
+    }
+});
+
+
+
+
+
+// =====================================
+// 📺 GET ALL MEDIAS
+// =====================================
+app.get("/media",
+async(req,res)=>{
+
+    try {
+
+        const medias =
+        await Media.find()
+        .sort({ dateCreated: -1 });
+
+        res.json(medias);
+
+    } catch(error){
+
+        console.error(error);
+
+        res.status(500).json({
+
+            success: false
+        });
+    }
+});
+
+
+
+
+
+// =====================================
+// 📩 CONTACT FOBAS MEDIA
+// =====================================
+app.post("/media-contact",
+async(req,res)=>{
+
+    try {
+
+        const nouveau =
+        new MediaContact(req.body);
+
+        await nouveau.save();
+
+        res.status(200).json({
+
+            success: true,
+
+            message:
+            "Message envoyé"
+        });
+
+    } catch(error){
+
+        console.error(error);
+
+        res.status(500).json({
+
+            success: false
+        });
+    }
+});
 
 
 
