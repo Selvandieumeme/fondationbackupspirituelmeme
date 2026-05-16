@@ -16,6 +16,7 @@
 
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 </head>
+
 <body>
 
   <!-- LOADER -->
@@ -39,7 +40,7 @@
       <a href="#contact">Contact</a>
     </nav>
 
-    <button class="btn-primary">Commencer</button>
+    <button class="btn-primary" id="btnCommencer">Commencer</button>
 
     <div class="menu-toggle" id="menu-toggle">
       <i class="fa-solid fa-bars"></i>
@@ -68,38 +69,18 @@
       </p>
 
       <div class="hero-buttons">
-        <button class="btn-primary large-btn">
+
+        <button class="btn-primary large-btn" id="btnBecomeAgent">
           Devenir Agent
         </button>
 
-        <button class="btn-secondary large-btn">
+        <button class="btn-secondary large-btn" id="btnCreateBusiness">
           Créer un Business
         </button>
-      </div>
-
-      <div class="stats-grid">
-
-        <div class="stat-card">
-          <h2>50K+</h2>
-          <p>Utilisateurs</p>
-        </div>
-
-        <div class="stat-card">
-          <h2>10K+</h2>
-          <p>Entrepreneurs</p>
-        </div>
-
-        <div class="stat-card">
-          <h2>24/7</h2>
-          <p>Opportunités</p>
-        </div>
 
       </div>
 
-    </div>
-
-    <div class="hero-right">
-
+      <!-- DASHBOARD DYNAMIC -->
       <div class="dashboard-card">
 
         <div class="dashboard-top">
@@ -109,23 +90,53 @@
 
         <div class="income-box">
           <p>Revenus du mois</p>
-          <h1>25,000 HTG</h1>
+          <h1 id="agentRevenue">0 HTG</h1>
         </div>
 
         <div class="agent-level">
           <p>Niveau Agent</p>
-          <h2>GOLD AGENT</h2>
+          <h2 id="agentLevel">Bronze</h2>
         </div>
 
         <div class="progress-section">
           <div class="progress-text">
             <span>Progression</span>
-            <span>85%</span>
+            <span id="agentProgress">0%</span>
           </div>
 
           <div class="progress-bar">
-            <div class="progress-fill"></div>
+            <div class="progress-fill" id="progressFill"></div>
           </div>
+        </div>
+
+        <!-- REFERRAL SYSTEM -->
+        <div class="referral-box">
+          <h4>Votre Lien d’Affiliation</h4>
+          <input type="text" id="referralLink" readonly />
+          <button onclick="copyReferral()">Copier</button>
+        </div>
+
+      </div>
+
+    </div>
+
+    <div class="hero-right">
+
+      <div class="stats-grid">
+
+        <div class="stat-card">
+          <h2 id="totalUsers">0</h2>
+          <p>Utilisateurs</p>
+        </div>
+
+        <div class="stat-card">
+          <h2 id="totalBusinesses">0</h2>
+          <p>Entrepreneurs</p>
+        </div>
+
+        <div class="stat-card">
+          <h2>24/7</h2>
+          <p>Opportunités</p>
         </div>
 
       </div>
@@ -147,33 +158,21 @@
       <div class="feature-card">
         <i class="fa-solid fa-money-bill-trend-up"></i>
         <h3>Revenus Digitaux</h3>
-        <p>
-          Gagnez des commissions grâce à vos activités digitales.
-        </p>
       </div>
 
       <div class="feature-card">
         <i class="fa-solid fa-store"></i>
         <h3>Promotion Business</h3>
-        <p>
-          Donnez plus de visibilité aux entreprises locales.
-        </p>
       </div>
 
       <div class="feature-card">
         <i class="fa-solid fa-mobile-screen-button"></i>
         <h3>100% Mobile</h3>
-        <p>
-          Travaillez directement depuis votre smartphone Android.
-        </p>
       </div>
 
       <div class="feature-card">
         <i class="fa-solid fa-users"></i>
         <h3>Réseau National</h3>
-        <p>
-          Construisez votre propre réseau digital à travers Haïti.
-        </p>
       </div>
 
     </div>
@@ -185,29 +184,24 @@
 
     <div class="section-title">
       <h2>Programme Digital Agents</h2>
-      <p>Construisez votre empire digital étape par étape.</p>
     </div>
 
     <div class="agents-grid">
 
       <div class="agent-box bronze">
-        <h3>Bronze Agent</h3>
-        <p>Débutant Digital</p>
+        <h3>Bronze</h3>
       </div>
 
       <div class="agent-box silver">
-        <h3>Silver Agent</h3>
-        <p>Agent Intermédiaire</p>
+        <h3>Silver</h3>
       </div>
 
       <div class="agent-box gold">
-        <h3>Gold Agent</h3>
-        <p>Agent Professionnel</p>
+        <h3>Gold</h3>
       </div>
 
       <div class="agent-box elite">
-        <h3>Elite Agent</h3>
-        <p>Leader Digital</p>
+        <h3>Elite</h3>
       </div>
 
     </div>
@@ -220,33 +214,18 @@
     <div class="business-content">
 
       <div class="business-left">
-        <h2>
-          Développez votre business grâce au digital.
-        </h2>
-
-        <p>
-          Faites connaître vos produits, services et activités
-          partout en Haïti grâce à notre réseau intelligent.
-        </p>
-
-        <ul>
-          <li>✔ Promotion Digitale</li>
-          <li>✔ Visibilité Nationale</li>
-          <li>✔ Plus de Clients</li>
-          <li>✔ Réseau de Digital Agents</li>
-        </ul>
-
+        <h2>Développez votre business grâce au digital.</h2>
       </div>
 
       <div class="business-right">
+
         <div class="business-card">
           <h3>Business Premium</h3>
-          <p>Boostez votre entreprise maintenant.</p>
-
-          <button class="btn-primary">
+          <button class="btn-primary" id="btnJoinBusiness">
             Rejoindre
           </button>
         </div>
+
       </div>
 
     </div>
@@ -256,15 +235,9 @@
   <!-- CTA -->
   <section class="cta-section">
 
-    <h2>
-      Rejoignez la Révolution Digitale Haïtienne
-    </h2>
+    <h2>Rejoignez la Révolution Digitale Haïtienne</h2>
 
-    <p>
-      Construisez votre avenir avec FOBAS DIGITAL AGENTS.
-    </p>
-
-    <button class="btn-secondary cta-btn">
+    <button class="btn-secondary" id="btnCreateAccount">
       Créer un Compte
     </button>
 
@@ -277,31 +250,12 @@
 
       <div>
         <h3>FOBAS DIGITAL AGENTS</h3>
-        <p>
-          Nouvelle Génération de Réseau Digital Haïtien.
-        </p>
-      </div>
-
-      <div>
-        <h4>Navigation</h4>
-        <a href="#">Accueil</a>
-        <a href="#">Agents</a>
-        <a href="#">Business</a>
-      </div>
-
-      <div>
-        <h4>Suivez-nous</h4>
-        <div class="social-icons">
-          <i class="fa-brands fa-facebook"></i>
-          <i class="fa-brands fa-whatsapp"></i>
-          <i class="fa-brands fa-youtube"></i>
-        </div>
       </div>
 
     </div>
 
     <div class="copyright">
-      © 2026 FOBAS DIGITAL AGENTS | Tous droits réservés.
+      © 2026 FOBAS DIGITAL AGENTS
     </div>
 
   </footer>
