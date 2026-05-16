@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>FOBAS Media</title>
+
+  <link rel="stylesheet" href="fobasmedia.css">
+
+  <link rel="stylesheet"
+  href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+
+<body>
+
+<!-- ================= NAVBAR ================= -->
+<header class="navbar">
+
+  <div class="logo">
+    <h1>FOBAS MEDIA</h1>
+  </div>
+
+  <nav>
+    <a href="#live">Live</a>
+    <a href="#podcasts">Podcasts</a>
+    <a href="#videos">Vidéos</a>
+    <a href="#premium">Premium</a>
+    <a href="#contact">Contact</a>
+  </nav>
+
+</header>
+
+
+<!-- ================= HERO ================= -->
+<section class="hero">
+
+  <div class="overlay">
+
+    <div class="hero-left">
+
+      <h2>PLATEFORME MEDIA DIGITALE</h2>
+
+      <h1>
+        Radios Live<br>
+        Podcasts<br>
+        Débats & Streaming
+      </h1>
+
+      <p>
+        Découvrez les contenus médias FOBAS :
+        radios, débats, podcasts et émissions exclusives.
+      </p>
+
+      <button onclick="scrollToVideos()" class="btn-primary">
+        Explorer les contenus
+      </button>
+
+    </div>
+
+    <div class="hero-right">
+      <i class="fa-solid fa-radio"></i>
+    </div>
+
+  </div>
+
+</section>
+
+
+<!-- ================= LIVE RADIOS ================= -->
+<section class="section" id="live">
+
+  <h2>Radios Live</h2>
+
+  <div class="media-grid" id="radioContainer">
+
+  </div>
+
+</section>
+
+
+<!-- ================= PODCASTS ================= -->
+<section class="section" id="podcasts">
+
+  <h2>Podcasts</h2>
+
+  <div class="media-grid" id="podcastContainer">
+
+  </div>
+
+</section>
+
+
+<!-- ================= VIDEOS ================= -->
+<section class="section" id="videos">
+
+  <h2>Émissions Vidéos</h2>
+
+  <div class="media-grid" id="videoContainer">
+
+  </div>
+
+</section>
+
+
+<!-- ================= PREMIUM ================= -->
+<section class="premium-section" id="premium">
+
+  <h2>FOBAS PREMIUM</h2>
+
+  <p>
+    Accédez à des émissions exclusives,
+    débats privés et archives premium.
+  </p>
+
+  <button class="premium-btn">
+    Devenir Premium
+  </button>
+
+</section>
+
+
+<!-- ================= CONTACT ================= -->
+<section class="contact-section" id="contact">
+
+  <h2>Contact FOBAS Media</h2>
+
+  <form id="contactForm">
+
+    <input type="text" id="nom"
+    placeholder="Votre nom">
+
+    <input type="email" id="email"
+    placeholder="Votre email">
+
+    <textarea id="message"
+    placeholder="Votre message"></textarea>
+
+    <button type="submit">
+      Envoyer
+    </button>
+
+  </form>
+
+</section>
+
+
+<!-- ================= FOOTER ================= -->
+<footer>
+
+  <h3>FOBAS MEDIA</h3>
+
+  <div class="socials">
+
+    <a href="https://wa.me/50943706706"
+    target="_blank">
+
+      <i class="fa-brands fa-whatsapp"></i>
+
+    </a>
+
+  </div>
+
+  <p>
+    © 2026 FOBAS MEDIA
+  </p>
+
+</footer>
+
+<script src="fobasmedia.js"></script>
+
+</body>
+</html>
