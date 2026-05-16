@@ -1,0 +1,210 @@
+// =========================
+// FOBAS MEDIA READY
+// =========================
+console.log("FOBAS MEDIA READY");
+
+
+// =========================
+// SCROLL
+// =========================
+function scrollToVideos() {
+
+  document.getElementById("videos")
+  .scrollIntoView({
+    behavior: "smooth"
+  });
+}
+
+
+// =========================
+// LOAD MEDIAS
+// =========================
+async function loadMedia() {
+
+  try {
+
+    const response = await fetch(
+      "https://api.fondationbackupspirituel.com/media"
+    );
+
+    const data = await response.json();
+
+    const radioContainer =
+    document.getElementById("radioContainer");
+
+    const podcastContainer =
+    document.getElementById("podcastContainer");
+
+    const videoContainer =
+    document.getElementById("videoContainer");
+
+    radioContainer.innerHTML = "";
+    podcastContainer.innerHTML = "";
+    videoContainer.innerHTML = "";
+
+
+
+    data.forEach(item => {
+
+      // ================= RADIO =================
+      if(item.type === "radio") {
+
+        radioContainer.innerHTML += `
+
+        <div class="media-card">
+
+          <img src="${item.thumbnail}" alt="radio">
+
+          <div class="media-content">
+
+            <h3>${item.title}</h3>
+
+            <p>${item.description}</p>
+
+            <audio controls>
+              <source src="${item.mediaUrl}">
+            </audio>
+
+          </div>
+
+        </div>
+        `;
+      }
+
+
+      // ================= PODCAST =================
+      if(item.type === "podcast") {
+
+        podcastContainer.innerHTML += `
+
+        <div class="media-card">
+
+          <img src="${item.thumbnail}" alt="podcast">
+
+          <div class="media-content">
+
+            <h3>${item.title}</h3>
+
+            <p>${item.description}</p>
+
+            <audio controls>
+              <source src="${item.mediaUrl}">
+            </audio>
+
+          </div>
+
+        </div>
+        `;
+      }
+
+
+      // ================= VIDEO =================
+      if(item.type === "video") {
+
+        videoContainer.innerHTML += `
+
+        <div class="media-card">
+
+          <img src="${item.thumbnail}" alt="video">
+
+          <div class="media-content">
+
+            <h3>${item.title}</h3>
+
+            <p>${item.description}</p>
+
+            <video controls>
+              <source src="${item.mediaUrl}">
+            </video>
+
+          </div>
+
+        </div>
+        `;
+      }
+
+    });
+
+  } catch(error) {
+
+    console.error(error);
+  }
+}
+
+loadMedia();
+
+
+// =========================
+// CONTACT FORM
+// =========================
+const contactForm =
+document.getElementById("contactForm");
+
+contactForm.addEventListener("submit",
+async function(e){
+
+  e.preventDefault();
+
+  const data = {
+
+    nom:
+    document.getElementById("nom")
+    .value.trim(),
+
+    email:
+    document.getElementById("email")
+    .value.trim(),
+
+    message:
+    document.getElementById("message")
+    .value.trim()
+  };
+
+
+  if(
+    !data.nom ||
+    !data.email ||
+    !data.message
+  ){
+
+    alert("Veuillez remplir tous les champs.");
+
+    return;
+  }
+
+
+  try {
+
+    const response = await fetch(
+      "https://api.fondationbackupspirituel.com/media-contact",
+      {
+        method:"POST",
+
+        headers:{
+          "Content-Type":"application/json"
+        },
+
+        body:JSON.stringify(data)
+      }
+    );
+
+
+    if(response.ok){
+
+      alert("Message envoyé avec succès.");
+
+      contactForm.reset();
+
+    } else {
+
+      alert("Erreur lors de l’envoi.");
+    }
+
+  } catch(error){
+
+    console.error(error);
+
+    alert("Impossible de contacter le serveur.");
+  }
+
+});
