@@ -305,6 +305,19 @@ app.get('/api/comments/:itemId', async (req, res) => {
 
 
 
+const contactSchema = new mongoose.Schema({
+   nom: String,
+   email: String,
+   telephone: String,
+   service: String,
+   message: String,
+   dateCreated: {
+      type: Date,
+      default: Date.now
+   }
+});
+
+const Contact = mongoose.model("contacts", contactSchema);
 
 // =====================================
 // 📩 CONTACT FOBAS TECH AGENCY
