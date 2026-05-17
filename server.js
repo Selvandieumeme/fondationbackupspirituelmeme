@@ -736,10 +736,20 @@ app.post("/agents/register", async (req, res) => {
 
     console.log("REGISTER BODY:", req.body);
 
-    let { name, email, password } = req.body || {};
+    let {
+      name,
+      email,
+      password,
+      role,
+      businessName,
+      whatsapp,
+      country,
+      city,
+      zone
+    } = req.body || {};
 
     // ==========================
-    // VALIDATION
+    // BASIC VALIDATION (SAFE BACKWARD COMPATIBLE)
     // ==========================
     if (!name || !email || !password) {
 
@@ -750,14 +760,29 @@ app.post("/agents/register", async (req, res) => {
 
     }
 
+    // ==========================
     // CLEAN DATA
+    // ==========================
     name = String(name).trim();
-
-    email = String(email)
-      .trim()
-      .toLowerCase();
-
+    email = String(email).trim().toLowerCase();
     password = String(password);
+
+    role = role || "agent";
+
+    // ==========================
+    // ROLE VALIDATION (SAFE)
+    // ==========================
+    if (role === "entrepreneur" || role === "agent_entrepreneur") {
+
+      if (!businessName || !whatsapp || !country || !city || !zone) {
+
+        return res.status(400).json({
+          success: false,
+          message: "Entrepreneur information required"
+        });
+
+      }
+    }
 
     // ==========================
     // COLLECTION
@@ -784,7 +809,7 @@ app.post("/agents/register", async (req, res) => {
     // HASH PASSWORD
     // ==========================
     const hashedPassword =
-  await bcryptjs.hash(password, 12);
+      await bcryptjs.hash(password, 12);
 
     // ==========================
     // REFERRAL
@@ -792,28 +817,36 @@ app.post("/agents/register", async (req, res) => {
     const referralCode =
       "AGT_" +
       Math.random()
-      .toString(36)
-      .substring(2, 8)
-      .toUpperCase();
+        .toString(36)
+        .substring(2, 8)
+        .toUpperCase();
 
     // ==========================
-    // INSERT
+    // INSERT (ENHANCED SAFE STRUCTURE)
     // ==========================
     const result =
       await Agents.insertOne({
 
         name,
         email,
-
         password: hashedPassword,
+
+        role,
 
         referralCode,
 
         level: "Bronze",
-
         totalCommission: 0,
-
         progress: 0,
+
+        // ==========================
+        // ENTREPRENEUR DATA (OPTIONAL SAFE)
+        // ==========================
+        businessName: businessName || null,
+        whatsapp: whatsapp || null,
+        country: country || null,
+        city: city || null,
+        zone: zone || null,
 
         createdAt: new Date()
 
@@ -821,15 +854,10 @@ app.post("/agents/register", async (req, res) => {
 
     console.log("AGENT CREATED:", result.insertedId);
 
-    // ==========================
-    // SUCCESS
-    // ==========================
     return res.status(201).json({
 
       success: true,
-
       message: "Agent created successfully",
-
       referralCode
 
     });
@@ -838,17 +866,12 @@ app.post("/agents/register", async (req, res) => {
 
   catch (err) {
 
-    console.error(
-      "REGISTER ERROR FULL:",
-      err
-    );
+    console.error("REGISTER ERROR FULL:", err);
 
     return res.status(500).json({
 
       success: false,
-
       message: "Internal server error",
-
       error: err.message
 
     });
@@ -856,7 +879,6 @@ app.post("/agents/register", async (req, res) => {
   }
 
 });
-
 
 
 
