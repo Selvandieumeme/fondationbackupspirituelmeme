@@ -903,7 +903,7 @@ console.log("FOBAS DIGITAL AGENTS MODULE LOADED SUCCESSFULLY");
 
 
 
-const bcrypt = require("bcryptjs"); // MOVE OUTSIDE ROUTE (IMPORTANT)
+
 
 app.post("/agents/register", async (req, res) => {
   try {
