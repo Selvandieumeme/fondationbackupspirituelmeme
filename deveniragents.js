@@ -93,6 +93,24 @@ window.addEventListener("DOMContentLoaded", () => {
       ?.value;
 
 
+
+
+
+
+// ==========================
+// ROLE + ENTREPRENEUR FIELDS (ADD ONLY)
+// ==========================
+const role = document.getElementById("agentRole")?.value || "agent";
+
+const businessName = document.getElementById("businessName")?.value?.trim();
+const whatsapp = document.getElementById("whatsapp")?.value?.trim();
+const country = document.getElementById("country")?.value?.trim();
+const city = document.getElementById("city")?.value?.trim();
+const zone = document.getElementById("zone")?.value?.trim();
+
+
+    
+    
     // ==========================
     // RESET ALERTS
     // ==========================
@@ -147,6 +165,32 @@ window.addEventListener("DOMContentLoaded", () => {
     }
 
 
+
+
+
+// ==========================
+// CONDITIONAL VALIDATION (ADD ONLY)
+// ==========================
+
+// Entrepreneur ONLY
+if (role === "entrepreneur") {
+
+  if (!businessName || !whatsapp || !country || !city || !zone) {
+    showError("Tous les champs entrepreneur sont obligatoires");
+    return;
+  }
+}
+
+// Agent + Entrepreneur
+if (role === "agent_entrepreneur") {
+
+  if (!businessName || !whatsapp || !country || !city || !zone) {
+    showError("Complétez les informations entrepreneur");
+    return;
+  }
+}
+
+    
     // ==========================
     // LOADING BUTTON
     // ==========================
@@ -173,10 +217,17 @@ window.addEventListener("DOMContentLoaded", () => {
           },
 
           body: JSON.stringify({
-            name,
-            email,
-            password
-          })
+  name,
+  email,
+  password,
+  role,
+
+  businessName,
+  whatsapp,
+  country,
+  city,
+  zone
+})
         }
       );
 
