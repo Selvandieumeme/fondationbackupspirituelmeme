@@ -225,17 +225,6 @@ window.addEventListener("DOMContentLoaded", () => {
       // ==========================
       form.reset();
 
-
-      // ==========================
-      // REDIRECT
-      // ==========================
-      setTimeout(() => {
-
-        window.location.href =
-          "/dashboard-agent.html";
-
-      }, 1500);
-
     }
 
     catch (err) {
