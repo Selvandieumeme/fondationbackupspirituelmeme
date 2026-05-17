@@ -152,7 +152,7 @@ async function loadDashboard() {
 
 // Become Agent
 document.getElementById("btnBecomeAgent")?.addEventListener("click", () => {
-  window.location.href = "/agents/register";
+  window.location.href = "/deveniragents.html";
 });
 
 // Create Business
