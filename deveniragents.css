@@ -363,3 +363,77 @@ body{
   }
 
 }
+
+
+
+
+
+
+
+
+/* ==========================
+   ROLE SELECT (NEW)
+========================== */
+
+#agentRole{
+  width:100%;
+  padding:17px 18px;
+  border:2px solid #e5e8f1;
+  border-radius:14px;
+  outline:none;
+  margin-bottom:18px;
+  font-size:15px;
+  background:white;
+  transition:0.3s ease;
+}
+
+#agentRole:focus{
+  border-color:#0066ff;
+  box-shadow:0 0 0 4px rgba(0,102,255,0.10);
+}
+
+
+/* ==========================
+   ENTREPRENEUR SECTION (NEW)
+========================== */
+
+#entrepreneurFields{
+  display:none;
+  flex-direction:column;
+  gap:12px;
+  margin-top:10px;
+  margin-bottom:18px;
+}
+
+
+/* inputs inside entrepreneur section */
+#entrepreneurFields input{
+  margin-bottom:0;
+}
+
+
+/* ==========================
+   OPTIONAL LABEL STYLE IMPROVEMENT
+========================== */
+
+.register-card select,
+.register-card option{
+  font-family:'Poppins', sans-serif;
+}
+
+
+/* ==========================
+   MULTI-ROLE VISUAL STATE (OPTIONAL UX)
+========================== */
+
+.role-agent{
+  border-left:4px solid #00c853;
+}
+
+.role-agent-entrepreneur{
+  border-left:4px solid #ffb300;
+}
+
+.role-entrepreneur{
+  border-left:4px solid #ff3d00;
+}
