@@ -707,187 +707,7 @@ async(req,res)=>{
 
 
 
-// ==========================
-// FOBAS DIGITAL AGENTS - SAFE ADD-ON MODULE
-// DO NOT MODIFY EXISTING CODE
-// ONLY APPEND THIS BLOCK
-// ==========================
 
-
-// ==========================
-// AGENTS COLLECTION (SAFE ACCESS)
-// ==========================
-const Agents = mongoose.connection.collection("agents");
-const Businesses = mongoose.connection.collection("businesses");
-const Commissions = mongoose.connection.collection("commissions");
-
-
-// ==========================
-// AGENT REGISTER (NEW SAFE ROUTE)
-// ==========================
-app.post("/agents/register", async (req, res) => {
-  try {
-
-    const { name, email, password } = req.body;
-
-    const exist = await Agents.findOne({ email });
-    if (exist) return res.json({ message: "Agent already exists" });
-
-    const hashedPassword = await bcrypt.hash(password, 12);
-
-    const referralCode =
-      "AGT_" + Math.random().toString(36).substring(2, 8).toUpperCase();
-
-    await Agents.insertOne({
-      name,
-      email,
-      password: hashedPassword,
-      referralCode,
-      level: "Bronze",
-      createdAt: new Date()
-    });
-
-    res.json({
-      message: "Agent created",
-      referralCode
-    });
-
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-
-// ==========================
-// AGENT LOGIN (SAFE ROUTE)
-// ==========================
-app.post("/agents/login", async (req, res) => {
-  try {
-
-    const { email, password } = req.body;
-
-    const agent = await Agents.findOne({ email });
-    if (!agent) return res.json({ message: "Agent not found" });
-
-    const match = await bcrypt.compare(password, agent.password);
-    if (!match) return res.json({ message: "Wrong password" });
-
-    res.json({
-      message: "Login success",
-      email: agent.email,
-      referralCode: agent.referralCode
-    });
-
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-
-// ==========================
-// AGENT DASHBOARD (API FOR JS)
-// ==========================
-app.get("/agents/dashboard", async (req, res) => {
-  try {
-
-    const email = req.query.email;
-
-    const agent = await Agents.findOne({ email });
-    if (!agent) return res.json({ message: "Agent not found" });
-
-    const businesses = await Businesses.find({
-      referredBy: agent.referralCode
-    }).toArray();
-
-    const commissions = await Commissions.find({
-      agentCode: agent.referralCode
-    }).toArray();
-
-    const totalCommission = commissions.reduce(
-      (sum, c) => sum + (c.amount || 0),
-      0
-    );
-
-    // SIMPLE PROGRESS LOGIC
-    const progress = Math.min(businesses.length * 20, 100);
-
-    res.json({
-      referralLink: `https://fondationbackupspirituel.com/register?ref=${agent.referralCode}`,
-      totalUsers: 0, // optional (safe fallback)
-      totalBusinesses: businesses.length,
-      totalCommission,
-      level: agent.level,
-      progress
-    });
-
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-
-// ==========================
-// BUSINESS REGISTER (WITH REFERRAL)
-// ==========================
-app.post("/business/register", async (req, res) => {
-  try {
-
-    const { name, email, ref } = req.body;
-
-    await Businesses.insertOne({
-      name,
-      email,
-      referredBy: ref || null,
-      createdAt: new Date()
-    });
-
-    // COMMISSION SYSTEM (SIMPLE)
-    if (ref) {
-      await Commissions.insertOne({
-        agentCode: ref,
-        amount: 1000,
-        type: "business_signup",
-        createdAt: new Date()
-      });
-    }
-
-    res.json({ message: "Business registered" });
-
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-
-// ==========================
-// WEBHOOK (FIXED & CLEAN)
-// ==========================
-app.post("/webhook", express.json(), async (req, res) => {
-  try {
-
-    const { event, data } = req.body;
-
-    if (event === "commission.added") {
-      await Commissions.insertOne({
-        agentCode: data.agentCode,
-        amount: data.amount,
-        type: "webhook",
-        createdAt: new Date()
-      });
-    }
-
-    res.json({ success: true });
-
-  } catch (err) {
-    res.status(500).json({ error: "Webhook error" });
-  }
-});
-
-
-// ==========================
-// DEBUG
-// ==========================
-console.log("FOBAS DIGITAL AGENTS MODULE LOADED SUCCESSFULLY");
 
 
 
@@ -904,8 +724,7 @@ console.log("FOBAS DIGITAL AGENTS MODULE LOADED SUCCESSFULLY");
 
 
 // ==========================
-// AGENTS REGISTER ROUTE
-// FINAL PRODUCTION VERSION
+// AGENTS REGISTER ROUTE (FIXED FINAL)
 // ==========================
 
 app.post("/agents/register", async (req, res) => {
@@ -915,155 +734,104 @@ app.post("/agents/register", async (req, res) => {
     let { name, email, password } = req.body;
 
     // ==========================
-    // BASIC VALIDATION
+    // VALIDATION
     // ==========================
     if (!name || !email || !password) {
-
       return res.status(400).json({
         success: false,
         message: "All fields are required"
       });
-
     }
 
-    // ==========================
-    // CLEAN DATA
-    // ==========================
     name = name.trim();
+    email = email.trim().toLowerCase();
 
-    email = email
-      .trim()
-      .toLowerCase();
-
-    // ==========================
-    // EMAIL VALIDATION
-    // ==========================
-    const emailRegex =
-      /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
+    // EMAIL CHECK
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
-
       return res.status(400).json({
         success: false,
         message: "Invalid email"
       });
-
     }
 
-    // ==========================
-    // PASSWORD VALIDATION
-    // ==========================
+    // PASSWORD CHECK
     if (password.length < 6) {
-
       return res.status(400).json({
         success: false,
         message: "Password too short"
       });
-
     }
 
     // ==========================
-    // COLLECTION
+    // SAFE COLLECTION (NO CONFLICT)
     // ==========================
-    const collection =
-      mongoose.connection.collection("agents");
+    const collection = mongoose.connection.collection("agents");
 
     // ==========================
-    // CHECK EXISTING AGENT
+    // CHECK EXISTING
     // ==========================
-    const exist = await collection.findOne({
-      email
-    });
+    const exist = await collection.findOne({ email });
 
     if (exist) {
-
       return res.status(409).json({
         success: false,
         message: "Agent already exists"
       });
-
     }
 
     // ==========================
-    // HASH PASSWORD (bcrypt 12)
+    // HASH PASSWORD
     // ==========================
-    const hashedPassword =
-      await bcrypt.hash(password, 12);
+    const hashedPassword = await bcrypt.hash(password, 12);
 
     // ==========================
-    // REFERRAL CODE
+    // REFERRAL SYSTEM
     // ==========================
     const referralCode =
-      "AGT_" +
-      Math.random()
-      .toString(36)
-      .substring(2, 8)
-      .toUpperCase();
+      "AGT_" + Math.random().toString(36).substring(2, 8).toUpperCase();
+
+    const referralLink =
+      `https://fondationbackupspirituel.com/register?ref=${referralCode}`;
 
     // ==========================
     // INSERT AGENT
     // ==========================
     await collection.insertOne({
-
       name,
       email,
-
       password: hashedPassword,
-
       referralCode,
-
-      referralLink:
-        `https://fondationbackupspirituel.com/register?ref=${referralCode}`,
-
+      referralLink,
       level: "Bronze",
-
       totalCommission: 0,
-
       progress: 0,
-
       createdAt: new Date()
-
     });
 
     // ==========================
-    // SUCCESS RESPONSE
+    // RESPONSE (FRONTEND COMPATIBLE)
     // ==========================
-    res.status(201).json({
-
+    return res.status(201).json({
       success: true,
-
       message: "Agent created successfully",
-
       referralCode,
-
-      referralLink:
-        `https://fondationbackupspirituel.com/register?ref=${referralCode}`
-
+      referralLink
     });
 
-  }
+  } catch (err) {
 
-  catch (err) {
+    console.error("REGISTER ERROR:", err);
 
-    console.error(
-      "REGISTER ERROR:",
-      err
-    );
-
-    res.status(500).json({
-
+    return res.status(500).json({
       success: false,
-
       message: "Internal server error",
-
       error: err.message
-
     });
 
   }
 
 });
-
 
 
 
