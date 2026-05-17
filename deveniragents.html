@@ -12,7 +12,10 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap"
+    rel="stylesheet"
+  >
 
 </head>
 
@@ -66,43 +69,92 @@
 
         <h2>Créer votre compte Agent</h2>
 
-        <input type="text" id="agentName" placeholder="Nom complet"/>
-
-        <input type="email" id="agentEmail" placeholder="Adresse Email"/>
-
-        <!-- PASSWORD -->
-        <div class="password-box">
-
-          <input
-            type="password"
-            id="agentPassword"
-            placeholder="Mot de passe"
-          />
-
-          <span id="togglePass1" class="eye">
-            👁
-          </span>
-
-        </div>
-
-        <!-- CONFIRM -->
-        <div class="password-box">
+        <!-- ==========================
+             FORM FIXED
+             IMPORTANT:
+             Sa se pati ki te manke a
+             ========================== -->
+        <form id="agentForm">
 
           <input
-            type="password"
-            id="agentConfirmPassword"
-            placeholder="Confirmer le mot de passe"
+            type="text"
+            id="agentName"
+            placeholder="Nom complet"
           />
 
-          <span id="togglePass2" class="eye">
-            👁
-          </span>
+          <input
+            type="email"
+            id="agentEmail"
+            placeholder="Adresse Email"
+          />
 
-        </div>
+          <!-- PASSWORD -->
+          <div class="password-box">
 
-        <button id="submitAgent">
-          Envoyer
-        </button>
+            <input
+              type="password"
+              id="agentPassword"
+              placeholder="Mot de passe"
+            />
+
+            <span id="togglePass1" class="eye">
+              👁
+            </span>
+
+          </div>
+
+          <!-- CONFIRM -->
+          <div class="password-box">
+
+            <input
+              type="password"
+              id="agentConfirmPassword"
+              placeholder="Confirmer le mot de passe"
+            />
+
+            <span id="togglePass2" class="eye">
+              👁
+            </span>
+
+          </div>
+
+          <!-- SUCCESS MESSAGE -->
+          <div
+            id="successMessage"
+            style="
+              display:none;
+              margin-bottom:15px;
+              padding:12px;
+              border-radius:10px;
+              background:#d4edda;
+              color:#155724;
+              font-weight:600;
+            "
+          ></div>
+
+          <!-- ERROR MESSAGE -->
+          <div
+            id="errorMessage"
+            style="
+              display:none;
+              margin-bottom:15px;
+              padding:12px;
+              border-radius:10px;
+              background:#ffd6d6;
+              color:#b00020;
+              font-weight:600;
+            "
+          ></div>
+
+          <!-- IMPORTANT FIX -->
+          <button
+            type="submit"
+            id="submitAgent"
+          >
+            Envoyer
+          </button>
+
+        </form>
 
         <a href="/" class="back-home">
           Retour Accueil
