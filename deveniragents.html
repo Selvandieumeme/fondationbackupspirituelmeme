@@ -88,6 +88,12 @@
             placeholder="Adresse Email"
           />
 
+          <select id="agentRole" required>
+          <option value="agent">Agent</option>
+          <option value="agent_entrepreneur">Agent + Entrepreneur</option>
+          <option value="entrepreneur">Entrepreneur</option>
+          </select>
+
           <!-- PASSWORD -->
           <div class="password-box">
 
@@ -117,6 +123,23 @@
             </span>
 
           </div>
+
+
+        <div id="entrepreneurFields" style="display:none;">
+
+  <input type="text" id="businessName" placeholder="Nom Business" />
+
+  <input type="text" id="whatsapp" placeholder="Whatsapp" />
+
+  <input type="text" id="country" placeholder="Pays" />
+
+  <input type="text" id="city" placeholder="Ville" />
+
+  <input type="text" id="zone" placeholder="Zone" />
+
+</div>
+
+          
 
           <!-- SUCCESS MESSAGE -->
           <div
