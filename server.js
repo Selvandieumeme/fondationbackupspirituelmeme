@@ -713,8 +713,6 @@ async(req,res)=>{
 // ONLY APPEND THIS BLOCK
 // ==========================
 
-const bcrypt = require("bcryptjs");
-
 
 // ==========================
 // AGENTS COLLECTION (SAFE ACCESS)
@@ -905,78 +903,165 @@ console.log("FOBAS DIGITAL AGENTS MODULE LOADED SUCCESSFULLY");
 
 
 
+// ==========================
+// AGENTS REGISTER ROUTE
+// FINAL PRODUCTION VERSION
+// ==========================
+
 app.post("/agents/register", async (req, res) => {
+
   try {
 
     let { name, email, password } = req.body;
 
     // ==========================
-    // BASIC VALIDATION (SAFE)
+    // BASIC VALIDATION
     // ==========================
     if (!name || !email || !password) {
-      return res.json({
+
+      return res.status(400).json({
         success: false,
         message: "All fields are required"
       });
+
     }
 
-    // normalize email
-    email = email.toLowerCase().trim();
+    // ==========================
+    // CLEAN DATA
+    // ==========================
     name = name.trim();
 
-    const collection = mongoose.connection.collection("agents");
+    email = email
+      .trim()
+      .toLowerCase();
+
+    // ==========================
+    // EMAIL VALIDATION
+    // ==========================
+    const emailRegex =
+      /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (!emailRegex.test(email)) {
+
+      return res.status(400).json({
+        success: false,
+        message: "Invalid email"
+      });
+
+    }
+
+    // ==========================
+    // PASSWORD VALIDATION
+    // ==========================
+    if (password.length < 6) {
+
+      return res.status(400).json({
+        success: false,
+        message: "Password too short"
+      });
+
+    }
+
+    // ==========================
+    // COLLECTION
+    // ==========================
+    const collection =
+      mongoose.connection.collection("agents");
 
     // ==========================
     // CHECK EXISTING AGENT
     // ==========================
-    const exist = await collection.findOne({ email });
+    const exist = await collection.findOne({
+      email
+    });
 
     if (exist) {
-      return res.json({
+
+      return res.status(409).json({
         success: false,
         message: "Agent already exists"
       });
+
     }
 
     // ==========================
     // HASH PASSWORD (bcrypt 12)
     // ==========================
-    const hashedPassword = await bcrypt.hash(password, 12);
+    const hashedPassword =
+      await bcrypt.hash(password, 12);
 
     // ==========================
-    // REFERRAL CODE GENERATION
+    // REFERRAL CODE
     // ==========================
     const referralCode =
-      "AGT_" + Math.random().toString(36).substring(2, 8).toUpperCase();
+      "AGT_" +
+      Math.random()
+      .toString(36)
+      .substring(2, 8)
+      .toUpperCase();
 
     // ==========================
     // INSERT AGENT
     // ==========================
     await collection.insertOne({
+
       name,
       email,
+
       password: hashedPassword,
+
       referralCode,
+
+      referralLink:
+        `https://fondationbackupspirituel.com/register?ref=${referralCode}`,
+
       level: "Bronze",
+
+      totalCommission: 0,
+
+      progress: 0,
+
       createdAt: new Date()
+
     });
 
     // ==========================
-    // RESPONSE
+    // SUCCESS RESPONSE
     // ==========================
-    res.json({
+    res.status(201).json({
+
       success: true,
-      referralCode
+
+      message: "Agent created successfully",
+
+      referralCode,
+
+      referralLink:
+        `https://fondationbackupspirituel.com/register?ref=${referralCode}`
+
     });
 
-  } catch (err) {
-    console.error("REGISTER ERROR:", err);
+  }
+
+  catch (err) {
+
+    console.error(
+      "REGISTER ERROR:",
+      err
+    );
 
     res.status(500).json({
+
       success: false,
+
+      message: "Internal server error",
+
       error: err.message
+
     });
+
   }
+
 });
 
 
