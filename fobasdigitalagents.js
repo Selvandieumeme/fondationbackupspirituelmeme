@@ -175,3 +175,107 @@ document.getElementById("btnCreateAccount")?.addEventListener("click", () => {
 // DEBUG
 // ==========================
 console.log("FOBAS DIGITAL AGENTS - PRODUCTION JS CONNECTED");
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// ==========================
+// SHOW / HIDE PASSWORD (SAFE FIX)
+// ==========================
+
+window.addEventListener("DOMContentLoaded", () => {
+
+  const pass1 = document.getElementById("agentPassword");
+  const pass2 = document.getElementById("agentConfirmPassword");
+
+  const toggle1 = document.getElementById("togglePass1");
+  const toggle2 = document.getElementById("togglePass2");
+
+  // PASSWORD 1 TOGGLE
+  toggle1?.addEventListener("click", () => {
+    if (!pass1) return;
+
+    pass1.type = pass1.type === "password" ? "text" : "password";
+  });
+
+  // PASSWORD 2 TOGGLE
+  toggle2?.addEventListener("click", () => {
+    if (!pass2) return;
+
+    pass2.type = pass2.type === "password" ? "text" : "password";
+  });
+
+});
+
+
+// ==========================
+// SUBMIT AGENT REGISTER (SAFE + PRO)
+// ==========================
+
+document.getElementById("submitAgent")?.addEventListener("click", async () => {
+
+  const name = document.getElementById("agentName")?.value?.trim();
+  const email = document.getElementById("agentEmail")?.value?.trim();
+  const password = document.getElementById("agentPassword")?.value;
+  const confirm = document.getElementById("agentConfirmPassword")?.value;
+
+  // ==========================
+  // VALIDATION SAFE
+  // ==========================
+  if (!name || !email || !password || !confirm) {
+    return alert("Tous les champs sont obligatoires");
+  }
+
+  if (password !== confirm) {
+    return alert("Les mots de passe ne correspondent pas");
+  }
+
+  try {
+
+    const res = await fetch("https://api.fondationbackupspirituel.com/agents/register", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        name,
+        email,
+        password
+      })
+    });
+
+    const data = await res.json();
+
+    if (!data || data.success === false) {
+      return alert(data?.message || "Erreur inscription");
+    }
+
+    alert("Agent créé avec succès");
+
+    // SAVE SESSION
+    localStorage.setItem("userEmail", email);
+
+    // CLOSE MODAL SAFELY
+    const modal = document.getElementById("agentModal");
+    if (modal) modal.style.display = "none";
+
+    // REDIRECT SAFE
+    window.location.href = "/dashboard-agent.html";
+
+  } catch (err) {
+    console.error("REGISTER ERROR:", err);
+    alert("Erreur serveur, veuillez réessayer");
+  }
+
+});
