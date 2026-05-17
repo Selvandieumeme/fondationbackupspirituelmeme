@@ -33,6 +33,32 @@ window.addEventListener("DOMContentLoaded", () => {
   const errorBox = document.getElementById("errorMessage");
 
 
+
+  // ==========================
+// ROLE UI TOGGLE FIX (ADD ONLY)
+// ==========================
+
+const roleSelect = document.getElementById("agentRole");
+const entrepreneurFields = document.getElementById("entrepreneurFields");
+
+function toggleEntrepreneurFields() {
+  if (!roleSelect || !entrepreneurFields) return;
+
+  const role = roleSelect.value;
+
+  if (role === "entrepreneur" || role === "agent_entrepreneur") {
+    entrepreneurFields.style.display = "block";
+  } else {
+    entrepreneurFields.style.display = "none";
+  }
+}
+
+roleSelect?.addEventListener("change", toggleEntrepreneurFields);
+
+// run on load
+toggleEntrepreneurFields();
+
+
   // ==========================
   // PASSWORD TOGGLE 1
   // ==========================
