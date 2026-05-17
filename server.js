@@ -784,7 +784,7 @@ app.post("/agents/register", async (req, res) => {
     // HASH PASSWORD
     // ==========================
     const hashedPassword =
-      await bcrypt.hash(password, 12);
+  await bcryptjs.hash(password, 12);
 
     // ==========================
     // REFERRAL
