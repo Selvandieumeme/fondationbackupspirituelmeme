@@ -1,0 +1,365 @@
+
+/* ==========================
+   RESET
+========================== */
+
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+}
+
+body{
+  font-family:'Poppins', sans-serif;
+  background:#f5f7fb;
+  min-height:100vh;
+  overflow-x:hidden;
+}
+
+
+/* ==========================
+   MAIN CONTAINER
+========================== */
+
+.register-container{
+  width:100%;
+  min-height:100vh;
+  display:flex;
+}
+
+
+/* ==========================
+   LEFT SIDE
+========================== */
+
+.register-left{
+  flex:1;
+  background:linear-gradient(
+    135deg,
+    #0047ff,
+    #0066ff,
+    #1d8fff
+  );
+
+  color:white;
+
+  padding:70px 60px;
+
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+
+  position:relative;
+
+  overflow:hidden;
+}
+
+
+/* LIGHT EFFECT */
+
+.register-left::before{
+  content:"";
+
+  position:absolute;
+
+  width:500px;
+  height:500px;
+
+  background:rgba(255,255,255,0.08);
+
+  border-radius:50%;
+
+  top:-150px;
+  right:-150px;
+}
+
+.register-left::after{
+  content:"";
+
+  position:absolute;
+
+  width:300px;
+  height:300px;
+
+  background:rgba(255,255,255,0.05);
+
+  border-radius:50%;
+
+  bottom:-100px;
+  left:-100px;
+}
+
+
+/* ==========================
+   LOGO
+========================== */
+
+.logo{
+  font-size:32px;
+  font-weight:800;
+  margin-bottom:40px;
+  z-index:2;
+}
+
+.logo .yellow{
+  color:#ffd400;
+}
+
+.logo .blue{
+  color:#ffffff;
+}
+
+
+/* ==========================
+   LEFT CONTENT
+========================== */
+
+.register-left h1{
+  font-size:48px;
+  line-height:1.2;
+  margin-bottom:25px;
+  z-index:2;
+}
+
+.register-left p{
+  font-size:18px;
+  line-height:1.8;
+  margin-bottom:40px;
+  color:#e5ecff;
+  z-index:2;
+}
+
+
+/* ==========================
+   BENEFITS
+========================== */
+
+.benefits{
+  display:flex;
+  flex-direction:column;
+  gap:20px;
+  z-index:2;
+}
+
+.benefit-card{
+  background:rgba(255,255,255,0.12);
+
+  padding:18px 22px;
+
+  border-radius:16px;
+
+  backdrop-filter:blur(8px);
+
+  font-weight:500;
+
+  transition:0.3s ease;
+}
+
+.benefit-card:hover{
+  transform:translateX(8px);
+  background:rgba(255,255,255,0.18);
+}
+
+
+/* ==========================
+   RIGHT SIDE
+========================== */
+
+.register-right{
+  flex:1;
+
+  display:flex;
+  justify-content:center;
+  align-items:center;
+
+  padding:40px;
+}
+
+
+/* ==========================
+   REGISTER CARD
+========================== */
+
+.register-card{
+  width:100%;
+  max-width:470px;
+
+  background:white;
+
+  padding:45px;
+
+  border-radius:28px;
+
+  box-shadow:
+  0 10px 40px rgba(0,0,0,0.08);
+}
+
+
+/* ==========================
+   CARD TITLE
+========================== */
+
+.register-card h2{
+  font-size:32px;
+  color:#0d1b4c;
+  margin-bottom:35px;
+  text-align:center;
+}
+
+
+/* ==========================
+   INPUTS
+========================== */
+
+.register-card input{
+  width:100%;
+
+  padding:17px 18px;
+
+  border:2px solid #e5e8f1;
+
+  border-radius:14px;
+
+  outline:none;
+
+  margin-bottom:18px;
+
+  font-size:15px;
+
+  transition:0.3s ease;
+}
+
+.register-card input:focus{
+  border-color:#0066ff;
+  box-shadow:
+  0 0 0 4px rgba(0,102,255,0.10);
+}
+
+
+/* ==========================
+   PASSWORD BOX
+========================== */
+
+.password-box{
+  position:relative;
+}
+
+.eye{
+  position:absolute;
+
+  top:50%;
+  right:18px;
+
+  transform:translateY(-50%);
+
+  cursor:pointer;
+
+  font-size:20px;
+
+  user-select:none;
+}
+
+
+/* ==========================
+   BUTTON
+========================== */
+
+#submitAgent{
+  width:100%;
+
+  padding:17px;
+
+  border:none;
+
+  border-radius:14px;
+
+  background:linear-gradient(
+    135deg,
+    #ffd400,
+    #ffbf00
+  );
+
+  color:#0d1b4c;
+
+  font-size:17px;
+  font-weight:700;
+
+  cursor:pointer;
+
+  transition:0.3s ease;
+
+  margin-top:10px;
+}
+
+#submitAgent:hover{
+  transform:translateY(-3px);
+
+  box-shadow:
+  0 10px 25px rgba(255,212,0,0.35);
+}
+
+
+/* ==========================
+   BACK HOME
+========================== */
+
+.back-home{
+  display:block;
+
+  text-align:center;
+
+  margin-top:25px;
+
+  color:#0066ff;
+
+  text-decoration:none;
+
+  font-weight:600;
+
+  transition:0.3s ease;
+}
+
+.back-home:hover{
+  color:#0047ff;
+}
+
+
+/* ==========================
+   RESPONSIVE
+========================== */
+
+@media(max-width:950px){
+
+  .register-container{
+    flex-direction:column;
+  }
+
+  .register-left{
+    padding:60px 30px;
+  }
+
+  .register-left h1{
+    font-size:36px;
+  }
+
+  .register-card{
+    padding:35px 25px;
+  }
+
+}
+
+@media(max-width:600px){
+
+  .register-left h1{
+    font-size:30px;
+  }
+
+  .register-left p{
+    font-size:16px;
+  }
+
+  .register-card h2{
+    font-size:26px;
+  }
+
+}
