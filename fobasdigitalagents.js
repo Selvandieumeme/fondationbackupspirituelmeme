@@ -152,7 +152,7 @@ async function loadDashboard() {
 
 // Become Agent
 document.getElementById("btnBecomeAgent")?.addEventListener("click", () => {
-  window.location.href = "/deveniragents.html";
+  window.location.href = "https://fondationbackupspirituel.com/deveniragents.html";
 });
 
 // Create Business
@@ -167,7 +167,7 @@ document.getElementById("btnJoinBusiness")?.addEventListener("click", () => {
 
 // Create Account
 document.getElementById("btnCreateAccount")?.addEventListener("click", () => {
-  window.location.href = "/agents/register";
+  window.location.href = "https://fondationbackupspirituel.com/deveniragents.html";
 });
 
 
