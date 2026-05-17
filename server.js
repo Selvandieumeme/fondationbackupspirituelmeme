@@ -903,6 +903,95 @@ console.log("FOBAS DIGITAL AGENTS MODULE LOADED SUCCESSFULLY");
 
 
 
+const bcrypt = require("bcryptjs"); // MOVE OUTSIDE ROUTE (IMPORTANT)
+
+app.post("/agents/register", async (req, res) => {
+  try {
+
+    let { name, email, password } = req.body;
+
+    // ==========================
+    // BASIC VALIDATION (SAFE)
+    // ==========================
+    if (!name || !email || !password) {
+      return res.json({
+        success: false,
+        message: "All fields are required"
+      });
+    }
+
+    // normalize email
+    email = email.toLowerCase().trim();
+    name = name.trim();
+
+    const collection = mongoose.connection.collection("agents");
+
+    // ==========================
+    // CHECK EXISTING AGENT
+    // ==========================
+    const exist = await collection.findOne({ email });
+
+    if (exist) {
+      return res.json({
+        success: false,
+        message: "Agent already exists"
+      });
+    }
+
+    // ==========================
+    // HASH PASSWORD (bcrypt 12)
+    // ==========================
+    const hashedPassword = await bcrypt.hash(password, 12);
+
+    // ==========================
+    // REFERRAL CODE GENERATION
+    // ==========================
+    const referralCode =
+      "AGT_" + Math.random().toString(36).substring(2, 8).toUpperCase();
+
+    // ==========================
+    // INSERT AGENT
+    // ==========================
+    await collection.insertOne({
+      name,
+      email,
+      password: hashedPassword,
+      referralCode,
+      level: "Bronze",
+      createdAt: new Date()
+    });
+
+    // ==========================
+    // RESPONSE
+    // ==========================
+    res.json({
+      success: true,
+      referralCode
+    });
+
+  } catch (err) {
+    console.error("REGISTER ERROR:", err);
+
+    res.status(500).json({
+      success: false,
+      error: err.message
+    });
+  }
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
