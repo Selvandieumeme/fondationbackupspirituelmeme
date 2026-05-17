@@ -723,110 +723,134 @@ async(req,res)=>{
 
 
 
+
+
 // ==========================
-// AGENTS REGISTER ROUTE (FIXED FINAL)
+// AGENTS REGISTER ROUTE
+// FINAL CLEAN VERSION
 // ==========================
 
 app.post("/agents/register", async (req, res) => {
 
   try {
 
-    let { name, email, password } = req.body;
+    console.log("REGISTER BODY:", req.body);
+
+    let { name, email, password } = req.body || {};
 
     // ==========================
     // VALIDATION
     // ==========================
     if (!name || !email || !password) {
+
       return res.status(400).json({
         success: false,
         message: "All fields are required"
       });
+
     }
 
-    name = name.trim();
-    email = email.trim().toLowerCase();
+    // CLEAN DATA
+    name = String(name).trim();
 
-    // EMAIL CHECK
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      return res.status(400).json({
-        success: false,
-        message: "Invalid email"
-      });
-    }
+    email = String(email)
+      .trim()
+      .toLowerCase();
 
-    // PASSWORD CHECK
-    if (password.length < 6) {
-      return res.status(400).json({
-        success: false,
-        message: "Password too short"
-      });
-    }
+    password = String(password);
 
     // ==========================
-    // SAFE COLLECTION (NO CONFLICT)
+    // COLLECTION
     // ==========================
-    const collection = mongoose.connection.collection("agents");
+    const Agents =
+      mongoose.connection.collection("agents");
 
     // ==========================
     // CHECK EXISTING
     // ==========================
-    const exist = await collection.findOne({ email });
+    const exist =
+      await Agents.findOne({ email });
 
     if (exist) {
+
       return res.status(409).json({
         success: false,
         message: "Agent already exists"
       });
+
     }
 
     // ==========================
     // HASH PASSWORD
     // ==========================
-    const hashedPassword = await bcrypt.hash(password, 12);
+    const hashedPassword =
+      await bcrypt.hash(password, 12);
 
     // ==========================
-    // REFERRAL SYSTEM
+    // REFERRAL
     // ==========================
     const referralCode =
-      "AGT_" + Math.random().toString(36).substring(2, 8).toUpperCase();
-
-    const referralLink =
-      `https://fondationbackupspirituel.com/register?ref=${referralCode}`;
-
-    // ==========================
-    // INSERT AGENT
-    // ==========================
-    await collection.insertOne({
-      name,
-      email,
-      password: hashedPassword,
-      referralCode,
-      referralLink,
-      level: "Bronze",
-      totalCommission: 0,
-      progress: 0,
-      createdAt: new Date()
-    });
+      "AGT_" +
+      Math.random()
+      .toString(36)
+      .substring(2, 8)
+      .toUpperCase();
 
     // ==========================
-    // RESPONSE (FRONTEND COMPATIBLE)
+    // INSERT
+    // ==========================
+    const result =
+      await Agents.insertOne({
+
+        name,
+        email,
+
+        password: hashedPassword,
+
+        referralCode,
+
+        level: "Bronze",
+
+        totalCommission: 0,
+
+        progress: 0,
+
+        createdAt: new Date()
+
+      });
+
+    console.log("AGENT CREATED:", result.insertedId);
+
+    // ==========================
+    // SUCCESS
     // ==========================
     return res.status(201).json({
+
       success: true,
+
       message: "Agent created successfully",
-      referralCode,
-      referralLink
+
+      referralCode
+
     });
 
-  } catch (err) {
+  }
 
-    console.error("REGISTER ERROR:", err);
+  catch (err) {
+
+    console.error(
+      "REGISTER ERROR FULL:",
+      err
+    );
 
     return res.status(500).json({
+
       success: false,
+
       message: "Internal server error",
+
       error: err.message
+
     });
 
   }
