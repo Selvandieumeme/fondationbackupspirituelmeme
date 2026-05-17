@@ -279,3 +279,25 @@ document.getElementById("submitAgent")?.addEventListener("click", async () => {
   }
 
 });
+
+
+
+
+
+// OPEN MODAL
+document.getElementById("btnBecomeAgent")?.addEventListener("click", () => {
+  document.getElementById("agentModal").style.display = "flex";
+});
+
+// CLOSE MODAL
+document.getElementById("closeModal")?.addEventListener("click", () => {
+  document.getElementById("agentModal").style.display = "none";
+});
+
+// CLOSE WHEN CLICK OUTSIDE
+window.addEventListener("click", (e) => {
+  const modal = document.getElementById("agentModal");
+  if (e.target === modal) {
+    modal.style.display = "none";
+  }
+});
