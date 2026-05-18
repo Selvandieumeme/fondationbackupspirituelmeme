@@ -47,6 +47,10 @@
 
     <div class="hero-content">
 
+      <div class="hero-badge">
+        🔥 Marketplace Nouvelle Génération
+      </div>
+
       <h1>
         Découvrez les meilleurs business
         du réseau FOBAS.
@@ -56,6 +60,47 @@
         Une plateforme digitale intelligente
         dédiée aux entrepreneurs haïtiens.
       </p>
+
+      <div class="hero-buttons">
+
+        <button id="btnOpenDashboard" class="btn-primary">
+          Dashboard Entrepreneur
+        </button>
+
+        <button id="btnBecomeEntrepreneur" class="btn-secondary">
+          Créer votre Business
+        </button>
+
+      </div>
+
+    </div>
+
+  </section>
+
+  <!-- STATS -->
+  <section class="stats-section">
+
+    <div class="stats-grid">
+
+      <div class="stat-card">
+        <h2 id="totalBusinesses">0</h2>
+        <p>Business</p>
+      </div>
+
+      <div class="stat-card">
+        <h2 id="totalProducts">0</h2>
+        <p>Produits</p>
+      </div>
+
+      <div class="stat-card">
+        <h2 id="totalOrders">0</h2>
+        <p>Commandes</p>
+      </div>
+
+      <div class="stat-card">
+        <h2>24/7</h2>
+        <p>Marketplace</p>
+      </div>
 
     </div>
 
@@ -78,11 +123,44 @@
 
   </section>
 
+  <!-- FILTERS -->
+  <section class="filter-section">
+
+    <div class="filters">
+
+      <button class="filter-btn active">
+        Tous
+      </button>
+
+      <button class="filter-btn">
+        Restaurants
+      </button>
+
+      <button class="filter-btn">
+        Mode
+      </button>
+
+      <button class="filter-btn">
+        Technologie
+      </button>
+
+      <button class="filter-btn">
+        Beauté
+      </button>
+
+    </div>
+
+  </section>
+
   <!-- BUSINESSES GRID -->
   <section class="businesses-section">
 
     <div class="section-title">
       <h2>Business Disponibles</h2>
+
+      <p>
+        Explorez les entrepreneurs du réseau FOBAS.
+      </p>
     </div>
 
     <div class="business-grid" id="businessGrid">
@@ -92,6 +170,239 @@
     </div>
 
   </section>
+
+  <!-- BUSINESS DETAILS MODAL -->
+  <div class="business-modal" id="businessModal">
+
+    <div class="modal-content">
+
+      <span class="close-modal" id="closeBusinessModal">
+        &times;
+      </span>
+
+      <!-- HEADER -->
+      <div class="modal-header">
+
+        <img
+          src=""
+          id="modalBusinessLogo"
+          class="modal-logo"
+        />
+
+        <div>
+
+          <h2 id="modalBusinessName">
+            Business Name
+          </h2>
+
+          <p id="modalBusinessCity">
+            Ville
+          </p>
+
+        </div>
+
+      </div>
+
+      <!-- PRODUCTS -->
+      <div class="products-section">
+
+        <h3>
+          Produits & Services
+        </h3>
+
+        <div
+          class="products-grid"
+          id="productsGrid"
+        >
+
+          <!-- DYNAMIC -->
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- ORDER MODAL -->
+  <div class="order-modal" id="orderModal">
+
+    <div class="order-content">
+
+      <span class="close-order-modal"
+      id="closeOrderModal">
+        &times;
+      </span>
+
+      <h2>
+        Commander Produit
+      </h2>
+
+      <!-- PRODUCT PREVIEW -->
+      <div class="selected-product">
+
+        <img
+          src=""
+          id="selectedProductImage"
+        />
+
+        <div>
+
+          <h3 id="selectedProductName">
+            Produit
+          </h3>
+
+          <p id="selectedProductPrice">
+            0 HTG
+          </p>
+
+        </div>
+
+      </div>
+
+      <!-- CLIENT FORM -->
+      <form id="orderForm">
+
+        <input
+          type="text"
+          id="customerName"
+          placeholder="Nom complet"
+          required
+        />
+
+        <input
+          type="text"
+          id="customerPhone"
+          placeholder="Téléphone"
+          required
+        />
+
+        <textarea
+          id="customerAddress"
+          placeholder="Adresse livraison"
+          required
+        ></textarea>
+
+        <!-- PAYMENT METHOD -->
+        <div class="payment-methods">
+
+          <h3>
+            Méthode Paiement
+          </h3>
+
+          <label class="payment-option">
+
+            <input
+              type="radio"
+              name="paymentMethod"
+              value="natcash"
+              checked
+            />
+
+            Natcash
+
+          </label>
+
+          <label class="payment-option">
+
+            <input
+              type="radio"
+              name="paymentMethod"
+              value="moncash"
+            />
+
+            Moncash
+
+          </label>
+
+          <label class="payment-option">
+
+            <input
+              type="radio"
+              name="paymentMethod"
+              value="fobas"
+            />
+
+            FOBAS
+
+          </label>
+
+        </div>
+
+        <!-- PAYMENT INFOS -->
+        <div class="payment-instructions">
+
+          <h4>
+            Informations Paiement
+          </h4>
+
+          <div id="paymentInfoBox">
+
+            <!-- DYNAMIC -->
+
+          </div>
+
+        </div>
+
+        <!-- PAYMENT PROOF -->
+        <div class="proof-section">
+
+          <h4>
+            Preuve Paiement
+          </h4>
+
+          <input
+            type="file"
+            id="paymentProof"
+            accept="image/png,image/jpeg,image/jpg"
+            required
+          />
+
+          <p class="proof-info">
+            Upload screenshot Natcash,
+            Moncash ou FOBAS.
+          </p>
+
+        </div>
+
+        <!-- SUBMIT -->
+        <button
+          type="submit"
+          class="btn-primary submit-order-btn"
+        >
+          Envoyer Commande
+        </button>
+
+      </form>
+
+    </div>
+
+  </div>
+
+  <!-- SUCCESS ALERT -->
+  <div class="success-alert"
+  id="successAlert">
+
+    <i class="fa-solid fa-circle-check"></i>
+
+    <span id="successText">
+      Succès
+    </span>
+
+  </div>
+
+  <!-- ERROR ALERT -->
+  <div class="error-alert"
+  id="errorAlert">
+
+    <i class="fa-solid fa-circle-exclamation"></i>
+
+    <span id="errorText">
+      Erreur
+    </span>
+
+  </div>
 
   <script src="businesses.js"></script>
 
