@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
+  <title>FOBAS DIGITAL AGENTS - Connexion</title>
+
+  <link rel="stylesheet" href="connexionagents.css"/>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet"
+  href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"/>
+</head>
+
+<body>
+
+  <!-- BACKGROUND EFFECT -->
+  <div class="bg-circle circle1"></div>
+  <div class="bg-circle circle2"></div>
+
+  <div class="login-container">
+
+    <!-- LEFT -->
+    <div class="login-left">
+
+      <div class="logo">
+        <span class="yellow">FOBAS</span>
+        <span class="white">DIGITAL AGENTS</span>
+      </div>
+
+      <h1>
+        Connectez-vous à votre espace digital.
+      </h1>
+
+      <p>
+        Accédez à votre dashboard intelligent FOBAS,
+        gérez votre activité digitale et développez
+        votre business en toute sécurité.
+      </p>
+
+      <div class="feature-list">
+
+        <div class="feature-card">
+          <i class="fa-solid fa-shield-halved"></i>
+          <span>Système Sécurisé</span>
+        </div>
+
+        <div class="feature-card">
+          <i class="fa-solid fa-chart-line"></i>
+          <span>Dashboard Intelligent</span>
+        </div>
+
+        <div class="feature-card">
+          <i class="fa-solid fa-users"></i>
+          <span>Plateforme Multi-Rôle</span>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- RIGHT -->
+    <div class="login-right">
+
+      <div class="login-card">
+
+        <h2>Connexion</h2>
+
+        <div id="successMessage" class="success-box"></div>
+        <div id="errorMessage" class="error-box"></div>
+
+        <form id="loginForm">
+
+          <input
+            type="email"
+            id="email"
+            placeholder="Adresse Email"
+            required
+          />
+
+          <div class="password-box">
+
+            <input
+              type="password"
+              id="password"
+              placeholder="Mot de passe"
+              required
+            />
+
+            <span id="togglePassword" class="eye">
+              <i class="fa-solid fa-eye"></i>
+            </span>
+
+          </div>
+
+          <button type="submit" id="loginBtn">
+            Se Connecter
+          </button>
+
+        </form>
+
+        <a
+          href="https://fondationbackupspirituel.com/fobasdigitalagents.html"
+          class="back-home"
+        >
+          Retour Accueil
+        </a>
+
+      </div>
+
+    </div>
+
+  </div>
+
+  <script src="connexionagents.js"></script>
+
+</body>
+</html>
