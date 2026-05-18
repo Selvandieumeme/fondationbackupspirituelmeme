@@ -934,21 +934,31 @@ if (email) {
     // ==========================
     return res.json({
 
-      success: true,
+  success: true,
 
-     referralLink:
-agent?.referralCode
-  ? `https://fondationbackupspirituel.com/deveniragents.html?ref=${agent.referralCode}`
-  : "",
+  // ==========================
+  // GLOBAL STATS
+  // ==========================
+  totalUsers,
+  totalAgents,
+  totalBusinesses,
 
-level:
-agent?.level || "Bronze",
+  // ==========================
+  // USER DATA
+  // ==========================
+  referralLink:
+    agent?.referralCode
+      ? `https://fondationbackupspirituel.com/deveniragents.html?ref=${agent.referralCode}`
+      : "",
 
-totalCommission:
-agent?.totalCommission || 0,
+  level:
+    agent?.level || "Bronze",
 
-progress:
-agent?.progress || 0
+  totalCommission:
+    agent?.totalCommission || 0,
+
+  progress:
+    agent?.progress || 0
 
     });
 
@@ -971,8 +981,6 @@ agent?.progress || 0
   }
 
 });
-
-
 
 
 
