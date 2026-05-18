@@ -903,17 +903,11 @@ app.get("/agents/dashboard", async (req, res) => {
     // ==========================
     // FIND USER
     // ==========================
-    const agent =
-      await Agents.findOne({ email });
+    let agent = null;
 
-    if (!agent) {
-
-      return res.status(404).json({
-        success: false,
-        message: "Agent not found"
-      });
-
-    }
+if (email) {
+  agent = await Agents.findOne({ email });
+}
 
     // ==========================
     // GLOBAL STATS
