@@ -1392,6 +1392,592 @@ app.get("/agents/profile", async (req, res) => {
 
 
 
+// ==========================
+// BUSINESS FOLDERS
+// ==========================
+const businessUploadPath =
+path.join(
+  __dirname,
+  "fobas_uploads",
+  "businesses"
+);
+
+const orderUploadPath =
+path.join(
+  __dirname,
+  "fobas_uploads",
+  "orders"
+);
+
+
+// ==========================
+// AUTO CREATE
+// ==========================
+if (!fs.existsSync(businessUploadPath)) {
+
+  fs.mkdirSync(
+    businessUploadPath,
+    { recursive: true }
+  );
+
+}
+
+if (!fs.existsSync(orderUploadPath)) {
+
+  fs.mkdirSync(
+    orderUploadPath,
+    { recursive: true }
+  );
+
+}
+
+
+// ==========================
+// STORAGE BUSINESS
+// ==========================
+const businessStorage =
+multer.diskStorage({
+
+  destination: (
+    req,
+    file,
+    cb
+  ) => {
+
+    cb(
+      null,
+      businessUploadPath
+    );
+
+  },
+
+  filename: (
+    req,
+    file,
+    cb
+  ) => {
+
+    const unique =
+      Date.now() +
+      "-" +
+      Math.round(
+        Math.random() * 1e9
+      );
+
+    cb(
+      null,
+      unique +
+      path.extname(
+        file.originalname
+      )
+    );
+
+  }
+
+});
+
+
+// ==========================
+// STORAGE ORDERS
+// ==========================
+const orderStorage =
+multer.diskStorage({
+
+  destination: (
+    req,
+    file,
+    cb
+  ) => {
+
+    cb(
+      null,
+      orderUploadPath
+    );
+
+  },
+
+  filename: (
+    req,
+    file,
+    cb
+  ) => {
+
+    const unique =
+      Date.now() +
+      "-" +
+      Math.round(
+        Math.random() * 1e9
+      );
+
+    cb(
+      null,
+      unique +
+      path.extname(
+        file.originalname
+      )
+    );
+
+  }
+
+});
+
+
+// ==========================
+// UPLOADS
+// ==========================
+const uploadBusiness =
+multer({
+
+  storage: businessStorage,
+
+  limits:{
+    fileSize:
+    15 * 1024 * 1024
+  }
+
+});
+
+const uploadOrder =
+multer({
+
+  storage: orderStorage,
+
+  limits:{
+    fileSize:
+    15 * 1024 * 1024
+  }
+
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// ==========================
+// GET ALL BUSINESSES
+// ==========================
+
+app.get(
+  "/business/all",
+
+  async (req, res) => {
+
+    try {
+
+      const Agents =
+      mongoose.connection.collection(
+        "agents"
+      );
+
+      // ==========================
+      // FIND ENTREPRENEURS
+      // ==========================
+      const businesses =
+      await Agents.find({
+
+        role:{
+          $in:[
+            "entrepreneur",
+            "agent_entrepreneur"
+          ]
+        }
+
+      })
+
+      .sort({
+        createdAt:-1
+      })
+
+      .toArray();
+
+      // ==========================
+      // RESPONSE
+      // ==========================
+      return res.json({
+
+        success:true,
+
+        businesses
+
+      });
+
+    }
+
+    catch(err){
+
+      console.error(
+        "BUSINESS LOAD ERROR:",
+        err
+      );
+
+      return res.status(500).json({
+
+        success:false,
+        message:
+        "Internal server error"
+
+      });
+
+    }
+
+  }
+);
+
+
+
+
+
+
+
+
+
+
+
+// ==========================
+// CREATE / UPDATE BUSINESS
+// ==========================
+
+app.post(
+
+  "/business/save",
+
+  uploadBusiness.fields([
+
+    {
+      name:"logo",
+      maxCount:1
+    },
+
+    {
+      name:"products",
+      maxCount:30
+    }
+
+  ]),
+
+  async (req, res) => {
+
+    try {
+
+      const {
+
+        email,
+        businessName,
+        whatsapp,
+        city,
+        natcash,
+        moncash,
+        fobasEmail
+
+      } = req.body;
+
+      const Agents =
+      mongoose.connection.collection(
+        "agents"
+      );
+
+      // ==========================
+      // FIND USER
+      // ==========================
+      const agent =
+      await Agents.findOne({
+        email
+      });
+
+      if(!agent){
+
+        return res.status(404).json({
+
+          success:false,
+          message:"User not found"
+
+        });
+
+      }
+
+      // ==========================
+      // LOGO
+      // ==========================
+      let logo = agent.logo || "";
+
+      if(
+        req.files &&
+        req.files.logo &&
+        req.files.logo[0]
+      ){
+
+        logo =
+        `https://api.fondationbackupspirituel.com/fobas_uploads/businesses/${req.files.logo[0].filename}`;
+
+      }
+
+      // ==========================
+      // PRODUCTS
+      // ==========================
+      let products = [];
+
+      if(
+        req.files &&
+        req.files.products
+      ){
+
+        req.files.products.forEach(
+          (file, index) => {
+
+          products.push({
+
+            image:
+            `https://api.fondationbackupspirituel.com/fobas_uploads/businesses/${file.filename}`,
+
+            name:
+            req.body[
+              `productName_${index}`
+            ] || "Produit",
+
+            price:
+            req.body[
+              `productPrice_${index}`
+            ] || 0
+
+          });
+
+        });
+
+      }
+
+      // ==========================
+      // UPDATE
+      // ==========================
+      await Agents.updateOne(
+
+        {
+          email
+        },
+
+        {
+          $set:{
+
+            businessName:
+            businessName || "",
+
+            whatsapp:
+            whatsapp || "",
+
+            city:
+            city || "",
+
+            natcash:
+            natcash || "",
+
+            moncash:
+            moncash || "",
+
+            fobasEmail:
+            fobasEmail || "",
+
+            logo,
+
+            products
+
+          }
+
+        }
+
+      );
+
+      // ==========================
+      // RESPONSE
+      // ==========================
+      return res.json({
+
+        success:true,
+        message:
+        "Business updated"
+
+      });
+
+    }
+
+    catch(err){
+
+      console.error(
+        "BUSINESS SAVE ERROR:",
+        err
+      );
+
+      return res.status(500).json({
+
+        success:false,
+        message:
+        "Internal server error"
+
+      });
+
+    }
+
+  }
+);
+
+
+
+
+// ==========================
+// CREATE ORDER
+// ==========================
+
+app.post(
+
+  "/business/order",
+
+  uploadOrder.single(
+    "proof"
+  ),
+
+  async (req, res) => {
+
+    try {
+
+      const {
+
+        businessId,
+        name,
+        phone,
+        address,
+        order,
+        paymentMethod
+
+      } = req.body;
+
+      // ==========================
+      // VALIDATION
+      // ==========================
+      if(
+        !businessId ||
+        !name ||
+        !phone ||
+        !order
+      ){
+
+        return res.status(400).json({
+
+          success:false,
+          message:
+          "Missing fields"
+
+        });
+
+      }
+
+      // ==========================
+      // COLLECTION
+      // ==========================
+      const Orders =
+      mongoose.connection.collection(
+        "business_orders"
+      );
+
+      // ==========================
+      // PROOF
+      // ==========================
+      let proof = "";
+
+      if(req.file){
+
+        proof =
+        `https://api.fondationbackupspirituel.com/fobas_uploads/orders/${req.file.filename}`;
+
+      }
+
+      // ==========================
+      // INSERT
+      // ==========================
+      await Orders.insertOne({
+
+        businessId,
+
+        clientName:name,
+
+        phone,
+
+        address,
+
+        order,
+
+        paymentMethod,
+
+        proof,
+
+        status:"pending",
+
+        createdAt:
+        new Date()
+
+      });
+
+      // ==========================
+      // RESPONSE
+      // ==========================
+      return res.json({
+
+        success:true,
+        message:
+        "Order created"
+
+      });
+
+    }
+
+    catch(err){
+
+      console.error(
+        "ORDER ERROR:",
+        err
+      );
+
+      return res.status(500).json({
+
+        success:false,
+        message:
+        "Internal server error"
+
+      });
+
+    }
+
+  }
+);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
