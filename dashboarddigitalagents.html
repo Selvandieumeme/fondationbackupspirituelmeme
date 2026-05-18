@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FOBAS DIGITAL DASHBOARD</title>
+
+  <link rel="stylesheet" href="dashboarddigitalagents.css" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+</head>
+<body>
+
+<div class="dashboard-container">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+
+    <div class="logo">
+      <span class="yellow">FOBAS</span>
+      <span class="white">DASHBOARD</span>
+    </div>
+
+    <div class="profile-box">
+      <div class="avatar">
+        <i class="fa-solid fa-user"></i>
+      </div>
+
+      <h3 id="userName">Utilisateur</h3>
+      <p id="userRole">Agent</p>
+    </div>
+
+    <nav class="sidebar-menu">
+      <a href="#"><i class="fa-solid fa-chart-line"></i> Dashboard</a>
+      <a href="#"><i class="fa-solid fa-wallet"></i> Revenus</a>
+      <a href="#"><i class="fa-solid fa-users"></i> Références</a>
+      <a href="#"><i class="fa-solid fa-store"></i> Business</a>
+      <a href="#"><i class="fa-solid fa-gear"></i> Paramètres</a>
+    </nav>
+
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main-content">
+
+    <!-- TOPBAR -->
+    <header class="topbar">
+      <div>
+        <h1>FOBAS DIGITAL DASHBOARD</h1>
+        <p>Bienvenue dans votre espace intelligent.</p>
+      </div>
+
+      <button class="logout-btn" id="logoutBtn">
+        Déconnexion
+      </button>
+    </header>
+
+
+    <!-- STATS -->
+    <section class="stats-grid">
+
+      <div class="stat-card">
+        <h2 id="totalCommission">0 HTG</h2>
+        <p>Commission Totale</p>
+      </div>
+
+      <div class="stat-card">
+        <h2 id="userLevel">Bronze</h2>
+        <p>Niveau</p>
+      </div>
+
+      <div class="stat-card">
+        <h2 id="userProgress">0%</h2>
+        <p>Progression</p>
+      </div>
+
+      <div class="stat-card">
+        <h2 id="userRoleCard">Agent</h2>
+        <p>Rôle</p>
+      </div>
+
+    </section>
+
+
+    <!-- AGENT SECTION -->
+    <section class="dashboard-section" id="agentSection">
+
+      <div class="section-header">
+        <h2>
+          <i class="fa-solid fa-user-tie"></i>
+          Espace Agent
+        </h2>
+      </div>
+
+      <div class="cards-grid">
+
+        <div class="info-card">
+          <h3>Code Referral</h3>
+          <p id="referralCode">---</p>
+        </div>
+
+        <div class="info-card">
+          <h3>Total Références</h3>
+          <p id="totalReferrals">0</p>
+        </div>
+
+        <div class="info-card">
+          <h3>Revenus du Mois</h3>
+          <p id="monthlyRevenue">0 HTG</p>
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- ENTREPRENEUR SECTION -->
+    <section class="dashboard-section" id="entrepreneurSection">
+
+      <div class="section-header">
+        <h2>
+          <i class="fa-solid fa-store"></i>
+          Espace Entrepreneur
+        </h2>
+      </div>
+
+      <div class="cards-grid">
+
+        <div class="info-card">
+          <h3>Business</h3>
+          <p id="businessName">---</p>
+        </div>
+
+        <div class="info-card">
+          <h3>Ville</h3>
+          <p id="businessCity">---</p>
+        </div>
+
+        <div class="info-card">
+          <h3>Whatsapp</h3>
+          <p id="businessWhatsapp">---</p>
+        </div>
+
+      </div>
+
+    </section>
+
+  </main>
+
+</div>
+
+<script src="dashboarddigitalagents.js"></script>
+</body>
+</html>
