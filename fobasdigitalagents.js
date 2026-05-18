@@ -124,6 +124,11 @@ async function loadDashboard() {
 
     const totalBusinesses = document.getElementById("totalBusinesses");
     if (totalBusinesses) totalBusinesses.innerText = data.totalBusinesses || 0;
+    
+    const totalAgents = document.getElementById("totalAgents");
+if (totalAgents) {
+  totalAgents.innerText = data.totalAgents || 0;
+}
 
     // AGENT INFO
     const level = document.getElementById("agentLevel");
