@@ -936,20 +936,19 @@ if (email) {
 
       success: true,
 
-      referralLink:
-        `https://fondationbackupspirituel.com/deveniragents.html?ref=${agent.referralCode}`,
+     referralLink:
+agent?.referralCode
+  ? `https://fondationbackupspirituel.com/deveniragents.html?ref=${agent.referralCode}`
+  : "",
 
-      totalUsers,
-      totalAgents,
-      totalBusinesses,
+level:
+agent?.level || "Bronze",
 
-      level: agent.level || "Bronze",
+totalCommission:
+agent?.totalCommission || 0,
 
-      totalCommission:
-        agent.totalCommission || 0,
-
-      progress:
-        agent.progress || 0
+progress:
+agent?.progress || 0
 
     });
 
