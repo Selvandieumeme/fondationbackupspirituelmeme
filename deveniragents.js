@@ -297,6 +297,14 @@ if (role === "agent_entrepreneur") {
       );
 
 
+      setTimeout(() => {
+    window.location.href = "/dashboarddigitalagents.html";
+    }, 1500);
+
+
+
+      
+
       // ==========================
       // RESET FORM
       // ==========================
