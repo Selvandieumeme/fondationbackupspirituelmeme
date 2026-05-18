@@ -990,6 +990,129 @@ if (email) {
 
 
 
+// ==========================
+// DASHBOARD PROFILE ROUTE
+// ==========================
+
+app.get("/dashboard/profile", async (req, res) => {
+
+  try {
+
+    const email = req.query.email;
+
+    if (!email) {
+
+      return res.status(400).json({
+        success: false,
+        message: "Email required"
+      });
+
+    }
+
+    const Agents =
+      mongoose.connection.collection("agents");
+
+
+    // ==========================
+    // FIND USER
+    // ==========================
+    const user =
+      await Agents.findOne({
+        email: String(email)
+          .trim()
+          .toLowerCase()
+      });
+
+
+    if (!user) {
+
+      return res.status(404).json({
+        success: false,
+        message: "User not found"
+      });
+
+    }
+
+
+    // ==========================
+    // RESPONSE
+    // ==========================
+    return res.json({
+
+      success: true,
+
+      name: user.name || "Utilisateur",
+      email: user.email || "",
+
+      role: user.role || "agent",
+
+      level: user.level || "Bronze",
+
+      totalCommission:
+        user.totalCommission || 0,
+
+      progress:
+        user.progress || 0,
+
+      referralCode:
+        user.referralCode || "",
+
+      totalReferrals:
+        user.totalReferrals || 0,
+
+      monthlyRevenue:
+        user.monthlyRevenue || 0,
+
+      businessName:
+        user.businessName || "",
+
+      whatsapp:
+        user.whatsapp || "",
+
+      country:
+        user.country || "",
+
+      city:
+        user.city || "",
+
+      zone:
+        user.zone || ""
+
+    });
+
+  }
+
+  catch (err) {
+
+    console.error(
+      "DASHBOARD PROFILE ERROR:",
+      err
+    );
+
+    return res.status(500).json({
+
+      success: false,
+      message: "Internal server error"
+
+    });
+
+  }
+
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
