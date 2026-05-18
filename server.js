@@ -1111,6 +1111,300 @@ app.get("/dashboard/profile", async (req, res) => {
 
 
 
+// ==========================
+// AGENTS LOGIN ROUTE
+// SAFE FINAL VERSION
+// ==========================
+
+app.post("/agents/login", async (req, res) => {
+
+  try {
+
+    let { email, password } = req.body || {};
+
+    // ==========================
+    // VALIDATION
+    // ==========================
+    if (!email || !password) {
+
+      return res.status(400).json({
+        success: false,
+        message: "Email et mot de passe requis"
+      });
+
+    }
+
+    // ==========================
+    // CLEAN DATA
+    // ==========================
+    email = String(email)
+      .trim()
+      .toLowerCase();
+
+    password = String(password);
+
+    // ==========================
+    // COLLECTION
+    // ==========================
+    const Agents =
+      mongoose.connection.collection("agents");
+
+    // ==========================
+    // FIND USER
+    // ==========================
+    const agent =
+      await Agents.findOne({ email });
+
+    if (!agent) {
+
+      return res.status(404).json({
+        success: false,
+        message: "Compte introuvable"
+      });
+
+    }
+
+    // ==========================
+    // PASSWORD CHECK
+    // ==========================
+    const validPassword =
+      await bcryptjs.compare(
+        password,
+        agent.password
+      );
+
+    if (!validPassword) {
+
+      return res.status(401).json({
+        success: false,
+        message: "Mot de passe incorrect"
+      });
+
+    }
+
+    // ==========================
+    // SUCCESS
+    // ==========================
+    return res.json({
+
+      success: true,
+
+      message: "Connexion réussie",
+
+      user: {
+
+        id: agent._id,
+
+        name: agent.name,
+
+        email: agent.email,
+
+        role: agent.role || "agent",
+
+        referralCode:
+          agent.referralCode || "",
+
+        level:
+          agent.level || "Bronze",
+
+        totalCommission:
+          agent.totalCommission || 0,
+
+        progress:
+          agent.progress || 0,
+
+        businessName:
+          agent.businessName || "",
+
+        whatsapp:
+          agent.whatsapp || "",
+
+        country:
+          agent.country || "",
+
+        city:
+          agent.city || "",
+
+        zone:
+          agent.zone || ""
+
+      }
+
+    });
+
+  }
+
+  catch (err) {
+
+    console.error(
+      "LOGIN ERROR:",
+      err
+    );
+
+    return res.status(500).json({
+
+      success: false,
+
+      message: "Internal server error",
+
+      error: err.message
+
+    });
+
+  }
+
+});
+
+
+
+
+
+
+// ==========================
+// SECURE AGENT DASHBOARD
+// ==========================
+
+app.get("/agents/profile", async (req, res) => {
+
+  try {
+
+    const email =
+      req.query.email;
+
+    if (!email) {
+
+      return res.status(400).json({
+        success: false,
+        message: "Email requis"
+      });
+
+    }
+
+    const Agents =
+      mongoose.connection.collection("agents");
+
+    // ==========================
+    // FIND USER
+    // ==========================
+    const agent =
+      await Agents.findOne({
+
+        email:
+          String(email)
+            .trim()
+            .toLowerCase()
+
+      });
+
+    if (!agent) {
+
+      return res.status(404).json({
+
+        success: false,
+        message: "Utilisateur introuvable"
+
+      });
+
+    }
+
+    // ==========================
+    // RESPONSE
+    // ==========================
+    return res.json({
+
+      success: true,
+
+      profile: {
+
+        name:
+          agent.name || "",
+
+        email:
+          agent.email || "",
+
+        role:
+          agent.role || "agent",
+
+        referralCode:
+          agent.referralCode || "",
+
+        level:
+          agent.level || "Bronze",
+
+        totalCommission:
+          agent.totalCommission || 0,
+
+        progress:
+          agent.progress || 0,
+
+        businessName:
+          agent.businessName || "",
+
+        whatsapp:
+          agent.whatsapp || "",
+
+        country:
+          agent.country || "",
+
+        city:
+          agent.city || "",
+
+        zone:
+          agent.zone || "",
+
+        createdAt:
+          agent.createdAt || null
+
+      }
+
+    });
+
+  }
+
+  catch (err) {
+
+    console.error(
+      "PROFILE ERROR:",
+      err
+    );
+
+    return res.status(500).json({
+
+      success: false,
+      message: "Internal server error"
+
+    });
+
+  }
+
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
