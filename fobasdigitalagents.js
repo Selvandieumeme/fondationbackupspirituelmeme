@@ -160,9 +160,12 @@ document.getElementById("btnBecomeAgent")?.addEventListener("click", () => {
   window.location.href = "https://fondationbackupspirituel.com/deveniragents.html";
 });
 
-// Create Business
-document.getElementById("btnCreateBusiness")?.addEventListener("click", () => {
-  window.location.href = "/business/register";
+// Connexion
+document.getElementById("btnConnexion")?.addEventListener("click", () => {
+
+  window.location.href =
+    "https://fondationbackupspirituel.com/connexionagents.html";
+
 });
 
 // Join Business
