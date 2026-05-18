@@ -887,6 +887,103 @@ app.post("/agents/register", async (req, res) => {
 
 
 
+// ==========================
+// AGENTS DASHBOARD ROUTE
+// ==========================
+
+app.get("/agents/dashboard", async (req, res) => {
+
+  try {
+
+    const email = req.query.email;
+
+    const Agents =
+      mongoose.connection.collection("agents");
+
+    // ==========================
+    // FIND USER
+    // ==========================
+    const agent =
+      await Agents.findOne({ email });
+
+    if (!agent) {
+
+      return res.status(404).json({
+        success: false,
+        message: "Agent not found"
+      });
+
+    }
+
+    // ==========================
+    // GLOBAL STATS
+    // ==========================
+    const totalUsers =
+      await Agents.countDocuments();
+
+    const totalAgents =
+      await Agents.countDocuments({
+        role: {
+          $in: ["agent", "agent_entrepreneur"]
+        }
+      });
+
+    const totalBusinesses =
+      await Agents.countDocuments({
+        role: {
+          $in: ["entrepreneur", "agent_entrepreneur"]
+        }
+      });
+
+    // ==========================
+    // RESPONSE
+    // ==========================
+    return res.json({
+
+      success: true,
+
+      referralLink:
+        `https://fondationbackupspirituel.com/deveniragents.html?ref=${agent.referralCode}`,
+
+      totalUsers,
+      totalAgents,
+      totalBusinesses,
+
+      level: agent.level || "Bronze",
+
+      totalCommission:
+        agent.totalCommission || 0,
+
+      progress:
+        agent.progress || 0
+
+    });
+
+  }
+
+  catch (err) {
+
+    console.error(
+      "DASHBOARD ERROR:",
+      err
+    );
+
+    return res.status(500).json({
+
+      success: false,
+      message: "Internal server error"
+
+    });
+
+  }
+
+});
+
+
+
+
+
+
 
 
 
