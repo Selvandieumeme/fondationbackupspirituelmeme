@@ -105,12 +105,12 @@ function copyReferral() {
 async function loadDashboard() {
   try {
 
-    const email = localStorage.getItem("userEmail");
-    if (!email) return;
+    const email =
+  localStorage.getItem("userEmail") || "";
 
-    const res = await fetch(
-      `${API_URL}/agents/dashboard?email=${email}`
-    );
+const res = await fetch(
+  `${API_URL}/agents/dashboard?email=${email}`
+);
 
     const data = await res.json();
 
