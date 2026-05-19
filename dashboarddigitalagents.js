@@ -164,3 +164,100 @@ businessLogoInput?.addEventListener(
     reader.readAsDataURL(file);
 
 });
+
+
+
+
+
+// ==========================
+// UPLOAD BUSINESS LOGO
+// ==========================
+
+const uploadBusinessLogoBtn =
+document.getElementById(
+  "uploadBusinessLogoBtn"
+);
+
+uploadBusinessLogoBtn?.addEventListener(
+  "click",
+  async () => {
+
+    try{
+
+      const file =
+      businessLogoInput.files[0];
+
+      if(!file){
+
+        alert(
+          "Choisissez un logo."
+        );
+
+        return;
+      }
+
+      const email =
+      localStorage.getItem(
+        "userEmail"
+      );
+
+      const formData =
+      new FormData();
+
+      formData.append(
+        "logo",
+        file
+      );
+
+      formData.append(
+        "email",
+        email
+      );
+
+      const res = await fetch(
+
+        `${API_URL}/business/upload-logo`,
+
+        {
+          method:"POST",
+          body:formData
+        }
+
+      );
+
+      const data =
+      await res.json();
+
+      if(data.success){
+
+        alert(
+          "Logo business mis à jour."
+        );
+
+      }
+
+      else{
+
+        alert(
+          data.message ||
+          "Erreur upload."
+        );
+
+      }
+
+    }
+
+    catch(error){
+
+      console.error(
+        "UPLOAD LOGO ERROR:",
+        error
+      );
+
+      alert(
+        "Erreur serveur."
+      );
+
+    }
+
+});
