@@ -37,6 +37,33 @@ window.addEventListener("DOMContentLoaded", async () => {
     document.getElementById("userRoleCard").innerText = data.role || "agent";
 
 
+// ==========================
+// AVATAR STABILITY
+// ==========================
+if (
+  data.avatar &&
+  userAvatar
+) {
+
+  if (
+    data.avatar.startsWith("http")
+  ) {
+
+    userAvatar.src =
+      data.avatar;
+
+  } else {
+
+    userAvatar.src =
+      `${API_URL}${data.avatar}`;
+
+  }
+
+}
+
+    
+
+
     // ==========================
     // STATS
     // ==========================
