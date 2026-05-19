@@ -1353,7 +1353,12 @@ app.get("/agents/profile", async (req, res) => {
           agent.zone || "",
 
         createdAt:
-          agent.createdAt || null
+          agent.createdAt || null,
+	// ==========================
+    // BUSINESS LOGO
+    // ==========================
+    logo:
+      agent.logo || ""		  
 
       }
 
