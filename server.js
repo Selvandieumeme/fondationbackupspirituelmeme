@@ -1966,6 +1966,78 @@ app.post(
 
 
 
+// ==========================
+// UPLOAD BUSINESS LOGO
+// ==========================
+app.post(
+
+  "/business/upload-logo",
+
+  uploadBusiness.single("logo"),
+
+  async (req,res) => {
+
+    try{
+
+      const { email } = req.body;
+
+      if(
+        !email ||
+        !req.file
+      ){
+
+        return res.json({
+          success:false,
+          message:
+          "Informations manquantes"
+        });
+
+      }
+
+      const logo =
+      `/fobas_uploads/businesses/${req.file.filename}`;
+
+      await User.updateOne(
+
+        { email },
+
+        {
+          $set:{
+            businessLogo:logo
+          }
+        }
+
+      );
+
+      res.json({
+        success:true,
+        logo
+      });
+
+    }
+
+    catch(error){
+
+      console.error(
+        "UPLOAD BUSINESS LOGO ERROR:",
+        error
+      );
+
+      res.status(500).json({
+        success:false,
+        message:"Erreur serveur"
+      });
+
+    }
+
+});
+
+
+
+
+
+
+
 
 
 
