@@ -1970,6 +1970,7 @@ app.post(
 // UPLOAD BUSINESS LOGO
 // ==========================
 app.post(
+
   "/business/upload-logo",
 
   uploadBusiness.single("logo"),
@@ -1978,67 +1979,96 @@ app.post(
 
     try {
 
-      console.log(req.file);
+      // ==========================
+      // DEBUG
+      // ==========================
+      console.log(
+        "UPLOAD FILE:",
+        req.file
+      );
 
+      console.log(
+        "UPLOAD BODY:",
+        req.body
+      );
+
+      // ==========================
+      // EMAIL
+      // ==========================
       const { email } = req.body;
 
       if (!email) {
 
         return res.status(400).json({
+
           success: false,
           message: "Email manquant"
-        });
 
-      }
-
-      if (!req.file) {
-
-        return res.status(400).json({
-          success: false,
-          message: "Logo manquant"
         });
 
       }
 
       // ==========================
-      // LOGO PATH
+      // FILE
+      // ==========================
+      if (!req.file) {
+
+        return res.status(400).json({
+
+          success: false,
+          message: "Logo manquant"
+
+        });
+
+      }
+
+      // ==========================
+      // SAFE LOGO PATH
       // ==========================
       const logoPath =
         `/fobas_uploads/businesses/${req.file.filename}`;
 
       // ==========================
-      // UPDATE USER
+      // CHECK USER
       // ==========================
-      const updatedUser =
-      await User.findOneAndUpdate(
+      const user =
+      await User.findOne({
 
-        { email },
+        email: email
 
-        {
-          $set: {
-            businessLogo: logoPath
-          }
-        },
+      });
 
-        { new: true }
-
-      );
-
-      if (!updatedUser) {
+      if (!user) {
 
         return res.status(404).json({
+
           success: false,
           message: "Utilisateur introuvable"
+
         });
 
       }
 
       // ==========================
+      // UPDATE LOGO
+      // ==========================
+      user.businessLogo =
+      logoPath;
+
+      await user.save();
+
+      // ==========================
       // SUCCESS
       // ==========================
-      res.json({
+      return res.status(200).json({
+
         success: true,
+
+        message:
+        "Logo uploadé avec succès",
+
         logo: logoPath
+
       });
 
     }
@@ -2050,10 +2080,16 @@ app.post(
         error
       );
 
-      res.status(500).json({
+      return res.status(500).json({
+
         success: false,
-        message: "Erreur serveur",
-        error: error.message
+
+        message:
+        "Erreur serveur",
+
+        error:
+        error.message
+
       });
 
     }
@@ -2061,7 +2097,6 @@ app.post(
   }
 
 );
-
 
 
 
