@@ -94,6 +94,33 @@ window.addEventListener("DOMContentLoaded", async () => {
       document.getElementById("businessWhatsapp").innerText =
         data.whatsapp || "---";
 
+      // ==========================
+      // BUSINESS LOGO STABILITY
+      // ==========================
+      if (
+        data.logo &&
+        businessLogoPreview
+      ) {
+
+        // ==========================
+        // AUTO FIX URL
+        // ==========================
+        if (
+          data.logo.startsWith("http")
+        ) {
+
+          businessLogoPreview.src =
+            data.logo;
+
+        } else {
+
+          businessLogoPreview.src =
+            `${API_URL}${data.logo}`;
+
+        }
+
+      }
+
     } else {
 
       document.getElementById("entrepreneurSection").style.display = "none";
