@@ -323,3 +323,56 @@ nav a{
   .stats-grid{grid-template-columns:1fr;}
   .products-grid{grid-template-columns:1fr;}
 }
+
+
+
+
+
+
+
+
+/* ==========================
+   ALERTS (FIX FINAL)
+========================== */
+
+.success-alert,
+.error-alert {
+  position: fixed;
+  bottom: 25px;
+  right: 25px;
+  padding: 14px 18px;
+  border-radius: 14px;
+  display: none; /* 🔥 ENPÒTAN: kache yo default */
+  align-items: center;
+  gap: 10px;
+  font-weight: 600;
+  z-index: 99999;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+}
+
+/* SUCCESS */
+.success-alert {
+  background: #e8fff1;
+  color: #0a7a3d;
+  border-left: 5px solid #00c853;
+}
+
+/* ERROR */
+.error-alert {
+  background: #ffecec;
+  color: #b00020;
+  border-left: 5px solid #ff1744;
+}
+
+
+
+
+
+
+
+
+
+.success-alert.show,
+.error-alert.show {
+  display: flex;
+}
