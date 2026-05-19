@@ -129,16 +129,18 @@ async function loadBusinesses() {
       <div class="business-card">
 
         <!-- BANNER -->
-        <div class="business-banner">
+<div class="business-banner">
 
-          <img
-            src="${
-              business.logo ||
-              "https://via.placeholder.com/200"
-            }"
-          />
+  <img
+    src="${
+      business.logo
+      ? `${API_URL}${business.logo}`
+      : 'https://via.placeholder.com/200'
+    }"
+    class="business-logo"
+  />
 
-        </div>
+</div>
 
         <!-- CONTENT -->
         <div class="business-content">
