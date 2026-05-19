@@ -24,6 +24,7 @@ window.addEventListener("DOMContentLoaded", async () => {
     );
 
     const data = await response.json();
+    const profile = data.profile;
 
 
     // ==========================
@@ -129,6 +130,26 @@ window.addEventListener("DOMContentLoaded", async () => {
 
   }
 
+  // ==========================
+// LOAD USER AVATAR
+// ==========================
+const userAvatar =
+document.getElementById(
+  "userAvatar"
+);
+
+if (
+  profile.avatar &&
+  userAvatar
+) {
+
+  userAvatar.src =
+    `${API_URL}${profile.avatar}`;
+
+}
+
+
+  
   catch (err) {
 
     console.error("DASHBOARD ERROR:", err);
@@ -283,6 +304,147 @@ uploadBusinessLogoBtn?.addEventListener(
 
       alert(
         "Erreur serveur."
+      );
+
+    }
+
+});
+
+
+
+
+
+
+
+
+
+
+
+// ==========================
+// AVATAR SYSTEM
+// ==========================
+
+const avatarInput =
+document.getElementById(
+  "avatarInput"
+);
+
+const userAvatar =
+document.getElementById(
+  "userAvatar"
+);
+
+// ==========================
+// OPEN FILE SELECTOR
+// ==========================
+userAvatar?.addEventListener(
+  "click",
+  () => {
+
+    avatarInput.click();
+
+  }
+);
+
+// ==========================
+// UPLOAD AVATAR
+// ==========================
+avatarInput?.addEventListener(
+  "change",
+
+  async (e) => {
+
+    try {
+
+      const file =
+      e.target.files[0];
+
+      if(!file) return;
+
+      // ==========================
+      // LOCAL PREVIEW
+      // ==========================
+      const reader =
+      new FileReader();
+
+      reader.onload = () => {
+
+        userAvatar.src =
+        reader.result;
+
+      };
+
+      reader.readAsDataURL(file);
+
+      // ==========================
+      // FORM DATA
+      // ==========================
+      const formData =
+      new FormData();
+
+      formData.append(
+        "avatar",
+        file
+      );
+
+      formData.append(
+        "email",
+        localStorage.getItem(
+          "userEmail"
+        )
+      );
+
+      // ==========================
+      // REQUEST
+      // ==========================
+      const res =
+      await fetch(
+
+        `${API_URL}/agents/upload-avatar`,
+
+        {
+          method:"POST",
+          body:formData
+        }
+
+      );
+
+      const data =
+      await res.json();
+
+      // ==========================
+      // FINAL AVATAR
+      // ==========================
+      if(
+        data.success &&
+        data.avatar
+      ){
+
+        userAvatar.src =
+        `${API_URL}${data.avatar}`;
+
+      }
+
+      else{
+
+        alert(
+          data.message ||
+          "Erreur avatar"
+        );
+
+      }
+
+    }
+
+    catch(err){
+
+      console.error(
+        "AVATAR JS ERROR:",
+        err
+      );
+
+      alert(
+        "Erreur serveur"
       );
 
     }
