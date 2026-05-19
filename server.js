@@ -1263,7 +1263,6 @@ app.post("/agents/login", async (req, res) => {
 // ==========================
 // SECURE AGENT DASHBOARD
 // ==========================
-
 app.get("/agents/profile", async (req, res) => {
 
   try {
@@ -1354,11 +1353,18 @@ app.get("/agents/profile", async (req, res) => {
 
         createdAt:
           agent.createdAt || null,
-	// ==========================
-    // BUSINESS LOGO
-    // ==========================
-    logo:
-      agent.logo || ""		  
+
+        // ==========================
+        // BUSINESS LOGO
+        // ==========================
+        logo:
+          agent.logo || "",
+
+        // ==========================
+        // USER AVATAR
+        // ==========================
+        avatar:
+          agent.avatar || ""
 
       }
 
@@ -1482,6 +1488,72 @@ multer.diskStorage({
 });
 
 
+
+
+
+
+
+// ==========================
+// STORAGE AVATARS
+// ==========================
+const avatarUploadPath =
+path.join(
+  __dirname,
+  "fobas_uploads",
+  "avatars"
+);
+
+// ==========================
+// STORAGE AVATAR
+// ==========================
+const avatarStorage =
+multer.diskStorage({
+
+  destination: (
+    req,
+    file,
+    cb
+  ) => {
+
+    cb(
+      null,
+      avatarUploadPath
+    );
+
+  },
+
+  filename: (
+    req,
+    file,
+    cb
+  ) => {
+
+    const unique =
+      Date.now() +
+      "-" +
+      Math.round(
+        Math.random() * 1e9
+      );
+
+    cb(
+      null,
+      unique +
+      path.extname(
+        file.originalname
+      )
+    );
+
+  }
+
+});
+
+
+
+
+
+
+
+
 // ==========================
 // STORAGE ORDERS
 // ==========================
@@ -1557,7 +1629,20 @@ multer({
 
 
 
+// ==========================
+// UPLOAD AVATAR
+// ==========================
+const uploadAvatar =
+multer({
 
+  storage: avatarStorage,
+
+  limits:{
+    fileSize:
+    15 * 1024 * 1024
+  }
+
+});
 
 
 
@@ -2126,7 +2211,155 @@ app.post(
 
 
 
+// ==========================
+// UPLOAD USER AVATAR
+// ==========================
+app.post(
 
+  "/agents/upload-avatar",
+
+  uploadAvatar.single(
+    "avatar"
+  ),
+
+  async (req, res) => {
+
+    try {
+
+      console.log(
+        "AVATAR FILE:",
+        req.file
+      );
+
+      console.log(
+        "AVATAR BODY:",
+        req.body
+      );
+
+      const { email } =
+      req.body;
+
+      if (!email) {
+
+        return res.status(400).json({
+
+          success:false,
+          message:"Email requis"
+
+        });
+
+      }
+
+      if (!req.file) {
+
+        return res.status(400).json({
+
+          success:false,
+          message:"Avatar manquant"
+
+        });
+
+      }
+
+      // ==========================
+      // AVATAR PATH
+      // ==========================
+      const avatarPath =
+      `/fobas_uploads/avatars/${req.file.filename}`;
+
+      // ==========================
+      // AGENTS
+      // ==========================
+      const Agents =
+      mongoose.connection.collection(
+        "agents"
+      );
+
+      // ==========================
+      // CHECK USER
+      // ==========================
+      const user =
+      await Agents.findOne({
+
+        email:
+        String(email)
+        .trim()
+        .toLowerCase()
+
+      });
+
+      if(!user){
+
+        return res.status(404).json({
+
+          success:false,
+          message:
+          "Utilisateur introuvable"
+
+        });
+
+      }
+
+      // ==========================
+      // UPDATE AVATAR
+      // ==========================
+      await Agents.updateOne(
+
+        {
+          email:
+          String(email)
+          .trim()
+          .toLowerCase()
+        },
+
+        {
+          $set:{
+
+            avatar:
+            avatarPath
+
+          }
+        }
+
+      );
+
+      // ==========================
+      // RESPONSE
+      // ==========================
+      return res.json({
+
+        success:true,
+
+        message:
+        "Avatar mis à jour",
+
+        avatar:
+        avatarPath
+
+      });
+
+    }
+
+    catch(err){
+
+      console.error(
+        "AVATAR ERROR:",
+        err
+      );
+
+      return res.status(500).json({
+
+        success:false,
+        message:
+        "Internal server error"
+
+      });
+
+    }
+
+  }
+
+);
 
 
 
