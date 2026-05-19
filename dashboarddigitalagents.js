@@ -124,3 +124,43 @@ logoutBtn?.addEventListener("click", () => {
   window.location.href = "/deveniragents.html";
 
 });
+
+
+
+
+// ==========================
+// BUSINESS LOGO PREVIEW
+// ==========================
+
+const businessLogoInput =
+document.getElementById(
+  "businessLogoInput"
+);
+
+const businessLogoPreview =
+document.getElementById(
+  "businessLogoPreview"
+);
+
+businessLogoInput?.addEventListener(
+  "change",
+  (e) => {
+
+    const file =
+      e.target.files[0];
+
+    if(!file) return;
+
+    const reader =
+      new FileReader();
+
+    reader.onload = () => {
+
+      businessLogoPreview.src =
+        reader.result;
+
+    };
+
+    reader.readAsDataURL(file);
+
+});
