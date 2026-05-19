@@ -1978,16 +1978,15 @@ app.post(
 
     try {
 
-  console.log(req.file);
-  console.log(req.body);
+      console.log(req.file);
 
-  const { email } = req.body;
+      const { email } = req.body;
 
       if (!email) {
 
         return res.status(400).json({
-          success:false,
-          message:"Email manquant"
+          success: false,
+          message: "Email manquant"
         });
 
       }
@@ -1995,51 +1994,73 @@ app.post(
       if (!req.file) {
 
         return res.status(400).json({
-          success:false,
-          message:"Logo manquant"
+          success: false,
+          message: "Logo manquant"
         });
 
       }
 
+      // ==========================
+      // LOGO PATH
+      // ==========================
       const logoPath =
-      `/fobas_uploads/businesses/${req.file.filename}`;
+        `/fobas_uploads/businesses/${req.file.filename}`;
 
+      // ==========================
       // UPDATE USER
-      await User.updateOne(
+      // ==========================
+      const updatedUser =
+      await User.findOneAndUpdate(
 
         { email },
 
         {
-          $set:{
-            businessLogo:logoPath
+          $set: {
+            businessLogo: logoPath
           }
-        }
+        },
+
+        { new: true }
 
       );
 
+      if (!updatedUser) {
+
+        return res.status(404).json({
+          success: false,
+          message: "Utilisateur introuvable"
+        });
+
+      }
+
+      // ==========================
+      // SUCCESS
+      // ==========================
       res.json({
-        success:true,
-        logo:logoPath
+        success: true,
+        logo: logoPath
       });
 
     }
 
-    catch(error){
+    catch (error) {
 
-  console.log(
-    "UPLOAD LOGO FULL ERROR:",
-    error
-  );
+      console.log(
+        "UPLOAD LOGO FULL ERROR:",
+        error
+      );
 
-  res.status(500).json({
-    success:false,
-    error:error.message
-  });
+      res.status(500).json({
+        success: false,
+        message: "Erreur serveur",
+        error: error.message
+      });
 
-}
+    }
 
-});
+  }
 
+);
 
 
 
