@@ -129,27 +129,7 @@ window.addEventListener("DOMContentLoaded", async () => {
     }
 
   }
-
-  // ==========================
-// LOAD USER AVATAR
-// ==========================
-const userAvatar =
-document.getElementById(
-  "userAvatar"
-);
-
-if (
-  profile.avatar &&
-  userAvatar
-) {
-
-  userAvatar.src =
-    `${API_URL}${profile.avatar}`;
-
-}
-
-
-  
+ 
   catch (err) {
 
     console.error("DASHBOARD ERROR:", err);
