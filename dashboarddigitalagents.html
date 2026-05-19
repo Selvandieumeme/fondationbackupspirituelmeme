@@ -120,35 +120,69 @@
 
 
     <!-- ENTREPRENEUR SECTION -->
-    <section class="dashboard-section" id="entrepreneurSection">
+<section class="dashboard-section" id="entrepreneurSection">
 
-      <div class="section-header">
-        <h2>
-          <i class="fa-solid fa-store"></i>
-          Espace Entrepreneur
-        </h2>
-      </div>
+  <div class="section-header">
+    <h2>
+      <i class="fa-solid fa-store"></i>
+      Espace Entrepreneur
+    </h2>
+  </div>
 
-      <div class="cards-grid">
+  <div class="cards-grid">
 
-        <div class="info-card">
-          <h3>Business</h3>
-          <p id="businessName">---</p>
-        </div>
+    <div class="info-card">
+      <h3>Business</h3>
+      <p id="businessName">---</p>
+    </div>
 
-        <div class="info-card">
-          <h3>Ville</h3>
-          <p id="businessCity">---</p>
-        </div>
+    <div class="info-card">
+      <h3>Ville</h3>
+      <p id="businessCity">---</p>
+    </div>
 
-        <div class="info-card">
-          <h3>Whatsapp</h3>
-          <p id="businessWhatsapp">---</p>
-        </div>
+    <div class="info-card">
+      <h3>Whatsapp</h3>
+      <p id="businessWhatsapp">---</p>
+    </div>
 
-      </div>
+  </div>
 
-    </section>
+  <!-- BUSINESS LOGO -->
+
+  <div class="business-logo-upload">
+
+    <h3 class="upload-title">
+      Logo de votre Business
+    </h3>
+
+    <label
+      for="businessLogoInput"
+      class="logo-upload-box"
+    >
+
+      <img
+        src="https://via.placeholder.com/200"
+        id="businessLogoPreview"
+        class="business-logo-preview"
+      />
+
+      <span>
+        Upload Logo
+      </span>
+
+    </label>
+
+    <input
+      type="file"
+      id="businessLogoInput"
+      accept="image/png,image/jpeg,image/jpg"
+      hidden
+    />
+
+  </div>
+
+</section>
 
   </main>
 
