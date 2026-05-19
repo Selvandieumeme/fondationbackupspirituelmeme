@@ -24,9 +24,20 @@ window.addEventListener("DOMContentLoaded", async () => {
     );
 
     const data = await response.json();
-    if (data.avatar && userAvatar) {
-  userAvatar.src = `${API_URL}${data.avatar}?t=${Date.now()}`;
-}
+
+    // ==========================
+    // AVATAR (CLEAN + SINGLE SOURCE OF TRUTH)
+    // ==========================
+    const userAvatar = document.getElementById("userAvatar");
+
+    if (userAvatar) {
+      userAvatar.src = data.avatar
+        ? `${API_URL}${data.avatar}?t=${Date.now()}`
+        : "https://via.placeholder.com/120";
+    }
+
+    
+   
     
 
 
@@ -40,29 +51,6 @@ window.addEventListener("DOMContentLoaded", async () => {
     document.getElementById("userRoleCard").innerText = data.role || "agent";
 
 
-// ==========================
-// AVATAR STABILITY
-// ==========================
-if (
-  data.avatar &&
-  userAvatar
-) {
-
-  if (
-    data.avatar.startsWith("http")
-  ) {
-
-    userAvatar.src =
-      data.avatar;
-
-  } else {
-
-    userAvatar.src =
-      `${API_URL}${data.avatar}`;
-
-  }
-
-}
 
     
 
