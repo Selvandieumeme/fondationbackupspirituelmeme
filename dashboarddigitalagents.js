@@ -405,19 +405,40 @@ avatarInput?.addEventListener(
       // REQUEST
       // ==========================
       const res =
-      await fetch(
+await fetch(
 
-        `${API_URL}/agents/upload-avatar`,
+  `${API_URL}/agents/upload-avatar`,
 
-        {
-          method:"POST",
-          body:formData
-        }
+  {
+    method:"POST",
+    body:formData
+  }
 
-      );
+);
 
-      const data =
-      await res.json();
+if(!res.ok){
+
+  throw new Error(
+    `HTTP ${res.status}`
+  );
+
+}
+
+let data;
+
+try{
+
+  data = await res.json();
+
+}
+
+catch{
+
+  throw new Error(
+    "Réponse JSON invalide"
+  );
+
+}
 
       // ==========================
       // FINAL AVATAR
