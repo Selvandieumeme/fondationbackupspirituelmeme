@@ -24,6 +24,9 @@ window.addEventListener("DOMContentLoaded", async () => {
     );
 
     const data = await response.json();
+    if (data.avatar && userAvatar) {
+  userAvatar.src = `${API_URL}${data.avatar}?t=${Date.now()}`;
+}
     
 
 
