@@ -2023,16 +2023,24 @@ app.post(
       }
 
       // ==========================
-      // SAFE LOGO PATH
+      // LOGO PATH
       // ==========================
       const logoPath =
         `/fobas_uploads/businesses/${req.file.filename}`;
 
       // ==========================
-      // CHECK USER
+      // AGENTS COLLECTION
+      // ==========================
+      const Agents =
+      mongoose.connection.collection(
+        "agents"
+      );
+
+      // ==========================
+      // FIND USER
       // ==========================
       const user =
-      await User.findOne({
+      await Agents.findOne({
 
         email: email
 
@@ -2052,10 +2060,21 @@ app.post(
       // ==========================
       // UPDATE LOGO
       // ==========================
-      user.businessLogo =
-      logoPath;
+      await Agents.updateOne(
 
-      await user.save();
+        {
+          email: email
+        },
+
+        {
+          $set: {
+
+            logo: logoPath
+
+          }
+        }
+
+      );
 
       // ==========================
       // SUCCESS
