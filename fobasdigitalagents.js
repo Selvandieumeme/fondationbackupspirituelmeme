@@ -168,6 +168,12 @@ document.getElementById("btnConnexion")?.addEventListener("click", () => {
 
 });
 
+
+document.getElementById("btnPromoteBusiness")?.addEventListener("click", () => {
+  window.location.href = "https://fondationbackupspirituel.com/businesses.html";
+});
+
+
 // Join Business
 document.getElementById("btnJoinBusiness")?.addEventListener("click", () => {
   window.location.href = "/business/register";
