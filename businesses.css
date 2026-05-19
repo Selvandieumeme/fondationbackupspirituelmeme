@@ -1,97 +1,254 @@
 /* ==========================
-   PRODUCTS GRID (CLEAN)
+   GLOBAL RESET + COLORS
 ========================== */
 
-.products-gallery{
-  display:grid;
-  grid-template-columns:repeat(3, 1fr);
-  gap:14px;
-  margin-top:25px;
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
 }
 
-.product-card{
-  background:#ffffff;
-  border-radius:18px;
-  overflow:hidden;
-  border:1px solid rgba(0,102,255,0.08);
-  box-shadow:0 10px 25px rgba(0,0,0,0.05);
-  transition:0.3s ease;
-}
-
-.product-card:hover{
-  transform:translateY(-5px);
-}
-
-.product-image{
-  width:100%;
-  height:130px;
-  object-fit:cover;
-  display:block;
-}
-
-.product-details{
-  padding:14px;
-}
-
-.product-name{
-  font-size:14px;
-  font-weight:700;
+body{
+  font-family:'Poppins', sans-serif;
+  background:#f4f7ff;
   color:#0d1b4c;
-
-  overflow:hidden;
-  text-overflow:ellipsis;
-  white-space:nowrap;
 }
 
-.product-price{
-  margin-top:6px;
-  color:#0066ff;
-  font-size:15px;
+/* ==========================
+   LOADER
+========================== */
+
+.loader-wrapper{
+  position:fixed;
+  inset:0;
+  background:white;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  z-index:9999;
+}
+
+.loader{
+  width:60px;
+  height:60px;
+  border-radius:50%;
+  border:6px solid #eee;
+  border-top:6px solid #0066ff;
+  animation:spin 1s linear infinite;
+}
+
+@keyframes spin{
+  to{transform:rotate(360deg);}
+}
+
+/* ==========================
+   NAVBAR
+========================== */
+
+.navbar{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:20px 7%;
+  background:white;
+  box-shadow:0 5px 20px rgba(0,0,0,0.05);
+}
+
+.logo{
+  font-size:26px;
   font-weight:800;
 }
 
+.yellow{color:#ffd400;}
+.blue{color:#0066ff;}
+
+nav{
+  display:flex;
+  gap:20px;
+}
+
+nav a{
+  text-decoration:none;
+  color:#0d1b4c;
+  font-weight:600;
+}
 
 /* ==========================
-   ACTION BUTTONS
+   HERO
 ========================== */
 
-.business-actions{
-  display:flex;
-  gap:12px;
-  margin-top:20px;
+.hero{
+  padding:80px 7%;
+  text-align:center;
+  background:linear-gradient(135deg,#0066ff,#0047ff);
+  color:white;
 }
 
-.command-btn,
-.whatsapp-btn{
-  flex:1;
+.hero h1{
+  font-size:42px;
+}
+
+.hero p{
+  margin-top:15px;
+  color:#eaf0ff;
+}
+
+.hero-badge{
+  display:inline-block;
+  background:#ffd400;
+  color:#0d1b4c;
+  padding:8px 14px;
+  border-radius:20px;
+  font-weight:700;
+  margin-bottom:20px;
+}
+
+.hero-buttons{
+  margin-top:25px;
+  display:flex;
+  justify-content:center;
+  gap:15px;
+}
+
+.btn-primary{
+  background:#ffd400;
   border:none;
-  padding:14px;
-  border-radius:14px;
+  padding:12px 18px;
+  border-radius:12px;
   font-weight:700;
   cursor:pointer;
-  transition:0.3s ease;
 }
 
-.command-btn{
-  background:linear-gradient(135deg,#ffd400,#ffbf00);
-  color:#0d1b4c;
+.btn-secondary{
+  background:white;
+  color:#0066ff;
+  border:none;
+  padding:12px 18px;
+  border-radius:12px;
+  font-weight:700;
+  cursor:pointer;
 }
 
-.whatsapp-btn{
+/* ==========================
+   STATS
+========================== */
+
+.stats-grid{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:15px;
+  padding:40px 7%;
+}
+
+.stat-card{
+  background:white;
+  padding:20px;
+  border-radius:18px;
+  text-align:center;
+  box-shadow:0 10px 25px rgba(0,0,0,0.05);
+}
+
+.stat-card h2{
+  color:#0066ff;
+}
+
+/* ==========================
+   SEARCH
+========================== */
+
+.search-section{
+  padding:20px 7%;
+}
+
+.search-box{
+  display:flex;
+  align-items:center;
+  background:white;
+  padding:15px;
+  border-radius:14px;
+  box-shadow:0 10px 25px rgba(0,0,0,0.05);
+}
+
+.search-box input{
+  width:100%;
+  border:none;
+  outline:none;
+  padding-left:10px;
+}
+
+/* ==========================
+   FILTERS
+========================== */
+
+.filters{
+  display:flex;
+  gap:10px;
+  padding:20px 7%;
+  flex-wrap:wrap;
+}
+
+.filter-btn{
+  padding:8px 14px;
+  border:none;
+  background:#edf2ff;
+  border-radius:12px;
+  cursor:pointer;
+  font-weight:600;
+}
+
+.filter-btn.active{
   background:#0066ff;
   color:white;
 }
 
-.command-btn:hover,
-.whatsapp-btn:hover{
-  transform:translateY(-3px);
-}
-
-
 /* ==========================
-   ORDER MODAL (CLEAN FIX)
+   BUSINESS GRID
 ========================== */
 
+.business-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+  gap:20px;
+  padding:30px 7%;
+}
+
+.business-card{
+  background:white;
+  border-radius:20px;
+  overflow:hidden;
+  box-shadow:0 10px 25px rgba(0,0,0,0.06);
+}
+
+.business-banner{
+  height:160px;
+  background:linear-gradient(135deg,#ffd400,#0066ff);
+  display:flex;
+  justify-content:center;
+  align-items:center;
+}
+
+.business-banner img{
+  width:80px;
+  height:80px;
+  border-radius:50%;
+  object-fit:cover;
+  border:4px solid white;
+}
+
+.business-content{
+  padding:20px;
+}
+
+.business-info p{
+  font-size:14px;
+  margin-top:6px;
+}
+
+/* ==========================
+   MODAL
+========================== */
+
+.business-modal,
 .order-modal{
   position:fixed;
   inset:0;
@@ -100,192 +257,69 @@
   justify-content:center;
   align-items:center;
   z-index:99999;
-  padding:20px;
 }
 
+.modal-content,
+.order-content{
+  background:white;
+  width:90%;
+  max-width:800px;
+  padding:25px;
+  border-radius:20px;
+  max-height:90vh;
+  overflow-y:auto;
+}
+
+.business-modal.active,
 .order-modal.active{
   display:flex;
 }
 
-.order-box{
-  width:100%;
-  max-width:700px;
-  max-height:90vh;
-  overflow-y:auto;
-  background:white;
-  border-radius:25px;
-  padding:30px;
-  box-shadow:0 20px 60px rgba(0,0,0,0.2);
-}
-
-.order-box h2{
-  color:#0d1b4c;
-  margin-bottom:20px;
-  font-size:28px;
-}
-
-.order-grid{
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
-  gap:15px;
-}
-
-.order-group{
-  display:flex;
-  flex-direction:column;
-}
-
-.order-group label{
-  margin-bottom:6px;
-  font-size:13px;
-  font-weight:600;
-  color:#0d1b4c;
-}
-
-.order-group input,
-.order-group textarea,
-.order-group select{
-  border:none;
-  background:#f4f7ff;
-  padding:14px;
-  border-radius:14px;
-  outline:none;
-  font-size:14px;
-}
-
-.order-group textarea{
-  min-height:110px;
-  resize:none;
-}
-
-
-/* ==========================
-   PAYMENT BOX
-========================== */
-
-.payment-preview{
-  margin-top:20px;
-  background:#f7f9ff;
-  border-radius:18px;
-  padding:18px;
-}
-
-.payment-preview h3{
-  color:#0d1b4c;
-  margin-bottom:12px;
-}
-
-.payment-preview p{
-  margin-bottom:8px;
-  color:#4d5b85;
-  font-size:14px;
-}
-
-.payment-preview strong{
-  color:#0066ff;
-}
-
-
-/* ==========================
-   UPLOAD
-========================== */
-
-.payment-upload{
-  margin-top:15px;
-}
-
-.payment-upload input{
-  width:100%;
-}
-
-
-/* ==========================
-   ORDER BUTTONS
-========================== */
-
-.order-buttons{
-  display:flex;
-  gap:12px;
-  margin-top:25px;
-}
-
-.send-order-btn,
-.close-order-btn{
-  flex:1;
-  border:none;
-  padding:14px;
-  border-radius:14px;
-  font-size:15px;
-  font-weight:700;
+.close-modal,
+.close-order-modal{
+  float:right;
   cursor:pointer;
+  font-size:22px;
 }
-
-.send-order-btn{
-  background:linear-gradient(135deg,#0066ff,#0047ff);
-  color:white;
-}
-
-.close-order-btn{
-  background:#edf2ff;
-  color:#0d1b4c;
-}
-
 
 /* ==========================
-   EMPTY STATE (FIXED)
+   PRODUCTS GRID FIX (IMPORTANT)
 ========================== */
 
-.empty-business{
+.products-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:12px;
+  margin-top:20px;
+}
+
+.product-card{
+  background:#f7f9ff;
+  border-radius:14px;
+  overflow:hidden;
+}
+
+.product-image{
   width:100%;
-  background:white;
-  border-radius:25px;
-  padding:50px 25px;
-  text-align:center;
-  box-shadow:0 10px 25px rgba(0,0,0,0.06);
+  height:120px;
+  object-fit:cover;
 }
 
-.empty-business i{
-  font-size:60px;
-  color:#0066ff;
-  margin-bottom:15px;
+.product-details{
+  padding:10px;
 }
-
-.empty-business h3{
-  color:#0d1b4c;
-  margin-bottom:10px;
-}
-
-.empty-business p{
-  color:#4d5b85;
-}
-
 
 /* ==========================
-   RESPONSIVE CLEAN
+   RESPONSIVE
 ========================== */
 
 @media(max-width:768px){
-
-  .products-gallery{
-    grid-template-columns:repeat(2,1fr);
-  }
-
-  .business-actions{
-    flex-direction:column;
-  }
-
-  .order-box{
-    padding:22px;
-  }
-
-  .order-buttons{
-    flex-direction:column;
-  }
+  .stats-grid{grid-template-columns:repeat(2,1fr);}
+  .hero h1{font-size:32px;}
+  .products-grid{grid-template-columns:repeat(2,1fr);}
 }
 
 @media(max-width:480px){
-
-  .products-gallery{
-    grid-template-columns:1fr;
-  }
+  .stats-grid{grid-template-columns:1fr;}
+  .products-grid{grid-template-columns:1fr;}
 }
