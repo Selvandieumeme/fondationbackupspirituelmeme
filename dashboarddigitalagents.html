@@ -26,11 +26,31 @@
       <span class="white">DASHBOARD</span>
     </div>
 
-    <div class="profile-box">
-      <div class="avatar">
-        <i class="fa-solid fa-user"></i>
-      </div>
+<!-- ========================== -->
+<!-- USER AVATAR -->
+<!-- ========================== -->
 
+<img
+  id="userAvatar"
+  src="https://via.placeholder.com/120"
+  alt="Avatar"
+  class="avatar"
+  style="
+    width:70px;
+    height:70px;
+    border-radius:50%;
+    object-fit:cover;
+    cursor:pointer;
+    margin-bottom:10px;
+  "
+>
+
+<input
+  type="file"
+  id="avatarInput"
+  accept="image/*"
+  style="display:none;"
+>
       <h3 id="userName">Utilisateur</h3>
       <p id="userRole">Agent</p>
     </div>
