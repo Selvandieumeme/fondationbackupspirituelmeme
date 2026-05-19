@@ -1978,9 +1978,10 @@ app.post(
 
     try {
 
-      console.log(req.file);
+  console.log(req.file);
+  console.log(req.body);
 
-      const { email } = req.body;
+  const { email } = req.body;
 
       if (!email) {
 
@@ -2025,17 +2026,17 @@ app.post(
 
     catch(error){
 
-      console.error(
-        "UPLOAD LOGO ERROR:",
-        error
-      );
+  console.log(
+    "UPLOAD LOGO FULL ERROR:",
+    error
+  );
 
-      res.status(500).json({
-        success:false,
-        message:"Erreur serveur"
-      });
+  res.status(500).json({
+    success:false,
+    error:error.message
+  });
 
-    }
+}
 
 });
 
