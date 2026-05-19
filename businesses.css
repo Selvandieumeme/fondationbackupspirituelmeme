@@ -376,3 +376,24 @@ nav a{
 .error-alert.show {
   display: flex;
 }
+
+
+
+
+
+
+.business-logo{
+  width:95px;
+  height:95px;
+
+  object-fit:cover;
+
+  border-radius:50%;
+
+  border:5px solid white;
+
+  background:white;
+
+  box-shadow:
+  0 10px 25px rgba(0,0,0,0.15);
+}
