@@ -1313,60 +1313,56 @@ app.get("/agents/profile", async (req, res) => {
 
       success: true,
 
-      profile: {
+      name:
+        agent.name || "",
 
-        name:
-          agent.name || "",
+      email:
+        agent.email || "",
 
-        email:
-          agent.email || "",
+      role:
+        agent.role || "agent",
 
-        role:
-          agent.role || "agent",
+      referralCode:
+        agent.referralCode || "",
 
-        referralCode:
-          agent.referralCode || "",
+      level:
+        agent.level || "Bronze",
 
-        level:
-          agent.level || "Bronze",
+      totalCommission:
+        agent.totalCommission || 0,
 
-        totalCommission:
-          agent.totalCommission || 0,
+      progress:
+        agent.progress || 0,
 
-        progress:
-          agent.progress || 0,
+      businessName:
+        agent.businessName || "",
 
-        businessName:
-          agent.businessName || "",
+      whatsapp:
+        agent.whatsapp || "",
 
-        whatsapp:
-          agent.whatsapp || "",
+      country:
+        agent.country || "",
 
-        country:
-          agent.country || "",
+      city:
+        agent.city || "",
 
-        city:
-          agent.city || "",
+      zone:
+        agent.zone || "",
 
-        zone:
-          agent.zone || "",
+      createdAt:
+        agent.createdAt || null,
 
-        createdAt:
-          agent.createdAt || null,
+      // ==========================
+      // BUSINESS LOGO
+      // ==========================
+      logo:
+        agent.logo || "",
 
-        // ==========================
-        // BUSINESS LOGO
-        // ==========================
-        logo:
-          agent.logo || "",
-
-        // ==========================
-        // USER AVATAR
-        // ==========================
-        avatar:
-          agent.avatar || ""
-
-      }
+      // ==========================
+      // USER AVATAR
+      // ==========================
+      avatar:
+        agent.avatar || ""
 
     });
 
@@ -1389,6 +1385,7 @@ app.get("/agents/profile", async (req, res) => {
   }
 
 });
+ 
 
 
 
