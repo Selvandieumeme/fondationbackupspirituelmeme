@@ -243,3 +243,43 @@ body{
   font-weight:700;
   color:#0066ff;
 }
+
+
+
+
+.upload-logo-btn{
+  margin-top:20px;
+
+  border:none;
+
+  padding:15px 28px;
+
+  border-radius:16px;
+
+  background:linear-gradient(
+    135deg,
+    #0066ff,
+    #0047ff
+  );
+
+  color:white;
+
+  font-size:15px;
+  font-weight:700;
+
+  cursor:pointer;
+
+  transition:0.3s ease;
+
+  box-shadow:
+  0 10px 25px rgba(0,102,255,0.25);
+}
+
+.upload-logo-btn:hover{
+  transform:translateY(-3px);
+}
+
+
+
+
+
