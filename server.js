@@ -1970,40 +1970,47 @@ app.post(
 // UPLOAD BUSINESS LOGO
 // ==========================
 app.post(
-
   "/business/upload-logo",
 
   uploadBusiness.single("logo"),
 
-  async (req,res) => {
+  async (req, res) => {
 
-    try{
+    try {
+
+      console.log(req.file);
 
       const { email } = req.body;
 
-      if(
-        !email ||
-        !req.file
-      ){
+      if (!email) {
 
-        return res.json({
+        return res.status(400).json({
           success:false,
-          message:
-          "Informations manquantes"
+          message:"Email manquant"
         });
 
       }
 
-      const logo =
+      if (!req.file) {
+
+        return res.status(400).json({
+          success:false,
+          message:"Logo manquant"
+        });
+
+      }
+
+      const logoPath =
       `/fobas_uploads/businesses/${req.file.filename}`;
 
+      // UPDATE USER
       await User.updateOne(
 
         { email },
 
         {
           $set:{
-            businessLogo:logo
+            businessLogo:logoPath
           }
         }
 
@@ -2011,7 +2018,7 @@ app.post(
 
       res.json({
         success:true,
-        logo
+        logo:logoPath
       });
 
     }
@@ -2019,7 +2026,7 @@ app.post(
     catch(error){
 
       console.error(
-        "UPLOAD BUSINESS LOGO ERROR:",
+        "UPLOAD LOGO ERROR:",
         error
       );
 
