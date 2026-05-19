@@ -440,7 +440,7 @@ catch{
       ){
 
         userAvatar.src =
-        `${API_URL}${data.avatar}`;
+  `${API_URL}${data.avatar}?t=${Date.now()}`;
 
       }
 
