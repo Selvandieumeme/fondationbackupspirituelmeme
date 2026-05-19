@@ -24,7 +24,7 @@ window.addEventListener("DOMContentLoaded", async () => {
     );
 
     const data = await response.json();
-    const profile = data.profile;
+    
 
 
     // ==========================
