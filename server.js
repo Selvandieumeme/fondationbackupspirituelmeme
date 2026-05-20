@@ -1076,9 +1076,14 @@ app.get("/dashboard/profile", async (req, res) => {
         user.city || "",
 
       zone:
-        user.zone || ""
+        user.zone || "",
 
-    });
+		logo:
+  user.logo || "",
+
+avatar:
+  user.avatar || ""
+});
 
   }
 
@@ -1349,14 +1354,7 @@ app.get("/agents/profile", async (req, res) => {
       zone:
         agent.zone || "",
 
-	// ✅ BUSINESS LOGO
-  logo:
-    user.logo || "",
-
-  // ✅ USER AVATAR
-  avatar:
-    user.avatar || "",
-
+	
       createdAt:
         agent.createdAt || null,
 
