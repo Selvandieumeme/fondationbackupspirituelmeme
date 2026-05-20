@@ -1088,56 +1088,11 @@ app.get("/dashboard/profile", async (req, res) => {
     }
 
 
-    // ==========================
-    // RESPONSE
-    // ==========================
-    return res.json({
-
-      success: true,
-
-      name: user.name || "Utilisateur",
-      email: user.email || "",
-
-      role: user.role || "agent",
-
-      level: user.level || "Bronze",
-
-      totalCommission:
-        user.totalCommission || 0,
-
-      progress:
-        user.progress || 0,
-
-      referralCode:
-        user.referralCode || "",
-
-      totalReferrals:
-        user.totalReferrals || 0,
-
-      monthlyRevenue:
-        user.monthlyRevenue || 0,
-
-      businessName:
-        user.businessName || "",
-
-      whatsapp:
-        user.whatsapp || "",
-
-      country:
-        user.country || "",
-
-      city:
-        user.city || "",
-
-      zone:
-        user.zone || "",
-
-		logo:
-  user.logo || "",
-
-
-
-referrals:
+    
+// ==========================
+// REFERRALS
+// ==========================
+const referrals =
   await Agents.find({
     referredBy: user._id
   })
@@ -1145,10 +1100,62 @@ referrals:
     name: 1,
     role: 1
   })
-  .toArray(),
-		
-avatar:
-  user.avatar || ""
+  .toArray();
+
+
+// ==========================
+// RESPONSE
+// ==========================
+return res.json({
+
+  success: true,
+
+  name: user.name || "Utilisateur",
+
+  email: user.email || "",
+
+  role: user.role || "agent",
+
+  level: user.level || "Bronze",
+
+  totalCommission:
+    user.totalCommission || 0,
+
+  progress:
+    user.progress || 0,
+
+  referralCode:
+    user.referralCode || "",
+
+  totalReferrals:
+    user.totalReferrals || 0,
+
+  monthlyRevenue:
+    user.monthlyRevenue || 0,
+
+  businessName:
+    user.businessName || "",
+
+  whatsapp:
+    user.whatsapp || "",
+
+  country:
+    user.country || "",
+
+  city:
+    user.city || "",
+
+  zone:
+    user.zone || "",
+
+  logo:
+    user.logo || "",
+
+  referrals,
+
+  avatar:
+    user.avatar || ""
+
 });
 
   }
