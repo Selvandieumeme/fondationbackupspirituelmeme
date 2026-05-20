@@ -14,6 +14,15 @@ window.addEventListener("DOMContentLoaded", () => {
 
   console.log("DEVENIR AGENTS PAGE CONNECTED");
 
+// ==========================
+  // REFERRAL SYSTEM (AJOUT SA LA)
+  // ==========================
+  const params = new URLSearchParams(window.location.search);
+  const referralCode = params.get("ref");
+
+  if (referralCode) {
+    localStorage.setItem("referralCode", referralCode);
+  }
 
   // ==========================
   // ELEMENTS
@@ -252,7 +261,8 @@ if (role === "agent_entrepreneur") {
   whatsapp,
   country,
   city,
-  zone
+  zone,
+  referralCode: localStorage.getItem("referralCode") || null
 })
         }
       );
