@@ -117,25 +117,50 @@
 
       <div class="cards-grid">
 
-        <div class="info-card">
-          <h3>Code Referral</h3>
-          <p id="referralCode">---</p>
-        </div>
+  <div class="info-card">
+    <h3>Code Referral</h3>
+    <p id="referralCode">---</p>
+  </div>
 
-        <div class="info-card">
-          <h3>Total Références</h3>
-          <p id="totalReferrals">0</p>
-        </div>
+  <div class="info-card">
+    <h3>Mon Lien Referral</h3>
 
-        <div class="info-card">
-          <h3>Revenus du Mois</h3>
-          <p id="monthlyRevenue">0 HTG</p>
-        </div>
+    <input
+      id="referralLink"
+      type="text"
+      readonly
+    />
 
-      </div>
+    <button onclick="copyReferralLink()">
+      Copier
+    </button>
+  </div>
+
+  <div class="info-card">
+    <h3>Total Références</h3>
+    <p id="totalReferrals">0</p>
+  </div>
+
+  <div class="info-card">
+    <h3>Revenus du Mois</h3>
+    <p id="monthlyRevenue">0 HTG</p>
+  </div>
+
+</div> <!-- ✅ FERME cards-grid ICI -->
+
+<!-- REFERRAL LIST (NOUVO) -->
+<div class="referral-list-box">
+
+  <h3>Mes Références Récentes</h3>
+
+  <ul id="referralList"></ul>
+
+</div>
 
     </section>
 
+
+    
 
     <!-- ENTREPRENEUR SECTION -->
 <section class="dashboard-section" id="entrepreneurSection">
