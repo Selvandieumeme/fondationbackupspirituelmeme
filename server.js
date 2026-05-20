@@ -2458,6 +2458,723 @@ app.post(
 
 
 
+// =====================================================
+// FOBAS MASTER ADMIN ROUTES
+// SAFE VERSION — NO DUPLICATION
+// =====================================================
+
+// =====================================================
+// GET MASTER DASHBOARD STATS
+// =====================================================
+app.get("/fobas/admin/dashboard", async (req, res) => {
+
+  try {
+
+    const Agents =
+      mongoose.connection.collection("agents");
+
+    const Orders =
+      mongoose.connection.collection("business_orders");
+
+    // ==========================================
+    // GLOBAL COUNTS
+    // ==========================================
+    const totalUsers =
+      await Agents.countDocuments();
+
+    const totalAgents =
+      await Agents.countDocuments({
+        role: "agent"
+      });
+
+    const totalEntrepreneurs =
+      await Agents.countDocuments({
+        role: "entrepreneur"
+      });
+
+    const totalHybridAccounts =
+      await Agents.countDocuments({
+        role: "agent_entrepreneur"
+      });
+
+    const totalOrders =
+      await Orders.countDocuments();
+
+    const pendingOrders =
+      await Orders.countDocuments({
+        status: "pending"
+      });
+
+    const completedOrders =
+      await Orders.countDocuments({
+        status: "completed"
+      });
+
+    // ==========================================
+    // RECENT USERS
+    // ==========================================
+    const recentUsers =
+      await Agents.find({})
+      .sort({ createdAt: -1 })
+      .limit(10)
+      .toArray();
+
+    // ==========================================
+    // RECENT ORDERS
+    // ==========================================
+    const recentOrders =
+      await Orders.find({})
+      .sort({ createdAt: -1 })
+      .limit(10)
+      .toArray();
+
+    // ==========================================
+    // RESPONSE
+    // ==========================================
+    return res.json({
+
+      success: true,
+
+      stats: {
+        totalUsers,
+        totalAgents,
+        totalEntrepreneurs,
+        totalHybridAccounts,
+        totalOrders,
+        pendingOrders,
+        completedOrders
+      },
+
+      recentUsers,
+      recentOrders
+
+    });
+
+  }
+
+  catch (err) {
+
+    console.error(
+      "MASTER DASHBOARD ERROR:",
+      err
+    );
+
+    return res.status(500).json({
+
+      success: false,
+      message: "Internal server error"
+
+    });
+
+  }
+
+});
+
+
+
+// =====================================================
+// SEARCH USERS
+// =====================================================
+app.get("/fobas/admin/search-users", async (req, res) => {
+
+  try {
+
+    const {
+      country,
+      city,
+      zone,
+      role,
+      businessName,
+      keyword
+    } = req.query;
+
+    const Agents =
+      mongoose.connection.collection("agents");
+
+    let query = {};
+
+    // ==========================================
+    // COUNTRY
+    // ==========================================
+    if (country) {
+
+      query.country = {
+        $regex: country,
+        $options: "i"
+      };
+
+    }
+
+    // ==========================================
+    // CITY
+    // ==========================================
+    if (city) {
+
+      query.city = {
+        $regex: city,
+        $options: "i"
+      };
+
+    }
+
+    // ==========================================
+    // ZONE
+    // ==========================================
+    if (zone) {
+
+      query.zone = {
+        $regex: zone,
+        $options: "i"
+      };
+
+    }
+
+    // ==========================================
+    // ROLE
+    // ==========================================
+    if (role) {
+
+      query.role = role;
+
+    }
+
+    // ==========================================
+    // BUSINESS NAME
+    // ==========================================
+    if (businessName) {
+
+      query.businessName = {
+        $regex: businessName,
+        $options: "i"
+      };
+
+    }
+
+    // ==========================================
+    // KEYWORD SEARCH
+    // ==========================================
+    if (keyword) {
+
+      query.$or = [
+
+        {
+          name: {
+            $regex: keyword,
+            $options: "i"
+          }
+        },
+
+        {
+          email: {
+            $regex: keyword,
+            $options: "i"
+          }
+        },
+
+        {
+          referralCode: {
+            $regex: keyword,
+            $options: "i"
+          }
+        }
+
+      ];
+
+    }
+
+    const users =
+      await Agents.find(query)
+      .sort({ createdAt: -1 })
+      .toArray();
+
+    return res.json({
+
+      success: true,
+      total: users.length,
+      users
+
+    });
+
+  }
+
+  catch (err) {
+
+    console.error(
+      "SEARCH USERS ERROR:",
+      err
+    );
+
+    return res.status(500).json({
+
+      success: false,
+      message: "Internal server error"
+
+    });
+
+  }
+
+});
+
+
+
+// =====================================================
+// GET ALL ORDERS
+// =====================================================
+app.get("/fobas/admin/orders", async (req, res) => {
+
+  try {
+
+    const Orders =
+      mongoose.connection.collection("business_orders");
+
+    const orders =
+      await Orders.find({})
+      .sort({ createdAt: -1 })
+      .toArray();
+
+    return res.json({
+
+      success: true,
+      total: orders.length,
+      orders
+
+    });
+
+  }
+
+  catch (err) {
+
+    console.error(
+      "ADMIN ORDERS ERROR:",
+      err
+    );
+
+    return res.status(500).json({
+
+      success: false,
+      message: "Internal server error"
+
+    });
+
+  }
+
+});
+
+
+
+// =====================================================
+// UPDATE ORDER STATUS
+// =====================================================
+app.put("/fobas/admin/order-status", async (req, res) => {
+
+  try {
+
+    const {
+      orderId,
+      status
+    } = req.body;
+
+    if (!orderId || !status) {
+
+      return res.status(400).json({
+
+        success: false,
+        message: "Missing fields"
+
+      });
+
+    }
+
+    const Orders =
+      mongoose.connection.collection("business_orders");
+
+    await Orders.updateOne(
+
+      {
+        _id: new mongoose.Types.ObjectId(orderId)
+      },
+
+      {
+        $set: {
+          status
+        }
+      }
+
+    );
+
+    return res.json({
+
+      success: true,
+      message: "Order status updated"
+
+    });
+
+  }
+
+  catch (err) {
+
+    console.error(
+      "ORDER STATUS ERROR:",
+      err
+    );
+
+    return res.status(500).json({
+
+      success: false,
+      message: "Internal server error"
+
+    });
+
+  }
+
+});
+
+
+
+// =====================================================
+// UPDATE USER
+// =====================================================
+app.put("/fobas/admin/update-user", async (req, res) => {
+
+  try {
+
+    const {
+      userId,
+      name,
+      role,
+      level,
+      totalCommission,
+      progress,
+      businessName,
+      whatsapp,
+      country,
+      city,
+      zone
+    } = req.body;
+
+    if (!userId) {
+
+      return res.status(400).json({
+
+        success: false,
+        message: "User ID required"
+
+      });
+
+    }
+
+    const Agents =
+      mongoose.connection.collection("agents");
+
+    await Agents.updateOne(
+
+      {
+        _id: new mongoose.Types.ObjectId(userId)
+      },
+
+      {
+        $set: {
+
+          name,
+          role,
+          level,
+          totalCommission:
+            Number(totalCommission) || 0,
+
+          progress:
+            Number(progress) || 0,
+
+          businessName,
+          whatsapp,
+          country,
+          city,
+          zone
+
+        }
+      }
+
+    );
+
+    return res.json({
+
+      success: true,
+      message: "User updated"
+
+    });
+
+  }
+
+  catch (err) {
+
+    console.error(
+      "UPDATE USER ERROR:",
+      err
+    );
+
+    return res.status(500).json({
+
+      success: false,
+      message: "Internal server error"
+
+    });
+
+  }
+
+});
+
+
+
+// =====================================================
+// DELETE USER
+// =====================================================
+app.delete("/fobas/admin/delete-user/:id", async (req, res) => {
+
+  try {
+
+    const { id } = req.params;
+
+    const Agents =
+      mongoose.connection.collection("agents");
+
+    const user =
+      await Agents.findOne({
+        _id: new mongoose.Types.ObjectId(id)
+      });
+
+    if (!user) {
+
+      return res.status(404).json({
+
+        success: false,
+        message: "User not found"
+
+      });
+
+    }
+
+    // ==========================================
+    // DELETE AVATAR FILE
+    // ==========================================
+    if (user.avatar) {
+
+      try {
+
+        const avatarFile =
+          path.join(
+            __dirname,
+            user.avatar
+          );
+
+        if (fs.existsSync(avatarFile)) {
+          fs.unlinkSync(avatarFile);
+        }
+
+      }
+
+      catch (e) {
+
+        console.log(
+          "AVATAR DELETE ERROR:",
+          e.message
+        );
+
+      }
+
+    }
+
+    // ==========================================
+    // DELETE LOGO FILE
+    // ==========================================
+    if (user.logo) {
+
+      try {
+
+        const logoFile =
+          path.join(
+            __dirname,
+            user.logo
+          );
+
+        if (fs.existsSync(logoFile)) {
+          fs.unlinkSync(logoFile);
+        }
+
+      }
+
+      catch (e) {
+
+        console.log(
+          "LOGO DELETE ERROR:",
+          e.message
+        );
+
+      }
+
+    }
+
+    // ==========================================
+    // DELETE USER
+    // ==========================================
+    await Agents.deleteOne({
+      _id: new mongoose.Types.ObjectId(id)
+    });
+
+    return res.json({
+
+      success: true,
+      message: "User deleted"
+
+    });
+
+  }
+
+  catch (err) {
+
+    console.error(
+      "DELETE USER ERROR:",
+      err
+    );
+
+    return res.status(500).json({
+
+      success: false,
+      message: "Internal server error"
+
+    });
+
+  }
+
+});
+
+
+
+// =====================================================
+// GET USER REFERRALS
+// =====================================================
+app.get("/fobas/admin/referrals/:id", async (req, res) => {
+
+  try {
+
+    const { id } = req.params;
+
+    const Agents =
+      mongoose.connection.collection("agents");
+
+    const referrals =
+      await Agents.find({
+        referredBy:
+          new mongoose.Types.ObjectId(id)
+      })
+      .sort({ createdAt: -1 })
+      .toArray();
+
+    return res.json({
+
+      success: true,
+      total: referrals.length,
+      referrals
+
+    });
+
+  }
+
+  catch (err) {
+
+    console.error(
+      "REFERRALS ERROR:",
+      err
+    );
+
+    return res.status(500).json({
+
+      success: false,
+      message: "Internal server error"
+
+    });
+
+  }
+
+});
+
+
+
+// =====================================================
+// GET ENTREPRENEUR ORDERS
+// =====================================================
+app.get("/fobas/admin/business-orders/:businessId", async (req, res) => {
+
+  try {
+
+    const { businessId } = req.params;
+
+    const Orders =
+      mongoose.connection.collection("business_orders");
+
+    const orders =
+      await Orders.find({
+        businessId
+      })
+      .sort({ createdAt: -1 })
+      .toArray();
+
+    return res.json({
+
+      success: true,
+      total: orders.length,
+      orders
+
+    });
+
+  }
+
+  catch (err) {
+
+    console.error(
+      "BUSINESS ORDERS ERROR:",
+      err
+    );
+
+    return res.status(500).json({
+
+      success: false,
+      message: "Internal server error"
+
+    });
+
+  }
+
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
