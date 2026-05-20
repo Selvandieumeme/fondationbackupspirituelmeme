@@ -769,15 +769,7 @@ app.post("/agents/register", async (req, res) => {
 
     role = role || "agent";
 	  
-	const referralCodeFromLink = req.body.referralCode || null;
-
-let referrerAgent = null;
-
-if (referralCodeFromLink) {
-  referrerAgent = await Agents.findOne({
-    referralCode: referralCodeFromLink
-  });
-}
+	
 
     // ==========================
     // ROLE VALIDATION (SAFE)
@@ -1143,6 +1135,18 @@ app.get("/dashboard/profile", async (req, res) => {
 		logo:
   user.logo || "",
 
+
+
+referrals:
+  await Agents.find({
+    referredBy: user._id
+  })
+  .project({
+    name: 1,
+    role: 1
+  })
+  .toArray(),
+		
 avatar:
   user.avatar || ""
 });
