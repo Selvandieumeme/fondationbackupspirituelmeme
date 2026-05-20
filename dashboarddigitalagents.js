@@ -434,15 +434,44 @@ catch{
       // ==========================
       // FINAL AVATAR
       // ==========================
-      if(
-        data.success &&
-        data.avatar
-      ){
+      if (
+  data.success &&
+  data.avatar
+) {
 
-        userAvatar.src =
-  `${API_URL}${data.avatar}?t=${Date.now()}`;
+  const finalAvatar =
+    data.avatar.startsWith("http")
+      ? data.avatar
+      : `${API_URL}${data.avatar}`;
 
-      }
+  // TEST IMAGE LOAD
+  const testImg = new Image();
+
+  testImg.onload = () => {
+
+    userAvatar.src =
+      `${finalAvatar}?t=${Date.now()}`;
+
+    alert("Avatar uploadé avec succès");
+
+  };
+
+  testImg.onerror = () => {
+
+    console.error(
+      "IMAGE LOAD ERROR:",
+      finalAvatar
+    );
+
+    alert(
+      "Avatar sauvegardé mais image inaccessible"
+    );
+
+  };
+
+  testImg.src = finalAvatar;
+
+}
 
       else{
 
