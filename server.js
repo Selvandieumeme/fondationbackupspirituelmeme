@@ -768,6 +768,16 @@ app.post("/agents/register", async (req, res) => {
     password = String(password);
 
     role = role || "agent";
+	  
+	const referralCodeFromLink = req.body.referralCode || null;
+
+let referrerAgent = null;
+
+if (referralCodeFromLink) {
+  referrerAgent = await Agents.findOne({
+    referralCode: referralCodeFromLink
+  });
+}
 
     // ==========================
     // ROLE VALIDATION (SAFE)
@@ -811,34 +821,86 @@ app.post("/agents/register", async (req, res) => {
     const hashedPassword =
       await bcryptjs.hash(password, 12);
 
-    // ==========================
-    // REFERRAL
-    // ==========================
-    const referralCode =
-      "AGT_" +
-      Math.random()
-        .toString(36)
-        .substring(2, 8)
-        .toUpperCase();
 
-    // ==========================
-    // INSERT (ENHANCED SAFE STRUCTURE)
-    // ==========================
-    const result =
-      await Agents.insertOne({
 
-        name,
-        email,
-        password: hashedPassword,
 
-        role,
 
-        referralCode,
 
-        level: "Bronze",
-        totalCommission: 0,
-        progress: 0,
 
+// ==========================
+// REFERRAL
+// ==========================
+const referralCode =
+  "AGT_" +
+  Math.random()
+    .toString(36)
+    .substring(2, 8)
+    .toUpperCase();
+
+const referralCodeFromLink =
+  (req.body.referralCode || req.body.referralFrom || "").trim() || null;
+
+let referrerAgent = null;
+
+if (referralCodeFromLink) {
+  referrerAgent = await Agents.findOne({
+    referralCode: referralCodeFromLink
+  });
+
+  // ❗ prevent self referral
+  if (referrerAgent && referrerAgent.email === email) {
+    referrerAgent = null;
+  }
+}
+
+
+// ==========================
+// INSERT
+// ==========================
+const result = await Agents.insertOne({
+
+  name,
+  email,
+  password: hashedPassword,
+  role,
+
+  referralCode,
+
+  level: "Bronze",
+  totalCommission: 0,
+  progress: 0,
+
+  referralFrom: referralCodeFromLink || null,
+  referredBy: referrerAgent ? referrerAgent._id : null,
+  referralPaid: false,
+
+  createdAt: new Date()
+});
+
+
+// ==========================
+// REFERRAL REWARD (APRE INSERT - SAFE PLACE)
+// ==========================
+if (referrerAgent && role === "entrepreneur") {
+
+  await Agents.updateOne(
+    { _id: referrerAgent._id },
+    {
+      $inc: {
+        totalReferrals: 1,
+        totalCommission: 500
+      }
+    }
+  );
+
+}
+
+
+	  
+
+
+	  
+		  
         // ==========================
         // ENTREPRENEUR DATA (OPTIONAL SAFE)
         // ==========================
