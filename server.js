@@ -866,6 +866,15 @@ const result = await Agents.insertOne({
   referredBy: referrerAgent ? referrerAgent._id : null,
   referralPaid: false,
 
+		// ==========================
+        // ENTREPRENEUR DATA (OPTIONAL SAFE)
+        // ==========================
+        businessName: businessName || null,
+        whatsapp: whatsapp || null,
+        country: country || null,
+        city: city || null,
+        zone: zone || null,
+
   createdAt: new Date()
 });
 
@@ -893,18 +902,7 @@ if (referrerAgent && role === "entrepreneur") {
 
 	  
 		  
-        // ==========================
-        // ENTREPRENEUR DATA (OPTIONAL SAFE)
-        // ==========================
-        businessName: businessName || null,
-        whatsapp: whatsapp || null,
-        country: country || null,
-        city: city || null,
-        zone: zone || null,
-
-        createdAt: new Date()
-
-      });
+        
 
     console.log("AGENT CREATED:", result.insertedId);
 
