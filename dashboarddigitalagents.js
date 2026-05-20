@@ -87,6 +87,68 @@ window.addEventListener("DOMContentLoaded", async () => {
       document.getElementById("monthlyRevenue").innerText =
         (data.monthlyRevenue || 0) + " HTG";
 
+
+  // ==========================
+      // REFERRAL LINK
+      // ==========================
+      const referralLinkInput =
+        document.getElementById(
+          "referralLink"
+        );
+
+      if (
+        referralLinkInput &&
+        data.referralCode
+      ) {
+
+        referralLinkInput.value =
+          `https://fondationbackupspirituel.com/deveniragents.html?ref=${data.referralCode}`;
+
+      }
+
+      // ==========================
+// REFERRAL LIST
+// ==========================
+const referralList =
+  document.getElementById(
+    "referralList"
+  );
+
+if (
+  referralList &&
+  Array.isArray(data.referrals)
+) {
+
+  referralList.innerHTML = "";
+
+  if (data.referrals.length === 0) {
+
+    referralList.innerHTML =
+      "<li>Aucune référence pour le moment.</li>";
+
+  } else {
+
+    data.referrals.forEach(
+      (ref) => {
+
+        const li =
+          document.createElement("li");
+
+        li.innerText =
+          `${ref.name || "Utilisateur"} (${ref.role || "entrepreneur"})`;
+
+        referralList.appendChild(li);
+
+      }
+    );
+
+  }
+
+}
+
+      
+      
+
     } else {
 
       document.getElementById("agentSection").style.display = "none";
@@ -94,6 +156,11 @@ window.addEventListener("DOMContentLoaded", async () => {
     }
 
 
+
+      
+
+    
+    
     // ==========================
     // ENTREPRENEUR SECTION
     // ==========================
@@ -498,3 +565,38 @@ catch{
     }
 
 });
+
+
+
+
+
+
+
+
+
+
+// ==========================
+// COPY REFERRAL LINK
+// ==========================
+function copyReferralLink() {
+
+  const referralInput =
+    document.getElementById(
+      "referralLink"
+    );
+
+  if (!referralInput) return;
+
+  referralInput.select();
+  referralInput.setSelectionRange(
+    0,
+    99999
+  );
+
+  navigator.clipboard.writeText(
+    referralInput.value
+  );
+
+  alert("Lien referral copié");
+
+}
