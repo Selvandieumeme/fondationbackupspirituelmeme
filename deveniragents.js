@@ -21,8 +21,10 @@ window.addEventListener("DOMContentLoaded", () => {
   const referralCode = params.get("ref");
 
   if (referralCode) {
-    localStorage.setItem("referralCode", referralCode);
-  }
+  localStorage.setItem("referralCode", referralCode);
+} else {
+  localStorage.removeItem("referralCode");
+}
 
   // ==========================
   // ELEMENTS
