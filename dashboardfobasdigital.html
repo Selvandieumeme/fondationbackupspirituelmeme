@@ -1,0 +1,250 @@
+# dashboardfobasdigital.html
+
+```html
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FOBAS DIGITAL - MASTER DASHBOARD</title>
+
+  <link rel="stylesheet" href="dashboardfobasdigital.css" />
+
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+  />
+</head>
+<body>
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+
+    <div class="logoBox">
+      <h1>FOBAS</h1>
+      <span>DIGITAL</span>
+    </div>
+
+    <nav>
+
+      <button class="menuBtn active" data-page="dashboardPage">
+        <i class="fa-solid fa-chart-line"></i>
+        Dashboard
+      </button>
+
+      <button class="menuBtn" data-page="agentsPage">
+        <i class="fa-solid fa-users"></i>
+        Agents
+      </button>
+
+      <button class="menuBtn" data-page="entrepreneursPage">
+        <i class="fa-solid fa-store"></i>
+        Entrepreneurs
+      </button>
+
+      <button class="menuBtn" data-page="ordersPage">
+        <i class="fa-solid fa-cart-shopping"></i>
+        Orders
+      </button>
+
+      <button class="menuBtn" data-page="referralsPage">
+        <i class="fa-solid fa-network-wired"></i>
+        Referrals
+      </button>
+
+      <button class="menuBtn" data-page="uploadsPage">
+        <i class="fa-solid fa-folder-open"></i>
+        Uploads
+      </button>
+
+    </nav>
+
+  </aside>
+
+
+  <!-- MAIN -->
+  <main class="mainContent">
+
+    <!-- HEADER -->
+    <header class="topHeader">
+
+      <div>
+        <h2>FOBAS DIGITAL MASTER PANEL</h2>
+        <p>Contrôle intelligent de toute la plateforme FOBAS</p>
+      </div>
+
+      <div class="adminBox">
+        <span>FOBAS ADMIN</span>
+      </div>
+
+    </header>
+
+
+    <!-- DASHBOARD PAGE -->
+    <section id="dashboardPage" class="page activePage">
+
+      <div class="cardsGrid">
+
+        <div class="card">
+          <h3>Total Users</h3>
+          <h1 id="totalUsers">0</h1>
+        </div>
+
+        <div class="card">
+          <h3>Total Agents</h3>
+          <h1 id="totalAgents">0</h1>
+        </div>
+
+        <div class="card">
+          <h3>Total Entrepreneurs</h3>
+          <h1 id="totalEntrepreneurs">0</h1>
+        </div>
+
+        <div class="card">
+          <h3>Total Orders</h3>
+          <h1 id="totalOrders">0</h1>
+        </div>
+
+      </div>
+
+
+      <div class="dashboardFlex">
+
+        <div class="bigCard">
+          <div class="sectionHeader">
+            <h3>Recent Users</h3>
+          </div>
+
+          <div id="recentUsers" class="listBox"></div>
+        </div>
+
+
+        <div class="bigCard">
+          <div class="sectionHeader">
+            <h3>Recent Orders</h3>
+          </div>
+
+          <div id="recentOrders" class="listBox"></div>
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- AGENTS PAGE -->
+    <section id="agentsPage" class="page">
+
+      <div class="sectionHeader">
+        <h2>Agents Management</h2>
+
+        <div class="searchGrid">
+
+          <input type="text" id="searchAgent" placeholder="Search agent..." />
+
+          <input type="text" id="searchCountry" placeholder="Country" />
+
+          <input type="text" id="searchCity" placeholder="City" />
+
+          <input type="text" id="searchZone" placeholder="Zone" />
+
+        </div>
+
+      </div>
+
+      <div id="agentsContainer" class="cardsWrap"></div>
+
+    </section>
+
+
+    <!-- ENTREPRENEURS PAGE -->
+    <section id="entrepreneursPage" class="page">
+
+      <div class="sectionHeader">
+        <h2>Entrepreneurs</h2>
+      </div>
+
+      <div id="entrepreneursContainer" class="cardsWrap"></div>
+
+    </section>
+
+
+    <!-- ORDERS PAGE -->
+    <section id="ordersPage" class="page">
+
+      <div class="sectionHeader">
+        <h2>Orders</h2>
+      </div>
+
+      <div id="ordersContainer" class="cardsWrap"></div>
+
+    </section>
+
+
+    <!-- REFERRALS PAGE -->
+    <section id="referralsPage" class="page">
+
+      <div class="sectionHeader">
+        <h2>Referral Tracking</h2>
+      </div>
+
+      <div id="referralsContainer" class="cardsWrap"></div>
+
+    </section>
+
+
+    <!-- UPLOADS PAGE -->
+    <section id="uploadsPage" class="page">
+
+      <div class="sectionHeader">
+        <h2>Files Control</h2>
+      </div>
+
+      <div class="uploadsBox">
+
+        <button id="reloadUploads">
+          Reload Uploads
+        </button>
+
+        <div id="uploadsContainer"></div>
+
+      </div>
+
+    </section>
+
+  </main>
+
+
+  <!-- EDIT MODAL -->
+  <div id="editModal" class="modal">
+
+    <div class="modalContent">
+
+      <span class="closeModal">×</span>
+
+      <h2>Edit User</h2>
+
+      <input type="hidden" id="editId" />
+
+      <input type="text" id="editName" placeholder="Name" />
+
+      <input type="email" id="editEmail" placeholder="Email" />
+
+      <input type="text" id="editRole" placeholder="Role" />
+
+      <input type="number" id="editCommission" placeholder="Commission" />
+
+      <input type="text" id="editLevel" placeholder="Level" />
+
+      <button id="saveEditBtn">
+        Save Changes
+      </button>
+
+    </div>
+
+  </div>
+
+
+  <script src="dashboardfobasdigital.js"></script>
+</body>
+</html>
