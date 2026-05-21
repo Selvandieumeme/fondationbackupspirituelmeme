@@ -3158,6 +3158,210 @@ app.get("/fobas/admin/business-orders/:businessId", async (req, res) => {
 
 
 
+// ==========================
+// ADMIN GET SINGLE USER
+// ==========================
+app.get("/admin/user/:id", async (req, res) => {
+
+  try {
+
+    const { id } = req.params;
+
+    // ==========================
+    // COLLECTIONS
+    // ==========================
+    const Agents =
+      mongoose.connection.collection("agents");
+
+    const Orders =
+      mongoose.connection.collection("business_orders");
+
+    // ==========================
+    // FIND USER
+    // ==========================
+    const user =
+      await Agents.findOne({
+
+        _id:
+          new mongoose.Types.ObjectId(id)
+
+      });
+
+    if (!user) {
+
+      return res.status(404).json({
+
+        success: false,
+        message: "Utilisateur introuvable"
+
+      });
+
+    }
+
+    // ==========================
+    // REFERRALS
+    // ==========================
+    const referrals =
+      await Agents.find({
+
+        referredBy: user._id
+
+      })
+
+      .project({
+
+        password: 0
+
+      })
+
+      .toArray();
+
+    // ==========================
+    // BUSINESS ORDERS
+    // ==========================
+    let orders = [];
+
+    if (
+      user.role === "entrepreneur" ||
+      user.role === "agent_entrepreneur"
+    ) {
+
+      orders =
+        await Orders.find({
+
+          businessId:
+            String(user._id)
+
+        })
+
+        .sort({
+          createdAt: -1
+        })
+
+        .toArray();
+
+    }
+
+    // ==========================
+    // RESPONSE
+    // ==========================
+    return res.json({
+
+      success: true,
+
+      user: {
+
+        _id:
+          user._id,
+
+        name:
+          user.name || "",
+
+        email:
+          user.email || "",
+
+        role:
+          user.role || "agent",
+
+        referralCode:
+          user.referralCode || "",
+
+        referralFrom:
+          user.referralFrom || "",
+
+        referredBy:
+          user.referredBy || null,
+
+        totalReferrals:
+          user.totalReferrals || 0,
+
+        referralPaid:
+          user.referralPaid || false,
+
+        level:
+          user.level || "Bronze",
+
+        totalCommission:
+          user.totalCommission || 0,
+
+        progress:
+          user.progress || 0,
+
+        monthlyRevenue:
+          user.monthlyRevenue || 0,
+
+        businessName:
+          user.businessName || "",
+
+        whatsapp:
+          user.whatsapp || "",
+
+        country:
+          user.country || "",
+
+        city:
+          user.city || "",
+
+        zone:
+          user.zone || "",
+
+        natcash:
+          user.natcash || "",
+
+        moncash:
+          user.moncash || "",
+
+        fobasEmail:
+          user.fobasEmail || "",
+
+        logo:
+          user.logo || "",
+
+        avatar:
+          user.avatar || "",
+
+        products:
+          user.products || [],
+
+        createdAt:
+          user.createdAt || null
+
+      },
+
+      referrals,
+
+      orders
+
+    });
+
+  }
+
+  catch (err) {
+
+    console.error(
+      "ADMIN USER DETAIL ERROR:",
+      err
+    );
+
+    return res.status(500).json({
+
+      success: false,
+      message: "Internal server error"
+
+    });
+
+  }
+
+});
+
+
+
+
+
+
+
+
+
 
 
 
