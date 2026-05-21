@@ -203,7 +203,7 @@ function renderUsers(users) {
 
       <p>${user.email}</p>
 
-      <p><strong>Role:</strong> ${user.role}</p>
+      <p><strong>Role:</strong> ${user.role || 'agent'}</p>
 
       <p><strong>Commission:</strong> ${user.totalCommission || 0}</p>
 
