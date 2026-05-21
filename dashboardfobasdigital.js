@@ -197,7 +197,13 @@ function renderUsers(users) {
 
     card.innerHTML = `
 
-      <img src="${user.avatar || 'https://via.placeholder.com/80'}" />
+      <img 
+  src="${
+    user.avatar
+      ? `${API}${user.avatar}`
+      : 'https://via.placeholder.com/80'
+  }" 
+/>
 
       <h3>${user.name}</h3>
 
