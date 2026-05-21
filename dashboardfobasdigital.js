@@ -319,6 +319,8 @@ async function openUser(id) {
       await res.json();
 
     const user = data.user;
+    console.log("REFERRALS:", data.referrals);
+    console.log("ORDERS:", data.orders);
 
 alert(
 
