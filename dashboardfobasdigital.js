@@ -186,6 +186,11 @@ function renderUsers(users) {
 
     card.className = "userCard";
 
+    card.setAttribute(
+  "onclick",
+  `openUser('${user._id}')`
+);
+
     card.innerHTML = `
 
       <img src="${user.avatar || 'https://via.placeholder.com/80'}" />
@@ -282,6 +287,46 @@ async function deleteUser(id) {
   }
 
 }
+
+
+
+
+
+
+// ==========================
+// OPEN USER DETAILS
+// ==========================
+async function openUser(id) {
+
+  try {
+
+    const res =
+      await fetch(
+        `${API}/admin/user/${id}`
+      );
+
+    const data =
+      await res.json();
+
+    console.log(
+      "USER DETAILS:",
+      data
+    );
+
+  }
+
+  catch (err) {
+
+    console.error(
+      "OPEN USER ERROR:",
+      err
+    );
+
+  }
+
+}
+
+
 
 
 // ==========================
