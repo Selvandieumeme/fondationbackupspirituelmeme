@@ -2572,6 +2572,64 @@ app.get("/fobas/admin/dashboard", async (req, res) => {
 
 
 
+
+
+
+
+
+// =====================================================
+// GET ALL USERS
+// =====================================================
+app.get("/fobas/admin/users", async (req, res) => {
+
+  try {
+
+    const Agents =
+      mongoose.connection.collection("agents");
+
+    const users =
+      await Agents.find({})
+      .sort({ createdAt: -1 })
+      .toArray();
+
+    return res.json({
+
+      success: true,
+
+      total:
+        users.length,
+
+      users
+
+    });
+
+  }
+
+  catch (err) {
+
+    console.error(
+      "ADMIN USERS ERROR:",
+      err
+    );
+
+    return res.status(500).json({
+
+      success: false,
+      message:
+        "Internal server error"
+
+    });
+
+  }
+
+});
+
+
+
+
+
+
+
 // =====================================================
 // SEARCH USERS
 // =====================================================
