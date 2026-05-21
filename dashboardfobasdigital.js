@@ -43,21 +43,25 @@ async function loadDashboard() {
 
     const data = await res.json();
 
-    document.getElementById(
-      "totalUsers"
-    ).innerText = data.totalUsers || 0;
+  document.getElementById(
+  "totalUsers"
+).innerText =
+  data.stats?.totalUsers || 0;
 
-    document.getElementById(
-      "totalAgents"
-    ).innerText = data.totalAgents || 0;
+document.getElementById(
+  "totalAgents"
+).innerText =
+  data.stats?.totalAgents || 0;
 
-    document.getElementById(
-      "totalEntrepreneurs"
-    ).innerText = data.totalEntrepreneurs || 0;
+document.getElementById(
+  "totalEntrepreneurs"
+).innerText =
+  data.stats?.totalEntrepreneurs || 0;
 
-    document.getElementById(
-      "totalOrders"
-    ).innerText = data.totalOrders || 0;
+document.getElementById(
+  "totalOrders"
+).innerText =
+  data.stats?.totalOrders || 0;
 
     loadRecentUsers(
       data.recentUsers || []
@@ -186,7 +190,7 @@ function renderUsers(users) {
 
     card.className = "userCard";
 
-    card.setAttribute(
+   card.setAttribute(
   "onclick",
   `openUser('${user._id}')`
 );
@@ -308,10 +312,38 @@ async function openUser(id) {
     const data =
       await res.json();
 
-    console.log(
-      "USER DETAILS:",
-      data
-    );
+    const user = data.user;
+
+alert(
+
+`Nom: ${user.name}
+
+Email: ${user.email}
+
+Role: ${user.role}
+
+ReferralCode:
+${user.referralCode || "-"}
+
+Commission:
+${user.totalCommission || 0}
+
+Pays:
+${user.country || "-"}
+
+Ville:
+${user.city || "-"}
+
+Zone:
+${user.zone || "-"}
+
+Business:
+${user.businessName || "-"}
+
+WhatsApp:
+${user.whatsapp || "-"}`
+
+);
 
   }
 
