@@ -900,9 +900,7 @@ if (referrerAgent && role === "entrepreneur") {
 
 }
 	  
-// 👇 ADD THIS (IMPORTANT)
-  await updateAgentProgress(referrerAgent._id);
-}
+
 
 	  
 
@@ -2097,8 +2095,7 @@ app.post(
 
       });
 
-	// 👇 ADD THIS
-	await updateAgentProgress(businessId);
+	
 		
 
       // ==========================
