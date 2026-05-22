@@ -652,35 +652,74 @@ function closeWithdraw() {
 
 }
 
+
 // SUBMIT WITHDRAW
 async function submitWithdraw() {
 
   try {
 
     const amount = Number(document.getElementById("withdrawAmount").value);
-    const method = document.getElementById("withdrawMethod").value;
+
+    const method =
+      document.getElementById("withdrawMethod").value;
+
+    const withdrawNumber =
+      document.getElementById("withdrawNumber").value.trim();
 
     if (!currentWithdrawUser) {
+
       alert("User not loaded");
+
       return;
+
     }
 
     if (!amount || amount < 2500) {
+
       alert("Minimum withdraw is 2500 HTG");
+
       return;
+
     }
 
-    const res = await fetch(`${API_URL}/agents/withdraw`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        email: currentWithdrawUser,
-        amount,
-        method
-      })
-    });
+    // ==========================
+    // VALIDATE NUMBER / EMAIL
+    // ==========================
+    if (!withdrawNumber) {
+
+      alert("Enter your payment number or FOBAS email");
+
+      return;
+
+    }
+
+    const res = await fetch(
+
+      `${API_URL}/agents/withdraw`,
+
+      {
+
+        method: "POST",
+
+        headers: {
+          "Content-Type": "application/json"
+        },
+
+        body: JSON.stringify({
+
+          email: currentWithdrawUser,
+
+          amount,
+
+          method,
+
+          withdrawNumber
+
+        })
+
+      }
+
+    );
 
     const data = await res.json();
 
@@ -691,20 +730,50 @@ async function submitWithdraw() {
       closeWithdraw();
 
       // refresh dashboard WITHOUT reload page
-      const refresh = await fetch(`${API_URL}/dashboard/profile?email=${currentWithdrawUser}`);
+      const refresh = await fetch(
+        `${API_URL}/dashboard/profile?email=${currentWithdrawUser}`
+      );
+
       const newData = await refresh.json();
 
-      document.getElementById("totalCommission").innerText =
+      document.getElementById(
+        "totalCommission"
+      ).innerText =
+
         (newData.totalCommission || 0) + " HTG";
 
-    } else {
-      alert(data.message || "Withdraw error");
+      // ==========================
+      // RESET FIELDS
+      // ==========================
+      document.getElementById(
+        "withdrawAmount"
+      ).value = "";
+
+      document.getElementById(
+        "withdrawNumber"
+      ).value = "";
+
+    }
+
+    else {
+
+      alert(
+        data.message || "Withdraw error"
+      );
+
     }
 
   }
 
   catch (err) {
-    console.error("WITHDRAW ERROR:", err);
+
+    console.error(
+      "WITHDRAW ERROR:",
+      err
+    );
+
     alert("Server error");
+
   }
+
 }
