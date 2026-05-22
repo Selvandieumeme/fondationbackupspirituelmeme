@@ -44,6 +44,207 @@ app.use(express.json());
 
 
 
+
+
+
+
+// ==========================
+// FOBAS PROGRESS ENGINE
+// ==========================
+
+async function calculateAgentProgress(agent) {
+
+  let progress = 0;
+
+  // ==========================
+  // LEVEL BASE
+  // ==========================
+  const levelMap = {
+    Bronze: 0,
+    Silver: 25,
+    Gold: 50,
+    Elite: 75,
+    Ambassador: 100
+  };
+
+  progress += levelMap[agent.level] || 0;
+
+  // ==========================
+  // CONDITION 1: REFERRALS (entrepreneurs + agents)
+  // ==========================
+  const totalReferrals =
+    (agent.totalReferrals || 0);
+
+  if (agent.level === "Bronze" && totalReferrals >= 100) {
+    progress += 25;
+  }
+
+  if (agent.level === "Silver" && totalReferrals >= 500) {
+    progress += 25;
+  }
+
+  if (agent.level === "Gold" && totalReferrals >= 2000) {
+    progress += 25;
+  }
+
+  if (agent.level === "Elite" && totalReferrals >= 5000) {
+    progress += 25;
+  }
+
+  // ==========================
+  // CONDITION 2: WITHDRAW HISTORY
+  // ==========================
+  const withdrawals = agent.withdrawHistory || [];
+
+  if (agent.level === "Bronze") {
+    const valid = withdrawals.filter(w => w.amount >= 2500).length;
+    if (valid >= 3) progress += 25;
+  }
+
+  if (agent.level === "Silver") {
+    const valid = withdrawals.filter(w => w.amount >= 15000).length;
+    if (valid >= 5) progress += 25;
+  }
+
+  if (agent.level === "Gold") {
+    const valid = withdrawals.filter(w => w.amount >= 75000).length;
+    if (valid >= 10) progress += 25;
+  }
+
+  if (agent.level === "Elite") {
+    const valid = withdrawals.filter(w => w.amount >= 100000).length;
+    if (valid >= 5) progress += 25;
+  }
+
+  // ==========================
+  // CONDITION 3: AGENTS REFERRED
+  // ==========================
+  const agentReferrals = agent.agentReferrals || 0;
+
+  if (agent.level === "Bronze" && agentReferrals >= 100) progress += 25;
+  if (agent.level === "Silver" && agentReferrals >= 500) progress += 25;
+  if (agent.level === "Gold" && agentReferrals >= 2000) progress += 25;
+  if (agent.level === "Elite" && agentReferrals >= 5000) progress += 25;
+
+  // ==========================
+  // CONDITION 4: CLIENT ORDERS
+  // ==========================
+  const clientOrders = agent.clientOrders || 0;
+
+  if (agent.level === "Bronze" && clientOrders >= 10) progress += 25;
+  if (agent.level === "Silver" && clientOrders >= 25) progress += 25;
+  if (agent.level === "Gold" && clientOrders >= 50) progress += 25;
+  if (agent.level === "Elite" && clientOrders >= 100) progress += 25;
+
+  // ==========================
+  // CAP PROGRESS
+  // ==========================
+  if (progress > 100) progress = 100;
+
+  return progress;
+}
+
+
+
+
+
+
+
+
+
+async function checkLevelUpgrade(Agents, agent) {
+
+  let newLevel = agent.level;
+
+  if (agent.level === "Bronze" && agent.progress >= 100) {
+    newLevel = "Silver";
+    agent.totalCommission += 1000;
+  }
+
+  else if (agent.level === "Silver" && agent.progress >= 100) {
+    newLevel = "Gold";
+    agent.totalCommission += 2000;
+  }
+
+  else if (agent.level === "Gold" && agent.progress >= 100) {
+    newLevel = "Elite";
+    agent.totalCommission += 5000;
+  }
+
+  else if (agent.level === "Elite" && agent.progress >= 100) {
+    newLevel = "Ambassador";
+    agent.totalCommission += 10000;
+  }
+
+  if (newLevel !== agent.level) {
+
+    await Agents.updateOne(
+      { _id: agent._id },
+      {
+        $set: {
+          level: newLevel,
+          progress: 0
+        }
+      }
+    );
+
+    return true;
+  }
+
+  return false;
+}
+
+
+
+
+
+
+
+
+
+async function updateAgentProgress(agentId) {
+
+  const Agents =
+    mongoose.connection.collection("agents");
+
+  const agent = await Agents.findOne({
+    _id: new mongoose.Types.ObjectId(agentId)
+  });
+
+  if (!agent) return;
+
+  const progress = await calculateAgentProgress(agent);
+
+  agent.progress = progress;
+
+  await Agents.updateOne(
+    { _id: agent._id },
+    {
+      $set: {
+        progress
+      }
+    }
+  );
+
+  await checkLevelUpgrade(Agents, agent);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 // =====================================
 // 📤 MULTER STORAGE
 // =====================================
@@ -895,7 +1096,10 @@ if (referrerAgent && role === "entrepreneur") {
   );
 
 }
-
+	  
+// 👇 ADD THIS (IMPORTANT)
+  await updateAgentProgress(referrerAgent._id);
+}
 
 	  
 
@@ -2089,6 +2293,10 @@ app.post(
         new Date()
 
       });
+
+	// 👇 ADD THIS
+	await updateAgentProgress(businessId);
+		
 
       // ==========================
       // RESPONSE
