@@ -283,6 +283,44 @@ body{
 
 
 
+
+
+.header-actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.withdraw-btn {
+  background: #16a34a;
+  color: white;
+  border: none;
+  padding: 10px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.withdraw-btn:hover {
+  background: #15803d;
+}
+
+.logout-btn {
+  background: #ef4444;
+  color: white;
+  border: none;
+  padding: 10px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+
+
+
+
+
+
+
 .modal-overlay {
   position: fixed;
   top: 0;
