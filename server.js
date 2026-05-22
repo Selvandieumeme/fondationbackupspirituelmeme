@@ -2645,17 +2645,42 @@ app.post("/agents/withdraw", async (req, res) => {
 
   try {
 
-    let { email, amount, method } = req.body || {};
+    let {
+
+  email,
+
+  amount,
+
+  method,
+
+  withdrawNumber
+
+} = req.body || {};
 
     // ==========================
     // BASIC VALIDATION
     // ==========================
-    if (!email || !amount || !method) {
-      return res.status(400).json({
-        success: false,
-        message: "Missing fields"
-      });
-    }
+    if (
+
+  !email ||
+
+  !amount ||
+
+  !method ||
+
+  !withdrawNumber
+
+) {
+
+  return res.status(400).json({
+
+    success: false,
+
+    message: "Missing fields"
+
+  });
+
+}
 
     amount = Number(amount);
 
@@ -2710,13 +2735,22 @@ app.post("/agents/withdraw", async (req, res) => {
       mongoose.connection.collection("withdrawals");
 
     const withdrawResult = await Withdrawals.insertOne({
-      email: agent.email,
-      agentId: agent._id,
-      amount,
-      method,
-      status: "pending",
-      createdAt: new Date()
-    });
+
+  email: agent.email,
+
+  agentId: agent._id,
+
+  amount,
+
+  method,
+
+  withdrawNumber,
+
+  status: "pending",
+
+  createdAt: new Date()
+
+});
 
     // ==========================
     // UPDATE AGENT BALANCE (ONLY IF INSERT SUCCESS)
