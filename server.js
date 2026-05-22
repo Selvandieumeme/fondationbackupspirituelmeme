@@ -3857,10 +3857,7 @@ app.post("/admin/withdrawals/update", async (req, res) => {
     // ==========================
     // VALIDATION
     // ==========================
-    if (
-      !withdrawId ||
-      !status
-    ) {
+    if (!withdrawId || !status) {
 
       return res.status(400).json({
         success: false,
@@ -3872,14 +3869,9 @@ app.post("/admin/withdrawals/update", async (req, res) => {
     // ==========================
     // ALLOWED STATUS
     // ==========================
-    const allowedStatus = [
-      "approved",
-      "rejected"
-    ];
+    const allowedStatus = ["approved", "rejected"];
 
-    if (
-      !allowedStatus.includes(status)
-    ) {
+    if (!allowedStatus.includes(status)) {
 
       return res.status(400).json({
         success: false,
@@ -3899,12 +3891,7 @@ app.post("/admin/withdrawals/update", async (req, res) => {
     // ==========================
     const withdraw =
       await Withdrawals.findOne({
-
-        _id:
-        new mongoose.Types.ObjectId(
-          withdrawId
-        )
-
+        _id: new mongoose.Types.ObjectId(withdrawId)
       });
 
     if (!withdraw) {
@@ -3919,34 +3906,28 @@ app.post("/admin/withdrawals/update", async (req, res) => {
     // ==========================
     // ALREADY PROCESSED
     // ==========================
-    if (
-      withdraw.status !== "pending"
-    ) {
+    if (withdraw.status !== "pending") {
 
       return res.status(400).json({
         success: false,
-        message:
-        "Withdraw already processed"
+        message: "Withdraw already processed"
       });
 
     }
 
     // ==========================
-    // UPDATE STATUS
+    // UPDATE WITHDRAW STATUS
     // ==========================
     await Withdrawals.updateOne(
-
       {
         _id: withdraw._id
       },
-
       {
         $set: {
           status,
           processedAt: new Date()
         }
       }
-
     );
 
     // ==========================
@@ -3955,18 +3936,14 @@ app.post("/admin/withdrawals/update", async (req, res) => {
     if (status === "rejected") {
 
       await Agents.updateOne(
-
         {
-          _id: withdraw.agentId
+          _id: new mongoose.Types.ObjectId(withdraw.agentId)
         },
-
         {
           $inc: {
-            totalCommission:
-            withdraw.amount
+            totalCommission: Number(withdraw.amount)
           }
         }
-
       );
 
     }
@@ -3975,35 +3952,24 @@ app.post("/admin/withdrawals/update", async (req, res) => {
     // RESPONSE
     // ==========================
     return res.json({
-
       success: true,
-      message:
-      `Withdraw ${status} successfully`
-
+      message: `Withdraw ${status} successfully`
     });
 
   }
 
   catch (err) {
 
-    console.error(
-      "UPDATE WITHDRAW ERROR:",
-      err
-    );
+    console.error("UPDATE WITHDRAW ERROR:", err);
 
     return res.status(500).json({
-
       success: false,
-      message:
-      "Internal server error"
-
+      message: "Internal server error"
     });
 
   }
 
 });
-
-
 
 
 
