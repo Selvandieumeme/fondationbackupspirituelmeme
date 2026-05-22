@@ -3841,6 +3841,80 @@ app.get("/fobas/admin/withdraws", async (req, res) => {
 
 
 
+
+
+app.put("/fobas/admin/approve-withdraw/:id", async (req, res) => {
+  try {
+
+    const Withdrawals = mongoose.connection.collection("withdrawals");
+
+    const withdraw = await Withdrawals.findOne({
+      _id: new mongoose.Types.ObjectId(req.params.id)
+    });
+
+    if (!withdraw) {
+      return res.status(404).json({ success: false, message: "Withdraw not found" });
+    }
+
+    if (withdraw.status !== "pending") {
+      return res.status(400).json({ success: false, message: "Already processed" });
+    }
+
+    await Withdrawals.updateOne(
+      { _id: withdraw._id },
+      { $set: { status: "approved", processedAt: new Date() } }
+    );
+
+    return res.json({ success: true, message: "Withdraw approved" });
+
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ success: false, message: "Internal server error" });
+  }
+});
+
+
+
+
+
+app.put("/fobas/admin/reject-withdraw/:id", async (req, res) => {
+  try {
+
+    const Withdrawals = mongoose.connection.collection("withdrawals");
+    const Agents = mongoose.connection.collection("agents");
+
+    const withdraw = await Withdrawals.findOne({
+      _id: new mongoose.Types.ObjectId(req.params.id)
+    });
+
+    if (!withdraw) {
+      return res.status(404).json({ success: false, message: "Withdraw not found" });
+    }
+
+    if (withdraw.status !== "pending") {
+      return res.status(400).json({ success: false, message: "Already processed" });
+    }
+
+    // refund
+    await Agents.updateOne(
+      { _id: new mongoose.Types.ObjectId(withdraw.agentId) },
+      { $inc: { totalCommission: Number(withdraw.amount) } }
+    );
+
+    await Withdrawals.updateOne(
+      { _id: withdraw._id },
+      { $set: { status: "rejected", processedAt: new Date() } }
+    );
+
+    return res.json({ success: true, message: "Withdraw rejected" });
+
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ success: false, message: "Internal server error" });
+  }
+});
+
+
 // ==========================
 // ADMIN UPDATE WITHDRAW STATUS
 // ==========================
