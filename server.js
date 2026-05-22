@@ -29,25 +29,6 @@ const cron = require('node-cron');
 
 
 
-
-// ----------------------- MODELS -----------------------
-const VipSession = require('./models/VipSession.js');   // CommonJS
-const User = require('./models/User.js');               // CommonJSP
-
-
-
-const app = express(); 
-app.use(cors()); 
-app.use(express.json());
-
-
-
-
-
-
-
-
-
 // ==========================
 // FOBAS PROGRESS ENGINE
 // ==========================
@@ -233,13 +214,15 @@ async function updateAgentProgress(agentId) {
 
 
 
+// ----------------------- MODELS -----------------------
+const VipSession = require('./models/VipSession.js');   // CommonJS
+const User = require('./models/User.js');               // CommonJSP
 
 
 
-
-
-
-
+const app = express(); 
+app.use(cors()); 
+app.use(express.json());
 
 
 
