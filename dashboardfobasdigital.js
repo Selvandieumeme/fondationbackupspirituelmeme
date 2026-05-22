@@ -166,6 +166,43 @@ async function loadUsers() {
 }
 
 
+
+
+
+// ==========================
+// LOAD WITHDRAWS
+// ==========================
+async function loadWithdraws() {
+
+  try {
+
+    const res = await fetch(
+      `${API}/fobas/admin/withdraws`
+    );
+
+    const data = await res.json();
+
+    renderWithdraws(
+      data.withdraws || []
+    );
+
+  }
+
+  catch (err) {
+
+    console.error(
+      "WITHDRAW LOAD ERROR:",
+      err
+    );
+
+  }
+
+}
+
+
+
+
+
 // ==========================
 // RENDER USERS
 // ==========================
@@ -258,6 +295,78 @@ function renderUsers(users) {
 }
 
 
+
+// ==========================
+// RENDER WITHDRAWS
+// ==========================
+function renderWithdraws(withdraws) {
+
+  const container =
+    document.getElementById(
+      "withdrawsContainer"
+    );
+
+  if (!container) return;
+
+  container.innerHTML = "";
+
+  withdraws.forEach((withdraw) => {
+
+    const card =
+      document.createElement("div");
+
+    card.className =
+      "userCard";
+
+    card.innerHTML = `
+
+      <h3>${withdraw.email}</h3>
+
+      <p>
+        <strong>Amount:</strong>
+        ${withdraw.amount} HTG
+      </p>
+
+      <p>
+        <strong>Method:</strong>
+        ${withdraw.method || "-"}
+      </p>
+
+      <p>
+        <strong>Status:</strong>
+        ${withdraw.status}
+      </p>
+
+      <div class="actionBtns">
+
+        <button
+          class="editBtn"
+          onclick="approveWithdraw('${withdraw._id}')"
+        >
+          Approve
+        </button>
+
+        <button
+          class="deleteBtn"
+          onclick="rejectWithdraw('${withdraw._id}')"
+        >
+          Reject
+        </button>
+
+      </div>
+
+    `;
+
+    container.appendChild(card);
+
+  });
+
+}
+
+
+
+
+
 // ==========================
 // DELETE USER
 // ==========================
@@ -291,6 +400,100 @@ async function deleteUser(id) {
 
     console.error(
       "DELETE ERROR:",
+      err
+    );
+
+  }
+
+}
+
+
+
+
+
+// ==========================
+// APPROVE WITHDRAW
+// ==========================
+async function approveWithdraw(id) {
+
+  const confirmation =
+    confirm(
+      "Approve this withdraw?"
+    );
+
+  if (!confirmation) return;
+
+  try {
+
+    const res = await fetch(
+
+      `${API}/fobas/admin/approve-withdraw/${id}`,
+
+      {
+        method: "PUT"
+      }
+
+    );
+
+    const data =
+      await res.json();
+
+    alert(data.message);
+
+    loadWithdraws();
+
+  }
+
+  catch (err) {
+
+    console.error(
+      "APPROVE ERROR:",
+      err
+    );
+
+  }
+
+}
+
+
+
+// ==========================
+// REJECT WITHDRAW
+// ==========================
+async function rejectWithdraw(id) {
+
+  const confirmation =
+    confirm(
+      "Reject this withdraw?"
+    );
+
+  if (!confirmation) return;
+
+  try {
+
+    const res = await fetch(
+
+      `${API}/fobas/admin/reject-withdraw/${id}`,
+
+      {
+        method: "PUT"
+      }
+
+    );
+
+    const data =
+      await res.json();
+
+    alert(data.message);
+
+    loadWithdraws();
+
+  }
+
+  catch (err) {
+
+    console.error(
+      "REJECT ERROR:",
       err
     );
 
@@ -543,3 +746,4 @@ function filterUsers() {
 // ==========================
 loadDashboard();
 loadUsers();
+loadWithdraws();
