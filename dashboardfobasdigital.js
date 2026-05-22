@@ -333,6 +333,11 @@ function renderWithdraws(withdraws) {
       </p>
 
       <p>
+  <strong>Withdraw Info:</strong>
+  ${withdraw.withdrawNumber || "-"}
+</p>
+
+      <p>
         <strong>Status:</strong>
         ${withdraw.status}
       </p>
