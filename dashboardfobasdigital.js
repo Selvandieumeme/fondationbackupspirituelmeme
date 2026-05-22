@@ -581,7 +581,7 @@ ${user.whatsapp || "-"}`
 // OPEN EDIT
 // ==========================
 function openEdit(
-  id,
+  _id,
   name,
   email,
   role,
@@ -595,7 +595,7 @@ function openEdit(
 
   document.getElementById(
     "editId"
-  ).value = id;
+  ).value = _id;
 
   document.getElementById(
     "editName"
@@ -645,7 +645,7 @@ document.getElementById(
 
     const body = {
 
-      id:
+      _id:
         document.getElementById(
           "editId"
         ).value,
