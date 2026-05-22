@@ -2636,6 +2636,148 @@ app.post(
 
 
 
+// ==========================
+// WITHDRAW REQUEST ROUTE
+// SAFE FINTECH VERSION (PRODUCTION READY)
+// ==========================
+
+app.post("/agents/withdraw", async (req, res) => {
+
+  try {
+
+    let { email, amount, method } = req.body || {};
+
+    // ==========================
+    // BASIC VALIDATION
+    // ==========================
+    if (!email || !amount || !method) {
+      return res.status(400).json({
+        success: false,
+        message: "Missing fields"
+      });
+    }
+
+    amount = Number(amount);
+
+    if (isNaN(amount)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid amount"
+      });
+    }
+
+    // ==========================
+    // MINIMUM RULE
+    // ==========================
+    if (amount < 2500) {
+      return res.status(400).json({
+        success: false,
+        message: "Minimum withdraw is 2500 HTG"
+      });
+    }
+
+    const Agents =
+      mongoose.connection.collection("agents");
+
+    // ==========================
+    // FIND USER (SAFE NORMALIZATION)
+    // ==========================
+    const agent = await Agents.findOne({
+      email: String(email).trim().toLowerCase()
+    });
+
+    if (!agent) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found"
+      });
+    }
+
+    // ==========================
+    // CHECK BALANCE
+    // ==========================
+    if ((agent.totalCommission || 0) < amount) {
+      return res.status(400).json({
+        success: false,
+        message: "Insufficient commission"
+      });
+    }
+
+    // ==========================
+    // CREATE WITHDRAW REQUEST FIRST (SAFE FLOW)
+    // ==========================
+    const Withdrawals =
+      mongoose.connection.collection("withdrawals");
+
+    const withdrawResult = await Withdrawals.insertOne({
+      email: agent.email,
+      agentId: agent._id,
+      amount,
+      method,
+      status: "pending",
+      createdAt: new Date()
+    });
+
+    // ==========================
+    // UPDATE AGENT BALANCE (ONLY IF INSERT SUCCESS)
+    // ==========================
+    if (withdrawResult.insertedId) {
+
+      await Agents.updateOne(
+        { _id: agent._id },
+        {
+          $inc: {
+            totalCommission: -amount
+          }
+        }
+      );
+
+      // ==========================
+      // OPTIONAL: PROGRESS ENGINE HOOK (SAFE PLACE)
+      // ==========================
+      if (typeof updateAgentProgress === "function") {
+        await updateAgentProgress(agent._id);
+      }
+    }
+
+    // ==========================
+    // RESPONSE
+    // ==========================
+    return res.json({
+      success: true,
+      message: "Withdraw request created successfully",
+      withdrawId: withdrawResult.insertedId
+    });
+
+  }
+
+  catch (err) {
+
+    console.error("WITHDRAW ERROR:", err);
+
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error"
+    });
+  }
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -3611,130 +3753,35 @@ app.get("/admin/user/:id", async (req, res) => {
 
 
 
-
-
-
-
-
-
 // ==========================
-// WITHDRAW REQUEST ROUTE
-// SAFE FINTECH VERSION (PRODUCTION READY)
+// ADMIN GET ALL WITHDRAWALS
 // ==========================
 
-app.post("/agents/withdraw", async (req, res) => {
+app.get("/admin/withdrawals", async (req, res) => {
 
   try {
 
-    let { email, amount, method } = req.body || {};
-
-    // ==========================
-    // BASIC VALIDATION
-    // ==========================
-    if (!email || !amount || !method) {
-      return res.status(400).json({
-        success: false,
-        message: "Missing fields"
-      });
-    }
-
-    amount = Number(amount);
-
-    if (isNaN(amount)) {
-      return res.status(400).json({
-        success: false,
-        message: "Invalid amount"
-      });
-    }
-
-    // ==========================
-    // MINIMUM RULE
-    // ==========================
-    if (amount < 2500) {
-      return res.status(400).json({
-        success: false,
-        message: "Minimum withdraw is 2500 HTG"
-      });
-    }
-
-    const Agents =
-      mongoose.connection.collection("agents");
-
-    // ==========================
-    // FIND USER (SAFE NORMALIZATION)
-    // ==========================
-    const agent = await Agents.findOne({
-      email: String(email).trim().toLowerCase()
-    });
-
-    if (!agent) {
-      return res.status(404).json({
-        success: false,
-        message: "User not found"
-      });
-    }
-
-    // ==========================
-    // CHECK BALANCE
-    // ==========================
-    if ((agent.totalCommission || 0) < amount) {
-      return res.status(400).json({
-        success: false,
-        message: "Insufficient commission"
-      });
-    }
-
-    // ==========================
-    // CREATE WITHDRAW REQUEST FIRST (SAFE FLOW)
-    // ==========================
     const Withdrawals =
       mongoose.connection.collection("withdrawals");
 
-    const withdrawResult = await Withdrawals.insertOne({
-      email: agent.email,
-      agentId: agent._id,
-      amount,
-      method,
-      status: "pending",
-      createdAt: new Date()
-    });
+    const withdrawals =
+      await Withdrawals.find({})
+      .sort({ createdAt: -1 })
+      .toArray();
 
-    // ==========================
-    // UPDATE AGENT BALANCE (ONLY IF INSERT SUCCESS)
-    // ==========================
-    if (withdrawResult.insertedId) {
-
-      await Agents.updateOne(
-        { _id: agent._id },
-        {
-          $inc: {
-            totalCommission: -amount
-          }
-        }
-      );
-
-      // ==========================
-      // OPTIONAL: PROGRESS ENGINE HOOK (SAFE PLACE)
-      // ==========================
-      if (typeof updateAgentProgress === "function") {
-        await updateAgentProgress(agent._id);
-      }
-    }
-
-    // ==========================
-    // RESPONSE
-    // ==========================
     return res.json({
       success: true,
-      message: "Withdraw request created successfully",
-      withdrawId: withdrawResult.insertedId
+      withdrawals
     });
 
   }
 
   catch (err) {
 
-    console.error("WITHDRAW ERROR:", err);
+    console.error(
+      "ADMIN WITHDRAWALS ERROR:",
+      err
+    );
 
     return res.status(500).json({
       success: false,
@@ -3742,6 +3789,175 @@ app.post("/agents/withdraw", async (req, res) => {
     });
   }
 });
+
+
+
+
+
+// ==========================
+// ADMIN UPDATE WITHDRAW STATUS
+// ==========================
+
+app.post("/admin/withdrawals/update", async (req, res) => {
+
+  try {
+
+    const {
+      withdrawId,
+      status
+    } = req.body || {};
+
+    // ==========================
+    // VALIDATION
+    // ==========================
+    if (
+      !withdrawId ||
+      !status
+    ) {
+
+      return res.status(400).json({
+        success: false,
+        message: "Missing fields"
+      });
+
+    }
+
+    // ==========================
+    // ALLOWED STATUS
+    // ==========================
+    const allowedStatus = [
+      "approved",
+      "rejected"
+    ];
+
+    if (
+      !allowedStatus.includes(status)
+    ) {
+
+      return res.status(400).json({
+        success: false,
+        message: "Invalid status"
+      });
+
+    }
+
+    const Withdrawals =
+      mongoose.connection.collection("withdrawals");
+
+    const Agents =
+      mongoose.connection.collection("agents");
+
+    // ==========================
+    // FIND WITHDRAW
+    // ==========================
+    const withdraw =
+      await Withdrawals.findOne({
+
+        _id:
+        new mongoose.Types.ObjectId(
+          withdrawId
+        )
+
+      });
+
+    if (!withdraw) {
+
+      return res.status(404).json({
+        success: false,
+        message: "Withdraw not found"
+      });
+
+    }
+
+    // ==========================
+    // ALREADY PROCESSED
+    // ==========================
+    if (
+      withdraw.status !== "pending"
+    ) {
+
+      return res.status(400).json({
+        success: false,
+        message:
+        "Withdraw already processed"
+      });
+
+    }
+
+    // ==========================
+    // UPDATE STATUS
+    // ==========================
+    await Withdrawals.updateOne(
+
+      {
+        _id: withdraw._id
+      },
+
+      {
+        $set: {
+          status,
+          processedAt: new Date()
+        }
+      }
+
+    );
+
+    // ==========================
+    // REFUND IF REJECTED
+    // ==========================
+    if (status === "rejected") {
+
+      await Agents.updateOne(
+
+        {
+          _id: withdraw.agentId
+        },
+
+        {
+          $inc: {
+            totalCommission:
+            withdraw.amount
+          }
+        }
+
+      );
+
+    }
+
+    // ==========================
+    // RESPONSE
+    // ==========================
+    return res.json({
+
+      success: true,
+      message:
+      `Withdraw ${status} successfully`
+
+    });
+
+  }
+
+  catch (err) {
+
+    console.error(
+      "UPDATE WITHDRAW ERROR:",
+      err
+    );
+
+    return res.status(500).json({
+
+      success: false,
+      message:
+      "Internal server error"
+
+    });
+
+  }
+
+});
+
+
+
 
 
 
