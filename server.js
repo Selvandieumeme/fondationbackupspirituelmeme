@@ -3793,6 +3793,53 @@ app.get("/admin/withdrawals", async (req, res) => {
 
 
 
+// ==========================
+// ADMIN GET ALL WITHDRAWS
+// JS COMPATIBILITY VERSION
+// ==========================
+app.get("/fobas/admin/withdraws", async (req, res) => {
+
+  try {
+
+    const Withdrawals =
+      mongoose.connection.collection("withdrawals");
+
+    const withdrawals =
+      await Withdrawals.find({})
+      .sort({ createdAt: -1 })
+      .toArray();
+
+    return res.json({
+
+      success: true,
+      withdrawals
+
+    });
+
+  }
+
+  catch (err) {
+
+    console.error(
+      "ADMIN WITHDRAWS ERROR:",
+      err
+    );
+
+    return res.status(500).json({
+
+      success: false,
+      message:
+      "Internal server error"
+
+    });
+
+  }
+
+});
+
+
+
+
 
 // ==========================
 // ADMIN UPDATE WITHDRAW STATUS
