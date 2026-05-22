@@ -285,6 +285,53 @@
 
 </div>
 
+
+
+  <script>
+
+const withdrawMethod =
+  document.getElementById("withdrawMethod");
+
+const withdrawDestination =
+  document.getElementById("withdrawDestination");
+
+function updateWithdrawPlaceholder() {
+
+  const method =
+    withdrawMethod.value;
+
+  if (method === "natcash") {
+
+    withdrawDestination.placeholder =
+      "Enter NatCash number";
+
+  }
+
+  else if (method === "moncash") {
+
+    withdrawDestination.placeholder =
+      "Enter MonCash number";
+
+  }
+
+  else if (method === "wallet") {
+
+    withdrawDestination.placeholder =
+      "Enter FOBAS email";
+
+  }
+
+}
+
+withdrawMethod.addEventListener(
+  "change",
+  updateWithdrawPlaceholder
+);
+
+updateWithdrawPlaceholder();
+
+</script>
+  
 <script src="dashboarddigitalagents.js"></script>
 </body>
 </html>
