@@ -600,3 +600,111 @@ function copyReferralLink() {
   alert("Lien referral copié");
 
 }
+
+
+
+
+
+// ==========================
+// WITHDRAW SYSTEM (SAFE MODULE)
+// ==========================
+
+let currentWithdrawUser = null;
+
+// OPEN MODAL
+function requestWithdraw() {
+
+  const modal = document.getElementById("withdrawModal");
+  if (!modal) return;
+
+  const email = localStorage.getItem("userEmail");
+
+  if (!email) {
+    alert("User not found");
+    return;
+  }
+
+  currentWithdrawUser = email;
+
+  // load balance live
+  fetch(`${API_URL}/dashboard/profile?email=${email}`)
+    .then(res => res.json())
+    .then(data => {
+
+      const text = document.getElementById("withdrawBalanceText");
+
+      if (text) {
+        text.innerText =
+          `Commission disponible: ${data.totalCommission || 0} HTG`;
+      }
+
+      modal.style.display = "flex";
+
+    });
+
+}
+
+// CLOSE MODAL
+function closeWithdraw() {
+
+  const modal = document.getElementById("withdrawModal");
+  if (modal) modal.style.display = "none";
+
+}
+
+// SUBMIT WITHDRAW
+async function submitWithdraw() {
+
+  try {
+
+    const amount = Number(document.getElementById("withdrawAmount").value);
+    const method = document.getElementById("withdrawMethod").value;
+
+    if (!currentWithdrawUser) {
+      alert("User not loaded");
+      return;
+    }
+
+    if (!amount || amount < 2500) {
+      alert("Minimum withdraw is 2500 HTG");
+      return;
+    }
+
+    const res = await fetch(`${API_URL}/agents/withdraw`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        email: currentWithdrawUser,
+        amount,
+        method
+      })
+    });
+
+    const data = await res.json();
+
+    if (data.success) {
+
+      alert("Withdraw request sent");
+
+      closeWithdraw();
+
+      // refresh dashboard WITHOUT reload page
+      const refresh = await fetch(`${API_URL}/dashboard/profile?email=${currentWithdrawUser}`);
+      const newData = await refresh.json();
+
+      document.getElementById("totalCommission").innerText =
+        (newData.totalCommission || 0) + " HTG";
+
+    } else {
+      alert(data.message || "Withdraw error");
+    }
+
+  }
+
+  catch (err) {
+    console.error("WITHDRAW ERROR:", err);
+    alert("Server error");
+  }
+}
