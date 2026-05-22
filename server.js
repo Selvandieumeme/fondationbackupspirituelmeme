@@ -3804,7 +3804,7 @@ app.get("/fobas/admin/withdraws", async (req, res) => {
     const Withdrawals =
       mongoose.connection.collection("withdrawals");
 
-    const withdrawals =
+    const withdraws =
       await Withdrawals.find({})
       .sort({ createdAt: -1 })
       .toArray();
@@ -3812,7 +3812,7 @@ app.get("/fobas/admin/withdraws", async (req, res) => {
     return res.json({
 
       success: true,
-      withdrawals
+      withdraws
 
     });
 
