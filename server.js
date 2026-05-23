@@ -53,26 +53,69 @@ async function calculateAgentProgress(agent) {
   progress += levelMap[agent.level] || 0;
 
   // ==========================
-  // CONDITION 1: REFERRALS (entrepreneurs + agents)
+  // CONDITION 1: AGENTS REFERRALS 
   // ==========================
-  const totalReferrals =
-    (agent.totalReferrals || 0);
+  const totalAgentReferrals =
+  agent.totalAgentReferrals || 0;
 
-  if (agent.level === "Bronze" && totalReferrals >= 100) {
-    progress += 25;
+if (agent.level === "Bronze") {
+
+  const target = 100;
+
+  let agentProgress =
+    (totalAgentReferrals / target) * 25;
+
+  if (agentProgress > 25) {
+    agentProgress = 25;
   }
 
-  if (agent.level === "Silver" && totalReferrals >= 500) {
-    progress += 25;
+  progress += agentProgress;
+
+}
+  if (agent.level === "Silver") {
+
+  const target = 500;
+
+  let agentProgress =
+    (totalAgentReferrals / target) * 25;
+
+  if (agentProgress > 25) {
+    agentProgress = 25;
   }
 
-  if (agent.level === "Gold" && totalReferrals >= 2000) {
-    progress += 25;
+  progress += agentProgress;
+
+}
+
+  if (agent.level === "Gold") {
+
+  const target = 2000;
+
+  let agentProgress =
+    (totalAgentReferrals / target) * 25;
+
+  if (agentProgress > 25) {
+    agentProgress = 25;
   }
 
-  if (agent.level === "Elite" && totalReferrals >= 5000) {
-    progress += 25;
+  progress += agentProgress;
+
+}
+
+  if (agent.level === "Elite") {
+
+  const target = 5000;
+
+  let agentProgress =
+    (totalAgentReferrals / target) * 25;
+
+  if (agentProgress > 25) {
+    agentProgress = 25;
   }
+
+  progress += agentProgress;
+
+}
 
 // ==========================
 // CONDITION 2: WITHDRAW HISTORY
@@ -165,7 +208,7 @@ if (agent.level === "Elite") {
 
 }
   // ==========================
-  // CONDITION 3: AGENTS REFERRED
+  // CONDITION 3: ENTREPREPRENEUR REFERRED
   // ==========================
   const entrepreneurReferrals =
   agent.totalReferrals || 0;
