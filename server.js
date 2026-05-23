@@ -1191,7 +1191,10 @@ const result = await Agents.insertOne({
 // ==========================
 // REFERRAL REWARD (APRE INSERT - SAFE PLACE)
 // ==========================
-if (referrerAgent && role === "entrepreneur") {
+if (
+  referrerAgent &&
+  (role === "entrepreneur" || role === "agent_entrepreneur")
+) {
 
   await Agents.updateOne(
     { _id: referrerAgent._id },
@@ -1202,7 +1205,8 @@ if (referrerAgent && role === "entrepreneur") {
       }
     }
   );
-// 👇 ADD THIS HERE
+
+  // 🔥 REAL-TIME PROGRESS UPDATE
   await updateAgentProgress(referrerAgent._id);
 
 }
