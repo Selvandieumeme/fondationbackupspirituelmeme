@@ -3890,32 +3890,62 @@ app.get("/fobas/admin/withdraws", async (req, res) => {
 app.put("/fobas/admin/approve-withdraw/:id", async (req, res) => {
   try {
 
-    const Withdrawals = mongoose.connection.collection("withdrawals");
+    const Withdrawals =
+      mongoose.connection.collection("withdrawals");
 
     const withdraw = await Withdrawals.findOne({
       _id: new mongoose.Types.ObjectId(req.params.id)
     });
 
     if (!withdraw) {
-      return res.status(404).json({ success: false, message: "Withdraw not found" });
+      return res.status(404).json({
+        success: false,
+        message: "Withdraw not found"
+      });
     }
 
     if (withdraw.status !== "pending") {
-      return res.status(400).json({ success: false, message: "Already processed" });
+      return res.status(400).json({
+        success: false,
+        message: "Already processed"
+      });
     }
 
     await Withdrawals.updateOne(
       { _id: withdraw._id },
-      { $set: { status: "approved", processedAt: new Date() } }
+      {
+        $set: {
+          status: "approved",
+          processedAt: new Date()
+        }
+      }
     );
 
-    return res.json({ success: true, message: "Withdraw approved" });
+    // ==========================
+    // 🔥 ONLY ADDITION (SAFE HOOK)
+    // ==========================
+    try {
+      if (typeof updateAgentProgress === "function" && withdraw.agentId) {
+        await updateAgentProgress(withdraw.agentId);
+      }
+    } catch (e) {
+      console.log("PROGRESS HOOK ERROR:", e.message);
+    }
+
+    return res.json({
+      success: true,
+      message: "Withdraw approved"
+    });
 
   } catch (err) {
     console.error(err);
-    return res.status(500).json({ success: false, message: "Internal server error" });
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error"
+    });
   }
 });
+
 
 
 
