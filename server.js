@@ -1211,7 +1211,28 @@ if (
   await updateAgentProgress(referrerAgent._id);
 
 }
+	  
+// ==========================
+// AGENT REFERRAL PROGRESS
+// ==========================
+if (
+  referrerAgent &&
+  role === "agent"
+) {
 
+  await Agents.updateOne(
+    { _id: referrerAgent._id },
+    {
+      $inc: {
+        totalAgentReferrals: 1
+      }
+    }
+  );
+
+  // 🔥 REAL-TIME PROGRESS UPDATE
+  await updateAgentProgress(referrerAgent._id);
+
+}
 	  
 
 
