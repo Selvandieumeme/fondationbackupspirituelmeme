@@ -3268,7 +3268,7 @@ app.put("/fobas/admin/update-user", async (req, res) => {
   try {
 
     const {
-      _Id,
+      _id,
       name,
       role,
       level,
@@ -3281,12 +3281,12 @@ app.put("/fobas/admin/update-user", async (req, res) => {
       zone
     } = req.body;
 
-    if (!_Id) {
+    if (!_id) {
 
       return res.status(400).json({
 
         success: false,
-        message: "User ID required"
+        message: "_id required"
 
       });
 
@@ -3298,7 +3298,7 @@ app.put("/fobas/admin/update-user", async (req, res) => {
     await Agents.updateOne(
 
       {
-        _id: new mongoose.Types.ObjectId(_Id)
+        _id: new mongoose.Types.ObjectId(_id)
       },
 
       {
