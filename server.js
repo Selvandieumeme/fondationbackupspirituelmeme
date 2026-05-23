@@ -74,35 +74,41 @@ async function calculateAgentProgress(agent) {
     progress += 25;
   }
 
-  // ==========================
-  // CONDITION 2: WITHDRAW HISTORY
-  // ==========================
-  const withdrawals = agent.withdrawHistory || [];
+// ==========================
+// CONDITION 2: WITHDRAW HISTORY
+// ==========================
+const Withdrawals =
+  mongoose.connection.collection("withdrawals");
 
-  if (agent.level === "Bronze") {
-    const valid = withdrawals.filter(w => w.amount >= 2500).length;
-    if (valid >= 3) progress += 25;
-  }
+const withdrawals =
+  await Withdrawals.find({
+    agentId: agent._id,
+    status: "approved"
+  }).toArray();
 
-  if (agent.level === "Silver") {
-    const valid = withdrawals.filter(w => w.amount >= 15000).length;
-    if (valid >= 5) progress += 25;
-  }
+if (agent.level === "Bronze") {
+  const valid = withdrawals.filter(w => w.amount >= 2500).length;
+  if (valid >= 3) progress += 25;
+}
 
-  if (agent.level === "Gold") {
-    const valid = withdrawals.filter(w => w.amount >= 75000).length;
-    if (valid >= 10) progress += 25;
-  }
+if (agent.level === "Silver") {
+  const valid = withdrawals.filter(w => w.amount >= 15000).length;
+  if (valid >= 5) progress += 25;
+}
 
-  if (agent.level === "Elite") {
-    const valid = withdrawals.filter(w => w.amount >= 100000).length;
-    if (valid >= 5) progress += 25;
-  }
+if (agent.level === "Gold") {
+  const valid = withdrawals.filter(w => w.amount >= 75000).length;
+  if (valid >= 10) progress += 25;
+}
 
+if (agent.level === "Elite") {
+  const valid = withdrawals.filter(w => w.amount >= 100000).length;
+  if (valid >= 5) progress += 25;
+}
   // ==========================
   // CONDITION 3: AGENTS REFERRED
   // ==========================
-  const agentReferrals = agent.agentReferrals || 0;
+  const agentReferrals = agent.totalReferrals || 0;
 
   if (agent.level === "Bronze" && agentReferrals >= 100) progress += 25;
   if (agent.level === "Silver" && agentReferrals >= 500) progress += 25;
