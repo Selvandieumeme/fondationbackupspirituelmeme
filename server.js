@@ -1170,6 +1170,7 @@ const result = await Agents.insertOne({
   level: "Bronze",
   totalCommission: 0,
   progress: 0,
+  totalAgentReferrals: 0,
 
   referralFrom: referralCodeFromLink || null,
   referredBy: referrerAgent ? referrerAgent._id : null,
