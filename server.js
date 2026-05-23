@@ -2284,7 +2284,8 @@ app.post(
         new Date()
 
       });
-
+	// 👇 ADD THIS HERE
+await updateAgentProgress(businessId);
 	
 		
 
