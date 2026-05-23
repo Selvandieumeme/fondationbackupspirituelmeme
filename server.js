@@ -87,8 +87,16 @@ const withdrawals =
   }).toArray();
 
 if (agent.level === "Bronze") {
+
   const valid = withdrawals.filter(w => w.amount >= 2500).length;
-  if (valid >= 3) progress += 25;
+  if (valid >= 1) progress += 5;
+
+  const valid2 = withdrawals.filter(w => w.amount >= 5000).length;
+  if (valid2 >= 1) progress += 10;
+
+  const valid3 = withdrawals.filter(w => w.amount >= 10000).length;
+  if (valid3 >= 1) progress += 10;
+
 }
 
 if (agent.level === "Silver") {
