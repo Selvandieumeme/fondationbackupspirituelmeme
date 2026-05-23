@@ -167,12 +167,65 @@ if (agent.level === "Elite") {
   // ==========================
   // CONDITION 3: AGENTS REFERRED
   // ==========================
-  const agentReferrals = agent.totalReferrals || 0;
+  const entrepreneurReferrals =
+  agent.totalReferrals || 0;
 
-  if (agent.level === "Bronze" && agentReferrals >= 100) progress += 25;
-  if (agent.level === "Silver" && agentReferrals >= 500) progress += 25;
-  if (agent.level === "Gold" && agentReferrals >= 2000) progress += 25;
-  if (agent.level === "Elite" && agentReferrals >= 5000) progress += 25;
+if (agent.level === "Bronze") {
+
+  const target = 100;
+
+  let entrepreneurProgress =
+    (entrepreneurReferrals / target) * 25;
+
+  if (entrepreneurProgress > 25) {
+    entrepreneurProgress = 25;
+  }
+
+  progress += entrepreneurProgress;
+
+}
+if (agent.level === "Silver") {
+
+  const target = 500;
+
+  let entrepreneurProgress =
+    (entrepreneurReferrals / target) * 25;
+
+  if (entrepreneurProgress > 25) {
+    entrepreneurProgress = 25;
+  }
+
+  progress += entrepreneurProgress;
+
+}
+  if (agent.level === "Gold") {
+
+  const target = 2000;
+
+  let entrepreneurProgress =
+    (entrepreneurReferrals / target) * 25;
+
+  if (entrepreneurProgress > 25) {
+    entrepreneurProgress = 25;
+  }
+
+  progress += entrepreneurProgress;
+
+}
+  if (agent.level === "Elite") {
+
+  const target = 5000;
+
+  let entrepreneurProgress =
+    (entrepreneurReferrals / target) * 25;
+
+  if (entrepreneurProgress > 25) {
+    entrepreneurProgress = 25;
+  }
+
+  progress += entrepreneurProgress;
+
+}
 
   // ==========================
   // CONDITION 4: CLIENT ORDERS
