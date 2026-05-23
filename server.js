@@ -100,18 +100,69 @@ if (agent.level === "Bronze") {
 }
 
 if (agent.level === "Silver") {
-  const valid = withdrawals.filter(w => w.amount >= 15000).length;
-  if (valid >= 5) progress += 25;
+
+  const step1 = withdrawals.filter(w => w.amount >= 15000).length;
+  if (step1 >= 1) progress += 5;
+
+  const step2 = withdrawals.filter(w => w.amount >= 25000).length;
+  if (step2 >= 1) progress += 5;
+
+  const step3 = withdrawals.filter(w => w.amount >= 35000).length;
+  if (step3 >= 1) progress += 5;
+
+  const step4 = withdrawals.filter(w => w.amount >= 40000).length;
+  if (step4 >= 1) progress += 5;
+
+  const step5 = withdrawals.filter(w => w.amount >= 50000).length;
+  if (step5 >= 1) progress += 5;
+
 }
 
 if (agent.level === "Gold") {
-  const valid = withdrawals.filter(w => w.amount >= 75000).length;
-  if (valid >= 10) progress += 25;
+
+  const step1 = withdrawals.filter(w => w.amount >= 75000).length;
+  if (step1 >= 1) progress += 2.5;
+
+  const step2 = withdrawals.filter(w => w.amount >= 100000).length;
+  if (step2 >= 1) progress += 2.5;
+
+  const step3 = withdrawals.filter(w => w.amount >= 125000).length;
+  if (step3 >= 1) progress += 2.5;
+
+  const step4 = withdrawals.filter(w => w.amount >= 130000).length;
+  if (step4 >= 1) progress += 2.5;
+
+  const step5 = withdrawals.filter(w => w.amount >= 140000).length;
+  if (step5 >= 1) progress += 2.5;
+
+  const step6 = withdrawals.filter(w => w.amount >= 150000).length;
+  if (step6 >= 1) progress += 2.5;
+
+  const step7 = withdrawals.filter(w => w.amount >= 150000).length;
+  if (step7 >= 2) progress += 2.5;
+
+  const step8 = withdrawals.filter(w => w.amount >= 150000).length;
+  if (step8 >= 3) progress += 2.5;
+
+  const step9 = withdrawals.filter(w => w.amount >= 150000).length;
+  if (step9 >= 4) progress += 2.5;
+
+  const step10 = withdrawals.filter(w => w.amount >= 150000).length;
+  if (step10 >= 5) progress += 2.5;
+
 }
 
 if (agent.level === "Elite") {
-  const valid = withdrawals.filter(w => w.amount >= 100000).length;
-  if (valid >= 5) progress += 25;
+
+  const eliteWithdraws =
+    withdrawals.filter(w => w.amount >= 100000).length;
+
+  if (eliteWithdraws >= 1) progress += 5;
+  if (eliteWithdraws >= 2) progress += 5;
+  if (eliteWithdraws >= 3) progress += 5;
+  if (eliteWithdraws >= 4) progress += 5;
+  if (eliteWithdraws >= 5) progress += 5;
+
 }
   // ==========================
   // CONDITION 3: AGENTS REFERRED
