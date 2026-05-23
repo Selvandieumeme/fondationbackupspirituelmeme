@@ -713,7 +713,7 @@ async function submitWithdraw() {
 
           method,
 
-          withdrawNumber
+          withdrawDestination
 
         })
 
@@ -750,7 +750,7 @@ async function submitWithdraw() {
       ).value = "";
 
       document.getElementById(
-        "withdrawNumber"
+        "withdrawDestination"
       ).value = "";
 
     }
