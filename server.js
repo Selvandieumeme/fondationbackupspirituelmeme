@@ -3281,7 +3281,7 @@ app.put("/fobas/admin/update-user", async (req, res) => {
       zone
     } = req.body;
 
-    if (!userId) {
+    if (!_Id) {
 
       return res.status(400).json({
 
