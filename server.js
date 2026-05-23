@@ -1084,8 +1084,11 @@ if (referrerAgent && role === "entrepreneur") {
       }
     }
   );
+// 👇 ADD THIS HERE
+  await updateAgentProgress(referrerAgent._id);
 
 }
+
 	  
 
 
