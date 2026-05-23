@@ -3268,7 +3268,7 @@ app.put("/fobas/admin/update-user", async (req, res) => {
   try {
 
     const {
-      userId,
+      _Id,
       name,
       role,
       level,
@@ -3298,7 +3298,7 @@ app.put("/fobas/admin/update-user", async (req, res) => {
     await Agents.updateOne(
 
       {
-        _id: new mongoose.Types.ObjectId(userId)
+        _id: new mongoose.Types.ObjectId(_Id)
       },
 
       {
