@@ -663,8 +663,8 @@ async function submitWithdraw() {
     const method =
       document.getElementById("withdrawMethod").value;
 
-    const withdrawNumber =
-      document.getElementById("withdrawNumber").value.trim();
+   const withdrawNumber =
+  document.getElementById("withdrawDestination").value.trim();
 
     if (!currentWithdrawUser) {
 
