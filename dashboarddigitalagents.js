@@ -936,3 +936,200 @@ window.submitProduct = async function () {
   }
 
 };
+
+
+
+
+
+
+
+
+
+
+
+// ==========================
+// LOAD ENTREPRENEUR PRODUCTS
+// ==========================
+
+async function loadDashboardProducts() {
+
+  try {
+
+    const email =
+      localStorage.getItem("userEmail");
+
+    if (!email) return;
+
+    const container =
+      document.getElementById(
+        "dashboardProducts"
+      );
+
+    if (!container) return;
+
+    const res = await fetch(
+      `${API_URL}/dashboard/profile?email=${email}`
+    );
+
+    const data = await res.json();
+
+    container.innerHTML = "";
+
+    if (
+      !data.products ||
+      !Array.isArray(data.products) ||
+      data.products.length === 0
+    ) {
+
+      container.innerHTML =
+        "<p>Aucun produit uploadé.</p>";
+
+      return;
+
+    }
+
+    data.products.forEach(
+      (product, index) => {
+
+        const card =
+          document.createElement("div");
+
+        card.className =
+          "product-card";
+
+        const imageUrl =
+          product.image?.startsWith("http")
+            ? product.image
+            : `${API_URL}${product.image}`;
+
+        card.innerHTML = `
+
+          <img
+            src="${imageUrl}"
+            class="product-image"
+          >
+
+          <h3>
+            ${product.name || "Produit"}
+          </h3>
+
+          <p>
+            ${product.price || 0} HTG
+          </p>
+
+          <button
+            onclick="deleteProduct(${index})"
+          >
+            Supprimer
+          </button>
+
+        `;
+
+        container.appendChild(card);
+
+      }
+
+    );
+
+  }
+
+  catch(err) {
+
+    console.error(
+      "LOAD PRODUCTS ERROR:",
+      err
+    );
+
+  }
+
+}
+
+// ==========================
+// DELETE PRODUCT
+// ==========================
+
+window.deleteProduct =
+async function(index) {
+
+  try {
+
+    const email =
+      localStorage.getItem(
+        "userEmail"
+      );
+
+    const res = await fetch(
+
+      `${API_URL}/business/delete-product`,
+
+      {
+
+        method:"POST",
+
+        headers:{
+          "Content-Type":
+          "application/json"
+        },
+
+        body: JSON.stringify({
+
+          email,
+          index
+
+        })
+
+      }
+
+    );
+
+    const data =
+      await res.json();
+
+    if(data.success){
+
+      alert(
+        "Produit supprimé"
+      );
+
+      loadDashboardProducts();
+
+    }
+
+    else{
+
+      alert(
+        data.message ||
+        "Erreur suppression"
+      );
+
+    }
+
+  }
+
+  catch(err){
+
+    console.error(
+      "DELETE PRODUCT ERROR:",
+      err
+    );
+
+    alert(
+      "Erreur serveur"
+    );
+
+  }
+
+};
+
+// ==========================
+// AUTO REFRESH PRODUCTS
+// ==========================
+
+window.addEventListener(
+  "DOMContentLoaded",
+  () => {
+
+    loadDashboardProducts();
+
+  }
+);
