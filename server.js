@@ -3006,7 +3006,85 @@ app.post("/agents/withdraw", async (req, res) => {
 
 
 
+// ==========================
+// DELETE PRODUCT
+// ==========================
+app.post(
+  "/business/delete-product",
 
+  async (req, res) => {
+
+    try {
+
+      const {
+        email,
+        index
+      } = req.body;
+
+      const Businesses =
+        mongoose.connection.collection(
+          "businesses"
+        );
+
+      const business =
+        await Businesses.findOne({
+          email
+        });
+
+      if (
+        !business ||
+        !business.products
+      ) {
+
+        return res.json({
+          success:false,
+          message:"Business introuvable"
+        });
+
+      }
+
+      business.products.splice(
+        index,
+        1
+      );
+
+      await Businesses.updateOne(
+
+        { email },
+
+        {
+          $set:{
+            products:
+            business.products
+          }
+        }
+
+      );
+
+      res.json({
+        success:true
+      });
+
+    }
+
+    catch(err){
+
+      console.error(
+        "DELETE PRODUCT ERROR:",
+        err
+      );
+
+      res.status(500).json({
+
+        success:false,
+        message:"Erreur serveur"
+
+      });
+
+    }
+
+  }
+);
 
 
 
