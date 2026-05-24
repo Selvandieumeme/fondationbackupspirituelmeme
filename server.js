@@ -2316,9 +2316,9 @@ if (products.length >= 20) {
 
 
 		
-      // ==========================
+    // ==========================
       // UPDATE
-      // ==========================
+    // ==========================
       await Agents.updateOne(
 
         {
@@ -2326,36 +2326,45 @@ if (products.length >= 20) {
         },
 
         {
-          $set:{
+          $set: {
 
-  businessName:
-    businessName || agent.businessName || "",
+            businessName:
+              businessName || agent.businessName || "",
 
-  whatsapp:
-    whatsapp || agent.whatsapp || "",
+            whatsapp:
+              whatsapp || agent.whatsapp || "",
 
-  city:
-    city || agent.city || "",
+            city:
+              city || agent.city || "",
 
-  natcash:
-    natcash || agent.natcash || "",
+            natcash:
+              natcash || agent.natcash || "",
 
-  moncash:
-    moncash || agent.moncash || "",
+            moncash:
+              moncash || agent.moncash || "",
 
-  fobasEmail:
-    fobasEmail || agent.fobasEmail || "",
+            fobasEmail:
+              fobasEmail || agent.fobasEmail || "",
 
-  logo:
-    logo || agent.logo || "",
+            logo:
+              logo || agent.logo || "",
 
-  products:
-    [
-      ...(agent.products || []),
-      ...products
-    ]
+            // IMPORTANT:
+            // ajoute nouvo produits yo
+            // san efase ansyen yo
+            products: [
 
-}
+              ...(agent.products || []),
+
+              ...products
+
+            ]
+
+          }
+
+        }
+
+      );
 
 
 
