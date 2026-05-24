@@ -691,9 +691,7 @@ function closeProductModal() {
   document.getElementById("productModal")?.remove();
 }
 
-window.submitProduct = async function () {
-  alert("test bouton marche");
-};
+
 
 
 // ==========================
