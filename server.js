@@ -2328,33 +2328,36 @@ if (products.length >= 20) {
         {
           $set:{
 
-            businessName:
-            businessName || "",
+  businessName:
+    businessName || agent.businessName || "",
 
-            whatsapp:
-            whatsapp || "",
+  whatsapp:
+    whatsapp || agent.whatsapp || "",
 
-            city:
-            city || "",
+  city:
+    city || agent.city || "",
 
-            natcash:
-            natcash || "",
+  natcash:
+    natcash || agent.natcash || "",
 
-            moncash:
-            moncash || "",
+  moncash:
+    moncash || agent.moncash || "",
 
-            fobasEmail:
-            fobasEmail || "",
+  fobasEmail:
+    fobasEmail || agent.fobasEmail || "",
 
-            logo,
+  logo:
+    logo || agent.logo || "",
 
-            products
+  products:
+    [
+      ...(agent.products || []),
+      ...products
+    ]
 
-          }
+}
 
-        }
-
-      );
+);
 
       // ==========================
       // RESPONSE
