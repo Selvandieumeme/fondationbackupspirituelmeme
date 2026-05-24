@@ -888,3 +888,63 @@ window.copyMarketplaceLink = function () {
 
   alert("lien referral order copie");
 };
+
+
+
+
+
+
+
+
+window.submitProduct = async function () {
+
+  try {
+
+    const name = document.getElementById("productName").value.trim();
+    const price = document.getElementById("productPrice").value;
+    const image = document.getElementById("productImage").files[0];
+    const email = localStorage.getItem("userEmail");
+
+    if (!name || !price || !image) {
+      alert("Ranpli tout chan yo");
+      return;
+    }
+
+    const formData = new FormData();
+
+    formData.append("email", email);
+
+    // 👉 SA SE PI ENPÒTAN
+    formData.append("productName_0", name);
+    formData.append("productPrice_0", price);
+
+    // 👉 IMAGE LA DWE MATCHE MULTER "products"
+    formData.append("products", image);
+
+    const res = await fetch(`${API_URL}/business/save`, {
+      method: "POST",
+      body: formData
+    });
+
+    const data = await res.json();
+
+    if (data.success) {
+
+      alert("Produit enregistré avec succès");
+
+      closeProductModal();
+
+    } else {
+
+      alert(data.message || "Erreur upload produit");
+
+    }
+
+  } catch (err) {
+
+    console.error(err);
+    alert("Erreur serveur");
+
+  }
+
+};
