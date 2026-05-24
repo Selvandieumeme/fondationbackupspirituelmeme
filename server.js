@@ -2303,6 +2303,19 @@ app.post(
 
       }
 
+
+
+// 👇👇👇 ADD LIMIT CHECK HERE (EXACT PLACE)
+if (products.length >= 20) {
+  return res.status(400).json({
+    success: false,
+    message: "Limit 20 produits atteint"
+  });
+}
+
+
+
+		
       // ==========================
       // UPDATE
       // ==========================
