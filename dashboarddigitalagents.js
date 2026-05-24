@@ -107,12 +107,18 @@ window.addEventListener("DOMContentLoaded", async () => {
       }
 
 
-  const marketplaceLink =
+ const marketplaceLink =
   document.getElementById("marketplaceLink");
 
-if (marketplaceLink && data.referralCode) {
+if (
+  marketplaceLink &&
+  data.referralCode &&
+  (data.role === "agent" || data.role === "agent_entrepreneur")
+) {
+
   marketplaceLink.value =
-    `${location.origin}/businesses.html?ref=${data.referralCode}`;
+    `https://www.fondationbackupspirituel.com/businesses.html?ref=${data.referralCode}`;
+
 }
       
       // ==========================
