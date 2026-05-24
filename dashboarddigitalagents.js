@@ -25,6 +25,23 @@ window.addEventListener("DOMContentLoaded", async () => {
 
     const data = await response.json();
 
+   const productBtn = document.getElementById("openProductUploaderBtn");
+
+if (productBtn) {
+  productBtn.addEventListener("click", () => {
+
+    if (
+      data.role === "entrepreneur" ||
+      data.role === "agent_entrepreneur"
+    ) {
+      openProductModal();
+    } else {
+      alert("Accès refusé");
+    }
+
+  });
+}
+
     // ==========================
     // AVATAR (CLEAN + SINGLE SOURCE OF TRUTH)
     // ==========================
@@ -623,6 +640,56 @@ function copyReferralLink() {
 
 }
 
+
+
+
+
+// ==========================
+// PRODUCT UPLOADER (SAFE)
+// ==========================
+
+document.getElementById("openProductUploaderBtn")?.addEventListener("click", () => {
+
+  const role =
+    document.getElementById("userRole")?.innerText;
+
+  if (!role.includes("entrepreneur")) {
+    alert("Accès refusé");
+    return;
+  }
+
+  openProductModal();
+
+});
+
+function openProductModal() {
+
+  const modal = document.createElement("div");
+
+  modal.className = "modal-overlay";
+  modal.id = "productModal";
+
+  modal.innerHTML = `
+    <div class="modal-box">
+
+      <h2>Upload Produits</h2>
+
+      <input type="text" id="productName" placeholder="Nom produit" />
+      <input type="number" id="productPrice" placeholder="Prix HTG" />
+      <input type="file" id="productImage" accept="image/*" />
+
+      <button onclick="submitProduct()">Enregistrer</button>
+      <button onclick="closeProductModal()">Fermer</button>
+
+    </div>
+  `;
+
+  document.body.appendChild(modal);
+}
+
+function closeProductModal() {
+  document.getElementById("productModal")?.remove();
+}
 
 
 
