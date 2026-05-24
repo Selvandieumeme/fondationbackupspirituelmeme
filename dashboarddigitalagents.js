@@ -124,29 +124,7 @@ if (
 
       
 
-function copyMarketplaceLink() {
 
-  const input =
-    document.getElementById("marketplaceLink");
-
-  if (!input) {
-    console.error("marketplaceLink input pa jwenn");
-    return;
-  }
-
-  input.select();
-  input.setSelectionRange(0, 99999);
-
-  navigator.clipboard.writeText(input.value)
-    .then(() => {
-      alert("Lien marketplace copié");
-    })
-    .catch(err => {
-      console.error("COPY ERROR:", err);
-      alert("Erreur lors de la copie");
-    });
-
-}
 
       
       
@@ -821,3 +799,23 @@ async function submitWithdraw() {
   }
 
 }
+
+
+
+
+
+
+
+window.copyMarketplaceLink = function () {
+
+  const input = document.getElementById("marketplaceLink");
+
+  if (!input || !input.value) {
+    alert("Lien marketplace pa disponib");
+    return;
+  }
+
+  navigator.clipboard.writeText(input.value);
+
+  alert("lien referral order copie");
+};
