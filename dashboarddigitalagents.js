@@ -120,6 +120,24 @@ if (
     `https://www.fondationbackupspirituel.com/businesses.html?ref=${data.referralCode}`;
 
 }
+
+
+      
+
+function copyMarketplaceLink() {
+
+  const input =
+    document.getElementById("marketplaceLink");
+
+  if (!input) return;
+
+  input.select();
+  input.setSelectionRange(0, 99999);
+
+  navigator.clipboard.writeText(input.value);
+
+  alert("Lien marketplace copié");
+}
       
       // ==========================
 // REFERRAL LIST
