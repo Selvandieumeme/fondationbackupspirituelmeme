@@ -898,22 +898,28 @@ window.submitProduct = async function () {
 
   try {
 
-    const nameEl = document.getElementById("productName");
-    const priceEl = document.getElementById("productPrice");
-    const imageEl = document.getElementById("productImage");
+    const name = document.getElementById("productName")?.value?.trim();
+    const price = document.getElementById("productPrice")?.value;
+    const imageInput = document.getElementById("productImage");
 
-    if (!nameEl || !priceEl || !imageEl) {
-      alert("Modal pa chaje byen");
+    const image = imageInput?.files?.[0];
+    const email = localStorage.getItem("userEmail");
+
+    // ==========================
+    // DEBUG (IMPORTANT)
+    // ==========================
+    console.log({ name, price, image, email });
+
+    // ==========================
+    // VALIDATION PROPRE
+    // ==========================
+    if (!name || !price || !email) {
+      alert("Ranpli tout chan yo");
       return;
     }
 
-    const name = nameEl.value.trim();
-    const price = priceEl.value;
-    const image = imageEl.files[0];
-    const email = localStorage.getItem("userEmail");
-
-    if (!name || !price || !image) {
-      alert("Ranpli tout chan yo");
+    if (!image) {
+      alert("Chwazi yon imaj pwodwi");
       return;
     }
 
