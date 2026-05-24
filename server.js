@@ -2315,56 +2315,24 @@ if (products.length >= 20) {
 
 
 
-		
-    // ==========================
-      // UPDATE
-    // ==========================
-      await Agents.updateOne(
-
-        {
-          email
-        },
-
-        {
-          $set: {
-
-            businessName:
-              businessName || agent.businessName || "",
-
-            whatsapp:
-              whatsapp || agent.whatsapp || "",
-
-            city:
-              city || agent.city || "",
-
-            natcash:
-              natcash || agent.natcash || "",
-
-            moncash:
-              moncash || agent.moncash || "",
-
-            fobasEmail:
-              fobasEmail || agent.fobasEmail || "",
-
-            logo:
-              logo || agent.logo || "",
-
-            // IMPORTANT:
-            // ajoute nouvo produits yo
-            // san efase ansyen yo
-            products: [
-
-              ...(agent.products || []),
-
-              ...products
-
-            ]
-
-          }
-
-        }
-
-      );
+		// ==========================
+// UPDATE
+// ==========================
+await Agents.updateOne(
+  { email },
+  {
+    $set: {
+      businessName: businessName || "",
+      whatsapp: whatsapp || "",
+      city: city || "",
+      natcash: natcash || "",
+      moncash: moncash || "",
+      fobasEmail: fobasEmail || "",
+      logo,
+      products
+    }
+  }
+);
 
 
 
