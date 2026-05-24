@@ -106,6 +106,15 @@ window.addEventListener("DOMContentLoaded", async () => {
 
       }
 
+
+  const marketplaceLink =
+  document.getElementById("marketplaceLink");
+
+if (marketplaceLink && data.referralCode) {
+  marketplaceLink.value =
+    `${location.origin}/businesses.html?ref=${data.referralCode}`;
+}
+      
       // ==========================
 // REFERRAL LIST
 // ==========================
