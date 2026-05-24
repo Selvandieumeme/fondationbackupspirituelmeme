@@ -648,20 +648,6 @@ function copyReferralLink() {
 // PRODUCT UPLOADER (SAFE)
 // ==========================
 
-document.getElementById("openProductUploaderBtn")?.addEventListener("click", () => {
-
-  const role =
-    document.getElementById("userRole")?.innerText;
-
-  if (!role.includes("entrepreneur")) {
-    alert("Accès refusé");
-    return;
-  }
-
-  openProductModal();
-
-});
-
 function openProductModal() {
 
   const modal = document.createElement("div");
