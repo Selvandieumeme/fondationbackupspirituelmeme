@@ -2447,24 +2447,31 @@ app.post(
 
       const {
 
-        businessId,
-        name,
-        phone,
-        address,
-        order,
-        paymentMethod
+  businessId,
+  name,
+  phone,
+  address,
+  order,
+  product,
+  paymentMethod
 
-      } = req.body;
+} = req.body;
+
+// ==========================
+// SAFE PRODUCT
+// ==========================
+const finalOrder =
+  order || product || "";
 
       // ==========================
       // VALIDATION
       // ==========================
       if(
-        !businessId ||
-        !name ||
-        !phone ||
-        !order
-      ){
+  		!businessId ||
+  		!name ||
+  		!phone ||
+  		!finalOrder
+		){
 
         return res.status(400).json({
 
@@ -2511,7 +2518,7 @@ app.post(
 
   address,
 
-  product: order, // (compatibility safe)
+  product: finalOrder, // (compatibility safe)
 
   price: 0,       // ✅ NEW
 
@@ -3067,7 +3074,7 @@ app.post(
 
       const Businesses =
         mongoose.connection.collection(
-          "businesses"
+          "business_orders"
         );
 
       const business =
