@@ -2501,26 +2501,33 @@ app.post(
       // ==========================
       await Orders.insertOne({
 
-        businessId,
+  orderId: "ORD-" + Date.now(),   // ✅ NEW
 
-        clientName:name,
+  businessId,
 
-        phone,
+  clientName: name,
 
-        address,
+  phone,
 
-        order,
+  address,
 
-        paymentMethod,
+  product: order, // (compatibility safe)
 
-        proof,
+  price: 0,       // ✅ NEW
 
-        status:"pending",
+  paymentMethod,
 
-        createdAt:
-        new Date()
+  referralAgent: req.body.referralAgent || null, // ✅ NEW
 
-      });
+  whatsapp: req.body.whatsapp || null,           // ✅ NEW
+
+  proof,
+
+  status: "pending",
+
+  createdAt: new Date()
+
+});
 	// 👇 ADD THIS HERE
 await updateAgentProgress(businessId);
 	
