@@ -1531,6 +1531,9 @@ return res.json({
   logo:
     user.logo || "",
 
+products:
+  user.products || [],
+
   referrals,
 
   avatar:
@@ -2269,70 +2272,124 @@ app.post(
 
       }
 
-      // ==========================
-      // PRODUCTS
-      // ==========================
-      let products = [];
+// ==========================
+// PRODUCTS
+// ==========================
+let newProducts = [];
 
-      if(
-        req.files &&
-        req.files.products
-      ){
+if (
+  req.files &&
+  req.files.products
+) {
 
-        req.files.products.forEach(
-          (file, index) => {
+  req.files.products.forEach(
+    (file, index) => {
 
-          products.push({
+      newProducts.push({
 
-            image:
-            `https://api.fondationbackupspirituel.com/fobas_uploads/businesses/${file.filename}`,
+        image:
+          `https://api.fondationbackupspirituel.com/fobas_uploads/businesses/${file.filename}`,
 
-            name:
-            req.body[
-              `productName_${index}`
-            ] || "Produit",
+        name:
+          req.body[
+            `productName_${index}`
+          ] || "Produit",
 
-            price:
-            req.body[
-              `productPrice_${index}`
-            ] || 0
+        price:
+          req.body[
+            `productPrice_${index}`
+          ] || 0
 
-          });
+      });
 
-        });
+    }
+  );
 
-      }
-
-
-
-// 👇👇👇 ADD LIMIT CHECK HERE (EXACT PLACE)
-if (products.length >= 20) {
-  return res.status(400).json({
-    success: false,
-    message: "Limit 20 produits atteint"
-  });
 }
 
+// ==========================
+// KEEP OLD PRODUCTS
+// ==========================
+const existingProducts =
+  Array.isArray(agent.products)
+    ? agent.products
+    : [];
 
+// ==========================
+// FINAL PRODUCTS
+// ==========================
+const finalProducts = [
+  ...existingProducts,
+  ...newProducts
+];
+
+// ==========================
+// LIMIT 20 PRODUCTS
+// ==========================
+if (finalProducts.length > 20) {
+
+  return res.status(400).json({
+
+    success: false,
+    message: "Limit 20 produits atteint"
+
+  });
+
+}
 
 // ==========================
 // UPDATE
 // ==========================
 await Agents.updateOne(
+
   { email },
+
   {
+
     $set: {
-      businessName: businessName || "",
-      whatsapp: whatsapp || "",
-      city: city || "",
-      natcash: natcash || "",
-      moncash: moncash || "",
-      fobasEmail: fobasEmail || "",
+
+      businessName:
+        businessName ||
+        agent.businessName ||
+        "",
+
+      whatsapp:
+        whatsapp ||
+        agent.whatsapp ||
+        "",
+
+      city:
+        city ||
+        agent.city ||
+        "",
+
+      natcash:
+        natcash ||
+        agent.natcash ||
+        "",
+
+      moncash:
+        moncash ||
+        agent.moncash ||
+        "",
+
+      fobasEmail:
+        fobasEmail ||
+        agent.fobasEmail ||
+        "",
+
       logo,
-      products
+
+      products:
+        finalProducts
+
     }
+
   }
+
 );
+
+
 
 
 
