@@ -443,99 +443,77 @@ async function submitOrder(businessId){
 
   try {
 
-    const formData =
-      new FormData();
-
-    formData.append(
-      "businessId",
-      businessId
-    );
-
-    formData.append(
-      "name",
-      document.getElementById("clientName").value
-    );
-
-    formData.append(
-      "phone",
-      document.getElementById("clientPhone").value
-    );
-
-    formData.append(
-      "address",
-      document.getElementById("clientAddress").value
-    );
-
-    formData.append(
-      "order",
-      document.getElementById("clientOrder").value
-    );
-
-    formData.append(
-      "paymentMethod",
-      document.getElementById("paymentMethod").value
-    );
-
-    // IMAGE
     const file =
-      document.getElementById("paymentProof")
-      ?.files[0];
+      document.getElementById("paymentProof")?.files[0];
 
-    if(file){
-      formData.append(
-        "proof",
-        file
-      );
+    const clientName =
+      document.getElementById("clientName").value.trim();
+
+    const phone =
+      document.getElementById("clientPhone").value.trim();
+
+    const address =
+      document.getElementById("clientAddress").value.trim();
+
+    const paymentMethod =
+      document.getElementById("paymentMethod").value;
+
+    const orderText =
+      document.getElementById("clientOrder")?.value?.trim() || "";
+
+    const email =
+      localStorage.getItem("userEmail");
+
+    // ⚠️ VALIDATION SAFE
+    if(!clientName || !phone || !address || !file){
+      alert("Ranpli tout chan yo");
+      return;
     }
 
-    // SEND
+    const formData = new FormData();
+
+    formData.append("businessId", businessId);
+    formData.append("clientName", clientName);
+    formData.append("phone", phone);
+    formData.append("address", address);
+    formData.append("product", orderText);
+    formData.append("paymentMethod", paymentMethod);
+    formData.append("email", email);
+
+    if(file){
+      formData.append("proof", file);
+    }
+
     const res = await fetch(
-
       `${API_URL}/business/order`,
-
       {
-        method:"POST",
-        body:formData
+        method: "POST",
+        body: formData
       }
-
     );
 
-    const data =
-      await res.json();
+    const data = await res.json();
 
     if(data.success){
 
-      alert(
-        "Commande envoyée avec succès"
-      );
+      alert("Commande envoyée avec succès");
 
       closeOrderModal();
 
-    }else{
+    } else {
 
-      alert(
-        data.message ||
-        "Erreur commande"
-      );
+      alert(data.message || "Erreur commande");
 
     }
 
-  }
+  } catch(err){
 
-  catch(error){
-
-    console.error(
-      "ORDER ERROR:",
-      error
-    );
-
-    alert(
-      "Erreur serveur"
-    );
+    console.error("ORDER ERROR:", err);
+    alert("Erreur serveur");
 
   }
-
 }
+
 
 
 // ==========================
