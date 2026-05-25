@@ -254,8 +254,8 @@ search?.addEventListener("input", () => {
 // ==========================
 // ORDER MODAL
 // ==========================
-function openOrderModal(business){
-
+function openOrderModal(business, product = null){
+  
   // REMOVE OLD
   const old =
     document.getElementById("orderModal");
@@ -272,6 +272,8 @@ function openOrderModal(business){
     "order-modal active";
 
   modal.id = "orderModal";
+
+  setProductPrice(product?.price || business.products?.[0]?.price || 0);
 
   modal.innerHTML = `
 
@@ -319,6 +321,35 @@ function openOrderModal(business){
         />
 
       </div>
+
+
+  <div class="order-group">
+
+  <label>Quantité</label>
+
+  <input
+    type="number"
+    id="quantity"
+    min="1"
+    value="1"
+    oninput="updateTotalPrice()"
+  />
+
+</div>
+
+<div class="order-group">
+
+  <label>Total à payer</label>
+
+  <input
+    type="number"
+    id="totalPrice"
+    readonly
+    value="0"
+  />
+
+</div>
+      
 
       <div class="order-group">
 
@@ -522,3 +553,35 @@ async function submitOrder(businessId){
 console.log(
   "FOBAS BUSINESSES CONNECTED"
 );
+
+
+
+
+
+
+
+
+let currentBusinessProductPrice = 0;
+
+// ==========================
+// SET PRICE WHEN MODAL OPEN
+// ==========================
+function setProductPrice(price) {
+  currentBusinessProductPrice = Number(price) || 0;
+  updateTotalPrice();
+}
+
+// ==========================
+// UPDATE TOTAL (SAFE)
+// ==========================
+function updateTotalPrice() {
+
+  const qtyEl = document.getElementById("quantity");
+  const totalEl = document.getElementById("totalPrice");
+
+  if(!qtyEl || !totalEl) return;
+
+  const qty = Number(qtyEl.value) || 1;
+
+  totalEl.value = currentBusinessProductPrice * qty;
+}
