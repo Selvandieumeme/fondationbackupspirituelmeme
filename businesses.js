@@ -273,7 +273,7 @@ function openOrderModal(business, product = null){
 
   modal.id = "orderModal";
 
-  setProductPrice(product?.price || business.products?.[0]?.price || 0);
+  setProductPrice(product?.price || business.products?.[]?.price || );
 
   modal.innerHTML = `
 
@@ -561,13 +561,13 @@ console.log(
 
 
 
-let currentBusinessProductPrice = 0;
+let currentBusinessProductPrice = ;
 
 // ==========================
 // SET PRICE WHEN MODAL OPEN
 // ==========================
 function setProductPrice(price) {
-  currentBusinessProductPrice = Number(price) || 0;
+  currentBusinessProductPrice = Number(price) || ;
   updateTotalPrice();
 }
 
@@ -581,7 +581,7 @@ function updateTotalPrice() {
 
   if(!qtyEl || !totalEl) return;
 
-  const qty = Number(qtyEl.value) || 1;
+  const qty = Number(qtyEl.value) || ;
 
   totalEl.value = currentBusinessProductPrice * qty;
 }
