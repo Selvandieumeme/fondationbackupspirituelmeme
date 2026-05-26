@@ -3059,65 +3059,196 @@ app.post("/agents/withdraw", async (req, res) => {
 // ==========================
 // DELETE PRODUCT
 // ==========================
-const { ObjectId } = require("mongodb");
+const fs = require("fs");
+const path = require("path");
 
 app.post("/business/delete-product", async (req, res) => {
 
   try {
 
-    const { businessId, productId } = req.body;
+    const { email, index } = req.body;
 
-    const Businesses =
-      mongoose.connection.collection("business_orders");
+    // ==========================
+    // VALIDATION
+    // ==========================
+    if (
+      !email ||
+      index === undefined
+    ) {
 
-    // 🔥 VALIDATION SAFE
-    if (!businessId || !productId) {
       return res.json({
+
         success: false,
         message: "Données manquantes"
+
       });
+
     }
 
-    // 🔥 FIND BUSINESS
+    // ==========================
+    // COLLECTION
+    // ==========================
+    const Agents =
+      mongoose.connection.collection(
+        "agents"
+      );
+
+    // ==========================
+    // FIND USER
+    // ==========================
     const business =
-      await Businesses.findOne({
-        _id: new mongoose.Types.ObjectId(businessId)
+      await Agents.findOne({
+
+        email: String(email)
+          .trim()
+          .toLowerCase()
+
       });
 
     if (!business) {
+
       return res.json({
+
         success: false,
         message: "Business introuvable"
+
       });
+
     }
 
-    if (!Array.isArray(business.products)) {
-      business.products = [];
+    // ==========================
+    // PRODUCTS
+    // ==========================
+    let products =
+      Array.isArray(business.products)
+        ? business.products
+        : [];
+
+    // ==========================
+    // VALID INDEX
+    // ==========================
+    if (
+      index < 0 ||
+      index >= products.length
+    ) {
+
+      return res.json({
+
+        success: false,
+        message: "Produit introuvable"
+
+      });
+
     }
 
-    // 🔥 FILTER PRODUCT BY ID
-    const newProducts = business.products.filter(p =>
-      String(p._id) !== String(productId)
+    // ==========================
+    // PRODUCT IMAGE
+    // ==========================
+    const product =
+      products[index];
+
+    // ==========================
+    // DELETE VPS IMAGE
+    // ==========================
+    if (
+      product.image
+    ) {
+
+      try {
+
+        const fileName =
+          product.image
+            .split("/")
+            .pop();
+
+        const filePath =
+          path.join(
+
+            __dirname,
+
+            "fobas_uploads",
+            "businesses",
+
+            fileName
+
+          );
+
+        if (
+          fs.existsSync(filePath)
+        ) {
+
+          fs.unlinkSync(filePath);
+
+        }
+
+      }
+
+      catch(fileErr) {
+
+        console.error(
+          "FILE DELETE ERROR:",
+          fileErr
+        );
+
+      }
+
+    }
+
+    // ==========================
+    // REMOVE PRODUCT
+    // ==========================
+    products.splice(index, 1);
+
+    // ==========================
+    // UPDATE DB
+    // ==========================
+    await Agents.updateOne(
+
+      {
+
+        email: String(email)
+          .trim()
+          .toLowerCase()
+
+      },
+
+      {
+
+        $set: {
+
+          products
+
+        }
+
+      }
+
     );
 
-    // 🔥 UPDATE DB
-    await Businesses.updateOne(
-      { _id: new mongoose.Types.ObjectId(businessId) },
-      { $set: { products: newProducts } }
-    );
-
+    // ==========================
+    // SUCCESS
+    // ==========================
     return res.json({
+
       success: true,
-      message: "Produit supprimé avec succès"
+      message:
+        "Produit supprimé avec succès"
+
     });
 
-  } catch (err) {
+  }
 
-    console.error("DELETE PRODUCT ERROR:", err);
+  catch (err) {
+
+    console.error(
+      "DELETE PRODUCT ERROR:",
+      err
+    );
 
     return res.status(500).json({
+
       success: false,
       message: "Erreur serveur"
+
     });
 
   }
