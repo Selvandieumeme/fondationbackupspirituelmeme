@@ -2211,7 +2211,7 @@ app.post(
 
     {
       name:"products",
-      maxCount:30
+      maxCount:20
     }
 
   ]),
@@ -2286,22 +2286,17 @@ if (
     (file, index) => {
 
       newProducts.push({
+  _id: new ObjectId(),
 
-        image:
-          `https://api.fondationbackupspirituel.com/fobas_uploads/businesses/${file.filename}`,
+  image:
+    `https://api.fondationbackupspirituel.com/fobas_uploads/businesses/${file.filename}`,
 
-        name:
-          req.body[
-            `productName_${index}`
-          ] || "Produit",
+  name:
+    req.body[`productName_${index}`] || "Produit",
 
-        price:
-          req.body[
-            `productPrice_${index}`
-          ] || 0
-
-      });
-
+  price:
+    req.body[`productPrice_${index}`] || 0
+});
     }
   );
 
@@ -3056,61 +3051,46 @@ app.post("/agents/withdraw", async (req, res) => {
 
 
 
+
+
 // ==========================
-// DELETE PRODUCT
+// DELETE PRODUCT (FINAL SAFE VERSION)
 // ==========================
 app.post("/business/delete-product", async (req, res) => {
 
   try {
 
-    const { email, index } = req.body;
+    const { email, productId } = req.body;
 
     // ==========================
     // VALIDATION
     // ==========================
-    if (
-      !email ||
-      index === undefined
-    ) {
-
+    if (!email || !productId) {
       return res.json({
-
         success: false,
         message: "Données manquantes"
-
       });
-
     }
 
     // ==========================
     // COLLECTION
     // ==========================
     const Agents =
-      mongoose.connection.collection(
-        "agents"
-      );
+      mongoose.connection.collection("agents");
 
     // ==========================
     // FIND USER
     // ==========================
     const business =
       await Agents.findOne({
-
-        email: String(email)
-          .trim()
-          .toLowerCase()
-
+        email: String(email).trim().toLowerCase()
       });
 
     if (!business) {
-
       return res.json({
-
         success: false,
         message: "Business introuvable"
-
       });
-
     }
 
     // ==========================
@@ -3122,138 +3102,84 @@ app.post("/business/delete-product", async (req, res) => {
         : [];
 
     // ==========================
-    // VALID INDEX
+    // FIND TARGET PRODUCT
     // ==========================
-    if (
-      index < 0 ||
-      index >= products.length
-    ) {
+    const targetProduct = products.find(
+      p => String(p._id) === String(productId)
+    );
 
+    if (!targetProduct) {
       return res.json({
-
         success: false,
         message: "Produit introuvable"
-
       });
-
     }
 
     // ==========================
-    // PRODUCT IMAGE
+    // DELETE IMAGE FILE (SAFE)
     // ==========================
-    const product =
-      products[index];
-
-    // ==========================
-    // DELETE VPS IMAGE
-    // ==========================
-    if (
-      product.image
-    ) {
-
+    if (targetProduct.image) {
       try {
 
-        const fileName =
-          product.image
-            .split("/")
-            .pop();
+        const fileName = targetProduct.image.split("/").pop();
 
-        const filePath =
-          path.join(
-
-            __dirname,
-
-            "fobas_uploads",
-            "businesses",
-
-            fileName
-
-          );
-
-        if (
-          fs.existsSync(filePath)
-        ) {
-
-          fs.unlinkSync(filePath);
-
-        }
-
-      }
-
-      catch(fileErr) {
-
-        console.error(
-          "FILE DELETE ERROR:",
-          fileErr
+        const filePath = path.join(
+          __dirname,
+          "fobas_uploads",
+          "businesses",
+          fileName
         );
 
-      }
+        if (fs.existsSync(filePath)) {
+          fs.unlinkSync(filePath);
+        }
 
+      } catch (fileErr) {
+        console.error("FILE DELETE ERROR:", fileErr);
+      }
     }
 
     // ==========================
-    // REMOVE PRODUCT
+    // REMOVE BY ID (NOT INDEX)
     // ==========================
-    products.splice(index, 1);
+    products = products.filter(
+      p => String(p._id) !== String(productId)
+    );
 
     // ==========================
     // UPDATE DB
     // ==========================
     await Agents.updateOne(
-
       {
-
-        email: String(email)
-          .trim()
-          .toLowerCase()
-
+        email: String(email).trim().toLowerCase()
       },
-
       {
-
         $set: {
-
           products
-
         }
-
       }
-
     );
 
     // ==========================
     // SUCCESS
     // ==========================
     return res.json({
-
       success: true,
-      message:
-        "Produit supprimé avec succès"
-
+      message: "Produit supprimé avec succès"
     });
 
-  }
+  } catch (err) {
 
-  catch (err) {
-
-    console.error(
-      "DELETE PRODUCT ERROR:",
-      err
-    );
+    console.error("DELETE PRODUCT ERROR:", err);
 
     return res.status(500).json({
-
       success: false,
       message: "Erreur serveur"
-
     });
 
   }
 
 });
-
-
-
 
 
 
