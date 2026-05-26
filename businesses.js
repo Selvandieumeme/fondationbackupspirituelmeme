@@ -86,41 +86,63 @@ async function loadBusinesses() {
       // ==========================
       let productsHTML = "";
 
-      if(
-        business.products &&
-        business.products.length
-      ){
+if (
+  business.products &&
+  business.products.length
+) {
 
-        business.products.forEach((product) => {
+  business.products.forEach((product) => {
 
-          productsHTML += `
+    const wa =
+      (business.whatsapp || "").replace(/\D/g, "");
 
-          <div class="product-card">
+    productsHTML += `
+      <div class="product-card">
 
-            <img
-              class="product-image"
-              src="${product.image}"
-            />
+        <img
+          class="product-image"
+          src="${product.image}"
+        />
 
-            <div class="product-details">
+        <div class="product-details">
 
-              <div class="product-name">
-                ${product.name || "Produit"}
-              </div>
+          <div class="product-name">
+            ${product.name || "Produit"}
+          </div>
 
-              <div class="product-price">
-                ${product.price || 0} HTG
-              </div>
+          <div class="product-price">
+            ${product.price || 0} HTG
+          </div>
 
-            </div>
+          <!-- FIXED: product-level actions -->
+          <div style="margin-top:10px; display:flex; gap:8px;">
+
+            <button
+              class="command-btn"
+              onclick='openOrderModal(
+                ${JSON.stringify(business)},
+                ${JSON.stringify(product)}
+              )'
+            >
+              Commander
+            </button>
+
+            <a
+              class="whatsapp-btn"
+              href="${wa ? `https://wa.me/${wa}` : "#"}"
+              target="_blank"
+            >
+              WhatsApp
+            </a>
 
           </div>
 
-          `;
+        </div>
 
-        });
-
-      }
+      </div>
+    `;
+  });
+}
 
       // ==========================
       // CARD
@@ -176,15 +198,7 @@ async function loadBusinesses() {
 
           </div>
 
-          <!-- ACTIONS -->
-<div class="business-actions">
-
-  <button
-    class="command-btn"
-    onclick="openOrderModalById('${business._id}')"
-  >
-    Commander
-  </button>
+  
 
   ${(() => {
     const wa = (business.whatsapp || "").replace(/\D/g, "");
