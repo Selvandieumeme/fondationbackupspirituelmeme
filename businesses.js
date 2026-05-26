@@ -179,10 +179,7 @@ if (
               ${business.city || "Ville"}
             </p>
 
-            <p>
-              <i class="fa-brands fa-whatsapp"></i>
-              ${business.whatsapp || "Whatsapp"}
-            </p>
+            
 
             <p>
               <i class="fa-solid fa-user"></i>
