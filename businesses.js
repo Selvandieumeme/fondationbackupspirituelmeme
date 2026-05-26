@@ -86,10 +86,7 @@ async function loadBusinesses() {
       // ==========================
       let productsHTML = "";
 
-if (
-  business.products &&
-  business.products.length
-) {
+if (business.products && business.products.length) {
 
   business.products.forEach((product) => {
 
@@ -97,7 +94,7 @@ if (
       (business.whatsapp || "").replace(/\D/g, "");
 
     productsHTML += `
-      <div class="product-card">
+      <div class="product-card" data-product-id="${product._id}">
 
         <img
           class="product-image"
@@ -114,7 +111,7 @@ if (
             ${product.price || 0} HTG
           </div>
 
-          <!-- FIXED: product-level actions -->
+          <!-- ACTIONS -->
           <div style="margin-top:10px; display:flex; gap:8px;">
 
             <button
@@ -135,6 +132,14 @@ if (
               WhatsApp
             </a>
 
+            <!-- 🔴 DELETE BUTTON (ADD THIS) -->
+            <button
+              class="delete-btn"
+              onclick="deleteProduct('${business._id}', '${product._id}')"
+            >
+              Supprimer
+            </button>
+
           </div>
 
         </div>
@@ -143,7 +148,6 @@ if (
     `;
   });
 }
-
       // ==========================
       // CARD
       // ==========================
