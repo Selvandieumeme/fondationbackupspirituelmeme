@@ -3059,84 +3059,58 @@ app.post("/agents/withdraw", async (req, res) => {
 // ==========================
 // DELETE PRODUCT
 // ==========================
-app.post(
-  "/business/delete-product",
+const { ObjectId } = require("mongodb");
 
-  async (req, res) => {
+app.post("/business/delete-product", async (req, res) => {
 
-    try {
+  try {
 
-      const {
-        email,
-        index
-      } = req.body;
+    const { businessId, productId } = req.body;
 
-      const Businesses =
-        mongoose.connection.collection(
-          "business_orders"
-        );
+    const Businesses =
+      mongoose.connection.collection("business_orders");
 
-      const business =
-        await Businesses.findOne({
-          email
-        });
+    const business = await Businesses.findOne({
+      _id: new ObjectId(businessId)
+    });
 
-      if (
-        !business ||
-        !business.products
-      ) {
+    if (!business || !business.products) {
+      return res.json({
+        success: false,
+        message: "Business introuvable"
+      });
+    }
 
-        return res.json({
-          success:false,
-          message:"Business introuvable"
-        });
+    const updatedProducts = business.products.filter(
+      p => String(p._id) !== String(productId)
+    );
 
-      }
-
-      business.products.splice(
-        index,
-        1
-      );
-
-      await Businesses.updateOne(
-
-        { email },
-
-        {
-          $set:{
-            products:
-            business.products
-          }
+    await Businesses.updateOne(
+      { _id: new ObjectId(businessId) },
+      {
+        $set: {
+          products: updatedProducts
         }
+      }
+    );
 
-      );
+    return res.json({
+      success: true,
+      message: "Produit supprimé"
+    });
 
-      res.json({
-        success:true
-      });
+  } catch (err) {
 
-    }
+    console.error("DELETE PRODUCT ERROR:", err);
 
-    catch(err){
-
-      console.error(
-        "DELETE PRODUCT ERROR:",
-        err
-      );
-
-      res.status(500).json({
-
-        success:false,
-        message:"Erreur serveur"
-
-      });
-
-    }
+    return res.status(500).json({
+      success: false,
+      message: "Erreur serveur"
+    });
 
   }
-);
 
-
+});
 
 
 
