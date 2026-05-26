@@ -200,14 +200,7 @@ if (
 
   
 
-  ${(() => {
-    const wa = (business.whatsapp || "").replace(/\D/g, "");
-    return `
-      <a class="whatsapp-btn" href="${wa ? `https://wa.me/${wa}` : "#"}" target="_blank">
-        WhatsApp
-      </a>
-    `;
-  })()}
+ 
 
 </div>
 
