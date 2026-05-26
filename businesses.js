@@ -40,7 +40,8 @@ async function loadBusinesses() {
     );
 
     const data = await res.json();
-
+   window.businessCache = data.businesses;
+    
     const grid =
       document.getElementById("businessGrid");
 
@@ -180,17 +181,19 @@ async function loadBusinesses() {
 
             <button
               class="command-btn"
-              onclick='openOrderModal(${JSON.stringify(business)})'
+              onclick="openOrderModalById('${business._id}')"
             >
               Commander
             </button>
 
-            <a
-              href="https://wa.me/${(
-                business.whatsapp || ""
-              ).replace(/\D/g, "")}"
-              target="_blank"
-            >
+            ${(() => {
+  const wa = (business.whatsapp || "").replace(/\D/g, "");
+  return `
+    <a href="${wa ? `https://wa.me/${wa}` : "#"}" target="_blank">
+      <button class="whatsapp-btn">WhatsApp</button>
+    </a>
+  `;
+})()}
 
               <button class="whatsapp-btn">
                 WhatsApp
@@ -273,7 +276,13 @@ function openOrderModal(business, product = null){
 
   modal.id = "orderModal";
 
-  setProductPrice(product?.price ?? business.products?.[0]?.price ?? 0);
+  let price = product?.price;
+
+if(!price && business.products?.length){
+  price = business.products[0].price;
+}
+
+setProductPrice(price || 1);
 
   modal.innerHTML = `
 
@@ -555,7 +564,10 @@ console.log(
 );
 
 
-
+function openOrderModalById(id){
+  const business = window.businessCache.find(b => b._id === id);
+  openOrderModal(business);
+}
 
 
 
