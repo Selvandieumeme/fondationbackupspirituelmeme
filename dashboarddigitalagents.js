@@ -1054,72 +1054,46 @@ async function(index) {
   try {
 
     const email =
-      localStorage.getItem(
-        "userEmail"
-      );
+      localStorage.getItem("userEmail");
+
+    // 🔥 STEP 1: find business from cache (NO DB CHANGE)
+    const business = (window.businessCache || []).find(b => b.email === email);
+
+    if (!business) {
+      alert("Business introuvable");
+      return;
+    }
 
     const res = await fetch(
-
       `${API_URL}/business/delete-product`,
-
       {
-
-        method:"POST",
-
-        headers:{
-          "Content-Type":
-          "application/json"
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
         },
-
         body: JSON.stringify({
-
-          email,
+          businessId: business._id,
           index
-
         })
-
       }
-
     );
 
-    const data =
-      await res.json();
+    const data = await res.json();
 
-    if(data.success){
-
-      alert(
-        "Produit supprimé"
-      );
-
+    if (data.success) {
+      alert("Produit supprimé");
       loadDashboardProducts();
-
+    } else {
+      alert(data.message || "Erreur suppression");
     }
 
-    else{
-
-      alert(
-        data.message ||
-        "Erreur suppression"
-      );
-
-    }
-
-  }
-
-  catch(err){
-
-    console.error(
-      "DELETE PRODUCT ERROR:",
-      err
-    );
-
-    alert(
-      "Erreur serveur"
-    );
-
+  } catch (err) {
+    console.error("DELETE ERROR:", err);
+    alert("Erreur serveur");
   }
 
 };
+
 
 // ==========================
 // AUTO REFRESH PRODUCTS
