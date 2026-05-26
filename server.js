@@ -2448,7 +2448,7 @@ app.post(
       const {
 
   businessId,
-  name,
+  clientName,
   phone,
   address,
   order,
@@ -2468,9 +2468,9 @@ const finalOrder =
       // ==========================
       if(
   		!businessId ||
-  		!name ||
-  		!phone ||
-  		!finalOrder
+  		!clientName ||
+ 		 !phone ||
+ 		 !address
 		){
 
         return res.status(400).json({
@@ -2512,8 +2512,7 @@ const finalOrder =
 
   businessId,
 
-  clientName: name,
-
+  clientName,
   phone,
 
   address,
