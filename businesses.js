@@ -111,36 +111,31 @@ if (business.products && business.products.length) {
             ${product.price || 0} HTG
           </div>
 
-          <!-- ACTIONS -->
-          <div style="margin-top:10px; display:flex; gap:8px;">
 
-            <button
-              class="command-btn"
-              onclick='openOrderModal(
-                ${JSON.stringify(business)},
-                ${JSON.stringify(product)}
-              )'
-            >
-              Commander
-            </button>
 
-            <a
-              class="whatsapp-btn"
-              href="${wa ? `https://wa.me/${wa}` : "#"}"
-              target="_blank"
-            >
-              WhatsApp
-            </a>
 
-            <!-- 🔴 DELETE BUTTON (ADD THIS) -->
-            <button
-              class="delete-btn"
-              onclick="deleteProduct('${business._id}', '${product._id}')"
-            >
-              Supprimer
-            </button>
+<!-- ACTIONS -->
+<div style="margin-top:10px; display:flex; gap:8px;">
 
-          </div>
+  <button
+    class="command-btn"
+    onclick='openOrderModal(
+      ${JSON.stringify(business)},
+      ${JSON.stringify(product)}
+    )'
+  >
+    Commander
+  </button>
+
+  <a
+    class="whatsapp-btn"
+    href="${wa ? `https://wa.me/${wa}` : "#"}"
+    target="_blank"
+  >
+    WhatsApp
+  </a>
+
+</div>
 
         </div>
 
@@ -148,7 +143,10 @@ if (business.products && business.products.length) {
     `;
   });
 }
-      // ==========================
+
+
+
+       // ==========================
       // CARD
       // ==========================
       grid.innerHTML += `
