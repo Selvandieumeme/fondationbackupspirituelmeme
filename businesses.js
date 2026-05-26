@@ -576,6 +576,16 @@ function openOrderModalById(id){
 
 
 
+// ==========================
+// DELETE SYSTEM (CONFIRM MODAL)
+// ==========================
+let pendingDelete = { 
+  businessId: null,
+  productId: null
+};
+
+
+
 
 
 let currentBusinessProductPrice = 1;
@@ -601,4 +611,100 @@ function updateTotalPrice() {
   const qty = Number(qtyEl.value) || 1;
 
   totalEl.value = currentBusinessProductPrice * qty;
+}
+
+
+
+// ==========================
+// CONFIRM DELETE MODAL
+// ==========================
+function confirmDeleteProduct(businessId, productId) {
+
+  pendingDelete.businessId = businessId;
+  pendingDelete.productId = productId;
+
+  const old = document.getElementById("confirmDeleteModal");
+  if (old) old.remove();
+
+  const modal = document.createElement("div");
+  modal.id = "confirmDeleteModal";
+  modal.style.cssText = `
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+  `;
+
+  modal.innerHTML = `
+    <div style="background:#fff; padding:20px; border-radius:10px; text-align:center; width:300px;">
+      <h3>Eske ou sèten ?</h3>
+      <p>Sa ap efase pwodwi sa nèt.</p>
+
+      <div style="display:flex; gap:10px; justify-content:center; margin-top:15px;">
+
+        <button onclick="executeDelete()" style="background:red;color:#fff;border:none;padding:8px 12px;border-radius:5px;">
+          Wi, efase
+        </button>
+
+        <button onclick="closeConfirmModal()" style="background:#ccc;border:none;padding:8px 12px;border-radius:5px;">
+          Anile
+        </button>
+
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(modal);
+}
+
+
+
+
+
+
+// ==========================
+// EXECUTE DELETE
+// ==========================
+async function executeDelete() {
+
+  const { businessId, productId } = pendingDelete;
+
+  closeConfirmModal();
+
+  try {
+
+    const res = await fetch(`${API_URL}/business/delete-product`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        businessId,
+        productId
+      })
+    });
+
+    const data = await res.json();
+
+    if (data.success) {
+      alert("Produit supprimé");
+      loadBusinesses();
+    } else {
+      alert(data.message || "Erreur suppression");
+    }
+
+  } catch (err) {
+    console.error(err);
+    alert("Erreur serveur");
+  }
+}
+
+// ==========================
+// CLOSE MODAL
+// ==========================
+function closeConfirmModal() {
+  const modal = document.getElementById("confirmDeleteModal");
+  if (modal) modal.remove();
 }
