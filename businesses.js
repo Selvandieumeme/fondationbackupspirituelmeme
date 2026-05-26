@@ -40,7 +40,7 @@ async function loadBusinesses() {
     );
 
     const data = await res.json();
-   window.businessCache = data.businesses;
+   window.businessCache = data.businesses || [];
     
     const grid =
       document.getElementById("businessGrid");
@@ -177,31 +177,25 @@ async function loadBusinesses() {
           </div>
 
           <!-- ACTIONS -->
-          <div class="business-actions">
+<div class="business-actions">
 
-            <button
-              class="command-btn"
-              onclick="openOrderModalById('${business._id}')"
-            >
-              Commander
-            </button>
+  <button
+    class="command-btn"
+    onclick="openOrderModalById('${business._id}')"
+  >
+    Commander
+  </button>
 
-            ${(() => {
-  const wa = (business.whatsapp || "").replace(/\D/g, "");
-  return `
-    <a href="${wa ? `https://wa.me/${wa}` : "#"}" target="_blank">
-      <button class="whatsapp-btn">WhatsApp</button>
-    </a>
-  `;
-})()}
+  ${(() => {
+    const wa = (business.whatsapp || "").replace(/\D/g, "");
+    return `
+      <a class="whatsapp-btn" href="${wa ? `https://wa.me/${wa}` : "#"}" target="_blank">
+        WhatsApp
+      </a>
+    `;
+  })()}
 
-              <button class="whatsapp-btn">
-                WhatsApp
-              </button>
-
-            </a>
-
-          </div>
+</div>
 
         </div>
 
@@ -565,7 +559,10 @@ console.log(
 
 
 function openOrderModalById(id){
-  const business = window.businessCache.find(b => b._id === id);
+  const business = (window.businessCache || []).find(b => b._id === id);
+
+  if(!business) return;
+
   openOrderModal(business);
 }
 
