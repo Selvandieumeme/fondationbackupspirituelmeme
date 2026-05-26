@@ -3070,33 +3070,45 @@ app.post("/business/delete-product", async (req, res) => {
     const Businesses =
       mongoose.connection.collection("business_orders");
 
-    const business = await Businesses.findOne({
-      _id: new ObjectId(businessId)
-    });
+    // 🔥 VALIDATION SAFE
+    if (!businessId || !productId) {
+      return res.json({
+        success: false,
+        message: "Données manquantes"
+      });
+    }
 
-    if (!business || !business.products) {
+    // 🔥 FIND BUSINESS
+    const business =
+      await Businesses.findOne({
+        _id: new mongoose.Types.ObjectId(businessId)
+      });
+
+    if (!business) {
       return res.json({
         success: false,
         message: "Business introuvable"
       });
     }
 
-    const updatedProducts = business.products.filter(
-      p => String(p._id) !== String(productId)
+    if (!Array.isArray(business.products)) {
+      business.products = [];
+    }
+
+    // 🔥 FILTER PRODUCT BY ID
+    const newProducts = business.products.filter(p =>
+      String(p._id) !== String(productId)
     );
 
+    // 🔥 UPDATE DB
     await Businesses.updateOne(
-      { _id: new ObjectId(businessId) },
-      {
-        $set: {
-          products: updatedProducts
-        }
-      }
+      { _id: new mongoose.Types.ObjectId(businessId) },
+      { $set: { products: newProducts } }
     );
 
     return res.json({
       success: true,
-      message: "Produit supprimé"
+      message: "Produit supprimé avec succès"
     });
 
   } catch (err) {
@@ -3111,7 +3123,6 @@ app.post("/business/delete-product", async (req, res) => {
   }
 
 });
-
 
 
 
