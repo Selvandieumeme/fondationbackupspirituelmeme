@@ -1054,9 +1054,7 @@ async function loadDashboardProducts() {
 // DELETE PRODUCT
 // ==========================
 
-window.deleteProduct =
-async function(index) {
-
+window.deleteProduct = async function(productId) {
   try {
 
     const email =
@@ -1100,8 +1098,7 @@ async function(index) {
     // ==========================
     // FIND PRODUCT
     // ==========================
-    const product =
-      products[index];
+    const product = products.find(p => String(p._id) === String(productId));
 
     if (!product) {
 
@@ -1144,8 +1141,7 @@ async function(index) {
     const data =
       await res.json();
 
-    if (data.success) {
-
+   if (!profileData || !profileData.products) {
       alert("Produit supprimé");
 
       loadDashboardProducts();
