@@ -3059,9 +3059,6 @@ app.post("/agents/withdraw", async (req, res) => {
 // ==========================
 // DELETE PRODUCT
 // ==========================
-const fs = require("fs");
-const path = require("path");
-
 app.post("/business/delete-product", async (req, res) => {
 
   try {
