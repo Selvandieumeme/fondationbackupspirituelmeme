@@ -1050,127 +1050,66 @@ async function loadDashboardProducts() {
 
 
 
-// ==========================
-// DELETE PRODUCT
-// ==========================
-
 window.deleteProduct = async function(productId) {
+
   try {
 
-    const email =
-      localStorage.getItem("userEmail");
+    const email = localStorage.getItem("userEmail");
 
     if (!email) {
-
       alert("Utilisateur introuvable");
       return;
-
     }
 
     // ==========================
-    // LOAD USER PRODUCTS
+    // DELETE REQUEST (CLEAN VERSION)
     // ==========================
-    const profileRes =
-      await fetch(
-        `${API_URL}/dashboard/profile?email=${email}`
-      );
+    const res = await fetch(
+      `${API_URL}/business/delete-product`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          email: email,
+          productId: productId
+        })
+      }
+    );
 
-    const profileData =
-      await profileRes.json();
+    const data = await res.json();
 
-    if (
-      !profileData.success
-    ) {
+    if (data.success) {
 
-      alert("Business introuvable");
-      return;
-
-    }
-
-    // ==========================
-    // PRODUCTS ARRAY
-    // ==========================
-    const products =
-      Array.isArray(profileData.products)
-        ? profileData.products
-        : [];
-
-    // ==========================
-    // FIND PRODUCT
-    // ==========================
-    const product = products.find(p => String(p._id) === String(productId));
-
-    if (!product) {
-
-      alert("Produit introuvable");
-      return;
-
-    }
-
-    // ==========================
-    // DELETE REQUEST
-    // ==========================
-    const res =
-      await fetch(
-
-        `${API_URL}/business/delete-product`,
-
-        {
-
-          method: "POST",
-
-          headers: {
-            "Content-Type": "application/json"
-          },
-
-          body: JSON.stringify({
-
-            businessId:
-              profileData.id ||
-              profileData._id,
-
-            productId:
-              product._id
-
-          })
-
-        }
-
-      );
-
-    const data =
-      await res.json();
-
-   if (!profileData || !profileData.products) {
       alert("Produit supprimé");
 
+      // refresh UI
       loadDashboardProducts();
 
-    }
+    } else {
 
-    else {
-
-      alert(
-        data.message ||
-        "Erreur suppression"
-      );
+      alert(data.message || "Erreur suppression");
 
     }
 
-  }
+  } catch (err) {
 
-  catch (err) {
-
-    console.error(
-      "DELETE ERROR:",
-      err
-    );
+    console.error("DELETE ERROR:", err);
 
     alert("Erreur serveur");
 
   }
 
 };
+
+
+
+
+
+
+
+
 // ==========================
 // AUTO REFRESH PRODUCTS
 // ==========================
