@@ -3130,9 +3130,9 @@ app.post("/business/delete-product", async (req, res) => {
           fileName
         );
 
-        if (fs.existsSync(filePath)) {
-          fs.unlinkSync(filePath);
-        }
+        await fs.promises.unlink(filePath).catch(() => {
+  		// file already deleted or missing - ignore safely
+		});
 
       } catch (fileErr) {
         console.error("FILE DELETE ERROR:", fileErr);
@@ -3146,6 +3146,28 @@ app.post("/business/delete-product", async (req, res) => {
       p => String(p._id) !== String(productId)
     );
 
+
+	  // ==========================
+// AUDIT LOG (ADDED SAFE)
+// ==========================
+const auditEntry = {
+  action: "DELETE_PRODUCT",
+  email: String(email).trim().toLowerCase(),
+  productId: String(productId),
+  productSnapshot: targetProduct,
+  deletedAt: new Date()
+};
+
+// OPTIONAL: log to console (safe)
+console.log("AUDIT LOG:", auditEntry);
+
+// OPTIONAL: save in DB collection (if you want history)
+const AuditLogs = mongoose.connection.collection("audit_logs");
+
+await AuditLogs.insertOne(auditEntry).catch(err => {
+  console.error("AUDIT SAVE ERROR:", err);
+});
+	
     // ==========================
     // UPDATE DB
     // ==========================
