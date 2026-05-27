@@ -4514,7 +4514,57 @@ app.post("/admin/withdrawals/update", async (req, res) => {
 
 
 
+app.get("/admin/all-products", async (req, res) => {
 
+  try {
+
+    const Agents = mongoose.connection.collection("agents");
+
+    const allAgents = await Agents.find({}).toArray();
+
+    let allProducts = [];
+
+    allAgents.forEach(agent => {
+
+      if (Array.isArray(agent.products)) {
+
+        agent.products.forEach(product => {
+
+          allProducts.push({
+            productId: product._id,
+            name: product.name,
+            price: product.price,
+            image: product.image,
+
+            // 👇 IMPORTANT CONTEXT
+            ownerEmail: agent.email,
+            ownerName: agent.name || "Unknown",
+            businessName: agent.businessName || "---"
+          });
+
+        });
+
+      }
+
+    });
+
+    return res.json({
+      success: true,
+      products: allProducts
+    });
+
+  } catch (err) {
+
+    console.error("ADMIN PRODUCTS ERROR:", err);
+
+    return res.status(500).json({
+      success: false,
+      message: "Erreur serveur"
+    });
+
+  }
+
+});
 
 
 
