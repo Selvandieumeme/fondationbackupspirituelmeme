@@ -752,3 +752,312 @@ function filterUsers() {
 loadDashboard();
 loadUsers();
 loadWithdraws();
+
+
+
+
+
+
+
+// ==========================
+// LOAD ALL PRODUCTS
+// ==========================
+async function loadAdminProducts() {
+
+  try {
+
+    const container =
+      document.getElementById(
+        "productsContainer"
+      );
+
+    if (!container) return;
+
+    const res = await fetch(
+      `${API}/admin/all-products`
+    );
+
+    const data = await res.json();
+
+    container.innerHTML = "";
+
+    if (
+      !data.products ||
+      data.products.length === 0
+    ) {
+
+      container.innerHTML =
+        "<p>Aucun produit trouvé</p>";
+
+      return;
+
+    }
+
+    data.products.forEach((product) => {
+
+      const card =
+        document.createElement("div");
+
+      card.className = "userCard";
+
+      card.innerHTML = `
+
+        <img
+          src="${product.image}"
+          style="
+            width:100%;
+            height:180px;
+            object-fit:cover;
+            border-radius:10px;
+          "
+        >
+
+        <h3>
+          ${product.name || "Produit"}
+        </h3>
+
+        <p>
+          <strong>Prix:</strong>
+          ${product.price || 0} HTG
+        </p>
+
+        <p>
+          <strong>Owner:</strong>
+          ${product.ownerName || "-"}
+        </p>
+
+        <p>
+          <strong>Email:</strong>
+          ${product.ownerEmail || "-"}
+        </p>
+
+        <p>
+          <strong>Business:</strong>
+          ${product.businessName || "-"}
+        </p>
+
+        <div class="actionBtns">
+
+          <button
+            class="editBtn"
+            onclick="
+              adminEditProduct(
+                '${product.ownerEmail}',
+                '${product.productId}',
+                \`${product.name || ""}\`,
+                '${product.price || 0}'
+              )
+            "
+          >
+            Modifier
+          </button>
+
+          <button
+            class="deleteBtn"
+            onclick="
+              adminDeleteProduct(
+                '${product.ownerEmail}',
+                '${product.productId}'
+              )
+            "
+          >
+            Supprimer
+          </button>
+
+        </div>
+
+      `;
+
+      container.appendChild(card);
+
+    });
+
+  }
+
+  catch (err) {
+
+    console.error(
+      "LOAD PRODUCTS ERROR:",
+      err
+    );
+
+  }
+
+}
+
+
+
+
+
+// ==========================
+// ADMIN DELETE PRODUCT
+// ==========================
+window.adminDeleteProduct =
+async function(email, productId) {
+
+  try {
+
+    const confirmDelete =
+      confirm("Delete this product ?");
+
+    if (!confirmDelete) return;
+
+    const res = await fetch(
+
+      `${API}/business/delete-product`,
+
+      {
+
+        method: "POST",
+
+        headers: {
+          "Content-Type":
+          "application/json"
+        },
+
+        body: JSON.stringify({
+
+          email,
+          productId
+
+        })
+
+      }
+
+    );
+
+    const data =
+      await res.json();
+
+    if (data.success) {
+
+      alert("Produit supprimé");
+
+      loadAdminProducts();
+
+    }
+
+    else {
+
+      alert(
+        data.message ||
+        "Erreur delete"
+      );
+
+    }
+
+  }
+
+  catch (err) {
+
+    console.error(
+      "ADMIN DELETE ERROR:",
+      err
+    );
+
+    alert("Erreur serveur");
+
+  }
+
+};
+
+
+
+
+// ==========================
+// ADMIN EDIT PRODUCT
+// ==========================
+window.adminEditProduct =
+async function(
+  email,
+  productId,
+  currentName,
+  currentPrice
+) {
+
+  try {
+
+    const newName =
+      prompt(
+        "Nouveau nom",
+        currentName
+      );
+
+    if (newName === null) return;
+
+    const newPrice =
+      prompt(
+        "Nouveau prix",
+        currentPrice
+      );
+
+    if (newPrice === null) return;
+
+    const res = await fetch(
+
+      `${API}/admin/update-product`,
+
+      {
+
+        method: "PUT",
+
+        headers: {
+          "Content-Type":
+          "application/json"
+        },
+
+        body: JSON.stringify({
+
+          email,
+          productId,
+          name:newName,
+          price:newPrice
+
+        })
+
+      }
+
+    );
+
+    const data =
+      await res.json();
+
+    if (data.success) {
+
+      alert("Produit modifié");
+
+      loadAdminProducts();
+
+    }
+
+    else {
+
+      alert(
+        data.message ||
+        "Erreur modification"
+      );
+
+    }
+
+  }
+
+  catch (err) {
+
+    console.error(
+      "ADMIN EDIT ERROR:",
+      err
+    );
+
+    alert("Erreur serveur");
+
+  }
+
+};
+
+
+
+
+// ==========================
+// AUTO LOAD PRODUCTS
+// ==========================
+loadAdminProducts();
