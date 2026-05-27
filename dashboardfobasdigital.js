@@ -828,6 +828,10 @@ function renderOrders(orders) {
     card.className =
       "userCard";
 
+    const base = order.financial?.basePrice || 0;
+const fee = order.financial?.fee || 0;
+const total = order.financial?.totalPrice || (base + fee);
+
     card.innerHTML = `
 
       ${
@@ -865,7 +869,7 @@ function renderOrders(orders) {
 
       <p>
         <strong>Product:</strong>
-        ${order.product || "-"}
+        ${order.product || order.order || "-"}
       </p>
 
       <p>
@@ -878,12 +882,11 @@ function renderOrders(orders) {
         ${order.status || "pending"}
       </p>
 
-      <p>
-        <strong>Total:</strong>
-        ${
-          order.financial?.totalPrice || 0
-        } HTG
-      </p>
+      <p><strong>Base:</strong> ${base} HTG</p>
+
+      <p><strong>Fee (5%):</strong> ${fee} HTG</p>
+
+      <p><strong>Total:</strong> ${total} HTG</p>
 
       <div class="actionBtns">
 
