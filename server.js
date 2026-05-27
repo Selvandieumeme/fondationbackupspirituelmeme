@@ -2107,7 +2107,12 @@ multer({
 
 
 
-
+// ==========================
+// ADMIN SYNC HOOK (SAFE UTILITY)
+// ==========================
+async function triggerAdminSync() {
+  console.log("ADMIN SYNC TRIGGERED");
+}
 
 
 
@@ -2453,8 +2458,28 @@ app.post(
   order,
   product,
   paymentMethod
-
+		  
 } = req.body;
+
+// ==========================
+// FINANCIAL ENGINE
+// ==========================
+const basePrice =
+  Number(req.body.basePrice || 0);
+
+const platformFee =
+  basePrice * 0.05;
+
+const totalPrice =
+  basePrice + platformFee;
+
+const referralCommission =
+  basePrice * 0.02;
+
+const adminCommission =
+  basePrice * 0.03;
+
+		
 
 // ==========================
 // SAFE PRODUCT
@@ -2518,7 +2543,7 @@ const finalOrder =
 
   product: finalOrder, // (compatibility safe)
 
-  price: 0,       // ✅ NEW
+  price: basePrice,       // ✅ NEW
 
   paymentMethod,
 
@@ -2530,8 +2555,30 @@ const finalOrder =
 
   status: "pending",
 
-  createdAt: new Date()
+  createdAt: new Date(),
 
+// ==========================
+  // FINANCIAL SYSTEM (SAFE ADDITION)
+  // ==========================
+  financial: {
+    basePrice: Number(req.body.basePrice || 0),
+
+    platformFee:
+      Number(req.body.basePrice || 0) * 0.05,
+
+    totalPrice:
+      Number(req.body.basePrice || 0) * 1.05,
+
+    entrepreneurEarnings:
+      Number(req.body.basePrice || 0),
+
+    referralCommission:
+      Number(req.body.basePrice || 0) * 0.02,
+
+    adminCommission:
+      Number(req.body.basePrice || 0) * 0.03
+  }
+							 
 });
 	// 👇 ADD THIS HERE
 await updateAgentProgress(businessId);
@@ -4565,6 +4612,235 @@ app.get("/admin/all-products", async (req, res) => {
   }
 
 });
+
+
+
+
+
+
+
+
+
+
+
+
+
+app.get("/fobas/admin/order/:id", async (req, res) => {
+  try {
+    const Orders = mongoose.connection.collection("business_orders");
+
+    const order = await Orders.findOne({
+      _id: new mongoose.Types.ObjectId(req.params.id)
+    });
+
+    if (!order) {
+      return res.status(404).json({
+        success: false,
+        message: "Order not found"
+      });
+    }
+
+    return res.json({
+      success: true,
+      order
+    });
+
+  } catch (err) {
+    console.error("ORDER DETAIL ERROR:", err);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error"
+    });
+  }
+});
+
+
+
+
+
+
+
+
+const allowedFlow = {
+  pending: ["approved"],
+  approved: ["delivered"],
+  delivered: ["completed"],
+  completed: []
+};
+
+app.put("/fobas/admin/order-status-safe", async (req, res) => {
+  try {
+
+    const { orderId, status } = req.body;
+
+    const Orders = mongoose.connection.collection("business_orders");
+
+    const order = await Orders.findOne({
+      _id: new mongoose.Types.ObjectId(orderId)
+    });
+
+    if (!order) {
+      return res.status(404).json({ success: false, message: "Not found" });
+    }
+
+    if (!allowedFlow[order.status]?.includes(status)) {
+      return res.status(400).json({
+        success: false,
+        message: `Invalid transition: ${order.status} → ${status}`
+      });
+    }
+
+    await Orders.updateOne(
+      { _id: order._id },
+      {
+        $set: {
+          status,
+          updatedAt: new Date()
+        }
+      }
+    );
+
+    return res.json({
+      success: true,
+      message: "Status updated safely"
+    });
+
+  } catch (err) {
+    return res.status(500).json({
+      success: false,
+      message: "Internal error"
+    });
+  }
+});
+
+
+
+
+
+
+
+// ==========================
+// FOBAS ORDER DETAIL (ADMIN SAFE VIEW)
+// ==========================
+app.get("/fobas/admin/order-detail/:id", async (req, res) => {
+
+  try {
+
+    const Orders = mongoose.connection.collection("business_orders");
+
+    const order = await Orders.findOne({
+      _id: new mongoose.Types.ObjectId(req.params.id)
+    });
+
+    if (!order) {
+      return res.status(404).json({
+        success: false,
+        message: "Order not found"
+      });
+    }
+
+    // enrich view (safe, no modification)
+    const enrichedOrder = {
+      ...order,
+      isPaid: order.status === "approved" || order.status === "completed",
+      isCompleted: order.status === "completed"
+    };
+
+    return res.json({
+      success: true,
+      order: enrichedOrder
+    });
+
+  } catch (err) {
+    console.error("ORDER DETAIL ERROR:", err);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error"
+    });
+  }
+});
+
+
+
+
+
+
+
+
+// ==========================
+// FOBAS SAFE ORDER STATUS ENGINE
+// ==========================
+const ORDER_FLOW = {
+  pending: ["approved"],
+  approved: ["delivered"],
+  delivered: ["completed"],
+  completed: []
+};
+
+app.put("/fobas/admin/order-status-flow", async (req, res) => {
+
+  try {
+
+    const { orderId, status } = req.body;
+
+    const Orders = mongoose.connection.collection("business_orders");
+
+    const order = await Orders.findOne({
+      _id: new mongoose.Types.ObjectId(orderId)
+    });
+
+    if (!order) {
+      return res.status(404).json({
+        success: false,
+        message: "Order not found"
+      });
+    }
+
+    const currentStatus = order.status;
+
+    // 🚨 FLOW VALIDATION
+    if (!ORDER_FLOW[currentStatus]?.includes(status)) {
+      return res.status(400).json({
+        success: false,
+        message: `Invalid transition: ${currentStatus} → ${status}`
+      });
+    }
+
+    await Orders.updateOne(
+      { _id: order._id },
+      {
+        $set: {
+          status,
+          updatedAt: new Date()
+        }
+      }
+    );
+
+    // 🔥 OPTIONAL HOOK
+    await triggerAdminSync();
+
+    return res.json({
+      success: true,
+      message: "Order status updated safely",
+      from: currentStatus,
+      to: status
+    });
+
+  } catch (err) {
+    console.error("FLOW ERROR:", err);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error"
+    });
+  }
+});
+
+
+
+
+
+
+
 
 
 
