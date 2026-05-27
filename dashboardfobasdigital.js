@@ -746,13 +746,276 @@ function filterUsers() {
 }
 
 
+
+
+
+
+// ==========================
+// LOAD ALL ORDERS
+// ==========================
+async function loadOrders() {
+
+  try {
+
+    const container =
+      document.getElementById(
+        "ordersContainer"
+      );
+
+    if (!container) return;
+
+    const res =
+      await fetch(
+        `${API}/fobas/admin/orders`
+      );
+
+    const data =
+      await res.json();
+
+    renderOrders(
+      data.orders || []
+    );
+
+  }
+
+  catch (err) {
+
+    console.error(
+      "LOAD ORDERS ERROR:",
+      err
+    );
+
+  }
+
+}
+
+
+
+// ==========================
+// RENDER ORDERS
+// ==========================
+function renderOrders(orders) {
+
+  const container =
+    document.getElementById(
+      "ordersContainer"
+    );
+
+  if (!container) return;
+
+  container.innerHTML = "";
+
+  // ==========================
+  // EMPTY
+  // ==========================
+  if (orders.length === 0) {
+
+    container.innerHTML =
+      "<p>Aucune commande trouvée</p>";
+
+    return;
+
+  }
+
+  // ==========================
+  // LOOP
+  // ==========================
+  orders.forEach((order) => {
+
+    const card =
+      document.createElement("div");
+
+    card.className =
+      "userCard";
+
+    card.innerHTML = `
+
+      ${
+        order.proof
+        ?
+        `
+        <img
+          src="${order.proof}"
+          style="
+            width:100%;
+            height:220px;
+            object-fit:cover;
+            border-radius:10px;
+            margin-bottom:10px;
+          "
+        >
+        `
+        :
+        ""
+      }
+
+      <h3>
+        ${order.clientName || "-"}
+      </h3>
+
+      <p>
+        <strong>Phone:</strong>
+        ${order.phone || "-"}
+      </p>
+
+      <p>
+        <strong>Address:</strong>
+        ${order.address || "-"}
+      </p>
+
+      <p>
+        <strong>Product:</strong>
+        ${order.product || "-"}
+      </p>
+
+      <p>
+        <strong>Payment:</strong>
+        ${order.paymentMethod || "-"}
+      </p>
+
+      <p>
+        <strong>Status:</strong>
+        ${order.status || "pending"}
+      </p>
+
+      <p>
+        <strong>Total:</strong>
+        ${
+          order.financial?.totalPrice || 0
+        } HTG
+      </p>
+
+      <div class="actionBtns">
+
+        <button
+          class="editBtn"
+          onclick="
+            updateOrderStatus(
+              '${order._id}',
+              'confirmed'
+            )
+          "
+        >
+          Confirm
+        </button>
+
+        <button
+          class="editBtn"
+          onclick="
+            updateOrderStatus(
+              '${order._id}',
+              'shipping'
+            )
+          "
+        >
+          Shipping
+        </button>
+
+        <button
+          class="editBtn"
+          onclick="
+            updateOrderStatus(
+              '${order._id}',
+              'completed'
+            )
+          "
+        >
+          Complete
+        </button>
+
+        <button
+          class="deleteBtn"
+          onclick="
+            updateOrderStatus(
+              '${order._id}',
+              'cancelled'
+            )
+          "
+        >
+          Cancel
+        </button>
+
+      </div>
+
+    `;
+
+    container.appendChild(card);
+
+  });
+
+}
+
+
+
+// ==========================
+// UPDATE ORDER STATUS
+// ==========================
+async function updateOrderStatus(
+  orderId,
+  status
+) {
+
+  try {
+
+    const res =
+      await fetch(
+
+        `${API}/fobas/admin/order-status`,
+
+        {
+          method: "PUT",
+
+          headers: {
+            "Content-Type":
+            "application/json"
+          },
+
+          body: JSON.stringify({
+
+            orderId,
+            status
+
+          })
+
+        }
+
+      );
+
+    const data =
+      await res.json();
+
+    alert(
+      data.message
+    );
+
+    // ==========================
+    // AUTO REFRESH
+    // ==========================
+    loadOrders();
+
+    loadDashboard();
+
+  }
+
+  catch (err) {
+
+    console.error(
+      "UPDATE ORDER ERROR:",
+      err
+    );
+
+  }
+
+}
+
+
 // ==========================
 // START
 // ==========================
 loadDashboard();
 loadUsers();
 loadWithdraws();
-
+loadOrders();
 
 
 
