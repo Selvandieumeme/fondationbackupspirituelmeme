@@ -4518,9 +4518,7 @@ app.get("/admin/all-products", async (req, res) => {
 
   try {
 
-    const Agents = mongoose.connection.collection("agents");
-
-    const allAgents = await Agents.find({}).toArray();
+    
 
     let allProducts = [];
 
