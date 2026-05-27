@@ -496,6 +496,9 @@ async function submitOrder(businessId){
     const orderText =
       document.getElementById("clientOrder")?.value?.trim() || "";
 
+  const totalPrice =
+    document.getElementById("totalPrice")?.value || 0;
+
     const email =
       localStorage.getItem("userEmail");
 
@@ -513,6 +516,7 @@ async function submitOrder(businessId){
     formData.append("address", address);
     formData.append("product", orderText);
     formData.append("paymentMethod", paymentMethod);
+    formData.append("basePrice", totalPrice);
     formData.append("email", email);
 
     if(file){
@@ -589,12 +593,30 @@ function setProductPrice(price) {
 // ==========================
 function updateTotalPrice() {
 
-  const qtyEl = document.getElementById("quantity");
-  const totalEl = document.getElementById("totalPrice");
+  const qtyEl =
+    document.getElementById("quantity");
+
+  const totalEl =
+    document.getElementById("totalPrice");
 
   if(!qtyEl || !totalEl) return;
 
-  const qty = Number(qtyEl.value) || 1;
+  const qty =
+    Number(qtyEl.value) || 1;
 
-  totalEl.value = currentBusinessProductPrice * qty;
+  // PRIX BASE
+  const subtotal =
+    currentBusinessProductPrice * qty;
+
+  // FOBAS 5%
+  const fee =
+    subtotal * 0.05;
+
+  // TOTAL CLIENT
+  const total =
+    subtotal + fee;
+
+  totalEl.value =
+    Math.round(total);
+
 }
