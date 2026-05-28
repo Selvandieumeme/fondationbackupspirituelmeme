@@ -2282,28 +2282,24 @@ app.post(
 // ==========================
 let newProducts = [];
 
-if (
-  req.files &&
-  req.files.products
-) {
+if (req.files && req.files.products) {
 
-  req.files.products.forEach(
-    (file, index) => {
+  req.files.products.forEach((file, index) => {
 
-      newProducts.push({
+    newProducts.push({
 
-        _id:
-          Date.now().toString() +
-          Math.random().toString(36).substring(2, 9),
+      _id:
+        Date.now().toString() +
+        Math.random().toString(36).substring(2, 9),
 
-        image:
-          `https://api.fondationbackupspirituel.com/fobas_uploads/businesses/${path.basename(optimizedPath)}`,
+      image:
+        `https://api.fondationbackupspirituel.com/fobas_uploads/businesses/${file.filename}`,
 
-        name:
-          req.body[`productName_${index}`] || "Produit",
+      name:
+        req.body[`productName_${index}`] || "Produit",
 
-        price:
-          req.body[`productPrice_${index}`] || 0
+      price:
+        req.body[`productPrice_${index}`] || 0
 
       });
 
