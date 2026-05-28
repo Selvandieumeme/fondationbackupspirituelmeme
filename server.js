@@ -2680,6 +2680,163 @@ await updateAgentProgress(businessId);
 
 
 
+// ==========================
+// UPLOAD BUSINESS LOGO
+// ==========================
+app.post(
+
+  "/business/upload-logo",
+
+  uploadBusiness.single("logo"),
+
+  async (req, res) => {
+
+    try {
+
+      // ==========================
+      // DEBUG
+      // ==========================
+      console.log(
+        "UPLOAD FILE:",
+        req.file
+      );
+
+      console.log(
+        "UPLOAD BODY:",
+        req.body
+      );
+
+      // ==========================
+      // EMAIL
+      // ==========================
+      const { email } = req.body;
+
+      if (!email) {
+
+        return res.status(400).json({
+
+          success: false,
+          message: "Email manquant"
+
+        });
+
+      }
+
+      // ==========================
+      // FILE
+      // ==========================
+      if (!req.file) {
+
+        return res.status(400).json({
+
+          success: false,
+          message: "Logo manquant"
+
+        });
+
+      }
+
+      // ==========================
+      // LOGO PATH
+      // ==========================
+      const logoPath =
+        `/fobas_uploads/businesses/${req.file.filename}`;
+
+	
+      // ==========================
+      // AGENTS COLLECTION
+      // ==========================
+      const Agents =
+      mongoose.connection.collection(
+        "agents"
+      );
+
+      // ==========================
+      // FIND USER
+      // ==========================
+      const user =
+      await Agents.findOne({
+
+        email: email
+
+      });
+
+      if (!user) {
+
+        return res.status(404).json({
+
+          success: false,
+          message: "Utilisateur introuvable"
+
+        });
+
+      }
+
+      // ==========================
+      // UPDATE LOGO
+      // ==========================
+      await Agents.updateOne(
+
+        {
+          email: email
+        },
+
+        {
+          $set: {
+
+            logo: logoPath
+
+          }
+        }
+
+      );
+
+      // ==========================
+      // SUCCESS
+      // ==========================
+      return res.status(200).json({
+
+        success: true,
+
+        message:
+        "Logo uploadé avec succès",
+
+        logo: logoPath
+
+      });
+
+    }
+
+    catch (error) {
+
+      console.log(
+        "UPLOAD LOGO FULL ERROR:",
+        error
+      );
+
+      return res.status(500).json({
+
+        success: false,
+
+        message:
+        "Erreur serveur",
+
+        error:
+        error.message
+
+      });
+
+    }
+
+  }
+
+);
+
+
+
+
+
+
 
 
 
