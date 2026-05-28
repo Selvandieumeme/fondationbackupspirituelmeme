@@ -1871,6 +1871,787 @@ app.get("/agents/profile", async (req, res) => {
 
 
 
+// ==========================
+// BUSINESS FOLDERS
+// ==========================
+const businessUploadPath =
+path.join(
+  __dirname,
+  "fobas_uploads",
+  "businesses"
+);
+
+const orderUploadPath =
+path.join(
+  __dirname,
+  "fobas_uploads",
+  "orders"
+);
+
+
+// ==========================
+// AUTO CREATE
+// ==========================
+if (!fs.existsSync(businessUploadPath)) {
+
+  fs.mkdirSync(
+    businessUploadPath,
+    { recursive: true }
+  );
+
+}
+
+if (!fs.existsSync(orderUploadPath)) {
+
+  fs.mkdirSync(
+    orderUploadPath,
+    { recursive: true }
+  );
+
+}
+
+
+// ==========================
+// STORAGE BUSINESS
+// ==========================
+const businessStorage =
+multer.diskStorage({
+
+  destination: (
+    req,
+    file,
+    cb
+  ) => {
+
+    cb(
+      null,
+      businessUploadPath
+    );
+
+  },
+
+  filename: (
+    req,
+    file,
+    cb
+  ) => {
+
+    const unique =
+      Date.now() +
+      "-" +
+      Math.round(
+        Math.random() * 1e9
+      );
+
+    cb(
+      null,
+      unique +
+      path.extname(
+        file.originalname
+      )
+    );
+
+  }
+
+});
+
+
+
+
+
+
+
+// ==========================
+// STORAGE AVATARS
+// ==========================
+const avatarUploadPath =
+path.join(
+  __dirname,
+  "fobas_uploads",
+  "avatars"
+);
+
+// ==========================
+// STORAGE AVATAR
+// ==========================
+const avatarStorage =
+multer.diskStorage({
+
+  destination: (
+    req,
+    file,
+    cb
+  ) => {
+
+    cb(
+      null,
+      avatarUploadPath
+    );
+
+  },
+
+  filename: (
+    req,
+    file,
+    cb
+  ) => {
+
+    const unique =
+      Date.now() +
+      "-" +
+      Math.round(
+        Math.random() * 1e9
+      );
+
+    cb(
+      null,
+      unique +
+      path.extname(
+        file.originalname
+      )
+    );
+
+  }
+
+});
+
+
+
+
+
+
+
+
+// ==========================
+// STORAGE ORDERS
+// ==========================
+const orderStorage =
+multer.diskStorage({
+
+  destination: (
+    req,
+    file,
+    cb
+  ) => {
+
+    cb(
+      null,
+      orderUploadPath
+    );
+
+  },
+
+  filename: (
+    req,
+    file,
+    cb
+  ) => {
+
+    const unique =
+      Date.now() +
+      "-" +
+      Math.round(
+        Math.random() * 1e9
+      );
+
+    cb(
+      null,
+      unique +
+      path.extname(
+        file.originalname
+       );
+}
+
+
+// ==========================
+// UPLOADS
+// ==========================
+const uploadBusiness =
+multer({
+
+  storage: businessStorage,
+
+  limits:{
+    fileSize:
+    15 * 1024 * 1024
+  }
+
+});
+
+const uploadOrder =
+multer({
+
+  storage: orderStorage,
+
+  limits:{
+    fileSize:
+    15 * 1024 * 1024
+  }
+
+});
+
+
+
+
+// ==========================
+// UPLOAD AVATAR
+// ==========================
+const uploadAvatar =
+multer({
+
+  storage: avatarStorage,
+
+  limits:{
+    fileSize:
+    15 * 1024 * 1024
+  }
+
+});
+
+
+
+
+
+// ==========================
+// ADMIN SYNC HOOK (SAFE UTILITY)
+// ==========================
+async function triggerAdminSync() {
+  console.log("ADMIN SYNC TRIGGERED");
+}
+
+
+
+
+
+
+// ==========================
+// GET ALL BUSINESSES
+// ==========================
+
+app.get(
+  "/business/all",
+
+  async (req, res) => {
+
+    try {
+
+      const Agents =
+      mongoose.connection.collection(
+        "agents"
+      );
+
+      // ==========================
+      // FIND ENTREPRENEURS
+      // ==========================
+      const businesses =
+      await Agents.find({
+
+        role:{
+          $in:[
+            "entrepreneur",
+            "agent_entrepreneur"
+          ]
+        }
+
+      })
+
+      .sort({
+        createdAt:-1
+      })
+
+      .toArray();
+
+      // ==========================
+      // RESPONSE
+      // ==========================
+      return res.json({
+
+        success:true,
+
+        businesses
+
+      });
+
+    }
+
+    catch(err){
+
+      console.error(
+        "BUSINESS LOAD ERROR:",
+        err
+      );
+
+      return res.status(500).json({
+
+        success:false,
+        message:
+        "Internal server error"
+
+      });
+
+    }
+
+  }
+);
+
+
+
+
+
+
+
+
+
+
+
+// ==========================
+// CREATE / UPDATE BUSINESS
+// ==========================
+
+app.post(
+
+  "/business/save",
+
+  uploadBusiness.fields([
+
+    {
+      name:"logo",
+      maxCount:1
+    },
+
+    {
+      name:"products",
+      maxCount:20
+    }
+
+  ]),
+
+  async (req, res) => {
+
+    try {
+
+      const {
+
+        email,
+        businessName,
+        whatsapp,
+        city,
+        natcash,
+        moncash,
+        fobasEmail
+
+      } = req.body;
+
+      const Agents =
+      mongoose.connection.collection(
+        "agents"
+      );
+
+      // ==========================
+      // FIND USER
+      // ==========================
+      const agent =
+      await Agents.findOne({
+        email
+      });
+
+      if(!agent){
+
+        return res.status(404).json({
+
+          success:false,
+          message:"User not found"
+			
+        });
+
+      }
+
+      // ==========================
+      // LOGO
+      // ==========================
+      let logo = agent.logo || "";
+
+      if(
+        req.files &&
+        req.files.logo &&
+        req.files.logo[0]
+      ){
+
+        logo =
+        `https://api.fondationbackupspirituel.com/fobas_uploads/businesses/${req.files.logo[0].filename}`;
+
+      }
+
+
+
+// ==========================
+// PRODUCTS
+// ==========================
+let newProducts = [];
+
+if (req.files && req.files.products) {
+
+  req.files.products.forEach((file, index) => {
+
+    newProducts.push({
+
+      _id:
+        Date.now().toString() +
+        Math.random().toString(36).substring(2, 9),
+
+      image:
+        `https://api.fondationbackupspirituel.com/fobas_uploads/businesses/${file.filename}`,
+
+      name:
+        req.body[`productName_${index}`] || "Produit",
+
+      price:
+        req.body[`productPrice_${index}`] || 0
+
+        });
+
+  });
+
+}
+	
+
+
+
+
+	
+// ==========================
+// KEEP OLD PRODUCTS
+// ==========================
+const existingProducts =
+  Array.isArray(agent.products)
+    ? agent.products
+    : [];
+
+// ==========================
+// FINAL PRODUCTS
+// ==========================
+const finalProducts = [
+  ...existingProducts,
+  ...newProducts
+];
+
+// ==========================
+// LIMIT 20 PRODUCTS
+// ==========================
+if (finalProducts.length > 20) {
+
+  return res.status(400).json({
+
+    success: false,
+    message: "Limit 20 produits atteint"
+
+  });
+
+}
+
+// ==========================
+// UPDATE
+// ==========================
+await Agents.updateOne(
+
+  { email },
+
+  {
+
+    $set: {
+
+      businessName:
+        businessName ||
+        agent.businessName ||
+        "",
+
+      whatsapp:
+        whatsapp ||
+        agent.whatsapp ||
+        "",
+
+      city:
+        city ||
+        agent.city ||
+        "",
+
+      natcash:
+        natcash ||
+        agent.natcash ||
+        "",
+
+      moncash:
+        moncash ||
+        agent.moncash ||
+        "",
+
+      fobasEmail:
+        fobasEmail ||
+        agent.fobasEmail ||
+        "",
+
+      logo,
+
+      products:
+        finalProducts
+
+    }
+
+  }
+
+);
+
+
+
+
+
+      // ==========================
+      // RESPONSE
+      // ==========================
+      return res.json({
+
+        success:true,
+        message:
+        "Business updated"
+
+      });
+
+    }
+
+    catch(err){
+
+      console.error(
+        "BUSINESS SAVE ERROR:",
+        err
+      );
+
+      return res.status(500).json({
+
+        success:false,
+        message:
+        "Internal server error"
+
+      });
+
+    }
+
+  }
+);
+
+
+
+
+// ==========================
+// CREATE ORDER
+// ==========================
+
+app.post(
+
+  "/business/order",
+
+  uploadOrder.single(
+    "proof"
+  ),
+
+  async (req, res) => {
+
+    try {
+
+      const {
+
+  businessId,
+  clientName,
+  phone,
+  address,
+  order,
+  product,
+  paymentMethod
+		  
+} = req.body;
+
+// ==========================
+// FINANCIAL ENGINE
+// ==========================
+const basePrice =
+  Number(req.body.basePrice || 0);
+
+const platformFee =
+  basePrice * 0.05;
+
+const totalPrice =
+  basePrice + platformFee;
+
+const referralCommission =
+  basePrice * 0.02;
+
+const adminCommission =
+  basePrice * 0.03;
+
+		
+
+// ==========================
+// SAFE PRODUCT
+// ==========================
+const finalOrder =
+  order || product || "";
+
+      // ==========================
+      // VALIDATION
+      // ==========================
+      if(
+  		!businessId ||
+  		!clientName ||
+ 		 !phone ||
+ 		 !address
+		){
+
+        return res.status(400).json({
+
+          success:false,
+          message:
+          "Missing fields"
+
+        });
+
+      }
+
+      // ==========================
+      // COLLECTION
+      // ==========================
+      const Orders =
+      mongoose.connection.collection(
+        "business_orders"
+      );
+
+      // ==========================
+      // PROOF
+      // ==========================
+      let proof = "";
+
+      if(req.file){
+
+        proof =
+        `https://api.fondationbackupspirituel.com/fobas_uploads/orders/${req.file.filename}`;
+
+      }
+
+      // ==========================
+      // INSERT
+      // ==========================
+      await Orders.insertOne({
+
+  orderId: "ORD-" + Date.now(),   // ✅ NEW
+
+  businessId,
+
+  clientName,
+  phone,
+
+  address,
+
+  product: finalOrder, // (compatibility safe)
+
+  price: basePrice,       // ✅ NEW
+
+  paymentMethod,
+
+  referralAgent: req.body.referralAgent || null, // ✅ NEW
+
+  whatsapp: req.body.whatsapp || null,           // ✅ NEW
+
+  proof,
+
+  status: "pending",
+
+  createdAt: new Date(),
+
+// ==========================
+  // FINANCIAL SYSTEM (SAFE ADDITION)
+  // ==========================
+  financial: {
+    basePrice: Number(req.body.basePrice || 0),
+
+    platformFee:
+      Number(req.body.basePrice || 0) * 0.05,
+
+    totalPrice:
+      Number(req.body.basePrice || 0) * 1.05,
+
+    entrepreneurEarnings:
+      Number(req.body.basePrice || 0),
+
+    referralCommission:
+      Number(req.body.basePrice || 0) * 0.02,
+
+    adminCommission:
+      Number(req.body.basePrice || 0) * 0.03
+  }
+							 
+});
+	// 👇 ADD THIS HERE
+await updateAgentProgress(businessId);
+	
+		
+
+      // ==========================
+      // RESPONSE
+      // ==========================
+      return res.json({
+
+        success:true,
+        message:
+        "Order created"
+
+      });
+
+    }
+
+    catch(err){
+
+      console.error(
+        "ORDER ERROR:",
+        err
+      );
+
+      return res.status(500).json({
+
+        success:false,
+        message:
+        "Internal server error"
+
+      });
+
+    }
+
+  }
+);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
