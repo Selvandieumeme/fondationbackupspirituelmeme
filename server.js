@@ -2636,50 +2636,6 @@ await updateAgentProgress(businessId);
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 // ==========================
 // UPLOAD BUSINESS LOGO
 // ==========================
@@ -2861,6 +2817,166 @@ app.post(
 
 
 
+
+// ==========================
+// WITHDRAW REQUEST ROUTE
+// SAFE FINTECH VERSION (PRODUCTION READY)
+// ==========================
+
+app.post("/agents/withdraw", async (req, res) => {
+
+  try {
+
+    let {
+
+  email,
+
+  amount,
+
+  method,
+
+  withdrawNumber
+
+} = req.body || {};
+
+    // ==========================
+    // BASIC VALIDATION
+    // ==========================
+    if (
+
+  !email ||
+
+  !amount ||
+
+  !method ||
+
+  !withdrawNumber
+
+) {
+
+  return res.status(400).json({
+
+    success: false,
+
+    message: "Missing fields"
+
+  });
+
+}
+
+    amount = Number(amount);
+
+    if (isNaN(amount)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid amount"
+      });
+    }
+
+    // ==========================
+    // MINIMUM RULE
+    // ==========================
+    if (amount < 2500) {
+      return res.status(400).json({
+        success: false,
+        message: "Minimum withdraw is 2500 HTG"
+      });
+    }
+
+    const Agents =
+      mongoose.connection.collection("agents");
+
+    // ==========================
+    // FIND USER (SAFE NORMALIZATION)
+    // ==========================
+    const agent = await Agents.findOne({
+      email: String(email).trim().toLowerCase()
+    });
+
+    if (!agent) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found"
+      });
+    }
+
+    // ==========================
+    // CHECK BALANCE
+    // ==========================
+    if ((agent.totalCommission || 0) < amount) {
+      return res.status(400).json({
+        success: false,
+        message: "Insufficient commission"
+      });
+    }
+
+    // ==========================
+    // CREATE WITHDRAW REQUEST FIRST (SAFE FLOW)
+    // ==========================
+    const Withdrawals =
+      mongoose.connection.collection("withdrawals");
+
+    const withdrawResult = await Withdrawals.insertOne({
+
+  email: agent.email,
+
+  agentId: agent._id,
+
+  amount,
+
+  method,
+
+  withdrawNumber,
+
+  status: "pending",
+
+  createdAt: new Date()
+
+});
+
+    // ==========================
+    // UPDATE AGENT BALANCE (ONLY IF INSERT SUCCESS)
+    // ==========================
+    if (withdrawResult.insertedId) {
+
+      await Agents.updateOne(
+        { _id: agent._id },
+        {
+          $inc: {
+            totalCommission: -amount
+          }
+        }
+      );
+
+      // ==========================
+      // OPTIONAL: PROGRESS ENGINE HOOK (SAFE PLACE)
+      // ==========================
+      if (typeof updateAgentProgress === "function") {
+        await updateAgentProgress(agent._id);
+      }
+    }
+
+    // ==========================
+    // RESPONSE
+    // ==========================
+    return res.json({
+      success: true,
+      message: "Withdraw request created successfully",
+      withdrawId: withdrawResult.insertedId
+    });
+
+  }
+
+  catch (err) {
+
+    console.error("WITHDRAW ERROR:", err);
+
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error"
+    });
+  }
+});
 
 
 
