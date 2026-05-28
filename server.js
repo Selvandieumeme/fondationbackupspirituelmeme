@@ -2255,7 +2255,7 @@ app.post(
 
           success:false,
           message:"User not found"
-
+			
         });
 
       }
@@ -2683,29 +2683,7 @@ app.post(
       const logoPath =
         `/fobas_uploads/businesses/${req.file.filename}`;
 
-		
-	// ==========================
-// COMPRESS LOGO (SHARP)
-// ==========================
-const newLogoPath =
-  path.join(
-    path.dirname(req.file.path),
-    "opt-" + req.file.filename + ".jpg"
-  );
-
-await sharp(file.path)
-  .jpeg({ quality: 70, mozjpeg: true, progressive: true, force: true })
-  .toFile(optimizedPath);
-
-// optional cleanup original
-fs.unlinkSync(req.file.path);
-
-const logoPath =
-  `/fobas_uploads/businesses/${path.basename(newLogoPath)}`;
-
-
-		
-
+	
       // ==========================
       // AGENTS COLLECTION
       // ==========================
@@ -2862,10 +2840,6 @@ app.post(
     path.dirname(req.file.path),
     "opt-" + req.file.filename + ".jpg"
   );
-
-await sharp(file.path)
-  .jpeg({ quality: 70, mozjpeg: true, progressive: true, force: true })
-  .toFile(optimizedPath);
 
 fs.unlinkSync(req.file.path);
 
