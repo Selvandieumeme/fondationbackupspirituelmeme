@@ -2059,9 +2059,12 @@ multer.diskStorage({
       unique +
       path.extname(
         file.originalname
-       );
-}
+      )
+    );
 
+  }
+
+});
 
 // ==========================
 // UPLOADS
