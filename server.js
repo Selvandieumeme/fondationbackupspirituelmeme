@@ -2282,35 +2282,52 @@ app.post(
 // ==========================
 let newProducts = [];
 
-if (
-  req.files &&
-  req.files.products
-) {
+if (req.files && req.files.products) {
 
-  req.files.products.forEach(
-    (file, index) => {
+  for (const [index, file] of req.files.products.entries()) {
 
-      newProducts.push({
+    // ==========================
+    // IMAGE OPTIMIZATION
+    // ==========================
+    const optimizedPath = path.join(
+      path.dirname(file.path),
+      "opt-" + file.filename + ".jpg"
+    );
 
-  _id:
-    Date.now().toString() +
-    Math.random().toString(36).substring(2, 9),
+    await sharp(file.path)
+      .jpeg({
+        quality: 70,
+        mozjpeg: true,
+        progressive: true,
+        force: true
+      })
+      .toFile(optimizedPath);
 
-  image:
-    `https://api.fondationbackupspirituel.com/fobas_uploads/businesses/${file.filename}`,
+    fs.unlinkSync(file.path);
 
-  name:
-    req.body[`productName_${index}`] || "Produit",
+    // ==========================
+    // PUSH PRODUCT
+    // ==========================
+    newProducts.push({
 
-  price:
-    req.body[`productPrice_${index}`] || 0
+      _id:
+        Date.now().toString() +
+        Math.random().toString(36).substring(2, 9),
 
-});
-    }
-  );
+      image:
+        `https://api.fondationbackupspirituel.com/fobas_uploads/businesses/${path.basename(optimizedPath)}`,
 
+      name:
+        req.body[`productName_${index}`] || "Produit",
+
+      price:
+        req.body[`productPrice_${index}`] || 0
+
+    });
+
+  }
 }
-
+		
 // ==========================
 // KEEP OLD PRODUCTS
 // ==========================
@@ -2687,6 +2704,29 @@ app.post(
       const logoPath =
         `/fobas_uploads/businesses/${req.file.filename}`;
 
+		
+	// ==========================
+// COMPRESS LOGO (SHARP)
+// ==========================
+const newLogoPath =
+  path.join(
+    path.dirname(req.file.path),
+    "opt-" + req.file.filename + ".jpg"
+  );
+
+await sharp(file.path)
+  .jpeg({ quality: 70, mozjpeg: true, progressive: true, force: true })
+  .toFile(optimizedPath);
+
+// optional cleanup original
+fs.unlinkSync(req.file.path);
+
+const logoPath =
+  `/fobas_uploads/businesses/${path.basename(newLogoPath)}`;
+
+
+		
+
       // ==========================
       // AGENTS COLLECTION
       // ==========================
@@ -2835,6 +2875,27 @@ app.post(
       // ==========================
       const avatarPath =
       `/fobas_uploads/avatars/${req.file.filename}`;
+
+
+
+	const newAvatarPath =
+  path.join(
+    path.dirname(req.file.path),
+    "opt-" + req.file.filename + ".jpg"
+  );
+
+await sharp(file.path)
+  .jpeg({ quality: 70, mozjpeg: true, progressive: true, force: true })
+  .toFile(optimizedPath);
+
+fs.unlinkSync(req.file.path);
+
+const avatarPath =
+  `/fobas_uploads/avatars/${path.basename(newAvatarPath)}`;
+
+
+
+		
 
       // ==========================
       // AGENTS
