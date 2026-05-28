@@ -2282,51 +2282,34 @@ app.post(
 // ==========================
 let newProducts = [];
 
-if (req.files && req.files.products) {
+if (
+  req.files &&
+  req.files.products
+) {
 
-  for (const [index, file] of req.files.products.entries()) {
+  req.files.products.forEach(
+    (file, index) => {
 
-    // ==========================
-    // IMAGE OPTIMIZATION
-    // ==========================
-    const optimizedPath = path.join(
-      path.dirname(file.path),
-      "opt-" + file.filename + ".jpg"
-    );
+      newProducts.push({
 
-    await sharp(file.path)
-      .jpeg({
-        quality: 70,
-        mozjpeg: true,
-        progressive: true,
-        force: true
-      })
-      .toFile(optimizedPath);
+        _id:
+          Date.now().toString() +
+          Math.random().toString(36).substring(2, 9),
 
-    fs.unlinkSync(file.path);
+        image:
+          `https://api.fondationbackupspirituel.com/fobas_uploads/businesses/${path.basename(optimizedPath)}`,
 
-    // ==========================
-    // PUSH PRODUCT
-    // ==========================
-    newProducts.push({
+        name:
+          req.body[`productName_${index}`] || "Produit",
 
-      _id:
-        Date.now().toString() +
-        Math.random().toString(36).substring(2, 9),
+        price:
+          req.body[`productPrice_${index}`] || 0
 
-      image:
-        `https://api.fondationbackupspirituel.com/fobas_uploads/businesses/${path.basename(optimizedPath)}`,
+      });
 
-      name:
-        req.body[`productName_${index}`] || "Produit",
+    }
+  );
 
-      price:
-        req.body[`productPrice_${index}`] || 0
-
-    });
-
-  }
-);
 }
 		
 // ==========================
