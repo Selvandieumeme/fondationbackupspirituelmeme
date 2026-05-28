@@ -2050,10 +2050,7 @@ multer.diskStorage({
       unique +
       path.extname(
         file.originalname
-       });
-
-  });
-
+       );
 }
 
 
@@ -2275,6 +2272,42 @@ app.post(
         `https://api.fondationbackupspirituel.com/fobas_uploads/businesses/${req.files.logo[0].filename}`;
 
       }
+
+
+
+// ==========================
+// PRODUCTS
+// ==========================
+let newProducts = [];
+
+if (req.files && req.files.products) {
+
+  req.files.products.forEach((file, index) => {
+
+    newProducts.push({
+
+      _id:
+        Date.now().toString() +
+        Math.random().toString(36).substring(2, 9),
+
+      image:
+        `https://api.fondationbackupspirituel.com/fobas_uploads/businesses/${file.filename}`,
+
+      name:
+        req.body[`productName_${index}`] || "Produit",
+
+      price:
+        req.body[`productPrice_${index}`] || 0
+
+        });
+
+  });
+
+}
+	
+
+
+
 
 	
 // ==========================
