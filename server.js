@@ -34,7 +34,347 @@ const cron = require('node-cron');
 
 
 
+// ==========================
+// FOBAS PROGRESS ENGINE
+// ==========================
 
+async function calculateAgentProgress(agent) {
+
+  let progress = 0;
+
+  // ==========================
+  // LEVEL BASE
+  // ==========================
+  const levelMap = {
+    Bronze: 0,
+    Silver: 25,
+    Gold: 50,
+    Elite: 75,
+    Ambassador: 100
+  };
+
+  progress += levelMap[agent.level] || 0;
+
+  // ==========================
+  // CONDITION 1: AGENTS REFERRALS 
+  // ==========================
+  const totalAgentReferrals =
+  agent.totalAgentReferrals || 0;
+
+if (agent.level === "Bronze") {
+
+  const target = 100;
+
+  let agentProgress =
+    (totalAgentReferrals / target) * 25;
+
+  if (agentProgress > 25) {
+    agentProgress = 25;
+  }
+
+  progress += agentProgress;
+
+}
+  if (agent.level === "Silver") {
+
+  const target = 500;
+
+  let agentProgress =
+    (totalAgentReferrals / target) * 25;
+
+  if (agentProgress > 25) {
+    agentProgress = 25;
+  }
+
+  progress += agentProgress;
+
+}
+
+  if (agent.level === "Gold") {
+
+  const target = 2000;
+
+  let agentProgress =
+    (totalAgentReferrals / target) * 25;
+
+  if (agentProgress > 25) {
+    agentProgress = 25;
+  }
+
+  progress += agentProgress;
+
+}
+
+  if (agent.level === "Elite") {
+
+  const target = 5000;
+
+  let agentProgress =
+    (totalAgentReferrals / target) * 25;
+
+  if (agentProgress > 25) {
+    agentProgress = 25;
+  }
+
+  progress += agentProgress;
+
+}
+
+// ==========================
+// CONDITION 2: WITHDRAW HISTORY
+// ==========================
+const Withdrawals =
+  mongoose.connection.collection("withdrawals");
+
+const withdrawals =
+  await Withdrawals.find({
+    agentId: agent._id,
+    status: "approved"
+  }).toArray();
+
+if (agent.level === "Bronze") {
+
+  const valid = withdrawals.filter(w => w.amount >= 2500).length;
+  if (valid >= 1) progress += 5;
+
+  const valid2 = withdrawals.filter(w => w.amount >= 5000).length;
+  if (valid2 >= 1) progress += 10;
+
+  const valid3 = withdrawals.filter(w => w.amount >= 10000).length;
+  if (valid3 >= 1) progress += 10;
+
+}
+
+if (agent.level === "Silver") {
+
+  const step1 = withdrawals.filter(w => w.amount >= 15000).length;
+  if (step1 >= 1) progress += 5;
+
+  const step2 = withdrawals.filter(w => w.amount >= 25000).length;
+  if (step2 >= 1) progress += 5;
+
+  const step3 = withdrawals.filter(w => w.amount >= 35000).length;
+  if (step3 >= 1) progress += 5;
+
+  const step4 = withdrawals.filter(w => w.amount >= 40000).length;
+  if (step4 >= 1) progress += 5;
+
+  const step5 = withdrawals.filter(w => w.amount >= 50000).length;
+  if (step5 >= 1) progress += 5;
+
+}
+
+if (agent.level === "Gold") {
+
+  const step1 = withdrawals.filter(w => w.amount >= 75000).length;
+  if (step1 >= 1) progress += 2.5;
+
+  const step2 = withdrawals.filter(w => w.amount >= 100000).length;
+  if (step2 >= 1) progress += 2.5;
+
+  const step3 = withdrawals.filter(w => w.amount >= 125000).length;
+  if (step3 >= 1) progress += 2.5;
+
+  const step4 = withdrawals.filter(w => w.amount >= 130000).length;
+  if (step4 >= 1) progress += 2.5;
+
+  const step5 = withdrawals.filter(w => w.amount >= 140000).length;
+  if (step5 >= 1) progress += 2.5;
+
+  const step6 = withdrawals.filter(w => w.amount >= 150000).length;
+  if (step6 >= 1) progress += 2.5;
+
+  const step7 = withdrawals.filter(w => w.amount >= 150000).length;
+  if (step7 >= 2) progress += 2.5;
+
+  const step8 = withdrawals.filter(w => w.amount >= 150000).length;
+  if (step8 >= 3) progress += 2.5;
+
+  const step9 = withdrawals.filter(w => w.amount >= 150000).length;
+  if (step9 >= 4) progress += 2.5;
+
+  const step10 = withdrawals.filter(w => w.amount >= 150000).length;
+  if (step10 >= 5) progress += 2.5;
+
+}
+
+if (agent.level === "Elite") {
+
+  const eliteWithdraws =
+    withdrawals.filter(w => w.amount >= 100000).length;
+
+  if (eliteWithdraws >= 1) progress += 5;
+  if (eliteWithdraws >= 2) progress += 5;
+  if (eliteWithdraws >= 3) progress += 5;
+  if (eliteWithdraws >= 4) progress += 5;
+  if (eliteWithdraws >= 5) progress += 5;
+
+}
+  // ==========================
+  // CONDITION 3: ENTREPREPRENEUR REFERRED
+  // ==========================
+  const entrepreneurReferrals =
+  agent.totalReferrals || 0;
+
+if (agent.level === "Bronze") {
+
+  const target = 100;
+
+  let entrepreneurProgress =
+    (entrepreneurReferrals / target) * 25;
+
+  if (entrepreneurProgress > 25) {
+    entrepreneurProgress = 25;
+  }
+
+  progress += entrepreneurProgress;
+
+}
+if (agent.level === "Silver") {
+
+  const target = 500;
+
+  let entrepreneurProgress =
+    (entrepreneurReferrals / target) * 25;
+
+  if (entrepreneurProgress > 25) {
+    entrepreneurProgress = 25;
+  }
+
+  progress += entrepreneurProgress;
+
+}
+  if (agent.level === "Gold") {
+
+  const target = 2000;
+
+  let entrepreneurProgress =
+    (entrepreneurReferrals / target) * 25;
+
+  if (entrepreneurProgress > 25) {
+    entrepreneurProgress = 25;
+  }
+
+  progress += entrepreneurProgress;
+
+}
+  if (agent.level === "Elite") {
+
+  const target = 5000;
+
+  let entrepreneurProgress =
+    (entrepreneurReferrals / target) * 25;
+
+  if (entrepreneurProgress > 25) {
+    entrepreneurProgress = 25;
+  }
+
+  progress += entrepreneurProgress;
+
+}
+
+  // ==========================
+  // CONDITION 4: CLIENT ORDERS
+  // ==========================
+  const clientOrders = agent.clientOrders || 0;
+
+  if (agent.level === "Bronze" && clientOrders >= 10) progress += 25;
+  if (agent.level === "Silver" && clientOrders >= 25) progress += 25;
+  if (agent.level === "Gold" && clientOrders >= 50) progress += 25;
+  if (agent.level === "Elite" && clientOrders >= 100) progress += 25;
+
+  // ==========================
+  // CAP PROGRESS
+  // ==========================
+  if (progress > 100) progress = 100;
+
+  return progress;
+}
+
+
+
+
+
+
+
+
+
+async function checkLevelUpgrade(Agents, agent) {
+
+  let newLevel = agent.level;
+
+  if (agent.level === "Bronze" && agent.progress >= 100) {
+    newLevel = "Silver";
+    agent.totalCommission += 1000;
+  }
+
+  else if (agent.level === "Silver" && agent.progress >= 100) {
+    newLevel = "Gold";
+    agent.totalCommission += 2000;
+  }
+
+  else if (agent.level === "Gold" && agent.progress >= 100) {
+    newLevel = "Elite";
+    agent.totalCommission += 5000;
+  }
+
+  else if (agent.level === "Elite" && agent.progress >= 100) {
+    newLevel = "Ambassador";
+    agent.totalCommission += 10000;
+  }
+
+  if (newLevel !== agent.level) {
+
+    await Agents.updateOne(
+      { _id: agent._id },
+      {
+        $set: {
+          level: newLevel,
+          progress: 0
+        }
+      }
+    );
+
+    return true;
+  }
+
+  return false;
+}
+
+
+
+
+
+
+
+
+
+async function updateAgentProgress(agentId) {
+
+  const Agents =
+    mongoose.connection.collection("agents");
+
+  const agent = await Agents.findOne({
+    _id: new mongoose.Types.ObjectId(agentId)
+  });
+
+  if (!agent) return;
+
+  const progress = await calculateAgentProgress(agent);
+
+  agent.progress = progress;
+
+  await Agents.updateOne(
+    { _id: agent._id },
+    {
+      $set: {
+        progress
+      }
+    }
+  );
+
+  await checkLevelUpgrade(Agents, agent);
+}
 
 
 
@@ -714,6 +1054,792 @@ async(req,res)=>{
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+// ==========================
+// AGENTS REGISTER ROUTE
+// FINAL CLEAN VERSION
+// ==========================
+
+app.post("/agents/register", async (req, res) => {
+
+  try {
+
+    console.log("REGISTER BODY:", req.body);
+
+    let {
+      name,
+      email,
+      password,
+      role,
+      businessName,
+      whatsapp,
+      country,
+      city,
+      zone
+    } = req.body || {};
+
+    // ==========================
+    // BASIC VALIDATION (SAFE BACKWARD COMPATIBLE)
+    // ==========================
+    if (!name || !email || !password) {
+
+      return res.status(400).json({
+        success: false,
+        message: "All fields are required"
+      });
+
+    }
+
+    // ==========================
+    // CLEAN DATA
+    // ==========================
+    name = String(name).trim();
+    email = String(email).trim().toLowerCase();
+    password = String(password);
+
+    role = role || "agent";
+	  
+	
+
+    // ==========================
+    // ROLE VALIDATION (SAFE)
+    // ==========================
+    if (role === "entrepreneur" || role === "agent_entrepreneur") {
+
+      if (!businessName || !whatsapp || !country || !city || !zone) {
+
+        return res.status(400).json({
+          success: false,
+          message: "Entrepreneur information required"
+        });
+
+      }
+    }
+
+    // ==========================
+    // COLLECTION
+    // ==========================
+    const Agents =
+      mongoose.connection.collection("agents");
+
+    // ==========================
+    // CHECK EXISTING
+    // ==========================
+    const exist =
+      await Agents.findOne({ email });
+
+    if (exist) {
+
+      return res.status(409).json({
+        success: false,
+        message: "Agent already exists"
+      });
+
+    }
+
+    // ==========================
+    // HASH PASSWORD
+    // ==========================
+    const hashedPassword =
+      await bcryptjs.hash(password, 12);
+
+
+
+
+
+
+
+// ==========================
+// REFERRAL
+// ==========================
+const referralCode =
+  "AGT_" +
+  Math.random()
+    .toString(36)
+    .substring(2, 8)
+    .toUpperCase();
+
+const referralCodeFromLink =
+  (req.body.referralCode || req.body.referralFrom || "").trim() || null;
+
+let referrerAgent = null;
+
+if (referralCodeFromLink) {
+  referrerAgent = await Agents.findOne({
+    referralCode: referralCodeFromLink
+  });
+
+  // ❗ prevent self referral
+  if (referrerAgent && referrerAgent.email === email) {
+    referrerAgent = null;
+  }
+}
+
+
+// ==========================
+// INSERT
+// ==========================
+const result = await Agents.insertOne({
+
+  name,
+  email,
+  password: hashedPassword,
+  role,
+
+  referralCode,
+
+  level: "Bronze",
+  totalCommission: 0,
+  progress: 0,
+  totalAgentReferrals: 0,
+
+  referralFrom: referralCodeFromLink || null,
+  referredBy: referrerAgent ? referrerAgent._id : null,
+  referralPaid: false,
+
+		// ==========================
+        // ENTREPRENEUR DATA (OPTIONAL SAFE)
+        // ==========================
+        businessName: businessName || null,
+        whatsapp: whatsapp || null,
+        country: country || null,
+        city: city || null,
+        zone: zone || null,
+
+  createdAt: new Date()
+});
+
+
+// ==========================
+// REFERRAL REWARD (APRE INSERT - SAFE PLACE)
+// ==========================
+if (
+  referrerAgent &&
+  (role === "entrepreneur" || role === "agent_entrepreneur")
+) {
+
+  await Agents.updateOne(
+    { _id: referrerAgent._id },
+    {
+      $inc: {
+        totalReferrals: 1,
+        totalCommission: 500
+      }
+    }
+  );
+
+  // 🔥 REAL-TIME PROGRESS UPDATE
+  await updateAgentProgress(referrerAgent._id);
+
+}
+	  
+// ==========================
+// AGENT REFERRAL PROGRESS
+// ==========================
+if (
+  referrerAgent &&
+  role === "agent"
+) {
+
+  await Agents.updateOne(
+    { _id: referrerAgent._id },
+    {
+      $inc: {
+        totalAgentReferrals: 1
+      }
+    }
+  );
+
+  // 🔥 REAL-TIME PROGRESS UPDATE
+  await updateAgentProgress(referrerAgent._id);
+
+}
+
+
+
+
+
+
+
+
+console.log("AGENT CREATED:", result.insertedId);
+
+    return res.status(201).json({
+
+      success: true,
+      message: "Agent created successfully",
+      referralCode
+
+    });
+
+  }
+
+  catch (err) {
+
+    console.error("REGISTER ERROR FULL:", err);
+
+    return res.status(500).json({
+
+      success: false,
+      message: "Internal server error",
+      error: err.message
+
+    });
+
+  }
+
+});
+
+
+
+
+
+
+
+
+// ==========================
+// AGENTS DASHBOARD ROUTE
+// ==========================
+
+app.get("/agents/dashboard", async (req, res) => {
+
+  try {
+
+    const email = req.query.email;
+
+    const Agents =
+      mongoose.connection.collection("agents");
+
+    // ==========================
+    // FIND USER
+    // ==========================
+    let agent = null;
+
+if (email) {
+  agent = await Agents.findOne({ email });
+}
+
+    // ==========================
+    // GLOBAL STATS
+    // ==========================
+    const totalUsers =
+      await Agents.countDocuments();
+
+    const totalAgents =
+      await Agents.countDocuments({
+        role: {
+          $in: ["agent", "agent_entrepreneur"]
+        }
+      });
+
+    const totalBusinesses =
+      await Agents.countDocuments({
+        role: {
+          $in: ["entrepreneur", "agent_entrepreneur"]
+        }
+      });
+
+    // ==========================
+    // RESPONSE
+    // ==========================
+    return res.json({
+
+  success: true,
+
+  // ==========================
+  // GLOBAL STATS
+  // ==========================
+  totalUsers,
+  totalAgents,
+  totalBusinesses,
+
+  // ==========================
+  // USER DATA
+  // ==========================
+  referralLink:
+    agent?.referralCode
+      ? `https://fondationbackupspirituel.com/deveniragents.html?ref=${agent.referralCode}`
+      : "",
+
+  level:
+    agent?.level || "Bronze",
+
+  totalCommission:
+    agent?.totalCommission || 0,
+
+  progress:
+    agent?.progress || 0
+
+    });
+
+  }
+
+  catch (err) {
+
+    console.error(
+      "DASHBOARD ERROR:",
+      err
+    );
+
+    return res.status(500).json({
+
+      success: false,
+      message: "Internal server error"
+
+    });
+
+  }
+
+});
+
+
+
+
+
+
+
+
+
+// ==========================
+// DASHBOARD PROFILE ROUTE
+// ==========================
+
+app.get("/dashboard/profile", async (req, res) => {
+
+  try {
+
+    const email = req.query.email;
+
+    if (!email) {
+
+      return res.status(400).json({
+        success: false,
+        message: "Email required"
+      });
+
+    }
+
+    const Agents =
+      mongoose.connection.collection("agents");
+
+
+    // ==========================
+    // FIND USER
+    // ==========================
+    const user =
+      await Agents.findOne({
+        email: String(email)
+          .trim()
+          .toLowerCase()
+      });
+
+
+    if (!user) {
+
+      return res.status(404).json({
+        success: false,
+        message: "User not found"
+      });
+
+    }
+
+
+    
+// ==========================
+// REFERRALS
+// ==========================
+const referrals =
+  await Agents.find({
+    referredBy: user._id
+  })
+  .project({
+    name: 1,
+    role: 1
+  })
+  .toArray();
+
+
+// ==========================
+// RESPONSE
+// ==========================
+return res.json({
+
+  success: true,
+
+  name: user.name || "Utilisateur",
+
+  email: user.email || "",
+
+  role: user.role || "agent",
+
+  level: user.level || "Bronze",
+
+  totalCommission:
+    user.totalCommission || 0,
+
+  progress:
+    user.progress || 0,
+
+  referralCode:
+    user.referralCode || "",
+
+  totalReferrals:
+    user.totalReferrals || 0,
+
+  monthlyRevenue:
+    user.monthlyRevenue || 0,
+
+  businessName:
+    user.businessName || "",
+
+  whatsapp:
+    user.whatsapp || "",
+
+  country:
+    user.country || "",
+
+  city:
+    user.city || "",
+
+  zone:
+    user.zone || "",
+
+  logo:
+    user.logo || "",
+
+products:
+  user.products || [],
+
+  referrals,
+
+  avatar:
+    user.avatar || ""
+
+});
+
+  }
+
+  catch (err) {
+
+    console.error(
+      "DASHBOARD PROFILE ERROR:",
+      err
+    );
+
+    return res.status(500).json({
+
+      success: false,
+      message: "Internal server error"
+
+    });
+
+  }
+
+});
+
+
+
+
+
+
+
+
+
+
+
+
+// ==========================
+// AGENTS LOGIN ROUTE
+// SAFE FINAL VERSION
+// ==========================
+
+app.post("/agents/login", async (req, res) => {
+
+  try {
+
+    let { email, password } = req.body || {};
+
+    // ==========================
+    // VALIDATION
+    // ==========================
+    if (!email || !password) {
+
+      return res.status(400).json({
+        success: false,
+        message: "Email et mot de passe requis"
+      });
+
+    }
+
+    // ==========================
+    // CLEAN DATA
+    // ==========================
+    email = String(email)
+      .trim()
+      .toLowerCase();
+
+    password = String(password);
+
+    // ==========================
+    // COLLECTION
+    // ==========================
+    const Agents =
+      mongoose.connection.collection("agents");
+
+    // ==========================
+    // FIND USER
+    // ==========================
+    const agent =
+      await Agents.findOne({ email });
+
+    if (!agent) {
+
+      return res.status(404).json({
+        success: false,
+        message: "Compte introuvable"
+      });
+
+    }
+
+    // ==========================
+    // PASSWORD CHECK
+    // ==========================
+    const validPassword =
+      await bcryptjs.compare(
+        password,
+        agent.password
+      );
+
+    if (!validPassword) {
+
+      return res.status(401).json({
+        success: false,
+        message: "Mot de passe incorrect"
+      });
+
+    }
+
+    // ==========================
+    // SUCCESS
+    // ==========================
+    return res.json({
+
+      success: true,
+
+      message: "Connexion réussie",
+
+      user: {
+
+        id: agent._id,
+
+        name: agent.name,
+
+        email: agent.email,
+
+        role: agent.role || "agent",
+
+        referralCode:
+          agent.referralCode || "",
+
+        level:
+          agent.level || "Bronze",
+
+        totalCommission:
+          agent.totalCommission || 0,
+
+        progress:
+          agent.progress || 0,
+
+        businessName:
+          agent.businessName || "",
+
+        whatsapp:
+          agent.whatsapp || "",
+
+        country:
+          agent.country || "",
+
+        city:
+          agent.city || "",
+
+        zone:
+          agent.zone || ""
+
+      }
+
+    });
+
+  }
+
+  catch (err) {
+
+    console.error(
+      "LOGIN ERROR:",
+      err
+    );
+
+    return res.status(500).json({
+
+      success: false,
+
+      message: "Internal server error",
+
+      error: err.message
+
+    });
+
+  }
+
+});
+
+
+
+
+
+
+
+
+
+
+
+// ==========================
+// SECURE AGENT DASHBOARD
+// ==========================
+app.get("/agents/profile", async (req, res) => {
+
+  try {
+
+    const email =
+      req.query.email;
+
+    if (!email) {
+
+      return res.status(400).json({
+        success: false,
+        message: "Email requis"
+      });
+
+    }
+
+    const Agents =
+      mongoose.connection.collection("agents");
+
+    // ==========================
+    // FIND USER
+    // ==========================
+    const agent =
+      await Agents.findOne({
+
+        email:
+          String(email)
+            .trim()
+            .toLowerCase()
+
+      });
+
+    if (!agent) {
+
+      return res.status(404).json({
+
+        success: false,
+        message: "Utilisateur introuvable"
+
+      });
+
+    }
+
+    // ==========================
+    // RESPONSE
+    // ==========================
+    return res.json({
+
+      success: true,
+
+      name:
+        agent.name || "",
+
+      email:
+        agent.email || "",
+
+      role:
+        agent.role || "agent",
+
+      referralCode:
+        agent.referralCode || "",
+
+      level:
+        agent.level || "Bronze",
+
+      totalCommission:
+        agent.totalCommission || 0,
+
+      progress:
+        agent.progress || 0,
+
+      businessName:
+        agent.businessName || "",
+
+      whatsapp:
+        agent.whatsapp || "",
+
+      country:
+        agent.country || "",
+
+      city:
+        agent.city || "",
+
+      zone:
+        agent.zone || "",
+
+	
+      createdAt:
+        agent.createdAt || null,
+
+      // ==========================
+      // BUSINESS LOGO
+      // ==========================
+      logo:
+        agent.logo || "",
+
+      // ==========================
+      // USER AVATAR
+      // ==========================
+      avatar:
+        agent.avatar || ""
+
+    });
+
+  }
+
+  catch (err) {
+
+    console.error(
+      "PROFILE ERROR:",
+      err
+    );
+
+    return res.status(500).json({
+
+      success: false,
+      message: "Internal server error"
+
+    });
+
+  }
+
+});
+ 
 
 
 
