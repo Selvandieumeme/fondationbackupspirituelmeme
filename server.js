@@ -2794,30 +2794,6 @@ app.post(
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 // ==========================
 // WITHDRAW REQUEST ROUTE
 // SAFE FINTECH VERSION (PRODUCTION READY)
@@ -2984,6 +2960,164 @@ app.post("/agents/withdraw", async (req, res) => {
 
 
 
+
+
+
+
+
+
+
+
+
+// ==========================
+// DELETE PRODUCT (FINAL SAFE VERSION)
+// ==========================
+app.post("/business/delete-product", async (req, res) => {
+
+  try {
+
+    const { email, productId } = req.body;
+
+    // ==========================
+    // VALIDATION
+    // ==========================
+    if (!email || !productId) {
+      return res.json({
+        success: false,
+        message: "Données manquantes"
+      });
+    }
+
+    // ==========================
+    // COLLECTION
+    // ==========================
+    const Agents =
+      mongoose.connection.collection("agents");
+
+    // ==========================
+    // FIND USER
+    // ==========================
+    const business =
+      await Agents.findOne({
+        email: String(email).trim().toLowerCase()
+      });
+
+    if (!business) {
+      return res.json({
+        success: false,
+        message: "Business introuvable"
+      });
+    }
+
+    // ==========================
+    // PRODUCTS
+    // ==========================
+    let products =
+      Array.isArray(business.products)
+        ? business.products
+        : [];
+
+    // ==========================
+    // FIND TARGET PRODUCT
+    // ==========================
+    const targetProduct = products.find(
+      p => String(p._id) === String(productId)
+    );
+
+    if (!targetProduct) {
+      return res.json({
+        success: false,
+        message: "Produit introuvable"
+      });
+    }
+
+    // ==========================
+    // DELETE IMAGE FILE (SAFE)
+    // ==========================
+    if (targetProduct.image) {
+      try {
+
+        const fileName = targetProduct.image.split("/").pop();
+
+        const filePath = path.join(
+          __dirname,
+          "fobas_uploads",
+          "businesses",
+          fileName
+        );
+
+        await fs.promises.unlink(filePath).catch(() => {
+  		// file already deleted or missing - ignore safely
+		});
+
+      } catch (fileErr) {
+        console.error("FILE DELETE ERROR:", fileErr);
+      }
+    }
+
+    // ==========================
+    // REMOVE BY ID (NOT INDEX)
+    // ==========================
+    products = products.filter(
+      p => String(p._id) !== String(productId)
+    );
+
+
+	  // ==========================
+// AUDIT LOG (ADDED SAFE)
+// ==========================
+const auditEntry = {
+  action: "DELETE_PRODUCT",
+  email: String(email).trim().toLowerCase(),
+  productId: String(productId),
+  productSnapshot: targetProduct,
+  deletedAt: new Date()
+};
+
+// OPTIONAL: log to console (safe)
+console.log("AUDIT LOG:", auditEntry);
+
+// OPTIONAL: save in DB collection (if you want history)
+const AuditLogs = mongoose.connection.collection("audit_logs");
+
+await AuditLogs.insertOne(auditEntry).catch(err => {
+  console.error("AUDIT SAVE ERROR:", err);
+});
+	
+    // ==========================
+    // UPDATE DB
+    // ==========================
+    await Agents.updateOne(
+      {
+        email: String(email).trim().toLowerCase()
+      },
+      {
+        $set: {
+          products
+        }
+      }
+    );
+
+    // ==========================
+    // SUCCESS
+    // ==========================
+    return res.json({
+      success: true,
+      message: "Produit supprimé avec succès"
+    });
+
+  } catch (err) {
+
+    console.error("DELETE PRODUCT ERROR:", err);
+
+    return res.status(500).json({
+      success: false,
+      message: "Erreur serveur"
+    });
+
+  }
+
+});
 
 
 
