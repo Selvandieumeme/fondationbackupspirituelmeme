@@ -1981,6 +1981,7 @@ if (!fs.existsSync(avatarUploadPath)) {
     avatarUploadPath,
     { recursive: true }
   );
+  }
 
 // ==========================
 // STORAGE AVATAR
