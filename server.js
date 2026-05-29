@@ -2020,7 +2020,7 @@ multer.diskStorage({
 
 // ==========================
 // SAFE IMAGE FILE FILTER
-// ANDROID + IPHONE SUPPORT
+// FULL ANDROID + IPHONE SUPPORT
 // ==========================
 const imageFileFilter = (
   req,
@@ -2028,72 +2028,105 @@ const imageFileFilter = (
   cb
 ) => {
 
-  const allowedMimeTypes = [
+  try {
 
-    "image/jpeg",
-    "image/jpg",
-    "image/png",
+    const allowedMimeTypes = [
 
-    // ✅ ANDROID / IPHONE
-    "image/heic",
-    "image/heif",
-    "image/webp"
+      "image/jpeg",
+      "image/jpg",
+      "image/png",
+      "image/heic",
+      "image/heif",
+      "image/webp",
 
-  ];
+      // ✅ SOME ANDROID CAMERAS
+      "image/pjpeg",
 
-  const allowedExtensions = [
+      // ✅ GENERIC MOBILE CAMERA
+      "application/octet-stream"
 
-    ".jpg",
-    ".jpeg",
-    ".png",
+    ];
 
-    // ✅ ANDROID / IPHONE
-    ".heic",
-    ".heif",
-    ".webp"
+    const allowedExtensions = [
 
-  ];
+      ".jpg",
+      ".jpeg",
+      ".png",
+      ".heic",
+      ".heif",
+      ".webp"
 
-  const ext =
-    path.extname(
-      file.originalname
-    )
-    .toLowerCase();
+    ];
 
-  if (
+    const originalName =
+      String(file.originalname || "")
+      .toLowerCase();
 
-    allowedMimeTypes.includes(
-      file.mimetype
-    )
+    const ext =
+      path.extname(originalName);
 
-    ||
+    // ==========================
+    // ACCEPT BY MIME TYPE
+    // ==========================
+    if (
+      allowedMimeTypes.includes(
+        String(file.mimetype || "").toLowerCase()
+      )
+    ) {
 
-    allowedExtensions.includes(
-      ext
-    )
+      return cb(null, true);
 
-  ) {
+    }
 
-    cb(null, true);
+    // ==========================
+    // ACCEPT BY EXTENSION
+    // ==========================
+    if (
+      allowedExtensions.includes(ext)
+    ) {
 
-  }
+      return cb(null, true);
 
-  else {
+    }
 
-    cb(
+    // ==========================
+    // ACCEPT UNKNOWN MOBILE FILES
+    // ==========================
+    if (
+      String(file.mimetype || "")
+      .startsWith("image/")
+    ) {
 
+      return cb(null, true);
+
+    }
+
+    return cb(
       new Error(
         "Format image non supporté"
       ),
-
       false
+    );
 
+  }
+
+  catch(err) {
+
+    console.error(
+      "IMAGE FILTER ERROR:",
+      err
+    );
+
+    return cb(
+      new Error(
+        "Erreur upload image"
+      ),
+      false
     );
 
   }
 
 };
-
 
 
 // ==========================
