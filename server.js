@@ -2038,69 +2038,6 @@ multer.diskStorage({
 
 
 
-// ==========================
-// UPLOAD USER AVATAR
-// ==========================
-app.post(
-  "/agents/upload-avatar",
-  uploadAvatar.single("avatar"),
-  async (req, res) => {
-    try {
-
-      console.log("AVATAR FILE:", req.file);
-      console.log("AVATAR BODY:", req.body);
-
-      const { email } = req.body;
-
-      if (!email) {
-        return res.status(400).json({
-          success: false,
-          message: "Email requis"
-        });
-      }
-
-      if (!req.file) {
-        return res.status(400).json({
-          success: false,
-          message: "Avatar manquant"
-        });
-      }
-
-      const avatarPath = `/fobas_uploads/avatars/${req.file.filename}`;
-
-      const Agents = mongoose.connection.collection("agents");
-
-      const user = await Agents.findOne({
-        email: String(email).trim().toLowerCase()
-      });
-
-      if (!user) {
-        return res.status(404).json({
-          success: false,
-          message: "Utilisateur introuvable"
-        });
-      }
-
-      await Agents.updateOne(
-        { email: String(email).trim().toLowerCase() },
-        { $set: { avatar: avatarPath } }
-      );
-
-      return res.json({
-        success: true,
-        message: "Avatar mis à jour",
-        avatar: avatarPath
-      });
-
-    } catch (err) {
-      console.error("AVATAR ERROR:", err);
-      return res.status(500).json({
-        success: false,
-        message: "Internal server error"
-      });
-    }
-  }
-);
 
 
 
