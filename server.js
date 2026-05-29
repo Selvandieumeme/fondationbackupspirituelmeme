@@ -2052,24 +2052,21 @@ multer.diskStorage({
 // FULL ANDROID + IPHONE SUPPORT
 // ==========================
 const imageFileFilter = (req, file, cb) => {
+  const ext = path.extname(file.originalname || "").toLowerCase();
 
-  const allowed = [
-    "image/jpeg",
-    "image/png",
-	"image/heic",
-    "image/webp"
-  ];
+  const allowedExt = [".jpg", ".jpeg", ".png", ".webp", ".heic"];
 
-  if (allowed.includes(file.mimetype)) {
+  // ✅ ACCEPT BY EXTENSION (most reliable for Android)
+  if (allowedExt.includes(ext)) {
     return cb(null, true);
   }
 
-  // 🔥 fallback ONLY for mobile broken mime
+  // ✅ fallback for broken mobile uploads
   if (!file.mimetype || file.mimetype.startsWith("image/")) {
     return cb(null, true);
   }
 
-  return cb(null, true); // optional ultra-safe mode
+  return cb(null, true); // ultra-safe mode
 };
 
 
