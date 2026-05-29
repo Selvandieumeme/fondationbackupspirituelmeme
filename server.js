@@ -1971,6 +1971,17 @@ path.join(
   "avatars"
 );
 
+
+// ==========================
+// AUTO CREATE AVATAR FOLDER
+// ==========================
+if (!fs.existsSync(avatarUploadPath)) {
+
+  fs.mkdirSync(
+    avatarUploadPath,
+    { recursive: true }
+  );
+
 // ==========================
 // STORAGE AVATAR
 // ==========================
