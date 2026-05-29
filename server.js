@@ -1971,7 +1971,6 @@ path.join(
   "avatars"
 );
 
-
 // ==========================
 // AUTO CREATE AVATAR FOLDER
 // ==========================
@@ -1981,7 +1980,8 @@ if (!fs.existsSync(avatarUploadPath)) {
     avatarUploadPath,
     { recursive: true }
   );
-  }
+
+}
 
 // ==========================
 // STORAGE AVATAR
@@ -2026,7 +2026,6 @@ multer.diskStorage({
   }
 
 });
-
 
 
 
