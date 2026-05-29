@@ -2018,7 +2018,81 @@ multer.diskStorage({
 
 
 
+// ==========================
+// SAFE IMAGE FILE FILTER
+// ANDROID + IPHONE SUPPORT
+// ==========================
+const imageFileFilter = (
+  req,
+  file,
+  cb
+) => {
 
+  const allowedMimeTypes = [
+
+    "image/jpeg",
+    "image/jpg",
+    "image/png",
+
+    // ✅ ANDROID / IPHONE
+    "image/heic",
+    "image/heif",
+    "image/webp"
+
+  ];
+
+  const allowedExtensions = [
+
+    ".jpg",
+    ".jpeg",
+    ".png",
+
+    // ✅ ANDROID / IPHONE
+    ".heic",
+    ".heif",
+    ".webp"
+
+  ];
+
+  const ext =
+    path.extname(
+      file.originalname
+    )
+    .toLowerCase();
+
+  if (
+
+    allowedMimeTypes.includes(
+      file.mimetype
+    )
+
+    ||
+
+    allowedExtensions.includes(
+      ext
+    )
+
+  ) {
+
+    cb(null, true);
+
+  }
+
+  else {
+
+    cb(
+
+      new Error(
+        "Format image non supporté"
+      ),
+
+      false
+
+    );
+
+  }
+
+};
 
 
 
@@ -2073,6 +2147,7 @@ const uploadBusiness =
 multer({
 
   storage: businessStorage,
+  fileFilter:imageFileFilter,
 
   limits:{
     fileSize:
@@ -2085,6 +2160,7 @@ const uploadOrder =
 multer({
 
   storage: orderStorage,
+  fileFilter:imageFileFilter,
 
   limits:{
     fileSize:
@@ -2103,7 +2179,7 @@ const uploadAvatar =
 multer({
 
   storage: avatarStorage,
-
+  fileFilter:imageFileFilter,
   limits:{
     fileSize:
     15 * 1024 * 1024
