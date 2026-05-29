@@ -2258,66 +2258,136 @@ multer({
 // UPLOAD USER AVATAR
 // ==========================
 app.post(
+
   "/agents/upload-avatar",
-  uploadAvatar.single("avatar"),
+
+  uploadAvatar.single(
+    "avatar"
+  ),
+
   async (req, res) => {
+
     try {
 
-      console.log("AVATAR FILE:", req.file);
-      console.log("AVATAR BODY:", req.body);
+      console.log(
+        "AVATAR FILE:",
+        req.file
+      );
 
-      const { email } = req.body;
+      console.log(
+        "AVATAR BODY:",
+        req.body
+      );
+
+      const { email } =
+        req.body;
 
       if (!email) {
+
         return res.status(400).json({
-          success: false,
-          message: "Email requis"
+          success:false,
+          message:"Email requis"
         });
+
       }
 
       if (!req.file) {
+
         return res.status(400).json({
-          success: false,
-          message: "Avatar manquant"
+          success:false,
+          message:"Avatar manquant"
         });
+
       }
 
-      const avatarPath = `/fobas_uploads/avatars/${req.file.filename}`;
+      // ==========================
+      // AVATAR PATH
+      // ==========================
+      const avatarPath =
+        `/fobas_uploads/avatars/${req.file.filename}`;
 
-      const Agents = mongoose.connection.collection("agents");
+      // ==========================
+      // AGENTS
+      // ==========================
+      const Agents =
+        mongoose.connection.collection(
+          "agents"
+        );
 
-      const user = await Agents.findOne({
-        email: String(email).trim().toLowerCase()
-      });
+      // ==========================
+      // CHECK USER
+      // ==========================
+      const user =
+        await Agents.findOne({
 
-      if (!user) {
+          email: String(email)
+            .trim()
+            .toLowerCase()
+
+        });
+
+      if(!user){
+
         return res.status(404).json({
-          success: false,
-          message: "Utilisateur introuvable"
+          success:false,
+          message:
+          "Utilisateur introuvable"
         });
+
       }
 
+      // ==========================
+      // UPDATE AVATAR
+      // ==========================
       await Agents.updateOne(
-        { email: String(email).trim().toLowerCase() },
-        { $set: { avatar: avatarPath } }
+
+        {
+          email: String(email)
+            .trim()
+            .toLowerCase()
+        },
+
+        {
+          $set:{
+            avatar: avatarPath
+          }
+        }
+
       );
 
+      // ==========================
+      // RESPONSE
+      // ==========================
       return res.json({
-        success: true,
-        message: "Avatar mis à jour",
+
+        success:true,
+
+        message:
+        "Avatar mis à jour",
+
         avatar: avatarPath
+
       });
 
-    } catch (err) {
-      console.error("AVATAR ERROR:", err);
-      return res.status(500).json({
-        success: false,
-        message: "Internal server error"
-      });
     }
+
+    catch(err){
+
+      console.error(
+        "AVATAR ERROR:",
+        err
+      );
+
+      return res.status(500).json({
+        success:false,
+        message:
+        "Internal server error"
+      });
+
+    }
+
   }
 );
-
 
 
 
