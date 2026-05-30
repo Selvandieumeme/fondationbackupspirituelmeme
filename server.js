@@ -2735,8 +2735,8 @@ const adminCommission = basePrice * 0.03;
 
   proof,
   status: "pending",
-  createdAt: new Date()
-});
+  createdAt: new Date(),
+
 
         // ==========================
         // FINANCIAL SYSTEM (FROM FRONTEND - NO SERVER RE-CALC)
