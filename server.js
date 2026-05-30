@@ -2643,186 +2643,96 @@ await Agents.updateOne(
 // ==========================
 
 app.post(
-
   "/business/order",
-
-  uploadOrder.single(
-    "proof"
-  ),
-
+  uploadOrder.single("proof"),
   async (req, res) => {
 
     try {
 
       const {
-
-  businessId,
-  clientName,
-  phone,
-  address,
-  order,
-  product,
-  paymentMethod
-		  
-} = req.body;
-
-// ==========================
-// FINANCIAL ENGINE
-// ==========================
-const basePrice =
-  Number(req.body.basePrice || 0);
-
-const platformFee =
-  basePrice * 0.05;
-
-const totalPrice =
-  basePrice + platformFee;
-
-const referralCommission =
-  basePrice * 0.02;
-
-const adminCommission =
-  basePrice * 0.03;
-
-		
-
-// ==========================
-// SAFE PRODUCT
-// ==========================
-const finalOrder =
-  order || product || "";
+        businessId,
+        clientName,
+        phone,
+        address,
+        order,
+        product,
+        paymentMethod,
+        basePrice,
+        platformFee,
+        totalPrice
+      } = req.body;
 
       // ==========================
-      // VALIDATION
+      // VALIDATION (UNCHANGED)
       // ==========================
-      if(
-  		!businessId ||
-  		!clientName ||
- 		 !phone ||
- 		 !address
-		){
-
+      if (
+        !businessId ||
+        !clientName ||
+        !phone ||
+        !address
+      ) {
         return res.status(400).json({
-
-          success:false,
-          message:
-          "Missing fields"
-
+          success: false,
+          message: "Missing fields"
         });
-
       }
 
-      // ==========================
-      // COLLECTION
-      // ==========================
-      const Orders =
-      mongoose.connection.collection(
-        "business_orders"
-      );
+      const finalOrder = order || product || "";
 
-      // ==========================
-      // PROOF
-      // ==========================
       let proof = "";
 
-      if(req.file){
-
+      if (req.file) {
         proof =
-        `https://api.fondationbackupspirituel.com/fobas_uploads/orders/${req.file.filename}`;
-
+          `https://api.fondationbackupspirituel.com/fobas_uploads/orders/${req.file.filename}`;
       }
 
+      const Orders =
+        mongoose.connection.collection("business_orders");
+
       // ==========================
-      // INSERT
+      // INSERT (CLEAN - NO CALCULATION)
       // ==========================
       await Orders.insertOne({
 
-  orderId: "ORD-" + Date.now(),   // ✅ NEW
+        orderId: "ORD-" + Date.now(),
 
-  businessId,
+        businessId,
+        clientName,
+        phone,
+        address,
 
-  clientName,
-  phone,
+        product: finalOrder,
 
-  address,
+        paymentMethod,
 
-  product: finalOrder, // (compatibility safe)
+        basePrice: Number(basePrice || 0),
+        platformFee: Number(platformFee || 0),
+        totalPrice: Number(totalPrice || 0),
 
-  price: basePrice,       // ✅ NEW
-
-  paymentMethod,
-
-  referralAgent: req.body.referralAgent || null, // ✅ NEW
-
-  whatsapp: req.body.whatsapp || null,           // ✅ NEW
-
-  proof,
-
-  status: "pending",
-
-  createdAt: new Date(),
-
-// ==========================
-  // FINANCIAL SYSTEM (SAFE ADDITION)
-  // ==========================
-  financial: {
-    basePrice: Number(req.body.basePrice || 0),
-
-    platformFee:
-      Number(req.body.basePrice || 0) * 0.05,
-
-    totalPrice:
-      Number(req.body.basePrice || 0) * 1.05,
-
-    entrepreneurEarnings:
-      Number(req.body.basePrice || 0),
-
-    referralCommission:
-      Number(req.body.basePrice || 0) * 0.02,
-
-    adminCommission:
-      Number(req.body.basePrice || 0) * 0.03
-  }
-							 
-});
-	// 👇 ADD THIS HERE
-await updateAgentProgress(businessId);
-	
-		
-
-      // ==========================
-      // RESPONSE
-      // ==========================
-      return res.json({
-
-        success:true,
-        message:
-        "Order created"
-
+        proof,
+        status: "pending",
+        createdAt: new Date()
       });
 
-    }
+      await updateAgentProgress(businessId);
 
-    catch(err){
+      return res.json({
+        success: true,
+        message: "Order created"
+      });
 
-      console.error(
-        "ORDER ERROR:",
-        err
-      );
+    } catch (err) {
+
+      console.error("ORDER ERROR:", err);
 
       return res.status(500).json({
-
-        success:false,
-        message:
-        "Internal server error"
-
+        success: false,
+        message: "Internal server error"
       });
 
     }
-
   }
 );
-
 
 
 
