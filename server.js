@@ -2638,15 +2638,15 @@ await Agents.updateOne(
 
 
 
+
+
 // ==========================
 // CREATE ORDER
 // ==========================
-
 app.post(
   "/business/order",
   uploadOrder.single("proof"),
   async (req, res) => {
-
     try {
 
       const {
@@ -2656,14 +2656,27 @@ app.post(
         address,
         order,
         product,
-        paymentMethod,
-        basePrice,
-        platformFee,
-        totalPrice
+        paymentMethod
       } = req.body;
 
       // ==========================
-      // VALIDATION (UNCHANGED)
+      // FINANCIAL ENGINE (FIXED - NO SERVER CALC PRICE)
+      // ==========================
+      const basePrice = Number(req.body.basePrice || 0);
+
+      
+
+      // ✔ KEEP ONLY COMMISSIONS (SERVER RESPONSIBILITY)
+      const referralCommission = basePrice * 0.02;
+      const adminCommission = basePrice * 0.03;
+
+      // ==========================
+      // SAFE PRODUCT
+      // ==========================
+      const finalOrder = order || product || "";
+
+      // ==========================
+      // VALIDATION
       // ==========================
       if (
         !businessId ||
@@ -2677,8 +2690,15 @@ app.post(
         });
       }
 
-      const finalOrder = order || product || "";
+      // ==========================
+      // COLLECTION
+      // ==========================
+      const Orders =
+        mongoose.connection.collection("business_orders");
 
+      // ==========================
+      // PROOF
+      // ==========================
       let proof = "";
 
       if (req.file) {
@@ -2686,11 +2706,8 @@ app.post(
           `https://api.fondationbackupspirituel.com/fobas_uploads/orders/${req.file.filename}`;
       }
 
-      const Orders =
-        mongoose.connection.collection("business_orders");
-
       // ==========================
-      // INSERT (CLEAN - NO CALCULATION)
+      // INSERT (SAFE + CLEAN)
       // ==========================
       await Orders.insertOne({
 
@@ -2703,19 +2720,38 @@ app.post(
 
         product: finalOrder,
 
+        price: basePrice,
+
         paymentMethod,
 
-        basePrice: Number(basePrice || 0),
-        platformFee: Number(platformFee || 0),
-        totalPrice: Number(totalPrice || 0),
+        referralAgent: req.body.referralAgent || null,
+        whatsapp: req.body.whatsapp || null,
 
         proof,
         status: "pending",
-        createdAt: new Date()
+        createdAt: new Date(),
+
+        // ==========================
+        // FINANCIAL SYSTEM (FROM FRONTEND - NO SERVER RE-CALC)
+        // ==========================
+        financial: {
+          basePrice: Number(req.body.basePrice || 0),
+          platformFee: Number(req.body.platformFee || 0),
+          totalPrice: Number(req.body.totalPrice || 0),
+
+          entrepreneurEarnings: Number(req.body.basePrice || 0),
+
+          referralCommission,
+          adminCommission
+        }
       });
 
+      // 👇 KEEP AS IS (IMPORTANT FOR SYSTEM FLOW)
       await updateAgentProgress(businessId);
 
+      // ==========================
+      // RESPONSE
+      // ==========================
       return res.json({
         success: true,
         message: "Order created"
@@ -2729,7 +2765,6 @@ app.post(
         success: false,
         message: "Internal server error"
       });
-
     }
   }
 );
