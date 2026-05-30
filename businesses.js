@@ -510,18 +510,20 @@ async function submitOrder(businessId){
 
     const formData = new FormData();
 
-    formData.append("businessId", businessId);
-    formData.append("clientName", clientName);
-    formData.append("phone", phone);
-    formData.append("address", address);
-    formData.append("product", orderText);
-    formData.append("paymentMethod", paymentMethod);
-    formData.append("basePrice", totalPrice);
-    formData.append("email", email);
+formData.append("businessId", businessId);
+formData.append("clientName", clientName);
+formData.append("phone", phone);
+formData.append("address", address);
+formData.append("product", orderText);
+formData.append("paymentMethod", paymentMethod);
+formData.append("email", email);
+formData.append("basePrice", subtotal);      // 10000
+formData.append("platformFee", fee);         // 500
+formData.append("totalPrice", total);        // 10500
 
-    if(file){
-      formData.append("proof", file);
-    }
+if (file) {
+  formData.append("proof", file);
+}
 
     const res = await fetch(
       `${API_URL}/business/order`,
