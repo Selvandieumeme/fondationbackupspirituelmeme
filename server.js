@@ -2660,15 +2660,18 @@ app.post(
       } = req.body;
 
       // ==========================
-      // FINANCIAL ENGINE (FIXED - NO SERVER CALC PRICE)
-      // ==========================
-      const basePrice = Number(req.body.basePrice || 0);
+// FINANCIAL ENGINE (SAFE HYBRID MODE)
+// ==========================
 
-      
+const basePrice = Number(req.body.basePrice || 0);
 
-      // ✔ KEEP ONLY COMMISSIONS (SERVER RESPONSIBILITY)
-      const referralCommission = basePrice * 0.02;
-      const adminCommission = basePrice * 0.03;
+// 👇 frontend values (PRIMARY SOURCE)
+const platformFee = Number(req.body.platformFee || 0);
+const totalPrice = Number(req.body.totalPrice || 0);
+
+// 👇 server-only commissions (SAFE)
+const referralCommission = basePrice * 0.02;
+const adminCommission = basePrice * 0.03;
 
       // ==========================
       // SAFE PRODUCT
@@ -2711,25 +2714,29 @@ app.post(
       // ==========================
       await Orders.insertOne({
 
-        orderId: "ORD-" + Date.now(),
+  orderId: "ORD-" + Date.now(),
 
-        businessId,
-        clientName,
-        phone,
-        address,
+  businessId,
+  clientName,
+  phone,
+  address,
 
-        product: finalOrder,
+  product: finalOrder,
 
-        price: basePrice,
+  // ==========================
+  // SAFE PRICE SAN RISK NaN
+  // ==========================
+  price: Number(basePrice) || 0,
 
-        paymentMethod,
+  paymentMethod,
 
-        referralAgent: req.body.referralAgent || null,
-        whatsapp: req.body.whatsapp || null,
+  referralAgent: req.body.referralAgent || null,
+  whatsapp: req.body.whatsapp || null,
 
-        proof,
-        status: "pending",
-        createdAt: new Date(),
+  proof,
+  status: "pending",
+  createdAt: new Date()
+});
 
         // ==========================
         // FINANCIAL SYSTEM (FROM FRONTEND - NO SERVER RE-CALC)
