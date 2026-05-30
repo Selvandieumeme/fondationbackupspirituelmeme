@@ -464,7 +464,7 @@ setProductPrice(price || 1);
 
   requestAnimationFrame(() => {
   updateTotalPrice();
-}
+});
 }
 
 // ==========================
