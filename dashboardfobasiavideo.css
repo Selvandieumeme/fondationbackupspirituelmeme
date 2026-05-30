@@ -1,0 +1,299 @@
+/* =========================
+FOBAS IA VIDEO - PREMIUM UI
+========================= */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Segoe UI", sans-serif;
+}
+
+body {
+  background: linear-gradient(135deg, #0b1b3a, #0f2f6b);
+  color: white;
+  min-height: 100vh;
+}
+
+/* =========================
+TOP BAR
+========================= */
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 25px;
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.logo {
+  font-size: 20px;
+  font-weight: bold;
+  color: #ffd700;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.balance-box {
+  display: flex;
+  gap: 20px;
+  font-size: 14px;
+}
+
+/* =========================
+CONTAINER
+========================= */
+.container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  padding: 20px;
+}
+
+/* =========================
+CARDS (GLASS EFFECT)
+========================= */
+.card {
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(12px);
+  border-radius: 18px;
+  padding: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.card.full {
+  grid-column: span 2;
+}
+
+h2 {
+  margin-bottom: 15px;
+  color: #ffd700;
+}
+
+/* =========================
+INPUTS
+========================= */
+label {
+  font-size: 13px;
+  margin-top: 10px;
+  display: block;
+  opacity: 0.8;
+}
+
+textarea,
+select,
+input {
+  width: 100%;
+  padding: 10px;
+  margin-top: 5px;
+  border-radius: 10px;
+  border: none;
+  outline: none;
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+}
+
+textarea {
+  min-height: 100px;
+  resize: none;
+}
+
+/* =========================
+GRID
+========================= */
+.grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+/* =========================
+BUTTONS
+========================= */
+button {
+  cursor: pointer;
+  border: none;
+  padding: 12px 15px;
+  border-radius: 12px;
+  font-weight: bold;
+  transition: 0.3s ease;
+}
+
+.btn-primary {
+  width: 100%;
+  margin-top: 15px;
+  background: linear-gradient(90deg, #ffd700, #1e90ff);
+  color: #000;
+}
+
+.btn-primary:hover {
+  transform: scale(1.03);
+}
+
+.btn-secondary {
+  background: #1e90ff;
+  color: white;
+  width: 100%;
+  margin-top: 10px;
+}
+
+.btn-danger {
+  background: #ff4d4d;
+  color: white;
+}
+
+/* =========================
+INFO BOX
+========================= */
+.info-box {
+  background: rgba(255, 255, 255, 0.07);
+  padding: 15px;
+  border-radius: 12px;
+  margin-top: 15px;
+}
+
+.info-box.warning {
+  border-left: 4px solid #ffd700;
+}
+
+/* =========================
+COST BOX
+========================= */
+.cost-box {
+  margin-top: 10px;
+  padding: 10px;
+  background: rgba(255, 215, 0, 0.1);
+  border-radius: 10px;
+  border: 1px solid rgba(255, 215, 0, 0.3);
+}
+
+/* =========================
+VIDEO BOX
+========================= */
+.video-box {
+  width: 100%;
+  min-height: 250px;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+/* =========================
+HISTORY
+========================= */
+.history {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.history-item {
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  border-left: 3px solid #1e90ff;
+}
+
+.empty {
+  opacity: 0.6;
+}
+
+/* =========================
+ACTIONS
+========================= */
+.actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+.actions button {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+}
+
+.actions button:hover {
+  background: rgba(30, 144, 255, 0.4);
+}
+
+/* =========================
+MODAL
+========================= */
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal.hidden {
+  display: none;
+}
+
+.modal-box {
+  background: #0f2f6b;
+  padding: 20px;
+  border-radius: 15px;
+  width: 350px;
+  text-align: center;
+}
+
+/* =========================
+LOADER
+========================= */
+.loader {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.8);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.loader.hidden {
+  display: none;
+}
+
+.spinner {
+  width: 50px;
+  height: 50px;
+  border: 5px solid rgba(255,255,255,0.2);
+  border-top: 5px solid #ffd700;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg);}
+  100% { transform: rotate(360deg);}
+}
+
+/* =========================
+RESPONSIVE
+========================= */
+@media (max-width: 900px) {
+  .container {
+    grid-template-columns: 1fr;
+  }
+
+  .card.full {
+    grid-column: span 1;
+  }
+}
