@@ -507,9 +507,6 @@ async function submitOrder(businessId){
     const orderText =
       document.getElementById("clientOrder")?.value?.trim() || "";
 
-  const currentTotal =
-    document.getElementById("currentTotal")?.value || 0;
-
     const email =
       localStorage.getItem("userEmail");
 
@@ -521,48 +518,40 @@ async function submitOrder(businessId){
 
     const formData = new FormData();
 
-formData.append("businessId", businessId);
-formData.append("clientName", clientName);
-formData.append("phone", phone);
-formData.append("address", address);
-formData.append("product", orderText);
-formData.append("paymentMethod", paymentMethod);
-formData.append("email", email);
-formData.append("basePrice", currentSubtotal);
-formData.append("platformFee", currentFee);
-formData.append("totalPrice", currentTotal);
+    formData.append("businessId", businessId);
+    formData.append("clientName", clientName);
+    formData.append("phone", phone);
+    formData.append("address", address);
+    formData.append("product", orderText);
+    formData.append("paymentMethod", paymentMethod);
+    formData.append("email", email);
 
-if (file) {
-  formData.append("proof", file);
-}
+    // ✅ FIXED VALUES (IMPORTANT)
+    formData.append("basePrice", currentSubtotal);
+    formData.append("platformFee", currentFee);
+    formData.append("totalPrice", currentTotal);
 
-    const res = await fetch(
-      `${API_URL}/business/order`,
-      {
-        method: "POST",
-        body: formData
-      }
-    );
+    if (file) {
+      formData.append("proof", file);
+    }
+
+    const res = await fetch(`${API_URL}/business/order`, {
+      method: "POST",
+      body: formData
+    });
 
     const data = await res.json();
 
     if(data.success){
-
       alert("Commande envoyée avec succès");
-
       closeOrderModal();
-
     } else {
-
       alert(data.message || "Erreur commande");
-
     }
 
   } catch(err){
-
     console.error("ORDER ERROR:", err);
     alert("Erreur serveur");
-
   }
 }
 
@@ -626,12 +615,10 @@ function updateTotalPrice() {
   const total =
     subtotal + fee;
 
-  // 🔥 SAVE GLOBAL
   currentSubtotal = subtotal;
   currentFee = fee;
   currentTotal = total;
 
   totalEl.value =
     Math.round(total);
-
 }
