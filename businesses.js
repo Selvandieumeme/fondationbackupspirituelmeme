@@ -462,6 +462,8 @@ setProductPrice(price || 1);
 
   document.body.appendChild(modal);
 
+  requestAnimationFrame(() => {
+  updateTotalPrice();
 }
 
 
