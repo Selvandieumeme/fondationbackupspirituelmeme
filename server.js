@@ -2054,7 +2054,7 @@ multer.diskStorage({
 const imageFileFilter = (req, file, cb) => {
   const ext = path.extname(file.originalname || "").toLowerCase();
 
-  const allowedExt = [".jpg", ".jpeg", ".png", ".webp", ".heic"];
+  const allowedExt = ['.jpg', '.jpeg', '.png', '.webp', '.heic'];
 
   // ✅ ACCEPT BY EXTENSION (most reliable for Android)
   if (allowedExt.includes(ext)) {
