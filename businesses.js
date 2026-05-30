@@ -6,6 +6,15 @@
 const API_URL =
 "https://api.fondationbackupspirituel.com";
 
+// ==========================
+// GLOBAL ORDER VARIABLES (FIX)
+// ==========================
+let currentSubtotal = 0;
+let currentFee = 0;
+let currentTotal = 0;
+
+let currentBusinessProductPrice = 1;
+
 
 // ==========================
 // LOADER
@@ -471,6 +480,8 @@ function closeOrderModal(){
 }
 
 
+
+
 // ==========================
 // SUBMIT ORDER
 // ==========================
@@ -496,8 +507,8 @@ async function submitOrder(businessId){
     const orderText =
       document.getElementById("clientOrder")?.value?.trim() || "";
 
-  const totalPrice =
-    document.getElementById("totalPrice")?.value || 0;
+  const currentTotal =
+    document.getElementById("currentTotal")?.value || 0;
 
     const email =
       localStorage.getItem("userEmail");
@@ -517,9 +528,9 @@ formData.append("address", address);
 formData.append("product", orderText);
 formData.append("paymentMethod", paymentMethod);
 formData.append("email", email);
-formData.append("basePrice", subtotal);      // 10000
-formData.append("platformFee", fee);         // 500
-formData.append("totalPrice", total);        // 10500
+formData.append("basePrice", currentSubtotal);
+formData.append("platformFee", currentFee);
+formData.append("totalPrice", currentTotal);
 
 if (file) {
   formData.append("proof", file);
@@ -580,7 +591,7 @@ function openOrderModalById(id){
 
 
 
-let currentBusinessProductPrice = 1;
+
 
 // ==========================
 // SET PRICE WHEN MODAL OPEN
@@ -606,17 +617,19 @@ function updateTotalPrice() {
   const qty =
     Number(qtyEl.value) || 1;
 
-  // PRIX BASE
   const subtotal =
     currentBusinessProductPrice * qty;
 
-  // FOBAS 5%
   const fee =
     subtotal * 0.05;
 
-  // TOTAL CLIENT
   const total =
     subtotal + fee;
+
+  // 🔥 SAVE GLOBAL
+  currentSubtotal = subtotal;
+  currentFee = fee;
+  currentTotal = total;
 
   totalEl.value =
     Math.round(total);
