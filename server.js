@@ -25,6 +25,18 @@ const Pusher = require('pusher');
 const sharp = require('sharp');
 const fs = require('fs'); // <-- AJOUTE LIG SA A LA OUVÈTI BLOK LA
 const cron = require('node-cron');
+const Queue = require("bull");
+
+
+
+
+
+const videoQueue = new Queue("fobas-video", {
+  redis: {
+    host: process.env.REDIS_HOST,
+    port: Number(process.env.REDIS_PORT)
+  }
+});
 
 
 
@@ -4627,47 +4639,6 @@ app.post("/admin/withdrawals/update", async (req, res) => {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 app.get("/admin/all-products", async (req, res) => {
 
   try {
@@ -4724,14 +4695,6 @@ app.get("/admin/all-products", async (req, res) => {
 
 
 
-
-
-
-
-
-
-
-
 app.get("/fobas/admin/order/:id", async (req, res) => {
   try {
     const Orders = mongoose.connection.collection("business_orders");
@@ -4760,9 +4723,6 @@ app.get("/fobas/admin/order/:id", async (req, res) => {
     });
   }
 });
-
-
-
 
 
 
@@ -4941,6 +4901,266 @@ app.put("/fobas/admin/order-status-flow", async (req, res) => {
     });
   }
 });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// ==========================
+// VIDEO SCHEMA
+// ==========================
+const FobasVideoSchema = new mongoose.Schema({
+  agentId: String,
+  prompt: String,
+  script: String,
+  voicePath: String,
+  videoPath: String,
+  thumbnail: String,
+
+  status: {
+    type: String,
+    default: "pending"
+  },
+
+  progress: {
+    type: Number,
+    default: 0
+  },
+
+  createdAt: {
+    type: Date,
+    default: Date.now
+  }
+});
+
+const FobasVideo =
+  mongoose.models.FobasVideo ||
+  mongoose.model("FobasVideo", FobasVideoSchema);
+
+
+
+
+
+==========================
+2. ROUTE: CREATE VIDEO JOB (NO CRASH VERSION)
+==========================
+app.post("/ia-video/generate", async (req, res) => {
+  try {
+    const { agentId, prompt, duration, language, style } = req.body;
+
+    if (!agentId || !prompt) {
+      return res.status(400).json({ success: false, message: "Missing fields" });
+    }
+
+    const Agent = mongoose.model("agents");
+    const agent = await Agent.findById(agentId);
+
+    if (!agent) {
+      return res.status(404).json({ success: false, message: "Agent not found" });
+    }
+
+    if ((agent.videoCredits || 0) < 1) {
+      return res.status(403).json({ success: false, message: "No credits" });
+    }
+
+    // DEDUCT CREDIT SAFE
+    agent.videoCredits -= 1;
+    await agent.save();
+
+    // CREATE JOB
+    const job = await FobasVideo.create({
+      agentId,
+      prompt,
+      status: "pending",
+      progress: 0
+    });
+
+    // PUSH TO QUEUE (NO BLOCK SERVER)
+    videoQueue.add({ jobId: job._id });
+
+    return res.json({
+      success: true,
+      jobId: job._id,
+      remainingCredits: agent.videoCredits
+    });
+
+  } catch (err) {
+    console.error("GENERATE ERROR:", err);
+    return res.status(500).json({ success: false });
+  }
+});
+
+
+
+==========================
+3. ROUTE: STATUS CHECK
+==========================
+app.get("/ia-video/status/:id", async (req, res) => {
+  try {
+    const job = await FobasVideo.findById(req.params.id);
+
+    if (!job) {
+      return res.status(404).json({ success: false });
+    }
+
+    return res.json({
+      success: true,
+      job
+    });
+
+  } catch (err) {
+    return res.status(500).json({ success: false });
+  }
+});
+
+
+
+==========================
+4. QUEUE WORKER (CORE ENGINE)
+==========================
+videoQueue.process(1, async (job) => {
+  const data = job.data;
+
+  const videoJob = await FobasVideo.findById(data.jobId);
+  if (!videoJob) return;
+
+  try {
+    // STEP 1 - SCRIPT (GROQ HOOK LATER)
+    videoJob.status = "processing";
+    videoJob.progress = 10;
+    await videoJob.save();
+
+    const script = `AI VIDEO: ${videoJob.prompt}`;
+    videoJob.script = script;
+
+    videoJob.progress = 25;
+    await videoJob.save();
+
+    // STEP 2 - VOICE (COQUI PLACEHOLDER)
+    const voicePath = `/fobas_uploads/temp/${videoJob._id}.mp3`;
+    fs.writeFileSync(voicePath, "VOICE_DATA");
+
+    videoJob.voicePath = voicePath;
+    videoJob.progress = 50;
+    await videoJob.save();
+
+    // STEP 3 - VIDEO (FFMPEG SAFE 1GB VPS)
+    const videoPath = `/fobas_uploads/videos/${videoJob._id}.mp4`;
+
+    await new Promise((resolve, reject) => {
+      ffmpeg()
+        .input("color=c=black:s=1280x720:d=5")
+        .inputFormat("lavfi")
+        .output(videoPath)
+        .on("end", resolve)
+        .on("error", reject)
+        .run();
+    });
+
+    videoJob.videoPath = videoPath;
+    videoJob.progress = 85;
+    await videoJob.save();
+
+    // STEP 4 - THUMBNAIL
+    const thumbPath = `/fobas_uploads/thumbnails/${videoJob._id}.jpg`;
+
+    await new Promise((resolve, reject) => {
+      ffmpeg(videoPath)
+        .screenshots({
+          count: 1,
+          filename: path.basename(thumbPath),
+          folder: path.dirname(thumbPath)
+        })
+        .on("end", resolve)
+        .on("error", reject);
+    });
+
+    videoJob.thumbnail = thumbPath;
+    videoJob.progress = 100;
+    videoJob.status = "done";
+
+    await videoJob.save();
+
+  } catch (err) {
+    console.error("PIPELINE ERROR:", err);
+
+    videoJob.status = "error";
+    await videoJob.save();
+  }
+});
+
+
+
+==========================
+5. GROQ SCRIPT (READY HOOK)
+==========================
+async function generateScript(prompt) {
+  return `FOBAS IA VIDEO SCRIPT:
+Topic: ${prompt}
+Intro: Welcome to FOBAS AI Video
+Main: ${prompt}
+Outro: Powered by FOBAS`;
+}
+
+
+
+==========================
+6. AUTO CLEAN (10 JOURS VPS SAFE)
+==========================
+const cron = require("node-cron");
+
+cron.schedule("0 0 * * *", async () => {
+  const limitDate = new Date();
+  limitDate.setDate(limitDate.getDate() - 10);
+
+  const oldVideos = await FobasVideo.find({
+    createdAt: { $lt: limitDate }
+  });
+
+  for (const v of oldVideos) {
+    try {
+      if (v.videoPath) fs.unlinkSync(v.videoPath);
+      if (v.voicePath) fs.unlinkSync(v.voicePath);
+      if (v.thumbnail) fs.unlinkSync(v.thumbnail);
+      await FobasVideo.deleteOne({ _id: v._id });
+    } catch (e) {}
+  }
+
+  console.log("AUTO CLEAN DONE");
+});
+
+
+
+
+
+
 
 
 
