@@ -5387,6 +5387,74 @@ Outro: Powered by FOBAS
 
 
 
+// ==========================
+// AUTO CLEAN JOBS (10 DAYS VPS SAFE)
+// ==========================
+const cron = require("node-cron");
+
+// Prevent multiple cron instances (IMPORTANT for production)
+let isCleaning = false;
+
+cron.schedule("0 0 * * *", async () => {
+  if (isCleaning) {
+    console.log("AUTO CLEAN SKIPPED (already running)");
+    return;
+  }
+
+  isCleaning = true;
+
+  try {
+    const limitDate = new Date();
+    limitDate.setDate(limitDate.getDate() - 10);
+
+    // ==========================
+    // FIND OLD VIDEOS SAFE QUERY
+    // ==========================
+    const oldVideos = await FobasVideo.find({
+      createdAt: { $lt: limitDate }
+    }).lean();
+
+    if (!oldVideos || oldVideos.length === 0) {
+      console.log("AUTO CLEAN: no files to delete");
+      isCleaning = false;
+      return;
+    }
+
+    // ==========================
+    // PROCESS DELETE SAFE LOOP
+    // ==========================
+    for (const v of oldVideos) {
+      try {
+        if (v?.videoPath && fs.existsSync(v.videoPath)) {
+          fs.unlinkSync(v.videoPath);
+        }
+
+        if (v?.voicePath && fs.existsSync(v.voicePath)) {
+          fs.unlinkSync(v.voicePath);
+        }
+
+        if (v?.thumbnail && fs.existsSync(v.thumbnail)) {
+          fs.unlinkSync(v.thumbnail);
+        }
+
+        await FobasVideo.deleteOne({ _id: v._id });
+
+      } catch (fileErr) {
+        console.error("FILE DELETE ERROR:", fileErr);
+        // continue loop (NO CRASH)
+      }
+    }
+
+    console.log(`AUTO CLEAN DONE: ${oldVideos.length} items processed`);
+
+  } catch (err) {
+    console.error("AUTO CLEAN SYSTEM ERROR:", err);
+
+  } finally {
+    isCleaning = false;
+  }
+});
+
 
 
 
