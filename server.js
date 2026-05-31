@@ -5111,6 +5111,63 @@ app.post("/ia-video/generate", async (req, res) => {
 
 
 
+// ==========================
+// IA VIDEO: STATUS CHECK (PRODUCTION SAFE)
+// ==========================
+app.get("/ia-video/status/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // ==========================
+    // VALIDATION SAFE (ObjectId check)
+    // ==========================
+    if (!id) {
+      return res.status(400).json({
+        success: false,
+        message: "Missing job id"
+      });
+    }
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid job id"
+      });
+    }
+
+    // ==========================
+    // FETCH JOB (SAFE MONGOOSE MODEL)
+    // ==========================
+    const job = await FobasVideo.findById(id).lean();
+
+    if (!job) {
+      return res.status(404).json({
+        success: false,
+        message: "Job not found"
+      });
+    }
+
+    // ==========================
+    // RESPONSE SAFE
+    // ==========================
+    return res.json({
+      success: true,
+      job
+    });
+
+  } catch (err) {
+    console.error("VIDEO STATUS ERROR:", err);
+
+    return res.status(500).json({
+      success: false,
+      message: "Server error"
+    });
+  }
+});
+
+
+
+
 
 
 
