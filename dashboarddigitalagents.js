@@ -1141,31 +1141,36 @@ window.addEventListener(
 
 function openFobasIAVideo() {
 
+  // MASTER DATA (safe fallback)
   const fullName =
-    document.getElementById("userName")
-      ?.textContent
-      ?.trim();
+    document.getElementById("userName")?.textContent?.trim() ||
+    sessionStorage.getItem("fobas_fullName");
 
   const role =
-    document.getElementById("userRole")
-      ?.textContent
-      ?.trim();
+    document.getElementById("userRole")?.textContent?.trim() ||
+    sessionStorage.getItem("fobas_role");
+
+  const agentId =
+    sessionStorage.getItem("agentId");
 
   if (!fullName || !role) {
     alert("User data not found");
     return;
   }
 
-  sessionStorage.setItem(
-    "fobas_fullName",
-    fullName
-  );
+  // SAFE CACHE (NO IMPACT ON SYSTEM)
+  sessionStorage.setItem("fobas_fullName", fullName);
+  sessionStorage.setItem("fobas_role", role);
+  sessionStorage.setItem("fobas_agentId", agentId || "");
 
-  sessionStorage.setItem(
-    "fobas_role",
-    role
-  );
+  // OPTIONAL DEBUG SAFE LOG
+  console.log("FOBAS IA VIDEO ACCESS:", {
+    fullName,
+    role,
+    agentId
+  });
 
+  // REDIRECT
   window.location.href =
     "https://fondationbackupspirituel.com/dashboardfobasiavideo";
 }
