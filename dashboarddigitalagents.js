@@ -1122,3 +1122,50 @@ window.addEventListener(
 
   }
 );
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+function openFobasIAVideo() {
+
+  const fullName =
+    document.getElementById("userName")
+      ?.textContent
+      ?.trim();
+
+  const role =
+    document.getElementById("userRole")
+      ?.textContent
+      ?.trim();
+
+  if (!fullName || !role) {
+    alert("User data not found");
+    return;
+  }
+
+  sessionStorage.setItem(
+    "fobas_fullName",
+    fullName
+  );
+
+  sessionStorage.setItem(
+    "fobas_role",
+    role
+  );
+
+  window.location.href =
+    "https://fondationbackupspirituel.com/dashboardfobasiavideo";
+}
