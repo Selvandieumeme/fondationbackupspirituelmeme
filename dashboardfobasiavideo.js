@@ -244,3 +244,31 @@ window.shareTikTok = shareTikTok;
 window.openNatcashModal = openNatcashModal;
 window.closeNatcashModal = closeNatcashModal;
 window.playHistory = playHistory;
+
+
+
+
+
+
+
+
+
+
+
+
+
+window.addEventListener("DOMContentLoaded", () => {
+
+  const fullName =
+    sessionStorage.getItem("fobas_fullName");
+
+  const role =
+    sessionStorage.getItem("fobas_role");
+
+  document.getElementById("userFullName")
+    .textContent = fullName || "Unknown User";
+
+  document.getElementById("userRole")
+    .textContent = role || "Unknown Role";
+
+});
