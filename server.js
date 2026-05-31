@@ -5006,6 +5006,102 @@ const FobasVideo =
 
 
 
+// ==========================
+// IA VIDEO: CREATE JOB (PRODUCTION SAFE)
+// ==========================
+app.post("/ia-video/generate", async (req, res) => {
+  try {
+    const { agentId, prompt, duration, language, style } = req.body;
+
+    // ==========================
+    // VALIDATION SAFE
+    // ==========================
+    if (!agentId || !prompt) {
+      return res.status(400).json({
+        success: false,
+        message: "Missing fields"
+      });
+    }
+
+    // ==========================
+    // AGENT COLLECTION SAFE ACCESS
+    // (konpatib ak sistèm ou ki itilize collection)
+    // ==========================
+    const Agents = mongoose.connection.collection("agents");
+
+    const agent = await Agents.findOne({
+      _id: new mongoose.Types.ObjectId(agentId)
+    });
+
+    if (!agent) {
+      return res.status(404).json({
+        success: false,
+        message: "Agent not found"
+      });
+    }
+
+    // ==========================
+    // CREDIT CHECK SAFE
+    // ==========================
+    if ((agent.videoCredits || 0) < 1) {
+      return res.status(403).json({
+        success: false,
+        message: "No video credits available"
+      });
+    }
+
+    // ==========================
+    // DEDUCT CREDIT (SAFE ATOMIC STYLE)
+    // ==========================
+    await Agents.updateOne(
+      { _id: agent._id },
+      { $inc: { videoCredits: -1 } }
+    );
+
+    // ==========================
+    // CREATE JOB (MONGOOSE MODEL SAFE)
+    // ==========================
+    const job = await FobasVideo.create({
+      agentId: agent._id,
+      prompt,
+      status: "pending",
+      progress: 0,
+
+      // optional metadata (safe for pipeline)
+      duration: duration || null,
+      language: language || "auto",
+      style: style || "default"
+    });
+
+    // ==========================
+    // QUEUE PUSH (SAFE CHECK)
+    // ==========================
+    if (typeof videoQueue !== "undefined") {
+      await videoQueue.add({ jobId: job._id });
+    } else {
+      console.error("VIDEO QUEUE NOT INITIALIZED");
+    }
+
+    // ==========================
+    // RESPONSE
+    // ==========================
+    return res.json({
+      success: true,
+      jobId: job._id,
+      remainingCredits: agent.videoCredits - 1
+    });
+
+  } catch (err) {
+    console.error("IA VIDEO GENERATE ERROR:", err);
+
+    return res.status(500).json({
+      success: false,
+      message: "Server error generating video"
+    });
+  }
+});
+
+
 
 
 
