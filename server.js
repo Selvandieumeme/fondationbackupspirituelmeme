@@ -4985,7 +4985,21 @@ const FobasVideoSchema = new mongoose.Schema(
       default: 0,
       min: 0,
       max: 100
-    }
+    },
+	duration: {
+  type: String,
+  default: ""
+},
+
+language: {
+  type: String,
+  default: "auto"
+},
+
+style: {
+  type: String,
+  default: "default"
+}
   },
   {
     timestamps: true
