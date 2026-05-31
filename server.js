@@ -40,7 +40,7 @@ const videoQueue = new Queue("fobas-video", {
 
 
 
-const Queue = require("bull");
+
 const videoQueue = new Queue("video");
 
 
