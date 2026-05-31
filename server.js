@@ -4934,6 +4934,35 @@ app.put("/fobas/admin/order-status-flow", async (req, res) => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 // ==========================
 // FOBAS VIDEO SCHEMA (FINAL SAFE)
 // ==========================
@@ -5001,8 +5030,14 @@ const FobasVideo =
 
 
 
+
+
+
+
+
+
 // ==========================
-// 2.  IA VIDEO: CREATE JOB (PRODUCTION SAFE)
+// IA VIDEO: CREATE JOB (PRODUCTION SAFE)
 // ==========================
 app.post("/ia-video/generate", async (req, res) => {
   try {
@@ -5097,9 +5132,15 @@ app.post("/ia-video/generate", async (req, res) => {
 });
 
 
-==========================
-3. ROUTE: STATUS CHECK
-==========================
+
+
+
+
+
+
+// ==========================
+// IA VIDEO: STATUS CHECK (PRODUCTION SAFE)
+// ==========================
 app.get("/ia-video/status/:id", async (req, res) => {
   try {
     const { id } = req.params;
@@ -5134,7 +5175,7 @@ app.get("/ia-video/status/:id", async (req, res) => {
     }
 
     // ==========================
-    // 3. RESPONSE SAFE
+    // RESPONSE SAFE
     // ==========================
     return res.json({
       success: true,
@@ -5150,6 +5191,12 @@ app.get("/ia-video/status/:id", async (req, res) => {
     });
   }
 });
+
+
+
+
+
+
 
 
 
@@ -5209,8 +5256,6 @@ videoQueue.process(1, async (job) => {
     videoJob.progress = 50;
     await videoJob.save();
 
-
-	  
     // ==========================
     // STEP 3 - VIDEO GENERATION (SAFE FFMPEG)
     // ==========================
@@ -5236,8 +5281,6 @@ videoQueue.process(1, async (job) => {
     videoJob.progress = 85;
     await videoJob.save();
 
-
-	  
     // ==========================
     // STEP 4 - THUMBNAIL SAFE
     // ==========================
@@ -5282,6 +5325,15 @@ videoQueue.process(1, async (job) => {
   }
 });
 
+
+
+
+
+
+
+
+
+
 // ==========================
 // GROQ SCRIPT GENERATOR (SAFE + PRODUCTION READY)
 // ==========================
@@ -5297,12 +5349,7 @@ async function generateScript(prompt) {
 
     const cleanPrompt = prompt.trim();
 
-    // ==========================
-    // FUTURE HOOK (GROQ API READY)
-    // ==========================
-    // 👉 HERE YOU WILL INJECT REAL GROQ API CALL LATER
-    // const response = await groq.chat.completions.create(...)
-
+   
     // ==========================
     // SAFE FALLBACK SCRIPT (NO CRASH)
     // ==========================
@@ -5323,10 +5370,10 @@ Outro: Powered by FOBAS DIGITAL AGENTS
   } catch (err) {
     console.error("SCRIPT GENERATION ERROR:", err);
 
- // ==========================
-// 5. EMERGENCY FALLBACK (NO CRASH GUARANTEE)
- // ==========================
-return `
+    // ==========================
+    // EMERGENCY FALLBACK (NO CRASH GUARANTEE)
+    // ==========================
+    return `
 FOBAS IA VIDEO SCRIPT
 
 Topic: fallback content
@@ -5339,6 +5386,11 @@ Outro: Powered by FOBAS
 `.trim();
   }
 }
+
+
+
+
+
 
 
 
@@ -5378,11 +5430,8 @@ cron.schedule("0 0 * * *", async () => {
       return;
     }
 
-
-
-	  
     // ==========================
-    // 6.  PROCESS DELETE SAFE LOOP
+    // PROCESS DELETE SAFE LOOP
     // ==========================
     for (const v of oldVideos) {
       try {
@@ -5415,6 +5464,14 @@ cron.schedule("0 0 * * *", async () => {
     isCleaning = false;
   }
 });
+
+
+
+
+
+
+
+
 
 
 
