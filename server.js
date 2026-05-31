@@ -5466,6 +5466,99 @@ cron.schedule("0 0 * * *", async () => {
 
 
 
+// ==========================
+// AUTO CLEAN JOBS (10 DAYS VPS SAFE - FINAL)
+// ==========================
+const cron = require("node-cron");
+const fs = require("fs");
+
+// Prevent multiple cron instances
+let isCleaning = false;
+
+// Guard: ensure model exists
+if (!FobasVideo) {
+  console.error("FobasVideo model not loaded - AUTO CLEAN disabled");
+} else {
+
+  cron.schedule("0 0 * * *", async () => {
+    if (isCleaning) {
+      console.log("AUTO CLEAN SKIPPED (already running)");
+      return;
+    }
+
+    isCleaning = true;
+
+    try {
+      const limitDate = new Date();
+      limitDate.setDate(limitDate.getDate() - 10);
+
+      const oldVideos = await FobasVideo.find({
+        createdAt: { $lt: limitDate }
+      }).lean();
+
+      if (!Array.isArray(oldVideos) || oldVideos.length === 0) {
+        console.log("AUTO CLEAN: no files to delete");
+        return;
+      }
+
+      for (const v of oldVideos) {
+        try {
+          if (v?.videoPath && fs.existsSync(v.videoPath)) {
+            fs.unlinkSync(v.videoPath);
+          }
+
+          if (v?.voicePath && fs.existsSync(v.voicePath)) {
+            fs.unlinkSync(v.voicePath);
+          }
+
+          if (v?.thumbnail && fs.existsSync(v.thumbnail)) {
+            fs.unlinkSync(v.thumbnail);
+          }
+
+          if (v?._id) {
+            await FobasVideo.deleteOne({ _id: v._id });
+          }
+
+        } catch (fileErr) {
+          console.error("FILE DELETE ERROR (SKIP CONTINUE):", fileErr);
+        }
+      }
+
+      console.log(`AUTO CLEAN DONE: ${oldVideos.length} items processed`);
+
+    } catch (err) {
+      console.error("AUTO CLEAN SYSTEM ERROR:", err);
+
+    } finally {
+      isCleaning = false;
+    }
+  });
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
