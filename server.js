@@ -5534,35 +5534,7 @@ cron.schedule("0 0 * * *", async () => {
 
 
 
-app.get("/agents/resolve/:fullName", async (req, res) => {
-  try {
-    const fullName = decodeURIComponent(req.params.fullName);
 
-    const agent = await mongoose.connection
-      .collection("agents")
-      .findOne({ fullName });
-
-    if (!agent) {
-      return res.status(404).json({
-        success: false,
-        message: "Agent not found"
-      });
-    }
-
-    return res.json({
-      success: true,
-      agentId: agent._id,
-      fullName: agent.fullName,
-      role: agent.role,
-      videoCredits: agent.videoCredits,
-      totalCommission: agent.totalCommission
-    });
-
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ success: false });
-  }
-});
 
 
 
