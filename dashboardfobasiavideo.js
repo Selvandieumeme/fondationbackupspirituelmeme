@@ -266,37 +266,23 @@ window.playHistory = playHistory;
 
 
 
+
 async function loadUser() {
   const fullName = sessionStorage.getItem("fobas_fullName");
 
   if (!fullName) return;
 
-  try {
-    const res = await fetch(
-      `${API_URL}/agents/resolve/${encodeURIComponent(fullName)}`
-    );
+  const res = await fetch(
+    `${API_URL}/agents/resolve/${encodeURIComponent(fullName)}`
+  );
 
-    const data = await res.json();
+  const data = await res.json();
 
-    if (!data.success) {
-      console.error("Agent not found");
-      return;
-    }
+  if (!data.success) return;
 
-    currentUser = {
-      fullName: data.fullName,
-      agentId: data.agentId,
-      role: data.role
-    };
-
-    // UPDATE UI IMMEDIATEMENT
-    document.getElementById("videoCredits").innerText =
-      data.videoCredits || 0;
-
-    document.getElementById("totalCommission").innerText =
-      `${data.totalCommission || 0} HTG`;
-
-  } catch (err) {
-    console.error("LOAD USER ERROR:", err);
-  }
+  currentUser = {
+    fullName,
+    role: sessionStorage.getItem("fobas_role"),
+    agentId: data.agentId // hidden only
+  };
 }
