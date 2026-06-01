@@ -267,22 +267,13 @@ window.playHistory = playHistory;
 
 
 
-async function loadUser() {
+window.addEventListener("DOMContentLoaded", () => {
   const fullName = sessionStorage.getItem("fobas_fullName");
+  const role = sessionStorage.getItem("fobas_role");
 
-  if (!fullName) return;
+  document.getElementById("userFullName").textContent =
+    fullName || "Unknown User";
 
-  const res = await fetch(
-    `${API_URL}/agents/resolve/${encodeURIComponent(fullName)}`
-  );
-
-  const data = await res.json();
-
-  if (!data.success) return;
-
-  currentUser = {
-    fullName,
-    role: sessionStorage.getItem("fobas_role"),
-    agentId: data.agentId // hidden only
-  };
-}
+  document.getElementById("userRole").textContent =
+    role || "Unknown Role";
+});
