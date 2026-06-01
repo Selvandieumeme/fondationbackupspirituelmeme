@@ -5036,42 +5036,54 @@ app.post("/ia-video/generate", async (req, res) => {
         message: "Missing fields"
       });
     }
+	  
+	// ==========================
+// PAYMENT CONFIG (SAFE PLACE)
+// ==========================
+const VIDEO_PRICE_CREDITS = 1;
+const VIDEO_PRICE_COMMISSION = 100;
 
-    // ==========================
-    // AGENT COLLECTION SAFE ACCESS
-    // (konpatib ak sistèm ou ki itilize collection)
-    // ==========================
-    const Agents = mongoose.connection.collection("agents");
+	  
+    let paymentMethod = null;
 
-    const agent = await Agents.findOne({
-      _id: new mongoose.Types.ObjectId(agentId)
-    });
+// ==========================
+// 1. PRIORITY: VIDEO CREDITS
+// ==========================
+if ((agent.videoCredits || 0) >= VIDEO_PRICE_CREDITS) {
 
-    if (!agent) {
-      return res.status(404).json({
-        success: false,
-        message: "Agent not found"
-      });
-    }
+  paymentMethod = "credits";
 
-    // ==========================
-    // CREDIT CHECK SAFE
-    // ==========================
-    if ((agent.videoCredits || 0) < 1) {
-      return res.status(403).json({
-        success: false,
-        message: "No video credits available"
-      });
-    }
+  await Agents.updateOne(
+    { _id: agent._id },
+    { $inc: { videoCredits: -VIDEO_PRICE_CREDITS } }
+  );
 
-    // ==========================
-    // DEDUCT CREDIT (SAFE ATOMIC STYLE)
-    // ==========================
-    await Agents.updateOne(
-      { _id: agent._id },
-      { $inc: { videoCredits: -1 } }
-    );
+}
 
+// ==========================
+// 2. FALLBACK: TOTAL COMMISSION
+// ==========================
+else if ((agent.totalCommission || 0) >= VIDEO_PRICE_COMMISSION) {
+
+  paymentMethod = "commission";
+
+  await Agents.updateOne(
+    { _id: agent._id },
+    { $inc: { totalCommission: -VIDEO_PRICE_COMMISSION } }
+  );
+
+}
+
+// ==========================
+// 3. BLOCK IF NO FUNDS
+// ==========================
+else {
+  return res.status(403).json({
+    success: false,
+    message: "No credits or commission available"
+  });
+}
+    
     // ==========================
     // CREATE JOB (MONGOOSE MODEL SAFE)
     // ==========================
