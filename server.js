@@ -4986,6 +4986,13 @@ const FobasVideoSchema = new mongoose.Schema(
       min: 0,
       max: 100
     },
+
+	paymentMethod: {
+  type: String,
+  enum: ["credits", "commission"],
+  default: "credits"
+},
+	  
 	duration: {
   type: String,
   default: ""
@@ -5036,8 +5043,26 @@ app.post("/ia-video/generate", async (req, res) => {
         message: "Missing fields"
       });
     }
-	  
+
 	// ==========================
+// AGENT COLLECTION SAFE ACCESS
+// ==========================
+const Agents =
+  mongoose.connection.collection("agents");
+
+const agent =
+  await Agents.findOne({
+    _id: new mongoose.Types.ObjectId(agentId)
+  });
+
+if (!agent) {
+  return res.status(404).json({
+    success: false,
+    message: "Agent not found"
+  });
+}
+	  
+// ==========================
 // PAYMENT CONFIG (SAFE PLACE)
 // ==========================
 const VIDEO_PRICE_CREDITS = 1;
@@ -5089,15 +5114,17 @@ else {
     // ==========================
     const job = await FobasVideo.create({
       agentId: agent._id,
-      prompt,
-      status: "pending",
-      progress: 0,
+  prompt,
+  status: "pending",
+  progress: 0,
 
-      // optional metadata (safe for pipeline)
-      duration: duration || null,
-      language: language || "auto",
-      style: style || "default"
-    });
+  paymentMethod, // 🔥 IMPORTANT FIX
+
+  duration: duration || null,
+  language: language || "auto",
+  style: style || "default"
+});
+
 
     // ==========================
     // QUEUE PUSH (SAFE CHECK)
@@ -5112,10 +5139,22 @@ else {
     // RESPONSE
     // ==========================
     return res.json({
-      success: true,
-      jobId: job._id,
-      remainingCredits: agent.videoCredits - 1
-    });
+  success: true,
+
+  jobId: job._id,
+
+  remainingCredits:
+    paymentMethod === "credits"
+      ? (agent.videoCredits || 0) - VIDEO_PRICE_CREDITS
+      : (agent.videoCredits || 0),
+
+  remainingCommission:
+    paymentMethod === "commission"
+      ? (agent.totalCommission || 0) - VIDEO_PRICE_COMMISSION
+      : (agent.totalCommission || 0),
+
+  paymentMethod
+});
 
   } catch (err) {
     console.error("IA VIDEO GENERATE ERROR:", err);
