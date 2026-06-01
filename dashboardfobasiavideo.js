@@ -257,18 +257,46 @@ window.playHistory = playHistory;
 
 
 
-window.addEventListener("DOMContentLoaded", () => {
 
-  const fullName =
-    sessionStorage.getItem("fobas_fullName");
 
-  const role =
-    sessionStorage.getItem("fobas_role");
 
-  document.getElementById("userFullName")
-    .textContent = fullName || "Unknown User";
 
-  document.getElementById("userRole")
-    .textContent = role || "Unknown Role";
 
-});
+
+
+
+
+async function loadUser() {
+  const fullName = sessionStorage.getItem("fobas_fullName");
+
+  if (!fullName) return;
+
+  try {
+    const res = await fetch(
+      `${API_URL}/agents/resolve/${encodeURIComponent(fullName)}`
+    );
+
+    const data = await res.json();
+
+    if (!data.success) {
+      console.error("Agent not found");
+      return;
+    }
+
+    currentUser = {
+      fullName: data.fullName,
+      agentId: data.agentId,
+      role: data.role
+    };
+
+    // UPDATE UI IMMEDIATEMENT
+    document.getElementById("videoCredits").innerText =
+      data.videoCredits || 0;
+
+    document.getElementById("totalCommission").innerText =
+      `${data.totalCommission || 0} HTG`;
+
+  } catch (err) {
+    console.error("LOAD USER ERROR:", err);
+  }
+}
