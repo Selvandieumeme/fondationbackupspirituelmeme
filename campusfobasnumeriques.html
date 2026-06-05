@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FOBAS DIGITAL AGENTS ACADEMYC</title>
+
+    <link rel="stylesheet" href="campusfobasnumeriques.css">
+</head>
+<body>
+
+<header class="hero">
+
+    <div class="hero-overlay"></div>
+
+    <div class="hero-content">
+
+        <h1>FOBAS DIGITAL AGENTS ACADEMYC</h1>
+
+        <h2>Campus Numérique Intelligent</h2>
+
+        <p>
+            Plateforme académique numérique destinée aux étudiants,
+            professeurs, directeurs et agents.
+        </p>
+
+    </div>
+
+</header>
+
+<section class="language-section">
+
+    <div class="language-selector">
+
+        <button type="button" data-lang="fr">
+            Français
+        </button>
+
+        <button type="button" data-lang="en">
+            English
+        </button>
+
+        <button type="button" data-lang="es">
+            Español
+        </button>
+
+    </div>
+
+</section>
+
+<section class="registration-container">
+
+    <div class="registration-card">
+
+        <h2>Créer un compte</h2>
+
+        <p>
+            Sélectionnez votre profil pour commencer.
+        </p>
+
+        <div class="profile-selector">
+
+            <label>
+                <input
+                    type="radio"
+                    name="role"
+                    value="etudiant">
+                Étudiant
+            </label>
+
+            <label>
+                <input
+                    type="radio"
+                    name="role"
+                    value="directeur">
+                Directeur
+            </label>
+
+            <label>
+                <input
+                    type="radio"
+                    name="role"
+                    value="professeur">
+                Professeur
+            </label>
+
+            <label>
+                <input
+                    type="radio"
+                    name="role"
+                    value="agent">
+                Agent
+            </label>
+
+        </div>
+
+        <div id="formMessage"></div>
+
+        <!-- ETUDIANT -->
+
+        <form id="etudiantForm" class="dynamic-form hidden">
+
+            <h3>Étudiant</h3>
+
+            <input type="text" name="nomComplet" placeholder="Nom complet">
+
+            <input type="text" name="whatsapp" placeholder="WhatsApp">
+
+            <input type="email" name="email" placeholder="Email">
+
+            <input type="text" name="pays" placeholder="Pays">
+
+            <input type="text" name="ville" placeholder="Ville">
+
+            <input type="text" name="nomInstitution" placeholder="Nom d'Institution">
+
+            <input type="text" name="nomDirecteur" placeholder="Nom du Directeur">
+
+            <input type="text" name="nomProfesseur" placeholder="Nom du Professeur">
+
+            <input type="text" name="niveauEtude" placeholder="Niveau d'Étude">
+
+            <select name="parcoursAcademique">
+
+                <option value="">
+                    Parcours Académique
+                </option>
+
+                <option>Informatique Fondamentale</option>
+                <option>Bureautique Professionnelle</option>
+                <option>Word Expert</option>
+                <option>Excel Expert</option>
+                <option>PowerPoint Expert</option>
+                <option>Access Expert</option>
+                <option>Windows Professionnel</option>
+                <option>Intelligence Artificielle</option>
+                <option>Cybersécurité</option>
+                <option>Développement Web</option>
+                <option>Développement Mobile</option>
+                <option>Programmation Python</option>
+                <option>Programmation JavaScript</option>
+                <option>Cloud Computing</option>
+                <option>Data Science</option>
+                <option>Marketing Digital</option>
+                <option>UI/UX Design</option>
+                <option>Comptabilité</option>
+                <option>Gestion</option>
+                <option>Entrepreneuriat Numérique</option>
+                <option>English Professional</option>
+                <option>Español Profesional</option>
+
+            </select>
+
+            <div class="password-field">
+
+                <input
+                    type="password"
+                    name="password"
+                    placeholder="Mot de passe">
+
+                <button type="button"
+                        class="toggle-password">
+                    👁
+                </button>
+
+            </div>
+
+            <div class="password-field">
+
+                <input
+                    type="password"
+                    name="confirmPassword"
+                    placeholder="Confirmation Mot de passe">
+
+                <button type="button"
+                        class="toggle-password">
+                    👁
+                </button>
+
+            </div>
+
+            <button type="submit">
+                Créer mon compte
+            </button>
+
+        </form>
+
+        <!-- DIRECTEUR -->
+
+        <form id="directeurForm" class="dynamic-form hidden">
+
+            <h3>Directeur</h3>
+
+            <!-- champs directeur -->
+
+            <div id="directeurFields"></div>
+
+            <button type="submit">
+                Créer mon compte
+            </button>
+
+        </form>
+
+        <!-- PROFESSEUR -->
+
+        <form id="professeurForm" class="dynamic-form hidden">
+
+            <h3>Professeur</h3>
+
+            <!-- champs professeur -->
+
+            <div id="professeurFields"></div>
+
+            <button type="submit">
+                Créer mon compte
+            </button>
+
+        </form>
+
+        <!-- AGENT -->
+
+        <form id="agentForm" class="dynamic-form hidden">
+
+            <h3>Agent</h3>
+
+            <!-- champs agent -->
+
+            <div id="agentFields"></div>
+
+            <button type="submit">
+                Créer mon compte
+            </button>
+
+        </form>
+
+    </div>
+
+</section>
+
+<footer>
+
+    <p>
+        © FOBAS DIGITAL AGENTS ACADEMYC
+    </p>
+
+</footer>
+
+<script src="campusfobasnumeriques.js"></script>
+
+</body>
+</html>
