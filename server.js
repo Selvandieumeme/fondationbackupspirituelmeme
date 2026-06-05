@@ -5608,17 +5608,49 @@ const academiqueSchema = new mongoose.Schema({
         trim: true
     },
 
-    pays: String,
-    ville: String,
+    pays: {
+        type: String,
+        default: null
+    },
 
-    nomInstitution: String,
-    nomDirecteur: String,
-    nomProfesseur: String,
+    ville: {
+        type: String,
+        default: null
+    },
 
-    niveauEtude: String,
-    parcoursAcademique: String,
+    // =====================================
+    // ETUDIANT / DIRECTEUR / PROFESSEUR
+    // =====================================
 
-    typeInstitution: String,
+    nomInstitution: {
+        type: String,
+        default: null
+    },
+
+    nomDirecteur: {
+        type: String,
+        default: null
+    },
+
+    nomProfesseur: {
+        type: String,
+        default: null
+    },
+
+    niveauEtude: {
+        type: String,
+        default: null
+    },
+
+    parcoursAcademique: {
+        type: String,
+        default: null
+    },
+
+    typeInstitution: {
+        type: String,
+        default: null
+    },
 
     nombreProfesseurs: {
         type: Number,
@@ -5630,13 +5662,28 @@ const academiqueSchema = new mongoose.Schema({
         default: []
     },
 
-    domaineEnseignement: String,
-    niveauExperience: String,
+    domaineEnseignement: {
+        type: String,
+        default: null
+    },
+
+    niveauExperience: {
+        type: String,
+        default: null
+    },
+
+    // =====================================
+    // AUTH
+    // =====================================
 
     passwordHash: {
         type: String,
         required: true
     },
+
+    // =====================================
+    // CAMPUS
+    // =====================================
 
     campusLanguage: {
         type: String,
@@ -5673,8 +5720,12 @@ const academiqueSchema = new mongoose.Schema({
     timestamps: true
 });
 
-const Academique = mongoose.models.Academique ||
-    mongoose.model("Academique", academiqueSchema);
+const Academique =
+    mongoose.models.Academique ||
+    mongoose.model(
+        "Academique",
+        academiqueSchema
+    );
 
 
 
@@ -5694,6 +5745,7 @@ app.post("/academiques/register", async (req, res) => {
             pays,
             ville,
 
+            // ETUDIANT
             nomInstitution,
             nomDirecteur,
             nomProfesseur,
@@ -5701,12 +5753,14 @@ app.post("/academiques/register", async (req, res) => {
             niveauEtude,
             parcoursAcademique,
 
+            // DIRECTEUR + PROFESSEUR
+            institution,
+            directeur,
+            domaine,
+            experience,
+
             typeInstitution,
             nombreProfesseurs,
-            professeurs,
-
-            domaineEnseignement,
-            niveauExperience,
 
             password,
             confirmPassword
@@ -5757,6 +5811,21 @@ app.post("/academiques/register", async (req, res) => {
         }
 
         // =====================================
+        // CONSTRUCTION LISTE PROFESSEURS
+        // =====================================
+
+        const professeurs = [];
+
+        Object.keys(req.body).forEach((key) => {
+            if (
+                key.startsWith("professeur_") &&
+                req.body[key]
+            ) {
+                professeurs.push(req.body[key]);
+            }
+        });
+
+        // =====================================
         // VALIDATION ROLE
         // =====================================
 
@@ -5782,7 +5851,7 @@ app.post("/academiques/register", async (req, res) => {
             case "directeur":
 
                 if (
-                    !nomInstitution ||
+                    !institution ||
                     !typeInstitution ||
                     nombreProfesseurs === undefined ||
                     nombreProfesseurs === null
@@ -5794,8 +5863,8 @@ app.post("/academiques/register", async (req, res) => {
                 }
 
                 if (
-                    !Array.isArray(professeurs) ||
-                    professeurs.length < Number(nombreProfesseurs)
+                    professeurs.length <
+                    Number(nombreProfesseurs)
                 ) {
                     return res.status(400).json({
                         success: false,
@@ -5803,24 +5872,15 @@ app.post("/academiques/register", async (req, res) => {
                     });
                 }
 
-                for (let i = 0; i < Number(nombreProfesseurs); i++) {
-                    if (!professeurs[i]) {
-                        return res.status(400).json({
-                            success: false,
-                            message: `Professor ${i + 1} missing`
-                        });
-                    }
-                }
-
                 break;
 
             case "professeur":
 
                 if (
-                    !nomInstitution ||
-                    !nomDirecteur ||
-                    !domaineEnseignement ||
-                    !niveauExperience
+                    !institution ||
+                    !directeur ||
+                    !domaine ||
+                    !experience
                 ) {
                     return res.status(400).json({
                         success: false,
@@ -5832,10 +5892,7 @@ app.post("/academiques/register", async (req, res) => {
 
             case "agent":
 
-                if (
-                    !pays ||
-                    !ville
-                ) {
+                if (!pays || !ville) {
                     return res.status(400).json({
                         success: false,
                         message: "Agent information incomplete"
@@ -5877,26 +5934,28 @@ app.post("/academiques/register", async (req, res) => {
             pays: pays || null,
             ville: ville || null,
 
-            nomInstitution: nomInstitution || null,
-            nomDirecteur: nomDirecteur || null,
+            // ETUDIANT
+            nomInstitution: nomInstitution || institution || null,
+            nomDirecteur: nomDirecteur || directeur || null,
             nomProfesseur: nomProfesseur || null,
 
             niveauEtude: niveauEtude || null,
             parcoursAcademique: parcoursAcademique || null,
 
+            // DIRECTEUR
             typeInstitution: typeInstitution || null,
 
-            nombreProfesseurs: Number(nombreProfesseurs) || 0,
+            nombreProfesseurs:
+                Number(nombreProfesseurs) || 0,
 
-            professeurs: Array.isArray(professeurs)
-                ? professeurs
-                : [],
+            professeurs,
 
+            // PROFESSEUR
             domaineEnseignement:
-                domaineEnseignement || null,
+                domaine || null,
 
             niveauExperience:
-                niveauExperience || null,
+                experience || null,
 
             passwordHash,
 
@@ -5914,10 +5973,6 @@ app.post("/academiques/register", async (req, res) => {
         });
 
         await academique.save();
-
-        // =====================================
-        // SUCCESS
-        // =====================================
 
         return res.status(201).json({
             success: true,
@@ -5938,7 +5993,6 @@ app.post("/academiques/register", async (req, res) => {
         });
     }
 });
-
 
 
 
