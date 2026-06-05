@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>
+        FOBAS DIGITAL AGENTS ACADEMY | CampusNumérique
+    </title>
+
+    <link rel="stylesheet" href="campusnumeriques.css">
+
+</head>
+
+<body>
+
+    <!-- ========================= -->
+    <!-- HEADER GLOBAL -->
+    <!-- ========================= -->
+
+    <header id="campusHeader">
+
+        <div class="campus-logo">
+
+            <h1>
+                FOBAS DIGITAL AGENTS ACADEMY
+            </h1>
+
+            <span>
+                CampusNumérique
+            </span>
+
+        </div>
+
+        <div class="campus-top-actions">
+
+            <div class="language-switcher">
+
+                <button data-lang="fr">
+                    Français
+                </button>
+
+                <button data-lang="en">
+                    English
+                </button>
+
+                <button data-lang="es">
+                    Español
+                </button>
+
+            </div>
+
+            <div class="top-buttons">
+
+                <button id="notificationBtn">
+                    Notifications
+                </button>
+
+                <button id="logoutBtn">
+                    Déconnexion
+                </button>
+
+            </div>
+
+        </div>
+
+    </header>
+
+    <!-- ========================= -->
+    <!-- HERO CAMPUS -->
+    <!-- ========================= -->
+
+    <section id="campusHero">
+
+        <div class="hero-left">
+
+            <h2 id="welcomeText">
+                Bienvenue sur CampusNumérique
+            </h2>
+
+            <p id="campusSubtitle">
+                Plateforme Académique Intelligente
+            </p>
+
+        </div>
+
+        <div class="hero-right">
+
+            <div class="profile-card">
+
+                <div class="profile-photo-container">
+
+                    <img
+                        id="profilePhoto"
+                        src=""
+                        alt="Photo Profil">
+
+                </div>
+
+                <h3 id="userFullName">
+                    Utilisateur
+                </h3>
+
+                <p id="userRole">
+                    Role
+                </p>
+
+            </div>
+
+        </div>
+
+    </section>
+
+    <!-- ========================= -->
+    <!-- PROGRESSION -->
+    <!-- ========================= -->
+
+    <section id="campusProgression">
+
+        <div id="studentProgressionCard"></div>
+
+        <div id="agentProgressionCard"></div>
+
+        <div id="teacherProgressionCard"></div>
+
+        <div id="directorProgressionCard"></div>
+
+    </section>
+
+    <!-- ========================= -->
+    <!-- LAYOUT PRINCIPAL -->
+    <!-- ========================= -->
+
+    <div id="campusLayout">
+
+        <!-- ========================= -->
+        <!-- SIDEBAR -->
+        <!-- ========================= -->
+
+        <aside id="campusSidebar">
+
+            <!-- MENU DYNAMIQUE -->
+
+        </aside>
+
+        <!-- ========================= -->
+        <!-- CONTENU -->
+        <!-- ========================= -->
+
+        <main id="campusMainContent">
+
+            <!-- ========================= -->
+            <!-- WIDGETS -->
+            <!-- ========================= -->
+
+            <section id="campusWidgets">
+
+                <div id="formationsWidget"></div>
+
+                <div id="examensWidget"></div>
+
+                <div id="certificatsWidget"></div>
+
+                <div id="aiWidget"></div>
+
+                <div id="notificationsWidget"></div>
+
+            </section>
+
+            <!-- ========================= -->
+            <!-- CONTENU DYNAMIQUE -->
+            <!-- ========================= -->
+
+            <section id="campusContent">
+
+            </section>
+
+        </main>
+
+    </div>
+
+    <!-- ========================= -->
+    <!-- PANNEAU ACTUALITÉS -->
+    <!-- ========================= -->
+
+    <section id="campusNews">
+
+        <h2>
+            Actualités Campus
+        </h2>
+
+        <div id="newsContainer"></div>
+
+    </section>
+
+    <!-- ========================= -->
+    <!-- PUBLICITÉS -->
+    <!-- ========================= -->
+
+    <section id="campusAds">
+
+        <h2>
+            Informations & Publicités
+        </h2>
+
+        <div id="adsContainer"></div>
+
+    </section>
+
+    <!-- ========================= -->
+    <!-- CLASSEMENTS -->
+    <!-- ========================= -->
+
+    <section id="campusRankings">
+
+        <div class="ranking-card">
+
+            <h3>
+                Top 10 Institutions
+            </h3>
+
+            <div id="topInstitutions"></div>
+
+        </div>
+
+        <div class="ranking-card">
+
+            <h3>
+                Top 10 Étudiants
+            </h3>
+
+            <div id="topStudents"></div>
+
+        </div>
+
+        <div class="ranking-card">
+
+            <h3>
+                Top 10 Agents
+            </h3>
+
+            <div id="topAgents"></div>
+
+        </div>
+
+        <div class="ranking-card">
+
+            <h3>
+                Top 10 Professeurs
+            </h3>
+
+            <div id="topTeachers"></div>
+
+        </div>
+
+    </section>
+
+    <!-- ========================= -->
+    <!-- MODALES -->
+    <!-- ========================= -->
+
+    <div id="notificationModal"></div>
+
+    <div id="profileModal"></div>
+
+    <div id="languageModal"></div>
+
+    <div id="photoModal"></div>
+
+    <!-- ========================= -->
+    <!-- PAGES INTERNES -->
+    <!-- ========================= -->
+
+    <section id="formationsPage" hidden></section>
+
+    <section id="progressionPage" hidden></section>
+
+    <section id="examensPage" hidden></section>
+
+    <section id="certificatsPage" hidden></section>
+
+    <section id="professeurIAPage" hidden></section>
+
+    <section id="laboratoiresPage" hidden></section>
+
+    <section id="profilPage" hidden></section>
+
+    <section id="institutionsPage" hidden></section>
+
+    <section id="revenusPage" hidden></section>
+
+    <section id="parrainagePage" hidden></section>
+
+    <section id="etudiantsPage" hidden></section>
+
+    <section id="classesPage" hidden></section>
+
+    <section id="professeursPage" hidden></section>
+
+    <section id="rapportsPage" hidden></section>
+
+    <!-- ========================= -->
+    <!-- FOOTER -->
+    <!-- ========================= -->
+
+    <footer id="campusFooter">
+
+        <h3>
+            FOBAS DIGITAL AGENTS ACADEMY
+        </h3>
+
+        <p>
+            Campus Numérique International
+        </p>
+
+        <p>
+            © Tous droits réservés 2026
+        </p>
+
+    </footer>
+
+    <script src="campusnumeriques.js"></script>
+
+</body>
+
+</html>
