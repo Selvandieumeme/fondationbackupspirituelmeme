@@ -50,6 +50,55 @@ const translations = {
 let currentLanguage =
   localStorage.getItem("fobasAcademyLanguage") || "fr";
 
+
+
+function applyLanguage() {
+
+  const pageTexts = {
+
+    fr: {
+      title: "Créer un compte",
+      subtitle:
+        "Sélectionnez votre profil pour commencer."
+    },
+
+    en: {
+      title: "Create Account",
+      subtitle:
+        "Select your profile to begin."
+    },
+
+    es: {
+      title: "Crear Cuenta",
+      subtitle:
+        "Seleccione su perfil para comenzar."
+    }
+  };
+
+  const registrationTitle =
+    document.querySelector(
+      ".registration-card h2"
+    );
+
+  const registrationText =
+    document.querySelector(
+      ".registration-card p"
+    );
+
+  if (registrationTitle) {
+    registrationTitle.textContent =
+      pageTexts[currentLanguage].title;
+  }
+
+  if (registrationText) {
+    registrationText.textContent =
+      pageTexts[currentLanguage].subtitle;
+  }
+}
+
+
+
+
 // =====================================
 // MESSAGE BOX
 // =====================================
@@ -71,24 +120,39 @@ function showMessage(message, type = "info") {
 // =====================================
 
 function initializeLanguageSystem() {
+
+  applyLanguage();
+
   const buttons =
-    document.querySelectorAll("[data-lang]");
+    document.querySelectorAll(
+      "[data-lang]"
+    );
 
   buttons.forEach((btn) => {
-    btn.addEventListener("click", () => {
-      currentLanguage = btn.dataset.lang;
 
-      localStorage.setItem(
-        "fobasAcademyLanguage",
-        currentLanguage
-      );
+    btn.addEventListener(
+      "click",
+      () => {
 
-      showMessage(
-        `Language: ${currentLanguage.toUpperCase()}`,
-        "success"
-      );
-    });
+        currentLanguage =
+          btn.dataset.lang;
+
+        localStorage.setItem(
+          "fobasAcademyLanguage",
+          currentLanguage
+        );
+
+        applyLanguage();
+
+        showMessage(
+          `Language: ${currentLanguage.toUpperCase()}`,
+          "success"
+        );
+      }
+    );
+
   });
+
 }
 
 // =====================================
@@ -198,7 +262,7 @@ function generateDirectorForm() {
             placeholder="Email">
 
         <input type="text"
-            name="nominstitution"
+            name="nomInstitution"
             placeholder="Nom de l'Institution">
 
         <select name="typeInstitution">
@@ -376,11 +440,11 @@ function generateProfesseurForm() {
             placeholder="Email">
 
         <input type="text"
-            name="nominstitution"
+            name="nomInstitution"
             placeholder="Nom de l'Institution">
 
         <input type="text"
-            name="nomdirecteur"
+            name="nomDirecteur"
             placeholder="Nom du Directeur">
 
         <select name="domaineEnseignement">
@@ -561,12 +625,15 @@ function validatePasswords(form) {
 // =====================================
 
 async function submitForm(form) {
+
   if (!validatePasswords(form)) {
+
     showMessage(
       translations[currentLanguage]
         .passwordMismatch,
       "error"
     );
+
     return;
   }
 
@@ -575,44 +642,96 @@ async function submitForm(form) {
       new FormData(form).entries()
     );
 
-const selectedRole =
-  document.querySelector(
-    'input[name="role"]:checked'
-  );
+  const selectedRole =
+    document.querySelector(
+      'input[name="role"]:checked'
+    );
 
-if (!selectedRole) {
-  showMessage(
-    translations[currentLanguage]
-      .roleRequired,
-    "error"
-  );
-  return;
-}
+  if (!selectedRole) {
 
-data.role = selectedRole.value;
+    showMessage(
+      translations[currentLanguage]
+        .roleRequired,
+      "error"
+    );
+
+    return;
+  }
+
+  data.role =
+    selectedRole.value;
+
+  // =====================================
+  // DIRECTEUR -> PROFESSEURS ARRAY
+  // =====================================
+
+  if (data.role === "directeur") {
+
+    data.professeurs = [];
+
+    Object.keys(data).forEach(
+      (key) => {
+
+        if (
+          key.startsWith(
+            "professeur_"
+          )
+        ) {
+
+          if (
+            data[key] &&
+            data[key].trim()
+          ) {
+
+            data.professeurs.push(
+              data[key].trim()
+            );
+          }
+
+          delete data[key];
+        }
+
+        if (
+          key.startsWith(
+            "domaine_"
+          )
+        ) {
+
+          delete data[key];
+        }
+      }
+    );
+  }
 
   try {
+
     console.log(
       "FOBAS DATA",
       data
     );
 
-    const response = await fetch(
-      `${API_BASE_URL}/academiques/register`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type":
-            "application/json"
-        },
-        body: JSON.stringify(data)
-      }
-    );
+    const response =
+      await fetch(
+        `${API_BASE_URL}/academiques/register`,
+        {
+          method: "POST",
+
+          headers: {
+            "Content-Type":
+              "application/json"
+          },
+
+          body: JSON.stringify(
+            data
+          )
+        }
+      );
 
     const result =
       await response.json();
 
     if (!response.ok) {
+
       throw new Error(
         result.message ||
         "Registration failed"
@@ -621,14 +740,16 @@ data.role = selectedRole.value;
 
     showMessage(
       result.message ||
-      translations[currentLanguage]
-        .success,
+      translations[
+        currentLanguage
+      ].success,
       "success"
     );
 
     form.reset();
 
   } catch (error) {
+
     console.error(error);
 
     showMessage(
