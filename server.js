@@ -5814,16 +5814,10 @@ app.post("/academiques/register", async (req, res) => {
         // CONSTRUCTION LISTE PROFESSEURS
         // =====================================
 
-        const professeurs = [];
-
-        Object.keys(req.body).forEach((key) => {
-            if (
-                key.startsWith("professeur_") &&
-                req.body[key]
-            ) {
-                professeurs.push(req.body[key]);
-            }
-        });
+        const professeurs =
+    Array.isArray(req.body.professeurs)
+        ? req.body.professeurs
+        : [];
 
         // =====================================
         // VALIDATION ROLE
@@ -5863,14 +5857,15 @@ case "directeur":
     }
 
     if (
-        professeurs.length <
-        Number(nombreProfesseurs)
-    ) {
-        return res.status(400).json({
-            success: false,
-            message: "Professors list incomplete"
-        });
-    }
+    Number(nombreProfesseurs) > 0 &&
+    professeurs.length !==
+    Number(nombreProfesseurs)
+) {
+    return res.status(400).json({
+        success: false,
+        message: "Professors list incomplete"
+    });
+}
 
     break;
 
