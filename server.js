@@ -5738,33 +5738,33 @@ app.post("/academiques/register", async (req, res) => {
     try {
 
         const {
-            role,
-            nomComplet,
-            whatsapp,
-            email,
-            pays,
-            ville,
+    role,
+    nomComplet,
+    whatsapp,
+    email,
+    pays,
+    ville,
 
-            // ETUDIANT
-            nomInstitution,
-            nomDirecteur,
-            nomProfesseur,
+    // ETUDIANT
+    nomInstitution,
+    nomDirecteur,
+    nomProfesseur,
 
-            niveauEtude,
-            parcoursAcademique,
+    niveauEtude,
+    parcoursAcademique,
 
-            // DIRECTEUR + PROFESSEUR
-            institution,
-            directeur,
-            domaine,
-            experience,
+    // DIRECTEUR
+    typeInstitution,
+    nombreProfesseurs,
 
-            typeInstitution,
-            nombreProfesseurs,
+    // PROFESSEUR
+    domaineEnseignement,
+    niveauExperience,
 
-            password,
-            confirmPassword
-        } = req.body;
+    password,
+    confirmPassword
+
+} = req.body;
 
         // =====================================
         // VALIDATION GLOBALE
@@ -5848,47 +5848,31 @@ app.post("/academiques/register", async (req, res) => {
 
                 break;
 
-            case "directeur":
+case "directeur":
 
-                if (
-                    !institution ||
-                    !typeInstitution ||
-                    nombreProfesseurs === undefined ||
-                    nombreProfesseurs === null
-                ) {
-                    return res.status(400).json({
-                        success: false,
-                        message: "Director information incomplete"
-                    });
-                }
+    if (
+        !nomInstitution ||
+        !typeInstitution ||
+        nombreProfesseurs === undefined ||
+        nombreProfesseurs === null
+    ) {
+        return res.status(400).json({
+            success: false,
+            message: "Director information incomplete"
+        });
+    }
 
-                if (
-                    professeurs.length <
-                    Number(nombreProfesseurs)
-                ) {
-                    return res.status(400).json({
-                        success: false,
-                        message: "Professors list incomplete"
-                    });
-                }
+    if (
+        professeurs.length <
+        Number(nombreProfesseurs)
+    ) {
+        return res.status(400).json({
+            success: false,
+            message: "Professors list incomplete"
+        });
+    }
 
-                break;
-
-            case "professeur":
-
-                if (
-                    !institution ||
-                    !directeur ||
-                    !domaine ||
-                    !experience
-                ) {
-                    return res.status(400).json({
-                        success: false,
-                        message: "Professor information incomplete"
-                    });
-                }
-
-                break;
+    break;
 
             case "agent":
 
