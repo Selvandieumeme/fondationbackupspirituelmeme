@@ -5935,9 +5935,11 @@ case "directeur":
             ville: ville || null,
 
             // ETUDIANT
-            nomInstitution: nomInstitution || institution || null,
-            nomDirecteur: nomDirecteur || directeur || null,
-            nomProfesseur: nomProfesseur || null,
+            
+nomInstitution: nomInstitution || null,
+nomDirecteur: nomDirecteur || null,
+
+
 
             niveauEtude: niveauEtude || null,
             parcoursAcademique: parcoursAcademique || null,
@@ -5951,11 +5953,16 @@ case "directeur":
             professeurs,
 
             // PROFESSEUR
-            domaineEnseignement:
-                domaine || null,
+            
 
-            niveauExperience:
-                experience || null,
+domaineEnseignement:
+    domaineEnseignement || null,
+
+niveauExperience:
+    niveauExperience || null,
+
+
+
 
             passwordHash,
 
@@ -5982,10 +5989,11 @@ case "directeur":
 
     } catch (error) {
 
-        console.error(
-            "Academiques Register Error:",
-            error
-        );
+
+console.error(
+    "Academiques Register Error:",
+    error.stack
+);
 
         return res.status(500).json({
             success: false,
