@@ -5583,7 +5583,98 @@ cron.schedule("0 0 * * *", async () => {
 
 
 
+const academiqueSchema = new mongoose.Schema({
 
+    role: {
+        type: String,
+        required: true
+    },
+
+    nomComplet: {
+        type: String,
+        required: true
+    },
+
+    whatsapp: {
+        type: String,
+        required: true
+    },
+
+    email: {
+        type: String,
+        required: true,
+        unique: true,
+        lowercase: true,
+        trim: true
+    },
+
+    pays: String,
+    ville: String,
+
+    nomInstitution: String,
+    nomDirecteur: String,
+    nomProfesseur: String,
+
+    niveauEtude: String,
+    parcoursAcademique: String,
+
+    typeInstitution: String,
+
+    nombreProfesseurs: {
+        type: Number,
+        default: 0
+    },
+
+    professeurs: {
+        type: [String],
+        default: []
+    },
+
+    domaineEnseignement: String,
+    niveauExperience: String,
+
+    passwordHash: {
+        type: String,
+        required: true
+    },
+
+    campusLanguage: {
+        type: String,
+        default: "fr"
+    },
+
+    campusStatus: {
+        type: String,
+        default: "actif"
+    },
+
+    campusProfileCompleted: {
+        type: Boolean,
+        default: false
+    },
+
+    campusEmailVerified: {
+        type: Boolean,
+        default: false
+    },
+
+    campusWhatsappVerified: {
+        type: Boolean,
+        default: false
+    },
+
+    campusLastLogin: {
+        type: Date,
+        default: null
+    }
+
+}, {
+    collection: "academiques",
+    timestamps: true
+});
+
+const Academique = mongoose.models.Academique ||
+    mongoose.model("Academique", academiqueSchema);
 
 
 
