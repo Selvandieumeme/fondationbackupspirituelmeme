@@ -15,17 +15,21 @@
 
     <div class="hero-content">
 
-        <h1>FOBAS DIGITAL AGENTS ACADEMYC</h1>
+    <h1 id="heroTitle">
+        FOBAS DIGITAL AGENTS ACADEMYC
+    </h1>
 
-        <h2>Campus Numérique Intelligent</h2>
+    <h2 id="heroSubtitle">
+        Campus Numérique Intelligent
+    </h2>
 
-        <p>
-            Plateforme académique numérique destinée aux étudiants,
-            professeurs, directeurs et agents.
-        </p>
+    <p id="heroDescription">
+        Plateforme académique numérique destinée aux étudiants,
+        professeurs, directeurs et agents.
+    </p>
 
-    </div>
-
+</div>
+    
 </header>
 
 <section class="language-section">
@@ -52,46 +56,58 @@
 
     <div class="registration-card">
 
-        <h2>Créer un compte</h2>
+        <h2 id="createAccountTitle">
+    Créer un compte
+</h2>
 
-        <p>
-            Sélectionnez votre profil pour commencer.
-        </p>
+<p id="createAccountDescription">
+    Sélectionnez votre profil pour commencer.
+</p>
 
         <div class="profile-selector">
 
             <label>
                 <input
                     type="radio"
-                    name="role"
-                    value="etudiant">
-                Étudiant
-            </label>
+                    <label>
+    <input
+        type="radio"
+        name="role"
+        value="etudiant">
+    <span id="labelEtudiant">
+        Étudiant
+    </span>
+</label>
 
-            <label>
-                <input
-                    type="radio"
-                    name="role"
-                    value="directeur">
-                Directeur
-            </label>
+<label>
+    <input
+        type="radio"
+        name="role"
+        value="directeur">
+    <span id="labelDirecteur">
+        Directeur
+    </span>
+</label>
 
-            <label>
-                <input
-                    type="radio"
-                    name="role"
-                    value="professeur">
-                Professeur
-            </label>
+<label>
+    <input
+        type="radio"
+        name="role"
+        value="professeur">
+    <span id="labelProfesseur">
+        Professeur
+    </span>
+</label>
 
-            <label>
-                <input
-                    type="radio"
-                    name="role"
-                    value="agent">
-                Agent
-            </label>
-
+<label>
+    <input
+        type="radio"
+        name="role"
+        value="agent">
+    <span id="labelAgent">
+        Agent
+    </span>
+</label>
         </div>
 
         <div id="formMessage"></div>
@@ -100,7 +116,9 @@
 
         <form id="etudiantForm" class="dynamic-form hidden">
 
-            <h3>Étudiant</h3>
+             <h3 id="studentFormTitle">
+        Étudiant
+    </h3>
 
             <input type="text" name="nomComplet" placeholder="Nom complet">
 
@@ -189,7 +207,9 @@
 
         <form id="directeurForm" class="dynamic-form hidden">
 
-            <h3>Directeur</h3>
+            <h3 id="directorFormTitle">
+    Directeur
+</h3>
 
             <!-- champs directeur -->
 
@@ -205,7 +225,9 @@
 
         <form id="professeurForm" class="dynamic-form hidden">
 
-            <h3>Professeur</h3>
+            <h3 id="professorFormTitle">
+    Professeur
+</h3>
 
             <!-- champs professeur -->
 
@@ -221,7 +243,9 @@
 
         <form id="agentForm" class="dynamic-form hidden">
 
-            <h3>Agent</h3>
+            <h3 id="agentFormTitle">
+    Agent
+</h3>
 
             <!-- champs agent -->
 
