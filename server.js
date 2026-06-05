@@ -5874,6 +5874,22 @@ case "directeur":
 
     break;
 
+	case "professeur":
+
+    if (
+        !nomInstitution ||
+        !nomDirecteur ||
+        !domaineEnseignement ||
+        !niveauExperience
+    ) {
+        return res.status(400).json({
+            success: false,
+            message: "Professor information incomplete"
+        });
+    }
+
+    break;
+
             case "agent":
 
                 if (!pays || !ville) {
