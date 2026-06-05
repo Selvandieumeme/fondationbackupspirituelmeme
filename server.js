@@ -5588,43 +5588,265 @@ cron.schedule("0 0 * * *", async () => {
 
 
 
+// =====================================
+// REGISTER ACADEMIQUES
+// =====================================
+
+app.post("/academiques/register", async (req, res) => {
+    try {
+
+        const {
+            role,
+            nomComplet,
+            whatsapp,
+            email,
+            pays,
+            ville,
+
+            nomInstitution,
+            nomDirecteur,
+            nomProfesseur,
+
+            niveauEtude,
+            parcoursAcademique,
+
+            typeInstitution,
+            nombreProfesseurs,
+            professeurs,
+
+            domaineEnseignement,
+            niveauExperience,
+
+            password,
+            confirmPassword
+        } = req.body;
+
+        // =====================================
+        // VALIDATION GLOBALE
+        // =====================================
+
+        if (
+            !role ||
+            !nomComplet ||
+            !whatsapp ||
+            !email ||
+            !password ||
+            !confirmPassword
+        ) {
+            return res.status(400).json({
+                success: false,
+                message: "Missing required fields"
+            });
+        }
+
+        // =====================================
+        // VALIDATION PASSWORD
+        // =====================================
+
+        if (password !== confirmPassword) {
+            return res.status(400).json({
+                success: false,
+                message: "Passwords do not match"
+            });
+        }
+
+        // =====================================
+        // VALIDATION EMAIL UNIQUE
+        // =====================================
+
+        const existingUser = await Academique.findOne({
+            email: email.toLowerCase().trim()
+        });
+
+        if (existingUser) {
+            return res.status(409).json({
+                success: false,
+                message: "Email already exists"
+            });
+        }
+
+        // =====================================
+        // VALIDATION ROLE
+        // =====================================
+
+        switch (role) {
+
+            case "etudiant":
+
+                if (
+                    !nomInstitution ||
+                    !nomDirecteur ||
+                    !nomProfesseur ||
+                    !niveauEtude ||
+                    !parcoursAcademique
+                ) {
+                    return res.status(400).json({
+                        success: false,
+                        message: "Student information incomplete"
+                    });
+                }
+
+                break;
+
+            case "directeur":
+
+                if (
+                    !nomInstitution ||
+                    !typeInstitution ||
+                    nombreProfesseurs === undefined ||
+                    nombreProfesseurs === null
+                ) {
+                    return res.status(400).json({
+                        success: false,
+                        message: "Director information incomplete"
+                    });
+                }
+
+                if (
+                    !Array.isArray(professeurs) ||
+                    professeurs.length < Number(nombreProfesseurs)
+                ) {
+                    return res.status(400).json({
+                        success: false,
+                        message: "Professors list incomplete"
+                    });
+                }
+
+                for (let i = 0; i < Number(nombreProfesseurs); i++) {
+                    if (!professeurs[i]) {
+                        return res.status(400).json({
+                            success: false,
+                            message: `Professor ${i + 1} missing`
+                        });
+                    }
+                }
 
+                break;
 
+            case "professeur":
 
+                if (
+                    !nomInstitution ||
+                    !nomDirecteur ||
+                    !domaineEnseignement ||
+                    !niveauExperience
+                ) {
+                    return res.status(400).json({
+                        success: false,
+                        message: "Professor information incomplete"
+                    });
+                }
 
+                break;
 
+            case "agent":
 
+                if (
+                    !pays ||
+                    !ville
+                ) {
+                    return res.status(400).json({
+                        success: false,
+                        message: "Agent information incomplete"
+                    });
+                }
 
+                break;
 
+            default:
 
+                return res.status(400).json({
+                    success: false,
+                    message: "Invalid role"
+                });
+        }
 
+        // =====================================
+        // HASH PASSWORD
+        // =====================================
 
+        const passwordHash = await bcryptjs.hash(
+            password,
+            12
+        );
 
+        // =====================================
+        // CREATE DOCUMENT
+        // =====================================
 
+        const academique = new Academique({
 
+            role,
 
+            nomComplet,
+            whatsapp,
 
+            email: email.toLowerCase().trim(),
 
+            pays: pays || null,
+            ville: ville || null,
 
+            nomInstitution: nomInstitution || null,
+            nomDirecteur: nomDirecteur || null,
+            nomProfesseur: nomProfesseur || null,
 
+            niveauEtude: niveauEtude || null,
+            parcoursAcademique: parcoursAcademique || null,
 
+            typeInstitution: typeInstitution || null,
 
+            nombreProfesseurs: Number(nombreProfesseurs) || 0,
 
+            professeurs: Array.isArray(professeurs)
+                ? professeurs
+                : [],
 
+            domaineEnseignement:
+                domaineEnseignement || null,
 
+            niveauExperience:
+                niveauExperience || null,
 
+            passwordHash,
 
+            campusLanguage: "fr",
 
+            campusStatus: "actif",
 
+            campusProfileCompleted: false,
 
+            campusEmailVerified: false,
 
+            campusWhatsappVerified: false,
 
+            campusLastLogin: null
+        });
 
+        await academique.save();
 
+        // =====================================
+        // SUCCESS
+        // =====================================
 
+        return res.status(201).json({
+            success: true,
+            message: "Inscription réussie",
+            role
+        });
 
+    } catch (error) {
 
+        console.error(
+            "Academiques Register Error:",
+            error
+        );
 
+        return res.status(500).json({
+            success: false,
+            message: "Internal server error"
+        });
+    }
+});
 
 
 
@@ -5739,6 +5961,165 @@ cron.schedule("0 0 * * *", async () => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+   
 
 
 
