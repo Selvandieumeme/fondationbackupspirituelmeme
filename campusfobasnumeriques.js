@@ -198,7 +198,7 @@ function generateDirectorForm() {
             placeholder="Email">
 
         <input type="text"
-            name="institution"
+            name="nominstitution"
             placeholder="Nom de l'Institution">
 
         <select name="typeInstitution">
@@ -223,6 +223,7 @@ function generateDirectorForm() {
 
         <input type="number"
             id="nombreProfesseurs"
+            name="nombreProfesseurs"
             min="0"
             placeholder="Nombre de Professeurs">
 
@@ -375,14 +376,14 @@ function generateProfesseurForm() {
             placeholder="Email">
 
         <input type="text"
-            name="institution"
+            name="nominstitution"
             placeholder="Nom de l'Institution">
 
         <input type="text"
-            name="directeur"
+            name="nomdirecteur"
             placeholder="Nom du Directeur">
 
-        <select name="domaine">
+        <select name="domaineEnseignement">
             <option value="">
                 Domaine d'Enseignement
             </option>
@@ -420,7 +421,7 @@ function generateProfesseurForm() {
             </option>
         </select>
 
-        <select name="experience">
+        <select name="niveauExperience">
             <option value="">
                 Niveau d'Expérience
             </option>
@@ -573,6 +574,22 @@ async function submitForm(form) {
     Object.fromEntries(
       new FormData(form).entries()
     );
+
+const selectedRole =
+  document.querySelector(
+    'input[name="role"]:checked'
+  );
+
+if (!selectedRole) {
+  showMessage(
+    translations[currentLanguage]
+      .roleRequired,
+    "error"
+  );
+  return;
+}
+
+data.role = selectedRole.value;
 
   try {
     console.log(
