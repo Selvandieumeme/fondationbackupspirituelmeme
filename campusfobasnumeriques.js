@@ -580,27 +580,37 @@ async function submitForm(form) {
       data
     );
 
-    /*
-    await fetch(
+    const response = await fetch(
       `${API_BASE_URL}/academiques/register`,
       {
         method: "POST",
         headers: {
           "Content-Type":
-          "application/json"
+            "application/json"
         },
         body: JSON.stringify(data)
       }
     );
-    */
+
+    const result =
+      await response.json();
+
+    if (!response.ok) {
+      throw new Error(
+        result.message ||
+        "Registration failed"
+      );
+    }
 
     showMessage(
+      result.message ||
       translations[currentLanguage]
         .success,
       "success"
     );
 
     form.reset();
+
   } catch (error) {
     console.error(error);
 
