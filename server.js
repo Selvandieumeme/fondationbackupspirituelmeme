@@ -6198,6 +6198,29 @@ if (academique.role === "directeur") {
 
 
 
+// ==========================
+// LISTE ETUDIANTS DIRECTEUR
+// ==========================
+
+let listeEtudiants = [];
+
+if (academique.role === "directeur") {
+
+    listeEtudiants =
+        await Academique.find({
+
+            role: "etudiant",
+
+            nomInstitution:
+                academique.nomInstitution
+
+        })
+        .select(
+            "nomComplet nomProfesseur parcoursAcademique niveauEtude"
+        );
+}
+
+
         // ==========================
         // SUCCESS LOGIN
         // ==========================
@@ -6250,13 +6273,16 @@ if (academique.role === "directeur") {
                     academique.campusLanguage,
 				 
 				nombreProfesseurs:
-    academique.nombreProfesseurs || 0,
+    nombreProfesseurs,
 				
 professeurs:
     academique.professeurs || [],
 
 nombreEtudiants:
         nombreEtudiants,
+
+			etudiants:
+    academique.etudiants || [],
 				
 
 typeInstitution:
