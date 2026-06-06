@@ -6141,7 +6141,27 @@ app.post("/academiques/login", async (req, res) => {
                     academique.niveauExperience,
 
                 campusLanguage:
-                    academique.campusLanguage
+                    academique.campusLanguage,
+				nombreProfesseurs:
+    academique.nombreProfesseurs || 0,
+
+professeurs:
+    academique.professeurs || [],
+
+nombreEtudiants:
+    academique.nombreEtudiants || 0,
+
+etudiants:
+    academique.etudiants || [],
+
+typeInstitution:
+    academique.typeInstitution || "",
+
+campusStatus:
+    academique.campusStatus || "",
+
+campusProfileCompleted:
+    academique.campusProfileCompleted || false
             }
         });
 
