@@ -1244,12 +1244,14 @@ async function loadTeacherStats() {
             </p>
 
             <p>
-                👨‍🎓 Nombre étudiants : 0
-            </p>
+    👨‍🎓 Nombre étudiants :
+    ${user.nombreEtudiantsProf || 0}
+</p>
 
-            <p>
-                📝 Examens créés : 0
-            </p>
+<p>
+    📝 Examens créés :
+    ${user.nombreExamensCrees || 0}
+</p>
 
         </div>
     `;
@@ -1346,7 +1348,31 @@ async function loadDirectorStats() {
 
         ${listeEtudiantsHtml}
 
-  
+
+
+
+  <div>
+
+    <strong>
+        Liste Étudiants
+    </strong>
+
+    <ul>
+
+        ${
+            (user.listeEtudiantsProf || [])
+            .map(
+                etudiant => `
+                <li>
+                    ${etudiant.nomComplet}
+                    <br>
+                    ${etudiant.parcoursAcademique || ""}
+                </li>
+                `
+            )
+            .join("")
+        }
+
         
             </ul>
 
