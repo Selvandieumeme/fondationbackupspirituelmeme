@@ -399,35 +399,50 @@ function buildAgentMenu() {
 
 async function buildRoleInterface() {
 
-  const user =
-    JSON.parse(
-      localStorage.getItem(
-        "campusUser"
-      )
-    );
+    const user =
+        JSON.parse(
+            localStorage.getItem(
+                "campusUser"
+            )
+        );
 
-  if (!user) return;
+    if (!user) return;
 
-  switch (user.role) {
+    switch (user.role) {
 
-    case "etudiant":
-      buildStudentMenu();
-      break;
+        case "etudiant":
 
-    case "professeur":
-      buildTeacherMenu();
-      break;
+            buildStudentMenu();
 
-    case "directeur":
-      buildDirectorMenu();
-      break;
+            await loadStudentProgress();
 
-    case "agent":
-      buildAgentMenu();
-      break;
-  }
+            break;
+
+        case "professeur":
+
+            buildTeacherMenu();
+
+            await loadTeacherStats();
+
+            break;
+
+        case "directeur":
+
+            buildDirectorMenu();
+
+            await loadDirectorStats();
+
+            break;
+
+        case "agent":
+
+            buildAgentMenu();
+
+            await loadAgentProgress();
+
+            break;
+    }
 }
-
 // =====================================
 // PAGES INTERNES
 // =====================================
