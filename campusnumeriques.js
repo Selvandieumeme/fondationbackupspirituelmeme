@@ -1099,12 +1099,46 @@ async function loadStudentProgress() {
 
     if (!card) return;
 
+    const user =
+        JSON.parse(
+            localStorage.getItem(
+                "campusUser"
+            )
+        );
+
     card.innerHTML = `
-        <h3>
-            Progression Étudiant
-        </h3>
+
+        <div class="progress-card">
+
+            <h3>
+                📚 Espace Étudiant
+            </h3>
+
+            <p>
+                <strong>Nom :</strong>
+                ${user.nomComplet || "-"}
+            </p>
+
+            <p>
+                📚 Formations suivies : 0
+            </p>
+
+            <p>
+                📝 Examens réalisés : 0
+            </p>
+
+            <p>
+                🏆 Certificats obtenus : 0
+            </p>
+
+            <p>
+                📈 Progression globale : 0%
+            </p>
+
+        </div>
     `;
 }
+
 
 async function loadAgentProgress() {
 
@@ -1115,10 +1149,43 @@ async function loadAgentProgress() {
 
     if (!card) return;
 
+    const user =
+        JSON.parse(
+            localStorage.getItem(
+                "campusUser"
+            )
+        );
+
     card.innerHTML = `
-        <h3>
-            Progression Agent
-        </h3>
+
+        <div class="progress-card">
+
+            <h3>
+                🤝 Espace Agent
+            </h3>
+
+            <p>
+                <strong>Nom :</strong>
+                ${user.nomComplet || "-"}
+            </p>
+
+            <p>
+                🏫 Institutions affiliées : 0
+            </p>
+
+            <p>
+                🤝 Parrainages : 0
+            </p>
+
+            <p>
+                💰 Revenus : 0 HTG
+            </p>
+
+            <p>
+                📈 Performance : 0%
+            </p>
+
+        </div>
     `;
 }
 
@@ -1131,10 +1198,45 @@ async function loadTeacherStats() {
 
     if (!card) return;
 
+    const user =
+        JSON.parse(
+            localStorage.getItem(
+                "campusUser"
+            )
+        );
+
     card.innerHTML = `
-        <h3>
-            Statistiques Professeur
-        </h3>
+
+        <div class="progress-card">
+
+            <h3>
+                👨‍🏫 Espace Professeur
+            </h3>
+
+            <p>
+                <strong>Nom :</strong>
+                ${user.nomComplet || "-"}
+            </p>
+
+            <p>
+                📖 Domaine :
+                ${user.domaineEnseignement || "-"}
+            </p>
+
+            <p>
+                ⭐ Niveau :
+                ${user.niveauExperience || "-"}
+            </p>
+
+            <p>
+                👨‍🎓 Nombre étudiants : 0
+            </p>
+
+            <p>
+                📝 Examens créés : 0
+            </p>
+
+        </div>
     `;
 }
 
@@ -1147,13 +1249,48 @@ async function loadDirectorStats() {
 
     if (!card) return;
 
+    const user =
+        JSON.parse(
+            localStorage.getItem(
+                "campusUser"
+            )
+        );
+
     card.innerHTML = `
-        <h3>
-            Statistiques Directeur
-        </h3>
+
+        <div class="progress-card">
+
+            <h3>
+                🏢 Espace Directeur
+            </h3>
+
+            <p>
+                <strong>Institution :</strong>
+                ${user.nomInstitution || "-"}
+            </p>
+
+            <p>
+                👨‍🏫 Professeurs :
+                ${user.nombreProfesseurs || 0}
+            </p>
+
+            <p>
+                🎓 Étudiants : 0
+            </p>
+
+            <p>
+                🌍 Pays :
+                ${user.pays || "-"}
+            </p>
+
+            <p>
+                🏙️ Ville :
+                ${user.ville || "-"}
+            </p>
+
+        </div>
     `;
 }
-
 
 
 
