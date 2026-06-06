@@ -6221,6 +6221,38 @@ if (academique.role === "directeur") {
 }
 
 
+
+
+
+// ==========================
+// STATS PROFESSEUR
+// ==========================
+
+let nombreEtudiantsProf = 0;
+
+let listeEtudiantsProf = [];
+
+if (academique.role === "professeur") {
+
+    listeEtudiantsProf =
+        await Academique.find({
+
+            role: "etudiant",
+
+            nomProfesseur:
+                academique.nomComplet
+
+        })
+        .select(
+            "nomComplet parcoursAcademique niveauEtude"
+        );
+
+    nombreEtudiantsProf =
+        listeEtudiantsProf.length;
+}
+
+		
+
         // ==========================
         // SUCCESS LOGIN
         // ==========================
@@ -6286,6 +6318,13 @@ nombreEtudiants:
 
 			etudiants:
     academique.etudiants || [],
+
+
+nombreEtudiantsProf:
+    nombreEtudiantsProf,
+
+listeEtudiantsProf:
+    listeEtudiantsProf,
 				
 
 typeInstitution:
