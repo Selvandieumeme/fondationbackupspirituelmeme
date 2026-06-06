@@ -6021,6 +6021,150 @@ console.error(
 
 
 
+// =====================================
+// LOGIN ACADEMIQUES
+// =====================================
+
+app.post("/academiques/login", async (req, res) => {
+
+    try {
+
+        const {
+            email,
+            password
+        } = req.body;
+
+        // ==========================
+        // VALIDATION
+        // ==========================
+
+        if (
+            !email ||
+            !password
+        ) {
+            return res.status(400).json({
+                success: false,
+                message: "Email et mot de passe requis"
+            });
+        }
+
+        // ==========================
+        // RECHERCHE UTILISATEUR
+        // ==========================
+
+        const academique =
+            await Academique.findOne({
+                email: email
+                    .toLowerCase()
+                    .trim()
+            });
+
+        if (!academique) {
+            return res.status(401).json({
+                success: false,
+                message: "Email ou mot de passe incorrect"
+            });
+        }
+
+        // ==========================
+        // VERIFICATION PASSWORD
+        // ==========================
+
+        const passwordMatch =
+            await bcryptjs.compare(
+                password,
+                academique.passwordHash
+            );
+
+        if (!passwordMatch) {
+            return res.status(401).json({
+                success: false,
+                message: "Email ou mot de passe incorrect"
+            });
+        }
+
+        // ==========================
+        // UPDATE LAST LOGIN
+        // ==========================
+
+        academique.campusLastLogin =
+            new Date();
+
+        await academique.save();
+
+        // ==========================
+        // SUCCESS LOGIN
+        // ==========================
+
+        return res.status(200).json({
+
+            success: true,
+
+            message: "Connexion réussie",
+
+            user: {
+
+                _id:
+                    academique._id,
+
+                role:
+                    academique.role,
+
+                nomComplet:
+                    academique.nomComplet,
+
+                email:
+                    academique.email,
+
+                whatsapp:
+                    academique.whatsapp,
+
+                pays:
+                    academique.pays,
+
+                ville:
+                    academique.ville,
+
+                nomInstitution:
+                    academique.nomInstitution,
+
+                nomDirecteur:
+                    academique.nomDirecteur,
+
+                nomProfesseur:
+                    academique.nomProfesseur,
+
+                domaineEnseignement:
+                    academique.domaineEnseignement,
+
+                niveauExperience:
+                    academique.niveauExperience,
+
+                campusLanguage:
+                    academique.campusLanguage
+            }
+        });
+
+    } catch (error) {
+
+        console.error(
+            "Academiques Login Error:",
+            error
+        );
+
+        return res.status(500).json({
+            success: false,
+            message: "Internal server error"
+        });
+    }
+});
+
+
+
+
+
+
+
 
 
 
