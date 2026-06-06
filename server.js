@@ -6000,7 +6000,7 @@ case "directeur":
             
 nomInstitution: nomInstitution || null,
 nomDirecteur: nomDirecteur || null,
-
+nomProfesseur: nomProfesseur || null,
 
 
             niveauEtude: niveauEtude || null,
