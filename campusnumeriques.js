@@ -1257,13 +1257,6 @@ async function loadTeacherStats() {
 
 async function loadDirectorStats() {
 
-    const card =
-        document.getElementById(
-            "directorProgressionCard"
-        );
-
-    if (!card) return;
-
     const user =
         JSON.parse(
             localStorage.getItem(
@@ -1271,42 +1264,67 @@ async function loadDirectorStats() {
             )
         );
 
+    const card =
+        document.getElementById(
+            "directorProgressionCard"
+        );
+
+    if (!card || !user) return;
+
     card.innerHTML = `
 
-        <div class="progress-card">
+        <h3>
+            🏢 Espace Directeur
+        </h3>
 
-            <h3>
-                🏢 Espace Directeur
-            </h3>
+        <p>
+            Institution :
+            ${user.nomInstitution || "-"}
+        </p>
 
-            <p>
-                <strong>Institution :</strong>
-                ${user.nomInstitution || "-"}
-            </p>
+        <p>
+            👨‍🏫 Professeurs :
+            ${user.nombreProfesseurs || 0}
+        </p>
 
-            <p>
-                👨‍🏫 Professeurs :
-                ${user.nombreProfesseurs || 0}
-            </p>
+        <p>
+            🎓 Étudiants :
+            ${user.nombreEtudiants || 0}
+        </p>
 
-            <p>
-                🎓 Étudiants : 0
-            </p>
+        <p>
+            🌍 Pays :
+            ${user.pays || "-"}
+        </p>
 
-            <p>
-                🌍 Pays :
-                ${user.pays || "-"}
-            </p>
+        <p>
+            🏙️ Ville :
+            ${user.ville || "-"}
+        </p>
 
-            <p>
-                🏙️ Ville :
-                ${user.ville || "-"}
-            </p>
+        <div>
+
+            <strong>
+                Liste Professeurs
+            </strong>
+
+            <ul>
+
+                ${
+                    (user.professeurs || [])
+                    .map(
+                        professeur =>
+                        `<li>${professeur}</li>`
+                    )
+                    .join("")
+                }
+
+            </ul>
 
         </div>
+
     `;
 }
-
 
 
 
