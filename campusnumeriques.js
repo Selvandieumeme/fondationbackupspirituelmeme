@@ -1271,6 +1271,22 @@ async function loadDirectorStats() {
 
     if (!card || !user) return;
 
+
+  const listeEtudiantsHtml =
+    (user.listeEtudiants || [])
+    .map(etudiant => `
+        <li>
+            ${etudiant.nomComplet}
+            <br>
+            Parcours :
+            ${etudiant.parcoursAcademique || ""}
+            <br>
+            Professeur :
+            ${etudiant.nomProfesseur || ""}
+        </li>
+    `)
+    .join("");
+
     card.innerHTML = `
 
         <h3>
@@ -1319,6 +1335,19 @@ async function loadDirectorStats() {
                     .join("")
                 }
 
+
+<div>
+
+    <strong>
+        Liste Étudiants
+    </strong>
+
+    <ul>
+
+        ${listeEtudiantsHtml}
+
+  
+        
             </ul>
 
         </div>
