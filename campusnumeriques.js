@@ -136,65 +136,29 @@ function initializeLanguageSystem() {
 // =====================================
 // SESSION UTILISATEUR
 // =====================================
-
 async function loadCurrentUser() {
 
-  const token =
-    localStorage.getItem(
-      "campusToken"
-    );
+    const userData =
+        localStorage.getItem(
+            "campusUser"
+        );
 
-  if (!token) {
+    if (!userData) {
 
-    window.location.href =
-      "/campusfobasnumeriques.html";
+        window.location.href =
+            "/campusloginnumeriques.html";
 
-    return null;
-  }
-
-  try {
-
-    const response =
-      await fetch(
-        `${API_BASE_URL}/academiques/me`,
-        {
-          headers: {
-            Authorization:
-              `Bearer ${token}`
-          }
-        }
-      );
-
-    if (!response.ok) {
-
-      throw new Error(
-        "Session invalide"
-      );
+        return null;
     }
 
     const user =
-      await response.json();
-
-    localStorage.setItem(
-      "campusUser",
-      JSON.stringify(user)
-    );
+        JSON.parse(
+            userData
+        );
 
     loadProfile(user);
 
     return user;
-
-  } catch (error) {
-
-    localStorage.removeItem(
-      "campusToken"
-    );
-
-    window.location.href =
-      "/campusfobasnumeriques.html";
-
-    return null;
-  }
 }
 
 // =====================================
@@ -1310,39 +1274,6 @@ async function loadDirectorStats() {
 
 
 
-async function buildRoleInterface(user) {
-
-    switch (user.role) {
-
-        case "etudiant":
-
-            await loadStudentProgress();
-
-            break;
-
-        case "agent":
-
-            await loadAgentProgress();
-
-            break;
-
-        case "professeur":
-
-            await loadTeacherStats();
-
-            break;
-
-        case "directeur":
-
-            await loadDirectorStats();
-
-            break;
-    }
-}
-
-
-
-
 
 
 
@@ -1361,7 +1292,7 @@ document.addEventListener(
 
         buildSidebar(user.role);
 
-        await buildRoleInterface(user);
+        await buildRoleInterface();
 
         await loadWidgets();
 
