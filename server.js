@@ -6281,6 +6281,9 @@ professeurs:
 nombreEtudiants:
         nombreEtudiants,
 
+	listeEtudiants:
+    listeEtudiants,
+
 			etudiants:
     academique.etudiants || [],
 				
