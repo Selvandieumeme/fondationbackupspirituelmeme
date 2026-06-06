@@ -5784,10 +5784,6 @@ nombreExamensCrees: {
 }, {
     collection: "academiques",
     timestamps: true
-
-}, {
-    collection: "academiques",
-    timestamps: true
 	
 });
 
@@ -6261,13 +6257,7 @@ professeurs:
 
 nombreEtudiants:
         nombreEtudiants,
-
-	
-listeEtudiants:
-        listeEtudiants,
 				
-etudiants:
-    academique.etudiants || [],
 
 typeInstitution:
     academique.typeInstitution || "",
