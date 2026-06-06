@@ -5713,11 +5713,82 @@ const academiqueSchema = new mongoose.Schema({
     campusLastLogin: {
         type: Date,
         default: null
-    }
+    },
+// =====================================
+// AGENT
+// =====================================
+
+nombreParrainages: {
+    type: Number,
+    default: 0
+},
+
+revenus: {
+    type: Number,
+    default: 0
+},
+
+performance: {
+    type: Number,
+    default: 0
+},
+
+institutionsAffiliees: {
+    type: [String],
+    default: []
+},
+
+// =====================================
+// ETUDIANT
+// =====================================
+
+nombreFormations: {
+    type: Number,
+    default: 0
+},
+
+nombreExamens: {
+    type: Number,
+    default: 0
+},
+
+nombreCertificats: {
+    type: Number,
+    default: 0
+},
+
+progressionGlobale: {
+    type: Number,
+    default: 0
+},
+
+// =====================================
+// PROFESSEUR
+// =====================================
+
+nombreEtudiants: {
+    type: Number,
+    default: 0
+},
+
+nombreClasses: {
+    type: Number,
+    default: 0
+},
+
+nombreExamensCrees: {
+    type: Number,
+    default: 0
+}
 
 }, {
     collection: "academiques",
     timestamps: true
+
+}, {
+    collection: "academiques",
+    timestamps: true
+	
 });
 
 const Academique =
@@ -6092,6 +6163,42 @@ app.post("/academiques/login", async (req, res) => {
 
         await academique.save();
 
+
+
+		// ==========================
+// STATISTIQUES DYNAMIQUES
+// ==========================
+
+let nombreEtudiants = 0;
+
+if (academique.role === "directeur") {
+
+    nombreEtudiants =
+        await Academique.countDocuments({
+
+            role: "etudiant",
+
+            nomInstitution:
+                academique.nomInstitution
+
+        });
+}
+
+let nombreProfesseurs = 0;
+
+if (academique.role === "directeur") {
+
+    nombreProfesseurs =
+        await Academique.countDocuments({
+
+            role: "professeur",
+
+            nomInstitution:
+                academique.nomInstitution
+
+        });
+}
+
         // ==========================
         // SUCCESS LOGIN
         // ==========================
@@ -6142,14 +6249,11 @@ app.post("/academiques/login", async (req, res) => {
 
                 campusLanguage:
                     academique.campusLanguage,
-				nombreProfesseurs:
-    academique.nombreProfesseurs || 0,
-
+				nombreProfesseurs,
 professeurs:
     academique.professeurs || [],
 
-nombreEtudiants:
-    academique.nombreEtudiants || 0,
+nombreEtudiants,
 
 etudiants:
     academique.etudiants || [],
