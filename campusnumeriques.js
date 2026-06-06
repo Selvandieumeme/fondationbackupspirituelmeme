@@ -1220,6 +1220,21 @@ async function loadTeacherStats() {
             )
         );
 
+    const listeEtudiantsProfHtml =
+        (user.listeEtudiantsProf || [])
+        .map(etudiant => `
+            <li>
+                ${etudiant.nomComplet}
+                <br>
+                Parcours :
+                ${etudiant.parcoursAcademique || "-"}
+                <br>
+                Niveau :
+                ${etudiant.niveauEtude || "-"}
+            </li>
+        `)
+        .join("");
+
     card.innerHTML = `
 
         <div class="progress-card">
@@ -1244,18 +1259,36 @@ async function loadTeacherStats() {
             </p>
 
             <p>
-    👨‍🎓 Nombre étudiants :
-    ${user.nombreEtudiantsProf || 0}
-</p>
+                👨‍🎓 Nombre étudiants :
+                ${user.nombreEtudiantsProf || 0}
+            </p>
 
-<p>
-    📝 Examens créés :
-    ${user.nombreExamensCrees || 0}
-</p>
+            <p>
+                📝 Examens créés :
+                ${user.nombreExamensCrees || 0}
+            </p>
+
+            <div>
+
+                <strong>
+                    Liste Étudiants
+                </strong>
+
+                <ul>
+
+                    ${listeEtudiantsProfHtml}
+
+                </ul>
+
+            </div>
 
         </div>
+
     `;
 }
+
+
+
 
 async function loadDirectorStats() {
 
@@ -1347,31 +1380,6 @@ async function loadDirectorStats() {
     <ul>
 
         ${listeEtudiantsHtml}
-
-
-
-
-  <div>
-
-    <strong>
-        Liste Étudiants
-    </strong>
-
-    <ul>
-
-        ${
-            (user.listeEtudiantsProf || [])
-            .map(
-                etudiant => `
-                <li>
-                    ${etudiant.nomComplet}
-                    <br>
-                    ${etudiant.parcoursAcademique || ""}
-                </li>
-                `
-            )
-            .join("")
-        }
 
         
             </ul>
