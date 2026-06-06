@@ -6165,7 +6165,7 @@ app.post("/academiques/login", async (req, res) => {
 
 
 
-		// ==========================
+// ==========================
 // STATISTIQUES DYNAMIQUES
 // ==========================
 
@@ -6197,6 +6197,37 @@ if (academique.role === "directeur") {
                 academique.nomInstitution
 
         });
+}
+
+
+
+// ==========================
+// DIRECTEUR STATS
+// ==========================
+
+let nombreEtudiants = 0;
+let listeEtudiants = [];
+
+if (academique.role === "directeur") {
+
+    const etudiants =
+        await Academique.find({
+
+            role: "etudiant",
+
+            nomInstitution:
+                academique.nomInstitution
+
+        })
+        .select(
+            "nomComplet nomProfesseur parcoursAcademique niveauEtude"
+        );
+
+    nombreEtudiants =
+        etudiants.length;
+
+    listeEtudiants =
+        etudiants;
 }
 
         // ==========================
@@ -6249,12 +6280,20 @@ if (academique.role === "directeur") {
 
                 campusLanguage:
                     academique.campusLanguage,
-				nombreProfesseurs,
+				 
+				nombreProfesseurs:
+        academique.nombreProfesseurs || 0,
+				
 professeurs:
     academique.professeurs || [],
 
-nombreEtudiants,
+nombreEtudiants:
+        nombreEtudiants,
 
+	
+listeEtudiants:
+        listeEtudiants,
+				
 etudiants:
     academique.etudiants || [],
 
