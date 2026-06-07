@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Microsoft Office Word 2007 Simulator</title>
+
+    <link rel="stylesheet" href="campusword2007simulator.css">
+</head>
+
+<body>
+
+    <!-- ========================================= -->
+    <!-- ROOT CONTAINER -->
+    <!-- ========================================= -->
+
+    <div id="campusword2007simulator">
+
+        <!-- ========================================= -->
+        <!-- LOADING SCREEN -->
+        <!-- ========================================= -->
+
+        <div id="word-loading-screen">
+
+            <div id="loading-logo"></div>
+
+            <div id="loading-title">
+                Microsoft Office Word 2007
+            </div>
+
+            <div id="loading-message">
+                Chargement du simulateur...
+            </div>
+
+            <div id="loading-progress-container">
+                <div id="loading-progress-bar"></div>
+            </div>
+
+        </div>
+
+        <!-- ========================================= -->
+        <!-- WORD APPLICATION -->
+        <!-- ========================================= -->
+
+        <div id="word-app">
+
+            <!-- ========================================= -->
+            <!-- TITLE BAR -->
+            <!-- ========================================= -->
+
+            <div id="title-bar">
+
+                <div id="title-left-section">
+
+                    <div id="window-icon"></div>
+
+                    <div id="document-title">
+                        Document1 - Microsoft Office Word 2007
+                    </div>
+
+                </div>
+
+                <div id="title-right-section">
+
+                    <button id="window-minimize"></button>
+
+                    <button id="window-maximize"></button>
+
+                    <button id="window-close"></button>
+
+                </div>
+
+            </div>
+
+            <!-- ========================================= -->
+            <!-- TOP APPLICATION AREA -->
+            <!-- ========================================= -->
+
+            <div id="top-application-area">
+
+                <!-- OFFICE BUTTON -->
+
+                <div id="office-button-area">
+
+                    <button id="office-button">
+                        Office
+                    </button>
+
+                </div>
+
+                <!-- QUICK ACCESS TOOLBAR -->
+
+                <div id="quick-access-toolbar">
+
+                    <button id="qat-save"></button>
+
+                    <button id="qat-undo"></button>
+
+                    <button id="qat-redo"></button>
+
+                    <button id="qat-customize"></button>
+
+                </div>
+
+            </div>
+
+            <!-- ========================================= -->
+            <!-- RIBBON TABS -->
+            <!-- ========================================= -->
+
+            <div id="ribbon-tabs">
+
+                <button class="ribbon-tab active-tab"
+                        id="tab-home">
+                    Accueil
+                </button>
+
+                <button class="ribbon-tab"
+                        id="tab-insert">
+                    Insertion
+                </button>
+
+                <button class="ribbon-tab"
+                        id="tab-page-layout">
+                    Mise en page
+                </button>
+
+                <button class="ribbon-tab"
+                        id="tab-references">
+                    Références
+                </button>
+
+                <button class="ribbon-tab"
+                        id="tab-mailings">
+                    Publipostage
+                </button>
+
+                <button class="ribbon-tab"
+                        id="tab-review">
+                    Révision
+                </button>
+
+                <button class="ribbon-tab"
+                        id="tab-view">
+                    Affichage
+                </button>
+
+            </div>
+
+            <!-- ========================================= -->
+            <!-- RIBBON CONTAINER -->
+            <!-- ========================================= -->
+
+            <div id="ribbon-container">
+
+                <!-- Clipboard -->
+
+                <div class="ribbon-group"
+                     id="clipboard-group">
+
+                    <div class="ribbon-group-content"></div>
+
+                    <div class="ribbon-group-label">
+                        Presse-papiers
+                    </div>
+
+                </div>
+
+                <!-- Font -->
+
+                <div class="ribbon-group"
+                     id="font-group">
+
+                    <div class="ribbon-group-content"></div>
+
+                    <div class="ribbon-group-label">
+                        Police
+                    </div>
+
+                </div>
+
+                <!-- Paragraph -->
+
+                <div class="ribbon-group"
+                     id="paragraph-group">
+
+                    <div class="ribbon-group-content"></div>
+
+                    <div class="ribbon-group-label">
+                        Paragraphe
+                    </div>
+
+                </div>
+
+                <!-- Styles -->
+
+                <div class="ribbon-group"
+                     id="styles-group">
+
+                    <div class="ribbon-group-content"></div>
+
+                    <div class="ribbon-group-label">
+                        Styles
+                    </div>
+
+                </div>
+
+                <!-- Editing -->
+
+                <div class="ribbon-group"
+                     id="editing-group">
+
+                    <div class="ribbon-group-content"></div>
+
+                    <div class="ribbon-group-label">
+                        Modification
+                    </div>
+
+                </div>
+
+            </div>
+
+            <!-- ========================================= -->
+            <!-- WORKSPACE -->
+            <!-- ========================================= -->
+
+            <div id="workspace">
+
+                <!-- VERTICAL RULER -->
+
+                <div id="vertical-ruler">
+
+                    <div id="vertical-ruler-scale"></div>
+
+                </div>
+
+                <!-- DOCUMENT VIEWPORT -->
+
+                <div id="document-viewport">
+
+                    <!-- HORIZONTAL RULER -->
+
+                    <div id="horizontal-ruler">
+
+                        <div id="horizontal-ruler-scale"></div>
+
+                    </div>
+
+                    <!-- DOCUMENT SCROLL AREA -->
+
+                    <div id="document-scroll-area">
+
+                        <!-- PAGE WRAPPER -->
+
+                        <div id="document-page-wrapper">
+
+                            <!-- PAGE SHADOW -->
+
+                            <div id="page-shadow"></div>
+
+                            <!-- DOCUMENT PAGE -->
+
+                            <div id="document-page">
+
+                                <div id="page-content">
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <!-- SCROLLBARS -->
+
+                <div id="workspace-scrollbars">
+
+                    <div id="vertical-scrollbar">
+
+                        <div id="vertical-scroll-thumb"></div>
+
+                    </div>
+
+                    <div id="horizontal-scrollbar">
+
+                        <div id="horizontal-scroll-thumb"></div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <!-- ========================================= -->
+            <!-- STATUS BAR -->
+            <!-- ========================================= -->
+
+            <div id="status-bar">
+
+                <div id="status-left">
+
+                    <div id="status-page-number">
+                        Page 1 sur 1
+                    </div>
+
+                    <div id="status-word-count">
+                        0 mot
+                    </div>
+
+                    <div id="status-language">
+                        Français
+                    </div>
+
+                </div>
+
+                <div id="status-right">
+
+                    <div id="status-view-mode">
+
+                        <button id="print-layout-view"></button>
+
+                        <button id="web-layout-view"></button>
+
+                        <button id="reading-layout-view"></button>
+
+                    </div>
+
+                    <div id="status-zoom-percentage">
+                        100%
+                    </div>
+
+                </div>
+
+            </div>
+
+            <!-- ========================================= -->
+            <!-- ZOOM CONTROL -->
+            <!-- ========================================= -->
+
+            <div id="zoom-control">
+
+                <button id="zoom-out">
+                    -
+                </button>
+
+                <div id="zoom-slider-container">
+
+                    <div id="zoom-slider-track">
+
+                        <div id="zoom-slider-thumb"></div>
+
+                    </div>
+
+                </div>
+
+                <button id="zoom-in">
+                    +
+                </button>
+
+            </div>
+
+        </div>
+
+        <!-- ========================================= -->
+        <!-- HIDDEN SYSTEM LAYERS -->
+        <!-- ========================================= -->
+
+        <div id="hidden-system-layers">
+
+            <div id="simulation-engine-layer"></div>
+
+            <div id="validation-layer"></div>
+
+            <div id="mission-layer"></div>
+
+            <div id="events-layer"></div>
+
+            <div id="api-layer"></div>
+
+            <div id="authentication-layer"></div>
+
+            <div id="session-layer"></div>
+
+            <div id="user-profile-layer"></div>
+
+            <div id="permissions-layer"></div>
+
+            <div id="autosave-layer"></div>
+
+            <div id="analytics-layer"></div>
+
+            <div id="notification-layer"></div>
+
+            <div id="word-state-layer"></div>
+
+            <div id="ribbon-state-layer"></div>
+
+            <div id="document-state-layer"></div>
+
+            <div id="ui-state-layer"></div>
+
+        </div>
+
+    </div>
+
+    <script src="campusword2007simulator.js"></script>
+
+</body>
+</html>
