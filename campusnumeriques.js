@@ -1324,21 +1324,6 @@ async function loadDirectorStats() {
 
     card.innerHTML = `
 
-
-const addBtn =
-    document.getElementById(
-        "addProfesseurBtn"
-    );
-
-if (addBtn) {
-
-    addBtn.addEventListener(
-        "click",
-        addProfesseur
-    );
-
-}
-
         <h3>
             🏢 Espace Directeur
         </h3>
@@ -1387,7 +1372,7 @@ if (addBtn) {
 
     <ul>
 
-                (user.professeurs || [])
+${(user.professeurs || [])
 .map(
     professeur => `
     <li>
@@ -1405,8 +1390,26 @@ if (addBtn) {
     </li>
     `
 )
-.join("")
+.join("")}
+
+</ul>
 }
+
+
+const addBtn =
+    document.getElementById(
+        "addProfesseurBtn"
+    );
+
+if (addBtn) {
+
+    addBtn.addEventListener(
+        "click",
+        addProfesseur
+    );
+
+}
+
 
 
 <div>
