@@ -1387,14 +1387,26 @@ if (addBtn) {
 
     <ul>
 
-                ${
-                    (user.professeurs || [])
-                    .map(
-                        professeur =>
-                        `<li>${professeur}</li>`
-                    )
-                    .join("")
-                }
+                (user.professeurs || [])
+.map(
+    professeur => `
+    <li>
+
+        ${professeur}
+
+        <button
+            class="delete-prof-btn"
+            data-prof="${professeur}">
+
+            🗑️
+
+        </button>
+
+    </li>
+    `
+)
+.join("")
+}
 
 
 <div>
