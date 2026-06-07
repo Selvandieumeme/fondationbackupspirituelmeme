@@ -1433,6 +1433,108 @@ if (addBtn) {
 
 
 
+async function addProfesseur() {
+
+    const user =
+        JSON.parse(
+            localStorage.getItem(
+                "campusUser"
+            )
+        );
+
+    const nomProfesseur =
+        prompt(
+            "Nom du professeur"
+        );
+
+    if (!nomProfesseur) return;
+
+    const response =
+        await fetch(
+            `${API_BASE_URL}/academiques/directeur/add-professeur`,
+            {
+                method: "POST",
+
+                headers: {
+                    "Content-Type":
+                        "application/json"
+                },
+
+                body: JSON.stringify({
+
+                    directeurId:
+                        user._id,
+
+                    nomProfesseur
+
+                })
+            }
+        );
+
+    if (response.ok) {
+
+        location.reload();
+
+    }
+}
+
+
+
+
+
+
+
+
+async function removeProfesseur(
+    nomProfesseur
+) {
+
+    const user =
+        JSON.parse(
+            localStorage.getItem(
+                "campusUser"
+            )
+        );
+
+    const response =
+        await fetch(
+            `${API_BASE_URL}/academiques/directeur/remove-professeur`,
+            {
+                method: "DELETE",
+
+                headers: {
+                    "Content-Type":
+                        "application/json"
+                },
+
+                body: JSON.stringify({
+
+                    directeurId:
+                        user._id,
+
+                    nomProfesseur
+
+                })
+            }
+        );
+
+    if (response.ok) {
+
+        location.reload();
+
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
 
 
 document.addEventListener(
