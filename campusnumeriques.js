@@ -1430,35 +1430,38 @@ if (addBtn) {
 
 
 
-const deleteButtons =
-    document.querySelectorAll(
-        ".delete-prof-btn"
+const addBtn =
+    document.getElementById(
+        "addProfesseurBtn"
     );
 
-deleteButtons.forEach(btn => {
+if (addBtn) {
 
-    btn.addEventListener(
+    addBtn.addEventListener(
         "click",
-        async () => {
+        addProfesseur
+    );
 
-            const nomProfesseur =
-                btn.dataset.prof;
+}
 
-            const confirmation =
-                confirm(
-                    `Supprimer ${nomProfesseur} ?`
+document
+    .querySelectorAll(
+        ".delete-prof-btn"
+    )
+    .forEach(btn => {
+
+        btn.addEventListener(
+            "click",
+            () => {
+
+                removeProfesseur(
+                    btn.dataset.prof
                 );
 
-            if (!confirmation) return;
+            }
+        );
 
-            await removeProfesseur(
-                nomProfesseur
-            );
-
-        }
-    );
-
-});
+    });
 
 
 
