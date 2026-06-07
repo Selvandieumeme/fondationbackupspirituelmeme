@@ -1430,19 +1430,6 @@ if (addBtn) {
 
 
 
-const addBtn =
-    document.getElementById(
-        "addProfesseurBtn"
-    );
-
-if (addBtn) {
-
-    addBtn.addEventListener(
-        "click",
-        addProfesseur
-    );
-
-}
 
 document
     .querySelectorAll(
@@ -1462,6 +1449,9 @@ document
         );
 
     });
+
+
+
 
 
 
