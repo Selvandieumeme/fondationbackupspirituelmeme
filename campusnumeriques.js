@@ -1431,18 +1431,29 @@ if (addBtn) {
 
 
 
+// event bouton supprimer
 document
     .querySelectorAll(
         ".delete-prof-btn"
     )
-    .forEach(btn => {
+    .forEach(button => {
 
-        btn.addEventListener(
+        button.addEventListener(
             "click",
-            () => {
+            async () => {
 
-                removeProfesseur(
-                    btn.dataset.prof
+                const nomProfesseur =
+                    button.dataset.prof;
+
+                const confirmation =
+                    confirm(
+                        `Supprimer ${nomProfesseur} ?`
+                    );
+
+                if (!confirmation) return;
+
+                await removeProfesseur(
+                    nomProfesseur
                 );
 
             }
