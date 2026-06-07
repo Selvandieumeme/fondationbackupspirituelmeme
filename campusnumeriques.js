@@ -1324,6 +1324,21 @@ async function loadDirectorStats() {
 
     card.innerHTML = `
 
+
+const addBtn =
+    document.getElementById(
+        "addProfesseurBtn"
+    );
+
+if (addBtn) {
+
+    addBtn.addEventListener(
+        "click",
+        addProfesseur
+    );
+
+}
+
         <h3>
             🏢 Espace Directeur
         </h3>
@@ -1349,17 +1364,28 @@ async function loadDirectorStats() {
         </p>
 
         <p>
-            🏙️ Ville :
-            ${user.ville || "-"}
-        </p>
+    🏙️ Ville :
+    ${user.ville || "-"}
+</p>
 
-        <div>
+<div class="director-actions">
 
-            <strong>
-                Liste Professeurs
-            </strong>
+    <button
+        id="addProfesseurBtn">
 
-            <ul>
+        ➕ Ajouter Professeur
+
+    </button>
+
+</div>
+
+<div>
+
+    <strong>
+        Liste Professeurs
+    </strong>
+
+    <ul>
 
                 ${
                     (user.professeurs || [])
