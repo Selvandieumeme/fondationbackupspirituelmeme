@@ -1127,6 +1127,11 @@ CampusWord2007Simulator.RibbonConfig = {
             name: "Insertion"
         },
 
+      format: {
+            id: "tab-format",
+            name: "Format"
+        },
+
         pageLayout: {
             id: "tab-page-layout",
             name: "Mise en page"
@@ -1440,6 +1445,8 @@ CampusWord2007Simulator.RibbonPanels = {
     home: {},
 
     insert: {},
+
+   format: {},
 
     pageLayout: {},
 
