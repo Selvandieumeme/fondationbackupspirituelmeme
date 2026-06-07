@@ -6360,7 +6360,135 @@ campusProfileCompleted:
 
 
 
+// =====================================
+// AJOUTER PROFESSEUR DIRECTEUR
+// =====================================
 
+app.post(
+    "/academiques/directeur/add-professeur",
+    async (req, res) => {
+
+        try {
+
+            const {
+                directeurId,
+                nomProfesseur
+            } = req.body;
+
+            const directeur =
+                await Academique.findById(
+                    directeurId
+                );
+
+            if (
+                !directeur ||
+                directeur.role !== "directeur"
+            ) {
+                return res.status(404).json({
+                    success: false
+                });
+            }
+
+            if (
+                directeur.professeurs.includes(
+                    nomProfesseur
+                )
+            ) {
+                return res.status(400).json({
+                    success: false,
+                    message:
+                        "Professeur déjà présent"
+                });
+            }
+
+            directeur.professeurs.push(
+                nomProfesseur
+            );
+
+            directeur.nombreProfesseurs =
+                directeur.professeurs.length;
+
+            await directeur.save();
+
+            res.json({
+                success: true,
+                professeurs:
+                    directeur.professeurs
+            });
+
+        } catch (error) {
+
+            res.status(500).json({
+                success: false
+            });
+
+        }
+    }
+);
+
+
+
+
+
+
+
+
+
+// =====================================
+// SUPPRIMER PROFESSEUR DIRECTEUR
+// =====================================
+
+app.delete(
+    "/academiques/directeur/remove-professeur",
+    async (req, res) => {
+
+        try {
+
+            const {
+                directeurId,
+                nomProfesseur
+            } = req.body;
+
+            const directeur =
+                await Academique.findById(
+                    directeurId
+                );
+
+            if (
+                !directeur ||
+                directeur.role !== "directeur"
+            ) {
+                return res.status(404).json({
+                    success: false
+                });
+            }
+
+            directeur.professeurs =
+                directeur.professeurs.filter(
+                    p =>
+                        p !== nomProfesseur
+                );
+
+            directeur.nombreProfesseurs =
+                directeur.professeurs.length;
+
+            await directeur.save();
+
+            res.json({
+                success: true,
+                professeurs:
+                    directeur.professeurs
+            });
+
+        } catch (error) {
+
+            res.status(500).json({
+                success: false
+            });
+
+        }
+    }
+);
 
 
 
