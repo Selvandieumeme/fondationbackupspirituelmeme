@@ -1328,24 +1328,6 @@ async function loadDirectorStats() {
             🏢 Espace Directeur
         </h3>
 
-`;
-  
-const addBtn =
-    document.getElementById(
-        "addProfesseurBtn"
-    );
-
-if (addBtn) {
-
-    addBtn.addEventListener(
-        "click",
-        addProfesseur
-    );
-
-}
-
-
-
         <p>
             Institution :
             ${user.nomInstitution || "-"}
@@ -1394,15 +1376,12 @@ ${(user.professeurs || [])
 .map(
     professeur => `
     <li>
-
         ${professeur}
 
         <button
             class="delete-prof-btn"
             data-prof="${professeur}">
-
             🗑️
-
         </button>
 
     </li>
@@ -1410,8 +1389,9 @@ ${(user.professeurs || [])
 )
 .join("")}
 
-</ul>
-}
+    </ul>
+
+</div>
 
 
 
@@ -1431,8 +1411,22 @@ ${(user.professeurs || [])
         </div>
 
     `;
+
+const addBtn =
+    document.getElementById(
+        "addProfesseurBtn"
+    );
+
+if (addBtn) {
+
+    addBtn.addEventListener(
+        "click",
+        addProfesseur
+    );
+
 }
 
+}
 
 
 
