@@ -1328,6 +1328,24 @@ async function loadDirectorStats() {
             🏢 Espace Directeur
         </h3>
 
+`;
+  
+const addBtn =
+    document.getElementById(
+        "addProfesseurBtn"
+    );
+
+if (addBtn) {
+
+    addBtn.addEventListener(
+        "click",
+        addProfesseur
+    );
+
+}
+
+
+
         <p>
             Institution :
             ${user.nomInstitution || "-"}
@@ -1393,21 +1411,6 @@ ${(user.professeurs || [])
 .join("")}
 
 </ul>
-}
-
-
-const addBtn =
-    document.getElementById(
-        "addProfesseurBtn"
-    );
-
-if (addBtn) {
-
-    addBtn.addEventListener(
-        "click",
-        addProfesseur
-    );
-
 }
 
 
