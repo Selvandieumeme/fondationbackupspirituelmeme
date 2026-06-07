@@ -3105,3 +3105,271 @@ CampusWord2007Simulator.SystemLayers = {
             .getAll();
     }
 };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+CampusWord2007Simulator.MouseEngine = {};
+
+CampusWord2007Simulator.MouseState = {
+
+    x: 0,
+
+    y: 0,
+
+    isDown: false,
+
+    leftButton: false,
+
+    rightButton: false,
+
+    middleButton: false,
+
+    lastClickTime: 0,
+
+    clickCount: 0
+};
+
+
+
+
+
+
+/* ==========================================================
+   MOUSE ENGINE CORE
+   ========================================================== */
+
+CampusWord2007Simulator.MouseEngine = {
+
+    initialized: false,
+
+    initialize() {
+
+        if (this.initialized) {
+            return;
+        }
+
+        document.addEventListener(
+            "mousemove",
+            this.handleMove.bind(this)
+        );
+
+        document.addEventListener(
+            "mousedown",
+            this.handleDown.bind(this)
+        );
+
+        document.addEventListener(
+            "mouseup",
+            this.handleUp.bind(this)
+        );
+
+        document.addEventListener(
+            "contextmenu",
+            this.handleContextMenu.bind(this)
+        );
+
+        this.initialized = true;
+
+        CampusWord2007Simulator
+            .Logger
+            .log(
+                "Mouse Engine Initialized"
+            );
+    },
+
+    handleMove(event) {
+
+        const state =
+            CampusWord2007Simulator
+                .MouseState;
+
+        state.x =
+            event.clientX;
+
+        state.y =
+            event.clientY;
+
+        CampusWord2007Simulator
+            .EventBus
+            .emit(
+                "mouse:move",
+                {
+                    x: state.x,
+                    y: state.y
+                }
+            );
+    },
+
+    handleDown(event) {
+
+        const state =
+            CampusWord2007Simulator
+                .MouseState;
+
+        state.isDown = true;
+
+        if (event.button === 0) {
+            state.leftButton = true;
+        }
+
+        if (event.button === 1) {
+            state.middleButton = true;
+        }
+
+        if (event.button === 2) {
+            state.rightButton = true;
+        }
+
+        CampusWord2007Simulator
+            .EventBus
+            .emit(
+                "mouse:down",
+                {
+                    button:
+                        event.button
+                }
+            );
+    },
+
+    handleUp(event) {
+
+        const state =
+            CampusWord2007Simulator
+                .MouseState;
+
+        state.isDown = false;
+
+        state.leftButton = false;
+
+        state.middleButton = false;
+
+        state.rightButton = false;
+
+        CampusWord2007Simulator
+            .EventBus
+            .emit(
+                "mouse:up",
+                {
+                    button:
+                        event.button
+                }
+            );
+    },
+
+    handleContextMenu(event) {
+
+        CampusWord2007Simulator
+            .EventBus
+            .emit(
+                "mouse:rightclick",
+                {
+                    x:
+                        event.clientX,
+                    y:
+                        event.clientY
+                }
+            );
+    }
+};
+
+
+
+
+
+
+
+CampusWord2007Simulator.TouchEngine = {};
+
+CampusWord2007Simulator.TouchState = {
+
+    active: false,
+
+    x: 0,
+
+    y: 0,
+
+    fingerCount: 0
+};
+
+
+
+CampusWord2007Simulator.CursorEngine = {};
+
+CampusWord2007Simulator.CursorRegistry = {
+
+    default: "default",
+
+    text: "text",
+
+    pointer: "pointer",
+
+    move: "move",
+
+    wait: "wait"
+};
+
+
+CampusWord2007Simulator.VirtualFocusEngine = {};
+
+CampusWord2007Simulator.VirtualFocusState = {
+
+    activeElement: null,
+
+    focusedArea: null,
+
+    lastFocusedArea: null
+};
+
+
+
+CampusWord2007Simulator.PointerTracker = {};
+
+
+CampusWord2007Simulator.PointerState = {
+
+    startX: 0,
+
+    startY: 0,
+
+    currentX: 0,
+
+    currentY: 0,
+
+    deltaX: 0,
+
+    deltaY: 0,
+
+    dragging: false
+};
+
+
+
+
