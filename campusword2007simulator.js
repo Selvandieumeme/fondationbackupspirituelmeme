@@ -1,0 +1,3100 @@
+/* ==========================================================
+   CAMPUS WORD 2007 SIMULATOR
+   PHASE 1A
+   CORE BOOTSTRAP
+   ========================================================== */
+
+"use strict";
+
+/* ==========================================================
+   GLOBAL NAMESPACE
+   ========================================================== */
+
+const CampusWord2007Simulator = {};
+
+/* ==========================================================
+   GLOBAL CONFIGURATION
+   ========================================================== */
+
+CampusWord2007Simulator.config = {
+
+    appName: "Campus Word 2007 Simulator",
+
+    appCode: "CAMPUS_WORD_2007",
+
+    version: "1.0.0",
+
+    apiBaseUrl:
+        "https://api.fondationbackupspirituel.com",
+
+    debug: true,
+
+    loadingDuration: 1500,
+
+    apiTimeout: 15000
+};
+
+/* ==========================================================
+   GLOBAL STATE
+   ========================================================== */
+
+CampusWord2007Simulator.state = {
+
+    initialized: false,
+
+    loading: true,
+
+    online: false,
+
+    activeTab: "home",
+
+    zoomLevel: 100,
+
+    currentDocument: null,
+
+    documentLoaded: false,
+
+    apiConnected: false,
+
+    bootCompleted: false
+};
+
+/* ==========================================================
+   DOM CACHE
+   ========================================================== */
+
+CampusWord2007Simulator.dom = {};
+
+/* ==========================================================
+   DOM MANAGER
+   ========================================================== */
+
+CampusWord2007Simulator.DOMManager = {
+
+    cache() {
+
+        const dom =
+            CampusWord2007Simulator.dom;
+
+        dom.loadingScreen =
+            document.getElementById(
+                "word-loading-screen"
+            );
+
+        dom.wordApp =
+            document.getElementById(
+                "word-app"
+            );
+
+        dom.titleBar =
+            document.getElementById(
+                "title-bar"
+            );
+
+        dom.officeButton =
+            document.getElementById(
+                "office-button"
+            );
+
+        dom.quickAccessToolbar =
+            document.getElementById(
+                "quick-access-toolbar"
+            );
+
+        dom.ribbonTabs =
+            document.getElementById(
+                "ribbon-tabs"
+            );
+
+        dom.ribbonContainer =
+            document.getElementById(
+                "ribbon-container"
+            );
+
+        dom.workspace =
+            document.getElementById(
+                "workspace"
+            );
+
+        dom.documentViewport =
+            document.getElementById(
+                "document-viewport"
+            );
+
+        dom.documentPage =
+            document.getElementById(
+                "document-page"
+            );
+
+        dom.pageContent =
+            document.getElementById(
+                "page-content"
+            );
+
+        dom.statusBar =
+            document.getElementById(
+                "status-bar"
+            );
+
+        dom.zoomControl =
+            document.getElementById(
+                "zoom-control"
+            );
+
+        dom.loadingProgressBar =
+            document.getElementById(
+                "loading-progress-bar"
+            );
+
+        dom.documentTitle =
+            document.getElementById(
+                "document-title"
+            );
+
+        return dom;
+    }
+};
+
+/* ==========================================================
+   EVENT BUS
+   ========================================================== */
+
+CampusWord2007Simulator.EventBus = {
+
+    events: {},
+
+    on(eventName, callback) {
+
+        if (!this.events[eventName]) {
+
+            this.events[eventName] = [];
+        }
+
+        this.events[eventName].push(
+            callback
+        );
+    },
+
+    emit(eventName, payload = {}) {
+
+        if (
+            !this.events[eventName]
+        ) {
+            return;
+        }
+
+        this.events[eventName]
+            .forEach(callback => {
+
+                try {
+
+                    callback(payload);
+
+                } catch (error) {
+
+                    CampusWord2007Simulator
+                        .ErrorManager
+                        .capture(error);
+                }
+
+            });
+    },
+
+    remove(eventName) {
+
+        delete this.events[eventName];
+    }
+};
+
+/* ==========================================================
+   ERROR MANAGER
+   ========================================================== */
+
+CampusWord2007Simulator.ErrorManager = {
+
+    capture(error) {
+
+        console.error(
+            "[Campus Word Error]",
+            error
+        );
+
+        CampusWord2007Simulator
+            .EventBus
+            .emit(
+                "system:error",
+                {
+                    error
+                }
+            );
+    }
+};
+
+/* ==========================================================
+   LOADING MANAGER
+   ========================================================== */
+
+CampusWord2007Simulator.LoadingManager = {
+
+    setProgress(percent) {
+
+        const progressBar =
+            CampusWord2007Simulator
+                .dom
+                .loadingProgressBar;
+
+        if (!progressBar) {
+            return;
+        }
+
+        progressBar.style.width =
+            percent + "%";
+    },
+
+    show() {
+
+        const screen =
+            CampusWord2007Simulator
+                .dom
+                .loadingScreen;
+
+        if (!screen) {
+            return;
+        }
+
+        screen.style.display =
+            "flex";
+    },
+
+    hide() {
+
+        const screen =
+            CampusWord2007Simulator
+                .dom
+                .loadingScreen;
+
+        if (!screen) {
+            return;
+        }
+
+        screen.style.opacity = "0";
+
+        setTimeout(() => {
+
+            screen.style.display =
+                "none";
+
+        }, 500);
+    }
+};
+
+/* ==========================================================
+   API MANAGER
+   ========================================================== */
+
+CampusWord2007Simulator.ApiManager = {
+
+    async request(
+        endpoint,
+        options = {}
+    ) {
+
+        const baseUrl =
+            CampusWord2007Simulator
+                .config
+                .apiBaseUrl;
+
+        const controller =
+            new AbortController();
+
+        const timeout =
+            setTimeout(
+                () =>
+                    controller.abort(),
+                CampusWord2007Simulator
+                    .config
+                    .apiTimeout
+            );
+
+        try {
+
+            const response =
+                await fetch(
+                    `${baseUrl}${endpoint}`,
+                    {
+                        ...options,
+                        signal:
+                            controller.signal,
+                        headers: {
+                            "Content-Type":
+                                "application/json",
+                            ...(options.headers || {})
+                        }
+                    }
+                );
+
+            clearTimeout(timeout);
+
+            return response;
+
+        } catch (error) {
+
+            clearTimeout(timeout);
+
+            throw error;
+        }
+    },
+
+    async checkConnection() {
+
+        try {
+
+            const response =
+                await this.request(
+                    "/campus-word-2007/status"
+                );
+
+            CampusWord2007Simulator
+                .state
+                .apiConnected =
+                response.ok;
+
+            return response.ok;
+
+        } catch (error) {
+
+            CampusWord2007Simulator
+                .state
+                .apiConnected =
+                false;
+
+            return false;
+        }
+    }
+};
+
+/* ==========================================================
+   APPLICATION LOGGER
+   ========================================================== */
+
+CampusWord2007Simulator.Logger = {
+
+    log(...data) {
+
+        if (
+            CampusWord2007Simulator
+                .config
+                .debug
+        ) {
+
+            console.log(
+                "[Campus Word]",
+                ...data
+            );
+        }
+    },
+
+    warn(...data) {
+
+        console.warn(
+            "[Campus Word]",
+            ...data
+        );
+    },
+
+    error(...data) {
+
+        console.error(
+            "[Campus Word]",
+            ...data
+        );
+    }
+};
+
+/* ==========================================================
+   BOOTSTRAP ENGINE
+   ========================================================== */
+
+CampusWord2007Simulator.Bootstrap = {
+
+    async initialize() {
+
+        try {
+
+            CampusWord2007Simulator
+                .Logger
+                .log(
+                    "Initialization started"
+                );
+
+            CampusWord2007Simulator
+                .DOMManager
+                .cache();
+
+            CampusWord2007Simulator
+                .LoadingManager
+                .show();
+
+            CampusWord2007Simulator
+                .LoadingManager
+                .setProgress(15);
+
+            CampusWord2007Simulator
+                .EventBus
+                .emit(
+                    "application:starting"
+                );
+
+            await this.loadConfiguration();
+
+            CampusWord2007Simulator
+                .LoadingManager
+                .setProgress(40);
+
+            await this.checkApi();
+
+            CampusWord2007Simulator
+                .LoadingManager
+                .setProgress(75);
+
+            await this.finalize();
+
+            CampusWord2007Simulator
+                .LoadingManager
+                .setProgress(100);
+
+            CampusWord2007Simulator
+                .LoadingManager
+                .hide();
+
+            CampusWord2007Simulator
+                .state
+                .initialized = true;
+
+            CampusWord2007Simulator
+                .state
+                .bootCompleted = true;
+
+            CampusWord2007Simulator
+                .state
+                .loading = false;
+
+            CampusWord2007Simulator
+                .EventBus
+                .emit(
+                    "application:ready"
+                );
+
+            CampusWord2007Simulator
+                .Logger
+                .log(
+                    "Initialization complete"
+                );
+
+        } catch (error) {
+
+            CampusWord2007Simulator
+                .ErrorManager
+                .capture(error);
+        }
+    },
+
+    async loadConfiguration() {
+
+        CampusWord2007Simulator
+            .Logger
+            .log(
+                "Loading configuration"
+            );
+
+        return true;
+    },
+
+    async checkApi() {
+
+        CampusWord2007Simulator
+            .Logger
+            .log(
+                "Checking API connection"
+            );
+
+        await CampusWord2007Simulator
+            .ApiManager
+            .checkConnection();
+    },
+
+    async finalize() {
+
+        return new Promise(
+            resolve => {
+
+                setTimeout(
+                    () => {
+
+                        resolve();
+
+                    },
+                    500
+                );
+            }
+        );
+    }
+};
+
+/* ==========================================================
+   GLOBAL EVENTS
+   ========================================================== */
+
+CampusWord2007Simulator
+    .EventBus
+    .on(
+        "application:ready",
+        () => {
+
+            CampusWord2007Simulator
+                .Logger
+                .log(
+                    "Application Ready"
+                );
+        }
+    );
+
+/* ==========================================================
+   DOM READY
+   ========================================================== */
+
+document.addEventListener(
+    "DOMContentLoaded",
+    () => {
+
+        CampusWord2007Simulator
+            .Bootstrap
+            .initialize();
+    }
+);
+
+/* ==========================================================
+   GLOBAL EXPORT
+   ========================================================== */
+
+window.CampusWord2007Simulator =
+    CampusWord2007Simulator;
+
+
+
+
+
+
+/* ==========================================================
+   PHASE 1B
+   APPLICATION LIFECYCLE
+   STARTUP ENGINE
+   SHUTDOWN ENGINE
+   LAYOUT ENGINE
+   RESIZE ENGINE
+   RESPONSIVE ENGINE
+   ========================================================== */
+
+/* ==========================================================
+   VIEWPORT STATE
+   ========================================================== */
+
+CampusWord2007Simulator.state.viewport = {
+
+    width: window.innerWidth,
+
+    height: window.innerHeight,
+
+    mode: "desktop",
+
+    orientation:
+        window.innerWidth >
+        window.innerHeight
+            ? "landscape"
+            : "portrait"
+};
+
+/* ==========================================================
+   STARTUP ENGINE
+   ========================================================== */
+
+CampusWord2007Simulator.StartupEngine = {
+
+    async start() {
+
+        CampusWord2007Simulator
+            .Logger
+            .log(
+                "Startup Engine Started"
+            );
+
+        CampusWord2007Simulator
+            .LayoutEngine
+            .initialize();
+
+        CampusWord2007Simulator
+            .ResponsiveEngine
+            .detect();
+
+        CampusWord2007Simulator
+            .EventBus
+            .emit(
+                "startup:completed"
+            );
+    }
+};
+
+/* ==========================================================
+   SHUTDOWN ENGINE
+   ========================================================== */
+
+CampusWord2007Simulator.ShutdownEngine = {
+
+    async shutdown() {
+
+        CampusWord2007Simulator
+            .Logger
+            .warn(
+                "Application Shutdown"
+            );
+
+        CampusWord2007Simulator
+            .EventBus
+            .emit(
+                "application:shutdown"
+            );
+    }
+};
+
+/* ==========================================================
+   LAYOUT ENGINE
+   ========================================================== */
+
+CampusWord2007Simulator.LayoutEngine = {
+
+    initialize() {
+
+        this.updateViewport();
+
+        this.updateDocumentArea();
+
+        this.updateWorkspace();
+
+        CampusWord2007Simulator
+            .Logger
+            .log(
+                "Layout Initialized"
+            );
+    },
+
+    updateViewport() {
+
+        CampusWord2007Simulator
+            .state
+            .viewport
+            .width =
+            window.innerWidth;
+
+        CampusWord2007Simulator
+            .state
+            .viewport
+            .height =
+            window.innerHeight;
+    },
+
+    updateWorkspace() {
+
+        const workspace =
+            CampusWord2007Simulator
+                .dom
+                .workspace;
+
+        if (!workspace) {
+            return;
+        }
+
+        workspace.dataset.viewport =
+            CampusWord2007Simulator
+                .state
+                .viewport
+                .mode;
+    },
+
+    updateDocumentArea() {
+
+        const page =
+            CampusWord2007Simulator
+                .dom
+                .documentPage;
+
+        if (!page) {
+            return;
+        }
+
+        page.dataset.ready = "true";
+    },
+
+    refresh() {
+
+        this.updateViewport();
+
+        this.updateWorkspace();
+
+        this.updateDocumentArea();
+
+        CampusWord2007Simulator
+            .EventBus
+            .emit(
+                "layout:updated"
+            );
+    }
+};
+
+/* ==========================================================
+   RESIZE ENGINE
+   ========================================================== */
+
+CampusWord2007Simulator.ResizeEngine = {
+
+    resizeTimer: null,
+
+    initialize() {
+
+        window.addEventListener(
+            "resize",
+            () => {
+
+                clearTimeout(
+                    this.resizeTimer
+                );
+
+                this.resizeTimer =
+                    setTimeout(
+                        () => {
+
+                            this.handleResize();
+
+                        },
+                        100
+                    );
+            }
+        );
+
+        window.addEventListener(
+            "orientationchange",
+            () => {
+
+                this.handleResize();
+            }
+        );
+
+        CampusWord2007Simulator
+            .Logger
+            .log(
+                "Resize Engine Initialized"
+            );
+    },
+
+    handleResize() {
+
+        CampusWord2007Simulator
+            .Logger
+            .log(
+                "Window Resized"
+            );
+
+        CampusWord2007Simulator
+            .LayoutEngine
+            .refresh();
+
+        CampusWord2007Simulator
+            .ResponsiveEngine
+            .detect();
+
+        CampusWord2007Simulator
+            .EventBus
+            .emit(
+                "window:resized"
+            );
+    }
+};
+
+/* ==========================================================
+   RESPONSIVE ENGINE
+   ========================================================== */
+
+CampusWord2007Simulator.ResponsiveEngine = {
+
+    detect() {
+
+        const width =
+            window.innerWidth;
+
+        let mode =
+            "desktop";
+
+        if (width <= 480) {
+
+            mode = "mobile";
+
+        } else if (
+            width <= 1024
+        ) {
+
+            mode = "tablet";
+
+        } else {
+
+            mode = "desktop";
+        }
+
+        CampusWord2007Simulator
+            .state
+            .viewport
+            .mode = mode;
+
+        CampusWord2007Simulator
+            .state
+            .viewport
+            .orientation =
+            window.innerWidth >
+            window.innerHeight
+                ? "landscape"
+                : "portrait";
+
+        this.applyMode(mode);
+
+        CampusWord2007Simulator
+            .Logger
+            .log(
+                "Responsive Mode:",
+                mode
+            );
+
+        CampusWord2007Simulator
+            .EventBus
+            .emit(
+                "responsive:changed",
+                {
+                    mode
+                }
+            );
+    },
+
+    applyMode(mode) {
+
+        document.body.classList.remove(
+            "desktop-mode",
+            "tablet-mode",
+            "mobile-mode"
+        );
+
+        switch (mode) {
+
+            case "mobile":
+
+                document.body.classList.add(
+                    "mobile-mode"
+                );
+
+                break;
+
+            case "tablet":
+
+                document.body.classList.add(
+                    "tablet-mode"
+                );
+
+                break;
+
+            default:
+
+                document.body.classList.add(
+                    "desktop-mode"
+                );
+        }
+    }
+};
+
+/* ==========================================================
+   WINDOW VISIBILITY ENGINE
+   ========================================================== */
+
+CampusWord2007Simulator.VisibilityEngine = {
+
+    initialize() {
+
+        document.addEventListener(
+            "visibilitychange",
+            () => {
+
+                if (
+                    document.hidden
+                ) {
+
+                    CampusWord2007Simulator
+                        .EventBus
+                        .emit(
+                            "application:hidden"
+                        );
+
+                } else {
+
+                    CampusWord2007Simulator
+                        .EventBus
+                        .emit(
+                            "application:visible"
+                        );
+                }
+            }
+        );
+    }
+};
+
+/* ==========================================================
+   WINDOW FOCUS ENGINE
+   ========================================================== */
+
+CampusWord2007Simulator.FocusEngine = {
+
+    initialize() {
+
+        window.addEventListener(
+            "focus",
+            () => {
+
+                CampusWord2007Simulator
+                    .EventBus
+                    .emit(
+                        "application:focus"
+                    );
+            }
+        );
+
+        window.addEventListener(
+            "blur",
+            () => {
+
+                CampusWord2007Simulator
+                    .EventBus
+                    .emit(
+                        "application:blur"
+                    );
+            }
+        );
+    }
+};
+
+/* ==========================================================
+   LIFECYCLE MANAGER
+   ========================================================== */
+
+CampusWord2007Simulator.LifecycleManager = {
+
+    initialize() {
+
+        CampusWord2007Simulator
+            .StartupEngine
+            .start();
+
+        CampusWord2007Simulator
+            .ResizeEngine
+            .initialize();
+
+        CampusWord2007Simulator
+            .VisibilityEngine
+            .initialize();
+
+        CampusWord2007Simulator
+            .FocusEngine
+            .initialize();
+
+        CampusWord2007Simulator
+            .Logger
+            .log(
+                "Lifecycle Manager Initialized"
+            );
+    }
+};
+
+/* ==========================================================
+   BEFORE UNLOAD
+   ========================================================== */
+
+window.addEventListener(
+    "beforeunload",
+    () => {
+
+        CampusWord2007Simulator
+            .ShutdownEngine
+            .shutdown();
+    }
+);
+
+/* ==========================================================
+   APPLICATION READY HOOK
+   ========================================================== */
+
+CampusWord2007Simulator
+    .EventBus
+    .on(
+        "application:ready",
+        () => {
+
+            CampusWord2007Simulator
+                .LifecycleManager
+                .initialize();
+        }
+    );
+
+/* ==========================================================
+   LIFECYCLE EVENTS
+   ========================================================== */
+
+CampusWord2007Simulator
+    .EventBus
+    .on(
+        "responsive:changed",
+        payload => {
+
+            CampusWord2007Simulator
+                .Logger
+                .log(
+                    "Mode Updated:",
+                    payload.mode
+                );
+        }
+    );
+
+CampusWord2007Simulator
+    .EventBus
+    .on(
+        "window:resized",
+        () => {
+
+            CampusWord2007Simulator
+                .Logger
+                .log(
+                    "Resize Event Completed"
+                );
+        }
+    );
+
+
+
+
+
+
+
+
+/* ==========================================================
+   PHASE 1C
+   RIBBON MANAGER
+   ACTIVE TABS
+   TAB SWITCHING
+   RIBBON STATES
+   RIBBON EVENTS
+   ========================================================== */
+
+/* ==========================================================
+   RIBBON STATE
+   ========================================================== */
+
+CampusWord2007Simulator.state.ribbon = {
+
+    activeTab: "home",
+
+    initialized: false,
+
+    tabsLoaded: false
+};
+
+/* ==========================================================
+   RIBBON CONFIGURATION
+   ========================================================== */
+
+CampusWord2007Simulator.RibbonConfig = {
+
+    tabs: {
+
+        home: {
+            id: "tab-home",
+            name: "Accueil"
+        },
+
+        insert: {
+            id: "tab-insert",
+            name: "Insertion"
+        },
+
+        pageLayout: {
+            id: "tab-page-layout",
+            name: "Mise en page"
+        },
+
+        references: {
+            id: "tab-references",
+            name: "Références"
+        },
+
+        mailings: {
+            id: "tab-mailings",
+            name: "Publipostage"
+        },
+
+        review: {
+            id: "tab-review",
+            name: "Révision"
+        },
+
+        view: {
+            id: "tab-view",
+            name: "Affichage"
+        }
+    }
+};
+
+/* ==========================================================
+   RIBBON DOM CACHE
+   ========================================================== */
+
+CampusWord2007Simulator.RibbonDOM = {
+
+    tabs: {}
+};
+
+/* ==========================================================
+   RIBBON MANAGER
+   ========================================================== */
+
+CampusWord2007Simulator.RibbonManager = {
+
+    initialize() {
+
+        this.cacheTabs();
+
+        this.attachEvents();
+
+        this.activateTab("home");
+
+        CampusWord2007Simulator
+            .state
+            .ribbon
+            .initialized = true;
+
+        CampusWord2007Simulator
+            .state
+            .ribbon
+            .tabsLoaded = true;
+
+        CampusWord2007Simulator
+            .Logger
+            .log(
+                "Ribbon Manager Initialized"
+            );
+
+        CampusWord2007Simulator
+            .EventBus
+            .emit(
+                "ribbon:initialized"
+            );
+    },
+
+    cacheTabs() {
+
+        const config =
+            CampusWord2007Simulator
+                .RibbonConfig
+                .tabs;
+
+        Object.keys(config)
+            .forEach(key => {
+
+                CampusWord2007Simulator
+                    .RibbonDOM
+                    .tabs[key] =
+                    document.getElementById(
+                        config[key].id
+                    );
+            });
+    },
+
+    attachEvents() {
+
+        Object.keys(
+            CampusWord2007Simulator
+                .RibbonDOM
+                .tabs
+        ).forEach(tabKey => {
+
+            const tabElement =
+                CampusWord2007Simulator
+                    .RibbonDOM
+                    .tabs[tabKey];
+
+            if (!tabElement) {
+                return;
+            }
+
+            tabElement
+                .addEventListener(
+                    "click",
+                    () => {
+
+                        this.activateTab(
+                            tabKey
+                        );
+                    }
+                );
+
+            tabElement
+                .addEventListener(
+                    "mouseenter",
+                    () => {
+
+                        CampusWord2007Simulator
+                            .EventBus
+                            .emit(
+                                "ribbon:hover",
+                                {
+                                    tab:
+                                        tabKey
+                                }
+                            );
+                    }
+                );
+        });
+    },
+
+    activateTab(tabKey) {
+
+        if (
+            !CampusWord2007Simulator
+                .RibbonDOM
+                .tabs[tabKey]
+        ) {
+            return;
+        }
+
+        this.clearActiveTabs();
+
+        CampusWord2007Simulator
+            .RibbonDOM
+            .tabs[tabKey]
+            .classList
+            .add(
+                "active-tab"
+            );
+
+        CampusWord2007Simulator
+            .state
+            .activeTab =
+            tabKey;
+
+        CampusWord2007Simulator
+            .state
+            .ribbon
+            .activeTab =
+            tabKey;
+
+        CampusWord2007Simulator
+            .Logger
+            .log(
+                "Ribbon Tab Activated:",
+                tabKey
+            );
+
+        CampusWord2007Simulator
+            .EventBus
+            .emit(
+                "ribbon:tabChanged",
+                {
+                    activeTab:
+                        tabKey
+                }
+            );
+    },
+
+    clearActiveTabs() {
+
+        Object.values(
+            CampusWord2007Simulator
+                .RibbonDOM
+                .tabs
+        ).forEach(tab => {
+
+            if (!tab) {
+                return;
+            }
+
+            tab.classList.remove(
+                "active-tab"
+            );
+        });
+    },
+
+    getActiveTab() {
+
+        return CampusWord2007Simulator
+            .state
+            .ribbon
+            .activeTab;
+    }
+};
+
+/* ==========================================================
+   RIBBON STATE MANAGER
+   ========================================================== */
+
+CampusWord2007Simulator.RibbonStateManager = {
+
+    setState(stateName, value) {
+
+        CampusWord2007Simulator
+            .state
+            .ribbon[stateName] =
+            value;
+
+        CampusWord2007Simulator
+            .EventBus
+            .emit(
+                "ribbon:stateChanged",
+                {
+                    stateName,
+                    value
+                }
+            );
+    },
+
+    getState(stateName) {
+
+        return CampusWord2007Simulator
+            .state
+            .ribbon[stateName];
+    }
+};
+
+/* ==========================================================
+   RIBBON EVENT REGISTRY
+   ========================================================== */
+
+CampusWord2007Simulator.RibbonEvents = {
+
+    initialize() {
+
+        CampusWord2007Simulator
+            .EventBus
+            .on(
+                "ribbon:tabChanged",
+                payload => {
+
+                    CampusWord2007Simulator
+                        .Logger
+                        .log(
+                            "Active Ribbon Tab:",
+                            payload.activeTab
+                        );
+                }
+            );
+
+        CampusWord2007Simulator
+            .EventBus
+            .on(
+                "ribbon:hover",
+                payload => {
+
+                    CampusWord2007Simulator
+                        .Logger
+                        .log(
+                            "Ribbon Hover:",
+                            payload.tab
+                        );
+                }
+            );
+
+        CampusWord2007Simulator
+            .EventBus
+            .on(
+                "ribbon:stateChanged",
+                payload => {
+
+                    CampusWord2007Simulator
+                        .Logger
+                        .log(
+                            "Ribbon State Updated:",
+                            payload.stateName,
+                            payload.value
+                        );
+                }
+            );
+    }
+};
+
+/* ==========================================================
+   RIBBON PANEL REGISTRY
+   FUTURE PHASES
+   ========================================================== */
+
+CampusWord2007Simulator.RibbonPanels = {
+
+    home: {},
+
+    insert: {},
+
+    pageLayout: {},
+
+    references: {},
+
+    mailings: {},
+
+    review: {},
+
+    view: {}
+};
+
+/* ==========================================================
+   RIBBON LIFECYCLE
+   ========================================================== */
+
+CampusWord2007Simulator
+    .EventBus
+    .on(
+        "application:ready",
+        () => {
+
+            CampusWord2007Simulator
+                .RibbonManager
+                .initialize();
+
+            CampusWord2007Simulator
+                .RibbonEvents
+                .initialize();
+        }
+    );
+
+/* ==========================================================
+   PUBLIC API
+   ========================================================== */
+
+CampusWord2007Simulator.Ribbon = {
+
+    activate(tabName) {
+
+        CampusWord2007Simulator
+            .RibbonManager
+            .activateTab(
+                tabName
+            );
+    },
+
+    current() {
+
+        return CampusWord2007Simulator
+            .RibbonManager
+            .getActiveTab();
+    }
+};
+
+
+
+
+
+
+
+/* ==========================================================
+   PHASE 1D
+   STATUS BAR
+   ZOOM MANAGER
+   VIEW MODES
+   ========================================================== */
+
+/* ==========================================================
+   STATUS STATE
+   ========================================================== */
+
+CampusWord2007Simulator.state.status = {
+
+    pageNumber: 1,
+
+    totalPages: 1,
+
+    wordCount: 0,
+
+    language: "Français",
+
+    zoomPercentage: 100,
+
+    viewMode: "print"
+};
+
+/* ==========================================================
+   STATUS DOM CACHE
+   ========================================================== */
+
+CampusWord2007Simulator.StatusDOM = {
+
+    pageNumber: null,
+
+    wordCount: null,
+
+    language: null,
+
+    zoomPercentage: null,
+
+    printLayout: null,
+
+    webLayout: null,
+
+    readingLayout: null
+};
+
+/* ==========================================================
+   ZOOM STATE
+   ========================================================== */
+
+CampusWord2007Simulator.state.zoom = {
+
+    current: 100,
+
+    min: 25,
+
+    max: 500,
+
+    step: 10
+};
+
+/* ==========================================================
+   STATUS MANAGER
+   ========================================================== */
+
+CampusWord2007Simulator.StatusManager = {
+
+    initialize() {
+
+        this.cache();
+
+        this.refresh();
+
+        CampusWord2007Simulator
+            .Logger
+            .log(
+                "Status Manager Initialized"
+            );
+    },
+
+    cache() {
+
+        const dom =
+            CampusWord2007Simulator.StatusDOM;
+
+        dom.pageNumber =
+            document.getElementById(
+                "status-page-number"
+            );
+
+        dom.wordCount =
+            document.getElementById(
+                "status-word-count"
+            );
+
+        dom.language =
+            document.getElementById(
+                "status-language"
+            );
+
+        dom.zoomPercentage =
+            document.getElementById(
+                "status-zoom-percentage"
+            );
+
+        dom.printLayout =
+            document.getElementById(
+                "print-layout-view"
+            );
+
+        dom.webLayout =
+            document.getElementById(
+                "web-layout-view"
+            );
+
+        dom.readingLayout =
+            document.getElementById(
+                "reading-layout-view"
+            );
+    },
+
+    refresh() {
+
+        const state =
+            CampusWord2007Simulator
+                .state
+                .status;
+
+        const dom =
+            CampusWord2007Simulator
+                .StatusDOM;
+
+        if (dom.pageNumber) {
+
+            dom.pageNumber.textContent =
+                `Page ${state.pageNumber} sur ${state.totalPages}`;
+        }
+
+        if (dom.wordCount) {
+
+            dom.wordCount.textContent =
+                `${state.wordCount} mot`;
+        }
+
+        if (dom.language) {
+
+            dom.language.textContent =
+                state.language;
+        }
+
+        if (dom.zoomPercentage) {
+
+            dom.zoomPercentage.textContent =
+                `${state.zoomPercentage}%`;
+        }
+    },
+
+    update(data = {}) {
+
+        Object.assign(
+            CampusWord2007Simulator
+                .state
+                .status,
+            data
+        );
+
+        this.refresh();
+
+        CampusWord2007Simulator
+            .EventBus
+            .emit(
+                "status:updated",
+                data
+            );
+    }
+};
+
+/* ==========================================================
+   ZOOM MANAGER
+   ========================================================== */
+
+CampusWord2007Simulator.ZoomManager = {
+
+    initialize() {
+
+        this.cache();
+
+        this.attachEvents();
+
+        this.updateZoom(
+            CampusWord2007Simulator
+                .state
+                .zoom
+                .current
+        );
+
+        CampusWord2007Simulator
+            .Logger
+            .log(
+                "Zoom Manager Initialized"
+            );
+    },
+
+    cache() {
+
+        this.zoomIn =
+            document.getElementById(
+                "zoom-in"
+            );
+
+        this.zoomOut =
+            document.getElementById(
+                "zoom-out"
+            );
+
+        this.zoomTrack =
+            document.getElementById(
+                "zoom-slider-track"
+            );
+
+        this.zoomThumb =
+            document.getElementById(
+                "zoom-slider-thumb"
+            );
+    },
+
+    attachEvents() {
+
+        if (this.zoomIn) {
+
+            this.zoomIn
+                .addEventListener(
+                    "click",
+                    () => {
+
+                        this.zoomPlus();
+                    }
+                );
+        }
+
+        if (this.zoomOut) {
+
+            this.zoomOut
+                .addEventListener(
+                    "click",
+                    () => {
+
+                        this.zoomMinus();
+                    }
+                );
+        }
+
+        if (this.zoomTrack) {
+
+            this.zoomTrack
+                .addEventListener(
+                    "click",
+                    event => {
+
+                        this.handleTrackClick(
+                            event
+                        );
+                    }
+                );
+        }
+    },
+
+    zoomPlus() {
+
+        const state =
+            CampusWord2007Simulator
+                .state
+                .zoom;
+
+        this.updateZoom(
+            state.current +
+            state.step
+        );
+    },
+
+    zoomMinus() {
+
+        const state =
+            CampusWord2007Simulator
+                .state
+                .zoom;
+
+        this.updateZoom(
+            state.current -
+            state.step
+        );
+    },
+
+    updateZoom(value) {
+
+        const zoomState =
+            CampusWord2007Simulator
+                .state
+                .zoom;
+
+        value =
+            Math.max(
+                zoomState.min,
+                Math.min(
+                    zoomState.max,
+                    value
+                )
+            );
+
+        zoomState.current =
+            value;
+
+        CampusWord2007Simulator
+            .state
+            .zoomLevel =
+            value;
+
+        CampusWord2007Simulator
+            .state
+            .status
+            .zoomPercentage =
+            value;
+
+        this.applyZoom(value);
+
+        this.updateSlider(value);
+
+        CampusWord2007Simulator
+            .StatusManager
+            .refresh();
+
+        CampusWord2007Simulator
+            .EventBus
+            .emit(
+                "zoom:changed",
+                {
+                    zoom:value
+                }
+            );
+    },
+
+    applyZoom(value) {
+
+        const page =
+            CampusWord2007Simulator
+                .dom
+                .documentPage;
+
+        if (!page) {
+            return;
+        }
+
+        const scale =
+            value / 100;
+
+        page.style.transform =
+            `scale(${scale})`;
+
+        page.style.transformOrigin =
+            "top center";
+    },
+
+    updateSlider(value) {
+
+        if (!this.zoomThumb) {
+            return;
+        }
+
+        const zoomState =
+            CampusWord2007Simulator
+                .state
+                .zoom;
+
+        const percentage =
+            (
+                (
+                    value -
+                    zoomState.min
+                ) /
+                (
+                    zoomState.max -
+                    zoomState.min
+                )
+            ) * 100;
+
+        this.zoomThumb.style.left =
+            `${percentage}%`;
+    },
+
+    handleTrackClick(event) {
+
+        if (!this.zoomTrack) {
+            return;
+        }
+
+        const rect =
+            this.zoomTrack
+                .getBoundingClientRect();
+
+        const clickX =
+            event.clientX -
+            rect.left;
+
+        const ratio =
+            clickX / rect.width;
+
+        const zoomState =
+            CampusWord2007Simulator
+                .state
+                .zoom;
+
+        const newZoom =
+            Math.round(
+                zoomState.min +
+                ratio *
+                (
+                    zoomState.max -
+                    zoomState.min
+                )
+            );
+
+        this.updateZoom(
+            newZoom
+        );
+    }
+};
+
+/* ==========================================================
+   VIEW MODE MANAGER
+   ========================================================== */
+
+CampusWord2007Simulator.ViewModeManager = {
+
+    initialize() {
+
+        this.attachEvents();
+
+        this.activate(
+            "print"
+        );
+
+        CampusWord2007Simulator
+            .Logger
+            .log(
+                "View Mode Manager Initialized"
+            );
+    },
+
+    attachEvents() {
+
+        const printBtn =
+            document.getElementById(
+                "print-layout-view"
+            );
+
+        const webBtn =
+            document.getElementById(
+                "web-layout-view"
+            );
+
+        const readingBtn =
+            document.getElementById(
+                "reading-layout-view"
+            );
+
+        if (printBtn) {
+
+            printBtn.addEventListener(
+                "click",
+                () => {
+
+                    this.activate(
+                        "print"
+                    );
+                }
+            );
+        }
+
+        if (webBtn) {
+
+            webBtn.addEventListener(
+                "click",
+                () => {
+
+                    this.activate(
+                        "web"
+                    );
+                }
+            );
+        }
+
+        if (readingBtn) {
+
+            readingBtn.addEventListener(
+                "click",
+                () => {
+
+                    this.activate(
+                        "reading"
+                    );
+                }
+            );
+        }
+    },
+
+    activate(mode) {
+
+        CampusWord2007Simulator
+            .state
+            .status
+            .viewMode =
+            mode;
+
+        document.body.dataset.viewMode =
+            mode;
+
+        CampusWord2007Simulator
+            .EventBus
+            .emit(
+                "viewmode:changed",
+                {
+                    mode
+                }
+            );
+    }
+};
+
+/* ==========================================================
+   STATUS EVENTS
+   ========================================================== */
+
+CampusWord2007Simulator.StatusEvents = {
+
+    initialize() {
+
+        CampusWord2007Simulator
+            .EventBus
+            .on(
+                "zoom:changed",
+                payload => {
+
+                    CampusWord2007Simulator
+                        .Logger
+                        .log(
+                            "Zoom Changed:",
+                            payload.zoom
+                        );
+                }
+            );
+
+        CampusWord2007Simulator
+            .EventBus
+            .on(
+                "viewmode:changed",
+                payload => {
+
+                    CampusWord2007Simulator
+                        .Logger
+                        .log(
+                            "View Mode:",
+                            payload.mode
+                        );
+                }
+            );
+
+        CampusWord2007Simulator
+            .EventBus
+            .on(
+                "status:updated",
+                payload => {
+
+                    CampusWord2007Simulator
+                        .Logger
+                        .log(
+                            "Status Updated",
+                            payload
+                        );
+                }
+            );
+    }
+};
+
+/* ==========================================================
+   APPLICATION READY HOOK
+   ========================================================== */
+
+CampusWord2007Simulator
+    .EventBus
+    .on(
+        "application:ready",
+        () => {
+
+            CampusWord2007Simulator
+                .StatusManager
+                .initialize();
+
+            CampusWord2007Simulator
+                .ZoomManager
+                .initialize();
+
+            CampusWord2007Simulator
+                .ViewModeManager
+                .initialize();
+
+            CampusWord2007Simulator
+                .StatusEvents
+                .initialize();
+        }
+    );
+
+
+
+
+
+
+
+/* ==========================================================
+   PHASE 1E
+   FOBAS API LAYER
+   INIT
+   CONFIG
+   STATUS
+   SESSION BOOTSTRAP
+   ========================================================== */
+
+/* ==========================================================
+   API STATE
+   ========================================================== */
+
+CampusWord2007Simulator.state.api = {
+
+    initialized: false,
+
+    configLoaded: false,
+
+    statusLoaded: false,
+
+    sessionLoaded: false,
+
+    health: "unknown",
+
+    lastCheck: null
+};
+
+/* ==========================================================
+   SESSION STATE
+   ========================================================== */
+
+CampusWord2007Simulator.state.session = {
+
+    sessionId: null,
+
+    userId: null,
+
+    role: null,
+
+    authenticated: false,
+
+    loaded: false
+};
+
+/* ==========================================================
+   FOBAS API
+   ========================================================== */
+
+CampusWord2007Simulator.FobasApi = {
+
+    async init() {
+
+        try {
+
+            const response =
+                await CampusWord2007Simulator
+                    .ApiManager
+                    .request(
+                        "/campus-word-2007/init"
+                    );
+
+            if (!response.ok) {
+
+                throw new Error(
+                    "INIT_REQUEST_FAILED"
+                );
+            }
+
+            const data =
+                await response.json();
+
+            CampusWord2007Simulator
+                .state
+                .api
+                .initialized = true;
+
+            CampusWord2007Simulator
+                .EventBus
+                .emit(
+                    "api:init:success",
+                    data
+                );
+
+            return data;
+
+        } catch (error) {
+
+            CampusWord2007Simulator
+                .EventBus
+                .emit(
+                    "api:init:error",
+                    error
+                );
+
+            throw error;
+        }
+    },
+
+    async loadConfig() {
+
+        try {
+
+            const response =
+                await CampusWord2007Simulator
+                    .ApiManager
+                    .request(
+                        "/campus-word-2007/config"
+                    );
+
+            if (!response.ok) {
+
+                throw new Error(
+                    "CONFIG_REQUEST_FAILED"
+                );
+            }
+
+            const config =
+                await response.json();
+
+            CampusWord2007Simulator
+                .state
+                .api
+                .configLoaded = true;
+
+            CampusWord2007Simulator
+                .config
+                .serverConfig =
+                config;
+
+            CampusWord2007Simulator
+                .EventBus
+                .emit(
+                    "api:config:loaded",
+                    config
+                );
+
+            return config;
+
+        } catch (error) {
+
+            CampusWord2007Simulator
+                .EventBus
+                .emit(
+                    "api:config:error",
+                    error
+                );
+
+            throw error;
+        }
+    },
+
+    async loadStatus() {
+
+        try {
+
+            const response =
+                await CampusWord2007Simulator
+                    .ApiManager
+                    .request(
+                        "/campus-word-2007/status"
+                    );
+
+            if (!response.ok) {
+
+                throw new Error(
+                    "STATUS_REQUEST_FAILED"
+                );
+            }
+
+            const status =
+                await response.json();
+
+            CampusWord2007Simulator
+                .state
+                .api
+                .statusLoaded = true;
+
+            CampusWord2007Simulator
+                .state
+                .api
+                .health = "online";
+
+            CampusWord2007Simulator
+                .state
+                .api
+                .lastCheck =
+                Date.now();
+
+            CampusWord2007Simulator
+                .EventBus
+                .emit(
+                    "api:status:loaded",
+                    status
+                );
+
+            return status;
+
+        } catch (error) {
+
+            CampusWord2007Simulator
+                .state
+                .api
+                .health = "offline";
+
+            CampusWord2007Simulator
+                .EventBus
+                .emit(
+                    "api:status:error",
+                    error
+                );
+
+            throw error;
+        }
+    },
+
+    async bootstrapSession() {
+
+        try {
+
+            const response =
+                await CampusWord2007Simulator
+                    .ApiManager
+                    .request(
+                        "/campus-word-2007/session/bootstrap"
+                    );
+
+            if (!response.ok) {
+
+                throw new Error(
+                    "SESSION_BOOTSTRAP_FAILED"
+                );
+            }
+
+            const session =
+                await response.json();
+
+            CampusWord2007Simulator
+                .state
+                .session =
+                {
+                    ...CampusWord2007Simulator
+                        .state
+                        .session,
+
+                    ...session,
+
+                    loaded: true
+                };
+
+            CampusWord2007Simulator
+                .state
+                .api
+                .sessionLoaded = true;
+
+            CampusWord2007Simulator
+                .EventBus
+                .emit(
+                    "session:loaded",
+                    session
+                );
+
+            return session;
+
+        } catch (error) {
+
+            CampusWord2007Simulator
+                .EventBus
+                .emit(
+                    "session:error",
+                    error
+                );
+
+            throw error;
+        }
+    }
+};
+
+/* ==========================================================
+   API HEALTH MONITOR
+   ========================================================== */
+
+CampusWord2007Simulator.ApiHealthMonitor = {
+
+    interval: null,
+
+    start() {
+
+        if (this.interval) {
+
+            clearInterval(
+                this.interval
+            );
+        }
+
+        this.interval =
+            setInterval(
+                async () => {
+
+                    try {
+
+                        await CampusWord2007Simulator
+                            .FobasApi
+                            .loadStatus();
+
+                    } catch (error) {
+
+                        CampusWord2007Simulator
+                            .Logger
+                            .warn(
+                                "API Offline"
+                            );
+                    }
+
+                },
+                60000
+            );
+
+        CampusWord2007Simulator
+            .Logger
+            .log(
+                "API Health Monitor Started"
+            );
+    },
+
+    stop() {
+
+        clearInterval(
+            this.interval
+        );
+
+        this.interval = null;
+    }
+};
+
+/* ==========================================================
+   SESSION MANAGER
+   ========================================================== */
+
+CampusWord2007Simulator.SessionManager = {
+
+    getSession() {
+
+        return CampusWord2007Simulator
+            .state
+            .session;
+    },
+
+    isAuthenticated() {
+
+        return !!(
+            CampusWord2007Simulator
+                .state
+                .session
+                .authenticated
+        );
+    },
+
+    getRole() {
+
+        return CampusWord2007Simulator
+            .state
+            .session
+            .role;
+    }
+};
+
+/* ==========================================================
+   API BOOTSTRAP ENGINE
+   ========================================================== */
+
+CampusWord2007Simulator.ApiBootstrapEngine = {
+
+    async initialize() {
+
+        try {
+
+            CampusWord2007Simulator
+                .Logger
+                .log(
+                    "FOBAS API Bootstrap Started"
+                );
+
+            await CampusWord2007Simulator
+                .FobasApi
+                .init();
+
+            await CampusWord2007Simulator
+                .FobasApi
+                .loadConfig();
+
+            await CampusWord2007Simulator
+                .FobasApi
+                .loadStatus();
+
+            await CampusWord2007Simulator
+                .FobasApi
+                .bootstrapSession();
+
+            CampusWord2007Simulator
+                .ApiHealthMonitor
+                .start();
+
+            CampusWord2007Simulator
+                .EventBus
+                .emit(
+                    "api:bootstrap:complete"
+                );
+
+            CampusWord2007Simulator
+                .Logger
+                .log(
+                    "FOBAS API Bootstrap Complete"
+                );
+
+        } catch (error) {
+
+            CampusWord2007Simulator
+                .ErrorManager
+                .capture(error);
+        }
+    }
+};
+
+/* ==========================================================
+   API EVENTS
+   ========================================================== */
+
+CampusWord2007Simulator.ApiEvents = {
+
+    initialize() {
+
+        CampusWord2007Simulator
+            .EventBus
+            .on(
+                "api:init:success",
+                data => {
+
+                    CampusWord2007Simulator
+                        .Logger
+                        .log(
+                            "INIT Loaded",
+                            data
+                        );
+                }
+            );
+
+        CampusWord2007Simulator
+            .EventBus
+            .on(
+                "api:config:loaded",
+                config => {
+
+                    CampusWord2007Simulator
+                        .Logger
+                        .log(
+                            "CONFIG Loaded",
+                            config
+                        );
+                }
+            );
+
+        CampusWord2007Simulator
+            .EventBus
+            .on(
+                "api:status:loaded",
+                status => {
+
+                    CampusWord2007Simulator
+                        .Logger
+                        .log(
+                            "STATUS Loaded",
+                            status
+                        );
+                }
+            );
+
+        CampusWord2007Simulator
+            .EventBus
+            .on(
+                "session:loaded",
+                session => {
+
+                    CampusWord2007Simulator
+                        .Logger
+                        .log(
+                            "SESSION Loaded",
+                            session
+                        );
+                }
+            );
+    }
+};
+
+/* ==========================================================
+   APPLICATION READY
+   ========================================================== */
+
+CampusWord2007Simulator
+    .EventBus
+    .on(
+        "application:ready",
+        async () => {
+
+            CampusWord2007Simulator
+                .ApiEvents
+                .initialize();
+
+            await CampusWord2007Simulator
+                .ApiBootstrapEngine
+                .initialize();
+        }
+    );
+
+
+
+
+
+
+
+
+
+
+/* ==========================================================
+   PHASE 1F
+   SYSTEM LAYERS REGISTRATION
+   ========================================================== */
+
+/* ==========================================================
+   LAYER STATE
+   ========================================================== */
+
+CampusWord2007Simulator.state.layers = {
+
+    initialized: false,
+
+    simulation: false,
+
+    validation: false,
+
+    missions: false,
+
+    events: false
+};
+
+/* ==========================================================
+   LAYER REGISTRY
+   ========================================================== */
+
+CampusWord2007Simulator.LayerRegistry = {
+
+    layers: {},
+
+    register(name, layer) {
+
+        this.layers[name] = layer;
+
+        CampusWord2007Simulator
+            .Logger
+            .log(
+                `Layer Registered: ${name}`
+            );
+
+        CampusWord2007Simulator
+            .EventBus
+            .emit(
+                "layer:registered",
+                {
+                    name
+                }
+            );
+    },
+
+    get(name) {
+
+        return this.layers[name];
+    },
+
+    exists(name) {
+
+        return !!this.layers[name];
+    },
+
+    getAll() {
+
+        return this.layers;
+    }
+};
+
+/* ==========================================================
+   SIMULATION LAYER
+   ========================================================== */
+
+CampusWord2007Simulator.SimulationLayer = {
+
+    id: "simulation-layer",
+
+    version: "1.0.0",
+
+    initialized: false,
+
+    active: false,
+
+    missionsLoaded: false,
+
+    start() {
+
+        this.active = true;
+
+        CampusWord2007Simulator
+            .EventBus
+            .emit(
+                "simulation:start"
+            );
+    },
+
+    stop() {
+
+        this.active = false;
+
+        CampusWord2007Simulator
+            .EventBus
+            .emit(
+                "simulation:stop"
+            );
+    }
+};
+
+/* ==========================================================
+   VALIDATION LAYER
+   ========================================================== */
+
+CampusWord2007Simulator.ValidationLayer = {
+
+    id: "validation-layer",
+
+    version: "1.0.0",
+
+    initialized: false,
+
+    active: false,
+
+    validate() {
+
+        CampusWord2007Simulator
+            .Logger
+            .log(
+                "Validation Engine Pending"
+            );
+    }
+};
+
+/* ==========================================================
+   MISSION LAYER
+   ========================================================== */
+
+CampusWord2007Simulator.MissionLayer = {
+
+    id: "mission-layer",
+
+    version: "1.0.0",
+
+    initialized: false,
+
+    active: false,
+
+    currentMission: null,
+
+    missions: [],
+
+    loadMission(id) {
+
+        CampusWord2007Simulator
+            .Logger
+            .log(
+                "Mission Loader Pending",
+                id
+            );
+    }
+};
+
+/* ==========================================================
+   EVENTS LAYER
+   ========================================================== */
+
+CampusWord2007Simulator.SystemEventsLayer = {
+
+    id: "events-layer",
+
+    version: "1.0.0",
+
+    initialized: false,
+
+    active: false,
+
+    dispatch(eventName, payload) {
+
+        CampusWord2007Simulator
+            .EventBus
+            .emit(
+                eventName,
+                payload
+            );
+    }
+};
+
+/* ==========================================================
+   LAYER MANAGER
+   ========================================================== */
+
+CampusWord2007Simulator.LayerManager = {
+
+    initialize() {
+
+        this.registerLayers();
+
+        this.activateLayerStates();
+
+        CampusWord2007Simulator
+            .state
+            .layers
+            .initialized = true;
+
+        CampusWord2007Simulator
+            .EventBus
+            .emit(
+                "layers:initialized"
+            );
+
+        CampusWord2007Simulator
+            .Logger
+            .log(
+                "System Layers Initialized"
+            );
+    },
+
+    registerLayers() {
+
+        CampusWord2007Simulator
+            .LayerRegistry
+            .register(
+                "simulation",
+                CampusWord2007Simulator
+                    .SimulationLayer
+            );
+
+        CampusWord2007Simulator
+            .LayerRegistry
+            .register(
+                "validation",
+                CampusWord2007Simulator
+                    .ValidationLayer
+            );
+
+        CampusWord2007Simulator
+            .LayerRegistry
+            .register(
+                "missions",
+                CampusWord2007Simulator
+                    .MissionLayer
+            );
+
+        CampusWord2007Simulator
+            .LayerRegistry
+            .register(
+                "events",
+                CampusWord2007Simulator
+                    .SystemEventsLayer
+            );
+    },
+
+    activateLayerStates() {
+
+        CampusWord2007Simulator
+            .state
+            .layers
+            .simulation = true;
+
+        CampusWord2007Simulator
+            .state
+            .layers
+            .validation = true;
+
+        CampusWord2007Simulator
+            .state
+            .layers
+            .missions = true;
+
+        CampusWord2007Simulator
+            .state
+            .layers
+            .events = true;
+    }
+};
+
+/* ==========================================================
+   SYSTEM EVENT DEFINITIONS
+   ========================================================== */
+
+CampusWord2007Simulator.SystemEvents = {
+
+    APPLICATION_READY:
+        "application:ready",
+
+    APPLICATION_SHUTDOWN:
+        "application:shutdown",
+
+    SIMULATION_START:
+        "simulation:start",
+
+    SIMULATION_STOP:
+        "simulation:stop",
+
+    MISSION_LOADED:
+        "mission:loaded",
+
+    MISSION_COMPLETED:
+        "mission:completed",
+
+    VALIDATION_STARTED:
+        "validation:started",
+
+    VALIDATION_COMPLETED:
+        "validation:completed"
+};
+
+/* ==========================================================
+   LAYER EVENTS
+   ========================================================== */
+
+CampusWord2007Simulator.LayerEvents = {
+
+    initialize() {
+
+        CampusWord2007Simulator
+            .EventBus
+            .on(
+                "layer:registered",
+                payload => {
+
+                    CampusWord2007Simulator
+                        .Logger
+                        .log(
+                            "Layer Available:",
+                            payload.name
+                        );
+                }
+            );
+
+        CampusWord2007Simulator
+            .EventBus
+            .on(
+                "layers:initialized",
+                () => {
+
+                    CampusWord2007Simulator
+                        .Logger
+                        .log(
+                            "All Layers Ready"
+                        );
+                }
+            );
+
+        CampusWord2007Simulator
+            .EventBus
+            .on(
+                "simulation:start",
+                () => {
+
+                    CampusWord2007Simulator
+                        .Logger
+                        .log(
+                            "Simulation Engine Started"
+                        );
+                }
+            );
+
+        CampusWord2007Simulator
+            .EventBus
+            .on(
+                "simulation:stop",
+                () => {
+
+                    CampusWord2007Simulator
+                        .Logger
+                        .log(
+                            "Simulation Engine Stopped"
+                        );
+                }
+            );
+    }
+};
+
+/* ==========================================================
+   INTERNAL SERVICE REGISTRY
+   ========================================================== */
+
+CampusWord2007Simulator.ServiceRegistry = {
+
+    services: {},
+
+    register(name, service) {
+
+        this.services[name] =
+            service;
+    },
+
+    get(name) {
+
+        return this.services[name];
+    }
+};
+
+/* ==========================================================
+   FUTURE MODULE REGISTRY
+   ========================================================== */
+
+CampusWord2007Simulator.ModuleRegistry = {
+
+    modules: {},
+
+    register(name, module) {
+
+        this.modules[name] =
+            module;
+    },
+
+    get(name) {
+
+        return this.modules[name];
+    }
+};
+
+/* ==========================================================
+   APPLICATION READY
+   ========================================================== */
+
+CampusWord2007Simulator
+    .EventBus
+    .on(
+        "application:ready",
+        () => {
+
+            CampusWord2007Simulator
+                .LayerEvents
+                .initialize();
+
+            CampusWord2007Simulator
+                .LayerManager
+                .initialize();
+        }
+    );
+
+/* ==========================================================
+   PUBLIC API
+   ========================================================== */
+
+CampusWord2007Simulator.SystemLayers = {
+
+    get(name) {
+
+        return CampusWord2007Simulator
+            .LayerRegistry
+            .get(name);
+    },
+
+    exists(name) {
+
+        return CampusWord2007Simulator
+            .LayerRegistry
+            .exists(name);
+    },
+
+    list() {
+
+        return CampusWord2007Simulator
+            .LayerRegistry
+            .getAll();
+    }
+};
