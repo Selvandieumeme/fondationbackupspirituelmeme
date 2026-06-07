@@ -1430,6 +1430,36 @@ if (addBtn) {
 
 
 
+const deleteButtons =
+    document.querySelectorAll(
+        ".delete-prof-btn"
+    );
+
+deleteButtons.forEach(btn => {
+
+    btn.addEventListener(
+        "click",
+        async () => {
+
+            const nomProfesseur =
+                btn.dataset.prof;
+
+            const confirmation =
+                confirm(
+                    `Supprimer ${nomProfesseur} ?`
+                );
+
+            if (!confirmation) return;
+
+            await removeProfesseur(
+                nomProfesseur
+            );
+
+        }
+    );
+
+});
+
 
 
 
