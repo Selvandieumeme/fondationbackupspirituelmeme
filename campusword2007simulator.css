@@ -2048,3 +2048,53 @@ body{
 }
 
 
+
+
+
+
+/* =======================================================
+   FORMAT RIBBON SAFETY PATCH
+   MINI PHASE F1-R
+   ======================================================= */
+
+#ribbon-tabs{
+
+    overflow-x:auto;
+
+    overflow-y:hidden;
+
+    flex-wrap:nowrap;
+
+    white-space:nowrap;
+}
+
+#ribbon-tabs::-webkit-scrollbar{
+
+    display:none;
+}
+
+#ribbon-tabs{
+
+    scrollbar-width:none;
+}
+
+
+
+
+
+
+/* =======================================================
+   FORMAT LAYER
+   ======================================================= */
+
+#format-layer{
+
+    display:none;
+}
+
+
+
+
+
+
+
