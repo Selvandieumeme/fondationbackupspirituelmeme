@@ -3373,3 +3373,218 @@ CampusWord2007Simulator.PointerState = {
 
 
 
+
+
+/* ==========================================================
+   INPUT LIFECYCLE MANAGER
+   ========================================================== */
+
+/* ==========================================================
+   INPUT FOUNDATION STATE
+   ========================================================== */
+
+CampusWord2007Simulator.state.input = {
+
+    initialized: false,
+
+    mouseReady: false,
+
+    touchReady: false,
+
+    cursorReady: false,
+
+    focusReady: false,
+
+    pointerReady: false
+};
+
+
+
+
+/* ==========================================================
+   INPUT LIFECYCLE MANAGER
+   ========================================================== */
+
+CampusWord2007Simulator.InputLifecycleManager = {
+
+    initialize() {
+
+        this.initializeMouse();
+
+        this.initializeTouch();
+
+        this.initializeCursor();
+
+        this.initializeFocus();
+
+        this.initializePointer();
+
+        CampusWord2007Simulator
+            .state
+            .input
+            .initialized = true;
+
+        CampusWord2007Simulator
+            .Logger
+            .log(
+                "Input Lifecycle Initialized"
+            );
+
+        CampusWord2007Simulator
+            .EventBus
+            .emit(
+                "input:initialized"
+            );
+    },
+
+    initializeMouse() {
+
+        if (
+            CampusWord2007Simulator
+                .MouseEngine
+                .initialize
+        ) {
+
+            CampusWord2007Simulator
+                .MouseEngine
+                .initialize();
+        }
+
+        CampusWord2007Simulator
+            .state
+            .input
+            .mouseReady = true;
+    },
+
+    initializeTouch() {
+
+        if (
+            CampusWord2007Simulator
+                .TouchEngine
+                .initialize
+        ) {
+
+            CampusWord2007Simulator
+                .TouchEngine
+                .initialize();
+        }
+
+        CampusWord2007Simulator
+            .state
+            .input
+            .touchReady = true;
+    },
+
+    initializeCursor() {
+
+        if (
+            CampusWord2007Simulator
+                .CursorEngine
+                .initialize
+        ) {
+
+            CampusWord2007Simulator
+                .CursorEngine
+                .initialize();
+        }
+
+        CampusWord2007Simulator
+            .state
+            .input
+            .cursorReady = true;
+    },
+
+    initializeFocus() {
+
+        if (
+            CampusWord2007Simulator
+                .VirtualFocusEngine
+                .initialize
+        ) {
+
+            CampusWord2007Simulator
+                .VirtualFocusEngine
+                .initialize();
+        }
+
+        CampusWord2007Simulator
+            .state
+            .input
+            .focusReady = true;
+    },
+
+    initializePointer() {
+
+        if (
+            CampusWord2007Simulator
+                .PointerTracker
+                .initialize
+        ) {
+
+            CampusWord2007Simulator
+                .PointerTracker
+                .initialize();
+        }
+
+        CampusWord2007Simulator
+            .state
+            .input
+            .pointerReady = true;
+    }
+};
+
+
+
+
+/* ==========================================================
+   INPUT EVENTS
+   ========================================================== */
+
+CampusWord2007Simulator.InputEvents = {
+
+    initialize() {
+
+        CampusWord2007Simulator
+            .EventBus
+            .on(
+                "input:initialized",
+                () => {
+
+                    CampusWord2007Simulator
+                        .Logger
+                        .log(
+                            "Virtual Input Foundation Ready"
+                        );
+                }
+            );
+    }
+};
+
+
+
+
+
+/* ==========================================================
+   APPLICATION READY
+   ========================================================== */
+
+CampusWord2007Simulator
+    .EventBus
+    .on(
+        "application:ready",
+        () => {
+
+            CampusWord2007Simulator
+                .InputEvents
+                .initialize();
+
+            CampusWord2007Simulator
+                .InputLifecycleManager
+                .initialize();
+        }
+    );
+
+
+
+
+
