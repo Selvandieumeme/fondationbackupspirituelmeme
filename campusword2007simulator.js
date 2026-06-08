@@ -3866,169 +3866,6 @@ CampusWord2007Simulator.TextInputEngine = {
 
 
 
-/* ==========================================================
-   MOBILE KEYBOARD ENGINE
-   ========================================================== */
-
-CampusWord2007Simulator.MobileKeyboardEngine = {
-
-    initialized: false,
-
-    initialize() {
-
-        if (this.initialized) {
-            return;
-        }
-
-        const bridge =
-            document.getElementById(
-                "mobile-keyboard-bridge"
-            );
-
-        if (!bridge) {
-            return;
-        }
-
-        CampusWord2007Simulator
-            .MobileKeyboardState
-            .bridge = bridge;
-
-        const editor =
-            document.getElementById(
-                "document-editor-surface"
-            );
-
-        if (editor) {
-
-            editor.addEventListener(
-                "click",
-                () => {
-
-                    bridge.focus();
-                }
-            );
-
-            editor.addEventListener(
-                "touchstart",
-                () => {
-
-                    bridge.focus();
-                }
-            );
-        }
-
-        bridge.addEventListener(
-            "input",
-            event => {
-
-                const value =
-                    event.target.value;
-
-                if (
-                    value.length > 0
-                ) {
-
-                    const character =
-                        value[
-                            value.length - 1
-                        ];
-
-                    CampusWord2007Simulator
-                        .EventBus
-                        .emit(
-                            "keyboard:input",
-                            {
-                                key:
-                                    character
-                            }
-                        );
-                }
-
-                event.target.value = "";
-            }
-        );
-
-        this.initialized = true;
-
-       console.log(
-    "Mobile Keyboard Initialized"
-);
-
-        CampusWord2007Simulator
-            .Logger
-            .log(
-                "Mobile Keyboard Initialized"
-            );
-    }
-   
-};
-
-
-
-
-
-/* ==========================================================
-   DOCUMENT RENDER ENGINE
-   ========================================================== */
-
-CampusWord2007Simulator.DocumentRenderEngine = {
-
-    initialized: false,
-
-    surface: null,
-
-    initialize() {
-
-        if (this.initialized) {
-            return;
-        }
-
-        this.surface =
-            document.getElementById(
-                "document-editor-surface"
-            );
-
-        if (!this.surface) {
-            return;
-        }
-
-        CampusWord2007Simulator
-            .EventBus
-            .on(
-                "editor:textchanged",
-                () => {
-
-                    this.render();
-                }
-            );
-
-        this.render();
-
-        this.initialized = true;
-
-        CampusWord2007Simulator
-            .Logger
-            .log(
-                "Document Render Initialized"
-            );
-    },
-
-    render() {
-
-        if (!this.surface) {
-            return;
-        }
-       console.log(
-    "Rendering..."
-); 
-
-        this.surface.textContent =
-            CampusWord2007Simulator
-                .EditorState
-                .textContent;
-    }
-};
-
 
 
 /* ==========================================================
@@ -4615,6 +4452,172 @@ CampusWord2007Simulator.KeyboardEngine = {
 };
 
 
+
+
+
+
+
+
+
+
+/* ==========================================================
+   MOBILE KEYBOARD ENGINE
+   ========================================================== */
+
+CampusWord2007Simulator.MobileKeyboardEngine = {
+
+    initialized: false,
+
+    initialize() {
+
+        if (this.initialized) {
+            return;
+        }
+
+        const bridge =
+            document.getElementById(
+                "mobile-keyboard-bridge"
+            );
+
+        if (!bridge) {
+            return;
+        }
+
+        CampusWord2007Simulator
+            .MobileKeyboardState
+            .bridge = bridge;
+
+        const editor =
+            document.getElementById(
+                "document-editor-surface"
+            );
+
+        if (editor) {
+
+            editor.addEventListener(
+                "click",
+                () => {
+
+                    bridge.focus();
+                }
+            );
+
+            editor.addEventListener(
+                "touchstart",
+                () => {
+
+                    bridge.focus();
+                }
+            );
+        }
+
+        bridge.addEventListener(
+            "input",
+            event => {
+
+                const value =
+                    event.target.value;
+
+                if (
+                    value.length > 0
+                ) {
+
+                    const character =
+                        value[
+                            value.length - 1
+                        ];
+
+                    CampusWord2007Simulator
+                        .EventBus
+                        .emit(
+                            "keyboard:input",
+                            {
+                                key:
+                                    character
+                            }
+                        );
+                }
+
+                event.target.value = "";
+            }
+        );
+
+        this.initialized = true;
+
+       console.log(
+    "Mobile Keyboard Initialized"
+);
+
+        CampusWord2007Simulator
+            .Logger
+            .log(
+                "Mobile Keyboard Initialized"
+            );
+    }
+   
+};
+
+
+
+
+
+/* ==========================================================
+   DOCUMENT RENDER ENGINE
+   ========================================================== */
+
+CampusWord2007Simulator.DocumentRenderEngine = {
+
+    initialized: false,
+
+    surface: null,
+
+    initialize() {
+
+        if (this.initialized) {
+            return;
+        }
+
+        this.surface =
+            document.getElementById(
+                "document-editor-surface"
+            );
+
+        if (!this.surface) {
+            return;
+        }
+
+        CampusWord2007Simulator
+            .EventBus
+            .on(
+                "editor:textchanged",
+                () => {
+
+                    this.render();
+                }
+            );
+
+        this.render();
+
+        this.initialized = true;
+
+        CampusWord2007Simulator
+            .Logger
+            .log(
+                "Document Render Initialized"
+            );
+    },
+
+    render() {
+
+        if (!this.surface) {
+            return;
+        }
+       console.log(
+    "Rendering..."
+); 
+
+    }
+};
 
 
 
