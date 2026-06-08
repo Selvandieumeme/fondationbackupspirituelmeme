@@ -3771,7 +3771,9 @@ CampusWord2007Simulator.state.input = {
 
     pointerReady: false,
    
-    editorReady: false
+    editorReady: false,
+   
+   caretReady: false
    
 };
 
@@ -3797,6 +3799,8 @@ CampusWord2007Simulator.InputLifecycleManager = {
         this.initializePointer();
        
         this.initializeEditor();
+
+        this.initializeCaret();
 
         CampusWord2007Simulator
             .state
@@ -3933,6 +3937,28 @@ CampusWord2007Simulator.InputLifecycleManager = {
         .state
         .input
         .editorReady = true;
+},
+
+
+   initializeCaret() {
+
+    if (
+        CampusWord2007Simulator
+            .CaretEngine &&
+        CampusWord2007Simulator
+            .CaretEngine
+            .initialize
+    ) {
+
+        CampusWord2007Simulator
+            .CaretEngine
+            .initialize();
+    }
+
+    CampusWord2007Simulator
+        .state
+        .input
+        .caretReady = true;
 }
 };
 
@@ -3994,6 +4020,89 @@ CampusWord2007Simulator
 
 
 
+
+
+
+
+
+/* ==========================================================
+   CARET STATE
+   ========================================================== */
+
+CampusWord2007Simulator.CaretState = {
+
+    visible: true,
+
+    blinking: false,
+
+    x: 20,
+
+    y: 20,
+
+    height: 18
+};
+
+
+
+
+
+
+/* ==========================================================
+   CARET ENGINE
+   ========================================================== */
+
+CampusWord2007Simulator.CaretEngine = {
+
+    initialized: false,
+
+    element: null,
+
+    initialize() {
+
+        if (this.initialized) {
+            return;
+        }
+
+        this.element =
+            document.getElementById(
+                "virtual-caret"
+            );
+
+        if (!this.element) {
+            return;
+        }
+
+        this.render();
+
+        this.initialized = true;
+
+        CampusWord2007Simulator
+            .Logger
+            .log(
+                "Caret Engine Initialized"
+            );
+    },
+
+    render() {
+
+        const state =
+            CampusWord2007Simulator
+                .CaretState;
+
+        if (!this.element) {
+            return;
+        }
+
+        this.element.style.left =
+            state.x + "px";
+
+        this.element.style.top =
+            state.y + "px";
+
+        this.element.style.height =
+            state.height + "px";
+    }
+};
 
 
 
