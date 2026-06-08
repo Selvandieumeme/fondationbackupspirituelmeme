@@ -2138,24 +2138,22 @@ body{
 
 #mobile-keyboard-bridge {
 
-    position: absolute;
+    position: relative;
 
-    opacity: 0;
+    opacity: 1;
 
-    left: -9999px;
+    left: 0;
 
-    top: -9999px;
+    top: 0;
 
-    width: 1px;
+    width: 300px;
 
-    height: 1px;
+    height: 40px;
 
-    pointer-events: none;
+    pointer-events: auto;
+
+    border: 1px solid #000;
 }
-
-
-
-
 
 
 
