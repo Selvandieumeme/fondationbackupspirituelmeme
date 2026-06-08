@@ -2131,3 +2131,24 @@ body{
 
 
 
+
+
+
+
+
+#mobile-keyboard-bridge {
+
+    position: absolute;
+
+    opacity: 0;
+
+    left: -9999px;
+
+    top: -9999px;
+
+    width: 1px;
+
+    height: 1px;
+
+    pointer-events: none;
+}
