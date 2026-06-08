@@ -2137,24 +2137,15 @@ body{
 
 
 #mobile-keyboard-bridge {
-
-    position: relative;
-
-    opacity: 1;
-
-    left: 0;
-
-    top: 0;
-
-    width: 300px;
-
-    height: 40px;
-
-    pointer-events: auto;
-
-    border: 1px solid #000;
+    position: absolute;
+    top: 20px;       /* mete li nan zòn ki pa twò deranje */
+    left: 20px;
+    width: 1px;      /* ti l, pa okipe anpil espas */
+    height: 1px;
+    opacity: 0.01;   /* prèske envizib men egziste */
+    pointer-events: auto; /* pèmèt Android touche li */
+    z-index: 1000;   /* pi wo pase lòt eleman pou touche li fasil */
 }
-
 
 
 
