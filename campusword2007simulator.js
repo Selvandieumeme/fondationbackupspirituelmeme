@@ -3673,31 +3673,66 @@ CampusWord2007Simulator.EditableSurfaceEngine = {
             );
     },
 
-    attachEvents() {
+   attachEvents() {
 
-        if (!this.editorElement) {
-            return;
-        }
-
-        this.editorElement
-            .addEventListener(
-                "click",
-                () => {
-
-                    CampusWord2007Simulator
-                        .EditorState
-                        .focused = true;
-
-                    CampusWord2007Simulator
-                        .EventBus
-                        .emit(
-                            "editor:focus"
-                        );
-                }
-            );
+    if (!this.editorElement) {
+        return;
     }
-};
 
+    this.editorElement
+        .addEventListener(
+            "click",
+            () => {
+
+                const mobileBridge =
+                    document.getElementById(
+                        "mobile-keyboard-bridge"
+                    );
+
+                if (mobileBridge) {
+
+                    mobileBridge.focus();
+                }
+
+                CampusWord2007Simulator
+                    .EditorState
+                    .focused = true;
+
+                CampusWord2007Simulator
+                    .EventBus
+                    .emit(
+                        "editor:focus"
+                    );
+            }
+        );
+
+    this.editorElement
+        .addEventListener(
+            "touchstart",
+            () => {
+
+                const mobileBridge =
+                    document.getElementById(
+                        "mobile-keyboard-bridge"
+                    );
+
+                if (mobileBridge) {
+
+                    mobileBridge.focus();
+                }
+
+                CampusWord2007Simulator
+                    .EditorState
+                    .focused = true;
+
+                CampusWord2007Simulator
+                    .EventBus
+                    .emit(
+                        "editor:focus"
+                    );
+            }
+        );
+}
 
 
 
