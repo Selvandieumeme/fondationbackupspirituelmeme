@@ -3949,14 +3949,11 @@ CampusWord2007Simulator.MobileKeyboardEngine = {
             }
         );
 
-       
-       console.log(
-    document.getElementById(
-        "mobile-keyboard-bridge"
-    )
-);
-
         this.initialized = true;
+
+       console.log(
+    "Mobile Keyboard Initialized"
+);
 
         CampusWord2007Simulator
             .Logger
