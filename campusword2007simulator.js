@@ -3692,11 +3692,12 @@ CampusWord2007Simulator.EditableSurfaceEngine = {
                     .EventBus
                     .emit(
                         "editor:focus"
-                    );
+                             );
             }
         );
 }
 
+};
 
 
 
