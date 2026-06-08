@@ -4616,6 +4616,10 @@ CampusWord2007Simulator.DocumentRenderEngine = {
     "Rendering..."
 ); 
 
+this.surface.textContent =
+CampusWord2007Simulator
+    .EditorState
+   .textContent;
     }
 };
 
