@@ -2096,5 +2096,16 @@ body{
 
 
 
+.document-editor-surface {
 
+    position: relative;
+
+    width: 100%;
+
+    min-height: 100%;
+
+    outline: none;
+
+    cursor: text;
+}
 
