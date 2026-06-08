@@ -3779,6 +3779,8 @@ CampusWord2007Simulator.state.input = {
     editorReady: false,
    
    caretReady: false,
+
+   caretMovementReady: false,
    
    keyboardReady: false,
 
@@ -3889,6 +3891,8 @@ CampusWord2007Simulator.InputLifecycleManager = {
         this.initializeEditor();
 
         this.initializeCaret();
+
+       this.initializeCaretMovement();
        
        this.initializeKeyboard();
 
@@ -4056,6 +4060,28 @@ CampusWord2007Simulator.InputLifecycleManager = {
         .input
         .caretReady = true;
 },
+
+initializeCaretMovement() {
+
+    if (
+        CampusWord2007Simulator
+            .CaretMovementEngine &&
+        CampusWord2007Simulator
+            .CaretMovementEngine
+            .initialize
+    ) {
+
+        CampusWord2007Simulator
+            .CaretMovementEngine
+            .initialize();
+    }
+
+    CampusWord2007Simulator
+        .state
+        .input
+        .caretMovementReady = true;
+},
+   
 
 initializeKeyboard() {
 
@@ -4642,4 +4668,94 @@ CampusWord2007Simulator.DocumentRenderEngine = {
 
 
 
+
+
+
+
+/* ==========================================================
+   CARET MOVEMENT ENGINE
+   ========================================================== */
+
+CampusWord2007Simulator.CaretMovementEngine = {
+
+    initialized: false,
+
+    initialize() {
+
+        if (this.initialized) {
+            return;
+        }
+
+        CampusWord2007Simulator
+            .EventBus
+            .on(
+                "keyboard:keydown",
+                event => {
+
+                    this.handleKey(
+                        event
+                    );
+                }
+            );
+
+        this.initialized = true;
+
+        CampusWord2007Simulator
+            .Logger
+            .log(
+                "Caret Movement Initialized"
+            );
+    },
+
+    handleKey(event) {
+
+        switch (
+            event.key
+        ) {
+
+            case "ArrowLeft":
+
+                this.moveLeft();
+
+                break;
+
+            case "ArrowRight":
+
+                this.moveRight();
+
+                break;
+        }
+    },
+
+    moveLeft() {
+
+        const editor =
+            CampusWord2007Simulator
+                .EditorState;
+
+        if (
+            editor.caretPosition <= 0
+        ) {
+            return;
+        }
+
+        editor.caretPosition--;
+    },
+
+    moveRight() {
+
+        const editor =
+            CampusWord2007Simulator
+                .EditorState;
+
+        if (
+            editor.caretPosition >=
+            editor.textContent.length
+        ) {
+            return;
+        }
+
+        editor.caretPosition++;
+    }
+};
 
