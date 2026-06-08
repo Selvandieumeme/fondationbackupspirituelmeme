@@ -4289,7 +4289,11 @@ CampusWord2007Simulator.CaretEngine = {
         if (this.initialized) {
             return;
         }
-
+   console.log(
+        "Caret:",
+        state.x,
+        state.y
+    );
         this.element =
             document.getElementById(
                 "virtual-caret"
