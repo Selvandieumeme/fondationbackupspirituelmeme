@@ -4614,7 +4614,7 @@ CampusWord2007Simulator.DocumentRenderEngine = {
         }
        console.log(
     "Rendering..."
-); 
+);
 
 this.surface.textContent =
 CampusWord2007Simulator
