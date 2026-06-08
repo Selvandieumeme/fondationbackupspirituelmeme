@@ -3773,7 +3773,9 @@ CampusWord2007Simulator.state.input = {
    
     editorReady: false,
    
-   caretReady: false
+   caretReady: false,
+   
+   keyboardReady: false,
    
 };
 
@@ -3801,6 +3803,8 @@ CampusWord2007Simulator.InputLifecycleManager = {
         this.initializeEditor();
 
         this.initializeCaret();
+       
+       this.initializeKeyboard();
 
         CampusWord2007Simulator
             .state
@@ -3959,6 +3963,27 @@ CampusWord2007Simulator.InputLifecycleManager = {
         .state
         .input
         .caretReady = true;
+},
+
+initializeKeyboard() {
+
+    if (
+        CampusWord2007Simulator
+            .KeyboardEngine &&
+        CampusWord2007Simulator
+            .KeyboardEngine
+            .initialize
+    ) {
+
+        CampusWord2007Simulator
+            .KeyboardEngine
+            .initialize();
+    }
+
+    CampusWord2007Simulator
+        .state
+        .input
+        .keyboardReady = true;
 }
 };
 
@@ -4046,6 +4071,24 @@ CampusWord2007Simulator.CaretState = {
 
 
 
+   /* ==========================================================
+   KEYBOARD STATE
+   ========================================================== */
+
+CampusWord2007Simulator.KeyboardState = {
+
+    initialized: false,
+
+    lastKey: null,
+
+    ctrlKey: false,
+
+    shiftKey: false,
+
+    altKey: false
+};
+
+
 
 /* ==========================================================
    CARET ENGINE
@@ -4131,6 +4174,123 @@ CampusWord2007Simulator.CaretEngine = {
 
                 },
                 500
+            );
+    }
+};
+
+
+
+
+
+
+/* ==========================================================
+   KEYBOARD ENGINE
+   ========================================================== */
+
+CampusWord2007Simulator.KeyboardEngine = {
+
+    initialized: false,
+
+    initialize() {
+
+        if (this.initialized) {
+            return;
+        }
+
+        document.addEventListener(
+            "keydown",
+            this.handleKeyDown.bind(this)
+        );
+
+        document.addEventListener(
+            "keyup",
+            this.handleKeyUp.bind(this)
+        );
+
+        document.addEventListener(
+            "keypress",
+            this.handleKeyPress.bind(this)
+        );
+
+        this.initialized = true;
+
+        CampusWord2007Simulator
+            .Logger
+            .log(
+                "Keyboard Engine Initialized"
+            );
+    },
+
+    handleKeyDown(event) {
+
+        const state =
+            CampusWord2007Simulator
+                .KeyboardState;
+
+        state.lastKey =
+            event.key;
+
+        state.ctrlKey =
+            event.ctrlKey;
+
+        state.shiftKey =
+            event.shiftKey;
+
+        state.altKey =
+            event.altKey;
+
+        CampusWord2007Simulator
+            .EventBus
+            .emit(
+                "keyboard:keydown",
+                {
+                    key:
+                        event.key,
+
+                    code:
+                        event.code,
+
+                    ctrlKey:
+                        event.ctrlKey,
+
+                    shiftKey:
+                        event.shiftKey,
+
+                    altKey:
+                        event.altKey
+                }
+            );
+    },
+
+    handleKeyUp(event) {
+
+        CampusWord2007Simulator
+            .EventBus
+            .emit(
+                "keyboard:keyup",
+                {
+                    key:
+                        event.key,
+
+                    code:
+                        event.code
+                }
+            );
+    },
+
+    handleKeyPress(event) {
+
+        CampusWord2007Simulator
+            .EventBus
+            .emit(
+                "keyboard:input",
+                {
+                    key:
+                        event.key,
+
+                    code:
+                        event.code
+                }
             );
     }
 };
