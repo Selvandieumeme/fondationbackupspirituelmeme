@@ -3785,7 +3785,9 @@ CampusWord2007Simulator.state.input = {
 
    textInputReady: false,
 
-    renderReady: false
+    renderReady: false,
+
+   mobileKeyboardReady: false
    
 };
 
@@ -4394,9 +4396,8 @@ CampusWord2007Simulator.KeyboardState = {
 
     shiftKey: false,
 
-    altKey: false,
+    altKey: false
    
-   mobileKeyboardReady: false
 };
 
 
