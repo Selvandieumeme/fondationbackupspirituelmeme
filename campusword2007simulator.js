@@ -3949,6 +3949,13 @@ CampusWord2007Simulator.MobileKeyboardEngine = {
             }
         );
 
+       
+       console.log(
+    document.getElementById(
+        "mobile-keyboard-bridge"
+    )
+);
+
         this.initialized = true;
 
         CampusWord2007Simulator
@@ -3957,6 +3964,7 @@ CampusWord2007Simulator.MobileKeyboardEngine = {
                 "Mobile Keyboard Initialized"
             );
     }
+   
 };
 
 
@@ -4014,6 +4022,9 @@ CampusWord2007Simulator.DocumentRenderEngine = {
         if (!this.surface) {
             return;
         }
+       console.log(
+    "Rendering..."
+); 
 
         this.surface.textContent =
             CampusWord2007Simulator
