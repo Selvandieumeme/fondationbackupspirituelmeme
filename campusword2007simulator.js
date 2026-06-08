@@ -4561,6 +4561,9 @@ CampusWord2007Simulator.MobileKeyboardEngine = {
 
 
 
+
+
+
 /* ==========================================================
    DOCUMENT RENDER ENGINE
    ========================================================== */
@@ -4570,6 +4573,8 @@ CampusWord2007Simulator.DocumentRenderEngine = {
     initialized: false,
 
     surface: null,
+
+    textLayer: null,
 
     initialize() {
 
@@ -4582,7 +4587,15 @@ CampusWord2007Simulator.DocumentRenderEngine = {
                 "document-editor-surface"
             );
 
-        if (!this.surface) {
+        this.textLayer =
+            document.getElementById(
+                "document-text-layer"
+            );
+
+        if (
+            !this.surface ||
+            !this.textLayer
+        ) {
             return;
         }
 
@@ -4609,19 +4622,20 @@ CampusWord2007Simulator.DocumentRenderEngine = {
 
     render() {
 
-        if (!this.surface) {
+        if (!this.textLayer) {
             return;
         }
-       console.log(
-    "Rendering..."
-);
 
-       
+        console.log(
+            "Rendering..."
+        );
+
+        this.textLayer.textContent =
+            CampusWord2007Simulator
+                .EditorState
+                .textContent;
     }
 };
-
-
-
 
 
 
