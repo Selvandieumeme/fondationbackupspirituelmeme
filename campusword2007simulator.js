@@ -3776,9 +3776,148 @@ CampusWord2007Simulator.state.input = {
    caretReady: false,
    
    keyboardReady: false,
+
+   textInputReady: false,
+
+    renderReady: false
    
 };
 
+
+
+
+
+
+
+/* ==========================================================
+   TEXT INPUT ENGINE
+   ========================================================== */
+
+CampusWord2007Simulator.TextInputEngine = {
+
+    initialized: false,
+
+    initialize() {
+
+        if (this.initialized) {
+            return;
+        }
+
+        CampusWord2007Simulator
+            .EventBus
+            .on(
+                "keyboard:input",
+                event => {
+
+                    this.insertCharacter(
+                        event.key
+                    );
+                }
+            );
+
+        this.initialized = true;
+
+        CampusWord2007Simulator
+            .Logger
+            .log(
+                "Text Input Engine Initialized"
+            );
+    },
+
+    insertCharacter(character) {
+
+        if (
+            !character ||
+            character.length !== 1
+        ) {
+            return;
+        }
+
+        const editor =
+            CampusWord2007Simulator
+                .EditorState;
+
+        editor.textContent +=
+            character;
+
+        editor.caretPosition++;
+
+        CampusWord2007Simulator
+            .EventBus
+            .emit(
+                "editor:textchanged",
+                {
+                    text:
+                        editor.textContent
+                }
+            );
+    }
+};
+
+
+
+
+
+
+
+/* ==========================================================
+   DOCUMENT RENDER ENGINE
+   ========================================================== */
+
+CampusWord2007Simulator.DocumentRenderEngine = {
+
+    initialized: false,
+
+    surface: null,
+
+    initialize() {
+
+        if (this.initialized) {
+            return;
+        }
+
+        this.surface =
+            document.getElementById(
+                "document-editor-surface"
+            );
+
+        if (!this.surface) {
+            return;
+        }
+
+        CampusWord2007Simulator
+            .EventBus
+            .on(
+                "editor:textchanged",
+                () => {
+
+                    this.render();
+                }
+            );
+
+        this.render();
+
+        this.initialized = true;
+
+        CampusWord2007Simulator
+            .Logger
+            .log(
+                "Document Render Initialized"
+            );
+    },
+
+    render() {
+
+        if (!this.surface) {
+            return;
+        }
+
+        this.surface.textContent =
+            CampusWord2007Simulator
+                .EditorState
+                .textContent;
+    }
+};
 
 
 
@@ -3805,6 +3944,10 @@ CampusWord2007Simulator.InputLifecycleManager = {
         this.initializeCaret();
        
        this.initializeKeyboard();
+
+       this.initializeTextInput();
+
+      this.initializeRenderer();
 
         CampusWord2007Simulator
             .state
@@ -3984,6 +4127,48 @@ initializeKeyboard() {
         .state
         .input
         .keyboardReady = true;
+},
+
+initializeTextInput() {
+
+    if (
+        CampusWord2007Simulator
+            .TextInputEngine &&
+        CampusWord2007Simulator
+            .TextInputEngine
+            .initialize
+    ) {
+
+        CampusWord2007Simulator
+            .TextInputEngine
+            .initialize();
+    }
+
+    CampusWord2007Simulator
+        .state
+        .input
+        .textInputReady = true;
+},
+
+initializeRenderer() {
+
+    if (
+        CampusWord2007Simulator
+            .DocumentRenderEngine &&
+        CampusWord2007Simulator
+            .DocumentRenderEngine
+            .initialize
+    ) {
+
+        CampusWord2007Simulator
+            .DocumentRenderEngine
+            .initialize();
+    }
+
+    CampusWord2007Simulator
+        .state
+        .input
+        .renderReady = true;
 }
 };
 
@@ -4294,6 +4479,14 @@ CampusWord2007Simulator.KeyboardEngine = {
             );
     }
 };
+
+
+
+
+
+
+
+
 
 
 
