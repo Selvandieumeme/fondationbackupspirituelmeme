@@ -2109,3 +2109,25 @@ body{
     cursor: text;
 }
 
+
+
+
+.virtual-caret {
+
+    position: absolute;
+
+    top: 20px;
+
+    left: 20px;
+
+    width: 1px;
+
+    height: 18px;
+
+    background: #000000;
+
+    display: block;
+}
+
+
+
