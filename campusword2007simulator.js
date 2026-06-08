@@ -3609,6 +3609,104 @@ CampusWord2007Simulator.PointerTracker = {
 
 
 
+
+/* ==========================================================
+   EDITOR STATE
+   ========================================================== */
+
+CampusWord2007Simulator.EditorState = {
+
+    focused: false,
+
+    textContent: "",
+
+    caretPosition: 0,
+
+    selectionStart: 0,
+
+    selectionEnd: 0
+};
+
+
+
+
+/* ==========================================================
+   EDITABLE SURFACE ENGINE
+   ========================================================== */
+
+CampusWord2007Simulator.EditableSurfaceEngine = {
+
+    initialized: false,
+
+    editorElement: null,
+
+    initialize() {
+
+        if (this.initialized) {
+            return;
+        }
+
+        this.cache();
+
+        this.attachEvents();
+
+        this.initialized = true;
+
+        CampusWord2007Simulator
+            .Logger
+            .log(
+                "Editable Surface Initialized"
+            );
+    },
+
+    cache() {
+
+        this.editorElement =
+            document.getElementById(
+                "document-editor-surface"
+            );
+    },
+
+    attachEvents() {
+
+        if (!this.editorElement) {
+            return;
+        }
+
+        this.editorElement
+            .addEventListener(
+                "click",
+                () => {
+
+                    CampusWord2007Simulator
+                        .EditorState
+                        .focused = true;
+
+                    CampusWord2007Simulator
+                        .EventBus
+                        .emit(
+                            "editor:focus"
+                        );
+                }
+            );
+    }
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 /* ==========================================================
    POINTER EVENTS
    ========================================================== */
@@ -3671,7 +3769,10 @@ CampusWord2007Simulator.state.input = {
 
     focusReady: false,
 
-    pointerReady: false
+    pointerReady: false,
+   
+    editorReady: false
+   
 };
 
 
@@ -3694,6 +3795,8 @@ CampusWord2007Simulator.InputLifecycleManager = {
         this.initializeFocus();
 
         this.initializePointer();
+       
+        this.initializeEditor();
 
         CampusWord2007Simulator
             .state
@@ -3806,7 +3909,31 @@ CampusWord2007Simulator.InputLifecycleManager = {
             .state
             .input
             .pointerReady = true;
+    },
+
+
+
+
+   initializeEditor() {
+
+    if (
+        CampusWord2007Simulator
+            .EditableSurfaceEngine &&
+        CampusWord2007Simulator
+            .EditableSurfaceEngine
+            .initialize
+    ) {
+
+        CampusWord2007Simulator
+            .EditableSurfaceEngine
+            .initialize();
     }
+
+    CampusWord2007Simulator
+        .state
+        .input
+        .editorReady = true;
+}
 };
 
 
@@ -3863,6 +3990,12 @@ CampusWord2007Simulator
                 .initialize();
         }
     );
+
+
+
+
+
+
 
 
 
