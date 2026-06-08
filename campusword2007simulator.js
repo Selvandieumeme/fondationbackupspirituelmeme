@@ -4056,7 +4056,7 @@ CampusWord2007Simulator.CaretEngine = {
     initialized: false,
 
     element: null,
-
+   blinkTimer: null,
     initialize() {
 
         if (this.initialized) {
@@ -4073,6 +4073,8 @@ CampusWord2007Simulator.CaretEngine = {
         }
 
         this.render();
+       
+       this.startBlinking();
 
         this.initialized = true;
 
@@ -4105,6 +4107,33 @@ CampusWord2007Simulator.CaretEngine = {
 };
 
 
+
+startBlinking() {
+
+    this.blinkTimer =
+        setInterval(
+            () => {
+
+                const state =
+                    CampusWord2007Simulator
+                        .CaretState;
+
+                state.visible =
+                    !state.visible;
+
+                if (!this.element) {
+                    return;
+                }
+
+                this.element.style.opacity =
+                    state.visible
+                        ? "1"
+                        : "0";
+
+            },
+            500
+        );
+}
 
 
 
