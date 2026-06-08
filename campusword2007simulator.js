@@ -3361,6 +3361,12 @@ CampusWord2007Simulator.TouchState = {
 
 
 
+CampusWord2007Simulator.MobileKeyboardState = {
+
+    bridge: null
+};
+
+
 CampusWord2007Simulator.CursorEngine = {};
 
 CampusWord2007Simulator.CursorRegistry = {
@@ -3859,6 +3865,101 @@ CampusWord2007Simulator.TextInputEngine = {
 
 
 
+/* ==========================================================
+   MOBILE KEYBOARD ENGINE
+   ========================================================== */
+
+CampusWord2007Simulator.MobileKeyboardEngine = {
+
+    initialized: false,
+
+    initialize() {
+
+        if (this.initialized) {
+            return;
+        }
+
+        const bridge =
+            document.getElementById(
+                "mobile-keyboard-bridge"
+            );
+
+        if (!bridge) {
+            return;
+        }
+
+        CampusWord2007Simulator
+            .MobileKeyboardState
+            .bridge = bridge;
+
+        const editor =
+            document.getElementById(
+                "document-editor-surface"
+            );
+
+        if (editor) {
+
+            editor.addEventListener(
+                "click",
+                () => {
+
+                    bridge.focus();
+                }
+            );
+
+            editor.addEventListener(
+                "touchstart",
+                () => {
+
+                    bridge.focus();
+                }
+            );
+        }
+
+        bridge.addEventListener(
+            "input",
+            event => {
+
+                const value =
+                    event.target.value;
+
+                if (
+                    value.length > 0
+                ) {
+
+                    const character =
+                        value[
+                            value.length - 1
+                        ];
+
+                    CampusWord2007Simulator
+                        .EventBus
+                        .emit(
+                            "keyboard:input",
+                            {
+                                key:
+                                    character
+                            }
+                        );
+                }
+
+                event.target.value = "";
+            }
+        );
+
+        this.initialized = true;
+
+        CampusWord2007Simulator
+            .Logger
+            .log(
+                "Mobile Keyboard Initialized"
+            );
+    }
+};
+
+
+
+
 
 /* ==========================================================
    DOCUMENT RENDER ENGINE
@@ -3948,6 +4049,8 @@ CampusWord2007Simulator.InputLifecycleManager = {
        this.initializeTextInput();
 
       this.initializeRenderer();
+
+      this.initializeMobileKeyboard();
 
         CampusWord2007Simulator
             .state
@@ -4169,6 +4272,27 @@ initializeRenderer() {
         .state
         .input
         .renderReady = true;
+},
+
+initializeMobileKeyboard() {
+
+    if (
+        CampusWord2007Simulator
+            .MobileKeyboardEngine &&
+        CampusWord2007Simulator
+            .MobileKeyboardEngine
+            .initialize
+    ) {
+
+        CampusWord2007Simulator
+            .MobileKeyboardEngine
+            .initialize();
+    }
+
+    CampusWord2007Simulator
+        .state
+        .input
+        .mobileKeyboardReady = true;
 }
 };
 
@@ -4270,7 +4394,9 @@ CampusWord2007Simulator.KeyboardState = {
 
     shiftKey: false,
 
-    altKey: false
+    altKey: false,
+   
+   mobileKeyboardReady: false
 };
 
 
