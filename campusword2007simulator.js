@@ -3136,6 +3136,46 @@ CampusWord2007Simulator.SystemLayers = {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 CampusWord2007Simulator.MouseEngine = {};
 
 CampusWord2007Simulator.MouseState = {
@@ -3375,6 +3415,242 @@ CampusWord2007Simulator.PointerState = {
 
 
 
+
+
+/* ==========================================================
+   POINTER TRACKER RUNTIME
+   ========================================================== */
+
+CampusWord2007Simulator.PointerTracker = {
+
+    initialized: false,
+
+    initialize() {
+
+        if (this.initialized) {
+            return;
+        }
+
+        this.attachEvents();
+
+        this.initialized = true;
+
+        CampusWord2007Simulator
+            .Logger
+            .log(
+                "Pointer Tracker Initialized"
+            );
+    },
+
+    attachEvents() {
+
+        CampusWord2007Simulator
+            .EventBus
+            .on(
+                "mouse:down",
+                payload => {
+
+                    this.handleDown(
+                        payload
+                    );
+                }
+            );
+
+        CampusWord2007Simulator
+            .EventBus
+            .on(
+                "mouse:move",
+                payload => {
+
+                    this.handleMove(
+                        payload
+                    );
+                }
+            );
+
+        CampusWord2007Simulator
+            .EventBus
+            .on(
+                "mouse:up",
+                payload => {
+
+                    this.handleUp(
+                        payload
+                    );
+                }
+            );
+    },
+
+
+
+
+
+       handleDown() {
+
+        const state =
+            CampusWord2007Simulator
+                .PointerState;
+
+        const mouse =
+            CampusWord2007Simulator
+                .MouseState;
+
+        state.startX =
+            mouse.x;
+
+        state.startY =
+            mouse.y;
+
+        state.currentX =
+            mouse.x;
+
+        state.currentY =
+            mouse.y;
+
+        state.deltaX = 0;
+
+        state.deltaY = 0;
+
+        state.dragging = false;
+
+        CampusWord2007Simulator
+            .EventBus
+            .emit(
+                "pointer:start",
+                {
+                    x: mouse.x,
+                    y: mouse.y
+                }
+            );
+    },
+
+
+
+
+
+       handleMove() {
+
+        const pointer =
+            CampusWord2007Simulator
+                .PointerState;
+
+        const mouse =
+            CampusWord2007Simulator
+                .MouseState;
+
+        pointer.currentX =
+            mouse.x;
+
+        pointer.currentY =
+            mouse.y;
+
+        pointer.deltaX =
+            mouse.x -
+            pointer.startX;
+
+        pointer.deltaY =
+            mouse.y -
+            pointer.startY;
+
+        CampusWord2007Simulator
+            .EventBus
+            .emit(
+                "pointer:update",
+                {
+                    currentX:
+                        pointer.currentX,
+
+                    currentY:
+                        pointer.currentY,
+
+                    deltaX:
+                        pointer.deltaX,
+
+                    deltaY:
+                        pointer.deltaY
+                }
+            );
+    },
+
+   
+
+
+
+
+
+       handleUp() {
+
+        const pointer =
+            CampusWord2007Simulator
+                .PointerState;
+
+        CampusWord2007Simulator
+            .EventBus
+            .emit(
+                "pointer:end",
+                {
+                    x:
+                        pointer.currentX,
+
+                    y:
+                        pointer.currentY
+                }
+            );
+
+        pointer.dragging =
+            false;
+    }
+};
+
+
+
+
+
+
+
+
+/* ==========================================================
+   POINTER EVENTS
+   ========================================================== */
+
+CampusWord2007Simulator.PointerEvents = {
+
+    initialize() {
+
+        CampusWord2007Simulator
+            .EventBus
+            .on(
+                "pointer:start",
+                () => {}
+            );
+
+        CampusWord2007Simulator
+            .EventBus
+            .on(
+                "pointer:update",
+                () => {}
+            );
+
+        CampusWord2007Simulator
+            .EventBus
+            .on(
+                "pointer:end",
+                () => {}
+            );
+    }
+};
+
+
+
+
+
+
+
+
+
+
+
+
 /* ==========================================================
    INPUT LIFECYCLE MANAGER
    ========================================================== */
@@ -3576,6 +3852,10 @@ CampusWord2007Simulator
 
             CampusWord2007Simulator
                 .InputEvents
+                .initialize();
+
+           CampusWord2007Simulator
+                .PointerEvents
                 .initialize();
 
             CampusWord2007Simulator
