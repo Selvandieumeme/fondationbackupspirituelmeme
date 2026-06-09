@@ -3697,7 +3697,7 @@ CampusWord2007Simulator.EditableSurfaceEngine = {
       );
      
 
-};
+}
 
 
 
