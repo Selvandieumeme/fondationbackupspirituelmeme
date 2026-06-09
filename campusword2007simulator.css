@@ -2137,29 +2137,12 @@ body{
 
 
 #mobile-keyboard-bridge {
-
     position:absolute;
-
-    top:0;
-
-    left:0;
-
-    width:20px;
-
-    height:20px;
-
-    opacity:0;
-
-    border:none;
-
-    outline:none;
-
-    resize:none;
-
-    overflow:hidden;
-
-    z-index:-1;
+    top:20px;
+    left:20px;
+    width:1px;
+    height:1px;
+    opacity:0.01;
 }
-
 
 
