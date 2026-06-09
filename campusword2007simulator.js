@@ -4696,7 +4696,7 @@ CampusWord2007Simulator.DocumentRenderEngine = {
             .CaretEngine
             .render();
     }
-};
+}
 
 
 
