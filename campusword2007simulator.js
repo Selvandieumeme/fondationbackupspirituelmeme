@@ -3679,24 +3679,43 @@ CampusWord2007Simulator.EditableSurfaceEngine = {
         return;
     }
 
-    this.editorElement
-        .addEventListener(
-            "click",
-            () => {
+    const bridge =
+        document.getElementById(
+            "mobile-keyboard-bridge"
+        );
 
-                CampusWord2007Simulator
-                    .EditorState
-                    .focused = true;
+    this.editorElement.addEventListener(
+        "click",
+        () => {
 
-                CampusWord2007Simulator
-                    .EventBus
-                    .emit(
-                        "editor:focus"
-                             );
-              }
-      );
-     
+            CampusWord2007Simulator
+                .EditorState
+                .focused = true;
 
+            CampusWord2007Simulator
+                .EventBus
+                .emit(
+                    "editor:focus"
+                );
+
+            if (bridge) {
+                bridge.focus();
+            }
+        }
+    );
+
+    this.editorElement.addEventListener(
+        "touchstart",
+        () => {
+
+            if (bridge) {
+                bridge.focus();
+            }
+        },
+        {
+            passive: true
+        }
+    );
 }
 
 
