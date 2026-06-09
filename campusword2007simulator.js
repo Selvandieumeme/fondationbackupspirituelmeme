@@ -3679,36 +3679,6 @@ CampusWord2007Simulator.EditableSurfaceEngine = {
         return;
     }
 
- const surface =
-document.getElementById(
-    "document-editor-surface"
-);
-
-const bridge =
-document.getElementById(
-    "mobile-keyboard-bridge"
-);
-
-surface.addEventListener(
-    "touchstart",
-    () => {
-
-        bridge.focus();
-
-    },
-    { passive:true }
-);
-
-surface.addEventListener(
-    "click",
-    () => {
-
-        bridge.focus();
-
-    }
-);
-
-
     this.editorElement
         .addEventListener(
             "click",
