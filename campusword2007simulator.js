@@ -4684,7 +4684,7 @@ CampusWord2007Simulator.DocumentRenderEngine = {
             characterWidth
         );
 
-    caretState.y = 20;
+    caretState.y = 0;
 
         if (
         CampusWord2007Simulator
