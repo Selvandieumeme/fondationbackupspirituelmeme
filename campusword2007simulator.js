@@ -4686,7 +4686,7 @@ CampusWord2007Simulator.DocumentRenderEngine = {
 
     caretState.y = 20;
 
-    if (
+        if (
         CampusWord2007Simulator
             .CaretEngine
             .render
@@ -4697,7 +4697,7 @@ CampusWord2007Simulator.DocumentRenderEngine = {
             .render();
     }
 }
-
+};
 
 
 
