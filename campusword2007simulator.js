@@ -4658,21 +4658,45 @@ CampusWord2007Simulator.DocumentRenderEngine = {
 
     render() {
 
-        if (!this.textLayer) {
-            return;
-        }
+    if (!this.textLayer) {
+        return;
+    }
 
-        console.log(
-            "Rendering..."
+    this.textLayer.textContent =
+        CampusWord2007Simulator
+            .EditorState
+            .textContent;
+
+    const caretState =
+        CampusWord2007Simulator
+            .CaretState;
+
+    const editorState =
+        CampusWord2007Simulator
+            .EditorState;
+
+    const characterWidth = 8;
+
+    caretState.x =
+        20 +
+        (
+            editorState.caretPosition *
+            characterWidth
         );
 
-        this.textLayer.textContent =
-            CampusWord2007Simulator
-                .EditorState
-                .textContent;
+    caretState.y = 20;
+
+    if (
+        CampusWord2007Simulator
+            .CaretEngine
+            .render
+    ) {
+
+        CampusWord2007Simulator
+            .CaretEngine
+            .render();
     }
 };
-
 
 
 
