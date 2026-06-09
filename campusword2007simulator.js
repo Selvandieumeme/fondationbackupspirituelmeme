@@ -4706,6 +4706,16 @@ CampusWord2007Simulator.DocumentRenderEngine = {
 
 
 
+
+
+
+
+
+
+
+
+
+
 /* ==========================================================
    CARET MOVEMENT ENGINE
    ========================================================== */
@@ -4774,6 +4784,10 @@ CampusWord2007Simulator.CaretMovementEngine = {
         }
 
         editor.caretPosition--;
+
+        CampusWord2007Simulator
+            .DocumentRenderEngine
+            .render();
     },
 
     moveRight() {
@@ -4790,6 +4804,9 @@ CampusWord2007Simulator.CaretMovementEngine = {
         }
 
         editor.caretPosition++;
+
+        CampusWord2007Simulator
+            .DocumentRenderEngine
+            .render();
     }
 };
-
