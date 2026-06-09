@@ -3673,52 +3673,43 @@ CampusWord2007Simulator.EditableSurfaceEngine = {
             );
     },
 
-  attachEvents() {
+attachEvents() {
 
     if (!this.editorElement) {
         return;
     }
 
-    const bridge =
+   const bridge =
         document.getElementById(
             "mobile-keyboard-bridge"
         );
+    this.editorElement
+        .addEventListener(
+            "click",
+            () => {
 
-    this.editorElement.addEventListener(
-        "click",
-        () => {
+                CampusWord2007Simulator
+                    .EditorState
+                    .focused = true;
 
-            CampusWord2007Simulator
-                .EditorState
-                .focused = true;
+                CampusWord2007Simulator
+                    .EventBus
+                    .emit(
+                        "editor:focus"
+                    );
 
-            CampusWord2007Simulator
-                .EventBus
-                .emit(
-                    "editor:focus"
-                );
-
-            if (bridge) {
-                bridge.focus();
             }
-        }
-    );
-
-    this.editorElement.addEventListener(
-        "touchstart",
-        () => {
-
-            if (bridge) {
-                bridge.focus();
-            }
-        },
-        {
-            passive: true
-        }
-    );
+        );
 }
 
+};
 
+
+
+
+
+   
+ 
 
 
 
