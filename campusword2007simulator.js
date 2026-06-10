@@ -4900,24 +4900,38 @@ CampusWord2007Simulator.RulerEngine = {
         }
     },
 
-    onHorizontalClick(event) {
+   onHorizontalClick(event) {
 
-        const rect =
-            this.horizontalRuler
-                .getBoundingClientRect();
+    const rect =
+        this.horizontalRuler
+            .getBoundingClientRect();
 
-        const x =
-            event.clientX -
-            rect.left;
+    const x =
+        event.clientX -
+        rect.left;
+
+    CampusWord2007Simulator
+        .CaretState
+        .x = x;
+
+    if (
+        CampusWord2007Simulator
+            .CaretEngine
+            .render
+    ) {
 
         CampusWord2007Simulator
-            .Logger
-            .log(
-                "Horizontal Ruler Click:",
-                x
-            );
-    },
+            .CaretEngine
+            .render();
+    }
 
+    CampusWord2007Simulator
+        .Logger
+        .log(
+            "Horizontal Ruler Click:",
+            x
+        );
+},
     onVerticalClick(event) {
 
         const rect =
