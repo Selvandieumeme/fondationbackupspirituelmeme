@@ -4963,6 +4963,7 @@ CampusWord2007Simulator.RulerEngine = {
             "Vertical Ruler Click:",
             y
         );
-}
-);
+    }
+};
+
 
