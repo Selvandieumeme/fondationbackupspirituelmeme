@@ -4696,8 +4696,11 @@ const currentColumn =
     maxCharactersPerLine;
 
 caretState.x =
-    currentColumn *
-    characterWidth;
+    20 +
+    (
+        currentColumn *
+        characterWidth
+    );
 
 caretState.y =
     currentLine *
