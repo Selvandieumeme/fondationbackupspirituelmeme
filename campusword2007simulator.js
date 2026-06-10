@@ -4934,20 +4934,35 @@ CampusWord2007Simulator.RulerEngine = {
 },
     onVerticalClick(event) {
 
-        const rect =
-            this.verticalRuler
-                .getBoundingClientRect();
+    const rect =
+        this.verticalRuler
+            .getBoundingClientRect();
 
-        const y =
-            event.clientY -
-            rect.top;
+    const y =
+        event.clientY -
+        rect.top;
+
+    CampusWord2007Simulator
+        .CaretState
+        .y = y;
+
+    if (
+        CampusWord2007Simulator
+            .CaretEngine
+            .render
+    ) {
 
         CampusWord2007Simulator
-            .Logger
-            .log(
-                "Vertical Ruler Click:",
-                y
-            );
+            .CaretEngine
+            .render();
     }
+
+    CampusWord2007Simulator
+        .Logger
+        .log(
+            "Vertical Ruler Click:",
+            y
+        );
+}
 };
 
