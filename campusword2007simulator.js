@@ -551,6 +551,10 @@ CampusWord2007Simulator
         "application:ready",
         () => {
 
+   CampusWord2007Simulator
+    .RulerEngine
+    .initialize();
+
             CampusWord2007Simulator
                 .Logger
                 .log(
@@ -4810,3 +4814,126 @@ CampusWord2007Simulator.CaretMovementEngine = {
             .render();
     }
 };
+
+
+
+
+
+
+
+
+
+
+
+
+/* ==========================================================
+   RULER ENGINE
+   ========================================================== */
+
+CampusWord2007Simulator.RulerEngine = {
+
+    initialized: false,
+
+    horizontalRuler: null,
+
+    verticalRuler: null,
+
+    initialize() {
+
+        if (this.initialized) {
+            return;
+        }
+
+        this.horizontalRuler =
+            document.getElementById(
+                "horizontal-ruler"
+            );
+
+        this.verticalRuler =
+            document.getElementById(
+                "vertical-ruler"
+            );
+
+        this.attachEvents();
+
+        this.initialized = true;
+
+        CampusWord2007Simulator
+            .Logger
+            .log(
+                "Ruler Engine Initialized"
+            );
+    },
+
+    attachEvents() {
+
+        if (
+            this.horizontalRuler
+        ) {
+
+            this.horizontalRuler
+                .addEventListener(
+                    "click",
+                    event => {
+
+                        this.onHorizontalClick(
+                            event
+                        );
+                    }
+                );
+        }
+
+        if (
+            this.verticalRuler
+        ) {
+
+            this.verticalRuler
+                .addEventListener(
+                    "click",
+                    event => {
+
+                        this.onVerticalClick(
+                            event
+                        );
+                    }
+                );
+        }
+    },
+
+    onHorizontalClick(event) {
+
+        const rect =
+            this.horizontalRuler
+                .getBoundingClientRect();
+
+        const x =
+            event.clientX -
+            rect.left;
+
+        CampusWord2007Simulator
+            .Logger
+            .log(
+                "Horizontal Ruler Click:",
+                x
+            );
+    },
+
+    onVerticalClick(event) {
+
+        const rect =
+            this.verticalRuler
+                .getBoundingClientRect();
+
+        const y =
+            event.clientY -
+            rect.top;
+
+        CampusWord2007Simulator
+            .Logger
+            .log(
+                "Vertical Ruler Click:",
+                y
+            );
+    }
+};
+
