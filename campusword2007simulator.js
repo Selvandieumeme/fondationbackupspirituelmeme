@@ -4681,14 +4681,27 @@ CampusWord2007Simulator.DocumentRenderEngine = {
 
     const characterWidth = 8;
 
-    caretState.x =
-        20 +
-        (
-            editorState.caretPosition *
-            characterWidth
-        );
+const lineHeight = 18;
 
-    caretState.y = 0;
+const maxCharactersPerLine = 80;
+
+const currentLine =
+    Math.floor(
+        editorState.caretPosition /
+        maxCharactersPerLine
+    );
+
+const currentColumn =
+    editorState.caretPosition %
+    maxCharactersPerLine;
+
+caretState.x =
+    currentColumn *
+    characterWidth;
+
+caretState.y =
+    currentLine *
+    lineHeight;
 
         if (
         CampusWord2007Simulator
