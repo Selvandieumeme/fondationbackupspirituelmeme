@@ -4679,66 +4679,86 @@ CampusWord2007Simulator.DocumentRenderEngine = {
         CampusWord2007Simulator
             .EditorState;
 
-    const textLayer =
-    this.textLayer;
-
-const textBeforeCaret =
+   const textBeforeCaret =
     editorState.textContent.substring(
         0,
         editorState.caretPosition
     );
 
-const measurement =
+const probe =
+    document.createElement(
+        "div"
+    );
+
+probe.style.position =
+    "absolute";
+
+probe.style.visibility =
+    "hidden";
+
+probe.style.whiteSpace =
+    "pre-wrap";
+
+probe.style.wordWrap =
+    "break-word";
+
+probe.style.overflowWrap =
+    "break-word";
+
+probe.style.fontFamily =
+    '"Times New Roman", serif';
+
+probe.style.fontSize =
+    "12pt";
+
+probe.style.lineHeight =
+    "18px";
+
+probe.style.width =
+    this.textLayer.offsetWidth +
+    "px";
+
+const textNode =
+    document.createTextNode(
+        textBeforeCaret
+    );
+
+const marker =
     document.createElement(
         "span"
     );
 
-measurement.style.position =
-    "absolute";
+marker.textContent =
+    "\u200B";
 
-measurement.style.visibility =
-    "hidden";
-
-measurement.style.whiteSpace =
-    "pre-wrap";
-
-measurement.style.wordWrap =
-    "break-word";
-
-measurement.style.overflowWrap =
-    "break-word";
-
-measurement.style.fontFamily =
-    '"Times New Roman", serif';
-
-measurement.style.fontSize =
-    "12pt";
-
-measurement.style.lineHeight =
-    "18px";
-
-measurement.style.width =
-    textLayer.offsetWidth +
-    "px";
-
-measurement.textContent =
-    textBeforeCaret;
-
-document.body.appendChild(
-    measurement
+probe.appendChild(
+    textNode
 );
 
-const rect =
-    measurement.getBoundingClientRect();
+probe.appendChild(
+    marker
+);
+
+document.body.appendChild(
+    probe
+);
+
+const probeRect =
+    probe.getBoundingClientRect();
+
+const markerRect =
+    marker.getBoundingClientRect();
 
 caretState.x =
-    rect.width;
+    markerRect.left -
+    probeRect.left;
 
 caretState.y =
-    rect.height - 18;
+    markerRect.top -
+    probeRect.top;
 
 document.body.removeChild(
-    measurement
+    probe
 );
 
        
