@@ -4679,30 +4679,69 @@ CampusWord2007Simulator.DocumentRenderEngine = {
         CampusWord2007Simulator
             .EditorState;
 
-    const characterWidth = 7;
+    const textLayer =
+    this.textLayer;
 
-const lineHeight = 18;
-
-const maxCharactersPerLine = 86;
-
-const currentLine =
-    Math.floor(
-        editorState.caretPosition /
-        maxCharactersPerLine
+const textBeforeCaret =
+    editorState.textContent.substring(
+        0,
+        editorState.caretPosition
     );
 
-const currentColumn =
-    editorState.caretPosition %
-    maxCharactersPerLine;
+const measurement =
+    document.createElement(
+        "span"
+    );
+
+measurement.style.position =
+    "absolute";
+
+measurement.style.visibility =
+    "hidden";
+
+measurement.style.whiteSpace =
+    "pre-wrap";
+
+measurement.style.wordWrap =
+    "break-word";
+
+measurement.style.overflowWrap =
+    "break-word";
+
+measurement.style.fontFamily =
+    '"Times New Roman", serif';
+
+measurement.style.fontSize =
+    "12pt";
+
+measurement.style.lineHeight =
+    "18px";
+
+measurement.style.width =
+    textLayer.offsetWidth +
+    "px";
+
+measurement.textContent =
+    textBeforeCaret;
+
+document.body.appendChild(
+    measurement
+);
+
+const rect =
+    measurement.getBoundingClientRect();
 
 caretState.x =
-    currentColumn *
-    characterWidth;
+    rect.width;
 
 caretState.y =
-    currentLine *
-    lineHeight;
+    rect.height - 18;
 
+document.body.removeChild(
+    measurement
+);
+
+       
         if (
         CampusWord2007Simulator
             .CaretEngine
