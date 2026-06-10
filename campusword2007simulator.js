@@ -4287,6 +4287,26 @@ CampusWord2007Simulator.KeyboardState = {
 
 
 /* ==========================================================
+   PAGE MARGIN STATE
+   ========================================================== */
+
+CampusWord2007Simulator.PageMarginState = {
+
+    left: 96,
+
+    right: 96,
+
+    top: 96,
+
+    bottom: 96
+};
+
+
+
+
+
+
+/* ==========================================================
    CARET ENGINE
    ========================================================== */
 
@@ -4771,6 +4791,11 @@ document.body.removeChild(
         CampusWord2007Simulator
             .CaretEngine
             .render();
+
+      CampusWord2007Simulator
+    .PageMarginEngine
+    .initialize();
+           
     }
 }
 };
@@ -5039,3 +5064,137 @@ CampusWord2007Simulator.RulerEngine = {
 };
 
 
+
+
+
+
+
+
+
+
+
+/* ==========================================================
+   PAGE MARGIN ENGINE
+   HORIZONTAL LEFT MARGIN
+   ========================================================== */
+
+CampusWord2007Simulator.PageMarginEngine = {
+
+    initialized: false,
+
+    leftMarker: null,
+
+    pageContent: null,
+
+    dragging: false,
+
+    initialize() {
+
+        if (this.initialized) {
+            return;
+        }
+
+        this.leftMarker =
+            document.getElementById(
+                "horizontal-margin-left"
+            );
+
+        this.pageContent =
+            document.getElementById(
+                "page-content"
+            );
+
+        if (
+            !this.leftMarker ||
+            !this.pageContent
+        ) {
+            return;
+        }
+
+        this.attachEvents();
+
+        this.render();
+
+        this.initialized = true;
+
+        CampusWord2007Simulator
+            .Logger
+            .log(
+                "Page Margin Engine Initialized"
+            );
+    },
+
+    attachEvents() {
+
+        this.leftMarker.addEventListener(
+            "mousedown",
+            () => {
+
+                this.dragging = true;
+            }
+        );
+
+        document.addEventListener(
+            "mouseup",
+            () => {
+
+                this.dragging = false;
+            }
+        );
+
+        document.addEventListener(
+            "mousemove",
+            event => {
+
+                if (!this.dragging) {
+                    return;
+                }
+
+                const ruler =
+                    document.getElementById(
+                        "horizontal-ruler"
+                    );
+
+                if (!ruler) {
+                    return;
+                }
+
+                const rect =
+                    ruler.getBoundingClientRect();
+
+                let newMargin =
+                    event.clientX -
+                    rect.left;
+
+                if (newMargin < 20) {
+                    newMargin = 20;
+                }
+
+                if (newMargin > 250) {
+                    newMargin = 250;
+                }
+
+                CampusWord2007Simulator
+                    .PageMarginState
+                    .left =
+                        newMargin;
+
+                this.render();
+            }
+        );
+    },
+
+    render() {
+
+        const margin =
+            CampusWord2007Simulator
+                .PageMarginState
+                .left;
+
+        this.leftMarker.style.left =
+            margin + "px";
+
+        this.pageContent.style.paddingLeft =
+            margin + "px";
+    }
+};
