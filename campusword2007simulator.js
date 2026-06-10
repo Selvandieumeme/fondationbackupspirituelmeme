@@ -4683,7 +4683,7 @@ CampusWord2007Simulator.DocumentRenderEngine = {
 
 const lineHeight = 18;
 
-const maxCharactersPerLine = 80;
+const maxCharactersPerLine = 86;
 
 const currentLine =
     Math.floor(
