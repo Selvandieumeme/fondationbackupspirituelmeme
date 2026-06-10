@@ -2146,3 +2146,49 @@ body{
 }
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+/* =======================================================
+   DOCUMENT TEXT LAYER
+   ======================================================= */
+
+#document-text-layer {
+
+    position: absolute;
+
+    top: 0;
+
+    left: 0;
+
+    width: 100%;
+
+    min-height: 100%;
+
+    white-space: pre-wrap;
+
+    word-wrap: break-word;
+
+    overflow-wrap: break-word;
+
+    line-height: 18px;
+
+    font-family:
+        "Times New Roman",
+        serif;
+
+    font-size: 12pt;
+
+    color: #000000;
+
+    pointer-events: none;
+}
