@@ -4679,7 +4679,7 @@ CampusWord2007Simulator.DocumentRenderEngine = {
         CampusWord2007Simulator
             .EditorState;
 
-    const characterWidth = 8;
+    const characterWidth = 6;
 
 const lineHeight = 18;
 
