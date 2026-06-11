@@ -4908,7 +4908,7 @@ handleKey(event) {
              this.handleBackspace();
 
              break;
-    }
+    },
 
 
 
