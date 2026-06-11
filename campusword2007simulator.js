@@ -4945,16 +4945,62 @@ handleKey(event) {
     },
 
 
-   moveUp() {
+  moveUp() {
 
+    const editor =
+        CampusWord2007Simulator
+            .EditorState;
+
+    const beforeCaret =
+        editor.textContent.slice(
+            0,
+            editor.caretPosition
+        );
+
+    const lines =
+        beforeCaret.split(
+            "\n"
+        );
+
+    if (
+        lines.length <= 1
+    ) {
+        return;
+    }
+
+    CampusWord2007Simulator
+        .Logger
+        .log(
+            "ArrowUp Ready"
+        );
 },
 
 moveDown() {
 
+    const editor =
+        CampusWord2007Simulator
+            .EditorState;
+
+    const afterCaret =
+        editor.textContent.slice(
+            editor.caretPosition
+        );
+
+    if (
+        !afterCaret.includes(
+            "\n"
+        )
+    ) {
+        return;
+    }
+
+    CampusWord2007Simulator
+        .Logger
+        .log(
+            "ArrowDown Ready"
+        );
 }
-
 };
-
 
 
 
