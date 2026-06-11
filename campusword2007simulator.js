@@ -4945,7 +4945,7 @@ handleKey(event) {
     },
 
 
-  moveUp() {
+ moveUp() {
 
     const editor =
         CampusWord2007Simulator
@@ -4968,11 +4968,42 @@ handleKey(event) {
         return;
     }
 
-    CampusWord2007Simulator
-        .Logger
-        .log(
-            "ArrowUp Ready"
+    const currentColumn =
+        lines[
+            lines.length - 1
+        ].length;
+
+    const previousLineLength =
+        lines[
+            lines.length - 2
+        ].length;
+
+    const targetColumn =
+        Math.min(
+            currentColumn,
+            previousLineLength
         );
+
+    let newPosition = 0;
+
+    for (
+        let i = 0;
+        i < lines.length - 2;
+        i++
+    ) {
+        newPosition +=
+            lines[i].length + 1;
+    }
+
+    newPosition +=
+        targetColumn;
+
+    editor.caretPosition =
+        newPosition;
+
+    CampusWord2007Simulator
+        .DocumentRenderEngine
+        .render();
 },
 
 moveDown() {
@@ -4981,24 +5012,71 @@ moveDown() {
         CampusWord2007Simulator
             .EditorState;
 
-    const afterCaret =
-        editor.textContent.slice(
+    const text =
+        editor.textContent;
+
+    const beforeCaret =
+        text.slice(
+            0,
             editor.caretPosition
         );
 
-    if (
-        !afterCaret.includes(
+    const lines =
+        beforeCaret.split(
             "\n"
-        )
+        );
+
+    const allLines =
+        text.split(
+            "\n"
+        );
+
+    const currentLineIndex =
+        lines.length - 1;
+
+    if (
+        currentLineIndex >=
+        allLines.length - 1
     ) {
         return;
     }
 
-    CampusWord2007Simulator
-        .Logger
-        .log(
-            "ArrowDown Ready"
+    const currentColumn =
+        lines[
+            lines.length - 1
+        ].length;
+
+    const nextLineLength =
+        allLines[
+            currentLineIndex + 1
+        ].length;
+
+    const targetColumn =
+        Math.min(
+            currentColumn,
+            nextLineLength
         );
+
+    let newPosition = 0;
+
+    for (
+        let i = 0;
+        i < currentLineIndex + 1;
+        i++
+    ) {
+        newPosition +=
+            allLines[i].length + 1;
+    }
+
+    newPosition +=
+        targetColumn;
+
+    editor.caretPosition =
+        newPosition;
+
+    CampusWord2007Simulator
+        .DocumentRenderEngine
+        .render();
 }
 };
 
