@@ -3816,67 +3816,61 @@ CampusWord2007Simulator.state.input = {
    TEXT INPUT ENGINE
    ========================================================== */
 
-CampusWord2007Simulator.TextInputEngine = {
+insertCharacter(character) {
 
-    initialized: false,
+    if (!character) {
+        return;
+    }
 
-    initialize() {
-
-        if (this.initialized) {
-            return;
-        }
-
+    const editor =
         CampusWord2007Simulator
-            .EventBus
-            .on(
-                "keyboard:input",
-                event => {
+            .EditorState;
 
-                    this.insertCharacter(
-                        event.key
-                    );
-                }
+    /* ENTER */
+
+    if (
+        character === "Enter"
+    ) {
+
+        editor.textContent =
+            editor.textContent.slice(
+                0,
+                editor.caretPosition
+            ) +
+            "\n" +
+            editor.textContent.slice(
+                editor.caretPosition
             );
-
-        this.initialized = true;
-
-        CampusWord2007Simulator
-            .Logger
-            .log(
-                "Text Input Engine Initialized"
-            );
-    },
-
-    insertCharacter(character) {
-
-        if (
-            !character ||
-            character.length !== 1
-        ) {
-            return;
-        }
-
-        const editor =
-            CampusWord2007Simulator
-                .EditorState;
-
-        editor.textContent +=
-            character;
 
         editor.caretPosition++;
 
-        CampusWord2007Simulator
-            .EventBus
-            .emit(
-                "editor:textchanged",
-                {
-                    text:
-                        editor.textContent
-                }
-            );
-    }
-};
+    } else if (
+        character.length === 1
+    ) {
 
+        editor.textContent =
+            editor.textContent.slice(
+                0,
+                editor.caretPosition
+            ) +
+            character +
+            editor.textContent.slice(
+                editor.caretPosition
+            );
+
+        editor.caretPosition++;
+    }
+
+    CampusWord2007Simulator
+        .EventBus
+        .emit(
+            "editor:textchanged",
+            {
+                text:
+                    editor.textContent
+            }
+        );
+}
 
 
 
