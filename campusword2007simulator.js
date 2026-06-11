@@ -4949,7 +4949,9 @@ handleKey(event) {
             {
                 text:
                     editor.textContent
-            },
+            }
+           );
+},
 
 
 
