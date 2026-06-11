@@ -4908,6 +4908,12 @@ handleKey(event) {
              this.handleBackspace();
 
              break;
+
+      case "Delete":
+
+    this.handleDelete();
+
+    break;
     }   
 },
 
@@ -4944,7 +4950,45 @@ handleKey(event) {
                 text:
                     editor.textContent
             }
+
+
+
+
+           handleDelete() {
+
+    const editor =
+        CampusWord2007Simulator
+            .EditorState;
+
+    if (
+        editor.caretPosition >=
+        editor.textContent.length
+    ) {
+        return;
+    }
+
+    editor.textContent =
+        editor.textContent.slice(
+            0,
+            editor.caretPosition
+        ) +
+        editor.textContent.slice(
+            editor.caretPosition + 1
         );
+
+    CampusWord2007Simulator
+        .EventBus
+        .emit(
+            "editor:textchanged",
+            {
+                text:
+                    editor.textContent
+            }
+        );
+},
+
+      
+        );     
 },
 
     moveLeft() {
