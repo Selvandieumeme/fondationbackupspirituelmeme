@@ -4985,7 +4985,7 @@ handleKey(event) {
                     editor.textContent
             }
         );
-},
+}
 
       
         );     
