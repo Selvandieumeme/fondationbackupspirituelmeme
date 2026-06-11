@@ -5086,7 +5086,9 @@ CampusWord2007Simulator.PageMarginEngine = {
 
     pageContent: null,
 
-    dragging: false,
+    draggingLeft: false,
+
+   draggingRight: false,
 
     initialize() {
 
@@ -5098,6 +5100,11 @@ CampusWord2007Simulator.PageMarginEngine = {
             document.getElementById(
                 "horizontal-margin-left"
             );
+
+         this.rightMarker =
+    document.getElementById(
+        "horizontal-margin-right"
+             );
 
         this.pageContent =
             document.getElementById(
@@ -5127,28 +5134,39 @@ CampusWord2007Simulator.PageMarginEngine = {
     attachEvents() {
 
         this.leftMarker.addEventListener(
-            "mousedown",
-            () => {
+    "mousedown",
+    () => {
 
-                this.dragging = true;
-            }
-        );
+        this.draggingLeft = true;
+    }
+);
 
-        document.addEventListener(
-            "mouseup",
-            () => {
 
-                this.dragging = false;
-            }
-        );
+      this.rightMarker.addEventListener(
+    "mousedown",
+    () => {
+
+        this.draggingRight = true;
+    }
+);
+
+       
+
+document.addEventListener(
+    "mouseup",
+    () => {
+
+        this.draggingLeft = false;
+
+        this.draggingRight = false;
+    }
+);
 
         document.addEventListener(
             "mousemove",
             event => {
 
-                if (!this.dragging) {
-                    return;
-                }
+               
 
                 const ruler =
                     document.getElementById(
@@ -5161,40 +5179,74 @@ CampusWord2007Simulator.PageMarginEngine = {
 
                 const rect =
                     ruler.getBoundingClientRect();
+/* =========================
+   LEFT MARGIN
+   ========================= */
 
-                let newMargin =
-                    event.clientX -
-                    rect.left;
+if (this.draggingLeft) {
 
-                if (newMargin < 20) {
-                    newMargin = 20;
-                }
+    let newMargin =
+        event.clientX -
+        rect.left;
 
-                if (newMargin > 250) {
-                    newMargin = 250;
-                }
+    if (newMargin < 20) {
+        newMargin = 20;
+    }
 
-                CampusWord2007Simulator
-                    .PageMarginState
-                    .left =
-                        newMargin;
+    if (newMargin > 250) {
+        newMargin = 250;
+    }
 
-                this.render();
-            }
-        );
-    },
+    CampusWord2007Simulator
+        .PageMarginState
+        .left =
+            newMargin;
+}
 
-    render() {
+/* =========================
+   RIGHT MARGIN
+   ========================= */
 
-        const margin =
-            CampusWord2007Simulator
-                .PageMarginState
-                .left;
+if (this.draggingRight) {
 
-        this.leftMarker.style.left =
-            margin + "px";
+    let newMargin =
+        rect.right -
+        event.clientX;
 
-        this.pageContent.style.paddingLeft =
-            margin + "px";
+    if (newMargin < 20) {
+        newMargin = 20;
+    }
+
+    if (newMargin > 250) {
+        newMargin = 250;
+    }
+
+    CampusWord2007Simulator
+        .PageMarginState
+        .right =
+            newMargin;
+}
+
+this.render();
+
+       const state =
+    CampusWord2007Simulator
+        .PageMarginState;
+
+/* LEFT */
+
+this.leftMarker.style.left =
+    state.left + "px";
+
+this.pageContent.style.paddingLeft =
+    state.left + "px";
+
+/* RIGHT */
+
+this.rightMarker.style.right =
+    state.right + "px";
+
+this.pageContent.style.paddingRight =
+    state.right + "px";
     }
 };
