@@ -5144,6 +5144,14 @@ CampusWord2007Simulator.PageMarginEngine = {
             }
         );
 
+       this.leftMarker.addEventListener(
+    "touchstart",
+    () => {
+
+        this.draggingLeft = true;
+    }
+);
+
         this.rightMarker.addEventListener(
             "mousedown",
             () => {
@@ -5152,6 +5160,13 @@ CampusWord2007Simulator.PageMarginEngine = {
             }
         );
 
+       this.rightMarker.addEventListener(
+    "touchstart",
+    () => {
+
+        this.draggingRight = true;
+    }
+);
         document.addEventListener(
             "mouseup",
             () => {
