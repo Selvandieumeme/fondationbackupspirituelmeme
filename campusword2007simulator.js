@@ -4873,25 +4873,37 @@ CampusWord2007Simulator.CaretMovementEngine = {
             );
     },
 
-    handleKey(event) {
+handleKey(event) {
 
-        switch (
-            event.key
-        ) {
+    switch (
+        event.key
+    ) {
 
-            case "ArrowLeft":
+        case "ArrowLeft":
 
-                this.moveLeft();
+            this.moveLeft();
 
-                break;
+            break;
 
-            case "ArrowRight":
+        case "ArrowRight":
 
-                this.moveRight();
+            this.moveRight();
 
-                break;
-        }
-    },
+            break;
+
+        case "ArrowUp":
+
+            this.moveUp();
+
+            break;
+
+        case "ArrowDown":
+
+            this.moveDown();
+
+            break;
+    }
+},
 
     moveLeft() {
 
@@ -4930,8 +4942,19 @@ CampusWord2007Simulator.CaretMovementEngine = {
         CampusWord2007Simulator
             .DocumentRenderEngine
             .render();
-    }
+    },
+
+
+   moveUp() {
+
+},
+
+moveDown() {
+
+}
+
 };
+
 
 
 
