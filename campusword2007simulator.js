@@ -5090,11 +5090,15 @@ CampusWord2007Simulator.PageMarginEngine = {
 
     pageContent: null,
 
+   bottomMarker: null,
+
     draggingLeft: false,
 
     draggingRight: false,
 
     draggingTop: false,
+
+   draggingBottom: false,
    
    initialize() {
 
@@ -5118,6 +5122,12 @@ CampusWord2007Simulator.PageMarginEngine = {
         "vertical-margin-top"
             );
 
+      this.bottomMarker =
+    document.getElementById(
+        "vertical-margin-bottom"
+    );
+      
+
         this.pageContent =
             document.getElementById(
                 "page-content"
@@ -5127,6 +5137,7 @@ CampusWord2007Simulator.PageMarginEngine = {
             !this.leftMarker ||
             !this.rightMarker ||
             !this.topMarker ||
+           !this.bottomMarker ||
             !this.pageContent
         ) {
             return;
@@ -5155,6 +5166,7 @@ CampusWord2007Simulator.PageMarginEngine = {
             }
         );
 
+
        this.leftMarker.addEventListener(
     "touchstart",
     () => {
@@ -5179,6 +5191,16 @@ CampusWord2007Simulator.PageMarginEngine = {
     }
 );
 
+
+this.bottomMarker.addEventListener(
+    "mousedown",
+    () => {
+
+        this.draggingBottom = true;
+    }
+);
+       
+       
        this.topMarker.addEventListener(
     "touchstart",
     () => {
@@ -5186,7 +5208,6 @@ CampusWord2007Simulator.PageMarginEngine = {
         this.draggingTop = true;
     }
 );
-       
 
        this.rightMarker.addEventListener(
     "touchstart",
@@ -5195,6 +5216,18 @@ CampusWord2007Simulator.PageMarginEngine = {
         this.draggingRight = true;
     }
 );
+
+
+  this.bottomMarker.addEventListener(
+    "touchstart",
+    () => {
+
+        this.draggingBottom = true;
+    }
+);
+
+
+       
         document.addEventListener(
             "mouseup",
             () => {
@@ -5204,6 +5237,8 @@ CampusWord2007Simulator.PageMarginEngine = {
                 this.draggingRight = false;
 
                 this.draggingTop = false;
+
+               this.draggingBottom = false;
             }
         );
 
@@ -5217,6 +5252,8 @@ CampusWord2007Simulator.PageMarginEngine = {
         this.draggingRight = false;
 
         this.draggingTop = false;
+
+       this.draggingBottom = false;
     }
 );
 
@@ -5285,7 +5322,7 @@ CampusWord2007Simulator.PageMarginEngine = {
 
                
 
-         if (this.draggingTop) {
+        if (this.draggingTop) {
 
     const verticalRuler =
         document.getElementById(
@@ -5316,7 +5353,40 @@ CampusWord2007Simulator.PageMarginEngine = {
         .top =
             newMargin;
 }
-      
+
+/* BOTTOM */
+
+if (this.draggingBottom) {
+
+    const verticalRuler =
+        document.getElementById(
+            "vertical-ruler"
+        );
+
+    if (!verticalRuler) {
+        return;
+    }
+
+    const verticalRect =
+        verticalRuler.getBoundingClientRect();
+
+    let newMargin =
+        verticalRect.bottom -
+        event.clientY;
+
+    if (newMargin < 20) {
+        newMargin = 20;
+    }
+
+    if (newMargin > 250) {
+        newMargin = 250;
+    }
+
+    CampusWord2007Simulator
+        .PageMarginState
+        .bottom =
+            newMargin;
+}
                 this.render();
             }
         );
@@ -5431,6 +5501,40 @@ if (this.draggingTop) {
             newMargin;
 }
 
+
+       /* BOTTOM */
+
+if (this.draggingBottom) {
+
+    const verticalRuler =
+        document.getElementById(
+            "vertical-ruler"
+        );
+
+    if (!verticalRuler) {
+        return;
+    }
+
+    const verticalRect =
+        verticalRuler.getBoundingClientRect();
+
+    let newMargin =
+        verticalRect.bottom -
+        simulatedEvent.clientY;
+
+    if (newMargin < 20) {
+        newMargin = 20;
+    }
+
+    if (newMargin > 250) {
+        newMargin = 250;
+    }
+
+    CampusWord2007Simulator
+        .PageMarginState
+        .bottom =
+            newMargin;
+}
         this.render();
     }
 );
@@ -5467,6 +5571,15 @@ this.topMarker.style.top =
 
 this.pageContent.style.paddingTop =
     state.top + "px";
+
+
+       /* BOTTOM */
+
+this.bottomMarker.style.bottom =
+    state.bottom + "px";
+
+this.pageContent.style.paddingBottom =
+    state.bottom + "px";
        
     }
 };
