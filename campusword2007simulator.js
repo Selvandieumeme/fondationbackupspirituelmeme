@@ -5177,6 +5177,19 @@ CampusWord2007Simulator.PageMarginEngine = {
             }
         );
 
+
+       document.addEventListener(
+    "touchend",
+    () => {
+
+        this.draggingLeft = false;
+
+        this.draggingRight = false;
+
+        this.draggingTop = false;
+    }
+);
+
         document.addEventListener(
             "mousemove",
             event => {
@@ -5265,3 +5278,83 @@ CampusWord2007Simulator.PageMarginEngine = {
             state.right + "px";
     }
 };
+
+
+
+
+
+document.addEventListener(
+    "touchmove",
+    event => {
+
+        const touch =
+            event.touches[0];
+
+        if (!touch) {
+            return;
+        }
+
+        const simulatedEvent = {
+
+            clientX:
+                touch.clientX,
+
+            clientY:
+                touch.clientY
+        };
+
+        const ruler =
+            document.getElementById(
+                "horizontal-ruler"
+            );
+
+        if (!ruler) {
+            return;
+        }
+
+        const rect =
+            ruler.getBoundingClientRect();
+
+        if (this.draggingLeft) {
+
+            let newMargin =
+                simulatedEvent.clientX -
+                rect.left;
+
+            if (newMargin < 20) {
+                newMargin = 20;
+            }
+
+            if (newMargin > 250) {
+                newMargin = 250;
+            }
+
+            CampusWord2007Simulator
+                .PageMarginState
+                .left =
+                    newMargin;
+        }
+
+        if (this.draggingRight) {
+
+            let newMargin =
+                rect.right -
+                simulatedEvent.clientX;
+
+            if (newMargin < 20) {
+                newMargin = 20;
+            }
+
+            if (newMargin > 250) {
+                newMargin = 250;
+            }
+
+            CampusWord2007Simulator
+                .PageMarginState
+                .right =
+                    newMargin;
+        }
+
+        this.render();
+    }
+);
