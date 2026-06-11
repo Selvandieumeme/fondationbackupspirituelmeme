@@ -4902,7 +4902,49 @@ handleKey(event) {
             this.moveDown();
 
             break;
+
+      case "Backspace":
+
+             this.handleBackspace();
+
+             break;
     }
+
+
+
+   handleBackspace() {
+
+    const editor =
+        CampusWord2007Simulator
+            .EditorState;
+
+    if (
+        editor.caretPosition <= 0
+    ) {
+        return;
+    }
+
+    editor.textContent =
+        editor.textContent.slice(
+            0,
+            editor.caretPosition - 1
+        ) +
+        editor.textContent.slice(
+            editor.caretPosition
+        );
+
+    editor.caretPosition--;
+
+    CampusWord2007Simulator
+        .EventBus
+        .emit(
+            "editor:textchanged",
+            {
+                text:
+                    editor.textContent
+            }
+        );
+}
 },
 
     moveLeft() {
