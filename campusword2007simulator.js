@@ -4984,13 +4984,10 @@ handleKey(event) {
             "editor:textchanged",
             {
                 text:
-                    editor.textContent
-            }
-        );
+                    editor.textContent  
 }
 
-      
-        );     
+);     
 },
 
     moveLeft() {
