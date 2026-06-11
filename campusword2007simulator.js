@@ -4908,7 +4908,8 @@ handleKey(event) {
              this.handleBackspace();
 
              break;
-    },
+    }   
+},
 
 
 
@@ -4944,7 +4945,6 @@ handleKey(event) {
                     editor.textContent
             }
         );
-}
 },
 
     moveLeft() {
