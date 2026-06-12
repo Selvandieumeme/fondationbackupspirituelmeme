@@ -4816,6 +4816,10 @@ document.body.removeChild(
       CampusWord2007Simulator
     .PageMarginEngine
     .initialize();
+
+      CampusWord2007Simulator
+    .ScrollbarEngine
+    .initialize();
            
     }
 }
@@ -5838,3 +5842,37 @@ this.pageContent.style.paddingBottom =
 };
 
 
+
+
+
+
+
+
+
+
+
+
+
+/* ==========================================================
+   SCROLLBAR ENGINE
+   ========================================================== */
+
+CampusWord2007Simulator.ScrollbarEngine = {
+
+    initialized: false,
+
+    initialize() {
+
+        if (this.initialized) {
+            return;
+        }
+
+        this.attachEvents();
+
+        this.initialized = true;
+    },
+
+    attachEvents() {
+
+    }
+};
