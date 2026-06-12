@@ -6208,5 +6208,46 @@ CampusWord2007Simulator.PageEngine = {
                 pageHeight
             )
         );
+    },
+
+    renderPages() {
+
+        const wrapper =
+            document.getElementById(
+                "document-page-wrapper"
+            );
+
+        if (!wrapper) {
+            return;
+        }
+
+        const totalPages =
+            this.calculatePageCount();
+
+        const oldPages =
+            wrapper.querySelectorAll(
+                ".generated-page"
+            );
+
+        oldPages.forEach(
+            page => page.remove()
+        );
+
+        let pagesHtml = "";
+
+        for (
+            let i = 1;
+            i < totalPages;
+            i++
+        ) {
+
+            pagesHtml +=
+                '<div class="generated-page"></div>';
+        }
+
+        wrapper.insertAdjacentHTML(
+            "beforeend",
+            pagesHtml
+        );
     }
 };
