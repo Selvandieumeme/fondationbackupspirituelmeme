@@ -6031,7 +6031,8 @@ CampusWord2007Simulator.StatusBarEngine = {
     initialized: false,
 
     wordCountElement: null,
-   pageNumberElement: null,
+
+    pageNumberElement: null,
 
     initialize() {
 
@@ -6042,6 +6043,11 @@ CampusWord2007Simulator.StatusBarEngine = {
         this.wordCountElement =
             document.getElementById(
                 "status-word-count"
+            );
+
+        this.pageNumberElement =
+            document.getElementById(
+                "status-page-number"
             );
 
         if (
@@ -6057,11 +6063,14 @@ CampusWord2007Simulator.StatusBarEngine = {
                 () => {
 
                     this.updateWordCount();
-                   this.updatePageCount();
+
+                    this.updatePageCount();
                 }
             );
 
         this.updateWordCount();
+
+        this.updatePageCount();
 
         this.initialized = true;
 
@@ -6100,9 +6109,43 @@ CampusWord2007Simulator.StatusBarEngine = {
                     ? " mot"
                     : " mots"
             );
+    },
+
+    updatePageCount() {
+
+        if (
+            !this.pageNumberElement
+        ) {
+            return;
+        }
+
+        const text =
+            CampusWord2007Simulator
+                .EditorState
+                .textContent;
+
+        const lineCount =
+            text.split(
+                "\n"
+            ).length;
+
+        const linesPerPage =
+            45;
+
+        const totalPages =
+            Math.max(
+                1,
+                Math.ceil(
+                    lineCount /
+                    linesPerPage
+                )
+            );
+
+        this.pageNumberElement.textContent =
+            "Page 1 sur " +
+            totalPages;
     }
 };
-
 
 
 
