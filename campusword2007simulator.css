@@ -2380,12 +2380,3 @@ body{
 
 
 
-.virtual-caret{
-
-    display:block !important;
-
-    opacity:1 !important;
-
-    z-index:999999 !important;
-}
-
