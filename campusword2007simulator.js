@@ -6246,7 +6246,15 @@ CampusWord2007Simulator.PageEngine = {
         ) {
 
             pagesHtml +=
-                '<div class="generated-page"></div>';
+`
+<div class="generated-page">
+
+    <div class="generated-page-content">
+
+    </div>
+
+</div>
+`;
         }
 
         wrapper.insertAdjacentHTML(
@@ -6255,3 +6263,11 @@ CampusWord2007Simulator.PageEngine = {
         );
     }
 };
+
+
+
+
+
+
+
+
