@@ -6100,12 +6100,7 @@ CampusWord2007Simulator.StatusBarEngine = {
                     ? " mot"
                     : " mots"
             );
-    },
-
-
-
-
-
+    }
 };
 
 
