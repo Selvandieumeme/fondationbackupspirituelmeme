@@ -5874,5 +5874,110 @@ CampusWord2007Simulator.ScrollbarEngine = {
 
     attachEvents() {
 
+    },
+
+
+
+
+attachEvents() {
+
+    if (
+        !this.verticalThumb ||
+        !this.scrollArea
+    ) {
+        return;
     }
+
+    this.verticalThumb.addEventListener(
+        "mousedown",
+        event => {
+
+            this.startDrag(
+                event
+            );
+        }
+    );
+},
+
+
+
+
+
+   startDrag(event) {
+
+    this.isDragging = true;
+
+    this.startY =
+        event.clientY;
+
+    this.startScrollTop =
+        this.scrollArea.scrollTop;
+
+    document.addEventListener(
+        "mousemove",
+        this.dragHandler =
+            moveEvent => {
+
+                this.handleDrag(
+                    moveEvent
+                );
+            }
+    );
+
+    document.addEventListener(
+        "mouseup",
+        this.upHandler =
+            () => {
+
+                this.stopDrag();
+            }
+    );
+},
+   
+
+
+
+
+
+handleDrag(event) {
+
+    if (
+        !this.isDragging
+    ) {
+        return;
+    }
+
+    const deltaY =
+        event.clientY -
+        this.startY;
+
+    this.scrollArea.scrollTop =
+        this.startScrollTop +
+        (deltaY * 5);
+
+    this.updateThumb();
+},
+
+
+
+
+
+
+
+stopDrag() {
+
+    this.isDragging = false;
+
+    document.removeEventListener(
+        "mousemove",
+        this.dragHandler
+    );
+
+    document.removeEventListener(
+        "mouseup",
+        this.upHandler
+    );
+}
+
+   
 };
