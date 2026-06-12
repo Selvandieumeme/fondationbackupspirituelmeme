@@ -4825,6 +4825,11 @@ document.body.removeChild(
     .StatusBarEngine
     .initialize();
 
+      this.pageNumberElement =
+    document.getElementById(
+        "status-page-number"
+    );
+
 
    CampusWord2007Simulator
     .PageEngine
@@ -6026,6 +6031,7 @@ CampusWord2007Simulator.StatusBarEngine = {
     initialized: false,
 
     wordCountElement: null,
+   pageNumberElement: null,
 
     initialize() {
 
@@ -6051,6 +6057,7 @@ CampusWord2007Simulator.StatusBarEngine = {
                 () => {
 
                     this.updateWordCount();
+                   this.updatePageCount();
                 }
             );
 
@@ -6093,7 +6100,12 @@ CampusWord2007Simulator.StatusBarEngine = {
                     ? " mot"
                     : " mots"
             );
-    }
+    },
+
+
+
+
+
 };
 
 
