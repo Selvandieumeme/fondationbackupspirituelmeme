@@ -4841,6 +4841,10 @@ const totalPages =
         .calculatePageCount();
 
 CampusWord2007Simulator
+    .PageEngine
+    .renderPages();
+
+CampusWord2007Simulator
     .Logger
     .log(
         "Pages: " +
