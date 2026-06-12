@@ -6286,7 +6286,7 @@ CampusWord2007Simulator.PageEngine = {
         );
     }
 }
-
+};
 
 
 
