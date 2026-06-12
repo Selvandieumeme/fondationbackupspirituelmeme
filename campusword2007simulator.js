@@ -5861,11 +5861,35 @@ CampusWord2007Simulator.ScrollbarEngine = {
 
     initialized: false,
 
+    scrollArea: null,
+
+    verticalThumb: null,
+
+    isDragging: false,
+
+    startY: 0,
+
+    startScrollTop: 0,
+
+    dragHandler: null,
+
+    upHandler: null,
+
     initialize() {
 
         if (this.initialized) {
             return;
         }
+
+        this.scrollArea =
+            document.getElementById(
+                "document-scroll-area"
+            );
+
+        this.verticalThumb =
+            document.getElementById(
+                "vertical-scroll-thumb"
+            );
 
         this.attachEvents();
 
@@ -5874,110 +5898,84 @@ CampusWord2007Simulator.ScrollbarEngine = {
 
     attachEvents() {
 
-    },
-
-
-
-
-attachEvents() {
-
-    if (
-        !this.verticalThumb ||
-        !this.scrollArea
-    ) {
-        return;
-    }
-
-    this.verticalThumb.addEventListener(
-        "mousedown",
-        event => {
-
-            this.startDrag(
-                event
-            );
+        if (
+            !this.verticalThumb ||
+            !this.scrollArea
+        ) {
+            return;
         }
-    );
-},
 
+        this.verticalThumb.addEventListener(
+            "mousedown",
+            event => {
 
-
-
-
-   startDrag(event) {
-
-    this.isDragging = true;
-
-    this.startY =
-        event.clientY;
-
-    this.startScrollTop =
-        this.scrollArea.scrollTop;
-
-    document.addEventListener(
-        "mousemove",
-        this.dragHandler =
-            moveEvent => {
-
-                this.handleDrag(
-                    moveEvent
+                this.startDrag(
+                    event
                 );
             }
-    );
+        );
+    },
 
-    document.addEventListener(
-        "mouseup",
-        this.upHandler =
-            () => {
+    startDrag(event) {
 
-                this.stopDrag();
-            }
-    );
-},
-   
+        this.isDragging = true;
 
+        this.startY =
+            event.clientY;
 
+        this.startScrollTop =
+            this.scrollArea.scrollTop;
 
+        document.addEventListener(
+            "mousemove",
+            this.dragHandler =
+                moveEvent => {
 
+                    this.handleDrag(
+                        moveEvent
+                    );
+                }
+        );
 
-handleDrag(event) {
+        document.addEventListener(
+            "mouseup",
+            this.upHandler =
+                () => {
 
-    if (
-        !this.isDragging
-    ) {
-        return;
+                    this.stopDrag();
+                }
+        );
+    },
+
+    handleDrag(event) {
+
+        if (
+            !this.isDragging
+        ) {
+            return;
+        }
+
+        const deltaY =
+            event.clientY -
+            this.startY;
+
+        this.scrollArea.scrollTop =
+            this.startScrollTop +
+            (deltaY * 5);
+    },
+
+    stopDrag() {
+
+        this.isDragging = false;
+
+        document.removeEventListener(
+            "mousemove",
+            this.dragHandler
+        );
+
+        document.removeEventListener(
+            "mouseup",
+            this.upHandler
+        );
     }
-
-    const deltaY =
-        event.clientY -
-        this.startY;
-
-    this.scrollArea.scrollTop =
-        this.startScrollTop +
-        (deltaY * 5);
-
-    this.updateThumb();
-},
-
-
-
-
-
-
-
-stopDrag() {
-
-    this.isDragging = false;
-
-    document.removeEventListener(
-        "mousemove",
-        this.dragHandler
-    );
-
-    document.removeEventListener(
-        "mouseup",
-        this.upHandler
-    );
-}
-
-   
 };
