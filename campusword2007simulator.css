@@ -2307,3 +2307,37 @@ body{
     border-left:10px solid #2f5f9d;
 }
 
+
+
+
+
+
+
+
+
+
+.generated-page{
+
+    position:relative;
+
+    width:794px;
+
+    min-height:1123px;
+
+    margin-top:30px;
+
+    background:#ffffff;
+
+    border:
+        1px solid
+        #cfcfcf;
+
+    box-shadow:
+        0 1px 0
+        rgba(
+            255,
+            255,
+            255,
+            .80
+        );
+}
