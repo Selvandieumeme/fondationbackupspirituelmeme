@@ -4821,6 +4821,10 @@ document.body.removeChild(
     .ScrollbarEngine
     .initialize();
 
+      CampusWord2007Simulator
+    .StatusBarEngine
+    .initialize();
+
 
    CampusWord2007Simulator
     .PageEngine
@@ -5997,6 +6001,103 @@ CampusWord2007Simulator.ScrollbarEngine = {
         );
     }
 };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* ==========================================================
+   STATUS BAR ENGINE
+   ========================================================== */
+
+CampusWord2007Simulator.StatusBarEngine = {
+
+    initialized: false,
+
+    wordCountElement: null,
+
+    initialize() {
+
+        if (this.initialized) {
+            return;
+        }
+
+        this.wordCountElement =
+            document.getElementById(
+                "status-word-count"
+            );
+
+        if (
+            !this.wordCountElement
+        ) {
+            return;
+        }
+
+        CampusWord2007Simulator
+            .EventBus
+            .on(
+                "editor:textchanged",
+                () => {
+
+                    this.updateWordCount();
+                }
+            );
+
+        this.updateWordCount();
+
+        this.initialized = true;
+
+        CampusWord2007Simulator
+            .Logger
+            .log(
+                "Status Bar Initialized"
+            );
+    },
+
+    updateWordCount() {
+
+        const text =
+            CampusWord2007Simulator
+                .EditorState
+                .textContent;
+
+        const words =
+            text
+                .trim()
+                .split(/\s+/)
+                .filter(
+                    word =>
+                        word.length > 0
+                );
+
+        const count =
+            text.trim() === ""
+                ? 0
+                : words.length;
+
+        this.wordCountElement.textContent =
+            count +
+            (
+                count === 1
+                    ? " mot"
+                    : " mots"
+            );
+    }
+};
+
+
+
 
 
 
