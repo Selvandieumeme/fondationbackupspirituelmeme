@@ -2327,3 +2327,65 @@ body{
 
 
 
+
+
+
+
+
+
+
+
+
+.generated-page{
+
+    position:relative;
+
+    width:794px;
+
+    min-height:1123px;
+
+    background:#ffffff;
+
+    border:1px solid #cfcfcf;
+
+    margin-bottom:30px;
+}
+
+.generated-page-content{
+
+    width:100%;
+
+    min-height:1123px;
+
+    padding-top:96px;
+
+    padding-right:96px;
+
+    padding-bottom:96px;
+
+    padding-left:96px;
+
+    box-sizing:border-box;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+.virtual-caret{
+
+    display:block !important;
+
+    opacity:1 !important;
+
+    z-index:999999 !important;
+}
+
