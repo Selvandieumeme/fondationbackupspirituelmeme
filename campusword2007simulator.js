@@ -4820,6 +4820,24 @@ document.body.removeChild(
       CampusWord2007Simulator
     .ScrollbarEngine
     .initialize();
+
+
+   CampusWord2007Simulator
+    .PageEngine
+    .initialize();
+
+const totalPages =
+    CampusWord2007Simulator
+        .PageEngine
+        .calculatePageCount();
+
+CampusWord2007Simulator
+    .Logger
+    .log(
+        "Pages: " +
+        totalPages
+    );
+   
            
     }
 }
@@ -5976,6 +5994,68 @@ CampusWord2007Simulator.ScrollbarEngine = {
         document.removeEventListener(
             "mouseup",
             this.upHandler
+        );
+    }
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* ==========================================================
+   PAGE ENGINE
+   ========================================================== */
+
+CampusWord2007Simulator.PageEngine = {
+
+    initialized: false,
+
+    initialize() {
+
+        if (this.initialized) {
+            return;
+        }
+
+        this.initialized = true;
+
+        CampusWord2007Simulator
+            .Logger
+            .log(
+                "Page Engine Initialized"
+            );
+    },
+
+    calculatePageCount() {
+
+        const textLayer =
+            document.getElementById(
+                "document-text-layer"
+            );
+
+        if (!textLayer) {
+            return 1;
+        }
+
+        const contentHeight =
+            textLayer.scrollHeight;
+
+        const pageHeight =
+            930;
+
+        return Math.max(
+            1,
+            Math.ceil(
+                contentHeight /
+                pageHeight
+            )
         );
     }
 };
