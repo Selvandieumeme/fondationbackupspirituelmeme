@@ -4850,7 +4850,10 @@ CampusWord2007Simulator
         "Pages: " +
         totalPages
     );
-   
+
+CampusWord2007Simulator
+    .PageRenderEngine
+    .render();
            
     }
 }
@@ -6290,6 +6293,111 @@ CampusWord2007Simulator.PageEngine = {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+/* ==========================================================
+   PAGE RENDER ENGINE
+   SAFE VISUAL PAGINATION
+   ========================================================== */
+
+CampusWord2007Simulator.PageRenderEngine = {
+
+    pageHeight: 930,
+
+    render() {
+
+        const textLayer =
+            document.getElementById(
+                "document-text-layer"
+            );
+
+        const pages =
+            document.querySelectorAll(
+                ".generated-page-content"
+            );
+
+        if (
+            !textLayer ||
+            !pages.length
+        ) {
+            return;
+        }
+
+        pages.forEach(
+            page => {
+
+                page.innerHTML = "";
+            }
+        );
+
+        const totalPages =
+            CampusWord2007Simulator
+                .PageEngine
+                .calculatePageCount();
+
+        for (
+            let pageIndex = 1;
+            pageIndex < totalPages;
+            pageIndex++
+        ) {
+
+            const page =
+                pages[
+                    pageIndex - 1
+                ];
+
+            if (!page) {
+                continue;
+            }
+
+            const clone =
+                textLayer.cloneNode(
+                    true
+                );
+
+            clone.removeAttribute(
+                "id"
+            );
+
+            clone.style.position =
+                "relative";
+
+            clone.style.top =
+                "-" +
+                (
+                    pageIndex *
+                    this.pageHeight
+                ) +
+                "px";
+
+            clone.style.left =
+                "0";
+
+            clone.style.pointerEvents =
+                "none";
+
+            page.style.overflow =
+                "hidden";
+
+            page.style.height =
+                this.pageHeight +
+                "px";
+
+            page.appendChild(
+                clone
+            );
+        }
+    }
+};
 
 
 
