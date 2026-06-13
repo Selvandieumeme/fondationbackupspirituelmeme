@@ -4401,17 +4401,8 @@ CampusWord2007Simulator.CaretEngine = {
 
        
 
-
-const caretPageState =
-    CampusWord2007Simulator
-        .CaretPageState;
-
 this.element.style.top =
-    caretPageState.pageOffsetY +
-    "px";
-
-
-
+    state.y + "px";
 
 
 
