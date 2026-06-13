@@ -4293,8 +4293,11 @@ CampusWord2007Simulator.CaretPageState = {
 
     pageHeight: 930,
 
-    pageOffsetY: 0
+    pageOffsetY: 0,
 
+    pageTop: 0,
+
+    pageBottom: 930
 };
 
 
