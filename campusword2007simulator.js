@@ -4407,13 +4407,14 @@ CampusWord2007Simulator.CaretEngine = {
             return;
         }
 
-        this.element.style.left =
-            state.x + "px";
-
-       
+       this.element.style.left =
+    state.x + "px";
 
 this.element.style.top =
-    state.y + "px";
+    CampusWord2007Simulator
+        .CaretPageState
+        .pageOffsetY +
+    "px";
 
 
 
