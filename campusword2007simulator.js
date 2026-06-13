@@ -4691,6 +4691,8 @@ CampusWord2007Simulator.DocumentRenderEngine = {
 
     textLayer: null,
 
+lastRenderedPageCount: 0,
+
     initialize() {
 
         if (this.initialized) {
@@ -4948,16 +4950,20 @@ const totalPages =
         .PageEngine
         .calculatePageCount();
 
-CampusWord2007Simulator
-    .PageEngine
-    .renderPages();
 
-CampusWord2007Simulator
-    .Logger
-    .log(
-        "Pages: " +
-        totalPages
-    );
+if (
+    totalPages !==
+    this.lastRenderedPageCount
+) {
+
+    CampusWord2007Simulator
+        .PageEngine
+        .renderPages();
+
+    this.lastRenderedPageCount =
+        totalPages;
+}
+
 
 
 
