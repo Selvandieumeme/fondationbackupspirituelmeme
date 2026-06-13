@@ -6121,40 +6121,23 @@ CampusWord2007Simulator.StatusBarEngine = {
             );
     },
 
-    updatePageCount() {
+   updatePageCount() {
 
-        if (
-            !this.pageNumberElement
-        ) {
-            return;
-        }
-
-        const text =
-            CampusWord2007Simulator
-                .EditorState
-                .textContent;
-
-        const lineCount =
-            text.split(
-                "\n"
-            ).length;
-
-        const linesPerPage =
-            45;
-
-        const totalPages =
-            Math.max(
-                1,
-                Math.ceil(
-                    lineCount /
-                    linesPerPage
-                )
-            );
-
-        this.pageNumberElement.textContent =
-            "Page 1 sur " +
-            totalPages;
+    if (
+        !this.pageNumberElement
+    ) {
+        return;
     }
+
+    const totalPages =
+        CampusWord2007Simulator
+            .PageEngine
+            .calculatePageCount();
+
+    this.pageNumberElement.textContent =
+        "Page 1 sur " +
+        totalPages;
+}
 };
 
 
