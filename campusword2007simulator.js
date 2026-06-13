@@ -6321,6 +6321,7 @@ CampusWord2007Simulator.PageEngine = {
     ) {
 
        
+
 pagesHtml +=
 `
 <div
@@ -6331,12 +6332,16 @@ pagesHtml +=
         class="generated-page-content"
         data-page-number="${i + 1}">
 
+        <div
+            class="page-editor-surface"
+            data-page-number="${i + 1}">
+
+        </div>
+
     </div>
 
 </div>
 `;
-
-
 
 
     }
