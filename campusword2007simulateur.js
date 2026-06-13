@@ -122,12 +122,13 @@ if (
 
 
 
+
 /* ==========================================================
    A2 — GLOBAL STATE
    CENTRALIZED STATE TREE
    ========================================================== */
 
-CampusWord2007Simulator.state = {
+CampusWord2007Simulateur.state = {
 
     application: {
 
@@ -359,6 +360,7 @@ CampusWord2007Simulator.state = {
         mobileKeyboardReady: false
     }
 };
+
 
 
 
