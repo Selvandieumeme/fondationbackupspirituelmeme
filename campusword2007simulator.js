@@ -6320,16 +6320,25 @@ CampusWord2007Simulator.PageEngine = {
         i++
     ) {
 
-        pagesHtml +=
+       
+pagesHtml +=
 `
-<div class="generated-page">
+<div
+    class="generated-page"
+    data-page-number="${i + 1}">
 
-    <div class="generated-page-content">
+    <div
+        class="generated-page-content"
+        data-page-number="${i + 1}">
 
     </div>
 
 </div>
 `;
+
+
+
+
     }
 
     wrapper.insertAdjacentHTML(
