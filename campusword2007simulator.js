@@ -4817,6 +4817,29 @@ caretState.y =
     markerRect.top -
     probeRect.top;
 
+
+
+
+const caretPageState =
+    CampusWord2007Simulator
+        .CaretPageState;
+
+caretPageState.currentPage =
+    Math.floor(
+        caretState.y /
+        caretPageState.pageHeight
+    ) + 1;
+
+caretPageState.pageOffsetY =
+    caretState.y -
+    (
+        (caretPageState.currentPage - 1) *
+        caretPageState.pageHeight
+    );
+
+
+
+
 document.body.removeChild(
     probe
 );
