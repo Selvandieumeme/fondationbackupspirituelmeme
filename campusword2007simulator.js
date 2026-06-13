@@ -3624,6 +3624,7 @@ CampusWord2007Simulator.PointerTracker = {
    EDITOR STATE
    ========================================================== */
 
+
 CampusWord2007Simulator.EditorState = {
 
     focused: false,
@@ -3634,8 +3635,15 @@ CampusWord2007Simulator.EditorState = {
 
     selectionStart: 0,
 
-    selectionEnd: 0
+    selectionEnd: 0,
+
+    pages: [
+        {
+            text: ""
+        }
+    ]
 };
+
 
 
 
