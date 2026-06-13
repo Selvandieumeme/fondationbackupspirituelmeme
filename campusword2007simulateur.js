@@ -106,6 +106,21 @@ CampusWord2007Simulateur.SystemInformation = {
 
 
 
+/* ==========================================================
+   A1.3 — ROOT VALIDATION
+   ========================================================== */
+
+if (
+    typeof CampusWord2007Simulateur !==
+    "object"
+) {
+
+    throw new Error(
+        "CampusWord2007Simulateur Root Missing"
+    );
+}
+
+
 
 /* ==========================================================
    A2 — GLOBAL STATE
