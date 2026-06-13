@@ -4287,6 +4287,25 @@ CampusWord2007Simulator.CaretState = {
 
 
 
+CampusWord2007Simulator.CaretPageState = {
+
+    currentPage: 1,
+
+    pageHeight: 930,
+
+    pageOffsetY: 0
+
+};
+
+
+
+
+
+
+
+
+
+
    /* ==========================================================
    KEYBOARD STATE
    ========================================================== */
