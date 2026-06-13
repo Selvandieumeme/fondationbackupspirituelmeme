@@ -69,37 +69,39 @@ CampusWord2007Simulateur.markDestroyed = function () {
 
 
 
+
+
+
 /* ==========================================================
    A1.2 — SYSTEM INFORMATION
    ========================================================== */
 
-CampusWord2007Simulator.SystemInformation = {
+CampusWord2007Simulateur.SystemInformation = {
 
     getVersion() {
 
-        return CampusWord2007Simulator
+        return CampusWord2007Simulateur
             .version;
     },
 
     getBuildName() {
 
-        return CampusWord2007Simulator
+        return CampusWord2007Simulateur
             .buildName;
     },
 
     isReady() {
 
-        return CampusWord2007Simulator
+        return CampusWord2007Simulateur
             .ready;
     },
 
     isBooting() {
 
-        return CampusWord2007Simulator
+        return CampusWord2007Simulateur
             .booting;
     }
 };
-
 
 
 
