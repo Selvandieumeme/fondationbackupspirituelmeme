@@ -27,26 +27,28 @@ window.CampusWord2007Simulateur = {
 
 
 
+
+
 /* ==========================================================
    A1.1 — ROOT UTILITIES
    ========================================================== */
 
-CampusWord2007Simulator.isReady = function () {
+CampusWord2007Simulateur.isReady = function () {
 
     return this.ready === true;
 };
 
-CampusWord2007Simulator.isInitialized = function () {
+CampusWord2007Simulateur.isInitialized = function () {
 
     return this.initialized === true;
 };
 
-CampusWord2007Simulator.markBooting = function () {
+CampusWord2007Simulateur.markBooting = function () {
 
     this.booting = true;
 };
 
-CampusWord2007Simulator.markReady = function () {
+CampusWord2007Simulateur.markReady = function () {
 
     this.booting = false;
 
@@ -55,7 +57,7 @@ CampusWord2007Simulator.markReady = function () {
     this.initialized = true;
 };
 
-CampusWord2007Simulator.markDestroyed = function () {
+CampusWord2007Simulateur.markDestroyed = function () {
 
     this.destroyed = true;
 
