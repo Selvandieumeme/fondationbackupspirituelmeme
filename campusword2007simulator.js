@@ -4851,6 +4851,26 @@ CampusWord2007Simulator
         totalPages
     );
 
+
+const pages =
+    document.querySelectorAll(
+        ".generated-page-content"
+    );
+
+pages.forEach(
+    page => {
+
+        page.textContent =
+            "";
+    }
+);
+
+if (pages[0]) {
+
+    pages[0].textContent =
+        "TEST PAGE 2";
+}
+           
 CampusWord2007Simulator
     .PageRenderEngine
     .render();
