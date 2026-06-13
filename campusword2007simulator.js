@@ -6239,6 +6239,7 @@ CampusWord2007Simulator.PageRegistry = {
 
 
 
+
 /* ==========================================================
    PAGE ENGINE
    ========================================================== */
@@ -6259,6 +6260,44 @@ CampusWord2007Simulator.PageEngine = {
             .Logger
             .log(
                 "Page Engine Initialized"
+            );
+    },
+
+    getPage(pageNumber) {
+
+        const pages =
+            CampusWord2007Simulator
+                .EditorState
+                .pages;
+
+        if (
+            !pages[
+                pageNumber - 1
+            ]
+        ) {
+
+            pages[
+                pageNumber - 1
+            ] = {
+
+                text: ""
+            };
+        }
+
+        return pages[
+            pageNumber - 1
+        ];
+    },
+
+    createPage() {
+
+        CampusWord2007Simulator
+            .EditorState
+            .pages
+            .push(
+                {
+                    text: ""
+                }
             );
     },
 
@@ -6288,49 +6327,47 @@ CampusWord2007Simulator.PageEngine = {
         );
     },
 
-   renderPages() {
+    renderPages() {
 
-    const bridge =
-        document.getElementById(
-            "mobile-keyboard-bridge"
+        const bridge =
+            document.getElementById(
+                "mobile-keyboard-bridge"
+            );
+
+        const hadFocus =
+            bridge &&
+            document.activeElement === bridge;
+
+        const wrapper =
+            document.getElementById(
+                "document-page-wrapper"
+            );
+
+        if (!wrapper) {
+            return;
+        }
+
+        const totalPages =
+            this.calculatePageCount();
+
+        const oldPages =
+            wrapper.querySelectorAll(
+                ".generated-page"
+            );
+
+        oldPages.forEach(
+            page => page.remove()
         );
 
-    const hadFocus =
-        bridge &&
-        document.activeElement === bridge;
+        let pagesHtml = "";
 
-    const wrapper =
-        document.getElementById(
-            "document-page-wrapper"
-        );
+        for (
+            let i = 1;
+            i < totalPages;
+            i++
+        ) {
 
-    if (!wrapper) {
-        return;
-    }
-
-    const totalPages =
-        this.calculatePageCount();
-
-    const oldPages =
-        wrapper.querySelectorAll(
-            ".generated-page"
-        );
-
-    oldPages.forEach(
-        page => page.remove()
-    );
-
-    let pagesHtml = "";
-
-    for (
-        let i = 1;
-        i < totalPages;
-        i++
-    ) {
-
-       
-
-pagesHtml +=
+            pagesHtml +=
 `
 <div
     class="generated-page"
@@ -6350,31 +6387,36 @@ pagesHtml +=
 
 </div>
 `;
+        }
 
-
-    }
-
-    wrapper.insertAdjacentHTML(
-        "beforeend",
-        pagesHtml
-    );
-
-    if (
-        hadFocus &&
-        bridge
-    ) {
-
-        setTimeout(
-            () => {
-
-                bridge.focus();
-
-            },
-            0
+        wrapper.insertAdjacentHTML(
+            "beforeend",
+            pagesHtml
         );
+
+        if (
+            hadFocus &&
+            bridge
+        ) {
+
+            setTimeout(
+                () => {
+
+                    bridge.focus();
+
+                },
+                0
+            );
+        }
     }
-}
 };
+
+
+
+
+
+
+
 
 
 
