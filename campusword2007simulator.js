@@ -4915,7 +4915,7 @@ if (
     CampusWord2007Simulator
         .PageEngine
         .renderPages();
-}
+},
 
 
 
