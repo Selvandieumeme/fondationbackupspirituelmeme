@@ -4859,6 +4859,51 @@ document.body.removeChild(
     probe
 );
 
+
+
+
+const pageHeight = 930;
+
+const caretPage =
+    Math.floor(
+        caretState.y /
+        pageHeight
+    ) + 1;
+
+CampusWord2007Simulator
+    .CaretPageState
+    .currentPage =
+        caretPage;
+
+CampusWord2007Simulator
+    .CaretPageState
+    .pageOffsetY =
+        caretState.y %
+        pageHeight;
+
+CampusWord2007Simulator
+    .CaretPageState
+    .pageTop =
+        (
+            caretPage - 1
+        ) *
+        pageHeight;
+
+CampusWord2007Simulator
+    .CaretPageState
+    .pageBottom =
+        caretPage *
+        pageHeight;
+
+
+
+
+
+
+
+
+
+
        
         if (
         CampusWord2007Simulator
@@ -4918,8 +4963,6 @@ CampusWord2007Simulator
     }
 }
 };
-
-
 
 
 
