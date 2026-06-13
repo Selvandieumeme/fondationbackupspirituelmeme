@@ -1,0 +1,2530 @@
+/* =======================================================
+   CAMPUS WORD 2007 SIMULATOR
+   PHASE 1A
+   FOUNDATION
+   ======================================================= */
+
+/* =======================================================
+   CSS RESET
+   ======================================================= */
+
+*,
+*::before,
+*::after{
+
+    margin:0;
+
+    padding:0;
+
+    box-sizing:border-box;
+}
+
+html,
+body{
+
+    width:100%;
+
+    height:100%;
+
+    overflow:hidden;
+}
+
+body{
+
+    font-family:
+        "Segoe UI",
+        Tahoma,
+        Arial,
+        sans-serif;
+
+    background:#7b8ba3;
+}
+
+/* =======================================================
+   WORD 2007 VARIABLES
+   ======================================================= */
+
+:root{
+
+    /* Primary */
+
+    --word-blue-dark:#2f5f9d;
+
+    --word-blue:#4f81bd;
+
+    --word-blue-light:#dbe5f1;
+
+    /* Ribbon */
+
+    --ribbon-top:#f8fbff;
+
+    --ribbon-bottom:#dfe8f5;
+
+    /* Borders */
+
+    --border-light:#d7d7d7;
+
+    --border-medium:#b6b6b6;
+
+    --border-dark:#8f8f8f;
+
+    /* Window */
+
+    --window-bg:#edf2fa;
+
+    --window-shadow:
+        0 6px 25px
+        rgba(0,0,0,.25);
+
+    /* Title */
+
+    --title-text:#ffffff;
+
+    /* Office Button */
+
+    --office-red:#d54527;
+
+    --office-orange:#f39b2c;
+
+    /* Toolbar */
+
+    --toolbar-hover:#fff8d7;
+
+    --toolbar-active:#ffe38c;
+
+    /* Dimensions */
+
+    --title-height:30px;
+
+    --office-size:42px;
+
+    /* Word Page */
+
+    --page-width:794px;
+
+    --page-height:1123px;
+
+    --page-margin:96px;
+
+    /* Layers */
+
+    --z-background:1;
+
+    --z-page:10;
+
+    --z-text:20;
+
+    --z-selection:30;
+
+    --z-caret:40;
+
+    --z-overlay:50;
+}
+
+/* =======================================================
+   ROOT APPLICATION CONTAINER
+   ======================================================= */
+
+#campusword2007simulateur{
+
+    position:relative;
+
+    width:100vw;
+
+    height:100vh;
+
+    overflow:hidden;
+
+    display:flex;
+
+    flex-direction:column;
+
+    background:
+        linear-gradient(
+            to bottom,
+            #8da4c2,
+            #7b8ba3
+        );
+}
+
+
+
+
+/* =======================================================
+   LOADING SCREEN
+   ======================================================= */
+
+#word-loading-screen{
+
+    position:absolute;
+
+    top:0;
+    left:0;
+
+    width:100%;
+
+    height:100%;
+
+    display:flex;
+
+    flex-direction:column;
+
+    align-items:center;
+
+    justify-content:center;
+
+    gap:20px;
+
+    z-index:99999;
+
+    background:
+        linear-gradient(
+            to bottom,
+            #f4f7fc,
+            #d7e3f3
+        );
+}
+
+#loading-logo{
+
+    width:120px;
+
+    height:120px;
+
+    border-radius:20px;
+
+    background:
+        linear-gradient(
+            135deg,
+            var(--word-blue),
+            var(--word-blue-dark)
+        );
+
+    box-shadow:
+        0 8px 20px
+        rgba(0,0,0,.20);
+}
+
+#loading-title{
+
+    font-size:24px;
+
+    font-weight:600;
+
+    color:#24456d;
+
+    text-align:center;
+}
+
+#loading-message{
+
+    font-size:14px;
+
+    color:#4f4f4f;
+
+    text-align:center;
+}
+
+#loading-progress-container{
+
+    width:320px;
+
+    height:18px;
+
+    overflow:hidden;
+
+    border-radius:20px;
+
+    border:
+        1px solid
+        #9eb5d4;
+
+    background:#ffffff;
+}
+
+#loading-progress-bar{
+
+    width:35%;
+
+    height:100%;
+
+    background:
+        linear-gradient(
+            to right,
+            #4f81bd,
+            #86aee0
+        );
+}
+
+/* =======================================================
+   WORD APP
+   ======================================================= */
+
+#word-app{
+
+    position:relative;
+
+    width:100%;
+
+    height:100%;
+
+    display:flex;
+
+    flex-direction:column;
+
+    overflow:hidden;
+
+    background:
+        var(--window-bg);
+}
+
+/* =======================================================
+   TITLE BAR
+   ======================================================= */
+
+#title-bar{
+
+    width:100%;
+
+    height:var(--title-height);
+
+    min-height:var(--title-height);
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:space-between;
+
+    padding:0 10px;
+
+    background:
+        linear-gradient(
+            to bottom,
+            #5d89c3,
+            #3e6ea8
+        );
+
+    border-bottom:
+        1px solid
+        rgba(255,255,255,.25);
+
+    user-select:none;
+}
+
+#title-left-section{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:10px;
+}
+
+#window-icon{
+
+    width:18px;
+
+    height:18px;
+
+    border-radius:3px;
+
+    background:
+        linear-gradient(
+            135deg,
+            #4a7fc3,
+            #1d4f89
+        );
+}
+
+#document-title{
+
+    font-size:13px;
+
+    font-weight:600;
+
+    color:var(--title-text);
+
+    white-space:nowrap;
+
+    overflow:hidden;
+
+    text-overflow:ellipsis;
+}
+
+#title-right-section{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:4px;
+}
+
+/* =======================================================
+   WINDOW BUTTONS
+   ======================================================= */
+
+#window-minimize,
+#window-maximize,
+#window-close{
+
+    width:22px;
+
+    height:18px;
+
+    border:none;
+
+    cursor:pointer;
+
+    border-radius:2px;
+
+    background:
+        rgba(255,255,255,.15);
+
+    transition:
+        background .18s ease,
+        transform .12s ease;
+}
+
+#window-minimize:hover,
+#window-maximize:hover{
+
+    background:
+        rgba(255,255,255,.30);
+}
+
+#window-close:hover{
+
+    background:#c75050;
+}
+
+#window-minimize:active,
+#window-maximize:active,
+#window-close:active{
+
+    transform:scale(.95);
+}
+
+#window-minimize:focus,
+#window-maximize:focus,
+#window-close:focus{
+
+    outline:none;
+}
+
+
+
+
+
+
+/* =======================================================
+   TOP APPLICATION AREA
+   OFFICE BUTTON
+   QUICK ACCESS TOOLBAR
+   ======================================================= */
+
+/* =======================================================
+   TOP APPLICATION AREA
+   ======================================================= */
+
+#top-application-area{
+
+    width:100%;
+
+    min-height:56px;
+
+    display:flex;
+
+    align-items:flex-start;
+
+    gap:10px;
+
+    padding:6px 8px;
+
+    background:
+        linear-gradient(
+            to bottom,
+            #edf3fb,
+            #dce6f3
+        );
+
+    border-bottom:
+        1px solid
+        var(--border-medium);
+
+    flex-shrink:0;
+}
+
+/* =======================================================
+   OFFICE BUTTON AREA
+   ======================================================= */
+
+#office-button-area{
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    flex-shrink:0;
+}
+
+/* =======================================================
+   OFFICE BUTTON
+   ======================================================= */
+
+#office-button{
+
+    width:var(--office-size);
+
+    height:var(--office-size);
+
+    border:none;
+
+    border-radius:50%;
+
+    cursor:pointer;
+
+    font-size:11px;
+
+    font-weight:700;
+
+    color:#ffffff;
+
+    background:
+        radial-gradient(
+            circle at top,
+            var(--office-orange),
+            var(--office-red)
+        );
+
+    box-shadow:
+        inset 0 2px 3px rgba(255,255,255,.35),
+        0 3px 8px rgba(0,0,0,.25);
+
+    transition:
+        transform .15s ease,
+        box-shadow .15s ease;
+}
+
+#office-button:hover{
+
+    transform:scale(1.04);
+}
+
+#office-button:active{
+
+    transform:scale(.98);
+}
+
+#office-button:focus{
+
+    outline:none;
+
+    box-shadow:
+        inset 0 2px 3px rgba(255,255,255,.35),
+        0 3px 8px rgba(0,0,0,.25),
+        0 0 0 2px rgba(79,129,189,.35);
+}
+
+/* =======================================================
+   QUICK ACCESS TOOLBAR
+   ======================================================= */
+
+#quick-access-toolbar{
+
+    height:42px;
+
+    display:flex;
+
+    align-items:center;
+
+    padding:0 10px;
+
+    border-radius:5px;
+
+    border:
+        1px solid
+        var(--border-light);
+
+    background:
+        linear-gradient(
+            to bottom,
+            #ffffff,
+            #eef4fb
+        );
+
+    flex-shrink:0;
+}
+
+/* =======================================================
+   QUICK ACCESS BUTTON CONTAINER
+   ======================================================= */
+
+#quick-access-toolbar-buttons{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:4px;
+}
+
+/* =======================================================
+   QAT BUTTONS
+   ======================================================= */
+
+#qat-save,
+#qat-undo,
+#qat-redo,
+#qat-customize{
+
+    width:26px;
+
+    height:26px;
+
+    border:none;
+
+    cursor:pointer;
+
+    border-radius:3px;
+
+    background:
+        linear-gradient(
+            to bottom,
+            #ffffff,
+            #dde8f6
+        );
+
+    transition:
+        background .15s ease,
+        transform .15s ease;
+}
+
+#qat-save:hover,
+#qat-undo:hover,
+#qat-redo:hover,
+#qat-customize:hover{
+
+    background:
+        var(--toolbar-hover);
+}
+
+#qat-save:active,
+#qat-undo:active,
+#qat-redo:active,
+#qat-customize:active{
+
+    background:
+        var(--toolbar-active);
+
+    transform:scale(.96);
+}
+
+#qat-save:focus,
+#qat-undo:focus,
+#qat-redo:focus,
+#qat-customize:focus{
+
+    outline:none;
+
+    box-shadow:
+        0 0 0 2px
+        rgba(79,129,189,.35);
+}
+
+
+
+
+
+/* =======================================================
+   RIBBON TABS
+   RIBBON CONTAINER
+   RIBBON GROUPS
+   RIBBON PANELS
+   ======================================================= */
+
+/* =======================================================
+   RIBBON TABS BAR
+   ======================================================= */
+
+#ribbon-tabs{
+
+    width:100%;
+
+    height:32px;
+
+    display:flex;
+
+    align-items:flex-end;
+
+    gap:2px;
+
+    padding-left:12px;
+
+    background:
+        linear-gradient(
+            to bottom,
+            #eef4fb,
+            #dfe8f5
+        );
+
+    border-bottom:
+        1px solid
+        var(--border-medium);
+
+    position:relative;
+
+    z-index:20;
+
+    overflow-x:auto;
+
+    overflow-y:hidden;
+
+    flex-wrap:nowrap;
+
+    white-space:nowrap;
+
+    scrollbar-width:none;
+}
+
+#ribbon-tabs::-webkit-scrollbar{
+
+    display:none;
+}
+
+/* =======================================================
+   INDIVIDUAL TAB
+   ======================================================= */
+
+.ribbon-tab{
+
+    height:28px;
+
+    min-width:90px;
+
+    padding:0 14px;
+
+    border:none;
+
+    cursor:pointer;
+
+    flex-shrink:0;
+
+    font-size:12px;
+
+    font-weight:600;
+
+    color:#2f3e50;
+
+    border-top-left-radius:5px;
+
+    border-top-right-radius:5px;
+
+    background:
+        linear-gradient(
+            to bottom,
+            #f8fbff,
+            #d8e4f3
+        );
+
+    border:
+        1px solid
+        transparent;
+
+    border-bottom:none;
+
+    transition:
+        background .18s ease,
+        transform .12s ease,
+        color .18s ease,
+        border-color .18s ease;
+}
+
+/* =======================================================
+   TAB HOVER
+   ======================================================= */
+
+.ribbon-tab:hover{
+
+    color:#1d4f89;
+
+    background:
+        linear-gradient(
+            to bottom,
+            #ffffff,
+            #edf4fc
+        );
+
+    border-color:#a9bfdc;
+}
+
+/* =======================================================
+   TAB ACTIVE
+   ======================================================= */
+
+.ribbon-tab.active-tab{
+
+    color:#153a67;
+
+    background:
+        linear-gradient(
+            to bottom,
+            #ffffff,
+            #ffffff
+        );
+
+    border:
+        1px solid
+        #9fb8da;
+
+    border-bottom:
+        1px solid
+        #ffffff;
+
+    position:relative;
+
+    top:1px;
+
+    z-index:50;
+}
+
+/* =======================================================
+   TAB PRESSED
+   ======================================================= */
+
+.ribbon-tab:active{
+
+    transform:
+        translateY(1px);
+}
+
+/* =======================================================
+   TAB FOCUS
+   ======================================================= */
+
+.ribbon-tab:focus{
+
+    outline:none;
+
+    box-shadow:
+        0 0 0 2px
+        rgba(79,129,189,.35);
+}
+
+/* =======================================================
+   RIBBON CONTAINER
+   ======================================================= */
+
+#ribbon-container{
+
+    width:100%;
+
+    height:108px;
+
+    display:flex;
+
+    align-items:stretch;
+
+    gap:0;
+
+    padding:6px;
+
+    background:
+        linear-gradient(
+            to bottom,
+            var(--ribbon-top),
+            var(--ribbon-bottom)
+        );
+
+    border-bottom:
+        1px solid
+        var(--border-medium);
+
+    overflow:hidden;
+
+    position:relative;
+
+    z-index:10;
+}
+
+/* =======================================================
+   RIBBON GROUP
+   ======================================================= */
+
+.ribbon-group{
+
+    position:relative;
+
+    display:flex;
+
+    flex-direction:column;
+
+    justify-content:space-between;
+
+    min-width:130px;
+
+    height:100%;
+
+    padding:4px;
+
+    border-right:
+        1px solid
+        #c8d5e6;
+
+    background:
+        linear-gradient(
+            to bottom,
+            rgba(255,255,255,.35),
+            rgba(255,255,255,.05)
+        );
+
+    transition:
+        background .18s ease;
+}
+
+/* =======================================================
+   LAST GROUP
+   ======================================================= */
+
+.ribbon-group:last-child{
+
+    border-right:none;
+}
+
+/* =======================================================
+   GROUP CONTENT
+   ======================================================= */
+
+.ribbon-group-content{
+
+    flex:1;
+
+    display:flex;
+
+    align-items:flex-start;
+
+    justify-content:flex-start;
+
+    gap:4px;
+
+    padding:2px;
+
+    overflow:hidden;
+}
+
+/* =======================================================
+   GROUP LABEL
+   ======================================================= */
+
+.ribbon-group-label{
+
+    height:18px;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    font-size:11px;
+
+    color:#4a4a4a;
+
+    border-top:
+        1px solid
+        rgba(255,255,255,.45);
+
+    user-select:none;
+}
+
+/* =======================================================
+   GROUP HOVER
+   ======================================================= */
+
+.ribbon-group:hover{
+
+    background:
+        linear-gradient(
+            to bottom,
+            rgba(255,255,255,.65),
+            rgba(230,238,248,.35)
+        );
+}
+
+/* =======================================================
+   GROUP ACTIVE
+   ======================================================= */
+
+.ribbon-group.active-group{
+
+    background:
+        linear-gradient(
+            to bottom,
+            rgba(255,255,255,.95),
+            rgba(221,232,246,.75)
+        );
+}
+
+/* =======================================================
+   PLACEHOLDER BUTTON
+   ======================================================= */
+
+.ribbon-placeholder-button{
+
+    width:28px;
+
+    height:28px;
+
+    border:none;
+
+    cursor:pointer;
+
+    border-radius:3px;
+
+    background:
+        linear-gradient(
+            to bottom,
+            #ffffff,
+            #dfe8f5
+        );
+
+    transition:.18s ease;
+}
+
+.ribbon-placeholder-button:hover{
+
+    background:
+        linear-gradient(
+            to bottom,
+            #fffde9,
+            #ffe49c
+        );
+
+    box-shadow:
+        0 0 0 1px
+        rgba(210,165,42,.35);
+}
+
+.ribbon-placeholder-button:active{
+
+    transform:scale(.96);
+}
+
+/* =======================================================
+   LARGE BUTTON
+   ======================================================= */
+
+.ribbon-large-button{
+
+    width:46px;
+
+    height:58px;
+
+    border:none;
+
+    cursor:pointer;
+
+    border-radius:4px;
+
+    background:
+        linear-gradient(
+            to bottom,
+            #ffffff,
+            #dce8f6
+        );
+
+    transition:.18s ease;
+}
+
+.ribbon-large-button:hover{
+
+    background:
+        linear-gradient(
+            to bottom,
+            #fffce3,
+            #ffd77c
+        );
+}
+
+.ribbon-large-button:active{
+
+    transform:scale(.97);
+}
+
+/* =======================================================
+   RIBBON SEPARATOR
+   ======================================================= */
+
+.ribbon-separator{
+
+    width:1px;
+
+    height:72px;
+
+    align-self:center;
+
+    background:
+        linear-gradient(
+            to bottom,
+            transparent,
+            #c9d4e4,
+            transparent
+        );
+}
+
+/* =======================================================
+   BUTTON FOCUS STATES
+   ======================================================= */
+
+.ribbon-placeholder-button:focus,
+.ribbon-large-button:focus{
+
+    outline:none;
+
+    box-shadow:
+        0 0 0 2px
+        rgba(79,129,189,.35);
+}
+
+/* =======================================================
+   RENDERING OPTIMIZATION
+   ======================================================= */
+
+#ribbon-tabs,
+.ribbon-tab,
+#ribbon-container,
+.ribbon-group{
+
+    will-change:
+        transform,
+        background,
+        opacity;
+}
+
+/* =======================================================
+   FUTURE RIBBON PANELS
+   ======================================================= */
+
+.ribbon-panel{
+
+    display:none;
+
+    width:100%;
+
+    height:100%;
+}
+
+.ribbon-panel.active{
+
+    display:flex;
+}
+
+
+
+
+
+
+
+
+
+/* =======================================================
+   WORKSPACE
+   RULERS
+   DOCUMENT VIEWPORT
+   DOCUMENT CANVAS
+   DOCUMENT PAGES SYSTEM
+   ======================================================= */
+
+/* =======================================================
+   WORKSPACE
+   ======================================================= */
+
+#workspace{
+
+    flex:1;
+
+    display:flex;
+
+    position:relative;
+
+    overflow:hidden;
+
+    background:
+        linear-gradient(
+            to bottom,
+            #c8ced8,
+            #b8c1cd
+        );
+}
+
+/* =======================================================
+   RULER CORNER
+   ======================================================= */
+
+#workspace::before{
+
+    content:"";
+
+    position:absolute;
+
+    top:0;
+    left:0;
+
+    width:28px;
+
+    height:24px;
+
+    background:
+        linear-gradient(
+            to bottom,
+            #efefef,
+            #d7d7d7
+        );
+
+    border-right:
+        1px solid
+        #aeb7c2;
+
+    border-bottom:
+        1px solid
+        #aeb7c2;
+
+    z-index:50;
+}
+
+/* =======================================================
+   VERTICAL RULER
+   ======================================================= */
+
+#vertical-ruler{
+
+    width:28px;
+
+    min-width:28px;
+
+    height:100%;
+
+    position:relative;
+
+    overflow:hidden;
+
+    border-right:
+        1px solid
+        #aeb7c2;
+
+    background:
+        linear-gradient(
+            to right,
+            #f4f4f4,
+            #dddddd
+        );
+}
+
+/* =======================================================
+   VERTICAL SCALE
+   ======================================================= */
+
+#vertical-ruler-scale{
+
+    position:absolute;
+
+    top:0;
+    left:0;
+    right:0;
+    bottom:0;
+
+    opacity:.60;
+
+    background-image:
+        repeating-linear-gradient(
+            to bottom,
+            transparent 0px,
+            transparent 11px,
+            #7d7d7d 12px,
+            transparent 13px,
+            transparent 24px
+        );
+}
+
+/* =======================================================
+   DOCUMENT VIEWPORT
+   ======================================================= */
+
+#document-viewport{
+
+    flex:1;
+
+    display:flex;
+
+    flex-direction:column;
+
+    position:relative;
+
+    overflow:hidden;
+
+    background:
+        linear-gradient(
+            to bottom,
+            #cfd5df,
+            #bcc5d0
+        );
+}
+
+/* =======================================================
+   VIEWPORT TOP HIGHLIGHT
+   ======================================================= */
+
+#document-viewport::before{
+
+    content:"";
+
+    position:absolute;
+
+    top:0;
+    left:0;
+    right:0;
+
+    height:6px;
+
+    z-index:2;
+
+    pointer-events:none;
+
+    background:
+        linear-gradient(
+            to bottom,
+            rgba(255,255,255,.35),
+            transparent
+        );
+}
+
+/* =======================================================
+   DOCUMENT WORKSPACE BACKGROUND
+   ======================================================= */
+
+#document-workspace-background{
+
+    position:absolute;
+
+    inset:0;
+
+    pointer-events:none;
+
+    z-index:0;
+
+    background:
+        linear-gradient(
+            to bottom,
+            #cfd5df,
+            #bcc5d0
+        );
+}
+
+/* =======================================================
+   HORIZONTAL RULER
+   ======================================================= */
+
+#horizontal-ruler{
+
+    width:100%;
+
+    height:24px;
+
+    min-height:24px;
+
+    position:relative;
+
+    overflow:hidden;
+
+    z-index:5;
+
+    border-bottom:
+        1px solid
+        #aeb7c2;
+
+    background:
+        linear-gradient(
+            to bottom,
+            #f4f4f4,
+            #dcdcdc
+        );
+}
+
+/* =======================================================
+   HORIZONTAL SCALE
+   ======================================================= */
+
+#horizontal-ruler-scale{
+
+    position:absolute;
+
+    top:0;
+    left:0;
+    right:0;
+    bottom:0;
+
+    opacity:.60;
+
+    background-image:
+        repeating-linear-gradient(
+            to right,
+            transparent 0px,
+            transparent 11px,
+            #7b7b7b 12px,
+            transparent 13px,
+            transparent 24px
+        );
+}
+
+/* =======================================================
+   DOCUMENT SCROLL AREA
+   ======================================================= */
+
+#document-scroll-area{
+
+    flex:1;
+
+    position:relative;
+
+    overflow:auto;
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:flex-start;
+
+    padding-top:30px;
+
+    padding-bottom:60px;
+
+    padding-left:50px;
+
+    padding-right:50px;
+
+    background:
+        linear-gradient(
+            to bottom,
+            #c9d0da,
+            #b9c2cd
+        );
+}
+
+/* =======================================================
+   DOCUMENT CANVAS
+   ======================================================= */
+
+#document-canvas{
+
+    position:relative;
+
+    display:flex;
+
+    justify-content:center;
+
+    width:100%;
+}
+
+/* =======================================================
+   DOCUMENT PAGES CONTAINER
+   ======================================================= */
+
+#document-pages-container{
+
+    position:relative;
+
+    display:flex;
+
+    flex-direction:column;
+
+    align-items:center;
+
+    width:100%;
+}
+
+/* =======================================================
+   DOCUMENT PAGE
+   ======================================================= */
+
+.document-page{
+
+    position:relative;
+
+    width:794px;
+
+    min-height:1123px;
+
+    margin-bottom:30px;
+
+    background:#ffffff;
+
+    border:
+        1px solid
+        #cfcfcf;
+
+    overflow:hidden;
+
+    z-index:5;
+}
+
+/* =======================================================
+   PAGE HOVER
+   ======================================================= */
+
+.document-page:hover{
+
+    box-shadow:
+        0 0 0 1px
+        rgba(160,160,160,.15);
+}
+
+/* =======================================================
+   PAGE SHADOW
+   ======================================================= */
+
+.page-shadow{
+
+    position:absolute;
+
+    top:14px;
+
+    left:14px;
+
+    width:100%;
+
+    height:100%;
+
+    background:
+        rgba(0,0,0,.18);
+
+    filter:blur(14px);
+
+    pointer-events:none;
+
+    z-index:-1;
+}
+
+/* =======================================================
+   PAGE CONTENT
+   ======================================================= */
+
+.page-content{
+
+    position:relative;
+
+    width:100%;
+
+    min-height:1123px;
+
+    padding-top:96px;
+
+    padding-right:96px;
+
+    padding-bottom:96px;
+
+    padding-left:96px;
+
+    background:#ffffff;
+
+    font-family:
+        "Times New Roman",
+        serif;
+
+    font-size:12pt;
+
+    line-height:1.4;
+
+    color:#000000;
+}
+
+/* =======================================================
+   PAGE LAYERS
+   ======================================================= */
+
+.page-text-layer,
+.page-object-layer,
+.page-selection-layer,
+.page-caret-layer,
+.page-overlay-layer{
+
+    position:absolute;
+
+    top:96px;
+
+    left:96px;
+
+    right:96px;
+
+    bottom:96px;
+}
+
+/* =======================================================
+   TEXT LAYER
+   ======================================================= */
+
+.page-text-layer{
+
+    white-space:pre-wrap;
+
+    overflow-wrap:break-word;
+
+    word-break:normal;
+}
+
+/* =======================================================
+   OBJECT LAYER
+   ======================================================= */
+
+.page-object-layer{
+
+    pointer-events:auto;
+}
+
+/* =======================================================
+   SELECTION LAYER
+   ======================================================= */
+
+.page-selection-layer{
+
+    pointer-events:none;
+}
+
+/* =======================================================
+   CARET LAYER
+   ======================================================= */
+
+.page-caret-layer{
+
+    pointer-events:none;
+}
+
+/* =======================================================
+   OVERLAY LAYER
+   ======================================================= */
+
+.page-overlay-layer{
+
+    pointer-events:none;
+}
+
+
+
+
+
+
+
+
+/* =======================================================
+   MARGIN MARKERS
+   SCROLLBARS
+   STATUS BAR
+   ZOOM CONTROL
+   HIDDEN SYSTEM LAYERS
+   ======================================================= */
+
+/* =======================================================
+   HORIZONTAL MARGIN MARKERS
+   ======================================================= */
+
+#horizontal-margin-left,
+#horizontal-margin-right{
+
+    position:absolute;
+
+    top:2px;
+
+    width:12px;
+
+    height:20px;
+
+    z-index:100;
+
+    cursor:ew-resize;
+
+    pointer-events:auto;
+}
+
+#horizontal-margin-left{
+
+    left:96px;
+}
+
+#horizontal-margin-right{
+
+    right:96px;
+}
+
+#horizontal-margin-left::before,
+#horizontal-margin-right::before{
+
+    content:"";
+
+    position:absolute;
+
+    left:0;
+
+    top:4px;
+
+    width:0;
+    height:0;
+
+    border-left:6px solid transparent;
+
+    border-right:6px solid transparent;
+
+    border-top:10px solid #2f5f9d;
+}
+
+/* =======================================================
+   VERTICAL MARGIN MARKERS
+   ======================================================= */
+
+#vertical-margin-top,
+#vertical-margin-bottom{
+
+    position:absolute;
+
+    left:2px;
+
+    width:20px;
+
+    height:12px;
+
+    z-index:100;
+
+    cursor:ns-resize;
+
+    pointer-events:auto;
+}
+
+#vertical-margin-top{
+
+    top:96px;
+}
+
+#vertical-margin-bottom{
+
+    bottom:96px;
+}
+
+#vertical-margin-top::before,
+#vertical-margin-bottom::before{
+
+    content:"";
+
+    position:absolute;
+
+    top:0;
+
+    left:4px;
+
+    width:0;
+    height:0;
+
+    border-top:6px solid transparent;
+
+    border-bottom:6px solid transparent;
+
+    border-left:10px solid #2f5f9d;
+}
+
+/* =======================================================
+   WORKSPACE SCROLLBARS
+   ======================================================= */
+
+#workspace-scrollbars{
+
+    position:absolute;
+
+    top:0;
+    right:0;
+    bottom:0;
+
+    width:16px;
+
+    z-index:40;
+
+    pointer-events:none;
+}
+
+/* =======================================================
+   VERTICAL SCROLLBAR
+   ======================================================= */
+
+#vertical-scrollbar{
+
+    position:absolute;
+
+    top:24px;
+
+    right:0;
+
+    bottom:16px;
+
+    width:16px;
+
+    pointer-events:auto;
+
+    border-left:
+        1px solid
+        #b9b9b9;
+
+    background:
+        linear-gradient(
+            to right,
+            #efefef,
+            #d7d7d7
+        );
+}
+
+#vertical-scroll-thumb{
+
+    width:12px;
+
+    height:120px;
+
+    margin:2px auto;
+
+    border-radius:2px;
+
+    cursor:pointer;
+
+    border:
+        1px solid
+        #ababab;
+
+    background:
+        linear-gradient(
+            to bottom,
+            #fdfdfd,
+            #cfcfcf
+        );
+}
+
+/* =======================================================
+   HORIZONTAL SCROLLBAR
+   ======================================================= */
+
+#horizontal-scrollbar{
+
+    position:absolute;
+
+    left:0;
+
+    right:16px;
+
+    bottom:0;
+
+    height:16px;
+
+    pointer-events:auto;
+
+    border-top:
+        1px solid
+        #b9b9b9;
+
+    background:
+        linear-gradient(
+            to bottom,
+            #efefef,
+            #d7d7d7
+        );
+}
+
+#horizontal-scroll-thumb{
+
+    width:140px;
+
+    height:12px;
+
+    margin:2px;
+
+    border-radius:2px;
+
+    cursor:pointer;
+
+    border:
+        1px solid
+        #ababab;
+
+    background:
+        linear-gradient(
+            to bottom,
+            #ffffff,
+            #d1d1d1
+        );
+}
+
+/* =======================================================
+   SCROLLBAR HOVER
+   ======================================================= */
+
+#vertical-scroll-thumb:hover,
+#horizontal-scroll-thumb:hover{
+
+    background:
+        linear-gradient(
+            to bottom,
+            #fffce7,
+            #ffd977
+        );
+}
+
+/* =======================================================
+   STATUS BAR
+   ======================================================= */
+
+#status-bar{
+
+    width:100%;
+
+    height:24px;
+
+    min-height:24px;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:space-between;
+
+    padding:0 10px;
+
+    background:
+        linear-gradient(
+            to bottom,
+            #e8edf5,
+            #d2dce9
+        );
+
+    border-top:
+        1px solid
+        #b4c2d3;
+
+    color:#34495e;
+
+    font-size:11px;
+
+    user-select:none;
+
+    flex-shrink:0;
+}
+
+/* =======================================================
+   STATUS LEFT
+   ======================================================= */
+
+#status-left{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:18px;
+}
+
+/* =======================================================
+   STATUS RIGHT
+   ======================================================= */
+
+#status-right{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:12px;
+}
+
+/* =======================================================
+   STATUS ITEMS
+   ======================================================= */
+
+#status-page-number,
+#status-word-count,
+#status-language,
+#status-proofing,
+#status-zoom-percentage{
+
+    white-space:nowrap;
+}
+
+/* =======================================================
+   VIEW MODES
+   ======================================================= */
+
+#status-view-mode{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:4px;
+}
+
+#print-layout-view,
+#web-layout-view,
+#reading-layout-view{
+
+    width:18px;
+
+    height:18px;
+
+    border:none;
+
+    border-radius:2px;
+
+    cursor:pointer;
+
+    background:
+        linear-gradient(
+            to bottom,
+            #ffffff,
+            #dce7f3
+        );
+}
+
+#print-layout-view:hover,
+#web-layout-view:hover,
+#reading-layout-view:hover{
+
+    background:
+        linear-gradient(
+            to bottom,
+            #fffbe0,
+            #ffd56b
+        );
+}
+
+/* =======================================================
+   ZOOM CONTROL
+   ======================================================= */
+
+#zoom-control{
+
+    position:absolute;
+
+    right:8px;
+
+    bottom:28px;
+
+    height:20px;
+
+    display:flex;
+
+    align-items:center;
+
+    gap:4px;
+
+    z-index:100;
+}
+
+/* =======================================================
+   ZOOM BUTTONS
+   ======================================================= */
+
+#zoom-out,
+#zoom-in{
+
+    width:18px;
+
+    height:18px;
+
+    border:none;
+
+    border-radius:2px;
+
+    cursor:pointer;
+
+    font-size:11px;
+
+    background:
+        linear-gradient(
+            to bottom,
+            #ffffff,
+            #d8e2ef
+        );
+}
+
+#zoom-out:hover,
+#zoom-in:hover{
+
+    background:
+        linear-gradient(
+            to bottom,
+            #fffbe4,
+            #ffd46b
+        );
+}
+
+/* =======================================================
+   ZOOM TRACK
+   ======================================================= */
+
+#zoom-slider-container{
+
+    width:90px;
+
+    height:16px;
+
+    display:flex;
+
+    align-items:center;
+}
+
+#zoom-slider-track{
+
+    position:relative;
+
+    width:100%;
+
+    height:4px;
+
+    border-radius:10px;
+
+    background:#b6c4d7;
+}
+
+#zoom-slider-thumb{
+
+    position:absolute;
+
+    top:-4px;
+
+    left:45%;
+
+    width:12px;
+
+    height:12px;
+
+    border-radius:50%;
+
+    cursor:pointer;
+
+    border:
+        1px solid
+        #8c8c8c;
+
+    background:
+        linear-gradient(
+            to bottom,
+            #ffffff,
+            #d4d4d4
+        );
+}
+
+/* =======================================================
+   HIDDEN SYSTEM LAYERS
+   ======================================================= */
+
+#hidden-system-layers{
+
+    display:none;
+}
+
+/* =======================================================
+   FORMAT LAYER
+   ======================================================= */
+
+#format-layer{
+
+    display:none;
+}
+
+/* =======================================================
+   VIRTUAL MOUSE SUPPORT
+   ======================================================= */
+
+.virtual-mouse-active *{
+
+    cursor:none !important;
+}
+
+#virtual-mouse-layer{
+
+    position:fixed;
+
+    top:0;
+    left:0;
+
+    width:100%;
+    height:100%;
+
+    pointer-events:none;
+
+    z-index:999999;
+}
+
+
+
+
+
+
+
+
+/* =======================================================
+   RESPONSIVE SYSTEM
+   TOUCH DEVICES
+   PERFORMANCE OPTIMIZATION
+   FINAL PATCHES
+   ======================================================= */
+
+/* =======================================================
+   DESKTOP HD
+   ======================================================= */
+
+@media (min-width:1400px){
+
+    #document-scroll-area{
+
+        padding-left:80px;
+
+        padding-right:80px;
+    }
+
+    .document-page{
+
+        transform:none;
+    }
+}
+
+/* =======================================================
+   VERY LARGE DISPLAYS
+   ======================================================= */
+
+@media (min-width:1600px){
+
+    #document-scroll-area{
+
+        padding-left:100px;
+
+        padding-right:100px;
+    }
+}
+
+/* =======================================================
+   LAPTOP
+   ======================================================= */
+
+@media (max-width:1366px){
+
+    .document-page{
+
+        transform:scale(.95);
+
+        transform-origin:top center;
+    }
+}
+
+/* =======================================================
+   TABLET
+   ======================================================= */
+
+@media (max-width:1024px){
+
+    #title-bar{
+
+        padding:0 6px;
+    }
+
+    #document-title{
+
+        font-size:12px;
+    }
+
+    #quick-access-toolbar{
+
+        padding:0 6px;
+    }
+
+    #status-left{
+
+        gap:10px;
+    }
+
+    #document-scroll-area{
+
+        padding-left:25px;
+
+        padding-right:25px;
+    }
+
+    .document-page{
+
+        transform:scale(.88);
+
+        transform-origin:top center;
+    }
+}
+
+/* =======================================================
+   LARGE MOBILE
+   ======================================================= */
+
+@media (max-width:768px){
+
+    #vertical-ruler{
+
+        display:none;
+    }
+
+    #workspace::before{
+
+        display:none;
+    }
+
+    .document-page{
+
+        transform:scale(.72);
+
+        transform-origin:top center;
+    }
+
+    #document-scroll-area{
+
+        padding-top:20px;
+
+        padding-left:10px;
+
+        padding-right:10px;
+    }
+
+    #status-word-count{
+
+        display:none;
+    }
+
+    #status-language{
+
+        display:none;
+    }
+
+    #zoom-slider-container{
+
+        width:60px;
+    }
+}
+
+/* =======================================================
+   SMALL MOBILE
+   ======================================================= */
+
+@media (max-width:480px){
+
+    #title-right-section{
+
+        gap:2px;
+    }
+
+    #window-minimize,
+    #window-maximize,
+    #window-close{
+
+        width:18px;
+
+        height:16px;
+    }
+
+    #document-title{
+
+        max-width:180px;
+
+        overflow:hidden;
+
+        text-overflow:ellipsis;
+
+        white-space:nowrap;
+    }
+
+    .document-page{
+
+        transform:scale(.60);
+
+        transform-origin:top center;
+    }
+
+    #status-page-number{
+
+        display:none;
+    }
+
+    #status-view-mode{
+
+        display:none;
+    }
+
+    #zoom-control{
+
+        right:4px;
+    }
+}
+
+/* =======================================================
+   TOUCH DEVICES
+   ======================================================= */
+
+@media (hover:none){
+
+    #office-button,
+
+    .ribbon-tab,
+
+    #zoom-in,
+
+    #zoom-out,
+
+    #qat-save,
+
+    #qat-undo,
+
+    #qat-redo,
+
+    #qat-customize{
+
+        min-width:32px;
+
+        min-height:32px;
+    }
+}
+
+/* =======================================================
+   PAGE FOCUS STATE
+   ======================================================= */
+
+.document-page.focused{
+
+    border:
+        1px solid
+        #8eb3df;
+}
+
+/* =======================================================
+   PAGE RENDER STABILITY
+   ======================================================= */
+
+.document-page,
+
+.page-content,
+
+.page-text-layer,
+
+.page-object-layer,
+
+.page-selection-layer,
+
+.page-caret-layer,
+
+.page-overlay-layer{
+
+    backface-visibility:hidden;
+
+    transform-style:preserve-3d;
+}
+
+/* =======================================================
+   SCROLL OPTIMIZATION
+   ======================================================= */
+
+#document-scroll-area{
+
+    scroll-behavior:smooth;
+
+    -webkit-overflow-scrolling:touch;
+}
+
+/* =======================================================
+   PAGE SELECTION SAFETY
+   ======================================================= */
+
+.page-selection-layer,
+
+.page-overlay-layer{
+
+    user-select:none;
+}
+
+/* =======================================================
+   PAGE TEXT DEFAULTS
+   ======================================================= */
+
+.page-text-layer{
+
+    font-family:
+        "Times New Roman",
+        serif;
+
+    font-size:12pt;
+
+    line-height:1.4;
+
+    color:#000000;
+}
+
+/* =======================================================
+   DOCUMENT ENGINE PLACEHOLDERS
+   ======================================================= */
+
+.page-object-layer{
+
+    z-index:10;
+}
+
+.page-selection-layer{
+
+    z-index:20;
+}
+
+.page-caret-layer{
+
+    z-index:30;
+}
+
+.page-overlay-layer{
+
+    z-index:40;
+}
+
+/* =======================================================
+   ANTI OVERFLOW SAFETY
+   ======================================================= */
+
+#document-canvas{
+
+    overflow:visible;
+}
+
+#document-pages-container{
+
+    overflow:visible;
+}
+
+/* =======================================================
+   FINAL VISUAL POLISH
+   ======================================================= */
+
+.document-page{
+
+    box-shadow:
+        0 1px 0 rgba(255,255,255,.80);
+}
+
+/* =======================================================
+   ACCESSIBILITY
+   ======================================================= */
+
+button{
+
+    font-family:inherit;
+}
+
+button:focus-visible{
+
+    outline:none;
+}
+
+/* =======================================================
+   END OF CAMPUS WORD 2007 CSS
+   ======================================================= */
