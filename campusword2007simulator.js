@@ -6375,6 +6375,37 @@ pagesHtml +=
 
 
 
+/* ==========================================================
+   PAGE SURFACE ENGINE
+   ========================================================== */
+
+CampusWord2007Simulator.PageSurfaceEngine = {
+
+    getAllSurfaces() {
+
+        return document.querySelectorAll(
+            ".page-editor-surface"
+        );
+    },
+
+    getSurface(pageNumber) {
+
+        return document.querySelector(
+            '.page-editor-surface[data-page-number="' +
+            pageNumber +
+            '"]'
+        );
+    }
+};
+
+
+
+
+
+
+
+
+
 
 
 
