@@ -4899,6 +4899,29 @@ CampusWord2007Simulator
 
 
 
+const caretPageState =
+    CampusWord2007Simulator
+        .CaretPageState;
+
+if (
+    caretState.y >=
+    caretPageState.pageBottom
+) {
+
+    CampusWord2007Simulator
+        .PageEngine
+        .createPage();
+
+    CampusWord2007Simulator
+        .PageEngine
+        .renderPages();
+}
+
+
+
+
+
+
 
 
 
