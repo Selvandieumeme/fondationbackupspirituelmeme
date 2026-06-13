@@ -1,9 +1,10 @@
+
 /* ==========================================================
-   A1 — CAMPUSWORD2007SIMULATOR ROOT
+   A1 — CAMPUSWORD2007SIMULATEUR ROOT
    SYSTEM FOUNDATION ROOT OBJECT
    ========================================================== */
 
-window.CampusWord2007Simulator = {
+window.CampusWord2007Simulateur = {
 
     version: "1.0.0",
 
@@ -15,7 +16,7 @@ window.CampusWord2007Simulator = {
 
     destroyed: false,
 
-    buildName: "Campus Word 2007 Simulator",
+    buildName: "Campus Word 2007 Simulateur",
 
     state: {},
 
@@ -23,7 +24,6 @@ window.CampusWord2007Simulator = {
 
     registry: {}
 };
-
 
 
 
