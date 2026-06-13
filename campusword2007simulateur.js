@@ -367,6 +367,140 @@ CampusWord2007Simulateur.state = {
 
 
 
+/* ==========================================================
+   A2.1 — STATE ACCESSOR
+   ========================================================== */
+
+CampusWord2007Simulateur.State = {
+
+    get(section) {
+
+        return CampusWord2007Simulateur
+            .state[section];
+    },
+
+    set(
+        section,
+        key,
+        value
+    ) {
+
+        if (
+            !CampusWord2007Simulateur
+                .state[section]
+        ) {
+
+            return;
+        }
+
+        CampusWord2007Simulateur
+            .state[section][key] =
+                value;
+    },
+
+    merge(
+        section,
+        values
+    ) {
+
+        if (
+            !CampusWord2007Simulateur
+                .state[section]
+        ) {
+
+            return;
+        }
+
+        Object.assign(
+            CampusWord2007Simulateur
+                .state[section],
+            values
+        );
+    }
+};
+
+
+
+
+
+/* ==========================================================
+   A2.2 — STATE RESET ENGINE
+   ========================================================== */
+
+CampusWord2007Simulateur.StateResetEngine = {
+
+    resetEditor() {
+
+        const editor =
+            CampusWord2007Simulateur
+                .state
+                .editor;
+
+        editor.textContent = "";
+
+        editor.caretPosition = 0;
+
+        editor.selectionStart = 0;
+
+        editor.selectionEnd = 0;
+
+        editor.activePage = 1;
+
+        editor.totalPages = 1;
+    },
+
+    resetCaret() {
+
+        const caret =
+            CampusWord2007Simulateur
+                .state
+                .caret;
+
+        caret.x = 0;
+
+        caret.y = 0;
+
+        caret.visible = true;
+    },
+
+    resetMouse() {
+
+        const mouse =
+            CampusWord2007Simulateur
+                .state
+                .mouse;
+
+        mouse.x = 0;
+
+        mouse.y = 0;
+
+        mouse.isDown = false;
+
+        mouse.leftButton = false;
+
+        mouse.middleButton = false;
+
+        mouse.rightButton = false;
+    }
+};
+
+
+
+
+/* ==========================================================
+   A2.3 — STATE VALIDATION
+   ========================================================== */
+
+if (
+    !CampusWord2007Simulateur.state
+) {
+
+    throw new Error(
+        "Global State Missing"
+    );
+}
+
+
 
 /* ==========================================================
    A3 — CONFIG MANAGER
