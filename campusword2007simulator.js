@@ -4399,8 +4399,21 @@ CampusWord2007Simulator.CaretEngine = {
         this.element.style.left =
             state.x + "px";
 
-        this.element.style.top =
-            state.y + "px";
+       
+
+
+const caretPageState =
+    CampusWord2007Simulator
+        .CaretPageState;
+
+this.element.style.top =
+    caretPageState.pageOffsetY +
+    "px";
+
+
+
+
+
 
         this.element.style.height =
             state.height + "px";
