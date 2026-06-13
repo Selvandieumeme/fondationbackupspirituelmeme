@@ -487,34 +487,20 @@ CampusWord2007Simulateur.StateResetEngine = {
 
 
 
-/* ==========================================================
-   A2.3 — STATE VALIDATION
-   ========================================================== */
-
-if (
-    !CampusWord2007Simulateur.state
-) {
-
-    throw new Error(
-        "Global State Missing"
-    );
-}
-
-
 
 /* ==========================================================
    A3 — CONFIG MANAGER
    CENTRAL APPLICATION CONFIGURATION
    ========================================================== */
 
-CampusWord2007Simulator.Config = {
+CampusWord2007Simulateur.Config = {
 
     values: {
 
         application: {
 
             name:
-                "Campus Word 2007 Simulator",
+                "Campus Word 2007 Simulateur",
 
             version:
                 "1.0.0"
@@ -602,7 +588,6 @@ CampusWord2007Simulator.Config = {
         }
     }
 };
-
 
 
 
