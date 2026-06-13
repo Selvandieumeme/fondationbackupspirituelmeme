@@ -6359,6 +6359,24 @@ CampusWord2007Simulator.PageRenderEngine = {
                 continue;
             }
 
+            const viewport =
+                document.createElement(
+                    "div"
+                );
+
+            viewport.style.position =
+                "relative";
+
+            viewport.style.width =
+                "100%";
+
+            viewport.style.height =
+                this.pageHeight +
+                "px";
+
+            viewport.style.overflow =
+                "hidden";
+
             const clone =
                 textLayer.cloneNode(
                     true
@@ -6369,7 +6387,7 @@ CampusWord2007Simulator.PageRenderEngine = {
             );
 
             clone.style.position =
-                "relative";
+                "absolute";
 
             clone.style.top =
                 "-" +
@@ -6382,22 +6400,19 @@ CampusWord2007Simulator.PageRenderEngine = {
             clone.style.left =
                 "0";
 
+            clone.style.width =
+                "100%";
+
             clone.style.pointerEvents =
                 "none";
 
-            page.style.overflow =
-                "hidden";
-
-            page.style.height =
-                this.pageHeight +
-                "px";
+            viewport.appendChild(
+                clone
+            );
 
             page.appendChild(
-                clone
+                viewport
             );
         }
     }
 };
-
-
-
