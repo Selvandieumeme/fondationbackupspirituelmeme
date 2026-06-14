@@ -5251,3 +5251,209 @@ CampusWord2007Simulateur
 
 
 
+
+/* ==========================================================
+   B6.4 — FOCUS EVENTS
+   FOCUS EVENT DISPATCH SYSTEM
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .FocusEngine
+    .attachEvents =
+function () {
+
+    document.addEventListener(
+
+        "focusin",
+
+        event => {
+
+            const target =
+                event.target;
+
+            CampusWord2007Simulateur
+                .EventBus
+                .emit(
+
+                    "focus:in",
+
+                    {
+
+                        element:
+                            target
+                    }
+                );
+
+            CampusWord2007Simulateur
+                .Logger
+                .info(
+                    "Focus In"
+                );
+        }
+    );
+
+    document.addEventListener(
+
+        "focusout",
+
+        event => {
+
+            const target =
+                event.target;
+
+            CampusWord2007Simulateur
+                .EventBus
+                .emit(
+
+                    "focus:out",
+
+                    {
+
+                        element:
+                            target
+                    }
+                );
+
+            CampusWord2007Simulateur
+                .Logger
+                .info(
+                    "Focus Out"
+                );
+        }
+    );
+};
+
+
+
+
+
+
+/* ==========================================================
+   B6.4.1 — APPLICATION FOCUS EVENT
+   ========================================================== */
+
+window.addEventListener(
+
+    "focus",
+
+    () => {
+
+        CampusWord2007Simulateur
+            .EventBus
+            .emit(
+                "application:focus"
+            );
+    }
+);
+
+
+
+
+/* ==========================================================
+   B6.4.2 — APPLICATION BLUR EVENT
+   ========================================================== */
+
+window.addEventListener(
+
+    "blur",
+
+    () => {
+
+        CampusWord2007Simulateur
+            .EventBus
+            .emit(
+                "application:blur"
+            );
+    }
+);
+
+
+
+
+
+
+/* ==========================================================
+   B6.4.3 — FOCUS CHANGE EVENT
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .FocusEngine
+    .notifyFocusChange =
+function (
+    previousElement,
+    currentElement
+) {
+
+    CampusWord2007Simulateur
+        .EventBus
+        .emit(
+
+            "focus:changed",
+
+            {
+
+                previous:
+                    previousElement,
+
+                current:
+                    currentElement
+            }
+        );
+};
+
+
+
+
+
+
+/* ==========================================================
+   B6.4.4 — REGISTER EVENTS
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .EventBus
+    .on(
+
+        "application:ready",
+
+        () => {
+
+            CampusWord2007Simulateur
+                .FocusEngine
+                .attachEvents();
+        }
+    );
+
+
+
+
+
+
+/* ==========================================================
+   B6.4.5 — FOCUS EVENTS VALIDATION
+   ========================================================== */
+
+if (
+
+    typeof
+    CampusWord2007Simulateur
+        .FocusEngine
+        .attachEvents !==
+
+    "function"
+
+) {
+
+    throw new Error(
+
+        "Focus Events Missing"
+
+    );
+}
+
+
+
+
+
+
+
