@@ -4404,6 +4404,47 @@ if (
 
 
 
+/* ==========================================================
+   B6 — FOCUS ENGINE
+   CENTRAL APPLICATION FOCUS SYSTEM
+   ========================================================== */
+
+CampusWord2007Simulateur.FocusEngine = {
+
+    initialized: false,
+
+    activeElement: null,
+
+    focusedArea: null,
+
+    lastFocusedArea: null,
+
+    windowFocused: true,
+
+    initialize() {
+
+        if (
+            this.initialized
+        ) {
+
+            return;
+        }
+
+        this.initialized = true;
+
+        CampusWord2007Simulateur
+            .Logger
+            .info(
+                "Focus Engine Initialized"
+            );
+    }
+};
+
+
+
+
+
+
 
 /* ==========================================================
    B6.1 — FOCUS STATE INITIALIZATION
@@ -5703,6 +5744,11 @@ function () {
 
     return this.isRegistered();
 };
+
+
+
+
+
 
 
 
