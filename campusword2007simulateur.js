@@ -591,3 +591,945 @@ CampusWord2007Simulateur.Config = {
 
 
 
+
+
+
+
+/* ==========================================================
+   A3.1 — CONFIG GETTER
+   ========================================================== */
+
+CampusWord2007Simulateur.Config.get =
+function (section, key) {
+
+    const config =
+        this.values[section];
+
+    if (!config) {
+        return null;
+    }
+
+    return config[key];
+};
+
+
+
+
+
+
+/* ==========================================================
+   A3.2 — CONFIG SETTER
+   ========================================================== */
+
+CampusWord2007Simulateur.Config.set =
+function (
+    section,
+    key,
+    value
+) {
+
+    if (
+        !this.values[section]
+    ) {
+
+        this.values[section] = {};
+    }
+
+    this.values[section][key] =
+        value;
+};
+
+
+
+
+
+
+
+/* ==========================================================
+   A3.3 — CONFIG MERGE
+   ========================================================== */
+
+CampusWord2007Simulateur.Config.merge =
+function (
+    section,
+    values
+) {
+
+    if (
+        !this.values[section]
+    ) {
+
+        this.values[section] = {};
+    }
+
+    Object.assign(
+        this.values[section],
+        values
+    );
+};
+
+
+
+
+
+
+
+
+/* ==========================================================
+   A3.4 — CONFIG RESET
+   ========================================================== */
+
+CampusWord2007Simulateur.Config.reset =
+function () {
+
+    this.values.margins.left =
+        96;
+
+    this.values.margins.right =
+        96;
+
+    this.values.margins.top =
+        96;
+
+    this.values.margins.bottom =
+        96;
+};
+
+
+
+
+
+
+
+
+
+/* ==========================================================
+   A3.5 — CONFIG VALIDATION
+   ========================================================== */
+
+if (
+    !CampusWord2007Simulateur.Config
+) {
+
+    throw new Error(
+        "Config Manager Missing"
+    );
+}
+
+
+
+
+
+
+
+/* ==========================================================
+   A4 — LOGGER
+   CENTRAL LOGGING SYSTEM
+   ========================================================== */
+
+CampusWord2007Simulateur.Logger = {
+
+    enabled: true,
+
+    showTimestamp: true,
+
+    history: [],
+
+    maxHistory: 1000,
+
+    log(...args) {
+
+        this.write(
+            "LOG",
+            args
+        );
+    },
+
+    info(...args) {
+
+        this.write(
+            "INFO",
+            args
+        );
+    },
+
+    warn(...args) {
+
+        this.write(
+            "WARN",
+            args
+        );
+    },
+
+    error(...args) {
+
+        this.write(
+            "ERROR",
+            args
+        );
+    },
+
+    debug(...args) {
+
+        this.write(
+            "DEBUG",
+            args
+        );
+    },
+
+    write(
+        level,
+        args
+    ) {
+
+        if (
+            !this.enabled
+        ) {
+
+            return;
+        }
+
+        const timestamp =
+            new Date()
+                .toISOString();
+
+        const entry = {
+
+            level,
+
+            timestamp,
+
+            data: [...args]
+        };
+
+        this.history.push(
+            entry
+        );
+
+        if (
+            this.history.length >
+            this.maxHistory
+        ) {
+
+            this.history.shift();
+        }
+
+        const output = [];
+
+        if (
+            this.showTimestamp
+        ) {
+
+            output.push(
+                "[" +
+                timestamp +
+                "]"
+            );
+        }
+
+        output.push(
+            "[CampusWord2007]"
+        );
+
+        output.push(
+            "[" +
+            level +
+            "]"
+        );
+
+        console.log(
+            ...output,
+            ...args
+        );
+    },
+
+    clearHistory() {
+
+        this.history = [];
+    },
+
+    getHistory() {
+
+        return [
+            ...this.history
+        ];
+    },
+
+    enable() {
+
+        this.enabled = true;
+    },
+
+    disable() {
+
+        this.enabled = false;
+    }
+};
+
+
+
+
+
+
+
+/* ==========================================================
+   A4.1 — LOGGER SHORTCUTS
+   ========================================================== */
+
+CampusWord2007Simulateur.Log =
+    CampusWord2007Simulateur
+        .Logger;
+
+
+
+
+/* ==========================================================
+   A4.2 — LOGGER CONFIGURATION
+   ========================================================== */
+
+CampusWord2007Simulateur.Logger.configure =
+function (
+    options = {}
+) {
+
+    if (
+        typeof options.enabled ===
+        "boolean"
+    ) {
+
+        this.enabled =
+            options.enabled;
+    }
+
+    if (
+        typeof options.showTimestamp ===
+        "boolean"
+    ) {
+
+        this.showTimestamp =
+            options.showTimestamp;
+    }
+
+    if (
+        typeof options.maxHistory ===
+        "number"
+    ) {
+
+        this.maxHistory =
+            options.maxHistory;
+    }
+};
+
+
+
+
+
+
+/* ==========================================================
+   A4.3 — LOGGER RESET
+   ========================================================== */
+
+CampusWord2007Simulateur.Logger.reset =
+function () {
+
+    this.enabled = true;
+
+    this.showTimestamp = true;
+
+    this.history = [];
+
+    this.maxHistory = 1000;
+};
+
+
+
+
+
+
+/* ==========================================================
+   A4.4 — LOGGER VALIDATION
+   ========================================================== */
+
+if (
+    !CampusWord2007Simulateur
+        .Logger
+) {
+
+    throw new Error(
+        "Logger Missing"
+    );
+}
+
+
+
+
+
+
+
+/* ==========================================================
+   A5 — EVENT BUS
+   CENTRAL APPLICATION EVENT SYSTEM
+   ========================================================== */
+
+CampusWord2007Simulateur.EventBus = {
+
+    events: {},
+
+    initialized: false,
+
+    initialize() {
+
+        if (this.initialized) {
+            return;
+        }
+
+        this.events = {};
+
+        this.initialized = true;
+
+        CampusWord2007Simulateur
+            .Logger
+            .info(
+                "EventBus Initialized"
+            );
+    }
+};
+
+
+
+
+
+
+
+/* ==========================================================
+   A5.1 — EVENT SUBSCRIPTION
+   ========================================================== */
+
+CampusWord2007Simulateur.EventBus.on =
+function (
+    eventName,
+    callback
+) {
+
+    if (
+        typeof callback !==
+        "function"
+    ) {
+
+        return;
+    }
+
+    if (
+        !this.events[eventName]
+    ) {
+
+        this.events[eventName] = [];
+    }
+
+    this.events[eventName]
+        .push(
+            callback
+        );
+};
+
+
+
+
+
+
+
+/* ==========================================================
+   A5.2 — EVENT UNSUBSCRIPTION
+   ========================================================== */
+
+CampusWord2007Simulateur.EventBus.off =
+function (
+    eventName,
+    callback
+) {
+
+    const listeners =
+        this.events[eventName];
+
+    if (
+        !listeners
+    ) {
+
+        return;
+    }
+
+    this.events[eventName] =
+        listeners.filter(
+            listener =>
+                listener !== callback
+        );
+};
+
+
+
+
+
+
+/* ==========================================================
+   A5.3 — EVENT EMITTER
+   ========================================================== */
+
+CampusWord2007Simulateur.EventBus.emit =
+function (
+    eventName,
+    payload = {}
+) {
+
+    const listeners =
+        this.events[eventName];
+
+    if (
+        !listeners ||
+        listeners.length === 0
+    ) {
+
+        return;
+    }
+
+    listeners.forEach(
+        listener => {
+
+            try {
+
+                listener(
+                    payload
+                );
+
+            } catch (error) {
+
+                CampusWord2007Simulateur
+                    .Logger
+                    .error(
+                        "Event Error:",
+                        error
+                    );
+            }
+        }
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   A5.4 — EMIT ONCE
+   ========================================================== */
+
+CampusWord2007Simulateur.EventBus.once =
+function (
+    eventName,
+    callback
+) {
+
+    const wrapper =
+        payload => {
+
+            callback(
+                payload
+            );
+
+            this.off(
+                eventName,
+                wrapper
+            );
+        };
+
+    this.on(
+        eventName,
+        wrapper
+    );
+};
+
+
+
+
+
+
+
+/* ==========================================================
+   A5.5 — CLEAR EVENT
+   ========================================================== */
+
+CampusWord2007Simulateur.EventBus.clear =
+function (
+    eventName
+) {
+
+    delete this.events[
+        eventName
+    ];
+};
+
+
+
+
+
+
+/* ==========================================================
+   A5.6 — CLEAR ALL EVENTS
+   ========================================================== */
+
+CampusWord2007Simulateur.EventBus.clearAll =
+function () {
+
+    this.events = {};
+};
+
+
+
+
+
+/* ==========================================================
+   A5.7 — EVENT COUNT
+   ========================================================== */
+
+CampusWord2007Simulateur.EventBus.listenerCount =
+function (
+    eventName
+) {
+
+    const listeners =
+        this.events[eventName];
+
+    if (
+        !listeners
+    ) {
+
+        return 0;
+    }
+
+    return listeners.length;
+};
+
+
+
+
+/* ==========================================================
+   A5.8 — EVENT BUS VALIDATION
+   ========================================================== */
+
+if (
+    !CampusWord2007Simulateur
+        .EventBus
+) {
+
+    throw new Error(
+        "EventBus Missing"
+    );
+}
+
+
+
+
+
+
+/* ==========================================================
+   A6 — ERROR MANAGER
+   CENTRALIZED ERROR HANDLING SYSTEM
+   ========================================================== */
+
+CampusWord2007Simulateur.ErrorManager = {
+
+    initialized: false,
+
+    errors: [],
+
+    maxErrors: 1000,
+
+    initialize() {
+
+        if (this.initialized) {
+            return;
+        }
+
+        this.attachGlobalHandlers();
+
+       this.attachPromiseHandler();
+
+        this.initialized = true;
+
+        CampusWord2007Simulateur
+            .Logger
+            .info(
+                "ErrorManager Initialized"
+            );
+    }
+};
+
+
+
+
+
+
+
+
+/* ==========================================================
+   A6.1 — REGISTER ERROR
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ErrorManager
+    .register =
+function (
+    source,
+    error
+) {
+
+    const entry = {
+
+        timestamp:
+            Date.now(),
+
+        source:
+            source ||
+
+            "Unknown",
+
+        message:
+            error?.message ||
+
+            String(error),
+
+        stack:
+            error?.stack ||
+
+            null
+    };
+
+    this.errors.push(
+        entry
+    );
+
+    if (
+        this.errors.length >
+        this.maxErrors
+    ) {
+
+        this.errors.shift();
+    }
+
+    CampusWord2007Simulateur
+        .Logger
+        .error(
+            "[" +
+            entry.source +
+            "]",
+            entry.message
+        );
+
+    CampusWord2007Simulateur
+        .EventBus
+        .emit(
+            "system:error",
+            entry
+        );
+};
+
+
+
+
+
+/* ==========================================================
+   A6.2 — GET ALL ERRORS
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ErrorManager
+    .getAll =
+function () {
+
+    return [
+        ...this.errors
+    ];
+};
+
+
+
+
+
+
+
+/* ==========================================================
+   A6.3 — GET LAST ERROR
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ErrorManager
+    .getLast =
+function () {
+
+    if (
+        this.errors.length === 0
+    ) {
+
+        return null;
+    }
+
+    return this.errors[
+        this.errors.length - 1
+    ];
+};
+
+
+
+
+
+
+
+
+/* ==========================================================
+   A6.4 — CLEAR ERRORS
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ErrorManager
+    .clear =
+function () {
+
+    this.errors = [];
+};
+
+
+
+
+
+/* ==========================================================
+   A6.5 — ERROR COUNT
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ErrorManager
+    .count =
+function () {
+
+    return this.errors.length;
+};
+
+
+
+
+
+
+/* ==========================================================
+   A6.6 — GLOBAL ERROR CAPTURE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ErrorManager
+    .attachGlobalHandlers =
+function () {
+
+    window.addEventListener(
+        "error",
+        event => {
+
+            this.register(
+                "WindowError",
+                event.error ||
+                new Error(
+                    event.message
+                )
+            );
+        }
+    );
+};
+
+
+
+
+
+
+
+/* ==========================================================
+   A6.7 — PROMISE ERROR CAPTURE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ErrorManager
+    .attachPromiseHandler =
+function () {
+
+    window.addEventListener(
+        "unhandledrejection",
+        event => {
+
+            this.register(
+                "PromiseError",
+                event.reason
+            );
+        }
+    );
+};
+
+
+
+
+
+
+
+
+
+/* ==========================================================
+   A6.8 — SAFE EXECUTION
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ErrorManager
+    .safe =
+function (
+    source,
+    callback
+) {
+
+    try {
+
+        return callback();
+
+    } catch (error) {
+
+        this.register(
+            source,
+            error
+        );
+
+        return null;
+    }
+};
+
+
+
+
+
+
+/* ==========================================================
+   A6.10 — ERROR MANAGER VALIDATION
+   ========================================================== */
+
+if (
+    !CampusWord2007Simulateur
+        .ErrorManager
+) {
+
+    throw new Error(
+        "ErrorManager Missing"
+    );
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
