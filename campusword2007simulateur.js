@@ -4405,6 +4405,213 @@ if (
 
 
 
+/* ==========================================================
+   B6.1 — FOCUS STATE INITIALIZATION
+   ========================================================== */
+
+CampusWord2007Simulateur.FocusEngine = {
+
+    initialized: false,
+
+    initialize() {
+
+        if (
+            this.initialized
+        ) {
+
+            return;
+        }
+
+        this.initializeFocusState();
+
+        this.initialized = true;
+
+        CampusWord2007Simulateur
+            .Logger
+            .info(
+                "Focus Engine Initialized"
+            );
+    }
+};
+
+
+
+
+
+/* ==========================================================
+   B6.1.1 — INITIALIZE FOCUS STATE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .FocusEngine
+    .initializeFocusState =
+function () {
+
+    const focusState =
+        CampusWord2007Simulateur
+            .state
+            .focus;
+
+    if (
+        !focusState
+    ) {
+
+        throw new Error(
+            "Focus State Missing"
+        );
+    }
+
+    if (
+        typeof focusState
+            .activeElement ===
+        "undefined"
+    ) {
+
+        focusState.activeElement =
+            null;
+    }
+
+    if (
+        typeof focusState
+            .focusedArea ===
+        "undefined"
+    ) {
+
+        focusState.focusedArea =
+            null;
+    }
+
+    if (
+        typeof focusState
+            .lastFocusedArea ===
+        "undefined"
+    ) {
+
+        focusState.lastFocusedArea =
+            null;
+    }
+};
+
+
+
+
+
+/* ==========================================================
+   B6.1.2 — GET FOCUS STATE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .FocusEngine
+    .getFocusState =
+function () {
+
+    return CampusWord2007Simulateur
+        .state
+        .focus;
+};
+
+
+
+
+
+
+/* ==========================================================
+   B6.1.3 — RESET FOCUS STATE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .FocusEngine
+    .resetFocusState =
+function () {
+
+    const focusState =
+        this.getFocusState();
+
+    focusState.activeElement =
+        null;
+
+    focusState.focusedArea =
+        null;
+
+    focusState.lastFocusedArea =
+        null;
+};
+
+
+
+
+
+
+
+/* ==========================================================
+   B6.1.4 — FOCUS STATE VALIDATION
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .FocusEngine
+    .validateFocusState =
+function () {
+
+    const focusState =
+        this.getFocusState();
+
+    if (
+        !focusState
+    ) {
+
+        return false;
+    }
+
+    return true;
+};
+
+
+
+
+
+
+/* ==========================================================
+   B6.1.5 — FOCUS ENGINE READY HOOK
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .EventBus
+    .on(
+        "application:ready",
+
+        () => {
+
+            CampusWord2007Simulateur
+                .FocusEngine
+                .initialize();
+        }
+    );
+
+
+
+
+
+
+/* ==========================================================
+   B6.1.6 — FOCUS ENGINE VALIDATION
+   ========================================================== */
+
+if (
+    !CampusWord2007Simulateur
+        .FocusEngine
+) {
+
+    throw new Error(
+        "Focus Engine Missing"
+    );
+}
+
+
+
+
+
+
+
 
 
 
