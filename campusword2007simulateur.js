@@ -2085,6 +2085,718 @@ if (
 
 
 
+/* ==========================================================
+   B2 — BOOTSTRAP ENGINE
+   APPLICATION STARTUP ENGINE
+   ========================================================== */
+
+CampusWord2007Simulateur.BootstrapEngine = {
+
+    initialized: false,
+
+    booted: false,
+
+    initialize() {
+
+        if (
+            this.initialized
+        ) {
+
+            return;
+        }
+
+        CampusWord2007Simulateur
+            .markBooting();
+
+        this.initialized = true;
+
+        CampusWord2007Simulateur
+            .Logger
+            .info(
+                "Bootstrap Engine Initialized"
+            );
+    }
+};
+
+
+
+
+
+
+
+/* ==========================================================
+   B2.1 — START APPLICATION
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .BootstrapEngine
+    .start =
+function () {
+
+    if (
+        this.booted
+    ) {
+
+        return;
+    }
+
+    this.initialize();
+
+    this.loadRegistries();
+
+    this.validateDOM();
+
+    this.booted = true;
+
+    CampusWord2007Simulateur
+        .Logger
+        .info(
+            "Application Started"
+        );
+
+    CampusWord2007Simulateur
+        .EventBus
+        .emit(
+            "application:started"
+        );
+};
+
+
+
+
+
+
+
+
+
+/* ==========================================================
+   B2.2 — LOAD REGISTRIES
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .BootstrapEngine
+    .loadRegistries =
+function () {
+
+    CampusWord2007Simulateur
+        .Registry
+        .initialize();
+
+    CampusWord2007Simulateur
+        .EventBus
+        .initialize();
+
+    CampusWord2007Simulateur
+        .ErrorManager
+        .initialize();
+};
+
+
+
+
+
+
+
+/* ==========================================================
+   B2.3 — REQUIRED DOM VALIDATION
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .BootstrapEngine
+    .validateDOM =
+function () {
+
+    const requiredIds = [
+
+        "campusword2007simulateur",
+
+        "word-app",
+
+        "workspace",
+
+        "document-viewport",
+
+        "document-scroll-area",
+
+        "document-canvas",
+
+        "document-pages-container",
+
+        "document-page-template"
+    ];
+
+    requiredIds.forEach(
+        id => {
+
+            const element =
+                document.getElementById(
+                    id
+                );
+
+            if (
+                !element
+            ) {
+
+                throw new Error(
+                    "Missing DOM Element: " +
+                    id
+                );
+            }
+        }
+    );
+};
+
+
+
+
+
+
+/* ==========================================================
+   B2.4 — REGISTER CORE DOM
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .BootstrapEngine
+    .registerDOM =
+function () {
+
+    const registry =
+        CampusWord2007Simulateur
+            .Registry;
+
+    registry.registerDOM(
+        "root",
+        document.getElementById(
+            "campusword2007simulateur"
+        )
+    );
+
+    registry.registerDOM(
+        "workspace",
+        document.getElementById(
+            "workspace"
+        )
+    );
+
+    registry.registerDOM(
+        "viewport",
+        document.getElementById(
+            "document-viewport"
+        )
+    );
+
+    registry.registerDOM(
+        "canvas",
+        document.getElementById(
+            "document-canvas"
+        )
+    );
+
+    registry.registerDOM(
+        "pagesContainer",
+        document.getElementById(
+            "document-pages-container"
+        )
+    );
+
+    registry.registerDOM(
+        "pageTemplate",
+        document.getElementById(
+            "document-page-template"
+        )
+    );
+};
+
+
+
+
+
+
+
+/* ==========================================================
+   B2.5 — UPDATE APPLICATION STATE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .BootstrapEngine
+    .updateState =
+function () {
+
+    CampusWord2007Simulateur
+        .state
+        .application
+        .initialized = true;
+
+    CampusWord2007Simulateur
+        .state
+        .application
+        .booting = false;
+
+    CampusWord2007Simulateur
+        .state
+        .application
+        .ready = true;
+};
+
+
+
+
+
+
+
+/* ==========================================================
+   B2.6 — MARK SYSTEM READY
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .BootstrapEngine
+    .finish =
+function () {
+
+    this.registerDOM();
+
+    this.updateState();
+
+    CampusWord2007Simulateur
+        .markReady();
+
+    CampusWord2007Simulateur
+        .Logger
+        .info(
+            "System Ready"
+        );
+
+    CampusWord2007Simulateur
+        .EventBus
+        .emit(
+            "application:ready"
+        );
+};
+
+
+
+
+
+
+
+/* ==========================================================
+   B2.7 — SAFE BOOT
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .BootstrapEngine
+    .boot =
+function () {
+
+    CampusWord2007Simulateur
+        .ErrorManager
+        .safe(
+            "BootstrapEngine",
+
+            () => {
+
+                this.start();
+
+                this.finish();
+            }
+        );
+};
+
+
+
+
+
+
+/* ==========================================================
+   B2.8 — DOM READY STARTUP
+   ========================================================== */
+
+document.addEventListener(
+    "DOMContentLoaded",
+
+    () => {
+
+        CampusWord2007Simulateur
+            .BootstrapEngine
+            .boot();
+    }
+);
+
+
+
+
+
+
+
+/* ==========================================================
+   B2.9 — BOOTSTRAP VALIDATION
+   ========================================================== */
+
+if (
+    !CampusWord2007Simulateur
+        .BootstrapEngine
+) {
+
+    throw new Error(
+        "Bootstrap Engine Missing"
+    );
+}
+
+
+
+
+
+
+
+/* ==========================================================
+   B3 — DOM MANAGER
+   CENTRAL DOM MANAGEMENT SYSTEM
+   ========================================================== */
+
+CampusWord2007Simulateur.DOMManager = {
+
+    initialized: false,
+
+    initialize() {
+
+        if (
+            this.initialized
+        ) {
+
+            return;
+        }
+
+        this.initialized = true;
+
+        CampusWord2007Simulateur
+            .Logger
+            .info(
+                "DOM Manager Initialized"
+            );
+    }
+};
+
+
+
+
+
+
+
+/* ==========================================================
+   B3.1 — DOM CACHE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .DOMManager
+    .cache =
+function () {
+
+    const registry =
+        CampusWord2007Simulateur
+            .Registry;
+
+    registry.registerDOM(
+        "root",
+        document.getElementById(
+            "campusword2007simulateur"
+        )
+    );
+
+    registry.registerDOM(
+        "pagesContainer",
+        document.getElementById(
+            "document-pages-container"
+        )
+    );
+
+    registry.registerDOM(
+        "pageTemplate",
+        document.getElementById(
+            "document-page-template"
+        )
+    );
+};
+
+
+
+
+
+
+/* ==========================================================
+   B3.2 — CREATE PAGE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .DOMManager
+    .createPage =
+function (
+    pageNumber
+) {
+
+    const template =
+        CampusWord2007Simulateur
+            .Registry
+            .getDOM(
+                "pageTemplate"
+            );
+
+    if (
+        !template
+    ) {
+
+        return null;
+    }
+
+    const fragment =
+        template.content.cloneNode(
+            true
+        );
+
+    const page =
+        fragment.querySelector(
+            ".document-page"
+        );
+
+    page.setAttribute(
+        "data-page-number",
+        pageNumber
+    );
+
+    return page;
+};
+
+
+
+
+
+
+
+/* ==========================================================
+   B3.3 — APPEND PAGE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .DOMManager
+    .appendPage =
+function (
+    pageElement
+) {
+
+    const container =
+        CampusWord2007Simulateur
+            .Registry
+            .getDOM(
+                "pagesContainer"
+            );
+
+    if (
+        !container ||
+        !pageElement
+    ) {
+
+        return;
+    }
+
+    container.appendChild(
+        pageElement
+    );
+};
+
+
+
+
+
+
+/* ==========================================================
+   B3.4 — CREATE FIRST PAGE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .DOMManager
+    .createFirstPage =
+function () {
+
+    const page =
+        this.createPage(
+            1
+        );
+
+    if (
+        !page
+    ) {
+
+        return;
+    }
+
+    this.appendPage(
+        page
+    );
+
+    CampusWord2007Simulateur
+        .state
+        .page
+        .currentPage = 1;
+
+    CampusWord2007Simulateur
+        .state
+        .page
+        .totalPages = 1;
+
+    CampusWord2007Simulateur
+        .state
+        .editor
+        .activePage = 1;
+
+    CampusWord2007Simulateur
+        .state
+        .editor
+        .totalPages = 1;
+};
+
+
+
+
+
+
+/* ==========================================================
+   B3.5 — CLEAR PAGES
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .DOMManager
+    .clearPages =
+function () {
+
+    const container =
+        CampusWord2007Simulateur
+            .Registry
+            .getDOM(
+                "pagesContainer"
+            );
+
+    if (
+        !container
+    ) {
+
+        return;
+    }
+
+    container.innerHTML = "";
+};
+
+
+
+
+
+
+/* ==========================================================
+   B3.6 — PAGE COUNT
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .DOMManager
+    .getPageCount =
+function () {
+
+    const container =
+        CampusWord2007Simulateur
+            .Registry
+            .getDOM(
+                "pagesContainer"
+            );
+
+    if (
+        !container
+    ) {
+
+        return 0;
+    }
+
+    return container
+        .querySelectorAll(
+            ".document-page"
+        )
+        .length;
+};
+
+
+
+
+
+/* ==========================================================
+   B3.7 — INITIALIZE DOCUMENT
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .DOMManager
+    .initializeDocument =
+function () {
+
+    this.cache();
+
+    this.clearPages();
+
+    this.createFirstPage();
+
+    CampusWord2007Simulateur
+        .Logger
+        .info(
+            "First Page Created"
+        );
+};
+
+
+
+
+
+
+/* ==========================================================
+   B3.8 — REGISTER WITH BOOTSTRAP
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .EventBus
+    .on(
+        "application:ready",
+
+        () => {
+
+            CampusWord2007Simulateur
+                .DOMManager
+                .initialize();
+
+            CampusWord2007Simulateur
+                .DOMManager
+                .initializeDocument();
+        }
+    );
+
+
+
+
+
+
+
+
+/* ==========================================================
+   B3.9 — DOM MANAGER VALIDATION
+   ========================================================== */
+
+if (
+    !CampusWord2007Simulateur
+        .DOMManager
+) {
+
+    throw new Error(
+        "DOM Manager Missing"
+    );
+}
+
+
+
+
+
+
 
 
 
