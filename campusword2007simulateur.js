@@ -4614,6 +4614,296 @@ if (
 
 
 
+/* ==========================================================
+   B6.2 — ACTIVE ELEMENT TRACKING
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .FocusEngine
+    .activeElementTracked =
+false;
+
+
+
+
+/* ==========================================================
+   B6.2.1 — GET ACTIVE ELEMENT
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .FocusEngine
+    .getActiveElement =
+function () {
+
+    return CampusWord2007Simulateur
+        .state
+        .focus
+        .activeElement;
+};
+
+
+
+
+
+/* ==========================================================
+   B6.2.2 — SET ACTIVE ELEMENT
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .FocusEngine
+    .setActiveElement =
+function (
+    element
+) {
+
+    CampusWord2007Simulateur
+        .state
+        .focus
+        .activeElement =
+            element || null;
+
+    return true;
+};
+
+
+
+
+
+/* ==========================================================
+   B6.2.3 — CLEAR ACTIVE ELEMENT
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .FocusEngine
+    .clearActiveElement =
+function () {
+
+    CampusWord2007Simulateur
+        .state
+        .focus
+        .activeElement =
+            null;
+};
+
+
+
+
+
+
+
+/* ==========================================================
+   B6.2.4 — HAS ACTIVE ELEMENT
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .FocusEngine
+    .hasActiveElement =
+function () {
+
+    return (
+
+        this.getActiveElement() !==
+        null
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   B6.2.5 — ACTIVE ELEMENT EXISTS
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .FocusEngine
+    .activeElementExists =
+function () {
+
+    const element =
+        this.getActiveElement();
+
+    if (
+        !element
+    ) {
+
+        return false;
+    }
+
+    return document.body.contains(
+        element
+    );
+};
+
+
+
+
+
+
+/* ==========================================================
+   B6.2.6 — GET ACTIVE ELEMENT ID
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .FocusEngine
+    .getActiveElementId =
+function () {
+
+    const element =
+        this.getActiveElement();
+
+    if (
+        !element
+    ) {
+
+        return null;
+    }
+
+    return (
+        element.id ||
+        null
+    );
+};
+
+
+
+
+
+
+
+
+/* ==========================================================
+   B6.2.7 — GET ACTIVE ELEMENT TAG
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .FocusEngine
+    .getActiveElementTag =
+function () {
+
+    const element =
+        this.getActiveElement();
+
+    if (
+        !element
+    ) {
+
+        return null;
+    }
+
+    return (
+        element.tagName ||
+        null
+    );
+};
+
+
+
+
+
+
+/* ==========================================================
+   B6.2.8 — ACTIVE ELEMENT VALIDATION
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .FocusEngine
+    .validateActiveElement =
+function () {
+
+    const element =
+        this.getActiveElement();
+
+    if (
+        element === null
+    ) {
+
+        return true;
+    }
+
+    return (
+        element instanceof
+        Element
+    );
+};
+
+
+
+
+
+
+/* ==========================================================
+   B6.2.9 — TRACKING INITIALIZATION
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .FocusEngine
+    .initializeActiveElementTracking =
+function () {
+
+    if (
+        this.activeElementTracked
+    ) {
+
+        return;
+    }
+
+    this.activeElementTracked =
+        true;
+
+    CampusWord2007Simulateur
+        .Logger
+        .info(
+            "Active Element Tracking Ready"
+        );
+};
+
+
+
+
+
+/* ==========================================================
+   B6.2.10 — ACTIVE ELEMENT TRACKING VALIDATION
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .FocusEngine
+    .validateActiveElementTracking =
+function () {
+
+    return (
+
+        this.validateFocusState() &&
+
+        this.validateActiveElement()
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   B6.2.11 — ACTIVE ELEMENT TRACKING READY
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .EventBus
+    .on(
+        "application:ready",
+
+        () => {
+
+            CampusWord2007Simulateur
+                .FocusEngine
+                .initializeActiveElementTracking();
+        }
+    );
+
+
+
 
 
 
