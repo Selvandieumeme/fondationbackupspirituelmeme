@@ -7997,6 +7997,269 @@ CampusWord2007Simulateur
 
 
 
+/* ==========================================================
+   B7.4 — SUSPEND LIFECYCLE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ApplicationLifecycleEngine
+    .suspendLifecycleReady =
+false;
+
+
+
+
+
+/* ==========================================================
+   B7.4.1 — ENTER SUSPEND STATE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ApplicationLifecycleEngine
+    .enterSuspendState =
+function () {
+
+    const state =
+        this.getApplicationState();
+
+    if (
+        state.suspended
+    ) {
+
+        return true;
+    }
+
+    state.suspended =
+        true;
+
+    CampusWord2007Simulateur
+        .EventBus
+        .emit(
+            "application:suspend"
+        );
+
+    return true;
+};
+
+
+
+
+
+/* ==========================================================
+   B7.4.2 — EXIT SUSPEND STATE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ApplicationLifecycleEngine
+    .exitSuspendState =
+function () {
+
+    const state =
+        this.getApplicationState();
+
+    if (
+        !state.suspended
+    ) {
+
+        return true;
+    }
+
+    state.suspended =
+        false;
+
+    CampusWord2007Simulateur
+        .EventBus
+        .emit(
+            "application:resume"
+        );
+
+    return true;
+};
+
+
+
+
+
+/* ==========================================================
+   B7.4.3 — IS SUSPENDED
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ApplicationLifecycleEngine
+    .isSuspended =
+function () {
+
+    return (
+
+        this
+            .getApplicationState()
+            .suspended ===
+        true
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   B7.4.4 — CAN SUSPEND
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ApplicationLifecycleEngine
+    .canSuspend =
+function () {
+
+    const state =
+        this.getApplicationState();
+
+    return (
+
+        state.initialized &&
+
+        !state.destroyed
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   B7.4.5 — CAN RESUME
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ApplicationLifecycleEngine
+    .canResume =
+function () {
+
+    return (
+        this.isSuspended()
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   B7.4.6 — SUSPEND LIFECYCLE VALIDATION
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ApplicationLifecycleEngine
+    .validateSuspendLifecycle =
+function () {
+
+    const state =
+        this.getApplicationState();
+
+    return (
+
+        typeof
+        state.suspended ===
+        "boolean" &&
+
+        typeof
+        this.enterSuspendState ===
+        "function" &&
+
+        typeof
+        this.exitSuspendState ===
+        "function" &&
+
+        typeof
+        this.isSuspended ===
+        "function"
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   B7.4.7 — INITIALIZE SUSPEND LIFECYCLE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ApplicationLifecycleEngine
+    .initializeSuspendLifecycle =
+function () {
+
+    if (
+        this.suspendLifecycleReady
+    ) {
+
+        return;
+    }
+
+    this.suspendLifecycleReady =
+        true;
+
+    CampusWord2007Simulateur
+        .Logger
+        .info(
+            "Suspend Lifecycle Ready"
+        );
+};
+
+
+
+
+
+/* ==========================================================
+   B7.4.8 — SUSPEND LIFECYCLE STATUS
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ApplicationLifecycleEngine
+    .isSuspendLifecycleReady =
+function () {
+
+    return (
+
+        this
+            .suspendLifecycleReady ===
+        true
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   B7.4.9 — SUSPEND LIFECYCLE HOOK
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .EventBus
+    .on(
+
+        "application:ready",
+
+        () => {
+
+            CampusWord2007Simulateur
+                .ApplicationLifecycleEngine
+                .initializeSuspendLifecycle();
+        }
+    );
+
+
+
+
+
+
+
+
 
 
 
