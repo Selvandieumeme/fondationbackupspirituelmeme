@@ -4905,5 +4905,349 @@ CampusWord2007Simulateur
 
 
 
+/* ==========================================================
+   B6.3 — FOCUS AREA TRACKING
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .FocusEngine
+    .focusAreaTrackingReady =
+false;
+
+
+
+
+
+/* ==========================================================
+   B6.3.1 — GET FOCUSED AREA
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .FocusEngine
+    .getFocusedArea =
+function () {
+
+    return CampusWord2007Simulateur
+        .state
+        .focus
+        .focusedArea;
+};
+
+
+
+
+
+/* ==========================================================
+   B6.3.2 — GET LAST FOCUSED AREA
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .FocusEngine
+    .getLastFocusedArea =
+function () {
+
+    return CampusWord2007Simulateur
+        .state
+        .focus
+        .lastFocusedArea;
+};
+
+
+
+
+/* ==========================================================
+   B6.3.3 — SET FOCUSED AREA
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .FocusEngine
+    .setFocusedArea =
+function (
+    area
+) {
+
+    const focusState =
+        CampusWord2007Simulateur
+            .state
+            .focus;
+
+    if (
+        focusState.focusedArea !==
+        area
+    ) {
+
+        focusState.lastFocusedArea =
+            focusState.focusedArea;
+    }
+
+    focusState.focusedArea =
+        area || null;
+
+    return true;
+};
+
+
+
+
+
+
+/* ==========================================================
+   B6.3.4 — CLEAR FOCUSED AREA
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .FocusEngine
+    .clearFocusedArea =
+function () {
+
+    const focusState =
+        CampusWord2007Simulateur
+            .state
+            .focus;
+
+    focusState.lastFocusedArea =
+        focusState.focusedArea;
+
+    focusState.focusedArea =
+        null;
+};
+
+
+
+
+
+
+
+/* ==========================================================
+   B6.3.5 — RESTORE LAST AREA
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .FocusEngine
+    .restoreLastArea =
+function () {
+
+    const focusState =
+        CampusWord2007Simulateur
+            .state
+            .focus;
+
+    if (
+        !focusState.lastFocusedArea
+    ) {
+
+        return false;
+    }
+
+    focusState.focusedArea =
+        focusState.lastFocusedArea;
+
+    return true;
+};
+
+
+
+
+
+/* ==========================================================
+   B6.3.6 — HAS FOCUSED AREA
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .FocusEngine
+    .hasFocusedArea =
+function () {
+
+    return (
+
+        this.getFocusedArea() !==
+        null
+
+    );
+};
+
+
+
+
+
+
+/* ==========================================================
+   B6.3.7 — HAS LAST FOCUSED AREA
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .FocusEngine
+    .hasLastFocusedArea =
+function () {
+
+    return (
+
+        this.getLastFocusedArea() !==
+        null
+
+    );
+};
+
+
+
+
+
+
+
+
+/* ==========================================================
+   B6.3.8 — AREA MATCH CHECK
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .FocusEngine
+    .isFocusedArea =
+function (
+    area
+) {
+
+    return (
+
+        this.getFocusedArea() ===
+        area
+
+    );
+};
+
+
+
+
+
+
+/* ==========================================================
+   B6.3.9 — FOCUS AREA VALIDATION
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .FocusEngine
+    .validateFocusedArea =
+function () {
+
+    const area =
+        this.getFocusedArea();
+
+    if (
+        area === null
+    ) {
+
+        return true;
+    }
+
+    return (
+        typeof area ===
+        "string"
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   B6.3.10 — LAST AREA VALIDATION
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .FocusEngine
+    .validateLastFocusedArea =
+function () {
+
+    const area =
+        this.getLastFocusedArea();
+
+    if (
+        area === null
+    ) {
+
+        return true;
+    }
+
+    return (
+        typeof area ===
+        "string"
+    );
+};
+
+
+
+
+
+
+/* ==========================================================
+   B6.3.11 — INITIALIZE AREA TRACKING
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .FocusEngine
+    .initializeFocusAreaTracking =
+function () {
+
+    if (
+        this.focusAreaTrackingReady
+    ) {
+
+        return;
+    }
+
+    this.focusAreaTrackingReady =
+        true;
+
+    CampusWord2007Simulateur
+        .Logger
+        .info(
+            "Focus Area Tracking Ready"
+        );
+};
+
+
+
+
+/* ==========================================================
+   B6.3.12 — TRACKING VALIDATION
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .FocusEngine
+    .validateFocusAreaTracking =
+function () {
+
+    return (
+
+        this.validateFocusedArea() &&
+
+        this.validateLastFocusedArea()
+
+    );
+};
+
+
+
+
+
+
+/* ==========================================================
+   B6.3.13 — TRACKING READY HOOK
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .EventBus
+    .on(
+        "application:ready",
+
+        () => {
+
+            CampusWord2007Simulateur
+                .FocusEngine
+                .initializeFocusAreaTracking();
+        }
+    );
+
+
+
 
 
