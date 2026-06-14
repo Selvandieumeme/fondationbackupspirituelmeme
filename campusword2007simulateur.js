@@ -5292,358 +5292,38 @@ CampusWord2007Simulateur
 
 
 
-
 /* ==========================================================
-   B6.4 — FOCUS EVENTS
-   FOCUS EVENT DISPATCH SYSTEM
+   B6.4 — FOCUS SET ENGINE
    ========================================================== */
 
 CampusWord2007Simulateur
     .FocusEngine
-    .attachEvents =
-function () {
-
-    document.addEventListener(
-
-        "focusin",
-
-        event => {
-
-            const target =
-                event.target;
-
-            CampusWord2007Simulateur
-                .EventBus
-                .emit(
-
-                    "focus:in",
-
-                    {
-
-                        element:
-                            target
-                    }
-                );
-
-            CampusWord2007Simulateur
-                .Logger
-                .info(
-                    "Focus In"
-                );
-        }
-    );
-
-    document.addEventListener(
-
-        "focusout",
-
-        event => {
-
-            const target =
-                event.target;
-
-            CampusWord2007Simulateur
-                .EventBus
-                .emit(
-
-                    "focus:out",
-
-                    {
-
-                        element:
-                            target
-                    }
-                );
-
-            CampusWord2007Simulateur
-                .Logger
-                .info(
-                    "Focus Out"
-                );
-        }
-    );
-};
-
+    .focusSetReady =
+false;
 
 
 
 
 
 /* ==========================================================
-   B6.4.1 — APPLICATION FOCUS EVENT
-   ========================================================== */
-
-window.addEventListener(
-
-    "focus",
-
-    () => {
-
-        CampusWord2007Simulateur
-            .EventBus
-            .emit(
-                "application:focus"
-            );
-    }
-);
-
-
-
-
-/* ==========================================================
-   B6.4.2 — APPLICATION BLUR EVENT
-   ========================================================== */
-
-window.addEventListener(
-
-    "blur",
-
-    () => {
-
-        CampusWord2007Simulateur
-            .EventBus
-            .emit(
-                "application:blur"
-            );
-    }
-);
-
-
-
-
-
-
-/* ==========================================================
-   B6.4.3 — FOCUS CHANGE EVENT
+   B6.4.1 — SET FOCUS
    ========================================================== */
 
 CampusWord2007Simulateur
     .FocusEngine
-    .notifyFocusChange =
+    .setFocus =
 function (
-    previousElement,
-    currentElement
+    element,
+    area
 ) {
 
-    CampusWord2007Simulateur
-        .EventBus
-        .emit(
-
-            "focus:changed",
-
-            {
-
-                previous:
-                    previousElement,
-
-                current:
-                    currentElement
-            }
-        );
-};
-
-
-
-
-
-
-/* ==========================================================
-   B6.4.4 — REGISTER EVENTS
-   ========================================================== */
-
-CampusWord2007Simulateur
-    .EventBus
-    .on(
-
-        "application:ready",
-
-        () => {
-
-            CampusWord2007Simulateur
-                .FocusEngine
-                .attachEvents();
-        }
+    this.setActiveElement(
+        element || null
     );
 
-
-
-
-
-
-/* ==========================================================
-   B6.4.5 — FOCUS EVENTS VALIDATION
-   ========================================================== */
-
-if (
-
-    typeof
-    CampusWord2007Simulateur
-        .FocusEngine
-        .attachEvents !==
-
-    "function"
-
-) {
-
-    throw new Error(
-
-        "Focus Events Missing"
-
+    this.setFocusedArea(
+        area || null
     );
-}
-
-
-
-
-
-
-/* ==========================================================
-   B6.5 — FOCUS ENGINE VALIDATION
-   FOCUS SYSTEM VALIDATION LAYER
-   ========================================================== */
-
-CampusWord2007Simulateur
-    .FocusEngine
-    .validate =
-function () {
-
-    return (
-
-        this.validateFocusState() &&
-
-        this.validateActiveElementTracking() &&
-
-        this.validateFocusAreaTracking()
-
-    );
-};
-
-
-
-
-
-
-/* ==========================================================
-   B6.5.1 — FOCUS ENGINE READY STATE
-   ========================================================== */
-
-CampusWord2007Simulateur
-    .FocusEngine
-    .isReady =
-function () {
-
-    return (
-
-        this.initialized ===
-        true
-
-    );
-};
-
-
-
-
-
-/* ==========================================================
-   B6.5.2 — ACTIVE ELEMENT TRACKING READY
-   ========================================================== */
-
-CampusWord2007Simulateur
-    .FocusEngine
-    .isActiveElementTrackingReady =
-function () {
-
-    return (
-
-        typeof this.trackActiveElement ===
-        "function"
-
-    );
-};
-
-
-
-
-
-
-
-/* ==========================================================
-   B6.5.3 — FOCUS AREA TRACKING READY
-   ========================================================== */
-
-CampusWord2007Simulateur
-    .FocusEngine
-    .isFocusAreaTrackingReady =
-function () {
-
-    return (
-
-        typeof this.trackFocusArea ===
-        "function"
-
-    );
-};
-
-
-
-
-
-
-
-
-/* ==========================================================
-   B6.5.4 — COMPLETE FOCUS VALIDATION
-   ========================================================== */
-
-CampusWord2007Simulateur
-    .FocusEngine
-    .validate =
-function () {
-
-    return (
-
-        this.isReady() &&
-
-        this
-            .isActiveElementTrackingReady() &&
-
-        this
-            .isFocusAreaTrackingReady()
-
-    );
-};
-
-
-
-
-/* ==========================================================
-   B6.6 — FOCUS ENGINE REGISTRATION
-   ========================================================== */
-
-CampusWord2007Simulateur
-    .FocusEngine
-    .register =
-function () {
-
-    if (
-
-        !CampusWord2007Simulateur
-            .Registry
-
-    ) {
-
-        return false;
-    }
-
-    CampusWord2007Simulateur
-        .Registry
-        .registerEngine(
-
-            "FocusEngine",
-
-            CampusWord2007Simulateur
-                .FocusEngine
-        );
 
     return true;
 };
@@ -5653,105 +5333,232 @@ function () {
 
 
 
+
 /* ==========================================================
-   B6.6.1 — REGISTRATION STATUS
+   B6.5 — FOCUS CLEAR ENGINE
    ========================================================== */
 
 CampusWord2007Simulateur
     .FocusEngine
-    .isRegistered =
+    .focusClearReady =
+false;
+
+
+
+
+
+/* ==========================================================
+   B6.5.1 — CLEAR FOCUS
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .FocusEngine
+    .clearFocus =
 function () {
 
-    return
+    this.clearActiveElement();
 
-        CampusWord2007Simulateur
-            .Registry
-            .getEngine(
+    this.clearFocusedArea();
 
-                "FocusEngine"
-            )
-
-        ===
-
-        CampusWord2007Simulateur
-            .FocusEngine;
+    return true;
 };
 
 
 
 
 
-
 /* ==========================================================
-   B6.6.2 — SAFE REGISTRATION
+   B6.6 — FOCUS RESTORE ENGINE
    ========================================================== */
 
 CampusWord2007Simulateur
     .FocusEngine
-    .safeRegister =
+    .focusRestoreReady =
+false;
+
+
+
+
+
+/* ==========================================================
+   B6.6.1 — RESTORE ACTIVE ELEMENT
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .FocusEngine
+    .restoreActiveElement =
+function () {
+
+    const element =
+        this.getActiveElement();
+
+    if (
+        !element
+    ) {
+
+        return false;
+    }
+
+    if (
+        !document.body.contains(
+            element
+        )
+    ) {
+
+        return false;
+    }
+
+    if (
+        typeof element.focus ===
+        "function"
+    ) {
+
+        element.focus();
+    }
+
+    return true;
+};
+ 
+
+
+
+
+/* ==========================================================
+   B6.6.2 — RESTORE FOCUSED AREA
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .FocusEngine
+    .restoreFocusedArea =
+function () {
+
+    return this.restoreLastArea();
+};
+
+
+
+
+
+/* ==========================================================
+   B6.6.3 — RESTORE COMPLETE FOCUS
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .FocusEngine
+    .restoreFocus =
+function () {
+
+    const areaRestored =
+        this.restoreFocusedArea();
+
+    const elementRestored =
+        this.restoreActiveElement();
+
+    return (
+        areaRestored ||
+        elementRestored
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   B6.6.4 — CAN RESTORE FOCUS
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .FocusEngine
+    .canRestoreFocus =
+function () {
+
+    return (
+
+        this.hasLastFocusedArea() ||
+
+        this.hasActiveElement()
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   B6.6.5 — INITIALIZE RESTORE ENGINE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .FocusEngine
+    .initializeFocusRestoreEngine =
 function () {
 
     if (
-
-        this.isRegistered()
-
+        this.focusRestoreReady
     ) {
 
-        return true;
+        return;
     }
 
-    return this.register();
+    this.focusRestoreReady =
+        true;
+
+    CampusWord2007Simulateur
+        .Logger
+        .info(
+            "Focus Restore Engine Ready"
+        );
 };
 
 
 
 
 
+/* ==========================================================
+   B6.6.6 — RESTORE ENGINE VALIDATION
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .FocusEngine
+    .validateFocusRestoreEngine =
+function () {
+
+    return (
+
+        typeof this.restoreFocus ===
+        "function" &&
+
+        typeof this.restoreActiveElement ===
+        "function" &&
+
+        typeof this.restoreFocusedArea ===
+        "function"
+
+    );
+};
+
+
 
 
 
 /* ==========================================================
-   B6.6.3 — AUTO REGISTRATION
+   B6.6.7 — RESTORE READY HOOK
    ========================================================== */
 
 CampusWord2007Simulateur
     .EventBus
     .on(
-
         "application:ready",
 
         () => {
 
             CampusWord2007Simulateur
                 .FocusEngine
-                .safeRegister();
+                .initializeFocusRestoreEngine();
         }
     );
-
-
-
-
-
-
-/* ==========================================================
-   B6.6.4 — REGISTRATION VALIDATION
-   ========================================================== */
-
-CampusWord2007Simulateur
-    .FocusEngine
-    .isRegistrationReady =
-function () {
-
-    return this.isRegistered();
-};
-
-
-
-
-
-
-
-
 
 
 
