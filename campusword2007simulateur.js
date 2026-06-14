@@ -8761,5 +8761,244 @@ function () {
 
 
 
+/* ==========================================================
+   B7.7 — LIFECYCLE READY HOOK
+   ========================================================== */
 
+CampusWord2007Simulateur
+    .ApplicationLifecycleEngine
+    .lifecycleHookReady =
+false;
+
+
+
+
+
+/* ==========================================================
+   B7.7.1 — IS LIFECYCLE READY
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ApplicationLifecycleEngine
+    .isLifecycleReady =
+function () {
+
+    return (
+
+        this.isLifecycleStateReady() &&
+
+        this.isStartupLifecycleReady() &&
+
+        this.isReadyLifecycleReady() &&
+
+        this.isSuspendLifecycleReady() &&
+
+        this.isDestroyLifecycleReady() &&
+
+        this.isLifecycleValidationReady()
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   B7.7.2 — EMIT LIFECYCLE READY
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ApplicationLifecycleEngine
+    .emitLifecycleReady =
+function () {
+
+    if (
+
+        !this.isLifecycleReady()
+
+    ) {
+
+        return false;
+    }
+
+    CampusWord2007Simulateur
+        .EventBus
+        .emit(
+            "lifecycle:ready"
+        );
+
+    return true;
+};
+
+
+
+
+
+/* ==========================================================
+   B7.7.3 — INITIALIZE READY HOOK
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ApplicationLifecycleEngine
+    .initializeLifecycleReadyHook =
+function () {
+
+    if (
+
+        this.lifecycleHookReady
+
+    ) {
+
+        return;
+    }
+
+    this.lifecycleHookReady =
+        true;
+
+    this.emitLifecycleReady();
+
+    CampusWord2007Simulateur
+        .Logger
+        .info(
+            "Lifecycle Ready Hook Initialized"
+        );
+};
+
+
+
+
+
+/* ==========================================================
+   B7.7.4 — READY HOOK STATUS
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ApplicationLifecycleEngine
+    .isLifecycleHookReady =
+function () {
+
+    return (
+
+        this.lifecycleHookReady ===
+        true
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   B7.7.5 — GET LIFECYCLE STATUS
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ApplicationLifecycleEngine
+    .getLifecycleStatus =
+function () {
+
+    return {
+
+        state:
+            this.isLifecycleStateReady(),
+
+        startup:
+            this.isStartupLifecycleReady(),
+
+        ready:
+            this.isReadyLifecycleReady(),
+
+        suspend:
+            this.isSuspendLifecycleReady(),
+
+        destroy:
+            this.isDestroyLifecycleReady(),
+
+        validation:
+            this.isLifecycleValidationReady(),
+
+        lifecycle:
+            this.isLifecycleReady()
+    };
+};
+
+
+
+
+
+/* ==========================================================
+   B7.7.6 — READY HOOK VALIDATION
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ApplicationLifecycleEngine
+    .validateLifecycleReadyHook =
+function () {
+
+    return (
+
+        typeof
+        this.isLifecycleReady ===
+        "function" &&
+
+        typeof
+        this.emitLifecycleReady ===
+        "function" &&
+
+        typeof
+        this.getLifecycleStatus ===
+        "function"
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   B7.7.7 — READY HOOK INITIALIZATION EVENT
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .EventBus
+    .on(
+
+        "application:ready",
+
+        () => {
+
+            CampusWord2007Simulateur
+                .ApplicationLifecycleEngine
+                .initializeLifecycleReadyHook();
+        }
+    );
+
+
+
+
+
+/* ==========================================================
+   B7.7.8 — READY HOOK REPORT
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ApplicationLifecycleEngine
+    .getLifecycleReadyReport =
+function () {
+
+    return {
+
+        hookReady:
+            this.isLifecycleHookReady(),
+
+        lifecycleReady:
+            this.isLifecycleReady(),
+
+        valid:
+            this.validateLifecycleReadyHook()
+    };
+};
 
