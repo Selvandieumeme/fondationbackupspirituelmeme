@@ -5524,3 +5524,189 @@ function () {
 
 
 
+
+
+/* ==========================================================
+   B6.5.3 — FOCUS AREA TRACKING READY
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .FocusEngine
+    .isFocusAreaTrackingReady =
+function () {
+
+    return (
+
+        typeof this.trackFocusArea ===
+        "function"
+
+    );
+};
+
+
+
+
+
+
+
+
+/* ==========================================================
+   B6.5.4 — COMPLETE FOCUS VALIDATION
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .FocusEngine
+    .validate =
+function () {
+
+    return (
+
+        this.isReady() &&
+
+        this
+            .isActiveElementTrackingReady() &&
+
+        this
+            .isFocusAreaTrackingReady()
+
+    );
+};
+
+
+
+
+/* ==========================================================
+   B6.6 — FOCUS ENGINE REGISTRATION
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .FocusEngine
+    .register =
+function () {
+
+    if (
+
+        !CampusWord2007Simulateur
+            .Registry
+
+    ) {
+
+        return false;
+    }
+
+    CampusWord2007Simulateur
+        .Registry
+        .registerEngine(
+
+            "FocusEngine",
+
+            CampusWord2007Simulateur
+                .FocusEngine
+        );
+
+    return true;
+};
+
+
+
+
+
+
+/* ==========================================================
+   B6.6.1 — REGISTRATION STATUS
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .FocusEngine
+    .isRegistered =
+function () {
+
+    return
+
+        CampusWord2007Simulateur
+            .Registry
+            .getEngine(
+
+                "FocusEngine"
+            )
+
+        ===
+
+        CampusWord2007Simulateur
+            .FocusEngine;
+};
+
+
+
+
+
+
+/* ==========================================================
+   B6.6.2 — SAFE REGISTRATION
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .FocusEngine
+    .safeRegister =
+function () {
+
+    if (
+
+        this.isRegistered()
+
+    ) {
+
+        return true;
+    }
+
+    return this.register();
+};
+
+
+
+
+
+
+
+
+/* ==========================================================
+   B6.6.3 — AUTO REGISTRATION
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .EventBus
+    .on(
+
+        "application:ready",
+
+        () => {
+
+            CampusWord2007Simulateur
+                .FocusEngine
+                .safeRegister();
+        }
+    );
+
+
+
+
+
+
+/* ==========================================================
+   B6.6.4 — REGISTRATION VALIDATION
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .FocusEngine
+    .isRegistrationReady =
+function () {
+
+    return this.isRegistered();
+};
+
+
+
+
+
+
+
