@@ -5456,4 +5456,28 @@ if (
 
 
 
+/* ==========================================================
+   B6.5 — FOCUS ENGINE VALIDATION
+   FOCUS SYSTEM VALIDATION LAYER
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .FocusEngine
+    .validate =
+function () {
+
+    return (
+
+        this.validateFocusState() &&
+
+        this.validateActiveElementTracking() &&
+
+        this.validateFocusAreaTracking()
+
+    );
+};
+
+
+
+
 
