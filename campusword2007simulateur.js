@@ -6076,5 +6076,315 @@ CampusWord2007Simulateur
 
 
 
+/* ==========================================================
+   B6.9 — WINDOW FOCUS ENGINE
+   ========================================================== */
 
+CampusWord2007Simulateur
+    .FocusEngine
+    .windowFocusReady =
+false;
+
+
+
+
+
+/* ==========================================================
+   B6.9.1 — HANDLE WINDOW FOCUS
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .FocusEngine
+    .handleWindowFocus =
+function () {
+
+    this.windowFocused =
+        true;
+
+    CampusWord2007Simulateur
+        .EventBus
+        .emit(
+            "window:focus"
+        );
+};
+
+
+
+
+
+/* ==========================================================
+   B6.9.2 — IS WINDOW FOCUSED
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .FocusEngine
+    .isWindowFocused =
+function () {
+
+    return (
+        this.windowFocused ===
+        true
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   B6.9.3 — REGISTER WINDOW FOCUS
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .FocusEngine
+    .registerWindowFocus =
+function () {
+
+    window.addEventListener(
+
+        "focus",
+
+        () => {
+
+            this.handleWindowFocus();
+        }
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   B6.9.4 — INITIALIZE WINDOW FOCUS ENGINE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .FocusEngine
+    .initializeWindowFocusEngine =
+function () {
+
+    if (
+        this.windowFocusReady
+    ) {
+
+        return;
+    }
+
+    this.registerWindowFocus();
+
+    this.windowFocusReady =
+        true;
+
+    CampusWord2007Simulateur
+        .Logger
+        .info(
+            "Window Focus Engine Ready"
+        );
+};
+
+
+
+
+
+/* ==========================================================
+   B6.9.5 — WINDOW FOCUS VALIDATION
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .FocusEngine
+    .validateWindowFocusEngine =
+function () {
+
+    return (
+
+        this.windowFocusReady ===
+        true &&
+
+        typeof
+        this.handleWindowFocus ===
+        "function"
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   B6.9.6 — WINDOW FOCUS READY HOOK
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .EventBus
+    .on(
+
+        "application:ready",
+
+        () => {
+
+            CampusWord2007Simulateur
+                .FocusEngine
+                .initializeWindowFocusEngine();
+        }
+    );
+
+
+
+
+
+/* ==========================================================
+   B6.10 — WINDOW BLUR ENGINE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .FocusEngine
+    .windowBlurReady =
+false;
+
+
+
+
+
+/* ==========================================================
+   B6.10.1 — HANDLE WINDOW BLUR
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .FocusEngine
+    .handleWindowBlur =
+function () {
+
+    this.windowFocused =
+        false;
+
+    CampusWord2007Simulateur
+        .EventBus
+        .emit(
+            "window:blur"
+        );
+};
+
+
+
+
+
+/* ==========================================================
+   B6.10.2 — IS WINDOW BLURRED
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .FocusEngine
+    .isWindowBlurred =
+function () {
+
+    return (
+        this.windowFocused ===
+        false
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   B6.10.3 — REGISTER WINDOW BLUR
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .FocusEngine
+    .registerWindowBlur =
+function () {
+
+    window.addEventListener(
+
+        "blur",
+
+        () => {
+
+            this.handleWindowBlur();
+        }
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   B6.10.4 — INITIALIZE WINDOW BLUR ENGINE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .FocusEngine
+    .initializeWindowBlurEngine =
+function () {
+
+    if (
+        this.windowBlurReady
+    ) {
+
+        return;
+    }
+
+    this.registerWindowBlur();
+
+    this.windowBlurReady =
+        true;
+
+    CampusWord2007Simulateur
+        .Logger
+        .info(
+            "Window Blur Engine Ready"
+        );
+};
+
+
+
+
+
+/* ==========================================================
+   B6.10.5 — WINDOW BLUR VALIDATION
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .FocusEngine
+    .validateWindowBlurEngine =
+function () {
+
+    return (
+
+        this.windowBlurReady ===
+        true &&
+
+        typeof
+        this.handleWindowBlur ===
+        "function"
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   B6.10.6 — WINDOW BLUR READY HOOK
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .EventBus
+    .on(
+
+        "application:ready",
+
+        () => {
+
+            CampusWord2007Simulateur
+                .FocusEngine
+                .initializeWindowBlurEngine();
+        }
+    );
 
