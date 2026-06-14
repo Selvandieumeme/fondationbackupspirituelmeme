@@ -1709,3 +1709,386 @@ if (
 
 
 
+
+/* ==========================================================
+   B1 — REGISTRY MANAGER
+   CENTRAL APPLICATION REGISTRY
+   ========================================================== */
+
+CampusWord2007Simulateur.Registry = {
+
+    initialized: false,
+
+    engines: {},
+
+    modules: {},
+
+    services: {},
+
+    dom: {},
+
+    components: {},
+
+    initialize() {
+
+        if (this.initialized) {
+
+            return;
+        }
+
+        this.initialized = true;
+
+        CampusWord2007Simulateur
+            .Logger
+            .info(
+                "Registry Initialized"
+            );
+    }
+};
+
+
+
+
+
+
+/* ==========================================================
+   B1.1 — ENGINE REGISTRY
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .Registry
+    .registerEngine =
+function (
+    name,
+    engine
+) {
+
+    if (
+        !name ||
+        !engine
+    ) {
+
+        return false;
+    }
+
+    this.engines[name] =
+        engine;
+
+    return true;
+};
+
+CampusWord2007Simulateur
+    .Registry
+    .getEngine =
+function (
+    name
+) {
+
+    return (
+        this.engines[name] ||
+        null
+    );
+};
+
+
+
+
+
+
+/* ==========================================================
+   B1.2 — MODULE REGISTRY
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .Registry
+    .registerModule =
+function (
+    name,
+    module
+) {
+
+    if (
+        !name ||
+        !module
+    ) {
+
+        return false;
+    }
+
+    this.modules[name] =
+        module;
+
+    return true;
+};
+
+CampusWord2007Simulateur
+    .Registry
+    .getModule =
+function (
+    name
+) {
+
+    return (
+        this.modules[name] ||
+        null
+    );
+};
+
+
+
+
+
+
+
+/* ==========================================================
+   B1.3 — SERVICE REGISTRY
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .Registry
+    .registerService =
+function (
+    name,
+    service
+) {
+
+    if (
+        !name ||
+        !service
+    ) {
+
+        return false;
+    }
+
+    this.services[name] =
+        service;
+
+    return true;
+};
+
+CampusWord2007Simulateur
+    .Registry
+    .getService =
+function (
+    name
+) {
+
+    return (
+        this.services[name] ||
+        null
+    );
+};
+
+
+
+
+
+
+/* ==========================================================
+   B1.4 — DOM REGISTRY
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .Registry
+    .registerDOM =
+function (
+    name,
+    element
+) {
+
+    if (
+        !name ||
+        !element
+    ) {
+
+        return false;
+    }
+
+    this.dom[name] =
+        element;
+
+    return true;
+};
+
+CampusWord2007Simulateur
+    .Registry
+    .getDOM =
+function (
+    name
+) {
+
+    return (
+        this.dom[name] ||
+        null
+    );
+};
+
+
+
+
+
+
+
+/* ==========================================================
+   B1.5 — COMPONENT REGISTRY
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .Registry
+    .registerComponent =
+function (
+    name,
+    component
+) {
+
+    if (
+        !name ||
+        !component
+    ) {
+
+        return false;
+    }
+
+    this.components[name] =
+        component;
+
+    return true;
+};
+
+CampusWord2007Simulateur
+    .Registry
+    .getComponent =
+function (
+    name
+) {
+
+    return (
+        this.components[name] ||
+        null
+    );
+};
+
+
+
+
+
+
+/* ==========================================================
+   B1.6 — REGISTRY EXISTENCE CHECK
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .Registry
+    .has =
+function (
+    category,
+    name
+) {
+
+    const group =
+        this[category];
+
+    if (
+        !group
+    ) {
+
+        return false;
+    }
+
+    return (
+        name in group
+    );
+};
+
+
+
+
+
+
+
+
+
+/* ==========================================================
+   B1.7 — REMOVE REGISTRY ENTRY
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .Registry
+    .remove =
+function (
+    category,
+    name
+) {
+
+    const group =
+        this[category];
+
+    if (
+        !group
+    ) {
+
+        return false;
+    }
+
+    delete group[name];
+
+    return true;
+};
+
+
+
+
+
+
+
+/* ==========================================================
+   B1.8 — CLEAR REGISTRY
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .Registry
+    .clear =
+function () {
+
+    this.engines = {};
+
+    this.modules = {};
+
+    this.services = {};
+
+    this.dom = {};
+
+    this.components = {};
+};
+
+
+
+
+
+
+/* ==========================================================
+   B1.9 — REGISTRY VALIDATION
+   ========================================================== */
+
+if (
+    !CampusWord2007Simulateur
+        .Registry
+) {
+
+    throw new Error(
+        "Registry Manager Missing"
+    );
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
