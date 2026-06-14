@@ -2798,6 +2798,533 @@ if (
 
 
 
+/* ==========================================================
+   B4 — PAGE MANAGER
+   DOCUMENT PAGE MANAGEMENT SYSTEM
+   ========================================================== */
+
+CampusWord2007Simulateur.PageManager = {
+
+    initialized: false,
+
+    initialize() {
+
+        if (
+            this.initialized
+        ) {
+
+            return;
+        }
+
+        this.initialized = true;
+
+        CampusWord2007Simulateur
+            .Logger
+            .info(
+                "Page Manager Initialized"
+            );
+    }
+};
+
+
+
+
+
+
+
+
+/* ==========================================================
+   B4.1 — GET PAGE CONTAINER
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PageManager
+    .getContainer =
+function () {
+
+    return CampusWord2007Simulateur
+        .Registry
+        .getDOM(
+            "pagesContainer"
+        );
+};
+
+
+
+
+
+
+
+/* ==========================================================
+   B4.2 — GET PAGE TEMPLATE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PageManager
+    .getTemplate =
+function () {
+
+    return CampusWord2007Simulateur
+        .Registry
+        .getDOM(
+            "pageTemplate"
+        );
+};
+
+
+
+
+
+
+
+
+
+/* ==========================================================
+   B4.3 — GET ALL PAGES
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PageManager
+    .getPages =
+function () {
+
+    const container =
+        this.getContainer();
+
+    if (
+        !container
+    ) {
+
+        return [];
+    }
+
+    return Array.from(
+        container.querySelectorAll(
+            ".document-page"
+        )
+    );
+};
+
+
+
+
+
+
+
+
+
+/* ==========================================================
+   B4.4 — GET PAGE COUNT
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PageManager
+    .getPageCount =
+function () {
+
+    return this
+        .getPages()
+        .length;
+};
+
+
+
+
+
+
+
+
+/* ==========================================================
+   B4.5 — GET PAGE BY NUMBER
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PageManager
+    .getPage =
+function (
+    pageNumber
+) {
+
+    return document
+        .querySelector(
+            '.document-page[data-page-number="' +
+            pageNumber +
+            '"]'
+        );
+};
+
+
+
+
+
+
+
+
+/* ==========================================================
+   B4.6 — CREATE PAGE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PageManager
+    .createPage =
+function (
+    pageNumber
+) {
+
+    const template =
+        this.getTemplate();
+
+    if (
+        !template
+    ) {
+
+        return null;
+    }
+
+    const fragment =
+        template.content
+            .cloneNode(
+                true
+            );
+
+    const page =
+        fragment.querySelector(
+            ".document-page"
+        );
+
+    page.setAttribute(
+        "data-page-number",
+        pageNumber
+    );
+
+    return page;
+};
+
+
+
+
+
+
+
+
+
+/* ==========================================================
+   B4.7 — APPEND PAGE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PageManager
+    .appendPage =
+function (
+    pageElement
+) {
+
+    const container =
+        this.getContainer();
+
+    if (
+        !container ||
+        !pageElement
+    ) {
+
+        return;
+    }
+
+    container.appendChild(
+        pageElement
+    );
+};
+
+
+
+
+
+
+
+
+
+/* ==========================================================
+   B4.8 — ADD NEW PAGE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PageManager
+    .addPage =
+function () {
+
+    const nextPageNumber =
+        this.getPageCount() + 1;
+
+    const page =
+        this.createPage(
+            nextPageNumber
+        );
+
+    if (
+        !page
+    ) {
+
+        return null;
+    }
+
+    this.appendPage(
+        page
+    );
+
+    CampusWord2007Simulateur
+        .state
+        .page
+        .totalPages =
+            nextPageNumber;
+
+    CampusWord2007Simulateur
+        .state
+        .editor
+        .totalPages =
+            nextPageNumber;
+
+    return page;
+};
+
+
+
+
+
+
+
+
+
+
+
+/* ==========================================================
+   B4.9 — REMOVE PAGE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PageManager
+    .removePage =
+function (
+    pageNumber
+) {
+
+    if (
+        pageNumber <= 1
+    ) {
+
+        return false;
+    }
+
+    const page =
+        this.getPage(
+            pageNumber
+        );
+
+    if (
+        !page
+    ) {
+
+        return false;
+    }
+
+    page.remove();
+
+    this.refreshNumbers();
+
+    return true;
+};
+
+
+
+
+
+
+
+
+/* ==========================================================
+   B4.10 — REFRESH PAGE NUMBERS
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PageManager
+    .refreshNumbers =
+function () {
+
+    const pages =
+        this.getPages();
+
+    pages.forEach(
+        (
+            page,
+            index
+        ) => {
+
+            page.setAttribute(
+                "data-page-number",
+                index + 1
+            );
+        }
+    );
+
+    const total =
+        pages.length;
+
+    CampusWord2007Simulateur
+        .state
+        .page
+        .totalPages =
+            total;
+
+    CampusWord2007Simulateur
+        .state
+        .editor
+        .totalPages =
+            total;
+};
+
+
+
+
+
+
+/* ==========================================================
+   B4.11 — GET ACTIVE PAGE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PageManager
+    .getActivePage =
+function () {
+
+    return this.getPage(
+
+        CampusWord2007Simulateur
+            .state
+            .editor
+            .activePage
+    );
+};
+
+
+
+
+
+
+
+
+/* ==========================================================
+   B4.12 — SET ACTIVE PAGE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PageManager
+    .setActivePage =
+function (
+    pageNumber
+) {
+
+    const page =
+        this.getPage(
+            pageNumber
+        );
+
+    if (
+        !page
+    ) {
+
+        return false;
+    }
+
+    CampusWord2007Simulateur
+        .state
+        .editor
+        .activePage =
+            pageNumber;
+
+    CampusWord2007Simulateur
+        .state
+        .page
+        .currentPage =
+            pageNumber;
+
+    return true;
+};
+
+
+
+
+
+
+
+
+/* ==========================================================
+   B4.13 — CREATE DOCUMENT
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PageManager
+    .createDocument =
+function () {
+
+    if (
+        this.getPageCount() > 0
+    ) {
+
+        return;
+    }
+
+    this.addPage();
+};
+
+
+
+
+
+
+
+
+/* ==========================================================
+   B4.14 — PAGE MANAGER READY EVENT
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .EventBus
+    .on(
+        "application:ready",
+
+        () => {
+
+            CampusWord2007Simulateur
+                .PageManager
+                .initialize();
+        }
+    );
+
+
+
+
+
+
+
+
+/* ==========================================================
+   B4.15 — PAGE MANAGER VALIDATION
+   ========================================================== */
+
+if (
+    !CampusWord2007Simulateur
+        .PageManager
+) {
+
+    throw new Error(
+        "Page Manager Missing"
+    );
+}
+
+
+
+
+
+
 
 
 
