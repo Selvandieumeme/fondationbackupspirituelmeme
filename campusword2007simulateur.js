@@ -5563,3 +5563,232 @@ CampusWord2007Simulateur
 
 
 
+
+
+
+
+/* ==========================================================
+   B6.7 — FOCUS VALIDATION ENGINE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .FocusEngine
+    .focusValidationReady =
+false;
+
+
+
+
+
+/* ==========================================================
+   B6.7.1 — VALIDATE ACTIVE ELEMENT STATE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .FocusEngine
+    .validateActiveElementState =
+function () {
+
+    return this
+        .validateActiveElement();
+};
+
+
+
+
+
+/* ==========================================================
+   B6.7.2 — VALIDATE FOCUSED AREA STATE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .FocusEngine
+    .validateFocusedAreaState =
+function () {
+
+    return (
+
+        this.validateFocusedArea() &&
+
+        this.validateLastFocusedArea()
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   B6.7.3 — VALIDATE RESTORE STATE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .FocusEngine
+    .validateRestoreState =
+function () {
+
+    return (
+
+        typeof this.restoreFocus ===
+        "function" &&
+
+        typeof this.restoreActiveElement ===
+        "function" &&
+
+        typeof this.restoreFocusedArea ===
+        "function"
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   B6.7.4 — VALIDATE FOCUS ENGINE STATE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .FocusEngine
+    .validateFocusEngineState =
+function () {
+
+    return (
+
+        this.validateFocusState() &&
+
+        this.validateActiveElementState() &&
+
+        this.validateFocusedAreaState()
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   B6.7.5 — VALIDATE FOCUS OPERATIONS
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .FocusEngine
+    .validateFocusOperations =
+function () {
+
+    return (
+
+        typeof this.setFocus ===
+        "function" &&
+
+        typeof this.clearFocus ===
+        "function" &&
+
+        typeof this.restoreFocus ===
+        "function"
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   B6.7.6 — COMPLETE FOCUS VALIDATION
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .FocusEngine
+    .validateFocusEngine =
+function () {
+
+    return (
+
+        this.validateFocusEngineState() &&
+
+        this.validateFocusOperations() &&
+
+        this.validateRestoreState()
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   B6.7.7 — INITIALIZE VALIDATION ENGINE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .FocusEngine
+    .initializeFocusValidationEngine =
+function () {
+
+    if (
+        this.focusValidationReady
+    ) {
+
+        return;
+    }
+
+    this.focusValidationReady =
+        true;
+
+    CampusWord2007Simulateur
+        .Logger
+        .info(
+            "Focus Validation Engine Ready"
+        );
+};
+
+
+
+
+
+/* ==========================================================
+   B6.7.8 — VALIDATION READY CHECK
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .FocusEngine
+    .isFocusValidationReady =
+function () {
+
+    return (
+        this.focusValidationReady ===
+        true
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   B6.7.9 — VALIDATION READY HOOK
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .EventBus
+    .on(
+        "application:ready",
+
+        () => {
+
+            CampusWord2007Simulateur
+                .FocusEngine
+                .initializeFocusValidationEngine();
+        }
+    );
+
+
+
+
+
+
