@@ -7280,4 +7280,273 @@ if (
 
 
 
-       
+
+
+
+
+/* ==========================================================
+   B7.1 — LIFECYCLE STATE INITIALIZATION
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ApplicationLifecycleEngine
+    .lifecycleStateReady =
+false;
+
+
+
+
+
+/* ==========================================================
+   B7.1.1 — INITIALIZE LIFECYCLE STATE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ApplicationLifecycleEngine
+    .initializeLifecycleState =
+function () {
+
+    const applicationState =
+        CampusWord2007Simulateur
+            .state
+            .application;
+
+    if (
+        !applicationState
+    ) {
+
+        throw new Error(
+            "Application State Missing"
+        );
+    }
+
+    if (
+        typeof applicationState
+            .initialized ===
+        "undefined"
+    ) {
+
+        applicationState.initialized =
+            false;
+    }
+
+    if (
+        typeof applicationState
+            .booting ===
+        "undefined"
+    ) {
+
+        applicationState.booting =
+            false;
+    }
+
+    if (
+        typeof applicationState
+            .ready ===
+        "undefined"
+    ) {
+
+        applicationState.ready =
+            false;
+    }
+
+    if (
+        typeof applicationState
+            .destroyed ===
+        "undefined"
+    ) {
+
+        applicationState.destroyed =
+            false;
+    }
+};
+
+
+
+
+
+/* ==========================================================
+   B7.1.2 — GET APPLICATION STATE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ApplicationLifecycleEngine
+    .getApplicationState =
+function () {
+
+    return CampusWord2007Simulateur
+        .state
+        .application;
+};
+
+
+
+
+
+/* ==========================================================
+   B7.1.3 — RESET APPLICATION STATE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ApplicationLifecycleEngine
+    .resetApplicationState =
+function () {
+
+    const state =
+        this.getApplicationState();
+
+    state.initialized =
+        false;
+
+    state.booting =
+        false;
+
+    state.ready =
+        false;
+
+    state.destroyed =
+        false;
+};
+
+
+
+
+
+/* ==========================================================
+   B7.1.4 — APPLICATION STATE VALIDATION
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ApplicationLifecycleEngine
+    .validateApplicationState =
+function () {
+
+    const state =
+        this.getApplicationState();
+
+    if (
+        !state
+    ) {
+
+        return false;
+    }
+
+    return (
+
+        typeof state.initialized ===
+        "boolean" &&
+
+        typeof state.booting ===
+        "boolean" &&
+
+        typeof state.ready ===
+        "boolean" &&
+
+        typeof state.destroyed ===
+        "boolean"
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   B7.1.5 — INITIALIZE LIFECYCLE STATE ENGINE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ApplicationLifecycleEngine
+    .initializeLifecycleStateEngine =
+function () {
+
+    if (
+        this.lifecycleStateReady
+    ) {
+
+        return;
+    }
+
+    this.initializeLifecycleState();
+
+    this.lifecycleStateReady =
+        true;
+
+    CampusWord2007Simulateur
+        .Logger
+        .info(
+            "Lifecycle State Ready"
+        );
+};
+
+
+
+
+
+/* ==========================================================
+   B7.1.6 — LIFECYCLE STATE READY CHECK
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ApplicationLifecycleEngine
+    .isLifecycleStateReady =
+function () {
+
+    return (
+        this.lifecycleStateReady ===
+        true
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   B7.1.7 — LIFECYCLE STATE READY HOOK
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .EventBus
+    .on(
+
+        "application:ready",
+
+        () => {
+
+            CampusWord2007Simulateur
+                .ApplicationLifecycleEngine
+                .initializeLifecycleStateEngine();
+        }
+    );
+
+
+
+
+
+/* ==========================================================
+   B7.1.8 — LIFECYCLE STATE VALIDATION BLOCK
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ApplicationLifecycleEngine
+    .validateLifecycleStateEngine =
+function () {
+
+    return (
+
+        this.lifecycleStateReady ===
+        true &&
+
+        this.validateApplicationState()
+
+    );
+};
+
+
+
+
+
+
+
