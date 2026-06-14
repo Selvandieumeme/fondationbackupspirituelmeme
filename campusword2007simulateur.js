@@ -7549,5 +7549,214 @@ function () {
 
 
 
+/* ==========================================================
+   B7.2 — STARTUP LIFECYCLE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ApplicationLifecycleEngine
+    .startupLifecycleReady =
+false;
+
+
+
+
+
+/* ==========================================================
+   B7.2.1 — START APPLICATION BOOT
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ApplicationLifecycleEngine
+    .startBoot =
+function () {
+
+    const state =
+        this.getApplicationState();
+
+    state.booting =
+        true;
+
+    CampusWord2007Simulateur
+        .EventBus
+        .emit(
+            "application:boot:start"
+        );
+
+    return true;
+};
+
+
+
+
+
+/* ==========================================================
+   B7.2.2 — FINISH APPLICATION BOOT
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ApplicationLifecycleEngine
+    .finishBoot =
+function () {
+
+    const state =
+        this.getApplicationState();
+
+    state.booting =
+        false;
+
+    state.initialized =
+        true;
+
+    CampusWord2007Simulateur
+        .EventBus
+        .emit(
+            "application:boot:finish"
+        );
+
+    return true;
+};
+
+
+
+
+
+/* ==========================================================
+   B7.2.3 — IS BOOTING
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ApplicationLifecycleEngine
+    .isBooting =
+function () {
+
+    return (
+        this.getApplicationState()
+            .booting === true
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   B7.2.4 — IS INITIALIZED
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ApplicationLifecycleEngine
+    .isInitialized =
+function () {
+
+    return (
+        this.getApplicationState()
+            .initialized === true
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   B7.2.5 — STARTUP LIFECYCLE VALIDATION
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ApplicationLifecycleEngine
+    .validateStartupLifecycle =
+function () {
+
+    return (
+
+        typeof
+        this.startBoot ===
+        "function" &&
+
+        typeof
+        this.finishBoot ===
+        "function"
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   B7.2.6 — INITIALIZE STARTUP LIFECYCLE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ApplicationLifecycleEngine
+    .initializeStartupLifecycle =
+function () {
+
+    if (
+        this.startupLifecycleReady
+    ) {
+
+        return;
+    }
+
+    this.startupLifecycleReady =
+        true;
+
+    CampusWord2007Simulateur
+        .Logger
+        .info(
+            "Startup Lifecycle Ready"
+        );
+};
+
+
+
+
+
+/* ==========================================================
+   B7.2.7 — STARTUP READY CHECK
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ApplicationLifecycleEngine
+    .isStartupLifecycleReady =
+function () {
+
+    return (
+        this.startupLifecycleReady ===
+        true
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   B7.2.8 — STARTUP READY HOOK
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .EventBus
+    .on(
+
+        "application:ready",
+
+        () => {
+
+            CampusWord2007Simulateur
+                .ApplicationLifecycleEngine
+                .initializeStartupLifecycle();
+        }
+    );
+
+
+
+
+
+
+
 
 
