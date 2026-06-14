@@ -6388,3 +6388,737 @@ CampusWord2007Simulateur
         }
     );
 
+
+
+
+
+
+
+
+/* ==========================================================
+   B6.11 — FOCUS SYNCHRONIZATION ENGINE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .FocusEngine
+    .focusSynchronizationReady =
+false;
+
+
+
+
+
+/* ==========================================================
+   B6.11.1 — SYNCHRONIZE ACTIVE ELEMENT
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .FocusEngine
+    .synchronizeActiveElement =
+function () {
+
+    const domActiveElement =
+        document.activeElement;
+
+    if (
+        !domActiveElement
+    ) {
+
+        return false;
+    }
+
+    this.setActiveElement(
+        domActiveElement
+    );
+
+    return true;
+};
+
+
+
+
+
+/* ==========================================================
+   B6.11.2 — SYNCHRONIZE WINDOW STATE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .FocusEngine
+    .synchronizeWindowState =
+function () {
+
+    this.windowFocused =
+        document.hasFocus();
+
+    return true;
+};
+
+
+
+
+
+/* ==========================================================
+   B6.11.3 — SYNCHRONIZE FOCUS STATE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .FocusEngine
+    .synchronizeFocusState =
+function () {
+
+    this.synchronizeActiveElement();
+
+    this.synchronizeWindowState();
+
+    return true;
+};
+
+
+
+
+
+/* ==========================================================
+   B6.11.4 — AUTO SYNCHRONIZE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .FocusEngine
+    .autoSynchronizeFocus =
+function () {
+
+    this.synchronizeFocusState();
+};
+
+
+
+
+
+/* ==========================================================
+   B6.11.5 — START SYNCHRONIZATION
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .FocusEngine
+    .startFocusSynchronization =
+function () {
+
+    if (
+        this.focusSynchronizationInterval
+    ) {
+
+        return;
+    }
+
+    this.focusSynchronizationInterval =
+        setInterval(
+
+            () => {
+
+                this.autoSynchronizeFocus();
+
+            },
+
+            250
+        );
+};
+
+
+
+
+
+/* ==========================================================
+   B6.11.6 — STOP SYNCHRONIZATION
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .FocusEngine
+    .stopFocusSynchronization =
+function () {
+
+    if (
+        !this.focusSynchronizationInterval
+    ) {
+
+        return;
+    }
+
+    clearInterval(
+        this.focusSynchronizationInterval
+    );
+
+    this.focusSynchronizationInterval =
+        null;
+};
+
+
+
+
+
+/* ==========================================================
+   B6.11.7 — INITIALIZE SYNCHRONIZATION ENGINE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .FocusEngine
+    .initializeFocusSynchronizationEngine =
+function () {
+
+    if (
+        this.focusSynchronizationReady
+    ) {
+
+        return;
+    }
+
+    this.startFocusSynchronization();
+
+    this.focusSynchronizationReady =
+        true;
+
+    CampusWord2007Simulateur
+        .Logger
+        .info(
+            "Focus Synchronization Engine Ready"
+        );
+};
+
+
+
+
+
+/* ==========================================================
+   B6.11.8 — SYNCHRONIZATION VALIDATION
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .FocusEngine
+    .validateFocusSynchronizationEngine =
+function () {
+
+    return (
+
+        this.focusSynchronizationReady ===
+        true &&
+
+        typeof
+        this.synchronizeFocusState ===
+        "function"
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   B6.11.9 — SYNCHRONIZATION READY HOOK
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .EventBus
+    .on(
+
+        "application:ready",
+
+        () => {
+
+            CampusWord2007Simulateur
+                .FocusEngine
+                .initializeFocusSynchronizationEngine();
+        }
+    );
+
+
+
+
+
+
+/* ==========================================================
+   B6.12 — FOCUS READY HOOK
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .FocusEngine
+    .focusReady =
+false;
+
+
+
+
+
+/* ==========================================================
+   B6.12.1 — CHECK FOCUS READINESS
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .FocusEngine
+    .checkFocusReadiness =
+function () {
+
+    return (
+
+        this.activeElementTracked ===
+        true &&
+
+        this.focusAreaTrackingReady ===
+        true &&
+
+        this.windowFocusReady ===
+        true &&
+
+        this.windowBlurReady ===
+        true &&
+
+        this.focusSynchronizationReady ===
+        true
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   B6.12.2 — SET FOCUS READY
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .FocusEngine
+    .setFocusReady =
+function () {
+
+    if (
+        !this.checkFocusReadiness()
+    ) {
+
+        return false;
+    }
+
+    this.focusReady =
+        true;
+
+    return true;
+};
+
+
+
+
+
+/* ==========================================================
+   B6.12.3 — IS FOCUS READY
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .FocusEngine
+    .isFocusReady =
+function () {
+
+    return (
+        this.focusReady ===
+        true
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   B6.12.4 — INITIALIZE READY HOOK
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .FocusEngine
+    .initializeFocusReadyHook =
+function () {
+
+    this.setFocusReady();
+
+    if (
+        this.focusReady
+    ) {
+
+        CampusWord2007Simulateur
+            .Logger
+            .info(
+                "Focus Engine Ready"
+            );
+    }
+};
+
+
+
+
+
+/* ==========================================================
+   B6.12.5 — READY HOOK VALIDATION
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .FocusEngine
+    .validateFocusReadyHook =
+function () {
+
+    return (
+
+        typeof
+        this.isFocusReady ===
+        "function" &&
+
+        typeof
+        this.checkFocusReadiness ===
+        "function"
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   B6.12.6 — READY HOOK EVENT
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .EventBus
+    .on(
+
+        "application:ready",
+
+        () => {
+
+            CampusWord2007Simulateur
+                .FocusEngine
+                .initializeFocusReadyHook();
+        }
+    );
+
+
+
+
+
+
+
+/* ==========================================================
+   B6.13 — FOCUS VALIDATION BLOCK
+   FINAL FOCUS ENGINE VALIDATION
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .FocusEngine
+    .focusValidationBlockReady =
+false;
+
+
+
+
+
+/* ==========================================================
+   B6.13.1 — VALIDATE CORE FOCUS STATE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .FocusEngine
+    .validateCoreFocusState =
+function () {
+
+    return (
+        this.validateFocusState()
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   B6.13.2 — VALIDATE ACTIVE ELEMENT TRACKING
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .FocusEngine
+    .validateActiveElementTrackingBlock =
+function () {
+
+    return (
+        this.validateActiveElementTracking()
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   B6.13.3 — VALIDATE FOCUS AREA TRACKING
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .FocusEngine
+    .validateFocusAreaTrackingBlock =
+function () {
+
+    return (
+        this.validateFocusAreaTracking()
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   B6.13.4 — VALIDATE RESTORE ENGINE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .FocusEngine
+    .validateRestoreEngineBlock =
+function () {
+
+    return (
+        this.validateFocusRestoreEngine()
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   B6.13.5 — VALIDATE FOCUS ENGINE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .FocusEngine
+    .validateFocusEngineBlock =
+function () {
+
+    return (
+        this.validateFocusEngine()
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   B6.13.6 — VALIDATE EVENT ENGINE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .FocusEngine
+    .validateEventEngineBlock =
+function () {
+
+    return (
+        this.validateFocusEventEngine()
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   B6.13.7 — VALIDATE WINDOW FOCUS ENGINE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .FocusEngine
+    .validateWindowFocusEngineBlock =
+function () {
+
+    return (
+        this.validateWindowFocusEngine()
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   B6.13.8 — VALIDATE WINDOW BLUR ENGINE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .FocusEngine
+    .validateWindowBlurEngineBlock =
+function () {
+
+    return (
+        this.validateWindowBlurEngine()
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   B6.13.9 — VALIDATE SYNCHRONIZATION ENGINE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .FocusEngine
+    .validateSynchronizationEngineBlock =
+function () {
+
+    return (
+        this.validateFocusSynchronizationEngine()
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   B6.13.10 — VALIDATE READY HOOK
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .FocusEngine
+    .validateReadyHookBlock =
+function () {
+
+    return (
+        this.validateFocusReadyHook()
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   B6.13.11 — COMPLETE FOCUS VALIDATION BLOCK
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .FocusEngine
+    .validateCompleteFocusBlock =
+function () {
+
+    return (
+
+        this.validateCoreFocusState() &&
+
+        this.validateActiveElementTrackingBlock() &&
+
+        this.validateFocusAreaTrackingBlock() &&
+
+        this.validateRestoreEngineBlock() &&
+
+        this.validateFocusEngineBlock() &&
+
+        this.validateEventEngineBlock() &&
+
+        this.validateWindowFocusEngineBlock() &&
+
+        this.validateWindowBlurEngineBlock() &&
+
+        this.validateSynchronizationEngineBlock() &&
+
+        this.validateReadyHookBlock()
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   B6.13.12 — INITIALIZE VALIDATION BLOCK
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .FocusEngine
+    .initializeFocusValidationBlock =
+function () {
+
+    if (
+        this.focusValidationBlockReady
+    ) {
+
+        return;
+    }
+
+    this.focusValidationBlockReady =
+        true;
+
+    CampusWord2007Simulateur
+        .Logger
+        .info(
+            "Focus Validation Block Ready"
+        );
+};
+
+
+
+
+
+/* ==========================================================
+   B6.13.13 — VALIDATION BLOCK STATUS
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .FocusEngine
+    .isFocusValidationBlockReady =
+function () {
+
+    return (
+        this.focusValidationBlockReady ===
+        true
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   B6.13.14 — VALIDATION BLOCK READY HOOK
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .EventBus
+    .on(
+
+        "application:ready",
+
+        () => {
+
+            CampusWord2007Simulateur
+                .FocusEngine
+                .initializeFocusValidationBlock();
+        }
+    );
+
+
+
+
+
+/* ==========================================================
+   B6.13.15 — FINAL FOCUS ENGINE VALIDATION
+   ========================================================== */
+
+if (
+
+    !CampusWord2007Simulateur
+        .FocusEngine
+
+) {
+
+    throw new Error(
+        "Focus Engine Missing"
+    );
+}
+
+
