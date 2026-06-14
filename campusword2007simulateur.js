@@ -138,10 +138,10 @@ CampusWord2007Simulateur.state = {
 
     ready: false,
 
+    suspended: false,
+
     destroyed: false
-
-
-    },
+},
 
     editor: {
 
@@ -8251,6 +8251,7 @@ CampusWord2007Simulateur
                 .initializeSuspendLifecycle();
         }
     );
+
 
 
 
