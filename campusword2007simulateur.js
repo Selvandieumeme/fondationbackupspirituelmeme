@@ -7757,6 +7757,252 @@ CampusWord2007Simulateur
 
 
 
+/* ==========================================================
+   B7.3 — READY LIFECYCLE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ApplicationLifecycleEngine
+    .readyLifecycleReady =
+false;
+
+
+
+
+
+/* ==========================================================
+   B7.3.1 — SET APPLICATION READY
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ApplicationLifecycleEngine
+    .setReady =
+function () {
+
+    const state =
+        this.getApplicationState();
+
+    state.ready =
+        true;
+
+    CampusWord2007Simulateur
+        .EventBus
+        .emit(
+            "application:ready:state"
+        );
+
+    return true;
+};
+
+
+
+
+
+/* ==========================================================
+   B7.3.2 — CLEAR APPLICATION READY
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ApplicationLifecycleEngine
+    .clearReady =
+function () {
+
+    const state =
+        this.getApplicationState();
+
+    state.ready =
+        false;
+
+    return true;
+};
+
+
+
+
+
+/* ==========================================================
+   B7.3.3 — IS APPLICATION READY
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ApplicationLifecycleEngine
+    .isReady =
+function () {
+
+    return (
+
+        this.getApplicationState()
+            .ready === true
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   B7.3.4 — CAN ENTER READY STATE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ApplicationLifecycleEngine
+    .canEnterReadyState =
+function () {
+
+    return (
+
+        this.isInitialized() &&
+
+        !this.isBooting()
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   B7.3.5 — ENTER READY STATE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ApplicationLifecycleEngine
+    .enterReadyState =
+function () {
+
+    if (
+
+        !this.canEnterReadyState()
+
+    ) {
+
+        return false;
+    }
+
+    this.setReady();
+
+    return true;
+};
+
+
+
+
+
+/* ==========================================================
+   B7.3.6 — READY LIFECYCLE VALIDATION
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ApplicationLifecycleEngine
+    .validateReadyLifecycle =
+function () {
+
+    return (
+
+        typeof
+        this.setReady ===
+        "function" &&
+
+        typeof
+        this.isReady ===
+        "function" &&
+
+        typeof
+        this.enterReadyState ===
+        "function"
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   B7.3.7 — INITIALIZE READY LIFECYCLE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ApplicationLifecycleEngine
+    .initializeReadyLifecycle =
+function () {
+
+    if (
+
+        this.readyLifecycleReady
+
+    ) {
+
+        return;
+    }
+
+    this.readyLifecycleReady =
+        true;
+
+    CampusWord2007Simulateur
+        .Logger
+        .info(
+            "Ready Lifecycle Ready"
+        );
+};
+
+
+
+
+
+/* ==========================================================
+   B7.3.8 — READY LIFECYCLE STATUS
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ApplicationLifecycleEngine
+    .isReadyLifecycleReady =
+function () {
+
+    return (
+
+        this.readyLifecycleReady ===
+        true
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   B7.3.9 — READY LIFECYCLE HOOK
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .EventBus
+    .on(
+
+        "application:ready",
+
+        () => {
+
+            CampusWord2007Simulateur
+                .ApplicationLifecycleEngine
+                .initializeReadyLifecycle();
+        }
+    );
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
