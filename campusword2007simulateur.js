@@ -9024,7 +9024,306 @@ function () {
 
 
 
+/* ==========================================================
+   B7.8 — LIFECYCLE VALIDATION BLOCK
+   ========================================================== */
 
+CampusWord2007Simulateur
+    .ApplicationLifecycleEngine
+    .lifecycleValidationBlockReady =
+false;
+
+
+
+
+
+/* ==========================================================
+   B7.8.1 — VALIDATE LIFECYCLE STATE BLOCK
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ApplicationLifecycleEngine
+    .validateLifecycleStateBlock =
+function () {
+
+    return (
+
+        typeof
+        this.isLifecycleStateReady ===
+        "function"
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   B7.8.2 — VALIDATE STARTUP BLOCK
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ApplicationLifecycleEngine
+    .validateStartupBlock =
+function () {
+
+    return (
+
+        typeof
+        this.isStartupLifecycleReady ===
+        "function"
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   B7.8.3 — VALIDATE READY BLOCK
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ApplicationLifecycleEngine
+    .validateReadyBlock =
+function () {
+
+    return (
+
+        typeof
+        this.isReadyLifecycleReady ===
+        "function"
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   B7.8.4 — VALIDATE SUSPEND BLOCK
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ApplicationLifecycleEngine
+    .validateSuspendBlock =
+function () {
+
+    return (
+
+        typeof
+        this.isSuspendLifecycleReady ===
+        "function"
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   B7.8.5 — VALIDATE DESTROY BLOCK
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ApplicationLifecycleEngine
+    .validateDestroyBlock =
+function () {
+
+    return (
+
+        typeof
+        this.isDestroyLifecycleReady ===
+        "function"
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   B7.8.6 — VALIDATE LIFECYCLE VALIDATION BLOCK
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ApplicationLifecycleEngine
+    .validateValidationBlock =
+function () {
+
+    return (
+
+        typeof
+        this.isLifecycleValidationReady ===
+        "function"
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   B7.8.7 — VALIDATE READY HOOK BLOCK
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ApplicationLifecycleEngine
+    .validateReadyHookBlock =
+function () {
+
+    return (
+
+        typeof
+        this.isLifecycleHookReady ===
+        "function"
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   B7.8.8 — COMPLETE VALIDATION BLOCK
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ApplicationLifecycleEngine
+    .validateLifecycleBlock =
+function () {
+
+    return (
+
+        this.validateLifecycleStateBlock() &&
+
+        this.validateStartupBlock() &&
+
+        this.validateReadyBlock() &&
+
+        this.validateSuspendBlock() &&
+
+        this.validateDestroyBlock() &&
+
+        this.validateValidationBlock() &&
+
+        this.validateReadyHookBlock()
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   B7.8.9 — INITIALIZE VALIDATION BLOCK
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ApplicationLifecycleEngine
+    .initializeLifecycleValidationBlock =
+function () {
+
+    if (
+        this.lifecycleValidationBlockReady
+    ) {
+
+        return;
+    }
+
+    this.lifecycleValidationBlockReady =
+        true;
+
+    if (
+
+        CampusWord2007Simulateur
+            .Logger &&
+
+        typeof
+        CampusWord2007Simulateur
+            .Logger
+            .info ===
+        "function"
+
+    ) {
+
+        CampusWord2007Simulateur
+            .Logger
+            .info(
+                "Lifecycle Validation Block Ready"
+            );
+    }
+};
+
+
+
+
+
+/* ==========================================================
+   B7.8.10 — VALIDATION BLOCK STATUS
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ApplicationLifecycleEngine
+    .isLifecycleValidationBlockReady =
+function () {
+
+    return (
+
+        this.lifecycleValidationBlockReady ===
+        true
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   B7.8.11 — VALIDATION BLOCK REPORT
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ApplicationLifecycleEngine
+    .getLifecycleBlockReport =
+function () {
+
+    return {
+
+        state:
+            this.validateLifecycleStateBlock(),
+
+        startup:
+            this.validateStartupBlock(),
+
+        ready:
+            this.validateReadyBlock(),
+
+        suspend:
+            this.validateSuspendBlock(),
+
+        destroy:
+            this.validateDestroyBlock(),
+
+        validation:
+            this.validateValidationBlock(),
+
+        hook:
+            this.validateReadyHookBlock(),
+
+        complete:
+            this.validateLifecycleBlock()
+    };
+};
 
 
 
