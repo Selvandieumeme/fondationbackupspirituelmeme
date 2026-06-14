@@ -8477,6 +8477,273 @@ function () {
 
 
 
+/* ==========================================================
+   B7.6 — LIFECYCLE VALIDATION
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ApplicationLifecycleEngine
+    .lifecycleValidationReady =
+false;
+
+
+
+
+
+/* ==========================================================
+   B7.6.1 — VALIDATE STATE LIFECYCLE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ApplicationLifecycleEngine
+    .validateStateLifecycle =
+function () {
+
+    return (
+
+        this.validateApplicationState &&
+
+        this.validateApplicationState()
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   B7.6.2 — VALIDATE STARTUP LIFECYCLE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ApplicationLifecycleEngine
+    .validateStartupLifecycleBlock =
+function () {
+
+    return (
+
+        this.validateStartupLifecycle &&
+
+        this.validateStartupLifecycle()
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   B7.6.3 — VALIDATE READY LIFECYCLE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ApplicationLifecycleEngine
+    .validateReadyLifecycleBlock =
+function () {
+
+    return (
+
+        this.validateReadyLifecycle &&
+
+        this.validateReadyLifecycle()
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   B7.6.4 — VALIDATE SUSPEND LIFECYCLE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ApplicationLifecycleEngine
+    .validateSuspendLifecycleBlock =
+function () {
+
+    return (
+
+        this.validateSuspendLifecycle &&
+
+        this.validateSuspendLifecycle()
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   B7.6.5 — VALIDATE DESTROY LIFECYCLE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ApplicationLifecycleEngine
+    .validateDestroyLifecycleBlock =
+function () {
+
+    return (
+
+        this.validateDestroyLifecycle &&
+
+        this.validateDestroyLifecycle()
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   B7.6.6 — VALIDATE COMPLETE LIFECYCLE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ApplicationLifecycleEngine
+    .validateLifecycle =
+function () {
+
+    return (
+
+        this.validateStateLifecycle() &&
+
+        this.validateStartupLifecycleBlock() &&
+
+        this.validateReadyLifecycleBlock() &&
+
+        this.validateSuspendLifecycleBlock() &&
+
+        this.validateDestroyLifecycleBlock()
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   B7.6.7 — INITIALIZE LIFECYCLE VALIDATION
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ApplicationLifecycleEngine
+    .initializeLifecycleValidation =
+function () {
+
+    if (
+        this.lifecycleValidationReady
+    ) {
+
+        return;
+    }
+
+    this.lifecycleValidationReady =
+        true;
+
+    if (
+        CampusWord2007Simulateur
+            .Logger &&
+        typeof
+        CampusWord2007Simulateur
+            .Logger
+            .info ===
+        "function"
+    ) {
+
+        CampusWord2007Simulateur
+            .Logger
+            .info(
+                "Lifecycle Validation Ready"
+            );
+    }
+};
+
+
+
+
+
+/* ==========================================================
+   B7.6.8 — LIFECYCLE VALIDATION STATUS
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ApplicationLifecycleEngine
+    .isLifecycleValidationReady =
+function () {
+
+    return (
+
+        this.lifecycleValidationReady ===
+        true
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   B7.6.9 — REMOVED AUTO HOOK
+   ========================================================== */
+
+/*
+   Intentionally disabled.
+
+   Previous EventBus hook caused
+   startup instability on some builds.
+
+   initializeLifecycleValidation()
+   must be called explicitly
+   by the Application Lifecycle Engine.
+*/
+
+
+
+
+
+/* ==========================================================
+   B7.6.10 — GET LIFECYCLE VALIDATION REPORT
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ApplicationLifecycleEngine
+    .getLifecycleValidationReport =
+function () {
+
+    return {
+
+        state:
+            this.validateStateLifecycle(),
+
+        startup:
+            this.validateStartupLifecycleBlock(),
+
+        ready:
+            this.validateReadyLifecycleBlock(),
+
+        suspend:
+            this.validateSuspendLifecycleBlock(),
+
+        destroy:
+            this.validateDestroyLifecycleBlock(),
+
+        complete:
+            this.validateLifecycle()
+    };
+};
+
+
+
+
+
 
 
 
