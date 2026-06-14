@@ -8474,24 +8474,6 @@ function () {
 
 
 
-/* ==========================================================
-   B7.5.8 — DESTROY LIFECYCLE HOOK
-   ========================================================== */
-
-CampusWord2007Simulateur
-    .EventBus
-    .on(
-
-        "application:ready",
-
-        () => {
-
-            CampusWord2007Simulateur
-                .ApplicationLifecycleEngine
-                .initializeDestroyLifecycle();
-        }
-    );
-};
 
 
 
