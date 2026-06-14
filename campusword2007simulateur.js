@@ -132,13 +132,16 @@ CampusWord2007Simulateur.state = {
 
     application: {
 
-        initialized: false,
+    initialized: false,
 
-        booting: false,
+    booting: false,
 
-        ready: false,
+    ready: false,
 
-        destroyed: false
+    suspended: false,
+
+    destroyed: false
+
     },
 
     editor: {
