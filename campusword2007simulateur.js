@@ -2360,11 +2360,21 @@ function () {
     CampusWord2007Simulateur
         .markReady();
 
+
+   CampusWord2007Simulateur
+    .DOMManager
+    .initialize();
+
+CampusWord2007Simulateur
+    .DOMManager
+    .initializeDocument();
+
     CampusWord2007Simulateur
         .Logger
         .info(
             "System Ready"
         );
+
 
     CampusWord2007Simulateur
         .EventBus
