@@ -9335,4 +9335,471 @@ function () {
 
 
 
+/* ==========================================================
+   C1.1 — MOUSE STATE VALIDATION
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .MouseEngine =
+CampusWord2007Simulateur
+    .MouseEngine || {};
+
+
+
+
+
+/* ==========================================================
+   C1.1.1 — GET MOUSE STATE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .MouseEngine
+    .getMouseState =
+function () {
+
+    return CampusWord2007Simulateur
+        .state
+        .mouse;
+};
+
+
+
+
+
+/* ==========================================================
+   C1.1.2 — VALIDATE MOUSE STATE EXISTS
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .MouseEngine
+    .validateMouseState =
+function () {
+
+    const mouseState =
+        this.getMouseState();
+
+    return !!mouseState;
+};
+
+
+
+
+
+/* ==========================================================
+   C1.1.3 — VALIDATE MOUSE POSITION
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .MouseEngine
+    .validateMousePosition =
+function () {
+
+    const mouseState =
+        this.getMouseState();
+
+    return (
+
+        typeof mouseState.x ===
+        "number" &&
+
+        typeof mouseState.y ===
+        "number"
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C1.1.4 — VALIDATE BUTTON STATE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .MouseEngine
+    .validateMouseButtons =
+function () {
+
+    const mouseState =
+        this.getMouseState();
+
+    return (
+
+        typeof mouseState.isDown ===
+        "boolean" &&
+
+        typeof mouseState.leftButton ===
+        "boolean" &&
+
+        typeof mouseState.middleButton ===
+        "boolean" &&
+
+        typeof mouseState.rightButton ===
+        "boolean"
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C1.1.5 — VALIDATE CLICK STATE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .MouseEngine
+    .validateMouseClicks =
+function () {
+
+    const mouseState =
+        this.getMouseState();
+
+    return (
+
+        typeof mouseState.lastClickTime ===
+        "number" &&
+
+        typeof mouseState.clickCount ===
+        "number"
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C1.1.6 — COMPLETE MOUSE VALIDATION
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .MouseEngine
+    .validateMouseEngine =
+function () {
+
+    return (
+
+        this.validateMouseState() &&
+
+        this.validateMousePosition() &&
+
+        this.validateMouseButtons() &&
+
+        this.validateMouseClicks()
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C1.1.7 — MOUSE VALIDATION REPORT
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .MouseEngine
+    .getMouseValidationReport =
+function () {
+
+    return {
+
+        state:
+            this.validateMouseState(),
+
+        position:
+            this.validateMousePosition(),
+
+        buttons:
+            this.validateMouseButtons(),
+
+        clicks:
+            this.validateMouseClicks(),
+
+        complete:
+            this.validateMouseEngine()
+    };
+};
+
+
+
+
+
+
+
+/* ==========================================================
+   C1.2 — POSITION TRACKING
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .MouseEngine
+    .positionTrackingReady =
+false;
+
+
+
+
+
+/* ==========================================================
+   C1.2.1 — GET MOUSE X
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .MouseEngine
+    .getMouseX =
+function () {
+
+    return CampusWord2007Simulateur
+        .state
+        .mouse
+        .x;
+};
+
+
+
+
+
+/* ==========================================================
+   C1.2.2 — GET MOUSE Y
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .MouseEngine
+    .getMouseY =
+function () {
+
+    return CampusWord2007Simulateur
+        .state
+        .mouse
+        .y;
+};
+
+
+
+
+
+/* ==========================================================
+   C1.2.3 — SET MOUSE POSITION
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .MouseEngine
+    .setMousePosition =
+function (
+    x,
+    y
+) {
+
+    const mouseState =
+        CampusWord2007Simulateur
+            .state
+            .mouse;
+
+    mouseState.x =
+        Number(x) || 0;
+
+    mouseState.y =
+        Number(y) || 0;
+
+    return true;
+};
+
+
+
+
+
+/* ==========================================================
+   C1.2.4 — GET MOUSE POSITION
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .MouseEngine
+    .getMousePosition =
+function () {
+
+    return {
+
+        x:
+            this.getMouseX(),
+
+        y:
+            this.getMouseY()
+    };
+};
+
+
+
+
+
+/* ==========================================================
+   C1.2.5 — RESET MOUSE POSITION
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .MouseEngine
+    .resetMousePosition =
+function () {
+
+    return this.setMousePosition(
+        0,
+        0
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C1.2.6 — POSITION EXISTS
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .MouseEngine
+    .hasMousePosition =
+function () {
+
+    return (
+
+        typeof
+        this.getMouseX() ===
+        "number" &&
+
+        typeof
+        this.getMouseY() ===
+        "number"
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C1.2.7 — POSITION VALIDATION
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .MouseEngine
+    .validateMousePositionTracking =
+function () {
+
+    return (
+
+        typeof
+        this.getMouseX() ===
+        "number" &&
+
+        typeof
+        this.getMouseY() ===
+        "number"
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C1.2.8 — INITIALIZE POSITION TRACKING
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .MouseEngine
+    .initializePositionTracking =
+function () {
+
+    if (
+        this.positionTrackingReady
+    ) {
+
+        return;
+    }
+
+    this.positionTrackingReady =
+        true;
+
+    if (
+
+        CampusWord2007Simulateur
+            .Logger &&
+
+        typeof
+        CampusWord2007Simulateur
+            .Logger
+            .info ===
+        "function"
+
+    ) {
+
+        CampusWord2007Simulateur
+            .Logger
+            .info(
+                "Mouse Position Tracking Ready"
+            );
+    }
+};
+
+
+
+
+
+/* ==========================================================
+   C1.2.9 — POSITION TRACKING STATUS
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .MouseEngine
+    .isPositionTrackingReady =
+function () {
+
+    return (
+
+        this.positionTrackingReady ===
+        true
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C1.2.10 — POSITION TRACKING REPORT
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .MouseEngine
+    .getPositionTrackingReport =
+function () {
+
+    return {
+
+        ready:
+            this.isPositionTrackingReady(),
+
+        valid:
+            this.validateMousePositionTracking(),
+
+        position:
+            this.getMousePosition()
+    };
+};
+
+
+
+
+
+
+
+
+
 
