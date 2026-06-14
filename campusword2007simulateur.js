@@ -3619,3 +3619,794 @@ function () {
 };
 
 
+
+
+
+
+
+
+/* ==========================================================
+   B5.10 — WORKSPACE METRICS ENGINE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .LayoutEngine
+    .getWorkspaceMetrics =
+function () {
+
+    const workspace =
+        this.getWorkspaceLayout();
+
+    if (
+        !workspace
+    ) {
+
+        return null;
+    }
+
+    const rect =
+        workspace
+            .getBoundingClientRect();
+
+    return {
+
+        width:
+            rect.width,
+
+        height:
+            rect.height,
+
+        top:
+            rect.top,
+
+        left:
+            rect.left,
+
+        right:
+            rect.right,
+
+        bottom:
+            rect.bottom
+    };
+};
+
+
+
+
+
+
+
+
+/* ==========================================================
+   B5.11 — WORKSPACE REFRESH ENGINE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .LayoutEngine
+    .refreshWorkspaceLayout =
+function () {
+
+    const metrics =
+        this.getWorkspaceMetrics();
+
+    if (
+        !metrics
+    ) {
+
+        return false;
+    }
+
+    this.workspaceMetrics =
+        metrics;
+
+    return true;
+};
+
+
+
+
+
+
+
+
+/* ==========================================================
+   B5.12 — WORKSPACE VALIDATION ENGINE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .LayoutEngine
+    .validateWorkspaceLayout =
+function () {
+
+    const workspace =
+        this.getWorkspaceLayout();
+
+    if (
+        !workspace
+    ) {
+
+        CampusWord2007Simulateur
+            .Logger
+            .error(
+                "Workspace Layout Missing"
+            );
+
+        return false;
+    }
+
+    const metrics =
+        this.getWorkspaceMetrics();
+
+    if (
+        !metrics
+    ) {
+
+        CampusWord2007Simulateur
+            .Logger
+            .error(
+                "Workspace Metrics Missing"
+            );
+
+        return false;
+    }
+
+    if (
+        metrics.width <= 0
+    ) {
+
+        CampusWord2007Simulateur
+            .Logger
+            .error(
+                "Invalid Workspace Width"
+            );
+
+        return false;
+    }
+
+    if (
+        metrics.height <= 0
+    ) {
+
+        CampusWord2007Simulateur
+            .Logger
+            .error(
+                "Invalid Workspace Height"
+            );
+
+        return false;
+    }
+
+    return true;
+};
+
+
+
+
+
+
+
+
+
+
+
+/* ==========================================================
+   B5.13 — VIEWPORT LAYOUT ENGINE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .LayoutEngine
+    .cacheViewportLayout =
+function () {
+
+    const registry =
+        CampusWord2007Simulateur
+            .Registry;
+
+    registry.registerDOM(
+        "viewportLayout",
+        document.getElementById(
+            "document-viewport"
+        )
+    );
+};
+
+
+
+
+
+
+
+
+/* ==========================================================
+   B5.13.1 — VIEWPORT LAYOUT LOOKUP
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .LayoutEngine
+    .getViewportLayout =
+function () {
+
+    return CampusWord2007Simulateur
+        .Registry
+        .getDOM(
+            "viewportLayout"
+        );
+};
+
+
+
+
+
+
+
+/* ==========================================================
+   B5.13.2 — VIEWPORT LAYOUT INITIALIZATION
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .LayoutEngine
+    .initializeViewportLayout =
+function () {
+
+    this.cacheViewportLayout();
+
+    const viewport =
+        this.getViewportLayout();
+
+    if (
+        !viewport
+    ) {
+
+        throw new Error(
+            "Viewport Layout Missing"
+        );
+    }
+
+    CampusWord2007Simulateur
+        .Logger
+        .info(
+            "Viewport Layout Ready"
+        );
+};
+
+
+
+
+
+
+
+/* ==========================================================
+   B5.13.3 — VIEWPORT LAYOUT READY HOOK
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .EventBus
+    .on(
+        "application:ready",
+
+        () => {
+
+            CampusWord2007Simulateur
+                .LayoutEngine
+                .initializeViewportLayout();
+        }
+    );
+
+
+
+
+
+
+
+
+
+
+/* ==========================================================
+   B5.14 — VIEWPORT METRICS ENGINE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .LayoutEngine
+    .getViewportMetrics =
+function () {
+
+    const viewport =
+        this.getViewportLayout();
+
+    if (
+        !viewport
+    ) {
+
+        return null;
+    }
+
+    const rect =
+        viewport
+            .getBoundingClientRect();
+
+    return {
+
+        width:
+            rect.width,
+
+        height:
+            rect.height,
+
+        top:
+            rect.top,
+
+        left:
+            rect.left,
+
+        right:
+            rect.right,
+
+        bottom:
+            rect.bottom
+    };
+};
+
+
+
+
+
+
+
+
+/* ==========================================================
+   B5.14.1 — VIEWPORT METRICS REFRESH
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .LayoutEngine
+    .refreshViewportMetrics =
+function () {
+
+    const metrics =
+        this.getViewportMetrics();
+
+    if (
+        !metrics
+    ) {
+
+        return false;
+    }
+
+    this.viewportMetrics =
+        metrics;
+
+    return true;
+};
+
+
+
+
+
+
+
+
+
+/* ==========================================================
+   B5.14.2 — VIEWPORT METRICS LOOKUP
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .LayoutEngine
+    .getCachedViewportMetrics =
+function () {
+
+    return (
+        this.viewportMetrics ||
+        null
+    );
+};
+
+
+
+
+
+
+
+
+/* ==========================================================
+   B5.14.3 — VIEWPORT METRICS VALIDATION
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .LayoutEngine
+    .validateViewportMetrics =
+function () {
+
+    const metrics =
+        this.getViewportMetrics();
+
+    if (
+        !metrics
+    ) {
+
+        return false;
+    }
+
+    if (
+        metrics.width <= 0
+    ) {
+
+        return false;
+    }
+
+    if (
+        metrics.height <= 0
+    ) {
+
+        return false;
+    }
+
+    return true;
+};
+
+
+
+
+
+
+
+
+/* ==========================================================
+   B5.14.4 — VIEWPORT METRICS INITIALIZATION
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .LayoutEngine
+    .initializeViewportMetrics =
+function () {
+
+    this.refreshViewportMetrics();
+
+    if (
+        !this.validateViewportMetrics()
+    ) {
+
+        throw new Error(
+            "Viewport Metrics Validation Failed"
+        );
+    }
+
+    CampusWord2007Simulateur
+        .Logger
+        .info(
+            "Viewport Metrics Ready"
+        );
+};
+
+
+
+
+
+
+
+/* ==========================================================
+   B5.15 — RESPONSIVE LAYOUT ENGINE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .LayoutEngine
+    .initializeResponsiveLayout =
+function () {
+
+    this.attachResizeListener();
+
+    this.attachOrientationListener();
+
+    this.refreshResponsiveLayout();
+
+    CampusWord2007Simulateur
+        .Logger
+        .info(
+            "Responsive Layout Ready"
+        );
+};
+
+
+
+
+
+
+
+
+
+/* ==========================================================
+   B5.15.1 — WINDOW RESIZE LISTENER
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .LayoutEngine
+    .attachResizeListener =
+function () {
+
+    window.addEventListener(
+
+        "resize",
+
+        () => {
+
+            this.refreshResponsiveLayout();
+        }
+    );
+};
+
+
+
+
+
+
+
+
+/* ==========================================================
+   B5.15.2 — ORIENTATION LISTENER
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .LayoutEngine
+    .attachOrientationListener =
+function () {
+
+    window.addEventListener(
+
+        "orientationchange",
+
+        () => {
+
+            this.refreshResponsiveLayout();
+        }
+    );
+};
+
+
+
+
+
+
+
+
+
+/* ==========================================================
+   B5.15.3 — RESPONSIVE REFRESH
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .LayoutEngine
+    .refreshResponsiveLayout =
+function () {
+
+    this.refreshWorkspaceLayout();
+
+    this.refreshViewportMetrics();
+
+    CampusWord2007Simulateur
+        .EventBus
+        .emit(
+            "layout:updated",
+            {
+                workspace:
+                    this.workspaceMetrics,
+
+                viewport:
+                    this.viewportMetrics
+            }
+        );
+};
+
+
+
+
+
+
+
+
+/* ==========================================================
+   B5.15.4 — VIEWPORT SIZE CATEGORY
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .LayoutEngine
+    .getViewportCategory =
+function () {
+
+    const metrics =
+        this.getViewportMetrics();
+
+    if (
+        !metrics
+    ) {
+
+        return "unknown";
+    }
+
+    if (
+        metrics.width < 768
+    ) {
+
+        return "mobile";
+    }
+
+    if (
+        metrics.width < 1024
+    ) {
+
+        return "tablet";
+    }
+
+    return "desktop";
+};
+
+
+
+
+
+
+
+/* ==========================================================
+   B5.15.5 — ORIENTATION LOOKUP
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .LayoutEngine
+    .getOrientation =
+function () {
+
+    const metrics =
+        this.getViewportMetrics();
+
+    if (
+        !metrics
+    ) {
+
+        return "unknown";
+    }
+
+    if (
+        metrics.width >
+        metrics.height
+    ) {
+
+        return "landscape";
+    }
+
+    return "portrait";
+};
+
+
+
+
+
+
+
+/* ==========================================================
+   B5.15.6 — RESPONSIVE STATE UPDATE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .LayoutEngine
+    .updateResponsiveState =
+function () {
+
+    this.viewportCategory =
+        this.getViewportCategory();
+
+    this.orientation =
+        this.getOrientation();
+};
+
+
+
+
+
+
+
+/* ==========================================================
+   B5.15.7 — RESPONSIVE VALIDATION
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .LayoutEngine
+    .validateResponsiveLayout =
+function () {
+
+    return (
+
+        this.validateWorkspaceLayout() &&
+
+        this.validateViewportMetrics()
+    );
+};
+
+
+
+
+
+
+
+/* ==========================================================
+   B5.15.8 — RESPONSIVE INITIALIZATION
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .LayoutEngine
+    .initializeResponsiveSystem =
+function () {
+
+    this.updateResponsiveState();
+
+    this.initializeResponsiveLayout();
+
+    if (
+        !this.validateResponsiveLayout()
+    ) {
+
+        throw new Error(
+            "Responsive Layout Validation Failed"
+        );
+    }
+};
+
+
+
+
+
+
+
+/* ==========================================================
+   B5.15.9 — RESPONSIVE READY HOOK
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .EventBus
+    .on(
+        "application:ready",
+
+        () => {
+
+            CampusWord2007Simulateur
+                .LayoutEngine
+                .initializeResponsiveSystem();
+        }
+    );
+
+
+
+
+
+
+
+
+
+
+
+/* ==========================================================
+   B5.15.10 — RESPONSIVE ENGINE VALIDATION
+   ========================================================== */
+
+if (
+
+    !CampusWord2007Simulateur
+        .LayoutEngine
+        .initializeResponsiveSystem
+
+) {
+
+    throw new Error(
+        "Responsive Layout Engine Missing"
+    );
+}
+
+
+
+
+
+
+
+
+
+
+
+
