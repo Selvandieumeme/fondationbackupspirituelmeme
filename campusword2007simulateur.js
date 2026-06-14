@@ -5791,4 +5791,290 @@ CampusWord2007Simulateur
 
 
 
+/* ==========================================================
+   B6.8 — FOCUS EVENT ENGINE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .FocusEngine
+    .focusEventEngineReady =
+false;
+
+
+
+
+
+/* ==========================================================
+   B6.8.1 — HANDLE ELEMENT FOCUS
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .FocusEngine
+    .handleFocusEvent =
+function (
+    element,
+    area
+) {
+
+    this.setFocus(
+        element,
+        area
+    );
+};
+
+
+
+
+
+
+/* ==========================================================
+   B6.8.2 — HANDLE ELEMENT BLUR
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .FocusEngine
+    .handleBlurEvent =
+function () {
+
+    this.clearFocus();
+};
+
+
+
+
+
+
+/* ==========================================================
+   B6.8.3 — REGISTER FOCUS LISTENER
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .FocusEngine
+    .registerFocusListener =
+function (
+    element,
+    area
+) {
+
+    if (
+        !(element instanceof Element)
+    ) {
+
+        return false;
+    }
+
+    element.addEventListener(
+        "focus",
+
+        () => {
+
+            this.handleFocusEvent(
+                element,
+                area
+            );
+        }
+    );
+
+    return true;
+};
+
+
+
+
+
+
+/* ==========================================================
+   B6.8.4 — REGISTER BLUR LISTENER
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .FocusEngine
+    .registerBlurListener =
+function (
+    element
+) {
+
+    if (
+        !(element instanceof Element)
+    ) {
+
+        return false;
+    }
+
+    element.addEventListener(
+        "blur",
+
+        () => {
+
+            this.handleBlurEvent();
+        }
+    );
+
+    return true;
+};
+
+
+
+
+
+
+/* ==========================================================
+   B6.8.5 — REGISTER FOCUS EVENTS
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .FocusEngine
+    .registerFocusEvents =
+function (
+    element,
+    area
+) {
+
+    this.registerFocusListener(
+        element,
+        area
+    );
+
+    this.registerBlurListener(
+        element
+    );
+
+    return true;
+};
+
+
+
+
+
+
+/* ==========================================================
+   B6.8.6 — EMIT FOCUS CHANGED EVENT
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .FocusEngine
+    .emitFocusChanged =
+function () {
+
+    CampusWord2007Simulateur
+        .EventBus
+        .emit(
+            "focus:changed",
+
+            {
+                activeElement:
+                    this.getActiveElement(),
+
+                focusedArea:
+                    this.getFocusedArea()
+            }
+        );
+};
+
+
+
+
+
+
+/* ==========================================================
+   B6.8.7 — EMIT FOCUS CLEARED EVENT
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .FocusEngine
+    .emitFocusCleared =
+function () {
+
+    CampusWord2007Simulateur
+        .EventBus
+        .emit(
+            "focus:cleared"
+        );
+};
+
+
+
+
+
+
+/* ==========================================================
+   B6.8.8 — INITIALIZE EVENT ENGINE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .FocusEngine
+    .initializeFocusEventEngine =
+function () {
+
+    if (
+        this.focusEventEngineReady
+    ) {
+
+        return;
+    }
+
+    this.focusEventEngineReady =
+        true;
+
+    CampusWord2007Simulateur
+        .Logger
+        .info(
+            "Focus Event Engine Ready"
+        );
+};
+
+
+
+
+
+
+/* ==========================================================
+   B6.8.9 — EVENT ENGINE VALIDATION
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .FocusEngine
+    .validateFocusEventEngine =
+function () {
+
+    return (
+
+        this.focusEventEngineReady ===
+        true
+
+    );
+};
+
+
+
+
+
+
+/* ==========================================================
+   B6.8.10 — EVENT ENGINE READY HOOK
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .EventBus
+    .on(
+
+        "application:ready",
+
+        () => {
+
+            CampusWord2007Simulateur
+                .FocusEngine
+                .initializeFocusEventEngine();
+        }
+    );
+
+
+
+
+
+
+
+
+
+
 
