@@ -3337,11 +3337,285 @@ if (
 
 
 
+/* ==========================================================
+   B5 — LAYOUT ENGINE
+   APPLICATION LAYOUT MANAGEMENT SYSTEM
+   ========================================================== */
+
+CampusWord2007Simulateur.LayoutEngine = {
+
+    initialized: false,
+
+    initialize() {
+
+        if (
+            this.initialized
+        ) {
+
+            return;
+        }
+
+        this.initialized = true;
+
+        CampusWord2007Simulateur
+            .Logger
+            .info(
+                "Layout Engine Initialized"
+            );
+    }
+};
 
 
 
 
 
 
+
+
+/* ==========================================================
+   B5.1 — ROOT LAYOUT ENGINE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .LayoutEngine
+    .cacheRootLayout =
+function () {
+
+    const registry =
+        CampusWord2007Simulateur
+            .Registry;
+
+    registry.registerDOM(
+        "rootLayout",
+        document.getElementById(
+            "campusword2007simulateur"
+        )
+    );
+
+    registry.registerDOM(
+        "wordApp",
+        document.getElementById(
+            "word-app"
+        )
+    );
+};
+
+
+
+
+
+
+
+
+
+/* ==========================================================
+   B5.2 — ROOT LAYOUT LOOKUP
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .LayoutEngine
+    .getRootLayout =
+function () {
+
+    return CampusWord2007Simulateur
+        .Registry
+        .getDOM(
+            "rootLayout"
+        );
+};
+
+
+
+
+
+
+
+
+/* ==========================================================
+   B5.3 — APPLICATION LAYOUT LOOKUP
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .LayoutEngine
+    .getApplicationLayout =
+function () {
+
+    return CampusWord2007Simulateur
+        .Registry
+        .getDOM(
+            "wordApp"
+        );
+};
+
+
+
+
+
+
+
+
+
+
+/* ==========================================================
+   B5.4 — ROOT LAYOUT VALIDATION
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .LayoutEngine
+    .validateRootLayout =
+function () {
+
+    const root =
+        this.getRootLayout();
+
+    const app =
+        this.getApplicationLayout();
+
+    return (
+        !!root &&
+        !!app
+    );
+};
+
+
+
+
+
+
+
+/* ==========================================================
+   B5.5 — ROOT LAYOUT INITIALIZATION
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .LayoutEngine
+    .initializeRootLayout =
+function () {
+
+    this.cacheRootLayout();
+
+    if (
+        !this.validateRootLayout()
+    ) {
+
+        throw new Error(
+            "Root Layout Validation Failed"
+        );
+    }
+
+    CampusWord2007Simulateur
+        .Logger
+        .info(
+            "Root Layout Ready"
+        );
+};
+
+
+
+
+
+
+
+
+
+
+/* ==========================================================
+   B5.6 — APPLICATION READY HOOK
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .EventBus
+    .on(
+        "application:ready",
+
+        () => {
+
+            CampusWord2007Simulateur
+                .LayoutEngine
+                .initialize();
+
+            CampusWord2007Simulateur
+                .LayoutEngine
+                .initializeRootLayout();
+        }
+    );
+
+
+
+
+
+
+
+
+
+
+/* ==========================================================
+   B5.7 — LAYOUT ENGINE VALIDATION
+   ========================================================== */
+
+if (
+    !CampusWord2007Simulateur
+        .LayoutEngine
+) {
+
+    throw new Error(
+        "Layout Engine Missing"
+    );
+}
+
+
+
+
+
+
+
+
+
+
+/* ==========================================================
+   B5.8 — WORKSPACE LAYOUT CACHE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .LayoutEngine
+    .cacheWorkspaceLayout =
+function () {
+
+    const registry =
+        CampusWord2007Simulateur
+            .Registry;
+
+    registry.registerDOM(
+        "workspaceLayout",
+        document.getElementById(
+            "workspace"
+        )
+    );
+};
+
+
+
+
+
+
+
+
+
+
+/* ==========================================================
+   B5.9 — WORKSPACE LAYOUT LOOKUP
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .LayoutEngine
+    .getWorkspaceLayout =
+function () {
+
+    return CampusWord2007Simulateur
+        .Registry
+        .getDOM(
+            "workspaceLayout"
+        );
+};
 
 
