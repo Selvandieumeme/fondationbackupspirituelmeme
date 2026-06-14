@@ -1522,3 +1522,190 @@ if (
 }
 
 
+
+
+
+
+
+
+/* ==========================================================
+   A7 — APPLICATION BOOTSTRAP
+   SYSTEM STARTUP ENGINE
+   ========================================================== */
+
+CampusWord2007Simulateur.Bootstrap = {
+
+    initialized: false,
+
+    initialize() {
+
+        if (this.initialized) {
+            return;
+        }
+
+        CampusWord2007Simulateur
+            .markBooting();
+
+        CampusWord2007Simulateur
+            .Logger
+            .info(
+                "Boot Sequence Started"
+            );
+
+        this.initializeCore();
+
+        this.initializeInterface();
+
+        this.initializeState();
+
+        this.finishBoot();
+
+        this.initialized = true;
+    },
+
+    initializeCore() {
+
+        CampusWord2007Simulateur
+            .EventBus
+            .initialize();
+
+        CampusWord2007Simulateur
+            .ErrorManager
+            .initialize();
+    },
+
+    initializeInterface() {
+
+        this.loadingScreen =
+            document.getElementById(
+                "word-loading-screen"
+            );
+
+        this.wordApp =
+            document.getElementById(
+                "word-app"
+            );
+
+        this.root =
+            document.getElementById(
+                "campusword2007simulateur"
+            );
+    },
+
+    initializeState() {
+
+        CampusWord2007Simulateur
+            .state
+            .application
+            .initialized = true;
+
+        CampusWord2007Simulateur
+            .state
+            .application
+            .booting = true;
+    },
+
+    finishBoot() {
+
+        setTimeout(
+            () => {
+
+                if (
+                    this.loadingScreen
+                ) {
+
+                    this.loadingScreen
+                        .style
+                        .display =
+                            "none";
+                }
+
+                if (
+                    this.wordApp
+                ) {
+
+                    this.wordApp
+                        .style
+                        .display =
+                            "flex";
+                }
+
+                CampusWord2007Simulateur
+                    .state
+                    .application
+                    .booting = false;
+
+                CampusWord2007Simulateur
+                    .state
+                    .application
+                    .ready = true;
+
+                CampusWord2007Simulateur
+                    .markReady();
+
+                CampusWord2007Simulateur
+                    .Logger
+                    .info(
+                        "System Ready"
+                    );
+
+                CampusWord2007Simulateur
+                    .EventBus
+                    .emit(
+                        "application:ready"
+                    );
+
+            },
+            500
+        );
+    }
+};
+
+
+
+
+
+
+
+
+
+/* ==========================================================
+   A7.1 — DOM READY STARTUP
+   ========================================================== */
+
+document.addEventListener(
+    "DOMContentLoaded",
+    () => {
+
+        CampusWord2007Simulateur
+            .Bootstrap
+            .initialize();
+    }
+);
+
+
+
+
+
+
+
+/* ==========================================================
+   A7.2 — BOOTSTRAP VALIDATION
+   ========================================================== */
+
+if (
+    !CampusWord2007Simulateur
+        .Bootstrap
+) {
+
+    throw new Error(
+        "Bootstrap Missing"
+    );
+}
+
+
+
+
+
+
+
