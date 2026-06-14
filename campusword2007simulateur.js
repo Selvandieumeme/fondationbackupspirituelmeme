@@ -5481,3 +5481,46 @@ function () {
 
 
 
+
+/* ==========================================================
+   B6.5.1 — FOCUS ENGINE READY STATE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .FocusEngine
+    .isReady =
+function () {
+
+    return (
+
+        this.initialized ===
+        true
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   B6.5.2 — ACTIVE ELEMENT TRACKING READY
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .FocusEngine
+    .isActiveElementTrackingReady =
+function () {
+
+    return (
+
+        typeof this.trackActiveElement ===
+        "function"
+
+    );
+};
+
+
+
+
+
