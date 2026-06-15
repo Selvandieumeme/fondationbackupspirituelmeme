@@ -10798,3 +10798,218 @@ function () {
 
 
 
+/* ==========================================================
+   C1.6 — MOUSE READY HOOK
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .MouseEngine
+    .mouseReadyHookInitialized =
+false;
+
+
+
+
+
+/* ==========================================================
+   C1.6.1 — MOUSE ENGINE READY CHECK
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .MouseEngine
+    .isMouseEngineReady =
+function () {
+
+    return (
+
+        this.validateMouseEngine() &&
+
+        this.validateMousePositionTracking() &&
+
+        this.validateButtonTracking() &&
+
+        this.validateClickTracking() &&
+
+        this.validateMouseEvents()
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C1.6.2 — CAN INITIALIZE MOUSE ENGINE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .MouseEngine
+    .canInitializeMouseEngine =
+function () {
+
+    return (
+
+        !this.isMouseEventEngineReady() &&
+
+        this.isMouseEngineReady()
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C1.6.3 — EXECUTE MOUSE READY HOOK
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .MouseEngine
+    .executeMouseReadyHook =
+function () {
+
+    if (
+
+        !this.canInitializeMouseEngine()
+
+    ) {
+
+        return false;
+    }
+
+    this.initializeMouseEvents();
+
+    return true;
+};
+
+
+
+
+
+/* ==========================================================
+   C1.6.4 — INITIALIZE MOUSE READY HOOK
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .MouseEngine
+    .initializeMouseReadyHook =
+function () {
+
+    if (
+
+        this.mouseReadyHookInitialized
+
+    ) {
+
+        return;
+    }
+
+    this.mouseReadyHookInitialized =
+        true;
+
+    if (
+
+        CampusWord2007Simulateur
+            .Logger &&
+
+        typeof
+        CampusWord2007Simulateur
+            .Logger
+            .info ===
+        "function"
+
+    ) {
+
+        CampusWord2007Simulateur
+            .Logger
+            .info(
+                "Mouse Ready Hook Ready"
+            );
+    }
+};
+
+
+
+
+
+/* ==========================================================
+   C1.6.5 — READY HOOK STATUS
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .MouseEngine
+    .isMouseReadyHookInitialized =
+function () {
+
+    return (
+
+        this.mouseReadyHookInitialized ===
+        true
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C1.6.6 — READY HOOK VALIDATION
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .MouseEngine
+    .validateMouseReadyHook =
+function () {
+
+    return (
+
+        typeof
+        this.isMouseEngineReady ===
+        "function" &&
+
+        typeof
+        this.canInitializeMouseEngine ===
+        "function" &&
+
+        typeof
+        this.executeMouseReadyHook ===
+        "function"
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C1.6.7 — READY HOOK REPORT
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .MouseEngine
+    .getMouseReadyHookReport =
+function () {
+
+    return {
+
+        initialized:
+            this.isMouseReadyHookInitialized(),
+
+        engineReady:
+            this.isMouseEngineReady(),
+
+        eventEngineReady:
+            this.isMouseEventEngineReady(),
+
+        valid:
+            this.validateMouseReadyHook()
+    };
+};
+
+
+
+
