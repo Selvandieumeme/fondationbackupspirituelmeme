@@ -10437,3 +10437,364 @@ function () {
 
 
 
+
+/* ==========================================================
+   C1.5 — MOUSE EVENT ENGINE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .MouseEngine
+    .mouseEventsReady =
+false;
+
+
+
+
+
+/* ==========================================================
+   C1.5.1 — HANDLE MOUSE MOVE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .MouseEngine
+    .handleMouseMove =
+function (
+    event
+) {
+
+    if (
+        !event
+    ) {
+
+        return;
+    }
+
+    this.setMousePosition(
+
+        event.clientX,
+
+        event.clientY
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C1.5.2 — HANDLE MOUSE DOWN
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .MouseEngine
+    .handleMouseDown =
+function (
+    event
+) {
+
+    if (
+        !event
+    ) {
+
+        return;
+    }
+
+    this.setMouseDown(
+        true
+    );
+
+    switch (
+        event.button
+    ) {
+
+        case 0:
+
+            this.setButtonState(
+                "left",
+                true
+            );
+
+            break;
+
+        case 1:
+
+            this.setButtonState(
+                "middle",
+                true
+            );
+
+            break;
+
+        case 2:
+
+            this.setButtonState(
+                "right",
+                true
+            );
+
+            break;
+    }
+};
+
+
+
+
+
+/* ==========================================================
+   C1.5.3 — HANDLE MOUSE UP
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .MouseEngine
+    .handleMouseUp =
+function (
+    event
+) {
+
+    if (
+        !event
+    ) {
+
+        return;
+    }
+
+    this.setMouseDown(
+        false
+    );
+
+    switch (
+        event.button
+    ) {
+
+        case 0:
+
+            this.setButtonState(
+                "left",
+                false
+            );
+
+            break;
+
+        case 1:
+
+            this.setButtonState(
+                "middle",
+                false
+            );
+
+            break;
+
+        case 2:
+
+            this.setButtonState(
+                "right",
+                false
+            );
+
+            break;
+    }
+};
+
+
+
+
+
+/* ==========================================================
+   C1.5.4 — HANDLE CLICK
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .MouseEngine
+    .handleClick =
+function () {
+
+    this.registerClick();
+};
+
+
+
+
+
+/* ==========================================================
+   C1.5.5 — REGISTER EVENTS
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .MouseEngine
+    .registerMouseEvents =
+function () {
+
+    document.addEventListener(
+
+        "mousemove",
+
+        this.handleMouseMove
+            .bind(
+                this
+            )
+    );
+
+    document.addEventListener(
+
+        "mousedown",
+
+        this.handleMouseDown
+            .bind(
+                this
+            )
+    );
+
+    document.addEventListener(
+
+        "mouseup",
+
+        this.handleMouseUp
+            .bind(
+                this
+            )
+    );
+
+    document.addEventListener(
+
+        "click",
+
+        this.handleClick
+            .bind(
+                this
+            )
+    );
+
+    return true;
+};
+
+
+
+
+
+/* ==========================================================
+   C1.5.6 — INITIALIZE MOUSE EVENTS
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .MouseEngine
+    .initializeMouseEvents =
+function () {
+
+    if (
+        this.mouseEventsReady
+    ) {
+
+        return;
+    }
+
+    this.registerMouseEvents();
+
+    this.mouseEventsReady =
+        true;
+
+    if (
+
+        CampusWord2007Simulateur
+            .Logger &&
+
+        typeof
+        CampusWord2007Simulateur
+            .Logger
+            .info ===
+        "function"
+
+    ) {
+
+        CampusWord2007Simulateur
+            .Logger
+            .info(
+                "Mouse Event Engine Ready"
+            );
+    }
+};
+
+
+
+
+
+/* ==========================================================
+   C1.5.7 — MOUSE EVENT STATUS
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .MouseEngine
+    .isMouseEventEngineReady =
+function () {
+
+    return (
+
+        this.mouseEventsReady ===
+        true
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C1.5.8 — MOUSE EVENT VALIDATION
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .MouseEngine
+    .validateMouseEvents =
+function () {
+
+    return (
+
+        typeof
+        this.handleMouseMove ===
+        "function" &&
+
+        typeof
+        this.handleMouseDown ===
+        "function" &&
+
+        typeof
+        this.handleMouseUp ===
+        "function" &&
+
+        typeof
+        this.handleClick ===
+        "function"
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C1.5.9 — MOUSE EVENT REPORT
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .MouseEngine
+    .getMouseEventReport =
+function () {
+
+    return {
+
+        ready:
+            this.isMouseEventEngineReady(),
+
+        valid:
+            this.validateMouseEvents()
+    };
+};
+
+
+
+
+
+
+
+
