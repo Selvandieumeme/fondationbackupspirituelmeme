@@ -10138,3 +10138,302 @@ function () {
 
 
 
+
+
+
+
+
+
+
+/* ==========================================================
+   C1.4 — CLICK TRACKING
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .MouseEngine
+    .clickTrackingReady =
+false;
+
+
+
+
+
+/* ==========================================================
+   C1.4.1 — GET CLICK COUNT
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .MouseEngine
+    .getClickCount =
+function () {
+
+    return CampusWord2007Simulateur
+        .state
+        .mouse
+        .clickCount;
+};
+
+
+
+
+
+/* ==========================================================
+   C1.4.2 — SET CLICK COUNT
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .MouseEngine
+    .setClickCount =
+function (
+    count
+) {
+
+    CampusWord2007Simulateur
+        .state
+        .mouse
+        .clickCount =
+            Math.max(
+                0,
+                Number(count) || 0
+            );
+
+    return true;
+};
+
+
+
+
+
+/* ==========================================================
+   C1.4.3 — INCREMENT CLICK COUNT
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .MouseEngine
+    .incrementClickCount =
+function () {
+
+    const mouseState =
+        CampusWord2007Simulateur
+            .state
+            .mouse;
+
+    mouseState.clickCount++;
+
+    return mouseState.clickCount;
+};
+
+
+
+
+
+/* ==========================================================
+   C1.4.4 — RESET CLICK COUNT
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .MouseEngine
+    .resetClickCount =
+function () {
+
+    return this.setClickCount(
+        0
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C1.4.5 — GET LAST CLICK TIME
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .MouseEngine
+    .getLastClickTime =
+function () {
+
+    return CampusWord2007Simulateur
+        .state
+        .mouse
+        .lastClickTime;
+};
+
+
+
+
+
+/* ==========================================================
+   C1.4.6 — SET LAST CLICK TIME
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .MouseEngine
+    .setLastClickTime =
+function (
+    timestamp
+) {
+
+    CampusWord2007Simulateur
+        .state
+        .mouse
+        .lastClickTime =
+            Number(timestamp) || 0;
+
+    return true;
+};
+
+
+
+
+
+/* ==========================================================
+   C1.4.7 — REGISTER CLICK
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .MouseEngine
+    .registerClick =
+function () {
+
+    this.incrementClickCount();
+
+    this.setLastClickTime(
+        Date.now()
+    );
+
+    return true;
+};
+
+
+
+
+
+/* ==========================================================
+   C1.4.8 — CLICK TRACKING VALIDATION
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .MouseEngine
+    .validateClickTracking =
+function () {
+
+    const mouseState =
+        CampusWord2007Simulateur
+            .state
+            .mouse;
+
+    return (
+
+        typeof
+        mouseState.clickCount ===
+        "number" &&
+
+        typeof
+        mouseState.lastClickTime ===
+        "number"
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C1.4.9 — INITIALIZE CLICK TRACKING
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .MouseEngine
+    .initializeClickTracking =
+function () {
+
+    if (
+        this.clickTrackingReady
+    ) {
+
+        return;
+    }
+
+    this.clickTrackingReady =
+        true;
+
+    if (
+
+        CampusWord2007Simulateur
+            .Logger &&
+
+        typeof
+        CampusWord2007Simulateur
+            .Logger
+            .info ===
+        "function"
+
+    ) {
+
+        CampusWord2007Simulateur
+            .Logger
+            .info(
+                "Mouse Click Tracking Ready"
+            );
+    }
+};
+
+
+
+
+
+/* ==========================================================
+   C1.4.10 — CLICK TRACKING STATUS
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .MouseEngine
+    .isClickTrackingReady =
+function () {
+
+    return (
+
+        this.clickTrackingReady ===
+        true
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C1.4.11 — CLICK TRACKING REPORT
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .MouseEngine
+    .getClickTrackingReport =
+function () {
+
+    return {
+
+        ready:
+            this.isClickTrackingReady(),
+
+        valid:
+            this.validateClickTracking(),
+
+        clickCount:
+            this.getClickCount(),
+
+        lastClickTime:
+            this.getLastClickTime()
+    };
+};
+
+
+
+
+
+
+
