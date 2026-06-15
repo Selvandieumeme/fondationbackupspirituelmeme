@@ -11902,5 +11902,272 @@ function () {
 
 
 
+/* ==========================================================
+   C2.3 — POINTER MOVE TRACKING
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PointerEngine
+    .pointerMoveTrackingReady =
+false;
+
+
+
+
+
+/* ==========================================================
+   C2.3.1 — GET POINTER X
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PointerEngine
+    .getPointerX =
+function () {
+
+    return CampusWord2007Simulateur
+        .state
+        .pointer
+        .currentX;
+};
+
+
+
+
+
+/* ==========================================================
+   C2.3.2 — GET POINTER Y
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PointerEngine
+    .getPointerY =
+function () {
+
+    return CampusWord2007Simulateur
+        .state
+        .pointer
+        .currentY;
+};
+
+
+
+
+
+/* ==========================================================
+   C2.3.3 — SET POINTER POSITION
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PointerEngine
+    .setPointerPosition =
+function (
+    x,
+    y
+) {
+
+    const pointerState =
+        this.getPointerState();
+
+    pointerState.currentX =
+        Number(x) || 0;
+
+    pointerState.currentY =
+        Number(y) || 0;
+
+    return true;
+};
+
+
+
+
+
+/* ==========================================================
+   C2.3.4 — GET POINTER POSITION
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PointerEngine
+    .getPointerPosition =
+function () {
+
+    return {
+
+        x:
+            this.getPointerX(),
+
+        y:
+            this.getPointerY()
+    };
+};
+
+
+
+
+
+/* ==========================================================
+   C2.3.5 — RESET POINTER POSITION
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PointerEngine
+    .resetPointerPosition =
+function () {
+
+    return this.setPointerPosition(
+        0,
+        0
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C2.3.6 — HAS POINTER POSITION
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PointerEngine
+    .hasPointerPosition =
+function () {
+
+    return (
+
+        typeof
+        this.getPointerX() ===
+        "number" &&
+
+        typeof
+        this.getPointerY() ===
+        "number"
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C2.3.7 — MOVE TRACKING VALIDATION
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PointerEngine
+    .validatePointerMoveTracking =
+function () {
+
+    return (
+
+        typeof
+        this.getPointerX() ===
+        "number" &&
+
+        typeof
+        this.getPointerY() ===
+        "number"
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C2.3.8 — INITIALIZE MOVE TRACKING
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PointerEngine
+    .initializePointerMoveTracking =
+function () {
+
+    if (
+
+        this.pointerMoveTrackingReady
+
+    ) {
+
+        return;
+    }
+
+    this.pointerMoveTrackingReady =
+        true;
+
+    if (
+
+        CampusWord2007Simulateur
+            .Logger &&
+
+        typeof
+        CampusWord2007Simulateur
+            .Logger
+            .info ===
+        "function"
+
+    ) {
+
+        CampusWord2007Simulateur
+            .Logger
+            .info(
+                "Pointer Move Tracking Ready"
+            );
+    }
+};
+
+
+
+
+
+/* ==========================================================
+   C2.3.9 — MOVE TRACKING STATUS
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PointerEngine
+    .isPointerMoveTrackingReady =
+function () {
+
+    return (
+
+        this.pointerMoveTrackingReady ===
+        true
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C2.3.10 — MOVE TRACKING REPORT
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PointerEngine
+    .getPointerMoveTrackingReport =
+function () {
+
+    return {
+
+        ready:
+            this.isPointerMoveTrackingReady(),
+
+        valid:
+            this.validatePointerMoveTracking(),
+
+        position:
+            this.getPointerPosition()
+    };
+};
+
+
+
+
+
+
 
 
