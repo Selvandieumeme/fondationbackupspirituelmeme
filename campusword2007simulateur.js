@@ -14019,5 +14019,208 @@ function () {
 
 
 
+/* ==========================================================
+   C3.6 — TOUCH READY HOOK
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .TouchEngine
+    .touchReadyHookReady =
+false;
+
+
+
+
+
+/* ==========================================================
+   C3.6.1 — IS TOUCH ENGINE READY
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .TouchEngine
+    .isTouchEngineReady =
+function () {
+
+    return (
+
+        this.isTouchStateValidationReady() &&
+
+        this.isTouchStartEngineReady() &&
+
+        this.isTouchMoveEngineReady() &&
+
+        this.isTouchEndEngineReady() &&
+
+        this.isFingerTrackingReady()
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C3.6.2 — INITIALIZE TOUCH READY HOOK
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .TouchEngine
+    .initializeTouchReadyHook =
+function () {
+
+    if (
+
+        this.touchReadyHookReady
+
+    ) {
+
+        return;
+    }
+
+    this.touchReadyHookReady =
+        true;
+
+    if (
+
+        CampusWord2007Simulateur
+            .Logger &&
+
+        typeof
+        CampusWord2007Simulateur
+            .Logger
+            .info ===
+        "function"
+
+    ) {
+
+        CampusWord2007Simulateur
+            .Logger
+            .info(
+                "Touch Ready Hook Ready"
+            );
+    }
+};
+
+
+
+
+
+/* ==========================================================
+   C3.6.3 — TOUCH READY HOOK STATUS
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .TouchEngine
+    .isTouchReadyHookReady =
+function () {
+
+    return (
+
+        this.touchReadyHookReady ===
+        true
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C3.6.4 — TOUCH READY HOOK VALIDATION
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .TouchEngine
+    .validateTouchReadyHook =
+function () {
+
+    return (
+
+        typeof
+        this.isTouchEngineReady ===
+        "function" &&
+
+        typeof
+        this.initializeTouchReadyHook ===
+        "function"
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C3.6.5 — GET TOUCH READY STATUS
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .TouchEngine
+    .getTouchReadyStatus =
+function () {
+
+    return {
+
+        stateValidation:
+            this.isTouchStateValidationReady(),
+
+        startEngine:
+            this.isTouchStartEngineReady(),
+
+        moveEngine:
+            this.isTouchMoveEngineReady(),
+
+        endEngine:
+            this.isTouchEndEngineReady(),
+
+        fingerTracking:
+            this.isFingerTrackingReady(),
+
+        touchReady:
+            this.isTouchEngineReady(),
+
+        hookReady:
+            this.isTouchReadyHookReady()
+    };
+};
+
+
+
+
+
+/* ==========================================================
+   C3.6.6 — TOUCH READY REPORT
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .TouchEngine
+    .getTouchReadyReport =
+function () {
+
+    return {
+
+        ready:
+            this.isTouchEngineReady(),
+
+        hookReady:
+            this.isTouchReadyHookReady(),
+
+        valid:
+            this.validateTouchReadyHook(),
+
+        status:
+            this.getTouchReadyStatus()
+    };
+};
+
+
+
+
+
+
+
 
 
