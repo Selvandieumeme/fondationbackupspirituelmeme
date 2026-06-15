@@ -13556,3 +13556,202 @@ function () {
 
 
 
+
+
+
+/* ==========================================================
+   C3.4 — TOUCH END ENGINE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .TouchEngine
+    .touchEndEngineReady =
+false;
+
+
+
+
+
+/* ==========================================================
+   C3.4.1 — END TOUCH
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .TouchEngine
+    .endTouch =
+function () {
+
+    CampusWord2007Simulateur
+        .state
+        .touch
+        .active =
+            false;
+
+    return true;
+};
+
+
+
+
+
+/* ==========================================================
+   C3.4.2 — CLEAR TOUCH STATE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .TouchEngine
+    .clearTouchState =
+function () {
+
+    return this.endTouch();
+};
+
+
+
+
+
+/* ==========================================================
+   C3.4.3 — HAS ACTIVE TOUCH
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .TouchEngine
+    .hasActiveTouch =
+function () {
+
+    return this.isTouchActive();
+};
+
+
+
+
+
+/* ==========================================================
+   C3.4.4 — TOUCH END VALIDATION
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .TouchEngine
+    .validateTouchEndEngine =
+function () {
+
+    return (
+
+        typeof
+        this.endTouch ===
+        "function" &&
+
+        typeof
+        this.clearTouchState ===
+        "function" &&
+
+        typeof
+        this.hasActiveTouch ===
+        "function"
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C3.4.5 — INITIALIZE TOUCH END ENGINE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .TouchEngine
+    .initializeTouchEndEngine =
+function () {
+
+    if (
+
+        this.touchEndEngineReady
+
+    ) {
+
+        return;
+    }
+
+    this.touchEndEngineReady =
+        true;
+
+    if (
+
+        CampusWord2007Simulateur
+            .Logger &&
+
+        typeof
+        CampusWord2007Simulateur
+            .Logger
+            .info ===
+        "function"
+
+    ) {
+
+        CampusWord2007Simulateur
+            .Logger
+            .info(
+                "Touch End Engine Ready"
+            );
+    }
+};
+
+
+
+
+
+/* ==========================================================
+   C3.4.6 — TOUCH END STATUS
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .TouchEngine
+    .isTouchEndEngineReady =
+function () {
+
+    return (
+
+        this.touchEndEngineReady ===
+        true
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C3.4.7 — TOUCH END REPORT
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .TouchEngine
+    .getTouchEndReport =
+function () {
+
+    return {
+
+        ready:
+            this.isTouchEndEngineReady(),
+
+        active:
+            this.isTouchActive(),
+
+        valid:
+            this.validateTouchEndEngine()
+    };
+};
+
+
+
+
+
+
+
+
+
+
+
