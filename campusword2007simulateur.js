@@ -13011,4 +13011,548 @@ function () {
 
 
 
+/* ==========================================================
+   C3.2 — TOUCH START ENGINE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .TouchEngine
+    .touchStartEngineReady =
+false;
+
+
+
+
+
+/* ==========================================================
+   C3.2.1 — IS TOUCH ACTIVE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .TouchEngine
+    .isTouchActive =
+function () {
+
+    return (
+
+        CampusWord2007Simulateur
+            .state
+            .touch
+            .active ===
+        true
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C3.2.2 — GET TOUCH X
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .TouchEngine
+    .getTouchX =
+function () {
+
+    return CampusWord2007Simulateur
+        .state
+        .touch
+        .x;
+};
+
+
+
+
+
+/* ==========================================================
+   C3.2.3 — GET TOUCH Y
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .TouchEngine
+    .getTouchY =
+function () {
+
+    return CampusWord2007Simulateur
+        .state
+        .touch
+        .y;
+};
+
+
+
+
+
+/* ==========================================================
+   C3.2.4 — START TOUCH
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .TouchEngine
+    .startTouch =
+function (
+    x,
+    y
+) {
+
+    const touchState =
+        this.getTouchState();
+
+    touchState.active =
+        true;
+
+    touchState.x =
+        Number(x) || 0;
+
+    touchState.y =
+        Number(y) || 0;
+
+    return true;
+};
+
+
+
+
+
+/* ==========================================================
+   C3.2.5 — GET TOUCH POSITION
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .TouchEngine
+    .getTouchPosition =
+function () {
+
+    return {
+
+        x:
+            this.getTouchX(),
+
+        y:
+            this.getTouchY()
+    };
+};
+
+
+
+
+
+/* ==========================================================
+   C3.2.6 — HAS TOUCH POSITION
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .TouchEngine
+    .hasTouchPosition =
+function () {
+
+    return (
+
+        typeof
+        this.getTouchX() ===
+        "number" &&
+
+        typeof
+        this.getTouchY() ===
+        "number"
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C3.2.7 — TOUCH START VALIDATION
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .TouchEngine
+    .validateTouchStartEngine =
+function () {
+
+    return (
+
+        typeof
+        this.startTouch ===
+        "function" &&
+
+        typeof
+        this.isTouchActive ===
+        "function" &&
+
+        this.hasTouchPosition()
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C3.2.8 — INITIALIZE TOUCH START ENGINE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .TouchEngine
+    .initializeTouchStartEngine =
+function () {
+
+    if (
+
+        this.touchStartEngineReady
+
+    ) {
+
+        return;
+    }
+
+    this.touchStartEngineReady =
+        true;
+
+    if (
+
+        CampusWord2007Simulateur
+            .Logger &&
+
+        typeof
+        CampusWord2007Simulateur
+            .Logger
+            .info ===
+        "function"
+
+    ) {
+
+        CampusWord2007Simulateur
+            .Logger
+            .info(
+                "Touch Start Engine Ready"
+            );
+    }
+};
+
+
+
+
+
+/* ==========================================================
+   C3.2.9 — TOUCH START STATUS
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .TouchEngine
+    .isTouchStartEngineReady =
+function () {
+
+    return (
+
+        this.touchStartEngineReady ===
+        true
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C3.2.10 — TOUCH START REPORT
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .TouchEngine
+    .getTouchStartReport =
+function () {
+
+    return {
+
+        ready:
+            this.isTouchStartEngineReady(),
+
+        active:
+            this.isTouchActive(),
+
+        position:
+            this.getTouchPosition(),
+
+        valid:
+            this.validateTouchStartEngine()
+    };
+};
+
+
+
+
+
+
+
+
+
+/* ==========================================================
+   C3.3 — TOUCH MOVE ENGINE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .TouchEngine
+    .touchMoveEngineReady =
+false;
+
+
+
+
+
+/* ==========================================================
+   C3.3.1 — SET TOUCH POSITION
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .TouchEngine
+    .setTouchPosition =
+function (
+    x,
+    y
+) {
+
+    const touchState =
+        this.getTouchState();
+
+    touchState.x =
+        Number(x) || 0;
+
+    touchState.y =
+        Number(y) || 0;
+
+    return true;
+};
+
+
+
+
+
+/* ==========================================================
+   C3.3.2 — MOVE TOUCH
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .TouchEngine
+    .moveTouch =
+function (
+    x,
+    y
+) {
+
+    return this.setTouchPosition(
+        x,
+        y
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C3.3.3 — GET CURRENT TOUCH X
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .TouchEngine
+    .getCurrentTouchX =
+function () {
+
+    return this.getTouchX();
+};
+
+
+
+
+
+/* ==========================================================
+   C3.3.4 — GET CURRENT TOUCH Y
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .TouchEngine
+    .getCurrentTouchY =
+function () {
+
+    return this.getTouchY();
+};
+
+
+
+
+
+/* ==========================================================
+   C3.3.5 — GET CURRENT TOUCH POSITION
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .TouchEngine
+    .getCurrentTouchPosition =
+function () {
+
+    return {
+
+        x:
+            this.getCurrentTouchX(),
+
+        y:
+            this.getCurrentTouchY()
+    };
+};
+
+
+
+
+
+/* ==========================================================
+   C3.3.6 — RESET TOUCH POSITION
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .TouchEngine
+    .resetTouchPosition =
+function () {
+
+    return this.setTouchPosition(
+        0,
+        0
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C3.3.7 — TOUCH MOVE VALIDATION
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .TouchEngine
+    .validateTouchMoveEngine =
+function () {
+
+    return (
+
+        typeof
+        this.setTouchPosition ===
+        "function" &&
+
+        typeof
+        this.moveTouch ===
+        "function" &&
+
+        typeof
+        this.getCurrentTouchPosition ===
+        "function"
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C3.3.8 — INITIALIZE TOUCH MOVE ENGINE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .TouchEngine
+    .initializeTouchMoveEngine =
+function () {
+
+    if (
+
+        this.touchMoveEngineReady
+
+    ) {
+
+        return;
+    }
+
+    this.touchMoveEngineReady =
+        true;
+
+    if (
+
+        CampusWord2007Simulateur
+            .Logger &&
+
+        typeof
+        CampusWord2007Simulateur
+            .Logger
+            .info ===
+        "function"
+
+    ) {
+
+        CampusWord2007Simulateur
+            .Logger
+            .info(
+                "Touch Move Engine Ready"
+            );
+    }
+};
+
+
+
+
+
+/* ==========================================================
+   C3.3.9 — TOUCH MOVE STATUS
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .TouchEngine
+    .isTouchMoveEngineReady =
+function () {
+
+    return (
+
+        this.touchMoveEngineReady ===
+        true
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C3.3.10 — TOUCH MOVE REPORT
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .TouchEngine
+    .getTouchMoveReport =
+function () {
+
+    return {
+
+        ready:
+            this.isTouchMoveEngineReady(),
+
+        position:
+            this.getCurrentTouchPosition(),
+
+        valid:
+            this.validateTouchMoveEngine()
+    };
+};
+
+
+
+
+
+
 
