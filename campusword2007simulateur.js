@@ -11629,3 +11629,278 @@ function () {
 
 
 
+
+
+
+
+/* ==========================================================
+   C2.2 — POINTER START TRACKING
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PointerEngine
+    .pointerStartTrackingReady =
+false;
+
+
+
+
+
+/* ==========================================================
+   C2.2.1 — GET POINTER START X
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PointerEngine
+    .getPointerStartX =
+function () {
+
+    return CampusWord2007Simulateur
+        .state
+        .pointer
+        .startX;
+};
+
+
+
+
+
+/* ==========================================================
+   C2.2.2 — GET POINTER START Y
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PointerEngine
+    .getPointerStartY =
+function () {
+
+    return CampusWord2007Simulateur
+        .state
+        .pointer
+        .startY;
+};
+
+
+
+
+
+/* ==========================================================
+   C2.2.3 — SET POINTER START
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PointerEngine
+    .setPointerStart =
+function (
+    x,
+    y
+) {
+
+    const pointerState =
+        this.getPointerState();
+
+    pointerState.startX =
+        Number(x) || 0;
+
+    pointerState.startY =
+        Number(y) || 0;
+
+    return true;
+};
+
+
+
+
+
+/* ==========================================================
+   C2.2.4 — GET POINTER START POSITION
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PointerEngine
+    .getPointerStartPosition =
+function () {
+
+    return {
+
+        x:
+            this.getPointerStartX(),
+
+        y:
+            this.getPointerStartY()
+    };
+};
+
+
+
+
+
+/* ==========================================================
+   C2.2.5 — RESET POINTER START
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PointerEngine
+    .resetPointerStart =
+function () {
+
+    return this.setPointerStart(
+        0,
+        0
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C2.2.6 — HAS POINTER START
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PointerEngine
+    .hasPointerStart =
+function () {
+
+    return (
+
+        typeof
+        this.getPointerStartX() ===
+        "number" &&
+
+        typeof
+        this.getPointerStartY() ===
+        "number"
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C2.2.7 — START TRACKING VALIDATION
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PointerEngine
+    .validatePointerStartTracking =
+function () {
+
+    return (
+
+        typeof
+        this.getPointerStartX() ===
+        "number" &&
+
+        typeof
+        this.getPointerStartY() ===
+        "number"
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C2.2.8 — INITIALIZE START TRACKING
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PointerEngine
+    .initializePointerStartTracking =
+function () {
+
+    if (
+
+        this.pointerStartTrackingReady
+
+    ) {
+
+        return;
+    }
+
+    this.pointerStartTrackingReady =
+        true;
+
+    if (
+
+        CampusWord2007Simulateur
+            .Logger &&
+
+        typeof
+        CampusWord2007Simulateur
+            .Logger
+            .info ===
+        "function"
+
+    ) {
+
+        CampusWord2007Simulateur
+            .Logger
+            .info(
+                "Pointer Start Tracking Ready"
+            );
+    }
+};
+
+
+
+
+
+/* ==========================================================
+   C2.2.9 — START TRACKING STATUS
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PointerEngine
+    .isPointerStartTrackingReady =
+function () {
+
+    return (
+
+        this.pointerStartTrackingReady ===
+        true
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C2.2.10 — START TRACKING REPORT
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PointerEngine
+    .getPointerStartTrackingReport =
+function () {
+
+    return {
+
+        ready:
+            this.isPointerStartTrackingReady(),
+
+        valid:
+            this.validatePointerStartTracking(),
+
+        position:
+            this.getPointerStartPosition()
+    };
+};
+
+
+
+
+
+
+
+
+
+
