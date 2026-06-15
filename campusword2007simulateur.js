@@ -12448,3 +12448,290 @@ function () {
 
 
 
+
+/* ==========================================================
+   C2.5 — POINTER DRAG ENGINE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PointerEngine
+    .pointerDragEngineReady =
+false;
+
+
+
+
+
+/* ==========================================================
+   C2.5.1 — IS DRAGGING
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PointerEngine
+    .isDragging =
+function () {
+
+    return (
+
+        CampusWord2007Simulateur
+            .state
+            .pointer
+            .dragging ===
+        true
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C2.5.2 — START DRAG
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PointerEngine
+    .startDrag =
+function () {
+
+    CampusWord2007Simulateur
+        .state
+        .pointer
+        .dragging =
+            true;
+
+    return true;
+};
+
+
+
+
+
+/* ==========================================================
+   C2.5.3 — STOP DRAG
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PointerEngine
+    .stopDrag =
+function () {
+
+    CampusWord2007Simulateur
+        .state
+        .pointer
+        .dragging =
+            false;
+
+    return true;
+};
+
+
+
+
+
+/* ==========================================================
+   C2.5.4 — SET DRAG STATE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PointerEngine
+    .setDragState =
+function (
+    dragging
+) {
+
+    CampusWord2007Simulateur
+        .state
+        .pointer
+        .dragging =
+            !!dragging;
+
+    return true;
+};
+
+
+
+
+
+/* ==========================================================
+   C2.5.5 — TOGGLE DRAG STATE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PointerEngine
+    .toggleDragState =
+function () {
+
+    this.setDragState(
+
+        !this.isDragging()
+
+    );
+
+    return this.isDragging();
+};
+
+
+
+
+
+/* ==========================================================
+   C2.5.6 — GET DRAG INFO
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PointerEngine
+    .getDragInfo =
+function () {
+
+    return {
+
+        dragging:
+            this.isDragging(),
+
+        start:
+            this.getPointerStartPosition(),
+
+        current:
+            this.getPointerPosition(),
+
+        delta:
+            this.getPointerDelta()
+    };
+};
+
+
+
+
+
+/* ==========================================================
+   C2.5.7 — DRAG ENGINE VALIDATION
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PointerEngine
+    .validatePointerDragEngine =
+function () {
+
+    return (
+
+        typeof
+        this.isDragging ===
+        "function" &&
+
+        typeof
+        this.startDrag ===
+        "function" &&
+
+        typeof
+        this.stopDrag ===
+        "function" &&
+
+        typeof
+        this.setDragState ===
+        "function"
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C2.5.8 — INITIALIZE DRAG ENGINE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PointerEngine
+    .initializePointerDragEngine =
+function () {
+
+    if (
+
+        this.pointerDragEngineReady
+
+    ) {
+
+        return;
+    }
+
+    this.pointerDragEngineReady =
+        true;
+
+    if (
+
+        CampusWord2007Simulateur
+            .Logger &&
+
+        typeof
+        CampusWord2007Simulateur
+            .Logger
+            .info ===
+        "function"
+
+    ) {
+
+        CampusWord2007Simulateur
+            .Logger
+            .info(
+                "Pointer Drag Engine Ready"
+            );
+    }
+};
+
+
+
+
+
+/* ==========================================================
+   C2.5.9 — DRAG ENGINE STATUS
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PointerEngine
+    .isPointerDragEngineReady =
+function () {
+
+    return (
+
+        this.pointerDragEngineReady ===
+        true
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C2.5.10 — DRAG ENGINE REPORT
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PointerEngine
+    .getPointerDragEngineReport =
+function () {
+
+    return {
+
+        ready:
+            this.isPointerDragEngineReady(),
+
+        valid:
+            this.validatePointerDragEngine(),
+
+        dragging:
+            this.isDragging(),
+
+        info:
+            this.getDragInfo()
+    };
+};
+
+
+
+
+
