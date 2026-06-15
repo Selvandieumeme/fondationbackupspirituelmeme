@@ -14222,5 +14222,296 @@ function () {
 
 
 
+/* ==========================================================
+   C3.7 — TOUCH VALIDATION BLOCK
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .TouchEngine
+    .touchValidationBlockReady =
+false;
+
+
+
+
+
+/* ==========================================================
+   C3.7.1 — VALIDATE TOUCH STATE BLOCK
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .TouchEngine
+    .validateTouchStateBlock =
+function () {
+
+    return (
+
+        this.validateTouchEngine &&
+
+        this.validateTouchEngine()
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C3.7.2 — VALIDATE TOUCH START BLOCK
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .TouchEngine
+    .validateTouchStartBlock =
+function () {
+
+    return (
+
+        this.validateTouchStartEngine &&
+
+        this.validateTouchStartEngine()
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C3.7.3 — VALIDATE TOUCH MOVE BLOCK
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .TouchEngine
+    .validateTouchMoveBlock =
+function () {
+
+    return (
+
+        this.validateTouchMoveEngine &&
+
+        this.validateTouchMoveEngine()
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C3.7.4 — VALIDATE TOUCH END BLOCK
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .TouchEngine
+    .validateTouchEndBlock =
+function () {
+
+    return (
+
+        this.validateTouchEndEngine &&
+
+        this.validateTouchEndEngine()
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C3.7.5 — VALIDATE FINGER TRACKING BLOCK
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .TouchEngine
+    .validateFingerTrackingBlock =
+function () {
+
+    return (
+
+        this.validateFingerTracking &&
+
+        this.validateFingerTracking()
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C3.7.6 — VALIDATE TOUCH READY BLOCK
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .TouchEngine
+    .validateTouchReadyBlock =
+function () {
+
+    return (
+
+        this.validateTouchReadyHook &&
+
+        this.validateTouchReadyHook()
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C3.7.7 — VALIDATE COMPLETE TOUCH SYSTEM
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .TouchEngine
+    .validateCompleteTouchSystem =
+function () {
+
+    return (
+
+        this.validateTouchStateBlock() &&
+
+        this.validateTouchStartBlock() &&
+
+        this.validateTouchMoveBlock() &&
+
+        this.validateTouchEndBlock() &&
+
+        this.validateFingerTrackingBlock() &&
+
+        this.validateTouchReadyBlock()
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C3.7.8 — INITIALIZE TOUCH VALIDATION BLOCK
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .TouchEngine
+    .initializeTouchValidationBlock =
+function () {
+
+    if (
+
+        this.touchValidationBlockReady
+
+    ) {
+
+        return;
+    }
+
+    this.touchValidationBlockReady =
+        true;
+
+    if (
+
+        CampusWord2007Simulateur
+            .Logger &&
+
+        typeof
+        CampusWord2007Simulateur
+            .Logger
+            .info ===
+        "function"
+
+    ) {
+
+        CampusWord2007Simulateur
+            .Logger
+            .info(
+                "Touch Validation Block Ready"
+            );
+    }
+};
+
+
+
+
+
+/* ==========================================================
+   C3.7.9 — TOUCH VALIDATION BLOCK STATUS
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .TouchEngine
+    .isTouchValidationBlockReady =
+function () {
+
+    return (
+
+        this.touchValidationBlockReady ===
+        true
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C3.7.10 — TOUCH VALIDATION REPORT
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .TouchEngine
+    .getTouchValidationBlockReport =
+function () {
+
+    return {
+
+        state:
+            this.validateTouchStateBlock(),
+
+        start:
+            this.validateTouchStartBlock(),
+
+        move:
+            this.validateTouchMoveBlock(),
+
+        end:
+            this.validateTouchEndBlock(),
+
+        fingers:
+            this.validateFingerTrackingBlock(),
+
+        ready:
+            this.validateTouchReadyBlock(),
+
+        complete:
+            this.validateCompleteTouchSystem(),
+
+        blockReady:
+            this.isTouchValidationBlockReady()
+    };
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
