@@ -12735,3 +12735,280 @@ function () {
 
 
 
+
+
+
+
+/* ==========================================================
+   C3 — TOUCH ENGINE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .TouchEngine =
+CampusWord2007Simulateur
+    .TouchEngine || {
+
+        initialized: false
+    };
+
+
+
+
+
+
+
+/* ==========================================================
+   C3.1 — TOUCH STATE VALIDATION
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .TouchEngine
+    .touchStateValidationReady =
+false;
+
+
+
+
+
+/* ==========================================================
+   C3.1.1 — GET TOUCH STATE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .TouchEngine
+    .getTouchState =
+function () {
+
+    return CampusWord2007Simulateur
+        .state
+        .touch;
+};
+
+
+
+
+
+/* ==========================================================
+   C3.1.2 — VALIDATE TOUCH STATE EXISTS
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .TouchEngine
+    .validateTouchState =
+function () {
+
+    return !!this.getTouchState();
+};
+
+
+
+
+
+/* ==========================================================
+   C3.1.3 — VALIDATE TOUCH ACTIVE STATE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .TouchEngine
+    .validateTouchActiveState =
+function () {
+
+    const touchState =
+        this.getTouchState();
+
+    return (
+
+        typeof touchState.active ===
+        "boolean"
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C3.1.4 — VALIDATE TOUCH POSITION STATE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .TouchEngine
+    .validateTouchPositionState =
+function () {
+
+    const touchState =
+        this.getTouchState();
+
+    return (
+
+        typeof touchState.x ===
+        "number" &&
+
+        typeof touchState.y ===
+        "number"
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C3.1.5 — VALIDATE FINGER COUNT STATE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .TouchEngine
+    .validateFingerCountState =
+function () {
+
+    const touchState =
+        this.getTouchState();
+
+    return (
+
+        typeof touchState.fingerCount ===
+        "number"
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C3.1.6 — COMPLETE TOUCH VALIDATION
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .TouchEngine
+    .validateTouchEngine =
+function () {
+
+    return (
+
+        this.validateTouchState() &&
+
+        this.validateTouchActiveState() &&
+
+        this.validateTouchPositionState() &&
+
+        this.validateFingerCountState()
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C3.1.7 — INITIALIZE TOUCH VALIDATION
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .TouchEngine
+    .initializeTouchStateValidation =
+function () {
+
+    if (
+
+        this.touchStateValidationReady
+
+    ) {
+
+        return;
+    }
+
+    this.touchStateValidationReady =
+        true;
+
+    if (
+
+        CampusWord2007Simulateur
+            .Logger &&
+
+        typeof
+        CampusWord2007Simulateur
+            .Logger
+            .info ===
+        "function"
+
+    ) {
+
+        CampusWord2007Simulateur
+            .Logger
+            .info(
+                "Touch State Validation Ready"
+            );
+    }
+};
+
+
+
+
+
+/* ==========================================================
+   C3.1.8 — TOUCH VALIDATION STATUS
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .TouchEngine
+    .isTouchStateValidationReady =
+function () {
+
+    return (
+
+        this.touchStateValidationReady ===
+        true
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C3.1.9 — TOUCH VALIDATION REPORT
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .TouchEngine
+    .getTouchValidationReport =
+function () {
+
+    return {
+
+        state:
+            this.validateTouchState(),
+
+        active:
+            this.validateTouchActiveState(),
+
+        position:
+            this.validateTouchPositionState(),
+
+        fingers:
+            this.validateFingerCountState(),
+
+        complete:
+            this.validateTouchEngine(),
+
+        ready:
+            this.isTouchStateValidationReady()
+    };
+};
+
+
+
+
+
+
+
+
+
+
