@@ -9801,5 +9801,340 @@ function () {
 
 
 
+/* ==========================================================
+   C1.3 — BUTTON TRACKING
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .MouseEngine
+    .buttonTrackingReady =
+false;
+
+
+
+
+
+/* ==========================================================
+   C1.3.1 — IS MOUSE DOWN
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .MouseEngine
+    .isMouseDown =
+function () {
+
+    return CampusWord2007Simulateur
+        .state
+        .mouse
+        .isDown;
+};
+
+
+
+
+
+/* ==========================================================
+   C1.3.2 — SET MOUSE DOWN
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .MouseEngine
+    .setMouseDown =
+function (
+    value
+) {
+
+    CampusWord2007Simulateur
+        .state
+        .mouse
+        .isDown =
+            !!value;
+
+    return true;
+};
+
+
+
+
+
+/* ==========================================================
+   C1.3.3 — SET BUTTON STATE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .MouseEngine
+    .setButtonState =
+function (
+    button,
+    pressed
+) {
+
+    const mouseState =
+        CampusWord2007Simulateur
+            .state
+            .mouse;
+
+    switch (
+        button
+    ) {
+
+        case "left":
+
+            mouseState.leftButton =
+                !!pressed;
+
+            break;
+
+        case "middle":
+
+            mouseState.middleButton =
+                !!pressed;
+
+            break;
+
+        case "right":
+
+            mouseState.rightButton =
+                !!pressed;
+
+            break;
+
+        default:
+
+            return false;
+    }
+
+    return true;
+};
+
+
+
+
+
+/* ==========================================================
+   C1.3.4 — IS LEFT BUTTON DOWN
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .MouseEngine
+    .isLeftButtonDown =
+function () {
+
+    return CampusWord2007Simulateur
+        .state
+        .mouse
+        .leftButton;
+};
+
+
+
+
+
+/* ==========================================================
+   C1.3.5 — IS MIDDLE BUTTON DOWN
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .MouseEngine
+    .isMiddleButtonDown =
+function () {
+
+    return CampusWord2007Simulateur
+        .state
+        .mouse
+        .middleButton;
+};
+
+
+
+
+
+/* ==========================================================
+   C1.3.6 — IS RIGHT BUTTON DOWN
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .MouseEngine
+    .isRightButtonDown =
+function () {
+
+    return CampusWord2007Simulateur
+        .state
+        .mouse
+        .rightButton;
+};
+
+
+
+
+
+/* ==========================================================
+   C1.3.7 — CLEAR BUTTON STATES
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .MouseEngine
+    .clearButtonStates =
+function () {
+
+    const mouseState =
+        CampusWord2007Simulateur
+            .state
+            .mouse;
+
+    mouseState.isDown =
+        false;
+
+    mouseState.leftButton =
+        false;
+
+    mouseState.middleButton =
+        false;
+
+    mouseState.rightButton =
+        false;
+
+    return true;
+};
+
+
+
+
+
+/* ==========================================================
+   C1.3.8 — BUTTON VALIDATION
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .MouseEngine
+    .validateButtonTracking =
+function () {
+
+    const mouseState =
+        CampusWord2007Simulateur
+            .state
+            .mouse;
+
+    return (
+
+        typeof mouseState.isDown ===
+        "boolean" &&
+
+        typeof mouseState.leftButton ===
+        "boolean" &&
+
+        typeof mouseState.middleButton ===
+        "boolean" &&
+
+        typeof mouseState.rightButton ===
+        "boolean"
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C1.3.9 — INITIALIZE BUTTON TRACKING
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .MouseEngine
+    .initializeButtonTracking =
+function () {
+
+    if (
+        this.buttonTrackingReady
+    ) {
+
+        return;
+    }
+
+    this.buttonTrackingReady =
+        true;
+
+    if (
+
+        CampusWord2007Simulateur
+            .Logger &&
+
+        typeof
+        CampusWord2007Simulateur
+            .Logger
+            .info ===
+        "function"
+
+    ) {
+
+        CampusWord2007Simulateur
+            .Logger
+            .info(
+                "Mouse Button Tracking Ready"
+            );
+    }
+};
+
+
+
+
+
+/* ==========================================================
+   C1.3.10 — BUTTON TRACKING STATUS
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .MouseEngine
+    .isButtonTrackingReady =
+function () {
+
+    return (
+
+        this.buttonTrackingReady ===
+        true
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C1.3.11 — BUTTON TRACKING REPORT
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .MouseEngine
+    .getButtonTrackingReport =
+function () {
+
+    return {
+
+        ready:
+            this.isButtonTrackingReady(),
+
+        valid:
+            this.validateButtonTracking(),
+
+        isDown:
+            this.isMouseDown(),
+
+        left:
+            this.isLeftButtonDown(),
+
+        middle:
+            this.isMiddleButtonDown(),
+
+        right:
+            this.isRightButtonDown()
+    };
+};
+
+
+
+
+
 
 
