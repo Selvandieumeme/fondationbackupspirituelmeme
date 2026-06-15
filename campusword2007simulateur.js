@@ -12171,3 +12171,280 @@ function () {
 
 
 
+
+
+
+
+/* ==========================================================
+   C2.4 — POINTER DELTA TRACKING
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PointerEngine
+    .pointerDeltaTrackingReady =
+false;
+
+
+
+
+
+/* ==========================================================
+   C2.4.1 — GET POINTER DELTA X
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PointerEngine
+    .getPointerDeltaX =
+function () {
+
+    return CampusWord2007Simulateur
+        .state
+        .pointer
+        .deltaX;
+};
+
+
+
+
+
+/* ==========================================================
+   C2.4.2 — GET POINTER DELTA Y
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PointerEngine
+    .getPointerDeltaY =
+function () {
+
+    return CampusWord2007Simulateur
+        .state
+        .pointer
+        .deltaY;
+};
+
+
+
+
+
+/* ==========================================================
+   C2.4.3 — SET POINTER DELTA
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PointerEngine
+    .setPointerDelta =
+function (
+    deltaX,
+    deltaY
+) {
+
+    const pointerState =
+        this.getPointerState();
+
+    pointerState.deltaX =
+        Number(
+            deltaX
+        ) || 0;
+
+    pointerState.deltaY =
+        Number(
+            deltaY
+        ) || 0;
+
+    return true;
+};
+
+
+
+
+
+/* ==========================================================
+   C2.4.4 — GET POINTER DELTA
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PointerEngine
+    .getPointerDelta =
+function () {
+
+    return {
+
+        x:
+            this.getPointerDeltaX(),
+
+        y:
+            this.getPointerDeltaY()
+    };
+};
+
+
+
+
+
+/* ==========================================================
+   C2.4.5 — RESET POINTER DELTA
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PointerEngine
+    .resetPointerDelta =
+function () {
+
+    return this.setPointerDelta(
+        0,
+        0
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C2.4.6 — HAS POINTER DELTA
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PointerEngine
+    .hasPointerDelta =
+function () {
+
+    return (
+
+        typeof
+        this.getPointerDeltaX() ===
+        "number" &&
+
+        typeof
+        this.getPointerDeltaY() ===
+        "number"
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C2.4.7 — DELTA TRACKING VALIDATION
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PointerEngine
+    .validatePointerDeltaTracking =
+function () {
+
+    return (
+
+        typeof
+        this.getPointerDeltaX() ===
+        "number" &&
+
+        typeof
+        this.getPointerDeltaY() ===
+        "number"
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C2.4.8 — INITIALIZE DELTA TRACKING
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PointerEngine
+    .initializePointerDeltaTracking =
+function () {
+
+    if (
+
+        this.pointerDeltaTrackingReady
+
+    ) {
+
+        return;
+    }
+
+    this.pointerDeltaTrackingReady =
+        true;
+
+    if (
+
+        CampusWord2007Simulateur
+            .Logger &&
+
+        typeof
+        CampusWord2007Simulateur
+            .Logger
+            .info ===
+        "function"
+
+    ) {
+
+        CampusWord2007Simulateur
+            .Logger
+            .info(
+                "Pointer Delta Tracking Ready"
+            );
+    }
+};
+
+
+
+
+
+/* ==========================================================
+   C2.4.9 — DELTA TRACKING STATUS
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PointerEngine
+    .isPointerDeltaTrackingReady =
+function () {
+
+    return (
+
+        this.pointerDeltaTrackingReady ===
+        true
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C2.4.10 — DELTA TRACKING REPORT
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PointerEngine
+    .getPointerDeltaTrackingReport =
+function () {
+
+    return {
+
+        ready:
+            this.isPointerDeltaTrackingReady(),
+
+        valid:
+            this.validatePointerDeltaTracking(),
+
+        delta:
+            this.getPointerDelta()
+    };
+};
+
+
+
+
+
+
+
+
