@@ -11326,3 +11326,306 @@ function () {
 
 
 
+
+
+
+
+/* ==========================================================
+   C2 — POINTER ENGINE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PointerEngine =
+CampusWord2007Simulateur
+    .PointerEngine || {
+
+        initialized: false
+    };
+
+
+
+
+
+/* ==========================================================
+   C2.1 — POINTER STATE VALIDATION
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PointerEngine
+    .pointerStateValidationReady =
+false;
+
+
+
+
+
+/* ==========================================================
+   C2.1.1 — GET POINTER STATE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PointerEngine
+    .getPointerState =
+function () {
+
+    return CampusWord2007Simulateur
+        .state
+        .pointer;
+};
+
+
+
+
+
+/* ==========================================================
+   C2.1.2 — VALIDATE POINTER STATE EXISTS
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PointerEngine
+    .validatePointerState =
+function () {
+
+    return !!this.getPointerState();
+};
+
+
+
+
+
+/* ==========================================================
+   C2.1.3 — VALIDATE POINTER START STATE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PointerEngine
+    .validatePointerStartState =
+function () {
+
+    const pointerState =
+        this.getPointerState();
+
+    return (
+
+        typeof pointerState.startX ===
+        "number" &&
+
+        typeof pointerState.startY ===
+        "number"
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C2.1.4 — VALIDATE POINTER POSITION STATE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PointerEngine
+    .validatePointerPositionState =
+function () {
+
+    const pointerState =
+        this.getPointerState();
+
+    return (
+
+        typeof pointerState.currentX ===
+        "number" &&
+
+        typeof pointerState.currentY ===
+        "number"
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C2.1.5 — VALIDATE POINTER DELTA STATE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PointerEngine
+    .validatePointerDeltaState =
+function () {
+
+    const pointerState =
+        this.getPointerState();
+
+    return (
+
+        typeof pointerState.deltaX ===
+        "number" &&
+
+        typeof pointerState.deltaY ===
+        "number"
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C2.1.6 — VALIDATE POINTER DRAG STATE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PointerEngine
+    .validatePointerDragState =
+function () {
+
+    const pointerState =
+        this.getPointerState();
+
+    return (
+
+        typeof pointerState.dragging ===
+        "boolean"
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C2.1.7 — COMPLETE POINTER VALIDATION
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PointerEngine
+    .validatePointerEngine =
+function () {
+
+    return (
+
+        this.validatePointerState() &&
+
+        this.validatePointerStartState() &&
+
+        this.validatePointerPositionState() &&
+
+        this.validatePointerDeltaState() &&
+
+        this.validatePointerDragState()
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C2.1.8 — INITIALIZE POINTER VALIDATION
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PointerEngine
+    .initializePointerStateValidation =
+function () {
+
+    if (
+
+        this.pointerStateValidationReady
+
+    ) {
+
+        return;
+    }
+
+    this.pointerStateValidationReady =
+        true;
+
+    if (
+
+        CampusWord2007Simulateur
+            .Logger &&
+
+        typeof
+        CampusWord2007Simulateur
+            .Logger
+            .info ===
+        "function"
+
+    ) {
+
+        CampusWord2007Simulateur
+            .Logger
+            .info(
+                "Pointer State Validation Ready"
+            );
+    }
+};
+
+
+
+
+
+/* ==========================================================
+   C2.1.9 — POINTER VALIDATION STATUS
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PointerEngine
+    .isPointerStateValidationReady =
+function () {
+
+    return (
+
+        this.pointerStateValidationReady ===
+        true
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C2.1.10 — POINTER VALIDATION REPORT
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PointerEngine
+    .getPointerValidationReport =
+function () {
+
+    return {
+
+        state:
+            this.validatePointerState(),
+
+        start:
+            this.validatePointerStartState(),
+
+        position:
+            this.validatePointerPositionState(),
+
+        delta:
+            this.validatePointerDeltaState(),
+
+        drag:
+            this.validatePointerDragState(),
+
+        complete:
+            this.validatePointerEngine(),
+
+        ready:
+            this.isPointerStateValidationReady()
+    };
+};
+
+
+
