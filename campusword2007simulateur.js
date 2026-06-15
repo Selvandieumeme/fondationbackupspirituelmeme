@@ -9334,6 +9334,19 @@ function () {
 
 
 
+/* ==========================================================
+   C1 — MOUSE ENGINE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .MouseEngine =
+CampusWord2007Simulateur
+    .MouseEngine || {
+
+        initialized: false
+    };
+
+
 
 /* ==========================================================
    C1.1 — MOUSE STATE VALIDATION
