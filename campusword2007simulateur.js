@@ -11013,3 +11013,303 @@ function () {
 
 
 
+
+
+
+
+
+/* ==========================================================
+   C1.7 — MOUSE VALIDATION BLOCK
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .MouseEngine
+    .mouseValidationBlockReady =
+false;
+
+
+
+
+
+/* ==========================================================
+   C1.7.1 — VALIDATE STATE BLOCK
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .MouseEngine
+    .validateMouseStateBlock =
+function () {
+
+    return (
+
+        typeof
+        this.validateMouseEngine ===
+        "function" &&
+
+        this.validateMouseEngine()
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C1.7.2 — VALIDATE POSITION BLOCK
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .MouseEngine
+    .validatePositionBlock =
+function () {
+
+    return (
+
+        typeof
+        this.validateMousePositionTracking ===
+        "function" &&
+
+        this.validateMousePositionTracking()
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C1.7.3 — VALIDATE BUTTON BLOCK
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .MouseEngine
+    .validateButtonBlock =
+function () {
+
+    return (
+
+        typeof
+        this.validateButtonTracking ===
+        "function" &&
+
+        this.validateButtonTracking()
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C1.7.4 — VALIDATE CLICK BLOCK
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .MouseEngine
+    .validateClickBlock =
+function () {
+
+    return (
+
+        typeof
+        this.validateClickTracking ===
+        "function" &&
+
+        this.validateClickTracking()
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C1.7.5 — VALIDATE EVENT BLOCK
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .MouseEngine
+    .validateEventBlock =
+function () {
+
+    return (
+
+        typeof
+        this.validateMouseEvents ===
+        "function" &&
+
+        this.validateMouseEvents()
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C1.7.6 — VALIDATE READY HOOK BLOCK
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .MouseEngine
+    .validateReadyHookBlock =
+function () {
+
+    return (
+
+        typeof
+        this.validateMouseReadyHook ===
+        "function" &&
+
+        this.validateMouseReadyHook()
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C1.7.7 — COMPLETE MOUSE VALIDATION
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .MouseEngine
+    .validateMouseSystem =
+function () {
+
+    return (
+
+        this.validateMouseStateBlock() &&
+
+        this.validatePositionBlock() &&
+
+        this.validateButtonBlock() &&
+
+        this.validateClickBlock() &&
+
+        this.validateEventBlock() &&
+
+        this.validateReadyHookBlock()
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C1.7.8 — INITIALIZE VALIDATION BLOCK
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .MouseEngine
+    .initializeMouseValidationBlock =
+function () {
+
+    if (
+
+        this.mouseValidationBlockReady
+
+    ) {
+
+        return;
+    }
+
+    this.mouseValidationBlockReady =
+        true;
+
+    if (
+
+        CampusWord2007Simulateur
+            .Logger &&
+
+        typeof
+        CampusWord2007Simulateur
+            .Logger
+            .info ===
+        "function"
+
+    ) {
+
+        CampusWord2007Simulateur
+            .Logger
+            .info(
+                "Mouse Validation Block Ready"
+            );
+    }
+};
+
+
+
+
+
+/* ==========================================================
+   C1.7.9 — VALIDATION BLOCK STATUS
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .MouseEngine
+    .isMouseValidationBlockReady =
+function () {
+
+    return (
+
+        this.mouseValidationBlockReady ===
+        true
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C1.7.10 — MOUSE VALIDATION REPORT
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .MouseEngine
+    .getMouseValidationBlockReport =
+function () {
+
+    return {
+
+        state:
+            this.validateMouseStateBlock(),
+
+        position:
+            this.validatePositionBlock(),
+
+        buttons:
+            this.validateButtonBlock(),
+
+        clicks:
+            this.validateClickBlock(),
+
+        events:
+            this.validateEventBlock(),
+
+        readyHook:
+            this.validateReadyHookBlock(),
+
+        complete:
+            this.validateMouseSystem(),
+
+        blockReady:
+            this.isMouseValidationBlockReady()
+    };
+};
+
+
+
+
+
