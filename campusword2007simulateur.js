@@ -13753,5 +13753,271 @@ function () {
 
 
 
+/* ==========================================================
+   C3.5 — FINGER TRACKING
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .TouchEngine
+    .fingerTrackingReady =
+false;
+
+
+
+
+
+/* ==========================================================
+   C3.5.1 — GET FINGER COUNT
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .TouchEngine
+    .getFingerCount =
+function () {
+
+    return CampusWord2007Simulateur
+        .state
+        .touch
+        .fingerCount;
+};
+
+
+
+
+
+/* ==========================================================
+   C3.5.2 — SET FINGER COUNT
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .TouchEngine
+    .setFingerCount =
+function (
+    count
+) {
+
+    CampusWord2007Simulateur
+        .state
+        .touch
+        .fingerCount =
+            Number(count) || 0;
+
+    return true;
+};
+
+
+
+
+
+/* ==========================================================
+   C3.5.3 — RESET FINGER COUNT
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .TouchEngine
+    .resetFingerCount =
+function () {
+
+    return this.setFingerCount(
+        0
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C3.5.4 — HAS FINGERS
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .TouchEngine
+    .hasFingers =
+function () {
+
+    return (
+
+        this.getFingerCount() > 0
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C3.5.5 — IS SINGLE TOUCH
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .TouchEngine
+    .isSingleTouch =
+function () {
+
+    return (
+
+        this.getFingerCount() === 1
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C3.5.6 — IS MULTI TOUCH
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .TouchEngine
+    .isMultiTouch =
+function () {
+
+    return (
+
+        this.getFingerCount() > 1
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C3.5.7 — FINGER TRACKING VALIDATION
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .TouchEngine
+    .validateFingerTracking =
+function () {
+
+    return (
+
+        typeof
+        this.getFingerCount ===
+        "function" &&
+
+        typeof
+        this.setFingerCount ===
+        "function" &&
+
+        typeof
+        this.hasFingers ===
+        "function"
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C3.5.8 — INITIALIZE FINGER TRACKING
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .TouchEngine
+    .initializeFingerTracking =
+function () {
+
+    if (
+
+        this.fingerTrackingReady
+
+    ) {
+
+        return;
+    }
+
+    this.fingerTrackingReady =
+        true;
+
+    if (
+
+        CampusWord2007Simulateur
+            .Logger &&
+
+        typeof
+        CampusWord2007Simulateur
+            .Logger
+            .info ===
+        "function"
+
+    ) {
+
+        CampusWord2007Simulateur
+            .Logger
+            .info(
+                "Finger Tracking Ready"
+            );
+    }
+};
+
+
+
+
+
+/* ==========================================================
+   C3.5.9 — FINGER TRACKING STATUS
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .TouchEngine
+    .isFingerTrackingReady =
+function () {
+
+    return (
+
+        this.fingerTrackingReady ===
+        true
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C3.5.10 — FINGER TRACKING REPORT
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .TouchEngine
+    .getFingerTrackingReport =
+function () {
+
+    return {
+
+        ready:
+            this.isFingerTrackingReady(),
+
+        fingerCount:
+            this.getFingerCount(),
+
+        singleTouch:
+            this.isSingleTouch(),
+
+        multiTouch:
+            this.isMultiTouch(),
+
+        valid:
+            this.validateFingerTracking()
+    };
+};
+
+
+
+
+
+
+
+
 
 
