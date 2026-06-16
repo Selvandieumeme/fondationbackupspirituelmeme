@@ -14525,3 +14525,428 @@ CampusWord2007Simulateur
 
 
 
+
+
+
+/* ==========================================================
+   C4.1 — CURSOR STATE VALIDATION
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .CursorEngine
+    .cursorStateValidationReady =
+false;
+
+
+
+
+
+/* ==========================================================
+   C4.1.1 — VALIDATE CURSOR ENGINE EXISTS
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .CursorEngine
+    .validateCursorEngine =
+function () {
+
+    return (
+
+        !!CampusWord2007Simulateur
+            .CursorEngine
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C4.1.2 — VALIDATE CURSOR ENGINE OBJECT
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .CursorEngine
+    .validateCursorEngineObject =
+function () {
+
+    return (
+
+        typeof
+        CampusWord2007Simulateur
+            .CursorEngine ===
+        "object"
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C4.1.3 — VALIDATE INITIALIZED FLAG
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .CursorEngine
+    .validateInitializedFlag =
+function () {
+
+    return (
+
+        typeof
+        this.initialized ===
+        "boolean"
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C4.1.4 — VALIDATE CURSOR STATE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .CursorEngine
+    .validateCursorState =
+function () {
+
+    return (
+
+        this.validateCursorEngine() &&
+
+        this.validateCursorEngineObject() &&
+
+        this.validateInitializedFlag()
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C4.1.5 — INITIALIZE CURSOR VALIDATION
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .CursorEngine
+    .initializeCursorStateValidation =
+function () {
+
+    if (
+
+        this.cursorStateValidationReady
+
+    ) {
+
+        return;
+    }
+
+    this.cursorStateValidationReady =
+        true;
+
+    if (
+
+        CampusWord2007Simulateur
+            .Logger &&
+
+        typeof
+        CampusWord2007Simulateur
+            .Logger
+            .info ===
+        "function"
+
+    ) {
+
+        CampusWord2007Simulateur
+            .Logger
+            .info(
+                "Cursor State Validation Ready"
+            );
+    }
+};
+
+
+
+
+
+/* ==========================================================
+   C4.1.6 — VALIDATION STATUS
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .CursorEngine
+    .isCursorStateValidationReady =
+function () {
+
+    return (
+
+        this.cursorStateValidationReady ===
+        true
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C4.1.7 — VALIDATION REPORT
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .CursorEngine
+    .getCursorValidationReport =
+function () {
+
+    return {
+
+        engine:
+            this.validateCursorEngine(),
+
+        object:
+            this.validateCursorEngineObject(),
+
+        initialized:
+            this.validateInitializedFlag(),
+
+        valid:
+            this.validateCursorState(),
+
+        ready:
+            this.isCursorStateValidationReady()
+    };
+};
+
+
+
+
+
+
+
+/* ==========================================================
+   C4.2 — CURSOR POSITION ENGINE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .CursorEngine
+    .cursorPositionEngineReady =
+false;
+
+
+
+
+
+/* ==========================================================
+   C4.2.1 — GET CURSOR X
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .CursorEngine
+    .getCursorX =
+function () {
+
+    return CampusWord2007Simulateur
+        .state
+        .mouse
+        .x;
+};
+
+
+
+
+
+/* ==========================================================
+   C4.2.2 — GET CURSOR Y
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .CursorEngine
+    .getCursorY =
+function () {
+
+    return CampusWord2007Simulateur
+        .state
+        .mouse
+        .y;
+};
+
+
+
+
+
+/* ==========================================================
+   C4.2.3 — GET CURSOR POSITION
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .CursorEngine
+    .getCursorPosition =
+function () {
+
+    return {
+
+        x:
+            this.getCursorX(),
+
+        y:
+            this.getCursorY()
+    };
+};
+
+
+
+
+
+/* ==========================================================
+   C4.2.4 — HAS CURSOR POSITION
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .CursorEngine
+    .hasCursorPosition =
+function () {
+
+    return (
+
+        typeof
+        this.getCursorX() ===
+        "number" &&
+
+        typeof
+        this.getCursorY() ===
+        "number"
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C4.2.5 — CURSOR POSITION VALIDATION
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .CursorEngine
+    .validateCursorPosition =
+function () {
+
+    return (
+
+        this.hasCursorPosition()
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C4.2.6 — INITIALIZE CURSOR POSITION ENGINE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .CursorEngine
+    .initializeCursorPositionEngine =
+function () {
+
+    if (
+
+        this.cursorPositionEngineReady
+
+    ) {
+
+        return;
+    }
+
+    this.cursorPositionEngineReady =
+        true;
+
+    if (
+
+        CampusWord2007Simulateur
+            .Logger &&
+
+        typeof
+        CampusWord2007Simulateur
+            .Logger
+            .info ===
+        "function"
+
+    ) {
+
+        CampusWord2007Simulateur
+            .Logger
+            .info(
+                "Cursor Position Engine Ready"
+            );
+    }
+};
+
+
+
+
+
+/* ==========================================================
+   C4.2.7 — POSITION ENGINE STATUS
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .CursorEngine
+    .isCursorPositionEngineReady =
+function () {
+
+    return (
+
+        this.cursorPositionEngineReady ===
+        true
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C4.2.8 — POSITION ENGINE REPORT
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .CursorEngine
+    .getCursorPositionReport =
+function () {
+
+    return {
+
+        ready:
+            this.isCursorPositionEngineReady(),
+
+        valid:
+            this.validateCursorPosition(),
+
+        position:
+            this.getCursorPosition()
+    };
+};
+
+
+
+
+
+
+
+
+
+
