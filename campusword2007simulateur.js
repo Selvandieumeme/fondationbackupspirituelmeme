@@ -14509,7 +14509,17 @@ function () {
 
 
 
+/* ==========================================================
+   C4 — CURSOR ENGINE
+   ========================================================== */
 
+CampusWord2007Simulateur
+    .CursorEngine =
+CampusWord2007Simulateur
+    .CursorEngine || {
+
+        initialized: false
+    };
 
 
 
