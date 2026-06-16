@@ -14949,4 +14949,247 @@ function () {
 
 
 
+/* ==========================================================
+   C4.3 — CURSOR STYLE ENGINE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .CursorEngine
+    .cursorStyleEngineReady =
+false;
+
+CampusWord2007Simulateur
+    .CursorEngine
+    .currentCursorStyle =
+"default";
+
+
+
+
+
+/* ==========================================================
+   C4.3.1 — GET CURSOR STYLE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .CursorEngine
+    .getCursorStyle =
+function () {
+
+    return this.currentCursorStyle;
+};
+
+
+
+
+
+/* ==========================================================
+   C4.3.2 — SET CURSOR STYLE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .CursorEngine
+    .setCursorStyle =
+function (
+    style
+) {
+
+    if (
+        typeof style !==
+        "string"
+    ) {
+
+        return false;
+    }
+
+    this.currentCursorStyle =
+        style;
+
+    return true;
+};
+
+
+
+
+
+/* ==========================================================
+   C4.3.3 — RESET CURSOR STYLE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .CursorEngine
+    .resetCursorStyle =
+function () {
+
+    this.currentCursorStyle =
+        "default";
+
+    return true;
+};
+
+
+
+
+
+/* ==========================================================
+   C4.3.4 — IS CURSOR STYLE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .CursorEngine
+    .isCursorStyle =
+function (
+    style
+) {
+
+    return (
+
+        this.getCursorStyle() ===
+        style
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C4.3.5 — HAS CURSOR STYLE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .CursorEngine
+    .hasCursorStyle =
+function () {
+
+    return (
+
+        typeof
+        this.currentCursorStyle ===
+        "string"
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C4.3.6 — CURSOR STYLE VALIDATION
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .CursorEngine
+    .validateCursorStyle =
+function () {
+
+    return (
+
+        this.hasCursorStyle()
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C4.3.7 — INITIALIZE CURSOR STYLE ENGINE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .CursorEngine
+    .initializeCursorStyleEngine =
+function () {
+
+    if (
+
+        this.cursorStyleEngineReady
+
+    ) {
+
+        return;
+    }
+
+    this.cursorStyleEngineReady =
+        true;
+
+    if (
+
+        CampusWord2007Simulateur
+            .Logger &&
+
+        typeof
+        CampusWord2007Simulateur
+            .Logger
+            .info ===
+        "function"
+
+    ) {
+
+        CampusWord2007Simulateur
+            .Logger
+            .info(
+                "Cursor Style Engine Ready"
+            );
+    }
+};
+
+
+
+
+
+/* ==========================================================
+   C4.3.8 — STYLE ENGINE STATUS
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .CursorEngine
+    .isCursorStyleEngineReady =
+function () {
+
+    return (
+
+        this.cursorStyleEngineReady ===
+        true
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C4.3.9 — STYLE ENGINE REPORT
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .CursorEngine
+    .getCursorStyleReport =
+function () {
+
+    return {
+
+        ready:
+            this.isCursorStyleEngineReady(),
+
+        valid:
+            this.validateCursorStyle(),
+
+        style:
+            this.getCursorStyle()
+    };
+};
+
+
+
+
+
+
+
+
 
