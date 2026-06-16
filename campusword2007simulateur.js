@@ -15193,3 +15193,233 @@ function () {
 
 
 
+
+/* ==========================================================
+   C4.4 — CURSOR VISIBILITY ENGINE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .CursorEngine
+    .cursorVisibilityEngineReady =
+false;
+
+CampusWord2007Simulateur
+    .CursorEngine
+    .cursorVisible =
+true;
+
+
+
+
+
+/* ==========================================================
+   C4.4.1 — IS CURSOR VISIBLE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .CursorEngine
+    .isCursorVisible =
+function () {
+
+    return (
+
+        this.cursorVisible ===
+        true
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C4.4.2 — SHOW CURSOR
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .CursorEngine
+    .showCursor =
+function () {
+
+    this.cursorVisible =
+        true;
+
+    return true;
+};
+
+
+
+
+
+/* ==========================================================
+   C4.4.3 — HIDE CURSOR
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .CursorEngine
+    .hideCursor =
+function () {
+
+    this.cursorVisible =
+        false;
+
+    return true;
+};
+
+
+
+
+
+/* ==========================================================
+   C4.4.4 — TOGGLE CURSOR VISIBILITY
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .CursorEngine
+    .toggleCursorVisibility =
+function () {
+
+    this.cursorVisible =
+        !this.cursorVisible;
+
+    return this.cursorVisible;
+};
+
+
+
+
+
+/* ==========================================================
+   C4.4.5 — SET CURSOR VISIBILITY
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .CursorEngine
+    .setCursorVisibility =
+function (
+    visible
+) {
+
+    this.cursorVisible =
+        !!visible;
+
+    return true;
+};
+
+
+
+
+
+/* ==========================================================
+   C4.4.6 — CURSOR VISIBILITY VALIDATION
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .CursorEngine
+    .validateCursorVisibility =
+function () {
+
+    return (
+
+        typeof
+        this.cursorVisible ===
+        "boolean"
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C4.4.7 — INITIALIZE CURSOR VISIBILITY ENGINE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .CursorEngine
+    .initializeCursorVisibilityEngine =
+function () {
+
+    if (
+
+        this.cursorVisibilityEngineReady
+
+    ) {
+
+        return;
+    }
+
+    this.cursorVisibilityEngineReady =
+        true;
+
+    if (
+
+        CampusWord2007Simulateur
+            .Logger &&
+
+        typeof
+        CampusWord2007Simulateur
+            .Logger
+            .info ===
+        "function"
+
+    ) {
+
+        CampusWord2007Simulateur
+            .Logger
+            .info(
+                "Cursor Visibility Engine Ready"
+            );
+    }
+};
+
+
+
+
+
+/* ==========================================================
+   C4.4.8 — VISIBILITY ENGINE STATUS
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .CursorEngine
+    .isCursorVisibilityEngineReady =
+function () {
+
+    return (
+
+        this.cursorVisibilityEngineReady ===
+        true
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C4.4.9 — VISIBILITY ENGINE REPORT
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .CursorEngine
+    .getCursorVisibilityReport =
+function () {
+
+    return {
+
+        ready:
+            this.isCursorVisibilityEngineReady(),
+
+        visible:
+            this.isCursorVisible(),
+
+        valid:
+            this.validateCursorVisibility()
+    };
+};
+
+
