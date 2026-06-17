@@ -19918,3 +19918,2238 @@ function () {
 
 
 
+
+
+/* ==========================================================
+   C7 — INPUT ROUTER
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .InputRouter =
+CampusWord2007Simulateur
+    .InputRouter || {
+
+        initialized: false
+    };
+
+
+
+
+
+
+
+
+
+/* ==========================================================
+   C7.1 — INPUT ROUTER STATE VALIDATION
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .InputRouter
+    .inputRouterStateValidationReady =
+false;
+
+
+
+
+
+/* ==========================================================
+   C7.1.1 — VALIDATE INPUT ROUTER
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .InputRouter
+    .validateInputRouter =
+function () {
+
+    return (
+
+        !!CampusWord2007Simulateur
+            .InputRouter
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C7.1.2 — VALIDATE INITIALIZED FLAG
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .InputRouter
+    .validateInputRouterInitialization =
+function () {
+
+    return (
+
+        typeof
+        CampusWord2007Simulateur
+            .InputRouter
+            .initialized ===
+        "boolean"
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C7.1.3 — VALIDATE INPUT ROUTER STATE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .InputRouter
+    .validateInputRouterState =
+function () {
+
+    return (
+
+        this
+            .validateInputRouter() &&
+
+        this
+            .validateInputRouterInitialization()
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C7.1.4 — INITIALIZE STATE VALIDATION
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .InputRouter
+    .initializeInputRouterStateValidation =
+function () {
+
+    if (
+
+        this
+            .inputRouterStateValidationReady
+
+    ) {
+
+        return;
+    }
+
+    this
+        .inputRouterStateValidationReady =
+            true;
+
+    if (
+
+        CampusWord2007Simulateur
+            .Logger &&
+
+        typeof
+        CampusWord2007Simulateur
+            .Logger
+            .info ===
+        "function"
+
+    ) {
+
+        CampusWord2007Simulateur
+            .Logger
+            .info(
+                "Input Router State Validation Ready"
+            );
+    }
+};
+
+
+
+
+
+/* ==========================================================
+   C7.1.5 — VALIDATION STATUS
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .InputRouter
+    .isInputRouterStateValidationReady =
+function () {
+
+    return (
+
+        this
+            .inputRouterStateValidationReady ===
+        true
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C7.1.6 — VALIDATION REPORT
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .InputRouter
+    .getInputRouterValidationReport =
+function () {
+
+    return {
+
+        router:
+            this
+                .validateInputRouter(),
+
+        initialized:
+            this
+                .validateInputRouterInitialization(),
+
+        valid:
+            this
+                .validateInputRouterState(),
+
+        ready:
+            this
+                .isInputRouterStateValidationReady()
+    };
+};
+
+
+
+
+
+
+
+
+/* ==========================================================
+   C7.2 — MOUSE ROUTING ENGINE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .InputRouter
+    .mouseRoutingReady =
+false;
+
+
+
+
+
+/* ==========================================================
+   C7.2.1 — CREATE MOUSE ROUTE REGISTRY
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .InputRouter
+    .mouseRouteRegistry =
+CampusWord2007Simulateur
+    .InputRouter
+    .mouseRouteRegistry || {};
+
+
+
+
+
+/* ==========================================================
+   C7.2.2 — REGISTER MOUSE ROUTE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .InputRouter
+    .registerMouseRoute =
+function (
+    route,
+    handler
+) {
+
+    if (
+
+        typeof route !==
+        "string"
+
+    ) {
+
+        return false;
+    }
+
+    if (
+
+        typeof handler !==
+        "function"
+
+    ) {
+
+        return false;
+    }
+
+    this
+        .mouseRouteRegistry[
+            route
+        ] = handler;
+
+    return true;
+};
+
+
+
+
+
+/* ==========================================================
+   C7.2.3 — UNREGISTER MOUSE ROUTE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .InputRouter
+    .unregisterMouseRoute =
+function (
+    route
+) {
+
+    if (
+
+        !this
+            .mouseRouteRegistry[
+                route
+            ]
+
+    ) {
+
+        return false;
+    }
+
+    delete
+
+        this
+            .mouseRouteRegistry[
+                route
+            ];
+
+    return true;
+};
+
+
+
+
+
+/* ==========================================================
+   C7.2.4 — HAS MOUSE ROUTE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .InputRouter
+    .hasMouseRoute =
+function (
+    route
+) {
+
+    return (
+
+        typeof
+
+        this
+            .mouseRouteRegistry[
+                route
+            ]
+
+        ===
+
+        "function"
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C7.2.5 — GET MOUSE ROUTE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .InputRouter
+    .getMouseRoute =
+function (
+    route
+) {
+
+    return (
+
+        this
+            .mouseRouteRegistry[
+                route
+            ] ||
+
+        null
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C7.2.6 — ROUTE MOUSE INPUT
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .InputRouter
+    .routeMouseInput =
+function (
+    route,
+    payload
+) {
+
+    const handler =
+
+        this
+            .getMouseRoute(
+                route
+            );
+
+    if (
+
+        typeof handler !==
+        "function"
+
+    ) {
+
+        return false;
+    }
+
+    handler(
+        payload || null
+    );
+
+    return true;
+};
+
+
+
+
+
+/* ==========================================================
+   C7.2.7 — GET REGISTERED MOUSE ROUTES
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .InputRouter
+    .getRegisteredMouseRoutes =
+function () {
+
+    return Object
+        .keys(
+
+            this
+                .mouseRouteRegistry
+
+        );
+};
+
+
+
+
+
+/* ==========================================================
+   C7.2.8 — VALIDATE MOUSE ROUTING
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .InputRouter
+    .validateMouseRouting =
+function () {
+
+    return (
+
+        typeof
+        this
+            .registerMouseRoute ===
+        "function" &&
+
+        typeof
+        this
+            .routeMouseInput ===
+        "function" &&
+
+        typeof
+        this
+            .getMouseRoute ===
+        "function"
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C7.2.9 — INITIALIZE MOUSE ROUTING
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .InputRouter
+    .initializeMouseRouting =
+function () {
+
+    if (
+
+        this
+            .mouseRoutingReady
+
+    ) {
+
+        return;
+    }
+
+    this
+        .mouseRoutingReady =
+            true;
+
+    if (
+
+        CampusWord2007Simulateur
+            .Logger &&
+
+        typeof
+        CampusWord2007Simulateur
+            .Logger
+            .info ===
+        "function"
+
+    ) {
+
+        CampusWord2007Simulateur
+            .Logger
+            .info(
+                "Mouse Routing Ready"
+            );
+    }
+};
+
+
+
+
+
+/* ==========================================================
+   C7.2.10 — ROUTING STATUS
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .InputRouter
+    .isMouseRoutingReady =
+function () {
+
+    return (
+
+        this
+            .mouseRoutingReady ===
+        true
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C7.2.11 — MOUSE ROUTING REPORT
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .InputRouter
+    .getMouseRoutingReport =
+function () {
+
+    return {
+
+        routes:
+
+            this
+                .getRegisteredMouseRoutes()
+                .length,
+
+        valid:
+
+            this
+                .validateMouseRouting(),
+
+        ready:
+
+            this
+                .isMouseRoutingReady()
+    };
+};
+
+
+
+
+
+
+
+
+
+
+/* ==========================================================
+   C7.3 — POINTER ROUTING ENGINE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .InputRouter
+    .pointerRoutingReady =
+false;
+
+
+
+
+
+/* ==========================================================
+   C7.3.1 — CREATE POINTER ROUTE REGISTRY
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .InputRouter
+    .pointerRouteRegistry =
+CampusWord2007Simulateur
+    .InputRouter
+    .pointerRouteRegistry || {};
+
+
+
+
+
+/* ==========================================================
+   C7.3.2 — REGISTER POINTER ROUTE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .InputRouter
+    .registerPointerRoute =
+function (
+    route,
+    handler
+) {
+
+    if (
+
+        typeof route !==
+        "string"
+
+    ) {
+
+        return false;
+    }
+
+    if (
+
+        typeof handler !==
+        "function"
+
+    ) {
+
+        return false;
+    }
+
+    this
+        .pointerRouteRegistry[
+            route
+        ] = handler;
+
+    return true;
+};
+
+
+
+
+
+/* ==========================================================
+   C7.3.3 — UNREGISTER POINTER ROUTE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .InputRouter
+    .unregisterPointerRoute =
+function (
+    route
+) {
+
+    if (
+
+        !this
+            .pointerRouteRegistry[
+                route
+            ]
+
+    ) {
+
+        return false;
+    }
+
+    delete
+
+        this
+            .pointerRouteRegistry[
+                route
+            ];
+
+    return true;
+};
+
+
+
+
+
+/* ==========================================================
+   C7.3.4 — HAS POINTER ROUTE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .InputRouter
+    .hasPointerRoute =
+function (
+    route
+) {
+
+    return (
+
+        typeof
+
+        this
+            .pointerRouteRegistry[
+                route
+            ]
+
+        ===
+
+        "function"
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C7.3.5 — GET POINTER ROUTE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .InputRouter
+    .getPointerRoute =
+function (
+    route
+) {
+
+    return (
+
+        this
+            .pointerRouteRegistry[
+                route
+            ] ||
+
+        null
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C7.3.6 — ROUTE POINTER INPUT
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .InputRouter
+    .routePointerInput =
+function (
+    route,
+    payload
+) {
+
+    const handler =
+
+        this
+            .getPointerRoute(
+                route
+            );
+
+    if (
+
+        typeof handler !==
+        "function"
+
+    ) {
+
+        return false;
+    }
+
+    handler(
+        payload || null
+    );
+
+    return true;
+};
+
+
+
+
+
+/* ==========================================================
+   C7.3.7 — GET REGISTERED POINTER ROUTES
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .InputRouter
+    .getRegisteredPointerRoutes =
+function () {
+
+    return Object
+        .keys(
+
+            this
+                .pointerRouteRegistry
+
+        );
+};
+
+
+
+
+
+/* ==========================================================
+   C7.3.8 — VALIDATE POINTER ROUTING
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .InputRouter
+    .validatePointerRouting =
+function () {
+
+    return (
+
+        typeof
+        this
+            .registerPointerRoute ===
+        "function" &&
+
+        typeof
+        this
+            .routePointerInput ===
+        "function" &&
+
+        typeof
+        this
+            .getPointerRoute ===
+        "function"
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C7.3.9 — INITIALIZE POINTER ROUTING
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .InputRouter
+    .initializePointerRouting =
+function () {
+
+    if (
+
+        this
+            .pointerRoutingReady
+
+    ) {
+
+        return;
+    }
+
+    this
+        .pointerRoutingReady =
+            true;
+
+    if (
+
+        CampusWord2007Simulateur
+            .Logger &&
+
+        typeof
+        CampusWord2007Simulateur
+            .Logger
+            .info ===
+        "function"
+
+    ) {
+
+        CampusWord2007Simulateur
+            .Logger
+            .info(
+                "Pointer Routing Ready"
+            );
+    }
+};
+
+
+
+
+
+/* ==========================================================
+   C7.3.10 — POINTER ROUTING STATUS
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .InputRouter
+    .isPointerRoutingReady =
+function () {
+
+    return (
+
+        this
+            .pointerRoutingReady ===
+        true
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C7.3.11 — POINTER ROUTING REPORT
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .InputRouter
+    .getPointerRoutingReport =
+function () {
+
+    return {
+
+        routes:
+
+            this
+                .getRegisteredPointerRoutes()
+                .length,
+
+        valid:
+
+            this
+                .validatePointerRouting(),
+
+        ready:
+
+            this
+                .isPointerRoutingReady()
+    };
+};
+
+
+
+
+
+
+
+
+
+/* ==========================================================
+   C7.4 — TOUCH ROUTING ENGINE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .InputRouter
+    .touchRoutingReady =
+false;
+
+
+
+
+
+/* ==========================================================
+   C7.4.1 — CREATE TOUCH ROUTE REGISTRY
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .InputRouter
+    .touchRouteRegistry =
+CampusWord2007Simulateur
+    .InputRouter
+    .touchRouteRegistry || {};
+
+
+
+
+
+/* ==========================================================
+   C7.4.2 — REGISTER TOUCH ROUTE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .InputRouter
+    .registerTouchRoute =
+function (
+    route,
+    handler
+) {
+
+    if (
+
+        typeof route !==
+        "string"
+
+    ) {
+
+        return false;
+    }
+
+    if (
+
+        typeof handler !==
+        "function"
+
+    ) {
+
+        return false;
+    }
+
+    this
+        .touchRouteRegistry[
+            route
+        ] = handler;
+
+    return true;
+};
+
+
+
+
+
+/* ==========================================================
+   C7.4.3 — UNREGISTER TOUCH ROUTE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .InputRouter
+    .unregisterTouchRoute =
+function (
+    route
+) {
+
+    if (
+
+        !this
+            .touchRouteRegistry[
+                route
+            ]
+
+    ) {
+
+        return false;
+    }
+
+    delete
+
+        this
+            .touchRouteRegistry[
+                route
+            ];
+
+    return true;
+};
+
+
+
+
+
+/* ==========================================================
+   C7.4.4 — HAS TOUCH ROUTE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .InputRouter
+    .hasTouchRoute =
+function (
+    route
+) {
+
+    return (
+
+        typeof
+
+        this
+            .touchRouteRegistry[
+                route
+            ]
+
+        ===
+
+        "function"
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C7.4.5 — GET TOUCH ROUTE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .InputRouter
+    .getTouchRoute =
+function (
+    route
+) {
+
+    return (
+
+        this
+            .touchRouteRegistry[
+                route
+            ] ||
+
+        null
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C7.4.6 — ROUTE TOUCH INPUT
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .InputRouter
+    .routeTouchInput =
+function (
+    route,
+    payload
+) {
+
+    const handler =
+
+        this
+            .getTouchRoute(
+                route
+            );
+
+    if (
+
+        typeof handler !==
+        "function"
+
+    ) {
+
+        return false;
+    }
+
+    handler(
+        payload || null
+    );
+
+    return true;
+};
+
+
+
+
+
+/* ==========================================================
+   C7.4.7 — GET REGISTERED TOUCH ROUTES
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .InputRouter
+    .getRegisteredTouchRoutes =
+function () {
+
+    return Object
+        .keys(
+
+            this
+                .touchRouteRegistry
+
+        );
+};
+
+
+
+
+
+/* ==========================================================
+   C7.4.8 — VALIDATE TOUCH ROUTING
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .InputRouter
+    .validateTouchRouting =
+function () {
+
+    return (
+
+        typeof
+        this
+            .registerTouchRoute ===
+        "function" &&
+
+        typeof
+        this
+            .routeTouchInput ===
+        "function" &&
+
+        typeof
+        this
+            .getTouchRoute ===
+        "function"
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C7.4.9 — INITIALIZE TOUCH ROUTING
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .InputRouter
+    .initializeTouchRouting =
+function () {
+
+    if (
+
+        this
+            .touchRoutingReady
+
+    ) {
+
+        return;
+    }
+
+    this
+        .touchRoutingReady =
+            true;
+
+    if (
+
+        CampusWord2007Simulateur
+            .Logger &&
+
+        typeof
+        CampusWord2007Simulateur
+            .Logger
+            .info ===
+        "function"
+
+    ) {
+
+        CampusWord2007Simulateur
+            .Logger
+            .info(
+                "Touch Routing Ready"
+            );
+    }
+};
+
+
+
+
+
+/* ==========================================================
+   C7.4.10 — TOUCH ROUTING STATUS
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .InputRouter
+    .isTouchRoutingReady =
+function () {
+
+    return (
+
+        this
+            .touchRoutingReady ===
+        true
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C7.4.11 — TOUCH ROUTING REPORT
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .InputRouter
+    .getTouchRoutingReport =
+function () {
+
+    return {
+
+        routes:
+
+            this
+                .getRegisteredTouchRoutes()
+                .length,
+
+        valid:
+
+            this
+                .validateTouchRouting(),
+
+        ready:
+
+            this
+                .isTouchRoutingReady()
+    };
+};
+
+
+
+
+
+
+
+
+
+
+
+
+/* ==========================================================
+   C7.5 — KEYBOARD ROUTING ENGINE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .InputRouter
+    .keyboardRoutingReady =
+false;
+
+
+
+
+
+/* ==========================================================
+   C7.5.1 — CREATE KEYBOARD ROUTE REGISTRY
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .InputRouter
+    .keyboardRouteRegistry =
+CampusWord2007Simulateur
+    .InputRouter
+    .keyboardRouteRegistry || {};
+
+
+
+
+
+/* ==========================================================
+   C7.5.2 — REGISTER KEYBOARD ROUTE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .InputRouter
+    .registerKeyboardRoute =
+function (
+    route,
+    handler
+) {
+
+    if (
+
+        typeof route !==
+        "string"
+
+    ) {
+
+        return false;
+    }
+
+    if (
+
+        typeof handler !==
+        "function"
+
+    ) {
+
+        return false;
+    }
+
+    this
+        .keyboardRouteRegistry[
+            route
+        ] = handler;
+
+    return true;
+};
+
+
+
+
+
+/* ==========================================================
+   C7.5.3 — UNREGISTER KEYBOARD ROUTE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .InputRouter
+    .unregisterKeyboardRoute =
+function (
+    route
+) {
+
+    if (
+
+        !this
+            .keyboardRouteRegistry[
+                route
+            ]
+
+    ) {
+
+        return false;
+    }
+
+    delete
+
+        this
+            .keyboardRouteRegistry[
+                route
+            ];
+
+    return true;
+};
+
+
+
+
+
+/* ==========================================================
+   C7.5.4 — HAS KEYBOARD ROUTE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .InputRouter
+    .hasKeyboardRoute =
+function (
+    route
+) {
+
+    return (
+
+        typeof
+
+        this
+            .keyboardRouteRegistry[
+                route
+            ]
+
+        ===
+
+        "function"
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C7.5.5 — GET KEYBOARD ROUTE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .InputRouter
+    .getKeyboardRoute =
+function (
+    route
+) {
+
+    return (
+
+        this
+            .keyboardRouteRegistry[
+                route
+            ] ||
+
+        null
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C7.5.6 — ROUTE KEYBOARD INPUT
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .InputRouter
+    .routeKeyboardInput =
+function (
+    route,
+    payload
+) {
+
+    const handler =
+
+        this
+            .getKeyboardRoute(
+                route
+            );
+
+    if (
+
+        typeof handler !==
+        "function"
+
+    ) {
+
+        return false;
+    }
+
+    handler(
+        payload || null
+    );
+
+    return true;
+};
+
+
+
+
+
+/* ==========================================================
+   C7.5.7 — GET REGISTERED KEYBOARD ROUTES
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .InputRouter
+    .getRegisteredKeyboardRoutes =
+function () {
+
+    return Object
+        .keys(
+
+            this
+                .keyboardRouteRegistry
+
+        );
+};
+
+
+
+
+
+/* ==========================================================
+   C7.5.8 — VALIDATE KEYBOARD ROUTING
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .InputRouter
+    .validateKeyboardRouting =
+function () {
+
+    return (
+
+        typeof
+        this
+            .registerKeyboardRoute ===
+        "function" &&
+
+        typeof
+        this
+            .routeKeyboardInput ===
+        "function" &&
+
+        typeof
+        this
+            .getKeyboardRoute ===
+        "function"
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C7.5.9 — INITIALIZE KEYBOARD ROUTING
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .InputRouter
+    .initializeKeyboardRouting =
+function () {
+
+    if (
+
+        this
+            .keyboardRoutingReady
+
+    ) {
+
+        return;
+    }
+
+    this
+        .keyboardRoutingReady =
+            true;
+
+    if (
+
+        CampusWord2007Simulateur
+            .Logger &&
+
+        typeof
+        CampusWord2007Simulateur
+            .Logger
+            .info ===
+        "function"
+
+    ) {
+
+        CampusWord2007Simulateur
+            .Logger
+            .info(
+                "Keyboard Routing Ready"
+            );
+    }
+};
+
+
+
+
+
+/* ==========================================================
+   C7.5.10 — KEYBOARD ROUTING STATUS
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .InputRouter
+    .isKeyboardRoutingReady =
+function () {
+
+    return (
+
+        this
+            .keyboardRoutingReady ===
+        true
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C7.5.11 — KEYBOARD ROUTING REPORT
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .InputRouter
+    .getKeyboardRoutingReport =
+function () {
+
+    return {
+
+        routes:
+
+            this
+                .getRegisteredKeyboardRoutes()
+                .length,
+
+        valid:
+
+            this
+                .validateKeyboardRouting(),
+
+        ready:
+
+            this
+                .isKeyboardRoutingReady()
+    };
+};
+
+
+
+
+
+
+
+
+
+/* ==========================================================
+   C7.6 — INPUT READY HOOK
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .InputRouter
+    .inputReadyHookReady =
+false;
+
+
+
+
+
+/* ==========================================================
+   C7.6.1 — IS INPUT ROUTER READY
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .InputRouter
+    .isInputRouterReady =
+function () {
+
+    return (
+
+        this
+            .isInputRouterStateValidationReady() &&
+
+        this
+            .isMouseRoutingReady() &&
+
+        this
+            .isPointerRoutingReady() &&
+
+        this
+            .isTouchRoutingReady() &&
+
+        this
+            .isKeyboardRoutingReady()
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C7.6.2 — INITIALIZE INPUT READY HOOK
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .InputRouter
+    .initializeInputReadyHook =
+function () {
+
+    if (
+
+        this
+            .inputReadyHookReady
+
+    ) {
+
+        return;
+    }
+
+    this
+        .inputReadyHookReady =
+            true;
+
+    if (
+
+        CampusWord2007Simulateur
+            .Logger &&
+
+        typeof
+        CampusWord2007Simulateur
+            .Logger
+            .info ===
+        "function"
+
+    ) {
+
+        CampusWord2007Simulateur
+            .Logger
+            .info(
+                "Input Ready Hook Ready"
+            );
+    }
+};
+
+
+
+
+
+/* ==========================================================
+   C7.6.3 — READY HOOK STATUS
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .InputRouter
+    .isInputReadyHookReady =
+function () {
+
+    return (
+
+        this
+            .inputReadyHookReady ===
+        true
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C7.6.4 — VALIDATE INPUT READY HOOK
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .InputRouter
+    .validateInputReadyHook =
+function () {
+
+    return (
+
+        typeof
+        this
+            .isInputRouterReady ===
+        "function" &&
+
+        typeof
+        this
+            .initializeInputReadyHook ===
+        "function"
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C7.6.5 — GET INPUT READY STATUS
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .InputRouter
+    .getInputReadyStatus =
+function () {
+
+    return {
+
+        stateValidation:
+            this
+                .isInputRouterStateValidationReady(),
+
+        mouse:
+            this
+                .isMouseRoutingReady(),
+
+        pointer:
+            this
+                .isPointerRoutingReady(),
+
+        touch:
+            this
+                .isTouchRoutingReady(),
+
+        keyboard:
+            this
+                .isKeyboardRoutingReady(),
+
+        routerReady:
+            this
+                .isInputRouterReady(),
+
+        hookReady:
+            this
+                .isInputReadyHookReady()
+    };
+};
+
+
+
+
+
+/* ==========================================================
+   C7.6.6 — INPUT READY REPORT
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .InputRouter
+    .getInputReadyReport =
+function () {
+
+    return {
+
+        ready:
+            this
+                .isInputRouterReady(),
+
+        hookReady:
+            this
+                .isInputReadyHookReady(),
+
+        valid:
+            this
+                .validateInputReadyHook(),
+
+        status:
+            this
+                .getInputReadyStatus()
+    };
+};
+
+
+
+
+
+
+
+
+
+
+/* ==========================================================
+   C7.7 — INPUT VALIDATION BLOCK
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .InputRouter
+    .inputValidationBlockReady =
+false;
+
+
+
+
+
+/* ==========================================================
+   C7.7.1 — VALIDATE ROUTER STATE BLOCK
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .InputRouter
+    .validateInputRouterStateBlock =
+function () {
+
+    return (
+
+        this
+            .validateInputRouterState &&
+
+        this
+            .validateInputRouterState()
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C7.7.2 — VALIDATE MOUSE ROUTING BLOCK
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .InputRouter
+    .validateMouseRoutingBlock =
+function () {
+
+    return (
+
+        this
+            .validateMouseRouting &&
+
+        this
+            .validateMouseRouting()
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C7.7.3 — VALIDATE POINTER ROUTING BLOCK
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .InputRouter
+    .validatePointerRoutingBlock =
+function () {
+
+    return (
+
+        this
+            .validatePointerRouting &&
+
+        this
+            .validatePointerRouting()
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C7.7.4 — VALIDATE TOUCH ROUTING BLOCK
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .InputRouter
+    .validateTouchRoutingBlock =
+function () {
+
+    return (
+
+        this
+            .validateTouchRouting &&
+
+        this
+            .validateTouchRouting()
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C7.7.5 — VALIDATE KEYBOARD ROUTING BLOCK
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .InputRouter
+    .validateKeyboardRoutingBlock =
+function () {
+
+    return (
+
+        this
+            .validateKeyboardRouting &&
+
+        this
+            .validateKeyboardRouting()
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C7.7.6 — VALIDATE READY HOOK BLOCK
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .InputRouter
+    .validateInputReadyHookBlock =
+function () {
+
+    return (
+
+        this
+            .validateInputReadyHook &&
+
+        this
+            .validateInputReadyHook()
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C7.7.7 — VALIDATE COMPLETE INPUT ROUTER
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .InputRouter
+    .validateCompleteInputRouter =
+function () {
+
+    return (
+
+        this
+            .validateInputRouterStateBlock() &&
+
+        this
+            .validateMouseRoutingBlock() &&
+
+        this
+            .validatePointerRoutingBlock() &&
+
+        this
+            .validateTouchRoutingBlock() &&
+
+        this
+            .validateKeyboardRoutingBlock() &&
+
+        this
+            .validateInputReadyHookBlock()
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C7.7.8 — INITIALIZE INPUT VALIDATION BLOCK
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .InputRouter
+    .initializeInputValidationBlock =
+function () {
+
+    if (
+
+        this
+            .inputValidationBlockReady
+
+    ) {
+
+        return;
+    }
+
+    this
+        .inputValidationBlockReady =
+            true;
+
+    if (
+
+        CampusWord2007Simulateur
+            .Logger &&
+
+        typeof
+        CampusWord2007Simulateur
+            .Logger
+            .info ===
+        "function"
+
+    ) {
+
+        CampusWord2007Simulateur
+            .Logger
+            .info(
+                "Input Validation Block Ready"
+            );
+    }
+};
+
+
+
+
+
+/* ==========================================================
+   C7.7.9 — VALIDATION BLOCK STATUS
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .InputRouter
+    .isInputValidationBlockReady =
+function () {
+
+    return (
+
+        this
+            .inputValidationBlockReady ===
+        true
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C7.7.10 — INPUT VALIDATION REPORT
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .InputRouter
+    .getInputValidationReport =
+function () {
+
+    return {
+
+        state:
+            this
+                .validateInputRouterStateBlock(),
+
+        mouse:
+            this
+                .validateMouseRoutingBlock(),
+
+        pointer:
+            this
+                .validatePointerRoutingBlock(),
+
+        touch:
+            this
+                .validateTouchRoutingBlock(),
+
+        keyboard:
+            this
+                .validateKeyboardRoutingBlock(),
+
+        readyHook:
+            this
+                .validateInputReadyHookBlock(),
+
+        complete:
+            this
+                .validateCompleteInputRouter(),
+
+        blockReady:
+            this
+                .isInputValidationBlockReady()
+    };
+};
+
+
+
+
+
+
+
+
+
+
+
