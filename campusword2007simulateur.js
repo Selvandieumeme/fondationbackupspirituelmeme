@@ -30264,3 +30264,260 @@ function () {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+/* ==========================================================
+   E1.1 — CARET DOM CREATION
+   ========================================================== */
+
+CampusWord2007Simulateur.CaretEngine =
+CampusWord2007Simulateur.CaretEngine || {};
+
+CampusWord2007Simulateur
+    .CaretEngine
+    .initialized =
+false;
+
+
+
+
+
+/* ==========================================================
+   E1.1.1 — CARET CLASS NAME
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .CaretEngine
+    .CARET_CLASS_NAME =
+"word-caret";
+
+
+
+
+
+/* ==========================================================
+   E1.1.2 — GET CARET LAYER
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .CaretEngine
+    .getCaretLayer =
+function (
+    pageElement
+) {
+
+    if (
+        !pageElement
+    ) {
+
+        return null;
+    }
+
+    return pageElement
+        .querySelector(
+            ".page-caret-layer"
+        );
+};
+
+
+
+
+
+/* ==========================================================
+   E1.1.3 — GET EXISTING CARET
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .CaretEngine
+    .getCaret =
+function (
+    pageElement
+) {
+
+    const layer =
+        this.getCaretLayer(
+            pageElement
+        );
+
+    if (
+        !layer
+    ) {
+
+        return null;
+    }
+
+    return layer.querySelector(
+        "." +
+        this.CARET_CLASS_NAME
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   E1.1.4 — CREATE CARET ELEMENT
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .CaretEngine
+    .createCaretElement =
+function () {
+
+    const caret =
+        document.createElement(
+            "div"
+        );
+
+    caret.className =
+        this.CARET_CLASS_NAME;
+
+    caret.setAttribute(
+        "data-caret",
+        "true"
+    );
+
+    return caret;
+};
+
+
+
+
+
+/* ==========================================================
+   E1.1.5 — ENSURE CARET EXISTS
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .CaretEngine
+    .ensureCaret =
+function (
+    pageElement
+) {
+
+    const layer =
+        this.getCaretLayer(
+            pageElement
+        );
+
+    if (
+        !layer
+    ) {
+
+        return null;
+    }
+
+    let caret =
+        this.getCaret(
+            pageElement
+        );
+
+    if (
+        caret
+    ) {
+
+        return caret;
+    }
+
+    caret =
+        this.createCaretElement();
+
+    layer.appendChild(
+        caret
+    );
+
+    return caret;
+};
+
+
+
+
+
+/* ==========================================================
+   E1.1.6 — CREATE CARET FOR ACTIVE PAGE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .CaretEngine
+    .createActivePageCaret =
+function () {
+
+    const page =
+        CampusWord2007Simulateur
+            .PageManager
+            .getActivePage();
+
+    if (
+        !page
+    ) {
+
+        return null;
+    }
+
+    return this.ensureCaret(
+        page
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   E1.1.7 — INITIALIZE CARET ENGINE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .CaretEngine
+    .initialize =
+function () {
+
+    if (
+        this.initialized
+    ) {
+
+        return;
+    }
+
+    this.initialized =
+        true;
+
+    this.createActivePageCaret();
+
+    CampusWord2007Simulateur
+        .Logger
+        .info(
+            "Caret DOM Created"
+        );
+};
+
+
+
+
+
+/* ==========================================================
+   E1.1.8 — APPLICATION READY HOOK
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .EventBus
+    .on(
+        "application:ready",
+
+        () => {
+
+            CampusWord2007Simulateur
+                .CaretEngine
+                .initialize();
+        }
+    );
