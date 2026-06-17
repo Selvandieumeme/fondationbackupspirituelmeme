@@ -26260,5 +26260,2041 @@ function () {
 
 
 
+/* ==========================================================
+   D3 — PAGE ENGINE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PageEngine =
+CampusWord2007Simulateur
+    .PageEngine || {
+
+        initialized: false
+    };
+
+
+
+
+
+
+
+
+
+
+/* ==========================================================
+   D3.1 — PAGE STATE VALIDATION
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PageEngine
+    .pageStateValidationReady =
+false;
+
+
+
+
+
+/* ==========================================================
+   D3.1.1 — VALIDATE PAGE ENGINE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PageEngine
+    .validatePageEngine =
+function () {
+
+    return (
+
+        !!CampusWord2007Simulateur
+            .PageEngine
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   D3.1.2 — VALIDATE INITIALIZATION STATE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PageEngine
+    .validatePageInitialization =
+function () {
+
+    return (
+
+        typeof
+        CampusWord2007Simulateur
+            .PageEngine
+            .initialized ===
+        "boolean"
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   D3.1.3 — VALIDATE PAGE STATE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PageEngine
+    .validatePageState =
+function () {
+
+    return (
+
+        this
+            .validatePageEngine() &&
+
+        this
+            .validatePageInitialization()
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   D3.1.4 — INITIALIZE PAGE STATE VALIDATION
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PageEngine
+    .initializePageStateValidation =
+function () {
+
+    if (
+
+        this
+            .pageStateValidationReady
+
+    ) {
+
+        return;
+    }
+
+    this
+        .pageStateValidationReady =
+            true;
+
+    if (
+
+        CampusWord2007Simulateur
+            .Logger &&
+
+        typeof
+        CampusWord2007Simulateur
+            .Logger
+            .info ===
+        "function"
+
+    ) {
+
+        CampusWord2007Simulateur
+            .Logger
+            .info(
+                "Page State Validation Ready"
+            );
+    }
+};
+
+
+
+
+
+/* ==========================================================
+   D3.1.5 — PAGE STATE VALIDATION STATUS
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PageEngine
+    .isPageStateValidationReady =
+function () {
+
+    return (
+
+        this
+            .pageStateValidationReady ===
+        true
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   D3.1.6 — PAGE STATE VALIDATION REPORT
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PageEngine
+    .getPageStateValidationReport =
+function () {
+
+    return {
+
+        engine:
+            this
+                .validatePageEngine(),
+
+        initialized:
+            this
+                .validatePageInitialization(),
+
+        valid:
+            this
+                .validatePageState(),
+
+        ready:
+            this
+                .isPageStateValidationReady()
+    };
+};
+
+
+
+
+
+
+
+
+
+
+
+/* ==========================================================
+   D3.2 — ACTIVE PAGE TRACKING
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PageEngine
+    .activePageTrackingReady =
+false;
+
+
+
+
+
+/* ==========================================================
+   D3.2.1 — ACTIVE PAGE STORAGE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PageEngine
+    .activePage = {
+
+        id: null,
+
+        index: 0
+    };
+
+
+
+
+
+/* ==========================================================
+   D3.2.2 — SET ACTIVE PAGE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PageEngine
+    .setActivePage =
+function (
+    pageId,
+    pageIndex
+) {
+
+    this
+        .activePage
+        .id =
+            pageId;
+
+    this
+        .activePage
+        .index =
+            typeof pageIndex ===
+            "number"
+                ? pageIndex
+                : 0;
+
+    return true;
+};
+
+
+
+
+
+/* ==========================================================
+   D3.2.3 — GET ACTIVE PAGE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PageEngine
+    .getActivePage =
+function () {
+
+    return this
+        .activePage;
+};
+
+
+
+
+
+/* ==========================================================
+   D3.2.4 — GET ACTIVE PAGE ID
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PageEngine
+    .getActivePageId =
+function () {
+
+    return (
+
+        this
+            .activePage
+            .id
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   D3.2.5 — GET ACTIVE PAGE INDEX
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PageEngine
+    .getActivePageIndex =
+function () {
+
+    return (
+
+        this
+            .activePage
+            .index
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   D3.2.6 — HAS ACTIVE PAGE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PageEngine
+    .hasActivePage =
+function () {
+
+    return (
+
+        this
+            .activePage
+            .id !== null
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   D3.2.7 — CLEAR ACTIVE PAGE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PageEngine
+    .clearActivePage =
+function () {
+
+    this
+        .activePage
+        .id =
+            null;
+
+    this
+        .activePage
+        .index =
+            0;
+
+    return true;
+};
+
+
+
+
+
+/* ==========================================================
+   D3.2.8 — VALIDATE ACTIVE PAGE TRACKING
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PageEngine
+    .validateActivePageTracking =
+function () {
+
+    return (
+
+        typeof
+        this
+            .setActivePage ===
+        "function" &&
+
+        typeof
+        this
+            .getActivePage ===
+        "function" &&
+
+        typeof
+        this
+            .getActivePageId ===
+        "function" &&
+
+        typeof
+        this
+            .getActivePageIndex ===
+        "function"
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   D3.2.9 — INITIALIZE ACTIVE PAGE TRACKING
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PageEngine
+    .initializeActivePageTracking =
+function () {
+
+    if (
+
+        this
+            .activePageTrackingReady
+
+    ) {
+
+        return;
+    }
+
+    this
+        .activePageTrackingReady =
+            true;
+
+    if (
+
+        CampusWord2007Simulateur
+            .Logger &&
+
+        typeof
+        CampusWord2007Simulateur
+            .Logger
+            .info ===
+        "function"
+
+    ) {
+
+        CampusWord2007Simulateur
+            .Logger
+            .info(
+                "Active Page Tracking Ready"
+            );
+    }
+};
+
+
+
+
+
+/* ==========================================================
+   D3.2.10 — ACTIVE PAGE TRACKING STATUS
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PageEngine
+    .isActivePageTrackingReady =
+function () {
+
+    return (
+
+        this
+            .activePageTrackingReady ===
+        true
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   D3.2.11 — ACTIVE PAGE REPORT
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PageEngine
+    .getActivePageReport =
+function () {
+
+    return {
+
+        pageId:
+            this
+                .getActivePageId(),
+
+        pageIndex:
+            this
+                .getActivePageIndex(),
+
+        hasPage:
+            this
+                .hasActivePage(),
+
+        valid:
+            this
+                .validateActivePageTracking(),
+
+        ready:
+            this
+                .isActivePageTrackingReady()
+    };
+};
+
+
+
+
+
+
+
+
+
+
+/* ==========================================================
+   D3.3 — PAGE COLLECTION ENGINE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PageEngine
+    .pageCollectionEngineReady =
+false;
+
+
+
+
+
+/* ==========================================================
+   D3.3.1 — PAGE COLLECTION STORAGE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PageEngine
+    .pages =
+[];
+
+
+
+
+
+/* ==========================================================
+   D3.3.2 — ADD PAGE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PageEngine
+    .addPage =
+function (
+    pageData
+) {
+
+    if (
+
+        !pageData
+
+    ) {
+
+        return false;
+    }
+
+    this
+        .pages
+        .push(
+            pageData
+        );
+
+    return true;
+};
+
+
+
+
+
+/* ==========================================================
+   D3.3.3 — GET ALL PAGES
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PageEngine
+    .getPages =
+function () {
+
+    return this
+        .pages;
+};
+
+
+
+
+
+/* ==========================================================
+   D3.3.4 — GET PAGE COUNT
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PageEngine
+    .getPageCount =
+function () {
+
+    return this
+        .pages
+        .length;
+};
+
+
+
+
+
+/* ==========================================================
+   D3.3.5 — GET PAGE BY INDEX
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PageEngine
+    .getPageByIndex =
+function (
+    index
+) {
+
+    if (
+
+        typeof index !==
+        "number"
+
+    ) {
+
+        return null;
+    }
+
+    return (
+
+        this
+            .pages[
+                index
+            ] || null
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   D3.3.6 — HAS PAGES
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PageEngine
+    .hasPages =
+function () {
+
+    return (
+
+        this
+            .pages
+            .length > 0
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   D3.3.7 — CLEAR PAGE COLLECTION
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PageEngine
+    .clearPages =
+function () {
+
+    this
+        .pages =
+            [];
+
+    return true;
+};
+
+
+
+
+
+/* ==========================================================
+   D3.3.8 — VALIDATE PAGE COLLECTION ENGINE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PageEngine
+    .validatePageCollectionEngine =
+function () {
+
+    return (
+
+        typeof
+        this
+            .addPage ===
+        "function" &&
+
+        typeof
+        this
+            .getPages ===
+        "function" &&
+
+        typeof
+        this
+            .getPageCount ===
+        "function" &&
+
+        typeof
+        this
+            .getPageByIndex ===
+        "function"
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   D3.3.9 — INITIALIZE PAGE COLLECTION ENGINE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PageEngine
+    .initializePageCollectionEngine =
+function () {
+
+    if (
+
+        this
+            .pageCollectionEngineReady
+
+    ) {
+
+        return;
+    }
+
+    this
+        .pageCollectionEngineReady =
+            true;
+
+    if (
+
+        CampusWord2007Simulateur
+            .Logger &&
+
+        typeof
+        CampusWord2007Simulateur
+            .Logger
+            .info ===
+        "function"
+
+    ) {
+
+        CampusWord2007Simulateur
+            .Logger
+            .info(
+                "Page Collection Engine Ready"
+            );
+    }
+};
+
+
+
+
+
+/* ==========================================================
+   D3.3.10 — PAGE COLLECTION STATUS
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PageEngine
+    .isPageCollectionEngineReady =
+function () {
+
+    return (
+
+        this
+            .pageCollectionEngineReady ===
+        true
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   D3.3.11 — PAGE COLLECTION REPORT
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PageEngine
+    .getPageCollectionReport =
+function () {
+
+    return {
+
+        pageCount:
+            this
+                .getPageCount(),
+
+        hasPages:
+            this
+                .hasPages(),
+
+        valid:
+            this
+                .validatePageCollectionEngine(),
+
+        ready:
+            this
+                .isPageCollectionEngineReady()
+    };
+};
+
+
+
+
+
+
+
+
+
+
+
+/* ==========================================================
+   D3.4 — PAGE STATE ENGINE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PageEngine
+    .pageStateEngineReady =
+false;
+
+
+
+
+
+/* ==========================================================
+   D3.4.1 — PAGE STATE STORAGE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PageEngine
+    .pageState = {
+
+        initialized: false,
+
+        loaded: false,
+
+        active: false
+    };
+
+
+
+
+
+/* ==========================================================
+   D3.4.2 — GET PAGE STATE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PageEngine
+    .getPageState =
+function () {
+
+    return this
+        .pageState;
+};
+
+
+
+
+
+/* ==========================================================
+   D3.4.3 — SET PAGE STATE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PageEngine
+    .setPageState =
+function (
+    stateName,
+    value
+) {
+
+    if (
+
+        typeof stateName !==
+        "string"
+
+    ) {
+
+        return false;
+    }
+
+    this
+        .pageState[
+            stateName
+        ] =
+            value;
+
+    return true;
+};
+
+
+
+
+
+/* ==========================================================
+   D3.4.4 — GET PAGE STATE VALUE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PageEngine
+    .getPageStateValue =
+function (
+    stateName
+) {
+
+    return this
+        .pageState[
+            stateName
+        ];
+};
+
+
+
+
+
+/* ==========================================================
+   D3.4.5 — IS PAGE INITIALIZED
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PageEngine
+    .isPageInitialized =
+function () {
+
+    return (
+
+        this
+            .pageState
+            .initialized ===
+        true
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   D3.4.6 — IS PAGE LOADED
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PageEngine
+    .isPageLoaded =
+function () {
+
+    return (
+
+        this
+            .pageState
+            .loaded ===
+        true
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   D3.4.7 — IS PAGE ACTIVE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PageEngine
+    .isPageActive =
+function () {
+
+    return (
+
+        this
+            .pageState
+            .active ===
+        true
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   D3.4.8 — VALIDATE PAGE STATE ENGINE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PageEngine
+    .validatePageStateEngine =
+function () {
+
+    return (
+
+        typeof
+        this
+            .getPageState ===
+        "function" &&
+
+        typeof
+        this
+            .setPageState ===
+        "function" &&
+
+        typeof
+        this
+            .getPageStateValue ===
+        "function"
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   D3.4.9 — INITIALIZE PAGE STATE ENGINE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PageEngine
+    .initializePageStateEngine =
+function () {
+
+    if (
+
+        this
+            .pageStateEngineReady
+
+    ) {
+
+        return;
+    }
+
+    this
+        .pageStateEngineReady =
+            true;
+
+    if (
+
+        CampusWord2007Simulateur
+            .Logger &&
+
+        typeof
+        CampusWord2007Simulateur
+            .Logger
+            .info ===
+        "function"
+
+    ) {
+
+        CampusWord2007Simulateur
+            .Logger
+            .info(
+                "Page State Engine Ready"
+            );
+    }
+};
+
+
+
+
+
+/* ==========================================================
+   D3.4.10 — PAGE STATE ENGINE STATUS
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PageEngine
+    .isPageStateEngineReady =
+function () {
+
+    return (
+
+        this
+            .pageStateEngineReady ===
+        true
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   D3.4.11 — PAGE STATE REPORT
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PageEngine
+    .getPageStateReport =
+function () {
+
+    return {
+
+        initialized:
+            this
+                .isPageInitialized(),
+
+        loaded:
+            this
+                .isPageLoaded(),
+
+        active:
+            this
+                .isPageActive(),
+
+        valid:
+            this
+                .validatePageStateEngine(),
+
+        ready:
+            this
+                .isPageStateEngineReady()
+    };
+};
+
+
+
+
+
+
+
+
+
+
+
+/* ==========================================================
+   D3.5 — PAGE SYNCHRONIZATION
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PageEngine
+    .pageSynchronizationReady =
+false;
+
+
+
+
+
+/* ==========================================================
+   D3.5.1 — SYNCHRONIZATION STATE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PageEngine
+    .pageSynchronizationState = {
+
+        synchronized: true,
+
+        dirty: false,
+
+        lastSynchronizationTime: null
+    };
+
+
+
+
+
+/* ==========================================================
+   D3.5.2 — GET SYNCHRONIZATION STATE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PageEngine
+    .getPageSynchronizationState =
+function () {
+
+    return this
+        .pageSynchronizationState;
+};
+
+
+
+
+
+/* ==========================================================
+   D3.5.3 — MARK PAGE DIRTY
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PageEngine
+    .markPageDirty =
+function () {
+
+    this
+        .pageSynchronizationState
+        .dirty =
+            true;
+
+    this
+        .pageSynchronizationState
+        .synchronized =
+            false;
+
+    return true;
+};
+
+
+
+
+
+/* ==========================================================
+   D3.5.4 — MARK PAGE SYNCHRONIZED
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PageEngine
+    .markPageSynchronized =
+function () {
+
+    this
+        .pageSynchronizationState
+        .dirty =
+            false;
+
+    this
+        .pageSynchronizationState
+        .synchronized =
+            true;
+
+    this
+        .pageSynchronizationState
+        .lastSynchronizationTime =
+            Date.now();
+
+    return true;
+};
+
+
+
+
+
+/* ==========================================================
+   D3.5.5 — IS PAGE DIRTY
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PageEngine
+    .isPageDirty =
+function () {
+
+    return (
+
+        this
+            .pageSynchronizationState
+            .dirty ===
+        true
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   D3.5.6 — IS PAGE SYNCHRONIZED
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PageEngine
+    .isPageSynchronized =
+function () {
+
+    return (
+
+        this
+            .pageSynchronizationState
+            .synchronized ===
+        true
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   D3.5.7 — GET LAST SYNCHRONIZATION TIME
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PageEngine
+    .getLastPageSynchronizationTime =
+function () {
+
+    return (
+
+        this
+            .pageSynchronizationState
+            .lastSynchronizationTime
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   D3.5.8 — VALIDATE PAGE SYNCHRONIZATION
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PageEngine
+    .validatePageSynchronization =
+function () {
+
+    return (
+
+        typeof
+        this
+            .markPageDirty ===
+        "function" &&
+
+        typeof
+        this
+            .markPageSynchronized ===
+        "function" &&
+
+        typeof
+        this
+            .isPageDirty ===
+        "function" &&
+
+        typeof
+        this
+            .isPageSynchronized ===
+        "function"
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   D3.5.9 — INITIALIZE PAGE SYNCHRONIZATION
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PageEngine
+    .initializePageSynchronization =
+function () {
+
+    if (
+
+        this
+            .pageSynchronizationReady
+
+    ) {
+
+        return;
+    }
+
+    this
+        .pageSynchronizationReady =
+            true;
+
+    if (
+
+        CampusWord2007Simulateur
+            .Logger &&
+
+        typeof
+        CampusWord2007Simulateur
+            .Logger
+            .info ===
+        "function"
+
+    ) {
+
+        CampusWord2007Simulateur
+            .Logger
+            .info(
+                "Page Synchronization Ready"
+            );
+    }
+};
+
+
+
+
+
+/* ==========================================================
+   D3.5.10 — SYNCHRONIZATION STATUS
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PageEngine
+    .isPageSynchronizationReady =
+function () {
+
+    return (
+
+        this
+            .pageSynchronizationReady ===
+        true
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   D3.5.11 — SYNCHRONIZATION REPORT
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PageEngine
+    .getPageSynchronizationReport =
+function () {
+
+    return {
+
+        synchronized:
+            this
+                .isPageSynchronized(),
+
+        dirty:
+            this
+                .isPageDirty(),
+
+        lastSynchronizationTime:
+            this
+                .getLastPageSynchronizationTime(),
+
+        valid:
+            this
+                .validatePageSynchronization(),
+
+        ready:
+            this
+                .isPageSynchronizationReady()
+    };
+};
+
+
+
+
+
+
+
+
+/* ==========================================================
+   D3.6 — PAGE READY HOOK
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PageEngine
+    .pageReadyHookReady =
+false;
+
+
+
+
+
+/* ==========================================================
+   D3.6.1 — IS PAGE ENGINE READY
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PageEngine
+    .isPageEngineReady =
+function () {
+
+    return (
+
+        this
+            .isPageStateValidationReady() &&
+
+        this
+            .isActivePageTrackingReady() &&
+
+        this
+            .isPageCollectionEngineReady() &&
+
+        this
+            .isPageStateEngineReady() &&
+
+        this
+            .isPageSynchronizationReady()
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   D3.6.2 — INITIALIZE PAGE READY HOOK
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PageEngine
+    .initializePageReadyHook =
+function () {
+
+    if (
+
+        this
+            .pageReadyHookReady
+
+    ) {
+
+        return;
+    }
+
+    this
+        .pageReadyHookReady =
+            true;
+
+    if (
+
+        CampusWord2007Simulateur
+            .Logger &&
+
+        typeof
+        CampusWord2007Simulateur
+            .Logger
+            .info ===
+        "function"
+
+    ) {
+
+        CampusWord2007Simulateur
+            .Logger
+            .info(
+                "Page Ready Hook Ready"
+            );
+    }
+};
+
+
+
+
+
+/* ==========================================================
+   D3.6.3 — PAGE READY HOOK STATUS
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PageEngine
+    .isPageReadyHookReady =
+function () {
+
+    return (
+
+        this
+            .pageReadyHookReady ===
+        true
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   D3.6.4 — VALIDATE PAGE READY HOOK
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PageEngine
+    .validatePageReadyHook =
+function () {
+
+    return (
+
+        typeof
+        this
+            .isPageEngineReady ===
+        "function" &&
+
+        typeof
+        this
+            .initializePageReadyHook ===
+        "function"
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   D3.6.5 — PAGE READY STATUS
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PageEngine
+    .getPageReadyStatus =
+function () {
+
+    return {
+
+        stateValidation:
+            this
+                .isPageStateValidationReady(),
+
+        activePageTracking:
+            this
+                .isActivePageTrackingReady(),
+
+        collectionEngine:
+            this
+                .isPageCollectionEngineReady(),
+
+        stateEngine:
+            this
+                .isPageStateEngineReady(),
+
+        synchronization:
+            this
+                .isPageSynchronizationReady(),
+
+        pageReady:
+            this
+                .isPageEngineReady(),
+
+        readyHook:
+            this
+                .isPageReadyHookReady()
+    };
+};
+
+
+
+
+
+/* ==========================================================
+   D3.6.6 — PAGE READY REPORT
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PageEngine
+    .getPageReadyReport =
+function () {
+
+    return {
+
+        ready:
+            this
+                .isPageEngineReady(),
+
+        hookReady:
+            this
+                .isPageReadyHookReady(),
+
+        valid:
+            this
+                .validatePageReadyHook(),
+
+        status:
+            this
+                .getPageReadyStatus()
+    };
+};
+
+
+
+
+
+
+
+
+
+
+/* ==========================================================
+   D3.7 — PAGE VALIDATION BLOCK
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PageEngine
+    .pageValidationBlockReady =
+false;
+
+
+
+
+
+/* ==========================================================
+   D3.7.1 — VALIDATE PAGE STATE VALIDATION
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PageEngine
+    .validatePageStateValidationBlock =
+function () {
+
+    return (
+
+        this
+            .validatePageState &&
+
+        this
+            .validatePageState()
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   D3.7.2 — VALIDATE ACTIVE PAGE TRACKING
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PageEngine
+    .validateActivePageTrackingBlock =
+function () {
+
+    return (
+
+        this
+            .validateActivePageTracking &&
+
+        this
+            .validateActivePageTracking()
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   D3.7.3 — VALIDATE PAGE COLLECTION ENGINE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PageEngine
+    .validatePageCollectionEngineBlock =
+function () {
+
+    return (
+
+        this
+            .validatePageCollectionEngine &&
+
+        this
+            .validatePageCollectionEngine()
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   D3.7.4 — VALIDATE PAGE STATE ENGINE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PageEngine
+    .validatePageStateEngineBlock =
+function () {
+
+    return (
+
+        this
+            .validatePageStateEngine &&
+
+        this
+            .validatePageStateEngine()
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   D3.7.5 — VALIDATE PAGE SYNCHRONIZATION
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PageEngine
+    .validatePageSynchronizationBlock =
+function () {
+
+    return (
+
+        this
+            .validatePageSynchronization &&
+
+        this
+            .validatePageSynchronization()
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   D3.7.6 — VALIDATE PAGE READY HOOK
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PageEngine
+    .validatePageReadyHookBlock =
+function () {
+
+    return (
+
+        this
+            .validatePageReadyHook &&
+
+        this
+            .validatePageReadyHook()
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   D3.7.7 — VALIDATE COMPLETE PAGE ENGINE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PageEngine
+    .validateCompletePageEngine =
+function () {
+
+    return (
+
+        this
+            .validatePageStateValidationBlock() &&
+
+        this
+            .validateActivePageTrackingBlock() &&
+
+        this
+            .validatePageCollectionEngineBlock() &&
+
+        this
+            .validatePageStateEngineBlock() &&
+
+        this
+            .validatePageSynchronizationBlock() &&
+
+        this
+            .validatePageReadyHookBlock()
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   D3.7.8 — INITIALIZE PAGE VALIDATION BLOCK
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PageEngine
+    .initializePageValidationBlock =
+function () {
+
+    if (
+
+        this
+            .pageValidationBlockReady
+
+    ) {
+
+        return;
+    }
+
+    this
+        .pageValidationBlockReady =
+            true;
+
+    if (
+
+        CampusWord2007Simulateur
+            .Logger &&
+
+        typeof
+        CampusWord2007Simulateur
+            .Logger
+            .info ===
+        "function"
+
+    ) {
+
+        CampusWord2007Simulateur
+            .Logger
+            .info(
+                "Page Validation Block Ready"
+            );
+    }
+};
+
+
+
+
+
+/* ==========================================================
+   D3.7.9 — PAGE VALIDATION BLOCK STATUS
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PageEngine
+    .isPageValidationBlockReady =
+function () {
+
+    return (
+
+        this
+            .pageValidationBlockReady ===
+        true
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   D3.7.10 — PAGE VALIDATION REPORT
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PageEngine
+    .getPageValidationReport =
+function () {
+
+    return {
+
+        stateValidation:
+            this
+                .validatePageStateValidationBlock(),
+
+        activePageTracking:
+            this
+                .validateActivePageTrackingBlock(),
+
+        collectionEngine:
+            this
+                .validatePageCollectionEngineBlock(),
+
+        stateEngine:
+            this
+                .validatePageStateEngineBlock(),
+
+        synchronization:
+            this
+                .validatePageSynchronizationBlock(),
+
+        readyHook:
+            this
+                .validatePageReadyHookBlock(),
+
+        complete:
+            this
+                .validateCompletePageEngine(),
+
+        blockReady:
+            this
+                .isPageValidationBlockReady()
+    };
+};
+
+
+
+
+
+
+
+
+
 
 
