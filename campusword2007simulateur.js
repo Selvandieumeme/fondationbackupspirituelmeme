@@ -15423,3 +15423,742 @@ function () {
 };
 
 
+
+
+
+
+
+
+
+
+
+/* ==========================================================
+   C4.5 — CURSOR SYNCHRONIZATION
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .CursorEngine
+    .cursorSynchronizationReady =
+false;
+
+
+
+
+
+/* ==========================================================
+   C4.5.1 — GET SYNCHRONIZED POSITION
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .CursorEngine
+    .getSynchronizedCursorPosition =
+function () {
+
+    return this.getCursorPosition();
+};
+
+
+
+
+
+/* ==========================================================
+   C4.5.2 — IS POSITION SYNCHRONIZED
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .CursorEngine
+    .isCursorPositionSynchronized =
+function () {
+
+    const position =
+        this.getSynchronizedCursorPosition();
+
+    return (
+
+        typeof position.x ===
+        "number" &&
+
+        typeof position.y ===
+        "number"
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C4.5.3 — GET SYNCHRONIZED STYLE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .CursorEngine
+    .getSynchronizedCursorStyle =
+function () {
+
+    return this.getCursorStyle();
+};
+
+
+
+
+
+/* ==========================================================
+   C4.5.4 — IS STYLE SYNCHRONIZED
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .CursorEngine
+    .isCursorStyleSynchronized =
+function () {
+
+    return (
+
+        typeof
+        this.getSynchronizedCursorStyle() ===
+        "string"
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C4.5.5 — IS VISIBILITY SYNCHRONIZED
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .CursorEngine
+    .isCursorVisibilitySynchronized =
+function () {
+
+    return (
+
+        typeof
+        this.isCursorVisible() ===
+        "boolean"
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C4.5.6 — VALIDATE CURSOR SYNCHRONIZATION
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .CursorEngine
+    .validateCursorSynchronization =
+function () {
+
+    return (
+
+        this.isCursorPositionSynchronized() &&
+
+        this.isCursorStyleSynchronized() &&
+
+        this.isCursorVisibilitySynchronized()
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C4.5.7 — INITIALIZE CURSOR SYNCHRONIZATION
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .CursorEngine
+    .initializeCursorSynchronization =
+function () {
+
+    if (
+
+        this.cursorSynchronizationReady
+
+    ) {
+
+        return;
+    }
+
+    this.cursorSynchronizationReady =
+        true;
+
+    if (
+
+        CampusWord2007Simulateur
+            .Logger &&
+
+        typeof
+        CampusWord2007Simulateur
+            .Logger
+            .info ===
+        "function"
+
+    ) {
+
+        CampusWord2007Simulateur
+            .Logger
+            .info(
+                "Cursor Synchronization Ready"
+            );
+    }
+};
+
+
+
+
+
+/* ==========================================================
+   C4.5.8 — SYNCHRONIZATION STATUS
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .CursorEngine
+    .isCursorSynchronizationReady =
+function () {
+
+    return (
+
+        this.cursorSynchronizationReady ===
+        true
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C4.5.9 — SYNCHRONIZATION REPORT
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .CursorEngine
+    .getCursorSynchronizationReport =
+function () {
+
+    return {
+
+        ready:
+            this.isCursorSynchronizationReady(),
+
+        position:
+            this.isCursorPositionSynchronized(),
+
+        style:
+            this.isCursorStyleSynchronized(),
+
+        visibility:
+            this.isCursorVisibilitySynchronized(),
+
+        valid:
+            this.validateCursorSynchronization()
+    };
+};
+
+
+
+
+
+
+
+
+/* ==========================================================
+   C4.6 — CURSOR READY HOOK
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .CursorEngine
+    .cursorReadyHookReady =
+false;
+
+
+
+
+
+/* ==========================================================
+   C4.6.1 — IS CURSOR ENGINE READY
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .CursorEngine
+    .isCursorEngineReady =
+function () {
+
+    return (
+
+        this.isCursorStateValidationReady() &&
+
+        this.isCursorPositionEngineReady() &&
+
+        this.isCursorStyleEngineReady() &&
+
+        this.isCursorVisibilityEngineReady() &&
+
+        this.isCursorSynchronizationReady()
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C4.6.2 — INITIALIZE CURSOR READY HOOK
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .CursorEngine
+    .initializeCursorReadyHook =
+function () {
+
+    if (
+
+        this.cursorReadyHookReady
+
+    ) {
+
+        return;
+    }
+
+    this.cursorReadyHookReady =
+        true;
+
+    if (
+
+        CampusWord2007Simulateur
+            .Logger &&
+
+        typeof
+        CampusWord2007Simulateur
+            .Logger
+            .info ===
+        "function"
+
+    ) {
+
+        CampusWord2007Simulateur
+            .Logger
+            .info(
+                "Cursor Ready Hook Ready"
+            );
+    }
+};
+
+
+
+
+
+/* ==========================================================
+   C4.6.3 — READY HOOK STATUS
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .CursorEngine
+    .isCursorReadyHookReady =
+function () {
+
+    return (
+
+        this.cursorReadyHookReady ===
+        true
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C4.6.4 — READY HOOK VALIDATION
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .CursorEngine
+    .validateCursorReadyHook =
+function () {
+
+    return (
+
+        typeof
+        this.isCursorEngineReady ===
+        "function" &&
+
+        typeof
+        this.initializeCursorReadyHook ===
+        "function"
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C4.6.5 — GET CURSOR READY STATUS
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .CursorEngine
+    .getCursorReadyStatus =
+function () {
+
+    return {
+
+        stateValidation:
+            this.isCursorStateValidationReady(),
+
+        positionEngine:
+            this.isCursorPositionEngineReady(),
+
+        styleEngine:
+            this.isCursorStyleEngineReady(),
+
+        visibilityEngine:
+            this.isCursorVisibilityEngineReady(),
+
+        synchronization:
+            this.isCursorSynchronizationReady(),
+
+        cursorReady:
+            this.isCursorEngineReady(),
+
+        hookReady:
+            this.isCursorReadyHookReady()
+    };
+};
+
+
+
+
+
+/* ==========================================================
+   C4.6.6 — CURSOR READY REPORT
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .CursorEngine
+    .getCursorReadyReport =
+function () {
+
+    return {
+
+        ready:
+            this.isCursorEngineReady(),
+
+        hookReady:
+            this.isCursorReadyHookReady(),
+
+        valid:
+            this.validateCursorReadyHook(),
+
+        status:
+            this.getCursorReadyStatus()
+    };
+};
+
+
+
+
+
+
+
+
+
+/* ==========================================================
+   C4.7 — CURSOR VALIDATION BLOCK
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .CursorEngine
+    .cursorValidationBlockReady =
+false;
+
+
+
+
+
+/* ==========================================================
+   C4.7.1 — VALIDATE CURSOR STATE BLOCK
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .CursorEngine
+    .validateCursorStateBlock =
+function () {
+
+    return (
+
+        this.validateCursorState &&
+
+        this.validateCursorState()
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C4.7.2 — VALIDATE CURSOR POSITION BLOCK
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .CursorEngine
+    .validateCursorPositionBlock =
+function () {
+
+    return (
+
+        this.validateCursorPosition &&
+
+        this.validateCursorPosition()
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C4.7.3 — VALIDATE CURSOR STYLE BLOCK
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .CursorEngine
+    .validateCursorStyleBlock =
+function () {
+
+    return (
+
+        this.validateCursorStyle &&
+
+        this.validateCursorStyle()
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C4.7.4 — VALIDATE CURSOR VISIBILITY BLOCK
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .CursorEngine
+    .validateCursorVisibilityBlock =
+function () {
+
+    return (
+
+        this.validateCursorVisibility &&
+
+        this.validateCursorVisibility()
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C4.7.5 — VALIDATE CURSOR SYNCHRONIZATION BLOCK
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .CursorEngine
+    .validateCursorSynchronizationBlock =
+function () {
+
+    return (
+
+        this.validateCursorSynchronization &&
+
+        this.validateCursorSynchronization()
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C4.7.6 — VALIDATE CURSOR READY BLOCK
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .CursorEngine
+    .validateCursorReadyHookBlock =
+function () {
+
+    return (
+
+        this.validateCursorReadyHook &&
+
+        this.validateCursorReadyHook()
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C4.7.7 — VALIDATE COMPLETE CURSOR SYSTEM
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .CursorEngine
+    .validateCompleteCursorSystem =
+function () {
+
+    return (
+
+        this.validateCursorStateBlock() &&
+
+        this.validateCursorPositionBlock() &&
+
+        this.validateCursorStyleBlock() &&
+
+        this.validateCursorVisibilityBlock() &&
+
+        this.validateCursorSynchronizationBlock() &&
+
+        this.validateCursorReadyHookBlock()
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C4.7.8 — INITIALIZE CURSOR VALIDATION BLOCK
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .CursorEngine
+    .initializeCursorValidationBlock =
+function () {
+
+    if (
+
+        this.cursorValidationBlockReady
+
+    ) {
+
+        return;
+    }
+
+    this.cursorValidationBlockReady =
+        true;
+
+    if (
+
+        CampusWord2007Simulateur
+            .Logger &&
+
+        typeof
+        CampusWord2007Simulateur
+            .Logger
+            .info ===
+        "function"
+
+    ) {
+
+        CampusWord2007Simulateur
+            .Logger
+            .info(
+                "Cursor Validation Block Ready"
+            );
+    }
+};
+
+
+
+
+
+/* ==========================================================
+   C4.7.9 — VALIDATION BLOCK STATUS
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .CursorEngine
+    .isCursorValidationBlockReady =
+function () {
+
+    return (
+
+        this.cursorValidationBlockReady ===
+        true
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C4.7.10 — CURSOR VALIDATION REPORT
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .CursorEngine
+    .getCursorValidationReportBlock =
+function () {
+
+    return {
+
+        state:
+            this.validateCursorStateBlock(),
+
+        position:
+            this.validateCursorPositionBlock(),
+
+        style:
+            this.validateCursorStyleBlock(),
+
+        visibility:
+            this.validateCursorVisibilityBlock(),
+
+        synchronization:
+            this.validateCursorSynchronizationBlock(),
+
+        ready:
+            this.validateCursorReadyHookBlock(),
+
+        complete:
+            this.validateCompleteCursorSystem(),
+
+        blockReady:
+            this.isCursorValidationBlockReady()
+    };
+};
+
+
+
+
+
