@@ -18039,6 +18039,1879 @@ function () {
 
 
 
+/* ==========================================================
+   C6 — SHORTCUT ENGINE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ShortcutEngine =
+CampusWord2007Simulateur
+    .ShortcutEngine || {
+
+        initialized: false
+    };
+
+
+
+
+
+
+
+
+
+
+/* ==========================================================
+   C6.1 — SHORTCUT STATE VALIDATION
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ShortcutEngine
+    .shortcutStateValidationReady =
+false;
+
+
+
+
+
+/* ==========================================================
+   C6.1.1 — VALIDATE SHORTCUT ENGINE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ShortcutEngine
+    .validateShortcutEngine =
+function () {
+
+    return (
+
+        !!CampusWord2007Simulateur
+            .ShortcutEngine
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C6.1.2 — VALIDATE INITIALIZED FLAG
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ShortcutEngine
+    .validateShortcutInitialization =
+function () {
+
+    return (
+
+        typeof
+        CampusWord2007Simulateur
+            .ShortcutEngine
+            .initialized ===
+        "boolean"
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C6.1.3 — VALIDATE SHORTCUT STATE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ShortcutEngine
+    .validateShortcutState =
+function () {
+
+    return (
+
+        this
+            .validateShortcutEngine() &&
+
+        this
+            .validateShortcutInitialization()
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C6.1.4 — INITIALIZE SHORTCUT VALIDATION
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ShortcutEngine
+    .initializeShortcutStateValidation =
+function () {
+
+    if (
+
+        this
+            .shortcutStateValidationReady
+
+    ) {
+
+        return;
+    }
+
+    this
+        .shortcutStateValidationReady =
+            true;
+
+    if (
+
+        CampusWord2007Simulateur
+            .Logger &&
+
+        typeof
+        CampusWord2007Simulateur
+            .Logger
+            .info ===
+        "function"
+
+    ) {
+
+        CampusWord2007Simulateur
+            .Logger
+            .info(
+                "Shortcut State Validation Ready"
+            );
+    }
+};
+
+
+
+
+
+/* ==========================================================
+   C6.1.5 — VALIDATION STATUS
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ShortcutEngine
+    .isShortcutStateValidationReady =
+function () {
+
+    return (
+
+        this
+            .shortcutStateValidationReady ===
+        true
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C6.1.6 — VALIDATION REPORT
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ShortcutEngine
+    .getShortcutValidationReport =
+function () {
+
+    return {
+
+        engine:
+            this
+                .validateShortcutEngine(),
+
+        initialized:
+            this
+                .validateShortcutInitialization(),
+
+        valid:
+            this
+                .validateShortcutState(),
+
+        ready:
+            this
+                .isShortcutStateValidationReady()
+    };
+};
+
+
+
+
+
+
+
+
+
+
+/* ==========================================================
+   C6.2 — SHORTCUT REGISTRATION ENGINE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ShortcutEngine
+    .shortcutRegistrationReady =
+false;
+
+
+
+
+
+/* ==========================================================
+   C6.2.1 — CREATE SHORTCUT REGISTRY
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ShortcutEngine
+    .shortcutRegistry =
+CampusWord2007Simulateur
+    .ShortcutEngine
+    .shortcutRegistry || {};
+
+
+
+
+
+/* ==========================================================
+   C6.2.2 — REGISTER SHORTCUT
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ShortcutEngine
+    .registerShortcut =
+function (
+    shortcut,
+    handler
+) {
+
+    if (
+
+        typeof shortcut !==
+        "string"
+
+    ) {
+
+        return false;
+    }
+
+    if (
+
+        typeof handler !==
+        "function"
+
+    ) {
+
+        return false;
+    }
+
+    this
+        .shortcutRegistry[
+            shortcut
+        ] = handler;
+
+    return true;
+};
+
+
+
+
+
+/* ==========================================================
+   C6.2.3 — UNREGISTER SHORTCUT
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ShortcutEngine
+    .unregisterShortcut =
+function (
+    shortcut
+) {
+
+    if (
+
+        !this
+            .shortcutRegistry[
+                shortcut
+            ]
+
+    ) {
+
+        return false;
+    }
+
+    delete
+        this
+            .shortcutRegistry[
+                shortcut
+            ];
+
+    return true;
+};
+
+
+
+
+
+/* ==========================================================
+   C6.2.4 — HAS SHORTCUT
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ShortcutEngine
+    .hasShortcut =
+function (
+    shortcut
+) {
+
+    return (
+
+        typeof
+
+        this
+            .shortcutRegistry[
+                shortcut
+            ]
+
+        ===
+
+        "function"
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C6.2.5 — GET SHORTCUT
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ShortcutEngine
+    .getShortcut =
+function (
+    shortcut
+) {
+
+    return
+
+        this
+            .shortcutRegistry[
+                shortcut
+            ] ||
+
+        null;
+};
+
+
+
+
+
+/* ==========================================================
+   C6.2.6 — GET REGISTERED SHORTCUTS
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ShortcutEngine
+    .getRegisteredShortcuts =
+function () {
+
+    return Object
+        .keys(
+
+            this
+                .shortcutRegistry
+
+        );
+};
+
+
+
+
+
+/* ==========================================================
+   C6.2.7 — CLEAR SHORTCUT REGISTRY
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ShortcutEngine
+    .clearShortcutRegistry =
+function () {
+
+    this
+        .shortcutRegistry = {};
+
+    return true;
+};
+
+
+
+
+
+/* ==========================================================
+   C6.2.8 — VALIDATE SHORTCUT REGISTRY
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ShortcutEngine
+    .validateShortcutRegistry =
+function () {
+
+    return (
+
+        typeof
+        this
+            .shortcutRegistry ===
+        "object"
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C6.2.9 — INITIALIZE REGISTRATION ENGINE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ShortcutEngine
+    .initializeShortcutRegistration =
+function () {
+
+    if (
+
+        this
+            .shortcutRegistrationReady
+
+    ) {
+
+        return;
+    }
+
+    this
+        .shortcutRegistrationReady =
+            true;
+
+    if (
+
+        CampusWord2007Simulateur
+            .Logger &&
+
+        typeof
+        CampusWord2007Simulateur
+            .Logger
+            .info ===
+        "function"
+
+    ) {
+
+        CampusWord2007Simulateur
+            .Logger
+            .info(
+                "Shortcut Registration Ready"
+            );
+    }
+};
+
+
+
+
+
+/* ==========================================================
+   C6.2.10 — REGISTRATION STATUS
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ShortcutEngine
+    .isShortcutRegistrationReady =
+function () {
+
+    return (
+
+        this
+            .shortcutRegistrationReady ===
+        true
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C6.2.11 — REGISTRATION REPORT
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ShortcutEngine
+    .getShortcutRegistrationReport =
+function () {
+
+    return {
+
+        count:
+
+            this
+                .getRegisteredShortcuts()
+                .length,
+
+        valid:
+
+            this
+                .validateShortcutRegistry(),
+
+        ready:
+
+            this
+                .isShortcutRegistrationReady()
+    };
+};
+
+
+
+
+
+
+
+
+
+
+
+/* ==========================================================
+   C6.3 — SHORTCUT DETECTION ENGINE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ShortcutEngine
+    .shortcutDetectionReady =
+false;
+
+
+
+
+
+/* ==========================================================
+   C6.3.1 — BUILD SHORTCUT STRING
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ShortcutEngine
+    .buildShortcutString =
+function (
+    event
+) {
+
+    if (
+        !event
+    ) {
+
+        return "";
+    }
+
+    const parts = [];
+
+    if (
+        event.ctrlKey
+    ) {
+
+        parts.push(
+            "Ctrl"
+        );
+    }
+
+    if (
+        event.shiftKey
+    ) {
+
+        parts.push(
+            "Shift"
+        );
+    }
+
+    if (
+        event.altKey
+    ) {
+
+        parts.push(
+            "Alt"
+        );
+    }
+
+    if (
+        event.key
+    ) {
+
+        parts.push(
+            event.key
+                .toUpperCase()
+        );
+    }
+
+    return parts.join(
+        "+"
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C6.3.2 — DETECT SHORTCUT
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ShortcutEngine
+    .detectShortcut =
+function (
+    event
+) {
+
+    const shortcut =
+
+        this
+            .buildShortcutString(
+                event
+            );
+
+    return (
+
+        this
+            .hasShortcut(
+                shortcut
+            )
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C6.3.3 — GET DETECTED SHORTCUT
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ShortcutEngine
+    .getDetectedShortcut =
+function (
+    event
+) {
+
+    const shortcut =
+
+        this
+            .buildShortcutString(
+                event
+            );
+
+    if (
+
+        this
+            .hasShortcut(
+                shortcut
+            )
+
+    ) {
+
+        return shortcut;
+    }
+
+    return null;
+};
+
+
+
+
+
+/* ==========================================================
+   C6.3.4 — VALIDATE SHORTCUT DETECTION
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ShortcutEngine
+    .validateShortcutDetection =
+function () {
+
+    return (
+
+        typeof
+        this
+            .buildShortcutString ===
+        "function" &&
+
+        typeof
+        this
+            .detectShortcut ===
+        "function" &&
+
+        typeof
+        this
+            .getDetectedShortcut ===
+        "function"
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C6.3.5 — INITIALIZE SHORTCUT DETECTION
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ShortcutEngine
+    .initializeShortcutDetection =
+function () {
+
+    if (
+
+        this
+            .shortcutDetectionReady
+
+    ) {
+
+        return;
+    }
+
+    this
+        .shortcutDetectionReady =
+            true;
+
+    if (
+
+        CampusWord2007Simulateur
+            .Logger &&
+
+        typeof
+        CampusWord2007Simulateur
+            .Logger
+            .info ===
+        "function"
+
+    ) {
+
+        CampusWord2007Simulateur
+            .Logger
+            .info(
+                "Shortcut Detection Ready"
+            );
+    }
+};
+
+
+
+
+
+/* ==========================================================
+   C6.3.6 — DETECTION STATUS
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ShortcutEngine
+    .isShortcutDetectionReady =
+function () {
+
+    return (
+
+        this
+            .shortcutDetectionReady ===
+        true
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C6.3.7 — DETECTION REPORT
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ShortcutEngine
+    .getShortcutDetectionReport =
+function () {
+
+    return {
+
+        valid:
+
+            this
+                .validateShortcutDetection(),
+
+        ready:
+
+            this
+                .isShortcutDetectionReady(),
+
+        registered:
+
+            this
+                .getRegisteredShortcuts()
+                .length
+    };
+};
+
+
+
+
+
+
+
+
+
+
+/* ==========================================================
+   C6.4 — SHORTCUT EXECUTION ENGINE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ShortcutEngine
+    .shortcutExecutionReady =
+false;
+
+
+
+
+
+/* ==========================================================
+   C6.4.1 — EXECUTE SHORTCUT
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ShortcutEngine
+    .executeShortcut =
+function (
+    shortcut,
+    event
+) {
+
+    const handler =
+
+        this
+            .getShortcut(
+                shortcut
+            );
+
+    if (
+
+        typeof handler !==
+        "function"
+
+    ) {
+
+        return false;
+    }
+
+    handler(
+        event || null
+    );
+
+    return true;
+};
+
+
+
+
+
+/* ==========================================================
+   C6.4.2 — EXECUTE DETECTED SHORTCUT
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ShortcutEngine
+    .executeDetectedShortcut =
+function (
+    event
+) {
+
+    const shortcut =
+
+        this
+            .getDetectedShortcut(
+                event
+            );
+
+    if (
+
+        !shortcut
+
+    ) {
+
+        return false;
+    }
+
+    return (
+
+        this
+            .executeShortcut(
+                shortcut,
+                event
+            )
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C6.4.3 — CAN EXECUTE SHORTCUT
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ShortcutEngine
+    .canExecuteShortcut =
+function (
+    shortcut
+) {
+
+    return (
+
+        this
+            .hasShortcut(
+                shortcut
+            )
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C6.4.4 — GET EXECUTABLE SHORTCUTS
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ShortcutEngine
+    .getExecutableShortcuts =
+function () {
+
+    return (
+
+        this
+            .getRegisteredShortcuts()
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C6.4.5 — VALIDATE EXECUTION ENGINE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ShortcutEngine
+    .validateShortcutExecution =
+function () {
+
+    return (
+
+        typeof
+        this
+            .executeShortcut ===
+        "function" &&
+
+        typeof
+        this
+            .executeDetectedShortcut ===
+        "function" &&
+
+        typeof
+        this
+            .canExecuteShortcut ===
+        "function"
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C6.4.6 — INITIALIZE EXECUTION ENGINE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ShortcutEngine
+    .initializeShortcutExecution =
+function () {
+
+    if (
+
+        this
+            .shortcutExecutionReady
+
+    ) {
+
+        return;
+    }
+
+    this
+        .shortcutExecutionReady =
+            true;
+
+    if (
+
+        CampusWord2007Simulateur
+            .Logger &&
+
+        typeof
+        CampusWord2007Simulateur
+            .Logger
+            .info ===
+        "function"
+
+    ) {
+
+        CampusWord2007Simulateur
+            .Logger
+            .info(
+                "Shortcut Execution Ready"
+            );
+    }
+};
+
+
+
+
+
+/* ==========================================================
+   C6.4.7 — EXECUTION STATUS
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ShortcutEngine
+    .isShortcutExecutionReady =
+function () {
+
+    return (
+
+        this
+            .shortcutExecutionReady ===
+        true
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C6.4.8 — EXECUTION REPORT
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ShortcutEngine
+    .getShortcutExecutionReport =
+function () {
+
+    return {
+
+        ready:
+
+            this
+                .isShortcutExecutionReady(),
+
+        valid:
+
+            this
+                .validateShortcutExecution(),
+
+        executable:
+
+            this
+                .getExecutableShortcuts()
+                .length
+    };
+};
+
+
+
+
+
+
+
+
+
+
+
+/* ==========================================================
+   C6.5 — SHORTCUT SYNCHRONIZATION
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ShortcutEngine
+    .shortcutSynchronizationReady =
+false;
+
+
+
+
+
+/* ==========================================================
+   C6.5.1 — IS REGISTRY SYNCHRONIZED
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ShortcutEngine
+    .isShortcutRegistrySynchronized =
+function () {
+
+    return (
+
+        this
+            .validateShortcutRegistry()
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C6.5.2 — IS DETECTION SYNCHRONIZED
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ShortcutEngine
+    .isShortcutDetectionSynchronized =
+function () {
+
+    return (
+
+        this
+            .validateShortcutDetection()
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C6.5.3 — IS EXECUTION SYNCHRONIZED
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ShortcutEngine
+    .isShortcutExecutionSynchronized =
+function () {
+
+    return (
+
+        this
+            .validateShortcutExecution()
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C6.5.4 — VALIDATE SHORTCUT SYNCHRONIZATION
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ShortcutEngine
+    .validateShortcutSynchronization =
+function () {
+
+    return (
+
+        this
+            .isShortcutRegistrySynchronized() &&
+
+        this
+            .isShortcutDetectionSynchronized() &&
+
+        this
+            .isShortcutExecutionSynchronized()
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C6.5.5 — INITIALIZE SHORTCUT SYNCHRONIZATION
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ShortcutEngine
+    .initializeShortcutSynchronization =
+function () {
+
+    if (
+
+        this
+            .shortcutSynchronizationReady
+
+    ) {
+
+        return;
+    }
+
+    this
+        .shortcutSynchronizationReady =
+            true;
+
+    if (
+
+        CampusWord2007Simulateur
+            .Logger &&
+
+        typeof
+        CampusWord2007Simulateur
+            .Logger
+            .info ===
+        "function"
+
+    ) {
+
+        CampusWord2007Simulateur
+            .Logger
+            .info(
+                "Shortcut Synchronization Ready"
+            );
+    }
+};
+
+
+
+
+
+/* ==========================================================
+   C6.5.6 — SYNCHRONIZATION STATUS
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ShortcutEngine
+    .isShortcutSynchronizationReady =
+function () {
+
+    return (
+
+        this
+            .shortcutSynchronizationReady ===
+        true
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C6.5.7 — GET SYNCHRONIZATION STATUS
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ShortcutEngine
+    .getShortcutSynchronizationStatus =
+function () {
+
+    return {
+
+        registry:
+            this
+                .isShortcutRegistrySynchronized(),
+
+        detection:
+            this
+                .isShortcutDetectionSynchronized(),
+
+        execution:
+            this
+                .isShortcutExecutionSynchronized(),
+
+        valid:
+            this
+                .validateShortcutSynchronization()
+    };
+};
+
+
+
+
+
+/* ==========================================================
+   C6.5.8 — SYNCHRONIZATION REPORT
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ShortcutEngine
+    .getShortcutSynchronizationReport =
+function () {
+
+    return {
+
+        ready:
+            this
+                .isShortcutSynchronizationReady(),
+
+        status:
+            this
+                .getShortcutSynchronizationStatus(),
+
+        valid:
+            this
+                .validateShortcutSynchronization()
+    };
+};
+
+
+
+
+
+
+
+
+
+
+/* ==========================================================
+   C6.6 — SHORTCUT READY HOOK
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ShortcutEngine
+    .shortcutReadyHookReady =
+false;
+
+
+
+
+
+/* ==========================================================
+   C6.6.1 — IS SHORTCUT ENGINE READY
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ShortcutEngine
+    .isShortcutEngineReady =
+function () {
+
+    return (
+
+        this
+            .isShortcutStateValidationReady() &&
+
+        this
+            .isShortcutRegistrationReady() &&
+
+        this
+            .isShortcutDetectionReady() &&
+
+        this
+            .isShortcutExecutionReady() &&
+
+        this
+            .isShortcutSynchronizationReady()
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C6.6.2 — INITIALIZE SHORTCUT READY HOOK
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ShortcutEngine
+    .initializeShortcutReadyHook =
+function () {
+
+    if (
+
+        this
+            .shortcutReadyHookReady
+
+    ) {
+
+        return;
+    }
+
+    this
+        .shortcutReadyHookReady =
+            true;
+
+    if (
+
+        CampusWord2007Simulateur
+            .Logger &&
+
+        typeof
+        CampusWord2007Simulateur
+            .Logger
+            .info ===
+        "function"
+
+    ) {
+
+        CampusWord2007Simulateur
+            .Logger
+            .info(
+                "Shortcut Ready Hook Ready"
+            );
+    }
+};
+
+
+
+
+
+/* ==========================================================
+   C6.6.3 — READY HOOK STATUS
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ShortcutEngine
+    .isShortcutReadyHookReady =
+function () {
+
+    return (
+
+        this
+            .shortcutReadyHookReady ===
+        true
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C6.6.4 — VALIDATE READY HOOK
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ShortcutEngine
+    .validateShortcutReadyHook =
+function () {
+
+    return (
+
+        typeof
+        this
+            .isShortcutEngineReady ===
+        "function" &&
+
+        typeof
+        this
+            .initializeShortcutReadyHook ===
+        "function"
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C6.6.5 — GET SHORTCUT READY STATUS
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ShortcutEngine
+    .getShortcutReadyStatus =
+function () {
+
+    return {
+
+        stateValidation:
+            this
+                .isShortcutStateValidationReady(),
+
+        registration:
+            this
+                .isShortcutRegistrationReady(),
+
+        detection:
+            this
+                .isShortcutDetectionReady(),
+
+        execution:
+            this
+                .isShortcutExecutionReady(),
+
+        synchronization:
+            this
+                .isShortcutSynchronizationReady(),
+
+        shortcutReady:
+            this
+                .isShortcutEngineReady(),
+
+        hookReady:
+            this
+                .isShortcutReadyHookReady()
+    };
+};
+
+
+
+
+
+/* ==========================================================
+   C6.6.6 — SHORTCUT READY REPORT
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ShortcutEngine
+    .getShortcutReadyReport =
+function () {
+
+    return {
+
+        ready:
+            this
+                .isShortcutEngineReady(),
+
+        hookReady:
+            this
+                .isShortcutReadyHookReady(),
+
+        valid:
+            this
+                .validateShortcutReadyHook(),
+
+        status:
+            this
+                .getShortcutReadyStatus()
+    };
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* ==========================================================
+   C6.7 — SHORTCUT VALIDATION BLOCK
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ShortcutEngine
+    .shortcutValidationBlockReady =
+false;
+
+
+
+
+
+/* ==========================================================
+   C6.7.1 — VALIDATE SHORTCUT STATE BLOCK
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ShortcutEngine
+    .validateShortcutStateBlock =
+function () {
+
+    return (
+
+        this.validateShortcutState &&
+
+        this.validateShortcutState()
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C6.7.2 — VALIDATE REGISTRATION BLOCK
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ShortcutEngine
+    .validateShortcutRegistrationBlock =
+function () {
+
+    return (
+
+        this.validateShortcutRegistry &&
+
+        this.validateShortcutRegistry()
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C6.7.3 — VALIDATE DETECTION BLOCK
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ShortcutEngine
+    .validateShortcutDetectionBlock =
+function () {
+
+    return (
+
+        this.validateShortcutDetection &&
+
+        this.validateShortcutDetection()
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C6.7.4 — VALIDATE EXECUTION BLOCK
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ShortcutEngine
+    .validateShortcutExecutionBlock =
+function () {
+
+    return (
+
+        this.validateShortcutExecution &&
+
+        this.validateShortcutExecution()
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C6.7.5 — VALIDATE SYNCHRONIZATION BLOCK
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ShortcutEngine
+    .validateShortcutSynchronizationBlock =
+function () {
+
+    return (
+
+        this.validateShortcutSynchronization &&
+
+        this.validateShortcutSynchronization()
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C6.7.6 — VALIDATE READY HOOK BLOCK
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ShortcutEngine
+    .validateShortcutReadyHookBlock =
+function () {
+
+    return (
+
+        this.validateShortcutReadyHook &&
+
+        this.validateShortcutReadyHook()
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C6.7.7 — VALIDATE COMPLETE SHORTCUT SYSTEM
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ShortcutEngine
+    .validateCompleteShortcutSystem =
+function () {
+
+    return (
+
+        this.validateShortcutStateBlock() &&
+
+        this.validateShortcutRegistrationBlock() &&
+
+        this.validateShortcutDetectionBlock() &&
+
+        this.validateShortcutExecutionBlock() &&
+
+        this.validateShortcutSynchronizationBlock() &&
+
+        this.validateShortcutReadyHookBlock()
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C6.7.8 — INITIALIZE SHORTCUT VALIDATION BLOCK
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ShortcutEngine
+    .initializeShortcutValidationBlock =
+function () {
+
+    if (
+
+        this.shortcutValidationBlockReady
+
+    ) {
+
+        return;
+    }
+
+    this.shortcutValidationBlockReady =
+        true;
+
+    if (
+
+        CampusWord2007Simulateur
+            .Logger &&
+
+        typeof
+        CampusWord2007Simulateur
+            .Logger
+            .info ===
+        "function"
+
+    ) {
+
+        CampusWord2007Simulateur
+            .Logger
+            .info(
+                "Shortcut Validation Block Ready"
+            );
+    }
+};
+
+
+
+
+
+/* ==========================================================
+   C6.7.9 — VALIDATION BLOCK STATUS
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ShortcutEngine
+    .isShortcutValidationBlockReady =
+function () {
+
+    return (
+
+        this.shortcutValidationBlockReady ===
+        true
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C6.7.10 — SHORTCUT VALIDATION REPORT
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ShortcutEngine
+    .getShortcutValidationReportBlock =
+function () {
+
+    return {
+
+        state:
+            this.validateShortcutStateBlock(),
+
+        registration:
+            this.validateShortcutRegistrationBlock(),
+
+        detection:
+            this.validateShortcutDetectionBlock(),
+
+        execution:
+            this.validateShortcutExecutionBlock(),
+
+        synchronization:
+            this.validateShortcutSynchronizationBlock(),
+
+        ready:
+            this.validateShortcutReadyHookBlock(),
+
+        complete:
+            this.validateCompleteShortcutSystem(),
+
+        blockReady:
+            this.isShortcutValidationBlockReady()
+    };
+};
+
+
+
+
 
 
 
