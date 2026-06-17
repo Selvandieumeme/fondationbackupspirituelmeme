@@ -28296,5 +28296,1971 @@ function () {
 
 
 
+       /* ==========================================================
+   D4 — PAGE SURFACE ENGINE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PageSurfaceEngine =
+CampusWord2007Simulateur
+    .PageSurfaceEngine || {
+
+        initialized: false
+    };
+
+
+
+
+
+
+
+
+/* ==========================================================
+   D4.1 — SURFACE STATE VALIDATION
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PageSurfaceEngine
+    .surfaceStateValidationReady =
+false;
+
+
+
+
+
+/* ==========================================================
+   D4.1.1 — VALIDATE SURFACE ENGINE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PageSurfaceEngine
+    .validateSurfaceEngine =
+function () {
+
+    return (
+
+        !!CampusWord2007Simulateur
+            .PageSurfaceEngine
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   D4.1.2 — VALIDATE INITIALIZATION STATE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PageSurfaceEngine
+    .validateSurfaceInitialization =
+function () {
+
+    return (
+
+        typeof
+        CampusWord2007Simulateur
+            .PageSurfaceEngine
+            .initialized ===
+        "boolean"
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   D4.1.3 — VALIDATE SURFACE STATE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PageSurfaceEngine
+    .validateSurfaceState =
+function () {
+
+    return (
+
+        this
+            .validateSurfaceEngine() &&
+
+        this
+            .validateSurfaceInitialization()
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   D4.1.4 — INITIALIZE SURFACE STATE VALIDATION
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PageSurfaceEngine
+    .initializeSurfaceStateValidation =
+function () {
+
+    if (
+
+        this
+            .surfaceStateValidationReady
+
+    ) {
+
+        return;
+    }
+
+    this
+        .surfaceStateValidationReady =
+            true;
+
+    if (
+
+        CampusWord2007Simulateur
+            .Logger &&
+
+        typeof
+        CampusWord2007Simulateur
+            .Logger
+            .info ===
+        "function"
+
+    ) {
+
+        CampusWord2007Simulateur
+            .Logger
+            .info(
+                "Surface State Validation Ready"
+            );
+    }
+};
+
+
+
+
+
+/* ==========================================================
+   D4.1.5 — SURFACE STATE VALIDATION STATUS
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PageSurfaceEngine
+    .isSurfaceStateValidationReady =
+function () {
+
+    return (
+
+        this
+            .surfaceStateValidationReady ===
+        true
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   D4.1.6 — SURFACE STATE VALIDATION REPORT
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PageSurfaceEngine
+    .getSurfaceStateValidationReport =
+function () {
+
+    return {
+
+        engine:
+            this
+                .validateSurfaceEngine(),
+
+        initialized:
+            this
+                .validateSurfaceInitialization(),
+
+        valid:
+            this
+                .validateSurfaceState(),
+
+        ready:
+            this
+                .isSurfaceStateValidationReady()
+    };
+};
+
+
+
+
+
+
+
+
+
+/* ==========================================================
+   D4.2 — SURFACE CREATION
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PageSurfaceEngine
+    .surfaceCreationReady =
+false;
+
+
+
+
+
+/* ==========================================================
+   D4.2.1 — SURFACE ID COUNTER
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PageSurfaceEngine
+    .surfaceIdCounter =
+0;
+
+
+
+
+
+/* ==========================================================
+   D4.2.2 — CREATE SURFACE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PageSurfaceEngine
+    .createSurface =
+function () {
+
+    this
+        .surfaceIdCounter++;
+
+    return {
+
+        id:
+            "surface-" +
+            this.surfaceIdCounter,
+
+        pageId: null,
+
+        created: true,
+
+        active: false,
+
+        visible: true
+    };
+};
+
+
+
+
+
+/* ==========================================================
+   D4.2.3 — CREATE SURFACE FOR PAGE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PageSurfaceEngine
+    .createSurfaceForPage =
+function (
+    pageId
+) {
+
+    var surface =
+        this
+            .createSurface();
+
+    surface.pageId =
+        pageId;
+
+    return surface;
+};
+
+
+
+
+
+/* ==========================================================
+   D4.2.4 — CREATE DEFAULT SURFACE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PageSurfaceEngine
+    .createDefaultSurface =
+function () {
+
+    return {
+
+        id:
+            "surface-default",
+
+        pageId: null,
+
+        created: true,
+
+        active: false,
+
+        visible: true
+    };
+};
+
+
+
+
+
+/* ==========================================================
+   D4.2.5 — VALIDATE SURFACE OBJECT
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PageSurfaceEngine
+    .validateSurfaceObject =
+function (
+    surface
+) {
+
+    if (
+        !surface
+    ) {
+
+        return false;
+    }
+
+    return (
+
+        typeof
+        surface.id ===
+        "string"
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   D4.2.6 — VALIDATE SURFACE CREATION
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PageSurfaceEngine
+    .validateSurfaceCreation =
+function () {
+
+    return (
+
+        typeof
+        this
+            .createSurface ===
+        "function" &&
+
+        typeof
+        this
+            .createSurfaceForPage ===
+        "function" &&
+
+        typeof
+        this
+            .validateSurfaceObject ===
+        "function"
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   D4.2.7 — INITIALIZE SURFACE CREATION
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PageSurfaceEngine
+    .initializeSurfaceCreation =
+function () {
+
+    if (
+
+        this
+            .surfaceCreationReady
+
+    ) {
+
+        return;
+    }
+
+    this
+        .surfaceCreationReady =
+            true;
+
+    if (
+
+        CampusWord2007Simulateur
+            .Logger &&
+
+        typeof
+        CampusWord2007Simulateur
+            .Logger
+            .info ===
+        "function"
+
+    ) {
+
+        CampusWord2007Simulateur
+            .Logger
+            .info(
+                "Surface Creation Ready"
+            );
+    }
+};
+
+
+
+
+
+/* ==========================================================
+   D4.2.8 — SURFACE CREATION STATUS
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PageSurfaceEngine
+    .isSurfaceCreationReady =
+function () {
+
+    return (
+
+        this
+            .surfaceCreationReady ===
+        true
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   D4.2.9 — SURFACE CREATION REPORT
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PageSurfaceEngine
+    .getSurfaceCreationReport =
+function () {
+
+    return {
+
+        counter:
+            this
+                .surfaceIdCounter,
+
+        valid:
+            this
+                .validateSurfaceCreation(),
+
+        ready:
+            this
+                .isSurfaceCreationReady()
+    };
+};
+
+
+
+
+
+
+
+
+
+
+
+/* ==========================================================
+   D4.3 — SURFACE CACHE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PageSurfaceEngine
+    .surfaceCacheReady =
+false;
+
+
+
+
+
+/* ==========================================================
+   D4.3.1 — SURFACE CACHE STORAGE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PageSurfaceEngine
+    .surfaceCache =
+{};
+
+
+
+
+
+/* ==========================================================
+   D4.3.2 — ADD SURFACE TO CACHE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PageSurfaceEngine
+    .addSurfaceToCache =
+function (
+    surface
+) {
+
+    if (
+
+        !this
+            .validateSurfaceObject(
+                surface
+            )
+
+    ) {
+
+        return false;
+    }
+
+    this
+        .surfaceCache[
+            surface.id
+        ] =
+            surface;
+
+    return true;
+};
+
+
+
+
+
+/* ==========================================================
+   D4.3.3 — GET SURFACE FROM CACHE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PageSurfaceEngine
+    .getSurfaceFromCache =
+function (
+    surfaceId
+) {
+
+    return (
+
+        this
+            .surfaceCache[
+                surfaceId
+            ] || null
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   D4.3.4 — HAS SURFACE IN CACHE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PageSurfaceEngine
+    .hasSurfaceInCache =
+function (
+    surfaceId
+) {
+
+    return (
+
+        !!this
+            .surfaceCache[
+                surfaceId
+            ]
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   D4.3.5 — REMOVE SURFACE FROM CACHE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PageSurfaceEngine
+    .removeSurfaceFromCache =
+function (
+    surfaceId
+) {
+
+    if (
+
+        !this
+            .hasSurfaceInCache(
+                surfaceId
+            )
+
+    ) {
+
+        return false;
+    }
+
+    delete this
+        .surfaceCache[
+            surfaceId
+        ];
+
+    return true;
+};
+
+
+
+
+
+/* ==========================================================
+   D4.3.6 — CLEAR SURFACE CACHE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PageSurfaceEngine
+    .clearSurfaceCache =
+function () {
+
+    this
+        .surfaceCache =
+            {};
+
+    return true;
+};
+
+
+
+
+
+/* ==========================================================
+   D4.3.7 — GET SURFACE CACHE COUNT
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PageSurfaceEngine
+    .getSurfaceCacheCount =
+function () {
+
+    return Object
+        .keys(
+            this
+                .surfaceCache
+        )
+        .length;
+};
+
+
+
+
+
+/* ==========================================================
+   D4.3.8 — VALIDATE SURFACE CACHE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PageSurfaceEngine
+    .validateSurfaceCache =
+function () {
+
+    return (
+
+        typeof
+        this
+            .addSurfaceToCache ===
+        "function" &&
+
+        typeof
+        this
+            .getSurfaceFromCache ===
+        "function" &&
+
+        typeof
+        this
+            .removeSurfaceFromCache ===
+        "function"
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   D4.3.9 — INITIALIZE SURFACE CACHE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PageSurfaceEngine
+    .initializeSurfaceCache =
+function () {
+
+    if (
+
+        this
+            .surfaceCacheReady
+
+    ) {
+
+        return;
+    }
+
+    this
+        .surfaceCacheReady =
+            true;
+
+    if (
+
+        CampusWord2007Simulateur
+            .Logger &&
+
+        typeof
+        CampusWord2007Simulateur
+            .Logger
+            .info ===
+        "function"
+
+    ) {
+
+        CampusWord2007Simulateur
+            .Logger
+            .info(
+                "Surface Cache Ready"
+            );
+    }
+};
+
+
+
+
+
+/* ==========================================================
+   D4.3.10 — SURFACE CACHE STATUS
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PageSurfaceEngine
+    .isSurfaceCacheReady =
+function () {
+
+    return (
+
+        this
+            .surfaceCacheReady ===
+        true
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   D4.3.11 — SURFACE CACHE REPORT
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PageSurfaceEngine
+    .getSurfaceCacheReport =
+function () {
+
+    return {
+
+        count:
+            this
+                .getSurfaceCacheCount(),
+
+        valid:
+            this
+                .validateSurfaceCache(),
+
+        ready:
+            this
+                .isSurfaceCacheReady()
+    };
+};
+
+
+
+
+
+
+
+/* ==========================================================
+   D4.4 — SURFACE LOOKUP
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PageSurfaceEngine
+    .surfaceLookupReady =
+false;
+
+
+
+
+
+/* ==========================================================
+   D4.4.1 — FIND SURFACE BY ID
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PageSurfaceEngine
+    .findSurfaceById =
+function (
+    surfaceId
+) {
+
+    return this
+        .getSurfaceFromCache(
+            surfaceId
+        );
+};
+
+
+
+
+
+/* ==========================================================
+   D4.4.2 — FIND SURFACE BY PAGE ID
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PageSurfaceEngine
+    .findSurfaceByPageId =
+function (
+    pageId
+) {
+
+    var cache =
+        this
+            .surfaceCache;
+
+    var key;
+
+    for (
+
+        key in cache
+
+    ) {
+
+        if (
+
+            cache[
+                key
+            ] &&
+
+            cache[
+                key
+            ]
+            .pageId ===
+            pageId
+
+        ) {
+
+            return cache[
+                key
+            ];
+        }
+    }
+
+    return null;
+};
+
+
+
+
+
+/* ==========================================================
+   D4.4.3 — SURFACE EXISTS
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PageSurfaceEngine
+    .surfaceExists =
+function (
+    surfaceId
+) {
+
+    return this
+        .hasSurfaceInCache(
+            surfaceId
+        );
+};
+
+
+
+
+
+/* ==========================================================
+   D4.4.4 — GET ALL SURFACES
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PageSurfaceEngine
+    .getAllSurfaces =
+function () {
+
+    return Object
+        .values(
+            this
+                .surfaceCache
+        );
+};
+
+
+
+
+
+/* ==========================================================
+   D4.4.5 — GET ALL SURFACE IDS
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PageSurfaceEngine
+    .getAllSurfaceIds =
+function () {
+
+    return Object
+        .keys(
+            this
+                .surfaceCache
+        );
+};
+
+
+
+
+
+/* ==========================================================
+   D4.4.6 — GET SURFACES COUNT
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PageSurfaceEngine
+    .getSurfaceLookupCount =
+function () {
+
+    return this
+        .getAllSurfaceIds()
+        .length;
+};
+
+
+
+
+
+/* ==========================================================
+   D4.4.7 — VALIDATE SURFACE LOOKUP
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PageSurfaceEngine
+    .validateSurfaceLookup =
+function () {
+
+    return (
+
+        typeof
+        this
+            .findSurfaceById ===
+        "function" &&
+
+        typeof
+        this
+            .findSurfaceByPageId ===
+        "function" &&
+
+        typeof
+        this
+            .surfaceExists ===
+        "function"
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   D4.4.8 — INITIALIZE SURFACE LOOKUP
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PageSurfaceEngine
+    .initializeSurfaceLookup =
+function () {
+
+    if (
+
+        this
+            .surfaceLookupReady
+
+    ) {
+
+        return;
+    }
+
+    this
+        .surfaceLookupReady =
+            true;
+
+    if (
+
+        CampusWord2007Simulateur
+            .Logger &&
+
+        typeof
+        CampusWord2007Simulateur
+            .Logger
+            .info ===
+        "function"
+
+    ) {
+
+        CampusWord2007Simulateur
+            .Logger
+            .info(
+                "Surface Lookup Ready"
+            );
+    }
+};
+
+
+
+
+
+/* ==========================================================
+   D4.4.9 — SURFACE LOOKUP STATUS
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PageSurfaceEngine
+    .isSurfaceLookupReady =
+function () {
+
+    return (
+
+        this
+            .surfaceLookupReady ===
+        true
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   D4.4.10 — SURFACE LOOKUP REPORT
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PageSurfaceEngine
+    .getSurfaceLookupReport =
+function () {
+
+    return {
+
+        surfaces:
+            this
+                .getSurfaceLookupCount(),
+
+        valid:
+            this
+                .validateSurfaceLookup(),
+
+        ready:
+            this
+                .isSurfaceLookupReady()
+    };
+};
+
+
+
+
+
+
+
+
+
+
+
+/* ==========================================================
+   D4.5 — SURFACE SYNCHRONIZATION
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PageSurfaceEngine
+    .surfaceSynchronizationReady =
+false;
+
+
+
+
+
+/* ==========================================================
+   D4.5.1 — SYNCHRONIZATION STATE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PageSurfaceEngine
+    .surfaceSynchronizationState = {
+
+        synchronized: true,
+
+        dirty: false,
+
+        lastSynchronizationTime: null
+    };
+
+
+
+
+
+/* ==========================================================
+   D4.5.2 — GET SYNCHRONIZATION STATE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PageSurfaceEngine
+    .getSurfaceSynchronizationState =
+function () {
+
+    return this
+        .surfaceSynchronizationState;
+};
+
+
+
+
+
+/* ==========================================================
+   D4.5.3 — MARK SURFACE DIRTY
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PageSurfaceEngine
+    .markSurfaceDirty =
+function () {
+
+    this
+        .surfaceSynchronizationState
+        .dirty =
+            true;
+
+    this
+        .surfaceSynchronizationState
+        .synchronized =
+            false;
+
+    return true;
+};
+
+
+
+
+
+/* ==========================================================
+   D4.5.4 — MARK SURFACE SYNCHRONIZED
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PageSurfaceEngine
+    .markSurfaceSynchronized =
+function () {
+
+    this
+        .surfaceSynchronizationState
+        .dirty =
+            false;
+
+    this
+        .surfaceSynchronizationState
+        .synchronized =
+            true;
+
+    this
+        .surfaceSynchronizationState
+        .lastSynchronizationTime =
+            Date.now();
+
+    return true;
+};
+
+
+
+
+
+/* ==========================================================
+   D4.5.5 — IS SURFACE DIRTY
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PageSurfaceEngine
+    .isSurfaceDirty =
+function () {
+
+    return (
+
+        this
+            .surfaceSynchronizationState
+            .dirty ===
+        true
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   D4.5.6 — IS SURFACE SYNCHRONIZED
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PageSurfaceEngine
+    .isSurfaceSynchronized =
+function () {
+
+    return (
+
+        this
+            .surfaceSynchronizationState
+            .synchronized ===
+        true
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   D4.5.7 — GET LAST SYNCHRONIZATION TIME
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PageSurfaceEngine
+    .getLastSurfaceSynchronizationTime =
+function () {
+
+    return this
+        .surfaceSynchronizationState
+        .lastSynchronizationTime;
+};
+
+
+
+
+
+/* ==========================================================
+   D4.5.8 — VALIDATE SURFACE SYNCHRONIZATION
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PageSurfaceEngine
+    .validateSurfaceSynchronization =
+function () {
+
+    return (
+
+        typeof
+        this
+            .markSurfaceDirty ===
+        "function" &&
+
+        typeof
+        this
+            .markSurfaceSynchronized ===
+        "function" &&
+
+        typeof
+        this
+            .isSurfaceDirty ===
+        "function" &&
+
+        typeof
+        this
+            .isSurfaceSynchronized ===
+        "function"
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   D4.5.9 — INITIALIZE SURFACE SYNCHRONIZATION
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PageSurfaceEngine
+    .initializeSurfaceSynchronization =
+function () {
+
+    if (
+
+        this
+            .surfaceSynchronizationReady
+
+    ) {
+
+        return;
+    }
+
+    this
+        .surfaceSynchronizationReady =
+            true;
+
+    if (
+
+        CampusWord2007Simulateur
+            .Logger &&
+
+        typeof
+        CampusWord2007Simulateur
+            .Logger
+            .info ===
+        "function"
+
+    ) {
+
+        CampusWord2007Simulateur
+            .Logger
+            .info(
+                "Surface Synchronization Ready"
+            );
+    }
+};
+
+
+
+
+
+/* ==========================================================
+   D4.5.10 — SYNCHRONIZATION STATUS
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PageSurfaceEngine
+    .isSurfaceSynchronizationReady =
+function () {
+
+    return (
+
+        this
+            .surfaceSynchronizationReady ===
+        true
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   D4.5.11 — SYNCHRONIZATION REPORT
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PageSurfaceEngine
+    .getSurfaceSynchronizationReport =
+function () {
+
+    return {
+
+        synchronized:
+            this
+                .isSurfaceSynchronized(),
+
+        dirty:
+            this
+                .isSurfaceDirty(),
+
+        lastSynchronizationTime:
+            this
+                .getLastSurfaceSynchronizationTime(),
+
+        valid:
+            this
+                .validateSurfaceSynchronization(),
+
+        ready:
+            this
+                .isSurfaceSynchronizationReady()
+    };
+};
+
+
+
+
+
+
+
+
+
+
+
+
+/* ==========================================================
+   D4.6 — SURFACE READY HOOK
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PageSurfaceEngine
+    .surfaceReadyHookReady =
+false;
+
+
+
+
+
+/* ==========================================================
+   D4.6.1 — IS SURFACE ENGINE READY
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PageSurfaceEngine
+    .isSurfaceEngineReady =
+function () {
+
+    return (
+
+        this
+            .isSurfaceStateValidationReady() &&
+
+        this
+            .isSurfaceCreationReady() &&
+
+        this
+            .isSurfaceCacheReady() &&
+
+        this
+            .isSurfaceLookupReady() &&
+
+        this
+            .isSurfaceSynchronizationReady()
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   D4.6.2 — INITIALIZE SURFACE READY HOOK
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PageSurfaceEngine
+    .initializeSurfaceReadyHook =
+function () {
+
+    if (
+
+        this
+            .surfaceReadyHookReady
+
+    ) {
+
+        return;
+    }
+
+    this
+        .surfaceReadyHookReady =
+            true;
+
+    if (
+
+        CampusWord2007Simulateur
+            .Logger &&
+
+        typeof
+        CampusWord2007Simulateur
+            .Logger
+            .info ===
+        "function"
+
+    ) {
+
+        CampusWord2007Simulateur
+            .Logger
+            .info(
+                "Surface Ready Hook Ready"
+            );
+    }
+};
+
+
+
+
+
+/* ==========================================================
+   D4.6.3 — SURFACE READY HOOK STATUS
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PageSurfaceEngine
+    .isSurfaceReadyHookReady =
+function () {
+
+    return (
+
+        this
+            .surfaceReadyHookReady ===
+        true
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   D4.6.4 — VALIDATE SURFACE READY HOOK
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PageSurfaceEngine
+    .validateSurfaceReadyHook =
+function () {
+
+    return (
+
+        typeof
+        this
+            .isSurfaceEngineReady ===
+        "function" &&
+
+        typeof
+        this
+            .initializeSurfaceReadyHook ===
+        "function"
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   D4.6.5 — SURFACE READY STATUS
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PageSurfaceEngine
+    .getSurfaceReadyStatus =
+function () {
+
+    return {
+
+        stateValidation:
+            this
+                .isSurfaceStateValidationReady(),
+
+        creation:
+            this
+                .isSurfaceCreationReady(),
+
+        cache:
+            this
+                .isSurfaceCacheReady(),
+
+        lookup:
+            this
+                .isSurfaceLookupReady(),
+
+        synchronization:
+            this
+                .isSurfaceSynchronizationReady(),
+
+        surfaceReady:
+            this
+                .isSurfaceEngineReady(),
+
+        readyHook:
+            this
+                .isSurfaceReadyHookReady()
+    };
+};
+
+
+
+
+
+/* ==========================================================
+   D4.6.6 — SURFACE READY REPORT
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PageSurfaceEngine
+    .getSurfaceReadyReport =
+function () {
+
+    return {
+
+        ready:
+            this
+                .isSurfaceEngineReady(),
+
+        hookReady:
+            this
+                .isSurfaceReadyHookReady(),
+
+        valid:
+            this
+                .validateSurfaceReadyHook(),
+
+        status:
+            this
+                .getSurfaceReadyStatus()
+    };
+};
+
+
+
+
+
+
+
+
+/* ==========================================================
+   D4.7 — SURFACE VALIDATION BLOCK
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PageSurfaceEngine
+    .surfaceValidationBlockReady =
+false;
+
+
+
+
+
+/* ==========================================================
+   D4.7.1 — VALIDATE SURFACE STATE VALIDATION
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PageSurfaceEngine
+    .validateSurfaceStateValidationBlock =
+function () {
+
+    return (
+
+        this
+            .validateSurfaceState &&
+
+        this
+            .validateSurfaceState()
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   D4.7.2 — VALIDATE SURFACE CREATION
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PageSurfaceEngine
+    .validateSurfaceCreationBlock =
+function () {
+
+    return (
+
+        this
+            .validateSurfaceCreation &&
+
+        this
+            .validateSurfaceCreation()
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   D4.7.3 — VALIDATE SURFACE CACHE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PageSurfaceEngine
+    .validateSurfaceCacheBlock =
+function () {
+
+    return (
+
+        this
+            .validateSurfaceCache &&
+
+        this
+            .validateSurfaceCache()
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   D4.7.4 — VALIDATE SURFACE LOOKUP
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PageSurfaceEngine
+    .validateSurfaceLookupBlock =
+function () {
+
+    return (
+
+        this
+            .validateSurfaceLookup &&
+
+        this
+            .validateSurfaceLookup()
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   D4.7.5 — VALIDATE SURFACE SYNCHRONIZATION
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PageSurfaceEngine
+    .validateSurfaceSynchronizationBlock =
+function () {
+
+    return (
+
+        this
+            .validateSurfaceSynchronization &&
+
+        this
+            .validateSurfaceSynchronization()
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   D4.7.6 — VALIDATE SURFACE READY HOOK
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PageSurfaceEngine
+    .validateSurfaceReadyHookBlock =
+function () {
+
+    return (
+
+        this
+            .validateSurfaceReadyHook &&
+
+        this
+            .validateSurfaceReadyHook()
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   D4.7.7 — VALIDATE COMPLETE SURFACE ENGINE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PageSurfaceEngine
+    .validateCompleteSurfaceEngine =
+function () {
+
+    return (
+
+        this
+            .validateSurfaceStateValidationBlock() &&
+
+        this
+            .validateSurfaceCreationBlock() &&
+
+        this
+            .validateSurfaceCacheBlock() &&
+
+        this
+            .validateSurfaceLookupBlock() &&
+
+        this
+            .validateSurfaceSynchronizationBlock() &&
+
+        this
+            .validateSurfaceReadyHookBlock()
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   D4.7.8 — INITIALIZE SURFACE VALIDATION BLOCK
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PageSurfaceEngine
+    .initializeSurfaceValidationBlock =
+function () {
+
+    if (
+
+        this
+            .surfaceValidationBlockReady
+
+    ) {
+
+        return;
+    }
+
+    this
+        .surfaceValidationBlockReady =
+            true;
+
+    if (
+
+        CampusWord2007Simulateur
+            .Logger &&
+
+        typeof
+        CampusWord2007Simulateur
+            .Logger
+            .info ===
+        "function"
+
+    ) {
+
+        CampusWord2007Simulateur
+            .Logger
+            .info(
+                "Surface Validation Block Ready"
+            );
+    }
+};
+
+
+
+
+
+/* ==========================================================
+   D4.7.9 — SURFACE VALIDATION STATUS
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PageSurfaceEngine
+    .isSurfaceValidationBlockReady =
+function () {
+
+    return (
+
+        this
+            .surfaceValidationBlockReady ===
+        true
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   D4.7.10 — SURFACE VALIDATION REPORT
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PageSurfaceEngine
+    .getSurfaceValidationReport =
+function () {
+
+    return {
+
+        stateValidation:
+            this
+                .validateSurfaceStateValidationBlock(),
+
+        creation:
+            this
+                .validateSurfaceCreationBlock(),
+
+        cache:
+            this
+                .validateSurfaceCacheBlock(),
+
+        lookup:
+            this
+                .validateSurfaceLookupBlock(),
+
+        synchronization:
+            this
+                .validateSurfaceSynchronizationBlock(),
+
+        readyHook:
+            this
+                .validateSurfaceReadyHookBlock(),
+
+        complete:
+            this
+                .validateCompleteSurfaceEngine(),
+
+        blockReady:
+            this
+                .isSurfaceValidationBlockReady()
+    };
+};
+
 
 
