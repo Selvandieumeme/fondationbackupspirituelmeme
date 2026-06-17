@@ -22606,3 +22606,1554 @@ function () {
                 .isActiveDocumentTrackingReady()
     };
 };
+
+
+
+
+
+
+
+
+
+
+/* ==========================================================
+   D1.3 — DOCUMENT METADATA ENGINE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .DocumentEngine
+    .documentMetadataReady =
+false;
+
+
+
+
+
+/* ==========================================================
+   D1.3.1 — DOCUMENT METADATA STORAGE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .DocumentEngine
+    .documentMetadata = {
+
+        id: null,
+
+        name: "",
+
+        author: "",
+
+        version: "1.0",
+
+        createdAt: null,
+
+        updatedAt: null
+    };
+
+
+
+
+
+/* ==========================================================
+   D1.3.2 — GET DOCUMENT METADATA
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .DocumentEngine
+    .getDocumentMetadata =
+function () {
+
+    return this
+        .documentMetadata;
+};
+
+
+
+
+
+/* ==========================================================
+   D1.3.3 — SET DOCUMENT METADATA
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .DocumentEngine
+    .setDocumentMetadata =
+function (
+    metadata
+) {
+
+    if (
+
+        !metadata ||
+
+        typeof metadata !==
+        "object"
+
+    ) {
+
+        return false;
+    }
+
+    Object.assign(
+
+        this.documentMetadata,
+
+        metadata
+
+    );
+
+    return true;
+};
+
+
+
+
+
+/* ==========================================================
+   D1.3.4 — SET DOCUMENT METADATA FIELD
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .DocumentEngine
+    .setDocumentMetadataField =
+function (
+    key,
+    value
+) {
+
+    if (
+
+        typeof key !==
+        "string"
+
+    ) {
+
+        return false;
+    }
+
+    this.documentMetadata[
+        key
+    ] = value;
+
+    return true;
+};
+
+
+
+
+
+/* ==========================================================
+   D1.3.5 — GET DOCUMENT METADATA FIELD
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .DocumentEngine
+    .getDocumentMetadataField =
+function (
+    key
+) {
+
+    return this
+        .documentMetadata[
+            key
+        ];
+};
+
+
+
+
+
+/* ==========================================================
+   D1.3.6 — VALIDATE DOCUMENT METADATA
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .DocumentEngine
+    .validateDocumentMetadata =
+function () {
+
+    return (
+
+        typeof
+        this.getDocumentMetadata ===
+        "function" &&
+
+        typeof
+        this.setDocumentMetadata ===
+        "function" &&
+
+        typeof
+        this.getDocumentMetadataField ===
+        "function" &&
+
+        typeof
+        this.setDocumentMetadataField ===
+        "function"
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   D1.3.7 — INITIALIZE DOCUMENT METADATA
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .DocumentEngine
+    .initializeDocumentMetadata =
+function () {
+
+    if (
+
+        this
+            .documentMetadataReady
+
+    ) {
+
+        return;
+    }
+
+    this
+        .documentMetadataReady =
+            true;
+
+    if (
+
+        CampusWord2007Simulateur
+            .Logger &&
+
+        typeof
+        CampusWord2007Simulateur
+            .Logger
+            .info ===
+        "function"
+
+    ) {
+
+        CampusWord2007Simulateur
+            .Logger
+            .info(
+                "Document Metadata Ready"
+            );
+    }
+};
+
+
+
+
+
+/* ==========================================================
+   D1.3.8 — DOCUMENT METADATA STATUS
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .DocumentEngine
+    .isDocumentMetadataReady =
+function () {
+
+    return (
+
+        this
+            .documentMetadataReady ===
+        true
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   D1.3.9 — DOCUMENT METADATA REPORT
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .DocumentEngine
+    .getDocumentMetadataReport =
+function () {
+
+    return {
+
+        valid:
+            this
+                .validateDocumentMetadata(),
+
+        ready:
+            this
+                .isDocumentMetadataReady(),
+
+        metadata:
+            this
+                .getDocumentMetadata()
+    };
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* ==========================================================
+   D1.4 — DOCUMENT STATE ENGINE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .DocumentEngine
+    .documentStateEngineReady =
+false;
+
+
+
+
+
+/* ==========================================================
+   D1.4.1 — DOCUMENT STATE STORAGE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .DocumentEngine
+    .documentState = {
+
+        opened: false,
+
+        modified: false,
+
+        saved: true,
+
+        readOnly: false
+    };
+
+
+
+
+
+/* ==========================================================
+   D1.4.2 — GET DOCUMENT STATE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .DocumentEngine
+    .getDocumentState =
+function () {
+
+    return this
+        .documentState;
+};
+
+
+
+
+
+/* ==========================================================
+   D1.4.3 — SET DOCUMENT STATE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .DocumentEngine
+    .setDocumentState =
+function (
+    state
+) {
+
+    if (
+
+        !state ||
+
+        typeof state !==
+        "object"
+
+    ) {
+
+        return false;
+    }
+
+    Object.assign(
+
+        this.documentState,
+
+        state
+
+    );
+
+    return true;
+};
+
+
+
+
+
+/* ==========================================================
+   D1.4.4 — SET DOCUMENT STATE FIELD
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .DocumentEngine
+    .setDocumentStateField =
+function (
+    key,
+    value
+) {
+
+    if (
+
+        typeof key !==
+        "string"
+
+    ) {
+
+        return false;
+    }
+
+    this.documentState[
+        key
+    ] = value;
+
+    return true;
+};
+
+
+
+
+
+/* ==========================================================
+   D1.4.5 — GET DOCUMENT STATE FIELD
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .DocumentEngine
+    .getDocumentStateField =
+function (
+    key
+) {
+
+    return this
+        .documentState[
+            key
+        ];
+};
+
+
+
+
+
+/* ==========================================================
+   D1.4.6 — DOCUMENT STATE HELPERS
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .DocumentEngine
+    .isDocumentOpened =
+function () {
+
+    return (
+
+        this.documentState
+            .opened ===
+        true
+
+    );
+};
+
+
+
+
+
+CampusWord2007Simulateur
+    .DocumentEngine
+    .isDocumentModified =
+function () {
+
+    return (
+
+        this.documentState
+            .modified ===
+        true
+
+    );
+};
+
+
+
+
+
+CampusWord2007Simulateur
+    .DocumentEngine
+    .isDocumentSaved =
+function () {
+
+    return (
+
+        this.documentState
+            .saved ===
+        true
+
+    );
+};
+
+
+
+
+
+CampusWord2007Simulateur
+    .DocumentEngine
+    .isDocumentReadOnly =
+function () {
+
+    return (
+
+        this.documentState
+            .readOnly ===
+        true
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   D1.4.7 — VALIDATE DOCUMENT STATE ENGINE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .DocumentEngine
+    .validateDocumentStateEngine =
+function () {
+
+    return (
+
+        typeof
+        this.getDocumentState ===
+        "function" &&
+
+        typeof
+        this.setDocumentState ===
+        "function" &&
+
+        typeof
+        this.isDocumentOpened ===
+        "function" &&
+
+        typeof
+        this.isDocumentModified ===
+        "function" &&
+
+        typeof
+        this.isDocumentSaved ===
+        "function" &&
+
+        typeof
+        this.isDocumentReadOnly ===
+        "function"
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   D1.4.8 — INITIALIZE DOCUMENT STATE ENGINE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .DocumentEngine
+    .initializeDocumentStateEngine =
+function () {
+
+    if (
+
+        this
+            .documentStateEngineReady
+
+    ) {
+
+        return;
+    }
+
+    this
+        .documentStateEngineReady =
+            true;
+
+    if (
+
+        CampusWord2007Simulateur
+            .Logger &&
+
+        typeof
+        CampusWord2007Simulateur
+            .Logger
+            .info ===
+        "function"
+
+    ) {
+
+        CampusWord2007Simulateur
+            .Logger
+            .info(
+                "Document State Engine Ready"
+            );
+    }
+};
+
+
+
+
+
+/* ==========================================================
+   D1.4.9 — DOCUMENT STATE ENGINE STATUS
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .DocumentEngine
+    .isDocumentStateEngineReady =
+function () {
+
+    return (
+
+        this
+            .documentStateEngineReady ===
+        true
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   D1.4.10 — DOCUMENT STATE REPORT
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .DocumentEngine
+    .getDocumentStateReport =
+function () {
+
+    return {
+
+        opened:
+            this
+                .isDocumentOpened(),
+
+        modified:
+            this
+                .isDocumentModified(),
+
+        saved:
+            this
+                .isDocumentSaved(),
+
+        readOnly:
+            this
+                .isDocumentReadOnly(),
+
+        valid:
+            this
+                .validateDocumentStateEngine(),
+
+        ready:
+            this
+                .isDocumentStateEngineReady()
+    };
+};
+
+
+
+
+
+
+
+
+
+
+
+/* ==========================================================
+   D1.5 — DOCUMENT SYNCHRONIZATION
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .DocumentEngine
+    .documentSynchronizationReady =
+false;
+
+
+
+
+
+/* ==========================================================
+   D1.5.1 — SYNCHRONIZATION STATE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .DocumentEngine
+    .documentSynchronizationState = {
+
+        synchronized: true,
+
+        dirty: false,
+
+        lastSynchronizationTime: null
+    };
+
+
+
+
+
+/* ==========================================================
+   D1.5.2 — GET SYNCHRONIZATION STATE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .DocumentEngine
+    .getDocumentSynchronizationState =
+function () {
+
+    return this
+        .documentSynchronizationState;
+};
+
+
+
+
+
+/* ==========================================================
+   D1.5.3 — MARK DOCUMENT DIRTY
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .DocumentEngine
+    .markDocumentDirty =
+function () {
+
+    this
+        .documentSynchronizationState
+        .dirty =
+            true;
+
+    this
+        .documentSynchronizationState
+        .synchronized =
+            false;
+
+    return true;
+};
+
+
+
+
+
+/* ==========================================================
+   D1.5.4 — MARK DOCUMENT SYNCHRONIZED
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .DocumentEngine
+    .markDocumentSynchronized =
+function () {
+
+    this
+        .documentSynchronizationState
+        .dirty =
+            false;
+
+    this
+        .documentSynchronizationState
+        .synchronized =
+            true;
+
+    this
+        .documentSynchronizationState
+        .lastSynchronizationTime =
+            Date.now();
+
+    return true;
+};
+
+
+
+
+
+/* ==========================================================
+   D1.5.5 — IS DOCUMENT DIRTY
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .DocumentEngine
+    .isDocumentDirty =
+function () {
+
+    return (
+
+        this
+            .documentSynchronizationState
+            .dirty ===
+        true
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   D1.5.6 — IS DOCUMENT SYNCHRONIZED
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .DocumentEngine
+    .isDocumentSynchronized =
+function () {
+
+    return (
+
+        this
+            .documentSynchronizationState
+            .synchronized ===
+        true
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   D1.5.7 — GET LAST SYNCHRONIZATION TIME
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .DocumentEngine
+    .getLastSynchronizationTime =
+function () {
+
+    return (
+
+        this
+            .documentSynchronizationState
+            .lastSynchronizationTime
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   D1.5.8 — VALIDATE DOCUMENT SYNCHRONIZATION
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .DocumentEngine
+    .validateDocumentSynchronization =
+function () {
+
+    return (
+
+        typeof
+        this.markDocumentDirty ===
+        "function" &&
+
+        typeof
+        this.markDocumentSynchronized ===
+        "function" &&
+
+        typeof
+        this.isDocumentDirty ===
+        "function" &&
+
+        typeof
+        this.isDocumentSynchronized ===
+        "function"
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   D1.5.9 — INITIALIZE DOCUMENT SYNCHRONIZATION
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .DocumentEngine
+    .initializeDocumentSynchronization =
+function () {
+
+    if (
+
+        this
+            .documentSynchronizationReady
+
+    ) {
+
+        return;
+    }
+
+    this
+        .documentSynchronizationReady =
+            true;
+
+    if (
+
+        CampusWord2007Simulateur
+            .Logger &&
+
+        typeof
+        CampusWord2007Simulateur
+            .Logger
+            .info ===
+        "function"
+
+    ) {
+
+        CampusWord2007Simulateur
+            .Logger
+            .info(
+                "Document Synchronization Ready"
+            );
+    }
+};
+
+
+
+
+
+/* ==========================================================
+   D1.5.10 — SYNCHRONIZATION STATUS
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .DocumentEngine
+    .isDocumentSynchronizationReady =
+function () {
+
+    return (
+
+        this
+            .documentSynchronizationReady ===
+        true
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   D1.5.11 — SYNCHRONIZATION REPORT
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .DocumentEngine
+    .getDocumentSynchronizationReport =
+function () {
+
+    return {
+
+        synchronized:
+            this
+                .isDocumentSynchronized(),
+
+        dirty:
+            this
+                .isDocumentDirty(),
+
+        lastSynchronizationTime:
+            this
+                .getLastSynchronizationTime(),
+
+        valid:
+            this
+                .validateDocumentSynchronization(),
+
+        ready:
+            this
+                .isDocumentSynchronizationReady()
+    };
+};
+
+
+
+
+
+
+
+
+
+
+
+
+/* ==========================================================
+   D1.6 — DOCUMENT READY HOOK
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .DocumentEngine
+    .documentReadyHookReady =
+false;
+
+
+
+
+
+/* ==========================================================
+   D1.6.1 — IS DOCUMENT ENGINE READY
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .DocumentEngine
+    .isDocumentEngineReady =
+function () {
+
+    return (
+
+        this
+            .isDocumentStateValidationReady() &&
+
+        this
+            .isActiveDocumentTrackingReady() &&
+
+        this
+            .isDocumentMetadataReady() &&
+
+        this
+            .isDocumentStateEngineReady() &&
+
+        this
+            .isDocumentSynchronizationReady()
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   D1.6.2 — INITIALIZE DOCUMENT READY HOOK
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .DocumentEngine
+    .initializeDocumentReadyHook =
+function () {
+
+    if (
+
+        this
+            .documentReadyHookReady
+
+    ) {
+
+        return;
+    }
+
+    this
+        .documentReadyHookReady =
+            true;
+
+    if (
+
+        CampusWord2007Simulateur
+            .Logger &&
+
+        typeof
+        CampusWord2007Simulateur
+            .Logger
+            .info ===
+        "function"
+
+    ) {
+
+        CampusWord2007Simulateur
+            .Logger
+            .info(
+                "Document Ready Hook Ready"
+            );
+    }
+};
+
+
+
+
+
+/* ==========================================================
+   D1.6.3 — READY HOOK STATUS
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .DocumentEngine
+    .isDocumentReadyHookReady =
+function () {
+
+    return (
+
+        this
+            .documentReadyHookReady ===
+        true
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   D1.6.4 — VALIDATE DOCUMENT READY HOOK
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .DocumentEngine
+    .validateDocumentReadyHook =
+function () {
+
+    return (
+
+        typeof
+        this
+            .isDocumentEngineReady ===
+        "function" &&
+
+        typeof
+        this
+            .initializeDocumentReadyHook ===
+        "function"
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   D1.6.5 — DOCUMENT READY STATUS
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .DocumentEngine
+    .getDocumentReadyStatus =
+function () {
+
+    return {
+
+        stateValidation:
+            this
+                .isDocumentStateValidationReady(),
+
+        activeDocument:
+            this
+                .isActiveDocumentTrackingReady(),
+
+        metadata:
+            this
+                .isDocumentMetadataReady(),
+
+        stateEngine:
+            this
+                .isDocumentStateEngineReady(),
+
+        synchronization:
+            this
+                .isDocumentSynchronizationReady(),
+
+        documentReady:
+            this
+                .isDocumentEngineReady(),
+
+        readyHook:
+            this
+                .isDocumentReadyHookReady()
+    };
+};
+
+
+
+
+
+/* ==========================================================
+   D1.6.6 — DOCUMENT READY REPORT
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .DocumentEngine
+    .getDocumentReadyReport =
+function () {
+
+    return {
+
+        ready:
+            this
+                .isDocumentEngineReady(),
+
+        hookReady:
+            this
+                .isDocumentReadyHookReady(),
+
+        valid:
+            this
+                .validateDocumentReadyHook(),
+
+        status:
+            this
+                .getDocumentReadyStatus()
+    };
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* ==========================================================
+   D1.7 — DOCUMENT VALIDATION BLOCK
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .DocumentEngine
+    .documentValidationBlockReady =
+false;
+
+
+
+
+
+/* ==========================================================
+   D1.7.1 — VALIDATE DOCUMENT STATE VALIDATION
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .DocumentEngine
+    .validateDocumentStateValidationBlock =
+function () {
+
+    return (
+
+        this
+            .validateDocumentState &&
+
+        this
+            .validateDocumentState()
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   D1.7.2 — VALIDATE ACTIVE DOCUMENT TRACKING
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .DocumentEngine
+    .validateActiveDocumentTrackingBlock =
+function () {
+
+    return (
+
+        this
+            .validateActiveDocument &&
+
+        this
+            .validateActiveDocument()
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   D1.7.3 — VALIDATE DOCUMENT METADATA
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .DocumentEngine
+    .validateDocumentMetadataBlock =
+function () {
+
+    return (
+
+        this
+            .validateDocumentMetadata &&
+
+        this
+            .validateDocumentMetadata()
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   D1.7.4 — VALIDATE DOCUMENT STATE ENGINE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .DocumentEngine
+    .validateDocumentStateEngineBlock =
+function () {
+
+    return (
+
+        this
+            .validateDocumentStateEngine &&
+
+        this
+            .validateDocumentStateEngine()
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   D1.7.5 — VALIDATE DOCUMENT SYNCHRONIZATION
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .DocumentEngine
+    .validateDocumentSynchronizationBlock =
+function () {
+
+    return (
+
+        this
+            .validateDocumentSynchronization &&
+
+        this
+            .validateDocumentSynchronization()
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   D1.7.6 — VALIDATE DOCUMENT READY HOOK
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .DocumentEngine
+    .validateDocumentReadyHookBlock =
+function () {
+
+    return (
+
+        this
+            .validateDocumentReadyHook &&
+
+        this
+            .validateDocumentReadyHook()
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   D1.7.7 — VALIDATE COMPLETE DOCUMENT ENGINE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .DocumentEngine
+    .validateCompleteDocumentEngine =
+function () {
+
+    return (
+
+        this
+            .validateDocumentStateValidationBlock() &&
+
+        this
+            .validateActiveDocumentTrackingBlock() &&
+
+        this
+            .validateDocumentMetadataBlock() &&
+
+        this
+            .validateDocumentStateEngineBlock() &&
+
+        this
+            .validateDocumentSynchronizationBlock() &&
+
+        this
+            .validateDocumentReadyHookBlock()
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   D1.7.8 — INITIALIZE DOCUMENT VALIDATION BLOCK
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .DocumentEngine
+    .initializeDocumentValidationBlock =
+function () {
+
+    if (
+
+        this
+            .documentValidationBlockReady
+
+    ) {
+
+        return;
+    }
+
+    this
+        .documentValidationBlockReady =
+            true;
+
+    if (
+
+        CampusWord2007Simulateur
+            .Logger &&
+
+        typeof
+        CampusWord2007Simulateur
+            .Logger
+            .info ===
+        "function"
+
+    ) {
+
+        CampusWord2007Simulateur
+            .Logger
+            .info(
+                "Document Validation Block Ready"
+            );
+    }
+};
+
+
+
+
+
+/* ==========================================================
+   D1.7.9 — VALIDATION BLOCK STATUS
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .DocumentEngine
+    .isDocumentValidationBlockReady =
+function () {
+
+    return (
+
+        this
+            .documentValidationBlockReady ===
+        true
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   D1.7.10 — DOCUMENT VALIDATION REPORT
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .DocumentEngine
+    .getDocumentValidationReport =
+function () {
+
+    return {
+
+        stateValidation:
+            this
+                .validateDocumentStateValidationBlock(),
+
+        activeDocument:
+            this
+                .validateActiveDocumentTrackingBlock(),
+
+        metadata:
+            this
+                .validateDocumentMetadataBlock(),
+
+        stateEngine:
+            this
+                .validateDocumentStateEngineBlock(),
+
+        synchronization:
+            this
+                .validateDocumentSynchronizationBlock(),
+
+        readyHook:
+            this
+                .validateDocumentReadyHookBlock(),
+
+        complete:
+            this
+                .validateCompleteDocumentEngine(),
+
+        blockReady:
+            this
+                .isDocumentValidationBlockReady()
+    };
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
