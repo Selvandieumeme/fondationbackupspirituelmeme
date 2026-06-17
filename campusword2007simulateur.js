@@ -17305,4 +17305,743 @@ function () {
 
 
 
+/* ==========================================================
+   C5.5 — KEYBOARD STATE SYNCHRONIZATION
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .KeyboardEngine
+    .keyboardSynchronizationReady =
+false;
+
+
+
+
+
+/* ==========================================================
+   C5.5.1 — IS LAST KEY SYNCHRONIZED
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .KeyboardEngine
+    .isLastKeySynchronized =
+function () {
+
+    const key =
+        this.getLastKey();
+
+    return (
+
+        key === null ||
+
+        typeof key ===
+        "string"
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C5.5.2 — IS CTRL SYNCHRONIZED
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .KeyboardEngine
+    .isCtrlSynchronized =
+function () {
+
+    return (
+
+        typeof
+        this.getKeyboardState()
+            .ctrlKey ===
+        "boolean"
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C5.5.3 — IS SHIFT SYNCHRONIZED
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .KeyboardEngine
+    .isShiftSynchronized =
+function () {
+
+    return (
+
+        typeof
+        this.getKeyboardState()
+            .shiftKey ===
+        "boolean"
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C5.5.4 — IS ALT SYNCHRONIZED
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .KeyboardEngine
+    .isAltSynchronized =
+function () {
+
+    return (
+
+        typeof
+        this.getKeyboardState()
+            .altKey ===
+        "boolean"
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C5.5.5 — VALIDATE KEYBOARD SYNCHRONIZATION
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .KeyboardEngine
+    .validateKeyboardSynchronization =
+function () {
+
+    return (
+
+        this.isLastKeySynchronized() &&
+
+        this.isCtrlSynchronized() &&
+
+        this.isShiftSynchronized() &&
+
+        this.isAltSynchronized()
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C5.5.6 — INITIALIZE KEYBOARD SYNCHRONIZATION
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .KeyboardEngine
+    .initializeKeyboardSynchronization =
+function () {
+
+    if (
+
+        this.keyboardSynchronizationReady
+
+    ) {
+
+        return;
+    }
+
+    this.keyboardSynchronizationReady =
+        true;
+
+    if (
+
+        CampusWord2007Simulateur
+            .Logger &&
+
+        typeof
+        CampusWord2007Simulateur
+            .Logger
+            .info ===
+        "function"
+
+    ) {
+
+        CampusWord2007Simulateur
+            .Logger
+            .info(
+                "Keyboard Synchronization Ready"
+            );
+    }
+};
+
+
+
+
+
+/* ==========================================================
+   C5.5.7 — SYNCHRONIZATION STATUS
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .KeyboardEngine
+    .isKeyboardSynchronizationReady =
+function () {
+
+    return (
+
+        this.keyboardSynchronizationReady ===
+        true
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C5.5.8 — SYNCHRONIZATION REPORT
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .KeyboardEngine
+    .getKeyboardSynchronizationReport =
+function () {
+
+    return {
+
+        lastKey:
+            this.isLastKeySynchronized(),
+
+        ctrl:
+            this.isCtrlSynchronized(),
+
+        shift:
+            this.isShiftSynchronized(),
+
+        alt:
+            this.isAltSynchronized(),
+
+        valid:
+            this.validateKeyboardSynchronization(),
+
+        ready:
+            this.isKeyboardSynchronizationReady()
+    };
+};
+
+
+
+
+
+
+
+
+
+
+/* ==========================================================
+   C5.6 — KEYBOARD READY HOOK
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .KeyboardEngine
+    .keyboardReadyHookReady =
+false;
+
+
+
+
+
+/* ==========================================================
+   C5.6.1 — IS KEYBOARD ENGINE READY
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .KeyboardEngine
+    .isKeyboardEngineReady =
+function () {
+
+    return (
+
+        this.isKeyboardStateValidationReady() &&
+
+        this.isKeyTrackingEngineReady() &&
+
+        this.isModifierKeyEngineReady() &&
+
+        this.isKeyEventEngineReady() &&
+
+        this.isKeyboardSynchronizationReady()
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C5.6.2 — INITIALIZE KEYBOARD READY HOOK
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .KeyboardEngine
+    .initializeKeyboardReadyHook =
+function () {
+
+    if (
+
+        this.keyboardReadyHookReady
+
+    ) {
+
+        return;
+    }
+
+    this.keyboardReadyHookReady =
+        true;
+
+    if (
+
+        CampusWord2007Simulateur
+            .Logger &&
+
+        typeof
+        CampusWord2007Simulateur
+            .Logger
+            .info ===
+        "function"
+
+    ) {
+
+        CampusWord2007Simulateur
+            .Logger
+            .info(
+                "Keyboard Ready Hook Ready"
+            );
+    }
+};
+
+
+
+
+
+/* ==========================================================
+   C5.6.3 — READY HOOK STATUS
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .KeyboardEngine
+    .isKeyboardReadyHookReady =
+function () {
+
+    return (
+
+        this.keyboardReadyHookReady ===
+        true
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C5.6.4 — READY HOOK VALIDATION
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .KeyboardEngine
+    .validateKeyboardReadyHook =
+function () {
+
+    return (
+
+        typeof
+        this.isKeyboardEngineReady ===
+        "function" &&
+
+        typeof
+        this.initializeKeyboardReadyHook ===
+        "function"
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C5.6.5 — GET KEYBOARD READY STATUS
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .KeyboardEngine
+    .getKeyboardReadyStatus =
+function () {
+
+    return {
+
+        stateValidation:
+            this.isKeyboardStateValidationReady(),
+
+        keyTracking:
+            this.isKeyTrackingEngineReady(),
+
+        modifierKeys:
+            this.isModifierKeyEngineReady(),
+
+        keyEvents:
+            this.isKeyEventEngineReady(),
+
+        synchronization:
+            this.isKeyboardSynchronizationReady(),
+
+        keyboardReady:
+            this.isKeyboardEngineReady(),
+
+        hookReady:
+            this.isKeyboardReadyHookReady()
+    };
+};
+
+
+
+
+
+/* ==========================================================
+   C5.6.6 — KEYBOARD READY REPORT
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .KeyboardEngine
+    .getKeyboardReadyReport =
+function () {
+
+    return {
+
+        ready:
+            this.isKeyboardEngineReady(),
+
+        hookReady:
+            this.isKeyboardReadyHookReady(),
+
+        valid:
+            this.validateKeyboardReadyHook(),
+
+        status:
+            this.getKeyboardReadyStatus()
+    };
+};
+
+
+
+
+
+
+
+
+
+
+
+/* ==========================================================
+   C5.7 — KEYBOARD VALIDATION BLOCK
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .KeyboardEngine
+    .keyboardValidationBlockReady =
+false;
+
+
+
+
+
+/* ==========================================================
+   C5.7.1 — VALIDATE KEYBOARD STATE BLOCK
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .KeyboardEngine
+    .validateKeyboardStateBlock =
+function () {
+
+    return (
+
+        this.validateKeyboardState &&
+
+        this.validateKeyboardState()
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C5.7.2 — VALIDATE KEY TRACKING BLOCK
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .KeyboardEngine
+    .validateKeyTrackingBlock =
+function () {
+
+    return (
+
+        this.validateKeyTracking &&
+
+        this.validateKeyTracking()
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C5.7.3 — VALIDATE MODIFIER KEY BLOCK
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .KeyboardEngine
+    .validateModifierKeyBlock =
+function () {
+
+    return (
+
+        this.validateModifierKeyEngine &&
+
+        this.validateModifierKeyEngine()
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C5.7.4 — VALIDATE KEY EVENT BLOCK
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .KeyboardEngine
+    .validateKeyEventBlock =
+function () {
+
+    return (
+
+        this.validateKeyEventEngine &&
+
+        this.validateKeyEventEngine()
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C5.7.5 — VALIDATE SYNCHRONIZATION BLOCK
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .KeyboardEngine
+    .validateKeyboardSynchronizationBlock =
+function () {
+
+    return (
+
+        this.validateKeyboardSynchronization &&
+
+        this.validateKeyboardSynchronization()
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C5.7.6 — VALIDATE READY HOOK BLOCK
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .KeyboardEngine
+    .validateKeyboardReadyHookBlock =
+function () {
+
+    return (
+
+        this.validateKeyboardReadyHook &&
+
+        this.validateKeyboardReadyHook()
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C5.7.7 — VALIDATE COMPLETE KEYBOARD SYSTEM
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .KeyboardEngine
+    .validateCompleteKeyboardSystem =
+function () {
+
+    return (
+
+        this.validateKeyboardStateBlock() &&
+
+        this.validateKeyTrackingBlock() &&
+
+        this.validateModifierKeyBlock() &&
+
+        this.validateKeyEventBlock() &&
+
+        this.validateKeyboardSynchronizationBlock() &&
+
+        this.validateKeyboardReadyHookBlock()
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C5.7.8 — INITIALIZE KEYBOARD VALIDATION BLOCK
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .KeyboardEngine
+    .initializeKeyboardValidationBlock =
+function () {
+
+    if (
+
+        this.keyboardValidationBlockReady
+
+    ) {
+
+        return;
+    }
+
+    this.keyboardValidationBlockReady =
+        true;
+
+    if (
+
+        CampusWord2007Simulateur
+            .Logger &&
+
+        typeof
+        CampusWord2007Simulateur
+            .Logger
+            .info ===
+        "function"
+
+    ) {
+
+        CampusWord2007Simulateur
+            .Logger
+            .info(
+                "Keyboard Validation Block Ready"
+            );
+    }
+};
+
+
+
+
+
+/* ==========================================================
+   C5.7.9 — VALIDATION BLOCK STATUS
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .KeyboardEngine
+    .isKeyboardValidationBlockReady =
+function () {
+
+    return (
+
+        this.keyboardValidationBlockReady ===
+        true
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C5.7.10 — KEYBOARD VALIDATION REPORT
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .KeyboardEngine
+    .getKeyboardValidationReportBlock =
+function () {
+
+    return {
+
+        state:
+            this.validateKeyboardStateBlock(),
+
+        keyTracking:
+            this.validateKeyTrackingBlock(),
+
+        modifier:
+            this.validateModifierKeyBlock(),
+
+        keyEvents:
+            this.validateKeyEventBlock(),
+
+        synchronization:
+            this.validateKeyboardSynchronizationBlock(),
+
+        ready:
+            this.validateKeyboardReadyHookBlock(),
+
+        complete:
+            this.validateCompleteKeyboardSystem(),
+
+        blockReady:
+            this.isKeyboardValidationBlockReady()
+    };
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
 
