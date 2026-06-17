@@ -16162,3 +16162,1147 @@ function () {
 
 
 
+
+
+
+
+
+
+/* ==========================================================
+   C5 — KEYBOARD ENGINE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .KeyboardEngine =
+CampusWord2007Simulateur
+    .KeyboardEngine || {
+
+        initialized: false
+    };
+
+
+
+
+
+
+
+
+
+
+
+/* ==========================================================
+   C5.1 — KEYBOARD STATE VALIDATION
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .KeyboardEngine
+    .keyboardStateValidationReady =
+false;
+
+
+
+
+
+/* ==========================================================
+   C5.1.1 — GET KEYBOARD STATE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .KeyboardEngine
+    .getKeyboardState =
+function () {
+
+    return CampusWord2007Simulateur
+        .state
+        .keyboard;
+};
+
+
+
+
+
+/* ==========================================================
+   C5.1.2 — VALIDATE KEYBOARD OBJECT
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .KeyboardEngine
+    .validateKeyboardObject =
+function () {
+
+    return (
+
+        !!this.getKeyboardState()
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C5.1.3 — VALIDATE INITIALIZED FLAG
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .KeyboardEngine
+    .validateKeyboardInitialized =
+function () {
+
+    return (
+
+        typeof
+        this.getKeyboardState()
+            .initialized ===
+        "boolean"
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C5.1.4 — VALIDATE LAST KEY
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .KeyboardEngine
+    .validateLastKey =
+function () {
+
+    const value =
+        this.getKeyboardState()
+            .lastKey;
+
+    return (
+
+        value === null ||
+
+        typeof value ===
+        "string"
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C5.1.5 — VALIDATE MODIFIER KEYS
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .KeyboardEngine
+    .validateModifierKeys =
+function () {
+
+    const state =
+        this.getKeyboardState();
+
+    return (
+
+        typeof
+        state.ctrlKey ===
+        "boolean" &&
+
+        typeof
+        state.shiftKey ===
+        "boolean" &&
+
+        typeof
+        state.altKey ===
+        "boolean"
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C5.1.6 — VALIDATE KEYBOARD STATE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .KeyboardEngine
+    .validateKeyboardState =
+function () {
+
+    return (
+
+        this.validateKeyboardObject() &&
+
+        this.validateKeyboardInitialized() &&
+
+        this.validateLastKey() &&
+
+        this.validateModifierKeys()
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C5.1.7 — INITIALIZE KEYBOARD VALIDATION
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .KeyboardEngine
+    .initializeKeyboardStateValidation =
+function () {
+
+    if (
+
+        this.keyboardStateValidationReady
+
+    ) {
+
+        return;
+    }
+
+    this.keyboardStateValidationReady =
+        true;
+
+    if (
+
+        CampusWord2007Simulateur
+            .Logger &&
+
+        typeof
+        CampusWord2007Simulateur
+            .Logger
+            .info ===
+        "function"
+
+    ) {
+
+        CampusWord2007Simulateur
+            .Logger
+            .info(
+                "Keyboard State Validation Ready"
+            );
+    }
+};
+
+
+
+
+
+/* ==========================================================
+   C5.1.8 — VALIDATION STATUS
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .KeyboardEngine
+    .isKeyboardStateValidationReady =
+function () {
+
+    return (
+
+        this.keyboardStateValidationReady ===
+        true
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C5.1.9 — VALIDATION REPORT
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .KeyboardEngine
+    .getKeyboardValidationReport =
+function () {
+
+    return {
+
+        object:
+            this.validateKeyboardObject(),
+
+        initialized:
+            this.validateKeyboardInitialized(),
+
+        lastKey:
+            this.validateLastKey(),
+
+        modifiers:
+            this.validateModifierKeys(),
+
+        valid:
+            this.validateKeyboardState(),
+
+        ready:
+            this.isKeyboardStateValidationReady()
+    };
+};
+
+
+
+
+
+
+
+
+
+/* ==========================================================
+   C5.2 — KEY TRACKING ENGINE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .KeyboardEngine
+    .keyTrackingEngineReady =
+false;
+
+
+
+
+
+/* ==========================================================
+   C5.2.1 — GET LAST KEY
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .KeyboardEngine
+    .getLastKey =
+function () {
+
+    return this
+        .getKeyboardState()
+        .lastKey;
+};
+
+
+
+
+
+/* ==========================================================
+   C5.2.2 — SET LAST KEY
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .KeyboardEngine
+    .setLastKey =
+function (
+    key
+) {
+
+    if (
+        key !== null &&
+        typeof key !==
+        "string"
+    ) {
+
+        return false;
+    }
+
+    this
+        .getKeyboardState()
+        .lastKey =
+            key;
+
+    return true;
+};
+
+
+
+
+
+/* ==========================================================
+   C5.2.3 — CLEAR LAST KEY
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .KeyboardEngine
+    .clearLastKey =
+function () {
+
+    this
+        .getKeyboardState()
+        .lastKey =
+            null;
+
+    return true;
+};
+
+
+
+
+
+/* ==========================================================
+   C5.2.4 — HAS LAST KEY
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .KeyboardEngine
+    .hasLastKey =
+function () {
+
+    return (
+
+        this.getLastKey() !==
+        null
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C5.2.5 — IS KEY TRACKED
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .KeyboardEngine
+    .isKeyTracked =
+function (
+    key
+) {
+
+    return (
+
+        this.getLastKey() ===
+        key
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C5.2.6 — VALIDATE KEY TRACKING
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .KeyboardEngine
+    .validateKeyTracking =
+function () {
+
+    const key =
+        this.getLastKey();
+
+    return (
+
+        key === null ||
+
+        typeof key ===
+        "string"
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C5.2.7 — INITIALIZE KEY TRACKING
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .KeyboardEngine
+    .initializeKeyTracking =
+function () {
+
+    if (
+
+        this.keyTrackingEngineReady
+
+    ) {
+
+        return;
+    }
+
+    this.keyTrackingEngineReady =
+        true;
+
+    if (
+
+        CampusWord2007Simulateur
+            .Logger &&
+
+        typeof
+        CampusWord2007Simulateur
+            .Logger
+            .info ===
+        "function"
+
+    ) {
+
+        CampusWord2007Simulateur
+            .Logger
+            .info(
+                "Key Tracking Engine Ready"
+            );
+    }
+};
+
+
+
+
+
+/* ==========================================================
+   C5.2.8 — KEY TRACKING STATUS
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .KeyboardEngine
+    .isKeyTrackingEngineReady =
+function () {
+
+    return (
+
+        this.keyTrackingEngineReady ===
+        true
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C5.2.9 — KEY TRACKING REPORT
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .KeyboardEngine
+    .getKeyTrackingReport =
+function () {
+
+    return {
+
+        ready:
+            this
+                .isKeyTrackingEngineReady(),
+
+        tracked:
+            this
+                .hasLastKey(),
+
+        lastKey:
+            this
+                .getLastKey(),
+
+        valid:
+            this
+                .validateKeyTracking()
+    };
+};
+
+
+
+
+
+
+
+
+
+/* ==========================================================
+   C5.3 — MODIFIER KEY ENGINE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .KeyboardEngine
+    .modifierKeyEngineReady =
+false;
+
+
+
+
+
+/* ==========================================================
+   C5.3.1 — IS CTRL PRESSED
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .KeyboardEngine
+    .isCtrlPressed =
+function () {
+
+    return (
+
+        this
+            .getKeyboardState()
+            .ctrlKey ===
+        true
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C5.3.2 — IS SHIFT PRESSED
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .KeyboardEngine
+    .isShiftPressed =
+function () {
+
+    return (
+
+        this
+            .getKeyboardState()
+            .shiftKey ===
+        true
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C5.3.3 — IS ALT PRESSED
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .KeyboardEngine
+    .isAltPressed =
+function () {
+
+    return (
+
+        this
+            .getKeyboardState()
+            .altKey ===
+        true
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C5.3.4 — SET CTRL STATE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .KeyboardEngine
+    .setCtrlState =
+function (
+    value
+) {
+
+    this
+        .getKeyboardState()
+        .ctrlKey =
+            !!value;
+
+    return true;
+};
+
+
+
+
+
+/* ==========================================================
+   C5.3.5 — SET SHIFT STATE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .KeyboardEngine
+    .setShiftState =
+function (
+    value
+) {
+
+    this
+        .getKeyboardState()
+        .shiftKey =
+            !!value;
+
+    return true;
+};
+
+
+
+
+
+/* ==========================================================
+   C5.3.6 — SET ALT STATE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .KeyboardEngine
+    .setAltState =
+function (
+    value
+) {
+
+    this
+        .getKeyboardState()
+        .altKey =
+            !!value;
+
+    return true;
+};
+
+
+
+
+
+/* ==========================================================
+   C5.3.7 — CLEAR MODIFIER KEYS
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .KeyboardEngine
+    .clearModifierKeys =
+function () {
+
+    this.setCtrlState(
+        false
+    );
+
+    this.setShiftState(
+        false
+    );
+
+    this.setAltState(
+        false
+    );
+
+    return true;
+};
+
+
+
+
+
+/* ==========================================================
+   C5.3.8 — VALIDATE MODIFIER KEY ENGINE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .KeyboardEngine
+    .validateModifierKeyEngine =
+function () {
+
+    const state =
+        this.getKeyboardState();
+
+    return (
+
+        typeof
+        state.ctrlKey ===
+        "boolean" &&
+
+        typeof
+        state.shiftKey ===
+        "boolean" &&
+
+        typeof
+        state.altKey ===
+        "boolean"
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C5.3.9 — INITIALIZE MODIFIER KEY ENGINE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .KeyboardEngine
+    .initializeModifierKeyEngine =
+function () {
+
+    if (
+
+        this
+            .modifierKeyEngineReady
+
+    ) {
+
+        return;
+    }
+
+    this
+        .modifierKeyEngineReady =
+            true;
+
+    if (
+
+        CampusWord2007Simulateur
+            .Logger &&
+
+        typeof
+        CampusWord2007Simulateur
+            .Logger
+            .info ===
+        "function"
+
+    ) {
+
+        CampusWord2007Simulateur
+            .Logger
+            .info(
+                "Modifier Key Engine Ready"
+            );
+    }
+};
+
+
+
+
+
+/* ==========================================================
+   C5.3.10 — MODIFIER KEY STATUS
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .KeyboardEngine
+    .isModifierKeyEngineReady =
+function () {
+
+    return (
+
+        this
+            .modifierKeyEngineReady ===
+        true
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C5.3.11 — MODIFIER KEY REPORT
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .KeyboardEngine
+    .getModifierKeyReport =
+function () {
+
+    return {
+
+        ctrl:
+            this
+                .isCtrlPressed(),
+
+        shift:
+            this
+                .isShiftPressed(),
+
+        alt:
+            this
+                .isAltPressed(),
+
+        valid:
+            this
+                .validateModifierKeyEngine(),
+
+        ready:
+            this
+                .isModifierKeyEngineReady()
+    };
+};
+
+
+
+
+
+
+
+
+
+
+/* ==========================================================
+   C5.4 — KEY EVENT ENGINE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .KeyboardEngine
+    .keyEventEngineReady =
+false;
+
+
+
+
+
+/* ==========================================================
+   C5.4.1 — HANDLE KEY DOWN
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .KeyboardEngine
+    .handleKeyDown =
+function (
+    event
+) {
+
+    if (
+        !event
+    ) {
+
+        return;
+    }
+
+    this.setLastKey(
+        event.key
+    );
+
+    this.setCtrlState(
+        event.ctrlKey
+    );
+
+    this.setShiftState(
+        event.shiftKey
+    );
+
+    this.setAltState(
+        event.altKey
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C5.4.2 — HANDLE KEY UP
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .KeyboardEngine
+    .handleKeyUp =
+function (
+    event
+) {
+
+    if (
+        !event
+    ) {
+
+        return;
+    }
+
+    this.setCtrlState(
+        event.ctrlKey
+    );
+
+    this.setShiftState(
+        event.shiftKey
+    );
+
+    this.setAltState(
+        event.altKey
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C5.4.3 — REGISTER KEY EVENTS
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .KeyboardEngine
+    .registerKeyEvents =
+function () {
+
+    if (
+
+        this.keyEventsRegistered ===
+        true
+
+    ) {
+
+        return;
+    }
+
+    document
+        .addEventListener(
+
+            "keydown",
+
+            this.handleKeyDown
+                .bind(this)
+
+        );
+
+    document
+        .addEventListener(
+
+            "keyup",
+
+            this.handleKeyUp
+                .bind(this)
+
+        );
+
+    this.keyEventsRegistered =
+        true;
+};
+
+
+
+
+
+/* ==========================================================
+   C5.4.4 — VALIDATE KEY EVENT ENGINE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .KeyboardEngine
+    .validateKeyEventEngine =
+function () {
+
+    return (
+
+        typeof
+        this.handleKeyDown ===
+        "function" &&
+
+        typeof
+        this.handleKeyUp ===
+        "function" &&
+
+        typeof
+        this.registerKeyEvents ===
+        "function"
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C5.4.5 — INITIALIZE KEY EVENT ENGINE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .KeyboardEngine
+    .initializeKeyEventEngine =
+function () {
+
+    if (
+
+        this.keyEventEngineReady
+
+    ) {
+
+        return;
+    }
+
+    this.registerKeyEvents();
+
+    this.keyEventEngineReady =
+        true;
+
+    if (
+
+        CampusWord2007Simulateur
+            .Logger &&
+
+        typeof
+        CampusWord2007Simulateur
+            .Logger
+            .info ===
+        "function"
+
+    ) {
+
+        CampusWord2007Simulateur
+            .Logger
+            .info(
+                "Key Event Engine Ready"
+            );
+    }
+};
+
+
+
+
+
+/* ==========================================================
+   C5.4.6 — KEY EVENT ENGINE STATUS
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .KeyboardEngine
+    .isKeyEventEngineReady =
+function () {
+
+    return (
+
+        this.keyEventEngineReady ===
+        true
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C5.4.7 — KEY EVENT REPORT
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .KeyboardEngine
+    .getKeyEventReport =
+function () {
+
+    return {
+
+        ready:
+            this
+                .isKeyEventEngineReady(),
+
+        registered:
+            this
+                .keyEventsRegistered ===
+            true,
+
+        valid:
+            this
+                .validateKeyEventEngine()
+    };
+};
+
+
+
+
+
+
+
+
+
+
