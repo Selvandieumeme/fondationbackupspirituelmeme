@@ -24157,3 +24157,2108 @@ function () {
 
 
 
+/* ==========================================================
+   D2 — VIEWPORT ENGINE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ViewportEngine =
+CampusWord2007Simulateur
+    .ViewportEngine || {
+
+        initialized: false
+    };
+
+
+
+
+
+
+
+
+
+
+
+
+/* ==========================================================
+   D2.1 — VIEWPORT STATE VALIDATION
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ViewportEngine
+    .viewportStateValidationReady =
+false;
+
+
+
+
+
+/* ==========================================================
+   D2.1.1 — VALIDATE VIEWPORT ENGINE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ViewportEngine
+    .validateViewportEngine =
+function () {
+
+    return (
+
+        !!CampusWord2007Simulateur
+            .ViewportEngine
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   D2.1.2 — VALIDATE INITIALIZATION STATE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ViewportEngine
+    .validateViewportInitialization =
+function () {
+
+    return (
+
+        typeof
+        CampusWord2007Simulateur
+            .ViewportEngine
+            .initialized ===
+        "boolean"
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   D2.1.3 — VALIDATE VIEWPORT STATE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ViewportEngine
+    .validateViewportState =
+function () {
+
+    return (
+
+        this
+            .validateViewportEngine() &&
+
+        this
+            .validateViewportInitialization()
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   D2.1.4 — INITIALIZE VIEWPORT STATE VALIDATION
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ViewportEngine
+    .initializeViewportStateValidation =
+function () {
+
+    if (
+
+        this
+            .viewportStateValidationReady
+
+    ) {
+
+        return;
+    }
+
+    this
+        .viewportStateValidationReady =
+            true;
+
+    if (
+
+        CampusWord2007Simulateur
+            .Logger &&
+
+        typeof
+        CampusWord2007Simulateur
+            .Logger
+            .info ===
+        "function"
+
+    ) {
+
+        CampusWord2007Simulateur
+            .Logger
+            .info(
+                "Viewport State Validation Ready"
+            );
+    }
+};
+
+
+
+
+
+/* ==========================================================
+   D2.1.5 — VALIDATION STATUS
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ViewportEngine
+    .isViewportStateValidationReady =
+function () {
+
+    return (
+
+        this
+            .viewportStateValidationReady ===
+        true
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   D2.1.6 — VIEWPORT VALIDATION REPORT
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ViewportEngine
+    .getViewportStateValidationReport =
+function () {
+
+    return {
+
+        engine:
+            this
+                .validateViewportEngine(),
+
+        initialized:
+            this
+                .validateViewportInitialization(),
+
+        valid:
+            this
+                .validateViewportState(),
+
+        ready:
+            this
+                .isViewportStateValidationReady()
+    };
+};
+
+
+
+
+
+
+
+
+
+
+
+/* ==========================================================
+   D2.2 — VIEWPORT SIZE TRACKING
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ViewportEngine
+    .viewportSizeTrackingReady =
+false;
+
+
+
+
+
+/* ==========================================================
+   D2.2.1 — VIEWPORT SIZE STORAGE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ViewportEngine
+    .viewportSize = {
+
+        width: 0,
+
+        height: 0
+    };
+
+
+
+
+
+/* ==========================================================
+   D2.2.2 — SET VIEWPORT SIZE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ViewportEngine
+    .setViewportSize =
+function (
+    width,
+    height
+) {
+
+    if (
+
+        typeof width !==
+        "number" ||
+
+        typeof height !==
+        "number"
+
+    ) {
+
+        return false;
+    }
+
+    this
+        .viewportSize
+        .width =
+            width;
+
+    this
+        .viewportSize
+        .height =
+            height;
+
+    return true;
+};
+
+
+
+
+
+/* ==========================================================
+   D2.2.3 — GET VIEWPORT SIZE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ViewportEngine
+    .getViewportSize =
+function () {
+
+    return this
+        .viewportSize;
+};
+
+
+
+
+
+/* ==========================================================
+   D2.2.4 — GET VIEWPORT WIDTH
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ViewportEngine
+    .getViewportWidth =
+function () {
+
+    return (
+
+        this
+            .viewportSize
+            .width
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   D2.2.5 — GET VIEWPORT HEIGHT
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ViewportEngine
+    .getViewportHeight =
+function () {
+
+    return (
+
+        this
+            .viewportSize
+            .height
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   D2.2.6 — HAS VIEWPORT SIZE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ViewportEngine
+    .hasViewportSize =
+function () {
+
+    return (
+
+        this
+            .viewportSize
+            .width > 0 &&
+
+        this
+            .viewportSize
+            .height > 0
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   D2.2.7 — VALIDATE VIEWPORT SIZE TRACKING
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ViewportEngine
+    .validateViewportSizeTracking =
+function () {
+
+    return (
+
+        typeof
+        this
+            .setViewportSize ===
+        "function" &&
+
+        typeof
+        this
+            .getViewportSize ===
+        "function" &&
+
+        typeof
+        this
+            .getViewportWidth ===
+        "function" &&
+
+        typeof
+        this
+            .getViewportHeight ===
+        "function"
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   D2.2.8 — INITIALIZE VIEWPORT SIZE TRACKING
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ViewportEngine
+    .initializeViewportSizeTracking =
+function () {
+
+    if (
+
+        this
+            .viewportSizeTrackingReady
+
+    ) {
+
+        return;
+    }
+
+    this
+        .viewportSizeTrackingReady =
+            true;
+
+    if (
+
+        CampusWord2007Simulateur
+            .Logger &&
+
+        typeof
+        CampusWord2007Simulateur
+            .Logger
+            .info ===
+        "function"
+
+    ) {
+
+        CampusWord2007Simulateur
+            .Logger
+            .info(
+                "Viewport Size Tracking Ready"
+            );
+    }
+};
+
+
+
+
+
+/* ==========================================================
+   D2.2.9 — VIEWPORT SIZE STATUS
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ViewportEngine
+    .isViewportSizeTrackingReady =
+function () {
+
+    return (
+
+        this
+            .viewportSizeTrackingReady ===
+        true
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   D2.2.10 — VIEWPORT SIZE REPORT
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ViewportEngine
+    .getViewportSizeReport =
+function () {
+
+    return {
+
+        width:
+            this
+                .getViewportWidth(),
+
+        height:
+            this
+                .getViewportHeight(),
+
+        hasSize:
+            this
+                .hasViewportSize(),
+
+        valid:
+            this
+                .validateViewportSizeTracking(),
+
+        ready:
+            this
+                .isViewportSizeTrackingReady()
+    };
+};
+
+
+
+
+
+
+
+
+
+
+
+
+/* ==========================================================
+   D2.3 — VIEWPORT POSITION TRACKING
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ViewportEngine
+    .viewportPositionTrackingReady =
+false;
+
+
+
+
+
+/* ==========================================================
+   D2.3.1 — VIEWPORT POSITION STORAGE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ViewportEngine
+    .viewportPosition = {
+
+        x: 0,
+
+        y: 0
+    };
+
+
+
+
+
+/* ==========================================================
+   D2.3.2 — SET VIEWPORT POSITION
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ViewportEngine
+    .setViewportPosition =
+function (
+    x,
+    y
+) {
+
+    if (
+
+        typeof x !==
+        "number" ||
+
+        typeof y !==
+        "number"
+
+    ) {
+
+        return false;
+    }
+
+    this
+        .viewportPosition
+        .x =
+            x;
+
+    this
+        .viewportPosition
+        .y =
+            y;
+
+    return true;
+};
+
+
+
+
+
+/* ==========================================================
+   D2.3.3 — GET VIEWPORT POSITION
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ViewportEngine
+    .getViewportPosition =
+function () {
+
+    return this
+        .viewportPosition;
+};
+
+
+
+
+
+/* ==========================================================
+   D2.3.4 — GET VIEWPORT X
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ViewportEngine
+    .getViewportX =
+function () {
+
+    return (
+
+        this
+            .viewportPosition
+            .x
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   D2.3.5 — GET VIEWPORT Y
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ViewportEngine
+    .getViewportY =
+function () {
+
+    return (
+
+        this
+            .viewportPosition
+            .y
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   D2.3.6 — RESET VIEWPORT POSITION
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ViewportEngine
+    .resetViewportPosition =
+function () {
+
+    this
+        .viewportPosition
+        .x =
+            0;
+
+    this
+        .viewportPosition
+        .y =
+            0;
+
+    return true;
+};
+
+
+
+
+
+/* ==========================================================
+   D2.3.7 — VALIDATE VIEWPORT POSITION TRACKING
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ViewportEngine
+    .validateViewportPositionTracking =
+function () {
+
+    return (
+
+        typeof
+        this
+            .setViewportPosition ===
+        "function" &&
+
+        typeof
+        this
+            .getViewportPosition ===
+        "function" &&
+
+        typeof
+        this
+            .getViewportX ===
+        "function" &&
+
+        typeof
+        this
+            .getViewportY ===
+        "function"
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   D2.3.8 — INITIALIZE VIEWPORT POSITION TRACKING
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ViewportEngine
+    .initializeViewportPositionTracking =
+function () {
+
+    if (
+
+        this
+            .viewportPositionTrackingReady
+
+    ) {
+
+        return;
+    }
+
+    this
+        .viewportPositionTrackingReady =
+            true;
+
+    if (
+
+        CampusWord2007Simulateur
+            .Logger &&
+
+        typeof
+        CampusWord2007Simulateur
+            .Logger
+            .info ===
+        "function"
+
+    ) {
+
+        CampusWord2007Simulateur
+            .Logger
+            .info(
+                "Viewport Position Tracking Ready"
+            );
+    }
+};
+
+
+
+
+
+/* ==========================================================
+   D2.3.9 — POSITION TRACKING STATUS
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ViewportEngine
+    .isViewportPositionTrackingReady =
+function () {
+
+    return (
+
+        this
+            .viewportPositionTrackingReady ===
+        true
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   D2.3.10 — VIEWPORT POSITION REPORT
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ViewportEngine
+    .getViewportPositionReport =
+function () {
+
+    return {
+
+        x:
+            this
+                .getViewportX(),
+
+        y:
+            this
+                .getViewportY(),
+
+        valid:
+            this
+                .validateViewportPositionTracking(),
+
+        ready:
+            this
+                .isViewportPositionTrackingReady()
+    };
+};
+
+
+
+
+
+
+
+
+
+
+
+/* ==========================================================
+   D2.4 — SCROLL TRACKING
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ViewportEngine
+    .scrollTrackingReady =
+false;
+
+
+
+
+
+/* ==========================================================
+   D2.4.1 — SCROLL STATE STORAGE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ViewportEngine
+    .scrollState = {
+
+        scrollX: 0,
+
+        scrollY: 0,
+
+        lastScrollX: 0,
+
+        lastScrollY: 0
+    };
+
+
+
+
+
+/* ==========================================================
+   D2.4.2 — SET SCROLL POSITION
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ViewportEngine
+    .setScrollPosition =
+function (
+    scrollX,
+    scrollY
+) {
+
+    if (
+
+        typeof scrollX !==
+        "number" ||
+
+        typeof scrollY !==
+        "number"
+
+    ) {
+
+        return false;
+    }
+
+    this
+        .scrollState
+        .lastScrollX =
+            this
+                .scrollState
+                .scrollX;
+
+    this
+        .scrollState
+        .lastScrollY =
+            this
+                .scrollState
+                .scrollY;
+
+    this
+        .scrollState
+        .scrollX =
+            scrollX;
+
+    this
+        .scrollState
+        .scrollY =
+            scrollY;
+
+    return true;
+};
+
+
+
+
+
+/* ==========================================================
+   D2.4.3 — GET SCROLL POSITION
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ViewportEngine
+    .getScrollPosition =
+function () {
+
+    return {
+
+        x:
+            this
+                .scrollState
+                .scrollX,
+
+        y:
+            this
+                .scrollState
+                .scrollY
+    };
+};
+
+
+
+
+
+/* ==========================================================
+   D2.4.4 — GET SCROLL X
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ViewportEngine
+    .getScrollX =
+function () {
+
+    return (
+
+        this
+            .scrollState
+            .scrollX
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   D2.4.5 — GET SCROLL Y
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ViewportEngine
+    .getScrollY =
+function () {
+
+    return (
+
+        this
+            .scrollState
+            .scrollY
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   D2.4.6 — GET LAST SCROLL POSITION
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ViewportEngine
+    .getLastScrollPosition =
+function () {
+
+    return {
+
+        x:
+            this
+                .scrollState
+                .lastScrollX,
+
+        y:
+            this
+                .scrollState
+                .lastScrollY
+    };
+};
+
+
+
+
+
+/* ==========================================================
+   D2.4.7 — RESET SCROLL POSITION
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ViewportEngine
+    .resetScrollPosition =
+function () {
+
+    this
+        .scrollState
+        .scrollX =
+            0;
+
+    this
+        .scrollState
+        .scrollY =
+            0;
+
+    this
+        .scrollState
+        .lastScrollX =
+            0;
+
+    this
+        .scrollState
+        .lastScrollY =
+            0;
+
+    return true;
+};
+
+
+
+
+
+/* ==========================================================
+   D2.4.8 — HAS SCROLL POSITION
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ViewportEngine
+    .hasScrollPosition =
+function () {
+
+    return (
+
+        this
+            .scrollState
+            .scrollX !== 0 ||
+
+        this
+            .scrollState
+            .scrollY !== 0
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   D2.4.9 — VALIDATE SCROLL TRACKING
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ViewportEngine
+    .validateScrollTracking =
+function () {
+
+    return (
+
+        typeof
+        this
+            .setScrollPosition ===
+        "function" &&
+
+        typeof
+        this
+            .getScrollPosition ===
+        "function" &&
+
+        typeof
+        this
+            .getScrollX ===
+        "function" &&
+
+        typeof
+        this
+            .getScrollY ===
+        "function"
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   D2.4.10 — INITIALIZE SCROLL TRACKING
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ViewportEngine
+    .initializeScrollTracking =
+function () {
+
+    if (
+
+        this
+            .scrollTrackingReady
+
+    ) {
+
+        return;
+    }
+
+    this
+        .scrollTrackingReady =
+            true;
+
+    if (
+
+        CampusWord2007Simulateur
+            .Logger &&
+
+        typeof
+        CampusWord2007Simulateur
+            .Logger
+            .info ===
+        "function"
+
+    ) {
+
+        CampusWord2007Simulateur
+            .Logger
+            .info(
+                "Scroll Tracking Ready"
+            );
+    }
+};
+
+
+
+
+
+/* ==========================================================
+   D2.4.11 — SCROLL TRACKING STATUS
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ViewportEngine
+    .isScrollTrackingReady =
+function () {
+
+    return (
+
+        this
+            .scrollTrackingReady ===
+        true
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   D2.4.12 — SCROLL TRACKING REPORT
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ViewportEngine
+    .getScrollTrackingReport =
+function () {
+
+    return {
+
+        position:
+            this
+                .getScrollPosition(),
+
+        lastPosition:
+            this
+                .getLastScrollPosition(),
+
+        hasScroll:
+            this
+                .hasScrollPosition(),
+
+        valid:
+            this
+                .validateScrollTracking(),
+
+        ready:
+            this
+                .isScrollTrackingReady()
+    };
+};
+
+
+
+
+
+
+
+
+
+
+/* ==========================================================
+   D2.5 — VIEWPORT SYNCHRONIZATION
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ViewportEngine
+    .viewportSynchronizationReady =
+false;
+
+
+
+
+
+/* ==========================================================
+   D2.5.1 — SYNCHRONIZATION STATE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ViewportEngine
+    .viewportSynchronizationState = {
+
+        synchronized: true,
+
+        dirty: false,
+
+        lastSynchronizationTime: null
+    };
+
+
+
+
+
+/* ==========================================================
+   D2.5.2 — GET SYNCHRONIZATION STATE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ViewportEngine
+    .getViewportSynchronizationState =
+function () {
+
+    return this
+        .viewportSynchronizationState;
+};
+
+
+
+
+
+/* ==========================================================
+   D2.5.3 — MARK VIEWPORT DIRTY
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ViewportEngine
+    .markViewportDirty =
+function () {
+
+    this
+        .viewportSynchronizationState
+        .dirty =
+            true;
+
+    this
+        .viewportSynchronizationState
+        .synchronized =
+            false;
+
+    return true;
+};
+
+
+
+
+
+/* ==========================================================
+   D2.5.4 — MARK VIEWPORT SYNCHRONIZED
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ViewportEngine
+    .markViewportSynchronized =
+function () {
+
+    this
+        .viewportSynchronizationState
+        .dirty =
+            false;
+
+    this
+        .viewportSynchronizationState
+        .synchronized =
+            true;
+
+    this
+        .viewportSynchronizationState
+        .lastSynchronizationTime =
+            Date.now();
+
+    return true;
+};
+
+
+
+
+
+/* ==========================================================
+   D2.5.5 — IS VIEWPORT DIRTY
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ViewportEngine
+    .isViewportDirty =
+function () {
+
+    return (
+
+        this
+            .viewportSynchronizationState
+            .dirty ===
+        true
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   D2.5.6 — IS VIEWPORT SYNCHRONIZED
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ViewportEngine
+    .isViewportSynchronized =
+function () {
+
+    return (
+
+        this
+            .viewportSynchronizationState
+            .synchronized ===
+        true
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   D2.5.7 — GET LAST SYNCHRONIZATION TIME
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ViewportEngine
+    .getLastViewportSynchronizationTime =
+function () {
+
+    return (
+
+        this
+            .viewportSynchronizationState
+            .lastSynchronizationTime
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   D2.5.8 — VALIDATE VIEWPORT SYNCHRONIZATION
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ViewportEngine
+    .validateViewportSynchronization =
+function () {
+
+    return (
+
+        typeof
+        this
+            .markViewportDirty ===
+        "function" &&
+
+        typeof
+        this
+            .markViewportSynchronized ===
+        "function" &&
+
+        typeof
+        this
+            .isViewportDirty ===
+        "function" &&
+
+        typeof
+        this
+            .isViewportSynchronized ===
+        "function"
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   D2.5.9 — INITIALIZE VIEWPORT SYNCHRONIZATION
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ViewportEngine
+    .initializeViewportSynchronization =
+function () {
+
+    if (
+
+        this
+            .viewportSynchronizationReady
+
+    ) {
+
+        return;
+    }
+
+    this
+        .viewportSynchronizationReady =
+            true;
+
+    if (
+
+        CampusWord2007Simulateur
+            .Logger &&
+
+        typeof
+        CampusWord2007Simulateur
+            .Logger
+            .info ===
+        "function"
+
+    ) {
+
+        CampusWord2007Simulateur
+            .Logger
+            .info(
+                "Viewport Synchronization Ready"
+            );
+    }
+};
+
+
+
+
+
+/* ==========================================================
+   D2.5.10 — SYNCHRONIZATION STATUS
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ViewportEngine
+    .isViewportSynchronizationReady =
+function () {
+
+    return (
+
+        this
+            .viewportSynchronizationReady ===
+        true
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   D2.5.11 — SYNCHRONIZATION REPORT
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ViewportEngine
+    .getViewportSynchronizationReport =
+function () {
+
+    return {
+
+        synchronized:
+            this
+                .isViewportSynchronized(),
+
+        dirty:
+            this
+                .isViewportDirty(),
+
+        lastSynchronizationTime:
+            this
+                .getLastViewportSynchronizationTime(),
+
+        valid:
+            this
+                .validateViewportSynchronization(),
+
+        ready:
+            this
+                .isViewportSynchronizationReady()
+    };
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* ==========================================================
+   D2.6 — VIEWPORT READY HOOK
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ViewportEngine
+    .viewportReadyHookReady =
+false;
+
+
+
+
+
+/* ==========================================================
+   D2.6.1 — IS VIEWPORT ENGINE READY
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ViewportEngine
+    .isViewportEngineReady =
+function () {
+
+    return (
+
+        this
+            .isViewportStateValidationReady() &&
+
+        this
+            .isViewportSizeTrackingReady() &&
+
+        this
+            .isViewportPositionTrackingReady() &&
+
+        this
+            .isScrollTrackingReady() &&
+
+        this
+            .isViewportSynchronizationReady()
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   D2.6.2 — INITIALIZE VIEWPORT READY HOOK
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ViewportEngine
+    .initializeViewportReadyHook =
+function () {
+
+    if (
+
+        this
+            .viewportReadyHookReady
+
+    ) {
+
+        return;
+    }
+
+    this
+        .viewportReadyHookReady =
+            true;
+
+    if (
+
+        CampusWord2007Simulateur
+            .Logger &&
+
+        typeof
+        CampusWord2007Simulateur
+            .Logger
+            .info ===
+        "function"
+
+    ) {
+
+        CampusWord2007Simulateur
+            .Logger
+            .info(
+                "Viewport Ready Hook Ready"
+            );
+    }
+};
+
+
+
+
+
+/* ==========================================================
+   D2.6.3 — READY HOOK STATUS
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ViewportEngine
+    .isViewportReadyHookReady =
+function () {
+
+    return (
+
+        this
+            .viewportReadyHookReady ===
+        true
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   D2.6.4 — VALIDATE VIEWPORT READY HOOK
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ViewportEngine
+    .validateViewportReadyHook =
+function () {
+
+    return (
+
+        typeof
+        this
+            .isViewportEngineReady ===
+        "function" &&
+
+        typeof
+        this
+            .initializeViewportReadyHook ===
+        "function"
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   D2.6.5 — VIEWPORT READY STATUS
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ViewportEngine
+    .getViewportReadyStatus =
+function () {
+
+    return {
+
+        stateValidation:
+            this
+                .isViewportStateValidationReady(),
+
+        sizeTracking:
+            this
+                .isViewportSizeTrackingReady(),
+
+        positionTracking:
+            this
+                .isViewportPositionTrackingReady(),
+
+        scrollTracking:
+            this
+                .isScrollTrackingReady(),
+
+        synchronization:
+            this
+                .isViewportSynchronizationReady(),
+
+        viewportReady:
+            this
+                .isViewportEngineReady(),
+
+        readyHook:
+            this
+                .isViewportReadyHookReady()
+    };
+};
+
+
+
+
+
+/* ==========================================================
+   D2.6.6 — VIEWPORT READY REPORT
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ViewportEngine
+    .getViewportReadyReport =
+function () {
+
+    return {
+
+        ready:
+            this
+                .isViewportEngineReady(),
+
+        hookReady:
+            this
+                .isViewportReadyHookReady(),
+
+        valid:
+            this
+                .validateViewportReadyHook(),
+
+        status:
+            this
+                .getViewportReadyStatus()
+    };
+};
+
+
+
+
+
+
+
+
+
+
+
+/* ==========================================================
+   D2.7 — VIEWPORT VALIDATION BLOCK
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ViewportEngine
+    .viewportValidationBlockReady =
+false;
+
+
+
+
+
+/* ==========================================================
+   D2.7.1 — VALIDATE VIEWPORT STATE VALIDATION
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ViewportEngine
+    .validateViewportStateValidationBlock =
+function () {
+
+    return (
+
+        this
+            .validateViewportState &&
+
+        this
+            .validateViewportState()
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   D2.7.2 — VALIDATE VIEWPORT SIZE TRACKING
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ViewportEngine
+    .validateViewportSizeTrackingBlock =
+function () {
+
+    return (
+
+        this
+            .validateViewportSizeTracking &&
+
+        this
+            .validateViewportSizeTracking()
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   D2.7.3 — VALIDATE VIEWPORT POSITION TRACKING
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ViewportEngine
+    .validateViewportPositionTrackingBlock =
+function () {
+
+    return (
+
+        this
+            .validateViewportPositionTracking &&
+
+        this
+            .validateViewportPositionTracking()
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   D2.7.4 — VALIDATE SCROLL TRACKING
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ViewportEngine
+    .validateScrollTrackingBlock =
+function () {
+
+    return (
+
+        this
+            .validateScrollTracking &&
+
+        this
+            .validateScrollTracking()
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   D2.7.5 — VALIDATE VIEWPORT SYNCHRONIZATION
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ViewportEngine
+    .validateViewportSynchronizationBlock =
+function () {
+
+    return (
+
+        this
+            .validateViewportSynchronization &&
+
+        this
+            .validateViewportSynchronization()
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   D2.7.6 — VALIDATE VIEWPORT READY HOOK
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ViewportEngine
+    .validateViewportReadyHookBlock =
+function () {
+
+    return (
+
+        this
+            .validateViewportReadyHook &&
+
+        this
+            .validateViewportReadyHook()
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   D2.7.7 — VALIDATE COMPLETE VIEWPORT ENGINE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ViewportEngine
+    .validateCompleteViewportEngine =
+function () {
+
+    return (
+
+        this
+            .validateViewportStateValidationBlock() &&
+
+        this
+            .validateViewportSizeTrackingBlock() &&
+
+        this
+            .validateViewportPositionTrackingBlock() &&
+
+        this
+            .validateScrollTrackingBlock() &&
+
+        this
+            .validateViewportSynchronizationBlock() &&
+
+        this
+            .validateViewportReadyHookBlock()
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   D2.7.8 — INITIALIZE VIEWPORT VALIDATION BLOCK
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ViewportEngine
+    .initializeViewportValidationBlock =
+function () {
+
+    if (
+
+        this
+            .viewportValidationBlockReady
+
+    ) {
+
+        return;
+    }
+
+    this
+        .viewportValidationBlockReady =
+            true;
+
+    if (
+
+        CampusWord2007Simulateur
+            .Logger &&
+
+        typeof
+        CampusWord2007Simulateur
+            .Logger
+            .info ===
+        "function"
+
+    ) {
+
+        CampusWord2007Simulateur
+            .Logger
+            .info(
+                "Viewport Validation Block Ready"
+            );
+    }
+};
+
+
+
+
+
+/* ==========================================================
+   D2.7.9 — VALIDATION BLOCK STATUS
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ViewportEngine
+    .isViewportValidationBlockReady =
+function () {
+
+    return (
+
+        this
+            .viewportValidationBlockReady ===
+        true
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   D2.7.10 — VIEWPORT VALIDATION REPORT
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .ViewportEngine
+    .getViewportValidationReport =
+function () {
+
+    return {
+
+        stateValidation:
+            this
+                .validateViewportStateValidationBlock(),
+
+        sizeTracking:
+            this
+                .validateViewportSizeTrackingBlock(),
+
+        positionTracking:
+            this
+                .validateViewportPositionTrackingBlock(),
+
+        scrollTracking:
+            this
+                .validateScrollTrackingBlock(),
+
+        synchronization:
+            this
+                .validateViewportSynchronizationBlock(),
+
+        readyHook:
+            this
+                .validateViewportReadyHookBlock(),
+
+        complete:
+            this
+                .validateCompleteViewportEngine(),
+
+        blockReady:
+            this
+                .isViewportValidationBlockReady()
+    };
+};
+
+
+
+
+
+
+
+
+
+
