@@ -30521,3 +30521,582 @@ CampusWord2007Simulateur
                 .initialize();
         }
     );
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* ==========================================================
+   E1.2 — CARET RENDERING
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .CaretEngine
+    .caretRenderingReady =
+false;
+
+
+
+
+
+/* ==========================================================
+   E1.2.1 — CARET DEFAULT STYLE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .CaretEngine
+    .applyCaretStyle =
+function (
+    caret
+) {
+
+    if (
+        !caret
+    ) {
+
+        return false;
+    }
+
+    caret.style.position =
+        "absolute";
+
+    caret.style.left =
+        "0px";
+
+    caret.style.top =
+        "0px";
+
+    caret.style.width =
+        "1px";
+
+    caret.style.height =
+        "16px";
+
+    caret.style.background =
+        "#000000";
+
+    caret.style.display =
+        "block";
+
+    caret.style.pointerEvents =
+        "none";
+
+    caret.style.zIndex =
+        "1000";
+
+    return true;
+};
+
+
+
+
+
+/* ==========================================================
+   E1.2.2 — PREPARE CARET LAYER
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .CaretEngine
+    .prepareCaretLayer =
+function (
+    pageElement
+) {
+
+    const layer =
+        this.getCaretLayer(
+            pageElement
+        );
+
+    if (
+        !layer
+    ) {
+
+        return false;
+    }
+
+    layer.style.position =
+        "absolute";
+
+    layer.style.left =
+        "0";
+
+    layer.style.top =
+        "0";
+
+    layer.style.right =
+        "0";
+
+    layer.style.bottom =
+        "0";
+
+    layer.style.pointerEvents =
+        "none";
+
+    return true;
+};
+
+
+
+
+
+/* ==========================================================
+   E1.2.3 — RENDER CARET
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .CaretEngine
+    .renderCaret =
+function (
+    pageElement
+) {
+
+    const caret =
+        this.ensureCaret(
+            pageElement
+        );
+
+    if (
+        !caret
+    ) {
+
+        return null;
+    }
+
+    this.prepareCaretLayer(
+        pageElement
+    );
+
+    this.applyCaretStyle(
+        caret
+    );
+
+    return caret;
+};
+
+
+
+
+
+/* ==========================================================
+   E1.2.4 — RENDER ACTIVE PAGE CARET
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .CaretEngine
+    .renderActivePageCaret =
+function () {
+
+    const page =
+        CampusWord2007Simulateur
+            .PageManager
+            .getActivePage();
+
+    if (
+        !page
+    ) {
+
+        return null;
+    }
+
+    return this.renderCaret(
+        page
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   E1.2.5 — INITIALIZE CARET RENDERING
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .CaretEngine
+    .initializeCaretRendering =
+function () {
+
+    if (
+        this.caretRenderingReady
+    ) {
+
+        return;
+    }
+
+    this.caretRenderingReady =
+        true;
+
+    this.renderActivePageCaret();
+
+    if (
+
+        CampusWord2007Simulateur
+            .Logger &&
+
+        typeof
+        CampusWord2007Simulateur
+            .Logger
+            .info ===
+        "function"
+
+    ) {
+
+        CampusWord2007Simulateur
+            .Logger
+            .info(
+                "Caret Rendering Ready"
+            );
+    }
+};
+
+
+
+
+
+/* ==========================================================
+   E1.2.6 — CARET RENDERING STATUS
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .CaretEngine
+    .isCaretRenderingReady =
+function () {
+
+    return (
+
+        this
+            .caretRenderingReady ===
+        true
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   E1.2.7 — CARET RENDERING REPORT
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .CaretEngine
+    .getCaretRenderingReport =
+function () {
+
+    return {
+
+        ready:
+            this
+                .isCaretRenderingReady()
+    };
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* ==========================================================
+   E1.3 — CARET BLINK
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .CaretEngine
+    .caretBlinkReady =
+false;
+
+CampusWord2007Simulateur
+    .CaretEngine
+    .caretBlinkInterval =
+null;
+
+
+
+
+
+/* ==========================================================
+   E1.3.1 — SHOW CARET
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .CaretEngine
+    .showCaret =
+function (
+    caret
+) {
+
+    if (
+        !caret
+    ) {
+
+        return;
+    }
+
+    caret.style.visibility =
+        "visible";
+};
+
+
+
+
+
+/* ==========================================================
+   E1.3.2 — HIDE CARET
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .CaretEngine
+    .hideCaret =
+function (
+    caret
+) {
+
+    if (
+        !caret
+    ) {
+
+        return;
+    }
+
+    caret.style.visibility =
+        "hidden";
+};
+
+
+
+
+
+/* ==========================================================
+   E1.3.3 — TOGGLE CARET
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .CaretEngine
+    .toggleCaret =
+function (
+    caret
+) {
+
+    if (
+        !caret
+    ) {
+
+        return;
+    }
+
+    if (
+
+        caret.style.visibility ===
+        "hidden"
+
+    ) {
+
+        this.showCaret(
+            caret
+        );
+
+    } else {
+
+        this.hideCaret(
+            caret
+        );
+    }
+};
+
+
+
+
+
+/* ==========================================================
+   E1.3.4 — START CARET BLINK
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .CaretEngine
+    .startCaretBlink =
+function () {
+
+    const page =
+        CampusWord2007Simulateur
+            .PageManager
+            .getActivePage();
+
+    if (
+        !page
+    ) {
+
+        return;
+    }
+
+    const caret =
+        this.getCaret(
+            page
+        );
+
+    if (
+        !caret
+    ) {
+
+        return;
+    }
+
+    if (
+        this.caretBlinkInterval
+    ) {
+
+        clearInterval(
+            this.caretBlinkInterval
+        );
+    }
+
+    this.showCaret(
+        caret
+    );
+
+    this.caretBlinkInterval =
+        setInterval(
+
+            () => {
+
+                this.toggleCaret(
+                    caret
+                );
+
+            },
+
+            530
+        );
+};
+
+
+
+
+
+/* ==========================================================
+   E1.3.5 — STOP CARET BLINK
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .CaretEngine
+    .stopCaretBlink =
+function () {
+
+    if (
+        this.caretBlinkInterval
+    ) {
+
+        clearInterval(
+            this.caretBlinkInterval
+        );
+
+        this.caretBlinkInterval =
+            null;
+    }
+};
+
+
+
+
+
+/* ==========================================================
+   E1.3.6 — INITIALIZE CARET BLINK
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .CaretEngine
+    .initializeCaretBlink =
+function () {
+
+    if (
+        this.caretBlinkReady
+    ) {
+
+        return;
+    }
+
+    this.caretBlinkReady =
+        true;
+
+    this.startCaretBlink();
+
+    if (
+
+        CampusWord2007Simulateur
+            .Logger &&
+
+        typeof
+        CampusWord2007Simulateur
+            .Logger
+            .info ===
+        "function"
+
+    ) {
+
+        CampusWord2007Simulateur
+            .Logger
+            .info(
+                "Caret Blink Ready"
+            );
+    }
+};
+
+
+
+
+
+/* ==========================================================
+   E1.3.7 — CARET BLINK STATUS
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .CaretEngine
+    .isCaretBlinkReady =
+function () {
+
+    return (
+
+        this
+            .caretBlinkReady ===
+        true
+
+    );
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
