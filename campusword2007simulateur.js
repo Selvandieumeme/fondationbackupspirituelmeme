@@ -22153,3 +22153,456 @@ function () {
 
 
 
+
+
+
+
+
+/* ==========================================================
+   D1 — DOCUMENT ENGINE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .DocumentEngine =
+CampusWord2007Simulateur
+    .DocumentEngine || {
+
+        initialized: false
+    };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* ==========================================================
+   D1.1 — DOCUMENT STATE VALIDATION
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .DocumentEngine
+    .documentStateValidationReady =
+false;
+
+
+
+
+
+/* ==========================================================
+   D1.1.1 — VALIDATE DOCUMENT ENGINE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .DocumentEngine
+    .validateDocumentEngine =
+function () {
+
+    return (
+
+        !!CampusWord2007Simulateur
+            .DocumentEngine
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   D1.1.2 — VALIDATE INITIALIZED FLAG
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .DocumentEngine
+    .validateDocumentInitialization =
+function () {
+
+    return (
+
+        typeof
+        CampusWord2007Simulateur
+            .DocumentEngine
+            .initialized ===
+        "boolean"
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   D1.1.3 — VALIDATE DOCUMENT STATE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .DocumentEngine
+    .validateDocumentState =
+function () {
+
+    return (
+
+        this
+            .validateDocumentEngine() &&
+
+        this
+            .validateDocumentInitialization()
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   D1.1.4 — INITIALIZE DOCUMENT STATE VALIDATION
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .DocumentEngine
+    .initializeDocumentStateValidation =
+function () {
+
+    if (
+
+        this
+            .documentStateValidationReady
+
+    ) {
+
+        return;
+    }
+
+    this
+        .documentStateValidationReady =
+            true;
+
+    if (
+
+        CampusWord2007Simulateur
+            .Logger &&
+
+        typeof
+        CampusWord2007Simulateur
+            .Logger
+            .info ===
+        "function"
+
+    ) {
+
+        CampusWord2007Simulateur
+            .Logger
+            .info(
+                "Document State Validation Ready"
+            );
+    }
+};
+
+
+
+
+
+/* ==========================================================
+   D1.1.5 — VALIDATION STATUS
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .DocumentEngine
+    .isDocumentStateValidationReady =
+function () {
+
+    return (
+
+        this
+            .documentStateValidationReady ===
+        true
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   D1.1.6 — DOCUMENT VALIDATION REPORT
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .DocumentEngine
+    .getDocumentStateValidationReport =
+function () {
+
+    return {
+
+        engine:
+            this
+                .validateDocumentEngine(),
+
+        initialized:
+            this
+                .validateDocumentInitialization(),
+
+        valid:
+            this
+                .validateDocumentState(),
+
+        ready:
+            this
+                .isDocumentStateValidationReady()
+    };
+};
+
+
+
+
+
+
+
+
+
+/* ==========================================================
+   D1.2 — ACTIVE DOCUMENT TRACKING
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .DocumentEngine
+    .activeDocumentTrackingReady =
+false;
+
+
+
+
+
+/* ==========================================================
+   D1.2.1 — ACTIVE DOCUMENT REFERENCE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .DocumentEngine
+    .activeDocument =
+null;
+
+
+
+
+
+/* ==========================================================
+   D1.2.2 — SET ACTIVE DOCUMENT
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .DocumentEngine
+    .setActiveDocument =
+function (
+    documentReference
+) {
+
+    this.activeDocument =
+        documentReference ||
+        null;
+
+    return true;
+};
+
+
+
+
+
+/* ==========================================================
+   D1.2.3 — GET ACTIVE DOCUMENT
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .DocumentEngine
+    .getActiveDocument =
+function () {
+
+    return (
+
+        this.activeDocument
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   D1.2.4 — HAS ACTIVE DOCUMENT
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .DocumentEngine
+    .hasActiveDocument =
+function () {
+
+    return (
+
+        this.activeDocument !==
+        null
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   D1.2.5 — CLEAR ACTIVE DOCUMENT
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .DocumentEngine
+    .clearActiveDocument =
+function () {
+
+    this.activeDocument =
+        null;
+
+    return true;
+};
+
+
+
+
+
+/* ==========================================================
+   D1.2.6 — VALIDATE ACTIVE DOCUMENT
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .DocumentEngine
+    .validateActiveDocument =
+function () {
+
+    return (
+
+        typeof
+        this.getActiveDocument ===
+        "function" &&
+
+        typeof
+        this.setActiveDocument ===
+        "function" &&
+
+        typeof
+        this.hasActiveDocument ===
+        "function"
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   D1.2.7 — INITIALIZE ACTIVE DOCUMENT TRACKING
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .DocumentEngine
+    .initializeActiveDocumentTracking =
+function () {
+
+    if (
+
+        this
+            .activeDocumentTrackingReady
+
+    ) {
+
+        return;
+    }
+
+    this
+        .activeDocumentTrackingReady =
+            true;
+
+    if (
+
+        CampusWord2007Simulateur
+            .Logger &&
+
+        typeof
+        CampusWord2007Simulateur
+            .Logger
+            .info ===
+        "function"
+
+    ) {
+
+        CampusWord2007Simulateur
+            .Logger
+            .info(
+                "Active Document Tracking Ready"
+            );
+    }
+};
+
+
+
+
+
+/* ==========================================================
+   D1.2.8 — TRACKING STATUS
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .DocumentEngine
+    .isActiveDocumentTrackingReady =
+function () {
+
+    return (
+
+        this
+            .activeDocumentTrackingReady ===
+        true
+
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   D1.2.9 — ACTIVE DOCUMENT REPORT
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .DocumentEngine
+    .getActiveDocumentReport =
+function () {
+
+    return {
+
+        hasDocument:
+            this
+                .hasActiveDocument(),
+
+        valid:
+            this
+                .validateActiveDocument(),
+
+        ready:
+            this
+                .isActiveDocumentTrackingReady()
+    };
+};
