@@ -9577,6 +9577,8 @@ CampusWord2007Simulateur.CaretEngine = {
 
         this.createCaret();
 
+        this.completeInitialization();
+
         this.initialized = true;
 
         CampusWord2007Simulateur
@@ -9585,6 +9587,16 @@ CampusWord2007Simulateur.CaretEngine = {
             .caretReady = true;
     }
 };
+
+
+
+
+
+
+
+
+
+
 
 
 
