@@ -9346,49 +9346,144 @@ function () {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 /* ==========================================================
-   CARET INITIALIZER
+   C1 — CARET ENGINE
    ========================================================== */
 
-CampusWord2007Simulateur.initializeCaret =
-function(){
+CampusWord2007Simulateur.CaretEngine = {
 
-    const layer =
-        document.querySelector(
-            ".page-caret-layer"
+    caretElement: null,
+
+    initialize() {
+
+        this.createCaret();
+    },
+
+    createCaret() {
+
+        const layer =
+            document.querySelector(
+                ".page-caret-layer"
+            );
+
+        if (
+            !layer
+        ) {
+
+            return;
+        }
+
+        const caret =
+            document.createElement(
+                "div"
+            );
+
+        caret.id =
+            "cw-caret";
+
+        caret.style.position =
+            "absolute";
+
+        caret.style.left =
+            CampusWord2007Simulateur
+                .state
+                .caret
+                .x + "px";
+
+        caret.style.top =
+            CampusWord2007Simulateur
+                .state
+                .caret
+                .y + "px";
+
+        caret.style.width =
+            CampusWord2007Simulateur
+                .Config
+                .get(
+                    "caret",
+                    "width"
+                ) + "px";
+
+        caret.style.height =
+            CampusWord2007Simulateur
+                .state
+                .caret
+                .height + "px";
+
+        caret.style.background =
+            "#000000";
+
+        caret.style.pointerEvents =
+            "none";
+
+        caret.style.display =
+            "block";
+
+        layer.appendChild(
+            caret
         );
 
-    if(!layer){
-        return;
-    }
+        this.caretElement =
+            caret;
 
-    const caret =
-        document.createElement(
-            "div"
-        );
+        CampusWord2007Simulateur
+            .Registry
+            .registerDOM(
+                "caret",
+                caret
+            );
 
-    caret.id =
-        "campusword-caret";
-
-    caret.style.position =
-        "absolute";
-
-    caret.style.left = "0px";
-
-    caret.style.top = "0px";
-
-    caret.style.width = "2px";
-
-    caret.style.height =
         CampusWord2007Simulateur
             .state
-            .caret
-            .height + "px";
-
-    caret.style.background =
-        "#000000";
-
-    layer.appendChild(
-        caret
-    );
+            .input
+            .caretReady = true;
+    }
 };
+
+
+
+
+
+/* ==========================================================
+   C1.1 — CARET READY HOOK
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .EventBus
+    .on(
+        "application:ready",
+
+        () => {
+
+            setTimeout(
+                () => {
+
+                    CampusWord2007Simulateur
+                        .CaretEngine
+                        .initialize();
+
+                },
+                1000
+            );
+        }
+    );
