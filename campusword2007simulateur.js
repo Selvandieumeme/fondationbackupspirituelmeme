@@ -1691,6 +1691,11 @@ CampusWord2007Simulateur
     .TextEngine
     .renderText();
 
+
+CampusWord2007Simulateur
+    .TextEngine
+    .updateCaretPosition();
+
 };
 
 
@@ -2011,6 +2016,39 @@ function(){
             .content;
 };
 
+
+
+
+
+/* ==========================================================
+   UPDATE CARET FROM TEXT
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .TextEngine
+    .updateCaretPosition =
+function(){
+
+    const textState =
+
+        CampusWord2007Simulateur
+            .TextState;
+
+    const characterWidth = 8;
+
+    const newX =
+
+        textState.content.length
+        *
+        characterWidth;
+
+    CampusWord2007Simulateur
+        .CaretEngine
+        .moveCaret(
+            newX,
+            0
+        );
+};
 
 
 
