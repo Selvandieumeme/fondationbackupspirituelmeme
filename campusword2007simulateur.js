@@ -32,7 +32,7 @@ CampusWord2007Simulateur.ZoomEngine = {};
 CampusWord2007Simulateur.StatusBarEngine = {};
 CampusWord2007Simulateur.RibbonEngine = {};
 CampusWord2007Simulateur.RenderEngine = {};
-
+CampusWord2007Simulateur.MobileInputEngine = {};
 
 
 
@@ -973,6 +973,25 @@ CampusWord2007Simulateur.TextState = {
     wordCount: 0
 
 };
+
+
+
+
+
+/* ==========================================================
+   MOBILE INPUT STATE
+   ========================================================== */
+
+CampusWord2007Simulateur.MobileInputState = {
+
+    initialized: false,
+
+    element: null,
+
+    focused: false
+
+};
+
 
 
 
@@ -2060,6 +2079,95 @@ function(){
             0
         );
 };
+
+
+
+
+
+
+
+
+
+
+/* ==========================================================
+   CREATE HIDDEN INPUT
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .MobileInputEngine
+    .createHiddenInput =
+function(){
+
+    const mobileState =
+
+        CampusWord2007Simulateur
+            .MobileInputState;
+
+    if(
+        mobileState.element
+    ){
+        return;
+    }
+
+    const input =
+
+        document.createElement(
+            "textarea"
+        );
+
+    input.setAttribute(
+        "autocomplete",
+        "off"
+    );
+
+    input.setAttribute(
+        "autocorrect",
+        "off"
+    );
+
+    input.setAttribute(
+        "autocapitalize",
+        "off"
+    );
+
+    input.setAttribute(
+        "spellcheck",
+        "false"
+    );
+
+    input.style.position =
+        "fixed";
+
+    input.style.left =
+        "-9999px";
+
+    input.style.top =
+        "-9999px";
+
+    input.style.width =
+        "1px";
+
+    input.style.height =
+        "1px";
+
+    input.style.opacity =
+        "0";
+
+    input.style.pointerEvents =
+        "none";
+
+    document.body.appendChild(
+        input
+    );
+
+    mobileState.element =
+        input;
+};
+
+
+
+
+
 
 
 
