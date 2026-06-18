@@ -377,16 +377,20 @@ function(){
         .detectDevice();
 
     CampusWord2007Simulateur
-        .LoadingEngine
-        .start();
+    .LoadingEngine
+    .start();
 
-    state.initialized =
-        true;
+CampusWord2007Simulateur
+    .DocumentEngine
+    .createDocument();
+
+CampusWord2007Simulateur
+    .StatusBarEngine
+    .updatePageDisplay();
+
+state.initialized = true;
+
 };
-
-
-
-
 
 
 
@@ -435,6 +439,237 @@ document.addEventListener(
 
 
 
+
+
+
+/* ==========================================================
+   DOCUMENT STATE
+   ========================================================== */
+
+CampusWord2007Simulateur.DocumentState = {
+
+    pages: [],
+
+    activePage: null,
+
+    documentCreated: false
+
+};
+
+
+
+
+
+
+
+/* ==========================================================
+   PAGE ENGINE
+   CREATE PAGE
+   ========================================================== */
+
+CampusWord2007Simulateur.PageEngine.createPage =
+function(){
+
+    const DOM =
+        CampusWord2007Simulateur.DOM;
+
+    const documentState =
+        CampusWord2007Simulateur.DocumentState;
+
+    if(
+        !DOM.pageTemplate ||
+        !DOM.documentPagesContainer
+    ){
+        return null;
+    }
+
+    const pageElement =
+        DOM.pageTemplate
+        .content
+        .firstElementChild
+        .cloneNode(true);
+
+    const pageNumber =
+        documentState.pages.length + 1;
+
+    pageElement.setAttribute(
+        "data-page-number",
+        pageNumber
+    );
+
+    DOM.documentPagesContainer
+        .appendChild(
+            pageElement
+        );
+
+    documentState.pages.push(
+        pageElement
+    );
+
+    return pageElement;
+};
+
+
+
+
+
+
+
+
+/* ==========================================================
+   PAGE ENGINE
+   GET PAGE
+   ========================================================== */
+
+CampusWord2007Simulateur.PageEngine.getPage =
+function(pageNumber){
+
+    const pages =
+        CampusWord2007Simulateur
+        .DocumentState
+        .pages;
+
+    return pages[
+        pageNumber - 1
+    ] || null;
+};
+
+
+
+
+
+
+
+
+
+/* ==========================================================
+   PAGE ENGINE
+   PAGE COUNT
+   ========================================================== */
+
+CampusWord2007Simulateur.PageEngine.getPageCount =
+function(){
+
+    return CampusWord2007Simulateur
+        .DocumentState
+        .pages
+        .length;
+};
+
+
+
+
+
+
+
+/* ==========================================================
+   PAGE ENGINE
+   REMOVE PAGE
+   ========================================================== */
+
+CampusWord2007Simulateur.PageEngine.removePage =
+function(pageNumber){
+
+    const documentState =
+        CampusWord2007Simulateur
+        .DocumentState;
+
+    const page =
+        CampusWord2007Simulateur
+        .PageEngine
+        .getPage(
+            pageNumber
+        );
+
+    if(!page){
+        return false;
+    }
+
+    page.remove();
+
+    documentState.pages.splice(
+        pageNumber - 1,
+        1
+    );
+
+    return true;
+};
+
+
+
+
+
+
+
+/* ==========================================================
+   DOCUMENT ENGINE
+   CREATE DOCUMENT
+   ========================================================== */
+
+CampusWord2007Simulateur.DocumentEngine
+.createDocument =
+function(){
+
+    const documentState =
+        CampusWord2007Simulateur
+        .DocumentState;
+
+    if(
+        documentState.documentCreated
+    ){
+        return;
+    }
+
+    const firstPage =
+        CampusWord2007Simulateur
+        .PageEngine
+        .createPage();
+
+    documentState.activePage =
+        firstPage;
+
+    documentState.documentCreated =
+        true;
+};
+
+
+
+
+
+
+
+
+
+
+
+/* ==========================================================
+   STATUS BAR ENGINE
+   ========================================================== */
+
+CampusWord2007Simulateur
+.StatusBarEngine
+.updatePageDisplay =
+function(){
+
+    const DOM =
+        CampusWord2007Simulateur.DOM;
+
+    const pageCount =
+        CampusWord2007Simulateur
+        .PageEngine
+        .getPageCount();
+
+    if(
+        !DOM.statusPageNumber
+    ){
+        return;
+    }
+
+    DOM.statusPageNumber
+        .textContent =
+        "Page 1 of " +
+        pageCount;
+};
 
 
 
