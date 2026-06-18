@@ -388,6 +388,14 @@ CampusWord2007Simulateur
     .StatusBarEngine
     .updatePageDisplay();
 
+CampusWord2007Simulateur
+    .LayoutEngine
+    .calculateWritableArea();
+
+CampusWord2007Simulateur
+    .RenderEngine
+    .render();
+
 state.initialized = true;
 
 };
@@ -670,6 +678,222 @@ function(){
         "Page 1 of " +
         pageCount;
 };
+
+
+
+
+
+
+
+
+
+
+
+/* ==========================================================
+   WRITABLE AREA STATE
+   ========================================================== */
+
+CampusWord2007Simulateur.LayoutState = {
+
+    writableWidth: 0,
+
+    writableHeight: 0,
+
+    pageWidth: 0,
+
+    pageHeight: 0
+
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* ==========================================================
+   LAYOUT ENGINE
+   CALCULATE WRITABLE AREA
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .LayoutEngine
+    .calculateWritableArea =
+function(){
+
+    const config =
+        CampusWord2007Simulateur.Config;
+
+    const layoutState =
+        CampusWord2007Simulateur.LayoutState;
+
+    layoutState.pageWidth =
+        config.PAGE_WIDTH;
+
+    layoutState.pageHeight =
+        config.PAGE_HEIGHT;
+
+    layoutState.writableWidth =
+
+        config.PAGE_WIDTH
+
+        -
+
+        config.PAGE_MARGIN_LEFT
+
+        -
+
+        config.PAGE_MARGIN_RIGHT;
+
+    layoutState.writableHeight =
+
+        config.PAGE_HEIGHT
+
+        -
+
+        config.PAGE_MARGIN_TOP
+
+        -
+
+        config.PAGE_MARGIN_BOTTOM;
+
+    return {
+
+        width:
+            layoutState.writableWidth,
+
+        height:
+            layoutState.writableHeight
+
+    };
+};
+
+
+
+
+
+
+
+
+/* ==========================================================
+   UPDATE PAGE LAYOUT
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .LayoutEngine
+    .updatePageLayout =
+function(){
+
+    const pageCount =
+
+        CampusWord2007Simulateur
+            .PageEngine
+            .getPageCount();
+
+    for(
+        let i = 1;
+        i <= pageCount;
+        i++
+    ){
+
+        const page =
+
+            CampusWord2007Simulateur
+                .PageEngine
+                .getPage(i);
+
+        if(!page){
+            continue;
+        }
+
+        page.dataset.pageNumber =
+            i;
+    }
+};
+
+
+
+
+
+
+
+
+
+/* ==========================================================
+   RENDER ENGINE
+   ========================================================== */
+
+CampusWord2007Simulateur.RenderState = {
+
+    renderCount: 0,
+
+    lastRenderTime: 0
+
+};
+
+
+
+
+
+
+
+
+/* ==========================================================
+   RENDER DOCUMENT
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .RenderEngine
+    .render =
+function(){
+
+    const renderState =
+
+        CampusWord2007Simulateur
+            .RenderState;
+
+    renderState.renderCount++;
+
+    renderState.lastRenderTime =
+        Date.now();
+
+    CampusWord2007Simulateur
+        .LayoutEngine
+        .updatePageLayout();
+};
+
+
+
+
+
+
+
+
+/* ==========================================================
+   REFRESH DOCUMENT
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .RenderEngine
+    .refresh =
+function(){
+
+    CampusWord2007Simulateur
+        .RenderEngine
+        .render();
+};
+
+
+
+
+
+
 
 
 
