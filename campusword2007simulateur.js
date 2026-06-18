@@ -9346,71 +9346,49 @@ function () {
 
 
 
-
-
-
-
-
-
 /* ==========================================================
-   CARET
+   CARET INITIALIZER
    ========================================================== */
 
-CampusWord2007Simulateur.Caret = {
+CampusWord2007Simulateur.initializeCaret =
+function(){
 
-    element: null,
-
-    initialize(){
-
-        const layer =
-            document.querySelector(
-                ".page-caret-layer"
-            );
-
-        if(!layer){
-            return;
-        }
-
-        this.element =
-            document.createElement(
-                "div"
-            );
-
-        this.element.id =
-            "campusword-caret";
-
-        this.element.style.position =
-            "absolute";
-
-        this.element.style.left =
-            CampusWord2007Simulateur
-                .state
-                .caret
-                .x + "px";
-
-        this.element.style.top =
-            CampusWord2007Simulateur
-                .state
-                .caret
-                .y + "px";
-
-        this.element.style.width =
-            "2px";
-
-        this.element.style.height =
-            CampusWord2007Simulateur
-                .state
-                .caret
-                .height + "px";
-
-        this.element.style.background =
-            "#000000";
-
-        this.element.style.pointerEvents =
-            "none";
-
-        layer.appendChild(
-            this.element
+    const layer =
+        document.querySelector(
+            ".page-caret-layer"
         );
+
+    if(!layer){
+        return;
     }
+
+    const caret =
+        document.createElement(
+            "div"
+        );
+
+    caret.id =
+        "campusword-caret";
+
+    caret.style.position =
+        "absolute";
+
+    caret.style.left = "0px";
+
+    caret.style.top = "0px";
+
+    caret.style.width = "2px";
+
+    caret.style.height =
+        CampusWord2007Simulateur
+            .state
+            .caret
+            .height + "px";
+
+    caret.style.background =
+        "#000000";
+
+    layer.appendChild(
+        caret
+    );
 };
