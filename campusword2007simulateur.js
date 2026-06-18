@@ -9343,40 +9343,74 @@ function () {
 
 
 
+
+
+
+
+
+
+
+
+
 /* ==========================================================
-   CARET TEST
+   CARET
    ========================================================== */
 
-window.addEventListener(
-    "load",
-    function(){
+CampusWord2007Simulateur.Caret = {
 
-        setTimeout(
-            function(){
+    element: null,
 
-                const layer =
-                    document.querySelector(
-                        ".page-caret-layer"
-                    );
+    initialize(){
 
-                if(!layer){
-                    return;
-                }
+        const layer =
+            document.querySelector(
+                ".page-caret-layer"
+            );
 
-                layer.innerHTML +=
-                    '<div style="position:absolute;left:0;top:0;width:2px;height:20px;background:#000;"></div>';
+        if(!layer){
+            return;
+        }
 
-            },
-            1000
+        this.element =
+            document.createElement(
+                "div"
+            );
+
+        this.element.id =
+            "campusword-caret";
+
+        this.element.style.position =
+            "absolute";
+
+        this.element.style.left =
+            CampusWord2007Simulateur
+                .state
+                .caret
+                .x + "px";
+
+        this.element.style.top =
+            CampusWord2007Simulateur
+                .state
+                .caret
+                .y + "px";
+
+        this.element.style.width =
+            "2px";
+
+        this.element.style.height =
+            CampusWord2007Simulateur
+                .state
+                .caret
+                .height + "px";
+
+        this.element.style.background =
+            "#000000";
+
+        this.element.style.pointerEvents =
+            "none";
+
+        layer.appendChild(
+            this.element
         );
     }
-);
-
-
-
-
-
-
-
-
-
+};
