@@ -1819,6 +1819,17 @@ function(){
     CampusWord2007Simulateur
         .TextEngine
         .updateWordCount();
+
+
+CampusWord2007Simulateur
+    .TextEngine
+    .renderText();
+
+CampusWord2007Simulateur
+    .TextEngine
+    .updateCaretPosition();
+
+
 };
 
 
