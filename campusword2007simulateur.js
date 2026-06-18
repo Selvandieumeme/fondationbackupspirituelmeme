@@ -1481,6 +1481,12 @@ function(event){
 
     keyboardState.lastKeyDown =
         event.key;
+
+CampusWord2007Simulateur
+    .KeyboardEngine
+    .processTextInput(
+        event
+    );
 };
 
 
@@ -1754,6 +1760,93 @@ function(){
 
 
 
+
+
+
+
+
+
+/* ==========================================================
+   REMOVE CHARACTER
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .TextEngine
+    .removeCharacter =
+function(){
+
+    const textState =
+
+        CampusWord2007Simulateur
+            .TextState;
+
+    if(
+        textState.content.length
+        ===
+        0
+    ){
+        return;
+    }
+
+    textState.content =
+
+        textState.content.slice(
+            0,
+            -1
+        );
+
+    CampusWord2007Simulateur
+        .TextEngine
+        .updateCharacterCount();
+
+    CampusWord2007Simulateur
+        .TextEngine
+        .updateWordCount();
+};
+
+
+
+
+
+
+
+
+/* ==========================================================
+   PROCESS TEXT INPUT
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .KeyboardEngine
+    .processTextInput =
+function(event){
+
+    if(
+        event.ctrlKey ||
+        event.altKey ||
+        event.metaKey
+    ){
+        return;
+    }
+
+    if(
+        typeof event.key !==
+        "string"
+    ){
+        return;
+    }
+
+    if(
+        event.key.length !== 1
+    ){
+        return;
+    }
+
+    CampusWord2007Simulateur
+        .TextEngine
+        .insertCharacter(
+            event.key
+        );
+};
 
 
 
