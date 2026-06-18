@@ -9367,96 +9367,29 @@ function () {
 
 
 /* ==========================================================
-   C1 — CARET ENGINE
+   C1 — DOCUMENT RENDER
+   DOCUMENT RENDER ENGINE
    ========================================================== */
 
-CampusWord2007Simulateur.CaretEngine = {
+CampusWord2007Simulateur.DocumentRender = {
 
-    caretElement: null,
+    initialized: false,
 
     initialize() {
 
-        this.createCaret();
-    },
-
-    createCaret() {
-
-        const layer =
-            document.querySelector(
-                ".page-caret-layer"
-            );
-
         if (
-            !layer
+            this.initialized
         ) {
 
             return;
         }
 
-        const caret =
-            document.createElement(
-                "div"
-            );
-
-        caret.id =
-            "cw-caret";
-
-        caret.style.position =
-            "absolute";
-
-        caret.style.left =
-            CampusWord2007Simulateur
-                .state
-                .caret
-                .x + "px";
-
-        caret.style.top =
-            CampusWord2007Simulateur
-                .state
-                .caret
-                .y + "px";
-
-        caret.style.width =
-            CampusWord2007Simulateur
-                .Config
-                .get(
-                    "caret",
-                    "width"
-                ) + "px";
-
-        caret.style.height =
-            CampusWord2007Simulateur
-                .state
-                .caret
-                .height + "px";
-
-        caret.style.background =
-            "#000000";
-
-        caret.style.pointerEvents =
-            "none";
-
-        caret.style.display =
-            "block";
-
-        layer.appendChild(
-            caret
-        );
-
-        this.caretElement =
-            caret;
-
-        CampusWord2007Simulateur
-            .Registry
-            .registerDOM(
-                "caret",
-                caret
-            );
+        this.initialized = true;
 
         CampusWord2007Simulateur
             .state
             .input
-            .caretReady = true;
+            .renderReady = true;
     }
 };
 
@@ -9465,7 +9398,134 @@ CampusWord2007Simulateur.CaretEngine = {
 
 
 /* ==========================================================
-   C1.1 — CARET READY HOOK
+   C1.1 — ACTIVE PAGE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .DocumentRender
+    .getActivePage =
+function () {
+
+    return document.querySelector(
+        ".document-page[data-page-number='" +
+        CampusWord2007Simulateur
+            .state
+            .editor
+            .activePage +
+        "']"
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C1.2 — TEXT LAYER
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .DocumentRender
+    .getTextLayer =
+function () {
+
+    const page =
+        this.getActivePage();
+
+    if (!page) {
+
+        return null;
+    }
+
+    return page.querySelector(
+        ".page-text-layer"
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C1.3 — SELECTION LAYER
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .DocumentRender
+    .getSelectionLayer =
+function () {
+
+    const page =
+        this.getActivePage();
+
+    if (!page) {
+
+        return null;
+    }
+
+    return page.querySelector(
+        ".page-selection-layer"
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C1.4 — CARET LAYER
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .DocumentRender
+    .getCaretLayer =
+function () {
+
+    const page =
+        this.getActivePage();
+
+    if (!page) {
+
+        return null;
+    }
+
+    return page.querySelector(
+        ".page-caret-layer"
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C1.5 — OVERLAY LAYER
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .DocumentRender
+    .getOverlayLayer =
+function () {
+
+    const page =
+        this.getActivePage();
+
+    if (!page) {
+
+        return null;
+    }
+
+    return page.querySelector(
+        ".page-overlay-layer"
+    );
+};
+
+
+
+
+
+/* ==========================================================
+   C1.6 — DOCUMENT READY
    ========================================================== */
 
 CampusWord2007Simulateur
@@ -9475,15 +9535,8 @@ CampusWord2007Simulateur
 
         () => {
 
-            setTimeout(
-                () => {
-
-                    CampusWord2007Simulateur
-                        .CaretEngine
-                        .initialize();
-
-                },
-                1000
-            );
+            CampusWord2007Simulateur
+                .DocumentRender
+                .initialize();
         }
     );
