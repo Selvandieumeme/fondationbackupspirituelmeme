@@ -220,4 +220,226 @@ CampusWord2007Simulateur.CoreEngine.cacheDOM = function(){
 
 
 
+
+
+
+
+/* ==========================================================
+   DEVICE ENGINE
+   ========================================================== */
+
+CampusWord2007Simulateur.DeviceEngine.detectDevice =
+function(){
+
+    const deviceState =
+        CampusWord2007Simulateur.DeviceState;
+
+    const width =
+        window.innerWidth;
+
+    const height =
+        window.innerHeight;
+
+    const touchSupport =
+        (
+            "ontouchstart" in window
+            ||
+            navigator.maxTouchPoints > 0
+        );
+
+    deviceState.screenWidth =
+        width;
+
+    deviceState.screenHeight =
+        height;
+
+    deviceState.pixelRatio =
+        window.devicePixelRatio || 1;
+
+    deviceState.isTouch =
+        touchSupport;
+
+    deviceState.isMobile =
+        width <= 768;
+
+    deviceState.isTablet =
+        width > 768 &&
+        width <= 1024;
+
+    deviceState.isDesktop =
+        width > 1024;
+};
+
+CampusWord2007Simulateur.DeviceEngine.updateDevice =
+function(){
+
+    CampusWord2007Simulateur
+        .DeviceEngine
+        .detectDevice();
+};
+
+
+
+
+
+
+/* ==========================================================
+   LOADING ENGINE
+   ========================================================== */
+
+CampusWord2007Simulateur.LoadingEngine = {};
+
+CampusWord2007Simulateur.LoadingEngine.show =
+function(){
+
+    const DOM =
+        CampusWord2007Simulateur.DOM;
+
+    if(!DOM.loadingScreen){
+        return;
+    }
+
+    DOM.loadingScreen.style.display =
+        "flex";
+};
+
+CampusWord2007Simulateur.LoadingEngine.hide =
+function(){
+
+    const DOM =
+        CampusWord2007Simulateur.DOM;
+
+    const state =
+        CampusWord2007Simulateur.State;
+
+    if(!DOM.loadingScreen){
+        return;
+    }
+
+    DOM.loadingScreen.style.display =
+        "none";
+
+    state.loadingCompleted =
+        true;
+};
+
+CampusWord2007Simulateur.LoadingEngine.start =
+function(){
+
+    const duration =
+        CampusWord2007Simulateur
+        .Config
+        .LOADING_DURATION;
+
+    CampusWord2007Simulateur
+        .LoadingEngine
+        .show();
+
+    window.setTimeout(
+        function(){
+
+            CampusWord2007Simulateur
+                .LoadingEngine
+                .hide();
+
+        },
+        duration
+    );
+};
+
+
+
+
+
+
+
+
+/* ==========================================================
+   CORE INITIALIZATION
+   ========================================================== */
+
+CampusWord2007Simulateur.CoreEngine.initialize =
+function(){
+
+    const state =
+        CampusWord2007Simulateur.State;
+
+    if(state.initialized){
+        return;
+    }
+
+    CampusWord2007Simulateur
+        .CoreEngine
+        .cacheDOM();
+
+    CampusWord2007Simulateur
+        .DeviceEngine
+        .detectDevice();
+
+    CampusWord2007Simulateur
+        .LoadingEngine
+        .start();
+
+    state.initialized =
+        true;
+};
+
+
+
+
+
+
+
+
+
+
+/* ==========================================================
+   WINDOW EVENTS
+   ========================================================== */
+
+window.addEventListener(
+    "resize",
+    function(){
+
+        CampusWord2007Simulateur
+            .DeviceEngine
+            .updateDevice();
+
+    }
+);
+
+
+
+
+
+
+
+
+
+
+/* ==========================================================
+   APPLICATION STARTUP
+   ========================================================== */
+
+document.addEventListener(
+    "DOMContentLoaded",
+    function(){
+
+        CampusWord2007Simulateur
+            .CoreEngine
+            .initialize();
+
+    }
+);
+
+
+
+
+
+
+
+
+
+
+
        
