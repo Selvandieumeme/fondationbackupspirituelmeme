@@ -9343,69 +9343,34 @@ function () {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 /* ==========================================================
-   CREATE FIRST CARET
+   CARET TEST
    ========================================================== */
 
-CampusWord2007Simulateur.createCaret = function(){
+window.addEventListener(
+    "load",
+    function(){
 
-    const caretLayer =
-        document.querySelector(
-            '.page-caret-layer'
+        setTimeout(
+            function(){
+
+                const layer =
+                    document.querySelector(
+                        ".page-caret-layer"
+                    );
+
+                if(!layer){
+                    return;
+                }
+
+                layer.innerHTML +=
+                    '<div style="position:absolute;left:0;top:0;width:2px;height:20px;background:#000;"></div>';
+
+            },
+            1000
         );
-
-    if(!caretLayer) return;
-
-    const caret =
-        document.createElement('div');
-
-    caret.id = 'campusword-caret';
-
-    caret.style.position = 'absolute';
-
-    caret.style.left = '96px';
-
-    caret.style.top = '96px';
-
-    caret.style.width = '2px';
-
-    caret.style.height = '20px';
-
-    caret.style.backgroundColor = '#000000';
-
-    caret.style.pointerEvents = 'none';
-
-    caret.style.zIndex = '999999';
-
-    caretLayer.appendChild(caret);
-
-    CampusWord2007Simulateur.CaretState.element =
-        caret;
-};
-
-
-
-
-
-
-
-
+    }
+);
 
 
 
