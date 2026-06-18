@@ -404,6 +404,11 @@ CampusWord2007Simulateur
     .KeyboardEngine
     .initialize();
 
+
+CampusWord2007Simulateur
+    .MobileInputEngine
+    .initialize();
+
 state.initialized = true;
 
 };
@@ -2242,6 +2247,92 @@ function(){
 
 
 
+
+
+
+
+
+
+/* ==========================================================
+   BIND TOUCH EVENTS
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .MobileInputEngine
+    .bindTouchEvents =
+function(){
+
+    const DOM =
+
+        CampusWord2007Simulateur
+            .DOM;
+
+    if(
+        !DOM.documentViewport
+    ){
+        return;
+    }
+
+    DOM.documentViewport
+        .addEventListener(
+
+            "touchstart",
+
+            function(){
+
+                CampusWord2007Simulateur
+                    .MobileInputEngine
+                    .focusInput();
+
+            },
+
+            {
+                passive: true
+            }
+
+        );
+};
+
+
+
+
+
+
+
+
+
+
+/* ==========================================================
+   INITIALIZE MOBILE INPUT
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .MobileInputEngine
+    .initialize =
+function(){
+
+    const mobileState =
+
+        CampusWord2007Simulateur
+            .MobileInputState;
+
+    if(
+        mobileState.initialized
+    ){
+        return;
+    }
+
+    CampusWord2007Simulateur
+        .MobileInputEngine
+        .createHiddenInput();
+
+    CampusWord2007Simulateur
+        .MobileInputEngine
+        .bindTouchEvents();
+
+    mobileState.initialized =
+        true;
+};
 
 
 
