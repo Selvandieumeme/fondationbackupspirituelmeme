@@ -2330,12 +2330,74 @@ function(){
         .MobileInputEngine
         .bindTouchEvents();
 
+
+CampusWord2007Simulateur
+    .MobileInputEngine
+    .bindInputEvents();
     mobileState.initialized =
         true;
 };
 
 
 
+
+
+
+
+
+
+/* ==========================================================
+   BIND INPUT EVENTS
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .MobileInputEngine
+    .bindInputEvents =
+function(){
+
+    const input =
+
+        CampusWord2007Simulateur
+            .MobileInputState
+            .element;
+
+    if(!input){
+        return;
+    }
+
+    input.addEventListener(
+
+        "input",
+
+        function(){
+
+            const value =
+                input.value;
+
+            if(
+                value.length === 0
+            ){
+                return;
+            }
+
+            for(
+                const character
+                of value
+            ){
+
+                CampusWord2007Simulateur
+                    .TextEngine
+                    .insertCharacter(
+                        character
+                    );
+            }
+
+            input.value = "";
+
+        }
+
+    );
+};
 
 
 
