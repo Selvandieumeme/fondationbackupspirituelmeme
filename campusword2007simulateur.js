@@ -1487,6 +1487,12 @@ CampusWord2007Simulateur
     .processTextInput(
         event
     );
+
+CampusWord2007Simulateur
+    .KeyboardEngine
+    .processBackspace(
+        event
+    );
 };
 
 
@@ -1846,6 +1852,108 @@ function(event){
         .insertCharacter(
             event.key
         );
+};
+
+
+
+
+
+
+
+
+
+
+
+
+/* ==========================================================
+   PROCESS BACKSPACE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .KeyboardEngine
+    .processBackspace =
+function(event){
+
+    if(
+        event.key !==
+        "Backspace"
+    ){
+        return;
+    }
+
+    event.preventDefault();
+
+    CampusWord2007Simulateur
+        .TextEngine
+        .removeCharacter();
+};
+
+
+
+
+
+
+
+/* ==========================================================
+   GET TEXT CONTENT
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .TextEngine
+    .getContent =
+function(){
+
+    return
+
+        CampusWord2007Simulateur
+            .TextState
+            .content;
+};
+
+
+
+
+
+
+
+
+
+/* ==========================================================
+   GET CHARACTER COUNT
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .TextEngine
+    .getCharacterCount =
+function(){
+
+    return
+
+        CampusWord2007Simulateur
+            .TextState
+            .characterCount;
+};
+
+
+
+
+
+
+
+/* ==========================================================
+   GET WORD COUNT
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .TextEngine
+    .getWordCount =
+function(){
+
+    return
+
+        CampusWord2007Simulateur
+            .TextState
+            .wordCount;
 };
 
 
