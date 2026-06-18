@@ -9540,3 +9540,277 @@ CampusWord2007Simulateur
                 .initialize();
         }
     );
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* ==========================================================
+   C2 — CARET ENGINE
+   DOCUMENT CARET ENGINE
+   ========================================================== */
+
+CampusWord2007Simulateur.CaretEngine = {
+
+    initialized: false,
+
+    caretElement: null,
+
+    initialize() {
+
+        if (
+            this.initialized
+        ) {
+
+            return;
+        }
+
+        this.createCaret();
+
+        this.initialized = true;
+
+        CampusWord2007Simulateur
+            .state
+            .input
+            .caretReady = true;
+    }
+};
+
+
+
+
+
+/* ==========================================================
+   C2.1 — CREATE CARET
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .CaretEngine
+    .createCaret =
+function () {
+
+    const layer =
+        CampusWord2007Simulateur
+            .DocumentRender
+            .getCaretLayer();
+
+    if (
+        !layer
+    ) {
+
+        return null;
+    }
+
+    const caret =
+        document.createElement(
+            "div"
+        );
+
+    caret.id =
+        "cw-caret";
+
+    caret.style.position =
+        "absolute";
+
+    caret.style.left =
+        "0px";
+
+    caret.style.top =
+        "0px";
+
+    caret.style.width =
+        CampusWord2007Simulateur
+            .Config
+            .get(
+                "caret",
+                "width"
+            ) + "px";
+
+    caret.style.height =
+        CampusWord2007Simulateur
+            .Config
+            .get(
+                "caret",
+                "height"
+            ) + "px";
+
+    caret.style.background =
+        "#000000";
+
+    caret.style.pointerEvents =
+        "none";
+
+    caret.style.display =
+        "block";
+
+    layer.appendChild(
+        caret
+    );
+
+    this.caretElement =
+        caret;
+
+    return caret;
+};
+
+
+
+
+
+/* ==========================================================
+   C2.2 — GET CARET
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .CaretEngine
+    .getCaret =
+function () {
+
+    return this.caretElement;
+};
+
+
+
+
+
+/* ==========================================================
+   C2.3 — SHOW CARET
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .CaretEngine
+    .show =
+function () {
+
+    if (
+        !this.caretElement
+    ) {
+
+        return;
+    }
+
+    this.caretElement
+        .style
+        .display =
+            "block";
+
+    CampusWord2007Simulateur
+        .state
+        .caret
+        .visible = true;
+};
+
+
+
+
+
+/* ==========================================================
+   C2.4 — HIDE CARET
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .CaretEngine
+    .hide =
+function () {
+
+    if (
+        !this.caretElement
+    ) {
+
+        return;
+    }
+
+    this.caretElement
+        .style
+        .display =
+            "none";
+
+    CampusWord2007Simulateur
+        .state
+        .caret
+        .visible = false;
+};
+
+
+
+
+
+/* ==========================================================
+   C2.5 — POSITION CARET
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .CaretEngine
+    .setPosition =
+function (
+    x,
+    y
+) {
+
+    if (
+        !this.caretElement
+    ) {
+
+        return;
+    }
+
+    this.caretElement
+        .style
+        .left =
+            x + "px";
+
+    this.caretElement
+        .style
+        .top =
+            y + "px";
+
+    CampusWord2007Simulateur
+        .state
+        .caret
+        .x = x;
+
+    CampusWord2007Simulateur
+        .state
+        .caret
+        .y = y;
+};
+
+
+
+
+
+/* ==========================================================
+   C2.6 — CARET READY
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .EventBus
+    .on(
+        "application:ready",
+
+        () => {
+
+            setTimeout(
+
+                () => {
+
+                    CampusWord2007Simulateur
+                        .CaretEngine
+                        .initialize();
+
+                },
+
+                100
+            );
+        }
+    );
