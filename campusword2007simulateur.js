@@ -1685,6 +1685,12 @@ function(character){
     CampusWord2007Simulateur
         .TextEngine
         .updateWordCount();
+
+
+CampusWord2007Simulateur
+    .TextEngine
+    .renderText();
+
 };
 
 
