@@ -960,6 +960,25 @@ CampusWord2007Simulateur.KeyboardState = {
 
 
 
+/* ==========================================================
+   TEXT STATE
+   ========================================================== */
+
+CampusWord2007Simulateur.TextState = {
+
+    content: "",
+
+    characterCount: 0,
+
+    wordCount: 0
+
+};
+
+
+
+
+
+
 
 
 /* ==========================================================
@@ -1607,6 +1626,137 @@ function(){
     keyboardState.initialized =
         true;
 };
+
+
+
+
+
+
+
+
+
+
+/* ==========================================================
+   INSERT CHARACTER
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .TextEngine
+    .insertCharacter =
+function(character){
+
+    const textState =
+
+        CampusWord2007Simulateur
+            .TextState;
+
+    if(
+        typeof character !==
+        "string"
+    ){
+        return;
+    }
+
+    if(
+        character.length === 0
+    ){
+        return;
+    }
+
+    textState.content +=
+        character;
+
+    CampusWord2007Simulateur
+        .TextEngine
+        .updateCharacterCount();
+
+    CampusWord2007Simulateur
+        .TextEngine
+        .updateWordCount();
+};
+
+
+
+
+
+
+
+
+
+/* ==========================================================
+   UPDATE CHARACTER COUNT
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .TextEngine
+    .updateCharacterCount =
+function(){
+
+    const textState =
+
+        CampusWord2007Simulateur
+            .TextState;
+
+    textState.characterCount =
+
+        textState.content.length;
+
+    return textState.characterCount;
+};
+
+
+
+
+
+
+
+
+/* ==========================================================
+   UPDATE WORD COUNT
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .TextEngine
+    .updateWordCount =
+function(){
+
+    const textState =
+
+        CampusWord2007Simulateur
+            .TextState;
+
+    const content =
+
+        textState.content
+            .trim();
+
+    if(
+        content.length === 0
+    ){
+
+        textState.wordCount = 0;
+
+        return 0;
+    }
+
+    const words =
+
+        content.split(
+            /\s+/
+        );
+
+    textState.wordCount =
+        words.length;
+
+    return textState.wordCount;
+};
+
+
+
+
+
+
+
 
 
 
