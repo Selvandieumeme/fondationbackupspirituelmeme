@@ -2173,6 +2173,81 @@ function(){
 
 
 
+/* ==========================================================
+   FOCUS INPUT
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .MobileInputEngine
+    .focusInput =
+function(){
+
+    const mobileState =
+
+        CampusWord2007Simulateur
+            .MobileInputState;
+
+    const input =
+        mobileState.element;
+
+    if(!input){
+        return;
+    }
+
+    input.focus();
+
+    mobileState.focused =
+        true;
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* ==========================================================
+   BLUR INPUT
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .MobileInputEngine
+    .blurInput =
+function(){
+
+    const mobileState =
+
+        CampusWord2007Simulateur
+            .MobileInputState;
+
+    const input =
+        mobileState.element;
+
+    if(!input){
+        return;
+    }
+
+    input.blur();
+
+    mobileState.focused =
+        false;
+};
+
+
+
+
+
+
+
+
+
+
 
 
 
