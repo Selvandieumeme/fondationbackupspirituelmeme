@@ -2055,10 +2055,11 @@ function(){
 
 
 
+
+
 /* ==========================================================
    UPDATE CARET FROM TEXT
    ========================================================== */
-
 
 
 /* ==========================================================
@@ -2070,29 +2071,19 @@ CampusWord2007Simulateur
     .updateCaretPosition =
 function(){
 
-    const page =
+    const textState =
 
         CampusWord2007Simulateur
-            .PageEngine
-            .getPage(1);
+            .TextState;
 
-    if(!page){
-        return;
-    }
-
-    const textLayer =
-
-        page.querySelector(
-            ".page-text-layer"
-        );
-
-    if(!textLayer){
-        return;
-    }
+    const characterWidth =
+        8;
 
     const newX =
 
-        textLayer.scrollWidth;
+        textState.content.length
+        *
+        characterWidth;
 
     CampusWord2007Simulateur
         .CaretEngine
@@ -2101,6 +2092,9 @@ function(){
             0
         );
 };
+
+
+
 
 
 
