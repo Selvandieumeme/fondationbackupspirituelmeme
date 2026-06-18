@@ -18284,7 +18284,26 @@ function () {
 
 
 
+/* ==========================================================
+   E1.3.8 — CARET STARTUP PIPELINE
+   ========================================================== */
 
+CampusWord2007Simulateur
+    .EventBus
+    .on(
+        "application:ready",
+
+        () => {
+
+            CampusWord2007Simulateur
+                .CaretEngine
+                .initializeCaretRendering();
+
+            CampusWord2007Simulateur
+                .CaretEngine
+                .initializeCaretBlink();
+        }
+    );
 
 
 
