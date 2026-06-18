@@ -396,6 +396,10 @@ CampusWord2007Simulateur
     .RenderEngine
     .render();
 
+CampusWord2007Simulateur
+    .CaretEngine
+    .initialize();
+
 state.initialized = true;
 
 };
@@ -893,6 +897,328 @@ function(){
 
 
 
+
+
+
+
+
+/* ==========================================================
+   CARET STATE
+   ========================================================== */
+
+CampusWord2007Simulateur.CaretState = {
+
+    created: false,
+
+    visible: true,
+
+    x: 0,
+
+    y: 0,
+
+    width: 1,
+
+    height: 20,
+
+    element: null,
+
+    blinkInterval: null
+
+};
+
+
+
+
+
+
+
+/* ==========================================================
+   CREATE CARET
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .CaretEngine
+    .createCaret =
+function(){
+
+    const caretState =
+        CampusWord2007Simulateur
+            .CaretState;
+
+    if(
+        caretState.created
+    ){
+        return;
+    }
+
+    const page =
+
+        CampusWord2007Simulateur
+            .PageEngine
+            .getPage(1);
+
+    if(!page){
+        return;
+    }
+
+    const caretLayer =
+
+        page.querySelector(
+            ".page-caret-layer"
+        );
+
+    if(!caretLayer){
+        return;
+    }
+
+    const caret =
+
+        document.createElement(
+            "div"
+        );
+
+    caret.id =
+        "word-caret";
+
+    caret.style.position =
+        "absolute";
+
+    caret.style.left =
+        "0px";
+
+    caret.style.top =
+        "0px";
+
+    caret.style.width =
+        "1px";
+
+    caret.style.height =
+        "20px";
+
+    caret.style.background =
+        "#000000";
+
+    caret.style.pointerEvents =
+        "none";
+
+    caret.style.display =
+        "block";
+
+    caretLayer.appendChild(
+        caret
+    );
+
+    caretState.element =
+        caret;
+
+    caretState.created =
+        true;
+};
+
+
+
+
+
+
+
+
+/* ==========================================================
+   SHOW CARET
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .CaretEngine
+    .showCaret =
+function(){
+
+    const caret =
+
+        CampusWord2007Simulateur
+            .CaretState
+            .element;
+
+    if(!caret){
+        return;
+    }
+
+    caret.style.display =
+        "block";
+
+    CampusWord2007Simulateur
+        .CaretState
+        .visible = true;
+};
+
+
+
+
+
+
+
+/* ==========================================================
+   HIDE CARET
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .CaretEngine
+    .hideCaret =
+function(){
+
+    const caret =
+
+        CampusWord2007Simulateur
+            .CaretState
+            .element;
+
+    if(!caret){
+        return;
+    }
+
+    caret.style.display =
+        "none";
+
+    CampusWord2007Simulateur
+        .CaretState
+        .visible = false;
+};
+
+
+
+
+
+
+
+/* ==========================================================
+   MOVE CARET
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .CaretEngine
+    .moveCaret =
+function(
+    x,
+    y
+){
+
+    const caretState =
+
+        CampusWord2007Simulateur
+            .CaretState;
+
+    const caret =
+        caretState.element;
+
+    if(!caret){
+        return;
+    }
+
+    caretState.x = x;
+    caretState.y = y;
+
+    caret.style.left =
+        x + "px";
+
+    caret.style.top =
+        y + "px";
+};
+
+
+
+
+
+
+
+/* ==========================================================
+   BLINK CARET
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .CaretEngine
+    .blinkCaret =
+function(){
+
+    const caretState =
+
+        CampusWord2007Simulateur
+            .CaretState;
+
+    const caret =
+        caretState.element;
+
+    if(!caret){
+        return;
+    }
+
+    if(
+        caretState.blinkInterval
+    ){
+        clearInterval(
+            caretState.blinkInterval
+        );
+    }
+
+    caretState.blinkInterval =
+
+        window.setInterval(
+
+            function(){
+
+                if(
+                    caret.style.visibility
+                    ===
+                    "hidden"
+                ){
+
+                    caret.style.visibility =
+                        "visible";
+
+                }
+                else{
+
+                    caret.style.visibility =
+                        "hidden";
+                }
+
+            },
+
+            CampusWord2007Simulateur
+                .Config
+                .CARET_BLINK_INTERVAL
+
+        );
+};
+
+
+
+
+
+
+
+
+/* ==========================================================
+   INITIALIZE CARET
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .CaretEngine
+    .initialize =
+function(){
+
+    CampusWord2007Simulateur
+        .CaretEngine
+        .createCaret();
+
+    CampusWord2007Simulateur
+        .CaretEngine
+        .moveCaret(
+            0,
+            0
+        );
+
+    CampusWord2007Simulateur
+        .CaretEngine
+        .blinkCaret();
+};
 
 
 
