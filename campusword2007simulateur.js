@@ -400,6 +400,10 @@ CampusWord2007Simulateur
     .CaretEngine
     .initialize();
 
+CampusWord2007Simulateur
+    .KeyboardEngine
+    .initialize();
+
 state.initialized = true;
 
 };
@@ -933,6 +937,30 @@ CampusWord2007Simulateur.CaretState = {
 
 
 
+/* ==========================================================
+   KEYBOARD STATE
+   ========================================================== */
+
+CampusWord2007Simulateur.KeyboardState = {
+
+    initialized: false,
+
+    lastKeyDown: null,
+
+    lastKeyUp: null,
+
+    lastInputData: null,
+
+    isComposing: false
+
+};
+
+
+
+
+
+
+
 
 /* ==========================================================
    CREATE CARET
@@ -1403,6 +1431,185 @@ function(pageNumber){
     caretState.activePage =
         pageNumber;
 };
+
+
+
+
+
+
+
+
+
+/* ==========================================================
+   PHASE 5
+   KEYBOARD SYSTEM
+   KEYBOARD CAPTURE
+   ========================================================== */
+
+/* ==========================================================
+   KEYDOWN
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .KeyboardEngine
+    .handleKeyDown =
+function(event){
+
+    const keyboardState =
+
+        CampusWord2007Simulateur
+            .KeyboardState;
+
+    keyboardState.lastKeyDown =
+        event.key;
+};
+
+
+
+/* ==========================================================
+   KEYUP
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .KeyboardEngine
+    .handleKeyUp =
+function(event){
+
+    const keyboardState =
+
+        CampusWord2007Simulateur
+            .KeyboardState;
+
+    keyboardState.lastKeyUp =
+        event.key;
+};
+
+
+
+
+
+/* ==========================================================
+   BEFORE INPUT
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .KeyboardEngine
+    .handleBeforeInput =
+function(event){
+
+    const keyboardState =
+
+        CampusWord2007Simulateur
+            .KeyboardState;
+
+    keyboardState.lastInputData =
+        event.data || null;
+};
+
+
+
+
+
+/* ==========================================================
+   COMPOSITION START
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .KeyboardEngine
+    .handleCompositionStart =
+function(){
+
+    CampusWord2007Simulateur
+        .KeyboardState
+        .isComposing = true;
+};
+
+
+
+
+
+
+/* ==========================================================
+   COMPOSITION END
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .KeyboardEngine
+    .handleCompositionEnd =
+function(){
+
+    CampusWord2007Simulateur
+        .KeyboardState
+        .isComposing = false;
+};
+
+
+
+
+
+
+
+/* ==========================================================
+   INITIALIZE KEYBOARD
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .KeyboardEngine
+    .initialize =
+function(){
+
+    const keyboardState =
+
+        CampusWord2007Simulateur
+            .KeyboardState;
+
+    if(
+        keyboardState.initialized
+    ){
+        return;
+    }
+
+    document.addEventListener(
+        "keydown",
+        CampusWord2007Simulateur
+            .KeyboardEngine
+            .handleKeyDown
+    );
+
+    document.addEventListener(
+        "keyup",
+        CampusWord2007Simulateur
+            .KeyboardEngine
+            .handleKeyUp
+    );
+
+    document.addEventListener(
+        "beforeinput",
+        CampusWord2007Simulateur
+            .KeyboardEngine
+            .handleBeforeInput
+    );
+
+    document.addEventListener(
+        "compositionstart",
+        CampusWord2007Simulateur
+            .KeyboardEngine
+            .handleCompositionStart
+    );
+
+    document.addEventListener(
+        "compositionend",
+        CampusWord2007Simulateur
+            .KeyboardEngine
+            .handleCompositionEnd
+    );
+
+    keyboardState.initialized =
+        true;
+};
+
+
+
 
 
 
