@@ -10208,3 +10208,94 @@ CampusWord2007Simulateur
 
 
 
+
+
+
+
+
+/* ==========================================================
+   E1.4 — FORCE CARET POSITION
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .CaretEngine
+    .forceCaretVisible =
+function () {
+
+    const page =
+        CampusWord2007Simulateur
+            .PageManager
+            .getActivePage();
+
+    if (!page) {
+        return false;
+    }
+
+    const caret =
+        this.renderCaret(page);
+
+    if (!caret) {
+        return false;
+    }
+
+    caret.style.position =
+        "absolute";
+
+    caret.style.left =
+        "100px";
+
+    caret.style.top =
+        "100px";
+
+    caret.style.width =
+        "2px";
+
+    caret.style.height =
+        "20px";
+
+    caret.style.background =
+        "#000";
+
+    caret.style.display =
+        "block";
+
+    caret.style.visibility =
+        "visible";
+
+    caret.style.opacity =
+        "1";
+
+    caret.style.zIndex =
+        "999999";
+
+    return true;
+};
+
+
+
+/* ==========================================================
+   E1.4.1 — FORCE STARTUP
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .EventBus
+    .on(
+        "application:ready",
+
+        () => {
+
+            setTimeout(
+
+                () => {
+
+                    CampusWord2007Simulateur
+                        .CaretEngine
+                        .forceCaretVisible();
+
+                },
+
+                500
+            );
+        }
+    );
+
