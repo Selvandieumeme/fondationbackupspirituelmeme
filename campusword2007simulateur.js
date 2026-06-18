@@ -920,6 +920,8 @@ CampusWord2007Simulateur.CaretState = {
 
     height: 20,
 
+   activePage: 1,
+
     element: null,
 
     blinkInterval: null
@@ -1112,6 +1114,28 @@ function(
         return;
     }
 
+    const limits =
+
+        CampusWord2007Simulateur
+            .CaretEngine
+            .getWritableLimits();
+
+    x = Math.max(
+        limits.minX,
+        Math.min(
+            x,
+            limits.maxX
+        )
+    );
+
+    y = Math.max(
+        limits.minY,
+        Math.min(
+            y,
+            limits.maxY
+        )
+    );
+
     caretState.x = x;
     caretState.y = y;
 
@@ -1121,7 +1145,6 @@ function(
     caret.style.top =
         y + "px";
 };
-
 
 
 
@@ -1227,4 +1250,159 @@ function(){
 
 
 
+
+/* ==========================================================
+   GET WRITABLE LIMITS
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .CaretEngine
+    .getWritableLimits =
+function(){
+
+    const layoutState =
+
+        CampusWord2007Simulateur
+            .LayoutState;
+
+    return {
+
+        minX: 0,
+
+        minY: 0,
+
+        maxX:
+            layoutState.writableWidth,
+
+        maxY:
+            layoutState.writableHeight
+
+    };
+};
+
+
+
+
+
+
+
+
+
        
+/* ==========================================================
+   GET CARET POSITION
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .CaretEngine
+    .getPosition =
+function(){
+
+    return {
+
+        x:
+            CampusWord2007Simulateur
+                .CaretState
+                .x,
+
+        y:
+            CampusWord2007Simulateur
+                .CaretState
+                .y
+
+    };
+};
+
+
+
+
+
+
+
+
+
+/* ==========================================================
+   SET CARET HEIGHT
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .CaretEngine
+    .setHeight =
+function(height){
+
+    const caretState =
+
+        CampusWord2007Simulateur
+            .CaretState;
+
+    const caret =
+        caretState.element;
+
+    if(!caret){
+        return;
+    }
+
+    caretState.height =
+        height;
+
+    caret.style.height =
+        height + "px";
+};
+
+
+
+
+
+
+
+
+
+/* ==========================================================
+   SET ACTIVE PAGE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .CaretEngine
+    .setPage =
+function(pageNumber){
+
+    const page =
+
+        CampusWord2007Simulateur
+            .PageEngine
+            .getPage(pageNumber);
+
+    if(!page){
+        return;
+    }
+
+    const layer =
+
+        page.querySelector(
+            ".page-caret-layer"
+        );
+
+    if(!layer){
+        return;
+    }
+
+    const caretState =
+
+        CampusWord2007Simulateur
+            .CaretState;
+
+    if(
+        caretState.element
+    ){
+
+        layer.appendChild(
+            caretState.element
+        );
+    }
+
+    caretState.activePage =
+        pageNumber;
+};
+
+
+
