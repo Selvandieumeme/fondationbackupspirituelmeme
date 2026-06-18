@@ -1964,3 +1964,52 @@ function(){
 
 
 
+
+
+
+
+/* ==========================================================
+   TEXT ENGINE
+   RENDER TEXT
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .TextEngine
+    .renderText =
+function(){
+
+    const page =
+
+        CampusWord2007Simulateur
+            .PageEngine
+            .getPage(1);
+
+    if(!page){
+        return;
+    }
+
+    const textLayer =
+
+        page.querySelector(
+            ".page-text-layer"
+        );
+
+    if(!textLayer){
+        return;
+    }
+
+    textLayer.textContent =
+
+        CampusWord2007Simulateur
+            .TextState
+            .content;
+};
+
+
+
+
+
+
+
+
+
