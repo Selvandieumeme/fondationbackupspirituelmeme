@@ -1517,6 +1517,12 @@ CampusWord2007Simulateur
     .processBackspace(
         event
     );
+
+CampusWord2007Simulateur
+    .KeyboardEngine
+    .processEnter(
+        event
+    );
 };
 
 
@@ -1934,6 +1940,33 @@ function(event){
         .removeCharacter();
 };
 
+
+
+
+
+
+/* ==========================================================
+   PROCESS ENTER
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .KeyboardEngine
+    .processEnter =
+function(event){
+
+    if(
+        event.key !==
+        "Enter"
+    ){
+        return;
+    }
+
+    event.preventDefault();
+
+    CampusWord2007Simulateur
+        .TextEngine
+        .insertNewLine();
+};
 
 
 
@@ -2441,6 +2474,48 @@ function(){
 
     );
 };
+
+
+
+
+
+
+
+
+/* ==========================================================
+   INSERT NEW LINE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .TextEngine
+    .insertNewLine =
+function(){
+
+    const textState =
+
+        CampusWord2007Simulateur
+            .TextState;
+
+    textState.content += "\n";
+
+    CampusWord2007Simulateur
+        .TextEngine
+        .updateCharacterCount();
+
+    CampusWord2007Simulateur
+        .TextEngine
+        .updateWordCount();
+
+    CampusWord2007Simulateur
+        .TextEngine
+        .renderText();
+
+    CampusWord2007Simulateur
+        .TextEngine
+        .updateCaretPosition();
+};
+
+
 
 
 
