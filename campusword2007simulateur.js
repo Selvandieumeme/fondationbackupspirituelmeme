@@ -1480,6 +1480,34 @@ function(
         return;
     }
 
+    const activePage =
+
+        CampusWord2007Simulateur
+            .PageEngine
+            .getPage(
+                caretState.activePage
+            );
+
+    if(activePage){
+
+        const caretLayer =
+
+            activePage.querySelector(
+                ".page-caret-layer"
+            );
+
+        if(
+            caretLayer &&
+            caret.parentNode !==
+            caretLayer
+        ){
+
+            caretLayer.appendChild(
+                caret
+            );
+        }
+    }
+
     const limits =
 
         CampusWord2007Simulateur
@@ -1511,7 +1539,6 @@ function(
     caret.style.top =
         y + "px";
 };
-
 
 
 
