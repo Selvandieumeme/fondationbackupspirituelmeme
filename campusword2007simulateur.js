@@ -2060,13 +2060,9 @@ function(){
 
 
 
-
-
 /* ==========================================================
    UPDATE CARET FROM TEXT
    ========================================================== */
-
-
 
 CampusWord2007Simulateur
     .TextEngine
@@ -2074,6 +2070,7 @@ CampusWord2007Simulateur
 function(){
 
     const page =
+
         CampusWord2007Simulateur
             .PageEngine
             .getPage(1);
@@ -2083,6 +2080,7 @@ function(){
     }
 
     const textLayer =
+
         page.querySelector(
             ".page-text-layer"
         );
@@ -2091,48 +2089,14 @@ function(){
         return;
     }
 
-    let lastNode =
-        textLayer.lastChild;
-
-    if(!lastNode){
-        CampusWord2007Simulateur
-            .CaretEngine
-            .moveCaret(
-                0,
-                0
-            );
-
-        return;
-    }
-
-    while(
-        lastNode &&
-        lastNode.lastChild
-    ){
-        lastNode =
-            lastNode.lastChild;
-    }
-
     const range =
         document.createRange();
 
-    if(
-        lastNode.nodeType === 3
-    ){
+    range.selectNodeContents(
+        textLayer
+    );
 
-        range.setStart(
-            lastNode,
-            lastNode.textContent.length
-        );
-
-    }else{
-
-        range.selectNodeContents(
-            lastNode
-        );
-
-        range.collapse(false);
-    }
+    range.collapse(false);
 
     const rect =
         range.getBoundingClientRect();
@@ -2144,18 +2108,13 @@ function(){
         rect.right -
         layerRect.left;
 
-    const newY =
-        rect.bottom -
-        layerRect.top;
-
     CampusWord2007Simulateur
         .CaretEngine
         .moveCaret(
             newX,
-            newY
+            0
         );
 };
-
 
 
 
