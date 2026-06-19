@@ -717,6 +717,52 @@ function(){
 
 
 
+
+/* ==========================================================
+   PAGE ENGINE
+   CREATE NEXT PAGE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PageEngine
+    .createNextPage =
+function(){
+
+    const page =
+
+        CampusWord2007Simulateur
+            .PageEngine
+            .createPage();
+
+    if(!page){
+        return null;
+    }
+
+    CampusWord2007Simulateur
+        .PageContentState
+        .pageContents.push(
+            ""
+        );
+
+    CampusWord2007Simulateur
+        .StatusBarEngine
+        .updatePageDisplay();
+
+    return page;
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
 /* ==========================================================
    PAGE ENGINE
    GET PAGE
@@ -734,6 +780,43 @@ function(pageNumber){
         pageNumber - 1
     ] || null;
 };
+
+
+
+
+
+/* ==========================================================
+   GET LAST PAGE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PageEngine
+    .getLastPage =
+function(){
+
+    const pages =
+
+        CampusWord2007Simulateur
+            .DocumentState
+            .pages;
+
+    if(
+        pages.length === 0
+    ){
+        return null;
+    }
+
+    return pages[
+        pages.length - 1
+    ];
+};
+
+
+
+
+
+
+
 
 
 
@@ -2312,10 +2395,18 @@ CampusWord2007Simulateur
     .updateCaretPosition =
 function(){
 
-    const page =
-        CampusWord2007Simulateur
-            .PageEngine
-            .getPage(1);
+   
+
+const page =
+    CampusWord2007Simulateur
+        .PageEngine
+        .getPage(
+
+            CampusWord2007Simulateur
+                .CaretState
+                .activePage
+
+        );
 
     if(!page){
         return;
