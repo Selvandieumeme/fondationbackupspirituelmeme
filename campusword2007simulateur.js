@@ -2398,24 +2398,13 @@ CampusWord2007Simulateur
     .renderText =
 function(){
 
-    
-const textLayer =
+   
 
-        page.querySelector(
-            ".page-text-layer"
-        );
-
-    if(!textLayer){
-        return;
-    }
-
-    textLayer.textContent =
+const page =
 
         CampusWord2007Simulateur
-            .TextState
-            .content;
-
-
+            .PageEngine
+            .getPage(1);
 
 
 
