@@ -484,6 +484,116 @@ CampusWord2007Simulateur.DocumentState = {
 
 
 /* ==========================================================
+   PAGE CONTENT STATE
+   ========================================================== */
+
+CampusWord2007Simulateur.PageContentState = {
+
+    pageContents: []
+
+};
+
+
+
+
+
+
+/* ==========================================================
+   INITIALIZE PAGE CONTENT
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PageContentState
+    .pageContents[0] = "";
+
+
+
+
+
+
+
+/* ==========================================================
+   GET PAGE CONTENT
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PageContentState
+    .getPageContent =
+function(pageNumber){
+
+    return
+
+        CampusWord2007Simulateur
+            .PageContentState
+            .pageContents[
+                pageNumber - 1
+            ] || "";
+};
+
+
+
+
+
+
+/* ==========================================================
+   SET PAGE CONTENT
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PageContentState
+    .setPageContent =
+function(
+    pageNumber,
+    content
+){
+
+    CampusWord2007Simulateur
+        .PageContentState
+        .pageContents[
+            pageNumber - 1
+        ] = content;
+};
+
+
+
+
+
+
+
+
+
+/* ==========================================================
+   GET PAGE CONTENT COUNT
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PageContentState
+    .getPageCount =
+function(){
+
+    return
+
+        CampusWord2007Simulateur
+            .PageContentState
+            .pageContents
+            .length;
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* ==========================================================
    PAGE ENGINE
    CREATE PAGE
    ========================================================== */
