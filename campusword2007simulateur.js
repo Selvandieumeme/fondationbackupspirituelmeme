@@ -794,6 +794,36 @@ function(){
 
 
 
+
+/* ==========================================================
+   GET WRITABLE AREA
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .LayoutEngine
+    .getWritableArea =
+function(){
+
+    const layoutState =
+
+        CampusWord2007Simulateur
+            .LayoutState;
+
+    return {
+
+        width:
+            layoutState.writableWidth,
+
+        height:
+            layoutState.writableHeight
+
+    };
+};
+
+
+
+
+
 /* ==========================================================
    UPDATE PAGE LAYOUT
    ========================================================== */
