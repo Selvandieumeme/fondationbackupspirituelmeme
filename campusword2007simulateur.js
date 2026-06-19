@@ -2456,7 +2456,6 @@ const page =
 
         );
       
-    }
 
     const textLayer =
         page.querySelector(
