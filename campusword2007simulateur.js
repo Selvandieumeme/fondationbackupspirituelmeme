@@ -1980,11 +1980,6 @@ CampusWord2007Simulateur
     .insertCharacter =
 function(character){
 
-    const textState =
-
-        CampusWord2007Simulateur
-            .TextState;
-
     if(
         typeof character !==
         "string"
@@ -1998,7 +1993,31 @@ function(character){
         return;
     }
 
-    textState.content +=
+    const activePage =
+
+        CampusWord2007Simulateur
+            .CaretState
+            .activePage;
+
+    const currentContent =
+
+        CampusWord2007Simulateur
+            .PageContentState
+            .getPageContent(
+                activePage
+            );
+
+    CampusWord2007Simulateur
+        .PageContentState
+        .setPageContent(
+            activePage,
+            currentContent +
+            character
+        );
+
+    CampusWord2007Simulateur
+        .TextState
+        .content +=
         character;
 
     CampusWord2007Simulateur
@@ -2009,19 +2028,15 @@ function(character){
         .TextEngine
         .updateWordCount();
 
+    CampusWord2007Simulateur
+        .TextEngine
+        .renderText();
 
-CampusWord2007Simulateur
-    .TextEngine
-    .renderText();
-
-
-CampusWord2007Simulateur
-    .TextEngine
-    .updateCaretPosition();
+    CampusWord2007Simulateur
+        .TextEngine
+        .updateCaretPosition();
 
 };
-
-
 
 
 
