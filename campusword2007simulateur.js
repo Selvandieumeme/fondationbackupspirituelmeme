@@ -2089,33 +2089,67 @@ function(){
         return;
     }
 
-    const range =
-        document.createRange();
+    const caretElement =
+        CampusWord2007Simulateur
+            .CaretState
+            .element;
 
-    range.selectNodeContents(
-        textLayer
+    if(!caretElement){
+        return;
+    }
+
+    const text =
+        CampusWord2007Simulateur
+            .TextState
+            .content;
+
+    if(text.length === 0){
+
+        CampusWord2007Simulateur
+            .CaretEngine
+            .moveCaret(
+                0,
+                0
+            );
+
+        return;
+    }
+
+    const marker =
+        document.createElement(
+            "span"
+        );
+
+    marker.textContent =
+        "\u200B";
+
+    textLayer.appendChild(
+        marker
     );
 
-    range.collapse(false);
-
-    const rect =
-        range.getBoundingClientRect();
+    const markerRect =
+        marker.getBoundingClientRect();
 
     const layerRect =
         textLayer.getBoundingClientRect();
 
     const newX =
-        rect.right -
+        markerRect.left -
         layerRect.left;
+
+    const newY =
+        markerRect.top -
+        layerRect.top;
+
+    marker.remove();
 
     CampusWord2007Simulateur
         .CaretEngine
         .moveCaret(
             newX,
-            0
+            newY
         );
 };
-
 
 
 
