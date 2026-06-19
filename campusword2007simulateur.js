@@ -2070,6 +2070,9 @@ function(){
    UPDATE CARET FROM TEXT
    ========================================================== */
 
+
+
+
 CampusWord2007Simulateur
     .TextEngine
     .updateCaretPosition =
@@ -2095,19 +2098,32 @@ function(){
         return;
     }
 
-    const textWidth =
-        textLayer.scrollWidth;
+    const range =
+        document.createRange();
+
+    range.selectNodeContents(
+        textLayer
+    );
+
+    range.collapse(false);
+
+    const rect =
+        range.getBoundingClientRect();
+
+    const layerRect =
+        textLayer.getBoundingClientRect();
+
+    const newX =
+        rect.right -
+        layerRect.left;
 
     CampusWord2007Simulateur
         .CaretEngine
         .moveCaret(
-            textWidth,
+            newX,
             0
         );
 };
-
-
-
 
 
 
