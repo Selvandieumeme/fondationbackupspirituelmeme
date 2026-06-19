@@ -2455,12 +2455,6 @@ const page =
                 .activePage
 
         );
-
-   console.log(
-    "[CARET] page element:",
-    page
-    if(!page){
-        return;
       
     }
 
