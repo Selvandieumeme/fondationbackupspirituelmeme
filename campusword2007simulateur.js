@@ -586,6 +586,41 @@ function(){
 
 
 
+/* ==========================================================
+   GET ACTIVE PAGE NUMBER
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .DocumentEngine
+    .getActivePageNumber =
+function(){
+
+    const activePage =
+
+        CampusWord2007Simulateur
+            .DocumentState
+            .activePage;
+
+    if(!activePage){
+        return 1;
+    }
+
+    return Number(
+
+        activePage.getAttribute(
+            "data-page-number"
+        )
+
+    ) || 1;
+};
+
+
+
+
+
+
+
+
 
 
 
