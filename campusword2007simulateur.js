@@ -33,6 +33,8 @@ CampusWord2007Simulateur.StatusBarEngine = {};
 CampusWord2007Simulateur.RibbonEngine = {};
 CampusWord2007Simulateur.RenderEngine = {};
 CampusWord2007Simulateur.MobileInputEngine = {};
+CampusWord2007Simulateur.PaginationEngine = {};
+
 
 
 
@@ -408,7 +410,7 @@ CampusWord2007Simulateur
 CampusWord2007Simulateur
     .MobileInputEngine
     .initialize();
-
+   
 state.initialized = true;
 
 };
@@ -2032,6 +2034,10 @@ function(character){
         .TextEngine
         .renderText();
 
+   CampusWord2007Simulateur
+    .PaginationEngine
+    .createNextPageIfNeeded();
+
     CampusWord2007Simulateur
         .TextEngine
         .updateCaretPosition();
@@ -2830,6 +2836,130 @@ function(){
         .TextEngine
         .updateCaretPosition();
 };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* ==========================================================
+   PAGINATION ENGINE
+   CHECK PAGE OVERFLOW
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PaginationEngine
+    .isPageOverflow =
+function(pageNumber){
+
+    const page =
+
+        CampusWord2007Simulateur
+            .PageEngine
+            .getPage(
+                pageNumber
+            );
+
+    if(!page){
+        return false;
+    }
+
+    const textLayer =
+
+        page.querySelector(
+            ".page-text-layer"
+        );
+
+    if(!textLayer){
+        return false;
+    }
+
+    const writableHeight =
+
+        CampusWord2007Simulateur
+            .LayoutState
+            .writableHeight;
+
+    return (
+        textLayer.scrollHeight >
+        writableHeight
+    );
+};
+
+
+
+
+
+
+
+/* ==========================================================
+   PAGINATION ENGINE
+   CREATE NEXT PAGE IF NEEDED
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PaginationEngine
+    .createNextPageIfNeeded =
+function(){
+
+    const activePage =
+
+        CampusWord2007Simulateur
+            .CaretState
+            .activePage;
+
+    const overflow =
+
+        CampusWord2007Simulateur
+            .PaginationEngine
+            .isPageOverflow(
+                activePage
+            );
+
+    if(!overflow){
+        return;
+    }
+
+    const nextPageNumber =
+        activePage + 1;
+
+    let nextPage =
+
+        CampusWord2007Simulateur
+            .PageEngine
+            .getPage(
+                nextPageNumber
+            );
+
+    if(!nextPage){
+
+        nextPage =
+
+            CampusWord2007Simulateur
+                .PageEngine
+                .createNextPage();
+    }
+
+    CampusWord2007Simulateur
+        .CaretState
+        .activePage =
+        nextPageNumber;
+};
+
 
 
 
