@@ -2957,11 +2957,6 @@ function(){
    CampusWord2007Simulateur
     .PaginationEngine
     .moveCaretToNextPage();
-
-    CampusWord2007Simulateur
-        .CaretState
-        .activePage =
-        nextPageNumber;
 };
 
 
