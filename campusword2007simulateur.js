@@ -2414,7 +2414,7 @@ const textLayer =
         CampusWord2007Simulateur
             .TextState
             .content;
-};
+
 
 
 
