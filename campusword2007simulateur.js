@@ -2461,7 +2461,7 @@ const page =
     page
     if(!page){
         return;
-      );
+      
     }
 
     const textLayer =
