@@ -2976,11 +2976,20 @@ CampusWord2007Simulateur
     .moveCaretToNextPage =
 function(){
 
+    console.log(
+        "[PAGINATION] moveCaretToNextPage() called"
+    );
+
     const activePage =
 
         CampusWord2007Simulateur
             .CaretState
             .activePage;
+
+    console.log(
+        "[PAGINATION] active page:",
+        activePage
+    );
 
     const nextPageNumber =
         activePage + 1;
@@ -2993,7 +3002,18 @@ function(){
                 nextPageNumber
             );
 
+    console.log(
+        "[PAGINATION] next page:",
+        nextPageNumber,
+        nextPage
+    );
+
     if(!nextPage){
+
+        console.log(
+            "[PAGINATION] next page NOT FOUND"
+        );
+
         return;
     }
 
@@ -3002,10 +3022,21 @@ function(){
         .activePage =
         nextPageNumber;
 
+    console.log(
+        "[PAGINATION] activePage changed to:",
+        CampusWord2007Simulateur
+            .CaretState
+            .activePage
+    );
+
     CampusWord2007Simulateur
         .CaretEngine
         .moveCaret(
             0,
             0
         );
+
+    console.log(
+        "[PAGINATION] moveCaret(0,0) executed"
+    );
 };
