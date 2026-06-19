@@ -2398,11 +2398,29 @@ CampusWord2007Simulateur
     .renderText =
 function(){
 
-    const page =
+    
+const textLayer =
+
+        page.querySelector(
+            ".page-text-layer"
+        );
+
+    if(!textLayer){
+        return;
+    }
+
+    textLayer.textContent =
 
         CampusWord2007Simulateur
-            .PageEngine
-            .getPage(1);
+            .TextState
+            .content;
+};
+
+
+
+
+
+
 
     if(!page){
         return;
