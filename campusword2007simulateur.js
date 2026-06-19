@@ -2456,8 +2456,12 @@ const page =
 
         );
 
+   console.log(
+    "[CARET] page element:",
+    page
     if(!page){
         return;
+      );
     }
 
     const textLayer =
