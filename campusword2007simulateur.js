@@ -2954,6 +2954,10 @@ function(){
                 .createNextPage();
     }
 
+   CampusWord2007Simulateur
+    .PaginationEngine
+    .moveCaretToNextPage();
+
     CampusWord2007Simulateur
         .CaretState
         .activePage =
@@ -2967,3 +2971,46 @@ function(){
 
 
 
+/* ==========================================================
+   PAGINATION ENGINE
+   MOVE CARET TO NEXT PAGE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .PaginationEngine
+    .moveCaretToNextPage =
+function(){
+
+    const activePage =
+
+        CampusWord2007Simulateur
+            .CaretState
+            .activePage;
+
+    const nextPageNumber =
+        activePage + 1;
+
+    const nextPage =
+
+        CampusWord2007Simulateur
+            .PageEngine
+            .getPage(
+                nextPageNumber
+            );
+
+    if(!nextPage){
+        return;
+    }
+
+    CampusWord2007Simulateur
+        .CaretState
+        .activePage =
+        nextPageNumber;
+
+    CampusWord2007Simulateur
+        .CaretEngine
+        .moveCaret(
+            0,
+            0
+        );
+};
