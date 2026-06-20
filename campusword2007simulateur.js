@@ -2009,59 +2009,34 @@ CampusWord2007Simulateur
     .insertCharacter =
 function(character){
 
-    // SECURITY CHECK
-    if (typeof character !== "string") return;
-    if (character.length === 0) return;
-
-    const caretState =
-        CampusWord2007Simulateur.CaretState;
+    if (typeof character !== "string" || character.length === 0) {
+        return;
+    }
 
     const activePage =
-        caretState.activePage;
-
-    if (!activePage) return;
+        CampusWord2007Simulateur.CaretState.activePage;
 
     const PageContentState =
         CampusWord2007Simulateur.PageContentState;
 
-    // GET CURRENT PAGE CONTENT ONLY
-    let currentContent =
-        PageContentState.getPageContent(activePage);
+    const currentContent =
+        PageContentState.getPageContent(activePage) || "";
 
-    if (typeof currentContent !== "string") {
-        currentContent = "";
-    }
-
-    // UPDATE ONLY PAGE CONTENT (SOURCE OF TRUTH)
     const newContent =
         currentContent + character;
 
-    PageContentState.setPageContent(
-        activePage,
-        newContent
-    );
+    PageContentState.setPageContent(activePage, newContent);
 
-    // ❌ REMOVE CONFLICT: do NOT use TextState.content +=
-
-    // OPTIONAL SAFETY SYNC (NO LOGIC DEPENDENCY)
-    CampusWord2007Simulateur.TextState.characterCount =
-        newContent.length;
-
-    // UPDATE UI STATS
+    // update stats only (NO TextState.content dependency)
     CampusWord2007Simulateur.TextEngine.updateCharacterCount();
     CampusWord2007Simulateur.TextEngine.updateWordCount();
 
-    // RENDER ONLY FROM PAGE SYSTEM
     CampusWord2007Simulateur.TextEngine.renderText();
 
-    // PAGINATION CHECK
     CampusWord2007Simulateur.PaginationEngine.createNextPageIfNeeded();
 
-    // CARET UPDATE
     CampusWord2007Simulateur.TextEngine.updateCaretPosition();
 };
-
-
 
 
 
@@ -2169,65 +2144,29 @@ CampusWord2007Simulateur
     .removeCharacter =
 function(){
 
-    const textState =
-        CampusWord2007Simulateur.TextState;
-
-    const caretState =
-        CampusWord2007Simulateur.CaretState;
-
     const activePage =
-        caretState.activePage;
-
-    if (!activePage) return;
+        CampusWord2007Simulateur.CaretState.activePage;
 
     const PageContentState =
         CampusWord2007Simulateur.PageContentState;
 
-    // GET CURRENT PAGE CONTENT
-    let currentContent =
-        PageContentState.getPageContent(activePage);
+    let content =
+        PageContentState.getPageContent(activePage) || "";
 
-    if (typeof currentContent !== "string") {
-        currentContent = "";
-    }
-
-    // NOTHING TO DELETE
-    if (currentContent.length === 0) {
+    if (content.length === 0) {
         return;
     }
 
-    // REMOVE LAST CHARACTER ONLY FROM ACTIVE PAGE
     const newContent =
-        currentContent.slice(0, -1);
+        content.slice(0, -1);
 
-    PageContentState.setPageContent(
-        activePage,
-        newContent
-    );
+    PageContentState.setPageContent(activePage, newContent);
 
-    // ❌ REMOVE CONFLICT: do NOT modify TextState.content
+    CampusWord2007Simulateur.TextEngine.updateCharacterCount();
+    CampusWord2007Simulateur.TextEngine.updateWordCount();
 
-    // SAFE SYNC (only stats)
-    textState.characterCount =
-        newContent.length;
-
-    CampusWord2007Simulateur
-        .TextEngine
-        .updateCharacterCount();
-
-    CampusWord2007Simulateur
-        .TextEngine
-        .updateWordCount();
-
-    // RENDER ONLY PAGE SYSTEM
-    CampusWord2007Simulateur
-        .TextEngine
-        .renderText();
-
-    // CARET UPDATE
-    CampusWord2007Simulateur
-        .TextEngine
-        .updateCaretPosition();
+    CampusWord2007Simulateur.TextEngine.renderText();
+    CampusWord2007Simulateur.TextEngine.updateCaretPosition();
 };
 
 
@@ -2896,62 +2835,29 @@ CampusWord2007Simulateur
     .insertNewLine =
 function(){
 
-    const textState =
-        CampusWord2007Simulateur.TextState;
-
-    const caretState =
-        CampusWord2007Simulateur.CaretState;
-
     const activePage =
-        caretState.activePage;
-
-    if (!activePage) return;
+        CampusWord2007Simulateur.CaretState.activePage;
 
     const PageContentState =
         CampusWord2007Simulateur.PageContentState;
 
-    // GET CURRENT PAGE CONTENT
-    let currentContent =
-        PageContentState.getPageContent(activePage);
+    const currentContent =
+        PageContentState.getPageContent(activePage) || "";
 
-    if (typeof currentContent !== "string") {
-        currentContent = "";
-    }
-
-    // ADD NEW LINE ONLY TO ACTIVE PAGE
     const newContent =
         currentContent + "\n";
 
-    PageContentState.setPageContent(
-        activePage,
-        newContent
-    );
+    PageContentState.setPageContent(activePage, newContent);
 
-    // ❌ REMOVE CONFLICT: do NOT modify TextState.content
+    CampusWord2007Simulateur.TextEngine.updateCharacterCount();
+    CampusWord2007Simulateur.TextEngine.updateWordCount();
 
-    // SAFE STATS SYNC ONLY
-    textState.characterCount =
-        newContent.length;
+    CampusWord2007Simulateur.TextEngine.renderText();
 
-    CampusWord2007Simulateur
-        .TextEngine.updateCharacterCount();
+    CampusWord2007Simulateur.TextEngine.updateCaretPosition();
 
-    CampusWord2007Simulateur
-        .TextEngine.updateWordCount();
-
-    // RENDER FROM PAGE SYSTEM ONLY
-    CampusWord2007Simulateur
-        .TextEngine.renderText();
-
-    // UPDATE CARET POSITION
-    CampusWord2007Simulateur
-        .TextEngine.updateCaretPosition();
-
-    // PAGINATION CHECK (IMPORTANT FOR ENTER KEY)
-    CampusWord2007Simulateur
-        .PaginationEngine.createNextPageIfNeeded();
+    CampusWord2007Simulateur.PaginationEngine.createNextPageIfNeeded();
 };
-
 
 
 
