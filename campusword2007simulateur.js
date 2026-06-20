@@ -2922,7 +2922,7 @@ function(pageNumber){
 
 
 
-/* ==========================================================
+ /* ==========================================================
    PAGINATION ENGINE
    CREATE NEXT PAGE IF NEEDED
    ========================================================== */
@@ -2933,13 +2933,11 @@ CampusWord2007Simulateur
 function(){
 
     const activePage =
-
         CampusWord2007Simulateur
             .CaretState
             .activePage;
 
     const overflow =
-
         CampusWord2007Simulateur
             .PaginationEngine
             .isPageOverflow(
@@ -2954,7 +2952,6 @@ function(){
         activePage + 1;
 
     let nextPage =
-
         CampusWord2007Simulateur
             .PageEngine
             .getPage(
@@ -2964,17 +2961,28 @@ function(){
     if(!nextPage){
 
         nextPage =
-
             CampusWord2007Simulateur
                 .PageEngine
                 .createNextPage();
     }
 
-   CampusWord2007Simulateur
-    .PaginationEngine
-    .moveCaretToNextPage();
-};
+    // 🔥 FIX IMPORTANT: UPDATE CARET STATE
+    CampusWord2007Simulateur.CaretState.activePage =
+        nextPageNumber;
 
+    // 🔥 FIX IMPORTANT: ATTACH CARET TO NEW PAGE LAYER
+    CampusWord2007Simulateur
+        .CaretEngine
+        .setPage(nextPageNumber);
+
+    // 🔥 FIX IMPORTANT: RESET CARET POSITION
+    CampusWord2007Simulateur
+        .CaretEngine
+        .moveCaret(
+            0,
+            0
+        );
+};
 
 
 
