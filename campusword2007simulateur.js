@@ -2074,19 +2074,30 @@ CampusWord2007Simulateur
     .updateCharacterCount =
 function(){
 
-    const textState =
+    const PageContentState =
+        CampusWord2007Simulateur.PageContentState;
 
-        CampusWord2007Simulateur
-            .TextState;
+    const caretState =
+        CampusWord2007Simulateur.CaretState;
+
+    const activePage =
+        caretState.activePage;
+
+    let content =
+        PageContentState.getPageContent(activePage);
+
+    if (typeof content !== "string") {
+        content = "";
+    }
+
+    const textState =
+        CampusWord2007Simulateur.TextState;
 
     textState.characterCount =
-
-        textState.content.length;
+        content.length;
 
     return textState.characterCount;
 };
-
-
 
 
 
@@ -2102,19 +2113,29 @@ CampusWord2007Simulateur
     .updateWordCount =
 function(){
 
+    const PageContentState =
+        CampusWord2007Simulateur.PageContentState;
+
+    const caretState =
+        CampusWord2007Simulateur.CaretState;
+
+    const activePage =
+        caretState.activePage;
+
+    let content =
+        PageContentState.getPageContent(activePage);
+
+    if (typeof content !== "string") {
+        content = "";
+    }
+
+    const trimmed =
+        content.trim();
+
     const textState =
+        CampusWord2007Simulateur.TextState;
 
-        CampusWord2007Simulateur
-            .TextState;
-
-    const content =
-
-        textState.content
-            .trim();
-
-    if(
-        content.length === 0
-    ){
+    if (trimmed.length === 0) {
 
         textState.wordCount = 0;
 
@@ -2122,10 +2143,7 @@ function(){
     }
 
     const words =
-
-        content.split(
-            /\s+/
-        );
+        trimmed.split(/\s+/);
 
     textState.wordCount =
         words.length;
@@ -2266,8 +2284,8 @@ function(event){
 
 
 
-/* ==========================================================
-   PROCESS BACKSPACE
+ /* ==========================================================
+   PROCESS BACKSPACE (CLEAN & SAFE)
    ========================================================== */
 
 CampusWord2007Simulateur
@@ -2275,20 +2293,34 @@ CampusWord2007Simulateur
     .processBackspace =
 function(event){
 
-    if(
-        event.key !==
-        "Backspace"
+    if (
+        event.key !== "Backspace"
+    ){
+        return;
+    }
+
+    // SAFETY: ignore if composing text (IME support)
+    if (
+        CampusWord2007Simulateur.KeyboardState &&
+        CampusWord2007Simulateur.KeyboardState.isComposing
     ){
         return;
     }
 
     event.preventDefault();
 
+    // SAFETY: ensure TextEngine exists
+    if (
+        !CampusWord2007Simulateur.TextEngine ||
+        !CampusWord2007Simulateur.TextEngine.removeCharacter
+    ){
+        return;
+    }
+
     CampusWord2007Simulateur
         .TextEngine
         .removeCharacter();
 };
-
 
 
 
