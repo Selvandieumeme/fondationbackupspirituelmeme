@@ -2143,7 +2143,7 @@ function(){
 
 
 /* ==========================================================
-   REMOVE CHARACTER
+   REMOVE CHARACTER (CLEAN MULTI-PAGE SYSTEM)
    ========================================================== */
 
 CampusWord2007Simulateur
@@ -2152,24 +2152,46 @@ CampusWord2007Simulateur
 function(){
 
     const textState =
+        CampusWord2007Simulateur.TextState;
 
-        CampusWord2007Simulateur
-            .TextState;
+    const caretState =
+        CampusWord2007Simulateur.CaretState;
 
-    if(
-        textState.content.length
-        ===
-        0
-    ){
+    const activePage =
+        caretState.activePage;
+
+    if (!activePage) return;
+
+    const PageContentState =
+        CampusWord2007Simulateur.PageContentState;
+
+    // GET CURRENT PAGE CONTENT
+    let currentContent =
+        PageContentState.getPageContent(activePage);
+
+    if (typeof currentContent !== "string") {
+        currentContent = "";
+    }
+
+    // NOTHING TO DELETE
+    if (currentContent.length === 0) {
         return;
     }
 
-    textState.content =
+    // REMOVE LAST CHARACTER ONLY FROM ACTIVE PAGE
+    const newContent =
+        currentContent.slice(0, -1);
 
-        textState.content.slice(
-            0,
-            -1
-        );
+    PageContentState.setPageContent(
+        activePage,
+        newContent
+    );
+
+    // ❌ REMOVE CONFLICT: do NOT modify TextState.content
+
+    // SAFE SYNC (only stats)
+    textState.characterCount =
+        newContent.length;
 
     CampusWord2007Simulateur
         .TextEngine
@@ -2179,18 +2201,16 @@ function(){
         .TextEngine
         .updateWordCount();
 
+    // RENDER ONLY PAGE SYSTEM
+    CampusWord2007Simulateur
+        .TextEngine
+        .renderText();
 
-CampusWord2007Simulateur
-    .TextEngine
-    .renderText();
-
-CampusWord2007Simulateur
-    .TextEngine
-    .updateCaretPosition();
-
-
+    // CARET UPDATE
+    CampusWord2007Simulateur
+        .TextEngine
+        .updateCaretPosition();
 };
-
 
 
 
@@ -2836,7 +2856,7 @@ function(){
 
 
 /* ==========================================================
-   INSERT NEW LINE
+   INSERT NEW LINE (CLEAN MULTI-PAGE SYSTEM)
    ========================================================== */
 
 CampusWord2007Simulateur
@@ -2845,27 +2865,59 @@ CampusWord2007Simulateur
 function(){
 
     const textState =
+        CampusWord2007Simulateur.TextState;
 
-        CampusWord2007Simulateur
-            .TextState;
+    const caretState =
+        CampusWord2007Simulateur.CaretState;
 
-    textState.content += "\n";
+    const activePage =
+        caretState.activePage;
+
+    if (!activePage) return;
+
+    const PageContentState =
+        CampusWord2007Simulateur.PageContentState;
+
+    // GET CURRENT PAGE CONTENT
+    let currentContent =
+        PageContentState.getPageContent(activePage);
+
+    if (typeof currentContent !== "string") {
+        currentContent = "";
+    }
+
+    // ADD NEW LINE ONLY TO ACTIVE PAGE
+    const newContent =
+        currentContent + "\n";
+
+    PageContentState.setPageContent(
+        activePage,
+        newContent
+    );
+
+    // ❌ REMOVE CONFLICT: do NOT modify TextState.content
+
+    // SAFE STATS SYNC ONLY
+    textState.characterCount =
+        newContent.length;
 
     CampusWord2007Simulateur
-        .TextEngine
-        .updateCharacterCount();
+        .TextEngine.updateCharacterCount();
 
     CampusWord2007Simulateur
-        .TextEngine
-        .updateWordCount();
+        .TextEngine.updateWordCount();
 
+    // RENDER FROM PAGE SYSTEM ONLY
     CampusWord2007Simulateur
-        .TextEngine
-        .renderText();
+        .TextEngine.renderText();
 
+    // UPDATE CARET POSITION
     CampusWord2007Simulateur
-        .TextEngine
-        .updateCaretPosition();
+        .TextEngine.updateCaretPosition();
+
+    // PAGINATION CHECK (IMPORTANT FOR ENTER KEY)
+    CampusWord2007Simulateur
+        .PaginationEngine.createNextPageIfNeeded();
 };
 
 
