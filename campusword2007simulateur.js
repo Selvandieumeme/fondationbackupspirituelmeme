@@ -1839,6 +1839,13 @@ CampusWord2007Simulateur
     .KeyboardEngine
     .processEnter(
         event
+ 
+    );
+
+   CampusWord2007Simulateur
+    .KeyboardEngine
+    .processArrowKeys(
+        event
     );
 };
 
