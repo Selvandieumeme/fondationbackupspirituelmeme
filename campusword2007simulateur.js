@@ -2997,7 +2997,6 @@ function(){
     );
 
     const activePage =
-
         CampusWord2007Simulateur
             .CaretState
             .activePage;
@@ -3011,7 +3010,6 @@ function(){
         activePage + 1;
 
     const nextPage =
-
         CampusWord2007Simulateur
             .PageEngine
             .getPage(
@@ -3033,9 +3031,8 @@ function(){
         return;
     }
 
-    CampusWord2007Simulateur
-        .CaretState
-        .activePage =
+    // 🔥 FIX 1: UPDATE STATE
+    CampusWord2007Simulateur.CaretState.activePage =
         nextPageNumber;
 
     console.log(
@@ -3045,6 +3042,12 @@ function(){
             .activePage
     );
 
+    // 🔥 FIX 2: ATTACH CARET TO NEW PAGE LAYER (IMPORTANT)
+    CampusWord2007Simulateur
+        .CaretEngine
+        .setPage(nextPageNumber);
+
+    // 🔥 FIX 3: RESET POSITION ON NEW PAGE
     CampusWord2007Simulateur
         .CaretEngine
         .moveCaret(
