@@ -2001,7 +2001,7 @@ function(){
 
 
 /* ==========================================================
-   INSERT CHARACTER
+   INSERT CHARACTER (CLEAN MULTI-PAGE SYSTEM)
    ========================================================== */
 
 CampusWord2007Simulateur
@@ -2009,69 +2009,57 @@ CampusWord2007Simulateur
     .insertCharacter =
 function(character){
 
-    if(
-        typeof character !==
-        "string"
-    ){
-        return;
-    }
+    // SECURITY CHECK
+    if (typeof character !== "string") return;
+    if (character.length === 0) return;
 
-    if(
-        character.length === 0
-    ){
-        return;
-    }
+    const caretState =
+        CampusWord2007Simulateur.CaretState;
 
     const activePage =
+        caretState.activePage;
 
-        CampusWord2007Simulateur
-            .CaretState
-            .activePage;
+    if (!activePage) return;
 
-    const currentContent =
+    const PageContentState =
+        CampusWord2007Simulateur.PageContentState;
 
-        CampusWord2007Simulateur
-            .PageContentState
-            .getPageContent(
-                activePage
-            );
+    // GET CURRENT PAGE CONTENT ONLY
+    let currentContent =
+        PageContentState.getPageContent(activePage);
 
-    CampusWord2007Simulateur
-        .PageContentState
-        .setPageContent(
-            activePage,
-            currentContent +
-            character
-        );
+    if (typeof currentContent !== "string") {
+        currentContent = "";
+    }
 
-    CampusWord2007Simulateur
-        .TextState
-        .content +=
-        character;
+    // UPDATE ONLY PAGE CONTENT (SOURCE OF TRUTH)
+    const newContent =
+        currentContent + character;
 
-    CampusWord2007Simulateur
-        .TextEngine
-        .updateCharacterCount();
+    PageContentState.setPageContent(
+        activePage,
+        newContent
+    );
 
-    CampusWord2007Simulateur
-        .TextEngine
-        .updateWordCount();
+    // ❌ REMOVE CONFLICT: do NOT use TextState.content +=
 
-    CampusWord2007Simulateur
-        .TextEngine
-        .renderText();
+    // OPTIONAL SAFETY SYNC (NO LOGIC DEPENDENCY)
+    CampusWord2007Simulateur.TextState.characterCount =
+        newContent.length;
 
-   CampusWord2007Simulateur
-    .PaginationEngine
-    .createNextPageIfNeeded();
+    // UPDATE UI STATS
+    CampusWord2007Simulateur.TextEngine.updateCharacterCount();
+    CampusWord2007Simulateur.TextEngine.updateWordCount();
 
-    CampusWord2007Simulateur
-        .TextEngine
-        .updateCaretPosition();
+    // RENDER ONLY FROM PAGE SYSTEM
+    CampusWord2007Simulateur.TextEngine.renderText();
 
+    // PAGINATION CHECK
+    CampusWord2007Simulateur.PaginationEngine.createNextPageIfNeeded();
+
+    // CARET UPDATE
+    CampusWord2007Simulateur.TextEngine.updateCaretPosition();
 };
-
-
 
 
 
