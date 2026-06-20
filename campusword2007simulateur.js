@@ -528,7 +528,6 @@ function(pageNumber){
 
     return CampusWord2007Simulateur.PageContentState.pageContents[pageNumber - 1] || "";
 
-};
 
 
 
