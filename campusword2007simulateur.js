@@ -523,15 +523,12 @@ CampusWord2007Simulateur
     .getPageContent =
 function(pageNumber){
 
- return
-
-    CampusWord2007Simulateur
+ return CampusWord2007Simulateur
         .PageContentState
         .pageContents[
             pageNumber - 1
         ] || "";
-
-   };
+};
 
 
 
