@@ -2398,40 +2398,52 @@ CampusWord2007Simulateur
     .renderText =
 function(){
 
-   
-
-const page =
+    const pageCount =
 
         CampusWord2007Simulateur
             .PageEngine
-            .getPage(1);
+            .getPageCount();
 
+    for(
+        let pageNumber = 1;
+        pageNumber <= pageCount;
+        pageNumber++
+    ){
 
+        const page =
 
+            CampusWord2007Simulateur
+                .PageEngine
+                .getPage(
+                    pageNumber
+                );
 
+        if(!page){
+            continue;
+        }
 
+        const textLayer =
 
-    if(!page){
-        return;
+            page.querySelector(
+                ".page-text-layer"
+            );
+
+        if(!textLayer){
+            continue;
+        }
+
+        const pageContent =
+
+            CampusWord2007Simulateur
+                .PageContentState
+                .getPageContent(
+                    pageNumber
+                ) || "";
+
+        textLayer.textContent =
+            pageContent;
     }
-
-    const textLayer =
-
-        page.querySelector(
-            ".page-text-layer"
-        );
-
-    if(!textLayer){
-        return;
-    }
-
-    textLayer.textContent =
-
-        CampusWord2007Simulateur
-            .TextState
-            .content;
 };
-
 
 
 
