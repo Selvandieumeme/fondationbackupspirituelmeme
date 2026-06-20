@@ -2404,7 +2404,13 @@ const page =
 
         CampusWord2007Simulateur
             .PageEngine
-            .getPage(1);
+            .getPage(
+
+                CampusWord2007Simulateur
+                    .CaretState
+                    .activePage
+
+            );
 
 
 
