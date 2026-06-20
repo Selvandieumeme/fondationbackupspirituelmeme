@@ -2289,6 +2289,81 @@ function(event){
 
 
 /* ==========================================================
+   PROCESS ARROW KEYS
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .KeyboardEngine
+    .processArrowKeys =
+function(event){
+
+    const caretState =
+        CampusWord2007Simulateur
+            .CaretState;
+
+    switch(event.key){
+
+        case "ArrowLeft":
+
+            event.preventDefault();
+
+            CampusWord2007Simulateur
+                .CaretEngine
+                .moveCaret(
+                    caretState.x - 10,
+                    caretState.y
+                );
+
+            break;
+
+        case "ArrowRight":
+
+            event.preventDefault();
+
+            CampusWord2007Simulateur
+                .CaretEngine
+                .moveCaret(
+                    caretState.x + 10,
+                    caretState.y
+                );
+
+            break;
+
+        case "ArrowUp":
+
+            event.preventDefault();
+
+            CampusWord2007Simulateur
+                .CaretEngine
+                .moveCaret(
+                    caretState.x,
+                    caretState.y - 20
+                );
+
+            break;
+
+        case "ArrowDown":
+
+            event.preventDefault();
+
+            CampusWord2007Simulateur
+                .CaretEngine
+                .moveCaret(
+                    caretState.x,
+                    caretState.y + 20
+                );
+
+            break;
+    }
+};
+
+
+
+
+
+
+
+/* ==========================================================
    GET TEXT CONTENT
    ========================================================== */
 
