@@ -412,6 +412,10 @@ function(){
         .CoreEngine
         .cacheDOM();
 
+CampusWord2007Simulateur
+    .WindowEngine
+    .initialize();
+
     CampusWord2007Simulateur
         .DeviceEngine
         .detectDevice();
@@ -448,12 +452,6 @@ CampusWord2007Simulateur
 CampusWord2007Simulateur
     .MobileInputEngine
     .initialize();
-
-
-CampusWord2007Simulateur
-    .WindowEngine
-    .initialize();
-
    
 state.initialized = true;
 
