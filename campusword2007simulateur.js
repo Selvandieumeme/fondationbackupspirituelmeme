@@ -3415,3 +3415,30 @@ function(){
             state.maximized ? "❐" : "□";
     }
 };
+
+
+
+
+
+
+
+
+
+
+/* ==========================================================
+   WINDOW ENGINE
+   CLOSE WINDOW
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .WindowEngine
+    .closeWindow =
+function(){
+
+    window.location.href =
+        "https://fondationbackupspirituel.com/campusloginnumeriques";
+};
+
+
+
+
