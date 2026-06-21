@@ -419,6 +419,18 @@ CampusWord2007Simulateur
     .WindowEngine
     .initialize();
 
+
+    DOM.officeButton =
+        document.getElementById(
+            "office-button"
+        );
+
+    DOM.officeMenu =
+        document.getElementById(
+            "office-menu"
+        );
+
+
     CampusWord2007Simulateur
         .DeviceEngine
         .detectDevice();
