@@ -3325,3 +3325,58 @@ function(){
         "[PAGINATION] moveCaret(0,0) executed"
     );
 };
+
+
+
+
+
+
+
+
+
+
+/* ==========================================================
+   WINDOW ENGINE
+   TOGGLE MAXIMIZE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .WindowEngine
+    .toggleMaximize =
+function(){
+
+    const state =
+        CampusWord2007Simulateur
+            .WindowState;
+
+    const app =
+        CampusWord2007Simulateur
+            .DOM
+            .wordApp;
+
+    if(!app){
+        return;
+    }
+
+    if(!state.maximized){
+
+        app.classList.add(
+            "window-maximized"
+        );
+
+        state.maximized =
+            true;
+    }
+    else{
+
+        app.classList.remove(
+            "window-maximized"
+        );
+
+        state.maximized =
+            false;
+    }
+};
+
+
+
