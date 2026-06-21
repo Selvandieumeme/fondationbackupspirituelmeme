@@ -2932,24 +2932,26 @@ function(){
     }
 
     if(
-        DOM.windowMaximize
-    ){
+    DOM.windowClose
+){
 
-        DOM.windowMaximize
-            .addEventListener(
+    DOM.windowClose
+        .addEventListener(
 
-                "click",
+            "click",
 
-                function(){
+            function(){
 
-                    CampusWord2007Simulateur
-                        .WindowEngine
-                        .toggleMaximize();
+                CampusWord2007Simulateur
+                    .WindowEngine
+                    .closeWindow();
 
-                }
+            }
 
-            );
-    }
+        );
+}
+
+                
 
     if(
         DOM.windowClose
