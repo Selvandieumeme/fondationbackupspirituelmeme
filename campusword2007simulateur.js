@@ -679,9 +679,7 @@ CampusWord2007Simulateur
     .getPageCount =
 function(){
 
-    return
-
-        CampusWord2007Simulateur
+    return CampusWord2007Simulateur
             .PageContentState
             .pageContents
             .length;
@@ -2490,9 +2488,7 @@ CampusWord2007Simulateur
     .getContent =
 function(){
 
-    return
-
-        CampusWord2007Simulateur
+    return  CampusWord2007Simulateur
             .TextState
             .content;
 };
@@ -2514,9 +2510,7 @@ CampusWord2007Simulateur
     .getCharacterCount =
 function(){
 
-    return
-
-        CampusWord2007Simulateur
+    return CampusWord2007Simulateur
             .TextState
             .characterCount;
 };
