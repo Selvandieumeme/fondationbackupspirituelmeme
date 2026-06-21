@@ -35,7 +35,7 @@ CampusWord2007Simulateur.RenderEngine = {};
 CampusWord2007Simulateur.MobileInputEngine = {};
 CampusWord2007Simulateur.PaginationEngine = {};
 
-
+CampusWord2007Simulateur.WindowEngine = {};
 
 
 
