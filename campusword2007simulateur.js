@@ -3356,6 +3356,16 @@ function(){
         return;
     }
 
+    // 🔥 SAFE INIT (pa kraze si state pa egziste)
+    if(!state){
+        CampusWord2007Simulateur.WindowState = {};
+    }
+
+    // 🔥 INITIALIZE FLAG SI LI MANKE
+    if(typeof state.maximized === "undefined"){
+        state.maximized = false;
+    }
+
     if(!state.maximized){
 
         app.classList.add(
@@ -3374,7 +3384,17 @@ function(){
         state.maximized =
             false;
     }
+
+    // 🔥 UPDATE ICON (SÈLMAN SA MWEN AJOUTE)
+    if(
+        CampusWord2007Simulateur
+            .DOM
+            .windowMaximize
+    ){
+        CampusWord2007Simulateur
+            .DOM
+            .windowMaximize
+            .innerText =
+                state.maximized ? "❐" : "□";
+    }
 };
-
-
-
