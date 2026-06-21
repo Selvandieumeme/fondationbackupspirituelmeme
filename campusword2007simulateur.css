@@ -2600,66 +2600,49 @@ button:focus-visible{
 
 
 /* =======================================================
-   OFFICE MENU
+   OFFICE MENU (FIXED & CONSISTENT)
    ======================================================= */
 
 #office-button-area{
-
-    position:relative;
+    position: relative;
 }
 
 #office-menu{
+    position: absolute;
+    top: 48px;
+    left: 0;
+    width: 220px;
 
-    position:absolute;
+    display: none;
+    flex-direction: column;
 
-    top:48px;
+    padding: 6px;
+    border: 1px solid #b6b6b6;
+    background: #ffffff;
 
-    left:0;
+    box-shadow: 0 4px 12px rgba(0,0,0,.25);
 
-    width:220px;
-
-    display:none;
-
-    flex-direction:column;
-
-    padding:6px;
-
-    border:1px solid #b6b6b6;
-
-    background:#ffffff;
-
-    box-shadow:
-        0 4px 12px
-        rgba(0,0,0,.25);
-
-    z-index:10000;
+    z-index: 10000;
 }
 
+/* ✅ JS toggle "visible" match CSS now */
 #office-menu.visible{
-
-    display:flex;
+    display: flex;
 }
 
 .office-menu-item{
+    width: 100%;
+    border: none;
+    cursor: pointer;
+    text-align: left;
 
-    width:100%;
-
-    border:none;
-
-    cursor:pointer;
-
-    text-align:left;
-
-    padding:8px 12px;
-
-    background:#ffffff;
-
-    font-size:13px;
+    padding: 8px 12px;
+    background: #ffffff;
+    font-size: 13px;
 }
 
 .office-menu-item:hover{
-
-    background:#e7f0fc;
+    background: #e7f0fc;
 }
 
 
