@@ -2858,6 +2858,85 @@ function(){
 
 
 
+/* ==========================================================
+   WINDOW ENGINE
+   BIND EVENTS
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .WindowEngine
+    .bindEvents =
+function(){
+
+    const DOM =
+        CampusWord2007Simulateur.DOM;
+
+    if(
+        DOM.windowMinimize
+    ){
+
+        DOM.windowMinimize
+            .addEventListener(
+
+                "click",
+
+                function(){
+
+                    console.log(
+                        "[WINDOW] Minimize clicked"
+                    );
+
+                }
+
+            );
+    }
+
+    if(
+        DOM.windowMaximize
+    ){
+
+        DOM.windowMaximize
+            .addEventListener(
+
+                "click",
+
+                function(){
+
+                    console.log(
+                        "[WINDOW] Maximize clicked"
+                    );
+
+                }
+
+            );
+    }
+
+    if(
+        DOM.windowClose
+    ){
+
+        DOM.windowClose
+            .addEventListener(
+
+                "click",
+
+                function(){
+
+                    console.log(
+                        "[WINDOW] Close clicked"
+                    );
+
+                }
+
+            );
+    }
+};
+
+
+
+
+
+
 
 
 /* ==========================================================
