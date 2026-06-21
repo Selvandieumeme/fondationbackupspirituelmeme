@@ -2897,7 +2897,6 @@ function(){
 
 
 
-
 /* ==========================================================
    WINDOW ENGINE
    BIND EVENTS
@@ -2932,26 +2931,24 @@ function(){
     }
 
     if(
-    DOM.windowClose
-){
+        DOM.windowMaximize
+    ){
 
-    DOM.windowClose
-        .addEventListener(
+        DOM.windowMaximize
+            .addEventListener(
 
-            "click",
+                "click",
 
-            function(){
+                function(){
 
-                CampusWord2007Simulateur
-                    .WindowEngine
-                    .closeWindow();
+                    CampusWord2007Simulateur
+                        .WindowEngine
+                        .toggleMaximize();
 
-            }
+                }
 
-        );
-}
-
-                
+            );
+    }
 
     if(
         DOM.windowClose
@@ -2964,9 +2961,9 @@ function(){
 
                 function(){
 
-                    console.log(
-                        "[WINDOW] Close clicked"
-                    );
+                    CampusWord2007Simulateur
+                        .WindowEngine
+                        .closeWindow();
 
                 }
 
