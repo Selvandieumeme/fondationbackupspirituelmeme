@@ -3332,8 +3332,7 @@ function(){
 
 
 
-
-/* ==========================================================
+ /* ==========================================================
    WINDOW ENGINE
    TOGGLE MAXIMIZE
    ========================================================== */
@@ -3347,54 +3346,69 @@ function(){
         CampusWord2007Simulateur
             .WindowState;
 
+    const DOM =
+        CampusWord2007Simulateur.DOM;
+
     const app =
-        CampusWord2007Simulateur
-            .DOM
-            .wordApp;
+        DOM.wordApp;
 
     if(!app){
         return;
     }
 
-    // 🔥 SAFE INIT (pa kraze si state pa egziste)
+    // 🔥 SAFE INIT (pa kraze state system la)
     if(!state){
-        CampusWord2007Simulateur.WindowState = {};
+        CampusWord2007Simulateur.WindowState = {
+            maximized: false
+        };
     }
 
-    // 🔥 INITIALIZE FLAG SI LI MANKE
-    if(typeof state.maximized === "undefined"){
+    // 🔥 ENSURE BOOLEAN SAFE VALUE
+    if(typeof state.maximized !== "boolean"){
         state.maximized = false;
     }
 
+    // 🔥 MAXIMIZE ACTION
     if(!state.maximized){
 
-        app.classList.add(
-            "window-maximized"
-        );
+        // save original style (safe restore future-proof)
+        state.previousStyle = {
+            width: app.style.width,
+            height: app.style.height,
+            top: app.style.top,
+            left: app.style.left,
+            position: app.style.position,
+            transform: app.style.transform
+        };
 
-        state.maximized =
-            true;
+        app.classList.add("window-maximized");
+
+        state.maximized = true;
     }
+
+    // 🔥 RESTORE ACTION
     else{
 
-        app.classList.remove(
-            "window-maximized"
-        );
+        app.classList.remove("window-maximized");
 
-        state.maximized =
-            false;
+        // restore previous inline styles if exist
+        if(state.previousStyle){
+
+            app.style.width = state.previousStyle.width || "";
+            app.style.height = state.previousStyle.height || "";
+            app.style.top = state.previousStyle.top || "";
+            app.style.left = state.previousStyle.left || "";
+            app.style.position = state.previousStyle.position || "";
+            app.style.transform = state.previousStyle.transform || "";
+        }
+
+        state.maximized = false;
     }
 
-    // 🔥 UPDATE ICON (SÈLMAN SA MWEN AJOUTE)
-    if(
-        CampusWord2007Simulateur
-            .DOM
-            .windowMaximize
-    ){
-        CampusWord2007Simulateur
-            .DOM
-            .windowMaximize
-            .innerText =
-                state.maximized ? "❐" : "□";
+    // 🔥 ICON UPDATE (SAFE DOM CHECK)
+    if(DOM.windowMaximize){
+
+        DOM.windowMaximize.innerText =
+            state.maximized ? "❐" : "□";
     }
 };
