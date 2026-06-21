@@ -150,6 +150,44 @@ CampusWord2007Simulateur.DOM = {};
 
 
 
+
+
+/* ==========================================================
+   WINDOW DOM CACHE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .WindowEngine
+    .cacheDOM =
+function(){
+
+    const DOM =
+        CampusWord2007Simulateur.DOM;
+
+    DOM.windowMinimize =
+        document.getElementById(
+            "window-minimize"
+        );
+
+    DOM.windowMaximize =
+        document.getElementById(
+            "window-maximize"
+        );
+
+    DOM.windowClose =
+        document.getElementById(
+            "window-close"
+        );
+};
+
+
+
+
+
+
+
+
+
 /* ==========================================================
    DOM INITIALIZATION
    ========================================================== */
