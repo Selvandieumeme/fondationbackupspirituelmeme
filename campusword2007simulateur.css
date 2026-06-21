@@ -2525,6 +2525,49 @@ button:focus-visible{
     outline:none;
 }
 
+
+
+
+
+
+
+
+
+
+
+/* ==========================================================
+   WINDOW MAXIMIZED STATE
+   ========================================================== */
+
+.window-maximized{
+
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+
+    width: 100% !important;
+    height: 100% !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+
+    border-radius: 0 !important;
+
+    transform: none !important;
+
+    z-index: 9999 !important;
+}
+
+
 /* =======================================================
    END OF CAMPUS WORD 2007 CSS
    ======================================================= */
+
+
+
+
+
+
+
+
+
