@@ -3441,3 +3441,51 @@ function(){
 
 
 
+
+
+
+
+/* ==========================================================
+   WINDOW ENGINE
+   TOGGLE MINIMIZE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .WindowEngine
+    .toggleMinimize =
+function(){
+
+    const state =
+        CampusWord2007Simulateur
+            .WindowState;
+
+    const app =
+        CampusWord2007Simulateur
+            .DOM
+            .wordApp;
+
+    if(!app){
+        return;
+    }
+
+    if(typeof state.minimized === "undefined"){
+        state.minimized = false;
+    }
+
+    if(!state.minimized){
+
+        app.classList.add(
+            "window-minimized"
+        );
+
+        state.minimized = true;
+    }
+    else{
+
+        app.classList.remove(
+            "window-minimized"
+        );
+
+        state.minimized = false;
+    }
+};
