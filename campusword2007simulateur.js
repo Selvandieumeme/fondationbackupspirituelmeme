@@ -2980,6 +2980,29 @@ function(){
 
             );
     }
+
+
+
+    if(
+        DOM.officeButton
+    ){
+
+        DOM.officeButton
+            .addEventListener(
+
+                "click",
+
+                function(){
+
+                    CampusWord2007Simulateur
+                        .toggleOfficeMenu();
+
+                }
+
+            );
+    }
+
+
 };
 
 
