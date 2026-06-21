@@ -2598,50 +2598,76 @@ button:focus-visible{
 
 
 
-
 /* =======================================================
    OFFICE MENU (FIXED & CONSISTENT)
    ======================================================= */
 
 #office-button-area{
+
     position: relative;
+
+    z-index: 10001;
 }
 
 #office-menu{
+
     position: absolute;
+
     top: 48px;
+
     left: 0;
+
     width: 220px;
 
     display: none;
+
     flex-direction: column;
 
     padding: 6px;
+
     border: 1px solid #b6b6b6;
+
     background: #ffffff;
 
-    box-shadow: 0 4px 12px rgba(0,0,0,.25);
+    box-shadow:
+        0 4px 12px
+        rgba(0,0,0,.25);
 
-    z-index: 10000;
+    z-index: 99999;
 }
 
-/* ✅ JS toggle "visible" match CSS now */
+/* =======================================================
+   MENU OPEN STATE
+   ======================================================= */
+
 #office-menu.visible{
-    display: flex;
+
+    display: flex !important;
 }
+
+/* =======================================================
+   MENU ITEMS
+   ======================================================= */
 
 .office-menu-item{
+
     width: 100%;
+
     border: none;
+
     cursor: pointer;
+
     text-align: left;
 
     padding: 8px 12px;
+
     background: #ffffff;
+
     font-size: 13px;
 }
 
 .office-menu-item:hover{
+
     background: #e7f0fc;
 }
 
