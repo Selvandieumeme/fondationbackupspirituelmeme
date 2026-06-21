@@ -150,8 +150,6 @@ CampusWord2007Simulateur.DOM = {};
 
 
 
-
-
 /* ==========================================================
    WINDOW DOM CACHE
    ========================================================== */
@@ -163,6 +161,11 @@ function(){
 
     const DOM =
         CampusWord2007Simulateur.DOM;
+
+    DOM.wordApp =
+        document.getElementById(
+            "word-app"
+        );
 
     DOM.windowMinimize =
         document.getElementById(
