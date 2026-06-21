@@ -2911,24 +2911,24 @@ function(){
         CampusWord2007Simulateur.DOM;
 
     if(
-        DOM.windowMinimize
-    ){
+    DOM.windowMinimize
+){
 
-        DOM.windowMinimize
-            .addEventListener(
+    DOM.windowMinimize
+        .addEventListener(
 
-                "click",
+            "click",
 
-                function(){
+            function(){
 
-                    console.log(
-                        "[WINDOW] Minimize clicked"
-                    );
+                CampusWord2007Simulateur
+                    .WindowEngine
+                    .toggleMinimize();
 
-                }
+            }
 
-            );
-    }
+        );
+}
 
     if(
         DOM.windowMaximize
