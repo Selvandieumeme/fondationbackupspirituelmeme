@@ -3535,7 +3535,6 @@ function(){
 
 
 
-
 /* ==========================================================
    OFFICE MENU TOGGLE
    ========================================================== */
@@ -3544,16 +3543,37 @@ CampusWord2007Simulateur
     .toggleOfficeMenu =
 function(){
 
+    console.log(
+        "[OFFICE] Bouton Office klike"
+    );
+
     const menu =
         CampusWord2007Simulateur
             .DOM
             .officeMenu;
 
+    console.log(
+        "[OFFICE] Menu jwenn:",
+        menu
+    );
+
     if(!menu){
+
+        console.log(
+            "[OFFICE] officeMenu = NULL"
+        );
+
         return;
     }
 
     menu.classList.toggle(
         "open"
+    );
+
+    console.log(
+        "[OFFICE] Klas open:",
+        menu.classList.contains(
+            "open"
+        )
     );
 };
