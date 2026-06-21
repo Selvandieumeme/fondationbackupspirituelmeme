@@ -448,10 +448,48 @@ CampusWord2007Simulateur
 CampusWord2007Simulateur
     .MobileInputEngine
     .initialize();
+
+
+CampusWord2007Simulateur
+    .WindowEngine
+    .initialize();
+
    
 state.initialized = true;
 
 };
+
+
+
+
+
+
+
+
+
+
+/* ==========================================================
+   WINDOW ENGINE
+   INITIALIZE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .WindowEngine
+    .initialize =
+function(){
+
+    CampusWord2007Simulateur
+        .WindowEngine
+        .cacheDOM();
+
+    CampusWord2007Simulateur
+        .WindowEngine
+        .bindEvents();
+};
+
+
+
+
 
 
 
