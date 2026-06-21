@@ -2555,6 +2555,29 @@ button:focus-visible{
 
 
 
+.window-maximized #workspace{
+    height: calc(100% - var(--title-height));
+}
+
+.window-maximized #document-scroll-area{
+    height: 100%;
+}
+
+.window-maximized .document-page{
+    transform: scale(1) !important;
+}
+
+
+
+
+
+.window-maximized #document-viewport{
+    height: 100%;
+}
+
+
+
+
 
 /* =======================================================
    END OF CAMPUS WORD 2007 CSS
