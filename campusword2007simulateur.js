@@ -3489,3 +3489,37 @@ function(){
         state.minimized = false;
     }
 };
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* ==========================================================
+   OFFICE MENU TOGGLE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .toggleOfficeMenu =
+function(){
+
+    const menu =
+        CampusWord2007Simulateur
+            .DOM
+            .officeMenu;
+
+    if(!menu){
+        return;
+    }
+
+    menu.classList.toggle(
+        "open"
+    );
+};
