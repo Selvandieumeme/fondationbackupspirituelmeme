@@ -2579,15 +2579,19 @@ button:focus-visible{
 
 
 
+
+
+.window-minimized #top-application-area,
+.window-minimized #ribbon-tabs,
+.window-minimized #ribbon-container,
+.window-minimized #workspace,
+.window-minimized #status-bar,
+.window-minimized #zoom-control{
+
+    display:none !important;
+}
+
+
 /* =======================================================
    END OF CAMPUS WORD 2007 CSS
    ======================================================= */
-
-
-
-
-
-
-
-
-
