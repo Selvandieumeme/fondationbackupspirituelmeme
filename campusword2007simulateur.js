@@ -2894,6 +2894,7 @@ function(){
 
 
 
+
 /* ==========================================================
    WINDOW ENGINE
    BIND EVENTS
@@ -2938,9 +2939,9 @@ function(){
 
                 function(){
 
-                    console.log(
-                        "[WINDOW] Maximize clicked"
-                    );
+                    CampusWord2007Simulateur
+                        .WindowEngine
+                        .toggleMaximize();
 
                 }
 
@@ -2967,9 +2968,6 @@ function(){
             );
     }
 };
-
-
-
 
 
 
