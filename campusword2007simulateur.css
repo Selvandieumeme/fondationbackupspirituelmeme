@@ -2913,6 +2913,114 @@ button:focus-visible{
 }
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+/* =======================================================
+   INSERT TAB
+   ======================================================= */
+
+#insert-tab{
+
+    display:none;
+
+    align-items:flex-start;
+
+    gap:12px;
+
+    padding:8px;
+
+    background:#f3f3f3;
+
+    overflow-x:auto;
+}
+
+/* =======================================================
+   INSERT GROUPS
+   ======================================================= */
+
+#insert-tab .ribbon-group{
+
+    display:flex;
+
+    flex-direction:column;
+
+    gap:4px;
+
+    min-width:120px;
+
+    padding:0 10px;
+
+    border-right:1px solid #c8c8c8;
+}
+
+#insert-tab .ribbon-group:last-child{
+
+    border-right:none;
+}
+
+/* =======================================================
+   INSERT TITLES
+   ======================================================= */
+
+#insert-tab .group-title{
+
+    text-align:center;
+
+    font-size:11px;
+
+    color:#666666;
+
+    margin-top:4px;
+
+    border-top:1px solid #dddddd;
+
+    padding-top:4px;
+}
+
+/* =======================================================
+   INSERT BUTTONS
+   ======================================================= */
+
+#insert-tab .ribbon-btn{
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:flex-start;
+
+    gap:6px;
+
+    min-height:28px;
+
+    padding:5px 8px;
+
+    border:1px solid transparent;
+
+    background:#ffffff;
+
+    cursor:pointer;
+
+    font-size:12px;
+}
+
+#insert-tab .ribbon-btn:hover{
+
+    background:#e6f0ff;
+
+    border-color:#9fc5ff;
+}
+
 /* =======================================================
    END OF CAMPUS WORD 2007 CSS
    ======================================================= */
