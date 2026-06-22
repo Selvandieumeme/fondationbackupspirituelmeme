@@ -3311,6 +3311,27 @@ button:focus-visible{
     white-space: nowrap;
 }
 
+
+
+
+
+
+
+
+
+
+
+
+
+/* smooth scroll like Office ribbon */
+#page-layout-tab::-webkit-scrollbar {
+    height: 6px;
+}
+
+#page-layout-tab::-webkit-scrollbar-thumb {
+    background: #b6c6d6;
+    border-radius: 10px;
+}
 /* =======================================================
    END OF CAMPUS WORD 2007 CSS
    ======================================================= */
