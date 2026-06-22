@@ -3691,7 +3691,19 @@ CampusWord2007Simulateur
 
 
 
+
+
+
+
+
+
+
+
+
+
 function showTab(tabName){
+
+    // kache tout tab yo
 
     document.getElementById(
         "home-tab"
@@ -3713,7 +3725,100 @@ function showTab(tabName){
         "references-tab"
     ).style.display = "none";
 
+    // montre tab yo klike a
+
     document.getElementById(
         tabName
     ).style.display = "flex";
 }
+
+// HOME
+
+document
+.getElementById(
+    "tab-home"
+)
+.addEventListener(
+    "click",
+    function(){
+
+        showTab(
+            "home-tab"
+        );
+
+    }
+);
+
+// INSERT
+
+document
+.getElementById(
+    "tab-insert"
+)
+.addEventListener(
+    "click",
+    function(){
+
+        showTab(
+            "insert-tab"
+        );
+
+    }
+);
+
+// FORMAT
+
+document
+.getElementById(
+    "tab-format"
+)
+.addEventListener(
+    "click",
+    function(){
+
+        showTab(
+            "format-tab"
+        );
+
+    }
+);
+
+// PAGE LAYOUT
+
+document
+.getElementById(
+    "tab-page-layout"
+)
+.addEventListener(
+    "click",
+    function(){
+
+        showTab(
+            "page-layout-tab"
+        );
+
+    }
+);
+
+// REFERENCES
+
+document
+.getElementById(
+    "tab-references"
+)
+.addEventListener(
+    "click",
+    function(){
+
+        showTab(
+            "references-tab"
+        );
+
+    }
+);
+
+// OUVRI HOME PA DEFO
+
+showTab(
+    "home-tab"
+);
