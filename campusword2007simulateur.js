@@ -467,6 +467,11 @@ CampusWord2007Simulateur
     .MobileInputEngine
     .initialize();
    
+
+CampusWord2007Simulateur
+    .RibbonTabsEngine
+    .initialize();
+
 state.initialized = true;
 
 };
@@ -3570,4 +3575,104 @@ function(){
             "open"
         )
     );
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* ==========================================================
+   RIBBON TAB SWITCHER
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .RibbonTabsEngine = {
+
+    initialize : function(){
+
+        const homeTabButton =
+            document.getElementById(
+                "tab-home"
+            );
+
+        const insertTabButton =
+            document.getElementById(
+                "tab-insert"
+            );
+
+        const homeTab =
+            document.getElementById(
+                "home-tab"
+            );
+
+        const insertTab =
+            document.getElementById(
+                "insert-tab"
+            );
+
+        if(
+            homeTab
+        ){
+            homeTab.style.display =
+                "flex";
+        }
+
+        if(
+            insertTab
+        ){
+            insertTab.style.display =
+                "none";
+        }
+
+        if(
+            homeTabButton
+        ){
+
+            homeTabButton
+            .addEventListener(
+                "click",
+                function(){
+
+                    homeTab.style.display =
+                        "flex";
+
+                    insertTab.style.display =
+                        "none";
+
+                }
+            );
+
+        }
+
+        if(
+            insertTabButton
+        ){
+
+            insertTabButton
+            .addEventListener(
+                "click",
+                function(){
+
+                    homeTab.style.display =
+                        "none";
+
+                    insertTab.style.display =
+                        "flex";
+
+                }
+            );
+
+        }
+
+    }
+
 };
