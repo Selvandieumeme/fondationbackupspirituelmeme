@@ -2598,6 +2598,11 @@ button:focus-visible{
 
 
 
+
+
+
+
+
 /* =======================================================
    OFFICE MENU (FIXED & CONSISTENT)
    ======================================================= */
@@ -2640,7 +2645,7 @@ button:focus-visible{
    MENU OPEN STATE
    ======================================================= */
 
-#office-menu.visible{
+#office-menu.open{
 
     display: flex !important;
 }
@@ -2670,7 +2675,6 @@ button:focus-visible{
 
     background: #e7f0fc;
 }
-
 
 /* =======================================================
    END OF CAMPUS WORD 2007 CSS
