@@ -3707,3 +3707,15 @@ document.getElementById("tab-insert").addEventListener("click", function(){
 document.getElementById("tab-format").addEventListener("click", function(){
     showTab("format-tab");
 });
+
+
+
+
+
+
+
+
+
+document.getElementById("tab-page-layout").addEventListener("click", function(){
+    showTab("page-layout-tab");
+});
