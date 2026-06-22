@@ -2687,46 +2687,209 @@ button:focus-visible{
 
 
 
-
+/* =======================================================
+   HOME TAB
+   ======================================================= */
 
 #home-tab{
+
     display:flex;
-    gap:10px;
+
+    align-items:flex-start;
+
+    gap:12px;
+
     padding:8px;
+
     background:#f3f3f3;
+
+    overflow-x:auto;
 }
+
+/* =======================================================
+   GROUPS
+   ======================================================= */
 
 #home-tab .ribbon-group{
+
+    display:flex;
+
+    flex-direction:column;
+
+    gap:4px;
+
+    min-width:120px;
+
     padding:0 10px;
-    border-right:1px solid #ccc;
+
+    border-right:1px solid #c8c8c8;
 }
+
+#home-tab .ribbon-group:last-child{
+
+    border-right:none;
+}
+
+/* =======================================================
+   GROUP TITLES
+   ======================================================= */
 
 #home-tab .group-title{
+
+    text-align:center;
+
     font-size:11px;
-    color:#666;
-    margin-bottom:6px;
+
+    color:#666666;
+
+    margin-top:4px;
+
+    border-top:1px solid #dddddd;
+
+    padding-top:4px;
 }
 
+/* =======================================================
+   BUTTONS
+   ======================================================= */
+
 #home-tab .ribbon-btn{
+
     display:flex;
+
     align-items:center;
+
+    justify-content:flex-start;
+
     gap:6px;
+
+    min-height:28px;
+
     padding:5px 8px;
-    border:none;
-    background:white;
+
+    border:1px solid transparent;
+
+    background:#ffffff;
+
     cursor:pointer;
+
     font-size:12px;
 }
 
 #home-tab .ribbon-btn:hover{
+
     background:#e6f0ff;
+
+    border-color:#9fc5ff;
 }
 
-#home-tab .icon{
-    width:16px;
-    height:16px;
-    fill:black;
+/* =======================================================
+   LARGE BUTTONS (PASTE)
+   ======================================================= */
+
+#home-tab .large-btn{
+
+    min-height:48px;
+
+    font-weight:bold;
 }
+
+/* =======================================================
+   FONT SELECTORS
+   ======================================================= */
+
+#home-tab select{
+
+    width:100%;
+
+    height:26px;
+
+    font-size:12px;
+
+    border:1px solid #bdbdbd;
+
+    background:#ffffff;
+
+    padding:2px 4px;
+}
+
+/* =======================================================
+   FONT ACTIONS
+   ======================================================= */
+
+#home-tab .font-actions{
+
+    display:flex;
+
+    flex-wrap:wrap;
+
+    gap:3px;
+}
+
+#home-tab .font-actions .ribbon-btn{
+
+    min-width:32px;
+
+    justify-content:center;
+
+    padding:4px;
+}
+
+/* =======================================================
+   PARAGRAPH ACTIONS
+   ======================================================= */
+
+#home-tab .paragraph-actions{
+
+    display:flex;
+
+    flex-wrap:wrap;
+
+    gap:3px;
+}
+
+#home-tab .paragraph-actions .ribbon-btn{
+
+    min-width:36px;
+
+    justify-content:center;
+
+    padding:4px;
+}
+
+/* =======================================================
+   STYLES LIST
+   ======================================================= */
+
+#home-tab .styles-list{
+
+    display:flex;
+
+    flex-direction:column;
+
+    gap:3px;
+}
+
+#home-tab .styles-list .ribbon-btn{
+
+    width:100%;
+}
+
+/* =======================================================
+   ICONS
+   ======================================================= */
+
+#home-tab .icon{
+
+    width:16px;
+
+    height:16px;
+
+    fill:currentColor;
+
+    flex-shrink:0;
+}
+
 /* =======================================================
    END OF CAMPUS WORD 2007 CSS
    ======================================================= */
