@@ -2676,6 +2676,57 @@ button:focus-visible{
     background: #e7f0fc;
 }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+#home-tab{
+    display:flex;
+    gap:10px;
+    padding:8px;
+    background:#f3f3f3;
+}
+
+#home-tab .ribbon-group{
+    padding:0 10px;
+    border-right:1px solid #ccc;
+}
+
+#home-tab .group-title{
+    font-size:11px;
+    color:#666;
+    margin-bottom:6px;
+}
+
+#home-tab .ribbon-btn{
+    display:flex;
+    align-items:center;
+    gap:6px;
+    padding:5px 8px;
+    border:none;
+    background:white;
+    cursor:pointer;
+    font-size:12px;
+}
+
+#home-tab .ribbon-btn:hover{
+    background:#e6f0ff;
+}
+
+#home-tab .icon{
+    width:16px;
+    height:16px;
+    fill:black;
+}
 /* =======================================================
    END OF CAMPUS WORD 2007 CSS
    ======================================================= */
