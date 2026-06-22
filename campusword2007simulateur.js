@@ -3785,3 +3785,19 @@ document
 
     }
 );
+
+
+document
+.getElementById(
+    "tab-references"
+)
+.addEventListener(
+    "click",
+    function(){
+
+        showTab(
+            "references-tab"
+        );
+
+    }
+);
