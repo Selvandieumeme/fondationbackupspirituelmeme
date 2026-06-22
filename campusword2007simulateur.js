@@ -3682,40 +3682,106 @@ CampusWord2007Simulateur
 
 
 
+
+
+
+
+
+
+
+
+
 function showTab(tabName){
 
     // kache tout tab yo
-    document.getElementById("home-tab").style.display = "none";
-    document.getElementById("insert-tab").style.display = "none";
-    document.getElementById("format-tab").style.display = "none";
 
-    // montre tab ki klike a
-    document.getElementById(tabName).style.display = "flex";
+    document.getElementById(
+        "home-tab"
+    ).style.display = "none";
+
+    document.getElementById(
+        "insert-tab"
+    ).style.display = "none";
+
+    document.getElementById(
+        "format-tab"
+    ).style.display = "none";
+
+    document.getElementById(
+        "page-layout-tab"
+    ).style.display = "none";
+
+    // montre tab yo klike a
+
+    document.getElementById(
+        tabName
+    ).style.display = "flex";
 }
 
 // HOME
-document.getElementById("tab-home").addEventListener("click", function(){
-    showTab("home-tab");
-});
+
+document
+.getElementById(
+    "tab-home"
+)
+.addEventListener(
+    "click",
+    function(){
+
+        showTab(
+            "home-tab"
+        );
+
+    }
+);
 
 // INSERT
-document.getElementById("tab-insert").addEventListener("click", function(){
-    showTab("insert-tab");
-});
 
-// FORMAT ⭐ (SA KI MANKE W LA)
-document.getElementById("tab-format").addEventListener("click", function(){
-    showTab("format-tab");
-});
+document
+.getElementById(
+    "tab-insert"
+)
+.addEventListener(
+    "click",
+    function(){
 
+        showTab(
+            "insert-tab"
+        );
 
+    }
+);
 
+// FORMAT
 
+document
+.getElementById(
+    "tab-format"
+)
+.addEventListener(
+    "click",
+    function(){
 
+        showTab(
+            "format-tab"
+        );
 
+    }
+);
 
+// PAGE LAYOUT
 
+document
+.getElementById(
+    "tab-page-layout"
+)
+.addEventListener(
+    "click",
+    function(){
 
-document.getElementById("tab-page-layout").addEventListener("click", function(){
-    showTab("page-layout-tab");
-});
+        showTab(
+            "page-layout-tab"
+        );
+
+    }
+);
