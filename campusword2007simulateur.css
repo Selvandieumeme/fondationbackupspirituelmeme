@@ -3300,6 +3300,185 @@ button:focus-visible{
     border-color:#9fc5ff;
 }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* =======================================================
+   REFERENCES TAB
+   ======================================================= */
+
+#references-tab{
+
+    display:none;
+
+    align-items:flex-start;
+
+    gap:12px;
+
+    padding:8px;
+
+    background:#f3f3f3;
+
+    overflow-x:auto;
+}
+
+/* =======================================================
+   REFERENCES GROUPS
+   ======================================================= */
+
+#references-tab .ribbon-group{
+
+    display:flex;
+
+    flex-direction:column;
+
+    gap:4px;
+
+    min-width:170px;
+
+    padding:0 10px;
+
+    border-right:1px solid #c8c8c8;
+}
+
+#references-tab .ribbon-group:last-child{
+
+    border-right:none;
+}
+
+/* =======================================================
+   REFERENCES TITLES
+   ======================================================= */
+
+#references-tab .group-title{
+
+    text-align:center;
+
+    font-size:11px;
+
+    color:#666666;
+
+    margin-top:4px;
+
+    border-top:1px solid #dddddd;
+
+    padding-top:4px;
+}
+
+/* =======================================================
+   REFERENCES BUTTONS
+   ======================================================= */
+
+#references-tab .ribbon-btn{
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:flex-start;
+
+    gap:6px;
+
+    min-height:28px;
+
+    padding:5px 8px;
+
+    border:1px solid transparent;
+
+    background:#ffffff;
+
+    cursor:pointer;
+
+    font-size:12px;
+
+    white-space:nowrap;
+}
+
+#references-tab .ribbon-btn:hover{
+
+    background:#e6f0ff;
+
+    border-color:#9fc5ff;
+}
+
+/* =======================================================
+   GROUP WIDTHS
+   ======================================================= */
+
+#references-toc-group{
+
+    min-width:190px;
+}
+
+#references-footnotes-group{
+
+    min-width:190px;
+}
+
+#references-citations-group{
+
+    min-width:220px;
+}
+
+#references-captions-group{
+
+    min-width:200px;
+}
+
+#references-index-group{
+
+    min-width:180px;
+}
+
+#references-authorities-group{
+
+    min-width:220px;
+}
+
+/* =======================================================
+   SCROLLBAR
+   ======================================================= */
+
+#references-tab::-webkit-scrollbar{
+
+    height:8px;
+}
+
+#references-tab::-webkit-scrollbar-track{
+
+    background:#ececec;
+}
+
+#references-tab::-webkit-scrollbar-thumb{
+
+    background:#bdbdbd;
+
+    border-radius:4px;
+}
+
+/* =======================================================
+   REFERENCES ACTIVE BUTTON
+   ======================================================= */
+
+#references-tab .ribbon-btn:active{
+
+    background:#d6e8ff;
+
+    border-color:#6ea8ff;
+}
+
 /* =======================================================
    END OF CAMPUS WORD 2007 CSS
    ======================================================= */
