@@ -3205,67 +3205,6 @@ button:focus-visible{
 
 
 
-/* ================= WORD 2007 RIBBON FIX ================= */
-
-#page-layout-tab {
-    display: flex;
-    flex-direction: row;
-    align-items: flex-start;
-    gap: 10px;
-
-    overflow-x: auto;
-    overflow-y: hidden;
-
-    padding: 10px;
-}
-
-/* GROUP YO PA DWE STACK VERTICAL */
-.ribbon-group {
-    display: inline-flex;
-    flex-direction: column;
-
-    min-width: 160px;
-
-    background: #f7f9fc;
-    border: 1px solid #c3ccd8;
-    padding: 6px;
-}
-
-/* TITLE */
-.group-title {
-    font-size: 11px;
-    text-align: center;
-    margin-bottom: 6px;
-}
-
-/* BUTTON STYLE */
-.ribbon-btn {
-    display: flex;
-    align-items: center;
-
-    padding: 4px 6px;
-    margin: 2px 0;
-
-    font-size: 12px;
-    background: transparent;
-    border: 1px solid transparent;
-}
-
-/* HOVER */
-.ribbon-btn:hover {
-    background: #eaf2fb;
-    border: 1px solid #9fb7d7;
-}
-
-/* SCROLL BAR (OPTIONAL) */
-#page-layout-tab::-webkit-scrollbar {
-    height: 6px;
-}
-
-#page-layout-tab::-webkit-scrollbar-thumb {
-    background: #b6c6d6;
-    border-radius: 10px;
-}
 
 /* =======================================================
    END OF CAMPUS WORD 2007 CSS
