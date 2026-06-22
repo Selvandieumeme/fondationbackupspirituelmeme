@@ -3021,6 +3021,180 @@ button:focus-visible{
     border-color:#9fc5ff;
 }
 
+
+
+
+
+
+
+
+
+
+
+/* =======================================================
+   FORMAT TAB
+   ======================================================= */
+
+#format-tab{
+
+    display:none;
+
+    align-items:flex-start;
+
+    gap:12px;
+
+    padding:8px;
+
+    background:#f3f3f3;
+
+    overflow-x:auto;
+}
+
+/* =======================================================
+   FORMAT GROUPS
+   ======================================================= */
+
+#format-tab .ribbon-group{
+
+    display:flex;
+
+    flex-direction:column;
+
+    gap:4px;
+
+    min-width:150px;
+
+    padding:0 10px;
+
+    border-right:1px solid #c8c8c8;
+}
+
+#format-tab .ribbon-group:last-child{
+
+    border-right:none;
+}
+
+/* =======================================================
+   FORMAT TITLES
+   ======================================================= */
+
+#format-tab .group-title{
+
+    text-align:center;
+
+    font-size:11px;
+
+    color:#666666;
+
+    margin-top:4px;
+
+    border-top:1px solid #dddddd;
+
+    padding-top:4px;
+}
+
+/* =======================================================
+   FORMAT BUTTONS
+   ======================================================= */
+
+#format-tab .ribbon-btn{
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:flex-start;
+
+    gap:6px;
+
+    min-height:28px;
+
+    padding:5px 8px;
+
+    border:1px solid transparent;
+
+    background:#ffffff;
+
+    cursor:pointer;
+
+    font-size:12px;
+
+    white-space:nowrap;
+}
+
+#format-tab .ribbon-btn:hover{
+
+    background:#e6f0ff;
+
+    border-color:#9fc5ff;
+}
+
+/* =======================================================
+   ARRANGE GROUP
+   ======================================================= */
+
+#format-arrange-group{
+
+    min-width:170px;
+}
+
+/* =======================================================
+   PICTURE STYLES
+   ======================================================= */
+
+#format-picture-styles-group{
+
+    min-width:180px;
+}
+
+/* =======================================================
+   WORDART STYLES
+   ======================================================= */
+
+#format-wordart-group{
+
+    min-width:170px;
+}
+
+/* =======================================================
+   SIZE GROUP
+   ======================================================= */
+
+#format-size-group{
+
+    min-width:120px;
+}
+
+/* =======================================================
+   TEXT GROUP
+   ======================================================= */
+
+#format-text-group{
+
+    min-width:140px;
+}
+
+/* =======================================================
+   SCROLLBAR SUPPORT
+   ======================================================= */
+
+#format-tab::-webkit-scrollbar{
+
+    height:8px;
+}
+
+#format-tab::-webkit-scrollbar-thumb{
+
+    background:#bdbdbd;
+
+    border-radius:4px;
+}
+
+#format-tab::-webkit-scrollbar-track{
+
+    background:#ececec;
+}
+
 /* =======================================================
    END OF CAMPUS WORD 2007 CSS
    ======================================================= */
