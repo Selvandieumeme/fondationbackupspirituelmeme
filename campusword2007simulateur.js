@@ -2700,8 +2700,9 @@ function(){
         // ======================================================
         // RESTORED ORIGINAL BEHAVIOR (NO LOGIC CHANGE)
         // ======================================================
-        textLayer.textContent =
-            pageContent;
+       
+        textLayer.innerHTML = pageContent;
+
     }
 };
 
