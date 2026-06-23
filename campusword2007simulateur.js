@@ -1431,9 +1431,6 @@ CampusWord2007Simulateur.FormatState = {
 
 
 
-CampusWord2007Simulateur.TextFormatState = {
-    pages: {}
-};
 
 
 /* ==========================================================
@@ -2618,6 +2615,10 @@ function(){
    RENDER TEXT
    =========================================================
 
+/* ==========================================================
+   TEXT ENGINE
+   RENDER TEXT
+   ========================================================== */
 
 CampusWord2007Simulateur
     .TextEngine
@@ -2670,17 +2671,6 @@ function(){
             pageContent;
     }
 };
-
-
-
-
-
-
-
-
-
-
-
 
 
 
