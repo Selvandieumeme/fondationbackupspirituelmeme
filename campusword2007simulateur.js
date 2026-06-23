@@ -3976,3 +3976,50 @@ CampusWord2007Simulateur.FormattingEngine = {
     }
 };
 
+
+
+
+
+
+
+
+
+
+
+/* ==========================================================
+   FORMAT BUTTONS EVENTS
+   ========================================================== */
+
+document.addEventListener("DOMContentLoaded", function(){
+
+    const fs = CampusWord2007Simulateur.FormatState;
+
+    const boldBtn = document.getElementById("btn-bold");
+    if(boldBtn){
+        boldBtn.onclick = function(){
+            fs.bold = !fs.bold;
+        };
+    }
+
+    const italicBtn = document.getElementById("btn-italic");
+    if(italicBtn){
+        italicBtn.onclick = function(){
+            fs.italic = !fs.italic;
+        };
+    }
+
+    const underlineBtn = document.getElementById("btn-underline");
+    if(underlineBtn){
+        underlineBtn.onclick = function(){
+            fs.underline = !fs.underline;
+        };
+    }
+
+    const strikeBtn = document.getElementById("btn-strikethrough");
+    if(strikeBtn){
+        strikeBtn.onclick = function(){
+            fs.strikeThrough = !fs.strikeThrough;
+        };
+    }
+
+});
