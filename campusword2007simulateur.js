@@ -2611,13 +2611,13 @@ function(){
    RENDER TEXT
    ========================================================== */
 
+
 CampusWord2007Simulateur
     .TextEngine
     .renderText =
 function(){
 
     const pageCount =
-
         CampusWord2007Simulateur
             .PageEngine
             .getPageCount();
@@ -2629,7 +2629,6 @@ function(){
     ){
 
         const page =
-
             CampusWord2007Simulateur
                 .PageEngine
                 .getPage(
@@ -2641,7 +2640,6 @@ function(){
         }
 
         const textLayer =
-
             page.querySelector(
                 ".page-text-layer"
             );
@@ -2651,17 +2649,26 @@ function(){
         }
 
         const pageContent =
-
             CampusWord2007Simulateur
                 .PageContentState
                 .getPageContent(
                     pageNumber
                 ) || "";
 
+        // ======================================================
+        // RESTORED ORIGINAL BEHAVIOR (NO LOGIC CHANGE)
+        // ======================================================
         textLayer.textContent =
             pageContent;
     }
 };
+
+
+
+
+
+
+
 
 
 
