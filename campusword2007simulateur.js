@@ -2615,50 +2615,60 @@ function(){
    RENDER TEXT
    ========================================================== */
 
-
-CampusWord2007Simulateur.TextEngine.renderText = function () {
+CampusWord2007Simulateur
+    .TextEngine
+    .renderText =
+function(){
 
     const pageCount =
-        CampusWord2007Simulateur.PageEngine.getPageCount();
 
-    for (let pageNumber = 1; pageNumber <= pageCount; pageNumber++) {
+        CampusWord2007Simulateur
+            .PageEngine
+            .getPageCount();
+
+    for(
+        let pageNumber = 1;
+        pageNumber <= pageCount;
+        pageNumber++
+    ){
 
         const page =
-            CampusWord2007Simulateur.PageEngine.getPage(pageNumber);
 
-        if (!page) continue;
+            CampusWord2007Simulateur
+                .PageEngine
+                .getPage(
+                    pageNumber
+                );
+
+        if(!page){
+            continue;
+        }
 
         const textLayer =
-            page.querySelector(".page-text-layer");
 
-        if (!textLayer) continue;
+            page.querySelector(
+                ".page-text-layer"
+            );
 
-        const segments =
-            CampusWord2007Simulateur.TextFormatState?.pages?.[pageNumber];
-
-        // ======================================================
-        // SAFE MODE: no DOM rebuild if formatting exists
-        // ======================================================
-        if (segments) {
-
-            // ONLY update textContent per segment join
-            let plainText = "";
-
-            for (const seg of segments) {
-                plainText += seg.text;
-            }
-
-            textLayer.textContent = plainText;
-
-        } else {
-
-            const pageContent =
-                CampusWord2007Simulateur.PageContentState.getPageContent(pageNumber) || "";
-
-            textLayer.textContent = pageContent;
+        if(!textLayer){
+            continue;
         }
+
+        const pageContent =
+
+            CampusWord2007Simulateur
+                .PageContentState
+                .getPageContent(
+                    pageNumber
+                ) || "";
+
+        textLayer.textContent =
+            pageContent;
     }
 };
+
+
+
 
 
 
