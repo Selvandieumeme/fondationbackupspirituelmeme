@@ -3261,7 +3261,7 @@ function(){
         PageContentState.getPageContent(activePage) || "";
 
     const newContent =
-        currentContent + "\n";
+    currentContent + "<br>";
 
     PageContentState.setPageContent(activePage, newContent);
 
