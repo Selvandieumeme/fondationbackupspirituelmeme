@@ -3242,6 +3242,7 @@ function(){
 
 
 
+
 /* ==========================================================
    INSERT NEW LINE (CLEAN MULTI-PAGE SYSTEM)
    ========================================================== */
@@ -3261,7 +3262,7 @@ function(){
         PageContentState.getPageContent(activePage) || "";
 
     const newContent =
-    currentContent + "<br>";
+        currentContent + "<br>";
 
     PageContentState.setPageContent(activePage, newContent);
 
@@ -3270,10 +3271,25 @@ function(){
 
     CampusWord2007Simulateur.TextEngine.renderText();
 
-    CampusWord2007Simulateur.TextEngine.updateCaretPosition();
+    // 🔥 SAFE FIX (pa chanje sistèm nan, jis tann DOM update)
+    setTimeout(() => {
+
+        CampusWord2007Simulateur.TextEngine.updateCaretPosition();
+
+    }, 0);
 
     CampusWord2007Simulateur.PaginationEngine.createNextPageIfNeeded();
 };
+
+
+
+
+
+
+
+
+
+
 
 
 
