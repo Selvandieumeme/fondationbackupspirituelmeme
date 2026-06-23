@@ -1429,6 +1429,13 @@ CampusWord2007Simulateur.FormatState = {
 
 
 
+
+
+CampusWord2007Simulateur.TextFormatState = {
+    pages: {}
+};
+
+
 /* ==========================================================
    MOBILE INPUT STATE
    ========================================================== */
@@ -2609,60 +2616,75 @@ function(){
 /* ==========================================================
    TEXT ENGINE
    RENDER TEXT
-   ========================================================== */
+   =========================================================
 
 
-CampusWord2007Simulateur
-    .TextEngine
-    .renderText =
-function(){
+CampusWord2007Simulateur.TextEngine.renderText = function () {
 
     const pageCount =
-        CampusWord2007Simulateur
-            .PageEngine
-            .getPageCount();
+        CampusWord2007Simulateur.PageEngine.getPageCount();
 
-    for(
-        let pageNumber = 1;
-        pageNumber <= pageCount;
-        pageNumber++
-    ){
+    for (let pageNumber = 1; pageNumber <= pageCount; pageNumber++) {
 
         const page =
-            CampusWord2007Simulateur
-                .PageEngine
-                .getPage(
-                    pageNumber
-                );
+            CampusWord2007Simulateur.PageEngine.getPage(pageNumber);
 
-        if(!page){
+        if (!page) {
             continue;
         }
 
         const textLayer =
-            page.querySelector(
-                ".page-text-layer"
-            );
+            page.querySelector(".page-text-layer");
 
-        if(!textLayer){
+        if (!textLayer) {
             continue;
         }
 
-        const pageContent =
-            CampusWord2007Simulateur
-                .PageContentState
-                .getPageContent(
-                    pageNumber
-                ) || "";
+        const segments =
+            CampusWord2007Simulateur.TextFormatState?.pages?.[pageNumber];
 
         // ======================================================
-        // RESTORED ORIGINAL BEHAVIOR (NO LOGIC CHANGE)
+        // FALLBACK SYSTEM (INTACT - DO NOT BREAK OLD DATA)
         // ======================================================
-        textLayer.textContent =
-            pageContent;
+        if (!segments) {
+
+            const pageContent =
+                CampusWord2007Simulateur.PageContentState.getPageContent(pageNumber) || "";
+
+            textLayer.textContent = pageContent;
+            continue;
+        }
+
+        // ======================================================
+        // FORMATTED RENDERING SYSTEM (NEW LAYER)
+        // ======================================================
+        let html = "";
+
+        for (const seg of segments) {
+
+            let style = "";
+
+            if (seg.bold) style += "font-weight:bold;";
+            if (seg.italic) style += "font-style:italic;";
+            if (seg.underline) style += "text-decoration:underline;";
+            if (seg.strikeThrough) style += "text-decoration:line-through;";
+            if (seg.subscript) style += "vertical-align:sub;font-size:smaller;";
+            if (seg.superscript) style += "vertical-align:super;font-size:smaller;";
+
+            if (seg.fontSize) style += `font-size:${seg.fontSize}px;`;
+            if (seg.fontFamily) style += `font-family:${seg.fontFamily};`;
+            if (seg.fontColor) style += `color:${seg.fontColor};`;
+
+            if (seg.highlightColor) {
+                style += `background-color:${seg.highlightColor};`;
+            }
+
+            html += `<span style="${style}">${seg.text}</span>`;
+        }
+
+        textLayer.innerHTML = html;
     }
 };
-
 
 
 
