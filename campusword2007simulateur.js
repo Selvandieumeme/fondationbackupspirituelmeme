@@ -2671,11 +2671,9 @@ function(){
         CampusWord2007Simulateur
             .PageEngine
             .getPage(
-
                 CampusWord2007Simulateur
                     .CaretState
                     .activePage
-
             );
 
     if(!page){
@@ -2691,15 +2689,30 @@ function(){
         return;
     }
 
-    // 🔥 FIX ONLY (DO NOT TOUCH OTHER LOGIC)
-    const range =
-        document.createRange();
+    const spans =
+        textLayer.querySelectorAll(
+            "span"
+        );
 
-    range.selectNodeContents(textLayer);
-    range.collapse(false);
+    if(spans.length === 0){
 
-    const rect =
-        range.getBoundingClientRect();
+        CampusWord2007Simulateur
+            .CaretEngine
+            .moveCaret(
+                0,
+                0
+            );
+
+        return;
+    }
+
+    const lastSpan =
+        spans[
+            spans.length - 1
+        ];
+
+    const spanRect =
+        lastSpan.getBoundingClientRect();
 
     const layerRect =
         textLayer.getBoundingClientRect();
@@ -2707,13 +2720,23 @@ function(){
     CampusWord2007Simulateur
         .CaretEngine
         .moveCaret(
-            rect.left -
-            layerRect.left,
-
-            rect.top -
-            layerRect.top
+            (
+                spanRect.right -
+                layerRect.left
+            ),
+            (
+                spanRect.top -
+                layerRect.top
+            )
         );
 };
+
+
+
+
+
+
+
 
 
 
