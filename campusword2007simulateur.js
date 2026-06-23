@@ -2686,8 +2686,6 @@ function(){
 
 
 
-
-
 /* ==========================================================
    UPDATE CARET FROM TEXT
    ========================================================== */
@@ -2721,33 +2719,12 @@ function(){
         return;
     }
 
-    const textNode =
-        textLayer.firstChild;
-
-    if(!textNode){
-
-        CampusWord2007Simulateur
-            .CaretEngine
-            .moveCaret(
-                0,
-                0
-            );
-
-        return;
-    }
-
+    // 🔥 FIX ONLY HERE (NO ARCHITECTURE CHANGE)
     const range =
         document.createRange();
 
-    range.setStart(
-        textNode,
-        textNode.length
-    );
-
-    range.setEnd(
-        textNode,
-        textNode.length
-    );
+    range.selectNodeContents(textLayer);
+    range.collapse(false);
 
     const rect =
         range.getBoundingClientRect();
@@ -2765,6 +2742,12 @@ function(){
             layerRect.top
         );
 };
+
+
+
+
+
+
 
 
 
