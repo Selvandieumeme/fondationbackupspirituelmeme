@@ -2615,6 +2615,7 @@ function(){
    RENDER TEXT
    ========================================================== */
 
+
 CampusWord2007Simulateur.TextEngine.renderText = function () {
 
     const pageCount =
@@ -2625,62 +2626,50 @@ CampusWord2007Simulateur.TextEngine.renderText = function () {
         const page =
             CampusWord2007Simulateur.PageEngine.getPage(pageNumber);
 
-        if (!page) {
-            continue;
-        }
+        if (!page) continue;
 
         const textLayer =
             page.querySelector(".page-text-layer");
 
-        if (!textLayer) {
-            continue;
-        }
+        if (!textLayer) continue;
 
         const segments =
             CampusWord2007Simulateur.TextFormatState?.pages?.[pageNumber];
 
         // ======================================================
-        // FALLBACK SYSTEM (INTACT - DO NOT BREAK OLD DATA)
+        // SAFE MODE: no DOM rebuild if formatting exists
         // ======================================================
-        if (!segments) {
+        if (segments) {
+
+            // ONLY update textContent per segment join
+            let plainText = "";
+
+            for (const seg of segments) {
+                plainText += seg.text;
+            }
+
+            textLayer.textContent = plainText;
+
+        } else {
 
             const pageContent =
                 CampusWord2007Simulateur.PageContentState.getPageContent(pageNumber) || "";
 
             textLayer.textContent = pageContent;
-            continue;
         }
-
-        // ======================================================
-        // FORMATTED RENDERING SYSTEM (NEW LAYER)
-        // ======================================================
-        let html = "";
-
-        for (const seg of segments) {
-
-            let style = "";
-
-            if (seg.bold) style += "font-weight:bold;";
-            if (seg.italic) style += "font-style:italic;";
-            if (seg.underline) style += "text-decoration:underline;";
-            if (seg.strikeThrough) style += "text-decoration:line-through;";
-            if (seg.subscript) style += "vertical-align:sub;font-size:smaller;";
-            if (seg.superscript) style += "vertical-align:super;font-size:smaller;";
-
-            if (seg.fontSize) style += `font-size:${seg.fontSize}px;`;
-            if (seg.fontFamily) style += `font-family:${seg.fontFamily};`;
-            if (seg.fontColor) style += `color:${seg.fontColor};`;
-
-            if (seg.highlightColor) {
-                style += `background-color:${seg.highlightColor};`;
-            }
-
-            html += `<span style="${style}">${seg.text}</span>`;
-        }
-
-        textLayer.innerHTML = html;
     }
 };
+
+
+
+
+
+
+
+
+
+
+
 
 
 
