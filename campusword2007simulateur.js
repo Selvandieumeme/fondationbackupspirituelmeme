@@ -2684,8 +2684,6 @@ function(){
 
 
 
-
-
 /* ==========================================================
    UPDATE CARET FROM TEXT
    ========================================================== */
@@ -2719,7 +2717,7 @@ function(){
         return;
     }
 
-    // 🔥 FIX ONLY HERE (NO ARCHITECTURE CHANGE)
+    // 🔥 FIX ONLY (DO NOT TOUCH OTHER LOGIC)
     const range =
         document.createRange();
 
@@ -2742,6 +2740,13 @@ function(){
             layerRect.top
         );
 };
+
+
+
+
+
+
+
 
 
 
