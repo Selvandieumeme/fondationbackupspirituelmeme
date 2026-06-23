@@ -2615,10 +2615,6 @@ function(){
    RENDER TEXT
    =========================================================
 
-/* ==========================================================
-   TEXT ENGINE
-   RENDER TEXT
-   ========================================================== */
 
 CampusWord2007Simulateur
     .TextEngine
@@ -2626,7 +2622,6 @@ CampusWord2007Simulateur
 function(){
 
     const pageCount =
-
         CampusWord2007Simulateur
             .PageEngine
             .getPageCount();
@@ -2638,7 +2633,6 @@ function(){
     ){
 
         const page =
-
             CampusWord2007Simulateur
                 .PageEngine
                 .getPage(
@@ -2650,7 +2644,6 @@ function(){
         }
 
         const textLayer =
-
             page.querySelector(
                 ".page-text-layer"
             );
@@ -2660,7 +2653,6 @@ function(){
         }
 
         const pageContent =
-
             CampusWord2007Simulateur
                 .PageContentState
                 .getPageContent(
