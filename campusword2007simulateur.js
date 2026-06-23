@@ -2679,7 +2679,83 @@ function(){
 
 
 
+/* ==========================================================
+   UPDATE CARET FROM TEXT
+   ========================================================== */
 
+CampusWord2007Simulateur
+    .TextEngine
+    .updateCaretPosition =
+function(){
+
+    const page =
+        CampusWord2007Simulateur
+            .PageEngine
+            .getPage(
+
+                CampusWord2007Simulateur
+                    .CaretState
+                    .activePage
+
+            );
+
+    if(!page){
+        return;
+    }
+
+    const textLayer =
+        page.querySelector(
+            ".page-text-layer"
+        );
+
+    if(!textLayer){
+        return;
+    }
+
+    const textNode =
+        textLayer.firstChild;
+
+    if(!textNode){
+
+        CampusWord2007Simulateur
+            .CaretEngine
+            .moveCaret(
+                0,
+                0
+            );
+
+        return;
+    }
+
+    const range =
+        document.createRange();
+
+    range.setStart(
+        textNode,
+        textNode.length
+    );
+
+    range.setEnd(
+        textNode,
+        textNode.length
+    );
+
+    const rect =
+        range.getBoundingClientRect();
+
+    const layerRect =
+        textLayer.getBoundingClientRect();
+
+    CampusWord2007Simulateur
+        .CaretEngine
+        .moveCaret(
+            rect.left -
+            layerRect.left,
+
+            rect.top -
+            layerRect.top
+        );
+};
 
 
 
