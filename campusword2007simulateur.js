@@ -3940,13 +3940,15 @@ showTab(
 
 
 
+
+
 CampusWord2007Simulateur.FormattingEngine = {
 
     state: {
         bold: false,
         italic: false,
         underline: false,
-        strike: false,
+        strikeThrough: false,
         fontFamily: "Calibri",
         fontSize: 12,
         color: "#000000",
@@ -3962,7 +3964,7 @@ CampusWord2007Simulateur.FormattingEngine = {
         if(s.bold) style += "font-weight:bold;";
         if(s.italic) style += "font-style:italic;";
         if(s.underline) style += "text-decoration:underline;";
-        if(s.strike) style += "text-decoration:line-through;";
+        if(s.strikeThrough) style += "text-decoration:line-through;";
 
         style += "font-family:" + s.fontFamily + ";";
         style += "font-size:" + s.fontSize + "px;";
@@ -3992,7 +3994,7 @@ CampusWord2007Simulateur.FormattingEngine = {
 
 document.addEventListener("DOMContentLoaded", function(){
 
-    const fs = CampusWord2007Simulateur.FormatState;
+    const fs = CampusWord2007Simulateur.FormattingEngine.state;
 
     const boldBtn = document.getElementById("btn-bold");
     if(boldBtn){
@@ -4023,3 +4025,8 @@ document.addEventListener("DOMContentLoaded", function(){
     }
 
 });
+
+
+
+
+
