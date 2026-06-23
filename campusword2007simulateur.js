@@ -2662,10 +2662,18 @@ function(){
    UPDATE CARET FROM TEXT
    ========================================================== */
 
+
+
+
+
 CampusWord2007Simulateur
     .TextEngine
     .updateCaretPosition =
 function(){
+
+    console.log(
+        "========== UPDATE CARET =========="
+    );
 
     const page =
         CampusWord2007Simulateur
@@ -2676,7 +2684,15 @@ function(){
                     .activePage
             );
 
+    console.log(
+        "PAGE:",
+        page
+    );
+
     if(!page){
+        console.log(
+            "PAGE NOT FOUND"
+        );
         return;
     }
 
@@ -2685,7 +2701,15 @@ function(){
             ".page-text-layer"
         );
 
+    console.log(
+        "TEXT LAYER:",
+        textLayer
+    );
+
     if(!textLayer){
+        console.log(
+            "TEXT LAYER NOT FOUND"
+        );
         return;
     }
 
@@ -2694,7 +2718,16 @@ function(){
             "span"
         );
 
+    console.log(
+        "SPAN COUNT:",
+        spans.length
+    );
+
     if(spans.length === 0){
+
+        console.log(
+            "NO SPAN -> moveCaret(0,0)"
+        );
 
         CampusWord2007Simulateur
             .CaretEngine
@@ -2711,25 +2744,64 @@ function(){
             spans.length - 1
         ];
 
+    console.log(
+        "LAST SPAN:",
+        lastSpan
+    );
+
     const spanRect =
         lastSpan.getBoundingClientRect();
 
     const layerRect =
         textLayer.getBoundingClientRect();
 
+    console.log(
+        "SPAN RECT:",
+        {
+            left: spanRect.left,
+            right: spanRect.right,
+            top: spanRect.top,
+            bottom: spanRect.bottom,
+            width: spanRect.width,
+            height: spanRect.height
+        }
+    );
+
+    console.log(
+        "LAYER RECT:",
+        {
+            left: layerRect.left,
+            right: layerRect.right,
+            top: layerRect.top,
+            bottom: layerRect.bottom,
+            width: layerRect.width,
+            height: layerRect.height
+        }
+    );
+
+    const targetX =
+        spanRect.right -
+        layerRect.left;
+
+    const targetY =
+        spanRect.top -
+        layerRect.top;
+
+    console.log(
+        "MOVE CARET TO:",
+        targetX,
+        targetY
+    );
+
     CampusWord2007Simulateur
         .CaretEngine
         .moveCaret(
-            (
-                spanRect.right -
-                layerRect.left
-            ),
-            (
-                spanRect.top -
-                layerRect.top
-            )
+            targetX,
+            targetY
         );
 };
+
+
 
 
 
