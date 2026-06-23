@@ -2162,8 +2162,16 @@ function(){
 
 
 
+
+
+
+
+
+
+
+
 /* ==========================================================
-   INSERT CHARACTER (CLEAN MULTI-PAGE SYSTEM)
+   INSERT CHARACTER (CLEAN MULTI-PAGE + FORMATTING SAFE)
    ========================================================== */
 
 CampusWord2007Simulateur
@@ -2184,8 +2192,19 @@ function(character){
     const currentContent =
         PageContentState.getPageContent(activePage) || "";
 
+    // 🔥 SAFE FORMAT WRAPPER (NO BREAK IF MISSING)
+    let formattedCharacter = character;
+
+    if (
+        CampusWord2007Simulateur.TextEngine &&
+        CampusWord2007Simulateur.TextEngine.wrapCharacter
+    ){
+        formattedCharacter =
+            CampusWord2007Simulateur.TextEngine.wrapCharacter(character);
+    }
+
     const newContent =
-        currentContent + character;
+        currentContent + formattedCharacter;
 
     PageContentState.setPageContent(activePage, newContent);
 
@@ -2193,12 +2212,30 @@ function(character){
     CampusWord2007Simulateur.TextEngine.updateCharacterCount();
     CampusWord2007Simulateur.TextEngine.updateWordCount();
 
-    CampusWord2007Simulateur.TextEngine.renderText();
+    // render safely
+    if (CampusWord2007Simulateur.TextEngine.renderText){
+        CampusWord2007Simulateur.TextEngine.renderText();
+    }
 
-    CampusWord2007Simulateur.PaginationEngine.createNextPageIfNeeded();
+    // pagination safe call
+    if (CampusWord2007Simulateur.PaginationEngine){
+        CampusWord2007Simulateur.PaginationEngine.createNextPageIfNeeded();
+    }
 
-    CampusWord2007Simulateur.TextEngine.updateCaretPosition();
+    // caret update safe
+    if (CampusWord2007Simulateur.TextEngine.updateCaretPosition){
+        CampusWord2007Simulateur.TextEngine.updateCaretPosition();
+    }
 };
+
+
+
+
+
+
+
+
+
 
 
 
