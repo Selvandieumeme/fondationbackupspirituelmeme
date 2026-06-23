@@ -3953,7 +3953,15 @@ CampusWord2007Simulateur.FormattingEngine = {
 
 
 
+CampusWord2007Simulateur
+    .TextEngine
+    .wrapCharacter =
+function(character){
 
+    return CampusWord2007Simulateur
+        .FormattingEngine
+        .wrap(character);
+};
 
 
 
