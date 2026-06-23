@@ -39,6 +39,13 @@ CampusWord2007Simulateur.WindowEngine = {};
 
 
 
+CampusWord2007Simulateur.RibbonEngine = {};
+
+
+CampusWord2007Simulateur.HomeRibbonEngine = {};
+
+
+
 
 
 
@@ -1384,6 +1391,38 @@ CampusWord2007Simulateur.TextState = {
 };
 
 
+
+
+
+
+
+/* ==========================================================
+   FORMAT STATE
+   ========================================================== */
+
+CampusWord2007Simulateur.FormatState = {
+
+    bold: false,
+
+    italic: false,
+
+    underline: false,
+
+    strikeThrough: false,
+
+    subscript: false,
+
+    superscript: false,
+
+    fontFamily: "Calibri",
+
+    fontSize: 12,
+
+    highlightColor: null,
+
+    fontColor: "#000000"
+
+};
 
 
 
