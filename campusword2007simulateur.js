@@ -2616,6 +2616,7 @@ function(){
    ========================================================= */
 
 
+
 CampusWord2007Simulateur
     .TextEngine
     .renderText =
@@ -2659,10 +2660,15 @@ function(){
                     pageNumber
                 ) || "";
 
+        // ======================================================
+        // RESTORED ORIGINAL BEHAVIOR (NO LOGIC CHANGE)
+        // ======================================================
         textLayer.textContent =
             pageContent;
     }
 };
+
+
 
 
 
