@@ -2646,7 +2646,7 @@ function(){
         // RESTORED ORIGINAL BEHAVIOR (NO LOGIC CHANGE)
         // ======================================================
        
-        textLayer.innerHTML = pageContent;
+   textLayer.innerHTML = pageContent || "";
 
     }
 };
