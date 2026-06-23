@@ -3893,41 +3893,6 @@ showTab(
 
 
 
-CampusWord2007Simulateur.FormattingEngine = {
-
-    state: {
-        bold: false,
-        italic: false,
-        underline: false,
-        strike: false,
-        fontFamily: "Calibri",
-        fontSize: 12,
-        color: "#000000",
-        highlight: "transparent"
-    },
-
-    wrap: function(text){
-
-        const s = this.state;
-
-        let style = "";
-
-        if(s.bold) style += "font-weight:bold;";
-        if(s.italic) style += "font-style:italic;";
-        if(s.underline) style += "text-decoration:underline;";
-        if(s.strike) style += "text-decoration:line-through;";
-
-        style += "font-family:" + s.fontFamily + ";";
-        style += "font-size:" + s.fontSize + "px;";
-        style += "color:" + s.color + ";";
-
-        if(s.highlight !== "transparent"){
-            style += "background:" + s.highlight + ";";
-        }
-
-        return `<span style="${style}">${text}</span>`;
-    }
-};
 
 
 
