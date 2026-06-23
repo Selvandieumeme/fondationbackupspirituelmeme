@@ -1426,10 +1426,6 @@ CampusWord2007Simulateur.FormatState = {
 
 
 
-CampusWord2007Simulateur.TextFormatState = {
-    pages: {}
-};
-
 
 
 
