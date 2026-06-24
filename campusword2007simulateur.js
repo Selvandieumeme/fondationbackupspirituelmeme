@@ -855,6 +855,57 @@ function(){
 
 
 
+
+
+/* ==========================================================
+   START SELECTION
+   SAFE FOUNDATION
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .SelectionEngine
+    .startSelection =
+function(
+    pageNumber,
+    characterIndex
+){
+
+    const state =
+        CampusWord2007Simulateur
+            .SelectionState;
+
+    state.active = true;
+
+    state.startPage =
+        pageNumber;
+
+    state.endPage =
+        pageNumber;
+
+    state.startIndex =
+        characterIndex;
+
+    state.endIndex =
+        characterIndex;
+
+    state.selectedText = "";
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 /* ==========================================================
    PAGE ENGINE
    CREATE PAGE
