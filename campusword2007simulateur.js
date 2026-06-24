@@ -4104,3 +4104,189 @@ document.addEventListener("DOMContentLoaded", function(){
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+/* ==========================================================
+   HOME RIBBON ENGINE
+   ========================================================== */
+
+document.addEventListener(
+    "DOMContentLoaded",
+    function(){
+
+        const fs =
+            CampusWord2007Simulateur
+                .FormattingEngine
+                .state;
+
+        /* FONT FAMILY */
+
+        const fontFamily =
+            document.getElementById(
+                "font-family"
+            );
+
+        if(fontFamily){
+
+            fontFamily.addEventListener(
+                "change",
+                function(){
+
+                    fs.fontFamily =
+                        this.value;
+
+                }
+            );
+
+        }
+
+        /* FONT SIZE */
+
+        const fontSize =
+            document.getElementById(
+                "font-size"
+            );
+
+        if(fontSize){
+
+            fontSize.addEventListener(
+                "change",
+                function(){
+
+                    fs.fontSize =
+                        Number(
+                            this.value
+                        ) || 12;
+
+                }
+            );
+
+        }
+
+        /* GROW FONT */
+
+        const growFont =
+            document.getElementById(
+                "btn-grow-font"
+            );
+
+        if(growFont){
+
+            growFont.addEventListener(
+                "click",
+                function(){
+
+                    fs.fontSize++;
+
+                    if(fontSize){
+                        fontSize.value =
+                            fs.fontSize;
+                    }
+
+                }
+            );
+
+        }
+
+        /* SHRINK FONT */
+
+        const shrinkFont =
+            document.getElementById(
+                "btn-shrink-font"
+            );
+
+        if(shrinkFont){
+
+            shrinkFont.addEventListener(
+                "click",
+                function(){
+
+                    fs.fontSize =
+                        Math.max(
+                            1,
+                            fs.fontSize - 1
+                        );
+
+                    if(fontSize){
+                        fontSize.value =
+                            fs.fontSize;
+                    }
+
+                }
+            );
+
+        }
+
+        /* FONT COLOR */
+
+        const fontColor =
+            document.getElementById(
+                "btn-font-color"
+            );
+
+        if(fontColor){
+
+            fontColor.addEventListener(
+                "click",
+                function(){
+
+                    const color =
+                        prompt(
+                            "Font color (#ff0000)"
+                        );
+
+                    if(color){
+
+                        fs.color =
+                            color;
+
+                    }
+
+                }
+            );
+
+        }
+
+        /* HIGHLIGHT */
+
+        const highlight =
+            document.getElementById(
+                "btn-highlight"
+            );
+
+        if(highlight){
+
+            highlight.addEventListener(
+                "click",
+                function(){
+
+                    const color =
+                        prompt(
+                            "Highlight color"
+                        );
+
+                    if(color){
+
+                        fs.highlight =
+                            color;
+
+                    }
+
+                }
+            );
+
+        }
+
+    }
+);
+
