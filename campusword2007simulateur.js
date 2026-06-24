@@ -838,6 +838,23 @@ function(){
 
 
 
+
+/* ==========================================================
+   GET SELECTED TEXT
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .SelectionEngine
+    .getSelectedText =
+function(){
+
+    return CampusWord2007Simulateur
+        .SelectionState
+        .selectedText || "";
+};
+
+
+
 /* ==========================================================
    PAGE ENGINE
    CREATE PAGE
