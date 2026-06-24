@@ -620,6 +620,31 @@ CampusWord2007Simulateur.WindowState = {
 
 
 
+/* ==========================================================
+   SELECTION STATE
+   ========================================================== */
+
+CampusWord2007Simulateur.SelectionState = {
+
+    active: false,
+
+    startPage: 1,
+
+    endPage: 1,
+
+    startIndex: 0,
+
+    endIndex: 0,
+
+    selectedText: "",
+
+    selectionLayer: null
+
+};
+
+
+
+
 
 
 
