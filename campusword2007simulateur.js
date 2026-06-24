@@ -482,6 +482,10 @@ CampusWord2007Simulateur
     .initialize();
 
 CampusWord2007Simulateur
+    .SelectionEngine
+    .initialize();
+
+CampusWord2007Simulateur
     .KeyboardEngine
     .initialize();
 
@@ -890,6 +894,177 @@ function(
 
     state.selectedText = "";
 };
+
+
+
+
+
+
+/* ==========================================================
+   UPDATE SELECTION
+   SAFE FOUNDATION
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .SelectionEngine
+    .updateSelection =
+function(
+    pageNumber,
+    characterIndex
+){
+
+    const state =
+        CampusWord2007Simulateur
+            .SelectionState;
+
+    if(
+        !state.active
+    ){
+        return;
+    }
+
+    state.endPage =
+        pageNumber;
+
+    state.endIndex =
+        characterIndex;
+};
+
+
+
+
+
+
+
+
+/* ==========================================================
+   FINISH SELECTION
+   SAFE FOUNDATION
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .SelectionEngine
+    .finishSelection =
+function(){
+
+    const state =
+        CampusWord2007Simulateur
+            .SelectionState;
+
+    if(
+        !state.active
+    ){
+        return;
+    }
+
+    const pageContent =
+
+        CampusWord2007Simulateur
+            .PageContentState
+            .getPageContent(
+                state.startPage
+            ) || "";
+
+    const start =
+        Math.min(
+            state.startIndex,
+            state.endIndex
+        );
+
+    const end =
+        Math.max(
+            state.startIndex,
+            state.endIndex
+        );
+
+    state.selectedText =
+        pageContent.slice(
+            start,
+            end
+        );
+};
+
+
+
+
+
+
+/* ==========================================================
+   MOUSE SELECTION STATE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .SelectionState
+    .mouseDown = false;
+
+
+
+
+
+
+
+
+
+/* ==========================================================
+   INITIALIZE SELECTION ENGINE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .SelectionEngine
+    .initialize =
+function(){
+
+    document.addEventListener(
+
+        "mousedown",
+
+        function(){
+
+            CampusWord2007Simulateur
+                .SelectionState
+                .mouseDown = true;
+
+        }
+
+    );
+
+    document.addEventListener(
+
+        "mouseup",
+
+        function(){
+
+            CampusWord2007Simulateur
+                .SelectionState
+                .mouseDown = false;
+
+            CampusWord2007Simulateur
+                .SelectionEngine
+                .finishSelection();
+
+        }
+
+    );
+
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
