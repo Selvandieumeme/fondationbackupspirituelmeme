@@ -3273,14 +3273,28 @@ function(){
 
     // 🔥 SAFE FIX (pa chanje sistèm nan, jis tann DOM update)
 
-  
-              setTimeout(() => {
+
+             setTimeout(() => {
 
     CampusWord2007Simulateur
         .TextEngine
         .updateCaretPosition();
 
 }, 0);
+
+CampusWord2007Simulateur
+    .PaginationEngine
+    .createNextPageIfNeeded();
+
+};
+
+
+
+
+
+
+  
+              
 
             
 
