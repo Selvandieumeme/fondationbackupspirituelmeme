@@ -818,6 +818,23 @@ function(){
 
 
 
+/* ==========================================================
+   HAS SELECTION
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .SelectionEngine
+    .hasSelection =
+function(){
+
+    return CampusWord2007Simulateur
+        .SelectionState
+        .active;
+};
+
+
+
+
 
 
 
