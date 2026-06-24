@@ -768,7 +768,32 @@ function(){
 
 
 
+/* ==========================================================
+   CLEAR SELECTION
+   ========================================================== */
 
+CampusWord2007Simulateur
+    .SelectionEngine
+    .clearSelection =
+function(){
+
+    const state =
+        CampusWord2007Simulateur
+            .SelectionState;
+
+    state.active = false;
+
+    state.startPage = 1;
+
+    state.endPage = 1;
+
+    state.startIndex = 0;
+
+    state.endIndex = 0;
+
+    state.selectedText = "";
+
+};
 
 
 
