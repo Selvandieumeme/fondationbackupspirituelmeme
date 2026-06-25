@@ -508,7 +508,22 @@ state.initialized = true;
 
 
 
+/* ==========================================================
+   SELECTION ENGINE AUTO BOOTSTRAP (SAFE HOOK)
+   ========================================================== */
 
+document.addEventListener("DOMContentLoaded", function () {
+
+    const selection =
+        CampusWord2007Simulateur.SelectionEngine;
+
+    if (!selection || !selection.initialize) {
+        return;
+    }
+
+    selection.initialize();
+
+});
 
 
 
