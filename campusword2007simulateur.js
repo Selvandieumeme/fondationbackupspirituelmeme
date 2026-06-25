@@ -1642,6 +1642,8 @@ CampusWord2007Simulateur.CaretState = {
 
    activePage: 1,
 
+ characterIndex: 0,
+
     element: null,
 
     blinkInterval: null
