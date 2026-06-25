@@ -1100,61 +1100,6 @@ CampusWord2007Simulateur
 
 
 
-
-
-
-/* ==========================================================
-   INITIALIZE SELECTION ENGINE
-   ========================================================== */
-
-CampusWord2007Simulateur
-    .SelectionEngine
-    .initialize =
-function(){
-
-    document.addEventListener(
-
-        "mousedown",
-
-        function(){
-
-            CampusWord2007Simulateur
-                .SelectionState
-                .mouseDown = true;
-
-        }
-
-    );
-
-    document.addEventListener(
-
-        "mouseup",
-
-        function(){
-
-            CampusWord2007Simulateur
-                .SelectionState
-                .mouseDown = false;
-
-            CampusWord2007Simulateur
-                .SelectionEngine
-                .finishSelection();
-
-        }
-
-    );
-
-};
-
-
-
-
-
-
-
-
-
-
 /* ==========================================================
    SELECTION ENGINE
    MOUSE SELECTION BIND (FINAL FIX)
