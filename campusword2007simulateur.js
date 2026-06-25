@@ -1103,7 +1103,72 @@ function(){
 
 
 
+/* ==========================================================
+   SELECTION ENGINE
+   MOUSE BIND SYSTEM
+   ========================================================== */
 
+CampusWord2007Simulateur.SelectionEngine.bindMouseSelection = function () {
+
+    const viewport =
+        CampusWord2007Simulateur.DOM.documentViewport;
+
+    if (!viewport) {
+        return;
+    }
+
+    viewport.addEventListener("mousedown", function (e) {
+
+        const state =
+            CampusWord2007Simulateur.SelectionState;
+
+        const page =
+            CampusWord2007Simulateur.DocumentState.activePage;
+
+        if (!page) {
+            return;
+        }
+
+        state.mouseDown = true;
+
+        CampusWord2007Simulateur.SelectionEngine.startSelection(
+            1,
+            0
+        );
+
+    });
+
+    viewport.addEventListener("mousemove", function (e) {
+
+        const state =
+            CampusWord2007Simulateur.SelectionState;
+
+        if (!state.mouseDown || !state.active) {
+            return;
+        }
+
+        const fakeIndex =
+            Math.floor(e.offsetX / 7);
+
+        CampusWord2007Simulateur.SelectionEngine.updateSelection(
+            state.startPage,
+            fakeIndex
+        );
+
+    });
+
+    viewport.addEventListener("mouseup", function () {
+
+        const state =
+            CampusWord2007Simulateur.SelectionState;
+
+        state.mouseDown = false;
+
+        CampusWord2007Simulateur.SelectionEngine.finishSelection();
+
+    });
+
+};
 
 
 
