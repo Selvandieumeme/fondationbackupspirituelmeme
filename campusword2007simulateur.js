@@ -942,6 +942,7 @@ function(
    SAFE FOUNDATION
    ========================================================== */
 
+
 CampusWord2007Simulateur
     .SelectionEngine
     .finishSelection =
@@ -957,32 +958,79 @@ function(){
         return;
     }
 
-    const pageContent =
-
+    let pageContent =
         CampusWord2007Simulateur
             .PageContentState
             .getPageContent(
                 state.startPage
             ) || "";
 
-    const start =
-        Math.min(
-            state.startIndex,
-            state.endIndex
-        );
+    // 🔥 SAFE EXTENSION (pa touche orijinal flow la)
+    if (state.startPage === state.endPage) {
 
-    const end =
-        Math.max(
-            state.startIndex,
-            state.endIndex
-        );
+        const start =
+            Math.min(
+                state.startIndex,
+                state.endIndex
+            );
 
-    state.selectedText =
-        pageContent.slice(
-            start,
-            end
-        );
+        const end =
+            Math.max(
+                state.startIndex,
+                state.endIndex
+            );
+
+        state.selectedText =
+            pageContent.slice(
+                start,
+                end
+            );
+
+        return;
+    }
+
+    // multi-page fallback SAFE (pa afekte single page logic)
+    let result = "";
+
+    for (
+        let p = state.startPage;
+        p <= state.endPage;
+        p++
+    ) {
+
+        const content =
+            CampusWord2007Simulateur
+                .PageContentState
+                .getPageContent(p) || "";
+
+        if (p === state.startPage) {
+
+            result += content.slice(state.startIndex);
+
+        } else if (p === state.endPage) {
+
+            result += content.slice(0, state.endIndex);
+
+        } else {
+
+            result += content;
+        }
+    }
+
+    state.selectedText = result;
 };
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
