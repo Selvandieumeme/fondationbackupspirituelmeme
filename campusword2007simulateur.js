@@ -669,6 +669,50 @@ CampusWord2007Simulateur.SelectionState = {
 
 
 /* ==========================================================
+   SELECTION ENGINE
+   CREATE SELECTION LAYER
+   ========================================================== */
+
+CampusWord2007Simulateur.SelectionEngine.ensureSelectionLayer = function () {
+
+    const page =
+        CampusWord2007Simulateur.DocumentState.activePage;
+
+    if (!page) {
+        return null;
+    }
+
+    let layer =
+        page.querySelector(".selection-layer");
+
+    if (!layer) {
+
+        layer =
+            document.createElement("div");
+
+        layer.className = "selection-layer";
+
+        layer.style.position = "absolute";
+        layer.style.top = "0";
+        layer.style.left = "0";
+        layer.style.width = "100%";
+        layer.style.height = "100%";
+        layer.style.pointerEvents = "none";
+        layer.style.zIndex = "5";
+
+        page.appendChild(layer);
+    }
+
+    CampusWord2007Simulateur.SelectionState.selectionLayer = layer;
+
+    return layer;
+};
+
+
+
+
+
+/* ==========================================================
    INITIALIZE PAGE CONTENT
    ========================================================== */
 
@@ -1053,6 +1097,12 @@ CampusWord2007Simulateur
 
 
 
+
+
+
+
+
+
 /* ==========================================================
    INITIALIZE SELECTION ENGINE
    ========================================================== */
@@ -1108,6 +1158,11 @@ function(){
    MOUSE BIND SYSTEM
    ========================================================== */
 
+/* ==========================================================
+   SELECTION ENGINE
+   MOUSE SELECTION BIND (FINAL FIX)
+   ========================================================== */
+
 CampusWord2007Simulateur.SelectionEngine.bindMouseSelection = function () {
 
     const viewport =
@@ -1129,13 +1184,15 @@ CampusWord2007Simulateur.SelectionEngine.bindMouseSelection = function () {
             return;
         }
 
+        const startIndex =
+            Math.floor(e.offsetX / 7);
+
         state.mouseDown = true;
 
         CampusWord2007Simulateur.SelectionEngine.startSelection(
             1,
-            0
+            startIndex
         );
-
     });
 
     viewport.addEventListener("mousemove", function (e) {
@@ -1147,14 +1204,16 @@ CampusWord2007Simulateur.SelectionEngine.bindMouseSelection = function () {
             return;
         }
 
-        const fakeIndex =
+        const currentIndex =
             Math.floor(e.offsetX / 7);
 
         CampusWord2007Simulateur.SelectionEngine.updateSelection(
             state.startPage,
-            fakeIndex
+            currentIndex
         );
 
+        // LIVE HIGHLIGHT UPDATE
+        CampusWord2007Simulateur.SelectionEngine.renderSelectionHighlight();
     });
 
     viewport.addEventListener("mouseup", function () {
@@ -1166,8 +1225,8 @@ CampusWord2007Simulateur.SelectionEngine.bindMouseSelection = function () {
 
         CampusWord2007Simulateur.SelectionEngine.finishSelection();
 
+        CampusWord2007Simulateur.SelectionEngine.renderSelectionHighlight();
     });
-
 };
 
 
@@ -1182,6 +1241,96 @@ CampusWord2007Simulateur.SelectionEngine.bindMouseSelection = function () {
 
 
 
+
+
+
+
+
+
+
+
+/* ==========================================================
+   SELECTION ENGINE
+   VISUAL HIGHLIGHT SYSTEM
+   ========================================================== */
+
+CampusWord2007Simulateur.SelectionEngine.renderHighlight = function () {
+
+    const state =
+        CampusWord2007Simulateur.SelectionState;
+
+    if (!state.active) {
+        return;
+    }
+
+    const page =
+        CampusWord2007Simulateur.PageEngine.getPage(state.startPage);
+
+    if (!page) {
+        return;
+    }
+
+    let layer =
+        state.selectionLayer;
+
+    if (!layer) {
+
+        layer =
+            document.createElement("div");
+
+        layer.style.position = "absolute";
+        layer.style.left = "0";
+        layer.style.top = "0";
+        layer.style.width = "100%";
+        layer.style.height = "100%";
+        layer.style.pointerEvents = "none";
+        layer.style.zIndex = "9999";
+
+        page.appendChild(layer);
+
+        state.selectionLayer = layer;
+    }
+
+    layer.innerHTML = "";
+
+    const start =
+        Math.min(state.startIndex, state.endIndex);
+
+    const end =
+        Math.max(state.startIndex, state.endIndex);
+
+    const pageContent =
+        CampusWord2007Simulateur.PageContentState.getPageContent(
+            state.startPage
+        ) || "";
+
+    const selectedText =
+        pageContent.slice(start, end);
+
+    const rect =
+        page.querySelector(".page-text-layer")
+            ?.getBoundingClientRect();
+
+    if (!rect) {
+        return;
+    }
+
+    const highlight =
+        document.createElement("div");
+
+    highlight.style.position = "absolute";
+    highlight.style.left = "10px";
+    highlight.style.top = "10px";
+    highlight.style.background = "rgba(0, 120, 215, 0.25)";
+    highlight.style.color = "transparent";
+    highlight.style.whiteSpace = "pre-wrap";
+    highlight.style.fontFamily = "inherit";
+    highlight.style.fontSize = "inherit";
+
+    highlight.textContent = selectedText;
+
+    layer.appendChild(highlight);
+};
 
 
 
