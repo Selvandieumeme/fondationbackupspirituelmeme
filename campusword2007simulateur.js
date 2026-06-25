@@ -1259,10 +1259,6 @@ CampusWord2007Simulateur.SelectionEngine.renderHighlight = function () {
     const state =
         CampusWord2007Simulateur.SelectionState;
 
-    if (!state.active) {
-        return;
-    }
-
     const page =
         CampusWord2007Simulateur.PageEngine.getPage(state.startPage);
 
@@ -1278,13 +1274,15 @@ CampusWord2007Simulateur.SelectionEngine.renderHighlight = function () {
         layer =
             document.createElement("div");
 
+        layer.className = "selection-layer";
+
         layer.style.position = "absolute";
-        layer.style.left = "0";
         layer.style.top = "0";
+        layer.style.left = "0";
         layer.style.width = "100%";
         layer.style.height = "100%";
         layer.style.pointerEvents = "none";
-        layer.style.zIndex = "9999";
+        layer.style.zIndex = "5";
 
         page.appendChild(layer);
 
@@ -1293,44 +1291,41 @@ CampusWord2007Simulateur.SelectionEngine.renderHighlight = function () {
 
     layer.innerHTML = "";
 
+    if (!state.active) {
+        return;
+    }
+
     const start =
         Math.min(state.startIndex, state.endIndex);
 
     const end =
         Math.max(state.startIndex, state.endIndex);
 
-    const pageContent =
-        CampusWord2007Simulateur.PageContentState.getPageContent(
-            state.startPage
-        ) || "";
-
-    const selectedText =
-        pageContent.slice(start, end);
-
-    const rect =
-        page.querySelector(".page-text-layer")
-            ?.getBoundingClientRect();
-
-    if (!rect) {
+    if (start === end) {
         return;
     }
 
+    // SIMPLE SAFE VISUAL MAPPING (same logic as mouse)
     const highlight =
         document.createElement("div");
 
     highlight.style.position = "absolute";
-    highlight.style.left = "10px";
-    highlight.style.top = "10px";
+    highlight.style.left = (start * 7) + "px";
+    highlight.style.top = "0px";
+    highlight.style.height = "20px";
+    highlight.style.width = ((end - start) * 7) + "px";
     highlight.style.background = "rgba(0, 120, 215, 0.25)";
-    highlight.style.color = "transparent";
-    highlight.style.whiteSpace = "pre-wrap";
-    highlight.style.fontFamily = "inherit";
-    highlight.style.fontSize = "inherit";
-
-    highlight.textContent = selectedText;
+    highlight.style.borderRadius = "2px";
 
     layer.appendChild(highlight);
 };
+
+
+
+
+
+
+
 
 
 
