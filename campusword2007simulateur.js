@@ -1153,10 +1153,7 @@ function(){
 
 
 
-/* ==========================================================
-   SELECTION ENGINE
-   MOUSE BIND SYSTEM
-   ========================================================== */
+
 
 /* ==========================================================
    SELECTION ENGINE
@@ -1249,6 +1246,8 @@ CampusWord2007Simulateur.SelectionEngine.bindMouseSelection = function () {
 
 
 
+
+
 /* ==========================================================
    SELECTION ENGINE
    VISUAL HIGHLIGHT SYSTEM
@@ -1305,20 +1304,66 @@ CampusWord2007Simulateur.SelectionEngine.renderHighlight = function () {
         return;
     }
 
-    // SIMPLE SAFE VISUAL MAPPING (same logic as mouse)
+    // ================================
+    // FIX: DOM-BASED SELECTION (SAFE)
+    // ================================
+
+    const textLayer =
+        page.querySelector(".page-text-layer");
+
+    if (!textLayer) {
+        return;
+    }
+
+    const spans =
+        textLayer.querySelectorAll("span");
+
+    if (!spans || spans.length === 0) {
+        return;
+    }
+
+    const startSpan =
+        spans[start] || spans[0];
+
+    const endSpan =
+        spans[end] || spans[spans.length - 1];
+
+    const startRect =
+        startSpan.getBoundingClientRect();
+
+    const endRect =
+        endSpan.getBoundingClientRect();
+
+    const layerRect =
+        layer.getBoundingClientRect();
+
     const highlight =
         document.createElement("div");
 
     highlight.style.position = "absolute";
-    highlight.style.left = (start * 7) + "px";
-    highlight.style.top = "0px";
-    highlight.style.height = "20px";
-    highlight.style.width = ((end - start) * 7) + "px";
-    highlight.style.background = "rgba(0, 120, 215, 0.25)";
-    highlight.style.borderRadius = "2px";
+    highlight.style.left =
+        (startRect.left - layerRect.left) + "px";
+
+    highlight.style.top =
+        (startRect.top - layerRect.top) + "px";
+
+    highlight.style.height =
+        (startRect.height || 20) + "px";
+
+    highlight.style.width =
+        (endRect.right - startRect.left) + "px";
+
+    highlight.style.background =
+        "rgba(0, 120, 215, 0.25)";
+
+    highlight.style.borderRadius =
+        "2px";
 
     layer.appendChild(highlight);
 };
+
+
+
 
 
 
