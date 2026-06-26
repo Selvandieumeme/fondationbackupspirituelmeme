@@ -3175,57 +3175,48 @@ function(){
    RENDER TEXT
    ========================================================== */
 
-CampusWord2007Simulateur
-    .TextEngine
-    .renderText =
-function(){
+CampusWord2007Simulateur.TextEngine.renderText = function () {
 
     const pageCount =
-        CampusWord2007Simulateur
-            .PageEngine
-            .getPageCount();
+        CampusWord2007Simulateur.PageEngine.getPageCount();
 
-    for(
+    for (
         let pageNumber = 1;
         pageNumber <= pageCount;
         pageNumber++
-    ){
+    ) {
 
         const page =
-            CampusWord2007Simulateur
-                .PageEngine
-                .getPage(
-                    pageNumber
-                );
+            CampusWord2007Simulateur.PageEngine.getPage(pageNumber);
 
-        if(!page){
+        if (!page) {
             continue;
         }
 
         const textLayer =
-            page.querySelector(
-                ".page-text-layer"
-            );
+            page.querySelector(".page-text-layer");
 
-        if(!textLayer){
+        if (!textLayer) {
             continue;
         }
 
         const pageContent =
-            CampusWord2007Simulateur
-                .PageContentState
-                .getPageContent(
-                    pageNumber
-                ) || "";
+            CampusWord2007Simulateur.PageContentState.getPageContent(pageNumber) || "";
 
         // ======================================================
         // RESTORED ORIGINAL BEHAVIOR (NO LOGIC CHANGE)
         // ======================================================
 
         textLayer.innerHTML = pageContent || "";
-
     }
 };
+
+
+
+
+
+
+
 
 
 
