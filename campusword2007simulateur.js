@@ -3177,8 +3177,12 @@ function(){
 
 CampusWord2007Simulateur.TextEngine.renderText = function () {
 
+    console.log("[renderText] START renderText called");
+
     const pageCount =
         CampusWord2007Simulateur.PageEngine.getPageCount();
+
+    console.log("[renderText] pageCount =", pageCount);
 
     for (
         let pageNumber = 1;
@@ -3186,10 +3190,13 @@ CampusWord2007Simulateur.TextEngine.renderText = function () {
         pageNumber++
     ) {
 
+        console.log("[renderText] processing page =", pageNumber);
+
         const page =
             CampusWord2007Simulateur.PageEngine.getPage(pageNumber);
 
         if (!page) {
+            console.warn("[renderText] page NOT FOUND =", pageNumber);
             continue;
         }
 
@@ -3197,20 +3204,31 @@ CampusWord2007Simulateur.TextEngine.renderText = function () {
             page.querySelector(".page-text-layer");
 
         if (!textLayer) {
+            console.warn("[renderText] textLayer MISSING on page =", pageNumber);
             continue;
         }
 
         const pageContent =
             CampusWord2007Simulateur.PageContentState.getPageContent(pageNumber) || "";
 
+        console.log(
+            "[renderText] pageContent length for page",
+            pageNumber,
+            "=",
+            pageContent.length
+        );
+
         // ======================================================
         // RESTORED ORIGINAL BEHAVIOR (NO LOGIC CHANGE)
         // ======================================================
 
         textLayer.innerHTML = pageContent || "";
-    }
-};
 
+        console.log("[renderText] rendered page =", pageNumber);
+    }
+
+    console.log("[renderText] END renderText finished");
+};
 
 
 
