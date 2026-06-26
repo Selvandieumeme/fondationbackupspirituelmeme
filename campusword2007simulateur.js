@@ -3169,6 +3169,7 @@ function(){
 
 
 
+
 /* ==========================================================
    TEXT ENGINE
    RENDER TEXT
@@ -3220,12 +3221,11 @@ function(){
         // ======================================================
         // RESTORED ORIGINAL BEHAVIOR (NO LOGIC CHANGE)
         // ======================================================
-       
+
         textLayer.innerHTML = pageContent || "";
 
     }
 };
-
 
 
 
