@@ -3167,6 +3167,8 @@ function(){
 
 
 
+
+
 /* ==========================================================
    TEXT ENGINE
    RENDER TEXT
@@ -3218,37 +3220,11 @@ function(){
         // ======================================================
         // RESTORED ORIGINAL BEHAVIOR (NO LOGIC CHANGE)
         // ======================================================
-
+       
         textLayer.innerHTML = pageContent || "";
 
-        // ======================================================
-        // SAFE SELECTION OVERLAY LAYER (NO CORE IMPACT)
-        // ======================================================
-
-        let selectionLayer =
-            page.querySelector(".page-selection-layer");
-
-        if(!selectionLayer){
-
-            selectionLayer =
-                document.createElement("div");
-
-            selectionLayer.className =
-                "page-selection-layer";
-
-            selectionLayer.style.position = "absolute";
-            selectionLayer.style.top = "0";
-            selectionLayer.style.left = "0";
-            selectionLayer.style.right = "0";
-            selectionLayer.style.bottom = "0";
-
-            selectionLayer.style.pointerEvents = "none";
-
-            page.appendChild(selectionLayer);
-        }
     }
 };
-
 
 
 
