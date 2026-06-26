@@ -47,7 +47,6 @@ CampusWord2007Simulateur.HomeRibbonEngine = {};
 
 
 
-CampusWord2007Simulateur.SelectionEngine = {};
 
 
 
