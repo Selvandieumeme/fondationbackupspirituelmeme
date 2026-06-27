@@ -668,45 +668,6 @@ CampusWord2007Simulateur.SelectionState = {
 
 
 
-/* ==========================================================
-   SELECTION ENGINE
-   CREATE SELECTION LAYER
-   ========================================================== */
-
-CampusWord2007Simulateur.SelectionEngine.ensureSelectionLayer = function () {
-
-    const page =
-        CampusWord2007Simulateur.DocumentState.activePage;
-
-    if (!page) {
-        return null;
-    }
-
-    let layer =
-        page.querySelector(".selection-layer");
-
-    if (!layer) {
-
-        layer =
-            document.createElement("div");
-
-        layer.className = "selection-layer";
-
-        layer.style.position = "absolute";
-        layer.style.top = "0";
-        layer.style.left = "0";
-        layer.style.width = "100%";
-        layer.style.height = "100%";
-        layer.style.pointerEvents = "none";
-        layer.style.zIndex = "5";
-
-        page.appendChild(layer);
-    }
-
-    CampusWord2007Simulateur.SelectionState.selectionLayer = layer;
-
-    return layer;
-};
 
 
 
@@ -820,289 +781,6 @@ function(){
 
     ) || 1;
 };
-
-
-
-
-
-
-
-
-
-
-
-
-/* ==========================================================
-   CLEAR SELECTION
-   ========================================================== */
-
-CampusWord2007Simulateur
-    .SelectionEngine
-    .clearSelection =
-function(){
-
-    const state =
-        CampusWord2007Simulateur
-            .SelectionState;
-
-    state.active = false;
-
-    state.startPage = 1;
-
-    state.endPage = 1;
-
-    state.startIndex = 0;
-
-    state.endIndex = 0;
-
-    state.selectedText = "";
-
-};
-
-
-
-
-
-
-
-
-/* ==========================================================
-   HAS SELECTION
-   ========================================================== */
-
-CampusWord2007Simulateur
-    .SelectionEngine
-    .hasSelection =
-function(){
-
-    return CampusWord2007Simulateur
-        .SelectionState
-        .active;
-};
-
-
-
-
-
-
-
-
-/* ==========================================================
-   GET SELECTED TEXT
-   ========================================================== */
-
-CampusWord2007Simulateur
-    .SelectionEngine
-    .getSelectedText =
-function(){
-
-    return CampusWord2007Simulateur
-        .SelectionState
-        .selectedText || "";
-};
-
-
-
-
-
-/* ==========================================================
-   START SELECTION
-   SAFE FOUNDATION
-   ========================================================== */
-
-CampusWord2007Simulateur
-    .SelectionEngine
-    .startSelection =
-function(
-    pageNumber,
-    characterIndex
-){
-
-    const state =
-        CampusWord2007Simulateur
-            .SelectionState;
-
-    state.active = true;
-
-    state.startPage =
-        pageNumber;
-
-    state.endPage =
-        pageNumber;
-
-    state.startIndex =
-        characterIndex;
-
-    state.endIndex =
-        characterIndex;
-
-    state.selectedText = "";
-};
-
-
-
-
-
-
-/* ==========================================================
-   UPDATE SELECTION
-   SAFE FOUNDATION
-   ========================================================== */
-
-CampusWord2007Simulateur
-    .SelectionEngine
-    .updateSelection =
-function(
-    pageNumber,
-    characterIndex
-){
-
-    const state =
-        CampusWord2007Simulateur
-            .SelectionState;
-
-    if(
-        !state.active
-    ){
-        return;
-    }
-
-    state.endPage =
-        pageNumber;
-
-    state.endIndex =
-        characterIndex;
-};
-
-
-
-
-
-
-
-
-/* ==========================================================
-   FINISH SELECTION
-   SAFE FOUNDATION
-   ========================================================== */
-
-
-CampusWord2007Simulateur
-    .SelectionEngine
-    .finishSelection =
-function(){
-
-    const state =
-        CampusWord2007Simulateur
-            .SelectionState;
-
-    if(
-        !state.active
-    ){
-        return;
-    }
-
-    let pageContent =
-        CampusWord2007Simulateur
-            .PageContentState
-            .getPageContent(
-                state.startPage
-            ) || "";
-
-    // 🔥 SAFE EXTENSION (pa touche orijinal flow la)
-    if (state.startPage === state.endPage) {
-
-        const start =
-            Math.min(
-                state.startIndex,
-                state.endIndex
-            );
-
-        const end =
-            Math.max(
-                state.startIndex,
-                state.endIndex
-            );
-
-        state.selectedText =
-            pageContent.slice(
-                start,
-                end
-            );
-
-        return;
-    }
-
-    // multi-page fallback SAFE (pa afekte single page logic)
-    let result = "";
-
-    for (
-        let p = state.startPage;
-        p <= state.endPage;
-        p++
-    ) {
-
-        const content =
-            CampusWord2007Simulateur
-                .PageContentState
-                .getPageContent(p) || "";
-
-        if (p === state.startPage) {
-
-            result += content.slice(state.startIndex);
-
-        } else if (p === state.endPage) {
-
-            result += content.slice(0, state.endIndex);
-
-        } else {
-
-            result += content;
-        }
-    }
-
-    state.selectedText = result;
-};
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/* ==========================================================
-   MOUSE SELECTION STATE
-   ========================================================== */
-
-CampusWord2007Simulateur
-    .SelectionState
-    .mouseDown = false;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -4685,4 +4363,338 @@ document.addEventListener(
 
     }
 );
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* ==========================================================
+   SELECTION ENGINE
+   CREATE SELECTION LAYER
+   ========================================================== */
+
+CampusWord2007Simulateur.SelectionEngine.ensureSelectionLayer = function () {
+
+    const page =
+        CampusWord2007Simulateur.DocumentState.activePage;
+
+    if (!page) {
+        return null;
+    }
+
+    let layer =
+        page.querySelector(".selection-layer");
+
+    if (!layer) {
+
+        layer =
+            document.createElement("div");
+
+        layer.className = "selection-layer";
+
+        layer.style.position = "absolute";
+        layer.style.top = "0";
+        layer.style.left = "0";
+        layer.style.width = "100%";
+        layer.style.height = "100%";
+        layer.style.pointerEvents = "none";
+        layer.style.zIndex = "5";
+
+        page.appendChild(layer);
+    }
+
+    CampusWord2007Simulateur.SelectionState.selectionLayer = layer;
+
+    return layer;
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* ==========================================================
+   CLEAR SELECTION
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .SelectionEngine
+    .clearSelection =
+function(){
+
+    const state =
+        CampusWord2007Simulateur
+            .SelectionState;
+
+    state.active = false;
+
+    state.startPage = 1;
+
+    state.endPage = 1;
+
+    state.startIndex = 0;
+
+    state.endIndex = 0;
+
+    state.selectedText = "";
+
+};
+
+
+
+
+
+
+
+
+/* ==========================================================
+   HAS SELECTION
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .SelectionEngine
+    .hasSelection =
+function(){
+
+    return CampusWord2007Simulateur
+        .SelectionState
+        .active;
+};
+
+
+
+
+
+
+
+
+/* ==========================================================
+   GET SELECTED TEXT
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .SelectionEngine
+    .getSelectedText =
+function(){
+
+    return CampusWord2007Simulateur
+        .SelectionState
+        .selectedText || "";
+};
+
+
+
+
+
+/* ==========================================================
+   START SELECTION
+   SAFE FOUNDATION
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .SelectionEngine
+    .startSelection =
+function(
+    pageNumber,
+    characterIndex
+){
+
+    const state =
+        CampusWord2007Simulateur
+            .SelectionState;
+
+    state.active = true;
+
+    state.startPage =
+        pageNumber;
+
+    state.endPage =
+        pageNumber;
+
+    state.startIndex =
+        characterIndex;
+
+    state.endIndex =
+        characterIndex;
+
+    state.selectedText = "";
+};
+
+
+
+
+
+
+/* ==========================================================
+   UPDATE SELECTION
+   SAFE FOUNDATION
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .SelectionEngine
+    .updateSelection =
+function(
+    pageNumber,
+    characterIndex
+){
+
+    const state =
+        CampusWord2007Simulateur
+            .SelectionState;
+
+    if(
+        !state.active
+    ){
+        return;
+    }
+
+    state.endPage =
+        pageNumber;
+
+    state.endIndex =
+        characterIndex;
+};
+
+
+
+
+
+
+
+
+/* ==========================================================
+   FINISH SELECTION
+   SAFE FOUNDATION
+   ========================================================== */
+
+
+CampusWord2007Simulateur
+    .SelectionEngine
+    .finishSelection =
+function(){
+
+    const state =
+        CampusWord2007Simulateur
+            .SelectionState;
+
+    if(
+        !state.active
+    ){
+        return;
+    }
+
+    let pageContent =
+        CampusWord2007Simulateur
+            .PageContentState
+            .getPageContent(
+                state.startPage
+            ) || "";
+
+    // 🔥 SAFE EXTENSION (pa touche orijinal flow la)
+    if (state.startPage === state.endPage) {
+
+        const start =
+            Math.min(
+                state.startIndex,
+                state.endIndex
+            );
+
+        const end =
+            Math.max(
+                state.startIndex,
+                state.endIndex
+            );
+
+        state.selectedText =
+            pageContent.slice(
+                start,
+                end
+            );
+
+        return;
+    }
+
+    // multi-page fallback SAFE (pa afekte single page logic)
+    let result = "";
+
+    for (
+        let p = state.startPage;
+        p <= state.endPage;
+        p++
+    ) {
+
+        const content =
+            CampusWord2007Simulateur
+                .PageContentState
+                .getPageContent(p) || "";
+
+        if (p === state.startPage) {
+
+            result += content.slice(state.startIndex);
+
+        } else if (p === state.endPage) {
+
+            result += content.slice(0, state.endIndex);
+
+        } else {
+
+            result += content;
+        }
+    }
+
+    state.selectedText = result;
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* ==========================================================
+   MOUSE SELECTION STATE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .SelectionState
+    .mouseDown = false;
+
 
