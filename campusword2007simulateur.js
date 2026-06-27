@@ -1100,212 +1100,27 @@ CampusWord2007Simulateur
 
 
 
-/* ==========================================================
-   SELECTION ENGINE
-   MOUSE SELECTION BIND (FINAL FIX)
-   ========================================================== */
 
-CampusWord2007Simulateur.SelectionEngine.bindMouseSelection = function () {
 
-    const viewport =
-        CampusWord2007Simulateur.DOM.documentViewport;
 
-    if (!viewport) {
-        return;
-    }
 
-    viewport.addEventListener("mousedown", function (e) {
 
-        const state =
-            CampusWord2007Simulateur.SelectionState;
 
-        const page =
-            CampusWord2007Simulateur.DocumentState.activePage;
 
-        if (!page) {
-            return;
-        }
 
-        const startIndex =
-            Math.floor(e.offsetX / 7);
 
-        state.mouseDown = true;
 
-        CampusWord2007Simulateur.SelectionEngine.startSelection(
-            1,
-            startIndex
-        );
-    });
 
-    viewport.addEventListener("mousemove", function (e) {
 
-        const state =
-            CampusWord2007Simulateur.SelectionState;
 
-        if (!state.mouseDown || !state.active) {
-            return;
-        }
 
-        const currentIndex =
-            Math.floor(e.offsetX / 7);
 
-        CampusWord2007Simulateur.SelectionEngine.updateSelection(
-            state.startPage,
-            currentIndex
-        );
 
-        // LIVE HIGHLIGHT UPDATE
-        CampusWord2007Simulateur.SelectionEngine.renderSelectionHighlight();
-    });
 
-    viewport.addEventListener("mouseup", function () {
 
-        const state =
-            CampusWord2007Simulateur.SelectionState;
 
-        state.mouseDown = false;
 
-        CampusWord2007Simulateur.SelectionEngine.finishSelection();
 
-        CampusWord2007Simulateur.SelectionEngine.renderSelectionHighlight();
-    });
-};
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/* ==========================================================
-   SELECTION ENGINE
-   VISUAL HIGHLIGHT SYSTEM
-   ========================================================== */
-
-CampusWord2007Simulateur.SelectionEngine.renderHighlight = function () {
-
-    const state =
-        CampusWord2007Simulateur.SelectionState;
-
-    const page =
-        CampusWord2007Simulateur.PageEngine.getPage(state.startPage);
-
-    if (!page) {
-        return;
-    }
-
-    let layer =
-        state.selectionLayer;
-
-    if (!layer) {
-
-        layer =
-            document.createElement("div");
-
-        layer.className = "selection-layer";
-
-        layer.style.position = "absolute";
-        layer.style.top = "0";
-        layer.style.left = "0";
-        layer.style.width = "100%";
-        layer.style.height = "100%";
-        layer.style.pointerEvents = "none";
-        layer.style.zIndex = "5";
-
-        page.appendChild(layer);
-
-        state.selectionLayer = layer;
-    }
-
-    layer.innerHTML = "";
-
-    if (!state.active) {
-        return;
-    }
-
-    const start =
-        Math.min(state.startIndex, state.endIndex);
-
-    const end =
-        Math.max(state.startIndex, state.endIndex);
-
-    if (start === end) {
-        return;
-    }
-
-    // ================================
-    // FIX: DOM-BASED SELECTION (SAFE)
-    // ================================
-
-    const textLayer =
-        page.querySelector(".page-text-layer");
-
-    if (!textLayer) {
-        return;
-    }
-
-    const spans =
-        textLayer.querySelectorAll("span");
-
-    if (!spans || spans.length === 0) {
-        return;
-    }
-
-    const startSpan =
-        spans[start] || spans[0];
-
-    const endSpan =
-        spans[end] || spans[spans.length - 1];
-
-    const startRect =
-        startSpan.getBoundingClientRect();
-
-    const endRect =
-        endSpan.getBoundingClientRect();
-
-    const layerRect =
-        layer.getBoundingClientRect();
-
-    const highlight =
-        document.createElement("div");
-
-    highlight.style.position = "absolute";
-    highlight.style.left =
-        (startRect.left - layerRect.left) + "px";
-
-    highlight.style.top =
-        (startRect.top - layerRect.top) + "px";
-
-    highlight.style.height =
-        (startRect.height || 20) + "px";
-
-    highlight.style.width =
-        (endRect.right - startRect.left) + "px";
-
-    highlight.style.background =
-        "rgba(0, 120, 215, 0.25)";
-
-    highlight.style.borderRadius =
-        "2px";
-
-    layer.appendChild(highlight);
-};
 
 
 
