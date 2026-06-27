@@ -1,6 +1,7 @@
 /* ==========================================================
    CAMPUS WORD 2007 SIMULATOR
-   CORE BASE v1 (NO COMPLEXITY)
+   CORE BASE v1
+   FILE: campusword2007simulateurs.js
    ========================================================== */
 
 const CampusWord2007Simulateur = {};
@@ -65,7 +66,7 @@ CampusWord2007Simulateur.Document = {
 };
 
 /* ==========================================================
-   CARET ENGINE (LOGIC ONLY)
+   CARET ENGINE
    ========================================================== */
 
 CampusWord2007Simulateur.CaretEngine = {
@@ -98,30 +99,36 @@ CampusWord2007Simulateur.CaretEngine = {
 };
 
 /* ==========================================================
-   SELECTION ENGINE (SIMPLE RANGE)
+   SELECTION ENGINE
    ========================================================== */
 
 CampusWord2007Simulateur.SelectionEngine = {
 
     start(position){
 
-        CampusWord2007Simulateur.State.selection.active = true;
-        CampusWord2007Simulateur.State.selection.start = position;
-        CampusWord2007Simulateur.State.selection.end = position;
+        const s = CampusWord2007Simulateur.State.selection;
+
+        s.active = true;
+        s.start = position;
+        s.end = position;
     },
 
     update(position){
 
-        if(!CampusWord2007Simulateur.State.selection.active) return;
+        const s = CampusWord2007Simulateur.State.selection;
 
-        CampusWord2007Simulateur.State.selection.end = position;
+        if(!s.active) return;
+
+        s.end = position;
     },
 
     clear(){
 
-        CampusWord2007Simulateur.State.selection.active = false;
-        CampusWord2007Simulateur.State.selection.start = null;
-        CampusWord2007Simulateur.State.selection.end = null;
+        CampusWord2007Simulateur.State.selection = {
+            active: false,
+            start: null,
+            end: null
+        };
     },
 
     get(){
@@ -131,7 +138,7 @@ CampusWord2007Simulateur.SelectionEngine = {
 };
 
 /* ==========================================================
-   INPUT ENGINE (KEYBOARD BASIC)
+   INPUT ENGINE
    ========================================================== */
 
 CampusWord2007Simulateur.InputEngine = {
@@ -146,22 +153,19 @@ CampusWord2007Simulateur.InputEngine = {
 
     handleKey(e){
 
-        // STOP browser scroll behavior
         e.preventDefault();
 
-        const key = e.key;
+        if(e.key.length === 1){
 
-        if(key.length === 1){
-
-            this.insertText(key);
+            this.insertText(e.key);
         }
 
-        if(key === "Backspace"){
+        if(e.key === "Backspace"){
 
             this.deleteText();
         }
 
-        if(key === "Enter"){
+        if(e.key === "Enter"){
 
             this.newLine();
         }
@@ -169,41 +173,39 @@ CampusWord2007Simulateur.InputEngine = {
 
     insertText(char){
 
-        // BASE LOGIC ONLY (no DOM yet)
-        const caret = CampusWord2007Simulateur.State.caret;
-
-        console.log("Insert:", char, caret);
+        console.log("INSERT:", char, CampusWord2007Simulateur.State.caret);
     },
 
     deleteText(){
 
-        console.log("Delete at:", CampusWord2007Simulateur.State.caret);
+        console.log("DELETE:", CampusWord2007Simulateur.State.caret);
     },
 
     newLine(){
 
-        console.log("New Line at:", CampusWord2007Simulateur.State.caret);
+        console.log("NEW LINE");
 
         CampusWord2007Simulateur.CaretEngine.nextPage();
     }
 };
 
 /* ==========================================================
-   RENDER ENGINE (PLACEHOLDER ONLY)
+   RENDER ENGINE (PLACEHOLDER)
    ========================================================== */
 
 CampusWord2007Simulateur.RenderEngine = {
 
     render(){
 
-        const doc = CampusWord2007Simulateur.Document;
-
-        console.log("Rendering pages:", doc.pages.length);
+        console.log(
+            "RENDER:",
+            CampusWord2007Simulateur.Document.pages.length
+        );
     }
 };
 
 /* ==========================================================
-   CORE INITIALIZER
+   CORE
    ========================================================== */
 
 CampusWord2007Simulateur.Core = {
@@ -218,12 +220,12 @@ CampusWord2007Simulateur.Core = {
 
         CampusWord2007Simulateur.RenderEngine.render();
 
-        console.log("Campus Word CORE v1 READY");
+        console.log("CAMPUS WORD READY ✔");
     }
 };
 
 /* ==========================================================
-   START SYSTEM
+   BOOT SYSTEM
    ========================================================== */
 
 window.addEventListener("load", () => {
