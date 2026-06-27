@@ -1,48 +1,45 @@
-/* ==========================================================
-   CAMPUS WORD 2007 CORE BASE v1
-   FILE: campusword2007.js
-   ========================================================== */
 
-const CampusWord2007 = {};
+
 
 /* ==========================================================
-   STATE (GLOBAL ENGINE STATE)
+   CAMPUS WORD 2007 CORE BOOT v2 (VISIBLE START)
+   FILE: campusword2007simulateurs.js
    ========================================================== */
 
-CampusWord2007.State = {
+const CampusWord2007Simulateur = {};
+
+/* ==========================================================
+   STATE
+   ========================================================== */
+
+CampusWord2007Simulateur.State = {
     ready: false,
 
     caret: {
         page: 0,
         block: 0,
         offset: 0
-    },
-
-    selection: {
-        active: false,
-        start: null,
-        end: null
     }
 };
 
 /* ==========================================================
-   DOCUMENT MODEL (MULTI PAGE FOUNDATION)
+   DOCUMENT MODEL (MULTI PAGE)
    ========================================================== */
 
-CampusWord2007.Document = {
+CampusWord2007Simulateur.Document = {
 
     pages: [],
 
     createPage() {
-        return {
-            id: crypto.randomUUID ? crypto.randomUUID() : Date.now() + Math.random(),
+
+        const page = {
+            id: Date.now() + Math.random(),
             blocks: [
-                {
-                    type: "paragraph",
-                    text: ""
-                }
+                { type: "paragraph", text: "" }
             ]
         };
+
+        return page;
     },
 
     init() {
@@ -54,201 +51,181 @@ CampusWord2007.Document = {
         const page = this.createPage();
         this.pages.push(page);
         return page;
-    },
-
-    getPage(index) {
-        return this.pages[index] || null;
     }
 };
 
 /* ==========================================================
-   CARET ENGINE (GLOBAL POSITIONING)
+   DOM ENGINE (IMPORTANT: REND FIRST PAGE VISIBLE)
    ========================================================== */
 
-CampusWord2007.CaretEngine = {
+CampusWord2007Simulateur.DOM = {
 
-    set(page, block, offset) {
-        CampusWord2007.State.caret = { page, block, offset };
-    },
-
-    get() {
-        return CampusWord2007.State.caret;
-    },
-
-    moveForward() {
-        const c = CampusWord2007.State.caret;
-        c.offset++;
-    },
-
-    moveToNextBlock() {
-        const c = CampusWord2007.State.caret;
-        c.block++;
-        c.offset = 0;
-    },
-
-    moveToNextPage() {
-        const c = CampusWord2007.State.caret;
-        c.page++;
-        c.block = 0;
-        c.offset = 0;
-
-        if (!CampusWord2007.Document.getPage(c.page)) {
-            CampusWord2007.Document.addPage();
-        }
-    }
-};
-
-/* ==========================================================
-   SELECTION ENGINE (GLOBAL RANGE)
-   ========================================================== */
-
-CampusWord2007.SelectionEngine = {
-
-    start(pos) {
-        const s = CampusWord2007.State.selection;
-        s.active = true;
-        s.start = structuredClone(pos);
-        s.end = structuredClone(pos);
-    },
-
-    update(pos) {
-        const s = CampusWord2007.State.selection;
-        if (!s.active) return;
-        s.end = structuredClone(pos);
-    },
-
-    clear() {
-        CampusWord2007.State.selection = {
-            active: false,
-            start: null,
-            end: null
-        };
-    },
-
-    get() {
-        return CampusWord2007.State.selection;
-    }
-};
-
-/* ==========================================================
-   INPUT ENGINE (KEYBOARD CORE)
-   ========================================================== */
-
-CampusWord2007.InputEngine = {
+    app: null,
+    pagesContainer: null,
 
     init() {
-        document.addEventListener("keydown", (e) => this.handleKey(e));
-    },
 
-    handleKey(e) {
+        this.app = document.getElementById("campusword2007simulateurs");
+        this.pagesContainer = document.getElementById("document-pages-container");
 
-        const key = e.key;
-
-        if (key.length === 1) {
-            e.preventDefault();
-            this.insertText(key);
+        if (!this.pagesContainer) {
+            console.error("Missing #document-pages-container in HTML");
             return;
         }
-
-        switch (key) {
-            case "Backspace":
-                e.preventDefault();
-                this.deleteText();
-                break;
-
-            case "Enter":
-                e.preventDefault();
-                this.newLine();
-                break;
-        }
     },
 
-    insertText(char) {
-        const c = CampusWord2007.State.caret;
-        const page = CampusWord2007.Document.getPage(c.page);
-        if (!page) return;
+    renderPages() {
 
-        const block = page.blocks[c.block];
-        if (!block) return;
+        this.pagesContainer.innerHTML = "";
 
-        block.text =
-            block.text.slice(0, c.offset) +
-            char +
-            block.text.slice(c.offset);
+        CampusWord2007Simulateur.Document.pages.forEach((page, index) => {
 
-        c.offset++;
+            const pageEl = document.createElement("div");
+            pageEl.className = "document-page";
+            pageEl.dataset.page = index;
 
-        CampusWord2007.RenderEngine.render();
-    },
+            const content = document.createElement("div");
+            content.className = "page-content";
 
-    deleteText() {
-        const c = CampusWord2007.State.caret;
-        const page = CampusWord2007.Document.getPage(c.page);
-        if (!page) return;
+            const textLayer = document.createElement("div");
+            textLayer.className = "page-text-layer";
 
-        const block = page.blocks[c.block];
-        if (!block || c.offset <= 0) return;
+            textLayer.textContent = page.blocks.map(b => b.text).join("\n");
 
-        block.text =
-            block.text.slice(0, c.offset - 1) +
-            block.text.slice(c.offset);
+            content.appendChild(textLayer);
+            pageEl.appendChild(content);
 
-        c.offset--;
+            this.pagesContainer.appendChild(pageEl);
+        });
+    }
+};
 
-        CampusWord2007.RenderEngine.render();
+/* ==========================================================
+   CARET
+   ========================================================== */
+
+CampusWord2007Simulateur.Caret = {
+
+    moveForward() {
+        CampusWord2007Simulateur.State.caret.offset++;
     },
 
     newLine() {
-        const c = CampusWord2007.State.caret;
-        const page = CampusWord2007.Document.getPage(c.page);
+
+        const state = CampusWord2007Simulateur.State;
+        const doc = CampusWord2007Simulateur.Document;
+
+        const page = doc.pages[state.caret.page];
         if (!page) return;
 
-        const current = page.blocks[c.block];
+        const currentBlock = page.blocks[state.caret.block];
 
-        const remaining = current.text.slice(c.offset);
-        current.text = current.text.slice(0, c.offset);
+        const remaining = currentBlock.text.slice(state.caret.offset);
+        currentBlock.text = currentBlock.text.slice(0, state.caret.offset);
 
-        page.blocks.splice(c.block + 1, 0, {
+        page.blocks.splice(state.caret.block + 1, 0, {
             type: "paragraph",
             text: remaining
         });
 
-        CampusWord2007.CaretEngine.moveToNextBlock();
-        CampusWord2007.RenderEngine.render();
+        state.caret.block++;
+        state.caret.offset = 0;
     }
 };
 
 /* ==========================================================
-   RENDER ENGINE (MINIMAL FOUNDATION)
+   INPUT ENGINE
    ========================================================== */
 
-CampusWord2007.RenderEngine = {
+CampusWord2007Simulateur.Input = {
+
+    init() {
+        document.addEventListener("keydown", (e) => this.handle(e));
+    },
+
+    handle(e) {
+
+        const state = CampusWord2007Simulateur.State;
+        const doc = CampusWord2007Simulateur.Document;
+
+        if (e.key.length === 1) {
+
+            e.preventDefault();
+
+            const page = doc.pages[state.caret.page];
+            const block = page.blocks[state.caret.block];
+
+            block.text =
+                block.text.slice(0, state.caret.offset) +
+                e.key +
+                block.text.slice(state.caret.offset);
+
+            state.caret.offset++;
+
+            CampusWord2007Simulateur.Render.render();
+        }
+
+        if (e.key === "Backspace") {
+            e.preventDefault();
+
+            const page = doc.pages[state.caret.page];
+            const block = page.blocks[state.caret.block];
+
+            if (state.caret.offset > 0) {
+
+                block.text =
+                    block.text.slice(0, state.caret.offset - 1) +
+                    block.text.slice(state.caret.offset);
+
+                state.caret.offset--;
+            }
+
+            CampusWord2007Simulateur.Render.render();
+        }
+
+        if (e.key === "Enter") {
+            e.preventDefault();
+            CampusWord2007Simulateur.Caret.newLine();
+            CampusWord2007Simulateur.Render.render();
+        }
+    }
+};
+
+/* ==========================================================
+   RENDER ENGINE
+   ========================================================== */
+
+CampusWord2007Simulateur.Render = {
 
     render() {
-        // foundation only: prepare for DOM binding later
-        console.log(
-            "RENDER PAGES:",
-            CampusWord2007.Document.pages.map(p => p.blocks.map(b => b.text))
-        );
+        CampusWord2007Simulateur.DOM.renderPages();
     }
 };
 
 /* ==========================================================
-   CORE BOOTSTRAP
+   CORE BOOT
    ========================================================== */
 
-CampusWord2007.Core = {
+CampusWord2007Simulateur.Core = {
 
     init() {
 
-        CampusWord2007.Document.init();
-        CampusWord2007.InputEngine.init();
+        // 1. INIT DOCUMENT (MULTI PAGE READY)
+        CampusWord2007Simulateur.Document.init();
 
-        CampusWord2007.State.ready = true;
+        // 2. INIT DOM
+        CampusWord2007Simulateur.DOM.init();
 
-        CampusWord2007.RenderEngine.render();
+        // 3. RENDER FIRST PAGE IMMEDIATELY
+        CampusWord2007Simulateur.DOM.renderPages();
 
-        console.log("WORD CORE READY ✔");
+        // 4. INPUT ACTIVE
+        CampusWord2007Simulateur.Input.init();
+
+        // 5. READY
+        CampusWord2007Simulateur.State.ready = true;
+
+        console.log("WORD STARTED ✔ MULTI PAGE ACTIVE");
     }
 };
 
@@ -257,8 +234,16 @@ CampusWord2007.Core = {
    ========================================================== */
 
 window.addEventListener("load", () => {
-    CampusWord2007.Core.init();
+    CampusWord2007Simulateur.Core.init();
 });
+
+
+
+
+
+
+
+
 
 
 
