@@ -235,3 +235,280 @@
 
 
 
+
+
+
+
+
+
+
+/* ==========================================================
+   CAMPUS WORD 2007 SIMULATEUR
+   PHASE 2A
+   DOM ENGINE
+   Cache
+   Validation
+   Registration
+========================================================== */
+
+CampusWord2007Simulateur.DOMEngine = {
+
+    elements: {},
+
+    requiredIds: [
+
+        "campusword2007simulateur",
+
+        "word-loading-screen",
+        "loading-progress-bar",
+        "loading-message",
+
+        "word-app",
+
+        "title-bar",
+        "document-title",
+
+        "window-minimize",
+        "window-maximize",
+        "window-close",
+
+        "office-button",
+        "office-menu",
+
+        "quick-access-toolbar",
+
+        "ribbon-tabs",
+        "ribbon-container",
+
+        "home-tab",
+        "insert-tab",
+        "format-tab",
+        "page-layout-tab",
+        "references-tab",
+
+        "workspace",
+
+        "vertical-ruler",
+        "vertical-ruler-scale",
+        "vertical-margin-top",
+        "vertical-margin-bottom",
+
+        "document-viewport",
+        "document-workspace-background",
+
+        "horizontal-ruler",
+        "horizontal-ruler-scale",
+        "horizontal-margin-left",
+        "horizontal-margin-right",
+
+        "document-scroll-area",
+        "document-canvas",
+        "document-pages-container",
+        "document-page-template",
+
+        "workspace-scrollbars",
+        "vertical-scrollbar",
+        "vertical-scroll-thumb",
+        "horizontal-scrollbar",
+        "horizontal-scroll-thumb",
+
+        "status-bar",
+        "status-page-number",
+        "status-word-count",
+        "status-language",
+        "status-proofing",
+
+        "print-layout-view",
+        "web-layout-view",
+        "reading-layout-view",
+
+        "status-zoom-percentage",
+
+        "zoom-control",
+        "zoom-out",
+        "zoom-in",
+        "zoom-slider-container",
+        "zoom-slider-track",
+        "zoom-slider-thumb"
+
+    ],
+
+    cache(){
+
+        this.elements = {};
+
+        this.requiredIds.forEach(id=>{
+
+            this.elements[id]=document.getElementById(id);
+
+        });
+
+        return this.elements;
+
+    },
+
+    get(id){
+
+        return this.elements[id] || null;
+
+    },
+
+    exists(id){
+
+        return this.get(id)!==null;
+
+    },
+
+    query(selector){
+
+        return document.querySelector(selector);
+
+    },
+
+    queryAll(selector){
+
+        return Array.from(
+            document.querySelectorAll(selector)
+        );
+
+    },
+
+    validate(){
+
+        const missing=[];
+
+        this.requiredIds.forEach(id=>{
+
+            if(!this.elements[id]){
+
+                missing.push(id);
+
+            }
+
+        });
+
+        if(missing.length){
+
+            console.error(
+
+                "[DOMEngine] Missing DOM elements:",
+
+                missing
+
+            );
+
+            return false;
+
+        }
+
+        return true;
+
+    },
+
+    registerRibbonTabs(){
+
+        this.elements.ribbonTabs=
+
+            this.queryAll(".ribbon-tab");
+
+    },
+
+    registerRibbonGroups(){
+
+        this.elements.ribbonGroups=
+
+            this.queryAll(".ribbon-group");
+
+    },
+
+    registerRibbonButtons(){
+
+        this.elements.ribbonButtons=
+
+            this.queryAll(".ribbon-btn");
+
+    },
+
+    registerPages(){
+
+        this.elements.documentPages=
+
+            this.queryAll(".document-page");
+
+    },
+
+    registerLayers(){
+
+        this.elements.textLayers=
+
+            this.queryAll(".page-text-layer");
+
+        this.elements.objectLayers=
+
+            this.queryAll(".page-object-layer");
+
+        this.elements.selectionLayers=
+
+            this.queryAll(".page-selection-layer");
+
+        this.elements.caretLayers=
+
+            this.queryAll(".page-caret-layer");
+
+        this.elements.overlayLayers=
+
+            this.queryAll(".page-overlay-layer");
+
+    },
+
+    registerInputs(){
+
+        this.elements.selects=
+
+            this.queryAll("select");
+
+        this.elements.inputs=
+
+            this.queryAll("input");
+
+        this.elements.textareas=
+
+            this.queryAll("textarea");
+
+    },
+
+    register(){
+
+        this.registerRibbonTabs();
+
+        this.registerRibbonGroups();
+
+        this.registerRibbonButtons();
+
+        this.registerPages();
+
+        this.registerLayers();
+
+        this.registerInputs();
+
+    },
+
+    refresh(){
+
+        this.cache();
+
+        this.register();
+
+    },
+
+    initialize(){
+
+        this.cache();
+
+        this.register();
+
+        return this.validate();
+
+    }
+
+};
