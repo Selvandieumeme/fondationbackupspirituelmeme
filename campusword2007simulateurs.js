@@ -1,20 +1,16 @@
 /* ==========================================================
-   CAMPUS WORD 2007 SIMULATOR
-   CORE BASE v1
-   FILE: campusword2007simulateurs.js
+   CAMPUS WORD 2007 CORE BASE v1
+   FILE: campusword2007.js
    ========================================================== */
 
-const CampusWord2007Simulateur = {};
+const CampusWord2007 = {};
 
 /* ==========================================================
-   STATE (GLOBAL MEMORY)
+   STATE (GLOBAL ENGINE STATE)
    ========================================================== */
 
-CampusWord2007Simulateur.State = {
-
-    documentReady: false,
-
-    currentPageIndex: 0,
+CampusWord2007.State = {
+    ready: false,
 
     caret: {
         page: 0,
@@ -33,202 +29,251 @@ CampusWord2007Simulateur.State = {
    DOCUMENT MODEL (MULTI PAGE FOUNDATION)
    ========================================================== */
 
-CampusWord2007Simulateur.Document = {
+CampusWord2007.Document = {
 
     pages: [],
 
-    createPage(){
-
+    createPage() {
         return {
-            id: Date.now() + Math.random(),
-            blocks: []
+            id: crypto.randomUUID ? crypto.randomUUID() : Date.now() + Math.random(),
+            blocks: [
+                {
+                    type: "paragraph",
+                    text: ""
+                }
+            ]
         };
     },
 
-    init(){
-
+    init() {
         this.pages = [];
         this.pages.push(this.createPage());
     },
 
-    addPage(){
-
+    addPage() {
         const page = this.createPage();
         this.pages.push(page);
-
         return page;
     },
 
-    getPage(index){
-
+    getPage(index) {
         return this.pages[index] || null;
     }
 };
 
 /* ==========================================================
-   CARET ENGINE
+   CARET ENGINE (GLOBAL POSITIONING)
    ========================================================== */
 
-CampusWord2007Simulateur.CaretEngine = {
+CampusWord2007.CaretEngine = {
 
-    moveTo(page, block, offset){
-
-        CampusWord2007Simulateur.State.caret = {
-            page,
-            block,
-            offset
-        };
+    set(page, block, offset) {
+        CampusWord2007.State.caret = { page, block, offset };
     },
 
-    get(){
-
-        return CampusWord2007Simulateur.State.caret;
+    get() {
+        return CampusWord2007.State.caret;
     },
 
-    nextChar(){
-
-        CampusWord2007Simulateur.State.caret.offset++;
+    moveForward() {
+        const c = CampusWord2007.State.caret;
+        c.offset++;
     },
 
-    nextPage(){
+    moveToNextBlock() {
+        const c = CampusWord2007.State.caret;
+        c.block++;
+        c.offset = 0;
+    },
 
-        CampusWord2007Simulateur.State.caret.page++;
-        CampusWord2007Simulateur.State.caret.block = 0;
-        CampusWord2007Simulateur.State.caret.offset = 0;
+    moveToNextPage() {
+        const c = CampusWord2007.State.caret;
+        c.page++;
+        c.block = 0;
+        c.offset = 0;
+
+        if (!CampusWord2007.Document.getPage(c.page)) {
+            CampusWord2007.Document.addPage();
+        }
     }
 };
 
 /* ==========================================================
-   SELECTION ENGINE
+   SELECTION ENGINE (GLOBAL RANGE)
    ========================================================== */
 
-CampusWord2007Simulateur.SelectionEngine = {
+CampusWord2007.SelectionEngine = {
 
-    start(position){
-
-        const s = CampusWord2007Simulateur.State.selection;
-
+    start(pos) {
+        const s = CampusWord2007.State.selection;
         s.active = true;
-        s.start = position;
-        s.end = position;
+        s.start = structuredClone(pos);
+        s.end = structuredClone(pos);
     },
 
-    update(position){
-
-        const s = CampusWord2007Simulateur.State.selection;
-
-        if(!s.active) return;
-
-        s.end = position;
+    update(pos) {
+        const s = CampusWord2007.State.selection;
+        if (!s.active) return;
+        s.end = structuredClone(pos);
     },
 
-    clear(){
-
-        CampusWord2007Simulateur.State.selection = {
+    clear() {
+        CampusWord2007.State.selection = {
             active: false,
             start: null,
             end: null
         };
     },
 
-    get(){
-
-        return CampusWord2007Simulateur.State.selection;
+    get() {
+        return CampusWord2007.State.selection;
     }
 };
 
 /* ==========================================================
-   INPUT ENGINE
+   INPUT ENGINE (KEYBOARD CORE)
    ========================================================== */
 
-CampusWord2007Simulateur.InputEngine = {
+CampusWord2007.InputEngine = {
 
-    init(){
+    init() {
+        document.addEventListener("keydown", (e) => this.handleKey(e));
+    },
 
-        document.addEventListener("keydown", (e) => {
+    handleKey(e) {
 
-            this.handleKey(e);
+        const key = e.key;
+
+        if (key.length === 1) {
+            e.preventDefault();
+            this.insertText(key);
+            return;
+        }
+
+        switch (key) {
+            case "Backspace":
+                e.preventDefault();
+                this.deleteText();
+                break;
+
+            case "Enter":
+                e.preventDefault();
+                this.newLine();
+                break;
+        }
+    },
+
+    insertText(char) {
+        const c = CampusWord2007.State.caret;
+        const page = CampusWord2007.Document.getPage(c.page);
+        if (!page) return;
+
+        const block = page.blocks[c.block];
+        if (!block) return;
+
+        block.text =
+            block.text.slice(0, c.offset) +
+            char +
+            block.text.slice(c.offset);
+
+        c.offset++;
+
+        CampusWord2007.RenderEngine.render();
+    },
+
+    deleteText() {
+        const c = CampusWord2007.State.caret;
+        const page = CampusWord2007.Document.getPage(c.page);
+        if (!page) return;
+
+        const block = page.blocks[c.block];
+        if (!block || c.offset <= 0) return;
+
+        block.text =
+            block.text.slice(0, c.offset - 1) +
+            block.text.slice(c.offset);
+
+        c.offset--;
+
+        CampusWord2007.RenderEngine.render();
+    },
+
+    newLine() {
+        const c = CampusWord2007.State.caret;
+        const page = CampusWord2007.Document.getPage(c.page);
+        if (!page) return;
+
+        const current = page.blocks[c.block];
+
+        const remaining = current.text.slice(c.offset);
+        current.text = current.text.slice(0, c.offset);
+
+        page.blocks.splice(c.block + 1, 0, {
+            type: "paragraph",
+            text: remaining
         });
-    },
 
-    handleKey(e){
-
-        e.preventDefault();
-
-        if(e.key.length === 1){
-
-            this.insertText(e.key);
-        }
-
-        if(e.key === "Backspace"){
-
-            this.deleteText();
-        }
-
-        if(e.key === "Enter"){
-
-            this.newLine();
-        }
-    },
-
-    insertText(char){
-
-        console.log("INSERT:", char, CampusWord2007Simulateur.State.caret);
-    },
-
-    deleteText(){
-
-        console.log("DELETE:", CampusWord2007Simulateur.State.caret);
-    },
-
-    newLine(){
-
-        console.log("NEW LINE");
-
-        CampusWord2007Simulateur.CaretEngine.nextPage();
+        CampusWord2007.CaretEngine.moveToNextBlock();
+        CampusWord2007.RenderEngine.render();
     }
 };
 
 /* ==========================================================
-   RENDER ENGINE (PLACEHOLDER)
+   RENDER ENGINE (MINIMAL FOUNDATION)
    ========================================================== */
 
-CampusWord2007Simulateur.RenderEngine = {
+CampusWord2007.RenderEngine = {
 
-    render(){
-
+    render() {
+        // foundation only: prepare for DOM binding later
         console.log(
-            "RENDER:",
-            CampusWord2007Simulateur.Document.pages.length
+            "RENDER PAGES:",
+            CampusWord2007.Document.pages.map(p => p.blocks.map(b => b.text))
         );
     }
 };
 
 /* ==========================================================
-   CORE
+   CORE BOOTSTRAP
    ========================================================== */
 
-CampusWord2007Simulateur.Core = {
+CampusWord2007.Core = {
 
-    init(){
+    init() {
 
-        CampusWord2007Simulateur.Document.init();
+        CampusWord2007.Document.init();
+        CampusWord2007.InputEngine.init();
 
-        CampusWord2007Simulateur.InputEngine.init();
+        CampusWord2007.State.ready = true;
 
-        CampusWord2007Simulateur.State.documentReady = true;
+        CampusWord2007.RenderEngine.render();
 
-        CampusWord2007Simulateur.RenderEngine.render();
-
-        console.log("CAMPUS WORD READY ✔");
+        console.log("WORD CORE READY ✔");
     }
 };
 
 /* ==========================================================
-   BOOT SYSTEM
+   BOOT
    ========================================================== */
 
 window.addEventListener("load", () => {
-
-    CampusWord2007Simulateur.Core.init();
+    CampusWord2007.Core.init();
 });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
