@@ -1662,6 +1662,7 @@ CampusWord2007Simulateur.PageFactory={
    Visibility
 ========================================================== */
 
+
 CampusWord2007Simulateur.CaretEngine={
 
     initialized:false,
@@ -1676,9 +1677,9 @@ CampusWord2007Simulateur.CaretEngine={
 
     blinking:false,
 
-    x:0,
+    x:96,
 
-    y:0,
+    y:96,
 
     width:1,
 
@@ -1693,6 +1694,24 @@ CampusWord2007Simulateur.CaretEngine={
             return true;
 
         }
+
+        if(!this.attachToActivePage()){
+
+            return false;
+
+        }
+
+        this.show();
+
+        this.startBlink();
+
+        this.initialized=true;
+
+        return true;
+
+    },
+
+    attachToActivePage(){
 
         const documentEngine=
 
@@ -1716,7 +1735,7 @@ CampusWord2007Simulateur.CaretEngine={
 
         }
 
-        this.layer=
+        const layer=
 
             page.querySelector(
 
@@ -1724,7 +1743,7 @@ CampusWord2007Simulateur.CaretEngine={
 
             );
 
-        if(!this.layer){
+        if(!layer){
 
             CampusWord2007Simulateur.Utilities.error(
 
@@ -1738,21 +1757,17 @@ CampusWord2007Simulateur.CaretEngine={
 
         }
 
+        this.layer=layer;
+
         this.createCaret();
 
         this.setPosition(
 
-            96,
+            this.x,
 
-            96
+            this.y
 
         );
-
-        this.show();
-
-        this.startBlink();
-
-        this.initialized=true;
 
         return true;
 
@@ -1760,10 +1775,9 @@ CampusWord2007Simulateur.CaretEngine={
 
     createCaret(){
 
-        if(this.caret){
+        if(!this.layer){
 
             return;
-
         }
 
         if(
@@ -1776,73 +1790,73 @@ CampusWord2007Simulateur.CaretEngine={
 
         ){
 
-            this.layer.style.position=
-
-                "relative";
+            this.layer.style.position="relative";
 
         }
 
-        this.caret=
+        if(
 
-            document.createElement("div");
+            this.caret &&
 
-        this.caret.id=
+            this.caret.parentNode!==this.layer
 
-            "document-caret";
+        ){
 
-        this.caret.style.position=
+            this.caret.parentNode.removeChild(
 
-            "absolute";
+                this.caret
 
-        this.caret.style.left="0px";
+            );
 
-        this.caret.style.top="0px";
+        }
 
-        this.caret.style.width=
+        if(!this.caret){
 
-            this.width+"px";
+            this.caret=document.createElement("div");
 
-        this.caret.style.height=
+            this.caret.id="document-caret";
 
-            this.height+"px";
+            this.caret.style.position="absolute";
 
-        this.caret.style.background=
+            this.caret.style.width=
 
-            "#000000";
+                this.width+"px";
 
-        this.caret.style.pointerEvents=
+            this.caret.style.height=
 
-            "none";
+                this.height+"px";
 
-        this.caret.style.userSelect=
+            this.caret.style.background="#000000";
 
-            "none";
+            this.caret.style.pointerEvents="none";
 
-        this.caret.style.display=
+            this.caret.style.userSelect="none";
 
-            "block";
+            this.caret.style.display="block";
 
-        this.caret.style.visibility=
+            this.caret.style.visibility="visible";
 
-            "visible";
+            this.caret.style.opacity="1";
 
-        this.caret.style.opacity=
+            this.caret.style.zIndex="999";
 
-            "1";
+            this.caret.style.transform="translate3d(0,0,0)";
 
-        this.caret.style.zIndex=
+        }
 
-            "999";
+        if(
 
-        this.caret.style.transform=
+            this.caret.parentNode!==this.layer
 
-            "translate3d(0,0,0)";
+        ){
 
-        this.layer.appendChild(
+            this.layer.appendChild(
 
-            this.caret
+                this.caret
 
-        );
+            );
+
+        }
 
     },
 
@@ -1858,13 +1872,45 @@ CampusWord2007Simulateur.CaretEngine={
 
         }
 
-        this.caret.style.left=
+        this.caret.style.left=x+"px";
 
-            x+"px";
+        this.caret.style.top=y+"px";
 
-        this.caret.style.top=
+    },
 
-            y+"px";
+    moveToPage(page){
+
+        if(!page){
+
+            return;
+
+        }
+
+        const layer=
+
+            page.querySelector(
+
+                ".page-caret-layer"
+
+            );
+
+        if(!layer){
+
+            return;
+
+        }
+
+        this.layer=layer;
+
+        this.createCaret();
+
+        this.setPosition(
+
+            this.x,
+
+            this.y
+
+        );
 
     },
 
@@ -1890,13 +1936,9 @@ CampusWord2007Simulateur.CaretEngine={
 
         this.visible=true;
 
-        this.caret.style.visibility=
+        this.caret.style.visibility="visible";
 
-            "visible";
-
-        this.caret.style.opacity=
-
-            "1";
+        this.caret.style.opacity="1";
 
     },
 
@@ -1910,17 +1952,19 @@ CampusWord2007Simulateur.CaretEngine={
 
         this.visible=false;
 
-        this.caret.style.visibility=
+        this.caret.style.visibility="hidden";
 
-            "hidden";
-
-        this.caret.style.opacity=
-
-            "0";
+        this.caret.style.opacity="0";
 
     },
 
     toggle(){
+
+        if(!this.caret){
+
+            return;
+
+        }
 
         if(this.visible){
 
@@ -1946,19 +1990,23 @@ CampusWord2007Simulateur.CaretEngine={
 
         this.blinking=true;
 
-        this.timer=
+        this.timer=setInterval(()=>{
 
-            setInterval(
+            if(
 
-                ()=>{
+                this.caret &&
 
-                    this.toggle();
+                this.caret.isConnected
 
-                },
+            ){
 
-                this.blinkInterval
+                this.toggle();
 
-            );
+            }
+
+        },
+
+        this.blinkInterval);
 
     },
 
@@ -2008,14 +2056,8 @@ CampusWord2007Simulateur.CaretEngine={
 
         this.visible=true;
 
-        this.x=0;
-
-        this.y=0;
-
         this.initialized=false;
 
     }
 
 };
-
-
