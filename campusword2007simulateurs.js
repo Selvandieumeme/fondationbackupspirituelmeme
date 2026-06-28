@@ -1141,6 +1141,185 @@ document.addEventListener(
 
 
 
+/* ==========================================================
+   CAMPUS WORD 2007 SIMULATEUR
+   PHASE 3B
+   LOADING ENGINE
+   Application Loading System
+========================================================== */
+
+CampusWord2007Simulateur.LoadingEngine={
+
+    initialized:false,
+
+    loadingScreen:null,
+
+    progressBar:null,
+
+    message:null,
+
+    progress:0,
+
+    visible:false,
+
+    initialize(){
+
+        if(this.initialized){
+
+            return true;
+
+        }
+
+        const DOM=
+
+            CampusWord2007Simulateur.DOMEngine;
+
+        this.loadingScreen=
+
+            DOM.get("word-loading-screen");
+
+        this.progressBar=
+
+            DOM.get("loading-progress-bar");
+
+        this.message=
+
+            DOM.get("loading-message");
+
+        if(
+
+            !this.loadingScreen ||
+
+            !this.progressBar ||
+
+            !this.message
+
+        ){
+
+            CampusWord2007Simulateur.Utilities.error(
+
+                "LoadingEngine",
+
+                "Loading elements missing."
+
+            );
+
+            return false;
+
+        }
+
+        this.reset();
+
+        this.initialized=true;
+
+        return true;
+
+    },
+
+    reset(){
+
+        this.progress=0;
+
+        this.visible=true;
+
+        this.updateProgress(0);
+
+        this.setMessage(
+
+            "Starting Campus Word 2007..."
+
+        );
+
+        this.show();
+
+    },
+
+    show(){
+
+        this.visible=true;
+
+        this.loadingScreen.style.display="flex";
+
+        CampusWord2007Simulateur.State.loading=true;
+
+    },
+
+    hide(){
+
+        this.visible=false;
+
+        this.loadingScreen.style.display="none";
+
+        CampusWord2007Simulateur.State.loading=false;
+
+    },
+
+    updateProgress(value){
+
+        value=
+
+            CampusWord2007Simulateur.Utilities.clamp(
+
+                value,
+
+                0,
+
+                100
+
+            );
+
+        this.progress=value;
+
+        this.progressBar.style.width=
+
+            value+"%";
+
+    },
+
+    increase(step=1){
+
+        this.updateProgress(
+
+            this.progress+step
+
+        );
+
+    },
+
+    setMessage(text){
+
+        this.message.textContent=text;
+
+    },
+
+    complete(){
+
+        this.updateProgress(100);
+
+        this.setMessage(
+
+            "Application Ready"
+
+        );
+
+    },
+
+    isVisible(){
+
+        return this.visible;
+
+    },
+
+    getProgress(){
+
+        return this.progress;
+
+    }
+
+};
+
+
+
 
 
 
