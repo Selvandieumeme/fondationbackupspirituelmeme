@@ -1231,196 +1231,171 @@ CampusWord2007Simulateur.LoadingEngine = {
 
 
 
+CampusWord2007Simulateur.LoadingEngine = {
 
+    initialized: false,
 
+    loadingScreen: null,
+    progressBar: null,
+    message: null,
 
+    progress: 0,
+    visible: false,
 
+    fadeOpacity: 1,
 
+    initialize() {
 
+        if (this.initialized) return true;
 
+        const DOM = CampusWord2007Simulateur.DOMEngine;
 
+        this.loadingScreen = DOM.get("word-loading-screen");
+        this.progressBar = DOM.get("loading-progress-bar");
+        this.message = DOM.get("loading-message");
 
-
-
-
-/* ==========================================================
-   CAMPUS WORD 2007 SIMULATEUR
-   PHASE 3A
-   DOCUMENT ENGINE
-   Dynamic Document Management
-========================================================== */
-
-CampusWord2007Simulateur.DocumentEngine = {
-
-    documentId:null,
-
-    pages:[],
-
-    activePage:null,
-
-    pageTemplate:null,
-
-    pageContainer:null,
-
-    pageCounter:0,
-
-    initialized:false,
-
-    initialize(){
-
-        if(this.initialized){
-
-            return true;
-
-        }
-
-        const DOM=
-
-            CampusWord2007Simulateur.DOMEngine;
-
-        this.pageTemplate=
-
-            DOM.get("document-page-template");
-
-        this.pageContainer=
-
-            DOM.get("document-pages-container");
-
-        if(
-
-            !this.pageTemplate ||
-
-            !this.pageContainer
-
-        ){
-
+        if (!this.loadingScreen || !this.progressBar || !this.message) {
             CampusWord2007Simulateur.Utilities.error(
-
-                "DocumentEngine",
-
-                "Document template or container missing."
-
+                "LoadingEngine missing elements"
             );
-
             return false;
-
         }
 
-        this.createDocument();
+        // smooth transition setup
+        this.loadingScreen.style.transition = "opacity 0.6s ease";
+        this.progressBar.style.transition = "width 0.25s ease";
+        this.message.style.transition = "opacity 0.3s ease";
 
-        this.initialized=true;
+        this.reset();
 
+        this.initialized = true;
         return true;
-
     },
 
-    createDocument(){
+    reset() {
 
-        this.documentId=
+        this.progress = 0;
+        this.visible = true;
 
-            CampusWord2007Simulateur.Utilities.generateId(
+        this.loadingScreen.style.opacity = "1";
+        this.loadingScreen.style.display = "flex";
 
-                "document"
+        CampusWord2007Simulateur.State.loading = true;
 
-            );
+        this.setMessage("Starting Word 2007...");
 
-        this.pages=[];
-
-        this.pageCounter=0;
-
-        this.activePage=null;
-
-        this.pageContainer.innerHTML="";
-
-        CampusWord2007Simulateur.PageFactory.createPage();
-
+        this.startFakeProgress();
     },
 
-    getActivePage(){
-
-        return this.activePage;
-
+    show() {
+        this.loadingScreen.style.display = "flex";
+        this.loadingScreen.style.opacity = "1";
+        this.visible = true;
     },
 
-    getPage(index){
+    hide() {
 
-        return this.pages[index] || null;
+        // smooth fade out
+        this.loadingScreen.style.opacity = "0";
 
+        setTimeout(() => {
+            this.loadingScreen.style.display = "none";
+            this.visible = false;
+            CampusWord2007Simulateur.State.loading = false;
+        }, 650);
     },
 
-    getPageCount(){
+    updateProgress(value) {
 
-        return this.pages.length;
+        this.progress = CampusWord2007Simulateur.Utilities.clamp(value, 0, 100);
 
+        this.progressBar.style.width = this.progress + "%";
+
+        // dynamic message like Word 2007
+        if (this.progress < 30) {
+            this.setMessage("Loading components...");
+        } else if (this.progress < 60) {
+            this.setMessage("Initializing document engine...");
+        } else if (this.progress < 90) {
+            this.setMessage("Preparing workspace...");
+        } else {
+            this.setMessage("Almost ready...");
+        }
     },
 
-    getPages(){
+    startFakeProgress() {
 
-        return [...this.pages];
+        let step = 0;
 
+        const interval = setInterval(() => {
+
+            // smooth acceleration (Word-like feel)
+            let increment = Math.random() * 6 + 2;
+
+            step += increment;
+
+            this.updateProgress(step);
+
+            if (step >= 100) {
+
+                clearInterval(interval);
+
+                this.updateProgress(100);
+
+                this.setMessage("Ready");
+
+                setTimeout(() => {
+
+                    this.finish();
+
+                }, 400);
+            }
+
+        }, 120);
     },
 
-    setActivePage(page){
+    finish() {
 
-        if(!page){
+        // fade out loading screen
+        this.hide();
 
-            return;
+        // optional: trigger app reveal
+        const app = document.getElementById("word-app");
 
+        if (app) {
+            app.style.opacity = "0";
+            app.style.display = "block";
+
+            app.style.transition = "opacity 0.7s ease";
+
+            setTimeout(() => {
+                app.style.opacity = "1";
+            }, 50);
         }
 
-        this.activePage=page;
-
-        this.updateStatus();
-
+        CampusWord2007Simulateur.Utilities.log("Word ready");
     },
 
-    clearDocument(){
-
-        this.pages=[];
-
-        this.pageCounter=0;
-
-        this.activePage=null;
-
-        this.pageContainer.innerHTML="";
-
+    setMessage(text) {
+        this.message.textContent = text;
     },
 
-    newDocument(){
-
-        this.clearDocument();
-
-        this.createDocument();
-
+    getProgress() {
+        return this.progress;
     },
 
-    updateStatus(){
-
-        const status=
-
-            CampusWord2007Simulateur.DOMEngine.get(
-
-                "status-page-number"
-
-            );
-
-        if(status){
-
-            status.textContent=
-
-                "Page "+
-
-                this.pageCounter+
-
-                " of "+
-
-                this.pageCounter;
-
-        }
-
+    isVisible() {
+        return this.visible;
     }
-
 };
+
+
+
+
+
+
+
+
 
 
 
