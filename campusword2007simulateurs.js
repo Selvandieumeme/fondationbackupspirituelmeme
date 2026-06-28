@@ -2264,11 +2264,13 @@ CampusWord2007Simulateur.CaretEngine
 
         layerRect.left;
 
-    const y=
+const y=
 
-        paragraphRect.top-
+    Math.round(
 
-        layerRect.top;
+        paragraph.offsetTop
+
+    );
 
     this.setPosition(
 
