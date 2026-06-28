@@ -2181,6 +2181,230 @@ CampusWord2007Simulateur.CaretEngine.attachToPage = function(page){
 
 
 
+/* ==========================================================
+   CAMPUS WORD 2007 SIMULATEUR
+   PHASE 5A
+   KEYBOARD ENGINE
+   Foundation
+========================================================== */
+
+CampusWord2007Simulateur.KeyboardEngine={
+
+    initialized:false,
+
+    enabled:true,
+
+    target:null,
+
+    boundKeyDown:null,
+
+    boundKeyUp:null,
+
+    boundKeyPress:null,
+
+    initialize(){
+
+        if(this.initialized){
+
+            return true;
+
+        }
+
+        this.target=document;
+
+        this.boundKeyDown=
+
+            this.onKeyDown.bind(this);
+
+        this.boundKeyUp=
+
+            this.onKeyUp.bind(this);
+
+        this.boundKeyPress=
+
+            this.onKeyPress.bind(this);
+
+        this.attach();
+
+        this.initialized=true;
+
+        return true;
+
+    },
+
+    attach(){
+
+        if(!this.target){
+
+            return;
+        }
+
+        this.target.addEventListener(
+
+            "keydown",
+
+            this.boundKeyDown,
+
+            false
+
+        );
+
+        this.target.addEventListener(
+
+            "keyup",
+
+            this.boundKeyUp,
+
+            false
+
+        );
+
+        this.target.addEventListener(
+
+            "keypress",
+
+            this.boundKeyPress,
+
+            false
+
+        );
+
+    },
+
+    detach(){
+
+        if(!this.target){
+
+            return;
+        }
+
+        this.target.removeEventListener(
+
+            "keydown",
+
+            this.boundKeyDown,
+
+            false
+
+        );
+
+        this.target.removeEventListener(
+
+            "keyup",
+
+            this.boundKeyUp,
+
+            false
+
+        );
+
+        this.target.removeEventListener(
+
+            "keypress",
+
+            this.boundKeyPress,
+
+            false
+
+        );
+
+    },
+
+    enable(){
+
+        this.enabled=true;
+
+    },
+
+    disable(){
+
+        this.enabled=false;
+
+    },
+
+    isEnabled(){
+
+        return this.enabled;
+
+    },
+
+    onKeyDown(event){
+
+        if(!this.enabled){
+
+            return;
+
+        }
+
+        switch(event.key){
+
+            case "Enter":
+
+                event.preventDefault();
+
+                break;
+
+            default:
+
+                break;
+
+        }
+
+    },
+
+    onKeyUp(event){
+
+        if(!this.enabled){
+
+            return;
+
+        }
+
+    },
+
+    onKeyPress(event){
+
+        if(!this.enabled){
+
+            return;
+
+        }
+
+    },
+
+    destroy(){
+
+        this.detach();
+
+        this.target=null;
+
+        this.boundKeyDown=null;
+
+        this.boundKeyUp=null;
+
+        this.boundKeyPress=null;
+
+        this.enabled=true;
+
+        this.initialized=false;
+
+    }
+
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
