@@ -2660,85 +2660,121 @@ CampusWord2007Simulateur.TextEngine={
 
     },
 
-    refreshActiveLayer(){
+refreshActiveLayer(){
 
-        const page=
+    const page=
 
-            CampusWord2007Simulateur
-            .DocumentEngine
-            .getActivePage();
+        CampusWord2007Simulateur
+        .DocumentEngine
+        .getActivePage();
 
-        if(!page){
+    if(!page){
 
-            this.currentLayer=null;
+        this.currentLayer=null;
 
-            this.currentParagraph=null;
+        this.currentParagraph=null;
 
-            return false;
+        return false;
 
-        }
+    }
 
-        this.currentLayer=
+    this.currentLayer=
 
-            page.querySelector(
+        page.querySelector(
 
-                ".page-text-layer"
+            ".page-text-layer"
 
-            );
+        );
 
-        if(!this.currentLayer){
+    if(!this.currentLayer){
 
-            this.currentParagraph=null;
+        this.currentParagraph=null;
 
-            return false;
+        return false;
 
-        }
+    }
 
-        if(!this.currentParagraph ||
+    if(
 
-           !this.currentParagraph.isConnected){
+        this.currentParagraph &&
 
-            this.currentParagraph=
+        this.currentParagraph.isConnected &&
 
-                document.createElement("div");
+        this.currentParagraph.parentNode===
 
-            this.currentParagraph.className=
+        this.currentLayer
 
-                "text-paragraph";
-
-            this.currentParagraph.style.position=
-
-                "relative";
-
-            this.currentParagraph.style.whiteSpace=
-
-                "pre";
-
-            this.currentParagraph.style.lineHeight=
-
-                "19px";
-
-            this.currentParagraph.style.fontFamily=
-
-                this.defaultFont;
-
-            this.currentParagraph.style.fontSize=
-
-                this.defaultFontSize+"px";
-
-            this.currentParagraph.style.minHeight=
-
-                "19px";
-
-            this.currentLayer.appendChild(
-
-                this.currentParagraph
-
-            );
-
-        }
+    ){
 
         return true;
+
+    }
+
+    const lastParagraph=
+
+        this.currentLayer.lastElementChild;
+
+    if(
+
+        lastParagraph &&
+
+        lastParagraph.classList &&
+
+        lastParagraph.classList.contains(
+
+            "text-paragraph"
+
+        )
+
+    ){
+
+        this.currentParagraph=
+
+            lastParagraph;
+
+        return true;
+
+    }
+
+    this.currentParagraph=
+
+        document.createElement("div");
+
+    this.currentParagraph.className=
+
+        "text-paragraph";
+
+    this.currentParagraph.style.position=
+
+        "relative";
+
+    this.currentParagraph.style.whiteSpace=
+
+        "pre";
+
+    this.currentParagraph.style.lineHeight=
+
+        "19px";
+
+    this.currentParagraph.style.fontFamily=
+
+        this.defaultFont;
+
+    this.currentParagraph.style.fontSize=
+
+        this.defaultFontSize+"px";
+
+    this.currentParagraph.style.minHeight=
+
+        "19px";
+
+    this.currentLayer.appendChild(
+
+        this.currentParagraph
+
+    );
+
+    return true;
 
     },
 
