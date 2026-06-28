@@ -2861,6 +2861,169 @@ CampusWord2007Simulateur.TextEngine={
 
 
 
+/* ==========================================================
+   CAMPUS WORD 2007 SIMULATEUR
+   PHASE 5D
+   PARAGRAPH ENGINE
+   Paragraph Foundation
+========================================================== */
+
+CampusWord2007Simulateur.ParagraphEngine={
+
+    initialized:false,
+
+    defaultLineHeight:19,
+
+    initialize(){
+
+        if(this.initialized){
+
+            return true;
+
+        }
+
+        this.initialized=true;
+
+        return true;
+
+    },
+
+    createParagraph(){
+
+        const Text=
+
+            CampusWord2007Simulateur.TextEngine;
+
+        if(
+
+            !Text ||
+
+            typeof Text.refreshActiveLayer!=="function"
+
+        ){
+
+            return null;
+
+        }
+
+        if(
+
+            !Text.refreshActiveLayer()
+
+        ){
+
+            return null;
+
+        }
+
+        const paragraph=
+
+            document.createElement(
+
+                "div"
+
+            );
+
+        paragraph.className=
+
+            "text-paragraph";
+
+        paragraph.style.position=
+
+            "relative";
+
+        paragraph.style.whiteSpace=
+
+            "pre";
+
+        paragraph.style.minHeight=
+
+            this.defaultLineHeight+"px";
+
+        paragraph.style.lineHeight=
+
+            this.defaultLineHeight+"px";
+
+        paragraph.style.fontFamily=
+
+            Text.defaultFont;
+
+        paragraph.style.fontSize=
+
+            Text.defaultFontSize+"px";
+
+        Text.currentLayer.appendChild(
+
+            paragraph
+
+        );
+
+        Text.currentParagraph=
+
+            paragraph;
+
+        return paragraph;
+
+    },
+
+    insertParagraph(){
+
+        const paragraph=
+
+            this.createParagraph();
+
+        if(!paragraph){
+
+            return false;
+
+        }
+
+        const Caret=
+
+            CampusWord2007Simulateur.CaretEngine;
+
+        if(
+
+            Caret &&
+
+            typeof Caret.getPosition==="function" &&
+
+            typeof Caret.setPosition==="function"
+
+        ){
+
+            const position=
+
+                Caret.getPosition();
+
+            Caret.setPosition(
+
+                96,
+
+                position.y+
+
+                this.defaultLineHeight
+
+            );
+
+        }
+
+        return true;
+
+    },
+
+    destroy(){
+
+        this.initialized=false;
+
+    }
+
+};
+
+
+
+
+
 
 
 
