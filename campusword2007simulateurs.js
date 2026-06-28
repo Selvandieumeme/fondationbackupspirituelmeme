@@ -2924,81 +2924,94 @@ CampusWord2007Simulateur.ParagraphEngine={
 
     },
 
-    createParagraph(){
+createParagraph(){
 
-        const Text=
+    const Text=
 
-            CampusWord2007Simulateur.TextEngine;
+        CampusWord2007Simulateur.TextEngine;
 
-        if(
+    if(
 
-            !Text ||
+        !Text ||
 
-            typeof Text.refreshActiveLayer!=="function"
+        typeof Text.refreshActiveLayer!=="function"
 
-        ){
+    ){
 
-            return null;
+        return null;
 
-        }
+    }
 
-        if(
+    if(
 
-            !Text.refreshActiveLayer()
+        !Text.refreshActiveLayer()
 
-        ){
+    ){
 
-            return null;
+        return null;
 
-        }
+    }
 
-        const paragraph=
+    const paragraph=
 
-            document.createElement(
+        document.createElement(
 
-                "div"
-
-            );
-
-        paragraph.className=
-
-            "text-paragraph";
-
-        paragraph.style.position=
-
-            "relative";
-
-        paragraph.style.whiteSpace=
-
-            "pre";
-
-        paragraph.style.minHeight=
-
-            this.defaultLineHeight+"px";
-
-        paragraph.style.lineHeight=
-
-            this.defaultLineHeight+"px";
-
-        paragraph.style.fontFamily=
-
-            Text.defaultFont;
-
-        paragraph.style.fontSize=
-
-            Text.defaultFontSize+"px";
-
-        Text.currentLayer.appendChild(
-
-            paragraph
+            "div"
 
         );
 
-        Text.currentParagraph=
+    paragraph.className=
 
-            paragraph;
+        "text-paragraph";
 
-        return paragraph;
+    paragraph.style.position=
+
+        "relative";
+
+    paragraph.style.whiteSpace=
+
+        "pre";
+
+    paragraph.style.minHeight=
+
+        this.defaultLineHeight+"px";
+
+    paragraph.style.lineHeight=
+
+        this.defaultLineHeight+"px";
+
+    paragraph.style.fontFamily=
+
+        Text.defaultFont;
+
+    paragraph.style.fontSize=
+
+        Text.defaultFontSize+"px";
+
+    Text.currentLayer.appendChild(
+
+        paragraph
+
+    );
+
+    Text.currentLayer=
+
+        paragraph.parentNode;
+
+    Text.currentParagraph=
+
+        paragraph;
+
+    this.currentParagraph=
+
+        paragraph;
+
+    this.currentLayer=
+
+        Text.currentLayer;
+
+    return paragraph;
+
 
     },
 
