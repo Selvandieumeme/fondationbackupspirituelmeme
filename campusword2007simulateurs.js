@@ -926,3 +926,209 @@ CampusWord2007Simulateur.Utilities = {
 
 
 
+/* ==========================================================
+   CAMPUS WORD 2007 SIMULATEUR
+   PHASE 2C
+   APPLICATION ENGINE
+   Boot
+   Initialize
+   Lifecycle
+========================================================== */
+
+CampusWord2007Simulateur.ApplicationEngine = {
+
+    initialized:false,
+
+    started:false,
+
+    version:"1.0.0",
+
+    bootTime:0,
+
+    initialize(){
+
+        if(this.initialized){
+
+            return true;
+
+        }
+
+        this.bootTime=
+
+            CampusWord2007Simulateur.Utilities.now();
+
+        CampusWord2007Simulateur.Utilities.log(
+
+            "Initializing application..."
+
+        );
+
+        const domReady=
+
+            CampusWord2007Simulateur.DOMEngine.initialize();
+
+        if(!domReady){
+
+            CampusWord2007Simulateur.Utilities.error(
+
+                "DOM validation failed."
+
+            );
+
+            return false;
+
+        }
+
+        this.initializeRegisteredEngines();
+
+        this.initialized=true;
+
+        CampusWord2007Simulateur.Utilities.log(
+
+            "Application initialized."
+
+        );
+
+        return true;
+
+    },
+
+    start(){
+
+        if(this.started){
+
+            return;
+
+        }
+
+        if(!this.initialize()){
+
+            return;
+
+        }
+
+        this.started=true;
+
+        CampusWord2007Simulateur.Utilities.log(
+
+            "Application started."
+
+        );
+
+    },
+
+    restart(){
+
+        this.shutdown();
+
+        this.initialize();
+
+        this.start();
+
+    },
+
+    shutdown(){
+
+        this.started=false;
+
+        this.initialized=false;
+
+        CampusWord2007Simulateur.Utilities.log(
+
+            "Application stopped."
+
+        );
+
+    },
+
+    initializeRegisteredEngines(){
+
+        const app=
+
+            CampusWord2007Simulateur;
+
+        Object.keys(app).forEach(name=>{
+
+            if(
+
+                name==="ApplicationEngine" ||
+
+                name==="DOMEngine" ||
+
+                name==="Utilities"
+
+            ){
+
+                return;
+
+            }
+
+            const engine=app[name];
+
+            if(
+
+                engine &&
+
+                typeof engine.initialize==="function"
+
+            ){
+
+                try{
+
+                    engine.initialize();
+
+                }
+
+                catch(error){
+
+                    CampusWord2007Simulateur.Utilities.error(
+
+                        name,
+
+                        error
+
+                    );
+
+                }
+
+            }
+
+        });
+
+    },
+
+    isRunning(){
+
+        return this.started;
+
+    },
+
+    getVersion(){
+
+        return this.version;
+
+    },
+
+    getBootTime(){
+
+        return this.bootTime;
+
+    }
+
+};
+
+/* ==========================================================
+   APPLICATION BOOTSTRAP
+========================================================== */
+
+document.addEventListener(
+
+    "DOMContentLoaded",
+
+    ()=>{
+
+        CampusWord2007Simulateur.ApplicationEngine.start();
+
+    }
+
+);
