@@ -1625,19 +1625,37 @@ CampusWord2007Simulateur.PageFactory={
 
         Document.updateStatus();
 
+        /* =====================================
+           Synchronize Caret With Active Page
+        ===================================== */
+
+        const Caret=
+
+            CampusWord2007Simulateur.CaretEngine;
+
+        if(
+
+            Caret &&
+
+            Caret.initialized &&
+
+            typeof Caret.moveToPage==="function"
+
+        ){
+
+            Caret.moveToPage(
+
+                createdPage
+
+            );
+
+        }
+
         return createdPage;
 
     }
 
 };
-
-
-
-
-
-
-
-
 
 
 
