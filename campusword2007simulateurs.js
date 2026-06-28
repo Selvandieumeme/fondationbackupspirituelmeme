@@ -2398,6 +2398,176 @@ CampusWord2007Simulateur.KeyboardEngine={
 
 
 
+/* ==========================================================
+   CAMPUS WORD 2007 SIMULATEUR
+   PHASE 5B
+   ENTER ENGINE
+   Line Break Management
+========================================================== */
+
+CampusWord2007Simulateur.EnterEngine={
+
+    initialized:false,
+
+    lineHeight:19,
+
+    topMargin:96,
+
+    bottomMargin:96,
+
+    initialize(){
+
+        if(this.initialized){
+
+            return true;
+
+        }
+
+        this.initialized=true;
+
+        return true;
+
+    },
+
+    execute(){
+
+        const Caret=
+
+            CampusWord2007Simulateur.CaretEngine;
+
+        const Document=
+
+            CampusWord2007Simulateur.DocumentEngine;
+
+        const PageFactory=
+
+            CampusWord2007Simulateur.PageFactory;
+
+        if(
+
+            !Caret ||
+
+            !Caret.caret ||
+
+            !Document ||
+
+            !Document.getActivePage()
+
+        ){
+
+            return;
+
+        }
+
+        const page=
+
+            Document.getActivePage();
+
+        const content=
+
+            page.querySelector(
+
+                ".page-content"
+
+            );
+
+        if(!content){
+
+            return;
+
+        }
+
+        const pageHeight=
+
+            content.clientHeight;
+
+        const limit=
+
+            pageHeight-
+
+            this.bottomMargin-
+
+            Caret.height;
+
+        const position=
+
+            Caret.getPosition();
+
+        let nextY=
+
+            position.y+
+
+            this.lineHeight;
+
+        if(nextY>limit){
+
+            const newPage=
+
+                PageFactory.createPage();
+
+            if(!newPage){
+
+                return;
+
+            }
+
+            if(
+
+                typeof Caret.attachToPage===
+
+                "function"
+
+            ){
+
+                Caret.attachToPage(
+
+                    newPage
+
+                );
+
+            }
+
+            Caret.setPosition(
+
+                this.topMargin,
+
+                this.topMargin
+
+            );
+
+            Caret.show();
+
+            return;
+
+        }
+
+        Caret.setPosition(
+
+            this.topMargin,
+
+            nextY
+
+        );
+
+        Caret.show();
+
+    }
+
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
