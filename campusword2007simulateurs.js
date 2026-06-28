@@ -1630,3 +1630,301 @@ CampusWord2007Simulateur.PageFactory={
     }
 
 };
+
+
+
+
+
+
+
+
+
+
+/* ==========================================================
+   CAMPUS WORD 2007 SIMULATEUR
+   PHASE 4A
+   CARET ENGINE
+   Caret Creation
+   Blink
+   Visibility
+========================================================== */
+
+CampusWord2007Simulateur.CaretEngine={
+
+    initialized:false,
+
+    caret:null,
+
+    layer:null,
+
+    timer:null,
+
+    visible:true,
+
+    blinking:false,
+
+    x:0,
+
+    y:0,
+
+    width:1,
+
+    height:19,
+
+    blinkInterval:530,
+
+    initialize(){
+
+        if(this.initialized){
+
+            return true;
+
+        }
+
+        const documentEngine=
+
+            CampusWord2007Simulateur.DocumentEngine;
+
+        const page=
+
+            documentEngine.getActivePage();
+
+        if(!page){
+
+            CampusWord2007Simulateur.Utilities.error(
+
+                "CaretEngine",
+
+                "No active page."
+
+            );
+
+            return false;
+
+        }
+
+        this.layer=
+
+            page.querySelector(
+
+                ".page-caret-layer"
+
+            );
+
+        if(!this.layer){
+
+            CampusWord2007Simulateur.Utilities.error(
+
+                "CaretEngine",
+
+                "Caret layer missing."
+
+            );
+
+            return false;
+
+        }
+
+        this.createCaret();
+
+        this.startBlink();
+
+        this.initialized=true;
+
+        return true;
+
+    },
+
+    createCaret(){
+
+        this.caret=
+
+            document.createElement("div");
+
+        this.caret.id=
+
+            "document-caret";
+
+        this.caret.style.position="absolute";
+
+        this.caret.style.left="0px";
+
+        this.caret.style.top="0px";
+
+        this.caret.style.width=
+
+            this.width+"px";
+
+        this.caret.style.height=
+
+            this.height+"px";
+
+        this.caret.style.background="#000000";
+
+        this.caret.style.pointerEvents="none";
+
+        this.caret.style.userSelect="none";
+
+        this.caret.style.display="block";
+
+        this.layer.appendChild(
+
+            this.caret
+
+        );
+
+    },
+
+    setPosition(x,y){
+
+        this.x=x;
+
+        this.y=y;
+
+        if(!this.caret){
+
+            return;
+
+        }
+
+        this.caret.style.left=
+
+            x+"px";
+
+        this.caret.style.top=
+
+            y+"px";
+
+    },
+
+    getPosition(){
+
+        return{
+
+            x:this.x,
+
+            y:this.y
+
+        };
+
+    },
+
+    show(){
+
+        if(!this.caret){
+
+            return;
+
+        }
+
+        this.visible=true;
+
+        this.caret.style.visibility=
+
+            "visible";
+
+    },
+
+    hide(){
+
+        if(!this.caret){
+
+            return;
+
+        }
+
+        this.visible=false;
+
+        this.caret.style.visibility=
+
+            "hidden";
+
+    },
+
+    toggle(){
+
+        if(this.visible){
+
+            this.hide();
+
+        }
+
+        else{
+
+            this.show();
+
+        }
+
+    },
+
+    startBlink(){
+
+        if(this.blinking){
+
+            return;
+
+        }
+
+        this.blinking=true;
+
+        this.timer=
+
+            setInterval(()=>{
+
+                this.toggle();
+
+            },
+
+            this.blinkInterval);
+
+    },
+
+    stopBlink(){
+
+        if(this.timer){
+
+            clearInterval(
+
+                this.timer
+
+            );
+
+        }
+
+        this.timer=null;
+
+        this.blinking=false;
+
+        this.show();
+
+    },
+
+    destroy(){
+
+        this.stopBlink();
+
+        if(
+
+            this.caret &&
+
+            this.caret.parentNode
+
+        ){
+
+            this.caret.parentNode.removeChild(
+
+                this.caret
+
+            );
+
+        }
+
+        this.caret=null;
+
+        this.layer=null;
+
+        this.initialized=false;
+
+    }
+
+};
