@@ -1758,6 +1758,16 @@ CampusWord2007Simulateur.CaretEngine={
 
     blinkInterval:530,
 
+defaultMarginLeft:96,
+
+defaultMarginTop:96,
+
+currentCharacter:null,
+
+currentParagraph:null,
+
+pendingFrame:0,
+
     initialize(){
 
         if(this.initialized){
