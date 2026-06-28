@@ -3059,115 +3059,118 @@ CampusWord2007Simulateur.EnterEngine={
 
     },
 
-    execute(){
 
-        const Caret=
+execute(){
 
-            CampusWord2007Simulateur.CaretEngine;
+    const Caret=
 
-        const Document=
+        CampusWord2007Simulateur.CaretEngine;
 
-            CampusWord2007Simulateur.DocumentEngine;
+    const Document=
 
-        const PageFactory=
+        CampusWord2007Simulateur.DocumentEngine;
 
-            CampusWord2007Simulateur.PageFactory;
+    const PageFactory=
+
+        CampusWord2007Simulateur.PageFactory;
+
+    const Paragraph=
+
+        CampusWord2007Simulateur.ParagraphEngine;
+
+    if(
+
+        !Caret ||
+
+        !Caret.caret ||
+
+        !Document ||
+
+        !Document.getActivePage()
+
+    ){
+
+        return;
+
+    }
+
+    const page=
+
+        Document.getActivePage();
+
+    const content=
+
+        page.querySelector(
+
+            ".page-content"
+
+        );
+
+    if(!content){
+
+        return;
+
+    }
+
+    const pageHeight=
+
+        content.clientHeight;
+
+    const limit=
+
+        pageHeight-
+
+        this.bottomMargin-
+
+        Caret.height;
+
+    const position=
+
+        Caret.getPosition();
+
+    let nextY=
+
+        position.y+
+
+        this.lineHeight;
+
+    if(nextY>limit){
+
+        const newPage=
+
+            PageFactory.createPage();
+
+        if(!newPage){
+
+            return;
+
+        }
 
         if(
 
-            !Caret ||
+            typeof Caret.attachToPage===
 
-            !Caret.caret ||
-
-            !Document ||
-
-            !Document.getActivePage()
+            "function"
 
         ){
 
-            return;
+            Caret.attachToPage(
 
-        }
-
-        const page=
-
-            Document.getActivePage();
-
-        const content=
-
-            page.querySelector(
-
-                ".page-content"
+                newPage
 
             );
 
-        if(!content){
-
-            return;
-
         }
 
-        const pageHeight=
+        if(
 
-            content.clientHeight;
+            Paragraph &&
 
-        const limit=
+            typeof Paragraph.createParagraph==="function"
 
-            pageHeight-
+        ){
 
-            this.bottomMargin-
-
-            Caret.height;
-
-        const position=
-
-            Caret.getPosition();
-
-        let nextY=
-
-            position.y+
-
-            this.lineHeight;
-
-        if(nextY>limit){
-
-            const newPage=
-
-                PageFactory.createPage();
-
-            if(!newPage){
-
-                return;
-
-            }
-
-            if(
-
-                typeof Caret.attachToPage===
-
-                "function"
-
-            ){
-
-                Caret.attachToPage(
-
-                    newPage
-
-                );
-
-            }
-
-            Caret.setPosition(
-
-                this.topMargin,
-
-                this.topMargin
-
-            );
-
-            Caret.show();
-
-            return;
+            Paragraph.createParagraph();
 
         }
 
@@ -3175,15 +3178,43 @@ CampusWord2007Simulateur.EnterEngine={
 
             this.topMargin,
 
-            nextY
+            this.topMargin
 
         );
 
         Caret.show();
 
+        return;
+
     }
 
+    if(
+
+        Paragraph &&
+
+        typeof Paragraph.createParagraph==="function"
+
+    ){
+
+        Paragraph.createParagraph();
+
+    }
+
+    Caret.setPosition(
+
+        this.topMargin,
+
+        nextY
+
+    );
+
+    Caret.show();
+
+}   
+
 };
+
+
 
 
 
