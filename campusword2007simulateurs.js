@@ -1582,3 +1582,126 @@ CampusWord2007Simulateur.DocumentEngine = {
 
 
 
+
+
+
+/* ==========================================================
+   CAMPUS WORD 2007 SIMULATEUR
+   PHASE 3B
+   PAGE FACTORY
+   Dynamic Page Creation
+========================================================== */
+
+CampusWord2007Simulateur.PageFactory={
+
+    initialized:false,
+
+    initialize(){
+
+        if(this.initialized){
+
+            return true;
+
+        }
+
+        this.initialized=true;
+
+        return true;
+
+    },
+
+    createPage(){
+
+        const Document=
+
+            CampusWord2007Simulateur.DocumentEngine;
+
+        if(
+
+            !Document.pageTemplate ||
+
+            !Document.pageContainer
+
+        ){
+
+            CampusWord2007Simulateur.Utilities.error(
+
+                "PageFactory",
+
+                "Document template or container unavailable."
+
+            );
+
+            return null;
+
+        }
+
+        const fragment=
+
+            Document.pageTemplate.content.cloneNode(
+
+                true
+
+            );
+
+        const page=
+
+            fragment.querySelector(
+
+                ".document-page"
+
+            );
+
+        if(!page){
+
+            CampusWord2007Simulateur.Utilities.error(
+
+                "PageFactory",
+
+                "Unable to create page."
+
+            );
+
+            return null;
+
+        }
+
+        Document.pageCounter++;
+
+        page.dataset.pageNumber=
+
+            Document.pageCounter;
+
+        page.id=
+
+            "document-page-"+
+
+            Document.pageCounter;
+
+        Document.pageContainer.appendChild(
+
+            fragment
+
+        );
+
+        const createdPage=
+
+            Document.pageContainer.lastElementChild;
+
+        Document.pages.push(
+
+            createdPage
+
+        );
+
+        Document.activePage=
+
+            createdPage;
+
+        Document.updateStatus();
+
+        return createdPage;
+
+    }
+
+};
