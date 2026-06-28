@@ -1516,7 +1516,6 @@ CampusWord2007Simulateur.DocumentEngine = {
    PAGE FACTORY
    Dynamic Page Creation
 ========================================================== */
-
 CampusWord2007Simulateur.PageFactory={
 
     initialized:false,
@@ -1613,6 +1612,44 @@ CampusWord2007Simulateur.PageFactory={
 
             Document.pageContainer.lastElementChild;
 
+        createdPage.addEventListener(
+
+            "click",
+
+            ()=>{
+
+                Document.setActivePage(
+
+                    createdPage
+
+                );
+
+                const Caret=
+
+                    CampusWord2007Simulateur.CaretEngine;
+
+                if(
+
+                    Caret &&
+
+                    Caret.initialized &&
+
+                    typeof Caret.moveToPage==="function"
+
+                ){
+
+                    Caret.moveToPage(
+
+                        createdPage
+
+                    );
+
+                }
+
+            }
+
+        );
+
         Document.pages.push(
 
             createdPage
@@ -1652,11 +1689,6 @@ CampusWord2007Simulateur.PageFactory={
     }
 
 };
-
-
-
-
-
 
 
 
