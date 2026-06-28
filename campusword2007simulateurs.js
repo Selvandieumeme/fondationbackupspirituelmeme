@@ -1407,7 +1407,16 @@ CampusWord2007Simulateur.DocumentEngine = {
 
         this.pageCounter=0;
 
-        this.pageContainer.innerHTML="";
+        this.activePage=null;
+
+        if(this.pageContainer){
+
+            this.pageContainer.innerHTML="";
+        }
+
+        CampusWord2007Simulateur.State.currentPage=1;
+
+        CampusWord2007Simulateur.State.totalPages=0;
 
         CampusWord2007Simulateur.PageFactory.createPage();
 
@@ -1447,6 +1456,10 @@ CampusWord2007Simulateur.DocumentEngine = {
 
         this.activePage=page;
 
+        CampusWord2007Simulateur.State.currentPage=
+
+            Number(page.dataset.pageNumber)||1;
+
         this.updateStatus();
 
     },
@@ -1459,7 +1472,14 @@ CampusWord2007Simulateur.DocumentEngine = {
 
         this.activePage=null;
 
-        this.pageContainer.innerHTML="";
+        if(this.pageContainer){
+
+            this.pageContainer.innerHTML="";
+        }
+
+        CampusWord2007Simulateur.State.currentPage=0;
+
+        CampusWord2007Simulateur.State.totalPages=0;
 
     },
 
@@ -1472,6 +1492,10 @@ CampusWord2007Simulateur.DocumentEngine = {
     },
 
     updateStatus(){
+
+        CampusWord2007Simulateur.State.totalPages=
+
+            this.pages.length;
 
         const status=
 
@@ -1487,17 +1511,23 @@ CampusWord2007Simulateur.DocumentEngine = {
 
                 "Page "+
 
-                this.pageCounter+
+                (CampusWord2007Simulateur.State.currentPage||1)+
 
                 " of "+
 
-                this.pageCounter;
+                this.pages.length;
 
         }
 
     }
 
 };
+
+
+
+
+
+
 
 
 
