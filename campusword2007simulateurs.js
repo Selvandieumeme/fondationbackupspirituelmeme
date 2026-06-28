@@ -2226,6 +2226,21 @@ CampusWord2007Simulateur.KeyboardEngine={
 
         this.attach();
 
+
+if(
+
+    CampusWord2007Simulateur.VirtualKeyboardEngine &&
+
+    typeof CampusWord2007Simulateur.VirtualKeyboardEngine.focus==="function"
+
+){
+
+    CampusWord2007Simulateur.VirtualKeyboardEngine.focus();
+
+}
+
+
+
         this.initialized=true;
 
         return true;
@@ -2571,7 +2586,232 @@ CampusWord2007Simulateur.EnterEngine={
 
 
 
+/* ==========================================================
+   CAMPUS WORD 2007 SIMULATEUR
+   PHASE 5B.1
+   VIRTUAL KEYBOARD ENGINE
+   Android / Tablet / iOS Support
+========================================================== */
 
+CampusWord2007Simulateur.VirtualKeyboardEngine={
+
+    initialized:false,
+
+    input:null,
+
+    enabled:true,
+
+    initialize(){
+
+        if(this.initialized){
+
+            return true;
+
+        }
+
+        this.createInput();
+
+        this.attach();
+
+        this.initialized=true;
+
+        return true;
+
+    },
+
+    createInput(){
+
+        if(this.input){
+
+            return;
+
+        }
+
+        this.input=
+
+            document.createElement("input");
+
+        this.input.type="text";
+
+        this.input.id=
+
+            "virtual-keyboard-input";
+
+        this.input.autocomplete="off";
+
+        this.input.autocorrect="off";
+
+        this.input.autocapitalize="off";
+
+        this.input.spellcheck=false;
+
+        this.input.tabIndex=-1;
+
+        this.input.value="";
+
+        this.input.style.position="fixed";
+
+        this.input.style.left="-10000px";
+
+        this.input.style.top="0";
+
+        this.input.style.width="1px";
+
+        this.input.style.height="1px";
+
+        this.input.style.opacity="0";
+
+        this.input.style.pointerEvents="none";
+
+        this.input.style.zIndex="-1";
+
+        document.body.appendChild(
+
+            this.input
+
+        );
+
+    },
+
+    attach(){
+
+        if(!this.input){
+
+            return;
+
+        }
+
+        document.addEventListener(
+
+            "pointerdown",
+
+            ()=>{
+
+                this.focus();
+
+            },
+
+            false
+
+        );
+
+        document.addEventListener(
+
+            "touchstart",
+
+            ()=>{
+
+                this.focus();
+
+            },
+
+            false
+
+        );
+
+        window.addEventListener(
+
+            "focus",
+
+            ()=>{
+
+                this.focus();
+
+            },
+
+            false
+
+        );
+
+    },
+
+    focus(){
+
+        if(
+
+            !this.enabled ||
+
+            !this.input
+
+        ){
+
+            return;
+
+        }
+
+        this.input.focus(
+
+            {
+
+                preventScroll:true
+
+            }
+
+        );
+
+    },
+
+    blur(){
+
+        if(this.input){
+
+            this.input.blur();
+
+        }
+
+    },
+
+    enable(){
+
+        this.enabled=true;
+
+    },
+
+    disable(){
+
+        this.enabled=false;
+
+        this.blur();
+
+    },
+
+    isFocused(){
+
+        return(
+
+            document.activeElement===
+
+            this.input
+
+        );
+
+    },
+
+    destroy(){
+
+        if(
+
+            this.input &&
+
+            this.input.parentNode
+
+        ){
+
+            this.input.parentNode.removeChild(
+
+                this.input
+
+            );
+
+        }
+
+        this.input=null;
+
+        this.initialized=false;
+
+    }
+
+};
 
 
 
