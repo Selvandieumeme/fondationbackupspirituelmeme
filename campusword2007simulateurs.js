@@ -2972,25 +2972,11 @@ insertCharacter(character){
 
     ){
 
-        const position=
+Caret.synchronizeWithCharacter(
+    span
+);
 
-            Caret.getPosition();
 
-        const width=
-
-            Math.ceil(
-
-                span.getBoundingClientRect().width
-
-            );
-
-        Caret.setPosition(
-
-            position.x+width,
-
-            position.y
-
-        );
 
         Caret.show();
 
