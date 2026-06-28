@@ -2778,106 +2778,124 @@ refreshActiveLayer(){
 
     },
 
-    insertCharacter(character){
+insertCharacter(character){
 
-        if(
+    if(
 
-            typeof character!=="string" ||
+        typeof character!=="string" ||
 
-            character.length!==1
+        character.length!==1
 
-        ){
+    ){
 
-            return false;
+        return false;
 
-        }
+    }
 
-        if(
+    if(
 
-            !this.refreshActiveLayer()
+        !this.refreshActiveLayer()
 
-        ){
+    ){
 
-            return false;
+        return false;
 
-        }
+    }
 
-        const span=
+    if(
 
-            document.createElement("span");
+        !this.currentParagraph ||
 
-        span.className=
+        !this.currentParagraph.isConnected
 
-            "text-character";
+    ){
 
-        span.textContent=
+        return false;
 
-            character;
+    }
 
-        span.style.display=
+    const span=
 
-            "inline";
+        document.createElement("span");
 
-        span.style.whiteSpace=
+    span.className=
 
-            "pre";
+        "text-character";
 
-        span.style.fontFamily=
+    span.textContent=
 
-            this.defaultFont;
+        character;
 
-        span.style.fontSize=
+    span.style.display=
 
-            this.defaultFontSize+"px";
+        "inline";
 
-        if(this.characterSpacing!==0){
+    span.style.whiteSpace=
 
-            span.style.letterSpacing=
+        "pre";
 
-                this.characterSpacing+"px";
+    span.style.fontFamily=
 
-        }
+        this.defaultFont;
 
-        this.currentParagraph.appendChild(
+    span.style.fontSize=
 
-            span
+        this.defaultFontSize+"px";
 
-        );
+    if(this.characterSpacing!==0){
 
-        const Caret=
+        span.style.letterSpacing=
 
-            CampusWord2007Simulateur
-            .CaretEngine;
+            this.characterSpacing+"px";
 
-        if(
+    }
 
-            Caret &&
+    this.currentParagraph.appendChild(
 
-            typeof Caret.getPosition==="function" &&
+        span
 
-            typeof Caret.setPosition==="function"
+    );
 
-        ){
+    const Caret=
 
-            const position=
+        CampusWord2007Simulateur
+        .CaretEngine;
 
-                Caret.getPosition();
+    if(
 
-            const width=
+        Caret &&
 
-                span.getBoundingClientRect().width;
+        typeof Caret.getPosition==="function" &&
 
-            Caret.setPosition(
+        typeof Caret.setPosition==="function"
 
-                position.x+width,
+    ){
 
-                position.y
+        const position=
+
+            Caret.getPosition();
+
+        const width=
+
+            Math.ceil(
+
+                span.getBoundingClientRect().width
 
             );
 
-        }
+        Caret.setPosition(
 
-        return true;
+            position.x+width,
+
+            position.y
+
+        );
+
+        Caret.show();
+
+    }
+
+    return true;
 
     },
 
