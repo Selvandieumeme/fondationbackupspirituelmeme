@@ -1625,10 +1625,6 @@ CampusWord2007Simulateur.PageFactory={
 
         Document.updateStatus();
 
-        /* =====================================
-           Synchronize Caret With Active Page
-        ===================================== */
-
         const Caret=
 
             CampusWord2007Simulateur.CaretEngine;
@@ -1656,13 +1652,6 @@ CampusWord2007Simulateur.PageFactory={
     }
 
 };
-
-
-
-
-
-
-
 
 
 
