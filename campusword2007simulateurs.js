@@ -2340,9 +2340,21 @@ CampusWord2007Simulateur.KeyboardEngine={
 
             case "Enter":
 
-                event.preventDefault();
+    event.preventDefault();
 
-                break;
+    if(
+
+        CampusWord2007Simulateur.EnterEngine &&
+
+        typeof CampusWord2007Simulateur.EnterEngine.execute==="function"
+
+    ){
+
+        CampusWord2007Simulateur.EnterEngine.execute();
+
+    }
+
+    break;
 
             default:
 
