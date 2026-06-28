@@ -1642,43 +1642,19 @@ CampusWord2007Simulateur.PageFactory={
 
             Document.pageContainer.lastElementChild;
 
-        createdPage.addEventListener(
+        if(!createdPage){
 
-            "click",
+            CampusWord2007Simulateur.Utilities.error(
 
-            ()=>{
+                "PageFactory",
 
-                Document.setActivePage(
+                "Page creation failed."
 
-                    createdPage
+            );
 
-                );
+            return null;
 
-                const Caret=
-
-                    CampusWord2007Simulateur.CaretEngine;
-
-                if(
-
-                    Caret &&
-
-                    Caret.initialized &&
-
-                    typeof Caret.moveToPage==="function"
-
-                ){
-
-                    Caret.moveToPage(
-
-                        createdPage
-
-                    );
-
-                }
-
-            }
-
-        );
+        }
 
         Document.pages.push(
 
@@ -1686,9 +1662,19 @@ CampusWord2007Simulateur.PageFactory={
 
         );
 
-        Document.activePage=
+        Document.setActivePage(
 
-            createdPage;
+            createdPage
+
+        );
+
+        CampusWord2007Simulateur.State.currentPage=
+
+            Document.pageCounter;
+
+        CampusWord2007Simulateur.State.totalPages=
+
+            Document.pages.length;
 
         Document.updateStatus();
 
@@ -1700,13 +1686,11 @@ CampusWord2007Simulateur.PageFactory={
 
             Caret &&
 
-            Caret.initialized &&
-
-            typeof Caret.moveToPage==="function"
+            typeof Caret.attachToPage==="function"
 
         ){
 
-            Caret.moveToPage(
+            Caret.attachToPage(
 
                 createdPage
 
@@ -1719,8 +1703,6 @@ CampusWord2007Simulateur.PageFactory={
     }
 
 };
-
-
 
 /* ==========================================================
    CAMPUS WORD 2007 SIMULATEUR
