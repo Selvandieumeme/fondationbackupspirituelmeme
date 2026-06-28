@@ -1640,6 +1640,11 @@ CampusWord2007Simulateur.PageFactory={
 
 
 
+
+
+
+
+
 /* ==========================================================
    CAMPUS WORD 2007 SIMULATEUR
    PHASE 4A
@@ -1727,6 +1732,8 @@ CampusWord2007Simulateur.CaretEngine={
 
         this.createCaret();
 
+        this.show();
+
         this.startBlink();
 
         this.initialized=true;
@@ -1736,6 +1743,12 @@ CampusWord2007Simulateur.CaretEngine={
     },
 
     createCaret(){
+
+        if(this.caret){
+
+            return;
+
+        }
 
         this.caret=
 
@@ -1759,13 +1772,29 @@ CampusWord2007Simulateur.CaretEngine={
 
             this.height+"px";
 
-        this.caret.style.background="#000000";
+        this.caret.style.background=
 
-        this.caret.style.pointerEvents="none";
+            "currentColor";
 
-        this.caret.style.userSelect="none";
+        this.caret.style.pointerEvents=
 
-        this.caret.style.display="block";
+            "none";
+
+        this.caret.style.userSelect=
+
+            "none";
+
+        this.caret.style.display="";
+
+        this.caret.style.visibility=
+
+            "visible";
+
+        this.caret.style.zIndex="1";
+
+        this.caret.style.transform=
+
+            "translate3d(0,0,0)";
 
         this.layer.appendChild(
 
@@ -1871,7 +1900,31 @@ CampusWord2007Simulateur.CaretEngine={
 
             setInterval(()=>{
 
-                this.toggle();
+                if(!this.caret){
+
+                    return;
+
+                }
+
+                if(this.visible){
+
+                    this.caret.style.visibility=
+
+                        "hidden";
+
+                    this.visible=false;
+
+                }
+
+                else{
+
+                    this.caret.style.visibility=
+
+                        "visible";
+
+                    this.visible=true;
+
+                }
 
             },
 
@@ -1923,8 +1976,22 @@ CampusWord2007Simulateur.CaretEngine={
 
         this.layer=null;
 
+        this.visible=true;
+
+        this.x=0;
+
+        this.y=0;
+
         this.initialized=false;
 
     }
 
 };
+
+
+
+
+
+
+
+
