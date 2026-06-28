@@ -1531,6 +1531,58 @@ CampusWord2007Simulateur.DocumentEngine = {
 
 
 
+/* ==========================================================
+   CARET ENGINE
+   attachToPage()
+========================================================== */
+
+CampusWord2007Simulateur.CaretEngine.attachToPage = function(page){
+
+    if(!page){
+
+        return false;
+
+    }
+
+    const layer = page.querySelector(
+        ".page-caret-layer"
+    );
+
+    if(!layer){
+
+        return false;
+
+    }
+
+    this.layer = layer;
+
+    this.createCaret();
+
+    this.setPosition(
+        this.x,
+        this.y
+    );
+
+    this.show();
+
+    if(!this.blinking){
+
+        this.startBlink();
+
+    }
+
+    return true;
+
+};
+
+
+
+
+
+
+
+
+
 
 
 
