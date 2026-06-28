@@ -2390,15 +2390,68 @@ CampusWord2007Simulateur.KeyboardEngine={
 
     },
 
-    onKeyPress(event){
+onKeyPress(event){
 
-        if(!this.enabled){
+    if(!this.enabled){
 
-            return;
+        return;
 
-        }
+    }
 
-    },
+    if(
+
+        event.ctrlKey ||
+
+        event.altKey ||
+
+        event.metaKey
+
+    ){
+
+        return;
+
+    }
+
+    const character=
+
+        event.key;
+
+    if(
+
+        typeof character!=="string" ||
+
+        character.length!==1
+
+    ){
+
+        return;
+
+    }
+
+    if(
+
+        !CampusWord2007Simulateur.TextEngine ||
+
+        typeof CampusWord2007Simulateur.TextEngine.insertCharacter!=="function"
+
+    ){
+
+        return;
+
+    }
+
+    event.preventDefault();
+
+    CampusWord2007Simulateur.TextEngine.insertCharacter(
+
+        character
+
+    );
+
+},
+
+
+
 
     destroy(){
 
