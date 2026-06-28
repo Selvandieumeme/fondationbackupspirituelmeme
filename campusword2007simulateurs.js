@@ -1645,6 +1645,14 @@ CampusWord2007Simulateur.PageFactory={
 
 
 
+
+
+
+
+
+
+
+
 /* ==========================================================
    CAMPUS WORD 2007 SIMULATEUR
    PHASE 4A
@@ -1732,6 +1740,14 @@ CampusWord2007Simulateur.CaretEngine={
 
         this.createCaret();
 
+        this.setPosition(
+
+            96,
+
+            96
+
+        );
+
         this.show();
 
         this.startBlink();
@@ -1750,6 +1766,22 @@ CampusWord2007Simulateur.CaretEngine={
 
         }
 
+        if(
+
+            getComputedStyle(
+
+                this.layer
+
+            ).position==="static"
+
+        ){
+
+            this.layer.style.position=
+
+                "relative";
+
+        }
+
         this.caret=
 
             document.createElement("div");
@@ -1758,7 +1790,9 @@ CampusWord2007Simulateur.CaretEngine={
 
             "document-caret";
 
-        this.caret.style.position="absolute";
+        this.caret.style.position=
+
+            "absolute";
 
         this.caret.style.left="0px";
 
@@ -1774,7 +1808,7 @@ CampusWord2007Simulateur.CaretEngine={
 
         this.caret.style.background=
 
-            "currentColor";
+            "#000000";
 
         this.caret.style.pointerEvents=
 
@@ -1784,13 +1818,21 @@ CampusWord2007Simulateur.CaretEngine={
 
             "none";
 
-        this.caret.style.display="";
+        this.caret.style.display=
+
+            "block";
 
         this.caret.style.visibility=
 
             "visible";
 
-        this.caret.style.zIndex="1";
+        this.caret.style.opacity=
+
+            "1";
+
+        this.caret.style.zIndex=
+
+            "999";
 
         this.caret.style.transform=
 
@@ -1852,6 +1894,10 @@ CampusWord2007Simulateur.CaretEngine={
 
             "visible";
 
+        this.caret.style.opacity=
+
+            "1";
+
     },
 
     hide(){
@@ -1867,6 +1913,10 @@ CampusWord2007Simulateur.CaretEngine={
         this.caret.style.visibility=
 
             "hidden";
+
+        this.caret.style.opacity=
+
+            "0";
 
     },
 
@@ -1898,37 +1948,17 @@ CampusWord2007Simulateur.CaretEngine={
 
         this.timer=
 
-            setInterval(()=>{
+            setInterval(
 
-                if(!this.caret){
+                ()=>{
 
-                    return;
+                    this.toggle();
 
-                }
+                },
 
-                if(this.visible){
+                this.blinkInterval
 
-                    this.caret.style.visibility=
-
-                        "hidden";
-
-                    this.visible=false;
-
-                }
-
-                else{
-
-                    this.caret.style.visibility=
-
-                        "visible";
-
-                    this.visible=true;
-
-                }
-
-            },
-
-            this.blinkInterval);
+            );
 
     },
 
@@ -1987,11 +2017,5 @@ CampusWord2007Simulateur.CaretEngine={
     }
 
 };
-
-
-
-
-
-
 
 
