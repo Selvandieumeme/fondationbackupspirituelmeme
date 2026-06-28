@@ -2177,10 +2177,6 @@ CampusWord2007Simulateur.CaretEngine.attachToPage = function(page){
 
 
 
-
-
-
-
 /* ==========================================================
    CAMPUS WORD 2007 SIMULATEUR
    PHASE 5A
@@ -2226,20 +2222,23 @@ CampusWord2007Simulateur.KeyboardEngine={
 
         this.attach();
 
+        const VirtualKeyboard=
 
-if(
+            CampusWord2007Simulateur.VirtualKeyboardEngine;
 
-    CampusWord2007Simulateur.VirtualKeyboardEngine &&
+        if(
 
-    typeof CampusWord2007Simulateur.VirtualKeyboardEngine.focus==="function"
+            VirtualKeyboard &&
 
-){
+            VirtualKeyboard.initialized &&
 
-    CampusWord2007Simulateur.VirtualKeyboardEngine.focus();
+            typeof VirtualKeyboard.focus==="function"
 
-}
+        ){
 
+            VirtualKeyboard.focus();
 
+        }
 
         this.initialized=true;
 
@@ -2252,6 +2251,7 @@ if(
         if(!this.target){
 
             return;
+
         }
 
         this.target.addEventListener(
@@ -2291,6 +2291,7 @@ if(
         if(!this.target){
 
             return;
+
         }
 
         this.target.removeEventListener(
@@ -2355,21 +2356,21 @@ if(
 
             case "Enter":
 
-    event.preventDefault();
+                event.preventDefault();
 
-    if(
+                if(
 
-        CampusWord2007Simulateur.EnterEngine &&
+                    CampusWord2007Simulateur.EnterEngine &&
 
-        typeof CampusWord2007Simulateur.EnterEngine.execute==="function"
+                    typeof CampusWord2007Simulateur.EnterEngine.execute==="function"
 
-    ){
+                ){
 
-        CampusWord2007Simulateur.EnterEngine.execute();
+                    CampusWord2007Simulateur.EnterEngine.execute();
 
-    }
+                }
 
-    break;
+                break;
 
             default:
 
@@ -2403,6 +2404,22 @@ if(
 
         this.detach();
 
+        const VirtualKeyboard=
+
+            CampusWord2007Simulateur.VirtualKeyboardEngine;
+
+        if(
+
+            VirtualKeyboard &&
+
+            typeof VirtualKeyboard.destroy==="function"
+
+        ){
+
+            VirtualKeyboard.destroy();
+
+        }
+
         this.target=null;
 
         this.boundKeyDown=null;
@@ -2418,6 +2435,16 @@ if(
     }
 
 };
+
+
+
+
+
+
+
+
+
+
 
 
 
