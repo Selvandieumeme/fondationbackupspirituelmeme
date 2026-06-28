@@ -1143,83 +1143,169 @@ document.addEventListener(
    Simple Boot Loader
 ========================================================== */
 
+
 CampusWord2007Simulateur.LoadingEngine = {
 
-    initialized:false,
+    initialized: false,
 
-    loadingScreen:null,
+    loadingScreen: null,
+    progressBar: null,
+    message: null,
 
-    initialize(){
+    progress: 0,
+    visible: false,
 
-        if(this.initialized){
+    fadeOpacity: 1,
 
-            return true;
+    initialize() {
 
-        }
+        if (this.initialized) return true;
 
         const DOM = CampusWord2007Simulateur.DOMEngine;
 
-        this.loadingScreen =
-            DOM.get("word-loading-screen");
+        this.loadingScreen = DOM.get("word-loading-screen");
+        this.progressBar = DOM.get("loading-progress-bar");
+        this.message = DOM.get("loading-message");
 
-        if(!this.loadingScreen){
-
+        if (!this.loadingScreen || !this.progressBar || !this.message) {
             CampusWord2007Simulateur.Utilities.error(
-                "LoadingEngine",
-                "Loading screen missing."
+                "LoadingEngine missing elements"
             );
-
             return false;
-
         }
+
+        // smooth transition setup
+        this.loadingScreen.style.transition = "opacity 0.6s ease";
+        this.progressBar.style.transition = "width 0.25s ease";
+        this.message.style.transition = "opacity 0.3s ease";
+
+        this.reset();
 
         this.initialized = true;
-
         return true;
-
     },
 
-    start(){
+    reset() {
 
-        if(!this.initialized){
+        this.progress = 0;
+        this.visible = true;
 
-            this.initialize();
-
-        }
-
-        this.show();
-
-        // 👉 imedyat ouvè app la
-        this.finish();
-    },
-
-    show(){
-
-        if(this.loadingScreen){
-
-            this.loadingScreen.style.display = "flex";
-
-        }
+        this.loadingScreen.style.opacity = "1";
+        this.loadingScreen.style.display = "flex";
 
         CampusWord2007Simulateur.State.loading = true;
 
+        this.setMessage("Starting Word 2007...");
+
+        this.startFakeProgress();
     },
 
-    finish(){
+    show() {
+        this.loadingScreen.style.display = "flex";
+        this.loadingScreen.style.opacity = "1";
+        this.visible = true;
+    },
 
-        if(this.loadingScreen){
+    hide() {
 
+        // smooth fade out
+        this.loadingScreen.style.opacity = "0";
+
+        setTimeout(() => {
             this.loadingScreen.style.display = "none";
+            this.visible = false;
+            CampusWord2007Simulateur.State.loading = false;
+        }, 650);
+    },
 
+    updateProgress(value) {
+
+        this.progress = CampusWord2007Simulateur.Utilities.clamp(value, 0, 100);
+
+        this.progressBar.style.width = this.progress + "%";
+
+        // dynamic message like Word 2007
+        if (this.progress < 30) {
+            this.setMessage("Loading components...");
+        } else if (this.progress < 60) {
+            this.setMessage("Initializing document engine...");
+        } else if (this.progress < 90) {
+            this.setMessage("Preparing workspace...");
+        } else {
+            this.setMessage("Almost ready...");
+        }
+    },
+
+    startFakeProgress() {
+
+        let step = 0;
+
+        const interval = setInterval(() => {
+
+            // smooth acceleration (Word-like feel)
+            let increment = Math.random() * 6 + 2;
+
+            step += increment;
+
+            this.updateProgress(step);
+
+            if (step >= 100) {
+
+                clearInterval(interval);
+
+                this.updateProgress(100);
+
+                this.setMessage("Ready");
+
+                setTimeout(() => {
+
+                    this.finish();
+
+                }, 400);
+            }
+
+        }, 120);
+    },
+
+    finish() {
+
+        // fade out loading screen
+        this.hide();
+
+        // optional: trigger app reveal
+        const app = document.getElementById("word-app");
+
+        if (app) {
+            app.style.opacity = "0";
+            app.style.display = "block";
+
+            app.style.transition = "opacity 0.7s ease";
+
+            setTimeout(() => {
+                app.style.opacity = "1";
+            }, 50);
         }
 
-        CampusWord2007Simulateur.State.loading = false;
+        CampusWord2007Simulateur.Utilities.log("Word ready");
+    },
 
-        CampusWord2007Simulateur.ApplicationEngine.start();
+    setMessage(text) {
+        this.message.textContent = text;
+    },
 
+    getProgress() {
+        return this.progress;
+    },
+
+    isVisible() {
+        return this.visible;
     }
-
 };
+
+
+
+
+
 
 
 
