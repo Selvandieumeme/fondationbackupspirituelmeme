@@ -40,7 +40,6 @@ CampusWord2007Simulateur.WindowEngine = {};
 
 
 
-CampusWord2007Simulateur.RibbonEngine = {};
 
 
 CampusWord2007Simulateur.HomeRibbonEngine = {};
