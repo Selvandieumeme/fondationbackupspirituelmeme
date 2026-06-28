@@ -2188,6 +2188,7 @@ CampusWord2007Simulateur.CaretEngine.attachToPage = function(page){
 
 
 
+
 /* ==========================================================
    CAMPUS WORD 2007 SIMULATEUR
    PHASE 5A
@@ -2208,6 +2209,8 @@ CampusWord2007Simulateur.KeyboardEngine={
     boundKeyUp:null,
 
     boundKeyPress:null,
+    boundBeforeInput:null,
+    boundInput:null,
 
     initialize(){
 
@@ -2230,6 +2233,14 @@ CampusWord2007Simulateur.KeyboardEngine={
         this.boundKeyPress=
 
             this.onKeyPress.bind(this);
+
+        this.boundBeforeInput=
+
+            this.onBeforeInput.bind(this);
+
+        this.boundInput=
+
+            this.onInput.bind(this);
 
         this.attach();
 
@@ -2295,6 +2306,26 @@ CampusWord2007Simulateur.KeyboardEngine={
 
         );
 
+        this.target.addEventListener(
+
+            "beforeinput",
+
+            this.boundBeforeInput,
+
+            false
+
+        );
+
+        this.target.addEventListener(
+
+            "input",
+
+            this.boundInput,
+
+            false
+
+        );
+
     },
 
     detach(){
@@ -2330,6 +2361,26 @@ CampusWord2007Simulateur.KeyboardEngine={
             "keypress",
 
             this.boundKeyPress,
+
+            false
+
+        );
+
+        this.target.removeEventListener(
+
+            "beforeinput",
+
+            this.boundBeforeInput,
+
+            false
+
+        );
+
+        this.target.removeEventListener(
+
+            "input",
+
+            this.boundInput,
 
             false
 
@@ -2401,68 +2452,129 @@ CampusWord2007Simulateur.KeyboardEngine={
 
     },
 
-onKeyPress(event){
+    onKeyPress(event){
 
-    if(!this.enabled){
+        if(!this.enabled){
 
-        return;
+            return;
 
-    }
+        }
 
-    if(
+        if(
 
-        event.ctrlKey ||
+            event.ctrlKey ||
 
-        event.altKey ||
+            event.altKey ||
 
-        event.metaKey
+            event.metaKey
 
-    ){
+        ){
 
-        return;
+            return;
 
-    }
+        }
 
-    const character=
+        const character=
 
-        event.key;
+            event.key;
 
-    if(
+        if(
 
-        typeof character!=="string" ||
+            typeof character!=="string" ||
 
-        character.length!==1
+            character.length!==1
 
-    ){
+        ){
 
-        return;
+            return;
 
-    }
+        }
 
-    if(
+        if(
 
-        !CampusWord2007Simulateur.TextEngine ||
+            !CampusWord2007Simulateur.TextEngine ||
 
-        typeof CampusWord2007Simulateur.TextEngine.insertCharacter!=="function"
+            typeof CampusWord2007Simulateur.TextEngine.insertCharacter!=="function"
 
-    ){
+        ){
 
-        return;
+            return;
 
-    }
+        }
 
-    event.preventDefault();
+        event.preventDefault();
 
-    CampusWord2007Simulateur.TextEngine.insertCharacter(
+        CampusWord2007Simulateur.TextEngine.insertCharacter(
 
-        character
+            character
 
-    );
+        );
 
-},
+    },
 
+    onBeforeInput(event){
 
+        if(!this.enabled){
 
+            return;
+
+        }
+
+        if(
+
+            !event ||
+
+            event.isComposing
+
+        ){
+
+            return;
+
+        }
+
+        if(
+
+            typeof event.data!=="string" ||
+
+            event.data.length!==1
+
+        ){
+
+            return;
+
+        }
+
+        if(
+
+            !CampusWord2007Simulateur.TextEngine ||
+
+            typeof CampusWord2007Simulateur.TextEngine.insertCharacter!=="function"
+
+        ){
+
+            return;
+
+        }
+
+        event.preventDefault();
+
+        CampusWord2007Simulateur.TextEngine.insertCharacter(
+
+            event.data
+
+        );
+
+    },
+
+    onInput(event){
+
+        if(!this.enabled){
+
+            return;
+
+        }
+
+    },
 
     destroy(){
 
@@ -2491,6 +2603,8 @@ onKeyPress(event){
         this.boundKeyUp=null;
 
         this.boundKeyPress=null;
+        this.boundBeforeInput=null;
+        this.boundInput=null;
 
         this.enabled=true;
 
@@ -2499,6 +2613,9 @@ onKeyPress(event){
     }
 
 };
+
+
+
 
 
 
