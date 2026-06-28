@@ -2170,3 +2170,635 @@ CampusWord2007Simulateur.CaretEngine.attachToPage = function(page){
 };
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* ==========================================================
+   OFFICE MENU TOGGLE
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .toggleOfficeMenu =
+function(){
+
+    console.log(
+        "[OFFICE] Bouton Office klike"
+    );
+
+    const menu =
+        CampusWord2007Simulateur
+            .DOM
+            .officeMenu;
+
+    console.log(
+        "[OFFICE] Menu jwenn:",
+        menu
+    );
+
+    if(!menu){
+
+        console.log(
+            "[OFFICE] officeMenu = NULL"
+        );
+
+        return;
+    }
+
+    menu.classList.toggle(
+        "open"
+    );
+
+    console.log(
+        "[OFFICE] Klas open:",
+        menu.classList.contains(
+            "open"
+        )
+    );
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* ==========================================================
+   RIBBON TAB SWITCHER
+   ========================================================== */
+
+CampusWord2007Simulateur
+    .RibbonTabsEngine = {
+
+    initialize : function(){
+
+        const homeTabButton =
+            document.getElementById(
+                "tab-home"
+            );
+
+        const insertTabButton =
+            document.getElementById(
+                "tab-insert"
+            );
+
+        const homeTab =
+            document.getElementById(
+                "home-tab"
+            );
+
+        const insertTab =
+            document.getElementById(
+                "insert-tab"
+            );
+
+        if(
+            homeTab
+        ){
+            homeTab.style.display =
+                "flex";
+        }
+
+        if(
+            insertTab
+        ){
+            insertTab.style.display =
+                "none";
+        }
+
+        if(
+            homeTabButton
+        ){
+
+            homeTabButton
+            .addEventListener(
+                "click",
+                function(){
+
+                    homeTab.style.display =
+                        "flex";
+
+                    insertTab.style.display =
+                        "none";
+
+                }
+            );
+
+        }
+
+        if(
+            insertTabButton
+        ){
+
+            insertTabButton
+            .addEventListener(
+                "click",
+                function(){
+
+                    homeTab.style.display =
+                        "none";
+
+                    insertTab.style.display =
+                        "flex";
+
+                }
+            );
+
+        }
+
+    }
+
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+function showTab(tabName){
+
+    // kache tout tab yo
+
+    document.getElementById(
+        "home-tab"
+    ).style.display = "none";
+
+    document.getElementById(
+        "insert-tab"
+    ).style.display = "none";
+
+    document.getElementById(
+        "format-tab"
+    ).style.display = "none";
+
+    document.getElementById(
+        "page-layout-tab"
+    ).style.display = "none";
+
+    document.getElementById(
+        "references-tab"
+    ).style.display = "none";
+
+    // montre tab yo klike a
+
+    document.getElementById(
+        tabName
+    ).style.display = "flex";
+}
+
+// HOME
+
+document
+.getElementById(
+    "tab-home"
+)
+.addEventListener(
+    "click",
+    function(){
+
+        showTab(
+            "home-tab"
+        );
+
+    }
+);
+
+// INSERT
+
+document
+.getElementById(
+    "tab-insert"
+)
+.addEventListener(
+    "click",
+    function(){
+
+        showTab(
+            "insert-tab"
+        );
+
+    }
+);
+
+// FORMAT
+
+document
+.getElementById(
+    "tab-format"
+)
+.addEventListener(
+    "click",
+    function(){
+
+        showTab(
+            "format-tab"
+        );
+
+    }
+);
+
+// PAGE LAYOUT
+
+document
+.getElementById(
+    "tab-page-layout"
+)
+.addEventListener(
+    "click",
+    function(){
+
+        showTab(
+            "page-layout-tab"
+        );
+
+    }
+);
+
+// REFERENCES
+
+document
+.getElementById(
+    "tab-references"
+)
+.addEventListener(
+    "click",
+    function(){
+
+        showTab(
+            "references-tab"
+        );
+
+    }
+);
+
+// OUVRI HOME PA DEFO
+
+showTab(
+    "home-tab"
+);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+CampusWord2007Simulateur.FormattingEngine = {
+
+    state: {
+        bold: false,
+        italic: false,
+        underline: false,
+        strikeThrough: false,
+        fontFamily: "Calibri",
+        fontSize: 12,
+        color: "#000000",
+        highlight: "transparent"
+    },
+
+    wrap: function(text){
+
+        const s = this.state;
+
+        let style = "";
+
+        if(s.bold) style += "font-weight:bold;";
+        if(s.italic) style += "font-style:italic;";
+        if(s.underline) style += "text-decoration:underline;";
+        if(s.strikeThrough) style += "text-decoration:line-through;";
+
+        style += "font-family:" + s.fontFamily + ";";
+        style += "font-size:" + s.fontSize + "px;";
+        style += "color:" + s.color + ";";
+
+        if(s.highlight !== "transparent"){
+            style += "background:" + s.highlight + ";";
+        }
+
+        return `<span style="${style}">${text}</span>`;
+    }
+};
+
+
+
+
+
+CampusWord2007Simulateur
+    .TextEngine
+    .wrapCharacter =
+function(character){
+
+    return CampusWord2007Simulateur
+        .FormattingEngine
+        .wrap(character);
+};
+
+
+
+
+
+/* ==========================================================
+   FORMAT BUTTONS EVENTS
+   ========================================================== */
+
+document.addEventListener("DOMContentLoaded", function(){
+
+    const fs = CampusWord2007Simulateur.FormattingEngine.state;
+
+    const boldBtn = document.getElementById("btn-bold");
+    if(boldBtn){
+        boldBtn.onclick = function(){
+            fs.bold = !fs.bold;
+        };
+    }
+
+    const italicBtn = document.getElementById("btn-italic");
+    if(italicBtn){
+        italicBtn.onclick = function(){
+            fs.italic = !fs.italic;
+        };
+    }
+
+    const underlineBtn = document.getElementById("btn-underline");
+    if(underlineBtn){
+        underlineBtn.onclick = function(){
+            fs.underline = !fs.underline;
+        };
+    }
+
+    const strikeBtn = document.getElementById("btn-strikethrough");
+    if(strikeBtn){
+        strikeBtn.onclick = function(){
+            fs.strikeThrough = !fs.strikeThrough;
+        };
+    }
+
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* ==========================================================
+   HOME RIBBON ENGINE
+   ========================================================== */
+
+document.addEventListener(
+    "DOMContentLoaded",
+    function(){
+
+        const fs =
+            CampusWord2007Simulateur
+                .FormattingEngine
+                .state;
+
+        /* FONT FAMILY */
+
+        const fontFamily =
+            document.getElementById(
+                "font-family"
+            );
+
+        if(fontFamily){
+
+            fontFamily.addEventListener(
+                "change",
+                function(){
+
+                    fs.fontFamily =
+                        this.value;
+
+                }
+            );
+
+        }
+
+        /* FONT SIZE */
+
+        const fontSize =
+            document.getElementById(
+                "font-size"
+            );
+
+        if(fontSize){
+
+            fontSize.addEventListener(
+                "change",
+                function(){
+
+                    fs.fontSize =
+                        Number(
+                            this.value
+                        ) || 12;
+
+                }
+            );
+
+        }
+
+        /* GROW FONT */
+
+        const growFont =
+            document.getElementById(
+                "btn-grow-font"
+            );
+
+        if(growFont){
+
+            growFont.addEventListener(
+                "click",
+                function(){
+
+                    fs.fontSize++;
+
+                    if(fontSize){
+                        fontSize.value =
+                            fs.fontSize;
+                    }
+
+                }
+            );
+
+        }
+
+        /* SHRINK FONT */
+
+        const shrinkFont =
+            document.getElementById(
+                "btn-shrink-font"
+            );
+
+        if(shrinkFont){
+
+            shrinkFont.addEventListener(
+                "click",
+                function(){
+
+                    fs.fontSize =
+                        Math.max(
+                            1,
+                            fs.fontSize - 1
+                        );
+
+                    if(fontSize){
+                        fontSize.value =
+                            fs.fontSize;
+                    }
+
+                }
+            );
+
+        }
+
+        /* FONT COLOR */
+
+        const fontColor =
+            document.getElementById(
+                "btn-font-color"
+            );
+
+        if(fontColor){
+
+            fontColor.addEventListener(
+                "click",
+                function(){
+
+                    const color =
+                        prompt(
+                            "Font color (#ff0000)"
+                        );
+
+                    if(color){
+
+                        fs.color =
+                            color;
+
+                    }
+
+                }
+            );
+
+        }
+
+        /* HIGHLIGHT */
+
+        const highlight =
+            document.getElementById(
+                "btn-highlight"
+            );
+
+        if(highlight){
+
+            highlight.addEventListener(
+                "click",
+                function(){
+
+                    const color =
+                        prompt(
+                            "Highlight color"
+                        );
+
+                    if(color){
+
+                        fs.highlight =
+                            color;
+
+                    }
+
+                }
+            );
+
+        }
+
+    }
+);
