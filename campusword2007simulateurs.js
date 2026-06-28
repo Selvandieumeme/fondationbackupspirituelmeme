@@ -2188,6 +2188,105 @@ CampusWord2007Simulateur.CaretEngine.attachToPage = function(page){
 
 
 
+/* ==========================================================
+   CARET ENGINE
+   synchronizeWithCharacter()
+========================================================== */
+
+CampusWord2007Simulateur.CaretEngine
+.synchronizeWithCharacter=function(character){
+
+    if(
+
+        !character ||
+
+        !character.isConnected ||
+
+        !this.caret
+
+    ){
+
+        return false;
+
+    }
+
+    const paragraph=
+
+        character.parentNode;
+
+    if(!paragraph){
+
+        return false;
+
+    }
+
+    const page=
+
+        paragraph.closest(
+
+            ".document-page"
+
+        );
+
+    if(
+
+        page &&
+
+        page!==CampusWord2007Simulateur
+                .DocumentEngine
+                .getActivePage()
+
+    ){
+
+        CampusWord2007Simulateur
+        .DocumentEngine
+        .setActivePage(page);
+
+        this.attachToPage(page);
+
+    }
+
+    const paragraphRect=
+
+        paragraph.getBoundingClientRect();
+
+    const characterRect=
+
+        character.getBoundingClientRect();
+
+    const layerRect=
+
+        this.layer.getBoundingClientRect();
+
+    const x=
+
+        characterRect.right-
+
+        layerRect.left;
+
+    const y=
+
+        paragraphRect.top-
+
+        layerRect.top;
+
+    this.setPosition(
+
+        Math.round(x),
+
+        Math.round(y)
+
+    );
+
+    this.show();
+
+    return true;
+
+};
+
+
+
+
 
 /* ==========================================================
    CAMPUS WORD 2007 SIMULATEUR
