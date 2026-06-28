@@ -512,3 +512,417 @@ CampusWord2007Simulateur.DOMEngine = {
     }
 
 };
+
+
+
+
+
+
+/* ==========================================================
+   CAMPUS WORD 2007 SIMULATEUR
+   PHASE 2B
+   UTILITIES
+   Shared Helper Functions
+========================================================== */
+
+CampusWord2007Simulateur.Utilities = {
+
+    /* ======================================================
+       UNIQUE ID
+    ====================================================== */
+
+    _idCounter: 0,
+
+    generateId(prefix = "cw"){
+
+        this._idCounter++;
+
+        return (
+            prefix +
+            "-" +
+            Date.now() +
+            "-" +
+            this._idCounter
+        );
+
+    },
+
+    /* ======================================================
+       TYPE CHECKS
+    ====================================================== */
+
+    isString(value){
+
+        return typeof value === "string";
+
+    },
+
+    isNumber(value){
+
+        return typeof value === "number" &&
+               Number.isFinite(value);
+
+    },
+
+    isFunction(value){
+
+        return typeof value === "function";
+
+    },
+
+    isObject(value){
+
+        return value !== null &&
+               typeof value === "object";
+
+    },
+
+    isElement(value){
+
+        return value instanceof HTMLElement;
+
+    },
+
+    /* ======================================================
+       DOM HELPERS
+    ====================================================== */
+
+    create(tag, className = "", id = ""){
+
+        const element = document.createElement(tag);
+
+        if(className){
+
+            element.className = className;
+
+        }
+
+        if(id){
+
+            element.id = id;
+
+        }
+
+        return element;
+
+    },
+
+    remove(element){
+
+        if(
+            this.isElement(element) &&
+            element.parentNode
+        ){
+
+            element.parentNode.removeChild(element);
+
+        }
+
+    },
+
+    empty(element){
+
+        if(!this.isElement(element)){
+
+            return;
+
+        }
+
+        while(element.firstChild){
+
+            element.removeChild(
+                element.firstChild
+            );
+
+        }
+
+    },
+
+    /* ======================================================
+       CLASS HELPERS
+    ====================================================== */
+
+    addClass(element,className){
+
+        if(this.isElement(element)){
+
+            element.classList.add(className);
+
+        }
+
+    },
+
+    removeClass(element,className){
+
+        if(this.isElement(element)){
+
+            element.classList.remove(className);
+
+        }
+
+    },
+
+    toggleClass(element,className){
+
+        if(this.isElement(element)){
+
+            element.classList.toggle(className);
+
+        }
+
+    },
+
+    hasClass(element,className){
+
+        if(!this.isElement(element)){
+
+            return false;
+
+        }
+
+        return element.classList.contains(className);
+
+    },
+
+    /* ======================================================
+       STYLE HELPERS
+    ====================================================== */
+
+    css(element,property,value){
+
+        if(!this.isElement(element)){
+
+            return;
+
+        }
+
+        element.style[property]=value;
+
+    },
+
+    show(element){
+
+        if(this.isElement(element)){
+
+            element.style.display="";
+
+        }
+
+    },
+
+    hide(element){
+
+        if(this.isElement(element)){
+
+            element.style.display="none";
+
+        }
+
+    },
+
+    /* ======================================================
+       EVENTS
+    ====================================================== */
+
+    on(element,event,callback,options=false){
+
+        if(
+            this.isElement(element) &&
+            this.isFunction(callback)
+        ){
+
+            element.addEventListener(
+                event,
+                callback,
+                options
+            );
+
+        }
+
+    },
+
+    off(element,event,callback,options=false){
+
+        if(
+            this.isElement(element) &&
+            this.isFunction(callback)
+        ){
+
+            element.removeEventListener(
+                event,
+                callback,
+                options
+            );
+
+        }
+
+    },
+
+    /* ======================================================
+       CLAMP
+    ====================================================== */
+
+    clamp(value,min,max){
+
+        return Math.min(
+            Math.max(value,min),
+            max
+        );
+
+    },
+
+    /* ======================================================
+       RANDOM
+    ====================================================== */
+
+    random(min,max){
+
+        return Math.floor(
+
+            Math.random() *
+
+            (max-min+1)
+
+        ) + min;
+
+    },
+
+    /* ======================================================
+       DEBOUNCE
+    ====================================================== */
+
+    debounce(callback,delay=150){
+
+        let timer=null;
+
+        return (...args)=>{
+
+            clearTimeout(timer);
+
+            timer=setTimeout(()=>{
+
+                callback(...args);
+
+            },delay);
+
+        };
+
+    },
+
+    /* ======================================================
+       THROTTLE
+    ====================================================== */
+
+    throttle(callback,delay=16){
+
+        let waiting=false;
+
+        return (...args)=>{
+
+            if(waiting){
+
+                return;
+
+            }
+
+            waiting=true;
+
+            callback(...args);
+
+            setTimeout(()=>{
+
+                waiting=false;
+
+            },delay);
+
+        };
+
+    },
+
+    /* ======================================================
+       NEXT FRAME
+    ====================================================== */
+
+    nextFrame(callback){
+
+        requestAnimationFrame(callback);
+
+    },
+
+    /* ======================================================
+       NEXT TICK
+    ====================================================== */
+
+    nextTick(callback){
+
+        setTimeout(callback,0);
+
+    },
+
+    /* ======================================================
+       DEEP COPY
+    ====================================================== */
+
+    clone(object){
+
+        return structuredClone(object);
+
+    },
+
+    /* ======================================================
+       NOW
+    ====================================================== */
+
+    now(){
+
+        return performance.now();
+
+    },
+
+    /* ======================================================
+       LOG
+    ====================================================== */
+
+    log(...message){
+
+        console.log(
+
+            "[CampusWord]",
+
+            ...message
+
+        );
+
+    },
+
+    warn(...message){
+
+        console.warn(
+
+            "[CampusWord]",
+
+            ...message
+
+        );
+
+    },
+
+    error(...message){
+
+        console.error(
+
+            "[CampusWord]",
+
+            ...message
+
+        );
+
+    }
+
+};
+
+
+
+
+
+
