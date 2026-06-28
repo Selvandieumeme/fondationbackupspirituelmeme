@@ -2972,12 +2972,12 @@ insertCharacter(character){
 
     ){
 
-this.currentParagraph.appendChild(span);
+Caret.synchronizeWithCharacter(
+    span
+);
 
-requestAnimationFrame(() => {
-    Caret.synchronizeWithCharacter(span);
-    Caret.show();
-});
+
+
 
         Caret.show();
 
