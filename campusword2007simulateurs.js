@@ -1713,6 +1713,17 @@ CampusWord2007Simulateur.PageFactory={
 
 };
 
+
+
+
+
+
+
+
+
+
+
+
 /* ==========================================================
    CAMPUS WORD 2007 SIMULATEUR
    PHASE 4A
@@ -2495,7 +2506,239 @@ onKeyPress(event){
 
 
 
+/* ==========================================================
+   CAMPUS WORD 2007 SIMULATEUR
+   PHASE 5C.2
+   TEXT ENGINE
+   Character Rendering Foundation
+========================================================== */
 
+CampusWord2007Simulateur.TextEngine={
+
+    initialized:false,
+
+    currentLayer:null,
+
+    currentParagraph:null,
+
+    defaultFont:"Calibri",
+
+    defaultFontSize:16,
+
+    characterSpacing:0,
+
+    initialize(){
+
+        if(this.initialized){
+
+            return true;
+
+        }
+
+        this.refreshActiveLayer();
+
+        this.initialized=true;
+
+        return true;
+
+    },
+
+    refreshActiveLayer(){
+
+        const page=
+
+            CampusWord2007Simulateur
+            .DocumentEngine
+            .getActivePage();
+
+        if(!page){
+
+            this.currentLayer=null;
+
+            this.currentParagraph=null;
+
+            return false;
+
+        }
+
+        this.currentLayer=
+
+            page.querySelector(
+
+                ".page-text-layer"
+
+            );
+
+        if(!this.currentLayer){
+
+            this.currentParagraph=null;
+
+            return false;
+
+        }
+
+        if(!this.currentParagraph ||
+
+           !this.currentParagraph.isConnected){
+
+            this.currentParagraph=
+
+                document.createElement("div");
+
+            this.currentParagraph.className=
+
+                "text-paragraph";
+
+            this.currentParagraph.style.position=
+
+                "relative";
+
+            this.currentParagraph.style.whiteSpace=
+
+                "pre";
+
+            this.currentParagraph.style.lineHeight=
+
+                "19px";
+
+            this.currentParagraph.style.fontFamily=
+
+                this.defaultFont;
+
+            this.currentParagraph.style.fontSize=
+
+                this.defaultFontSize+"px";
+
+            this.currentParagraph.style.minHeight=
+
+                "19px";
+
+            this.currentLayer.appendChild(
+
+                this.currentParagraph
+
+            );
+
+        }
+
+        return true;
+
+    },
+
+    insertCharacter(character){
+
+        if(
+
+            typeof character!=="string" ||
+
+            character.length!==1
+
+        ){
+
+            return false;
+
+        }
+
+        if(
+
+            !this.refreshActiveLayer()
+
+        ){
+
+            return false;
+
+        }
+
+        const span=
+
+            document.createElement("span");
+
+        span.className=
+
+            "text-character";
+
+        span.textContent=
+
+            character;
+
+        span.style.display=
+
+            "inline";
+
+        span.style.whiteSpace=
+
+            "pre";
+
+        span.style.fontFamily=
+
+            this.defaultFont;
+
+        span.style.fontSize=
+
+            this.defaultFontSize+"px";
+
+        if(this.characterSpacing!==0){
+
+            span.style.letterSpacing=
+
+                this.characterSpacing+"px";
+
+        }
+
+        this.currentParagraph.appendChild(
+
+            span
+
+        );
+
+        const Caret=
+
+            CampusWord2007Simulateur
+            .CaretEngine;
+
+        if(
+
+            Caret &&
+
+            typeof Caret.getPosition==="function" &&
+
+            typeof Caret.setPosition==="function"
+
+        ){
+
+            const position=
+
+                Caret.getPosition();
+
+            const width=
+
+                span.getBoundingClientRect().width;
+
+            Caret.setPosition(
+
+                position.x+width,
+
+                position.y
+
+            );
+
+        }
+
+        return true;
+
+    },
+
+    destroy(){
+
+        this.currentLayer=null;
+
+        this.currentParagraph=null;
+
+        this.initialized=false;
+
+    }
+
+};
 
 
 
