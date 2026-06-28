@@ -223,6 +223,9 @@
 
     CampusWord2007Simulateur.TableEngine = {};
 
+
+CampusWord2007Simulateur.HomeRibbonEngine = {};
+
 })();
 
 
