@@ -2698,8 +2698,19 @@ CampusWord2007Simulateur.TextEngine = {
 
             // 🔥 KEY FIX:
             // send paragraph end, NOT individual span/character
-            Caret.synchronizeWithCharacter(
-                this.currentParagraph
+
+
+const lastNode =
+    this.currentParagraph.lastChild;
+
+if(Caret && lastNode){
+
+    Caret.synchronizeWithCharacter(lastNode);
+
+
+
+
+
             );
 
             Caret.show();
