@@ -1718,6 +1718,236 @@ CampusWord2007Simulateur.PageFactory={
 
 
 
+CampusWord2007Simulateur.TextEngine = {
+
+    initialized: false,
+
+    /* ==========================================================
+       DOCUMENT MODEL (SOURCE OF TRUTH)
+    ========================================================== */
+
+    model: {
+        paragraphs: [
+            {
+                id: "p-1",
+                text: "",
+                chars: []
+            }
+        ],
+
+        absoluteText: "",
+
+        caretIndex: 0
+    },
+
+    /* ==========================================================
+       INTERNAL SAFE LAYER (DO NOT CACHE DOM STATICALLY)
+    ========================================================== */
+
+    getActiveLayer() {
+
+        const Document =
+            CampusWord2007Simulateur.DocumentEngine;
+
+        const page =
+            Document.getActivePage?.();
+
+        if (!page) return null;
+
+        return page.querySelector(".page-text-layer");
+    },
+
+    initialize() {
+
+        if (this.initialized) return true;
+
+        this.initialized = true;
+
+        return true;
+    },
+
+    /* ==========================================================
+       CORE INSERT TEXT
+    ========================================================== */
+
+    insertText(char) {
+
+        const paragraph =
+            this.model.paragraphs[this.model.paragraphs.length - 1];
+
+        paragraph.chars.splice(this.model.caretIndex, 0, char);
+
+        this.model.caretIndex++;
+
+        this.rebuildParagraph(paragraph);
+
+        this.syncToDOM();
+
+        this.updateAbsoluteText();
+    },
+
+    /* ==========================================================
+       DELETE TEXT (BACKSPACE)
+    ========================================================== */
+
+    deleteText() {
+
+        const paragraph =
+            this.model.paragraphs[this.model.paragraphs.length - 1];
+
+        if (this.model.caretIndex <= 0) return;
+
+        paragraph.chars.splice(this.model.caretIndex - 1, 1);
+
+        this.model.caretIndex--;
+
+        this.rebuildParagraph(paragraph);
+
+        this.syncToDOM();
+
+        this.updateAbsoluteText();
+    },
+
+    /* ==========================================================
+       PARAGRAPH HANDLING
+    ========================================================== */
+
+    insertParagraph() {
+
+        this.model.paragraphs.push({
+            id: "p-" + (this.model.paragraphs.length + 1),
+            text: "",
+            chars: []
+        });
+
+        this.model.caretIndex = 0;
+
+        this.syncToDOM();
+    },
+
+    /* ==========================================================
+       REBUILD PARAGRAPH TEXT
+    ========================================================== */
+
+    rebuildParagraph(paragraph) {
+
+        paragraph.text =
+            paragraph.chars.join("");
+    },
+
+    /* ==========================================================
+       ABSOLUTE TEXT TRACKING (SAFE FOR FUTURE LAYOUT ENGINE)
+    ========================================================== */
+
+    updateAbsoluteText() {
+
+        let full = "";
+
+        for (let i = 0; i < this.model.paragraphs.length; i++) {
+
+            full += this.model.paragraphs[i].text;
+
+            if (i < this.model.paragraphs.length - 1) {
+                full += "\n";
+            }
+        }
+
+        this.model.absoluteText = full;
+    },
+
+    getAbsoluteIndex() {
+
+        return this.model.caretIndex;
+    },
+
+    /* ==========================================================
+       DOM SYNC (SAFE RENDER ONLY - NO INNERHTML)
+    ========================================================== */
+
+    syncToDOM() {
+
+        const layer = this.getActiveLayer();
+
+        if (!layer) return;
+
+        layer.textContent =
+            this.model.paragraphs
+                .map(p => p.text)
+                .join("\n");
+
+        // SAFE caret reset (avoid layout conflict)
+        const Caret =
+            CampusWord2007Simulateur.CaretEngine;
+
+        if (Caret && typeof Caret.reset === "function") {
+
+            requestAnimationFrame(() => {
+                Caret.reset();
+            });
+
+        }
+    },
+
+    /* ==========================================================
+       CARET CONTROL
+    ========================================================== */
+
+    setCaretIndex(index) {
+
+        this.model.caretIndex =
+            Math.max(0, index);
+    },
+
+    moveCaret(delta) {
+
+        this.model.caretIndex =
+            Math.max(0, this.model.caretIndex + delta);
+    },
+
+    /* ==========================================================
+       HELPERS
+    ========================================================== */
+
+    getText() {
+        return this.model.absoluteText;
+    },
+
+    clear() {
+
+        this.model.paragraphs = [
+            { id: "p-1", text: "", chars: [] }
+        ];
+
+        this.model.caretIndex = 0;
+
+        this.syncToDOM();
+    }
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
