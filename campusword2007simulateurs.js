@@ -1748,6 +1748,8 @@ CampusWord2007Simulateur.CaretEngine={
 
     blinking:false,
 
+initialPlacementDone:false,
+
     x:96,
 
     y:96,
