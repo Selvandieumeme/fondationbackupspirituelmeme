@@ -2214,6 +2214,148 @@ CampusWord2007Simulateur.InputEngine = {
 
 
 
+/* ==========================================================
+   CAMPUS WORD 2007 SIMULATEUR
+   PHASE 4A
+   RENDER ENGINE v1
+   Runs → DOM Span Rendering (NO textContent)
+========================================================== */
+
+CampusWord2007Simulateur.RenderEngine = {
+
+    initialized: false,
+
+    activePageLayer: null,
+
+    initialize() {
+
+        if (this.initialized) return true;
+
+        const Document =
+            CampusWord2007Simulateur.DocumentEngine;
+
+        const page = Document.getActivePage?.();
+
+        if (page) {
+            this.activePageLayer =
+                page.querySelector(".page-text-layer");
+        }
+
+        this.initialized = true;
+        return true;
+    },
+
+    /* ==========================================================
+       GET ACTIVE LAYER SAFE
+    ========================================================== */
+
+    getLayer() {
+
+        if (this.activePageLayer) return this.activePageLayer;
+
+        const page =
+            CampusWord2007Simulateur.DocumentEngine.getActivePage?.();
+
+        if (!page) return null;
+
+        this.activePageLayer =
+            page.querySelector(".page-text-layer");
+
+        return this.activePageLayer;
+    },
+
+    /* ==========================================================
+       CORE RENDER FUNCTION (NO textContent EVER)
+       RUNS → <span>
+    ========================================================== */
+
+    render(paragraphs) {
+
+        const layer = this.getLayer();
+
+        if (!layer) return;
+
+        // CLEAR SAFE (not textContent replacement)
+        while (layer.firstChild) {
+            layer.removeChild(layer.firstChild);
+        }
+
+        // Build DOM structure
+        paragraphs.forEach((p, pIndex) => {
+
+            const paragraphEl =
+                document.createElement("div");
+
+            paragraphEl.className = "cw-paragraph";
+            paragraphEl.dataset.index = pIndex;
+
+            // RUNS rendering (future-proof)
+            const runs = p.runs || this.convertCharsToRuns(p.chars);
+
+            runs.forEach(run => {
+
+                const span =
+                    document.createElement("span");
+
+                span.textContent = run.char;
+
+                // formatting support foundation
+                if (run.bold) span.style.fontWeight = "bold";
+                if (run.italic) span.style.fontStyle = "italic";
+                if (run.underline) span.style.textDecoration = "underline";
+
+                if (run.font) span.style.fontFamily = run.font;
+                if (run.size) span.style.fontSize = run.size + "px";
+
+                paragraphEl.appendChild(span);
+            });
+
+            // line break between paragraphs
+            paragraphEl.appendChild(document.createElement("br"));
+
+            layer.appendChild(paragraphEl);
+        });
+    },
+
+    /* ==========================================================
+       COMPATIBILITY BRIDGE (chars → runs)
+       (temporary safe bridge for your current engine)
+    ========================================================== */
+
+    convertCharsToRuns(chars) {
+
+        return chars.map(ch => {
+
+            return {
+                char: ch,
+                bold: false,
+                italic: false,
+                underline: false,
+                font: "Calibri",
+                size: 12
+            };
+        });
+    },
+
+    /* ==========================================================
+       UPDATE ENTRY POINT
+    ========================================================== */
+
+    update() {
+
+        const Document =
+            CampusWord2007Simulateur.DocumentEngine;
+
+        if (!Document.model || !Document.model.paragraphs) return;
+
+        this.render(Document.model.paragraphs);
+    }
+};
+
+
+
+
+
 
 
 
