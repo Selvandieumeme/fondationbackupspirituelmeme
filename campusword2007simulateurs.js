@@ -2253,6 +2253,7 @@ CampusWord2007Simulateur.CaretEngine.attachToPage = function(page){
 
 
 
+
 /* ==========================================================
    CARET ENGINE
    synchronizeWithCharacter()
@@ -2285,6 +2286,14 @@ CampusWord2007Simulateur.CaretEngine
 
     }
 
+    this.currentCharacter=
+
+        character;
+
+    this.currentParagraph=
+
+        paragraph;
+
     const page=
 
         paragraph.closest(
@@ -2311,45 +2320,65 @@ CampusWord2007Simulateur.CaretEngine
 
     }
 
-    const paragraphRect=
+    this.scheduleUpdate(()=>{
 
-        paragraph.getBoundingClientRect();
+        if(
 
-    const characterRect=
+            !this.currentCharacter ||
 
-        character.getBoundingClientRect();
+            !this.currentCharacter.isConnected ||
 
-    const layerRect=
+            !this.layer ||
 
-        this.layer.getBoundingClientRect();
+            !this.caret
 
-    const x=
+        ){
 
-        characterRect.right-
+            return;
 
-        layerRect.left;
+        }
 
-const y=
+        const characterRect=
 
-    Math.round(
+            this.currentCharacter
+            .getBoundingClientRect();
 
-        paragraph.offsetTop
+        const layerRect=
 
-    );
+            this.layer
+            .getBoundingClientRect();
 
-    this.setPosition(
+        const x=
 
-        Math.round(x),
+            characterRect.right-
 
-        Math.round(y)
+            layerRect.left;
 
-    );
+        const y=
 
-    this.show();
+            characterRect.top-
+
+            layerRect.top;
+
+        this.setPosition(
+
+            x,
+
+            y
+
+        );
+
+        this.show();
+
+    });
 
     return true;
 
 };
+
+
+
+
 
 
 
