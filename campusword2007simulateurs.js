@@ -2074,7 +2074,141 @@ CampusWord2007Simulateur.TextEngine = {
 
 
 
+/* ==========================================================
+   CAMPUS WORD 2007 SIMULATEUR
+   INPUT ENGINE v1
+   ANDROID KEYBOARD SUPPORT + TEXTENGINE BRIDGE
+========================================================== */
 
+CampusWord2007Simulateur.InputEngine = {
+
+    initialized: false,
+
+    inputEl: null,
+
+    active: false,
+
+    /* ==========================================================
+       INITIALIZE INPUT ENGINE
+    ========================================================== */
+
+    initialize() {
+
+        if (this.initialized) return true;
+
+        this.createHiddenInput();
+        this.bindEvents();
+
+        this.initialized = true;
+        return true;
+    },
+
+    /* ==========================================================
+       CREATE HIDDEN INPUT (FOR ANDROID / DESKTOP KEYBOARD TRIGGER)
+    ========================================================== */
+
+    createHiddenInput() {
+
+        const input = document.createElement("input");
+
+        input.type = "text";
+        input.id = "word-hidden-input";
+
+        /* IMPORTANT: invisible but still focusable */
+        input.style.position = "absolute";
+        input.style.opacity = "0";
+        input.style.left = "-9999px";
+        input.style.top = "0px";
+        input.style.height = "1px";
+        input.style.width = "1px";
+        input.style.zIndex = "-1";
+
+        document.body.appendChild(input);
+
+        this.inputEl = input;
+    },
+
+    /* ==========================================================
+       BIND EVENTS (SAFE + NO DUPLICATION LOGIC)
+    ========================================================== */
+
+    bindEvents() {
+
+        const input = this.inputEl;
+
+        if (!input) return;
+
+        /* ======================================================
+           TEXT INPUT HANDLER (ANDROID + DESKTOP)
+        ====================================================== */
+
+        input.addEventListener("input", (e) => {
+
+            let value = input.value;
+
+            if (!value || value.length === 0) return;
+
+            // send each character safely to TextEngine
+            for (let i = 0; i < value.length; i++) {
+
+                CampusWord2007Simulateur.TextEngine.insertText(value[i]);
+            }
+
+            // clear buffer after processing
+            input.value = "";
+        });
+
+        /* ======================================================
+           BACKSPACE HANDLER
+        ====================================================== */
+
+        input.addEventListener("keydown", (e) => {
+
+            if (e.key === "Backspace") {
+
+                e.preventDefault();
+
+                CampusWord2007Simulateur.TextEngine.deleteText();
+            }
+        });
+
+        /* ======================================================
+           MOBILE FOCUS KEEPER (ANTI-LOSS FOCUS)
+        ====================================================== */
+
+        setInterval(() => {
+
+            if (!this.active) return;
+
+            if (document.activeElement !== this.inputEl) {
+                this.inputEl.focus();
+            }
+
+        }, 300);
+    },
+
+    /* ==========================================================
+       ACTIVATE INPUT (TRIGGERS KEYBOARD)
+    ========================================================== */
+
+    activate() {
+
+        this.active = true;
+
+        if (this.inputEl) {
+            this.inputEl.focus();
+        }
+    },
+
+    /* ==========================================================
+       DEACTIVATE INPUT
+    ========================================================== */
+
+    deactivate() {
+
+        this.active = false;
+    }
+};
 
 
 
