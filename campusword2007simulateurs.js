@@ -1964,71 +1964,28 @@ lastKnownY:96,
 
     },
 
-setPosition(x,y){
 
-    this.x=Math.round(x);
+setPosition(x, y){
 
-    this.y=Math.round(y);
-
-    if(!this.caret){
-
+    // ❗ BLOCK auto-reset on first render jump
+    if(this.initialPlacementDone && this.isAtDocumentStart){
         return;
-
     }
 
-    this.caret.style.left=this.x+"px";
+    this.x = Math.round(x);
+    this.y = Math.round(y);
 
-    this.caret.style.top=this.y+"px";
+    if(!this.caret){
+        return;
+    }
 
-    },
+    this.caret.style.left = this.x + "px";
+    this.caret.style.top = this.y + "px";
 
-    moveToPage(page){
+    this.initialPlacementDone = true;
+}
 
-        if(!page){
-
-            return;
-
-        }
-
-        const layer=
-
-            page.querySelector(
-
-                ".page-caret-layer"
-
-            );
-
-        if(!layer){
-
-            return;
-
-        }
-
-        this.layer=layer;
-
-        this.createCaret();
-
-        this.setPosition(
-
-            this.x,
-
-            this.y
-
-        );
-
-    },
-
-    getPosition(){
-
-        return{
-
-            x:this.x,
-
-            y:this.y
-
-        };
-
-    },
+ },
 
 
 
