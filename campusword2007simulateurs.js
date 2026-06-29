@@ -2187,6 +2187,133 @@ resetToDocumentStart(){
 
     },
 
+
+
+
+getLogicalPosition(){
+
+    return{
+
+        caretIndex:this.caretIndex,
+
+        currentLine:this.currentLine,
+
+        currentColumn:this.currentColumn,
+
+        preferredX:this.preferredX,
+
+        isAtDocumentStart:this.isAtDocumentStart,
+
+        isFollowingCharacter:this.isFollowingCharacter
+
+    };
+
+},
+
+
+setLogicalPosition(state){
+
+    if(!state){
+
+        return;
+
+    }
+
+    if(typeof state.caretIndex==="number"){
+
+        this.caretIndex=state.caretIndex;
+
+    }
+
+    if(typeof state.currentLine==="number"){
+
+        this.currentLine=state.currentLine;
+
+    }
+
+    if(typeof state.currentColumn==="number"){
+
+        this.currentColumn=state.currentColumn;
+
+    }
+
+    if(state.preferredX!==undefined){
+
+        this.preferredX=state.preferredX;
+
+    }
+
+    if(typeof state.isAtDocumentStart==="boolean"){
+
+        this.isAtDocumentStart=
+
+            state.isAtDocumentStart;
+
+    }
+
+    if(typeof state.isFollowingCharacter==="boolean"){
+
+        this.isFollowingCharacter=
+
+            state.isFollowingCharacter;
+
+    }
+
+},
+
+
+resetLogicalState(){
+
+    this.caretIndex=0;
+
+    this.currentLine=0;
+
+    this.currentColumn=0;
+
+    this.preferredX=null;
+
+    this.isAtDocumentStart=true;
+
+    this.isFollowingCharacter=false;
+
+    this.lastCharacter=null;
+
+    this.lastParagraph=null;
+
+},
+
+
+advanceLogicalPosition(){
+
+    this.caretIndex++;
+
+    this.currentColumn++;
+
+    this.isAtDocumentStart=false;
+
+    this.isFollowingCharacter=true;
+
+},
+
+
+newLogicalLine(){
+
+    this.currentLine++;
+
+    this.currentColumn=0;
+
+    this.preferredX=null;
+
+    this.isAtDocumentStart=false;
+
+    this.isFollowingCharacter=false;
+
+}
+
+
+
+
+
     destroy(){
 
         this.stopBlink();
