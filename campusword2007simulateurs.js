@@ -1733,577 +1733,229 @@ CampusWord2007Simulateur.PageFactory={
    Visibility
 ========================================================== */
 
-
-CampusWord2007Simulateur.CaretEngine={
+CampusWord2007Simulateur.CaretEngine = {
 
     initialized:false,
 
     caret:null,
-
     layer:null,
 
     timer:null,
 
     visible:true,
-
     blinking:false,
 
-initialPlacementDone:false,
-
     x:96,
-
     y:96,
 
     width:1,
-
     height:19,
 
     blinkInterval:530,
 
-defaultMarginLeft:96,
+    defaultMarginLeft:96,
+    defaultMarginTop:96,
 
-defaultMarginTop:96,
-
-currentCharacter:null,
-
-currentParagraph:null,
-
-pendingFrame:0,
-
-
-caretIndex:0,
-
-currentLine:0,
-
-currentColumn:0,
-
-preferredX:null,
-
-isAtDocumentStart:true,
-
-isFollowingCharacter:false,
-
-lastCharacter:null,
-
-lastParagraph:null,
-
-lastKnownX:96,
-
-lastKnownY:96,
+    pendingFrame:0,
 
     initialize(){
 
         if(this.initialized){
-
             return true;
-
         }
 
         if(!this.attachToActivePage()){
-
             return false;
-
         }
 
         this.show();
-
         this.startBlink();
 
-        this.initialized=true;
-
+        this.initialized = true;
         return true;
-
     },
 
     attachToActivePage(){
 
-        const documentEngine=
-
-            CampusWord2007Simulateur.DocumentEngine;
-
-        const page=
-
-            documentEngine.getActivePage();
+        const page =
+            CampusWord2007Simulateur.DocumentEngine.getActivePage();
 
         if(!page){
-
-            CampusWord2007Simulateur.Utilities.error(
-
-                "CaretEngine",
-
-                "No active page."
-
-            );
-
             return false;
-
         }
 
-        const layer=
-
-            page.querySelector(
-
-                ".page-caret-layer"
-
-            );
+        const layer =
+            page.querySelector(".page-caret-layer");
 
         if(!layer){
-
-            CampusWord2007Simulateur.Utilities.error(
-
-                "CaretEngine",
-
-                "Caret layer missing."
-
-            );
-
             return false;
-
         }
 
-        this.layer=layer;
-
+        this.layer = layer;
         this.createCaret();
 
-        this.setPosition(
-
-            this.x,
-
-            this.y
-
-        );
+        this.setPosition(this.x, this.y);
 
         return true;
-
     },
 
     createCaret(){
 
         if(!this.layer){
-
             return;
         }
 
-        if(
-
-            getComputedStyle(
-
-                this.layer
-
-            ).position==="static"
-
-        ){
-
-            this.layer.style.position="relative";
-
-        }
-
-        if(
-
-            this.caret &&
-
-            this.caret.parentNode!==this.layer
-
-        ){
-
-            this.caret.parentNode.removeChild(
-
-                this.caret
-
-            );
-
+        if(getComputedStyle(this.layer).position === "static"){
+            this.layer.style.position = "relative";
         }
 
         if(!this.caret){
+            this.caret = document.createElement("div");
+            this.caret.id = "document-caret";
 
-            this.caret=document.createElement("div");
-
-            this.caret.id="document-caret";
-
-            this.caret.style.position="absolute";
-
-            this.caret.style.width=
-
-                this.width+"px";
-
-            this.caret.style.height=
-
-                this.height+"px";
-
-            this.caret.style.background="#000000";
-
-            this.caret.style.pointerEvents="none";
-
-            this.caret.style.userSelect="none";
-
-            this.caret.style.display="block";
-
-            this.caret.style.visibility="visible";
-
-            this.caret.style.opacity="1";
-
-            this.caret.style.zIndex="999";
-
-            this.caret.style.transform="translate3d(0,0,0)";
-
+            this.caret.style.position = "absolute";
+            this.caret.style.width = this.width + "px";
+            this.caret.style.height = this.height + "px";
+            this.caret.style.background = "#000";
+            this.caret.style.pointerEvents = "none";
+            this.caret.style.zIndex = "999";
         }
 
-        if(
-
-            this.caret.parentNode!==this.layer
-
-        ){
-
-            this.layer.appendChild(
-
-                this.caret
-
-            );
-
+        if(this.caret.parentNode !== this.layer){
+            this.layer.appendChild(this.caret);
         }
-
     },
 
+    setPosition(x, y){
 
-setPosition(x, y){
-
-    // ❗ BLOCK auto-reset on first render jump
-    if(this.initialPlacementDone && this.isAtDocumentStart){
-        return;
-    }
-
-    this.x = Math.round(x);
-    this.y = Math.round(y);
-
-    if(!this.caret){
-        return;
-    }
-
-    this.caret.style.left = this.x + "px";
-    this.caret.style.top = this.y + "px";
-
-    this.initialPlacementDone = true;
-}
-
- },
-
-
-
-
-scheduleUpdate(callback){
-
-    if(this.pendingFrame){
-
-        cancelAnimationFrame(
-
-            this.pendingFrame
-
-        );
-
-    }
-
-    this.pendingFrame=
-
-        requestAnimationFrame(()=>{
-
-            this.pendingFrame=0;
-
-            callback();
-
-        });
-
-},
-
-
-
-
-
-resetToDocumentStart(){
-
-    this.currentCharacter=null;
-
-    this.currentParagraph=null;
-
-    this.setPosition(
-
-        this.defaultMarginLeft,
-
-        this.defaultMarginTop
-
-    );
-
-    this.show();
-
-},
-
-
-
-
-
-
-
-    show(){
+        this.x = Math.round(x);
+        this.y = Math.round(y);
 
         if(!this.caret){
-
             return;
-
         }
 
-        this.visible=true;
+        this.caret.style.left = this.x + "px";
+        this.caret.style.top = this.y + "px";
+    },
 
-        this.caret.style.visibility="visible";
+    getPosition(){
+        return { x:this.x, y:this.y };
+    },
 
-        this.caret.style.opacity="1";
+    moveToPage(page){
 
+        if(!page){
+            return;
+        }
+
+        const layer =
+            page.querySelector(".page-caret-layer");
+
+        if(!layer){
+            return;
+        }
+
+        this.layer = layer;
+        this.createCaret();
+
+        this.setPosition(this.x, this.y);
+    },
+
+    resetToDocumentStart(){
+
+        this.setPosition(
+            this.defaultMarginLeft,
+            this.defaultMarginTop
+        );
+
+        this.show();
+    },
+
+    scheduleUpdate(callback){
+
+        if(this.pendingFrame){
+            cancelAnimationFrame(this.pendingFrame);
+        }
+
+        this.pendingFrame =
+            requestAnimationFrame(() => {
+                this.pendingFrame = 0;
+                callback();
+            });
+    },
+
+    show(){
+        if(!this.caret) return;
+        this.visible = true;
+        this.caret.style.visibility = "visible";
+        this.caret.style.opacity = "1";
     },
 
     hide(){
-
-        if(!this.caret){
-
-            return;
-
-        }
-
-        this.visible=false;
-
-        this.caret.style.visibility="hidden";
-
-        this.caret.style.opacity="0";
-
+        if(!this.caret) return;
+        this.visible = false;
+        this.caret.style.visibility = "hidden";
+        this.caret.style.opacity = "0";
     },
 
     toggle(){
-
-        if(!this.caret){
-
-            return;
-
-        }
-
         if(this.visible){
-
             this.hide();
-
-        }
-
-        else{
-
+        } else {
             this.show();
-
         }
-
     },
 
     startBlink(){
 
         if(this.blinking){
-
             return;
-
         }
 
-        this.blinking=true;
+        this.blinking = true;
 
-        this.timer=setInterval(()=>{
-
-            if(
-
-                this.caret &&
-
-                this.caret.isConnected
-
-            ){
-
+        this.timer = setInterval(() => {
+            if(this.caret && this.caret.isConnected){
                 this.toggle();
-
             }
-
-        },
-
-        this.blinkInterval);
-
+        }, this.blinkInterval);
     },
 
     stopBlink(){
 
         if(this.timer){
-
-            clearInterval(
-
-                this.timer
-
-            );
-
+            clearInterval(this.timer);
         }
 
-        this.timer=null;
-
-        this.blinking=false;
+        this.timer = null;
+        this.blinking = false;
 
         this.show();
-
     },
-
-
-
-
-getLogicalPosition(){
-
-    return{
-
-        caretIndex:this.caretIndex,
-
-        currentLine:this.currentLine,
-
-        currentColumn:this.currentColumn,
-
-        preferredX:this.preferredX,
-
-        isAtDocumentStart:this.isAtDocumentStart,
-
-        isFollowingCharacter:this.isFollowingCharacter
-
-    };
-
-},
-
-
-setLogicalPosition(state){
-
-    if(!state){
-
-        return;
-
-    }
-
-    if(typeof state.caretIndex==="number"){
-
-        this.caretIndex=state.caretIndex;
-
-    }
-
-    if(typeof state.currentLine==="number"){
-
-        this.currentLine=state.currentLine;
-
-    }
-
-    if(typeof state.currentColumn==="number"){
-
-        this.currentColumn=state.currentColumn;
-
-    }
-
-    if(state.preferredX!==undefined){
-
-        this.preferredX=state.preferredX;
-
-    }
-
-    if(typeof state.isAtDocumentStart==="boolean"){
-
-        this.isAtDocumentStart=
-
-            state.isAtDocumentStart;
-
-    }
-
-    if(typeof state.isFollowingCharacter==="boolean"){
-
-        this.isFollowingCharacter=
-
-            state.isFollowingCharacter;
-
-    }
-
-},
-
-
-resetLogicalState(){
-
-    this.caretIndex=0;
-
-    this.currentLine=0;
-
-    this.currentColumn=0;
-
-    this.preferredX=null;
-
-    this.isAtDocumentStart=true;
-
-    this.isFollowingCharacter=false;
-
-    this.lastCharacter=null;
-
-    this.lastParagraph=null;
-
-},
-
-
-advanceLogicalPosition(){
-
-    this.caretIndex++;
-
-    this.currentColumn++;
-
-    this.isAtDocumentStart=false;
-
-    this.isFollowingCharacter=true;
-
-},
-
-
-newLogicalLine(){
-
-    this.currentLine++;
-
-    this.currentColumn=0;
-
-    this.preferredX=null;
-
-    this.isAtDocumentStart=false;
-
-    this.isFollowingCharacter=false;
-
-     },
-
-
-
-
 
     destroy(){
 
         this.stopBlink();
 
-        if(
-
-            this.caret &&
-
-            this.caret.parentNode
-
-        ){
-
-            this.caret.parentNode.removeChild(
-
-                this.caret
-
-            );
-
+        if(this.caret && this.caret.parentNode){
+            this.caret.parentNode.removeChild(this.caret);
         }
 
-        this.caret=null;
-
-        this.layer=null;
-
-        this.visible=true;
-
-        this.initialized=false;
-
+        this.caret = null;
+        this.layer = null;
+        this.initialized = false;
     }
-
 };
+
+
+
+
+
+
+
+
+
 
 
 
