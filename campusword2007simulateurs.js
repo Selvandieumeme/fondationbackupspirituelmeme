@@ -1758,6 +1758,10 @@ CampusWord2007Simulateur.CaretEngine = {
 
     pendingFrame:0,
 
+    // 🔥 NEW (anti teleport system)
+    pendingCaretPosition:null,
+    isLockedByTyping:false,
+
     initialize(){
 
         if(this.initialized){
@@ -1794,7 +1798,8 @@ CampusWord2007Simulateur.CaretEngine = {
         this.layer = layer;
         this.createCaret();
 
-        this.setPosition(this.x, this.y);
+        // ❌ REMOVED: this.setPosition(this.x, this.y);
+        // 🔥 SAFE: no auto reposition on page attach
 
         return true;
     },
@@ -1859,7 +1864,10 @@ CampusWord2007Simulateur.CaretEngine = {
         this.layer = layer;
         this.createCaret();
 
-        this.setPosition(this.x, this.y);
+        // ❌ REMOVED: this.setPosition(this.x, this.y);
+        // 🔥 prevent page switch teleport
+
+        return true;
     },
 
     resetToDocumentStart(){
@@ -1883,6 +1891,26 @@ CampusWord2007Simulateur.CaretEngine = {
                 this.pendingFrame = 0;
                 callback();
             });
+    },
+
+    // =========================
+    // 🔥 FINAL SAFE APPLY SYSTEM
+    // =========================
+    applyCaretPositionSafely(){
+
+        if(!this.pendingCaretPosition){
+            return;
+        }
+
+        if(this.isLockedByTyping){
+            return;
+        }
+
+        const {x, y} = this.pendingCaretPosition;
+
+        this.setPosition(x, y);
+
+        this.pendingCaretPosition = null;
     },
 
     show(){
@@ -1947,6 +1975,13 @@ CampusWord2007Simulateur.CaretEngine = {
         this.initialized = false;
     }
 };
+
+
+
+
+
+
+
 
 
 
