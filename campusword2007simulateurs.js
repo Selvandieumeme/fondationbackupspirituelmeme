@@ -2217,7 +2217,225 @@ CampusWord2007Simulateur.InputEngine = {
 
 
 
+/* ==========================================================
+   CAMPUS WORD 2007 SIMULATEUR
+   CARET ENGINE v2
+   REAL BLINKING + POSITIONING + MULTI-PAGE AWARE
+========================================================== */
 
+CampusWord2007Simulateur.CaretEngine = {
+
+    initialized: false,
+
+    caretEl: null,
+
+    blinkTimer: null,
+
+    visible: true,
+
+    position: {
+        index: 0
+    },
+
+    activePageLayer: null,
+
+    /* ==========================================================
+       INITIALIZE CARET ENGINE
+    ========================================================== */
+
+    initialize() {
+
+        if (this.initialized) return true;
+
+        this.createCaret();
+        this.startBlink();
+
+        this.initialized = true;
+        return true;
+    },
+
+    /* ==========================================================
+       CREATE CARET ELEMENT (DOM CURSOR)
+    ========================================================== */
+
+    createCaret() {
+
+        const caret = document.createElement("div");
+
+        caret.id = "word-caret";
+
+        caret.style.position = "absolute";
+        caret.style.width = "1px";
+        caret.style.height = "18px";
+        caret.style.background = "black";
+        caret.style.zIndex = "9999";
+
+        caret.style.pointerEvents = "none";
+
+        document.body.appendChild(caret);
+
+        this.caretEl = caret;
+    },
+
+    /* ==========================================================
+       BLINK SYSTEM
+    ========================================================== */
+
+    startBlink() {
+
+        this.blinkTimer = setInterval(() => {
+
+            if (!this.caretEl) return;
+
+            this.visible = !this.visible;
+
+            this.caretEl.style.opacity = this.visible ? "1" : "0";
+
+        }, 500);
+    },
+
+    /* ==========================================================
+       RESET (CALLED AFTER TEXT CHANGE)
+    ========================================================== */
+
+    reset() {
+
+        const TextEngine =
+            CampusWord2007Simulateur.TextEngine;
+
+        if (!TextEngine) return;
+
+        this.position.index = TextEngine.model.caretIndex;
+
+        this.render();
+    },
+
+    /* ==========================================================
+       RENDER CARET POSITION (DOM MAPPING)
+    ========================================================== */
+
+    render() {
+
+        const TextEngine =
+            CampusWord2007Simulateur.TextEngine;
+
+        const Document =
+            CampusWord2007Simulateur.DocumentEngine;
+
+        if (!TextEngine || !Document) return;
+
+        const page = Document.getActivePage?.();
+
+        if (!page) return;
+
+        this.activePageLayer =
+            page.querySelector(".page-text-layer");
+
+        if (!this.activePageLayer) return;
+
+        // SAFE TEXT FETCH
+        const text = TextEngine.getText?.() || "";
+
+        // Create temporary span for measurement
+        const range = document.createRange();
+        const sel = window.getSelection();
+
+        // Find approximate position (simple model v2)
+        const textNode = this.ensureTextNode();
+
+        if (!textNode) return;
+
+        const index = Math.min(this.position.index, textNode.length);
+
+        range.setStart(textNode, index);
+        range.setEnd(textNode, index);
+
+        const rect = range.getBoundingClientRect();
+
+        this.caretEl.style.left = rect.left + "px";
+        this.caretEl.style.top = rect.top + "px";
+    },
+
+    /* ==========================================================
+       ENSURE TEXT NODE EXISTS (SAFE DOM MODEL)
+    ========================================================== */
+
+    ensureTextNode() {
+
+        const page =
+            CampusWord2007Simulateur.DocumentEngine.getActivePage?.();
+
+        if (!page) return null;
+
+        const layer =
+            page.querySelector(".page-text-layer");
+
+        if (!layer) return null;
+
+        if (layer.childNodes.length === 0) {
+
+            layer.textContent = " ";
+        }
+
+        return layer.firstChild;
+    },
+
+    /* ==========================================================
+       MOVE CARET LEFT
+    ========================================================== */
+
+    moveLeft() {
+
+        const TextEngine =
+            CampusWord2007Simulateur.TextEngine;
+
+        if (!TextEngine) return;
+
+        TextEngine.moveCaret(-1);
+
+        this.reset();
+    },
+
+    /* ==========================================================
+       MOVE CARET RIGHT
+    ========================================================== */
+
+    moveRight() {
+
+        const TextEngine =
+            CampusWord2007Simulateur.TextEngine;
+
+        if (!TextEngine) return;
+
+        TextEngine.moveCaret(1);
+
+        this.reset();
+    },
+
+    /* ==========================================================
+       SYNC AFTER TEXT CHANGE
+    ========================================================== */
+
+    sync() {
+
+        this.reset();
+    },
+
+    /* ==========================================================
+       DESTROY CARET
+    ========================================================== */
+
+    destroy() {
+
+        if (this.blinkTimer) {
+            clearInterval(this.blinkTimer);
+        }
+
+        if (this.caretEl) {
+            this.caretEl.remove();
+        }
+    }
+};
 
 
 
