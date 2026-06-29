@@ -1348,40 +1348,64 @@ CampusWord2007Simulateur.DocumentEngine = {
 
     initialized:false,
 
+    /* ==========================================================
+       🧠 NEW: DOCUMENT MODEL (WORD FOUNDATION ADDITION)
+    ========================================================== */
+
+    model: {
+        paragraphs: [],
+        runs: [],
+        selection: {
+            start: 0,
+            end: 0
+        },
+        metadata: {
+            font: "Calibri",
+            size: 12
+        }
+    },
+
+    /* ==========================================================
+       🧠 NEW: EVENT SYSTEM (SAFE BRIDGE)
+    ========================================================== */
+
+    onChange: null,
+
+    triggerChange(){
+
+        if(typeof this.onChange === "function"){
+            this.onChange(this.model);
+        }
+
+    },
+
+    /* ==========================================================
+       INIT
+    ========================================================== */
+
     initialize(){
 
         if(this.initialized){
-
             return true;
-
         }
 
         const DOM=
-
             CampusWord2007Simulateur.DOMEngine;
 
         this.pageTemplate=
-
             DOM.get("document-page-template");
 
         this.pageContainer=
-
             DOM.get("document-pages-container");
 
         if(
-
             !this.pageTemplate ||
-
             !this.pageContainer
-
         ){
 
             CampusWord2007Simulateur.Utilities.error(
-
                 "DocumentEngine",
-
                 "Document template or container missing."
-
             );
 
             return false;
@@ -1396,131 +1420,165 @@ CampusWord2007Simulateur.DocumentEngine = {
 
     },
 
+    /* ==========================================================
+       CREATE DOCUMENT
+    ========================================================== */
+
     createDocument(){
 
         this.documentId=
-
             CampusWord2007Simulateur.Utilities.generateId(
-
                 "document"
-
             );
 
         this.pages=[];
-
         this.pageCounter=0;
-
         this.activePage=null;
 
-        if(this.pageContainer){
+        /* NEW SAFE RESET */
+        this.model.paragraphs = [
+            { id: "p-1", text: "", chars: [] }
+        ];
 
+        this.model.runs = [];
+        this.model.selection = { start: 0, end: 0 };
+
+        if(this.pageContainer){
             this.pageContainer.innerHTML="";
         }
 
         CampusWord2007Simulateur.State.currentPage=1;
-
         CampusWord2007Simulateur.State.totalPages=0;
 
         CampusWord2007Simulateur.PageFactory.createPage();
 
+        this.triggerChange();
+
     },
 
+    /* ==========================================================
+       PAGE ACCESS
+    ========================================================== */
+
     getActivePage(){
-
         return this.activePage;
-
     },
 
     getPage(index){
-
         return this.pages[index] || null;
-
     },
 
     getPageCount(){
-
         return this.pages.length;
-
     },
 
     getPages(){
-
         return [...this.pages];
-
     },
 
     setActivePage(page){
 
         if(!page){
-
             return;
-
         }
 
         this.activePage=page;
 
         CampusWord2007Simulateur.State.currentPage=
-
             Number(page.dataset.pageNumber)||1;
 
         this.updateStatus();
 
+        this.triggerChange();
+
     },
+
+    /* ==========================================================
+       CLEAR
+    ========================================================== */
 
     clearDocument(){
 
         this.pages=[];
-
         this.pageCounter=0;
-
         this.activePage=null;
 
         if(this.pageContainer){
-
             this.pageContainer.innerHTML="";
         }
 
         CampusWord2007Simulateur.State.currentPage=0;
-
         CampusWord2007Simulateur.State.totalPages=0;
+
+        /* SAFE RESET MODEL */
+        this.model.paragraphs = [
+            { id: "p-1", text: "", chars: [] }
+        ];
+
+        this.model.runs = [];
+        this.model.selection = { start: 0, end: 0 };
+
+        this.triggerChange();
 
     },
 
     newDocument(){
 
         this.clearDocument();
-
         this.createDocument();
 
     },
 
+    /* ==========================================================
+       STATUS UPDATE
+    ========================================================== */
+
     updateStatus(){
 
         CampusWord2007Simulateur.State.totalPages=
-
             this.pages.length;
 
         const status=
-
             CampusWord2007Simulateur.DOMEngine.get(
-
                 "status-page-number"
-
             );
 
         if(status){
 
             status.textContent=
-
                 "Page "+
-
                 (CampusWord2007Simulateur.State.currentPage||1)+
-
                 " of "+
-
                 this.pages.length;
 
         }
+
+    },
+
+    /* ==========================================================
+       🧠 NEW: WORD-LIKE HELPERS (SAFE ADDITION)
+    ========================================================== */
+
+    getFullText(){
+
+        return this.model.paragraphs
+            .map(p => p.text)
+            .join("\n");
+
+    },
+
+    setSelection(start, end){
+
+        this.model.selection.start = Math.max(0, start);
+        this.model.selection.end = Math.max(0, end);
+
+        this.triggerChange();
+
+    },
+
+    getSelection(){
+
+        return this.model.selection;
 
     }
 
