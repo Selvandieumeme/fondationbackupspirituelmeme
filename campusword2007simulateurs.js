@@ -1768,6 +1768,27 @@ currentParagraph:null,
 
 pendingFrame:0,
 
+
+caretIndex:0,
+
+currentLine:0,
+
+currentColumn:0,
+
+preferredX:null,
+
+isAtDocumentStart:true,
+
+isFollowingCharacter:false,
+
+lastCharacter:null,
+
+lastParagraph:null,
+
+lastKnownX:96,
+
+lastKnownY:96,
+
     initialize(){
 
         if(this.initialized){
