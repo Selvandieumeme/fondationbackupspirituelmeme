@@ -1971,41 +1971,44 @@ CampusWord2007Simulateur.CaretEngine = {
 CampusWord2007Simulateur.CaretEngine.attachToPage = function(page){
 
     if(!page){
-
         return false;
-
     }
 
-    const layer = page.querySelector(
-        ".page-caret-layer"
-    );
+    const layer = page.querySelector(".page-caret-layer");
 
     if(!layer){
-
         return false;
-
     }
 
+    // 🔥 ONLY update layer reference
     this.layer = layer;
 
+    // 🔥 ensure caret exists inside correct layer
     this.createCaret();
 
-    this.setPosition(
-        this.x,
-        this.y
-    );
+    // ❌ IMPORTANT: DO NOT reset position
+    // this.setPosition(this.x, this.y);  <-- REMOVED
 
+    // keep visibility stable
     this.show();
 
+    // blinking control stays safe
     if(!this.blinking){
-
         this.startBlink();
-
     }
 
     return true;
-
 };
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -2018,122 +2021,78 @@ CampusWord2007Simulateur.CaretEngine.attachToPage = function(page){
    synchronizeWithCharacter()
 ========================================================== */
 
-CampusWord2007Simulateur.CaretEngine
-.synchronizeWithCharacter=function(character){
+CampusWord2007Simulateur.CaretEngine.synchronizeWithCharacter = function(character){
 
     if(
-
         !character ||
-
         !character.isConnected ||
-
-        !this.caret
-
+        !this.caret ||
+        !this.layer
     ){
-
         return false;
-
     }
 
-    const paragraph=
-
-        character.parentNode;
+    const paragraph = character.parentNode;
 
     if(!paragraph){
-
         return false;
-
     }
 
-    this.currentCharacter=
+    // 🔥 state tracking only (NO POSITION CONTROL)
+    this.currentCharacter = character;
+    this.currentParagraph = paragraph;
 
-        character;
-
-    this.currentParagraph=
-
-        paragraph;
-
-    const page=
-
-        paragraph.closest(
-
-            ".document-page"
-
-        );
+    const page = paragraph.closest(".document-page");
 
     if(
-
         page &&
-
-        page!==CampusWord2007Simulateur
-                .DocumentEngine
-                .getActivePage()
-
+        page !== CampusWord2007Simulateur.DocumentEngine.getActivePage()
     ){
-
-        CampusWord2007Simulateur
-        .DocumentEngine
-        .setActivePage(page);
-
+        CampusWord2007Simulateur.DocumentEngine.setActivePage(page);
         this.attachToPage(page);
-
     }
 
-    this.scheduleUpdate(()=>{
+    // ❗ IMPORTANT: NO DIRECT setPosition HERE
+    this.scheduleUpdate(() => {
 
         if(
-
             !this.currentCharacter ||
-
             !this.currentCharacter.isConnected ||
-
             !this.layer ||
-
             !this.caret
-
         ){
-
             return;
-
         }
 
-        const characterRect=
+        const characterRect =
+            this.currentCharacter.getBoundingClientRect();
 
-            this.currentCharacter
-            .getBoundingClientRect();
+        const layerRect =
+            this.layer.getBoundingClientRect();
 
-        const layerRect=
+        const x =
+            characterRect.right - layerRect.left;
 
-            this.layer
-            .getBoundingClientRect();
+        const y =
+            characterRect.top - layerRect.top;
 
-        const x=
+        // 🔥 CRITICAL FIX:
+        // DO NOT MOVE CARET DIRECTLY
+        // ONLY UPDATE "REQUESTED POSITION"
 
-            characterRect.right-
+        this.pendingCaretPosition = { x, y };
 
-            layerRect.left;
-
-        const y=
-
-            characterRect.top-
-
-            layerRect.top;
-
-        this.setPosition(
-
-            x,
-
-            y
-
-        );
-
-        this.show();
-
+        this.applyCaretPositionSafely();
     });
 
     return true;
-
 };
+
+
+
+
+
+
 
 
 
