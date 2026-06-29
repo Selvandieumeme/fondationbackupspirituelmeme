@@ -1776,48 +1776,79 @@ CampusWord2007Simulateur.PageFactory={
 
 
 
+
+
+
+
+
+/* ==========================================================
+   CAMPUS WORD 2007 SIMULATEUR
+   TEXT ENGINE v2
+   RUN SYSTEM + SELECTION READY (SAFE UPGRADE)
+========================================================== */
+
 CampusWord2007Simulateur.TextEngine = {
 
     initialized: false,
 
     /* ==========================================================
-       DOCUMENT MODEL (SOURCE OF TRUTH)
+       🧠 CORE STATE (v1 + v2 COMPATIBLE)
     ========================================================== */
 
     model: {
+
         paragraphs: [
             {
                 id: "p-1",
+
+                chars: [],
+
                 text: "",
-                chars: []
+
+                /* v2 ADDITION */
+                runs: [
+                    {
+                        text: "",
+                        bold: false,
+                        italic: false,
+                        underline: false,
+                        font: "Calibri",
+                        size: 12
+                    }
+                ]
             }
         ],
 
         absoluteText: "",
 
-        caretIndex: 0
+        caretIndex: 0,
+
+        /* v2 SELECTION SUPPORT */
+        selection: {
+            start: 0,
+            end: 0
+        }
     },
+
+    activePageLayer: null,
 
     /* ==========================================================
-       INTERNAL SAFE LAYER (DO NOT CACHE DOM STATICALLY)
+       INIT
     ========================================================== */
-
-    getActiveLayer() {
-
-        const Document =
-            CampusWord2007Simulateur.DocumentEngine;
-
-        const page =
-            Document.getActivePage?.();
-
-        if (!page) return null;
-
-        return page.querySelector(".page-text-layer");
-    },
 
     initialize() {
 
         if (this.initialized) return true;
+
+        const Document =
+            CampusWord2007Simulateur.DocumentEngine;
+
+        const page = Document.getActivePage?.();
+
+        if (page) {
+            this.activePageLayer =
+                page.querySelector(".page-text-layer");
+        }
 
         this.initialized = true;
 
@@ -1825,7 +1856,28 @@ CampusWord2007Simulateur.TextEngine = {
     },
 
     /* ==========================================================
-       CORE INSERT TEXT
+       🧠 RUN SYSTEM CORE (NEW)
+    ========================================================== */
+
+    ensureRunExists(paragraph){
+
+        if(!paragraph.runs || paragraph.runs.length === 0){
+
+            paragraph.runs = [{
+                text: paragraph.text || "",
+                bold: false,
+                italic: false,
+                underline: false,
+                font: "Calibri",
+                size: 12
+            }];
+
+        }
+
+    },
+
+    /* ==========================================================
+       CORE INSERT TEXT (SAFE EXTENDED)
     ========================================================== */
 
     insertText(char) {
@@ -1833,11 +1885,15 @@ CampusWord2007Simulateur.TextEngine = {
         const paragraph =
             this.model.paragraphs[this.model.paragraphs.length - 1];
 
+        this.ensureRunExists(paragraph);
+
         paragraph.chars.splice(this.model.caretIndex, 0, char);
 
         this.model.caretIndex++;
 
         this.rebuildParagraph(paragraph);
+
+        this.syncRuns(paragraph);
 
         this.syncToDOM();
 
@@ -1845,7 +1901,7 @@ CampusWord2007Simulateur.TextEngine = {
     },
 
     /* ==========================================================
-       DELETE TEXT (BACKSPACE)
+       DELETE TEXT
     ========================================================== */
 
     deleteText() {
@@ -1861,6 +1917,8 @@ CampusWord2007Simulateur.TextEngine = {
 
         this.rebuildParagraph(paragraph);
 
+        this.syncRuns(paragraph);
+
         this.syncToDOM();
 
         this.updateAbsoluteText();
@@ -1875,7 +1933,8 @@ CampusWord2007Simulateur.TextEngine = {
         this.model.paragraphs.push({
             id: "p-" + (this.model.paragraphs.length + 1),
             text: "",
-            chars: []
+            chars: [],
+            runs: []
         });
 
         this.model.caretIndex = 0;
@@ -1884,66 +1943,89 @@ CampusWord2007Simulateur.TextEngine = {
     },
 
     /* ==========================================================
-       REBUILD PARAGRAPH TEXT
+       REBUILD TEXT
     ========================================================== */
 
     rebuildParagraph(paragraph) {
-
-        paragraph.text =
-            paragraph.chars.join("");
+        paragraph.text = paragraph.chars.join("");
     },
 
     /* ==========================================================
-       ABSOLUTE TEXT TRACKING (SAFE FOR FUTURE LAYOUT ENGINE)
+       🧠 RUN SYNC (NEW CORE LOGIC)
+    ========================================================== */
+
+    syncRuns(paragraph){
+
+        this.ensureRunExists(paragraph);
+
+        // simple safe strategy: single run sync (v2 foundation)
+        paragraph.runs[0].text = paragraph.text;
+
+    },
+
+    /* ==========================================================
+       ABSOLUTE TEXT
     ========================================================== */
 
     updateAbsoluteText() {
 
         let full = "";
 
-        for (let i = 0; i < this.model.paragraphs.length; i++) {
-
-            full += this.model.paragraphs[i].text;
-
-            if (i < this.model.paragraphs.length - 1) {
-                full += "\n";
-            }
-        }
+        this.model.paragraphs.forEach(p => {
+            full += p.text + "\n";
+        });
 
         this.model.absoluteText = full;
     },
 
     getAbsoluteIndex() {
-
         return this.model.caretIndex;
     },
 
     /* ==========================================================
-       DOM SYNC (SAFE RENDER ONLY - NO INNERHTML)
+       DOM SYNC (SAFE RENDER)
     ========================================================== */
 
     syncToDOM() {
 
-        const layer = this.getActiveLayer();
+        if (!this.activePageLayer) {
 
-        if (!layer) return;
+            const page =
+                CampusWord2007Simulateur.DocumentEngine.getActivePage?.();
 
-        layer.textContent =
+            if (!page) return;
+
+            this.activePageLayer =
+                page.querySelector(".page-text-layer");
+        }
+
+        // SAFE RENDER (still v1 style display)
+        this.activePageLayer.textContent =
             this.model.paragraphs
                 .map(p => p.text)
                 .join("\n");
 
-        // SAFE caret reset (avoid layout conflict)
         const Caret =
             CampusWord2007Simulateur.CaretEngine;
 
-        if (Caret && typeof Caret.reset === "function") {
-
-            requestAnimationFrame(() => {
-                Caret.reset();
-            });
-
+        if (Caret && Caret.reset) {
+            Caret.reset();
         }
+    },
+
+    /* ==========================================================
+       SELECTION SYSTEM (NEW)
+    ========================================================== */
+
+    setSelection(start, end){
+
+        this.model.selection.start = Math.max(0, start);
+        this.model.selection.end = Math.max(0, end);
+
+    },
+
+    getSelection(){
+        return this.model.selection;
     },
 
     /* ==========================================================
@@ -1951,13 +2033,10 @@ CampusWord2007Simulateur.TextEngine = {
     ========================================================== */
 
     setCaretIndex(index) {
-
-        this.model.caretIndex =
-            Math.max(0, index);
+        this.model.caretIndex = Math.max(0, index);
     },
 
     moveCaret(delta) {
-
         this.model.caretIndex =
             Math.max(0, this.model.caretIndex + delta);
     },
@@ -1973,7 +2052,12 @@ CampusWord2007Simulateur.TextEngine = {
     clear() {
 
         this.model.paragraphs = [
-            { id: "p-1", text: "", chars: [] }
+            {
+                id: "p-1",
+                text: "",
+                chars: [],
+                runs: []
+            }
         ];
 
         this.model.caretIndex = 0;
@@ -1981,6 +2065,9 @@ CampusWord2007Simulateur.TextEngine = {
         this.syncToDOM();
     }
 };
+
+
+
 
 
 
