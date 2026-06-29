@@ -2015,25 +2015,41 @@ CampusWord2007Simulateur.CaretEngine.attachToPage = function(page){
         return false;
     }
 
-    // 🔥 ONLY update layer reference
+    // 🔥 update only DOM container reference
     this.layer = layer;
 
-    // 🔥 ensure caret exists inside correct layer
+    // 🔥 ensure caret exists in correct layer
     this.createCaret();
 
-    // ❌ IMPORTANT: DO NOT reset position
-    // this.setPosition(this.x, this.y);  <-- REMOVED
+    // ❌ DO NOT reset position (important for preventing jump bug)
+    // this.setPosition(this.x, this.y);
 
-    // keep visibility stable
+    // 🔥 ensure caret is visible after page switch
     this.show();
 
-    // blinking control stays safe
+    // 🔥 SAFE: blinking only controls visibility, not position
     if(!this.blinking){
         this.startBlink();
     }
 
+    // 🧠 CRITICAL FIX (prevents half-word visual glitch after page switch)
+    // force DOM repaint sync without changing position
+    this.scheduleUpdate(() => {
+        if(this.caret && this.caret.isConnected){
+            this.caret.style.transform = "translate3d(0,0,0)";
+        }
+    });
+
     return true;
 };
+
+
+
+
+
+
+
+
 
 
 
