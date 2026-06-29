@@ -1941,21 +1941,21 @@ pendingFrame:0,
 
     },
 
-    setPosition(x,y){
+setPosition(x,y){
 
-        this.x=x;
+    this.x=Math.round(x);
 
-        this.y=y;
+    this.y=Math.round(y);
 
-        if(!this.caret){
+    if(!this.caret){
 
-            return;
+        return;
 
-        }
+    }
 
-        this.caret.style.left=x+"px";
+    this.caret.style.left=this.x+"px";
 
-        this.caret.style.top=y+"px";
+    this.caret.style.top=this.y+"px";
 
     },
 
@@ -2006,6 +2006,61 @@ pendingFrame:0,
         };
 
     },
+
+
+
+
+scheduleUpdate(callback){
+
+    if(this.pendingFrame){
+
+        cancelAnimationFrame(
+
+            this.pendingFrame
+
+        );
+
+    }
+
+    this.pendingFrame=
+
+        requestAnimationFrame(()=>{
+
+            this.pendingFrame=0;
+
+            callback();
+
+        });
+
+},
+
+
+
+
+
+resetToDocumentStart(){
+
+    this.currentCharacter=null;
+
+    this.currentParagraph=null;
+
+    this.setPosition(
+
+        this.defaultMarginLeft,
+
+        this.defaultMarginTop
+
+    );
+
+    this.show();
+
+},
+
+
+
+
+
+
 
     show(){
 
