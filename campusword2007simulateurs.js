@@ -2308,7 +2308,7 @@ newLogicalLine(){
 
     this.isFollowingCharacter=false;
 
-
+     },
 
 
 
