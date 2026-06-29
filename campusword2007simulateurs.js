@@ -1325,264 +1325,292 @@ CampusWord2007Simulateur.LoadingEngine = {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 /* ==========================================================
    CAMPUS WORD 2007 SIMULATEUR
-   PHASE 3A
-   DOCUMENT ENGINE
-   Dynamic Document Management
+   DOCUMENT ENGINE - CORE FINAL ARCHITECTURE
+   (CLEAN + STABLE + FUTURE READY)
 ========================================================== */
 
 CampusWord2007Simulateur.DocumentEngine = {
 
-    documentId:null,
+    /* ======================================================
+       CORE IDENTITY
+    ====================================================== */
 
-    pages:[],
+    documentId: null,
+    initialized: false,
 
-    activePage:null,
+    /* ======================================================
+       DOM REFERENCES (READ ONLY)
+    ====================================================== */
 
-    pageTemplate:null,
+    dom: {
+        pageTemplate: null,
+        pageContainer: null
+    },
 
-    pageContainer:null,
-
-    pageCounter:0,
-
-    initialized:false,
-
-    /* ==========================================================
-       🧠 NEW: DOCUMENT MODEL (WORD FOUNDATION ADDITION)
-    ========================================================== */
+    /* ======================================================
+       SOURCE OF TRUTH MODEL (MINIMAL BUT COMPLETE)
+    ====================================================== */
 
     model: {
-        paragraphs: [],
-        runs: [],
-        selection: {
-            start: 0,
-            end: 0
+
+        sections: [
+            {
+                id: "section-1",
+                pages: [
+                    {
+                        id: "page-1",
+                        number: 1,
+
+                        blocks: [
+                            {
+                                id: "block-1",
+                                type: "paragraph",
+
+                                runs: [
+                                    {
+                                        id: "run-1",
+                                        text: "",
+                                        style: {
+                                            fontFamily: "Calibri",
+                                            fontSize: 12,
+                                            bold: false,
+                                            italic: false,
+                                            underline: false,
+                                            color: "#000000"
+                                        }
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+
+        /* CARET (future editing engine) */
+        caret: {
+            sectionId: "section-1",
+            pageId: "page-1",
+            blockId: "block-1",
+            runId: "run-1",
+            offset: 0
         },
+
+        /* SELECTION (Word style anchor/focus) */
+        selection: {
+            anchor: null,
+            focus: null
+        },
+
+        /* DOCUMENT METADATA */
         metadata: {
+            title: "Untitled",
             font: "Calibri",
-            size: 12
+            size: 12,
+            createdAt: Date.now(),
+            updatedAt: Date.now()
         }
     },
 
-    /* ==========================================================
-       🧠 NEW: EVENT SYSTEM (SAFE BRIDGE)
-    ========================================================== */
+    /* ======================================================
+       EVENT BRIDGE (SAFE ONLY)
+    ====================================================== */
 
     onChange: null,
 
-    triggerChange(){
-
-        if(typeof this.onChange === "function"){
+    triggerChange() {
+        if (typeof this.onChange === "function") {
             this.onChange(this.model);
         }
-
     },
 
-    /* ==========================================================
-       INIT
-    ========================================================== */
+    /* ======================================================
+       INITIALIZE (SAFE DOM LINKING ONLY)
+    ====================================================== */
 
-    initialize(){
+    initialize() {
 
-        if(this.initialized){
-            return true;
-        }
+        if (this.initialized) return true;
 
-        const DOM=
-            CampusWord2007Simulateur.DOMEngine;
+        const DOM = CampusWord2007Simulateur.DOMEngine;
 
-        this.pageTemplate=
-            DOM.get("document-page-template");
+        this.dom.pageTemplate = DOM.get("document-page-template");
+        this.dom.pageContainer = DOM.get("document-pages-container");
 
-        this.pageContainer=
-            DOM.get("document-pages-container");
-
-        if(
-            !this.pageTemplate ||
-            !this.pageContainer
-        ){
-
+        if (!this.dom.pageTemplate || !this.dom.pageContainer) {
             CampusWord2007Simulateur.Utilities.error(
                 "DocumentEngine",
-                "Document template or container missing."
+                "Missing DOM structure"
             );
-
             return false;
-
         }
 
         this.createDocument();
-
-        this.initialized=true;
+        this.initialized = true;
 
         return true;
-
     },
 
-    /* ==========================================================
-       CREATE DOCUMENT
-    ========================================================== */
+    /* ======================================================
+       CREATE / RESET DOCUMENT
+    ====================================================== */
 
-    createDocument(){
+    createDocument() {
 
-        this.documentId=
-            CampusWord2007Simulateur.Utilities.generateId(
-                "document"
-            );
+        this.documentId =
+            CampusWord2007Simulateur.Utilities.generateId("document");
 
-        this.pages=[];
-        this.pageCounter=0;
-        this.activePage=null;
+        this.model.sections = [{
+            id: "section-1",
+            pages: [this._createPage(1)]
+        }];
 
-        /* NEW SAFE RESET */
-        this.model.paragraphs = [
-            { id: "p-1", text: "", chars: [] }
-        ];
-
-        this.model.runs = [];
-        this.model.selection = { start: 0, end: 0 };
-
-        if(this.pageContainer){
-            this.pageContainer.innerHTML="";
-        }
-
-        CampusWord2007Simulateur.State.currentPage=1;
-        CampusWord2007Simulateur.State.totalPages=0;
-
-        CampusWord2007Simulateur.PageFactory.createPage();
+        this.resetCaret();
+        this.resetSelection();
 
         this.triggerChange();
-
     },
 
-    /* ==========================================================
-       PAGE ACCESS
-    ========================================================== */
+    _createPage(number) {
+        return {
+            id: "page-" + number,
+            number,
 
-    getActivePage(){
-        return this.activePage;
+            blocks: [{
+                id: "block-1",
+                type: "paragraph",
+                runs: [{
+                    id: "run-1",
+                    text: "",
+                    style: {
+                        fontFamily: "Calibri",
+                        fontSize: 12,
+                        bold: false,
+                        italic: false,
+                        underline: false,
+                        color: "#000000"
+                    }
+                }]
+            }]
+        };
     },
 
-    getPage(index){
-        return this.pages[index] || null;
-    },
+    /* ======================================================
+       CLEAR / RESET
+    ====================================================== */
 
-    getPageCount(){
-        return this.pages.length;
-    },
-
-    getPages(){
-        return [...this.pages];
-    },
-
-    setActivePage(page){
-
-        if(!page){
-            return;
-        }
-
-        this.activePage=page;
-
-        CampusWord2007Simulateur.State.currentPage=
-            Number(page.dataset.pageNumber)||1;
-
-        this.updateStatus();
-
-        this.triggerChange();
-
-    },
-
-    /* ==========================================================
-       CLEAR
-    ========================================================== */
-
-    clearDocument(){
-
-        this.pages=[];
-        this.pageCounter=0;
-        this.activePage=null;
-
-        if(this.pageContainer){
-            this.pageContainer.innerHTML="";
-        }
-
-        CampusWord2007Simulateur.State.currentPage=0;
-        CampusWord2007Simulateur.State.totalPages=0;
-
-        /* SAFE RESET MODEL */
-        this.model.paragraphs = [
-            { id: "p-1", text: "", chars: [] }
-        ];
-
-        this.model.runs = [];
-        this.model.selection = { start: 0, end: 0 };
-
-        this.triggerChange();
-
-    },
-
-    newDocument(){
-
-        this.clearDocument();
+    clearDocument() {
         this.createDocument();
-
     },
 
-    /* ==========================================================
-       STATUS UPDATE
-    ========================================================== */
-
-    updateStatus(){
-
-        CampusWord2007Simulateur.State.totalPages=
-            this.pages.length;
-
-        const status=
-            CampusWord2007Simulateur.DOMEngine.get(
-                "status-page-number"
-            );
-
-        if(status){
-
-            status.textContent=
-                "Page "+
-                (CampusWord2007Simulateur.State.currentPage||1)+
-                " of "+
-                this.pages.length;
-
-        }
-
+    newDocument() {
+        this.clearDocument();
     },
 
-    /* ==========================================================
-       🧠 NEW: WORD-LIKE HELPERS (SAFE ADDITION)
-    ========================================================== */
+    /* ======================================================
+       CARET SYSTEM (IMPORTANT FOR FUTURE EDITING)
+    ====================================================== */
 
-    getFullText(){
-
-        return this.model.paragraphs
-            .map(p => p.text)
-            .join("\n");
-
-    },
-
-    setSelection(start, end){
-
-        this.model.selection.start = Math.max(0, start);
-        this.model.selection.end = Math.max(0, end);
+    setCaret(path) {
+        this.model.caret = {
+            sectionId: path.sectionId,
+            pageId: path.pageId,
+            blockId: path.blockId,
+            runId: path.runId,
+            offset: Math.max(0, path.offset || 0)
+        };
 
         this.triggerChange();
-
     },
 
-    getSelection(){
+    getCaret() {
+        return this.model.caret;
+    },
 
+    resetCaret() {
+        this.model.caret = {
+            sectionId: "section-1",
+            pageId: "page-1",
+            blockId: "block-1",
+            runId: "run-1",
+            offset: 0
+        };
+    },
+
+    /* ======================================================
+       SELECTION SYSTEM
+    ====================================================== */
+
+    setSelection(anchor, focus) {
+        this.model.selection = { anchor, focus };
+        this.triggerChange();
+    },
+
+    getSelection() {
         return this.model.selection;
+    },
 
+    resetSelection() {
+        this.model.selection = { anchor: null, focus: null };
+    },
+
+    /* ======================================================
+       TEXT API (CORE OUTPUT)
+    ====================================================== */
+
+    getFullText() {
+
+        let text = "";
+
+        for (const s of this.model.sections) {
+            for (const p of s.pages) {
+                for (const b of p.blocks) {
+                    for (const r of b.runs) {
+                        text += r.text;
+                    }
+                    text += "\n";
+                }
+            }
+        }
+
+        return text;
+    },
+
+    /* ======================================================
+       SAFE READ HELPERS
+    ====================================================== */
+
+    getPages() {
+        return this.model.sections[0].pages;
+    },
+
+    getPageCount() {
+        return this.getPages().length;
+    },
+
+    getPage(index) {
+        return this.getPages()[index] || null;
     }
-
 };
+
+
+
 
 
 
