@@ -6012,6 +6012,207 @@ CampusWord2007Simulateur.LayoutEngine.API = {
 
 
 
+/* ==========================================================
+   CAMPUS WORD 2007 SIMULATEUR
+   CARET ENGINE
+   PHASE 1.1
+   FOUNDATION KERNEL
+   ----------------------------------------------------------
+   RESPONSIBILITY
+
+   • Create CaretEngine kernel
+   • Internal state
+   • Public configuration
+   • Runtime flags
+   • Shared references
+
+   DOES NOT
+
+   • Create DOM
+   • Render caret
+   • Blink
+   • Calculate layout
+   • Calculate coordinates
+   • Communicate with TextEngine
+
+   ========================================================== */
+
+CampusWord2007Simulateur.CaretEngine = {
+
+    /* ======================================================
+       ENGINE INFORMATION
+    ====================================================== */
+
+    initialized: false,
+
+    version: "2.0.0",
+
+    build: "Foundation Kernel",
+
+    /* ======================================================
+       ENGINE CONFIGURATION
+    ====================================================== */
+
+    configuration: {
+
+        width: 1,
+
+        defaultHeight: 19,
+
+        blinkInterval: 530,
+
+        zIndex: 999,
+
+        color: "#000000",
+
+        className: "document-caret",
+
+        id: "document-caret"
+
+    },
+
+    /* ======================================================
+       INTERNAL STATE
+    ====================================================== */
+
+    state: {
+
+        visible: false,
+
+        blinking: false,
+
+        attached: false,
+
+        focused: false,
+
+        destroyed: false,
+
+        suspended: false
+
+    },
+
+    /* ======================================================
+       RUNTIME REFERENCES
+    ====================================================== */
+
+    references: {
+
+        page: null,
+
+        layer: null,
+
+        caret: null,
+
+        timer: null
+
+    },
+
+    /* ======================================================
+       SHARED POSITION OBJECT
+
+       Filled ONLY by LayoutEngine.
+    ====================================================== */
+
+    position: {
+
+        x: 0,
+
+        y: 0,
+
+        height: 0,
+
+        pageNumber: 1
+
+    },
+
+    /* ======================================================
+       INITIALIZATION
+    ====================================================== */
+
+    initialize() {
+
+        if (this.initialized) {
+
+            return true;
+
+        }
+
+        this.reset();
+
+        this.initialized = true;
+
+        return true;
+
+    },
+
+    /* ======================================================
+       RESET RUNTIME STATE
+    ====================================================== */
+
+    reset() {
+
+        this.state.visible = false;
+
+        this.state.blinking = false;
+
+        this.state.attached = false;
+
+        this.state.focused = false;
+
+        this.state.destroyed = false;
+
+        this.state.suspended = false;
+
+        this.references.page = null;
+
+        this.references.layer = null;
+
+        this.references.caret = null;
+
+        this.references.timer = null;
+
+        this.position.x = 0;
+
+        this.position.y = 0;
+
+        this.position.height =
+            this.configuration.defaultHeight;
+
+        this.position.pageNumber = 1;
+
+    },
+
+    /* ======================================================
+       DESTROY
+    ====================================================== */
+
+    destroy() {
+
+        this.reset();
+
+        this.state.destroyed = true;
+
+        this.initialized = false;
+
+    }
+
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
