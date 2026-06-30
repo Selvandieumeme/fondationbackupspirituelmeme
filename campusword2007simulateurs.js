@@ -233,10 +233,6 @@ CampusWord2007Simulateur.HomeRibbonEngine = {};
 
 
 
-
-
-
-
 /* ==========================================================
    CAMPUS WORD 2007 SIMULATEUR
    PHASE 2A
@@ -1301,24 +1297,6 @@ CampusWord2007Simulateur.LoadingEngine = {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 /* ==========================================================
    CAMPUS WORD 2007 SIMULATEUR
    PHASE 3A
@@ -1500,26 +1478,6 @@ CampusWord2007Simulateur.DocumentEngine = {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 /* ==========================================================
    CAMPUS WORD 2007 SIMULATEUR
    PHASE 3B
@@ -1690,7 +1648,368 @@ CampusWord2007Simulateur.PageFactory={
 
 
 
+/* ==========================================================
+   CAMPUS WORD 2007 SIMULATEUR
+   LAYOUT ENGINE
+   PHASE 1.1
+   FOUNDATION KERNEL
+========================================================== */
 
+CampusWord2007Simulateur.LayoutEngine = {
+
+    /* ======================================================
+       ENGINE STATE
+    ====================================================== */
+
+    initialized:false,
+
+    ready:false,
+
+    rendering:false,
+
+    updating:false,
+
+    layoutLocked:false,
+
+
+
+    /* ======================================================
+       DOCUMENT METRICS
+    ====================================================== */
+
+    pageWidth:794,
+
+    pageHeight:1123,
+
+    marginTop:96,
+
+    marginRight:96,
+
+    marginBottom:96,
+
+    marginLeft:96,
+
+
+
+    /* ======================================================
+       TEXT METRICS
+    ====================================================== */
+
+    defaultFont:"Calibri",
+
+    defaultFontSize:16,
+
+    defaultLineHeight:19,
+
+    defaultCharacterSpacing:0,
+
+    defaultWordSpacing:0,
+
+
+
+    /* ======================================================
+       CURRENT LAYOUT STATE
+    ====================================================== */
+
+    currentPage:null,
+
+    currentParagraph:null,
+
+    currentLine:null,
+
+    currentCharacter:null,
+
+
+
+    /* ======================================================
+       CARET LOGICAL POSITION
+       (NOT PIXELS ON SCREEN)
+    ====================================================== */
+
+    caret:{
+
+        pageIndex:0,
+
+        paragraphIndex:0,
+
+        lineIndex:0,
+
+        characterIndex:0,
+
+        preferredColumn:0
+
+    },
+
+
+
+    /* ======================================================
+       CACHED POSITIONS
+    ====================================================== */
+
+    positions:{
+
+        pages:[],
+
+        paragraphs:[],
+
+        lines:[],
+
+        characters:[]
+
+    },
+
+
+
+    /* ======================================================
+       LAYOUT FLAGS
+    ====================================================== */
+
+    dirty:{
+
+        document:true,
+
+        pages:true,
+
+        paragraphs:true,
+
+        lines:true,
+
+        caret:true
+
+    },
+
+
+
+    /* ======================================================
+       INITIALIZATION
+    ====================================================== */
+
+    initialize(){
+
+        if(this.initialized){
+
+            return true;
+
+        }
+
+        this.reset();
+
+        this.initialized=true;
+
+        this.ready=true;
+
+        return true;
+
+    },
+
+
+
+    /* ======================================================
+       RESET
+    ====================================================== */
+
+    reset(){
+
+        this.currentPage=null;
+
+        this.currentParagraph=null;
+
+        this.currentLine=null;
+
+        this.currentCharacter=null;
+
+
+
+        this.caret.pageIndex=0;
+        this.caret.paragraphIndex=0;
+        this.caret.lineIndex=0;
+        this.caret.characterIndex=0;
+        this.caret.preferredColumn=0;
+
+
+
+        this.positions.pages.length=0;
+        this.positions.paragraphs.length=0;
+        this.positions.lines.length=0;
+        this.positions.characters.length=0;
+
+
+
+        this.markDirty();
+
+    },
+
+
+
+    /* ======================================================
+       DIRTY MANAGEMENT
+    ====================================================== */
+
+    markDirty(){
+
+        this.dirty.document=true;
+        this.dirty.pages=true;
+        this.dirty.paragraphs=true;
+        this.dirty.lines=true;
+        this.dirty.caret=true;
+
+    },
+
+    clearDirty(){
+
+        this.dirty.document=false;
+        this.dirty.pages=false;
+        this.dirty.paragraphs=false;
+        this.dirty.lines=false;
+        this.dirty.caret=false;
+
+    },
+
+
+
+    /* ======================================================
+       LOCK
+    ====================================================== */
+
+    lock(){
+
+        this.layoutLocked=true;
+
+    },
+
+    unlock(){
+
+        this.layoutLocked=false;
+
+    },
+
+
+
+    /* ======================================================
+       DOCUMENT METRICS
+    ====================================================== */
+
+    getContentWidth(){
+
+        return this.pageWidth-
+               this.marginLeft-
+               this.marginRight;
+
+    },
+
+    getContentHeight(){
+
+        return this.pageHeight-
+               this.marginTop-
+               this.marginBottom;
+
+    },
+
+
+
+    /* ======================================================
+       PAGE REGISTRATION
+    ====================================================== */
+
+    setCurrentPage(page){
+
+        this.currentPage=page;
+
+    },
+
+    getCurrentPage(){
+
+        return this.currentPage;
+
+    },
+
+
+
+    /* ======================================================
+       PARAGRAPH REGISTRATION
+    ====================================================== */
+
+    setCurrentParagraph(paragraph){
+
+        this.currentParagraph=paragraph;
+
+    },
+
+    getCurrentParagraph(){
+
+        return this.currentParagraph;
+
+    },
+
+
+
+    /* ======================================================
+       LINE REGISTRATION
+    ====================================================== */
+
+    setCurrentLine(line){
+
+        this.currentLine=line;
+
+    },
+
+    getCurrentLine(){
+
+        return this.currentLine;
+
+    },
+
+
+
+    /* ======================================================
+       CHARACTER REGISTRATION
+    ====================================================== */
+
+    setCurrentCharacter(character){
+
+        this.currentCharacter=character;
+
+    },
+
+    getCurrentCharacter(){
+
+        return this.currentCharacter;
+
+    },
+
+
+
+    /* ======================================================
+       ENGINE STATUS
+    ====================================================== */
+
+    isReady(){
+
+        return this.ready;
+
+    },
+
+    isLocked(){
+
+        return this.layoutLocked;
+
+    },
+
+    isDirty(){
+
+        return(
+
+            this.dirty.document||
+            this.dirty.pages||
+            this.dirty.paragraphs||
+            this.dirty.lines||
+            this.dirty.caret
+
+        );
+
+    }
+
+};
 
 
 
