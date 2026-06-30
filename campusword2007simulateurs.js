@@ -1325,248 +1325,234 @@ CampusWord2007Simulateur.LoadingEngine = {
 
 
 
-
-
-
-
-
-
-
-
 /* ==========================================================
    CAMPUS WORD 2007 SIMULATEUR
-   CORE ENGINE
-   DocumentEngine v2 (Multipage Dynamic)
+   PHASE 3A
+   DOCUMENT ENGINE
+   Dynamic Document Management
 ========================================================== */
 
 CampusWord2007Simulateur.DocumentEngine = {
 
-    /* =========================
-       STATE
-    ========================== */
+    documentId:null,
 
-    initialized: false,
+    pages:[],
 
-    pageTemplate: null,
-    pageContainer: null,
+    activePage:null,
 
-    pages: [],
-    pageCounter: 0,
+    pageTemplate:null,
 
-    activePage: null,
+    pageContainer:null,
 
-    maxPages: Infinity, // 🔥 unlimited like Word
+    pageCounter:0,
 
+    initialized:false,
 
-    /* =========================
-       INIT
-    ========================== */
+    initialize(){
 
-    initialize() {
+        if(this.initialized){
 
-        if (this.initialized) return true;
+            return true;
 
-        this.cacheDOM();
+        }
 
-        this.ensureFirstPage();
+        const DOM=
 
-        this.initialized = true;
+            CampusWord2007Simulateur.DOMEngine;
 
-        this.updateStatus();
+        this.pageTemplate=
 
-        return true;
-    },
+            DOM.get("document-page-template");
 
+        this.pageContainer=
 
-    /* =========================
-       DOM
-    ========================== */
+            DOM.get("document-pages-container");
 
-    cacheDOM() {
+        if(
 
-        this.pageTemplate =
-            document.querySelector("#page-template");
+            !this.pageTemplate ||
 
-        this.pageContainer =
-            document.querySelector("#page-container");
+            !this.pageContainer
 
-        if (!this.pageTemplate || !this.pageContainer) {
+        ){
 
             CampusWord2007Simulateur.Utilities.error(
+
                 "DocumentEngine",
-                "Missing template or container"
+
+                "Document template or container missing."
+
             );
 
             return false;
+
         }
+
+        this.createDocument();
+
+        this.initialized=true;
 
         return true;
+
     },
 
+    createDocument(){
 
-    /* =========================
-       CORE PAGE CREATION
-    ========================== */
+        this.documentId=
 
-    ensureFirstPage() {
+            CampusWord2007Simulateur.Utilities.generateId(
 
-        if (this.pages.length === 0) {
-            this.createPage();
-        }
+                "document"
+
+            );
+
+        this.pages=[];
+
+        this.pageCounter=0;
+
+        this.pageContainer.innerHTML="";
+
+        this.createPage();
+
     },
 
+    createPage(){
 
-    createPage() {
+        const fragment=
 
-        if (this.pages.length >= this.maxPages) {
-            return null;
-        }
+            this.pageTemplate.content.cloneNode(true);
 
-        const page =
-            CampusWord2007Simulateur.PageFactory.createPage();
+        const page=
 
-        if (!page) return null;
-
-        this.registerPage(page);
-
-        this.setActivePage(page);
-
-        return page;
-    },
-
-
-    /* =========================
-       REGISTRATION (SINGLE SOURCE OF TRUTH)
-    ========================== */
-
-    registerPage(page) {
-
-        if (!page) return false;
-
-        this.pages.push(page);
+            fragment.querySelector(".document-page");
 
         this.pageCounter++;
 
+        page.dataset.pageNumber=
+
+            this.pageCounter;
+
+        page.id=
+
+            "document-page-"+
+
+            this.pageCounter;
+
+        this.pageContainer.appendChild(
+
+            fragment
+
+        );
+
+        const createdPage=
+
+            this.pageContainer.lastElementChild;
+
+        this.pages.push(createdPage);
+
+        this.activePage=
+
+            createdPage;
+
         this.updateStatus();
 
-        return true;
+        return createdPage;
+
     },
 
+    getActivePage(){
 
-    /* =========================
-       ACTIVE PAGE
-    ========================== */
-
-    setActivePage(page) {
-
-        if (!page) return false;
-
-        this.activePage = page;
-
-        CampusWord2007Simulateur.State.currentPage =
-            page.dataset.pageNumber;
-
-        return true;
-    },
-
-
-    getActivePage() {
         return this.activePage;
+
     },
 
+    getPage(index){
 
-    /* =========================
-       AUTO MULTIPAGE SYSTEM
-       (🔥 KEY FEATURE)
-    ========================== */
-
-    checkAutoPagination(contentHeight, pageHeight) {
-
-        // Si kontni depase paj la → kreye nouvo paj otomatik
-        if (contentHeight > pageHeight) {
-
-            const newPage = this.createPage();
-
-            if (newPage) {
-
-                CampusWord2007Simulateur.Utilities.log(
-                    "New page auto-created (pagination)"
-                );
-
-                return newPage;
-            }
-        }
-
-        return null;
-    },
-
-
-    /* =========================
-       NAVIGATION
-    ========================== */
-
-    goToPage(index) {
-
-        const page = this.pages[index];
-
-        if (!page) return false;
-
-        this.setActivePage(page);
-
-        return true;
-    },
-
-
-    getPageByIndex(index) {
         return this.pages[index] || null;
+
     },
 
+    getPageCount(){
 
-    getTotalPages() {
         return this.pages.length;
+
     },
 
+    getPages(){
 
-    /* =========================
-       DELETE PAGE (OPTIONAL)
-    ========================== */
+        return [...this.pages];
 
-    removePage(page) {
+    },
 
-        const index = this.pages.indexOf(page);
+    setActivePage(page){
 
-        if (index === -1) return false;
+        if(!page){
 
-        this.pages.splice(index, 1);
+            return;
 
-        page.remove();
-
-        if (this.activePage === page) {
-            this.activePage =
-                this.pages[this.pages.length - 1] || null;
         }
+
+        this.activePage=page;
 
         this.updateStatus();
 
-        return true;
     },
 
+    clearDocument(){
 
-    /* =========================
-       STATUS SYNC
-    ========================== */
+        this.pages=[];
 
-    updateStatus() {
+        this.pageCounter=0;
 
-        CampusWord2007Simulateur.State.totalPages =
-            this.pages.length;
+        this.activePage=null;
 
-        if (this.activePage) {
-            CampusWord2007Simulateur.State.currentPage =
-                this.activePage.dataset.pageNumber;
+        this.pageContainer.innerHTML="";
+
+    },
+
+    newDocument(){
+
+        this.clearDocument();
+
+        this.createDocument();
+
+    },
+
+    updateStatus(){
+
+        const status=
+
+            CampusWord2007Simulateur.DOMEngine.get(
+
+                "status-page-number"
+
+            );
+
+        if(status){
+
+            status.textContent=
+
+                "Page "+
+
+                this.pageCounter+
+
+                " of "+
+
+                this.pageCounter;
+
         }
+
     }
+
 };
+
+
+
+
+
+
+
+
 
 
 
