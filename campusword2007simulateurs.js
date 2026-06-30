@@ -6662,6 +6662,209 @@ CampusWord2007Simulateur.CaretEngine.Renderer = {
 
 
 
+/* ==========================================================
+   CAMPUS WORD 2007 SIMULATEUR
+   CARET ENGINE
+   PHASE 1.5
+   VISIBILITY MANAGER
+   ----------------------------------------------------------
+   RESPONSIBILITY
+
+   • Show caret
+   • Hide caret
+   • Opacity control
+   • Visual visibility rules
+
+   DOES NOT
+
+   • Render
+   • Calculate layout
+   • Calculate coordinates
+   • Blink
+   • Manage focus
+   • Attach pages
+   • Use LayoutEngine
+   • Modify Caret State
+   ========================================================== */
+
+CampusWord2007Simulateur.CaretEngine.VisibilityManager = {
+
+    initialized: false,
+
+    /* ======================================================
+       INITIALIZE
+    ====================================================== */
+
+    initialize() {
+
+        if (this.initialized) {
+            return true;
+        }
+
+        this.initialized = true;
+
+        return true;
+
+    },
+
+    /* ======================================================
+       SHOW
+    ====================================================== */
+
+    show() {
+
+        const engine =
+            CampusWord2007Simulateur.CaretEngine;
+
+        const caret =
+            engine.references.caret;
+
+        if (!caret) {
+            return false;
+        }
+
+        caret.style.display = "block";
+
+        caret.style.visibility = "visible";
+
+        caret.style.opacity = "1";
+
+        return true;
+
+    },
+
+    /* ======================================================
+       HIDE
+    ====================================================== */
+
+    hide() {
+
+        const engine =
+            CampusWord2007Simulateur.CaretEngine;
+
+        const caret =
+            engine.references.caret;
+
+        if (!caret) {
+            return false;
+        }
+
+        caret.style.opacity = "0";
+
+        caret.style.visibility = "hidden";
+
+        caret.style.display = "none";
+
+        return true;
+
+    },
+
+    /* ======================================================
+       SET OPACITY
+    ====================================================== */
+
+    setOpacity(value) {
+
+        const engine =
+            CampusWord2007Simulateur.CaretEngine;
+
+        const caret =
+            engine.references.caret;
+
+        if (!caret) {
+            return false;
+        }
+
+        const opacity =
+            Math.max(
+                0,
+                Math.min(
+                    1,
+                    Number(value)
+                )
+            );
+
+        caret.style.opacity =
+            String(opacity);
+
+        return true;
+
+    },
+
+    /* ======================================================
+       APPLY VISIBILITY RULES
+
+       Visual rules only.
+       No state transitions.
+    ====================================================== */
+
+    applyRules() {
+
+        const engine =
+            CampusWord2007Simulateur.CaretEngine;
+
+        const caret =
+            engine.references.caret;
+
+        if (!caret) {
+            return false;
+        }
+
+        if (
+            engine.state.destroyed ||
+            engine.state.suspended
+        ) {
+
+            this.hide();
+
+            return true;
+
+        }
+
+        if (!engine.state.visible) {
+
+            this.hide();
+
+            return true;
+
+        }
+
+        this.show();
+
+        return true;
+
+    },
+
+    /* ======================================================
+       RESET
+    ====================================================== */
+
+    reset() {
+
+        this.hide();
+
+        return true;
+
+    },
+
+    /* ======================================================
+       DESTROY
+    ====================================================== */
+
+    destroy() {
+
+        this.reset();
+
+        this.initialized = false;
+
+        return true;
+
+    }
+
+};
+
+
+
 
 
 
