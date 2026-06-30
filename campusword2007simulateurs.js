@@ -6510,7 +6510,148 @@ CampusWord2007Simulateur.CaretEngine.DOMManager = {
 
 
 
+/* ==========================================================
+   CAMPUS WORD 2007 SIMULATEUR
+   CARET ENGINE
+   PHASE 1.4
+   CARET RENDERER
+   ----------------------------------------------------------
+   RESPONSIBILITY
 
+   • Apply position to DOM
+   • Apply visual style
+   • Paint only
+
+   DOES NOT
+
+   • Calculate layout
+   • Calculate coordinates
+   • Blink
+   • Show / Hide
+   • Attach pages
+   • Use LayoutEngine
+   • Modify state
+   ========================================================== */
+
+CampusWord2007Simulateur.CaretEngine.Renderer = {
+
+    initialized: false,
+
+    /* ======================================================
+       INITIALIZE
+    ====================================================== */
+
+    initialize() {
+
+        if (this.initialized) {
+            return true;
+        }
+
+        this.initialized = true;
+
+        return true;
+
+    },
+
+    /* ======================================================
+       RENDER
+
+       Paint only.
+    ====================================================== */
+
+    render() {
+
+        const engine =
+            CampusWord2007Simulateur.CaretEngine;
+
+        const caret =
+            engine.references.caret;
+
+        if (!caret) {
+            return false;
+        }
+
+        caret.style.left =
+            engine.position.x + "px";
+
+        caret.style.top =
+            engine.position.y + "px";
+
+        caret.style.width =
+            engine.configuration.width + "px";
+
+        caret.style.height =
+            engine.position.height + "px";
+
+        caret.style.backgroundColor =
+            engine.configuration.color;
+
+        caret.style.zIndex =
+            engine.configuration.zIndex;
+
+        return true;
+
+    },
+
+    /* ======================================================
+       REFRESH STYLE
+
+       Visual properties only.
+    ====================================================== */
+
+    refreshStyle() {
+
+        const engine =
+            CampusWord2007Simulateur.CaretEngine;
+
+        const caret =
+            engine.references.caret;
+
+        if (!caret) {
+            return false;
+        }
+
+        caret.style.width =
+            engine.configuration.width + "px";
+
+        caret.style.height =
+            engine.position.height + "px";
+
+        caret.style.backgroundColor =
+            engine.configuration.color;
+
+        caret.style.zIndex =
+            engine.configuration.zIndex;
+
+        return true;
+
+    },
+
+    /* ======================================================
+       RESET
+    ====================================================== */
+
+    reset() {
+
+        return true;
+
+    },
+
+    /* ======================================================
+       DESTROY
+    ====================================================== */
+
+    destroy() {
+
+        this.reset();
+
+        this.initialized = false;
+
+        return true;
+
+    }
+
+};
 
 
 
