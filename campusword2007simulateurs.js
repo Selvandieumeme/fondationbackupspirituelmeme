@@ -1326,310 +1326,180 @@ CampusWord2007Simulateur.LoadingEngine = {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 /* ==========================================================
    CAMPUS WORD 2007 SIMULATEUR
-   DOCUMENT ENGINE - CORE FINAL ARCHITECTURE
-   (CLEAN + STABLE + FUTURE READY)
+   CORE ENGINE
+   DocumentEngine (Clean Architecture)
 ========================================================== */
 
 CampusWord2007Simulateur.DocumentEngine = {
 
-    /* ======================================================
-       CORE IDENTITY
-    ====================================================== */
+    /* =========================
+       STATE
+    ========================== */
 
-    documentId: null,
     initialized: false,
 
-    /* ======================================================
-       DOM REFERENCES (READ ONLY)
-    ====================================================== */
+    pageTemplate: null,
+    pageContainer: null,
 
-    dom: {
-        pageTemplate: null,
-        pageContainer: null
-    },
+    pages: [],
+    pageCounter: 0,
 
-    /* ======================================================
-       SOURCE OF TRUTH MODEL (MINIMAL BUT COMPLETE)
-    ====================================================== */
+    activePage: null,
 
-    model: {
 
-        sections: [
-            {
-                id: "section-1",
-                pages: [
-                    {
-                        id: "page-1",
-                        number: 1,
-
-                        blocks: [
-                            {
-                                id: "block-1",
-                                type: "paragraph",
-
-                                runs: [
-                                    {
-                                        id: "run-1",
-                                        text: "",
-                                        style: {
-                                            fontFamily: "Calibri",
-                                            fontSize: 12,
-                                            bold: false,
-                                            italic: false,
-                                            underline: false,
-                                            color: "#000000"
-                                        }
-                                    }
-                                ]
-                            }
-                        ]
-                    }
-                ]
-            }
-        ],
-
-        /* CARET (future editing engine) */
-        caret: {
-            sectionId: "section-1",
-            pageId: "page-1",
-            blockId: "block-1",
-            runId: "run-1",
-            offset: 0
-        },
-
-        /* SELECTION (Word style anchor/focus) */
-        selection: {
-            anchor: null,
-            focus: null
-        },
-
-        /* DOCUMENT METADATA */
-        metadata: {
-            title: "Untitled",
-            font: "Calibri",
-            size: 12,
-            createdAt: Date.now(),
-            updatedAt: Date.now()
-        }
-    },
-
-    /* ======================================================
-       EVENT BRIDGE (SAFE ONLY)
-    ====================================================== */
-
-    onChange: null,
-
-    triggerChange() {
-        if (typeof this.onChange === "function") {
-            this.onChange(this.model);
-        }
-    },
-
-    /* ======================================================
-       INITIALIZE (SAFE DOM LINKING ONLY)
-    ====================================================== */
+    /* =========================
+       INIT
+    ========================== */
 
     initialize() {
 
-        if (this.initialized) return true;
-
-        const DOM = CampusWord2007Simulateur.DOMEngine;
-
-        this.dom.pageTemplate = DOM.get("document-page-template");
-        this.dom.pageContainer = DOM.get("document-pages-container");
-
-        if (!this.dom.pageTemplate || !this.dom.pageContainer) {
-            CampusWord2007Simulateur.Utilities.error(
-                "DocumentEngine",
-                "Missing DOM structure"
-            );
-            return false;
+        if (this.initialized) {
+            return true;
         }
 
-        this.createDocument();
+        this.cacheDOM();
+
+        this.createFirstPage();
+
         this.initialized = true;
+
+        this.updateStatus();
 
         return true;
     },
 
-    /* ======================================================
-       CREATE / RESET DOCUMENT
-    ====================================================== */
 
-    createDocument() {
+    /* =========================
+       DOM CACHE
+    ========================== */
 
-        this.documentId =
-            CampusWord2007Simulateur.Utilities.generateId("document");
+    cacheDOM() {
 
-        this.model.sections = [{
-            id: "section-1",
-            pages: [this._createPage(1)]
-        }];
+        this.pageTemplate =
+            document.querySelector("#page-template");
 
-        this.resetCaret();
-        this.resetSelection();
+        this.pageContainer =
+            document.querySelector("#page-container");
 
-        this.triggerChange();
-    },
+        if (!this.pageTemplate || !this.pageContainer) {
 
-    _createPage(number) {
-        return {
-            id: "page-" + number,
-            number,
+            CampusWord2007Simulateur.Utilities.error(
+                "DocumentEngine",
+                "Missing pageTemplate or pageContainer"
+            );
 
-            blocks: [{
-                id: "block-1",
-                type: "paragraph",
-                runs: [{
-                    id: "run-1",
-                    text: "",
-                    style: {
-                        fontFamily: "Calibri",
-                        fontSize: 12,
-                        bold: false,
-                        italic: false,
-                        underline: false,
-                        color: "#000000"
-                    }
-                }]
-            }]
-        };
-    },
-
-    /* ======================================================
-       CLEAR / RESET
-    ====================================================== */
-
-    clearDocument() {
-        this.createDocument();
-    },
-
-    newDocument() {
-        this.clearDocument();
-    },
-
-    /* ======================================================
-       CARET SYSTEM (IMPORTANT FOR FUTURE EDITING)
-    ====================================================== */
-
-    setCaret(path) {
-        this.model.caret = {
-            sectionId: path.sectionId,
-            pageId: path.pageId,
-            blockId: path.blockId,
-            runId: path.runId,
-            offset: Math.max(0, path.offset || 0)
-        };
-
-        this.triggerChange();
-    },
-
-    getCaret() {
-        return this.model.caret;
-    },
-
-    resetCaret() {
-        this.model.caret = {
-            sectionId: "section-1",
-            pageId: "page-1",
-            blockId: "block-1",
-            runId: "run-1",
-            offset: 0
-        };
-    },
-
-    /* ======================================================
-       SELECTION SYSTEM
-    ====================================================== */
-
-    setSelection(anchor, focus) {
-        this.model.selection = { anchor, focus };
-        this.triggerChange();
-    },
-
-    getSelection() {
-        return this.model.selection;
-    },
-
-    resetSelection() {
-        this.model.selection = { anchor: null, focus: null };
-    },
-
-    /* ======================================================
-       TEXT API (CORE OUTPUT)
-    ====================================================== */
-
-    getFullText() {
-
-        let text = "";
-
-        for (const s of this.model.sections) {
-            for (const p of s.pages) {
-                for (const b of p.blocks) {
-                    for (const r of b.runs) {
-                        text += r.text;
-                    }
-                    text += "\n";
-                }
-            }
+            return false;
         }
 
-        return text;
+        return true;
     },
 
-    /* ======================================================
-       SAFE READ HELPERS
-    ====================================================== */
 
-    getPages() {
-        return this.model.sections[0].pages;
+    /* =========================
+       PAGE CREATION FLOW
+    ========================== */
+
+    createFirstPage() {
+
+        const firstPage =
+            CampusWord2007Simulateur.PageFactory.createPage();
+
+        if (!firstPage) {
+            return null;
+        }
+
+        this.setActivePage(firstPage);
+
+        return firstPage;
     },
 
-    getPageCount() {
-        return this.getPages().length;
+
+    /* =========================
+       PAGE MANAGEMENT
+    ========================== */
+
+    setActivePage(page) {
+
+        if (!page) return false;
+
+        this.activePage = page;
+
+        CampusWord2007Simulateur.State.currentPage =
+            page.dataset.pageNumber || this.pageCounter;
+
+        return true;
     },
 
-    getPage(index) {
-        return this.getPages()[index] || null;
+
+    getActivePage() {
+        return this.activePage;
+    },
+
+
+    addPage(page) {
+
+        if (!page) return false;
+
+        this.pages.push(page);
+
+        this.pageCounter++;
+
+        this.updateStatus();
+
+        return true;
+    },
+
+
+    removePage(page) {
+
+        const index =
+            this.pages.indexOf(page);
+
+        if (index === -1) return false;
+
+        this.pages.splice(index, 1);
+
+        if (this.activePage === page) {
+            this.activePage = this.pages[this.pages.length - 1] || null;
+        }
+
+        this.updateStatus();
+
+        return true;
+    },
+
+
+    /* =========================
+       STATUS
+    ========================== */
+
+    updateStatus() {
+
+        CampusWord2007Simulateur.State.totalPages =
+            this.pages.length;
+
+        if (this.activePage) {
+            CampusWord2007Simulateur.State.currentPage =
+                this.activePage.dataset.pageNumber;
+        }
+    },
+
+
+    /* =========================
+       HELPERS
+    ========================== */
+
+    getPageByIndex(index) {
+        return this.pages[index] || null;
+    },
+
+    getTotalPages() {
+        return this.pages.length;
     }
+
 };
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
