@@ -4055,6 +4055,983 @@ CampusWord2007Simulateur.LayoutEngine.CharacterMeasurement = {
 
 
 
+/* ==========================================================
+   CAMPUS WORD 2007 SIMULATEUR
+   LAYOUT ENGINE
+   PHASE 2.3
+   LINE LAYOUT MANAGER
+   ----------------------------------------------------------
+   RESPONSIBILITY
+   • Decide line start
+   • Decide line end
+   • Detect word wrap
+   • Compute line baseline
+   • NO DOM rendering
+   • NO caret movement
+   • NO paragraph creation
+   • NO page creation
+   ========================================================== */
+
+CampusWord2007Simulateur.LayoutEngine.LineLayout = {
+
+    initialized: false,
+
+    line: {
+
+        index: 0,
+
+        startX: 0,
+
+        endX: 0,
+
+        width: 0,
+
+        availableWidth: 0,
+
+        baseline: 0,
+
+        characterCount: 0,
+
+        wrapped: false
+
+    },
+
+    initialize() {
+
+        if (this.initialized) {
+
+            return true;
+
+        }
+
+        this.initialized = true;
+
+        return true;
+
+    },
+
+    begin(availableWidth) {
+
+        const InsertionPoint =
+            CampusWord2007Simulateur
+            .LayoutEngine
+            .InsertionPoint;
+
+        const Metrics =
+            CampusWord2007Simulateur
+            .LayoutEngine
+            .LineMetrics;
+
+        const point =
+            InsertionPoint.get();
+
+        this.line.startX = point.x;
+        this.line.endX = point.x;
+
+        this.line.width = 0;
+
+        this.line.availableWidth =
+            availableWidth;
+
+        this.line.baseline =
+            Metrics.getBaseline();
+
+        this.line.characterCount = 0;
+
+        this.line.wrapped = false;
+
+        return this.getLine();
+
+    },
+
+    canFit(characterWidth) {
+
+        return (
+
+            this.line.width +
+
+            characterWidth <=
+
+            this.line.availableWidth
+
+        );
+
+    },
+
+    append(characterWidth) {
+
+        this.line.width +=
+
+            characterWidth;
+
+        this.line.endX =
+
+            this.line.startX +
+
+            this.line.width;
+
+        this.line.characterCount++;
+
+    },
+
+    wrap() {
+
+        this.line.wrapped = true;
+
+    },
+
+    nextLine(availableWidth) {
+
+        this.line.index++;
+
+        this.begin(
+
+            availableWidth
+
+        );
+
+    },
+
+    getLine() {
+
+        return {
+
+            index:
+                this.line.index,
+
+            startX:
+                this.line.startX,
+
+            endX:
+                this.line.endX,
+
+            width:
+                this.line.width,
+
+            availableWidth:
+                this.line.availableWidth,
+
+            baseline:
+                this.line.baseline,
+
+            characterCount:
+                this.line.characterCount,
+
+            wrapped:
+                this.line.wrapped
+
+        };
+
+    },
+
+    getStartX() {
+
+        return this.line.startX;
+
+    },
+
+    getEndX() {
+
+        return this.line.endX;
+
+    },
+
+    getBaseline() {
+
+        return this.line.baseline;
+
+    },
+
+    getWidth() {
+
+        return this.line.width;
+
+    },
+
+    isWrapped() {
+
+        return this.line.wrapped;
+
+    },
+
+    reset() {
+
+        this.line.index = 0;
+
+        this.line.startX = 0;
+
+        this.line.endX = 0;
+
+        this.line.width = 0;
+
+        this.line.availableWidth = 0;
+
+        this.line.baseline = 0;
+
+        this.line.characterCount = 0;
+
+        this.line.wrapped = false;
+
+    },
+
+    destroy() {
+
+        this.reset();
+
+        this.initialized = false;
+
+    }
+
+};
+
+
+
+
+
+
+
+/* ==========================================================
+   CAMPUS WORD 2007 SIMULATEUR
+   LAYOUT ENGINE
+   PHASE 2.4
+   PARAGRAPH FLOW MANAGER
+   ----------------------------------------------------------
+   RESPONSIBILITY
+
+   • Compute paragraph flow
+   • Paragraph spacing
+   • First line indent
+   • Left / Right indent
+   • Paragraph start position
+   • Paragraph next position
+
+   DOES NOT
+
+   • create paragraph
+   • move caret
+   • render text
+   • create pages
+   ========================================================== */
+
+CampusWord2007Simulateur.LayoutEngine.ParagraphFlow = {
+
+    initialized: false,
+
+    defaults: {
+
+        spaceBefore: 0,
+
+        spaceAfter: 0,
+
+        firstLineIndent: 0,
+
+        leftIndent: 0,
+
+        rightIndent: 0
+
+    },
+
+    current: {
+
+        x: 0,
+
+        y: 0,
+
+        width: 0,
+
+        height: 0,
+
+        baseline: 0
+
+    },
+
+    initialize() {
+
+        if (this.initialized) {
+            return true;
+        }
+
+        this.initialized = true;
+
+        return true;
+
+    },
+
+    compute(options = {}) {
+
+        const writableArea =
+            CampusWord2007Simulateur
+            .LayoutEngine
+            .WritableArea
+            .get();
+
+        const metrics =
+            CampusWord2007Simulateur
+            .LayoutEngine
+            .LineMetrics
+            .getMetrics();
+
+        const config = {
+
+            spaceBefore:
+                options.spaceBefore ??
+                this.defaults.spaceBefore,
+
+            spaceAfter:
+                options.spaceAfter ??
+                this.defaults.spaceAfter,
+
+            firstLineIndent:
+                options.firstLineIndent ??
+                this.defaults.firstLineIndent,
+
+            leftIndent:
+                options.leftIndent ??
+                this.defaults.leftIndent,
+
+            rightIndent:
+                options.rightIndent ??
+                this.defaults.rightIndent
+
+        };
+
+        this.current.x =
+            Math.round(
+                writableArea.left +
+                config.leftIndent +
+                config.firstLineIndent
+            );
+
+        this.current.y =
+            Math.round(
+                writableArea.top +
+                config.spaceBefore
+            );
+
+        this.current.width =
+            Math.max(
+                0,
+                writableArea.width -
+                config.leftIndent -
+                config.rightIndent
+            );
+
+        this.current.height =
+            metrics.lineHeight;
+
+        this.current.baseline =
+            metrics.baseline;
+
+        return this.getCurrent();
+
+    },
+
+    getCurrent() {
+
+        return {
+
+            x: this.current.x,
+
+            y: this.current.y,
+
+            width: this.current.width,
+
+            height: this.current.height,
+
+            baseline: this.current.baseline
+
+        };
+
+    },
+
+    getNextParagraphPosition() {
+
+        return {
+
+            x: this.current.x,
+
+            y:
+                this.current.y +
+                this.current.height +
+                this.defaults.spaceAfter
+
+        };
+
+    },
+
+    setDefaults(options = {}) {
+
+        if (typeof options.spaceBefore === "number") {
+
+            this.defaults.spaceBefore =
+                options.spaceBefore;
+
+        }
+
+        if (typeof options.spaceAfter === "number") {
+
+            this.defaults.spaceAfter =
+                options.spaceAfter;
+
+        }
+
+        if (typeof options.firstLineIndent === "number") {
+
+            this.defaults.firstLineIndent =
+                options.firstLineIndent;
+
+        }
+
+        if (typeof options.leftIndent === "number") {
+
+            this.defaults.leftIndent =
+                options.leftIndent;
+
+        }
+
+        if (typeof options.rightIndent === "number") {
+
+            this.defaults.rightIndent =
+                options.rightIndent;
+
+        }
+
+    },
+
+    reset() {
+
+        this.current.x = 0;
+        this.current.y = 0;
+        this.current.width = 0;
+        this.current.height = 0;
+        this.current.baseline = 0;
+
+    },
+
+    destroy() {
+
+        this.reset();
+
+        this.initialized = false;
+
+    }
+
+};
+
+
+
+
+
+
+/* ==========================================================
+   CAMPUS WORD 2007 SIMULATEUR
+   LAYOUT ENGINE
+   PHASE 2.5
+   PAGE FLOW MANAGER
+   ----------------------------------------------------------
+   RESPONSIBILITY
+   • Decide page overflow
+   • Decide when next page is required
+   • Create page automatically when necessary
+   • Return destination page only
+   ----------------------------------------------------------
+   DOES NOT
+   ✘ Move caret
+   ✘ Render text
+   ✘ Create paragraph
+   ✘ Calculate character position
+   ========================================================== */
+
+CampusWord2007Simulateur.LayoutEngine.PageFlow = {
+
+    initialized:false,
+
+    initialize(){
+
+        if(this.initialized){
+            return true;
+        }
+
+        this.initialized=true;
+
+        return true;
+
+    },
+
+    getDestination(currentPage,nextParagraphHeight){
+
+        if(!currentPage){
+            return null;
+        }
+
+        const Limits=
+            CampusWord2007Simulateur
+            .LayoutEngine
+            .PageLimits;
+
+        if(
+            !Limits ||
+            typeof Limits.calculate!=="function"
+        ){
+            return currentPage;
+        }
+
+        Limits.calculate(currentPage);
+
+        const pageLimits=
+            Limits.get();
+
+        const textLayer=
+            currentPage.querySelector(
+                ".page-text-layer"
+            );
+
+        if(!textLayer){
+            return currentPage;
+        }
+
+        const usedHeight=
+            textLayer.scrollHeight;
+
+        const availableHeight=
+            pageLimits.writableHeight;
+
+        if(
+            usedHeight+
+            nextParagraphHeight
+            <=
+            availableHeight
+        ){
+            return currentPage;
+        }
+
+        const Document=
+            CampusWord2007Simulateur
+            .DocumentEngine;
+
+        const PageFactory=
+            CampusWord2007Simulateur
+            .PageFactory;
+
+        const pages=
+            Document.getPages();
+
+        const index=
+            pages.indexOf(currentPage);
+
+        if(
+            index>=0 &&
+            index<pages.length-1
+        ){
+            return pages[index+1];
+        }
+
+        return PageFactory.createPage();
+
+    },
+
+    pageRequired(currentPage,nextParagraphHeight){
+
+        const page=
+            this.getDestination(
+                currentPage,
+                nextParagraphHeight
+            );
+
+        return(
+            page &&
+            page!==currentPage
+        );
+
+    },
+
+    destroy(){
+
+        this.initialized=false;
+
+    }
+
+};
+
+
+
+
+
+
+
+
+/* ==========================================================
+   CAMPUS WORD 2007 SIMULATEUR
+   LAYOUT ENGINE
+   PHASE 2.6A
+   CARET POSITION OBJECT
+   ----------------------------------------------------------
+   RESPONSIBILITY
+   • Standard caret position object
+   • Store layout position
+   • Public API
+   • Shared by all layout modules
+   ----------------------------------------------------------
+   DOES NOT
+   ✘ Calculate coordinates
+   ✘ Move caret
+   ✘ Read DOM
+   ✘ Modify DOM
+   ✘ Create pages
+   ✘ Create paragraphs
+   ========================================================== */
+
+CampusWord2007Simulateur.LayoutEngine.CaretPosition = {
+
+    initialized:false,
+
+    position:null,
+
+    initialize(){
+
+        if(this.initialized){
+            return true;
+        }
+
+        this.reset();
+
+        this.initialized=true;
+
+        return true;
+
+    },
+
+    create(){
+
+        return{
+
+            page:null,
+
+            pageIndex:-1,
+
+            paragraph:null,
+
+            paragraphIndex:-1,
+
+            line:null,
+
+            lineIndex:-1,
+
+            character:null,
+
+            characterIndex:-1,
+
+            x:0,
+
+            y:0,
+
+            baseline:0,
+
+            height:0,
+
+            valid:false
+
+        };
+
+    },
+
+    reset(){
+
+        this.position=this.create();
+
+        return this.position;
+
+    },
+
+    set(data={}){
+
+        if(!this.position){
+            this.position=this.create();
+        }
+
+        Object.assign(
+            this.position,
+            data
+        );
+
+        this.position.valid=true;
+
+        return this.position;
+
+    },
+
+    get(){
+
+        if(!this.position){
+            this.reset();
+        }
+
+        return{
+
+            page:this.position.page,
+
+            pageIndex:this.position.pageIndex,
+
+            paragraph:this.position.paragraph,
+
+            paragraphIndex:this.position.paragraphIndex,
+
+            line:this.position.line,
+
+            lineIndex:this.position.lineIndex,
+
+            character:this.position.character,
+
+            characterIndex:this.position.characterIndex,
+
+            x:this.position.x,
+
+            y:this.position.y,
+
+            baseline:this.position.baseline,
+
+            height:this.position.height,
+
+            valid:this.position.valid
+
+        };
+
+    },
+
+    invalidate(){
+
+        if(!this.position){
+            return;
+        }
+
+        this.position.valid=false;
+
+    },
+
+    isValid(){
+
+        return(
+            this.position &&
+            this.position.valid===true
+        );
+
+    },
+
+    destroy(){
+
+        this.position=null;
+
+        this.initialized=false;
+
+    }
+
+};
+
+
+
+
+
+
+
+/* ==========================================================
+   CAMPUS WORD 2007 SIMULATEUR
+   LAYOUT ENGINE
+   PHASE 2.6B
+   CHARACTER POSITION RESOLVER
+   ----------------------------------------------------------
+   RESPONSIBILITY
+   • Resolve caret position after a character
+   • Resolve caret position before a character
+   • Return CaretPosition object only
+   ----------------------------------------------------------
+   DOES NOT
+   ✘ Move caret
+   ✘ Modify DOM
+   ✘ Create paragraph
+   ✘ Create page
+   ✘ Render text
+   ========================================================== */
+
+CampusWord2007Simulateur.LayoutEngine.CharacterPositionResolver = {
+
+    initialized:false,
+
+    initialize(){
+
+        if(this.initialized){
+            return true;
+        }
+
+        this.initialized=true;
+
+        return true;
+
+    },
+
+    afterCharacter(character){
+
+        return this.resolve(
+            character,
+            "after"
+        );
+
+    },
+
+    beforeCharacter(character){
+
+        return this.resolve(
+            character,
+            "before"
+        );
+
+    },
+
+    resolve(character,mode="after"){
+
+        if(
+            !character ||
+            !character.isConnected
+        ){
+            return null;
+        }
+
+        const page=
+            character.closest(
+                ".document-page"
+            );
+
+        if(!page){
+            return null;
+        }
+
+        const paragraph=
+            character.parentElement;
+
+        if(!paragraph){
+            return null;
+        }
+
+        const layer=
+            page.querySelector(
+                ".page-caret-layer"
+            );
+
+        if(!layer){
+            return null;
+        }
+
+        const pageRect=
+            page.getBoundingClientRect();
+
+        const layerRect=
+            layer.getBoundingClientRect();
+
+        const rect=
+            character.getBoundingClientRect();
+
+        const LineMetrics=
+            CampusWord2007Simulateur
+            .LayoutEngine
+            .LineMetrics;
+
+        const metrics=
+            LineMetrics.getMetrics();
+
+        const Position=
+            CampusWord2007Simulateur
+            .LayoutEngine
+            .CaretPosition;
+
+        const pageIndex=
+            Number(
+                page.dataset.pageNumber || 1
+            )-1;
+
+        const paragraphIndex=
+            Array.prototype.indexOf.call(
+                paragraph.parentNode.children,
+                paragraph
+            );
+
+        const characterIndex=
+            Array.prototype.indexOf.call(
+                paragraph.children,
+                character
+            );
+
+        const x=
+
+            mode==="before"
+
+            ?
+
+            Math.round(
+                rect.left-
+                layerRect.left
+            )
+
+            :
+
+            Math.round(
+                rect.right-
+                layerRect.left
+            );
+
+        const y=
+
+            Math.round(
+                rect.top-
+                layerRect.top
+            );
+
+        Position.set({
+
+            page:page,
+
+            pageIndex:pageIndex,
+
+            paragraph:paragraph,
+
+            paragraphIndex:paragraphIndex,
+
+            line:paragraph,
+
+            lineIndex:0,
+
+            character:character,
+
+            characterIndex:characterIndex,
+
+            x:x,
+
+            y:y,
+
+            baseline:
+                y+
+                metrics.baseline,
+
+            height:
+                rect.height
+
+        });
+
+        return Position.get();
+
+    },
+
+    destroy(){
+
+        this.initialized=false;
+
+    }
+
+};
+
+
+
+
+
+
 
 
 
