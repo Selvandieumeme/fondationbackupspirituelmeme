@@ -3518,9 +3518,535 @@ CampusWord2007Simulateur.LayoutEngine.Viewport = {
 
 
 
+/* ==========================================================
+   CAMPUS WORD 2007 SIMULATEUR
+   LAYOUT ENGINE
+   PHASE 1.3B
+   VIEWPORT METRICS COLLECTOR
+   ----------------------------------------------------------
+   RESPONSIBILITY
+   • Measure viewport metrics
+   • Populate Viewport cache
+   • NO resize observer
+   • NO layout calculation
+   • NO page calculation
+   • NO caret calculation
+   ========================================================== */
+
+CampusWord2007Simulateur.LayoutEngine.Viewport.refresh = function () {
+
+    if (!this.initialized) {
+
+        return false;
+
+    }
+
+    const root = document.documentElement;
+
+    const body = document.body;
+
+    const visual = window.visualViewport;
+
+    this.metrics.width =
+        window.innerWidth;
+
+    this.metrics.height =
+        window.innerHeight;
+
+    this.metrics.clientWidth =
+        root.clientWidth;
+
+    this.metrics.clientHeight =
+        root.clientHeight;
+
+    this.metrics.scrollWidth =
+        Math.max(
+
+            root.scrollWidth,
+
+            body ? body.scrollWidth : 0
+
+        );
+
+    this.metrics.scrollHeight =
+        Math.max(
+
+            root.scrollHeight,
+
+            body ? body.scrollHeight : 0
+
+        );
+
+    this.metrics.scrollLeft =
+        window.pageXOffset ||
+        root.scrollLeft ||
+        0;
+
+    this.metrics.scrollTop =
+        window.pageYOffset ||
+        root.scrollTop ||
+        0;
+
+    this.metrics.devicePixelRatio =
+        window.devicePixelRatio || 1;
+
+    this.metrics.orientation =
+
+        this.metrics.width >=
+        this.metrics.height
+
+        ? "landscape"
+
+        : "portrait";
+
+    if (visual) {
+
+        this.metrics.visualViewport =
+            visual;
+
+        this.metrics.scale =
+            visual.scale;
+
+        this.metrics.offsetLeft =
+            visual.offsetLeft;
+
+        this.metrics.offsetTop =
+            visual.offsetTop;
+
+    }
+
+    else {
+
+        this.metrics.visualViewport =
+            null;
+
+        this.metrics.scale = 1;
+
+        this.metrics.offsetLeft = 0;
+
+        this.metrics.offsetTop = 0;
+
+    }
+
+    return this.getMetrics();
+
+};
 
 
 
+
+
+
+
+
+
+
+
+/* ==========================================================
+   CAMPUS WORD 2007 SIMULATEUR
+   LAYOUT ENGINE
+   PHASE 2.1
+   CURSOR LAYOUT API
+   ----------------------------------------------------------
+   RESPONSIBILITY
+   • Single source of truth for caret position
+   • Store current caret coordinates
+   • Store next caret coordinates
+   • Public API only
+   • NO calculation
+   • NO DOM manipulation
+   • NO caret movement
+   ========================================================== */
+
+CampusWord2007Simulateur.LayoutEngine.Cursor = {
+
+    initialized: false,
+
+    current: {
+
+        page: null,
+
+        paragraph: null,
+
+        line: null,
+
+        x: 0,
+
+        y: 0
+
+    },
+
+    next: {
+
+        page: null,
+
+        paragraph: null,
+
+        line: null,
+
+        x: 0,
+
+        y: 0
+
+    },
+
+    initialize() {
+
+        if (this.initialized) {
+
+            return true;
+
+        }
+
+        this.initialized = true;
+
+        return true;
+
+    },
+
+    setCurrent(position) {
+
+        if (!position) {
+
+            return false;
+
+        }
+
+        Object.assign(
+            this.current,
+            position
+        );
+
+        return true;
+
+    },
+
+    setNext(position) {
+
+        if (!position) {
+
+            return false;
+
+        }
+
+        Object.assign(
+            this.next,
+            position
+        );
+
+        return true;
+
+    },
+
+    getCurrent() {
+
+        return {
+
+            page: this.current.page,
+
+            paragraph: this.current.paragraph,
+
+            line: this.current.line,
+
+            x: this.current.x,
+
+            y: this.current.y
+
+        };
+
+    },
+
+    getNext() {
+
+        return {
+
+            page: this.next.page,
+
+            paragraph: this.next.paragraph,
+
+            line: this.next.line,
+
+            x: this.next.x,
+
+            y: this.next.y
+
+        };
+
+    },
+
+    getCurrentX() {
+
+        return this.current.x;
+
+    },
+
+    getCurrentY() {
+
+        return this.current.y;
+
+    },
+
+    getNextX() {
+
+        return this.next.x;
+
+    },
+
+    getNextY() {
+
+        return this.next.y;
+
+    },
+
+    reset() {
+
+        this.current.page = null;
+        this.current.paragraph = null;
+        this.current.line = null;
+        this.current.x = 0;
+        this.current.y = 0;
+
+        this.next.page = null;
+        this.next.paragraph = null;
+        this.next.line = null;
+        this.next.x = 0;
+        this.next.y = 0;
+
+    },
+
+    destroy() {
+
+        this.reset();
+
+        this.initialized = false;
+
+    }
+
+};
+
+
+
+
+
+
+
+/* ==========================================================
+   CAMPUS WORD 2007 SIMULATEUR
+   LAYOUT ENGINE
+   PHASE 2.2
+   CHARACTER MEASUREMENT
+   ----------------------------------------------------------
+   RESPONSIBILITY
+   • Measure every character
+   • Measure space
+   • Measure tab
+   • Measure current font
+   • Cache measurements
+   • NO text rendering
+   • NO caret movement
+   • NO paragraph calculation
+   • NO DOM layout calculation
+   ========================================================== */
+
+CampusWord2007Simulateur.LayoutEngine.CharacterMeasurement = {
+
+    initialized: false,
+
+    canvas: null,
+
+    context: null,
+
+    currentFont: {
+
+        family: "Calibri",
+
+        size: 16,
+
+        weight: "normal",
+
+        style: "normal"
+
+    },
+
+    cache: Object.create(null),
+
+    initialize() {
+
+        if (this.initialized) {
+
+            return true;
+
+        }
+
+        this.canvas = document.createElement("canvas");
+
+        this.context = this.canvas.getContext("2d");
+
+        if (!this.context) {
+
+            return false;
+
+        }
+
+        this.updateFont();
+
+        this.initialized = true;
+
+        return true;
+
+    },
+
+    updateFont(font = {}) {
+
+        if (font.family) {
+
+            this.currentFont.family = font.family;
+
+        }
+
+        if (font.size) {
+
+            this.currentFont.size = font.size;
+
+        }
+
+        if (font.weight) {
+
+            this.currentFont.weight = font.weight;
+
+        }
+
+        if (font.style) {
+
+            this.currentFont.style = font.style;
+
+        }
+
+        this.context.font =
+
+            this.currentFont.style + " " +
+
+            this.currentFont.weight + " " +
+
+            this.currentFont.size + "px " +
+
+            this.currentFont.family;
+
+    },
+
+    clearCache() {
+
+        this.cache = Object.create(null);
+
+    },
+
+    measure(character) {
+
+        if (
+
+            typeof character !== "string" ||
+
+            character.length !== 1
+
+        ) {
+
+            return 0;
+
+        }
+
+        const key =
+
+            this.context.font +
+
+            "::" +
+
+            character;
+
+        if (
+
+            this.cache[key] !== undefined
+
+        ) {
+
+            return this.cache[key];
+
+        }
+
+        const width =
+
+            this.context.measureText(
+
+                character
+
+            ).width;
+
+        this.cache[key] = width;
+
+        return width;
+
+    },
+
+    measureSpace() {
+
+        return this.measure(" ");
+
+    },
+
+    measureTab(tabSize = 4) {
+
+        return (
+
+            this.measureSpace() *
+
+            tabSize
+
+        );
+
+    },
+
+    getCurrentFont() {
+
+        return {
+
+            family:
+
+                this.currentFont.family,
+
+            size:
+
+                this.currentFont.size,
+
+            weight:
+
+                this.currentFont.weight,
+
+            style:
+
+                this.currentFont.style
+
+        };
+
+    },
+
+    getCharacterWidth(character) {
+
+        return this.measure(character);
+
+    },
+
+    destroy() {
+
+        this.canvas = null;
+
+        this.context = null;
+
+        this.clearCache();
+
+        this.initialized = false;
+
+    }
+
+};
 
 
 
