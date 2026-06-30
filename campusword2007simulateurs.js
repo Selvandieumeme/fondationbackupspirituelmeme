@@ -2749,6 +2749,186 @@ CampusWord2007Simulateur.LayoutEngine.getCache=function(){
 
 
 
+/* ==========================================================
+   CAMPUS WORD 2007 SIMULATEUR
+   LAYOUT ENGINE
+   PHASE 1.2D
+   PAGE BOUNDARY CALCULATOR
+========================================================== */
+
+(function(){
+
+    const Layout =
+        CampusWord2007Simulateur.LayoutEngine;
+
+    if(!Layout){
+
+        return;
+
+    }
+
+    /* ======================================================
+       UPDATE PAGE BOUNDARIES
+    ====================================================== */
+
+    Layout.updatePageBoundaries = function(){
+
+        if(
+
+            !this.metrics ||
+
+            !this.cache ||
+
+            !this.cache.pageRect
+
+        ){
+
+            return false;
+
+        }
+
+        const metrics =
+            this.metrics;
+
+        const pageRect =
+            this.cache.pageRect;
+
+        /* ----------------------------------------------
+           PAGE LIMITS (LOCAL COORDINATES)
+        ---------------------------------------------- */
+
+        metrics.page.left = 0;
+
+        metrics.page.top = 0;
+
+        metrics.page.right =
+            pageRect.width;
+
+        metrics.page.bottom =
+            pageRect.height;
+
+        metrics.page.width =
+            pageRect.width;
+
+        metrics.page.height =
+            pageRect.height;
+
+        /* ----------------------------------------------
+           PAGE BOUNDARIES
+        ---------------------------------------------- */
+
+        metrics.boundaries.minX =
+            metrics.page.left;
+
+        metrics.boundaries.maxX =
+            metrics.page.right;
+
+        metrics.boundaries.minY =
+            metrics.page.top;
+
+        metrics.boundaries.maxY =
+            metrics.page.bottom;
+
+        this.validate();
+
+        return true;
+
+    };
+
+    /* ======================================================
+       GET PAGE BOUNDARIES
+    ====================================================== */
+
+    Layout.getPageBoundaries = function(){
+
+        return{
+
+            minX:
+                this.metrics.boundaries.minX,
+
+            maxX:
+                this.metrics.boundaries.maxX,
+
+            minY:
+                this.metrics.boundaries.minY,
+
+            maxY:
+                this.metrics.boundaries.maxY
+
+        };
+
+    };
+
+    /* ======================================================
+       GET PAGE SIZE
+    ====================================================== */
+
+    Layout.getPageSize = function(){
+
+        return{
+
+            width:
+                this.metrics.page.width,
+
+            height:
+                this.metrics.page.height
+
+        };
+
+    };
+
+    /* ======================================================
+       INSIDE PAGE ?
+    ====================================================== */
+
+    Layout.isInsidePage = function(x,y){
+
+        const boundary =
+            this.metrics.boundaries;
+
+        return(
+
+            x >= boundary.minX &&
+
+            x <= boundary.maxX &&
+
+            y >= boundary.minY &&
+
+            y <= boundary.maxY
+
+        );
+
+    };
+
+})();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
