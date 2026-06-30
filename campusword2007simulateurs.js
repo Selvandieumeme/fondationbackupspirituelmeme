@@ -1815,7 +1815,7 @@ CampusWord2007Simulateur.PageFactory={
 
 
 
-
+CampusWord2007Simulateur.CaretEngine = {
 
     /* ======================================================
        STATE
