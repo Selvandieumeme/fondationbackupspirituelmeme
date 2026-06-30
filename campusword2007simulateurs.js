@@ -2270,6 +2270,272 @@ CampusWord2007Simulateur.LayoutEngine.getCache=function(){
 
 
 
+/* ==========================================================
+   CAMPUS WORD 2007 SIMULATEUR
+   LAYOUT ENGINE
+   PHASE 1.2B
+   WRITABLE AREA CALCULATOR
+========================================================== */
+
+(function(){
+
+    const Layout =
+        CampusWord2007Simulateur.LayoutEngine;
+
+    if(!Layout){
+
+        return;
+
+    }
+
+    /* ======================================================
+       UPDATE WRITABLE AREA
+    ====================================================== */
+
+    Layout.updateWritableArea = function(){
+
+        const Document =
+            CampusWord2007Simulateur.DocumentEngine;
+
+        if(
+            !Document ||
+            typeof Document.getActivePage !== "function"
+        ){
+
+            return false;
+
+        }
+
+        const page =
+            Document.getActivePage();
+
+        if(!page){
+
+            return false;
+
+        }
+
+        const content =
+            page.querySelector(
+                ".page-content"
+            );
+
+        if(!content){
+
+            return false;
+
+        }
+
+        const metrics =
+            this.metrics;
+
+        const config =
+            CampusWord2007Simulateur.Configuration;
+
+        /* ----------------------------------------------
+           PAGE SIZE
+        ---------------------------------------------- */
+
+        metrics.page.width =
+            content.clientWidth;
+
+        metrics.page.height =
+            content.clientHeight;
+
+        /* ----------------------------------------------
+           MARGINS
+        ---------------------------------------------- */
+
+        metrics.margins.left =
+            config.pageMarginLeft;
+
+        metrics.margins.top =
+            config.pageMarginTop;
+
+        metrics.margins.right =
+            config.pageMarginRight;
+
+        metrics.margins.bottom =
+            config.pageMarginBottom;
+
+        /* ----------------------------------------------
+           WRITABLE TEXT AREA
+        ---------------------------------------------- */
+
+        metrics.textArea.left =
+            metrics.margins.left;
+
+        metrics.textArea.top =
+            metrics.margins.top;
+
+        metrics.textArea.width =
+            metrics.page.width -
+            metrics.margins.left -
+            metrics.margins.right;
+
+        metrics.textArea.height =
+            metrics.page.height -
+            metrics.margins.top -
+            metrics.margins.bottom;
+
+        metrics.textArea.right =
+            metrics.textArea.left +
+            metrics.textArea.width;
+
+        metrics.textArea.bottom =
+            metrics.textArea.top +
+            metrics.textArea.height;
+
+        /* ----------------------------------------------
+           CONTENT
+        ---------------------------------------------- */
+
+        metrics.content.left =
+            metrics.textArea.left;
+
+        metrics.content.top =
+            metrics.textArea.top;
+
+        metrics.content.width =
+            metrics.textArea.width;
+
+        metrics.content.height =
+            metrics.textArea.height;
+
+        metrics.content.right =
+            metrics.textArea.right;
+
+        metrics.content.bottom =
+            metrics.textArea.bottom;
+
+        /* ----------------------------------------------
+           LIMITS
+        ---------------------------------------------- */
+
+        metrics.limits.minX =
+            metrics.textArea.left;
+
+        metrics.limits.maxX =
+            metrics.textArea.right;
+
+        metrics.limits.minY =
+            metrics.textArea.top;
+
+        metrics.limits.maxY =
+            metrics.textArea.bottom;
+
+        /* ----------------------------------------------
+           DEFAULT CARET POSITION
+        ---------------------------------------------- */
+
+        metrics.caret.x =
+            metrics.textArea.left;
+
+        metrics.caret.y =
+            metrics.textArea.top;
+
+        this.validate();
+
+        return true;
+
+    };
+
+    /* ======================================================
+       GET WRITABLE WIDTH
+    ====================================================== */
+
+    Layout.getWritableWidth = function(){
+
+        return this.metrics
+                   .textArea
+                   .width;
+
+    };
+
+    /* ======================================================
+       GET WRITABLE HEIGHT
+    ====================================================== */
+
+    Layout.getWritableHeight = function(){
+
+        return this.metrics
+                   .textArea
+                   .height;
+
+    };
+
+    /* ======================================================
+       GET WRITABLE RECT
+    ====================================================== */
+
+    Layout.getWritableRect = function(){
+
+        return{
+
+            left:
+                this.metrics.textArea.left,
+
+            top:
+                this.metrics.textArea.top,
+
+            right:
+                this.metrics.textArea.right,
+
+            bottom:
+                this.metrics.textArea.bottom,
+
+            width:
+                this.metrics.textArea.width,
+
+            height:
+                this.metrics.textArea.height
+
+        };
+
+    };
+
+    /* ======================================================
+       IS INSIDE WRITABLE AREA
+    ====================================================== */
+
+    Layout.isInsideWritableArea = function(x,y){
+
+        const area =
+            this.metrics.textArea;
+
+        return(
+
+            x >= area.left &&
+
+            x <= area.right &&
+
+            y >= area.top &&
+
+            y <= area.bottom
+
+        );
+
+    };
+
+})();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
