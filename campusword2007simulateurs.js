@@ -6338,6 +6338,181 @@ CampusWord2007Simulateur.CaretEngine.StateManager = {
 
 
 
+/* ==========================================================
+   CAMPUS WORD 2007 SIMULATEUR
+   CARET ENGINE
+   PHASE 1.3
+   CARET DOM MANAGER
+   ----------------------------------------------------------
+   RESPONSIBILITY
+
+   • Create single caret DOM element
+   • Store DOM reference
+   • Safe DOM destruction
+   • Prevent duplicate caret
+   • Prevent memory leaks
+
+   DOES NOT
+
+   • Render caret
+   • Attach to page
+   • Calculate layout
+   • Calculate coordinates
+   • Blink
+   • Use LayoutEngine
+   ========================================================== */
+
+CampusWord2007Simulateur.CaretEngine.DOMManager = {
+
+    initialized: false,
+
+    /* ======================================================
+       INITIALIZE
+    ====================================================== */
+
+    initialize() {
+
+        if (this.initialized) {
+            return true;
+        }
+
+        this.initialized = true;
+
+        return true;
+
+    },
+
+    /* ======================================================
+       CREATE CARET ELEMENT
+
+       Creates ONE shared DOM element only.
+    ====================================================== */
+
+    create() {
+
+        const engine =
+            CampusWord2007Simulateur.CaretEngine;
+
+        if (engine.references.caret) {
+            return engine.references.caret;
+        }
+
+        const caret =
+            document.createElement("div");
+
+        caret.id =
+            engine.configuration.id;
+
+        caret.className =
+            engine.configuration.className;
+
+        caret.setAttribute(
+            "aria-hidden",
+            "true"
+        );
+
+        caret.style.position = "absolute";
+
+        caret.style.display = "none";
+
+        caret.style.pointerEvents = "none";
+
+        caret.style.userSelect = "none";
+
+        caret.style.width =
+            engine.configuration.width + "px";
+
+        caret.style.height =
+            engine.position.height + "px";
+
+        caret.style.backgroundColor =
+            engine.configuration.color;
+
+        caret.style.zIndex =
+            engine.configuration.zIndex;
+
+        engine.references.caret = caret;
+
+        return caret;
+
+    },
+
+    /* ======================================================
+       GET CARET ELEMENT
+    ====================================================== */
+
+    get() {
+
+        return CampusWord2007Simulateur
+            .CaretEngine
+            .references
+            .caret;
+
+    },
+
+    /* ======================================================
+       CHECK EXISTENCE
+    ====================================================== */
+
+    exists() {
+
+        return !!CampusWord2007Simulateur
+            .CaretEngine
+            .references
+            .caret;
+
+    },
+
+    /* ======================================================
+       DESTROY CARET SAFELY
+    ====================================================== */
+
+    destroy() {
+
+        const engine =
+            CampusWord2007Simulateur.CaretEngine;
+
+        const caret =
+            engine.references.caret;
+
+        if (!caret) {
+            return true;
+        }
+
+        if (caret.parentNode) {
+
+            caret.parentNode.removeChild(
+                caret
+            );
+
+        }
+
+        engine.references.caret = null;
+
+        return true;
+
+    },
+
+    /* ======================================================
+       RESET
+    ====================================================== */
+
+    reset() {
+
+        this.destroy();
+
+    }
+
+};
+
+
+
+
+
+
+
+
+
 
 
 
