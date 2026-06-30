@@ -3294,6 +3294,235 @@ CampusWord2007Simulateur.LayoutEngine.InsertionPoint = {
 
 
 
+/* ==========================================================
+   CAMPUS WORD 2007 SIMULATEUR
+   LAYOUT ENGINE
+   PHASE 1.3A
+   VIEWPORT FOUNDATION
+   ----------------------------------------------------------
+   RESPONSIBILITY
+   • Viewport object
+   • Cached viewport metrics
+   • Initialization
+   • Public API
+   • NO calculation
+   • NO resize handling
+   • NO zoom handling
+   ========================================================== */
+
+CampusWord2007Simulateur.LayoutEngine.Viewport = {
+
+    initialized: false,
+
+    metrics: {
+
+        width: 0,
+
+        height: 0,
+
+        clientWidth: 0,
+
+        clientHeight: 0,
+
+        scrollWidth: 0,
+
+        scrollHeight: 0,
+
+        scrollLeft: 0,
+
+        scrollTop: 0,
+
+        devicePixelRatio: 1,
+
+        orientation: "portrait",
+
+        visualViewport: null
+
+    },
+
+    root: null,
+
+    initialize() {
+
+        if (this.initialized) {
+
+            return true;
+
+        }
+
+        this.root =
+            document.documentElement;
+
+        this.metrics.devicePixelRatio =
+            window.devicePixelRatio || 1;
+
+        if (window.visualViewport) {
+
+            this.metrics.visualViewport =
+                window.visualViewport;
+
+        }
+
+        this.initialized = true;
+
+        return true;
+
+    },
+
+    setMetrics(data) {
+
+        if (!data) {
+
+            return;
+
+        }
+
+        Object.assign(
+            this.metrics,
+            data
+        );
+
+    },
+
+    getMetrics() {
+
+        return {
+
+            width:
+                this.metrics.width,
+
+            height:
+                this.metrics.height,
+
+            clientWidth:
+                this.metrics.clientWidth,
+
+            clientHeight:
+                this.metrics.clientHeight,
+
+            scrollWidth:
+                this.metrics.scrollWidth,
+
+            scrollHeight:
+                this.metrics.scrollHeight,
+
+            scrollLeft:
+                this.metrics.scrollLeft,
+
+            scrollTop:
+                this.metrics.scrollTop,
+
+            devicePixelRatio:
+                this.metrics.devicePixelRatio,
+
+            orientation:
+                this.metrics.orientation,
+
+            visualViewport:
+                this.metrics.visualViewport
+
+        };
+
+    },
+
+    getWidth() {
+
+        return this.metrics.width;
+
+    },
+
+    getHeight() {
+
+        return this.metrics.height;
+
+    },
+
+    getClientWidth() {
+
+        return this.metrics.clientWidth;
+
+    },
+
+    getClientHeight() {
+
+        return this.metrics.clientHeight;
+
+    },
+
+    getScrollWidth() {
+
+        return this.metrics.scrollWidth;
+
+    },
+
+    getScrollHeight() {
+
+        return this.metrics.scrollHeight;
+
+    },
+
+    getScrollLeft() {
+
+        return this.metrics.scrollLeft;
+
+    },
+
+    getScrollTop() {
+
+        return this.metrics.scrollTop;
+
+    },
+
+    getDevicePixelRatio() {
+
+        return this.metrics.devicePixelRatio;
+
+    },
+
+    getOrientation() {
+
+        return this.metrics.orientation;
+
+    },
+
+    getVisualViewport() {
+
+        return this.metrics.visualViewport;
+
+    },
+
+    destroy() {
+
+        this.root = null;
+
+        this.metrics.width = 0;
+        this.metrics.height = 0;
+        this.metrics.clientWidth = 0;
+        this.metrics.clientHeight = 0;
+        this.metrics.scrollWidth = 0;
+        this.metrics.scrollHeight = 0;
+        this.metrics.scrollLeft = 0;
+        this.metrics.scrollTop = 0;
+        this.metrics.devicePixelRatio = 1;
+        this.metrics.orientation = "portrait";
+        this.metrics.visualViewport = null;
+
+        this.initialized = false;
+
+    }
+
+};
+
+
+
+
+
+
+
+
+
+
+
 
 
 
