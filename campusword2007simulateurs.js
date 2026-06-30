@@ -6208,6 +6208,136 @@ CampusWord2007Simulateur.CaretEngine = {
 
 
 
+CampusWord2007Simulateur.CaretEngine.StateManager = {
+
+    /* =========================================
+       STATE DEFINITIONS
+    ========================================= */
+
+    STATES: {
+        IDLE: "idle",
+        ACTIVE: "active",
+        BLINKING: "blinking",
+        HIDDEN: "hidden",
+        SUSPENDED: "suspended",
+        FROZEN: "frozen"
+    },
+
+    /* =========================================
+       CURRENT STATE (SINGLE SOURCE OF TRUTH)
+    ========================================= */
+
+    current: "idle",
+
+    previous: null,
+
+    /* =========================================
+       VALID TRANSITIONS MAP
+    ========================================= */
+
+    transitions: {
+        idle: ["active"],
+        active: ["blinking", "hidden", "suspended"],
+        blinking: ["hidden", "suspended"],
+        hidden: ["active", "suspended"],
+        suspended: ["active", "frozen"],
+        frozen: []
+    },
+
+    /* =========================================
+       CHECK IF TRANSITION IS VALID
+    ========================================= */
+
+    canTransition(toState) {
+
+        const allowed = this.transitions[this.current] || [];
+
+        return allowed.includes(toState);
+    },
+
+    /* =========================================
+       SET STATE (CONTROLLED ENTRY POINT)
+    ========================================= */
+
+    setState(newState) {
+
+        if (newState === this.current) {
+            return true;
+        }
+
+        if (!this.canTransition(newState)) {
+            return false;
+        }
+
+        this.previous = this.current;
+        this.current = newState;
+
+        return true;
+    },
+
+    /* =========================================
+       GET CURRENT STATE
+    ========================================= */
+
+    getState() {
+        return this.current;
+    },
+
+    /* =========================================
+       FORCE RESET (ONLY INTERNAL USE)
+    ========================================= */
+
+    reset() {
+        this.previous = this.current;
+        this.current = this.STATES.IDLE;
+    },
+
+    /* =========================================
+       FREEZE SYSTEM (SECURITY / SAFETY MODE)
+    ========================================= */
+
+    freeze() {
+        this.previous = this.current;
+        this.current = this.STATES.FROZEN;
+    },
+
+    /* =========================================
+       IS ACTIVE CHECK
+    ========================================= */
+
+    isActive() {
+        return this.current === this.STATES.ACTIVE;
+    },
+
+    isBlinking() {
+        return this.current === this.STATES.BLINKING;
+    },
+
+    isHidden() {
+        return this.current === this.STATES.HIDDEN;
+    },
+
+    isSuspended() {
+        return this.current === this.STATES.SUSPENDED;
+    },
+
+    isFrozen() {
+        return this.current === this.STATES.FROZEN;
+    }
+
+};
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
