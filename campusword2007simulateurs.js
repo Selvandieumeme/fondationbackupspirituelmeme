@@ -6868,6 +6868,452 @@ CampusWord2007Simulateur.CaretEngine.VisibilityManager = {
 
 
 
+/* ==========================================================
+   CAMPUS WORD 2007 SIMULATEUR
+   CARET ENGINE
+   PHASE 2.1
+   BLINK MANAGER
+   ----------------------------------------------------------
+   RESPONSIBILITY
+
+   • Interval control
+   • Blink timing engine
+   • Pause / Resume blinking
+   • Internal blink visibility flag
+
+   DOES NOT
+
+   • Touch DOM
+   • Show / Hide caret
+   • Render
+   • Calculate layout
+   • Use LayoutEngine
+   • Manage focus
+   • Attach pages
+   ========================================================== */
+
+CampusWord2007Simulateur.CaretEngine.BlinkManager = {
+
+    initialized: false,
+
+    /* ======================================================
+       INTERNAL BLINK STATE
+    ====================================================== */
+
+    blinkVisible: true,
+
+    running: false,
+
+    paused: false,
+
+    /* ======================================================
+       INITIALIZE
+    ====================================================== */
+
+    initialize() {
+
+        if (this.initialized) {
+            return true;
+        }
+
+        this.stop();
+
+        this.initialized = true;
+
+        return true;
+
+    },
+
+    /* ======================================================
+       START BLINK
+    ====================================================== */
+
+    start() {
+
+        const engine =
+            CampusWord2007Simulateur.CaretEngine;
+
+        if (this.running) {
+            return true;
+        }
+
+        this.running = true;
+
+        this.paused = false;
+
+        this.blinkVisible = true;
+
+        engine.references.timer =
+            window.setInterval(() => {
+
+                if (this.paused) {
+                    return;
+                }
+
+                this.blinkVisible =
+                    !this.blinkVisible;
+
+            }, engine.configuration.blinkInterval);
+
+        return true;
+
+    },
+
+    /* ======================================================
+       STOP BLINK
+    ====================================================== */
+
+    stop() {
+
+        const engine =
+            CampusWord2007Simulateur.CaretEngine;
+
+        if (engine.references.timer !== null) {
+
+            clearInterval(
+                engine.references.timer
+            );
+
+            engine.references.timer = null;
+
+        }
+
+        this.running = false;
+
+        this.paused = false;
+
+        this.blinkVisible = true;
+
+        return true;
+
+    },
+
+    /* ======================================================
+       PAUSE
+    ====================================================== */
+
+    pause() {
+
+        if (!this.running) {
+            return false;
+        }
+
+        this.paused = true;
+
+        return true;
+
+    },
+
+    /* ======================================================
+       RESUME
+    ====================================================== */
+
+    resume() {
+
+        if (!this.running) {
+            return false;
+        }
+
+        this.paused = false;
+
+        return true;
+
+    },
+
+    /* ======================================================
+       CURRENT FLAG
+    ====================================================== */
+
+    isVisible() {
+
+        return this.blinkVisible;
+
+    },
+
+    /* ======================================================
+       IS RUNNING
+    ====================================================== */
+
+    isRunning() {
+
+        return this.running;
+
+    },
+
+    /* ======================================================
+       IS PAUSED
+    ====================================================== */
+
+    isPaused() {
+
+        return this.paused;
+
+    },
+
+    /* ======================================================
+       RESET
+    ====================================================== */
+
+    reset() {
+
+        this.stop();
+
+        return true;
+
+    },
+
+    /* ======================================================
+       DESTROY
+    ====================================================== */
+
+    destroy() {
+
+        this.stop();
+
+        this.initialized = false;
+
+        return true;
+
+    }
+
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* ==========================================================
+   CAMPUS WORD 2007 SIMULATEUR
+   CARET ENGINE
+   PHASE 2.2
+   FOCUS MANAGER
+   ----------------------------------------------------------
+   RESPONSIBILITY
+
+   • Detect editor focus state
+   • Synchronize with editor focus
+   • Trigger caret activation request
+
+   DOES NOT
+
+   • Show / Hide caret
+   • Render
+   • Blink
+   • Modify Caret State
+   • Attach pages
+   • Calculate layout
+   • Use LayoutEngine
+   • Touch caret DOM
+
+   ========================================================== */
+
+CampusWord2007Simulateur.CaretEngine.FocusManager = {
+
+    initialized: false,
+
+    /* ======================================================
+       INTERNAL STATE
+    ====================================================== */
+
+    focused: false,
+
+    activationRequested: false,
+
+    editor: null,
+
+    boundFocusHandler: null,
+
+    boundBlurHandler: null,
+
+    /* ======================================================
+       INITIALIZE
+    ====================================================== */
+
+    initialize(editorElement) {
+
+        if (this.initialized) {
+            return true;
+        }
+
+        if (!(editorElement instanceof HTMLElement)) {
+            return false;
+        }
+
+        this.editor = editorElement;
+
+        this.boundFocusHandler =
+            this.handleFocus.bind(this);
+
+        this.boundBlurHandler =
+            this.handleBlur.bind(this);
+
+        this.editor.addEventListener(
+            "focus",
+            this.boundFocusHandler
+        );
+
+        this.editor.addEventListener(
+            "blur",
+            this.boundBlurHandler
+        );
+
+        this.initialized = true;
+
+        return true;
+
+    },
+
+    /* ======================================================
+       HANDLE FOCUS
+    ====================================================== */
+
+    handleFocus() {
+
+        this.focused = true;
+
+        this.activationRequested = true;
+
+    },
+
+    /* ======================================================
+       HANDLE BLUR
+    ====================================================== */
+
+    handleBlur() {
+
+        this.focused = false;
+
+        this.activationRequested = false;
+
+    },
+
+    /* ======================================================
+       SYNCHRONIZE
+    ====================================================== */
+
+    synchronize() {
+
+        if (!this.editor) {
+            return false;
+        }
+
+        const hasFocus =
+            document.activeElement === this.editor;
+
+        this.focused = hasFocus;
+
+        this.activationRequested = hasFocus;
+
+        return true;
+
+    },
+
+    /* ======================================================
+       CURRENT FOCUS STATE
+    ====================================================== */
+
+    hasFocus() {
+
+        return this.focused;
+
+    },
+
+    /* ======================================================
+       ACTIVATION REQUEST
+    ====================================================== */
+
+    shouldActivateCaret() {
+
+        return this.activationRequested;
+
+    },
+
+    /* ======================================================
+       CLEAR ACTIVATION REQUEST
+    ====================================================== */
+
+    consumeActivationRequest() {
+
+        const requested =
+            this.activationRequested;
+
+        this.activationRequested = false;
+
+        return requested;
+
+    },
+
+    /* ======================================================
+       RESET
+    ====================================================== */
+
+    reset() {
+
+        this.focused = false;
+
+        this.activationRequested = false;
+
+    },
+
+    /* ======================================================
+       DESTROY
+    ====================================================== */
+
+    destroy() {
+
+        if (
+            this.editor &&
+            this.boundFocusHandler
+        ) {
+
+            this.editor.removeEventListener(
+                "focus",
+                this.boundFocusHandler
+            );
+
+        }
+
+        if (
+            this.editor &&
+            this.boundBlurHandler
+        ) {
+
+            this.editor.removeEventListener(
+                "blur",
+                this.boundBlurHandler
+            );
+
+        }
+
+        this.boundFocusHandler = null;
+
+        this.boundBlurHandler = null;
+
+        this.editor = null;
+
+        this.reset();
+
+        this.initialized = false;
+
+        return true;
+
+    }
+
+};
+
+
+
+
+
 
 
 
