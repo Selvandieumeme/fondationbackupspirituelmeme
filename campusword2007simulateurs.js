@@ -2906,6 +2906,425 @@ CampusWord2007Simulateur.LayoutEngine.getCache=function(){
 
 
 
+/* ==========================================================
+   CAMPUS WORD 2007 SIMULATEUR
+   LAYOUT ENGINE
+   PHASE 1.2E
+   BASELINE & LINE METRICS
+   ----------------------------------------------------------
+   RESPONSIBILITY
+   • Compute font metrics
+   • Compute baseline
+   • Compute line metrics
+   • Compute character box metrics
+   • NO caret calculation
+   • NO text positioning
+   ========================================================== */
+
+CampusWord2007Simulateur.LayoutEngine.LineMetrics = {
+
+    initialized: false,
+
+    metrics: {
+
+        fontFamily: "",
+
+        fontSize: 0,
+
+        lineHeight: 0,
+
+        baseline: 0,
+
+        ascent: 0,
+
+        descent: 0,
+
+        capHeight: 0,
+
+        xHeight: 0,
+
+        characterWidth: 0,
+
+        spaceWidth: 0
+
+    },
+
+    measurementElement: null,
+
+    initialize() {
+
+        if (this.initialized) {
+            return true;
+        }
+
+        this.createMeasurementElement();
+
+        this.initialized = true;
+
+        return true;
+
+    },
+
+    createMeasurementElement() {
+
+        if (this.measurementElement) {
+            return;
+        }
+
+        const element = document.createElement("span");
+
+        element.textContent = "Hg";
+
+        element.style.position = "absolute";
+        element.style.visibility = "hidden";
+        element.style.pointerEvents = "none";
+        element.style.whiteSpace = "pre";
+        element.style.left = "-100000px";
+        element.style.top = "-100000px";
+        element.style.padding = "0";
+        element.style.margin = "0";
+        element.style.border = "0";
+
+        document.body.appendChild(element);
+
+        this.measurementElement = element;
+
+    },
+
+    measure(fontFamily, fontSize, lineHeight) {
+
+        if (!this.measurementElement) {
+            return null;
+        }
+
+        const element = this.measurementElement;
+
+        element.style.fontFamily = fontFamily;
+        element.style.fontSize = fontSize + "px";
+        element.style.lineHeight = lineHeight + "px";
+
+        const rect = element.getBoundingClientRect();
+
+        const width = rect.width;
+        const height = rect.height;
+
+        this.metrics.fontFamily = fontFamily;
+        this.metrics.fontSize = fontSize;
+        this.metrics.lineHeight = lineHeight;
+
+        /*
+            Browser pa bay ascent/descent dirèk.
+            Nou itilize estimasyon tipografik estanda.
+        */
+
+        this.metrics.ascent = Math.round(fontSize * 0.80);
+
+        this.metrics.descent =
+            Math.max(
+                0,
+                lineHeight - this.metrics.ascent
+            );
+
+        this.metrics.baseline =
+            this.metrics.ascent;
+
+        this.metrics.capHeight =
+            Math.round(fontSize * 0.70);
+
+        this.metrics.xHeight =
+            Math.round(fontSize * 0.52);
+
+        this.metrics.characterWidth =
+            width / 2;
+
+        element.textContent = " ";
+
+        this.metrics.spaceWidth =
+            element.getBoundingClientRect().width;
+
+        element.textContent = "Hg";
+
+        return this.getMetrics();
+
+    },
+
+    getMetrics() {
+
+        return {
+
+            fontFamily:
+                this.metrics.fontFamily,
+
+            fontSize:
+                this.metrics.fontSize,
+
+            lineHeight:
+                this.metrics.lineHeight,
+
+            baseline:
+                this.metrics.baseline,
+
+            ascent:
+                this.metrics.ascent,
+
+            descent:
+                this.metrics.descent,
+
+            capHeight:
+                this.metrics.capHeight,
+
+            xHeight:
+                this.metrics.xHeight,
+
+            characterWidth:
+                this.metrics.characterWidth,
+
+            spaceWidth:
+                this.metrics.spaceWidth
+
+        };
+
+    },
+
+    getBaseline() {
+
+        return this.metrics.baseline;
+
+    },
+
+    getAscent() {
+
+        return this.metrics.ascent;
+
+    },
+
+    getDescent() {
+
+        return this.metrics.descent;
+
+    },
+
+    getLineHeight() {
+
+        return this.metrics.lineHeight;
+
+    },
+
+    getCharacterWidth() {
+
+        return this.metrics.characterWidth;
+
+    },
+
+    getSpaceWidth() {
+
+        return this.metrics.spaceWidth;
+
+    },
+
+    destroy() {
+
+        if (
+            this.measurementElement &&
+            this.measurementElement.parentNode
+        ) {
+
+            this.measurementElement.parentNode.removeChild(
+                this.measurementElement
+            );
+
+        }
+
+        this.measurementElement = null;
+
+        this.initialized = false;
+
+    }
+
+};
+
+
+
+
+
+
+/* ==========================================================
+   CAMPUS WORD 2007 SIMULATEUR
+   LAYOUT ENGINE
+   PHASE 1.2F
+   DEFAULT INSERTION POINT
+   ----------------------------------------------------------
+   RESPONSIBILITY
+   • Calculate default insertion point
+   • First typing position
+   • Paragraph origin
+   • NO caret movement
+   • NO text rendering
+   • NO paragraph creation
+   ========================================================== */
+
+CampusWord2007Simulateur.LayoutEngine.InsertionPoint = {
+
+    initialized: false,
+
+    point: {
+
+        x: 0,
+
+        y: 0
+
+    },
+
+    initialize() {
+
+        if (this.initialized) {
+
+            return true;
+
+        }
+
+        this.initialized = true;
+
+        return true;
+
+    },
+
+    calculate(page) {
+
+        if (!page) {
+
+            return null;
+
+        }
+
+        const Geometry =
+            CampusWord2007Simulateur
+            .LayoutEngine
+            .Geometry;
+
+        const WritableArea =
+            CampusWord2007Simulateur
+            .LayoutEngine
+            .WritableArea;
+
+        const LineMetrics =
+            CampusWord2007Simulateur
+            .LayoutEngine
+            .LineMetrics;
+
+        if (
+            !Geometry ||
+            !WritableArea ||
+            !LineMetrics
+        ) {
+
+            return null;
+
+        }
+
+        Geometry.measure(page);
+
+        WritableArea.calculate(page);
+
+        const writable =
+            WritableArea.get();
+
+        const metrics =
+            LineMetrics.getMetrics();
+
+        this.point.x =
+            Math.round(
+                writable.left
+            );
+
+        this.point.y =
+            Math.round(
+                writable.top +
+                metrics.baseline
+            );
+
+        return this.get();
+
+    },
+
+    get() {
+
+        return {
+
+            x: this.point.x,
+
+            y: this.point.y
+
+        };
+
+    },
+
+    getX() {
+
+        return this.point.x;
+
+    },
+
+    getY() {
+
+        return this.point.y;
+
+    },
+
+    reset() {
+
+        this.point.x = 0;
+
+        this.point.y = 0;
+
+    },
+
+    destroy() {
+
+        this.reset();
+
+        this.initialized = false;
+
+    }
+
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
