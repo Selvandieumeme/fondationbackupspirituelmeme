@@ -2015,6 +2015,286 @@ CampusWord2007Simulateur.LayoutEngine = {
 
 
 
+/* ==========================================================
+   CAMPUS WORD 2007 SIMULATEUR
+   LAYOUT ENGINE
+   PHASE 1.2A
+   GEOMETRY OBJECTS & METRICS CACHE
+========================================================== */
+
+CampusWord2007Simulateur.LayoutEngine.metrics = {
+
+    /* ======================================================
+       DOCUMENT GEOMETRY
+    ====================================================== */
+
+    document:{
+
+        width:0,
+        height:0,
+
+        left:0,
+        top:0,
+        right:0,
+        bottom:0
+
+    },
+
+    /* ======================================================
+       PAGE GEOMETRY
+    ====================================================== */
+
+    page:{
+
+        width:0,
+        height:0,
+
+        left:0,
+        top:0,
+        right:0,
+        bottom:0
+
+    },
+
+    /* ======================================================
+       CONTENT AREA
+    ====================================================== */
+
+    content:{
+
+        left:0,
+        top:0,
+
+        right:0,
+        bottom:0,
+
+        width:0,
+        height:0
+
+    },
+
+    /* ======================================================
+       MARGINS
+    ====================================================== */
+
+    margins:{
+
+        left:0,
+        top:0,
+        right:0,
+        bottom:0
+
+    },
+
+    /* ======================================================
+       TEXT AREA
+    ====================================================== */
+
+    textArea:{
+
+        left:0,
+        top:0,
+
+        width:0,
+        height:0,
+
+        right:0,
+        bottom:0
+
+    },
+
+    /* ======================================================
+       LINE METRICS
+    ====================================================== */
+
+    line:{
+
+        height:19,
+
+        baseline:15,
+
+        ascent:15,
+
+        descent:4
+
+    },
+
+    /* ======================================================
+       CHARACTER METRICS
+    ====================================================== */
+
+    character:{
+
+        width:0,
+
+        height:19,
+
+        spacing:0
+
+    },
+
+    /* ======================================================
+       CARET METRICS
+    ====================================================== */
+
+    caret:{
+
+        width:1,
+
+        height:19,
+
+        x:0,
+
+        y:0
+
+    },
+
+    /* ======================================================
+       PARAGRAPH METRICS
+    ====================================================== */
+
+    paragraph:{
+
+        firstLineIndent:0,
+
+        leftIndent:0,
+
+        rightIndent:0,
+
+        spacingBefore:0,
+
+        spacingAfter:0
+
+    },
+
+    /* ======================================================
+       PAGE LIMITS
+    ====================================================== */
+
+    limits:{
+
+        minX:0,
+        maxX:0,
+
+        minY:0,
+        maxY:0
+
+    }
+
+};
+
+/* ==========================================================
+   METRICS CACHE
+========================================================== */
+
+CampusWord2007Simulateur.LayoutEngine.cache={
+
+    pageRect:null,
+
+    contentRect:null,
+
+    textLayerRect:null,
+
+    caretLayerRect:null,
+
+    paragraphRect:null,
+
+    characterRect:null,
+
+    workspaceRect:null,
+
+    viewportRect:null,
+
+    scrollRect:null
+
+};
+
+/* ==========================================================
+   RUNTIME GEOMETRY
+========================================================== */
+
+CampusWord2007Simulateur.LayoutEngine.runtime={
+
+    dirty:true,
+
+    measuring:false,
+
+    updating:false,
+
+    version:1,
+
+    lastUpdate:0
+
+};
+
+/* ==========================================================
+   INTERNAL HELPERS
+========================================================== */
+
+CampusWord2007Simulateur.LayoutEngine.invalidate=function(){
+
+    this.runtime.dirty=true;
+
+};
+
+CampusWord2007Simulateur.LayoutEngine.validate=function(){
+
+    this.runtime.dirty=false;
+
+    this.runtime.lastUpdate=
+
+        performance.now();
+
+};
+
+CampusWord2007Simulateur.LayoutEngine.isDirty=function(){
+
+    return this.runtime.dirty;
+
+};
+
+CampusWord2007Simulateur.LayoutEngine.getMetrics=function(){
+
+    return this.metrics;
+
+};
+
+CampusWord2007Simulateur.LayoutEngine.getCache=function(){
+
+    return this.cache;
+
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
