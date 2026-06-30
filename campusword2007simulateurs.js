@@ -5033,10 +5033,665 @@ CampusWord2007Simulateur.LayoutEngine.CharacterPositionResolver = {
 
 
 
+/* ==========================================================
+   CAMPUS WORD 2007 SIMULATEUR
+   LAYOUT ENGINE
+   PHASE 2.6C
+   EMPTY LINE RESOLVER
+   ----------------------------------------------------------
+   RESPONSIBILITY
+   • Resolve caret position on empty line
+   • Resolve first insertion point of paragraph
+   • Resolve empty paragraph position
+   • Return CaretPosition only
+   ----------------------------------------------------------
+   DOES NOT
+   ✘ Move caret
+   ✘ Modify DOM
+   ✘ Create paragraph
+   ✘ Create page
+   ✘ Render text
+   ========================================================== */
+
+CampusWord2007Simulateur.LayoutEngine.EmptyLineResolver = {
+
+    initialized:false,
+
+    initialize(){
+
+        if(this.initialized){
+            return true;
+        }
+
+        this.initialized=true;
+
+        return true;
+
+    },
+
+    resolve(paragraph){
+
+        if(!paragraph){
+            return null;
+        }
+
+        const page=
+            paragraph.closest(
+                ".document-page"
+            );
+
+        if(!page){
+            return null;
+        }
+
+        const Position=
+            CampusWord2007Simulateur
+            .LayoutEngine
+            .CaretPosition;
+
+        const Insertion=
+            CampusWord2007Simulateur
+            .LayoutEngine
+            .InsertionPoint;
+
+        const LineMetrics=
+            CampusWord2007Simulateur
+            .LayoutEngine
+            .LineMetrics;
+
+        Insertion.calculate(page);
+
+        const point=
+            Insertion.get();
+
+        const metrics=
+            LineMetrics.getMetrics();
+
+        const paragraphIndex=
+            Array.prototype.indexOf.call(
+                paragraph.parentNode.children,
+                paragraph
+            );
+
+        const pageIndex=
+            Number(
+                page.dataset.pageNumber || 1
+            )-1;
+
+        Position.set({
+
+            page:page,
+
+            pageIndex:pageIndex,
+
+            paragraph:paragraph,
+
+            paragraphIndex:paragraphIndex,
+
+            line:paragraph,
+
+            lineIndex:0,
+
+            character:null,
+
+            characterIndex:-1,
+
+            x:Math.round(point.x),
+
+            y:Math.round(point.y),
+
+            baseline:Math.round(point.y),
+
+            height:metrics.lineHeight
+
+        });
+
+        return Position.get();
+
+    },
+
+    resolveFromPage(page){
+
+        if(!page){
+            return null;
+        }
+
+        const layer=
+            page.querySelector(
+                ".page-text-layer"
+            );
+
+        if(!layer){
+            return null;
+        }
+
+        let paragraph=
+            layer.lastElementChild;
+
+        if(
+            !paragraph ||
+            !paragraph.classList ||
+            !paragraph.classList.contains(
+                "text-paragraph"
+            )
+        ){
+
+            paragraph=
+                document.createElement("div");
+
+            paragraph.className=
+                "text-paragraph";
+
+            layer.appendChild(
+                paragraph
+            );
+
+        }
+
+        return this.resolve(
+            paragraph
+        );
+
+    },
+
+    destroy(){
+
+        this.initialized=false;
+
+    }
+
+};
 
 
 
 
+
+
+
+
+
+/* ==========================================================
+   CAMPUS WORD 2007 SIMULATEUR
+   LAYOUT ENGINE
+   PHASE 2.6D
+   ENTER RESOLVER
+   ----------------------------------------------------------
+   RESPONSIBILITY
+   • Resolve caret position after Enter
+   • Resolve next paragraph insertion point
+   • Resolve next line insertion point
+   • Return CaretPosition only
+   ----------------------------------------------------------
+   DOES NOT
+   ✘ Move caret
+   ✘ Create paragraph
+   ✘ Create page
+   ✘ Modify DOM
+   ✘ Render text
+   ========================================================== */
+
+CampusWord2007Simulateur.LayoutEngine.EnterResolver = {
+
+    initialized:false,
+
+    initialize(){
+
+        if(this.initialized){
+            return true;
+        }
+
+        this.initialized=true;
+
+        return true;
+
+    },
+
+    resolve(paragraph){
+
+        if(!paragraph){
+            return null;
+        }
+
+        const Position =
+            CampusWord2007Simulateur
+            .LayoutEngine
+            .CaretPosition;
+
+        const EmptyResolver =
+            CampusWord2007Simulateur
+            .LayoutEngine
+            .EmptyLineResolver;
+
+        const ParagraphFlow =
+            CampusWord2007Simulateur
+            .LayoutEngine
+            .ParagraphFlowManager;
+
+        const LineMetrics =
+            CampusWord2007Simulateur
+            .LayoutEngine
+            .LineMetrics;
+
+        const metrics =
+            LineMetrics.getMetrics();
+
+        let paragraphSpacing = 0;
+
+        if(
+            ParagraphFlow &&
+            typeof ParagraphFlow.getParagraphSpacing==="function"
+        ){
+            paragraphSpacing =
+                ParagraphFlow.getParagraphSpacing();
+        }
+
+        const base =
+            EmptyResolver.resolve(
+                paragraph
+            );
+
+        if(!base){
+            return null;
+        }
+
+        Position.set({
+
+            page:base.page,
+
+            pageIndex:base.pageIndex,
+
+            paragraph:base.paragraph,
+
+            paragraphIndex:
+                base.paragraphIndex + 1,
+
+            line:null,
+
+            lineIndex:0,
+
+            character:null,
+
+            characterIndex:-1,
+
+            x:base.x,
+
+            y:
+                Math.round(
+                    base.y +
+                    metrics.lineHeight +
+                    paragraphSpacing
+                ),
+
+            baseline:
+                Math.round(
+                    base.baseline +
+                    metrics.lineHeight +
+                    paragraphSpacing
+                ),
+
+            height:metrics.lineHeight
+
+        });
+
+        return Position.get();
+
+    },
+
+    destroy(){
+
+        this.initialized=false;
+
+    }
+
+};
+
+
+
+
+
+
+
+
+
+
+/* ==========================================================
+   CAMPUS WORD 2007 SIMULATEUR
+   LAYOUT ENGINE
+   PHASE 2.6E
+   NEW PAGE RESOLVER
+   ----------------------------------------------------------
+   RESPONSIBILITY
+   • Resolve caret position on a newly created page
+   • Compute first insertion position of the page
+   • NO page creation
+   • NO DOM modification
+   • NO caret movement
+   • NO rendering
+   ========================================================== */
+
+CampusWord2007Simulateur.LayoutEngine.NewPageResolver = {
+
+    initialized: false,
+
+    initialize() {
+
+        if (this.initialized) {
+            return true;
+        }
+
+        this.initialized = true;
+
+        return true;
+
+    },
+
+    resolve(page) {
+
+        if (!page) {
+            return null;
+        }
+
+        const InsertionPoint =
+            CampusWord2007Simulateur
+            .LayoutEngine
+            .InsertionPoint;
+
+        const CaretPosition =
+            CampusWord2007Simulateur
+            .LayoutEngine
+            .CaretPosition;
+
+        if (
+            !InsertionPoint ||
+            !CaretPosition
+        ) {
+            return null;
+        }
+
+        const point =
+            InsertionPoint.calculate(page);
+
+        if (!point) {
+            return null;
+        }
+
+        CaretPosition.set({
+
+            page: page,
+
+            paragraph: null,
+
+            character: null,
+
+            line: 0,
+
+            column: 0,
+
+            x: point.x,
+
+            y: point.y,
+
+            baseline: point.y,
+
+            placement: "new-page"
+
+        });
+
+        return CaretPosition.get();
+
+    },
+
+    destroy() {
+
+        this.initialized = false;
+
+    }
+
+};
+
+
+
+
+
+
+
+
+/* ==========================================================
+   CAMPUS WORD 2007 SIMULATEUR
+   LAYOUT ENGINE
+   PHASE 2.6F
+   PUBLIC CARET PLACEMENT API
+   ----------------------------------------------------------
+   RESPONSIBILITY
+   • Single public API for caret placement
+   • Delegate to specialized resolvers
+   • NO geometry calculation
+   • NO DOM measurement
+   • NO caret rendering
+   • NO text insertion
+   ========================================================== */
+
+CampusWord2007Simulateur.LayoutEngine.CaretPlacement = {
+
+    initialized: false,
+
+    initialize() {
+
+        if (this.initialized) {
+            return true;
+        }
+
+        this.initialized = true;
+
+        return true;
+
+    },
+
+    /* ======================================================
+       AFTER CHARACTER
+    ====================================================== */
+
+    afterCharacter(character) {
+
+        const Resolver =
+            CampusWord2007Simulateur
+            .LayoutEngine
+            .CharacterPositionResolver;
+
+        if (
+            !Resolver ||
+            typeof Resolver.afterCharacter !== "function"
+        ) {
+
+            return null;
+
+        }
+
+        return Resolver.afterCharacter(character);
+
+    },
+
+    /* ======================================================
+       BEFORE CHARACTER
+    ====================================================== */
+
+    beforeCharacter(character) {
+
+        const Resolver =
+            CampusWord2007Simulateur
+            .LayoutEngine
+            .CharacterPositionResolver;
+
+        if (
+            !Resolver ||
+            typeof Resolver.beforeCharacter !== "function"
+        ) {
+
+            return null;
+
+        }
+
+        return Resolver.beforeCharacter(character);
+
+    },
+
+    /* ======================================================
+       EMPTY LINE
+    ====================================================== */
+
+    emptyLine(paragraph) {
+
+        const Resolver =
+            CampusWord2007Simulateur
+            .LayoutEngine
+            .EmptyLineResolver;
+
+        if (
+            !Resolver ||
+            typeof Resolver.resolve !== "function"
+        ) {
+
+            return null;
+
+        }
+
+        return Resolver.resolve(paragraph);
+
+    },
+
+    /* ======================================================
+       AFTER ENTER
+    ====================================================== */
+
+    afterEnter(paragraph) {
+
+        const Resolver =
+            CampusWord2007Simulateur
+            .LayoutEngine
+            .EnterResolver;
+
+        if (
+            !Resolver ||
+            typeof Resolver.resolve !== "function"
+        ) {
+
+            return null;
+
+        }
+
+        return Resolver.resolve(paragraph);
+
+    },
+
+    /* ======================================================
+       NEW PAGE
+    ====================================================== */
+
+    newPage(page) {
+
+        const Resolver =
+            CampusWord2007Simulateur
+            .LayoutEngine
+            .NewPageResolver;
+
+        if (
+            !Resolver ||
+            typeof Resolver.resolve !== "function"
+        ) {
+
+            return null;
+
+        }
+
+        return Resolver.resolve(page);
+
+    },
+
+    /* ======================================================
+       CURRENT CARET
+    ====================================================== */
+
+    current() {
+
+        const Cursor =
+            CampusWord2007Simulateur
+            .LayoutEngine
+            .Cursor;
+
+        if (
+            !Cursor ||
+            typeof Cursor.get !== "function"
+        ) {
+
+            return null;
+
+        }
+
+        return Cursor.get();
+
+    },
+
+    /* ======================================================
+       UPDATE CURRENT CARET
+    ====================================================== */
+
+    update(position) {
+
+        const Cursor =
+            CampusWord2007Simulateur
+            .LayoutEngine
+            .Cursor;
+
+        if (
+            !Cursor ||
+            typeof Cursor.set !== "function"
+        ) {
+
+            return false;
+
+        }
+
+        Cursor.set(position);
+
+        return true;
+
+    },
+
+    /* ======================================================
+       RESET
+    ====================================================== */
+
+    reset() {
+
+        const Cursor =
+            CampusWord2007Simulateur
+            .LayoutEngine
+            .Cursor;
+
+        if (
+            Cursor &&
+            typeof Cursor.reset === "function"
+        ) {
+
+            Cursor.reset();
+
+        }
+
+    },
+
+    /* ======================================================
+       DESTROY
+    ====================================================== */
+
+    destroy() {
+
+        this.reset();
+
+        this.initialized = false;
+
+    }
+
+};
 
 
 
