@@ -2523,7 +2523,228 @@ CampusWord2007Simulateur.LayoutEngine.getCache=function(){
 
 
 
+/* ==========================================================
+   CAMPUS WORD 2007 SIMULATEUR
+   LAYOUT ENGINE
+   PHASE 1.2C
+   COORDINATE SYSTEM API
+   DOM GEOMETRY SCANNER
+========================================================== */
 
+(function(){
+
+    const Layout =
+        CampusWord2007Simulateur.LayoutEngine;
+
+    if(!Layout){
+
+        return;
+
+    }
+
+    /* ======================================================
+       REFRESH GEOMETRY CACHE
+    ====================================================== */
+
+    Layout.refreshGeometryCache = function(){
+
+        const Document =
+            CampusWord2007Simulateur.DocumentEngine;
+
+        if(
+            !Document ||
+            typeof Document.getActivePage !== "function"
+        ){
+
+            return false;
+
+        }
+
+        const page =
+            Document.getActivePage();
+
+        if(!page){
+
+            return false;
+
+        }
+
+        const cache =
+            this.cache;
+
+        cache.page =
+            page;
+
+        cache.pageRect =
+            page.getBoundingClientRect();
+
+        cache.content =
+            page.querySelector(
+                ".page-content"
+            );
+
+        cache.contentRect =
+            cache.content
+                ? cache.content.getBoundingClientRect()
+                : null;
+
+        cache.textLayer =
+            page.querySelector(
+                ".page-text-layer"
+            );
+
+        cache.textLayerRect =
+            cache.textLayer
+                ? cache.textLayer.getBoundingClientRect()
+                : null;
+
+        cache.caretLayer =
+            page.querySelector(
+                ".page-caret-layer"
+            );
+
+        cache.caretLayerRect =
+            cache.caretLayer
+                ? cache.caretLayer.getBoundingClientRect()
+                : null;
+
+        cache.selectionLayer =
+            page.querySelector(
+                ".page-selection-layer"
+            );
+
+        cache.selectionLayerRect =
+            cache.selectionLayer
+                ? cache.selectionLayer.getBoundingClientRect()
+                : null;
+
+        cache.objectLayer =
+            page.querySelector(
+                ".page-object-layer"
+            );
+
+        cache.objectLayerRect =
+            cache.objectLayer
+                ? cache.objectLayer.getBoundingClientRect()
+                : null;
+
+        cache.overlayLayer =
+            page.querySelector(
+                ".page-overlay-layer"
+            );
+
+        cache.overlayLayerRect =
+            cache.overlayLayer
+                ? cache.overlayLayer.getBoundingClientRect()
+                : null;
+
+        cache.workspace =
+            CampusWord2007Simulateur
+            .DOMEngine
+            .get("workspace");
+
+        cache.workspaceRect =
+            cache.workspace
+                ? cache.workspace.getBoundingClientRect()
+                : null;
+
+        cache.viewport =
+            CampusWord2007Simulateur
+            .DOMEngine
+            .get("document-viewport");
+
+        cache.viewportRect =
+            cache.viewport
+                ? cache.viewport.getBoundingClientRect()
+                : null;
+
+        cache.scrollArea =
+            CampusWord2007Simulateur
+            .DOMEngine
+            .get("document-scroll-area");
+
+        cache.scrollRect =
+            cache.scrollArea
+                ? cache.scrollArea.getBoundingClientRect()
+                : null;
+
+        this.validate();
+
+        return true;
+
+    };
+
+    /* ======================================================
+       GET PAGE RECT
+    ====================================================== */
+
+    Layout.getPageRect = function(){
+
+        return this.cache.pageRect;
+
+    };
+
+    /* ======================================================
+       GET CONTENT RECT
+    ====================================================== */
+
+    Layout.getContentRect = function(){
+
+        return this.cache.contentRect;
+
+    };
+
+    /* ======================================================
+       GET TEXT LAYER RECT
+    ====================================================== */
+
+    Layout.getTextLayerRect = function(){
+
+        return this.cache.textLayerRect;
+
+    };
+
+    /* ======================================================
+       GET CARET LAYER RECT
+    ====================================================== */
+
+    Layout.getCaretLayerRect = function(){
+
+        return this.cache.caretLayerRect;
+
+    };
+
+    /* ======================================================
+       GET WORKSPACE RECT
+    ====================================================== */
+
+    Layout.getWorkspaceRect = function(){
+
+        return this.cache.workspaceRect;
+
+    };
+
+    /* ======================================================
+       GET VIEWPORT RECT
+    ====================================================== */
+
+    Layout.getViewportRect = function(){
+
+        return this.cache.viewportRect;
+
+    };
+
+    /* ======================================================
+       GET SCROLL RECT
+    ====================================================== */
+
+    Layout.getScrollRect = function(){
+
+        return this.cache.scrollRect;
+
+    };
+
+})();
 
 
 
