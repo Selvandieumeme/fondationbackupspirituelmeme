@@ -1817,10 +1817,276 @@ CampusWord2007Simulateur.PageFactory={
 
 
 
+    /* ======================================================
+       STATE
+    ====================================================== */
+
+    position: 0,
+    visible: true,
+
+    /* ======================================================
+       INIT CARET (ALWAYS SAFE START)
+    ====================================================== */
+
+    initialize() {
+        this.position = 0;
+        this.visible = true;
+    },
+
+    /* ======================================================
+       SET CARET SAFELY
+       -> never allow invalid position
+    ====================================================== */
+
+    set(position) {
+
+        const text =
+            CampusWord2007Simulateur.DocumentEngine.getFullText();
+
+        this.position = this._clamp(position, 0, text.length);
+
+        this._syncToModel();
+    },
+
+    /* ======================================================
+       MOVE CARET (INSERT MODE SAFE)
+    ====================================================== */
+
+    move(offset) {
+        this.set(this.position + offset);
+    },
+
+    /* ======================================================
+       INSERT TEXT (CRITICAL FIX ZONE)
+    ====================================================== */
+
+    insert(textToInsert) {
+
+        const doc = CampusWord2007Simulateur.DocumentEngine;
+
+        let text = doc.getFullText();
+
+        const before = text.slice(0, this.position);
+        const after = text.slice(this.position);
+
+        const newText = before + textToInsert + after;
+
+        doc.model.sections[0].pages[0]
+            .blocks[0]
+            .runs[0]
+            .text = newText;
+
+        this.position += textToInsert.length;
+
+        doc.triggerChange();
+    },
+
+    /* ======================================================
+       BACKSPACE (NO BUG GUARANTEE)
+    ====================================================== */
+
+    backspace() {
+
+        if (this.position <= 0) return;
+
+        const doc = CampusWord2007Simulateur.DocumentEngine;
+
+        let text = doc.getFullText();
+
+        const before = text.slice(0, this.position - 1);
+        const after = text.slice(this.position);
+
+        const newText = before + after;
+
+        doc.model.sections[0].pages[0]
+            .blocks[0]
+            .runs[0]
+            .text = newText;
+
+        this.position--;
+
+        doc.triggerChange();
+    },
+
+    /* ======================================================
+       FORCE SAFE START (IMPORTANT FOR YOU)
+    ====================================================== */
+
+    resetToStart() {
+        this.position = 0;
+    },
+
+    /* ======================================================
+       FORCE END (FIX YOUR "Je suis Selv[andieu]" ISSUE)
+    ====================================================== */
+
+    resetToEnd() {
+
+        const text =
+            CampusWord2007Simulateur.DocumentEngine.getFullText();
+
+        this.position = text.length;
+    },
+
+    /* ======================================================
+       INTERNAL SYNC TO MODEL
+    ====================================================== */
+
+    _syncToModel() {
+
+        const doc =
+            CampusWord2007Simulateur.DocumentEngine;
+
+        doc.model.caret = {
+            position: this.position
+        };
+
+        doc.triggerChange();
+    },
+
+    /* ======================================================
+       SAFE CLAMP
+    ====================================================== */
+
+    _clamp(v, min, max) {
+        return Math.max(min, Math.min(max, v));
+    }
+};
 
 
 
 
+
+
+
+
+
+
+
+CampusWord2007Simulateur.CaretVisualEngine = {
+
+    caretEl: null,
+    blinkInterval: null,
+
+    visible: true,
+
+    initialize() {
+
+        // create caret element
+        this.caretEl = document.createElement("div");
+
+        this.caretEl.id = "cw-caret";
+        this.caretEl.style.position = "absolute";
+        this.caretEl.style.width = "2px";
+        this.caretEl.style.background = "black";
+        this.caretEl.style.zIndex = "999999";
+        this.caretEl.style.height = "18px";
+        this.caretEl.style.pointerEvents = "none";
+
+        document.body.appendChild(this.caretEl);
+
+        this.startBlink();
+    },
+
+    /* =========================================
+       MAIN UPDATE (CALL THIS ALWAYS)
+    ========================================= */
+
+    update() {
+
+        const doc = CampusWord2007Simulateur.DocumentEngine;
+        const caret = CampusWord2007Simulateur.CaretEngine;
+
+        if (!doc || !caret) return;
+
+        const pos = caret.position;
+
+        const pages = doc.dom.pageContainer;
+
+        if (!pages) return;
+
+        const page = pages.querySelector(".document-page");
+
+        if (!page) return;
+
+        const textLayer = page.querySelector(".page-text-layer");
+
+        if (!textLayer) return;
+
+        // create invisible range for accurate position
+        const range = document.createRange();
+        const textNode = this._getTextNode(textLayer);
+
+        if (!textNode) return;
+
+        const safePos = Math.min(pos, textNode.length);
+
+        range.setStart(textNode, safePos);
+        range.setEnd(textNode, safePos);
+
+        const rect = range.getBoundingClientRect();
+
+        // position caret
+        this.caretEl.style.left = rect.left + window.scrollX + "px";
+        this.caretEl.style.top = rect.top + window.scrollY + "px";
+
+        this.caretEl.style.height = rect.height + "px";
+    },
+
+    /* =========================================
+       BLINK EFFECT (WORD STYLE)
+    ========================================= */
+
+    startBlink() {
+
+        this.blinkInterval = setInterval(() => {
+
+            this.visible = !this.visible;
+
+            this.caretEl.style.opacity =
+                this.visible ? "1" : "0";
+
+        }, 530); // Word 2007 speed
+
+    },
+
+    stopBlink() {
+        clearInterval(this.blinkInterval);
+    },
+
+    /* =========================================
+       TEXT NODE SAFETY
+    ========================================= */
+
+    _getTextNode(container) {
+
+        // simple fallback (you can improve later)
+        const el = container.querySelector(".page-text-layer");
+
+        if (!el) return null;
+
+        if (!el.firstChild) {
+
+            el.textContent = " "; // prevent crash
+        }
+
+        return el.firstChild;
+    }
+};
+
+
+
+
+
+
+
+document.addEventListener("click", () => {
+    CampusWord2007Simulateur.CaretVisualEngine.update();
+});
+
+document.addEventListener("keyup", () => {
+    CampusWord2007Simulateur.CaretVisualEngine.update();
+});
 
 
 
