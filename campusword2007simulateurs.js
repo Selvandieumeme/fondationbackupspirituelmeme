@@ -1319,12 +1319,6 @@ CampusWord2007Simulateur.LoadingEngine = {
 
 
 
-
-
-
-
-
-
 /* ==========================================================
    CAMPUS WORD 2007 SIMULATEUR
    PHASE 3A
@@ -1412,51 +1406,7 @@ CampusWord2007Simulateur.DocumentEngine = {
 
         this.pageContainer.innerHTML="";
 
-        this.createPage();
-
-    },
-
-    createPage(){
-
-        const fragment=
-
-            this.pageTemplate.content.cloneNode(true);
-
-        const page=
-
-            fragment.querySelector(".document-page");
-
-        this.pageCounter++;
-
-        page.dataset.pageNumber=
-
-            this.pageCounter;
-
-        page.id=
-
-            "document-page-"+
-
-            this.pageCounter;
-
-        this.pageContainer.appendChild(
-
-            fragment
-
-        );
-
-        const createdPage=
-
-            this.pageContainer.lastElementChild;
-
-        this.pages.push(createdPage);
-
-        this.activePage=
-
-            createdPage;
-
-        this.updateStatus();
-
-        return createdPage;
+        CampusWord2007Simulateur.PageFactory.createPage();
 
     },
 
@@ -1545,6 +1495,9 @@ CampusWord2007Simulateur.DocumentEngine = {
     }
 
 };
+
+
+
 
 
 
