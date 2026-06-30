@@ -5698,6 +5698,309 @@ CampusWord2007Simulateur.LayoutEngine.CaretPlacement = {
 
 
 
+/* ==========================================================
+   CAMPUS WORD 2007 SIMULATEUR
+   LAYOUT ENGINE
+   PHASE 2.7
+   PUBLIC LAYOUT API
+   ----------------------------------------------------------
+   RESPONSIBILITY
+   • Public entry point of LayoutEngine
+   • Delegate to specialized modules
+   • NO calculations
+   • NO rendering
+   • NO DOM modification
+   ========================================================== */
+
+CampusWord2007Simulateur.LayoutEngine.API = {
+
+    initialized:false,
+
+    initialize(){
+
+        if(this.initialized){
+            return true;
+        }
+
+        this.initialized=true;
+
+        return true;
+
+    },
+
+    /* ======================================================
+       VIEWPORT
+    ====================================================== */
+
+    getViewport(){
+
+        return CampusWord2007Simulateur
+            .LayoutEngine
+            .Viewport
+            .get();
+
+    },
+
+    /* ======================================================
+       PAGE GEOMETRY
+    ====================================================== */
+
+    measurePage(page){
+
+        return CampusWord2007Simulateur
+            .LayoutEngine
+            .Geometry
+            .measure(page);
+
+    },
+
+    /* ======================================================
+       WRITABLE AREA
+    ====================================================== */
+
+    getWritableArea(page){
+
+        CampusWord2007Simulateur
+        .LayoutEngine
+        .WritableArea
+        .calculate(page);
+
+        return CampusWord2007Simulateur
+            .LayoutEngine
+            .WritableArea
+            .get();
+
+    },
+
+    /* ======================================================
+       LINE METRICS
+    ====================================================== */
+
+    getLineMetrics(){
+
+        return CampusWord2007Simulateur
+            .LayoutEngine
+            .LineMetrics
+            .getMetrics();
+
+    },
+
+    /* ======================================================
+       DEFAULT INSERTION POINT
+    ====================================================== */
+
+    getInsertionPoint(page){
+
+        return CampusWord2007Simulateur
+            .LayoutEngine
+            .InsertionPoint
+            .calculate(page);
+
+    },
+
+    /* ======================================================
+       CHARACTER MEASUREMENT
+    ====================================================== */
+
+    measureCharacter(character){
+
+        return CampusWord2007Simulateur
+            .LayoutEngine
+            .CharacterMeasurement
+            .measure(character);
+
+    },
+
+    /* ======================================================
+       CARET AFTER CHARACTER
+    ====================================================== */
+
+    afterCharacter(character){
+
+        return CampusWord2007Simulateur
+            .LayoutEngine
+            .CaretPlacement
+            .afterCharacter(character);
+
+    },
+
+    /* ======================================================
+       CARET BEFORE CHARACTER
+    ====================================================== */
+
+    beforeCharacter(character){
+
+        return CampusWord2007Simulateur
+            .LayoutEngine
+            .CaretPlacement
+            .beforeCharacter(character);
+
+    },
+
+    /* ======================================================
+       EMPTY LINE
+    ====================================================== */
+
+    emptyLine(paragraph){
+
+        return CampusWord2007Simulateur
+            .LayoutEngine
+            .CaretPlacement
+            .emptyLine(paragraph);
+
+    },
+
+    /* ======================================================
+       AFTER ENTER
+    ====================================================== */
+
+    afterEnter(paragraph){
+
+        return CampusWord2007Simulateur
+            .LayoutEngine
+            .CaretPlacement
+            .afterEnter(paragraph);
+
+    },
+
+    /* ======================================================
+       NEW PAGE
+    ====================================================== */
+
+    newPage(page){
+
+        return CampusWord2007Simulateur
+            .LayoutEngine
+            .CaretPlacement
+            .newPage(page);
+
+    },
+
+    /* ======================================================
+       CURRENT CURSOR
+    ====================================================== */
+
+    getCursor(){
+
+        return CampusWord2007Simulateur
+            .LayoutEngine
+            .Cursor
+            .get();
+
+    },
+
+    setCursor(position){
+
+        return CampusWord2007Simulateur
+            .LayoutEngine
+            .Cursor
+            .set(position);
+
+    },
+
+    /* ======================================================
+       PAGE FLOW
+    ====================================================== */
+
+    shouldCreatePage(page, paragraph){
+
+        return CampusWord2007Simulateur
+            .LayoutEngine
+            .PageFlowManager
+            .shouldCreatePage(
+                page,
+                paragraph
+            );
+
+    },
+
+    /* ======================================================
+       PARAGRAPH FLOW
+    ====================================================== */
+
+    getParagraphSpacing(){
+
+        return CampusWord2007Simulateur
+            .LayoutEngine
+            .ParagraphFlowManager
+            .getParagraphSpacing();
+
+    },
+
+    getFirstLineIndent(){
+
+        return CampusWord2007Simulateur
+            .LayoutEngine
+            .ParagraphFlowManager
+            .getFirstLineIndent();
+
+    },
+
+    getLeftIndent(){
+
+        return CampusWord2007Simulateur
+            .LayoutEngine
+            .ParagraphFlowManager
+            .getLeftIndent();
+
+    },
+
+    getRightIndent(){
+
+        return CampusWord2007Simulateur
+            .LayoutEngine
+            .ParagraphFlowManager
+            .getRightIndent();
+
+    },
+
+    /* ======================================================
+       RESET
+    ====================================================== */
+
+    reset(){
+
+        if(
+            CampusWord2007Simulateur
+            .LayoutEngine
+            .Cursor &&
+            typeof CampusWord2007Simulateur
+                .LayoutEngine
+                .Cursor
+                .reset==="function"
+        ){
+
+            CampusWord2007Simulateur
+            .LayoutEngine
+            .Cursor
+            .reset();
+
+        }
+
+    },
+
+    destroy(){
+
+        this.reset();
+
+        this.initialized=false;
+
+    }
+
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
