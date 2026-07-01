@@ -2384,23 +2384,3 @@ body{
 
 
 
-
-
-#document-pages-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-
-/* chak paj (active + generated) */
-#document-page,
-.generated-page {
-    margin-bottom: 30px;
-}
-
-/* asire paj yo pa kraze layout la */
-#document-page-wrapper {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
