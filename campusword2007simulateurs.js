@@ -6011,133 +6011,57 @@ CampusWord2007Simulateur.LayoutEngine.API = {
 
 
 
-
 /* ==========================================================
    CAMPUS WORD 2007 SIMULATEUR
    CARET ENGINE
    PHASE 1.1
-   FOUNDATION KERNEL
+   SINGLE CARET DOM
    ----------------------------------------------------------
    RESPONSIBILITY
 
-   • Create CaretEngine kernel
-   • Internal state
-   • Public configuration
-   • Runtime flags
-   • Shared references
+   • Create one shared caret element
+   • Return caret reference
+   • Prevent duplicate caret
+   • Destroy caret safely
 
    DOES NOT
 
-   • Create DOM
+   • Calculate position
    • Render caret
+   • Attach to page
    • Blink
-   • Calculate layout
-   • Calculate coordinates
-   • Communicate with TextEngine
+   • Show / Hide
+   • Use LayoutEngine
 
    ========================================================== */
 
 CampusWord2007Simulateur.CaretEngine = {
 
-    /* ======================================================
-       ENGINE INFORMATION
-    ====================================================== */
-
     initialized: false,
 
-    version: "2.0.0",
-
-    build: "Foundation Kernel",
-
-    /* ======================================================
-       ENGINE CONFIGURATION
-    ====================================================== */
+    caret: null,
 
     configuration: {
 
-        width: 1,
-
-        defaultHeight: 19,
-
-        blinkInterval: 530,
-
-        zIndex: 999,
-
-        color: "#000000",
+        id: "document-caret",
 
         className: "document-caret",
 
-        id: "document-caret"
+        width: 1,
+
+        color: "#000000",
+
+        defaultHeight: 19,
+
+        zIndex: 999
 
     },
-
-    /* ======================================================
-       INTERNAL STATE
-    ====================================================== */
-
-    state: {
-
-        visible: false,
-
-        blinking: false,
-
-        attached: false,
-
-        focused: false,
-
-        destroyed: false,
-
-        suspended: false
-
-    },
-
-    /* ======================================================
-       RUNTIME REFERENCES
-    ====================================================== */
-
-    references: {
-
-        page: null,
-
-        layer: null,
-
-        caret: null,
-
-        timer: null
-
-    },
-
-    /* ======================================================
-       SHARED POSITION OBJECT
-
-       Filled ONLY by LayoutEngine.
-    ====================================================== */
-
-    position: {
-
-        x: 0,
-
-        y: 0,
-
-        height: 0,
-
-        pageNumber: 1
-
-    },
-
-    /* ======================================================
-       INITIALIZATION
-    ====================================================== */
 
     initialize() {
 
         if (this.initialized) {
-
             return true;
-
         }
-
-        this.reset();
 
         this.initialized = true;
 
@@ -6145,52 +6069,76 @@ CampusWord2007Simulateur.CaretEngine = {
 
     },
 
-    /* ======================================================
-       RESET RUNTIME STATE
-    ====================================================== */
+    create() {
 
-    reset() {
+        if (this.caret) {
+            return this.caret;
+        }
 
-        this.state.visible = false;
+        const caret = document.createElement("div");
 
-        this.state.blinking = false;
+        caret.id = this.configuration.id;
 
-        this.state.attached = false;
+        caret.className = this.configuration.className;
 
-        this.state.focused = false;
+        caret.setAttribute("aria-hidden", "true");
 
-        this.state.destroyed = false;
+        caret.style.position = "absolute";
 
-        this.state.suspended = false;
+        caret.style.left = "0px";
 
-        this.references.page = null;
+        caret.style.top = "0px";
 
-        this.references.layer = null;
+        caret.style.width =
+            this.configuration.width + "px";
 
-        this.references.caret = null;
+        caret.style.height =
+            this.configuration.defaultHeight + "px";
 
-        this.references.timer = null;
+        caret.style.backgroundColor =
+            this.configuration.color;
 
-        this.position.x = 0;
+        caret.style.display = "none";
 
-        this.position.y = 0;
+        caret.style.pointerEvents = "none";
 
-        this.position.height =
-            this.configuration.defaultHeight;
+        caret.style.userSelect = "none";
 
-        this.position.pageNumber = 1;
+        caret.style.zIndex =
+            this.configuration.zIndex;
+
+        this.caret = caret;
+
+        return this.caret;
 
     },
 
-    /* ======================================================
-       DESTROY
-    ====================================================== */
+    get() {
+
+        return this.caret;
+
+    },
+
+    exists() {
+
+        return this.caret !== null;
+
+    },
 
     destroy() {
 
-        this.reset();
+        if (
+            this.caret &&
+            this.caret.parentNode
+        ) {
 
-        this.state.destroyed = true;
+            this.caret.parentNode.removeChild(
+                this.caret
+            );
+
+        }
+
+        this.caret = null;
 
         this.initialized = false;
 
@@ -6205,131 +6153,168 @@ CampusWord2007Simulateur.CaretEngine = {
 
 
 
+/* ==========================================================
+   CAMPUS WORD 2007 SIMULATEUR
+   CARET ENGINE
+   PHASE 1.2
+   CARET POSITION
+   ----------------------------------------------------------
+   RESPONSIBILITY
 
+   • Store caret position
+   • Validate position payload
+   • Expose current position
 
+   DOES NOT
 
-CampusWord2007Simulateur.CaretEngine.StateManager = {
+   • Calculate coordinates
+   • Render caret
+   • Attach to page
+   • Blink
+   • Use LayoutEngine
+   • Modify DOM
 
-    /* =========================================
-       STATE DEFINITIONS
-    ========================================= */
+   ========================================================== */
 
-    STATES: {
-        IDLE: "idle",
-        ACTIVE: "active",
-        BLINKING: "blinking",
-        HIDDEN: "hidden",
-        SUSPENDED: "suspended",
-        FROZEN: "frozen"
-    },
+CampusWord2007Simulateur.CaretEngine.Position = {
 
-    /* =========================================
-       CURRENT STATE (SINGLE SOURCE OF TRUTH)
-    ========================================= */
+    initialized: false,
 
-    current: "idle",
+    current: null,
 
-    previous: null,
+    initialize() {
 
-    /* =========================================
-       VALID TRANSITIONS MAP
-    ========================================= */
-
-    transitions: {
-        idle: ["active"],
-        active: ["blinking", "hidden", "suspended"],
-        blinking: ["hidden", "suspended"],
-        hidden: ["active", "suspended"],
-        suspended: ["active", "frozen"],
-        frozen: []
-    },
-
-    /* =========================================
-       CHECK IF TRANSITION IS VALID
-    ========================================= */
-
-    canTransition(toState) {
-
-        const allowed = this.transitions[this.current] || [];
-
-        return allowed.includes(toState);
-    },
-
-    /* =========================================
-       SET STATE (CONTROLLED ENTRY POINT)
-    ========================================= */
-
-    setState(newState) {
-
-        if (newState === this.current) {
+        if (this.initialized) {
             return true;
         }
 
-        if (!this.canTransition(newState)) {
-            return false;
-        }
+        this.reset();
 
-        this.previous = this.current;
-        this.current = newState;
+        this.initialized = true;
 
         return true;
+
     },
 
-    /* =========================================
-       GET CURRENT STATE
-    ========================================= */
+    create() {
 
-    getState() {
-        return this.current;
+        return {
+
+            page: null,
+
+            pageNumber: 1,
+
+            x: 0,
+
+            y: 0,
+
+            height: 0,
+
+            baseline: 0
+
+        };
+
     },
 
-    /* =========================================
-       FORCE RESET (ONLY INTERNAL USE)
-    ========================================= */
+    set(position) {
+
+        if (
+            !position ||
+            typeof position !== "object"
+        ) {
+
+            return false;
+
+        }
+
+        if (
+            typeof position.x !== "number" ||
+            typeof position.y !== "number" ||
+            typeof position.height !== "number"
+        ) {
+
+            return false;
+
+        }
+
+        this.current = {
+
+            page:
+                position.page ?? null,
+
+            pageNumber:
+                position.pageNumber ?? 1,
+
+            x:
+                position.x,
+
+            y:
+                position.y,
+
+            height:
+                position.height,
+
+            baseline:
+                position.baseline ?? 0
+
+        };
+
+        return true;
+
+    },
+
+    get() {
+
+        if (!this.current) {
+
+            this.reset();
+
+        }
+
+        return {
+
+            page:
+                this.current.page,
+
+            pageNumber:
+                this.current.pageNumber,
+
+            x:
+                this.current.x,
+
+            y:
+                this.current.y,
+
+            height:
+                this.current.height,
+
+            baseline:
+                this.current.baseline
+
+        };
+
+    },
 
     reset() {
-        this.previous = this.current;
-        this.current = this.STATES.IDLE;
+
+        this.current =
+            this.create();
+
+        return true;
+
     },
 
-    /* =========================================
-       FREEZE SYSTEM (SECURITY / SAFETY MODE)
-    ========================================= */
+    destroy() {
 
-    freeze() {
-        this.previous = this.current;
-        this.current = this.STATES.FROZEN;
-    },
+        this.reset();
 
-    /* =========================================
-       IS ACTIVE CHECK
-    ========================================= */
+        this.initialized = false;
 
-    isActive() {
-        return this.current === this.STATES.ACTIVE;
-    },
+        return true;
 
-    isBlinking() {
-        return this.current === this.STATES.BLINKING;
-    },
-
-    isHidden() {
-        return this.current === this.STATES.HIDDEN;
-    },
-
-    isSuspended() {
-        return this.current === this.STATES.SUSPENDED;
-    },
-
-    isFrozen() {
-        return this.current === this.STATES.FROZEN;
     }
 
 };
-
-
-
-
 
 
 
@@ -6342,204 +6327,31 @@ CampusWord2007Simulateur.CaretEngine.StateManager = {
    CAMPUS WORD 2007 SIMULATEUR
    CARET ENGINE
    PHASE 1.3
-   CARET DOM MANAGER
+   CARET ATTACHMENT
    ----------------------------------------------------------
    RESPONSIBILITY
 
-   • Create single caret DOM element
-   • Store DOM reference
-   • Safe DOM destruction
-   • Prevent duplicate caret
-   • Prevent memory leaks
+   • Attach the shared caret to a page
+   • Move caret between pages
+   • Keep a single caret in the document
 
    DOES NOT
 
+   • Calculate position
    • Render caret
-   • Attach to page
-   • Calculate layout
-   • Calculate coordinates
-   • Blink
-   • Use LayoutEngine
-   ========================================================== */
-
-CampusWord2007Simulateur.CaretEngine.DOMManager = {
-
-    initialized: false,
-
-    /* ======================================================
-       INITIALIZE
-    ====================================================== */
-
-    initialize() {
-
-        if (this.initialized) {
-            return true;
-        }
-
-        this.initialized = true;
-
-        return true;
-
-    },
-
-    /* ======================================================
-       CREATE CARET ELEMENT
-
-       Creates ONE shared DOM element only.
-    ====================================================== */
-
-    create() {
-
-        const engine =
-            CampusWord2007Simulateur.CaretEngine;
-
-        if (engine.references.caret) {
-            return engine.references.caret;
-        }
-
-        const caret =
-            document.createElement("div");
-
-        caret.id =
-            engine.configuration.id;
-
-        caret.className =
-            engine.configuration.className;
-
-        caret.setAttribute(
-            "aria-hidden",
-            "true"
-        );
-
-        caret.style.position = "absolute";
-
-        caret.style.display = "none";
-
-        caret.style.pointerEvents = "none";
-
-        caret.style.userSelect = "none";
-
-        caret.style.width =
-            engine.configuration.width + "px";
-
-        caret.style.height =
-            engine.position.height + "px";
-
-        caret.style.backgroundColor =
-            engine.configuration.color;
-
-        caret.style.zIndex =
-            engine.configuration.zIndex;
-
-        engine.references.caret = caret;
-
-        return caret;
-
-    },
-
-    /* ======================================================
-       GET CARET ELEMENT
-    ====================================================== */
-
-    get() {
-
-        return CampusWord2007Simulateur
-            .CaretEngine
-            .references
-            .caret;
-
-    },
-
-    /* ======================================================
-       CHECK EXISTENCE
-    ====================================================== */
-
-    exists() {
-
-        return !!CampusWord2007Simulateur
-            .CaretEngine
-            .references
-            .caret;
-
-    },
-
-    /* ======================================================
-       DESTROY CARET SAFELY
-    ====================================================== */
-
-    destroy() {
-
-        const engine =
-            CampusWord2007Simulateur.CaretEngine;
-
-        const caret =
-            engine.references.caret;
-
-        if (!caret) {
-            return true;
-        }
-
-        if (caret.parentNode) {
-
-            caret.parentNode.removeChild(
-                caret
-            );
-
-        }
-
-        engine.references.caret = null;
-
-        return true;
-
-    },
-
-    /* ======================================================
-       RESET
-    ====================================================== */
-
-    reset() {
-
-        this.destroy();
-
-    }
-
-};
-
-
-
-
-
-
-/* ==========================================================
-   CAMPUS WORD 2007 SIMULATEUR
-   CARET ENGINE
-   PHASE 1.4
-   CARET RENDERER
-   ----------------------------------------------------------
-   RESPONSIBILITY
-
-   • Apply position to DOM
-   • Apply visual style
-   • Paint only
-
-   DOES NOT
-
-   • Calculate layout
-   • Calculate coordinates
    • Blink
    • Show / Hide
-   • Attach pages
    • Use LayoutEngine
-   • Modify state
+
    ========================================================== */
 
-CampusWord2007Simulateur.CaretEngine.Renderer = {
+CampusWord2007Simulateur.CaretEngine.Attachment = {
 
     initialized: false,
 
-    /* ======================================================
-       INITIALIZE
-    ====================================================== */
+    currentPage: null,
+
+    currentLayer: null,
 
     initialize() {
 
@@ -6553,869 +6365,28 @@ CampusWord2007Simulateur.CaretEngine.Renderer = {
 
     },
 
-    /* ======================================================
-       RENDER
+    attach(page) {
 
-       Paint only.
-    ====================================================== */
-
-    render() {
-
-        const engine =
-            CampusWord2007Simulateur.CaretEngine;
+        if (!(page instanceof HTMLElement)) {
+            return false;
+        }
 
         const caret =
-            engine.references.caret;
+            CampusWord2007Simulateur
+            .CaretEngine
+            .get();
 
         if (!caret) {
             return false;
         }
 
-        caret.style.left =
-            engine.position.x + "px";
-
-        caret.style.top =
-            engine.position.y + "px";
-
-        caret.style.width =
-            engine.configuration.width + "px";
-
-        caret.style.height =
-            engine.position.height + "px";
-
-        caret.style.backgroundColor =
-            engine.configuration.color;
-
-        caret.style.zIndex =
-            engine.configuration.zIndex;
-
-        return true;
-
-    },
-
-    /* ======================================================
-       REFRESH STYLE
-
-       Visual properties only.
-    ====================================================== */
-
-    refreshStyle() {
-
-        const engine =
-            CampusWord2007Simulateur.CaretEngine;
-
-        const caret =
-            engine.references.caret;
-
-        if (!caret) {
-            return false;
-        }
-
-        caret.style.width =
-            engine.configuration.width + "px";
-
-        caret.style.height =
-            engine.position.height + "px";
-
-        caret.style.backgroundColor =
-            engine.configuration.color;
-
-        caret.style.zIndex =
-            engine.configuration.zIndex;
-
-        return true;
-
-    },
-
-    /* ======================================================
-       RESET
-    ====================================================== */
-
-    reset() {
-
-        return true;
-
-    },
-
-    /* ======================================================
-       DESTROY
-    ====================================================== */
-
-    destroy() {
-
-        this.reset();
-
-        this.initialized = false;
-
-        return true;
-
-    }
-
-};
-
-
-
-
-
-
-
-
-
-
-/* ==========================================================
-   CAMPUS WORD 2007 SIMULATEUR
-   CARET ENGINE
-   PHASE 1.5
-   VISIBILITY MANAGER
-   ----------------------------------------------------------
-   RESPONSIBILITY
-
-   • Show caret
-   • Hide caret
-   • Opacity control
-   • Visual visibility rules
-
-   DOES NOT
-
-   • Render
-   • Calculate layout
-   • Calculate coordinates
-   • Blink
-   • Manage focus
-   • Attach pages
-   • Use LayoutEngine
-   • Modify Caret State
-   ========================================================== */
-
-CampusWord2007Simulateur.CaretEngine.VisibilityManager = {
-
-    initialized: false,
-
-    /* ======================================================
-       INITIALIZE
-    ====================================================== */
-
-    initialize() {
-
-        if (this.initialized) {
-            return true;
-        }
-
-        this.initialized = true;
-
-        return true;
-
-    },
-
-    /* ======================================================
-       SHOW
-    ====================================================== */
-
-    show() {
-
-        const engine =
-            CampusWord2007Simulateur.CaretEngine;
-
-        const caret =
-            engine.references.caret;
-
-        if (!caret) {
-            return false;
-        }
-
-        caret.style.display = "block";
-
-        caret.style.visibility = "visible";
-
-        caret.style.opacity = "1";
-
-        return true;
-
-    },
-
-    /* ======================================================
-       HIDE
-    ====================================================== */
-
-    hide() {
-
-        const engine =
-            CampusWord2007Simulateur.CaretEngine;
-
-        const caret =
-            engine.references.caret;
-
-        if (!caret) {
-            return false;
-        }
-
-        caret.style.opacity = "0";
-
-        caret.style.visibility = "hidden";
-
-        caret.style.display = "none";
-
-        return true;
-
-    },
-
-    /* ======================================================
-       SET OPACITY
-    ====================================================== */
-
-    setOpacity(value) {
-
-        const engine =
-            CampusWord2007Simulateur.CaretEngine;
-
-        const caret =
-            engine.references.caret;
-
-        if (!caret) {
-            return false;
-        }
-
-        const opacity =
-            Math.max(
-                0,
-                Math.min(
-                    1,
-                    Number(value)
-                )
+        const layer =
+            page.querySelector(
+                ".page-caret-layer"
             );
-
-        caret.style.opacity =
-            String(opacity);
-
-        return true;
-
-    },
-
-    /* ======================================================
-       APPLY VISIBILITY RULES
-
-       Visual rules only.
-       No state transitions.
-    ====================================================== */
-
-    applyRules() {
-
-        const engine =
-            CampusWord2007Simulateur.CaretEngine;
-
-        const caret =
-            engine.references.caret;
-
-        if (!caret) {
-            return false;
-        }
-
-        if (
-            engine.state.destroyed ||
-            engine.state.suspended
-        ) {
-
-            this.hide();
-
-            return true;
-
-        }
-
-        if (!engine.state.visible) {
-
-            this.hide();
-
-            return true;
-
-        }
-
-        this.show();
-
-        return true;
-
-    },
-
-    /* ======================================================
-       RESET
-    ====================================================== */
-
-    reset() {
-
-        this.hide();
-
-        return true;
-
-    },
-
-    /* ======================================================
-       DESTROY
-    ====================================================== */
-
-    destroy() {
-
-        this.reset();
-
-        this.initialized = false;
-
-        return true;
-
-    }
-
-};
-
-
-
-
-
-
-/* ==========================================================
-   CAMPUS WORD 2007 SIMULATEUR
-   CARET ENGINE
-   PHASE 2.1
-   BLINK MANAGER
-   ----------------------------------------------------------
-   RESPONSIBILITY
-
-   • Interval control
-   • Blink timing engine
-   • Pause / Resume blinking
-   • Internal blink visibility flag
-
-   DOES NOT
-
-   • Touch DOM
-   • Show / Hide caret
-   • Render
-   • Calculate layout
-   • Use LayoutEngine
-   • Manage focus
-   • Attach pages
-   ========================================================== */
-
-CampusWord2007Simulateur.CaretEngine.BlinkManager = {
-
-    initialized: false,
-
-    /* ======================================================
-       INTERNAL BLINK STATE
-    ====================================================== */
-
-    blinkVisible: true,
-
-    running: false,
-
-    paused: false,
-
-    /* ======================================================
-       INITIALIZE
-    ====================================================== */
-
-    initialize() {
-
-        if (this.initialized) {
-            return true;
-        }
-
-        this.stop();
-
-        this.initialized = true;
-
-        return true;
-
-    },
-
-    /* ======================================================
-       START BLINK
-    ====================================================== */
-
-    start() {
-
-        const engine =
-            CampusWord2007Simulateur.CaretEngine;
-
-        if (this.running) {
-            return true;
-        }
-
-        this.running = true;
-
-        this.paused = false;
-
-        this.blinkVisible = true;
-
-        engine.references.timer =
-            window.setInterval(() => {
-
-                if (this.paused) {
-                    return;
-                }
-
-                this.blinkVisible =
-                    !this.blinkVisible;
-
-            }, engine.configuration.blinkInterval);
-
-        return true;
-
-    },
-
-    /* ======================================================
-       STOP BLINK
-    ====================================================== */
-
-    stop() {
-
-        const engine =
-            CampusWord2007Simulateur.CaretEngine;
-
-        if (engine.references.timer !== null) {
-
-            clearInterval(
-                engine.references.timer
-            );
-
-            engine.references.timer = null;
-
-        }
-
-        this.running = false;
-
-        this.paused = false;
-
-        this.blinkVisible = true;
-
-        return true;
-
-    },
-
-    /* ======================================================
-       PAUSE
-    ====================================================== */
-
-    pause() {
-
-        if (!this.running) {
-            return false;
-        }
-
-        this.paused = true;
-
-        return true;
-
-    },
-
-    /* ======================================================
-       RESUME
-    ====================================================== */
-
-    resume() {
-
-        if (!this.running) {
-            return false;
-        }
-
-        this.paused = false;
-
-        return true;
-
-    },
-
-    /* ======================================================
-       CURRENT FLAG
-    ====================================================== */
-
-    isVisible() {
-
-        return this.blinkVisible;
-
-    },
-
-    /* ======================================================
-       IS RUNNING
-    ====================================================== */
-
-    isRunning() {
-
-        return this.running;
-
-    },
-
-    /* ======================================================
-       IS PAUSED
-    ====================================================== */
-
-    isPaused() {
-
-        return this.paused;
-
-    },
-
-    /* ======================================================
-       RESET
-    ====================================================== */
-
-    reset() {
-
-        this.stop();
-
-        return true;
-
-    },
-
-    /* ======================================================
-       DESTROY
-    ====================================================== */
-
-    destroy() {
-
-        this.stop();
-
-        this.initialized = false;
-
-        return true;
-
-    }
-
-};
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/* ==========================================================
-   CAMPUS WORD 2007 SIMULATEUR
-   CARET ENGINE
-   PHASE 2.2
-   FOCUS MANAGER
-   ----------------------------------------------------------
-   RESPONSIBILITY
-
-   • Detect editor focus state
-   • Synchronize with editor focus
-   • Trigger caret activation request
-
-   DOES NOT
-
-   • Show / Hide caret
-   • Render
-   • Blink
-   • Modify Caret State
-   • Attach pages
-   • Calculate layout
-   • Use LayoutEngine
-   • Touch caret DOM
-
-   ========================================================== */
-
-CampusWord2007Simulateur.CaretEngine.FocusManager = {
-
-    initialized: false,
-
-    /* ======================================================
-       INTERNAL STATE
-    ====================================================== */
-
-    focused: false,
-
-    activationRequested: false,
-
-    editor: null,
-
-    boundFocusHandler: null,
-
-    boundBlurHandler: null,
-
-    /* ======================================================
-       INITIALIZE
-    ====================================================== */
-
-    initialize(editorElement) {
-
-        if (this.initialized) {
-            return true;
-        }
-
-        if (!(editorElement instanceof HTMLElement)) {
-            return false;
-        }
-
-        this.editor = editorElement;
-
-        this.boundFocusHandler =
-            this.handleFocus.bind(this);
-
-        this.boundBlurHandler =
-            this.handleBlur.bind(this);
-
-        this.editor.addEventListener(
-            "focus",
-            this.boundFocusHandler
-        );
-
-        this.editor.addEventListener(
-            "blur",
-            this.boundBlurHandler
-        );
-
-        this.initialized = true;
-
-        return true;
-
-    },
-
-    /* ======================================================
-       HANDLE FOCUS
-    ====================================================== */
-
-    handleFocus() {
-
-        this.focused = true;
-
-        this.activationRequested = true;
-
-    },
-
-    /* ======================================================
-       HANDLE BLUR
-    ====================================================== */
-
-    handleBlur() {
-
-        this.focused = false;
-
-        this.activationRequested = false;
-
-    },
-
-    /* ======================================================
-       SYNCHRONIZE
-    ====================================================== */
-
-    synchronize() {
-
-        if (!this.editor) {
-            return false;
-        }
-
-        const hasFocus =
-            document.activeElement === this.editor;
-
-        this.focused = hasFocus;
-
-        this.activationRequested = hasFocus;
-
-        return true;
-
-    },
-
-    /* ======================================================
-       CURRENT FOCUS STATE
-    ====================================================== */
-
-    hasFocus() {
-
-        return this.focused;
-
-    },
-
-    /* ======================================================
-       ACTIVATION REQUEST
-    ====================================================== */
-
-    shouldActivateCaret() {
-
-        return this.activationRequested;
-
-    },
-
-    /* ======================================================
-       CLEAR ACTIVATION REQUEST
-    ====================================================== */
-
-    consumeActivationRequest() {
-
-        const requested =
-            this.activationRequested;
-
-        this.activationRequested = false;
-
-        return requested;
-
-    },
-
-    /* ======================================================
-       RESET
-    ====================================================== */
-
-    reset() {
-
-        this.focused = false;
-
-        this.activationRequested = false;
-
-    },
-
-    /* ======================================================
-       DESTROY
-    ====================================================== */
-
-    destroy() {
-
-        if (
-            this.editor &&
-            this.boundFocusHandler
-        ) {
-
-            this.editor.removeEventListener(
-                "focus",
-                this.boundFocusHandler
-            );
-
-        }
-
-        if (
-            this.editor &&
-            this.boundBlurHandler
-        ) {
-
-            this.editor.removeEventListener(
-                "blur",
-                this.boundBlurHandler
-            );
-
-        }
-
-        this.boundFocusHandler = null;
-
-        this.boundBlurHandler = null;
-
-        this.editor = null;
-
-        this.reset();
-
-        this.initialized = false;
-
-        return true;
-
-    }
-
-};
-
-
-
-
-
-
-
-
-
-
-
-
-
-/* ==========================================================
-   CAMPUS WORD 2007 SIMULATEUR
-   CARET ENGINE
-   PHASE 2.3
-   PAGE ATTACHMENT MANAGER
-   ----------------------------------------------------------
-   RESPONSIBILITY
-
-   • Attach caret to page context
-   • Handle multi-page switching
-   • Detach caret cleanly
-   • Update CaretEngine references
-
-   DOES NOT
-
-   • Render caret
-   • Blink
-   • Show / Hide caret
-   • Calculate layout
-   • Calculate coordinates
-   • Call LayoutEngine
-   • Create caret DOM
-   ========================================================== */
-
-CampusWord2007Simulateur.CaretEngine.PageAttachmentManager = {
-
-    initialized: false,
-
-    initialize() {
-
-        if (this.initialized) {
-            return true;
-        }
-
-        this.initialized = true;
-
-        return true;
-
-    },
-
-    /* ======================================================
-       ATTACH TO PAGE
-    ====================================================== */
-
-    attach(pageNumber) {
-
-        if (
-            typeof pageNumber !== "number" ||
-            !Number.isFinite(pageNumber)
-        ) {
-
-            return false;
-
-        }
-
-        const Caret =
-            CampusWord2007Simulateur.CaretEngine;
-
-        const references =
-            Caret.references;
-
-        const caret =
-            references.caret;
-
-        if (!caret) {
-
-            return false;
-
-        }
-
-        const page = document.querySelector(
-
-            '.document-page[data-page-number="' +
-            pageNumber +
-            '"]'
-
-        );
-
-        if (!page) {
-
-            return false;
-
-        }
-
-        const layer = page.querySelector(
-
-            ".page-caret-layer"
-
-        );
 
         if (!layer) {
-
             return false;
-
         }
 
         if (
@@ -7439,28 +6410,20 @@ CampusWord2007Simulateur.CaretEngine.PageAttachmentManager = {
 
         }
 
-        references.page = page;
+        this.currentPage = page;
 
-        references.layer = layer;
+        this.currentLayer = layer;
 
         return true;
 
     },
 
-    /* ======================================================
-       DETACH
-    ====================================================== */
-
     detach() {
 
-        const Caret =
-            CampusWord2007Simulateur.CaretEngine;
-
-        const references =
-            Caret.references;
-
         const caret =
-            references.caret;
+            CampusWord2007Simulateur
+            .CaretEngine
+            .get();
 
         if (
             caret &&
@@ -7473,64 +6436,43 @@ CampusWord2007Simulateur.CaretEngine.PageAttachmentManager = {
 
         }
 
-        references.page = null;
+        this.currentPage = null;
 
-        references.layer = null;
+        this.currentLayer = null;
 
         return true;
 
     },
 
-    /* ======================================================
-       CURRENT PAGE
-    ====================================================== */
-
     getPage() {
 
-        return CampusWord2007Simulateur
-            .CaretEngine
-            .references
-            .page;
+        return this.currentPage;
 
     },
-
-    /* ======================================================
-       CURRENT LAYER
-    ====================================================== */
 
     getLayer() {
 
-        return CampusWord2007Simulateur
-            .CaretEngine
-            .references
-            .layer;
+        return this.currentLayer;
 
     },
-
-    /* ======================================================
-       IS ATTACHED
-    ====================================================== */
 
     isAttached() {
 
-        const references =
+        const caret =
             CampusWord2007Simulateur
             .CaretEngine
-            .references;
+            .get();
 
         return !!(
-            references.page &&
-            references.layer &&
-            references.caret &&
-            references.caret.parentNode ===
-                references.layer
+
+            caret &&
+            this.currentLayer &&
+            caret.parentNode ===
+            this.currentLayer
+
         );
 
     },
-
-    /* ======================================================
-       DESTROY
-    ====================================================== */
 
     destroy() {
 
@@ -7553,463 +6495,6 @@ CampusWord2007Simulateur.CaretEngine.PageAttachmentManager = {
 
 
 
-/* ==========================================================
-   CAMPUS WORD 2007 SIMULATEUR
-   CARET ENGINE
-   PHASE 2.4
-   LAYOUTENGINE INTEGRATION
-   ----------------------------------------------------------
-   RESPONSIBILITY
-
-   • Accept position from LayoutEngine
-   • Validate payload
-   • Reject invalid payload
-   • Synchronize Caret position safely
-
-   DOES NOT
-
-   • Call LayoutEngine
-   • Calculate coordinates
-   • Render caret
-   • Blink
-   • Show / Hide
-   • Attach pages
-   • Modify DOM
-   ========================================================== */
-
-CampusWord2007Simulateur.CaretEngine.LayoutIntegration = {
-
-    initialized: false,
-
-    lastPayload: null,
-
-    initialize() {
-
-        if (this.initialized) {
-            return true;
-        }
-
-        this.initialized = true;
-
-        return true;
-
-    },
-
-    /* ======================================================
-       VALIDATE PAYLOAD
-    ====================================================== */
-
-    validate(payload) {
-
-        if (
-            !payload ||
-            typeof payload !== "object"
-        ) {
-            return false;
-        }
-
-        if (
-            typeof payload.x !== "number" ||
-            !Number.isFinite(payload.x)
-        ) {
-            return false;
-        }
-
-        if (
-            typeof payload.y !== "number" ||
-            !Number.isFinite(payload.y)
-        ) {
-            return false;
-        }
-
-        if (
-            typeof payload.height !== "number" ||
-            !Number.isFinite(payload.height)
-        ) {
-            return false;
-        }
-
-        if (
-            typeof payload.pageNumber !== "number" ||
-            !Number.isFinite(payload.pageNumber)
-        ) {
-            return false;
-        }
-
-        return true;
-
-    },
-
-    /* ======================================================
-       SYNCHRONIZE
-    ====================================================== */
-
-    synchronize(payload) {
-
-        if (
-            !this.validate(payload)
-        ) {
-
-            return false;
-
-        }
-
-        const Caret =
-            CampusWord2007Simulateur.CaretEngine;
-
-        Caret.position.x =
-            payload.x;
-
-        Caret.position.y =
-            payload.y;
-
-        Caret.position.height =
-            payload.height;
-
-        Caret.position.pageNumber =
-            payload.pageNumber;
-
-        this.lastPayload = {
-
-            x: payload.x,
-
-            y: payload.y,
-
-            height: payload.height,
-
-            pageNumber: payload.pageNumber
-
-        };
-
-        return true;
-
-    },
-
-    /* ======================================================
-       LAST PAYLOAD
-    ====================================================== */
-
-    getLastPayload() {
-
-        if (!this.lastPayload) {
-            return null;
-        }
-
-        return {
-
-            x: this.lastPayload.x,
-
-            y: this.lastPayload.y,
-
-            height: this.lastPayload.height,
-
-            pageNumber: this.lastPayload.pageNumber
-
-        };
-
-    },
-
-    /* ======================================================
-       RESET
-    ====================================================== */
-
-    reset() {
-
-        this.lastPayload = null;
-
-        return true;
-
-    },
-
-    /* ======================================================
-       DESTROY
-    ====================================================== */
-
-    destroy() {
-
-        this.reset();
-
-        this.initialized = false;
-
-        return true;
-
-    }
-
-};
-
-
-
-
-
-
-
-/* ==========================================================
-   CAMPUS WORD 2007 SIMULATEUR
-   CARET ENGINE
-   PHASE 2.5
-   PUBLIC CARET API
-   ----------------------------------------------------------
-   RESPONSIBILITY
-
-   • Expose stable public API
-   • Hide internal modules
-   • Safe access only
-
-   DOES NOT
-
-   • Calculate coordinates
-   • Render directly
-   • Blink directly
-   • Attach pages directly
-   • Call LayoutEngine directly
-   • Modify DOM directly
-
-   ========================================================== */
-
-CampusWord2007Simulateur.CaretEngine.API = {
-
-    initialized: false,
-
-    initialize() {
-
-        if (this.initialized) {
-            return true;
-        }
-
-        this.initialized = true;
-
-        return true;
-
-    },
-
-    /* ======================================================
-       POSITION
-    ====================================================== */
-
-    setPosition(position) {
-
-        const integration =
-            CampusWord2007Simulateur
-                .CaretEngine
-                .LayoutIntegration;
-
-        if (
-            !integration ||
-            typeof integration.synchronize !== "function"
-        ) {
-
-            return false;
-
-        }
-
-        return integration.synchronize(position);
-
-    },
-
-    getPosition() {
-
-        return Object.assign(
-            {},
-            CampusWord2007Simulateur
-                .CaretEngine
-                .position
-        );
-
-    },
-
-    /* ======================================================
-       PAGE
-    ====================================================== */
-
-    attachToPage(pageNumber) {
-
-        return CampusWord2007Simulateur
-            .CaretEngine
-            .PageAttachmentManager
-            .attach(pageNumber);
-
-    },
-
-    detachFromPage() {
-
-        return CampusWord2007Simulateur
-            .CaretEngine
-            .PageAttachmentManager
-            .detach();
-
-    },
-
-    /* ======================================================
-       RENDER
-    ====================================================== */
-
-    render() {
-
-        return CampusWord2007Simulateur
-            .CaretEngine
-            .Renderer
-            .render();
-
-    },
-
-    /* ======================================================
-       VISIBILITY
-    ====================================================== */
-
-    show() {
-
-        return CampusWord2007Simulateur
-            .CaretEngine
-            .VisibilityManager
-            .show();
-
-    },
-
-    hide() {
-
-        return CampusWord2007Simulateur
-            .CaretEngine
-            .VisibilityManager
-            .hide();
-
-    },
-
-    /* ======================================================
-       BLINK
-    ====================================================== */
-
-    startBlink() {
-
-        return CampusWord2007Simulateur
-            .CaretEngine
-            .BlinkManager
-            .start();
-
-    },
-
-    stopBlink() {
-
-        return CampusWord2007Simulateur
-            .CaretEngine
-            .BlinkManager
-            .stop();
-
-    },
-
-    pauseBlink() {
-
-        return CampusWord2007Simulateur
-            .CaretEngine
-            .BlinkManager
-            .pause();
-
-    },
-
-    resumeBlink() {
-
-        return CampusWord2007Simulateur
-            .CaretEngine
-            .BlinkManager
-            .resume();
-
-    },
-
-    /* ======================================================
-       FOCUS
-    ====================================================== */
-
-    hasFocus() {
-
-        return CampusWord2007Simulateur
-            .CaretEngine
-            .FocusManager
-            .hasFocus();
-
-    },
-
-    synchronizeFocus() {
-
-        return CampusWord2007Simulateur
-            .CaretEngine
-            .FocusManager
-            .synchronize();
-
-    },
-
-    /* ======================================================
-       STATE
-    ====================================================== */
-
-    getState() {
-
-        return CampusWord2007Simulateur
-            .CaretEngine
-            .StateManager
-            .getState();
-
-    },
-
-    /* ======================================================
-       ATTACHMENT
-    ====================================================== */
-
-    isAttached() {
-
-        return CampusWord2007Simulateur
-            .CaretEngine
-            .PageAttachmentManager
-            .isAttached();
-
-    },
-
-    /* ======================================================
-       DOM
-    ====================================================== */
-
-    getCaretElement() {
-
-        return CampusWord2007Simulateur
-            .CaretEngine
-            .DOMManager
-            .get();
-
-    },
-
-    /* ======================================================
-       RESET
-    ====================================================== */
-
-    reset() {
-
-        CampusWord2007Simulateur
-            .CaretEngine
-            .BlinkManager
-            .stop();
-
-        CampusWord2007Simulateur
-            .CaretEngine
-            .VisibilityManager
-            .hide();
-
-        return true;
-
-    },
-
-    /* ======================================================
-       DESTROY
-    ====================================================== */
-
-    destroy() {
-
-        this.reset();
-
-        this.initialized = false;
-
-        return true;
-
-    }
-
-};
 
 
 
