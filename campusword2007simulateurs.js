@@ -6687,11 +6687,6 @@ CampusWord2007Simulateur.CaretEngine.Renderer = {
 
 
 
-
-
-
-
-
 /* ==========================================================
    CAMPUS WORD 2007 SIMULATEUR
    CARET ENGINE
@@ -6701,17 +6696,16 @@ CampusWord2007Simulateur.CaretEngine.Renderer = {
    RESPONSIBILITY
 
    • Receive position from LayoutEngine
-   • Update Position
+   • Update Caret Position
    • Attach caret to page
    • Render caret
-   • Show / Hide caret
+   • Display caret
 
    DOES NOT
 
    • Calculate coordinates
-   • Call LayoutEngine
+   • Modify LayoutEngine
    • Blink
-
    ========================================================== */
 
 CampusWord2007Simulateur.CaretEngine.Controller = {
@@ -6733,32 +6727,35 @@ CampusWord2007Simulateur.CaretEngine.Controller = {
     update(position) {
 
         if (
-            !position ||
-            typeof position !== "object"
+            !CampusWord2007Simulateur
+                .CaretEngine
+                .Position
+                .set(position)
         ) {
+
             return false;
+
         }
 
         const engine =
             CampusWord2007Simulateur
-            .CaretEngine;
+                .CaretEngine;
+
+        const current =
+            engine.Position.get();
 
         if (
-            !engine.Position.set(position)
-        ) {
-            return false;
-        }
-
-        if (
-            typeof position.pageNumber === "number"
+            current.page instanceof HTMLElement
         ) {
 
             if (
                 !engine.Attachment.attach(
-                    position.pageNumber
+                    current.page
                 )
             ) {
+
                 return false;
+
             }
 
         }
@@ -6766,7 +6763,9 @@ CampusWord2007Simulateur.CaretEngine.Controller = {
         if (
             !engine.Renderer.render()
         ) {
+
             return false;
+
         }
 
         return engine.Renderer.show();
@@ -6793,6 +6792,13 @@ CampusWord2007Simulateur.CaretEngine.Controller = {
     }
 
 };
+
+
+
+
+
+
+
 
 
 
