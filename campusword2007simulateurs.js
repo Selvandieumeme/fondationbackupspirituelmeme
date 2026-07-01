@@ -5672,6 +5672,155 @@ CampusWord2007Simulateur.LayoutEngine.API = {
 
 
 
+/* ==========================================================
+   CAMPUS WORD 2007 SIMULATEUR
+   LAYOUT ENGINE
+   PHASE 2.8
+   CARET ENGINE BRIDGE
+========================================================== */
+
+CampusWord2007Simulateur.LayoutEngine.CaretBridge = {
+
+    initialized: false,
+
+    initialize() {
+
+        if (this.initialized) {
+            return true;
+        }
+
+        this.initialized = true;
+        return true;
+
+    },
+
+    /* ======================================================
+       PLACE CARET FROM RESOLVER RESULT
+    ====================================================== */
+
+    apply(position) {
+
+        if (!position || position.valid === false) {
+            return false;
+        }
+
+        const Cursor =
+            CampusWord2007Simulateur
+            .LayoutEngine
+            .Cursor;
+
+        if (!Cursor || !Cursor.set) {
+            return false;
+        }
+
+        Cursor.set({
+
+            page: position.page || null,
+            pageIndex: position.pageIndex ?? -1,
+
+            paragraph: position.paragraph || null,
+            paragraphIndex: position.paragraphIndex ?? -1,
+
+            line: position.line || null,
+            lineIndex: position.lineIndex ?? -1,
+
+            character: position.character || null,
+            characterIndex: position.characterIndex ?? -1,
+
+            x: position.x || 0,
+            y: position.y || 0,
+
+            baseline: position.baseline || 0,
+            height: position.height || 0
+
+        });
+
+        return true;
+
+    },
+
+    /* ======================================================
+       APPLY VIA CARET PLACEMENT API
+    ====================================================== */
+
+    fromCharacter(character, mode = "after") {
+
+        const Placement =
+            CampusWord2007Simulateur
+            .LayoutEngine
+            .CaretPlacement;
+
+        if (!Placement) {
+            return false;
+        }
+
+        const result =
+            mode === "before"
+                ? Placement.beforeCharacter(character)
+                : Placement.afterCharacter(character);
+
+        return this.apply(result);
+
+    },
+
+    fromEmptyLine(paragraph) {
+
+        const Placement =
+            CampusWord2007Simulateur
+            .LayoutEngine
+            .CaretPlacement;
+
+        if (!Placement) {
+            return false;
+        }
+
+        return this.apply(
+            Placement.emptyLine(paragraph)
+        );
+
+    },
+
+    fromEnter(paragraph) {
+
+        const Placement =
+            CampusWord2007Simulateur
+            .LayoutEngine
+            .CaretPlacement;
+
+        if (!Placement) {
+            return false;
+        }
+
+        return this.apply(
+            Placement.afterEnter(paragraph)
+        );
+
+    },
+
+    fromNewPage(page) {
+
+        const Placement =
+            CampusWord2007Simulateur
+            .LayoutEngine
+            .CaretPlacement;
+
+        if (!Placement) {
+            return false;
+        }
+
+        return this.apply(
+            Placement.newPage(page)
+        );
+
+    },
+
+    destroy() {
+
+        this.initialized = false;
+
+    }
+
+};
 
 
 
@@ -5710,6 +5859,81 @@ CampusWord2007Simulateur.LayoutEngine.API = {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+CampusWord2007Simulateur.UI = CampusWord2007Simulateur.UI || {};
+
+CampusWord2007Simulateur.UI.Caret = {
+
+    el: null,
+
+    initialize() {
+
+        if (this.el) return true;
+
+        const div = document.createElement("div");
+
+        div.style.position = "absolute";
+        div.style.width = "2px";
+        div.style.background = "black";
+        div.style.zIndex = "9999";
+        div.style.pointerEvents = "none";
+
+        document.body.appendChild(div);
+
+        this.el = div;
+
+        return true;
+
+    },
+
+    render() {
+
+        const Cursor =
+            CampusWord2007Simulateur
+            .LayoutEngine
+            .Cursor;
+
+        if (!Cursor) return;
+
+        const pos = Cursor.get();
+
+        if (!pos) return;
+
+        this.el.style.left = pos.x + "px";
+        this.el.style.top = pos.y + "px";
+        this.el.style.height = (pos.height || 18) + "px";
+
+    },
+
+    startAutoRender() {
+
+        const loop = () => {
+
+            this.render();
+
+            requestAnimationFrame(loop);
+
+        };
+
+        loop();
+
+    }
+
+};
 
 
 
