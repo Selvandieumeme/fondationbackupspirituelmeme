@@ -6923,8 +6923,179 @@ CampusWord2007Simulateur.CaretEngine.PageAttachmentManager = {
 
 
 
+/* ==========================================================
+   CAMPUS WORD 2007 SIMULATEUR
+   CARET ENGINE
+   PHASE 1.6
+   VISIBILITY MANAGER
+   ----------------------------------------------------------
+   RESPONSIBILITY
+
+   • Show caret
+   • Hide caret
+
+   DOES NOT
+
+   • Calculate position
+   • Render caret
+   • Blink
+   • Attach page
+   • Call LayoutEngine
+   ========================================================== */
+
+CampusWord2007Simulateur.CaretEngine.VisibilityManager = {
+
+    initialized: false,
+
+    initialize() {
+
+        if (this.initialized) {
+            return true;
+        }
+
+        this.initialized = true;
+
+        return true;
+
+    },
+
+    show() {
+
+        const caret =
+            CampusWord2007Simulateur
+            .CaretEngine
+            .references
+            .caret;
+
+        if (!caret) {
+            return false;
+        }
+
+        caret.style.display = "block";
+        caret.style.visibility = "visible";
+        caret.style.opacity = "1";
+
+        return true;
+
+    },
+
+    hide() {
+
+        const caret =
+            CampusWord2007Simulateur
+            .CaretEngine
+            .references
+            .caret;
+
+        if (!caret) {
+            return false;
+        }
+
+        caret.style.display = "none";
+        caret.style.visibility = "hidden";
+        caret.style.opacity = "0";
+
+        return true;
+
+    },
+
+    destroy() {
+
+        this.hide();
+
+        this.initialized = false;
+
+    }
+
+};
 
 
+
+
+
+
+
+
+
+/* ==========================================================
+   CAMPUS WORD 2007 SIMULATEUR
+   CARET ENGINE
+   PHASE 1.7
+   CARET CONTROLLER
+   ----------------------------------------------------------
+   RESPONSIBILITY
+
+   • Receive LayoutEngine position
+   • Update CaretPosition
+   • Attach caret to page
+   • Render caret
+   • Show caret
+
+   DOES NOT
+
+   • Calculate coordinates
+   • Call LayoutEngine
+   • Blink
+   ========================================================== */
+
+CampusWord2007Simulateur.CaretEngine.Controller = {
+
+    initialized: false,
+
+    initialize() {
+
+        if (this.initialized) {
+            return true;
+        }
+
+        this.initialized = true;
+
+        return true;
+
+    },
+
+    update(position) {
+
+        if (!position) {
+            return false;
+        }
+
+        const Engine =
+            CampusWord2007Simulateur
+            .CaretEngine;
+
+        Engine.CaretPosition.set(position);
+
+        Engine.PageAttachmentManager.attach(
+            position.pageNumber
+        );
+
+        Engine.Renderer.render();
+
+        Engine.VisibilityManager.show();
+
+        return true;
+
+    },
+
+    hide() {
+
+        return CampusWord2007Simulateur
+            .CaretEngine
+            .VisibilityManager
+            .hide();
+
+    },
+
+    destroy() {
+
+        this.hide();
+
+        this.initialized = false;
+
+    }
+
+};
 
 
 
