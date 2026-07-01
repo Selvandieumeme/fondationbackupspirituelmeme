@@ -7553,6 +7553,195 @@ CampusWord2007Simulateur.CaretEngine.PageAttachmentManager = {
 
 
 
+/* ==========================================================
+   CAMPUS WORD 2007 SIMULATEUR
+   CARET ENGINE
+   PHASE 2.4
+   LAYOUTENGINE INTEGRATION
+   ----------------------------------------------------------
+   RESPONSIBILITY
+
+   • Accept position from LayoutEngine
+   • Validate payload
+   • Reject invalid payload
+   • Synchronize Caret position safely
+
+   DOES NOT
+
+   • Call LayoutEngine
+   • Calculate coordinates
+   • Render caret
+   • Blink
+   • Show / Hide
+   • Attach pages
+   • Modify DOM
+   ========================================================== */
+
+CampusWord2007Simulateur.CaretEngine.LayoutIntegration = {
+
+    initialized: false,
+
+    lastPayload: null,
+
+    initialize() {
+
+        if (this.initialized) {
+            return true;
+        }
+
+        this.initialized = true;
+
+        return true;
+
+    },
+
+    /* ======================================================
+       VALIDATE PAYLOAD
+    ====================================================== */
+
+    validate(payload) {
+
+        if (
+            !payload ||
+            typeof payload !== "object"
+        ) {
+            return false;
+        }
+
+        if (
+            typeof payload.x !== "number" ||
+            !Number.isFinite(payload.x)
+        ) {
+            return false;
+        }
+
+        if (
+            typeof payload.y !== "number" ||
+            !Number.isFinite(payload.y)
+        ) {
+            return false;
+        }
+
+        if (
+            typeof payload.height !== "number" ||
+            !Number.isFinite(payload.height)
+        ) {
+            return false;
+        }
+
+        if (
+            typeof payload.pageNumber !== "number" ||
+            !Number.isFinite(payload.pageNumber)
+        ) {
+            return false;
+        }
+
+        return true;
+
+    },
+
+    /* ======================================================
+       SYNCHRONIZE
+    ====================================================== */
+
+    synchronize(payload) {
+
+        if (
+            !this.validate(payload)
+        ) {
+
+            return false;
+
+        }
+
+        const Caret =
+            CampusWord2007Simulateur.CaretEngine;
+
+        Caret.position.x =
+            payload.x;
+
+        Caret.position.y =
+            payload.y;
+
+        Caret.position.height =
+            payload.height;
+
+        Caret.position.pageNumber =
+            payload.pageNumber;
+
+        this.lastPayload = {
+
+            x: payload.x,
+
+            y: payload.y,
+
+            height: payload.height,
+
+            pageNumber: payload.pageNumber
+
+        };
+
+        return true;
+
+    },
+
+    /* ======================================================
+       LAST PAYLOAD
+    ====================================================== */
+
+    getLastPayload() {
+
+        if (!this.lastPayload) {
+            return null;
+        }
+
+        return {
+
+            x: this.lastPayload.x,
+
+            y: this.lastPayload.y,
+
+            height: this.lastPayload.height,
+
+            pageNumber: this.lastPayload.pageNumber
+
+        };
+
+    },
+
+    /* ======================================================
+       RESET
+    ====================================================== */
+
+    reset() {
+
+        this.lastPayload = null;
+
+        return true;
+
+    },
+
+    /* ======================================================
+       DESTROY
+    ====================================================== */
+
+    destroy() {
+
+        this.reset();
+
+        this.initialized = false;
+
+        return true;
+
+    }
+
+};
+
+
+
+
+
+
 
 
 
