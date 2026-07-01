@@ -2096,117 +2096,6 @@ CampusWord2007Simulateur.LayoutEngine = {
 
 
 
-/* ==========================================================
-   CAMPUS WORD 2007 SIMULATEUR
-   LAYOUT ENGINE
-   PHASE 1.3
-   FIRST INSERTION POINT
-   ----------------------------------------------------------
-   RESPONSIBILITY
-   • Calculate first writable position
-   • Return logical caret coordinates
-   • Store current caret position
-   • Dynamic API
-   ----------------------------------------------------------
-   DOES NOT
-   ✘ Render caret
-   ✘ Create DOM
-   ✘ Move caret visually
-========================================================== */
-
-(function(){
-
-    const Layout =
-        CampusWord2007Simulateur.LayoutEngine;
-
-    if(!Layout){
-        return;
-    }
-
-    /* ======================================================
-       CURRENT CARET POSITION
-    ====================================================== */
-
-    Layout.currentCaretPosition = {
-
-        page : null,
-
-        x : 0,
-
-        y : 0
-
-    };
-
-    /* ======================================================
-       FIRST INSERTION POINT
-    ====================================================== */
-
-    Layout.getFirstInsertionPoint = function(page){
-
-        page =
-            page ||
-            Layout.currentPage;
-
-        if(!page){
-            return null;
-        }
-
-        if(
-            typeof Layout.measurePage === "function"
-        ){
-            Layout.measurePage(page);
-        }
-
-        const area =
-            Layout.getWritableArea();
-
-        if(!area){
-            return null;
-        }
-
-        const point = {
-
-            page : page,
-
-            x : Math.round(area.left),
-
-            y : Math.round(area.top)
-
-        };
-
-        Layout.currentCaretPosition = point;
-
-        return point;
-
-    };
-
-    /* ======================================================
-       CURRENT CARET POSITION
-    ====================================================== */
-
-    Layout.getCurrentCaretPosition = function(){
-
-        return {
-
-            page :
-                Layout.currentCaretPosition.page,
-
-            x :
-                Layout.currentCaretPosition.x,
-
-            y :
-                Layout.currentCaretPosition.y
-
-        };
-
-    };
-
-})();
-
-
-
-
-
 
 
 
@@ -2215,7 +2104,7 @@ CampusWord2007Simulateur.LayoutEngine = {
 /* ==========================================================
    CAMPUS WORD 2007 SIMULATEUR
    LAYOUT ENGINE
-   PHASE 1.4
+   PHASE 1.4 (FIXED)
    FIRST INSERTION POINT
    ----------------------------------------------------------
    RESPONSIBILITY
@@ -2224,77 +2113,57 @@ CampusWord2007Simulateur.LayoutEngine = {
    • Use writable area only
    • Return logical caret coordinates
    • Keep page reference
-
-   DOES NOT
-
-   ✘ Create caret
-   ✘ Render caret
-   ✘ Blink
-   ✘ Modify DOM
 ========================================================== */
 
-(function(){
+(function () {
 
     const Layout =
         CampusWord2007Simulateur.LayoutEngine;
 
-    if(!Layout){
-        return;
-    }
+    if (!Layout) return;
 
     /* ======================================================
        FIRST INSERTION POINT
     ====================================================== */
 
-    Layout.getFirstInsertionPoint = function(){
+    Layout.getFirstInsertionPoint = function (page) {
 
-        /* ----------------------------------------------
-           ENSURE PAGE IS MEASURED
-        ---------------------------------------------- */
+        // 🔧 Ensure page is provided
+        page = page || this.current.page;
 
-        if(
-            typeof this.measurePage === "function"
-        ){
-            this.measurePage();
-        }
-
-        /* ----------------------------------------------
-           CURRENT PAGE
-        ---------------------------------------------- */
-
-        const page =
-            this.getCurrentPage();
-
-        if(!page){
+        if (!page) {
             return null;
         }
 
-        /* ----------------------------------------------
-           WRITABLE AREA
-        ---------------------------------------------- */
+        // 🔧 Measure page BEFORE writable area
+        if (typeof this.measurePage === "function") {
+            this.measurePage(page);
+        }
 
+        // 🔧 Writable area safety check
         const area =
-            this.getWritableArea();
+            typeof this.getWritableArea === "function"
+                ? this.getWritableArea()
+                : null;
 
-        if(!area){
+        if (!area) {
             return null;
         }
 
-        /* ----------------------------------------------
-           DEFAULT LINE METRICS
-        ---------------------------------------------- */
-
+        // 🔧 Safe default line metrics
         const lineHeight =
-            Number(this.defaultLineHeight) || 19;
+            (typeof this.defaultLineHeight === "number")
+                ? this.defaultLineHeight
+                : 19;
 
-        const baseline =
+        const baselineOffset =
             Math.round(lineHeight * 0.80);
 
-        /* ----------------------------------------------
-           RETURN LOGICAL POSITION
-        ---------------------------------------------- */
+        // ======================================================
+        // RETURN CARET LOGICAL POSITION
+        // ======================================================
 
-        return{
+        return {
 
             page: page,
 
@@ -2302,11 +2171,9 @@ CampusWord2007Simulateur.LayoutEngine = {
 
             y: Math.round(area.top),
 
-            baseline:
-                Math.round(area.top + baseline),
+            baseline: Math.round(area.top + baselineOffset),
 
-            height:
-                lineHeight
+            height: lineHeight
 
         };
 
@@ -2323,6 +2190,22 @@ CampusWord2007Simulateur.LayoutEngine = {
 
 
 
+
+
+CampusWord2007Simulateur.LayoutEngine.commitCaret = function(page) {
+
+    const pos = this.getFirstInsertionPoint(page);
+
+    if (!pos) return null;
+
+    this.currentCaretPosition = pos;
+
+    if (CampusWord2007Simulateur.CaretEngine?.render) {
+        CampusWord2007Simulateur.CaretEngine.render(pos);
+    }
+
+    return pos;
+};
 
 
 
