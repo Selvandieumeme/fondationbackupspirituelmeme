@@ -3528,36 +3528,106 @@ CampusWord2007Simulateur.LayoutEngine.Viewport = {
 
 
 
+/* ==========================================================
+   CAMPUS WORD 2007 SIMULATEUR
+   LAYOUT ENGINE
+   PHASE 1.3B
+   VIEWPORT METRICS COLLECTOR (CLEAN VERSION)
+========================================================== */
 
+CampusWord2007Simulateur.LayoutEngine.Viewport.refresh = function () {
 
+    if (!this.initialized) {
+        return false;
+    }
 
+    const root =
+        (typeof document !== "undefined")
+            ? document.documentElement
+            : null;
 
+    const body =
+        (typeof document !== "undefined")
+            ? document.body
+            : null;
 
+    const visual =
+        (typeof window !== "undefined")
+            ? window.visualViewport
+            : null;
 
+    if (!root || typeof window === "undefined") {
+        return false;
+    }
 
+    this.metrics.width =
+        window.innerWidth || 0;
 
+    this.metrics.height =
+        window.innerHeight || 0;
 
+    this.metrics.clientWidth =
+        root.clientWidth || 0;
 
+    this.metrics.clientHeight =
+        root.clientHeight || 0;
 
+    this.metrics.scrollWidth =
+        Math.max(
+            root.scrollWidth || 0,
+            body ? (body.scrollWidth || 0) : 0
+        );
 
+    this.metrics.scrollHeight =
+        Math.max(
+            root.scrollHeight || 0,
+            body ? (body.scrollHeight || 0) : 0
+        );
 
+    this.metrics.scrollLeft =
+        window.pageXOffset ||
+        root.scrollLeft ||
+        0;
 
+    this.metrics.scrollTop =
+        window.pageYOffset ||
+        root.scrollTop ||
+        0;
 
+    this.metrics.devicePixelRatio =
+        window.devicePixelRatio || 1;
 
+    this.metrics.orientation =
+        this.metrics.width >= this.metrics.height
+            ? "landscape"
+            : "portrait";
 
+    if (visual) {
 
+        this.metrics.visualViewport = visual;
 
+        this.metrics.scale =
+            visual.scale || 1;
 
+        this.metrics.offsetLeft =
+            visual.offsetLeft || 0;
 
+        this.metrics.offsetTop =
+            visual.offsetTop || 0;
 
+    } else {
 
+        this.metrics.visualViewport = null;
 
+        this.metrics.scale = 1;
 
+        this.metrics.offsetLeft = 0;
 
+        this.metrics.offsetTop = 0;
+    }
 
-
-
-
+    return this.getMetrics();
+};
 
 
 
@@ -3575,183 +3645,143 @@ CampusWord2007Simulateur.LayoutEngine.Viewport = {
    CAMPUS WORD 2007 SIMULATEUR
    LAYOUT ENGINE
    PHASE 2.1
-   CURSOR LAYOUT API
-   ----------------------------------------------------------
-   RESPONSIBILITY
-   • Single source of truth for caret position
-   • Store current caret coordinates
-   • Store next caret coordinates
-   • Public API only
-   • NO calculation
-   • NO DOM manipulation
-   • NO caret movement
-   ========================================================== */
+   CURSOR LAYOUT API (CLEAN VERSION)
+========================================================== */
 
 CampusWord2007Simulateur.LayoutEngine.Cursor = {
 
     initialized: false,
 
     current: {
-
         page: null,
-
         paragraph: null,
-
         line: null,
-
         x: 0,
-
         y: 0
-
     },
 
     next: {
-
         page: null,
-
         paragraph: null,
-
         line: null,
-
         x: 0,
-
         y: 0
-
     },
 
     initialize() {
 
         if (this.initialized) {
-
             return true;
-
         }
 
+        this.reset();
         this.initialized = true;
 
         return true;
-
     },
 
     setCurrent(position) {
 
-        if (!position) {
-
+        if (!position || typeof position !== "object") {
             return false;
-
         }
 
-        Object.assign(
-            this.current,
-            position
-        );
+        Object.assign(this.current, {
+
+            page: position.page ?? this.current.page,
+            paragraph: position.paragraph ?? this.current.paragraph,
+            line: position.line ?? this.current.line,
+            x: Number(position.x) || 0,
+            y: Number(position.y) || 0
+
+        });
 
         return true;
-
     },
 
     setNext(position) {
 
-        if (!position) {
-
+        if (!position || typeof position !== "object") {
             return false;
-
         }
 
-        Object.assign(
-            this.next,
-            position
-        );
+        Object.assign(this.next, {
+
+            page: position.page ?? this.next.page,
+            paragraph: position.paragraph ?? this.next.paragraph,
+            line: position.line ?? this.next.line,
+            x: Number(position.x) || 0,
+            y: Number(position.y) || 0
+
+        });
 
         return true;
-
     },
 
     getCurrent() {
 
         return {
-
             page: this.current.page,
-
             paragraph: this.current.paragraph,
-
             line: this.current.line,
-
             x: this.current.x,
-
             y: this.current.y
-
         };
-
     },
 
     getNext() {
 
         return {
-
             page: this.next.page,
-
             paragraph: this.next.paragraph,
-
             line: this.next.line,
-
             x: this.next.x,
-
             y: this.next.y
-
         };
-
     },
 
     getCurrentX() {
-
         return this.current.x;
-
     },
 
     getCurrentY() {
-
         return this.current.y;
-
     },
 
     getNextX() {
-
         return this.next.x;
-
     },
 
     getNextY() {
-
         return this.next.y;
-
     },
 
     reset() {
 
-        this.current.page = null;
-        this.current.paragraph = null;
-        this.current.line = null;
-        this.current.x = 0;
-        this.current.y = 0;
+        this.current = {
+            page: null,
+            paragraph: null,
+            line: null,
+            x: 0,
+            y: 0
+        };
 
-        this.next.page = null;
-        this.next.paragraph = null;
-        this.next.line = null;
-        this.next.x = 0;
-        this.next.y = 0;
-
+        this.next = {
+            page: null,
+            paragraph: null,
+            line: null,
+            x: 0,
+            y: 0
+        };
     },
 
     destroy() {
 
         this.reset();
-
         this.initialized = false;
-
     }
-
 };
+
 
 
 
@@ -3763,19 +3793,8 @@ CampusWord2007Simulateur.LayoutEngine.Cursor = {
    CAMPUS WORD 2007 SIMULATEUR
    LAYOUT ENGINE
    PHASE 2.2
-   CHARACTER MEASUREMENT
-   ----------------------------------------------------------
-   RESPONSIBILITY
-   • Measure every character
-   • Measure space
-   • Measure tab
-   • Measure current font
-   • Cache measurements
-   • NO text rendering
-   • NO caret movement
-   • NO paragraph calculation
-   • NO DOM layout calculation
-   ========================================================== */
+   CHARACTER MEASUREMENT (CLEAN VERSION)
+========================================================== */
 
 CampusWord2007Simulateur.LayoutEngine.CharacterMeasurement = {
 
@@ -3786,15 +3805,10 @@ CampusWord2007Simulateur.LayoutEngine.CharacterMeasurement = {
     context: null,
 
     currentFont: {
-
         family: "Calibri",
-
         size: 16,
-
         weight: "normal",
-
         style: "normal"
-
     },
 
     cache: Object.create(null),
@@ -3802,9 +3816,11 @@ CampusWord2007Simulateur.LayoutEngine.CharacterMeasurement = {
     initialize() {
 
         if (this.initialized) {
-
             return true;
+        }
 
+        if (typeof document === "undefined") {
+            return false;
         }
 
         this.canvas = document.createElement("canvas");
@@ -3812,171 +3828,116 @@ CampusWord2007Simulateur.LayoutEngine.CharacterMeasurement = {
         this.context = this.canvas.getContext("2d");
 
         if (!this.context) {
-
             return false;
-
         }
 
-        this.updateFont();
+        this.updateFont(this.currentFont);
 
         this.initialized = true;
 
         return true;
-
     },
 
     updateFont(font = {}) {
 
-        if (font.family) {
-
-            this.currentFont.family = font.family;
-
+        if (!this.context) {
+            return false;
         }
 
-        if (font.size) {
+        this.currentFont.family =
+            font.family ?? this.currentFont.family;
 
-            this.currentFont.size = font.size;
+        this.currentFont.size =
+            Number(font.size) || this.currentFont.size;
 
-        }
+        this.currentFont.weight =
+            font.weight ?? this.currentFont.weight;
 
-        if (font.weight) {
+        this.currentFont.style =
+            font.style ?? this.currentFont.style;
 
-            this.currentFont.weight = font.weight;
+        const safeFamily =
+            this.currentFont.family || "Calibri";
 
-        }
+        const safeSize =
+            this.currentFont.size > 0 ? this.currentFont.size : 16;
 
-        if (font.style) {
+        const safeWeight =
+            this.currentFont.weight || "normal";
 
-            this.currentFont.style = font.style;
-
-        }
+        const safeStyle =
+            this.currentFont.style || "normal";
 
         this.context.font =
+            `${safeStyle} ${safeWeight} ${safeSize}px ${safeFamily}`;
 
-            this.currentFont.style + " " +
-
-            this.currentFont.weight + " " +
-
-            this.currentFont.size + "px " +
-
-            this.currentFont.family;
-
+        return true;
     },
 
     clearCache() {
-
         this.cache = Object.create(null);
-
     },
 
     measure(character) {
 
-        if (
-
-            typeof character !== "string" ||
-
-            character.length !== 1
-
-        ) {
-
+        if (!this.context) {
             return 0;
+        }
 
+        if (typeof character !== "string" || character.length !== 1) {
+            return 0;
         }
 
         const key =
+            this.context.font + "::" + character;
 
-            this.context.font +
-
-            "::" +
-
-            character;
-
-        if (
-
-            this.cache[key] !== undefined
-
-        ) {
-
+        if (this.cache[key] !== undefined) {
             return this.cache[key];
-
         }
 
         const width =
-
-            this.context.measureText(
-
-                character
-
-            ).width;
+            this.context.measureText(character).width || 0;
 
         this.cache[key] = width;
 
         return width;
-
     },
 
     measureSpace() {
-
         return this.measure(" ");
-
     },
 
     measureTab(tabSize = 4) {
 
-        return (
+        const space = this.measureSpace();
 
-            this.measureSpace() *
-
-            tabSize
-
-        );
-
+        return space * (Number(tabSize) || 4);
     },
 
     getCurrentFont() {
 
         return {
-
-            family:
-
-                this.currentFont.family,
-
-            size:
-
-                this.currentFont.size,
-
-            weight:
-
-                this.currentFont.weight,
-
-            style:
-
-                this.currentFont.style
-
+            family: this.currentFont.family,
+            size: this.currentFont.size,
+            weight: this.currentFont.weight,
+            style: this.currentFont.style
         };
-
     },
 
     getCharacterWidth(character) {
-
         return this.measure(character);
-
     },
 
     destroy() {
 
         this.canvas = null;
-
         this.context = null;
 
         this.clearCache();
 
         this.initialized = false;
-
     }
-
 };
-
 
 
 
@@ -3988,18 +3949,8 @@ CampusWord2007Simulateur.LayoutEngine.CharacterMeasurement = {
    CAMPUS WORD 2007 SIMULATEUR
    LAYOUT ENGINE
    PHASE 2.3
-   LINE LAYOUT MANAGER
-   ----------------------------------------------------------
-   RESPONSIBILITY
-   • Decide line start
-   • Decide line end
-   • Detect word wrap
-   • Compute line baseline
-   • NO DOM rendering
-   • NO caret movement
-   • NO paragraph creation
-   • NO page creation
-   ========================================================== */
+   LINE LAYOUT MANAGER (CLEAN VERSION)
+========================================================== */
 
 CampusWord2007Simulateur.LayoutEngine.LineLayout = {
 
@@ -4022,185 +3973,144 @@ CampusWord2007Simulateur.LayoutEngine.LineLayout = {
         characterCount: 0,
 
         wrapped: false
-
     },
 
     initialize() {
 
         if (this.initialized) {
-
             return true;
-
         }
 
         this.initialized = true;
 
         return true;
-
     },
 
     begin(availableWidth) {
 
         const InsertionPoint =
-            CampusWord2007Simulateur
-            .LayoutEngine
-            .InsertionPoint;
+            CampusWord2007Simulateur.LayoutEngine.InsertionPoint;
 
         const Metrics =
-            CampusWord2007Simulateur
-            .LayoutEngine
-            .LineMetrics;
+            CampusWord2007Simulateur.LayoutEngine.LineMetrics;
+
+        if (!InsertionPoint || !Metrics) {
+            return null;
+        }
 
         const point =
             InsertionPoint.get();
 
-        this.line.startX = point.x;
-        this.line.endX = point.x;
+        const safeWidth =
+            Number(availableWidth) || 0;
+
+        this.line.startX = point?.x || 0;
+        this.line.endX = point?.x || 0;
 
         this.line.width = 0;
 
-        this.line.availableWidth =
-            availableWidth;
+        this.line.availableWidth = safeWidth;
 
         this.line.baseline =
-            Metrics.getBaseline();
+            (Metrics.getBaseline && Metrics.getBaseline()) || 0;
 
         this.line.characterCount = 0;
 
         this.line.wrapped = false;
 
         return this.getLine();
-
     },
 
     canFit(characterWidth) {
 
+        const width =
+            Number(characterWidth) || 0;
+
         return (
-
-            this.line.width +
-
-            characterWidth <=
-
-            this.line.availableWidth
-
+            this.line.width + width <= this.line.availableWidth
         );
-
     },
 
     append(characterWidth) {
 
-        this.line.width +=
+        const width =
+            Number(characterWidth) || 0;
 
-            characterWidth;
+        this.line.width += width;
 
         this.line.endX =
+            this.line.startX + this.line.width;
 
-            this.line.startX +
-
-            this.line.width;
-
-        this.line.characterCount++;
-
+        this.line.characterCount += 1;
     },
 
     wrap() {
-
         this.line.wrapped = true;
-
     },
 
     nextLine(availableWidth) {
 
-        this.line.index++;
+        this.line.index += 1;
 
-        this.begin(
-
-            availableWidth
-
-        );
-
+        return this.begin(availableWidth);
     },
 
     getLine() {
 
         return {
+            index: this.line.index,
 
-            index:
-                this.line.index,
+            startX: this.line.startX,
+            endX: this.line.endX,
 
-            startX:
-                this.line.startX,
+            width: this.line.width,
+            availableWidth: this.line.availableWidth,
 
-            endX:
-                this.line.endX,
+            baseline: this.line.baseline,
 
-            width:
-                this.line.width,
+            characterCount: this.line.characterCount,
 
-            availableWidth:
-                this.line.availableWidth,
-
-            baseline:
-                this.line.baseline,
-
-            characterCount:
-                this.line.characterCount,
-
-            wrapped:
-                this.line.wrapped
-
+            wrapped: this.line.wrapped
         };
-
     },
 
     getStartX() {
-
         return this.line.startX;
-
     },
 
     getEndX() {
-
         return this.line.endX;
-
     },
 
     getBaseline() {
-
         return this.line.baseline;
-
     },
 
     getWidth() {
-
         return this.line.width;
-
     },
 
     isWrapped() {
-
         return this.line.wrapped;
-
     },
 
     reset() {
 
-        this.line.index = 0;
+        this.line = {
+            index: 0,
 
-        this.line.startX = 0;
+            startX: 0,
+            endX: 0,
 
-        this.line.endX = 0;
+            width: 0,
+            availableWidth: 0,
 
-        this.line.width = 0;
+            baseline: 0,
 
-        this.line.availableWidth = 0;
+            characterCount: 0,
 
-        this.line.baseline = 0;
-
-        this.line.characterCount = 0;
-
-        this.line.wrapped = false;
-
+            wrapped: false
+        };
     },
 
     destroy() {
@@ -4208,10 +4118,9 @@ CampusWord2007Simulateur.LayoutEngine.LineLayout = {
         this.reset();
 
         this.initialized = false;
-
     }
-
 };
+
 
 
 
@@ -4249,13 +4158,9 @@ CampusWord2007Simulateur.LayoutEngine.ParagraphFlow = {
     defaults: {
 
         spaceBefore: 0,
-
         spaceAfter: 0,
-
         firstLineIndent: 0,
-
         leftIndent: 0,
-
         rightIndent: 0
 
     },
@@ -4263,81 +4168,76 @@ CampusWord2007Simulateur.LayoutEngine.ParagraphFlow = {
     current: {
 
         x: 0,
-
         y: 0,
-
         width: 0,
-
         height: 0,
-
         baseline: 0
 
     },
 
     initialize() {
 
-        if (this.initialized) {
-            return true;
-        }
+        if (this.initialized) return true;
 
         this.initialized = true;
 
         return true;
-
     },
 
     compute(options = {}) {
 
+        const LayoutEngine =
+            CampusWord2007Simulateur.LayoutEngine;
+
+        if (!LayoutEngine) return null;
+
+        const WritableArea =
+            LayoutEngine.WritableArea;
+
+        const LineMetrics =
+            LayoutEngine.LineMetrics;
+
+        if (!WritableArea || !LineMetrics) return null;
+
         const writableArea =
-            CampusWord2007Simulateur
-            .LayoutEngine
-            .WritableArea
-            .get();
+            WritableArea.get ? WritableArea.get() : null;
 
         const metrics =
-            CampusWord2007Simulateur
-            .LayoutEngine
-            .LineMetrics
-            .getMetrics();
+            LineMetrics.getMetrics ? LineMetrics.getMetrics() : null;
+
+        if (!writableArea || !metrics) return null;
 
         const config = {
 
             spaceBefore:
-                options.spaceBefore ??
-                this.defaults.spaceBefore,
+                options.spaceBefore ?? this.defaults.spaceBefore,
 
             spaceAfter:
-                options.spaceAfter ??
-                this.defaults.spaceAfter,
+                options.spaceAfter ?? this.defaults.spaceAfter,
 
             firstLineIndent:
-                options.firstLineIndent ??
-                this.defaults.firstLineIndent,
+                options.firstLineIndent ?? this.defaults.firstLineIndent,
 
             leftIndent:
-                options.leftIndent ??
-                this.defaults.leftIndent,
+                options.leftIndent ?? this.defaults.leftIndent,
 
             rightIndent:
-                options.rightIndent ??
-                this.defaults.rightIndent
+                options.rightIndent ?? this.defaults.rightIndent
 
         };
 
-        this.current.x =
-            Math.round(
-                writableArea.left +
-                config.leftIndent +
-                config.firstLineIndent
-            );
+        this.current.x = Math.round(
+            writableArea.left +
+            config.leftIndent +
+            config.firstLineIndent
+        );
 
-        this.current.y =
-            Math.round(
-                writableArea.top +
-                config.spaceBefore
-            );
+        this.current.y = Math.round(
+            writableArea.top +
+            config.spaceBefore
+        );
 
-        this.current.width =
+        const usableWidth =
             Math.max(
                 0,
                 writableArea.width -
@@ -4345,30 +4245,21 @@ CampusWord2007Simulateur.LayoutEngine.ParagraphFlow = {
                 config.rightIndent
             );
 
-        this.current.height =
-            metrics.lineHeight;
-
-        this.current.baseline =
-            metrics.baseline;
+        this.current.width = usableWidth;
+        this.current.height = metrics.lineHeight || 0;
+        this.current.baseline = metrics.baseline || 0;
 
         return this.getCurrent();
-
     },
 
     getCurrent() {
 
         return {
-
             x: this.current.x,
-
             y: this.current.y,
-
             width: this.current.width,
-
             height: this.current.height,
-
             baseline: this.current.baseline
-
         };
 
     },
@@ -4376,14 +4267,11 @@ CampusWord2007Simulateur.LayoutEngine.ParagraphFlow = {
     getNextParagraphPosition() {
 
         return {
-
             x: this.current.x,
-
             y:
                 this.current.y +
                 this.current.height +
                 this.defaults.spaceAfter
-
         };
 
     },
@@ -4391,38 +4279,23 @@ CampusWord2007Simulateur.LayoutEngine.ParagraphFlow = {
     setDefaults(options = {}) {
 
         if (typeof options.spaceBefore === "number") {
-
-            this.defaults.spaceBefore =
-                options.spaceBefore;
-
+            this.defaults.spaceBefore = options.spaceBefore;
         }
 
         if (typeof options.spaceAfter === "number") {
-
-            this.defaults.spaceAfter =
-                options.spaceAfter;
-
+            this.defaults.spaceAfter = options.spaceAfter;
         }
 
         if (typeof options.firstLineIndent === "number") {
-
-            this.defaults.firstLineIndent =
-                options.firstLineIndent;
-
+            this.defaults.firstLineIndent = options.firstLineIndent;
         }
 
         if (typeof options.leftIndent === "number") {
-
-            this.defaults.leftIndent =
-                options.leftIndent;
-
+            this.defaults.leftIndent = options.leftIndent;
         }
 
         if (typeof options.rightIndent === "number") {
-
-            this.defaults.rightIndent =
-                options.rightIndent;
-
+            this.defaults.rightIndent = options.rightIndent;
         }
 
     },
@@ -4440,7 +4313,6 @@ CampusWord2007Simulateur.LayoutEngine.ParagraphFlow = {
     destroy() {
 
         this.reset();
-
         this.initialized = false;
 
     }
@@ -4473,114 +4345,108 @@ CampusWord2007Simulateur.LayoutEngine.ParagraphFlow = {
 
 CampusWord2007Simulateur.LayoutEngine.PageFlow = {
 
-    initialized:false,
+    initialized: false,
 
-    initialize(){
+    initialize() {
 
-        if(this.initialized){
-            return true;
-        }
+        if (this.initialized) return true;
 
-        this.initialized=true;
+        this.initialized = true;
 
         return true;
-
     },
 
-    getDestination(currentPage,nextParagraphHeight){
+    getDestination(currentPage, nextParagraphHeight) {
 
-        if(!currentPage){
-            return null;
-        }
+        if (!currentPage) return null;
 
-        const Limits=
-            CampusWord2007Simulateur
-            .LayoutEngine
-            .PageLimits;
+        const LayoutEngine =
+            CampusWord2007Simulateur.LayoutEngine;
 
-        if(
-            !Limits ||
-            typeof Limits.calculate!=="function"
-        ){
+        const Limits =
+            LayoutEngine.PageLimits;
+
+        if (!Limits || typeof Limits.calculate !== "function") {
             return currentPage;
         }
 
         Limits.calculate(currentPage);
 
-        const pageLimits=
-            Limits.get();
+        const pageLimits =
+            Limits.get ? Limits.get() : null;
 
-        const textLayer=
-            currentPage.querySelector(
-                ".page-text-layer"
-            );
-
-        if(!textLayer){
+        if (!pageLimits) {
             return currentPage;
         }
 
-        const usedHeight=
-            textLayer.scrollHeight;
+        const textLayer =
+            currentPage.querySelector(".page-text-layer");
 
-        const availableHeight=
-            pageLimits.writableHeight;
-
-        if(
-            usedHeight+
-            nextParagraphHeight
-            <=
-            availableHeight
-        ){
+        if (!textLayer) {
             return currentPage;
         }
 
-        const Document=
-            CampusWord2007Simulateur
-            .DocumentEngine;
+        const usedHeight =
+            textLayer.scrollHeight || 0;
 
-        const PageFactory=
-            CampusWord2007Simulateur
-            .PageFactory;
+        const availableHeight =
+            pageLimits.writableHeight || 0;
 
-        const pages=
-            Document.getPages();
+        const neededHeight =
+            nextParagraphHeight || 0;
 
-        const index=
+        if (usedHeight + neededHeight <= availableHeight) {
+            return currentPage;
+        }
+
+        const Document =
+            CampusWord2007Simulateur.DocumentEngine;
+
+        const PageFactory =
+            CampusWord2007Simulateur.PageFactory;
+
+        if (!Document || !PageFactory) {
+            return currentPage;
+        }
+
+        const pages =
+            typeof Document.getPages === "function"
+                ? Document.getPages()
+                : [];
+
+        const index =
             pages.indexOf(currentPage);
 
-        if(
-            index>=0 &&
-            index<pages.length-1
-        ){
-            return pages[index+1];
+        if (index >= 0 && index < pages.length - 1) {
+            return pages[index + 1];
         }
 
-        return PageFactory.createPage();
+        if (typeof PageFactory.createPage === "function") {
+            return PageFactory.createPage();
+        }
+
+        return currentPage;
 
     },
 
-    pageRequired(currentPage,nextParagraphHeight){
+    pageRequired(currentPage, nextParagraphHeight) {
 
-        const page=
-            this.getDestination(
-                currentPage,
-                nextParagraphHeight
-            );
+        const destination =
+            this.getDestination(currentPage, nextParagraphHeight);
 
-        return(
-            page &&
-            page!==currentPage
+        return (
+            destination &&
+            destination !== currentPage
         );
 
     },
 
-    destroy(){
-
-        this.initialized=false;
-
+    destroy() {
+        this.initialized = false;
     }
 
 };
+
 
 
 
@@ -4612,149 +4478,117 @@ CampusWord2007Simulateur.LayoutEngine.PageFlow = {
 
 CampusWord2007Simulateur.LayoutEngine.CaretPosition = {
 
-    initialized:false,
+    initialized: false,
 
-    position:null,
+    position: null,
 
-    initialize(){
+    initialize() {
 
-        if(this.initialized){
-            return true;
-        }
+        if (this.initialized) return true;
 
         this.reset();
 
-        this.initialized=true;
+        this.initialized = true;
 
         return true;
-
     },
 
-    create(){
+    create() {
 
-        return{
-
-            page:null,
-
-            pageIndex:-1,
-
-            paragraph:null,
-
-            paragraphIndex:-1,
-
-            line:null,
-
-            lineIndex:-1,
-
-            character:null,
-
-            characterIndex:-1,
-
-            x:0,
-
-            y:0,
-
-            baseline:0,
-
-            height:0,
-
-            valid:false
-
+        return {
+            page: null,
+            pageIndex: -1,
+            paragraph: null,
+            paragraphIndex: -1,
+            line: null,
+            lineIndex: -1,
+            character: null,
+            characterIndex: -1,
+            x: 0,
+            y: 0,
+            baseline: 0,
+            height: 0,
+            valid: false
         };
 
     },
 
-    reset(){
+    reset() {
 
-        this.position=this.create();
+        this.position = this.create();
+        return this.position;
+
+    },
+
+    set(data = {}) {
+
+        if (!this.position) {
+            this.position = this.create();
+        }
+
+        if (typeof data !== "object") {
+            return this.position;
+        }
+
+        Object.assign(this.position, data);
+
+        this.position.valid = true;
 
         return this.position;
 
     },
 
-    set(data={}){
+    get() {
 
-        if(!this.position){
-            this.position=this.create();
+        if (!this.position) {
+            this.position = this.create();
         }
 
-        Object.assign(
-            this.position,
-            data
-        );
-
-        this.position.valid=true;
-
-        return this.position;
-
-    },
-
-    get(){
-
-        if(!this.position){
-            this.reset();
-        }
-
-        return{
-
-            page:this.position.page,
-
-            pageIndex:this.position.pageIndex,
-
-            paragraph:this.position.paragraph,
-
-            paragraphIndex:this.position.paragraphIndex,
-
-            line:this.position.line,
-
-            lineIndex:this.position.lineIndex,
-
-            character:this.position.character,
-
-            characterIndex:this.position.characterIndex,
-
-            x:this.position.x,
-
-            y:this.position.y,
-
-            baseline:this.position.baseline,
-
-            height:this.position.height,
-
-            valid:this.position.valid
-
+        return {
+            page: this.position.page,
+            pageIndex: this.position.pageIndex,
+            paragraph: this.position.paragraph,
+            paragraphIndex: this.position.paragraphIndex,
+            line: this.position.line,
+            lineIndex: this.position.lineIndex,
+            character: this.position.character,
+            characterIndex: this.position.characterIndex,
+            x: this.position.x,
+            y: this.position.y,
+            baseline: this.position.baseline,
+            height: this.position.height,
+            valid: this.position.valid
         };
 
     },
 
-    invalidate(){
+    invalidate() {
 
-        if(!this.position){
-            return;
-        }
+        if (!this.position) return;
 
-        this.position.valid=false;
+        this.position.valid = false;
 
     },
 
-    isValid(){
+    isValid() {
 
-        return(
+        return !!(
             this.position &&
-            this.position.valid===true
+            this.position.valid === true
         );
 
     },
 
-    destroy(){
+    destroy() {
 
-        this.position=null;
-
-        this.initialized=false;
+        this.position = null;
+        this.initialized = false;
 
     }
 
 };
+
+
 
 
 
@@ -4783,178 +4617,127 @@ CampusWord2007Simulateur.LayoutEngine.CaretPosition = {
 
 CampusWord2007Simulateur.LayoutEngine.CharacterPositionResolver = {
 
-    initialized:false,
+    initialized: false,
 
-    initialize(){
+    initialize() {
 
-        if(this.initialized){
-            return true;
-        }
+        if (this.initialized) return true;
 
-        this.initialized=true;
+        this.initialized = true;
 
         return true;
-
     },
 
-    afterCharacter(character){
-
-        return this.resolve(
-            character,
-            "after"
-        );
-
+    afterCharacter(character) {
+        return this.resolve(character, "after");
     },
 
-    beforeCharacter(character){
-
-        return this.resolve(
-            character,
-            "before"
-        );
-
+    beforeCharacter(character) {
+        return this.resolve(character, "before");
     },
 
-    resolve(character,mode="after"){
+    resolve(character, mode = "after") {
 
-        if(
-            !character ||
-            !character.isConnected
-        ){
+        if (!character || !character.isConnected) {
             return null;
         }
 
-        const page=
-            character.closest(
-                ".document-page"
-            );
+        const LayoutEngine =
+            CampusWord2007Simulateur.LayoutEngine;
 
-        if(!page){
-            return null;
-        }
+        if (!LayoutEngine) return null;
 
-        const paragraph=
+        const LineMetrics =
+            LayoutEngine.LineMetrics;
+
+        const Position =
+            LayoutEngine.CaretPosition;
+
+        if (!LineMetrics || !Position) return null;
+
+        const page =
+            character.closest
+                ? character.closest(".document-page")
+                : null;
+
+        if (!page) return null;
+
+        const paragraph =
             character.parentElement;
 
-        if(!paragraph){
-            return null;
-        }
+        if (!paragraph) return null;
 
-        const layer=
-            page.querySelector(
-                ".page-caret-layer"
-            );
+        const layer =
+            page.querySelector(".page-caret-layer");
 
-        if(!layer){
-            return null;
-        }
+        if (!layer) return null;
 
-        const pageRect=
+        const pageRect =
             page.getBoundingClientRect();
 
-        const layerRect=
+        const layerRect =
             layer.getBoundingClientRect();
 
-        const rect=
+        const rect =
             character.getBoundingClientRect();
 
-        const LineMetrics=
-            CampusWord2007Simulateur
-            .LayoutEngine
-            .LineMetrics;
+        if (!rect || !layerRect) return null;
 
-        const metrics=
-            LineMetrics.getMetrics();
+        const metrics =
+            LineMetrics.getMetrics ? LineMetrics.getMetrics() : null;
 
-        const Position=
-            CampusWord2007Simulateur
-            .LayoutEngine
-            .CaretPosition;
+        if (!metrics) return null;
 
-        const pageIndex=
-            Number(
-                page.dataset.pageNumber || 1
-            )-1;
+        const pageIndex =
+            Number(page.dataset.pageNumber || 1) - 1;
 
-        const paragraphIndex=
-            Array.prototype.indexOf.call(
-                paragraph.parentNode.children,
-                paragraph
-            );
+        const paragraphIndex =
+            paragraph.parentNode
+                ? Array.prototype.indexOf.call(
+                    paragraph.parentNode.children,
+                    paragraph
+                )
+                : -1;
 
-        const characterIndex=
+        const characterIndex =
             Array.prototype.indexOf.call(
                 paragraph.children,
                 character
             );
 
-        const x=
+        const x =
+            mode === "before"
+                ? Math.round(rect.left - layerRect.left)
+                : Math.round(rect.right - layerRect.left);
 
-            mode==="before"
-
-            ?
-
-            Math.round(
-                rect.left-
-                layerRect.left
-            )
-
-            :
-
-            Math.round(
-                rect.right-
-                layerRect.left
-            );
-
-        const y=
-
-            Math.round(
-                rect.top-
-                layerRect.top
-            );
+        const y =
+            Math.round(rect.top - layerRect.top);
 
         Position.set({
-
-            page:page,
-
-            pageIndex:pageIndex,
-
-            paragraph:paragraph,
-
-            paragraphIndex:paragraphIndex,
-
-            line:paragraph,
-
-            lineIndex:0,
-
-            character:character,
-
-            characterIndex:characterIndex,
-
-            x:x,
-
-            y:y,
-
-            baseline:
-                y+
-                metrics.baseline,
-
-            height:
-                rect.height
-
+            page: page,
+            pageIndex: pageIndex,
+            paragraph: paragraph,
+            paragraphIndex: paragraphIndex,
+            line: paragraph,
+            lineIndex: 0,
+            character: character,
+            characterIndex: characterIndex,
+            x: x,
+            y: y,
+            baseline: y + (metrics.baseline || 0),
+            height: rect.height || 0
         });
 
         return Position.get();
-
     },
 
-    destroy(){
-
-        this.initialized=false;
-
+    destroy() {
+        this.initialized = false;
     }
 
 };
+
+
 
 
 
@@ -4984,153 +4767,121 @@ CampusWord2007Simulateur.LayoutEngine.CharacterPositionResolver = {
 
 CampusWord2007Simulateur.LayoutEngine.EmptyLineResolver = {
 
-    initialized:false,
+    initialized: false,
 
-    initialize(){
+    initialize() {
 
-        if(this.initialized){
-            return true;
-        }
+        if (this.initialized) return true;
 
-        this.initialized=true;
+        this.initialized = true;
 
         return true;
-
     },
 
-    resolve(paragraph){
+    resolve(paragraph) {
 
-        if(!paragraph){
-            return null;
-        }
+        if (!paragraph) return null;
 
-        const page=
-            paragraph.closest(
-                ".document-page"
-            );
+        const LayoutEngine =
+            CampusWord2007Simulateur.LayoutEngine;
 
-        if(!page){
-            return null;
-        }
+        if (!LayoutEngine) return null;
 
-        const Position=
-            CampusWord2007Simulateur
-            .LayoutEngine
-            .CaretPosition;
+        const Position = LayoutEngine.CaretPosition;
+        const Insertion = LayoutEngine.InsertionPoint;
+        const LineMetrics = LayoutEngine.LineMetrics;
 
-        const Insertion=
-            CampusWord2007Simulateur
-            .LayoutEngine
-            .InsertionPoint;
+        if (!Position || !Insertion || !LineMetrics) return null;
 
-        const LineMetrics=
-            CampusWord2007Simulateur
-            .LayoutEngine
-            .LineMetrics;
+        const page =
+            paragraph.closest
+                ? paragraph.closest(".document-page")
+                : null;
+
+        if (!page) return null;
+
+        if (typeof Insertion.calculate !== "function") return null;
 
         Insertion.calculate(page);
 
-        const point=
-            Insertion.get();
+        const point =
+            typeof Insertion.get === "function"
+                ? Insertion.get()
+                : null;
 
-        const metrics=
-            LineMetrics.getMetrics();
+        if (!point) return null;
 
-        const paragraphIndex=
-            Array.prototype.indexOf.call(
-                paragraph.parentNode.children,
-                paragraph
-            );
+        const metrics =
+            LineMetrics.getMetrics
+                ? LineMetrics.getMetrics()
+                : null;
 
-        const pageIndex=
-            Number(
-                page.dataset.pageNumber || 1
-            )-1;
+        if (!metrics) return null;
+
+        const paragraphIndex =
+            paragraph.parentNode
+                ? Array.prototype.indexOf.call(
+                    paragraph.parentNode.children,
+                    paragraph
+                )
+                : -1;
+
+        const pageIndex =
+            Number(page.dataset?.pageNumber || 1) - 1;
 
         Position.set({
-
-            page:page,
-
-            pageIndex:pageIndex,
-
-            paragraph:paragraph,
-
-            paragraphIndex:paragraphIndex,
-
-            line:paragraph,
-
-            lineIndex:0,
-
-            character:null,
-
-            characterIndex:-1,
-
-            x:Math.round(point.x),
-
-            y:Math.round(point.y),
-
-            baseline:Math.round(point.y),
-
-            height:metrics.lineHeight
-
+            page: page,
+            pageIndex: pageIndex,
+            paragraph: paragraph,
+            paragraphIndex: paragraphIndex,
+            line: paragraph,
+            lineIndex: 0,
+            character: null,
+            characterIndex: -1,
+            x: Math.round(point.x || 0),
+            y: Math.round(point.y || 0),
+            baseline: Math.round(point.y || 0),
+            height: metrics.lineHeight || 0
         });
 
         return Position.get();
-
     },
 
-    resolveFromPage(page){
+    resolveFromPage(page) {
 
-        if(!page){
-            return null;
-        }
+        if (!page) return null;
 
-        const layer=
-            page.querySelector(
-                ".page-text-layer"
-            );
+        const layer =
+            page.querySelector(".page-text-layer");
 
-        if(!layer){
-            return null;
-        }
+        if (!layer) return null;
 
-        let paragraph=
+        let paragraph =
             layer.lastElementChild;
 
-        if(
-            !paragraph ||
-            !paragraph.classList ||
-            !paragraph.classList.contains(
-                "text-paragraph"
-            )
-        ){
+        const isValidParagraph =
+            paragraph &&
+            paragraph.classList &&
+            paragraph.classList.contains("text-paragraph");
 
-            paragraph=
+        if (!isValidParagraph) {
+
+            paragraph =
                 document.createElement("div");
 
-            paragraph.className=
-                "text-paragraph";
+            paragraph.className = "text-paragraph";
 
-            layer.appendChild(
-                paragraph
-            );
-
+            layer.appendChild(paragraph);
         }
 
-        return this.resolve(
-            paragraph
-        );
-
+        return this.resolve(paragraph);
     },
 
-    destroy(){
-
-        this.initialized=false;
-
+    destroy() {
+        this.initialized = false;
     }
 
 };
-
 
 
 
@@ -5161,120 +4912,86 @@ CampusWord2007Simulateur.LayoutEngine.EmptyLineResolver = {
 
 CampusWord2007Simulateur.LayoutEngine.EnterResolver = {
 
-    initialized:false,
+    initialized: false,
 
-    initialize(){
+    initialize() {
 
-        if(this.initialized){
-            return true;
-        }
+        if (this.initialized) return true;
 
-        this.initialized=true;
+        this.initialized = true;
 
         return true;
-
     },
 
-    resolve(paragraph){
+    resolve(paragraph) {
 
-        if(!paragraph){
-            return null;
-        }
+        if (!paragraph) return null;
 
-        const Position =
-            CampusWord2007Simulateur
-            .LayoutEngine
-            .CaretPosition;
+        const LayoutEngine =
+            CampusWord2007Simulateur.LayoutEngine;
 
-        const EmptyResolver =
-            CampusWord2007Simulateur
-            .LayoutEngine
-            .EmptyLineResolver;
+        if (!LayoutEngine) return null;
 
-        const ParagraphFlow =
-            CampusWord2007Simulateur
-            .LayoutEngine
-            .ParagraphFlowManager;
+        const Position = LayoutEngine.CaretPosition;
+        const EmptyResolver = LayoutEngine.EmptyLineResolver;
+        const ParagraphFlow = LayoutEngine.ParagraphFlow;
+        const LineMetrics = LayoutEngine.LineMetrics;
 
-        const LineMetrics =
-            CampusWord2007Simulateur
-            .LayoutEngine
-            .LineMetrics;
+        if (!Position || !EmptyResolver || !LineMetrics) return null;
 
         const metrics =
-            LineMetrics.getMetrics();
+            LineMetrics.getMetrics
+                ? LineMetrics.getMetrics()
+                : null;
+
+        if (!metrics) return null;
 
         let paragraphSpacing = 0;
 
-        if(
+        if (
             ParagraphFlow &&
-            typeof ParagraphFlow.getParagraphSpacing==="function"
-        ){
+            typeof ParagraphFlow.getParagraphSpacing === "function"
+        ) {
             paragraphSpacing =
-                ParagraphFlow.getParagraphSpacing();
+                ParagraphFlow.getParagraphSpacing() || 0;
         }
 
         const base =
-            EmptyResolver.resolve(
-                paragraph
-            );
+            EmptyResolver.resolve(paragraph);
 
-        if(!base){
-            return null;
-        }
+        if (!base) return null;
+
+        const nextParagraphIndex =
+            typeof base.paragraphIndex === "number"
+                ? base.paragraphIndex + 1
+                : -1;
+
+        const yOffset =
+            metrics.lineHeight + paragraphSpacing;
 
         Position.set({
-
-            page:base.page,
-
-            pageIndex:base.pageIndex,
-
-            paragraph:base.paragraph,
-
-            paragraphIndex:
-                base.paragraphIndex + 1,
-
-            line:null,
-
-            lineIndex:0,
-
-            character:null,
-
-            characterIndex:-1,
-
-            x:base.x,
-
-            y:
-                Math.round(
-                    base.y +
-                    metrics.lineHeight +
-                    paragraphSpacing
-                ),
-
-            baseline:
-                Math.round(
-                    base.baseline +
-                    metrics.lineHeight +
-                    paragraphSpacing
-                ),
-
-            height:metrics.lineHeight
-
+            page: base.page,
+            pageIndex: base.pageIndex,
+            paragraph: base.paragraph,
+            paragraphIndex: nextParagraphIndex,
+            line: null,
+            lineIndex: 0,
+            character: null,
+            characterIndex: -1,
+            x: base.x,
+            y: Math.round(base.y + yOffset),
+            baseline: Math.round(base.baseline + yOffset),
+            height: metrics.lineHeight || 0
         });
 
         return Position.get();
-
     },
 
-    destroy(){
-
-        this.initialized=false;
-
+    destroy() {
+        this.initialized = false;
     }
 
 };
-
-
 
 
 
@@ -5304,79 +5021,67 @@ CampusWord2007Simulateur.LayoutEngine.NewPageResolver = {
 
     initialize() {
 
-        if (this.initialized) {
-            return true;
-        }
+        if (this.initialized) return true;
 
         this.initialized = true;
 
         return true;
-
     },
 
     resolve(page) {
 
-        if (!page) {
-            return null;
-        }
+        if (!page) return null;
 
-        const InsertionPoint =
-            CampusWord2007Simulateur
-            .LayoutEngine
-            .InsertionPoint;
+        const LayoutEngine =
+            CampusWord2007Simulateur.LayoutEngine;
 
-        const CaretPosition =
-            CampusWord2007Simulateur
-            .LayoutEngine
-            .CaretPosition;
+        if (!LayoutEngine) return null;
 
-        if (
-            !InsertionPoint ||
-            !CaretPosition
-        ) {
+        const InsertionPoint = LayoutEngine.InsertionPoint;
+        const CaretPosition = LayoutEngine.CaretPosition;
+
+        if (!InsertionPoint || !CaretPosition) return null;
+
+        if (typeof InsertionPoint.calculate !== "function") {
             return null;
         }
 
         const point =
             InsertionPoint.calculate(page);
 
-        if (!point) {
-            return null;
-        }
+        if (!point) return null;
+
+        const x =
+            typeof point.x === "number" ? point.x : 0;
+
+        const y =
+            typeof point.y === "number" ? point.y : 0;
 
         CaretPosition.set({
-
             page: page,
-
             paragraph: null,
-
+            paragraphIndex: -1,
+            line: null,
+            lineIndex: -1,
             character: null,
-
-            line: 0,
-
-            column: 0,
-
-            x: point.x,
-
-            y: point.y,
-
-            baseline: point.y,
-
+            characterIndex: -1,
+            x: Math.round(x),
+            y: Math.round(y),
+            baseline: Math.round(y),
+            height: 0,
+            valid: true,
             placement: "new-page"
-
         });
 
         return CaretPosition.get();
-
     },
 
     destroy() {
-
         this.initialized = false;
-
     }
 
 };
+
 
 
 
@@ -5390,15 +5095,7 @@ CampusWord2007Simulateur.LayoutEngine.NewPageResolver = {
    LAYOUT ENGINE
    PHASE 2.6F
    PUBLIC CARET PLACEMENT API
-   ----------------------------------------------------------
-   RESPONSIBILITY
-   • Single public API for caret placement
-   • Delegate to specialized resolvers
-   • NO geometry calculation
-   • NO DOM measurement
-   • NO caret rendering
-   • NO text insertion
-   ========================================================== */
+========================================================== */
 
 CampusWord2007Simulateur.LayoutEngine.CaretPlacement = {
 
@@ -5411,7 +5108,6 @@ CampusWord2007Simulateur.LayoutEngine.CaretPlacement = {
         }
 
         this.initialized = true;
-
         return true;
 
     },
@@ -5427,13 +5123,8 @@ CampusWord2007Simulateur.LayoutEngine.CaretPlacement = {
             .LayoutEngine
             .CharacterPositionResolver;
 
-        if (
-            !Resolver ||
-            typeof Resolver.afterCharacter !== "function"
-        ) {
-
+        if (!Resolver || !Resolver.afterCharacter) {
             return null;
-
         }
 
         return Resolver.afterCharacter(character);
@@ -5451,13 +5142,8 @@ CampusWord2007Simulateur.LayoutEngine.CaretPlacement = {
             .LayoutEngine
             .CharacterPositionResolver;
 
-        if (
-            !Resolver ||
-            typeof Resolver.beforeCharacter !== "function"
-        ) {
-
+        if (!Resolver || !Resolver.beforeCharacter) {
             return null;
-
         }
 
         return Resolver.beforeCharacter(character);
@@ -5475,13 +5161,8 @@ CampusWord2007Simulateur.LayoutEngine.CaretPlacement = {
             .LayoutEngine
             .EmptyLineResolver;
 
-        if (
-            !Resolver ||
-            typeof Resolver.resolve !== "function"
-        ) {
-
+        if (!Resolver || !Resolver.resolve) {
             return null;
-
         }
 
         return Resolver.resolve(paragraph);
@@ -5499,13 +5180,8 @@ CampusWord2007Simulateur.LayoutEngine.CaretPlacement = {
             .LayoutEngine
             .EnterResolver;
 
-        if (
-            !Resolver ||
-            typeof Resolver.resolve !== "function"
-        ) {
-
+        if (!Resolver || !Resolver.resolve) {
             return null;
-
         }
 
         return Resolver.resolve(paragraph);
@@ -5523,13 +5199,8 @@ CampusWord2007Simulateur.LayoutEngine.CaretPlacement = {
             .LayoutEngine
             .NewPageResolver;
 
-        if (
-            !Resolver ||
-            typeof Resolver.resolve !== "function"
-        ) {
-
+        if (!Resolver || !Resolver.resolve) {
             return null;
-
         }
 
         return Resolver.resolve(page);
@@ -5547,13 +5218,8 @@ CampusWord2007Simulateur.LayoutEngine.CaretPlacement = {
             .LayoutEngine
             .Cursor;
 
-        if (
-            !Cursor ||
-            typeof Cursor.get !== "function"
-        ) {
-
+        if (!Cursor || !Cursor.get) {
             return null;
-
         }
 
         return Cursor.get();
@@ -5571,18 +5237,11 @@ CampusWord2007Simulateur.LayoutEngine.CaretPlacement = {
             .LayoutEngine
             .Cursor;
 
-        if (
-            !Cursor ||
-            typeof Cursor.set !== "function"
-        ) {
-
+        if (!Cursor || !Cursor.set) {
             return false;
-
         }
 
-        Cursor.set(position);
-
-        return true;
+        return Cursor.set(position);
 
     },
 
@@ -5597,13 +5256,8 @@ CampusWord2007Simulateur.LayoutEngine.CaretPlacement = {
             .LayoutEngine
             .Cursor;
 
-        if (
-            Cursor &&
-            typeof Cursor.reset === "function"
-        ) {
-
+        if (Cursor && Cursor.reset) {
             Cursor.reset();
-
         }
 
     },
@@ -5615,7 +5269,6 @@ CampusWord2007Simulateur.LayoutEngine.CaretPlacement = {
     destroy() {
 
         this.reset();
-
         this.initialized = false;
 
     }
@@ -5627,32 +5280,26 @@ CampusWord2007Simulateur.LayoutEngine.CaretPlacement = {
 
 
 
+
+
 /* ==========================================================
    CAMPUS WORD 2007 SIMULATEUR
    LAYOUT ENGINE
    PHASE 2.7
    PUBLIC LAYOUT API
-   ----------------------------------------------------------
-   RESPONSIBILITY
-   • Public entry point of LayoutEngine
-   • Delegate to specialized modules
-   • NO calculations
-   • NO rendering
-   • NO DOM modification
-   ========================================================== */
+========================================================== */
 
 CampusWord2007Simulateur.LayoutEngine.API = {
 
-    initialized:false,
+    initialized: false,
 
-    initialize(){
+    initialize() {
 
-        if(this.initialized){
+        if (this.initialized) {
             return true;
         }
 
-        this.initialized=true;
-
+        this.initialized = true;
         return true;
 
     },
@@ -5661,12 +5308,22 @@ CampusWord2007Simulateur.LayoutEngine.API = {
        VIEWPORT
     ====================================================== */
 
-    getViewport(){
+    getViewport() {
 
-        return CampusWord2007Simulateur
+        const Viewport =
+            CampusWord2007Simulateur
             .LayoutEngine
-            .Viewport
-            .get();
+            .Viewport;
+
+        if (!Viewport) {
+            return null;
+        }
+
+        if (typeof Viewport.getMetrics === "function") {
+            return Viewport.getMetrics();
+        }
+
+        return null;
 
     },
 
@@ -5674,12 +5331,18 @@ CampusWord2007Simulateur.LayoutEngine.API = {
        PAGE GEOMETRY
     ====================================================== */
 
-    measurePage(page){
+    measurePage(page) {
 
-        return CampusWord2007Simulateur
+        const Geometry =
+            CampusWord2007Simulateur
             .LayoutEngine
-            .Geometry
-            .measure(page);
+            .Geometry;
+
+        if (!Geometry || !Geometry.measure) {
+            return null;
+        }
+
+        return Geometry.measure(page);
 
     },
 
@@ -5687,17 +5350,24 @@ CampusWord2007Simulateur.LayoutEngine.API = {
        WRITABLE AREA
     ====================================================== */
 
-    getWritableArea(page){
+    getWritableArea(page) {
 
-        CampusWord2007Simulateur
-        .LayoutEngine
-        .WritableArea
-        .calculate(page);
-
-        return CampusWord2007Simulateur
+        const WritableArea =
+            CampusWord2007Simulateur
             .LayoutEngine
-            .WritableArea
-            .get();
+            .WritableArea;
+
+        if (!WritableArea || !WritableArea.calculate) {
+            return null;
+        }
+
+        WritableArea.calculate(page);
+
+        if (typeof WritableArea.get === "function") {
+            return WritableArea.get();
+        }
+
+        return null;
 
     },
 
@@ -5705,12 +5375,18 @@ CampusWord2007Simulateur.LayoutEngine.API = {
        LINE METRICS
     ====================================================== */
 
-    getLineMetrics(){
+    getLineMetrics() {
 
-        return CampusWord2007Simulateur
+        const LineMetrics =
+            CampusWord2007Simulateur
             .LayoutEngine
-            .LineMetrics
-            .getMetrics();
+            .LineMetrics;
+
+        if (!LineMetrics || !LineMetrics.getMetrics) {
+            return null;
+        }
+
+        return LineMetrics.getMetrics();
 
     },
 
@@ -5718,12 +5394,18 @@ CampusWord2007Simulateur.LayoutEngine.API = {
        DEFAULT INSERTION POINT
     ====================================================== */
 
-    getInsertionPoint(page){
+    getInsertionPoint(page) {
 
-        return CampusWord2007Simulateur
+        const InsertionPoint =
+            CampusWord2007Simulateur
             .LayoutEngine
-            .InsertionPoint
-            .calculate(page);
+            .InsertionPoint;
+
+        if (!InsertionPoint || !InsertionPoint.calculate) {
+            return null;
+        }
+
+        return InsertionPoint.calculate(page);
 
     },
 
@@ -5731,12 +5413,18 @@ CampusWord2007Simulateur.LayoutEngine.API = {
        CHARACTER MEASUREMENT
     ====================================================== */
 
-    measureCharacter(character){
+    measureCharacter(character) {
 
-        return CampusWord2007Simulateur
+        const CM =
+            CampusWord2007Simulateur
             .LayoutEngine
-            .CharacterMeasurement
-            .measure(character);
+            .CharacterMeasurement;
+
+        if (!CM || !CM.measure) {
+            return 0;
+        }
+
+        return CM.measure(character);
 
     },
 
@@ -5744,12 +5432,18 @@ CampusWord2007Simulateur.LayoutEngine.API = {
        CARET AFTER CHARACTER
     ====================================================== */
 
-    afterCharacter(character){
+    afterCharacter(character) {
 
-        return CampusWord2007Simulateur
+        const CP =
+            CampusWord2007Simulateur
             .LayoutEngine
-            .CaretPlacement
-            .afterCharacter(character);
+            .CaretPlacement;
+
+        if (!CP || !CP.afterCharacter) {
+            return null;
+        }
+
+        return CP.afterCharacter(character);
 
     },
 
@@ -5757,12 +5451,18 @@ CampusWord2007Simulateur.LayoutEngine.API = {
        CARET BEFORE CHARACTER
     ====================================================== */
 
-    beforeCharacter(character){
+    beforeCharacter(character) {
 
-        return CampusWord2007Simulateur
+        const CP =
+            CampusWord2007Simulateur
             .LayoutEngine
-            .CaretPlacement
-            .beforeCharacter(character);
+            .CaretPlacement;
+
+        if (!CP || !CP.beforeCharacter) {
+            return null;
+        }
+
+        return CP.beforeCharacter(character);
 
     },
 
@@ -5770,12 +5470,18 @@ CampusWord2007Simulateur.LayoutEngine.API = {
        EMPTY LINE
     ====================================================== */
 
-    emptyLine(paragraph){
+    emptyLine(paragraph) {
 
-        return CampusWord2007Simulateur
+        const CP =
+            CampusWord2007Simulateur
             .LayoutEngine
-            .CaretPlacement
-            .emptyLine(paragraph);
+            .CaretPlacement;
+
+        if (!CP || !CP.emptyLine) {
+            return null;
+        }
+
+        return CP.emptyLine(paragraph);
 
     },
 
@@ -5783,12 +5489,18 @@ CampusWord2007Simulateur.LayoutEngine.API = {
        AFTER ENTER
     ====================================================== */
 
-    afterEnter(paragraph){
+    afterEnter(paragraph) {
 
-        return CampusWord2007Simulateur
+        const CP =
+            CampusWord2007Simulateur
             .LayoutEngine
-            .CaretPlacement
-            .afterEnter(paragraph);
+            .CaretPlacement;
+
+        if (!CP || !CP.afterEnter) {
+            return null;
+        }
+
+        return CP.afterEnter(paragraph);
 
     },
 
@@ -5796,12 +5508,18 @@ CampusWord2007Simulateur.LayoutEngine.API = {
        NEW PAGE
     ====================================================== */
 
-    newPage(page){
+    newPage(page) {
 
-        return CampusWord2007Simulateur
+        const CP =
+            CampusWord2007Simulateur
             .LayoutEngine
-            .CaretPlacement
-            .newPage(page);
+            .CaretPlacement;
+
+        if (!CP || !CP.newPage) {
+            return null;
+        }
+
+        return CP.newPage(page);
 
     },
 
@@ -5809,21 +5527,33 @@ CampusWord2007Simulateur.LayoutEngine.API = {
        CURRENT CURSOR
     ====================================================== */
 
-    getCursor(){
+    getCursor() {
 
-        return CampusWord2007Simulateur
+        const Cursor =
+            CampusWord2007Simulateur
             .LayoutEngine
-            .Cursor
-            .get();
+            .Cursor;
+
+        if (!Cursor || !Cursor.get) {
+            return null;
+        }
+
+        return Cursor.get();
 
     },
 
-    setCursor(position){
+    setCursor(position) {
 
-        return CampusWord2007Simulateur
+        const Cursor =
+            CampusWord2007Simulateur
             .LayoutEngine
-            .Cursor
-            .set(position);
+            .Cursor;
+
+        if (!Cursor || !Cursor.set) {
+            return false;
+        }
+
+        return Cursor.set(position);
 
     },
 
@@ -5831,15 +5561,18 @@ CampusWord2007Simulateur.LayoutEngine.API = {
        PAGE FLOW
     ====================================================== */
 
-    shouldCreatePage(page, paragraph){
+    shouldCreatePage(page, paragraph) {
 
-        return CampusWord2007Simulateur
+        const PageFlow =
+            CampusWord2007Simulateur
             .LayoutEngine
-            .PageFlowManager
-            .shouldCreatePage(
-                page,
-                paragraph
-            );
+            .PageFlow;
+
+        if (!PageFlow || !PageFlow.pageRequired) {
+            return false;
+        }
+
+        return PageFlow.pageRequired(page, paragraph);
 
     },
 
@@ -5847,39 +5580,63 @@ CampusWord2007Simulateur.LayoutEngine.API = {
        PARAGRAPH FLOW
     ====================================================== */
 
-    getParagraphSpacing(){
+    getParagraphSpacing() {
 
-        return CampusWord2007Simulateur
+        const PF =
+            CampusWord2007Simulateur
             .LayoutEngine
-            .ParagraphFlowManager
-            .getParagraphSpacing();
+            .ParagraphFlow;
+
+        if (!PF || !PF.defaults) {
+            return 0;
+        }
+
+        return PF.defaults.spaceBefore || 0;
 
     },
 
-    getFirstLineIndent(){
+    getFirstLineIndent() {
 
-        return CampusWord2007Simulateur
+        const PF =
+            CampusWord2007Simulateur
             .LayoutEngine
-            .ParagraphFlowManager
-            .getFirstLineIndent();
+            .ParagraphFlow;
+
+        if (!PF || !PF.defaults) {
+            return 0;
+        }
+
+        return PF.defaults.firstLineIndent || 0;
 
     },
 
-    getLeftIndent(){
+    getLeftIndent() {
 
-        return CampusWord2007Simulateur
+        const PF =
+            CampusWord2007Simulateur
             .LayoutEngine
-            .ParagraphFlowManager
-            .getLeftIndent();
+            .ParagraphFlow;
+
+        if (!PF || !PF.defaults) {
+            return 0;
+        }
+
+        return PF.defaults.leftIndent || 0;
 
     },
 
-    getRightIndent(){
+    getRightIndent() {
 
-        return CampusWord2007Simulateur
+        const PF =
+            CampusWord2007Simulateur
             .LayoutEngine
-            .ParagraphFlowManager
-            .getRightIndent();
+            .ParagraphFlow;
+
+        if (!PF || !PF.defaults) {
+            return 0;
+        }
+
+        return PF.defaults.rightIndent || 0;
 
     },
 
@@ -5887,36 +5644,61 @@ CampusWord2007Simulateur.LayoutEngine.API = {
        RESET
     ====================================================== */
 
-    reset(){
+    reset() {
 
-        if(
+        const Cursor =
             CampusWord2007Simulateur
             .LayoutEngine
-            .Cursor &&
-            typeof CampusWord2007Simulateur
-                .LayoutEngine
-                .Cursor
-                .reset==="function"
-        ){
+            .Cursor;
 
-            CampusWord2007Simulateur
-            .LayoutEngine
-            .Cursor
-            .reset();
-
+        if (Cursor && Cursor.reset) {
+            Cursor.reset();
         }
 
     },
 
-    destroy(){
+    destroy() {
 
         this.reset();
-
-        this.initialized=false;
+        this.initialized = false;
 
     }
 
 };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
