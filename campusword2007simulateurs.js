@@ -6494,8 +6494,427 @@ CampusWord2007Simulateur.CaretEngine.Attachment = {
 
 
 
+/* ==========================================================
+   CAMPUS WORD 2007 SIMULATEUR
+   CARET ENGINE
+   PHASE 1.4
+   CARET RENDERER
+   ----------------------------------------------------------
+   RESPONSIBILITY
+
+   • Render caret visually
+   • Apply position
+   • Apply size
+   • Show / Hide caret
+
+   DOES NOT
+
+   • Calculate coordinates
+   • Attach caret to page
+   • Blink
+   • Use LayoutEngine
+
+   ========================================================== */
+
+CampusWord2007Simulateur.CaretEngine.Renderer = {
+
+    initialized: false,
+
+    visible: false,
+
+    initialize() {
+
+        if (this.initialized) {
+            return true;
+        }
+
+        this.initialized = true;
+
+        return true;
+
+    },
+
+    render() {
+
+        const caret =
+            CampusWord2007Simulateur
+            .CaretEngine
+            .get();
+
+        if (!caret) {
+            return false;
+        }
+
+        const position =
+            CampusWord2007Simulateur
+            .CaretEngine
+            .Position
+            .get();
+
+        caret.style.left =
+            Math.round(position.x) + "px";
+
+        caret.style.top =
+            Math.round(position.y) + "px";
+
+        caret.style.width =
+            CampusWord2007Simulateur
+            .CaretEngine
+            .configuration
+            .width + "px";
+
+        caret.style.height =
+            Math.round(position.height) + "px";
+
+        caret.style.backgroundColor =
+            CampusWord2007Simulateur
+            .CaretEngine
+            .configuration
+            .color;
+
+        caret.style.zIndex =
+            CampusWord2007Simulateur
+            .CaretEngine
+            .configuration
+            .zIndex;
+
+        return true;
+
+    },
+
+    show() {
+
+        const caret =
+            CampusWord2007Simulateur
+            .CaretEngine
+            .get();
+
+        if (!caret) {
+            return false;
+        }
+
+        caret.style.display =
+            "block";
+
+        caret.style.visibility =
+            "visible";
+
+        caret.style.opacity =
+            "1";
+
+        this.visible = true;
+
+        return true;
+
+    },
+
+    hide() {
+
+        const caret =
+            CampusWord2007Simulateur
+            .CaretEngine
+            .get();
+
+        if (!caret) {
+            return false;
+        }
+
+        caret.style.display =
+            "none";
+
+        caret.style.visibility =
+            "hidden";
+
+        caret.style.opacity =
+            "0";
+
+        this.visible = false;
+
+        return true;
+
+    },
+
+    isVisible() {
+
+        return this.visible;
+
+    },
+
+    refresh() {
+
+        if (
+            !this.render()
+        ) {
+            return false;
+        }
+
+        if (
+            this.visible
+        ) {
+
+            this.show();
+
+        }
+
+        return true;
+
+    },
+
+    reset() {
+
+        this.hide();
+
+        return true;
+
+    },
+
+    destroy() {
+
+        this.reset();
+
+        this.initialized = false;
+
+        return true;
+
+    }
+
+};
 
 
+
+
+
+
+
+
+/* ==========================================================
+   CAMPUS WORD 2007 SIMULATEUR
+   CARET ENGINE
+   PHASE 1.4
+   CARET RENDERER
+   ----------------------------------------------------------
+   RESPONSIBILITY
+
+   • Render caret from current position
+   • Apply x
+   • Apply y
+   • Apply height
+
+   DOES NOT
+
+   • Calculate position
+   • Call LayoutEngine
+   • Show / Hide caret
+   • Blink
+   • Attach page
+   ========================================================== */
+
+CampusWord2007Simulateur.CaretEngine.Renderer = {
+
+    initialized: false,
+
+    initialize() {
+
+        if (this.initialized) {
+            return true;
+        }
+
+        this.initialized = true;
+
+        return true;
+
+    },
+
+    render() {
+
+        const Engine =
+            CampusWord2007Simulateur
+            .CaretEngine;
+
+        const caret =
+            Engine.references.caret;
+
+        if (!caret) {
+            return false;
+        }
+
+        const position =
+            Engine.position;
+
+        caret.style.left =
+            position.x + "px";
+
+        caret.style.top =
+            position.y + "px";
+
+        caret.style.height =
+            position.height + "px";
+
+        return true;
+
+    },
+
+    destroy() {
+
+        this.initialized = false;
+
+    }
+
+};
+
+
+
+
+
+
+
+
+
+/* ==========================================================
+   CAMPUS WORD 2007 SIMULATEUR
+   CARET ENGINE
+   PHASE 1.5
+   PAGE ATTACHMENT MANAGER
+   ----------------------------------------------------------
+   RESPONSIBILITY
+
+   • Attach the single caret to the requested page
+   • Move caret between page caret layers
+   • Maintain current page reference
+
+   DOES NOT
+
+   • Calculate coordinates
+   • Render caret
+   • Show / Hide caret
+   • Blink
+   • Call LayoutEngine
+   ========================================================== */
+
+CampusWord2007Simulateur.CaretEngine.PageAttachmentManager = {
+
+    initialized: false,
+
+    initialize() {
+
+        if (this.initialized) {
+            return true;
+        }
+
+        this.initialized = true;
+
+        return true;
+
+    },
+
+    attach(pageNumber) {
+
+        const Engine =
+            CampusWord2007Simulateur
+            .CaretEngine;
+
+        const caret =
+            Engine.references.caret;
+
+        if (!caret) {
+            return false;
+        }
+
+        const page = document.querySelector(
+            '.document-page[data-page-number="' +
+            pageNumber +
+            '"]'
+        );
+
+        if (!page) {
+            return false;
+        }
+
+        const layer =
+            page.querySelector(
+                ".page-caret-layer"
+            );
+
+        if (!layer) {
+            return false;
+        }
+
+        if (
+            caret.parentNode &&
+            caret.parentNode !== layer
+        ) {
+            caret.parentNode.removeChild(
+                caret
+            );
+        }
+
+        if (
+            caret.parentNode !== layer
+        ) {
+            layer.appendChild(
+                caret
+            );
+        }
+
+        Engine.references.page = page;
+        Engine.references.layer = layer;
+
+        return true;
+
+    },
+
+    detach() {
+
+        const Engine =
+            CampusWord2007Simulateur
+            .CaretEngine;
+
+        const caret =
+            Engine.references.caret;
+
+        if (
+            caret &&
+            caret.parentNode
+        ) {
+            caret.parentNode.removeChild(
+                caret
+            );
+        }
+
+        Engine.references.page = null;
+        Engine.references.layer = null;
+
+        return true;
+
+    },
+
+    currentPage() {
+
+        return CampusWord2007Simulateur
+            .CaretEngine
+            .references
+            .page;
+
+    },
+
+    currentLayer() {
+
+        return CampusWord2007Simulateur
+            .CaretEngine
+            .references
+            .layer;
+
+    },
+
+    destroy() {
+
+        this.detach();
+
+        this.initialized = false;
+
+    }
+
+};
 
 
 
