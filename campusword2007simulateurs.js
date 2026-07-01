@@ -6173,7 +6173,6 @@ CampusWord2007Simulateur.CaretEngine = {
    • Blink
    • Use LayoutEngine
    • Modify DOM
-
    ========================================================== */
 
 CampusWord2007Simulateur.CaretEngine.Position = {
@@ -6222,19 +6221,35 @@ CampusWord2007Simulateur.CaretEngine.Position = {
             !position ||
             typeof position !== "object"
         ) {
-
             return false;
-
         }
 
         if (
             typeof position.x !== "number" ||
-            typeof position.y !== "number" ||
-            typeof position.height !== "number"
+            !Number.isFinite(position.x)
         ) {
-
             return false;
+        }
 
+        if (
+            typeof position.y !== "number" ||
+            !Number.isFinite(position.y)
+        ) {
+            return false;
+        }
+
+        if (
+            typeof position.height !== "number" ||
+            !Number.isFinite(position.height)
+        ) {
+            return false;
+        }
+
+        if (
+            typeof position.pageNumber !== "number" ||
+            !Number.isFinite(position.pageNumber)
+        ) {
+            return false;
         }
 
         this.current = {
@@ -6243,7 +6258,7 @@ CampusWord2007Simulateur.CaretEngine.Position = {
                 position.page ?? null,
 
             pageNumber:
-                position.pageNumber ?? 1,
+                position.pageNumber,
 
             x:
                 position.x,
@@ -6266,9 +6281,7 @@ CampusWord2007Simulateur.CaretEngine.Position = {
     get() {
 
         if (!this.current) {
-
             this.reset();
-
         }
 
         return {
@@ -6342,7 +6355,6 @@ CampusWord2007Simulateur.CaretEngine.Position = {
    • Blink
    • Show / Hide
    • Use LayoutEngine
-
    ========================================================== */
 
 CampusWord2007Simulateur.CaretEngine.Attachment = {
@@ -6385,7 +6397,7 @@ CampusWord2007Simulateur.CaretEngine.Attachment = {
                 ".page-caret-layer"
             );
 
-        if (!layer) {
+        if (!(layer instanceof HTMLElement)) {
             return false;
         }
 
@@ -6393,25 +6405,20 @@ CampusWord2007Simulateur.CaretEngine.Attachment = {
             caret.parentNode &&
             caret.parentNode !== layer
         ) {
-
             caret.parentNode.removeChild(
                 caret
             );
-
         }
 
         if (
             caret.parentNode !== layer
         ) {
-
             layer.appendChild(
                 caret
             );
-
         }
 
         this.currentPage = page;
-
         this.currentLayer = layer;
 
         return true;
@@ -6429,15 +6436,12 @@ CampusWord2007Simulateur.CaretEngine.Attachment = {
             caret &&
             caret.parentNode
         ) {
-
             caret.parentNode.removeChild(
                 caret
             );
-
         }
 
         this.currentPage = null;
-
         this.currentLayer = null;
 
         return true;
@@ -6466,9 +6470,10 @@ CampusWord2007Simulateur.CaretEngine.Attachment = {
         return !!(
 
             caret &&
+            this.currentPage &&
             this.currentLayer &&
             caret.parentNode ===
-            this.currentLayer
+                this.currentLayer
 
         );
 
@@ -6485,6 +6490,8 @@ CampusWord2007Simulateur.CaretEngine.Attachment = {
     }
 
 };
+
+
 
 
 
@@ -6536,18 +6543,19 @@ CampusWord2007Simulateur.CaretEngine.Renderer = {
 
     render() {
 
-        const caret =
+        const engine =
             CampusWord2007Simulateur
-            .CaretEngine
-            .get();
+            .CaretEngine;
+
+        const caret =
+            engine.get();
 
         if (!caret) {
             return false;
         }
 
         const position =
-            CampusWord2007Simulateur
-            .CaretEngine
+            engine
             .Position
             .get();
 
@@ -6558,23 +6566,26 @@ CampusWord2007Simulateur.CaretEngine.Renderer = {
             Math.round(position.y) + "px";
 
         caret.style.width =
-            CampusWord2007Simulateur
-            .CaretEngine
+            engine
             .configuration
             .width + "px";
 
         caret.style.height =
-            Math.round(position.height) + "px";
+            Math.max(
+                1,
+                Math.round(
+                    position.height ||
+                    engine.configuration.defaultHeight
+                )
+            ) + "px";
 
         caret.style.backgroundColor =
-            CampusWord2007Simulateur
-            .CaretEngine
+            engine
             .configuration
             .color;
 
         caret.style.zIndex =
-            CampusWord2007Simulateur
-            .CaretEngine
+            engine
             .configuration
             .zIndex;
 
@@ -6642,18 +6653,12 @@ CampusWord2007Simulateur.CaretEngine.Renderer = {
 
     refresh() {
 
-        if (
-            !this.render()
-        ) {
+        if (!this.render()) {
             return false;
         }
 
-        if (
-            this.visible
-        ) {
-
+        if (this.visible) {
             this.show();
-
         }
 
         return true;
@@ -6690,350 +6695,23 @@ CampusWord2007Simulateur.CaretEngine.Renderer = {
 /* ==========================================================
    CAMPUS WORD 2007 SIMULATEUR
    CARET ENGINE
-   PHASE 1.4
-   CARET RENDERER
-   ----------------------------------------------------------
-   RESPONSIBILITY
-
-   • Render caret from current position
-   • Apply x
-   • Apply y
-   • Apply height
-
-   DOES NOT
-
-   • Calculate position
-   • Call LayoutEngine
-   • Show / Hide caret
-   • Blink
-   • Attach page
-   ========================================================== */
-
-CampusWord2007Simulateur.CaretEngine.Renderer = {
-
-    initialized: false,
-
-    initialize() {
-
-        if (this.initialized) {
-            return true;
-        }
-
-        this.initialized = true;
-
-        return true;
-
-    },
-
-    render() {
-
-        const Engine =
-            CampusWord2007Simulateur
-            .CaretEngine;
-
-        const caret =
-            Engine.references.caret;
-
-        if (!caret) {
-            return false;
-        }
-
-        const position =
-            Engine.position;
-
-        caret.style.left =
-            position.x + "px";
-
-        caret.style.top =
-            position.y + "px";
-
-        caret.style.height =
-            position.height + "px";
-
-        return true;
-
-    },
-
-    destroy() {
-
-        this.initialized = false;
-
-    }
-
-};
-
-
-
-
-
-
-
-
-
-/* ==========================================================
-   CAMPUS WORD 2007 SIMULATEUR
-   CARET ENGINE
    PHASE 1.5
-   PAGE ATTACHMENT MANAGER
-   ----------------------------------------------------------
-   RESPONSIBILITY
-
-   • Attach the single caret to the requested page
-   • Move caret between page caret layers
-   • Maintain current page reference
-
-   DOES NOT
-
-   • Calculate coordinates
-   • Render caret
-   • Show / Hide caret
-   • Blink
-   • Call LayoutEngine
-   ========================================================== */
-
-CampusWord2007Simulateur.CaretEngine.PageAttachmentManager = {
-
-    initialized: false,
-
-    initialize() {
-
-        if (this.initialized) {
-            return true;
-        }
-
-        this.initialized = true;
-
-        return true;
-
-    },
-
-    attach(pageNumber) {
-
-        const Engine =
-            CampusWord2007Simulateur
-            .CaretEngine;
-
-        const caret =
-            Engine.references.caret;
-
-        if (!caret) {
-            return false;
-        }
-
-        const page = document.querySelector(
-            '.document-page[data-page-number="' +
-            pageNumber +
-            '"]'
-        );
-
-        if (!page) {
-            return false;
-        }
-
-        const layer =
-            page.querySelector(
-                ".page-caret-layer"
-            );
-
-        if (!layer) {
-            return false;
-        }
-
-        if (
-            caret.parentNode &&
-            caret.parentNode !== layer
-        ) {
-            caret.parentNode.removeChild(
-                caret
-            );
-        }
-
-        if (
-            caret.parentNode !== layer
-        ) {
-            layer.appendChild(
-                caret
-            );
-        }
-
-        Engine.references.page = page;
-        Engine.references.layer = layer;
-
-        return true;
-
-    },
-
-    detach() {
-
-        const Engine =
-            CampusWord2007Simulateur
-            .CaretEngine;
-
-        const caret =
-            Engine.references.caret;
-
-        if (
-            caret &&
-            caret.parentNode
-        ) {
-            caret.parentNode.removeChild(
-                caret
-            );
-        }
-
-        Engine.references.page = null;
-        Engine.references.layer = null;
-
-        return true;
-
-    },
-
-    currentPage() {
-
-        return CampusWord2007Simulateur
-            .CaretEngine
-            .references
-            .page;
-
-    },
-
-    currentLayer() {
-
-        return CampusWord2007Simulateur
-            .CaretEngine
-            .references
-            .layer;
-
-    },
-
-    destroy() {
-
-        this.detach();
-
-        this.initialized = false;
-
-    }
-
-};
-
-
-
-
-
-
-
-
-/* ==========================================================
-   CAMPUS WORD 2007 SIMULATEUR
-   CARET ENGINE
-   PHASE 1.6
-   VISIBILITY MANAGER
-   ----------------------------------------------------------
-   RESPONSIBILITY
-
-   • Show caret
-   • Hide caret
-
-   DOES NOT
-
-   • Calculate position
-   • Render caret
-   • Blink
-   • Attach page
-   • Call LayoutEngine
-   ========================================================== */
-
-CampusWord2007Simulateur.CaretEngine.VisibilityManager = {
-
-    initialized: false,
-
-    initialize() {
-
-        if (this.initialized) {
-            return true;
-        }
-
-        this.initialized = true;
-
-        return true;
-
-    },
-
-    show() {
-
-        const caret =
-            CampusWord2007Simulateur
-            .CaretEngine
-            .references
-            .caret;
-
-        if (!caret) {
-            return false;
-        }
-
-        caret.style.display = "block";
-        caret.style.visibility = "visible";
-        caret.style.opacity = "1";
-
-        return true;
-
-    },
-
-    hide() {
-
-        const caret =
-            CampusWord2007Simulateur
-            .CaretEngine
-            .references
-            .caret;
-
-        if (!caret) {
-            return false;
-        }
-
-        caret.style.display = "none";
-        caret.style.visibility = "hidden";
-        caret.style.opacity = "0";
-
-        return true;
-
-    },
-
-    destroy() {
-
-        this.hide();
-
-        this.initialized = false;
-
-    }
-
-};
-
-
-
-
-
-
-/* ==========================================================
-   CAMPUS WORD 2007 SIMULATEUR
-   CARET ENGINE
-   PHASE 1.7
-   CONTROLLER
+   CARET CONTROLLER
    ----------------------------------------------------------
    RESPONSIBILITY
 
    • Receive position from LayoutEngine
-   • Store position
-   • Attach caret to target page
+   • Update Position
+   • Attach caret to page
    • Render caret
-   • Show caret
+   • Show / Hide caret
 
    DOES NOT
 
    • Calculate coordinates
    • Call LayoutEngine
    • Blink
-   • Modify DOM directly
+
    ========================================================== */
 
 CampusWord2007Simulateur.CaretEngine.Controller = {
@@ -7054,60 +6732,44 @@ CampusWord2007Simulateur.CaretEngine.Controller = {
 
     update(position) {
 
-        if (!position) {
+        if (
+            !position ||
+            typeof position !== "object"
+        ) {
             return false;
         }
 
-        const Engine =
+        const engine =
             CampusWord2007Simulateur
             .CaretEngine;
 
-        /* ==========================================
-           STORE POSITION
-        ========================================== */
-
         if (
-            !Engine.Position.set(position)
+            !engine.Position.set(position)
         ) {
             return false;
         }
 
-        const current =
-            Engine.Position.get();
+        if (
+            typeof position.pageNumber === "number"
+        ) {
 
-        /* ==========================================
-           ATTACH TO PAGE
-        ========================================== */
+            if (
+                !engine.Attachment.attach(
+                    position.pageNumber
+                )
+            ) {
+                return false;
+            }
+
+        }
 
         if (
-            !Engine.PageAttachmentManager.attach(
-                current.pageNumber
-            )
+            !engine.Renderer.render()
         ) {
             return false;
         }
 
-        /* ==========================================
-           RENDER
-        ========================================== */
-
-        if (
-            !Engine.Renderer.render()
-        ) {
-            return false;
-        }
-
-        /* ==========================================
-           SHOW
-        ========================================== */
-
-        if (
-            !Engine.VisibilityManager.show()
-        ) {
-            return false;
-        }
-
-        return true;
+        return engine.Renderer.show();
 
     },
 
@@ -7115,36 +6777,14 @@ CampusWord2007Simulateur.CaretEngine.Controller = {
 
         return CampusWord2007Simulateur
             .CaretEngine
-            .VisibilityManager
+            .Renderer
             .hide();
-
-    },
-
-    getPosition() {
-
-        return CampusWord2007Simulateur
-            .CaretEngine
-            .Position
-            .get();
-
-    },
-
-    reset() {
-
-        this.hide();
-
-        CampusWord2007Simulateur
-            .CaretEngine
-            .Position
-            .reset();
-
-        return true;
 
     },
 
     destroy() {
 
-        this.reset();
+        this.hide();
 
         this.initialized = false;
 
@@ -7153,14 +6793,6 @@ CampusWord2007Simulateur.CaretEngine.Controller = {
     }
 
 };
-
-
-
-
-
-
-
-
 
 
 
