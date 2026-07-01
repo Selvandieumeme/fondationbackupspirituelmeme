@@ -1648,11 +1648,34 @@ CampusWord2007Simulateur.PageFactory={
 
 
 
+
+
+
 /* ==========================================================
    CAMPUS WORD 2007 SIMULATEUR
    LAYOUT ENGINE
-   PHASE 1.1
+   PHASE 1.0
    FOUNDATION KERNEL
+   Dynamic Layout Core
+   ----------------------------------------------------------
+   RESPONSIBILITY
+
+   • Initialize Layout Engine
+   • Store runtime state
+   • Register current page
+   • Register writable area
+   • Register current caret position
+   • Provide shared runtime for all future modules
+   • Remain independent from rendering
+
+   DOES NOT
+
+   ✘ Render DOM
+   ✘ Create Pages
+   ✘ Create Paragraphs
+   ✘ Create Caret
+   ✘ Measure Characters
+   ✘ Calculate Line Breaks
 ========================================================== */
 
 CampusWord2007Simulateur.LayoutEngine = {
@@ -1665,123 +1688,76 @@ CampusWord2007Simulateur.LayoutEngine = {
 
     ready:false,
 
-    rendering:false,
-
-    updating:false,
-
-    layoutLocked:false,
-
-
+    version:"1.0",
 
     /* ======================================================
-       DOCUMENT METRICS
+       CURRENT DOCUMENT REFERENCES
     ====================================================== */
 
-    pageWidth:794,
+    current:{
 
-    pageHeight:1123,
+        page:null,
 
-    marginTop:96,
+        content:null
 
-    marginRight:96,
-
-    marginBottom:96,
-
-    marginLeft:96,
-
-
+    },
 
     /* ======================================================
-       TEXT METRICS
+       PAGE METRICS
     ====================================================== */
 
-    defaultFont:"Calibri",
+    page:{
 
-    defaultFontSize:16,
+        width:0,
 
-    defaultLineHeight:19,
+        height:0
 
-    defaultCharacterSpacing:0,
-
-    defaultWordSpacing:0,
-
-
+    },
 
     /* ======================================================
-       CURRENT LAYOUT STATE
+       WRITABLE AREA
     ====================================================== */
 
-    currentPage:null,
+    writableArea:{
 
-    currentParagraph:null,
+        left:0,
 
-    currentLine:null,
+        top:0,
 
-    currentCharacter:null,
+        width:0,
 
+        height:0,
 
+        right:0,
+
+        bottom:0
+
+    },
 
     /* ======================================================
-       CARET LOGICAL POSITION
-       (NOT PIXELS ON SCREEN)
+       CURRENT CARET POSITION
     ====================================================== */
 
     caret:{
 
-        pageIndex:0,
+        x:0,
 
-        paragraphIndex:0,
+        y:0,
 
-        lineIndex:0,
+        height:0,
 
-        characterIndex:0,
-
-        preferredColumn:0
+        baseline:0
 
     },
 
-
-
     /* ======================================================
-       CACHED POSITIONS
+       FUTURE MODULE REGISTRY
     ====================================================== */
 
-    positions:{
-
-        pages:[],
-
-        paragraphs:[],
-
-        lines:[],
-
-        characters:[]
-
-    },
-
-
+    modules:Object.create(null),
 
     /* ======================================================
-       LAYOUT FLAGS
-    ====================================================== */
-
-    dirty:{
-
-        document:true,
-
-        pages:true,
-
-        paragraphs:true,
-
-        lines:true,
-
-        caret:true
-
-    },
-
-
-
-    /* ======================================================
-       INITIALIZATION
+       INITIALIZE
     ====================================================== */
 
     initialize(){
@@ -1802,195 +1778,61 @@ CampusWord2007Simulateur.LayoutEngine = {
 
     },
 
-
-
-
-/* ======================================================
-   RESET
-====================================================== */
-
-reset(){
-
-    this.currentPage = null;
-
-    this.currentParagraph = null;
-
-    this.currentLine = null;
-
-    this.currentCharacter = null;
-
-    this.caret.pageIndex = 0;
-    this.caret.paragraphIndex = 0;
-    this.caret.lineIndex = 0;
-    this.caret.characterIndex = 0;
-    this.caret.preferredColumn = 0;
-
-    this.positions.pages.length = 0;
-    this.positions.paragraphs.length = 0;
-    this.positions.lines.length = 0;
-    this.positions.characters.length = 0;
-
-    /* ----------------------------------------------
-       KEEP LAYOUT CARET MODULES SYNCHRONIZED
-    ---------------------------------------------- */
-
-    if(
-        this.CaretPosition &&
-        typeof this.CaretPosition.reset === "function"
-    ){
-        this.CaretPosition.reset();
-    }
-
-    if(
-        this.Cursor &&
-        typeof this.Cursor.reset === "function"
-    ){
-        this.Cursor.reset();
-    }
-
-    this.markDirty();
-
-},
-
-
-
     /* ======================================================
-       DIRTY MANAGEMENT
+       RESET
     ====================================================== */
 
-    markDirty(){
+    reset(){
 
-        this.dirty.document=true;
-        this.dirty.pages=true;
-        this.dirty.paragraphs=true;
-        this.dirty.lines=true;
-        this.dirty.caret=true;
+        this.current.page=null;
+
+        this.current.content=null;
+
+        this.page.width=0;
+
+        this.page.height=0;
+
+        this.writableArea.left=0;
+        this.writableArea.top=0;
+        this.writableArea.width=0;
+        this.writableArea.height=0;
+        this.writableArea.right=0;
+        this.writableArea.bottom=0;
+
+        this.caret.x=0;
+        this.caret.y=0;
+        this.caret.height=0;
+        this.caret.baseline=0;
 
     },
-
-    clearDirty(){
-
-        this.dirty.document=false;
-        this.dirty.pages=false;
-        this.dirty.paragraphs=false;
-        this.dirty.lines=false;
-        this.dirty.caret=false;
-
-    },
-
-
 
     /* ======================================================
-       LOCK
+       MODULE REGISTRATION
     ====================================================== */
 
-    lock(){
+    registerModule(name,module){
 
-        this.layoutLocked=true;
+        if(
+            typeof name!=="string" ||
+            !name ||
+            !module
+        ){
 
-    },
+            return false;
 
-    unlock(){
+        }
 
-        this.layoutLocked=false;
+        this.modules[name]=module;
 
-    },
-
-
-
-    /* ======================================================
-       DOCUMENT METRICS
-    ====================================================== */
-
-    getContentWidth(){
-
-        return this.pageWidth-
-               this.marginLeft-
-               this.marginRight;
+        return true;
 
     },
 
-    getContentHeight(){
+    getModule(name){
 
-        return this.pageHeight-
-               this.marginTop-
-               this.marginBottom;
+        return this.modules[name] || null;
 
     },
-
-
-
-    /* ======================================================
-       PAGE REGISTRATION
-    ====================================================== */
-
-    setCurrentPage(page){
-
-        this.currentPage=page;
-
-    },
-
-    getCurrentPage(){
-
-        return this.currentPage;
-
-    },
-
-
-
-    /* ======================================================
-       PARAGRAPH REGISTRATION
-    ====================================================== */
-
-    setCurrentParagraph(paragraph){
-
-        this.currentParagraph=paragraph;
-
-    },
-
-    getCurrentParagraph(){
-
-        return this.currentParagraph;
-
-    },
-
-
-
-    /* ======================================================
-       LINE REGISTRATION
-    ====================================================== */
-
-    setCurrentLine(line){
-
-        this.currentLine=line;
-
-    },
-
-    getCurrentLine(){
-
-        return this.currentLine;
-
-    },
-
-
-
-    /* ======================================================
-       CHARACTER REGISTRATION
-    ====================================================== */
-
-    setCurrentCharacter(character){
-
-        this.currentCharacter=character;
-
-    },
-
-    getCurrentCharacter(){
-
-        return this.currentCharacter;
-
-    },
-
-
 
     /* ======================================================
        ENGINE STATUS
@@ -2000,26 +1842,6 @@ reset(){
 
         return this.ready;
 
-    },
-
-    isLocked(){
-
-        return this.layoutLocked;
-
-    },
-
-    isDirty(){
-
-        return(
-
-            this.dirty.document||
-            this.dirty.pages||
-            this.dirty.paragraphs||
-            this.dirty.lines||
-            this.dirty.caret
-
-        );
-
     }
 
 };
@@ -2033,332 +1855,21 @@ reset(){
 /* ==========================================================
    CAMPUS WORD 2007 SIMULATEUR
    LAYOUT ENGINE
-   PHASE 1.2A
-   GEOMETRY OBJECTS & METRICS CACHE
-========================================================== */
-
-CampusWord2007Simulateur.LayoutEngine.metrics = {
-
-    /* ======================================================
-       DOCUMENT GEOMETRY
-    ====================================================== */
-
-    document:{
-
-        width:0,
-        height:0,
-
-        left:0,
-        top:0,
-        right:0,
-        bottom:0
-
-    },
-
-    /* ======================================================
-       PAGE GEOMETRY
-    ====================================================== */
-
-    page:{
-
-        width:0,
-        height:0,
-
-        left:0,
-        top:0,
-        right:0,
-        bottom:0
-
-    },
-
-    /* ======================================================
-       CONTENT AREA
-    ====================================================== */
-
-    content:{
-
-        left:0,
-        top:0,
-
-        right:0,
-        bottom:0,
-
-        width:0,
-        height:0
-
-    },
-
-    /* ======================================================
-       MARGINS
-    ====================================================== */
-
-    margins:{
-
-        left:0,
-        top:0,
-        right:0,
-        bottom:0
-
-    },
-
-    /* ======================================================
-       TEXT AREA
-    ====================================================== */
-
-    textArea:{
-
-        left:0,
-        top:0,
-
-        width:0,
-        height:0,
-
-        right:0,
-        bottom:0
-
-    },
-
-    /* ======================================================
-       LINE CACHE
-       (Compatibility Cache)
-    ====================================================== */
-
-    line:{
-
-        height:19,
-
-        baseline:15,
-
-        ascent:15,
-
-        descent:4
-
-    },
-
-    /* ======================================================
-       CHARACTER CACHE
-    ====================================================== */
-
-    character:{
-
-        width:0,
-
-        height:19,
-
-        spacing:0
-
-    },
-
-    /* ======================================================
-       CARET CACHE
-    ====================================================== */
-
-    caret:{
-
-        width:1,
-
-        height:19,
-
-        x:0,
-
-        y:0,
-
-        baseline:0
-
-    },
-
-    /* ======================================================
-       PARAGRAPH CACHE
-    ====================================================== */
-
-    paragraph:{
-
-        firstLineIndent:0,
-
-        leftIndent:0,
-
-        rightIndent:0,
-
-        spacingBefore:0,
-
-        spacingAfter:0
-
-    },
-
-    /* ======================================================
-       PAGE LIMITS
-    ====================================================== */
-
-    limits:{
-
-        minX:0,
-        maxX:0,
-
-        minY:0,
-        maxY:0
-
-    }
-
-};
-
-/* ==========================================================
-   METRICS CACHE
-========================================================== */
-
-CampusWord2007Simulateur.LayoutEngine.cache = {
-
-    page:null,
-
-    content:null,
-
-    textLayer:null,
-
-    caretLayer:null,
-
-    selectionLayer:null,
-
-    objectLayer:null,
-
-    overlayLayer:null,
-
-    workspace:null,
-
-    viewport:null,
-
-    scrollArea:null,
-
-    pageRect:null,
-
-    contentRect:null,
-
-    textLayerRect:null,
-
-    caretLayerRect:null,
-
-    selectionLayerRect:null,
-
-    objectLayerRect:null,
-
-    overlayLayerRect:null,
-
-    paragraphRect:null,
-
-    characterRect:null,
-
-    workspaceRect:null,
-
-    viewportRect:null,
-
-    scrollRect:null
-
-};
-
-/* ==========================================================
-   RUNTIME GEOMETRY
-========================================================== */
-
-CampusWord2007Simulateur.LayoutEngine.runtime = {
-
-    dirty:true,
-
-    measuring:false,
-
-    updating:false,
-
-    version:1,
-
-    lastUpdate:0
-
-};
-
-/* ==========================================================
-   INTERNAL HELPERS
-========================================================== */
-
-CampusWord2007Simulateur.LayoutEngine.invalidate = function(){
-
-    this.runtime.dirty = true;
-
-};
-
-CampusWord2007Simulateur.LayoutEngine.validate = function(){
-
-    this.runtime.dirty = false;
-
-    this.runtime.lastUpdate = performance.now();
-
-};
-
-CampusWord2007Simulateur.LayoutEngine.isDirty = function(){
-
-    return this.runtime.dirty;
-
-};
-
-CampusWord2007Simulateur.LayoutEngine.getMetrics = function(){
-
-    return this.metrics;
-
-};
-
-CampusWord2007Simulateur.LayoutEngine.getCache = function(){
-
-    return this.cache;
-
-};
-
-/* ==========================================================
-   COMPATIBILITY SYNCHRONIZATION
-========================================================== */
-
-CampusWord2007Simulateur.LayoutEngine.syncMetrics = function(){
-
-    if(
-        this.LineMetrics &&
-        typeof this.LineMetrics.getMetrics === "function"
-    ){
-
-        const line = this.LineMetrics.getMetrics();
-
-        this.metrics.line.height = line.lineHeight;
-        this.metrics.line.baseline = line.baseline;
-        this.metrics.line.ascent = line.ascent;
-        this.metrics.line.descent = line.descent;
-
-    }
-
-    if(
-        this.CaretPosition &&
-        typeof this.CaretPosition.get === "function"
-    ){
-
-        const caret = this.CaretPosition.get();
-
-        if(caret){
-
-            this.metrics.caret.x = caret.x;
-            this.metrics.caret.y = caret.y;
-            this.metrics.caret.height = caret.height;
-            this.metrics.caret.baseline = caret.baseline;
-
-        }
-
-    }
-
-    return this.metrics;
-
-};
-
-
-
-
-
-
-/* ==========================================================
-   CAMPUS WORD 2007 SIMULATEUR
-   LAYOUT ENGINE
-   PHASE 1.2B
-   WRITABLE AREA CALCULATOR
+   PHASE 1.1
+   PAGE MEASUREMENT
+   ----------------------------------------------------------
+   RESPONSIBILITY
+
+   • Measure current page
+   • Measure page content
+   • Store page dimensions
+   • Register active page
+
+   DOES NOT
+
+   ✘ Calculate writable area
+   ✘ Calculate caret
+   ✘ Render DOM
 ========================================================== */
 
 (function(){
@@ -2366,632 +1877,60 @@ CampusWord2007Simulateur.LayoutEngine.syncMetrics = function(){
     const Layout =
         CampusWord2007Simulateur.LayoutEngine;
 
-    if(!Layout){
-        return;
-    }
-
-    /* ======================================================
-       UPDATE WRITABLE AREA
-    ====================================================== */
-
-    Layout.updateWritableArea = function(){
-
-        const Document =
-            CampusWord2007Simulateur.DocumentEngine;
-
-        if(
-            !Document ||
-            typeof Document.getActivePage !== "function"
-        ){
-            return false;
-        }
-
-        const page =
-            Document.getActivePage();
+    Layout.measurePage = function(page){
 
         if(!page){
+
             return false;
+
         }
 
         const content =
-            page.querySelector(
-                ".page-content"
-            );
+            page.querySelector(".page-content");
 
         if(!content){
+
             return false;
+
         }
 
-        const metrics =
-            Layout.metrics;
-
-        const config =
-            CampusWord2007Simulateur.Configuration || {};
-
-        /* ----------------------------------------------
-           PAGE SIZE
-        ---------------------------------------------- */
-
-        metrics.page.width =
-            content.clientWidth;
-
-        metrics.page.height =
-            content.clientHeight;
-
-        /* ----------------------------------------------
-           MARGINS
-        ---------------------------------------------- */
-
-        metrics.margins.left =
-            config.pageMarginLeft ??
-            Layout.marginLeft;
-
-        metrics.margins.top =
-            config.pageMarginTop ??
-            Layout.marginTop;
-
-        metrics.margins.right =
-            config.pageMarginRight ??
-            Layout.marginRight;
-
-        metrics.margins.bottom =
-            config.pageMarginBottom ??
-            Layout.marginBottom;
-
-        /* ----------------------------------------------
-           WRITABLE TEXT AREA
-        ---------------------------------------------- */
-
-        metrics.textArea.left =
-            metrics.margins.left;
-
-        metrics.textArea.top =
-            metrics.margins.top;
-
-        metrics.textArea.width =
-            metrics.page.width -
-            metrics.margins.left -
-            metrics.margins.right;
-
-        metrics.textArea.height =
-            metrics.page.height -
-            metrics.margins.top -
-            metrics.margins.bottom;
-
-        metrics.textArea.right =
-            metrics.textArea.left +
-            metrics.textArea.width;
-
-        metrics.textArea.bottom =
-            metrics.textArea.top +
-            metrics.textArea.height;
-
-        /* ----------------------------------------------
-           CONTENT
-        ---------------------------------------------- */
-
-        metrics.content.left =
-            metrics.textArea.left;
-
-        metrics.content.top =
-            metrics.textArea.top;
-
-        metrics.content.width =
-            metrics.textArea.width;
-
-        metrics.content.height =
-            metrics.textArea.height;
-
-        metrics.content.right =
-            metrics.textArea.right;
-
-        metrics.content.bottom =
-            metrics.textArea.bottom;
-
-        /* ----------------------------------------------
-           LIMITS
-        ---------------------------------------------- */
-
-        metrics.limits.minX =
-            metrics.textArea.left;
-
-        metrics.limits.maxX =
-            metrics.textArea.right;
-
-        metrics.limits.minY =
-            metrics.textArea.top;
-
-        metrics.limits.maxY =
-            metrics.textArea.bottom;
-
-        /* ----------------------------------------------
-           DEFAULT CARET POSITION
-        ---------------------------------------------- */
-
-        metrics.caret.x =
-            metrics.textArea.left;
-
-        metrics.caret.y =
-            metrics.textArea.top;
-
-        Layout.validate();
-
-        return true;
-
-    };
-
-    /* ======================================================
-       GET WRITABLE WIDTH
-    ====================================================== */
-
-    Layout.getWritableWidth = function(){
-
-        return Layout.metrics
-            .textArea
-            .width;
-
-    };
-
-    /* ======================================================
-       GET WRITABLE HEIGHT
-    ====================================================== */
-
-    Layout.getWritableHeight = function(){
-
-        return Layout.metrics
-            .textArea
-            .height;
-
-    };
-
-    /* ======================================================
-       GET WRITABLE RECT
-    ====================================================== */
-
-    Layout.getWritableRect = function(){
-
-        return{
-
-            left:
-                Layout.metrics.textArea.left,
-
-            top:
-                Layout.metrics.textArea.top,
-
-            right:
-                Layout.metrics.textArea.right,
-
-            bottom:
-                Layout.metrics.textArea.bottom,
-
-            width:
-                Layout.metrics.textArea.width,
-
-            height:
-                Layout.metrics.textArea.height
-
-        };
-
-    };
-
-    /* ======================================================
-       IS INSIDE WRITABLE AREA
-    ====================================================== */
-
-    Layout.isInsideWritableArea = function(x,y){
-
-        const area =
-            Layout.metrics.textArea;
-
-        return(
-
-            x >= area.left &&
-            x <= area.right &&
-            y >= area.top &&
-            y <= area.bottom
-
-        );
-
-    };
-
-})();
-
-
-
-
-
-
-
-/* ==========================================================
-   CAMPUS WORD 2007 SIMULATEUR
-   LAYOUT ENGINE
-   PHASE 1.2C
-   COORDINATE SYSTEM API
-   DOM GEOMETRY SCANNER
-========================================================== */
-
-(function(){
-
-    const Layout =
-        CampusWord2007Simulateur.LayoutEngine;
-
-    if(!Layout){
-        return;
-    }
-
-    /* ======================================================
-       REFRESH GEOMETRY CACHE
-    ====================================================== */
-
-    Layout.refreshGeometryCache = function(){
-
-        const Document =
-            CampusWord2007Simulateur.DocumentEngine;
-
-        if(
-            !Document ||
-            typeof Document.getActivePage !== "function"
-        ){
-            return false;
-        }
-
-        const page =
-            Document.getActivePage();
-
-        if(!page){
-            return false;
-        }
-
-        const DOM =
-            CampusWord2007Simulateur.DOMEngine;
-
-        const cache =
-            Layout.cache;
-
-        cache.page =
+        this.current.page =
             page;
 
-        cache.pageRect =
-            page.getBoundingClientRect();
+        this.current.content =
+            content;
 
-        /* --------------------------------------------------
-           PAGE CONTENT
-        -------------------------------------------------- */
+        this.page.width =
+            content.clientWidth;
 
-        cache.content =
-            page.querySelector(
-                ".page-content"
-            );
-
-        cache.contentRect =
-            cache.content
-                ? cache.content.getBoundingClientRect()
-                : null;
-
-        /* --------------------------------------------------
-           TEXT LAYER
-        -------------------------------------------------- */
-
-        cache.textLayer =
-            page.querySelector(
-                ".page-text-layer"
-            );
-
-        cache.textLayerRect =
-            cache.textLayer
-                ? cache.textLayer.getBoundingClientRect()
-                : null;
-
-        /* --------------------------------------------------
-           CARET LAYER
-        -------------------------------------------------- */
-
-        cache.caretLayer =
-            page.querySelector(
-                ".page-caret-layer"
-            );
-
-        cache.caretLayerRect =
-            cache.caretLayer
-                ? cache.caretLayer.getBoundingClientRect()
-                : null;
-
-        /* --------------------------------------------------
-           SELECTION LAYER
-        -------------------------------------------------- */
-
-        cache.selectionLayer =
-            page.querySelector(
-                ".page-selection-layer"
-            );
-
-        cache.selectionLayerRect =
-            cache.selectionLayer
-                ? cache.selectionLayer.getBoundingClientRect()
-                : null;
-
-        /* --------------------------------------------------
-           OBJECT LAYER
-        -------------------------------------------------- */
-
-        cache.objectLayer =
-            page.querySelector(
-                ".page-object-layer"
-            );
-
-        cache.objectLayerRect =
-            cache.objectLayer
-                ? cache.objectLayer.getBoundingClientRect()
-                : null;
-
-        /* --------------------------------------------------
-           OVERLAY LAYER
-        -------------------------------------------------- */
-
-        cache.overlayLayer =
-            page.querySelector(
-                ".page-overlay-layer"
-            );
-
-        cache.overlayLayerRect =
-            cache.overlayLayer
-                ? cache.overlayLayer.getBoundingClientRect()
-                : null;
-
-        /* --------------------------------------------------
-           WORKSPACE
-        -------------------------------------------------- */
-
-        cache.workspace =
-            DOM &&
-            typeof DOM.get === "function"
-                ? DOM.get("workspace")
-                : null;
-
-        cache.workspaceRect =
-            cache.workspace
-                ? cache.workspace.getBoundingClientRect()
-                : null;
-
-        /* --------------------------------------------------
-           VIEWPORT
-        -------------------------------------------------- */
-
-        cache.viewport =
-            DOM &&
-            typeof DOM.get === "function"
-                ? DOM.get("document-viewport")
-                : null;
-
-        cache.viewportRect =
-            cache.viewport
-                ? cache.viewport.getBoundingClientRect()
-                : null;
-
-        /* --------------------------------------------------
-           SCROLL AREA
-        -------------------------------------------------- */
-
-        cache.scrollArea =
-            DOM &&
-            typeof DOM.get === "function"
-                ? DOM.get("document-scroll-area")
-                : null;
-
-        cache.scrollRect =
-            cache.scrollArea
-                ? cache.scrollArea.getBoundingClientRect()
-                : null;
-
-        Layout.validate();
-
-        return true;
-
-    };
-
-    /* ======================================================
-       GET PAGE RECT
-    ====================================================== */
-
-    Layout.getPageRect = function(){
-
-        return Layout.cache.pageRect;
-
-    };
-
-    /* ======================================================
-       GET CONTENT RECT
-    ====================================================== */
-
-    Layout.getContentRect = function(){
-
-        return Layout.cache.contentRect;
-
-    };
-
-    /* ======================================================
-       GET TEXT LAYER RECT
-    ====================================================== */
-
-    Layout.getTextLayerRect = function(){
-
-        return Layout.cache.textLayerRect;
-
-    };
-
-    /* ======================================================
-       GET CARET LAYER RECT
-    ====================================================== */
-
-    Layout.getCaretLayerRect = function(){
-
-        return Layout.cache.caretLayerRect;
-
-    };
-
-    /* ======================================================
-       GET WORKSPACE RECT
-    ====================================================== */
-
-    Layout.getWorkspaceRect = function(){
-
-        return Layout.cache.workspaceRect;
-
-    };
-
-    /* ======================================================
-       GET VIEWPORT RECT
-    ====================================================== */
-
-    Layout.getViewportRect = function(){
-
-        return Layout.cache.viewportRect;
-
-    };
-
-    /* ======================================================
-       GET SCROLL RECT
-    ====================================================== */
-
-    Layout.getScrollRect = function(){
-
-        return Layout.cache.scrollRect;
-
-    };
-
-})();
-
-
-
-
-
-/* ==========================================================
-   CAMPUS WORD 2007 SIMULATEUR
-   LAYOUT ENGINE
-   PHASE 1.2D
-   PAGE BOUNDARY CALCULATOR
-========================================================== */
-
-(function(){
-
-    const Layout =
-        CampusWord2007Simulateur.LayoutEngine;
-
-    if(!Layout){
-        return;
-    }
-
-    /* ======================================================
-       UPDATE PAGE BOUNDARIES
-    ====================================================== */
-
-    Layout.updatePageBoundaries = function(){
-
-        if(
-            !this.metrics ||
-            !this.cache ||
-            !this.cache.pageRect ||
-            !this.metrics.limits
-        ){
-            return false;
-        }
-
-        const metrics =
-            this.metrics;
-
-        const pageRect =
-            this.cache.pageRect;
-
-        /* ----------------------------------------------
-           PAGE LIMITS (LOCAL COORDINATES)
-        ---------------------------------------------- */
-
-        metrics.page.left = 0;
-        metrics.page.top = 0;
-
-        metrics.page.right =
-            pageRect.width;
-
-        metrics.page.bottom =
-            pageRect.height;
-
-        metrics.page.width =
-            pageRect.width;
-
-        metrics.page.height =
-            pageRect.height;
-
-        /* ----------------------------------------------
-           PAGE BOUNDARIES -> USING LIMITS (NO NEW STRUCTURE)
-        ---------------------------------------------- */
-
-        metrics.limits.minX =
-            metrics.page.left;
-
-        metrics.limits.maxX =
-            metrics.page.right;
-
-        metrics.limits.minY =
-            metrics.page.top;
-
-        metrics.limits.maxY =
-            metrics.page.bottom;
-
-        Layout.validate();
-
-        return true;
-
-    };
-
-    /* ======================================================
-       GET PAGE BOUNDARIES
-    ====================================================== */
-
-    Layout.getPageBoundaries = function(){
+        this.page.height =
+            content.clientHeight;
 
         return {
 
-            minX: Layout.metrics.limits.minX,
-            maxX: Layout.metrics.limits.maxX,
-            minY: Layout.metrics.limits.minY,
-            maxY: Layout.metrics.limits.maxY
+            width:this.page.width,
+
+            height:this.page.height
 
         };
 
     };
 
-    /* ======================================================
-       GET PAGE SIZE
-    ====================================================== */
+    Layout.getCurrentPage = function(){
+
+        return this.current.page;
+
+    };
 
     Layout.getPageSize = function(){
 
-        return {
+        return{
 
-            width: Layout.metrics.page.width,
-            height: Layout.metrics.page.height
+            width:this.page.width,
+
+            height:this.page.height
 
         };
-
-    };
-
-    /* ======================================================
-       INSIDE PAGE ?
-    ====================================================== */
-
-    Layout.isInsidePage = function(x, y){
-
-        const boundary =
-            Layout.metrics.limits;
-
-        return (
-
-            x >= boundary.minX &&
-            x <= boundary.maxX &&
-            y >= boundary.minY &&
-            y <= boundary.maxY
-
-        );
 
     };
 
@@ -3003,221 +1942,155 @@ CampusWord2007Simulateur.LayoutEngine.syncMetrics = function(){
 
 
 
+
+
+
+
+
 /* ==========================================================
    CAMPUS WORD 2007 SIMULATEUR
    LAYOUT ENGINE
-   PHASE 1.2E
-   BASELINE & LINE METRICS
+   PHASE 1.2
+   WRITABLE AREA
+   ----------------------------------------------------------
+   RESPONSIBILITY
+
+   • Calculate writable area
+   • Apply page margins
+   • Store writable rectangle
+   • Provide public writable API
+
+   DOES NOT
+
+   ✘ Render DOM
+   ✘ Move Caret
+   ✘ Measure Characters
+   ✘ Create Pages
 ========================================================== */
 
-CampusWord2007Simulateur.LayoutEngine.LineMetrics = {
+(function(){
 
-    initialized: false,
+    const Layout =
+        CampusWord2007Simulateur.LayoutEngine;
 
-    metrics: {
+    /* ======================================================
+       PAGE MARGINS
+    ====================================================== */
 
-        fontFamily: "",
-        fontSize: 0,
-        lineHeight: 0,
+    Layout.margins = {
 
-        baseline: 0,
-        ascent: 0,
-        descent: 0,
+        top:96,
 
-        capHeight: 0,
-        xHeight: 0,
+        right:96,
 
-        characterWidth: 0,
-        spaceWidth: 0
+        bottom:96,
 
-    },
+        left:96
 
-    measurementElement: null,
+    };
 
-    initialize() {
+    /* ======================================================
+       CALCULATE WRITABLE AREA
+    ====================================================== */
 
-        if (this.initialized) {
-            return true;
-        }
-
-        this.createMeasurementElement();
-        this.initialized = true;
-
-        return true;
-
-    },
-
-    createMeasurementElement() {
-
-        if (this.measurementElement) {
-            return;
-        }
-
-        if (typeof document === "undefined") {
-            return;
-        }
-
-        const element =
-            document.createElement("span");
-
-        element.textContent = "Hg";
-
-        element.style.position = "absolute";
-        element.style.visibility = "hidden";
-        element.style.pointerEvents = "none";
-        element.style.whiteSpace = "pre";
-        element.style.left = "-100000px";
-        element.style.top = "-100000px";
-        element.style.padding = "0";
-        element.style.margin = "0";
-        element.style.border = "0";
-
-        if (document.body) {
-            document.body.appendChild(element);
-        }
-
-        this.measurementElement = element;
-
-    },
-
-    measure(fontFamily, fontSize, lineHeight) {
-
-        if (!this.measurementElement) {
-            this.createMeasurementElement();
-        }
-
-        if (!this.measurementElement) {
-            return this.getMetrics();
-        }
-
-        const element =
-            this.measurementElement;
-
-        element.style.fontFamily = fontFamily;
-        element.style.fontSize = fontSize + "px";
-        element.style.lineHeight = lineHeight + "px";
-
-        const rect =
-            element.getBoundingClientRect();
+    Layout.getWritableArea = function(){
 
         const width =
-            rect.width || 0;
-
-        /* --------------------------------------------------
-           STORE BASIC METRICS
-        -------------------------------------------------- */
-
-        this.metrics.fontFamily = fontFamily;
-        this.metrics.fontSize = fontSize;
-        this.metrics.lineHeight = lineHeight;
-
-        /* --------------------------------------------------
-           TYPOGRAPHIC APPROXIMATION (SAFE MODEL)
-        -------------------------------------------------- */
-
-        this.metrics.ascent =
-            Math.round(fontSize * 0.80);
-
-        this.metrics.descent =
             Math.max(
                 0,
-                lineHeight - this.metrics.ascent
+                this.page.width -
+                this.margins.left -
+                this.margins.right
             );
 
-        this.metrics.baseline =
-            this.metrics.ascent;
+        const height =
+            Math.max(
+                0,
+                this.page.height -
+                this.margins.top -
+                this.margins.bottom
+            );
 
-        this.metrics.capHeight =
-            Math.round(fontSize * 0.70);
+        this.writableArea.left =
+            this.margins.left;
 
-        this.metrics.xHeight =
-            Math.round(fontSize * 0.52);
+        this.writableArea.top =
+            this.margins.top;
 
-        this.metrics.characterWidth =
-            Math.round(width / 2);
+        this.writableArea.width =
+            width;
 
-        /* --------------------------------------------------
-           SPACE WIDTH
-        -------------------------------------------------- */
+        this.writableArea.height =
+            height;
 
-        element.textContent = " ";
+        this.writableArea.right =
+            this.writableArea.left +
+            width;
 
-        const spaceRect =
-            element.getBoundingClientRect();
-
-        this.metrics.spaceWidth =
-            spaceRect.width || 0;
-
-        /* restore */
-        element.textContent = "Hg";
-
-        return this.getMetrics();
-
-    },
-
-    getMetrics() {
+        this.writableArea.bottom =
+            this.writableArea.top +
+            height;
 
         return {
 
-            fontFamily: this.metrics.fontFamily,
-            fontSize: this.metrics.fontSize,
-            lineHeight: this.metrics.lineHeight,
+            left:this.writableArea.left,
 
-            baseline: this.metrics.baseline,
-            ascent: this.metrics.ascent,
-            descent: this.metrics.descent,
+            top:this.writableArea.top,
 
-            capHeight: this.metrics.capHeight,
-            xHeight: this.metrics.xHeight,
+            width:this.writableArea.width,
 
-            characterWidth: this.metrics.characterWidth,
-            spaceWidth: this.metrics.spaceWidth
+            height:this.writableArea.height,
+
+            right:this.writableArea.right,
+
+            bottom:this.writableArea.bottom
 
         };
 
-    },
+    };
 
-    getBaseline() {
-        return this.metrics.baseline;
-    },
+    /* ======================================================
+       UPDATE PAGE MARGINS
+    ====================================================== */
 
-    getAscent() {
-        return this.metrics.ascent;
-    },
+    Layout.setMargins = function(margins={}){
 
-    getDescent() {
-        return this.metrics.descent;
-    },
+        if(typeof margins.left==="number"){
 
-    getLineHeight() {
-        return this.metrics.lineHeight;
-    },
+            this.margins.left =
+                margins.left;
 
-    getCharacterWidth() {
-        return this.metrics.characterWidth;
-    },
-
-    getSpaceWidth() {
-        return this.metrics.spaceWidth;
-    },
-
-    destroy() {
-
-        if (
-            this.measurementElement &&
-            this.measurementElement.parentNode
-        ) {
-            this.measurementElement.parentNode.removeChild(
-                this.measurementElement
-            );
         }
 
-        this.measurementElement = null;
-        this.initialized = false;
+        if(typeof margins.top==="number"){
 
-    }
+            this.margins.top =
+                margins.top;
 
-};
+        }
+
+        if(typeof margins.right==="number"){
+
+            this.margins.right =
+                margins.right;
+
+        }
+
+        if(typeof margins.bottom==="number"){
+
+            this.margins.bottom =
+                margins.bottom;
+
+        }
+
+        return this.getWritableArea();
+
+    };
+
+})();
+
+
+
 
 
 
@@ -3226,2714 +2099,229 @@ CampusWord2007Simulateur.LayoutEngine.LineMetrics = {
 /* ==========================================================
    CAMPUS WORD 2007 SIMULATEUR
    LAYOUT ENGINE
-   PHASE 1.2F
-   DEFAULT INSERTION POINT
+   PHASE 1.3
+   FIRST INSERTION POINT
+   ----------------------------------------------------------
+   RESPONSIBILITY
+   • Calculate first writable position
+   • Return logical caret coordinates
+   • Store current caret position
+   • Dynamic API
+   ----------------------------------------------------------
+   DOES NOT
+   ✘ Render caret
+   ✘ Create DOM
+   ✘ Move caret visually
 ========================================================== */
 
-CampusWord2007Simulateur.LayoutEngine.InsertionPoint = {
+(function(){
 
-    initialized: false,
+    const Layout =
+        CampusWord2007Simulateur.LayoutEngine;
 
-    point: {
+    if(!Layout){
+        return;
+    }
 
-        x: 0,
-        y: 0
+    /* ======================================================
+       CURRENT CARET POSITION
+    ====================================================== */
 
-    },
+    Layout.currentCaretPosition = {
 
-    initialize() {
+        page : null,
 
-        if (this.initialized) {
-            return true;
-        }
+        x : 0,
 
-        this.initialized = true;
+        y : 0
 
-        return true;
+    };
 
-    },
+    /* ======================================================
+       FIRST INSERTION POINT
+    ====================================================== */
 
-    calculate(page) {
+    Layout.getFirstInsertionPoint = function(page){
 
-        if (!page) {
+        page =
+            page ||
+            Layout.currentPage;
+
+        if(!page){
             return null;
         }
 
-        const Layout =
-            CampusWord2007Simulateur.LayoutEngine;
+        if(
+            typeof Layout.measurePage === "function"
+        ){
+            Layout.measurePage(page);
+        }
 
-        const Geometry =
-            Layout.Geometry;
+        const area =
+            Layout.getWritableArea();
 
-        const WritableArea =
-            Layout.WritableArea;
-
-        const LineMetrics =
-            Layout.LineMetrics;
-
-        /* --------------------------------------------------
-           SAFE GUARD: required modules
-        -------------------------------------------------- */
-
-        if (!Layout) {
+        if(!area){
             return null;
         }
 
-        if (
-            !WritableArea ||
-            typeof WritableArea.calculate !== "function"
-        ) {
+        const point = {
+
+            page : page,
+
+            x : Math.round(area.left),
+
+            y : Math.round(area.top)
+
+        };
+
+        Layout.currentCaretPosition = point;
+
+        return point;
+
+    };
+
+    /* ======================================================
+       CURRENT CARET POSITION
+    ====================================================== */
+
+    Layout.getCurrentCaretPosition = function(){
+
+        return {
+
+            page :
+                Layout.currentCaretPosition.page,
+
+            x :
+                Layout.currentCaretPosition.x,
+
+            y :
+                Layout.currentCaretPosition.y
+
+        };
+
+    };
+
+})();
+
+
+
+
+
+
+
+
+
+
+/* ==========================================================
+   CAMPUS WORD 2007 SIMULATEUR
+   LAYOUT ENGINE
+   PHASE 1.4
+   FIRST INSERTION POINT
+   ----------------------------------------------------------
+   RESPONSIBILITY
+
+   • Compute first insertion point
+   • Use writable area only
+   • Return logical caret coordinates
+   • Keep page reference
+
+   DOES NOT
+
+   ✘ Create caret
+   ✘ Render caret
+   ✘ Blink
+   ✘ Modify DOM
+========================================================== */
+
+(function(){
+
+    const Layout =
+        CampusWord2007Simulateur.LayoutEngine;
+
+    if(!Layout){
+        return;
+    }
+
+    /* ======================================================
+       FIRST INSERTION POINT
+    ====================================================== */
+
+    Layout.getFirstInsertionPoint = function(){
+
+        /* ----------------------------------------------
+           ENSURE PAGE IS MEASURED
+        ---------------------------------------------- */
+
+        if(
+            typeof this.measurePage === "function"
+        ){
+            this.measurePage();
+        }
+
+        /* ----------------------------------------------
+           CURRENT PAGE
+        ---------------------------------------------- */
+
+        const page =
+            this.getCurrentPage();
+
+        if(!page){
             return null;
         }
 
-        if (
-            !LineMetrics ||
-            typeof LineMetrics.getMetrics !== "function"
-        ) {
+        /* ----------------------------------------------
+           WRITABLE AREA
+        ---------------------------------------------- */
+
+        const area =
+            this.getWritableArea();
+
+        if(!area){
             return null;
         }
 
-        /* --------------------------------------------------
-           MEASURE PAGE (IF AVAILABLE)
-        -------------------------------------------------- */
+        /* ----------------------------------------------
+           DEFAULT LINE METRICS
+        ---------------------------------------------- */
 
-        if (
-            Geometry &&
-            typeof Geometry.measure === "function"
-        ) {
-            Geometry.measure(page);
-        }
-
-        /* --------------------------------------------------
-           CALCULATE WRITABLE AREA
-        -------------------------------------------------- */
-
-        WritableArea.calculate(page);
-
-        const writable =
-            WritableArea.get ? WritableArea.get() : null;
-
-        if (!writable) {
-            return null;
-        }
-
-        const metrics =
-            LineMetrics.getMetrics();
+        const lineHeight =
+            Number(this.defaultLineHeight) || 19;
 
         const baseline =
-            metrics && metrics.baseline
-                ? metrics.baseline
-                : 0;
+            Math.round(lineHeight * 0.80);
 
-        /* --------------------------------------------------
-           INSERTION POINT
-        -------------------------------------------------- */
+        /* ----------------------------------------------
+           RETURN LOGICAL POSITION
+        ---------------------------------------------- */
 
-        this.point.x =
-            Math.round(
-                writable.left || 0
-            );
+        return{
 
-        this.point.y =
-            Math.round(
-                (writable.top || 0) + baseline
-            );
-
-        return this.get();
-
-    },
-
-    get() {
-
-        return {
-
-            x: this.point.x,
-            y: this.point.y
-
-        };
-
-    },
-
-    getX() {
-        return this.point.x;
-    },
-
-    getY() {
-        return this.point.y;
-    },
-
-    reset() {
-
-        this.point.x = 0;
-        this.point.y = 0;
-
-    },
-
-    destroy() {
-
-        this.reset();
-        this.initialized = false;
-
-    }
-
-};
-
-
-
-
-
-
-/* ==========================================================
-   CAMPUS WORD 2007 SIMULATEUR
-   LAYOUT ENGINE
-   PHASE 1.3A
-   VIEWPORT FOUNDATION (CLEAN VERSION)
-========================================================== */
-
-CampusWord2007Simulateur.LayoutEngine.Viewport = {
-
-    initialized: false,
-
-    metrics: {
-
-        width: 0,
-        height: 0,
-
-        clientWidth: 0,
-        clientHeight: 0,
-
-        scrollWidth: 0,
-        scrollHeight: 0,
-
-        scrollLeft: 0,
-        scrollTop: 0,
-
-        devicePixelRatio: 1,
-
-        orientation: "portrait",
-
-        visualViewport: null
-    },
-
-    root: null,
-
-    initialize() {
-
-        if (this.initialized) {
-            return true;
-        }
-
-        this.root =
-            (typeof document !== "undefined")
-                ? document.documentElement
-                : null;
-
-        this.metrics.devicePixelRatio =
-            (typeof window !== "undefined" && window.devicePixelRatio)
-                ? window.devicePixelRatio
-                : 1;
-
-        if (typeof window !== "undefined" && window.visualViewport) {
-            this.metrics.visualViewport = window.visualViewport;
-        }
-
-        this.initialized = true;
-
-        return true;
-    },
-
-    setMetrics(data) {
-
-        if (!data || typeof data !== "object") {
-            return false;
-        }
-
-        Object.assign(this.metrics, data);
-
-        return true;
-    },
-
-    getMetrics() {
-
-        return {
-            width: this.metrics.width,
-            height: this.metrics.height,
-
-            clientWidth: this.metrics.clientWidth,
-            clientHeight: this.metrics.clientHeight,
-
-            scrollWidth: this.metrics.scrollWidth,
-            scrollHeight: this.metrics.scrollHeight,
-
-            scrollLeft: this.metrics.scrollLeft,
-            scrollTop: this.metrics.scrollTop,
-
-            devicePixelRatio: this.metrics.devicePixelRatio,
-            orientation: this.metrics.orientation,
-
-            visualViewport: this.metrics.visualViewport
-        };
-    },
-
-    getWidth() { return this.metrics.width; },
-    getHeight() { return this.metrics.height; },
-
-    getClientWidth() { return this.metrics.clientWidth; },
-    getClientHeight() { return this.metrics.clientHeight; },
-
-    getScrollWidth() { return this.metrics.scrollWidth; },
-    getScrollHeight() { return this.metrics.scrollHeight; },
-
-    getScrollLeft() { return this.metrics.scrollLeft; },
-    getScrollTop() { return this.metrics.scrollTop; },
-
-    getDevicePixelRatio() { return this.metrics.devicePixelRatio; },
-
-    getOrientation() { return this.metrics.orientation; },
-
-    getVisualViewport() { return this.metrics.visualViewport; },
-
-    destroy() {
-
-        this.root = null;
-
-        this.metrics = {
-            width: 0,
-            height: 0,
-
-            clientWidth: 0,
-            clientHeight: 0,
-
-            scrollWidth: 0,
-            scrollHeight: 0,
-
-            scrollLeft: 0,
-            scrollTop: 0,
-
-            devicePixelRatio: 1,
-
-            orientation: "portrait",
-
-            visualViewport: null
-        };
-
-        this.initialized = false;
-    }
-};
-
-
-
-
-
-
-
-
-/* ==========================================================
-   CAMPUS WORD 2007 SIMULATEUR
-   LAYOUT ENGINE
-   PHASE 1.3B
-   VIEWPORT METRICS COLLECTOR (CLEAN VERSION)
-========================================================== */
-
-CampusWord2007Simulateur.LayoutEngine.Viewport.refresh = function () {
-
-    if (!this.initialized) {
-        return false;
-    }
-
-    const root =
-        (typeof document !== "undefined")
-            ? document.documentElement
-            : null;
-
-    const body =
-        (typeof document !== "undefined")
-            ? document.body
-            : null;
-
-    const visual =
-        (typeof window !== "undefined")
-            ? window.visualViewport
-            : null;
-
-    if (!root || typeof window === "undefined") {
-        return false;
-    }
-
-    this.metrics.width =
-        window.innerWidth || 0;
-
-    this.metrics.height =
-        window.innerHeight || 0;
-
-    this.metrics.clientWidth =
-        root.clientWidth || 0;
-
-    this.metrics.clientHeight =
-        root.clientHeight || 0;
-
-    this.metrics.scrollWidth =
-        Math.max(
-            root.scrollWidth || 0,
-            body ? (body.scrollWidth || 0) : 0
-        );
-
-    this.metrics.scrollHeight =
-        Math.max(
-            root.scrollHeight || 0,
-            body ? (body.scrollHeight || 0) : 0
-        );
-
-    this.metrics.scrollLeft =
-        window.pageXOffset ||
-        root.scrollLeft ||
-        0;
-
-    this.metrics.scrollTop =
-        window.pageYOffset ||
-        root.scrollTop ||
-        0;
-
-    this.metrics.devicePixelRatio =
-        window.devicePixelRatio || 1;
-
-    this.metrics.orientation =
-        this.metrics.width >= this.metrics.height
-            ? "landscape"
-            : "portrait";
-
-    if (visual) {
-
-        this.metrics.visualViewport = visual;
-
-        this.metrics.scale =
-            visual.scale || 1;
-
-        this.metrics.offsetLeft =
-            visual.offsetLeft || 0;
-
-        this.metrics.offsetTop =
-            visual.offsetTop || 0;
-
-    } else {
-
-        this.metrics.visualViewport = null;
-
-        this.metrics.scale = 1;
-
-        this.metrics.offsetLeft = 0;
-
-        this.metrics.offsetTop = 0;
-    }
-
-    return this.getMetrics();
-};
-
-
-
-
-
-
-
-
-
-
-
-
-
-/* ==========================================================
-   CAMPUS WORD 2007 SIMULATEUR
-   LAYOUT ENGINE
-   PHASE 2.1
-   CURSOR LAYOUT API (CLEAN VERSION)
-========================================================== */
-
-CampusWord2007Simulateur.LayoutEngine.Cursor = {
-
-    initialized: false,
-
-    current: {
-        page: null,
-        paragraph: null,
-        line: null,
-        x: 0,
-        y: 0
-    },
-
-    next: {
-        page: null,
-        paragraph: null,
-        line: null,
-        x: 0,
-        y: 0
-    },
-
-    initialize() {
-
-        if (this.initialized) {
-            return true;
-        }
-
-        this.reset();
-        this.initialized = true;
-
-        return true;
-    },
-
-    setCurrent(position) {
-
-        if (!position || typeof position !== "object") {
-            return false;
-        }
-
-        Object.assign(this.current, {
-
-            page: position.page ?? this.current.page,
-            paragraph: position.paragraph ?? this.current.paragraph,
-            line: position.line ?? this.current.line,
-            x: Number(position.x) || 0,
-            y: Number(position.y) || 0
-
-        });
-
-        return true;
-    },
-
-    setNext(position) {
-
-        if (!position || typeof position !== "object") {
-            return false;
-        }
-
-        Object.assign(this.next, {
-
-            page: position.page ?? this.next.page,
-            paragraph: position.paragraph ?? this.next.paragraph,
-            line: position.line ?? this.next.line,
-            x: Number(position.x) || 0,
-            y: Number(position.y) || 0
-
-        });
-
-        return true;
-    },
-
-    getCurrent() {
-
-        return {
-            page: this.current.page,
-            paragraph: this.current.paragraph,
-            line: this.current.line,
-            x: this.current.x,
-            y: this.current.y
-        };
-    },
-
-    getNext() {
-
-        return {
-            page: this.next.page,
-            paragraph: this.next.paragraph,
-            line: this.next.line,
-            x: this.next.x,
-            y: this.next.y
-        };
-    },
-
-    getCurrentX() {
-        return this.current.x;
-    },
-
-    getCurrentY() {
-        return this.current.y;
-    },
-
-    getNextX() {
-        return this.next.x;
-    },
-
-    getNextY() {
-        return this.next.y;
-    },
-
-    reset() {
-
-        this.current = {
-            page: null,
-            paragraph: null,
-            line: null,
-            x: 0,
-            y: 0
-        };
-
-        this.next = {
-            page: null,
-            paragraph: null,
-            line: null,
-            x: 0,
-            y: 0
-        };
-    },
-
-    destroy() {
-
-        this.reset();
-        this.initialized = false;
-    }
-};
-
-
-
-
-
-
-
-
-/* ==========================================================
-   CAMPUS WORD 2007 SIMULATEUR
-   LAYOUT ENGINE
-   PHASE 2.2
-   CHARACTER MEASUREMENT (CLEAN VERSION)
-========================================================== */
-
-CampusWord2007Simulateur.LayoutEngine.CharacterMeasurement = {
-
-    initialized: false,
-
-    canvas: null,
-
-    context: null,
-
-    currentFont: {
-        family: "Calibri",
-        size: 16,
-        weight: "normal",
-        style: "normal"
-    },
-
-    cache: Object.create(null),
-
-    initialize() {
-
-        if (this.initialized) {
-            return true;
-        }
-
-        if (typeof document === "undefined") {
-            return false;
-        }
-
-        this.canvas = document.createElement("canvas");
-
-        this.context = this.canvas.getContext("2d");
-
-        if (!this.context) {
-            return false;
-        }
-
-        this.updateFont(this.currentFont);
-
-        this.initialized = true;
-
-        return true;
-    },
-
-    updateFont(font = {}) {
-
-        if (!this.context) {
-            return false;
-        }
-
-        this.currentFont.family =
-            font.family ?? this.currentFont.family;
-
-        this.currentFont.size =
-            Number(font.size) || this.currentFont.size;
-
-        this.currentFont.weight =
-            font.weight ?? this.currentFont.weight;
-
-        this.currentFont.style =
-            font.style ?? this.currentFont.style;
-
-        const safeFamily =
-            this.currentFont.family || "Calibri";
-
-        const safeSize =
-            this.currentFont.size > 0 ? this.currentFont.size : 16;
-
-        const safeWeight =
-            this.currentFont.weight || "normal";
-
-        const safeStyle =
-            this.currentFont.style || "normal";
-
-        this.context.font =
-            `${safeStyle} ${safeWeight} ${safeSize}px ${safeFamily}`;
-
-        return true;
-    },
-
-    clearCache() {
-        this.cache = Object.create(null);
-    },
-
-    measure(character) {
-
-        if (!this.context) {
-            return 0;
-        }
-
-        if (typeof character !== "string" || character.length !== 1) {
-            return 0;
-        }
-
-        const key =
-            this.context.font + "::" + character;
-
-        if (this.cache[key] !== undefined) {
-            return this.cache[key];
-        }
-
-        const width =
-            this.context.measureText(character).width || 0;
-
-        this.cache[key] = width;
-
-        return width;
-    },
-
-    measureSpace() {
-        return this.measure(" ");
-    },
-
-    measureTab(tabSize = 4) {
-
-        const space = this.measureSpace();
-
-        return space * (Number(tabSize) || 4);
-    },
-
-    getCurrentFont() {
-
-        return {
-            family: this.currentFont.family,
-            size: this.currentFont.size,
-            weight: this.currentFont.weight,
-            style: this.currentFont.style
-        };
-    },
-
-    getCharacterWidth(character) {
-        return this.measure(character);
-    },
-
-    destroy() {
-
-        this.canvas = null;
-        this.context = null;
-
-        this.clearCache();
-
-        this.initialized = false;
-    }
-};
-
-
-
-
-
-
-
-/* ==========================================================
-   CAMPUS WORD 2007 SIMULATEUR
-   LAYOUT ENGINE
-   PHASE 2.3
-   LINE LAYOUT MANAGER (CLEAN VERSION)
-========================================================== */
-
-CampusWord2007Simulateur.LayoutEngine.LineLayout = {
-
-    initialized: false,
-
-    line: {
-
-        index: 0,
-
-        startX: 0,
-
-        endX: 0,
-
-        width: 0,
-
-        availableWidth: 0,
-
-        baseline: 0,
-
-        characterCount: 0,
-
-        wrapped: false
-    },
-
-    initialize() {
-
-        if (this.initialized) {
-            return true;
-        }
-
-        this.initialized = true;
-
-        return true;
-    },
-
-    begin(availableWidth) {
-
-        const InsertionPoint =
-            CampusWord2007Simulateur.LayoutEngine.InsertionPoint;
-
-        const Metrics =
-            CampusWord2007Simulateur.LayoutEngine.LineMetrics;
-
-        if (!InsertionPoint || !Metrics) {
-            return null;
-        }
-
-        const point =
-            InsertionPoint.get();
-
-        const safeWidth =
-            Number(availableWidth) || 0;
-
-        this.line.startX = point?.x || 0;
-        this.line.endX = point?.x || 0;
-
-        this.line.width = 0;
-
-        this.line.availableWidth = safeWidth;
-
-        this.line.baseline =
-            (Metrics.getBaseline && Metrics.getBaseline()) || 0;
-
-        this.line.characterCount = 0;
-
-        this.line.wrapped = false;
-
-        return this.getLine();
-    },
-
-    canFit(characterWidth) {
-
-        const width =
-            Number(characterWidth) || 0;
-
-        return (
-            this.line.width + width <= this.line.availableWidth
-        );
-    },
-
-    append(characterWidth) {
-
-        const width =
-            Number(characterWidth) || 0;
-
-        this.line.width += width;
-
-        this.line.endX =
-            this.line.startX + this.line.width;
-
-        this.line.characterCount += 1;
-    },
-
-    wrap() {
-        this.line.wrapped = true;
-    },
-
-    nextLine(availableWidth) {
-
-        this.line.index += 1;
-
-        return this.begin(availableWidth);
-    },
-
-    getLine() {
-
-        return {
-            index: this.line.index,
-
-            startX: this.line.startX,
-            endX: this.line.endX,
-
-            width: this.line.width,
-            availableWidth: this.line.availableWidth,
-
-            baseline: this.line.baseline,
-
-            characterCount: this.line.characterCount,
-
-            wrapped: this.line.wrapped
-        };
-    },
-
-    getStartX() {
-        return this.line.startX;
-    },
-
-    getEndX() {
-        return this.line.endX;
-    },
-
-    getBaseline() {
-        return this.line.baseline;
-    },
-
-    getWidth() {
-        return this.line.width;
-    },
-
-    isWrapped() {
-        return this.line.wrapped;
-    },
-
-    reset() {
-
-        this.line = {
-            index: 0,
-
-            startX: 0,
-            endX: 0,
-
-            width: 0,
-            availableWidth: 0,
-
-            baseline: 0,
-
-            characterCount: 0,
-
-            wrapped: false
-        };
-    },
-
-    destroy() {
-
-        this.reset();
-
-        this.initialized = false;
-    }
-};
-
-
-
-
-
-
-
-
-/* ==========================================================
-   CAMPUS WORD 2007 SIMULATEUR
-   LAYOUT ENGINE
-   PHASE 2.4
-   PARAGRAPH FLOW MANAGER
-   ----------------------------------------------------------
-   RESPONSIBILITY
-
-   • Compute paragraph flow
-   • Paragraph spacing
-   • First line indent
-   • Left / Right indent
-   • Paragraph start position
-   • Paragraph next position
-
-   DOES NOT
-
-   • create paragraph
-   • move caret
-   • render text
-   • create pages
-   ========================================================== */
-
-CampusWord2007Simulateur.LayoutEngine.ParagraphFlow = {
-
-    initialized: false,
-
-    defaults: {
-
-        spaceBefore: 0,
-        spaceAfter: 0,
-        firstLineIndent: 0,
-        leftIndent: 0,
-        rightIndent: 0
-
-    },
-
-    current: {
-
-        x: 0,
-        y: 0,
-        width: 0,
-        height: 0,
-        baseline: 0
-
-    },
-
-    initialize() {
-
-        if (this.initialized) return true;
-
-        this.initialized = true;
-
-        return true;
-    },
-
-    compute(options = {}) {
-
-        const LayoutEngine =
-            CampusWord2007Simulateur.LayoutEngine;
-
-        if (!LayoutEngine) return null;
-
-        const WritableArea =
-            LayoutEngine.WritableArea;
-
-        const LineMetrics =
-            LayoutEngine.LineMetrics;
-
-        if (!WritableArea || !LineMetrics) return null;
-
-        const writableArea =
-            WritableArea.get ? WritableArea.get() : null;
-
-        const metrics =
-            LineMetrics.getMetrics ? LineMetrics.getMetrics() : null;
-
-        if (!writableArea || !metrics) return null;
-
-        const config = {
-
-            spaceBefore:
-                options.spaceBefore ?? this.defaults.spaceBefore,
-
-            spaceAfter:
-                options.spaceAfter ?? this.defaults.spaceAfter,
-
-            firstLineIndent:
-                options.firstLineIndent ?? this.defaults.firstLineIndent,
-
-            leftIndent:
-                options.leftIndent ?? this.defaults.leftIndent,
-
-            rightIndent:
-                options.rightIndent ?? this.defaults.rightIndent
-
-        };
-
-        this.current.x = Math.round(
-            writableArea.left +
-            config.leftIndent +
-            config.firstLineIndent
-        );
-
-        this.current.y = Math.round(
-            writableArea.top +
-            config.spaceBefore
-        );
-
-        const usableWidth =
-            Math.max(
-                0,
-                writableArea.width -
-                config.leftIndent -
-                config.rightIndent
-            );
-
-        this.current.width = usableWidth;
-        this.current.height = metrics.lineHeight || 0;
-        this.current.baseline = metrics.baseline || 0;
-
-        return this.getCurrent();
-    },
-
-    getCurrent() {
-
-        return {
-            x: this.current.x,
-            y: this.current.y,
-            width: this.current.width,
-            height: this.current.height,
-            baseline: this.current.baseline
-        };
-
-    },
-
-    getNextParagraphPosition() {
-
-        return {
-            x: this.current.x,
-            y:
-                this.current.y +
-                this.current.height +
-                this.defaults.spaceAfter
-        };
-
-    },
-
-    setDefaults(options = {}) {
-
-        if (typeof options.spaceBefore === "number") {
-            this.defaults.spaceBefore = options.spaceBefore;
-        }
-
-        if (typeof options.spaceAfter === "number") {
-            this.defaults.spaceAfter = options.spaceAfter;
-        }
-
-        if (typeof options.firstLineIndent === "number") {
-            this.defaults.firstLineIndent = options.firstLineIndent;
-        }
-
-        if (typeof options.leftIndent === "number") {
-            this.defaults.leftIndent = options.leftIndent;
-        }
-
-        if (typeof options.rightIndent === "number") {
-            this.defaults.rightIndent = options.rightIndent;
-        }
-
-    },
-
-    reset() {
-
-        this.current.x = 0;
-        this.current.y = 0;
-        this.current.width = 0;
-        this.current.height = 0;
-        this.current.baseline = 0;
-
-    },
-
-    destroy() {
-
-        this.reset();
-        this.initialized = false;
-
-    }
-
-};
-
-
-
-
-
-
-/* ==========================================================
-   CAMPUS WORD 2007 SIMULATEUR
-   LAYOUT ENGINE
-   PHASE 2.5
-   PAGE FLOW MANAGER
-   ----------------------------------------------------------
-   RESPONSIBILITY
-   • Decide page overflow
-   • Decide when next page is required
-   • Create page automatically when necessary
-   • Return destination page only
-   ----------------------------------------------------------
-   DOES NOT
-   ✘ Move caret
-   ✘ Render text
-   ✘ Create paragraph
-   ✘ Calculate character position
-   ========================================================== */
-
-CampusWord2007Simulateur.LayoutEngine.PageFlow = {
-
-    initialized: false,
-
-    initialize() {
-
-        if (this.initialized) return true;
-
-        this.initialized = true;
-
-        return true;
-    },
-
-    getDestination(currentPage, nextParagraphHeight) {
-
-        if (!currentPage) return null;
-
-        const LayoutEngine =
-            CampusWord2007Simulateur.LayoutEngine;
-
-        const Limits =
-            LayoutEngine.PageLimits;
-
-        if (!Limits || typeof Limits.calculate !== "function") {
-            return currentPage;
-        }
-
-        Limits.calculate(currentPage);
-
-        const pageLimits =
-            Limits.get ? Limits.get() : null;
-
-        if (!pageLimits) {
-            return currentPage;
-        }
-
-        const textLayer =
-            currentPage.querySelector(".page-text-layer");
-
-        if (!textLayer) {
-            return currentPage;
-        }
-
-        const usedHeight =
-            textLayer.scrollHeight || 0;
-
-        const availableHeight =
-            pageLimits.writableHeight || 0;
-
-        const neededHeight =
-            nextParagraphHeight || 0;
-
-        if (usedHeight + neededHeight <= availableHeight) {
-            return currentPage;
-        }
-
-        const Document =
-            CampusWord2007Simulateur.DocumentEngine;
-
-        const PageFactory =
-            CampusWord2007Simulateur.PageFactory;
-
-        if (!Document || !PageFactory) {
-            return currentPage;
-        }
-
-        const pages =
-            typeof Document.getPages === "function"
-                ? Document.getPages()
-                : [];
-
-        const index =
-            pages.indexOf(currentPage);
-
-        if (index >= 0 && index < pages.length - 1) {
-            return pages[index + 1];
-        }
-
-        if (typeof PageFactory.createPage === "function") {
-            return PageFactory.createPage();
-        }
-
-        return currentPage;
-
-    },
-
-    pageRequired(currentPage, nextParagraphHeight) {
-
-        const destination =
-            this.getDestination(currentPage, nextParagraphHeight);
-
-        return (
-            destination &&
-            destination !== currentPage
-        );
-
-    },
-
-    destroy() {
-        this.initialized = false;
-    }
-
-};
-
-
-
-
-
-
-
-
-
-/* ==========================================================
-   CAMPUS WORD 2007 SIMULATEUR
-   LAYOUT ENGINE
-   PHASE 2.6A
-   CARET POSITION OBJECT
-   ----------------------------------------------------------
-   RESPONSIBILITY
-   • Standard caret position object
-   • Store layout position
-   • Public API
-   • Shared by all layout modules
-   ----------------------------------------------------------
-   DOES NOT
-   ✘ Calculate coordinates
-   ✘ Move caret
-   ✘ Read DOM
-   ✘ Modify DOM
-   ✘ Create pages
-   ✘ Create paragraphs
-   ========================================================== */
-
-CampusWord2007Simulateur.LayoutEngine.CaretPosition = {
-
-    initialized: false,
-
-    position: null,
-
-    initialize() {
-
-        if (this.initialized) return true;
-
-        this.reset();
-
-        this.initialized = true;
-
-        return true;
-    },
-
-    create() {
-
-        return {
-            page: null,
-            pageIndex: -1,
-            paragraph: null,
-            paragraphIndex: -1,
-            line: null,
-            lineIndex: -1,
-            character: null,
-            characterIndex: -1,
-            x: 0,
-            y: 0,
-            baseline: 0,
-            height: 0,
-            valid: false
-        };
-
-    },
-
-    reset() {
-
-        this.position = this.create();
-        return this.position;
-
-    },
-
-    set(data = {}) {
-
-        if (!this.position) {
-            this.position = this.create();
-        }
-
-        if (typeof data !== "object") {
-            return this.position;
-        }
-
-        Object.assign(this.position, data);
-
-        this.position.valid = true;
-
-        return this.position;
-
-    },
-
-    get() {
-
-        if (!this.position) {
-            this.position = this.create();
-        }
-
-        return {
-            page: this.position.page,
-            pageIndex: this.position.pageIndex,
-            paragraph: this.position.paragraph,
-            paragraphIndex: this.position.paragraphIndex,
-            line: this.position.line,
-            lineIndex: this.position.lineIndex,
-            character: this.position.character,
-            characterIndex: this.position.characterIndex,
-            x: this.position.x,
-            y: this.position.y,
-            baseline: this.position.baseline,
-            height: this.position.height,
-            valid: this.position.valid
-        };
-
-    },
-
-    invalidate() {
-
-        if (!this.position) return;
-
-        this.position.valid = false;
-
-    },
-
-    isValid() {
-
-        return !!(
-            this.position &&
-            this.position.valid === true
-        );
-
-    },
-
-    destroy() {
-
-        this.position = null;
-        this.initialized = false;
-
-    }
-
-};
-
-
-
-
-
-
-
-
-
-/* ==========================================================
-   CAMPUS WORD 2007 SIMULATEUR
-   LAYOUT ENGINE
-   PHASE 2.6B
-   CHARACTER POSITION RESOLVER
-   ----------------------------------------------------------
-   RESPONSIBILITY
-   • Resolve caret position after a character
-   • Resolve caret position before a character
-   • Return CaretPosition object only
-   ----------------------------------------------------------
-   DOES NOT
-   ✘ Move caret
-   ✘ Modify DOM
-   ✘ Create paragraph
-   ✘ Create page
-   ✘ Render text
-   ========================================================== */
-
-CampusWord2007Simulateur.LayoutEngine.CharacterPositionResolver = {
-
-    initialized: false,
-
-    initialize() {
-
-        if (this.initialized) return true;
-
-        this.initialized = true;
-
-        return true;
-    },
-
-    afterCharacter(character) {
-        return this.resolve(character, "after");
-    },
-
-    beforeCharacter(character) {
-        return this.resolve(character, "before");
-    },
-
-    resolve(character, mode = "after") {
-
-        if (!character || !character.isConnected) {
-            return null;
-        }
-
-        const LayoutEngine =
-            CampusWord2007Simulateur.LayoutEngine;
-
-        if (!LayoutEngine) return null;
-
-        const LineMetrics =
-            LayoutEngine.LineMetrics;
-
-        const Position =
-            LayoutEngine.CaretPosition;
-
-        if (!LineMetrics || !Position) return null;
-
-        const page =
-            character.closest
-                ? character.closest(".document-page")
-                : null;
-
-        if (!page) return null;
-
-        const paragraph =
-            character.parentElement;
-
-        if (!paragraph) return null;
-
-        const layer =
-            page.querySelector(".page-caret-layer");
-
-        if (!layer) return null;
-
-        const pageRect =
-            page.getBoundingClientRect();
-
-        const layerRect =
-            layer.getBoundingClientRect();
-
-        const rect =
-            character.getBoundingClientRect();
-
-        if (!rect || !layerRect) return null;
-
-        const metrics =
-            LineMetrics.getMetrics ? LineMetrics.getMetrics() : null;
-
-        if (!metrics) return null;
-
-        const pageIndex =
-            Number(page.dataset.pageNumber || 1) - 1;
-
-        const paragraphIndex =
-            paragraph.parentNode
-                ? Array.prototype.indexOf.call(
-                    paragraph.parentNode.children,
-                    paragraph
-                )
-                : -1;
-
-        const characterIndex =
-            Array.prototype.indexOf.call(
-                paragraph.children,
-                character
-            );
-
-        const x =
-            mode === "before"
-                ? Math.round(rect.left - layerRect.left)
-                : Math.round(rect.right - layerRect.left);
-
-        const y =
-            Math.round(rect.top - layerRect.top);
-
-        Position.set({
             page: page,
-            pageIndex: pageIndex,
-            paragraph: paragraph,
-            paragraphIndex: paragraphIndex,
-            line: paragraph,
-            lineIndex: 0,
-            character: character,
-            characterIndex: characterIndex,
-            x: x,
-            y: y,
-            baseline: y + (metrics.baseline || 0),
-            height: rect.height || 0
-        });
 
-        return Position.get();
-    },
+            x: Math.round(area.left),
 
-    destroy() {
-        this.initialized = false;
-    }
+            y: Math.round(area.top),
 
-};
+            baseline:
+                Math.round(area.top + baseline),
 
-
-
-
-
-
-
-
-
-/* ==========================================================
-   CAMPUS WORD 2007 SIMULATEUR
-   LAYOUT ENGINE
-   PHASE 2.6C
-   EMPTY LINE RESOLVER
-   ----------------------------------------------------------
-   RESPONSIBILITY
-   • Resolve caret position on empty line
-   • Resolve first insertion point of paragraph
-   • Resolve empty paragraph position
-   • Return CaretPosition only
-   ----------------------------------------------------------
-   DOES NOT
-   ✘ Move caret
-   ✘ Modify DOM
-   ✘ Create paragraph
-   ✘ Create page
-   ✘ Render text
-   ========================================================== */
-
-CampusWord2007Simulateur.LayoutEngine.EmptyLineResolver = {
-
-    initialized: false,
-
-    initialize() {
-
-        if (this.initialized) return true;
-
-        this.initialized = true;
-
-        return true;
-    },
-
-    resolve(paragraph) {
-
-        if (!paragraph) return null;
-
-        const LayoutEngine =
-            CampusWord2007Simulateur.LayoutEngine;
-
-        if (!LayoutEngine) return null;
-
-        const Position = LayoutEngine.CaretPosition;
-        const Insertion = LayoutEngine.InsertionPoint;
-        const LineMetrics = LayoutEngine.LineMetrics;
-
-        if (!Position || !Insertion || !LineMetrics) return null;
-
-        const page =
-            paragraph.closest
-                ? paragraph.closest(".document-page")
-                : null;
-
-        if (!page) return null;
-
-        if (typeof Insertion.calculate !== "function") return null;
-
-        Insertion.calculate(page);
-
-        const point =
-            typeof Insertion.get === "function"
-                ? Insertion.get()
-                : null;
-
-        if (!point) return null;
-
-        const metrics =
-            LineMetrics.getMetrics
-                ? LineMetrics.getMetrics()
-                : null;
-
-        if (!metrics) return null;
-
-        const paragraphIndex =
-            paragraph.parentNode
-                ? Array.prototype.indexOf.call(
-                    paragraph.parentNode.children,
-                    paragraph
-                )
-                : -1;
-
-        const pageIndex =
-            Number(page.dataset?.pageNumber || 1) - 1;
-
-        Position.set({
-            page: page,
-            pageIndex: pageIndex,
-            paragraph: paragraph,
-            paragraphIndex: paragraphIndex,
-            line: paragraph,
-            lineIndex: 0,
-            character: null,
-            characterIndex: -1,
-            x: Math.round(point.x || 0),
-            y: Math.round(point.y || 0),
-            baseline: Math.round(point.y || 0),
-            height: metrics.lineHeight || 0
-        });
-
-        return Position.get();
-    },
-
-    resolveFromPage(page) {
-
-        if (!page) return null;
-
-        const layer =
-            page.querySelector(".page-text-layer");
-
-        if (!layer) return null;
-
-        let paragraph =
-            layer.lastElementChild;
-
-        const isValidParagraph =
-            paragraph &&
-            paragraph.classList &&
-            paragraph.classList.contains("text-paragraph");
-
-        if (!isValidParagraph) {
-
-            paragraph =
-                document.createElement("div");
-
-            paragraph.className = "text-paragraph";
-
-            layer.appendChild(paragraph);
-        }
-
-        return this.resolve(paragraph);
-    },
-
-    destroy() {
-        this.initialized = false;
-    }
-
-};
-
-
-
-
-
-
-
-
-/* ==========================================================
-   CAMPUS WORD 2007 SIMULATEUR
-   LAYOUT ENGINE
-   PHASE 2.6D
-   ENTER RESOLVER
-   ----------------------------------------------------------
-   RESPONSIBILITY
-   • Resolve caret position after Enter
-   • Resolve next paragraph insertion point
-   • Resolve next line insertion point
-   • Return CaretPosition only
-   ----------------------------------------------------------
-   DOES NOT
-   ✘ Move caret
-   ✘ Create paragraph
-   ✘ Create page
-   ✘ Modify DOM
-   ✘ Render text
-   ========================================================== */
-
-CampusWord2007Simulateur.LayoutEngine.EnterResolver = {
-
-    initialized: false,
-
-    initialize() {
-
-        if (this.initialized) return true;
-
-        this.initialized = true;
-
-        return true;
-    },
-
-    resolve(paragraph) {
-
-        if (!paragraph) return null;
-
-        const LayoutEngine =
-            CampusWord2007Simulateur.LayoutEngine;
-
-        if (!LayoutEngine) return null;
-
-        const Position = LayoutEngine.CaretPosition;
-        const EmptyResolver = LayoutEngine.EmptyLineResolver;
-        const ParagraphFlow = LayoutEngine.ParagraphFlow;
-        const LineMetrics = LayoutEngine.LineMetrics;
-
-        if (!Position || !EmptyResolver || !LineMetrics) return null;
-
-        const metrics =
-            LineMetrics.getMetrics
-                ? LineMetrics.getMetrics()
-                : null;
-
-        if (!metrics) return null;
-
-        let paragraphSpacing = 0;
-
-        if (
-            ParagraphFlow &&
-            typeof ParagraphFlow.getParagraphSpacing === "function"
-        ) {
-            paragraphSpacing =
-                ParagraphFlow.getParagraphSpacing() || 0;
-        }
-
-        const base =
-            EmptyResolver.resolve(paragraph);
-
-        if (!base) return null;
-
-        const nextParagraphIndex =
-            typeof base.paragraphIndex === "number"
-                ? base.paragraphIndex + 1
-                : -1;
-
-        const yOffset =
-            metrics.lineHeight + paragraphSpacing;
-
-        Position.set({
-            page: base.page,
-            pageIndex: base.pageIndex,
-            paragraph: base.paragraph,
-            paragraphIndex: nextParagraphIndex,
-            line: null,
-            lineIndex: 0,
-            character: null,
-            characterIndex: -1,
-            x: base.x,
-            y: Math.round(base.y + yOffset),
-            baseline: Math.round(base.baseline + yOffset),
-            height: metrics.lineHeight || 0
-        });
-
-        return Position.get();
-    },
-
-    destroy() {
-        this.initialized = false;
-    }
-
-};
-
-
-
-
-
-
-
-
-/* ==========================================================
-   CAMPUS WORD 2007 SIMULATEUR
-   LAYOUT ENGINE
-   PHASE 2.6E
-   NEW PAGE RESOLVER
-   ----------------------------------------------------------
-   RESPONSIBILITY
-   • Resolve caret position on a newly created page
-   • Compute first insertion position of the page
-   • NO page creation
-   • NO DOM modification
-   • NO caret movement
-   • NO rendering
-   ========================================================== */
-
-CampusWord2007Simulateur.LayoutEngine.NewPageResolver = {
-
-    initialized: false,
-
-    initialize() {
-
-        if (this.initialized) return true;
-
-        this.initialized = true;
-
-        return true;
-    },
-
-    resolve(page) {
-
-        if (!page) return null;
-
-        const LayoutEngine =
-            CampusWord2007Simulateur.LayoutEngine;
-
-        if (!LayoutEngine) return null;
-
-        const InsertionPoint = LayoutEngine.InsertionPoint;
-        const CaretPosition = LayoutEngine.CaretPosition;
-
-        if (!InsertionPoint || !CaretPosition) return null;
-
-        if (typeof InsertionPoint.calculate !== "function") {
-            return null;
-        }
-
-        const point =
-            InsertionPoint.calculate(page);
-
-        if (!point) return null;
-
-        const x =
-            typeof point.x === "number" ? point.x : 0;
-
-        const y =
-            typeof point.y === "number" ? point.y : 0;
-
-        CaretPosition.set({
-            page: page,
-            paragraph: null,
-            paragraphIndex: -1,
-            line: null,
-            lineIndex: -1,
-            character: null,
-            characterIndex: -1,
-            x: Math.round(x),
-            y: Math.round(y),
-            baseline: Math.round(y),
-            height: 0,
-            valid: true,
-            placement: "new-page"
-        });
-
-        return CaretPosition.get();
-    },
-
-    destroy() {
-        this.initialized = false;
-    }
-
-};
-
-
-
-
-
-
-
-
-
-/* ==========================================================
-   CAMPUS WORD 2007 SIMULATEUR
-   LAYOUT ENGINE
-   PHASE 2.6F
-   PUBLIC CARET PLACEMENT API
-========================================================== */
-
-CampusWord2007Simulateur.LayoutEngine.CaretPlacement = {
-
-    initialized: false,
-
-    initialize() {
-
-        if (this.initialized) {
-            return true;
-        }
-
-        this.initialized = true;
-        return true;
-
-    },
-
-    /* ======================================================
-       AFTER CHARACTER
-    ====================================================== */
-
-    afterCharacter(character) {
-
-        const Resolver =
-            CampusWord2007Simulateur
-            .LayoutEngine
-            .CharacterPositionResolver;
-
-        if (!Resolver || !Resolver.afterCharacter) {
-            return null;
-        }
-
-        return Resolver.afterCharacter(character);
-
-    },
-
-    /* ======================================================
-       BEFORE CHARACTER
-    ====================================================== */
-
-    beforeCharacter(character) {
-
-        const Resolver =
-            CampusWord2007Simulateur
-            .LayoutEngine
-            .CharacterPositionResolver;
-
-        if (!Resolver || !Resolver.beforeCharacter) {
-            return null;
-        }
-
-        return Resolver.beforeCharacter(character);
-
-    },
-
-    /* ======================================================
-       EMPTY LINE
-    ====================================================== */
-
-    emptyLine(paragraph) {
-
-        const Resolver =
-            CampusWord2007Simulateur
-            .LayoutEngine
-            .EmptyLineResolver;
-
-        if (!Resolver || !Resolver.resolve) {
-            return null;
-        }
-
-        return Resolver.resolve(paragraph);
-
-    },
-
-    /* ======================================================
-       AFTER ENTER
-    ====================================================== */
-
-    afterEnter(paragraph) {
-
-        const Resolver =
-            CampusWord2007Simulateur
-            .LayoutEngine
-            .EnterResolver;
-
-        if (!Resolver || !Resolver.resolve) {
-            return null;
-        }
-
-        return Resolver.resolve(paragraph);
-
-    },
-
-    /* ======================================================
-       NEW PAGE
-    ====================================================== */
-
-    newPage(page) {
-
-        const Resolver =
-            CampusWord2007Simulateur
-            .LayoutEngine
-            .NewPageResolver;
-
-        if (!Resolver || !Resolver.resolve) {
-            return null;
-        }
-
-        return Resolver.resolve(page);
-
-    },
-
-    /* ======================================================
-       CURRENT CARET
-    ====================================================== */
-
-    current() {
-
-        const Cursor =
-            CampusWord2007Simulateur
-            .LayoutEngine
-            .Cursor;
-
-        if (!Cursor || !Cursor.get) {
-            return null;
-        }
-
-        return Cursor.get();
-
-    },
-
-    /* ======================================================
-       UPDATE CURRENT CARET
-    ====================================================== */
-
-    update(position) {
-
-        const Cursor =
-            CampusWord2007Simulateur
-            .LayoutEngine
-            .Cursor;
-
-        if (!Cursor || !Cursor.set) {
-            return false;
-        }
-
-        return Cursor.set(position);
-
-    },
-
-    /* ======================================================
-       RESET
-    ====================================================== */
-
-    reset() {
-
-        const Cursor =
-            CampusWord2007Simulateur
-            .LayoutEngine
-            .Cursor;
-
-        if (Cursor && Cursor.reset) {
-            Cursor.reset();
-        }
-
-    },
-
-    /* ======================================================
-       DESTROY
-    ====================================================== */
-
-    destroy() {
-
-        this.reset();
-        this.initialized = false;
-
-    }
-
-};
-
-
-
-
-
-
-
-
-/* ==========================================================
-   CAMPUS WORD 2007 SIMULATEUR
-   LAYOUT ENGINE
-   PHASE 2.7
-   PUBLIC LAYOUT API
-========================================================== */
-
-CampusWord2007Simulateur.LayoutEngine.API = {
-
-    initialized: false,
-
-    initialize() {
-
-        if (this.initialized) {
-            return true;
-        }
-
-        this.initialized = true;
-        return true;
-
-    },
-
-    /* ======================================================
-       VIEWPORT
-    ====================================================== */
-
-    getViewport() {
-
-        const Viewport =
-            CampusWord2007Simulateur
-            .LayoutEngine
-            .Viewport;
-
-        if (!Viewport) {
-            return null;
-        }
-
-        if (typeof Viewport.getMetrics === "function") {
-            return Viewport.getMetrics();
-        }
-
-        return null;
-
-    },
-
-    /* ======================================================
-       PAGE GEOMETRY
-    ====================================================== */
-
-    measurePage(page) {
-
-        const Geometry =
-            CampusWord2007Simulateur
-            .LayoutEngine
-            .Geometry;
-
-        if (!Geometry || !Geometry.measure) {
-            return null;
-        }
-
-        return Geometry.measure(page);
-
-    },
-
-    /* ======================================================
-       WRITABLE AREA
-    ====================================================== */
-
-    getWritableArea(page) {
-
-        const WritableArea =
-            CampusWord2007Simulateur
-            .LayoutEngine
-            .WritableArea;
-
-        if (!WritableArea || !WritableArea.calculate) {
-            return null;
-        }
-
-        WritableArea.calculate(page);
-
-        if (typeof WritableArea.get === "function") {
-            return WritableArea.get();
-        }
-
-        return null;
-
-    },
-
-    /* ======================================================
-       LINE METRICS
-    ====================================================== */
-
-    getLineMetrics() {
-
-        const LineMetrics =
-            CampusWord2007Simulateur
-            .LayoutEngine
-            .LineMetrics;
-
-        if (!LineMetrics || !LineMetrics.getMetrics) {
-            return null;
-        }
-
-        return LineMetrics.getMetrics();
-
-    },
-
-    /* ======================================================
-       DEFAULT INSERTION POINT
-    ====================================================== */
-
-    getInsertionPoint(page) {
-
-        const InsertionPoint =
-            CampusWord2007Simulateur
-            .LayoutEngine
-            .InsertionPoint;
-
-        if (!InsertionPoint || !InsertionPoint.calculate) {
-            return null;
-        }
-
-        return InsertionPoint.calculate(page);
-
-    },
-
-    /* ======================================================
-       CHARACTER MEASUREMENT
-    ====================================================== */
-
-    measureCharacter(character) {
-
-        const CM =
-            CampusWord2007Simulateur
-            .LayoutEngine
-            .CharacterMeasurement;
-
-        if (!CM || !CM.measure) {
-            return 0;
-        }
-
-        return CM.measure(character);
-
-    },
-
-    /* ======================================================
-       CARET AFTER CHARACTER
-    ====================================================== */
-
-    afterCharacter(character) {
-
-        const CP =
-            CampusWord2007Simulateur
-            .LayoutEngine
-            .CaretPlacement;
-
-        if (!CP || !CP.afterCharacter) {
-            return null;
-        }
-
-        return CP.afterCharacter(character);
-
-    },
-
-    /* ======================================================
-       CARET BEFORE CHARACTER
-    ====================================================== */
-
-    beforeCharacter(character) {
-
-        const CP =
-            CampusWord2007Simulateur
-            .LayoutEngine
-            .CaretPlacement;
-
-        if (!CP || !CP.beforeCharacter) {
-            return null;
-        }
-
-        return CP.beforeCharacter(character);
-
-    },
-
-    /* ======================================================
-       EMPTY LINE
-    ====================================================== */
-
-    emptyLine(paragraph) {
-
-        const CP =
-            CampusWord2007Simulateur
-            .LayoutEngine
-            .CaretPlacement;
-
-        if (!CP || !CP.emptyLine) {
-            return null;
-        }
-
-        return CP.emptyLine(paragraph);
-
-    },
-
-    /* ======================================================
-       AFTER ENTER
-    ====================================================== */
-
-    afterEnter(paragraph) {
-
-        const CP =
-            CampusWord2007Simulateur
-            .LayoutEngine
-            .CaretPlacement;
-
-        if (!CP || !CP.afterEnter) {
-            return null;
-        }
-
-        return CP.afterEnter(paragraph);
-
-    },
-
-    /* ======================================================
-       NEW PAGE
-    ====================================================== */
-
-    newPage(page) {
-
-        const CP =
-            CampusWord2007Simulateur
-            .LayoutEngine
-            .CaretPlacement;
-
-        if (!CP || !CP.newPage) {
-            return null;
-        }
-
-        return CP.newPage(page);
-
-    },
-
-    /* ======================================================
-       CURRENT CURSOR
-    ====================================================== */
-
-    getCursor() {
-
-        const Cursor =
-            CampusWord2007Simulateur
-            .LayoutEngine
-            .Cursor;
-
-        if (!Cursor || !Cursor.get) {
-            return null;
-        }
-
-        return Cursor.get();
-
-    },
-
-    setCursor(position) {
-
-        const Cursor =
-            CampusWord2007Simulateur
-            .LayoutEngine
-            .Cursor;
-
-        if (!Cursor || !Cursor.set) {
-            return false;
-        }
-
-        return Cursor.set(position);
-
-    },
-
-    /* ======================================================
-       PAGE FLOW
-    ====================================================== */
-
-    shouldCreatePage(page, paragraph) {
-
-        const PageFlow =
-            CampusWord2007Simulateur
-            .LayoutEngine
-            .PageFlow;
-
-        if (!PageFlow || !PageFlow.pageRequired) {
-            return false;
-        }
-
-        return PageFlow.pageRequired(page, paragraph);
-
-    },
-
-    /* ======================================================
-       PARAGRAPH FLOW
-    ====================================================== */
-
-    getParagraphSpacing() {
-
-        const PF =
-            CampusWord2007Simulateur
-            .LayoutEngine
-            .ParagraphFlow;
-
-        if (!PF || !PF.defaults) {
-            return 0;
-        }
-
-        return PF.defaults.spaceBefore || 0;
-
-    },
-
-    getFirstLineIndent() {
-
-        const PF =
-            CampusWord2007Simulateur
-            .LayoutEngine
-            .ParagraphFlow;
-
-        if (!PF || !PF.defaults) {
-            return 0;
-        }
-
-        return PF.defaults.firstLineIndent || 0;
-
-    },
-
-    getLeftIndent() {
-
-        const PF =
-            CampusWord2007Simulateur
-            .LayoutEngine
-            .ParagraphFlow;
-
-        if (!PF || !PF.defaults) {
-            return 0;
-        }
-
-        return PF.defaults.leftIndent || 0;
-
-    },
-
-    getRightIndent() {
-
-        const PF =
-            CampusWord2007Simulateur
-            .LayoutEngine
-            .ParagraphFlow;
-
-        if (!PF || !PF.defaults) {
-            return 0;
-        }
-
-        return PF.defaults.rightIndent || 0;
-
-    },
-
-    /* ======================================================
-       RESET
-    ====================================================== */
-
-    reset() {
-
-        const Cursor =
-            CampusWord2007Simulateur
-            .LayoutEngine
-            .Cursor;
-
-        if (Cursor && Cursor.reset) {
-            Cursor.reset();
-        }
-
-    },
-
-    destroy() {
-
-        this.reset();
-        this.initialized = false;
-
-    }
-
-};
-
-
-
-
-
-
-
-/* ==========================================================
-   CAMPUS WORD 2007 SIMULATEUR
-   LAYOUT ENGINE
-   PHASE 2.8
-   CARET ENGINE BRIDGE
-========================================================== */
-
-CampusWord2007Simulateur.LayoutEngine.CaretBridge = {
-
-    initialized: false,
-
-    initialize() {
-
-        if (this.initialized) {
-            return true;
-        }
-
-        this.initialized = true;
-        return true;
-
-    },
-
-    /* ======================================================
-       PLACE CARET FROM RESOLVER RESULT
-    ====================================================== */
-
-    apply(position) {
-
-        if (!position || position.valid === false) {
-            return false;
-        }
-
-        const Cursor =
-            CampusWord2007Simulateur
-            .LayoutEngine
-            .Cursor;
-
-        if (!Cursor || !Cursor.set) {
-            return false;
-        }
-
-        Cursor.set({
-
-            page: position.page || null,
-            pageIndex: position.pageIndex ?? -1,
-
-            paragraph: position.paragraph || null,
-            paragraphIndex: position.paragraphIndex ?? -1,
-
-            line: position.line || null,
-            lineIndex: position.lineIndex ?? -1,
-
-            character: position.character || null,
-            characterIndex: position.characterIndex ?? -1,
-
-            x: position.x || 0,
-            y: position.y || 0,
-
-            baseline: position.baseline || 0,
-            height: position.height || 0
-
-        });
-
-        return true;
-
-    },
-
-    /* ======================================================
-       APPLY VIA CARET PLACEMENT API
-    ====================================================== */
-
-    fromCharacter(character, mode = "after") {
-
-        const Placement =
-            CampusWord2007Simulateur
-            .LayoutEngine
-            .CaretPlacement;
-
-        if (!Placement) {
-            return false;
-        }
-
-        const result =
-            mode === "before"
-                ? Placement.beforeCharacter(character)
-                : Placement.afterCharacter(character);
-
-        return this.apply(result);
-
-    },
-
-    fromEmptyLine(paragraph) {
-
-        const Placement =
-            CampusWord2007Simulateur
-            .LayoutEngine
-            .CaretPlacement;
-
-        if (!Placement) {
-            return false;
-        }
-
-        return this.apply(
-            Placement.emptyLine(paragraph)
-        );
-
-    },
-
-    fromEnter(paragraph) {
-
-        const Placement =
-            CampusWord2007Simulateur
-            .LayoutEngine
-            .CaretPlacement;
-
-        if (!Placement) {
-            return false;
-        }
-
-        return this.apply(
-            Placement.afterEnter(paragraph)
-        );
-
-    },
-
-    fromNewPage(page) {
-
-        const Placement =
-            CampusWord2007Simulateur
-            .LayoutEngine
-            .CaretPlacement;
-
-        if (!Placement) {
-            return false;
-        }
-
-        return this.apply(
-            Placement.newPage(page)
-        );
-
-    },
-
-    destroy() {
-
-        this.initialized = false;
-
-    }
-
-};
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-CampusWord2007Simulateur.UI = CampusWord2007Simulateur.UI || {};
-
-CampusWord2007Simulateur.UI.Caret = {
-
-    el: null,
-
-    initialize() {
-
-        if (this.el) return true;
-
-        const div = document.createElement("div");
-
-        div.style.position = "absolute";
-        div.style.width = "2px";
-        div.style.background = "black";
-        div.style.zIndex = "9999";
-        div.style.pointerEvents = "none";
-
-        document.body.appendChild(div);
-
-        this.el = div;
-
-        return true;
-
-    },
-
-    render() {
-
-        const Cursor =
-            CampusWord2007Simulateur
-            .LayoutEngine
-            .Cursor;
-
-        if (!Cursor) return;
-
-        const pos = Cursor.get();
-
-        if (!pos) return;
-
-        this.el.style.left = pos.x + "px";
-        this.el.style.top = pos.y + "px";
-        this.el.style.height = (pos.height || 18) + "px";
-
-    },
-
-    startAutoRender() {
-
-        const loop = () => {
-
-            this.render();
-
-            requestAnimationFrame(loop);
+            height:
+                lineHeight
 
         };
 
-        loop();
+    };
 
-    }
+})();
 
-};
+
+
+
+
+
+
+
+
 
 
 
@@ -5950,132 +2338,48 @@ CampusWord2007Simulateur.UI.Caret = {
    CAMPUS WORD 2007 SIMULATEUR
    CARET ENGINE
    PHASE 1.1
-   SINGLE CARET DOM
+   FOUNDATION KERNEL
    ----------------------------------------------------------
    RESPONSIBILITY
 
-   • Create one shared caret element
-   • Return caret reference
-   • Prevent duplicate caret
-   • Destroy caret safely
+   • Create visual caret
+   • Attach caret to page
+   • Store current page
+   • Store current layer
 
    DOES NOT
 
-   • Calculate position
-   • Render caret
-   • Attach to page
-   • Blink
-   • Show / Hide
-   • Use LayoutEngine
+   ✘ Calculate coordinates
+   ✘ Measure page
+   ✘ Measure characters
+   ✘ Resolve line breaks
+   ✘ Resolve page breaks
 
-   ========================================================== */
+   ALL POSITION CALCULATIONS
+   ARE PROVIDED BY LAYOUT ENGINE
+========================================================== */
 
 CampusWord2007Simulateur.CaretEngine = {
 
-    initialized: false,
+    initialized:false,
 
-    caret: null,
+    visible:false,
 
-    configuration: {
+    page:null,
 
-        id: "document-caret",
+    layer:null,
 
-        className: "document-caret",
+    element:null,
 
-        width: 1,
+    initialize(){
 
-        color: "#000000",
-
-        defaultHeight: 19,
-
-        zIndex: 999
-
-    },
-
-    initialize() {
-
-        if (this.initialized) {
+        if(this.initialized){
             return true;
         }
 
         this.initialized = true;
 
         return true;
-
-    },
-
-    create() {
-
-        if (this.caret) {
-            return this.caret;
-        }
-
-        const caret = document.createElement("div");
-
-        caret.id = this.configuration.id;
-
-        caret.className = this.configuration.className;
-
-        caret.setAttribute("aria-hidden", "true");
-
-        caret.style.position = "absolute";
-
-        caret.style.left = "0px";
-
-        caret.style.top = "0px";
-
-        caret.style.width =
-            this.configuration.width + "px";
-
-        caret.style.height =
-            this.configuration.defaultHeight + "px";
-
-        caret.style.backgroundColor =
-            this.configuration.color;
-
-        caret.style.display = "none";
-
-        caret.style.pointerEvents = "none";
-
-        caret.style.userSelect = "none";
-
-        caret.style.zIndex =
-            this.configuration.zIndex;
-
-        this.caret = caret;
-
-        return this.caret;
-
-    },
-
-    get() {
-
-        return this.caret;
-
-    },
-
-    exists() {
-
-        return this.caret !== null;
-
-    },
-
-    destroy() {
-
-        if (
-            this.caret &&
-            this.caret.parentNode
-        ) {
-
-            this.caret.parentNode.removeChild(
-                this.caret
-            );
-
-        }
-
-        this.caret = null;
-
-        this.initialized = false;
 
     }
 
@@ -6092,177 +2396,128 @@ CampusWord2007Simulateur.CaretEngine = {
    CAMPUS WORD 2007 SIMULATEUR
    CARET ENGINE
    PHASE 1.2
-   CARET POSITION
+   PAGE ATTACHMENT
    ----------------------------------------------------------
    RESPONSIBILITY
 
-   • Store caret position
-   • Validate position payload
-   • Expose current position
+   • Attach caret to a page
+   • Create visual caret
+   • Locate caret layer
+   • Keep one caret instance
 
    DOES NOT
 
-   • Calculate coordinates
-   • Render caret
-   • Attach to page
-   • Blink
-   • Use LayoutEngine
-   • Modify DOM
-   ========================================================== */
+   ✘ Calculate coordinates
+   ✘ Move caret
+   ✘ Blink
+   ✘ Modify text
+========================================================== */
 
-CampusWord2007Simulateur.CaretEngine.Position = {
+(function(){
 
-    initialized: false,
+    const Caret =
+        CampusWord2007Simulateur.CaretEngine;
 
-    current: null,
-
-    initialize() {
-
-        if (this.initialized) {
-            return true;
-        }
-
-        this.reset();
-
-        this.initialized = true;
-
-        return true;
-
-    },
-
-    create() {
-
-        return {
-
-            page: null,
-
-            pageNumber: null,
-
-            x: 0,
-
-            y: 0,
-
-            height: 0,
-
-            baseline: 0
-
-        };
-
-    },
-
-    set(position) {
-
-        if (
-            !position ||
-            typeof position !== "object"
-        ) {
-            return false;
-        }
-
-        if (
-            typeof position.x !== "number" ||
-            !Number.isFinite(position.x)
-        ) {
-            return false;
-        }
-
-        if (
-            typeof position.y !== "number" ||
-            !Number.isFinite(position.y)
-        ) {
-            return false;
-        }
-
-        if (
-            typeof position.height !== "number" ||
-            !Number.isFinite(position.height)
-        ) {
-            return false;
-        }
-
-        if (
-            typeof position.pageNumber !== "number" ||
-            !Number.isFinite(position.pageNumber)
-        ) {
-            return false;
-        }
-
-        this.current = {
-
-            page:
-                position.page ?? null,
-
-            pageNumber:
-                position.pageNumber,
-
-            x:
-                position.x,
-
-            y:
-                position.y,
-
-            height:
-                position.height,
-
-            baseline:
-                position.baseline ?? 0
-
-        };
-
-        return true;
-
-    },
-
-    get() {
-
-        if (!this.current) {
-            this.reset();
-        }
-
-        return {
-
-            page:
-                this.current.page,
-
-            pageNumber:
-                this.current.pageNumber,
-
-            x:
-                this.current.x,
-
-            y:
-                this.current.y,
-
-            height:
-                this.current.height,
-
-            baseline:
-                this.current.baseline
-
-        };
-
-    },
-
-    reset() {
-
-        this.current =
-            this.create();
-
-        return true;
-
-    },
-
-    destroy() {
-
-        this.reset();
-
-        this.initialized = false;
-
-        return true;
-
+    if(!Caret){
+        return;
     }
 
-};
+    /* ======================================================
+       ATTACH TO PAGE
+    ====================================================== */
+
+    Caret.attachToPage = function(page){
+
+        if(!page){
+            return false;
+        }
+
+        const layer =
+            page.querySelector(
+                ".page-caret-layer"
+            );
+
+        if(!layer){
+            return false;
+        }
+
+        this.page = page;
+        this.layer = layer;
+
+        /* ----------------------------------------------
+           CREATE CARET IF NEEDED
+        ---------------------------------------------- */
+
+        if(!this.element){
+
+            const caret =
+                document.createElement("div");
+
+            caret.className =
+                "document-caret";
+
+            caret.setAttribute(
+                "aria-hidden",
+                "true"
+            );
+
+            caret.style.position =
+                "absolute";
+
+            caret.style.left =
+                "0px";
+
+            caret.style.top =
+                "0px";
+
+            caret.style.width =
+                "1px";
+
+            caret.style.height =
+                "19px";
+
+            caret.style.display =
+                "none";
+
+            caret.style.pointerEvents =
+                "none";
+
+            this.element =
+                caret;
+
+        }
+
+        /* ----------------------------------------------
+           MOVE CARET TO CURRENT PAGE
+        ---------------------------------------------- */
+
+        if(
+            this.element.parentNode !== layer
+        ){
+
+            if(
+                this.element.parentNode
+            ){
+
+                this.element.parentNode.removeChild(
+                    this.element
+                );
+
+            }
+
+            layer.appendChild(
+                this.element
+            );
+
+        }
+
+        return true;
+
+    };
+
+})();
+
+
 
 
 
@@ -6275,158 +2530,158 @@ CampusWord2007Simulateur.CaretEngine.Position = {
    CAMPUS WORD 2007 SIMULATEUR
    CARET ENGINE
    PHASE 1.3
-   CARET ATTACHMENT
+   VISUAL CARET CONTROL
    ----------------------------------------------------------
    RESPONSIBILITY
 
-   • Attach the shared caret to a page
-   • Move caret between pages
-   • Keep a single caret in the document
+   • Move visual caret
+   • Refresh from LayoutEngine
+   • Automatically switch page
+   • Show caret
+   • Hide caret
 
    DOES NOT
 
-   • Calculate position
-   • Render caret
-   • Blink
-   • Show / Hide
-   • Use LayoutEngine
-   ========================================================== */
+   ✘ Calculate coordinates
+   ✘ Measure page
+   ✘ Measure text
+   ✘ Resolve insertion point
+========================================================== */
 
-CampusWord2007Simulateur.CaretEngine.Attachment = {
+(function(){
 
-    initialized: false,
+    const Caret =
+        CampusWord2007Simulateur.CaretEngine;
 
-    currentPage: null,
-
-    currentLayer: null,
-
-    initialize() {
-
-        if (this.initialized) {
-            return true;
-        }
-
-        this.initialized = true;
-
-        return true;
-
-    },
-
-    attach(page) {
-
-        if (!(page instanceof HTMLElement)) {
-            return false;
-        }
-
-        const caret =
-            CampusWord2007Simulateur
-            .CaretEngine
-            .get();
-
-        if (!caret) {
-            return false;
-        }
-
-        const layer =
-            page.querySelector(
-                ".page-caret-layer"
-            );
-
-        if (!(layer instanceof HTMLElement)) {
-            return false;
-        }
-
-        if (
-            caret.parentNode &&
-            caret.parentNode !== layer
-        ) {
-            caret.parentNode.removeChild(
-                caret
-            );
-        }
-
-        if (
-            caret.parentNode !== layer
-        ) {
-            layer.appendChild(
-                caret
-            );
-        }
-
-        this.currentPage = page;
-        this.currentLayer = layer;
-
-        return true;
-
-    },
-
-    detach() {
-
-        const caret =
-            CampusWord2007Simulateur
-            .CaretEngine
-            .get();
-
-        if (
-            caret &&
-            caret.parentNode
-        ) {
-            caret.parentNode.removeChild(
-                caret
-            );
-        }
-
-        this.currentPage = null;
-        this.currentLayer = null;
-
-        return true;
-
-    },
-
-    getPage() {
-
-        return this.currentPage;
-
-    },
-
-    getLayer() {
-
-        return this.currentLayer;
-
-    },
-
-    isAttached() {
-
-        const caret =
-            CampusWord2007Simulateur
-            .CaretEngine
-            .get();
-
-        return !!(
-
-            caret &&
-            this.currentPage &&
-            this.currentLayer &&
-            caret.parentNode ===
-                this.currentLayer
-
-        );
-
-    },
-
-    destroy() {
-
-        this.detach();
-
-        this.initialized = false;
-
-        return true;
-
+    if(!Caret){
+        return;
     }
 
-};
+    /* ======================================================
+       MOVE CARET
+    ====================================================== */
 
+    Caret.moveTo = function(position){
 
+        if(
+            !this.element ||
+            !position
+        ){
+            return false;
+        }
+
+        this.element.style.left =
+            (Number(position.x) || 0) + "px";
+
+        this.element.style.top =
+            (Number(position.y) || 0) + "px";
+
+        this.element.style.height =
+            (Number(position.height) || 19) + "px";
+
+        return true;
+
+    };
+
+    /* ======================================================
+       REFRESH FROM LAYOUT ENGINE
+    ====================================================== */
+
+    Caret.refresh = function(){
+
+        const Layout =
+            CampusWord2007Simulateur.LayoutEngine;
+
+        if(
+            !Layout ||
+            typeof Layout.getCurrentCaretPosition !==
+            "function"
+        ){
+            return false;
+        }
+
+        const position =
+            Layout.getCurrentCaretPosition();
+
+        if(!position){
+            return false;
+        }
+
+        if(
+            position.page &&
+            position.page !== this.page
+        ){
+
+            this.attachToPage(
+                position.page
+            );
+
+        }
+
+        this.moveTo(position);
+
+        this.show();
+
+        return true;
+
+    };
+
+    /* ======================================================
+       SHOW
+    ====================================================== */
+
+    Caret.show = function(){
+
+        if(!this.element){
+            return false;
+        }
+
+        this.element.style.display =
+            "block";
+
+        this.element.style.opacity =
+            "1";
+
+        this.visible = true;
+
+        if(
+            typeof this.restartBlink ===
+            "function"
+        ){
+            this.restartBlink();
+        }
+
+        return true;
+
+    };
+
+    /* ======================================================
+       HIDE
+    ====================================================== */
+
+    Caret.hide = function(){
+
+        if(!this.element){
+            return false;
+        }
+
+        if(
+            typeof this.stopBlink ===
+            "function"
+        ){
+            this.stopBlink();
+        }
+
+        this.element.style.display =
+            "none";
+
+        this.visible = false;
+
+        return true;
+
+    };
+
+})();
 
 
 
@@ -6440,185 +2695,126 @@ CampusWord2007Simulateur.CaretEngine.Attachment = {
    CAMPUS WORD 2007 SIMULATEUR
    CARET ENGINE
    PHASE 1.4
-   CARET RENDERER
+   BLINK MANAGER
    ----------------------------------------------------------
    RESPONSIBILITY
 
-   • Render caret visually
-   • Apply position
-   • Apply size
-   • Show / Hide caret
+   • Start caret blinking
+   • Stop caret blinking
+   • Restart blinking
+   • Keep visual state synchronized
 
    DOES NOT
 
-   • Calculate coordinates
-   • Attach caret to page
-   • Blink
-   • Use LayoutEngine
+   ✘ Calculate coordinates
+   ✘ Move caret
+   ✘ Render text
+   ✘ Measure page
+========================================================== */
 
-   ========================================================== */
+(function(){
 
-CampusWord2007Simulateur.CaretEngine.Renderer = {
+    const Caret =
+        CampusWord2007Simulateur.CaretEngine;
 
-    initialized: false,
-
-    visible: false,
-
-    initialize() {
-
-        if (this.initialized) {
-            return true;
-        }
-
-        this.initialized = true;
-
-        return true;
-
-    },
-
-    render() {
-
-        const engine =
-            CampusWord2007Simulateur
-            .CaretEngine;
-
-        const caret =
-            engine.get();
-
-        if (!caret) {
-            return false;
-        }
-
-        const position =
-            engine
-            .Position
-            .get();
-
-        caret.style.left =
-            Math.round(position.x) + "px";
-
-        caret.style.top =
-            Math.round(position.y) + "px";
-
-        caret.style.width =
-            engine
-            .configuration
-            .width + "px";
-
-        caret.style.height =
-            Math.max(
-                1,
-                Math.round(
-                    position.height ||
-                    engine.configuration.defaultHeight
-                )
-            ) + "px";
-
-        caret.style.backgroundColor =
-            engine
-            .configuration
-            .color;
-
-        caret.style.zIndex =
-            engine
-            .configuration
-            .zIndex;
-
-        return true;
-
-    },
-
-    show() {
-
-        const caret =
-            CampusWord2007Simulateur
-            .CaretEngine
-            .get();
-
-        if (!caret) {
-            return false;
-        }
-
-        caret.style.display =
-            "block";
-
-        caret.style.visibility =
-            "visible";
-
-        caret.style.opacity =
-            "1";
-
-        this.visible = true;
-
-        return true;
-
-    },
-
-    hide() {
-
-        const caret =
-            CampusWord2007Simulateur
-            .CaretEngine
-            .get();
-
-        if (!caret) {
-            return false;
-        }
-
-        caret.style.display =
-            "none";
-
-        caret.style.visibility =
-            "hidden";
-
-        caret.style.opacity =
-            "0";
-
-        this.visible = false;
-
-        return true;
-
-    },
-
-    isVisible() {
-
-        return this.visible;
-
-    },
-
-    refresh() {
-
-        if (!this.render()) {
-            return false;
-        }
-
-        if (this.visible) {
-            this.show();
-        }
-
-        return true;
-
-    },
-
-    reset() {
-
-        this.hide();
-
-        return true;
-
-    },
-
-    destroy() {
-
-        this.reset();
-
-        this.initialized = false;
-
-        return true;
-
+    if(!Caret){
+        return;
     }
 
-};
+    /* ======================================================
+       BLINK STATE
+    ====================================================== */
+
+    Caret.blinkTimer = null;
+
+    Caret.blinkDelay = 530;
+
+    /* ======================================================
+       START BLINK
+    ====================================================== */
+
+    Caret.startBlink = function(){
+
+        if(
+            !this.element ||
+            this.blinkTimer
+        ){
+            return false;
+        }
+
+        this.element.style.opacity = "1";
+
+        this.blinkTimer =
+            window.setInterval(()=>{
+
+                if(
+                    !this.element ||
+                    !this.visible
+                ){
+                    return;
+                }
+
+                this.element.style.opacity =
+                    this.element.style.opacity === "0"
+                        ? "1"
+                        : "0";
+
+            },this.blinkDelay);
+
+        return true;
+
+    };
+
+    /* ======================================================
+       STOP BLINK
+    ====================================================== */
+
+    Caret.stopBlink = function(){
+
+        if(this.blinkTimer){
+
+            clearInterval(
+                this.blinkTimer
+            );
+
+            this.blinkTimer = null;
+
+        }
+
+        if(this.element){
+
+            this.element.style.opacity = "1";
+
+        }
+
+        return true;
+
+    };
+
+    /* ======================================================
+       RESTART BLINK
+    ====================================================== */
+
+    Caret.restartBlink = function(){
+
+        this.stopBlink();
+
+        if(this.visible){
+
+            this.startBlink();
+
+        }
+
+        return true;
+
+    };
+
+})();
+
+
+
+
+
 
 
 
@@ -6626,107 +2822,281 @@ CampusWord2007Simulateur.CaretEngine.Renderer = {
    CAMPUS WORD 2007 SIMULATEUR
    CARET ENGINE
    PHASE 1.5
-   CARET CONTROLLER
+   PUBLIC API
    ----------------------------------------------------------
    RESPONSIBILITY
 
-   • Receive position from LayoutEngine
-   • Update Caret Position
-   • Attach caret to page
-   • Render caret
-   • Display caret
+   • Reset caret
+   • Destroy caret
+   • Expose public state
 
    DOES NOT
 
-   • Calculate coordinates
-   • Modify LayoutEngine
-   • Blink
-   ========================================================== */
+   ✘ Calculate coordinates
+   ✘ Render text
+   ✘ Measure page
+   ✘ Create pages
+========================================================== */
 
-CampusWord2007Simulateur.CaretEngine.Controller = {
+(function(){
 
-    initialized: false,
+    const Caret =
+        CampusWord2007Simulateur.CaretEngine;
 
-    initialize() {
+    if(!Caret){
+        return;
+    }
 
-        if (this.initialized) {
-            return true;
+    /* ======================================================
+       IS INITIALIZED
+    ====================================================== */
+
+    Caret.isInitialized = function(){
+
+        return this.initialized === true;
+
+    };
+
+    /* ======================================================
+       IS VISIBLE
+    ====================================================== */
+
+    Caret.isVisible = function(){
+
+        return this.visible === true;
+
+    };
+
+    /* ======================================================
+       GET CURRENT PAGE
+    ====================================================== */
+
+    Caret.getCurrentPage = function(){
+
+        return this.page;
+
+    };
+
+    /* ======================================================
+       GET CURRENT ELEMENT
+    ====================================================== */
+
+    Caret.getElement = function(){
+
+        return this.element;
+
+    };
+
+    /* ======================================================
+       RESET
+    ====================================================== */
+
+    Caret.reset = function(){
+
+        this.stopBlink();
+
+        if(this.element){
+
+            this.element.style.left = "0px";
+            this.element.style.top = "0px";
+            this.element.style.height = "19px";
+            this.element.style.opacity = "1";
+            this.element.style.display = "none";
+
         }
 
-        this.initialized = true;
+        this.visible = false;
+
+        this.page = null;
+        this.layer = null;
 
         return true;
 
-    },
+    };
 
-    update(position) {
+    /* ======================================================
+       DESTROY
+    ====================================================== */
 
-        if (
-            !CampusWord2007Simulateur
-                .CaretEngine
-                .Position
-                .set(position)
-        ) {
+    Caret.destroy = function(){
 
-            return false;
+        this.stopBlink();
 
-        }
+        if(
+            this.element &&
+            this.element.parentNode
+        ){
 
-        const engine =
-            CampusWord2007Simulateur
-                .CaretEngine;
-
-        const current =
-            engine.Position.get();
-
-        if (
-            current.page instanceof HTMLElement
-        ) {
-
-            if (
-                !engine.Attachment.attach(
-                    current.page
-                )
-            ) {
-
-                return false;
-
-            }
+            this.element.parentNode.removeChild(
+                this.element
+            );
 
         }
 
-        if (
-            !engine.Renderer.render()
-        ) {
+        this.element = null;
+        this.page = null;
+        this.layer = null;
 
-            return false;
-
-        }
-
-        return engine.Renderer.show();
-
-    },
-
-    hide() {
-
-        return CampusWord2007Simulateur
-            .CaretEngine
-            .Renderer
-            .hide();
-
-    },
-
-    destroy() {
-
-        this.hide();
-
+        this.visible = false;
         this.initialized = false;
 
         return true;
 
+    };
+
+})();
+
+
+
+
+
+
+
+
+
+
+/* ==========================================================
+   CAMPUS WORD 2007 SIMULATEUR
+   CARET ENGINE
+   PHASE 1.6
+   LAYOUT BRIDGE
+   ----------------------------------------------------------
+   RESPONSIBILITY
+
+   • Connect LayoutEngine to CaretEngine
+   • Initialize first caret
+   • Refresh caret after layout update
+
+   DOES NOT
+
+   ✘ Calculate coordinates
+   ✘ Render text
+   ✘ Measure page
+========================================================== */
+
+(function(){
+
+    const Caret =
+        CampusWord2007Simulateur.CaretEngine;
+
+    const Layout =
+        CampusWord2007Simulateur.LayoutEngine;
+
+    if(
+        !Caret ||
+        !Layout
+    ){
+        return;
     }
 
-};
+    /* ======================================================
+       SYNCHRONIZE
+    ====================================================== */
+
+    Caret.synchronize = function(){
+
+        if(
+            !this.page ||
+            typeof Layout.getCurrentCaretPosition !==
+            "function"
+        ){
+            return false;
+        }
+
+        const position =
+            Layout.getCurrentCaretPosition();
+
+        if(!position){
+            return false;
+        }
+
+        return this.refresh();
+
+    };
+
+    /* ======================================================
+       INITIALIZE FIRST CARET
+    ====================================================== */
+
+    Caret.initializeOnPage = function(page){
+
+        if(!page){
+            return false;
+        }
+
+        if(
+            typeof Layout.initialize ===
+            "function"
+        ){
+            Layout.initialize(page);
+        }
+
+        if(
+            typeof this.attachToPage ===
+            "function"
+        ){
+            this.attachToPage(page);
+        }
+
+        return this.synchronize();
+
+    };
+
+})();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
