@@ -2220,53 +2220,242 @@ CampusWord2007Simulateur.LayoutEngine.commitCaret = function(page) {
 /* ==========================================================
    CAMPUS WORD 2007 SIMULATEUR
    CARET ENGINE
-   PHASE 1.1
-   FOUNDATION KERNEL
-   ----------------------------------------------------------
-   RESPONSIBILITY
-
-   • Create visual caret
-   • Attach caret to page
-   • Store current page
-   • Store current layer
-
-   DOES NOT
-
-   ✘ Calculate coordinates
-   ✘ Measure page
-   ✘ Measure characters
-   ✘ Resolve line breaks
-   ✘ Resolve page breaks
-
-   ALL POSITION CALCULATIONS
-   ARE PROVIDED BY LAYOUT ENGINE
-========================================================== */
+   FINAL VERSION (CLEAN + SAFE)
+   ========================================================== */
 
 CampusWord2007Simulateur.CaretEngine = {
 
-    initialized:false,
+    initialized: false,
 
-    visible:false,
+    visible: false,
 
-    page:null,
+    page: null,
 
-    layer:null,
+    layer: null,
 
-    element:null,
+    element: null,
 
-    initialize(){
+    /* ======================================================
+       INITIALIZE
+    ====================================================== */
 
-        if(this.initialized){
+    initialize() {
+
+        if (this.initialized) {
             return true;
         }
 
         this.initialized = true;
+        return true;
+    },
+
+    /* ======================================================
+       ATTACH CARET TO PAGE
+    ====================================================== */
+
+    attachToPage(page) {
+
+        if (!page) return false;
+
+        const layer = page.querySelector(".page-caret-layer");
+        if (!layer) return false;
+
+        this.page = page;
+        this.layer = layer;
+
+        if (!this.element) {
+
+            const caret = document.createElement("div");
+
+            caret.className = "document-caret";
+            caret.setAttribute("aria-hidden", "true");
+
+            caret.style.position = "absolute";
+            caret.style.left = "0px";
+            caret.style.top = "0px";
+            caret.style.width = "1px";
+            caret.style.height = "19px";
+            caret.style.display = "none";
+            caret.style.pointerEvents = "none";
+            caret.style.opacity = "1";
+
+            this.element = caret;
+        }
+
+        if (this.element.parentNode !== this.layer) {
+            if (this.element.parentNode) {
+                this.element.parentNode.removeChild(this.element);
+            }
+            this.layer.appendChild(this.element);
+        }
 
         return true;
+    },
 
+    /* ======================================================
+       MOVE CARET
+    ====================================================== */
+
+    moveTo(position) {
+
+        if (!this.element || !position) return false;
+
+        this.element.style.left = (Number(position.x) || 0) + "px";
+        this.element.style.top = (Number(position.y) || 0) + "px";
+        this.element.style.height = (Number(position.height) || 19) + "px";
+
+        return true;
+    },
+
+    /* ======================================================
+       REFRESH FROM LAYOUT ENGINE
+    ====================================================== */
+
+    refresh() {
+
+        const Layout = CampusWord2007Simulateur.LayoutEngine;
+
+        if (!Layout || typeof Layout.getCurrentCaretPosition !== "function") {
+            return false;
+        }
+
+        const position = Layout.getCurrentCaretPosition();
+        if (!position) return false;
+
+        if (position.page && position.page !== this.page) {
+            this.attachToPage(position.page);
+        }
+
+        this.moveTo(position);
+        this.show();
+
+        return true;
+    },
+
+    /* ======================================================
+       SHOW / HIDE
+    ====================================================== */
+
+    show() {
+
+        if (!this.element) return false;
+
+        this.element.style.display = "block";
+        this.visible = true;
+
+        this.startBlink();
+        return true;
+    },
+
+    hide() {
+
+        if (!this.element) return false;
+
+        this.stopBlink();
+        this.element.style.display = "none";
+        this.visible = false;
+
+        return true;
+    },
+
+    /* ======================================================
+       BLINK SYSTEM
+    ====================================================== */
+
+    blinkTimer: null,
+    blinkDelay: 530,
+
+    startBlink() {
+
+        if (!this.element || this.blinkTimer) return false;
+
+        this.blinkTimer = setInterval(() => {
+
+            if (!this.element || !this.visible) return;
+
+            this.element.style.opacity =
+                this.element.style.opacity === "0" ? "1" : "0";
+
+        }, this.blinkDelay);
+
+        return true;
+    },
+
+    stopBlink() {
+
+        if (this.blinkTimer) {
+            clearInterval(this.blinkTimer);
+            this.blinkTimer = null;
+        }
+
+        if (this.element) {
+            this.element.style.opacity = "1";
+        }
+
+        return true;
+    },
+
+    /* ======================================================
+       RESET
+    ====================================================== */
+
+    reset() {
+
+        this.stopBlink();
+
+        if (this.element) {
+            this.element.style.left = "0px";
+            this.element.style.top = "0px";
+            this.element.style.height = "19px";
+            this.element.style.display = "none";
+            this.element.style.opacity = "1";
+        }
+
+        this.visible = false;
+        this.page = null;
+        this.layer = null;
+
+        return true;
+    },
+
+    /* ======================================================
+       DESTROY
+    ====================================================== */
+
+    destroy() {
+
+        this.stopBlink();
+
+        if (this.element && this.element.parentNode) {
+            this.element.parentNode.removeChild(this.element);
+        }
+
+        this.element = null;
+        this.page = null;
+        this.layer = null;
+        this.visible = false;
+        this.initialized = false;
+
+        return true;
+    },
+
+    /* ======================================================
+       STATUS HELPERS
+    ====================================================== */
+
+    isVisible() {
+        return this.visible === true;
+    },
+
+    getCurrentPage() {
+        return this.page;
+    },
+
+    getElement() {
+        return this.element;
     }
-
 };
+
 
 
 
@@ -2278,49 +2467,28 @@ CampusWord2007Simulateur.CaretEngine = {
 /* ==========================================================
    CAMPUS WORD 2007 SIMULATEUR
    CARET ENGINE
-   PHASE 1.2
-   PAGE ATTACHMENT
-   ----------------------------------------------------------
-   RESPONSIBILITY
+   PHASE 1.2 (SAFE + COMPATIBLE FIX)
+   ========================================================== */
 
-   • Attach caret to a page
-   • Create visual caret
-   • Locate caret layer
-   • Keep one caret instance
+(function () {
 
-   DOES NOT
+    const Caret = CampusWord2007Simulateur.CaretEngine;
 
-   ✘ Calculate coordinates
-   ✘ Move caret
-   ✘ Blink
-   ✘ Modify text
-========================================================== */
-
-(function(){
-
-    const Caret =
-        CampusWord2007Simulateur.CaretEngine;
-
-    if(!Caret){
-        return;
-    }
+    if (!Caret) return;
 
     /* ======================================================
        ATTACH TO PAGE
     ====================================================== */
 
-    Caret.attachToPage = function(page){
+    Caret.attachToPage = function (page) {
 
-        if(!page){
+        if (!page || !(page instanceof HTMLElement)) {
             return false;
         }
 
-        const layer =
-            page.querySelector(
-                ".page-caret-layer"
-            );
+        const layer = page.querySelector(".page-caret-layer");
 
-        if(!layer){
+        if (!layer || !(layer instanceof HTMLElement)) {
             return false;
         }
 
@@ -2331,71 +2499,42 @@ CampusWord2007Simulateur.CaretEngine = {
            CREATE CARET IF NEEDED
         ---------------------------------------------- */
 
-        if(!this.element){
+        if (!this.element) {
 
-            const caret =
-                document.createElement("div");
+            const caret = document.createElement("div");
 
-            caret.className =
-                "document-caret";
+            caret.className = "document-caret";
+            caret.setAttribute("aria-hidden", "true");
 
-            caret.setAttribute(
-                "aria-hidden",
-                "true"
-            );
+            caret.style.position = "absolute";
+            caret.style.left = "0px";
+            caret.style.top = "0px";
+            caret.style.width = "1px";
+            caret.style.height = "19px";
 
-            caret.style.position =
-                "absolute";
+            caret.style.display = "none";
+            caret.style.pointerEvents = "none";
+            caret.style.opacity = "1";
 
-            caret.style.left =
-                "0px";
+            caret.style.willChange = "transform, opacity";
 
-            caret.style.top =
-                "0px";
-
-            caret.style.width =
-                "1px";
-
-            caret.style.height =
-                "19px";
-
-            caret.style.display =
-                "none";
-
-            caret.style.pointerEvents =
-                "none";
-
-            this.element =
-                caret;
-
+            this.element = caret;
         }
 
         /* ----------------------------------------------
-           MOVE CARET TO CURRENT PAGE
+           SAFE DOM ATTACH (avoid duplicates + Android glitches)
         ---------------------------------------------- */
 
-        if(
-            this.element.parentNode !== layer
-        ){
+        if (this.element.parentNode !== layer) {
 
-            if(
-                this.element.parentNode
-            ){
-
-                this.element.parentNode.removeChild(
-                    this.element
-                );
-
+            if (this.element.parentNode) {
+                this.element.parentNode.removeChild(this.element);
             }
 
-            layer.appendChild(
-                this.element
-            );
-
+            layer.appendChild(this.element);
         }
 
         return true;
-
     };
 
 })();
@@ -2404,164 +2543,117 @@ CampusWord2007Simulateur.CaretEngine = {
 
 
 
-
-
-
-
-
 /* ==========================================================
    CAMPUS WORD 2007 SIMULATEUR
    CARET ENGINE
-   PHASE 1.3
-   VISUAL CARET CONTROL
-   ----------------------------------------------------------
-   RESPONSIBILITY
+   PHASE 1.3 (SAFE FIXED VERSION)
+   ========================================================== */
 
-   • Move visual caret
-   • Refresh from LayoutEngine
-   • Automatically switch page
-   • Show caret
-   • Hide caret
+(function () {
 
-   DOES NOT
+    const Caret = CampusWord2007Simulateur.CaretEngine;
 
-   ✘ Calculate coordinates
-   ✘ Measure page
-   ✘ Measure text
-   ✘ Resolve insertion point
-========================================================== */
-
-(function(){
-
-    const Caret =
-        CampusWord2007Simulateur.CaretEngine;
-
-    if(!Caret){
-        return;
-    }
+    if (!Caret) return;
 
     /* ======================================================
        MOVE CARET
     ====================================================== */
 
-    Caret.moveTo = function(position){
+    Caret.moveTo = function (position) {
 
-        if(
-            !this.element ||
-            !position
-        ){
+        if (!this.element || !position) {
             return false;
         }
 
-        this.element.style.left =
-            (Number(position.x) || 0) + "px";
+        const x = Number(position.x);
+        const y = Number(position.y);
+        const h = Number(position.height);
 
-        this.element.style.top =
-            (Number(position.y) || 0) + "px";
-
-        this.element.style.height =
-            (Number(position.height) || 19) + "px";
+        this.element.style.left = (isFinite(x) ? x : 0) + "px";
+        this.element.style.top = (isFinite(y) ? y : 0) + "px";
+        this.element.style.height = (isFinite(h) ? h : 19) + "px";
 
         return true;
-
     };
 
     /* ======================================================
        REFRESH FROM LAYOUT ENGINE
     ====================================================== */
 
-    Caret.refresh = function(){
+    Caret.refresh = function () {
 
-        const Layout =
-            CampusWord2007Simulateur.LayoutEngine;
+        const Layout = CampusWord2007Simulateur.LayoutEngine;
 
-        if(
-            !Layout ||
-            typeof Layout.getCurrentCaretPosition !==
-            "function"
-        ){
+        if (!Layout || typeof Layout.getCurrentCaretPosition !== "function") {
             return false;
         }
 
-        const position =
-            Layout.getCurrentCaretPosition();
+        const position = Layout.getCurrentCaretPosition();
 
-        if(!position){
+        if (!position) {
             return false;
         }
 
-        if(
+        /* ----------------------------------------------
+           SAFE PAGE SWITCH
+        ---------------------------------------------- */
+
+        if (
             position.page &&
-            position.page !== this.page
-        ){
-
-            this.attachToPage(
-                position.page
-            );
-
+            this.page !== position.page
+        ) {
+            if (typeof this.attachToPage === "function") {
+                this.attachToPage(position.page);
+            }
         }
 
         this.moveTo(position);
 
-        this.show();
+        if (typeof this.show === "function") {
+            this.show();
+        }
 
         return true;
-
     };
 
     /* ======================================================
        SHOW
     ====================================================== */
 
-    Caret.show = function(){
+    Caret.show = function () {
 
-        if(!this.element){
-            return false;
-        }
+        if (!this.element) return false;
 
-        this.element.style.display =
-            "block";
-
-        this.element.style.opacity =
-            "1";
+        this.element.style.display = "block";
+        this.element.style.opacity = "1";
 
         this.visible = true;
 
-        if(
-            typeof this.restartBlink ===
-            "function"
-        ){
+        if (typeof this.restartBlink === "function") {
             this.restartBlink();
         }
 
         return true;
-
     };
 
     /* ======================================================
        HIDE
     ====================================================== */
 
-    Caret.hide = function(){
+    Caret.hide = function () {
 
-        if(!this.element){
-            return false;
-        }
+        if (!this.element) return false;
 
-        if(
-            typeof this.stopBlink ===
-            "function"
-        ){
+        if (typeof this.stopBlink === "function") {
             this.stopBlink();
         }
 
-        this.element.style.display =
-            "none";
+        this.element.style.display = "none";
+        this.element.style.opacity = "1";
 
         this.visible = false;
 
         return true;
-
     };
 
 })();
@@ -2570,126 +2662,84 @@ CampusWord2007Simulateur.CaretEngine = {
 
 
 
-
-
-
-
 /* ==========================================================
    CAMPUS WORD 2007 SIMULATEUR
    CARET ENGINE
-   PHASE 1.4
-   BLINK MANAGER
-   ----------------------------------------------------------
-   RESPONSIBILITY
+   PHASE 1.4 (SAFE BLINK MANAGER)
+   ========================================================== */
 
-   • Start caret blinking
-   • Stop caret blinking
-   • Restart blinking
-   • Keep visual state synchronized
+(function () {
 
-   DOES NOT
+    const Caret = CampusWord2007Simulateur.CaretEngine;
 
-   ✘ Calculate coordinates
-   ✘ Move caret
-   ✘ Render text
-   ✘ Measure page
-========================================================== */
-
-(function(){
-
-    const Caret =
-        CampusWord2007Simulateur.CaretEngine;
-
-    if(!Caret){
-        return;
-    }
+    if (!Caret) return;
 
     /* ======================================================
        BLINK STATE
     ====================================================== */
 
     Caret.blinkTimer = null;
-
     Caret.blinkDelay = 530;
 
     /* ======================================================
        START BLINK
     ====================================================== */
 
-    Caret.startBlink = function(){
+    Caret.startBlink = function () {
 
-        if(
-            !this.element ||
-            this.blinkTimer
-        ){
+        if (!this.element || this.blinkTimer || !this.visible) {
             return false;
         }
 
         this.element.style.opacity = "1";
 
-        this.blinkTimer =
-            window.setInterval(()=>{
+        this.blinkTimer = window.setInterval(() => {
 
-                if(
-                    !this.element ||
-                    !this.visible
-                ){
-                    return;
-                }
+            if (!this.element || !this.visible) {
+                return;
+            }
 
-                this.element.style.opacity =
-                    this.element.style.opacity === "0"
-                        ? "1"
-                        : "0";
+            const current = this.element.style.opacity;
 
-            },this.blinkDelay);
+            this.element.style.opacity =
+                (current === "0" || current === "") ? "1" : "0";
+
+        }, this.blinkDelay);
 
         return true;
-
     };
 
     /* ======================================================
        STOP BLINK
     ====================================================== */
 
-    Caret.stopBlink = function(){
+    Caret.stopBlink = function () {
 
-        if(this.blinkTimer){
-
-            clearInterval(
-                this.blinkTimer
-            );
-
+        if (this.blinkTimer !== null) {
+            clearInterval(this.blinkTimer);
             this.blinkTimer = null;
-
         }
 
-        if(this.element){
-
+        if (this.element) {
             this.element.style.opacity = "1";
-
         }
 
         return true;
-
     };
 
     /* ======================================================
        RESTART BLINK
     ====================================================== */
 
-    Caret.restartBlink = function(){
+    Caret.restartBlink = function () {
 
         this.stopBlink();
 
-        if(this.visible){
-
+        if (this.visible === true) {
             this.startBlink();
-
         }
 
         return true;
-
     };
 
 })();
@@ -2697,123 +2747,88 @@ CampusWord2007Simulateur.CaretEngine = {
 
 
 
-
-
-
-
 /* ==========================================================
    CAMPUS WORD 2007 SIMULATEUR
    CARET ENGINE
-   PHASE 1.5
-   PUBLIC API
-   ----------------------------------------------------------
-   RESPONSIBILITY
+   PHASE 1.5 (SAFE PUBLIC API)
+   ========================================================== */
 
-   • Reset caret
-   • Destroy caret
-   • Expose public state
+(function () {
 
-   DOES NOT
+    const Caret = CampusWord2007Simulateur.CaretEngine;
 
-   ✘ Calculate coordinates
-   ✘ Render text
-   ✘ Measure page
-   ✘ Create pages
-========================================================== */
-
-(function(){
-
-    const Caret =
-        CampusWord2007Simulateur.CaretEngine;
-
-    if(!Caret){
-        return;
-    }
+    if (!Caret) return;
 
     /* ======================================================
        IS INITIALIZED
     ====================================================== */
 
-    Caret.isInitialized = function(){
-
+    Caret.isInitialized = function () {
         return this.initialized === true;
-
     };
 
     /* ======================================================
        IS VISIBLE
     ====================================================== */
 
-    Caret.isVisible = function(){
-
+    Caret.isVisible = function () {
         return this.visible === true;
-
     };
 
     /* ======================================================
        GET CURRENT PAGE
     ====================================================== */
 
-    Caret.getCurrentPage = function(){
-
-        return this.page;
-
+    Caret.getCurrentPage = function () {
+        return this.page || null;
     };
 
     /* ======================================================
        GET CURRENT ELEMENT
     ====================================================== */
 
-    Caret.getElement = function(){
-
-        return this.element;
-
+    Caret.getElement = function () {
+        return this.element || null;
     };
 
     /* ======================================================
        RESET
     ====================================================== */
 
-    Caret.reset = function(){
+    Caret.reset = function () {
 
-        this.stopBlink();
+        if (typeof this.stopBlink === "function") {
+            this.stopBlink();
+        }
 
-        if(this.element){
+        if (this.element) {
 
             this.element.style.left = "0px";
             this.element.style.top = "0px";
             this.element.style.height = "19px";
             this.element.style.opacity = "1";
             this.element.style.display = "none";
-
         }
 
         this.visible = false;
-
         this.page = null;
         this.layer = null;
 
         return true;
-
     };
 
     /* ======================================================
        DESTROY
     ====================================================== */
 
-    Caret.destroy = function(){
+    Caret.destroy = function () {
 
-        this.stopBlink();
+        if (typeof this.stopBlink === "function") {
+            this.stopBlink();
+        }
 
-        if(
-            this.element &&
-            this.element.parentNode
-        ){
-
-            this.element.parentNode.removeChild(
-                this.element
-            );
-
+        if (this.element && this.element.parentNode) {
+            this.element.parentNode.removeChild(this.element);
         }
 
         this.element = null;
@@ -2824,7 +2839,6 @@ CampusWord2007Simulateur.CaretEngine = {
         this.initialized = false;
 
         return true;
-
     };
 
 })();
@@ -2841,101 +2855,83 @@ CampusWord2007Simulateur.CaretEngine = {
 /* ==========================================================
    CAMPUS WORD 2007 SIMULATEUR
    CARET ENGINE
-   PHASE 1.6
-   LAYOUT BRIDGE
-   ----------------------------------------------------------
-   RESPONSIBILITY
+   PHASE 1.6 (SAFE LAYOUT BRIDGE)
+   ========================================================== */
 
-   • Connect LayoutEngine to CaretEngine
-   • Initialize first caret
-   • Refresh caret after layout update
+(function () {
 
-   DOES NOT
+    const Caret = CampusWord2007Simulateur.CaretEngine;
+    const Layout = CampusWord2007Simulateur.LayoutEngine;
 
-   ✘ Calculate coordinates
-   ✘ Render text
-   ✘ Measure page
-========================================================== */
-
-(function(){
-
-    const Caret =
-        CampusWord2007Simulateur.CaretEngine;
-
-    const Layout =
-        CampusWord2007Simulateur.LayoutEngine;
-
-    if(
-        !Caret ||
-        !Layout
-    ){
-        return;
-    }
+    if (!Caret || !Layout) return;
 
     /* ======================================================
        SYNCHRONIZE
     ====================================================== */
 
-    Caret.synchronize = function(){
+    Caret.synchronize = function () {
 
-        if(
-            !this.page ||
-            typeof Layout.getCurrentCaretPosition !==
-            "function"
-        ){
+        if (!this.page) {
             return false;
         }
 
-        const position =
-            Layout.getCurrentCaretPosition();
-
-        if(!position){
+        if (typeof Layout.getCurrentCaretPosition !== "function") {
             return false;
         }
 
-        return this.refresh();
+        const position = Layout.getCurrentCaretPosition();
 
+        if (!position) {
+            return false;
+        }
+
+        /* --------------------------------------------------
+           SAFE REFRESH CALL
+        -------------------------------------------------- */
+
+        if (typeof this.refresh === "function") {
+            return this.refresh();
+        }
+
+        /* fallback si refresh pa egziste */
+        if (typeof this.moveTo === "function") {
+            this.moveTo(position);
+            if (typeof this.show === "function") {
+                this.show();
+            }
+            return true;
+        }
+
+        return false;
     };
 
     /* ======================================================
        INITIALIZE FIRST CARET
     ====================================================== */
 
-    Caret.initializeOnPage = function(page){
+    Caret.initializeOnPage = function (page) {
 
-        if(!page){
-            return false;
-        }
+        if (!page) return false;
 
-        if(
-            typeof Layout.initialize ===
-            "function"
-        ){
+        /* Layout init si li egziste */
+        if (typeof Layout.initialize === "function") {
             Layout.initialize(page);
         }
 
-        if(
-            typeof this.attachToPage ===
-            "function"
-        ){
+        /* attach caret */
+        if (typeof this.attachToPage === "function") {
             this.attachToPage(page);
         }
 
-        return this.synchronize();
+        /* IMPORTANT: delay sync for mobile render stability */
+        setTimeout(() => {
+            this.synchronize();
+        }, 0);
 
+        return true;
     };
 
 })();
-
-
-
-
-
-
-
-
-
-
 
 
 
