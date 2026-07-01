@@ -7322,6 +7322,230 @@ CampusWord2007Simulateur.CaretEngine.FocusManager = {
 
 
 
+/* ==========================================================
+   CAMPUS WORD 2007 SIMULATEUR
+   CARET ENGINE
+   PHASE 2.3
+   PAGE ATTACHMENT MANAGER
+   ----------------------------------------------------------
+   RESPONSIBILITY
+
+   • Attach caret to page context
+   • Handle multi-page switching
+   • Detach caret cleanly
+   • Update CaretEngine references
+
+   DOES NOT
+
+   • Render caret
+   • Blink
+   • Show / Hide caret
+   • Calculate layout
+   • Calculate coordinates
+   • Call LayoutEngine
+   • Create caret DOM
+   ========================================================== */
+
+CampusWord2007Simulateur.CaretEngine.PageAttachmentManager = {
+
+    initialized: false,
+
+    initialize() {
+
+        if (this.initialized) {
+            return true;
+        }
+
+        this.initialized = true;
+
+        return true;
+
+    },
+
+    /* ======================================================
+       ATTACH TO PAGE
+    ====================================================== */
+
+    attach(pageNumber) {
+
+        if (
+            typeof pageNumber !== "number" ||
+            !Number.isFinite(pageNumber)
+        ) {
+
+            return false;
+
+        }
+
+        const Caret =
+            CampusWord2007Simulateur.CaretEngine;
+
+        const references =
+            Caret.references;
+
+        const caret =
+            references.caret;
+
+        if (!caret) {
+
+            return false;
+
+        }
+
+        const page = document.querySelector(
+
+            '.document-page[data-page-number="' +
+            pageNumber +
+            '"]'
+
+        );
+
+        if (!page) {
+
+            return false;
+
+        }
+
+        const layer = page.querySelector(
+
+            ".page-caret-layer"
+
+        );
+
+        if (!layer) {
+
+            return false;
+
+        }
+
+        if (
+            caret.parentNode &&
+            caret.parentNode !== layer
+        ) {
+
+            caret.parentNode.removeChild(
+                caret
+            );
+
+        }
+
+        if (
+            caret.parentNode !== layer
+        ) {
+
+            layer.appendChild(
+                caret
+            );
+
+        }
+
+        references.page = page;
+
+        references.layer = layer;
+
+        return true;
+
+    },
+
+    /* ======================================================
+       DETACH
+    ====================================================== */
+
+    detach() {
+
+        const Caret =
+            CampusWord2007Simulateur.CaretEngine;
+
+        const references =
+            Caret.references;
+
+        const caret =
+            references.caret;
+
+        if (
+            caret &&
+            caret.parentNode
+        ) {
+
+            caret.parentNode.removeChild(
+                caret
+            );
+
+        }
+
+        references.page = null;
+
+        references.layer = null;
+
+        return true;
+
+    },
+
+    /* ======================================================
+       CURRENT PAGE
+    ====================================================== */
+
+    getPage() {
+
+        return CampusWord2007Simulateur
+            .CaretEngine
+            .references
+            .page;
+
+    },
+
+    /* ======================================================
+       CURRENT LAYER
+    ====================================================== */
+
+    getLayer() {
+
+        return CampusWord2007Simulateur
+            .CaretEngine
+            .references
+            .layer;
+
+    },
+
+    /* ======================================================
+       IS ATTACHED
+    ====================================================== */
+
+    isAttached() {
+
+        const references =
+            CampusWord2007Simulateur
+            .CaretEngine
+            .references;
+
+        return !!(
+            references.page &&
+            references.layer &&
+            references.caret &&
+            references.caret.parentNode ===
+                references.layer
+        );
+
+    },
+
+    /* ======================================================
+       DESTROY
+    ====================================================== */
+
+    destroy() {
+
+        this.detach();
+
+        this.initialized = false;
+
+        return true;
+
+    }
+
+};
+
+
+
 
 
 
