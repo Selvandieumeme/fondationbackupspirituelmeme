@@ -1804,40 +1804,53 @@ CampusWord2007Simulateur.LayoutEngine = {
 
 
 
-    /* ======================================================
-       RESET
-    ====================================================== */
 
-    reset(){
+/* ======================================================
+   RESET
+====================================================== */
 
-        this.currentPage=null;
+reset(){
 
-        this.currentParagraph=null;
+    this.currentPage = null;
 
-        this.currentLine=null;
+    this.currentParagraph = null;
 
-        this.currentCharacter=null;
+    this.currentLine = null;
 
+    this.currentCharacter = null;
 
+    this.caret.pageIndex = 0;
+    this.caret.paragraphIndex = 0;
+    this.caret.lineIndex = 0;
+    this.caret.characterIndex = 0;
+    this.caret.preferredColumn = 0;
 
-        this.caret.pageIndex=0;
-        this.caret.paragraphIndex=0;
-        this.caret.lineIndex=0;
-        this.caret.characterIndex=0;
-        this.caret.preferredColumn=0;
+    this.positions.pages.length = 0;
+    this.positions.paragraphs.length = 0;
+    this.positions.lines.length = 0;
+    this.positions.characters.length = 0;
 
+    /* ----------------------------------------------
+       KEEP LAYOUT CARET MODULES SYNCHRONIZED
+    ---------------------------------------------- */
 
+    if(
+        this.CaretPosition &&
+        typeof this.CaretPosition.reset === "function"
+    ){
+        this.CaretPosition.reset();
+    }
 
-        this.positions.pages.length=0;
-        this.positions.paragraphs.length=0;
-        this.positions.lines.length=0;
-        this.positions.characters.length=0;
+    if(
+        this.Cursor &&
+        typeof this.Cursor.reset === "function"
+    ){
+        this.Cursor.reset();
+    }
 
+    this.markDirty();
 
-
-        this.markDirty();
-
-    },
+},
 
 
 
@@ -2015,6 +2028,8 @@ CampusWord2007Simulateur.LayoutEngine = {
 
 
 
+
+
 /* ==========================================================
    CAMPUS WORD 2007 SIMULATEUR
    LAYOUT ENGINE
@@ -2104,7 +2119,8 @@ CampusWord2007Simulateur.LayoutEngine.metrics = {
     },
 
     /* ======================================================
-       LINE METRICS
+       LINE CACHE
+       (Compatibility Cache)
     ====================================================== */
 
     line:{
@@ -2120,7 +2136,7 @@ CampusWord2007Simulateur.LayoutEngine.metrics = {
     },
 
     /* ======================================================
-       CHARACTER METRICS
+       CHARACTER CACHE
     ====================================================== */
 
     character:{
@@ -2134,7 +2150,7 @@ CampusWord2007Simulateur.LayoutEngine.metrics = {
     },
 
     /* ======================================================
-       CARET METRICS
+       CARET CACHE
     ====================================================== */
 
     caret:{
@@ -2145,12 +2161,14 @@ CampusWord2007Simulateur.LayoutEngine.metrics = {
 
         x:0,
 
-        y:0
+        y:0,
+
+        baseline:0
 
     },
 
     /* ======================================================
-       PARAGRAPH METRICS
+       PARAGRAPH CACHE
     ====================================================== */
 
     paragraph:{
@@ -2187,7 +2205,27 @@ CampusWord2007Simulateur.LayoutEngine.metrics = {
    METRICS CACHE
 ========================================================== */
 
-CampusWord2007Simulateur.LayoutEngine.cache={
+CampusWord2007Simulateur.LayoutEngine.cache = {
+
+    page:null,
+
+    content:null,
+
+    textLayer:null,
+
+    caretLayer:null,
+
+    selectionLayer:null,
+
+    objectLayer:null,
+
+    overlayLayer:null,
+
+    workspace:null,
+
+    viewport:null,
+
+    scrollArea:null,
 
     pageRect:null,
 
@@ -2196,6 +2234,12 @@ CampusWord2007Simulateur.LayoutEngine.cache={
     textLayerRect:null,
 
     caretLayerRect:null,
+
+    selectionLayerRect:null,
+
+    objectLayerRect:null,
+
+    overlayLayerRect:null,
 
     paragraphRect:null,
 
@@ -2213,7 +2257,7 @@ CampusWord2007Simulateur.LayoutEngine.cache={
    RUNTIME GEOMETRY
 ========================================================== */
 
-CampusWord2007Simulateur.LayoutEngine.runtime={
+CampusWord2007Simulateur.LayoutEngine.runtime = {
 
     dirty:true,
 
@@ -2231,37 +2275,77 @@ CampusWord2007Simulateur.LayoutEngine.runtime={
    INTERNAL HELPERS
 ========================================================== */
 
-CampusWord2007Simulateur.LayoutEngine.invalidate=function(){
+CampusWord2007Simulateur.LayoutEngine.invalidate = function(){
 
-    this.runtime.dirty=true;
-
-};
-
-CampusWord2007Simulateur.LayoutEngine.validate=function(){
-
-    this.runtime.dirty=false;
-
-    this.runtime.lastUpdate=
-
-        performance.now();
+    this.runtime.dirty = true;
 
 };
 
-CampusWord2007Simulateur.LayoutEngine.isDirty=function(){
+CampusWord2007Simulateur.LayoutEngine.validate = function(){
+
+    this.runtime.dirty = false;
+
+    this.runtime.lastUpdate = performance.now();
+
+};
+
+CampusWord2007Simulateur.LayoutEngine.isDirty = function(){
 
     return this.runtime.dirty;
 
 };
 
-CampusWord2007Simulateur.LayoutEngine.getMetrics=function(){
+CampusWord2007Simulateur.LayoutEngine.getMetrics = function(){
 
     return this.metrics;
 
 };
 
-CampusWord2007Simulateur.LayoutEngine.getCache=function(){
+CampusWord2007Simulateur.LayoutEngine.getCache = function(){
 
     return this.cache;
+
+};
+
+/* ==========================================================
+   COMPATIBILITY SYNCHRONIZATION
+========================================================== */
+
+CampusWord2007Simulateur.LayoutEngine.syncMetrics = function(){
+
+    if(
+        this.LineMetrics &&
+        typeof this.LineMetrics.getMetrics === "function"
+    ){
+
+        const line = this.LineMetrics.getMetrics();
+
+        this.metrics.line.height = line.lineHeight;
+        this.metrics.line.baseline = line.baseline;
+        this.metrics.line.ascent = line.ascent;
+        this.metrics.line.descent = line.descent;
+
+    }
+
+    if(
+        this.CaretPosition &&
+        typeof this.CaretPosition.get === "function"
+    ){
+
+        const caret = this.CaretPosition.get();
+
+        if(caret){
+
+            this.metrics.caret.x = caret.x;
+            this.metrics.caret.y = caret.y;
+            this.metrics.caret.height = caret.height;
+            this.metrics.caret.baseline = caret.baseline;
+
+        }
+
+    }
+
+    return this.metrics;
 
 };
 
@@ -2283,9 +2367,7 @@ CampusWord2007Simulateur.LayoutEngine.getCache=function(){
         CampusWord2007Simulateur.LayoutEngine;
 
     if(!Layout){
-
         return;
-
     }
 
     /* ======================================================
@@ -2301,18 +2383,14 @@ CampusWord2007Simulateur.LayoutEngine.getCache=function(){
             !Document ||
             typeof Document.getActivePage !== "function"
         ){
-
             return false;
-
         }
 
         const page =
             Document.getActivePage();
 
         if(!page){
-
             return false;
-
         }
 
         const content =
@@ -2321,16 +2399,14 @@ CampusWord2007Simulateur.LayoutEngine.getCache=function(){
             );
 
         if(!content){
-
             return false;
-
         }
 
         const metrics =
-            this.metrics;
+            Layout.metrics;
 
         const config =
-            CampusWord2007Simulateur.Configuration;
+            CampusWord2007Simulateur.Configuration || {};
 
         /* ----------------------------------------------
            PAGE SIZE
@@ -2347,16 +2423,20 @@ CampusWord2007Simulateur.LayoutEngine.getCache=function(){
         ---------------------------------------------- */
 
         metrics.margins.left =
-            config.pageMarginLeft;
+            config.pageMarginLeft ??
+            Layout.marginLeft;
 
         metrics.margins.top =
-            config.pageMarginTop;
+            config.pageMarginTop ??
+            Layout.marginTop;
 
         metrics.margins.right =
-            config.pageMarginRight;
+            config.pageMarginRight ??
+            Layout.marginRight;
 
         metrics.margins.bottom =
-            config.pageMarginBottom;
+            config.pageMarginBottom ??
+            Layout.marginBottom;
 
         /* ----------------------------------------------
            WRITABLE TEXT AREA
@@ -2434,7 +2514,7 @@ CampusWord2007Simulateur.LayoutEngine.getCache=function(){
         metrics.caret.y =
             metrics.textArea.top;
 
-        this.validate();
+        Layout.validate();
 
         return true;
 
@@ -2446,9 +2526,9 @@ CampusWord2007Simulateur.LayoutEngine.getCache=function(){
 
     Layout.getWritableWidth = function(){
 
-        return this.metrics
-                   .textArea
-                   .width;
+        return Layout.metrics
+            .textArea
+            .width;
 
     };
 
@@ -2458,9 +2538,9 @@ CampusWord2007Simulateur.LayoutEngine.getCache=function(){
 
     Layout.getWritableHeight = function(){
 
-        return this.metrics
-                   .textArea
-                   .height;
+        return Layout.metrics
+            .textArea
+            .height;
 
     };
 
@@ -2473,22 +2553,22 @@ CampusWord2007Simulateur.LayoutEngine.getCache=function(){
         return{
 
             left:
-                this.metrics.textArea.left,
+                Layout.metrics.textArea.left,
 
             top:
-                this.metrics.textArea.top,
+                Layout.metrics.textArea.top,
 
             right:
-                this.metrics.textArea.right,
+                Layout.metrics.textArea.right,
 
             bottom:
-                this.metrics.textArea.bottom,
+                Layout.metrics.textArea.bottom,
 
             width:
-                this.metrics.textArea.width,
+                Layout.metrics.textArea.width,
 
             height:
-                this.metrics.textArea.height
+                Layout.metrics.textArea.height
 
         };
 
@@ -2501,16 +2581,13 @@ CampusWord2007Simulateur.LayoutEngine.getCache=function(){
     Layout.isInsideWritableArea = function(x,y){
 
         const area =
-            this.metrics.textArea;
+            Layout.metrics.textArea;
 
         return(
 
             x >= area.left &&
-
             x <= area.right &&
-
             y >= area.top &&
-
             y <= area.bottom
 
         );
@@ -2518,6 +2595,8 @@ CampusWord2007Simulateur.LayoutEngine.getCache=function(){
     };
 
 })();
+
+
 
 
 
@@ -2537,9 +2616,7 @@ CampusWord2007Simulateur.LayoutEngine.getCache=function(){
         CampusWord2007Simulateur.LayoutEngine;
 
     if(!Layout){
-
         return;
-
     }
 
     /* ======================================================
@@ -2555,28 +2632,31 @@ CampusWord2007Simulateur.LayoutEngine.getCache=function(){
             !Document ||
             typeof Document.getActivePage !== "function"
         ){
-
             return false;
-
         }
 
         const page =
             Document.getActivePage();
 
         if(!page){
-
             return false;
-
         }
 
+        const DOM =
+            CampusWord2007Simulateur.DOMEngine;
+
         const cache =
-            this.cache;
+            Layout.cache;
 
         cache.page =
             page;
 
         cache.pageRect =
             page.getBoundingClientRect();
+
+        /* --------------------------------------------------
+           PAGE CONTENT
+        -------------------------------------------------- */
 
         cache.content =
             page.querySelector(
@@ -2588,6 +2668,10 @@ CampusWord2007Simulateur.LayoutEngine.getCache=function(){
                 ? cache.content.getBoundingClientRect()
                 : null;
 
+        /* --------------------------------------------------
+           TEXT LAYER
+        -------------------------------------------------- */
+
         cache.textLayer =
             page.querySelector(
                 ".page-text-layer"
@@ -2597,6 +2681,10 @@ CampusWord2007Simulateur.LayoutEngine.getCache=function(){
             cache.textLayer
                 ? cache.textLayer.getBoundingClientRect()
                 : null;
+
+        /* --------------------------------------------------
+           CARET LAYER
+        -------------------------------------------------- */
 
         cache.caretLayer =
             page.querySelector(
@@ -2608,6 +2696,10 @@ CampusWord2007Simulateur.LayoutEngine.getCache=function(){
                 ? cache.caretLayer.getBoundingClientRect()
                 : null;
 
+        /* --------------------------------------------------
+           SELECTION LAYER
+        -------------------------------------------------- */
+
         cache.selectionLayer =
             page.querySelector(
                 ".page-selection-layer"
@@ -2617,6 +2709,10 @@ CampusWord2007Simulateur.LayoutEngine.getCache=function(){
             cache.selectionLayer
                 ? cache.selectionLayer.getBoundingClientRect()
                 : null;
+
+        /* --------------------------------------------------
+           OBJECT LAYER
+        -------------------------------------------------- */
 
         cache.objectLayer =
             page.querySelector(
@@ -2628,6 +2724,10 @@ CampusWord2007Simulateur.LayoutEngine.getCache=function(){
                 ? cache.objectLayer.getBoundingClientRect()
                 : null;
 
+        /* --------------------------------------------------
+           OVERLAY LAYER
+        -------------------------------------------------- */
+
         cache.overlayLayer =
             page.querySelector(
                 ".page-overlay-layer"
@@ -2638,37 +2738,52 @@ CampusWord2007Simulateur.LayoutEngine.getCache=function(){
                 ? cache.overlayLayer.getBoundingClientRect()
                 : null;
 
+        /* --------------------------------------------------
+           WORKSPACE
+        -------------------------------------------------- */
+
         cache.workspace =
-            CampusWord2007Simulateur
-            .DOMEngine
-            .get("workspace");
+            DOM &&
+            typeof DOM.get === "function"
+                ? DOM.get("workspace")
+                : null;
 
         cache.workspaceRect =
             cache.workspace
                 ? cache.workspace.getBoundingClientRect()
                 : null;
 
+        /* --------------------------------------------------
+           VIEWPORT
+        -------------------------------------------------- */
+
         cache.viewport =
-            CampusWord2007Simulateur
-            .DOMEngine
-            .get("document-viewport");
+            DOM &&
+            typeof DOM.get === "function"
+                ? DOM.get("document-viewport")
+                : null;
 
         cache.viewportRect =
             cache.viewport
                 ? cache.viewport.getBoundingClientRect()
                 : null;
 
+        /* --------------------------------------------------
+           SCROLL AREA
+        -------------------------------------------------- */
+
         cache.scrollArea =
-            CampusWord2007Simulateur
-            .DOMEngine
-            .get("document-scroll-area");
+            DOM &&
+            typeof DOM.get === "function"
+                ? DOM.get("document-scroll-area")
+                : null;
 
         cache.scrollRect =
             cache.scrollArea
                 ? cache.scrollArea.getBoundingClientRect()
                 : null;
 
-        this.validate();
+        Layout.validate();
 
         return true;
 
@@ -2680,7 +2795,7 @@ CampusWord2007Simulateur.LayoutEngine.getCache=function(){
 
     Layout.getPageRect = function(){
 
-        return this.cache.pageRect;
+        return Layout.cache.pageRect;
 
     };
 
@@ -2690,7 +2805,7 @@ CampusWord2007Simulateur.LayoutEngine.getCache=function(){
 
     Layout.getContentRect = function(){
 
-        return this.cache.contentRect;
+        return Layout.cache.contentRect;
 
     };
 
@@ -2700,7 +2815,7 @@ CampusWord2007Simulateur.LayoutEngine.getCache=function(){
 
     Layout.getTextLayerRect = function(){
 
-        return this.cache.textLayerRect;
+        return Layout.cache.textLayerRect;
 
     };
 
@@ -2710,7 +2825,7 @@ CampusWord2007Simulateur.LayoutEngine.getCache=function(){
 
     Layout.getCaretLayerRect = function(){
 
-        return this.cache.caretLayerRect;
+        return Layout.cache.caretLayerRect;
 
     };
 
@@ -2720,7 +2835,7 @@ CampusWord2007Simulateur.LayoutEngine.getCache=function(){
 
     Layout.getWorkspaceRect = function(){
 
-        return this.cache.workspaceRect;
+        return Layout.cache.workspaceRect;
 
     };
 
@@ -2730,7 +2845,7 @@ CampusWord2007Simulateur.LayoutEngine.getCache=function(){
 
     Layout.getViewportRect = function(){
 
-        return this.cache.viewportRect;
+        return Layout.cache.viewportRect;
 
     };
 
@@ -2740,11 +2855,12 @@ CampusWord2007Simulateur.LayoutEngine.getCache=function(){
 
     Layout.getScrollRect = function(){
 
-        return this.cache.scrollRect;
+        return Layout.cache.scrollRect;
 
     };
 
 })();
+
 
 
 
@@ -2762,9 +2878,7 @@ CampusWord2007Simulateur.LayoutEngine.getCache=function(){
         CampusWord2007Simulateur.LayoutEngine;
 
     if(!Layout){
-
         return;
-
     }
 
     /* ======================================================
@@ -2774,17 +2888,12 @@ CampusWord2007Simulateur.LayoutEngine.getCache=function(){
     Layout.updatePageBoundaries = function(){
 
         if(
-
             !this.metrics ||
-
             !this.cache ||
-
-            !this.cache.pageRect
-
+            !this.cache.pageRect ||
+            !this.metrics.limits
         ){
-
             return false;
-
         }
 
         const metrics =
@@ -2798,7 +2907,6 @@ CampusWord2007Simulateur.LayoutEngine.getCache=function(){
         ---------------------------------------------- */
 
         metrics.page.left = 0;
-
         metrics.page.top = 0;
 
         metrics.page.right =
@@ -2814,22 +2922,22 @@ CampusWord2007Simulateur.LayoutEngine.getCache=function(){
             pageRect.height;
 
         /* ----------------------------------------------
-           PAGE BOUNDARIES
+           PAGE BOUNDARIES -> USING LIMITS (NO NEW STRUCTURE)
         ---------------------------------------------- */
 
-        metrics.boundaries.minX =
+        metrics.limits.minX =
             metrics.page.left;
 
-        metrics.boundaries.maxX =
+        metrics.limits.maxX =
             metrics.page.right;
 
-        metrics.boundaries.minY =
+        metrics.limits.minY =
             metrics.page.top;
 
-        metrics.boundaries.maxY =
+        metrics.limits.maxY =
             metrics.page.bottom;
 
-        this.validate();
+        Layout.validate();
 
         return true;
 
@@ -2841,19 +2949,12 @@ CampusWord2007Simulateur.LayoutEngine.getCache=function(){
 
     Layout.getPageBoundaries = function(){
 
-        return{
+        return {
 
-            minX:
-                this.metrics.boundaries.minX,
-
-            maxX:
-                this.metrics.boundaries.maxX,
-
-            minY:
-                this.metrics.boundaries.minY,
-
-            maxY:
-                this.metrics.boundaries.maxY
+            minX: Layout.metrics.limits.minX,
+            maxX: Layout.metrics.limits.maxX,
+            minY: Layout.metrics.limits.minY,
+            maxY: Layout.metrics.limits.maxY
 
         };
 
@@ -2865,13 +2966,10 @@ CampusWord2007Simulateur.LayoutEngine.getCache=function(){
 
     Layout.getPageSize = function(){
 
-        return{
+        return {
 
-            width:
-                this.metrics.page.width,
-
-            height:
-                this.metrics.page.height
+            width: Layout.metrics.page.width,
+            height: Layout.metrics.page.height
 
         };
 
@@ -2881,19 +2979,16 @@ CampusWord2007Simulateur.LayoutEngine.getCache=function(){
        INSIDE PAGE ?
     ====================================================== */
 
-    Layout.isInsidePage = function(x,y){
+    Layout.isInsidePage = function(x, y){
 
         const boundary =
-            this.metrics.boundaries;
+            Layout.metrics.limits;
 
-        return(
+        return (
 
             x >= boundary.minX &&
-
             x <= boundary.maxX &&
-
             y >= boundary.minY &&
-
             y <= boundary.maxY
 
         );
@@ -2906,20 +3001,14 @@ CampusWord2007Simulateur.LayoutEngine.getCache=function(){
 
 
 
+
+
 /* ==========================================================
    CAMPUS WORD 2007 SIMULATEUR
    LAYOUT ENGINE
    PHASE 1.2E
    BASELINE & LINE METRICS
-   ----------------------------------------------------------
-   RESPONSIBILITY
-   • Compute font metrics
-   • Compute baseline
-   • Compute line metrics
-   • Compute character box metrics
-   • NO caret calculation
-   • NO text positioning
-   ========================================================== */
+========================================================== */
 
 CampusWord2007Simulateur.LayoutEngine.LineMetrics = {
 
@@ -2928,23 +3017,17 @@ CampusWord2007Simulateur.LayoutEngine.LineMetrics = {
     metrics: {
 
         fontFamily: "",
-
         fontSize: 0,
-
         lineHeight: 0,
 
         baseline: 0,
-
         ascent: 0,
-
         descent: 0,
 
         capHeight: 0,
-
         xHeight: 0,
 
         characterWidth: 0,
-
         spaceWidth: 0
 
     },
@@ -2958,7 +3041,6 @@ CampusWord2007Simulateur.LayoutEngine.LineMetrics = {
         }
 
         this.createMeasurementElement();
-
         this.initialized = true;
 
         return true;
@@ -2971,7 +3053,12 @@ CampusWord2007Simulateur.LayoutEngine.LineMetrics = {
             return;
         }
 
-        const element = document.createElement("span");
+        if (typeof document === "undefined") {
+            return;
+        }
+
+        const element =
+            document.createElement("span");
 
         element.textContent = "Hg";
 
@@ -2985,7 +3072,9 @@ CampusWord2007Simulateur.LayoutEngine.LineMetrics = {
         element.style.margin = "0";
         element.style.border = "0";
 
-        document.body.appendChild(element);
+        if (document.body) {
+            document.body.appendChild(element);
+        }
 
         this.measurementElement = element;
 
@@ -2994,30 +3083,40 @@ CampusWord2007Simulateur.LayoutEngine.LineMetrics = {
     measure(fontFamily, fontSize, lineHeight) {
 
         if (!this.measurementElement) {
-            return null;
+            this.createMeasurementElement();
         }
 
-        const element = this.measurementElement;
+        if (!this.measurementElement) {
+            return this.getMetrics();
+        }
+
+        const element =
+            this.measurementElement;
 
         element.style.fontFamily = fontFamily;
         element.style.fontSize = fontSize + "px";
         element.style.lineHeight = lineHeight + "px";
 
-        const rect = element.getBoundingClientRect();
+        const rect =
+            element.getBoundingClientRect();
 
-        const width = rect.width;
-        const height = rect.height;
+        const width =
+            rect.width || 0;
+
+        /* --------------------------------------------------
+           STORE BASIC METRICS
+        -------------------------------------------------- */
 
         this.metrics.fontFamily = fontFamily;
         this.metrics.fontSize = fontSize;
         this.metrics.lineHeight = lineHeight;
 
-        /*
-            Browser pa bay ascent/descent dirèk.
-            Nou itilize estimasyon tipografik estanda.
-        */
+        /* --------------------------------------------------
+           TYPOGRAPHIC APPROXIMATION (SAFE MODEL)
+        -------------------------------------------------- */
 
-        this.metrics.ascent = Math.round(fontSize * 0.80);
+        this.metrics.ascent =
+            Math.round(fontSize * 0.80);
 
         this.metrics.descent =
             Math.max(
@@ -3035,13 +3134,21 @@ CampusWord2007Simulateur.LayoutEngine.LineMetrics = {
             Math.round(fontSize * 0.52);
 
         this.metrics.characterWidth =
-            width / 2;
+            Math.round(width / 2);
+
+        /* --------------------------------------------------
+           SPACE WIDTH
+        -------------------------------------------------- */
 
         element.textContent = " ";
 
-        this.metrics.spaceWidth =
-            element.getBoundingClientRect().width;
+        const spaceRect =
+            element.getBoundingClientRect();
 
+        this.metrics.spaceWidth =
+            spaceRect.width || 0;
+
+        /* restore */
         element.textContent = "Hg";
 
         return this.getMetrics();
@@ -3052,74 +3159,46 @@ CampusWord2007Simulateur.LayoutEngine.LineMetrics = {
 
         return {
 
-            fontFamily:
-                this.metrics.fontFamily,
+            fontFamily: this.metrics.fontFamily,
+            fontSize: this.metrics.fontSize,
+            lineHeight: this.metrics.lineHeight,
 
-            fontSize:
-                this.metrics.fontSize,
+            baseline: this.metrics.baseline,
+            ascent: this.metrics.ascent,
+            descent: this.metrics.descent,
 
-            lineHeight:
-                this.metrics.lineHeight,
+            capHeight: this.metrics.capHeight,
+            xHeight: this.metrics.xHeight,
 
-            baseline:
-                this.metrics.baseline,
-
-            ascent:
-                this.metrics.ascent,
-
-            descent:
-                this.metrics.descent,
-
-            capHeight:
-                this.metrics.capHeight,
-
-            xHeight:
-                this.metrics.xHeight,
-
-            characterWidth:
-                this.metrics.characterWidth,
-
-            spaceWidth:
-                this.metrics.spaceWidth
+            characterWidth: this.metrics.characterWidth,
+            spaceWidth: this.metrics.spaceWidth
 
         };
 
     },
 
     getBaseline() {
-
         return this.metrics.baseline;
-
     },
 
     getAscent() {
-
         return this.metrics.ascent;
-
     },
 
     getDescent() {
-
         return this.metrics.descent;
-
     },
 
     getLineHeight() {
-
         return this.metrics.lineHeight;
-
     },
 
     getCharacterWidth() {
-
         return this.metrics.characterWidth;
-
     },
 
     getSpaceWidth() {
-
         return this.metrics.spaceWidth;
-
     },
 
     destroy() {
@@ -3128,15 +3207,12 @@ CampusWord2007Simulateur.LayoutEngine.LineMetrics = {
             this.measurementElement &&
             this.measurementElement.parentNode
         ) {
-
             this.measurementElement.parentNode.removeChild(
                 this.measurementElement
             );
-
         }
 
         this.measurementElement = null;
-
         this.initialized = false;
 
     }
@@ -3147,21 +3223,12 @@ CampusWord2007Simulateur.LayoutEngine.LineMetrics = {
 
 
 
-
 /* ==========================================================
    CAMPUS WORD 2007 SIMULATEUR
    LAYOUT ENGINE
    PHASE 1.2F
    DEFAULT INSERTION POINT
-   ----------------------------------------------------------
-   RESPONSIBILITY
-   • Calculate default insertion point
-   • First typing position
-   • Paragraph origin
-   • NO caret movement
-   • NO text rendering
-   • NO paragraph creation
-   ========================================================== */
+========================================================== */
 
 CampusWord2007Simulateur.LayoutEngine.InsertionPoint = {
 
@@ -3170,7 +3237,6 @@ CampusWord2007Simulateur.LayoutEngine.InsertionPoint = {
     point: {
 
         x: 0,
-
         y: 0
 
     },
@@ -3178,9 +3244,7 @@ CampusWord2007Simulateur.LayoutEngine.InsertionPoint = {
     initialize() {
 
         if (this.initialized) {
-
             return true;
-
         }
 
         this.initialized = true;
@@ -3192,55 +3256,87 @@ CampusWord2007Simulateur.LayoutEngine.InsertionPoint = {
     calculate(page) {
 
         if (!page) {
-
             return null;
-
         }
+
+        const Layout =
+            CampusWord2007Simulateur.LayoutEngine;
 
         const Geometry =
-            CampusWord2007Simulateur
-            .LayoutEngine
-            .Geometry;
+            Layout.Geometry;
 
         const WritableArea =
-            CampusWord2007Simulateur
-            .LayoutEngine
-            .WritableArea;
+            Layout.WritableArea;
 
         const LineMetrics =
-            CampusWord2007Simulateur
-            .LayoutEngine
-            .LineMetrics;
+            Layout.LineMetrics;
 
-        if (
-            !Geometry ||
-            !WritableArea ||
-            !LineMetrics
-        ) {
+        /* --------------------------------------------------
+           SAFE GUARD: required modules
+        -------------------------------------------------- */
 
+        if (!Layout) {
             return null;
-
         }
 
-        Geometry.measure(page);
+        if (
+            !WritableArea ||
+            typeof WritableArea.calculate !== "function"
+        ) {
+            return null;
+        }
+
+        if (
+            !LineMetrics ||
+            typeof LineMetrics.getMetrics !== "function"
+        ) {
+            return null;
+        }
+
+        /* --------------------------------------------------
+           MEASURE PAGE (IF AVAILABLE)
+        -------------------------------------------------- */
+
+        if (
+            Geometry &&
+            typeof Geometry.measure === "function"
+        ) {
+            Geometry.measure(page);
+        }
+
+        /* --------------------------------------------------
+           CALCULATE WRITABLE AREA
+        -------------------------------------------------- */
 
         WritableArea.calculate(page);
 
         const writable =
-            WritableArea.get();
+            WritableArea.get ? WritableArea.get() : null;
+
+        if (!writable) {
+            return null;
+        }
 
         const metrics =
             LineMetrics.getMetrics();
 
+        const baseline =
+            metrics && metrics.baseline
+                ? metrics.baseline
+                : 0;
+
+        /* --------------------------------------------------
+           INSERTION POINT
+        -------------------------------------------------- */
+
         this.point.x =
             Math.round(
-                writable.left
+                writable.left || 0
             );
 
         this.point.y =
             Math.round(
-                writable.top +
-                metrics.baseline
+                (writable.top || 0) + baseline
             );
 
         return this.get();
@@ -3252,7 +3348,6 @@ CampusWord2007Simulateur.LayoutEngine.InsertionPoint = {
         return {
 
             x: this.point.x,
-
             y: this.point.y
 
         };
@@ -3260,21 +3355,16 @@ CampusWord2007Simulateur.LayoutEngine.InsertionPoint = {
     },
 
     getX() {
-
         return this.point.x;
-
     },
 
     getY() {
-
         return this.point.y;
-
     },
 
     reset() {
 
         this.point.x = 0;
-
         this.point.y = 0;
 
     },
@@ -3282,7 +3372,6 @@ CampusWord2007Simulateur.LayoutEngine.InsertionPoint = {
     destroy() {
 
         this.reset();
-
         this.initialized = false;
 
     }
@@ -3298,17 +3387,8 @@ CampusWord2007Simulateur.LayoutEngine.InsertionPoint = {
    CAMPUS WORD 2007 SIMULATEUR
    LAYOUT ENGINE
    PHASE 1.3A
-   VIEWPORT FOUNDATION
-   ----------------------------------------------------------
-   RESPONSIBILITY
-   • Viewport object
-   • Cached viewport metrics
-   • Initialization
-   • Public API
-   • NO calculation
-   • NO resize handling
-   • NO zoom handling
-   ========================================================== */
+   VIEWPORT FOUNDATION (CLEAN VERSION)
+========================================================== */
 
 CampusWord2007Simulateur.LayoutEngine.Viewport = {
 
@@ -3317,19 +3397,15 @@ CampusWord2007Simulateur.LayoutEngine.Viewport = {
     metrics: {
 
         width: 0,
-
         height: 0,
 
         clientWidth: 0,
-
         clientHeight: 0,
 
         scrollWidth: 0,
-
         scrollHeight: 0,
 
         scrollLeft: 0,
-
         scrollTop: 0,
 
         devicePixelRatio: 1,
@@ -3337,7 +3413,6 @@ CampusWord2007Simulateur.LayoutEngine.Viewport = {
         orientation: "portrait",
 
         visualViewport: null
-
     },
 
     root: null,
@@ -3345,172 +3420,105 @@ CampusWord2007Simulateur.LayoutEngine.Viewport = {
     initialize() {
 
         if (this.initialized) {
-
             return true;
-
         }
 
         this.root =
-            document.documentElement;
+            (typeof document !== "undefined")
+                ? document.documentElement
+                : null;
 
         this.metrics.devicePixelRatio =
-            window.devicePixelRatio || 1;
+            (typeof window !== "undefined" && window.devicePixelRatio)
+                ? window.devicePixelRatio
+                : 1;
 
-        if (window.visualViewport) {
-
-            this.metrics.visualViewport =
-                window.visualViewport;
-
+        if (typeof window !== "undefined" && window.visualViewport) {
+            this.metrics.visualViewport = window.visualViewport;
         }
 
         this.initialized = true;
 
         return true;
-
     },
 
     setMetrics(data) {
 
-        if (!data) {
-
-            return;
-
+        if (!data || typeof data !== "object") {
+            return false;
         }
 
-        Object.assign(
-            this.metrics,
-            data
-        );
+        Object.assign(this.metrics, data);
 
+        return true;
     },
 
     getMetrics() {
 
         return {
+            width: this.metrics.width,
+            height: this.metrics.height,
 
-            width:
-                this.metrics.width,
+            clientWidth: this.metrics.clientWidth,
+            clientHeight: this.metrics.clientHeight,
 
-            height:
-                this.metrics.height,
+            scrollWidth: this.metrics.scrollWidth,
+            scrollHeight: this.metrics.scrollHeight,
 
-            clientWidth:
-                this.metrics.clientWidth,
+            scrollLeft: this.metrics.scrollLeft,
+            scrollTop: this.metrics.scrollTop,
 
-            clientHeight:
-                this.metrics.clientHeight,
+            devicePixelRatio: this.metrics.devicePixelRatio,
+            orientation: this.metrics.orientation,
 
-            scrollWidth:
-                this.metrics.scrollWidth,
-
-            scrollHeight:
-                this.metrics.scrollHeight,
-
-            scrollLeft:
-                this.metrics.scrollLeft,
-
-            scrollTop:
-                this.metrics.scrollTop,
-
-            devicePixelRatio:
-                this.metrics.devicePixelRatio,
-
-            orientation:
-                this.metrics.orientation,
-
-            visualViewport:
-                this.metrics.visualViewport
-
+            visualViewport: this.metrics.visualViewport
         };
-
     },
 
-    getWidth() {
+    getWidth() { return this.metrics.width; },
+    getHeight() { return this.metrics.height; },
 
-        return this.metrics.width;
+    getClientWidth() { return this.metrics.clientWidth; },
+    getClientHeight() { return this.metrics.clientHeight; },
 
-    },
+    getScrollWidth() { return this.metrics.scrollWidth; },
+    getScrollHeight() { return this.metrics.scrollHeight; },
 
-    getHeight() {
+    getScrollLeft() { return this.metrics.scrollLeft; },
+    getScrollTop() { return this.metrics.scrollTop; },
 
-        return this.metrics.height;
+    getDevicePixelRatio() { return this.metrics.devicePixelRatio; },
 
-    },
+    getOrientation() { return this.metrics.orientation; },
 
-    getClientWidth() {
-
-        return this.metrics.clientWidth;
-
-    },
-
-    getClientHeight() {
-
-        return this.metrics.clientHeight;
-
-    },
-
-    getScrollWidth() {
-
-        return this.metrics.scrollWidth;
-
-    },
-
-    getScrollHeight() {
-
-        return this.metrics.scrollHeight;
-
-    },
-
-    getScrollLeft() {
-
-        return this.metrics.scrollLeft;
-
-    },
-
-    getScrollTop() {
-
-        return this.metrics.scrollTop;
-
-    },
-
-    getDevicePixelRatio() {
-
-        return this.metrics.devicePixelRatio;
-
-    },
-
-    getOrientation() {
-
-        return this.metrics.orientation;
-
-    },
-
-    getVisualViewport() {
-
-        return this.metrics.visualViewport;
-
-    },
+    getVisualViewport() { return this.metrics.visualViewport; },
 
     destroy() {
 
         this.root = null;
 
-        this.metrics.width = 0;
-        this.metrics.height = 0;
-        this.metrics.clientWidth = 0;
-        this.metrics.clientHeight = 0;
-        this.metrics.scrollWidth = 0;
-        this.metrics.scrollHeight = 0;
-        this.metrics.scrollLeft = 0;
-        this.metrics.scrollTop = 0;
-        this.metrics.devicePixelRatio = 1;
-        this.metrics.orientation = "portrait";
-        this.metrics.visualViewport = null;
+        this.metrics = {
+            width: 0,
+            height: 0,
+
+            clientWidth: 0,
+            clientHeight: 0,
+
+            scrollWidth: 0,
+            scrollHeight: 0,
+
+            scrollLeft: 0,
+            scrollTop: 0,
+
+            devicePixelRatio: 1,
+
+            orientation: "portrait",
+
+            visualViewport: null
+        };
 
         this.initialized = false;
-
     }
-
 };
 
 
@@ -3518,119 +3526,40 @@ CampusWord2007Simulateur.LayoutEngine.Viewport = {
 
 
 
-/* ==========================================================
-   CAMPUS WORD 2007 SIMULATEUR
-   LAYOUT ENGINE
-   PHASE 1.3B
-   VIEWPORT METRICS COLLECTOR
-   ----------------------------------------------------------
-   RESPONSIBILITY
-   • Measure viewport metrics
-   • Populate Viewport cache
-   • NO resize observer
-   • NO layout calculation
-   • NO page calculation
-   • NO caret calculation
-   ========================================================== */
 
-CampusWord2007Simulateur.LayoutEngine.Viewport.refresh = function () {
 
-    if (!this.initialized) {
 
-        return false;
 
-    }
 
-    const root = document.documentElement;
 
-    const body = document.body;
 
-    const visual = window.visualViewport;
 
-    this.metrics.width =
-        window.innerWidth;
 
-    this.metrics.height =
-        window.innerHeight;
 
-    this.metrics.clientWidth =
-        root.clientWidth;
 
-    this.metrics.clientHeight =
-        root.clientHeight;
 
-    this.metrics.scrollWidth =
-        Math.max(
 
-            root.scrollWidth,
 
-            body ? body.scrollWidth : 0
 
-        );
 
-    this.metrics.scrollHeight =
-        Math.max(
 
-            root.scrollHeight,
 
-            body ? body.scrollHeight : 0
 
-        );
 
-    this.metrics.scrollLeft =
-        window.pageXOffset ||
-        root.scrollLeft ||
-        0;
 
-    this.metrics.scrollTop =
-        window.pageYOffset ||
-        root.scrollTop ||
-        0;
 
-    this.metrics.devicePixelRatio =
-        window.devicePixelRatio || 1;
 
-    this.metrics.orientation =
 
-        this.metrics.width >=
-        this.metrics.height
 
-        ? "landscape"
 
-        : "portrait";
 
-    if (visual) {
 
-        this.metrics.visualViewport =
-            visual;
 
-        this.metrics.scale =
-            visual.scale;
 
-        this.metrics.offsetLeft =
-            visual.offsetLeft;
 
-        this.metrics.offsetTop =
-            visual.offsetTop;
 
-    }
 
-    else {
 
-        this.metrics.visualViewport =
-            null;
-
-        this.metrics.scale = 1;
-
-        this.metrics.offsetLeft = 0;
-
-        this.metrics.offsetTop = 0;
-
-    }
-
-    return this.getMetrics();
-
-};
 
 
 
