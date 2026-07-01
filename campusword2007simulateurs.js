@@ -7014,20 +7014,17 @@ CampusWord2007Simulateur.CaretEngine.VisibilityManager = {
 
 
 
-
-
-
 /* ==========================================================
    CAMPUS WORD 2007 SIMULATEUR
    CARET ENGINE
    PHASE 1.7
-   CARET CONTROLLER
+   CONTROLLER
    ----------------------------------------------------------
    RESPONSIBILITY
 
-   • Receive LayoutEngine position
-   • Update CaretPosition
-   • Attach caret to page
+   • Receive position from LayoutEngine
+   • Store position
+   • Attach caret to target page
    • Render caret
    • Show caret
 
@@ -7036,6 +7033,7 @@ CampusWord2007Simulateur.CaretEngine.VisibilityManager = {
    • Calculate coordinates
    • Call LayoutEngine
    • Blink
+   • Modify DOM directly
    ========================================================== */
 
 CampusWord2007Simulateur.CaretEngine.Controller = {
@@ -7064,15 +7062,50 @@ CampusWord2007Simulateur.CaretEngine.Controller = {
             CampusWord2007Simulateur
             .CaretEngine;
 
-        Engine.CaretPosition.set(position);
+        /* ==========================================
+           STORE POSITION
+        ========================================== */
 
-        Engine.PageAttachmentManager.attach(
-            position.pageNumber
-        );
+        if (
+            !Engine.Position.set(position)
+        ) {
+            return false;
+        }
 
-        Engine.Renderer.render();
+        const current =
+            Engine.Position.get();
 
-        Engine.VisibilityManager.show();
+        /* ==========================================
+           ATTACH TO PAGE
+        ========================================== */
+
+        if (
+            !Engine.PageAttachmentManager.attach(
+                current.pageNumber
+            )
+        ) {
+            return false;
+        }
+
+        /* ==========================================
+           RENDER
+        ========================================== */
+
+        if (
+            !Engine.Renderer.render()
+        ) {
+            return false;
+        }
+
+        /* ==========================================
+           SHOW
+        ========================================== */
+
+        if (
+            !Engine.VisibilityManager.show()
+        ) {
+            return false;
+        }
 
         return true;
 
@@ -7087,15 +7120,42 @@ CampusWord2007Simulateur.CaretEngine.Controller = {
 
     },
 
-    destroy() {
+    getPosition() {
+
+        return CampusWord2007Simulateur
+            .CaretEngine
+            .Position
+            .get();
+
+    },
+
+    reset() {
 
         this.hide();
 
+        CampusWord2007Simulateur
+            .CaretEngine
+            .Position
+            .reset();
+
+        return true;
+
+    },
+
+    destroy() {
+
+        this.reset();
+
         this.initialized = false;
+
+        return true;
 
     }
 
 };
+
+
+
 
 
 
