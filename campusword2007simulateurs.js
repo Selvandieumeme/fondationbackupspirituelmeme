@@ -7745,7 +7745,262 @@ CampusWord2007Simulateur.CaretEngine.LayoutIntegration = {
 
 
 
+/* ==========================================================
+   CAMPUS WORD 2007 SIMULATEUR
+   CARET ENGINE
+   PHASE 2.5
+   PUBLIC CARET API
+   ----------------------------------------------------------
+   RESPONSIBILITY
 
+   • Expose stable public API
+   • Hide internal modules
+   • Safe access only
+
+   DOES NOT
+
+   • Calculate coordinates
+   • Render directly
+   • Blink directly
+   • Attach pages directly
+   • Call LayoutEngine directly
+   • Modify DOM directly
+
+   ========================================================== */
+
+CampusWord2007Simulateur.CaretEngine.API = {
+
+    initialized: false,
+
+    initialize() {
+
+        if (this.initialized) {
+            return true;
+        }
+
+        this.initialized = true;
+
+        return true;
+
+    },
+
+    /* ======================================================
+       POSITION
+    ====================================================== */
+
+    setPosition(position) {
+
+        return CampusWord2007Simulateur
+            .CaretEngine
+            .LayoutBridge
+            .accept(position);
+
+    },
+
+    getPosition() {
+
+        return Object.assign(
+            {},
+            CampusWord2007Simulateur
+                .CaretEngine
+                .position
+        );
+
+    },
+
+    /* ======================================================
+       PAGE
+    ====================================================== */
+
+    attachToPage(pageNumber) {
+
+        return CampusWord2007Simulateur
+            .CaretEngine
+            .PageAttachmentManager
+            .attach(pageNumber);
+
+    },
+
+    detachFromPage() {
+
+        return CampusWord2007Simulateur
+            .CaretEngine
+            .PageAttachmentManager
+            .detach();
+
+    },
+
+    /* ======================================================
+       RENDER
+    ====================================================== */
+
+    render() {
+
+        return CampusWord2007Simulateur
+            .CaretEngine
+            .Renderer
+            .render();
+
+    },
+
+    /* ======================================================
+       VISIBILITY
+    ====================================================== */
+
+    show() {
+
+        return CampusWord2007Simulateur
+            .CaretEngine
+            .VisibilityManager
+            .show();
+
+    },
+
+    hide() {
+
+        return CampusWord2007Simulateur
+            .CaretEngine
+            .VisibilityManager
+            .hide();
+
+    },
+
+    /* ======================================================
+       BLINK
+    ====================================================== */
+
+    startBlink() {
+
+        return CampusWord2007Simulateur
+            .CaretEngine
+            .BlinkManager
+            .start();
+
+    },
+
+    stopBlink() {
+
+        return CampusWord2007Simulateur
+            .CaretEngine
+            .BlinkManager
+            .stop();
+
+    },
+
+    pauseBlink() {
+
+        return CampusWord2007Simulateur
+            .CaretEngine
+            .BlinkManager
+            .pause();
+
+    },
+
+    resumeBlink() {
+
+        return CampusWord2007Simulateur
+            .CaretEngine
+            .BlinkManager
+            .resume();
+
+    },
+
+    /* ======================================================
+       FOCUS
+    ====================================================== */
+
+    hasFocus() {
+
+        return CampusWord2007Simulateur
+            .CaretEngine
+            .FocusManager
+            .hasFocus();
+
+    },
+
+    synchronizeFocus() {
+
+        return CampusWord2007Simulateur
+            .CaretEngine
+            .FocusManager
+            .synchronize();
+
+    },
+
+    /* ======================================================
+       STATE
+    ====================================================== */
+
+    getState() {
+
+        return CampusWord2007Simulateur
+            .CaretEngine
+            .StateManager
+            .getState();
+
+    },
+
+    /* ======================================================
+       ATTACHMENT
+    ====================================================== */
+
+    isAttached() {
+
+        return CampusWord2007Simulateur
+            .CaretEngine
+            .PageAttachmentManager
+            .isAttached();
+
+    },
+
+    /* ======================================================
+       DOM
+    ====================================================== */
+
+    getCaretElement() {
+
+        return CampusWord2007Simulateur
+            .CaretEngine
+            .DOMManager
+            .get();
+
+    },
+
+    /* ======================================================
+       RESET
+    ====================================================== */
+
+    reset() {
+
+        CampusWord2007Simulateur
+            .CaretEngine
+            .BlinkManager
+            .stop();
+
+        CampusWord2007Simulateur
+            .CaretEngine
+            .VisibilityManager
+            .hide();
+
+        return true;
+
+    },
+
+    /* ======================================================
+       DESTROY
+    ====================================================== */
+
+    destroy() {
+
+        this.reset();
+
+        this.initialized = false;
+
+        return true;
+
+    }
+
+};
 
 
 
