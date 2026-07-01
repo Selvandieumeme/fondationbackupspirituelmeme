@@ -7743,8 +7743,6 @@ CampusWord2007Simulateur.CaretEngine.LayoutIntegration = {
 
 
 
-
-
 /* ==========================================================
    CAMPUS WORD 2007 SIMULATEUR
    CARET ENGINE
@@ -7790,10 +7788,21 @@ CampusWord2007Simulateur.CaretEngine.API = {
 
     setPosition(position) {
 
-        return CampusWord2007Simulateur
-            .CaretEngine
-            .LayoutBridge
-            .accept(position);
+        const integration =
+            CampusWord2007Simulateur
+                .CaretEngine
+                .LayoutIntegration;
+
+        if (
+            !integration ||
+            typeof integration.synchronize !== "function"
+        ) {
+
+            return false;
+
+        }
+
+        return integration.synchronize(position);
 
     },
 
@@ -8001,6 +8010,11 @@ CampusWord2007Simulateur.CaretEngine.API = {
     }
 
 };
+
+
+
+
+
 
 
 
