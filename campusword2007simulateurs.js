@@ -6201,7 +6201,7 @@ CampusWord2007Simulateur.CaretEngine.Position = {
 
             page: null,
 
-            pageNumber: 1,
+            pageNumber: null,
 
             x: 0,
 
