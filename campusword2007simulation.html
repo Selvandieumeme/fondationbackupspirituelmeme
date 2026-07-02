@@ -2,44 +2,28 @@
 <html lang="fr">
 
 <head>
-    <!-- =========================================================
-        CAMPUS WORD 2007 SIMULATION
-        PART 1 - FOUNDATION UI SHELL
-        CORE ARCHITECTURE
-    ========================================================= -->
-
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title>Campus Word 2007 Simulation</title>
 
-    <!-- CSS FILE -->
     <link rel="stylesheet" href="campusword2007simulation.css">
 </head>
 
 <body>
 
-<!-- =========================================================
-     WINDOW SHELL (ROOT CONTAINER)
-========================================================= -->
 <div id="cwWindow">
 
-    <!-- =====================================================
-         TITLE BAR
-    ====================================================== -->
     <div id="cwTitleBar">
 
-        <!-- OFFICE BUTTON -->
         <div id="cwOfficeButton">
             <span>Office</span>
         </div>
 
-        <!-- WINDOW TITLE -->
         <div id="cwTitle">
             Campus Word 2007 Simulation
         </div>
 
-        <!-- WINDOW CONTROLS -->
         <div id="cwWindowControls">
             <button class="cwControlBtn" id="minBtn">_</button>
             <button class="cwControlBtn" id="maxBtn">□</button>
@@ -48,9 +32,6 @@
 
     </div>
 
-    <!-- =====================================================
-         QUICK ACCESS TOOLBAR
-    ====================================================== -->
     <div id="cwQuickAccess">
 
         <button class="cwQBtn" id="saveBtn">Save</button>
@@ -59,9 +40,6 @@
 
     </div>
 
-    <!-- =====================================================
-         RIBBON HEADER
-    ====================================================== -->
     <div id="cwRibbon">
 
         <div class="cwRibbonGroup">
@@ -86,487 +64,161 @@
 
     </div>
 
-    <!-- =====================================================
-         WORKSPACE (DOCUMENT AREA)
-    ====================================================== -->
     <div id="cwWorkspace">
 
-        <!-- DocumentEngine ap konekte isit la -->
         <div id="cwPageContainer"></div>
 
     </div>
 
 </div>
 
-
-
-
-
-
-
-
-
-
-
 <!-- =========================================================
-     PART 2 - RIBBON SYSTEM (TABS + GROUPS + COMMANDS)
-     CONNECTED TO PART 1 (cwRibbon)
+     PART 2
 ========================================================= -->
 
 <div id="cwRibbonTabs">
 
-    <!-- =========================
-         TAB: FILE
-    ========================== -->
-    <div class="cwRibbonTab active"
-         data-tab="file">
+    <div class="cwRibbonTab active" data-tab="file">
 
         <div class="cwRibbonGroups">
 
-            <!-- GROUP 1 -->
-            <div class="cwRibbonGroup"
-                 data-group="file-main">
+            <div class="cwRibbonGroup" data-group="file-main">
 
                 <div class="cwGroupTitle">File</div>
 
-                <button class="cwRibbonBtn"
-                        id="cmdNew"
-                        data-role="button"
-                        data-command="file.new">
-                    New
-                </button>
+                <button class="cwRibbonBtn" id="cmdNew" data-role="button" data-command="file.new">New</button>
 
-                <button class="cwRibbonBtn"
-                        id="cmdOpen"
-                        data-role="button"
-                        data-command="file.open">
-                    Open
-                </button>
+                <button class="cwRibbonBtn" id="cmdOpen" data-role="button" data-command="file.open">Open</button>
 
-                <button class="cwRibbonBtn"
-                        id="cmdSave"
-                        data-role="button"
-                        data-command="file.save">
-                    Save
-                </button>
+                <button class="cwRibbonBtn" id="cmdSave" data-role="button" data-command="file.save">Save</button>
 
             </div>
 
         </div>
+
     </div>
 
-    <!-- =========================
-         TAB: HOME
-    ========================== -->
-    <div class="cwRibbonTab"
-         data-tab="home">
+    <div class="cwRibbonTab" data-tab="home">
 
         <div class="cwRibbonGroups">
 
-            <!-- GROUP 1: CLIPBOARD -->
-            <div class="cwRibbonGroup"
-                 data-group="clipboard">
+            <div class="cwRibbonGroup" data-group="clipboard">
 
                 <div class="cwGroupTitle">Clipboard</div>
 
-                <button class="cwRibbonBtn"
-                        id="cmdCut"
-                        data-role="button"
-                        data-command="edit.cut">
-                    Cut
-                </button>
-
-                <button class="cwRibbonBtn"
-                        id="cmdCopy"
-                        data-role="button"
-                        data-command="edit.copy">
-                    Copy
-                </button>
-
-                <button class="cwRibbonBtn"
-                        id="cmdPaste"
-                        data-role="button"
-                        data-command="edit.paste">
-                    Paste
-                </button>
+                <button class="cwRibbonBtn" id="cmdCut" data-command="edit.cut">Cut</button>
+                <button class="cwRibbonBtn" id="cmdCopy" data-command="edit.copy">Copy</button>
+                <button class="cwRibbonBtn" id="cmdPaste" data-command="edit.paste">Paste</button>
 
             </div>
 
-            <!-- GROUP 2: FONT -->
-            <div class="cwRibbonGroup"
-                 data-group="font">
+            <div class="cwRibbonGroup" data-group="font">
 
                 <div class="cwGroupTitle">Font</div>
 
-                <button class="cwRibbonBtn"
-                        id="cmdBold"
-                        data-role="button"
-                        data-command="format.bold">
-                    Bold
-                </button>
-
-                <button class="cwRibbonBtn"
-                        id="cmdItalic"
-                        data-role="button"
-                        data-command="format.italic">
-                    Italic
-                </button>
-
-                <button class="cwRibbonBtn"
-                        id="cmdUnderline"
-                        data-role="button"
-                        data-command="format.underline">
-                    Underline
-                </button>
+                <button class="cwRibbonBtn" id="cmdBold" data-command="format.bold">Bold</button>
+                <button class="cwRibbonBtn" id="cmdItalic" data-command="format.italic">Italic</button>
+                <button class="cwRibbonBtn" id="cmdUnderline" data-command="format.underline">Underline</button>
 
             </div>
 
         </div>
+
     </div>
 
-    <!-- =========================
-         TAB: INSERT
-    ========================== -->
-    <div class="cwRibbonTab"
-         data-tab="insert">
+    <div class="cwRibbonTab" data-tab="insert">
 
         <div class="cwRibbonGroups">
 
-            <div class="cwRibbonGroup"
-                 data-group="insert-basic">
+            <div class="cwRibbonGroup" data-group="insert-basic">
 
                 <div class="cwGroupTitle">Insert</div>
 
-                <button class="cwRibbonBtn"
-                        id="cmdInsertText"
-                        data-role="button"
-                        data-command="insert.text">
-                    Text
-                </button>
-
-                <button class="cwRibbonBtn"
-                        id="cmdInsertPage"
-                        data-role="button"
-                        data-command="insert.page">
-                    Page
-                </button>
+                <button class="cwRibbonBtn" id="cmdInsertText" data-command="insert.text">Text</button>
+                <button class="cwRibbonBtn" id="cmdInsertPage" data-command="insert.page">Page</button>
 
             </div>
 
         </div>
+
     </div>
 
 </div>
 
-<!-- =========================================================
-     RIBBON TAB SWITCHER (STRUCTURAL HOOK ONLY)
-     JS ap pran command sa yo pita
-========================================================= -->
 <div id="cwRibbonTabBar">
 
-    <button class="cwTabBtn active"
-            data-role="tab-button"
-            data-target="file">
-        File
-    </button>
-
-    <button class="cwTabBtn"
-            data-role="tab-button"
-            data-target="home">
-        Home
-    </button>
-
-    <button class="cwTabBtn"
-            data-role="tab-button"
-            data-target="insert">
-        Insert
-    </button>
+    <button class="cwTabBtn active" data-target="file">File</button>
+    <button class="cwTabBtn" data-target="home">Home</button>
+    <button class="cwTabBtn" data-target="insert">Insert</button>
 
 </div>
 
-
-
-
-
-
-
-
-
 <!-- =========================================================
-     PART 3 - WORKSPACE SYSTEM
-     (RULERS + SCROLL + MULTI-PAGE + FLOATING LAYERS)
-     CONNECTED TO PART 1 + PART 2
+     PART 3
 ========================================================= -->
 
 <div id="cwWorkspaceShell">
 
-    <!-- =====================================================
-         RULER TOP
-    ====================================================== -->
-    <div id="cwRulerTop" data-role="ruler" data-orientation="horizontal">
+    <div id="cwRulerTop"></div>
 
-        <div class="cwRulerMark">0</div>
-        <div class="cwRulerMark">1</div>
-        <div class="cwRulerMark">2</div>
-        <div class="cwRulerMark">3</div>
-        <div class="cwRulerMark">4</div>
-        <div class="cwRulerMark">5</div>
-        <div class="cwRulerMark">6</div>
-        <div class="cwRulerMark">7</div>
-        <div class="cwRulerMark">8</div>
-        <div class="cwRulerMark">9</div>
-        <div class="cwRulerMark">10</div>
+    <div id="cwRulerLeft"></div>
 
-    </div>
+    <div id="cwWorkspaceScroll">
 
-    <!-- =====================================================
-         MAIN WORK AREA (SCROLLABLE DOCUMENT ZONE)
-    ====================================================== -->
-    <div id="cwWorkspaceScroll"
-         data-role="workspace-scroll">
+        <div id="cwDocumentContainer">
 
-        <!-- LEFT RULER -->
-        <div id="cwRulerLeft"
-             data-role="ruler"
-             data-orientation="vertical">
-
-            <div class="cwRulerMark">1</div>
-            <div class="cwRulerMark">2</div>
-            <div class="cwRulerMark">3</div>
-            <div class="cwRulerMark">4</div>
-            <div class="cwRulerMark">5</div>
-            <div class="cwRulerMark">6</div>
-            <div class="cwRulerMark">7</div>
-            <div class="cwRulerMark">8</div>
-            <div class="cwRulerMark">9</div>
-            <div class="cwRulerMark">10</div>
-
-        </div>
-
-        <!-- =================================================
-             DOCUMENT CONTAINER (MULTI-PAGE ENGINE TARGET)
-        ================================================== -->
-        <div id="cwDocumentContainer"
-             data-role="document-container">
-
-            <!-- PAGE 1 -->
-            <div class="cwPage active"
-                 data-role="page"
-                 data-page-index="1">
-
-                <div class="cwPageContent"
-                     contenteditable="true"
-                     data-role="editor">
-
-                </div>
-
+            <div class="cwPage active" data-page-index="1">
+                <div class="cwPageContent" contenteditable="true"></div>
             </div>
 
-            <!-- PAGE 2 -->
-            <div class="cwPage"
-                 data-role="page"
-                 data-page-index="2">
-
-                <div class="cwPageContent"
-                     contenteditable="true"
-                     data-role="editor">
-
-                </div>
-
+            <div class="cwPage" data-page-index="2">
+                <div class="cwPageContent" contenteditable="true"></div>
             </div>
 
-            <!-- PAGE 3 (DYNAMIC TEMPLATE) -->
-            <div class="cwPage"
-                 data-role="page"
-                 data-page-index="3">
-
-                <div class="cwPageContent"
-                     contenteditable="true"
-                     data-role="editor">
-
-                </div>
-
+            <div class="cwPage" data-page-index="3">
+                <div class="cwPageContent" contenteditable="true"></div>
             </div>
 
         </div>
 
     </div>
 
-    <!-- =====================================================
-         FLOATING LAYERS (SELECTION, TOOLTIP, CURSOR FX)
-    ====================================================== -->
-    <div id="cwFloatingLayer"
-         data-role="floating-layer">
-
+    <div id="cwFloatingLayer">
         <div id="cwSelectionBox"></div>
         <div id="cwTooltip"></div>
-
     </div>
 
 </div>
-
-
-
-
-
-
-
-
 
 <!-- =========================================================
-     PART 4 - FINAL SYSTEM LAYER
-     STATUS BAR + DIALOGS + CONTEXT MENU + HIDDEN SYSTEMS
-     + SCRIPT HOOKS + CLOSING TAGS
+     PART 4
 ========================================================= -->
 
-<!-- =========================
-     STATUS BAR
-========================= -->
-<div id="cwStatusBar"
-     data-role="status-bar">
-
-    <div id="cwStatusLeft">
-        Ready
-    </div>
-
-    <div id="cwStatusCenter">
-        Page 1 of 3
-    </div>
-
-    <div id="cwStatusRight">
-        Zoom: 100%
-    </div>
-
+<div id="cwStatusBar">
+    <div id="cwStatusLeft">Ready</div>
+    <div id="cwStatusCenter">Page 1 of 3</div>
+    <div id="cwStatusRight">Zoom: 100%</div>
 </div>
 
-<!-- =========================
-     DIALOG CONTAINERS
-========================= -->
-<div id="cwDialogLayer"
-     data-role="dialog-layer">
+<div id="cwDialogLayer"></div>
 
-    <!-- Generic Dialog -->
-    <div class="cwDialog hidden"
-         data-dialog="generic">
+<div id="cwContextMenu" class="hidden"></div>
 
-        <div class="cwDialogHeader">
-            <span class="cwDialogTitle">Dialog</span>
-            <button class="cwDialogClose" data-command="dialog.close">X</button>
-        </div>
-
-        <div class="cwDialogBody">
-            <!-- Dynamic content injected by JS -->
-        </div>
-
-        <div class="cwDialogFooter">
-            <button data-command="dialog.ok">OK</button>
-            <button data-command="dialog.cancel">Cancel</button>
-        </div>
-
-    </div>
-
-</div>
-
-<!-- =========================
-     CONTEXT MENU SYSTEM
-========================= -->
-<div id="cwContextMenu"
-     data-role="context-menu"
-     class="hidden">
-
-    <div class="cwContextItem"
-         data-command="edit.cut">
-        Cut
-    </div>
-
-    <div class="cwContextItem"
-         data-command="edit.copy">
-        Copy
-    </div>
-
-    <div class="cwContextItem"
-         data-command="edit.paste">
-        Paste
-    </div>
-
-</div>
-
-<!-- =========================
-     HIDDEN SYSTEM CONTAINERS
-========================= -->
-<div id="cwSystemLayer"
-     data-role="system-layer"
-     style="display:none;">
-
+<div id="cwSystemLayer" style="display:none;">
     <div id="cwClipboardBuffer"></div>
-
     <div id="cwSelectionState"></div>
-
     <div id="cwRuntimeCache"></div>
-
 </div>
 
-<!-- =========================
-     SCRIPT PLACEHOLDERS
-     (JS ENGINE HOOKS ONLY)
-========================= -->
 <script src="campusword2007simulation.js"></script>
 
 <script>
-/* =========================================================
-   ENGINE BOOT HOOK (PLACEHOLDER ONLY)
-   JS pral pran kontwòl sa pita
-========================================================= */
-
 window.addEventListener("DOMContentLoaded", function () {
-
     console.log("[CampusWord] System loading...");
-
-    // Future hooks:
-    // initEngine();
-    // initPageSystem();
-    // initRibbonCommands();
-    // initCaretSystem();
-
 });
 </script>
 
-<!-- =========================
-     FINAL CLOSING TAGS
-========================= -->
 </body>
 </html>
-
-
-
-
-
-
-
-
-<!-- =========================================================
-     JS FILE
-========================================================= -->
-<script src="campusword2007simulation.js"></script>
-
-</body>
-</html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
