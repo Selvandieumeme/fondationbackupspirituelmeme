@@ -1,3 +1,4 @@
+
 /* =========================================================
    CAMPUS WORD 2007 SIMULATE - CORE STYLES
    VERSION: 1.0.0
@@ -23,32 +24,6 @@ body {
     height: 100vh;
     width: 100%;
     position: relative; /* FIX */
-}
-
-/* ================= BOOT SYSTEM ================= */
-#boot-system {
-    position: fixed;
-    inset: 0;
-    background: #1f1f1f;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 9999;
-}
-
-#boot-loader {
-    width: 60px;
-    height: 60px;
-    border: 6px solid #555;
-    border-top: 6px solid #ffffff;
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-    100% {
-        transform: rotate(360deg);
-    }
 }
 
 /* ================= TOP BAR ================= */
@@ -235,36 +210,3 @@ body {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-}
