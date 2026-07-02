@@ -1,3 +1,359 @@
+/* =========================================================
+   BLOCK 1 — RESET + CORE VARIABLES
+========================================================= */
+
+*,
+*::before,
+*::after{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+html, body{
+    width:100%;
+    height:100%;
+}
+
+body{
+    font-family:"Segoe UI", Tahoma, Arial, sans-serif;
+    background:linear-gradient(to bottom,#e9eef6,#cfd8e6);
+    overflow:hidden;
+    color:#000;
+}
+
+button{
+    font:inherit;
+    cursor:pointer;
+}
+
+:root{
+
+    /* WINDOW */
+    --cw-bg:#eef3fa;
+    --cw-border:#8ea3bb;
+
+    /* TITLE BAR */
+    --cw-title-top:#4b82c2;
+    --cw-title-bottom:#2d5f99;
+    --cw-title-text:#fff;
+
+    /* OFFICE */
+    --cw-office-start:#ffcb59;
+    --cw-office-end:#d56b00;
+
+    /* SHADOW */
+    --cw-shadow:0 10px 30px rgba(0,0,0,.25);
+
+    /* RIBBON */
+    --cw-ribbon-bg:#f3f7fd;
+
+    /* PAGE */
+    --cw-page-shadow:0 12px 35px rgba(0,0,0,.25);
+}
+
+
+
+
+
+
+/* =========================================================
+   BLOCK 2 — MAIN WINDOW + TITLE BAR
+========================================================= */
+
+#cwWindow{
+    width:100%;
+    height:100%;
+    display:flex;
+    flex-direction:column;
+    background:var(--cw-bg);
+    box-shadow:var(--cw-shadow);
+    border:1px solid var(--cw-border);
+}
+
+/* TITLE BAR */
+#cwTitleBar{
+    height:34px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:0 8px;
+    background:linear-gradient(to bottom,var(--cw-title-top),var(--cw-title-bottom));
+    color:var(--cw-title-text);
+}
+
+/* OFFICE BUTTON */
+#cwOfficeButton{
+    padding:6px 12px;
+    border-radius:14px;
+    background:linear-gradient(to bottom,var(--cw-office-start),var(--cw-office-end));
+    font-weight:700;
+    font-size:13px;
+    user-select:none;
+}
+
+/* TITLE */
+#cwTitle{
+    flex:1;
+    text-align:center;
+    font-size:13px;
+    font-weight:600;
+}
+
+/* WINDOW CONTROLS */
+#cwWindowControls{
+    display:flex;
+    gap:4px;
+}
+
+.cwControlBtn{
+    width:28px;
+    height:22px;
+    background:rgba(255,255,255,.2);
+    border-radius:3px;
+    color:#fff;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+}
+
+
+
+
+
+/* =========================================================
+   BLOCK 3 — QUICK ACCESS TOOLBAR
+========================================================= */
+
+#cwQuickAccess{
+    display:flex;
+    gap:8px;
+    padding:6px 10px;
+    background:#f6f9fd;
+    border-bottom:1px solid #c9d6e4;
+}
+
+/* BUTTON */
+.cwQBtn{
+    display:flex;
+    align-items:center;
+    gap:6px;
+    padding:4px 10px;
+    border:1px solid #b7c6d8;
+    background:#fff;
+    border-radius:4px;
+    font-size:12px;
+    font-weight:600;
+}
+
+/* ICON */
+.cwIcon{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:#2b579a;
+}
+
+.cwIcon svg{
+    width:14px;
+    height:14px;
+}
+
+.cwLabel{
+    font-size:12px;
+}
+
+
+
+
+
+
+/* =========================================================
+   BLOCK 4 — RIBBON SYSTEM
+========================================================= */
+
+#cwRibbonTabs{
+    display:flex;
+    flex-direction:column;
+}
+
+/* TAB BAR */
+#cwRibbonTabBar{
+    display:flex;
+    gap:2px;
+    padding:4px 8px;
+    background:#dfe8f5;
+    border-bottom:1px solid #b8c6d8;
+}
+
+/* TAB BUTTON */
+.cwTabBtn{
+    padding:6px 12px;
+    font-size:12px;
+    background:linear-gradient(to bottom,#f8fbff,#dfeaf6);
+    border:1px solid #aabbd2;
+}
+
+.cwTabBtn.active{
+    background:#fff;
+    border-bottom:1px solid #fff;
+}
+
+/* TAB CONTENT */
+.cwRibbonTab{
+    display:none;
+    padding:8px;
+}
+
+.cwRibbonTab.active{
+    display:block;
+}
+
+
+
+
+
+
+
+/* =========================================================
+   BLOCK 5 — WORKSPACE
+========================================================= */
+
+#cwWorkspace{
+    flex:1;
+    display:flex;
+    flex-direction:column;
+    overflow:hidden;
+}
+
+#cwWorkspaceShell{
+    flex:1;
+    display:flex;
+    flex-direction:column;
+}
+
+/* SCROLL AREA */
+#cwWorkspaceScroll{
+    flex:1;
+    overflow:auto;
+    display:flex;
+    justify-content:center;
+    padding:40px;
+    background:#d6dfec;
+}
+
+/* DOCUMENT HOLDER */
+#cwDocumentContainer{
+    display:flex;
+    flex-direction:column;
+    gap:40px;
+}
+
+
+
+
+
+
+
+/* =========================================================
+   BLOCK 6 — PAGE ENGINE
+========================================================= */
+
+.cwPage{
+    width:850px;
+    min-height:1100px;
+    background:#fff;
+    box-shadow:var(--cw-page-shadow);
+    padding:80px 70px;
+    border:1px solid #c7d2e3;
+}
+
+/* ACTIVE PAGE */
+.cwPage.active{
+    outline:2px solid rgba(43,87,154,.25);
+}
+
+/* CONTENT */
+.cwPageContent{
+    width:100%;
+    min-height:100%;
+    outline:none;
+    font-family:Calibri, Arial;
+    font-size:14px;
+    line-height:1.6;
+}
+
+
+
+
+
+
+
+
+/* =========================================================
+   BLOCK 7 — RULERS + FLOATING UI
+========================================================= */
+
+#cwRulerTop,
+#cwRulerLeft{
+    position:absolute;
+    background:#e8eef7;
+}
+
+#cwRulerTop{
+    height:20px;
+    width:100%;
+    top:0;
+}
+
+#cwRulerLeft{
+    width:40px;
+    height:100%;
+    left:0;
+}
+
+/* FLOATING */
+#cwFloatingLayer{
+    position:absolute;
+    inset:0;
+    pointer-events:none;
+}
+
+
+
+
+
+
+
+/* =========================================================
+   BLOCK 8 — STATUS BAR + SYSTEM
+========================================================= */
+
+#cwStatusBar{
+    height:26px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:0 10px;
+    background:#e3ebf6;
+    border-top:1px solid #b8c6d8;
+    font-size:12px;
+}
+
+#cwDialogLayer,
+#cwContextMenu{
+    position:fixed;
+    inset:0;
+    display:none;
+}
+
+
+
+
+
+
+
+
 
 
 
