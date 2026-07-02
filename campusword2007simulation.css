@@ -896,65 +896,166 @@ button{
 
 
 
-
-
 /* =========================================================
-   BLOCK 8.2 — STATUS BAR OVERFLOW CONTROL
-   Prevent layout breaking + enable horizontal scroll
+   BLOCK 8.3 — STATUS BAR UX ENGINE
+   Adaptive layout + Word-like behavior
 ========================================================= */
 
 
-/* PREVENT STATUS BAR FROM OVERFLOWING PAGE */
+/* MAIN STATUS BAR BECOMES SMART CONTAINER */
 #cwStatusBar{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+
+    gap:10px;
+
+    padding:0 10px;
+
+    overflow:hidden;
+
+    box-sizing:border-box;
+}
+
+
+/* =========================
+   LEFT SECTION (FIXED CORE INFO)
+========================= */
+
+#cwStatusLeft{
+    display:flex;
+    align-items:center;
+    gap:8px;
+
+    flex:1;
+    min-width:0;
+
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+}
+
+
+/* =========================
+   CENTER SECTION (PAGE INFO ALWAYS CENTERED)
+========================= */
+
+#cwStatusCenter{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    flex:0 0 auto;
+
+    white-space:nowrap;
+
+    padding:0 8px;
+
+    font-weight:500;
+}
+
+
+/* =========================
+   RIGHT SECTION (TOOLS ZONE)
+========================= */
+
+#cwStatusRight{
+    display:flex;
+    align-items:center;
+    gap:8px;
+
+    flex:1;
+    justify-content:flex-end;
+
+    min-width:0;
+
     overflow:hidden;
 }
 
 
-/* LEFT + CENTER STAY FIXED */
-#cwStatusLeft,
-#cwStatusCenter{
-    flex-shrink:0;
-}
+/* =========================
+   VIEW + ZOOM GROUP WRAPPER BEHAVIOR
+========================= */
 
-
-/* RIGHT SECTION BECOMES SCROLLABLE AREA */
-#cwStatusRight{
-    display:flex;
-    align-items:center;
-
-    gap:8px;
-
-    overflow-x:auto;
-    overflow-y:hidden;
-
-    white-space:nowrap;
-
-    max-width:45%;
-    scrollbar-width:thin;
-}
-
-
-/* MAKE INTERNAL GROUPS STAY IN ONE LINE */
 #cwViewModes,
 #cwZoomControls{
     display:flex;
+    align-items:center;
+    gap:6px;
+
     flex-shrink:0;
 }
 
 
-/* OPTIONAL: CLEAN SCROLLBAR (CHROME) */
-#cwStatusRight::-webkit-scrollbar{
-    height:4px;
+/* =========================
+   RESPONSIVE SCROLL FALLBACK (SMALL SCREENS)
+========================= */
+
+@media (max-width: 900px){
+
+    #cwStatusRight{
+        overflow-x:auto;
+        scrollbar-width:thin;
+    }
+
+    #cwStatusRight::-webkit-scrollbar{
+        height:4px;
+    }
+
+    #cwStatusRight::-webkit-scrollbar-thumb{
+        background:#b8c6d8;
+        border-radius:10px;
+    }
+
 }
 
-#cwStatusRight::-webkit-scrollbar-thumb{
-    background:#b8c6d8;
-    border-radius:10px;
+
+/* =========================
+   MICRO UX IMPROVEMENTS
+========================= */
+
+.cwViewBtn,
+.cwZoomBtn{
+    transition:all .12s ease;
 }
 
-#cwStatusRight::-webkit-scrollbar-track{
-    background:transparent;
+.cwViewBtn:hover,
+.cwZoomBtn:hover{
+    filter:brightness(1.08);
 }
+
+.cwViewBtn:active,
+.cwZoomBtn:active{
+    transform:scale(0.95);
+}
+
+
+/* =========================
+   ZOOM VALUE STABILITY
+========================= */
+
+#cwZoomValue{
+    min-width:45px;
+    text-align:right;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
