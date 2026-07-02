@@ -291,9 +291,19 @@ window.addEventListener("load", () => {
 
 
 
-/* ================= WORD PAGINATION PATCH ================= */
 
-const PagePaginationFix = {
+
+
+
+
+
+
+
+
+
+
+
+const PageFlowEngine = {
 
     init() {
         this.bind();
@@ -301,53 +311,58 @@ const PagePaginationFix = {
 
     bind() {
         document.addEventListener("input", () => {
-            this.check();
+            this.checkFlow();
         });
     },
 
-    check() {
+    checkFlow() {
+
         const page = PageEngine.getCurrentPage();
         if (!page) return;
 
-        // detect overflow EXACT like Word behavior
+        // overflow detect
         if (page.scrollHeight > page.clientHeight) {
-            this.breakPage();
+            this.splitToNewPage(page);
         }
     },
 
-    breakPage() {
-        const current = PageEngine.getCurrentPage();
+    splitToNewPage(currentPage) {
 
-        if (!current) return;
+        const selection = window.getSelection();
+        const range = selection.getRangeAt(0);
 
-        // move caret content automatically
-        const range = window.getSelection().getRangeAt(0);
+        // create next page
+        const newPage = PageEngine.createPage();
 
-        // create next page FIRST
-        const nextPage = PageEngine.createPage();
+        // MOVE LAST TEXT NODE (safe simple version)
+        const text = currentPage.innerText;
 
-        // move overflow content safely
-        const overflowContent = current.innerHTML;
+        const cutPoint = Math.floor(text.length * 0.7);
 
-        // split content (simple safe version)
-        const cutPoint = overflowContent.length / 2;
+        currentPage.innerText = text.substring(0, cutPoint);
+        newPage.innerText = text.substring(cutPoint);
 
-        current.innerHTML = overflowContent.substring(0, cutPoint);
-        nextPage.innerHTML = overflowContent.substring(cutPoint);
-
-        // focus next page
+        // switch focus
         PageEngine.setCurrentPage(PageEngine.pages.length - 1);
 
         setTimeout(() => {
-            nextPage.focus();
+            newPage.focus();
         }, 0);
     }
 
 };
 
-/* AUTO START PATCH */
+
+
+
+
+
+
+
+
+
 window.addEventListener("load", () => {
     setTimeout(() => {
-        PagePaginationFix.init();
+        PageFlowEngine.init();
     }, 300);
 });
