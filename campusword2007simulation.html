@@ -1,13 +1,10 @@
-
 <!DOCTYPE html>
 <html lang="fr">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
     <title>Campus Word 2007 Simulation</title>
-
     <link rel="stylesheet" href="campusword2007simulation.css">
 </head>
 
@@ -41,103 +38,110 @@
 
     </div>
 
-    <div id="cwRibbon">
+    <!-- RIBBON CONTROLLED BY TABS ONLY -->
+    <div id="cwRibbonTabs">
 
-        <div class="cwRibbonGroup">
-            <div class="cwGroupTitle">File</div>
-            <button class="cwRibbonBtn">New</button>
-            <button class="cwRibbonBtn">Open</button>
+        <div class="cwRibbonTab active" data-tab="file">
+
+            <div class="cwRibbonGroups">
+
+                <div class="cwRibbonGroup" data-group="file-main">
+
+                    <div class="cwGroupTitle">File</div>
+
+                    <button class="cwRibbonBtn" id="cmdNew" data-role="button" data-command="file.new">New</button>
+                    <button class="cwRibbonBtn" id="cmdOpen" data-role="button" data-command="file.open">Open</button>
+                    <button class="cwRibbonBtn" id="cmdSave" data-role="button" data-command="file.save">Save</button>
+
+                </div>
+
+            </div>
+
         </div>
 
-        <div class="cwRibbonGroup">
-            <div class="cwGroupTitle">Edit</div>
-            <button class="cwRibbonBtn">Cut</button>
-            <button class="cwRibbonBtn">Copy</button>
-            <button class="cwRibbonBtn">Paste</button>
+        <div class="cwRibbonTab" data-tab="home">
+
+            <div class="cwRibbonGroups">
+
+                <div class="cwRibbonGroup" data-group="clipboard">
+
+                    <div class="cwGroupTitle">Clipboard</div>
+
+                    <button class="cwRibbonBtn" id="cmdCut" data-command="edit.cut">Cut</button>
+                    <button class="cwRibbonBtn" id="cmdCopy" data-command="edit.copy">Copy</button>
+                    <button class="cwRibbonBtn" id="cmdPaste" data-command="edit.paste">Paste</button>
+
+                </div>
+
+                <div class="cwRibbonGroup" data-group="font">
+
+                    <div class="cwGroupTitle">Font</div>
+
+                    <button class="cwRibbonBtn" id="cmdBold" data-command="format.bold">Bold</button>
+                    <button class="cwRibbonBtn" id="cmdItalic" data-command="format.italic">Italic</button>
+                    <button class="cwRibbonBtn" id="cmdUnderline" data-command="format.underline">Underline</button>
+
+                </div>
+
+            </div>
+
         </div>
 
-        <div class="cwRibbonGroup">
-            <div class="cwGroupTitle">Format</div>
-            <button class="cwRibbonBtn">Bold</button>
-            <button class="cwRibbonBtn">Italic</button>
-            <button class="cwRibbonBtn">Underline</button>
+        <div class="cwRibbonTab" data-tab="insert">
+
+            <div class="cwRibbonGroups">
+
+                <div class="cwRibbonGroup" data-group="insert-basic">
+
+                    <div class="cwGroupTitle">Insert</div>
+
+                    <button class="cwRibbonBtn" id="cmdInsertText" data-command="insert.text">Text</button>
+                    <button class="cwRibbonBtn" id="cmdInsertPage" data-command="insert.page">Page</button>
+
+                </div>
+
+            </div>
+
         </div>
 
+    </div>
+
+    <div id="cwRibbonTabBar">
+        <button class="cwTabBtn active" data-target="file">File</button>
+        <button class="cwTabBtn" data-target="home">Home</button>
+        <button class="cwTabBtn" data-target="insert">Insert</button>
     </div>
 
     <div id="cwWorkspace">
 
-        <div id="cwPageContainer"></div>
+        <div id="cwWorkspaceShell">
 
-    </div>
+            <div id="cwRulerTop"></div>
+            <div id="cwRulerLeft"></div>
 
-</div>
+            <div id="cwWorkspaceScroll">
 
-<!-- =========================================================
-     PART 2
-========================================================= -->
+                <div id="cwDocumentContainer">
 
-<div id="cwRibbonTabs">
+                    <div class="cwPage active" data-page-index="1">
+                        <div class="cwPageContent" contenteditable="true"></div>
+                    </div>
 
-    <div class="cwRibbonTab active" data-tab="file">
+                    <div class="cwPage" data-page-index="2">
+                        <div class="cwPageContent" contenteditable="true"></div>
+                    </div>
 
-        <div class="cwRibbonGroups">
+                    <div class="cwPage" data-page-index="3">
+                        <div class="cwPageContent" contenteditable="true"></div>
+                    </div>
 
-            <div class="cwRibbonGroup" data-group="file-main">
-
-                <div class="cwGroupTitle">File</div>
-
-                <button class="cwRibbonBtn" id="cmdNew" data-role="button" data-command="file.new">New</button>
-
-                <button class="cwRibbonBtn" id="cmdOpen" data-role="button" data-command="file.open">Open</button>
-
-                <button class="cwRibbonBtn" id="cmdSave" data-role="button" data-command="file.save">Save</button>
+                </div>
 
             </div>
 
-        </div>
-
-    </div>
-
-    <div class="cwRibbonTab" data-tab="home">
-
-        <div class="cwRibbonGroups">
-
-            <div class="cwRibbonGroup" data-group="clipboard">
-
-                <div class="cwGroupTitle">Clipboard</div>
-
-                <button class="cwRibbonBtn" id="cmdCut" data-command="edit.cut">Cut</button>
-                <button class="cwRibbonBtn" id="cmdCopy" data-command="edit.copy">Copy</button>
-                <button class="cwRibbonBtn" id="cmdPaste" data-command="edit.paste">Paste</button>
-
-            </div>
-
-            <div class="cwRibbonGroup" data-group="font">
-
-                <div class="cwGroupTitle">Font</div>
-
-                <button class="cwRibbonBtn" id="cmdBold" data-command="format.bold">Bold</button>
-                <button class="cwRibbonBtn" id="cmdItalic" data-command="format.italic">Italic</button>
-                <button class="cwRibbonBtn" id="cmdUnderline" data-command="format.underline">Underline</button>
-
-            </div>
-
-        </div>
-
-    </div>
-
-    <div class="cwRibbonTab" data-tab="insert">
-
-        <div class="cwRibbonGroups">
-
-            <div class="cwRibbonGroup" data-group="insert-basic">
-
-                <div class="cwGroupTitle">Insert</div>
-
-                <button class="cwRibbonBtn" id="cmdInsertText" data-command="insert.text">Text</button>
-                <button class="cwRibbonBtn" id="cmdInsertPage" data-command="insert.page">Page</button>
-
+            <div id="cwFloatingLayer">
+                <div id="cwSelectionBox"></div>
+                <div id="cwTooltip"></div>
             </div>
 
         </div>
@@ -145,55 +149,6 @@
     </div>
 
 </div>
-
-<div id="cwRibbonTabBar">
-
-    <button class="cwTabBtn active" data-target="file">File</button>
-    <button class="cwTabBtn" data-target="home">Home</button>
-    <button class="cwTabBtn" data-target="insert">Insert</button>
-
-</div>
-
-<!-- =========================================================
-     PART 3
-========================================================= -->
-
-<div id="cwWorkspaceShell">
-
-    <div id="cwRulerTop"></div>
-
-    <div id="cwRulerLeft"></div>
-
-    <div id="cwWorkspaceScroll">
-
-        <div id="cwDocumentContainer">
-
-            <div class="cwPage active" data-page-index="1">
-                <div class="cwPageContent" contenteditable="true"></div>
-            </div>
-
-            <div class="cwPage" data-page-index="2">
-                <div class="cwPageContent" contenteditable="true"></div>
-            </div>
-
-            <div class="cwPage" data-page-index="3">
-                <div class="cwPageContent" contenteditable="true"></div>
-            </div>
-
-        </div>
-
-    </div>
-
-    <div id="cwFloatingLayer">
-        <div id="cwSelectionBox"></div>
-        <div id="cwTooltip"></div>
-    </div>
-
-</div>
-
-<!-- =========================================================
-     PART 4
-========================================================= -->
 
 <div id="cwStatusBar">
     <div id="cwStatusLeft">Ready</div>
@@ -212,8 +167,6 @@
 </div>
 
 <script src="campusword2007simulation.js"></script>
-
-
 
 </body>
 </html>
