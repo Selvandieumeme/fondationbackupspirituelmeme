@@ -337,6 +337,429 @@ body{
 
 
 
+/* ==========================================================
+   CAMPUS WORD 2007 SIMULATION
+   CSS ENGINE
+   BLOCK 2A
+   QUICK ACCESS TOOLBAR + RIBBON CONTAINER
+   ========================================================== */
+
+
+/* ==========================================================
+   QUICK ACCESS TOOLBAR
+   ========================================================== */
+
+#cwQuickAccess{
+
+    height:34px;
+
+    display:flex;
+
+    align-items:center;
+
+    gap:6px;
+
+    padding:4px 8px;
+
+    background:
+        linear-gradient(
+            to bottom,
+            #f8fbff 0%,
+            #edf4fc 55%,
+            #dfeaf7 100%
+        );
+
+    border-bottom:1px solid #aab9ca;
+
+    flex-shrink:0;
+
+}
+
+
+/* ==========================================================
+   QUICK ACCESS BUTTONS
+   ========================================================== */
+
+.cwQBtn{
+
+    min-width:64px;
+
+    height:24px;
+
+    padding:0 12px;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    border:1px solid #9fb3ca;
+
+    border-radius:3px;
+
+    background:
+        linear-gradient(
+            to bottom,
+            #ffffff 0%,
+            #f4f8fd 50%,
+            #dde9f8 100%
+        );
+
+    color:#24384d;
+
+    font-size:12px;
+
+    font-weight:600;
+
+    transition:
+        background .15s,
+        border-color .15s,
+        box-shadow .15s,
+        transform .08s;
+
+    box-shadow:
+        inset 0 1px rgba(255,255,255,.95),
+        0 1px 1px rgba(0,0,0,.08);
+
+}
+
+.cwQBtn:hover{
+
+    border-color:#6d9ad1;
+
+    background:
+        linear-gradient(
+            to bottom,
+            #fffef5 0%,
+            #fff0b8 45%,
+            #ffd95d 100%
+        );
+
+    box-shadow:
+        inset 0 1px rgba(255,255,255,.95),
+        0 0 5px rgba(255,196,0,.35);
+
+}
+
+.cwQBtn:active{
+
+    transform:scale(.98);
+
+    background:
+        linear-gradient(
+            to bottom,
+            #ffd45f,
+            #ffc034
+        );
+
+}
+
+
+/* ==========================================================
+   MAIN RIBBON
+   ========================================================== */
+
+#cwRibbon{
+
+    display:flex;
+
+    align-items:stretch;
+
+    gap:6px;
+
+    padding:8px;
+
+    min-height:92px;
+
+    background:
+        linear-gradient(
+            to bottom,
+            #fdfefe 0%,
+            #eef5fd 35%,
+            #dce8f6 100%
+        );
+
+    border-top:1px solid #ffffff;
+
+    border-bottom:1px solid #9fb0c5;
+
+    overflow-x:auto;
+
+    overflow-y:hidden;
+
+    flex-shrink:0;
+
+    scrollbar-width:thin;
+
+}
+
+
+/* ==========================================================
+   RIBBON SCROLLBAR
+   ========================================================== */
+
+#cwRibbon::-webkit-scrollbar{
+
+    height:8px;
+
+}
+
+#cwRibbon::-webkit-scrollbar-track{
+
+    background:#dce6f2;
+
+}
+
+#cwRibbon::-webkit-scrollbar-thumb{
+
+    background:#9bb4cf;
+
+    border-radius:8px;
+
+}
+
+#cwRibbon::-webkit-scrollbar-thumb:hover{
+
+    background:#6f94bf;
+
+}
+
+
+
+
+
+
+/* ==========================================================
+   CAMPUS WORD 2007 SIMULATION
+   CSS ENGINE
+   BLOCK 2B
+   RIBBON GROUPS
+   ========================================================== */
+
+
+/* ==========================================================
+   RIBBON GROUPS CONTAINER
+   ========================================================== */
+
+.cwRibbonGroups{
+
+    display:flex;
+
+    align-items:stretch;
+
+    gap:8px;
+
+    width:100%;
+
+    height:100%;
+
+}
+
+
+/* ==========================================================
+   RIBBON GROUP
+   ========================================================== */
+
+.cwRibbonGroup{
+
+    position:relative;
+
+    display:flex;
+
+    flex-direction:column;
+
+    justify-content:flex-start;
+
+    align-items:center;
+
+    min-width:120px;
+
+    min-height:78px;
+
+    padding:6px 8px 22px;
+
+    background:
+        linear-gradient(
+            to bottom,
+            #ffffff 0%,
+            #f7faff 45%,
+            #e6eef9 100%
+        );
+
+    border:1px solid #b6c6d8;
+
+    border-radius:4px;
+
+    box-shadow:
+        inset 0 1px rgba(255,255,255,.95),
+        0 1px 2px rgba(0,0,0,.08);
+
+    transition:
+        border-color .18s,
+        box-shadow .18s,
+        background .18s;
+
+}
+
+
+/* ==========================================================
+   GROUP HOVER
+   ========================================================== */
+
+.cwRibbonGroup:hover{
+
+    border-color:#6b9bd3;
+
+    background:
+        linear-gradient(
+            to bottom,
+            #ffffff 0%,
+            #f4f8ff 40%,
+            #dbe8fb 100%
+        );
+
+    box-shadow:
+        inset 0 1px rgba(255,255,255,.95),
+        0 0 8px rgba(98,145,210,.20);
+
+}
+
+
+/* ==========================================================
+   GROUP ACTIVE
+   ========================================================== */
+
+.cwRibbonGroup:active{
+
+    transform:translateY(1px);
+
+}
+
+
+/* ==========================================================
+   GROUP TITLE
+   ========================================================== */
+
+.cwGroupTitle{
+
+    position:absolute;
+
+    left:0;
+
+    right:0;
+
+    bottom:0;
+
+    height:18px;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    font-size:11px;
+
+    font-weight:600;
+
+    color:#4f5f73;
+
+    background:
+        linear-gradient(
+            to bottom,
+            #edf3fb,
+            #d7e3f2
+        );
+
+    border-top:1px solid #b6c6d8;
+
+    border-bottom-left-radius:4px;
+
+    border-bottom-right-radius:4px;
+
+    letter-spacing:.2px;
+
+}
+
+
+/* ==========================================================
+   GROUP SEPARATOR
+   ========================================================== */
+
+.cwRibbonGroup::after{
+
+    content:"";
+
+    position:absolute;
+
+    top:6px;
+
+    right:-5px;
+
+    width:1px;
+
+    height:calc(100% - 12px);
+
+    background:
+        linear-gradient(
+            to bottom,
+            transparent,
+            #c2cfdd,
+            transparent
+        );
+
+}
+
+
+/* Dernye gwoup la pa bezwen separateur */
+
+.cwRibbonGroup:last-child::after{
+
+    display:none;
+
+}
+
+
+/* ==========================================================
+   GROUP CONTENT
+   ========================================================== */
+
+.cwRibbonGroup > button{
+
+    width:100%;
+
+    margin-bottom:4px;
+
+}
+
+.cwRibbonGroup > button:last-of-type{
+
+    margin-bottom:0;
+
+}
+
+
+/* ==========================================================
+   EMPTY GROUP COMPATIBILITY
+   ========================================================== */
+
+.cwRibbonGroup:empty{
+
+    display:none;
+
+}
+
+
+
+
+
+
+
+
+
+
+
 
 
 
