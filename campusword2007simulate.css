@@ -1,8 +1,11 @@
 
-/* ==========================================================
-   MICROSOFT WORD 2007 VISUAL CORE (SIMULATION STYLE)
-========================================================== */
 
+/* =========================================================
+   CAMPUS WORD 2007 SIMULATE - CORE STYLES
+   VERSION: 1.0.0
+   ========================================================= */
+
+/* RESET */
 * {
     margin: 0;
     padding: 0;
@@ -10,177 +13,220 @@
 }
 
 body {
-    font-family: Calibri, Segoe UI, Arial;
-    background: #bfbfbf;
+    font-family: Arial, Helvetica, sans-serif;
+    background: #cfcfcf;
     overflow: hidden;
 }
 
-/* =========================
-   APP BACKGROUND (OFFICE FEEL)
-========================= */
-#app {
-    width: 100vw;
-    height: 100vh;
+/* ================= APP SHELL ================= */
+#cw-app-shell {
     display: flex;
     flex-direction: column;
-    background: linear-gradient(#d6d6d6, #bfbfbf);
+    height: 100vh;
+    width: 100%;
 }
 
-/* =========================
-   OFFICE BUTTON (TOP LEFT ICON STYLE)
-========================= */
-#officeButtonContainer {
-    background: linear-gradient(#2b579a, #1e3f73);
-    padding: 6px 10px;
-    box-shadow: inset 0 -1px 0 rgba(255,255,255,0.3);
+/* ================= BOOT SYSTEM ================= */
+#boot-system {
+    position: fixed;
+    inset: 0;
+    background: #1f1f1f;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
 }
 
-#officeButton {
-    background: #2b579a;
+#boot-loader {
+    width: 60px;
+    height: 60px;
+    border: 6px solid #555;
+    border-top: 6px solid #ffffff;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    100% { transform: rotate(360deg); }
+}
+
+/* ================= TOP BAR ================= */
+#cw-topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #1f4e79;
     color: white;
-    border: 1px solid #1c3763;
-    padding: 6px 14px;
-    font-weight: bold;
-    border-radius: 2px;
+    padding: 6px 10px;
+    height: 38px;
 }
 
-/* =========================
-   QUICK ACCESS TOOLBAR (GLASS STYLE)
-========================= */
-#quickAccessToolbar {
+#cw-office-menu {
+    font-size: 20px;
+    cursor: pointer;
+    padding: 2px 8px;
+}
+
+#cw-title-area {
+    flex: 1;
+    text-align: center;
+    font-weight: bold;
+}
+
+#cw-quick-access-toolbar {
     display: flex;
     gap: 5px;
-    padding: 5px 8px;
-    background: linear-gradient(#ffffff, #e9e9e9);
-    border-bottom: 1px solid #c0c0c0;
 }
 
-/* =========================
-   RIBBON CONTAINER (OFFICE 2007 STYLE)
-========================= */
-#ribbon {
-    background: linear-gradient(#f6f6f6, #e9e9e9);
-    border-bottom: 1px solid #a9a9a9;
-    box-shadow: inset 0 -1px 0 #ffffff;
+#cw-quick-access-toolbar button {
+    background: #ffffff;
+    border: none;
+    padding: 4px 8px;
+    cursor: pointer;
+    font-size: 12px;
+}
+
+/* ================= RIBBON ================= */
+#cw-ribbon {
+    background: #e6e6e6;
+    border-bottom: 1px solid #bdbdbd;
+    display: flex;
+    flex-direction: column;
+}
+
+#cw-ribbon-tabs {
+    display: flex;
+    gap: 2px;
+    padding: 4px;
+    background: #dcdcdc;
+}
+
+#cw-ribbon-tabs button {
+    border: none;
+    padding: 6px 10px;
+    cursor: pointer;
+    background: #f2f2f2;
+    font-size: 12px;
+}
+
+#cw-ribbon-tabs button:hover {
+    background: #ffffff;
+}
+
+#cw-ribbon-panels {
+    min-height: 60px;
     padding: 6px;
 }
 
-/* =========================
-   GROUP BOXES (REAL OFFICE SECTIONS)
-========================= */
-.group {
-    background: rgba(255,255,255,0.7);
-    border: 1px solid #d0d0d0;
-    padding: 8px;
-    margin-right: 10px;
-    border-radius: 3px;
-    min-width: 110px;
-}
-
-/* GROUP LABEL (LIKE WORD TITLES) */
-.group label {
-    font-size: 11px;
-    color: #666;
-    display: block;
-    margin-bottom: 5px;
-}
-
-/* =========================
-   BUTTONS (OFFICE STYLE)
-========================= */
-button {
-    font-size: 12px;
-    padding: 4px 6px;
-    border: 1px solid #c0c0c0;
-    background: linear-gradient(#ffffff, #e6e6e6);
-    cursor: pointer;
-    border-radius: 2px;
-}
-
-button:hover {
-    border-color: #7aa7ff;
-    background: #f0f6ff;
-}
-
-button:active {
-    background: #d9e8ff;
-}
-
-/* ACTIVE TOOL (LIKE WORD SELECTED TOOL) */
-button.active {
-    background: #cfe3ff;
-    border-color: #4a90ff;
-}
-
-/* =========================
-   WORKSPACE (DOCUMENT AREA)
-========================= */
-#workspace {
+/* ================= WORKSPACE ================= */
+#cw-workspace {
     flex: 1;
     overflow: auto;
-    background: #9e9e9e;
-    padding: 30px;
+    background: #bfbfbf;
+    display: flex;
+    justify-content: center;
+    padding: 20px;
 }
 
-/* =========================
-   PAGE (REAL WORD PAPER FEEL)
-========================= */
-.page {
-    width: 794px;
-    height: 1123px;
+/* ================= PAGE SYSTEM ================= */
+#cw-page-container {
+    width: 850px;
+    min-height: 1100px;
     background: white;
-    margin: 20px auto;
-    padding: 90px;
-    box-shadow:
-        0 2px 8px rgba(0,0,0,0.25),
-        inset 0 0 0 1px #e0e0e0;
+    box-shadow: 0 0 12px rgba(0,0,0,0.25);
+    padding: 40px;
+    position: relative;
 }
 
-/* TEXT AREA */
-.page-content {
+/* dynamic pages */
+.cw-page {
     width: 100%;
-    height: 100%;
-    font-size: 16px;
-    line-height: 1.6;
+    min-height: 1000px;
     outline: none;
-    white-space: pre-wrap;
+    font-size: 14px;
+    line-height: 1.6;
 }
 
-/* =========================
-   STATUS BAR (WORD STYLE)
-========================= */
-#statusBar {
-    height: 26px;
-    background: linear-gradient(#f3f3f3, #e6e6e6);
-    border-top: 1px solid #bdbdbd;
+/* ================= LAYERS SYSTEM ================= */
+#cw-layer-system {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+}
+
+#layer-caret,
+#layer-selection,
+#layer-objects,
+#layer-dialogs,
+#layer-tooltip {
+    position: absolute;
+    inset: 0;
+}
+
+/* ================= CONTEXT MENU ================= */
+#cw-context-menu {
+    position: absolute;
+    background: white;
+    border: 1px solid #ccc;
+    min-width: 150px;
+    z-index: 9999;
+}
+
+/* ================= STATUS BAR ================= */
+#cw-statusbar {
+    height: 28px;
+    background: #efefef;
+    border-top: 1px solid #c9c9c9;
     display: flex;
     justify-content: space-between;
-    padding: 4px 10px;
+    align-items: center;
+    padding: 0 10px;
     font-size: 12px;
+    color: #333;
 }
 
-/* =========================
-   CARET
-========================= */
-#globalCaret {
-    position: absolute;
-    width: 2px;
-    height: 18px;
-    background: black;
-    animation: blink 1s steps(2) infinite;
+/* ================= RESPONSIVE ================= */
+
+/* TABLET */
+@media (max-width: 1024px) {
+    #cw-page-container {
+        width: 90%;
+        padding: 20px;
+    }
 }
 
-@keyframes blink {
-    50% { opacity: 0; }
+/* MOBILE / ANDROID */
+@media (max-width: 768px) {
+    #cw-topbar {
+        flex-direction: column;
+        height: auto;
+    }
+
+    #cw-ribbon-tabs {
+        flex-wrap: wrap;
+    }
+
+    #cw-page-container {
+        width: 95%;
+        padding: 15px;
+    }
+
+    #cw-quick-access-toolbar {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
 }
 
-/* =========================
-   SELECTION
-========================= */
-.selection-block {
-    position: absolute;
-    background: rgba(51, 153, 255, 0.3);
-}
+
+
+
+
+
+
+
+
+
+
 
 
 
