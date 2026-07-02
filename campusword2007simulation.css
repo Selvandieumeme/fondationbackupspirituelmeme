@@ -757,3 +757,327 @@ body{
 
 
 
+
+
+
+
+
+
+
+
+
+/* ==========================================================
+   CAMPUS WORD 2007 SIMULATION
+   CSS ENGINE
+   BLOCK 3
+   RIBBON TABS + TAB BAR + SWITCHING STATES
+   ========================================================== */
+
+
+/* ==========================================================
+   RIBBON TABS CONTAINER
+   ========================================================== */
+
+#cwRibbonTabs{
+    display:flex;
+    flex-direction:column;
+    width:100%;
+}
+
+
+/* ==========================================================
+   INDIVIDUAL TAB PANELS
+   ========================================================== */
+
+.cwRibbonTab{
+    display:none;
+    width:100%;
+}
+
+.cwRibbonTab.active{
+    display:block;
+}
+
+
+/* ==========================================================
+   TAB BAR CONTAINER
+   ========================================================== */
+
+#cwRibbonTabBar{
+    display:flex;
+    align-items:center;
+    gap:2px;
+    height:30px;
+    padding:0 8px;
+    background:linear-gradient(to bottom,#eaf2fb,#d7e4f4);
+    border-bottom:1px solid #9fb3c9;
+}
+
+
+/* ==========================================================
+   TAB BUTTONS (WORD STYLE)
+   ========================================================== */
+
+.cwTabBtn{
+    padding:6px 14px;
+    font-size:12px;
+    font-weight:600;
+    color:#2a3f55;
+    border:1px solid #a9bcd3;
+    background:linear-gradient(to bottom,#f6f9fd,#dfeaf6);
+    cursor:pointer;
+    transition:.15s;
+}
+
+
+/* ==========================================================
+   TAB HOVER
+   ========================================================== */
+
+.cwTabBtn:hover{
+    background:linear-gradient(to bottom,#ffffff,#e8f1fb);
+}
+
+
+/* ==========================================================
+   ACTIVE TAB
+   ========================================================== */
+
+.cwTabBtn.active{
+    background:#ffffff;
+    border-bottom:1px solid #ffffff;
+}
+
+
+/* ==========================================================
+   TAB CLICK EFFECT
+   ========================================================== */
+
+.cwTabBtn:active{
+    transform:scale(.98);
+}
+
+
+
+
+
+
+
+
+
+
+
+/* ==========================================================
+   CAMPUS WORD 2007 SIMULATION
+   CSS ENGINE
+   BLOCK 4
+   WORKSPACE ENGINE + SCROLL + BACKGROUND + SHELL
+   ========================================================== */
+
+
+/* ==========================================================
+   WORKSPACE (MAIN EDITING AREA WRAPPER)
+   ========================================================== */
+
+#cwWorkspace{
+    flex:1;
+    display:flex;
+    flex-direction:column;
+    position:relative;
+    background:linear-gradient(to bottom,#cfd8e6,#bfcadd);
+    overflow:hidden;
+}
+
+
+/* ==========================================================
+   WORKSPACE SHELL
+   ========================================================== */
+
+#cwWorkspaceShell{
+    width:100%;
+    height:100%;
+    display:flex;
+    flex-direction:column;
+    position:relative;
+}
+
+
+/* ==========================================================
+   WORKSPACE SCROLL AREA (WORD PAGE CENTERING ZONE)
+   ========================================================== */
+
+#cwWorkspaceScroll{
+    flex:1;
+    overflow:auto;
+    display:flex;
+    justify-content:center;
+    align-items:flex-start;
+    padding:50px 40px;
+    background:
+        radial-gradient(circle at top,#e6edf7,#cfd8e6);
+    scrollbar-width:thin;
+}
+
+
+/* ==========================================================
+   SCROLLBAR (WORD STYLE)
+   ========================================================== */
+
+#cwWorkspaceScroll::-webkit-scrollbar{
+    width:10px;
+    height:10px;
+}
+
+#cwWorkspaceScroll::-webkit-scrollbar-track{
+    background:#b7c6d8;
+}
+
+#cwWorkspaceScroll::-webkit-scrollbar-thumb{
+    background:#7f93ad;
+    border-radius:8px;
+}
+
+#cwWorkspaceScroll::-webkit-scrollbar-thumb:hover{
+    background:#5f7692;
+}
+
+
+/* ==========================================================
+   DOCUMENT CONTAINER (CENTER FLOW HOLDER)
+   ========================================================== */
+
+#cwDocumentContainer{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:40px;
+    width:100%;
+}
+
+
+/* ==========================================================
+   WORD BACKGROUND FEEL (SUBTLE DEPTH)
+   ========================================================== */
+
+#cwWorkspace::before{
+    content:"";
+    position:absolute;
+    inset:0;
+    background:
+        radial-gradient(circle at 20% 10%,rgba(255,255,255,.35),transparent 60%),
+        radial-gradient(circle at 80% 30%,rgba(255,255,255,.25),transparent 55%);
+    pointer-events:none;
+    opacity:.6;
+}
+
+
+
+
+
+
+
+
+
+/* ==========================================================
+   CAMPUS WORD 2007 SIMULATION
+   CSS ENGINE
+   BLOCK 5
+   RULERS SYSTEM (TOP + LEFT)
+   ========================================================== */
+
+
+/* ==========================================================
+   RULER TOP (HORIZONTAL)
+   ========================================================== */
+
+#cwRulerTop{
+    height:22px;
+    width:100%;
+    background:
+        linear-gradient(to bottom,#f7f9fc,#d9e3f1);
+    border-bottom:1px solid #aab7c8;
+    position:relative;
+    display:flex;
+    align-items:flex-end;
+    padding-left:40px;
+    font-size:10px;
+    color:#4b5f77;
+    user-select:none;
+}
+
+/* tick marks simulation */
+#cwRulerTop::before{
+    content:"";
+    position:absolute;
+    left:40px;
+    right:0;
+    bottom:0;
+    height:100%;
+    background:
+        repeating-linear-gradient(
+            to right,
+            rgba(0,0,0,.25) 0px,
+            rgba(0,0,0,.25) 1px,
+            transparent 1px,
+            transparent 10px
+        );
+    opacity:.25;
+    pointer-events:none;
+}
+
+
+/* ==========================================================
+   RULER LEFT (VERTICAL)
+   ========================================================== */
+
+#cwRulerLeft{
+    position:absolute;
+    top:22px;
+    left:0;
+    width:40px;
+    height:100%;
+    background:
+        linear-gradient(to right,#e9eef6,#d3ddeb);
+    border-right:1px solid #aab7c8;
+    user-select:none;
+    z-index:5;
+}
+
+/* tick marks vertical */
+#cwRulerLeft::before{
+    content:"";
+    position:absolute;
+    top:0;
+    bottom:0;
+    left:0;
+    right:0;
+    background:
+        repeating-linear-gradient(
+            to bottom,
+            rgba(0,0,0,.25) 0px,
+            rgba(0,0,0,.25) 1px,
+            transparent 1px,
+            transparent 10px
+        );
+    opacity:.25;
+    pointer-events:none;
+}
+
+
+/* ==========================================================
+   RULER CORNER FIX (TOP LEFT BLOCK)
+   ========================================================== */
+
+#cwRulerTop::after{
+    content:"";
+    position:absolute;
+    left:0;
+    top:0;
+    width:40px;
+    height:100%;
+    background:linear-gradient(to bottom,#e2e8f2,#cfd9e7);
+    border-right:1px solid #aab7c8;
+}
+
+
+
