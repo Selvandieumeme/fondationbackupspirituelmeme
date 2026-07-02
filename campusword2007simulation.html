@@ -1,11 +1,11 @@
+
 <!DOCTYPE html>
 <html lang="fr">
 
 <head>
     <!-- =========================================================
         CAMPUS WORD 2007 SIMULATION
-        PART 1 - FOUNDATION UI SHELL
-        CORE ARCHITECTURE
+        FULL ARCHITECTURE BUILD (PART 1 → PART 4)
     ========================================================= -->
 
     <meta charset="UTF-8">
@@ -13,33 +13,22 @@
 
     <title>Campus Word 2007 Simulation</title>
 
-    <!-- CSS FILE -->
     <link rel="stylesheet" href="campusword2007simulation.css">
 </head>
 
 <body>
 
 <!-- =========================================================
-     WINDOW SHELL (ROOT CONTAINER)
+     PART 1 - WINDOW SHELL (BASE UI)
 ========================================================= -->
 <div id="cwWindow">
 
-    <!-- =====================================================
-         TITLE BAR
-    ====================================================== -->
     <div id="cwTitleBar">
 
-        <!-- OFFICE BUTTON -->
-        <div id="cwOfficeButton">
-            <span>Office</span>
-        </div>
+        <div id="cwOfficeButton"><span>Office</span></div>
 
-        <!-- WINDOW TITLE -->
-        <div id="cwTitle">
-            Campus Word 2007 Simulation
-        </div>
+        <div id="cwTitle">Campus Word 2007 Simulation</div>
 
-        <!-- WINDOW CONTROLS -->
         <div id="cwWindowControls">
             <button class="cwControlBtn" id="minBtn">_</button>
             <button class="cwControlBtn" id="maxBtn">□</button>
@@ -48,60 +37,135 @@
 
     </div>
 
-    <!-- =====================================================
-         QUICK ACCESS TOOLBAR
-    ====================================================== -->
     <div id="cwQuickAccess">
-
         <button class="cwQBtn" id="saveBtn">Save</button>
         <button class="cwQBtn" id="undoBtn">Undo</button>
         <button class="cwQBtn" id="redoBtn">Redo</button>
-
     </div>
 
     <!-- =====================================================
-         RIBBON HEADER
+         PART 2 - RIBBON SYSTEM (TABS + COMMANDS)
     ====================================================== -->
     <div id="cwRibbon">
 
-        <div class="cwRibbonGroup">
-            <div class="cwGroupTitle">File</div>
-            <button class="cwRibbonBtn">New</button>
-            <button class="cwRibbonBtn">Open</button>
+        <div class="cwRibbonTabBar">
+
+            <button class="cwTabBtn" data-target="file">File</button>
+            <button class="cwTabBtn" data-target="home">Home</button>
+            <button class="cwTabBtn" data-target="insert">Insert</button>
+
         </div>
 
-        <div class="cwRibbonGroup">
-            <div class="cwGroupTitle">Edit</div>
-            <button class="cwRibbonBtn">Cut</button>
-            <button class="cwRibbonBtn">Copy</button>
-            <button class="cwRibbonBtn">Paste</button>
+        <div class="cwRibbonTabs">
+
+            <div class="cwRibbonTab" data-tab="file">
+
+                <div class="cwRibbonGroup">
+                    <div class="cwGroupTitle">File</div>
+                    <button data-command="file.new">New</button>
+                    <button data-command="file.open">Open</button>
+                    <button data-command="file.save">Save</button>
+                </div>
+
+            </div>
+
+            <div class="cwRibbonTab" data-tab="home">
+
+                <div class="cwRibbonGroup">
+                    <div class="cwGroupTitle">Edit</div>
+                    <button data-command="edit.cut">Cut</button>
+                    <button data-command="edit.copy">Copy</button>
+                    <button data-command="edit.paste">Paste</button>
+                </div>
+
+                <div class="cwRibbonGroup">
+                    <div class="cwGroupTitle">Format</div>
+                    <button data-command="format.bold">Bold</button>
+                    <button data-command="format.italic">Italic</button>
+                    <button data-command="format.underline">Underline</button>
+                </div>
+
+            </div>
+
+            <div class="cwRibbonTab" data-tab="insert">
+
+                <div class="cwRibbonGroup">
+                    <div class="cwGroupTitle">Insert</div>
+                    <button data-command="insert.text">Text</button>
+                    <button data-command="insert.page">Page</button>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+    <!-- =====================================================
+         PART 3 - WORKSPACE ENGINE
+    ====================================================== -->
+    <div id="cwWorkspaceShell">
+
+        <div id="cwRulerTop"></div>
+        <div id="cwRulerLeft"></div>
+
+        <div id="cwWorkspaceScroll">
+
+            <div id="cwDocumentContainer">
+
+                <div class="cwPage" data-page="1">
+                    <div class="cwPageContent" contenteditable="true"></div>
+                </div>
+
+            </div>
+
         </div>
 
-        <div class="cwRibbonGroup">
-            <div class="cwGroupTitle">Format</div>
-            <button class="cwRibbonBtn">Bold</button>
-            <button class="cwRibbonBtn">Italic</button>
-            <button class="cwRibbonBtn">Underline</button>
+        <div id="cwFloatingLayer">
+            <div id="cwSelectionBox"></div>
+            <div id="cwTooltip"></div>
         </div>
 
     </div>
 
     <!-- =====================================================
-         WORKSPACE (DOCUMENT AREA)
+         PART 4 - SYSTEM LAYER (FINAL)
     ====================================================== -->
-    <div id="cwWorkspace">
 
-        <!-- DocumentEngine ap konekte isit la -->
-        <div id="cwPageContainer"></div>
+    <div id="cwStatusBar">
+        <span id="cwStatusLeft">Ready</span>
+        <span id="cwStatusCenter">Page 1</span>
+        <span id="cwStatusRight">100%</span>
+    </div>
 
+    <div id="cwDialogLayer"></div>
+
+    <div id="cwContextMenu" class="hidden"></div>
+
+    <div id="cwSystemLayer" style="display:none;">
+        <div id="cwClipboardBuffer"></div>
+        <div id="cwSelectionState"></div>
+        <div id="cwRuntimeCache"></div>
     </div>
 
 </div>
 
 <!-- =========================================================
-     JS FILE
+     JS ENGINE ENTRY
 ========================================================= -->
 <script src="campusword2007simulation.js"></script>
 
+<script>
+window.addEventListener("DOMContentLoaded", () => {
+    console.log("[CampusWord] Full system loaded");
+});
+</script>
+
 </body>
 </html>
+
+
+
+
+
+
+
