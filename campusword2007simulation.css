@@ -902,103 +902,72 @@ button{
 
 
 /* =========================================================
-   BLOCK 8.4 — STATUS BAR CONTAINER ENGINE (PRO FIX)
-   Fully responsive + scroll-contained Word-like UX
+   BLOCK 8.5 — COMPACT ZOOM ENGINE (WORD STYLE)
+   Smaller + tighter + no overflow design
 ========================================================= */
 
 
-/* MAIN STATUS BAR: NEVER CUT, NEVER BREAK */
-#cwStatusBar{
-    width:100%;
-
-    box-sizing:border-box;
-
-    display:flex;
-    align-items:center;
-
-    padding:0 10px;
-
-    overflow:hidden;
-
-    background:#e3ebf6;
-}
-
-
-/* WRAPPER THAT DEFINES DOCUMENT WIDTH CONTEXT */
-#cwStatusBar > div{
-    min-width:0;
-}
-
-
-/* LEFT SECTION */
-#cwStatusLeft{
-    flex:1;
-    display:flex;
-    align-items:center;
-    gap:8px;
-
-    min-width:0;
-    overflow:hidden;
-    white-space:nowrap;
-}
-
-
-/* CENTER SECTION (ALWAYS VISIBLE, NEVER CUT) */
-#cwStatusCenter{
-    flex:0 0 auto;
-
-    display:flex;
-    justify-content:center;
-    align-items:center;
-
-    white-space:nowrap;
-
-    padding:0 8px;
-}
-
-
-/* RIGHT SECTION BECOMES SCROLL CONTAINER */
-#cwStatusRight{
-    flex:1;
-
-    display:flex;
-    justify-content:flex-end;
-    align-items:center;
-
-    gap:8px;
-
-    min-width:0;
-
-    overflow-x:auto;
-    overflow-y:hidden;
-
-    white-space:nowrap;
-
-    scrollbar-width:thin;
-}
-
-
-/* KEEP GROUPS IN ONE LINE */
-#cwViewModes,
+/* ZOOM WRAPPER COMPACT */
 #cwZoomControls{
     display:flex;
-    flex-shrink:0;
+    align-items:center;
+    gap:4px;
 }
 
 
-/* SCROLLBAR (CLEAN WORD-LIKE) */
-#cwStatusRight::-webkit-scrollbar{
+/* ZOOM BUTTONS SMALLER */
+.cwZoomBtn{
+    width:18px;
+    height:18px;
+
+    font-size:12px;
+    font-weight:600;
+
+    border-radius:2px;
+
+    padding:0;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+}
+
+
+/* ZOOM SLIDER REDUCED SIZE */
+#cwZoomSlider{
+    width:70px;   /* reduced from ~110px */
+    height:14px;
+}
+
+
+/* TRACK THINNER */
+#cwZoomTrack{
     height:3px;
+    border-radius:8px;
 }
 
-#cwStatusRight::-webkit-scrollbar-thumb{
-    background:#b8c6d8;
-    border-radius:10px;
+
+/* PROGRESS BAR CLEANER */
+#cwZoomProgress{
+    height:100%;
 }
 
-#cwStatusRight::-webkit-scrollbar-track{
-    background:transparent;
+
+/* THUMB SMALLER */
+#cwZoomThumb{
+    width:10px;
+    height:10px;
 }
+
+
+/* ZOOM VALUE TIGHT */
+#cwZoomValue{
+    min-width:38px;
+    font-size:11px;
+    text-align:right;
+}
+
+
 
 
 
