@@ -1,103 +1,129 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>Campus Word 2007 Simulate</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Campus Word 2007 Simulate</title>
 
-    <link rel="stylesheet" href="campusword2007simulate.css" />
+<link rel="stylesheet" href="campusword2007simulate.css" />
 </head>
 
 <body>
 
-<!-- =========================
-     APPLICATION ROOT
-========================= -->
-<div id="app" data-name="app-root">
+<div id="app">
 
-    <!-- =========================
-         TOP BAR (RIBBON AREA)
-    ========================== -->
-    <header id="topBar" data-name="top-bar">
+    <!-- ================= OFFICE BUTTON AREA ================= -->
+    <div id="officeButtonContainer">
+        <button id="officeButton" data-name="office-button">Office</button>
+    </div>
 
-        <!-- QUICK ACCESS TOOLBAR -->
-        <div id="quickAccessToolbar" data-name="quick-access-toolbar">
+    <!-- ================= QUICK ACCESS TOOLBAR ================= -->
+    <div id="quickAccessToolbar">
 
-            <button id="btnSave" data-name="save">Save</button>
-            <button id="btnUndo" data-name="undo">Undo</button>
-            <button id="btnRedo" data-name="redo">Redo</button>
+        <button id="btnSave" data-name="save">Save</button>
+        <button id="btnUndo" data-name="undo">Undo</button>
+        <button id="btnRedo" data-name="redo">Redo</button>
+
+    </div>
+
+    <!-- ================= RIBBON MAIN ================= -->
+    <div id="ribbon">
+
+        <!-- TAB HEADER BAR -->
+        <div id="ribbonTabs">
+
+            <button class="tab active" data-tab="home">Home</button>
+            <button class="tab" data-tab="insert">Insert</button>
+            <button class="tab" data-tab="layout">Page Layout</button>
+            <button class="tab" data-tab="view">View</button>
 
         </div>
 
-        <!-- OFFICE BUTTON -->
-        <div id="officeButtonContainer" data-name="office-button-container">
-            <button id="officeButton" data-name="office-button">
-                Office
-            </button>
-        </div>
+        <!-- RIBBON CONTENT PANELS -->
+        <div id="ribbonContent">
 
-        <!-- RIBBON MENU -->
-        <nav id="ribbon" data-name="ribbon">
-
-            <!-- HOME TAB -->
-            <section id="tabHome" data-name="tab-home" class="ribbon-tab active">
+            <!-- HOME -->
+            <div class="ribbonPanel active" data-panel="home">
 
                 <div class="group" data-name="clipboard-group">
-                    <button id="btnPaste" data-name="paste">Paste</button>
+                    <label>Clipboard</label>
                     <button id="btnCut" data-name="cut">Cut</button>
                     <button id="btnCopy" data-name="copy">Copy</button>
+                    <button id="btnPaste" data-name="paste">Paste</button>
                 </div>
 
                 <div class="group" data-name="font-group">
+                    <label>Font</label>
                     <button id="btnBold" data-name="bold">B</button>
                     <button id="btnItalic" data-name="italic">I</button>
                     <button id="btnUnderline" data-name="underline">U</button>
                 </div>
 
                 <div class="group" data-name="paragraph-group">
+                    <label>Paragraph</label>
                     <button id="btnAlignLeft" data-name="align-left">Left</button>
                     <button id="btnAlignCenter" data-name="align-center">Center</button>
                     <button id="btnAlignRight" data-name="align-right">Right</button>
                 </div>
 
-            </section>
+            </div>
 
-        </nav>
+            <!-- INSERT -->
+            <div class="ribbonPanel" data-panel="insert">
 
-    </header>
+                <div class="group">
+                    <label>Insert</label>
+                    <button id="btnImage" data-name="image">Image</button>
+                    <button id="btnShape" data-name="shape">Shape</button>
+                    <button id="btnTable" data-name="table">Table</button>
+                </div>
 
-    <!-- =========================
-         MAIN WORKSPACE
-    ========================== -->
-    <main id="workspace" data-name="workspace">
+            </div>
 
-        <!-- DOCUMENT CONTAINER (MULTI-PAGE ENGINE) -->
-        <div id="documentContainer"
-             data-name="document-container">
+            <!-- PAGE LAYOUT -->
+            <div class="ribbonPanel" data-panel="layout">
 
-            <!-- Pages will be generated dynamically by JS -->
-            
+                <div class="group">
+                    <label>Page Setup</label>
+                    <button id="btnMargins" data-name="margins">Margins</button>
+                    <button id="btnOrientation" data-name="orientation">Orientation</button>
+                </div>
+
+            </div>
+
+            <!-- VIEW -->
+            <div class="ribbonPanel" data-panel="view">
+
+                <div class="group">
+                    <label>Zoom</label>
+                    <input id="zoomSlider" type="range" min="50" max="200" value="100" />
+                    <span id="zoomLevel">100%</span>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ================= WORKSPACE ================= -->
+    <main id="workspace">
+
+        <div id="documentContainer">
+            <!-- JS generates pages here -->
         </div>
 
     </main>
 
-    <!-- =========================
-         CARET LAYER (GLOBAL CARET ENGINE)
-         IMPORTANT: must float above all pages
-    ========================== -->
-    <div id="caretLayer" data-name="caret-layer">
-        <div id="globalCaret" data-name="global-caret"></div>
+    <!-- ================= CARET ================= -->
+    <div id="caretLayer">
+        <div id="globalCaret"></div>
     </div>
 
-    <!-- =========================
-         SELECTION LAYER
-    ========================== -->
-    <div id="selectionLayer" data-name="selection-layer"></div>
+    <!-- ================= SELECTION ================= -->
+    <div id="selectionLayer"></div>
 
-    <!-- =========================
-         CONTEXT MENU (RIGHT CLICK)
-    ========================== -->
-    <div id="contextMenu" data-name="context-menu" class="hidden">
+    <!-- ================= CONTEXT MENU ================= -->
+    <div id="contextMenu" class="hidden">
         <ul>
             <li data-action="cut">Cut</li>
             <li data-action="copy">Copy</li>
@@ -105,32 +131,38 @@
         </ul>
     </div>
 
-    <!-- =========================
-         STATUS BAR
-    ========================== -->
-    <footer id="statusBar" data-name="status-bar">
+    <!-- ================= STATUS BAR ================= -->
+    <footer id="statusBar">
 
-        <div id="statusLeft" data-name="status-left">
+        <div>
             Page: <span id="pageIndicator">1</span>
         </div>
 
-        <div id="statusCenter" data-name="status-center">
+        <div>
             Campus Word 2007 Simulation Engine
         </div>
 
-        <div id="statusRight" data-name="status-right">
-            Zoom: <span id="zoomLevel">100%</span>
+        <div>
+            Zoom: <span id="zoomLevelDisplay">100%</span>
         </div>
 
     </footer>
 
 </div>
 
-<!-- =========================
-     ENGINE LOADER
-     (JS WILL BUILD EVERYTHING DYNAMICALLY)
-========================= -->
 <script src="campusword2007simulate.js"></script>
 
 </body>
 </html>
+
+
+
+
+
+
+
+
+
+
+
+
