@@ -284,3 +284,70 @@ window.addEventListener("load", () => {
  
         
 
+
+
+
+
+
+
+
+/* ================= WORD PAGINATION PATCH ================= */
+
+const PagePaginationFix = {
+
+    init() {
+        this.bind();
+    },
+
+    bind() {
+        document.addEventListener("input", () => {
+            this.check();
+        });
+    },
+
+    check() {
+        const page = PageEngine.getCurrentPage();
+        if (!page) return;
+
+        // detect overflow EXACT like Word behavior
+        if (page.scrollHeight > page.clientHeight) {
+            this.breakPage();
+        }
+    },
+
+    breakPage() {
+        const current = PageEngine.getCurrentPage();
+
+        if (!current) return;
+
+        // move caret content automatically
+        const range = window.getSelection().getRangeAt(0);
+
+        // create next page FIRST
+        const nextPage = PageEngine.createPage();
+
+        // move overflow content safely
+        const overflowContent = current.innerHTML;
+
+        // split content (simple safe version)
+        const cutPoint = overflowContent.length / 2;
+
+        current.innerHTML = overflowContent.substring(0, cutPoint);
+        nextPage.innerHTML = overflowContent.substring(cutPoint);
+
+        // focus next page
+        PageEngine.setCurrentPage(PageEngine.pages.length - 1);
+
+        setTimeout(() => {
+            nextPage.focus();
+        }, 0);
+    }
+
+};
+
+/* AUTO START PATCH */
+window.addEventListener("load", () => {
+    setTimeout(() => {
+        PagePaginationFix.init();
+    }, 300);
+});
