@@ -140,7 +140,147 @@ window.addEventListener("load", () => {
 
 
 
+/* =========================================================
+   CAMPUS WORD 2007 SIMULATE
+   CARET ENGINE v1.0.0
+   ========================================================= */
 
+const CaretEngine = {
+    caret: null,
+    blinkInterval: null,
+    currentPage: null,
+
+    init() {
+
+        /* SAFETY: ensure PageEngine exists */
+        if (typeof PageEngine === "undefined") {
+            console.error("CARET ENGINE ERROR: PageEngine not found");
+            return;
+        }
+
+        this.currentPage = PageEngine.getCurrentPage();
+
+        this.createCaret();
+        this.startBlink();
+        this.bindEvents();
+
+        console.log("CARET ENGINE READY");
+    },
+
+    createCaret() {
+
+        this.caret = document.createElement("div");
+        this.caret.id = "cw-caret";
+
+        this.caret.style.position = "absolute";
+        this.caret.style.width = "2px";
+        this.caret.style.height = "18px";
+        this.caret.style.background = "black";
+
+        /* FIX: avoid double blink conflict (CSS already handles animation) */
+        this.caret.style.animation = "blink 1s step-end infinite";
+
+        this.caret.style.pointerEvents = "none";
+        this.caret.style.zIndex = "9999";
+
+        document.body.appendChild(this.caret);
+
+        this.updatePosition();
+    },
+
+    startBlink() {
+
+        /* FIX: prevent duplicate intervals */
+        if (this.blinkInterval) {
+            clearInterval(this.blinkInterval);
+        }
+
+        this.blinkInterval = setInterval(() => {
+
+            if (!this.caret) return;
+
+            this.caret.style.opacity =
+                (this.caret.style.opacity === "0") ? "1" : "0";
+
+        }, 500);
+    },
+
+    bindEvents() {
+
+        document.addEventListener("keydown", (e) => {
+            this.handleTyping(e);
+        });
+
+        document.addEventListener("click", () => {
+            this.updatePosition();
+        });
+
+        /* FIX: update caret after input changes */
+        document.addEventListener("input", () => {
+            this.updatePosition();
+        });
+
+    },
+
+    handleTyping(e) {
+
+        const page = PageEngine.getCurrentPage();
+        if (!page) return;
+
+        page.focus();
+
+        setTimeout(() => {
+            this.updatePosition();
+
+            /* SAFETY: check PageEngine exists */
+            if (PageEngine && typeof PageEngine.checkOverflow === "function") {
+                PageEngine.checkOverflow();
+            }
+
+        }, 0);
+    },
+
+    updatePosition() {
+
+        const page = PageEngine.getCurrentPage();
+        if (!page) return;
+
+        this.currentPage = page;
+
+        const selection = window.getSelection();
+        if (!selection || !selection.rangeCount) return;
+
+        const range = selection.getRangeAt(0);
+        const rect = range.getBoundingClientRect();
+
+        if (!rect) return;
+
+        /* FIX: include scroll offset for correct positioning */
+        this.caret.style.left = (rect.left + window.scrollX) + "px";
+        this.caret.style.top = (rect.top + window.scrollY) + "px";
+
+    }
+};
+
+/* ================= CARET CSS KEYFRAME ================= */
+const style = document.createElement("style");
+style.innerHTML = `
+@keyframes blink {
+    50% { opacity: 0; }
+}
+`;
+document.head.appendChild(style);
+
+/* ================= INIT CARET ================= */
+window.addEventListener("load", () => {
+
+    setTimeout(() => {
+
+        CaretEngine.init();
+
+    }, 200);
+
+});
  
         
 
