@@ -1,85 +1,109 @@
-/* ==========================================================
+
+/* =========================================================
    CAMPUS WORD 2007 SIMULATE
-   ENGINE CORE FOUNDATION (CLEAN START)
-   - Initialize system
-   - Create first page dynamically
-   - Prepare multi-page structure
-========================================================== */
+   PAGE ENGINE v1.0.0
+   ========================================================= */
 
-const CampusWord = {};
-
-/* =========================
-   STATE (SINGLE SOURCE OF TRUTH)
-========================= */
-CampusWord.State = {
+const PageEngine = {
     pages: [],
-    currentPage: 0,
-    initialized: false
+    currentPageIndex: 0,
+    pageContainer: null,
+
+    init() {
+        this.pageContainer = document.getElementById("cw-page-container");
+
+        // CREATE FIRST PAGE AUTOMATICALLY
+        this.createPage();
+
+        // ACTIVATE MONITORING SYSTEM
+        this.observeTyping();
+
+        console.log("PAGE ENGINE READY");
+    },
+
+    createPage() {
+        const page = document.createElement("div");
+        page.classList.add("cw-page");
+        page.setAttribute("data-role", "page");
+        page.setAttribute("contenteditable", "true");
+
+        page.innerHTML = "<br>";
+
+        this.pageContainer.appendChild(page);
+        this.pages.push(page);
+
+        this.setCurrentPage(this.pages.length - 1);
+
+        return page;
+    },
+
+    setCurrentPage(index) {
+        this.currentPageIndex = index;
+
+        this.pages.forEach((p, i) => {
+            p.style.display = (i === index) ? "block" : "none";
+        });
+    },
+
+    getCurrentPage() {
+        return this.pages[this.currentPageIndex];
+    },
+
+    observeTyping() {
+        document.addEventListener("input", () => {
+            this.checkOverflow();
+        });
+    },
+
+    checkOverflow() {
+        const page = this.getCurrentPage();
+
+        if (!page) return;
+
+        // IF CONTENT OVERFLOWS PAGE HEIGHT
+        if (page.scrollHeight > page.clientHeight + 50) {
+            this.goToNextPage();
+        }
+    },
+
+    goToNextPage() {
+        const nextIndex = this.currentPageIndex + 1;
+
+        // IF PAGE EXISTS
+        if (this.pages[nextIndex]) {
+            this.setCurrentPage(nextIndex);
+        } else {
+            this.createPage();
+        }
+
+        this.updateStatus();
+    },
+
+    updateStatus() {
+        const statusPage = document.getElementById("status-page");
+
+        if (statusPage) {
+            statusPage.innerText =
+                "Page: " + (this.currentPageIndex + 1);
+        }
+    }
 };
 
-/* =========================
-   DOM REFERENCES
-========================= */
-CampusWord.DOM = {
-    container: null,
-    caret: null
-};
-
-/* =========================
-   INIT ENGINE (ENTRY POINT)
-========================= */
-CampusWord.init = function () {
-
-    if (this.State.initialized) return;
-
-    this.DOM.container = document.getElementById("documentContainer");
-    this.DOM.caret = document.getElementById("globalCaret");
-
-    this.createPage();        // 🔥 FIRST PAGE AUTO GENERATION
-    this.setActivePage(0);
-
-    this.State.initialized = true;
-
-    console.log("CampusWord Engine Initialized");
-};
-
-/* =========================
-   CREATE PAGE (DYNAMIC)
-========================= */
-CampusWord.createPage = function () {
-
-    const page = document.createElement("div");
-    page.className = "page";
-
-    const content = document.createElement("div");
-    content.className = "page-content";
-    content.contentEditable = true;
-
-    page.appendChild(content);
-    this.DOM.container.appendChild(page);
-
-    this.State.pages.push(content);
-
-    return content;
-};
-
-/* =========================
-   SET ACTIVE PAGE
-========================= */
-CampusWord.setActivePage = function (index) {
-    this.State.currentPage = index;
-};
-
-/* =========================
-   GET ACTIVE PAGE
-========================= */
-CampusWord.getActivePage = function () {
-    return this.State.pages[this.State.currentPage];
-};
-
-/* =========================
-   BOOTSTRAP (AUTO START)
-========================= */
-window.addEventListener("DOMContentLoaded", () => {
-    CampusWord.init();
+/* ================= BOOT ================= */
+window.addEventListener("load", () => {
+    PageEngine.init();
 });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
