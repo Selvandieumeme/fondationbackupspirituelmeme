@@ -1,51 +1,52 @@
 /* ==========================================================
    CAMPUS WORD 2007 SIMULATE
-   CORE ENGINE v1.0
-   CLEAN FOUNDATION (NO OVERCOMPLEXITY)
+   ENGINE CORE FOUNDATION (CLEAN START)
+   - Initialize system
+   - Create first page dynamically
+   - Prepare multi-page structure
 ========================================================== */
 
-const CampusWord2007 = {};
+const CampusWord = {};
 
 /* =========================
-   GLOBAL STATE
+   STATE (SINGLE SOURCE OF TRUTH)
 ========================= */
-CampusWord2007.State = {
+CampusWord.State = {
     pages: [],
-    currentPageIndex: 0,
-    caretIndex: 0,
+    currentPage: 0,
     initialized: false
 };
 
 /* =========================
-   DOM CACHE
+   DOM REFERENCES
 ========================= */
-CampusWord2007.DOM = {
+CampusWord.DOM = {
     container: null,
     caret: null
 };
 
 /* =========================
-   INIT ENGINE
+   INIT ENGINE (ENTRY POINT)
 ========================= */
-CampusWord2007.init = function () {
+CampusWord.init = function () {
 
     if (this.State.initialized) return;
 
     this.DOM.container = document.getElementById("documentContainer");
     this.DOM.caret = document.getElementById("globalCaret");
 
-    this.createPage();           // first page
-    this.placeCaretAtStart();    // caret visible at start
-
-    this.bindEvents();
+    this.createPage();        // 🔥 FIRST PAGE AUTO GENERATION
+    this.setActivePage(0);
 
     this.State.initialized = true;
+
+    console.log("CampusWord Engine Initialized");
 };
 
 /* =========================
-   CREATE PAGE (MULTI PAGE CORE)
+   CREATE PAGE (DYNAMIC)
 ========================= */
-CampusWord2007.createPage = function () {
+CampusWord.createPage = function () {
 
     const page = document.createElement("div");
     page.className = "page";
@@ -54,14 +55,10 @@ CampusWord2007.createPage = function () {
     content.className = "page-content";
     content.contentEditable = true;
 
-    content.dataset.pageIndex = this.State.pages.length;
-
     page.appendChild(content);
     this.DOM.container.appendChild(page);
 
     this.State.pages.push(content);
-
-    this.setActivePage(this.State.pages.length - 1);
 
     return content;
 };
@@ -69,110 +66,20 @@ CampusWord2007.createPage = function () {
 /* =========================
    SET ACTIVE PAGE
 ========================= */
-CampusWord2007.setActivePage = function (index) {
-    this.State.currentPageIndex = index;
+CampusWord.setActivePage = function (index) {
+    this.State.currentPage = index;
 };
 
 /* =========================
    GET ACTIVE PAGE
 ========================= */
-CampusWord2007.getActivePage = function () {
-    return this.State.pages[this.State.currentPageIndex];
+CampusWord.getActivePage = function () {
+    return this.State.pages[this.State.currentPage];
 };
 
 /* =========================
-   CARET POSITION (BASIC VERSION)
-========================= */
-CampusWord2007.placeCaretAtStart = function () {
-
-    const page = this.getActivePage();
-    page.focus();
-
-    const range = document.createRange();
-    const sel = window.getSelection();
-
-    range.setStart(page, 0);
-    range.collapse(true);
-
-    sel.removeAllRanges();
-    sel.addRange(range);
-
-    this.updateCaretVisual();
-};
-
-/* =========================
-   UPDATE CARET VISUAL POSITION
-   (SIMPLIFIED ENGINE HOOK)
-========================= */
-CampusWord2007.updateCaretVisual = function () {
-
-    const sel = window.getSelection();
-
-    if (!sel.rangeCount) return;
-
-    const range = sel.getRangeAt(0);
-    const rect = range.getBoundingClientRect();
-
-    this.DOM.caret.style.left = rect.left + "px";
-    this.DOM.caret.style.top = rect.top + "px";
-};
-
-/* =========================
-   TEXT INPUT HANDLER
-========================= */
-CampusWord2007.onInput = function () {
-
-    this.updateCaretVisual();
-
-    this.checkPageOverflow();
-};
-
-/* =========================
-   PAGE OVERFLOW CHECK (BASIC)
-========================= */
-CampusWord2007.checkPageOverflow = function () {
-
-    const page = this.getActivePage();
-
-    if (page.scrollHeight > page.clientHeight) {
-        this.createPage();
-    }
-};
-
-/* =========================
-   KEYBOARD ENGINE
-========================= */
-CampusWord2007.bindEvents = function () {
-
-    document.addEventListener("selectionchange", () => {
-        this.updateCaretVisual();
-    });
-
-    document.addEventListener("input", () => {
-        this.onInput();
-    });
-
-    document.addEventListener("keydown", (e) => {
-
-        // ENTER → natural flow (handled by contentEditable)
-
-        // BACKSPACE safety hook
-        if (e.key === "Backspace") {
-            this.updateCaretVisual();
-        }
-
-        // manual overflow check fallback
-        setTimeout(() => this.checkPageOverflow(), 0);
-    });
-
-    window.addEventListener("resize", () => {
-        this.updateCaretVisual();
-    });
-};
-
-/* =========================
-   BOOT SYSTEM
+   BOOTSTRAP (AUTO START)
 ========================= */
 window.addEventListener("DOMContentLoaded", () => {
-    CampusWord2007.init();
+    CampusWord.init();
 });
