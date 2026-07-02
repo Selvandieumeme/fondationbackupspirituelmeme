@@ -1,7 +1,6 @@
+
 /* ==========================================================
-   CAMPUS WORD 2007 SIMULATE
-   FULL ENGINE FOUNDATION CSS
-   MULTI-MODULE READY (WORD / EXCEL / POWERPOINT BASE)
+   MICROSOFT WORD 2007 VISUAL CORE (SIMULATION STYLE)
 ========================================================== */
 
 * {
@@ -11,263 +10,200 @@
 }
 
 body {
-    font-family: Calibri, Arial, sans-serif;
-    background: #d4d4d4;
+    font-family: Calibri, Segoe UI, Arial;
+    background: #bfbfbf;
     overflow: hidden;
 }
 
-/* ==========================================================
-   APP ROOT
-========================================================== */
+/* =========================
+   APP BACKGROUND (OFFICE FEEL)
+========================= */
 #app {
     width: 100vw;
     height: 100vh;
     display: flex;
     flex-direction: column;
+    background: linear-gradient(#d6d6d6, #bfbfbf);
 }
 
-/* ==========================================================
-   TOOL BUTTON BASE (IMPORTANT FOR JS HOOKS)
-========================================================== */
-button {
-    border: 1px solid #c0c0c0;
-    background: #f8f8f8;
-    padding: 4px 8px;
-    font-size: 12px;
-    cursor: pointer;
-    transition: 0.1s;
-    user-select: none;
-}
-
-button:hover {
-    background: #eaeaea;
-}
-
-button:active {
-    background: #dcdcdc;
-}
-
-button.active {
-    background: #cfe3ff;
-    border-color: #6aa6ff;
-}
-
-button.disabled {
-    opacity: 0.4;
-    pointer-events: none;
-}
-
-/* ==========================================================
-   TOP BAR / RIBBON SYSTEM
-========================================================== */
-#topBar {
-    background: #f3f3f3;
-    border-bottom: 1px solid #bdbdbd;
-}
-
-/* QUICK ACCESS TOOLBAR */
-#quickAccessToolbar {
-    display: flex;
-    gap: 6px;
-    padding: 5px 8px;
-    background: #ffffff;
-    border-bottom: 1px solid #d0d0d0;
-}
-
-/* OFFICE BUTTON */
+/* =========================
+   OFFICE BUTTON (TOP LEFT ICON STYLE)
+========================= */
 #officeButtonContainer {
     background: linear-gradient(#2b579a, #1e3f73);
     padding: 6px 10px;
+    box-shadow: inset 0 -1px 0 rgba(255,255,255,0.3);
 }
 
 #officeButton {
     background: #2b579a;
     color: white;
+    border: 1px solid #1c3763;
+    padding: 6px 14px;
     font-weight: bold;
-    border: none;
+    border-radius: 2px;
 }
 
-/* ==========================================================
-   RIBBON SYSTEM
-========================================================== */
+/* =========================
+   QUICK ACCESS TOOLBAR (GLASS STYLE)
+========================= */
+#quickAccessToolbar {
+    display: flex;
+    gap: 5px;
+    padding: 5px 8px;
+    background: linear-gradient(#ffffff, #e9e9e9);
+    border-bottom: 1px solid #c0c0c0;
+}
+
+/* =========================
+   RIBBON CONTAINER (OFFICE 2007 STYLE)
+========================= */
 #ribbon {
-    background: #f7f7f7;
-    border-top: 1px solid white;
-    border-bottom: 1px solid #bdbdbd;
+    background: linear-gradient(#f6f6f6, #e9e9e9);
+    border-bottom: 1px solid #a9a9a9;
+    box-shadow: inset 0 -1px 0 #ffffff;
     padding: 6px;
-    display: flex;
-    gap: 10px;
 }
 
-.ribbon-tab {
-    display: flex;
-    gap: 18px;
-}
-
-/* Ribbon groups (IMPORTANT JS TARGET) */
+/* =========================
+   GROUP BOXES (REAL OFFICE SECTIONS)
+========================= */
 .group {
-    border-right: 1px solid #d0d0d0;
-    padding: 6px;
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    min-width: 90px;
+    background: rgba(255,255,255,0.7);
+    border: 1px solid #d0d0d0;
+    padding: 8px;
+    margin-right: 10px;
+    border-radius: 3px;
+    min-width: 110px;
 }
 
-/* Special button roles */
-button[data-name="bold"] { font-weight: bold; }
-button[data-name="italic"] { font-style: italic; }
-button[data-name="underline"] { text-decoration: underline; }
+/* GROUP LABEL (LIKE WORD TITLES) */
+.group label {
+    font-size: 11px;
+    color: #666;
+    display: block;
+    margin-bottom: 5px;
+}
 
-/* ==========================================================
-   WORKSPACE
-========================================================== */
+/* =========================
+   BUTTONS (OFFICE STYLE)
+========================= */
+button {
+    font-size: 12px;
+    padding: 4px 6px;
+    border: 1px solid #c0c0c0;
+    background: linear-gradient(#ffffff, #e6e6e6);
+    cursor: pointer;
+    border-radius: 2px;
+}
+
+button:hover {
+    border-color: #7aa7ff;
+    background: #f0f6ff;
+}
+
+button:active {
+    background: #d9e8ff;
+}
+
+/* ACTIVE TOOL (LIKE WORD SELECTED TOOL) */
+button.active {
+    background: #cfe3ff;
+    border-color: #4a90ff;
+}
+
+/* =========================
+   WORKSPACE (DOCUMENT AREA)
+========================= */
 #workspace {
     flex: 1;
     overflow: auto;
-    background: #cfcfcf;
-    padding: 25px;
+    background: #9e9e9e;
+    padding: 30px;
 }
 
-/* ==========================================================
-   DOCUMENT SYSTEM (MULTI-PAGE CORE)
-========================================================== */
-#documentContainer {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 25px;
-}
-
-/* PAGE CORE */
+/* =========================
+   PAGE (REAL WORD PAPER FEEL)
+========================= */
 .page {
     width: 794px;
     height: 1123px;
     background: white;
-    box-shadow: 0 4px 14px rgba(0,0,0,0.25);
-    position: relative;
-    padding: 90px 90px;
-    overflow: hidden;
+    margin: 20px auto;
+    padding: 90px;
+    box-shadow:
+        0 2px 8px rgba(0,0,0,0.25),
+        inset 0 0 0 1px #e0e0e0;
 }
 
-/* TEXT FLOW AREA */
+/* TEXT AREA */
 .page-content {
     width: 100%;
     height: 100%;
     font-size: 16px;
-    line-height: 1.5;
+    line-height: 1.6;
     outline: none;
     white-space: pre-wrap;
-    word-break: break-word;
 }
 
-/* ==========================================================
-   CARET SYSTEM (CRITICAL ENGINE LAYER)
-========================================================== */
-#caretLayer {
-    position: fixed;
-    inset: 0;
-    pointer-events: none;
-    z-index: 99999;
+/* =========================
+   STATUS BAR (WORD STYLE)
+========================= */
+#statusBar {
+    height: 26px;
+    background: linear-gradient(#f3f3f3, #e6e6e6);
+    border-top: 1px solid #bdbdbd;
+    display: flex;
+    justify-content: space-between;
+    padding: 4px 10px;
+    font-size: 12px;
 }
 
+/* =========================
+   CARET
+========================= */
 #globalCaret {
     position: absolute;
     width: 2px;
     height: 18px;
     background: black;
-    animation: caretBlink 1s steps(2) infinite;
+    animation: blink 1s steps(2) infinite;
 }
 
-@keyframes caretBlink {
+@keyframes blink {
     50% { opacity: 0; }
 }
 
-/* ==========================================================
-   SELECTION SYSTEM
-========================================================== */
-#selectionLayer {
-    position: fixed;
-    inset: 0;
-    pointer-events: none;
-    z-index: 99998;
-}
-
-/* Selection highlight (JS will create blocks) */
+/* =========================
+   SELECTION
+========================= */
 .selection-block {
     position: absolute;
-    background: rgba(51, 153, 255, 0.35);
+    background: rgba(51, 153, 255, 0.3);
 }
 
-/* ==========================================================
-   CONTEXT MENU
-========================================================== */
-#contextMenu {
-    position: absolute;
-    background: white;
-    border: 1px solid #c0c0c0;
-    box-shadow: 0 3px 10px rgba(0,0,0,0.2);
-    z-index: 100000;
-    width: 140px;
-}
 
-#contextMenu ul {
-    list-style: none;
-}
 
-#contextMenu li {
-    padding: 8px;
-    cursor: pointer;
-}
 
-#contextMenu li:hover {
-    background: #eeeeee;
-}
 
-.hidden {
-    display: none;
-}
 
-/* ==========================================================
-   STATUS BAR
-========================================================== */
-#statusBar {
-    height: 28px;
-    background: #f3f3f3;
-    border-top: 1px solid #bdbdbd;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-size: 12px;
-    padding: 0 10px;
-}
 
-/* ==========================================================
-   JS ENGINE HOOK HELPERS
-   (IMPORTANT FOR FUTURE MODULES)
-========================================================== */
 
-/* focus state for editable system */
-.focused {
-    outline: none;
-}
 
-/* text selection state */
-.selected {
-    background: rgba(51, 153, 255, 0.25);
-}
 
-/* page break marker (JS may use it) */
-.page-break {
-    break-after: page;
-}
 
-/* ==========================================================
-   RESPONSIVE (SAFE ONLY)
-========================================================== */
-@media (max-width: 900px) {
-    .page {
-        transform: scale(0.65);
-        transform-origin: top center;
-    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 }
