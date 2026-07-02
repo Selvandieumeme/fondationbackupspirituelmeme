@@ -121,29 +121,35 @@ button{
 
 
 /* =========================================================
-   BLOCK 2.3 — APPLICATION VERTICAL OFFSET
-   Force entire application lower on screen
+   BLOCK 2.1 — WINDOW SAFE TOP OFFSET
+   Prevent title bar from touching screen edge
 ========================================================= */
-
-body{
-
-    display:flex;
-    justify-content:flex-start;
-    align-items:stretch;
-
-}
 
 #cwWindow{
 
-    position:relative;
+    margin-top:12px;
 
-    top:18px;
-
-    height:calc(100% - 18px);
+    height:calc(100% - 12px);
 
 }
 
+/* EXTRA SAFE AREA FOR MOBILE DEVICES */
 
+@supports (padding-top: env(safe-area-inset-top)){
+
+    #cwWindow{
+
+        margin-top:calc(
+            env(safe-area-inset-top) + 12px
+        );
+
+        height:calc(
+            100% - env(safe-area-inset-top) - 12px
+        );
+
+    }
+
+}
 
 
 
