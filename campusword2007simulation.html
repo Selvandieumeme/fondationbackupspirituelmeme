@@ -186,16 +186,175 @@
 
 </div>
 
+
+
+<!-- =========================================================
+    STATUS BAR (WORD 2007 STRUCTURE)
+========================================================= -->
+<div id="cwStatusBar">
+
+    <!-- ==========================
+         LEFT SECTION
+    =========================== -->
+    <div id="cwStatusLeft">
+
+        <span id="cwStatusReady">
+            Ready
+        </span>
+
+        <span class="cwStatusSeparator"></span>
+
+        <span id="cwWordCount">
+            Words: 0
+        </span>
+
+        <span class="cwStatusSeparator"></span>
+
+        <span id="cwLanguage">
+            English
+        </span>
+
+    </div>
+
+
+    <!-- ==========================
+         CENTER SECTION
+    =========================== -->
+    <div id="cwStatusCenter">
+
+        <span id="cwCurrentPage">
+            Page 1
+        </span>
+
+        <span id="cwPageSeparator">
+            of
+        </span>
+
+        <span id="cwTotalPages">
+            1
+        </span>
+
+    </div>
+
+
+
 <!-- =========================================================
     STATUS BAR
 ========================================================= -->
 <div id="cwStatusBar">
 
-    <div id="cwStatusLeft">Ready</div>
-    <div id="cwStatusCenter">Page 0</div>
-    <div id="cwStatusRight">Zoom: 100%</div>
+    <!-- LEFT -->
+    <div id="cwStatusLeft">
+
+        <span id="cwStatusReady">Ready</span>
+
+        <span class="cwStatusSeparator">|</span>
+
+        <span id="cwWordCount">
+            Words:
+            <span id="cwWordCountValue">0</span>
+        </span>
+
+        <span class="cwStatusSeparator">|</span>
+
+        <span id="cwLanguage">
+            English
+        </span>
+
+    </div>
+
+
+    <!-- CENTER -->
+    <div id="cwStatusCenter">
+
+        <span id="cwCurrentPageLabel">Page</span>
+
+        <span id="cwCurrentPage">1</span>
+
+        <span id="cwPageSeparator">of</span>
+
+        <span id="cwTotalPages">1</span>
+
+    </div>
+
+
+    <!-- RIGHT -->
+    <div id="cwStatusRight">
+
+        <!-- VIEW MODES -->
+        <div id="cwViewModes">
+
+            <button
+                id="cwPrintLayoutBtn"
+                class="cwViewBtn"
+                title="Print Layout">
+                📄
+            </button>
+
+            <button
+                id="cwWebLayoutBtn"
+                class="cwViewBtn"
+                title="Web Layout">
+                🌐
+            </button>
+
+            <button
+                id="cwDraftViewBtn"
+                class="cwViewBtn"
+                title="Draft View">
+                📝
+            </button>
+
+        </div>
+
+        <span class="cwStatusSeparator">|</span>
+
+        <!-- ZOOM -->
+        <div id="cwZoomControls">
+
+            <button
+                id="cwZoomOut"
+                class="cwZoomBtn"
+                title="Zoom Out">
+                −
+            </button>
+
+            <div id="cwZoomSlider">
+
+                <div id="cwZoomTrack">
+
+                    <div id="cwZoomProgress"></div>
+
+                    <div id="cwZoomThumb"></div>
+
+                </div>
+
+            </div>
+
+            <button
+                id="cwZoomIn"
+                class="cwZoomBtn"
+                title="Zoom In">
+                +
+            </button>
+
+            <span id="cwZoomValue">
+                100%
+            </span>
+
+        </div>
+
+    </div>
 
 </div>
+
+
+
+
+
+
+
+
 
 <!-- =========================================================
     SYSTEM OVERLAYS (JS CONTROLLED LATER)
