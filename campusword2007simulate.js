@@ -1,3 +1,5 @@
+
+
 /* =========================================================
    CAMPUS WORD 2007 SIMULATE
    PAGE ENGINE v1.0.0
@@ -68,6 +70,9 @@ const PageEngine = {
 
     observeTyping() {
 
+        /* FIX: avoid crash if container missing events */
+        if (!this.pageContainer) return;
+
         this.pageContainer.addEventListener("input", () => {
             this.checkOverflow();
         });
@@ -93,13 +98,9 @@ const PageEngine = {
 
         // IF PAGE EXISTS
         if (this.pages[nextIndex]) {
-
             this.setCurrentPage(nextIndex);
-
         } else {
-
             this.createPage();
-
         }
 
         this.updateStatus();
@@ -111,10 +112,8 @@ const PageEngine = {
         const statusPage = document.getElementById("status-page");
 
         if (statusPage) {
-
             statusPage.innerText =
                 "Page: " + (this.currentPageIndex + 1);
-
         }
 
     }
@@ -124,7 +123,12 @@ const PageEngine = {
 /* ================= BOOT ================= */
 
 window.addEventListener("load", () => {
-    PageEngine.init();
+
+    /* FIX: ensure safe execution timing */
+    if (typeof PageEngine !== "undefined") {
+        PageEngine.init();
+    }
+
 });
 
 
@@ -133,26 +137,6 @@ window.addEventListener("load", () => {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
- 
 
 
 
