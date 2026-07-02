@@ -967,3 +967,205 @@ body{
 
 
 
+
+
+/* ==========================================================
+   CAMPUS WORD 2007 SIMULATION
+   CSS ENGINE
+   BLOCK 3
+   WORKSPACE + DOCUMENT AREA + PAGE SYSTEM
+   ========================================================== */
+
+
+/* ==========================================================
+   WORKSPACE CONTAINER
+   ========================================================== */
+
+#cwWorkspace{
+    flex:1;
+    display:flex;
+    flex-direction:column;
+    background:#cfd8e6;
+    overflow:hidden;
+    position:relative;
+}
+
+
+/* ==========================================================
+   DOCUMENT SCROLL AREA
+   ========================================================== */
+
+#cwScrollArea{
+    flex:1;
+    overflow:auto;
+    padding:40px;
+    display:flex;
+    justify-content:center;
+    align-items:flex-start;
+    background:radial-gradient(circle at top,#dfe7f2,#cfd8e6);
+    scrollbar-width:thin;
+}
+
+
+/* ==========================================================
+   SCROLLBAR STYLE
+   ========================================================== */
+
+#cwScrollArea::-webkit-scrollbar{
+    width:10px;
+}
+
+#cwScrollArea::-webkit-scrollbar-track{
+    background:#b8c6da;
+}
+
+#cwScrollArea::-webkit-scrollbar-thumb{
+    background:#7f93ad;
+    border-radius:8px;
+}
+
+#cwScrollArea::-webkit-scrollbar-thumb:hover{
+    background:#5f7692;
+}
+
+
+/* ==========================================================
+   DOCUMENT PAGE (WORD 2007 STYLE)
+   ========================================================== */
+
+.cwPage{
+    width:850px;
+    min-height:1100px;
+    background:#ffffff;
+    box-shadow:0 10px 30px rgba(0,0,0,.25);
+    border:1px solid #b9c6d6;
+    padding:80px 70px;
+    position:relative;
+    font-family:"Calibri","Segoe UI",Arial,sans-serif;
+    font-size:14px;
+    line-height:1.6;
+    color:#000;
+    overflow:hidden;
+}
+
+
+/* ==========================================================
+   PAGE MARGIN GUIDE (OPTIONAL VISUAL SYSTEM)
+   ========================================================== */
+
+.cwPage::before{
+    content:"";
+    position:absolute;
+    top:50px;
+    left:50px;
+    right:50px;
+    bottom:50px;
+    border:1px dashed rgba(120,140,170,.35);
+    pointer-events:none;
+}
+
+
+/* ==========================================================
+   DOCUMENT CONTENT AREA
+   ========================================================== */
+
+.cwPageContent{
+    width:100%;
+    min-height:100%;
+    outline:none;
+    white-space:pre-wrap;
+    word-wrap:break-word;
+}
+
+
+/* ==========================================================
+   SELECTION STYLE (WORD LIKE)
+   ========================================================== */
+
+.cwPageContent::selection{
+    background:#4a90e2;
+    color:#ffffff;
+}
+
+
+/* ==========================================================
+   CARET SYSTEM SUPPORT
+   ========================================================== */
+
+.cwCaret{
+    display:inline-block;
+    width:1px;
+    background:#000;
+    animation:blinkCaret 1s step-end infinite;
+    vertical-align:bottom;
+}
+
+@keyframes blinkCaret{
+    0%,50%{opacity:1;}
+    51%,100%{opacity:0;}
+}
+
+
+/* ==========================================================
+   LINE SYSTEM (TEXT ENGINE SUPPORT)
+   ========================================================== */
+
+.cwLine{
+    display:block;
+    min-height:18px;
+}
+
+
+/* ==========================================================
+   PAGE BREAK SYSTEM
+   ========================================================== */
+
+.cwPageBreak{
+    width:100%;
+    height:40px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:#6b7f99;
+    font-size:12px;
+    position:relative;
+}
+
+.cwPageBreak::before{
+    content:"";
+    position:absolute;
+    left:0;
+    right:0;
+    height:1px;
+    background:linear-gradient(to right,transparent,#9fb2c7,transparent);
+}
+
+
+/* ==========================================================
+   TEXT FORMATTING HELPERS
+   ========================================================== */
+
+.cwBold{font-weight:700;}
+.cwItalic{font-style:italic;}
+.cwUnderline{text-decoration:underline;}
+
+
+/* ==========================================================
+   SELECTION BOX SYSTEM
+   ========================================================== */
+
+.cwSelectionBox{
+    position:absolute;
+    border:1px solid rgba(60,120,200,.6);
+    background:rgba(80,140,220,.15);
+    pointer-events:none;
+}
+
+
+/* ==========================================================
+   FOCUS STATE
+   ========================================================== */
+
+.cwPageContent:focus{
+    outline:none;
+}
