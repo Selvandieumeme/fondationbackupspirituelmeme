@@ -1,4 +1,4 @@
-
+.
 /* =========================================================
    CAMPUS WORD 2007 SIMULATE - CORE STYLES
    VERSION: 1.0.0
@@ -225,17 +225,3 @@ body {
 
 
 
-
-
-/* FIX PAGE FLOW LIKE WORD */
-#cw-page-container {
-    display: flex;
-    flex-direction: column;
-}
-
-/* EACH PAGE BEHAVIOR */
-.cw-page {
-    break-after: always;
-    page-break-after: always;
-    overflow: hidden;
-}
