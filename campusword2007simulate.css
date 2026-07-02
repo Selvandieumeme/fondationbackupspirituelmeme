@@ -210,3 +210,71 @@ body {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+/* ================= WORD PRINT LAYER ================= */
+
+/* INNER TEXT AREA (simulate Word margins without breaking engine) */
+.cw-page {
+    position: relative;
+}
+
+/* REAL TEXT PRINT AREA */
+.cw-page::before {
+    content: "";
+    position: absolute;
+    top: 60px;
+    bottom: 60px;
+    left: 70px;
+    right: 70px;
+
+    border: 1px dashed rgba(0,0,0,0.08);
+    pointer-events: none;
+}
+
+/* PAGE VISUAL BREAK GUIDE */
+.cw-page::after {
+    content: "";
+    display: block;
+    height: 25px;
+}
+
+
+
+
+
+
+#cw-page-container {
+    background: #d3d3d3;
+    padding: 40px;
+}
+
+/* simule paper shadow separation */
+.cw-page {
+    box-shadow: 0 2px 10px rgba(0,0,0,0.12);
+}
+
+
+
+
+
+
+
+.cw-page:not(:last-child) {
+    border-bottom: 1px solid rgba(0,0,0,0.06);
+    margin-bottom: 20px;
+}
+
+
+
+
+
