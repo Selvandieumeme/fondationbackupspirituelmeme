@@ -215,6 +215,108 @@ button{
 
 
 
+
+
+
+/* =========================================================
+   BLOCK 4.1 — RIBBON VISUAL ENGINE (EXTENSION)
+   - Groups
+   - Group Boxes
+   - Separators
+   - Icon Buttons
+========================================================= */
+
+/* RIBBON GROUP CONTAINER */
+.cwRibbonGroups{
+    display:flex;
+    gap:12px;
+    padding:6px;
+    align-items:flex-start;
+}
+
+/* INDIVIDUAL GROUP BOX */
+.cwRibbonGroup{
+    display:flex;
+    flex-direction:column;
+    background:linear-gradient(to bottom,#ffffff,#f2f6fb);
+    border:1px solid #c7d2e3;
+    border-radius:4px;
+    padding:6px;
+    min-width:120px;
+    box-shadow:0 2px 6px rgba(0,0,0,0.08);
+}
+
+/* GROUP TITLE */
+.cwRibbonGroupTitle{
+    font-size:11px;
+    font-weight:600;
+    color:#2b579a;
+    margin-bottom:4px;
+    text-align:center;
+    border-bottom:1px solid #d6e0ef;
+    padding-bottom:3px;
+}
+
+/* ICON GRID INSIDE GROUP */
+.cwRibbonGroupContent{
+    display:flex;
+    flex-wrap:wrap;
+    gap:6px;
+    justify-content:center;
+}
+
+/* ICON BUTTON (SMALL RIBBON TOOL) */
+.cwRibbonIconBtn{
+    width:34px;
+    height:34px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    border:1px solid #b8c6d8;
+    border-radius:3px;
+    background:linear-gradient(to bottom,#ffffff,#e9f0f8);
+    cursor:pointer;
+    transition:all .15s ease;
+}
+
+/* ICON HOVER EFFECT */
+.cwRibbonIconBtn:hover{
+    background:linear-gradient(to bottom,#fdfefe,#dfeaf6);
+    border-color:#7f9db9;
+}
+
+/* ICON ACTIVE PRESS EFFECT */
+.cwRibbonIconBtn:active{
+    transform:scale(0.96);
+}
+
+/* ICON INSIDE BUTTON */
+.cwRibbonIconBtn svg{
+    width:16px;
+    height:16px;
+    color:#2b579a;
+}
+
+/* SEPARATOR BETWEEN GROUPS */
+.cwRibbonSeparator{
+    width:1px;
+    background:linear-gradient(to bottom,transparent,#b8c6d8,transparent);
+    margin:0 6px;
+    height:60px;
+}
+
+/* OPTIONAL GROUP FOOTER LABEL */
+.cwRibbonGroupFooter{
+    font-size:10px;
+    color:#6b7f99;
+    text-align:center;
+    margin-top:4px;
+}
+
+
+
+
+
 /* =========================================================
    BLOCK 5 — WORKSPACE
 ========================================================= */
