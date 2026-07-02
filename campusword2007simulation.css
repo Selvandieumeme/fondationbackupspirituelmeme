@@ -122,6 +122,56 @@ button{
 
 
 /* =========================================================
+   BLOCK 2.2 — CHROME SAFE VIEWPORT
+   Fix top clipping on Android Chrome
+========================================================= */
+
+html,
+body{
+
+    min-height:100vh;
+
+}
+
+body{
+
+    display:flex;
+    flex-direction:column;
+
+    padding-top:14px;
+
+}
+
+/* APP WINDOW */
+
+#cwWindow{
+
+    flex:1;
+
+    min-height:0;
+
+}
+
+/* DEVICES WITH SAFE AREA */
+
+@supports (padding-top: env(safe-area-inset-top)){
+
+    body{
+
+        padding-top:calc(
+            env(safe-area-inset-top) + 14px
+        );
+
+    }
+
+}
+
+
+
+
+
+
+/* =========================================================
    BLOCK 3 — QUICK ACCESS TOOLBAR
 ========================================================= */
 
