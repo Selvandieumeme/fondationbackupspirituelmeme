@@ -756,6 +756,208 @@ body{
 
 
 
+/* ==========================================================
+   CAMPUS WORD 2007 SIMULATION
+   CSS ENGINE
+   BLOCK 2C
+   RIBBON BUTTONS + STATES + TOOL ENHANCEMENTS
+   ========================================================== */
+
+
+/* ==========================================================
+   RIBBON BUTTON BASE
+   ========================================================== */
+
+.cwRibbonBtn{
+    width:100%;
+    min-height:26px;
+    display:flex;
+    align-items:center;
+    justify-content:flex-start;
+    gap:6px;
+    padding:3px 6px;
+    border:1px solid transparent;
+    border-radius:3px;
+    background:transparent;
+    color:#1f2f44;
+    font-size:12px;
+    font-weight:600;
+    transition:background .15s, border-color .15s, box-shadow .15s, transform .08s;
+}
+
+
+/* ==========================================================
+   RIBBON BUTTON ICON
+   ========================================================== */
+
+.cwRibbonBtnIcon{
+    width:18px;
+    height:18px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:13px;
+    color:#2c4a6a;
+    flex-shrink:0;
+}
+
+
+/* ==========================================================
+   RIBBON BUTTON LABEL
+   ========================================================== */
+
+.cwRibbonBtnLabel{
+    flex:1;
+    text-align:left;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+}
+
+
+/* ==========================================================
+   HOVER STATE
+   ========================================================== */
+
+.cwRibbonBtn:hover{
+    background:linear-gradient(to bottom,#ffffff 0%,#f3f8ff 50%,#d9e9ff 100%);
+    border-color:#7aa6d8;
+    box-shadow:inset 0 1px rgba(255,255,255,.9),0 0 4px rgba(90,140,200,.25);
+}
+
+
+/* ==========================================================
+   ACTIVE STATE
+   ========================================================== */
+
+.cwRibbonBtn:active{
+    transform:scale(.98);
+    background:linear-gradient(to bottom,#cfe4ff,#b8d6ff);
+}
+
+
+/* ==========================================================
+   DISABLED STATE
+   ========================================================== */
+
+.cwRibbonBtn:disabled{
+    opacity:.55;
+    cursor:not-allowed;
+    filter:grayscale(.2);
+}
+
+
+/* ==========================================================
+   SPLIT BUTTON SYSTEM
+   ========================================================== */
+
+.cwRibbonSplit{
+    display:flex;
+    width:100%;
+    border:1px solid transparent;
+    border-radius:3px;
+    overflow:hidden;
+}
+
+
+/* ==========================================================
+   SPLIT MAIN AREA
+   ========================================================== */
+
+.cwRibbonSplitMain{
+    flex:1;
+    display:flex;
+    align-items:center;
+    gap:6px;
+    padding:3px 6px;
+    background:transparent;
+    transition:background .15s;
+}
+
+
+/* ==========================================================
+   SPLIT ARROW AREA
+   ========================================================== */
+
+.cwRibbonSplitArrow{
+    width:22px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    border-left:1px solid rgba(120,150,180,.4);
+    font-size:10px;
+    color:#2c4a6a;
+    background:transparent;
+    transition:background .15s;
+}
+
+
+/* ==========================================================
+   SPLIT HOVER
+   ========================================================== */
+
+.cwRibbonSplit:hover{
+    border-color:#7aa6d8;
+    box-shadow:0 0 4px rgba(90,140,200,.25);
+}
+
+
+/* ==========================================================
+   SPLIT ACTIVE FEEDBACK
+   ========================================================== */
+
+.cwRibbonSplitMain:active,
+.cwRibbonSplitArrow:active{
+    background:#cfe4ff;
+}
+
+
+/* ==========================================================
+   BADGE SYSTEM
+   ========================================================== */
+
+.cwRibbonBadge{
+    min-width:16px;
+    height:16px;
+    padding:0 4px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:10px;
+    font-weight:700;
+    border-radius:10px;
+    background:#ffcc4d;
+    color:#1f2f44;
+    margin-left:auto;
+}
+
+
+/* ==========================================================
+   TOOLTIP SYSTEM
+   ========================================================== */
+
+.cwTooltip{
+    position:relative;
+}
+
+.cwTooltip:hover::after{
+    content:attr(data-tip);
+    position:absolute;
+    bottom:120%;
+    left:50%;
+    transform:translateX(-50%);
+    background:#1f2f44;
+    color:#fff;
+    font-size:11px;
+    padding:4px 6px;
+    border-radius:3px;
+    white-space:nowrap;
+    z-index:999;
+    opacity:.95;
+}
+
+
+
 
 
 
