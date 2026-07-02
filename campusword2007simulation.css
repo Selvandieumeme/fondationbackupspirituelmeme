@@ -1087,7 +1087,88 @@ button{
 
 
 
+/* =========================================================
+   CORE LAYOUT FIX — MAKES EVERYTHING VISIBLE
+========================================================= */
 
+
+/* BODY MUST ALLOW SCROLL SYSTEM */
+body{
+    overflow:auto !important;
+}
+
+
+/* MAIN APP MUST BE RELATIVE STACK */
+#cwWindow{
+    position:relative;
+    overflow:hidden;
+}
+
+
+/* WORKSPACE SHELL IS THE REAL LAYOUT ROOT */
+#cwWorkspaceShell{
+    position:relative;
+    height:100%;
+    width:100%;
+    overflow:visible;
+}
+
+
+/* RULERS MUST FLOAT ABOVE CONTENT */
+#cwRulerTop{
+    position:absolute;
+    top:0;
+    left:42px;
+    right:0;
+    height:22px;
+    z-index:1000;
+
+    background:#e8eef7;
+    border-bottom:1px solid #b8c6d8;
+}
+
+#cwRulerLeft{
+    position:absolute;
+    top:22px;
+    left:0;
+    bottom:0;
+    width:42px;
+    z-index:1000;
+
+    background:#e8eef7;
+    border-right:1px solid #b8c6d8;
+}
+
+
+/* WORKSPACE SCROLL MUST NOT COVER RULERS */
+#cwWorkspaceScroll{
+    position:absolute;
+    top:22px;
+    left:42px;
+    right:0;
+    bottom:26px; /* leave space for status bar */
+
+    overflow:auto;
+    z-index:1;
+
+    background:#d6dfec;
+}
+
+
+/* DOCUMENT AREA */
+#cwDocumentContainer{
+    min-width:850px;
+    padding:40px;
+}
+
+
+/* FLOATING LAYER ABOVE ALL */
+#cwFloatingLayer{
+    position:absolute;
+    inset:0;
+    z-index:2000;
+    pointer-events:none;
+}
 
 
 
