@@ -396,6 +396,65 @@ button{
 
 
 /* =========================================================
+   BLOCK 5.1 — APP WIDTH ALIGNMENT CORE
+   Sync Status Bar + Workspace width (Word-like)
+========================================================= */
+
+
+/* BASE ALIGNMENT ROOT */
+#cwWindow{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+}
+
+
+/* STATUS BAR MATCHES DOCUMENT WIDTH */
+#cwStatusBar{
+    width:850px;
+    max-width:95vw;
+
+    margin:0 auto;
+
+    box-sizing:border-box;
+}
+
+
+/* WORKSPACE MATCHES SAME WIDTH */
+#cwWorkspaceScroll{
+    justify-content:center;
+}
+
+
+/* DOCUMENT CONTAINER STAYS CONSISTENT */
+#cwDocumentContainer{
+    width:850px;
+    max-width:95vw;
+}
+
+
+/* PAGES ALSO FOLLOW SAME WIDTH SYSTEM */
+.cwPage{
+    width:100%;
+    max-width:850px;
+}
+
+
+/* RESPONSIVE SAFETY */
+@media (max-width:900px){
+
+    #cwStatusBar,
+    #cwDocumentContainer{
+        width:95vw;
+    }
+
+}
+
+
+
+
+
+/* =========================================================
    BLOCK 6 — PAGE ENGINE
 ========================================================= */
 
