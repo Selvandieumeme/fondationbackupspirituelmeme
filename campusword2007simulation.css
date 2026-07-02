@@ -120,51 +120,33 @@ button{
 
 
 
-
 /* =========================================================
-   BLOCK 2.2 — CHROME SAFE VIEWPORT
-   Fix top clipping on Android Chrome
+   BLOCK 2.3 — APPLICATION VERTICAL OFFSET
+   Force entire application lower on screen
 ========================================================= */
-
-html,
-body{
-
-    min-height:100vh;
-
-}
 
 body{
 
     display:flex;
-    flex-direction:column;
-
-    padding-top:14px;
+    justify-content:flex-start;
+    align-items:stretch;
 
 }
-
-/* APP WINDOW */
 
 #cwWindow{
 
-    flex:1;
+    position:relative;
 
-    min-height:0;
+    top:18px;
 
-}
-
-/* DEVICES WITH SAFE AREA */
-
-@supports (padding-top: env(safe-area-inset-top)){
-
-    body{
-
-        padding-top:calc(
-            env(safe-area-inset-top) + 14px
-        );
-
-    }
+    height:calc(100% - 18px);
 
 }
+
+
+
+
+
 
 
 
