@@ -1,22 +1,35 @@
 
+
+
+
+
 /* =========================================================
    CAMPUS WORD 2007 SIMULATE
-   PAGE ENGINE v1.0.0
+   ENGINE CORE FIXED v1.0.1
+   (PageEngine + CaretEngine STABLE BOOT)
    ========================================================= */
 
+/* ================= PAGE ENGINE ================= */
 const PageEngine = {
     pages: [],
     currentPageIndex: 0,
     pageContainer: null,
+    isReady: false,
 
     init() {
+
         this.pageContainer = document.getElementById("cw-page-container");
 
-        // CREATE FIRST PAGE AUTOMATICALLY
-        this.createPage();
+        // SAFETY CHECK
+        if (!this.pageContainer) {
+            console.error("PAGE ENGINE ERROR: container not found");
+            return;
+        }
 
-        // ACTIVATE MONITORING SYSTEM
+        this.createPage();
         this.observeTyping();
+
+        this.isReady = true;
 
         console.log("PAGE ENGINE READY");
     },
@@ -46,7 +59,7 @@ const PageEngine = {
     },
 
     getCurrentPage() {
-        return this.pages[this.currentPageIndex];
+        return this.pages[this.currentPageIndex] || null;
     },
 
     observeTyping() {
@@ -57,10 +70,8 @@ const PageEngine = {
 
     checkOverflow() {
         const page = this.getCurrentPage();
-
         if (!page) return;
 
-        // IF CONTENT OVERFLOWS PAGE HEIGHT
         if (page.scrollHeight > page.clientHeight + 50) {
             this.goToNextPage();
         }
@@ -69,7 +80,6 @@ const PageEngine = {
     goToNextPage() {
         const nextIndex = this.currentPageIndex + 1;
 
-        // IF PAGE EXISTS
         if (this.pages[nextIndex]) {
             this.setCurrentPage(nextIndex);
         } else {
@@ -83,44 +93,39 @@ const PageEngine = {
         const statusPage = document.getElementById("status-page");
 
         if (statusPage) {
-            statusPage.innerText =
-                "Page: " + (this.currentPageIndex + 1);
+            statusPage.innerText = "Page: " + (this.currentPageIndex + 1);
         }
     }
 };
 
-/* ================= BOOT ================= */
-window.addEventListener("load", () => {
-    PageEngine.init();
-});
-
-
-
-
-
-
-
-
-
-
-
-/* =========================================================
-   CAMPUS WORD 2007 SIMULATE
-   CARET ENGINE v1.0.0
-   ========================================================= */
-
+/* ================= CARET ENGINE ================= */
 const CaretEngine = {
     caret: null,
     blinkInterval: null,
     currentPage: null,
+    isReady: false,
 
     init() {
+
+        // WAIT FOR PAGE ENGINE
+        if (!PageEngine.isReady) {
+            setTimeout(() => this.init(), 100);
+            return;
+        }
+
         this.currentPage = PageEngine.getCurrentPage();
+
+        if (!this.currentPage) {
+            console.warn("CARET: waiting for page...");
+            setTimeout(() => this.init(), 100);
+            return;
+        }
 
         this.createCaret();
         this.startBlink();
-
         this.bindEvents();
+
+        this.isReady = true;
 
         console.log("CARET ENGINE READY");
     },
@@ -132,7 +137,6 @@ const CaretEngine = {
         this.caret.style.width = "2px";
         this.caret.style.height = "18px";
         this.caret.style.background = "black";
-        this.caret.style.animation = "blink 1s step-end infinite";
 
         document.body.appendChild(this.caret);
 
@@ -141,17 +145,14 @@ const CaretEngine = {
 
     startBlink() {
         this.blinkInterval = setInterval(() => {
-            if (this.caret.style.opacity === "0") {
-                this.caret.style.opacity = "1";
-            } else {
-                this.caret.style.opacity = "0";
-            }
+            this.caret.style.opacity =
+                this.caret.style.opacity === "0" ? "1" : "0";
         }, 500);
     },
 
     bindEvents() {
-        document.addEventListener("keydown", (e) => {
-            this.handleTyping(e);
+        document.addEventListener("keydown", () => {
+            this.handleTyping();
         });
 
         document.addEventListener("click", () => {
@@ -159,11 +160,10 @@ const CaretEngine = {
         });
     },
 
-    handleTyping(e) {
+    handleTyping() {
         const page = PageEngine.getCurrentPage();
         if (!page) return;
 
-        // allow text typing inside page
         page.focus();
 
         setTimeout(() => {
@@ -176,11 +176,8 @@ const CaretEngine = {
         const page = PageEngine.getCurrentPage();
         if (!page) return;
 
-        this.currentPage = page;
-
         const selection = window.getSelection();
-
-        if (!selection.rangeCount) return;
+        if (!selection || !selection.rangeCount) return;
 
         const range = selection.getRangeAt(0);
         const rect = range.getBoundingClientRect();
@@ -192,24 +189,32 @@ const CaretEngine = {
     }
 };
 
-/* ================= CARET CSS KEYFRAME ================= */
-const style = document.createElement("style");
-style.innerHTML = `
-@keyframes blink {
-    50% { opacity: 0; }
-}
-`;
-document.head.appendChild(style);
-
-/* ================= INIT CARET ================= */
+/* ================= BOOT SYSTEM (FIXED ORDER) ================= */
 window.addEventListener("load", () => {
+
+    // STEP 1: PAGE ENGINE FIRST
+    PageEngine.init();
+
+    // STEP 2: CARET ENGINE AFTER SAFE DELAY
     setTimeout(() => {
         CaretEngine.init();
-    }, 200);
+    }, 300);
+
 });
 
 
 
 
 
+
+
+
+
+
+
+
+
+
+ 
+        
 
