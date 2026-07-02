@@ -1,1 +1,26 @@
 
+
+
+
+
+
+
+
+
+.cwQBtn{
+    display:flex;
+    align-items:center;
+    gap:6px;
+}
+
+.cwIcon{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:#2a3f55;
+}
+
+.cwLabel{
+    font-size:12px;
+    font-weight:600;
+}
