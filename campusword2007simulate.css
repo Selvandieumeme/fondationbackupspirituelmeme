@@ -278,3 +278,20 @@ body {
 
 
 
+
+
+
+
+
+/* FIX PAGE FLOW LIKE WORD */
+#cw-page-container {
+    display: flex;
+    flex-direction: column;
+}
+
+/* EACH PAGE BEHAVIOR */
+.cw-page {
+    break-after: always;
+    page-break-after: always;
+    overflow: hidden;
+}
