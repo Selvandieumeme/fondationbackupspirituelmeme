@@ -225,3 +225,52 @@ body {
 
 
 
+/* ================= WORD PRINT LAYER (CLEAN FIXED) ================= */
+
+/* PAGE CONTAINER ONLY ONCE */
+#cw-page-container {
+    background: #d3d3d3;
+    padding: 40px;
+
+    display: flex;
+    flex-direction: column;
+}
+
+/* SINGLE PAGE STYLE ONLY */
+.cw-page {
+    position: relative;
+
+    background: #ffffff !important;
+
+    box-shadow: 0 2px 10px rgba(0,0,0,0.12);
+
+    margin-bottom: 20px;
+
+    padding: 60px 70px;
+
+    overflow: hidden;
+
+    break-after: auto;
+}
+
+/* PRINT AREA GUIDE */
+.cw-page::before {
+    content: "";
+    position: absolute;
+
+    top: 60px;
+    bottom: 60px;
+    left: 70px;
+    right: 70px;
+
+    border: 1px dashed rgba(0,0,0,0.08);
+
+    pointer-events: none;
+}
+
+/* REMOVE AFTER DUPLICATION EFFECT */
+.cw-page::after {
+    content: "";
+    display: block;
+    height: 0;
+}
