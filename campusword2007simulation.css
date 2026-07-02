@@ -898,7 +898,63 @@ button{
 
 
 
+/* =========================================================
+   BLOCK 8.2 — STATUS BAR OVERFLOW CONTROL
+   Prevent layout breaking + enable horizontal scroll
+========================================================= */
 
+
+/* PREVENT STATUS BAR FROM OVERFLOWING PAGE */
+#cwStatusBar{
+    overflow:hidden;
+}
+
+
+/* LEFT + CENTER STAY FIXED */
+#cwStatusLeft,
+#cwStatusCenter{
+    flex-shrink:0;
+}
+
+
+/* RIGHT SECTION BECOMES SCROLLABLE AREA */
+#cwStatusRight{
+    display:flex;
+    align-items:center;
+
+    gap:8px;
+
+    overflow-x:auto;
+    overflow-y:hidden;
+
+    white-space:nowrap;
+
+    max-width:45%;
+    scrollbar-width:thin;
+}
+
+
+/* MAKE INTERNAL GROUPS STAY IN ONE LINE */
+#cwViewModes,
+#cwZoomControls{
+    display:flex;
+    flex-shrink:0;
+}
+
+
+/* OPTIONAL: CLEAN SCROLLBAR (CHROME) */
+#cwStatusRight::-webkit-scrollbar{
+    height:4px;
+}
+
+#cwStatusRight::-webkit-scrollbar-thumb{
+    background:#b8c6d8;
+    border-radius:10px;
+}
+
+#cwStatusRight::-webkit-scrollbar-track{
+    background:transparent;
+}
 
 
 
