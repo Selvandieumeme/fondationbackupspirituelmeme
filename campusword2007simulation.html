@@ -4,18 +4,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>Campus Word 2007 Simulation</title>
+
     <link rel="stylesheet" href="campusword2007simulation.css">
 </head>
 
 <body>
 
-<div id="cwWindow">
+<!-- =========================================================
+    MAIN WINDOW
+========================================================= -->
+<div id="cwWindow" data-app="campusword2007simulation">
 
+    <!-- =====================================================
+        TITLE BAR
+    ====================================================== -->
     <div id="cwTitleBar">
 
-        <div id="cwOfficeButton">
-            <span>Office</span>
+        <div id="cwOfficeButton" data-role="office-button">
+            Office
         </div>
 
         <div id="cwTitle">
@@ -30,118 +38,73 @@
 
     </div>
 
+    <!-- =====================================================
+        QUICK ACCESS TOOLBAR
+    ====================================================== -->
     <div id="cwQuickAccess">
 
-        <button class="cwQBtn" id="saveBtn">Save</button>
-        <button class="cwQBtn" id="undoBtn">Undo</button>
-        <button class="cwQBtn" id="redoBtn">Redo</button>
+        <button class="cwQBtn" data-action="save">Save</button>
+        <button class="cwQBtn" data-action="undo">Undo</button>
+        <button class="cwQBtn" data-action="redo">Redo</button>
 
     </div>
 
-    <!-- RIBBON CONTROLLED BY TABS ONLY -->
+    <!-- =====================================================
+        RIBBON TABS (ONLY ONE SYSTEM - NO DUPLICATION)
+    ====================================================== -->
     <div id="cwRibbonTabs">
 
+        <!-- FILE -->
         <div class="cwRibbonTab active" data-tab="file">
-
-            <div class="cwRibbonGroups">
-
-                <div class="cwRibbonGroup" data-group="file-main">
-
-                    <div class="cwGroupTitle">File</div>
-
-                    <button class="cwRibbonBtn" id="cmdNew" data-role="button" data-command="file.new">New</button>
-                    <button class="cwRibbonBtn" id="cmdOpen" data-role="button" data-command="file.open">Open</button>
-                    <button class="cwRibbonBtn" id="cmdSave" data-role="button" data-command="file.save">Save</button>
-
-                </div>
-
-            </div>
-
+            <div class="cwRibbonGroups"></div>
         </div>
 
+        <!-- HOME -->
         <div class="cwRibbonTab" data-tab="home">
-
-            <div class="cwRibbonGroups">
-
-                <div class="cwRibbonGroup" data-group="clipboard">
-
-                    <div class="cwGroupTitle">Clipboard</div>
-
-                    <button class="cwRibbonBtn" id="cmdCut" data-command="edit.cut">Cut</button>
-                    <button class="cwRibbonBtn" id="cmdCopy" data-command="edit.copy">Copy</button>
-                    <button class="cwRibbonBtn" id="cmdPaste" data-command="edit.paste">Paste</button>
-
-                </div>
-
-                <div class="cwRibbonGroup" data-group="font">
-
-                    <div class="cwGroupTitle">Font</div>
-
-                    <button class="cwRibbonBtn" id="cmdBold" data-command="format.bold">Bold</button>
-                    <button class="cwRibbonBtn" id="cmdItalic" data-command="format.italic">Italic</button>
-                    <button class="cwRibbonBtn" id="cmdUnderline" data-command="format.underline">Underline</button>
-
-                </div>
-
-            </div>
-
+            <div class="cwRibbonGroups"></div>
         </div>
 
+        <!-- INSERT -->
         <div class="cwRibbonTab" data-tab="insert">
-
-            <div class="cwRibbonGroups">
-
-                <div class="cwRibbonGroup" data-group="insert-basic">
-
-                    <div class="cwGroupTitle">Insert</div>
-
-                    <button class="cwRibbonBtn" id="cmdInsertText" data-command="insert.text">Text</button>
-                    <button class="cwRibbonBtn" id="cmdInsertPage" data-command="insert.page">Page</button>
-
-                </div>
-
-            </div>
-
+            <div class="cwRibbonGroups"></div>
         </div>
 
     </div>
 
+    <!-- TAB BAR -->
     <div id="cwRibbonTabBar">
+
         <button class="cwTabBtn active" data-target="file">File</button>
         <button class="cwTabBtn" data-target="home">Home</button>
         <button class="cwTabBtn" data-target="insert">Insert</button>
+
     </div>
 
+    <!-- =====================================================
+        WORKSPACE (WORD EDITING AREA)
+    ====================================================== -->
     <div id="cwWorkspace">
 
         <div id="cwWorkspaceShell">
 
+            <!-- RULERS (EMPTY STRUCTURE - JS/CSS WILL RENDER VISUALS) -->
             <div id="cwRulerTop"></div>
             <div id="cwRulerLeft"></div>
 
+            <!-- SCROLL AREA -->
             <div id="cwWorkspaceScroll">
 
-                <div id="cwDocumentContainer">
-
-                    <div class="cwPage active" data-page-index="1">
-                        <div class="cwPageContent" contenteditable="true"></div>
-                    </div>
-
-                    <div class="cwPage" data-page-index="2">
-                        <div class="cwPageContent" contenteditable="true"></div>
-                    </div>
-
-                    <div class="cwPage" data-page-index="3">
-                        <div class="cwPageContent" contenteditable="true"></div>
-                    </div>
-
-                </div>
+                <!-- DOCUMENT CONTAINER (JS WILL CREATE PAGES HERE) -->
+                <div id="cwDocumentContainer"></div>
 
             </div>
 
+            <!-- FLOATING UI LAYER -->
             <div id="cwFloatingLayer">
+
                 <div id="cwSelectionBox"></div>
                 <div id="cwTooltip"></div>
+
             </div>
 
         </div>
@@ -150,12 +113,20 @@
 
 </div>
 
+<!-- =========================================================
+    STATUS BAR
+========================================================= -->
 <div id="cwStatusBar">
+
     <div id="cwStatusLeft">Ready</div>
-    <div id="cwStatusCenter">Page 1 of 3</div>
+    <div id="cwStatusCenter">Page 0</div>
     <div id="cwStatusRight">Zoom: 100%</div>
+
 </div>
 
+<!-- =========================================================
+    SYSTEM OVERLAYS (JS CONTROLLED LATER)
+========================================================= -->
 <div id="cwDialogLayer"></div>
 
 <div id="cwContextMenu" class="hidden"></div>
@@ -166,9 +137,9 @@
     <div id="cwRuntimeCache"></div>
 </div>
 
+<!-- JS (EMPTY FOR NOW, YOU SAID YOU START FROM SCRATCH) -->
 <script src="campusword2007simulation.js"></script>
 
 </body>
 </html>
-
 
