@@ -1,0 +1,273 @@
+/* ==========================================================
+   CAMPUS WORD 2007 SIMULATE
+   FULL ENGINE FOUNDATION CSS
+   MULTI-MODULE READY (WORD / EXCEL / POWERPOINT BASE)
+========================================================== */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Calibri, Arial, sans-serif;
+    background: #d4d4d4;
+    overflow: hidden;
+}
+
+/* ==========================================================
+   APP ROOT
+========================================================== */
+#app {
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* ==========================================================
+   TOOL BUTTON BASE (IMPORTANT FOR JS HOOKS)
+========================================================== */
+button {
+    border: 1px solid #c0c0c0;
+    background: #f8f8f8;
+    padding: 4px 8px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: 0.1s;
+    user-select: none;
+}
+
+button:hover {
+    background: #eaeaea;
+}
+
+button:active {
+    background: #dcdcdc;
+}
+
+button.active {
+    background: #cfe3ff;
+    border-color: #6aa6ff;
+}
+
+button.disabled {
+    opacity: 0.4;
+    pointer-events: none;
+}
+
+/* ==========================================================
+   TOP BAR / RIBBON SYSTEM
+========================================================== */
+#topBar {
+    background: #f3f3f3;
+    border-bottom: 1px solid #bdbdbd;
+}
+
+/* QUICK ACCESS TOOLBAR */
+#quickAccessToolbar {
+    display: flex;
+    gap: 6px;
+    padding: 5px 8px;
+    background: #ffffff;
+    border-bottom: 1px solid #d0d0d0;
+}
+
+/* OFFICE BUTTON */
+#officeButtonContainer {
+    background: linear-gradient(#2b579a, #1e3f73);
+    padding: 6px 10px;
+}
+
+#officeButton {
+    background: #2b579a;
+    color: white;
+    font-weight: bold;
+    border: none;
+}
+
+/* ==========================================================
+   RIBBON SYSTEM
+========================================================== */
+#ribbon {
+    background: #f7f7f7;
+    border-top: 1px solid white;
+    border-bottom: 1px solid #bdbdbd;
+    padding: 6px;
+    display: flex;
+    gap: 10px;
+}
+
+.ribbon-tab {
+    display: flex;
+    gap: 18px;
+}
+
+/* Ribbon groups (IMPORTANT JS TARGET) */
+.group {
+    border-right: 1px solid #d0d0d0;
+    padding: 6px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 90px;
+}
+
+/* Special button roles */
+button[data-name="bold"] { font-weight: bold; }
+button[data-name="italic"] { font-style: italic; }
+button[data-name="underline"] { text-decoration: underline; }
+
+/* ==========================================================
+   WORKSPACE
+========================================================== */
+#workspace {
+    flex: 1;
+    overflow: auto;
+    background: #cfcfcf;
+    padding: 25px;
+}
+
+/* ==========================================================
+   DOCUMENT SYSTEM (MULTI-PAGE CORE)
+========================================================== */
+#documentContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 25px;
+}
+
+/* PAGE CORE */
+.page {
+    width: 794px;
+    height: 1123px;
+    background: white;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.25);
+    position: relative;
+    padding: 90px 90px;
+    overflow: hidden;
+}
+
+/* TEXT FLOW AREA */
+.page-content {
+    width: 100%;
+    height: 100%;
+    font-size: 16px;
+    line-height: 1.5;
+    outline: none;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+/* ==========================================================
+   CARET SYSTEM (CRITICAL ENGINE LAYER)
+========================================================== */
+#caretLayer {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 99999;
+}
+
+#globalCaret {
+    position: absolute;
+    width: 2px;
+    height: 18px;
+    background: black;
+    animation: caretBlink 1s steps(2) infinite;
+}
+
+@keyframes caretBlink {
+    50% { opacity: 0; }
+}
+
+/* ==========================================================
+   SELECTION SYSTEM
+========================================================== */
+#selectionLayer {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 99998;
+}
+
+/* Selection highlight (JS will create blocks) */
+.selection-block {
+    position: absolute;
+    background: rgba(51, 153, 255, 0.35);
+}
+
+/* ==========================================================
+   CONTEXT MENU
+========================================================== */
+#contextMenu {
+    position: absolute;
+    background: white;
+    border: 1px solid #c0c0c0;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+    z-index: 100000;
+    width: 140px;
+}
+
+#contextMenu ul {
+    list-style: none;
+}
+
+#contextMenu li {
+    padding: 8px;
+    cursor: pointer;
+}
+
+#contextMenu li:hover {
+    background: #eeeeee;
+}
+
+.hidden {
+    display: none;
+}
+
+/* ==========================================================
+   STATUS BAR
+========================================================== */
+#statusBar {
+    height: 28px;
+    background: #f3f3f3;
+    border-top: 1px solid #bdbdbd;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 12px;
+    padding: 0 10px;
+}
+
+/* ==========================================================
+   JS ENGINE HOOK HELPERS
+   (IMPORTANT FOR FUTURE MODULES)
+========================================================== */
+
+/* focus state for editable system */
+.focused {
+    outline: none;
+}
+
+/* text selection state */
+.selected {
+    background: rgba(51, 153, 255, 0.25);
+}
+
+/* page break marker (JS may use it) */
+.page-break {
+    break-after: page;
+}
+
+/* ==========================================================
+   RESPONSIVE (SAFE ONLY)
+========================================================== */
+@media (max-width: 900px) {
+    .page {
+        transform: scale(0.65);
+        transform-origin: top center;
+    }
+}
