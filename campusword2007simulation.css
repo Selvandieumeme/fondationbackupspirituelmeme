@@ -355,6 +355,55 @@ button{
 
 
 
+
+
+
+/* =========================================================
+   BLOCK 4.2 — RIBBON CONTENT VIEWPORT ENGINE
+========================================================= */
+
+
+/* MAIN RIBBON CONTENT AREA */
+#cwRibbonContentArea{
+    width:100%;
+    background:var(--cw-ribbon-bg);
+
+    border-bottom:1px solid #b8c6d8;
+
+    min-height:110px;
+
+    padding:8px;
+
+    box-sizing:border-box;
+}
+
+
+/* EACH PANEL */
+.cwRibbonPanel{
+    display:none;
+
+    width:100%;
+
+    min-height:100px;
+
+    animation:fadeIn .12s ease;
+}
+
+
+/* ACTIVE PANEL */
+.cwRibbonPanel.active{
+    display:block;
+}
+
+
+/* SIMPLE FADE EFFECT */
+@keyframes fadeIn{
+    from{opacity:0; transform:translateY(-2px);}
+    to{opacity:1; transform:translateY(0);}
+}
+
+
+
 /* =========================================================
    BLOCK 5 — WORKSPACE
 ========================================================= */
