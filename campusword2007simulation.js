@@ -349,10 +349,8 @@ CampusWord2007Simulateur.init();
 
 
 
-
 /* =========================================================
-   ANDROID PAGINATION WATCHDOG FIX (NON-DESTRUCTIVE)
-   Fix: page 2 not appearing on Android / tablets
+   ANDROID PAGINATION WATCHDOG FIX (SAFE PRODUCTION)
 ========================================================= */
 
 (function () {
@@ -365,61 +363,63 @@ CampusWord2007Simulateur.init();
     let lastHeight = 0;
     let ticking = false;
 
-    function forceReflowAndPaginate() {
+    function forceReflow() {
 
-        const currentHeight = workspace.clientHeight;
+        const h = workspace.clientHeight;
+        if (h === lastHeight) return;
+        lastHeight = h;
 
-        if (currentHeight === lastHeight) return;
-        lastHeight = currentHeight;
+        // 🔥 SAFE reflow trigger (NO layout break)
+        container.style.transform = "translateZ(0)";
 
-        // 🔥 Force browser reflow
-        container.style.display = "none";
-        container.offsetHeight; // force repaint
-        container.style.display = "flex";
+        requestAnimationFrame(() => {
 
-        // 🔥 Trigger your pagination engine safely
-        if (window.PageEngine && typeof window.PageEngine.repaginate === "function") {
-            window.PageEngine.repaginate();
-        }
+            // 🔥 only force repaint (NOT display toggle)
+            container.offsetHeight;
 
-        if (window.DocumentEngine && typeof window.DocumentEngine.reflow === "function") {
-            window.DocumentEngine.reflow();
-        }
+            // 🔥 SAFE hook only (no crash if missing)
+            if (window.CampusWord2007Simulateur &&
+                typeof window.CampusWord2007Simulateur.checkPageOverflow === "function") {
+
+                // trigger re-evaluation on current active page
+                const active = document.querySelector(".cwPageContent");
+                if (active) {
+                    window.CampusWord2007Simulateur.checkPageOverflow(active);
+                }
+            }
+        });
     }
 
-    function scheduleCheck() {
+    function schedule() {
         if (ticking) return;
         ticking = true;
 
         requestAnimationFrame(() => {
             ticking = false;
-            forceReflowAndPaginate();
+            forceReflow();
         });
     }
 
     /* =========================
-       CRITICAL EVENTS FOR ANDROID
+       ANDROID CRITICAL EVENTS
     ========================== */
 
-    window.addEventListener("resize", scheduleCheck);
-    window.addEventListener("orientationchange", scheduleCheck);
+    window.addEventListener("resize", schedule);
+    window.addEventListener("orientationchange", schedule);
 
-    /* Android keyboard trigger workaround */
-    window.visualViewport?.addEventListener("resize", scheduleCheck);
+    window.visualViewport?.addEventListener("resize", schedule);
 
-    /* Touch input reflow safety */
-    document.addEventListener("touchstart", scheduleCheck, { passive: true });
+    document.addEventListener("focusin", schedule, { passive: true });
+    document.addEventListener("touchstart", schedule, { passive: true });
 
-    /* Focus (keyboard open) */
-    document.addEventListener("focusin", scheduleCheck);
+    workspace?.addEventListener("scroll", schedule);
 
-    /* Scroll fallback */
-    workspace.addEventListener("scroll", scheduleCheck);
-
-    /* Interval safety net (Android fallback layer) */
-    setInterval(forceReflowAndPaginate, 1200);
+    /* backup watchdog (low frequency safe) */
+    setInterval(forceReflow, 1500);
 
 })();
+
+
 
 
 
