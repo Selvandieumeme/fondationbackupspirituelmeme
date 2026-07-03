@@ -1177,7 +1177,43 @@ body{
 
 
 
+/* =========================================================
+   FIX CRITICAL INPUT + CARET + ANDROID TOUCH
+========================================================= */
 
+/* FORCE INPUT LAYER TO BE ABOVE BACKGROUND BUT BELOW FLOATING UI */
+#cwWorkspaceScroll{
+    touch-action: manipulation;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* ENSURE TEXT AREA CAN RECEIVE CARET */
+.cwPageContent{
+    position:relative;
+    z-index:2;
+    user-select:text;
+    -webkit-user-select:text;
+    outline:none;
+}
+
+/* FIX MOBILE CARET BUG */
+.cwPageContent:focus{
+    outline:none;
+}
+
+/* PREVENT RULERS FROM BLOCKING TOUCH */
+#cwRulerTop,
+#cwRulerLeft{
+    pointer-events:none;
+}
+
+/* ENSURE DOCUMENT CONTAINER ALWAYS ACTIVE LAYOUT */
+#cwDocumentContainer{
+    width:100%;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+}
 
 
 
