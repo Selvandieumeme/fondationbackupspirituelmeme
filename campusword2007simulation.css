@@ -452,14 +452,19 @@ padding:40px 0;
    BLOCK 6 — PAGE ENGINE
 ========================================================= */
 
-.cwPage{
-    width:850px;
-    min-height:1100px;
-    background:#fff;
-    box-shadow:var(--cw-page-shadow);
-    padding:80px 70px;
-    border:1px solid #c7d2e3;
+.cwPage {
+    width: 850px;
+    height: 1100px;
+    background: #fff;
+    box-shadow: var(--cw-page-shadow);
+    padding: 80px 70px;
+    border: 1px solid #c7d2e3;
+    overflow: hidden;
 }
+
+
+
+
 
 /* ACTIVE PAGE */
 .cwPage.active{
