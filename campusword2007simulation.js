@@ -1,3 +1,4 @@
+
 /* =========================================================
    CAMPUS WORD 2007 — CORE ENGINE (PRODUCTION FOUNDATION)
    SAFE • RESPONSIVE • MULTI-DEVICE • SCALABLE
@@ -13,89 +14,42 @@ const CampusWord2007Simulateur = {
         activePageIndex: 0,
         zoom: 100,
         wordCount: 0,
-        language: "English",
-        overflowDetected: false
-},
+        language: "English"
+    },
 
 
-
-/* =========================
-   SAFE INIT ENTRY (ANDROID STABLE)
-========================= */
-init() {
-
-    const start = () => {
-
-        this.cacheDOM();
-        this.bindUI();
-
-        /* safety check: ensure workspace exists */
-        if (!this.workspace) {
-
-            setTimeout(() => {
-                this.cacheDOM();
-
-                if (this.workspace) {
-                    this.createFirstPage();
-                    this.updateStatus();
-                }
-
-            }, 300);
-
-            return;
-        }
-
-        this.createFirstPage();
-        this.updateStatus();
-    };
-
-    /* if DOM already ready, run immediately */
-    if (document.readyState === "complete" ||
-        document.readyState === "interactive") {
-        start();
-    } else {
-        document.addEventListener("DOMContentLoaded", start);
-    }
-},
+    /* =========================
+       SAFE INIT ENTRY
+    ========================= */
+    init() {
+        document.addEventListener("DOMContentLoaded", () => {
+            this.cacheDOM();
+            this.bindUI();
+            this.createFirstPage();
+            this.updateStatus();
+        });
+    },
 
 
+    /* =========================
+       SAFE DOM CACHE (NO CRASH)
+    ========================= */
+    cacheDOM() {
 
+        const get = (id) => document.getElementById(id);
 
+        this.workspace = get("cwDocumentContainer");
 
-/* =========================
-   SAFE DOM CACHE (ANDROID STABLE)
-========================= */
-cacheDOM() {
+        this.statusReady = get("cwStatusReady");
+        this.wordCountEl = get("cwWordCountValue");
+        this.pageCurrentEl = get("cwCurrentPage");
+        this.pageTotalEl = get("cwTotalPages");
+        this.zoomValueEl = get("cwZoomValue");
 
-    const get = (id) => document.getElementById(id);
+        this.zoomInBtn = get("cwZoomIn");
+        this.zoomOutBtn = get("cwZoomOut");
 
-    this.workspace = get("cwDocumentContainer");
-
-    /* SAFETY: ensure workspace exists */
-    if (!this.workspace) {
-        this.workspace = null;
-    }
-
-    this.statusReady = get("cwStatusReady");
-    this.wordCountEl = get("cwWordCountValue");
-    this.pageCurrentEl = get("cwCurrentPage");
-    this.pageTotalEl = get("cwTotalPages");
-    this.zoomValueEl = get("cwZoomValue");
-
-    this.zoomInBtn = get("cwZoomIn");
-    this.zoomOutBtn = get("cwZoomOut");
-
-    /* DEBUG SAFE FLAGS (no console required) */
-    this.domReady =
-        !!this.workspace &&
-        !!this.statusReady &&
-        !!this.wordCountEl;
-
-},
-
-
-
-
+    },
 
 
     /* =========================
@@ -130,119 +84,30 @@ cacheDOM() {
     },
 
 
+    /* =========================
+       CREATE FIRST PAGE (SAFE)
+    ========================= */
+    createFirstPage() {
 
+        if (!this.workspace) return;
 
+        const page = document.createElement("div");
+        page.className = "cwPage active";
 
-/* =========================
-   CREATE FIRST PAGE (SAFE)
-========================= */
-createFirstPage() {
+        const content = document.createElement("div");
+        content.className = "cwPageContent";
+        content.contentEditable = true;
 
-    if (!this.workspace) return;
+        content.addEventListener("input", () => {
+            this.calculateWordCount(content.innerText);
+        });
 
-    const page = document.createElement("div");
-    page.className = "cwPage active";
+        page.appendChild(content);
+        this.workspace.appendChild(page);
 
-    const content = document.createElement("div");
-    content.className = "cwPageContent";
-    content.contentEditable = true;
-    content.spellcheck = false;
-
-    content.addEventListener("input", () => {
-
-        /* UPDATE WORD COUNT */
-        this.calculateWordCount(content.innerText);
-
-        /* PAGE OVERFLOW DETECTION */
-        if (typeof this.checkPageOverflow === "function") {
-            this.checkPageOverflow(content, page);
-        }
-
-    });
-
-    page.appendChild(content);
-
-    this.workspace.appendChild(page);
-
-    this.state.pages.push(page);
-
-    this.state.activePageIndex = 0;
-
-    content.focus();
-
-    this.updatePageStatus();
-
-},
-
-
-
-
-
-
-
-/* =========================
-   OVERFLOW DETECTION ENGINE
-   PHASE 2A
-========================= */
-
-/* CHECK PAGE WRITING LIMIT */
-checkPageOverflow(content, page) {
-
-    if (!content || !page) {
-        return false;
-    }
-
-    const isOverflow =
-        content.scrollHeight > content.clientHeight;
-
-    /* INTERNAL STATE */
-    this.state.overflowDetected = isOverflow;
-
-    /* PAGE STATE */
-    page.dataset.overflow =
-        isOverflow ? "true" : "false";
-
-    /* PAGINATION HOOK */
-    if (isOverflow) {
-        this.handlePageOverflow(page, content);
-    }
-
-    return isOverflow;
-
-},
-
-
-/* =========================
-   OVERFLOW CALLBACK (HOOK)
-========================= */
-handlePageOverflow(page, content) {
-
-    if (!page || !content) {
-        return;
-    }
-
-    /*
-    =========================================================
-    Pagination Engine (Phase 2B)
-
-    This method is intentionally empty.
-
-    The next module will:
-      • create a new page
-      • move overflowing content
-      • preserve caret position
-      • keep continuous typing
-      • update page numbering
-
-    =========================================================
-    */
-
-},
-
-
-
-
-
+        this.state.pages.push(page);
+        this.updatePageStatus();
+    },
 
 
     /* =========================
@@ -322,10 +187,6 @@ handlePageOverflow(page, content) {
    BOOTSTRAP (SAFE START)
 ========================================================= */
 CampusWord2007Simulateur.init();
-
-
-
-
 
 
 
