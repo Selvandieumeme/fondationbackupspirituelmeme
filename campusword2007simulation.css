@@ -1222,7 +1222,10 @@ body{
 
 
 
-
+.cwPageContent {
+    outline: none;
+    -webkit-user-modify: read-write-plaintext-only;
+}
 
 
 
