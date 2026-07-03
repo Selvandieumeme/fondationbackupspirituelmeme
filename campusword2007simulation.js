@@ -15,6 +15,7 @@ const CampusWord2007Simulateur = {
         wordCount: 0,
         language: "English",
         overflowDetected: false
+},
 
 
     /* =========================
