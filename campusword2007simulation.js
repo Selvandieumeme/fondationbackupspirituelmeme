@@ -18,17 +18,53 @@ const CampusWord2007Simulateur = {
     },
 
 
-    /* =========================
-       SAFE INIT ENTRY
-    ========================= */
-    init() {
-        document.addEventListener("DOMContentLoaded", () => {
-            this.cacheDOM();
-            this.bindUI();
-            this.createFirstPage();
-            this.updateStatus();
-        });
-    },
+/* =========================
+   SAFE INIT ENTRY (MOBILE FIXED)
+========================= */
+init() {
+
+    document.addEventListener("DOMContentLoaded", () => {
+
+        this.cacheDOM();
+        this.bindUI();
+        this.createFirstPage();
+        this.updateStatus();
+
+        /* =====================================================
+           ANDROID / MOBILE CARET FIX (NON-DESTRUCTIVE ADDON)
+        ===================================================== */
+        const tryFocusEditor = () => {
+
+            const editor = document.querySelector(".cwPageContent");
+
+            if (editor) {
+
+                editor.setAttribute("tabindex", "0");
+
+                /* Force focus on mobile (critical for Android keyboard) */
+                setTimeout(() => {
+                    editor.focus({ preventScroll: true });
+                }, 300);
+
+            }
+        };
+
+        /* First focus attempt */
+        tryFocusEditor();
+
+        /* Ensure focus when user touches screen */
+        document.addEventListener("touchstart", () => {
+            tryFocusEditor();
+        }, { passive: true });
+
+    });
+},
+
+
+
+
+
+
 
 
     /* =========================
