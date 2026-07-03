@@ -424,3 +424,52 @@ CampusWord2007Simulateur.init();
 
 
 
+
+
+
+/* =========================================================
+   WORD STYLE RULER MARKERS (SAFE CROSS DEVICE)
+========================================================= */
+
+function buildRulerMarkers() {
+
+    const top = document.getElementById("cwRulerTop");
+    const left = document.getElementById("cwRulerLeft");
+
+    if (!top || !left) return;
+
+    // clear si deja gen
+    top.innerHTML = "";
+    left.innerHTML = "";
+
+    /* =========================
+       HORIZONTAL RULER (TOP)
+    ========================== */
+    for (let i = 0; i <= 50; i++) {
+
+        const mark = document.createElement("div");
+        mark.className = "cwRulerMark cwRulerMarkTop";
+
+        mark.style.left = (i * 20) + "px";
+
+        mark.innerHTML = (i % 5 === 0) ? `<span>${i}</span>` : "";
+
+        top.appendChild(mark);
+    }
+
+    /* =========================
+       VERTICAL RULER (LEFT)
+    ========================== */
+    for (let i = 0; i <= 80; i++) {
+
+        const mark = document.createElement("div");
+        mark.className = "cwRulerMark cwRulerMarkLeft";
+
+        mark.style.top = (i * 20) + "px";
+
+        mark.innerHTML = (i % 5 === 0) ? `<span>${i}</span>` : "";
+
+        left.appendChild(mark);
+    }
+}
+
