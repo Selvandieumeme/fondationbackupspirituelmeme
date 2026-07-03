@@ -134,9 +134,21 @@ init() {
         content.className = "cwPageContent";
         content.contentEditable = true;
 
-        content.addEventListener("input", () => {
-            this.calculateWordCount(content.innerText);
-        });
+
+content.addEventListener("input", (e) => {
+    requestAnimationFrame(() => {
+        this.calculateWordCount(e.target.innerText);
+    });
+});
+
+
+
+        
+
+
+
+
+
 
         page.appendChild(content);
         this.workspace.appendChild(page);
