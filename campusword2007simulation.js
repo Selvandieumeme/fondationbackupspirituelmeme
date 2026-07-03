@@ -83,30 +83,51 @@ const CampusWord2007Simulateur = {
     },
 
 
-    /* =========================
-       CREATE FIRST PAGE (SAFE)
-    ========================= */
-    createFirstPage() {
 
-        if (!this.workspace) return;
 
-        const page = document.createElement("div");
-        page.className = "cwPage active";
 
-        const content = document.createElement("div");
-        content.className = "cwPageContent";
-        content.contentEditable = true;
+/* =========================
+   CREATE FIRST PAGE (SAFE)
+========================= */
+createFirstPage() {
 
-        content.addEventListener("input", () => {
-            this.calculateWordCount(content.innerText);
-        });
+    if (!this.workspace) return;
 
-        page.appendChild(content);
-        this.workspace.appendChild(page);
+    const page = document.createElement("div");
+    page.className = "cwPage active";
 
-        this.state.pages.push(page);
-        this.updatePageStatus();
-    },
+    const content = document.createElement("div");
+    content.className = "cwPageContent";
+    content.contentEditable = true;
+    content.spellcheck = false;
+
+    content.addEventListener("input", () => {
+
+        /* UPDATE WORD COUNT */
+        this.calculateWordCount(content.innerText);
+
+        /* PAGE OVERFLOW DETECTION */
+        if (typeof this.checkPageOverflow === "function") {
+            this.checkPageOverflow(content, page);
+        }
+
+    });
+
+    page.appendChild(content);
+
+    this.workspace.appendChild(page);
+
+    this.state.pages.push(page);
+
+    this.state.activePageIndex = 0;
+
+    content.focus();
+
+    this.updatePageStatus();
+
+},
+
+
 
 
     /* =========================
@@ -186,3 +207,17 @@ const CampusWord2007Simulateur = {
    BOOTSTRAP (SAFE START)
 ========================================================= */
 CampusWord2007Simulateur.init();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
