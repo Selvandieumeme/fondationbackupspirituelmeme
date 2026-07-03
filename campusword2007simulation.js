@@ -161,15 +161,22 @@ createFirstPage() {
 
 
 
+
+
+
+
+
 checkPageOverflow(contentEl) {
 
     const page = contentEl.parentElement;
-
     if (!page) return;
 
-    const PAGE_LIMIT = page.clientHeight;
+    // plis presizyon pase clientHeight (evite bug mobile)
+    const PAGE_LIMIT = page.clientHeight - 5;
 
+    // verifye vrè overflow la
     if (contentEl.scrollHeight > PAGE_LIMIT) {
+
         this.createNewPageAndMoveOverflow(contentEl);
     }
 },
@@ -178,8 +185,29 @@ checkPageOverflow(contentEl) {
 
 
 
+
+
+
 createNewPageAndMoveOverflow(contentEl) {
 
+    const currentPage = contentEl.parentElement;
+    if (!currentPage) return;
+
+    const currentContent = contentEl;
+
+    // 1. pran dènye liy (text after last line break)
+    const text = currentContent.innerText;
+
+    const lines = text.split("\n");
+
+    if (lines.length <= 1) return;
+
+    const lastLine = lines.pop();
+
+    // 2. retire dènye liy la nan paj aktyèl la
+    currentContent.innerText = lines.join("\n");
+
+    // 3. kreye nouvo paj
     const newPage = document.createElement("div");
     newPage.className = "cwPage";
 
@@ -187,9 +215,17 @@ createNewPageAndMoveOverflow(contentEl) {
     newContent.className = "cwPageContent";
     newContent.contentEditable = true;
 
-    newContent.addEventListener("input", (e) => {
-        this.calculateWordCount(newContent.innerText);
-        this.checkPageOverflow(newContent);
+    // 4. mete dènye liy lan nan nouvo paj
+    newContent.innerText = lastLine;
+
+    // 5. rebind event san chanje non yo
+    newContent.addEventListener("input", () => {
+
+        requestAnimationFrame(() => {
+            this.calculateWordCount(newContent.innerText);
+            this.checkPageOverflow(newContent);
+        });
+
     });
 
     newPage.appendChild(newContent);
@@ -197,13 +233,24 @@ createNewPageAndMoveOverflow(contentEl) {
 
     this.state.pages.push(newPage);
 
-    // move focus automatically
+    // 6. focus nouvo paj la
     setTimeout(() => {
         newContent.focus();
     }, 0);
 
     this.updatePageStatus();
 },
+
+
+
+
+
+
+
+
+
+
+
 
 
 
