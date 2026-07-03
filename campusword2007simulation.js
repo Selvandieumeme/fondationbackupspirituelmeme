@@ -175,7 +175,11 @@ init() {
 
         if (this.workspace) {
 
-            this.workspace.style.transform = `scale(${zoom / 100})`;
+
+      this.workspace.style.zoom = zoom / 100;
+   
+
+
 
             /* IMPORTANT: stable origin for all devices */
             this.workspace.style.transformOrigin = "top center";
