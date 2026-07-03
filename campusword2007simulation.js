@@ -120,34 +120,45 @@ init() {
     },
 
 
-    /* =========================
-       CREATE FIRST PAGE (SAFE)
-    ========================= */
-    createFirstPage() {
-
-        if (!this.workspace) return;
-
-        const page = document.createElement("div");
-        page.className = "cwPage active";
-
-        const content = document.createElement("div");
-        content.className = "cwPageContent";
-        content.contentEditable = true;
 
 
-content.addEventListener("input", (e) => {
-    requestAnimationFrame(() => {
-        this.calculateWordCount(e.target.innerText);
+
+
+/* =========================
+   CREATE FIRST PAGE (SAFE)
+========================= */
+createFirstPage() {
+
+    if (!this.workspace) return;
+
+    const page = document.createElement("div");
+    page.className = "cwPage active";
+
+    const content = document.createElement("div");
+    content.className = "cwPageContent";
+    content.contentEditable = true;
+
+    content.addEventListener("input", () => {
+
+        requestAnimationFrame(() => {
+
+            this.calculateWordCount(content.innerText);
+
+            this.checkPageOverflow(content);
+
+        });
+
     });
-});
 
+    page.appendChild(content);
+    this.workspace.appendChild(page);
 
-        page.appendChild(content);
-        this.workspace.appendChild(page);
+    this.state.pages.push(page);
 
-        this.state.pages.push(page);
-        this.updatePageStatus();
-    },
+    this.updatePageStatus();
+
+},
+
 
 
 checkPageOverflow(contentEl) {
@@ -162,6 +173,38 @@ checkPageOverflow(contentEl) {
         this.createNewPageAndMoveOverflow(contentEl);
     }
 },
+
+
+
+
+
+createNewPageAndMoveOverflow(contentEl) {
+
+    const newPage = document.createElement("div");
+    newPage.className = "cwPage";
+
+    const newContent = document.createElement("div");
+    newContent.className = "cwPageContent";
+    newContent.contentEditable = true;
+
+    newContent.addEventListener("input", (e) => {
+        this.calculateWordCount(newContent.innerText);
+        this.checkPageOverflow(newContent);
+    });
+
+    newPage.appendChild(newContent);
+    this.workspace.appendChild(newPage);
+
+    this.state.pages.push(newPage);
+
+    // move focus automatically
+    setTimeout(() => {
+        newContent.focus();
+    }, 0);
+
+    this.updatePageStatus();
+},
+
 
 
 
