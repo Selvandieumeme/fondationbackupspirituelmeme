@@ -517,37 +517,6 @@ button{
 
 
 
-/* =========================================================
-   BLOCK 7 — RULERS + FLOATING UI
-========================================================= */
-
-#cwRulerTop,
-#cwRulerLeft{
-    position:absolute;
-    background:#e8eef7;
-}
-
-#cwRulerTop{
-    height:20px;
-    width:100%;
-    top:0;
-}
-
-#cwRulerLeft{
-    width:40px;
-    height:100%;
-    left:0;
-}
-
-/* FLOATING */
-#cwFloatingLayer{
-    position:absolute;
-    inset:0;
-    pointer-events:none;
-}
-
-
-
 
 
 
@@ -1057,65 +1026,6 @@ button{
 
 
 
-
-
-
-
-/* =========================================================
-   FIX — RULER SYSTEM FOUNDATION (CRITICAL PATCH)
-========================================================= */
-
-
-/* MAKE WORKSPACE A POSITION CONTEXT */
-#cwWorkspaceShell{
-    position:relative;
-}
-
-
-/* CREATE VISUAL LAYER STACK */
-#cwRulerTop{
-    position:absolute;
-    top:0;
-    left:42px; /* skip left ruler width */
-    right:0;
-
-    height:22px;
-
-    z-index:20;
-}
-
-#cwRulerLeft{
-    position:absolute;
-    top:22px; /* skip top ruler height */
-    left:0;
-
-    width:42px;
-    bottom:0;
-
-    z-index:20;
-}
-
-
-/* DOCUMENT AREA MUST NOT COVER RULERS */
-#cwWorkspaceScroll{
-    position:relative;
-    z-index:1;
-}
-
-
-/* FLOATING LAYER ABOVE ALL */
-#cwFloatingLayer{
-    position:absolute;
-    inset:0;
-    z-index:50;
-    pointer-events:none;
-}
-
-
-/* MARKERS MUST BE ABOVE RULERS */
-.cwRulerMarker{
-    z-index:60;
-}
 
 
 
