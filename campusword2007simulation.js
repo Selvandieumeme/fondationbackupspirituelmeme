@@ -346,3 +346,81 @@ CampusWord2007Simulateur.init();
 
 
 
+
+
+
+
+/* =========================================================
+   ANDROID PAGINATION WATCHDOG FIX (NON-DESTRUCTIVE)
+   Fix: page 2 not appearing on Android / tablets
+========================================================= */
+
+(function () {
+
+    const workspace = document.getElementById("cwWorkspaceScroll");
+    const container = document.getElementById("cwDocumentContainer");
+
+    if (!workspace || !container) return;
+
+    let lastHeight = 0;
+    let ticking = false;
+
+    function forceReflowAndPaginate() {
+
+        const currentHeight = workspace.clientHeight;
+
+        if (currentHeight === lastHeight) return;
+        lastHeight = currentHeight;
+
+        // 🔥 Force browser reflow
+        container.style.display = "none";
+        container.offsetHeight; // force repaint
+        container.style.display = "flex";
+
+        // 🔥 Trigger your pagination engine safely
+        if (window.PageEngine && typeof window.PageEngine.repaginate === "function") {
+            window.PageEngine.repaginate();
+        }
+
+        if (window.DocumentEngine && typeof window.DocumentEngine.reflow === "function") {
+            window.DocumentEngine.reflow();
+        }
+    }
+
+    function scheduleCheck() {
+        if (ticking) return;
+        ticking = true;
+
+        requestAnimationFrame(() => {
+            ticking = false;
+            forceReflowAndPaginate();
+        });
+    }
+
+    /* =========================
+       CRITICAL EVENTS FOR ANDROID
+    ========================== */
+
+    window.addEventListener("resize", scheduleCheck);
+    window.addEventListener("orientationchange", scheduleCheck);
+
+    /* Android keyboard trigger workaround */
+    window.visualViewport?.addEventListener("resize", scheduleCheck);
+
+    /* Touch input reflow safety */
+    document.addEventListener("touchstart", scheduleCheck, { passive: true });
+
+    /* Focus (keyboard open) */
+    document.addEventListener("focusin", scheduleCheck);
+
+    /* Scroll fallback */
+    workspace.addEventListener("scroll", scheduleCheck);
+
+    /* Interval safety net (Android fallback layer) */
+    setInterval(forceReflowAndPaginate, 1200);
+
+})();
+
+
+
+
