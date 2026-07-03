@@ -348,6 +348,182 @@ CampusWord2007Simulateur.init();
 
 
 
+/* =========================================================
+   WORD 2007 RULER ENGINE — PRO INTERACTIVE VERSION
+========================================================= */
+
+const WordRulerEngine = {
+
+    state: {
+        zoom: 100,
+        leftMargin: 70,
+        rightMargin: 70,
+        dragging: null
+    },
+
+    init() {
+
+        this.top = document.getElementById("cwRulerTop");
+        this.left = document.getElementById("cwRulerLeft");
+        this.scroll = document.getElementById("cwWorkspaceScroll");
+
+        if (!this.top || !this.left || !this.scroll) return;
+
+        this.render();
+        this.bind();
+    },
+
+    bind() {
+
+        window.addEventListener("resize", () => this.render());
+        window.addEventListener("orientationchange", () => this.render());
+
+        this.createMarginHandles();
+    },
+
+    setZoom(z) {
+        this.state.zoom = z;
+        this.render();
+    },
+
+    render() {
+
+        this.top.innerHTML = "";
+        this.left.innerHTML = "";
+
+        const step = 20 * (this.state.zoom / 100);
+
+        const width = window.innerWidth;
+        const height = window.innerHeight;
+
+        /* ================= TOP RULER ================= */
+        for (let x = 0; x < width; x += step) {
+
+            const mark = document.createElement("div");
+            mark.className = "cwRulerMark";
+
+            mark.style.position = "absolute";
+            mark.style.left = x + "px";
+            mark.style.height = "100%";
+            mark.style.width = "1px";
+            mark.style.background = "#8aa6c7";
+
+            if ((x / step) % 5 === 0) {
+                mark.innerHTML = `<span>${Math.round(x / 10)}</span>`;
+            }
+
+            this.top.appendChild(mark);
+        }
+
+        /* ================= LEFT RULER ================= */
+        for (let y = 0; y < height; y += step) {
+
+            const mark = document.createElement("div");
+            mark.className = "cwRulerMark";
+
+            mark.style.position = "absolute";
+            mark.style.top = y + "px";
+            mark.style.width = "100%";
+            mark.style.height = "1px";
+            mark.style.background = "#8aa6c7";
+
+            this.left.appendChild(mark);
+        }
+
+        this.updateMargins();
+    },
+
+    createMarginHandles() {
+
+        const doc = document.getElementById("cwDocumentContainer");
+        if (!doc) return;
+
+        if (document.getElementById("cwMarginLeft")) return;
+
+        const left = document.createElement("div");
+        left.id = "cwMarginLeft";
+        left.className = "cwMarginHandle";
+
+        const right = document.createElement("div");
+        right.id = "cwMarginRight";
+        right.className = "cwMarginHandle";
+
+        doc.appendChild(left);
+        doc.appendChild(right);
+
+        this.enableDrag(left, "left");
+        this.enableDrag(right, "right");
+    },
+
+    enableDrag(el, type) {
+
+        const move = (clientX) => {
+
+            const rect = this.scroll.getBoundingClientRect();
+
+            let x = clientX - rect.left;
+
+            if (type === "left") {
+                this.state.leftMargin = Math.max(20, x);
+            } else {
+                this.state.rightMargin = Math.max(20, rect.width - x);
+            }
+
+            this.updateMargins();
+        };
+
+        /* TOUCH */
+        el.addEventListener("touchstart", (e) => {
+            this.state.dragging = type;
+        });
+
+        document.addEventListener("touchmove", (e) => {
+            if (this.state.dragging === type) {
+                move(e.touches[0].clientX);
+            }
+        });
+
+        document.addEventListener("touchend", () => {
+            this.state.dragging = null;
+        });
+
+        /* MOUSE */
+        el.addEventListener("mousedown", () => {
+            this.state.dragging = type;
+        });
+
+        document.addEventListener("mousemove", (e) => {
+            if (this.state.dragging === type) {
+                move(e.clientX);
+            }
+        });
+
+        document.addEventListener("mouseup", () => {
+            this.state.dragging = null;
+        });
+    },
+
+    updateMargins() {
+
+        const left = document.getElementById("cwMarginLeft");
+        const right = document.getElementById("cwMarginRight");
+
+        if (left) left.style.left = this.state.leftMargin + "px";
+        if (right) right.style.right = this.state.rightMargin + "px";
+    }
+};
+
+
+
+
+
+
+
+
+
+
+
+
 
 /* =========================================================
    ANDROID PAGINATION WATCHDOG FIX (SAFE PRODUCTION)
@@ -419,57 +595,4 @@ CampusWord2007Simulateur.init();
 
 })();
 
-
-
-
-
-
-
-
-
-/* =========================================================
-   WORD STYLE RULER MARKERS (SAFE CROSS DEVICE)
-========================================================= */
-
-function buildRulerMarkers() {
-
-    const top = document.getElementById("cwRulerTop");
-    const left = document.getElementById("cwRulerLeft");
-
-    if (!top || !left) return;
-
-    // clear si deja gen
-    top.innerHTML = "";
-    left.innerHTML = "";
-
-    /* =========================
-       HORIZONTAL RULER (TOP)
-    ========================== */
-    for (let i = 0; i <= 50; i++) {
-
-        const mark = document.createElement("div");
-        mark.className = "cwRulerMark cwRulerMarkTop";
-
-        mark.style.left = (i * 20) + "px";
-
-        mark.innerHTML = (i % 5 === 0) ? `<span>${i}</span>` : "";
-
-        top.appendChild(mark);
-    }
-
-    /* =========================
-       VERTICAL RULER (LEFT)
-    ========================== */
-    for (let i = 0; i <= 80; i++) {
-
-        const mark = document.createElement("div");
-        mark.className = "cwRulerMark cwRulerMarkLeft";
-
-        mark.style.top = (i * 20) + "px";
-
-        mark.innerHTML = (i % 5 === 0) ? `<span>${i}</span>` : "";
-
-        left.appendChild(mark);
-    }
-}
 
