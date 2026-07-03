@@ -596,3 +596,68 @@ const WordRulerEngine = {
 })();
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* =========================================================
+   RIBBON TAB SWITCH ENGINE (WORD 2007 STYLE)
+========================================================= */
+
+(function () {
+
+    const tabButtons = document.querySelectorAll(".cwTabBtn");
+    const panels = document.querySelectorAll(".cwRibbonPanel");
+
+    function activateTab(target) {
+
+        /* remove active from all buttons */
+        tabButtons.forEach(btn => {
+            btn.classList.remove("active");
+            if (btn.dataset.target === target) {
+                btn.classList.add("active");
+            }
+        });
+
+        /* hide all panels */
+        panels.forEach(panel => {
+            panel.classList.remove("active");
+            if (panel.dataset.panel === target) {
+                panel.classList.add("active");
+            }
+        });
+    }
+
+    /* click binding */
+    tabButtons.forEach(btn => {
+        btn.addEventListener("click", () => {
+            const target = btn.dataset.target;
+            activateTab(target);
+        });
+    });
+
+    /* default open HOME if exists */
+    activateTab("home");
+
+})();
