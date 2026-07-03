@@ -1297,7 +1297,10 @@ body{
 
 
 
-
+#cwDocumentContainer{
+    display:block;
+    position:relative;
+}
 
 
 
