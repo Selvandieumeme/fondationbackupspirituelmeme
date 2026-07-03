@@ -408,36 +408,56 @@ button{
    BLOCK 5 — WORKSPACE
 ========================================================= */
 
+
 #cwWorkspace{
     flex:1;
     display:flex;
     flex-direction:column;
-    overflow: visible;
+
+    /* IMPORTANT: pa bloké layout global la */
+    overflow:hidden;
+
+    position:relative;
 }
 
 #cwWorkspaceShell{
     flex:1;
     display:flex;
     flex-direction:column;
+
+    position:relative;
 }
 
-/* SCROLL AREA */
+/* SCROLL AREA (CRITICAL FOR PAGINATION ENGINE) */
 #cwWorkspaceScroll{
     flex:1;
-    overflow:auto;
 
-display:block;
-padding:40px 0;
+    overflow-y:auto;
+    overflow-x:hidden;
+
+    display:block;
+
+    padding:40px 0;
 
     background:#d6dfec;
+
+    /* IMPORTANT FOR MEASUREMENT ACCURACY */
+    position:relative;
 }
 
 /* DOCUMENT HOLDER */
 #cwDocumentContainer{
-    display:flex;
-    flex-direction:column;
-    gap:40px;
+    display:block;
+    position:relative;
+
+    min-height:100%;
 }
+
+
+
+
+
+
 
 
 
@@ -459,7 +479,7 @@ padding:40px 0;
     box-shadow: var(--cw-page-shadow);
     padding: 80px 70px;
     border: 1px solid #c7d2e3;
-    overflow: hidden;
+    overflow: visible;
 }
 
 
@@ -1268,6 +1288,18 @@ body{
 #cwWorkspaceScroll {
     scroll-padding-left: 0;
 }
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
