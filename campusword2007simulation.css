@@ -1352,63 +1352,16 @@ body{
 
 
 
-
-/* =========================
-   RULER BASE
-========================= */
-
-#cwRulerTop,
-#cwRulerLeft{
-    position:absolute;
-    background:#e8eef7;
-    overflow:hidden;
+#cwMarginLeft,
+#cwMarginRight {
+    position: absolute;
+    top: 0;
+    width: 3px;
+    height: 100%;
+    background: rgba(43,87,154,0.6);
+    cursor: ew-resize;
+    z-index: 9999;
 }
 
-/* TOP RULER */
-#cwRulerTop{
-    height:22px;
-    width:100%;
-}
-
-/* LEFT RULER */
-#cwRulerLeft{
-    width:42px;
-    height:100%;
-}
-
-/* =========================
-   MARKERS
-========================= */
-
-.cwRulerMarkTop{
-    position:absolute;
-    top:0;
-    width:20px;
-    height:100%;
-    border-left:1px solid #b8c6d8;
-    font-size:10px;
-    color:#2b579a;
-}
-
-.cwRulerMarkTop span{
-    position:absolute;
-    top:2px;
-    left:2px;
-}
-
-/* vertical */
-.cwRulerMarkLeft{
-    position:absolute;
-    left:0;
-    width:100%;
-    height:20px;
-    border-top:1px solid #b8c6d8;
-    font-size:10px;
-    color:#2b579a;
-}
-
-.cwRulerMarkLeft span{
-    position:absolute;
-    left:2px;
-    top:2px;
-}
+#cwMarginLeft { left: 70px; }
+#cwMarginRight { right: 70px; }
