@@ -570,160 +570,6 @@ button{
 
 
 
-/* =========================================================
-   BLOCK 9 — UI DEPTH LAYER
-   - Shadows
-   - Stronger gradients
-   - Active tab highlight
-   - Hover transitions
-   - Word 2007 visual polish
-========================================================= */
-
-
-/* =========================
-   GLOBAL DEPTH IMPROVEMENT
-========================= */
-
-#cwWindow{
-    box-shadow:
-        0 15px 40px rgba(0,0,0,0.25),
-        inset 0 1px 0 rgba(255,255,255,0.4);
-}
-
-/* subtle page background depth */
-#cwWorkspaceScroll{
-    background:linear-gradient(to bottom,#d6dfec,#c9d4e6);
-}
-
-
-/* =========================
-   TITLE BAR DEPTH
-========================= */
-
-#cwTitleBar{
-    box-shadow:
-        inset 0 1px 0 rgba(255,255,255,0.25),
-        0 2px 6px rgba(0,0,0,0.15);
-}
-
-
-/* =========================
-   QUICK ACCESS BUTTON DEPTH
-========================= */
-
-.cwQBtn{
-    transition:all .15s ease;
-    box-shadow:
-        inset 0 1px 0 rgba(255,255,255,0.8);
-}
-
-.cwQBtn:hover{
-    background:#ffffff;
-    border-color:#8aa6c7;
-    box-shadow:
-        0 2px 6px rgba(0,0,0,0.12);
-    transform:translateY(-1px);
-}
-
-.cwQBtn:active{
-    transform:translateY(0px) scale(0.98);
-}
-
-
-/* =========================
-   TAB BAR DEPTH + ACTIVE STATE
-========================= */
-
-#cwRibbonTabBar{
-    box-shadow:
-        inset 0 -1px 0 rgba(255,255,255,0.6),
-        0 2px 4px rgba(0,0,0,0.08);
-}
-
-.cwTabBtn{
-    transition:all .15s ease;
-    box-shadow:
-        inset 0 1px 0 rgba(255,255,255,0.9);
-}
-
-.cwTabBtn:hover{
-    background:linear-gradient(to bottom,#ffffff,#dbe7f5);
-    border-color:#8aa6c7;
-}
-
-.cwTabBtn.active{
-    background:#ffffff;
-    border-top:2px solid #2b579a;
-    border-bottom:1px solid #ffffff;
-    box-shadow:
-        0 -2px 6px rgba(0,0,0,0.08);
-    color:#1f4e8c;
-    font-weight:600;
-}
-
-
-/* =========================
-   RIBBON AREA DEPTH
-========================= */
-
-.cwRibbonTab{
-    background:linear-gradient(to bottom,#f7faff,#eef4fb);
-    box-shadow:
-        inset 0 1px 0 rgba(255,255,255,0.8);
-}
-
-
-/* =========================
-   PAGE DEPTH (WORD DOCUMENT LOOK)
-========================= */
-
-.cwPage{
-    box-shadow:
-        0 18px 45px rgba(0,0,0,0.18),
-        inset 0 1px 0 rgba(255,255,255,0.9);
-    transition:transform .15s ease, box-shadow .15s ease;
-}
-
-.cwPage:hover{
-    transform:translateY(-2px);
-    box-shadow:
-        0 25px 60px rgba(0,0,0,0.22),
-        inset 0 1px 0 rgba(255,255,255,1);
-}
-
-
-/* =========================
-   ICON BUTTON GLOBAL POLISH
-========================= */
-
-.cwRibbonIconBtn,
-.cwControlBtn{
-    transition:all .12s ease;
-}
-
-.cwRibbonIconBtn:hover,
-.cwControlBtn:hover{
-    filter:brightness(1.05);
-}
-
-.cwRibbonIconBtn:active,
-.cwControlBtn:active{
-    transform:scale(0.96);
-}
-
-
-/* =========================
-   STATUS BAR DEPTH
-========================= */
-
-#cwStatusBar{
-    box-shadow:
-        inset 0 1px 0 rgba(255,255,255,0.8);
-    background:linear-gradient(to bottom,#e7eef8,#dbe6f3);
-}
-
-
-
 
 
 /* =========================================================
@@ -1041,6 +887,164 @@ button{
     font-size:11px;
     text-align:right;
 }
+
+
+
+
+
+
+/* =========================================================
+   BLOCK 9 — UI DEPTH LAYER
+   - Shadows
+   - Stronger gradients
+   - Active tab highlight
+   - Hover transitions
+   - Word 2007 visual polish
+========================================================= */
+
+
+/* =========================
+   GLOBAL DEPTH IMPROVEMENT
+========================= */
+
+#cwWindow{
+    box-shadow:
+        0 15px 40px rgba(0,0,0,0.25),
+        inset 0 1px 0 rgba(255,255,255,0.4);
+}
+
+/* subtle page background depth */
+#cwWorkspaceScroll{
+    background:linear-gradient(to bottom,#d6dfec,#c9d4e6);
+}
+
+
+/* =========================
+   TITLE BAR DEPTH
+========================= */
+
+#cwTitleBar{
+    box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.25),
+        0 2px 6px rgba(0,0,0,0.15);
+}
+
+
+/* =========================
+   QUICK ACCESS BUTTON DEPTH
+========================= */
+
+.cwQBtn{
+    transition:all .15s ease;
+    box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.8);
+}
+
+.cwQBtn:hover{
+    background:#ffffff;
+    border-color:#8aa6c7;
+    box-shadow:
+        0 2px 6px rgba(0,0,0,0.12);
+    transform:translateY(-1px);
+}
+
+.cwQBtn:active{
+    transform:translateY(0px) scale(0.98);
+}
+
+
+/* =========================
+   TAB BAR DEPTH + ACTIVE STATE
+========================= */
+
+#cwRibbonTabBar{
+    box-shadow:
+        inset 0 -1px 0 rgba(255,255,255,0.6),
+        0 2px 4px rgba(0,0,0,0.08);
+}
+
+.cwTabBtn{
+    transition:all .15s ease;
+    box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.9);
+}
+
+.cwTabBtn:hover{
+    background:linear-gradient(to bottom,#ffffff,#dbe7f5);
+    border-color:#8aa6c7;
+}
+
+.cwTabBtn.active{
+    background:#ffffff;
+    border-top:2px solid #2b579a;
+    border-bottom:1px solid #ffffff;
+    box-shadow:
+        0 -2px 6px rgba(0,0,0,0.08);
+    color:#1f4e8c;
+    font-weight:600;
+}
+
+
+/* =========================
+   RIBBON AREA DEPTH
+========================= */
+
+.cwRibbonTab{
+    background:linear-gradient(to bottom,#f7faff,#eef4fb);
+    box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.8);
+}
+
+
+/* =========================
+   PAGE DEPTH (WORD DOCUMENT LOOK)
+========================= */
+
+.cwPage{
+    box-shadow:
+        0 18px 45px rgba(0,0,0,0.18),
+        inset 0 1px 0 rgba(255,255,255,0.9);
+    transition:transform .15s ease, box-shadow .15s ease;
+}
+
+.cwPage:hover{
+    transform:translateY(-2px);
+    box-shadow:
+        0 25px 60px rgba(0,0,0,0.22),
+        inset 0 1px 0 rgba(255,255,255,1);
+}
+
+
+/* =========================
+   ICON BUTTON GLOBAL POLISH
+========================= */
+
+.cwRibbonIconBtn,
+.cwControlBtn{
+    transition:all .12s ease;
+}
+
+.cwRibbonIconBtn:hover,
+.cwControlBtn:hover{
+    filter:brightness(1.05);
+}
+
+.cwRibbonIconBtn:active,
+.cwControlBtn:active{
+    transform:scale(0.96);
+}
+
+
+/* =========================
+   STATUS BAR DEPTH
+========================= */
+
+#cwStatusBar{
+    box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.8);
+    background:linear-gradient(to bottom,#e7eef8,#dbe6f3);
+}
+
 
 
 
