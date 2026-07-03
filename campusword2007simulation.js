@@ -142,20 +142,27 @@ content.addEventListener("input", (e) => {
 });
 
 
-
-        
-
-
-
-
-
-
         page.appendChild(content);
         this.workspace.appendChild(page);
 
         this.state.pages.push(page);
         this.updatePageStatus();
     },
+
+
+checkPageOverflow(contentEl) {
+
+    const page = contentEl.parentElement;
+
+    if (!page) return;
+
+    const PAGE_LIMIT = page.clientHeight;
+
+    if (contentEl.scrollHeight > PAGE_LIMIT) {
+        this.createNewPageAndMoveOverflow(contentEl);
+    }
+},
+
 
 
     /* =========================
