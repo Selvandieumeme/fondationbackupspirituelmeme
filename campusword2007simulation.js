@@ -13,8 +13,8 @@ const CampusWord2007Simulateur = {
         activePageIndex: 0,
         zoom: 100,
         wordCount: 0,
-        language: "English"
-    },
+        language: "English",
+        overflowDetected: false
 
 
     /* =========================
@@ -141,14 +141,21 @@ createFirstPage() {
 /* CHECK PAGE WRITING LIMIT */
 checkPageOverflow(content, page) {
 
-    if (!content || !page) return false;
+    if (!content || !page) {
+        return false;
+    }
 
     const isOverflow =
         content.scrollHeight > content.clientHeight;
 
+    /* INTERNAL STATE */
+    this.state.overflowDetected = isOverflow;
+
+    /* PAGE STATE */
     page.dataset.overflow =
         isOverflow ? "true" : "false";
 
+    /* PAGINATION HOOK */
     if (isOverflow) {
         this.handlePageOverflow(page, content);
     }
@@ -158,18 +165,33 @@ checkPageOverflow(content, page) {
 },
 
 
-/* OVERFLOW CALLBACK (HOOK) */
+/* =========================
+   OVERFLOW CALLBACK (HOOK)
+========================= */
 handlePageOverflow(page, content) {
 
-    /*
-        Pagination Engine (Phase 2B)
-        will be connected here.
+    if (!page || !content) {
+        return;
+    }
 
-        This method intentionally
-        does nothing yet.
+    /*
+    =========================================================
+    Pagination Engine (Phase 2B)
+
+    This method is intentionally empty.
+
+    The next module will:
+      • create a new page
+      • move overflowing content
+      • preserve caret position
+      • keep continuous typing
+      • update page numbering
+
+    =========================================================
     */
 
 },
+
 
 
 
