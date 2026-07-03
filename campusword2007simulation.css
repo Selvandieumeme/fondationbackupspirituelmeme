@@ -425,9 +425,10 @@ button{
 #cwWorkspaceScroll{
     flex:1;
     overflow:auto;
-    display:flex;
-    justify-content:center;
-    padding:40px;
+
+display:block;
+padding:40px 0;
+
     background:#d6dfec;
 }
 
