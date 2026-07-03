@@ -18,38 +18,84 @@ const CampusWord2007Simulateur = {
 },
 
 
-    /* =========================
-       SAFE INIT ENTRY
-    ========================= */
-    init() {
-        document.addEventListener("DOMContentLoaded", () => {
-            this.cacheDOM();
-            this.bindUI();
-            this.createFirstPage();
-            this.updateStatus();
-        });
-    },
+
+/* =========================
+   SAFE INIT ENTRY (ANDROID STABLE)
+========================= */
+init() {
+
+    const start = () => {
+
+        this.cacheDOM();
+        this.bindUI();
+
+        /* safety check: ensure workspace exists */
+        if (!this.workspace) {
+
+            setTimeout(() => {
+                this.cacheDOM();
+
+                if (this.workspace) {
+                    this.createFirstPage();
+                    this.updateStatus();
+                }
+
+            }, 300);
+
+            return;
+        }
+
+        this.createFirstPage();
+        this.updateStatus();
+    };
+
+    /* if DOM already ready, run immediately */
+    if (document.readyState === "complete" ||
+        document.readyState === "interactive") {
+        start();
+    } else {
+        document.addEventListener("DOMContentLoaded", start);
+    }
+},
 
 
-    /* =========================
-       SAFE DOM CACHE (NO CRASH)
-    ========================= */
-    cacheDOM() {
 
-        const get = (id) => document.getElementById(id);
 
-        this.workspace = get("cwDocumentContainer");
 
-        this.statusReady = get("cwStatusReady");
-        this.wordCountEl = get("cwWordCountValue");
-        this.pageCurrentEl = get("cwCurrentPage");
-        this.pageTotalEl = get("cwTotalPages");
-        this.zoomValueEl = get("cwZoomValue");
+/* =========================
+   SAFE DOM CACHE (ANDROID STABLE)
+========================= */
+cacheDOM() {
 
-        this.zoomInBtn = get("cwZoomIn");
-        this.zoomOutBtn = get("cwZoomOut");
+    const get = (id) => document.getElementById(id);
 
-    },
+    this.workspace = get("cwDocumentContainer");
+
+    /* SAFETY: ensure workspace exists */
+    if (!this.workspace) {
+        this.workspace = null;
+    }
+
+    this.statusReady = get("cwStatusReady");
+    this.wordCountEl = get("cwWordCountValue");
+    this.pageCurrentEl = get("cwCurrentPage");
+    this.pageTotalEl = get("cwTotalPages");
+    this.zoomValueEl = get("cwZoomValue");
+
+    this.zoomInBtn = get("cwZoomIn");
+    this.zoomOutBtn = get("cwZoomOut");
+
+    /* DEBUG SAFE FLAGS (no console required) */
+    this.domReady =
+        !!this.workspace &&
+        !!this.statusReady &&
+        !!this.wordCountEl;
+
+},
+
+
+
+
 
 
     /* =========================
