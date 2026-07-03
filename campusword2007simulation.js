@@ -130,6 +130,52 @@ createFirstPage() {
 
 
 
+
+
+
+/* =========================
+   OVERFLOW DETECTION ENGINE
+   PHASE 2A
+========================= */
+
+/* CHECK PAGE WRITING LIMIT */
+checkPageOverflow(content, page) {
+
+    if (!content || !page) return false;
+
+    const isOverflow =
+        content.scrollHeight > content.clientHeight;
+
+    page.dataset.overflow =
+        isOverflow ? "true" : "false";
+
+    if (isOverflow) {
+        this.handlePageOverflow(page, content);
+    }
+
+    return isOverflow;
+
+},
+
+
+/* OVERFLOW CALLBACK (HOOK) */
+handlePageOverflow(page, content) {
+
+    /*
+        Pagination Engine (Phase 2B)
+        will be connected here.
+
+        This method intentionally
+        does nothing yet.
+    */
+
+},
+
+
+
+
+
+
     /* =========================
        WORD COUNT ENGINE (ROBUST)
     ========================= */
