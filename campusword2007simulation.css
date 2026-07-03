@@ -445,13 +445,22 @@ button{
     position:relative;
 }
 
+
+
+
+
 /* DOCUMENT HOLDER */
 #cwDocumentContainer{
-    display:block;
-    position:relative;
-
-    min-height:100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
 }
+
+
+
+
+
 
 
 
