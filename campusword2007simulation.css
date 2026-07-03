@@ -1275,3 +1275,154 @@ body{
 
 #cwMarginLeft { left: 70px; }
 #cwMarginRight { right: 70px; }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* =========================================================
+   HOME RIBBON PANEL — WORD 2007 LEVEL 2 STYLE
+========================================================= */
+
+.cwRibbonPanel[data-panel="home"]{
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+
+    padding:10px;
+
+    background:linear-gradient(to bottom,#f7faff,#eef4fb);
+
+    border-top:1px solid #c7d2e3;
+    border-bottom:1px solid #c7d2e3;
+
+    min-height:110px;
+
+    align-items:flex-start;
+}
+
+/* =========================
+   GROUP BOX (WORD STYLE)
+========================= */
+
+.cwRibbonPanel[data-panel="home"] .cwRibbonGroup{
+    display:flex;
+    flex-direction:column;
+
+    min-width:140px;
+
+    padding:6px;
+
+    background:linear-gradient(to bottom,#ffffff,#f1f6fb);
+
+    border:1px solid #c7d2e3;
+    border-radius:4px;
+
+    box-shadow:0 2px 6px rgba(0,0,0,0.08);
+}
+
+/* GROUP TITLE */
+.cwRibbonPanel[data-panel="home"] .cwGroupTitle{
+    font-size:11px;
+    font-weight:600;
+    color:#2b579a;
+
+    margin-bottom:6px;
+
+    text-align:center;
+
+    border-bottom:1px solid #d6e0ef;
+    padding-bottom:3px;
+}
+
+/* =========================
+   BUTTON GRID INSIDE GROUP
+========================= */
+
+.cwRibbonPanel[data-panel="home"] .cwRibbonGroupContent{
+    display:flex;
+    flex-wrap:wrap;
+    gap:6px;
+    justify-content:center;
+}
+
+/* =========================
+   ICON BUTTON (WORD STYLE)
+========================= */
+
+.cwRibbonPanel[data-panel="home"] .cwRibbonIconBtn{
+    width:38px;
+    height:38px;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    border:1px solid #b8c6d8;
+    border-radius:3px;
+
+    background:linear-gradient(to bottom,#ffffff,#e9f0f8);
+
+    transition:all .15s ease;
+
+    touch-action:manipulation;
+}
+
+/* HOVER DESKTOP */
+.cwRibbonPanel[data-panel="home"] .cwRibbonIconBtn:hover{
+    background:linear-gradient(to bottom,#ffffff,#dfeaf6);
+    border-color:#7f9db9;
+}
+
+/* TOUCH FEEL */
+.cwRibbonPanel[data-panel="home"] .cwRibbonIconBtn:active{
+    transform:scale(0.95);
+}
+
+/* SVG INSIDE BUTTON */
+.cwRibbonPanel[data-panel="home"] .cwRibbonIconBtn svg{
+    width:18px;
+    height:18px;
+    color:#2b579a;
+}
+
+/* =========================
+   SEPARATOR (OPTIONAL)
+========================= */
+
+.cwRibbonPanel[data-panel="home"] .cwRibbonSeparator{
+    width:1px;
+    height:60px;
+    background:linear-gradient(to bottom,transparent,#b8c6d8,transparent);
+    margin:0 6px;
+}
+
+/* =========================
+   MOBILE ADAPTATION (ANDROID FIX)
+========================= */
+
+@media (max-width:768px){
+
+    .cwRibbonPanel[data-panel="home"]{
+        flex-wrap:nowrap;
+        overflow-x:auto;
+        -webkit-overflow-scrolling:touch;
+    }
+
+    .cwRibbonPanel[data-panel="home"] .cwRibbonGroup{
+        min-width:160px;
+        flex:0 0 auto;
+    }
+}
