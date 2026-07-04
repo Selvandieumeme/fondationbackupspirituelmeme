@@ -1438,3 +1438,37 @@ body{
 
 
 
+
+
+
+
+
+
+
+/* =========================================================
+   RIBBON TAB BAR - FORCE SINGLE LINE (NO WRAP)
+========================================================= */
+
+#cwRibbonTabBar {
+    display: flex;
+    flex-wrap: nowrap;          /* 🔥 pa kite li desann anba */
+    overflow-x: auto;           /* 🔥 si pa gen espas, li scroll horizontal */
+    white-space: nowrap;
+    align-items: center;
+}
+
+/* Tab buttons */
+#cwRibbonTabBar .cwTabBtn {
+    flex: 0 0 auto;            /* 🔥 chak bouton kenbe gwosè li */
+    white-space: nowrap;       /* pa kase text la */
+}
+
+/* Optional: cleaner scroll (Chrome/Edge) */
+#cwRibbonTabBar::-webkit-scrollbar {
+    height: 6px;
+}
+
+#cwRibbonTabBar::-webkit-scrollbar-thumb {
+    background: rgba(0,0,0,0.2);
+    border-radius: 10px;
+}
