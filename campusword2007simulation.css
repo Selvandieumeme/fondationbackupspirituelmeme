@@ -1292,25 +1292,42 @@ body{
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
 /* =========================================================
-   HOME RIBBON PANEL — WORD 2007 LEVEL 2 STYLE
+   HOME RIBBON PANEL — UNIFIED WORD STYLE (FIXED)
 ========================================================= */
 
 .cwRibbonPanel[data-panel="home"]{
     display:flex;
-    flex-wrap:wrap;
-    gap:10px;
 
+    flex-wrap:nowrap;              /* 🔥 FIX: pa janm desann anba */
+    overflow-x:auto;               /* 🔥 scroll horizontal */
+    overflow-y:hidden;
+
+    gap:10px;
     padding:10px;
+
+    align-items:flex-start;
 
     background:linear-gradient(to bottom,#f7faff,#eef4fb);
 
     border-top:1px solid #c7d2e3;
     border-bottom:1px solid #c7d2e3;
 
-    min-height:110px;
-
-    align-items:flex-start;
+    min-height:110px;              /* kenbe Word-like height */
+    
+    -webkit-overflow-scrolling:touch; /* smooth scroll Android/iOS */
 }
 
 /* =========================
@@ -1321,6 +1338,7 @@ body{
     display:flex;
     flex-direction:column;
 
+    flex:0 0 auto;                /* 🔥 FIX: pa shrink ni wrap */
     min-width:140px;
 
     padding:6px;
@@ -1380,18 +1398,18 @@ body{
     touch-action:manipulation;
 }
 
-/* HOVER DESKTOP */
+/* HOVER */
 .cwRibbonPanel[data-panel="home"] .cwRibbonIconBtn:hover{
     background:linear-gradient(to bottom,#ffffff,#dfeaf6);
     border-color:#7f9db9;
 }
 
-/* TOUCH FEEL */
+/* ACTIVE TOUCH */
 .cwRibbonPanel[data-panel="home"] .cwRibbonIconBtn:active{
     transform:scale(0.95);
 }
 
-/* SVG INSIDE BUTTON */
+/* SVG */
 .cwRibbonPanel[data-panel="home"] .cwRibbonIconBtn svg{
     width:18px;
     height:18px;
@@ -1399,7 +1417,7 @@ body{
 }
 
 /* =========================
-   SEPARATOR (OPTIONAL)
+   SEPARATOR
 ========================= */
 
 .cwRibbonPanel[data-panel="home"] .cwRibbonSeparator{
@@ -1410,25 +1428,18 @@ body{
 }
 
 /* =========================
-   MOBILE ADAPTATION (ANDROID FIX)
+   MOBILE + ALL DEVICES FIX
 ========================= */
 
-@media (max-width:768px){
-
-    .cwRibbonPanel[data-panel="home"]{
-        flex-wrap:nowrap;
-        overflow-x:auto;
-        -webkit-overflow-scrolling:touch;
-    }
-
-    .cwRibbonPanel[data-panel="home"] .cwRibbonGroup{
-        min-width:160px;
-        flex:0 0 auto;
-    }
+.cwRibbonPanel[data-panel="home"]{
+    scrollbar-width:thin; /* Firefox */
 }
 
+.cwRibbonPanel[data-panel="home"]::-webkit-scrollbar{
+    height:5px;
+}
 
-
-
-
-
+.cwRibbonPanel[data-panel="home"]::-webkit-scrollbar-thumb{
+    background:rgba(0,0,0,0.25);
+    border-radius:10px;
+}
