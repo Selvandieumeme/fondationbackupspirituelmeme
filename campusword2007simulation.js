@@ -659,3 +659,34 @@ const WordRulerEngine = {
 
 
 
+
+
+
+
+
+
+(function () {
+
+    const tabButtons = document.querySelectorAll(".cwTabBtn");
+    const tabs = document.querySelectorAll(".cwRibbonTab");
+
+    tabButtons.forEach(btn => {
+        btn.addEventListener("click", () => {
+
+            const target = btn.dataset.target;
+
+            // hide all tabs (JUST ADD, no change to your system)
+            tabs.forEach(tab => {
+                tab.style.display = "none";
+            });
+
+            // show only selected tab
+            const activeTab = document.querySelector(`.cwRibbonTab[data-tab="${target}"]`);
+            if (activeTab) {
+                activeTab.style.display = "block";
+            }
+
+        });
+    });
+
+})();
