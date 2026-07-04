@@ -167,131 +167,157 @@
 
 <div class="cwRibbonPanel active" data-panel="home">
 
-    <!-- ================= CLIPBOARD ================= -->
-    <div class="cwRibbonGroup">
-        <div class="cwGroupTitle">Clipboard</div>
-        <div class="cwRibbonGroupContent">
+<!-- ================= CLIPBOARD ================= -->
+<div class="cwRibbonGroup">
+    <div class="cwGroupTitle">Clipboard</div>
 
-            <button class="cwRibbonIconBtn" title="Paste">
-                <svg viewBox="0 0 24 24"><path fill="currentColor" d="M19 2h-4V1a1 1 0 0 0-1-1H10a1 1 0 0 0-1 1v1H5a2 2 0 0 0-2 2v18a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2z"/></svg>
-            </button>
+    <div class="cwRibbonGroupContent">
 
-            <button class="cwRibbonIconBtn" title="Cut">
-                <svg viewBox="0 0 24 24"><path fill="currentColor" d="M9 3a3 3 0 1 0 0 6 3 3 0 0 0 0-6zm6 0a3 3 0 1 0 0 6 3 3 0 0 0 0-6zM3 21l8-8 4 4-8 8H3z"/></svg>
-            </button>
+        <!-- Paste -->
+        <button class="cwRibbonIconBtn" title="Paste" data-command="paste">
+            <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
+                <path fill="currentColor"
+                    d="M16 2h-2.2A2.8 2.8 0 0 0 11 0a2.8 2.8 0 0 0-2.8 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2zm-5-1a1 1 0 0 1 1 1h-2a1 1 0 0 1 1-1zm7 19H6V4h2v2h6V4h2zM8 9h8v2H8zm0 4h6v2H8z"/>
+            </svg>
+        </button>
 
-            <button class="cwRibbonIconBtn" title="Copy">
-                <svg viewBox="0 0 24 24"><path fill="currentColor" d="M16 1H4a2 2 0 0 0-2 2v12h2V3h12V1zm4 4H8a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2z"/></svg>
-            </button>
+        <!-- Cut -->
+        <button class="cwRibbonIconBtn" title="Cut" data-command="cut">
+            <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
+                <path fill="currentColor"
+                    d="M9.5 3A2.5 2.5 0 1 0 12 5.5 2.5 2.5 0 0 0 9.5 3Zm5 0A2.5 2.5 0 1 0 17 5.5 2.5 2.5 0 0 0 14.5 3ZM8.6 8.8l3.4 3.4-3.4 3.4A2.5 2.5 0 1 0 10 17.5l3.4-3.4 3.4 3.4A2.5 2.5 0 1 0 18.5 16l-3.4-3.4 3.4-3.4A2.5 2.5 0 1 0 17 6.5L13.6 9.9 10.2 6.5A2.5 2.5 0 1 0 8.6 8.8Z"/>
+            </svg>
+        </button>
 
-        </div>
+        <!-- Copy -->
+        <button class="cwRibbonIconBtn" title="Copy" data-command="copy">
+            <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
+                <path fill="currentColor"
+                    d="M8 2a2 2 0 0 0-2 2v11h2V4h10V2zm4 4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2zm0 2h8v12h-8z"/>
+            </svg>
+        </button>
+
+        <!-- Format Painter -->
+        <button class="cwRibbonIconBtn" title="Format Painter" data-command="formatPainter">
+            <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
+                <path fill="currentColor"
+                    d="M3 5h13v3h2a2 2 0 0 1 2 2v2h-2v7a2 2 0 0 1-2 2h-2v-9H8V8H3zm2 1v1h9V6z"/>
+            </svg>
+        </button>
+
+        <!-- Clipboard History -->
+        <button class="cwRibbonIconBtn" title="Clipboard History" data-command="clipboardHistory">
+            <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
+                <path fill="currentColor"
+                    d="M9 2h6v2h3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h3zm0 4H6v14h12V6h-3v2H9zm1 5h4v2h-4zm0 4h6v2h-6z"/>
+            </svg>
+        </button>
+
+        <!-- Paste Special -->
+        <button class="cwRibbonIconBtn" title="Paste Special" data-command="pasteSpecial">
+            <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
+                <path fill="currentColor"
+                    d="M16 2h-2.2A2.8 2.8 0 0 0 11 0a2.8 2.8 0 0 0-2.8 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2zm-5-1a1 1 0 0 1 1 1h-2a1 1 0 0 1 1-1zm7 19H6V4h2v2h6V4h2zM10 10h2v2h2v2h-2v2h-2v-2H8v-2h2z"/>
+            </svg>
+        </button>
+
     </div>
+</div>
 
-    <!-- ================= FONT ================= -->
-    <div class="cwRibbonGroup">
-        <div class="cwGroupTitle">Font</div>
 
-        <div class="cwRibbonGroupContent">
 
-            <!-- Font Name -->
-            <select class="cwRibbonSelect" title="Font Name">
-                <option>Calibri</option>
-                <option>Arial</option>
-                <option>Times New Roman</option>
-                <option>Verdana</option>
-            </select>
+<!-- ================= FONT ================= -->
+<div class="cwRibbonGroup">
+    <div class="cwGroupTitle">Font</div>
 
-            <!-- Font Size -->
-            <select class="cwRibbonSelect" title="Font Size">
-                <option>8</option><option>9</option><option>10</option>
-                <option>11</option><option>12</option><option>14</option>
-                <option>16</option><option>18</option><option>20</option>
-            </select>
+    <div class="cwRibbonGroupContent">
 
-            <button class="cwRibbonIconBtn" title="Grow Font">
-                <svg viewBox="0 0 24 24"><path fill="currentColor" d="M12 4l4 4h-3v6h-2V8H8l4-4z"/></svg>
-            </button>
+        <!-- Font Name -->
+        <select class="cwRibbonSelect" title="Font Name" data-command="fontName">
+            <option selected>Calibri</option>
+            <option>Arial</option>
+            <option>Arial Black</option>
+            <option>Bahnschrift</option>
+            <option>Book Antiqua</option>
+            <option>Bookman Old Style</option>
+            <option>Cambria</option>
+            <option>Candara</option>
+            <option>Century</option>
+            <option>Century Gothic</option>
+            <option>Comic Sans MS</option>
+            <option>Consolas</option>
+            <option>Constantia</option>
+            <option>Corbel</option>
+            <option>Courier New</option>
+            <option>Franklin Gothic Medium</option>
+            <option>Garamond</option>
+            <option>Georgia</option>
+            <option>Impact</option>
+            <option>Lucida Console</option>
+            <option>Lucida Sans Unicode</option>
+            <option>Palatino Linotype</option>
+            <option>Segoe UI</option>
+            <option>Tahoma</option>
+            <option>Times New Roman</option>
+            <option>Trebuchet MS</option>
+            <option>Verdana</option>
+        </select>
 
-            <button class="cwRibbonIconBtn" title="Shrink Font">
-                <svg viewBox="0 0 24 24"><path fill="currentColor" d="M12 20l-4-4h3v-6h2v6h3l-4 4z"/></svg>
-            </button>
+        <!-- Font Size -->
+        <select class="cwRibbonSelect" title="Font Size" data-command="fontSize">
+            <option>8</option>
+            <option>9</option>
+            <option>10</option>
+            <option>11</option>
+            <option selected>12</option>
+            <option>14</option>
+            <option>16</option>
+            <option>18</option>
+            <option>20</option>
+            <option>22</option>
+            <option>24</option>
+            <option>26</option>
+            <option>28</option>
+            <option>36</option>
+            <option>48</option>
+            <option>72</option>
+        </select>
 
-            <button class="cwRibbonIconBtn" title="Change Case">
-                <svg viewBox="0 0 24 24"><path fill="currentColor" d="M5 7h6v2H9v8H7V9H5V7zm8 0h6v2h-2v10h-2V9h-2V7z"/></svg>
-            </button>
+        <!-- Grow Font -->
+        <button class="cwRibbonIconBtn" title="Increase Font Size" data-command="growFont">
+            <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
+                <path fill="currentColor"
+                    d="M11 3l5 8h-3v5H9v-5H6zm8 14v2h-2v2h-2v-2h-2v-2h2v-2h2v2z"/>
+            </svg>
+        </button>
 
-            <button class="cwRibbonIconBtn" title="Clear Formatting">
-                <svg viewBox="0 0 24 24"><path fill="currentColor" d="M3 3l18 18-1.4 1.4L12 13.8 8.6 20H6l4.6-7L2 4.4 3 3z"/></svg>
-            </button>
+        <!-- Shrink Font -->
+        <button class="cwRibbonIconBtn" title="Decrease Font Size" data-command="shrinkFont">
+            <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
+                <path fill="currentColor"
+                    d="M11 3l5 8h-3v5H9v-5H6zm4 14h6v2h-6z"/>
+            </svg>
+        </button>
 
-            <button class="cwRibbonIconBtn" title="Bold"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M7 4h7a4 4 0 0 1 0 8H7V4zm0 10h8a4 4 0 0 1 0 8H7v-8z"/></svg></button>
+        <!-- Change Case -->
+        <button class="cwRibbonIconBtn" title="Change Case" data-command="changeCase">
+            <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
+                <path fill="currentColor"
+                    d="M5 18l3.8-10h2.4L15 18h-2.2l-.8-2H8l-.8 2zm3.6-4h2.8L10 9.8zM17 8h2v8h-2zm-1 7h4v2h-4z"/>
+            </svg>
+        </button>
 
-            <button class="cwRibbonIconBtn" title="Italic"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M10 4h8l-1 2h-2l-3 12h2l-1 2H6l1-2h2l3-12H9l1-2z"/></svg></button>
+        <!-- Clear Formatting -->
+        <button class="cwRibbonIconBtn" title="Clear Formatting" data-command="clearFormatting">
+            <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
+                <path fill="currentColor"
+                    d="M5 4h10v2h-3l-2.2 6H8l2.2-6H5zm11.3 8.3L21 17l-1.4 1.4-4.7-4.7-2.5 2.5V13l1.1-1.1-2.7-2.7L12.2 8z"/>
+            </svg>
+        </button>
 
-            <button class="cwRibbonIconBtn" title="Underline"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M6 2v10a6 6 0 0 0 12 0V2h-2v10a4 4 0 0 1-8 0V2H6zm-2 20h16v2H4v-2z"/></svg></button>
-
-            <button class="cwRibbonIconBtn" title="Strikethrough"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M3 12h18v2H3v-2zm3-6h12v2H6V6zm2 12h8v2H8v-2z"/></svg></button>
-
-            <button class="cwRibbonIconBtn" title="Subscript"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M4 4h2l3 4 3-4h2l-4 6 4 6h-2l-3-4-3 4H4l4-6-4-6zm14 12h4v2h-2v2h2v2h-4v-2h2v-2h-2v-2z"/></svg></button>
-
-            <button class="cwRibbonIconBtn" title="Superscript"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M4 16h2l3-4 3 4h2l-4-6 4-6h-2l-3 4-3-4H4l4 6-4 6zm14-12h4v2h-2v2h2v2h-4v-2h2V6h-2V4z"/></svg></button>
-
-        </div>
     </div>
+</div>
 
-    <!-- ================= PARAGRAPH ================= -->
-    <div class="cwRibbonGroup">
-        <div class="cwGroupTitle">Paragraph</div>
-        <div class="cwRibbonGroupContent">
-
-            <button class="cwRibbonIconBtn" title="Bullets"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M4 6h2v2H4V6zm4 0h12v2H8V6zM4 11h2v2H4v-2zm4 0h12v2H8v-2zM4 16h2v2H4v-2zm4 0h12v2H8v-2z"/></svg></button>
-
-            <button class="cwRibbonIconBtn" title="Numbering"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M4 6h2v2H4V6zm4 0h12v2H8V6zM4 11h2v2H4v-2zm4 0h12v2H8v-2zM4 16h2v2H4v-2zm4 0h12v2H8v-2z"/></svg></button>
-
-            <button class="cwRibbonIconBtn" title="Decrease Indent"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M3 4h18v2H3V4zm6 6h12v2H9v-2zm-6 6h18v2H3v-2z"/></svg></button>
-
-            <button class="cwRibbonIconBtn" title="Increase Indent"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M3 4h18v2H3V4zm3 6h15v2H6v-2zm3 6h12v2H9v-2z"/></svg></button>
-
-            <button class="cwRibbonIconBtn" title="Line Spacing"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M4 6h16v2H4V6zm0 5h16v2H4v-2zm0 5h16v2H4v-2z"/></svg></button>
-
-            <button class="cwRibbonIconBtn" title="Align Left"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M3 4h18v2H3V4zm0 6h12v2H3v-2zm0 6h18v2H3v-2z"/></svg></button>
-
-            <button class="cwRibbonIconBtn" title="Center"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M6 4h12v2H6V4zm-3 6h18v2H3v-2zm6 6h6v2H9v-2z"/></svg></button>
-
-            <button class="cwRibbonIconBtn" title="Align Right"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M3 4h18v2H3V4zm6 6h12v2H9v-2zm-6 6h18v2H3v-2z"/></svg></button>
-
-            <button class="cwRibbonIconBtn" title="Justify"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M3 4h18v2H3V4zm0 6h18v2H3v-2zm0 6h18v2H3v-2z"/></svg></button>
-
-            <button class="cwRibbonIconBtn" title="Borders"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M4 4h16v16H4V4zm2 2v12h12V6H6z"/></svg></button>
-
-        </div>
-    </div>
-
-    <!-- ================= STYLES ================= -->
-    <div class="cwRibbonGroup">
-        <div class="cwGroupTitle">Styles</div>
-        <div class="cwRibbonGroupContent">
-
-            <button class="cwRibbonIconBtn" title="Normal"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M4 4h16v4H4V4zm0 6h10v10H4V10z"/></svg></button>
-
-            <button class="cwRibbonIconBtn" title="Heading"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M4 4h16v4H4V4zm0 8h16v8H4v-8z"/></svg></button>
-
-        </div>
-    </div>
-
-    <!-- ================= EDITING ================= -->
-    <div class="cwRibbonGroup">
-        <div class="cwGroupTitle">Editing</div>
-        <div class="cwRibbonGroupContent">
-
-            <button class="cwRibbonIconBtn" title="Find"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M10 2a8 8 0 0 1 6.32 12.9l4.39 4.39-1.41 1.41-4.39-4.39A8 8 0 1 1 10 2z"/></svg></button>
-
-            <button class="cwRibbonIconBtn" title="Replace"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M7 7h10v2H7V7zm0 4h10v2H7v-2zm0 4h10v2H7v-2z"/></svg></button>
-
-            <button class="cwRibbonIconBtn" title="Select"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M4 4h16v16H4V4zm4 4h8v8H8V8z"/></svg></button>
-
-        </div>
-    </div>
 
 </div>
 
