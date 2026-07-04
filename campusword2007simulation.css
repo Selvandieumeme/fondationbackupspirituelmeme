@@ -1438,33 +1438,3 @@ body{
 
 
 
-
-
-/* ================================
-   FIX TAB HEADER ALIGNMENT (DESKTOP + ALL DEVICES)
-================================ */
-
-#cwRibbonTabBar{
-    display:flex !important;
-    flex-direction:row !important;
-    flex-wrap:nowrap !important;
-    align-items:center !important;
-    justify-content:flex-start !important;
-
-    overflow-x:auto !important;
-    overflow-y:hidden !important;
-
-    gap:2px;
-}
-
-/* TAB BUTTON FIX */
-.cwTabBtn{
-    flex:0 0 auto !important;
-    white-space:nowrap !important;
-}
-
-/* OPTIONAL: REMOVE LEFT SHIFT LOOK */
-#cwRibbonTabs{
-    margin-left:0 !important;
-    padding-left:0 !important;
-}
