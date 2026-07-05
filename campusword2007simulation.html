@@ -157,11 +157,6 @@
 
 
 
-<!-- =====================================================
-    RIBBON CONTENT VIEWPORT (DYNAMIC AREA)
-===================================================== -->
-<div id="cwRibbonContentArea">
-
 
 
 
@@ -174,15 +169,24 @@
     <div class="cwRibbonGroup">
         <div class="cwGroupTitle">Clipboard</div>
 
-        <button class="cwRibbonBtn">
+        <button class="cwRibbonBtn" data-action="paste">
+            <svg viewBox="0 0 24 24" width="16" height="16">
+                <path d="M19 21H5V3h4l1-1h4l1 1h4zM8 7h8v2H8zm0 4h8v2H8z"/>
+            </svg>
             Paste
         </button>
 
-        <button class="cwRibbonBtn">
+        <button class="cwRibbonBtn" data-action="cut">
+            <svg viewBox="0 0 24 24" width="16" height="16">
+                <path d="M3 6h7l2 2-2 2H3V6zm0 6h7l2 2-2 2H3v-4zm12-6h6v12h-6l-2-2 2-2h4V8h-4l-2-2z"/>
+            </svg>
             Cut
         </button>
 
-        <button class="cwRibbonBtn">
+        <button class="cwRibbonBtn" data-action="copy">
+            <svg viewBox="0 0 24 24" width="16" height="16">
+                <path d="M16 1H4v14h2V3h10zM20 5H8v18h12z"/>
+            </svg>
             Copy
         </button>
 
@@ -192,30 +196,54 @@
     <div class="cwRibbonGroup">
         <div class="cwGroupTitle">Font</div>
 
-        <select>
+        <select data-action="font-family">
             <option>Calibri</option>
             <option>Arial</option>
             <option>Times New Roman</option>
         </select>
 
-        <input type="number" value="11">
+        <input type="number" value="11" data-action="font-size">
 
-        <button class="cwRibbonBtn">B</button>
-        <button class="cwRibbonBtn">I</button>
-        <button class="cwRibbonBtn">U</button>
+        <button class="cwRibbonBtn" data-action="bold" data-toggle="true">
+            <svg viewBox="0 0 24 24" width="16" height="16">
+                <path d="M7 4h6a4 4 0 010 8H7zm0 8h7a4 4 0 010 8H7z"/>
+            </svg>
+            B
+        </button>
 
-        <button class="cwRibbonBtn">Color</button>
+        <button class="cwRibbonBtn" data-action="italic" data-toggle="true">
+            <svg viewBox="0 0 24 24" width="16" height="16">
+                <path d="M10 4h10v2h-4l-4 12h4v2H6v-2h4l4-12h-4z"/>
+            </svg>
+            I
+        </button>
+
+        <button class="cwRibbonBtn" data-action="underline" data-toggle="true">
+            <svg viewBox="0 0 24 24" width="16" height="16">
+                <path d="M6 3v7a6 6 0 0012 0V3h-2v7a4 4 0 11-8 0V3zM4 21h16v-2H4z"/>
+            </svg>
+            U
+        </button>
+
+        <button class="cwRibbonBtn" data-action="color">
+            <svg viewBox="0 0 24 24" width="16" height="16">
+                <path d="M12 3l4 18h-2l-1-4H9l-1 4H6l4-18z"/>
+            </svg>
+            Color
+        </button>
+
     </div>
 
     <!-- ===================== PARAGRAPH ===================== -->
     <div class="cwRibbonGroup">
         <div class="cwGroupTitle">Paragraph</div>
 
-        <button class="cwRibbonBtn">Left</button>
-        <button class="cwRibbonBtn">Center</button>
-        <button class="cwRibbonBtn">Right</button>
-        <button class="cwRibbonBtn">Justify</button>
-        <button class="cwRibbonBtn">Bullets</button>
+        <button class="cwRibbonBtn" data-action="align-left">Left</button>
+        <button class="cwRibbonBtn" data-action="align-center">Center</button>
+        <button class="cwRibbonBtn" data-action="align-right">Right</button>
+        <button class="cwRibbonBtn" data-action="justify">Justify</button>
+
+        <button class="cwRibbonBtn" data-action="bullet">Bullets</button>
 
     </div>
 
@@ -223,9 +251,9 @@
     <div class="cwRibbonGroup">
         <div class="cwGroupTitle">Styles</div>
 
-        <button class="cwRibbonBtn">Normal</button>
-        <button class="cwRibbonBtn">Heading 1</button>
-        <button class="cwRibbonBtn">Heading 2</button>
+        <button class="cwRibbonBtn" data-action="style-normal">Normal</button>
+        <button class="cwRibbonBtn" data-action="style-h1">Heading 1</button>
+        <button class="cwRibbonBtn" data-action="style-h2">Heading 2</button>
 
     </div>
 
@@ -233,13 +261,22 @@
     <div class="cwRibbonGroup">
         <div class="cwGroupTitle">Editing</div>
 
-        <button class="cwRibbonBtn">Find</button>
-        <button class="cwRibbonBtn">Replace</button>
-        <button class="cwRibbonBtn">Select</button>
+        <button class="cwRibbonBtn" data-action="find">
+            <svg viewBox="0 0 24 24" width="16" height="16">
+                <path d="M10 2a8 8 0 105.3 14.3l4.7 4.7 1.4-1.4-4.7-4.7A8 8 0 0010 2z"/>
+            </svg>
+            Find
+        </button>
+
+        <button class="cwRibbonBtn" data-action="replace">Replace</button>
+
+        <button class="cwRibbonBtn" data-action="select">Select</button>
 
     </div>
 
 </div>
+
+
 
 
 
