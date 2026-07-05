@@ -1665,9 +1665,3 @@ body{
 
 
 
-
-#cwRibbonContentArea{
-    max-height: 140px;
-    overflow: hidden;
-    box-sizing: border-box;
-}
