@@ -156,6 +156,7 @@
 
 
 
+
 <!-- =====================================================
     RIBBON CONTENT VIEWPORT (DYNAMIC AREA)
 ===================================================== -->
@@ -164,119 +165,103 @@
     <!-- HOME -->
     <div class="cwRibbonPanel active" id="panel-home">
 
-<div class="cwRibbonTab" id="tab-home">
+        <div class="cwRibbonGroups">
 
-<!-- =====================================================
-    HOME TAB - PROFESSIONAL RIBBON (BLUE STYLE)
-===================================================== -->
+            <!-- =====================================================
+                HOME TAB - PROFESSIONAL RIBBON (BLUE STYLE)
+            ===================================================== -->
 
-    <div class="cwRibbonGroups">
+            <div class="cwRibbonGroup">
+                <div class="cwGroupTitle">Clipboard</div>
 
-        <!-- ================= CLIPBOARD ================= -->
-        <div class="cwRibbonGroup">
-            <div class="cwGroupTitle">Clipboard</div>
+                <button class="cwRibbonBtn primary">
+                    <span class="cwIcon">
+                        <svg viewBox="0 0 24 24">
+                            <path fill="#1e6bd6" d="M9 3h6v2h5v16H4V5h5V3zm2 4v2H7v2h10V9h-4V7h-2z"/>
+                        </svg>
+                    </span>
+                    Paste
+                </button>
 
-            <button class="cwRibbonBtn primary">
-                <span class="cwIcon">
-                    <svg viewBox="0 0 24 24">
-                        <path fill="#1e6bd6" d="M9 3h6v2h5v16H4V5h5V3zm2 4v2H7v2h10V9h-4V7h-2z"/>
-                    </svg>
-                </span>
-                Paste
-            </button>
+                <button class="cwRibbonBtn">
+                    <span class="cwIcon">
+                        <svg viewBox="0 0 24 24">
+                            <path fill="#1e6bd6" d="M19 3H8a2 2 0 0 0-2 2v12h2V5h11V3zM5 7v14h12V7H5z"/>
+                        </svg>
+                    </span>
+                    Copy
+                </button>
 
-            <button class="cwRibbonBtn">
-                <span class="cwIcon">
-                    <svg viewBox="0 0 24 24">
-                        <path fill="#1e6bd6" d="M19 3H8a2 2 0 0 0-2 2v12h2V5h11V3zM5 7v14h12V7H5z"/>
-                    </svg>
-                </span>
-                Copy
-            </button>
+                <button class="cwRibbonBtn">
+                    <span class="cwIcon">
+                        <svg viewBox="0 0 24 24">
+                            <path fill="#1e6bd6" d="M3 17l6-6 4 4 8-8 2 2-10 10-4-4-6 6z"/>
+                        </svg>
+                    </span>
+                    Cut
+                </button>
+            </div>
 
-            <button class="cwRibbonBtn">
-                <span class="cwIcon">
-                    <svg viewBox="0 0 24 24">
-                        <path fill="#1e6bd6" d="M3 17l6-6 4 4 8-8 2 2-10 10-4-4-6 6z"/>
-                    </svg>
-                </span>
-                Cut
-            </button>
-        </div>
+            <!-- FONT -->
+            <div class="cwRibbonGroup">
+                <div class="cwGroupTitle">Font</div>
 
-        <!-- ================= FONT ================= -->
-        <div class="cwRibbonGroup">
-            <div class="cwGroupTitle">Font</div>
+                <select class="cwSelect">
+                    <option>Calibri</option>
+                    <option>Arial</option>
+                    <option>Times New Roman</option>
+                </select>
 
-            <select class="cwSelect">
-                <option>Calibri</option>
-                <option>Arial</option>
-                <option>Times New Roman</option>
-            </select>
+                <select class="cwSelect small">
+                    <option>11</option>
+                    <option>12</option>
+                    <option>14</option>
+                </select>
 
-            <select class="cwSelect small">
-                <option>11</option>
-                <option>12</option>
-                <option>14</option>
-            </select>
+                <div class="cwBtnRow">
+                    <button class="cwIconBtn">B</button>
+                    <button class="cwIconBtn">I</button>
+                    <button class="cwIconBtn">U</button>
+                    <button class="cwIconBtn">A↑</button>
+                    <button class="cwIconBtn">A↓</button>
+                </div>
+            </div>
 
-            <div class="cwBtnRow">
+            <!-- PARAGRAPH -->
+            <div class="cwRibbonGroup">
+                <div class="cwGroupTitle">Paragraph</div>
 
-                <button class="cwIconBtn">B</button>
-                <button class="cwIconBtn">I</button>
-                <button class="cwIconBtn">U</button>
+                <button class="cwIconBtn">≡</button>
+                <button class="cwIconBtn">≣</button>
+                <button class="cwIconBtn">≡→</button>
+                <button class="cwIconBtn">≡←</button>
 
-                <button class="cwIconBtn">A↑</button>
-                <button class="cwIconBtn">A↓</button>
+                <button class="cwIconBtn">• List</button>
+                <button class="cwIconBtn">1. List</button>
+            </div>
+
+            <!-- STYLES -->
+            <div class="cwRibbonGroup">
+                <div class="cwGroupTitle">Styles</div>
+
+                <div class="cwStyleBox">Normal</div>
+                <div class="cwStyleBox">Heading 1</div>
+                <div class="cwStyleBox">Heading 2</div>
+            </div>
+
+            <!-- EDITING -->
+            <div class="cwRibbonGroup">
+                <div class="cwGroupTitle">Editing</div>
+
+                <button class="cwRibbonBtn">Find</button>
+                <button class="cwRibbonBtn">Replace</button>
+                <button class="cwRibbonBtn danger">Select</button>
 
             </div>
-        </div>
-
-        <!-- ================= PARAGRAPH ================= -->
-        <div class="cwRibbonGroup">
-            <div class="cwGroupTitle">Paragraph</div>
-
-            <button class="cwIconBtn">≡</button>
-            <button class="cwIconBtn">≣</button>
-            <button class="cwIconBtn">≡→</button>
-            <button class="cwIconBtn">≡←</button>
-
-            <button class="cwIconBtn">• List</button>
-            <button class="cwIconBtn">1. List</button>
-        </div>
-
-        <!-- ================= STYLES ================= -->
-        <div class="cwRibbonGroup">
-            <div class="cwGroupTitle">Styles</div>
-
-            <div class="cwStyleBox">Normal</div>
-            <div class="cwStyleBox">Heading 1</div>
-            <div class="cwStyleBox">Heading 2</div>
-        </div>
-
-        <!-- ================= EDITING ================= -->
-        <div class="cwRibbonGroup">
-            <div class="cwGroupTitle">Editing</div>
-
-            <button class="cwRibbonBtn">
-                Find
-            </button>
-
-            <button class="cwRibbonBtn">
-                Replace
-            </button>
-
-            <button class="cwRibbonBtn danger">
-                Select
-            </button>
 
         </div>
 
     </div>
-</div>
-
-
-
 
     <!-- INSERT -->
     <div class="cwRibbonPanel" id="panel-insert"></div>
@@ -301,7 +286,8 @@
 
 </div>
 
-</div>
+
+
 
 
 
