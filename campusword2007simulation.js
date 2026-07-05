@@ -636,6 +636,19 @@ const WordRulerEngine = {
                 panel.classList.add("active");
             }
         });
+
+        /* 🔥 FIX ADD: ensure fallback to HOME if target not found */
+        const panelExists = document.querySelector(`.cwRibbonPanel[data-panel="${target}"]`);
+        const btnExists = document.querySelector(`.cwTabBtn[data-target="${target}"]`);
+
+        if (!panelExists || !btnExists) {
+            document.querySelectorAll(".cwTabBtn, .cwRibbonPanel").forEach(el => {
+                el.classList.remove("active");
+            });
+
+            document.querySelector('.cwTabBtn[data-target="home"]')?.classList.add("active");
+            document.querySelector('.cwRibbonPanel[data-panel="home"]')?.classList.add("active");
+        }
     }
 
     /* click binding */
@@ -650,8 +663,3 @@ const WordRulerEngine = {
     activateTab("home");
 
 })();
-
-
-
-
-
