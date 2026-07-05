@@ -160,7 +160,55 @@
 ========================================================= -->
 <div id="cwRibbonContentArea">
 
-    <div class="cwRibbonPanel active" id="tab-home"></div>
+    <div class="cwRibbonPanel active" id="tab-home">
+
+<!-- =========================================================
+    TAB HOME — RIBBON GROUPS (CLEAN + ID SYSTEM)
+========================================================= -->
+
+    <!-- ================= CLIPBOARD ================= -->
+    <div class="cwRibbonGroup">
+
+        <div class="cwGroupTitle">Clipboard</div>
+
+        <div class="cwRibbonGroupContent">
+
+            <!-- Paste -->
+            <button class="cwRibbonIconBtn" title="Paste" data-command="paste">
+                <svg viewBox="0 0 24 24">
+                    <path fill="currentColor"
+                        d="M16 2h-2a2 2 0 0 0-2-2 2 2 0 0 0-2 2H8a2 2 0 0 0-2 2v2h12V4a2 2 0 0 0-2-2zm2 6H6v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V8zm-4 2v2H10v2h4v2l4-3-4-3z"/>
+                </svg>
+            </button>
+
+            <!-- Cut -->
+            <button class="cwRibbonIconBtn" title="Cut" data-command="cut">
+                <svg viewBox="0 0 24 24">
+                    <path fill="currentColor"
+                        d="M9.64 7.64a2.5 2.5 0 1 0-1.77 1.77L10.5 12l-2.63 2.59a2.5 2.5 0 1 0 1.77 1.77L12 13.5l2.36 2.36a2.5 2.5 0 1 0 1.77-1.77L13.5 12l2.63-2.59a2.5 2.5 0 1 0-1.77-1.77L12 10.5 9.64 7.64z"/>
+                </svg>
+            </button>
+
+            <!-- Copy -->
+            <button class="cwRibbonIconBtn" title="Copy" data-command="copy">
+                <svg viewBox="0 0 24 24">
+                    <path fill="currentColor"
+                        d="M16 1H6a2 2 0 0 0-2 2v12h2V3h10V1zm3 4H10a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h9a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2zm0 16H10V7h9v14z"/>
+                </svg>
+            </button>
+
+            <!-- Format Painter -->
+            <button class="cwRibbonIconBtn" title="Format Painter" data-command="formatPainter">
+                <svg viewBox="0 0 24 24">
+                    <path fill="currentColor"
+                        d="M3 5h13v3h2a2 2 0 0 1 2 2v2h-2v7a2 2 0 0 1-2 2h-2v-9H8V8H3z"/>
+                </svg>
+            </button>
+
+        </div>
+    </div>
+
+
 
 <div class="cwRibbonPanel"
  id="tab-insert"></div>
