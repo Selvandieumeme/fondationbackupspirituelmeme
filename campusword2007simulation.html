@@ -158,8 +158,6 @@
 
 
 
-
-
 <!-- =====================================================
     HOME TAB CONTENT (STRUCTURE ONLY - RIBBON READY)
 ===================================================== -->
@@ -190,9 +188,11 @@
             Copy
         </button>
 
-        <!-- NEW: Format Painter -->
         <button class="cwRibbonBtn" data-action="format-painter">
-            🎨 Format Painter
+            <svg viewBox="0 0 24 24" width="16" height="16">
+                <path d="M7 2h10v4H7zM6 7h12v3H6zM9 10h6v12H9z"/>
+            </svg>
+            Format Painter
         </button>
 
     </div>
@@ -211,85 +211,109 @@
 
         <input type="number" value="11" data-action="font-size">
 
-        <button class="cwRibbonBtn" data-action="grow-font">A+</button>
-        <button class="cwRibbonBtn" data-action="shrink-font">A-</button>
+        <button class="cwRibbonBtn" data-action="grow-font">
+            <svg viewBox="0 0 24 24" width="16" height="16">
+                <path d="M12 4l4 8h-3v8h-2v-8H8z"/>
+            </svg>
+            A+
+        </button>
 
-        <button class="cwRibbonBtn" data-action="bold" data-toggle="true">
+        <button class="cwRibbonBtn" data-action="shrink-font">
+            <svg viewBox="0 0 24 24" width="16" height="16">
+                <path d="M12 20l-4-8h3V4h2v8h3z"/>
+            </svg>
+            A-
+        </button>
+
+        <button class="cwRibbonBtn" data-action="bold">
             <svg viewBox="0 0 24 24" width="16" height="16">
                 <path d="M7 4h6a4 4 0 010 8H7zm0 8h7a4 4 0 010 8H7z"/>
             </svg>
             B
         </button>
 
-        <button class="cwRibbonBtn" data-action="italic" data-toggle="true">
+        <button class="cwRibbonBtn" data-action="italic">
             <svg viewBox="0 0 24 24" width="16" height="16">
                 <path d="M10 4h10v2h-4l-4 12h4v2H6v-2h4l4-12h-4z"/>
             </svg>
             I
         </button>
 
-        <button class="cwRibbonBtn" data-action="underline" data-toggle="true">
+        <button class="cwRibbonBtn" data-action="underline">
             <svg viewBox="0 0 24 24" width="16" height="16">
                 <path d="M6 3v7a6 6 0 0012 0V3h-2v7a4 4 0 11-8 0V3zM4 21h16v-2H4z"/>
             </svg>
             U
         </button>
 
-        <button class="cwRibbonBtn" data-action="strike">S̶</button>
+        <button class="cwRibbonBtn" data-action="strike">
+            <svg viewBox="0 0 24 24" width="16" height="16">
+                <path d="M3 12h18v2H3zM7 7c0-2 2-3 5-3s5 1 5 3h-2c0-1-1-1-3-1s-3 0-3 1 1 1 3 2c4 1 5 2 5 5s-2 4-5 4-5-1-5-4h2c0 1 1 2 3 2s3-1 3-2-1-2-4-3c-3-1-5-2-5-4z"/>
+            </svg>
+            S
+        </button>
 
-      <button class="cwRibbonBtn" data-action="color">
-    <svg viewBox="0 0 24 24" width="16" height="16">
-        <path d="M12 3l4 18h-2l-1-4H9l-1 4H6l4-18z"/>
-    </svg>
-    Color ▾
+        <!-- COLOR (ENHANCED - SAFE DROP ZONE READY) -->
+        <button class="cwRibbonBtn" data-action="color">
+            <svg viewBox="0 0 24 24" width="16" height="16">
+                <path d="M12 3l4 18h-2l-1-4H9l-1 4H6l4-18z"/>
+            </svg>
+            Color ▾
+        </button>
 
-    <!-- COLOR PALETTE (HTML ONLY EXTENSION) -->
-    <span class="cwColorPalette">
-        <span class="cwColorDot" data-color="#000000" title="Black"></span>
-        <span class="cwColorDot" data-color="#333333" title="Dark Gray"></span>
-        <span class="cwColorDot" data-color="#ff0000" title="Red"></span>
-        <span class="cwColorDot" data-color="#ff9900" title="Orange"></span>
-        <span class="cwColorDot" data-color="#ffff00" title="Yellow"></span>
-        <span class="cwColorDot" data-color="#00ff00" title="Green"></span>
-        <span class="cwColorDot" data-color="#00ccff" title="Sky Blue"></span>
-        <span class="cwColorDot" data-color="#0000ff" title="Blue"></span>
-        <span class="cwColorDot" data-color="#9900ff" title="Purple"></span>
-        <span class="cwColorDot" data-color="#ffffff" title="White"></span>
-    </span>
-</button>
+        <!-- HIGHLIGHT -->
+        <button class="cwRibbonBtn" data-action="highlight">
+            <svg viewBox="0 0 24 24" width="16" height="16">
+                <path d="M3 21h18v-2H3zm4-4h10l-1-3H8z"/>
+            </svg>
+            Highlight ▾
+        </button>
 
-<button class="cwRibbonBtn" data-action="highlight">
-    Highlight ▾
-
-    <!-- HIGHLIGHT PALETTE (HTML ONLY EXTENSION) -->
-    <span class="cwHighlightPalette">
-        <span class="cwColorDot highlight" data-color="yellow" title="Yellow"></span>
-        <span class="cwColorDot highlight" data-color="lightgreen" title="Green"></span>
-        <span class="cwColorDot highlight" data-color="orange" title="Orange"></span>
-        <span class="cwColorDot highlight" data-color="pink" title="Pink"></span>
-        <span class="cwColorDot highlight" data-color="lightblue" title="Blue"></span>
-        <span class="cwColorDot highlight" data-color="none" title="None"></span>
-    </span>
-</button>
+    </div>
 
     <!-- ===================== PARAGRAPH ===================== -->
     <div class="cwRibbonGroup">
         <div class="cwGroupTitle">Paragraph</div>
 
-        <button class="cwRibbonBtn" data-action="align-left">Left</button>
-        <button class="cwRibbonBtn" data-action="align-center">Center</button>
-        <button class="cwRibbonBtn" data-action="align-right">Right</button>
-        <button class="cwRibbonBtn" data-action="justify">Justify</button>
+        <button class="cwRibbonBtn" data-action="align-left">
+            <svg viewBox="0 0 24 24" width="16" height="16"><path d="M3 6h18v2H3zm0 5h12v2H3zm0 5h18v2H3z"/></svg>
+            Left
+        </button>
 
-        <button class="cwRibbonBtn" data-action="bullet">Bullets</button>
-        <button class="cwRibbonBtn" data-action="numbering">Numbering</button>
+        <button class="cwRibbonBtn" data-action="align-center">
+            <svg viewBox="0 0 24 24" width="16" height="16"><path d="M6 6h12v2H6zm-3 5h18v2H3zm3 5h12v2H6z"/></svg>
+            Center
+        </button>
 
-        <button class="cwRibbonBtn" data-action="indent-increase">Indent +</button>
-        <button class="cwRibbonBtn" data-action="indent-decrease">Indent -</button>
+        <button class="cwRibbonBtn" data-action="align-right">
+            <svg viewBox="0 0 24 24" width="16" height="16"><path d="M3 6h18v2H3zm6 5h12v2H9zm-6 5h18v2H3z"/></svg>
+            Right
+        </button>
 
-        <button class="cwRibbonBtn" data-action="line-spacing">Line Spacing</button>
+        <button class="cwRibbonBtn" data-action="justify">
+            <svg viewBox="0 0 24 24" width="16" height="16"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+            Justify
+        </button>
 
-        <button class="cwRibbonBtn" data-action="show-paragraph">¶</button>
+        <button class="cwRibbonBtn" data-action="bullet">
+            <svg viewBox="0 0 24 24" width="16" height="16"><circle cx="5" cy="7" r="2"/><circle cx="5" cy="12" r="2"/><circle cx="5" cy="17" r="2"/></svg>
+            Bullets
+        </button>
+
+        <button class="cwRibbonBtn" data-action="numbering">
+            <svg viewBox="0 0 24 24" width="16" height="16"><path d="M7 6h12v2H7zm0 5h12v2H7zm0 5h12v2H7z"/></svg>
+            Numbering
+        </button>
+
+        <button class="cwRibbonBtn" data-action="indent-increase">
+            <svg viewBox="0 0 24 24" width="16" height="16"><path d="M3 4h2v16H3zm5 4h13l-4 4 4 4H8z"/></svg>
+            Indent +
+        </button>
+
+        <button class="cwRibbonBtn" data-action="indent-decrease">
+            <svg viewBox="0 0 24 24" width="16" height="16"><path d="M3 4h2v16H3zm5 4h13l-4 4 4 4H8z"/></svg>
+            Indent -
+        </button>
 
     </div>
 
@@ -298,8 +322,8 @@
         <div class="cwGroupTitle">Styles</div>
 
         <button class="cwRibbonBtn" data-action="style-normal">Normal</button>
-        <button class="cwRibbonBtn" data-action="style-h1">Heading 1</button>
-        <button class="cwRibbonBtn" data-action="style-h2">Heading 2</button>
+        <button class="cwRibbonBtn" data-action="style-h1">H1</button>
+        <button class="cwRibbonBtn" data-action="style-h2">H2</button>
         <button class="cwRibbonBtn" data-action="style-title">Title</button>
         <button class="cwRibbonBtn" data-action="style-subtitle">Subtitle</button>
 
@@ -325,6 +349,11 @@
     </div>
 
 </div>
+
+
+
+
+
 
 
 
