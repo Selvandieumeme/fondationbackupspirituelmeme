@@ -162,8 +162,106 @@
 ===================================================== -->
 <div id="cwRibbonContentArea">
 
-    <!-- HOME -->
-    <div class="cwRibbonPanel active" id="tab-home"></div>
+
+<!-- =====================================================
+    HOME TAB (WORD 2007 STYLE - BLOCK 1)
+===================================================== -->
+<div class="cwRibbonPanel active" id="tab-home">
+
+    <!-- ===================== CLIPBOARD ===================== -->
+    <div class="cwRibbonGroup" id="cwClipboardGroup">
+
+        <div class="cwGroupTitle">Clipboard</div>
+
+        <button class="cwRibbonBtn" data-action="paste">
+            <svg viewBox="0 0 24 24"><path d="M19 3h-4.18C14.4 1.84 13.3 1 12 1S9.6 1.84 9.18 3H5a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2zm-7-1a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"/></svg>
+            Paste
+        </button>
+
+        <button class="cwRibbonBtn" data-action="cut">
+            <svg viewBox="0 0 24 24"><path d="M9 3a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm6 14a2 2 0 1 0 2 2l-2-2zm-6 0l-2 2a2 2 0 1 0 2-2zm0-2l6-6"/></svg>
+            Cut
+        </button>
+
+        <button class="cwRibbonBtn" data-action="copy">
+            <svg viewBox="0 0 24 24"><path d="M16 1H4a2 2 0 0 0-2 2v12h2V3h12V1zm4 4H8a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2z"/></svg>
+            Copy
+        </button>
+
+    </div>
+
+    <!-- ===================== FONT ===================== -->
+    <div class="cwRibbonGroup" id="cwFontGroup">
+
+        <div class="cwGroupTitle">Font</div>
+
+        <select class="cwFontFamily" data-action="fontFamily">
+            <option>Calibri</option>
+            <option>Arial</option>
+            <option>Times New Roman</option>
+        </select>
+
+        <input type="number" class="cwFontSize" value="11" data-action="fontSize">
+
+        <button class="cwRibbonBtn" data-action="bold"><b>B</b></button>
+        <button class="cwRibbonBtn" data-action="italic"><i>I</i></button>
+        <button class="cwRibbonBtn" data-action="underline"><u>U</u></button>
+
+        <button class="cwRibbonBtn" data-action="textColor">
+            <svg viewBox="0 0 24 24"><path d="M6 20h12v2H6v-2zm6-18l6 16h-2l-1.5-4h-5L8 18H6L12 2z"/></svg>
+            Color
+        </button>
+
+    </div>
+
+    <!-- ===================== PARAGRAPH ===================== -->
+    <div class="cwRibbonGroup" id="cwParagraphGroup">
+
+        <div class="cwGroupTitle">Paragraph</div>
+
+        <button class="cwRibbonBtn" data-action="align-left">L</button>
+        <button class="cwRibbonBtn" data-action="align-center">C</button>
+        <button class="cwRibbonBtn" data-action="align-right">R</button>
+        <button class="cwRibbonBtn" data-action="justify">J</button>
+
+        <button class="cwRibbonBtn" data-action="bullets">
+            <svg viewBox="0 0 24 24"><path d="M4 6h2v2H4V6zm0 5h2v2H4v-2zm0 5h2v2H4v-2z"/></svg>
+            • List
+        </button>
+
+    </div>
+
+    <!-- ===================== STYLES ===================== -->
+    <div class="cwRibbonGroup" id="cwStylesGroup">
+
+        <div class="cwGroupTitle">Styles</div>
+
+        <button class="cwRibbonBtn" data-action="normal">Normal</button>
+        <button class="cwRibbonBtn" data-action="heading1">H1</button>
+        <button class="cwRibbonBtn" data-action="heading2">H2</button>
+
+    </div>
+
+    <!-- ===================== EDITING ===================== -->
+    <div class="cwRibbonGroup" id="cwEditingGroup">
+
+        <div class="cwGroupTitle">Editing</div>
+
+        <button class="cwRibbonBtn" data-action="find">
+            <svg viewBox="0 0 24 24"><path d="M10 2a8 8 0 105.3 14.1l4.6 4.6 1.4-1.4-4.6-4.6A8 8 0 0010 2z"/></svg>
+            Find
+        </button>
+
+        <button class="cwRibbonBtn" data-action="replace">Replace</button>
+        <button class="cwRibbonBtn" data-action="select">Select</button>
+
+    </div>
+
+</div>
+
+
+</div>
+
 
     <!-- INSERT -->
     <div class="cwRibbonPanel" id="tab-insert"></div>
