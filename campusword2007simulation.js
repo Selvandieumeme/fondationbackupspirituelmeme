@@ -604,13 +604,7 @@ const WordRulerEngine = {
 
 
 
-
-
-
-
-
-
-/* =========================================================
+ /* =========================================================
    RIBBON TAB SWITCH ENGINE (WORD 2007 STYLE)
 ========================================================= */
 
@@ -632,13 +626,15 @@ const WordRulerEngine = {
         /* hide all panels */
         panels.forEach(panel => {
             panel.classList.remove("active");
-            if (panel.dataset.panel === target) {
+
+            /* 🔥 FIX: switched from data-panel → id system */
+            if (panel.id === target) {
                 panel.classList.add("active");
             }
         });
 
-        /* 🔥 FIX ADD: ensure fallback to HOME if target not found */
-        const panelExists = document.querySelector(`.cwRibbonPanel[data-panel="${target}"]`);
+        /* 🔥 FIX ADD: fallback HOME if target not found */
+        const panelExists = document.getElementById(target);
         const btnExists = document.querySelector(`.cwTabBtn[data-target="${target}"]`);
 
         if (!panelExists || !btnExists) {
@@ -646,8 +642,8 @@ const WordRulerEngine = {
                 el.classList.remove("active");
             });
 
-            document.querySelector('.cwTabBtn[data-target="home"]')?.classList.add("active");
-            document.querySelector('.cwRibbonPanel[data-panel="home"]')?.classList.add("active");
+            document.querySelector('.cwTabBtn[data-target="tab-home"]')?.classList.add("active");
+            document.getElementById("tab-home")?.classList.add("active");
         }
     }
 
@@ -660,6 +656,14 @@ const WordRulerEngine = {
     });
 
     /* default open HOME if exists */
-    activateTab("home");
+    activateTab("tab-home");
 
 })();
+
+
+
+
+
+
+
+
