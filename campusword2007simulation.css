@@ -1665,3 +1665,30 @@ body{
 
 
 
+
+
+
+
+
+
+.cwDropdownMenu{
+    display:none;
+    position:absolute;
+    background:#fff;
+    border:1px solid #c7d2e3;
+    padding:6px;
+    gap:4px;
+    flex-wrap:wrap;
+    box-shadow:0 3px 10px rgba(0,0,0,0.15);
+    z-index:999;
+}
+
+.cwDropdownBtn{
+    position:relative;
+}
+
+/* lè aktif */
+.cwDropdownBtn.active .cwDropdownMenu{
+    display:flex;
+}
+
