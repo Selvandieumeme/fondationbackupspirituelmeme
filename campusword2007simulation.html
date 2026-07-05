@@ -81,73 +81,74 @@
 </div>
 
 
+
+
 <!-- =====================================================
-    RIBBON TABS (FULL WORD 2007 STRUCTURE + FORMAT)
+    RIBBON TABS (ID ONLY VERSION)
 ===================================================== -->
 <div id="cwRibbonTabs">
 
-   
-
     <!-- HOME -->
-    <div class="cwRibbonTab" data-tab="home">
+    <div class="cwRibbonTab" id="tab-home">
         <div class="cwRibbonGroups"></div>
     </div>
 
     <!-- INSERT -->
-    <div class="cwRibbonTab" data-tab="insert">
+    <div class="cwRibbonTab" id="tab-insert">
         <div class="cwRibbonGroups"></div>
     </div>
 
     <!-- PAGE LAYOUT -->
-    <div class="cwRibbonTab" data-tab="page-layout">
+    <div class="cwRibbonTab" id="tab-page-layout">
         <div class="cwRibbonGroups"></div>
     </div>
 
     <!-- REFERENCES -->
-    <div class="cwRibbonTab" data-tab="references">
+    <div class="cwRibbonTab" id="tab-references">
         <div class="cwRibbonGroups"></div>
     </div>
 
     <!-- MAILINGS -->
-    <div class="cwRibbonTab" data-tab="mailings">
+    <div class="cwRibbonTab" id="tab-mailings">
         <div class="cwRibbonGroups"></div>
     </div>
 
     <!-- REVIEW -->
-    <div class="cwRibbonTab" data-tab="review">
+    <div class="cwRibbonTab" id="tab-review">
         <div class="cwRibbonGroups"></div>
     </div>
 
     <!-- VIEW -->
-    <div class="cwRibbonTab" data-tab="view">
+    <div class="cwRibbonTab" id="tab-view">
         <div class="cwRibbonGroups"></div>
     </div>
 
-    <!-- FORMAT (CUSTOM TAB LIKE WORD EXTENSIONS) -->
-    <div class="cwRibbonTab" data-tab="format">
+    <!-- FORMAT -->
+    <div class="cwRibbonTab" id="tab-format">
         <div class="cwRibbonGroups"></div>
     </div>
 
 </div>
 
+
+
+
+
 <!-- =====================================================
-    TAB BAR
+    TAB BAR (ID COMPATIBLE VERSION)
 ===================================================== -->
 <div id="cwRibbonTabBar">
 
-    <button class="cwTabBtn" data-target="home">Home</button>
-    <button class="cwTabBtn" data-target="insert">Insert</button>
-    <button class="cwTabBtn" data-target="page-layout">Page Layout</button>
-    <button class="cwTabBtn" data-target="references">References</button>
-    <button class="cwTabBtn" data-target="mailings">Mailings</button>
-    <button class="cwTabBtn" data-target="review">Review</button>
-    <button class="cwTabBtn" data-target="view">View</button>
-    <button class="cwTabBtn" data-target="format">Format</button>
+    <button class="cwTabBtn" data-target="tab-home">Home</button>
+    <button class="cwTabBtn" data-target="tab-insert">Insert</button>
+    <button class="cwTabBtn" data-target="tab-page-layout">Page Layout</button>
+    <button class="cwTabBtn" data-target="tab-references">References</button>
+    <button class="cwTabBtn" data-target="tab-mailings">Mailings</button>
+    <button class="cwTabBtn" data-target="tab-review">Review</button>
+    <button class="cwTabBtn" data-target="tab-view">View</button>
+    <button class="cwTabBtn" data-target="tab-format">Format</button>
 
 </div>
-
-
-
 
 
 
@@ -159,8 +160,8 @@
 ========================================================= -->
 <div id="cwRibbonContentArea">
 
+    <div class="cwRibbonPanel active" id="tab-home">
 
-<div class="cwRibbonPanel active" data-panel="home">
 
 <!-- ================= CLIPBOARD ================= -->
 <div class="cwRibbonGroup">
@@ -1045,77 +1046,27 @@
 </div>
 
 
-
-
-<div class="cwRibbonPanel" data-panel="insert">
-
-<!-- ================= PAGES ================= -->
-<div class="cwRibbonGroup">
-    <div class="cwGroupTitle">Pages</div>
-
-    <div class="cwRibbonGroupContent">
-
-        <!-- Cover Page -->
-        <button class="cwRibbonIconBtn"
-                title="Cover Page"
-                data-command="coverPage">
-            <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
-                <path fill="currentColor"
-                    d="M6 3h12a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2zm2 3v4h8V6H8zm0 6h8v2H8v-2zm0 4h6v2H8v-2z"/>
-            </svg>
-        </button>
-
-        <!-- Blank Page -->
-        <button class="cwRibbonIconBtn"
-                title="Blank Page"
-                data-command="blankPage">
-            <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
-                <path fill="currentColor"
-                    d="M6 3h9l3 3v15H6V3zm9 1.5V7h2.5L15 4.5z"/>
-            </svg>
-        </button>
-
-        <!-- Page Break -->
-        <button class="cwRibbonIconBtn"
-                title="Page Break"
-                data-command="pageBreak">
-            <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
-                <path fill="currentColor"
-                    d="M5 5h14v6H5V5zm0 8h14v6H5v-6zm-1 2h16v2H4v-2z"/>
-            </svg>
-        </button>
-
-        <!-- Pages Settings -->
-        <button class="cwRibbonIconBtn"
-                title="Pages Settings"
-                data-command="pagesDialog">
-            <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
-                <path fill="currentColor"
-                    d="M7 3h10l2 2v14H7V3zm2 3v2h6V6H9zm0 4v2h6v-2H9zm0 4v2h6v-2H9z"/>
-            </svg>
-        </button>
-
-    </div>
 </div>
 
 
 
- <div class="cwRibbonPanel" data-panel="page-layout"></div>
-    <div class="cwRibbonPanel" data-panel="references"></div>
-    <div class="cwRibbonPanel" data-panel="mailings"></div>
-    <div class="cwRibbonPanel" data-panel="review"></div>
-    <div class="cwRibbonPanel" data-panel="view"></div>
-    <div class="cwRibbonPanel" data-panel="format"></div>
 
-</div>
-
-</div>
 
 
 
 
    
+<div class="cwRibbonPanel"
+ id="tab-insert"></div>
 
+ <div class="cwRibbonPanel" id="tab-page-layout"></div>
+    <div class="cwRibbonPanel" id="tab-references"></div>
+    <div class="cwRibbonPanel" id="tab-mailings"></div>
+    <div class="cwRibbonPanel" id="tab-review"></div>
+    <div class="cwRibbonPanel" id="tab-view"></div>
+    <div class="cwRibbonPanel" id="tab-format"></div>
+
+</div>
 
 
 
