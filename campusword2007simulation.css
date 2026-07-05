@@ -1298,17 +1298,11 @@ body{
 
 
 
-
-
-
-
-
-
 /* =========================================================
    HOME RIBBON PANEL — UNIFIED WORD STYLE (FIXED)
 ========================================================= */
 
-.cwRibbonPanel[data-panel="home"]{
+#tab-home.cwRibbonPanel{
     display:flex;
 
     flex-wrap:nowrap;              /* 🔥 FIX: pa janm desann anba */
@@ -1326,7 +1320,7 @@ body{
     border-bottom:1px solid #c7d2e3;
 
     min-height:110px;              /* kenbe Word-like height */
-    
+
     -webkit-overflow-scrolling:touch; /* smooth scroll Android/iOS */
 }
 
@@ -1334,7 +1328,7 @@ body{
    GROUP BOX (WORD STYLE)
 ========================= */
 
-.cwRibbonPanel[data-panel="home"] .cwRibbonGroup{
+#tab-home.cwRibbonPanel .cwRibbonGroup{
     display:flex;
     flex-direction:column;
 
@@ -1352,7 +1346,7 @@ body{
 }
 
 /* GROUP TITLE */
-.cwRibbonPanel[data-panel="home"] .cwGroupTitle{
+#tab-home.cwRibbonPanel .cwGroupTitle{
     font-size:11px;
     font-weight:600;
     color:#2b579a;
@@ -1369,7 +1363,7 @@ body{
    BUTTON GRID INSIDE GROUP
 ========================= */
 
-.cwRibbonPanel[data-panel="home"] .cwRibbonGroupContent{
+#tab-home.cwRibbonPanel .cwRibbonGroupContent{
     display:flex;
     flex-wrap:wrap;
     gap:6px;
@@ -1380,7 +1374,7 @@ body{
    ICON BUTTON (WORD STYLE)
 ========================= */
 
-.cwRibbonPanel[data-panel="home"] .cwRibbonIconBtn{
+#tab-home.cwRibbonPanel .cwRibbonIconBtn{
     width:38px;
     height:38px;
 
@@ -1399,18 +1393,18 @@ body{
 }
 
 /* HOVER */
-.cwRibbonPanel[data-panel="home"] .cwRibbonIconBtn:hover{
+#tab-home.cwRibbonPanel .cwRibbonIconBtn:hover{
     background:linear-gradient(to bottom,#ffffff,#dfeaf6);
     border-color:#7f9db9;
 }
 
 /* ACTIVE TOUCH */
-.cwRibbonPanel[data-panel="home"] .cwRibbonIconBtn:active{
+#tab-home.cwRibbonPanel .cwRibbonIconBtn:active{
     transform:scale(0.95);
 }
 
 /* SVG */
-.cwRibbonPanel[data-panel="home"] .cwRibbonIconBtn svg{
+#tab-home.cwRibbonPanel .cwRibbonIconBtn svg{
     width:18px;
     height:18px;
     color:#2b579a;
@@ -1420,7 +1414,7 @@ body{
    SEPARATOR
 ========================= */
 
-.cwRibbonPanel[data-panel="home"] .cwRibbonSeparator{
+#tab-home.cwRibbonPanel .cwRibbonSeparator{
     width:1px;
     height:60px;
     background:linear-gradient(to bottom,transparent,#b8c6d8,transparent);
@@ -1431,15 +1425,19 @@ body{
    MOBILE + ALL DEVICES FIX
 ========================= */
 
-.cwRibbonPanel[data-panel="home"]{
+#tab-home.cwRibbonPanel{
     scrollbar-width:thin; /* Firefox */
 }
 
-.cwRibbonPanel[data-panel="home"]::-webkit-scrollbar{
+#tab-home.cwRibbonPanel::-webkit-scrollbar{
     height:5px;
 }
 
-.cwRibbonPanel[data-panel="home"]::-webkit-scrollbar-thumb{
+#tab-home.cwRibbonPanel::-webkit-scrollbar-thumb{
     background:rgba(0,0,0,0.25);
     border-radius:10px;
 }
+
+
+
+
