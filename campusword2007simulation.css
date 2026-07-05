@@ -1639,3 +1639,17 @@ body{
     border-bottom:1px solid #d7e2ef;
     padding-bottom:3px;
 }
+
+
+
+
+
+
+
+
+
+#cwRibbonContentArea{
+    max-height: 140px;
+    overflow: hidden;
+    box-sizing: border-box;
+}
