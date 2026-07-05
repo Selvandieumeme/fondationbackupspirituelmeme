@@ -1441,3 +1441,201 @@ body{
 
 
 
+
+
+
+
+
+
+
+
+
+
+/* =========================================================
+   WORD-STYLE ICON SYSTEM (SAFE ADD-ON)
+   Works with existing .cwRibbonBtn or any button
+========================================================= */
+
+
+/* =========================
+   BASE ICON BUTTON LOOK
+========================= */
+
+.cwRibbonBtn{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+
+    padding:6px 10px;
+
+    border:1px solid #b8c6d8;
+    border-radius:3px;
+
+    background:linear-gradient(to bottom,#ffffff,#e9f1fb);
+
+    font-size:12px;
+    font-weight:500;
+    color:#1f3b63;
+
+    cursor:pointer;
+
+    transition:all .15s ease;
+}
+
+/* HOVER */
+.cwRibbonBtn:hover{
+    background:linear-gradient(to bottom,#ffffff,#dbe7f7);
+    border-color:#7f9db9;
+}
+
+/* ACTIVE CLICK */
+.cwRibbonBtn:active{
+    transform:scale(0.97);
+}
+
+/* =========================
+   SVG ICON STYLE INSIDE BUTTON
+========================= */
+
+.cwRibbonBtn svg{
+    width:16px;
+    height:16px;
+    fill:#2b579a;
+    flex-shrink:0;
+}
+
+/* =========================
+   TEXT + ICON ALIGNMENT FIX
+========================= */
+
+.cwRibbonBtn svg + span,
+.cwRibbonBtn svg + {
+    margin-left:4px;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+/* =========================================================
+   WORD SPACING PRO — RIBBON LAYOUT POLISH
+========================================================= */
+
+
+/* =========================
+   TAB BAR IMPROVED SPACING
+========================= */
+
+#cwRibbonTabBar{
+    display:flex;
+    gap:4px;
+
+    padding:6px 10px;
+
+    background:linear-gradient(to bottom,#e8eff9,#d6e2f2);
+
+    border-bottom:1px solid #aebed4;
+
+    overflow-x:auto;
+    white-space:nowrap;
+}
+
+/* =========================
+   TABS LOOK MORE OFFICE-STYLE
+========================= */
+
+.cwTabBtn{
+    flex:0 0 auto;
+
+    padding:6px 16px;
+
+    border-radius:3px 3px 0 0;
+
+    border:1px solid #aabbd2;
+    border-bottom:none;
+
+    background:linear-gradient(to bottom,#f9fbff,#dfeaf6);
+
+    font-size:12px;
+    font-weight:600;
+
+    color:#1f3b63;
+
+    transition:all .15s ease;
+}
+
+/* ACTIVE TAB = WORD STYLE WHITE PANEL CONNECT */
+.cwTabBtn.active{
+    background:#ffffff;
+    border-bottom:1px solid #ffffff;
+
+    color:#2b579a;
+}
+
+/* HOVER */
+.cwTabBtn:hover{
+    background:linear-gradient(to bottom,#ffffff,#e6eef9);
+}
+
+/* =========================
+   RIBBON CONTENT AREA SPACING
+========================= */
+
+#cwRibbonContentArea{
+    padding:10px 12px;
+
+    background:#f4f8fd;
+
+    border-bottom:1px solid #b8c6d8;
+}
+
+/* =========================
+   GROUP SPACING LIKE WORD SECTIONS
+========================= */
+
+.cwRibbonGroups{
+    display:flex;
+    gap:14px;
+    align-items:flex-start;
+}
+
+/* =========================
+   GROUP BOX POLISH
+========================= */
+
+.cwRibbonGroup{
+    min-width:130px;
+    padding:8px;
+
+    border-radius:4px;
+
+    background:linear-gradient(to bottom,#ffffff,#f3f7fc);
+
+    border:1px solid #c7d2e3;
+
+    box-shadow:0 1px 3px rgba(0,0,0,0.06);
+}
+
+/* =========================
+   GROUP TITLE BETTER READABILITY
+========================= */
+
+.cwRibbonGroupTitle{
+    font-size:11px;
+    font-weight:600;
+    color:#2b579a;
+
+    text-align:center;
+
+    margin-bottom:6px;
+
+    border-bottom:1px solid #d7e2ef;
+    padding-bottom:3px;
+}
