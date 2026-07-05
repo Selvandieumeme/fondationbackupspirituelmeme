@@ -200,14 +200,30 @@
     <!-- ===================== FONT ===================== -->
     <div class="cwRibbonGroup">
         <div class="cwGroupTitle">Font</div>
+<select data-action="font-family">
+    <option>Calibri</option>
+    <option>Arial</option>
+    <option>Times New Roman</option>
+    <option>Verdana</option>
+    <option>Georgia</option>
+    <option>Tahoma</option>
+    <option>Trebuchet MS</option>
+    <option>Segoe UI</option>
+    <option>Helvetica</option>
+    <option>Cambria</option>
+    <option>Garamond</option>
+    <option>Book Antiqua</option>
+    <option>Palatino Linotype</option>
+    <option>Lucida Sans Unicode</option>
+    <option>Century Gothic</option>
+    <option>Consolas</option>
+    <option>Courier New</option>
+    <option>Impact</option>
+    <option>Franklin Gothic Medium</option>
+    <option>Roboto</option>
+</select>
 
-        <select data-action="font-family">
-            <option>Calibri</option>
-            <option>Arial</option>
-            <option>Times New Roman</option>
-            <option>Verdana</option>
-            <option>Georgia</option>
-        </select>
+
 
         <input type="number" value="11" data-action="font-size">
 
@@ -253,23 +269,46 @@
             S
         </button>
 
-        <!-- COLOR (ENHANCED - SAFE DROP ZONE READY) -->
-        <button class="cwRibbonBtn" data-action="color">
-            <svg viewBox="0 0 24 24" width="16" height="16">
-                <path d="M12 3l4 18h-2l-1-4H9l-1 4H6l4-18z"/>
-            </svg>
-            Color ▾
-        </button>
 
-        <!-- HIGHLIGHT -->
-        <button class="cwRibbonBtn" data-action="highlight">
-            <svg viewBox="0 0 24 24" width="16" height="16">
-                <path d="M3 21h18v-2H3zm4-4h10l-1-3H8z"/>
-            </svg>
-            Highlight ▾
-        </button>
+<!-- COLOR (ENHANCED - SAFE DROP ZONE READY) -->
+<button class="cwRibbonBtn cwDropdownBtn" data-action="color">
+    <svg viewBox="0 0 24 24" width="16" height="16">
+        <path d="M12 3l4 18h-2l-1-4H9l-1 4H6l4-18z"/>
+    </svg>
+    Color ▾
+
+    <!-- DROPDOWN (HIDDEN BY DEFAULT) -->
+    <span class="cwDropdownMenu cwColorMenu">
+        <span class="cwColorDot" data-color="#000000" title="Black"></span>
+        <span class="cwColorDot" data-color="#333333" title="Dark Gray"></span>
+        <span class="cwColorDot" data-color="#ff0000" title="Red"></span>
+        <span class="cwColorDot" data-color="#ff9900" title="Orange"></span>
+        <span class="cwColorDot" data-color="#ffff00" title="Yellow"></span>
+        <span class="cwColorDot" data-color="#00ff00" title="Green"></span>
+        <span class="cwColorDot" data-color="#00ccff" title="Sky Blue"></span>
+        <span class="cwColorDot" data-color="#0000ff" title="Blue"></span>
+        <span class="cwColorDot" data-color="#9900ff" title="Purple"></span>
+        <span class="cwColorDot" data-color="#ffffff" title="White"></span>
+    </span>
+</button>
+
+
+<button class="cwRibbonBtn cwDropdownBtn" data-action="highlight">
+    Highlight ▾
+
+    <span class="cwDropdownMenu cwHighlightMenu">
+        <span class="cwColorDot highlight" data-color="yellow"></span>
+        <span class="cwColorDot highlight" data-color="lightgreen"></span>
+        <span class="cwColorDot highlight" data-color="orange"></span>
+        <span class="cwColorDot highlight" data-color="pink"></span>
+        <span class="cwColorDot highlight" data-color="lightblue"></span>
+        <span class="cwColorDot highlight" data-color="none"></span>
+    </span>
+</button>
 
     </div>
+
+
 
     <!-- ===================== PARAGRAPH ===================== -->
     <div class="cwRibbonGroup">
