@@ -1648,6 +1648,24 @@ body{
 
 
 
+
+
+
+.cwRibbonGroup{
+    display:flex;
+    flex-direction:column;
+
+    max-height:120px;      /* 🔥 limite wotè group la */
+    overflow-y:auto;       /* 🔥 scroll vertical andedan group */
+    overflow-x:hidden;
+
+    flex:0 0 auto;
+}
+
+
+
+
+
 #cwRibbonContentArea{
     max-height: 140px;
     overflow: hidden;
