@@ -707,27 +707,22 @@ document.addEventListener("click", function (e) {
 
 
 
-document.addEventListener("DOMContentLoaded", function () {
 
-    const officeBtn = document.getElementById("cwOfficeButton");
-    const officeMenu = document.getElementById("cwOfficeMenu");
+document.addEventListener("DOMContentLoaded", () => {
 
-    if (!officeBtn || !officeMenu) return;
+    const btn = document.getElementById("cwOfficeButton");
+    const menu = document.getElementById("cwOfficeMenu");
 
-    officeBtn.addEventListener("click", function (e) {
+    btn.addEventListener("click", (e) => {
         e.stopPropagation();
-        officeMenu.classList.toggle("active");
+        menu.classList.toggle("active");
     });
 
-    document.addEventListener("click", function () {
-        officeMenu.classList.remove("active");
+    document.addEventListener("click", () => {
+        menu.classList.remove("active");
     });
 
 });
-
-
-
-
 
 
 
