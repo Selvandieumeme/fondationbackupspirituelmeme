@@ -1719,6 +1719,45 @@ body{
 
 
 
+/* =========================
+   OFFICE MENU BASE
+========================= */
 
+.cwOfficeMenu{
+    position:absolute;
+    top:45px;
+    left:10px;
+
+    width:220px;
+
+    background:#ffffff;
+    border:1px solid #c7d2e3;
+    box-shadow:0 8px 20px rgba(0,0,0,0.18);
+
+    display:none;
+    flex-direction:column;
+
+    z-index:99999;
+    border-radius:6px;
+
+    padding:6px 0;
+}
+
+/* show */
+.cwOfficeMenu.active{
+    display:flex;
+}
+
+/* items */
+.cwOfficeItem{
+    padding:8px 12px;
+    font-size:13px;
+    cursor:pointer;
+    user-select:none;
+}
+
+.cwOfficeItem:hover{
+    background:#e6f0ff;
+}
 
 
