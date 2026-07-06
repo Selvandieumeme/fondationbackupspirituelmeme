@@ -697,3 +697,29 @@ document.addEventListener("click", function (e) {
         b.classList.remove("active");
     });
 });
+
+
+
+
+
+
+
+
+
+
+
+document.addEventListener("DOMContentLoaded", () => {
+
+    const btn = document.getElementById("cwOfficeButton");
+    const menu = document.getElementById("cwOfficeMenu");
+
+    btn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        menu.classList.toggle("active");
+    });
+
+    document.addEventListener("click", () => {
+        menu.classList.remove("active");
+    });
+
+});
