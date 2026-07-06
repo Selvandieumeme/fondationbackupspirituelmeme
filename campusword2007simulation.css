@@ -1751,6 +1751,71 @@ body{
 
 
 
+
+
+
+/* =========================
+   COLOR / HIGHLIGHT POPUP FIX
+========================= */
+
+.cwRibbonBtn{
+    position: relative; /* enpòtan pou dropdown la ancrage */
+}
+
+/* kache pa default */
+.cwColorPalette,
+.cwHighlightPalette{
+    display: none;
+
+    position: absolute;
+    top: 100%;
+    left: 0;
+
+    margin-top: 6px;
+
+    background: #ffffff;
+    border: 1px solid #c7d2e3;
+    border-radius: 6px;
+
+    padding: 6px;
+    gap: 4px;
+
+    box-shadow: 0 6px 18px rgba(0,0,0,0.12);
+
+    z-index: 9999;
+
+    width: max-content;
+
+    display: grid;
+    grid-template-columns: repeat(5, 18px);
+}
+
+/* lè active */
+.cwRibbonBtn.open .cwColorPalette,
+.cwRibbonBtn.open .cwHighlightPalette{
+    display: grid;
+}
+
+/* dots style */
+.cwColorDot{
+    width: 14px;
+    height: 14px;
+    border-radius: 3px;
+    cursor: pointer;
+    border: 1px solid #ccc;
+}
+
+.cwColorDot.highlight{
+    border-radius: 50%;
+}
+
+
+
+
+
+
+
+
 /* =========================
    COLOR DROPDOWN FIX FINAL
 ========================= */
