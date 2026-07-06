@@ -1,4 +1,14 @@
 
+
+/* FORCE INITIAL STATE BEFORE ANYTHING */
+panels.forEach(p => {
+    p.style.display = "none";
+});
+
+
+
+
+
 /* =========================================================
    CAMPUS WORD 2007 — CORE ENGINE (PRODUCTION FOUNDATION)
    SAFE • RESPONSIVE • MULTI-DEVICE • SCALABLE
@@ -607,6 +617,13 @@ const WordRulerEngine = {
 
 
 
+
+
+
+<!-- =====================================================
+    RIBBON TAB SYSTEM CONTROLLER (SAFE + ISOLATED)
+===================================================== -->
+
 (function () {
 
     const tabButtons = document.querySelectorAll(".cwTabBtn");
@@ -614,7 +631,9 @@ const WordRulerEngine = {
 
     function activateTab(target) {
 
-        /* remove active from all buttons */
+        /* =====================================================
+           BUTTON STATE CONTROL
+        ===================================================== */
         tabButtons.forEach(btn => {
             btn.classList.remove("active");
             if (btn.dataset.target === target) {
@@ -622,40 +641,53 @@ const WordRulerEngine = {
             }
         });
 
-        /* hide all panels */
+        /* =====================================================
+           PANEL VISIBILITY CONTROL (STRICT ISOLATION FIX)
+        ===================================================== */
         panels.forEach(panel => {
             panel.classList.remove("active");
-
-            /* activate matching panel */
-            if (panel.id === target) {
-                panel.classList.add("active");
-            }
+            panel.style.display = "none"; // FORCE HIDE ALL
         });
 
         /* =====================================================
-           🔥 FIX: SAFE fallback (only if BOTH are truly invalid)
+           ACTIVATE SELECTED TAB PANEL
+        ===================================================== */
+        const activePanel = document.getElementById(target);
+
+        if (activePanel) {
+            activePanel.classList.add("active");
+            activePanel.style.display = "flex"; // or "block" depending layout
+        }
+
+        /* =====================================================
+           SAFE FALLBACK (HOME RECOVERY SYSTEM)
         ===================================================== */
         const panelExists = document.getElementById(target);
         const btnExists = document.querySelector(`.cwTabBtn[data-target="${target}"]`);
 
         if (!panelExists && !btnExists) {
 
-            /* DO NOT wipe everything aggressively */
             const homeBtn = document.querySelector('.cwTabBtn[data-target="tab-home"]');
             const homePanel = document.getElementById("tab-home");
 
             if (homeBtn && homePanel) {
 
                 tabButtons.forEach(b => b.classList.remove("active"));
-                panels.forEach(p => p.classList.remove("active"));
+                panels.forEach(p => {
+                    p.classList.remove("active");
+                    p.style.display = "none";
+                });
 
                 homeBtn.classList.add("active");
                 homePanel.classList.add("active");
+                homePanel.style.display = "flex";
             }
         }
     }
 
-    /* click binding */
+    /* =====================================================
+       CLICK EVENT BINDING
+    ===================================================== */
     tabButtons.forEach(btn => {
         btn.addEventListener("click", () => {
             const target = btn.dataset.target;
@@ -663,10 +695,16 @@ const WordRulerEngine = {
         });
     });
 
-    /* default open HOME */
+    /* =====================================================
+       DEFAULT TAB (HOME)
+    ===================================================== */
     activateTab("tab-home");
 
 })();
+
+
+
+
 
 
 
