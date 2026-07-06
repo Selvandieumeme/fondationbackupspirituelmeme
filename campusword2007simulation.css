@@ -1715,49 +1715,40 @@ body{
 
 
 
-
-
-
-
-/* =========================
-   OFFICE MENU BASE
-========================= */
-
-.cwOfficeMenu{
+#cwOfficeMenu{
     position:absolute;
-    top:45px;
-    left:10px;
-
-    width:220px;
-
-    background:#ffffff;
-    border:1px solid #c7d2e3;
-    box-shadow:0 8px 20px rgba(0,0,0,0.18);
+    top:40px;
+    left:0;
 
     display:none;
-    flex-direction:column;
+
+    background:#1f3b63;
+    color:#fff;
+
+    border:1px solid #0f223d;
+    box-shadow:0 6px 18px rgba(0,0,0,0.3);
 
     z-index:99999;
-    border-radius:6px;
-
-    padding:6px 0;
 }
 
-/* show */
-.cwOfficeMenu.active{
-    display:flex;
+#cwOfficeMenu.active{
+    display:block;
 }
 
-/* items */
 .cwOfficeItem{
-    padding:8px 12px;
-    font-size:13px;
+    padding:10px;
     cursor:pointer;
-    user-select:none;
 }
 
 .cwOfficeItem:hover{
-    background:#e6f0ff;
+    background:#2b579a;
 }
+
+
+
+
+
+
+
 
 
