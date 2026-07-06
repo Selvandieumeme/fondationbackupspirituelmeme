@@ -1930,3 +1930,21 @@ body{
     border-radius: 50%;
 }
 
+
+
+
+
+
+
+
+
+
+
+
+.cwRibbonPanel {
+    display: none;
+}
+
+.cwRibbonPanel.active {
+    display: block;
+}
