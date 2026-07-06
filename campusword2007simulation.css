@@ -207,6 +207,206 @@ button{
 
 
 
+/* =========================================================
+   BLOCK 4 — RIBBON SYSTEM
+========================================================= */
+
+#cwRibbonTabs{
+    display:flex;
+    flex-direction:column;
+}
+
+/* TAB BAR */
+#cwRibbonTabBar{
+    display:flex;
+    gap:2px;
+    padding:4px 8px;
+    background:#dfe8f5;
+    border-bottom:1px solid #b8c6d8;
+}
+
+/* TAB BUTTON */
+.cwTabBtn{
+    padding:6px 12px;
+    font-size:12px;
+    background:linear-gradient(to bottom,#f8fbff,#dfeaf6);
+    border:1px solid #aabbd2;
+}
+
+.cwTabBtn.active{
+    background:#fff;
+    border-bottom:1px solid #fff;
+}
+
+/* TAB CONTENT */
+.cwRibbonTab{
+    display:none;
+    padding:8px;
+}
+
+.cwRibbonTab.active{
+    display:block;
+}
+
+
+
+
+
+
+
+
+
+
+/* =========================================================
+   BLOCK 4.1 — RIBBON VISUAL ENGINE (EXTENSION)
+   - Groups
+   - Group Boxes
+   - Separators
+   - Icon Buttons
+========================================================= */
+
+/* RIBBON GROUP CONTAINER */
+.cwRibbonGroups{
+    display:flex;
+    gap:12px;
+    padding:6px;
+    align-items:flex-start;
+}
+
+/* INDIVIDUAL GROUP BOX */
+.cwRibbonGroup{
+    display:flex;
+    flex-direction:column;
+    background:linear-gradient(to bottom,#ffffff,#f2f6fb);
+    border:1px solid #c7d2e3;
+    border-radius:4px;
+    padding:6px;
+    min-width:120px;
+    box-shadow:0 2px 6px rgba(0,0,0,0.08);
+}
+
+/* GROUP TITLE */
+.cwRibbonGroupTitle{
+    font-size:11px;
+    font-weight:600;
+    color:#2b579a;
+    margin-bottom:4px;
+    text-align:center;
+    border-bottom:1px solid #d6e0ef;
+    padding-bottom:3px;
+}
+
+/* ICON GRID INSIDE GROUP */
+.cwRibbonGroupContent{
+    display:flex;
+    flex-wrap:wrap;
+    gap:6px;
+    justify-content:center;
+}
+
+/* ICON BUTTON (SMALL RIBBON TOOL) */
+.cwRibbonIconBtn{
+    width:34px;
+    height:34px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    border:1px solid #b8c6d8;
+    border-radius:3px;
+    background:linear-gradient(to bottom,#ffffff,#e9f0f8);
+    cursor:pointer;
+    transition:all .15s ease;
+}
+
+/* ICON HOVER EFFECT */
+.cwRibbonIconBtn:hover{
+    background:linear-gradient(to bottom,#fdfefe,#dfeaf6);
+    border-color:#7f9db9;
+}
+
+/* ICON ACTIVE PRESS EFFECT */
+.cwRibbonIconBtn:active{
+    transform:scale(0.96);
+}
+
+/* ICON INSIDE BUTTON */
+.cwRibbonIconBtn svg{
+    width:16px;
+    height:16px;
+    color:#2b579a;
+}
+
+/* SEPARATOR BETWEEN GROUPS */
+.cwRibbonSeparator{
+    width:1px;
+    background:linear-gradient(to bottom,transparent,#b8c6d8,transparent);
+    margin:0 6px;
+    height:60px;
+}
+
+/* OPTIONAL GROUP FOOTER LABEL */
+.cwRibbonGroupFooter{
+    font-size:10px;
+    color:#6b7f99;
+    text-align:center;
+    margin-top:4px;
+}
+
+
+
+
+
+
+
+
+/* =========================================================
+   BLOCK 4.2 — RIBBON CONTENT VIEWPORT ENGINE
+========================================================= */
+
+
+/* MAIN RIBBON CONTENT AREA */
+#cwRibbonContentArea{
+    width:100%;
+    background:var(--cw-ribbon-bg);
+
+    border-bottom:1px solid #b8c6d8;
+
+    min-height:110px;
+
+    padding:8px;
+
+    box-sizing:border-box;
+}
+
+
+/* EACH PANEL */
+.cwRibbonPanel{
+    display:none;
+
+    width:100%;
+
+    min-height:100px;
+
+    animation:fadeIn .12s ease;
+}
+
+
+/* ACTIVE PANEL */
+.cwRibbonPanel.active{
+    display:block;
+}
+
+
+/* SIMPLE FADE EFFECT */
+@keyframes fadeIn{
+    from{opacity:0; transform:translateY(-2px);}
+    to{opacity:1; transform:translateY(0);}
+}
+
+
+
+
+
 
 /* =========================================================
    BLOCK 5 — WORKSPACE
