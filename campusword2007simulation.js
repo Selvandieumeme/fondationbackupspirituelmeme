@@ -803,20 +803,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 
-    /* =====================================================
-       HARD ENFORCER: ensure only ONE active panel exists
-    ===================================================== */
-
-    const activePanels = document.querySelectorAll(".cwRibbonPanel.active");
-
-    if (activePanels.length > 1) {
-        activePanels.forEach(p => p.classList.remove("active"));
-
-        const safePanel = document.getElementById(target || "tab-home");
-        if (safePanel) {
-            safePanel.classList.add("active");
-        }
-    }
 
 
 
@@ -829,24 +815,3 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 
-document.addEventListener("click", () => {
-
-    const activePanels = document.querySelectorAll(".cwRibbonPanel.active");
-    const activeButtons = document.querySelectorAll(".cwTabBtn.active");
-
-    // si plis pase 1 active → korije otomatikman
-    if (activePanels.length > 1) {
-
-        activePanels.forEach(p => p.classList.remove("active"));
-        activeButtons.forEach(b => b.classList.remove("active"));
-
-        const homeBtn = document.querySelector('.cwTabBtn[data-target="tab-home"]');
-        const homePanel = document.getElementById("tab-home");
-
-        if (homeBtn && homePanel) {
-            homeBtn.classList.add("active");
-            homePanel.classList.add("active");
-        }
-    }
-
-});
