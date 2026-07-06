@@ -611,9 +611,9 @@ const WordRulerEngine = {
 
 
 
-<!-- =====================================================
-    RIBBON TAB SYSTEM CONTROLLER (SAFE + ISOLATED)
-===================================================== -->
+/* =========================================================
+   RIBBON TAB SWITCH ENGINE (WORD 2007 STYLE)
+========================================================= */
 
 (function () {
 
@@ -622,9 +622,7 @@ const WordRulerEngine = {
 
     function activateTab(target) {
 
-        /* =====================================================
-           BUTTON STATE CONTROL
-        ===================================================== */
+        /* remove active from all buttons */
         tabButtons.forEach(btn => {
             btn.classList.remove("active");
             if (btn.dataset.target === target) {
@@ -632,53 +630,31 @@ const WordRulerEngine = {
             }
         });
 
-        /* =====================================================
-           PANEL VISIBILITY CONTROL (STRICT ISOLATION FIX)
-        ===================================================== */
+        /* hide all panels */
         panels.forEach(panel => {
             panel.classList.remove("active");
-            panel.style.display = "none"; // FORCE HIDE ALL
+
+            /* 🔥 FIX: switched from data-panel → id system */
+            if (panel.id === target) {
+                panel.classList.add("active");
+            }
         });
 
-        /* =====================================================
-           ACTIVATE SELECTED TAB PANEL
-        ===================================================== */
-        const activePanel = document.getElementById(target);
-
-        if (activePanel) {
-            activePanel.classList.add("active");
-            activePanel.style.display = "flex"; // or "block" depending layout
-        }
-
-        /* =====================================================
-           SAFE FALLBACK (HOME RECOVERY SYSTEM)
-        ===================================================== */
+        /* 🔥 FIX ADD: fallback HOME if target not found */
         const panelExists = document.getElementById(target);
         const btnExists = document.querySelector(`.cwTabBtn[data-target="${target}"]`);
 
-        if (!panelExists && !btnExists) {
+        if (!panelExists || !btnExists) {
+            document.querySelectorAll(".cwTabBtn, .cwRibbonPanel").forEach(el => {
+                el.classList.remove("active");
+            });
 
-            const homeBtn = document.querySelector('.cwTabBtn[data-target="tab-home"]');
-            const homePanel = document.getElementById("tab-home");
-
-            if (homeBtn && homePanel) {
-
-                tabButtons.forEach(b => b.classList.remove("active"));
-                panels.forEach(p => {
-                    p.classList.remove("active");
-                    p.style.display = "none";
-                });
-
-                homeBtn.classList.add("active");
-                homePanel.classList.add("active");
-                homePanel.style.display = "flex";
-            }
+            document.querySelector('.cwTabBtn[data-target="tab-home"]')?.classList.add("active");
+            document.getElementById("tab-home")?.classList.add("active");
         }
     }
 
-    /* =====================================================
-       CLICK EVENT BINDING
-    ===================================================== */
+    /* click binding */
     tabButtons.forEach(btn => {
         btn.addEventListener("click", () => {
             const target = btn.dataset.target;
@@ -686,12 +662,13 @@ const WordRulerEngine = {
         });
     });
 
-    /* =====================================================
-       DEFAULT TAB (HOME)
-    ===================================================== */
+    /* default open HOME if exists */
     activateTab("tab-home");
 
 })();
+
+
+
 
 
 
