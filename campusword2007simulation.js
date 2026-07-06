@@ -604,9 +604,8 @@ const WordRulerEngine = {
 
 
 
- /* =========================================================
-   RIBBON TAB SWITCH ENGINE (WORD 2007 STYLE)
-========================================================= */
+
+
 
 (function () {
 
@@ -627,23 +626,32 @@ const WordRulerEngine = {
         panels.forEach(panel => {
             panel.classList.remove("active");
 
-            /* 🔥 FIX: switched from data-panel → id system */
+            /* activate matching panel */
             if (panel.id === target) {
                 panel.classList.add("active");
             }
         });
 
-        /* 🔥 FIX ADD: fallback HOME if target not found */
+        /* =====================================================
+           🔥 FIX: SAFE fallback (only if BOTH are truly invalid)
+        ===================================================== */
         const panelExists = document.getElementById(target);
         const btnExists = document.querySelector(`.cwTabBtn[data-target="${target}"]`);
 
-        if (!panelExists || !btnExists) {
-            document.querySelectorAll(".cwTabBtn, .cwRibbonPanel").forEach(el => {
-                el.classList.remove("active");
-            });
+        if (!panelExists && !btnExists) {
 
-            document.querySelector('.cwTabBtn[data-target="tab-home"]')?.classList.add("active");
-            document.getElementById("tab-home")?.classList.add("active");
+            /* DO NOT wipe everything aggressively */
+            const homeBtn = document.querySelector('.cwTabBtn[data-target="tab-home"]');
+            const homePanel = document.getElementById("tab-home");
+
+            if (homeBtn && homePanel) {
+
+                tabButtons.forEach(b => b.classList.remove("active"));
+                panels.forEach(p => p.classList.remove("active"));
+
+                homeBtn.classList.add("active");
+                homePanel.classList.add("active");
+            }
         }
     }
 
@@ -655,10 +663,26 @@ const WordRulerEngine = {
         });
     });
 
-    /* default open HOME if exists */
+    /* default open HOME */
     activateTab("tab-home");
 
 })();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
