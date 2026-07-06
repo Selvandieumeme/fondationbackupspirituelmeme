@@ -723,3 +723,29 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
 });
+
+
+
+
+
+
+
+
+
+document.addEventListener("DOMContentLoaded", function () {
+
+    const officeBtn = document.getElementById("cwOfficeButton");
+    const officeMenu = document.getElementById("cwOfficeMenu");
+
+    if (!officeBtn || !officeMenu) return;
+
+    officeBtn.addEventListener("click", function (e) {
+        e.stopPropagation();
+        officeMenu.classList.toggle("active");
+    });
+
+    document.addEventListener("click", function () {
+        officeMenu.classList.remove("active");
+    });
+
+});
