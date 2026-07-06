@@ -779,23 +779,3 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 
-document.addEventListener("click", function(e){
-
-    const tabBtn = e.target.closest("[data-tab]");
-
-    if(!tabBtn) return;
-
-    const target = tabBtn.getAttribute("data-tab");
-
-    // retire active sou tout panels
-    document.querySelectorAll(".cwRibbonPanel").forEach(p => {
-        p.classList.remove("active");
-    });
-
-    // aktive sèl sa yo vle a
-    const activePanel = document.getElementById("tab-" + target);
-    if(activePanel){
-        activePanel.classList.add("active");
-    }
-});
-
