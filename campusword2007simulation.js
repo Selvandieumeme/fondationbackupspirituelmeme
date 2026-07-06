@@ -669,6 +669,51 @@ const WordRulerEngine = {
 
 
 
+// =========================
+// COLOR / HIGHLIGHT TOGGLE
+// =========================
+
+document.addEventListener("click", function (e) {
+
+    const colorBtn = e.target.closest('[data-action="color"]');
+    const highlightBtn = e.target.closest('[data-action="highlight"]');
+
+    // ouvri color
+    if (colorBtn) {
+        e.preventDefault();
+
+        // fè toggle
+        colorBtn.classList.toggle("open");
+
+        // fèmen highlight si li louvri
+        document.querySelectorAll('.cwRibbonBtn[data-action="highlight"].open')
+            .forEach(el => el.classList.remove("open"));
+    }
+
+    // ouvri highlight
+    if (highlightBtn) {
+        e.preventDefault();
+
+        highlightBtn.classList.toggle("open");
+
+        document.querySelectorAll('.cwRibbonBtn[data-action="color"].open')
+            .forEach(el => el.classList.remove("open"));
+    }
+
+    // klik deyò fèmen tout
+    if (!colorBtn && !highlightBtn) {
+        document.querySelectorAll(".cwRibbonBtn.open")
+            .forEach(el => el.classList.remove("open"));
+    }
+});
+
+
+
+
+
+
+
+
 
 
 
