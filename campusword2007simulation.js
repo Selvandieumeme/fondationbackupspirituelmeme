@@ -676,7 +676,21 @@ const WordRulerEngine = {
 
 
 
+/* =========================================================
+   RIBBON TAB INITIAL VISIBILITY FIX
+========================================================= */
 
+document.addEventListener("DOMContentLoaded", () => {
+
+    const panels = document.querySelectorAll(".cwRibbonPanel");
+
+    panels.forEach(p => {
+        if (!p.classList.contains("active")) {
+            p.style.display = "none";
+        }
+    });
+
+});
 
 
 
@@ -772,31 +786,6 @@ document.addEventListener("click", function (e) {
         b.classList.remove("active");
     });
 });
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
