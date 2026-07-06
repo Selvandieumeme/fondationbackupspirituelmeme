@@ -803,3 +803,21 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 
+    /* =====================================================
+       HARD ENFORCER: ensure only ONE active panel exists
+    ===================================================== */
+
+    const activePanels = document.querySelectorAll(".cwRibbonPanel.active");
+
+    if (activePanels.length > 1) {
+        activePanels.forEach(p => p.classList.remove("active"));
+
+        const safePanel = document.getElementById(target || "tab-home");
+        if (safePanel) {
+            safePanel.classList.add("active");
+        }
+    }
+
+
+
+
