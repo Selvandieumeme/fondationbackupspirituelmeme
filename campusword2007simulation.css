@@ -1673,7 +1673,34 @@ body{
 
 
 
+#cwOfficeMenu{
+    position:absolute;
+    top:40px;
+    left:0;
 
+    display:none;
+
+    background:#1f3b63;
+    color:#fff;
+
+    border:1px solid #0f223d;
+    box-shadow:0 6px 18px rgba(0,0,0,0.3);
+
+    z-index:99999;
+}
+
+#cwOfficeMenu.active{
+    display:block;
+}
+
+.cwOfficeItem{
+    padding:10px;
+    cursor:pointer;
+}
+
+.cwOfficeItem:hover{
+    background:#2b579a;
+}
 
 
 
