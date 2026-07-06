@@ -1939,26 +1939,27 @@ body{
 
 
 
-
-
-.cwRibbonPanel {
-    display: none;
-}
-
-.cwRibbonPanel.active {
-    display: block;
-}
-
-
-
-
-
-
-
-
 .cwRibbonPanel {
     position: absolute;
     top: 0;
     left: 0;
     right: 0;
 }
+
+
+
+
+
+
+.cwRibbonPanel{
+    display: none;
+}
+
+.cwRibbonPanel.active{
+    display: flex;
+    flex-direction: column;
+}
+
+
+
+
