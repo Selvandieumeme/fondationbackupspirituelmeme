@@ -1942,10 +1942,28 @@ body{
 .
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+/* =========================
+   TAB ISOLATION FIX (CRITICAL)
+========================= */
+
+/* kache tout tab yo pa default */
 .cwRibbonPanel{
-    display:none !important;
+    display: none !important;
 }
 
+/* sèlman tab active la ap parèt */
 .cwRibbonPanel.active{
-    display:flex !important;
+    display: flex !important; /* si layout ou se grid/blok, ou ka chanje a block */
 }
