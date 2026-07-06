@@ -1697,3 +1697,66 @@ body{
 .cwDropdownBtn.active .cwDropdownMenu{
     display:flex;
 }
+
+
+
+
+
+
+
+
+
+/* =========================
+   COLOR DROPDOWN FIX FINAL
+========================= */
+
+/* bouton dwe reference positioning */
+.cwDropdownBtn{
+    position: relative;
+    overflow: visible;
+}
+
+/* menu an */
+.cwDropdownMenu{
+    position: absolute;
+    top: 100%;
+    left: 0;
+
+    display: none;
+
+    background: #fff;
+    border: 1px solid #c7d2e3;
+    border-radius: 6px;
+
+    padding: 6px;
+    gap: 6px;
+
+    box-shadow: 0 6px 18px rgba(0,0,0,0.15);
+
+    z-index: 99999;
+
+    width: max-content;
+
+    display: grid;
+    grid-template-columns: repeat(5, 18px);
+}
+
+/* show state (IMPORTANT) */
+.cwDropdownBtn.active .cwDropdownMenu{
+    display: grid;
+}
+
+/* color dots MUST be visible */
+.cwColorDot{
+    width: 14px;
+    height: 14px;
+    border-radius: 3px;
+    cursor: pointer;
+
+    border: 1px solid #ccc;
+}
+
+/* highlight dots */
+.cwColorDot.highlight{
+    border-radius: 50%;
+}
