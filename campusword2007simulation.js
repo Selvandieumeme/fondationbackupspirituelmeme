@@ -821,3 +821,32 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 
+
+
+
+
+
+
+
+
+document.addEventListener("click", () => {
+
+    const activePanels = document.querySelectorAll(".cwRibbonPanel.active");
+    const activeButtons = document.querySelectorAll(".cwTabBtn.active");
+
+    // si plis pase 1 active → korije otomatikman
+    if (activePanels.length > 1) {
+
+        activePanels.forEach(p => p.classList.remove("active"));
+        activeButtons.forEach(b => b.classList.remove("active"));
+
+        const homeBtn = document.querySelector('.cwTabBtn[data-target="tab-home"]');
+        const homePanel = document.getElementById("tab-home");
+
+        if (homeBtn && homePanel) {
+            homeBtn.classList.add("active");
+            homePanel.classList.add("active");
+        }
+    }
+
+});
