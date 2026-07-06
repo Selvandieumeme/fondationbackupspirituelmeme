@@ -1,14 +1,5 @@
 
 
-/* FORCE INITIAL STATE BEFORE ANYTHING */
-panels.forEach(p => {
-    p.style.display = "none";
-});
-
-
-
-
-
 /* =========================================================
    CAMPUS WORD 2007 — CORE ENGINE (PRODUCTION FOUNDATION)
    SAFE • RESPONSIVE • MULTI-DEVICE • SCALABLE
