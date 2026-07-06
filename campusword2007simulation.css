@@ -1942,3 +1942,10 @@ body{
 .
 
 
+.cwRibbonPanel{
+    display:none !important;
+}
+
+.cwRibbonPanel.active{
+    display:flex !important;
+}
