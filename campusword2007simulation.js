@@ -644,7 +644,7 @@ const WordRulerEngine = {
         const panelExists = document.getElementById(target);
         const btnExists = document.querySelector(`.cwTabBtn[data-target="${target}"]`);
 
-        if (!panelExists || !btnExists) {
+        if (!panelExists  && !btnExists) {
             document.querySelectorAll(".cwTabBtn, .cwRibbonPanel").forEach(el => {
                 el.classList.remove("active");
             });
