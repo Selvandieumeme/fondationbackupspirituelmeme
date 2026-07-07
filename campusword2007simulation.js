@@ -871,6 +871,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 
+
+
+
+
+
+
+/* =========================================================
+   CAMPUS WORD 2007 — BOLD TOGGLE COMMAND
+========================================================= */
+
 document.addEventListener("click", function(e){
 
     const button = e.target.closest('[data-action="bold"]');
@@ -883,31 +893,52 @@ document.addEventListener("click", function(e){
     if(selection.rangeCount === 0) return;
 
 
-    console.log("Before:", selection.toString());
-
-
     const range = selection.getRangeAt(0);
 
+    const selectedText = selection.toString();
 
-    const strong = document.createElement("strong");
-
-    strong.appendChild(range.extractContents());
-
-    range.insertNode(strong);
+    if(!selectedText) return;
 
 
-    selection.removeAllRanges();
-
-    const newRange = document.createRange();
-
-    newRange.selectNodeContents(strong);
-
-    selection.addRange(newRange);
+    const parent = range.commonAncestorContainer.parentElement;
 
 
-    console.log("Bold applied manually");
+    /* REMOVE BOLD IF ALREADY BOLD */
+    if(
+        parent &&
+        (
+            parent.tagName === "STRONG" ||
+            parent.tagName === "B"
+        )
+    ){
+
+        const fragment = document.createDocumentFragment();
+
+        while(parent.firstChild){
+            fragment.appendChild(parent.firstChild);
+        }
+
+        parent.replaceWith(fragment);
+
+    }
+
+
+    /* ADD BOLD */
+    else {
+
+        const strong = document.createElement("strong");
+
+        strong.appendChild(range.extractContents());
+
+        range.insertNode(strong);
+
+    }
+
 
 });
+
+
+
 
 
 
