@@ -899,29 +899,59 @@
 </div>
 
 
+<!-- ===================== HEADER/FOOTER ===================== -->
+<div class="cwRibbonGroup">
+    <div class="cwGroupTitle">Header & Footer</div>
 
 
+    <!-- HEADER -->
+    <button class="cwRibbonBtn cwDropdownBtn" data-action="header">
+        <svg viewBox="0 0 24 24" width="16" height="16">
+            <path d="M4 6h16v4H4zM4 12h16" fill="none" stroke="currentColor"/>
+        </svg>
+        Header ▾
 
-    <!-- ===================== HEADER/FOOTER ===================== -->
-    <div class="cwRibbonGroup">
-        <div class="cwGroupTitle">Header & Footer</div>
+        <div class="cwDropdownMenu">
+            <div data-action="header-blank">Blank Header</div>
+            <div data-action="header-edit">Edit Header</div>
+            <div data-action="header-remove">Remove Header</div>
+        </div>
+    </button>
 
-        <button class="cwRibbonBtn" data-action="header">
-            <svg viewBox="0 0 24 24" width="16" height="16">
-                <path d="M4 6h16v4H4zM4 12h16" stroke="currentColor"/>
-            </svg>
-            Header
-        </button>
 
-        <button class="cwRibbonBtn" data-action="footer">
-            <svg viewBox="0 0 24 24" width="16" height="16">
-                <path d="M4 6h16v12H4z" fill="none" stroke="currentColor"/>
-                <path d="M4 16h16" stroke="currentColor"/>
-            </svg>
-            Footer
-        </button>
-    </div>
+    <!-- FOOTER -->
+    <button class="cwRibbonBtn cwDropdownBtn" data-action="footer">
+        <svg viewBox="0 0 24 24" width="16" height="16">
+            <path d="M4 6h16v12H4z" fill="none" stroke="currentColor"/>
+            <path d="M4 16h16" stroke="currentColor"/>
+        </svg>
+        Footer ▾
 
+        <div class="cwDropdownMenu">
+            <div data-action="footer-blank">Blank Footer</div>
+            <div data-action="footer-edit">Edit Footer</div>
+            <div data-action="footer-remove">Remove Footer</div>
+        </div>
+    </button>
+
+
+    <!-- PAGE NUMBER -->
+    <button class="cwRibbonBtn cwDropdownBtn" data-action="page-number">
+        <svg viewBox="0 0 24 24" width="16" height="16">
+            <path d="M7 4h10v16H7z" fill="none" stroke="currentColor"/>
+            <path d="M10 8h4M10 12h4M10 16h4" stroke="currentColor"/>
+        </svg>
+        Page Number ▾
+
+        <div class="cwDropdownMenu">
+            <div data-action="page-top">Top of Page</div>
+            <div data-action="page-bottom">Bottom of Page</div>
+            <div data-action="page-margin">Page Margins</div>
+            <div data-action="page-remove">Remove Page Numbers</div>
+        </div>
+    </button>
+
+</div>
 </div>
 
 
