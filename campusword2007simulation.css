@@ -2016,3 +2016,31 @@ body{
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* =========================================================
+   GLOBAL RIBBON SCROLL BEHAVIOR
+========================================================= */
+
+.cwRibbonPanel{
+    overflow-x:auto;
+    overflow-y:auto;
+
+    width:100%;
+    box-sizing:border-box;
+}
+
+.cwRibbonPanel .cwRibbonGroup{
+    flex:0 0 auto;
+}
