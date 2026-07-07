@@ -2028,60 +2028,32 @@ body{
 
 
 
-
-
-
-
-
-
 /* =========================================================
-   OTHER RIBBON TABS SCROLL ENGINE
-   SAFE ISOLATED FIX — EXCLUDES HOME
+   OTHER RIBBON TABS HORIZONTAL SCROLL ONLY
+   SAFE — HOME REMAINS UNTOUCHED
 ========================================================= */
 
-/* Tout ribbon panel eksepte Home */
 .cwRibbonPanel:not(#tab-home){
-
     display:flex;
-
     flex-wrap:nowrap;
-
     overflow-x:auto;
     overflow-y:hidden;
 
-    width:100%;
-    box-sizing:border-box;
-
-    gap:10px;
-    padding:10px;
-
     -webkit-overflow-scrolling:touch;
-
-    scrollbar-width:thin;
 }
 
-
-/* Anpeche group yo kraze liy lan */
 .cwRibbonPanel:not(#tab-home) .cwRibbonGroup{
-
     flex:0 0 auto;
-
 }
 
 
-/* Scroll bar orizontal Android / Chrome */
-.cwRibbonPanel:not(#tab-home)::-webkit-scrollbar{
-
-    height:6px;
-
-}
 
 
-.cwRibbonPanel:not(#tab-home)::-webkit-scrollbar-thumb{
 
-    border-radius:10px;
 
-}
+
+
+
 
 
 
