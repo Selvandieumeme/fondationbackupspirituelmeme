@@ -1382,3 +1382,169 @@ CWCommandAdapter.register("indent-decrease", ({editor}) => {
 
 })();
 
+
+
+
+
+
+
+
+
+
+/* =========================================================
+   CAMPUS WORD 2007 — SELECTION PRESERVATION ENGINE
+   SAFE ADDON
+   Desktop + Android Touch Compatible
+========================================================= */
+
+const SelectionPreservationEngine = {
+
+    savedRange: null,
+    savedEditor: null,
+
+
+    /* =========================
+       SAVE CURRENT SELECTION
+    ========================= */
+    saveSelection() {
+
+        const selection = window.getSelection();
+
+        if (!selection) return;
+
+        if (selection.rangeCount === 0) return;
+
+
+        const range = selection.getRangeAt(0);
+
+
+        const editor = range.commonAncestorContainer
+            .parentElement
+            ?.closest(".cwPageContent");
+
+
+        if (!editor) return;
+
+
+        this.savedRange = range.cloneRange();
+        this.savedEditor = editor;
+
+    },
+
+
+
+    /* =========================
+       RESTORE SELECTION
+    ========================= */
+    restoreSelection() {
+
+        if (!this.savedRange) return false;
+
+
+        const selection = window.getSelection();
+
+        if (!selection) return false;
+
+
+        selection.removeAllRanges();
+
+        selection.addRange(
+            this.savedRange
+        );
+
+
+        return true;
+
+    },
+
+
+
+    /* =========================
+       CLEAR MEMORY
+    ========================= */
+    clear() {
+
+        this.savedRange = null;
+        this.savedEditor = null;
+
+    },
+
+
+
+    /* =========================
+       VERIFY ACTIVE EDITOR
+    ========================= */
+    hasSelection() {
+
+        return (
+            this.savedRange !== null &&
+            this.savedEditor !== null
+        );
+
+    }
+
+
+
+};
+
+
+
+
+
+/* =========================================================
+   AUTO SAVE SELECTION EVENTS
+========================================================= */
+
+document.addEventListener(
+    "selectionchange",
+    () => {
+
+        SelectionPreservationEngine.saveSelection();
+
+    }
+);
+
+
+
+
+/* =========================================================
+   TOUCH SAFE BACKUP
+========================================================= */
+
+document.addEventListener(
+    "touchend",
+    () => {
+
+        SelectionPreservationEngine.saveSelection();
+
+    },
+    {
+        passive:true
+    }
+);
+
+
+
+
+/* =========================================================
+   RIBBON BUTTON PROTECTION
+   SAVE BEFORE LOSING FOCUS
+========================================================= */
+
+document.addEventListener(
+    "mousedown",
+    (e)=>{
+
+        const ribbonButton =
+            e.target.closest(".cwRibbonBtn");
+
+
+        if(ribbonButton){
+
+            SelectionPreservationEngine.saveSelection();
+
+        }
+
+    }
+);
+
