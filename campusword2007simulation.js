@@ -1023,6 +1023,110 @@ document.addEventListener("click", function(e){
 
 
 
+/* =========================================================
+   HOME — PARAGRAPH COMMANDS
+   ALIGNMENT + LISTS + INDENT
+========================================================= */
+
+
+case "align-left":
+
+    document.execCommand(
+        "justifyLeft",
+        false,
+        null
+    );
+
+break;
+
+
+
+case "align-center":
+
+    document.execCommand(
+        "justifyCenter",
+        false,
+        null
+    );
+
+break;
+
+
+
+case "align-right":
+
+    document.execCommand(
+        "justifyRight",
+        false,
+        null
+    );
+
+break;
+
+
+
+case "justify":
+
+    document.execCommand(
+        "justifyFull",
+        false,
+        null
+    );
+
+break;
+
+
+
+case "bullet":
+
+    document.execCommand(
+        "insertUnorderedList",
+        false,
+        null
+    );
+
+break;
+
+
+
+case "numbering":
+
+    document.execCommand(
+        "insertOrderedList",
+        false,
+        null
+    );
+
+break;
+
+
+
+case "indent-increase":
+
+    document.execCommand(
+        "indent",
+        false,
+        null
+    );
+
+break;
+
+
+
+case "indent-decrease":
+
+    document.execCommand(
+        "outdent",
+        false,
+        null
+    );
+
+break;
+
+
+
+
+
 
 
 
