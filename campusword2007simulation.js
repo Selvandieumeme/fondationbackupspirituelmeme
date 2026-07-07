@@ -769,3 +769,120 @@ document.addEventListener("DOMContentLoaded", () => {
 
 });
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* =========================================================
+   CAMPUS WORD 2007 — RIBBON COMMAND ENGINE
+   GLOBAL • DYNAMIC • SAFE FOUNDATION
+   NO HTML INTERFERENCE
+========================================================= */
+
+const CWRibbonCommandEngine = {
+
+    /* =========================
+       COMMAND REGISTRY
+       Tout bouton Ribbon ap antre isit la
+    ========================= */
+    commands:{},
+
+
+
+    /* =========================
+       INIT ENGINE
+    ========================= */
+    init(){
+
+        this.bindRibbonEvents();
+
+    },
+
+
+
+    /* =========================
+       REGISTER COMMAND
+       Nou pral ajoute aksyon yo pita ladan
+    ========================= */
+    register(action, callback){
+
+        this.commands[action] = callback;
+
+    },
+
+
+
+    /* =========================
+       EXECUTE COMMAND
+    ========================= */
+    execute(action){
+
+        if(
+            this.commands[action] &&
+            typeof this.commands[action] === "function"
+        ){
+
+            this.commands[action]();
+
+        }
+
+    },
+
+
+
+    /* =========================
+       GLOBAL RIBBON LISTENER
+       Li pran tout data-action otomatikman
+    ========================= */
+    bindRibbonEvents(){
+
+        document.addEventListener(
+            "click",
+            (e)=>{
+
+                const button =
+                e.target.closest("[data-action]");
+
+
+                if(!button) return;
+
+
+                const action =
+                button.dataset.action;
+
+
+                this.execute(action);
+
+
+            }
+        );
+
+    }
+
+};
+
+
+
+
+/* =========================================================
+   BOOT RIBBON ENGINE
+========================================================= */
+
+CWRibbonCommandEngine.init();
