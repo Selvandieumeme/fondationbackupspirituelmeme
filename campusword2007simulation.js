@@ -1016,3 +1016,154 @@ document.addEventListener("click", function(e){
 
 
 });
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* =========================================================
+   CAMPUS WORD 2007 — FONT SIZE COMMAND ENGINE
+   PHASE 2: GROW FONT + SHRINK FONT
+   SAFE WITH CURRENT EDITOR ARCHITECTURE
+========================================================= */
+
+document.addEventListener("click", function(e){
+
+
+    const button = e.target.closest(
+        '[data-action="grow-font"],' +
+        '[data-action="shrink-font"]'
+    );
+
+
+    if(!button) return;
+
+
+
+    const selection = window.getSelection();
+
+
+    if(!selection) return;
+
+
+    if(selection.rangeCount === 0) return;
+
+
+    if(selection.toString().trim() === "") return;
+
+
+
+    const range = selection.getRangeAt(0);
+
+
+
+    const action = button.dataset.action;
+
+
+
+    /*
+       SIZE MAP
+       DEFAULT START: 11px
+    */
+
+    let size = 11;
+
+
+
+    const parent =
+        selection.anchorNode.parentElement;
+
+
+
+    if(parent){
+
+        const current =
+            window.getComputedStyle(parent).fontSize;
+
+
+        if(current){
+
+            size = parseInt(current);
+
+        }
+
+    }
+
+
+
+    if(action === "grow-font"){
+
+        size += 2;
+
+    }
+
+
+
+    if(action === "shrink-font"){
+
+        size -= 2;
+
+    }
+
+
+
+    /*
+       LIMIT SAFE SIZE
+    */
+
+    size = Math.max(6, Math.min(72, size));
+
+
+
+    /*
+       APPLY FONT SIZE
+    */
+
+    const span =
+        document.createElement("span");
+
+
+    span.style.fontSize = size + "px";
+
+
+
+    span.appendChild(
+        range.extractContents()
+    );
+
+
+
+    range.insertNode(span);
+
+
+
+    /*
+       KEEP SELECTION ACTIVE
+    */
+
+    selection.removeAllRanges();
+
+
+
+    const newRange =
+        document.createRange();
+
+
+
+    newRange.selectNodeContents(span);
+
+
+
+    selection.addRange(newRange);
+
+
+
+});
