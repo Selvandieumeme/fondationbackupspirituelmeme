@@ -886,3 +886,90 @@ const CWRibbonCommandEngine = {
 ========================================================= */
 
 CWRibbonCommandEngine.init();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* =========================================================
+   CAMPUS WORD 2007 — ACTIVE EDITOR RESOLVER
+   DYNAMIC • MULTI-PAGE • SAFE FOUNDATION
+   WORKS WITH .cwPageContent
+========================================================= */
+
+const CWActiveEditorResolver = {
+
+
+    /* =========================
+       GET ACTIVE EDITOR
+    ========================= */
+    get(){
+
+        const activeElement = document.activeElement;
+
+
+        /*
+            Si itilizatè a deja nan yon paj editab,
+            retounen paj sa a
+        */
+        if(
+            activeElement &&
+            activeElement.classList.contains("cwPageContent")
+        ){
+
+            return activeElement;
+
+        }
+
+
+
+        /*
+            Fallback:
+            si pa gen focus aktyèl,
+            pran premye editor disponib la
+        */
+        const firstEditor =
+        document.querySelector(".cwPageContent");
+
+
+        return firstEditor || null;
+
+    },
+
+
+
+
+    /* =========================
+       FOCUS ACTIVE EDITOR
+       Prepare pou Ribbon aksyon yo
+    ========================= */
+    focus(){
+
+        const editor = this.get();
+
+
+        if(editor){
+
+            editor.focus({
+                preventScroll:true
+            });
+
+        }
+
+
+        return editor;
+
+    }
+
+
+
+};
