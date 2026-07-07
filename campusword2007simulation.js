@@ -873,9 +873,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 
-
 /* =========================================================
    CAMPUS WORD 2007 — BOLD TOGGLE + BUTTON STATE
+   COMPATIBLE WITH CURRENT EDITOR
 ========================================================= */
 
 document.addEventListener("click", function(e){
@@ -885,43 +885,83 @@ document.addEventListener("click", function(e){
     if(!button) return;
 
 
-    const editor = document.querySelector(".cwPageContent");
-
-    if(!editor) return;
-
-
     const selection = window.getSelection();
 
+    if(selection.rangeCount === 0) return;
 
-    if(!selection.toString()) return;
+
+    if(selection.toString().trim() === "") return;
+
+
+    const range = selection.getRangeAt(0);
+
+
+    const parent =
+        selection.anchorNode.parentElement;
 
 
     /*
-       APLIKE / RETIRE BOLD
+       REMOVE BOLD IF ALREADY BOLD
     */
 
-    document.execCommand("bold", false, null);
+    if(
+        parent &&
+        parent.tagName === "STRONG"
+    ){
+
+        const text =
+            parent.innerHTML;
 
 
+        parent.outerHTML = text;
 
-    /*
-       METE ETA BOUTON AN
-    */
-
-    const isBold = document.queryCommandState("bold");
-
-
-    if(isBold){
-
-        button.classList.add("active");
-
-    }else{
 
         button.classList.remove("active");
+
+        return;
 
     }
 
 
+
+    /*
+       APPLY BOLD
+    */
+
+    const strong = document.createElement("strong");
+
+
+    strong.appendChild(
+        range.extractContents()
+    );
+
+
+    range.insertNode(strong);
+
+
+
+    /*
+       KEEP SELECTION
+    */
+
+    selection.removeAllRanges();
+
+
+    const newRange = document.createRange();
+
+
+    newRange.selectNodeContents(strong);
+
+
+    selection.addRange(newRange);
+
+
+
+    /*
+       ACTIVE BUTTON STATE
+    */
+
+    button.classList.add("active");
+
+
 });
-
-
