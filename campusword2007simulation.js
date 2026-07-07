@@ -850,9 +850,19 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
 /* =========================================================
-   CAMPUS WORD 2007 — BOLD COMMAND TEST
-   SAFE SINGLE ACTION
+   CAMPUS WORD 2007 — BOLD DEBUG TEST
 ========================================================= */
 
 document.addEventListener("click", function(e){
@@ -862,9 +872,22 @@ document.addEventListener("click", function(e){
     if(!button) return;
 
 
-    document.execCommand("bold", false, null);
+    const selection = window.getSelection();
+
+    console.log("Selected text:", selection.toString());
+
+
+    const result = document.execCommand("bold", false, null);
+
+    console.log("Bold result:", result);
 
 });
+
+
+
+
+
+
 
 
 
