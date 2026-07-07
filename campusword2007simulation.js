@@ -926,6 +926,58 @@ const button = e.target.closest(
 
 
 
+/*
+   PARAGRAPH COMMANDS
+*/
+
+switch(action){
+
+    case "align-left":
+        document.execCommand("justifyLeft");
+    break;
+
+
+    case "align-center":
+        document.execCommand("justifyCenter");
+    break;
+
+
+    case "align-right":
+        document.execCommand("justifyRight");
+    break;
+
+
+    case "justify":
+        document.execCommand("justifyFull");
+    break;
+
+
+    case "bullet":
+        document.execCommand("insertUnorderedList");
+    break;
+
+
+    case "numbering":
+        document.execCommand("insertOrderedList");
+    break;
+
+
+    case "indent-increase":
+        document.execCommand("indent");
+    break;
+
+
+    case "indent-decrease":
+        document.execCommand("outdent");
+    break;
+
+}
+
+
+
+
+
+
     const formatMap = {
 
         "bold": "strong",
@@ -1024,70 +1076,6 @@ const button = e.target.closest(
 
 
     button.classList.add("active");
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/*
-   PARAGRAPH COMMANDS
-*/
-
-switch(action){
-
-    case "align-left":
-        document.execCommand("justifyLeft");
-    break;
-
-
-    case "align-center":
-        document.execCommand("justifyCenter");
-    break;
-
-
-    case "align-right":
-        document.execCommand("justifyRight");
-    break;
-
-
-    case "justify":
-        document.execCommand("justifyFull");
-    break;
-
-
-    case "bullet":
-        document.execCommand("insertUnorderedList");
-    break;
-
-
-    case "numbering":
-        document.execCommand("insertOrderedList");
-    break;
-
-
-    case "indent-increase":
-        document.execCommand("indent");
-    break;
-
-
-    case "indent-decrease":
-        document.execCommand("outdent");
-    break;
-
-}
-
 
 
 });
