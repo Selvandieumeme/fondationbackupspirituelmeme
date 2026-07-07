@@ -768,27 +768,101 @@
 
 
 
+<!-- ===================== TEXT ===================== -->
+<div class="cwRibbonGroup">
+    <div class="cwGroupTitle">Text</div>
+
+    <!-- TEXT BOX -->
+    <button class="cwRibbonBtn" data-action="insert-textbox">
+        <svg viewBox="0 0 24 24" width="16" height="16">
+            <rect x="4" y="6" width="16" height="12" fill="none" stroke="currentColor"/>
+            <path d="M7 10h10M7 13h8" stroke="currentColor"/>
+        </svg>
+        Text Box
+    </button>
 
 
-    <!-- ===================== TEXT ===================== -->
-    <div class="cwRibbonGroup">
-        <div class="cwGroupTitle">Text</div>
+    <!-- QUICK PARTS -->
+    <button class="cwRibbonBtn cwDropdownBtn" data-action="quick-parts">
+        <svg viewBox="0 0 24 24" width="16" height="16">
+            <rect x="5" y="4" width="14" height="16" fill="none" stroke="currentColor"/>
+            <path d="M8 8h8M8 12h8M8 16h5" stroke="currentColor"/>
+        </svg>
+        Quick Parts ▾
 
-        <button class="cwRibbonBtn" data-action="insert-textbox">
-            <svg viewBox="0 0 24 24" width="16" height="16">
-                <rect x="4" y="6" width="16" height="12" fill="none" stroke="currentColor"/>
-                <path d="M7 10h10M7 13h8" stroke="currentColor"/>
-            </svg>
-            Text Box
-        </button>
+        <div class="cwDropdownMenu">
+            <div data-action="building-blocks">Building Blocks</div>
+            <div data-action="document-property">Document Property</div>
+            <div data-action="field">Field</div>
+        </div>
+    </button>
 
-        <button class="cwRibbonBtn" data-action="insert-wordart">
-            <svg viewBox="0 0 24 24" width="16" height="16">
-                <path d="M4 18l4-12 4 12 4-12 4 12" stroke="currentColor"/>
-            </svg>
-            WordArt
-        </button>
-    </div>
+
+    <!-- WORDART -->
+    <button class="cwRibbonBtn" data-action="insert-wordart">
+        <svg viewBox="0 0 24 24" width="16" height="16">
+            <path d="M4 18l4-12 4 12 4-12 4 12" stroke="currentColor" fill="none"/>
+        </svg>
+        WordArt
+    </button>
+
+
+    <!-- DROP CAP -->
+    <button class="cwRibbonBtn cwDropdownBtn" data-action="drop-cap">
+        <svg viewBox="0 0 24 24" width="16" height="16">
+            <path d="M6 18V6h6a4 4 0 0 1 0 8H6"/>
+            <path d="M14 6v12"/>
+        </svg>
+        Drop Cap ▾
+
+        <div class="cwDropdownMenu">
+            <div data-action="drop-none">None</div>
+            <div data-action="drop-dropped">Dropped</div>
+            <div data-action="drop-margin">In Margin</div>
+        </div>
+    </button>
+
+
+    <!-- SIGNATURE LINE -->
+    <button class="cwRibbonBtn" data-action="signature-line">
+        <svg viewBox="0 0 24 24" width="16" height="16">
+            <path d="M4 17h16"/>
+            <path d="M7 14l6-6 3 3-6 6H7z"/>
+        </svg>
+        Signature Line
+    </button>
+
+
+    <!-- DATE AND TIME -->
+    <button class="cwRibbonBtn" data-action="date-time">
+        <svg viewBox="0 0 24 24" width="16" height="16">
+            <circle cx="12" cy="12" r="9" fill="none" stroke="currentColor"/>
+            <path d="M12 7v5l3 2" stroke="currentColor"/>
+        </svg>
+        Date & Time
+    </button>
+
+
+    <!-- OBJECT -->
+    <button class="cwRibbonBtn cwDropdownBtn" data-action="insert-object">
+        <svg viewBox="0 0 24 24" width="16" height="16">
+            <rect x="5" y="5" width="14" height="14" fill="none" stroke="currentColor"/>
+            <circle cx="12" cy="12" r="3"/>
+        </svg>
+        Object ▾
+
+        <div class="cwDropdownMenu">
+            <div data-action="object-file">File</div>
+            <div data-action="object-embed">Embedded Object</div>
+        </div>
+    </button>
+
+</div>
+
+
+
+
+
 
 
 
