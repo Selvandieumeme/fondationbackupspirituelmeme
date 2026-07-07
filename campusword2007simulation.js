@@ -920,44 +920,6 @@ const button = e.target.closest(
 
 
 
-
-
-
-const button = e.target.closest(
-    '[data-action="bold"],' +
-    '[data-action="italic"],' +
-    '[data-action="underline"],' +
-    '[data-action="strike"],' +
-    '[data-action="align-left"],' +
-    '[data-action="align-center"],' +
-    '[data-action="align-right"],' +
-    '[data-action="justify"],' +
-    '[data-action="bullet"],' +
-    '[data-action="numbering"],' +
-    '[data-action="indent-increase"],' +
-    '[data-action="indent-decrease"]'
-);
-
-
-if(paragraphActions[action]){
-
-    document.execCommand(
-        paragraphActions[action],
-        false,
-        null
-    );
-
-    return;
-
-}
-
-
-
-
-
-
-
-
     const formatMap = {
 
         "bold": "strong",
