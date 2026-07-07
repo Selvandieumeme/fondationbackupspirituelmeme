@@ -923,19 +923,20 @@ const button = e.target.closest(
 
 
 
-
-const paragraphActions = {
-
-    "align-left": "justifyLeft",
-    "align-center": "justifyCenter",
-    "align-right": "justifyRight",
-    "justify": "justifyFull",
-    "bullet": "insertUnorderedList",
-    "numbering": "insertOrderedList",
-    "indent-increase": "indent",
-    "indent-decrease": "outdent"
-
-};
+const button = e.target.closest(
+    '[data-action="bold"],' +
+    '[data-action="italic"],' +
+    '[data-action="underline"],' +
+    '[data-action="strike"],' +
+    '[data-action="align-left"],' +
+    '[data-action="align-center"],' +
+    '[data-action="align-right"],' +
+    '[data-action="justify"],' +
+    '[data-action="bullet"],' +
+    '[data-action="numbering"],' +
+    '[data-action="indent-increase"],' +
+    '[data-action="indent-decrease"]'
+);
 
 
 if(paragraphActions[action]){
