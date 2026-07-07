@@ -1085,3 +1085,300 @@ CWRibbonCommandEngine.execute = function(action){
 
 
 
+
+
+/* =========================================================
+   CAMPUS WORD 2007 — HOME COMMAND HANDLERS
+   CLIPBOARD • FONT • PARAGRAPH
+   SAFE CONNECTOR LAYER
+========================================================= */
+
+
+(function(){
+
+
+
+/* =========================================================
+   CLIPBOARD COMMANDS
+========================================================= */
+
+
+CWCommandAdapter.register("copy", ({editor}) => {
+
+    if(!editor) return;
+
+    document.execCommand("copy");
+
+});
+
+
+
+CWCommandAdapter.register("cut", ({editor}) => {
+
+    if(!editor) return;
+
+    document.execCommand("cut");
+
+});
+
+
+
+CWCommandAdapter.register("paste", ({editor}) => {
+
+    if(!editor) return;
+
+    document.execCommand("paste");
+
+});
+
+
+
+CWCommandAdapter.register("format-painter", ({editor}) => {
+
+    if(!editor) return;
+
+    /*
+       Foundation hook:
+       style copy/paste engine ap vini isit la
+    */
+
+});
+
+
+
+
+
+
+
+/* =========================================================
+   FONT COMMANDS
+========================================================= */
+
+
+CWCommandAdapter.register("bold", ({editor}) => {
+
+    if(!editor) return;
+
+    document.execCommand("bold");
+
+});
+
+
+
+CWCommandAdapter.register("italic", ({editor}) => {
+
+    if(!editor) return;
+
+    document.execCommand("italic");
+
+});
+
+
+
+CWCommandAdapter.register("underline", ({editor}) => {
+
+    if(!editor) return;
+
+    document.execCommand("underline");
+
+});
+
+
+
+CWCommandAdapter.register("strike", ({editor}) => {
+
+    if(!editor) return;
+
+    document.execCommand("strikeThrough");
+
+});
+
+
+
+
+CWCommandAdapter.register("font-family", ({editor}) => {
+
+    if(!editor) return;
+
+
+    const actionElement =
+    document.querySelector('[data-action="font-family"]');
+
+
+    if(actionElement){
+
+        document.execCommand(
+            "fontName",
+            false,
+            actionElement.value
+        );
+
+    }
+
+
+});
+
+
+
+
+CWCommandAdapter.register("font-size", ({editor}) => {
+
+    if(!editor) return;
+
+
+    const actionElement =
+    document.querySelector('[data-action="font-size"]');
+
+
+    if(actionElement){
+
+        document.execCommand(
+            "fontSize",
+            false,
+            actionElement.value
+        );
+
+    }
+
+});
+
+
+
+
+
+CWCommandAdapter.register("grow-font", ({editor}) => {
+
+    if(!editor) return;
+
+    document.execCommand(
+        "increaseFontSize"
+    );
+
+});
+
+
+
+
+CWCommandAdapter.register("shrink-font", ({editor}) => {
+
+    if(!editor) return;
+
+    document.execCommand(
+        "decreaseFontSize"
+    );
+
+});
+
+
+
+
+
+
+
+/* =========================================================
+   PARAGRAPH COMMANDS
+========================================================= */
+
+
+CWCommandAdapter.register("align-left", ({editor}) => {
+
+    if(!editor) return;
+
+    document.execCommand(
+        "justifyLeft"
+    );
+
+});
+
+
+
+CWCommandAdapter.register("align-center", ({editor}) => {
+
+    if(!editor) return;
+
+    document.execCommand(
+        "justifyCenter"
+    );
+
+});
+
+
+
+CWCommandAdapter.register("align-right", ({editor}) => {
+
+    if(!editor) return;
+
+    document.execCommand(
+        "justifyRight"
+    );
+
+});
+
+
+
+CWCommandAdapter.register("justify", ({editor}) => {
+
+    if(!editor) return;
+
+    document.execCommand(
+        "justifyFull"
+    );
+
+});
+
+
+
+
+CWCommandAdapter.register("bullet", ({editor}) => {
+
+    if(!editor) return;
+
+    document.execCommand(
+        "insertUnorderedList"
+    );
+
+});
+
+
+
+
+CWCommandAdapter.register("numbering", ({editor}) => {
+
+    if(!editor) return;
+
+    document.execCommand(
+        "insertOrderedList"
+    );
+
+});
+
+
+
+
+CWCommandAdapter.register("indent-increase", ({editor}) => {
+
+    if(!editor) return;
+
+    document.execCommand(
+        "indent"
+    );
+
+});
+
+
+
+
+CWCommandAdapter.register("indent-decrease", ({editor}) => {
+
+    if(!editor) return;
+
+    document.execCommand(
+        "outdent"
+    );
+
+});
+
+
+
+})();
+
