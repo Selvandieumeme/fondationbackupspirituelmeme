@@ -841,15 +841,32 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 
+
+
+
+
+
+
+
+
+
+/* =========================================================
+   CAMPUS WORD 2007 — BOLD COMMAND TEST
+   SAFE SINGLE ACTION
+========================================================= */
+
 document.addEventListener("click", function(e){
 
-    const button = e.target.closest("[data-action]");
+    const button = e.target.closest('[data-action="bold"]');
 
     if(!button) return;
 
-    console.log("RIBBON ACTION:", button.dataset.action);
+
+    document.execCommand("bold", false, null);
 
 });
+
+
 
 
 
