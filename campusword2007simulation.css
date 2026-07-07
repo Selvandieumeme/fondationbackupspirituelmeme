@@ -1950,7 +1950,67 @@ body{
 
 
 
+/* =========================================================
+   OFFICE BUTTON MENU ENGINE (WORD 2007 STYLE)
+   SAFE ADD-ON — NO RIBBON INTERFERENCE
+========================================================= */
 
+(function () {
+
+    const officeButton = document.getElementById("cwOfficeButton");
+    const officeMenu = document.getElementById("cwOfficeMenu");
+
+    if (!officeButton || !officeMenu) return;
+
+
+    /* OPEN / CLOSE OFFICE MENU */
+    officeButton.addEventListener("click", function (e) {
+
+        e.stopPropagation();
+
+        officeMenu.classList.toggle("active");
+
+    });
+
+
+
+    /* CLOSE WHEN CLICK OUTSIDE */
+    document.addEventListener("click", function (e) {
+
+        if (!officeMenu.contains(e.target) &&
+            !officeButton.contains(e.target)) {
+
+            officeMenu.classList.remove("active");
+
+        }
+
+    });
+
+
+
+    /* KEEP MENU OPEN WHEN CLICK INSIDE */
+    officeMenu.addEventListener("click", function (e) {
+
+        e.stopPropagation();
+
+    });
+
+
+
+    /* OPTIONAL: OFFICE ITEMS ACTION HOOK */
+    document.querySelectorAll(".cwOfficeItem")
+    .forEach(item => {
+
+        item.addEventListener("click", function () {
+
+            officeMenu.classList.remove("active");
+
+        });
+
+    });
+
+
+})();
 
 
 
