@@ -887,15 +887,8 @@ const button = e.target.closest(
     '[data-action="bold"],' +
     '[data-action="italic"],' +
     '[data-action="underline"],' +
-    '[data-action="strike"],' +
-    '[data-action="align-left"],' +
-    '[data-action="align-center"],' +
-    '[data-action="align-right"],' +
-    '[data-action="justify"],' +
-    '[data-action="bullet"],' +
-    '[data-action="numbering"],' +
-    '[data-action="indent-increase"],' +
-    '[data-action="indent-decrease"]'
+    '[data-action="strike"]' 
+
 );
 
 
@@ -924,76 +917,6 @@ const button = e.target.closest(
 
 
     const action = button.dataset.action;
-
-
-
-/*
-   PARAGRAPH COMMANDS
-*/
-
-switch(action){
-
-    case "align-left":
-        document.execCommand("justifyLeft");
-    break;
-
-
-    case "align-center":
-        document.execCommand("justifyCenter");
-    break;
-
-
-    case "align-right":
-        document.execCommand("justifyRight");
-    break;
-
-
-    case "justify":
-        document.execCommand("justifyFull");
-    break;
-
-
-    case "bullet":
-        document.execCommand("insertUnorderedList");
-    break;
-
-
-    case "numbering":
-        document.execCommand("insertOrderedList");
-    break;
-
-
-    case "indent-increase":
-        document.execCommand("indent");
-    break;
-
-
-    case "indent-decrease":
-        document.execCommand("outdent");
-    break;
-
-}
-
-
-
-
-
-
-if(
-    action === "align-left" ||
-    action === "align-center" ||
-    action === "align-right" ||
-    action === "justify" ||
-    action === "bullet" ||
-    action === "numbering" ||
-    action === "indent-increase" ||
-    action === "indent-decrease"
-){
-    return;
-}
-
-
-
 
 
 
