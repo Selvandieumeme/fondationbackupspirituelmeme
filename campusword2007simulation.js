@@ -861,9 +861,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 
-/* =========================================================
-   CAMPUS WORD 2007 — BOLD DEBUG TEST
-========================================================= */
+
+
+
+
+
+
+
+
+
 
 document.addEventListener("click", function(e){
 
@@ -874,14 +880,37 @@ document.addEventListener("click", function(e){
 
     const selection = window.getSelection();
 
-    console.log("Selected text:", selection.toString());
+    if(selection.rangeCount === 0) return;
 
 
-    const result = document.execCommand("bold", false, null);
+    console.log("Before:", selection.toString());
 
-    console.log("Bold result:", result);
+
+    const range = selection.getRangeAt(0);
+
+
+    const strong = document.createElement("strong");
+
+    strong.appendChild(range.extractContents());
+
+    range.insertNode(strong);
+
+
+    selection.removeAllRanges();
+
+    const newRange = document.createRange();
+
+    newRange.selectNodeContents(strong);
+
+    selection.addRange(newRange);
+
+
+    console.log("Bold applied manually");
 
 });
+
+
+
 
 
 
