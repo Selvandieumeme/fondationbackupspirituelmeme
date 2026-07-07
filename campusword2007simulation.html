@@ -556,70 +556,219 @@
         </button>
     </div>
 
-    <!-- ===================== TABLE ===================== -->
-    <div class="cwRibbonGroup">
-        <div class="cwGroupTitle">Tables</div>
 
-        <button class="cwRibbonBtn cwDropdownBtn">
-            <svg viewBox="0 0 24 24" width="16" height="16">
-                <path d="M3 5h18v14H3zM3 10h18M9 5v14" stroke="currentColor" fill="none"/>
-            </svg>
-            Table ▾
 
-            <div class="cwDropdownMenu">
-                <div data-action="table-1x1">1x1</div>
-                <div data-action="table-2x2">2x2</div>
-                <div data-action="table-3x3">3x3</div>
-                <div data-action="table-custom">Insert Table...</div>
+<!-- ===================== TABLE ===================== -->
+<div class="cwRibbonGroup">
+    <div class="cwGroupTitle">Tables</div>
+
+    <!-- INSERT TABLE DROPDOWN -->
+    <button class="cwRibbonBtn cwDropdownBtn">
+        <svg viewBox="0 0 24 24" width="16" height="16">
+            <path d="M3 5h18v14H3zM3 10h18M9 5v14" 
+                  stroke="currentColor" fill="none"/>
+        </svg>
+
+        Table ▾
+
+        <div class="cwDropdownMenu">
+            <div data-action="table-1x1">1x1</div>
+            <div data-action="table-2x2">2x2</div>
+            <div data-action="table-3x3">3x3</div>
+            <div data-action="table-custom">Insert Table...</div>
+        </div>
+    </button>
+
+
+    <!-- DRAW TABLE -->
+    <button class="cwRibbonBtn" data-action="draw-table">
+        <svg viewBox="0 0 24 24" width="16" height="16">
+            <path d="M4 4h16v16H4z" 
+                  fill="none" stroke="currentColor"/>
+            <path d="M8 4v16M4 8h16" 
+                  stroke="currentColor"/>
+            <path d="M15 2l5 5" 
+                  stroke="currentColor"/>
+        </svg>
+
+        Draw Table
+    </button>
+
+
+    <!-- EXCEL SPREADSHEET -->
+    <button class="cwRibbonBtn" data-action="excel-spreadsheet">
+        <svg viewBox="0 0 24 24" width="16" height="16">
+            <rect x="3" y="3" width="18" height="18"
+                  fill="none" stroke="currentColor"/>
+            <path d="M3 8h18M3 13h18M3 18h18"
+                  stroke="currentColor"/>
+            <path d="M8 3v18M13 3v18"
+                  stroke="currentColor"/>
+        </svg>
+
+        Excel Spreadsheet
+    </button>
+
+
+    <!-- CONVERT TEXT TO TABLE -->
+    <button class="cwRibbonBtn" data-action="convert-text-table">
+        <svg viewBox="0 0 24 24" width="16" height="16">
+            <path d="M4 5h16M4 12h16M4 19h16"
+                  stroke="currentColor"/>
+            <path d="M8 3v18M16 3v18"
+                  stroke="currentColor"/>
+        </svg>
+
+        Convert Text to Table
+    </button>
+
+</div>
+
+
+
+
+
+<!-- ===================== ILLUSTRATIONS ===================== -->
+<div class="cwRibbonGroup">
+    <div class="cwGroupTitle">Illustrations</div>
+
+
+    <!-- PICTURE -->
+    <button class="cwRibbonBtn" data-action="insert-picture">
+        <svg viewBox="0 0 24 24" width="16" height="16">
+            <rect x="3" y="5" width="18" height="14"
+                  fill="none" stroke="currentColor"/>
+            <circle cx="9" cy="10" r="2"/>
+            <path d="M4 17l5-4 4 3 6-5 3 4"
+                  fill="none" stroke="currentColor"/>
+        </svg>
+        Picture
+    </button>
+
+
+    <!-- CLIP ART -->
+    <button class="cwRibbonBtn" data-action="insert-clipart">
+        <svg viewBox="0 0 24 24" width="16" height="16">
+            <circle cx="12" cy="8" r="3"
+                    fill="none" stroke="currentColor"/>
+            <path d="M5 20c1-4 4-6 7-6s6 2 7 6"
+                  fill="none" stroke="currentColor"/>
+        </svg>
+        Clip Art
+    </button>
+
+
+
+    <!-- SMARTART -->
+    <button class="cwRibbonBtn cwDropdownBtn">
+
+        <svg viewBox="0 0 24 24" width="16" height="16">
+            <circle cx="6" cy="6" r="2"/>
+            <circle cx="12" cy="12" r="2"/>
+            <circle cx="18" cy="6" r="2"/>
+            <path d="M6 6l6 6 6-6"
+                  fill="none" stroke="currentColor"/>
+        </svg>
+
+        SmartArt ▾
+
+
+        <div class="cwDropdownMenu">
+
+            <div data-action="smartart-list">
+                List
             </div>
-        </button>
-    </div>
 
-    <!-- ===================== ILLUSTRATIONS ===================== -->
-    <div class="cwRibbonGroup">
-        <div class="cwGroupTitle">Illustrations</div>
-
-        <button class="cwRibbonBtn" data-action="insert-picture">
-            <svg viewBox="0 0 24 24" width="16" height="16">
-                <rect x="3" y="5" width="18" height="14" fill="none" stroke="currentColor"/>
-                <circle cx="9" cy="10" r="2"/>
-                <path d="M4 17l5-4 4 3 6-5 3 4" stroke="currentColor"/>
-            </svg>
-            Pictures
-        </button>
-
-        <!-- SMARTART DROPDOWN -->
-        <button class="cwRibbonBtn cwDropdownBtn">
-            <svg viewBox="0 0 24 24" width="16" height="16">
-                <circle cx="6" cy="6" r="2"/>
-                <circle cx="12" cy="12" r="2"/>
-                <circle cx="18" cy="6" r="2"/>
-                <path d="M6 6l6 6 6-6" stroke="currentColor"/>
-            </svg>
-            SmartArt ▾
-
-            <div class="cwDropdownMenu">
-                <div data-action="smartart-list">List</div>
-                <div data-action="smartart-process">Process</div>
-                <div data-action="smartart-cycle">Cycle</div>
-                <div data-action="smartart-hierarchy">Hierarchy</div>
+            <div data-action="smartart-process">
+                Process
             </div>
-        </button>
 
-        <button class="cwRibbonBtn cwDropdownBtn">
-            <svg viewBox="0 0 24 24" width="16" height="16">
-                <path d="M4 18l6-10 4 6 6-8 4 12H4z" stroke="currentColor" fill="none"/>
-            </svg>
-            Shapes ▾
-
-            <div class="cwDropdownMenu">
-                <div data-action="shape-rect">Rectangle</div>
-                <div data-action="shape-circle">Circle</div>
-                <div data-action="shape-arrow">Arrow</div>
-                <div data-action="shape-line">Line</div>
+            <div data-action="smartart-cycle">
+                Cycle
             </div>
-        </button>
-    </div>
+
+            <div data-action="smartart-hierarchy">
+                Hierarchy
+            </div>
+
+            <div data-action="smartart-pyramid">
+                Pyramid
+            </div>
+
+        </div>
+
+    </button>
+
+
+
+
+    <!-- SHAPES -->
+    <button class="cwRibbonBtn cwDropdownBtn">
+
+        <svg viewBox="0 0 24 24" width="16" height="16">
+            <path d="M4 18l6-10 4 6 6-8 4 12H4z"
+                  fill="none"
+                  stroke="currentColor"/>
+        </svg>
+
+        Shapes ▾
+
+
+        <div class="cwDropdownMenu">
+
+            <div data-action="shape-rect">
+                Rectangle
+            </div>
+
+            <div data-action="shape-circle">
+                Circle
+            </div>
+
+            <div data-action="shape-arrow">
+                Arrow
+            </div>
+
+            <div data-action="shape-line">
+                Line
+            </div>
+
+            <div data-action="shape-star">
+                Star
+            </div>
+
+            <div data-action="shape-callout">
+                Callout
+            </div>
+
+        </div>
+
+    </button>
+
+
+
+
+    <!-- CHART -->
+    <button class="cwRibbonBtn" data-action="insert-chart">
+
+        <svg viewBox="0 0 24 24" width="16" height="16">
+            <path d="M5 20V10"
+                  stroke="currentColor"/>
+            <path d="M12 20V4"
+                  stroke="currentColor"/>
+            <path d="M19 20V7"
+                  stroke="currentColor"/>
+        </svg>
+
+        Chart
+
+    </button>
+
+
+</div>
+
+
+
+
 
     <!-- ===================== TEXT ===================== -->
     <div class="cwRibbonGroup">
@@ -641,18 +790,43 @@
         </button>
     </div>
 
-    <!-- ===================== LINKS ===================== -->
-    <div class="cwRibbonGroup">
-        <div class="cwGroupTitle">Links</div>
 
-        <button class="cwRibbonBtn" data-action="hyperlink">
-            <svg viewBox="0 0 24 24" width="16" height="16">
-                <path d="M10 14a4 4 0 0 1 0-6l2-2a4 4 0 0 1 6 6" fill="none" stroke="currentColor"/>
-                <path d="M14 10a4 4 0 0 1 0 6l-2 2a4 4 0 0 1-6-6" fill="none" stroke="currentColor"/>
-            </svg>
-            Hyperlink
-        </button>
-    </div>
+
+
+<!-- ===================== LINKS ===================== -->
+<div class="cwRibbonGroup">
+    <div class="cwGroupTitle">Links</div>
+
+    <button class="cwRibbonBtn" data-action="hyperlink">
+        <svg viewBox="0 0 24 24" width="16" height="16">
+            <path d="M10 14a4 4 0 0 1 0-6l2-2a4 4 0 0 1 6 6" fill="none" stroke="currentColor"/>
+            <path d="M14 10a4 4 0 0 1 0 6l-2 2a4 4 0 0 1-6-6" fill="none" stroke="currentColor"/>
+        </svg>
+        Hyperlink
+    </button>
+
+
+    <button class="cwRibbonBtn" data-action="bookmark">
+        <svg viewBox="0 0 24 24" width="16" height="16">
+            <path d="M6 3h12v18l-6-4-6 4z" fill="none" stroke="currentColor"/>
+        </svg>
+        Bookmark
+    </button>
+
+
+    <button class="cwRibbonBtn" data-action="cross-reference">
+        <svg viewBox="0 0 24 24" width="16" height="16">
+            <path d="M7 7h10v10H7z" fill="none" stroke="currentColor"/>
+            <path d="M9 12h6M12 9v6" stroke="currentColor"/>
+        </svg>
+        Cross-reference
+    </button>
+
+</div>
+
+
+
+
 
     <!-- ===================== HEADER/FOOTER ===================== -->
     <div class="cwRibbonGroup">
