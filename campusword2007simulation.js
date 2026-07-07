@@ -841,83 +841,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 
-
-
-
-
-
-/* =========================================================
-   CAMPUS WORD 2007 — SIMPLE RIBBON COMMAND ENGINE
-   SAFE BUTTON CONNECTION METHOD
-========================================================= */
-
 document.addEventListener("click", function(e){
 
     const button = e.target.closest("[data-action]");
 
     if(!button) return;
 
-
-    const action = button.dataset.action;
-
-
-    const editor = document.querySelector(".cwPageContent");
-
-    if(!editor) return;
-
-
-
-    switch(action){
-
-
-        case "bold":
-
-            document.execCommand("bold", false, null);
-
-        break;
-
-
-
-        case "italic":
-
-            document.execCommand("italic", false, null);
-
-        break;
-
-
-
-        case "underline":
-
-            document.execCommand("underline", false, null);
-
-        break;
-
-
-
-        case "copy":
-
-            document.execCommand("copy", false, null);
-
-        break;
-
-
-
-        case "cut":
-
-            document.execCommand("cut", false, null);
-
-        break;
-
-
-
-        case "paste":
-
-            document.execCommand("paste", false, null);
-
-        break;
-
-
-
-    }
+    console.log("RIBBON ACTION:", button.dataset.action);
 
 });
+
+
+
