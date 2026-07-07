@@ -923,6 +923,40 @@ const button = e.target.closest(
 
 
 
+
+const paragraphActions = {
+
+    "align-left": "justifyLeft",
+    "align-center": "justifyCenter",
+    "align-right": "justifyRight",
+    "justify": "justifyFull",
+    "bullet": "insertUnorderedList",
+    "numbering": "insertOrderedList",
+    "indent-increase": "indent",
+    "indent-decrease": "outdent"
+
+};
+
+
+if(paragraphActions[action]){
+
+    document.execCommand(
+        paragraphActions[action],
+        false,
+        null
+    );
+
+    return;
+
+}
+
+
+
+
+
+
+
+
     const formatMap = {
 
         "bold": "strong",
@@ -1032,67 +1066,6 @@ const button = e.target.closest(
 
 
 
-
-
-
-
-// BLOK 2 NOUVO
-document.addEventListener("click", function(e){
-
-    const button = e.target.closest(
-        '[data-action="align-left"],' +
-        '[data-action="align-center"],' +
-        '[data-action="align-right"],' +
-        '[data-action="justify"],' +
-        '[data-action="bullet"],' +
-        '[data-action="numbering"],' +
-        '[data-action="indent-increase"],' +
-        '[data-action="indent-decrease"]'
-    );
-
-    if(!button) return;
-
-
-    const action = button.dataset.action;
-
-
-    switch(action){
-
-        case "align-left":
-            document.execCommand("justifyLeft");
-        break;
-
-        case "align-center":
-            document.execCommand("justifyCenter");
-        break;
-
-        case "align-right":
-            document.execCommand("justifyRight");
-        break;
-
-        case "justify":
-            document.execCommand("justifyFull");
-        break;
-
-        case "bullet":
-            document.execCommand("insertUnorderedList");
-        break;
-
-        case "numbering":
-            document.execCommand("insertOrderedList");
-        break;
-
-        case "indent-increase":
-            document.execCommand("indent");
-        break;
-
-        case "indent-decrease":
-            document.execCommand("outdent");
-        break;
-
-    }
-
-});
 
 
 
