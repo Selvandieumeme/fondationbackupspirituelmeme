@@ -746,37 +746,26 @@ document.addEventListener("click", function (e) {
 
 
 
-document.addEventListener("click", function (e) {
 
-    // OPEN/CLOSE DROPDOWN
-    const btn = e.target.closest(".cwDropdownBtn");
 
-    // si klike sou bouton
-    if (btn) {
+
+
+
+
+
+document.addEventListener("DOMContentLoaded", () => {
+
+    const btn = document.getElementById("cwOfficeButton");
+    const menu = document.getElementById("cwOfficeMenu");
+
+    btn.addEventListener("click", (e) => {
         e.stopPropagation();
-
-        // toggle active
-        btn.classList.toggle("active");
-
-        // fè lòt yo fèmen
-        document.querySelectorAll(".cwDropdownBtn").forEach(b => {
-            if (b !== btn) b.classList.remove("active");
-        });
-
-        return;
-    }
-
-    // si klike deyò → fèmen tout
-    document.querySelectorAll(".cwDropdownBtn").forEach(b => {
-        b.classList.remove("active");
+        menu.classList.toggle("active");
     });
+
+    document.addEventListener("click", () => {
+        menu.classList.remove("active");
+    });
+
 });
-
-
-
-
-
-
-
-
 
