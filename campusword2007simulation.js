@@ -973,3 +973,115 @@ const CWActiveEditorResolver = {
 
 
 };
+
+
+
+
+
+
+
+/* =========================================================
+   CAMPUS WORD 2007 — COMMAND ADAPTER LAYER
+   GLOBAL BRIDGE BETWEEN RIBBON AND EDITOR
+   SAFE • DYNAMIC • FUTURE READY
+========================================================= */
+
+const CWCommandAdapter = {
+
+
+    /* =========================
+       COMMAND HANDLER MAP
+       Tout aksyon Ribbon yo ap pase isit la
+    ========================= */
+    handlers:{},
+
+
+
+
+    /* =========================
+       REGISTER ACTION HANDLER
+    ========================= */
+    register(action, handler){
+
+        this.handlers[action] = handler;
+
+    },
+
+
+
+
+    /* =========================
+       EXECUTE RIBBON COMMAND
+    ========================= */
+    execute(action, payload = null){
+
+
+        const editor =
+        CWActiveEditorResolver.get();
+
+
+
+        const commandContext = {
+
+            action: action,
+
+            editor: editor,
+
+            payload: payload
+
+        };
+
+
+
+        /*
+            Si gen yon handler deja konekte,
+            voye command lan ladan li
+        */
+        if(
+            this.handlers[action] &&
+            typeof this.handlers[action] === "function"
+        ){
+
+            this.handlers[action](commandContext);
+
+        }
+
+
+    }
+
+
+
+};
+
+
+
+
+
+
+/* =========================================================
+   CONNECT COMMAND ENGINE TO ADAPTER
+   SAFE OVERRIDE ONLY
+========================================================= */
+
+const originalExecute =
+CWRibbonCommandEngine.execute.bind(
+    CWRibbonCommandEngine
+);
+
+
+CWRibbonCommandEngine.execute = function(action){
+
+
+    CWCommandAdapter.execute(action);
+
+
+};
+
+
+
+
+
+
+
+
+
