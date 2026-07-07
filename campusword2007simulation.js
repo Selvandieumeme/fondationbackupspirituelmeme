@@ -874,11 +874,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 
-
-
-
 /* =========================================================
-   CAMPUS WORD 2007 — BOLD TOGGLE COMMAND
+   CAMPUS WORD 2007 — BOLD TOGGLE + BUTTON STATE
 ========================================================= */
 
 document.addEventListener("click", function(e){
@@ -888,68 +885,43 @@ document.addEventListener("click", function(e){
     if(!button) return;
 
 
+    const editor = document.querySelector(".cwPageContent");
+
+    if(!editor) return;
+
+
     const selection = window.getSelection();
 
-    if(selection.rangeCount === 0) return;
+
+    if(!selection.toString()) return;
 
 
-    const range = selection.getRangeAt(0);
+    /*
+       APLIKE / RETIRE BOLD
+    */
 
-    const selectedText = selection.toString();
-
-    if(!selectedText) return;
-
-
-    const parent = range.commonAncestorContainer.parentElement;
+    document.execCommand("bold", false, null);
 
 
-    /* REMOVE BOLD IF ALREADY BOLD */
-    if(
-        parent &&
-        (
-            parent.tagName === "STRONG" ||
-            parent.tagName === "B"
-        )
-    ){
 
-        const fragment = document.createDocumentFragment();
+    /*
+       METE ETA BOUTON AN
+    */
 
-        while(parent.firstChild){
-            fragment.appendChild(parent.firstChild);
-        }
-
-        parent.replaceWith(fragment);
-
-    }
+    const isBold = document.queryCommandState("bold");
 
 
-    /* ADD BOLD */
-    else {
+    if(isBold){
 
-        const strong = document.createElement("strong");
+        button.classList.add("active");
 
-        strong.appendChild(range.extractContents());
+    }else{
 
-        range.insertNode(strong);
+        button.classList.remove("active");
 
     }
 
 
 });
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
