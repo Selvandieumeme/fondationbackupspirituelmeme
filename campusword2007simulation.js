@@ -1,5 +1,6 @@
 
 
+
 /* =========================================================
    CAMPUS WORD 2007 — CORE ENGINE (PRODUCTION FOUNDATION)
    SAFE • RESPONSIVE • MULTI-DEVICE • SCALABLE
@@ -972,6 +973,27 @@ switch(action){
     break;
 
 }
+
+
+
+
+
+
+if(
+    action === "align-left" ||
+    action === "align-center" ||
+    action === "align-right" ||
+    action === "justify" ||
+    action === "bullet" ||
+    action === "numbering" ||
+    action === "indent-increase" ||
+    action === "indent-decrease"
+){
+    return;
+}
+
+
+
 
 
 
