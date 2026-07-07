@@ -872,20 +872,32 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 
-
 /* =========================================================
-   CAMPUS WORD 2007 — BOLD TOGGLE + BUTTON STATE
-   COMPATIBLE WITH CURRENT EDITOR
+   CAMPUS WORD 2007 — GLOBAL TEXT FORMAT COMMAND ENGINE
+   PHASE 1: BOLD + ITALIC + UNDERLINE + STRIKE
+   SAFE WITH CURRENT EDITOR ARCHITECTURE
 ========================================================= */
 
 document.addEventListener("click", function(e){
 
-    const button = e.target.closest('[data-action="bold"]');
+
+    const button = e.target.closest(
+        '[data-action="bold"],' +
+        '[data-action="italic"],' +
+        '[data-action="underline"],' +
+        '[data-action="strike"]'
+    );
+
 
     if(!button) return;
 
 
+
     const selection = window.getSelection();
+
+
+    if(!selection) return;
+
 
     if(selection.rangeCount === 0) return;
 
@@ -893,30 +905,58 @@ document.addEventListener("click", function(e){
     if(selection.toString().trim() === "") return;
 
 
+
     const range = selection.getRangeAt(0);
 
+
+
+    const action = button.dataset.action;
+
+
+
+    const formatMap = {
+
+        "bold": "strong",
+
+        "italic": "em",
+
+        "underline": "u",
+
+        "strike": "s"
+
+    };
+
+
+
+    const tagName = formatMap[action];
+
+
+    if(!tagName) return;
+
+
+
+    /*
+       VERIFY IF TEXT ALREADY HAS SAME FORMAT
+    */
 
     const parent =
         selection.anchorNode.parentElement;
 
 
-    /*
-       REMOVE BOLD IF ALREADY BOLD
-    */
 
     if(
         parent &&
-        parent.tagName === "STRONG"
+        parent.tagName.toLowerCase() === tagName
     ){
 
-        const text =
-            parent.innerHTML;
+        const text = parent.innerHTML;
 
 
         parent.outerHTML = text;
 
 
         button.classList.remove("active");
+
 
         return;
 
@@ -925,32 +965,41 @@ document.addEventListener("click", function(e){
 
 
     /*
-       APPLY BOLD
+       APPLY FORMAT
     */
 
-    const strong = document.createElement("strong");
+
+    const wrapper =
+        document.createElement(tagName);
 
 
-    strong.appendChild(
+
+    wrapper.appendChild(
         range.extractContents()
     );
 
 
-    range.insertNode(strong);
+
+    range.insertNode(wrapper);
 
 
 
     /*
-       KEEP SELECTION
+       KEEP SELECTION ACTIVE
     */
+
 
     selection.removeAllRanges();
 
 
-    const newRange = document.createRange();
+
+    const newRange =
+        document.createRange();
 
 
-    newRange.selectNodeContents(strong);
+
+    newRange.selectNodeContents(wrapper);
+
 
 
     selection.addRange(newRange);
@@ -958,10 +1007,12 @@ document.addEventListener("click", function(e){
 
 
     /*
-       ACTIVE BUTTON STATE
+       BUTTON ACTIVE STATE
     */
 
+
     button.classList.add("active");
+
 
 
 });
