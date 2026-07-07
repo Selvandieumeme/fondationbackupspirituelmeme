@@ -1307,7 +1307,7 @@ body{
    HOME RIBBON PANEL — UNIFIED WORD STYLE (FIXED)
 ========================================================= */
 
-#tab-home.cwRibbonPanel{
+.cwRibbonPanel{
     display:flex;
 
     flex-wrap:nowrap;              /* 🔥 FIX: pa janm desann anba */
@@ -2011,50 +2011,6 @@ body{
 
 
 })();
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/* =========================================================
-   OTHER RIBBON TABS HORIZONTAL SCROLL ONLY
-   SAFE — HOME REMAINS UNTOUCHED
-========================================================= */
-
-.cwRibbonPanel:not(#tab-home){
-    display:flex;
-    flex-wrap:nowrap;
-    overflow-x:auto;
-    overflow-y:hidden;
-
-    -webkit-overflow-scrolling:touch;
-}
-
-.cwRibbonPanel:not(#tab-home) .cwRibbonGroup{
-    flex:0 0 auto;
-}
-
-
-
-
-
-
-
-
-
-
 
 
 
