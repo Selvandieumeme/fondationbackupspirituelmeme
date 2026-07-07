@@ -2065,18 +2065,11 @@ body{
 
 
 
-
-
 /* =========================================================
-   RIBBON ACTIVE COMMAND BUTTON
+   RIBBON ACTIVE BUTTON STATE
 ========================================================= */
 
 .cwRibbonBtn.active{
-
     background:#ffd966;
-
     border-color:#c9a400;
-
-    color:#000;
-
 }
