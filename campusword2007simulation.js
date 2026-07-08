@@ -685,216 +685,6 @@ const WordRulerEngine = {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-// =========================
-// COLOR / HIGHLIGHT ENGINE
-// =========================
-
-document.addEventListener("click", function (e) {
-
-
-    const colorBtn = e.target.closest('[data-action="color"]');
-    const highlightBtn = e.target.closest('[data-action="highlight"]');
-
-
-    const dot = e.target.closest(".cwColorDot");
-
-
-
-    /*
-       =========================
-       APPLY COLOR / HIGHLIGHT
-       =========================
-    */
-
-    if(dot){
-
-        const parentButton = dot.closest(".cwRibbonBtn");
-
-        if(!parentButton) return;
-
-
-        const selection = window.getSelection();
-
-
-        if(selection &&
-           selection.rangeCount > 0 &&
-           selection.toString().trim() !== ""){
-
-
-            const range = selection.getRangeAt(0);
-
-
-            const span = document.createElement("span");
-
-
-
-            if(parentButton.dataset.action === "color"){
-
-                span.style.color =
-                    dot.style.backgroundColor;
-
-            }
-
-
-
-            if(parentButton.dataset.action === "highlight"){
-
-
-                const chosen =
-                    dot.dataset.color;
-
-
-                const current =
-                    selection.anchorNode.parentElement;
-
-
-                if(
-                    current &&
-                    current.style.backgroundColor === chosen
-                ){
-
-                    current.style.backgroundColor = "";
-
-                    return;
-
-                }
-
-
-                if(chosen !== "none"){
-
-                    span.style.backgroundColor = chosen;
-
-                }
-
-            }
-
-
-
-            span.appendChild(
-                range.extractContents()
-            );
-
-
-            range.insertNode(span);
-
-
-
-            selection.removeAllRanges();
-
-
-            const newRange = document.createRange();
-
-
-            newRange.selectNodeContents(span);
-
-
-            selection.addRange(newRange);
-
-        }
-
-
-        return;
-
-    }
-
-
-
-
-    /*
-       =========================
-       OPEN / CLOSE DROPDOWN
-       =========================
-    */
-
-
-    if(colorBtn){
-
-        e.preventDefault();
-
-
-        colorBtn.classList.toggle("open");
-
-
-        document.querySelectorAll(
-            '.cwRibbonBtn[data-action="highlight"].open'
-        )
-        .forEach(el =>
-            el.classList.remove("open")
-        );
-
-
-        return;
-
-    }
-
-
-
-    if(highlightBtn){
-
-        e.preventDefault();
-
-
-        highlightBtn.classList.toggle("open");
-
-
-        document.querySelectorAll(
-            '.cwRibbonBtn[data-action="color"].open'
-        )
-        .forEach(el =>
-            el.classList.remove("open")
-        );
-
-
-        return;
-
-    }
-
-
-
-
-    /*
-       CLICK OUTSIDE CLOSE
-    */
-
-    document.querySelectorAll(".cwRibbonBtn.open")
-    .forEach(el =>
-        el.classList.remove("open")
-    );
-
-
-});
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 document.addEventListener("DOMContentLoaded", () => {
 
     const btn = document.getElementById("cwOfficeButton");
@@ -1318,40 +1108,48 @@ document.addEventListener("click", function(e){
 
 
 
-
-
-
-
-
 /* =========================================================
    CAMPUS WORD 2007 — COLOR + HIGHLIGHT ENGINE
    ISOLATED MODULE
-   COMPATIBLE WITH CURRENT HTML
+   SAFE WITH CURRENT EDITOR ARCHITECTURE
 ========================================================= */
 
 document.addEventListener("click", function (e) {
 
 
-    const colorBtn = e.target.closest('[data-action="color"]');
-    const highlightBtn = e.target.closest('[data-action="highlight"]');
+    const colorBtn =
+        e.target.closest('[data-action="color"]');
 
-    const dot = e.target.closest(".cwColorDot");
+
+    const highlightBtn =
+        e.target.closest('[data-action="highlight"]');
+
+
+    const dot =
+        e.target.closest(".cwColorDot");
 
 
 
     /*
+       =====================================
        APPLY COLOR / HIGHLIGHT
+       =====================================
     */
 
     if(dot){
 
-        const parentButton = dot.closest(".cwRibbonBtn");
+
+        const parentButton =
+            dot.closest(".cwRibbonBtn");
+
 
         if(!parentButton) return;
 
 
 
-        const selection = window.getSelection();
+        const selection =
+            window.getSelection();
+
 
 
         if(
@@ -1359,27 +1157,43 @@ document.addEventListener("click", function (e) {
             selection.rangeCount === 0 ||
             selection.toString().trim() === ""
         ){
+
             return;
+
         }
 
 
 
-        const range = selection.getRangeAt(0);
+        const range =
+            selection.getRangeAt(0);
 
 
-        const span = document.createElement("span");
+
+        const span =
+            document.createElement("span");
 
 
 
         /*
-           COLOR
-           pran koulè reyèl ki soti nan HTML
+           COLOR VALUE
+           Compatible with current HTML
         */
 
-        if(parentButton.dataset.action === "color"){
+        const chosenColor =
+            dot.style.backgroundColor ||
+            dot.dataset.color;
 
-            span.style.color =
-                dot.style.backgroundColor;
+
+
+        /*
+           TEXT COLOR
+        */
+
+        if(
+            parentButton.dataset.action === "color"
+        ){
+
+            span.style.color = chosenColor;
 
         }
 
@@ -1387,10 +1201,12 @@ document.addEventListener("click", function (e) {
 
         /*
            HIGHLIGHT
-           kenbe lojik aktyèl la
+           KEEP EXISTING LOGIC
         */
 
-        if(parentButton.dataset.action === "highlight"){
+        if(
+            parentButton.dataset.action === "highlight"
+        ){
 
 
             const chosen =
@@ -1403,9 +1219,14 @@ document.addEventListener("click", function (e) {
 
 
 
-            if(
+            const currentHighlight =
                 current &&
-                current.style.backgroundColor === chosen
+                current.style.backgroundColor;
+
+
+
+            if(
+                currentHighlight === chosen
             ){
 
                 current.style.backgroundColor = "";
@@ -1426,6 +1247,10 @@ document.addEventListener("click", function (e) {
 
 
 
+        /*
+           INSERT FORMAT
+        */
+
         span.appendChild(
             range.extractContents()
         );
@@ -1434,6 +1259,10 @@ document.addEventListener("click", function (e) {
         range.insertNode(span);
 
 
+
+        /*
+           KEEP SELECTION ACTIVE
+        */
 
         selection.removeAllRanges();
 
@@ -1459,12 +1288,16 @@ document.addEventListener("click", function (e) {
 
 
 
+
     /*
+       =====================================
        OPEN / CLOSE DROPDOWN
+       =====================================
     */
 
 
     if(colorBtn){
+
 
         e.preventDefault();
 
@@ -1472,12 +1305,17 @@ document.addEventListener("click", function (e) {
         colorBtn.classList.toggle("open");
 
 
-        document.querySelectorAll(
+
+        document
+        .querySelectorAll(
             '.cwRibbonBtn[data-action="highlight"].open'
         )
-        .forEach(el =>
-            el.classList.remove("open")
-        );
+        .forEach(el => {
+
+            el.classList.remove("open");
+
+        });
+
 
 
         return;
@@ -1486,7 +1324,9 @@ document.addEventListener("click", function (e) {
 
 
 
+
     if(highlightBtn){
+
 
         e.preventDefault();
 
@@ -1494,12 +1334,17 @@ document.addEventListener("click", function (e) {
         highlightBtn.classList.toggle("open");
 
 
-        document.querySelectorAll(
+
+        document
+        .querySelectorAll(
             '.cwRibbonBtn[data-action="color"].open'
         )
-        .forEach(el =>
-            el.classList.remove("open")
-        );
+        .forEach(el => {
+
+            el.classList.remove("open");
+
+        });
+
 
 
         return;
@@ -1508,17 +1353,33 @@ document.addEventListener("click", function (e) {
 
 
 
+
     /*
-       CLICK OUTSIDE CLOSE
+       CLICK OUTSIDE
+       CLOSE ONLY COLOR/HIGHLIGHT DROPDOWNS
     */
 
-    document.querySelectorAll(".cwRibbonBtn.open")
-    .forEach(el =>
-        el.classList.remove("open")
-    );
+    document
+    .querySelectorAll(
+        '.cwRibbonBtn[data-action="color"].open,' +
+        '.cwRibbonBtn[data-action="highlight"].open'
+    )
+    .forEach(el => {
+
+        el.classList.remove("open");
+
+    });
+
 
 
 });
+
+
+
+
+
+
+
 
 
 
