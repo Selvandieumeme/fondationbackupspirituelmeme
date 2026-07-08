@@ -1998,37 +1998,6 @@ body{
 
 
 
-/* =========================================================
-   CAMPUS WORD 2007 — MOBILE LAYOUT STABILITY GUARD
-   ISOLATED TOUCH SAFE LAYER
-   DOES NOT TOUCH PAGE ENGINE
-========================================================= */
-
-html,
-body{
-
-    overscroll-behavior:none;
-
-}
-
-
-#cwWindow{
-
-    overscroll-behavior:none;
-
-}
-
-
-#cwWorkspaceScroll{
-
-    overscroll-behavior:contain;
-
-    -webkit-overflow-scrolling:touch;
-
-    scroll-behavior:auto;
-
-}
-
 
 
 
