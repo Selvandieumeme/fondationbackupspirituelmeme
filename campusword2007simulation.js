@@ -746,6 +746,68 @@ document.addEventListener("click", function (e) {
 
 
 
+// =========================
+// APPLY COLOR / HIGHLIGHT
+// =========================
+
+document.addEventListener("click", function(e){
+
+    const dot = e.target.closest(".cwColorDot");
+
+    if(!dot) return;
+
+    const color = dot.dataset.color;
+
+    const selection = window.getSelection();
+
+    if(!selection || selection.rangeCount === 0) return;
+
+    if(selection.toString().trim() === "") return;
+
+
+    const action = dot.classList.contains("highlight")
+        ? "highlight"
+        : "color";
+
+
+    if(action === "color"){
+
+        document.execCommand(
+            "foreColor",
+            false,
+            color
+        );
+
+    }
+
+
+    if(action === "highlight"){
+
+        if(color === "none"){
+
+            document.execCommand(
+                "hiliteColor",
+                false,
+                "transparent"
+            );
+
+        }else{
+
+            document.execCommand(
+                "hiliteColor",
+                false,
+                color
+            );
+
+        }
+
+    }
+
+
+});
+
+
+
 
 
 
