@@ -1812,49 +1812,54 @@ body{
 }
 
 
+
+
 /* =========================
    COLOR PALETTE VALUES
+   HTML DATA-COLOR COMPATIBLE
 ========================= */
 
-.cwColorDot[data-color="#000000"]{
+.cwColorDot[data-color="black"]{
     background:#000000;
 }
 
-.cwColorDot[data-color="#333333"]{
+.cwColorDot[data-color="darkgray"]{
     background:#333333;
 }
 
-.cwColorDot[data-color="#ff0000"]{
+.cwColorDot[data-color="red"]{
     background:#ff0000;
 }
 
-.cwColorDot[data-color="#ff9900"]{
+.cwColorDot[data-color="orange"]{
     background:#ff9900;
 }
 
-.cwColorDot[data-color="#ffff00"]{
+.cwColorDot[data-color="yellow"]{
     background:#ffff00;
 }
 
-.cwColorDot[data-color="#00ff00"]{
+.cwColorDot[data-color="green"]{
     background:#00ff00;
 }
 
-.cwColorDot[data-color="#00ccff"]{
+.cwColorDot[data-color="skyblue"]{
     background:#00ccff;
 }
 
-.cwColorDot[data-color="#0000ff"]{
+.cwColorDot[data-color="blue"]{
     background:#0000ff;
 }
 
-.cwColorDot[data-color="#9900ff"]{
+.cwColorDot[data-color="purple"]{
     background:#9900ff;
 }
 
-.cwColorDot[data-color="#ffffff"]{
+.cwColorDot[data-color="white"]{
     background:#ffffff;
 }
+
+
 
 
 
