@@ -1720,228 +1720,149 @@ body{
 
 
 
-#cwOfficeMenu{
+
+
+
+
+
+
+/* =========================================================
+   COLOR + HIGHLIGHT DROPDOWN SYSTEM
+   SINGLE CONTROL BLOCK
+   HTML + JS COMPATIBLE
+========================================================= */
+
+
+/* =========================
+   DROPDOWN BUTTON ANCHOR
+========================= */
+
+.cwDropdownBtn{
+    position:relative;
+    overflow:visible;
+}
+
+
+/* =========================
+   COLOR / HIGHLIGHT MENU
+========================= */
+
+.cwDropdownMenu{
+
     position:absolute;
-    top:40px;
+
+    top:100%;
     left:0;
 
     display:none;
 
-    background:#1f3b63;
-    color:#fff;
+    background:#ffffff;
 
-    border:1px solid #0f223d;
-    box-shadow:0 6px 18px rgba(0,0,0,0.3);
+    border:1px solid #c7d2e3;
+
+    border-radius:6px;
+
+    padding:6px;
+
+    gap:6px;
+
+    box-shadow:0 6px 18px rgba(0,0,0,0.15);
 
     z-index:99999;
+
+    width:max-content;
+
+    grid-template-columns:repeat(5,18px);
+
 }
 
-#cwOfficeMenu.active{
-    display:block;
+
+/* =========================
+   OPEN STATE
+   MATCH JS: classList.toggle("open")
+========================= */
+
+.cwDropdownBtn.open .cwDropdownMenu{
+
+    display:grid;
+
 }
 
-.cwOfficeItem{
-    padding:10px;
+
+/* =========================
+   COLOR DOTS
+========================= */
+
+.cwColorDot{
+
+    width:14px;
+
+    height:14px;
+
+    border-radius:3px;
+
     cursor:pointer;
+
+    border:1px solid #ccc;
+
 }
-
-.cwOfficeItem:hover{
-    background:#2b579a;
-}
-
-
-
-
-
-
-
-
-
 
 
 /* =========================
-   COLOR / HIGHLIGHT POPUP FIX
+   HIGHLIGHT DOT SHAPE
 ========================= */
 
-.cwRibbonBtn{
-    position: relative; /* enpòtan pou dropdown la ancrage */
-}
-
-/* kache pa default */
-.cwColorPalette,
-.cwHighlightPalette{
-    display: none;
-
-    position: absolute;
-    top: 100%;
-    left: 0;
-
-    margin-top: 6px;
-
-    background: #ffffff;
-    border: 1px solid #c7d2e3;
-    border-radius: 6px;
-
-    padding: 6px;
-    gap: 4px;
-
-    box-shadow: 0 6px 18px rgba(0,0,0,0.12);
-
-    z-index: 9999;
-
-    width: max-content;
-
-    display: grid;
-    grid-template-columns: repeat(5, 18px);
-}
-
-/* lè active */
-.cwRibbonBtn.open .cwColorPalette,
-.cwRibbonBtn.open .cwHighlightPalette{
-    display: grid;
-}
-
-/* dots style */
-.cwColorDot{
-    width: 14px;
-    height: 14px;
-    border-radius: 3px;
-    cursor: pointer;
-    border: 1px solid #ccc;
-}
-
 .cwColorDot.highlight{
-    border-radius: 50%;
+
+    border-radius:50%;
+
 }
-
-
-
-
-
-
 
 
 /* =========================
-   COLOR DROPDOWN FIX FINAL
+   COLOR VALUES
+   FOR COLOR BUTTON PALETTE
 ========================= */
 
-/* bouton dwe reference positioning */
-.cwDropdownBtn{
-    position: relative;
-    overflow: visible;
+.cwColorDot[data-color="#000000"]{
+    background:#000000;
 }
 
-/* menu an */
-.cwDropdownMenu{
-    position: absolute;
-    top: 100%;
-    left: 0;
-
-    display: none;
-
-    background: #fff;
-    border: 1px solid #c7d2e3;
-    border-radius: 6px;
-
-    padding: 6px;
-    gap: 6px;
-
-    box-shadow: 0 6px 18px rgba(0,0,0,0.15);
-
-    z-index: 99999;
-
-    width: max-content;
-
-    display: grid;
-    grid-template-columns: repeat(5, 18px);
+.cwColorDot[data-color="#333333"]{
+    background:#333333;
 }
 
-/* show state (IMPORTANT) */
-.cwDropdownBtn.active .cwDropdownMenu{
-    display: grid;
+.cwColorDot[data-color="#ff0000"]{
+    background:#ff0000;
 }
 
-/* color dots MUST be visible */
-.cwColorDot{
-    width: 14px;
-    height: 14px;
-    border-radius: 3px;
-    cursor: pointer;
-
-    border: 1px solid #ccc;
+.cwColorDot[data-color="#ff9900"]{
+    background:#ff9900;
 }
 
-/* highlight dots */
-.cwColorDot.highlight{
-    border-radius: 50%;
+.cwColorDot[data-color="#ffff00"]{
+    background:#ffff00;
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-.cwDropdownBtn{
-    position: relative;
+.cwColorDot[data-color="#00ff00"]{
+    background:#00ff00;
 }
 
-.cwDropdownMenu{
-    position: absolute;
-    top: 100%;
-    left: 0;
-
-    display: none;   /* CLOSED BY DEFAULT */
-
-    background: #fff;
-    border: 1px solid #c7d2e3;
-    border-radius: 6px;
-
-    padding: 6px;
-    gap: 6px;
-
-    box-shadow: 0 6px 18px rgba(0,0,0,0.15);
-
-    z-index: 99999;
-
-    width: max-content;
-
-    grid-template-columns: repeat(5, 18px);
+.cwColorDot[data-color="#00ccff"]{
+    background:#00ccff;
 }
 
-/* OPEN */
-.cwDropdownBtn.active .cwDropdownMenu{
-    display: grid;
+.cwColorDot[data-color="#0000ff"]{
+    background:#0000ff;
 }
 
-/* color dots */
-.cwColorDot{
-    width: 14px;
-    height: 14px;
-    border-radius: 3px;
-    cursor: pointer;
-    border: 1px solid #ccc;
+.cwColorDot[data-color="#9900ff"]{
+    background:#9900ff;
 }
 
-.cwColorDot.highlight{
-    border-radius: 50%;
+.cwColorDot[data-color="#ffffff"]{
+    background:#ffffff;
 }
-
-
-
-
-
-
-
-
 
 
 .
