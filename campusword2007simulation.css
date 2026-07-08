@@ -1978,7 +1978,80 @@ body{
 
 
 
+/* =========================================================
+   CAMPUS WORD — TOUCH VIEWPORT BOUNDARY LOCK
+   ISOLATED / NON-DESTRUCTIVE
+   STATUS BAR = FINAL APP LIMIT
+========================================================= */
 
+
+/* PREVENT BROWSER OVERSCROLL EFFECT */
+html,
+body{
+
+    overscroll-behavior:none;
+
+}
+
+
+/* APPLICATION WINDOW USES DEVICE VIEWPORT */
+
+#cwWindow{
+
+    max-height:100dvh;
+
+    overflow:hidden;
+
+}
+
+
+/* WORKSPACE REMAINS THE ONLY DOCUMENT MOTION AREA */
+
+#cwWorkspace{
+
+    min-height:0;
+
+    overflow:hidden;
+
+}
+
+
+/* STATUS BAR DEFINES THE BOTTOM BOUNDARY */
+
+#cwStatusBar{
+
+    position:relative;
+
+    flex-shrink:0;
+
+    z-index:1000;
+
+}
+
+
+/* PREVENT TOUCH FROM DRAGGING OUTSIDE APP */
+
+#cwWindow,
+#cwStatusBar{
+
+    overscroll-behavior:contain;
+
+}
+
+
+/* ANDROID TOUCH SAFETY */
+
+@media (pointer:coarse){
+
+    html,
+    body{
+
+        overscroll-behavior:none;
+        touch-action:pan-y;
+
+    }
+
+}
 
 
 
