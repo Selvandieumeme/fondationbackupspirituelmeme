@@ -1190,10 +1190,13 @@ document.addEventListener("click", function(e){
 
 
 
+
+
+
+
 /* =========================================================
    CAMPUS WORD 2007 — COLOR + HIGHLIGHT ENGINE
-   SAFE ISOLATED MODULE
-   DOES NOT TOUCH B/I/U/FONT SIZE
+   ISOLATED MODULE
 ========================================================= */
 
 document.addEventListener("click", function(e){
@@ -1203,93 +1206,105 @@ document.addEventListener("click", function(e){
         '[data-action="highlight"]'
     );
 
-
     if(!button) return;
 
 
-    const colorBox = e.target.closest(".cwColorDot");
+    const dot = e.target.closest(".cwColorDot");
+
+    if(!dot) return;
 
 
-    /*
-       USER CLICKS A COLOR
-    */
-    if(colorBox){
-
-        const color = colorBox.dataset.color;
+    const selection = window.getSelection();
 
 
-        const selection = window.getSelection();
+    if(!selection) return;
+    if(selection.rangeCount === 0) return;
+    if(selection.toString().trim() === "") return;
 
 
-        if(!selection) return;
-        if(selection.rangeCount === 0) return;
-        if(selection.toString().trim() === "") return;
+    const range = selection.getRangeAt(0);
 
 
-        const range = selection.getRangeAt(0);
+    const span = document.createElement("span");
 
 
-        const span = document.createElement("span");
-
-
-        if(button.dataset.action === "color"){
-
-            span.style.color = color;
-
-        }
-
-
-        if(button.dataset.action === "highlight"){
-
-            if(color === "none"){
-
-                span.style.backgroundColor = "";
-
-            }else{
-
-                span.style.backgroundColor = color;
-
-            }
-
-        }
+    const chosenColor = dot.dataset.color;
 
 
 
-        span.appendChild(
-            range.extractContents()
-        );
+    /* =========================
+       TEXT COLOR
+    ========================= */
 
+    if(button.dataset.action === "color"){
 
-        range.insertNode(span);
-
-
-
-        /*
-           KEEP SELECTION ACTIVE
-        */
-
-        selection.removeAllRanges();
-
-
-        const newRange = document.createRange();
-
-
-        newRange.selectNodeContents(span);
-
-
-        selection.addRange(newRange);
-
-
-        return;
+        span.style.color = chosenColor;
 
     }
 
+
+
+    /* =========================
+       HIGHLIGHT TOGGLE
+    ========================= */
+
+    if(button.dataset.action === "highlight"){
+
+
+        const currentParent =
+            selection.anchorNode.parentElement;
+
+
+        const currentHighlight =
+            currentParent.style.backgroundColor;
+
+
+
+        if(currentHighlight === chosenColor){
+
+            currentParent.style.backgroundColor = "";
+
+
+            return;
+
+        }
+
+
+        if(chosenColor === "none"){
+
+            span.style.backgroundColor = "";
+
+        }else{
+
+            span.style.backgroundColor = chosenColor;
+
+        }
+
+    }
+
+
+
+    span.appendChild(
+        range.extractContents()
+    );
+
+
+    range.insertNode(span);
+
+
+
+    /* KEEP SELECTION */
+
+    selection.removeAllRanges();
+
+
+    const newRange = document.createRange();
+
+
+    newRange.selectNodeContents(span);
+
+
+    selection.addRange(newRange);
+
+
 });
-
-
-
-
-
-
-
-
