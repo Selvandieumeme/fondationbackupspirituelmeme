@@ -1025,7 +1025,40 @@ const button = e.target.closest(
 
 
 
+/* =========================================================
+   PARAGRAPH ALIGNMENT ONLY
+   SAFE ADDON
+========================================================= */
 
+document.addEventListener("click", function(e){
+
+    const button = e.target.closest(
+        '[data-action="align-left"],' +
+        '[data-action="align-center"],' +
+        '[data-action="align-right"],' +
+        '[data-action="justify"]'
+    );
+
+    if(!button) return;
+
+
+    const command = {
+
+        "align-left": "justifyLeft",
+        "align-center": "justifyCenter",
+        "align-right": "justifyRight",
+        "justify": "justifyFull"
+
+    };
+
+
+    document.execCommand(
+        command[button.dataset.action],
+        false,
+        null
+    );
+
+});
 
 
 
