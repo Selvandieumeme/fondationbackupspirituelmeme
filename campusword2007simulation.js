@@ -697,45 +697,186 @@ const WordRulerEngine = {
 
 
 
-
-
 // =========================
-// COLOR / HIGHLIGHT TOGGLE
+// COLOR / HIGHLIGHT ENGINE
 // =========================
 
 document.addEventListener("click", function (e) {
 
+
     const colorBtn = e.target.closest('[data-action="color"]');
     const highlightBtn = e.target.closest('[data-action="highlight"]');
 
-    // ouvri color
-    if (colorBtn) {
-        e.preventDefault();
 
-        // fè toggle
-        colorBtn.classList.toggle("open");
+    const dot = e.target.closest(".cwColorDot");
 
-        // fèmen highlight si li louvri
-        document.querySelectorAll('.cwRibbonBtn[data-action="highlight"].open')
-            .forEach(el => el.classList.remove("open"));
+
+
+    /*
+       =========================
+       APPLY COLOR / HIGHLIGHT
+       =========================
+    */
+
+    if(dot){
+
+        const parentButton = dot.closest(".cwRibbonBtn");
+
+        if(!parentButton) return;
+
+
+        const selection = window.getSelection();
+
+
+        if(selection &&
+           selection.rangeCount > 0 &&
+           selection.toString().trim() !== ""){
+
+
+            const range = selection.getRangeAt(0);
+
+
+            const span = document.createElement("span");
+
+
+
+            if(parentButton.dataset.action === "color"){
+
+                span.style.color =
+                    dot.style.backgroundColor;
+
+            }
+
+
+
+            if(parentButton.dataset.action === "highlight"){
+
+
+                const chosen =
+                    dot.dataset.color;
+
+
+                const current =
+                    selection.anchorNode.parentElement;
+
+
+                if(
+                    current &&
+                    current.style.backgroundColor === chosen
+                ){
+
+                    current.style.backgroundColor = "";
+
+                    return;
+
+                }
+
+
+                if(chosen !== "none"){
+
+                    span.style.backgroundColor = chosen;
+
+                }
+
+            }
+
+
+
+            span.appendChild(
+                range.extractContents()
+            );
+
+
+            range.insertNode(span);
+
+
+
+            selection.removeAllRanges();
+
+
+            const newRange = document.createRange();
+
+
+            newRange.selectNodeContents(span);
+
+
+            selection.addRange(newRange);
+
+        }
+
+
+        return;
+
     }
 
-    // ouvri highlight
-    if (highlightBtn) {
+
+
+
+    /*
+       =========================
+       OPEN / CLOSE DROPDOWN
+       =========================
+    */
+
+
+    if(colorBtn){
+
         e.preventDefault();
+
+
+        colorBtn.classList.toggle("open");
+
+
+        document.querySelectorAll(
+            '.cwRibbonBtn[data-action="highlight"].open'
+        )
+        .forEach(el =>
+            el.classList.remove("open")
+        );
+
+
+        return;
+
+    }
+
+
+
+    if(highlightBtn){
+
+        e.preventDefault();
+
 
         highlightBtn.classList.toggle("open");
 
-        document.querySelectorAll('.cwRibbonBtn[data-action="color"].open')
-            .forEach(el => el.classList.remove("open"));
+
+        document.querySelectorAll(
+            '.cwRibbonBtn[data-action="color"].open'
+        )
+        .forEach(el =>
+            el.classList.remove("open")
+        );
+
+
+        return;
+
     }
 
-    // klik deyò fèmen tout
-    if (!colorBtn && !highlightBtn) {
-        document.querySelectorAll(".cwRibbonBtn.open")
-            .forEach(el => el.classList.remove("open"));
-    }
+
+
+
+    /*
+       CLICK OUTSIDE CLOSE
+    */
+
+    document.querySelectorAll(".cwRibbonBtn.open")
+    .forEach(el =>
+        el.classList.remove("open")
+    );
+
+
 });
+
+
 
 
 
@@ -1190,13 +1331,10 @@ document.addEventListener("click", function(e){
 
 
 
-
-
-
-
 /* =========================================================
    CAMPUS WORD 2007 — COLOR + HIGHLIGHT ENGINE
    ISOLATED MODULE
+   COLOR FIX ONLY
 ========================================================= */
 
 document.addEventListener("click", function(e){
@@ -1222,19 +1360,34 @@ document.addEventListener("click", function(e){
     if(selection.toString().trim() === "") return;
 
 
+
     const range = selection.getRangeAt(0);
 
 
     const span = document.createElement("span");
 
 
-    const chosenColor = dot.dataset.color;
+
+    /*
+       =========================
+       COLOR VALUE SOURCE
+       =========================
+
+       COLOR:
+       pran style background reyèl la
+
+       HIGHLIGHT:
+       kenbe data-color ki deja mache a
+    */
+
+    const chosenColor =
+        dot.style.backgroundColor || dot.dataset.color;
 
 
 
     /* =========================
        TEXT COLOR
-    ========================= */
+       ========================= */
 
     if(button.dataset.action === "color"){
 
@@ -1246,6 +1399,7 @@ document.addEventListener("click", function(e){
 
     /* =========================
        HIGHLIGHT TOGGLE
+       PA CHANJE LOGIC KI TE MACHÉ
     ========================= */
 
     if(button.dataset.action === "highlight"){
@@ -1270,7 +1424,8 @@ document.addEventListener("click", function(e){
         }
 
 
-        if(chosenColor === "none"){
+
+        if(dot.dataset.color === "none"){
 
             span.style.backgroundColor = "";
 
@@ -1298,6 +1453,7 @@ document.addEventListener("click", function(e){
     selection.removeAllRanges();
 
 
+
     const newRange = document.createRange();
 
 
@@ -1308,3 +1464,4 @@ document.addEventListener("click", function(e){
 
 
 });
+
