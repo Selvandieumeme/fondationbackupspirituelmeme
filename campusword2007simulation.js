@@ -1025,43 +1025,6 @@ const button = e.target.closest(
 
 
 
-/* =========================================================
-   PARAGRAPH ALIGNMENT ONLY
-   SAFE ADDON
-========================================================= */
-
-document.addEventListener("click", function(e){
-
-    const button = e.target.closest(
-        '[data-action="align-left"],' +
-        '[data-action="align-center"],' +
-        '[data-action="align-right"],' +
-        '[data-action="justify"]'
-    );
-
-    if(!button) return;
-
-
-    const command = {
-
-        "align-left": "justifyLeft",
-        "align-center": "justifyCenter",
-        "align-right": "justifyRight",
-        "justify": "justifyFull"
-
-    };
-
-
-    document.execCommand(
-        command[button.dataset.action],
-        false,
-        null
-    );
-
-});
-
-
-
 
 
 
@@ -1201,6 +1164,95 @@ document.addEventListener("click", function(e){
 
     newRange.selectNodeContents(span);
 
+
+
+    selection.addRange(newRange);
+
+
+
+});
+
+
+
+
+
+
+
+
+
+
+
+/* =========================================================
+   CAMPUS WORD 2007 — FONT SIZE SELECT ENGINE
+   SAFE WITH CURRENT EDITOR ARCHITECTURE
+========================================================= */
+
+document.addEventListener("change", function(e){
+
+
+    const select = e.target.closest(
+        '[data-action="font-size"]'
+    );
+
+
+    if(!select) return;
+
+
+
+    const size = select.value;
+
+
+
+    const selection = window.getSelection();
+
+
+    if(!selection) return;
+
+
+    if(selection.rangeCount === 0) return;
+
+
+    if(selection.toString().trim() === "") return;
+
+
+
+    const range = selection.getRangeAt(0);
+
+
+
+    /*
+       APPLY FONT SIZE
+    */
+
+    const span = document.createElement("span");
+
+
+    span.style.fontSize = size + "px";
+
+
+
+    span.appendChild(
+        range.extractContents()
+    );
+
+
+
+    range.insertNode(span);
+
+
+
+    /*
+       KEEP SELECTION ACTIVE
+    */
+
+    selection.removeAllRanges();
+
+
+
+    const newRange = document.createRange();
+
+
+    newRange.selectNodeContents(span);
 
 
     selection.addRange(newRange);
