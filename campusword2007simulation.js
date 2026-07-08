@@ -1113,29 +1113,6 @@ document.addEventListener("click", function(e){
 
 
 
-/* =========================================================
-   SAVE TEXT SELECTION FOR COLOR / HIGHLIGHT
-========================================================= */
-
-let cwSavedSelection = null;
-
-
-document.addEventListener("mouseup", function(){
-
-    const selection = window.getSelection();
-
-    if(
-        selection &&
-        selection.rangeCount > 0 &&
-        selection.toString().trim() !== ""
-    ){
-
-        cwSavedSelection =
-            selection.getRangeAt(0).cloneRange();
-
-    }
-
-});
 
 
 
@@ -1183,20 +1160,19 @@ document.addEventListener("click", function (e) {
 
 
 
+
 const selection =
     window.getSelection();
 
 
-if(!cwSavedSelection){
 
+if(
+    !selection ||
+    selection.rangeCount === 0 ||
+    selection.toString().trim() === ""
+){
     return;
-
 }
-
-
-selection.removeAllRanges();
-
-selection.addRange(cwSavedSelection);
 
 
 
