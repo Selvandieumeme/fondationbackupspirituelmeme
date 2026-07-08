@@ -1323,145 +1323,204 @@ document.addEventListener("click", function(e){
 
 
 
-
-
-
-
-
-
-
-
 /* =========================================================
    CAMPUS WORD 2007 — COLOR + HIGHLIGHT ENGINE
    ISOLATED MODULE
-   COLOR FIX ONLY
+   COMPATIBLE WITH CURRENT HTML
 ========================================================= */
 
-document.addEventListener("click", function(e){
+document.addEventListener("click", function (e) {
 
-    const button = e.target.closest(
-        '[data-action="color"],' +
-        '[data-action="highlight"]'
-    );
 
-    if(!button) return;
-
+    const colorBtn = e.target.closest('[data-action="color"]');
+    const highlightBtn = e.target.closest('[data-action="highlight"]');
 
     const dot = e.target.closest(".cwColorDot");
-
-    if(!dot) return;
-
-
-    const selection = window.getSelection();
-
-
-    if(!selection) return;
-    if(selection.rangeCount === 0) return;
-    if(selection.toString().trim() === "") return;
-
-
-
-    const range = selection.getRangeAt(0);
-
-
-    const span = document.createElement("span");
 
 
 
     /*
-       =========================
-       COLOR VALUE SOURCE
-       =========================
-
-       COLOR:
-       pran style background reyèl la
-
-       HIGHLIGHT:
-       kenbe data-color ki deja mache a
+       APPLY COLOR / HIGHLIGHT
     */
 
-    const chosenColor =
-        dot.style.backgroundColor || dot.dataset.color;
+    if(dot){
+
+        const parentButton = dot.closest(".cwRibbonBtn");
+
+        if(!parentButton) return;
 
 
 
-    /* =========================
-       TEXT COLOR
-       ========================= */
-
-    if(button.dataset.action === "color"){
-
-        span.style.color = chosenColor;
-
-    }
+        const selection = window.getSelection();
 
 
-
-    /* =========================
-       HIGHLIGHT TOGGLE
-       PA CHANJE LOGIC KI TE MACHÉ
-    ========================= */
-
-    if(button.dataset.action === "highlight"){
-
-
-        const currentParent =
-            selection.anchorNode.parentElement;
-
-
-        const currentHighlight =
-            currentParent.style.backgroundColor;
-
-
-
-        if(currentHighlight === chosenColor){
-
-            currentParent.style.backgroundColor = "";
-
-
+        if(
+            !selection ||
+            selection.rangeCount === 0 ||
+            selection.toString().trim() === ""
+        ){
             return;
+        }
+
+
+
+        const range = selection.getRangeAt(0);
+
+
+        const span = document.createElement("span");
+
+
+
+        /*
+           COLOR
+           pran koulè reyèl ki soti nan HTML
+        */
+
+        if(parentButton.dataset.action === "color"){
+
+            span.style.color =
+                dot.style.backgroundColor;
 
         }
 
 
 
-        if(dot.dataset.color === "none"){
+        /*
+           HIGHLIGHT
+           kenbe lojik aktyèl la
+        */
 
-            span.style.backgroundColor = "";
+        if(parentButton.dataset.action === "highlight"){
 
-        }else{
 
-            span.style.backgroundColor = chosenColor;
+            const chosen =
+                dot.dataset.color;
+
+
+
+            const current =
+                selection.anchorNode.parentElement;
+
+
+
+            if(
+                current &&
+                current.style.backgroundColor === chosen
+            ){
+
+                current.style.backgroundColor = "";
+
+                return;
+
+            }
+
+
+
+            if(chosen !== "none"){
+
+                span.style.backgroundColor = chosen;
+
+            }
 
         }
+
+
+
+        span.appendChild(
+            range.extractContents()
+        );
+
+
+        range.insertNode(span);
+
+
+
+        selection.removeAllRanges();
+
+
+
+        const newRange =
+            document.createRange();
+
+
+
+        newRange.selectNodeContents(span);
+
+
+
+        selection.addRange(newRange);
+
+
+
+        return;
 
     }
 
 
 
-    span.appendChild(
-        range.extractContents()
+
+    /*
+       OPEN / CLOSE DROPDOWN
+    */
+
+
+    if(colorBtn){
+
+        e.preventDefault();
+
+
+        colorBtn.classList.toggle("open");
+
+
+        document.querySelectorAll(
+            '.cwRibbonBtn[data-action="highlight"].open'
+        )
+        .forEach(el =>
+            el.classList.remove("open")
+        );
+
+
+        return;
+
+    }
+
+
+
+    if(highlightBtn){
+
+        e.preventDefault();
+
+
+        highlightBtn.classList.toggle("open");
+
+
+        document.querySelectorAll(
+            '.cwRibbonBtn[data-action="color"].open'
+        )
+        .forEach(el =>
+            el.classList.remove("open")
+        );
+
+
+        return;
+
+    }
+
+
+
+    /*
+       CLICK OUTSIDE CLOSE
+    */
+
+    document.querySelectorAll(".cwRibbonBtn.open")
+    .forEach(el =>
+        el.classList.remove("open")
     );
 
 
-    range.insertNode(span);
-
-
-
-    /* KEEP SELECTION */
-
-    selection.removeAllRanges();
-
-
-
-    const newRange = document.createRange();
-
-
-    newRange.selectNodeContents(span);
-
-
-    selection.addRange(newRange);
-
-
 });
+
+
+
+
 
