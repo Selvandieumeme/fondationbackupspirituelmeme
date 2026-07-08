@@ -1997,37 +1997,64 @@ body{
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 /* =========================================================
-   CAMPUS WORD — TOUCH VIEWPORT BOUNDARY LOCK
-   ISOLATED / NON-DESTRUCTIVE
-   STATUS BAR = FINAL APP LIMIT
+   CAMPUS WORD — APP FRAME BOTTOM LIMIT
+   ISOLATED SAFE PATCH
 ========================================================= */
 
-
-/* PREVENT BROWSER OVERSCROLL EFFECT */
 html,
 body{
-
-    overscroll-behavior:none;
-
+    width:100%;
+    height:100%;
+    margin:0;
+    padding:0;
 }
 
 
-/* APPLICATION WINDOW USES DEVICE VIEWPORT */
-
 #cwWindow{
 
-    max-height:100dvh;
+    height:100dvh;
+    min-height:100dvh;
+
+    display:flex;
+    flex-direction:column;
 
     overflow:hidden;
 
 }
 
 
-/* WORKSPACE REMAINS THE ONLY DOCUMENT MOTION AREA */
+/* WORKSPACE TAKES ONLY AVAILABLE SPACE */
 
 #cwWorkspace{
 
+    flex:1;
     min-height:0;
 
     overflow:hidden;
@@ -2035,40 +2062,21 @@ body{
 }
 
 
-/* STATUS BAR DEFINES THE BOTTOM BOUNDARY */
+/* DOCUMENT SCROLL REMAINS INSIDE */
+
+#cwWorkspaceScroll{
+
+    height:100%;
+    overflow-y:auto;
+
+}
+
+
+/* STATUS BAR ALWAYS CLOSES APP FRAME */
 
 #cwStatusBar{
-
-    position:relative;
 
     flex-shrink:0;
-
-    z-index:1000;
-
-}
-
-
-/* PREVENT TOUCH FROM DRAGGING OUTSIDE APP */
-
-#cwWindow,
-#cwStatusBar{
-
-    overscroll-behavior:contain;
-
-}
-
-
-/* ANDROID TOUCH SAFETY */
-
-@media (pointer:coarse){
-
-    html,
-    body{
-
-        overscroll-behavior:none;
-        touch-action:pan-y;
-
-    }
 
 }
 
