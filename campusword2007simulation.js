@@ -746,68 +746,6 @@ document.addEventListener("click", function (e) {
 
 
 
-// =========================
-// APPLY COLOR / HIGHLIGHT
-// =========================
-
-document.addEventListener("click", function(e){
-
-    const dot = e.target.closest(".cwColorDot");
-
-    if(!dot) return;
-
-    const color = dot.dataset.color;
-
-    const selection = window.getSelection();
-
-    if(!selection || selection.rangeCount === 0) return;
-
-    if(selection.toString().trim() === "") return;
-
-
-    const action = dot.classList.contains("highlight")
-        ? "highlight"
-        : "color";
-
-
-    if(action === "color"){
-
-        document.execCommand(
-            "foreColor",
-            false,
-            color
-        );
-
-    }
-
-
-    if(action === "highlight"){
-
-        if(color === "none"){
-
-            document.execCommand(
-                "hiliteColor",
-                false,
-                "transparent"
-            );
-
-        }else{
-
-            document.execCommand(
-                "hiliteColor",
-                false,
-                color
-            );
-
-        }
-
-    }
-
-
-});
-
-
-
 
 
 
@@ -1244,81 +1182,114 @@ document.addEventListener("click", function(e){
 
 
 
+
+
+
+
+
+
+
+
 /* =========================================================
-   CAMPUS WORD 2007 — FONT SIZE SELECT ENGINE
-   SAFE WITH CURRENT EDITOR ARCHITECTURE
+   CAMPUS WORD 2007 — COLOR + HIGHLIGHT ENGINE
+   SAFE ISOLATED MODULE
+   DOES NOT TOUCH B/I/U/FONT SIZE
 ========================================================= */
 
-document.addEventListener("change", function(e){
+document.addEventListener("click", function(e){
 
-
-    const select = e.target.closest(
-        '[data-action="font-size"]'
+    const button = e.target.closest(
+        '[data-action="color"],' +
+        '[data-action="highlight"]'
     );
 
 
-    if(!select) return;
+    if(!button) return;
 
 
-
-    const size = select.value;
-
-
-
-    const selection = window.getSelection();
-
-
-    if(!selection) return;
-
-
-    if(selection.rangeCount === 0) return;
-
-
-    if(selection.toString().trim() === "") return;
-
-
-
-    const range = selection.getRangeAt(0);
-
+    const colorBox = e.target.closest(".cwColorDot");
 
 
     /*
-       APPLY FONT SIZE
+       USER CLICKS A COLOR
     */
+    if(colorBox){
 
-    const span = document.createElement("span");
-
-
-    span.style.fontSize = size + "px";
+        const color = colorBox.dataset.color;
 
 
-
-    span.appendChild(
-        range.extractContents()
-    );
+        const selection = window.getSelection();
 
 
-
-    range.insertNode(span);
-
-
-
-    /*
-       KEEP SELECTION ACTIVE
-    */
-
-    selection.removeAllRanges();
+        if(!selection) return;
+        if(selection.rangeCount === 0) return;
+        if(selection.toString().trim() === "") return;
 
 
-
-    const newRange = document.createRange();
-
-
-    newRange.selectNodeContents(span);
+        const range = selection.getRangeAt(0);
 
 
-    selection.addRange(newRange);
+        const span = document.createElement("span");
 
 
+        if(button.dataset.action === "color"){
+
+            span.style.color = color;
+
+        }
+
+
+        if(button.dataset.action === "highlight"){
+
+            if(color === "none"){
+
+                span.style.backgroundColor = "";
+
+            }else{
+
+                span.style.backgroundColor = color;
+
+            }
+
+        }
+
+
+
+        span.appendChild(
+            range.extractContents()
+        );
+
+
+        range.insertNode(span);
+
+
+
+        /*
+           KEEP SELECTION ACTIVE
+        */
+
+        selection.removeAllRanges();
+
+
+        const newRange = document.createRange();
+
+
+        newRange.selectNodeContents(span);
+
+
+        selection.addRange(newRange);
+
+
+        return;
+
+    }
 
 });
+
+
+
+
+
+
+
+
