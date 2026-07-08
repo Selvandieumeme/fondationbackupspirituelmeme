@@ -1999,9 +1999,9 @@ body{
 
 
 /* =========================================================
-   CAMPUS WORD 2007 — MOBILE VIEWPORT STABILITY
-   ISOLATED SAFE LAYER
-   DOES NOT MOVE DOCUMENT POSITION
+   CAMPUS WORD 2007 — MOBILE LAYOUT STABILITY GUARD
+   ISOLATED TOUCH SAFE LAYER
+   DOES NOT TOUCH PAGE ENGINE
 ========================================================= */
 
 html,
@@ -2014,7 +2014,7 @@ body{
 
 #cwWindow{
 
-    overflow:hidden;
+    overscroll-behavior:none;
 
 }
 
@@ -2023,8 +2023,15 @@ body{
 
     overscroll-behavior:contain;
 
+    -webkit-overflow-scrolling:touch;
+
     scroll-behavior:auto;
 
-    touch-action:pan-y;
-
 }
+
+
+
+
+
+
+
