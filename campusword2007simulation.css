@@ -2009,80 +2009,53 @@ body{
 
 
 
-
-
-
-
-
-
-
-
-
-
-
 /* =========================================================
-   CAMPUS WORD — APP FRAME FINAL BOUNDARY
+   CAMPUS WORD — STATUS BAR HORIZONTAL SCROLL
+   ISOLATED FOOTER ONLY PATCH
 ========================================================= */
-
-html,
-body{
-
-    width:100%;
-    height:100%;
-
-    margin:0;
-    padding:0;
-
-    overflow:hidden;
-
-}
-
-
-#cwWindow{
-
-    width:100%;
-    height:100dvh;
-
-    display:flex;
-    flex-direction:column;
-
-    overflow:hidden;
-
-}
-
-
-/* EVERYTHING ABOVE STATUS BAR */
-#cwWorkspace{
-
-    flex:1;
-    min-height:0;
-
-    overflow:hidden;
-
-}
-
-
-/* ONLY DOCUMENT NAVIGATION */
-
-#cwWorkspaceScroll{
-
-    flex:1;
-
-    overflow-y:auto;
-    overflow-x:hidden;
-
-}
-
-
-/* LAST PIXEL OF THE APP */
 
 #cwStatusBar{
 
-    flex-shrink:0;
+    display:flex;
 
-    width:100%;
+    overflow-x:auto;
+    overflow-y:hidden;
+
+    white-space:nowrap;
+
+    -webkit-overflow-scrolling:touch;
+
+    touch-action:pan-x;
 
 }
+
+
+/* KEEP STATUS CONTENT IN ONE LINE */
+
+#cwStatusLeft,
+#cwStatusCenter,
+#cwStatusRight{
+
+    flex-shrink:0;
+
+}
+
+
+/* HIDE UGLY SCROLLBAR (OPTIONAL) */
+
+#cwStatusBar::-webkit-scrollbar{
+
+    height:4px;
+
+}
+
+
+
+
+
+
+
+
 
 
 
