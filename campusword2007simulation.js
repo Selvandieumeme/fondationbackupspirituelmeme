@@ -1505,3 +1505,189 @@ CampusWordColorHighlight.init();
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* =========================================================
+   CAMPUS WORD 2007 — GLOBAL TEXT SELECTION PRESERVER
+   ALL DEVICES
+   ANDROID • TABLET • LAPTOP • DESKTOP • CHROMEBOOK
+
+   ISOLATED MODULE
+   DOES NOT MODIFY FORMAT ENGINES
+========================================================= */
+
+const CampusWordSelectionPreserver = {
+
+
+    savedRange:null,
+
+
+    init(){
+
+
+        /*
+           SAVE LAST VALID TEXT SELECTION
+        */
+
+        document.addEventListener(
+            "selectionchange",
+            ()=>{
+
+
+                const selection =
+                    window.getSelection();
+
+
+
+                if(
+                    !selection ||
+                    selection.rangeCount === 0
+                ){
+                    return;
+                }
+
+
+
+                if(
+                    selection.toString().trim() === ""
+                ){
+                    return;
+                }
+
+
+
+                this.savedRange =
+                    selection
+                    .getRangeAt(0)
+                    .cloneRange();
+
+
+
+            }
+        );
+
+
+
+
+
+
+        /*
+           PRESERVE BEFORE ANY RIBBON ACTION
+        */
+
+        document.addEventListener(
+            "mousedown",
+            (e)=>{
+
+
+                const button =
+                    e.target.closest(
+                        "[data-action]"
+                    );
+
+
+                if(button){
+
+                    this.restore();
+
+                }
+
+
+            },
+            true
+        );
+
+
+
+
+
+
+        /*
+           MOBILE + TOUCH SUPPORT
+        */
+
+        document.addEventListener(
+            "touchstart",
+            (e)=>{
+
+
+                const button =
+                    e.target.closest(
+                        "[data-action]"
+                    );
+
+
+                if(button){
+
+                    this.restore();
+
+                }
+
+
+            },
+            true
+        );
+
+
+
+    },
+
+
+
+
+
+
+    restore(){
+
+
+        if(!this.savedRange){
+            return;
+        }
+
+
+
+        const selection =
+            window.getSelection();
+
+
+
+        if(!selection){
+            return;
+        }
+
+
+
+        selection.removeAllRanges();
+
+
+
+        selection.addRange(
+            this.savedRange
+        );
+
+
+    }
+
+
+};
+
+
+
+
+CampusWordSelectionPreserver.init();
