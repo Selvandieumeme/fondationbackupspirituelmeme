@@ -2016,10 +2016,12 @@ body{
 
 
 
+
+
+
+
 /* =========================================================
-   CAMPUS WORD — HARD APP BOTTOM CLIP
-   STATUS BAR IS FINAL SCREEN LIMIT
-   ISOLATED PATCH
+   CAMPUS WORD — APP FRAME FINAL BOUNDARY
 ========================================================= */
 
 html,
@@ -2038,41 +2040,21 @@ body{
 
 #cwWindow{
 
-    position:fixed;
-
-    top:0;
-    left:0;
-
     width:100%;
     height:100dvh;
-
-    overflow:hidden;
 
     display:flex;
     flex-direction:column;
 
-}
-
-
-/* KEEP STATUS BAR AS LAST VISIBLE APP EDGE */
-
-#cwStatusBar{
-
-    flex:none;
-
-    position:relative;
-
-    bottom:0;
+    overflow:hidden;
 
 }
 
 
-/* ONLY THIS AREA CAN MOVE */
-
+/* EVERYTHING ABOVE STATUS BAR */
 #cwWorkspace{
 
     flex:1;
-
     min-height:0;
 
     overflow:hidden;
@@ -2080,13 +2062,25 @@ body{
 }
 
 
+/* ONLY DOCUMENT NAVIGATION */
+
 #cwWorkspaceScroll{
 
-    height:100%;
+    flex:1;
 
     overflow-y:auto;
-
     overflow-x:hidden;
+
+}
+
+
+/* LAST PIXEL OF THE APP */
+
+#cwStatusBar{
+
+    flex-shrink:0;
+
+    width:100%;
 
 }
 
