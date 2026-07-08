@@ -1318,40 +1318,93 @@ const CampusWordColorHighlight = {
             document.createElement("span");
 
 
+/*
+=====================================
+TEXT COLOR
+TRUE TOGGLE COLOR SYSTEM
+SAFE WITH CURRENT EDITOR
+=====================================
+*/
 
-        /*
-        =====================================
-        TEXT COLOR
-        =====================================
-        */
-
-
-        if(type==="color"){
-
-
-            const colorMap = {
-
-                black:"#000000",
-                darkgray:"#333333",
-                red:"#ff0000",
-                orange:"#ff9900",
-                yellow:"#ffff00",
-                green:"#00ff00",
-                skyblue:"#00ccff",
-                blue:"#0000ff",
-                purple:"#9900ff",
-                white:"#ffffff"
-
-            };
+if(type==="color"){
 
 
-            span.style.color =
-                colorMap[color] || color;
+    const colorMap = {
+
+        black:"#000000",
+        darkgray:"#333333",
+        red:"#ff0000",
+        orange:"#ff9900",
+        yellow:"#ffff00",
+        green:"#008000",
+        skyblue:"#00ccff",
+        blue:"#0000ff",
+        purple:"#9900ff",
+        white:"#ffffff"
+
+    };
 
 
-        }
+
+    const newColor =
+        colorMap[color];
 
 
+
+    const current =
+        selection.anchorNode &&
+        selection.anchorNode.parentElement;
+
+
+
+    const currentColor =
+        current &&
+        getComputedStyle(current).color;
+
+
+
+    const colorRGB = {
+
+        "#000000":"rgb(0, 0, 0)",
+        "#333333":"rgb(51, 51, 51)",
+        "#ff0000":"rgb(255, 0, 0)",
+        "#ff9900":"rgb(255, 153, 0)",
+        "#ffff00":"rgb(255, 255, 0)",
+        "#008000":"rgb(0, 128, 0)",
+        "#00ccff":"rgb(0, 204, 255)",
+        "#0000ff":"rgb(0, 0, 255)",
+        "#9900ff":"rgb(153, 0, 255)",
+        "#ffffff":"rgb(255, 255, 255)"
+
+    };
+
+
+
+    /*
+       SAME COLOR = REMOVE COLOR
+    */
+
+    if(
+        currentColor === colorRGB[newColor]
+    ){
+
+        current.style.color = "";
+
+        return;
+
+    }
+
+
+
+    /*
+       NEW COLOR = APPLY
+    */
+
+    span.style.color =
+        newColor;
+
+
+}
 
 
 
