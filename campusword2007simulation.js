@@ -1194,9 +1194,11 @@ if(
            Compatible with current HTML
         */
 
-        const chosenColor =
-            dot.style.backgroundColor ||
-            dot.dataset.color;
+
+
+
+const chosenColor =
+    dot.dataset.color;
 
 
 
