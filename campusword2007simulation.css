@@ -1983,3 +1983,48 @@ body{
     }
 
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* =========================================================
+   CAMPUS WORD 2007 — MOBILE VIEWPORT STABILITY
+   ISOLATED SAFE LAYER
+   DOES NOT MOVE DOCUMENT POSITION
+========================================================= */
+
+html,
+body{
+
+    overscroll-behavior:none;
+
+}
+
+
+#cwWindow{
+
+    overflow:hidden;
+
+}
+
+
+#cwWorkspaceScroll{
+
+    overscroll-behavior:contain;
+
+    scroll-behavior:auto;
+
+    touch-action:pan-y;
+
+}
