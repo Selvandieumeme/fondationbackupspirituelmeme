@@ -2061,3 +2061,80 @@ body{
 
 
 
+
+
+
+
+
+/* =========================================================
+   CAMPUS WORD — FINAL APP FOOTER BOUNDARY
+   KEEP STATUS BAR IN NORMAL FLOW
+========================================================= */
+
+html,
+body{
+
+    width:100%;
+    height:100%;
+
+    margin:0;
+    padding:0;
+
+    overflow:hidden;
+
+}
+
+
+/* APP FRAME */
+
+#cwWindow{
+
+    height:100dvh;
+
+    display:flex;
+
+    flex-direction:column;
+
+    overflow:hidden;
+
+}
+
+
+
+/* EVERYTHING BEFORE FOOTER */
+
+#cwWorkspace{
+
+    flex:1;
+
+    min-height:0;
+
+    overflow:hidden;
+
+}
+
+
+
+/* DOCUMENT SCROLL ONLY */
+
+#cwWorkspaceScroll{
+
+    height:100%;
+
+    overflow-y:auto;
+
+    overflow-x:hidden;
+
+}
+
+
+
+/* FOOTER — LAST ELEMENT */
+
+#cwStatusBar{
+
+    flex-shrink:0;
+
+    position:relative;
+
+}
