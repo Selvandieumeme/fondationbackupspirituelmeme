@@ -1963,27 +1963,6 @@ body{
 
 
 
-/* =========================================================
-   CAMPUS WORD 2007 — TOUCH HEADER FIX
-   SAFE ISOLATED PATCH
-========================================================= */
-
-@media (max-width:768px){
-
-    #cwTitleBar,
-    #cwQuickAccess,
-    #cwRibbonTabBar{
-
-        position:sticky !important;
-
-        top:0 !important;
-
-        z-index:100000 !important;
-
-    }
-
-}
-
 
 
 
