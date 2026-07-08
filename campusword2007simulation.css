@@ -1719,13 +1719,6 @@ body{
 
 
 
-
-
-
-
-
-
-
 /* =========================================================
    COLOR + HIGHLIGHT DROPDOWN SYSTEM
    SINGLE CONTROL BLOCK
@@ -1779,7 +1772,7 @@ body{
 
 /* =========================
    OPEN STATE
-   MATCH JS: classList.toggle("open")
+   COMPATIBLE WITH JS open
 ========================= */
 
 .cwDropdownBtn.open .cwDropdownMenu{
@@ -1809,7 +1802,7 @@ body{
 
 
 /* =========================
-   HIGHLIGHT DOT SHAPE
+   HIGHLIGHT DOT STYLE
 ========================= */
 
 .cwColorDot.highlight{
@@ -1820,8 +1813,7 @@ body{
 
 
 /* =========================
-   COLOR VALUES
-   FOR COLOR BUTTON PALETTE
+   COLOR PALETTE VALUES
 ========================= */
 
 .cwColorDot[data-color="#000000"]{
@@ -1865,7 +1857,18 @@ body{
 }
 
 
-.
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1932,101 +1935,5 @@ body{
 
 
 })();
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/* SUPPORT JS OPEN STATE */
-.cwDropdownBtn.open .cwDropdownMenu{
-    display:grid;
-}
-
-
-/* COLOR DOT AUTO COLORS */
-.cwColorDot[data-color="#000000"]{
-    background:#000000;
-}
-
-.cwColorDot[data-color="#333333"]{
-    background:#333333;
-}
-
-.cwColorDot[data-color="#ff0000"]{
-    background:#ff0000;
-}
-
-.cwColorDot[data-color="#ff9900"]{
-    background:#ff9900;
-}
-
-.cwColorDot[data-color="#ffff00"]{
-    background:#ffff00;
-}
-
-.cwColorDot[data-color="#00ff00"]{
-    background:#00ff00;
-}
-
-.cwColorDot[data-color="#00ccff"]{
-    background:#00ccff;
-}
-
-.cwColorDot[data-color="#0000ff"]{
-    background:#0000ff;
-}
-
-.cwColorDot[data-color="#9900ff"]{
-    background:#9900ff;
-}
-
-.cwColorDot[data-color="#ffffff"]{
-    background:#ffffff;
-}
-
-
-
-
-
-
-
-
-
-
 
 
