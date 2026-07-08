@@ -1108,6 +1108,42 @@ document.addEventListener("click", function(e){
 
 
 
+
+
+
+
+
+/* =========================================================
+   SAVE TEXT SELECTION FOR COLOR / HIGHLIGHT
+========================================================= */
+
+let cwSavedSelection = null;
+
+
+document.addEventListener("mouseup", function(){
+
+    const selection = window.getSelection();
+
+    if(
+        selection &&
+        selection.rangeCount > 0 &&
+        selection.toString().trim() !== ""
+    ){
+
+        cwSavedSelection =
+            selection.getRangeAt(0).cloneRange();
+
+    }
+
+});
+
+
+
+
+
+
+
+
 /* =========================================================
    CAMPUS WORD 2007 — COLOR + HIGHLIGHT ENGINE
    ISOLATED MODULE
@@ -1147,20 +1183,23 @@ document.addEventListener("click", function (e) {
 
 
 
-        const selection =
-            window.getSelection();
+const selection =
+    window.getSelection();
+
+
+if(!cwSavedSelection){
+
+    return;
+
+}
+
+
+selection.removeAllRanges();
+
+selection.addRange(cwSavedSelection);
 
 
 
-        if(
-            !selection ||
-            selection.rangeCount === 0 ||
-            selection.toString().trim() === ""
-        ){
-
-            return;
-
-        }
 
 
 
