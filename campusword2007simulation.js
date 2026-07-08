@@ -1121,61 +1121,191 @@ document.addEventListener("click", function(e){
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
 /* =========================================================
    CAMPUS WORD 2007 — COLOR + HIGHLIGHT ENGINE
-   ISOLATED MODULE
+   TRUE ISOLATED MODULE
    SAFE WITH CURRENT EDITOR ARCHITECTURE
 ========================================================= */
 
-document.addEventListener("click", function (e) {
+const CampusWordColorHighlight = {
 
 
-    const colorBtn =
-        e.target.closest('[data-action="color"]');
+    init(){
 
+        document.addEventListener(
+            "click",
+            (e)=>{
 
-    const highlightBtn =
-        e.target.closest('[data-action="highlight"]');
+                this.handleClick(e);
 
+            }
+        );
 
-    const dot =
-        e.target.closest(".cwColorDot");
-
-
-
-    /*
-       =====================================
-       APPLY COLOR / HIGHLIGHT
-       =====================================
-    */
-
-    if(dot){
-
-
-        const parentButton =
-            dot.closest(".cwRibbonBtn");
-
-
-        if(!parentButton) return;
+    },
 
 
 
-
-const selection =
-    window.getSelection();
+    handleClick(e){
 
 
-
-if(
-    !selection ||
-    selection.rangeCount === 0 ||
-    selection.toString().trim() === ""
-){
-    return;
-}
+        const colorBtn =
+            e.target.closest('[data-action="color"]');
 
 
+        const highlightBtn =
+            e.target.closest('[data-action="highlight"]');
 
+
+        const dot =
+            e.target.closest(".cwColorDot");
+
+
+
+        /*
+        =====================================
+        APPLY COLOR / HIGHLIGHT
+        =====================================
+        */
+
+        if(dot){
+
+
+            const parentButton =
+                dot.closest(".cwRibbonBtn");
+
+
+            if(!parentButton) return;
+
+
+
+            this.applyFormat(
+                parentButton.dataset.action,
+                dot.dataset.color
+            );
+
+
+            return;
+
+        }
+
+
+
+        /*
+        =====================================
+        OPEN COLOR DROPDOWN
+        =====================================
+        */
+
+        if(colorBtn){
+
+            e.preventDefault();
+
+
+            colorBtn.classList.toggle("open");
+
+
+            document
+            .querySelectorAll(
+                '.cwRibbonBtn[data-action="highlight"].open'
+            )
+            .forEach(el=>{
+
+                el.classList.remove("open");
+
+            });
+
+
+            return;
+
+        }
+
+
+
+        /*
+        =====================================
+        OPEN HIGHLIGHT DROPDOWN
+        =====================================
+        */
+
+        if(highlightBtn){
+
+            e.preventDefault();
+
+
+            highlightBtn.classList.toggle("open");
+
+
+            document
+            .querySelectorAll(
+                '.cwRibbonBtn[data-action="color"].open'
+            )
+            .forEach(el=>{
+
+                el.classList.remove("open");
+
+            });
+
+
+            return;
+
+        }
+
+
+
+        /*
+        =====================================
+        CLOSE ONLY OWN MENUS
+        =====================================
+        */
+
+        document
+        .querySelectorAll(
+            '.cwRibbonBtn[data-action="color"].open,'+
+            '.cwRibbonBtn[data-action="highlight"].open'
+        )
+        .forEach(el=>{
+
+            el.classList.remove("open");
+
+        });
+
+
+    },
+
+
+
+
+
+    applyFormat(type,color){
+
+
+
+        const selection =
+            window.getSelection();
+
+
+
+        if(
+            !selection ||
+            selection.rangeCount === 0 ||
+            selection.toString().trim()===""
+        ){
+
+            return;
+
+        }
 
 
 
@@ -1190,45 +1320,49 @@ if(
 
 
         /*
-           COLOR VALUE
-           Compatible with current HTML
+        =====================================
+        TEXT COLOR
+        =====================================
         */
 
 
+        if(type==="color"){
 
 
-const chosenColor =
-    dot.dataset.color;
+            const colorMap = {
+
+                black:"#000000",
+                darkgray:"#333333",
+                red:"#ff0000",
+                orange:"#ff9900",
+                yellow:"#ffff00",
+                green:"#00ff00",
+                skyblue:"#00ccff",
+                blue:"#0000ff",
+                purple:"#9900ff",
+                white:"#ffffff"
+
+            };
 
 
+            span.style.color =
+                colorMap[color] || color;
 
-        /*
-           TEXT COLOR
-        */
-
-        if(
-            parentButton.dataset.action === "color"
-        ){
-
-            span.style.color = chosenColor;
 
         }
 
 
 
+
+
         /*
-           HIGHLIGHT
-           KEEP EXISTING LOGIC
+        =====================================
+        HIGHLIGHT
+        =====================================
         */
 
-        if(
-            parentButton.dataset.action === "highlight"
-        ){
 
-
-            const chosen =
-                dot.dataset.color;
-
+        if(type==="highlight"){
 
 
             const current =
@@ -1238,15 +1372,28 @@ const chosenColor =
 
             const currentHighlight =
                 current &&
-                current.style.backgroundColor;
+                getComputedStyle(current)
+                .backgroundColor;
+
+
+
+            const highlightMap = {
+
+                yellow:"rgb(255, 255, 0)",
+                lightgreen:"rgb(144, 238, 144)",
+                orange:"rgb(255, 165, 0)",
+                pink:"rgb(255, 192, 203)",
+                lightblue:"rgb(173, 216, 230)"
+
+            };
 
 
 
             if(
-                currentHighlight === chosen
+                currentHighlight === highlightMap[color]
             ){
 
-                current.style.backgroundColor = "";
+                current.style.backgroundColor="";
 
                 return;
 
@@ -1254,19 +1401,18 @@ const chosenColor =
 
 
 
-            if(chosen !== "none"){
+            if(color!=="none"){
 
-                span.style.backgroundColor = chosen;
+                span.style.backgroundColor =
+                    color;
 
             }
+
 
         }
 
 
 
-        /*
-           INSERT FORMAT
-        */
 
         span.appendChild(
             range.extractContents()
@@ -1276,10 +1422,6 @@ const chosenColor =
         range.insertNode(span);
 
 
-
-        /*
-           KEEP SELECTION ACTIVE
-        */
 
         selection.removeAllRanges();
 
@@ -1297,108 +1439,16 @@ const chosenColor =
         selection.addRange(newRange);
 
 
-
-        return;
-
     }
 
 
 
-
-
-    /*
-       =====================================
-       OPEN / CLOSE DROPDOWN
-       =====================================
-    */
-
-
-    if(colorBtn){
-
-
-        e.preventDefault();
-
-
-        colorBtn.classList.toggle("open");
-
-
-
-        document
-        .querySelectorAll(
-            '.cwRibbonBtn[data-action="highlight"].open'
-        )
-        .forEach(el => {
-
-            el.classList.remove("open");
-
-        });
-
-
-
-        return;
-
-    }
+};
 
 
 
 
-    if(highlightBtn){
-
-
-        e.preventDefault();
-
-
-        highlightBtn.classList.toggle("open");
-
-
-
-        document
-        .querySelectorAll(
-            '.cwRibbonBtn[data-action="color"].open'
-        )
-        .forEach(el => {
-
-            el.classList.remove("open");
-
-        });
-
-
-
-        return;
-
-    }
-
-
-
-
-    /*
-       CLICK OUTSIDE
-       CLOSE ONLY COLOR/HIGHLIGHT DROPDOWNS
-    */
-
-    document
-    .querySelectorAll(
-        '.cwRibbonBtn[data-action="color"].open,' +
-        '.cwRibbonBtn[data-action="highlight"].open'
-    )
-    .forEach(el => {
-
-        el.classList.remove("open");
-
-    });
-
-
-
-});
-
-
-
-
-
-
-
-
-
+CampusWordColorHighlight.init();
 
 
 
