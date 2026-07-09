@@ -1513,18 +1513,12 @@ CampusWordColorHighlight.init();
 
 
 
-
-
-
-
-
-
-
 /* =========================================================
-   CAMPUS WORD — MULTI PAGE SELECTION MEMORY ENGINE
+   CAMPUS WORD — MULTI PAGE SELECTION LOCK ENGINE
    ISOLATED MODULE
-   SAFE WITH CARETENGINE
-   NO GLOBAL SELECTION CONTROL
+   KEEP TEXT SELECTION ACROSS ALL PAGES
+   SAFE WITH CARET ENGINE
+   NO LAYOUT / SCROLL INTERFERENCE
 ========================================================= */
 
 (function(){
@@ -1535,15 +1529,14 @@ CampusWordColorHighlight.init();
 
 
     /*
-       SAVE ONLY USER TEXT SELECTION
+       STORE ACTIVE TEXT SELECTION
     */
 
-    function saveTextSelection(){
+    function saveSelection(){
 
 
         const selection =
             window.getSelection();
-
 
 
         if(
@@ -1552,7 +1545,6 @@ CampusWordColorHighlight.init();
         ){
             return;
         }
-
 
 
         if(
@@ -1568,15 +1560,19 @@ CampusWordColorHighlight.init();
 
 
 
-        const node =
+        /*
+           ONLY SAVE INSIDE DOCUMENT PAGES
+        */
+
+        const container =
             range.commonAncestorContainer;
 
 
 
         const page =
-            node.nodeType === 3
-            ? node.parentElement.closest(".cwPageContent")
-            : node.closest(".cwPageContent");
+            container.nodeType === 3
+            ? container.parentElement.closest(".cwPageContent")
+            : container.closest(".cwPageContent");
 
 
 
@@ -1596,10 +1592,10 @@ CampusWordColorHighlight.init();
 
 
     /*
-       RESTORE ONLY WHEN NEEDED
+       RESTORE SAVED TEXT SELECTION
     */
 
-    function restoreTextSelection(){
+    function restoreSelection(){
 
 
         if(!savedRange)
@@ -1631,8 +1627,8 @@ CampusWordColorHighlight.init();
 
 
     /*
-       ONLY WATCH SELECTION INSIDE DOCUMENT
-       DOES NOT TOUCH CARET OUTSIDE
+       SAVE AFTER USER SELECTS TEXT
+       DOES NOT TOUCH CARET MOVEMENT
     */
 
     document.addEventListener(
@@ -1644,7 +1640,7 @@ CampusWordColorHighlight.init();
                 e.target.closest(".cwPageContent")
             ){
 
-                saveTextSelection();
+                saveSelection();
 
             }
 
@@ -1656,32 +1652,18 @@ CampusWordColorHighlight.init();
 
 
     /*
-       RIBBON / UI CLICK RESTORE
-       WITHOUT BLOCKING BUTTONS
+       KEEP SELECTION AFTER TOUCH ACTIONS
     */
 
     document.addEventListener(
-        "mousedown",
-        function(e){
+        "touchend",
+        function(){
 
 
-            const ui =
-                e.target.closest(
-                    "#cwRibbonTabs," +
-                    "#cwRibbonTabBar," +
-                    "#cwQuickAccess," +
-                    "#cwStatusBar"
-                );
-
-
-
-            if(
-                ui &&
-                savedRange
-            ){
+            if(savedRange){
 
                 setTimeout(
-                    restoreTextSelection,
+                    restoreSelection,
                     0
                 );
 
@@ -1693,9 +1675,33 @@ CampusWordColorHighlight.init();
     );
 
 
+
+    /*
+       KEEP SELECTION AFTER BUTTON / FOCUS CHANGE
+    */
+
+    document.addEventListener(
+        "mouseup",
+        function(){
+
+
+            if(savedRange){
+
+                setTimeout(
+                    restoreSelection,
+                    0
+                );
+
+            }
+
+
+        },
+        false
+    );
+
+
+
 })();
-
-
 
 
 
