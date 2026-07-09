@@ -2389,3 +2389,308 @@ CampusWordColorHighlight.init();
 
 
 })();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* =========================================================
+   CAMPUS WORD — FONT STYLE ENGINE
+   ISOLATED MODULE
+   FONT FAMILY / FONT SIZE
+   CUSTOM RANGE STYLE APPLY
+   NO EXECOMMAND
+   NO CARET / LAYOUT INTERFERENCE
+========================================================= */
+
+(function(){
+
+
+    let savedFontRange = null;
+
+
+
+    function captureFontSelection(){
+
+
+        const selection =
+            window.getSelection();
+
+
+
+        if(
+            !selection ||
+            selection.rangeCount === 0
+        ){
+            return;
+        }
+
+
+
+        if(
+            selection.toString().trim() === ""
+        ){
+            return;
+        }
+
+
+
+        savedFontRange =
+            selection
+            .getRangeAt(0)
+            .cloneRange();
+
+
+
+    }
+
+
+
+
+
+    function restoreFontSelection(){
+
+
+        if(
+            !savedFontRange
+        ){
+            return null;
+        }
+
+
+
+        const selection =
+            window.getSelection();
+
+
+
+        if(
+            !selection
+        ){
+            return null;
+        }
+
+
+
+        selection.removeAllRanges();
+
+
+        selection.addRange(
+            savedFontRange
+        );
+
+
+        return selection;
+
+
+    }
+
+
+
+
+
+
+    function applyFontStyle(property,value){
+
+
+        const selection =
+            restoreFontSelection();
+
+
+
+        if(
+            !selection ||
+            selection.rangeCount === 0
+        ){
+            return;
+        }
+
+
+
+        const range =
+            selection.getRangeAt(0);
+
+
+
+        const span =
+            document.createElement(
+                "span"
+            );
+
+
+
+        span.style[property] =
+            value;
+
+
+
+        span.appendChild(
+            range.extractContents()
+        );
+
+
+
+        range.insertNode(
+            span
+        );
+
+
+
+        selection.removeAllRanges();
+
+
+    }
+
+
+
+
+
+
+
+    /*
+       SAVE SELECTION BEFORE FONT CONTROL USE
+    */
+
+    document.addEventListener(
+        "mousedown",
+        function(e){
+
+
+            const control =
+                e.target.closest(
+                    '[data-action="font-family"], [data-action="font-size"]'
+                );
+
+
+
+            if(
+                control
+            ){
+
+                captureFontSelection();
+
+            }
+
+
+        },
+        false
+    );
+
+
+
+
+
+
+
+
+    /*
+       FONT FAMILY
+    */
+
+    document.addEventListener(
+        "change",
+        function(e){
+
+
+            const target =
+                e.target;
+
+
+
+            if(
+                target.dataset.action === "font-family"
+            ){
+
+
+                applyFontStyle(
+                    "fontFamily",
+                    target.value
+                );
+
+
+            }
+
+
+        },
+        false
+    );
+
+
+
+
+
+
+
+
+    /*
+       FONT SIZE
+    */
+
+    document.addEventListener(
+        "keydown",
+        function(e){
+
+
+            const target =
+                e.target;
+
+
+
+            if(
+                target.dataset.action !== "font-size"
+            ){
+                return;
+            }
+
+
+
+            if(
+                e.key === "Enter"
+            ){
+
+
+                e.preventDefault();
+
+
+
+                const size =
+                    parseInt(
+                        target.value
+                    );
+
+
+
+                if(
+                    !isNaN(size)
+                ){
+
+                    applyFontStyle(
+                        "fontSize",
+                        size + "px"
+                    );
+
+                }
+
+
+            }
+
+
+
+        },
+        false
+    );
+
+
+
+})();
