@@ -2354,11 +2354,15 @@ CampusWordColorHighlight.init();
                 captureSelection();
 
 
-                /*
-                   Keep editor selection alive
-                */
+                
 
-                e.preventDefault();
+
+
+
+
+
+
+
 
             }
 
