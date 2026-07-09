@@ -1513,11 +1513,17 @@ CampusWordColorHighlight.init();
 
 
 
+
+
+
+
+
+
 /* =========================================================
    CAMPUS WORD — MULTI PAGE SELECTION LOCK ENGINE
    ISOLATED MODULE
    KEEP TEXT SELECTION ACROSS ALL PAGES
-   SAFE WITH CARET ENGINE
+   SAFE CARET PROTECTION
    NO LAYOUT / SCROLL INTERFERENCE
 ========================================================= */
 
@@ -1592,7 +1598,7 @@ CampusWordColorHighlight.init();
 
 
     /*
-       RESTORE SAVED TEXT SELECTION
+       RESTORE SELECTION AFTER SCREEN MOVEMENT
     */
 
     function restoreSelection(){
@@ -1627,22 +1633,39 @@ CampusWordColorHighlight.init();
 
 
     /*
-       SAVE AFTER USER SELECTS TEXT
-       DOES NOT TOUCH CARET MOVEMENT
+       CAPTURE ANY PAGE TEXT SELECTION
+       PROTECTED AGAINST CARET-ONLY MOVEMENT
     */
 
     document.addEventListener(
-        "mouseup",
-        function(e){
+        "selectionchange",
+        function(){
+
+
+            const selection =
+                window.getSelection();
+
 
 
             if(
-                e.target.closest(".cwPageContent")
+                !selection ||
+                selection.rangeCount === 0
             ){
-
-                saveSelection();
-
+                return;
             }
+
+
+
+            if(
+                selection.toString().trim() === ""
+            ){
+                return;
+            }
+
+
+
+            saveSelection();
+
 
 
         },
@@ -1652,23 +1675,17 @@ CampusWordColorHighlight.init();
 
 
     /*
-       KEEP SELECTION AFTER TOUCH ACTIONS
+       KEEP SELECTION DURING TOUCH ACTIONS
     */
 
     document.addEventListener(
         "touchend",
         function(){
 
-
-            if(savedRange){
-
-                setTimeout(
-                    restoreSelection,
-                    0
-                );
-
-            }
-
+            setTimeout(
+                restoreSelection,
+                0
+            );
 
         },
         false
@@ -1677,23 +1694,17 @@ CampusWordColorHighlight.init();
 
 
     /*
-       KEEP SELECTION AFTER BUTTON / FOCUS CHANGE
+       RESTORE AFTER FOCUS CHANGES
     */
 
     document.addEventListener(
         "mouseup",
         function(){
 
-
-            if(savedRange){
-
-                setTimeout(
-                    restoreSelection,
-                    0
-                );
-
-            }
-
+            setTimeout(
+                restoreSelection,
+                0
+            );
 
         },
         false
@@ -1702,7 +1713,4 @@ CampusWordColorHighlight.init();
 
 
 })();
-
-
-
 
