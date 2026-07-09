@@ -2151,14 +2151,137 @@ CampusWordColorHighlight.init();
 
 
 
+
+
+
+
+
+
+
 /* =========================================================
-   CAMPUS WORD — UNDO REDO COMMAND BRIDGE
+   CAMPUS WORD — BASIC HISTORY ENGINE
    ISOLATED MODULE
-   BASIC EDIT HISTORY CONTROL
-   NO CARET / LAYOUT / PAGE INTERFERENCE
+   CUSTOM UNDO / REDO
+   NO EXECOMMAND
+   NO CARET / LAYOUT INTERFERENCE
 ========================================================= */
 
 (function(){
+
+
+    const undoStack = [];
+    const redoStack = [];
+
+    let recording = true;
+
+
+
+    function getActiveEditor(){
+
+        return document.querySelector(
+            ".cwPageContent:focus"
+        );
+
+    }
+
+
+
+
+    function saveState(){
+
+        if(!recording)
+            return;
+
+
+        const pages =
+            Array.from(
+                document.querySelectorAll(
+                    ".cwPageContent"
+                )
+            );
+
+
+        const snapshot =
+            pages.map(
+                page => page.innerHTML
+            );
+
+
+        undoStack.push(
+            snapshot
+        );
+
+
+        redoStack.length = 0;
+
+
+    }
+
+
+
+
+    function restoreState(snapshot){
+
+
+        const pages =
+            Array.from(
+                document.querySelectorAll(
+                    ".cwPageContent"
+                )
+            );
+
+
+        recording = false;
+
+
+        pages.forEach(
+            (page,index)=>{
+
+                if(snapshot[index] !== undefined){
+
+                    page.innerHTML =
+                        snapshot[index];
+
+                }
+
+            }
+        );
+
+
+        recording = true;
+
+
+    }
+
+
+
+
+
+
+    document.addEventListener(
+        "input",
+        function(e){
+
+
+            if(
+                e.target.classList.contains(
+                    "cwPageContent"
+                )
+            ){
+
+                saveState();
+
+            }
+
+
+        },
+        false
+    );
+
+
+
+
+
 
 
 
@@ -2173,10 +2296,8 @@ CampusWordColorHighlight.init();
                 );
 
 
-
             if(!button)
                 return;
-
 
 
             const action =
@@ -2184,33 +2305,40 @@ CampusWordColorHighlight.init();
 
 
 
-
-            if(
-                action !== "undo" &&
-                action !== "redo"
-            ){
-                return;
-            }
-
-
-
-
-
-
             if(
                 action === "undo"
             ){
 
+                if(
+                    undoStack.length
+                ){
 
-                document.execCommand(
-                    "undo"
-                );
+                    const current =
+                        Array.from(
+                            document.querySelectorAll(".cwPageContent")
+                        )
+                        .map(
+                            p=>p.innerHTML
+                        );
 
 
-                return;
+                    redoStack.push(
+                        current
+                    );
+
+
+                    const previous =
+                        undoStack.pop();
+
+
+                    restoreState(
+                        previous
+                    );
+
+                }
+
 
             }
-
 
 
 
@@ -2220,13 +2348,35 @@ CampusWordColorHighlight.init();
                 action === "redo"
             ){
 
+                if(
+                    redoStack.length
+                ){
 
-                document.execCommand(
-                    "redo"
-                );
+
+                    const current =
+                        Array.from(
+                            document.querySelectorAll(".cwPageContent")
+                        )
+                        .map(
+                            p=>p.innerHTML
+                        );
 
 
-                return;
+                    undoStack.push(
+                        current
+                    );
+
+
+                    const next =
+                        redoStack.pop();
+
+
+                    restoreState(
+                        next
+                    );
+
+                }
+
 
             }
 
