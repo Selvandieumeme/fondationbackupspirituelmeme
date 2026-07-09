@@ -790,7 +790,113 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 
+/* =========================================================
+   CAMPUS WORD — GLOBAL TEXT SELECTION PRESERVER
+   ISOLATED MODULE
+   MULTI PAGE SAFE
+   DOES NOT TOUCH LAYOUT / CARET / DOCUMENT ENGINE
+========================================================= */
 
+(function(){
+
+    let savedRange = null;
+
+
+
+    /*
+       SAVE CURRENT TEXT SELECTION
+    */
+
+    document.addEventListener("mouseup", function(){
+
+        const selection = window.getSelection();
+
+
+        if(
+            selection &&
+            selection.rangeCount > 0 &&
+            selection.toString().trim() !== ""
+        ){
+
+            savedRange =
+                selection.getRangeAt(0).cloneRange();
+
+        }
+
+    });
+
+
+
+    /*
+       KEEP SELECTION WHEN CLICKING RIBBON BUTTONS
+    */
+
+    document.addEventListener("mousedown", function(e){
+
+
+        const button =
+            e.target.closest(
+                "button,[data-action]"
+            );
+
+
+        if(!button) return;
+
+
+        if(!savedRange) return;
+
+
+        e.preventDefault();
+
+
+        const selection =
+            window.getSelection();
+
+
+        selection.removeAllRanges();
+
+
+        selection.addRange(
+            savedRange
+        );
+
+
+    });
+
+
+
+    /*
+       RESTORE AFTER CLICK ACTION
+    */
+
+    document.addEventListener("click", function(){
+
+
+        if(!savedRange) return;
+
+
+        setTimeout(function(){
+
+
+            const selection =
+                window.getSelection();
+
+
+            selection.removeAllRanges();
+
+
+            selection.addRange(
+                savedRange
+            );
+
+
+        },0);
+
+
+    });
+
+
+})();
 
 
 
