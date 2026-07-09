@@ -2134,3 +2134,251 @@ CampusWordColorHighlight.init();
 
 })();
 
+
+
+
+
+
+
+
+
+
+
+/* =========================================================
+   CAMPUS WORD — FONT COMMAND BRIDGE
+   ISOLATED MODULE
+   FONT FAMILY / FONT SIZE
+   NO CARET / LAYOUT / PAGE INTERFERENCE
+========================================================= */
+
+(function(){
+
+
+
+    function getCurrentSelection(){
+
+
+        const selection =
+            window.getSelection();
+
+
+
+        if(
+            !selection ||
+            selection.rangeCount === 0
+        ){
+            return null;
+        }
+
+
+
+        if(
+            selection.toString().trim() === ""
+        ){
+            return null;
+        }
+
+
+
+        return selection;
+
+    }
+
+
+
+
+
+
+    function applyFontFamily(fontName){
+
+
+        const selection =
+            getCurrentSelection();
+
+
+
+        if(
+            !selection
+        ){
+            return;
+        }
+
+
+
+        document.execCommand(
+            "fontName",
+            false,
+            fontName
+        );
+
+
+    }
+
+
+
+
+
+
+
+    function applyFontSize(size){
+
+
+        const selection =
+            getCurrentSelection();
+
+
+
+        if(
+            !selection
+        ){
+            return;
+        }
+
+
+
+        /*
+           execCommand fontSize uses
+           browser size levels 1-7.
+           We create a temporary span
+           for exact pixel size.
+        */
+
+
+        const range =
+            selection.getRangeAt(0);
+
+
+
+        const span =
+            document.createElement(
+                "span"
+            );
+
+
+
+        span.style.fontSize =
+            size + "px";
+
+
+
+        span.appendChild(
+            range.extractContents()
+        );
+
+
+
+        range.insertNode(
+            span
+        );
+
+
+
+        selection.removeAllRanges();
+
+
+    }
+
+
+
+
+
+
+
+    document.addEventListener(
+        "change",
+        function(e){
+
+
+            const target =
+                e.target;
+
+
+
+            const action =
+                target.dataset.action;
+
+
+
+            if(
+                action === "font-family"
+            ){
+
+
+                applyFontFamily(
+                    target.value
+                );
+
+
+            }
+
+
+
+        },
+        false
+    );
+
+
+
+
+
+
+
+    document.addEventListener(
+        "keydown",
+        function(e){
+
+
+            const target =
+                e.target;
+
+
+
+            if(
+                target.dataset.action !== "font-size"
+            ){
+                return;
+            }
+
+
+
+
+            if(
+                e.key === "Enter"
+            ){
+
+
+                e.preventDefault();
+
+
+
+                const size =
+                    parseInt(
+                        target.value
+                    );
+
+
+
+                if(
+                    !isNaN(size)
+                ){
+
+
+                    applyFontSize(
+                        size
+                    );
+
+
+                }
+
+
+            }
+
+
+
+        },
+        false
+    );
+
+
+
+})();
