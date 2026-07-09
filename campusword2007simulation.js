@@ -1769,14 +1769,10 @@ CampusWordColorHighlight.init();
 
 
 
-
-
-
-
 /* =========================================================
    CAMPUS WORD — CLIPBOARD BASIC COMMAND BRIDGE
    ISOLATED MODULE
-   COPY / CUT ONLY
+   COPY / CUT / PASTE
    NO CARET / LAYOUT / PAGE INTERFERENCE
 ========================================================= */
 
@@ -1797,16 +1793,10 @@ CampusWordColorHighlight.init();
         }
 
 
-        if(
-            selection.toString().trim() === ""
-        ){
-            return null;
-        }
-
-
         return selection;
 
     }
+
 
 
 
@@ -1833,10 +1823,12 @@ CampusWordColorHighlight.init();
 
             if(
                 action !== "copy" &&
-                action !== "cut"
+                action !== "cut" &&
+                action !== "paste"
             ){
                 return;
             }
+
 
 
 
@@ -1845,12 +1837,18 @@ CampusWordColorHighlight.init();
 
 
 
-            if(!selection)
-                return;
+            if(
+                action === "copy"
+            ){
 
 
+                if(
+                    !selection ||
+                    selection.toString().trim() === ""
+                ){
+                    return;
+                }
 
-            if(action === "copy"){
 
 
                 navigator.clipboard.writeText(
@@ -1865,11 +1863,70 @@ CampusWordColorHighlight.init();
 
 
 
-            if(action === "cut"){
+
+            if(
+                action === "cut"
+            ){
+
+
+                if(
+                    !selection ||
+                    selection.toString().trim() === ""
+                ){
+                    return;
+                }
+
 
 
                 document.execCommand(
                     "cut"
+                );
+
+
+                return;
+
+            }
+
+
+
+
+
+            if(
+                action === "paste"
+            ){
+
+
+                navigator.clipboard.readText()
+                .then(
+                    function(text){
+
+
+                        if(
+                            !text
+                        ){
+                            return;
+                        }
+
+
+
+                        document.execCommand(
+                            "insertText",
+                            false,
+                            text
+                        );
+
+
+                    }
+                )
+                .catch(
+                    function(){
+
+                        /*
+                           Browser permission blocked
+                           Keep editor stable
+                        */
+
+                    }
                 );
 
 
@@ -1884,3 +1941,11 @@ CampusWordColorHighlight.init();
 
 
 })();
+
+
+
+
+
+
+
+
