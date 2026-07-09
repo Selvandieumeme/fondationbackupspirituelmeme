@@ -2146,11 +2146,15 @@ CampusWordColorHighlight.init();
 
 
 
+
+
+
+
 /* =========================================================
    CAMPUS WORD — FONT COMMAND BRIDGE
    ISOLATED MODULE
    FONT FAMILY / FONT SIZE
-   PRESERVE TEXT SELECTION
+   RANGE PRESERVATION
    NO CARET / LAYOUT INTERFERENCE
 ========================================================= */
 
@@ -2161,8 +2165,7 @@ CampusWordColorHighlight.init();
 
 
 
-
-    function captureSelection(){
+    function saveFontRange(){
 
 
         const selection =
@@ -2198,9 +2201,7 @@ CampusWordColorHighlight.init();
 
 
 
-
-
-    function restoreSelection(){
+    function restoreFontRange(){
 
 
         if(
@@ -2239,14 +2240,11 @@ CampusWordColorHighlight.init();
 
 
 
-
-
-
     function applyFontFamily(value){
 
 
         if(
-            !restoreSelection()
+            !restoreFontRange()
         ){
             return;
         }
@@ -2266,24 +2264,14 @@ CampusWordColorHighlight.init();
 
 
 
-
-
     function applyFontSize(value){
 
 
         if(
-            !restoreSelection()
+            !restoreFontRange()
         ){
             return;
         }
-
-
-
-        document.execCommand(
-            "fontSize",
-            false,
-            "7"
-        );
 
 
 
@@ -2306,20 +2294,26 @@ CampusWordColorHighlight.init();
 
 
 
-        const spans =
-            document.querySelectorAll(
-                "font[size='7']"
+        const span =
+            document.createElement(
+                "span"
             );
 
 
 
-        spans.forEach(
-            function(el){
+        span.style.fontSize =
+            value + "px";
 
-                el.style.fontSize =
-                    value + "px";
 
-            }
+
+        span.appendChild(
+            range.extractContents()
+        );
+
+
+
+        range.insertNode(
+            span
         );
 
 
@@ -2332,37 +2326,27 @@ CampusWordColorHighlight.init();
 
 
     /*
-       SAVE BEFORE RIBBON TAKES CONTROL
+       SAVE WHEN USER TOUCHES FONT CONTROLS
+       WITHOUT BLOCKING THEM
     */
 
     document.addEventListener(
-        "mousedown",
+        "focusin",
         function(e){
 
 
-            const control =
-                e.target.closest(
-                    '[data-action="font-family"], [data-action="font-size"]'
-                );
+            const target =
+                e.target;
 
 
 
             if(
-                control
+                target.matches(
+                    '[data-action="font-family"], [data-action="font-size"]'
+                )
             ){
 
-                captureSelection();
-
-
-                
-
-
-
-
-
-
-
-
+                saveFontRange();
 
             }
 
@@ -2376,6 +2360,9 @@ CampusWordColorHighlight.init();
 
 
 
+    /*
+       FONT FAMILY
+    */
 
     document.addEventListener(
         "change",
@@ -2409,6 +2396,9 @@ CampusWordColorHighlight.init();
 
 
 
+    /*
+       FONT SIZE
+    */
 
     document.addEventListener(
         "keydown",
