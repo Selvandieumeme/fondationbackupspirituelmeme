@@ -1520,110 +1520,149 @@ CampusWordColorHighlight.init();
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 /* =========================================================
-   CAMPUS WORD — GLOBAL TEXT SELECTION PRESERVER
-   ISOLATED MODULE
+   CAMPUS WORD — TEXT SELECTION MEMORY ENGINE
+   ISOLATED / PASSIVE MODULE
    MULTI PAGE SAFE
-   DOES NOT TOUCH LAYOUT / CARET / DOCUMENT ENGINE
+   NO CONFLICT WITH EXISTING COMMAND ENGINES
 ========================================================= */
 
-(function(){
-
-    let savedRange = null;
+(function(CWSelectionMemory){
 
 
-
-    /*
-       SAVE CURRENT TEXT SELECTION
-    */
-
-    document.addEventListener("mouseup", function(){
-
-        const selection = window.getSelection();
-
-
-        if(
-            selection &&
-            selection.rangeCount > 0 &&
-            selection.toString().trim() !== ""
-        ){
-
-            savedRange =
-                selection.getRangeAt(0).cloneRange();
-
-        }
-
-    });
+    let rangeMemory = null;
 
 
 
     /*
-       KEEP SELECTION WHEN CLICKING RIBBON BUTTONS
+       SAVE ONLY REAL TEXT SELECTION
     */
 
-    document.addEventListener("mousedown", function(e){
-
-
-        const button =
-            e.target.closest(
-                "button,[data-action]"
-            );
-
-
-        if(!button) return;
-
-
-        if(!savedRange) return;
-
-
-        e.preventDefault();
+    CWSelectionMemory.save = function(){
 
 
         const selection =
             window.getSelection();
 
 
-        selection.removeAllRanges();
+        if(
+            !selection ||
+            selection.rangeCount === 0
+        ){
+            return;
+        }
 
 
-        selection.addRange(
-            savedRange
-        );
+        if(
+            selection.toString().trim() === ""
+        ){
+            return;
+        }
 
 
-    });
+        rangeMemory =
+            selection
+            .getRangeAt(0)
+            .cloneRange();
+
+
+    };
 
 
 
     /*
-       RESTORE AFTER CLICK ACTION
+       RESTORE SAVED TEXT SELECTION
     */
 
-    document.addEventListener("click", function(){
+    CWSelectionMemory.restore = function(){
 
 
-        if(!savedRange) return;
+        if(!rangeMemory)
+            return;
 
 
-        setTimeout(function(){
+        const selection =
+            window.getSelection();
 
 
-            const selection =
-                window.getSelection();
+        if(!selection)
+            return;
 
 
-            selection.removeAllRanges();
+
+        selection.removeAllRanges();
 
 
-            selection.addRange(
-                savedRange
-            );
+        selection.addRange(
+            rangeMemory
+        );
 
 
-        },0);
+    };
 
 
-    });
+
+    /*
+       CHECK IF MEMORY EXISTS
+    */
+
+    CWSelectionMemory.exists = function(){
+
+        return rangeMemory !== null;
+
+    };
 
 
-})();
+
+    /*
+       AUTO SAVE WHEN USER FINISHES SELECTION
+    */
+
+    document.addEventListener(
+        "mouseup",
+        function(e){
+
+
+            if(
+                e.target.closest(
+                    ".cwPageContent"
+                )
+            ){
+
+                CWSelectionMemory.save();
+
+            }
+
+
+        },
+        false
+    );
+
+
+
+    /*
+       PUBLIC ACCESS ONLY
+       NO CLICK BLOCKING
+    */
+
+
+    window.CWSelectionMemory =
+        CWSelectionMemory;
+
+
+
+})({});
