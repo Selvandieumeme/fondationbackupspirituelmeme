@@ -2146,17 +2146,12 @@ CampusWordColorHighlight.init();
 
 
 
-
-
-
-
-
 /* =========================================================
    CAMPUS WORD — FONT COMMAND BRIDGE
    ISOLATED MODULE
    FONT FAMILY / FONT SIZE
-   SELECTION SAFE
-   NO CARET / LAYOUT / PAGE INTERFERENCE
+   PRESERVE TEXT SELECTION
+   NO CARET / LAYOUT INTERFERENCE
 ========================================================= */
 
 (function(){
@@ -2167,7 +2162,7 @@ CampusWordColorHighlight.init();
 
 
 
-    function saveFontSelection(){
+    function captureSelection(){
 
 
         const selection =
@@ -2198,7 +2193,6 @@ CampusWordColorHighlight.init();
             .cloneRange();
 
 
-
     }
 
 
@@ -2206,7 +2200,7 @@ CampusWordColorHighlight.init();
 
 
 
-    function restoreFontSelection(){
+    function restoreSelection(){
 
 
         if(
@@ -2233,11 +2227,9 @@ CampusWordColorHighlight.init();
         selection.removeAllRanges();
 
 
-
         selection.addRange(
             savedFontRange
         );
-
 
 
         return true;
@@ -2250,11 +2242,11 @@ CampusWordColorHighlight.init();
 
 
 
-    function applyFontFamily(fontName){
+    function applyFontFamily(value){
 
 
         if(
-            !restoreFontSelection()
+            !restoreSelection()
         ){
             return;
         }
@@ -2264,7 +2256,7 @@ CampusWordColorHighlight.init();
         document.execCommand(
             "fontName",
             false,
-            fontName
+            value
         );
 
 
@@ -2276,15 +2268,22 @@ CampusWordColorHighlight.init();
 
 
 
-
-    function applyFontSize(size){
+    function applyFontSize(value){
 
 
         if(
-            !restoreFontSelection()
+            !restoreSelection()
         ){
             return;
         }
+
+
+
+        document.execCommand(
+            "fontSize",
+            false,
+            "7"
+        );
 
 
 
@@ -2307,32 +2306,21 @@ CampusWordColorHighlight.init();
 
 
 
-        const span =
-            document.createElement(
-                "span"
+        const spans =
+            document.querySelectorAll(
+                "font[size='7']"
             );
 
 
 
-        span.style.fontSize =
-            size + "px";
+        spans.forEach(
+            function(el){
 
+                el.style.fontSize =
+                    value + "px";
 
-
-        span.appendChild(
-            range.extractContents()
+            }
         );
-
-
-
-        range.insertNode(
-            span
-        );
-
-
-
-        selection.removeAllRanges();
-
 
 
     }
@@ -2344,7 +2332,7 @@ CampusWordColorHighlight.init();
 
 
     /*
-       PRESERVE SELECTION BEFORE RIBBON TAKES FOCUS
+       SAVE BEFORE RIBBON TAKES CONTROL
     */
 
     document.addEventListener(
@@ -2363,7 +2351,14 @@ CampusWordColorHighlight.init();
                 control
             ){
 
-                saveFontSelection();
+                captureSelection();
+
+
+                /*
+                   Keep editor selection alive
+                */
+
+                e.preventDefault();
 
             }
 
@@ -2377,11 +2372,6 @@ CampusWordColorHighlight.init();
 
 
 
-
-
-    /*
-       FONT FAMILY SELECT
-    */
 
     document.addEventListener(
         "change",
@@ -2416,11 +2406,6 @@ CampusWordColorHighlight.init();
 
 
 
-
-    /*
-       FONT SIZE ENTER
-    */
-
     document.addEventListener(
         "keydown",
         function(e){
@@ -2448,26 +2433,11 @@ CampusWordColorHighlight.init();
 
 
 
-                saveFontSelection();
-
-
-
-                const size =
+                applyFontSize(
                     parseInt(
                         target.value
-                    );
-
-
-
-                if(
-                    !isNaN(size)
-                ){
-
-                    applyFontSize(
-                        size
-                    );
-
-                }
+                    )
+                );
 
 
             }
@@ -2480,3 +2450,6 @@ CampusWordColorHighlight.init();
 
 
 })();
+
+
+
