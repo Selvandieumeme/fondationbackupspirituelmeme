@@ -2115,7 +2115,11 @@ body{
 
 
 
-/* DOCUMENT SCROLL ONLY */
+
+
+/* DOCUMENT SCROLL ONLY — KEEP FOOTER FIXED
+   ALLOW WORD PAGE HORIZONTAL NAVIGATION
+*/
 
 #cwWorkspaceScroll{
 
@@ -2123,9 +2127,14 @@ body{
 
     overflow-y:auto;
 
-    overflow-x:hidden;
+    overflow-x:auto;
+
+    -webkit-overflow-scrolling:touch;
 
 }
+
+
+
 
 
 
