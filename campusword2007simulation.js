@@ -1520,20 +1520,11 @@ CampusWordColorHighlight.init();
 
 
 
-
-
-
-
-
-
-
-
-
 /* =========================================================
-   CAMPUS WORD — MULTI PAGE SELECTION LOCK ENGINE
+   CAMPUS WORD — MULTI PAGE SELECTION MEMORY ENGINE
    ISOLATED MODULE
-   KEEP TEXT SELECTION ACROSS ALL PAGES
-   NO LAYOUT / CARET / SCROLL INTERFERENCE
+   SAFE WITH CARETENGINE
+   NO GLOBAL SELECTION CONTROL
 ========================================================= */
 
 (function(){
@@ -1544,14 +1535,15 @@ CampusWordColorHighlight.init();
 
 
     /*
-       STORE ACTIVE TEXT SELECTION
+       SAVE ONLY USER TEXT SELECTION
     */
 
-    function saveSelection(){
+    function saveTextSelection(){
 
 
         const selection =
             window.getSelection();
+
 
 
         if(
@@ -1560,6 +1552,7 @@ CampusWordColorHighlight.init();
         ){
             return;
         }
+
 
 
         if(
@@ -1575,18 +1568,15 @@ CampusWordColorHighlight.init();
 
 
 
-        /*
-           ONLY SAVE INSIDE DOCUMENT PAGES
-        */
-
-        const container =
+        const node =
             range.commonAncestorContainer;
 
 
+
         const page =
-            container.nodeType === 3
-            ? container.parentElement.closest(".cwPageContent")
-            : container.closest(".cwPageContent");
+            node.nodeType === 3
+            ? node.parentElement.closest(".cwPageContent")
+            : node.closest(".cwPageContent");
 
 
 
@@ -1606,10 +1596,10 @@ CampusWordColorHighlight.init();
 
 
     /*
-       RESTORE SELECTION AFTER SCREEN MOVEMENT
+       RESTORE ONLY WHEN NEEDED
     */
 
-    function restoreSelection(){
+    function restoreTextSelection(){
 
 
         if(!savedRange)
@@ -1641,53 +1631,23 @@ CampusWordColorHighlight.init();
 
 
     /*
-       CAPTURE ANY PAGE SELECTION
-    */
-
-    document.addEventListener(
-        "selectionchange",
-        function(){
-
-            saveSelection();
-
-        },
-        false
-    );
-
-
-
-    /*
-       PREVENT LOSING MEMORY DURING TOUCH MOVE
-       DOES NOT BLOCK SCROLL
-    */
-
-    document.addEventListener(
-        "touchend",
-        function(){
-
-            setTimeout(
-                restoreSelection,
-                0
-            );
-
-        },
-        false
-    );
-
-
-
-    /*
-       RESTORE AFTER FOCUS CHANGES
+       ONLY WATCH SELECTION INSIDE DOCUMENT
+       DOES NOT TOUCH CARET OUTSIDE
     */
 
     document.addEventListener(
         "mouseup",
-        function(){
+        function(e){
 
-            setTimeout(
-                restoreSelection,
-                0
-            );
+
+            if(
+                e.target.closest(".cwPageContent")
+            ){
+
+                saveTextSelection();
+
+            }
+
 
         },
         false
@@ -1695,7 +1655,48 @@ CampusWordColorHighlight.init();
 
 
 
+    /*
+       RIBBON / UI CLICK RESTORE
+       WITHOUT BLOCKING BUTTONS
+    */
+
+    document.addEventListener(
+        "mousedown",
+        function(e){
+
+
+            const ui =
+                e.target.closest(
+                    "#cwRibbonTabs," +
+                    "#cwRibbonTabBar," +
+                    "#cwQuickAccess," +
+                    "#cwStatusBar"
+                );
+
+
+
+            if(
+                ui &&
+                savedRange
+            ){
+
+                setTimeout(
+                    restoreTextSelection,
+                    0
+                );
+
+            }
+
+
+        },
+        false
+    );
+
+
 })();
+
+
+
 
 
 
