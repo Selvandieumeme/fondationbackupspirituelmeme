@@ -2330,9 +2330,11 @@ CampusWordColorHighlight.init();
        WITHOUT BLOCKING THEM
     */
 
-    document.addEventListener(
-        "focusin",
-        function(e){
+
+document.addEventListener(
+    "pointerdown",
+
+ function(e){
 
 
             const target =
