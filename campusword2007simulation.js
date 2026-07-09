@@ -2151,3 +2151,91 @@ CampusWordColorHighlight.init();
 
 
 
+/* =========================================================
+   CAMPUS WORD — UNDO REDO COMMAND BRIDGE
+   ISOLATED MODULE
+   BASIC EDIT HISTORY CONTROL
+   NO CARET / LAYOUT / PAGE INTERFERENCE
+========================================================= */
+
+(function(){
+
+
+
+    document.addEventListener(
+        "click",
+        function(e){
+
+
+            const button =
+                e.target.closest(
+                    "[data-action]"
+                );
+
+
+
+            if(!button)
+                return;
+
+
+
+            const action =
+                button.dataset.action;
+
+
+
+
+            if(
+                action !== "undo" &&
+                action !== "redo"
+            ){
+                return;
+            }
+
+
+
+
+
+
+            if(
+                action === "undo"
+            ){
+
+
+                document.execCommand(
+                    "undo"
+                );
+
+
+                return;
+
+            }
+
+
+
+
+
+
+            if(
+                action === "redo"
+            ){
+
+
+                document.execCommand(
+                    "redo"
+                );
+
+
+                return;
+
+            }
+
+
+
+        },
+        false
+    );
+
+
+
+})();
