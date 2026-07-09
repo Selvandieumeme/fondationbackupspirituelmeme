@@ -1769,14 +1769,29 @@ CampusWordColorHighlight.init();
 
 
 
+
+
+
+
+
+
+
+
+
+
+
 /* =========================================================
-   CAMPUS WORD — CLIPBOARD BASIC COMMAND BRIDGE
+   CAMPUS WORD — CLIPBOARD + FORMAT PAINTER BRIDGE
    ISOLATED MODULE
-   COPY / CUT / PASTE
+   COPY / CUT / PASTE / FORMAT PAINTER
    NO CARET / LAYOUT / PAGE INTERFERENCE
 ========================================================= */
 
 (function(){
+
+
+    let painterStyle = null;
+
 
 
     function getCurrentSelection(){
@@ -1796,6 +1811,109 @@ CampusWordColorHighlight.init();
         return selection;
 
     }
+
+
+
+
+    function capturePainterStyle(selection){
+
+
+        const range =
+            selection.getRangeAt(0);
+
+
+
+        const node =
+            range.startContainer.nodeType === 3
+            ? range.startContainer.parentElement
+            : range.startContainer;
+
+
+
+        if(!node)
+            return;
+
+
+
+        const style =
+            window.getComputedStyle(node);
+
+
+
+        painterStyle = {
+
+            fontFamily:
+                style.fontFamily,
+
+            fontSize:
+                style.fontSize,
+
+            fontWeight:
+                style.fontWeight,
+
+            fontStyle:
+                style.fontStyle,
+
+            color:
+                style.color,
+
+            backgroundColor:
+                style.backgroundColor
+
+        };
+
+
+    }
+
+
+
+
+    function applyPainterStyle(selection){
+
+
+        if(
+            !painterStyle
+        ){
+            return;
+        }
+
+
+
+        const range =
+            selection.getRangeAt(0);
+
+
+
+        const span =
+            document.createElement(
+                "span"
+            );
+
+
+
+        Object.assign(
+            span.style,
+            painterStyle
+        );
+
+
+
+        span.appendChild(
+            range.extractContents()
+        );
+
+
+
+        range.insertNode(
+            span
+        );
+
+
+        painterStyle = null;
+
+
+    }
+
 
 
 
@@ -1821,6 +1939,37 @@ CampusWordColorHighlight.init();
 
 
 
+
+            /*
+               FORMAT PAINTER
+            */
+
+            if(
+                action === "format-painter"
+            ){
+
+
+                const selection =
+                    getCurrentSelection();
+
+
+
+                if(selection){
+
+                    capturePainterStyle(
+                        selection
+                    );
+
+                }
+
+
+                return;
+
+            }
+
+
+
+
             if(
                 action !== "copy" &&
                 action !== "cut" &&
@@ -1834,6 +1983,8 @@ CampusWordColorHighlight.init();
 
             const selection =
                 getCurrentSelection();
+
+
 
 
 
@@ -1940,12 +2091,46 @@ CampusWordColorHighlight.init();
 
 
 
+
+
+
+    /*
+       APPLY FORMAT PAINTER
+       AFTER TARGET TEXT SELECTION
+    */
+
+    document.addEventListener(
+        "mouseup",
+        function(){
+
+
+            if(
+                !painterStyle
+            ){
+                return;
+            }
+
+
+
+            const selection =
+                getCurrentSelection();
+
+
+
+            if(selection){
+
+                applyPainterStyle(
+                    selection
+                );
+
+            }
+
+
+        },
+        false
+    );
+
+
+
 })();
-
-
-
-
-
-
-
 
