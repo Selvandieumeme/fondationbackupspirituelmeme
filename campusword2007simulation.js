@@ -2403,3 +2403,204 @@ CampusWordColorHighlight.init();
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* =========================================================
+   CAMPUS WORD — PARAGRAPH ALIGNMENT BRIDGE
+   ISOLATED MODULE
+   LEFT / CENTER / RIGHT / JUSTIFY
+   NO CARET / LAYOUT / PAGE INTERFERENCE
+========================================================= */
+
+(function(){
+
+
+
+    function getCurrentParagraph(){
+
+
+        const selection =
+            window.getSelection();
+
+
+
+        if(
+            !selection ||
+            selection.rangeCount === 0
+        ){
+            return null;
+        }
+
+
+
+        let node =
+            selection
+            .getRangeAt(0)
+            .startContainer;
+
+
+
+        if(
+            node.nodeType === 3
+        ){
+            node =
+                node.parentElement;
+        }
+
+
+
+
+        return node.closest(
+            ".cwPageContent"
+        )
+        ?
+        node
+        :
+        null;
+
+
+    }
+
+
+
+
+
+
+    function applyAlignment(value){
+
+
+        const element =
+            getCurrentParagraph();
+
+
+
+        if(
+            !element
+        ){
+            return;
+        }
+
+
+
+        element.style.textAlign =
+            value;
+
+
+    }
+
+
+
+
+
+
+
+    document.addEventListener(
+        "click",
+        function(e){
+
+
+            const button =
+                e.target.closest(
+                    "[data-action]"
+                );
+
+
+
+            if(
+                !button
+            ){
+                return;
+            }
+
+
+
+            const action =
+                button.dataset.action;
+
+
+
+            if(
+                action === "align-left"
+            ){
+
+                applyAlignment(
+                    "left"
+                );
+
+
+                return;
+
+            }
+
+
+
+
+            if(
+                action === "align-center"
+            ){
+
+                applyAlignment(
+                    "center"
+                );
+
+
+                return;
+
+            }
+
+
+
+
+
+            if(
+                action === "align-right"
+            ){
+
+                applyAlignment(
+                    "right"
+                );
+
+
+                return;
+
+            }
+
+
+
+
+
+            if(
+                action === "justify"
+            ){
+
+                applyAlignment(
+                    "justify"
+                );
+
+
+                return;
+
+            }
+
+
+
+        },
+        false
+    );
+
+
+
+})();
