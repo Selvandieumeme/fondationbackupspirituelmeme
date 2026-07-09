@@ -2912,3 +2912,230 @@ CampusWordColorHighlight.init();
 
 
 
+
+
+
+
+
+
+
+
+
+
+/* =========================================================
+   CAMPUS WORD — PARAGRAPH LIST POSITION FIX
+   STEP 2.1
+   BULLETS / NUMBERING AT CARET POSITION
+   ISOLATED MODULE
+   NO CARET / LAYOUT / PAGE INTERFERENCE
+========================================================= */
+
+(function(){
+
+
+
+    function getCaretParagraph(){
+
+
+        const selection =
+            window.getSelection();
+
+
+
+        if(
+            !selection ||
+            selection.rangeCount === 0
+        ){
+            return null;
+        }
+
+
+
+        let node =
+            selection
+            .getRangeAt(0)
+            .startContainer;
+
+
+
+        if(
+            node.nodeType === 3
+        ){
+            node =
+                node.parentElement;
+        }
+
+
+
+        while(
+            node &&
+            node !== document.body
+        ){
+
+
+            if(
+                node.parentElement &&
+                node.parentElement.classList.contains(
+                    "cwPageContent"
+                )
+            ){
+
+                return node;
+
+            }
+
+
+
+            node =
+                node.parentElement;
+
+
+        }
+
+
+
+        return null;
+
+
+    }
+
+
+
+
+
+
+    function applyCaretList(type){
+
+
+        const paragraph =
+            getCaretParagraph();
+
+
+
+        if(
+            !paragraph
+        ){
+            return;
+        }
+
+
+
+        if(
+            paragraph.closest("ul, ol")
+        ){
+            return;
+        }
+
+
+
+        const list =
+            document.createElement(
+                type
+            );
+
+
+
+        const item =
+            document.createElement(
+                "li"
+            );
+
+
+
+        while(
+            paragraph.firstChild
+        ){
+
+            item.appendChild(
+                paragraph.firstChild
+            );
+
+        }
+
+
+
+        list.appendChild(
+            item
+        );
+
+
+
+        paragraph.appendChild(
+            list
+        );
+
+
+
+    }
+
+
+
+
+
+
+
+    document.addEventListener(
+        "click",
+        function(e){
+
+
+            const button =
+                e.target.closest(
+                    "[data-action]"
+                );
+
+
+
+            if(
+                !button
+            ){
+                return;
+            }
+
+
+
+            const action =
+                button.dataset.action;
+
+
+
+            if(
+                action === "bullet"
+            ){
+
+
+                applyCaretList(
+                    "ul"
+                );
+
+
+                return;
+
+            }
+
+
+
+
+            if(
+                action === "numbering"
+            ){
+
+
+                applyCaretList(
+                    "ol"
+                );
+
+
+                return;
+
+            }
+
+
+
+        },
+        false
+    );
+
+
+
+})();
