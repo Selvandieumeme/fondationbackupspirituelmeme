@@ -1758,3 +1758,129 @@ CampusWordColorHighlight.init();
 
 
 })();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* =========================================================
+   CAMPUS WORD — CLIPBOARD BASIC COMMAND BRIDGE
+   ISOLATED MODULE
+   COPY / CUT ONLY
+   NO CARET / LAYOUT / PAGE INTERFERENCE
+========================================================= */
+
+(function(){
+
+
+    function getCurrentSelection(){
+
+        const selection =
+            window.getSelection();
+
+
+        if(
+            !selection ||
+            selection.rangeCount === 0
+        ){
+            return null;
+        }
+
+
+        if(
+            selection.toString().trim() === ""
+        ){
+            return null;
+        }
+
+
+        return selection;
+
+    }
+
+
+
+    document.addEventListener(
+        "click",
+        function(e){
+
+
+            const button =
+                e.target.closest(
+                    "[data-action]"
+                );
+
+
+            if(!button)
+                return;
+
+
+
+            const action =
+                button.dataset.action;
+
+
+
+            if(
+                action !== "copy" &&
+                action !== "cut"
+            ){
+                return;
+            }
+
+
+
+            const selection =
+                getCurrentSelection();
+
+
+
+            if(!selection)
+                return;
+
+
+
+            if(action === "copy"){
+
+
+                navigator.clipboard.writeText(
+                    selection.toString()
+                );
+
+
+                return;
+
+            }
+
+
+
+
+            if(action === "cut"){
+
+
+                document.execCommand(
+                    "cut"
+                );
+
+
+            }
+
+
+
+        },
+        false
+    );
+
+
+
+})();
