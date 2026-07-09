@@ -1529,30 +1529,25 @@ CampusWordColorHighlight.init();
 
 
 
-
-
-
-
-
 /* =========================================================
-   CAMPUS WORD — TEXT SELECTION MEMORY ENGINE
-   ISOLATED / PASSIVE MODULE
-   MULTI PAGE SAFE
-   NO CONFLICT WITH EXISTING COMMAND ENGINES
+   CAMPUS WORD — MULTI PAGE SELECTION LOCK ENGINE
+   ISOLATED MODULE
+   KEEP TEXT SELECTION ACROSS ALL PAGES
+   NO LAYOUT / CARET / SCROLL INTERFERENCE
 ========================================================= */
 
-(function(CWSelectionMemory){
+(function(){
 
 
-    let rangeMemory = null;
+    let savedRange = null;
 
 
 
     /*
-       SAVE ONLY REAL TEXT SELECTION
+       STORE ACTIVE TEXT SELECTION
     */
 
-    CWSelectionMemory.save = function(){
+    function saveSelection(){
 
 
         const selection =
@@ -1574,29 +1569,57 @@ CampusWordColorHighlight.init();
         }
 
 
-        rangeMemory =
-            selection
-            .getRangeAt(0)
-            .cloneRange();
+
+        const range =
+            selection.getRangeAt(0);
 
 
-    };
+
+        /*
+           ONLY SAVE INSIDE DOCUMENT PAGES
+        */
+
+        const container =
+            range.commonAncestorContainer;
+
+
+        const page =
+            container.nodeType === 3
+            ? container.parentElement.closest(".cwPageContent")
+            : container.closest(".cwPageContent");
+
+
+
+        if(!page)
+            return;
+
+
+
+        savedRange =
+            range.cloneRange();
+
+
+
+    }
+
 
 
 
     /*
-       RESTORE SAVED TEXT SELECTION
+       RESTORE SELECTION AFTER SCREEN MOVEMENT
     */
 
-    CWSelectionMemory.restore = function(){
+    function restoreSelection(){
 
 
-        if(!rangeMemory)
+        if(!savedRange)
             return;
+
 
 
         const selection =
             window.getSelection();
+
 
 
         if(!selection)
@@ -1608,45 +1631,24 @@ CampusWordColorHighlight.init();
 
 
         selection.addRange(
-            rangeMemory
+            savedRange
         );
 
 
-    };
+    }
 
-
-
-    /*
-       CHECK IF MEMORY EXISTS
-    */
-
-    CWSelectionMemory.exists = function(){
-
-        return rangeMemory !== null;
-
-    };
 
 
 
     /*
-       AUTO SAVE WHEN USER FINISHES SELECTION
+       CAPTURE ANY PAGE SELECTION
     */
 
     document.addEventListener(
-        "mouseup",
-        function(e){
+        "selectionchange",
+        function(){
 
-
-            if(
-                e.target.closest(
-                    ".cwPageContent"
-                )
-            ){
-
-                CWSelectionMemory.save();
-
-            }
-
+            saveSelection();
 
         },
         false
@@ -1655,14 +1657,45 @@ CampusWordColorHighlight.init();
 
 
     /*
-       PUBLIC ACCESS ONLY
-       NO CLICK BLOCKING
+       PREVENT LOSING MEMORY DURING TOUCH MOVE
+       DOES NOT BLOCK SCROLL
     */
 
+    document.addEventListener(
+        "touchend",
+        function(){
 
-    window.CWSelectionMemory =
-        CWSelectionMemory;
+            setTimeout(
+                restoreSelection,
+                0
+            );
+
+        },
+        false
+    );
 
 
 
-})({});
+    /*
+       RESTORE AFTER FOCUS CHANGES
+    */
+
+    document.addEventListener(
+        "mouseup",
+        function(){
+
+            setTimeout(
+                restoreSelection,
+                0
+            );
+
+        },
+        false
+    );
+
+
+
+})();
+
+
+
