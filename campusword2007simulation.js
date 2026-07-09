@@ -1519,6 +1519,13 @@ CampusWordColorHighlight.init();
 
 
 
+
+
+
+
+
+
+
 /* =========================================================
    CAMPUS WORD — MULTI PAGE SELECTION LOCK ENGINE
    ISOLATED MODULE
@@ -1532,11 +1539,225 @@ CampusWordColorHighlight.init();
 
     let savedRange = null;
 
+    let caretActivity = false;
+
 
 
     /*
        STORE ACTIVE TEXT SELECTION
     */
+
+    function saveSelection(){
+
+
+        const selection =
+            window.getSelection();
+
+
+        if(
+            !selection ||
+            selection.rangeCount === 0
+        ){
+            return;
+        }
+
+
+        if(
+            selection.toString().trim() === ""
+        ){
+            return;
+        }
+
+
+
+        const range =
+            selection.getRangeAt(0);
+
+
+
+        /*
+           ONLY SAVE INSIDE DOCUMENT PAGES
+        */
+
+        const container =
+            range.commonAncestorContainer;
+
+
+
+        const page =
+            container.nodeType === 3
+            ? container.parentElement.closest(".cwPageContent")
+            : container.closest(".cwPageContent");
+
+
+
+        if(!page)
+            return;
+
+
+
+        savedRange =
+            range.cloneRange();
+
+
+
+    }
+
+
+
+
+    /*
+       RESTORE SELECTION AFTER SCREEN MOVEMENT
+       CARET SAFE PROTECTION
+    */
+
+    function restoreSelection(){
+
+
+        if(
+            !savedRange ||
+            caretActivity
+        ){
+            return;
+        }
+
+
+
+        const selection =
+            window.getSelection();
+
+
+
+        if(!selection)
+            return;
+
+
+
+        if(
+            selection.toString().trim() === ""
+        ){
+            return;
+        }
+
+
+
+        selection.removeAllRanges();
+
+
+        selection.addRange(
+            savedRange
+        );
+
+
+    }
+
+
+
+
+    /*
+       CAPTURE ANY PAGE TEXT SELECTION
+       PROTECTED AGAINST CARET-ONLY MOVEMENT
+    */
+
+    document.addEventListener(
+        "selectionchange",
+        function(){
+
+
+            const selection =
+                window.getSelection();
+
+
+
+            if(
+                !selection ||
+                selection.rangeCount === 0
+            ){
+                return;
+            }
+
+
+
+            /*
+               IGNORE CARET ONLY MOVEMENT
+            */
+
+            if(
+                selection.toString().trim() === ""
+            ){
+
+                caretActivity = true;
+
+
+                setTimeout(
+                    function(){
+
+                        caretActivity = false;
+
+                    },
+                    50
+                );
+
+
+                return;
+
+            }
+
+
+
+            saveSelection();
+
+
+
+        },
+        false
+    );
+
+
+
+    /*
+       KEEP SELECTION DURING TOUCH ACTIONS
+    */
+
+    document.addEventListener(
+        "touchend",
+        function(){
+
+            setTimeout(
+                restoreSelection,
+                0
+            );
+
+        },
+        false
+    );
+
+
+
+    /*
+       RESTORE AFTER FOCUS CHANGES
+    */
+
+    document.addEventListener(
+        "mouseup",
+        function(){
+
+            setTimeout(
+                restoreSelection,
+                0
+            );
+
+        },
+        false
+    );
+
+
+
+})();
+
+
+
+
 
     function saveSelection(){
 
