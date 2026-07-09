@@ -2604,3 +2604,311 @@ CampusWordColorHighlight.init();
 
 
 })();
+
+
+
+
+
+
+
+
+/* =========================================================
+   CAMPUS WORD — PARAGRAPH LIST & INDENT BRIDGE
+   ISOLATED MODULE
+   BULLETS / NUMBERING / INDENT
+   NO CARET / LAYOUT / PAGE INTERFERENCE
+========================================================= */
+
+(function(){
+
+
+
+    function getActiveBlock(){
+
+
+        const selection =
+            window.getSelection();
+
+
+
+        if(
+            !selection ||
+            selection.rangeCount === 0
+        ){
+            return null;
+        }
+
+
+
+        let node =
+            selection
+            .getRangeAt(0)
+            .startContainer;
+
+
+
+        if(
+            node.nodeType === 3
+        ){
+            node =
+                node.parentElement;
+        }
+
+
+
+        const page =
+            node.closest(
+                ".cwPageContent"
+            );
+
+
+
+        if(
+            !page
+        ){
+            return null;
+        }
+
+
+
+        return node;
+
+
+
+    }
+
+
+
+
+
+
+    function applyList(type){
+
+
+        const block =
+            getActiveBlock();
+
+
+
+        if(
+            !block
+        ){
+            return;
+        }
+
+
+
+        const text =
+            block.innerText.trim();
+
+
+
+        if(
+            !text
+        ){
+            return;
+        }
+
+
+
+        const list =
+            document.createElement(
+                type
+            );
+
+
+
+        const item =
+            document.createElement(
+                "li"
+            );
+
+
+
+        item.textContent =
+            text;
+
+
+
+        list.appendChild(
+            item
+        );
+
+
+
+        block.innerHTML = "";
+
+
+
+        block.appendChild(
+            list
+        );
+
+
+
+    }
+
+
+
+
+
+
+
+
+    function changeIndent(amount){
+
+
+        const block =
+            getActiveBlock();
+
+
+
+        if(
+            !block
+        ){
+            return;
+        }
+
+
+
+        const current =
+            parseInt(
+                window
+                .getComputedStyle(block)
+                .paddingLeft
+            ) || 0;
+
+
+
+        const next =
+            Math.max(
+                0,
+                current + amount
+            );
+
+
+
+        block.style.paddingLeft =
+            next + "px";
+
+
+
+    }
+
+
+
+
+
+
+
+
+    document.addEventListener(
+        "click",
+        function(e){
+
+
+
+            const button =
+                e.target.closest(
+                    "[data-action]"
+                );
+
+
+
+            if(
+                !button
+            ){
+                return;
+            }
+
+
+
+            const action =
+                button.dataset.action;
+
+
+
+
+            if(
+                action === "bullet"
+            ){
+
+                applyList(
+                    "ul"
+                );
+
+
+                return;
+
+            }
+
+
+
+
+
+
+            if(
+                action === "numbering"
+            ){
+
+                applyList(
+                    "ol"
+                );
+
+
+                return;
+
+            }
+
+
+
+
+
+
+            if(
+                action === "indent-increase"
+            ){
+
+                changeIndent(
+                    40
+                );
+
+
+                return;
+
+            }
+
+
+
+
+
+
+            if(
+                action === "indent-decrease"
+            ){
+
+                changeIndent(
+                    -40
+                );
+
+
+                return;
+
+            }
+
+
+
+
+        },
+        false
+    );
+
+
+
+})();
+
+
+
+
+
+
