@@ -2150,302 +2150,223 @@ CampusWordColorHighlight.init();
 
 
 
+
+
+
+
+
 /* =========================================================
-   CAMPUS WORD — FONT COMMAND BRIDGE
-   ISOLATED MODULE
-   FONT FAMILY / FONT SIZE
-   RANGE PRESERVATION
-   NO CARET / LAYOUT INTERFERENCE
+   CAMPUS WORD 2007 — FONT FAMILY + FONT SIZE ENGINE
+   SAME ARCHITECTURE AS BOLD / ITALIC / COLOR
+   SAFE WITH CURRENT EDITOR
+   NO EXEC COMMAND
+   NO CARET INTERFERENCE
 ========================================================= */
 
-(function(){
+
+document.addEventListener(
+    "change",
+    function(e){
 
 
-    let savedFontRange = null;
-
-
-
-    function saveFontRange(){
-
-
-        const selection =
-            window.getSelection();
+        const target = e.target;
 
 
 
-        if(
-            !selection ||
-            selection.rangeCount === 0
-        ){
-            return;
-        }
-
-
+        /*
+        =====================================
+        FONT FAMILY
+        =====================================
+        */
 
         if(
-            selection.toString().trim() === ""
+            target.matches(
+                '[data-action="font-family"]'
+            )
         ){
-            return;
-        }
+
+
+            const selection =
+                window.getSelection();
 
 
 
-        savedFontRange =
-            selection
-            .getRangeAt(0)
-            .cloneRange();
+            if(
+                !selection ||
+                selection.rangeCount === 0 ||
+                selection.toString().trim()===""
+            ){
 
+                return;
 
-    }
-
-
-
-
-    function restoreFontRange(){
-
-
-        if(
-            !savedFontRange
-        ){
-            return false;
-        }
+            }
 
 
 
-        const selection =
-            window.getSelection();
+            const range =
+                selection.getRangeAt(0);
 
 
 
-        if(
-            !selection
-        ){
-            return false;
-        }
+            const span =
+                document.createElement("span");
 
 
 
-        selection.removeAllRanges();
-
-
-        selection.addRange(
-            savedFontRange
-        );
-
-
-        return true;
-
-    }
+            span.style.fontFamily =
+                target.value;
 
 
 
-
-    function applyFontFamily(value){
-
-
-        if(
-            !restoreFontRange()
-        ){
-            return;
-        }
-
-
-
-        document.execCommand(
-            "fontName",
-            false,
-            value
-        );
-
-
-    }
-
-
-
-
-
-    function applyFontSize(value){
-
-
-        if(
-            !restoreFontRange()
-        ){
-            return;
-        }
-
-
-
-        const selection =
-            window.getSelection();
-
-
-
-        if(
-            !selection ||
-            selection.rangeCount === 0
-        ){
-            return;
-        }
-
-
-
-        const range =
-            selection.getRangeAt(0);
-
-
-
-        const span =
-            document.createElement(
-                "span"
+            span.appendChild(
+                range.extractContents()
             );
 
 
 
-        span.style.fontSize =
-            value + "px";
+            range.insertNode(
+                span
+            );
 
 
 
-        span.appendChild(
-            range.extractContents()
-        );
+            /*
+               KEEP SELECTION ACTIVE
+            */
+
+            selection.removeAllRanges();
 
 
 
-        range.insertNode(
-            span
-        );
-
-
-    }
+            const newRange =
+                document.createRange();
 
 
 
+            newRange.selectNodeContents(
+                span
+            );
 
 
 
-
-    /*
-       SAVE WHEN USER TOUCHES FONT CONTROLS
-       WITHOUT BLOCKING THEM
-    */
-
-
-document.addEventListener(
-    "pointerdown",
-
- function(e){
-
-
-            const target =
-                e.target;
+            selection.addRange(
+                newRange
+            );
 
 
 
-            if(
-                target.matches(
-                    '[data-action="font-family"], [data-action="font-size"]'
-                )
-            ){
+            return;
 
-                saveFontRange();
-
-            }
-
-
-        },
-        false
-    );
+        }
 
 
 
 
 
 
-    /*
-       FONT FAMILY
-    */
+        /*
+        =====================================
+        FONT SIZE
+        =====================================
+        */
 
-    document.addEventListener(
-        "change",
-        function(e){
-
-
-            const target =
-                e.target;
-
-
-
-            if(
-                target.dataset.action === "font-family"
-            ){
+        if(
+            target.matches(
+                '[data-action="font-size"]'
+            )
+        ){
 
 
-                applyFontFamily(
+            const size =
+                parseInt(
                     target.value
                 );
 
 
-            }
-
-
-        },
-        false
-    );
-
-
-
-
-
-
-    /*
-       FONT SIZE
-    */
-
-    document.addEventListener(
-        "keydown",
-        function(e){
-
-
-            const target =
-                e.target;
-
-
 
             if(
-                target.dataset.action !== "font-size"
+                isNaN(size)
             ){
+
                 return;
+
             }
+
+
+
+            const selection =
+                window.getSelection();
 
 
 
             if(
-                e.key === "Enter"
+                !selection ||
+                selection.rangeCount === 0 ||
+                selection.toString().trim()===""
             ){
 
-
-                e.preventDefault();
-
-
-
-                applyFontSize(
-                    parseInt(
-                        target.value
-                    )
-                );
-
+                return;
 
             }
 
 
-        },
-        false
-    );
+
+            const range =
+                selection.getRangeAt(0);
 
 
 
-})();
+            const span =
+                document.createElement("span");
 
 
 
+            span.style.fontSize =
+                size + "px";
+
+
+
+            span.appendChild(
+                range.extractContents()
+            );
+
+
+
+            range.insertNode(
+                span
+            );
+
+
+
+            /*
+               KEEP SELECTION ACTIVE
+            */
+
+            selection.removeAllRanges();
+
+
+
+            const newRange =
+                document.createRange();
+
+
+
+            newRange.selectNodeContents(
+                span
+            );
+
+
+
+            selection.addRange(
+                newRange
+            );
+
+
+
+        }
+
+
+
+    },
+    false
+);
