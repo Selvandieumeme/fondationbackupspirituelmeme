@@ -5519,32 +5519,191 @@ function applyList(type){
 
 
 
+
+
+
+
+
+
 /* =========================================================
-   CAMPUS WORD — EXCEL SHEET BEHAVIOR ENGINE
-   STEP 4
-   SHEET SWITCHING SYSTEM
+   CAMPUS WORD — INSERT TABLE DIALOG ENGINE
    ISOLATED MODULE
+   CUSTOM ROWS / COLUMNS TABLE CREATOR
+   NO LAYOUT / CARET INTERFERENCE
 ========================================================= */
 
 (function(){
 
 
 
-    let excelSheets = [];
+    let activeDialog = null;
 
 
 
 
 
-    function createSheetData(){
+    function closeDialog(){
 
-        return {
 
-            cells:
-                []
+        if(activeDialog){
+
+            activeDialog.remove();
+
+            activeDialog = null;
+
+        }
+
+
+    }
+
+
+
+
+
+
+
+
+    function openTableDialog(){
+
+
+        closeDialog();
+
+
+
+        const dialog =
+            document.createElement(
+                "div"
+            );
+
+
+
+        dialog.className =
+            "cwTableDialog";
+
+
+
+        dialog.innerHTML = `
+
+            <div class="cwTableDialogBox">
+
+                <div class="cwTableDialogTitle">
+                    Insert Table
+                </div>
+
+
+                <label>
+                    Columns:
+                    <input 
+                        id="cwTableColumns"
+                        type="number"
+                        value="5"
+                        min="1"
+                    >
+                </label>
+
+
+                <label>
+                    Rows:
+                    <input 
+                        id="cwTableRows"
+                        type="number"
+                        value="5"
+                        min="1"
+                    >
+                </label>
+
+
+
+                <div class="cwTableDialogButtons">
+
+                    <button id="cwTableCancel">
+                        Cancel
+                    </button>
+
+
+                    <button id="cwTableInsert">
+                        Insert
+                    </button>
+
+                </div>
+
+
+            </div>
+
+        `;
+
+
+
+        document.body.appendChild(
+            dialog
+        );
+
+
+
+        activeDialog =
+            dialog;
+
+
+
+
+
+        dialog.querySelector(
+            "#cwTableCancel"
+        )
+        .onclick =
+        function(){
+
+            closeDialog();
 
         };
 
+
+
+
+
+
+
+        dialog.querySelector(
+            "#cwTableInsert"
+        )
+        .onclick =
+        function(){
+
+
+
+            const cols =
+                parseInt(
+                    dialog.querySelector(
+                        "#cwTableColumns"
+                    ).value
+                ) || 1;
+
+
+
+            const rows =
+                parseInt(
+                    dialog.querySelector(
+                        "#cwTableRows"
+                    ).value
+                ) || 1;
+
+
+
+            insertTable(
+                rows,
+                cols
+            );
+
+
+
+            closeDialog();
+
+
+
+        };
+
+
+
     }
 
 
@@ -5552,190 +5711,170 @@ function applyList(type){
 
 
 
-    function captureCurrentSheet(frame){
 
 
-        const cells =
-            frame.querySelectorAll(
-                "td"
+
+
+    function insertTable(rows, cols){
+
+
+
+        const selection =
+            window.getSelection();
+
+
+
+        if(
+            !selection ||
+            selection.rangeCount === 0
+        ){
+            return;
+        }
+
+
+
+
+
+
+        const table =
+            document.createElement(
+                "table"
             );
 
 
-        const data = [];
+
+        table.style.borderCollapse =
+            "collapse";
 
 
-        cells.forEach(
-            function(cell){
 
-                data.push(
-                    cell.innerHTML
+        table.style.margin =
+            "10px 0";
+
+
+
+
+
+        for(
+            let r = 0;
+            r < rows;
+            r++
+        ){
+
+
+
+            const tr =
+                document.createElement(
+                    "tr"
                 );
 
-            }
-        );
 
 
-        return data;
-
-
-    }
-
-
+            for(
+                let c = 0;
+                c < cols;
+                c++
+            ){
 
 
 
-
-
-
-    function restoreSheet(frame, data){
-
-
-        const cells =
-            frame.querySelectorAll(
-                "td"
-            );
-
-
-
-        cells.forEach(
-            function(cell,index){
-
-
-                cell.innerHTML =
-                    data[index] ||
-                    "&nbsp;";
-
-
-            }
-        );
-
-
-    }
-
-
-
-
-
-
-
-
-    function activateExcelSheets(){
-
-
-        const frames =
-            document.querySelectorAll(
-                ".cwExcelFrame"
-            );
-
-
-
-        frames.forEach(
-            function(frame){
-
-
-
-                if(
-                    frame.dataset.sheetReady
-                ){
-                    return;
-                }
-
-
-
-                frame.dataset.sheetReady =
-                    "true";
-
-
-
-                const tabs =
-                    frame.querySelectorAll(
-                        "button"
+                const td =
+                    document.createElement(
+                        "td"
                     );
 
 
 
-                const sheets =
-                    [
-                        createSheetData(),
-                        createSheetData(),
-                        createSheetData()
-                    ];
+                td.contentEditable =
+                    true;
 
 
 
-                let current =
-                    0;
+                td.innerHTML =
+                    "&nbsp;";
 
 
 
-
-
-                tabs.forEach(
-                    function(tab,index){
-
-
-
-                        tab.addEventListener(
-                            "click",
-                            function(){
+                td.style.border =
+                    "1px solid #999";
 
 
 
-                                sheets[current].cells =
-                                    captureCurrentSheet(
-                                        frame
-                                    );
+                td.style.minWidth =
+                    "70px";
 
 
 
-                                current =
-                                    index;
+                td.style.height =
+                    "25px";
 
 
 
-                                restoreSheet(
-                                    frame,
-                                    sheets[current].cells
-                                );
-
-
-
-                                tabs.forEach(
-                                    function(t){
-
-                                        t.style.fontWeight =
-                                            "normal";
-
-                                    }
-                                );
-
-
-
-                                tab.style.fontWeight =
-                                    "bold";
-
-
-
-                            }
-                        );
-
-
-
-                    }
+                tr.appendChild(
+                    td
                 );
 
 
 
-                tabs[0].style.fontWeight =
-                    "bold";
-
-
-
             }
+
+
+
+            table.appendChild(
+                tr
+            );
+
+
+        }
+
+
+
+
+
+        const range =
+            selection.getRangeAt(0);
+
+
+
+        range.deleteContents();
+
+
+
+        range.insertNode(
+            table
         );
 
 
+
+        selection.removeAllRanges();
+
+
+
+        const next =
+            document.createRange();
+
+
+
+        next.setStartAfter(
+            table
+        );
+
+
+
+        next.collapse(
+            true
+        );
+
+
+
+        selection.addRange(
+            next
+        );
+
+
+
     }
+
 
 
 
@@ -5746,18 +5885,34 @@ function applyList(type){
 
     document.addEventListener(
         "click",
-        function(){
+        function(e){
 
 
-            setTimeout(
-                activateExcelSheets,
-                100
-            );
+
+            const button =
+                e.target.closest(
+                    '[data-action="table-custom"]'
+                );
 
 
-        }
+
+            if(
+                !button
+            ){
+                return;
+            }
+
+
+
+            openTableDialog();
+
+
+
+        },
+        false
     );
 
 
 
 })();
+
