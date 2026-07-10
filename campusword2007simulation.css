@@ -2223,103 +2223,206 @@ body{
 
 
 
-/* =====================================================
-   CAMPUS WORD — FIND TOOL BAR STYLE
-   ISOLATED UI
-   NO RIBBON / PAGE / LAYOUT INTERFERENCE
-===================================================== */
 
-#cwFindBar{
 
-    display:flex;
 
-    align-items:center;
+/* =========================================================
+   CAMPUS WORD — FIND NEXT ENGINE FIX
+   MULTI WORD SEARCH SAFE
+========================================================= */
 
-    gap:8px;
+(function(){
 
-    padding:6px 10px;
+    let lastSearch = "";
+    let currentPosition = 0;
 
-    background:linear-gradient(
-        to bottom,
-        #f7f7f7,
-        #e6e6e6
+
+
+    function searchNext(){
+
+
+        const input =
+            document.getElementById(
+                "cwFindInput"
+            );
+
+
+
+        if(!input){
+            return;
+        }
+
+
+
+        const value =
+            input.value.trim();
+
+
+
+        if(!value){
+            return;
+        }
+
+
+
+        /*
+           NEW WORD = RESET SEARCH
+        */
+
+        if(value !== lastSearch){
+
+            lastSearch = value;
+            currentPosition = 0;
+
+        }
+
+
+
+        const pages =
+            Array.from(
+                document.querySelectorAll(
+                    ".cwPageContent"
+                )
+            );
+
+
+
+        const fullTextNodes = [];
+
+
+
+        pages.forEach(
+            function(page){
+
+
+                const walker =
+                    document.createTreeWalker(
+                        page,
+                        NodeFilter.SHOW_TEXT
+                    );
+
+
+
+                let node;
+
+
+
+                while(
+                    node = walker.nextNode()
+                ){
+
+                    fullTextNodes.push(
+                        node
+                    );
+
+                }
+
+
+            }
+        );
+
+
+
+        for(
+            let i = 0;
+            i < fullTextNodes.length;
+            i++
+        ){
+
+
+            const node =
+                fullTextNodes[i];
+
+
+
+            const index =
+                node.textContent.indexOf(
+                    value
+                );
+
+
+
+            if(
+                index !== -1
+            ){
+
+
+                const range =
+                    document.createRange();
+
+
+
+                range.setStart(
+                    node,
+                    index
+                );
+
+
+
+                range.setEnd(
+                    node,
+                    index + value.length
+                );
+
+
+
+                const selection =
+                    window.getSelection();
+
+
+
+                selection.removeAllRanges();
+
+
+
+                selection.addRange(
+                    range
+                );
+
+
+
+                currentPosition =
+                    i + 1;
+
+
+
+                return;
+
+            }
+
+
+
+        }
+
+
+
+        currentPosition = 0;
+
+
+    }
+
+
+
+
+
+    document.addEventListener(
+        "click",
+        function(e){
+
+
+            if(
+                e.target.id === "cwFindNext"
+            ){
+
+                searchNext();
+
+            }
+
+
+        },
+        false
     );
 
-    border:1px solid #b8b8b8;
-
-    border-radius:4px;
-
-    width:max-content;
-
-    box-shadow:
-        0 1px 3px rgba(0,0,0,0.15);
-
-}
 
 
-
-#cwFindInput{
-
-    width:220px;
-
-    height:28px;
-
-    padding:4px 8px;
-
-    font-size:14px;
-
-    border:1px solid #999;
-
-    border-radius:3px;
-
-    outline:none;
-
-}
-
-
-
-#cwFindInput:focus{
-
-    border-color:#4a90e2;
-
-    box-shadow:
-        0 0 3px rgba(74,144,226,0.5);
-
-}
-
-
-
-
-#cwFindNext{
-
-    height:28px;
-
-    padding:0 14px;
-
-    font-size:14px;
-
-    cursor:pointer;
-
-    background:#ffffff;
-
-    border:1px solid #999;
-
-    border-radius:3px;
-
-}
-
-
-
-#cwFindNext:hover{
-
-    background:#eaf2ff;
-
-}
-
-
-
-#cwFindNext:active{
-
-    transform:scale(0.98);
-
-}
+})();
