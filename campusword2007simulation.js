@@ -3290,3 +3290,196 @@ function applyList(type){
 
 
 })();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* =========================================================
+   CAMPUS WORD — SCRIPT FORMAT BRIDGE
+   ISOLATED MODULE
+   SUPERSCRIPT / SUBSCRIPT
+   TEXT SELECTION BASED
+   NO CARET / LAYOUT / PAGE INTERFERENCE
+========================================================= */
+
+(function(){
+
+
+
+    function getSelectionRange(){
+
+
+        const selection =
+            window.getSelection();
+
+
+
+        if(
+            !selection ||
+            selection.rangeCount === 0
+        ){
+            return null;
+        }
+
+
+
+        if(
+            selection.toString().trim() === ""
+        ){
+            return null;
+        }
+
+
+
+        return selection.getRangeAt(0);
+
+
+
+    }
+
+
+
+
+
+
+
+    function applyScript(type){
+
+
+        const range =
+            getSelectionRange();
+
+
+
+        if(
+            !range
+        ){
+            return;
+        }
+
+
+
+        const tag =
+            type === "superscript"
+            ? "sup"
+            : "sub";
+
+
+
+        const wrapper =
+            document.createElement(
+                tag
+            );
+
+
+
+        wrapper.appendChild(
+            range.extractContents()
+        );
+
+
+
+        range.insertNode(
+            wrapper
+        );
+
+
+
+        const selection =
+            window.getSelection();
+
+
+
+        selection.removeAllRanges();
+
+
+
+    }
+
+
+
+
+
+
+
+
+    document.addEventListener(
+        "click",
+        function(e){
+
+
+
+            const button =
+                e.target.closest(
+                    "[data-action]"
+                );
+
+
+
+            if(
+                !button
+            ){
+                return;
+            }
+
+
+
+            const action =
+                button.dataset.action;
+
+
+
+
+
+            if(
+                action === "superscript"
+            ){
+
+                applyScript(
+                    "superscript"
+                );
+
+
+                return;
+
+            }
+
+
+
+
+
+
+            if(
+                action === "subscript"
+            ){
+
+                applyScript(
+                    "subscript"
+                );
+
+
+                return;
+
+            }
+
+
+
+
+        },
+        false
+    );
+
+
+
+})();
