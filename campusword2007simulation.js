@@ -5524,361 +5524,33 @@ function applyList(type){
 
 
 
-
 /* =========================================================
-   CAMPUS WORD — INSERT TABLE DIALOG ENGINE
+   CAMPUS WORD — TABLE DROPDOWN MENU ENGINE
+   STEP 1
+   OPEN / CLOSE TABLE MENU
    ISOLATED MODULE
-   CUSTOM ROWS / COLUMNS TABLE CREATOR
-   NO LAYOUT / CARET INTERFERENCE
 ========================================================= */
 
 (function(){
 
 
-
-    let activeDialog = null;
-
+    let activeMenu = null;
 
 
 
+    function closeMenu(){
 
-    function closeDialog(){
 
+        if(activeMenu){
 
-        if(activeDialog){
+            activeMenu.style.display =
+                "none";
 
-            activeDialog.remove();
-
-            activeDialog = null;
+            activeMenu = null;
 
         }
 
-
     }
-
-
-
-
-
-
-
-
-    function openTableDialog(){
-
-
-        closeDialog();
-
-
-
-        const dialog =
-            document.createElement(
-                "div"
-            );
-
-
-
-        dialog.className =
-            "cwTableDialog";
-
-
-
-        dialog.innerHTML = `
-
-            <div class="cwTableDialogBox">
-
-                <div class="cwTableDialogTitle">
-                    Insert Table
-                </div>
-
-
-                <label>
-                    Columns:
-                    <input 
-                        id="cwTableColumns"
-                        type="number"
-                        value="5"
-                        min="1"
-                    >
-                </label>
-
-
-                <label>
-                    Rows:
-                    <input 
-                        id="cwTableRows"
-                        type="number"
-                        value="5"
-                        min="1"
-                    >
-                </label>
-
-
-
-                <div class="cwTableDialogButtons">
-
-                    <button id="cwTableCancel">
-                        Cancel
-                    </button>
-
-
-                    <button id="cwTableInsert">
-                        Insert
-                    </button>
-
-                </div>
-
-
-            </div>
-
-        `;
-
-
-
-        document.body.appendChild(
-            dialog
-        );
-
-
-
-        activeDialog =
-            dialog;
-
-
-
-
-
-        dialog.querySelector(
-            "#cwTableCancel"
-        )
-        .onclick =
-        function(){
-
-            closeDialog();
-
-        };
-
-
-
-
-
-
-
-        dialog.querySelector(
-            "#cwTableInsert"
-        )
-        .onclick =
-        function(){
-
-
-
-            const cols =
-                parseInt(
-                    dialog.querySelector(
-                        "#cwTableColumns"
-                    ).value
-                ) || 1;
-
-
-
-            const rows =
-                parseInt(
-                    dialog.querySelector(
-                        "#cwTableRows"
-                    ).value
-                ) || 1;
-
-
-
-            insertTable(
-                rows,
-                cols
-            );
-
-
-
-            closeDialog();
-
-
-
-        };
-
-
-
-    }
-
-
-
-
-
-
-
-
-
-
-    function insertTable(rows, cols){
-
-
-
-        const selection =
-            window.getSelection();
-
-
-
-        if(
-            !selection ||
-            selection.rangeCount === 0
-        ){
-            return;
-        }
-
-
-
-
-
-
-        const table =
-            document.createElement(
-                "table"
-            );
-
-
-
-        table.style.borderCollapse =
-            "collapse";
-
-
-
-        table.style.margin =
-            "10px 0";
-
-
-
-
-
-        for(
-            let r = 0;
-            r < rows;
-            r++
-        ){
-
-
-
-            const tr =
-                document.createElement(
-                    "tr"
-                );
-
-
-
-            for(
-                let c = 0;
-                c < cols;
-                c++
-            ){
-
-
-
-                const td =
-                    document.createElement(
-                        "td"
-                    );
-
-
-
-                td.contentEditable =
-                    true;
-
-
-
-                td.innerHTML =
-                    "&nbsp;";
-
-
-
-                td.style.border =
-                    "1px solid #999";
-
-
-
-                td.style.minWidth =
-                    "70px";
-
-
-
-                td.style.height =
-                    "25px";
-
-
-
-                tr.appendChild(
-                    td
-                );
-
-
-
-            }
-
-
-
-            table.appendChild(
-                tr
-            );
-
-
-        }
-
-
-
-
-
-        const range =
-            selection.getRangeAt(0);
-
-
-
-        range.deleteContents();
-
-
-
-        range.insertNode(
-            table
-        );
-
-
-
-        selection.removeAllRanges();
-
-
-
-        const next =
-            document.createRange();
-
-
-
-        next.setStartAfter(
-            table
-        );
-
-
-
-        next.collapse(
-            true
-        );
-
-
-
-        selection.addRange(
-            next
-        );
-
-
-
-    }
-
-
-
-
-
 
 
 
@@ -5889,22 +5561,90 @@ function applyList(type){
 
 
 
-            const button =
+            const tableButton =
                 e.target.closest(
-                    '[data-action="table-custom"]'
+                    ".cwDropdownBtn"
                 );
 
 
 
-            if(
-                !button
-            ){
+            if(tableButton){
+
+
+                e.stopPropagation();
+
+
+
+                const menu =
+                    tableButton.querySelector(
+                        ".cwDropdownMenu"
+                    );
+
+
+
+                if(!menu){
+                    return;
+                }
+
+
+
+                if(
+                    activeMenu &&
+                    activeMenu !== menu
+                ){
+
+                    closeMenu();
+
+                }
+
+
+
+                const visible =
+                    menu.style.display === "block";
+
+
+
+                if(visible){
+
+                    closeMenu();
+
+                }else{
+
+
+                    menu.style.display =
+                        "block";
+
+
+                    menu.style.position =
+                        "absolute";
+
+
+                    menu.style.zIndex =
+                        "999999";
+
+
+                    activeMenu =
+                        menu;
+
+                }
+
+
                 return;
+
             }
 
 
 
-            openTableDialog();
+
+
+            if(
+                activeMenu &&
+                !activeMenu.contains(e.target)
+            ){
+
+                closeMenu();
+
+            }
 
 
 
@@ -5915,4 +5655,10 @@ function applyList(type){
 
 
 })();
+
+
+
+
+
+
 
