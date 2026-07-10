@@ -5662,3 +5662,286 @@ function applyList(type){
 
 
 
+
+
+
+
+
+
+
+
+
+/* =========================================================
+   CAMPUS WORD — TABLE SIZE INSERT ENGINE
+   ISOLATED MODULE
+   1x1 TO 15x15 TABLE CREATOR
+   NO LAYOUT / CARET ENGINE INTERFERENCE
+========================================================= */
+
+(function(){
+
+
+
+    function insertTable(rows, cols){
+
+
+        const selection =
+            window.getSelection();
+
+
+
+        if(
+            !selection ||
+            selection.rangeCount === 0
+        ){
+            return;
+        }
+
+
+
+
+        const table =
+            document.createElement(
+                "table"
+            );
+
+
+
+        table.style.borderCollapse =
+            "collapse";
+
+
+
+        table.style.margin =
+            "10px 0";
+
+
+
+
+
+        for(
+            let r = 0;
+            r < rows;
+            r++
+        ){
+
+
+            const tr =
+                document.createElement(
+                    "tr"
+                );
+
+
+
+            for(
+                let c = 0;
+                c < cols;
+                c++
+            ){
+
+
+                const td =
+                    document.createElement(
+                        "td"
+                    );
+
+
+
+                td.contentEditable =
+                    true;
+
+
+
+                td.innerHTML =
+                    "&nbsp;";
+
+
+
+                td.style.border =
+                    "1px solid #999";
+
+
+
+                td.style.minWidth =
+                    "70px";
+
+
+
+                td.style.height =
+                    "25px";
+
+
+
+                tr.appendChild(
+                    td
+                );
+
+
+            }
+
+
+
+            table.appendChild(
+                tr
+            );
+
+
+        }
+
+
+
+
+
+
+        const range =
+            selection.getRangeAt(0);
+
+
+
+        range.deleteContents();
+
+
+
+        range.insertNode(
+            table
+        );
+
+
+
+        selection.removeAllRanges();
+
+
+
+        const cursor =
+            document.createRange();
+
+
+
+        cursor.setStartAfter(
+            table
+        );
+
+
+
+        cursor.collapse(
+            true
+        );
+
+
+
+        selection.addRange(
+            cursor
+        );
+
+
+    }
+
+
+
+
+
+
+
+
+    document.addEventListener(
+        "click",
+        function(e){
+
+
+
+            const item =
+                e.target.closest(
+                    "[data-action]"
+                );
+
+
+
+            if(
+                !item
+            ){
+                return;
+            }
+
+
+
+            const action =
+                item.dataset.action;
+
+
+
+            if(
+                !action.startsWith(
+                    "table-"
+                )
+            ){
+                return;
+            }
+
+
+
+            if(
+                action === "table-custom"
+            ){
+                return;
+            }
+
+
+
+
+            const size =
+                action
+                .replace(
+                    "table-",
+                    ""
+                )
+                .split(
+                    "x"
+                );
+
+
+
+            if(
+                size.length !== 2
+            ){
+                return;
+            }
+
+
+
+            const rows =
+                parseInt(
+                    size[0]
+                );
+
+
+
+            const cols =
+                parseInt(
+                    size[1]
+                );
+
+
+
+            if(
+                rows &&
+                cols
+            ){
+
+                insertTable(
+                    rows,
+                    cols
+                );
+
+
+            }
+
+
+
+        },
+        false
+    );
+
+
+
+})();
+
