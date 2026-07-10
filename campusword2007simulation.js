@@ -3602,3 +3602,166 @@ function applyList(type){
 
 
 })();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* =========================================================
+   CAMPUS WORD — SELECT COMMAND BRIDGE
+   ISOLATED MODULE
+   SELECT CURRENT PARAGRAPH
+   NO CARET / LAYOUT / PAGE INTERFERENCE
+========================================================= */
+
+(function(){
+
+
+
+    function getCurrentParagraph(){
+
+
+        const selection =
+            window.getSelection();
+
+
+
+        if(
+            !selection ||
+            selection.rangeCount === 0
+        ){
+            return null;
+        }
+
+
+
+        let node =
+            selection
+            .getRangeAt(0)
+            .startContainer;
+
+
+
+        if(
+            node.nodeType === 3
+        ){
+            node =
+                node.parentElement;
+        }
+
+
+
+        return node.closest(
+            "p, h1, h2, div"
+        );
+
+
+
+    }
+
+
+
+
+
+
+
+    function selectParagraph(){
+
+
+        const paragraph =
+            getCurrentParagraph();
+
+
+
+        if(
+            !paragraph
+        ){
+            return;
+        }
+
+
+
+        const range =
+            document.createRange();
+
+
+
+        range.selectNodeContents(
+            paragraph
+        );
+
+
+
+        const selection =
+            window.getSelection();
+
+
+
+        selection.removeAllRanges();
+
+
+
+        selection.addRange(
+            range
+        );
+
+
+
+    }
+
+
+
+
+
+
+
+
+    document.addEventListener(
+        "click",
+        function(e){
+
+
+            const button =
+                e.target.closest(
+                    "[data-action]"
+                );
+
+
+
+            if(
+                !button
+            ){
+                return;
+            }
+
+
+
+            if(
+                button.dataset.action === "select"
+            ){
+
+                selectParagraph();
+
+            }
+
+
+
+        },
+        false
+    );
+
+
+
+})();
