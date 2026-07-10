@@ -4817,18 +4817,28 @@ function applyList(type){
 
 
 
+
+
+
+
+
+
+
+
+
+
 /* =========================================================
-   CAMPUS WORD — EXCEL SPREADSHEET BRIDGE
+   CAMPUS WORD — EXCEL SPREADSHEET FRAME ENGINE
+   STEP 1
+   GRID + HEADERS + SCROLLBARS + SHEETS
    ISOLATED MODULE
-   SIMPLE INSERT OBJECT
-   NO LAYOUT / CARET ENGINE INTERFERENCE
 ========================================================= */
 
 (function(){
 
 
 
-    function insertExcelObject(){
+    function createExcelFrame(){
 
 
         const selection =
@@ -4845,70 +4855,290 @@ function applyList(type){
 
 
 
-        const box =
+        const excel =
             document.createElement(
                 "div"
             );
 
 
 
-        box.className =
-            "cwExcelObject";
+        excel.className =
+            "cwExcelFrame";
 
 
 
-        box.contentEditable =
-            true;
+        excel.style.width =
+            "600px";
 
 
 
-        box.style.border =
-            "1px solid #999";
+        excel.style.height =
+            "350px";
 
 
 
-        box.style.padding =
-            "10px";
+        excel.style.border =
+            "1px solid #888";
 
 
 
-        box.style.display =
-            "inline-block";
+        excel.style.display =
+            "flex";
 
 
 
-        box.style.margin =
-            "10px 0";
+        excel.style.flexDirection =
+            "column";
 
 
 
-        box.innerHTML = `
+        excel.style.background =
+            "#fff";
 
-            <table style="
-                border-collapse:collapse;
-            ">
 
-                <tr>
-                    <td style="border:1px solid #999;width:80px;height:25px;"></td>
-                    <td style="border:1px solid #999;width:80px;height:25px;"></td>
-                    <td style="border:1px solid #999;width:80px;height:25px;"></td>
-                </tr>
 
-                <tr>
-                    <td style="border:1px solid #999;width:80px;height:25px;"></td>
-                    <td style="border:1px solid #999;width:80px;height:25px;"></td>
-                    <td style="border:1px solid #999;width:80px;height:25px;"></td>
-                </tr>
+        excel.style.overflow =
+            "hidden";
 
-                <tr>
-                    <td style="border:1px solid #999;width:80px;height:25px;"></td>
-                    <td style="border:1px solid #999;width:80px;height:25px;"></td>
-                    <td style="border:1px solid #999;width:80px;height:25px;"></td>
-                </tr>
 
-            </table>
+
+
+        const scrollArea =
+            document.createElement(
+                "div"
+            );
+
+
+
+        scrollArea.style.flex =
+            "1";
+
+
+
+        scrollArea.style.overflow =
+            "auto";
+
+
+
+        const table =
+            document.createElement(
+                "table"
+            );
+
+
+
+        table.style.borderCollapse =
+            "collapse";
+
+
+
+        const letters =
+            [
+                "A",
+                "B",
+                "C",
+                "D",
+                "E"
+            ];
+
+
+
+
+        const head =
+            document.createElement(
+                "tr"
+            );
+
+
+
+        const corner =
+            document.createElement(
+                "th"
+            );
+
+
+
+        corner.style.width =
+            "35px";
+
+
+
+        head.appendChild(
+            corner
+        );
+
+
+
+        letters.forEach(
+            function(letter){
+
+
+                const th =
+                    document.createElement(
+                        "th"
+                    );
+
+
+                th.textContent =
+                    letter;
+
+
+                th.style.border =
+                    "1px solid #bbb";
+
+
+                th.style.width =
+                    "90px";
+
+
+                th.style.height =
+                    "25px";
+
+
+                head.appendChild(
+                    th
+                );
+
+
+            }
+        );
+
+
+
+        table.appendChild(
+            head
+        );
+
+
+
+
+
+        for(
+            let r = 1;
+            r <= 10;
+            r++
+        ){
+
+
+            const row =
+                document.createElement(
+                    "tr"
+                );
+
+
+
+            const number =
+                document.createElement(
+                    "th"
+                );
+
+
+            number.textContent =
+                r;
+
+
+            number.style.border =
+                "1px solid #bbb";
+
+
+            row.appendChild(
+                number
+            );
+
+
+
+            letters.forEach(
+                function(){
+
+
+                    const cell =
+                        document.createElement(
+                            "td"
+                        );
+
+
+                    cell.style.border =
+                        "1px solid #bbb";
+
+
+                    cell.style.width =
+                        "90px";
+
+
+                    cell.style.height =
+                        "25px";
+
+
+                    cell.innerHTML =
+                        "&nbsp;";
+
+
+                    row.appendChild(
+                        cell
+                    );
+
+
+                }
+            );
+
+
+
+            table.appendChild(
+                row
+            );
+
+
+        }
+
+
+
+
+        scrollArea.appendChild(
+            table
+        );
+
+
+
+        excel.appendChild(
+            scrollArea
+        );
+
+
+
+
+
+        const sheets =
+            document.createElement(
+                "div"
+            );
+
+
+
+        sheets.style.height =
+            "30px";
+
+
+
+        sheets.style.borderTop =
+            "1px solid #aaa";
+
+
+
+        sheets.innerHTML = `
+
+            <button>Sheet1</button>
+            <button>Sheet2</button>
+            <button>Sheet3</button>
 
         `;
+
+
+
+        excel.appendChild(
+            sheets
+        );
+
+
 
 
 
@@ -4917,39 +5147,8 @@ function applyList(type){
 
 
 
-        range.deleteContents();
-
-
-
         range.insertNode(
-            box
-        );
-
-
-
-        selection.removeAllRanges();
-
-
-
-        const next =
-            document.createRange();
-
-
-
-        next.setStartAfter(
-            box
-        );
-
-
-
-        next.collapse(
-            true
-        );
-
-
-
-        selection.addRange(
-            next
+            excel
         );
 
 
@@ -4982,7 +5181,7 @@ function applyList(type){
 
 
 
-            insertExcelObject();
+            createExcelFrame();
 
 
 
