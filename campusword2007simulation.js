@@ -5506,3 +5506,258 @@ function applyList(type){
 
 
 })();
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* =========================================================
+   CAMPUS WORD — EXCEL SHEET BEHAVIOR ENGINE
+   STEP 4
+   SHEET SWITCHING SYSTEM
+   ISOLATED MODULE
+========================================================= */
+
+(function(){
+
+
+
+    let excelSheets = [];
+
+
+
+
+
+    function createSheetData(){
+
+        return {
+
+            cells:
+                []
+
+        };
+
+    }
+
+
+
+
+
+
+    function captureCurrentSheet(frame){
+
+
+        const cells =
+            frame.querySelectorAll(
+                "td"
+            );
+
+
+        const data = [];
+
+
+        cells.forEach(
+            function(cell){
+
+                data.push(
+                    cell.innerHTML
+                );
+
+            }
+        );
+
+
+        return data;
+
+
+    }
+
+
+
+
+
+
+
+
+    function restoreSheet(frame, data){
+
+
+        const cells =
+            frame.querySelectorAll(
+                "td"
+            );
+
+
+
+        cells.forEach(
+            function(cell,index){
+
+
+                cell.innerHTML =
+                    data[index] ||
+                    "&nbsp;";
+
+
+            }
+        );
+
+
+    }
+
+
+
+
+
+
+
+
+    function activateExcelSheets(){
+
+
+        const frames =
+            document.querySelectorAll(
+                ".cwExcelFrame"
+            );
+
+
+
+        frames.forEach(
+            function(frame){
+
+
+
+                if(
+                    frame.dataset.sheetReady
+                ){
+                    return;
+                }
+
+
+
+                frame.dataset.sheetReady =
+                    "true";
+
+
+
+                const tabs =
+                    frame.querySelectorAll(
+                        "button"
+                    );
+
+
+
+                const sheets =
+                    [
+                        createSheetData(),
+                        createSheetData(),
+                        createSheetData()
+                    ];
+
+
+
+                let current =
+                    0;
+
+
+
+
+
+                tabs.forEach(
+                    function(tab,index){
+
+
+
+                        tab.addEventListener(
+                            "click",
+                            function(){
+
+
+
+                                sheets[current].cells =
+                                    captureCurrentSheet(
+                                        frame
+                                    );
+
+
+
+                                current =
+                                    index;
+
+
+
+                                restoreSheet(
+                                    frame,
+                                    sheets[current].cells
+                                );
+
+
+
+                                tabs.forEach(
+                                    function(t){
+
+                                        t.style.fontWeight =
+                                            "normal";
+
+                                    }
+                                );
+
+
+
+                                tab.style.fontWeight =
+                                    "bold";
+
+
+
+                            }
+                        );
+
+
+
+                    }
+                );
+
+
+
+                tabs[0].style.fontWeight =
+                    "bold";
+
+
+
+            }
+        );
+
+
+    }
+
+
+
+
+
+
+
+
+    document.addEventListener(
+        "click",
+        function(){
+
+
+            setTimeout(
+                activateExcelSheets,
+                100
+            );
+
+
+        }
+    );
+
+
+
+})();
