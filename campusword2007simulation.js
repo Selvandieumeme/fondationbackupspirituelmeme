@@ -2690,77 +2690,84 @@ CampusWordColorHighlight.init();
 
 
 
+function applyList(type){
 
 
-    function applyList(type){
-
-
-        const block =
-            getActiveBlock();
-
-
-
-        if(
-            !block
-        ){
-            return;
-        }
+    const block =
+        getActiveBlock();
 
 
 
-        const existing =
-            block.querySelector(
-                "ul, ol"
-            );
+    if(
+        !block
+    ){
+        return;
+    }
 
 
 
-        /*
-           TOGGLE OFF
-        */
-
-        if(
-            existing &&
-            existing.tagName.toLowerCase() === type
-        ){
-
-
-            const text =
-                existing.innerText;
+    const currentList =
+        block.querySelector(
+            "ul, ol"
+        );
 
 
 
-            block.innerHTML =
-                text;
+    /*
+       REMOVE SAME LIST TYPE
+    */
 
-
-
-            return;
-
-        }
-
-
-
+    if(
+        currentList &&
+        currentList.tagName.toLowerCase() === type
+    ){
 
 
         const text =
-            block.innerText.trim();
+            currentList.innerText;
 
 
 
-        if(
-            !text
-        ){
-            return;
-        }
+        block.innerHTML =
+            text;
 
 
 
-        const list =
+        return;
+
+    }
+
+
+
+
+    const text =
+        block.innerText.trim();
+
+
+
+    if(
+        !text
+    ){
+        return;
+    }
+
+
+
+
+
+    /*
+       CHANGE EXISTING LIST TYPE
+    */
+
+    if(
+        currentList
+    ){
+
+
+        const newList =
             document.createElement(
                 type
             );
-
 
 
         const item =
@@ -2769,34 +2776,73 @@ CampusWordColorHighlight.init();
             );
 
 
-
         item.textContent =
             text;
 
 
-
-        list.appendChild(
+        newList.appendChild(
             item
         );
-
 
 
         block.innerHTML =
             "";
 
 
-
         block.appendChild(
-            list
+            newList
         );
 
 
+        return;
 
     }
 
 
 
 
+
+
+    /*
+       CREATE NEW LIST
+    */
+
+    const list =
+        document.createElement(
+            type
+        );
+
+
+
+    const item =
+        document.createElement(
+            "li"
+        );
+
+
+
+    item.textContent =
+        text;
+
+
+
+    list.appendChild(
+        item
+    );
+
+
+
+    block.innerHTML =
+        "";
+
+
+
+    block.appendChild(
+        list
+    );
+
+
+}
 
 
 
