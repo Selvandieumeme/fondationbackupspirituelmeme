@@ -2227,14 +2227,13 @@ body{
 
 
 
+#cwFontMenu{
 
+    background:white;
 
+    border:1px solid #999;
 
-#cwDynamicFontMenu{
-
-    position:absolute;
-
-    z-index:9999;
+    padding:6px;
 
     display:flex;
 
@@ -2244,33 +2243,17 @@ body{
 
     overflow-y:auto;
 
-    background:white;
-
-    border:1px solid #aaa;
-
-    padding:4px;
-
 }
 
 
-.cwFontOption{
+.cwFontMenuItem{
 
-    padding:5px 12px;
-
-    border:0;
+    padding:6px 15px;
 
     background:white;
 
-    cursor:pointer;
+    border:0;
 
     text-align:left;
 
 }
-
-
-.cwFontOption:hover{
-
-    background:#e8f1ff;
-
-}
-
