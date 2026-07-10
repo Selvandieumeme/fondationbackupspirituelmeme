@@ -4712,3 +4712,291 @@ function applyList(type){
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+/* =========================================================
+   CAMPUS WORD — INSERT PAGES BRIDGE
+   ISOLATED MODULE
+   BLANK PAGE / PAGE BREAK
+   NO LAYOUT / CARET INTERFERENCE
+========================================================= */
+
+(function(){
+
+
+
+    function createEmptyPage(){
+
+
+        const app =
+            window.CampusWord2007Simulateur;
+
+
+
+        if(
+            !app ||
+            !app.workspace
+        ){
+            return null;
+        }
+
+
+
+        const page =
+            document.createElement(
+                "div"
+            );
+
+
+        page.className =
+            "cwPage";
+
+
+
+        const content =
+            document.createElement(
+                "div"
+            );
+
+
+
+        content.className =
+            "cwPageContent";
+
+
+
+        content.contentEditable =
+            true;
+
+
+
+        content.addEventListener(
+            "input",
+            function(){
+
+
+                requestAnimationFrame(
+                    function(){
+
+
+                        app.calculateWordCount(
+                            content.innerText
+                        );
+
+
+                        app.checkPageOverflow(
+                            content
+                        );
+
+
+                    }
+                );
+
+
+            }
+        );
+
+
+
+        page.appendChild(
+            content
+        );
+
+
+
+        return page;
+
+
+    }
+
+
+
+
+
+
+
+
+    function insertBlankPage(){
+
+
+        const app =
+            window.CampusWord2007Simulateur;
+
+
+
+        const page =
+            createEmptyPage();
+
+
+
+        if(
+            !page
+        ){
+            return;
+        }
+
+
+
+        app.workspace.appendChild(
+            page
+        );
+
+
+
+        app.state.pages.push(
+            page
+        );
+
+
+
+        app.updatePageStatus();
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+    function insertPageBreak(){
+
+
+        const app =
+            window.CampusWord2007Simulateur;
+
+
+
+        const page =
+            createEmptyPage();
+
+
+
+        if(
+            !page
+        ){
+            return;
+        }
+
+
+
+        app.workspace.appendChild(
+            page
+        );
+
+
+
+        app.state.pages.push(
+            page
+        );
+
+
+
+        app.updatePageStatus();
+
+
+
+        setTimeout(
+            function(){
+
+                const content =
+                    page.querySelector(
+                        ".cwPageContent"
+                    );
+
+
+                if(content){
+
+                    content.focus();
+
+                }
+
+
+            },
+            0
+        );
+
+
+    }
+
+
+
+
+
+
+
+
+
+    document.addEventListener(
+        "click",
+        function(e){
+
+
+            const button =
+                e.target.closest(
+                    "[data-action]"
+                );
+
+
+
+            if(
+                !button
+            ){
+                return;
+            }
+
+
+
+            const action =
+                button.dataset.action;
+
+
+
+
+            if(
+                action === "insert-blank"
+            ){
+
+                insertBlankPage();
+
+                return;
+
+            }
+
+
+
+
+
+            if(
+                action === "page-break"
+            ){
+
+                insertPageBreak();
+
+                return;
+
+            }
+
+
+
+        },
+        false
+    );
+
+
+
+})();
+
