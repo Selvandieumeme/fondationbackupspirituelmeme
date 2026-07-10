@@ -2612,10 +2612,18 @@ CampusWordColorHighlight.init();
 
 
 
+
+
+
+
+
+
 /* =========================================================
-   CAMPUS WORD — PARAGRAPH LIST & INDENT BRIDGE
-   ISOLATED MODULE
+   CAMPUS WORD — PARAGRAPH LIST & INDENT ENGINE
+   STEP 2 + STEP 2.1 MERGED
    BULLETS / NUMBERING / INDENT
+   CARET POSITION BASED
+   WORD STYLE BEHAVIOR
    NO CARET / LAYOUT / PAGE INTERFERENCE
 ========================================================= */
 
@@ -2623,7 +2631,7 @@ CampusWordColorHighlight.init();
 
 
 
-    function getActiveBlock(){
+    function getCaretContainer(){
 
 
         const selection =
@@ -2674,6 +2682,57 @@ CampusWordColorHighlight.init();
         return node;
 
 
+    }
+
+
+
+
+
+
+    function getCurrentBlock(){
+
+
+        let node =
+            getCaretContainer();
+
+
+
+        if(
+            !node
+        ){
+            return null;
+        }
+
+
+
+        while(
+            node &&
+            node !== document.body
+        ){
+
+
+            if(
+                node.parentElement &&
+                node.parentElement.classList.contains(
+                    "cwPageContent"
+                )
+            ){
+
+                return node;
+
+            }
+
+
+            node =
+                node.parentElement;
+
+
+        }
+
+
+
+        return null;
+
 
     }
 
@@ -2682,11 +2741,12 @@ CampusWordColorHighlight.init();
 
 
 
-    function applyList(type){
+
+    function toggleList(type){
 
 
         const block =
-            getActiveBlock();
+            getCurrentBlock();
 
 
 
@@ -2698,16 +2758,49 @@ CampusWordColorHighlight.init();
 
 
 
-        const text =
-            block.innerText.trim();
+        const existingList =
+            block.closest(
+                "ul,ol"
+            );
 
 
 
         if(
-            !text
+            existingList
         ){
-            return;
+
+
+            if(
+                existingList.tagName.toLowerCase() === type
+            ){
+
+                const parent =
+                    existingList.parentElement;
+
+
+                while(
+                    existingList.firstChild
+                ){
+
+                    parent.insertBefore(
+                        existingList.firstChild,
+                        existingList
+                    );
+
+                }
+
+
+                existingList.remove();
+
+
+                return;
+
+            }
+
         }
+
+
+
 
 
 
@@ -2725,18 +2818,21 @@ CampusWordColorHighlight.init();
 
 
 
-        item.textContent =
-            text;
+        while(
+            block.firstChild
+        ){
+
+            item.appendChild(
+                block.firstChild
+            );
+
+        }
 
 
 
         list.appendChild(
             item
         );
-
-
-
-        block.innerHTML = "";
 
 
 
@@ -2759,7 +2855,7 @@ CampusWordColorHighlight.init();
 
 
         const block =
-            getActiveBlock();
+            getCurrentBlock();
 
 
 
@@ -2773,24 +2869,18 @@ CampusWordColorHighlight.init();
 
         const current =
             parseInt(
-                window
-                .getComputedStyle(block)
+                getComputedStyle(block)
                 .paddingLeft
             ) || 0;
 
 
 
-        const next =
+        block.style.paddingLeft =
             Math.max(
                 0,
                 current + amount
-            );
-
-
-
-        block.style.paddingLeft =
-            next + "px";
-
+            )
+            + "px";
 
 
     }
@@ -2802,10 +2892,100 @@ CampusWordColorHighlight.init();
 
 
 
+
+    /*
+       AUTOMATIC LIST CONTINUATION
+    */
+
+    document.addEventListener(
+        "keydown",
+        function(e){
+
+
+            if(
+                e.key !== "Enter"
+            ){
+                return;
+            }
+
+
+
+            const block =
+                getCurrentBlock();
+
+
+
+            if(
+                !block
+            ){
+                return;
+            }
+
+
+
+            const list =
+                block.closest(
+                    "ul,ol"
+                );
+
+
+
+            if(
+                !list
+            ){
+                return;
+            }
+
+
+
+            const text =
+                block.innerText.trim();
+
+
+
+            /*
+               EMPTY ITEM = EXIT LIST
+            */
+
+            if(
+                text === ""
+            ){
+
+
+                const parent =
+                    list.parentElement;
+
+
+
+                list.remove();
+
+
+
+                e.preventDefault();
+
+
+
+                return;
+
+            }
+
+
+
+        },
+        false
+    );
+
+
+
+
+
+
+
+
+
     document.addEventListener(
         "click",
         function(e){
-
 
 
             const button =
@@ -2833,7 +3013,7 @@ CampusWordColorHighlight.init();
                 action === "bullet"
             ){
 
-                applyList(
+                toggleList(
                     "ul"
                 );
 
@@ -2851,7 +3031,7 @@ CampusWordColorHighlight.init();
                 action === "numbering"
             ){
 
-                applyList(
+                toggleList(
                     "ol"
                 );
 
@@ -2898,7 +3078,6 @@ CampusWordColorHighlight.init();
 
 
 
-
         },
         false
     );
@@ -2911,231 +3090,3 @@ CampusWordColorHighlight.init();
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-/* =========================================================
-   CAMPUS WORD — PARAGRAPH LIST POSITION FIX
-   STEP 2.1
-   BULLETS / NUMBERING AT CARET POSITION
-   ISOLATED MODULE
-   NO CARET / LAYOUT / PAGE INTERFERENCE
-========================================================= */
-
-(function(){
-
-
-
-    function getCaretParagraph(){
-
-
-        const selection =
-            window.getSelection();
-
-
-
-        if(
-            !selection ||
-            selection.rangeCount === 0
-        ){
-            return null;
-        }
-
-
-
-        let node =
-            selection
-            .getRangeAt(0)
-            .startContainer;
-
-
-
-        if(
-            node.nodeType === 3
-        ){
-            node =
-                node.parentElement;
-        }
-
-
-
-        while(
-            node &&
-            node !== document.body
-        ){
-
-
-            if(
-                node.parentElement &&
-                node.parentElement.classList.contains(
-                    "cwPageContent"
-                )
-            ){
-
-                return node;
-
-            }
-
-
-
-            node =
-                node.parentElement;
-
-
-        }
-
-
-
-        return null;
-
-
-    }
-
-
-
-
-
-
-    function applyCaretList(type){
-
-
-        const paragraph =
-            getCaretParagraph();
-
-
-
-        if(
-            !paragraph
-        ){
-            return;
-        }
-
-
-
-        if(
-            paragraph.closest("ul, ol")
-        ){
-            return;
-        }
-
-
-
-        const list =
-            document.createElement(
-                type
-            );
-
-
-
-        const item =
-            document.createElement(
-                "li"
-            );
-
-
-
-        while(
-            paragraph.firstChild
-        ){
-
-            item.appendChild(
-                paragraph.firstChild
-            );
-
-        }
-
-
-
-        list.appendChild(
-            item
-        );
-
-
-
-        paragraph.appendChild(
-            list
-        );
-
-
-
-    }
-
-
-
-
-
-
-
-    document.addEventListener(
-        "click",
-        function(e){
-
-
-            const button =
-                e.target.closest(
-                    "[data-action]"
-                );
-
-
-
-            if(
-                !button
-            ){
-                return;
-            }
-
-
-
-            const action =
-                button.dataset.action;
-
-
-
-            if(
-                action === "bullet"
-            ){
-
-
-                applyCaretList(
-                    "ul"
-                );
-
-
-                return;
-
-            }
-
-
-
-
-            if(
-                action === "numbering"
-            ){
-
-
-                applyCaretList(
-                    "ol"
-                );
-
-
-                return;
-
-            }
-
-
-
-        },
-        false
-    );
-
-
-
-})();
