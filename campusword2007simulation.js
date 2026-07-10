@@ -4230,81 +4230,63 @@ function applyList(type){
 
 
 
-
-
-
-
-
-
-
-
 /* =========================================================
-   CAMPUS WORD — DYNAMIC FONT FAMILY / FONT SIZE MENU
-   ISOLATED MODULE
-   NO PAGE / NO ENTER / NO CARET INTERFERENCE
+   CAMPUS WORD — FONT FAMILY / SIZE DROPDOWN ENGINE
+   ISOLATED
 ========================================================= */
 
 (function(){
 
 
-    const fontFamilies = [
+    const families = [
         "Calibri",
         "Arial",
         "Times New Roman",
         "Verdana",
         "Georgia",
         "Tahoma",
-        "Trebuchet MS",
         "Segoe UI",
-        "Helvetica",
         "Cambria",
-        "Garamond",
-        "Book Antiqua",
-        "Palatino Linotype",
-        "Lucida Sans Unicode",
-        "Century Gothic",
         "Consolas",
-        "Courier New",
-        "Impact",
         "Roboto"
     ];
 
 
 
-    const fontSizes = [
-        8,
-        9,
-        10,
-        11,
-        12,
-        14,
-        16,
-        18,
-        20,
-        24,
-        28,
-        36,
-        48,
-        72
+    const sizes = [
+        "8",
+        "9",
+        "10",
+        "11",
+        "12",
+        "14",
+        "16",
+        "18",
+        "20",
+        "24",
+        "28",
+        "36",
+        "48",
+        "72"
     ];
 
 
 
 
-
-    function removeMenu(){
-
-
-        const menu =
-            document.getElementById(
-                "cwFontDynamicMenu"
-            );
+    let activeMenu = null;
 
 
-        if(menu){
-            menu.remove();
+
+
+    function closeMenu(){
+
+        if(activeMenu){
+
+            activeMenu.remove();
+
+            activeMenu = null;
+
         }
-
 
     }
 
@@ -4313,77 +4295,74 @@ function applyList(type){
 
 
 
+    function openMenu(button, list){
 
-    function createMenu(button, items){
 
-
-        removeMenu();
+        closeMenu();
 
 
 
         const menu =
-            document.createElement(
-                "div"
+            document.createElement("div");
+
+
+
+        menu.className =
+            "cwFontPopup";
+
+
+
+        list.forEach(function(item){
+
+
+            const option =
+                document.createElement("button");
+
+
+
+            option.type =
+                "button";
+
+
+
+            option.className =
+                "cwFontPopupItem";
+
+
+
+            option.textContent =
+                item;
+
+
+
+            option.onclick =
+                function(e){
+
+                    e.stopPropagation();
+
+                    closeMenu();
+
+                };
+
+
+
+            menu.appendChild(
+                option
             );
 
 
-        menu.id =
-            "cwFontDynamicMenu";
+        });
 
 
 
-        items.forEach(
-            function(item){
 
-
-                const option =
-                    document.createElement(
-                        "button"
-                    );
-
-
-                option.className =
-                    "cwFontDynamicItem";
-
-
-                option.type =
-                    "button";
-
-
-                option.textContent =
-                    item;
-
-
-
-                option.addEventListener(
-                    "click",
-                    function(e){
-
-
-                        e.stopPropagation();
-
-
-                        removeMenu();
-
-
-                    },
-                    false
-                );
-
-
-
-                menu.appendChild(
-                    option
-                );
-
-
-            }
+        document.body.appendChild(
+            menu
         );
 
 
 
-
-        const rect =
+        const box =
             button.getBoundingClientRect();
 
 
@@ -4393,21 +4372,20 @@ function applyList(type){
 
 
         menu.style.top =
-            (rect.bottom + 2) + "px";
+            box.bottom + "px";
 
 
         menu.style.left =
-            rect.left + "px";
+            box.left + "px";
 
 
         menu.style.zIndex =
-            "99999";
+            "999999";
 
 
 
-        document.body.appendChild(
-            menu
-        );
+        activeMenu =
+            menu;
 
 
     }
@@ -4418,56 +4396,34 @@ function applyList(type){
 
 
 
-
     document.addEventListener(
         "click",
         function(e){
 
 
-            const button =
+            const fontButton =
                 e.target.closest(
-                    "[data-action]"
+                    '[data-action="font-family"]'
                 );
 
 
-            if(!button){
-                return;
-            }
+
+            const sizeButton =
+                e.target.closest(
+                    '[data-action="font-size"]'
+                );
 
 
 
-            const action =
-                button.dataset.action;
-
-
-
-            if(
-                action === "font-family"
-            ){
-
+            if(fontButton){
 
                 e.stopPropagation();
 
 
-                const existing =
-                    document.getElementById(
-                        "cwFontDynamicMenu"
-                    );
-
-
-                if(existing){
-
-                    removeMenu();
-
-                }
-                else{
-
-                    createMenu(
-                        button,
-                        fontFamilies
-                    );
-
-                }
+                openMenu(
+                    fontButton,
+                    families
+                );
 
 
                 return;
@@ -4476,38 +4432,29 @@ function applyList(type){
 
 
 
-
-
-            if(
-                action === "font-size"
-            ){
-
+            if(sizeButton){
 
                 e.stopPropagation();
 
 
-                const existing =
-                    document.getElementById(
-                        "cwFontDynamicMenu"
-                    );
-
-
-                if(existing){
-
-                    removeMenu();
-
-                }
-                else{
-
-                    createMenu(
-                        button,
-                        fontSizes
-                    );
-
-                }
+                openMenu(
+                    sizeButton,
+                    sizes
+                );
 
 
                 return;
+
+            }
+
+
+
+            if(
+                activeMenu &&
+                !activeMenu.contains(e.target)
+            ){
+
+                closeMenu();
 
             }
 
@@ -4516,41 +4463,11 @@ function applyList(type){
         },
         false
     );
-
-
-
-
-
-
-
-    document.addEventListener(
-        "click",
-        function(e){
-
-
-            const menu =
-                document.getElementById(
-                    "cwFontDynamicMenu"
-                );
-
-
-            if(
-                menu &&
-                !menu.contains(e.target)
-            ){
-
-                removeMenu();
-
-            }
-
-
-        },
-        false
-    );
-
 
 
 })();
+
+
 
 
 
