@@ -2147,3 +2147,47 @@ body{
     position:relative;
 
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+.cwStyleNormal{
+    font-size:16px;
+    font-weight:normal;
+}
+
+
+.cwStyleH1{
+    font-size:32px;
+    font-weight:bold;
+}
+
+
+.cwStyleH2{
+    font-size:24px;
+    font-weight:bold;
+}
+
+
+.cwStyleTitle{
+    font-size:36px;
+    font-weight:bold;
+}
+
+
+.cwStyleSubtitle{
+    font-size:20px;
+    font-style:italic;
+}
