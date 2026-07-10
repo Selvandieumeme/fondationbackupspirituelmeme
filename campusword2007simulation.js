@@ -3017,3 +3017,247 @@ function applyList(type){
 
 
 
+
+
+
+
+
+
+
+/* =========================================================
+   CAMPUS WORD — STYLE COMMAND BRIDGE
+   ISOLATED MODULE
+   NORMAL / H1 / H2 / TITLE / SUBTITLE
+   CARET POSITION BASED
+   NO CARET / LAYOUT / PAGE INTERFERENCE
+========================================================= */
+
+(function(){
+
+
+
+    function getActiveBlock(){
+
+
+        const selection =
+            window.getSelection();
+
+
+
+        if(
+            !selection ||
+            selection.rangeCount === 0
+        ){
+            return null;
+        }
+
+
+
+        let node =
+            selection
+            .getRangeAt(0)
+            .startContainer;
+
+
+
+        if(
+            node.nodeType === 3
+        ){
+            node =
+                node.parentElement;
+        }
+
+
+
+        const page =
+            node.closest(
+                ".cwPageContent"
+            );
+
+
+
+        if(
+            !page
+        ){
+            return null;
+        }
+
+
+
+        return node;
+
+
+
+    }
+
+
+
+
+
+
+
+
+    function applyStyle(style){
+
+
+        const block =
+            getActiveBlock();
+
+
+
+        if(
+            !block
+        ){
+            return;
+        }
+
+
+
+
+        block.classList.remove(
+            "cwStyleNormal",
+            "cwStyleH1",
+            "cwStyleH2",
+            "cwStyleTitle",
+            "cwStyleSubtitle"
+        );
+
+
+
+
+        block.classList.add(
+            style
+        );
+
+
+
+    }
+
+
+
+
+
+
+
+
+    document.addEventListener(
+        "click",
+        function(e){
+
+
+
+            const button =
+                e.target.closest(
+                    "[data-action]"
+                );
+
+
+
+            if(
+                !button
+            ){
+                return;
+            }
+
+
+
+            const action =
+                button.dataset.action;
+
+
+
+
+            if(
+                action === "style-normal"
+            ){
+
+                applyStyle(
+                    "cwStyleNormal"
+                );
+
+
+                return;
+
+            }
+
+
+
+
+
+            if(
+                action === "style-h1"
+            ){
+
+                applyStyle(
+                    "cwStyleH1"
+                );
+
+
+                return;
+
+            }
+
+
+
+
+
+            if(
+                action === "style-h2"
+            ){
+
+                applyStyle(
+                    "cwStyleH2"
+                );
+
+
+                return;
+
+            }
+
+
+
+
+
+            if(
+                action === "style-title"
+            ){
+
+                applyStyle(
+                    "cwStyleTitle"
+                );
+
+
+                return;
+
+            }
+
+
+
+
+
+            if(
+                action === "style-subtitle"
+            ){
+
+                applyStyle(
+                    "cwStyleSubtitle"
+                );
+
+
+                return;
+
+            }
+
+
+
+
+        },
+        false
+    );
+
+
+
+})();
+
+
+
