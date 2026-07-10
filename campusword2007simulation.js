@@ -2618,20 +2618,21 @@ CampusWordColorHighlight.init();
 
 
 
+
+
 /* =========================================================
-   CAMPUS WORD — PARAGRAPH LIST & INDENT ENGINE
-   STEP 2 + STEP 2.1 MERGED
+   CAMPUS WORD — PARAGRAPH LIST & INDENT BRIDGE
+   ISOLATED MODULE
    BULLETS / NUMBERING / INDENT
-   CARET POSITION BASED
-   WORD STYLE BEHAVIOR
-   NO CARET / LAYOUT / PAGE INTERFERENCE
+   CARET POSITION SAFE
+   NO LAYOUT / PAGE INTERFERENCE
 ========================================================= */
 
 (function(){
 
 
 
-    function getCaretContainer(){
+    function getActiveBlock(){
 
 
         const selection =
@@ -2682,57 +2683,6 @@ CampusWordColorHighlight.init();
         return node;
 
 
-    }
-
-
-
-
-
-
-    function getCurrentBlock(){
-
-
-        let node =
-            getCaretContainer();
-
-
-
-        if(
-            !node
-        ){
-            return null;
-        }
-
-
-
-        while(
-            node &&
-            node !== document.body
-        ){
-
-
-            if(
-                node.parentElement &&
-                node.parentElement.classList.contains(
-                    "cwPageContent"
-                )
-            ){
-
-                return node;
-
-            }
-
-
-            node =
-                node.parentElement;
-
-
-        }
-
-
-
-        return null;
-
 
     }
 
@@ -2742,11 +2692,11 @@ CampusWordColorHighlight.init();
 
 
 
-    function toggleList(type){
+    function applyList(type){
 
 
         const block =
-            getCurrentBlock();
+            getActiveBlock();
 
 
 
@@ -2758,49 +2708,51 @@ CampusWordColorHighlight.init();
 
 
 
-        const existingList =
-            block.closest(
-                "ul,ol"
+        const existing =
+            block.querySelector(
+                "ul, ol"
             );
 
 
 
+        /*
+           TOGGLE OFF
+        */
+
         if(
-            existingList
+            existing &&
+            existing.tagName.toLowerCase() === type
         ){
 
 
-            if(
-                existingList.tagName.toLowerCase() === type
-            ){
-
-                const parent =
-                    existingList.parentElement;
+            const text =
+                existing.innerText;
 
 
-                while(
-                    existingList.firstChild
-                ){
 
-                    parent.insertBefore(
-                        existingList.firstChild,
-                        existingList
-                    );
-
-                }
+            block.innerHTML =
+                text;
 
 
-                existingList.remove();
 
-
-                return;
-
-            }
+            return;
 
         }
 
 
 
+
+
+        const text =
+            block.innerText.trim();
+
+
+
+        if(
+            !text
+        ){
+            return;
+        }
 
 
 
@@ -2818,21 +2770,19 @@ CampusWordColorHighlight.init();
 
 
 
-        while(
-            block.firstChild
-        ){
-
-            item.appendChild(
-                block.firstChild
-            );
-
-        }
+        item.textContent =
+            text;
 
 
 
         list.appendChild(
             item
         );
+
+
+
+        block.innerHTML =
+            "";
 
 
 
@@ -2851,11 +2801,12 @@ CampusWordColorHighlight.init();
 
 
 
+
     function changeIndent(amount){
 
 
         const block =
-            getCurrentBlock();
+            getActiveBlock();
 
 
 
@@ -2869,18 +2820,24 @@ CampusWordColorHighlight.init();
 
         const current =
             parseInt(
-                getComputedStyle(block)
+                window
+                .getComputedStyle(block)
                 .paddingLeft
             ) || 0;
 
 
 
-        block.style.paddingLeft =
+        const next =
             Math.max(
                 0,
                 current + amount
-            )
-            + "px";
+            );
+
+
+
+        block.style.paddingLeft =
+            next + "px";
+
 
 
     }
@@ -2893,99 +2850,10 @@ CampusWordColorHighlight.init();
 
 
 
-    /*
-       AUTOMATIC LIST CONTINUATION
-    */
-
-    document.addEventListener(
-        "keydown",
-        function(e){
-
-
-            if(
-                e.key !== "Enter"
-            ){
-                return;
-            }
-
-
-
-            const block =
-                getCurrentBlock();
-
-
-
-            if(
-                !block
-            ){
-                return;
-            }
-
-
-
-            const list =
-                block.closest(
-                    "ul,ol"
-                );
-
-
-
-            if(
-                !list
-            ){
-                return;
-            }
-
-
-
-            const text =
-                block.innerText.trim();
-
-
-
-            /*
-               EMPTY ITEM = EXIT LIST
-            */
-
-            if(
-                text === ""
-            ){
-
-
-                const parent =
-                    list.parentElement;
-
-
-
-                list.remove();
-
-
-
-                e.preventDefault();
-
-
-
-                return;
-
-            }
-
-
-
-        },
-        false
-    );
-
-
-
-
-
-
-
-
-
     document.addEventListener(
         "click",
         function(e){
+
 
 
             const button =
@@ -3009,11 +2877,14 @@ CampusWordColorHighlight.init();
 
 
 
+
+
             if(
                 action === "bullet"
             ){
 
-                toggleList(
+
+                applyList(
                     "ul"
                 );
 
@@ -3027,11 +2898,13 @@ CampusWordColorHighlight.init();
 
 
 
+
             if(
                 action === "numbering"
             ){
 
-                toggleList(
+
+                applyList(
                     "ol"
                 );
 
@@ -3045,9 +2918,11 @@ CampusWordColorHighlight.init();
 
 
 
+
             if(
                 action === "indent-increase"
             ){
+
 
                 changeIndent(
                     40
@@ -3063,9 +2938,11 @@ CampusWordColorHighlight.init();
 
 
 
+
             if(
                 action === "indent-decrease"
             ){
+
 
                 changeIndent(
                     -40
@@ -3078,6 +2955,7 @@ CampusWordColorHighlight.init();
 
 
 
+
         },
         false
     );
@@ -3085,6 +2963,9 @@ CampusWordColorHighlight.init();
 
 
 })();
+
+
+
 
 
 
