@@ -4807,10 +4807,20 @@ function applyList(type){
 
 
 
+
+
+
+
+
+
+
+
+
+
 /* =========================================================
-   CAMPUS WORD — SIMPLE TABLE INSERT ENGINE
+   CAMPUS WORD — EXCEL SPREADSHEET BRIDGE
    ISOLATED MODULE
-   TABLE DROPDOWN CONNECTOR
+   SIMPLE INSERT OBJECT
    NO LAYOUT / CARET ENGINE INTERFERENCE
 ========================================================= */
 
@@ -4818,7 +4828,7 @@ function applyList(type){
 
 
 
-    function insertTable(rows, cols){
+    function insertExcelObject(){
 
 
         const selection =
@@ -4835,92 +4845,70 @@ function applyList(type){
 
 
 
-        const table =
+        const box =
             document.createElement(
-                "table"
+                "div"
             );
 
 
 
-        table.style.borderCollapse =
-            "collapse";
+        box.className =
+            "cwExcelObject";
 
 
 
-        table.style.margin =
+        box.contentEditable =
+            true;
+
+
+
+        box.style.border =
+            "1px solid #999";
+
+
+
+        box.style.padding =
+            "10px";
+
+
+
+        box.style.display =
+            "inline-block";
+
+
+
+        box.style.margin =
             "10px 0";
 
 
 
-        for(
-            let r = 0;
-            r < rows;
-            r++
-        ){
+        box.innerHTML = `
 
+            <table style="
+                border-collapse:collapse;
+            ">
 
-            const tr =
-                document.createElement(
-                    "tr"
-                );
+                <tr>
+                    <td style="border:1px solid #999;width:80px;height:25px;"></td>
+                    <td style="border:1px solid #999;width:80px;height:25px;"></td>
+                    <td style="border:1px solid #999;width:80px;height:25px;"></td>
+                </tr>
 
+                <tr>
+                    <td style="border:1px solid #999;width:80px;height:25px;"></td>
+                    <td style="border:1px solid #999;width:80px;height:25px;"></td>
+                    <td style="border:1px solid #999;width:80px;height:25px;"></td>
+                </tr>
 
+                <tr>
+                    <td style="border:1px solid #999;width:80px;height:25px;"></td>
+                    <td style="border:1px solid #999;width:80px;height:25px;"></td>
+                    <td style="border:1px solid #999;width:80px;height:25px;"></td>
+                </tr>
 
-            for(
-                let c = 0;
-                c < cols;
-                c++
-            ){
+            </table>
 
-
-                const td =
-                    document.createElement(
-                        "td"
-                    );
-
-
-
-                td.contentEditable =
-                    true;
-
-
-
-                td.innerHTML =
-                    "&nbsp;";
-
-
-
-                td.style.border =
-                    "1px solid #000";
-
-
-
-                td.style.width =
-                    "80px";
-
-
-
-                td.style.height =
-                    "30px";
-
-
-
-                tr.appendChild(
-                    td
-                );
-
-
-            }
-
-
-
-            table.appendChild(
-                tr
-            );
-
-
-        }
-
+        `;
 
 
 
@@ -4934,7 +4922,7 @@ function applyList(type){
 
 
         range.insertNode(
-            table
+            box
         );
 
 
@@ -4943,25 +4931,25 @@ function applyList(type){
 
 
 
-        const after =
+        const next =
             document.createRange();
 
 
 
-        after.setStartAfter(
-            table
+        next.setStartAfter(
+            box
         );
 
 
 
-        after.collapse(
+        next.collapse(
             true
         );
 
 
 
         selection.addRange(
-            after
+            next
         );
 
 
@@ -4979,71 +4967,22 @@ function applyList(type){
         function(e){
 
 
-
-            const item =
+            const button =
                 e.target.closest(
-                    "[data-action]"
+                    '[data-action="excel-spreadsheet"]'
                 );
 
 
 
             if(
-                !item
+                !button
             ){
                 return;
             }
 
 
 
-            const action =
-                item.dataset.action;
-
-
-
-            if(
-                action === "table-1x1"
-            ){
-
-                insertTable(
-                    1,
-                    1
-                );
-
-                return;
-
-            }
-
-
-
-
-            if(
-                action === "table-2x2"
-            ){
-
-                insertTable(
-                    2,
-                    2
-                );
-
-                return;
-
-            }
-
-
-
-
-            if(
-                action === "table-3x3"
-            ){
-
-                insertTable(
-                    3,
-                    3
-                );
-
-                return;
-
-            }
+            insertExcelObject();
 
 
 
@@ -5054,9 +4993,3 @@ function applyList(type){
 
 
 })();
-
-
-
-
-
-
