@@ -4147,4 +4147,72 @@ function applyList(type){
 
 
 
+
+
+/* =========================================================
+   CAMPUS WORD — SELECT OBJECTS MODE BRIDGE
+   ISOLATED MODULE
+   OBJECT SELECTION MODE
+   NO TEXT / CARET / LAYOUT INTERFERENCE
+========================================================= */
+
+(function(){
+
+
+    let objectMode = false;
+
+
+
+    function enableObjectSelection(){
+
+
+        objectMode = true;
+
+
+        document.body.classList.add(
+            "cwObjectSelectionMode"
+        );
+
+
+    }
+
+
+
+
+    document.addEventListener(
+        "click",
+        function(e){
+
+
+            const button =
+                e.target.closest(
+                    "[data-action]"
+                );
+
+
+            if(
+                !button
+            ){
+                return;
+            }
+
+
+
+            if(
+                button.dataset.action === "select-objects"
+            ){
+
+                enableObjectSelection();
+
+            }
+
+
+
+        },
+        false
+    );
+
+
+
+})();
 ;
