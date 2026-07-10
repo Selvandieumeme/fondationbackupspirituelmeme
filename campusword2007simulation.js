@@ -3959,3 +3959,180 @@ function applyList(type){
 
 
 })();
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* =========================================================
+   CAMPUS WORD — REPLACE COMMAND BRIDGE
+   ISOLATED MODULE
+   FIND AND REPLACE FIRST MATCH
+   NO CARET / LAYOUT / PAGE INTERFERENCE
+========================================================= */
+
+(function(){
+
+
+
+    function replaceText(){
+
+
+        const find =
+            prompt(
+                "Find:"
+            );
+
+
+
+        if(
+            !find ||
+            find.trim() === ""
+        ){
+            return;
+        }
+
+
+
+        const replace =
+            prompt(
+                "Replace with:"
+            );
+
+
+
+        if(
+            replace === null
+        ){
+            return;
+        }
+
+
+
+        const walker =
+            document.createTreeWalker(
+                document.body,
+                NodeFilter.SHOW_TEXT
+            );
+
+
+
+        let node;
+
+
+
+        while(
+            node = walker.nextNode()
+        ){
+
+
+
+            const index =
+                node.textContent.indexOf(
+                    find
+                );
+
+
+
+            if(
+                index !== -1
+            ){
+
+
+
+                const range =
+                    document.createRange();
+
+
+
+                range.setStart(
+                    node,
+                    index
+                );
+
+
+
+                range.setEnd(
+                    node,
+                    index + find.length
+                );
+
+
+
+                range.deleteContents();
+
+
+
+                range.insertNode(
+                    document.createTextNode(
+                        replace
+                    )
+                );
+
+
+
+                return;
+
+            }
+
+
+
+        }
+
+
+
+    }
+
+
+
+
+
+
+
+
+    document.addEventListener(
+        "click",
+        function(e){
+
+
+
+            const button =
+                e.target.closest(
+                    "[data-action]"
+                );
+
+
+
+            if(
+                !button
+            ){
+                return;
+            }
+
+
+
+            if(
+                button.dataset.action === "replace"
+            ){
+
+                replaceText();
+
+            }
+
+
+
+        },
+        false
+    );
+
+
+
+})();
