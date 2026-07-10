@@ -4230,9 +4230,18 @@ function applyList(type){
 
 
 
+
+
+
+
+
+
+
+
 /* =========================================================
    CAMPUS WORD — FONT FAMILY / SIZE DROPDOWN ENGINE
    ISOLATED
+   DYNAMIC MENU + TEXT APPLY
 ========================================================= */
 
 (function(){
@@ -4245,9 +4254,18 @@ function applyList(type){
         "Verdana",
         "Georgia",
         "Tahoma",
+        "Trebuchet MS",
         "Segoe UI",
+        "Helvetica",
         "Cambria",
+        "Garamond",
+        "Book Antiqua",
+        "Palatino Linotype",
+        "Lucida Sans Unicode",
+        "Century Gothic",
         "Consolas",
+        "Courier New",
+        "Impact",
         "Roboto"
     ];
 
@@ -4276,6 +4294,143 @@ function applyList(type){
     let activeMenu = null;
 
 
+    let savedFontRange = null;
+
+
+
+
+
+
+    function saveFontSelection(){
+
+
+        const selection =
+            window.getSelection();
+
+
+
+        if(
+            !selection ||
+            selection.rangeCount === 0
+        ){
+            return;
+        }
+
+
+
+        if(
+            selection.toString().trim() === ""
+        ){
+            return;
+        }
+
+
+
+        savedFontRange =
+            selection
+            .getRangeAt(0)
+            .cloneRange();
+
+
+    }
+
+
+
+
+
+
+
+
+    function restoreFontSelection(){
+
+
+        if(
+            !savedFontRange
+        ){
+            return false;
+        }
+
+
+
+        const selection =
+            window.getSelection();
+
+
+
+        selection.removeAllRanges();
+
+
+
+        selection.addRange(
+            savedFontRange
+        );
+
+
+
+        return true;
+
+
+    }
+
+
+
+
+
+
+
+
+    function applyFont(property,value){
+
+
+        if(
+            !restoreFontSelection()
+        ){
+            return;
+        }
+
+
+
+        const selection =
+            window.getSelection();
+
+
+
+        const range =
+            selection.getRangeAt(0);
+
+
+
+        const span =
+            document.createElement(
+                "span"
+            );
+
+
+
+        span.style[property] =
+            value;
+
+
+
+        span.appendChild(
+            range.extractContents()
+        );
+
+
+
+        range.insertNode(
+            span
+        );
+
+
+
+    }
+
+
+
+
+
+
 
 
     function closeMenu(){
@@ -4289,6 +4444,8 @@ function applyList(type){
         }
 
     }
+
+
 
 
 
@@ -4309,6 +4466,33 @@ function applyList(type){
 
         menu.className =
             "cwFontPopup";
+
+
+
+
+        if(
+            button.dataset.action === "font-family"
+        ){
+
+            menu.dataset.type =
+                "family";
+
+        }
+
+
+
+
+        if(
+            button.dataset.action === "font-size"
+        ){
+
+            menu.dataset.type =
+                "size";
+
+        }
+
+
+
 
 
 
@@ -4338,9 +4522,39 @@ function applyList(type){
             option.onclick =
                 function(e){
 
+
                     e.stopPropagation();
 
+
+
+                    if(
+                        menu.dataset.type === "family"
+                    ){
+
+                        applyFont(
+                            "fontFamily",
+                            item
+                        );
+
+                    }
+
+
+
+                    if(
+                        menu.dataset.type === "size"
+                    ){
+
+                        applyFont(
+                            "fontSize",
+                            item + "px"
+                        );
+
+                    }
+
+
+
                     closeMenu();
+
 
                 };
 
@@ -4352,6 +4566,7 @@ function applyList(type){
 
 
         });
+
 
 
 
@@ -4396,6 +4611,7 @@ function applyList(type){
 
 
 
+
     document.addEventListener(
         "click",
         function(e){
@@ -4415,9 +4631,17 @@ function applyList(type){
 
 
 
+
+
             if(fontButton){
 
+
                 e.stopPropagation();
+
+
+
+                saveFontSelection();
+
 
 
                 openMenu(
@@ -4426,15 +4650,25 @@ function applyList(type){
                 );
 
 
+
                 return;
 
             }
 
 
 
+
+
+
             if(sizeButton){
 
+
                 e.stopPropagation();
+
+
+
+                saveFontSelection();
+
 
 
                 openMenu(
@@ -4443,9 +4677,13 @@ function applyList(type){
                 );
 
 
+
                 return;
 
             }
+
+
+
 
 
 
@@ -4465,7 +4703,10 @@ function applyList(type){
     );
 
 
+
 })();
+
+
 
 
 
