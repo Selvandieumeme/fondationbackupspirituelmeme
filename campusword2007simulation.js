@@ -4216,3 +4216,308 @@ function applyList(type){
 
 })();
 ;
+
+
+
+
+
+
+
+
+
+
+/* =========================================================
+   CAMPUS WORD — FONT FAMILY & SIZE BRIDGE
+   ISOLATED MODULE
+   SAFE TEXT SELECTION RESTORE
+   NO CARET / LAYOUT / PAGE INTERFERENCE
+========================================================= */
+
+(function(){
+
+
+    let savedFontRange = null;
+
+
+
+    function captureFontSelection(){
+
+
+        const selection =
+            window.getSelection();
+
+
+
+        if(
+            !selection ||
+            selection.rangeCount === 0
+        ){
+            return;
+        }
+
+
+
+        if(
+            selection.toString().trim() === ""
+        ){
+            return;
+        }
+
+
+
+        savedFontRange =
+            selection
+            .getRangeAt(0)
+            .cloneRange();
+
+
+    }
+
+
+
+
+    function restoreFontSelection(){
+
+
+        if(
+            !savedFontRange
+        ){
+            return false;
+        }
+
+
+
+        const selection =
+            window.getSelection();
+
+
+
+        if(
+            !selection
+        ){
+            return false;
+        }
+
+
+
+        selection.removeAllRanges();
+
+
+        selection.addRange(
+            savedFontRange
+        );
+
+
+        return true;
+
+    }
+
+
+
+
+    function applyFontFamily(font){
+
+
+        if(
+            !restoreFontSelection()
+        ){
+            return;
+        }
+
+
+
+        const range =
+            savedFontRange;
+
+
+
+        const span =
+            document.createElement(
+                "span"
+            );
+
+
+
+        span.style.fontFamily =
+            font;
+
+
+
+        span.appendChild(
+            range.extractContents()
+        );
+
+
+
+        range.insertNode(
+            span
+        );
+
+
+    }
+
+
+
+
+
+    function applyFontSize(size){
+
+
+        if(
+            !restoreFontSelection()
+        ){
+            return;
+        }
+
+
+
+        const range =
+            savedFontRange;
+
+
+
+        const span =
+            document.createElement(
+                "span"
+            );
+
+
+
+        span.style.fontSize =
+            size + "px";
+
+
+
+        span.appendChild(
+            range.extractContents()
+        );
+
+
+
+        range.insertNode(
+            span
+        );
+
+
+    }
+
+
+
+
+
+    /*
+       CAPTURE BEFORE RIBBON CONTROL
+    */
+
+    document.addEventListener(
+        "mousedown",
+        function(e){
+
+
+            const target =
+                e.target.closest(
+                    '[data-action="font-family"], [data-action="font-size"]'
+                );
+
+
+
+            if(
+                target
+            ){
+
+                captureFontSelection();
+
+            }
+
+
+        },
+        false
+    );
+
+
+
+
+
+
+
+    /*
+       FONT FAMILY
+    */
+
+    document.addEventListener(
+        "change",
+        function(e){
+
+
+            if(
+                e.target.dataset.action !== "font-family"
+            ){
+                return;
+            }
+
+
+
+            applyFontFamily(
+                e.target.value
+            );
+
+
+        },
+        false
+    );
+
+
+
+
+
+
+
+
+    /*
+       FONT SIZE ENTER
+    */
+
+    document.addEventListener(
+        "keydown",
+        function(e){
+
+
+            const target =
+                e.target;
+
+
+
+            if(
+                target.dataset.action !== "font-size"
+            ){
+                return;
+            }
+
+
+
+            if(
+                e.key === "Enter"
+            ){
+
+
+                e.preventDefault();
+
+
+
+                applyFontSize(
+                    parseInt(
+                        target.value
+                    )
+                );
+
+
+            }
+
+
+        },
+        false
+    );
+
+
+
+})();
