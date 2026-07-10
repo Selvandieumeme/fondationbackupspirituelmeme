@@ -4804,6 +4804,165 @@ function applyList(type){
 
 
 
+/* =========================================================
+   CAMPUS WORD — INSERT TABLE BRIDGE
+   ISOLATED MODULE
+   SIMPLE TABLE CREATOR
+   NO LAYOUT / CARET ENGINE INTERFERENCE
+========================================================= */
+
+(function(){
+
+
+
+    function createTable(rows, cols){
+
+
+        const selection =
+            window.getSelection();
+
+
+
+        if(
+            !selection ||
+            selection.rangeCount === 0
+        ){
+            return;
+        }
+
+
+
+        const table =
+            document.createElement(
+                "table"
+            );
+
+
+
+        table.style.borderCollapse =
+            "collapse";
+
+
+
+        table.style.margin =
+            "10px 0";
+
+
+
+        for(
+            let r = 0;
+            r < rows;
+            r++
+        ){
+
+
+            const tr =
+                document.createElement(
+                    "tr"
+                );
+
+
+
+            for(
+                let c = 0;
+                c < cols;
+                c++
+            ){
+
+
+                const td =
+                    document.createElement(
+                        "td"
+                    );
+
+
+
+                td.contentEditable =
+                    true;
+
+
+
+                td.style.border =
+                    "1px solid black";
+
+
+
+                td.style.width =
+                    "80px";
+
+
+
+                td.style.height =
+                    "30px";
+
+
+
+                td.innerHTML =
+                    "&nbsp;";
+
+
+
+                tr.appendChild(
+                    td
+                );
+
+
+            }
+
+
+
+            table.appendChild(
+                tr
+            );
+
+
+        }
+
+
+
+
+        const range =
+            selection.getRangeAt(0);
+
+
+
+        range.deleteContents();
+
+
+
+        range.insertNode(
+            table
+        );
+
+
+
+        selection.removeAllRanges();
+
+
+
+        const newRange =
+            document.createRange();
+
+
+
+        newRange.selectNodeContents(
+            table
+        );
+
+
+
+        newRange.collapse(
+            false
+        );
+
+
+
+        selection.addRange(
+            newRange
+        );
+
+
+    }
 
 
 
@@ -4812,4 +4971,82 @@ function applyList(type){
 
 
 
+    document.addEventListener(
+        "click",
+        function(e){
 
+
+            const item =
+                e.target.closest(
+                    "[data-action]"
+                );
+
+
+
+            if(
+                !item
+            ){
+                return;
+            }
+
+
+
+            const action =
+                item.dataset.action;
+
+
+
+            if(
+                action === "table-1x1"
+            ){
+
+                createTable(
+                    1,
+                    1
+                );
+
+                return;
+
+            }
+
+
+
+
+            if(
+                action === "table-2x2"
+            ){
+
+                createTable(
+                    2,
+                    2
+                );
+
+                return;
+
+            }
+
+
+
+
+            if(
+                action === "table-3x3"
+            ){
+
+                createTable(
+                    3,
+                    3
+                );
+
+                return;
+
+            }
+
+
+
+        },
+        false
+    );
+
+
+
+})();
