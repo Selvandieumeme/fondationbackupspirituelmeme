@@ -4994,3 +4994,331 @@ function applyList(type){
 
 
 })();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* =========================================================
+   CAMPUS WORD — SIMPLE PAGE BREAK BRIDGE
+   ISOLATED MODULE
+   CREATE NEXT PAGE FROM CARET LOCATION
+   NO LAYOUT / ENGINE INTERFERENCE
+========================================================= */
+
+(function(){
+
+
+
+    function getCurrentPage(){
+
+
+        const selection =
+            window.getSelection();
+
+
+
+        if(
+            !selection ||
+            selection.rangeCount === 0
+        ){
+            return null;
+        }
+
+
+
+        let node =
+            selection
+            .getRangeAt(0)
+            .startContainer;
+
+
+
+        if(
+            node.nodeType === 3
+        ){
+
+            node =
+                node.parentElement;
+
+        }
+
+
+
+        return node.closest(
+            ".cwPage"
+        );
+
+
+    }
+
+
+
+
+
+
+
+
+    function createNewPage(){
+
+
+        const page =
+            document.createElement(
+                "div"
+            );
+
+
+
+        page.className =
+            "cwPage";
+
+
+
+        const content =
+            document.createElement(
+                "div"
+            );
+
+
+
+        content.className =
+            "cwPageContent";
+
+
+
+        content.contentEditable =
+            true;
+
+
+
+        page.appendChild(
+            content
+        );
+
+
+
+        return page;
+
+
+    }
+
+
+
+
+
+
+
+
+    function putCaretStart(element){
+
+
+        element.focus();
+
+
+
+        const range =
+            document.createRange();
+
+
+
+        const selection =
+            window.getSelection();
+
+
+
+        range.setStart(
+            element,
+            0
+        );
+
+
+
+        range.collapse(
+            true
+        );
+
+
+
+        selection.removeAllRanges();
+
+
+
+        selection.addRange(
+            range
+        );
+
+
+    }
+
+
+
+
+
+
+
+
+    function pageBreak(){
+
+
+        const app =
+            window.CampusWord2007Simulateur;
+
+
+
+        if(
+            !app ||
+            !app.workspace
+        ){
+            return;
+        }
+
+
+
+        const currentPage =
+            getCurrentPage();
+
+
+
+        if(
+            !currentPage
+        ){
+            return;
+        }
+
+
+
+        const newPage =
+            createNewPage();
+
+
+
+        currentPage.after(
+            newPage
+        );
+
+
+
+        if(
+            app.state &&
+            Array.isArray(
+                app.state.pages
+            )
+        ){
+
+            const index =
+                app.state.pages.indexOf(
+                    currentPage
+                );
+
+
+
+            if(
+                index >= 0
+            ){
+
+                app.state.pages.splice(
+                    index + 1,
+                    0,
+                    newPage
+                );
+
+            }
+            else{
+
+                app.state.pages.push(
+                    newPage
+                );
+
+            }
+
+        }
+
+
+
+        if(
+            typeof app.updatePageStatus === "function"
+        ){
+
+            app.updatePageStatus();
+
+        }
+
+
+
+        const newContent =
+            newPage.querySelector(
+                ".cwPageContent"
+            );
+
+
+
+        if(
+            newContent
+        ){
+
+            setTimeout(
+                function(){
+
+                    putCaretStart(
+                        newContent
+                    );
+
+                },
+                0
+            );
+
+        }
+
+
+
+    }
+
+
+
+
+
+
+
+
+    document.addEventListener(
+        "click",
+        function(e){
+
+
+            const button =
+                e.target.closest(
+                    '[data-action="page-break"]'
+                );
+
+
+
+            if(
+                !button
+            ){
+                return;
+            }
+
+
+
+            pageBreak();
+
+
+
+        },
+        false
+    );
+
+
+
+})();
