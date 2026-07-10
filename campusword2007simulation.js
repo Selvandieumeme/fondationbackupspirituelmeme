@@ -4804,10 +4804,13 @@ function applyList(type){
 
 
 
+
+
+
 /* =========================================================
-   CAMPUS WORD — INSERT TABLE BRIDGE
+   CAMPUS WORD — SIMPLE TABLE INSERT ENGINE
    ISOLATED MODULE
-   SIMPLE TABLE CREATOR
+   TABLE DROPDOWN CONNECTOR
    NO LAYOUT / CARET ENGINE INTERFERENCE
 ========================================================= */
 
@@ -4815,7 +4818,7 @@ function applyList(type){
 
 
 
-    function createTable(rows, cols){
+    function insertTable(rows, cols){
 
 
         const selection =
@@ -4882,8 +4885,13 @@ function applyList(type){
 
 
 
+                td.innerHTML =
+                    "&nbsp;";
+
+
+
                 td.style.border =
-                    "1px solid black";
+                    "1px solid #000";
 
 
 
@@ -4894,11 +4902,6 @@ function applyList(type){
 
                 td.style.height =
                     "30px";
-
-
-
-                td.innerHTML =
-                    "&nbsp;";
 
 
 
@@ -4940,25 +4943,25 @@ function applyList(type){
 
 
 
-        const newRange =
+        const after =
             document.createRange();
 
 
 
-        newRange.selectNodeContents(
+        after.setStartAfter(
             table
         );
 
 
 
-        newRange.collapse(
-            false
+        after.collapse(
+            true
         );
 
 
 
         selection.addRange(
-            newRange
+            after
         );
 
 
@@ -4974,6 +4977,7 @@ function applyList(type){
     document.addEventListener(
         "click",
         function(e){
+
 
 
             const item =
@@ -5000,7 +5004,7 @@ function applyList(type){
                 action === "table-1x1"
             ){
 
-                createTable(
+                insertTable(
                     1,
                     1
                 );
@@ -5016,7 +5020,7 @@ function applyList(type){
                 action === "table-2x2"
             ){
 
-                createTable(
+                insertTable(
                     2,
                     2
                 );
@@ -5032,7 +5036,7 @@ function applyList(type){
                 action === "table-3x3"
             ){
 
-                createTable(
+                insertTable(
                     3,
                     3
                 );
@@ -5050,3 +5054,9 @@ function applyList(type){
 
 
 })();
+
+
+
+
+
+
