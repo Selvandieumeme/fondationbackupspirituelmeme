@@ -4536,10 +4536,19 @@ function applyList(type){
 
 
 
+
+
+
+
+
+
+
+
+
 /* =========================================================
    CAMPUS WORD — FONT FAMILY & SIZE BRIDGE
    ISOLATED MODULE
-   SAFE TEXT SELECTION RESTORE
+   STABLE RANGE REBUILD
    NO CARET / LAYOUT / PAGE INTERFERENCE
 ========================================================= */
 
@@ -4586,27 +4595,19 @@ function applyList(type){
 
 
 
-    function restoreFontSelection(){
+    function applyFontStyle(property, value){
 
 
         if(
             !savedFontRange
         ){
-            return false;
+            return;
         }
 
 
 
         const selection =
             window.getSelection();
-
-
-
-        if(
-            !selection
-        ){
-            return false;
-        }
 
 
 
@@ -4618,26 +4619,9 @@ function applyList(type){
         );
 
 
-        return true;
-
-    }
-
-
-
-
-    function applyFontFamily(font){
-
-
-        if(
-            !restoreFontSelection()
-        ){
-            return;
-        }
-
-
 
         const range =
-            savedFontRange;
+            selection.getRangeAt(0);
 
 
 
@@ -4648,13 +4632,18 @@ function applyList(type){
 
 
 
-        span.style.fontFamily =
-            font;
+        span.style[property] =
+            value;
+
+
+
+        const fragment =
+            range.extractContents();
 
 
 
         span.appendChild(
-            range.extractContents()
+            fragment
         );
 
 
@@ -4664,59 +4653,45 @@ function applyList(type){
         );
 
 
-    }
+
+        /*
+           REBUILD RANGE AFTER CHANGE
+        */
+
+        const newRange =
+            document.createRange();
 
 
 
-
-
-    function applyFontSize(size){
-
-
-        if(
-            !restoreFontSelection()
-        ){
-            return;
-        }
-
-
-
-        const range =
-            savedFontRange;
-
-
-
-        const span =
-            document.createElement(
-                "span"
-            );
-
-
-
-        span.style.fontSize =
-            size + "px";
-
-
-
-        span.appendChild(
-            range.extractContents()
-        );
-
-
-
-        range.insertNode(
+        newRange.selectNodeContents(
             span
         );
 
 
+
+        savedFontRange =
+            newRange;
+
+
+
+        selection.removeAllRanges();
+
+
+        selection.addRange(
+            savedFontRange
+        );
+
+
     }
+
+
 
 
 
 
 
     /*
-       CAPTURE BEFORE RIBBON CONTROL
+       SAVE BEFORE RIBBON ACTION
     */
 
     document.addEventListener(
@@ -4724,16 +4699,14 @@ function applyList(type){
         function(e){
 
 
-            const target =
+            const control =
                 e.target.closest(
                     '[data-action="font-family"], [data-action="font-size"]'
                 );
 
 
 
-            if(
-                target
-            ){
+            if(control){
 
                 captureFontSelection();
 
@@ -4760,16 +4733,15 @@ function applyList(type){
 
 
             if(
-                e.target.dataset.action !== "font-family"
+                e.target.dataset.action === "font-family"
             ){
-                return;
+
+                applyFontStyle(
+                    "fontFamily",
+                    e.target.value
+                );
+
             }
-
-
-
-            applyFontFamily(
-                e.target.value
-            );
 
 
         },
@@ -4782,9 +4754,8 @@ function applyList(type){
 
 
 
-
     /*
-       FONT SIZE ENTER
+       FONT SIZE
     */
 
     document.addEventListener(
@@ -4814,11 +4785,23 @@ function applyList(type){
 
 
 
-                applyFontSize(
+                const size =
                     parseInt(
                         target.value
-                    )
-                );
+                    );
+
+
+
+                if(
+                    !isNaN(size)
+                ){
+
+                    applyFontStyle(
+                        "fontSize",
+                        size + "px"
+                    );
+
+                }
 
 
             }
