@@ -4805,65 +4805,28 @@ function applyList(type){
 
 
 
+
+
+
+
+
+
+
+
+
+
 /* =========================================================
-   CAMPUS WORD — PAGE BREAK BRIDGE
+   CAMPUS WORD — INSERT COVER PAGE BRIDGE
    ISOLATED MODULE
-   CARET POSITION BASED
-   NO LAYOUT / ENGINE INTERFERENCE
+   SIMPLE WORD STYLE COVER
+   NO LAYOUT / CARET INTERFERENCE
 ========================================================= */
 
 (function(){
 
 
 
-    function getCaretPage(){
-
-
-        const selection =
-            window.getSelection();
-
-
-
-        if(
-            !selection ||
-            selection.rangeCount === 0
-        ){
-            return null;
-        }
-
-
-
-        let node =
-            selection
-            .getRangeAt(0)
-            .startContainer;
-
-
-
-        if(
-            node.nodeType === 3
-        ){
-            node =
-                node.parentElement;
-        }
-
-
-
-        return node.closest(
-            ".cwPage"
-        );
-
-
-    }
-
-
-
-
-
-
-
-
-    function createPage(){
+    function createCoverPage(){
 
 
         const app =
@@ -4872,9 +4835,10 @@ function applyList(type){
 
 
         if(
-            !app
+            !app ||
+            !app.workspace
         ){
-            return null;
+            return;
         }
 
 
@@ -4887,7 +4851,7 @@ function applyList(type){
 
 
         page.className =
-            "cwPage";
+            "cwPage cwCoverPage";
 
 
 
@@ -4908,44 +4872,38 @@ function applyList(type){
 
 
 
-        content.addEventListener(
-            "input",
-            function(){
+        content.innerHTML = `
+
+            <div style="
+                text-align:center;
+                margin-top:120px;
+            ">
+
+                <h1>
+                    Document Title
+                </h1>
 
 
-                requestAnimationFrame(
-                    function(){
+                <h2>
+                    Subtitle
+                </h2>
 
 
-                        if(
-                            typeof app.calculateWordCount === "function"
-                        ){
-
-                            app.calculateWordCount(
-                                content.innerText
-                            );
-
-                        }
+                <br><br>
 
 
-
-                        if(
-                            typeof app.checkPageOverflow === "function"
-                        ){
-
-                            app.checkPageOverflow(
-                                content
-                            );
-
-                        }
+                <p>
+                    Author Name
+                </p>
 
 
-                    }
-                );
+                <p>
+                    Date
+                </p>
 
+            </div>
 
-            }
-        );
+        `;
 
 
 
@@ -4955,108 +4913,8 @@ function applyList(type){
 
 
 
-        return page;
-
-
-    }
-
-
-
-
-
-
-
-
-
-    function placeCaretAtStart(element){
-
-
-        const range =
-            document.createRange();
-
-
-
-        const selection =
-            window.getSelection();
-
-
-
-        range.selectNodeContents(
-            element
-        );
-
-
-
-        range.collapse(
-            true
-        );
-
-
-
-        selection.removeAllRanges();
-
-
-
-        selection.addRange(
-            range
-        );
-
-
-    }
-
-
-
-
-
-
-
-
-
-    function executePageBreak(){
-
-
-        const app =
-            window.CampusWord2007Simulateur;
-
-
-
-        if(
-            !app ||
-            !app.workspace
-        ){
-            return;
-        }
-
-
-
-        const currentPage =
-            getCaretPage();
-
-
-
-        if(
-            !currentPage
-        ){
-            return;
-        }
-
-
-
-        const newPage =
-            createPage();
-
-
-
-        if(
-            !newPage
-        ){
-            return;
-        }
-
-
-
-        currentPage.after(
-            newPage
+        app.workspace.appendChild(
+            page
         );
 
 
@@ -5068,31 +4926,9 @@ function applyList(type){
             )
         ){
 
-            const index =
-                app.state.pages.indexOf(
-                    currentPage
-                );
-
-
-
-            if(
-                index !== -1
-            ){
-
-                app.state.pages.splice(
-                    index + 1,
-                    0,
-                    newPage
-                );
-
-            }
-            else{
-
-                app.state.pages.push(
-                    newPage
-                );
-
-            }
+            app.state.pages.push(
+                page
+            );
 
         }
 
@@ -5108,33 +4944,14 @@ function applyList(type){
 
 
 
-        const newContent =
-            newPage.querySelector(
-                ".cwPageContent"
-            );
+        setTimeout(
+            function(){
 
+                content.focus();
 
-
-        if(
-            newContent
-        ){
-
-            setTimeout(
-                function(){
-
-                    newContent.focus();
-
-                    placeCaretAtStart(
-                        newContent
-                    );
-
-
-                },
-                0
-            );
-
-        }
-
+            },
+            0
+        );
 
 
     }
@@ -5153,7 +4970,7 @@ function applyList(type){
 
             const button =
                 e.target.closest(
-                    '[data-action="page-break"]'
+                    '[data-action="insert-cover"]'
                 );
 
 
@@ -5166,7 +4983,7 @@ function applyList(type){
 
 
 
-            executePageBreak();
+            createCoverPage();
 
 
 
