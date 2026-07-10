@@ -5192,3 +5192,317 @@ function applyList(type){
 
 
 })();
+
+
+
+
+
+
+
+
+
+/* =========================================================
+   CAMPUS WORD — EXCEL FRAME RESIZE ENGINE
+   STEP 3
+   RESIZE / AGRANDISMAN
+   ISOLATED MODULE
+========================================================= */
+
+(function(){
+
+
+
+    function enableExcelResize(){
+
+
+        const frames =
+            document.querySelectorAll(
+                ".cwExcelFrame"
+            );
+
+
+
+        frames.forEach(
+            function(frame){
+
+
+
+                if(
+                    frame.dataset.resizeReady
+                ){
+                    return;
+                }
+
+
+
+                frame.dataset.resizeReady =
+                    "true";
+
+
+
+                frame.style.position =
+                    "relative";
+
+
+
+                const handle =
+                    document.createElement(
+                        "div"
+                    );
+
+
+
+                handle.className =
+                    "cwExcelResizeHandle";
+
+
+
+                handle.style.position =
+                    "absolute";
+
+
+
+                handle.style.right =
+                    "0";
+
+
+
+                handle.style.bottom =
+                    "0";
+
+
+
+                handle.style.width =
+                    "15px";
+
+
+
+                handle.style.height =
+                    "15px";
+
+
+
+                handle.style.cursor =
+                    "nwse-resize";
+
+
+
+                handle.style.background =
+                    "#777";
+
+
+
+                frame.appendChild(
+                    handle
+                );
+
+
+
+                let startX = 0;
+                let startY = 0;
+                let startWidth = 0;
+                let startHeight = 0;
+
+
+
+                function startResize(e){
+
+
+                    e.preventDefault();
+
+
+
+                    const point =
+                        e.touches
+                        ? e.touches[0]
+                        : e;
+
+
+
+                    startX =
+                        point.clientX;
+
+
+                    startY =
+                        point.clientY;
+
+
+                    startWidth =
+                        frame.offsetWidth;
+
+
+                    startHeight =
+                        frame.offsetHeight;
+
+
+
+                    document.addEventListener(
+                        "mousemove",
+                        resize
+                    );
+
+
+                    document.addEventListener(
+                        "mouseup",
+                        stopResize
+                    );
+
+
+                    document.addEventListener(
+                        "touchmove",
+                        resize,
+                        {
+                            passive:false
+                        }
+                    );
+
+
+                    document.addEventListener(
+                        "touchend",
+                        stopResize
+                    );
+
+
+                }
+
+
+
+
+
+
+                function resize(e){
+
+
+                    e.preventDefault();
+
+
+
+                    const point =
+                        e.touches
+                        ? e.touches[0]
+                        : e;
+
+
+
+                    const newWidth =
+                        startWidth +
+                        (
+                            point.clientX -
+                            startX
+                        );
+
+
+
+                    const newHeight =
+                        startHeight +
+                        (
+                            point.clientY -
+                            startY
+                        );
+
+
+
+                    frame.style.width =
+                        Math.max(
+                            300,
+                            newWidth
+                        )
+                        + "px";
+
+
+
+                    frame.style.height =
+                        Math.max(
+                            200,
+                            newHeight
+                        )
+                        + "px";
+
+
+                }
+
+
+
+
+
+
+                function stopResize(){
+
+
+                    document.removeEventListener(
+                        "mousemove",
+                        resize
+                    );
+
+
+                    document.removeEventListener(
+                        "mouseup",
+                        stopResize
+                    );
+
+
+                    document.removeEventListener(
+                        "touchmove",
+                        resize
+                    );
+
+
+                    document.removeEventListener(
+                        "touchend",
+                        stopResize
+                    );
+
+
+                }
+
+
+
+
+
+                handle.addEventListener(
+                    "mousedown",
+                    startResize
+                );
+
+
+
+                handle.addEventListener(
+                    "touchstart",
+                    startResize,
+                    {
+                        passive:false
+                    }
+                );
+
+
+
+            }
+        );
+
+
+    }
+
+
+
+
+
+
+
+
+    document.addEventListener(
+        "click",
+        function(){
+
+
+            setTimeout(
+                enableExcelResize,
+                50
+            );
+
+
+        }
+    );
+
+
+
+})();
