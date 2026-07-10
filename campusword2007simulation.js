@@ -3024,11 +3024,32 @@ function applyList(type){
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 /* =========================================================
    CAMPUS WORD — STYLE COMMAND BRIDGE
    ISOLATED MODULE
    NORMAL / H1 / H2 / TITLE / SUBTITLE
    CARET POSITION BASED
+   WORD STYLE BEHAVIOR
    NO CARET / LAYOUT / PAGE INTERFERENCE
 ========================================================= */
 
@@ -3097,7 +3118,8 @@ function applyList(type){
 
 
 
-    function applyStyle(style){
+
+    function applyStyle(tagName, className){
 
 
         const block =
@@ -3113,25 +3135,37 @@ function applyList(type){
 
 
 
+        const text =
+            block.innerHTML;
 
-        block.classList.remove(
-            "cwStyleNormal",
-            "cwStyleH1",
-            "cwStyleH2",
-            "cwStyleTitle",
-            "cwStyleSubtitle"
+
+
+        const newBlock =
+            document.createElement(
+                tagName
+            );
+
+
+
+        newBlock.innerHTML =
+            text;
+
+
+
+        newBlock.classList.add(
+            className
         );
 
 
 
-
-        block.classList.add(
-            style
+        block.replaceWith(
+            newBlock
         );
 
 
 
     }
+
 
 
 
@@ -3167,11 +3201,14 @@ function applyList(type){
 
 
 
+
+
             if(
                 action === "style-normal"
             ){
 
                 applyStyle(
+                    "p",
                     "cwStyleNormal"
                 );
 
@@ -3184,11 +3221,13 @@ function applyList(type){
 
 
 
+
             if(
                 action === "style-h1"
             ){
 
                 applyStyle(
+                    "h1",
                     "cwStyleH1"
                 );
 
@@ -3201,11 +3240,13 @@ function applyList(type){
 
 
 
+
             if(
                 action === "style-h2"
             ){
 
                 applyStyle(
+                    "h2",
                     "cwStyleH2"
                 );
 
@@ -3218,11 +3259,13 @@ function applyList(type){
 
 
 
+
             if(
                 action === "style-title"
             ){
 
                 applyStyle(
+                    "div",
                     "cwStyleTitle"
                 );
 
@@ -3235,11 +3278,13 @@ function applyList(type){
 
 
 
+
             if(
                 action === "style-subtitle"
             ){
 
                 applyStyle(
+                    "div",
                     "cwStyleSubtitle"
                 );
 
@@ -3258,6 +3303,3 @@ function applyList(type){
 
 
 })();
-
-
-
