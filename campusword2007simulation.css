@@ -2215,3 +2215,111 @@ body{
     font-style:italic;
 }
 
+
+
+
+
+
+
+
+
+/* =====================================================
+   CAMPUS WORD — FIND TOOL BAR STYLE
+   ISOLATED UI
+   NO RIBBON / PAGE / LAYOUT INTERFERENCE
+===================================================== */
+
+#cwFindBar{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:8px;
+
+    padding:6px 10px;
+
+    background:linear-gradient(
+        to bottom,
+        #f7f7f7,
+        #e6e6e6
+    );
+
+    border:1px solid #b8b8b8;
+
+    border-radius:4px;
+
+    width:max-content;
+
+    box-shadow:
+        0 1px 3px rgba(0,0,0,0.15);
+
+}
+
+
+
+#cwFindInput{
+
+    width:220px;
+
+    height:28px;
+
+    padding:4px 8px;
+
+    font-size:14px;
+
+    border:1px solid #999;
+
+    border-radius:3px;
+
+    outline:none;
+
+}
+
+
+
+#cwFindInput:focus{
+
+    border-color:#4a90e2;
+
+    box-shadow:
+        0 0 3px rgba(74,144,226,0.5);
+
+}
+
+
+
+
+#cwFindNext{
+
+    height:28px;
+
+    padding:0 14px;
+
+    font-size:14px;
+
+    cursor:pointer;
+
+    background:#ffffff;
+
+    border:1px solid #999;
+
+    border-radius:3px;
+
+}
+
+
+
+#cwFindNext:hover{
+
+    background:#eaf2ff;
+
+}
+
+
+
+#cwFindNext:active{
+
+    transform:scale(0.98);
+
+}
