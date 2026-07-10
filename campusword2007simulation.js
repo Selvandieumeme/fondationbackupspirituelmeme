@@ -4722,11 +4722,11 @@ function applyList(type){
 
 
 
-
 /* =========================================================
    CAMPUS WORD — INSERT PAGES BRIDGE
    ISOLATED MODULE
    BLANK PAGE / PAGE BREAK
+   SAFE ENGINE CONNECTION
    NO LAYOUT / CARET INTERFERENCE
 ========================================================= */
 
@@ -4734,11 +4734,27 @@ function applyList(type){
 
 
 
+    function getApp(){
+
+
+        return window.CampusWord2007Simulateur
+            || null;
+
+
+    }
+
+
+
+
+
+
+
+
     function createEmptyPage(){
 
 
         const app =
-            window.CampusWord2007Simulateur;
+            getApp();
 
 
 
@@ -4755,6 +4771,7 @@ function applyList(type){
             document.createElement(
                 "div"
             );
+
 
 
         page.className =
@@ -4788,14 +4805,28 @@ function applyList(type){
                     function(){
 
 
-                        app.calculateWordCount(
-                            content.innerText
-                        );
+                        if(
+                            typeof app.calculateWordCount === "function"
+                        ){
+
+                            app.calculateWordCount(
+                                content.innerText
+                            );
+
+                        }
 
 
-                        app.checkPageOverflow(
-                            content
-                        );
+
+                        if(
+                            typeof app.checkPageOverflow === "function"
+                        ){
+
+                            app.checkPageOverflow(
+                                content
+                            );
+
+                        }
+
 
 
                     }
@@ -4825,12 +4856,63 @@ function applyList(type){
 
 
 
-    function insertBlankPage(){
+    function registerPage(page){
 
 
         const app =
-            window.CampusWord2007Simulateur;
+            getApp();
 
+
+
+        if(
+            !app ||
+            !page
+        ){
+            return;
+        }
+
+
+
+        app.workspace.appendChild(
+            page
+        );
+
+
+
+        if(
+            app.state &&
+            Array.isArray(
+                app.state.pages
+            )
+        ){
+
+            app.state.pages.push(
+                page
+            );
+
+        }
+
+
+
+        if(
+            typeof app.updatePageStatus === "function"
+        ){
+
+            app.updatePageStatus();
+
+        }
+
+
+    }
+
+
+
+
+
+
+
+
+    function insertBlankPage(){
 
 
         const page =
@@ -4846,20 +4928,9 @@ function applyList(type){
 
 
 
-        app.workspace.appendChild(
+        registerPage(
             page
         );
-
-
-
-        app.state.pages.push(
-            page
-        );
-
-
-
-        app.updatePageStatus();
-
 
 
     }
@@ -4875,11 +4946,6 @@ function applyList(type){
     function insertPageBreak(){
 
 
-        const app =
-            window.CampusWord2007Simulateur;
-
-
-
         const page =
             createEmptyPage();
 
@@ -4893,24 +4959,15 @@ function applyList(type){
 
 
 
-        app.workspace.appendChild(
+        registerPage(
             page
         );
-
-
-
-        app.state.pages.push(
-            page
-        );
-
-
-
-        app.updatePageStatus();
 
 
 
         setTimeout(
             function(){
+
 
                 const content =
                     page.querySelector(
@@ -4918,11 +4975,13 @@ function applyList(type){
                     );
 
 
+
                 if(content){
 
                     content.focus();
 
                 }
+
 
 
             },
@@ -4945,9 +5004,10 @@ function applyList(type){
         function(e){
 
 
+
             const button =
                 e.target.closest(
-                    "[data-action]"
+                    '[data-action="insert-blank"], [data-action="page-break"]'
                 );
 
 
@@ -4965,7 +5025,6 @@ function applyList(type){
 
 
 
-
             if(
                 action === "insert-blank"
             ){
@@ -4975,8 +5034,6 @@ function applyList(type){
                 return;
 
             }
-
-
 
 
 
@@ -4999,4 +5056,11 @@ function applyList(type){
 
 
 })();
+
+
+
+
+
+
+
 
