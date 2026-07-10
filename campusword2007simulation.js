@@ -4788,3 +4788,392 @@ function applyList(type){
 })();
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* =========================================================
+   CAMPUS WORD — PAGE BREAK BRIDGE
+   ISOLATED MODULE
+   CARET POSITION BASED
+   NO LAYOUT / ENGINE INTERFERENCE
+========================================================= */
+
+(function(){
+
+
+
+    function getCaretPage(){
+
+
+        const selection =
+            window.getSelection();
+
+
+
+        if(
+            !selection ||
+            selection.rangeCount === 0
+        ){
+            return null;
+        }
+
+
+
+        let node =
+            selection
+            .getRangeAt(0)
+            .startContainer;
+
+
+
+        if(
+            node.nodeType === 3
+        ){
+            node =
+                node.parentElement;
+        }
+
+
+
+        return node.closest(
+            ".cwPage"
+        );
+
+
+    }
+
+
+
+
+
+
+
+
+    function createPage(){
+
+
+        const app =
+            window.CampusWord2007Simulateur;
+
+
+
+        if(
+            !app
+        ){
+            return null;
+        }
+
+
+
+        const page =
+            document.createElement(
+                "div"
+            );
+
+
+
+        page.className =
+            "cwPage";
+
+
+
+        const content =
+            document.createElement(
+                "div"
+            );
+
+
+
+        content.className =
+            "cwPageContent";
+
+
+
+        content.contentEditable =
+            true;
+
+
+
+        content.addEventListener(
+            "input",
+            function(){
+
+
+                requestAnimationFrame(
+                    function(){
+
+
+                        if(
+                            typeof app.calculateWordCount === "function"
+                        ){
+
+                            app.calculateWordCount(
+                                content.innerText
+                            );
+
+                        }
+
+
+
+                        if(
+                            typeof app.checkPageOverflow === "function"
+                        ){
+
+                            app.checkPageOverflow(
+                                content
+                            );
+
+                        }
+
+
+                    }
+                );
+
+
+            }
+        );
+
+
+
+        page.appendChild(
+            content
+        );
+
+
+
+        return page;
+
+
+    }
+
+
+
+
+
+
+
+
+
+    function placeCaretAtStart(element){
+
+
+        const range =
+            document.createRange();
+
+
+
+        const selection =
+            window.getSelection();
+
+
+
+        range.selectNodeContents(
+            element
+        );
+
+
+
+        range.collapse(
+            true
+        );
+
+
+
+        selection.removeAllRanges();
+
+
+
+        selection.addRange(
+            range
+        );
+
+
+    }
+
+
+
+
+
+
+
+
+
+    function executePageBreak(){
+
+
+        const app =
+            window.CampusWord2007Simulateur;
+
+
+
+        if(
+            !app ||
+            !app.workspace
+        ){
+            return;
+        }
+
+
+
+        const currentPage =
+            getCaretPage();
+
+
+
+        if(
+            !currentPage
+        ){
+            return;
+        }
+
+
+
+        const newPage =
+            createPage();
+
+
+
+        if(
+            !newPage
+        ){
+            return;
+        }
+
+
+
+        currentPage.after(
+            newPage
+        );
+
+
+
+        if(
+            app.state &&
+            Array.isArray(
+                app.state.pages
+            )
+        ){
+
+            const index =
+                app.state.pages.indexOf(
+                    currentPage
+                );
+
+
+
+            if(
+                index !== -1
+            ){
+
+                app.state.pages.splice(
+                    index + 1,
+                    0,
+                    newPage
+                );
+
+            }
+            else{
+
+                app.state.pages.push(
+                    newPage
+                );
+
+            }
+
+        }
+
+
+
+        if(
+            typeof app.updatePageStatus === "function"
+        ){
+
+            app.updatePageStatus();
+
+        }
+
+
+
+        const newContent =
+            newPage.querySelector(
+                ".cwPageContent"
+            );
+
+
+
+        if(
+            newContent
+        ){
+
+            setTimeout(
+                function(){
+
+                    newContent.focus();
+
+                    placeCaretAtStart(
+                        newContent
+                    );
+
+
+                },
+                0
+            );
+
+        }
+
+
+
+    }
+
+
+
+
+
+
+
+
+    document.addEventListener(
+        "click",
+        function(e){
+
+
+            const button =
+                e.target.closest(
+                    '[data-action="page-break"]'
+                );
+
+
+
+            if(
+                !button
+            ){
+                return;
+            }
+
+
+
+            executePageBreak();
+
+
+
+        },
+        false
+    );
+
+
+
+})();
