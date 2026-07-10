@@ -3765,3 +3765,197 @@ function applyList(type){
 
 
 })();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* =========================================================
+   CAMPUS WORD — FIND COMMAND BRIDGE
+   ISOLATED MODULE
+   SEARCH TEXT IN DOCUMENT PAGES
+   NO TEXT MODIFICATION
+   NO CARET / LAYOUT / PAGE INTERFERENCE
+========================================================= */
+
+(function(){
+
+
+
+    function findText(){
+
+
+        const search =
+            prompt(
+                "Find:"
+            );
+
+
+
+        if(
+            !search ||
+            search.trim() === ""
+        ){
+            return;
+        }
+
+
+
+        const pages =
+            document.querySelectorAll(
+                ".cwPageContent"
+            );
+
+
+
+        if(
+            !pages.length
+        ){
+            return;
+        }
+
+
+
+        const text =
+            search.trim();
+
+
+
+        const walker =
+            document.createTreeWalker(
+                document.body,
+                NodeFilter.SHOW_TEXT
+            );
+
+
+
+        let node;
+
+
+
+        while(
+            node = walker.nextNode()
+        ){
+
+
+
+            const index =
+                node.textContent.indexOf(
+                    text
+                );
+
+
+
+            if(
+                index !== -1
+            ){
+
+
+                const range =
+                    document.createRange();
+
+
+
+                range.setStart(
+                    node,
+                    index
+                );
+
+
+
+                range.setEnd(
+                    node,
+                    index + text.length
+                );
+
+
+
+                const selection =
+                    window.getSelection();
+
+
+
+                selection.removeAllRanges();
+
+
+
+                selection.addRange(
+                    range
+                );
+
+
+
+                return;
+
+            }
+
+
+
+        }
+
+
+
+    }
+
+
+
+
+
+
+
+    document.addEventListener(
+        "click",
+        function(e){
+
+
+
+            const button =
+                e.target.closest(
+                    "[data-action]"
+                );
+
+
+
+            if(
+                !button
+            ){
+                return;
+            }
+
+
+
+            if(
+                button.dataset.action === "find"
+            ){
+
+                findText();
+
+            }
+
+
+
+        },
+        false
+    );
+
+
+
+})();
