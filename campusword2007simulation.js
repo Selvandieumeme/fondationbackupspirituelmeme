@@ -3483,3 +3483,122 @@ function applyList(type){
 
 
 })();
+
+
+
+
+
+
+
+
+
+
+
+
+/* =========================================================
+   CAMPUS WORD — SELECT ALL BRIDGE
+   ISOLATED MODULE
+   SELECT ALL DOCUMENT TEXT
+   NO CARET / LAYOUT / PAGE INTERFERENCE
+========================================================= */
+
+(function(){
+
+
+
+    function selectAllText(){
+
+
+        const pages =
+            document.querySelectorAll(
+                ".cwPageContent"
+            );
+
+
+
+        if(
+            !pages.length
+        ){
+            return;
+        }
+
+
+
+        const selection =
+            window.getSelection();
+
+
+
+        const range =
+            document.createRange();
+
+
+
+        range.setStart(
+            pages[0],
+            0
+        );
+
+
+
+        range.setEnd(
+            pages[pages.length - 1],
+            pages[pages.length - 1].childNodes.length
+        );
+
+
+
+        selection.removeAllRanges();
+
+
+
+        selection.addRange(
+            range
+        );
+
+
+
+    }
+
+
+
+
+
+
+    document.addEventListener(
+        "click",
+        function(e){
+
+
+            const button =
+                e.target.closest(
+                    "[data-action]"
+                );
+
+
+
+            if(
+                !button
+            ){
+                return;
+            }
+
+
+
+            if(
+                button.dataset.action === "select-all"
+            ){
+
+                selectAllText();
+
+            }
+
+
+
+        },
+        false
+    );
+
+
+
+})();
