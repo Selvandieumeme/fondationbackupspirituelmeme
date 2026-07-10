@@ -4722,277 +4722,33 @@ function applyList(type){
 
 
 
+
+
+
+
+
+
+
+
+
 /* =========================================================
-   CAMPUS WORD — INSERT PAGES BRIDGE
-   ISOLATED MODULE
-   BLANK PAGE / PAGE BREAK
-   SAFE ENGINE CONNECTION
-   NO LAYOUT / CARET INTERFERENCE
+   CAMPUS WORD — INSERT BLANK DOCUMENT BRIDGE
+   WORD 2007 STYLE
+   NEW BLANK DOCUMENT
+   NO CURRENT DOCUMENT INTERFERENCE
 ========================================================= */
 
 (function(){
 
 
-
-    function getApp(){
-
-
-        return window.CampusWord2007Simulateur
-            || null;
+    function createBlankDocument(){
 
 
-    }
-
-
-
-
-
-
-
-
-    function createEmptyPage(){
-
-
-        const app =
-            getApp();
-
-
-
-        if(
-            !app ||
-            !app.workspace
-        ){
-            return null;
-        }
-
-
-
-        const page =
-            document.createElement(
-                "div"
-            );
-
-
-
-        page.className =
-            "cwPage";
-
-
-
-        const content =
-            document.createElement(
-                "div"
-            );
-
-
-
-        content.className =
-            "cwPageContent";
-
-
-
-        content.contentEditable =
-            true;
-
-
-
-        content.addEventListener(
-            "input",
-            function(){
-
-
-                requestAnimationFrame(
-                    function(){
-
-
-                        if(
-                            typeof app.calculateWordCount === "function"
-                        ){
-
-                            app.calculateWordCount(
-                                content.innerText
-                            );
-
-                        }
-
-
-
-                        if(
-                            typeof app.checkPageOverflow === "function"
-                        ){
-
-                            app.checkPageOverflow(
-                                content
-                            );
-
-                        }
-
-
-
-                    }
-                );
-
-
-            }
-        );
-
-
-
-        page.appendChild(
-            content
-        );
-
-
-
-        return page;
+        window.location.href =
+            "https://fondationbackupspirituel.com/campusword2007simulation";
 
 
     }
-
-
-
-
-
-
-
-
-    function registerPage(page){
-
-
-        const app =
-            getApp();
-
-
-
-        if(
-            !app ||
-            !page
-        ){
-            return;
-        }
-
-
-
-        app.workspace.appendChild(
-            page
-        );
-
-
-
-        if(
-            app.state &&
-            Array.isArray(
-                app.state.pages
-            )
-        ){
-
-            app.state.pages.push(
-                page
-            );
-
-        }
-
-
-
-        if(
-            typeof app.updatePageStatus === "function"
-        ){
-
-            app.updatePageStatus();
-
-        }
-
-
-    }
-
-
-
-
-
-
-
-
-    function insertBlankPage(){
-
-
-        const page =
-            createEmptyPage();
-
-
-
-        if(
-            !page
-        ){
-            return;
-        }
-
-
-
-        registerPage(
-            page
-        );
-
-
-    }
-
-
-
-
-
-
-
-
-
-    function insertPageBreak(){
-
-
-        const page =
-            createEmptyPage();
-
-
-
-        if(
-            !page
-        ){
-            return;
-        }
-
-
-
-        registerPage(
-            page
-        );
-
-
-
-        setTimeout(
-            function(){
-
-
-                const content =
-                    page.querySelector(
-                        ".cwPageContent"
-                    );
-
-
-
-                if(content){
-
-                    content.focus();
-
-                }
-
-
-
-            },
-            0
-        );
-
-
-    }
-
-
-
 
 
 
@@ -5004,10 +4760,9 @@ function applyList(type){
         function(e){
 
 
-
             const button =
                 e.target.closest(
-                    '[data-action="insert-blank"], [data-action="page-break"]'
+                    '[data-action="insert-blank"]'
                 );
 
 
@@ -5020,32 +4775,7 @@ function applyList(type){
 
 
 
-            const action =
-                button.dataset.action;
-
-
-
-            if(
-                action === "insert-blank"
-            ){
-
-                insertBlankPage();
-
-                return;
-
-            }
-
-
-
-            if(
-                action === "page-break"
-            ){
-
-                insertPageBreak();
-
-                return;
-
-            }
+            createBlankDocument();
 
 
 
@@ -5056,11 +4786,5 @@ function applyList(type){
 
 
 })();
-
-
-
-
-
-
 
 
