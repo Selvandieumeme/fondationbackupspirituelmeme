@@ -9189,3 +9189,296 @@ document.addEventListener(
 
 
 })();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* =========================================================
+   CAMPUS WORD — DRAW TABLE CREATE ENGINE
+   STEP 3
+   CONVERT DRAW FRAME TO REAL TABLE
+   ISOLATED MODULE
+   NO CUSTOM TABLE INTERFERENCE
+   NO CARET / RIBBON INTERFERENCE
+========================================================= */
+
+(function(){
+
+
+
+function createDrawnTable(width,height){
+
+
+
+    const selection =
+        window.getSelection();
+
+
+
+    if(
+        !selection ||
+        selection.rangeCount === 0
+    ){
+
+        return;
+
+    }
+
+
+
+
+
+    /*
+       SIZE CALCULATION
+       WORD STYLE GRID
+    */
+
+
+    const cellSize = 70;
+
+
+
+    let cols =
+        Math.max(
+            1,
+            Math.round(
+                width / cellSize
+            )
+        );
+
+
+
+    let rows =
+        Math.max(
+            1,
+            Math.round(
+                height / 30
+            )
+        );
+
+
+
+
+
+
+    const table =
+        document.createElement(
+            "table"
+        );
+
+
+
+    table.classList.add(
+        "cwWordTable"
+    );
+
+
+
+    table.style.borderCollapse =
+        "collapse";
+
+
+
+    table.style.margin =
+        "10px 0";
+
+
+
+    table.style.width =
+        width + "px";
+
+
+
+
+
+
+
+    for(
+        let r = 0;
+        r < rows;
+        r++
+    ){
+
+
+
+        const tr =
+            document.createElement(
+                "tr"
+            );
+
+
+
+        for(
+            let c = 0;
+            c < cols;
+            c++
+        ){
+
+
+
+            const td =
+                document.createElement(
+                    "td"
+                );
+
+
+
+            td.contentEditable =
+                true;
+
+
+
+            td.innerHTML =
+                "&nbsp;";
+
+
+
+            td.style.border =
+                "1px solid #999";
+
+
+
+            td.style.height =
+                "25px";
+
+
+
+            td.style.minWidth =
+                "70px";
+
+
+
+            tr.appendChild(
+                td
+            );
+
+
+        }
+
+
+
+        table.appendChild(
+            tr
+        );
+
+
+    }
+
+
+
+
+
+
+
+
+    const range =
+        selection.getRangeAt(0);
+
+
+
+    range.insertNode(
+        table
+    );
+
+
+
+    selection.removeAllRanges();
+
+
+
+}
+
+
+
+
+
+
+
+
+
+document.addEventListener(
+    "pointerup",
+    function(){
+
+
+
+        if(
+            !window.CampusWordDrawTable ||
+            !window.CampusWordDrawTable.isActive()
+        ){
+
+            return;
+
+        }
+
+
+
+        const frame =
+            document.querySelector(
+                ".cwDrawTableFrame"
+            );
+
+
+
+        if(!frame){
+
+            return;
+
+        }
+
+
+
+        const rect =
+            frame.getBoundingClientRect();
+
+
+
+
+
+        if(
+            rect.width < 20 ||
+            rect.height < 20
+        ){
+
+            frame.remove();
+
+            return;
+
+        }
+
+
+
+
+
+
+        createDrawnTable(
+            rect.width,
+            rect.height
+        );
+
+
+
+        frame.remove();
+
+
+
+    },
+    false
+);
+
+
+
+})();
