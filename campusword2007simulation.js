@@ -7755,21 +7755,14 @@ document.addEventListener(
 
 
 
-
-
-
-
-
-
-
-
 /* =========================================================
    CAMPUS WORD — TABLE COLUMN RESIZE ENGINE
-   STEP 1.5
-   PRECISE BORDER DETECTION
+   FINAL STABLE VERSION
    TOUCH + MOUSE
-   VISUAL BORDER PREVIEW
+   VISUAL RED DASHED GUIDE
+   COLUMN RESIZE
    ISOLATED MODULE
+   NO TABLE BORDER MODIFICATION
    NO CARET / NO RIBBON INTERFERENCE
 ========================================================= */
 
@@ -7784,16 +7777,17 @@ let startX = 0;
 
 let startWidth = 0;
 
-
-
-const previewClass =
-    "cwResizeBorderPreviewVertical";
+let guideLine = null;
 
 
 
+const ZONE = 14;
 
 
-function getPoint(e){
+
+
+
+function point(e){
 
     return e.touches
         ? e.touches[0]
@@ -7808,22 +7802,126 @@ function getPoint(e){
 
 
 
-function clearPreview(){
+function createGuide(){
 
 
-    document
-    .querySelectorAll(
-        "." + previewClass
-    )
-    .forEach(function(el){
+    if(guideLine){
+
+        return;
+
+    }
 
 
-        el.classList.remove(
-            previewClass
+
+    guideLine =
+        document.createElement(
+            "div"
         );
 
 
-    });
+
+    guideLine.style.position =
+        "fixed";
+
+    guideLine.style.width =
+        "2px";
+
+    guideLine.style.background =
+        "repeating-linear-gradient(to bottom, red 0px, red 6px, transparent 6px, transparent 12px)";
+
+    guideLine.style.zIndex =
+        "9999999";
+
+    guideLine.style.pointerEvents =
+        "none";
+
+    guideLine.style.display =
+        "none";
+
+
+
+    document.body.appendChild(
+        guideLine
+    );
+
+
+}
+
+
+
+
+
+
+
+
+function showGuide(cell){
+
+
+    createGuide();
+
+
+
+    const rect =
+        cell.getBoundingClientRect();
+
+
+
+    guideLine.style.left =
+        rect.right + "px";
+
+
+
+    guideLine.style.top =
+        rect.top + "px";
+
+
+
+    guideLine.style.height =
+        rect.height + "px";
+
+
+
+    guideLine.style.display =
+        "block";
+
+
+}
+
+
+
+
+
+
+
+
+function moveGuide(x){
+
+
+    if(guideLine){
+
+        guideLine.style.left =
+            x + "px";
+
+    }
+
+}
+
+
+
+
+
+
+
+
+function hideGuide(){
+
+
+    if(guideLine){
+
+        guideLine.style.display =
+            "none";
+
+    }
 
 
 }
@@ -7836,29 +7934,32 @@ function clearPreview(){
 
 
 
-function findBorderCell(e){
+function findResizeCell(e){
 
 
-    const point =
-        getPoint(e);
+    const p =
+        point(e);
 
 
 
     const elements =
         document.elementsFromPoint(
-            point.clientX,
-            point.clientY
+            p.clientX,
+            p.clientY
         );
 
 
 
     const cell =
         elements.find(
-            el =>
-            el.matches &&
-            el.matches(
-                ".cwWordTable td"
-            )
+            function(el){
+
+                return el.matches &&
+                el.matches(
+                    ".cwWordTable td"
+                );
+
+            }
         );
 
 
@@ -7878,22 +7979,15 @@ function findBorderCell(e){
 
 
     const x =
-        point.clientX -
+        p.clientX -
         rect.left;
 
 
 
-    const zone = 15;
-
-
-
-
     if(
-        x >
-        rect.width - zone
+        x > rect.width - ZONE
         ||
-        x <
-        zone
+        x < ZONE
     ){
 
         return cell;
@@ -7923,6 +8017,10 @@ document.addEventListener(
 
         if(resizing){
 
+            moveGuide(
+                point(e).clientX
+            );
+
             return;
 
         }
@@ -7930,14 +8028,8 @@ document.addEventListener(
 
 
 
-
-        clearPreview();
-
-
-
-
         const cell =
-            findBorderCell(e);
+            findResizeCell(e);
 
 
 
@@ -7945,38 +8037,26 @@ document.addEventListener(
         if(cell){
 
 
-
-            cell.classList.add(
-                previewClass
+            showGuide(
+                cell
             );
-
 
 
             document.body.style.cursor =
                 "col-resize";
 
 
-
-            resizeTarget =
-                cell;
-
-
-
         }else{
 
+
+            hideGuide();
 
 
             document.body.style.cursor =
                 "";
 
 
-
-            resizeTarget =
-                null;
-
-
         }
-
 
 
     },
@@ -7998,7 +8078,7 @@ document.addEventListener(
 
 
         const cell =
-            findBorderCell(e);
+            findResizeCell(e);
 
 
 
@@ -8019,22 +8099,24 @@ document.addEventListener(
 
 
 
-        clearPreview();
-
-
-
         resizeTarget =
             cell;
 
 
 
         startX =
-            getPoint(e).clientX;
+            point(e).clientX;
 
 
 
         startWidth =
             cell.offsetWidth;
+
+
+
+        showGuide(
+            cell
+        );
 
 
 
@@ -8068,7 +8150,7 @@ document.addEventListener(
 
 
         const diff =
-            getPoint(e).clientX -
+            point(e).clientX -
             startX;
 
 
@@ -8082,13 +8164,11 @@ document.addEventListener(
         if(width > 30){
 
 
-
             resizeTarget.style.width =
                 width + "px";
 
 
         }
-
 
 
     },
@@ -8113,11 +8193,11 @@ document.addEventListener(
 
 
 
-        clearPreview();
-
-
-
         resizeTarget = null;
+
+
+
+        hideGuide();
 
 
 
@@ -8132,8 +8212,13 @@ document.addEventListener(
 
 
 
-
-
 })();
+
+
+
+
+
+
+
 
 
