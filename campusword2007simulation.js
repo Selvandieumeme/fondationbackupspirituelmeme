@@ -9940,3 +9940,88 @@ document.addEventListener(
 
 
 })();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* =========================================================
+   CAMPUS WORD — CONVERT TEXT TO TABLE ENGINE
+   STEP 1
+   BUTTON ACTIVATION ONLY
+   ISOLATED MODULE
+   NO TABLE CREATION
+   NO CARET INTERFERENCE
+   NO RIBBON INTERFERENCE
+========================================================= */
+
+(function(){
+
+
+
+document.addEventListener(
+    "click",
+    function(e){
+
+
+
+        const button =
+            e.target.closest(
+                '[data-action="convert-text-to-table"]'
+            );
+
+
+
+        if(!button){
+
+            return;
+
+        }
+
+
+
+
+
+        e.preventDefault();
+
+
+
+        e.stopPropagation();
+
+
+
+
+
+        console.log(
+            "Convert Text to Table activated"
+        );
+
+
+
+    },
+    false
+);
+
+
+
+})();
