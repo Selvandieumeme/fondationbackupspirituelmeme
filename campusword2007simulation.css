@@ -2310,3 +2310,30 @@ body{
         3px solid #2563eb !important;
 
 }
+
+
+
+
+
+
+
+
+
+/* =========================================================
+   TABLE DRAG VISUAL STATE
+========================================================= */
+
+.cwWordTable{
+
+    cursor:move;
+
+}
+
+
+.cwTableDragging{
+
+    opacity:0.85;
+
+    user-select:none;
+
+}
