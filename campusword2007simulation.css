@@ -2368,3 +2368,23 @@ body{
     cursor:crosshair;
 
 }
+
+
+
+
+
+
+
+
+
+
+
+/* =========================================================
+   TABLE RESIZE VISUAL STATE
+========================================================= */
+
+.cwTableResizeActive{
+
+    cursor:col-resize;
+
+}
