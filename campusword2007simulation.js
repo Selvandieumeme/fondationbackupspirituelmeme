@@ -5529,7 +5529,172 @@ function applyList(type){
 
 
 
+/* =========================================================
+   CAMPUS WORD — TABLE DROPDOWN MENU ENGINE
+   STEP 1
+   OPEN / CLOSE TABLE MENU
+   FULLY ISOLATED
+   NO HOME BUTTON INTERFERENCE
+========================================================= */
 
+(function(){
+
+
+    let activeTableMenu = null;
+
+
+
+    function closeTableMenu(){
+
+
+        if(activeTableMenu){
+
+            activeTableMenu.style.display =
+                "none";
+
+
+            activeTableMenu = null;
+
+        }
+
+    }
+
+
+
+
+
+
+    document.addEventListener(
+        "click",
+        function(e){
+
+
+
+            const tableGroup =
+                e.target.closest(
+                    '[data-action^="table-"], .cwRibbonGroup'
+                );
+
+
+
+            const tableButton =
+                e.target.closest(
+                    ".cwDropdownBtn"
+                );
+
+
+
+            /*
+              VERIFY ONLY TABLE DROPDOWN
+            */
+            if(
+                tableButton &&
+                tableButton.querySelector(
+                    '[data-action^="table-"]'
+                )
+            ){
+
+
+                e.stopPropagation();
+
+
+
+                const menu =
+                    tableButton.querySelector(
+                        ".cwDropdownMenu"
+                    );
+
+
+
+                if(!menu){
+
+                    return;
+
+                }
+
+
+
+
+                if(
+                    activeTableMenu &&
+                    activeTableMenu !== menu
+                ){
+
+                    closeTableMenu();
+
+                }
+
+
+
+
+
+                const isOpen =
+                    menu.style.display === "block";
+
+
+
+                if(isOpen){
+
+
+                    closeTableMenu();
+
+
+                }else{
+
+
+                    menu.style.display =
+                        "block";
+
+
+                    menu.style.position =
+                        "absolute";
+
+
+                    menu.style.zIndex =
+                        "999999";
+
+
+
+                    activeTableMenu =
+                        menu;
+
+
+                }
+
+
+
+                return;
+
+            }
+
+
+
+
+
+
+
+            /*
+              CLOSE ONLY TABLE MENU
+              DO NOT TOUCH OTHER DROPDOWNS
+            */
+            if(
+                activeTableMenu &&
+                !activeTableMenu.contains(e.target)
+            ){
+
+                closeTableMenu();
+
+            }
+
+
+
+        },
+        false
+    );
+
+
+
+})();
 
 
 
