@@ -11041,3 +11041,145 @@ document.addEventListener(
 
 
 })();
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* =========================================================
+   CAMPUS WORD — INSERT PICTURE ENGINE
+   STEP 2
+   OPEN FILE PICKER
+   NO IMAGE INSERTION YET
+   ISOLATED MODULE
+   NO TABLE / NO CARET INTERFERENCE
+========================================================= */
+
+(function(){
+
+
+
+let pictureInput = null;
+
+
+
+
+
+
+function createPicturePicker(){
+
+
+
+    if(pictureInput){
+
+        return;
+
+    }
+
+
+
+    pictureInput =
+        document.createElement(
+            "input"
+        );
+
+
+
+    pictureInput.type =
+        "file";
+
+
+
+    pictureInput.accept =
+        "image/*";
+
+
+
+    pictureInput.style.display =
+        "none";
+
+
+
+    pictureInput.id =
+        "cwPictureFilePicker";
+
+
+
+    document.body.appendChild(
+        pictureInput
+    );
+
+
+
+}
+
+
+
+
+
+
+
+
+
+document.addEventListener(
+    "click",
+    function(e){
+
+
+
+        const button =
+            e.target.closest(
+                '[data-action="insert-picture"]'
+            );
+
+
+
+        if(!button){
+
+            return;
+
+        }
+
+
+
+
+
+        e.preventDefault();
+
+
+        e.stopPropagation();
+
+
+
+
+
+
+        createPicturePicker();
+
+
+
+
+
+
+        pictureInput.click();
+
+
+
+    },
+    false
+);
+
+
+
+
+
+
+})();
