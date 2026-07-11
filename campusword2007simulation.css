@@ -2379,12 +2379,27 @@ body{
 
 
 
+
+
+
+
+
 /* =========================================================
-   TABLE RESIZE VISUAL STATE
+   TABLE RESIZE BORDER PREVIEW
 ========================================================= */
 
-.cwTableResizeActive{
+.cwResizeBorderPreviewVertical{
 
-    cursor:col-resize;
+    border-right:
+        2px dashed #2563eb !important;
 
 }
+
+
+.cwResizeBorderPreviewHorizontal{
+
+    border-bottom:
+        2px dashed #2563eb !important;
+
+}
+
