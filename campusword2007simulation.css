@@ -2337,3 +2337,34 @@ body{
     user-select:none;
 
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* =========================================================
+   TABLE ERASER BUTTON STATE
+========================================================= */
+
+.cwEraserActive{
+
+    background:#dbeafe !important;
+
+    outline:2px solid #2563eb;
+
+}
+
+
+.cwTableEraserMode{
+
+    cursor:crosshair;
+
+}
