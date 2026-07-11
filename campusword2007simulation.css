@@ -2399,37 +2399,3 @@ body{
 
 
 
-
-/* =========================================================
-   CAMPUS WORD — TABLE CLEAN SELECTION CONTROL
-   ISOLATED CSS
-   PREVENT AUTO TEXT SELECTION
-   NO TABLE / CARET / RIBBON INTERFERENCE
-========================================================= */
-
-
-/* Retire seleksyon otomatik nan tablo a */
-.cwWordTable td,
-.cwWordTable th {
-
-    user-select: none;
-    -webkit-user-select: none;
-    -moz-user-select: none;
-
-}
-
-
-/* Kenbe edit tèks selil la nòmal */
-.cwWordTable td[contenteditable="true"] {
-
-    cursor: text;
-
-}
-
-
-/* Evite flash ble seleksyon sou touch */
-.cwWordTable * {
-
-    -webkit-tap-highlight-color: transparent;
-
-}
