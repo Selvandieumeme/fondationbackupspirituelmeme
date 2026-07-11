@@ -2643,3 +2643,101 @@ body{
     max-width:none;
 
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* =========================================================
+   CAMPUS WORD — IMAGE RESIZE HANDLES STYLE
+========================================================= */
+
+.cwImageResizeBox{
+
+    border:1px solid #2563eb;
+
+    pointer-events:none;
+
+}
+
+
+.cwResizeHandle{
+
+    width:10px;
+
+    height:10px;
+
+    background:white;
+
+    border:2px solid #2563eb;
+
+    position:absolute;
+
+    pointer-events:auto;
+
+}
+
+
+
+.cwResizeHandle.nw{
+    left:-6px;
+    top:-6px;
+    cursor:nw-resize;
+}
+
+
+.cwResizeHandle.n{
+    left:50%;
+    top:-6px;
+    cursor:n-resize;
+}
+
+
+.cwResizeHandle.ne{
+    right:-6px;
+    top:-6px;
+    cursor:ne-resize;
+}
+
+
+.cwResizeHandle.w{
+    left:-6px;
+    top:50%;
+    cursor:w-resize;
+}
+
+
+.cwResizeHandle.e{
+    right:-6px;
+    top:50%;
+    cursor:e-resize;
+}
+
+
+.cwResizeHandle.sw{
+    left:-6px;
+    bottom:-6px;
+    cursor:sw-resize;
+}
+
+
+.cwResizeHandle.s{
+    left:50%;
+    bottom:-6px;
+    cursor:s-resize;
+}
+
+
+.cwResizeHandle.se{
+    right:-6px;
+    bottom:-6px;
+    cursor:se-resize;
+}
