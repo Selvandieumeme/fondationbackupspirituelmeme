@@ -12507,3 +12507,241 @@ document.addEventListener(
 
 
 })();
+
+
+
+
+
+
+
+
+
+
+
+/* =========================================================
+   CAMPUS WORD — IMAGE TOUCH RESIZE FIX
+   TOUCH PRECISION UPGRADE
+   NO MOUSE BREAK
+   NO TABLE / CARET INTERFERENCE
+========================================================= */
+
+(function(){
+
+
+
+let touchResize = false;
+
+let touchHandle = null;
+
+let touchImage = null;
+
+
+let startX = 0;
+
+let startWidth = 0;
+
+let ratio = 1;
+
+
+
+
+
+
+document.addEventListener(
+    "pointerdown",
+    function(e){
+
+
+
+        const handle =
+            e.target.closest(
+                ".cwResizeHandle"
+            );
+
+
+
+        if(!handle){
+
+            return;
+
+        }
+
+
+
+        touchImage =
+            document.querySelector(
+                ".cwInsertedImage"
+            );
+
+
+
+        if(!touchImage){
+
+            return;
+
+        }
+
+
+
+
+
+        touchResize = true;
+
+
+
+        touchHandle =
+            handle.dataset.direction;
+
+
+
+        startX =
+            e.clientX;
+
+
+
+        startWidth =
+            touchImage.offsetWidth;
+
+
+
+        ratio =
+            touchImage.offsetHeight /
+            touchImage.offsetWidth;
+
+
+
+        e.preventDefault();
+
+
+
+    },
+    {
+        passive:false
+    }
+);
+
+
+
+
+
+
+
+
+document.addEventListener(
+    "pointermove",
+    function(e){
+
+
+
+        if(
+            !touchResize ||
+            !touchImage
+        ){
+
+            return;
+
+        }
+
+
+
+
+
+        const diff =
+            e.clientX -
+            startX;
+
+
+
+
+        let width =
+            startWidth;
+
+
+
+        /*
+          RIGHT / LEFT HANDLES
+        */
+
+        if(
+            touchHandle.includes("e") ||
+            touchHandle.includes("w")
+        ){
+
+            width =
+                startWidth + diff;
+
+        }
+
+
+
+
+
+        /*
+          TOP / BOTTOM / CORNER
+        */
+
+        if(
+            touchHandle.includes("s") ||
+            touchHandle.includes("n")
+        ){
+
+            width =
+                startWidth + diff;
+
+        }
+
+
+
+
+
+        if(width < 50){
+
+            width = 50;
+
+        }
+
+
+
+
+        touchImage.style.width =
+            width + "px";
+
+
+
+        touchImage.style.height =
+            "auto";
+
+
+
+    },
+    {
+        passive:false
+    }
+);
+
+
+
+
+
+
+
+
+document.addEventListener(
+    "pointerup",
+    function(){
+
+
+        touchResize = false;
+
+        touchHandle = null;
+
+        touchImage = null;
+
+
+    },
+    false
+);
+
+
+
+})();
