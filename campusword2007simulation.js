@@ -10505,3 +10505,448 @@ document.addEventListener(
 
 })();
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* =========================================================
+   CAMPUS WORD — CONVERT TEXT TO TABLE ENGINE
+   STEP 4
+   CREATE REAL CW WORD TABLE
+   REPLACE SELECTED TEXT
+   ISOLATED MODULE
+   NO CUSTOM / DRAW TABLE INTERFERENCE
+   NO CARET INTERFERENCE
+========================================================= */
+
+(function(){
+
+
+
+let savedSeparator = null;
+
+
+
+
+
+
+
+window.CampusWordConvertTable = {
+
+
+    setSeparator:function(value){
+
+        savedSeparator = value;
+
+    },
+
+
+    getSeparator:function(){
+
+        return savedSeparator;
+
+    }
+
+
+};
+
+
+
+
+
+
+
+
+
+function createTableFromText(
+    text,
+    separator
+){
+
+
+
+    const rows =
+        text
+        .split(/\r?\n/)
+        .filter(
+            row =>
+            row.trim() !== ""
+        );
+
+
+
+    if(
+        rows.length === 0
+    ){
+
+        return null;
+
+    }
+
+
+
+
+
+
+
+    const table =
+        document.createElement(
+            "table"
+        );
+
+
+
+    table.classList.add(
+        "cwWordTable"
+    );
+
+
+
+    table.style.borderCollapse =
+        "collapse";
+
+
+
+    table.style.margin =
+        "10px 0";
+
+
+
+
+
+
+
+
+    rows.forEach(
+        function(rowText){
+
+
+
+            const tr =
+                document.createElement(
+                    "tr"
+                );
+
+
+
+            let columns;
+
+
+
+            if(
+                separator === " "
+            ){
+
+
+                columns =
+                    rowText
+                    .trim()
+                    .split(
+                        /\s+/
+                    );
+
+
+            }else{
+
+
+                columns =
+                    rowText
+                    .split(
+                        separator
+                    );
+
+
+            }
+
+
+
+
+
+
+
+            columns.forEach(
+                function(value){
+
+
+
+                    const td =
+                        document.createElement(
+                            "td"
+                        );
+
+
+
+                    td.contentEditable =
+                        true;
+
+
+
+                    td.innerHTML =
+                        value.trim() ||
+                        "&nbsp;";
+
+
+
+                    td.style.border =
+                        "1px solid #999";
+
+
+
+                    td.style.minWidth =
+                        "70px";
+
+
+
+                    td.style.height =
+                        "25px";
+
+
+
+                    tr.appendChild(
+                        td
+                    );
+
+
+
+                }
+            );
+
+
+
+            table.appendChild(
+                tr
+            );
+
+
+
+        }
+    );
+
+
+
+    return table;
+
+
+}
+
+
+
+
+
+
+
+
+
+document.addEventListener(
+    "click",
+    function(e){
+
+
+
+        const ok =
+            e.target.closest(
+                "#cwConvertOK"
+            );
+
+
+
+        if(!ok){
+
+            return;
+
+        }
+
+
+
+
+
+
+
+        const separatorRadio =
+            document
+            .querySelector(
+                'input[name="cwSeparator"]:checked'
+            );
+
+
+
+        if(!separatorRadio){
+
+            return;
+
+        }
+
+
+
+
+
+
+
+        let separator =
+            separatorRadio.value;
+
+
+
+
+
+
+        if(
+            separator === "space"
+        ){
+
+            separator =
+                " ";
+
+        }
+
+
+
+
+
+
+
+        if(
+            separator === "other"
+        ){
+
+
+            separator =
+                document
+                .getElementById(
+                    "cwOtherSeparator"
+                )
+                .value;
+
+
+
+        }
+
+
+
+
+
+
+
+        window.CampusWordConvertTable
+        .setSeparator(
+            separator
+        );
+
+
+
+
+
+
+
+        const selection =
+            window.getSelection();
+
+
+
+
+
+        if(
+            !selection ||
+            selection.rangeCount === 0
+        ){
+
+            return;
+
+        }
+
+
+
+
+
+
+        const text =
+            selection
+            .toString()
+            .trim();
+
+
+
+
+
+        if(!text){
+
+            return;
+
+        }
+
+
+
+
+
+
+
+        const table =
+            createTableFromText(
+                text,
+                separator
+            );
+
+
+
+
+
+
+
+        if(!table){
+
+            return;
+
+        }
+
+
+
+
+
+
+
+        const range =
+            selection
+            .getRangeAt(0);
+
+
+
+
+
+        range.deleteContents();
+
+
+
+        range.insertNode(
+            table
+        );
+
+
+
+
+
+        selection.removeAllRanges();
+
+
+
+    },
+    false
+);
+
+
+
+})();
