@@ -7522,3 +7522,225 @@ table.classList.add(
 
 
 })();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* =========================================================
+   TABLE BORDER ERASE ACTION
+========================================================= */
+
+
+function removeBorder(cell, side){
+
+
+    if(!cell){
+        return;
+    }
+
+
+
+    if(side === "right"){
+
+        cell.style.borderRight =
+            "none";
+
+    }
+
+
+
+    if(side === "left"){
+
+        cell.style.borderLeft =
+            "none";
+
+    }
+
+
+
+    if(side === "top"){
+
+        cell.style.borderTop =
+            "none";
+
+    }
+
+
+
+    if(side === "bottom"){
+
+        cell.style.borderBottom =
+            "none";
+
+    }
+
+
+}
+
+
+
+
+
+
+
+function detectBorder(cell, event){
+
+
+    const rect =
+        cell.getBoundingClientRect();
+
+
+
+    const point =
+        event.touches
+        ? event.touches[0]
+        : event;
+
+
+
+    const x =
+        point.clientX - rect.left;
+
+
+
+    const y =
+        point.clientY - rect.top;
+
+
+
+    const size = 10;
+
+
+
+    /*
+       VERTICAL BORDER
+    */
+
+    if(x < size){
+
+        removeBorder(
+            cell,
+            "left"
+        );
+
+        return;
+
+    }
+
+
+
+    if(x > rect.width - size){
+
+        removeBorder(
+            cell,
+            "right"
+        );
+
+        return;
+
+    }
+
+
+
+    /*
+       HORIZONTAL BORDER
+    */
+
+    if(y < size){
+
+        removeBorder(
+            cell,
+            "top"
+        );
+
+        return;
+
+    }
+
+
+
+    if(y > rect.height - size){
+
+        removeBorder(
+            cell,
+            "bottom"
+        );
+
+        return;
+
+    }
+
+
+}
+
+
+
+
+
+
+
+
+
+document.addEventListener(
+    "pointerdown",
+    function(e){
+
+
+
+        if(
+            !window.CampusWordTableEraser ||
+            !window.CampusWordTableEraser.isActive()
+        ){
+
+            return;
+
+        }
+
+
+
+
+        const cell =
+            e.target.closest(
+                ".cwWordTable td"
+            );
+
+
+
+        if(!cell){
+
+            return;
+
+        }
+
+
+
+        e.preventDefault();
+
+
+
+        detectBorder(
+            cell,
+            e
+        );
+
+
+
+    },
+    false
+);
