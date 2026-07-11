@@ -11183,3 +11183,431 @@ document.addEventListener(
 
 
 })();
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* =========================================================
+   CAMPUS WORD — INSERT PICTURE ENGINE
+   STEP 3
+   INSERT IMAGE INTO PAGE
+   RESIZE + DRAG SUPPORT
+   TOUCH + MOUSE
+   ISOLATED MODULE
+   NO TABLE / NO CARET INTERFERENCE
+========================================================= */
+
+(function(){
+
+
+
+let pictureInput = null;
+
+
+
+let activeImage = null;
+
+
+
+let dragging = false;
+
+
+
+let startX = 0;
+
+let startY = 0;
+
+let startLeft = 0;
+
+let startTop = 0;
+
+
+
+
+
+
+
+function createPicker(){
+
+
+    if(pictureInput){
+
+        return;
+
+    }
+
+
+
+    pictureInput =
+        document.createElement(
+            "input"
+        );
+
+
+
+    pictureInput.type =
+        "file";
+
+
+
+    pictureInput.accept =
+        "image/*";
+
+
+
+    pictureInput.style.display =
+        "none";
+
+
+
+    document.body.appendChild(
+        pictureInput
+    );
+
+
+
+}
+
+
+
+
+
+
+
+
+function insertImage(file){
+
+
+
+    const reader =
+        new FileReader();
+
+
+
+
+    reader.onload =
+    function(event){
+
+
+
+        const img =
+            document.createElement(
+                "img"
+            );
+
+
+
+        img.src =
+            event.target.result;
+
+
+
+        img.className =
+            "cwInsertedImage";
+
+
+
+        img.style.position =
+            "absolute";
+
+
+
+        img.style.width =
+            "300px";
+
+
+
+        img.style.height =
+            "auto";
+
+
+
+        img.style.left =
+            "20px";
+
+
+
+        img.style.top =
+            "20px";
+
+
+
+        img.style.cursor =
+            "move";
+
+
+
+        img.draggable =
+            false;
+
+
+
+
+
+
+        const page =
+            document.querySelector(
+                ".cwPageContent"
+            );
+
+
+
+        if(!page){
+
+            return;
+
+        }
+
+
+
+        page.appendChild(
+            img
+        );
+
+
+
+        activeImage = img;
+
+
+
+    };
+
+
+
+
+    reader.readAsDataURL(
+        file
+    );
+
+
+}
+
+
+
+
+
+
+
+
+
+document.addEventListener(
+    "click",
+    function(e){
+
+
+
+        const button =
+            e.target.closest(
+                '[data-action="insert-picture"]'
+            );
+
+
+
+        if(!button){
+
+            return;
+
+        }
+
+
+
+        createPicker();
+
+
+
+        pictureInput.onchange =
+        function(){
+
+
+
+            const file =
+                pictureInput.files[0];
+
+
+
+            if(file){
+
+                insertImage(
+                    file
+                );
+
+            }
+
+
+
+            pictureInput.value =
+                "";
+
+
+
+        };
+
+
+
+        pictureInput.click();
+
+
+
+    },
+    false
+);
+
+
+
+
+
+
+
+
+
+document.addEventListener(
+    "pointerdown",
+    function(e){
+
+
+
+        const img =
+            e.target.closest(
+                ".cwInsertedImage"
+            );
+
+
+
+        if(!img){
+
+            return;
+
+        }
+
+
+
+        activeImage =
+            img;
+
+
+
+        dragging = true;
+
+
+
+        const point =
+            e;
+
+
+
+        startX =
+            point.clientX;
+
+
+
+        startY =
+            point.clientY;
+
+
+
+        startLeft =
+            img.offsetLeft;
+
+
+
+        startTop =
+            img.offsetTop;
+
+
+
+        e.preventDefault();
+
+
+
+    },
+    false
+);
+
+
+
+
+
+
+
+
+document.addEventListener(
+    "pointermove",
+    function(e){
+
+
+
+        if(
+            !dragging ||
+            !activeImage
+        ){
+
+            return;
+
+        }
+
+
+
+        const dx =
+            e.clientX -
+            startX;
+
+
+
+        const dy =
+            e.clientY -
+            startY;
+
+
+
+
+
+        activeImage.style.left =
+            startLeft + dx + "px";
+
+
+
+        activeImage.style.top =
+            startTop + dy + "px";
+
+
+
+    },
+    false
+);
+
+
+
+
+
+
+
+
+
+document.addEventListener(
+    "pointerup",
+    function(){
+
+
+
+        dragging = false;
+
+
+
+    },
+    false
+);
+
+
+
+
+
+})();
