@@ -6552,10 +6552,16 @@ table.classList.add(
 
 
 
+
+
+
+
+
 /* =========================================================
-   CAMPUS WORD — TABLE COLUMN MERGE ENGINE
+   CAMPUS WORD — TABLE BORDER MERGE ENGINE
    STEP 3
-   TOUCH VERTICAL BORDER MERGE
+   TOUCH / MOUSE BORDER MERGE
+   ROW + COLUMN MERGE
    ISOLATED MODULE
    NO HOME / CARET / RIBBON INTERFERENCE
 ========================================================= */
@@ -6563,14 +6569,40 @@ table.classList.add(
 (function(){
 
 
-    let activeMerge = null;
+    let activeBorder = null;
 
 
 
-    /*
-      DETECT VERTICAL BORDER
-    */
-    function detectVerticalBorder(cell, event){
+
+    function clearBorder(){
+
+
+        document
+        .querySelectorAll(
+            ".cwTableBorderActive"
+        )
+        .forEach(
+            function(el){
+
+                el.classList.remove(
+                    "cwTableBorderActive"
+                );
+
+            }
+        );
+
+
+        activeBorder = null;
+
+    }
+
+
+
+
+
+
+
+    function detectBorder(cell,event){
 
 
         const table =
@@ -6602,37 +6634,86 @@ table.classList.add(
             rect.left;
 
 
+        const y =
+            point.clientY -
+            rect.top;
+
+
 
         const size = 12;
 
 
 
+
+
         /*
-          ONLY RIGHT BORDER
-          = separation between columns
+          VERTICAL BORDER
         */
         if(
             x > rect.width - size
         ){
 
 
-            activeMerge = {
+            clearBorder();
 
-                table: table,
 
-                rowIndex:
-                    cell.parentElement.rowIndex,
 
-                colIndex:
+            cell.classList.add(
+                "cwTableBorderActive"
+            );
+
+
+
+            activeBorder = {
+
+                type:"column",
+
+                table:table,
+
+                index:
                     cell.cellIndex
 
             };
 
 
+            return;
+
+        }
+
+
+
+
+
+
+
+        /*
+          HORIZONTAL BORDER
+        */
+        if(
+            y > rect.height - size
+        ){
+
+
+            clearBorder();
+
+
 
             cell.classList.add(
-                "cwColumnBorderActive"
+                "cwTableBorderActive"
             );
+
+
+
+            activeBorder = {
+
+                type:"row",
+
+                table:table,
+
+                index:
+                    cell.parentElement.rowIndex
+
+            };
 
 
         }
@@ -6647,9 +6728,6 @@ table.classList.add(
 
 
 
-    /*
-      TOUCH / MOUSE
-    */
     document.addEventListener(
         "touchstart",
         function(e){
@@ -6661,15 +6739,14 @@ table.classList.add(
                 );
 
 
-            if(!cell){
-                return;
+            if(cell){
+
+                detectBorder(
+                    cell,
+                    e
+                );
+
             }
-
-
-            detectVerticalBorder(
-                cell,
-                e
-            );
 
 
         },
@@ -6677,6 +6754,8 @@ table.classList.add(
             passive:true
         }
     );
+
+
 
 
 
@@ -6693,15 +6772,14 @@ table.classList.add(
                 );
 
 
-            if(!cell){
-                return;
+            if(cell){
+
+                detectBorder(
+                    cell,
+                    e
+                );
+
             }
-
-
-            detectVerticalBorder(
-                cell,
-                e
-            );
 
 
         },
@@ -6715,9 +6793,7 @@ table.classList.add(
 
 
 
-    /*
-      BACKSPACE = MERGE COLUMN BORDER
-    */
+
     document.addEventListener(
         "keydown",
         function(e){
@@ -6727,15 +6803,19 @@ table.classList.add(
             if(
                 e.key !== "Backspace"
             ){
+
                 return;
+
             }
 
 
 
             if(
-                !activeMerge
+                !activeBorder
             ){
+
                 return;
+
             }
 
 
@@ -6744,74 +6824,151 @@ table.classList.add(
 
 
 
+
+
             const table =
-                activeMerge.table;
+                activeBorder.table;
 
 
 
-            const col =
-                activeMerge.colIndex;
 
 
 
-            Array.from(
-                table.rows
-            )
-            .forEach(
-                function(row){
 
 
-                    const left =
-                        row.cells[col];
-
-
-                    const right =
-                        row.cells[col + 1];
+            /*
+              MERGE COLUMN
+            */
+            if(
+                activeBorder.type === "column"
+            ){
 
 
 
-                    if(
-                        left &&
-                        right
-                    ){
-
-
-                        left.innerHTML +=
-                            " " +
-                            right.innerHTML;
+                const col =
+                    activeBorder.index;
 
 
 
-                        right.remove();
+                Array.from(
+                    table.rows
+                )
+                .forEach(
+                    function(row){
+
+
+
+                        const left =
+                            row.cells[col];
+
+
+
+                        const right =
+                            row.cells[col + 1];
+
+
+
+                        if(
+                            left &&
+                            right
+                        ){
+
+
+                            left.innerHTML +=
+                                " " +
+                                right.innerHTML;
+
+
+
+                            right.remove();
+
+
+                        }
 
 
                     }
+                );
 
 
-                }
-            );
+            }
 
 
 
 
 
-            document
-            .querySelectorAll(
-                ".cwColumnBorderActive"
-            )
-            .forEach(
-                function(el){
 
-                    el.classList.remove(
-                        "cwColumnBorderActive"
+
+
+
+            /*
+              MERGE ROW
+            */
+            if(
+                activeBorder.type === "row"
+            ){
+
+
+
+                const row =
+                    activeBorder.index;
+
+
+
+                const current =
+                    table.rows[row];
+
+
+                const next =
+                    table.rows[row + 1];
+
+
+
+                if(
+                    current &&
+                    next
+                ){
+
+
+
+                    Array.from(
+                        next.cells
+                    )
+                    .forEach(
+                        function(cell,i){
+
+
+                            if(
+                                current.cells[i]
+                            ){
+
+                                current.cells[i]
+                                .innerHTML +=
+                                " " +
+                                cell.innerHTML;
+
+
+                            }
+
+
+                        }
                     );
 
+
+
+                    next.remove();
+
+
                 }
-            );
+
+
+            }
 
 
 
-            activeMerge = null;
+
+
+
+            clearBorder();
 
 
 
@@ -6822,3 +6979,4 @@ table.classList.add(
 
 
 })();
+;
