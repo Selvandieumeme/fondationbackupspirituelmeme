@@ -2617,3 +2617,29 @@ body{
 
 }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* =========================================================
+   CAMPUS WORD — INSERTED IMAGE STYLE
+========================================================= */
+
+.cwInsertedImage{
+
+    user-select:none;
+
+    touch-action:none;
+
+    max-width:none;
+
+}
