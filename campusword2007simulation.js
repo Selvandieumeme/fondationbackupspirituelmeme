@@ -12043,4 +12043,56 @@ document.addEventListener(
 
 
 
+
+
+
+
+
+
+document.addEventListener(
+    "pointerdown",
+    function(e){
+
+
+
+        const clickedImage =
+            e.target.closest(
+                ".cwInsertedImage"
+            );
+
+
+
+        const clickedHandle =
+            e.target.closest(
+                ".cwResizeHandle"
+            );
+
+
+
+
+
+        if(
+            !clickedImage &&
+            !clickedHandle
+        ){
+
+            selectedImage = null;
+
+            resizing = false;
+
+            resizeHandle = null;
+
+
+            removeHandles();
+
+        }
+
+
+
+    },
+    false
+);
+
+
+
 })();
