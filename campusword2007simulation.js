@@ -6537,3 +6537,288 @@ table.classList.add(
 
 
 })();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* =========================================================
+   CAMPUS WORD — TABLE COLUMN MERGE ENGINE
+   STEP 3
+   TOUCH VERTICAL BORDER MERGE
+   ISOLATED MODULE
+   NO HOME / CARET / RIBBON INTERFERENCE
+========================================================= */
+
+(function(){
+
+
+    let activeMerge = null;
+
+
+
+    /*
+      DETECT VERTICAL BORDER
+    */
+    function detectVerticalBorder(cell, event){
+
+
+        const table =
+            cell.closest(
+                ".cwWordTable"
+            );
+
+
+        if(!table){
+            return;
+        }
+
+
+
+        const rect =
+            cell.getBoundingClientRect();
+
+
+
+        const point =
+            event.touches
+            ? event.touches[0]
+            : event;
+
+
+
+        const x =
+            point.clientX -
+            rect.left;
+
+
+
+        const size = 12;
+
+
+
+        /*
+          ONLY RIGHT BORDER
+          = separation between columns
+        */
+        if(
+            x > rect.width - size
+        ){
+
+
+            activeMerge = {
+
+                table: table,
+
+                rowIndex:
+                    cell.parentElement.rowIndex,
+
+                colIndex:
+                    cell.cellIndex
+
+            };
+
+
+
+            cell.classList.add(
+                "cwColumnBorderActive"
+            );
+
+
+        }
+
+
+    }
+
+
+
+
+
+
+
+
+    /*
+      TOUCH / MOUSE
+    */
+    document.addEventListener(
+        "touchstart",
+        function(e){
+
+
+            const cell =
+                e.target.closest(
+                    ".cwWordTable td"
+                );
+
+
+            if(!cell){
+                return;
+            }
+
+
+            detectVerticalBorder(
+                cell,
+                e
+            );
+
+
+        },
+        {
+            passive:true
+        }
+    );
+
+
+
+
+
+    document.addEventListener(
+        "mousedown",
+        function(e){
+
+
+            const cell =
+                e.target.closest(
+                    ".cwWordTable td"
+                );
+
+
+            if(!cell){
+                return;
+            }
+
+
+            detectVerticalBorder(
+                cell,
+                e
+            );
+
+
+        },
+        false
+    );
+
+
+
+
+
+
+
+
+    /*
+      BACKSPACE = MERGE COLUMN BORDER
+    */
+    document.addEventListener(
+        "keydown",
+        function(e){
+
+
+
+            if(
+                e.key !== "Backspace"
+            ){
+                return;
+            }
+
+
+
+            if(
+                !activeMerge
+            ){
+                return;
+            }
+
+
+
+            e.preventDefault();
+
+
+
+            const table =
+                activeMerge.table;
+
+
+
+            const col =
+                activeMerge.colIndex;
+
+
+
+            Array.from(
+                table.rows
+            )
+            .forEach(
+                function(row){
+
+
+                    const left =
+                        row.cells[col];
+
+
+                    const right =
+                        row.cells[col + 1];
+
+
+
+                    if(
+                        left &&
+                        right
+                    ){
+
+
+                        left.innerHTML +=
+                            " " +
+                            right.innerHTML;
+
+
+
+                        right.remove();
+
+
+                    }
+
+
+                }
+            );
+
+
+
+
+
+            document
+            .querySelectorAll(
+                ".cwColumnBorderActive"
+            )
+            .forEach(
+                function(el){
+
+                    el.classList.remove(
+                        "cwColumnBorderActive"
+                    );
+
+                }
+            );
+
+
+
+            activeMerge = null;
+
+
+
+        },
+        false
+    );
+
+
+
+})();
