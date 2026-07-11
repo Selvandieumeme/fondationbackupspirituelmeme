@@ -8683,3 +8683,201 @@ document.addEventListener(
 
 
 })();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* =========================================================
+   CAMPUS WORD — DRAW TABLE MODE ENGINE
+   STEP 1
+   ACTIVATE / DEACTIVATE DRAW MODE
+   ISOLATED MODULE
+   NO TABLE CREATION
+   NO TABLE ENGINE INTERFERENCE
+   NO CARET / RIBBON INTERFERENCE
+========================================================= */
+
+(function(){
+
+
+
+    let drawTableActive = false;
+
+
+
+
+
+    function enableDrawMode(button){
+
+
+
+        drawTableActive =
+            !drawTableActive;
+
+
+
+
+
+        if(drawTableActive){
+
+
+            button.classList.add(
+                "cwDrawTableActive"
+            );
+
+
+
+            document.body.classList.add(
+                "cwDrawTableMode"
+            );
+
+
+
+        }else{
+
+
+            button.classList.remove(
+                "cwDrawTableActive"
+            );
+
+
+
+            document.body.classList.remove(
+                "cwDrawTableMode"
+            );
+
+
+        }
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+    document.addEventListener(
+        "click",
+        function(e){
+
+
+
+            const button =
+                e.target.closest(
+                    '[data-action="draw-table"]'
+                );
+
+
+
+            if(!button){
+
+                return;
+
+            }
+
+
+
+
+
+            e.preventDefault();
+
+
+
+            e.stopPropagation();
+
+
+
+
+
+            enableDrawMode(
+                button
+            );
+
+
+
+        },
+        false
+    );
+
+
+
+
+
+
+
+
+
+    window.CampusWordDrawTable = {
+
+
+        isActive:function(){
+
+
+            return drawTableActive;
+
+
+        },
+
+
+
+        disable:function(){
+
+
+
+            drawTableActive =
+                false;
+
+
+
+            document.body.classList.remove(
+                "cwDrawTableMode"
+            );
+
+
+
+            const button =
+                document.querySelector(
+                    '[data-action="draw-table"]'
+                );
+
+
+
+            if(button){
+
+
+                button.classList.remove(
+                    "cwDrawTableActive"
+                );
+
+
+            }
+
+
+        }
+
+
+
+    };
+
+
+
+})();
