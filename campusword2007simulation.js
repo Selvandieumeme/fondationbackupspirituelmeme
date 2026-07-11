@@ -5988,3 +5988,313 @@ table.classList.add(
 
 
 })();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* =========================================================
+   CAMPUS WORD — TABLE BORDER SELECTION ENGINE
+   STEP 1
+   TOUCH / MOUSE BORDER DETECTION
+   ROW / COLUMN ACTIVE MARK
+   ISOLATED MODULE
+   NO HOME / CARET INTERFERENCE
+========================================================= */
+
+(function(){
+
+
+
+    let activeTarget = null;
+
+
+
+
+
+    function clearActive(){
+
+
+        document
+        .querySelectorAll(
+            ".cwTableActiveRow, .cwTableActiveColumn"
+        )
+        .forEach(
+            function(el){
+
+                el.classList.remove(
+                    "cwTableActiveRow",
+                    "cwTableActiveColumn"
+                );
+
+            }
+        );
+
+
+        activeTarget = null;
+
+    }
+
+
+
+
+
+
+
+
+    function activateRow(row){
+
+
+        clearActive();
+
+
+        row.classList.add(
+            "cwTableActiveRow"
+        );
+
+
+        activeTarget = {
+            type:"row",
+            element:row
+        };
+
+
+    }
+
+
+
+
+
+
+
+    function activateColumn(table, index){
+
+
+        clearActive();
+
+
+        const rows =
+            table.rows;
+
+
+
+        for(
+            let r = 0;
+            r < rows.length;
+            r++
+        ){
+
+            const cell =
+                rows[r].cells[index];
+
+
+            if(cell){
+
+                cell.classList.add(
+                    "cwTableActiveColumn"
+                );
+
+            }
+
+        }
+
+
+
+        activeTarget = {
+            type:"column",
+            index:index,
+            table:table
+        };
+
+
+    }
+
+
+
+
+
+
+
+
+
+    function detectBorder(cell, event){
+
+
+        const rect =
+            cell.getBoundingClientRect();
+
+
+
+        const point =
+            event.touches
+            ? event.touches[0]
+            : event;
+
+
+
+        const x =
+            point.clientX -
+            rect.left;
+
+
+
+        const y =
+            point.clientY -
+            rect.top;
+
+
+
+        const borderSize =
+            10;
+
+
+
+        const row =
+            cell.parentElement;
+
+
+
+        const table =
+            cell.closest(
+                ".cwWordTable"
+            );
+
+
+
+        if(!table){
+            return;
+        }
+
+
+
+
+
+        /*
+          DETECT HORIZONTAL BORDER
+        */
+
+        if(
+            y < borderSize ||
+            y > rect.height - borderSize
+        ){
+
+            activateRow(row);
+
+            return;
+
+        }
+
+
+
+
+
+        /*
+          DETECT VERTICAL BORDER
+        */
+
+        if(
+            x < borderSize
+        ){
+
+            const index =
+                cell.cellIndex;
+
+
+            activateColumn(
+                table,
+                index
+            );
+
+
+        }
+
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+    document.addEventListener(
+        "mousedown",
+        function(e){
+
+
+            const cell =
+                e.target.closest(
+                    ".cwWordTable td"
+                );
+
+
+            if(!cell){
+                return;
+            }
+
+
+            detectBorder(
+                cell,
+                e
+            );
+
+
+        },
+        false
+    );
+
+
+
+
+
+
+
+
+
+    document.addEventListener(
+        "touchstart",
+        function(e){
+
+
+            const cell =
+                e.target.closest(
+                    ".cwWordTable td"
+                );
+
+
+            if(!cell){
+                return;
+            }
+
+
+
+            detectBorder(
+                cell,
+                e
+            );
+
+
+        },
+        {
+            passive:true
+        }
+    );
+
+
+
+})();
