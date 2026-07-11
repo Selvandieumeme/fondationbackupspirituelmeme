@@ -12306,7 +12306,7 @@ document.addEventListener(
 
 
 
-
+window.CampusWordImageWrap = {
 
 apply:function(mode){
 
