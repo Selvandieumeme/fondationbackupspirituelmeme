@@ -8233,59 +8233,230 @@ document.addEventListener(
 
 
 
-
-
-
-
-
-
-
 /* =========================================================
-   CAMPUS WORD — CUSTOM TABLE DIALOG ENGINE
+   CAMPUS WORD — CUSTOM TABLE CREATOR ENGINE
    ISOLATED MODULE
    CUSTOM ROW / COLUMN INSERT
-   NO TABLE ENGINE INTERFERENCE
+   NO TABLE SIZE ENGINE INTERFERENCE
    NO CARET / NO RIBBON INTERFERENCE
 ========================================================= */
 
 (function(){
 
 
-function openCustomTableDialog(){
+
+function createCustomTable(rows, cols){
 
 
-    const dialog =
+    const selection =
+        window.getSelection();
+
+
+
+    if(
+        !selection ||
+        selection.rangeCount === 0
+    ){
+
+        return;
+
+    }
+
+
+
+
+
+    const table =
+        document.createElement(
+            "table"
+        );
+
+
+
+    table.classList.add(
+        "cwWordTable"
+    );
+
+
+
+    table.style.borderCollapse =
+        "collapse";
+
+
+
+    table.style.margin =
+        "10px 0";
+
+
+
+
+
+
+    for(
+        let r = 0;
+        r < rows;
+        r++
+    ){
+
+
+
+        const tr =
+            document.createElement(
+                "tr"
+            );
+
+
+
+        for(
+            let c = 0;
+            c < cols;
+            c++
+        ){
+
+
+
+            const td =
+                document.createElement(
+                    "td"
+                );
+
+
+
+            td.contentEditable =
+                true;
+
+
+
+            td.innerHTML =
+                "&nbsp;";
+
+
+
+            td.style.border =
+                "1px solid #999";
+
+
+
+            td.style.minWidth =
+                "70px";
+
+
+
+            td.style.height =
+                "25px";
+
+
+
+            tr.appendChild(
+                td
+            );
+
+
+        }
+
+
+
+        table.appendChild(
+            tr
+        );
+
+
+    }
+
+
+
+
+
+
+    const range =
+        selection.getRangeAt(0);
+
+
+
+    range.deleteContents();
+
+
+
+    range.insertNode(
+        table
+    );
+
+
+
+
+
+    selection.removeAllRanges();
+
+
+
+    const cursor =
+        document.createRange();
+
+
+
+    cursor.setStartAfter(
+        table
+    );
+
+
+
+    cursor.collapse(
+        true
+    );
+
+
+
+    selection.addRange(
+        cursor
+    );
+
+
+}
+
+
+
+
+
+
+
+
+
+function openCustomTableBox(){
+
+
+
+    const box =
         document.createElement(
             "div"
         );
 
 
 
-    dialog.className =
+    box.className =
         "cwCustomTableDialog";
 
 
 
-    dialog.innerHTML = `
+    box.innerHTML = `
 
         <div class="cwCustomTableBox">
 
 
-            <div class="cwCustomTableTitle">
+            <h3>
                 Insert Table
-            </div>
-
+            </h3>
 
 
             <label>
                 Rows
             </label>
 
+
             <input
-                id="cwCustomRows"
+                id="cwCustomTableRows"
                 type="number"
-                value="5"
                 min="1"
+                value="5"
             >
 
 
@@ -8294,30 +8465,31 @@ function openCustomTableDialog(){
                 Columns
             </label>
 
+
             <input
-                id="cwCustomCols"
+                id="cwCustomTableCols"
                 type="number"
-                value="5"
                 min="1"
+                value="5"
             >
 
 
 
-            <div class="cwCustomTableActions">
+
+            <div>
 
 
-                <button id="cwCustomCancel">
+                <button id="cwCustomTableCancel">
                     Cancel
                 </button>
 
 
-                <button id="cwCustomInsert">
+                <button id="cwCustomTableInsert">
                     Insert
                 </button>
 
 
             </div>
-
 
 
         </div>
@@ -8327,8 +8499,12 @@ function openCustomTableDialog(){
 
 
     document.body.appendChild(
-        dialog
+        box
     );
+
+
+
+
 
 
 
@@ -8336,12 +8512,12 @@ function openCustomTableDialog(){
 
     document
     .getElementById(
-        "cwCustomCancel"
+        "cwCustomTableCancel"
     )
     .onclick = function(){
 
 
-        dialog.remove();
+        box.remove();
 
 
     };
@@ -8352,9 +8528,11 @@ function openCustomTableDialog(){
 
 
 
+
+
     document
     .getElementById(
-        "cwCustomInsert"
+        "cwCustomTableInsert"
     )
     .onclick = function(){
 
@@ -8363,7 +8541,7 @@ function openCustomTableDialog(){
         const rows =
             parseInt(
                 document.getElementById(
-                    "cwCustomRows"
+                    "cwCustomTableRows"
                 ).value
             );
 
@@ -8372,39 +8550,31 @@ function openCustomTableDialog(){
         const cols =
             parseInt(
                 document.getElementById(
-                    "cwCustomCols"
+                    "cwCustomTableCols"
                 ).value
             );
 
 
 
-        if(
-            !rows ||
-            !cols
-        ){
-
-            return;
-
-        }
-
-
-
 
 
         if(
-            typeof insertTable === "function"
+            rows > 0 &&
+            cols > 0
         ){
 
-            insertTable(
+
+            createCustomTable(
                 rows,
                 cols
             );
 
+
         }
 
 
 
-        dialog.remove();
+        box.remove();
 
 
 
@@ -8421,20 +8591,21 @@ function openCustomTableDialog(){
 
 
 
+
 document.addEventListener(
     "click",
     function(e){
 
 
 
-        const custom =
+        const button =
             e.target.closest(
                 '[data-action="table-custom"]'
             );
 
 
 
-        if(!custom){
+        if(!button){
 
             return;
 
@@ -8450,7 +8621,7 @@ document.addEventListener(
 
 
 
-        openCustomTableDialog();
+        openCustomTableBox();
 
 
 
@@ -8460,4 +8631,10 @@ document.addEventListener(
 
 
 
+
 })();
+
+
+
+
+
