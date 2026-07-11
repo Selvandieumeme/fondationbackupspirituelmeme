@@ -2590,3 +2590,30 @@ body{
     margin:8px 0;
 
 }
+
+
+
+
+
+
+
+
+
+
+
+
+/* =========================================================
+   INSERT PICTURE ACTIVE STATE
+   VISUAL ACTIVE MODE
+========================================================= */
+
+.cwInsertPictureActive{
+
+    background:#fee2e2 !important;
+
+    border-color:#dc2626 !important;
+
+    color:#dc2626 !important;
+
+}
+
