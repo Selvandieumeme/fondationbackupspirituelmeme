@@ -6298,3 +6298,242 @@ table.classList.add(
 
 
 })();
+
+
+
+
+
+
+
+
+
+
+
+
+/* =========================================================
+   CAMPUS WORD — TABLE DELETE ENGINE
+   STEP 2
+   BACKSPACE DELETE ACTIVE ROW / COLUMN
+   ISOLATED MODULE
+   NO HOME / CARET INTERFERENCE
+========================================================= */
+
+(function(){
+
+
+
+    let activeDeleteTarget = null;
+
+
+
+
+
+    document.addEventListener(
+        "click",
+        function(e){
+
+
+            const row =
+                e.target.closest(
+                    ".cwTableActiveRow"
+                );
+
+
+
+            if(row){
+
+                activeDeleteTarget = {
+                    type:"row",
+                    element:row
+                };
+
+                return;
+
+            }
+
+
+
+
+
+
+            const column =
+                e.target.closest(
+                    ".cwTableActiveColumn"
+                );
+
+
+
+            if(column){
+
+                activeDeleteTarget = {
+                    type:"column",
+                    element:column
+                };
+
+            }
+
+
+
+        },
+        false
+    );
+
+
+
+
+
+
+
+
+
+    document.addEventListener(
+        "keydown",
+        function(e){
+
+
+
+            if(
+                e.key !== "Backspace"
+            ){
+
+                return;
+
+            }
+
+
+
+
+
+            if(
+                !activeDeleteTarget
+            ){
+
+                return;
+
+            }
+
+
+
+
+
+            e.preventDefault();
+
+
+
+
+
+
+
+
+            /*
+              DELETE ACTIVE ROW
+            */
+
+            if(
+                activeDeleteTarget.type === "row"
+            ){
+
+
+
+                const row =
+                    activeDeleteTarget.element;
+
+
+
+                if(row){
+
+                    row.remove();
+
+                }
+
+
+
+            }
+
+
+
+
+
+
+
+
+
+            /*
+              DELETE ACTIVE COLUMN
+            */
+
+            if(
+                activeDeleteTarget.type === "column"
+            ){
+
+
+
+                const cell =
+                    activeDeleteTarget.element;
+
+
+
+                const table =
+                    cell.closest(
+                        ".cwWordTable"
+                    );
+
+
+
+                if(table){
+
+
+
+                    const index =
+                        cell.cellIndex;
+
+
+
+                    Array.from(
+                        table.rows
+                    )
+                    .forEach(
+                        function(row){
+
+
+
+                            if(
+                                row.cells[index]
+                            ){
+
+                                row.cells[index].remove();
+
+                            }
+
+
+
+                        }
+                    );
+
+
+                }
+
+
+
+            }
+
+
+
+
+
+
+
+
+            activeDeleteTarget =
+                null;
+
+
+
+
+        },
+        false
+    );
+
+
+
+})();
