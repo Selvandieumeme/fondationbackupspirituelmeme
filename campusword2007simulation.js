@@ -12096,3 +12096,322 @@ document.addEventListener(
 
 
 })();
+
+
+
+
+
+
+
+
+
+
+/* =========================================================
+   CAMPUS WORD — IMAGE ROTATE + WRAP ENGINE
+   STEP 5
+   ROTATION HANDLE
+   TEXT WRAPPING MODES
+   TOUCH + MOUSE SUPPORT
+   ISOLATED MODULE
+   NO TABLE / NO CARET INTERFERENCE
+========================================================= */
+
+(function(){
+
+
+let selectedImage = null;
+
+let rotating = false;
+
+let startAngle = 0;
+
+let currentRotation = 0;
+
+
+
+function createRotateHandle(img){
+
+
+    document
+    .querySelectorAll(
+        ".cwImageRotateHandle"
+    )
+    .forEach(
+        h => h.remove()
+    );
+
+
+
+    const handle =
+        document.createElement(
+            "div"
+        );
+
+
+    handle.className =
+        "cwImageRotateHandle";
+
+
+
+    handle.dataset.rotate =
+        "true";
+
+
+
+    img.parentElement.appendChild(
+        handle
+    );
+
+
+}
+
+
+
+
+
+
+
+document.addEventListener(
+    "pointerdown",
+    function(e){
+
+
+
+        const img =
+            e.target.closest(
+                ".cwInsertedImage"
+            );
+
+
+
+        if(img){
+
+
+            selectedImage =
+                img;
+
+
+            createRotateHandle(
+                img
+            );
+
+
+            return;
+
+        }
+
+
+
+
+        const rotate =
+            e.target.closest(
+                ".cwImageRotateHandle"
+            );
+
+
+
+        if(!rotate ||
+           !selectedImage){
+
+            return;
+
+        }
+
+
+
+        rotating = true;
+
+
+
+        startAngle =
+            e.clientX;
+
+
+
+        e.preventDefault();
+
+
+
+    },
+    false
+);
+
+
+
+
+
+
+
+
+document.addEventListener(
+    "pointermove",
+    function(e){
+
+
+
+        if(
+            !rotating ||
+            !selectedImage
+        ){
+
+            return;
+
+        }
+
+
+
+        const diff =
+            e.clientX -
+            startAngle;
+
+
+
+        currentRotation =
+            diff;
+
+
+
+        selectedImage.style.transform =
+            "rotate(" +
+            currentRotation +
+            "deg)";
+
+
+
+    },
+    false
+);
+
+
+
+
+
+
+
+
+document.addEventListener(
+    "pointerup",
+    function(){
+
+
+
+        rotating = false;
+
+
+
+    },
+    false
+);
+
+
+
+
+
+
+
+
+
+window.CampusWordImageWrap = {
+
+
+    apply:function(mode){
+
+
+        const img =
+            selectedImage;
+
+
+
+        if(!img){
+
+            return;
+
+        }
+
+
+
+        img.dataset.wrap =
+            mode;
+
+
+
+
+        if(mode === "inline"){
+
+
+            img.style.position =
+                "relative";
+
+            img.style.display =
+                "inline-block";
+
+        }
+
+
+
+        if(mode === "square"){
+
+
+            img.style.float =
+                "left";
+
+
+        }
+
+
+
+        if(mode === "tight"){
+
+
+            img.style.float =
+                "left";
+
+
+            img.style.margin =
+                "5px";
+
+        }
+
+
+
+
+        if(mode === "behind"){
+
+
+            img.style.position =
+                "absolute";
+
+
+            img.style.zIndex =
+                "-1";
+
+
+        }
+
+
+
+
+        if(mode === "front"){
+
+
+            img.style.position =
+                "absolute";
+
+
+            img.style.zIndex =
+                "9999";
+
+
+        }
+
+
+    }
+
+
+};
+
+
+
+
+
+})();
