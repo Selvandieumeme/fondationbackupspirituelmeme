@@ -9960,11 +9960,6 @@ document.addEventListener(
 
 
 
-
-
-
-
-
 /* =========================================================
    CAMPUS WORD — CONVERT TEXT TO TABLE ENGINE
    STEP 1
@@ -9987,7 +9982,7 @@ document.addEventListener(
 
         const button =
             e.target.closest(
-                '[data-action="convert-text-to-table"]'
+                '[data-action="convert-text-table"]'
             );
 
 
@@ -10000,8 +9995,6 @@ document.addEventListener(
 
 
 
-
-
         e.preventDefault();
 
 
@@ -10010,10 +10003,8 @@ document.addEventListener(
 
 
 
-
-
-        console.log(
-            "Convert Text to Table activated"
+        button.classList.toggle(
+            "cwConvertTextTableActive"
         );
 
 
@@ -10025,3 +10016,14 @@ document.addEventListener(
 
 
 })();
+
+
+
+
+
+
+
+
+
+
+
