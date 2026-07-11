@@ -8222,3 +8222,95 @@ document.addEventListener(
 
 
 
+
+
+
+
+
+
+
+/* =========================================================
+   CAMPUS WORD — TABLE AUTO SELECTION CLEANER
+   ISOLATED MODULE
+   REMOVE UNWANTED TABLE SELECTION
+   NO TABLE ACTION INTERFERENCE
+========================================================= */
+
+(function(){
+
+
+function clearTableSelection(){
+
+
+    const selection =
+        window.getSelection();
+
+
+
+    if(!selection){
+        return;
+    }
+
+
+
+    if(selection.rangeCount){
+
+        selection.removeAllRanges();
+
+    }
+
+
+}
+
+
+
+
+
+
+document.addEventListener(
+    "pointerup",
+    function(e){
+
+
+
+        const insideTable =
+            e.target.closest(
+                ".cwWordTable"
+            );
+
+
+
+        if(!insideTable){
+
+            return;
+
+        }
+
+
+
+        /*
+          Retire selection otomatik
+          sèlman apre aksyon touch la fini
+        */
+
+        setTimeout(
+            function(){
+
+                clearTableSelection();
+
+            },
+            0
+        );
+
+
+    },
+    false
+);
+
+
+
+})();
+
+
+
+
