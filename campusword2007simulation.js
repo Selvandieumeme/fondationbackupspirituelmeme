@@ -8897,12 +8897,12 @@ document.addEventListener(
 
 
 
-
 /* =========================================================
    CAMPUS WORD — DRAW TABLE FRAME ENGINE
-   STEP 2
+   STEP 2 FIXED
    DRAW FIRST TABLE RECTANGLE
    TOUCH + MOUSE SUPPORT
+   STABLE POINTER TRACKING
    VISUAL FRAME ONLY
    NO TABLE CREATION
    NO CARET INTERFERENCE
@@ -8927,9 +8927,7 @@ let drawFrame = null;
 
 function getPoint(e){
 
-    return e.touches
-        ? e.touches[0]
-        : e;
+    return e;
 
 }
 
@@ -8964,7 +8962,7 @@ function createFrame(){
 
 
     drawFrame.style.position =
-        "absolute";
+        "fixed";
 
 
 
@@ -8979,6 +8977,11 @@ function createFrame(){
 
 
     drawFrame.style.pointerEvents =
+        "none";
+
+
+
+    drawFrame.style.touchAction =
         "none";
 
 
@@ -9072,9 +9075,6 @@ document.addEventListener(
 
 
 
-        const point =
-            getPoint(e);
-
 
 
         drawing = true;
@@ -9082,12 +9082,14 @@ document.addEventListener(
 
 
         startX =
-            point.clientX;
+            e.clientX;
 
 
 
         startY =
-            point.clientY;
+            e.clientY;
+
+
 
 
 
@@ -9107,12 +9109,27 @@ document.addEventListener(
 
 
 
+        if(
+            e.pointerId !== undefined &&
+            e.target.setPointerCapture
+        ){
+
+            e.target.setPointerCapture(
+                e.pointerId
+            );
+
+        }
+
+
+
         e.preventDefault();
 
 
 
     },
-    false
+    {
+        passive:false
+    }
 );
 
 
@@ -9140,20 +9157,23 @@ document.addEventListener(
 
 
 
-        const point =
-            getPoint(e);
-
 
 
         moveFrame(
-            point.clientX,
-            point.clientY
+            e.clientX,
+            e.clientY
         );
 
 
 
+        e.preventDefault();
+
+
+
     },
-    false
+    {
+        passive:false
+    }
 );
 
 
@@ -9166,7 +9186,7 @@ document.addEventListener(
 
 document.addEventListener(
     "pointerup",
-    function(){
+    function(e){
 
 
 
@@ -9179,6 +9199,19 @@ document.addEventListener(
 
 
         drawing = false;
+
+
+
+        if(
+            e.pointerId !== undefined &&
+            e.target.releasePointerCapture
+        ){
+
+            e.target.releasePointerCapture(
+                e.pointerId
+            );
+
+        }
 
 
 
@@ -9208,14 +9241,17 @@ document.addEventListener(
 
 /* =========================================================
    CAMPUS WORD — DRAW TABLE CREATE ENGINE
-   STEP 3
+   STEP 3 FIXED
    CONVERT DRAW FRAME TO REAL TABLE
+   TOUCH + MOUSE SAFE
    ISOLATED MODULE
    NO CUSTOM TABLE INTERFERENCE
    NO CARET / RIBBON INTERFERENCE
 ========================================================= */
 
 (function(){
+
+
 
 
 
@@ -9241,13 +9277,13 @@ function createDrawnTable(width,height){
 
 
 
-    /*
-       SIZE CALCULATION
-       WORD STYLE GRID
-    */
 
 
-    const cellSize = 70;
+    const cellWidth = 70;
+
+    const cellHeight = 30;
+
+
 
 
 
@@ -9255,7 +9291,7 @@ function createDrawnTable(width,height){
         Math.max(
             1,
             Math.round(
-                width / cellSize
+                width / cellWidth
             )
         );
 
@@ -9265,9 +9301,11 @@ function createDrawnTable(width,height){
         Math.max(
             1,
             Math.round(
-                height / 30
+                height / cellHeight
             )
         );
+
+
 
 
 
@@ -9299,6 +9337,7 @@ function createDrawnTable(width,height){
 
     table.style.width =
         width + "px";
+
 
 
 
@@ -9366,6 +9405,7 @@ function createDrawnTable(width,height){
             );
 
 
+
         }
 
 
@@ -9386,6 +9426,10 @@ function createDrawnTable(width,height){
 
     const range =
         selection.getRangeAt(0);
+
+
+
+    range.deleteContents();
 
 
 
@@ -9411,7 +9455,7 @@ function createDrawnTable(width,height){
 
 document.addEventListener(
     "pointerup",
-    function(){
+    function(e){
 
 
 
@@ -9423,6 +9467,9 @@ document.addEventListener(
             return;
 
         }
+
+
+
 
 
 
@@ -9441,8 +9488,12 @@ document.addEventListener(
 
 
 
+
+
+
         const rect =
             frame.getBoundingClientRect();
+
 
 
 
@@ -9453,11 +9504,33 @@ document.addEventListener(
             rect.height < 20
         ){
 
-            frame.remove();
+            return;
+
+        }
+
+
+
+
+
+
+
+        /*
+          PREVENT DOUBLE EXECUTION
+        */
+
+        if(
+            frame.dataset.used === "true"
+        ){
 
             return;
 
         }
+
+
+
+        frame.dataset.used =
+            "true";
+
 
 
 
@@ -9468,6 +9541,8 @@ document.addEventListener(
             rect.width,
             rect.height
         );
+
+
 
 
 
