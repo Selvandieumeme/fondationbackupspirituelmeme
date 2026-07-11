@@ -10027,3 +10027,143 @@ document.addEventListener(
 
 
 
+
+
+
+
+
+
+
+/* =========================================================
+   CAMPUS WORD — CONVERT TEXT TO TABLE ENGINE
+   STEP 2
+   TEXT SELECTION DETECTION
+   ISOLATED MODULE
+   NO TABLE CREATION
+   NO TABLE ENGINE INTERFERENCE
+   NO CARET INTERFERENCE
+========================================================= */
+
+(function(){
+
+
+
+let convertMode = false;
+
+
+
+
+
+
+document.addEventListener(
+    "click",
+    function(e){
+
+
+
+        const button =
+            e.target.closest(
+                '[data-action="convert-text-table"]'
+            );
+
+
+
+        if(!button){
+
+            return;
+
+        }
+
+
+
+        convertMode =
+            !convertMode;
+
+
+
+    },
+    false
+);
+
+
+
+
+
+
+
+
+
+document.addEventListener(
+    "mouseup",
+    function(){
+
+
+
+        if(!convertMode){
+
+            return;
+
+        }
+
+
+
+
+
+        const selection =
+            window.getSelection();
+
+
+
+        if(
+            !selection ||
+            selection.rangeCount === 0
+        ){
+
+            return;
+
+        }
+
+
+
+
+
+
+        const text =
+            selection.toString()
+            .trim();
+
+
+
+
+
+        if(!text){
+
+            return;
+
+        }
+
+
+
+
+
+
+        console.log(
+            "Selected text ready for conversion:",
+            text
+        );
+
+
+
+    },
+    false
+);
+
+
+
+
+
+})();
+
+
+
+
