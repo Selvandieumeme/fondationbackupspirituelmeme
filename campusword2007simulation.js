@@ -7753,12 +7753,24 @@ document.addEventListener(
 
 
 
+
+
+
+
+
+
+
+
+
+
 /* =========================================================
    CAMPUS WORD — TABLE COLUMN RESIZE ENGINE
    STEP 1.5
    PRECISE BORDER DETECTION
    TOUCH + MOUSE
+   VISUAL BORDER PREVIEW
    ISOLATED MODULE
+   NO CARET / NO RIBBON INTERFERENCE
 ========================================================= */
 
 (function(){
@@ -7774,6 +7786,12 @@ let startWidth = 0;
 
 
 
+const previewClass =
+    "cwResizeBorderPreviewVertical";
+
+
+
+
 
 function getPoint(e){
 
@@ -7782,6 +7800,36 @@ function getPoint(e){
         : e;
 
 }
+
+
+
+
+
+
+
+
+function clearPreview(){
+
+
+    document
+    .querySelectorAll(
+        "." + previewClass
+    )
+    .forEach(function(el){
+
+
+        el.classList.remove(
+            previewClass
+        );
+
+
+    });
+
+
+}
+
+
+
 
 
 
@@ -7816,7 +7864,9 @@ function findBorderCell(e){
 
 
     if(!cell){
+
         return null;
+
     }
 
 
@@ -7864,14 +7914,25 @@ function findBorderCell(e){
 
 
 
+
 document.addEventListener(
     "pointermove",
     function(e){
 
 
+
         if(resizing){
+
             return;
+
         }
+
+
+
+
+
+        clearPreview();
+
 
 
 
@@ -7880,26 +7941,39 @@ document.addEventListener(
 
 
 
+
         if(cell){
+
+
+
+            cell.classList.add(
+                previewClass
+            );
+
 
 
             document.body.style.cursor =
                 "col-resize";
 
 
+
             resizeTarget =
                 cell;
 
 
+
         }else{
+
 
 
             document.body.style.cursor =
                 "";
 
 
+
             resizeTarget =
                 null;
+
 
         }
 
@@ -7908,6 +7982,8 @@ document.addEventListener(
     },
     false
 );
+
+
 
 
 
@@ -7934,11 +8010,16 @@ document.addEventListener(
 
 
 
+
         e.preventDefault();
 
 
 
         resizing = true;
+
+
+
+        clearPreview();
 
 
 
@@ -7960,6 +8041,7 @@ document.addEventListener(
     },
     false
 );
+
 
 
 
@@ -8000,6 +8082,7 @@ document.addEventListener(
         if(width > 30){
 
 
+
             resizeTarget.style.width =
                 width + "px";
 
@@ -8019,6 +8102,7 @@ document.addEventListener(
 
 
 
+
 document.addEventListener(
     "pointerup",
     function(){
@@ -8027,7 +8111,15 @@ document.addEventListener(
 
         resizing = false;
 
+
+
+        clearPreview();
+
+
+
         resizeTarget = null;
+
+
 
         document.body.style.cursor =
             "";
@@ -8040,9 +8132,8 @@ document.addEventListener(
 
 
 
+
+
 })();
-
-
-
 
 
