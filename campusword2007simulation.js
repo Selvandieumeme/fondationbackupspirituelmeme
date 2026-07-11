@@ -5745,6 +5745,11 @@ function applyList(type){
             );
 
 
+table.classList.add(
+    "cwWordTable"
+);
+
+
 
         table.style.borderCollapse =
             "collapse";
