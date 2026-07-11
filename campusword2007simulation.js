@@ -10584,49 +10584,21 @@ document.addEventListener(
 
 
 
+
+
+
+
 /* =========================================================
    CAMPUS WORD — CONVERT TEXT TO TABLE ENGINE
    STEP 4
    CREATE REAL CW WORD TABLE
-   REPLACE SELECTED TEXT
+   REPLACE SAVED TEXT RANGE
    ISOLATED MODULE
    NO CUSTOM / DRAW TABLE INTERFERENCE
    NO CARET INTERFERENCE
 ========================================================= */
 
 (function(){
-
-
-
-let savedSeparator = null;
-
-
-
-
-
-
-
-window.CampusWordConvertTable = {
-
-
-    setSeparator:function(value){
-
-        savedSeparator = value;
-
-    },
-
-
-    getSeparator:function(){
-
-        return savedSeparator;
-
-    }
-
-
-};
-
-
-
 
 
 
@@ -10662,8 +10634,6 @@ function createTableFromText(
 
 
 
-
-
     const table =
         document.createElement(
             "table"
@@ -10684,7 +10654,6 @@ function createTableFromText(
 
     table.style.margin =
         "10px 0";
-
 
 
 
@@ -10724,12 +10693,23 @@ function createTableFromText(
             }else{
 
 
-                columns =
-                    rowText
-                    .split(
-                        separator
-                    );
+                if(
+                    separator === "\t"
+                ){
 
+                    columns =
+                        rowText.split("\t");
+
+                }else{
+
+
+                    columns =
+                        rowText.split(
+                            separator
+                        );
+
+
+                }
 
             }
 
@@ -10780,7 +10760,6 @@ function createTableFromText(
                     tr.appendChild(
                         td
                     );
-
 
 
                 }
@@ -10837,28 +10816,28 @@ document.addEventListener(
 
 
 
-        const separatorRadio =
+        let separator =
             document
             .querySelector(
                 'input[name="cwSeparator"]:checked'
-            );
+            )
+            .value;
 
 
 
-        if(!separatorRadio){
 
-            return;
+
+
+
+        if(
+            separator === "tab"
+        ){
+
+            separator =
+                "\t";
 
         }
 
-
-
-
-
-
-
-        let separator =
-            separatorRadio.value;
 
 
 
@@ -10884,7 +10863,6 @@ document.addEventListener(
             separator === "other"
         ){
 
-
             separator =
                 document
                 .getElementById(
@@ -10892,42 +10870,8 @@ document.addEventListener(
                 )
                 .value;
 
-
-
         }
 
-
-
-
-
-
-
-        window.CampusWordConvertTable
-        .setSeparator(
-            separator
-        );
-
-
-
-
-
-
-
-        const selection =
-            window.getSelection();
-
-
-
-
-
-        if(
-            !selection ||
-            selection.rangeCount === 0
-        ){
-
-            return;
-
-        }
 
 
 
@@ -10935,19 +10879,29 @@ document.addEventListener(
 
 
         const text =
-            selection
-            .toString()
-            .trim();
+            window.CampusWordConvertData
+            .getText();
+
+
+
+
+        const range =
+            window.CampusWordConvertData
+            .getRange();
 
 
 
 
 
-        if(!text){
+        if(
+            !text ||
+            !range
+        ){
 
             return;
 
         }
+
 
 
 
@@ -10979,13 +10933,6 @@ document.addEventListener(
 
 
 
-        const range =
-            selection
-            .getRangeAt(0);
-
-
-
-
 
         range.deleteContents();
 
@@ -10999,10 +10946,6 @@ document.addEventListener(
 
 
 
-        selection.removeAllRanges();
-
-
-
     },
     false
 );
@@ -11010,3 +10953,6 @@ document.addEventListener(
 
 
 })();
+
+
+
