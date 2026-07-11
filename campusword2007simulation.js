@@ -8237,14 +8237,33 @@ document.addEventListener(
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
 /* =========================================================
    CAMPUS WORD — CUSTOM TABLE CREATOR ENGINE
-   FIXED VERSION
+   FINAL FIXED VERSION
    DYNAMIC ROW / COLUMN VALUES
+   RANGE PRESERVATION
    ISOLATED MODULE
 ========================================================= */
 
 (function(){
+
+
+let customTableRange = null;
+
+
 
 
 
@@ -8255,12 +8274,17 @@ function createCustomTable(rows, cols){
         window.getSelection();
 
 
+
     if(
         !selection ||
         selection.rangeCount === 0
     ){
+
         return;
+
     }
+
+
 
 
 
@@ -8270,17 +8294,22 @@ function createCustomTable(rows, cols){
         );
 
 
+
     table.classList.add(
         "cwWordTable"
     );
+
 
 
     table.style.borderCollapse =
         "collapse";
 
 
+
     table.style.margin =
         "10px 0";
+
+
 
 
 
@@ -8291,6 +8320,7 @@ function createCustomTable(rows, cols){
         r < rows;
         r++
     ){
+
 
 
         const tr =
@@ -8307,26 +8337,32 @@ function createCustomTable(rows, cols){
         ){
 
 
+
             const td =
                 document.createElement(
                     "td"
                 );
 
 
+
             td.contentEditable =
                 true;
+
 
 
             td.innerHTML =
                 "&nbsp;";
 
 
+
             td.style.border =
                 "1px solid #999";
 
 
+
             td.style.minWidth =
                 "70px";
+
 
 
             td.style.height =
@@ -8386,6 +8422,30 @@ function createCustomTable(rows, cols){
 
 
 function openCustomTableBox(){
+
+
+
+    const selection =
+        window.getSelection();
+
+
+
+    if(
+        selection &&
+        selection.rangeCount > 0
+    ){
+
+
+        customTableRange =
+            selection
+            .getRangeAt(0)
+            .cloneRange();
+
+
+    }
+
+
+
 
 
 
@@ -8468,6 +8528,9 @@ function openCustomTableBox(){
     .onclick=function(){
 
 
+        customTableRange = null;
+
+
         box.remove();
 
 
@@ -8526,10 +8589,40 @@ function openCustomTableBox(){
 
 
 
+
+        if(customTableRange){
+
+
+            const selection =
+                window.getSelection();
+
+
+
+            selection.removeAllRanges();
+
+
+
+            selection.addRange(
+                customTableRange
+            );
+
+
+        }
+
+
+
+
+
+
+
         createCustomTable(
             rows,
             cols
         );
+
+
+
+        customTableRange = null;
 
 
 
@@ -8590,10 +8683,3 @@ document.addEventListener(
 
 
 })();
-
-
-
-
-
-
-
