@@ -2280,7 +2280,18 @@ body{
 
 
 
+/* =========================================================
+   TABLE ACTIVE ROW / COLUMN
+   VISUAL DISABLED
+   KEEP SYSTEM COMPATIBILITY
+========================================================= */
 
+.cwTableActiveRow td,
+.cwTableActiveColumn {
+
+    background: transparent !important;
+
+}
 
 
 
