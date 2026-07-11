@@ -12945,17 +12945,51 @@ document.addEventListener(
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
 /* =========================================================
-   CAMPUS WORD — IMAGE WRAP SELECTION LOCK
-   KEEP IMAGE SELECTED WHILE USING WRAP MENU
-   NO RESIZE / NO ROTATE / NO TABLE INTERFERENCE
+   CAMPUS WORD — IMAGE SELECTION LOCK ENGINE
+   KEEP 8 RESIZE HANDLES ACTIVE
+   WHILE USING PICTURE TOOLS
+   WRAP TEXT / ROTATE / STYLES
+   TOUCH + MOUSE
+   ISOLATED MODULE
 ========================================================= */
 
 (function(){
 
 
 
-let savedImage = null;
+let lockedImage = null;
+
+
+
+function lockCurrentImage(){
+
+
+    if(
+        window.CampusWordSelectedImage
+    ){
+
+        lockedImage =
+            window.CampusWordSelectedImage;
+
+    }
+
+
+}
+
+
 
 
 
@@ -12974,7 +13008,14 @@ document.addEventListener(
 
         if(img){
 
-            savedImage = img;
+
+            lockedImage = img;
+
+
+
+            window.CampusWordSelectedImage =
+                img;
+
 
         }
 
@@ -12990,20 +13031,61 @@ document.addEventListener(
 
 
 
+
+document.addEventListener(
+    "pointerdown",
+    function(e){
+
+
+
+        const pictureAction =
+            e.target.closest(
+                ".cwRibbonBtn"
+            );
+
+
+
+        if(!pictureAction){
+
+            return;
+
+        }
+
+
+
+
+
+        if(
+            lockedImage
+        ){
+
+
+            window.CampusWordSelectedImage =
+                lockedImage;
+
+
+        }
+
+
+
+    },
+    true
+);
+
+
+
+
+
+
+
+
 document.addEventListener(
     "click",
     function(e){
 
 
 
-        const wrapButton =
-            e.target.closest(
-                '[data-action="image-wrap-text"]'
-            );
-
-
-
-        const wrapOption =
+        const wrap =
             e.target.closest(
                 "[data-wrap]"
             );
@@ -13011,35 +13093,23 @@ document.addEventListener(
 
 
         if(
-            wrapButton ||
-            wrapOption
+            wrap &&
+            lockedImage
         ){
 
 
-
-            if(
-                savedImage
-            ){
-
-
-                window.CampusWordSelectedImage =
-                    savedImage;
+            window.CampusWordSelectedImage =
+                lockedImage;
 
 
 
-                if(
-                    window.CampusWordImageWrap
-                ){
+            /*
+              FORCE KEEP IMAGE STATE
+            */
 
-
-                    window.CampusWordImageWrap.selected =
-                        savedImage;
-
-
-                }
-
-
-            }
+            lockedImage.classList.add(
+                "cwImageSelected"
+            );
 
 
 
