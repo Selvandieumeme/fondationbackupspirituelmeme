@@ -2800,3 +2800,33 @@ body{
 
 }
 
+
+
+
+
+
+
+
+
+/* =========================================================
+   CAMPUS WORD — TOUCH IMAGE RESIZE HANDLE UPGRADE
+========================================================= */
+
+.cwResizeHandle{
+
+    width:18px;
+
+    height:18px;
+
+    border-radius:50%;
+
+    touch-action:none;
+
+}
+
+
+.cwImageResizeBox{
+
+    touch-action:none;
+
+}
