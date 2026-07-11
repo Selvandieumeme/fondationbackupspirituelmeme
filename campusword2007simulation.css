@@ -2509,3 +2509,42 @@ body{
     touch-action:none;
 
 }
+
+
+
+
+
+
+
+
+/* =========================================================
+   CAMPUS WORD — CONVERT TEXT TO TABLE ACTIVE STATE
+   VISUAL ONLY
+   NO FUNCTION INTERFERENCE
+========================================================= */
+
+.cwConvertTextTableActive{
+
+    background:#fee2e2 !important;
+
+    border-color:#dc2626 !important;
+
+    color:#dc2626 !important;
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
