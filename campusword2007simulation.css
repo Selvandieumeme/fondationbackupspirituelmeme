@@ -2547,4 +2547,46 @@ body{
 
 
 
+/* =========================================================
+   CAMPUS WORD — CONVERT TABLE DIALOG
+========================================================= */
 
+.cwConvertTableDialog{
+
+    position:fixed;
+
+    inset:0;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    z-index:999999;
+
+}
+
+
+.cwConvertTableBox{
+
+    background:white;
+
+    border:1px solid #999;
+
+    padding:20px;
+
+    min-width:260px;
+
+    box-shadow:0 4px 12px rgba(0,0,0,.25);
+
+}
+
+
+.cwConvertTableBox label{
+
+    display:block;
+
+    margin:8px 0;
+
+}
