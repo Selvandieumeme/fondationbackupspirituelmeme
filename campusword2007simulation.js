@@ -11611,3 +11611,436 @@ document.addEventListener(
 
 
 })();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* =========================================================
+   CAMPUS WORD — IMAGE RESIZE HANDLE ENGINE
+   STEP 4
+   8 RESIZE HANDLES
+   TOUCH + MOUSE SUPPORT
+   KEEP IMAGE RATIO
+   ISOLATED MODULE
+   NO TABLE / NO CARET INTERFERENCE
+========================================================= */
+
+(function(){
+
+
+
+let selectedImage = null;
+
+let resizeHandle = null;
+
+let resizing = false;
+
+
+let startX = 0;
+
+let startY = 0;
+
+
+let startWidth = 0;
+
+let startHeight = 0;
+
+
+let startRatio = 1;
+
+
+
+
+
+
+
+
+
+const handles = [
+
+    "nw",
+    "n",
+    "ne",
+    "w",
+    "e",
+    "sw",
+    "s",
+    "se"
+
+];
+
+
+
+
+
+
+
+
+
+function createHandles(img){
+
+
+
+    removeHandles();
+
+
+
+    const box =
+        document.createElement(
+            "div"
+        );
+
+
+    box.className =
+        "cwImageResizeBox";
+
+
+
+    box.style.position =
+        "absolute";
+
+
+
+    box.style.left =
+        img.offsetLeft + "px";
+
+
+
+    box.style.top =
+        img.offsetTop + "px";
+
+
+
+    box.style.width =
+        img.offsetWidth + "px";
+
+
+
+    box.style.height =
+        img.offsetHeight + "px";
+
+
+
+    box.dataset.target =
+        "image";
+
+
+
+
+    handles.forEach(
+        function(pos){
+
+
+            const h =
+                document.createElement(
+                    "div"
+                );
+
+
+            h.className =
+                "cwResizeHandle " + pos;
+
+
+
+            h.dataset.direction =
+                pos;
+
+
+
+            box.appendChild(
+                h
+            );
+
+
+        }
+    );
+
+
+
+
+    img.parentElement.appendChild(
+        box
+    );
+
+
+
+}
+
+
+
+
+
+
+
+
+
+function removeHandles(){
+
+
+    const old =
+        document.querySelector(
+            ".cwImageResizeBox"
+        );
+
+
+
+    if(old){
+
+        old.remove();
+
+    }
+
+
+}
+
+
+
+
+
+
+
+
+
+document.addEventListener(
+    "pointerdown",
+    function(e){
+
+
+
+        const img =
+            e.target.closest(
+                ".cwInsertedImage"
+            );
+
+
+
+        if(img){
+
+
+            selectedImage =
+                img;
+
+
+            createHandles(
+                img
+            );
+
+
+            return;
+
+
+        }
+
+
+
+
+
+
+        const handle =
+            e.target.closest(
+                ".cwResizeHandle"
+            );
+
+
+
+        if(!handle){
+
+            return;
+
+        }
+
+
+
+
+
+        resizing = true;
+
+
+
+        resizeHandle =
+            handle.dataset.direction;
+
+
+
+        const box =
+            handle.parentElement;
+
+
+
+        selectedImage =
+            document.querySelector(
+                ".cwInsertedImage"
+            );
+
+
+
+        startX =
+            e.clientX;
+
+
+
+        startY =
+            e.clientY;
+
+
+
+        startWidth =
+            selectedImage.offsetWidth;
+
+
+
+        startHeight =
+            selectedImage.offsetHeight;
+
+
+
+        startRatio =
+            startWidth /
+            startHeight;
+
+
+
+        e.preventDefault();
+
+
+
+    },
+    false
+);
+
+
+
+
+
+
+
+
+
+document.addEventListener(
+    "pointermove",
+    function(e){
+
+
+
+        if(
+            !resizing ||
+            !selectedImage
+        ){
+
+            return;
+
+        }
+
+
+
+
+
+        const dx =
+            e.clientX -
+            startX;
+
+
+
+        const dy =
+            e.clientY -
+            startY;
+
+
+
+        let newWidth =
+            startWidth;
+
+
+
+        if(
+            resizeHandle.includes("e")
+            ||
+            resizeHandle.includes("w")
+        ){
+
+            newWidth =
+                startWidth + dx;
+
+        }
+
+
+
+        if(
+            resizeHandle.includes("s")
+            ||
+            resizeHandle.includes("n")
+        ){
+
+            newWidth =
+                startWidth + dy * startRatio;
+
+        }
+
+
+
+
+        if(newWidth < 50){
+
+            newWidth = 50;
+
+        }
+
+
+
+
+        selectedImage.style.width =
+            newWidth + "px";
+
+
+
+        createHandles(
+            selectedImage
+        );
+
+
+
+    },
+    false
+);
+
+
+
+
+
+
+
+
+
+document.addEventListener(
+    "pointerup",
+    function(){
+
+
+        resizing = false;
+
+
+        resizeHandle = null;
+
+
+    },
+    false
+);
+
+
+
+
+
+})();
