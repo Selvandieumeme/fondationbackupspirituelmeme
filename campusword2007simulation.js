@@ -7359,3 +7359,166 @@ table.classList.add(
 
 
 })();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* =========================================================
+   CAMPUS WORD — TABLE ERASER TOOL ENGINE
+   STEP 1
+   ACTIVATE / DEACTIVATE ERASER MODE
+   ISOLATED MODULE
+   NO TABLE INSERT INTERFERENCE
+   NO CARET INTERFERENCE
+========================================================= */
+
+(function(){
+
+
+    let eraserActive = false;
+
+
+
+    function toggleEraser(button){
+
+
+        eraserActive =
+            !eraserActive;
+
+
+
+        if(eraserActive){
+
+
+            button.classList.add(
+                "cwEraserActive"
+            );
+
+
+            document.body.classList.add(
+                "cwTableEraserMode"
+            );
+
+
+        }else{
+
+
+            button.classList.remove(
+                "cwEraserActive"
+            );
+
+
+            document.body.classList.remove(
+                "cwTableEraserMode"
+            );
+
+
+        }
+
+
+    }
+
+
+
+
+
+
+    document.addEventListener(
+        "click",
+        function(e){
+
+
+
+            const button =
+                e.target.closest(
+                    '[data-action="table-eraser"]'
+                );
+
+
+
+            if(!button){
+                return;
+            }
+
+
+
+            e.preventDefault();
+
+
+
+            e.stopPropagation();
+
+
+
+            toggleEraser(
+                button
+            );
+
+
+
+        },
+        false
+    );
+
+
+
+
+
+    window.CampusWordTableEraser = {
+
+
+        isActive:function(){
+
+            return eraserActive;
+
+        },
+
+
+        disable:function(){
+
+
+            eraserActive = false;
+
+
+            document.body.classList.remove(
+                "cwTableEraserMode"
+            );
+
+
+            const btn =
+                document.querySelector(
+                    '[data-action="table-eraser"]'
+                );
+
+
+            if(btn){
+
+                btn.classList.remove(
+                    "cwEraserActive"
+                );
+
+            }
+
+
+        }
+
+
+    };
+
+
+
+})();
