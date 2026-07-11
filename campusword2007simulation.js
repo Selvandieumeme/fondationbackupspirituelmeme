@@ -8224,22 +8224,17 @@ document.addEventListener(
 
 
 
-
-
-
-
-
 /* =========================================================
-   CAMPUS WORD — TABLE AUTO SELECTION CLEANER
+   CAMPUS WORD — TABLE TOUCH SELECTION CLEANER
    ISOLATED MODULE
-   REMOVE UNWANTED TABLE SELECTION
+   REMOVE STUCK BLUE TOUCH SELECTION
    NO TABLE ACTION INTERFERENCE
 ========================================================= */
 
 (function(){
 
 
-function clearTableSelection(){
+function clearBrowserSelection(){
 
 
     const selection =
@@ -8247,13 +8242,7 @@ function clearTableSelection(){
 
 
 
-    if(!selection){
-        return;
-    }
-
-
-
-    if(selection.rangeCount){
+    if(selection){
 
         selection.removeAllRanges();
 
@@ -8267,20 +8256,21 @@ function clearTableSelection(){
 
 
 
+
 document.addEventListener(
-    "pointerup",
+    "touchstart",
     function(e){
 
 
 
-        const insideTable =
+        const table =
             e.target.closest(
                 ".cwWordTable"
             );
 
 
 
-        if(!insideTable){
+        if(!table){
 
             return;
 
@@ -8288,19 +8278,52 @@ document.addEventListener(
 
 
 
-        /*
-          Retire selection otomatik
-          sèlman apre aksyon touch la fini
-        */
+        clearBrowserSelection();
+
+
+
+    },
+    {
+        passive:true
+    }
+);
+
+
+
+
+
+
+
+document.addEventListener(
+    "touchend",
+    function(e){
+
+
+
+        const table =
+            e.target.closest(
+                ".cwWordTable"
+            );
+
+
+
+        if(!table){
+
+            return;
+
+        }
+
+
 
         setTimeout(
             function(){
 
-                clearTableSelection();
+                clearBrowserSelection();
 
             },
-            0
+            50
         );
+
 
 
     },
@@ -8310,6 +8333,10 @@ document.addEventListener(
 
 
 })();
+
+
+
+
 
 
 
