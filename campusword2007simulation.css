@@ -2384,22 +2384,22 @@ body{
 
 
 
+
+
+
 /* =========================================================
-   TABLE RESIZE BORDER PREVIEW
+   TABLE RESIZE BORDER VISUAL PREVIEW
+   RED GUIDE
 ========================================================= */
 
 .cwResizeBorderPreviewVertical{
 
     border-right:
-        2px dashed #2563eb !important;
+        2px dashed #ef4444 !important;
 
 }
 
 
-.cwResizeBorderPreviewHorizontal{
 
-    border-bottom:
-        2px dashed #2563eb !important;
 
-}
 
