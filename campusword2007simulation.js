@@ -12428,6 +12428,149 @@ window.CampusWordImageWrap = {
 
 
 /* =========================================================
+   CAMPUS WORD — WRAP TEXT DROPDOWN ACTIVATOR
+   STEP 5B FIX
+   OPEN / CLOSE WRAP TEXT MENU
+   ISOLATED MODULE
+   NO IMAGE / TABLE / CARET INTERFERENCE
+========================================================= */
+
+(function(){
+
+
+
+document.addEventListener(
+    "click",
+    function(e){
+
+
+
+        const button =
+            e.target.closest(
+                '[data-action="image-wrap-text"]'
+            );
+
+
+
+        if(button){
+
+
+            e.preventDefault();
+
+
+            e.stopPropagation();
+
+
+
+            button.classList.toggle(
+                "cwDropdownOpen"
+            );
+
+
+
+            const menu =
+                button.querySelector(
+                    ".cwDropdownMenu"
+                );
+
+
+
+            if(menu){
+
+
+                menu.style.display =
+                    button.classList.contains(
+                        "cwDropdownOpen"
+                    )
+                    ? "block"
+                    : "none";
+
+
+            }
+
+
+            return;
+
+        }
+
+
+
+
+
+
+
+        const insideMenu =
+            e.target.closest(
+                ".cwDropdownMenu"
+            );
+
+
+
+        if(!insideMenu){
+
+
+            document
+            .querySelectorAll(
+                '[data-action="image-wrap-text"].cwDropdownOpen'
+            )
+            .forEach(
+                function(btn){
+
+
+                    btn.classList.remove(
+                        "cwDropdownOpen"
+                    );
+
+
+                    const menu =
+                        btn.querySelector(
+                            ".cwDropdownMenu"
+                        );
+
+
+                    if(menu){
+
+                        menu.style.display =
+                            "none";
+
+                    }
+
+
+                }
+            );
+
+
+        }
+
+
+
+    },
+    false
+);
+
+
+
+})();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* =========================================================
    CAMPUS WORD — IMAGE WRAP TEXT MENU ENGINE
    STEP 5B
    WRAP TEXT OPTIONS
