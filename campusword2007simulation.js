@@ -10167,3 +10167,341 @@ document.addEventListener(
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+/* =========================================================
+   CAMPUS WORD — CONVERT TEXT TO TABLE ENGINE
+   STEP 3
+   CONVERSION OPTIONS DIALOG
+   TABS / COMMAS / SPACES / OTHER
+   ISOLATED MODULE
+   NO TABLE CREATION
+   NO CARET INTERFERENCE
+========================================================= */
+
+(function(){
+
+
+
+let dialogOpen = false;
+
+
+
+function openConvertDialog(text){
+
+
+
+    if(dialogOpen){
+
+        return;
+
+    }
+
+
+
+    dialogOpen = true;
+
+
+
+    const box =
+        document.createElement(
+            "div"
+        );
+
+
+
+    box.className =
+        "cwConvertTableDialog";
+
+
+
+    box.innerHTML = `
+
+    <div class="cwConvertTableBox">
+
+
+        <h3>
+            Convert Text to Table
+        </h3>
+
+
+        <p>
+            Separate text at:
+        </p>
+
+
+
+        <label>
+            <input 
+                type="radio"
+                name="cwSeparator"
+                value="tab"
+                checked
+            >
+            Tabs
+        </label>
+
+
+
+        <label>
+            <input 
+                type="radio"
+                name="cwSeparator"
+                value=","
+            >
+            Commas
+        </label>
+
+
+
+        <label>
+            <input 
+                type="radio"
+                name="cwSeparator"
+                value="space"
+            >
+            Spaces
+        </label>
+
+
+
+
+        <label>
+            <input 
+                type="radio"
+                name="cwSeparator"
+                value="other"
+            >
+            Other
+        </label>
+
+
+
+        <input
+            id="cwOtherSeparator"
+            type="text"
+            maxlength="1"
+            placeholder="Character"
+        >
+
+
+
+
+        <div>
+
+
+            <button id="cwConvertCancel">
+                Cancel
+            </button>
+
+
+            <button id="cwConvertOK">
+                OK
+            </button>
+
+
+        </div>
+
+
+    </div>
+
+    `;
+
+
+
+
+    document.body.appendChild(
+        box
+    );
+
+
+
+
+
+
+
+
+
+    document
+    .getElementById(
+        "cwConvertCancel"
+    )
+    .onclick=function(){
+
+
+        box.remove();
+
+        dialogOpen = false;
+
+
+    };
+
+
+
+
+
+
+
+
+
+    document
+    .getElementById(
+        "cwConvertOK"
+    )
+    .onclick=function(){
+
+
+
+        const selected =
+            box.querySelector(
+                'input[name="cwSeparator"]:checked'
+            );
+
+
+
+        let separator =
+            selected.value;
+
+
+
+        if(
+            separator === "space"
+        ){
+
+            separator =
+                " ";
+
+        }
+
+
+
+
+
+        if(
+            separator === "other"
+        ){
+
+            separator =
+                document
+                .getElementById(
+                    "cwOtherSeparator"
+                )
+                .value;
+
+        }
+
+
+
+
+
+        console.log(
+            "Separator selected:",
+            separator
+        );
+
+
+
+
+
+        box.remove();
+
+        dialogOpen = false;
+
+
+
+    };
+
+
+
+}
+
+
+
+
+
+
+
+
+
+document.addEventListener(
+    "mouseup",
+    function(){
+
+
+
+        if(dialogOpen){
+
+            return;
+
+        }
+
+
+
+
+
+        const button =
+            document.querySelector(
+                '[data-action="convert-text-table"].cwConvertTextTableActive'
+            );
+
+
+
+        if(!button){
+
+            return;
+
+        }
+
+
+
+
+
+
+
+        const selection =
+            window.getSelection();
+
+
+
+        const text =
+            selection
+            .toString()
+            .trim();
+
+
+
+
+
+        if(!text){
+
+            return;
+
+        }
+
+
+
+
+
+        openConvertDialog(
+            text
+        );
+
+
+
+    },
+    false
+);
+
+
+
+})();
+
