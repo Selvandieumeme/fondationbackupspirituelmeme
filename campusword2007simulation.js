@@ -8233,12 +8233,15 @@ document.addEventListener(
 
 
 
+
+
+
+
 /* =========================================================
    CAMPUS WORD — CUSTOM TABLE CREATOR ENGINE
+   FIXED VERSION
+   DYNAMIC ROW / COLUMN VALUES
    ISOLATED MODULE
-   CUSTOM ROW / COLUMN INSERT
-   NO TABLE SIZE ENGINE INTERFERENCE
-   NO CARET / NO RIBBON INTERFERENCE
 ========================================================= */
 
 (function(){
@@ -8252,17 +8255,12 @@ function createCustomTable(rows, cols){
         window.getSelection();
 
 
-
     if(
         !selection ||
         selection.rangeCount === 0
     ){
-
         return;
-
     }
-
-
 
 
 
@@ -8272,21 +8270,17 @@ function createCustomTable(rows, cols){
         );
 
 
-
     table.classList.add(
         "cwWordTable"
     );
-
 
 
     table.style.borderCollapse =
         "collapse";
 
 
-
     table.style.margin =
         "10px 0";
-
 
 
 
@@ -8297,7 +8291,6 @@ function createCustomTable(rows, cols){
         r < rows;
         r++
     ){
-
 
 
         const tr =
@@ -8314,32 +8307,26 @@ function createCustomTable(rows, cols){
         ){
 
 
-
             const td =
                 document.createElement(
                     "td"
                 );
 
 
-
             td.contentEditable =
                 true;
-
 
 
             td.innerHTML =
                 "&nbsp;";
 
 
-
             td.style.border =
                 "1px solid #999";
 
 
-
             td.style.minWidth =
                 "70px";
-
 
 
             td.style.height =
@@ -8368,6 +8355,7 @@ function createCustomTable(rows, cols){
 
 
 
+
     const range =
         selection.getRangeAt(0);
 
@@ -8383,32 +8371,8 @@ function createCustomTable(rows, cols){
 
 
 
-
-
     selection.removeAllRanges();
 
-
-
-    const cursor =
-        document.createRange();
-
-
-
-    cursor.setStartAfter(
-        table
-    );
-
-
-
-    cursor.collapse(
-        true
-    );
-
-
-
-    selection.addRange(
-        cursor
-    );
 
 
 }
@@ -8439,60 +8403,49 @@ function openCustomTableBox(){
 
     box.innerHTML = `
 
-        <div class="cwCustomTableBox">
+    <div class="cwCustomTableBox">
 
 
-            <h3>
-                Insert Table
-            </h3>
+        <div>
+            Insert Table
+        </div>
 
 
-            <label>
-                Rows
-            </label>
+        <input 
+            id="cwRowsInput"
+            type="number"
+            min="1"
+            value=""
+            placeholder="Rows"
+        >
 
 
-            <input
-                id="cwCustomTableRows"
-                type="number"
-                min="1"
-                value="5"
-            >
+        <input
+            id="cwColsInput"
+            type="number"
+            min="1"
+            value=""
+            placeholder="Columns"
+        >
 
 
-
-            <label>
-                Columns
-            </label>
+        <div>
 
 
-            <input
-                id="cwCustomTableCols"
-                type="number"
-                min="1"
-                value="5"
-            >
+            <button id="cwCancelTable">
+                Cancel
+            </button>
 
 
-
-
-            <div>
-
-
-                <button id="cwCustomTableCancel">
-                    Cancel
-                </button>
-
-
-                <button id="cwCustomTableInsert">
-                    Insert
-                </button>
-
-
-            </div>
+            <button id="cwInsertTable">
+                Insert
+            </button>
 
 
         </div>
+
+
+    </div>
 
     `;
 
@@ -8508,13 +8461,11 @@ function openCustomTableBox(){
 
 
 
-
-
     document
     .getElementById(
-        "cwCustomTableCancel"
+        "cwCancelTable"
     )
-    .onclick = function(){
+    .onclick=function(){
 
 
         box.remove();
@@ -8532,26 +8483,30 @@ function openCustomTableBox(){
 
     document
     .getElementById(
-        "cwCustomTableInsert"
+        "cwInsertTable"
     )
-    .onclick = function(){
+    .onclick=function(){
 
 
 
         const rows =
-            parseInt(
-                document.getElementById(
-                    "cwCustomTableRows"
-                ).value
+            Number(
+                document
+                .getElementById(
+                    "cwRowsInput"
+                )
+                .value
             );
 
 
 
         const cols =
-            parseInt(
-                document.getElementById(
-                    "cwCustomTableCols"
-                ).value
+            Number(
+                document
+                .getElementById(
+                    "cwColsInput"
+                )
+                .value
             );
 
 
@@ -8559,18 +8514,22 @@ function openCustomTableBox(){
 
 
         if(
-            rows > 0 &&
-            cols > 0
+            rows < 1 ||
+            cols < 1
         ){
 
-
-            createCustomTable(
-                rows,
-                cols
-            );
-
+            return;
 
         }
+
+
+
+
+
+        createCustomTable(
+            rows,
+            cols
+        );
 
 
 
@@ -8598,14 +8557,14 @@ document.addEventListener(
 
 
 
-        const button =
+        const custom =
             e.target.closest(
                 '[data-action="table-custom"]'
             );
 
 
 
-        if(!button){
+        if(!custom){
 
             return;
 
@@ -8614,7 +8573,6 @@ document.addEventListener(
 
 
         e.preventDefault();
-
 
 
         e.stopPropagation();
@@ -8631,8 +8589,9 @@ document.addEventListener(
 
 
 
-
 })();
+
+
 
 
 
