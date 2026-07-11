@@ -2830,3 +2830,33 @@ body{
     touch-action:none;
 
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* =========================================================
+   CAMPUS WORD — WRAP TEXT BUTTON ACTIVE STATE
+   VISUAL ONLY
+========================================================= */
+
+.cwDropdownOpen{
+
+    background:#fee2e2 !important;
+
+    border-color:#dc2626 !important;
+
+    color:#dc2626 !important;
+
+}
