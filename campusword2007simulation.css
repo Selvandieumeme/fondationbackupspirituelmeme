@@ -2741,3 +2741,38 @@ body{
     bottom:-6px;
     cursor:se-resize;
 }
+
+
+
+
+
+
+
+
+
+
+/* =========================================================
+   IMAGE ROTATE HANDLE
+========================================================= */
+
+.cwImageRotateHandle{
+
+    width:12px;
+
+    height:12px;
+
+    border-radius:50%;
+
+    background:#dc2626;
+
+    border:2px solid white;
+
+    position:absolute;
+
+    margin-top:-35px;
+
+    cursor:grab;
+
+    z-index:999999;
+
+}
