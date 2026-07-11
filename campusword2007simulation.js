@@ -8222,3 +8222,242 @@ document.addEventListener(
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* =========================================================
+   CAMPUS WORD — CUSTOM TABLE DIALOG ENGINE
+   ISOLATED MODULE
+   CUSTOM ROW / COLUMN INSERT
+   NO TABLE ENGINE INTERFERENCE
+   NO CARET / NO RIBBON INTERFERENCE
+========================================================= */
+
+(function(){
+
+
+function openCustomTableDialog(){
+
+
+    const dialog =
+        document.createElement(
+            "div"
+        );
+
+
+
+    dialog.className =
+        "cwCustomTableDialog";
+
+
+
+    dialog.innerHTML = `
+
+        <div class="cwCustomTableBox">
+
+
+            <div class="cwCustomTableTitle">
+                Insert Table
+            </div>
+
+
+
+            <label>
+                Rows
+            </label>
+
+            <input
+                id="cwCustomRows"
+                type="number"
+                value="5"
+                min="1"
+            >
+
+
+
+            <label>
+                Columns
+            </label>
+
+            <input
+                id="cwCustomCols"
+                type="number"
+                value="5"
+                min="1"
+            >
+
+
+
+            <div class="cwCustomTableActions">
+
+
+                <button id="cwCustomCancel">
+                    Cancel
+                </button>
+
+
+                <button id="cwCustomInsert">
+                    Insert
+                </button>
+
+
+            </div>
+
+
+
+        </div>
+
+    `;
+
+
+
+    document.body.appendChild(
+        dialog
+    );
+
+
+
+
+
+    document
+    .getElementById(
+        "cwCustomCancel"
+    )
+    .onclick = function(){
+
+
+        dialog.remove();
+
+
+    };
+
+
+
+
+
+
+
+    document
+    .getElementById(
+        "cwCustomInsert"
+    )
+    .onclick = function(){
+
+
+
+        const rows =
+            parseInt(
+                document.getElementById(
+                    "cwCustomRows"
+                ).value
+            );
+
+
+
+        const cols =
+            parseInt(
+                document.getElementById(
+                    "cwCustomCols"
+                ).value
+            );
+
+
+
+        if(
+            !rows ||
+            !cols
+        ){
+
+            return;
+
+        }
+
+
+
+
+
+        if(
+            typeof insertTable === "function"
+        ){
+
+            insertTable(
+                rows,
+                cols
+            );
+
+        }
+
+
+
+        dialog.remove();
+
+
+
+    };
+
+
+
+}
+
+
+
+
+
+
+
+
+document.addEventListener(
+    "click",
+    function(e){
+
+
+
+        const custom =
+            e.target.closest(
+                '[data-action="table-custom"]'
+            );
+
+
+
+        if(!custom){
+
+            return;
+
+        }
+
+
+
+        e.preventDefault();
+
+
+
+        e.stopPropagation();
+
+
+
+        openCustomTableDialog();
+
+
+
+    },
+    false
+);
+
+
+
+})();
