@@ -7744,3 +7744,310 @@ document.addEventListener(
     },
     false
 );
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* =========================================================
+   CAMPUS WORD — TABLE COLUMN RESIZE ENGINE
+   STEP 1
+   TOUCH / MOUSE COLUMN WIDTH RESIZE
+   ISOLATED MODULE
+   NO CARET / NO RIBBON INTERFERENCE
+========================================================= */
+
+(function(){
+
+
+    let resizing = false;
+
+    let activeCell = null;
+
+    let startX = 0;
+
+    let startWidth = 0;
+
+
+
+    const BORDER_ZONE = 12;
+
+
+
+
+    function isOnRightBorder(cell, e){
+
+
+        const rect =
+            cell.getBoundingClientRect();
+
+
+
+        const point =
+            e.touches
+            ? e.touches[0]
+            : e;
+
+
+
+        const x =
+            point.clientX -
+            rect.left;
+
+
+
+        return (
+            x >
+            rect.width - BORDER_ZONE
+        );
+
+    }
+
+
+
+
+
+
+
+
+    function startResize(cell, e){
+
+
+        resizing = true;
+
+
+        activeCell = cell;
+
+
+
+        const rect =
+            cell.getBoundingClientRect();
+
+
+
+        startWidth =
+            rect.width;
+
+
+
+        const point =
+            e.touches
+            ? e.touches[0]
+            : e;
+
+
+
+        startX =
+            point.clientX;
+
+
+
+        cell.classList.add(
+            "cwTableResizeActive"
+        );
+
+
+    }
+
+
+
+
+
+
+
+
+
+    function resizeMove(e){
+
+
+        if(
+            !resizing ||
+            !activeCell
+        ){
+
+            return;
+
+        }
+
+
+
+        const point =
+            e.touches
+            ? e.touches[0]
+            : e;
+
+
+
+        const diff =
+            point.clientX -
+            startX;
+
+
+
+        const newWidth =
+            startWidth +
+            diff;
+
+
+
+        if(
+            newWidth < 30
+        ){
+
+            return;
+
+        }
+
+
+
+        activeCell.style.width =
+            newWidth + "px";
+
+
+    }
+
+
+
+
+
+
+
+
+
+    function stopResize(){
+
+
+        if(activeCell){
+
+
+            activeCell.classList.remove(
+                "cwTableResizeActive"
+            );
+
+
+        }
+
+
+
+        resizing = false;
+
+        activeCell = null;
+
+
+    }
+
+
+
+
+
+
+
+
+
+    document.addEventListener(
+        "pointerdown",
+        function(e){
+
+
+
+            const cell =
+                e.target.closest(
+                    ".cwWordTable td"
+                );
+
+
+
+            if(!cell){
+
+                return;
+
+            }
+
+
+
+            if(
+                isOnRightBorder(
+                    cell,
+                    e
+                )
+            ){
+
+
+                e.preventDefault();
+
+
+
+                startResize(
+                    cell,
+                    e
+                );
+
+
+            }
+
+
+        },
+        false
+    );
+
+
+
+
+
+
+
+
+
+    document.addEventListener(
+        "pointermove",
+        function(e){
+
+
+            if(resizing){
+
+                e.preventDefault();
+
+                resizeMove(e);
+
+            }
+
+
+        },
+        false
+    );
+
+
+
+
+
+
+
+
+
+    document.addEventListener(
+        "pointerup",
+        function(){
+
+
+            stopResize();
+
+
+        },
+        false
+    );
+
+
+
+})();
