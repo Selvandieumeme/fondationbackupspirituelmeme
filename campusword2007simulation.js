@@ -12311,8 +12311,11 @@ window.CampusWordImageWrap = {
 apply:function(mode){
 
 
-    const img =
-        selectedImage;
+const img =
+    selectedImage ||
+    window.CampusWordSelectedImage;
+
+
 
 
 
@@ -12924,6 +12927,128 @@ document.addEventListener(
 
     },
     false
+);
+
+
+
+})();
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* =========================================================
+   CAMPUS WORD — IMAGE WRAP SELECTION LOCK
+   KEEP IMAGE SELECTED WHILE USING WRAP MENU
+   NO RESIZE / NO ROTATE / NO TABLE INTERFERENCE
+========================================================= */
+
+(function(){
+
+
+
+let savedImage = null;
+
+
+
+document.addEventListener(
+    "pointerdown",
+    function(e){
+
+
+
+        const img =
+            e.target.closest(
+                ".cwInsertedImage"
+            );
+
+
+
+        if(img){
+
+            savedImage = img;
+
+        }
+
+
+
+    },
+    true
+);
+
+
+
+
+
+
+
+document.addEventListener(
+    "click",
+    function(e){
+
+
+
+        const wrapButton =
+            e.target.closest(
+                '[data-action="image-wrap-text"]'
+            );
+
+
+
+        const wrapOption =
+            e.target.closest(
+                "[data-wrap]"
+            );
+
+
+
+        if(
+            wrapButton ||
+            wrapOption
+        ){
+
+
+
+            if(
+                savedImage
+            ){
+
+
+                window.CampusWordSelectedImage =
+                    savedImage;
+
+
+
+                if(
+                    window.CampusWordImageWrap
+                ){
+
+
+                    window.CampusWordImageWrap.selected =
+                        savedImage;
+
+
+                }
+
+
+            }
+
+
+
+        }
+
+
+
+    },
+    true
 );
 
 
