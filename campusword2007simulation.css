@@ -2462,3 +2462,27 @@ body{
 
 }
 
+
+
+
+
+
+
+
+
+
+/* =========================================================
+   CAMPUS WORD — DRAW TABLE ACTIVE STATE
+   VISUAL ONLY
+   NO FUNCTION INTERFERENCE
+========================================================= */
+
+.cwDrawTableActive{
+
+    background:#dbeafe !important;
+
+    border-color:#2563eb !important;
+
+    color:#2563eb !important;
+
+}
