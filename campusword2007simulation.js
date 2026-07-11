@@ -12415,3 +12415,95 @@ window.CampusWordImageWrap = {
 
 
 })();
+
+
+
+
+
+
+
+
+
+
+
+
+/* =========================================================
+   CAMPUS WORD — IMAGE WRAP TEXT MENU ENGINE
+   STEP 5B
+   WRAP TEXT OPTIONS
+   IN LINE / SQUARE / TIGHT
+   BEHIND / FRONT
+   ISOLATED MODULE
+   NO TABLE / NO CARET INTERFERENCE
+========================================================= */
+
+(function(){
+
+
+
+document.addEventListener(
+    "click",
+    function(e){
+
+
+
+        const option =
+            e.target.closest(
+                "[data-wrap]"
+            );
+
+
+
+        if(!option){
+
+            return;
+
+        }
+
+
+
+
+
+        e.preventDefault();
+
+
+
+        e.stopPropagation();
+
+
+
+
+
+
+        const mode =
+            option.dataset.wrap;
+
+
+
+
+
+        if(
+            window.CampusWordImageWrap &&
+            window.CampusWordImageWrap.apply
+        ){
+
+
+
+            window.CampusWordImageWrap.apply(
+                mode
+            );
+
+
+        }
+
+
+
+
+
+    },
+    false
+);
+
+
+
+})();
