@@ -10178,11 +10178,18 @@ document.addEventListener(
 
 
 
+
+
+
+
+
+
 /* =========================================================
    CAMPUS WORD — CONVERT TEXT TO TABLE ENGINE
    STEP 3
    CONVERSION OPTIONS DIALOG
    TABS / COMMAS / SPACES / OTHER
+   SAVE TEXT SELECTION
    ISOLATED MODULE
    NO TABLE CREATION
    NO CARET INTERFERENCE
@@ -10193,6 +10200,42 @@ document.addEventListener(
 
 
 let dialogOpen = false;
+
+
+let savedRange = null;
+
+
+let savedText = "";
+
+
+
+
+
+
+window.CampusWordConvertData = {
+
+
+    getText:function(){
+
+        return savedText;
+
+    },
+
+
+    getRange:function(){
+
+        return savedRange;
+
+    }
+
+
+};
+
+
+
+
+
+
 
 
 
@@ -10340,7 +10383,14 @@ function openConvertDialog(text){
 
         box.remove();
 
+
         dialogOpen = false;
+
+
+        savedRange = null;
+
+
+        savedText = "";
 
 
     };
@@ -10403,6 +10453,13 @@ function openConvertDialog(text){
 
 
 
+        window.CampusWordConvertData.separator =
+            separator;
+
+
+
+
+
         console.log(
             "Separator selected:",
             separator
@@ -10413,6 +10470,7 @@ function openConvertDialog(text){
 
 
         box.remove();
+
 
         dialogOpen = false;
 
@@ -10491,6 +10549,19 @@ document.addEventListener(
 
 
 
+        savedText = text;
+
+
+
+        savedRange =
+            selection
+            .getRangeAt(0)
+            .cloneRange();
+
+
+
+
+
         openConvertDialog(
             text
         );
@@ -10504,17 +10575,6 @@ document.addEventListener(
 
 
 })();
-
-
-
-
-
-
-
-
-
-
-
 
 
 
