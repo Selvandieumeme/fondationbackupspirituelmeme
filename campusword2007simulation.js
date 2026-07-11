@@ -10956,3 +10956,88 @@ document.addEventListener(
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* =========================================================
+   CAMPUS WORD — INSERT PICTURE BUTTON ENGINE
+   STEP 1
+   BUTTON ACTIVE STATE ONLY
+   NO IMAGE INSERTION YET
+   ISOLATED MODULE
+   NO TABLE / NO CARET INTERFERENCE
+========================================================= */
+
+(function(){
+
+
+
+document.addEventListener(
+    "click",
+    function(e){
+
+
+
+        const button =
+            e.target.closest(
+                '[data-action="insert-picture"]'
+            );
+
+
+
+        if(!button){
+
+            return;
+
+        }
+
+
+
+
+
+        e.preventDefault();
+
+
+        e.stopPropagation();
+
+
+
+
+
+
+        button.classList.toggle(
+            "cwInsertPictureActive"
+        );
+
+
+
+    },
+    false
+);
+
+
+
+})();
