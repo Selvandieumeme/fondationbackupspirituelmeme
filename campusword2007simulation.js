@@ -6980,3 +6980,382 @@ table.classList.add(
 
 })();
 ;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* =========================================================
+   CAMPUS WORD — TABLE DRAG POSITION ENGINE
+   ISOLATED MODULE
+   MOVE TABLE INSIDE PAGE
+   TOUCH + MOUSE SUPPORT
+   NO CARET / RIBBON INTERFERENCE
+========================================================= */
+
+(function(){
+
+
+    let dragTable = null;
+
+    let startX = 0;
+    let startY = 0;
+
+    let startLeft = 0;
+    let startTop = 0;
+
+
+
+
+
+    function startDrag(e, table){
+
+
+        const page =
+            table.closest(
+                ".cwPageContent"
+            );
+
+
+        if(!page){
+            return;
+        }
+
+
+
+        dragTable = table;
+
+
+
+        const point =
+            e.touches
+            ? e.touches[0]
+            : e;
+
+
+
+        startX =
+            point.clientX;
+
+
+
+        startY =
+            point.clientY;
+
+
+
+
+
+        const rect =
+            table.getBoundingClientRect();
+
+
+
+        const pageRect =
+            page.getBoundingClientRect();
+
+
+
+        startLeft =
+            rect.left - pageRect.left;
+
+
+
+        startTop =
+            rect.top - pageRect.top;
+
+
+
+
+
+        table.classList.add(
+            "cwTableDragging"
+        );
+
+
+
+        table.style.position =
+            "absolute";
+
+
+
+        table.style.left =
+            startLeft + "px";
+
+
+
+        table.style.top =
+            startTop + "px";
+
+
+
+        table.style.zIndex =
+            "9999";
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+    function moveDrag(e){
+
+
+        if(!dragTable){
+            return;
+        }
+
+
+
+        const page =
+            dragTable.closest(
+                ".cwPageContent"
+            );
+
+
+        if(!page){
+            return;
+        }
+
+
+
+        const point =
+            e.touches
+            ? e.touches[0]
+            : e;
+
+
+
+        const dx =
+            point.clientX - startX;
+
+
+
+        const dy =
+            point.clientY - startY;
+
+
+
+        let newLeft =
+            startLeft + dx;
+
+
+
+        let newTop =
+            startTop + dy;
+
+
+
+
+
+        /*
+          KEEP TABLE INSIDE PAGE
+        */
+
+        const maxLeft =
+            page.clientWidth -
+            dragTable.offsetWidth;
+
+
+
+        const maxTop =
+            page.clientHeight -
+            dragTable.offsetHeight;
+
+
+
+        newLeft =
+            Math.max(
+                0,
+                Math.min(
+                    newLeft,
+                    maxLeft
+                )
+            );
+
+
+
+        newTop =
+            Math.max(
+                0,
+                Math.min(
+                    newTop,
+                    maxTop
+                )
+            );
+
+
+
+
+        dragTable.style.left =
+            newLeft + "px";
+
+
+
+        dragTable.style.top =
+            newTop + "px";
+
+
+
+    }
+
+
+
+
+
+
+
+
+    function stopDrag(){
+
+
+        if(dragTable){
+
+
+            dragTable.classList.remove(
+                "cwTableDragging"
+            );
+
+
+        }
+
+
+
+        dragTable = null;
+
+
+    }
+
+
+
+
+
+
+
+
+
+    document.addEventListener(
+        "mousedown",
+        function(e){
+
+
+
+            const table =
+                e.target.closest(
+                    ".cwWordTable"
+                );
+
+
+
+            if(table){
+
+                startDrag(
+                    e,
+                    table
+                );
+
+            }
+
+
+        },
+        false
+    );
+
+
+
+
+
+
+
+    document.addEventListener(
+        "touchstart",
+        function(e){
+
+
+
+            const table =
+                e.target.closest(
+                    ".cwWordTable"
+                );
+
+
+
+            if(table){
+
+                startDrag(
+                    e,
+                    table
+                );
+
+            }
+
+
+
+        },
+        {
+            passive:true
+        }
+    );
+
+
+
+
+
+
+
+    document.addEventListener(
+        "mousemove",
+        moveDrag,
+        false
+    );
+
+
+
+    document.addEventListener(
+        "touchmove",
+        moveDrag,
+        {
+            passive:false
+        }
+    );
+
+
+
+
+
+
+
+    document.addEventListener(
+        "mouseup",
+        stopDrag,
+        false
+    );
+
+
+
+    document.addEventListener(
+        "touchend",
+        stopDrag,
+        false
+    );
+
+
+
+})();
