@@ -8881,3 +8881,311 @@ document.addEventListener(
 
 
 })();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* =========================================================
+   CAMPUS WORD — DRAW TABLE FRAME ENGINE
+   STEP 2
+   DRAW FIRST TABLE RECTANGLE
+   TOUCH + MOUSE SUPPORT
+   VISUAL FRAME ONLY
+   NO TABLE CREATION
+   NO CARET INTERFERENCE
+   NO RIBBON INTERFERENCE
+========================================================= */
+
+(function(){
+
+
+
+let drawing = false;
+
+let startX = 0;
+
+let startY = 0;
+
+let drawFrame = null;
+
+
+
+
+
+function getPoint(e){
+
+    return e.touches
+        ? e.touches[0]
+        : e;
+
+}
+
+
+
+
+
+
+
+
+function createFrame(){
+
+
+    if(drawFrame){
+
+        return;
+
+    }
+
+
+
+    drawFrame =
+        document.createElement(
+            "div"
+        );
+
+
+
+    drawFrame.className =
+        "cwDrawTableFrame";
+
+
+
+    drawFrame.style.position =
+        "absolute";
+
+
+
+    drawFrame.style.border =
+        "2px dashed #2563eb";
+
+
+
+    drawFrame.style.background =
+        "rgba(37,99,235,0.05)";
+
+
+
+    drawFrame.style.pointerEvents =
+        "none";
+
+
+
+    drawFrame.style.zIndex =
+        "999999";
+
+
+
+    document.body.appendChild(
+        drawFrame
+    );
+
+
+}
+
+
+
+
+
+
+
+
+
+function moveFrame(x,y){
+
+
+    const width =
+        Math.abs(
+            x - startX
+        );
+
+
+    const height =
+        Math.abs(
+            y - startY
+        );
+
+
+
+    drawFrame.style.left =
+        Math.min(
+            x,
+            startX
+        ) + "px";
+
+
+
+    drawFrame.style.top =
+        Math.min(
+            y,
+            startY
+        ) + "px";
+
+
+
+    drawFrame.style.width =
+        width + "px";
+
+
+
+    drawFrame.style.height =
+        height + "px";
+
+
+
+}
+
+
+
+
+
+
+
+
+
+document.addEventListener(
+    "pointerdown",
+    function(e){
+
+
+
+        if(
+            !window.CampusWordDrawTable ||
+            !window.CampusWordDrawTable.isActive()
+        ){
+
+            return;
+
+        }
+
+
+
+        const point =
+            getPoint(e);
+
+
+
+        drawing = true;
+
+
+
+        startX =
+            point.clientX;
+
+
+
+        startY =
+            point.clientY;
+
+
+
+        createFrame();
+
+
+
+        drawFrame.style.display =
+            "block";
+
+
+
+        moveFrame(
+            startX,
+            startY
+        );
+
+
+
+        e.preventDefault();
+
+
+
+    },
+    false
+);
+
+
+
+
+
+
+
+
+
+document.addEventListener(
+    "pointermove",
+    function(e){
+
+
+
+        if(
+            !drawing ||
+            !drawFrame
+        ){
+
+            return;
+
+        }
+
+
+
+        const point =
+            getPoint(e);
+
+
+
+        moveFrame(
+            point.clientX,
+            point.clientY
+        );
+
+
+
+    },
+    false
+);
+
+
+
+
+
+
+
+
+
+document.addEventListener(
+    "pointerup",
+    function(){
+
+
+
+        if(!drawing){
+
+            return;
+
+        }
+
+
+
+        drawing = false;
+
+
+
+    },
+    false
+);
+
+
+
+})();
