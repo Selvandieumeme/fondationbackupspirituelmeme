@@ -2776,3 +2776,27 @@ body{
     z-index:999999;
 
 }
+
+
+
+
+
+
+
+
+
+
+/* =========================================================
+   IMAGE WRAP ACTIVE STATE
+========================================================= */
+
+.cwWrapTextActive{
+
+    background:#fee2e2 !important;
+
+    border-color:#dc2626 !important;
+
+    color:#dc2626 !important;
+
+}
+
