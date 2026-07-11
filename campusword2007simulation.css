@@ -2486,3 +2486,26 @@ body{
     color:#2563eb !important;
 
 }
+
+
+
+
+
+
+
+
+
+
+
+
+/* =========================================================
+   CAMPUS WORD — DRAW TABLE FRAME TOUCH CONTROL
+   TOUCH ONLY
+   NO FUNCTION INTERFERENCE
+========================================================= */
+
+.cwDrawTableFrame{
+
+    touch-action:none;
+
+}
