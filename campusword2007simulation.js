@@ -12308,110 +12308,151 @@ document.addEventListener(
 
 
 
+apply:function(mode){
+
+
+    const img =
+        selectedImage;
 
 
 
-window.CampusWordImageWrap = {
+    if(!img){
 
+        return;
 
-    apply:function(mode){
-
-
-        const img =
-            selectedImage;
-
-
-
-        if(!img){
-
-            return;
-
-        }
-
-
-
-        img.dataset.wrap =
-            mode;
+    }
 
 
 
 
-        if(mode === "inline"){
-
-
-            img.style.position =
-                "relative";
-
-            img.style.display =
-                "inline-block";
-
-        }
-
-
-
-        if(mode === "square"){
-
-
-            img.style.float =
-                "left";
-
-
-        }
-
-
-
-        if(mode === "tight"){
-
-
-            img.style.float =
-                "left";
-
-
-            img.style.margin =
-                "5px";
-
-        }
+    img.dataset.wrap =
+        mode;
 
 
 
 
-        if(mode === "behind"){
+    /*
+       RESET
+    */
+
+    img.style.position =
+        "";
+
+    img.style.float =
+        "";
+
+    img.style.zIndex =
+        "";
+
+    img.style.margin =
+        "10px";
 
 
-            img.style.position =
-                "absolute";
-
-
-            img.style.zIndex =
-                "-1";
-
-
-        }
 
 
 
-
-        if(mode === "front"){
-
-
-            img.style.position =
-                "absolute";
+    if(mode === "inline"){
 
 
-            img.style.zIndex =
-                "9999";
+        img.style.display =
+            "inline-block";
 
 
-        }
+        img.style.position =
+            "relative";
 
 
     }
 
 
+
+
+
+    if(mode === "square"){
+
+
+        img.style.float =
+            "left";
+
+
+        img.style.marginRight =
+            "15px";
+
+
+        img.style.marginBottom =
+            "10px";
+
+
+    }
+
+
+
+
+
+
+
+    if(mode === "tight"){
+
+
+        img.style.float =
+            "left";
+
+
+        img.style.marginRight =
+            "5px";
+
+
+        img.style.marginBottom =
+            "5px";
+
+
+    }
+
+
+
+
+
+
+
+
+    if(mode === "behind"){
+
+
+        img.style.position =
+            "absolute";
+
+
+        img.style.zIndex =
+            "-1";
+
+
+    }
+
+
+
+
+
+
+
+    if(mode === "front"){
+
+
+        img.style.position =
+            "absolute";
+
+
+        img.style.zIndex =
+            "9999";
+
+
+    }
+
+
+
+}
+
+
 };
-
-
-
 
 
 })();
