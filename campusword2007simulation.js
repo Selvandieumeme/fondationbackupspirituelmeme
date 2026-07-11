@@ -9557,3 +9557,386 @@ document.addEventListener(
 
 
 })();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* =========================================================
+   CAMPUS WORD — DRAW TABLE INTERNAL LINES ENGINE
+   STEP 4
+   CREATE ROW / COLUMN DIVIDERS
+   TOUCH + MOUSE SUPPORT
+   ISOLATED MODULE
+   NO ERASER INTERFERENCE
+   NO RESIZE INTERFERENCE
+   NO CARET INTERFERENCE
+========================================================= */
+
+(function(){
+
+
+
+let drawingLine = false;
+
+let startX = 0;
+
+let startY = 0;
+
+let activeTable = null;
+
+
+
+const threshold = 15;
+
+
+
+
+
+
+function getPoint(e){
+
+    return e;
+
+}
+
+
+
+
+
+
+
+function findTable(e){
+
+
+    const target =
+        e.target.closest(
+            ".cwWordTable"
+        );
+
+
+    return target || null;
+
+
+}
+
+
+
+
+
+
+
+
+
+function addVerticalLine(table,x){
+
+
+    const rect =
+        table.getBoundingClientRect();
+
+
+
+    const ratio =
+        x - rect.left;
+
+
+
+    const columns =
+        table.rows[0]
+        ? table.rows[0].cells.length
+        : 0;
+
+
+
+    if(columns < 1){
+
+        return;
+
+    }
+
+
+
+    const position =
+        Math.round(
+            ratio /
+            (rect.width / columns)
+        );
+
+
+
+    Array.from(
+        table.rows
+    )
+    .forEach(function(row){
+
+
+        const cell =
+            row.cells[position - 1];
+
+
+
+        if(cell){
+
+            cell.style.borderRight =
+                "1px solid #999";
+
+        }
+
+
+    });
+
+
+
+}
+
+
+
+
+
+
+
+
+function addHorizontalLine(table,y){
+
+
+    const rect =
+        table.getBoundingClientRect();
+
+
+
+    const ratio =
+        y - rect.top;
+
+
+
+    const rows =
+        table.rows.length;
+
+
+
+    if(rows < 1){
+
+        return;
+
+    }
+
+
+
+    const position =
+        Math.round(
+            ratio /
+            (rect.height / rows)
+        );
+
+
+
+    const row =
+        table.rows[position - 1];
+
+
+
+    if(row){
+
+
+        Array.from(
+            row.cells
+        )
+        .forEach(function(cell){
+
+
+            cell.style.borderBottom =
+                "1px solid #999";
+
+
+        });
+
+
+    }
+
+
+}
+
+
+
+
+
+
+
+
+
+document.addEventListener(
+    "pointerdown",
+    function(e){
+
+
+
+        if(
+            !window.CampusWordDrawTable ||
+            !window.CampusWordDrawTable.isActive()
+        ){
+
+            return;
+
+        }
+
+
+
+
+
+        const table =
+            findTable(e);
+
+
+
+        if(!table){
+
+            return;
+
+        }
+
+
+
+        activeTable =
+            table;
+
+
+
+        drawingLine = true;
+
+
+
+        startX =
+            e.clientX;
+
+
+
+        startY =
+            e.clientY;
+
+
+
+        e.preventDefault();
+
+
+
+    },
+    {
+        passive:false
+    }
+);
+
+
+
+
+
+
+
+
+
+document.addEventListener(
+    "pointerup",
+    function(e){
+
+
+
+        if(
+            !drawingLine ||
+            !activeTable
+        ){
+
+            return;
+
+        }
+
+
+
+        const dx =
+            Math.abs(
+                e.clientX - startX
+            );
+
+
+
+        const dy =
+            Math.abs(
+                e.clientY - startY
+            );
+
+
+
+
+
+
+        /*
+          VERTICAL DRAW
+        */
+
+        if(
+            dx < threshold &&
+            dy > threshold
+        ){
+
+            addVerticalLine(
+                activeTable,
+                startX
+            );
+
+        }
+
+
+
+
+
+
+
+        /*
+          HORIZONTAL DRAW
+        */
+
+        if(
+            dy < threshold &&
+            dx > threshold
+        ){
+
+            addHorizontalLine(
+                activeTable,
+                startY
+            );
+
+        }
+
+
+
+
+
+
+
+        drawingLine = false;
+
+        activeTable = null;
+
+
+
+    },
+    false
+);
+
+
+
+})();
