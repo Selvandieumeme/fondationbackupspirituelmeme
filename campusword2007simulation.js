@@ -13855,3 +13855,291 @@ document.addEventListener(
 
 
 })();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* =========================================================
+   CAMPUS WORD — SHAPES CREATION ENGINE
+   STEP 3
+   CREATE REAL SHAPE OBJECT
+   INSERT INTO PAGE
+   USE SAVED POSITION
+   NO CARET INTERFERENCE
+   NO IMAGE / TABLE INTERFERENCE
+   ISOLATED MODULE
+========================================================= */
+
+(function(){
+
+
+
+
+
+
+function createShapeElement(
+    type
+){
+
+
+
+    const shape =
+        document.createElement(
+            "div"
+        );
+
+
+
+    shape.className =
+        "cwInsertedShape";
+
+
+
+    shape.dataset.shape =
+        type;
+
+
+
+
+
+    shape.style.position =
+        "absolute";
+
+
+
+    shape.style.width =
+        "120px";
+
+
+
+    shape.style.height =
+        "80px";
+
+
+
+    shape.style.left =
+        "0px";
+
+
+
+    shape.style.top =
+        "0px";
+
+
+
+    shape.style.cursor =
+        "move";
+
+
+
+
+
+    shape.style.border =
+        "2px solid #2563eb";
+
+
+
+    shape.style.background =
+        "rgba(37,99,235,0.15)";
+
+
+
+
+
+
+    if(type === "shape-circle"){
+
+
+        shape.style.borderRadius =
+            "50%";
+
+
+    }
+
+
+
+
+
+
+
+    if(type === "shape-line"){
+
+
+        shape.style.height =
+            "2px";
+
+
+        shape.style.background =
+            "#2563eb";
+
+
+    }
+
+
+
+
+
+
+
+
+    if(type === "shape-triangle"){
+
+
+        shape.style.width =
+            "0";
+
+
+        shape.style.height =
+            "0";
+
+
+        shape.style.background =
+            "transparent";
+
+
+        shape.style.borderLeft =
+            "60px solid transparent";
+
+
+        shape.style.borderRight =
+            "60px solid transparent";
+
+
+        shape.style.borderBottom =
+            "80px solid rgba(37,99,235,0.4)";
+
+
+    }
+
+
+
+
+
+
+
+    return shape;
+
+
+
+}
+
+
+
+
+
+
+
+
+
+document.addEventListener(
+    "pointerdown",
+    function(){
+
+
+
+        const data =
+            window.CampusWordShapeData;
+
+
+
+        if(
+            !data ||
+            !data.position ||
+            !data.getShape()
+        ){
+
+            return;
+
+        }
+
+
+
+
+
+
+
+        const page =
+            data.position.page;
+
+
+
+
+
+
+        const shape =
+            createShapeElement(
+                data.getShape()
+            );
+
+
+
+
+
+
+
+        shape.style.left =
+            data.position.x + "px";
+
+
+
+        shape.style.top =
+            data.position.y + "px";
+
+
+
+
+
+
+
+        page.appendChild(
+            shape
+        );
+
+
+
+
+
+
+
+        window.CampusWordSelectedShape =
+            shape;
+
+
+
+
+
+
+
+        data.position =
+            null;
+
+
+
+
+
+    },
+    false
+);
+
+
+
+
+
+
+
+})();
