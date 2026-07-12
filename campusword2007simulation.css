@@ -3021,3 +3021,27 @@ body{
     color:#16a34a !important;
 
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+.cwClipArtGallery{
+    display:block !important;
+    position:fixed;
+    top:100px;
+    left:100px;
+    z-index:999999;
+}
