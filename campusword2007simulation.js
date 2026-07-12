@@ -13870,10 +13870,6 @@ document.addEventListener(
 
 
 
-
-
-
-
 /* =========================================================
    CAMPUS WORD — SHAPES CREATION ENGINE
    STEP 3
@@ -13947,10 +13943,23 @@ function createShapeElement(
 
 
 
+    shape.style.display =
+        "flex";
 
 
-    shape.style.border =
-        "2px solid #2563eb";
+
+    shape.style.alignItems =
+        "center";
+
+
+
+    shape.style.justifyContent =
+        "center";
+
+
+
+    shape.style.overflow =
+        "hidden";
 
 
 
@@ -13959,10 +13968,17 @@ function createShapeElement(
 
 
 
+    shape.style.border =
+        "2px solid #2563eb";
 
 
 
-    if(type === "shape-circle"){
+
+
+
+    if(
+        type === "shape-circle"
+    ){
 
 
         shape.style.borderRadius =
@@ -13977,15 +13993,13 @@ function createShapeElement(
 
 
 
-    if(type === "shape-line"){
+    if(
+        type === "shape-rounded-rect"
+    ){
 
 
-        shape.style.height =
-            "2px";
-
-
-        shape.style.background =
-            "#2563eb";
+        shape.style.borderRadius =
+            "15px";
 
 
     }
@@ -13997,7 +14011,39 @@ function createShapeElement(
 
 
 
-    if(type === "shape-triangle"){
+    if(
+        type === "shape-line"
+    ){
+
+
+        shape.style.height =
+            "2px";
+
+
+        shape.style.width =
+            "120px";
+
+
+        shape.style.background =
+            "#2563eb";
+
+
+        shape.style.border =
+            "none";
+
+
+    }
+
+
+
+
+
+
+
+
+    if(
+        type === "shape-triangle"
+    ){
 
 
         shape.style.width =
@@ -14022,6 +14068,206 @@ function createShapeElement(
 
         shape.style.borderBottom =
             "80px solid rgba(37,99,235,0.4)";
+
+
+        shape.style.borderTop =
+            "none";
+
+
+    }
+
+
+
+
+
+
+
+    if(
+        type === "shape-diamond"
+    ){
+
+
+        shape.style.transform =
+            "rotate(45deg)";
+
+
+        shape.style.width =
+            "85px";
+
+
+        shape.style.height =
+            "85px";
+
+
+    }
+
+
+
+
+
+
+
+
+    if(
+        type === "shape-heart"
+    ){
+
+
+        shape.innerHTML =
+        "♥";
+
+
+        shape.style.color =
+            "#2563eb";
+
+
+        shape.style.background =
+            "transparent";
+
+
+        shape.style.border =
+            "none";
+
+
+        shape.style.fontSize =
+            "90px";
+
+
+    }
+
+
+
+
+
+
+
+
+    if(
+        type === "shape-star" ||
+        type === "shape-star-5"
+    ){
+
+
+        shape.innerHTML =
+            "★";
+
+
+        shape.style.color =
+            "#2563eb";
+
+
+        shape.style.background =
+            "transparent";
+
+
+        shape.style.border =
+            "none";
+
+
+        shape.style.fontSize =
+            "90px";
+
+
+    }
+
+
+
+
+
+
+
+
+    if(
+        type === "shape-cloud"
+    ){
+
+
+        shape.innerHTML =
+            "☁";
+
+
+        shape.style.color =
+            "#2563eb";
+
+
+        shape.style.background =
+            "transparent";
+
+
+        shape.style.border =
+            "none";
+
+
+        shape.style.fontSize =
+            "80px";
+
+
+    }
+
+
+
+
+
+
+
+
+    if(
+        type === "shape-lightning"
+    ){
+
+
+        shape.innerHTML =
+            "⚡";
+
+
+        shape.style.color =
+            "#2563eb";
+
+
+        shape.style.background =
+            "transparent";
+
+
+        shape.style.border =
+            "none";
+
+
+        shape.style.fontSize =
+            "80px";
+
+
+    }
+
+
+
+
+
+
+
+
+    if(
+        type === "shape-smiley"
+    ){
+
+
+        shape.innerHTML =
+            "☺";
+
+
+        shape.style.color =
+            "#2563eb";
+
+
+        shape.style.background =
+            "transparent";
+
+
+        shape.style.border =
+            "none";
+
+
+        shape.style.fontSize =
+            "90px";
 
 
     }
@@ -14139,6 +14385,9 @@ document.addEventListener(
 
 
 
+
+
+
 })();
 
 
@@ -14151,391 +14400,3 @@ document.addEventListener(
 
 
 
-
-
-
-
-
-
-
-/* =========================================================
-   CAMPUS WORD — SHAPES RENDER PATCH
-   STEP 3.1
-   MAP SHAPE ID TO REAL SHAPE
-   ISOLATED MODULE
-   NO RIBBON INTERFERENCE
-   NO CARET INTERFERENCE
-   NO IMAGE / TABLE INTERFERENCE
-========================================================= */
-
-(function(){
-
-
-
-function createSVGShape(type){
-
-
-
-    const svg =
-        document.createElementNS(
-            "http://www.w3.org/2000/svg",
-            "svg"
-        );
-
-
-
-    svg.setAttribute(
-        "viewBox",
-        "0 0 100 100"
-    );
-
-
-
-    svg.setAttribute(
-        "width",
-        "100%"
-    );
-
-
-
-    svg.setAttribute(
-        "height",
-        "100%"
-    );
-
-
-
-    svg.style.pointerEvents =
-        "none";
-
-
-
-
-
-
-
-    let element = null;
-
-
-
-
-
-
-    switch(type){
-
-
-
-        case "shape-rect":
-
-            element =
-            document.createElementNS(
-                "http://www.w3.org/2000/svg",
-                "rect"
-            );
-
-            element.setAttribute(
-                "x","10"
-            );
-
-            element.setAttribute(
-                "y","20"
-            );
-
-            element.setAttribute(
-                "width","80"
-            );
-
-            element.setAttribute(
-                "height","60"
-            );
-
-        break;
-
-
-
-
-
-
-
-        case "shape-rounded-rect":
-
-            element =
-            document.createElementNS(
-                "http://www.w3.org/2000/svg",
-                "rect"
-            );
-
-            element.setAttribute(
-                "x","10"
-            );
-
-            element.setAttribute(
-                "y","20"
-            );
-
-            element.setAttribute(
-                "width","80"
-            );
-
-            element.setAttribute(
-                "height","60"
-            );
-
-            element.setAttribute(
-                "rx","15"
-            );
-
-        break;
-
-
-
-
-
-
-
-        case "shape-circle":
-
-            element =
-            document.createElementNS(
-                "http://www.w3.org/2000/svg",
-                "ellipse"
-            );
-
-            element.setAttribute(
-                "cx","50"
-            );
-
-            element.setAttribute(
-                "cy","50"
-            );
-
-            element.setAttribute(
-                "rx","35"
-            );
-
-            element.setAttribute(
-                "ry","35"
-            );
-
-        break;
-
-
-
-
-
-
-
-        case "shape-triangle":
-
-            element =
-            document.createElementNS(
-                "http://www.w3.org/2000/svg",
-                "polygon"
-            );
-
-            element.setAttribute(
-                "points",
-                "50,10 90,85 10,85"
-            );
-
-        break;
-
-
-
-
-
-
-
-        case "shape-diamond":
-
-            element =
-            document.createElementNS(
-                "http://www.w3.org/2000/svg",
-                "polygon"
-            );
-
-            element.setAttribute(
-                "points",
-                "50,5 95,50 50,95 5,50"
-            );
-
-        break;
-
-
-
-
-
-
-
-        case "shape-heart":
-
-            element =
-            document.createElementNS(
-                "http://www.w3.org/2000/svg",
-                "path"
-            );
-
-            element.setAttribute(
-                "d",
-                "M50 85 C20 60 5 35 25 20 C38 10 50 25 50 25 C50 25 62 10 75 20 C95 35 80 60 50 85"
-            );
-
-        break;
-
-
-
-
-
-
-
-        case "shape-star":
-        case "shape-star-5":
-
-            element =
-            document.createElementNS(
-                "http://www.w3.org/2000/svg",
-                "polygon"
-            );
-
-            element.setAttribute(
-                "points",
-                "50,5 61,38 95,38 67,58 78,92 50,72 22,92 33,58 5,38 39,38"
-            );
-
-        break;
-
-
-
-
-
-
-
-        case "shape-line":
-
-            element =
-            document.createElementNS(
-                "http://www.w3.org/2000/svg",
-                "line"
-            );
-
-            element.setAttribute(
-                "x1","10"
-            );
-
-            element.setAttribute(
-                "y1","90"
-            );
-
-            element.setAttribute(
-                "x2","90"
-            );
-
-            element.setAttribute(
-                "y2","10"
-            );
-
-        break;
-
-
-
-
-
-
-
-        default:
-
-            element =
-            document.createElementNS(
-                "http://www.w3.org/2000/svg",
-                "rect"
-            );
-
-            element.setAttribute(
-                "x","10"
-            );
-
-            element.setAttribute(
-                "y","20"
-            );
-
-            element.setAttribute(
-                "width","80"
-            );
-
-            element.setAttribute(
-                "height","60"
-            );
-
-        break;
-
-
-    }
-
-
-
-
-
-
-
-    element.setAttribute(
-        "fill",
-        "rgba(37,99,235,0.20)"
-    );
-
-
-
-    element.setAttribute(
-        "stroke",
-        "#2563eb"
-    );
-
-
-
-    element.setAttribute(
-        "stroke-width",
-        "3"
-    );
-
-
-
-
-
-    svg.appendChild(
-        element
-    );
-
-
-
-    return svg;
-
-
-
-}
-
-
-
-
-
-
-
-window.CampusWordShapeRenderer = {
-
-
-    create:function(type){
-
-        return createSVGShape(
-            type
-        );
-
-    }
-
-
-};
-
-
-
-
-
-
-
-})();
