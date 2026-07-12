@@ -15411,280 +15411,245 @@ document.addEventListener(
 
 
 
-
-
-
-
 /* =========================================================
    CAMPUS WORD — INSERT CLIP ART ENGINE
    STEP 2
-   CLIP ART ACTIVATION DETECTION
-   PREPARE INSERT MODE ONLY
-   NO CLIPART INSERTION YET
-   NO IMAGE / SHAPE / CARET INTERFERENCE
+   WORD STYLE CLIP ART GALLERY
+   COLOR SVG COLLECTION
+   CATEGORIES
    ISOLATED MODULE
+   TARGET ONLY INSERT CLIPART BUTTON
+   NO IMAGE / SHAPE / TABLE / CARET INTERFERENCE
 ========================================================= */
 
 (function(){
 
 
-
-let clipArtMode = false;
-
+let clipArtOpen = false;
 
 
 
 
-document.addEventListener(
-    "click",
-    function(e){
+const clipArts = [
+
+{
+name:"Smile",
+category:"People",
+svg:`
+<svg viewBox="0 0 100 100">
+<circle cx="50" cy="50" r="40" fill="#facc15"/>
+<circle cx="35" cy="40" r="6" fill="#111827"/>
+<circle cx="65" cy="40" r="6" fill="#111827"/>
+<path d="M30 60 Q50 80 70 60"
+stroke="#111827"
+stroke-width="6"
+fill="none"/>
+</svg>`
+},
+
+
+{
+name:"Star",
+category:"Symbols",
+svg:`
+<svg viewBox="0 0 100 100">
+<path d="M50 5 L61 37 L95 37 L67 57 L78 92 L50 72 L22 92 L33 57 L5 37 L39 37Z"
+fill="#f97316"/>
+</svg>`
+},
+
+
+{
+name:"Heart",
+category:"Love",
+svg:`
+<svg viewBox="0 0 100 100">
+<path d="M50 85 C20 60 5 40 20 20 C35 5 50 25 50 25 C50 25 65 5 80 20 C95 40 80 60 50 85Z"
+fill="#ef4444"/>
+</svg>`
+},
+
+
+{
+name:"Cloud",
+category:"Nature",
+svg:`
+<svg viewBox="0 0 100 100">
+<path d="M25 70 H75 C95 70 95 40 75 40 C70 15 35 15 30 40 C10 40 10 70 25 70Z"
+fill="#60a5fa"/>
+</svg>`
+},
+
+
+{
+name:"Flower",
+category:"Nature",
+svg:`
+<svg viewBox="0 0 100 100">
+<circle cx="50" cy="50" r="15" fill="#facc15"/>
+<circle cx="50" cy="20" r="18" fill="#ec4899"/>
+<circle cx="80" cy="50" r="18" fill="#ec4899"/>
+<circle cx="50" cy="80" r="18" fill="#ec4899"/>
+<circle cx="20" cy="50" r="18" fill="#ec4899"/>
+</svg>`
+},
+
+
+{
+name:"Camera",
+category:"Objects",
+svg:`
+<svg viewBox="0 0 100 100">
+<rect x="15" y="30" width="70" height="45" rx="8" fill="#374151"/>
+<circle cx="50" cy="52" r="15" fill="#38bdf8"/>
+<rect x="35" y="20" width="30" height="10" fill="#111827"/>
+</svg>`
+},
+
+
+{
+name:"Gift",
+category:"Objects",
+svg:`
+<svg viewBox="0 0 100 100">
+<rect x="20" y="35" width="60" height="45" fill="#22c55e"/>
+<rect x="45" y="35" width="10" height="45" fill="#facc15"/>
+<rect x="20" y="25" width="60" height="15" fill="#16a34a"/>
+</svg>`
+}
+
+
+];
 
 
 
-        const button =
-            e.target.closest(
-                '[data-action="insert-clipart"]'
-            );
-
-
-
-        if(!button){
-
-            return;
-
-        }
 
 
 
 
-
-        clipArtMode =
-            button.classList.contains(
-                "cwInsertClipArtActive"
-            );
+function openClipArtGallery(){
 
 
+if(clipArtOpen){
 
+return;
 
-
-        if(clipArtMode){
-
-
-            window.CampusWordClipArtData = {
-
-
-                active:true
-
-
-            };
+}
 
 
 
-        }else{
-
-
-            window.CampusWordClipArtData = {
-
-
-                active:false
-
-
-            };
-
-
-        }
+clipArtOpen = true;
 
 
 
-
-
-    },
-    false
+const box =
+document.createElement(
+"div"
 );
 
 
 
-})();
+box.className =
+"cwClipArtGallery";
 
 
 
 
+box.innerHTML = `
 
+<div class="cwClipArtBox">
 
 
+<h3>
+Clip Art Gallery
+</h3>
 
 
 
+<div class="cwClipCategories">
 
-/* =========================================================
-   CAMPUS WORD — CLIP ART GALLERY ENGINE
-   STEP 3
-   OPEN CLIP ART GALLERY WINDOW
-   ISOLATED MODULE
-   ONLY INSERT-CLIPART BUTTON CONTROL
-   NO SHAPE / IMAGE / TABLE / CARET INTERFERENCE
-========================================================= */
+<button>
+All
+</button>
 
-(function(){
+<button>
+People
+</button>
 
+<button>
+Nature
+</button>
 
+<button>
+Objects
+</button>
 
-let cwClipArtGalleryBox = null;
+<button>
+Symbols
+</button>
 
+</div>
 
 
 
 
+<div class="cwClipArtGrid">
 
-function cwOpenClipArtGallery(){
+${clipArts.map(item=>`
 
+<div class="cwClipArtItem"
+data-clipart="${item.name}">
 
+${item.svg}
 
-    if(cwClipArtGalleryBox){
+<span>
+${item.name}
+</span>
 
-        return;
+</div>
 
-    }
+`).join("")}
 
 
+</div>
 
 
 
 
-    cwClipArtGalleryBox =
-        document.createElement(
-            "div"
-        );
+<button id="cwClipArtClose">
+Close
+</button>
 
 
 
-    cwClipArtGalleryBox.className =
-        "cwClipArtGallery";
+</div>
 
+`;
 
 
 
+document.body.appendChild(
+box
+);
 
 
-    cwClipArtGalleryBox.innerHTML = `
 
 
-        <div class="cwClipArtHeader">
 
-            <h3>
-                Clip Art Gallery
-            </h3>
+document
+.getElementById(
+"cwClipArtClose"
+)
+.onclick=function(){
 
 
-            <button 
-                id="cwClipArtCloseBtn">
-                X
-            </button>
+box.remove();
 
+clipArtOpen=false;
 
-        </div>
 
+};
 
-
-        <div class="cwClipArtGrid">
-
-
-            <div class="cwClipArtItem">
-                🌺
-            </div>
-
-
-            <div class="cwClipArtItem">
-                🌳
-            </div>
-
-
-            <div class="cwClipArtItem">
-                ⭐
-            </div>
-
-
-            <div class="cwClipArtItem">
-                ❤️
-            </div>
-
-
-            <div class="cwClipArtItem">
-                ☀️
-            </div>
-
-
-            <div class="cwClipArtItem">
-                ☁️
-            </div>
-
-
-            <div class="cwClipArtItem">
-                📷
-            </div>
-
-
-            <div class="cwClipArtItem">
-                💻
-            </div>
-
-
-            <div class="cwClipArtItem">
-                📘
-            </div>
-
-
-            <div class="cwClipArtItem">
-                🎵
-            </div>
-
-
-        </div>
-
-
-    `;
-
-
-
-
-
-
-
-    document.body.appendChild(
-        cwClipArtGalleryBox
-    );
-
-
-
-
-
-
-
-
-    const closeButton =
-        document.getElementById(
-            "cwClipArtCloseBtn"
-        );
-
-
-
-    if(closeButton){
-
-
-        closeButton.onclick =
-        function(){
-
-
-            cwClipArtGalleryBox.remove();
-
-
-            cwClipArtGalleryBox = null;
-
-
-        };
-
-
-    }
 
 
 
@@ -15699,52 +15664,43 @@ function cwOpenClipArtGallery(){
 
 
 document.addEventListener(
-    "click",
-    function(e){
+"click",
+function(e){
 
 
-
-        const clipButton =
-            e.target.closest(
-                '[data-action="insert-clipart"]'
-            );
-
-
-
-        if(!clipButton){
-
-            return;
-
-        }
-
-
-
-
-
-        e.preventDefault();
-
-
-        e.stopPropagation();
-
-
-
-
-
-        cwOpenClipArtGallery();
-
-
-
-    },
-    false
+const button =
+e.target.closest(
+'[data-action="insert-clipart"]'
 );
 
 
 
+if(!button){
+
+return;
+
+}
+
+
+
+
+e.preventDefault();
+
+e.stopPropagation();
+
+
+
+openClipArtGallery();
+
+
+
+},
+false
+);
+
 
 
 })();
-
-
 
 
 
