@@ -14408,30 +14408,25 @@ document.addEventListener(
 
 
 
-
-
-
 /* =========================================================
-   CAMPUS WORD — SHAPES RESIZE HANDLE ENGINE
+   CAMPUS WORD — SHAPE RESIZE ENGINE
    STEP 4
+   SHAPE ONLY
    8 RESIZE HANDLES
-   TOUCH + MOUSE SUPPORT
-   SHAPE SCALE CONTROL
-   ISOLATED MODULE
-   NO IMAGE INTERFERENCE
-   NO TABLE INTERFERENCE
-   NO CARET INTERFERENCE
+   TOUCH + MOUSE
+   ISOLATED FROM IMAGE RESIZE
+   ISOLATED FROM TABLE
+   ISOLATED FROM CARET
 ========================================================= */
 
 (function(){
 
 
-
-let selectedShape = null;
+let activeShape = null;
 
 let resizing = false;
 
-let resizeDirection = null;
+let direction = null;
 
 
 let startX = 0;
@@ -14446,12 +14441,7 @@ let startHeight = 0;
 
 
 
-
-
-
-
-const directions = [
-
+const points = [
     "nw",
     "n",
     "ne",
@@ -14460,7 +14450,6 @@ const directions = [
     "sw",
     "s",
     "se"
-
 ];
 
 
@@ -14469,16 +14458,12 @@ const directions = [
 
 
 
-
-function removeShapeHandles(){
-
-
+function clearShapeHandles(){
 
     const old =
         document.querySelector(
-            ".cwShapeResizeBox"
+            ".cwShapeHandles"
         );
-
 
 
     if(old){
@@ -14486,8 +14471,6 @@ function removeShapeHandles(){
         old.remove();
 
     }
-
-
 
 }
 
@@ -14498,14 +14481,10 @@ function removeShapeHandles(){
 
 
 
-
-function createShapeHandles(shape){
-
+function showShapeHandles(shape){
 
 
-    removeShapeHandles();
-
-
+    clearShapeHandles();
 
 
 
@@ -14515,9 +14494,8 @@ function createShapeHandles(shape){
         );
 
 
-
     box.className =
-        "cwShapeResizeBox";
+        "cwShapeHandles";
 
 
 
@@ -14525,25 +14503,20 @@ function createShapeHandles(shape){
         "absolute";
 
 
-
     box.style.left =
         shape.offsetLeft + "px";
-
 
 
     box.style.top =
         shape.offsetTop + "px";
 
 
-
     box.style.width =
         shape.offsetWidth + "px";
 
 
-
     box.style.height =
         shape.offsetHeight + "px";
-
 
 
     box.style.pointerEvents =
@@ -14552,44 +14525,35 @@ function createShapeHandles(shape){
 
 
 
-
-    directions.forEach(
-        function(dir){
-
+    points.forEach(
+        function(p){
 
 
-            const handle =
+            const h =
                 document.createElement(
                     "div"
                 );
 
 
-
-            handle.className =
-                "cwShapeResizeHandle " + dir;
-
+            h.className =
+                "cwShapeHandle-" + p;
 
 
-            handle.dataset.direction =
-                dir;
+            h.dataset.shapeResize =
+                p;
 
 
-
-            handle.style.pointerEvents =
+            h.style.pointerEvents =
                 "auto";
 
 
-
             box.appendChild(
-                handle
+                h
             );
-
 
 
         }
     );
-
-
 
 
 
@@ -14598,9 +14562,7 @@ function createShapeHandles(shape){
     );
 
 
-
 }
-
 
 
 
@@ -14615,6 +14577,69 @@ document.addEventListener(
 
 
 
+        const handle =
+            e.target.closest(
+                "[data-shape-resize]"
+            );
+
+
+
+        if(handle){
+
+
+            activeShape =
+                window.CampusWordSelectedShape;
+
+
+
+            if(!activeShape){
+
+                return;
+
+            }
+
+
+
+            resizing = true;
+
+
+
+            direction =
+                handle.dataset.shapeResize;
+
+
+
+            startX =
+                e.clientX;
+
+
+            startY =
+                e.clientY;
+
+
+            startWidth =
+                activeShape.offsetWidth;
+
+
+            startHeight =
+                activeShape.offsetHeight;
+
+
+
+            e.preventDefault();
+
+
+
+            return;
+
+        }
+
+
+
+
+
+
+
         const shape =
             e.target.closest(
                 ".cwInsertedShape"
@@ -14622,13 +14647,11 @@ document.addEventListener(
 
 
 
-
-
         if(shape){
 
 
 
-            selectedShape =
+            activeShape =
                 shape;
 
 
@@ -14638,7 +14661,7 @@ document.addEventListener(
 
 
 
-            createShapeHandles(
+            showShapeHandles(
                 shape
             );
 
@@ -14647,76 +14670,6 @@ document.addEventListener(
             return;
 
         }
-
-
-
-
-
-
-
-
-        const handle =
-            e.target.closest(
-                ".cwShapeResizeHandle"
-            );
-
-
-
-        if(!handle){
-
-            return;
-
-        }
-
-
-
-
-
-        selectedShape =
-            window.CampusWordSelectedShape;
-
-
-
-        if(!selectedShape){
-
-            return;
-
-        }
-
-
-
-
-
-        resizing = true;
-
-
-
-        resizeDirection =
-            handle.dataset.direction;
-
-
-
-        startX =
-            e.clientX;
-
-
-
-        startY =
-            e.clientY;
-
-
-
-        startWidth =
-            selectedShape.offsetWidth;
-
-
-
-        startHeight =
-            selectedShape.offsetHeight;
-
-
-
-        e.preventDefault();
 
 
 
@@ -14742,7 +14695,7 @@ document.addEventListener(
 
         if(
             !resizing ||
-            !selectedShape
+            !activeShape
         ){
 
             return;
@@ -14752,114 +14705,51 @@ document.addEventListener(
 
 
 
-
-
-        const dx =
-            e.clientX -
-            startX;
-
-
-
-        const dy =
-            e.clientY -
-            startY;
+        let w =
+            startWidth +
+            (
+                e.clientX -
+                startX
+            );
 
 
 
-        let width =
-            startWidth;
+        let h =
+            startHeight +
+            (
+                e.clientY -
+                startY
+            );
 
 
 
-        let height =
-            startHeight;
+        if(w < 40){
 
-
-
-
-
-
-
-        if(
-            resizeDirection.includes("e")
-        ){
-
-            width =
-                startWidth + dx;
+            w = 40;
 
         }
 
 
 
-        if(
-            resizeDirection.includes("w")
-        ){
+        if(h < 40){
 
-            width =
-                startWidth - dx;
+            h = 40;
 
         }
 
 
 
+        activeShape.style.width =
+            w + "px";
 
-        if(
-            resizeDirection.includes("s")
-        ){
 
-            height =
-                startHeight + dy;
-
-        }
+        activeShape.style.height =
+            h + "px";
 
 
 
-
-        if(
-            resizeDirection.includes("n")
-        ){
-
-            height =
-                startHeight - dy;
-
-        }
-
-
-
-
-
-        if(width < 30){
-
-            width = 30;
-
-        }
-
-
-
-        if(height < 30){
-
-            height = 30;
-
-        }
-
-
-
-
-
-        selectedShape.style.width =
-            width + "px";
-
-
-
-        selectedShape.style.height =
-            height + "px";
-
-
-
-
-
-        createShapeHandles(
-            selectedShape
+        showShapeHandles(
+            activeShape
         );
 
 
@@ -14883,11 +14773,9 @@ document.addEventListener(
     function(){
 
 
-
         resizing = false;
 
-        resizeDirection = null;
-
+        direction = null;
 
 
     },
@@ -14907,45 +14795,27 @@ document.addEventListener(
     function(e){
 
 
-
-        const shape =
+        const inside =
             e.target.closest(
-                ".cwInsertedShape"
+                ".cwInsertedShape, .cwShapeHandles"
             );
 
 
 
-        const handle =
-            e.target.closest(
-                ".cwShapeResizeHandle"
-            );
+        if(!inside){
 
 
-
-
-
-        if(
-            !shape &&
-            !handle
-        ){
-
-
-
-            selectedShape = null;
-
+            activeShape = null;
 
 
             window.CampusWordSelectedShape =
                 null;
 
 
-
-            removeShapeHandles();
-
+            clearShapeHandles();
 
 
         }
-
 
 
     },
@@ -14954,7 +14824,11 @@ document.addEventListener(
 
 
 
-
-
 })();
+
+
+
+
+
+
 
