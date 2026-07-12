@@ -13284,18 +13284,38 @@ document.addEventListener(
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 /* =========================================================
-   CAMPUS WORD 2007 — SHAPES DROPDOWN TOGGLE ENGINE
-   ISOLATED MODULE ONLY
+   CAMPUS WORD 2007 — SHAPES ONLY DROPDOWN TOGGLE
+   ISOLATED MODULE
 
-   PURPOSE:
-   Open / Close Shapes menu only
+   ONLY:
+   - Shapes button open
+   - Shapes button close
 
-   PROTECTION:
-   - NO OTHER DROPDOWN CONTROL
-   - NO SELECTION CHANGE
-   - NO CARET INTERACTION
-   - NO RIBBON TAB INTERFERENCE
+   NO IMPACT:
+   - Other dropdowns
+   - Home commands
+   - Caret
+   - Selection
+   - Ribbon tabs
 ========================================================= */
 
 (function(){
@@ -13303,80 +13323,62 @@ document.addEventListener(
     "use strict";
 
 
-    function initShapesDropdown(){
+    function initShapesDropdownOnly(){
 
 
-        const shapeButtons =
-            document.querySelectorAll(
-                '.cwRibbonBtn.cwDropdownBtn'
-            );
+        const shapeMenu =
+            document.querySelector(
+                '.cwDropdownMenu div[data-action^="shape-"]'
+            )?.parentElement;
 
 
-        shapeButtons.forEach(function(button){
+        if(!shapeMenu) return;
 
 
-            const menu =
-                button.nextElementSibling;
+
+        const shapeButton =
+            shapeMenu.previousElementSibling;
 
 
-            if(!menu) return;
+        if(!shapeButton) return;
 
 
-            /*
-              Detect only the Shapes dropdown
-              using shape actions inside menu
-            */
 
-            const hasShapes =
-                menu.querySelector(
-                    '[data-action^="shape-"]'
+        shapeButton.addEventListener(
+            "click",
+            function(e){
+
+
+                e.preventDefault();
+                e.stopPropagation();
+
+
+
+                shapeMenu.classList.toggle(
+                    "active"
                 );
 
 
-            if(!hasShapes) return;
+            },
+            false
+        );
 
 
 
-            button.addEventListener(
-                "click",
-                function(e){
+        /*
+          Prevent menu clicks from closing
+          the Shapes dropdown
+        */
 
+        shapeMenu.addEventListener(
+            "click",
+            function(e){
 
-                    e.preventDefault();
-                    e.stopPropagation();
+                e.stopPropagation();
 
-
-
-                    const isOpen =
-                        menu.classList.contains(
-                            "active"
-                        );
-
-
-
-                    // Close current state
-
-                    menu.classList.remove(
-                        "active"
-                    );
-
-
-
-                    if(!isOpen){
-
-                        menu.classList.add(
-                            "active"
-                        );
-
-                    }
-
-
-                },
-                false
-            );
-
-
-        });
+            },
+            false
+        );
 
 
     }
@@ -13385,7 +13387,7 @@ document.addEventListener(
 
     document.addEventListener(
         "DOMContentLoaded",
-        initShapesDropdown
+        initShapesDropdownOnly
     );
 
 
