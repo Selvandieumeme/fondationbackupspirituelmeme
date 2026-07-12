@@ -11627,7 +11627,6 @@ document.addEventListener(
 
 
 
-
 /* =========================================================
    CAMPUS WORD — IMAGE RESIZE HANDLE ENGINE
    STEP 4
@@ -11809,6 +11808,10 @@ function removeHandles(){
 
 
 
+
+
+
+
 document.addEventListener(
     "pointerdown",
     function(e){
@@ -11826,6 +11829,23 @@ document.addEventListener(
             e.target.closest(
                 ".cwResizeHandle"
             );
+
+
+
+        const clickedRibbon =
+            e.target.closest(
+                "#cwRibbon, .cwRibbonBtn, .cwDropdownMenu"
+            );
+
+
+
+        if(
+            clickedRibbon
+        ){
+
+            return;
+
+        }
 
 
 
@@ -11856,6 +11876,133 @@ document.addEventListener(
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+document.addEventListener(
+    "pointermove",
+    function(e){
+
+
+
+        if(
+            !resizing ||
+            !selectedImage
+        ){
+
+            return;
+
+        }
+
+
+
+
+
+        const dx =
+            e.clientX -
+            startX;
+
+
+
+        const dy =
+            e.clientY -
+            startY;
+
+
+
+        let newWidth =
+            startWidth;
+
+
+
+        if(
+            resizeHandle.includes("e")
+            ||
+            resizeHandle.includes("w")
+        ){
+
+            newWidth =
+                startWidth + dx;
+
+        }
+
+
+
+        if(
+            resizeHandle.includes("s")
+            ||
+            resizeHandle.includes("n")
+        ){
+
+            newWidth =
+                startWidth + dy * startRatio;
+
+        }
+
+
+
+
+        if(newWidth < 50){
+
+            newWidth = 50;
+
+        }
+
+
+
+
+        selectedImage.style.width =
+            newWidth + "px";
+
+
+
+        createHandles(
+            selectedImage
+        );
+
+
+
+    },
+    false
+);
+
+
+
+
+
+
+
+
+
+document.addEventListener(
+    "pointerup",
+    function(){
+
+
+        resizing = false;
+
+
+        resizeHandle = null;
+
+
+    },
+    false
+);
+
+
+
+
+
+})();
 
 
 
