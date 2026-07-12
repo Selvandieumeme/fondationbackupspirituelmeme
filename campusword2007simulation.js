@@ -14400,3 +14400,311 @@ document.addEventListener(
 
 
 
+
+
+
+
+
+
+
+
+
+
+/* =========================================================
+   CAMPUS WORD — SHAPE SELECTION + RESIZE HANDLE ENGINE
+   STEP 4
+   SELECT SHAPE
+   SHOW 8 RESIZE HANDLES
+   TOUCH + MOUSE SUPPORT
+   ISOLATED MODULE
+   NO IMAGE INTERFERENCE
+   NO TABLE INTERFERENCE
+   NO CARET INTERFERENCE
+========================================================= */
+
+(function(){
+
+
+
+let selectedShape = null;
+
+let resizeBox = null;
+
+
+
+const handles = [
+
+    "nw",
+    "n",
+    "ne",
+    "w",
+    "e",
+    "sw",
+    "s",
+    "se"
+
+];
+
+
+
+
+
+
+
+function removeShapeHandles(){
+
+
+    if(resizeBox){
+
+        resizeBox.remove();
+
+        resizeBox = null;
+
+    }
+
+
+}
+
+
+
+
+
+
+
+
+
+function createShapeHandles(shape){
+
+
+
+    removeShapeHandles();
+
+
+
+
+    const box =
+        document.createElement(
+            "div"
+        );
+
+
+
+    box.className =
+        "cwShapeResizeBox";
+
+
+
+    box.style.position =
+        "absolute";
+
+
+
+    box.style.left =
+        shape.offsetLeft + "px";
+
+
+
+    box.style.top =
+        shape.offsetTop + "px";
+
+
+
+    box.style.width =
+        shape.offsetWidth + "px";
+
+
+
+    box.style.height =
+        shape.offsetHeight + "px";
+
+
+
+
+
+    handles.forEach(
+        function(position){
+
+
+
+            const handle =
+                document.createElement(
+                    "div"
+                );
+
+
+
+            handle.className =
+                "cwShapeResizeHandle " +
+                position;
+
+
+
+            handle.dataset.direction =
+                position;
+
+
+
+            box.appendChild(
+                handle
+            );
+
+
+
+        }
+    );
+
+
+
+
+
+    shape.parentElement.appendChild(
+        box
+    );
+
+
+
+    resizeBox = box;
+
+
+
+}
+
+
+
+
+
+
+
+
+
+document.addEventListener(
+    "pointerdown",
+    function(e){
+
+
+
+        const shape =
+            e.target.closest(
+                ".cwInsertedShape"
+            );
+
+
+
+        if(!shape){
+
+            return;
+
+        }
+
+
+
+
+        selectedShape =
+            shape;
+
+
+
+        window.CampusWordSelectedShape =
+            shape;
+
+
+
+        createShapeHandles(
+            shape
+        );
+
+
+
+    },
+    false
+);
+
+
+
+
+
+
+
+
+
+document.addEventListener(
+    "pointerdown",
+    function(e){
+
+
+
+        const outside =
+            e.target.closest(
+                ".cwInsertedShape, .cwShapeResizeBox"
+            );
+
+
+
+        const ribbon =
+            e.target.closest(
+                "#cwRibbon, .cwRibbonBtn, .cwDropdownMenu"
+            );
+
+
+
+        if(ribbon){
+
+            return;
+
+        }
+
+
+
+
+
+        if(
+            !outside
+        ){
+
+            selectedShape = null;
+
+
+            window.CampusWordSelectedShape =
+                null;
+
+
+            removeShapeHandles();
+
+
+        }
+
+
+
+    },
+    false
+);
+
+
+
+
+
+
+
+
+
+window.CampusWordShapeSelection = {
+
+
+    get:function(){
+
+
+        return selectedShape;
+
+
+    }
+
+
+
+};
+
+
+
+})();
+
+
+
