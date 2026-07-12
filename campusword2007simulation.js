@@ -12842,6 +12842,60 @@ document.addEventListener(
 
 
 
+/* =========================================================
+   CAMPUS WORD — WRAP TEXT BUTTON STATE INDICATOR
+   VISUAL ACTIVE / INACTIVE ONLY
+   NO IMAGE INTERFERENCE
+   NO RESIZE INTERFERENCE
+========================================================= */
+
+(function(){
+
+
+
+document.addEventListener(
+    "click",
+    function(e){
+
+
+
+        const option =
+            e.target.closest(
+                "[data-wrap]"
+            );
+
+
+
+        if(!option){
+
+            return;
+
+        }
+
+
+
+        e.preventDefault();
+
+
+
+        option.classList.toggle(
+            "cwWrapOptionActive"
+        );
+
+
+
+    },
+    false
+);
+
+
+
+})();
+
+
+
+
+
 
 
 
