@@ -2783,6 +2783,29 @@ body{
 
 
 
+/* =========================================================
+   CAMPUS WORD — WRAP TEXT OPTION ACTIVE STATE
+   VISUAL ONLY
+   NO FUNCTION INTERFERENCE
+========================================================= */
+
+.cwWrapOptionActive{
+
+    background:#22c55e !important;
+
+    color:white !important;
+
+    border-radius:4px;
+
+}
+
+
+
+
+
+
+
+
 
 
 
