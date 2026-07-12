@@ -15403,3 +15403,105 @@ document.addEventListener(
 
 
 })();
+
+
+
+
+
+
+
+
+
+
+
+
+/* =========================================================
+   CAMPUS WORD — INSERT CLIP ART ENGINE
+   STEP 2
+   CLIP ART ACTIVATION DETECTION
+   PREPARE INSERT MODE ONLY
+   NO CLIPART INSERTION YET
+   NO IMAGE / SHAPE / CARET INTERFERENCE
+   ISOLATED MODULE
+========================================================= */
+
+(function(){
+
+
+
+let clipArtMode = false;
+
+
+
+
+
+document.addEventListener(
+    "click",
+    function(e){
+
+
+
+        const button =
+            e.target.closest(
+                '[data-action="insert-clipart"]'
+            );
+
+
+
+        if(!button){
+
+            return;
+
+        }
+
+
+
+
+
+        clipArtMode =
+            button.classList.contains(
+                "cwInsertClipArtActive"
+            );
+
+
+
+
+
+        if(clipArtMode){
+
+
+            window.CampusWordClipArtData = {
+
+
+                active:true
+
+
+            };
+
+
+
+        }else{
+
+
+            window.CampusWordClipArtData = {
+
+
+                active:false
+
+
+            };
+
+
+        }
+
+
+
+
+
+    },
+    false
+);
+
+
+
+})();
