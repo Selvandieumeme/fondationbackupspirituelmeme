@@ -13302,93 +13302,164 @@ document.addEventListener(
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 /* =========================================================
-   CAMPUS WORD 2007 — SHAPES ONLY DROPDOWN TOGGLE
+   CAMPUS WORD — SHAPES DROPDOWN ACTIVATOR
    ISOLATED MODULE
-
-   ONLY:
-   - Shapes button open
-   - Shapes button close
-
-   NO IMPACT:
-   - Other dropdowns
-   - Home commands
-   - Caret
-   - Selection
-   - Ribbon tabs
+   OPEN / CLOSE SHAPES MENU ONLY
+   NO OTHER DROPDOWN INTERFERENCE
 ========================================================= */
 
 (function(){
 
-    "use strict";
 
-
-    function initShapesDropdownOnly(){
-
-
-        const shapeMenu =
-            document.querySelector(
-                '.cwDropdownMenu div[data-action^="shape-"]'
-            )?.parentElement;
-
-
-        if(!shapeMenu) return;
+document.addEventListener(
+    "click",
+    function(e){
 
 
 
-        const shapeButton =
-            shapeMenu.previousElementSibling;
-
-
-        if(!shapeButton) return;
-
-
-
-        shapeButton.addEventListener(
-            "click",
-            function(e){
-
-
-                e.preventDefault();
-                e.stopPropagation();
+        const button =
+            e.target.closest(
+                '.cwRibbonBtn.cwDropdownBtn'
+            );
 
 
 
-                shapeMenu.classList.toggle(
-                    "active"
+        if(button){
+
+
+            const menu =
+                button.querySelector(
+                    ".cwDropdownMenu"
                 );
 
 
-            },
-            false
-        );
+            if(
+                !menu ||
+                !menu.querySelector(
+                    '[data-action^="shape-"]'
+                )
+            ){
+
+                return;
+
+            }
 
 
 
-        /*
-          Prevent menu clicks from closing
-          the Shapes dropdown
-        */
+            e.preventDefault();
 
-        shapeMenu.addEventListener(
-            "click",
-            function(e){
-
-                e.stopPropagation();
-
-            },
-            false
-        );
-
-
-    }
+            e.stopPropagation();
 
 
 
-    document.addEventListener(
-        "DOMContentLoaded",
-        initShapesDropdownOnly
-    );
+            button.classList.toggle(
+                "cwDropdownOpen"
+            );
+
+
+
+            menu.style.display =
+                button.classList.contains(
+                    "cwDropdownOpen"
+                )
+                ? "block"
+                : "none";
+
+
+
+            return;
+
+        }
+
+
+
+
+
+
+
+        const insideMenu =
+            e.target.closest(
+                ".cwDropdownMenu"
+            );
+
+
+
+        if(!insideMenu){
+
+
+            document
+            .querySelectorAll(
+                '.cwRibbonBtn.cwDropdownBtn.cwDropdownOpen'
+            )
+            .forEach(
+                function(btn){
+
+
+
+                    const menu =
+                        btn.querySelector(
+                            ".cwDropdownMenu"
+                        );
+
+
+
+                    if(
+                        menu &&
+                        menu.querySelector(
+                            '[data-action^="shape-"]'
+                        )
+                    ){
+
+
+                        btn.classList.remove(
+                            "cwDropdownOpen"
+                        );
+
+
+                        menu.style.display =
+                            "none";
+
+
+                    }
+
+
+
+                }
+            );
+
+
+        }
+
+
+
+    },
+    false
+);
+
 
 
 })();
