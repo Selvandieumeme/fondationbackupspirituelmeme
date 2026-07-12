@@ -13266,3 +13266,127 @@ document.addEventListener(
 
 
 })();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* =========================================================
+   CAMPUS WORD 2007 — SHAPES DROPDOWN TOGGLE ENGINE
+   ISOLATED MODULE ONLY
+
+   PURPOSE:
+   Open / Close Shapes menu only
+
+   PROTECTION:
+   - NO OTHER DROPDOWN CONTROL
+   - NO SELECTION CHANGE
+   - NO CARET INTERACTION
+   - NO RIBBON TAB INTERFERENCE
+========================================================= */
+
+(function(){
+
+    "use strict";
+
+
+    function initShapesDropdown(){
+
+
+        const shapeButtons =
+            document.querySelectorAll(
+                '.cwRibbonBtn.cwDropdownBtn'
+            );
+
+
+        shapeButtons.forEach(function(button){
+
+
+            const menu =
+                button.nextElementSibling;
+
+
+            if(!menu) return;
+
+
+            /*
+              Detect only the Shapes dropdown
+              using shape actions inside menu
+            */
+
+            const hasShapes =
+                menu.querySelector(
+                    '[data-action^="shape-"]'
+                );
+
+
+            if(!hasShapes) return;
+
+
+
+            button.addEventListener(
+                "click",
+                function(e){
+
+
+                    e.preventDefault();
+                    e.stopPropagation();
+
+
+
+                    const isOpen =
+                        menu.classList.contains(
+                            "active"
+                        );
+
+
+
+                    // Close current state
+
+                    menu.classList.remove(
+                        "active"
+                    );
+
+
+
+                    if(!isOpen){
+
+                        menu.classList.add(
+                            "active"
+                        );
+
+                    }
+
+
+                },
+                false
+            );
+
+
+        });
+
+
+    }
+
+
+
+    document.addEventListener(
+        "DOMContentLoaded",
+        initShapesDropdown
+    );
+
+
+})();
