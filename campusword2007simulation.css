@@ -2892,32 +2892,3 @@ body{
 
 
 
-
-
-/* =========================================================
-   CAMPUS WORD 2007 — SHAPES DROPDOWN DISPLAY CONTROL
-   ISOLATED MODULE ONLY
-
-   ONLY CONTROLS:
-   Shapes menu open / close
-
-   NO IMPACT:
-   Other dropdown menus
-   Ribbon layout
-   Caret
-   Selection
-========================================================= */
-
-
-/* Shapes menu hidden by default */
-.cwDropdownMenu:has([data-action^="shape-"]){
-    display:none;
-    position:absolute;
-    z-index:9999;
-}
-
-
-/* Shapes menu visible */
-.cwDropdownMenu:has([data-action^="shape-"]).active{
-    display:block;
-}
