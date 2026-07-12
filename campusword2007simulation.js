@@ -15522,6 +15522,17 @@ document.addEventListener(
 
 
 
+
+
+
+
+
+
+
+
+
+
+
 /* =========================================================
    CAMPUS WORD — CLIP ART GALLERY ENGINE
    STEP 3
@@ -15538,6 +15549,7 @@ document.addEventListener(
 
 
 let clipArtBox = null;
+
 
 
 
@@ -15579,11 +15591,13 @@ function openClipArtGallery(){
             Clip Art Gallery
         </h3>
 
+
         <button id="cwCloseClipArt">
             X
         </button>
 
     </div>
+
 
 
 
@@ -15616,8 +15630,8 @@ function openClipArtGallery(){
         </button>
 
 
-
     </div>
+
 
 
 
@@ -15629,108 +15643,84 @@ function openClipArtGallery(){
 
         <div class="cwClipArtItem"
              data-clipart="flower">
-
             🌺
-
         </div>
 
 
 
         <div class="cwClipArtItem"
              data-clipart="tree">
-
             🌳
-
         </div>
 
 
 
         <div class="cwClipArtItem"
              data-clipart="star">
-
             ⭐
-
         </div>
 
 
 
         <div class="cwClipArtItem"
              data-clipart="heart">
-
             ❤️
-
         </div>
 
 
 
         <div class="cwClipArtItem"
              data-clipart="sun">
-
             ☀️
-
         </div>
 
 
 
         <div class="cwClipArtItem"
              data-clipart="cloud">
-
             ☁️
-
         </div>
 
 
 
         <div class="cwClipArtItem"
              data-clipart="camera">
-
             📷
-
         </div>
 
 
 
         <div class="cwClipArtItem"
              data-clipart="book">
-
             📘
-
         </div>
 
 
 
         <div class="cwClipArtItem"
              data-clipart="idea">
-
             💡
-
         </div>
 
 
 
         <div class="cwClipArtItem"
              data-clipart="music">
-
             🎵
-
         </div>
 
 
 
         <div class="cwClipArtItem"
              data-clipart="computer">
-
             💻
-
         </div>
 
 
 
         <div class="cwClipArtItem"
              data-clipart="pencil">
-
             ✏️
-
         </div>
 
 
@@ -15747,6 +15737,7 @@ function openClipArtGallery(){
     document.body.appendChild(
         clipArtBox
     );
+
 
 
 
@@ -15779,6 +15770,7 @@ function openClipArtGallery(){
 
 
 
+
 document.addEventListener(
     "click",
     function(e){
@@ -15802,20 +15794,11 @@ document.addEventListener(
 
 
 
-        if(
-            !window.CampusWordClipArtData ||
-            !window.CampusWordClipArtData.active
-        ){
-
-            return;
-
-        }
-
-
-
         e.preventDefault();
 
+
         e.stopPropagation();
+
 
 
 
