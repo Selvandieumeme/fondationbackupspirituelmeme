@@ -13463,3 +13463,150 @@ document.addEventListener(
 
 
 })();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* =========================================================
+   CAMPUS WORD — SHAPES ENGINE
+   STEP 1
+   SHAPE SELECTION ONLY
+   SAVE ACTIVE SHAPE TYPE
+   NO SHAPE INSERTION
+   NO PAGE INTERFERENCE
+   NO CARET INTERFERENCE
+   NO IMAGE / TABLE INTERFERENCE
+   ISOLATED MODULE
+========================================================= */
+
+(function(){
+
+
+
+window.CampusWordActiveShape = null;
+
+
+
+
+
+
+document.addEventListener(
+    "click",
+    function(e){
+
+
+
+        const option =
+            e.target.closest(
+                '[data-action^="shape-"]'
+            );
+
+
+
+        if(!option){
+
+            return;
+
+        }
+
+
+
+
+
+        e.preventDefault();
+
+
+        e.stopPropagation();
+
+
+
+
+
+
+
+
+        const shape =
+            option.dataset.action;
+
+
+
+
+
+
+
+        window.CampusWordActiveShape =
+            shape;
+
+
+
+
+
+
+
+        document
+        .querySelectorAll(
+            '[data-action^="shape-"].cwShapeSelected'
+        )
+        .forEach(
+            function(item){
+
+
+                item.classList.remove(
+                    "cwShapeSelected"
+                );
+
+
+            }
+        );
+
+
+
+
+
+
+
+
+
+        option.classList.add(
+            "cwShapeSelected"
+        );
+
+
+
+
+
+
+
+        console.log(
+            "Active Shape:",
+            window.CampusWordActiveShape
+        );
+
+
+
+    },
+    false
+);
+
+
+
+})();
