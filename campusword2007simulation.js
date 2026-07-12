@@ -15505,3 +15505,329 @@ document.addEventListener(
 
 
 })();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* =========================================================
+   CAMPUS WORD — CLIP ART GALLERY ENGINE
+   STEP 3
+   CREATE CLIP ART PICKER WINDOW
+   MULTI CATEGORY GALLERY
+   VISUAL SELECTION ONLY
+   NO INSERTION YET
+   NO CARET / IMAGE / SHAPE INTERFERENCE
+   ISOLATED MODULE
+========================================================= */
+
+(function(){
+
+
+
+let clipArtBox = null;
+
+
+
+
+function openClipArtGallery(){
+
+
+
+    if(clipArtBox){
+
+        return;
+
+    }
+
+
+
+
+
+    clipArtBox =
+        document.createElement(
+            "div"
+        );
+
+
+
+    clipArtBox.className =
+        "cwClipArtGallery";
+
+
+
+
+
+    clipArtBox.innerHTML = `
+
+
+    <div class="cwClipArtHeader">
+
+        <h3>
+            Clip Art Gallery
+        </h3>
+
+        <button id="cwCloseClipArt">
+            X
+        </button>
+
+    </div>
+
+
+
+
+    <div class="cwClipArtCategories">
+
+
+        <button>
+            Animals
+        </button>
+
+
+        <button>
+            Nature
+        </button>
+
+
+        <button>
+            Objects
+        </button>
+
+
+        <button>
+            Symbols
+        </button>
+
+
+        <button>
+            Office
+        </button>
+
+
+
+    </div>
+
+
+
+
+
+    <div class="cwClipArtGrid">
+
+
+
+        <div class="cwClipArtItem"
+             data-clipart="flower">
+
+            🌺
+
+        </div>
+
+
+
+        <div class="cwClipArtItem"
+             data-clipart="tree">
+
+            🌳
+
+        </div>
+
+
+
+        <div class="cwClipArtItem"
+             data-clipart="star">
+
+            ⭐
+
+        </div>
+
+
+
+        <div class="cwClipArtItem"
+             data-clipart="heart">
+
+            ❤️
+
+        </div>
+
+
+
+        <div class="cwClipArtItem"
+             data-clipart="sun">
+
+            ☀️
+
+        </div>
+
+
+
+        <div class="cwClipArtItem"
+             data-clipart="cloud">
+
+            ☁️
+
+        </div>
+
+
+
+        <div class="cwClipArtItem"
+             data-clipart="camera">
+
+            📷
+
+        </div>
+
+
+
+        <div class="cwClipArtItem"
+             data-clipart="book">
+
+            📘
+
+        </div>
+
+
+
+        <div class="cwClipArtItem"
+             data-clipart="idea">
+
+            💡
+
+        </div>
+
+
+
+        <div class="cwClipArtItem"
+             data-clipart="music">
+
+            🎵
+
+        </div>
+
+
+
+        <div class="cwClipArtItem"
+             data-clipart="computer">
+
+            💻
+
+        </div>
+
+
+
+        <div class="cwClipArtItem"
+             data-clipart="pencil">
+
+            ✏️
+
+        </div>
+
+
+
+    </div>
+
+
+
+    `;
+
+
+
+
+    document.body.appendChild(
+        clipArtBox
+    );
+
+
+
+
+
+    document
+    .getElementById(
+        "cwCloseClipArt"
+    )
+    .onclick =
+    function(){
+
+
+        clipArtBox.remove();
+
+
+        clipArtBox = null;
+
+
+    };
+
+
+
+}
+
+
+
+
+
+
+
+
+document.addEventListener(
+    "click",
+    function(e){
+
+
+
+        const button =
+            e.target.closest(
+                '[data-action="insert-clipart"]'
+            );
+
+
+
+        if(!button){
+
+            return;
+
+        }
+
+
+
+
+
+        if(
+            !window.CampusWordClipArtData ||
+            !window.CampusWordClipArtData.active
+        ){
+
+            return;
+
+        }
+
+
+
+        e.preventDefault();
+
+        e.stopPropagation();
+
+
+
+
+        openClipArtGallery();
+
+
+
+    },
+    false
+);
+
+
+
+})();
