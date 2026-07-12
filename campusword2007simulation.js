@@ -14832,3 +14832,357 @@ document.addEventListener(
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* =========================================================
+   CAMPUS WORD — SHAPE RESIZE ACTION ENGINE
+   STEP 5
+   DRAG 8 HANDLES TO RESIZE SHAPE
+   TOUCH + MOUSE SUPPORT
+   SHAPE ONLY
+   NO IMAGE INTERFERENCE
+   NO TABLE INTERFERENCE
+   NO CARET INTERFERENCE
+========================================================= */
+
+(function(){
+
+
+let resizing = false;
+
+let activeShape = null;
+
+let resizeDirection = null;
+
+
+let startX = 0;
+
+let startY = 0;
+
+
+let startWidth = 0;
+
+let startHeight = 0;
+
+
+
+
+
+
+
+
+document.addEventListener(
+    "pointerdown",
+    function(e){
+
+
+
+        const handle =
+            e.target.closest(
+                "[data-shape-resize]"
+            );
+
+
+
+        if(!handle){
+
+            return;
+
+        }
+
+
+
+
+
+        activeShape =
+            window.CampusWordSelectedShape;
+
+
+
+        if(!activeShape){
+
+            return;
+
+        }
+
+
+
+
+
+
+        resizing = true;
+
+
+
+        resizeDirection =
+            handle.dataset.shapeResize;
+
+
+
+        startX =
+            e.clientX;
+
+
+
+        startY =
+            e.clientY;
+
+
+
+        startWidth =
+            activeShape.offsetWidth;
+
+
+
+        startHeight =
+            activeShape.offsetHeight;
+
+
+
+        e.preventDefault();
+
+
+
+    },
+    {
+        passive:false
+    }
+);
+
+
+
+
+
+
+
+
+
+document.addEventListener(
+    "pointermove",
+    function(e){
+
+
+
+        if(
+            !resizing ||
+            !activeShape
+        ){
+
+            return;
+
+        }
+
+
+
+
+
+
+        const dx =
+            e.clientX -
+            startX;
+
+
+
+        const dy =
+            e.clientY -
+            startY;
+
+
+
+
+
+        let width =
+            startWidth;
+
+
+
+        let height =
+            startHeight;
+
+
+
+
+
+
+
+        if(
+            resizeDirection.includes("e")
+        ){
+
+            width =
+                startWidth + dx;
+
+        }
+
+
+
+
+
+        if(
+            resizeDirection.includes("w")
+        ){
+
+            width =
+                startWidth - dx;
+
+        }
+
+
+
+
+
+        if(
+            resizeDirection.includes("s")
+        ){
+
+            height =
+                startHeight + dy;
+
+        }
+
+
+
+
+
+        if(
+            resizeDirection.includes("n")
+        ){
+
+            height =
+                startHeight - dy;
+
+        }
+
+
+
+
+
+
+
+        if(width < 40){
+
+            width = 40;
+
+        }
+
+
+
+
+        if(height < 40){
+
+            height = 40;
+
+        }
+
+
+
+
+
+
+
+        activeShape.style.width =
+            width + "px";
+
+
+
+        activeShape.style.height =
+            height + "px";
+
+
+
+
+
+
+
+        /*
+           KEEP HANDLES SYNC
+        */
+
+        const refresh =
+            new Event(
+                "pointerdown"
+            );
+
+
+
+        window.CampusWordSelectedShape =
+            activeShape;
+
+
+
+        const box =
+            document.querySelector(
+                ".cwShapeHandles"
+            );
+
+
+
+        if(box){
+
+            box.style.width =
+                activeShape.offsetWidth + "px";
+
+
+            box.style.height =
+                activeShape.offsetHeight + "px";
+
+
+            box.style.left =
+                activeShape.offsetLeft + "px";
+
+
+            box.style.top =
+                activeShape.offsetTop + "px";
+
+        }
+
+
+
+
+
+    },
+    {
+        passive:false
+    }
+);
+
+
+
+
+
+
+
+
+
+document.addEventListener(
+    "pointerup",
+    function(){
+
+
+
+        resizing = false;
+
+        resizeDirection = null;
+
+
+    },
+    false
+);
+
+
+
+})();
+
+
+
