@@ -11821,23 +11821,26 @@ document.addEventListener(
 
 
 
-        if(img){
+if(img){
 
 
-            selectedImage =
-                img;
+    selectedImage =
+        img;
 
 
-            createHandles(
-                img
-            );
+    window.CampusWordSelectedImage =
+        img;
 
 
-            return;
+    createHandles(
+        img
+    );
 
 
-        }
+    return;
 
+
+}
 
 
 
@@ -12045,22 +12048,6 @@ document.addEventListener(
     },
     false
 );
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
