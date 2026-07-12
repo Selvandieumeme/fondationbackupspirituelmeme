@@ -13610,3 +13610,248 @@ document.addEventListener(
 
 
 })();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* =========================================================
+   CAMPUS WORD — SHAPES INSERT MODE ENGINE
+   STEP 2
+   ACTIVATE INSERT MODE
+   SAVE PAGE POSITION ONLY
+   NO SHAPE CREATION
+   NO CARET INTERFERENCE
+   NO IMAGE / TABLE INTERFERENCE
+   ISOLATED MODULE
+========================================================= */
+
+(function(){
+
+
+
+let shapeInsertMode = false;
+
+
+
+
+
+window.CampusWordShapeData = {
+
+
+    getShape:function(){
+
+        return window.CampusWordActiveShape || null;
+
+    },
+
+
+
+    getPosition:function(){
+
+        return this.position || null;
+
+    },
+
+
+
+    position:null
+
+
+};
+
+
+
+
+
+
+
+
+
+document.addEventListener(
+    "click",
+    function(e){
+
+
+
+        const shapeOption =
+            e.target.closest(
+                '[data-action^="shape-"]'
+            );
+
+
+
+        if(!shapeOption){
+
+            return;
+
+        }
+
+
+
+
+
+        const shape =
+            shapeOption.dataset.action;
+
+
+
+
+
+        window.CampusWordActiveShape =
+            shape;
+
+
+
+
+
+        shapeInsertMode = true;
+
+
+
+
+
+        window.CampusWordShapeData.position =
+            null;
+
+
+
+
+
+    },
+    false
+);
+
+
+
+
+
+
+
+
+
+document.addEventListener(
+    "pointerdown",
+    function(e){
+
+
+
+        if(!shapeInsertMode){
+
+            return;
+
+        }
+
+
+
+
+
+        const page =
+            e.target.closest(
+                ".cwPageContent"
+            );
+
+
+
+
+
+        if(!page){
+
+            return;
+
+        }
+
+
+
+
+
+
+        const rect =
+            page.getBoundingClientRect();
+
+
+
+
+
+
+
+        const x =
+            e.clientX -
+            rect.left;
+
+
+
+
+
+        const y =
+            e.clientY -
+            rect.top;
+
+
+
+
+
+
+
+
+
+        window.CampusWordShapeData.position = {
+
+
+            x:x,
+
+            y:y,
+
+            page:page
+
+
+
+        };
+
+
+
+
+
+
+
+        console.log(
+            "Shape insertion position:",
+            window.CampusWordShapeData.position
+        );
+
+
+
+
+
+
+        shapeInsertMode = false;
+
+
+
+    },
+    {
+        passive:false
+    }
+);
+
+
+
+
+
+
+
+})();
