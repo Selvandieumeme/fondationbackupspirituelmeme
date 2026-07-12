@@ -11809,7 +11809,6 @@ function removeHandles(){
 
 
 
-
 document.addEventListener(
     "pointerdown",
     function(e){
@@ -11827,23 +11826,6 @@ document.addEventListener(
             e.target.closest(
                 ".cwResizeHandle"
             );
-
-
-
-        const clickedRibbon =
-            e.target.closest(
-                "#cwRibbon, .cwRibbonBtn, .cwDropdownMenu"
-            );
-
-
-
-        if(
-            clickedRibbon
-        ){
-
-            return;
-
-        }
 
 
 
@@ -11870,6 +11852,15 @@ document.addEventListener(
     },
     false
 );
+
+
+
+
+
+
+
+
+
 
 
 
