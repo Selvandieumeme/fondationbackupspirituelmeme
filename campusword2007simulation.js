@@ -14708,3 +14708,329 @@ window.CampusWordShapeSelection = {
 
 
 
+
+
+
+
+
+
+
+
+/* =========================================================
+   CAMPUS WORD — SHAPE RESIZE ENGINE
+   STEP 4.1
+   RESIZE SELECTED SHAPE
+   8 HANDLE SUPPORT
+   TOUCH + MOUSE SUPPORT
+   ISOLATED MODULE
+   NO IMAGE INTERFERENCE
+   NO TABLE INTERFERENCE
+   NO CARET INTERFERENCE
+========================================================= */
+
+(function(){
+
+
+
+let resizing = false;
+
+let activeHandle = null;
+
+let shape = null;
+
+
+let startX = 0;
+
+let startY = 0;
+
+
+let startWidth = 0;
+
+let startHeight = 0;
+
+
+
+
+
+
+document.addEventListener(
+    "pointerdown",
+    function(e){
+
+
+
+        const handle =
+            e.target.closest(
+                ".cwShapeResizeHandle"
+            );
+
+
+
+        if(!handle){
+
+            return;
+
+        }
+
+
+
+
+        shape =
+            window.CampusWordSelectedShape;
+
+
+
+        if(!shape){
+
+            return;
+
+        }
+
+
+
+
+
+        resizing = true;
+
+
+
+        activeHandle =
+            handle.dataset.direction;
+
+
+
+
+
+        startX =
+            e.clientX;
+
+
+
+        startY =
+            e.clientY;
+
+
+
+        startWidth =
+            shape.offsetWidth;
+
+
+
+        startHeight =
+            shape.offsetHeight;
+
+
+
+        e.preventDefault();
+
+
+
+    },
+    {
+        passive:false
+    }
+);
+
+
+
+
+
+
+
+
+
+document.addEventListener(
+    "pointermove",
+    function(e){
+
+
+
+        if(
+            !resizing ||
+            !shape
+        ){
+
+            return;
+
+        }
+
+
+
+
+
+        const dx =
+            e.clientX -
+            startX;
+
+
+
+        const dy =
+            e.clientY -
+            startY;
+
+
+
+
+        let width =
+            startWidth;
+
+
+
+        let height =
+            startHeight;
+
+
+
+
+
+
+
+
+        if(
+            activeHandle.includes("e")
+        ){
+
+            width =
+                startWidth + dx;
+
+        }
+
+
+
+
+
+        if(
+            activeHandle.includes("w")
+        ){
+
+            width =
+                startWidth - dx;
+
+        }
+
+
+
+
+
+        if(
+            activeHandle.includes("s")
+        ){
+
+            height =
+                startHeight + dy;
+
+        }
+
+
+
+
+
+        if(
+            activeHandle.includes("n")
+        ){
+
+            height =
+                startHeight - dy;
+
+        }
+
+
+
+
+
+
+        if(width < 30){
+
+            width = 30;
+
+        }
+
+
+
+
+        if(height < 30){
+
+            height = 30;
+
+        }
+
+
+
+
+
+        shape.style.width =
+            width + "px";
+
+
+
+        shape.style.height =
+            height + "px";
+
+
+
+
+
+
+        const box =
+            document.querySelector(
+                ".cwShapeResizeBox"
+            );
+
+
+
+        if(box){
+
+
+
+            box.style.width =
+                width + "px";
+
+
+
+            box.style.height =
+                height + "px";
+
+
+
+        }
+
+
+
+
+    },
+    {
+        passive:false
+    }
+);
+
+
+
+
+
+
+
+
+
+document.addEventListener(
+    "pointerup",
+    function(){
+
+
+
+        resizing = false;
+
+
+        activeHandle = null;
+
+
+        shape = null;
+
+
+
+    },
+    false
+);
+
+
+
+})();
