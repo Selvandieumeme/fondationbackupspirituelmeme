@@ -12002,8 +12002,6 @@ document.addEventListener(
 
 
 
-})();
-
 
 
 
