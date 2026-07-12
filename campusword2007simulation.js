@@ -14843,3 +14843,245 @@ document.addEventListener(
 
 
 
+
+
+
+
+/* =========================================================
+   CAMPUS WORD — SHAPE CORNER RESIZE ENGINE
+   STEP 5
+   RESIZE SHAPE USING STEP 4 HANDLES
+   TEST CORNER HANDLE (SE)
+   TOUCH + MOUSE SUPPORT
+   ISOLATED FROM IMAGE RESIZE
+   ISOLATED FROM TABLE
+   ISOLATED FROM CARET
+========================================================= */
+
+(function(){
+
+
+let resizing = false;
+
+let shape = null;
+
+let startX = 0;
+
+let startY = 0;
+
+let startWidth = 0;
+
+let startHeight = 0;
+
+
+
+document.addEventListener(
+    "pointerdown",
+    function(e){
+
+
+
+        const handle =
+            e.target.closest(
+                '[data-shape-resize="se"]'
+            );
+
+
+
+        if(!handle){
+
+            return;
+
+        }
+
+
+
+        shape =
+            window.CampusWordSelectedShape;
+
+
+
+        if(!shape){
+
+            return;
+
+        }
+
+
+
+        resizing = true;
+
+
+
+        startX =
+            e.clientX;
+
+
+        startY =
+            e.clientY;
+
+
+
+        startWidth =
+            shape.offsetWidth;
+
+
+        startHeight =
+            shape.offsetHeight;
+
+
+
+        e.preventDefault();
+
+
+        e.stopPropagation();
+
+
+
+    },
+    {
+        passive:false
+    }
+);
+
+
+
+
+
+
+
+
+
+document.addEventListener(
+    "pointermove",
+    function(e){
+
+
+
+        if(
+            !resizing ||
+            !shape
+        ){
+
+            return;
+
+        }
+
+
+
+        const dx =
+            e.clientX -
+            startX;
+
+
+
+        const dy =
+            e.clientY -
+            startY;
+
+
+
+
+
+        let newWidth =
+            startWidth + dx;
+
+
+
+        let newHeight =
+            startHeight + dy;
+
+
+
+
+
+        if(newWidth < 40){
+
+            newWidth = 40;
+
+        }
+
+
+
+        if(newHeight < 40){
+
+            newHeight = 40;
+
+        }
+
+
+
+
+
+        shape.style.width =
+            newWidth + "px";
+
+
+
+        shape.style.height =
+            newHeight + "px";
+
+
+
+
+        const refresh =
+            document.querySelector(
+                ".cwShapeHandles"
+            );
+
+
+
+        if(refresh){
+
+
+            refresh.style.width =
+                shape.offsetWidth + "px";
+
+
+            refresh.style.height =
+                shape.offsetHeight + "px";
+
+
+
+        }
+
+
+
+    },
+    {
+        passive:false
+    }
+);
+
+
+
+
+
+
+
+
+
+document.addEventListener(
+    "pointerup",
+    function(){
+
+
+        resizing = false;
+
+        shape = null;
+
+
+    },
+    false
+);
+
+
+
+})();
+
+
+
+
+
+
+
