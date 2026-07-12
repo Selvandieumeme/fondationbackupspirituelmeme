@@ -2892,3 +2892,31 @@ body{
 
 
 
+
+
+
+
+
+
+
+/* =========================================================
+   CAMPUS WORD — SHAPES ACTIVE STATE
+   VISUAL ONLY
+   NO FUNCTION INTERFERENCE
+========================================================= */
+
+.cwShapeSelected{
+
+    background:#dcfce7 !important;
+
+    border-color:#16a34a !important;
+
+    color:#15803d !important;
+
+    outline:2px solid #22c55e;
+
+}
+
+
+
+
