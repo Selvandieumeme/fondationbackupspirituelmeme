@@ -11808,6 +11808,381 @@ function removeHandles(){
 
 
 
+document.addEventListener(
+    "pointerdown",
+    function(e){
+
+
+
+        const img =
+            e.target.closest(
+                ".cwInsertedImage"
+            );
+
+
+
+        if(img){
+
+
+            selectedImage =
+                img;
+
+
+            createHandles(
+                img
+            );
+
+
+            return;
+
+
+        }
+
+
+
+
+
+
+        const handle =
+            e.target.closest(
+                ".cwResizeHandle"
+            );
+
+
+
+        if(!handle){
+
+            return;
+
+        }
+
+
+
+
+
+        resizing = true;
+
+
+
+        resizeHandle =
+            handle.dataset.direction;
+
+
+
+        const box =
+            handle.parentElement;
+
+
+
+        selectedImage =
+            document.querySelector(
+                ".cwInsertedImage"
+            );
+
+
+
+        startX =
+            e.clientX;
+
+
+
+        startY =
+            e.clientY;
+
+
+
+        startWidth =
+            selectedImage.offsetWidth;
+
+
+
+        startHeight =
+            selectedImage.offsetHeight;
+
+
+
+        startRatio =
+            startWidth /
+            startHeight;
+
+
+
+        e.preventDefault();
+
+
+
+    },
+    false
+);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+document.addEventListener(
+    "pointermove",
+    function(e){
+
+
+
+        if(
+            !resizing ||
+            !selectedImage
+        ){
+
+            return;
+
+        }
+
+
+
+
+
+        const dx =
+            e.clientX -
+            startX;
+
+
+
+        const dy =
+            e.clientY -
+            startY;
+
+
+
+        let newWidth =
+            startWidth;
+
+
+
+        if(
+            resizeHandle.includes("e")
+            ||
+            resizeHandle.includes("w")
+        ){
+
+            newWidth =
+                startWidth + dx;
+
+        }
+
+
+
+        if(
+            resizeHandle.includes("s")
+            ||
+            resizeHandle.includes("n")
+        ){
+
+            newWidth =
+                startWidth + dy * startRatio;
+
+        }
+
+
+
+
+        if(newWidth < 50){
+
+            newWidth = 50;
+
+        }
+
+
+
+
+        selectedImage.style.width =
+            newWidth + "px";
+
+
+
+        createHandles(
+            selectedImage
+        );
+
+
+
+    },
+    false
+);
+
+
+
+
+
+
+
+
+
+document.addEventListener(
+    "pointerup",
+    function(){
+
+
+        resizing = false;
+
+
+        resizeHandle = null;
+
+
+    },
+    false
+);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+document.addEventListener(
+    "pointermove",
+    function(e){
+
+
+
+        if(
+            !resizing ||
+            !selectedImage
+        ){
+
+            return;
+
+        }
+
+
+
+
+
+        const dx =
+            e.clientX -
+            startX;
+
+
+
+        const dy =
+            e.clientY -
+            startY;
+
+
+
+        let newWidth =
+            startWidth;
+
+
+
+        if(
+            resizeHandle.includes("e")
+            ||
+            resizeHandle.includes("w")
+        ){
+
+            newWidth =
+                startWidth + dx;
+
+        }
+
+
+
+        if(
+            resizeHandle.includes("s")
+            ||
+            resizeHandle.includes("n")
+        ){
+
+            newWidth =
+                startWidth + dy * startRatio;
+
+        }
+
+
+
+
+        if(newWidth < 50){
+
+            newWidth = 50;
+
+        }
+
+
+
+
+        selectedImage.style.width =
+            newWidth + "px";
+
+
+
+        createHandles(
+            selectedImage
+        );
+
+
+
+    },
+    false
+);
+
+
+
+
+
+
+
+
+
+document.addEventListener(
+    "pointerup",
+    function(){
+
+
+        resizing = false;
+
+
+        resizeHandle = null;
+
+
+    },
+    false
+);
+
+
+
 
 
 
@@ -11872,321 +12247,6 @@ document.addEventListener(
     },
     false
 );
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-document.addEventListener(
-    "pointermove",
-    function(e){
-
-
-
-        if(
-            !resizing ||
-            !selectedImage
-        ){
-
-            return;
-
-        }
-
-
-
-
-
-        const dx =
-            e.clientX -
-            startX;
-
-
-
-        const dy =
-            e.clientY -
-            startY;
-
-
-
-        let newWidth =
-            startWidth;
-
-
-
-        if(
-            resizeHandle.includes("e")
-            ||
-            resizeHandle.includes("w")
-        ){
-
-            newWidth =
-                startWidth + dx;
-
-        }
-
-
-
-        if(
-            resizeHandle.includes("s")
-            ||
-            resizeHandle.includes("n")
-        ){
-
-            newWidth =
-                startWidth + dy * startRatio;
-
-        }
-
-
-
-
-        if(newWidth < 50){
-
-            newWidth = 50;
-
-        }
-
-
-
-
-        selectedImage.style.width =
-            newWidth + "px";
-
-
-
-        createHandles(
-            selectedImage
-        );
-
-
-
-    },
-    false
-);
-
-
-
-
-
-
-
-
-
-document.addEventListener(
-    "pointerup",
-    function(){
-
-
-        resizing = false;
-
-
-        resizeHandle = null;
-
-
-    },
-    false
-);
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-document.addEventListener(
-    "pointermove",
-    function(e){
-
-
-
-        if(
-            !resizing ||
-            !selectedImage
-        ){
-
-            return;
-
-        }
-
-
-
-
-
-        const dx =
-            e.clientX -
-            startX;
-
-
-
-        const dy =
-            e.clientY -
-            startY;
-
-
-
-        let newWidth =
-            startWidth;
-
-
-
-        if(
-            resizeHandle.includes("e")
-            ||
-            resizeHandle.includes("w")
-        ){
-
-            newWidth =
-                startWidth + dx;
-
-        }
-
-
-
-        if(
-            resizeHandle.includes("s")
-            ||
-            resizeHandle.includes("n")
-        ){
-
-            newWidth =
-                startWidth + dy * startRatio;
-
-        }
-
-
-
-
-        if(newWidth < 50){
-
-            newWidth = 50;
-
-        }
-
-
-
-
-        selectedImage.style.width =
-            newWidth + "px";
-
-
-
-        createHandles(
-            selectedImage
-        );
-
-
-
-    },
-    false
-);
-
-
-
-
-
-
-
-
-
-document.addEventListener(
-    "pointerup",
-    function(){
-
-
-        resizing = false;
-
-
-        resizeHandle = null;
-
-
-    },
-    false
-);
-
-
-
-
-
-
-
-
-
-
-
-document.addEventListener(
-    "pointerdown",
-    function(e){
-
-
-
-        const clickedImage =
-            e.target.closest(
-                ".cwInsertedImage"
-            );
-
-
-
-        const clickedHandle =
-            e.target.closest(
-                ".cwResizeHandle"
-            );
-
-
-
-
-
-        if(
-            !clickedImage &&
-            !clickedHandle
-        ){
-
-            selectedImage = null;
-
-            resizing = false;
-
-            resizeHandle = null;
-
-
-            removeHandles();
-
-        }
-
-
-
-    },
-    false
-);
-
 
 
 })();
