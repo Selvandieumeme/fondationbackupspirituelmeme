@@ -15085,3 +15085,246 @@ document.addEventListener(
 
 
 
+
+
+
+
+
+
+
+
+
+/* =========================================================
+   CAMPUS WORD — SHAPE DRAG ENGINE
+   STEP 3.1
+   MOVE SHAPE WITH MOUSE + TOUCH
+   ISOLATED MODULE
+   NO IMAGE INTERFERENCE
+   NO TABLE INTERFERENCE
+   NO CARET INTERFERENCE
+========================================================= */
+
+(function(){
+
+
+
+let dragging = false;
+
+let activeShape = null;
+
+
+let startX = 0;
+
+let startY = 0;
+
+
+let startLeft = 0;
+
+let startTop = 0;
+
+
+
+
+
+
+
+
+document.addEventListener(
+    "pointerdown",
+    function(e){
+
+
+
+        const shape =
+            e.target.closest(
+                ".cwInsertedShape"
+            );
+
+
+
+        if(!shape){
+
+            return;
+
+        }
+
+
+
+        /*
+          Ignore resize handles
+        */
+
+        if(
+            e.target.closest(
+                ".cwShapeResizeHandle"
+            )
+        ){
+
+            return;
+
+        }
+
+
+
+
+
+        activeShape =
+            shape;
+
+
+
+        dragging = true;
+
+
+
+
+        startX =
+            e.clientX;
+
+
+
+        startY =
+            e.clientY;
+
+
+
+        startLeft =
+            shape.offsetLeft;
+
+
+
+        startTop =
+            shape.offsetTop;
+
+
+
+
+
+        window.CampusWordSelectedShape =
+            shape;
+
+
+
+        e.preventDefault();
+
+
+
+    },
+    {
+        passive:false
+    }
+);
+
+
+
+
+
+
+
+
+
+document.addEventListener(
+    "pointermove",
+    function(e){
+
+
+
+        if(
+            !dragging ||
+            !activeShape
+        ){
+
+            return;
+
+        }
+
+
+
+
+
+        const dx =
+            e.clientX -
+            startX;
+
+
+
+        const dy =
+            e.clientY -
+            startY;
+
+
+
+
+
+
+        activeShape.style.left =
+            startLeft + dx + "px";
+
+
+
+        activeShape.style.top =
+            startTop + dy + "px";
+
+
+
+
+
+        const box =
+            document.querySelector(
+                ".cwShapeResizeBox"
+            );
+
+
+
+        if(box){
+
+
+            box.style.left =
+                activeShape.offsetLeft + "px";
+
+
+            box.style.top =
+                activeShape.offsetTop + "px";
+
+
+        }
+
+
+
+
+    },
+    {
+        passive:false
+    }
+);
+
+
+
+
+
+
+
+
+
+document.addEventListener(
+    "pointerup",
+    function(){
+
+
+
+        dragging = false;
+
+
+        activeShape = null;
+
+
+
+    },
+    false
+);
+
+
+
+})();
+
+
