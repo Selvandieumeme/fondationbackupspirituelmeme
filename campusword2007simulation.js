@@ -15408,3 +15408,80 @@ document.addEventListener(
 
 
 })();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* =========================================================
+   CAMPUS WORD — INSERT CLIP ART BUTTON ENGINE
+   STEP 1
+   BUTTON ACTIVE STATE ONLY
+   MATCH REAL HTML ID
+   NO CLIPART INSERTION YET
+   ISOLATED MODULE
+   NO IMAGE / SHAPE / CARET INTERFERENCE
+========================================================= */
+
+(function(){
+
+
+
+document.addEventListener(
+    "click",
+    function(e){
+
+
+
+        const button =
+            e.target.closest(
+                '[data-action="insert-clipart"]'
+            );
+
+
+
+        if(!button){
+
+            return;
+
+        }
+
+
+
+
+
+        e.preventDefault();
+
+
+        e.stopPropagation();
+
+
+
+
+
+
+        button.classList.toggle(
+            "cwInsertClipArtActive"
+        );
+
+
+
+    },
+    false
+);
+
+
+
+})();
