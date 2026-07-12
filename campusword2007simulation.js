@@ -11810,53 +11810,36 @@ function removeHandles(){
 
 
 
-
-
-
-
 document.addEventListener(
     "pointerdown",
     function(e){
 
 
 
-        const img =
+        const clickedImage =
             e.target.closest(
                 ".cwInsertedImage"
             );
 
 
 
-        if(img){
-
-
-            selectedImage =
-                img;
-
-
-            createHandles(
-                img
-            );
-
-
-            return;
-
-
-        }
-
-
-
-
-
-
-        const handle =
+        const clickedHandle =
             e.target.closest(
                 ".cwResizeHandle"
             );
 
 
 
-        if(!handle){
+        const clickedRibbon =
+            e.target.closest(
+                "#cwRibbon, .cwRibbonBtn, .cwDropdownMenu"
+            );
+
+
+
+        if(
+            clickedRibbon
+        ){
 
             return;
 
@@ -11866,60 +11849,35 @@ document.addEventListener(
 
 
 
-        resizing = true;
+        if(
+            !clickedImage &&
+            !clickedHandle
+        ){
+
+            selectedImage = null;
+
+            resizing = false;
+
+            resizeHandle = null;
 
 
+            removeHandles();
 
-        resizeHandle =
-            handle.dataset.direction;
-
-
-
-        const box =
-            handle.parentElement;
-
-
-
-        selectedImage =
-            document.querySelector(
-                ".cwInsertedImage"
-            );
-
-
-
-        startX =
-            e.clientX;
-
-
-
-        startY =
-            e.clientY;
-
-
-
-        startWidth =
-            selectedImage.offsetWidth;
-
-
-
-        startHeight =
-            selectedImage.offsetHeight;
-
-
-
-        startRatio =
-            startWidth /
-            startHeight;
-
-
-
-        e.preventDefault();
+        }
 
 
 
     },
     false
 );
+
+
+
+
+
+
+
+
 
 
 
