@@ -15516,49 +15516,31 @@ document.addEventListener(
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 /* =========================================================
    CAMPUS WORD — CLIP ART GALLERY ENGINE
    STEP 3
-   CREATE CLIP ART PICKER WINDOW
-   MULTI CATEGORY GALLERY
-   VISUAL SELECTION ONLY
-   NO INSERTION YET
-   NO CARET / IMAGE / SHAPE INTERFERENCE
+   OPEN CLIP ART GALLERY WINDOW
    ISOLATED MODULE
+   ONLY INSERT-CLIPART BUTTON CONTROL
+   NO SHAPE / IMAGE / TABLE / CARET INTERFERENCE
 ========================================================= */
 
 (function(){
 
 
 
-let clipArtBox = null;
+let cwClipArtGalleryBox = null;
 
 
 
 
 
-function openClipArtGallery(){
+
+function cwOpenClipArtGallery(){
 
 
 
-    if(clipArtBox){
+    if(cwClipArtGalleryBox){
 
         return;
 
@@ -15568,165 +15550,96 @@ function openClipArtGallery(){
 
 
 
-    clipArtBox =
+
+    cwClipArtGalleryBox =
         document.createElement(
             "div"
         );
 
 
 
-    clipArtBox.className =
+    cwClipArtGalleryBox.className =
         "cwClipArtGallery";
 
 
 
 
 
-    clipArtBox.innerHTML = `
+
+    cwClipArtGalleryBox.innerHTML = `
 
 
-    <div class="cwClipArtHeader">
+        <div class="cwClipArtHeader">
 
-        <h3>
-            Clip Art Gallery
-        </h3>
-
-
-        <button id="cwCloseClipArt">
-            X
-        </button>
-
-    </div>
+            <h3>
+                Clip Art Gallery
+            </h3>
 
 
+            <button 
+                id="cwClipArtCloseBtn">
+                X
+            </button>
 
 
-
-    <div class="cwClipArtCategories">
-
-
-        <button>
-            Animals
-        </button>
-
-
-        <button>
-            Nature
-        </button>
-
-
-        <button>
-            Objects
-        </button>
-
-
-        <button>
-            Symbols
-        </button>
-
-
-        <button>
-            Office
-        </button>
-
-
-    </div>
-
-
-
-
-
-
-    <div class="cwClipArtGrid">
-
-
-
-        <div class="cwClipArtItem"
-             data-clipart="flower">
-            🌺
         </div>
 
 
 
-        <div class="cwClipArtItem"
-             data-clipart="tree">
-            🌳
+        <div class="cwClipArtGrid">
+
+
+            <div class="cwClipArtItem">
+                🌺
+            </div>
+
+
+            <div class="cwClipArtItem">
+                🌳
+            </div>
+
+
+            <div class="cwClipArtItem">
+                ⭐
+            </div>
+
+
+            <div class="cwClipArtItem">
+                ❤️
+            </div>
+
+
+            <div class="cwClipArtItem">
+                ☀️
+            </div>
+
+
+            <div class="cwClipArtItem">
+                ☁️
+            </div>
+
+
+            <div class="cwClipArtItem">
+                📷
+            </div>
+
+
+            <div class="cwClipArtItem">
+                💻
+            </div>
+
+
+            <div class="cwClipArtItem">
+                📘
+            </div>
+
+
+            <div class="cwClipArtItem">
+                🎵
+            </div>
+
+
         </div>
-
-
-
-        <div class="cwClipArtItem"
-             data-clipart="star">
-            ⭐
-        </div>
-
-
-
-        <div class="cwClipArtItem"
-             data-clipart="heart">
-            ❤️
-        </div>
-
-
-
-        <div class="cwClipArtItem"
-             data-clipart="sun">
-            ☀️
-        </div>
-
-
-
-        <div class="cwClipArtItem"
-             data-clipart="cloud">
-            ☁️
-        </div>
-
-
-
-        <div class="cwClipArtItem"
-             data-clipart="camera">
-            📷
-        </div>
-
-
-
-        <div class="cwClipArtItem"
-             data-clipart="book">
-            📘
-        </div>
-
-
-
-        <div class="cwClipArtItem"
-             data-clipart="idea">
-            💡
-        </div>
-
-
-
-        <div class="cwClipArtItem"
-             data-clipart="music">
-            🎵
-        </div>
-
-
-
-        <div class="cwClipArtItem"
-             data-clipart="computer">
-            💻
-        </div>
-
-
-
-        <div class="cwClipArtItem"
-             data-clipart="pencil">
-            ✏️
-        </div>
-
-
-
-    </div>
-
 
 
     `;
@@ -15734,8 +15647,11 @@ function openClipArtGallery(){
 
 
 
+
+
+
     document.body.appendChild(
-        clipArtBox
+        cwClipArtGalleryBox
     );
 
 
@@ -15743,21 +15659,32 @@ function openClipArtGallery(){
 
 
 
-    document
-    .getElementById(
-        "cwCloseClipArt"
-    )
-    .onclick =
-    function(){
 
 
-        clipArtBox.remove();
+    const closeButton =
+        document.getElementById(
+            "cwClipArtCloseBtn"
+        );
 
 
-        clipArtBox = null;
+
+    if(closeButton){
 
 
-    };
+        closeButton.onclick =
+        function(){
+
+
+            cwClipArtGalleryBox.remove();
+
+
+            cwClipArtGalleryBox = null;
+
+
+        };
+
+
+    }
 
 
 
@@ -15777,14 +15704,14 @@ document.addEventListener(
 
 
 
-        const button =
+        const clipButton =
             e.target.closest(
                 '[data-action="insert-clipart"]'
             );
 
 
 
-        if(!button){
+        if(!clipButton){
 
             return;
 
@@ -15803,7 +15730,7 @@ document.addEventListener(
 
 
 
-        openClipArtGallery();
+        cwOpenClipArtGallery();
 
 
 
@@ -15813,4 +15740,21 @@ document.addEventListener(
 
 
 
+
+
 })();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
