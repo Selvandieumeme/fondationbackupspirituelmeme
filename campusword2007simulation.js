@@ -15414,7 +15414,165 @@ document.addEventListener(
 
 
 
+/* =========================================================
+   CAMPUS WORD — GLOBAL ERROR MONITOR
+   DEBUG ONLY
+   NO DOM CHANGE
+   NO FUNCTION INTERFERENCE
+   NO LAYOUT MODIFICATION
+========================================================= */
 
+(function(){
+
+
+
+window.addEventListener(
+    "error",
+    function(e){
+
+
+        console.group(
+            "🚨 CAMPUS WORD ERROR DETECTED"
+        );
+
+
+        console.error(
+            "Message:",
+            e.message
+        );
+
+
+        console.error(
+            "File:",
+            e.filename
+        );
+
+
+        console.error(
+            "Line:",
+            e.lineno
+        );
+
+
+        console.error(
+            "Column:",
+            e.colno
+        );
+
+
+        console.error(
+            "Error Object:",
+            e.error
+        );
+
+
+        console.groupEnd();
+
+
+    },
+    false
+);
+
+
+
+
+
+
+
+window.addEventListener(
+    "unhandledrejection",
+    function(e){
+
+
+
+        console.group(
+            "🚨 PROMISE ERROR DETECTED"
+        );
+
+
+        console.error(
+            e.reason
+        );
+
+
+        console.groupEnd();
+
+
+
+    },
+    false
+);
+
+
+
+
+
+
+
+
+document.addEventListener(
+    "DOMContentLoaded",
+    function(){
+
+
+        console.log(
+            "✅ Campus Word Debug Monitor Active"
+        );
+
+
+        console.log(
+            "DOM Elements Check:"
+        );
+
+
+        console.log(
+            "Pages:",
+            document.querySelectorAll(
+                ".cwPageContent"
+            ).length
+        );
+
+
+        console.log(
+            "Ribbon:",
+            document.querySelector(
+                "#cwRibbon"
+            )
+        );
+
+
+        console.log(
+            "Images:",
+            document.querySelectorAll(
+                ".cwInsertedImage"
+            ).length
+        );
+
+
+        console.log(
+            "Shapes:",
+            document.querySelectorAll(
+                ".cwInsertedShape"
+            ).length
+        );
+
+
+        console.log(
+            "ClipArts:",
+            document.querySelectorAll(
+                ".cwInsertedClipArt"
+            ).length
+        );
+
+
+    },
+    false
+);
+
+
+
+
+})();
 
 
 
