@@ -18062,6 +18062,150 @@ Belgium
 
 
 
+{
+name:"Mexico Flag",
+category:"Objects",
+svg:`
+<svg viewBox="0 0 120 100">
+<rect x="10" y="15" width="33" height="55" fill="#16a34a"/>
+<rect x="43" y="15" width="34" height="55" fill="#ffffff"/>
+<rect x="77" y="15" width="33" height="55" fill="#ef4444"/>
+<circle cx="60" cy="42" r="6" fill="#16a34a"/>
+<text x="60" y="88" text-anchor="middle" font-size="10">Mexico</text>
+</svg>`
+},
+
+
+{
+name:"China Flag",
+category:"Objects",
+svg:`
+<svg viewBox="0 0 120 100">
+<rect x="10" y="15" width="100" height="55" fill="#dc2626"/>
+<polygon points="30,25 34,35 45,35 36,42 39,52 30,46 21,52 24,42 15,35 26,35"
+fill="#facc15"/>
+<text x="60" y="88" text-anchor="middle" font-size="10">China</text>
+</svg>`
+},
+
+
+{
+name:"South Korea Flag",
+category:"Objects",
+svg:`
+<svg viewBox="0 0 120 100">
+<rect x="10" y="15" width="100" height="55" fill="#ffffff"/>
+<circle cx="60" cy="42" r="15" fill="#ef4444"/>
+<path d="M60 27A15 15 0 0 0 60 57A15 15 0 0 1 60 27"
+fill="#2563eb"/>
+<text x="60" y="88" text-anchor="middle" font-size="10">South Korea</text>
+</svg>`
+},
+
+
+{
+name:"India Flag",
+category:"Objects",
+svg:`
+<svg viewBox="0 0 120 100">
+<rect x="10" y="15" width="100" height="18" fill="#f97316"/>
+<rect x="10" y="33" width="100" height="18" fill="#ffffff"/>
+<rect x="10" y="51" width="100" height="19" fill="#16a34a"/>
+<circle cx="60" cy="42" r="8" fill="#2563eb"/>
+<text x="60" y="88" text-anchor="middle" font-size="10">India</text>
+</svg>`
+},
+
+
+{
+name:"Australia Flag",
+category:"Objects",
+svg:`
+<svg viewBox="0 0 120 100">
+<rect x="10" y="15" width="100" height="55" fill="#1e40af"/>
+<circle cx="85" cy="35" r="8" fill="#ffffff"/>
+<polygon points="75,55 80,65 90,65 82,72 85,82 75,75 65,82 68,72 60,65 70,65"
+fill="#ffffff"/>
+<text x="60" y="88" text-anchor="middle" font-size="10">Australia</text>
+</svg>`
+},
+
+
+{
+name:"South Africa Flag",
+category:"Objects",
+svg:`
+<svg viewBox="0 0 120 100">
+<rect x="10" y="15" width="100" height="55" fill="#16a34a"/>
+<path d="M10 15L55 42L10 70Z" fill="#111827"/>
+<path d="M10 15L70 42L10 70" fill="none" stroke="#facc15" stroke-width="10"/>
+<text x="60" y="88" text-anchor="middle" font-size="10">South Africa</text>
+</svg>`
+},
+
+
+{
+name:"Argentina Flag",
+category:"Objects",
+svg:`
+<svg viewBox="0 0 120 100">
+<rect x="10" y="15" width="100" height="18" fill="#38bdf8"/>
+<rect x="10" y="33" width="100" height="18" fill="#ffffff"/>
+<rect x="10" y="51" width="100" height="19" fill="#38bdf8"/>
+<circle cx="60" cy="42" r="7" fill="#facc15"/>
+<text x="60" y="88" text-anchor="middle" font-size="10">Argentina</text>
+</svg>`
+},
+
+
+{
+name:"Portugal Flag",
+category:"Objects",
+svg:`
+<svg viewBox="0 0 120 100">
+<rect x="10" y="15" width="40" height="55" fill="#16a34a"/>
+<rect x="50" y="15" width="60" height="55" fill="#dc2626"/>
+<circle cx="50" cy="42" r="10" fill="#facc15"/>
+<text x="60" y="88" text-anchor="middle" font-size="10">Portugal</text>
+</svg>`
+},
+
+
+{
+name:"Belgium Flag",
+category:"Objects",
+svg:`
+<svg viewBox="0 0 120 100">
+<rect x="10" y="15" width="33" height="55" fill="#111827"/>
+<rect x="43" y="15" width="34" height="55" fill="#facc15"/>
+<rect x="77" y="15" width="33" height="55" fill="#dc2626"/>
+<text x="60" y="88" text-anchor="middle" font-size="10">Belgium</text>
+</svg>`
+},
+
+
+{
+name:"Switzerland Flag",
+category:"Objects",
+svg:`
+<svg viewBox="0 0 120 100">
+<rect x="10" y="15" width="100" height="55" fill="#dc2626"/>
+<rect x="55" y="25" width="10" height="35" fill="#ffffff"/>
+<rect x="45" y="37" width="30" height="10" fill="#ffffff"/>
+<text x="60" y="88" text-anchor="middle" font-size="10">Switzerland</text>
+</svg>`
+},
+
+
+
+
+
+
+
+
+
+
+
 
 
 
