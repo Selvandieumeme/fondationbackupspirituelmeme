@@ -16092,6 +16092,256 @@ fill="#ffffff">
 
 
 
+
+
+{
+name:"Key",
+category:"Symbols",
+svg:`
+<svg viewBox="0 0 100 100">
+<circle cx="35" cy="45" r="20" fill="#facc15"/>
+<circle cx="35" cy="45" r="8" fill="#ffffff"/>
+<rect x="50" y="40" width="35" height="10" fill="#92400e"/>
+<rect x="70" y="50" width="8" height="15" fill="#92400e"/>
+</svg>`
+},
+
+
+{
+name:"Shield",
+category:"Symbols",
+svg:`
+<svg viewBox="0 0 100 100">
+<path d="M50 10L85 25V55Q75 80 50 90Q25 80 15 55V25Z"
+fill="#2563eb"/>
+<path d="M35 50L47 62L70 35"
+stroke="#ffffff"
+stroke-width="8"
+fill="none"/>
+</svg>`
+},
+
+
+{
+name:"Like",
+category:"Symbols",
+svg:`
+<svg viewBox="0 0 100 100">
+<path d="M35 45L45 20Q55 10 60 25V45H80Q90 45 85 60L75 80H35Z"
+fill="#3b82f6"/>
+<rect x="20" y="45" width="15" height="35" fill="#2563eb"/>
+</svg>`
+},
+
+
+{
+name:"Dislike",
+category:"Symbols",
+svg:`
+<svg viewBox="0 0 100 100">
+<path d="M35 55L45 80Q55 90 60 75V55H80Q90 55 85 40L75 20H35Z"
+fill="#ef4444"/>
+<rect x="20" y="20" width="15" height="35" fill="#dc2626"/>
+</svg>`
+},
+
+
+{
+name:"Bell",
+category:"Symbols",
+svg:`
+<svg viewBox="0 0 100 100">
+<path d="M25 70H75Q65 55 65 35Q65 15 50 15Q35 15 35 35Q35 55 25 70Z"
+fill="#facc15"/>
+<circle cx="50" cy="82" r="8" fill="#111827"/>
+</svg>`
+},
+
+
+{
+name:"Eye",
+category:"Symbols",
+svg:`
+<svg viewBox="0 0 100 100">
+<path d="M10 50Q50 10 90 50Q50 90 10 50Z"
+fill="#60a5fa"/>
+<circle cx="50" cy="50" r="18" fill="#ffffff"/>
+<circle cx="50" cy="50" r="8" fill="#111827"/>
+</svg>`
+},
+
+
+{
+name:"Home",
+category:"Symbols",
+svg:`
+<svg viewBox="0 0 100 100">
+<polygon points="10,45 50,10 90,45"
+fill="#ef4444"/>
+<rect x="25" y="45" width="50" height="40" fill="#facc15"/>
+<rect x="45" y="60" width="12" height="25" fill="#92400e"/>
+</svg>`
+},
+
+
+{
+name:"Phone",
+category:"Symbols",
+svg:`
+<svg viewBox="0 0 100 100">
+<rect x="30" y="10" width="40" height="80" rx="8" fill="#111827"/>
+<rect x="36" y="20" width="28" height="50" fill="#60a5fa"/>
+<circle cx="50" cy="80" r="5" fill="#ffffff"/>
+</svg>`
+},
+
+
+{
+name:"Email",
+category:"Symbols",
+svg:`
+<svg viewBox="0 0 100 100">
+<rect x="15" y="25" width="70" height="50" rx="5" fill="#2563eb"/>
+<path d="M15 30L50 60L85 30"
+stroke="#ffffff"
+stroke-width="6"
+fill="none"/>
+</svg>`
+},
+
+
+{
+name:"Calendar",
+category:"Symbols",
+svg:`
+<svg viewBox="0 0 100 100">
+<rect x="20" y="25" width="60" height="60" fill="#ffffff" stroke="#111827" stroke-width="5"/>
+<rect x="20" y="25" width="60" height="15" fill="#ef4444"/>
+<line x1="35" y1="15" x2="35" y2="35" stroke="#111827" stroke-width="5"/>
+<line x1="65" y1="15" x2="65" y2="35" stroke="#111827" stroke-width="5"/>
+</svg>`
+},
+
+
+{
+name:"Clock",
+category:"Symbols",
+svg:`
+<svg viewBox="0 0 100 100">
+<circle cx="50" cy="50" r="40" fill="#ffffff" stroke="#111827" stroke-width="5"/>
+<line x1="50" y1="50" x2="50" y2="25" stroke="#111827" stroke-width="5"/>
+<line x1="50" y1="50" x2="70" y2="60" stroke="#111827" stroke-width="5"/>
+</svg>`
+},
+
+
+{
+name:"Map Pin",
+category:"Symbols",
+svg:`
+<svg viewBox="0 0 100 100">
+<path d="M50 90Q15 55 15 35Q15 10 50 10Q85 10 85 35Q85 55 50 90Z"
+fill="#ef4444"/>
+<circle cx="50" cy="35" r="12" fill="#ffffff"/>
+</svg>`
+},
+
+
+{
+name:"Download",
+category:"Symbols",
+svg:`
+<svg viewBox="0 0 100 100">
+<path d="M50 10V65"
+stroke="#2563eb"
+stroke-width="10"/>
+<polygon points="25,55 50,85 75,55"
+fill="#2563eb"/>
+<rect x="20" y="85" width="60" height="8" fill="#111827"/>
+</svg>`
+},
+
+
+{
+name:"Upload",
+category:"Symbols",
+svg:`
+<svg viewBox="0 0 100 100">
+<path d="M50 90V35"
+stroke="#22c55e"
+stroke-width="10"/>
+<polygon points="25,45 50,15 75,45"
+fill="#22c55e"/>
+<rect x="20" y="85" width="60" height="8" fill="#111827"/>
+</svg>`
+},
+
+
+{
+name:"Play",
+category:"Symbols",
+svg:`
+<svg viewBox="0 0 100 100">
+<circle cx="50" cy="50" r="40" fill="#22c55e"/>
+<polygon points="40,30 75,50 40,70"
+fill="#ffffff"/>
+</svg>`
+},
+
+
+{
+name:"Pause",
+category:"Symbols",
+svg:`
+<svg viewBox="0 0 100 100">
+<circle cx="50" cy="50" r="40" fill="#f97316"/>
+<rect x="35" y="30" width="10" height="40" fill="#ffffff"/>
+<rect x="55" y="30" width="10" height="40" fill="#ffffff"/>
+</svg>`
+},
+
+
+{
+name:"Camera Symbol",
+category:"Symbols",
+svg:`
+<svg viewBox="0 0 100 100">
+<rect x="15" y="30" width="70" height="50" rx="8" fill="#374151"/>
+<circle cx="50" cy="55" r="18" fill="#60a5fa"/>
+<circle cx="50" cy="55" r="8" fill="#111827"/>
+</svg>`
+},
+
+
+{
+name:"Search",
+category:"Symbols",
+svg:`
+<svg viewBox="0 0 100 100">
+<circle cx="42" cy="42" r="25"
+fill="none"
+stroke="#2563eb"
+stroke-width="8"/>
+<line x1="60" y1="60" x2="85" y2="85"
+stroke="#111827"
+stroke-width="10"/>
+</svg>`
+},
+
+
+{
+name:"Settings",
+category:"Symbols",
+svg:`
+<svg viewBox="0 0 100 100">
+<circle cx="50" cy="50" r="20" fill="#6b7280"/>
+<path d="M50 5V25M50 75V95M5 50H25M75 50H95"
+stroke="#111827"
+stroke-width="8"/>
+</svg>`
+},
+
+   
    
 {
 name:"Heart",
@@ -17169,6 +17419,944 @@ svg:`
 
 
 
+
+
+
+
+
+
+
+
+   
+
+
+{
+name:"Japan Flag",
+category:"Flags",
+svg:`
+<svg viewBox="0 0 100 100">
+<rect width="100" height="70" fill="#ffffff"/>
+<circle cx="50" cy="35" r="20" fill="#dc2626"/>
+</svg>`
+},
+
+
+{
+name:"Brazil Flag",
+category:"Flags",
+svg:`
+<svg viewBox="0 0 100 100">
+<rect width="100" height="70" fill="#16a34a"/>
+<path d="M50 10 L90 35 L50 60 L10 35Z" fill="#facc15"/>
+<circle cx="50" cy="35" r="15" fill="#2563eb"/>
+</svg>`
+},
+
+
+{
+name:"Canada Flag",
+category:"Flags",
+svg:`
+<svg viewBox="0 0 100 100">
+<rect width="100" height="70" fill="#ffffff"/>
+<rect width="20" height="70" fill="#dc2626"/>
+<rect x="80" width="20" height="70" fill="#dc2626"/>
+<path d="M50 15L58 35H70L60 45L65 60L50 50L35 60L40 45L30 35H42Z" fill="#dc2626"/>
+</svg>`
+},
+
+
+{
+name:"Mexico Flag",
+category:"Flags",
+svg:`
+<svg viewBox="0 0 100 100">
+<rect width="33" height="70" fill="#16a34a"/>
+<rect x="33" width="34" height="70" fill="#ffffff"/>
+<rect x="67" width="33" height="70" fill="#dc2626"/>
+<circle cx="50" cy="35" r="5" fill="#a16207"/>
+</svg>`
+},
+
+
+{
+name:"Argentina Flag",
+category:"Flags",
+svg:`
+<svg viewBox="0 0 100 100">
+<rect width="100" height="23" fill="#60a5fa"/>
+<rect y="23" width="100" height="24" fill="#ffffff"/>
+<rect y="47" width="100" height="23" fill="#60a5fa"/>
+<circle cx="50" cy="35" r="6" fill="#facc15"/>
+</svg>`
+},
+
+
+{
+name:"Chile Flag",
+category:"Flags",
+svg:`
+<svg viewBox="0 0 100 100">
+<rect width="100" height="35" fill="#ffffff"/>
+<rect y="35" width="100" height="35" fill="#dc2626"/>
+<rect width="35" height="35" fill="#2563eb"/>
+<circle cx="17" cy="17" r="6" fill="#ffffff"/>
+</svg>`
+},
+
+
+{
+name:"Colombia Flag",
+category:"Flags",
+svg:`
+<svg viewBox="0 0 100 100">
+<rect width="100" height="35" fill="#facc15"/>
+<rect y="35" width="100" height="18" fill="#2563eb"/>
+<rect y="53" width="100" height="17" fill="#dc2626"/>
+</svg>`
+},
+
+
+{
+name:"Peru Flag",
+category:"Flags",
+svg:`
+<svg viewBox="0 0 100 100">
+<rect width="33" height="70" fill="#dc2626"/>
+<rect x="33" width="34" height="70" fill="#ffffff"/>
+<rect x="67" width="33" height="70" fill="#dc2626"/>
+</svg>`
+},
+
+
+{
+name:"Portugal Flag",
+category:"Flags",
+svg:`
+<svg viewBox="0 0 100 100">
+<rect width="40" height="70" fill="#16a34a"/>
+<rect x="40" width="60" height="70" fill="#dc2626"/>
+<circle cx="40" cy="35" r="8" fill="#facc15"/>
+</svg>`
+},
+
+
+{
+name:"Greece Flag",
+category:"Flags",
+svg:`
+<svg viewBox="0 0 100 100">
+<rect width="100" height="70" fill="#2563eb"/>
+<path d="M0 15H100M0 35H100M0 55H100" stroke="#ffffff" stroke-width="8"/>
+</svg>`
+},
+
+
+{
+name:"Turkey Flag",
+category:"Flags",
+svg:`
+<svg viewBox="0 0 100 100">
+<rect width="100" height="70" fill="#dc2626"/>
+<circle cx="45" cy="35" r="18" fill="#ffffff"/>
+<circle cx="52" cy="35" r="14" fill="#dc2626"/>
+<circle cx="70" cy="35" r="5" fill="#ffffff"/>
+</svg>`
+},
+
+
+{
+name:"Saudi Arabia Flag",
+category:"Flags",
+svg:`
+<svg viewBox="0 0 100 100">
+<rect width="100" height="70" fill="#16a34a"/>
+<rect x="20" y="32" width="60" height="5" fill="#ffffff"/>
+</svg>`
+},
+
+
+{
+name:"South Africa Flag",
+category:"Flags",
+svg:`
+<svg viewBox="0 0 100 100">
+<rect width="100" height="70" fill="#16a34a"/>
+<path d="M0 0L45 35L0 70H25L70 35L25 0Z" fill="#facc15"/>
+<path d="M0 10L40 35L0 60" fill="#111827"/>
+</svg>`
+},
+
+
+{
+name:"Nigeria Flag",
+category:"Flags",
+svg:`
+<svg viewBox="0 0 100 100">
+<rect width="33" height="70" fill="#16a34a"/>
+<rect x="33" width="34" height="70" fill="#ffffff"/>
+<rect x="67" width="33" height="70" fill="#16a34a"/>
+</svg>`
+},
+
+
+{
+name:"Kenya Flag",
+category:"Flags",
+svg:`
+<svg viewBox="0 0 100 100">
+<rect width="100" height="23" fill="#111827"/>
+<rect y="23" width="100" height="24" fill="#ffffff"/>
+<rect y="47" width="100" height="23" fill="#dc2626"/>
+<path d="M50 15L65 35L50 55L35 35Z" fill="#ffffff"/>
+</svg>`
+},
+
+
+{
+name:"India Flag",
+category:"Flags",
+svg:`
+<svg viewBox="0v100 100">
+<rect width="100" height="23" fill="#f97316"/>
+<rect y="23" width="100" height="24" fill="#ffffff"/>
+<rect y="47" width="100" height="23" fill="#16a34a"/>
+<circle cx="50" cy="35" r="7" fill="#2563eb"/>
+</svg>`
+},
+
+
+{
+name:"Australia Flag",
+category:"Flags",
+svg:`
+<svg viewBox="0 0 100 100">
+<rect width="100" height="70" fill="#1d4ed8"/>
+<circle cx="75" cy="20" r="5" fill="#ffffff"/>
+<circle cx="65" cy="45" r="6" fill="#ffffff"/>
+</svg>`
+},
+
+
+{
+name:"South Korea Flag",
+category:"Flags",
+svg:`
+<svg viewBox="0 0 100 100">
+<rect width="100" height="70" fill="#ffffff"/>
+<circle cx="50" cy="35" r="15" fill="#dc2626"/>
+<path d="M50 20A15 15 0 0 0 50 50A15 15 0 0 1 50 20" fill="#2563eb"/>
+</svg>`
+},
+
+
+{
+name:"Switzerland Flag",
+category:"Flags",
+svg:`
+<svg viewBox="0 0 100 100">
+<rect width="100" height="70" fill="#dc2626"/>
+<rect x="42" y="15" width="16" height="40" fill="#ffffff"/>
+<rect x="30" y="27" width="40" height="16" fill="#ffffff"/>
+</svg>`
+},
+
+
+   
+
+{
+name:"Laptop",
+category:"Objects",
+svg:`
+<svg viewBox="0 0 100 100">
+<rect x="20" y="20" width="60" height="40" rx="5" fill="#374151"/>
+<rect x="25" y="25" width="50" height="30" fill="#60a5fa"/>
+<path d="M10 65H90L80 75H20Z" fill="#9ca3af"/>
+</svg>`
+},
+
+
+{
+name:"Smartphone",
+category:"Objects",
+svg:`
+<svg viewBox="0 0 100 100">
+<rect x="30" y="10" width="40" height="80" rx="8" fill="#111827"/>
+<rect x="35" y="20" width="30" height="55" fill="#38bdf8"/>
+<circle cx="50" cy="82" r="4" fill="#ffffff"/>
+</svg>`
+},
+
+
+{
+name:"Watch",
+category:"Objects",
+svg:`
+<svg viewBox="0 0 100 100">
+<rect x="40" y="5" width="20" height="90" fill="#1f2937"/>
+<circle cx="50" cy="50" r="25" fill="#e5e7eb"/>
+<circle cx="50" cy="50" r="15" fill="#2563eb"/>
+</svg>`
+},
+
+
+{
+name:"Book",
+category:"Objects",
+svg:`
+<svg viewBox="0 0 100 100">
+<path d="M20 20Q50 10 50 30V80Q30 65 20 75Z" fill="#2563eb"/>
+<path d="M50 30Q50 10 80 20V75Q70 65 50 80Z" fill="#60a5fa"/>
+</svg>`
+},
+
+
+{
+name:"Pen",
+category:"Objects",
+svg:`
+<svg viewBox="0 0 100 100">
+<path d="M25 75L70 30L80 40L35 85Z" fill="#2563eb"/>
+<path d="M70 30L80 40" stroke="#111827" stroke-width="5"/>
+</svg>`
+},
+
+
+{
+name:"Camera",
+category:"Objects",
+svg:`
+<svg viewBox="0 0 100 100">
+<rect x="15" y="30" width="70" height="45" rx="8" fill="#374151"/>
+<circle cx="50" cy="52" r="15" fill="#38bdf8"/>
+<rect x="35" y="20" width="30" height="10" fill="#111827"/>
+</svg>`
+},
+
+
+{
+name:"Headphones",
+category:"Objects",
+svg:`
+<svg viewBox="0 0 100 100">
+<path d="M20 55V45Q20 15 50 15Q80 15 80 45V55"
+stroke="#111827"
+stroke-width="10"
+fill="none"/>
+<rect x="15" y="50" width="15" height="25" fill="#2563eb"/>
+<rect x="70" y="50" width="15" height="25" fill="#2563eb"/>
+</svg>`
+},
+
+
+{
+name:"Keyboard",
+category:"Objects",
+svg:`
+<svg viewBox="0 0 100 100">
+<rect x="10" y="35" width="80" height="35" rx="5" fill="#9ca3af"/>
+${Array.from({length:6},(_,i)=>`
+<rect x="${18+i*12}" y="45" width="8" height="8" fill="#ffffff"/>
+`).join("")}
+</svg>`
+},
+
+
+{
+name:"Mouse",
+category:"Objects",
+svg:`
+<svg viewBox="0 0 100 100">
+<path d="M50 15Q25 15 25 55Q25 85 50 85Q75 85 75 55Q75 15 50 15Z" fill="#d1d5db"/>
+<line x1="50" y1="20" x2="50" y2="45" stroke="#111827" stroke-width="5"/>
+</svg>`
+},
+
+
+{
+name:"Chair",
+category:"Objects",
+svg:`
+<svg viewBox="0 0 100 100">
+<rect x="30" y="20" width="40" height="35" fill="#92400e"/>
+<rect x="25" y="55" width="50" height="15" fill="#b45309"/>
+<path d="M35 70V90M65 70V90" stroke="#111827" stroke-width="6"/>
+</svg>`
+},
+
+
+{
+name:"Table",
+category:"Objects",
+svg:`
+<svg viewBox="0 100 100 100">
+<rect x="15" y="35" width="70" height="15" fill="#92400e"/>
+<path d="M25 50V85M75 50V85" stroke="#78350f" stroke-width="8"/>
+</svg>`
+},
+
+
+{
+name:"Key",
+category:"Objects",
+svg:`
+<svg viewBox="0 0 100 100">
+<circle cx="30" cy="45" r="18" fill="#facc15"/>
+<rect x="45" y="40" width="40" height="10" fill="#facc15"/>
+<rect x="70" y="50" width="8" height="15" fill="#facc15"/>
+</svg>`
+},
+
+
+{
+name:"Lamp",
+category:"Objects",
+svg:`
+<svg viewBox="0 0 100 100">
+<path d="M25 45H75L60 15H40Z" fill="#facc15"/>
+<rect x="45" y="45" width="10" height="35" fill="#374151"/>
+<circle cx="50" cy="85" r="15" fill="#9ca3af"/>
+</svg>`
+},
+
+
+{
+name:"Backpack",
+category:"Objects",
+svg:`
+<svg viewBox="0 0 100 100">
+<rect x="25" y="30" width="50" height="55" rx="10" fill="#2563eb"/>
+<path d="M35 30Q35 10 50 10Q65 10 65 30" stroke="#111827" stroke-width="8" fill="none"/>
+</svg>`
+},
+
+
+{
+name:"Glasses",
+category:"Objects",
+svg:`
+<svg viewBox="0 0 100 100">
+<circle cx="35" cy="50" r="18" fill="none" stroke="#111827" stroke-width="5"/>
+<circle cx="65" cy="50" r="18" fill="none" stroke="#111827" stroke-width="5"/>
+<line x1="53" y1="50" x2="47" y2="50" stroke="#111827" stroke-width="5"/>
+</svg>`
+},
+
+
+{
+name:"Coffee Cup",
+category:"Objects",
+svg:`
+<svg viewBox="0 0 100 100">
+<rect x="30" y="30" width="40" height="45" rx="5" fill="#92400e"/>
+<path d="M70 40Q90 40 70 60" stroke="#92400e" stroke-width="8" fill="none"/>
+</svg>`
+},
+
+
+{
+name:"Umbrella",
+category:"Objects",
+svg:`
+<svg viewBox="0 0 100 100">
+<path d="M10 50Q50 10 90 50Z" fill="#ef4444"/>
+<path d="M50 50V85Q50 95 60 85" stroke="#111827" stroke-width="5" fill="none"/>
+</svg>`
+},
+
+
+{
+name:"Clock",
+category:"Objects",
+svg:`
+<svg viewBox="0 0 100 100">
+<circle cx="50" cy="50" r="35" fill="#e5e7eb" stroke="#111827" stroke-width="5"/>
+<line x1="50" y1="50" x2="50" y2="25" stroke="#111827" stroke-width="5"/>
+<line x1="50" y1="50" x2="70" y2="60" stroke="#111827" stroke-width="5"/>
+</svg>`
+},
+
+
+{
+name:"Globe",
+category:"Objects",
+svg:`
+<svg viewBox="0 0 100 100">
+<circle cx="50" cy="50" r="35" fill="#60a5fa"/>
+<path d="M20 50H80M50 15V85" stroke="#16a34a" stroke-width="8"/>
+</svg>`
+},
+
+
+{
+name:"Television",
+category:"Objects",
+svg:`
+<svg viewBox="0 0 100 100">
+<rect x="15" y="25" width="70" height="50" rx="5" fill="#111827"/>
+<rect x="22" y="32" width="56" height="35" fill="#38bdf8"/>
+<line x1="35" y1="15" x2="50" y2="25" stroke="#111827" stroke-width="4"/>
+<line x1="65" y1="15" x2="50" y2="25" stroke="#111827" stroke-width="4"/>
+</svg>`
+},
+
+
+{
+name:"Printer",
+category:"Objects",
+svg:`
+<svg viewBox="0 0 100 100">
+<rect x="25" y="35" width="50" height="35" rx="5" fill="#6b7280"/>
+<rect x="35" y="20" width="30" height="25" fill="#e5e7eb"/>
+<rect x="35" y="65" width="30" height="20" fill="#ffffff"/>
+<circle cx="70" cy="50" r="4" fill="#22c55e"/>
+</svg>`
+},
+
+
+{
+name:"Tablet",
+category:"Objects",
+svg:`
+<svg viewBox="0 0 100 100">
+<rect x="20" y="10" width="60" height="80" rx="8" fill="#1f2937"/>
+<rect x="27" y="20" width="46" height="55" fill="#60a5fa"/>
+<circle cx="50" cy="82" r="4" fill="#ffffff"/>
+</svg>`
+},
+
+
+{
+name:"Microphone",
+category:"Objects",
+svg:`
+<svg viewBox="0 0 100 100">
+<rect x="40" y="15" width="20" height="45" rx="10" fill="#374151"/>
+<path d="M30 50Q30 80 50 80Q70 80 70 50"
+stroke="#111827"
+stroke-width="6"
+fill="none"/>
+<line x1="50" y1="80" x2="50" y2="95" stroke="#111827" stroke-width="6"/>
+</svg>`
+},
+
+
+{
+name:"Speaker",
+category:"Objects",
+svg:`
+<svg viewBox="0 0 100 100">
+<rect x="30" y="10" width="40" height="80" rx="5" fill="#111827"/>
+<circle cx="50" cy="35" r="10" fill="#60a5fa"/>
+<circle cx="50" cy="65" r="15" fill="#374151"/>
+</svg>`
+},
+
+
+{
+name:"Drone",
+category:"Objects",
+svg:`
+<svg viewBox="0 0 100 100">
+<rect x="35" y="35" width="30" height="25" fill="#2563eb"/>
+<circle cx="20" cy="25" r="12" fill="#9ca3af"/>
+<circle cx="80" cy="25" r="12" fill="#9ca3af"/>
+<line x1="30" y1="35" x2="20" y2="25" stroke="#111827" stroke-width="4"/>
+<line x1="70" y1="35" x2="80" y2="25" stroke="#111827" stroke-width="4"/>
+</svg>`
+},
+
+
+{
+name:"Car",
+category:"Objects",
+svg:`
+<svg viewBox="0 0 100 100">
+<path d="M20 60L30 35H70L80 60Z" fill="#ef4444"/>
+<rect x="15" y="60" width="70" height="20" rx="5" fill="#dc2626"/>
+<circle cx="30" cy="80" r="8" fill="#111827"/>
+<circle cx="70" cy="80" r="8" fill="#111827"/>
+</svg>`
+},
+
+
+{
+name:"Bicycle",
+category:"Objects",
+svg:`
+<svg viewBox="0 0 100 100">
+<circle cx="25" cy="70" r="18" fill="none" stroke="#2563eb" stroke-width="5"/>
+<circle cx="75" cy="70" r="18" fill="none" stroke="#2563eb" stroke-width="5"/>
+<path d="M25 70L50 35L75 70M50 35H65"
+stroke="#111827"
+stroke-width="5"
+fill="none"/>
+</svg>`
+},
+
+
+{
+name:"Suitcase",
+category:"Objects",
+svg:`
+<svg viewBox="0 0 100 100">
+<rect x="25" y="30" width="50" height="50" rx="8" fill="#92400e"/>
+<path d="M40 30V15H60V30" stroke="#111827" stroke-width="5" fill="none"/>
+</svg>`
+},
+
+
+{
+name:"Wallet",
+category:"Objects",
+svg:`
+<svg viewBox="0 0 100 100">
+<rect x="20" y="35" width="60" height="40" rx="5" fill="#16a34a"/>
+<circle cx="65" cy="55" r="6" fill="#facc15"/>
+</svg>`
+},
+
+
+{
+name:"Camera Lens",
+category:"Objects",
+svg:`
+<svg viewBox="0 0 100 100">
+<circle cx="50" cy="50" r="35" fill="#111827"/>
+<circle cx="50" cy="50" r="22" fill="#2563eb"/>
+<circle cx="50" cy="50" r="10" fill="#38bdf8"/>
+</svg>`
+},
+
+
+{
+name:"Key Board Piano",
+category:"Objects",
+svg:`
+<svg viewBox="0 0 100 100">
+<rect x="10" y="30" width="80" height="40" fill="#ffffff" stroke="#111827" stroke-width="3"/>
+${Array.from({length:8},(_,i)=>`
+<rect x="${15+i*9}" y="30" width="5" height="25" fill="#111827"/>
+`).join("")}
+</svg>`
+},
+
+
+{
+name:"Guitar",
+category:"Objects",
+svg:`
+<svg viewBox="0 0 100 100">
+<circle cx="35" cy="65" r="20" fill="#f97316"/>
+<rect x="45" y="20" width="10" height="50" fill="#92400e"/>
+<circle cx="40" cy="65" r="5" fill="#111827"/>
+</svg>`
+},
+
+
+{
+name:"Football",
+category:"Objects",
+svg:`
+<svg viewBox="0 0 100 100">
+<circle cx="50" cy="50" r="35" fill="#ffffff" stroke="#111827" stroke-width="4"/>
+<path d="M50 30L65 40L60 60L40 60L35 40Z" fill="#111827"/>
+</svg>`
+},
+
+
+{
+name:"Basketball",
+category:"Objects",
+svg:`
+<svg viewBox="0 0 100 100">
+<circle cx="50" cy="50" r="35" fill="#f97316"/>
+<path d="M15 50H85M50 15V85"
+stroke="#111827"
+stroke-width="4"/>
+</svg>`
+},
+
+
+{
+name:"Trophy",
+category:"Objects",
+svg:`
+<svg viewBox="0 0 100 100">
+<path d="M30 20H70V45Q70 70 50 70Q30 70 30 45Z" fill="#facc15"/>
+<rect x="45" y="70" width="10" height="15" fill="#92400e"/>
+</svg>`
+},
+
+
+{
+name:"Keypad",
+category:"Objects",
+svg:`
+<svg viewBox="0 0 100 100">
+<rect x="20" y="15" width="60" height="70" rx="8" fill="#374151"/>
+${Array.from({length:9},(_,i)=>`
+<circle cx="${35+(i%3)*15}" cy="${35+Math.floor(i/3)*15}" r="4" fill="#ffffff"/>
+`).join("")}
+</svg>`
+},
+
+
+{
+name:"Flashlight",
+category:"Objects",
+svg:`
+<svg viewBox="0 0 100 100">
+<rect x="35" y="35" width="30" height="45" fill="#374151"/>
+<circle cx="50" cy="25" r="20" fill="#facc15"/>
+</svg>`
+},
+
+
+{
+name:"Tool Box",
+category:"Objects",
+svg:`
+<svg viewBox="0 0 100 100">
+<rect x="20" y="35" width="60" height="40" rx="5" fill="#dc2626"/>
+<path d="M35 35V20H65V35" stroke="#111827" stroke-width="6" fill="none"/>
+</svg>`
+},
+
+   
+{
+name:"House",
+category:"Objects",
+svg:`
+<svg viewBox="0 0 100 100">
+<path d="M15 45L50 15L85 45V85H15Z" fill="#ef4444"/>
+<rect x="40" y="55" width="20" height="30" fill="#92400e"/>
+<rect x="25" y="50" width="15" height="15" fill="#60a5fa"/>
+</svg>`
+},
+
+
+{
+name:"Car Key",
+category:"Objects",
+svg:`
+<svg viewBox="0 0 100 100">
+<circle cx="35" cy="45" r="18" fill="#facc15"/>
+<rect x="50" y="40" width="35" height="10" fill="#9ca3af"/>
+<rect x="70" y="50" width="8" height="15" fill="#9ca3af"/>
+</svg>`
+},
+
+
+{
+name:"Electric Fan",
+category:"Objects",
+svg:`
+<svg viewBox="0 0 100 100">
+<circle cx="50" cy="40" r="30" fill="#e5e7eb"/>
+<circle cx="50" cy="40" r="8" fill="#111827"/>
+<path d="M50 40L50 15M50 40L75 55M50 40L25 55"
+stroke="#2563eb"
+stroke-width="8"/>
+<rect x="45" y="70" width="10" height="20" fill="#374151"/>
+</svg>`
+},
+
+
+{
+name:"Refrigerator",
+category:"Objects",
+svg:`
+<svg viewBox="0 0 100 100">
+<rect x="30" y="10" width="40" height="80" fill="#e5e7eb"/>
+<line x1="30" y1="45" x2="70" y2="45" stroke="#9ca3af" stroke-width="3"/>
+<rect x="60" y="25" width="5" height="15" fill="#111827"/>
+</svg>`
+},
+
+
+{
+name:"Washing Machine",
+category:"Objects",
+svg:`
+<svg viewBox="0 0 100 100">
+<rect x="20" y="15" width="60" height="70" rx="8" fill="#d1d5db"/>
+<circle cx="50" cy="55" r="22" fill="#60a5fa"/>
+<circle cx="50" cy="55" r="10" fill="#ffffff"/>
+</svg>`
+},
+
+
+{
+name:"Iron",
+category:"Objects",
+svg:`
+<svg viewBox="0 0 100 100">
+<path d="M20 70H80L60 35H35Z" fill="#2563eb"/>
+<path d="M35 35Q50 10 70 35" fill="#9ca3af"/>
+</svg>`
+},
+
+
+{
+name:"Sewing Machine",
+category:"Objects",
+svg:`
+<svg viewBox="0 0 100 100">
+<rect x="20" y="55" width="60" height="15" fill="#374151"/>
+<path d="M30 55V25H60V55" stroke="#2563eb" stroke-width="8" fill="none"/>
+<circle cx="50" cy="55" r="8" fill="#ef4444"/>
+</svg>`
+},
+
+
+{
+name:"Toothbrush",
+category:"Objects",
+svg:`
+<svg viewBox="0 0 100 100">
+<rect x="45" y="25" width="10" height="60" fill="#22c55e"/>
+<rect x="35" y="15" width="30" height="15" fill="#60a5fa"/>
+</svg>`
+},
+
+
+{
+name:"Soap Bottle",
+category:"Objects",
+svg:`
+<svg viewBox="0 0 100 100">
+<rect x="35" y="30" width="30" height="50" rx="8" fill="#38bdf8"/>
+<rect x="45" y="15" width="10" height="15" fill="#111827"/>
+</svg>`
+},
+
+
+{
+name:"Backpack School",
+category:"Objects",
+svg:`
+<svg viewBox="0 0 100 100">
+<rect x="25" y="30" width="50" height="55" rx="12" fill="#f97316"/>
+<path d="M35 30Q35 10 50 10Q65 10 65 30"
+stroke="#111827"
+stroke-width="7"
+fill="none"/>
+</svg>`
+},
+
+
+{
+name:"Map",
+category:"Objects",
+svg:`
+<svg viewBox="0 0 100 100">
+<path d="M15 20L40 30L60 20L85 30V80L60 70L40 80L15 70Z"
+fill="#22c55e"/>
+<path d="M40 30V80M60 20V70"
+stroke="#ffffff"
+stroke-width="3"/>
+</svg>`
+},
+
+
+{
+name:"Compass",
+category:"Objects",
+svg:`
+<svg viewBox="0 0 100 100">
+<circle cx="50" cy="50" r="35" fill="#e5e7eb" stroke="#111827" stroke-width="4"/>
+<path d="M50 25L65 60L35 45Z" fill="#ef4444"/>
+</svg>`
+},
+
+
+{
+name:"Binoculars",
+category:"Objects",
+svg:`
+<svg viewBox="0 0 100 100">
+<circle cx="35" cy="50" r="20" fill="#2563eb"/>
+<circle cx="65" cy="50" r="20" fill="#2563eb"/>
+<rect x="40" y="45" width="20" height="10" fill="#111827"/>
+</svg>`
+},
+
+
+{
+name:"Painting Brush",
+category:"Objects",
+svg:`
+<svg viewBox="0 0 100 100">
+<path d="M25 75L70 30" stroke="#92400e" stroke-width="10"/>
+<path d="M65 35L85 15Q90 10 85 35Z" fill="#ef4444"/>
+</svg>`
+},
+
+
+{
+name:"Paint Palette",
+category:"Objects",
+svg:`
+<svg viewBox="0 0 100 100">
+<path d="M50 15Q15 15 15 55Q15 85 55 80Q80 75 80 45Q80 15 50 15Z" fill="#facc15"/>
+<circle cx="35" cy="40" r="6" fill="#ef4444"/>
+<circle cx="55" cy="30" r="6" fill="#2563eb"/>
+<circle cx="65" cy="55" r="6" fill="#22c55e"/>
+</svg>`
+},
+
+
+{
+name:"Medicine Bottle",
+category:"Objects",
+svg:`
+<svg viewBox="0 0 100 100">
+<rect x="35" y="30" width="30" height="55" rx="5" fill="#ffffff" stroke="#9ca3af"/>
+<rect x="40" y="15" width="20" height="15" fill="#ef4444"/>
+<cross fill="#ef4444"/>
+</svg>`
+},
+
+
+{
+name:"Shopping Cart",
+category:"Objects",
+svg:`
+<svg viewBox="0 0 100 100">
+<path d="M20 25H35L45 65H80L90 40H40"
+stroke="#374151"
+stroke-width="6"
+fill="none"/>
+<circle cx="50" cy="80" r="8" fill="#111827"/>
+<circle cx="75" cy="80" r="8" fill="#111827"/>
+</svg>`
+},
+
+
+{
+name:"Diamond",
+category:"Objects",
+svg:`
+<svg viewBox="0 0 100 100">
+<path d="M50 10L85 40L50 90L15 40Z" fill="#38bdf8"/>
+<path d="M15 40H85M50 10V90"
+stroke="#ffffff"
+stroke-width="3"/>
+</svg>`
+},
+
+
+{
+name:"Treasure Box",
+category:"Objects",
+svg:`
+<svg viewBox="0 0 100 100">
+<rect x="20" y="35" width="60" height="45" rx="8" fill="#92400e"/>
+<path d="M20 35Q50 5 80 35" fill="#facc15"/>
+<rect x="45" y="50" width="10" height="15" fill="#111827"/>
+</svg>`
+},
 
 
 
