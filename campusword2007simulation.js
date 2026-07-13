@@ -17233,7 +17233,7 @@ fill="#ffffff">
 FOBAS
 </text>
 </svg>`
-}.
+},
    
 
 
