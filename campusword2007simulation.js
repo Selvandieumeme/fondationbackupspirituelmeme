@@ -17113,6 +17113,283 @@ svg:`
 
 
 
+{
+name:"Realistic Camera",
+category:"Symbols",
+svg:`
+<svg viewBox="0 0 100 100">
+<rect x="15" y="30" width="70" height="45" rx="8" fill="#1f2937"/>
+<rect x="30" y="20" width="25" height="12" rx="3" fill="#374151"/>
+<circle cx="50" cy="52" r="18" fill="#111827"/>
+<circle cx="50" cy="52" r="10" fill="#60a5fa"/>
+<circle cx="50" cy="52" r="4" fill="#ffffff"/>
+</svg>`
+},
+
+
+{
+name:"Realistic Globe",
+category:"Symbols",
+svg:`
+<svg viewBox="0 0 100 100">
+<circle cx="50" cy="50" r="42" fill="#38bdf8"/>
+<path d="M20 50H80M50 10V90"
+stroke="#ffffff"
+stroke-width="3"/>
+<path d="M50 10Q20 50 50 90M50 10Q80 50 50 90"
+stroke="#ffffff"
+stroke-width="3"
+fill="none"/>
+<path d="M25 35Q50 45 75 35M25 65Q50 55 75 65"
+stroke="#22c55e"
+stroke-width="8"
+fill="none"/>
+</svg>`
+},
+
+
+{
+name:"Realistic Trophy",
+category:"Symbols",
+svg:`
+<svg viewBox="0 0 100 100">
+<path d="M30 20H70V45Q70 65 50 70Q30 65 30 45Z"
+fill="#facc15"/>
+<path d="M30 30H15Q15 55 35 55M70 30H85Q85 55 65 55"
+stroke="#f59e0b"
+stroke-width="6"
+fill="none"/>
+<rect x="45" y="70" width="10" height="15" fill="#92400e"/>
+<rect x="30" y="85" width="40" height="8" fill="#facc15"/>
+</svg>`
+},
+
+
+{
+name:"Realistic Folder",
+category:"Symbols",
+svg:`
+<svg viewBox="0 0 100 100">
+<path d="M10 30H40L50 40H90V80H10Z"
+fill="#facc15"/>
+<path d="M10 40H90V80H10Z"
+fill="#eab308"/>
+</svg>`
+},
+
+
+{
+name:"Realistic Document",
+category:"Symbols",
+svg:`
+<svg viewBox="0 0 100 100">
+<rect x="25" y="10" width="50" height="75" rx="5" fill="#ffffff" stroke="#9ca3af" stroke-width="3"/>
+<line x1="35" y1="35" x2="65" y2="35" stroke="#2563eb" stroke-width="5"/>
+<line x1="35" y1="50" x2="65" y2="50" stroke="#9ca3af" stroke-width="4"/>
+<line x1="35" y1="65" x2="55" y2="65" stroke="#9ca3af" stroke-width="4"/>
+</svg>`
+},
+
+
+{
+name:"Realistic Wallet",
+category:"Symbols",
+svg:`
+<svg viewBox="0 0 100 100">
+<rect x="15" y="30" width="70" height="45" rx="8" fill="#92400e"/>
+<rect x="55" y="45" width="30" height="20" fill="#facc15"/>
+<circle cx="65" cy="55" r="5" fill="#111827"/>
+</svg>`
+},
+
+
+{
+name:"Realistic Gift Box",
+category:"Symbols",
+svg:`
+<svg viewBox="0 0 100 100">
+<rect x="20" y="35" width="60" height="50" fill="#ef4444"/>
+<rect x="45" y="35" width="10" height="50" fill="#facc15"/>
+<path d="M20 35Q50 5 80 35"
+fill="none"
+stroke="#facc15"
+stroke-width="8"/>
+</svg>`
+},
+
+
+{
+name:"Realistic Diamond",
+category:"Symbols",
+svg:`
+<svg viewBox="0 0 100 100">
+<polygon points="20,35 80,35 50,85"
+fill="#38bdf8"/>
+<polygon points="20,35 35,15 65,15 80,35"
+fill="#bae6fd"/>
+<line x1="35" y1="15" x2="50" y2="85"
+stroke="#ffffff"
+stroke-width="3"/>
+</svg>`
+},
+
+
+{
+name:"Realistic Key",
+category:"Symbols",
+svg:`
+<svg viewBox="0 0 100 100">
+<circle cx="30" cy="50" r="18" fill="#facc15"/>
+<circle cx="30" cy="50" r="8" fill="#ffffff"/>
+<rect x="45" y="45" width="40" height="10" fill="#d97706"/>
+<rect x="70" y="55" width="8" height="15" fill="#d97706"/>
+</svg>`
+},
+
+
+{
+name:"Realistic Bell",
+category:"Symbols",
+svg:`
+<svg viewBox="0 0 100 100">
+<path d="M25 70H75Q65 55 65 35Q65 15 50 15Q35 15 35 35Q35 55 25 70Z"
+fill="#fbbf24"/>
+<circle cx="50" cy="82" r="8" fill="#92400e"/>
+</svg>`
+},
+
+
+{
+name:"Realistic Shield",
+category:"Symbols",
+svg:`
+<svg viewBox="0 0 100 100">
+<path d="M50 10L85 25V55Q70 85 50 90Q30 85 15 55V25Z"
+fill="#2563eb"/>
+<path d="M35 50L47 62L70 35"
+stroke="#ffffff"
+stroke-width="8"
+fill="none"/>
+</svg>`
+},
+
+
+{
+name:"Realistic Microphone",
+category:"Symbols",
+svg:`
+<svg viewBox="0 0 100 100">
+<rect x="35" y="15" width="30" height="45" rx="15" fill="#374151"/>
+<path d="M25 50Q25 80 50 80Q75 80 75 50"
+stroke="#111827"
+stroke-width="6"
+fill="none"/>
+<line x1="50" y1="80" x2="50" y2="95"
+stroke="#111827"
+stroke-width="6"/>
+</svg>`
+},
+
+
+{
+name:"Realistic Light Bulb",
+category:"Symbols",
+svg:`
+<svg viewBox="0 0 100 100">
+<circle cx="50" cy="40" r="25" fill="#facc15"/>
+<rect x="38" y="65" width="24" height="15" fill="#6b7280"/>
+<line x1="50" y1="5" x2="50" y2="15" stroke="#facc15" stroke-width="5"/>
+</svg>`
+},
+
+
+{
+name:"Realistic Puzzle",
+category:"Symbols",
+svg:`
+<svg viewBox="0 0 100 100">
+<path d="M25 25H50Q60 10 70 25V40H85V70H60Q50 85 40 70H25Z"
+fill="#22c55e"/>
+</svg>`
+},
+
+
+{
+name:"Realistic Pin",
+category:"Symbols",
+svg:`
+<svg viewBox="0 0 100 100">
+<path d="M50 90Q20 55 20 35Q20 10 50 10Q80 10 80 35Q80 55 50 90Z"
+fill="#ef4444"/>
+<circle cx="50" cy="35" r="12" fill="#ffffff"/>
+</svg>`
+},
+
+
+{
+name:"Realistic Lock",
+category:"Symbols",
+svg:`
+<svg viewBox="0 0 100 100">
+<rect x="25" y="40" width="50" height="45" rx="8" fill="#374151"/>
+<path d="M35 40V25Q50 5 65 25V40"
+stroke="#111827"
+stroke-width="8"
+fill="none"/>
+<circle cx="50" cy="62" r="6" fill="#facc15"/>
+</svg>`
+},
+
+
+{
+name:"Realistic Search",
+category:"Symbols",
+svg:`
+<svg viewBox="0 0 100 100">
+<circle cx="40" cy="40" r="25"
+fill="none"
+stroke="#2563eb"
+stroke-width="8"/>
+<line x1="60" y1="60" x2="85" y2="85"
+stroke="#111827"
+stroke-width="10"/>
+</svg>`
+},
+
+
+{
+name:"Realistic Music",
+category:"Symbols",
+svg:`
+<svg viewBox="0 0 100 100">
+<path d="M60 20V65"
+stroke="#111827"
+stroke-width="8"/>
+<circle cx="45" cy="70" r="12" fill="#ec4899"/>
+<circle cx="60" cy="20" r="6" fill="#2563eb"/>
+</svg>`
+},
+
+
+{
+name:"Realistic Compass",
+category:"Symbols",
+svg:`
+<svg viewBox="0 0 100 100">
+<circle cx="50" cy="50" r="40"
+fill="#ffffff"
+stroke="#111827"
+stroke-width="5"/>
+<polygon points="50,15 65,60 35,60"
+fill="#ef4444"/>
+<polygon points="50,85 35,40 65,40"
+fill="#2563eb"/>
+</svg>`
+},
+
+           
+
+
 
 
 {
@@ -17126,6 +17403,145 @@ svg:`
 </svg>`
 },
 
+
+
+
+{
+name:"Netherlands Flag",
+category:"Objects",
+svg:`
+<svg viewBox="0 0 120 100">
+<rect x="10" y="15" width="100" height="18" fill="#dc2626"/>
+<rect x="10" y="33" width="100" height="18" fill="#ffffff"/>
+<rect x="10" y="51" width="100" height="19" fill="#2563eb"/>
+<text x="60" y="88" text-anchor="middle" font-size="10">Netherlands</text>
+</svg>`
+},
+
+
+{
+name:"Norway Flag",
+category:"Objects",
+svg:`
+<svg viewBox="0 0 120 100">
+<rect x="10" y="15" width="100" height="55" fill="#dc2626"/>
+<rect x="35" y="15" width="14" height="55" fill="#ffffff"/>
+<rect x="10" y="35" width="100" height="14" fill="#ffffff"/>
+<rect x="39" y="15" width="7" height="55" fill="#2563eb"/>
+<rect x="10" y="39" width="100" height="7" fill="#2563eb"/>
+<text x="60" y="88" text-anchor="middle" font-size="10">Norway</text>
+</svg>`
+},
+
+
+{
+name:"Sweden Flag",
+category:"Objects",
+svg:`
+<svg viewBox="0 0 120 100">
+<rect x="10" y="15" width="100" height="55" fill="#2563eb"/>
+<rect x="40" y="15" width="12" height="55" fill="#facc15"/>
+<rect x="10" y="36" width="100" height="12" fill="#facc15"/>
+<text x="60" y="88" text-anchor="middle" font-size="10">Sweden</text>
+</svg>`
+},
+
+
+{
+name:"Finland Flag",
+category:"Objects",
+svg:`
+<svg viewBox="0 0 120 100">
+<rect x="10" y="15" width="100" height="55" fill="#ffffff"/>
+<rect x="38" y="15" width="15" height="55" fill="#2563eb"/>
+<rect x="10" y="35" width="100" height="15" fill="#2563eb"/>
+<text x="60" y="88" text-anchor="middle" font-size="10">Finland</text>
+</svg>`
+},
+
+
+{
+name:"Denmark Flag",
+category:"Objects",
+svg:`
+<svg viewBox="0 0 120 100">
+<rect x="10" y="15" width="100" height="55" fill="#dc2626"/>
+<rect x="35" y="15" width="12" height="55" fill="#ffffff"/>
+<rect x="10" y="36" width="100" height="12" fill="#ffffff"/>
+<text x="60" y="88" text-anchor="middle" font-size="10">Denmark</text>
+</svg>`
+},
+
+
+{
+name:"Greece Flag",
+category:"Objects",
+svg:`
+<svg viewBox="0 0 120 100">
+<rect x="10" y="15" width="100" height="55" fill="#2563eb"/>
+<path d="M10 25H110M10 45H110M10 65H110"
+stroke="#ffffff" stroke-width="5"/>
+<rect x="10" y="15" width="30" height="30" fill="#2563eb"/>
+<text x="60" y="88" text-anchor="middle" font-size="10">Greece</text>
+</svg>`
+},
+
+
+{
+name:"Turkey Flag",
+category:"Objects",
+svg:`
+<svg viewBox="0 0 120 100">
+<rect x="10" y="15" width="100" height="55" fill="#dc2626"/>
+<circle cx="55" cy="42" r="15" fill="#ffffff"/>
+<circle cx="61" cy="42" r="12" fill="#dc2626"/>
+<circle cx="75" cy="42" r="5" fill="#ffffff"/>
+<text x="60" y="88" text-anchor="middle" font-size="10">Turkey</text>
+</svg>`
+},
+
+
+{
+name:"Egypt Flag",
+category:"Objects",
+svg:`
+<svg viewBox="0 0 120 100">
+<rect x="10" y="15" width="100" height="18" fill="#dc2626"/>
+<rect x="10" y="33" width="100" height="18" fill="#ffffff"/>
+<rect x="10" y="51" width="100" height="19" fill="#111827"/>
+<circle cx="60" cy="42" r="5" fill="#facc15"/>
+<text x="60" y="88" text-anchor="middle" font-size="10">Egypt</text>
+</svg>`
+},
+
+
+{
+name:"Nigeria Flag",
+category:"Objects",
+svg:`
+<svg viewBox="0 0 120 100">
+<rect x="10" y="15" width="33" height="55" fill="#16a34a"/>
+<rect x="43" y="15" width="34" height="55" fill="#ffffff"/>
+<rect x="77" y="15" width="33" height="55" fill="#16a34a"/>
+<text x="60" y="88" text-anchor="middle" font-size="10">Nigeria</text>
+</svg>`
+},
+
+
+{
+name:"Kenya Flag",
+category:"Objects",
+svg:`
+<svg viewBox="0 0 120 100">
+<rect x="10" y="15" width="100" height="18" fill="#111827"/>
+<rect x="10" y="33" width="100" height="18" fill="#dc2626"/>
+<rect x="10" y="51" width="100" height="19" fill="#16a34a"/>
+<circle cx="60" cy="42" r="8" fill="#ffffff"/>
+<text x="60" y="88" text-anchor="middle" font-size="10">Kenya</text>
+</svg>`
+},
+
+   
 
 
 {
