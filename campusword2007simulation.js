@@ -21961,6 +21961,218 @@ false
 
 
 
+/* =========================================================
+   CAMPUS WORD — TEXT BOX INSERT POSITION ENGINE
+   STEP 2
+   SAVE TEXT BOX INSERT POSITION ONLY
+   WAIT FOR CREATION STEP
+   NO TEXT BOX CREATION
+   NO CARET INTERFERENCE
+   NO SHAPE INTERFERENCE
+   NO CLIPART INTERFERENCE
+   ISOLATED MODULE
+========================================================= */
+
+(function(){
+
+
+
+let textBoxInsertMode = false;
+
+
+
+
+window.CampusWordTextBoxData = {
+
+    position:null
+
+};
+
+
+
+
+
+
+document.addEventListener(
+"click",
+function(e){
+
+
+
+const button =
+e.target.closest(
+'[data-action="insert-textbox"]'
+);
+
+
+
+if(!button){
+
+return;
+
+}
+
+
+
+
+
+textBoxInsertMode =
+button.classList.contains(
+"cwTextBoxActive"
+);
+
+
+
+},
+false
+);
+
+
+
+
+
+
+
+
+
+document.addEventListener(
+"pointerdown",
+function(e){
+
+
+
+if(!textBoxInsertMode){
+
+return;
+
+}
+
+
+
+
+const page =
+e.target.closest(
+".cwPageContent"
+);
+
+
+
+
+
+if(!page){
+
+return;
+
+}
+
+
+
+
+
+const rect =
+page.getBoundingClientRect();
+
+
+
+
+
+
+
+window.CampusWordTextBoxData.position = {
+
+
+    x:e.clientX - rect.left,
+
+
+    y:e.clientY - rect.top,
+
+
+    page:page
+
+
+
+};
+
+
+
+
+
+console.log(
+"Text Box Position Saved",
+window.CampusWordTextBoxData.position
+);
+
+
+
+
+
+},
+{
+passive:false
+}
+);
+
+
+
+
+})();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
