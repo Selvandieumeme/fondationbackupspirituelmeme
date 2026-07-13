@@ -16851,6 +16851,246 @@ svg:`
 },
 
 
+
+
+
+
+{
+name:"House",
+category:"Objects",
+svg:`
+<svg viewBox="0 0 100 100">
+<path d="M15 45L50 15L85 45V85H15Z" fill="#ef4444"/>
+<rect x="40" y="55" width="20" height="30" fill="#92400e"/>
+<rect x="25" y="50" width="15" height="15" fill="#60a5fa"/>
+</svg>`
+},
+
+
+{
+name:"Car Key",
+category:"Objects",
+svg:`
+<svg viewBox="0 0 100 100">
+<circle cx="35" cy="45" r="18" fill="#facc15"/>
+<rect x="50" y="40" width="35" height="10" fill="#9ca3af"/>
+<rect x="70" y="50" width="8" height="15" fill="#9ca3af"/>
+</svg>`
+},
+
+
+{
+name:"Electric Fan",
+category:"Objects",
+svg:`
+<svg viewBox="0 0 100 100">
+<circle cx="50" cy="40" r="30" fill="#e5e7eb"/>
+<circle cx="50" cy="40" r="8" fill="#111827"/>
+<path d="M50 40L50 15M50 40L75 55M50 40L25 55"
+stroke="#2563eb"
+stroke-width="8"/>
+<rect x="45" y="70" width="10" height="20" fill="#374151"/>
+</svg>`
+},
+
+
+{
+name:"Refrigerator",
+category:"Objects",
+svg:`
+<svg viewBox="0 0 100 100">
+<rect x="30" y="10" width="40" height="80" fill="#e5e7eb"/>
+<line x1="30" y1="45" x2="70" y2="45" stroke="#9ca3af" stroke-width="3"/>
+<rect x="60" y="25" width="5" height="15" fill="#111827"/>
+</svg>`
+},
+
+
+{
+name:"Washing Machine",
+category:"Objects",
+svg:`
+<svg viewBox="0 0 100 100">
+<rect x="20" y="15" width="60" height="70" rx="8" fill="#d1d5db"/>
+<circle cx="50" cy="55" r="22" fill="#60a5fa"/>
+<circle cx="50" cy="55" r="10" fill="#ffffff"/>
+</svg>`
+},
+
+
+{
+name:"Iron",
+category:"Objects",
+svg:`
+<svg viewBox="0 0 100 100">
+<path d="M20 70H80L60 35H35Z" fill="#2563eb"/>
+<path d="M35 35Q50 10 70 35" fill="#9ca3af"/>
+</svg>`
+},
+
+
+{
+name:"Sewing Machine",
+category:"Objects",
+svg:`
+<svg viewBox="0 0 100 100">
+<rect x="20" y="55" width="60" height="15" fill="#374151"/>
+<path d="M30 55V25H60V55" stroke="#2563eb" stroke-width="8" fill="none"/>
+<circle cx="50" cy="55" r="8" fill="#ef4444"/>
+</svg>`
+},
+
+
+{
+name:"Toothbrush",
+category:"Objects",
+svg:`
+<svg viewBox="0 0 100 100">
+<rect x="45" y="25" width="10" height="60" fill="#22c55e"/>
+<rect x="35" y="15" width="30" height="15" fill="#60a5fa"/>
+</svg>`
+},
+
+
+{
+name:"Soap Bottle",
+category:"Objects",
+svg:`
+<svg viewBox="0 0 100 100">
+<rect x="35" y="30" width="30" height="50" rx="8" fill="#38bdf8"/>
+<rect x="45" y="15" width="10" height="15" fill="#111827"/>
+</svg>`
+},
+
+
+{
+name:"Backpack School",
+category:"Objects",
+svg:`
+<svg viewBox="0 0 100 100">
+<rect x="25" y="30" width="50" height="55" rx="12" fill="#f97316"/>
+<path d="M35 30Q35 10 50 10Q65 10 65 30"
+stroke="#111827"
+stroke-width="7"
+fill="none"/>
+</svg>`
+},
+
+
+{
+name:"Map",
+category:"Objects",
+svg:`
+<svg viewBox="0 0 100 100">
+<path d="M15 20L40 30L60 20L85 30V80L60 70L40 80L15 70Z"
+fill="#22c55e"/>
+<path d="M40 30V80M60 20V70"
+stroke="#ffffff"
+stroke-width="3"/>
+</svg>`
+},
+
+
+{
+name:"Compass",
+category:"Objects",
+svg:`
+<svg viewBox="0 0 100 100">
+<circle cx="50" cy="50" r="35" fill="#e5e7eb" stroke="#111827" stroke-width="4"/>
+<path d="M50 25L65 60L35 45Z" fill="#ef4444"/>
+</svg>`
+},
+
+
+{
+name:"Binoculars",
+category:"Objects",
+svg:`
+<svg viewBox="0 0 100 100">
+<circle cx="35" cy="50" r="20" fill="#2563eb"/>
+<circle cx="65" cy="50" r="20" fill="#2563eb"/>
+<rect x="40" y="45" width="20" height="10" fill="#111827"/>
+</svg>`
+},
+
+
+{
+name:"Painting Brush",
+category:"Objects",
+svg:`
+<svg viewBox="0 0 100 100">
+<path d="M25 75L70 30" stroke="#92400e" stroke-width="10"/>
+<path d="M65 35L85 15Q90 10 85 35Z" fill="#ef4444"/>
+</svg>`
+},
+
+
+{
+name:"Paint Palette",
+category:"Objects",
+svg:`
+<svg viewBox="0 0 100 100">
+<path d="M50 15Q15 15 15 55Q15 85 55 80Q80 75 80 45Q80 15 50 15Z" fill="#facc15"/>
+<circle cx="35" cy="40" r="6" fill="#ef4444"/>
+<circle cx="55" cy="30" r="6" fill="#2563eb"/>
+<circle cx="65" cy="55" r="6" fill="#22c55e"/>
+</svg>`
+},
+
+
+{
+name:"Medicine Bottle",
+category:"Objects",
+svg:`
+<svg viewBox="0 0 100 100">
+<rect x="35" y="30" width="30" height="55" rx="5" fill="#ffffff" stroke="#9ca3af"/>
+<rect x="40" y="15" width="20" height="15" fill="#ef4444"/>
+<cross fill="#ef4444"/>
+</svg>`
+},
+
+
+{
+name:"Shopping Cart",
+category:"Objects",
+svg:`
+<svg viewBox="0 0 100 100">
+<path d="M20 25H35L45 65H80L90 40H40"
+stroke="#374151"
+stroke-width="6"
+fill="none"/>
+<circle cx="50" cy="80" r="8" fill="#111827"/>
+<circle cx="75" cy="80" r="8" fill="#111827"/>
+</svg>`
+},
+
+
+{
+name:"Diamond",
+category:"Objects",
+svg:`
+<svg viewBox="0 0 100 100">
+<path d="M50 10L85 40L50 90L15 40Z" fill="#38bdf8"/>
+<path d="M15 40H85M50 10V90"
+stroke="#ffffff"
+stroke-width="3"/>
+</svg>`
+},
+
+
+{
+name:"Treasure Box",
+category:"Objects",
+svg:`
+<svg viewBox="0 0 100 100">
+<rect x="20" y="35" width="60" height="45" rx="8" fill="#92400e"/>
+<path d="M20 35Q50 5 80 35" fill="#facc15"/>
+<rect x="45" y="50" width="10" height="15" fill="#111827"/>
+</svg>`
+},
+
+
+
 {
 name:"Gift",
 category:"Objects",
