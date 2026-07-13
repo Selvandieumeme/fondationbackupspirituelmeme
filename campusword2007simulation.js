@@ -21755,7 +21755,119 @@ false
 
 
 
+/* =========================================================
+   CAMPUS WORD — CLIP ART DELETE ENGINE
+   STEP 7
+   DELETE SELECTED CLIP ART ONLY
+   KEYBOARD DELETE SUPPORT
+   TOUCH + MOUSE SAFE
+   ISOLATED FROM SHAPES
+   ISOLATED FROM CARET
+========================================================= */
 
+(function(){
+
+
+
+document.addEventListener(
+"keydown",
+function(e){
+
+
+
+if(
+e.key !== "Delete" &&
+e.key !== "Backspace"
+){
+
+return;
+
+}
+
+
+
+
+const clip =
+window.CampusWordSelectedClipArt;
+
+
+
+if(!clip){
+
+return;
+
+}
+
+
+
+
+
+
+if(
+!clip.classList.contains(
+"cwInsertedClipArt"
+)
+){
+
+return;
+
+}
+
+
+
+
+
+e.preventDefault();
+
+e.stopPropagation();
+
+
+
+
+
+
+clip.remove();
+
+
+
+
+
+
+window.CampusWordSelectedClipArt =
+null;
+
+
+
+
+
+
+const handles =
+document.querySelector(
+".cwClipArtHandles"
+);
+
+
+
+if(handles){
+
+handles.remove();
+
+}
+
+
+
+
+
+
+},
+false
+);
+
+
+
+
+
+})();
 
 
 
