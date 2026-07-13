@@ -3428,3 +3428,84 @@ bottom:-6px;
     outline:2px solid #16a34a;
 
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* =========================================================
+   TEXT BOX 4 HANDLES STYLE
+========================================================= */
+
+.cwTextBoxHandle-top,
+.cwTextBoxHandle-bottom,
+.cwTextBoxHandle-left,
+.cwTextBoxHandle-right{
+
+    position:absolute;
+
+    width:10px;
+
+    height:10px;
+
+    background:#2563eb;
+
+    border:2px solid white;
+
+    border-radius:50%;
+
+}
+
+
+
+.cwTextBoxHandle-top{
+
+    top:-6px;
+
+    left:50%;
+
+    transform:translateX(-50%);
+
+}
+
+
+.cwTextBoxHandle-bottom{
+
+    bottom:-6px;
+
+    left:50%;
+
+    transform:translateX(-50%);
+
+}
+
+
+.cwTextBoxHandle-left{
+
+    left:-6px;
+
+    top:50%;
+
+    transform:translateY(-50%);
+
+}
+
+
+.cwTextBoxHandle-right{
+
+    right:-6px;
+
+    top:50%;
+
+    transform:translateY(-50%);
+
+}
