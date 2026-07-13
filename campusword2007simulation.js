@@ -1,4 +1,3 @@
-
 /* =========================================================
    CAMPUS WORD 2007 — CORE ENGINE (PRODUCTION FOUNDATION)
    SAFE • RESPONSIVE • MULTI-DEVICE • SCALABLE
@@ -15832,6 +15831,268 @@ fill="#f97316"/>
 },
 
 
+
+
+{
+name:"Peace Symbol",
+category:"Symbols",
+svg:`
+<svg viewBox="0 0 100 100">
+<circle cx="50" cy="50" r="40" fill="#60a5fa"/>
+<path d="M50 15V85M50 50L25 20M50 50L75 20M50 50L25 80M50 50L75 80"
+stroke="#ffffff"
+stroke-width="6"
+fill="none"/>
+</svg>`
+},
+
+
+{
+name:"Check Mark",
+category:"Symbols",
+svg:`
+<svg viewBox="0 0 100 100">
+<circle cx="50" cy="50" r="40" fill="#22c55e"/>
+<path d="M25 52L42 70L78 30"
+stroke="#ffffff"
+stroke-width="10"
+fill="none"/>
+</svg>`
+},
+
+
+{
+name:"Warning",
+category:"Symbols",
+svg:`
+<svg viewBox="0 0 100 100">
+<polygon points="50,10 90,85 10,85"
+fill="#facc15"/>
+<rect x="46" y="35" width="8" height="28" fill="#111827"/>
+<circle cx="50" cy="72" r="5" fill="#111827"/>
+</svg>`
+},
+
+
+{
+name:"Information",
+category:"Symbols",
+svg:`
+<svg viewBox="0 0 100 100">
+<circle cx="50" cy="50" r="40" fill="#2563eb"/>
+<circle cx="50" cy="28" r="6" fill="#ffffff"/>
+<rect x="44" y="40" width="12" height="35" fill="#ffffff"/>
+</svg>`
+},
+
+
+{
+name:"Question Mark",
+category:"Symbols",
+svg:`
+<svg viewBox="0 0 100 100">
+<circle cx="50" cy="50" r="40" fill="#8b5cf6"/>
+<text x="50" y="70"
+text-anchor="middle"
+font-size="60"
+fill="#ffffff">
+?
+</text>
+</svg>`
+},
+
+
+{
+name:"Lock",
+category:"Symbols",
+svg:`
+<svg viewBox="0 0 100 100">
+<rect x="25" y="40" width="50" height="40" rx="8" fill="#374151"/>
+<path d="M35 40V25Q50 5 65 25V40"
+stroke="#111827"
+stroke-width="8"
+fill="none"/>
+<circle cx="50" cy="60" r="6" fill="#ffffff"/>
+</svg>`
+},
+
+
+{
+name:"Star Badge",
+category:"Symbols",
+svg:`
+<svg viewBox="0 0 100 100">
+<polygon points="50,5 61,38 95,38 67,58 78,92 50,72 22,92 33,58 5,38 39,38"
+fill="#f97316"/>
+<circle cx="50" cy="50" r="12" fill="#facc15"/>
+</svg>`
+},
+
+
+{
+name:"Lightning",
+category:"Symbols",
+svg:`
+<svg viewBox="0 0 100 100">
+<polygon points="55,5 20,55 45,55 35,95 80,40 55,40"
+fill="#facc15"/>
+</svg>`
+},
+
+
+{
+name:"Fire",
+category:"Symbols",
+svg:`
+<svg viewBox="0 0 100 100">
+<path d="M50 90Q15 65 45 20Q50 45 65 25Q90 65 50 90Z"
+fill="#ef4444"/>
+<path d="M50 75Q35 60 50 40Q65 60 50 75Z"
+fill="#facc15"/>
+</svg>`
+},
+
+
+{
+name:"Crown",
+category:"Symbols",
+svg:`
+<svg viewBox="0 0 100 100">
+<path d="M15 35L35 55L50 20L65 55L85 35L75 80H25Z"
+fill="#facc15"/>
+<circle cx="25" cy="75" r="5" fill="#ef4444"/>
+<circle cx="50" cy="75" r="5" fill="#2563eb"/>
+<circle cx="75" cy="75" r="5" fill="#22c55e"/>
+</svg>`
+},
+
+
+{
+name:"Diamond",
+category:"Symbols",
+svg:`
+<svg viewBox="0 0 100 100">
+<polygon points="50,5 90,50 50,95 10,50"
+fill="#ec4899"/>
+<polygon points="50,20 70,50 50,80 30,50"
+fill="#ffffff"/>
+</svg>`
+},
+
+
+{
+name:"Globe",
+category:"Symbols",
+svg:`
+<svg viewBox="0 0 100 100">
+<circle cx="50" cy="50" r="40" fill="#38bdf8"/>
+<path d="M10 50H90M50 10V90"
+stroke="#ffffff"
+stroke-width="5"/>
+<ellipse cx="50" cy="50" rx="20" ry="40"
+stroke="#ffffff"
+stroke-width="5"
+fill="none"/>
+</svg>`
+},
+
+
+{
+name:"Target",
+category:"Symbols",
+svg:`
+<svg viewBox="0 0 100 100">
+<circle cx="50" cy="50" r="40" fill="#ef4444"/>
+<circle cx="50" cy="50" r="25" fill="#ffffff"/>
+<circle cx="50" cy="50" r="10" fill="#ef4444"/>
+</svg>`
+},
+
+
+{
+name:"Flag",
+category:"Symbols",
+svg:`
+<svg viewBox="0 0 100 100">
+<rect x="25" y="15" width="6" height="70" fill="#111827"/>
+<path d="M31 20H80L65 40L80 60H31Z"
+fill="#2563eb"/>
+</svg>`
+},
+
+
+{
+name:"Magic Wand",
+category:"Symbols",
+svg:`
+<svg viewBox="0 0 100 100">
+<path d="M25 75L75 25"
+stroke="#8b5cf6"
+stroke-width="10"/>
+<polygon points="75,5 80,20 95,25 80,30 75,45 70,30 55,25 70,20"
+fill="#facc15"/>
+</svg>`
+},
+
+
+{
+name:"Puzzle",
+category:"Symbols",
+svg:`
+<svg viewBox="0 0 100 100">
+<path d="M30 25H55Q55 10 70 20Q85 30 70 45H85V75H55Q45 90 30 75Z"
+fill="#22c55e"/>
+</svg>`
+},
+
+
+{
+name:"Rocket",
+category:"Symbols",
+svg:`
+<svg viewBox="0 0 100 100">
+<path d="M50 10Q85 25 60 75L40 75Q15 25 50 10Z"
+fill="#ef4444"/>
+<circle cx="50" cy="40" r="8" fill="#60a5fa"/>
+<path d="M40 75L30 90M60 75L70 90"
+stroke="#f97316"
+stroke-width="6"/>
+</svg>`
+},
+
+
+{
+name:"Compass",
+category:"Symbols",
+svg:`
+<svg viewBox="0 0 100 100">
+<circle cx="50" cy="50" r="40" fill="#ffffff" stroke="#111827" stroke-width="5"/>
+<polygon points="50,20 65,60 35,60"
+fill="#ef4444"/>
+</svg>`
+},
+
+
+{
+name:"Medal",
+category:"Symbols",
+svg:`
+<svg viewBox="0 0 100 100">
+<path d="M35 10L50 40L65 10"
+fill="#2563eb"/>
+<circle cx="50" cy="60" r="25" fill="#facc15"/>
+<text x="50" y="70"
+text-anchor="middle"
+font-size="30"
+fill="#ffffff">
+1
+</text>
+</svg>`
+},
+
+
+
+   
 {
 name:"Heart",
 category:"Love",
@@ -16619,7 +16880,7 @@ svg:`
 
 {
 name:"Haiti Flag",
-category:"Objects",
+category:"Objects", 
 svg:`
 <svg viewBox="0 0 120 100">
 <rect x="10" y="15" width="100" height="55" fill="#0038A8"/>
