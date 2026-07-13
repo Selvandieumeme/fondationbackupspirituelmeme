@@ -1,4 +1,3 @@
-.
 
 /* =========================================================
    CAMPUS WORD 2007 — CORE ENGINE (PRODUCTION FOUNDATION)
