@@ -20772,6 +20772,222 @@ document.addEventListener(
 
 
 
+/* =========================================================
+   CAMPUS WORD — CLIP ART INSERT ENGINE
+   STEP 3
+   INSERT CLIPART INTO PAGE ONLY
+   ISOLATED MODULE
+   NO SELECTION SYSTEM
+   NO SHAPE ENGINE INTERFERENCE
+   NO RESIZE INTERFERENCE
+   NO CARET INTERFERENCE
+   TOUCH + MOUSE SUPPORT
+========================================================= */
+
+(function(){
+
+
+
+let clipArtInsertMode = false;
+
+
+
+
+
+
+document.addEventListener(
+    "pointerdown",
+    function(e){
+
+
+
+        const clipItem =
+            e.target.closest(
+                ".cwClipArtItem"
+            );
+
+
+
+        if(!clipItem){
+
+            return;
+
+        }
+
+
+
+
+
+        const page =
+            document.querySelector(
+                ".cwPageContent"
+            );
+
+
+
+        if(!page){
+
+            return;
+
+        }
+
+
+
+
+
+        e.preventDefault();
+
+
+
+
+
+
+        const rect =
+            page.getBoundingClientRect();
+
+
+
+
+
+
+        const x =
+            e.clientX -
+            rect.left;
+
+
+
+        const y =
+            e.clientY -
+            rect.top;
+
+
+
+
+
+
+
+        const clip =
+            document.createElement(
+                "div"
+            );
+
+
+
+
+
+
+        clip.className =
+            "cwInsertedClipArt";
+
+
+
+
+
+
+        clip.dataset.clipart =
+            clipItem.dataset.clipart;
+
+
+
+
+
+
+        clip.style.position =
+            "absolute";
+
+
+
+        clip.style.left =
+            x + "px";
+
+
+
+        clip.style.top =
+            y + "px";
+
+
+
+        clip.style.width =
+            "120px";
+
+
+
+        clip.style.height =
+            "120px";
+
+
+
+        clip.style.display =
+            "flex";
+
+
+
+        clip.style.alignItems =
+            "center";
+
+
+
+        clip.style.justifyContent =
+            "center";
+
+
+
+        clip.style.cursor =
+            "move";
+
+
+
+
+
+
+
+        clip.innerHTML =
+            clipItem.innerHTML;
+
+
+
+
+
+
+
+        page.appendChild(
+            clip
+        );
+
+
+
+
+
+
+    },
+    {
+        passive:false
+    }
+);
+
+
+
+
+
+})();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
