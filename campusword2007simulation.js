@@ -21893,6 +21893,197 @@ false
 
 
 
+/* =========================================================
+   CAMPUS WORD — TEXT BOX ENGINE
+   STEP 1
+   ACTIVATE TEXT BOX INSERT MODE
+   SAVE ACTIVE TEXT BOX TYPE
+   NO CREATION YET
+   NO CARET INTERFERENCE
+   NO SHAPE INTERFERENCE
+   NO CLIPART INTERFERENCE
+   ISOLATED MODULE
+========================================================= */
+
+(function(){
+
+
+let textBoxMode = false;
+
+
+
+window.CampusWordTextBoxData = {
+
+    active:false,
+
+    position:null
+
+};
+
+
+
+
+
+
+document.addEventListener(
+"click",
+function(e){
+
+
+
+const button =
+e.target.closest(
+'[data-action="insert-textbox"]'
+);
+
+
+
+if(!button){
+
+return;
+
+}
+
+
+
+
+
+e.preventDefault();
+
+e.stopPropagation();
+
+
+
+
+
+
+textBoxMode = true;
+
+
+
+window.CampusWordTextBoxData.active =
+true;
+
+
+
+window.CampusWordTextBoxData.position =
+null;
+
+
+
+
+console.log(
+"Text Box Insert Mode Active"
+);
+
+
+
+
+},
+false
+);
+
+
+
+
+
+
+
+
+
+document.addEventListener(
+"pointerdown",
+function(e){
+
+
+
+if(!textBoxMode){
+
+return;
+
+}
+
+
+
+
+const page =
+e.target.closest(
+".cwPageContent"
+);
+
+
+
+
+if(!page){
+
+return;
+
+}
+
+
+
+
+
+const rect =
+page.getBoundingClientRect();
+
+
+
+
+
+window.CampusWordTextBoxData.position = {
+
+    x:e.clientX - rect.left,
+
+    y:e.clientY - rect.top,
+
+    page:page
+
+};
+
+
+
+
+
+textBoxMode = false;
+
+
+
+console.log(
+"Text Box Position Saved",
+window.CampusWordTextBoxData.position
+);
+
+
+
+},
+{
+passive:false
+}
+);
+
+
+
+
+})();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
