@@ -21887,41 +21887,17 @@ false
 
 
 
-
-
-
-
-
-
 /* =========================================================
-   CAMPUS WORD — TEXT BOX ENGINE
+   CAMPUS WORD — TEXT BOX BUTTON ACTIVE ENGINE
    STEP 1
-   ACTIVATE TEXT BOX INSERT MODE
-   SAVE ACTIVE TEXT BOX TYPE
-   NO CREATION YET
+   TOGGLE BUTTON ACTIVE STATE ONLY
+   NO INSERTION
+   NO PAGE INTERFERENCE
    NO CARET INTERFERENCE
-   NO SHAPE INTERFERENCE
-   NO CLIPART INTERFERENCE
    ISOLATED MODULE
 ========================================================= */
 
 (function(){
-
-
-let textBoxMode = false;
-
-
-
-window.CampusWordTextBoxData = {
-
-    active:false,
-
-    position:null
-
-};
-
-
-
 
 
 
@@ -21956,25 +21932,10 @@ e.stopPropagation();
 
 
 
-
-textBoxMode = true;
-
-
-
-window.CampusWordTextBoxData.active =
-true;
-
-
-
-window.CampusWordTextBoxData.position =
-null;
-
-
-
-
-console.log(
-"Text Box Insert Mode Active"
+button.classList.toggle(
+"cwTextBoxActive"
 );
+
 
 
 
@@ -21982,86 +21943,6 @@ console.log(
 },
 false
 );
-
-
-
-
-
-
-
-
-
-document.addEventListener(
-"pointerdown",
-function(e){
-
-
-
-if(!textBoxMode){
-
-return;
-
-}
-
-
-
-
-const page =
-e.target.closest(
-".cwPageContent"
-);
-
-
-
-
-if(!page){
-
-return;
-
-}
-
-
-
-
-
-const rect =
-page.getBoundingClientRect();
-
-
-
-
-
-window.CampusWordTextBoxData.position = {
-
-    x:e.clientX - rect.left,
-
-    y:e.clientY - rect.top,
-
-    page:page
-
-};
-
-
-
-
-
-textBoxMode = false;
-
-
-
-console.log(
-"Text Box Position Saved",
-window.CampusWordTextBoxData.position
-);
-
-
-
-},
-{
-passive:false
-}
-);
-
 
 
 
