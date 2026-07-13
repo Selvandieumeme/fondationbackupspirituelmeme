@@ -15452,6 +15452,142 @@ fill="none"/>
 },
 
 
+
+
+
+{
+name:"Engineer",
+category:"People",
+svg:`
+<svg viewBox="0 0 100 100">
+<circle cx="50" cy="25" r="16" fill="#fde68a"/>
+<rect x="32" y="45" width="36" height="40" rx="8" fill="#64748b"/>
+<rect x="20" y="55" width="12" height="8" fill="#f97316"/>
+<circle cx="75" cy="65" r="10" fill="#38bdf8"/>
+</svg>`
+},
+
+
+{
+name:"Teacher Woman",
+category:"People",
+svg:`
+<svg viewBox="0 0 100 100">
+<circle cx="50" cy="25" r="17" fill="#fcd34d"/>
+<path d="M35 20 Q50 5 65 20" fill="#7c2d12"/>
+<rect x="30" y="45" width="40" height="40" rx="10" fill="#ec4899"/>
+<rect x="70" y="55" width="15" height="5" fill="#111827"/>
+</svg>`
+},
+
+
+{
+name:"Musician",
+category:"People",
+svg:`
+<svg viewBox="0 0 100 100">
+<circle cx="50" cy="25" r="16" fill="#facc15"/>
+<rect x="32" y="45" width="36" height="40" fill="#8b5cf6"/>
+<circle cx="75" cy="55" r="8" fill="#111827"/>
+<path d="M78 45V25" stroke="#111827" stroke-width="4"/>
+</svg>`
+},
+
+
+{
+name:"Photographer",
+category:"People",
+svg:`
+<svg viewBox="0 0 100 100">
+<circle cx="50" cy="25" r="16" fill="#fde68a"/>
+<rect x="32" y="45" width="36" height="40" fill="#334155"/>
+<rect x="65" y="55" width="25" height="15" fill="#111827"/>
+<circle cx="78" cy="62" r="5" fill="#38bdf8"/>
+</svg>`
+},
+
+
+{
+name:"Doctor Woman",
+category:"People",
+svg:`
+<svg viewBox="0 100 100 100">
+<circle cx="50" cy="25" r="16" fill="#fde68a"/>
+<rect x="32" y="45" width="36" height="40" fill="#ffffff"/>
+<path d="M50 55V75M40 65H60" stroke="#ef4444" stroke-width="6"/>
+</svg>`
+},
+
+
+{
+name:"Firefighter",
+category:"People",
+svg:`
+<svg viewBox="0 0 100 100">
+<circle cx="50" cy="25" r="16" fill="#facc15"/>
+<path d="M30 20H70L60 10H40Z" fill="#dc2626"/>
+<rect x="32" y="45" width="36" height="40" fill="#ef4444"/>
+<circle cx="75" cy="70" r="8" fill="#f97316"/>
+</svg>`
+},
+
+
+{
+name:"Student Girl",
+category:"People",
+svg:`
+<svg viewBox="0 0 100 100">
+<circle cx="50" cy="25" r="16" fill="#fde68a"/>
+<path d="M30 20Q50 0 70 20" fill="#1f2937"/>
+<rect x="32" y="45" width="36" height="40" fill="#14b8a6"/>
+<path d="M20 70H80" stroke="#2563eb" stroke-width="4"/>
+</svg>`
+},
+
+
+{
+name:"Designer",
+category:"People",
+svg:`
+<svg viewBox="0 0 100 100">
+<circle cx="50" cy="25" r="16" fill="#fcd34d"/>
+<rect x="32" y="45" width="36" height="40" fill="#f43f5e"/>
+<circle cx="75" cy="60" r="10" fill="#22c55e"/>
+<circle cx="75" cy="60" r="4" fill="#ffffff"/>
+</svg>`
+},
+
+
+{
+name:"Scientist Woman",
+category:"People",
+svg:`
+<svg viewBox="0 0 100 100">
+<circle cx="50" cy="25" r="16" fill="#fde68a"/>
+<rect x="32" y="45" width="36" height="40" fill="#0ea5e9"/>
+<path d="M75 55L85 75H65Z" fill="#22c55e"/>
+</svg>`
+},
+
+
+{
+name:"Cook",
+category:"People",
+svg:`
+<svg viewBox="0 0 100 100">
+<circle cx="50" cy="30" r="16" fill="#facc15"/>
+<path d="M30 25Q50 5 70 25" fill="#ffffff"/>
+<rect x="32" y="50" width="36" height="35" fill="#f97316"/>
+</svg>`
+},
+
+
+
+
+
+
+
+
 {
 name:"Star",
 category:"Symbols",
