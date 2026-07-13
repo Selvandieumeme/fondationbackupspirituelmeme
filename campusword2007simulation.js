@@ -17091,6 +17091,249 @@ svg:`
 
 
 
+
+{
+name:"Television",
+category:"Objects",
+svg:`
+<svg viewBox="0 0 100 100">
+<rect x="15" y="25" width="70" height="50" rx="5" fill="#111827"/>
+<rect x="22" y="32" width="56" height="35" fill="#38bdf8"/>
+<line x1="35" y1="15" x2="50" y2="25" stroke="#111827" stroke-width="4"/>
+<line x1="65" y1="15" x2="50" y2="25" stroke="#111827" stroke-width="4"/>
+</svg>`
+},
+
+
+{
+name:"Printer",
+category:"Objects",
+svg:`
+<svg viewBox="0 0 100 100">
+<rect x="25" y="35" width="50" height="35" rx="5" fill="#6b7280"/>
+<rect x="35" y="20" width="30" height="25" fill="#e5e7eb"/>
+<rect x="35" y="65" width="30" height="20" fill="#ffffff"/>
+<circle cx="70" cy="50" r="4" fill="#22c55e"/>
+</svg>`
+},
+
+
+{
+name:"Tablet",
+category:"Objects",
+svg:`
+<svg viewBox="0 0 100 100">
+<rect x="20" y="10" width="60" height="80" rx="8" fill="#1f2937"/>
+<rect x="27" y="20" width="46" height="55" fill="#60a5fa"/>
+<circle cx="50" cy="82" r="4" fill="#ffffff"/>
+</svg>`
+},
+
+
+{
+name:"Microphone",
+category:"Objects",
+svg:`
+<svg viewBox="0 0 100 100">
+<rect x="40" y="15" width="20" height="45" rx="10" fill="#374151"/>
+<path d="M30 50Q30 80 50 80Q70 80 70 50"
+stroke="#111827"
+stroke-width="6"
+fill="none"/>
+<line x1="50" y1="80" x2="50" y2="95" stroke="#111827" stroke-width="6"/>
+</svg>`
+},
+
+
+{
+name:"Speaker",
+category:"Objects",
+svg:`
+<svg viewBox="0 0 100 100">
+<rect x="30" y="10" width="40" height="80" rx="5" fill="#111827"/>
+<circle cx="50" cy="35" r="10" fill="#60a5fa"/>
+<circle cx="50" cy="65" r="15" fill="#374151"/>
+</svg>`
+},
+
+
+{
+name:"Drone",
+category:"Objects",
+svg:`
+<svg viewBox="0 0 100 100">
+<rect x="35" y="35" width="30" height="25" fill="#2563eb"/>
+<circle cx="20" cy="25" r="12" fill="#9ca3af"/>
+<circle cx="80" cy="25" r="12" fill="#9ca3af"/>
+<line x1="30" y1="35" x2="20" y2="25" stroke="#111827" stroke-width="4"/>
+<line x1="70" y1="35" x2="80" y2="25" stroke="#111827" stroke-width="4"/>
+</svg>`
+},
+
+
+{
+name:"Car",
+category:"Objects",
+svg:`
+<svg viewBox="0 0 100 100">
+<path d="M20 60L30 35H70L80 60Z" fill="#ef4444"/>
+<rect x="15" y="60" width="70" height="20" rx="5" fill="#dc2626"/>
+<circle cx="30" cy="80" r="8" fill="#111827"/>
+<circle cx="70" cy="80" r="8" fill="#111827"/>
+</svg>`
+},
+
+
+{
+name:"Bicycle",
+category:"Objects",
+svg:`
+<svg viewBox="0 0 100 100">
+<circle cx="25" cy="70" r="18" fill="none" stroke="#2563eb" stroke-width="5"/>
+<circle cx="75" cy="70" r="18" fill="none" stroke="#2563eb" stroke-width="5"/>
+<path d="M25 70L50 35L75 70M50 35H65"
+stroke="#111827"
+stroke-width="5"
+fill="none"/>
+</svg>`
+},
+
+
+{
+name:"Suitcase",
+category:"Objects",
+svg:`
+<svg viewBox="0 0 100 100">
+<rect x="25" y="30" width="50" height="50" rx="8" fill="#92400e"/>
+<path d="M40 30V15H60V30" stroke="#111827" stroke-width="5" fill="none"/>
+</svg>`
+},
+
+
+{
+name:"Wallet",
+category:"Objects",
+svg:`
+<svg viewBox="0 0 100 100">
+<rect x="20" y="35" width="60" height="40" rx="5" fill="#16a34a"/>
+<circle cx="65" cy="55" r="6" fill="#facc15"/>
+</svg>`
+},
+
+
+{
+name:"Camera Lens",
+category:"Objects",
+svg:`
+<svg viewBox="0 0 100 100">
+<circle cx="50" cy="50" r="35" fill="#111827"/>
+<circle cx="50" cy="50" r="22" fill="#2563eb"/>
+<circle cx="50" cy="50" r="10" fill="#38bdf8"/>
+</svg>`
+},
+
+
+{
+name:"Key Board Piano",
+category:"Objects",
+svg:`
+<svg viewBox="0 0 100 100">
+<rect x="10" y="30" width="80" height="40" fill="#ffffff" stroke="#111827" stroke-width="3"/>
+${Array.from({length:8},(_,i)=>`
+<rect x="${15+i*9}" y="30" width="5" height="25" fill="#111827"/>
+`).join("")}
+</svg>`
+},
+
+
+{
+name:"Guitar",
+category:"Objects",
+svg:`
+<svg viewBox="0 0 100 100">
+<circle cx="35" cy="65" r="20" fill="#f97316"/>
+<rect x="45" y="20" width="10" height="50" fill="#92400e"/>
+<circle cx="40" cy="65" r="5" fill="#111827"/>
+</svg>`
+},
+
+
+{
+name:"Football",
+category:"Objects",
+svg:`
+<svg viewBox="0 0 100 100">
+<circle cx="50" cy="50" r="35" fill="#ffffff" stroke="#111827" stroke-width="4"/>
+<path d="M50 30L65 40L60 60L40 60L35 40Z" fill="#111827"/>
+</svg>`
+},
+
+
+{
+name:"Basketball",
+category:"Objects",
+svg:`
+<svg viewBox="0 0 100 100">
+<circle cx="50" cy="50" r="35" fill="#f97316"/>
+<path d="M15 50H85M50 15V85"
+stroke="#111827"
+stroke-width="4"/>
+</svg>`
+},
+
+
+{
+name:"Trophy",
+category:"Objects",
+svg:`
+<svg viewBox="0 0 100 100">
+<path d="M30 20H70V45Q70 70 50 70Q30 70 30 45Z" fill="#facc15"/>
+<rect x="45" y="70" width="10" height="15" fill="#92400e"/>
+</svg>`
+},
+
+
+{
+name:"Keypad",
+category:"Objects",
+svg:`
+<svg viewBox="0 0 100 100">
+<rect x="20" y="15" width="60" height="70" rx="8" fill="#374151"/>
+${Array.from({length:9},(_,i)=>`
+<circle cx="${35+(i%3)*15}" cy="${35+Math.floor(i/3)*15}" r="4" fill="#ffffff"/>
+`).join("")}
+</svg>`
+},
+
+
+{
+name:"Flashlight",
+category:"Objects",
+svg:`
+<svg viewBox="0 0 100 100">
+<rect x="35" y="35" width="30" height="45" fill="#374151"/>
+<circle cx="50" cy="25" r="20" fill="#facc15"/>
+</svg>`
+},
+
+
+
+
+
+
+
+
+
+{
+name:"Tool Box",
+category:"Objects",
+svg:`
+<svg viewBox="0 0 100 100">
+<rect x="20" y="35" width="60" height="40" rx="5" fill="#dc2626"/>
+<path d="M35 35V20H65V35" stroke="#111827" stroke-width="6" fill="none"/>
+</svg>`
+},
+
 {
 name:"Gift",
 category:"Objects",
