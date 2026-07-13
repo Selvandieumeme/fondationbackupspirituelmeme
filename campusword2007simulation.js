@@ -18205,16 +18205,158 @@ svg:`
 
 
 
+{
+name:"Haiti Flag",
+category:"Objects",
+svg:`
+<svg viewBox="0 0 120 100">
+<rect x="10" y="15" width="100" height="55" fill="#0038A8"/>
+<rect x="10" y="42" width="100" height="28" fill="#D21034"/>
+<rect x="50" y="42" width="20" height="28" fill="#ffffff"/>
+<text x="60" y="88" text-anchor="middle" font-size="10" fill="#111827">
+Haiti
+</text>
+</svg>`
+},
 
 
+{
+name:"United States Flag",
+category:"Objects",
+svg:`
+<svg viewBox="0 0 120 100">
+<rect x="10" y="15" width="100" height="55" fill="#ffffff"/>
+<path d="M10 15H110V25H10ZM10 35H110V45H10ZM10 55H110V65H10Z"
+fill="#b91c1c"/>
+<rect x="10" y="15" width="45" height="30" fill="#1d4ed8"/>
+<text x="60" y="88" text-anchor="middle" font-size="10">
+United States
+</text>
+</svg>`
+},
 
 
+{
+name:"Canada Flag",
+category:"Objects",
+svg:`
+<svg viewBox="0 0 120 100">
+<rect x="10" y="15" width="100" height="55" fill="#ffffff"/>
+<rect x="10" y="15" width="25" height="55" fill="#ef4444"/>
+<rect x="85" y="15" width="25" height="55" fill="#ef4444"/>
+<path d="M60 25L66 45H80L68 55L72 70L60 60L48 70L52 55L40 45H54Z"
+fill="#ef4444"/>
+<text x="60" y="88" text-anchor="middle" font-size="10">
+Canada
+</text>
+</svg>`
+},
 
 
+{
+name:"France Flag",
+category:"Objects",
+svg:`
+<svg viewBox="0 0 120 100">
+<rect x="10" y="15" width="33" height="55" fill="#2563eb"/>
+<rect x="43" y="15" width="34" height="55" fill="#ffffff"/>
+<rect x="77" y="15" width="33" height="55" fill="#ef4444"/>
+<text x="60" y="88" text-anchor="middle" font-size="10">
+France
+</text>
+</svg>`
+},
 
 
+{
+name:"Brazil Flag",
+category:"Objects",
+svg:`
+<svg viewBox="0 0 120 100">
+<rect x="10" y="15" width="100" height="55" fill="#16a34a"/>
+<polygon points="60,20 95,42 60,65 25,42"
+fill="#facc15"/>
+<circle cx="60" cy="42" r="15" fill="#2563eb"/>
+<text x="60" y="88" text-anchor="middle" font-size="10">
+Brazil
+</text>
+</svg>`
+},
 
 
+{
+name:"Japan Flag",
+category:"Objects",
+svg:`
+<svg viewBox="0 0 120 100">
+<rect x="10" y="15" width="100" height="55" fill="#ffffff"/>
+<circle cx="60" cy="42" r="18" fill="#ef4444"/>
+<text x="60" y="88" text-anchor="middle" font-size="10">
+Japan
+</text>
+</svg>`
+},
+
+
+{
+name:"United Kingdom Flag",
+category:"Objects",
+svg:`
+<svg viewBox="0 0 120 100">
+<rect x="10" y="15" width="100" height="55" fill="#1e40af"/>
+<path d="M10 15L110 70M110 15L10 70"
+stroke="#ffffff" stroke-width="12"/>
+<path d="M10 15L110 70M110 15L10 70"
+stroke="#dc2626" stroke-width="5"/>
+<text x="60" y="88" text-anchor="middle" font-size="10">
+United Kingdom
+</text>
+</svg>`
+},
+
+
+{
+name:"Germany Flag",
+category:"Objects",
+svg:`
+<svg viewBox="0 0 120 100">
+<rect x="10" y="15" width="100" height="18" fill="#111827"/>
+<rect x="10" y="33" width="100" height="18" fill="#dc2626"/>
+<rect x="10" y="51" width="100" height="19" fill="#facc15"/>
+<text x="60" y="88" text-anchor="middle" font-size="10">
+Germany
+</text>
+</svg>`
+},
+
+
+{
+name:"Italy Flag",
+category:"Objects",
+svg:`
+<svg viewBox="0 0 120 100">
+<rect x="10" y="15" width="33" height="55" fill="#16a34a"/>
+<rect x="43" y="15" width="34" height="55" fill="#ffffff"/>
+<rect x="77" y="15" width="33" height="55" fill="#ef4444"/>
+<text x="60" y="88" text-anchor="middle" font-size="10">
+Italy
+</text>
+</svg>`
+},
+
+
+{
+name:"Spain Flag",
+category:"Objects",
+svg:`
+<svg viewBox="0 0 120 100">
+<rect x="10" y="15" width="100" height="55" fill="#ef4444"/>
+<rect x="10" y="32" width="100" height="21" fill="#facc15"/>
+<text x="60" y="88" text-anchor="middle" font-size="10">
+Spain
+</text>
+</svg>`
+},
 
 
 
