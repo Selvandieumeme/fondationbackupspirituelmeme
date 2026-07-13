@@ -16097,6 +16097,253 @@ svg:`
 },
 
 
+
+{
+name:"Wild Forest",
+category:"Nature",
+svg:`
+<svg viewBox="0 0 100 100">
+<defs>
+<linearGradient id="wildForest">
+<stop stop-color="#15803d"/>
+<stop offset="1" stop-color="#064e3b"/>
+</linearGradient>
+</defs>
+<rect y="70" width="100" height="30" fill="#65a30d"/>
+<path d="M20 80L35 25L50 80Z" fill="url(#wildForest)"/>
+<path d="M50 80L70 15L90 80Z" fill="#166534"/>
+<circle cx="25" cy="20" r="8" fill="#facc15"/>
+</svg>`
+},
+
+
+{
+name:"Palm Beach",
+category:"Nature",
+svg:`
+<svg viewBox="0 0 100 100">
+<rect y="60" width="100" height="40" fill="#38bdf8"/>
+<path d="M0 70Q50 50 100 70V100H0Z" fill="#fde68a"/>
+<rect x="48" y="25" width="7" height="45" fill="#92400e"/>
+<path d="M50 30Q20 10 10 25M50 30Q80 10 90 25" fill="#16a34a"/>
+</svg>`
+},
+
+
+{
+name:"Rainforest",
+category:"Nature",
+svg:`
+<svg viewBox="0 0 100 100">
+<rect width="100" height="100" fill="#0f766e"/>
+<circle cx="25" cy="35" r="25" fill="#166534"/>
+<circle cx="70" cy="40" r="30" fill="#15803d"/>
+<path d="M50 20V90" stroke="#78350f" stroke-width="8"/>
+<path d="M20 80Q50 60 80 80" fill="#22c55e"/>
+</svg>`
+},
+
+
+{
+name:"Golden Sunflower",
+category:"Nature",
+svg:`
+<svg viewBox="0 0 100 100">
+<circle cx="50" cy="45" r="15" fill="#78350f"/>
+<circle cx="50" cy="20" r="18" fill="#facc15"/>
+<circle cx="25" cy="45" r="18" fill="#fbbf24"/>
+<circle cx="75" cy="45" r="18" fill="#fbbf24"/>
+<circle cx="50" cy="70" r="18" fill="#facc15"/>
+<rect x="47" y="60" width="6" height="35" fill="#166534"/>
+</svg>`
+},
+
+
+{
+name:"River Valley",
+category:"Nature",
+svg:`
+<svg viewBox="0 0 100 100">
+<path d="M0 60L35 15L70 60Z" fill="#64748b"/>
+<path d="M100 60L70 20L40 60Z" fill="#475569"/>
+<path d="M45 60Q50 85 55 100H45Z" fill="#0ea5e9"/>
+</svg>`
+},
+
+
+{
+name:"Night Forest",
+category:"Nature",
+svg:`
+<svg viewBox="0 0 100 100">
+<rect width="100" height="100" fill="#0f172a"/>
+<circle cx="75" cy="20" r="12" fill="#fef3c7"/>
+<path d="M20 90L40 25L60 90Z" fill="#14532d"/>
+<path d="M60 90L80 35L100 90Z" fill="#166534"/>
+</svg>`
+},
+
+
+{
+name:"Desert Cactus",
+category:"Nature",
+svg:`
+<svg viewBox="0 0 100 100">
+<rect width="100" height="100" fill="#fed7aa"/>
+<circle cx="80" cy="20" r="15" fill="#f97316"/>
+<rect x="45" y="35" width="12" height="55" rx="8" fill="#16a34a"/>
+<rect x="25" y="50" width="20" height="10" fill="#22c55e"/>
+</svg>`
+},
+
+
+{
+name:"Ice Mountain",
+category:"Nature",
+svg:`
+<svg viewBox="0 0 100 100">
+<path d="M5 90L50 10L95 90Z" fill="#94a3b8"/>
+<path d="M50 10L35 40H65Z" fill="#ffffff"/>
+<path d="M20 90H80" stroke="#38bdf8" stroke-width="5"/>
+</svg>`
+},
+
+
+{
+name:"Green Valley",
+category:"Nature",
+svg:`
+<svg viewBox="0 0 100 100">
+<path d="M0 80Q30 30 60 80Q80 40 100 80V100H0Z" fill="#22c55e"/>
+<circle cx="20" cy="20" r="10" fill="#facc15"/>
+<path d="M50 100Q50 60 50 40" stroke="#166534" stroke-width="5"/>
+</svg>`
+},
+
+
+{
+name:"Blue Butterfly",
+category:"Nature",
+svg:`
+<svg viewBox="0 0 100 100">
+<ellipse cx="30" cy="45" rx="25" ry="18" fill="#2563eb"/>
+<ellipse cx="70" cy="45" rx="25" ry="18" fill="#38bdf8"/>
+<rect x="48" y="35" width="4" height="35" fill="#111827"/>
+</svg>`
+},
+
+
+{
+name:"Apple Tree",
+category:"Nature",
+svg:`
+<svg viewBox="0 0 100 100">
+<rect x="45" y="55" width="10" height="35" fill="#92400e"/>
+<circle cx="50" cy="35" r="30" fill="#16a34a"/>
+<circle cx="35" cy="35" r="5" fill="#ef4444"/>
+<circle cx="65" cy="45" r="5" fill="#ef4444"/>
+</svg>`
+},
+
+
+{
+name:"Fog Mountain",
+category:"Nature",
+svg:`
+<svg viewBox="0 0 100 100">
+<path d="M10 80L50 20L90 80Z" fill="#64748b"/>
+<path d="M0 55Q50 40 100 55" stroke="#e2e8f0" stroke-width="8"/>
+</svg>`
+},
+
+
+{
+name:"Green Bamboo",
+category:"Nature",
+svg:`
+<svg viewBox="0 0 100 100">
+<rect x="45" y="10" width="10" height="80" fill="#16a34a"/>
+<path d="M20 30L45 45M80 25L55 45" stroke="#22c55e" stroke-width="8"/>
+<circle cx="30" cy="20" r="8" fill="#4ade80"/>
+</svg>`
+},
+
+
+{
+name:"Tropical Island",
+category:"Nature",
+svg:`
+<svg viewBox="0 0 100 100">
+<ellipse cx="50" cy="80" rx="45" ry="15" fill="#38bdf8"/>
+<path d="M25 75Q50 25 75 75Z" fill="#22c55e"/>
+<rect x="48" y="40" width="5" height="35" fill="#92400e"/>
+</svg>`
+},
+
+
+{
+name:"Wild Flower Field",
+category:"Nature",
+svg:`
+<svg viewBox="0 0 100 100">
+<rect y="60" width="100" height="40" fill="#65a30d"/>
+<circle cx="20" cy="55" r="8" fill="#ec4899"/>
+<circle cx="50" cy="45" r="10" fill="#facc15"/>
+<circle cx="80" cy="55" r="8" fill="#8b5cf6"/>
+</svg>`
+},
+
+
+{
+name:"Crystal Lake",
+category:"Nature",
+svg:`
+<svg viewBox="0 0 100 100">
+<rect y="60" width="100" height="40" fill="#0284c7"/>
+<path d="M15 60L45 20L75 60Z" fill="#94a3b8"/>
+<path d="M45 20L55 35L35 35Z" fill="#ffffff"/>
+</svg>`
+},
+
+
+{
+name:"Storm Ocean",
+category:"Nature",
+svg:`
+<svg viewBox="0 0 100 100">
+<rect width="100" height="100" fill="#334155"/>
+<path d="M0 70Q50 45 100 70" fill="#0369a1"/>
+<path d="M50 20L40 55H60Z" fill="#facc15"/>
+</svg>`
+},
+
+
+{
+name:"Ancient Tree",
+category:"Nature",
+svg:`
+<svg viewBox="0 0 100 100">
+<rect x="42" y="45" width="16" height="45" fill="#78350f"/>
+<circle cx="50" cy="30" r="35" fill="#14532d"/>
+<path d="M50 50Q30 70 20 80" stroke="#92400e" stroke-width="6"/>
+</svg>`
+},
+
+
+{
+name:"Peace Garden",
+category:"Nature",
+svg:`
+<svg viewBox="0 0 100 100">
+<rect y="70" width="100" height="30" fill="#22c55e"/>
+<circle cx="30" cy="45" r="15" fill="#f472b6"/>
+<circle cx="70" cy="45" r="15" fill="#facc15"/>
+<path d="M50 70V40" stroke="#166534" stroke-width="5"/>
+</svg>`
+},
+
+
+
 {
 name:"Camera",
 category:"Objects",
