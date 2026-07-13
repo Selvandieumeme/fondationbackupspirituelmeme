@@ -21182,6 +21182,249 @@ false
 
 
 
+/* =========================================================
+   CAMPUS WORD — CLIP ART RESIZE HANDLE ENGINE
+   STEP 5
+   8 CORNERS + CENTER HANDLE
+   TOUCH + MOUSE SUPPORT
+   ONLY CLIPART
+   ISOLATED FROM SHAPES
+   ISOLATED FROM CARET
+========================================================= */
+
+(function(){
+
+
+let selectedClip = null;
+
+
+const handles = [
+    "nw",
+    "n",
+    "ne",
+    "w",
+    "center",
+    "e",
+    "sw",
+    "s",
+    "se"
+];
+
+
+
+
+
+function removeClipHandles(){
+
+
+const old =
+document.querySelector(
+".cwClipArtHandles"
+);
+
+
+
+if(old){
+
+old.remove();
+
+}
+
+
+}
+
+
+
+
+
+
+
+function showClipHandles(clip){
+
+
+removeClipHandles();
+
+
+
+const box =
+document.createElement(
+"div"
+);
+
+
+
+box.className =
+"cwClipArtHandles";
+
+
+
+box.style.left =
+clip.offsetLeft + "px";
+
+
+box.style.top =
+clip.offsetTop + "px";
+
+
+box.style.width =
+clip.offsetWidth + "px";
+
+
+box.style.height =
+clip.offsetHeight + "px";
+
+
+
+
+handles.forEach(
+function(pos){
+
+
+
+const h =
+document.createElement(
+"div"
+);
+
+
+
+h.className =
+"cwClipHandle " +
+"cwClipHandle-" +
+pos;
+
+
+
+h.dataset.clipResize =
+pos;
+
+
+
+box.appendChild(h);
+
+
+
+}
+);
+
+
+
+
+
+clip.parentElement.appendChild(
+box
+);
+
+
+
+}
+
+
+
+
+
+
+
+
+
+document.addEventListener(
+"pointerdown",
+function(e){
+
+
+
+const clip =
+e.target.closest(
+".cwInsertedClipArt"
+);
+
+
+
+if(!clip){
+
+return;
+
+}
+
+
+
+selectedClip = clip;
+
+
+
+window.CampusWordSelectedClipArt =
+clip;
+
+
+
+showClipHandles(
+clip
+);
+
+
+
+},
+false
+);
+
+
+
+
+
+
+
+
+document.addEventListener(
+"pointerdown",
+function(e){
+
+
+const outside =
+e.target.closest(
+".cwInsertedClipArt, .cwClipArtHandles"
+);
+
+
+
+if(!outside){
+
+
+
+selectedClip = null;
+
+
+window.CampusWordSelectedClipArt =
+null;
+
+
+removeClipHandles();
+
+
+
+}
+
+
+
+},
+false
+);
+
+
+
+
+
+})();
+
+
+
+
+
+
+
+
+
+
+
 
 
 
