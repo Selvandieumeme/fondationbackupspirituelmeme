@@ -15965,7 +15965,176 @@ false
 
 
 
+/* =========================================================
+   CAMPUS WORD — CLIP ART CATEGORY FILTER ENGINE
+   FIX CATEGORY DISPLAY
+   SHOW ALL CLIPART INSIDE SAME CATEGORY
+   AUTO SUPPORT NEW CLIPART ADDITIONS
+   ISOLATED MODULE
+   NO GALLERY OPEN CONFLICT
+   NO BUTTON CONFLICT
+========================================================= */
 
+(function(){
+
+
+
+document.addEventListener(
+    "click",
+    function(e){
+
+
+
+        const categoryButton =
+            e.target.closest(
+                ".cwClipCategories button"
+            );
+
+
+
+        if(!categoryButton){
+
+            return;
+
+        }
+
+
+
+        const gallery =
+            document.querySelector(
+                ".cwClipArtGallery"
+            );
+
+
+
+        if(!gallery){
+
+            return;
+
+        }
+
+
+
+        const grid =
+            gallery.querySelector(
+                ".cwClipArtGrid"
+            );
+
+
+
+        if(!grid){
+
+            return;
+
+        }
+
+
+
+
+
+        const category =
+            categoryButton.textContent
+            .trim();
+
+
+
+
+
+
+        e.preventDefault();
+
+
+
+
+
+        if(category === "All"){
+
+
+            grid.innerHTML =
+                clipArts.map(item=>`
+
+
+                <div class="cwClipArtItem"
+                data-clipart="${item.name}">
+
+
+                ${item.svg}
+
+
+                <span>
+                ${item.name}
+                </span>
+
+
+                </div>
+
+
+                `).join("");
+
+
+
+            return;
+
+        }
+
+
+
+
+
+
+
+        const filtered =
+            clipArts.filter(
+                function(item){
+
+
+                    return (
+                        item.category === category
+                    );
+
+
+                }
+            );
+
+
+
+
+
+
+
+
+        grid.innerHTML =
+            filtered.map(item=>`
+
+
+            <div class="cwClipArtItem"
+            data-clipart="${item.name}">
+
+
+            ${item.svg}
+
+
+            <span>
+            ${item.name}
+            </span>
+
+
+            </div>
+
+
+            `).join("");
+
+
+
+
+
+    },
+    false
+);
+
+
+
+})();
 
 
 
