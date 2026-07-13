@@ -16616,6 +16616,303 @@ svg:`
 },
 
 
+
+{
+name:"Haiti Flag",
+category:"Objects",
+svg:`
+<svg viewBox="0 0 120 100">
+<rect x="10" y="15" width="100" height="55" fill="#0038A8"/>
+<rect x="10" y="42" width="100" height="28" fill="#D21034"/>
+<rect x="50" y="42" width="20" height="28" fill="#ffffff"/>
+<text x="60" y="88" text-anchor="middle" font-size="10" fill="#111827">
+Haiti
+</text>
+</svg>`
+},
+
+
+{
+name:"United States Flag",
+category:"Objects",
+svg:`
+<svg viewBox="0 0 120 100">
+<rect x="10" y="15" width="100" height="55" fill="#ffffff"/>
+<path d="M10 15H110V25H10ZM10 35H110V45H10ZM10 55H110V65H10Z"
+fill="#b91c1c"/>
+<rect x="10" y="15" width="45" height="30" fill="#1d4ed8"/>
+<text x="60" y="88" text-anchor="middle" font-size="10">
+United States
+</text>
+</svg>`
+},
+
+
+{
+name:"Canada Flag",
+category:"Objects",
+svg:`
+<svg viewBox="0 0 120 100">
+<rect x="10" y="15" width="100" height="55" fill="#ffffff"/>
+<rect x="10" y="15" width="25" height="55" fill="#ef4444"/>
+<rect x="85" y="15" width="25" height="55" fill="#ef4444"/>
+<path d="M60 25L66 45H80L68 55L72 70L60 60L48 70L52 55L40 45H54Z"
+fill="#ef4444"/>
+<text x="60" y="88" text-anchor="middle" font-size="10">
+Canada
+</text>
+</svg>`
+},
+
+
+{
+name:"France Flag",
+category:"Objects",
+svg:`
+<svg viewBox="0 0 120 100">
+<rect x="10" y="15" width="33" height="55" fill="#2563eb"/>
+<rect x="43" y="15" width="34" height="55" fill="#ffffff"/>
+<rect x="77" y="15" width="33" height="55" fill="#ef4444"/>
+<text x="60" y="88" text-anchor="middle" font-size="10">
+France
+</text>
+</svg>`
+},
+
+
+{
+name:"Brazil Flag",
+category:"Objects",
+svg:`
+<svg viewBox="0 0 120 100">
+<rect x="10" y="15" width="100" height="55" fill="#16a34a"/>
+<polygon points="60,20 95,42 60,65 25,42"
+fill="#facc15"/>
+<circle cx="60" cy="42" r="15" fill="#2563eb"/>
+<text x="60" y="88" text-anchor="middle" font-size="10">
+Brazil
+</text>
+</svg>`
+},
+
+
+{
+name:"Japan Flag",
+category:"Objects",
+svg:`
+<svg viewBox="0 0 120 100">
+<rect x="10" y="15" width="100" height="55" fill="#ffffff"/>
+<circle cx="60" cy="42" r="18" fill="#ef4444"/>
+<text x="60" y="88" text-anchor="middle" font-size="10">
+Japan
+</text>
+</svg>`
+},
+
+
+{
+name:"United Kingdom Flag",
+category:"Objects",
+svg:`
+<svg viewBox="0 0 120 100">
+<rect x="10" y="15" width="100" height="55" fill="#1e40af"/>
+<path d="M10 15L110 70M110 15L10 70"
+stroke="#ffffff" stroke-width="12"/>
+<path d="M10 15L110 70M110 15L10 70"
+stroke="#dc2626" stroke-width="5"/>
+<text x="60" y="88" text-anchor="middle" font-size="10">
+United Kingdom
+</text>
+</svg>`
+},
+
+
+{
+name:"Germany Flag",
+category:"Objects",
+svg:`
+<svg viewBox="0 0 120 100">
+<rect x="10" y="15" width="100" height="18" fill="#111827"/>
+<rect x="10" y="33" width="100" height="18" fill="#dc2626"/>
+<rect x="10" y="51" width="100" height="19" fill="#facc15"/>
+<text x="60" y="88" text-anchor="middle" font-size="10">
+Germany
+</text>
+</svg>`
+},
+
+
+{
+name:"Italy Flag",
+category:"Objects",
+svg:`
+<svg viewBox="0 0 120 100">
+<rect x="10" y="15" width="33" height="55" fill="#16a34a"/>
+<rect x="43" y="15" width="34" height="55" fill="#ffffff"/>
+<rect x="77" y="15" width="33" height="55" fill="#ef4444"/>
+<text x="60" y="88" text-anchor="middle" font-size="10">
+Italy
+</text>
+</svg>`
+},
+
+
+{
+name:"Spain Flag",
+category:"Objects",
+svg:`
+<svg viewBox="0 0 120 100">
+<rect x="10" y="15" width="100" height="55" fill="#ef4444"/>
+<rect x="10" y="32" width="100" height="21" fill="#facc15"/>
+<text x="60" y="88" text-anchor="middle" font-size="10">
+Spain
+</text>
+</svg>`
+},
+
+
+
+{
+name:"Mexico Flag",
+category:"Objects",
+svg:`
+<svg viewBox="0 0 120 100">
+<rect x="10" y="15" width="33" height="55" fill="#16a34a"/>
+<rect x="43" y="15" width="34" height="55" fill="#ffffff"/>
+<rect x="77" y="15" width="33" height="55" fill="#ef4444"/>
+<circle cx="60" cy="42" r="6" fill="#16a34a"/>
+<text x="60" y="88" text-anchor="middle" font-size="10">Mexico</text>
+</svg>`
+},
+
+
+{
+name:"China Flag",
+category:"Objects",
+svg:`
+<svg viewBox="0 0 120 100">
+<rect x="10" y="15" width="100" height="55" fill="#dc2626"/>
+<polygon points="30,25 34,35 45,35 36,42 39,52 30,46 21,52 24,42 15,35 26,35"
+fill="#facc15"/>
+<text x="60" y="88" text-anchor="middle" font-size="10">China</text>
+</svg>`
+},
+
+
+{
+name:"South Korea Flag",
+category:"Objects",
+svg:`
+<svg viewBox="0 0 120 100">
+<rect x="10" y="15" width="100" height="55" fill="#ffffff"/>
+<circle cx="60" cy="42" r="15" fill="#ef4444"/>
+<path d="M60 27A15 15 0 0 0 60 57A15 15 0 0 1 60 27"
+fill="#2563eb"/>
+<text x="60" y="88" text-anchor="middle" font-size="10">South Korea</text>
+</svg>`
+},
+
+
+{
+name:"India Flag",
+category:"Objects",
+svg:`
+<svg viewBox="0 0 120 100">
+<rect x="10" y="15" width="100" height="18" fill="#f97316"/>
+<rect x="10" y="33" width="100" height="18" fill="#ffffff"/>
+<rect x="10" y="51" width="100" height="19" fill="#16a34a"/>
+<circle cx="60" cy="42" r="8" fill="#2563eb"/>
+<text x="60" y="88" text-anchor="middle" font-size="10">India</text>
+</svg>`
+},
+
+
+{
+name:"Australia Flag",
+category:"Objects",
+svg:`
+<svg viewBox="0 0 120 100">
+<rect x="10" y="15" width="100" height="55" fill="#1e40af"/>
+<circle cx="85" cy="35" r="8" fill="#ffffff"/>
+<polygon points="75,55 80,65 90,65 82,72 85,82 75,75 65,82 68,72 60,65 70,65"
+fill="#ffffff"/>
+<text x="60" y="88" text-anchor="middle" font-size="10">Australia</text>
+</svg>`
+},
+
+
+{
+name:"South Africa Flag",
+category:"Objects",
+svg:`
+<svg viewBox="0 0 120 100">
+<rect x="10" y="15" width="100" height="55" fill="#16a34a"/>
+<path d="M10 15L55 42L10 70Z" fill="#111827"/>
+<path d="M10 15L70 42L10 70" fill="none" stroke="#facc15" stroke-width="10"/>
+<text x="60" y="88" text-anchor="middle" font-size="10">South Africa</text>
+</svg>`
+},
+
+
+{
+name:"Argentina Flag",
+category:"Objects",
+svg:`
+<svg viewBox="0 0 120 100">
+<rect x="10" y="15" width="100" height="18" fill="#38bdf8"/>
+<rect x="10" y="33" width="100" height="18" fill="#ffffff"/>
+<rect x="10" y="51" width="100" height="19" fill="#38bdf8"/>
+<circle cx="60" cy="42" r="7" fill="#facc15"/>
+<text x="60" y="88" text-anchor="middle" font-size="10">Argentina</text>
+</svg>`
+},
+
+
+{
+name:"Portugal Flag",
+category:"Objects",
+svg:`
+<svg viewBox="0 0 120 100">
+<rect x="10" y="15" width="40" height="55" fill="#16a34a"/>
+<rect x="50" y="15" width="60" height="55" fill="#dc2626"/>
+<circle cx="50" cy="42" r="10" fill="#facc15"/>
+<text x="60" y="88" text-anchor="middle" font-size="10">Portugal</text>
+</svg>`
+},
+
+
+{
+name:"Belgium Flag",
+category:"Objects",
+svg:`
+<svg viewBox="0 0 120 100">
+<rect x="10" y="15" width="33" height="55" fill="#111827"/>
+<rect x="43" y="15" width="34" height="55" fill="#facc15"/>
+<rect x="77" y="15" width="33" height="55" fill="#dc2626"/>
+<text x="60" y="88" text-anchor="middle" font-size="10">Belgium</text>
+</svg>`
+},
+
+
+{
+name:"Switzerland Flag",
+category:"Objects",
+svg:`
+<svg viewBox="0 0 120 100">
+<rect x="10" y="15" width="100" height="55" fill="#dc2626"/>
+<rect x="55" y="25" width="10" height="35" fill="#ffffff"/>
+<rect x="45" y="37" width="30" height="10" fill="#ffffff"/>
+<text x="60" y="88" text-anchor="middle" font-size="10">Switzerland</text>
+</svg>`
+},
+
+
+
+
+
+
+
+   
 {
 name:"Gift",
 category:"Objects",
