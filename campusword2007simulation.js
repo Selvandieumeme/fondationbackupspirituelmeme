@@ -1,6 +1,5 @@
 
 
-
 /* =========================================================
    CAMPUS WORD 2007 — CORE ENGINE (PRODUCTION FOUNDATION)
    SAFE • RESPONSIVE • MULTI-DEVICE • SCALABLE
@@ -15890,6 +15889,92 @@ box
 
 
 document
+.querySelectorAll(
+    ".cwClipCategories button"
+)
+.forEach(
+    function(button){
+
+
+        button.onclick =
+        function(){
+
+
+            const category =
+                this.textContent.trim();
+
+
+
+            const grid =
+                box.querySelector(
+                    ".cwClipArtGrid"
+                );
+
+
+
+            if(!grid){
+
+                return;
+
+            }
+
+
+
+            const list =
+                category === "All"
+                ?
+                clipArts
+                :
+                clipArts.filter(
+                    function(item){
+
+                        return (
+                            item.category === category
+                        );
+
+                    }
+                );
+
+
+
+
+            grid.innerHTML =
+            list.map(item=>`
+
+
+            <div class="cwClipArtItem"
+            data-clipart="${item.name}">
+
+
+            ${item.svg}
+
+
+            <span>
+            ${item.name}
+            </span>
+
+
+            </div>
+
+
+            `).join("");
+
+
+
+        };
+
+
+    }
+);
+
+
+
+
+
+
+
+
+document
 .getElementById(
 "cwClipArtClose"
 )
@@ -16141,215 +16226,6 @@ document.addEventListener(
 
 
 
-
-
-
-
-
-
-/* =========================================================
-   CAMPUS WORD — CLIP ART CATEGORY FILTER ENGINE
-   STEP 3
-   CATEGORY BUTTON ACTIVATION
-   FILTER CLIP ART ITEMS ONLY
-   ISOLATED MODULE
-   NO GALLERY OPEN/CLOSE INTERFERENCE
-   NO IMAGE / SHAPE / CARET INTERFERENCE
-========================================================= */
-
-(function(){
-
-
-
-document.addEventListener(
-    "click",
-    function(e){
-
-
-
-        const categoryButton =
-            e.target.closest(
-                ".cwClipCategories button"
-            );
-
-
-
-        if(!categoryButton){
-
-            return;
-
-        }
-
-
-
-
-        e.preventDefault();
-
-        e.stopPropagation();
-
-
-
-
-
-        const category =
-            categoryButton.textContent
-            .trim();
-
-
-
-
-
-
-
-        const items =
-            document.querySelectorAll(
-                ".cwClipArtItem"
-            );
-
-
-
-
-
-
-        items.forEach(
-            function(item){
-
-
-
-                const name =
-                    item.dataset.clipart;
-
-
-
-                if(
-                    category === "All"
-                ){
-
-                    item.style.display =
-                        "flex";
-
-                    return;
-
-                }
-
-
-
-
-
-
-                /*
-                   Pou etap sa a nou baze sou
-                   non kategori yo nan done yo
-                   san chanje gallery la
-                */
-
-
-
-                const parentData =
-                    item.closest(
-                        ".cwClipArtGrid"
-                    );
-
-
-
-
-                if(
-                    !parentData
-                ){
-
-                    return;
-
-                }
-
-
-
-
-                const clipName =
-                    item.dataset.clipart
-                    .toLowerCase();
-
-
-
-
-                if(
-                    category === "People"
-                    &&
-                    (
-                    clipName === "smile"
-                    )
-                ){
-
-                    item.style.display =
-                        "flex";
-
-                }
-
-                else if(
-                    category === "Nature"
-                    &&
-                    (
-                    clipName === "cloud" ||
-                    clipName === "flower"
-                    )
-                ){
-
-                    item.style.display =
-                        "flex";
-
-                }
-
-                else if(
-                    category === "Objects"
-                    &&
-                    (
-                    clipName === "camera" ||
-                    clipName === "gift"
-                    )
-                ){
-
-                    item.style.display =
-                        "flex";
-
-                }
-
-                else if(
-                    category === "Symbols"
-                    &&
-                    (
-                    clipName === "star" ||
-                    clipName === "heart"
-                    )
-                ){
-
-                    item.style.display =
-                        "flex";
-
-                }
-
-                else{
-
-
-                    item.style.display =
-                        "none";
-
-
-                }
-
-
-
-            }
-        );
-
-
-
-
-    },
-    false
-);
-
-
-
-})();
 
 
 
