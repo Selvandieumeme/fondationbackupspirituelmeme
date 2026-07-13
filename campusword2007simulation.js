@@ -1,4 +1,4 @@
-
+.
 
 /* =========================================================
    CAMPUS WORD 2007 — CORE ENGINE (PRODUCTION FOUNDATION)
@@ -17315,6 +17315,237 @@ svg:`
 <circle cx="50" cy="25" r="20" fill="#facc15"/>
 </svg>`
 },
+
+
+{
+name:"Laptop",
+category:"Objects",
+svg:`
+<svg viewBox="0 0 100 100">
+<rect x="20" y="20" width="60" height="40" rx="5" fill="#374151"/>
+<rect x="25" y="25" width="50" height="30" fill="#60a5fa"/>
+<path d="M10 65H90L80 75H20Z" fill="#9ca3af"/>
+</svg>`
+},
+
+
+{
+name:"Smartphone",
+category:"Objects",
+svg:`
+<svg viewBox="0 0 100 100">
+<rect x="30" y="10" width="40" height="80" rx="8" fill="#111827"/>
+<rect x="35" y="20" width="30" height="55" fill="#38bdf8"/>
+<circle cx="50" cy="82" r="4" fill="#ffffff"/>
+</svg>`
+},
+
+
+{
+name:"Watch",
+category:"Objects",
+svg:`
+<svg viewBox="0 0 100 100">
+<rect x="40" y="5" width="20" height="90" fill="#1f2937"/>
+<circle cx="50" cy="50" r="25" fill="#e5e7eb"/>
+<circle cx="50" cy="50" r="15" fill="#2563eb"/>
+</svg>`
+},
+
+
+{
+name:"Book",
+category:"Objects",
+svg:`
+<svg viewBox="0 0 100 100">
+<path d="M20 20Q50 10 50 30V80Q30 65 20 75Z" fill="#2563eb"/>
+<path d="M50 30Q50 10 80 20V75Q70 65 50 80Z" fill="#60a5fa"/>
+</svg>`
+},
+
+
+{
+name:"Pen",
+category:"Objects",
+svg:`
+<svg viewBox="0 0 100 100">
+<path d="M25 75L70 30L80 40L35 85Z" fill="#2563eb"/>
+<path d="M70 30L80 40" stroke="#111827" stroke-width="5"/>
+</svg>`
+},
+
+
+{
+name:"Camera",
+category:"Objects",
+svg:`
+<svg viewBox="0 0 100 100">
+<rect x="15" y="30" width="70" height="45" rx="8" fill="#374151"/>
+<circle cx="50" cy="52" r="15" fill="#38bdf8"/>
+<rect x="35" y="20" width="30" height="10" fill="#111827"/>
+</svg>`
+},
+
+
+{
+name:"Headphones",
+category:"Objects",
+svg:`
+<svg viewBox="0 0 100 100">
+<path d="M20 55V45Q20 15 50 15Q80 15 80 45V55"
+stroke="#111827"
+stroke-width="10"
+fill="none"/>
+<rect x="15" y="50" width="15" height="25" fill="#2563eb"/>
+<rect x="70" y="50" width="15" height="25" fill="#2563eb"/>
+</svg>`
+},
+
+
+{
+name:"Keyboard",
+category:"Objects",
+svg:`
+<svg viewBox="0 0 100 100">
+<rect x="10" y="35" width="80" height="35" rx="5" fill="#9ca3af"/>
+${Array.from({length:6},(_,i)=>`
+<rect x="${18+i*12}" y="45" width="8" height="8" fill="#ffffff"/>
+`).join("")}
+</svg>`
+},
+
+
+{
+name:"Mouse",
+category:"Objects",
+svg:`
+<svg viewBox="0 0 100 100">
+<path d="M50 15Q25 15 25 55Q25 85 50 85Q75 85 75 55Q75 15 50 15Z" fill="#d1d5db"/>
+<line x1="50" y1="20" x2="50" y2="45" stroke="#111827" stroke-width="5"/>
+</svg>`
+},
+
+
+{
+name:"Chair",
+category:"Objects",
+svg:`
+<svg viewBox="0 0 100 100">
+<rect x="30" y="20" width="40" height="35" fill="#92400e"/>
+<rect x="25" y="55" width="50" height="15" fill="#b45309"/>
+<path d="M35 70V90M65 70V90" stroke="#111827" stroke-width="6"/>
+</svg>`
+},
+
+
+{
+name:"Table",
+category:"Objects",
+svg:`
+<svg viewBox="0 100 100 100">
+<rect x="15" y="35" width="70" height="15" fill="#92400e"/>
+<path d="M25 50V85M75 50V85" stroke="#78350f" stroke-width="8"/>
+</svg>`
+},
+
+
+{
+name:"Key",
+category:"Objects",
+svg:`
+<svg viewBox="0 0 100 100">
+<circle cx="30" cy="45" r="18" fill="#facc15"/>
+<rect x="45" y="40" width="40" height="10" fill="#facc15"/>
+<rect x="70" y="50" width="8" height="15" fill="#facc15"/>
+</svg>`
+},
+
+
+{
+name:"Lamp",
+category:"Objects",
+svg:`
+<svg viewBox="0 0 100 100">
+<path d="M25 45H75L60 15H40Z" fill="#facc15"/>
+<rect x="45" y="45" width="10" height="35" fill="#374151"/>
+<circle cx="50" cy="85" r="15" fill="#9ca3af"/>
+</svg>`
+},
+
+
+{
+name:"Backpack",
+category:"Objects",
+svg:`
+<svg viewBox="0 0 100 100">
+<rect x="25" y="30" width="50" height="55" rx="10" fill="#2563eb"/>
+<path d="M35 30Q35 10 50 10Q65 10 65 30" stroke="#111827" stroke-width="8" fill="none"/>
+</svg>`
+},
+
+
+{
+name:"Glasses",
+category:"Objects",
+svg:`
+<svg viewBox="0 0 100 100">
+<circle cx="35" cy="50" r="18" fill="none" stroke="#111827" stroke-width="5"/>
+<circle cx="65" cy="50" r="18" fill="none" stroke="#111827" stroke-width="5"/>
+<line x1="53" y1="50" x2="47" y2="50" stroke="#111827" stroke-width="5"/>
+</svg>`
+},
+
+
+{
+name:"Coffee Cup",
+category:"Objects",
+svg:`
+<svg viewBox="0 0 100 100">
+<rect x="30" y="30" width="40" height="45" rx="5" fill="#92400e"/>
+<path d="M70 40Q90 40 70 60" stroke="#92400e" stroke-width="8" fill="none"/>
+</svg>`
+},
+
+
+{
+name:"Umbrella",
+category:"Objects",
+svg:`
+<svg viewBox="0 0 100 100">
+<path d="M10 50Q50 10 90 50Z" fill="#ef4444"/>
+<path d="M50 50V85Q50 95 60 85" stroke="#111827" stroke-width="5" fill="none"/>
+</svg>`
+},
+
+
+{
+name:"Clock",
+category:"Objects",
+svg:`
+<svg viewBox="0 0 100 100">
+<circle cx="50" cy="50" r="35" fill="#e5e7eb" stroke="#111827" stroke-width="5"/>
+<line x1="50" y1="50" x2="50" y2="25" stroke="#111827" stroke-width="5"/>
+<line x1="50" y1="50" x2="70" y2="60" stroke="#111827" stroke-width="5"/>
+</svg>`
+},
+
+
+{
+name:"Globe",
+category:"Objects",
+svg:`
+<svg viewBox="0 0 100 100">
+<circle cx="50" cy="50" r="35" fill="#60a5fa"/>
+<path d="M20 50H80M50 15V85" stroke="#16a34a" stroke-width="8"/>
+</svg>`
+},
+
+
+
+
+
+
+
 
 
 
