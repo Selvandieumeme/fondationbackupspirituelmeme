@@ -20978,6 +20978,224 @@ document.addEventListener(
 
 
 
+/* =========================================================
+   CAMPUS WORD — CLIP ART MOVE ENGINE
+   STEP 4
+   MOVE INSERTED CLIPART ONLY
+   MOUSE + TOUCH SUPPORT
+   ISOLATED FROM SHAPES
+   ISOLATED FROM CARET
+   ISOLATED FROM IMAGE SYSTEM
+========================================================= */
+
+(function(){
+
+
+let moving = false;
+
+let activeClip = null;
+
+
+let startX = 0;
+
+let startY = 0;
+
+
+let startLeft = 0;
+
+let startTop = 0;
+
+
+
+
+
+
+
+
+document.addEventListener(
+"pointerdown",
+function(e){
+
+
+
+const clip =
+e.target.closest(
+".cwInsertedClipArt"
+);
+
+
+
+if(!clip){
+
+return;
+
+}
+
+
+
+activeClip = clip;
+
+
+
+moving = true;
+
+
+
+startX =
+e.clientX;
+
+
+startY =
+e.clientY;
+
+
+
+startLeft =
+clip.offsetLeft;
+
+
+startTop =
+clip.offsetTop;
+
+
+
+clip.setPointerCapture(
+e.pointerId
+);
+
+
+
+e.preventDefault();
+
+
+
+},
+{
+passive:false
+}
+);
+
+
+
+
+
+
+
+
+
+document.addEventListener(
+"pointermove",
+function(e){
+
+
+
+if(
+!moving ||
+!activeClip
+){
+
+return;
+
+}
+
+
+
+
+
+const dx =
+e.clientX - startX;
+
+
+
+const dy =
+e.clientY - startY;
+
+
+
+
+
+activeClip.style.left =
+(
+startLeft + dx
+)
++
+"px";
+
+
+
+
+activeClip.style.top =
+(
+startTop + dy
+)
++
+"px";
+
+
+
+
+
+},
+{
+passive:false
+}
+);
+
+
+
+
+
+
+
+
+
+document.addEventListener(
+"pointerup",
+function(){
+
+
+
+moving = false;
+
+
+activeClip = null;
+
+
+
+},
+false
+);
+
+
+
+
+
+
+
+})();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
