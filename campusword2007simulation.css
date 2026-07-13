@@ -3225,3 +3225,28 @@ body{
 
 
 
+
+
+
+
+#cwClipArtClose{
+
+    margin-top:15px;
+
+    width:100%;
+
+    padding:8px;
+
+    border:none;
+
+    border-radius:8px;
+
+    background:#ef4444;
+
+    color:white;
+
+    cursor:pointer;
+
+}
+
+
