@@ -16235,6 +16235,1530 @@ svg:`
 },
 
 
+
+{
+name:"FOBAS Royal Eagle Logo",
+category:"Symbols",
+svg:`
+<svg viewBox="0 0 120 100">
+<path d="M20 55Q60 10 100 55Q60 40 20 55Z" fill="#facc15"/>
+<circle cx="60" cy="42" r="15" fill="#111827"/>
+<text x="60" y="48" text-anchor="middle"
+font-size="10" font-weight="bold" fill="#ffffff">
+FOBAS
+</text>
+</svg>`
+},
+
+
+{
+name:"FOBAS Glass Logo",
+category:"Symbols",
+svg:`
+<svg viewBox="0 0 120 100">
+<circle cx="60" cy="45" r="38" fill="#e0f2fe"/>
+<circle cx="60" cy="45" r="30" fill="#2563eb"/>
+<text x="60" y="52" text-anchor="middle"
+font-size="18" font-weight="bold"
+fill="#ffffff">
+FOBAS
+</text>
+</svg>`
+},
+
+
+{
+name:"FOBAS Metallic Logo",
+category:"Symbols",
+svg:`
+<svg viewBox="0 0 120 100">
+<rect x="15" y="20" width="90" height="55"
+rx="12" fill="#64748b"/>
+<rect x="22" y="27" width="76" height="40"
+rx="8" fill="#111827"/>
+<text x="60" y="55"
+text-anchor="middle"
+font-size="20"
+font-weight="bold"
+fill="#f8fafc">
+FOBAS
+</text>
+</svg>`
+},
+
+
+{
+name:"FOBAS Luxury Black Logo",
+category:"Symbols",
+svg:`
+<svg viewBox="0 0 120 100">
+<circle cx="60" cy="45" r="35" fill="#000000"/>
+<circle cx="60" cy="45" r="27" fill="#facc15"/>
+<text x="60" y="51"
+text-anchor="middle"
+font-size="16"
+font-weight="bold">
+FOBAS
+</text>
+</svg>`
+},
+
+
+{
+name:"FOBAS Cyber Logo",
+category:"Symbols",
+svg:`
+<svg viewBox="0 0 120 100">
+<path d="M20 25H100V70H20Z"
+fill="#020617"
+stroke="#22d3ee"
+stroke-width="4"/>
+<text x="60" y="55"
+text-anchor="middle"
+font-size="20"
+font-weight="bold"
+fill="#22d3ee">
+FOBAS
+</text>
+</svg>`
+},
+
+
+{
+name:"FOBAS Mountain Logo",
+category:"Symbols",
+svg:`
+<svg viewBox="0 0 120 100">
+<path d="M20 75L55 20L75 75Z" fill="#475569"/>
+<path d="M50 75L85 30L105 75Z" fill="#94a3b8"/>
+<text x="60" y="90"
+text-anchor="middle"
+font-size="14"
+font-weight="bold">
+FOBAS
+</text>
+</svg>`
+},
+
+
+{
+name:"FOBAS Flame Logo",
+category:"Symbols",
+svg:`
+<svg viewBox="0 0 120 100">
+<path d="M60 10Q100 50 60 85Q20 50 60 10Z"
+fill="#ef4444"/>
+<path d="M60 30Q80 55 60 70Q40 55 60 30Z"
+fill="#facc15"/>
+<text x="60" y="52"
+text-anchor="middle"
+font-size="13"
+font-weight="bold">
+FOBAS
+</text>
+</svg>`
+},
+
+
+{
+name:"FOBAS Diamond Premium",
+category:"Symbols",
+svg:`
+<svg viewBox="0 0 120 100">
+<path d="M60 10L100 45L60 85L20 45Z"
+fill="#0ea5e9"/>
+<path d="M60 20L85 45L60 70L35 45Z"
+fill="#ffffff"/>
+<text x="60" y="50"
+text-anchor="middle"
+font-size="12"
+font-weight="bold">
+FOBAS
+</text>
+</svg>`
+},
+
+
+{
+name:"FOBAS Crown Elite",
+category:"Symbols",
+svg:`
+<svg viewBox="0 0 120 100">
+<path d="M20 55L30 25L60 45L90 25L100 55Z"
+fill="#fbbf24"/>
+<rect x="25" y="55" width="70" height="15"
+fill="#f59e0b"/>
+<text x="60" y="66"
+text-anchor="middle"
+font-size="13"
+font-weight="bold">
+FOBAS
+</text>
+</svg>`
+},
+
+
+{
+name:"FOBAS Digital Circle",
+category:"Symbols",
+svg:`
+<svg viewBox="0 0 120 100">
+<circle cx="60" cy="45" r="35"
+fill="#1d4ed8"/>
+<circle cx="60" cy="45" r="25"
+fill="#ffffff"/>
+<text x="60" y="52"
+text-anchor="middle"
+font-size="16"
+font-weight="bold">
+FOBAS
+</text>
+</svg>`
+},
+
+
+{
+name:"FOBAS Space Logo",
+category:"Symbols",
+svg:`
+<svg viewBox="0 0 120 100">
+<circle cx="60" cy="45" r="38"
+fill="#020617"/>
+<circle cx="35" cy="25" r="3" fill="#ffffff"/>
+<circle cx="85" cy="30" r="3" fill="#ffffff"/>
+<text x="60" y="52"
+text-anchor="middle"
+font-size="18"
+font-weight="bold"
+fill="#38bdf8">
+FOBAS
+</text>
+</svg>`
+},
+
+
+{
+name:"FOBAS Medical Logo",
+category:"Symbols",
+svg:`
+<svg viewBox="0 0 120 100">
+<circle cx="60" cy="45" r="35"
+fill="#22c55e"/>
+<path d="M55 25H65V40H80V50H65V65H55V50H40V40H55Z"
+fill="#ffffff"/>
+<text x="60" y="90"
+text-anchor="middle"
+font-size="12"
+font-weight="bold">
+FOBAS
+</text>
+</svg>`
+},
+
+
+{
+name:"FOBAS Future Tech",
+category:"Symbols",
+svg:`
+<svg viewBox="0 0 120 100">
+<path d="M60 10L95 75H25Z"
+fill="#06b6d4"/>
+<circle cx="60" cy="50" r="12"
+fill="#ffffff"/>
+<text x="60" y="54"
+text-anchor="middle"
+font-size="10"
+font-weight="bold">
+FOBAS
+</text>
+</svg>`
+},
+
+
+{
+name:"FOBAS Shield Gold",
+category:"Symbols",
+svg:`
+<svg viewBox="0 0 120 100">
+<path d="M20 15H100V55Q60 90 20 55Z"
+fill="#facc15"/>
+<path d="M30 25H90V55Q60 75 30 55Z"
+fill="#1e3a8a"/>
+<text x="60" y="52"
+text-anchor="middle"
+font-size="14"
+font-weight="bold"
+fill="#ffffff">
+FOBAS
+</text>
+</svg>`
+},
+
+
+{
+name:"FOBAS Hexagon Logo",
+category:"Symbols",
+svg:`
+<svg viewBox="0 0 120 100">
+<polygon points="60,10 95,30 95,65 60,85 25,65 25,30"
+fill="#7c3aed"/>
+<text x="60" y="55"
+text-anchor="middle"
+font-size="18"
+font-weight="bold"
+fill="#ffffff">
+FOBAS
+</text>
+</svg>`
+},
+
+
+{
+name:"FOBAS Network Globe",
+category:"Symbols",
+svg:`
+<svg viewBox="0 0 120 100">
+<circle cx="60" cy="45" r="35"
+fill="#0ea5e9"/>
+<path d="M25 45H95M60 10V80"
+stroke="#ffffff"
+stroke-width="2"/>
+<text x="60" y="50"
+text-anchor="middle"
+font-size="13"
+font-weight="bold">
+FOBAS
+</text>
+</svg>`
+},
+
+
+{
+name:"FOBAS Creative Studio",
+category:"Symbols",
+svg:`
+<svg viewBox="0 0 120 100">
+<circle cx="60" cy="45" r="35"
+fill="#ec4899"/>
+<path d="M40 60Q60 20 80 60"
+stroke="#ffffff"
+stroke-width="5"
+fill="none"/>
+<text x="60" y="90"
+text-anchor="middle"
+font-size="12"
+font-weight="bold">
+FOBAS
+</text>
+</svg>`
+},
+
+
+{
+name:"FOBAS Infinity Logo",
+category:"Symbols",
+svg:`
+<svg viewBox="0 0 120 100">
+<path d="M35 45Q20 25 45 25Q60 25 75 45Q90 65 75 65Q60 65 45 45Q30 25 15 45"
+stroke="#2563eb"
+stroke-width="8"
+fill="none"/>
+<text x="60" y="90"
+text-anchor="middle"
+font-size="14"
+font-weight="bold">
+FOBAS
+</text>
+</svg>`
+},
+
+
+{
+name:"FOBAS Royal Final",
+category:"Symbols",
+svg:`
+<svg viewBox="0 0 120 100">
+<circle cx="60" cy="45" r="38"
+fill="#111827"/>
+<circle cx="60" cy="45" r="30"
+fill="#f59e0b"/>
+<text x="60" y="52"
+text-anchor="middle"
+font-size="18"
+font-weight="bold">
+FOBAS
+</text>
+</svg>`
+},
+
+
+{
+name:"Royal Crown Logo",
+category:"Symbols",
+svg:`
+<svg viewBox="0 0 120 100">
+<path d="M20 55L30 25L60 45L90 25L100 55Z"
+fill="#facc15"/>
+<rect x="25" y="55" width="70" height="15"
+fill="#eab308"/>
+<circle cx="40" cy="45" r="4" fill="#ef4444"/>
+<circle cx="60" cy="45" r="4" fill="#2563eb"/>
+<circle cx="80" cy="45" r="4" fill="#22c55e"/>
+</svg>`
+},
+
+
+{
+name:"Modern Tech Logo",
+category:"Symbols",
+svg:`
+<svg viewBox="0 0 120 100">
+<circle cx="60" cy="45" r="35" fill="#0f172a"/>
+<path d="M40 45H80M60 25V65"
+stroke="#38bdf8"
+stroke-width="6"/>
+<circle cx="60" cy="45" r="12"
+fill="#ffffff"/>
+</svg>`
+},
+
+
+{
+name:"Luxury Diamond Logo",
+category:"Symbols",
+svg:`
+<svg viewBox="0 0 120 100">
+<path d="M60 10L100 45L60 85L20 45Z"
+fill="#06b6d4"/>
+<path d="M60 20L85 45L60 70L35 45Z"
+fill="#ffffff"/>
+</svg>`
+},
+
+
+{
+name:"Golden Lion Logo",
+category:"Symbols",
+svg:`
+<svg viewBox="0 0 120 100">
+<circle cx="60" cy="45" r="35"
+fill="#f59e0b"/>
+<path d="M45 45Q60 25 75 45Q60 65 45 45Z"
+fill="#ffffff"/>
+<circle cx="50" cy="42" r="3"/>
+<circle cx="70" cy="42" r="3"/>
+</svg>`
+},
+
+
+{
+name:"Infinity Future Logo",
+category:"Symbols",
+svg:`
+<svg viewBox="0 0 120 100">
+<path d="M35 45Q20 25 45 25Q60 25 75 45Q90 65 75 65Q60 65 45 45Q30 25 15 45"
+stroke="#2563eb"
+stroke-width="8"
+fill="none"/>
+</svg>`
+},
+
+
+{
+name:"Global World Logo",
+category:"Symbols",
+svg:`
+<svg viewBox="0 0 120 100">
+<circle cx="60" cy="45" r="35"
+fill="#22c55e"/>
+<path d="M25 45H95M60 10V80"
+stroke="#ffffff"
+stroke-width="3"/>
+<path d="M35 30Q60 45 85 30"
+stroke="#ffffff"
+stroke-width="3"
+fill="none"/>
+</svg>`
+},
+
+
+{
+name:"Premium Shield Logo",
+category:"Symbols",
+svg:`
+<svg viewBox="0 0 120 100">
+<path d="M25 15H95V55Q60 90 25 55Z"
+fill="#dc2626"/>
+<path d="M60 30L75 55H45Z"
+fill="#ffffff"/>
+</svg>`
+},
+
+
+{
+name:"Energy Power Logo",
+category:"Symbols",
+svg:`
+<svg viewBox="0 0 120 100">
+<circle cx="60" cy="45" r="35"
+fill="#f97316"/>
+<path d="M65 15L40 50H60L50 80L85 40H65Z"
+fill="#ffffff"/>
+</svg>`
+},
+
+
+{
+name:"Creative Wave Logo",
+category:"Symbols",
+svg:`
+<svg viewBox="0 0 120 100">
+<path d="M20 55Q60 10 100 55Q60 90 20 55Z"
+fill="#8b5cf6"/>
+<path d="M35 55Q60 30 85 55"
+stroke="#ffffff"
+stroke-width="5"
+fill="none"/>
+</svg>`
+},
+
+
+{
+name:"Smart Brain Logo",
+category:"Symbols",
+svg:`
+<svg viewBox="0 0 120 100">
+<circle cx="60" cy="45" r="35"
+fill="#ec4899"/>
+<path d="M40 45Q50 25 60 45Q70 25 80 45"
+stroke="#ffffff"
+stroke-width="4"
+fill="none"/>
+</svg>`
+},
+
+
+{
+name:"Rocket Logo",
+category:"Symbols",
+svg:`
+<svg viewBox="0 0 120 100">
+<path d="M60 15Q90 40 60 75Q30 40 60 15Z"
+fill="#2563eb"/>
+<circle cx="60" cy="40" r="8"
+fill="#ffffff"/>
+<path d="M45 70L35 85L55 75"
+fill="#ef4444"/>
+</svg>`
+},
+
+
+{
+name:"Star Premium Logo",
+category:"Symbols",
+svg:`
+<svg viewBox="0 0 120 100">
+<path d="M60 10L72 38L105 38L78 58L88 90L60 70L32 90L42 58L15 38L48 38Z"
+fill="#facc15"/>
+</svg>`
+},
+
+
+{
+name:"Mountain Adventure Logo",
+category:"Symbols",
+svg:`
+<svg viewBox="0 0 120 100">
+<path d="M15 80L55 20L80 80Z"
+fill="#475569"/>
+<path d="M50 80L85 35L110 80Z"
+fill="#94a3b8"/>
+<circle cx="90" cy="20" r="10"
+fill="#facc15"/>
+</svg>`
+},
+
+
+{
+name:"Ocean Wave Logo",
+category:"Symbols",
+svg:`
+<svg viewBox="0 0 120 100">
+<path d="M10 60Q40 20 70 60Q90 85 110 55"
+stroke="#0284c7"
+stroke-width="12"
+fill="none"/>
+<circle cx="60" cy="45" r="15"
+fill="#38bdf8"/>
+</svg>`
+},
+
+
+{
+name:"Camera Studio Logo",
+category:"Symbols",
+svg:`
+<svg viewBox="0 0 120 100">
+<rect x="20" y="25"
+width="80"
+height="50"
+rx="10"
+fill="#111827"/>
+<circle cx="60" cy="50" r="15"
+fill="#38bdf8"/>
+</svg>`
+},
+
+
+{
+name:"Music Note Logo",
+category:"Symbols",
+svg:`
+<svg viewBox="0 0 120 100">
+<circle cx="45" cy="70" r="12"
+fill="#ec4899"/>
+<path d="M55 65V20L85 30"
+stroke="#ec4899"
+stroke-width="8"
+fill="none"/>
+</svg>`
+},
+
+
+{
+name:"Medical Cross Logo",
+category:"Symbols",
+svg:`
+<svg viewBox="0 0 120 100">
+<circle cx="60" cy="45" r="35"
+fill="#22c55e"/>
+<path d="M50 25H70V40H85V55H70V70H50V55H35V40H50Z"
+fill="#ffffff"/>
+</svg>`
+},
+
+
+{
+name:"Security Eye Logo",
+category:"Symbols",
+svg:`
+<svg viewBox="0 0 120 100">
+<path d="M15 45Q60 5 105 45Q60 85 15 45Z"
+fill="#1e3a8a"/>
+<circle cx="60" cy="45" r="15"
+fill="#ffffff"/>
+<circle cx="60" cy="45" r="7"
+fill="#111827"/>
+</svg>`
+},
+
+
+{
+name:"Abstract Color Logo",
+category:"Symbols",
+svg:`
+<svg viewBox="0 0 120 100">
+<circle cx="40" cy="45" r="25"
+fill="#ef4444"/>
+<circle cx="80" cy="45" r="25"
+fill="#2563eb"/>
+<circle cx="60" cy="45" r="15"
+fill="#facc15"/>
+</svg>`
+},
+
+{
+name:"FOBAS Gold Logo",
+category:"Symbols",
+svg:`
+<svg viewBox="0 0 120 100">
+<circle cx="60" cy="45" r="35" fill="#facc15"/>
+<circle cx="60" cy="45" r="28" fill="#111827"/>
+<text x="60" y="53" text-anchor="middle"
+font-size="22" font-weight="bold"
+fill="#facc15">
+FOBAS
+</text>
+</svg>`
+},
+
+
+{
+name:"FOBAS Shield Logo",
+category:"Symbols",
+svg:`
+<svg viewBox="0 0 120 100">
+<path d="M20 15H100V55C100 75 60 90 60 90C60 90 20 75 20 55Z"
+fill="#2563eb"/>
+<path d="M60 25L75 55H45Z"
+fill="#ffffff"/>
+<text x="60" y="75"
+text-anchor="middle"
+font-size="14"
+font-weight="bold"
+fill="#ffffff">
+FOBAS
+</text>
+</svg>`
+},
+
+
+{
+name:"FOBAS Tech Logo",
+category:"Symbols",
+svg:`
+<svg viewBox="0 0 120 100">
+<rect x="15" y="20" width="90" height="55"
+rx="12"
+fill="#0f172a"/>
+<circle cx="35" cy="48" r="12" fill="#38bdf8"/>
+<text x="75" y="55"
+text-anchor="middle"
+font-size="18"
+font-weight="bold"
+fill="#ffffff">
+FOBAS
+</text>
+</svg>`
+},
+
+
+{
+name:"FOBAS Globe Logo",
+category:"Symbols",
+svg:`
+<svg viewBox="0 0 120 100">
+<circle cx="60" cy="45" r="35" fill="#22c55e"/>
+<path d="M25 45H95M60 10V80"
+stroke="#ffffff"
+stroke-width="3"/>
+<text x="60" y="50"
+text-anchor="middle"
+font-size="14"
+font-weight="bold"
+fill="#ffffff">
+FOBAS
+</text>
+</svg>`
+},
+
+
+{
+name:"FOBAS Diamond Logo",
+category:"Symbols",
+svg:`
+<svg viewBox="0 0 120 100">
+<path d="M60 10L100 45L60 80L20 45Z"
+fill="#9333ea"/>
+<text x="60" y="52"
+text-anchor="middle"
+font-size="18"
+font-weight="bold"
+fill="#ffffff">
+FOBAS
+</text>
+</svg>`
+},
+
+
+{
+name:"FOBAS Modern Logo",
+category:"Symbols",
+svg:`
+<svg viewBox="0 0 120 100">
+<rect x="15" y="25" width="90" height="45"
+rx="20"
+fill="#ef4444"/>
+<text x="60" y="55"
+text-anchor="middle"
+font-size="22"
+font-weight="bold"
+fill="#ffffff">
+FOBAS
+</text>
+</svg>`
+},
+
+
+{
+name:"FOBAS Crown Logo",
+category:"Symbols",
+svg:`
+<svg viewBox="0 0 120 100">
+<path d="M25 55L35 25L60 45L85 25L95 55Z"
+fill="#facc15"/>
+<rect x="25" y="55" width="70" height="15"
+fill="#eab308"/>
+<text x="60" y="65"
+text-anchor="middle"
+font-size="12"
+font-weight="bold">
+FOBAS
+</text>
+</svg>`
+},
+
+
+{
+name:"FOBAS App Logo",
+category:"Symbols",
+svg:`
+<svg viewBox="0 0 120 100">
+<rect x="25" y="10" width="70" height="70"
+rx="18"
+fill="#2563eb"/>
+<text x="60" y="50"
+text-anchor="middle"
+font-size="20"
+font-weight="bold"
+fill="#ffffff">
+F
+</text>
+<text x="60" y="70"
+text-anchor="middle"
+font-size="10"
+fill="#ffffff">
+FOBAS
+</text>
+</svg>`
+},
+
+
+{
+name:"FOBAS Energy Logo",
+category:"Symbols",
+svg:`
+<svg viewBox="0 0 120 100">
+<circle cx="60" cy="45" r="35"
+fill="#f97316"/>
+<path d="M65 15L40 50H60L50 80L85 40H65Z"
+fill="#ffffff"/>
+<text x="60" y="95"
+text-anchor="middle"
+font-size="12"
+font-weight="bold">
+FOBAS
+</text>
+</svg>`
+},
+
+
+{
+name:"FOBAS Education Logo",
+category:"Symbols",
+svg:`
+<svg viewBox="0 0 120 100">
+<path d="M20 35L60 15L100 35L60 55Z"
+fill="#16a34a"/>
+<path d="M35 45V70H85V45"
+fill="#22c55e"/>
+<text x="60" y="65"
+text-anchor="middle"
+font-size="14"
+font-weight="bold"
+fill="#ffffff">
+FOBAS
+</text>
+</svg>`
+},
+
+
+{
+name:"FOBAS Circle Logo",
+category:"Symbols",
+svg:`
+<svg viewBox="0 0 120 100">
+<circle cx="60" cy="45" r="38"
+fill="#111827"/>
+<circle cx="60" cy="45" r="30"
+fill="#ffffff"/>
+<text x="60" y="52"
+text-anchor="middle"
+font-size="16"
+font-weight="bold">
+FOBAS
+</text>
+</svg>`
+},
+
+
+{
+name:"FOBAS Future Logo",
+category:"Symbols",
+svg:`
+<svg viewBox="0 0 120 100">
+<polygon points="60,10 100,70 20,70"
+fill="#06b6d4"/>
+<text x="60" y="55"
+text-anchor="middle"
+font-size="18"
+font-weight="bold"
+fill="#ffffff">
+FOBAS
+</text>
+</svg>`
+},
+
+
+{
+name:"FOBAS Creative Logo",
+category:"Symbols",
+svg:`
+<svg viewBox="0 0 120 100">
+<circle cx="60" cy="45" r="35"
+fill="#ec4899"/>
+<path d="M45 45Q60 25 75 45Q60 65 45 45"
+fill="#ffffff"/>
+<text x="60" y="90"
+text-anchor="middle"
+font-size="12"
+font-weight="bold">
+FOBAS
+</text>
+</svg>`
+},
+
+
+{
+name:"FOBAS Premium Logo",
+category:"Symbols",
+svg:`
+<svg viewBox="0 0 120 100">
+<rect x="15" y="20" width="90" height="55"
+rx="8"
+fill="#111827"/>
+<text x="60" y="55"
+text-anchor="middle"
+font-size="20"
+font-weight="bold"
+fill="#facc15">
+FOBAS
+</text>
+</svg>`
+},
+
+
+{
+name:"FOBAS Network Logo",
+category:"Symbols",
+svg:`
+<svg viewBox="0 0 120 100">
+<circle cx="35" cy="45" r="10" fill="#2563eb"/>
+<circle cx="85" cy="45" r="10" fill="#2563eb"/>
+<circle cx="60" cy="70" r="10" fill="#2563eb"/>
+<path d="M35 45L60 70L85 45"
+stroke="#111827"
+stroke-width="3"/>
+<text x="60" y="25"
+text-anchor="middle"
+font-size="14"
+font-weight="bold">
+FOBAS
+</text>
+</svg>`
+},
+
+
+{
+name:"FOBAS Security Logo",
+category:"Symbols",
+svg:`
+<svg viewBox="0 0 120 100">
+<path d="M60 10L95 25V55C95 75 60 90 60 90C60 90 25 75 25 55V25Z"
+fill="#dc2626"/>
+<text x="60" y="55"
+text-anchor="middle"
+font-size="18"
+font-weight="bold"
+fill="#ffffff">
+FOBAS
+</text>
+</svg>`
+},
+
+
+{
+name:"FOBAS World Logo",
+category:"Symbols",
+svg:`
+<svg viewBox="0 0 120 100">
+<circle cx="60" cy="45" r="35"
+fill="#38bdf8"/>
+<path d="M30 45H90M60 15V75"
+stroke="#ffffff"
+stroke-width="3"/>
+<text x="60" y="50"
+text-anchor="middle"
+font-size="14"
+font-weight="bold"
+fill="#ffffff">
+FOBAS
+</text>
+</svg>`
+},
+
+
+{
+name:"FOBAS Innovation Logo",
+category:"Symbols",
+svg:`
+<svg viewBox="0 0 120 100">
+<path d="M60 10L90 45L60 80L30 45Z"
+fill="#22c55e"/>
+<circle cx="60" cy="45" r="12"
+fill="#ffffff"/>
+<text x="60" y="95"
+text-anchor="middle"
+font-size="12"
+font-weight="bold">
+FOBAS
+</text>
+</svg>`
+},
+
+
+{
+name:"FOBAS Final Logo",
+category:"Symbols",
+svg:`
+<svg viewBox="0 0 120 100">
+<rect x="10" y="20" width="100" height="60"
+rx="15"
+fill="#7c3aed"/>
+<text x="60" y="58"
+text-anchor="middle"
+font-size="24"
+font-weight="bold"
+fill="#ffffff">
+FOBAS
+</text>
+</svg>`
+}.
+   
+
+
+{
+name:"Football Balloon",
+category:"Symbols",
+svg:`
+<svg viewBox="0 0 100 100">
+<circle cx="50" cy="45" r="30" fill="#ffffff"/>
+<path d="M50 25L62 35L58 50H42L38 35Z" fill="#111827"/>
+<path d="M20 45H80M50 15V75" stroke="#d1d5db" stroke-width="2"/>
+<path d="M45 75L50 90L55 75" fill="#ffffff"/>
+</svg>`
+},
+
+
+{
+name:"Rainbow Balloon",
+category:"Symbols",
+svg:`
+<svg viewBox="0 0 100 100">
+<ellipse cx="50" cy="45" rx="28" ry="35" fill="#ef4444"/>
+<path d="M25 45Q50 15 75 45" stroke="#facc15" stroke-width="8" fill="none"/>
+<path d="M30 60Q50 85 70 60" stroke="#22c55e" stroke-width="8" fill="none"/>
+<path d="M50 80L50 95" stroke="#92400e" stroke-width="3"/>
+</svg>`
+},
+
+
+{
+name:"Party Balloon",
+category:"Symbols",
+svg:`
+<svg viewBox="0 0 100 100">
+<ellipse cx="50" cy="45" rx="28" ry="35" fill="#a855f7"/>
+<circle cx="40" cy="35" r="6" fill="#ffffff"/>
+<circle cx="65" cy="55" r="5" fill="#facc15"/>
+<path d="M50 80L50 95" stroke="#92400e" stroke-width="3"/>
+</svg>`
+},
+
+
+{
+name:"Red Heart Balloon",
+category:"Symbols",
+svg:`
+<svg viewBox="0 0 100 100">
+<path d="M50 75C20 55 15 35 30 25C40 18 50 30 50 30C50 30 60 18 70 25C85 35 80 55 50 75Z"
+fill="#ef4444"/>
+<circle cx="40" cy="35" r="5" fill="#ffffff"/>
+<path d="M50 75V95" stroke="#92400e" stroke-width="3"/>
+</svg>`
+},
+
+
+{
+name:"Blue Party Balloon",
+category:"Symbols",
+svg:`
+<svg viewBox="0 0 100 100">
+<ellipse cx="50" cy="45" rx="27" ry="35" fill="#2563eb"/>
+<ellipse cx="40" cy="30" rx="7" ry="12" fill="#93c5fd"/>
+<path d="M50 80V95" stroke="#92400e" stroke-width="3"/>
+</svg>`
+},
+
+
+{
+name:"Golden Balloon",
+category:"Symbols",
+svg:`
+<svg viewBox="0 0 100 100">
+<ellipse cx="50" cy="45" rx="28" ry="35" fill="#f59e0b"/>
+<circle cx="40" cy="30" r="7" fill="#fde68a"/>
+<path d="M50 80V95" stroke="#92400e" stroke-width="3"/>
+</svg>`
+},
+
+
+{
+name:"Star Balloon",
+category:"Symbols",
+svg:`
+<svg viewBox="0 0 100 100">
+<ellipse cx="50" cy="45" rx="30" ry="35" fill="#2563eb"/>
+<path d="M50 25L56 40L72 40L60 50L65 65L50 55L35 65L40 50L28 40L44 40Z"
+fill="#facc15"/>
+<path d="M50 80V95" stroke="#92400e" stroke-width="3"/>
+</svg>`
+},
+
+
+{
+name:"Birthday Balloon",
+category:"Symbols",
+svg:`
+<svg viewBox="0 0 100 100">
+<ellipse cx="50" cy="45" rx="28" ry="35" fill="#ec4899"/>
+<text x="50" y="52" text-anchor="middle" font-size="20" fill="#ffffff">🎂</text>
+<path d="M50 80V95" stroke="#92400e" stroke-width="3"/>
+</svg>`
+},
+
+
+{
+name:"Smile Balloon",
+category:"Symbols",
+svg:`
+<svg viewBox="0 100 100 100">
+<circle cx="50" cy="45" r="30" fill="#facc15"/>
+<circle cx="40" cy="38" r="4"/>
+<circle cx="60" cy="38" r="4"/>
+<path d="M38 55Q50 65 62 55" stroke="#111827" stroke-width="3" fill="none"/>
+<path d="M50 75V95" stroke="#92400e" stroke-width="3"/>
+</svg>`
+},
+
+
+{
+name:"Water Balloon",
+category:"Symbols",
+svg:`
+<svg viewBox="0 0 100 100">
+<ellipse cx="50" cy="45" rx="28" ry="35" fill="#38bdf8"/>
+<path d="M35 35Q50 25 65 35" stroke="#ffffff" stroke-width="4" fill="none"/>
+<path d="M50 80V95" stroke="#92400e" stroke-width="3"/>
+</svg>`
+},
+
+
+{
+name:"Football Party Balloon",
+category:"Symbols",
+svg:`
+<svg viewBox="0 0 100 100">
+<ellipse cx="50" cy="45" rx="30" ry="35" fill="#16a34a"/>
+<path d="M50 30L60 40L55 55H45L40 40Z" fill="#ffffff"/>
+<path d="M50 80V95" stroke="#92400e" stroke-width="3"/>
+</svg>`
+},
+
+
+{
+name:"Luxury Gold Balloon",
+category:"Symbols",
+svg:`
+<svg viewBox="0 100 100 100">
+<ellipse cx="50" cy="45" rx="28" ry="35" fill="#eab308"/>
+<circle cx="40" cy="30" r="7" fill="#fff7ed"/>
+<path d="M50 80V95" stroke="#92400e" stroke-width="3"/>
+</svg>`
+},
+
+
+{
+name:"Purple Balloon",
+category:"Symbols",
+svg:`
+<svg viewBox="0 0 100 100">
+<ellipse cx="50" cy="45" rx="28" ry="35" fill="#9333ea"/>
+<ellipse cx="40" cy="30" rx="6" ry="10" fill="#ddd6fe"/>
+<path d="M50 80V95" stroke="#92400e" stroke-width="3"/>
+</svg>`
+},
+
+
+{
+name:"Green Balloon",
+category:"Symbols",
+svg:`
+<svg viewBox="0 0 100 100">
+<ellipse cx="50" cy="45" rx="28" ry="35" fill="#22c55e"/>
+<circle cx="40" cy="30" r="6" fill="#bbf7d0"/>
+<path d="M50 80V95" stroke="#92400e" stroke-width="3"/>
+</svg>`
+},
+
+
+{
+name:"Blue Star Balloon",
+category:"Symbols",
+svg:`
+<svg viewBox="0 0 100 100">
+<ellipse cx="50" cy="45" rx="28" ry="35" fill="#0ea5e9"/>
+<path d="M50 25L56 40L72 40L60 50L65 65L50 55L35 65L40 50L28 40L44 40Z"
+fill="#ffffff"/>
+<path d="M50 80V95" stroke="#92400e" stroke-width="3"/>
+</svg>`
+},
+
+
+{
+name:"Wedding Balloon",
+category:"Symbols",
+svg:`
+<svg viewBox="0 0 100 100">
+<ellipse cx="50" cy="45" rx="28" ry="35" fill="#ffffff"/>
+<path d="M50 35C35 20 25 40 50 60C75 40 65 20 50 35Z"
+fill="#ef4444"/>
+<path d="M50 80V95" stroke="#92400e" stroke-width="3"/>
+</svg>`
+},
+
+
+{
+name:"Rainbow Party Balloon",
+category:"Symbols",
+svg:`
+<svg viewBox="0 0 100 100">
+<ellipse cx="50" cy="45" rx="28" ry="35" fill="#f97316"/>
+<path d="M30 45Q50 20 70 45" stroke="#22c55e" stroke-width="6" fill="none"/>
+<path d="M35 60Q50 75 65 60" stroke="#2563eb" stroke-width="6" fill="none"/>
+<path d="M50 80V95" stroke="#92400e" stroke-width="3"/>
+</svg>`
+},
+
+
+{
+name:"Champion Balloon",
+category:"Symbols",
+svg:`
+<svg viewBox="0 0 100 100">
+<ellipse cx="50" cy="45" rx="28" ry="35" fill="#dc2626"/>
+<text x="50" y="52" text-anchor="middle" font-size="18" fill="#facc15">★</text>
+<path d="M50 80V95" stroke="#92400e" stroke-width="3"/>
+</svg>`
+},
+
+
+{
+name:"Kids Game Balloon",
+category:"Symbols",
+svg:`
+<svg viewBox="0 0 100 100">
+<ellipse cx="50" cy="45" rx="28" ry="35" fill="#14b8a6"/>
+<circle cx="40" cy="35" r="5" fill="#ffffff"/>
+<circle cx="60" cy="55" r="5" fill="#facc15"/>
+<path d="M50 80V95" stroke="#92400e" stroke-width="3"/>
+</svg>`
+},
+
+
+
+   
+
+
+
+{
+name:"Football Ball",
+category:"Symbols",
+svg:`
+<svg viewBox="0 0 100 100">
+<circle cx="50" cy="50" r="40" fill="#ffffff" stroke="#111827" stroke-width="4"/>
+<polygon points="50,35 60,42 56,55 44,55 40,42"
+fill="#111827"/>
+<path d="M50 35L50 10M40 42L15 30M60 42L85 30M44 55L25 75M56 55L75 75"
+stroke="#111827"
+stroke-width="3"/>
+</svg>`
+},
+
+
+{
+name:"Basketball Ball",
+category:"Symbols",
+svg:`
+<svg viewBox="0 0 100 100">
+<circle cx="50" cy="50" r="40" fill="#f97316"/>
+<path d="M10 50H90M50 10V90"
+stroke="#111827"
+stroke-width="4"/>
+<path d="M20 20Q80 50 20 80M80 20Q20 50 80 80"
+stroke="#111827"
+stroke-width="4"
+fill="none"/>
+</svg>`
+},
+
+
+{
+name:"Baseball Ball",
+category:"Symbols",
+svg:`
+<svg viewBox="0 0 100 100">
+<circle cx="50" cy="50" r="40" fill="#ffffff" stroke="#d1d5db" stroke-width="3"/>
+<path d="M25 25Q50 50 25 75M75 25Q50 50 75 75"
+stroke="#ef4444"
+stroke-width="3"
+fill="none"/>
+</svg>`
+},
+
+
+{
+name:"Tennis Ball",
+category:"Symbols",
+svg:`
+<svg viewBox="0 0 100 100">
+<circle cx="50" cy="50" r="40" fill="#bef264"/>
+<path d="M20 35Q50 50 80 35M20 65Q50 50 80 65"
+stroke="#ffffff"
+stroke-width="5"
+fill="none"/>
+</svg>`
+},
+
+
+{
+name:"Volleyball Ball",
+category:"Symbols",
+svg:`
+<svg viewBox="0 0 100 100">
+<circle cx="50" cy="50" r="40" fill="#ffffff"/>
+<path d="M50 10Q30 50 50 90M10 50Q50 30 90 50M25 20Q60 50 75 80"
+stroke="#2563eb"
+stroke-width="5"
+fill="none"/>
+</svg>`
+},
+
+
+{
+name:"Golf Ball",
+category:"Symbols",
+svg:`
+<svg viewBox="0 0 100 100">
+<circle cx="50" cy="50" r="40" fill="#ffffff" stroke="#d1d5db" stroke-width="3"/>
+<circle cx="35" cy="35" r="2" fill="#9ca3af"/>
+<circle cx="60" cy="40" r="2" fill="#9ca3af"/>
+<circle cx="45" cy="65" r="2" fill="#9ca3af"/>
+</svg>`
+},
+
+
+{
+name:"Rugby Ball",
+category:"Symbols",
+svg:`
+<svg viewBox="0 0 100 100">
+<ellipse cx="50" cy="50" rx="40" ry="25" fill="#92400e"/>
+<line x1="35" y1="45" x2="65" y2="45"
+stroke="#ffffff"
+stroke-width="4"/>
+<line x1="35" y1="55" x2="65" y2="55"
+stroke="#ffffff"
+stroke-width="4"/>
+</svg>`
+},
+
+
+{
+name:"Bowling Ball",
+category:"Symbols",
+svg:`
+<svg viewBox="0 0 100 100">
+<circle cx="50" cy="50" r="40" fill="#111827"/>
+<circle cx="35" cy="35" r="7" fill="#374151"/>
+<circle cx="60" cy="35" r="7" fill="#374151"/>
+<circle cx="50" cy="55" r="7" fill="#374151"/>
+</svg>`
+},
+
+
+{
+name:"Billiard Ball",
+category:"Symbols",
+svg:`
+<svg viewBox="0 0 100 100">
+<circle cx="50" cy="50" r="40" fill="#111827"/>
+<circle cx="50" cy="50" r="18" fill="#ffffff"/>
+<text x="50" y="58"
+text-anchor="middle"
+font-size="18">
+8
+</text>
+</svg>`
+},
+
+
+{
+name:"Ping Pong Ball",
+category:"Symbols",
+svg:`
+<svg viewBox="0 0 100 100">
+<circle cx="50" cy="45" r="35" fill="#ffffff" stroke="#d1d5db" stroke-width="3"/>
+<rect x="25" y="80" width="50" height="8" fill="#92400e"/>
+</svg>`
+},
+
+
+{
+name:"Beach Ball",
+category:"Symbols",
+svg:`
+<svg viewBox="0 0 100 100">
+<circle cx="50" cy="50" r="40" fill="#ffffff"/>
+<path d="M50 10Q80 30 90 50Q60 55 50 90Q20 70 10 50Q40 45 50 10"
+fill="#38bdf8"/>
+<path d="M50 10Q40 45 50 90"
+stroke="#ef4444"
+stroke-width="8"/>
+</svg>`
+},
+
+
+{
+name:"Balloon Red",
+category:"Symbols",
+svg:`
+<svg viewBox="0 0 100 100">
+<ellipse cx="50" cy="40" rx="30" ry="38" fill="#ef4444"/>
+<path d="M50 78V95"
+stroke="#92400e"
+stroke-width="3"/>
+</svg>`
+},
+
+
+{
+name:"Balloon Blue",
+category:"Symbols",
+svg:`
+<svg viewBox="0 0 100 100">
+<ellipse cx="50" cy="40" rx="30" ry="38" fill="#2563eb"/>
+<path d="M50 78V95"
+stroke="#92400e"
+stroke-width="3"/>
+</svg>`
+},
+
+
+{
+name:"Balloon Green",
+category:"Symbols",
+svg:`
+<svg viewBox="0 0 100 100">
+<ellipse cx="50" cy="40" rx="30" ry="38" fill="#22c55e"/>
+<path d="M50 78V95"
+stroke="#92400e"
+stroke-width="3"/>
+</svg>`
+},
+
+
+{
+name:"Magic Ball",
+category:"Symbols",
+svg:`
+<svg viewBox="0 0 100 100">
+<circle cx="50" cy="50" r="40" fill="#111827"/>
+<circle cx="50" cy="50" r="18" fill="#ffffff"/>
+<text x="50" y="58"
+text-anchor="middle"
+font-size="18">
+?
+</text>
+</svg>`
+},
+
+
+{
+name:"Toy Ball",
+category:"Symbols",
+svg:`
+<svg viewBox="0 0 100 100">
+<circle cx="50" cy="50" r="40" fill="#ec4899"/>
+<path d="M15 50H85M50 15V85"
+stroke="#facc15"
+stroke-width="8"/>
+</svg>`
+},
+
+
+{
+name:"Soccer Color Ball",
+category:"Symbols",
+svg:`
+<svg viewBox="0 0 100 100">
+<circle cx="50" cy="50" r="40" fill="#22c55e"/>
+<polygon points="50,30 62,40 58,55 42,55 38,40"
+fill="#ffffff"/>
+<circle cx="50" cy="50" r="8" fill="#111827"/>
+</svg>`
+},
+
+
+{
+name:"Rainbow Ball",
+category:"Symbols",
+svg:`
+<svg viewBox="0 0">
+<circle cx="50" cy="50" r="40" fill="#facc15"/>
+<path d="M15 50Q50 15 85 50"
+stroke="#ef4444"
+stroke-width="8"
+fill="none"/>
+<path d="M20 60Q50 30 80 60"
+stroke="#2563eb"
+stroke-width="8"
+fill="none"/>
+</svg>`
+},
+
+
+{
+name:"Golden Trophy Ball",
+category:"Symbols",
+svg:`
+<svg viewBox="0 0 100 100">
+<circle cx="50" cy="45" r="35" fill="#facc15"/>
+<path d="M50 10V80"
+stroke="#ffffff"
+stroke-width="4"/>
+<path d="M20 45H80"
+stroke="#ffffff"
+stroke-width="4"/>
+<rect x="40" y="80" width="20" height="8" fill="#92400e"/>
+</svg>`
+},
+
+
+
+
+
+   
 {
 name:"Map Pin",
 category:"Symbols",
