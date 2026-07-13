@@ -15448,6 +15448,259 @@ fill="none"/>
 },
 
 
+
+
+{
+name:"Teacher",
+category:"People",
+svg:`
+<svg viewBox="0 0 100 100">
+<circle cx="50" cy="28" r="18" fill="#facc15"/>
+<rect x="32" y="48" width="36" height="35" rx="8" fill="#2563eb"/>
+<rect x="20" y="60" width="20" height="5" fill="#111827"/>
+<rect x="60" y="60" width="20" height="5" fill="#111827"/>
+</svg>`
+},
+
+
+{
+name:"Doctor",
+category:"People",
+svg:`
+<svg viewBox="0 0 100 100">
+<circle cx="50" cy="25" r="17" fill="#fde68a"/>
+<rect x="30" y="45" width="40" height="40" rx="8" fill="#ffffff"/>
+<rect x="45" y="55" width="10" height="25" fill="#ef4444"/>
+<rect x="38" y="62" width="24" height="10" fill="#ef4444"/>
+</svg>`
+},
+
+
+{
+name:"Student",
+category:"People",
+svg:`
+<svg viewBox="0 0 100 100">
+<circle cx="50" cy="30" r="17" fill="#fcd34d"/>
+<path d="M25 70 Q50 45 75 70V90H25Z" fill="#22c55e"/>
+<path d="M35 15L50 5L65 15" fill="#111827"/>
+</svg>`
+},
+
+
+{
+name:"Chef",
+category:"People",
+svg:`
+<svg viewBox="0 0 100 100">
+<circle cx="50" cy="32" r="16" fill="#fde68a"/>
+<path d="M30 30Q30 5 50 20Q70 5 70 30Z" fill="#ffffff"/>
+<rect x="32" y="50" width="36" height="40" fill="#f97316"/>
+</svg>`
+},
+
+
+{
+name:"Artist",
+category:"People",
+svg:`
+<svg viewBox="0 0 100 100">
+<circle cx="50" cy="25" r="17" fill="#fcd34d"/>
+<rect x="30" y="45" width="40" height="40" rx="10" fill="#a855f7"/>
+<circle cx="75" cy="65" r="10" fill="#ef4444"/>
+</svg>`
+},
+
+
+{
+name:"Singer",
+category:"People",
+svg:`
+<svg viewBox="0 0 100 100">
+<circle cx="50" cy="25" r="17" fill="#facc15"/>
+<rect x="32" y="45" width="36" height="40" fill="#ec4899"/>
+<circle cx="75" cy="55" r="8" fill="#111827"/>
+</svg>`
+},
+
+
+{
+name:"Builder",
+category:"People",
+svg:`
+<svg viewBox="0 0 100 100">
+<circle cx="50" cy="25" r="16" fill="#fcd34d"/>
+<rect x="32" y="45" width="36" height="40" fill="#f59e0b"/>
+<rect x="15" y="55" width="15" height="8" fill="#6b7280"/>
+</svg>`
+},
+
+
+{
+name:"Baby",
+category:"People",
+svg:`
+<svg viewBox="0 0 100 100">
+<circle cx="50" cy="35" r="25" fill="#fde68a"/>
+<circle cx="42" cy="32" r="4" fill="#111827"/>
+<circle cx="58" cy="32" r="4" fill="#111827"/>
+<path d="M35 55Q50 65 65 55" stroke="#111827" stroke-width="4" fill="none"/>
+</svg>`
+},
+
+
+{
+name:"Family",
+category:"People",
+svg:`
+<svg viewBox="0 0 100 100">
+<circle cx="30" cy="25" r="12" fill="#facc15"/>
+<circle cx="70" cy="25" r="12" fill="#facc15"/>
+<circle cx="50" cy="45" r="10" fill="#fde68a"/>
+<rect x="20" y="45" width="20" height="35" fill="#2563eb"/>
+<rect x="60" y="45" width="20" height="35" fill="#ec4899"/>
+</svg>`
+},
+
+
+{
+name:"Business Person",
+category:"People",
+svg:`
+<svg viewBox="0 0 100 100">
+<circle cx="50" cy="25" r="16" fill="#fcd34d"/>
+<rect x="30" y="45" width="40" height="40" fill="#1e3a8a"/>
+<rect x="45" y="50" width="10" height="30" fill="#ffffff"/>
+</svg>`
+},
+
+
+{
+name:"Scientist",
+category:"People",
+svg:`
+<svg viewBox="0 0 100 100">
+<circle cx="50" cy="25" r="16" fill="#fde68a"/>
+<rect x="32" y="45" width="36" height="40" fill="#10b981"/>
+<circle cx="75" cy="65" r="10" fill="#60a5fa"/>
+</svg>`
+},
+
+
+{
+name:"Gamer",
+category:"People",
+svg:`
+<svg viewBox="0 0 100 100">
+<circle cx="50" cy="25" r="16" fill="#facc15"/>
+<rect x="25" y="45" width="50" height="35" rx="15" fill="#111827"/>
+<circle cx="40" cy="62" r="5" fill="#22c55e"/>
+<circle cx="60" cy="62" r="5" fill="#ef4444"/>
+</svg>`
+},
+
+
+{
+name:"Athlete",
+category:"People",
+svg:`
+<svg viewBox="0 0 100 100">
+<circle cx="50" cy="20" r="15" fill="#fde68a"/>
+<path d="M30 45L70 45L80 85H20Z" fill="#2563eb"/>
+<circle cx="80" cy="25" r="10" fill="#f97316"/>
+</svg>`
+},
+
+
+{
+name:"Traveler",
+category:"People",
+svg:`
+<svg viewBox="0 0 100 100">
+<circle cx="50" cy="25" r="16" fill="#facc15"/>
+<rect x="32" y="45" width="36" height="40" fill="#9333ea"/>
+<rect x="70" y="55" width="15" height="25" fill="#92400e"/>
+</svg>`
+},
+
+
+{
+name:"Police",
+category:"People",
+svg:`
+<svg viewBox="0 0 100 100">
+<circle cx="50" cy="30" r="16" fill="#fde68a"/>
+<path d="M30 20H70L60 10H40Z" fill="#1e40af"/>
+<rect x="32" y="48" width="36" height="38" fill="#1d4ed8"/>
+</svg>`
+},
+
+
+{
+name:"Pilot",
+category:"People",
+svg:`
+<svg viewBox="0 0 100 100">
+<circle cx="50" cy="25" r="16" fill="#facc15"/>
+<rect x="32" y="45" width="36" height="40" fill="#e5e7eb"/>
+<path d="M35 55H65" stroke="#2563eb" stroke-width="5"/>
+</svg>`
+},
+
+
+{
+name:"Astronaut",
+category:"People",
+svg:`
+<svg viewBox="0 0 100 100">
+<circle cx="50" cy="30" r="22" fill="#e5e7eb"/>
+<circle cx="50" cy="30" r="12" fill="#60a5fa"/>
+<rect x="32" y="55" width="36" height="35" fill="#ffffff"/>
+</svg>`
+},
+
+
+{
+name:"Worker",
+category:"People",
+svg:`
+<svg viewBox="0 0 100 100">
+<circle cx="50" cy="25" r="16" fill="#fde68a"/>
+<path d="M25 20H75L65 10H35Z" fill="#f59e0b"/>
+<rect x="32" y="45" width="36" height="40" fill="#6b7280"/>
+</svg>`
+},
+
+
+{
+name:"Couple",
+category:"People",
+svg:`
+<svg viewBox="0 0 100 100">
+<circle cx="35" cy="30" r="14" fill="#facc15"/>
+<circle cx="65" cy="30" r="14" fill="#fde68a"/>
+<rect x="22" y="48" width="26" height="35" fill="#ec4899"/>
+<rect x="52" y="48" width="26" height="35" fill="#2563eb"/>
+</svg>`
+},
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 {
 name:"Star",
 category:"Symbols",
