@@ -15639,6 +15639,85 @@ box
 
 
 
+document
+.querySelectorAll(
+    ".cwClipCategories button"
+)
+.forEach(
+    function(button){
+
+
+        button.onclick =
+        function(){
+
+
+            const category =
+                this.textContent.trim();
+
+
+
+            const grid =
+                box.querySelector(
+                    ".cwClipArtGrid"
+                );
+
+
+
+            if(!grid){
+
+                return;
+
+            }
+
+
+
+            const list =
+                category === "All"
+                ?
+                clipArts
+                :
+                clipArts.filter(
+                    function(item){
+
+                        return (
+                            item.category === category
+                        );
+
+                    }
+                );
+
+
+
+
+            grid.innerHTML =
+            list.map(item=>`
+
+
+            <div class="cwClipArtItem"
+            data-clipart="${item.name}">
+
+
+            ${item.svg}
+
+
+            <span>
+            ${item.name}
+            </span>
+
+
+            </div>
+
+
+            `).join("");
+
+
+
+        };
+
+
+    }
+);
+
 
 document
 .getElementById(
