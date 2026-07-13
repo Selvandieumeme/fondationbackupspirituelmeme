@@ -17779,7 +17779,140 @@ svg:`
 
 
 
+{
+name:"Netherlands Flag",
+category:"Objects",
+svg:`
+<svg viewBox="0 0 120 100">
+<rect x="10" y="15" width="100" height="18" fill="#dc2626"/>
+<rect x="10" y="33" width="100" height="18" fill="#ffffff"/>
+<rect x="10" y="51" width="100" height="19" fill="#2563eb"/>
+<text x="60" y="88" text-anchor="middle" font-size="10">Netherlands</text>
+</svg>`
+},
 
+
+{
+name:"Norway Flag",
+category:"Objects",
+svg:`
+<svg viewBox="0 0 120 100">
+<rect x="10" y="15" width="100" height="55" fill="#dc2626"/>
+<rect x="35" y="15" width="14" height="55" fill="#ffffff"/>
+<rect x="10" y="35" width="100" height="14" fill="#ffffff"/>
+<rect x="39" y="15" width="7" height="55" fill="#2563eb"/>
+<rect x="10" y="39" width="100" height="7" fill="#2563eb"/>
+<text x="60" y="88" text-anchor="middle" font-size="10">Norway</text>
+</svg>`
+},
+
+
+{
+name:"Sweden Flag",
+category:"Objects",
+svg:`
+<svg viewBox="0 0 120 100">
+<rect x="10" y="15" width="100" height="55" fill="#2563eb"/>
+<rect x="40" y="15" width="12" height="55" fill="#facc15"/>
+<rect x="10" y="36" width="100" height="12" fill="#facc15"/>
+<text x="60" y="88" text-anchor="middle" font-size="10">Sweden</text>
+</svg>`
+},
+
+
+{
+name:"Finland Flag",
+category:"Objects",
+svg:`
+<svg viewBox="0 0 120 100">
+<rect x="10" y="15" width="100" height="55" fill="#ffffff"/>
+<rect x="38" y="15" width="15" height="55" fill="#2563eb"/>
+<rect x="10" y="35" width="100" height="15" fill="#2563eb"/>
+<text x="60" y="88" text-anchor="middle" font-size="10">Finland</text>
+</svg>`
+},
+
+
+{
+name:"Denmark Flag",
+category:"Objects",
+svg:`
+<svg viewBox="0 0 120 100">
+<rect x="10" y="15" width="100" height="55" fill="#dc2626"/>
+<rect x="35" y="15" width="12" height="55" fill="#ffffff"/>
+<rect x="10" y="36" width="100" height="12" fill="#ffffff"/>
+<text x="60" y="88" text-anchor="middle" font-size="10">Denmark</text>
+</svg>`
+},
+
+
+{
+name:"Greece Flag",
+category:"Objects",
+svg:`
+<svg viewBox="0 0 120 100">
+<rect x="10" y="15" width="100" height="55" fill="#2563eb"/>
+<path d="M10 25H110M10 45H110M10 65H110"
+stroke="#ffffff" stroke-width="5"/>
+<rect x="10" y="15" width="30" height="30" fill="#2563eb"/>
+<text x="60" y="88" text-anchor="middle" font-size="10">Greece</text>
+</svg>`
+},
+
+
+{
+name:"Turkey Flag",
+category:"Objects",
+svg:`
+<svg viewBox="0 0 120 100">
+<rect x="10" y="15" width="100" height="55" fill="#dc2626"/>
+<circle cx="55" cy="42" r="15" fill="#ffffff"/>
+<circle cx="61" cy="42" r="12" fill="#dc2626"/>
+<circle cx="75" cy="42" r="5" fill="#ffffff"/>
+<text x="60" y="88" text-anchor="middle" font-size="10">Turkey</text>
+</svg>`
+},
+
+
+{
+name:"Egypt Flag",
+category:"Objects",
+svg:`
+<svg viewBox="0 0 120 100">
+<rect x="10" y="15" width="100" height="18" fill="#dc2626"/>
+<rect x="10" y="33" width="100" height="18" fill="#ffffff"/>
+<rect x="10" y="51" width="100" height="19" fill="#111827"/>
+<circle cx="60" cy="42" r="5" fill="#facc15"/>
+<text x="60" y="88" text-anchor="middle" font-size="10">Egypt</text>
+</svg>`
+},
+
+
+{
+name:"Nigeria Flag",
+category:"Objects",
+svg:`
+<svg viewBox="0 0 120 100">
+<rect x="10" y="15" width="33" height="55" fill="#16a34a"/>
+<rect x="43" y="15" width="34" height="55" fill="#ffffff"/>
+<rect x="77" y="15" width="33" height="55" fill="#16a34a"/>
+<text x="60" y="88" text-anchor="middle" font-size="10">Nigeria</text>
+</svg>`
+},
+
+
+{
+name:"Kenya Flag",
+category:"Objects",
+svg:`
+<svg viewBox="0 0 120 100">
+<rect x="10" y="15" width="100" height="18" fill="#111827"/>
+<rect x="10" y="33" width="100" height="18" fill="#dc2626"/>
+<rect x="10" y="51" width="100" height="19" fill="#16a34a"/>
+<circle cx="60" cy="42" r="8" fill="#ffffff"/>
+<text x="60" y="88" text-anchor="middle" font-size="10">Kenya</text>
+</svg>`
+},
 
 
 
