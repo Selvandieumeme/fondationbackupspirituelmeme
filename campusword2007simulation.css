@@ -3403,3 +3403,28 @@ right:-6px;
 bottom:-6px;
 
 }
+
+
+
+
+
+
+
+
+
+
+
+
+/* =========================================================
+   TEXT BOX ACTIVE STATE
+========================================================= */
+
+.cwTextBoxActive{
+
+    background:#22c55e !important;
+
+    color:white !important;
+
+    outline:2px solid #16a34a;
+
+}
