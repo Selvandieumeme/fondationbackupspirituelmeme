@@ -21423,6 +21423,342 @@ false
 
 
 
+/* =========================================================
+   CAMPUS WORD — CLIP ART RESIZE ENGINE
+   STEP 6
+   RESIZE FROM 8 EDGE HANDLES
+   TOUCH + MOUSE
+   ONLY CLIP ART
+   ISOLATED FROM SHAPES
+   ISOLATED FROM CARET
+========================================================= */
+
+(function(){
+
+
+let resizing = false;
+
+let activeClip = null;
+
+let direction = null;
+
+
+let startX = 0;
+
+let startY = 0;
+
+
+let startWidth = 0;
+
+let startHeight = 0;
+
+
+
+
+
+
+
+document.addEventListener(
+"pointerdown",
+function(e){
+
+
+
+const handle =
+e.target.closest(
+"[data-clip-resize]"
+);
+
+
+
+if(!handle){
+
+return;
+
+}
+
+
+
+activeClip =
+window.CampusWordSelectedClipArt;
+
+
+
+if(!activeClip){
+
+return;
+
+}
+
+
+
+direction =
+handle.dataset.clipResize;
+
+
+
+resizing = true;
+
+
+
+startX =
+e.clientX;
+
+
+startY =
+e.clientY;
+
+
+
+startWidth =
+activeClip.offsetWidth;
+
+
+startHeight =
+activeClip.offsetHeight;
+
+
+
+e.preventDefault();
+
+e.stopPropagation();
+
+
+
+},
+{
+passive:false
+}
+
+);
+
+
+
+
+
+
+
+
+
+document.addEventListener(
+"pointermove",
+function(e){
+
+
+
+if(
+!resizing ||
+!activeClip
+){
+
+return;
+
+}
+
+
+
+const dx =
+e.clientX - startX;
+
+
+const dy =
+e.clientY - startY;
+
+
+
+let width =
+startWidth;
+
+
+let height =
+startHeight;
+
+
+
+
+
+/* RIGHT SIDE */
+
+if(
+direction === "e" ||
+direction === "ne" ||
+direction === "se"
+){
+
+width =
+startWidth + dx;
+
+}
+
+
+
+
+
+/* LEFT SIDE */
+
+if(
+direction === "w" ||
+direction === "nw" ||
+direction === "sw"
+){
+
+width =
+startWidth - dx;
+
+}
+
+
+
+
+
+/* BOTTOM SIDE */
+
+if(
+direction === "s" ||
+direction === "se" ||
+direction === "sw"
+){
+
+height =
+startHeight + dy;
+
+}
+
+
+
+
+
+/* TOP SIDE */
+
+if(
+direction === "n" ||
+direction === "ne" ||
+direction === "nw"
+){
+
+height =
+startHeight - dy;
+
+}
+
+
+
+
+
+
+if(width < 40){
+
+width = 40;
+
+}
+
+
+
+if(height < 40){
+
+height = 40;
+
+}
+
+
+
+
+
+activeClip.style.width =
+width + "px";
+
+
+
+activeClip.style.height =
+height + "px";
+
+
+
+
+
+
+
+const handles =
+document.querySelector(
+".cwClipArtHandles"
+);
+
+
+
+if(handles){
+
+
+handles.style.width =
+activeClip.offsetWidth + "px";
+
+
+handles.style.height =
+activeClip.offsetHeight + "px";
+
+
+handles.style.left =
+activeClip.offsetLeft + "px";
+
+
+handles.style.top =
+activeClip.offsetTop + "px";
+
+
+}
+
+
+
+
+
+},
+{
+passive:false
+}
+
+);
+
+
+
+
+
+
+
+
+
+document.addEventListener(
+"pointerup",
+function(){
+
+
+resizing = false;
+
+
+activeClip = null;
+
+
+direction = null;
+
+
+
+},
+false
+);
+
+
+
+
+
+})();
+
+
+
+
+
+
+
+
+
+
 
 
 
