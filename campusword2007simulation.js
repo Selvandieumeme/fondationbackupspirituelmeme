@@ -22128,6 +22128,294 @@ passive:false
 
 
 
+/* =========================================================
+   CAMPUS WORD — TEXT BOX CREATION ENGINE
+   STEP 3
+   CREATE REAL TEXT BOX OBJECT
+   INSERT INTO PAGE
+   USE SAVED POSITION
+   TOUCH + MOUSE SUPPORT
+   NO SHAPE INTERFERENCE
+   NO CLIPART INTERFERENCE
+   NO CARET INTERFERENCE
+   ISOLATED MODULE
+========================================================= */
+
+(function(){
+
+
+
+function createTextBox(){
+
+
+
+const box =
+document.createElement(
+"div"
+);
+
+
+
+
+
+box.className =
+"cwInsertedTextBox";
+
+
+
+
+
+box.contentEditable =
+"true";
+
+
+
+
+
+box.innerHTML =
+"";
+
+
+
+
+
+box.style.position =
+"absolute";
+
+
+
+
+
+box.style.left =
+"0px";
+
+
+
+
+
+box.style.top =
+"0px";
+
+
+
+
+
+box.style.width =
+"200px";
+
+
+
+
+
+box.style.height =
+"80px";
+
+
+
+
+
+box.style.minWidth =
+"80px";
+
+
+
+
+
+box.style.minHeight =
+"40px";
+
+
+
+
+
+box.style.padding =
+"10px";
+
+
+
+
+
+box.style.border =
+"2px solid #2563eb";
+
+
+
+
+
+box.style.background =
+"white";
+
+
+
+
+
+box.style.cursor =
+"text";
+
+
+
+
+
+box.style.overflow =
+"hidden";
+
+
+
+
+
+box.style.outline =
+"none";
+
+
+
+
+
+return box;
+
+
+
+}
+
+
+
+
+
+
+
+
+
+document.addEventListener(
+"pointerdown",
+function(){
+
+
+
+const data =
+window.CampusWordTextBoxData;
+
+
+
+
+
+if(
+!data ||
+!data.position
+){
+
+return;
+
+}
+
+
+
+
+
+
+const page =
+data.position.page;
+
+
+
+
+
+const box =
+createTextBox();
+
+
+
+
+
+
+box.style.left =
+data.position.x + "px";
+
+
+
+
+
+box.style.top =
+data.position.y + "px";
+
+
+
+
+
+
+page.appendChild(
+box
+);
+
+
+
+
+
+
+window.CampusWordSelectedTextBox =
+box;
+
+
+
+
+
+
+
+data.position =
+null;
+
+
+
+
+
+box.focus();
+
+
+
+
+
+},
+false
+);
+
+
+
+
+
+
+})();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
