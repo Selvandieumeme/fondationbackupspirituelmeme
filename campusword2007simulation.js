@@ -22392,6 +22392,314 @@ false
 
 
 
+/* =========================================================
+   CAMPUS WORD — TEXT BOX FOUR HANDLES ENGINE
+   STEP 4
+   SHOW 4 RESIZE HANDLES ONLY
+   TOP / BOTTOM / LEFT / RIGHT
+   TEXT BOX ONLY
+   NO SHAPE INTERFERENCE
+   NO CLIPART INTERFERENCE
+   NO CARET INTERFERENCE
+   ISOLATED MODULE
+========================================================= */
+
+(function(){
+
+
+
+let selectedTextBox = null;
+
+
+
+
+function removeTextBoxHandles(){
+
+
+const old =
+document.querySelector(
+".cwTextBoxHandles"
+);
+
+
+
+if(old){
+
+old.remove();
+
+}
+
+
+}
+
+
+
+
+
+
+
+function showTextBoxHandles(box){
+
+
+
+removeTextBoxHandles();
+
+
+
+
+const handles =
+document.createElement(
+"div"
+);
+
+
+
+handles.className =
+"cwTextBoxHandles";
+
+
+
+handles.style.position =
+"absolute";
+
+
+
+handles.style.left =
+box.offsetLeft + "px";
+
+
+
+handles.style.top =
+box.offsetTop + "px";
+
+
+
+handles.style.width =
+box.offsetWidth + "px";
+
+
+
+handles.style.height =
+box.offsetHeight + "px";
+
+
+
+handles.style.pointerEvents =
+"none";
+
+
+
+
+
+[
+"top",
+"bottom",
+"left",
+"right"
+
+].forEach(
+function(pos){
+
+
+
+const h =
+document.createElement(
+"div"
+);
+
+
+
+h.className =
+"cwTextBoxHandle-" + pos;
+
+
+
+h.dataset.textboxHandle =
+pos;
+
+
+
+h.style.pointerEvents =
+"auto";
+
+
+
+handles.appendChild(
+h
+);
+
+
+
+});
+
+
+
+
+
+box.parentElement.appendChild(
+handles
+);
+
+
+
+}
+
+
+
+
+
+
+
+
+
+
+document.addEventListener(
+"pointerdown",
+function(e){
+
+
+
+const box =
+e.target.closest(
+".cwInsertedTextBox"
+);
+
+
+
+if(!box){
+
+return;
+
+}
+
+
+
+
+selectedTextBox =
+box;
+
+
+
+window.CampusWordSelectedTextBox =
+box;
+
+
+
+
+showTextBoxHandles(
+box
+);
+
+
+
+
+},
+{
+passive:false
+}
+);
+
+
+
+
+
+
+
+
+
+document.addEventListener(
+"pointerdown",
+function(e){
+
+
+
+const inside =
+e.target.closest(
+".cwInsertedTextBox, .cwTextBoxHandles"
+);
+
+
+
+if(!inside){
+
+
+
+selectedTextBox = null;
+
+
+
+window.CampusWordSelectedTextBox =
+null;
+
+
+
+removeTextBoxHandles();
+
+
+
+}
+
+
+
+},
+false
+);
+
+
+
+
+
+
+})();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
