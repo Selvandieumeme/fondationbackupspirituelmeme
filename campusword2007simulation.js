@@ -23046,6 +23046,335 @@ false
 
 
 
+/* =========================================================
+   CAMPUS WORD — TEXT BOX MOVE ENGINE
+   STEP 6
+   MOVE TEXT BOX ANYWHERE ON PAGE
+   TOUCH + MOUSE SUPPORT
+   DRAG AND DROP POSITIONING
+   NO RESIZE INTERFERENCE
+   NO SHAPE INTERFERENCE
+   NO CLIPART INTERFERENCE
+   NO CARET INTERFERENCE
+   ISOLATED MODULE
+========================================================= */
+
+(function(){
+
+
+
+let moving = false;
+
+let box = null;
+
+
+
+let startX = 0;
+
+let startY = 0;
+
+
+
+let startLeft = 0;
+
+let startTop = 0;
+
+
+
+
+
+
+
+document.addEventListener(
+"pointerdown",
+function(e){
+
+
+
+const target =
+e.target.closest(
+".cwInsertedTextBox"
+);
+
+
+
+if(!target){
+
+return;
+
+}
+
+
+
+
+
+
+/*
+   Pa pran resize handles
+*/
+
+if(
+e.target.closest(
+".cwTextBoxHandles"
+)
+){
+
+return;
+
+}
+
+
+
+
+
+
+
+box = target;
+
+
+
+window.CampusWordSelectedTextBox =
+box;
+
+
+
+
+
+moving = true;
+
+
+
+
+
+startX =
+e.clientX;
+
+
+
+startY =
+e.clientY;
+
+
+
+
+
+startLeft =
+box.offsetLeft;
+
+
+
+startTop =
+box.offsetTop;
+
+
+
+
+
+
+box.setPointerCapture(
+e.pointerId
+);
+
+
+
+
+
+e.preventDefault();
+
+e.stopPropagation();
+
+
+
+
+
+},
+{
+passive:false
+}
+);
+
+
+
+
+
+
+
+
+
+document.addEventListener(
+"pointermove",
+function(e){
+
+
+
+if(
+!moving ||
+!box
+){
+
+return;
+
+}
+
+
+
+
+
+
+const dx =
+e.clientX - startX;
+
+
+
+const dy =
+e.clientY - startY;
+
+
+
+
+
+
+
+
+box.style.left =
+startLeft + dx + "px";
+
+
+
+
+
+box.style.top =
+startTop + dy + "px";
+
+
+
+
+
+
+
+
+const handles =
+document.querySelector(
+".cwTextBoxHandles"
+);
+
+
+
+
+
+if(handles){
+
+
+handles.style.left =
+box.offsetLeft + "px";
+
+
+handles.style.top =
+box.offsetTop + "px";
+
+
+}
+
+
+
+
+
+
+},
+{
+passive:false
+}
+);
+
+
+
+
+
+
+
+
+
+document.addEventListener(
+"pointerup",
+function(e){
+
+
+
+if(box){
+
+
+try{
+
+
+box.releasePointerCapture(
+e.pointerId
+);
+
+
+}catch(err){}
+
+
+
+}
+
+
+
+
+
+moving = false;
+
+
+box = null;
+
+
+
+
+},
+false
+);
+
+
+
+
+
+
+})();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
