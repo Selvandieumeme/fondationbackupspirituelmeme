@@ -25189,6 +25189,256 @@ false
 
 
 
+/* =========================================================
+   CAMPUS WORD — WORDART MOVE ENGINE
+   STEP MOVE
+   TOUCH + MOUSE SUPPORT
+   MOVE WORDART ONLY
+   ISOLATED SYSTEM
+   NO CLIPART INTERFERENCE
+   NO SHAPE INTERFERENCE
+   NO TEXTBOX INTERFERENCE
+   NO CARET INTERFERENCE
+========================================================= */
+
+(function(){
+
+
+
+let moving = false;
+
+let activeWordArt = null;
+
+
+let startX = 0;
+
+let startY = 0;
+
+
+let startLeft = 0;
+
+let startTop = 0;
+
+
+
+
+
+
+document.addEventListener(
+    "pointerdown",
+    function(e){
+
+
+
+        const wordArt =
+            e.target.closest(
+                ".cwInsertedWordArt"
+            );
+
+
+
+        if(!wordArt){
+
+            return;
+
+        }
+
+
+
+
+        activeWordArt =
+            wordArt;
+
+
+
+        window.CampusWordSelectedWordArtObject =
+            wordArt;
+
+
+
+
+        moving = true;
+
+
+
+        startX =
+            e.clientX;
+
+
+
+        startY =
+            e.clientY;
+
+
+
+        startLeft =
+            wordArt.offsetLeft;
+
+
+
+        startTop =
+            wordArt.offsetTop;
+
+
+
+
+        wordArt.setPointerCapture(
+            e.pointerId
+        );
+
+
+
+        e.preventDefault();
+
+
+
+    },
+    {
+        passive:false
+    }
+);
+
+
+
+
+
+
+
+
+
+document.addEventListener(
+    "pointermove",
+    function(e){
+
+
+
+        if(
+            !moving ||
+            !activeWordArt
+        ){
+
+            return;
+
+        }
+
+
+
+
+
+        const dx =
+            e.clientX -
+            startX;
+
+
+
+        const dy =
+            e.clientY -
+            startY;
+
+
+
+
+
+
+        activeWordArt.style.left =
+            (
+                startLeft +
+                dx
+            ) + "px";
+
+
+
+        activeWordArt.style.top =
+            (
+                startTop +
+                dy
+            ) + "px";
+
+
+
+
+    },
+    {
+        passive:false
+    }
+);
+
+
+
+
+
+
+
+
+
+document.addEventListener(
+    "pointerup",
+    function(){
+
+
+
+        moving = false;
+
+
+        activeWordArt = null;
+
+
+
+    },
+    false
+);
+
+
+
+
+
+})();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
