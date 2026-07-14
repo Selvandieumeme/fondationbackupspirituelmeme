@@ -24573,6 +24573,359 @@ false
 
 
 
+/* =========================================================
+   CAMPUS WORD — WORDART INSERT ENGINE
+   STEP 5
+   INSERT CREATED WORDART INTO PAGE
+   USE SELECTED STYLE + CUSTOM TEXT
+   NO GALLERY INTERFERENCE
+   NO CLIPART INTERFERENCE
+   NO SHAPE INTERFERENCE
+   NO TEXTBOX INTERFERENCE
+========================================================= */
+
+(function(){
+
+
+
+function createWordArtElement(
+    text,
+    style
+){
+
+
+
+const wordArt =
+document.createElement(
+"div"
+);
+
+
+
+wordArt.className =
+"cwInsertedWordArt";
+
+
+
+wordArt.dataset.wordart =
+style;
+
+
+
+wordArt.style.position =
+"absolute";
+
+
+
+wordArt.style.left =
+"100px";
+
+
+
+wordArt.style.top =
+"100px";
+
+
+
+wordArt.style.cursor =
+"move";
+
+
+
+wordArt.style.userSelect =
+"none";
+
+
+
+wordArt.style.fontSize =
+"38px";
+
+
+
+wordArt.style.fontWeight =
+"900";
+
+
+
+wordArt.style.padding =
+"10px";
+
+
+
+wordArt.style.whiteSpace =
+"nowrap";
+
+
+
+
+
+/* STYLE MATCHING */
+
+
+if(style==="Multi Color WordArt"){
+
+
+wordArt.style.background =
+"linear-gradient(90deg,#ef4444,#facc15,#22c55e,#2563eb,#9333ea)";
+
+
+wordArt.style.webkitBackgroundClip =
+"text";
+
+
+wordArt.style.color =
+"transparent";
+
+
+}
+
+
+
+else if(style==="Gold Luxury 3D"){
+
+
+wordArt.style.color =
+"#facc15";
+
+
+wordArt.style.textShadow =
+"3px 3px 0 #92400e";
+
+
+}
+
+
+
+else if(style==="Shadow Professional"){
+
+
+wordArt.style.color =
+"#111827";
+
+
+wordArt.style.textShadow =
+"4px 4px 5px #94a3b8";
+
+
+}
+
+
+
+else if(style==="Fire WordArt"){
+
+
+wordArt.style.color =
+"#ef4444";
+
+
+wordArt.style.textShadow =
+"2px 2px 4px #f97316";
+
+
+}
+
+
+
+else if(style==="Ocean Glass"){
+
+
+wordArt.style.color =
+"#0284c7";
+
+
+wordArt.style.textShadow =
+"2px 2px 5px #38bdf8";
+
+
+}
+
+
+
+else{
+
+
+wordArt.style.color =
+"#2563eb";
+
+
+}
+
+
+
+
+
+
+wordArt.innerHTML =
+text;
+
+
+
+return wordArt;
+
+
+
+}
+
+
+
+
+
+
+
+
+
+document.addEventListener(
+"click",
+function(e){
+
+
+
+const button =
+e.target.closest(
+".cwWordArtInsert"
+);
+
+
+
+if(!button){
+
+return;
+
+}
+
+
+
+
+e.preventDefault();
+
+e.stopPropagation();
+
+
+
+
+
+
+const text =
+window.CampusWordTextValue;
+
+
+
+const style =
+window.CampusWordPendingWordArt;
+
+
+
+if(
+!text ||
+!style
+){
+
+return;
+
+}
+
+
+
+
+
+
+
+const page =
+document.querySelector(
+".cwPageContent"
+);
+
+
+
+if(!page){
+
+return;
+
+}
+
+
+
+
+
+
+const wordArt =
+createWordArtElement(
+text,
+style
+);
+
+
+
+
+
+
+page.appendChild(
+wordArt
+);
+
+
+
+
+
+
+window.CampusWordSelectedWordArtObject =
+wordArt;
+
+
+
+
+
+/*
+RESET DATA
+*/
+
+
+window.CampusWordTextValue =
+null;
+
+
+
+window.CampusWordPendingWordArt =
+null;
+
+
+
+console.log(
+"WordArt inserted:",
+text,
+style
+);
+
+
+
+},
+false
+);
+
+
+
+})();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
