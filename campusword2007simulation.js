@@ -25191,7 +25191,7 @@ false
 
 /* =========================================================
    CAMPUS WORD — WORDART MOVE ENGINE
-   STEP MOVE
+   STEP 6 MOVE
    TOUCH + MOUSE SUPPORT
    MOVE WORDART ONLY
    ISOLATED SYSTEM
@@ -25408,7 +25408,7 @@ document.addEventListener(
 
 /* =========================================================
    CAMPUS WORD — WORDART 4 HANDLES DISPLAY ENGINE
-   STEP ONLY
+   STEP 7 ONLY
    CREATE 4 LARGE TOUCH HANDLES
    NO RESIZE
    NO MOVE
@@ -25568,12 +25568,14 @@ passive:true
 
 
 
+
 /* =========================================================
    CAMPUS WORD — WORDART 4 HANDLES RESIZE ACTION
-   STEP RESIZE ONLY
+   STEP 8 RESIZE ONLY
+   SCALE ONLY
+   NO TEXT CUT
    TOUCH + MOUSE SUPPORT
    WORDART ONLY
-   ISOLATED SYSTEM
 ========================================================= */
 
 (function(){
@@ -25591,9 +25593,7 @@ let startX = 0;
 let startY = 0;
 
 
-let startWidth = 0;
-
-let startHeight = 0;
+let startScale = 1;
 
 
 
@@ -25603,89 +25603,82 @@ document.addEventListener(
 function(e){
 
 
-    const handle =
-    e.target.closest(
-        ".cwWordHandle"
-    );
+
+const handle =
+e.target.closest(
+".cwWordHandle"
+);
 
 
 
-    if(!handle){
+if(!handle){
 
-        return;
+return;
 
-    }
-
-
-
-    activeWordArt =
-    window.CampusWordSelectedWordArtObject;
+}
 
 
 
-    if(!activeWordArt){
-
-        return;
-
-    }
+activeWordArt =
+window.CampusWordSelectedWordArtObject;
 
 
 
-    if(handle.classList.contains("right")){
+if(!activeWordArt){
 
-        direction = "right";
+return;
 
-    }
-
-
-    else if(handle.classList.contains("left")){
-
-        direction = "left";
-
-    }
-
-
-    else if(handle.classList.contains("top")){
-
-        direction = "top";
-
-    }
-
-
-    else if(handle.classList.contains("bottom")){
-
-        direction = "bottom";
-
-    }
+}
 
 
 
+if(handle.classList.contains("right")){
 
-    resizing = true;
+direction="right";
+
+}
+
+else if(handle.classList.contains("left")){
+
+direction="left";
+
+}
+
+else if(handle.classList.contains("top")){
+
+direction="top";
+
+}
+
+else if(handle.classList.contains("bottom")){
+
+direction="bottom";
+
+}
 
 
 
-    startX =
-    e.clientX;
+resizing = true;
 
 
 
-    startY =
-    e.clientY;
+startX =
+e.clientX;
+
+
+startY =
+e.clientY;
 
 
 
-    startWidth =
-    activeWordArt.offsetWidth;
+startScale =
+parseFloat(
+activeWordArt.dataset.wordScale || "1"
+);
 
 
 
-    startHeight =
-    activeWordArt.offsetHeight;
-
-
-
-    e.preventDefault();
+e.preventDefault();
 
 
 
@@ -25708,120 +25701,97 @@ document.addEventListener(
 function(e){
 
 
-    if(
-        !resizing ||
-        !activeWordArt
-    ){
 
-        return;
+if(
+!resizing ||
+!activeWordArt
+){
 
-    }
+return;
 
+}
 
 
-    let newWidth =
-    startWidth;
 
+const dx =
+e.clientX -
+startX;
 
-    let newHeight =
-    startHeight;
 
 
+const dy =
+e.clientY -
+startY;
 
-    const dx =
-    e.clientX - startX;
 
 
-    const dy =
-    e.clientY - startY;
+let change = 0;
 
 
 
+if(
+direction==="right" ||
+direction==="left"
+){
 
+change =
+dx / 250;
 
-    if(direction==="right"){
+}
 
-        newWidth =
-        startWidth + dx;
 
-    }
 
+if(
+direction==="top" ||
+direction==="bottom"
+){
 
+change =
+dy / 250;
 
-    if(direction==="left"){
+}
 
-        newWidth =
-        startWidth - dx;
 
-    }
 
 
 
-    if(direction==="bottom"){
+let scale =
+startScale +
+change;
 
-        newHeight =
-        startHeight + dy;
 
-    }
 
+if(scale < 0.3){
 
+scale = 0.3;
 
-    if(direction==="top"){
+}
 
-        newHeight =
-        startHeight - dy;
 
-    }
 
+if(scale > 3){
 
+scale = 3;
 
+}
 
-    if(newWidth < 80){
 
-        newWidth = 80;
 
-    }
 
+activeWordArt.style.transform =
+"scale(" + scale + ")";
 
-    if(newHeight < 40){
 
-        newHeight = 40;
 
-    }
+activeWordArt.style.transformOrigin =
+"center center";
 
 
 
+activeWordArt.dataset.wordScale =
+scale;
 
 
-    activeWordArt.style.width =
-    newWidth + "px";
-
-
-
-    activeWordArt.style.height =
-    newHeight + "px";
-
-
-
-
-
-    const handles =
-    document.querySelector(
-        ".cwWordArtHandles"
-    );
-
-
-
-    if(handles){
-
-        handles.style.width =
-        newWidth + "px";
-
-
-        handles.style.height =
-        newHeight + "px";
-
-    }
 
 
 
@@ -25838,18 +25808,18 @@ passive:false
 
 
 
+
+
 document.addEventListener(
 "pointerup",
 function(){
 
 
-    resizing = false;
+resizing=false;
 
+activeWordArt=null;
 
-    activeWordArt = null;
-
-
-    direction = null;
+direction=null;
 
 
 },
