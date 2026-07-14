@@ -24779,22 +24779,62 @@ wordArt.style.textShadow =
 
 
 
+
 else if(style==="Wave WordArt"){
 
 
 wordArt.style.color =
-"#0ea5e9";
+"#16a34a";
+
+
+
+wordArt.style.fontWeight =
+"900";
+
+
+
+wordArt.style.display =
+"inline-block";
+
 
 
 wordArt.style.transform =
-"skewX(-12deg)";
+"perspective(300px) rotateX(35deg)";
+
 
 
 wordArt.style.textShadow =
-"3px 3px 6px #7dd3fc";
+"3px 3px 5px #86efac";
+
+
+
+wordArt.style.letterSpacing =
+"3px";
+
+
+
+wordArt.style.background =
+"linear-gradient(90deg,#16a34a,#22c55e,#15803d)";
+
+
+
+wordArt.style.webkitBackgroundClip =
+"text";
+
+
+
+wordArt.style.webkitTextFillColor =
+"transparent";
+
+
+
+wordArt.style.borderRadius =
+"50%";
+
 
 
 }
+
 
 
 
@@ -25001,7 +25041,201 @@ false
 
 
 
+/* =========================================================
+   CAMPUS WORD — WAVE WORDART CURVE ENGINE
+   SPECIAL ONLY FOR WAVE WORDART
+   NO OTHER WORDART INTERFERENCE
+========================================================= */
 
+(function(){
+
+
+
+function applyWaveWordArt(
+    wordArt
+){
+
+
+
+if(
+    wordArt.dataset.wordart !== "Wave WordArt"
+){
+
+    return;
+
+}
+
+
+
+
+
+const text =
+wordArt.innerText;
+
+
+
+wordArt.innerHTML =
+"";
+
+
+
+wordArt.style.display =
+"flex";
+
+
+wordArt.style.alignItems =
+"center";
+
+
+wordArt.style.justifyContent =
+"center";
+
+
+wordArt.style.height =
+"120px";
+
+
+wordArt.style.width =
+"260px";
+
+
+wordArt.style.background =
+"transparent";
+
+
+wordArt.style.color =
+"#16a34a";
+
+
+
+wordArt.style.fontWeight =
+"900";
+
+
+
+wordArt.style.fontSize =
+"38px";
+
+
+
+
+
+const chars =
+text.split("");
+
+
+
+const middle =
+(chars.length - 1) / 2;
+
+
+
+
+
+
+chars.forEach(
+function(char,index){
+
+
+
+const letter =
+document.createElement(
+"span"
+);
+
+
+
+letter.innerHTML =
+char;
+
+
+
+letter.style.display =
+"inline-block";
+
+
+
+const distance =
+index - middle;
+
+
+
+const curve =
+Math.abs(distance) * 8;
+
+
+
+letter.style.transform =
+"translateY(" +
+curve +
+"px) rotate(" +
+(distance * 8) +
+"deg)";
+
+
+
+letter.style.textShadow =
+"3px 3px 5px #86efac";
+
+
+
+wordArt.appendChild(
+letter
+);
+
+
+
+}
+
+
+
+);
+
+
+
+}
+
+
+
+
+
+
+
+document.addEventListener(
+"click",
+function(){
+
+
+
+const obj =
+window.CampusWordSelectedWordArtObject;
+
+
+
+if(!obj){
+
+return;
+
+}
+
+
+
+
+applyWaveWordArt(
+obj
+);
+
+
+
+},
+false
+);
+
+
+
+
+
+})();
 
 
 
