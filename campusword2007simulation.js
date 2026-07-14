@@ -26020,7 +26020,7 @@ document.addEventListener(
 "pointerdown",
 function(e){
 
-...
+
 
 if(selectedObject){
 
