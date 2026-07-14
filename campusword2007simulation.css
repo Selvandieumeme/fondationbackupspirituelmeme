@@ -4307,3 +4307,38 @@ bottom:-6px;
     transform:translateY(-50%);
 
 }
+
+
+
+
+
+
+
+
+
+
+
+/* =========================================================
+   WORDART ROTATION RED HANDLE
+   STEP 10 DISPLAY ONLY
+========================================================= */
+
+.cwWordArtRotationHandle{
+
+    width:20px;
+
+    height:20px;
+
+    background:red;
+
+    border:3px solid white;
+
+    border-radius:50%;
+
+    z-index:10000;
+
+    cursor:grab;
+
+    pointer-events:auto;
+
+}
