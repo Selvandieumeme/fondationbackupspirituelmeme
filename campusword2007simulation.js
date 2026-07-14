@@ -25920,93 +25920,119 @@ false
 
 
 
+
 /* =========================================================
-   CAMPUS WORD — WORDART DELETE ENGINE
-   STEP 9
-   DELETE SELECTED WORDART
-   BACKSPACE + DELETE KEY
-   WORDART ONLY
+   CAMPUS WORD — FLOATING ROTATION BOX ENGINE
+   STEP 10
+   SHOW ROTATION BOX WHEN OBJECT IS SELECTED
+   DISPLAY ONLY
+   NO ROTATION ACTION
+   ALL OBJECT TYPES SUPPORT
    ISOLATED SYSTEM
 ========================================================= */
 
 (function(){
 
 
-
-document.addEventListener(
-"keydown",
-function(e){
+let rotationBox = null;
 
 
 
-if(
-e.key !== "Delete" &&
-e.key !== "Backspace"
-){
+function createRotationBox(){
 
-    return;
+
+    if(rotationBox){
+
+        return;
+
+    }
+
+
+
+    rotationBox =
+    document.createElement(
+        "div"
+    );
+
+
+
+    rotationBox.className =
+    "cwFloatingRotationBox";
+
+
+
+    rotationBox.innerHTML = `
+
+        <div class="cwRotationTitle">
+            Rotation
+        </div>
+
+        <div class="cwRotationButtons">
+
+            <button data-rotation="right">
+                ↻
+            </button>
+
+            <button data-rotation="left">
+                ↺
+            </button>
+
+            <button data-rotation="up">
+                ↑
+            </button>
+
+            <button data-rotation="down">
+                ↓
+            </button>
+
+            <button data-rotation="top-left">
+                ↖
+            </button>
+
+            <button data-rotation="top-right">
+                ↗
+            </button>
+
+            <button data-rotation="bottom-left">
+                ↙
+            </button>
+
+            <button data-rotation="bottom-right">
+                ↘
+            </button>
+
+        </div>
+
+    `;
+
+
+
+    document.body.appendChild(
+        rotationBox
+    );
+
 
 }
 
 
 
-const wordArt =
-window.CampusWordSelectedWordArtObject;
 
 
 
-if(!wordArt){
+function removeRotationBox(){
 
-    return;
+
+    if(rotationBox){
+
+        rotationBox.remove();
+
+        rotationBox=null;
+
+    }
+
 
 }
 
-
-
-
-
-e.preventDefault();
-
-
-
-
-
-wordArt.remove();
-
-
-
-
-
-
-const handles =
-document.querySelector(
-".cwWordArtHandles"
-);
-
-
-
-if(handles){
-
-    handles.remove();
-
-}
-
-
-
-
-
-window.CampusWordSelectedWordArtObject =
-null;
-
-
-
-},
-false
-);
-
-
-
-})();
 
 
 
@@ -26022,6 +26048,32 @@ function(e){
 
 
 
+const clickedRotationBox =
+e.target.closest(
+".cwFloatingRotationBox"
+);
+
+
+
+if(clickedRotationBox){
+
+    return;
+
+}
+
+
+
+
+
+const selectedObject =
+window.CampusWordSelectedWordArtObject ||
+window.CampusWordSelectedShape ||
+window.CampusWordSelectedClipart ||
+window.CampusWordSelectedImage ||
+window.CampusSelectedObject;
+
+
+
 if(selectedObject){
 
     createRotationBox();
@@ -26030,11 +26082,57 @@ if(selectedObject){
 
 }
 
+
+
+
+
 removeRotationBox();
+
+
 
 },
 false
 );
+
+
+
+
+
+
+
+
+
+
+
+
+/*
+   Lè yon lòt sistèm kreye handles
+   li ka rele fonksyon sa a
+*/
+
+window.CampusWordShowRotationBox =
+function(){
+
+    createRotationBox();
+
+};
+
+
+
+
+
+window.CampusWordHideRotationBox =
+function(){
+
+    removeRotationBox();
+
+};
+
+
+
+
+
+})();
 
 
 
