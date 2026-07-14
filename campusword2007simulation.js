@@ -25404,50 +25404,35 @@ document.addEventListener(
 
 
 
+
+
 /* =========================================================
-   CAMPUS WORD — WORDART 4 HANDLES RESIZE ENGINE
-   STEP RESIZE
-   TOUCH + MOUSE SUPPORT
+   CAMPUS WORD — WORDART 4 HANDLES DISPLAY ENGINE
+   STEP ONLY
+   CREATE 4 LARGE TOUCH HANDLES
+   NO RESIZE
+   NO MOVE
+   NO OTHER ACTION
    WORDART ONLY
-   ISOLATED SYSTEM
 ========================================================= */
 
 (function(){
 
 
-let activeWordArt = null;
-
-let resizing = false;
-
-let direction = null;
-
-
-let startX = 0;
-
-let startY = 0;
-
-
-let startWidth = 0;
-
-let startHeight = 0;
-
-
-
 function removeWordArtHandles(){
 
 
-const old =
-document.querySelector(
-".cwWordArtHandles"
-);
+    const old =
+    document.querySelector(
+        ".cwWordArtHandles"
+    );
 
 
-if(old){
+    if(old){
 
-old.remove();
+        old.remove();
 
-}
-
+    }
 
 }
 
@@ -25458,61 +25443,64 @@ old.remove();
 function showWordArtHandles(wordArt){
 
 
-
-removeWordArtHandles();
-
-
-
-const box =
-document.createElement(
-"div"
-);
+    removeWordArtHandles();
 
 
 
-box.className =
-"cwWordArtHandles";
+    const box =
+    document.createElement(
+        "div"
+    );
+
+
+    box.className =
+    "cwWordArtHandles";
 
 
 
-box.style.position =
-"absolute";
+    box.style.position =
+    "absolute";
 
 
-box.style.left =
-wordArt.offsetLeft + "px";
+    box.style.left =
+    wordArt.offsetLeft + "px";
 
 
-box.style.top =
-wordArt.offsetTop + "px";
+    box.style.top =
+    wordArt.offsetTop + "px";
 
 
-box.style.width =
-wordArt.offsetWidth + "px";
+    box.style.width =
+    wordArt.offsetWidth + "px";
 
 
-box.style.height =
-wordArt.offsetHeight + "px";
-
-
-
-box.innerHTML = `
-
-<div data-wordart-resize="top"></div>
-
-<div data-wordart-resize="bottom"></div>
-
-<div data-wordart-resize="left"></div>
-
-<div data-wordart-resize="right"></div>
-
-`;
+    box.style.height =
+    wordArt.offsetHeight + "px";
 
 
 
-wordArt.parentElement.appendChild(
-box
-);
+    box.innerHTML = `
+
+
+    <div class="cwWordHandle top"></div>
+
+
+    <div class="cwWordHandle bottom"></div>
+
+
+    <div class="cwWordHandle left"></div>
+
+
+    <div class="cwWordHandle right"></div>
+
+
+    `;
+
+
+
+    wordArt.parentElement.appendChild(
+        box
+    );
 
 
 }
@@ -25529,96 +25517,175 @@ document.addEventListener(
 function(e){
 
 
+    const wordArt =
+    e.target.closest(
+        ".cwInsertedWordArt"
+    );
 
-const wordArt =
-e.target.closest(
-".cwInsertedWordArt"
+
+
+    if(!wordArt){
+
+        return;
+
+    }
+
+
+
+    window.CampusWordSelectedWordArtObject =
+    wordArt;
+
+
+
+    showWordArtHandles(
+        wordArt
+    );
+
+
+
+},
+{
+passive:true
+}
 );
 
 
 
-if(wordArt){
 
 
-activeWordArt =
-wordArt;
 
-
-window.CampusWordSelectedWordArtObject =
-wordArt;
-
-
-showWordArtHandles(
-wordArt
-);
-
-
-return;
-
-
-}
+})();
 
 
 
 
 
 
-const handle =
-e.target.closest(
-"[data-wordart-resize]"
-);
 
 
 
-if(!handle){
-
-return;
-
-}
 
 
 
-activeWordArt =
-window.CampusWordSelectedWordArtObject;
+
+/* =========================================================
+   CAMPUS WORD — WORDART 4 HANDLES RESIZE ACTION
+   STEP RESIZE ONLY
+   TOUCH + MOUSE SUPPORT
+   WORDART ONLY
+   ISOLATED SYSTEM
+========================================================= */
+
+(function(){
+
+
+let resizing = false;
+
+let activeWordArt = null;
+
+let direction = null;
+
+
+let startX = 0;
+
+let startY = 0;
+
+
+let startWidth = 0;
+
+let startHeight = 0;
 
 
 
-if(!activeWordArt){
 
-return;
-
-}
-
+document.addEventListener(
+"pointerdown",
+function(e){
 
 
-resizing = true;
-
-
-
-direction =
-handle.dataset.wordartResize;
+    const handle =
+    e.target.closest(
+        ".cwWordHandle"
+    );
 
 
 
-startX =
-e.clientX;
+    if(!handle){
 
+        return;
 
-startY =
-e.clientY;
-
-
-
-startWidth =
-activeWordArt.offsetWidth;
-
-
-startHeight =
-activeWordArt.offsetHeight;
+    }
 
 
 
-e.preventDefault();
+    activeWordArt =
+    window.CampusWordSelectedWordArtObject;
+
+
+
+    if(!activeWordArt){
+
+        return;
+
+    }
+
+
+
+    if(handle.classList.contains("right")){
+
+        direction = "right";
+
+    }
+
+
+    else if(handle.classList.contains("left")){
+
+        direction = "left";
+
+    }
+
+
+    else if(handle.classList.contains("top")){
+
+        direction = "top";
+
+    }
+
+
+    else if(handle.classList.contains("bottom")){
+
+        direction = "bottom";
+
+    }
+
+
+
+
+    resizing = true;
+
+
+
+    startX =
+    e.clientX;
+
+
+
+    startY =
+    e.clientY;
+
+
+
+    startWidth =
+    activeWordArt.offsetWidth;
+
+
+
+    startHeight =
+    activeWordArt.offsetHeight;
+
+
+
+    e.preventDefault();
 
 
 
@@ -25627,7 +25694,6 @@ e.preventDefault();
 passive:false
 }
 );
-
 
 
 
@@ -25642,127 +25708,120 @@ document.addEventListener(
 function(e){
 
 
+    if(
+        !resizing ||
+        !activeWordArt
+    ){
 
-if(
-!resizing ||
-!activeWordArt
-){
+        return;
 
-return;
-
-}
-
-
-
-let width =
-startWidth;
+    }
 
 
 
-let height =
-startHeight;
+    let newWidth =
+    startWidth;
+
+
+    let newHeight =
+    startHeight;
 
 
 
-if(
-direction==="right"
-){
+    const dx =
+    e.clientX - startX;
 
 
-width =
-startWidth +
-(
-e.clientX -
-startX
-);
-
-
-}
-
-
-
-if(
-direction==="left"
-){
-
-
-width =
-startWidth -
-(
-e.clientX -
-startX
-);
-
-
-}
-
-
-
-if(
-direction==="bottom"
-){
-
-
-height =
-startHeight +
-(
-e.clientY -
-startY
-);
-
-
-}
-
-
-
-if(
-direction==="top"
-){
-
-
-height =
-startHeight -
-(
-e.clientY -
-startY
-);
-
-
-}
-
-
-
-
-if(width < 80){
-
-width = 80;
-
-}
-
-
-
-if(height < 40){
-
-height = 40;
-
-}
+    const dy =
+    e.clientY - startY;
 
 
 
 
 
-activeWordArt.style.width =
-width + "px";
+    if(direction==="right"){
+
+        newWidth =
+        startWidth + dx;
+
+    }
 
 
-activeWordArt.style.height =
-height + "px";
+
+    if(direction==="left"){
+
+        newWidth =
+        startWidth - dx;
+
+    }
 
 
 
-showWordArtHandles(
-activeWordArt
-);
+    if(direction==="bottom"){
+
+        newHeight =
+        startHeight + dy;
+
+    }
+
+
+
+    if(direction==="top"){
+
+        newHeight =
+        startHeight - dy;
+
+    }
+
+
+
+
+    if(newWidth < 80){
+
+        newWidth = 80;
+
+    }
+
+
+    if(newHeight < 40){
+
+        newHeight = 40;
+
+    }
+
+
+
+
+
+    activeWordArt.style.width =
+    newWidth + "px";
+
+
+
+    activeWordArt.style.height =
+    newHeight + "px";
+
+
+
+
+
+    const handles =
+    document.querySelector(
+        ".cwWordArtHandles"
+    );
+
+
+
+    if(handles){
+
+        handles.style.width =
+        newWidth + "px";
+
+
+        handles.style.height =
+        newHeight + "px";
+
+    }
 
 
 
@@ -25779,16 +25838,18 @@ passive:false
 
 
 
-
 document.addEventListener(
 "pointerup",
 function(){
 
 
-resizing = false;
+    resizing = false;
 
 
-direction = null;
+    activeWordArt = null;
+
+
+    direction = null;
 
 
 },
@@ -25797,9 +25858,26 @@ false
 
 
 
-
-
 })();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
