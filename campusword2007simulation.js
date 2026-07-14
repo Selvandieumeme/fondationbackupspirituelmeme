@@ -23567,6 +23567,251 @@ document.addEventListener(
 
 
 
+/* =========================================================
+   CAMPUS WORD — WORDART INSERT MODE ENGINE
+   STEP 2
+   ACTIVATE WORDART INSERT MODE
+   SAVE STATE ONLY
+   NO CREATION
+   NO TEXTBOX INTERFERENCE
+   NO SHAPE / CLIPART / CARET INTERFERENCE
+   ISOLATED MODULE
+========================================================= */
+
+(function(){
+
+
+let wordArtMode = false;
+
+
+
+window.CampusWordWordArtData = {
+
+    active:false,
+
+    text:"",
+
+    position:null
+
+
+};
+
+
+
+
+
+
+
+document.addEventListener(
+    "click",
+    function(e){
+
+
+
+        const button =
+            e.target.closest(
+                '[data-action="insert-wordart"]'
+            );
+
+
+
+        if(!button){
+
+            return;
+
+        }
+
+
+
+
+
+        e.preventDefault();
+
+        e.stopPropagation();
+
+
+
+
+
+
+
+        wordArtMode =
+            button.classList.contains(
+                "cwWordArtActive"
+            );
+
+
+
+
+
+        window.CampusWordWordArtData.active =
+            wordArtMode;
+
+
+
+
+
+
+        if(!wordArtMode){
+
+
+            window.CampusWordWordArtData.position =
+                null;
+
+
+        }
+
+
+
+
+
+
+
+        console.log(
+            "WordArt Mode:",
+            wordArtMode
+        );
+
+
+
+
+    },
+    false
+);
+
+
+
+
+
+
+
+
+
+document.addEventListener(
+    "pointerdown",
+    function(e){
+
+
+
+        if(
+            !window.CampusWordWordArtData.active
+        ){
+
+            return;
+
+        }
+
+
+
+
+
+
+
+        const page =
+            e.target.closest(
+                ".cwPageContent"
+            );
+
+
+
+
+        if(!page){
+
+            return;
+
+        }
+
+
+
+
+
+
+        const rect =
+            page.getBoundingClientRect();
+
+
+
+
+
+
+        window.CampusWordWordArtData.position = {
+
+
+            x:
+            e.clientX - rect.left,
+
+
+            y:
+            e.clientY - rect.top,
+
+
+            page:page
+
+
+
+        };
+
+
+
+
+
+
+        console.log(
+            "WordArt position:",
+            window.CampusWordWordArtData.position
+        );
+
+
+
+
+
+    },
+    {
+        passive:false
+    }
+);
+
+
+
+})();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
