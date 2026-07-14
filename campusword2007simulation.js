@@ -23352,6 +23352,182 @@ false
 
 
 
+/* =========================================================
+   CAMPUS WORD — TEXT BOX DELETE ENGINE
+   STEP 7
+   DELETE SELECTED TEXT BOX ONLY
+   REMOVE HANDLES
+   KEYBOARD DELETE SUPPORT
+   NO SHAPE INTERFERENCE
+   NO CLIPART INTERFERENCE
+   NO CARET INTERFERENCE
+   ISOLATED MODULE
+========================================================= */
+
+(function(){
+
+
+
+
+
+document.addEventListener(
+"keydown",
+function(e){
+
+
+
+
+
+if(
+e.key !== "Delete" &&
+e.key !== "Backspace"
+){
+
+return;
+
+}
+
+
+
+
+
+
+const box =
+window.CampusWordSelectedTextBox;
+
+
+
+
+
+
+if(!box){
+
+return;
+
+}
+
+
+
+
+
+
+/*
+   Evite efase pandan moun ap tape
+   andedan Text Box la
+*/
+
+if(
+document.activeElement === box
+){
+
+return;
+
+}
+
+
+
+
+
+
+
+e.preventDefault();
+
+e.stopPropagation();
+
+
+
+
+
+
+
+
+box.remove();
+
+
+
+
+
+
+
+
+const handles =
+document.querySelector(
+".cwTextBoxHandles"
+);
+
+
+
+
+
+if(handles){
+
+handles.remove();
+
+}
+
+
+
+
+
+
+
+
+window.CampusWordSelectedTextBox =
+null;
+
+
+
+
+
+
+},
+false
+);
+
+
+
+
+
+
+})();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
