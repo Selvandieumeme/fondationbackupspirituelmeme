@@ -26229,6 +26229,256 @@ function(){
 
 
 
+/* =========================================================
+   CAMPUS WORD — ROTATION BOX PROTECTION + DRAG
+   STEP 10 FIX
+   KEEP BOX ACTIVE WHEN CLICKED
+   ALLOW TOUCH + MOUSE DRAG
+========================================================= */
+
+
+(function(){
+
+
+let boxDragging = false;
+
+let offsetX = 0;
+
+let offsetY = 0;
+
+
+
+document.addEventListener(
+"pointerdown",
+function(e){
+
+
+
+const box =
+e.target.closest(
+".cwFloatingRotationBox"
+);
+
+
+
+if(box){
+
+
+    boxDragging = true;
+
+
+    const rect =
+    box.getBoundingClientRect();
+
+
+
+    offsetX =
+    e.clientX -
+    rect.left;
+
+
+
+    offsetY =
+    e.clientY -
+    rect.top;
+
+
+
+    e.preventDefault();
+
+    e.stopPropagation();
+
+
+    return;
+
+
+}
+
+
+
+},
+{
+passive:false
+}
+);
+
+
+
+
+
+
+
+
+
+document.addEventListener(
+"pointermove",
+function(e){
+
+
+
+if(
+!boxDragging
+){
+
+    return;
+
+}
+
+
+
+
+const box =
+document.querySelector(
+".cwFloatingRotationBox"
+);
+
+
+
+if(!box){
+
+    return;
+
+}
+
+
+
+
+box.style.left =
+(
+e.clientX -
+offsetX
+)
++
+"px";
+
+
+
+box.style.top =
+(
+e.clientY -
+offsetY
+)
++
+"px";
+
+
+
+box.style.right =
+"auto";
+
+
+
+},
+{
+passive:false
+}
+);
+
+
+
+
+
+
+
+
+
+document.addEventListener(
+"pointerup",
+function(){
+
+
+boxDragging=false;
+
+
+},
+false
+);
+
+
+
+
+
+
+
+/*
+  PROTECTION:
+  Pa retire bwat la lè moun
+  klike sou li
+*/
+
+document.addEventListener(
+"pointerdown",
+function(e){
+
+
+
+const insideBox =
+e.target.closest(
+".cwFloatingRotationBox"
+);
+
+
+
+if(insideBox){
+
+    return;
+
+}
+
+
+
+
+const insideObject =
+e.target.closest(
+".cwInsertedWordArt, 
+.cwInsertedShape,
+.cwInsertedClipArt,
+.cwInsertedImage,
+.cwInsertedTextBox"
+);
+
+
+
+if(insideObject){
+
+    return;
+
+}
+
+
+
+
+
+if(window.CampusWordHideRotationBox){
+
+    window.CampusWordHideRotationBox();
+
+}
+
+
+
+},
+false
+);
+
+
+
+})();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
