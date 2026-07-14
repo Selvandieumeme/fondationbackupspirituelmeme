@@ -4185,3 +4185,48 @@ bottom:-6px;
 
 
 }
+
+
+
+
+
+
+
+
+
+/* =========================================================
+   CAMPUS WORD — WAVE WORDART CURVE STYLE
+   ONLY WAVE WORDART
+========================================================= */
+
+.cwInsertedWordArt[data-wordart="Wave WordArt"]{
+
+    display:flex;
+
+    align-items:flex-start;
+
+    justify-content:center;
+
+    width:280px;
+
+    height:130px;
+
+    padding-top:25px;
+
+    border-radius:50% 50% 0 0;
+
+    transform:
+        perspective(400px)
+        rotateX(8deg);
+
+    color:#16a34a;
+
+    font-weight:900;
+
+    letter-spacing:2px;
+
+    text-shadow:
+        2px 3px 4px #86efac;
+
+}
+
