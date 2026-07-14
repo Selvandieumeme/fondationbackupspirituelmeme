@@ -26218,15 +26218,13 @@ false
 
 
 
-
-
 /* =========================================================
    CAMPUS WORD — WORDART ROTATION ENGINE
-   STEP 11
-   ROTATE USING RED HANDLE ONLY
-   TOUCH + MOUSE SUPPORT
+   STEP 11 FIX
+   ROTATION HANDLE ONLY
+   KEEP EXISTING TRANSFORM
+   TOUCH + MOUSE
    WORDART ONLY
-   ISOLATED SYSTEM
 ========================================================= */
 
 (function(){
@@ -26242,10 +26240,10 @@ let centerX = 0;
 let centerY = 0;
 
 
-
 let startAngle = 0;
 
-let currentRotation = 0;
+let startRotation = 0;
+
 
 
 
@@ -26272,6 +26270,8 @@ if(!handle){
 
 
 
+
+
 activeWordArt =
 window.CampusWordSelectedWordArtObject;
 
@@ -26282,6 +26282,8 @@ if(!activeWordArt){
     return;
 
 }
+
+
 
 
 
@@ -26314,10 +26316,12 @@ e.clientX - centerX
 
 
 
-currentRotation =
+startRotation =
 parseFloat(
-activeWordArt.dataset.rotation || "0"
+activeWordArt.dataset.rotation || 0
 );
+
+
 
 
 
@@ -26326,6 +26330,8 @@ rotating = true;
 
 
 e.preventDefault();
+
+e.stopPropagation();
 
 
 
@@ -26360,7 +26366,9 @@ if(
 
 
 
-const angle =
+
+
+const currentAngle =
 Math.atan2(
 e.clientY - centerY,
 e.clientX - centerX
@@ -26369,30 +26377,37 @@ e.clientX - centerX
 
 
 
-const degrees =
+
+const delta =
 (
-(angle - startAngle)
-*
-180
-/
-Math.PI
+currentAngle -
+startAngle
 )
-+
-currentRotation;
+*
+180 /
+Math.PI;
 
 
 
 
 
-activeWordArt.style.transform =
-"rotate(" + degrees + "deg)";
+const rotation =
+startRotation +
+delta;
+
+
+
+
+
+activeWordArt.style.rotate =
+rotation + "deg";
 
 
 
 
 
 activeWordArt.dataset.rotation =
-degrees;
+rotation;
 
 
 
@@ -26410,12 +26425,14 @@ passive:false
 
 
 
+
 document.addEventListener(
 "pointerup",
 function(){
 
 
 rotating = false;
+
 
 activeWordArt = null;
 
@@ -26427,9 +26444,6 @@ false
 
 
 })();
-
-
-
 
 
 
