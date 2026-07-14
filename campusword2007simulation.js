@@ -23507,6 +23507,82 @@ false
 
 
 
+/* =========================================================
+   CAMPUS WORD — WORDART BUTTON ACTIVE STATE
+   STEP 1
+   ACTIVATE / DEACTIVATE WORDART BUTTON
+   GREEN ACTIVE COLOR
+   ISOLATED MODULE
+   NO TEXTBOX INTERFERENCE
+   NO SHAPE / CLIPART / CARET INTERFERENCE
+========================================================= */
+
+(function(){
+
+
+document.addEventListener(
+    "click",
+    function(e){
+
+
+        const button =
+            e.target.closest(
+                '[data-action="insert-wordart"]'
+            );
+
+
+        if(!button){
+
+            return;
+
+        }
+
+
+
+        e.preventDefault();
+
+        e.stopPropagation();
+
+
+
+        button.classList.toggle(
+            "cwWordArtActive"
+        );
+
+
+
+    },
+    false
+);
+
+
+
+})();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
