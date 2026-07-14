@@ -24271,6 +24271,348 @@ false
 
 
 
+/* =========================================================
+   CAMPUS WORD — WORDART TEXT EDITOR ENGINE
+   STEP 4
+   OPEN WORDART TEXT EDITOR BOX
+   EDIT CUSTOM WORDART TEXT
+   KEEP SELECTED WORDART STYLE
+   NO INSERTION YET
+   ISOLATED SYSTEM
+   NO CLIPART INTERFERENCE
+   NO SHAPE INTERFERENCE
+   NO TEXTBOX INTERFERENCE
+========================================================= */
+
+(function(){
+
+
+
+let wordArtEditorOpen = false;
+
+
+
+window.CampusWordPendingWordArt = null;
+
+
+
+
+function openWordArtEditor(){
+
+
+
+if(wordArtEditorOpen){
+
+return;
+
+}
+
+
+
+const selected =
+window.CampusWordSelectedWordArt;
+
+
+
+if(!selected){
+
+return;
+
+}
+
+
+
+
+wordArtEditorOpen = true;
+
+
+
+window.CampusWordPendingWordArt =
+selected;
+
+
+
+
+
+const box =
+document.createElement(
+"div"
+);
+
+
+
+box.className =
+"cwWordArtEditor";
+
+
+
+
+
+box.innerHTML = `
+
+
+<div class="cwWordArtEditorBox">
+
+
+<h3>
+WordArt Text Editor
+</h3>
+
+
+
+<div class="cwWordArtSelectedName">
+
+${selected}
+
+</div>
+
+
+
+
+<div class="cwWordArtEditorPreview">
+
+${selected}
+
+</div>
+
+
+
+
+<input
+class="cwWordArtTextInput"
+type="text"
+value="Ranise"
+/>
+
+
+
+
+
+<div class="cwWordArtEditorButtons">
+
+
+<button class="cwWordArtCancel">
+
+Cancel
+
+</button>
+
+
+
+<button class="cwWordArtInsert">
+
+Insert
+
+</button>
+
+
+
+</div>
+
+
+
+</div>
+
+
+`;
+
+
+
+
+
+document.body.appendChild(box);
+
+
+
+
+
+
+
+box.querySelector(
+".cwWordArtCancel"
+)
+.onclick=function(){
+
+
+
+box.remove();
+
+
+wordArtEditorOpen=false;
+
+
+window.CampusWordPendingWordArt=null;
+
+
+
+};
+
+
+
+
+
+
+box.querySelector(
+".cwWordArtInsert"
+)
+.onclick=function(){
+
+
+
+window.CampusWordTextValue =
+box.querySelector(
+".cwWordArtTextInput"
+).value;
+
+
+
+/*
+STEP 5 WILL USE THIS DATA
+NO INSERTION HERE
+*/
+
+
+
+box.remove();
+
+
+wordArtEditorOpen=false;
+
+
+
+console.log(
+"WordArt Ready:",
+window.CampusWordTextValue,
+window.CampusWordPendingWordArt
+);
+
+
+
+};
+
+
+
+
+
+}
+
+
+
+
+
+
+
+
+document.addEventListener(
+"click",
+function(e){
+
+
+
+
+
+const item =
+e.target.closest(
+".cwWordArtItem"
+);
+
+
+
+if(!item){
+
+return;
+
+}
+
+
+
+
+
+
+setTimeout(function(){
+
+
+if(
+window.CampusWordSelectedWordArt
+){
+
+
+openWordArtEditor();
+
+
+}
+
+
+},50);
+
+
+
+
+
+},
+false
+);
+
+
+
+
+
+
+})();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
