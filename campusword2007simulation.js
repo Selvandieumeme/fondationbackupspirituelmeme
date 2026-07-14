@@ -26594,6 +26594,126 @@ function(){
 
 
 
+/* =========================================================
+   CAMPUS WORD — PRINT PREVIEW PAGE ZOOM ENGINE
+   STEP 2
+   ACTIVE PAGE ONLY
+   CLICK = 100%
+   CLICK AGAIN = 50%
+   NO OTHER PAGE INTERFERENCE
+========================================================= */
+
+(function(){
+
+
+document.addEventListener(
+"click",
+function(e){
+
+
+
+const page =
+e.target.closest(
+".cwPrintPreviewMode .cwPage"
+);
+
+
+
+if(!page){
+
+    return;
+
+}
+
+
+
+
+
+const active =
+page.classList.contains(
+"cwPreviewZoom100"
+);
+
+
+
+
+
+document
+.querySelectorAll(
+".cwPrintPreviewMode .cwPage"
+)
+.forEach(function(oldPage){
+
+
+oldPage.classList.remove(
+"cwPreviewZoom100"
+);
+
+
+});
+
+
+
+
+
+
+
+if(!active){
+
+
+page.classList.add(
+"cwPreviewZoom100"
+);
+
+
+}
+
+
+
+},
+false
+);
+
+
+
+})();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
