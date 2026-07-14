@@ -23785,18 +23785,13 @@ document.addEventListener(
 
 
 
-
-
-
-
-
-
 /* =========================================================
-   CAMPUS WORD — WORDART GALLERY ENGINE
+   CAMPUS WORD — ADVANCED WORDART GALLERY ENGINE
    STEP 3
-   CREATE WORDART GALLERY BOX
+   SVG WORDART STYLE GALLERY
    SHOW WORDART MODELS ONLY
-   SELECT WORDART MODEL
+   SELECT WORDART STYLE
+   READY FOR SHADOW / SHAPE EFFECTS
    ISOLATED SYSTEM
    NO CLIPART INTERFERENCE
    NO SHAPE INTERFERENCE
@@ -23812,143 +23807,259 @@ let wordArtGalleryOpen = false;
 
 const wordArts = [
 
+
 {
-name:"Classic Blue",
-text:"Campus Word",
-style:"color:#2563eb;font-size:28px;font-weight:900;"
+name:"Classic Blue Horizontal",
+svg:`
+<svg viewBox="0 0 260 80">
+<text x="130"
+y="50"
+text-anchor="middle"
+font-size="34"
+font-weight="900"
+fill="#2563eb">
+Ranise
+</text>
+</svg>`
 },
 
 
+
 {
-name:"Gold Premium",
-text:"Premium",
-style:"color:#f59e0b;font-size:30px;font-weight:900;"
+name:"Multi Color WordArt",
+svg:`
+<svg viewBox="0 0 260 80">
+<defs>
+<linearGradient id="multi">
+<stop stop-color="#ef4444"/>
+<stop offset=".25" stop-color="#facc15"/>
+<stop offset=".5" stop-color="#22c55e"/>
+<stop offset=".75" stop-color="#2563eb"/>
+<stop offset="1" stop-color="#9333ea"/>
+</linearGradient>
+</defs>
+
+<text x="130"
+y="50"
+text-anchor="middle"
+font-size="34"
+font-weight="900"
+fill="url(#multi)">
+Ranise
+</text>
+
+</svg>`
 },
 
 
+
 {
-name:"Fire Style",
-text:"Creative",
-style:"color:#ef4444;font-size:30px;font-weight:900;"
+name:"Gold Luxury 3D",
+svg:`
+<svg viewBox="0 0 260 80">
+
+<text x="130"
+y="55"
+text-anchor="middle"
+font-size="38"
+font-weight="900"
+fill="#92400e">
+Ranise
+</text>
+
+
+<text x="130"
+y="48"
+text-anchor="middle"
+font-size="38"
+font-weight="900"
+fill="#facc15">
+Ranise
+</text>
+
+</svg>`
 },
 
 
+
+
 {
-name:"Modern Black",
-text:"Modern",
-style:"color:#111827;font-size:32px;font-weight:900;"
+name:"Shadow Professional",
+svg:`
+<svg viewBox="0 0 260 80">
+
+<text x="134"
+y="54"
+text-anchor="middle"
+font-size="36"
+font-weight="900"
+fill="#94a3b8">
+Ranise
+</text>
+
+<text x="130"
+y="48"
+text-anchor="middle"
+font-size="36"
+font-weight="900"
+fill="#111827">
+Ranise
+</text>
+
+</svg>`
 },
 
 
+
+
 {
-name:"Ocean Style",
-text:"Ocean",
-style:"color:#0284c7;font-size:30px;font-weight:900;"
+name:"Wave WordArt",
+svg:`
+<svg viewBox="0 0 260 100">
+
+<path id="waveRanise"
+d="M20 60 Q70 10 130 60 T240 60"
+fill="none"/>
+
+<text font-size="34"
+font-weight="900"
+fill="#16a34a">
+
+<textPath href="#waveRanise">
+Ranise
+</textPath>
+
+</text>
+
+</svg>`
 },
 
 
+
+
 {
-name:"Green Future",
-text:"Future",
-style:"color:#16a34a;font-size:30px;font-weight:900;"
+name:"Vertical WordArt",
+svg:`
+<svg viewBox="0 0 100 220">
+
+<text x="50"
+y="35"
+text-anchor="middle"
+font-size="30"
+font-weight="900">
+
+<tspan x="50">R</tspan>
+<tspan x="50" dy="32">a</tspan>
+<tspan x="50" dy="32">n</tspan>
+<tspan x="50" dy="32">i</tspan>
+<tspan x="50" dy="32">s</tspan>
+<tspan x="50" dy="32">e</tspan>
+
+</text>
+
+</svg>`
 },
 
 
+
+
 {
-name:"Purple Luxury",
-text:"Luxury",
-style:"color:#9333ea;font-size:30px;font-weight:900;"
+name:"Fire WordArt",
+svg:`
+<svg viewBox="0 0 260 80">
+
+<defs>
+<linearGradient id="fire">
+<stop stop-color="#ef4444"/>
+<stop offset="1" stop-color="#f97316"/>
+</linearGradient>
+</defs>
+
+<text x="130"
+y="50"
+text-anchor="middle"
+font-size="36"
+font-weight="900"
+fill="url(#fire)">
+Ranise
+</text>
+
+</svg>`
 },
 
 
+
+
 {
-name:"Pink Style",
-text:"Creative",
-style:"color:#ec4899;font-size:30px;font-weight:900;"
+name:"Ocean Glass",
+svg:`
+<svg viewBox="0 0 260 80">
+
+<defs>
+<linearGradient id="glass">
+<stop stop-color="#38bdf8"/>
+<stop offset="1" stop-color="#0f766e"/>
+</linearGradient>
+</defs>
+
+<text x="130"
+y="50"
+text-anchor="middle"
+font-size="34"
+font-weight="900"
+fill="url(#glass)">
+Ranise
+</text>
+
+</svg>`
 },
 
 
+
+
 {
-name:"Silver Style",
-text:"Professional",
-style:"color:#64748b;font-size:28px;font-weight:900;"
+name:"Royal Purple",
+svg:`
+<svg viewBox="0 0 260 80">
+
+<text x="130"
+y="50"
+text-anchor="middle"
+font-size="36"
+font-weight="900"
+fill="#9333ea">
+Ranise
+</text>
+
+</svg>`
 },
 
 
-{
-name:"Shadow Style",
-text:"WordArt",
-style:"color:#1e293b;font-size:30px;font-weight:900;text-shadow:3px 3px #cbd5e1;"
-},
 
 
 {
-name:"Rainbow",
-text:"Rainbow",
-style:"color:#f97316;font-size:30px;font-weight:900;"
-},
+name:"Diamond Silver",
+svg:`
+<svg viewBox="0 0 260 80">
 
+<defs>
+<linearGradient id="silver">
+<stop stop-color="#ffffff"/>
+<stop offset=".5" stop-color="#64748b"/>
+<stop offset="1" stop-color="#e2e8f0"/>
+</linearGradient>
+</defs>
 
-{
-name:"Elegant",
-text:"Elegant",
-style:"color:#7c3aed;font-size:32px;font-weight:900;"
-},
+<text x="130"
+y="50"
+text-anchor="middle"
+font-size="34"
+font-weight="900"
+fill="url(#silver)">
+Ranise
+</text>
 
-
-{
-name:"Strong",
-text:"Strong",
-style:"color:#dc2626;font-size:34px;font-weight:900;"
-},
-
-
-{
-name:"Business",
-text:"Business",
-style:"color:#0f172a;font-size:30px;font-weight:900;"
-},
-
-
-{
-name:"Education",
-text:"Education",
-style:"color:#2563eb;font-size:28px;font-weight:900;"
-},
-
-
-{
-name:"Creative Wave",
-text:"Creative",
-style:"color:#0891b2;font-size:32px;font-weight:900;"
-},
-
-
-{
-name:"Diamond",
-text:"Diamond",
-style:"color:#06b6d4;font-size:30px;font-weight:900;"
-},
-
-
-{
-name:"Royal",
-text:"Royal",
-style:"color:#b45309;font-size:34px;font-weight:900;"
-},
-
-
-{
-name:"Future Tech",
-text:"Future Tech",
-style:"color:#4f46e5;font-size:28px;font-weight:900;"
-},
-
-
-{
-name:"Final Premium",
-text:"Campus Word",
-style:"color:#16a34a;font-size:34px;font-weight:900;"
+</svg>`
 }
 
 ];
@@ -23962,7 +24073,6 @@ window.CampusWordSelectedWordArt = null;
 function openWordArtGallery(){
 
 
-
 if(wordArtGalleryOpen){
 
 return;
@@ -23970,33 +24080,24 @@ return;
 }
 
 
-
-wordArtGalleryOpen = true;
-
-
-
-const box =
-document.createElement(
-"div"
-);
+wordArtGalleryOpen=true;
 
 
 
-box.className =
-"cwWordArtGallery";
+const box=document.createElement("div");
+
+
+box.className="cwWordArtGallery";
 
 
 
-box.innerHTML = `
-
+box.innerHTML=`
 
 <div class="cwWordArtBox">
-
 
 <h3>
 WordArt Gallery
 </h3>
-
 
 
 <div class="cwWordArtGrid">
@@ -24004,14 +24105,14 @@ WordArt Gallery
 
 ${wordArts.map(item=>`
 
-
 <div class="cwWordArtItem"
 data-wordart="${item.name}">
 
 
-<div class="cwWordArtPreview"
-style="${item.style}">
-${item.text}
+<div class="cwWordArtPreview">
+
+${item.svg}
+
 </div>
 
 
@@ -24022,19 +24123,15 @@ ${item.name}
 
 </div>
 
-
 `).join("")}
-
 
 
 </div>
 
 
-
 <button class="cwWordArtClose">
 Close
 </button>
-
 
 
 </div>
@@ -24049,34 +24146,29 @@ document.body.appendChild(box);
 
 
 
-
 box.querySelectorAll(
 ".cwWordArtItem"
 )
-.forEach(
-function(item){
+.forEach(function(item){
 
 
-item.addEventListener(
-"click",
-function(e){
+item.onclick=function(e){
 
 
 e.preventDefault();
 
 
+
 box.querySelectorAll(
 ".cwWordArtItem"
 )
-.forEach(
-function(old){
+.forEach(function(old){
 
 old.classList.remove(
 "cwWordArtSelected"
 );
 
-}
-);
+});
 
 
 
@@ -24091,13 +24183,10 @@ item.dataset.wordart;
 
 
 
-}
-);
+};
 
 
-}
-);
-
+});
 
 
 
@@ -24122,10 +24211,8 @@ window.CampusWordSelectedWordArt=null;
 };
 
 
-
-
-
 }
+
 
 
 
@@ -24133,7 +24220,6 @@ window.CampusWordSelectedWordArt=null;
 document.addEventListener(
 "click",
 function(e){
-
 
 
 const button =
@@ -24148,7 +24234,6 @@ if(!button){
 return;
 
 }
-
 
 
 
@@ -24169,6 +24254,11 @@ false
 
 
 })();
+
+
+
+
+
 
 
 
