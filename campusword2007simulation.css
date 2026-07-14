@@ -4391,3 +4391,56 @@ bottom:-6px;
     font-size:16px;
 
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* =========================================================
+   CAMPUS WORD — PRINT PREVIEW STYLE
+========================================================= */
+
+
+.cwPrintPreviewMode
+.cwRibbon,
+.cwPrintPreviewMode
+#cwTitleBar{
+
+    display:none !important;
+
+}
+
+
+
+.cwPrintPreviewMode
+#cwDocumentContainer{
+
+    margin-top:20px;
+
+    background:#e5e7eb;
+
+    min-height:100vh;
+
+}
+
+
+
+.cwPreviewDocument
+.cwPage{
+
+    margin:30px auto;
+
+    box-shadow:
+    0 0 15px rgba(0,0,0,.25);
+
+}
