@@ -24776,11 +24776,21 @@ wordArt.style.textShadow =
 }
 
 
+
+
+
+
 else if(style==="Wave WordArt"){
 
 
 wordArt.dataset.wordart =
 "Wave WordArt";
+
+
+wordArt.classList.add(
+    "cwWordArtWave"
+);
+
 
 
 wordArt.style.color =
@@ -24804,7 +24814,7 @@ wordArt.style.justifyContent =
 
 
 wordArt.style.alignItems =
-"center";
+"flex-start";
 
 
 wordArt.style.width =
@@ -24812,11 +24822,17 @@ wordArt.style.width =
 
 
 wordArt.style.height =
-"150px";
+"170px";
+
+
+wordArt.style.position =
+"relative";
 
 
 wordArt.innerHTML =
 "";
+
+
 
 
 
@@ -24825,8 +24841,15 @@ text.split("");
 
 
 
+const radius =
+140;
+
+
+
 const center =
 (letters.length - 1) / 2;
+
+
 
 
 
@@ -24836,29 +24859,73 @@ function(letter,index){
 
 
 const span =
-document.createElement("span");
+document.createElement(
+"span"
+);
+
 
 
 span.textContent =
 letter;
 
 
-const distance =
-index - center;
+
+span.style.position =
+"absolute";
+
+
+
+span.style.left =
+"50%";
+
+
+
+span.style.top =
+"20px";
+
+
+
+const angle =
+(
+(index - center)
+/
+center
+)
+*
+45;
+
+
+
+const rad =
+angle *
+Math.PI /
+180;
+
+
+
+const x =
+Math.sin(rad) *
+radius;
 
 
 
 const y =
-Math.pow(distance,2) * 5;
+radius -
+(
+Math.cos(rad) *
+radius
+);
 
-
-
-span.style.display =
-"inline-block";
 
 
 span.style.transform =
-"translateY(" + y + "px)";
+"translate(" +
+x +
+"px," +
+y +
+"px) rotate(" +
+angle +
+"deg)";
 
 
 
@@ -24872,6 +24939,11 @@ span.style.fontWeight =
 
 span.style.textShadow =
 "2px 3px 4px #86efac";
+
+
+
+span.style.display =
+"block";
 
 
 
