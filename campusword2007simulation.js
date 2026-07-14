@@ -26141,16 +26141,13 @@ function(){
 
 
 
-
-
-
-
 /* =========================================================
    CAMPUS WORD — ROTATION BUTTON ENGINE
    STEP 11
    ROTATE ACTIVE OBJECT USING ROTATION BOX
    ALL OBJECT TYPES SUPPORT
    TOUCH + MOUSE
+   ROTATE IN PLACE ONLY
    ISOLATED SYSTEM
 ========================================================= */
 
@@ -26213,6 +26210,25 @@ if(!object){
     return;
 
 }
+
+
+
+
+
+if(!object.dataset.rotation){
+
+    object.dataset.rotation = "0";
+
+}
+
+
+
+
+
+rotationValue =
+parseFloat(
+object.dataset.rotation
+);
 
 
 
@@ -26302,6 +26318,18 @@ rotationValue;
 
 
 
+
+
+/*
+   ROTATION SOU PLAS LI
+   PA CHANJE POSITION OBJE A
+*/
+
+object.style.transformOrigin =
+"center center";
+
+
+
 object.style.transform =
 "rotate("
 +
@@ -26328,6 +26356,9 @@ passive:false
 
 
 })();
+
+
+
 
 
 
