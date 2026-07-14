@@ -24696,6 +24696,8 @@ wordArt.style.textShadow =
 
 
 
+
+
 else if(style==="Shadow Professional"){
 
 
@@ -24741,6 +24743,84 @@ wordArt.style.textShadow =
 
 
 
+
+
+else if(style==="Royal Purple"){
+
+
+wordArt.style.color =
+"#9333ea";
+
+
+wordArt.style.textShadow =
+"3px 3px 5px #c4b5fd";
+
+
+}
+
+
+
+
+
+else if(style==="Diamond Silver"){
+
+
+wordArt.style.color =
+"#94a3b8";
+
+
+wordArt.style.textShadow =
+"2px 2px 5px #e2e8f0";
+
+
+}
+
+
+
+
+
+else if(style==="Wave WordArt"){
+
+
+wordArt.style.color =
+"#0ea5e9";
+
+
+wordArt.style.transform =
+"skewX(-12deg)";
+
+
+wordArt.style.textShadow =
+"3px 3px 6px #7dd3fc";
+
+
+}
+
+
+
+
+
+else if(style==="Vertical WordArt"){
+
+
+wordArt.style.color =
+"#2563eb";
+
+
+wordArt.style.writingMode =
+"vertical-rl";
+
+
+wordArt.style.textOrientation =
+"mixed";
+
+
+}
+
+
+
+
+
 else{
 
 
@@ -24749,6 +24829,10 @@ wordArt.style.color =
 
 
 }
+
+
+
+
 
 
 
@@ -24905,6 +24989,16 @@ false
 
 
 })();
+
+
+
+
+
+
+
+
+
+
 
 
 
