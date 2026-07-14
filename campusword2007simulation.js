@@ -26145,6 +26145,203 @@ function(){
 
 
 
+/* =========================================================
+   CAMPUS WORD — ROTATION BUTTON ENGINE
+   STEP 11
+   ROTATE ACTIVE OBJECT USING ROTATION BOX
+   ALL OBJECT TYPES SUPPORT
+   TOUCH + MOUSE
+   ISOLATED SYSTEM
+========================================================= */
+
+(function(){
+
+
+let rotationValue = 0;
+
+
+
+function getActiveObject(){
+
+
+return (
+window.CampusWordSelectedWordArtObject ||
+window.CampusWordSelectedShape ||
+window.CampusWordSelectedClipart ||
+window.CampusWordSelectedImage ||
+window.CampusSelectedObject ||
+null
+);
+
+
+}
+
+
+
+
+
+
+document.addEventListener(
+"pointerdown",
+function(e){
+
+
+
+const button =
+e.target.closest(
+".cwRotationButtons button"
+);
+
+
+
+if(!button){
+
+    return;
+
+}
+
+
+
+
+const object =
+getActiveObject();
+
+
+
+if(!object){
+
+    return;
+
+}
+
+
+
+
+
+let action =
+button.dataset.rotation;
+
+
+
+
+
+switch(action){
+
+
+case "right":
+
+    rotationValue += 15;
+
+break;
+
+
+
+case "left":
+
+    rotationValue -= 15;
+
+break;
+
+
+
+case "up":
+
+    rotationValue -= 90;
+
+break;
+
+
+
+case "down":
+
+    rotationValue += 90;
+
+break;
+
+
+
+case "top-left":
+
+    rotationValue -= 45;
+
+break;
+
+
+
+case "top-right":
+
+    rotationValue += 45;
+
+break;
+
+
+
+case "bottom-left":
+
+    rotationValue -= 135;
+
+break;
+
+
+
+case "bottom-right":
+
+    rotationValue += 135;
+
+break;
+
+
+}
+
+
+
+
+
+object.dataset.rotation =
+rotationValue;
+
+
+
+object.style.transform =
+"rotate("
++
+rotationValue
++
+"deg)";
+
+
+
+
+
+e.preventDefault();
+
+e.stopPropagation();
+
+
+
+},
+{
+passive:false
+}
+);
+
+
+
+})();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
