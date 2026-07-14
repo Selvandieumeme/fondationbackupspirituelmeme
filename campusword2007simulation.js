@@ -24779,6 +24779,10 @@ wordArt.style.textShadow =
 else if(style==="Wave WordArt"){
 
 
+wordArt.dataset.wordart =
+"Wave WordArt";
+
+
 wordArt.style.color =
 "#16a34a";
 
@@ -24791,21 +24795,98 @@ wordArt.style.fontSize =
 "38px";
 
 
-wordArt.style.letterSpacing =
-"2px";
+wordArt.style.display =
+"flex";
 
 
-wordArt.style.textShadow =
+wordArt.style.justifyContent =
+"center";
+
+
+wordArt.style.alignItems =
+"center";
+
+
+wordArt.style.width =
+"320px";
+
+
+wordArt.style.height =
+"150px";
+
+
+wordArt.innerHTML =
+"";
+
+
+
+const letters =
+text.split("");
+
+
+
+const center =
+(letters.length - 1) / 2;
+
+
+
+letters.forEach(
+function(letter,index){
+
+
+
+const span =
+document.createElement("span");
+
+
+span.textContent =
+letter;
+
+
+const distance =
+index - center;
+
+
+
+const y =
+Math.pow(distance,2) * 5;
+
+
+
+span.style.display =
+"inline-block";
+
+
+span.style.transform =
+"translateY(" + y + "px)";
+
+
+
+span.style.color =
+"#16a34a";
+
+
+span.style.fontWeight =
+"900";
+
+
+span.style.textShadow =
 "2px 3px 4px #86efac";
 
 
-wordArt.dataset.wordart =
-"Wave WordArt";
+
+wordArt.appendChild(
+span
+);
+
 
 
 }
 
+);
 
+
+}
 
 
 
