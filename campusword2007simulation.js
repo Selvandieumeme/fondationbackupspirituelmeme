@@ -26018,6 +26018,454 @@ false
 
 
 
+/* =========================================================
+   CAMPUS WORD — WORDART ROTATION HANDLE DISPLAY ENGINE
+   STEP 10
+   CREATE RED ROTATION POINT ONLY
+   NO ROTATION ACTION
+   WORDART ONLY
+   ISOLATED SYSTEM
+========================================================= */
+
+(function(){
+
+
+
+function removeRotationHandle(){
+
+
+    const old =
+    document.querySelector(
+        ".cwWordArtRotationHandle"
+    );
+
+
+    if(old){
+
+        old.remove();
+
+    }
+
+
+}
+
+
+
+
+
+
+function showRotationHandle(wordArt){
+
+
+
+    removeRotationHandle();
+
+
+
+    const point =
+    document.createElement(
+        "div"
+    );
+
+
+
+    point.className =
+    "cwWordArtRotationHandle";
+
+
+
+    point.style.position =
+    "absolute";
+
+
+
+    point.style.left =
+    (
+        wordArt.offsetLeft +
+        (wordArt.offsetWidth / 2) -
+        10
+    ) + "px";
+
+
+
+    point.style.top =
+    (
+        wordArt.offsetTop -
+        45
+    ) + "px";
+
+
+
+    wordArt.parentElement.appendChild(
+        point
+    );
+
+
+
+}
+
+
+
+
+
+
+
+
+
+document.addEventListener(
+"pointerdown",
+function(e){
+
+
+
+    const wordArt =
+    e.target.closest(
+        ".cwInsertedWordArt"
+    );
+
+
+
+    if(!wordArt){
+
+        return;
+
+    }
+
+
+
+    window.CampusWordSelectedWordArtObject =
+    wordArt;
+
+
+
+    showRotationHandle(
+        wordArt
+    );
+
+
+
+},
+false
+);
+
+
+
+
+
+
+
+
+
+
+document.addEventListener(
+"pointerdown",
+function(e){
+
+
+
+    const insideWordArt =
+    e.target.closest(
+        ".cwInsertedWordArt"
+    );
+
+
+
+    const insideRotation =
+    e.target.closest(
+        ".cwWordArtRotationHandle"
+    );
+
+
+
+    const insideHandles =
+    e.target.closest(
+        ".cwWordArtHandles"
+    );
+
+
+
+
+    if(
+        insideWordArt ||
+        insideRotation ||
+        insideHandles
+    ){
+
+        return;
+
+    }
+
+
+
+
+    removeRotationHandle();
+
+
+
+},
+false
+);
+
+
+
+
+})();
+
+
+
+
+
+
+
+
+
+
+/* =========================================================
+   CAMPUS WORD — WORDART ROTATION ENGINE
+   STEP 11
+   ROTATE USING RED HANDLE ONLY
+   TOUCH + MOUSE SUPPORT
+   WORDART ONLY
+   ISOLATED SYSTEM
+========================================================= */
+
+(function(){
+
+
+let rotating = false;
+
+let activeWordArt = null;
+
+
+let centerX = 0;
+
+let centerY = 0;
+
+
+
+let startAngle = 0;
+
+let currentRotation = 0;
+
+
+
+
+
+document.addEventListener(
+"pointerdown",
+function(e){
+
+
+
+const handle =
+e.target.closest(
+".cwWordArtRotationHandle"
+);
+
+
+
+if(!handle){
+
+    return;
+
+}
+
+
+
+activeWordArt =
+window.CampusWordSelectedWordArtObject;
+
+
+
+if(!activeWordArt){
+
+    return;
+
+}
+
+
+
+const rect =
+activeWordArt.getBoundingClientRect();
+
+
+
+centerX =
+rect.left +
+(rect.width / 2);
+
+
+
+centerY =
+rect.top +
+(rect.height / 2);
+
+
+
+
+
+startAngle =
+Math.atan2(
+e.clientY - centerY,
+e.clientX - centerX
+);
+
+
+
+
+
+currentRotation =
+parseFloat(
+activeWordArt.dataset.rotation || "0"
+);
+
+
+
+rotating = true;
+
+
+
+e.preventDefault();
+
+
+
+},
+{
+passive:false
+}
+);
+
+
+
+
+
+
+
+
+
+document.addEventListener(
+"pointermove",
+function(e){
+
+
+
+if(
+!rotating ||
+!activeWordArt
+){
+
+    return;
+
+}
+
+
+
+const angle =
+Math.atan2(
+e.clientY - centerY,
+e.clientX - centerX
+);
+
+
+
+
+const degrees =
+(
+(angle - startAngle)
+*
+180
+/
+Math.PI
+)
++
+currentRotation;
+
+
+
+
+
+activeWordArt.style.transform =
+"rotate(" + degrees + "deg)";
+
+
+
+
+
+activeWordArt.dataset.rotation =
+degrees;
+
+
+
+},
+{
+passive:false
+}
+);
+
+
+
+
+
+
+
+
+
+document.addEventListener(
+"pointerup",
+function(){
+
+
+rotating = false;
+
+activeWordArt = null;
+
+
+},
+false
+);
+
+
+
+})();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
