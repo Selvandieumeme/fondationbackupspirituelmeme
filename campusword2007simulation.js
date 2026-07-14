@@ -24776,10 +24776,6 @@ wordArt.style.textShadow =
 }
 
 
-
-
-
-
 else if(style==="Wave WordArt"){
 
 
@@ -24787,53 +24783,34 @@ wordArt.style.color =
 "#16a34a";
 
 
-
 wordArt.style.fontWeight =
 "900";
 
 
-
-wordArt.style.display =
-"inline-block";
-
-
-
-wordArt.style.transform =
-"perspective(300px) rotateX(35deg)";
-
-
-
-wordArt.style.textShadow =
-"3px 3px 5px #86efac";
-
+wordArt.style.fontSize =
+"38px";
 
 
 wordArt.style.letterSpacing =
-"3px";
+"2px";
 
 
-
-wordArt.style.background =
-"linear-gradient(90deg,#16a34a,#22c55e,#15803d)";
-
+wordArt.style.textShadow =
+"2px 3px 4px #86efac";
 
 
-wordArt.style.webkitBackgroundClip =
-"text";
-
-
-
-wordArt.style.webkitTextFillColor =
-"transparent";
-
-
-
-wordArt.style.borderRadius =
-"50%";
-
+wordArt.dataset.wordart =
+"Wave WordArt";
 
 
 }
+
+
+
+
+
+
+
 
 
 
