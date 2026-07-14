@@ -26404,6 +26404,213 @@ passive:false
 
 
 
+/* =========================================================
+   CAMPUS WORD — PRINT PREVIEW ENGINE
+   OFFICE BUTTON PRINT PREVIEW
+   ISOLATED SYSTEM
+   NO CORE ENGINE INTERFERENCE
+========================================================= */
+
+(function(){
+
+
+let previewActive = false;
+
+
+
+function enterPrintPreview(){
+
+
+    if(previewActive){
+
+        return;
+
+    }
+
+
+
+    const app =
+    document.getElementById(
+        "cwWindow"
+    );
+
+
+
+    const documentArea =
+    document.getElementById(
+        "cwDocumentContainer"
+    );
+
+
+
+    if(!app || !documentArea){
+
+        return;
+
+    }
+
+
+
+
+
+    previewActive = true;
+
+
+
+    app.classList.add(
+        "cwPrintPreviewMode"
+    );
+
+
+
+    documentArea.classList.add(
+        "cwPreviewDocument"
+    );
+
+
+
+}
+
+
+
+
+
+
+
+
+function exitPrintPreview(){
+
+
+
+    const app =
+    document.getElementById(
+        "cwWindow"
+    );
+
+
+
+    const documentArea =
+    document.getElementById(
+        "cwDocumentContainer"
+    );
+
+
+
+
+    if(app){
+
+        app.classList.remove(
+            "cwPrintPreviewMode"
+        );
+
+    }
+
+
+
+
+    if(documentArea){
+
+        documentArea.classList.remove(
+            "cwPreviewDocument"
+        );
+
+    }
+
+
+
+
+    previewActive = false;
+
+
+
+}
+
+
+
+
+
+
+
+
+document.addEventListener(
+"click",
+function(e){
+
+
+
+const button =
+e.target.closest(
+'[data-action="print-preview"]'
+);
+
+
+
+if(!button){
+
+    return;
+
+}
+
+
+
+e.preventDefault();
+
+e.stopPropagation();
+
+
+
+enterPrintPreview();
+
+
+
+},
+false
+);
+
+
+
+
+
+
+window.CampusWordClosePrintPreview =
+function(){
+
+    exitPrintPreview();
+
+};
+
+
+
+
+
+})();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
