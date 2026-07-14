@@ -25840,6 +25840,231 @@ false
 
 
 
+/* =========================================================
+   CAMPUS WORD — WORDART HANDLE AUTO HIDE ENGINE
+   REMOVE HANDLES WHEN CLICK OUTSIDE
+   WORDART ONLY
+   ISOLATED SYSTEM
+========================================================= */
+
+(function(){
+
+
+document.addEventListener(
+"pointerdown",
+function(e){
+
+
+
+const insideWordArt =
+e.target.closest(
+".cwInsertedWordArt"
+);
+
+
+
+const insideHandles =
+e.target.closest(
+".cwWordArtHandles"
+);
+
+
+
+if(
+insideWordArt ||
+insideHandles
+){
+
+    return;
+
+}
+
+
+
+
+const handles =
+document.querySelector(
+".cwWordArtHandles"
+);
+
+
+
+if(handles){
+
+    handles.remove();
+
+}
+
+
+
+window.CampusWordSelectedWordArtObject =
+null;
+
+
+
+},
+false
+);
+
+
+
+})();
+
+
+
+
+
+
+
+
+
+
+
+/* =========================================================
+   CAMPUS WORD — WORDART DELETE ENGINE
+   STEP 9
+   DELETE SELECTED WORDART
+   BACKSPACE + DELETE KEY
+   WORDART ONLY
+   ISOLATED SYSTEM
+========================================================= */
+
+(function(){
+
+
+
+document.addEventListener(
+"keydown",
+function(e){
+
+
+
+if(
+e.key !== "Delete" &&
+e.key !== "Backspace"
+){
+
+    return;
+
+}
+
+
+
+const wordArt =
+window.CampusWordSelectedWordArtObject;
+
+
+
+if(!wordArt){
+
+    return;
+
+}
+
+
+
+
+
+e.preventDefault();
+
+
+
+
+
+wordArt.remove();
+
+
+
+
+
+
+const handles =
+document.querySelector(
+".cwWordArtHandles"
+);
+
+
+
+if(handles){
+
+    handles.remove();
+
+}
+
+
+
+
+
+window.CampusWordSelectedWordArtObject =
+null;
+
+
+
+},
+false
+);
+
+
+
+})();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
