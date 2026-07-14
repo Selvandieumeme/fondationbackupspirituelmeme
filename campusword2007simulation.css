@@ -4444,3 +4444,37 @@ bottom:-6px;
     0 0 15px rgba(0,0,0,.25);
 
 }
+
+
+
+
+
+
+
+
+
+
+
+/* =========================================================
+   CAMPUS WORD — PRINT PREVIEW PAGE ZOOM
+========================================================= */
+
+
+.cwPrintPreviewMode .cwPage{
+
+    transform:scale(.5);
+
+    transform-origin:top center;
+
+    transition:
+    transform .25s ease;
+
+}
+
+
+
+.cwPrintPreviewMode .cwPage.cwPreviewZoom100{
+
+    transform:scale(1);
+
+}
