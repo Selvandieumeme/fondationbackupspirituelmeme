@@ -24793,44 +24793,29 @@ wordArt.classList.add(
 
 
 
-wordArt.style.color =
-"#16a34a";
-
-
-wordArt.style.fontWeight =
-"900";
-
-
-wordArt.style.fontSize =
-"38px";
-
-
-wordArt.style.display =
-"flex";
-
-
-wordArt.style.justifyContent =
-"center";
-
-
-wordArt.style.alignItems =
-"flex-start";
-
-
-wordArt.style.width =
-"320px";
-
-
-wordArt.style.height =
-"170px";
-
-
-wordArt.style.position =
-"relative";
-
-
 wordArt.innerHTML =
 "";
+
+
+
+wordArt.setAttribute(
+    "viewBox",
+    "0 0 320 170"
+);
+
+
+
+wordArt.setAttribute(
+    "width",
+    "320"
+);
+
+
+
+wordArt.setAttribute(
+    "height",
+    "170"
+);
 
 
 
@@ -24841,13 +24826,18 @@ text.split("");
 
 
 
-const radius =
-140;
-
-
-
 const center =
 (letters.length - 1) / 2;
+
+
+
+const radius =
+120;
+
+
+
+const svgNS =
+"http://www.w3.org/2000/svg";
 
 
 
@@ -24858,30 +24848,16 @@ function(letter,index){
 
 
 
-const span =
-document.createElement(
-"span"
+const textNode =
+document.createElementNS(
+svgNS,
+"text"
 );
 
 
 
-span.textContent =
+textNode.textContent =
 letter;
-
-
-
-span.style.position =
-"absolute";
-
-
-
-span.style.left =
-"50%";
-
-
-
-span.style.top =
-"20px";
 
 
 
@@ -24903,13 +24879,16 @@ Math.PI /
 
 
 
+
 const x =
+160 +
 Math.sin(rad) *
 radius;
 
 
 
 const y =
+40 +
 radius -
 (
 Math.cos(rad) *
@@ -24918,37 +24897,74 @@ radius
 
 
 
-span.style.transform =
-"translate(" +
-x +
-"px," +
-y +
-"px) rotate(" +
+
+
+textNode.setAttribute(
+"x",
+x
+);
+
+
+
+textNode.setAttribute(
+"y",
+y
+);
+
+
+
+textNode.setAttribute(
+"text-anchor",
+"middle"
+);
+
+
+
+textNode.setAttribute(
+"fill",
+"#16a34a"
+);
+
+
+
+textNode.setAttribute(
+"font-size",
+"38"
+);
+
+
+
+textNode.setAttribute(
+"font-weight",
+"900"
+);
+
+
+
+textNode.setAttribute(
+"transform",
+"rotate(" +
 angle +
-"deg)";
+" " +
+x +
+" " +
+y +
+")"
+);
 
 
 
-span.style.color =
-"#16a34a";
 
 
-span.style.fontWeight =
-"900";
+textNode.style.filter =
+"drop-shadow(2px 3px 3px #86efac)";
 
 
-span.style.textShadow =
-"2px 3px 4px #86efac";
-
-
-
-span.style.display =
-"block";
 
 
 
 wordArt.appendChild(
-span
+textNode
 );
 
 
@@ -24958,7 +24974,9 @@ span
 );
 
 
+
 }
+
 
 
 
