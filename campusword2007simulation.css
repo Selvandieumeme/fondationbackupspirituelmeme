@@ -4412,11 +4412,17 @@ bottom:-6px;
 
 
 .cwPrintPreviewMode
-.cwRibbon,
+.cwRibbon{
+
+    display:none !important;
+
+}
+
+
 .cwPrintPreviewMode
 #cwTitleBar{
 
-    display:none !important;
+    display:flex !important;
 
 }
 
