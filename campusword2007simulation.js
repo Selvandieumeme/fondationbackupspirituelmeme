@@ -22658,6 +22658,416 @@ false
 
 
 
+/* =========================================================
+   CAMPUS WORD — TEXT BOX RESIZE ENGINE
+   STEP 5
+   FOUR SIDE RESIZE ONLY
+   TOP / BOTTOM / LEFT / RIGHT
+   TOUCH + MOUSE SUPPORT
+   SMOOTH DRAG RESIZE
+   NO SHAPE INTERFERENCE
+   NO CLIPART INTERFERENCE
+   NO CARET INTERFERENCE
+   ISOLATED MODULE
+========================================================= */
+
+(function(){
+
+
+
+let resizing = false;
+
+let direction = null;
+
+let box = null;
+
+
+
+let startX = 0;
+
+let startY = 0;
+
+
+
+let startWidth = 0;
+
+let startHeight = 0;
+
+
+
+let startLeft = 0;
+
+let startTop = 0;
+
+
+
+
+
+
+document.addEventListener(
+"pointerdown",
+function(e){
+
+
+
+const handle =
+e.target.closest(
+"[data-textbox-handle]"
+);
+
+
+
+if(!handle){
+
+return;
+
+}
+
+
+
+
+
+box =
+window.CampusWordSelectedTextBox;
+
+
+
+if(!box){
+
+return;
+
+}
+
+
+
+
+
+resizing = true;
+
+
+
+direction =
+handle.dataset.textboxHandle;
+
+
+
+
+
+startX =
+e.clientX;
+
+
+startY =
+e.clientY;
+
+
+
+startWidth =
+box.offsetWidth;
+
+
+startHeight =
+box.offsetHeight;
+
+
+
+startLeft =
+box.offsetLeft;
+
+
+startTop =
+box.offsetTop;
+
+
+
+
+
+e.preventDefault();
+
+e.stopPropagation();
+
+
+
+
+},
+{
+passive:false
+}
+);
+
+
+
+
+
+
+
+
+
+document.addEventListener(
+"pointermove",
+function(e){
+
+
+
+if(
+!resizing ||
+!box
+){
+
+return;
+
+}
+
+
+
+
+
+const dx =
+e.clientX - startX;
+
+
+
+const dy =
+e.clientY - startY;
+
+
+
+
+
+
+if(
+direction === "right"
+){
+
+
+let width =
+startWidth + dx;
+
+
+if(width < 80){
+
+width = 80;
+
+}
+
+
+box.style.width =
+width + "px";
+
+
+}
+
+
+
+
+
+
+
+
+
+if(
+direction === "left"
+){
+
+
+let width =
+startWidth - dx;
+
+
+if(width < 80){
+
+width = 80;
+
+}
+
+
+box.style.width =
+width + "px";
+
+
+box.style.left =
+startLeft + dx + "px";
+
+
+}
+
+
+
+
+
+
+
+
+
+if(
+direction === "bottom"
+){
+
+
+let height =
+startHeight + dy;
+
+
+if(height < 40){
+
+height = 40;
+
+}
+
+
+box.style.height =
+height + "px";
+
+
+}
+
+
+
+
+
+
+
+
+
+if(
+direction === "top"
+){
+
+
+let height =
+startHeight - dy;
+
+
+if(height < 40){
+
+height = 40;
+
+}
+
+
+box.style.height =
+height + "px";
+
+
+box.style.top =
+startTop + dy + "px";
+
+
+}
+
+
+
+
+
+
+
+
+const handles =
+document.querySelector(
+".cwTextBoxHandles"
+);
+
+
+
+if(handles){
+
+
+handles.style.left =
+box.offsetLeft + "px";
+
+
+handles.style.top =
+box.offsetTop + "px";
+
+
+handles.style.width =
+box.offsetWidth + "px";
+
+
+handles.style.height =
+box.offsetHeight + "px";
+
+
+}
+
+
+
+},
+{
+passive:false
+}
+);
+
+
+
+
+
+
+
+
+
+document.addEventListener(
+"pointerup",
+function(){
+
+
+
+resizing = false;
+
+direction = null;
+
+box = null;
+
+
+
+},
+false
+);
+
+
+
+
+
+
+})();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
