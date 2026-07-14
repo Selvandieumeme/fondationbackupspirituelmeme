@@ -3522,3 +3522,83 @@ bottom:-6px;
 
 
 
+
+/* =========================================================
+   TEXT BOX 4 HANDLES STYLE
+   TOUCH SIZE ENHANCEMENT ONLY
+========================================================= */
+
+.cwTextBoxHandle-top,
+.cwTextBoxHandle-bottom,
+.cwTextBoxHandle-left,
+.cwTextBoxHandle-right{
+
+    position:absolute;
+
+    width:26px;
+
+    height:26px;
+
+    background:#2563eb;
+
+    border:2px solid white;
+
+    border-radius:50%;
+
+}
+
+
+
+
+
+.cwTextBoxHandle-top{
+
+    top:-13px;
+
+    left:50%;
+
+    transform:translateX(-50%);
+
+}
+
+
+
+
+.cwTextBoxHandle-bottom{
+
+    bottom:-13px;
+
+    left:50%;
+
+    transform:translateX(-50%);
+
+}
+
+
+
+
+.cwTextBoxHandle-left{
+
+    left:-13px;
+
+    top:50%;
+
+    transform:translateY(-50%);
+
+}
+
+
+
+
+.cwTextBoxHandle-right{
+
+    right:-13px;
+
+    top:50%;
+
+    transform:translateY(-50%);
+
+}
+
+
+
