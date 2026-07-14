@@ -4317,28 +4317,77 @@ bottom:-6px;
 
 
 
-
 /* =========================================================
-   WORDART ROTATION RED HANDLE
+   CAMPUS WORD — FLOATING ROTATION BOX STYLE
    STEP 10 DISPLAY ONLY
 ========================================================= */
 
-.cwWordArtRotationHandle{
+.cwFloatingRotationBox{
 
-    width:20px;
+    position:fixed;
 
-    height:20px;
+    top:120px;
 
-    background:red;
+    right:20px;
 
-    border:3px solid white;
+    width:150px;
 
-    border-radius:50%;
+    padding:10px;
 
-    z-index:10000;
+    background:white;
 
-    cursor:grab;
+    border:1px solid #cbd5e1;
 
-    pointer-events:auto;
+    border-radius:10px;
+
+    box-shadow:0 4px 15px rgba(0,0,0,.15);
+
+    z-index:99999;
+
+    font-family:Arial,sans-serif;
+
+}
+
+
+
+.cwRotationTitle{
+
+    text-align:center;
+
+    font-weight:bold;
+
+    margin-bottom:8px;
+
+}
+
+
+
+.cwRotationButtons{
+
+    display:grid;
+
+    grid-template-columns:repeat(4,1fr);
+
+    gap:6px;
+
+}
+
+
+
+.cwRotationButtons button{
+
+    width:28px;
+
+    height:28px;
+
+    border-radius:6px;
+
+    border:1px solid #cbd5e1;
+
+    background:#f8fafc;
+
+    cursor:pointer;
+
+    font-size:16px;
 
 }
