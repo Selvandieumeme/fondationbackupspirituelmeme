@@ -26018,92 +26018,119 @@ false
 
 
 
+
+
 /* =========================================================
-   CAMPUS WORD — WORDART ROTATION HANDLE DISPLAY ENGINE
+   CAMPUS WORD — FLOATING ROTATION BOX ENGINE
    STEP 10
-   CREATE RED ROTATION POINT ONLY
+   SHOW ROTATION BOX WHEN OBJECT IS SELECTED
+   DISPLAY ONLY
    NO ROTATION ACTION
-   WORDART ONLY
+   ALL OBJECT TYPES SUPPORT
    ISOLATED SYSTEM
 ========================================================= */
 
 (function(){
 
 
-
-function removeRotationHandle(){
-
-
-    const old =
-    document.querySelector(
-        ".cwWordArtRotationHandle"
-    );
+let rotationBox = null;
 
 
-    if(old){
 
-        old.remove();
+function createRotationBox(){
+
+
+    if(rotationBox){
+
+        return;
 
     }
 
 
-}
 
-
-
-
-
-
-function showRotationHandle(wordArt){
-
-
-
-    removeRotationHandle();
-
-
-
-    const point =
+    rotationBox =
     document.createElement(
         "div"
     );
 
 
 
-    point.className =
-    "cwWordArtRotationHandle";
+    rotationBox.className =
+    "cwFloatingRotationBox";
 
 
 
-    point.style.position =
-    "absolute";
+    rotationBox.innerHTML = `
+
+        <div class="cwRotationTitle">
+            Rotation
+        </div>
+
+        <div class="cwRotationButtons">
+
+            <button data-rotation="right">
+                ↻
+            </button>
+
+            <button data-rotation="left">
+                ↺
+            </button>
+
+            <button data-rotation="up">
+                ↑
+            </button>
+
+            <button data-rotation="down">
+                ↓
+            </button>
+
+            <button data-rotation="top-left">
+                ↖
+            </button>
+
+            <button data-rotation="top-right">
+                ↗
+            </button>
+
+            <button data-rotation="bottom-left">
+                ↙
+            </button>
+
+            <button data-rotation="bottom-right">
+                ↘
+            </button>
+
+        </div>
+
+    `;
 
 
 
-    point.style.left =
-    (
-        wordArt.offsetLeft +
-        (wordArt.offsetWidth / 2) -
-        10
-    ) + "px";
-
-
-
-    point.style.top =
-    (
-        wordArt.offsetTop -
-        45
-    ) + "px";
-
-
-
-    wordArt.parentElement.appendChild(
-        point
+    document.body.appendChild(
+        rotationBox
     );
-
 
 
 }
 
+
+
+
+
+
+function removeRotationBox(){
+
+
+    if(rotationBox){
+
+        rotationBox.remove();
+
+        rotationBox=null;
+
+    }
+
+
+}
 
 
 
@@ -26118,29 +26145,36 @@ function(e){
 
 
 
-    const wordArt =
-    e.target.closest(
-        ".cwInsertedWordArt"
-    );
+/*
+   Nou verifye si yon objè
+   Campus Word deja chwazi
+*/
+
+
+const selectedObject =
+window.CampusWordSelectedWordArtObject ||
+window.CampusWordSelectedShape ||
+window.CampusWordSelectedClipart ||
+window.CampusWordSelectedImage ||
+window.CampusSelectedObject;
 
 
 
-    if(!wordArt){
-
-        return;
-
-    }
 
 
+if(selectedObject){
 
-    window.CampusWordSelectedWordArtObject =
-    wordArt;
+    createRotationBox();
+
+    return;
+
+}
 
 
 
-    showRotationHandle(
-        wordArt
-    );
+
+
+removeRotationBox();
 
 
 
@@ -26157,293 +26191,39 @@ false
 
 
 
-document.addEventListener(
-"pointerdown",
-function(e){
-
-
-
-    const insideWordArt =
-    e.target.closest(
-        ".cwInsertedWordArt"
-    );
-
-
-
-    const insideRotation =
-    e.target.closest(
-        ".cwWordArtRotationHandle"
-    );
-
-
-
-    const insideHandles =
-    e.target.closest(
-        ".cwWordArtHandles"
-    );
-
-
-
-
-    if(
-        insideWordArt ||
-        insideRotation ||
-        insideHandles
-    ){
-
-        return;
-
-    }
-
-
-
-
-    removeRotationHandle();
-
-
-
-},
-false
-);
-
-
-
-
-})();
-
-
-
-
-
-
-
-
-/* =========================================================
-   CAMPUS WORD — WORDART ROTATION ENGINE
-   STEP 11 FIX
-   ROTATION HANDLE ONLY
-   KEEP EXISTING TRANSFORM
-   TOUCH + MOUSE
-   WORDART ONLY
-========================================================= */
-
-(function(){
-
-
-let rotating = false;
-
-let activeWordArt = null;
-
-
-let centerX = 0;
-
-let centerY = 0;
-
-
-let startAngle = 0;
-
-let startRotation = 0;
-
-
-
-
-
-
-document.addEventListener(
-"pointerdown",
-function(e){
-
-
-
-const handle =
-e.target.closest(
-".cwWordArtRotationHandle"
-);
-
-
-
-if(!handle){
-
-    return;
-
-}
-
-
-
-
-
-activeWordArt =
-window.CampusWordSelectedWordArtObject;
-
-
-
-if(!activeWordArt){
-
-    return;
-
-}
-
-
-
-
-
-const rect =
-activeWordArt.getBoundingClientRect();
-
-
-
-centerX =
-rect.left +
-(rect.width / 2);
-
-
-
-centerY =
-rect.top +
-(rect.height / 2);
-
-
-
-
-
-startAngle =
-Math.atan2(
-e.clientY - centerY,
-e.clientX - centerX
-);
-
-
-
-
-
-startRotation =
-parseFloat(
-activeWordArt.dataset.rotation || 0
-);
-
-
-
-
-
-rotating = true;
-
-
-
-e.preventDefault();
-
-e.stopPropagation();
-
-
-
-},
-{
-passive:false
-}
-);
-
-
-
-
-
-
-
-
-
-document.addEventListener(
-"pointermove",
-function(e){
-
-
-
-if(
-!rotating ||
-!activeWordArt
-){
-
-    return;
-
-}
-
-
-
-
-
-const currentAngle =
-Math.atan2(
-e.clientY - centerY,
-e.clientX - centerX
-);
-
-
-
-
-
-const delta =
-(
-currentAngle -
-startAngle
-)
-*
-180 /
-Math.PI;
-
-
-
-
-
-const rotation =
-startRotation +
-delta;
-
-
-
-
-
-activeWordArt.style.rotate =
-rotation + "deg";
-
-
-
-
-
-activeWordArt.dataset.rotation =
-rotation;
-
-
-
-},
-{
-passive:false
-}
-);
-
-
-
-
-
-
-
-
-
-
-document.addEventListener(
-"pointerup",
+/*
+   Lè yon lòt sistèm kreye handles
+   li ka rele fonksyon sa a
+*/
+
+window.CampusWordShowRotationBox =
 function(){
 
+    createRotationBox();
 
-rotating = false;
-
-
-activeWordArt = null;
+};
 
 
-},
-false
-);
+
+
+
+window.CampusWordHideRotationBox =
+function(){
+
+    removeRotationBox();
+
+};
+
+
 
 
 
 })();
+
+
+
+
+
 
 
 
