@@ -4191,3 +4191,21 @@ bottom:-6px;
 
 
 
+
+
+
+
+
+
+/* =========================================================
+   CAMPUS WORD — WORDART WAVE ARC SHAPE
+========================================================= */
+
+.cwWordArtWave{
+
+    overflow:visible;
+
+    transform-origin:center center;
+
+}
+
