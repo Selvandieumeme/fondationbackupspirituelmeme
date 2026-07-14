@@ -4227,81 +4227,83 @@ bottom:-6px;
 
 
 
-
-
-
 /* =========================================================
-   WORDART 4 RESIZE HANDLES TOUCH SIZE
+   WORDART 4 LARGE TOUCH HANDLES
+   DISPLAY ONLY
 ========================================================= */
 
-.cwWordArtHandles div{
+.cwWordArtHandles{
 
-position:absolute;
+    pointer-events:none;
 
-width:22px;
-
-height:22px;
-
-background:#2563eb;
-
-border:3px solid white;
-
-border-radius:50%;
-
-z-index:9999;
-
-touch-action:none;
+    z-index:9999;
 
 }
 
 
 
-.cwWordArtHandles div[data-wordart-resize="top"]{
+.cwWordHandle{
 
-top:-11px;
+    position:absolute;
 
-left:50%;
+    width:24px;
 
-transform:translateX(-50%);
+    height:24px;
 
-}
+    background:#2563eb;
 
+    border:3px solid white;
 
+    border-radius:50%;
 
-.cwWordArtHandles div[data-wordart-resize="bottom"]{
-
-bottom:-11px;
-
-left:50%;
-
-transform:translateX(-50%);
+    pointer-events:auto;
 
 }
 
 
 
-.cwWordArtHandles div[data-wordart-resize="left"]{
+.cwWordHandle.top{
 
-left:-11px;
+    top:-12px;
 
-top:50%;
+    left:50%;
 
-transform:translateY(-50%);
-
-}
-
-
-
-.cwWordArtHandles div[data-wordart-resize="right"]{
-
-right:-11px;
-
-top:50%;
-
-transform:translateY(-50%);
+    transform:translateX(-50%);
 
 }
 
 
 
+.cwWordHandle.bottom{
 
+    bottom:-12px;
+
+    left:50%;
+
+    transform:translateX(-50%);
+
+}
+
+
+
+.cwWordHandle.left{
+
+    left:-12px;
+
+    top:50%;
+
+    transform:translateY(-50%);
+
+}
+
+
+
+.cwWordHandle.right{
+
+    right:-12px;
+
+    top:50%;
+
+    transform:translateY(-50%);
+
+}
