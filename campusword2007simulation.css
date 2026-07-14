@@ -3602,3 +3602,25 @@ bottom:-6px;
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+/* =========================================================
+   WORDART ACTIVE STATE
+========================================================= */
+
+.cwWordArtActive{
+
+    background:#22c55e !important;
+
+    color:white !important;
+
+}
