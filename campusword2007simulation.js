@@ -23791,6 +23791,406 @@ document.addEventListener(
 
 
 
+/* =========================================================
+   CAMPUS WORD — WORDART GALLERY ENGINE
+   STEP 3
+   CREATE WORDART GALLERY BOX
+   SHOW WORDART MODELS ONLY
+   SELECT WORDART MODEL
+   ISOLATED SYSTEM
+   NO CLIPART INTERFERENCE
+   NO SHAPE INTERFERENCE
+   NO TEXTBOX INTERFERENCE
+========================================================= */
+
+(function(){
+
+
+let wordArtGalleryOpen = false;
+
+
+
+const wordArts = [
+
+{
+name:"Classic Blue",
+text:"Campus Word",
+style:"color:#2563eb;font-size:28px;font-weight:900;"
+},
+
+
+{
+name:"Gold Premium",
+text:"Premium",
+style:"color:#f59e0b;font-size:30px;font-weight:900;"
+},
+
+
+{
+name:"Fire Style",
+text:"Creative",
+style:"color:#ef4444;font-size:30px;font-weight:900;"
+},
+
+
+{
+name:"Modern Black",
+text:"Modern",
+style:"color:#111827;font-size:32px;font-weight:900;"
+},
+
+
+{
+name:"Ocean Style",
+text:"Ocean",
+style:"color:#0284c7;font-size:30px;font-weight:900;"
+},
+
+
+{
+name:"Green Future",
+text:"Future",
+style:"color:#16a34a;font-size:30px;font-weight:900;"
+},
+
+
+{
+name:"Purple Luxury",
+text:"Luxury",
+style:"color:#9333ea;font-size:30px;font-weight:900;"
+},
+
+
+{
+name:"Pink Style",
+text:"Creative",
+style:"color:#ec4899;font-size:30px;font-weight:900;"
+},
+
+
+{
+name:"Silver Style",
+text:"Professional",
+style:"color:#64748b;font-size:28px;font-weight:900;"
+},
+
+
+{
+name:"Shadow Style",
+text:"WordArt",
+style:"color:#1e293b;font-size:30px;font-weight:900;text-shadow:3px 3px #cbd5e1;"
+},
+
+
+{
+name:"Rainbow",
+text:"Rainbow",
+style:"color:#f97316;font-size:30px;font-weight:900;"
+},
+
+
+{
+name:"Elegant",
+text:"Elegant",
+style:"color:#7c3aed;font-size:32px;font-weight:900;"
+},
+
+
+{
+name:"Strong",
+text:"Strong",
+style:"color:#dc2626;font-size:34px;font-weight:900;"
+},
+
+
+{
+name:"Business",
+text:"Business",
+style:"color:#0f172a;font-size:30px;font-weight:900;"
+},
+
+
+{
+name:"Education",
+text:"Education",
+style:"color:#2563eb;font-size:28px;font-weight:900;"
+},
+
+
+{
+name:"Creative Wave",
+text:"Creative",
+style:"color:#0891b2;font-size:32px;font-weight:900;"
+},
+
+
+{
+name:"Diamond",
+text:"Diamond",
+style:"color:#06b6d4;font-size:30px;font-weight:900;"
+},
+
+
+{
+name:"Royal",
+text:"Royal",
+style:"color:#b45309;font-size:34px;font-weight:900;"
+},
+
+
+{
+name:"Future Tech",
+text:"Future Tech",
+style:"color:#4f46e5;font-size:28px;font-weight:900;"
+},
+
+
+{
+name:"Final Premium",
+text:"Campus Word",
+style:"color:#16a34a;font-size:34px;font-weight:900;"
+}
+
+];
+
+
+
+window.CampusWordSelectedWordArt = null;
+
+
+
+function openWordArtGallery(){
+
+
+
+if(wordArtGalleryOpen){
+
+return;
+
+}
+
+
+
+wordArtGalleryOpen = true;
+
+
+
+const box =
+document.createElement(
+"div"
+);
+
+
+
+box.className =
+"cwWordArtGallery";
+
+
+
+box.innerHTML = `
+
+
+<div class="cwWordArtBox">
+
+
+<h3>
+WordArt Gallery
+</h3>
+
+
+
+<div class="cwWordArtGrid">
+
+
+${wordArts.map(item=>`
+
+
+<div class="cwWordArtItem"
+data-wordart="${item.name}">
+
+
+<div class="cwWordArtPreview"
+style="${item.style}">
+${item.text}
+</div>
+
+
+<span>
+${item.name}
+</span>
+
+
+</div>
+
+
+`).join("")}
+
+
+
+</div>
+
+
+
+<button class="cwWordArtClose">
+Close
+</button>
+
+
+
+</div>
+
+`;
+
+
+
+document.body.appendChild(box);
+
+
+
+
+
+
+box.querySelectorAll(
+".cwWordArtItem"
+)
+.forEach(
+function(item){
+
+
+item.addEventListener(
+"click",
+function(e){
+
+
+e.preventDefault();
+
+
+box.querySelectorAll(
+".cwWordArtItem"
+)
+.forEach(
+function(old){
+
+old.classList.remove(
+"cwWordArtSelected"
+);
+
+}
+);
+
+
+
+item.classList.add(
+"cwWordArtSelected"
+);
+
+
+
+window.CampusWordSelectedWordArt =
+item.dataset.wordart;
+
+
+
+}
+);
+
+
+}
+);
+
+
+
+
+
+
+
+box.querySelector(
+".cwWordArtClose"
+)
+.onclick=function(){
+
+
+box.remove();
+
+
+wordArtGalleryOpen=false;
+
+
+window.CampusWordSelectedWordArt=null;
+
+
+};
+
+
+
+
+
+}
+
+
+
+
+document.addEventListener(
+"click",
+function(e){
+
+
+
+const button =
+e.target.closest(
+'[data-action="insert-wordart"]'
+);
+
+
+
+if(!button){
+
+return;
+
+}
+
+
+
+
+e.preventDefault();
+
+e.stopPropagation();
+
+
+
+openWordArtGallery();
+
+
+
+},
+false
+);
+
+
+
+})();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
