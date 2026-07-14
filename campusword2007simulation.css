@@ -3509,3 +3509,126 @@ bottom:-6px;
     transform:translateY(-50%);
 
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* =========================================================
+   CAMPUS WORD — TEXT BOX RESIZE HANDLES TOUCH BOOST
+   ISOLATED CSS ONLY
+   BIGGER 4 HANDLES FOR ANDROID TOUCH
+   NO JS INTERFERENCE
+   NO SHAPE INTERFERENCE
+   NO CLIPART INTERFERENCE
+========================================================= */
+
+
+.cwTextBoxHandles [data-textbox-resize]{
+
+    width:22px !important;
+
+    height:22px !important;
+
+    background:#2563eb;
+
+    border:2px solid #ffffff;
+
+    border-radius:50%;
+
+    position:absolute;
+
+    z-index:9999;
+
+    touch-action:none;
+
+}
+
+
+
+/* TOP HANDLE */
+
+.cwTextBoxHandles [data-textbox-resize="top"]{
+
+    left:50%;
+
+    top:-11px;
+
+    transform:translateX(-50%);
+
+}
+
+
+
+/* BOTTOM HANDLE */
+
+.cwTextBoxHandles [data-textbox-resize="bottom"]{
+
+    left:50%;
+
+    bottom:-11px;
+
+    transform:translateX(-50%);
+
+}
+
+
+
+/* LEFT HANDLE */
+
+.cwTextBoxHandles [data-textbox-resize="left"]{
+
+    left:-11px;
+
+    top:50%;
+
+    transform:translateY(-50%);
+
+}
+
+
+
+/* RIGHT HANDLE */
+
+.cwTextBoxHandles [data-textbox-resize="right"]{
+
+    right:-11px;
+
+    top:50%;
+
+    transform:translateY(-50%);
+
+}
+
+
+
+
+
+
+/* ANDROID / TOUCH DEVICES */
+
+@media (pointer:coarse){
+
+
+.cwTextBoxHandles [data-textbox-resize]{
+
+
+    width:30px !important;
+
+
+    height:30px !important;
+
+
+}
+
+
+}
