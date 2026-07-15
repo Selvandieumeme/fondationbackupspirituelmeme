@@ -26532,10 +26532,16 @@ function exitPrintPreview(){
 
 
 
+
+/* =========================================================
+   PRINT PREVIEW TOGGLE CONTROL
+   STEP 3
+   SAME BUTTON OPEN / CLOSE
+========================================================= */
+
 document.addEventListener(
 "click",
 function(e){
-
 
 
 const button =
@@ -26553,19 +26559,39 @@ if(!button){
 
 
 
+
 e.preventDefault();
 
 e.stopPropagation();
 
 
 
-enterPrintPreview();
+
+
+if(previewActive){
+
+
+    exitPrintPreview();
+
+
+}
+else{
+
+
+    enterPrintPreview();
+
+
+}
+
 
 
 
 },
 false
 );
+
+
+
 
 
 
