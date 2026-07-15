@@ -28589,13 +28589,12 @@ false
 
 
 
-
 /* =========================================================
    CAMPUS WORD — INDEXED DB STORAGE ENGINE
    STEP 1
    DATABASE INITIALIZATION
-   FOUNDATION ONLY
-   NO SAVE MIGRATION YET
+   DOCUMENT + FOLDER FOUNDATION
+   NO UI CONNECTION YET
    ISOLATED SYSTEM
 ========================================================= */
 
@@ -28607,12 +28606,20 @@ const DB_NAME =
 "CampusWordDB";
 
 
+
 const DB_VERSION =
-1;
+2;
 
 
-const STORE_NAME =
+
+const DOCUMENT_STORE =
 "documents";
+
+
+const FOLDER_STORE =
+"folders";
+
+
 
 
 
@@ -28637,6 +28644,8 @@ DB_VERSION
 
 
 
+
+
 request.onupgradeneeded =
 function(event){
 
@@ -28649,15 +28658,21 @@ event.target.result;
 
 
 
+
+/* =========================
+   DOCUMENT STORE
+========================= */
+
+
 if(
 !db.objectStoreNames.contains(
-STORE_NAME
+DOCUMENT_STORE
 )
 ){
 
 
 db.createObjectStore(
-STORE_NAME,
+DOCUMENT_STORE,
 {
 keyPath:"id",
 autoIncrement:true
@@ -28669,7 +28684,40 @@ autoIncrement:true
 
 
 
+
+
+
+
+
+/* =========================
+   FOLDER STORE
+========================= */
+
+
+if(
+!db.objectStoreNames.contains(
+FOLDER_STORE
+)
+){
+
+
+db.createObjectStore(
+FOLDER_STORE,
+{
+keyPath:"id",
+autoIncrement:true
+}
+);
+
+
+}
+
+
+
+
+
 };
+
 
 
 
@@ -28683,18 +28731,24 @@ function(event){
 
 
 
-window.CampusWordDB =
+const db =
 event.target.result;
 
 
 
+window.CampusWordDB =
+db;
+
+
+
 resolve(
-event.target.result
+db
 );
 
 
 
 };
+
 
 
 
@@ -28723,6 +28777,7 @@ event.target.error
 
 
 }
+
 
 
 
@@ -28782,11 +28837,302 @@ console.log(
 
 
 
+
 CampusWordStorageEngine.init();
 
 
 
 })();
+
+
+
+
+
+
+
+/* =========================================================
+   CAMPUS WORD — INDEXED DB FOLDER STORAGE
+   STEP 2
+   SAVE + LOAD FOLDERS
+   COMPATIBLE WITH STEP 1
+   NO UI CONNECTION YET
+   ISOLATED MODULE
+========================================================= */
+
+(function(){
+
+
+
+if(
+!window.CampusWordStorageEngine
+){
+
+    return;
+
+}
+
+
+
+
+
+const STORE =
+"folders";
+
+
+
+
+
+
+
+
+
+window.CampusWordStorageEngine.saveFolder =
+function(folder){
+
+
+
+return new Promise(function(resolve,reject){
+
+
+
+
+
+const db =
+CampusWordStorageEngine.db;
+
+
+
+
+
+if(!db){
+
+
+    reject(
+    "IndexedDB not ready"
+    );
+
+
+    return;
+
+}
+
+
+
+
+
+const transaction =
+db.transaction(
+STORE,
+"readwrite"
+);
+
+
+
+
+
+const store =
+transaction.objectStore(
+STORE
+);
+
+
+
+
+
+
+const request =
+store.add({
+
+    name:
+    folder.name,
+
+    createdAt:
+    new Date().toISOString()
+
+});
+
+
+
+
+
+
+
+request.onsuccess =
+function(){
+
+
+resolve(true);
+
+
+};
+
+
+
+
+
+
+
+request.onerror =
+function(event){
+
+
+
+reject(
+event.target.error
+);
+
+
+};
+
+
+
+
+
+});
+
+
+
+};
+
+
+
+
+
+
+
+
+
+CampusWordStorageEngine.getFolders =
+function(){
+
+
+
+return new Promise(function(resolve,reject){
+
+
+
+
+
+const db =
+CampusWordStorageEngine.db;
+
+
+
+
+
+if(!db){
+
+
+    reject(
+    "IndexedDB not ready"
+    );
+
+
+    return;
+
+}
+
+
+
+
+
+const transaction =
+db.transaction(
+STORE,
+"readonly"
+);
+
+
+
+
+
+const store =
+transaction.objectStore(
+STORE
+);
+
+
+
+
+
+const request =
+store.getAll();
+
+
+
+
+
+
+
+request.onsuccess =
+function(){
+
+
+resolve(
+request.result
+);
+
+
+};
+
+
+
+
+
+
+
+
+request.onerror =
+function(event){
+
+
+
+reject(
+event.target.error
+);
+
+
+};
+
+
+
+
+
+
+});
+
+
+
+};
+
+
+
+
+
+
+
+
+})();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
