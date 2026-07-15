@@ -4852,3 +4852,29 @@ bottom:-6px;
 
 }
 
+
+
+
+
+
+
+
+
+
+
+
+/* =========================================================
+   CAMPUS WORD — FOLDER ACTIVE STATE
+   STEP 2
+   ACTIVE FOLDER HIGHLIGHT
+========================================================= */
+
+.cwFolderItem.active{
+
+    background:#dbeafe;
+
+    border-left:4px solid #2563eb;
+
+    font-weight:bold;
+
+}
