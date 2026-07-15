@@ -4484,3 +4484,173 @@ bottom:-6px;
     transform:scale(1);
 
 }
+
+
+
+
+
+
+
+
+
+
+
+
+/* =========================================================
+   CAMPUS WORD — SAVE DIALOG WINDOW
+   STEP 1
+   DOCUMENT NAME BOX
+   ISOLATED STYLE
+========================================================= */
+
+
+.cwSaveDialog{
+
+    position:fixed;
+
+    inset:0;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    background:rgba(0,0,0,.25);
+
+    z-index:99999;
+
+}
+
+
+
+.cwSaveWindow{
+
+    width:320px;
+
+    padding:20px;
+
+    background:white;
+
+    border-radius:10px;
+
+    box-shadow:
+    0 10px 30px rgba(0,0,0,.35);
+
+    font-family:Arial, sans-serif;
+
+}
+
+
+
+.cwSaveWindow h3{
+
+    margin:0 0 15px;
+
+    font-size:18px;
+
+}
+
+
+
+.cwSaveWindow label{
+
+    display:block;
+
+    margin-bottom:8px;
+
+    font-size:14px;
+
+}
+
+
+
+.cwSaveNameInput{
+
+    width:100%;
+
+    box-sizing:border-box;
+
+    padding:10px;
+
+    border:1px solid #cbd5e1;
+
+    border-radius:6px;
+
+    font-size:14px;
+
+    outline:none;
+
+}
+
+
+
+.cwSaveNameInput:focus{
+
+    border-color:#2563eb;
+
+}
+
+
+
+
+
+.cwSaveActions{
+
+    display:flex;
+
+    justify-content:flex-end;
+
+    gap:10px;
+
+    margin-top:18px;
+
+}
+
+
+
+
+
+.cwSaveActions button{
+
+    padding:8px 18px;
+
+    border:none;
+
+    border-radius:6px;
+
+    cursor:pointer;
+
+    font-size:14px;
+
+}
+
+
+
+
+
+.cwSaveConfirm{
+
+    background:#2563eb;
+
+    color:white;
+
+}
+
+
+
+.cwSaveCancel{
+
+    background:#e5e7eb;
+
+    color:#111827;
+
+}
+
+
+
+.cwSaveActions button:active{
+
+    transform:scale(.97);
+
+}
