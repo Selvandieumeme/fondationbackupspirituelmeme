@@ -26724,8 +26724,10 @@ false
 
 
 
-function createNewDocument(){
 
+
+
+function createNewDocument(){
 
 
 const workspace =
@@ -26752,39 +26754,18 @@ workspace.innerHTML = "";
 
 
 
-/* Reset Core State safely */
+/* Reset state safely */
 
 if(
 window.CampusWord2007Simulateur &&
 CampusWord2007Simulateur.state
 ){
 
+    CampusWord2007Simulateur.state.pages = [];
 
-CampusWord2007Simulateur.state.pages = [];
+    CampusWord2007Simulateur.state.activePageIndex = 0;
 
-
-CampusWord2007Simulateur.state.activePageIndex = 0;
-
-
-CampusWord2007Simulateur.state.wordCount = 0;
-
-
-}
-
-
-
-
-
-/* Recreate first page using Core Engine */
-
-if(
-window.CampusWord2007Simulateur &&
-typeof CampusWord2007Simulateur.createFirstPage === "function"
-){
-
-
-CampusWord2007Simulateur.createFirstPage();
-
+    CampusWord2007Simulateur.state.wordCount = 0;
 
 }
 
@@ -26793,51 +26774,128 @@ CampusWord2007Simulateur.createFirstPage();
 
 
 
+/* Create new page */
 
-/* Update UI safely */
-
-if(
-window.CampusWord2007Simulateur
-){
-
-
-CampusWord2007Simulateur.updateStatus();
+const page =
+document.createElement(
+"div"
+);
 
 
-CampusWord2007Simulateur.updatePageStatus();
-
-
-}
+page.className =
+"cwPage active";
 
 
 
 
 
+const content =
+document.createElement(
+"div"
+);
 
-const newContent =
-document.querySelector(
-".cwPageContent:last-child"
+
+content.className =
+"cwPageContent";
+
+
+content.contentEditable = true;
+
+
+
+
+
+/* Reconnect page input system */
+
+content.addEventListener(
+"input",
+()=>{
+
+
+requestAnimationFrame(()=>{
+
+
+CampusWord2007Simulateur.calculateWordCount(
+content.innerText
+);
+
+
+CampusWord2007Simulateur.checkPageOverflow(
+content
 );
 
 
 
-if(newContent){
+});
+
+
+}
+);
+
+
+
+
+
+page.appendChild(
+content
+);
+
+
+workspace.appendChild(
+page
+);
+
+
+
+
+
+
+
+/* Register page inside Core State */
+
+if(
+window.CampusWord2007Simulateur &&
+CampusWord2007Simulateur.state
+){
+
+    CampusWord2007Simulateur.state.pages.push(
+        page
+    );
+
+}
+
+
+
+
+
+
+
+CampusWord2007Simulateur.updatePageStatus();
+
+CampusWord2007Simulateur.updateStatus();
+
+
+
+
 
 
 setTimeout(()=>{
 
-
-newContent.focus();
-
+content.focus();
 
 },0);
 
 
-}
-
-
 
 }
+
+
+
+
+
+
+
+
 
 
 
