@@ -26962,22 +26962,11 @@ false
 
 
 
-
-
-
-
-
-
-
-
-
-
 /* =========================================================
    CAMPUS WORD — SAVE DIALOG ENGINE
-   STEP 1
-   DOCUMENT NAME BOX
-   SAVE + CANCEL UI ONLY
-   NO DOCUMENT STORAGE YET
+   STEP 2
+   DOCUMENT NAME + SAVE + RENAME SUPPORT
+   SAFE LOCAL STORAGE
    ISOLATED SYSTEM
 ========================================================= */
 
@@ -27074,6 +27063,49 @@ saveBox
 
 
 
+
+/* LOAD CURRENT DOCUMENT NAME */
+
+const app =
+window.CampusWord2007Simulateur;
+
+
+
+const currentName =
+app &&
+app.state
+?
+app.state.documentName
+:
+"";
+
+
+
+const input =
+saveBox.querySelector(
+".cwSaveNameInput"
+);
+
+
+
+if(
+input &&
+currentName
+){
+
+    input.value =
+    currentName;
+
+}
+
+
+
+
+
+
+
+
+
 saveBox.querySelector(
 ".cwSaveCancel"
 )
@@ -27086,9 +27118,6 @@ saveBox=null;
 
 
 };
-
-
-
 
 
 
@@ -27124,11 +27153,22 @@ if(!name){
 
 
 
+/* KEEP OLD DOCUMENT NAME */
 
-const app =
-window.CampusWord2007Simulateur;
+const oldName =
+app &&
+app.state
+?
+app.state.documentName
+:
+"";
 
 
+
+
+
+
+/* UPDATE ACTIVE NAME */
 
 if(
 app &&
@@ -27141,6 +27181,33 @@ name;
 
 
 }
+
+
+
+
+
+
+
+/* REMOVE OLD SAVED DOCUMENT IF RENAMED */
+
+if(
+oldName &&
+oldName !== name
+){
+
+
+localStorage.removeItem(
+
+"CampusWordDocument_" +
+oldName
+
+);
+
+
+}
+
+
+
 
 
 
@@ -27290,6 +27357,9 @@ false
 
 
 })();
+
+
+
 
 
 
