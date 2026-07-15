@@ -26716,6 +26716,7 @@ false
    CAMPUS WORD — NEW DOCUMENT ENGINE
    SAFE RESET
    OFFICE MENU NEW BUTTON
+   USE CORE PAGE SYSTEM
    ISOLATED SYSTEM
 ========================================================= */
 
@@ -26751,54 +26752,7 @@ workspace.innerHTML = "";
 
 
 
-/* Create fresh page */
-
-const page =
-document.createElement(
-"div"
-);
-
-
-page.className =
-"cwPage active";
-
-
-
-
-
-const content =
-document.createElement(
-"div"
-);
-
-
-
-content.className =
-"cwPageContent";
-
-
-content.contentEditable = true;
-
-
-
-
-
-page.appendChild(
-content
-);
-
-
-
-workspace.appendChild(
-page
-);
-
-
-
-
-
-
-/* Update core state safely */
+/* Reset Core State safely */
 
 if(
 window.CampusWord2007Simulateur &&
@@ -26806,9 +26760,7 @@ CampusWord2007Simulateur.state
 ){
 
 
-CampusWord2007Simulateur.state.pages = [
-page
-];
+CampusWord2007Simulateur.state.pages = [];
 
 
 CampusWord2007Simulateur.state.activePageIndex = 0;
@@ -26823,17 +26775,15 @@ CampusWord2007Simulateur.state.wordCount = 0;
 
 
 
-/* Update UI */
+/* Recreate first page using Core Engine */
 
 if(
-window.CampusWord2007Simulateur
+window.CampusWord2007Simulateur &&
+typeof CampusWord2007Simulateur.createFirstPage === "function"
 ){
 
 
-CampusWord2007Simulateur.updatePageStatus();
-
-
-CampusWord2007Simulateur.updateStatus();
+CampusWord2007Simulateur.createFirstPage();
 
 
 }
@@ -26842,13 +26792,48 @@ CampusWord2007Simulateur.updateStatus();
 
 
 
+
+
+/* Update UI safely */
+
+if(
+window.CampusWord2007Simulateur
+){
+
+
+CampusWord2007Simulateur.updateStatus();
+
+
+CampusWord2007Simulateur.updatePageStatus();
+
+
+}
+
+
+
+
+
+
+const newContent =
+document.querySelector(
+".cwPageContent:last-child"
+);
+
+
+
+if(newContent){
+
+
 setTimeout(()=>{
 
-content.focus();
+
+newContent.focus();
+
 
 },0);
 
 
+}
 
 
 
@@ -26900,9 +26885,6 @@ false
 
 
 })();
-
-
-
 
 
 
