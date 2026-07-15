@@ -27763,6 +27763,189 @@ false
 
 
 
+/* =========================================================
+   CAMPUS WORD — FOLDER ENGINE
+   STEP 2
+   OPEN ACTIVE FOLDER
+   SELECT FOLDER ONLY
+   NO SAVE ACTION
+   ISOLATED PATCH
+========================================================= */
+
+(function(){
+
+
+
+function getFolders(){
+
+
+const data =
+localStorage.getItem(
+"CampusWordFolders"
+);
+
+
+
+return data
+?
+JSON.parse(data)
+:
+[];
+
+
+}
+
+
+
+
+
+
+document.addEventListener(
+"click",
+function(e){
+
+
+
+const folder =
+e.target.closest(
+".cwFolderItem"
+);
+
+
+
+if(!folder){
+
+    return;
+
+}
+
+
+
+
+const folderName =
+folder.textContent
+.replace("📁","")
+.trim();
+
+
+
+
+
+
+const folders =
+getFolders();
+
+
+
+
+
+const selected =
+folders.find(function(item){
+
+    return item.name === folderName;
+
+});
+
+
+
+
+
+if(!selected){
+
+    return;
+
+}
+
+
+
+
+
+
+
+/* STORE ACTIVE FOLDER */
+
+localStorage.setItem(
+
+"CampusWordActiveFolder",
+
+JSON.stringify(
+selected
+)
+
+);
+
+
+
+
+
+
+/* GLOBAL ACTIVE FOLDER */
+
+window.CampusWordActiveFolder =
+selected.name;
+
+
+
+
+
+
+/* VISUAL ACTIVE STATE */
+
+document
+.querySelectorAll(
+".cwFolderItem"
+)
+.forEach(function(item){
+
+
+item.classList.remove(
+"active"
+);
+
+
+});
+
+
+
+
+
+folder.classList.add(
+"active"
+);
+
+
+
+
+
+
+
+},
+false
+);
+
+
+
+
+
+})();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
