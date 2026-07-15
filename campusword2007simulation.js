@@ -28291,6 +28291,313 @@ false
 
 
 
+/* =========================================================
+   CAMPUS WORD — OPEN SAVED DOCUMENT ENGINE
+   STEP 5
+   LOAD DOCUMENT INTO WORD PAGE
+   FOLDER DOCUMENT SUPPORT
+   ISOLATED SYSTEM
+========================================================= */
+
+(function(){
+
+
+
+function getActiveFolder(){
+
+
+return (
+window.CampusWordActiveFolder ||
+null
+);
+
+
+}
+
+
+
+
+
+
+function loadDocument(documentData){
+
+
+
+const pages =
+document.querySelectorAll(
+".cwPageContent"
+);
+
+
+
+
+
+if(!pages.length){
+
+    return;
+
+}
+
+
+
+
+
+/*
+   Load first page content
+*/
+
+pages[0].innerHTML =
+documentData.pages[0]
+?
+documentData.pages[0].html
+:
+"";
+
+
+
+
+
+
+/*
+   Remove extra empty pages
+*/
+
+document
+.querySelectorAll(
+".cwPage:not(.active)"
+)
+.forEach(function(page){
+
+    page.remove();
+
+});
+
+
+
+
+
+
+
+/*
+   Restore title
+*/
+
+const title =
+document.getElementById(
+"cwTitle"
+);
+
+
+
+if(title){
+
+
+title.textContent =
+documentData.name +
+" - Campus Word 2007 Simulation";
+
+
+}
+
+
+
+
+
+
+
+if(
+window.CampusWord2007Simulateur
+){
+
+CampusWord2007Simulateur.calculateWordCount(
+pages[0].innerText
+);
+
+}
+
+
+
+}
+
+
+
+
+
+
+
+
+
+function openSelectedDocument(docName){
+
+
+
+const folder =
+getActiveFolder();
+
+
+
+
+
+if(!folder){
+
+    return;
+
+}
+
+
+
+
+
+const key =
+"CampusWordFolder_" + folder;
+
+
+
+
+
+const data =
+localStorage.getItem(
+key
+);
+
+
+
+
+
+if(!data){
+
+    return;
+
+}
+
+
+
+
+
+const documents =
+JSON.parse(
+data
+);
+
+
+
+
+
+
+const selected =
+documents.find(function(doc){
+
+
+return doc.name === docName;
+
+
+});
+
+
+
+
+
+
+if(!selected){
+
+    return;
+
+}
+
+
+
+
+
+
+loadDocument(
+selected
+);
+
+
+
+
+
+
+}
+
+
+
+
+
+
+
+
+
+document.addEventListener(
+"click",
+function(e){
+
+
+
+const item =
+e.target.closest(
+".cwFolderDocumentItem"
+);
+
+
+
+if(!item){
+
+    return;
+
+}
+
+
+
+
+
+const docName =
+item.textContent
+.replace("📄","")
+.trim();
+
+
+
+
+
+openSelectedDocument(
+docName
+);
+
+
+
+
+
+},
+false
+);
+
+
+
+
+
+})();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
