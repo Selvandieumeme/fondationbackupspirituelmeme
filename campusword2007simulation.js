@@ -26985,6 +26985,190 @@ false
 
 
 
+/* =========================================================
+   CAMPUS WORD — SAVE DOCUMENT ENGINE
+   OFFICE MENU SAVE BUTTON
+   SAFE STORAGE SYSTEM
+   ISOLATED SYSTEM
+========================================================= */
+
+(function(){
+
+
+
+function saveDocument(){
+
+
+
+const pages =
+document.querySelectorAll(
+".cwPageContent"
+);
+
+
+
+if(!pages.length){
+
+    return;
+
+}
+
+
+
+
+
+let documentData = {
+
+    title:"Campus Word Document",
+
+    pages:[],
+
+
+    savedAt:
+    new Date().toISOString()
+
+};
+
+
+
+
+
+
+
+pages.forEach(function(page){
+
+
+    documentData.pages.push({
+
+        content:
+        page.innerHTML
+
+    });
+
+
+});
+
+
+
+
+
+
+
+localStorage.setItem(
+"CampusWordSavedDocument",
+JSON.stringify(
+documentData
+)
+);
+
+
+
+
+
+/* Optional status feedback */
+
+if(
+window.CampusWord2007Simulateur &&
+CampusWord2007Simulateur.statusReady
+){
+
+    CampusWord2007Simulateur.statusReady.textContent =
+    "Saved";
+
+}
+
+
+
+
+
+}
+
+
+
+
+
+
+
+
+document.addEventListener(
+"click",
+function(e){
+
+
+
+const button =
+e.target.closest(
+'[data-action="save"]'
+);
+
+
+
+if(!button){
+
+    return;
+
+}
+
+
+
+e.preventDefault();
+
+e.stopPropagation();
+
+
+
+saveDocument();
+
+
+
+},
+false
+);
+
+
+
+
+
+})();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
