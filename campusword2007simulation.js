@@ -27093,6 +27093,11 @@ saveBox=null;
 
 
 
+
+
+
+
+
 saveBox.querySelector(
 ".cwSaveConfirm"
 )
@@ -27108,6 +27113,7 @@ saveBox.querySelector(
 
 
 
+
 if(!name){
 
     return;
@@ -27118,17 +27124,110 @@ if(!name){
 
 
 
+
+const app =
+window.CampusWord2007Simulateur;
+
+
+
 if(
-window.CampusWord2007Simulateur &&
-window.CampusWord2007Simulateur.state
+app &&
+app.state
 ){
 
 
-window.CampusWord2007Simulateur.state.documentName =
+app.state.documentName =
 name;
 
 
 }
+
+
+
+
+
+
+/* SAVE DOCUMENT SNAPSHOT */
+
+const pages =
+document.querySelectorAll(
+".cwPageContent"
+);
+
+
+
+const savedDocument = {
+
+    name:name,
+
+    savedAt:
+    new Date().toISOString(),
+
+    pages:[]
+
+};
+
+
+
+
+
+
+
+pages.forEach(function(page){
+
+
+savedDocument.pages.push({
+
+    html:
+    page.innerHTML
+
+});
+
+
+});
+
+
+
+
+
+
+
+localStorage.setItem(
+
+"CampusWordDocument_" + name,
+
+JSON.stringify(
+savedDocument
+)
+
+);
+
+
+
+
+
+
+/* UPDATE TITLE BAR */
+
+const title =
+document.getElementById(
+"cwTitle"
+);
+
+
+
+if(title){
+
+
+title.textContent =
+name +
+" - Campus Word 2007 Simulation";
+
+
+}
+
+
+
 
 
 
@@ -27140,9 +27239,6 @@ saveBox=null;
 
 
 };
-
-
-
 
 
 }
