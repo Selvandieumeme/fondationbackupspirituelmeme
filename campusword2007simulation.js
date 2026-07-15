@@ -29125,6 +29125,295 @@ event.target.error
 
 
 
+/* =========================================================
+   CAMPUS WORD — INDEXED DB DOCUMENT STORAGE
+   STEP 3
+   SAVE + LOAD DOCUMENTS
+   FOLDER LINK SUPPORT
+   NO UI CONNECTION YET
+   ISOLATED MODULE
+========================================================= */
+
+(function(){
+
+
+
+if(
+!window.CampusWordStorageEngine
+){
+
+    return;
+
+}
+
+
+
+
+
+
+
+const STORE =
+"documents";
+
+
+
+
+
+
+
+
+
+window.CampusWordStorageEngine.saveDocument =
+function(documentData){
+
+
+
+return new Promise(function(resolve,reject){
+
+
+
+
+
+const db =
+CampusWordStorageEngine.db;
+
+
+
+
+
+if(!db){
+
+
+    reject(
+    "IndexedDB not ready"
+    );
+
+
+    return;
+
+}
+
+
+
+
+
+const transaction =
+db.transaction(
+STORE,
+"readwrite"
+);
+
+
+
+
+
+const store =
+transaction.objectStore(
+STORE
+);
+
+
+
+
+
+
+
+const request =
+store.add({
+
+    name:
+    documentData.name,
+
+
+    folder:
+    documentData.folder || null,
+
+
+    pages:
+    documentData.pages || [],
+
+
+    savedAt:
+    new Date().toISOString()
+
+
+});
+
+
+
+
+
+
+
+request.onsuccess =
+function(){
+
+
+resolve(
+request.result
+);
+
+
+};
+
+
+
+
+
+
+
+request.onerror =
+function(event){
+
+
+reject(
+event.target.error
+);
+
+
+};
+
+
+
+
+
+
+});
+
+
+
+};
+
+
+
+
+
+
+
+
+
+window.CampusWordStorageEngine.getDocuments =
+function(){
+
+
+
+return new Promise(function(resolve,reject){
+
+
+
+
+
+const db =
+CampusWordStorageEngine.db;
+
+
+
+
+
+if(!db){
+
+
+    reject(
+    "IndexedDB not ready"
+    );
+
+
+    return;
+
+}
+
+
+
+
+
+const transaction =
+db.transaction(
+STORE,
+"readonly"
+);
+
+
+
+
+
+const store =
+transaction.objectStore(
+STORE
+);
+
+
+
+
+
+const request =
+store.getAll();
+
+
+
+
+
+
+
+request.onsuccess =
+function(){
+
+
+resolve(
+request.result
+);
+
+
+};
+
+
+
+
+
+
+
+request.onerror =
+function(event){
+
+
+reject(
+event.target.error
+);
+
+
+};
+
+
+
+
+
+
+});
+
+
+
+};
+
+
+
+
+
+
+
+
+
+})();
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
