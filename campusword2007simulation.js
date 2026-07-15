@@ -27258,16 +27258,91 @@ savedDocument.pages.push({
 
 
 
+/* =====================================================
+   STEP 3 — SAVE INSIDE ACTIVE FOLDER
+===================================================== */
 
-localStorage.setItem(
 
-"CampusWordDocument_" + name,
+const activeFolder =
+window.CampusWordActiveFolder;
 
-JSON.stringify(
-savedDocument
-)
 
-);
+
+if(activeFolder){
+
+
+
+    const folderKey =
+    "CampusWordFolder_" + activeFolder;
+
+
+
+    let folderDocuments =
+    localStorage.getItem(
+        folderKey
+    );
+
+
+
+    folderDocuments =
+    folderDocuments
+    ?
+    JSON.parse(folderDocuments)
+    :
+    [];
+
+
+
+
+
+    folderDocuments.push(
+        savedDocument
+    );
+
+
+
+
+
+    localStorage.setItem(
+
+        folderKey,
+
+        JSON.stringify(
+            folderDocuments
+        )
+
+    );
+
+
+
+}
+
+else{
+
+
+    /*
+       BACKWARD COMPATIBILITY
+       SAVE NORMAL SI PA GEN FOLDER
+    */
+
+
+    localStorage.setItem(
+
+        "CampusWordDocument_" + name,
+
+        JSON.stringify(
+            savedDocument
+        )
+
+    );
+
+
+}
+
+
+
+
+
 
 
 
