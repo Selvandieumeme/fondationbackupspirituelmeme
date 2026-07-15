@@ -26712,6 +26712,213 @@ false
 
 
 
+/* =========================================================
+   CAMPUS WORD — NEW DOCUMENT ENGINE
+   SAFE RESET
+   OFFICE MENU NEW BUTTON
+   ISOLATED SYSTEM
+========================================================= */
+
+(function(){
+
+
+
+function createNewDocument(){
+
+
+
+const workspace =
+document.getElementById(
+"cwDocumentContainer"
+);
+
+
+
+if(!workspace){
+
+    return;
+
+}
+
+
+
+
+/* Clear current document */
+
+workspace.innerHTML = "";
+
+
+
+
+
+/* Create fresh page */
+
+const page =
+document.createElement(
+"div"
+);
+
+
+page.className =
+"cwPage active";
+
+
+
+
+
+const content =
+document.createElement(
+"div"
+);
+
+
+
+content.className =
+"cwPageContent";
+
+
+content.contentEditable = true;
+
+
+
+
+
+page.appendChild(
+content
+);
+
+
+
+workspace.appendChild(
+page
+);
+
+
+
+
+
+
+/* Update core state safely */
+
+if(
+window.CampusWord2007Simulateur &&
+CampusWord2007Simulateur.state
+){
+
+
+CampusWord2007Simulateur.state.pages = [
+page
+];
+
+
+CampusWord2007Simulateur.state.activePageIndex = 0;
+
+
+CampusWord2007Simulateur.state.wordCount = 0;
+
+
+}
+
+
+
+
+
+/* Update UI */
+
+if(
+window.CampusWord2007Simulateur
+){
+
+
+CampusWord2007Simulateur.updatePageStatus();
+
+
+CampusWord2007Simulateur.updateStatus();
+
+
+}
+
+
+
+
+
+setTimeout(()=>{
+
+content.focus();
+
+},0);
+
+
+
+
+
+}
+
+
+
+
+
+
+
+document.addEventListener(
+"click",
+function(e){
+
+
+
+const button =
+e.target.closest(
+'[data-action="new"]'
+);
+
+
+
+if(!button){
+
+    return;
+
+}
+
+
+
+e.preventDefault();
+
+e.stopPropagation();
+
+
+
+createNewDocument();
+
+
+
+},
+false
+);
+
+
+
+
+
+})();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
