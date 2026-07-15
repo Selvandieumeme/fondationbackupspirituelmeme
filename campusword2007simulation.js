@@ -27449,6 +27449,7 @@ false
    CREATE NEW FOLDER
    SAVE FOLDER NAME LOCAL
    SHOW FOLDER LIST
+   DELETE UI ADDON
    ISOLATED SYSTEM
 ========================================================= */
 
@@ -27704,49 +27705,6 @@ updateFolderList();
 
 
 
-function updateFolderList(){
-
-
-
-if(!folderBox){
-
-    return;
-
-}
-
-
-
-
-const list =
-folderBox.querySelector(
-".cwFolderList"
-);
-
-
-
-const folders =
-getFolders();
-
-
-
-
-
-list.innerHTML="";
-
-
-};
-
-
-
-}
-
-
-
-
-
-
-
-
 
 
 function updateFolderList(){
@@ -27771,6 +27729,7 @@ folderBox.querySelector(
 
 const folders =
 getFolders();
+
 
 
 list.innerHTML="";
@@ -27807,6 +27766,7 @@ document.createElement(
 
 folderName.textContent =
 "📁 " + folder.name;
+
 
 
 
@@ -27859,6 +27819,7 @@ false
 
 
 
+
 item.appendChild(
 folderName
 );
@@ -27884,16 +27845,6 @@ item
 
 
 }
-
-
-
-
-
-
-
-
-
-
 
 
 
