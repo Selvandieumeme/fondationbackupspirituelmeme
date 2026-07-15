@@ -27706,7 +27706,6 @@ updateFolderList();
 
 
 
-
 function updateFolderList(){
 
 
@@ -27741,6 +27740,7 @@ list.innerHTML="";
 
 
 
+
 folders.forEach(function(folder){
 
 
@@ -27757,8 +27757,104 @@ item.className =
 
 
 
-item.textContent =
+
+
+const name =
+document.createElement(
+"span"
+);
+
+
+
+name.textContent =
 "📁 " + folder.name;
+
+
+
+
+
+
+
+const deleteBtn =
+document.createElement(
+"button"
+);
+
+
+
+deleteBtn.className =
+"cwFolderDeleteBtn";
+
+
+
+deleteBtn.textContent =
+"Delete";
+
+
+
+
+
+
+
+/*
+   Preserve folder opening behavior
+*/
+
+item.onclick =
+function(){
+
+
+console.log(
+"Open folder:",
+folder.name
+);
+
+
+};
+
+
+
+
+
+
+
+/*
+   Delete UI only
+*/
+
+deleteBtn.onclick =
+function(e){
+
+
+e.stopPropagation();
+
+
+
+console.log(
+"Delete clicked:",
+folder.name
+);
+
+
+};
+
+
+
+
+
+
+
+item.appendChild(
+name
+);
+
+
+
+item.appendChild(
+deleteBtn
+);
+
+
 
 
 
@@ -27773,6 +27869,14 @@ item
 
 
 }
+
+
+
+
+
+
+
+
 
 
 
