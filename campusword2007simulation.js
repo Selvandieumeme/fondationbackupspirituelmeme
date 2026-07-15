@@ -27739,6 +27739,41 @@ list.innerHTML="";
 
 
 
+
+
+
+
+function updateFolderList(){
+
+
+
+if(!folderBox){
+
+    return;
+
+}
+
+
+
+
+const list =
+folderBox.querySelector(
+".cwFolderList"
+);
+
+
+
+const folders =
+getFolders();
+
+
+list.innerHTML="";
+
+
+
+
+
+
 folders.forEach(function(folder){
 
 
@@ -27757,16 +27792,15 @@ item.className =
 
 
 
-const name =
+const folderName =
 document.createElement(
 "span"
 );
 
 
 
-name.textContent =
+folderName.textContent =
 "📁 " + folder.name;
-
 
 
 
@@ -27794,11 +27828,6 @@ deleteBtn.textContent =
 
 
 
-/*
-   DELETE BUTTON ONLY
-   DOES NOT BLOCK FOLDER CLICK
-*/
-
 deleteBtn.addEventListener(
 "click",
 function(e){
@@ -27809,7 +27838,7 @@ e.stopPropagation();
 
 
 console.log(
-"Delete clicked:",
+"Delete button:",
 folder.name
 );
 
@@ -27824,9 +27853,8 @@ false
 
 
 
-
 item.appendChild(
-name
+folderName
 );
 
 
