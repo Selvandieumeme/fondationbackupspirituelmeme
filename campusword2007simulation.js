@@ -27368,6 +27368,430 @@ false
 
 
 
+/* =========================================================
+   CAMPUS WORD — FOLDER ENGINE
+   STEP 1
+   CREATE NEW FOLDER
+   SAVE FOLDER NAME LOCAL
+   SHOW FOLDER LIST
+   ISOLATED SYSTEM
+========================================================= */
+
+(function(){
+
+
+let folderBox = null;
+
+
+
+function getFolders(){
+
+
+const data =
+localStorage.getItem(
+"CampusWordFolders"
+);
+
+
+
+return data
+?
+JSON.parse(data)
+:
+[];
+
+
+}
+
+
+
+
+
+
+function saveFolders(folders){
+
+
+localStorage.setItem(
+
+"CampusWordFolders",
+
+JSON.stringify(
+folders
+)
+
+);
+
+
+}
+
+
+
+
+
+
+
+function openFolderDialog(){
+
+
+
+if(folderBox){
+
+    return;
+
+}
+
+
+
+folderBox =
+document.createElement(
+"div"
+);
+
+
+
+folderBox.className =
+"cwFolderDialog";
+
+
+
+
+
+folderBox.innerHTML = `
+
+<div class="cwFolderWindow">
+
+
+<h3>
+Create New Folder
+</h3>
+
+
+
+<label>
+Folder Name
+</label>
+
+
+<input
+type="text"
+class="cwFolderNameInput"
+placeholder="Enter folder name"
+/>
+
+
+
+<div class="cwFolderActions">
+
+
+<button class="cwFolderCreate">
+Create
+</button>
+
+
+
+<button class="cwFolderCancel">
+Cancel
+</button>
+
+
+</div>
+
+
+
+<div class="cwFolderList">
+
+</div>
+
+
+</div>
+
+`;
+
+
+
+
+
+document.body.appendChild(
+folderBox
+);
+
+
+
+
+
+updateFolderList();
+
+
+
+
+
+
+
+folderBox.querySelector(
+".cwFolderCancel"
+)
+.onclick=function(){
+
+
+folderBox.remove();
+
+folderBox=null;
+
+
+};
+
+
+
+
+
+
+
+folderBox.querySelector(
+".cwFolderCreate"
+)
+.onclick=function(){
+
+
+
+const input =
+folderBox.querySelector(
+".cwFolderNameInput"
+);
+
+
+
+const name =
+input.value.trim();
+
+
+
+
+
+if(!name){
+
+    return;
+
+}
+
+
+
+
+
+
+const folders =
+getFolders();
+
+
+
+
+
+folders.push({
+
+    name:name,
+
+    created:
+    new Date().toISOString()
+
+});
+
+
+
+
+
+
+saveFolders(
+folders
+);
+
+
+
+
+
+
+input.value="";
+
+
+
+updateFolderList();
+
+
+
+};
+
+
+
+
+
+}
+
+
+
+
+
+
+
+
+
+function updateFolderList(){
+
+
+
+if(!folderBox){
+
+    return;
+
+}
+
+
+
+
+const list =
+folderBox.querySelector(
+".cwFolderList"
+);
+
+
+
+const folders =
+getFolders();
+
+
+
+
+
+list.innerHTML="";
+
+
+
+
+
+
+folders.forEach(function(folder){
+
+
+
+const item =
+document.createElement(
+"div"
+);
+
+
+
+item.className =
+"cwFolderItem";
+
+
+
+item.textContent =
+"📁 " + folder.name;
+
+
+
+list.appendChild(
+item
+);
+
+
+
+});
+
+
+
+}
+
+
+
+
+
+
+
+
+
+
+document.addEventListener(
+"click",
+function(e){
+
+
+
+const button =
+e.target.closest(
+'[data-action="new-folder"]'
+);
+
+
+
+if(!button){
+
+    return;
+
+}
+
+
+
+
+e.preventDefault();
+
+e.stopPropagation();
+
+
+
+openFolderDialog();
+
+
+
+},
+false
+);
+
+
+
+
+
+})();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
