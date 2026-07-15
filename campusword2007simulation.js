@@ -27441,15 +27441,12 @@ false
 
 
 
-
-
 /* =========================================================
    CAMPUS WORD — FOLDER ENGINE
    STEP 1
    CREATE NEW FOLDER
    SAVE FOLDER NAME LOCAL
    SHOW FOLDER LIST
-   DELETE UI ADDON
    ISOLATED SYSTEM
 ========================================================= */
 
@@ -27707,6 +27704,7 @@ updateFolderList();
 
 
 
+
 function updateFolderList(){
 
 
@@ -27729,6 +27727,8 @@ folderBox.querySelector(
 
 const folders =
 getFolders();
+
+
 
 
 
@@ -27755,82 +27755,8 @@ item.className =
 
 
 
-
-
-const folderName =
-document.createElement(
-"span"
-);
-
-
-
-folderName.textContent =
+item.textContent =
 "📁 " + folder.name;
-
-
-
-
-
-
-
-const deleteBtn =
-document.createElement(
-"button"
-);
-
-
-
-deleteBtn.className =
-"cwFolderDeleteBtn";
-
-
-
-deleteBtn.textContent =
-"Delete";
-
-
-
-
-
-
-
-deleteBtn.addEventListener(
-"click",
-function(e){
-
-
-e.stopPropagation();
-
-
-
-console.log(
-"Delete button:",
-folder.name
-);
-
-
-
-},
-false
-);
-
-
-
-
-
-
-
-item.appendChild(
-folderName
-);
-
-
-
-item.appendChild(
-deleteBtn
-);
-
-
 
 
 
@@ -27896,7 +27822,6 @@ false
 
 
 })();
-
 
 
 
