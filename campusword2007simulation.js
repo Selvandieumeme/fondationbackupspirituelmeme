@@ -26972,42 +26972,27 @@ false
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 /* =========================================================
-   CAMPUS WORD — SAVE DOCUMENT ENGINE
-   OFFICE MENU SAVE BUTTON
-   SAFE STORAGE SYSTEM
+   CAMPUS WORD — SAVE DIALOG ENGINE
+   STEP 1
+   DOCUMENT NAME BOX
+   SAVE + CANCEL UI ONLY
+   NO DOCUMENT STORAGE YET
    ISOLATED SYSTEM
 ========================================================= */
 
 (function(){
 
 
-
-function saveDocument(){
-
-
-
-const pages =
-document.querySelectorAll(
-".cwPageContent"
-);
+let saveBox = null;
 
 
 
-if(!pages.length){
+function openSaveDialog(){
+
+
+
+if(saveBox){
 
     return;
 
@@ -27015,17 +27000,90 @@ if(!pages.length){
 
 
 
+saveBox =
+document.createElement(
+"div"
+);
 
 
-let documentData = {
 
-    title:"Campus Word Document",
-
-    pages:[],
+saveBox.className =
+"cwSaveDialog";
 
 
-    savedAt:
-    new Date().toISOString()
+
+
+
+saveBox.innerHTML = `
+
+
+<div class="cwSaveWindow">
+
+
+<h3>
+Save Document
+</h3>
+
+
+<label>
+Document Name
+</label>
+
+
+<input 
+type="text"
+class="cwSaveNameInput"
+placeholder="Enter document name"
+/>
+
+
+
+<div class="cwSaveActions">
+
+
+<button class="cwSaveConfirm">
+Save
+</button>
+
+
+
+<button class="cwSaveCancel">
+Cancel
+</button>
+
+
+</div>
+
+
+
+</div>
+
+
+`;
+
+
+
+
+
+document.body.appendChild(
+saveBox
+);
+
+
+
+
+
+
+saveBox.querySelector(
+".cwSaveCancel"
+)
+.onclick=function(){
+
+
+saveBox.remove();
+
+saveBox=null;
+
 
 };
 
@@ -27035,47 +27093,53 @@ let documentData = {
 
 
 
-pages.forEach(function(page){
-
-
-    documentData.pages.push({
-
-        content:
-        page.innerHTML
-
-    });
-
-
-});
-
-
-
-
-
-
-
-localStorage.setItem(
-"CampusWordSavedDocument",
-JSON.stringify(
-documentData
+saveBox.querySelector(
+".cwSaveConfirm"
 )
-);
+.onclick=function(){
+
+
+
+const name =
+saveBox.querySelector(
+".cwSaveNameInput"
+).value.trim();
 
 
 
 
+if(!name){
 
-/* Optional status feedback */
+    return;
+
+}
+
+
+
+
 
 if(
 window.CampusWord2007Simulateur &&
-CampusWord2007Simulateur.statusReady
+window.CampusWord2007Simulateur.state
 ){
 
-    CampusWord2007Simulateur.statusReady.textContent =
-    "Saved";
+
+window.CampusWord2007Simulateur.state.documentName =
+name;
+
 
 }
+
+
+
+
+saveBox.remove();
+
+saveBox=null;
+
+
+
+};
 
 
 
@@ -27117,7 +27181,7 @@ e.stopPropagation();
 
 
 
-saveDocument();
+openSaveDialog();
 
 
 
@@ -27130,6 +27194,11 @@ false
 
 
 })();
+
+
+
+
+
 
 
 
