@@ -28017,6 +28017,298 @@ false
 
 
 
+/* =========================================================
+   CAMPUS WORD — OPEN FOLDER DOCUMENT VIEWER
+   STEP 4
+   SHOW DOCUMENTS INSIDE ACTIVE FOLDER
+   READ ONLY
+   NO EDIT / NO DELETE
+   ISOLATED SYSTEM
+========================================================= */
+
+(function(){
+
+
+function getActiveFolder(){
+
+
+return (
+window.CampusWordActiveFolder ||
+null
+);
+
+
+}
+
+
+
+
+
+
+function openFolderDocuments(){
+
+
+
+const folderName =
+getActiveFolder();
+
+
+
+
+
+if(!folderName){
+
+    return;
+
+}
+
+
+
+
+
+const key =
+"CampusWordFolder_" + folderName;
+
+
+
+
+
+const data =
+localStorage.getItem(
+key
+);
+
+
+
+
+
+const documents =
+data
+?
+JSON.parse(data)
+:
+[];
+
+
+
+
+
+
+const box =
+document.createElement(
+"div"
+);
+
+
+
+box.className =
+"cwFolderDocumentsDialog";
+
+
+
+
+
+box.innerHTML = `
+
+
+<div class="cwFolderDocumentsWindow">
+
+
+<h3>
+📁 ${folderName}
+</h3>
+
+
+<div class="cwDocumentsList">
+
+</div>
+
+
+
+<button class="cwDocumentsClose">
+Close
+</button>
+
+
+
+</div>
+
+`;
+
+
+
+
+
+document.body.appendChild(
+box
+);
+
+
+
+
+
+const list =
+box.querySelector(
+".cwDocumentsList"
+);
+
+
+
+
+
+
+if(documents.length===0){
+
+
+list.innerHTML =
+"<div>No documents saved in this folder</div>";
+
+
+}
+
+else{
+
+
+
+documents.forEach(function(doc){
+
+
+
+const item =
+document.createElement(
+"div"
+);
+
+
+
+item.className =
+"cwFolderDocumentItem";
+
+
+
+item.textContent =
+"📄 " + doc.name;
+
+
+
+list.appendChild(
+item
+);
+
+
+
+});
+
+
+
+}
+
+
+
+
+
+
+
+box.querySelector(
+".cwDocumentsClose"
+)
+.onclick=function(){
+
+
+box.remove();
+
+
+};
+
+
+
+
+
+}
+
+
+
+
+
+
+
+
+
+document.addEventListener(
+"click",
+function(e){
+
+
+
+const folder =
+e.target.closest(
+".cwFolderItem"
+);
+
+
+
+if(!folder){
+
+    return;
+
+}
+
+
+
+
+if(!window.CampusWordActiveFolder){
+
+    return;
+
+}
+
+
+
+openFolderDocuments();
+
+
+
+},
+false
+);
+
+
+
+
+
+})();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
