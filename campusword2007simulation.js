@@ -29694,6 +29694,165 @@ false
 
 
 
+/* =========================================================
+   CAMPUS WORD — INDEXED DB FOLDER DELETE
+   STEP 3A
+   DELETE FOLDER STORAGE
+   NO UI CONNECTION YET
+   ISOLATED SYSTEM
+========================================================= */
+
+(function(){
+
+
+
+if(
+!window.CampusWordStorageEngine
+){
+
+    return;
+
+}
+
+
+
+
+
+
+
+
+window.CampusWordStorageEngine.deleteFolder =
+function(folderId){
+
+
+
+return new Promise(function(resolve,reject){
+
+
+
+
+
+const db =
+CampusWordStorageEngine.db;
+
+
+
+
+
+if(!db){
+
+
+    reject(
+    "IndexedDB not ready"
+    );
+
+
+    return;
+
+}
+
+
+
+
+
+
+
+const transaction =
+db.transaction(
+"folders",
+"readwrite"
+);
+
+
+
+
+
+
+const store =
+transaction.objectStore(
+"folders"
+);
+
+
+
+
+
+
+
+const request =
+store.delete(
+folderId
+);
+
+
+
+
+
+
+
+request.onsuccess =
+function(){
+
+
+resolve(true);
+
+
+};
+
+
+
+
+
+
+
+request.onerror =
+function(event){
+
+
+
+reject(
+event.target.error
+);
+
+
+};
+
+
+
+
+
+
+});
+
+
+
+};
+
+
+
+
+
+
+
+
+})();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
