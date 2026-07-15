@@ -4878,3 +4878,97 @@ bottom:-6px;
     font-weight:bold;
 
 }
+
+
+
+
+
+
+
+
+
+
+
+
+/* =========================================================
+   CAMPUS WORD — FOLDER DOCUMENT VIEWER
+   STEP 4
+========================================================= */
+
+
+.cwFolderDocumentsDialog{
+
+    position:fixed;
+
+    inset:0;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    background:rgba(0,0,0,.25);
+
+    z-index:10001;
+
+}
+
+
+
+
+
+.cwFolderDocumentsWindow{
+
+    width:340px;
+
+    background:white;
+
+    padding:20px;
+
+    border-radius:8px;
+
+    box-shadow:
+    0 10px 30px rgba(0,0,0,.25);
+
+}
+
+
+
+
+
+.cwDocumentsList{
+
+    margin-top:15px;
+
+    max-height:200px;
+
+    overflow:auto;
+
+}
+
+
+
+
+
+.cwFolderDocumentItem{
+
+    padding:10px;
+
+    border-bottom:1px solid #ddd;
+
+}
+
+
+
+
+
+.cwDocumentsClose{
+
+    margin-top:15px;
+
+    width:100%;
+
+    padding:8px;
+
+}
