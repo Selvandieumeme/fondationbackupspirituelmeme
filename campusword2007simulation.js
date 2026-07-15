@@ -27704,8 +27704,6 @@ updateFolderList();
 
 
 
-
-
 function updateFolderList(){
 
 
@@ -27797,32 +27795,12 @@ deleteBtn.textContent =
 
 
 /*
-   Preserve folder opening behavior
+   DELETE BUTTON ONLY
+   DOES NOT BLOCK FOLDER CLICK
 */
 
-item.onclick =
-function(){
-
-
-console.log(
-"Open folder:",
-folder.name
-);
-
-
-};
-
-
-
-
-
-
-
-/*
-   Delete UI only
-*/
-
-deleteBtn.onclick =
+deleteBtn.addEventListener(
+"click",
 function(e){
 
 
@@ -27836,7 +27814,10 @@ folder.name
 );
 
 
-};
+
+},
+false
+);
 
 
 
@@ -27869,6 +27850,8 @@ item
 
 
 }
+
+
 
 
 
