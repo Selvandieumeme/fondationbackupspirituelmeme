@@ -5113,3 +5113,51 @@ bottom:-6px;
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+/* =========================================================
+   CAMPUS WORD — SAVE AS FOLDER CREATE DIALOG
+   ISOLATED CSS
+========================================================= */
+
+.cwSaveAsFolderCreateDialog{
+    position:fixed;
+    inset:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    z-index:99999;
+}
+
+.cwSaveAsFolderCreateWindow{
+    width:320px;
+    padding:20px;
+    background:white;
+    border:1px solid #999;
+    border-radius:8px;
+}
+
+.cwSaveAsFolderNameInput{
+    width:100%;
+    padding:8px;
+    margin:15px 0;
+}
+
+.cwSaveAsFolderActions{
+    display:flex;
+    justify-content:flex-end;
+    gap:10px;
+}
+
+
+
