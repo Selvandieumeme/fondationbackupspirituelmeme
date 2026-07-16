@@ -26959,6 +26959,287 @@ false
 
 
 
+/* =========================================================
+   CAMPUS WORD — INDEXED DB STORAGE ENGINE
+   STEP 1
+   DATABASE INITIALIZATION
+   DOCUMENT + FOLDER FOUNDATION
+   NO UI CONNECTION YET
+   ISOLATED SYSTEM
+========================================================= */
+
+(function(){
+
+
+
+const DB_NAME =
+"CampusWordDB";
+
+
+
+const DB_VERSION =
+2;
+
+
+
+const DOCUMENT_STORE =
+"documents";
+
+
+const FOLDER_STORE =
+"folders";
+
+
+
+
+
+
+
+function openDatabase(){
+
+
+
+return new Promise(function(resolve,reject){
+
+
+
+const request =
+indexedDB.open(
+DB_NAME,
+DB_VERSION
+);
+
+
+
+
+
+
+
+
+request.onupgradeneeded =
+function(event){
+
+
+
+const db =
+event.target.result;
+
+
+
+
+
+
+/* =========================
+   DOCUMENT STORE
+========================= */
+
+
+if(
+!db.objectStoreNames.contains(
+DOCUMENT_STORE
+)
+){
+
+
+db.createObjectStore(
+DOCUMENT_STORE,
+{
+keyPath:"id",
+autoIncrement:true
+}
+);
+
+
+}
+
+
+
+
+
+
+
+
+/* =========================
+   FOLDER STORE
+========================= */
+
+
+if(
+!db.objectStoreNames.contains(
+FOLDER_STORE
+)
+){
+
+
+db.createObjectStore(
+FOLDER_STORE,
+{
+keyPath:"id",
+autoIncrement:true
+}
+);
+
+
+}
+
+
+
+
+
+};
+
+
+
+
+
+
+
+
+
+request.onsuccess =
+function(event){
+
+
+
+const db =
+event.target.result;
+
+
+
+window.CampusWordDB =
+db;
+
+
+
+resolve(
+db
+);
+
+
+
+};
+
+
+
+
+
+
+
+
+
+request.onerror =
+function(event){
+
+
+reject(
+event.target.error
+);
+
+
+};
+
+
+
+
+
+});
+
+
+
+}
+
+
+
+
+
+
+
+
+
+window.CampusWordStorageEngine = {
+
+
+
+db:null,
+
+
+
+
+
+init:function(){
+
+
+
+return openDatabase()
+
+.then(function(db){
+
+
+
+CampusWordStorageEngine.db =
+db;
+
+
+
+console.log(
+"Campus Word IndexedDB Ready"
+);
+
+
+
+});
+
+
+
+}
+
+
+
+
+
+
+};
+
+
+
+
+
+
+
+
+
+CampusWordStorageEngine.init();
+
+
+
+})();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
