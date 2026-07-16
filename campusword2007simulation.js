@@ -29554,14 +29554,14 @@ console.log(
    CAMPUS WORD — SAVE AS FILE BROWSER ENGINE
    STEP 3
    LOAD INDEXED DB FOLDERS + DOCUMENTS
+   CREATE NEW FOLDER INSIDE SAVE AS
 
    COMPATIBLE WITH SAVE AS FOLDER BRIDGE
 
    NO NEW STORE
    NO VERSION CHANGE
    NO LOCAL STORAGE
-   NO ACTIVE FOLDER CHANGE
-   DOES NOT CLEAR SAVE AS UI
+   NO OLD FOLDER ENGINE
    ISOLATED MODULE
 ========================================================= */
 
@@ -29571,10 +29571,9 @@ console.log(
 
 
 
-
-
 let selectedSaveFolder = null;
 
+let createBox = null;
 
 
 
@@ -29583,19 +29582,6 @@ let selectedSaveFolder = null;
 
 
 function getSaveAsFolders(){
-
-
-
-if(
-!window.CampusWordSaveAsFolderEngine ||
-!window.CampusWordSaveAsFolderEngine.getFolders
-){
-
-return Promise.reject(
-"Save As Folder Engine unavailable"
-);
-
-}
 
 
 
@@ -29613,21 +29599,7 @@ CampusWordSaveAsFolderEngine.getFolders()
 
 
 
-
 function getSaveAsDocuments(){
-
-
-
-if(
-!window.CampusWordStorageEngine ||
-!window.CampusWordStorageEngine.getDocuments
-){
-
-return Promise.reject(
-"Document storage unavailable"
-);
-
-}
 
 
 
@@ -29665,12 +29637,7 @@ return;
 
 
 
-
-
-
 area.innerHTML="";
-
-
 
 
 
@@ -29681,51 +29648,19 @@ getSaveAsDocuments()
 
 
 
-const filtered =
-documents.filter(function(doc){
+documents
+.filter(function(doc){
 
+return doc.folder === folderName;
 
+})
 
-return (
-doc.folder === folderName
-);
-
-
-
-});
-
-
-
-
-
-
-if(filtered.length===0){
-
-
-
-area.innerHTML =
-"<div>No documents saved in this folder</div>";
-
-
-
-return;
-
-}
-
-
-
-
-
-
-
-filtered.forEach(function(doc){
+.forEach(function(doc){
 
 
 
 const file =
-document.createElement(
-"div"
-);
+document.createElement("div");
 
 
 
@@ -29739,17 +29674,11 @@ file.textContent =
 
 
 
-
-
-area.appendChild(
-file
-);
+area.appendChild(file);
 
 
 
 });
-
-
 
 
 
@@ -29758,12 +29687,10 @@ file
 .catch(function(error){
 
 
-
 console.error(
 "Save As document loading error:",
 error
 );
-
 
 
 });
@@ -29810,13 +29737,8 @@ item.classList.add(
 
 
 
-
-
 selectedSaveFolder =
 folderName;
-
-
-
 
 
 
@@ -29826,10 +29748,280 @@ folderName;
 
 
 
+showDocuments(folderName);
 
 
-showDocuments(
-folderName
+
+}
+
+
+
+
+
+
+
+
+
+
+function openCreateFolderBox(){
+
+
+
+if(createBox){
+
+return;
+
+}
+
+
+
+
+
+createBox =
+document.createElement("div");
+
+
+
+createBox.className =
+"cwSaveAsFolderCreateDialog";
+
+
+
+
+
+createBox.innerHTML = `
+
+<div class="cwSaveAsFolderCreateWindow">
+
+<h3>
+Create New Folder
+</h3>
+
+
+<input
+class="cwSaveAsFolderInput"
+placeholder="Folder name"
+/>
+
+
+<div class="cwSaveAsFolderButtons">
+
+
+<button class="cwSaveAsFolderCreate">
+Create
+</button>
+
+
+<button class="cwSaveAsFolderCancel">
+Cancel
+</button>
+
+
+</div>
+
+
+</div>
+
+`;
+
+
+
+
+document.body.appendChild(
+createBox
+);
+
+
+
+
+
+
+createBox
+.querySelector(
+".cwSaveAsFolderCancel"
+)
+.onclick=function(){
+
+
+createBox.remove();
+
+createBox=null;
+
+
+};
+
+
+
+
+
+
+
+createBox
+.querySelector(
+".cwSaveAsFolderCreate"
+)
+.onclick=function(){
+
+
+
+const input =
+createBox.querySelector(
+".cwSaveAsFolderInput"
+);
+
+
+
+const name =
+input.value.trim();
+
+
+
+
+if(!name){
+
+return;
+
+}
+
+
+
+
+
+CampusWordSaveAsFolderEngine
+.createFolder(name)
+
+.then(function(){
+
+
+
+console.log(
+"Save As Folder Created:",
+name
+);
+
+
+
+createBox.remove();
+
+createBox=null;
+
+
+
+
+loadSaveAsFolders();
+
+
+
+})
+
+.catch(function(error){
+
+
+
+console.error(
+"Save As Folder Create Error:",
+error
+);
+
+
+
+});
+
+
+
+};
+
+
+
+}
+
+
+
+
+
+
+
+
+
+function injectNewFolderButton(){
+
+
+
+const buttons =
+document.querySelector(
+".cwSaveAsButtons"
+);
+
+
+
+if(!buttons){
+
+return;
+
+}
+
+
+
+
+
+
+
+if(
+buttons.querySelector(
+".cwSaveAsNewFolderBtn"
+)
+){
+
+return;
+
+}
+
+
+
+
+
+
+const button =
+document.createElement("button");
+
+
+
+button.className =
+"cwSaveAsNewFolderBtn";
+
+
+
+button.textContent =
+"New Folder";
+
+
+
+
+
+button.onclick=function(e){
+
+
+
+e.preventDefault();
+
+e.stopPropagation();
+
+
+
+openCreateFolderBox();
+
+
+
+};
+
+
+
+
+
+
+buttons.insertBefore(
+button,
+buttons.firstChild
 );
 
 
@@ -29861,14 +30053,11 @@ document.querySelector(
 
 
 
-
-
 if(!container){
 
 return;
 
 }
-
 
 
 
@@ -29902,7 +30091,6 @@ folder.name
 
 
 
-
 if(exists){
 
 return;
@@ -29913,12 +30101,8 @@ return;
 
 
 
-
-
 const item =
-document.createElement(
-"div"
-);
+document.createElement("div");
 
 
 
@@ -29934,10 +30118,7 @@ item.textContent =
 
 
 
-
-
-item.onclick =
-function(e){
+item.onclick=function(e){
 
 
 
@@ -29959,9 +30140,7 @@ folder.name
 
 
 
-container.appendChild(
-item
-);
+container.appendChild(item);
 
 
 
@@ -29972,7 +30151,6 @@ item
 })
 
 .catch(function(error){
-
 
 
 console.error(
@@ -29996,6 +30174,7 @@ error
 
 
 
+
 document.addEventListener(
 "click",
 function(e){
@@ -30009,22 +30188,15 @@ e.target.closest(
 
 
 
-
-
-if(!saveAsButton){
-
-return;
-
-}
-
-
-
+if(saveAsButton){
 
 
 
 setTimeout(function(){
 
 
+
+injectNewFolderButton();
 
 loadSaveAsFolders();
 
@@ -30034,12 +30206,15 @@ loadSaveAsFolders();
 
 
 
+}
 
 
 
-},
-false
-);
+
+
+
+
+});
 
 
 
@@ -30050,9 +30225,6 @@ false
 console.log(
 "Save As File Browser Ready"
 );
-
-
-
 
 
 
@@ -30078,15 +30250,18 @@ console.log(
    SAVE DOCUMENT INSIDE SELECTED SAVE AS FOLDER
    INDEXED DB ONLY
 
-   FULL ISOLATION
+   COMPATIBLE WITH SAVE AS FOLDER BRIDGE
+
    NO LOCAL STORAGE
    NO OLD SAVE SYSTEM
    NO OPEN FOLDER CHANGE
+   ISOLATED MODULE
 ========================================================= */
 
 (function(){
 
 "use strict";
+
 
 
 
@@ -30113,7 +30288,6 @@ const savedPages = [];
 
 
 
-
 pages.forEach(function(page){
 
 
@@ -30123,9 +30297,7 @@ savedPages.push({
 html:
 page.innerHTML
 
-
 });
-
 
 
 });
@@ -30167,7 +30339,7 @@ e.target.closest(
 
 if(!button){
 
-    return;
+return;
 
 }
 
@@ -30181,9 +30353,10 @@ if(
 button.dataset.saving === "true"
 ){
 
-    return;
+return;
 
 }
+
 
 
 
@@ -30205,19 +30378,21 @@ if(
 !window.CampusWordStorageEngine.saveDocument
 ){
 
-    console.error(
-    "IndexedDB document engine unavailable"
-    );
 
 
-    button.dataset.saving =
-    "false";
+console.error(
+"IndexedDB document engine unavailable"
+);
 
 
-    return;
+
+button.dataset.saving =
+"false";
+
+
+return;
 
 }
-
 
 
 
@@ -30238,12 +30413,12 @@ document.querySelector(
 if(!input){
 
 
-    button.dataset.saving =
-    "false";
+
+button.dataset.saving =
+"false";
 
 
-    return;
-
+return;
 
 }
 
@@ -30264,15 +30439,14 @@ input.value.trim();
 if(!name){
 
 
-    button.dataset.saving =
-    "false";
+
+button.dataset.saving =
+"false";
 
 
-    return;
-
+return;
 
 }
-
 
 
 
@@ -30300,7 +30474,6 @@ folder:folder,
 
 pages:
 collectSaveAsPages()
-
 
 })
 
@@ -30331,13 +30504,14 @@ document.getElementById(
 
 
 
-
 if(title){
+
 
 
 title.textContent =
 name +
 " - Campus Word 2007 Simulation";
+
 
 
 }
@@ -30370,6 +30544,7 @@ error
 
 
 
+
 button.dataset.saving =
 "false";
 
@@ -30394,9 +30569,13 @@ false
 
 
 
+
 console.log(
 "Save As Document Connector Ready"
 );
+
+
+
 
 
 
