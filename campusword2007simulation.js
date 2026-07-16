@@ -29269,18 +29269,18 @@ false
 /* =========================================================
    CAMPUS WORD — SAVE AS FOLDER STORE ENGINE
    STEP 1
-   DYNAMIC INDEXED DB STORE CREATION
+   SAVE AS COMPATIBILITY BRIDGE
 
-   FULL ISOLATION
-   NO STEP 1 MODIFICATION
-   NO LOCAL STORAGE
+   USE EXISTING INDEXED DB FOLDER STORE
+   NO NEW STORE CREATION
+   NO VERSION UPGRADE
+   NO DATABASE REBUILD
    NO OLD FOLDER SYSTEM ACCESS
-   NO UI CONNECTION
+   NO LOCAL STORAGE
+   ISOLATED MODULE
 ========================================================= */
 
 (function(){
-
-
 
 "use strict";
 
@@ -29288,285 +29288,108 @@ false
 
 
 
-const SAVE_AS_STORE =
-"saveAsFolders";
+function saveAsFolderEngineReady(){
 
 
-
-
-
-
-function upgradeSaveAsStore(dbName,currentVersion){
-
-
-
-return new Promise(function(resolve,reject){
-
-
-
-const request =
-indexedDB.open(
-dbName,
-currentVersion + 1
-);
-
-
-
-
-
-
-
-request.onupgradeneeded =
-function(event){
-
-
-
-const db =
-event.target.result;
-
-
-
-
-
-
-if(
-!db.objectStoreNames.contains(
-SAVE_AS_STORE
-)
-){
-
-
-
-db.createObjectStore(
-SAVE_AS_STORE,
-{
-keyPath:"id",
-autoIncrement:true
-}
-);
-
-
-
-}
-
-
-
-};
-
-
-
-
-
-
-
-request.onsuccess =
-function(event){
-
-
-
-const db =
-event.target.result;
-
-
-
-/*
-   Refresh global DB reference
-   without touching other systems
-*/
-
-
-if(
-window.CampusWordStorageEngine
-){
-
-
-window.CampusWordStorageEngine.db =
-db;
-
-
-}
-
-
-
-
-
-console.log(
-"Save As Folder Store Ready"
-);
-
-
-
-resolve(
-db
-);
-
-
-
-};
-
-
-
-
-
-
-
-request.onerror =
-function(event){
-
-
-
-reject(
-event.target.error
-);
-
-
-
-};
-
-
-
-
-
-
-});
-
-
-
-}
-
-
-
-
-
-
-
-
-
-function initSaveAsFolderStore(){
-
-
-
-if(
-!window.CampusWordStorageEngine ||
-!window.CampusWordStorageEngine.db
-){
-
-
-
-console.warn(
-"Waiting for IndexedDB..."
-);
-
-
-
-return;
-
-}
-
-
-
-
-
-const db =
-window.CampusWordStorageEngine.db;
-
-
-
-
-
-
-if(
-db.objectStoreNames.contains(
-SAVE_AS_STORE
-)
-){
-
-
-
-console.log(
-"Save As Folder Store Already Exists"
-);
-
-
-
-return;
-
-}
-
-
-
-
-
-
-
-upgradeSaveAsStore(
-"CampusWordDB",
-db.version
-)
-
-.catch(function(error){
-
-
-
-console.error(
-"Save As Folder Store Error:",
-error
-);
-
-
-
-});
-
-
-
-}
-
-
-
-
-
-
-
-
-
-/*
-   Wait until main IndexedDB engine is ready
-*/
-
-
-
-
-if(
+return (
 window.CampusWordStorageEngine &&
-window.CampusWordStorageEngine.db
-){
-
-
-initSaveAsFolderStore();
+window.CampusWordStorageEngine.saveFolder &&
+window.CampusWordStorageEngine.getFolders
+);
 
 
 }
 
-else{
 
 
 
-document.addEventListener(
-"CampusWordIndexedDBReady",
-function(){
 
 
-initSaveAsFolderStore();
+
+
+window.CampusWordSaveAsFolderEngine = {
+
+
+
+createFolder:function(name){
+
+
+
+if(
+!saveAsFolderEngineReady()
+){
+
+return Promise.reject(
+"IndexedDB Folder Engine unavailable"
+);
+
+}
+
+
+
+
+
+
+return (
+CampusWordStorageEngine.saveFolder({
+
+name:name
+
+})
+);
+
 
 
 },
-false
+
+
+
+
+
+
+
+getFolders:function(){
+
+
+
+if(
+!saveAsFolderEngineReady()
+){
+
+return Promise.reject(
+"IndexedDB Folder Engine unavailable"
+);
+
+}
+
+
+
+
+
+
+return (
+CampusWordStorageEngine.getFolders()
 );
 
 
 
 }
 
+
+
+
+
+};
+
+
+
+
+
+
+
+console.log(
+"Save As Folder Store Compatible Ready"
+);
 
 
 
@@ -29574,8 +29397,6 @@ false
 
 
 })();
-
-
 
 
 
