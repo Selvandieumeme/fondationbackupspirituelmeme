@@ -26960,15 +26960,31 @@ false
 
 
 /* =========================================================
-   CAMPUS WORD — INDEXED DB STORAGE ENGINE
+   CAMPUS WORD — INDEXED DB CORE
    STEP 1
    DATABASE INITIALIZATION
-   DOCUMENT + FOLDER FOUNDATION
-   NO UI CONNECTION YET
-   ISOLATED SYSTEM
+
+   FOUNDATION ONLY
+
+   FEATURES:
+   ✅ DATABASE CREATION
+   ✅ OBJECT STORES CREATION
+   ✅ GLOBAL DB REFERENCE
+   ✅ READY MESSAGE
+
+   PROTECTION:
+   ❌ NO UI CONNECTION
+   ❌ NO SAVE SYSTEM
+   ❌ NO SAVE AS SYSTEM
+   ❌ NO FOLDER LOGIC
+   ❌ NO DOCUMENT LOGIC
+   ❌ NO LOCAL STORAGE
+
 ========================================================= */
 
 (function(){
+
+"use strict";
 
 
 
@@ -26978,16 +26994,21 @@ const DB_NAME =
 
 
 const DB_VERSION =
-2;
+1;
 
 
 
-const DOCUMENT_STORE =
-"documents";
+const STORES = {
+
+    FOLDERS:
+    "folders",
+
+    DOCUMENTS:
+    "documents"
+
+};
 
 
-const FOLDER_STORE =
-"folders";
 
 
 
@@ -27015,7 +27036,6 @@ DB_VERSION
 
 
 
-
 request.onupgradeneeded =
 function(event){
 
@@ -27030,24 +27050,26 @@ event.target.result;
 
 
 /* =========================
-   DOCUMENT STORE
+   FOLDERS STORE
 ========================= */
 
 
 if(
 !db.objectStoreNames.contains(
-DOCUMENT_STORE
+STORES.FOLDERS
 )
 ){
 
 
+
 db.createObjectStore(
-DOCUMENT_STORE,
+STORES.FOLDERS,
 {
 keyPath:"id",
 autoIncrement:true
 }
 );
+
 
 
 }
@@ -27060,24 +27082,26 @@ autoIncrement:true
 
 
 /* =========================
-   FOLDER STORE
+   DOCUMENTS STORE
 ========================= */
 
 
 if(
 !db.objectStoreNames.contains(
-FOLDER_STORE
+STORES.DOCUMENTS
 )
 ){
 
 
+
 db.createObjectStore(
-FOLDER_STORE,
+STORES.DOCUMENTS,
 {
 keyPath:"id",
 autoIncrement:true
 }
 );
+
 
 
 }
@@ -27106,14 +27130,14 @@ event.target.result;
 
 
 
+
+
 window.CampusWordDB =
 db;
 
 
 
-resolve(
-db
-);
+resolve(db);
 
 
 
@@ -27131,12 +27155,16 @@ request.onerror =
 function(event){
 
 
+
 reject(
 event.target.error
 );
 
 
+
 };
+
+
 
 
 
@@ -27166,6 +27194,15 @@ db:null,
 
 
 
+ready:false,
+
+
+
+
+
+
+
+
 init:function(){
 
 
@@ -27178,6 +27215,14 @@ return openDatabase()
 
 CampusWordStorageEngine.db =
 db;
+
+
+
+CampusWordStorageEngine.ready =
+true;
+
+
+
 
 
 
@@ -27208,7 +27253,23 @@ console.log(
 
 
 
-CampusWordStorageEngine.init();
+CampusWordStorageEngine
+.init()
+
+.catch(function(error){
+
+
+
+console.error(
+"Campus Word IndexedDB Initialization Error:",
+error
+);
+
+
+
+});
+
+
 
 
 
