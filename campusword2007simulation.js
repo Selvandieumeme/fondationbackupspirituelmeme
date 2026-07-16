@@ -30004,6 +30004,370 @@ false
 
 
 
+/* =========================================================
+   CAMPUS WORD — SAVE AS INDEXED DB CONNECTOR
+   STEP 2
+   CONNECT SAVE AS TO INDEXED DB
+   FULLY ISOLATED MODULE
+   NO LOCAL STORAGE
+   NO SAVE BUTTON INTERFERENCE
+========================================================= */
+
+(function(){
+
+
+
+"use strict";
+
+
+
+
+
+function collectPages(){
+
+
+
+const pages =
+document.querySelectorAll(
+".cwPageContent"
+);
+
+
+
+
+
+const savedPages = [];
+
+
+
+
+
+
+
+pages.forEach(function(page){
+
+
+
+savedPages.push({
+
+html:
+page.innerHTML
+
+
+});
+
+
+
+});
+
+
+
+
+
+
+
+return savedPages;
+
+
+
+}
+
+
+
+
+
+
+
+
+
+function getActiveFolder(){
+
+
+
+return (
+window.CampusWordActiveFolder ||
+null
+);
+
+
+
+}
+
+
+
+
+
+
+
+
+
+document.addEventListener(
+"click",
+function(e){
+
+
+
+
+
+const button =
+e.target.closest(
+".cwSaveAsConfirm"
+);
+
+
+
+
+
+if(!button){
+
+    return;
+
+}
+
+
+
+
+
+
+
+
+/*
+   BLOCK DUPLICATE EXECUTION
+*/
+
+if(
+button.dataset.saving === "true"
+){
+
+    return;
+
+}
+
+
+
+button.dataset.saving =
+"true";
+
+
+
+
+
+
+
+
+if(
+!window.CampusWordStorageEngine ||
+!window.CampusWordStorageEngine.saveDocument
+){
+
+    console.error(
+    "Save As IndexedDB engine unavailable"
+    );
+
+
+    button.dataset.saving =
+    "false";
+
+
+    return;
+
+}
+
+
+
+
+
+
+
+
+
+const input =
+document.querySelector(
+".cwSaveAsNameInput"
+);
+
+
+
+
+
+
+if(!input){
+
+
+    button.dataset.saving =
+    "false";
+
+
+    return;
+
+
+}
+
+
+
+
+
+
+
+const name =
+input.value.trim();
+
+
+
+
+
+
+
+if(!name){
+
+
+    button.dataset.saving =
+    "false";
+
+
+    return;
+
+
+}
+
+
+
+
+
+
+
+
+
+CampusWordStorageEngine.saveDocument({
+
+name:name,
+
+folder:
+getActiveFolder(),
+
+pages:
+collectPages()
+
+
+})
+
+.then(function(id){
+
+
+
+
+
+console.log(
+"Save As IndexedDB success:",
+id
+);
+
+
+
+
+
+/*
+   UPDATE TITLE BAR ONLY
+*/
+
+const title =
+document.getElementById(
+"cwTitle"
+);
+
+
+
+
+
+if(title){
+
+
+title.textContent =
+name +
+" - Campus Word 2007 Simulation";
+
+
+}
+
+
+
+
+
+
+
+
+button.dataset.saving =
+"false";
+
+
+
+
+
+
+
+})
+.catch(function(error){
+
+
+
+
+
+console.error(
+"Save As IndexedDB error:",
+error
+);
+
+
+
+
+
+button.dataset.saving =
+"false";
+
+
+
+
+
+
+});
+
+
+
+
+
+
+},
+false
+);
+
+
+
+
+
+
+})();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
