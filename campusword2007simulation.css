@@ -5123,41 +5123,107 @@ bottom:-6px;
 
 
 
-
-
 /* =========================================================
-   CAMPUS WORD — SAVE AS FOLDER CREATE DIALOG
-   ISOLATED CSS
+   CAMPUS WORD — SAVE AS FOLDER UI CSS
+   STEP 3
+
+   FULL ISOLATION
 ========================================================= */
 
+
 .cwSaveAsFolderCreateDialog{
+
     position:fixed;
+
     inset:0;
+
     display:flex;
+
     align-items:center;
+
     justify-content:center;
+
+    background:rgba(0,0,0,.25);
+
     z-index:99999;
+
 }
+
+
+
+
 
 .cwSaveAsFolderCreateWindow{
-    width:320px;
-    padding:20px;
+
+    width:340px;
+
     background:white;
-    border:1px solid #999;
+
+    padding:20px;
+
+    border:1px solid #888;
+
     border-radius:8px;
+
+    box-shadow:0 10px 30px rgba(0,0,0,.25);
+
 }
 
-.cwSaveAsFolderNameInput{
+
+
+
+
+.cwSaveAsFolderInput{
+
     width:100%;
+
+    box-sizing:border-box;
+
     padding:8px;
+
     margin:15px 0;
+
 }
 
-.cwSaveAsFolderActions{
+
+
+
+
+.cwSaveAsFolderButtons{
+
     display:flex;
+
     justify-content:flex-end;
+
     gap:10px;
+
 }
+
+
+
+
+
+.cwSaveAsFolderButtons button{
+
+    padding:6px 18px;
+
+    cursor:pointer;
+
+}
+
+
+
+
+
+.cwSaveAsFolderItem.active{
+
+    background:#dbeafe;
+
+    border:1px solid #2563eb;
+
+}
+
+
 
 
 
