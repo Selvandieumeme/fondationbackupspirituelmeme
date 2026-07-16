@@ -29704,6 +29704,315 @@ false
 
 
 
+/* =========================================================
+   CAMPUS WORD — SAVE AS DIALOG ENGINE
+   STEP 1
+   WORD STYLE UI ONLY
+   NO DATABASE CONNECTION
+   ISOLATED SYSTEM
+========================================================= */
+
+(function(){
+
+
+
+let saveAsBox = null;
+
+
+
+
+
+function openSaveAsDialog(){
+
+
+
+if(saveAsBox){
+
+    return;
+
+}
+
+
+
+
+
+saveAsBox =
+document.createElement(
+"div"
+);
+
+
+
+saveAsBox.className =
+"cwSaveAsDialog";
+
+
+
+
+
+saveAsBox.innerHTML = `
+
+<div class="cwSaveAsWindow">
+
+
+<div class="cwSaveAsHeader">
+
+<h2>
+Save As
+</h2>
+
+</div>
+
+
+
+
+
+<div class="cwSaveAsBody">
+
+
+
+<div class="cwSaveAsSidebar">
+
+
+<div class="cwSaveAsFolderScroll">
+
+
+<div class="cwSaveAsFolderItem">
+📁 My Documents
+</div>
+
+
+<div class="cwSaveAsFolderItem">
+🖥 Desktop
+</div>
+
+
+<div class="cwSaveAsFolderItem">
+💻 My Computer
+</div>
+
+
+<div class="cwSaveAsFolderItem">
+🎬 My Videos
+</div>
+
+
+<div class="cwSaveAsFolderItem">
+🖼 My Pictures
+</div>
+
+
+<div class="cwSaveAsFolderItem">
+🗄 Indexed DB
+</div>
+
+
+<div class="cwSaveAsFolderItem">
+💾 C:
+</div>
+
+
+<div class="cwSaveAsFolderItem">
+💾 E:
+</div>
+
+
+</div>
+
+
+</div>
+
+
+
+
+
+
+
+<div class="cwSaveAsFilesArea">
+
+
+<div class="cwSaveAsHorizontalScroll">
+
+
+<div class="cwSaveAsFileSpace">
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+
+
+
+</div>
+
+
+
+
+
+
+
+<div class="cwSaveAsFooter">
+
+
+<div class="cwSaveAsFileName">
+
+
+<label>
+File Name
+</label>
+
+
+<input
+type="text"
+class="cwSaveAsNameInput"
+/>
+
+
+</div>
+
+
+
+
+
+
+<div class="cwSaveAsButtons">
+
+
+<button class="cwSaveAsConfirm">
+Save
+</button>
+
+
+<button class="cwSaveAsCancel">
+Cancel
+</button>
+
+
+</div>
+
+
+
+</div>
+
+
+
+
+
+</div>
+
+`;
+
+
+
+
+
+
+document.body.appendChild(
+saveAsBox
+);
+
+
+
+
+
+
+
+saveAsBox.querySelector(
+".cwSaveAsCancel"
+)
+.onclick=function(){
+
+
+saveAsBox.remove();
+
+saveAsBox=null;
+
+
+};
+
+
+
+
+
+}
+
+
+
+
+
+
+
+
+document.addEventListener(
+"click",
+function(e){
+
+
+
+const button =
+e.target.closest(
+'[data-action="save-as"]'
+);
+
+
+
+
+
+if(!button){
+
+    return;
+
+}
+
+
+
+
+
+e.preventDefault();
+
+e.stopPropagation();
+
+
+
+openSaveAsDialog();
+
+
+
+},
+false
+);
+
+
+
+
+
+})();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
