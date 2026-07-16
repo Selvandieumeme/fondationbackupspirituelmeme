@@ -27200,6 +27200,330 @@ window.CampusWordStorageCore.init();
 
 
 
+/* =========================================================
+   CAMPUS WORD — STORAGE CORE FOLDER MANAGER
+   STEP 2
+
+   CREATE + READ FOLDERS
+
+   COMPATIBLE WITH STEP 1
+   USES ONLY CampusWordStorageCore
+
+   NO UI
+   NO OLD SYSTEM
+   NO LOCAL STORAGE
+========================================================= */
+
+(function(){
+
+"use strict";
+
+
+
+
+
+const STORE =
+"folders";
+
+
+
+
+
+
+function getDatabase(){
+
+
+
+if(
+!window.CampusWordStorageCore ||
+!window.CampusWordStorageCore.db
+){
+
+return null;
+
+}
+
+
+
+return (
+window.CampusWordStorageCore.db
+);
+
+
+
+}
+
+
+
+
+
+
+
+
+window.CampusWordStorageCore.createFolder =
+function(folderName){
+
+
+
+return new Promise(function(resolve,reject){
+
+
+
+const db =
+getDatabase();
+
+
+
+
+
+if(!db){
+
+
+
+reject(
+"Storage database not ready"
+);
+
+
+
+return;
+
+}
+
+
+
+
+
+
+
+const transaction =
+db.transaction(
+STORE,
+"readwrite"
+);
+
+
+
+
+
+const store =
+transaction.objectStore(
+STORE
+);
+
+
+
+
+
+
+
+const request =
+store.add({
+
+name:
+folderName,
+
+createdAt:
+new Date().toISOString()
+
+});
+
+
+
+
+
+
+
+request.onsuccess =
+function(){
+
+
+
+resolve(
+request.result
+);
+
+
+
+};
+
+
+
+
+
+
+request.onerror =
+function(event){
+
+
+
+reject(
+event.target.error
+);
+
+
+
+};
+
+
+
+
+
+
+});
+
+
+
+};
+
+
+
+
+
+
+
+
+
+window.CampusWordStorageCore.getFolders =
+function(){
+
+
+
+return new Promise(function(resolve,reject){
+
+
+
+const db =
+getDatabase();
+
+
+
+
+
+
+if(!db){
+
+
+
+reject(
+"Storage database not ready"
+);
+
+
+
+return;
+
+}
+
+
+
+
+
+
+const transaction =
+db.transaction(
+STORE,
+"readonly"
+);
+
+
+
+
+
+
+const store =
+transaction.objectStore(
+STORE
+);
+
+
+
+
+
+
+const request =
+store.getAll();
+
+
+
+
+
+
+
+request.onsuccess =
+function(){
+
+
+
+resolve(
+request.result
+);
+
+
+
+};
+
+
+
+
+
+
+request.onerror =
+function(event){
+
+
+
+reject(
+event.target.error
+);
+
+
+
+};
+
+
+
+
+
+});
+
+
+
+};
+
+
+
+
+
+
+
+console.log(
+"CampusWord Folder Core Ready"
+);
+
+
+
+
+
+
+})();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
