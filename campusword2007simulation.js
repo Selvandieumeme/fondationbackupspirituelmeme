@@ -28398,20 +28398,21 @@ false
 
 
 
-
-
 /* =========================================================
-   CAMPUS WORD — SAVE AS INDEXED DB CONNECTOR
+   CAMPUS WORD — SAVE AS FOLDER MANAGER
    STEP 2
-   CONNECT SAVE AS TO INDEXED DB
-   FULLY ISOLATED MODULE
+   CREATE + LOAD SAVE AS FOLDERS
+
+   COMPATIBLE WITH MAIN INDEXED DB FOLDER STORE
+
+   NO NEW STORE
+   NO VERSION CHANGE
    NO LOCAL STORAGE
-   NO SAVE BUTTON INTERFERENCE
+   NO OLD FOLDER ENGINE
+   ISOLATED MODULE
 ========================================================= */
 
 (function(){
-
-
 
 "use strict";
 
@@ -28419,70 +28420,15 @@ false
 
 
 
-function collectPages(){
 
-
-
-const pages =
-document.querySelectorAll(
-".cwPageContent"
-);
-
-
-
-
-
-const savedPages = [];
-
-
-
-
-
-
-
-pages.forEach(function(page){
-
-
-
-savedPages.push({
-
-html:
-page.innerHTML
-
-
-});
-
-
-
-});
-
-
-
-
-
-
-
-return savedPages;
-
-
-
-}
-
-
-
-
-
-
-
-
-
-function getActiveFolder(){
+function engineReady(){
 
 
 
 return (
-window.CampusWordActiveFolder ||
-null
+window.CampusWordStorageEngine &&
+window.CampusWordStorageEngine.saveFolder &&
+window.CampusWordStorageEngine.getFolders
 );
 
 
@@ -28496,28 +28442,27 @@ null
 
 
 
-
-document.addEventListener(
-"click",
-function(e){
+window.CampusWordSaveAsFolderEngine =
+{
 
 
 
 
 
-const button =
-e.target.closest(
-".cwSaveAsConfirm"
+
+
+createFolder:function(folderName){
+
+
+
+if(!engineReady()){
+
+
+return Promise.reject(
+"IndexedDB Folder Engine unavailable"
 );
 
 
-
-
-
-if(!button){
-
-    return;
-
 }
 
 
@@ -28525,215 +28470,70 @@ if(!button){
 
 
 
+return (
+CampusWordStorageEngine.saveFolder({
 
-
-/*
-   BLOCK DUPLICATE EXECUTION
-*/
-
-if(
-button.dataset.saving === "true"
-){
-
-    return;
-
-}
-
-
-
-button.dataset.saving =
-"true";
-
-
-
-
-
-
-
-
-if(
-!window.CampusWordStorageEngine ||
-!window.CampusWordStorageEngine.saveDocument
-){
-
-    console.error(
-    "Save As IndexedDB engine unavailable"
-    );
-
-
-    button.dataset.saving =
-    "false";
-
-
-    return;
-
-}
-
-
-
-
-
-
-
-
-
-const input =
-document.querySelector(
-".cwSaveAsNameInput"
-);
-
-
-
-
-
-
-if(!input){
-
-
-    button.dataset.saving =
-    "false";
-
-
-    return;
-
-
-}
-
-
-
-
-
-
-
-const name =
-input.value.trim();
-
-
-
-
-
-
-
-if(!name){
-
-
-    button.dataset.saving =
-    "false";
-
-
-    return;
-
-
-}
-
-
-
-
-
-
-
-
-
-CampusWordStorageEngine.saveDocument({
-
-name:name,
-
-folder:
-getActiveFolder(),
-
-pages:
-collectPages()
-
+name:folderName
 
 })
+);
 
-.then(function(id){
+
+
+},
+
+
+
+
+
+
+
+
+
+
+getFolders:function(){
+
+
+
+if(!engineReady()){
+
+
+return Promise.reject(
+"IndexedDB Folder Engine unavailable"
+);
+
+
+}
+
+
+
+
+
+
+return (
+CampusWordStorageEngine.getFolders()
+);
+
+
+
+}
+
+
+
+
+
+
+
+};
+
+
 
 
 
 
 
 console.log(
-"Save As IndexedDB success:",
-id
-);
-
-
-
-
-
-/*
-   UPDATE TITLE BAR ONLY
-*/
-
-const title =
-document.getElementById(
-"cwTitle"
-);
-
-
-
-
-
-if(title){
-
-
-title.textContent =
-name +
-" - Campus Word 2007 Simulation";
-
-
-}
-
-
-
-
-
-
-
-
-button.dataset.saving =
-"false";
-
-
-
-
-
-
-
-})
-.catch(function(error){
-
-
-
-
-
-console.error(
-"Save As IndexedDB error:",
-error
-);
-
-
-
-
-
-button.dataset.saving =
-"false";
-
-
-
-
-
-
-});
-
-
-
-
-
-
-},
-false
+"Save As Folder Manager Ready"
 );
 
 
@@ -28742,13 +28542,6 @@ false
 
 
 })();
-
-
-
-
-
-
-
 
 
 
@@ -29757,20 +29550,19 @@ console.log(
 
 
 
-
-
 /* =========================================================
-   CAMPUS WORD — SAVE AS FOLDER UI ENGINE
+   CAMPUS WORD — SAVE AS FILE BROWSER ENGINE
    STEP 3
+   LOAD INDEXED DB FOLDERS + DOCUMENTS
 
-   CREATE FOLDER INSIDE SAVE AS
-   LOAD SAVE AS FOLDERS
-   SELECT SAVE AS DESTINATION
+   COMPATIBLE WITH SAVE AS FOLDER BRIDGE
 
-   FULL ISOLATION
+   NO NEW STORE
+   NO VERSION CHANGE
    NO LOCAL STORAGE
-   NO OLD FOLDER ENGINE
-   NO SAVE BUTTON CHANGE
+   NO ACTIVE FOLDER CHANGE
+   DOES NOT CLEAR SAVE AS UI
+   ISOLATED MODULE
 ========================================================= */
 
 (function(){
@@ -29778,24 +29570,10 @@ console.log(
 "use strict";
 
 
-let createBox = null;
 
 
 
-
-
-
-function engineReady(){
-
-
-return (
-window.CampusWordSaveAsFolderEngine &&
-CampusWordSaveAsFolderEngine.createFolder &&
-CampusWordSaveAsFolderEngine.getFolders
-);
-
-
-}
+let selectedSaveFolder = null;
 
 
 
@@ -29804,38 +29582,28 @@ CampusWordSaveAsFolderEngine.getFolders
 
 
 
-
-function injectNewFolderButton(){
-
-
-
-const buttons =
-document.querySelector(
-".cwSaveAsButtons"
-);
-
-
-
-
-
-if(!buttons){
-
-    return;
-
-}
-
-
-
+function getSaveAsFolders(){
 
 
 
 if(
-buttons.querySelector(
-".cwSaveAsNewFolderBtn"
-)
+!window.CampusWordSaveAsFolderEngine ||
+!window.CampusWordSaveAsFolderEngine.getFolders
 ){
 
-    return;
+return Promise.reject(
+"Save As Folder Engine unavailable"
+);
+
+}
+
+
+
+return (
+CampusWordSaveAsFolderEngine.getFolders()
+);
+
+
 
 }
 
@@ -29845,50 +29613,223 @@ buttons.querySelector(
 
 
 
-const button =
+
+function getSaveAsDocuments(){
+
+
+
+if(
+!window.CampusWordStorageEngine ||
+!window.CampusWordStorageEngine.getDocuments
+){
+
+return Promise.reject(
+"Document storage unavailable"
+);
+
+}
+
+
+
+return (
+CampusWordStorageEngine.getDocuments()
+);
+
+
+
+}
+
+
+
+
+
+
+
+
+function showDocuments(folderName){
+
+
+
+const area =
+document.querySelector(
+".cwSaveAsFileSpace"
+);
+
+
+
+if(!area){
+
+return;
+
+}
+
+
+
+
+
+
+area.innerHTML="";
+
+
+
+
+
+
+getSaveAsDocuments()
+
+.then(function(documents){
+
+
+
+const filtered =
+documents.filter(function(doc){
+
+
+
+return (
+doc.folder === folderName
+);
+
+
+
+});
+
+
+
+
+
+
+if(filtered.length===0){
+
+
+
+area.innerHTML =
+"<div>No documents saved in this folder</div>";
+
+
+
+return;
+
+}
+
+
+
+
+
+
+
+filtered.forEach(function(doc){
+
+
+
+const file =
 document.createElement(
-"button"
+"div"
 );
 
 
 
-button.className =
-"cwSaveAsNewFolderBtn";
+file.className =
+"cwSaveAsFileItem";
 
 
 
-button.textContent =
-"New Folder";
-
-
-
-
-
-
-button.onclick=function(e){
-
-
-
-e.preventDefault();
-
-e.stopPropagation();
-
-
-
-openCreateFolderBox();
-
-
-
-};
+file.textContent =
+"📄 " + doc.name;
 
 
 
 
 
+area.appendChild(
+file
+);
 
-buttons.insertBefore(
-button,
-buttons.firstChild
+
+
+});
+
+
+
+
+
+})
+
+.catch(function(error){
+
+
+
+console.error(
+"Save As document loading error:",
+error
+);
+
+
+
+});
+
+
+
+}
+
+
+
+
+
+
+
+
+
+function activateFolder(item,folderName){
+
+
+
+document
+.querySelectorAll(
+".cwSaveAsFolderItem"
+)
+.forEach(function(folder){
+
+
+
+folder.classList.remove(
+"active"
+);
+
+
+
+});
+
+
+
+
+
+item.classList.add(
+"active"
+);
+
+
+
+
+
+selectedSaveFolder =
+folderName;
+
+
+
+
+
+
+window.CampusWordSaveAsSelectedFolder =
+folderName;
+
+
+
+
+
+
+showDocuments(
+folderName
 );
 
 
@@ -29903,17 +29844,13 @@ buttons.firstChild
 
 
 
-function refreshSaveAsFolderList(){
+function loadSaveAsFolders(){
 
 
 
-if(!engineReady()){
+getSaveAsFolders()
 
-    return;
-
-}
-
-
+.then(function(folders){
 
 
 
@@ -29928,7 +29865,7 @@ document.querySelector(
 
 if(!container){
 
-    return;
+return;
 
 }
 
@@ -29937,22 +29874,44 @@ if(!container){
 
 
 
-
-CampusWordSaveAsFolderEngine
-.getFolders()
-
-.then(function(folders){
-
-
-
-container.innerHTML="";
-
-
-
-
-
-
 folders.forEach(function(folder){
+
+
+
+const exists =
+Array.from(
+container.children
+)
+.some(function(item){
+
+
+
+return (
+item.textContent
+.replace("📁","")
+.trim()
+===
+folder.name
+);
+
+
+
+});
+
+
+
+
+
+
+if(exists){
+
+return;
+
+}
+
+
+
+
 
 
 
@@ -29977,8 +29936,8 @@ item.textContent =
 
 
 
-
-item.onclick=function(e){
+item.onclick =
+function(e){
 
 
 
@@ -29986,63 +29945,14 @@ e.stopPropagation();
 
 
 
-
-
-
-
-document
-.querySelectorAll(
-".cwSaveAsFolderItem"
-)
-.forEach(function(old){
-
-
-
-old.classList.remove(
-"active"
-);
-
-
-
-});
-
-
-
-
-
-
-
-item.classList.add(
-"active"
-);
-
-
-
-
-
-
-
-window.CampusWordSaveAsSelectedFolder =
-folder.name;
-
-
-
-
-
-
-
-console.log(
-"Save As Folder Selected:",
+activateFolder(
+item,
 folder.name
 );
 
 
 
-
-
 };
-
-
 
 
 
@@ -30055,8 +29965,6 @@ item
 
 
 
-
-
 });
 
 
@@ -30068,251 +29976,13 @@ item
 
 
 console.error(
-"Save As folder load error:",
+"Save As folder loading error:",
 error
 );
 
 
 
 });
-
-
-
-}
-
-
-
-
-
-
-
-
-
-function openCreateFolderBox(){
-
-
-
-if(createBox){
-
-    return;
-
-}
-
-
-
-
-
-createBox =
-document.createElement(
-"div"
-);
-
-
-
-
-
-createBox.className =
-"cwSaveAsFolderCreateDialog";
-
-
-
-
-
-
-
-
-createBox.innerHTML = `
-
-
-<div class="cwSaveAsFolderCreateWindow">
-
-
-<h3>
-Create New Folder
-</h3>
-
-
-
-
-<input
-class="cwSaveAsFolderInput"
-type="text"
-placeholder="Folder name"
-/>
-
-
-
-
-
-<div class="cwSaveAsFolderButtons">
-
-
-
-<button class="cwSaveAsFolderCreate">
-Create
-</button>
-
-
-
-
-<button class="cwSaveAsFolderCancel">
-Cancel
-</button>
-
-
-
-</div>
-
-
-
-
-</div>
-
-
-`;
-
-
-
-
-
-
-document.body.appendChild(
-createBox
-);
-
-
-
-
-
-
-
-createBox.querySelector(
-".cwSaveAsFolderCancel"
-)
-.onclick=function(){
-
-
-
-createBox.remove();
-
-createBox=null;
-
-
-
-};
-
-
-
-
-
-
-
-
-
-createBox.querySelector(
-".cwSaveAsFolderCreate"
-)
-.onclick=function(){
-
-
-
-const input =
-createBox.querySelector(
-".cwSaveAsFolderInput"
-);
-
-
-
-
-
-
-const name =
-input.value.trim();
-
-
-
-
-
-
-if(!name){
-
-    return;
-
-}
-
-
-
-
-
-
-if(!engineReady()){
-
-    console.error(
-    "Save As Folder Engine Missing"
-    );
-
-    return;
-
-}
-
-
-
-
-
-
-
-CampusWordSaveAsFolderEngine
-.createFolder(name)
-
-.then(function(){
-
-
-
-console.log(
-"Save As Folder Created:",
-name
-);
-
-
-
-
-
-
-createBox.remove();
-
-createBox=null;
-
-
-
-
-
-
-refreshSaveAsFolderList();
-
-
-
-
-
-
-})
-
-.catch(function(error){
-
-
-
-console.error(
-"Save As Folder Create Error:",
-error
-);
-
-
-
-});
-
-
-
-};
-
 
 
 
@@ -30332,7 +30002,7 @@ function(e){
 
 
 
-const saveAs =
+const saveAsButton =
 e.target.closest(
 '[data-action="save-as"]'
 );
@@ -30341,7 +30011,14 @@ e.target.closest(
 
 
 
-if(saveAs){
+if(!saveAsButton){
+
+return;
+
+}
+
+
+
 
 
 
@@ -30349,10 +30026,7 @@ setTimeout(function(){
 
 
 
-injectNewFolderButton();
-
-
-refreshSaveAsFolderList();
+loadSaveAsFolders();
 
 
 
@@ -30360,7 +30034,6 @@ refreshSaveAsFolderList();
 
 
 
-}
 
 
 
@@ -30374,14 +30047,19 @@ false
 
 
 
-
 console.log(
-"Save As Folder UI Ready"
+"Save As File Browser Ready"
 );
 
 
 
+
+
+
 })();
+
+
+
 
 
 
