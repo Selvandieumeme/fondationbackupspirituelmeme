@@ -27832,6 +27832,170 @@ false
 
 
 
+/* =========================================================
+   CAMPUS WORD — FOLDER DELETE UI ADDON
+   ISOLATED MODULE
+   NO STEP 1 MODIFICATION
+   UI ONLY
+========================================================= */
+
+(function(){
+
+
+
+function addDeleteButtons(){
+
+
+
+const folders =
+document.querySelectorAll(
+".cwFolderItem"
+);
+
+
+
+
+
+folders.forEach(function(item){
+
+
+
+if(
+item.querySelector(
+".cwFolderDeleteBtn"
+)
+){
+
+    return;
+
+}
+
+
+
+
+
+
+
+const deleteBtn =
+document.createElement(
+"button"
+);
+
+
+
+deleteBtn.className =
+"cwFolderDeleteBtn";
+
+
+
+deleteBtn.textContent =
+"Delete";
+
+
+
+
+
+
+
+deleteBtn.addEventListener(
+"click",
+function(e){
+
+
+/*
+   Stop only Delete click
+   from affecting folder click
+*/
+
+e.stopPropagation();
+
+
+
+const folderName =
+item.textContent
+.replace(
+"Delete",
+""
+)
+.trim();
+
+
+
+console.log(
+"Delete requested:",
+folderName
+);
+
+
+
+},
+false
+);
+
+
+
+
+
+
+
+item.appendChild(
+deleteBtn
+);
+
+
+
+});
+
+
+
+}
+
+
+
+
+
+
+
+
+const observer =
+new MutationObserver(
+function(){
+
+addDeleteButtons();
+
+});
+
+
+
+
+
+
+
+
+observer.observe(
+document.body,
+{
+childList:true,
+subtree:true
+}
+);
+
+
+
+
+
+
+})();
+
+
+
+
+
+
+
+
+
+
 
 
 
