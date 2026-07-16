@@ -29554,6 +29554,166 @@ savedPages
 
 
 
+/* =========================================================
+   CAMPUS WORD — SAVE BUTTON INDEXED DB CONNECTOR
+   STEP 5
+   CONNECT EXISTING SAVE BUTTON
+   USE INDEXED DB STORAGE
+   NO UI CHANGE
+   ISOLATED SYSTEM
+========================================================= */
+
+(function(){
+
+
+
+document.addEventListener(
+"click",
+function(e){
+
+
+
+const button =
+e.target.closest(
+'[data-action="save"]'
+);
+
+
+
+if(!button){
+
+    return;
+
+}
+
+
+
+
+
+/*
+   Verify IndexedDB bridge exists
+*/
+
+if(
+!window.CampusWordSaveToIndexedDB
+){
+
+    return;
+
+}
+
+
+
+
+
+
+
+const app =
+window.CampusWord2007Simulateur;
+
+
+
+
+
+
+let documentName = "";
+
+
+
+
+
+if(
+app &&
+app.state &&
+app.state.documentName
+){
+
+    documentName =
+    app.state.documentName;
+
+}
+
+
+
+
+
+
+if(!documentName){
+
+    return;
+
+}
+
+
+
+
+
+
+
+CampusWordSaveToIndexedDB(
+documentName
+)
+.then(function(id){
+
+
+
+console.log(
+"Document saved in IndexedDB:",
+id
+);
+
+
+
+})
+.catch(function(error){
+
+
+
+console.error(
+"IndexedDB Save Error:",
+error
+);
+
+
+
+});
+
+
+
+
+
+},
+false
+);
+
+
+
+
+
+})();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
