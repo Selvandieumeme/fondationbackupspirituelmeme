@@ -30356,13 +30356,12 @@ false
 
 
 
-
-
 /* =========================================================
    CAMPUS WORD — SAVE AS FILE BROWSER ENGINE
    STEP 3
-   LOAD FOLDERS + DOCUMENTS FROM INDEXED DB
-   SAVE AS ONLY
+   LOAD INDEXED DB FOLDERS + DOCUMENTS
+   SAFE UI PATCH
+   DOES NOT CLEAR EXISTING SAVE AS UI
    NO ACTIVE FOLDER CHANGE
    ISOLATED MODULE
 ========================================================= */
@@ -30377,8 +30376,9 @@ false
 
 
 
-
 let selectedSaveFolder = null;
+
+
 
 
 
@@ -30489,9 +30489,6 @@ getSaveAsDocuments()
 
 
 
-
-
-
 const filtered =
 documents.filter(function(doc){
 
@@ -30510,9 +30507,7 @@ doc.folder === folderName
 
 
 
-
-
-if(filtered.length===0){
+if(filtered.length === 0){
 
 
 
@@ -30562,12 +30557,7 @@ file
 
 
 
-
-
 });
-
-
-
 
 
 
@@ -30578,7 +30568,7 @@ file
 
 
 console.error(
-"Save As file loading error:",
+"Save As document loading error:",
 error
 );
 
@@ -30628,14 +30618,8 @@ item.classList.add(
 
 
 
-/*
-   LOCAL SAVE AS SELECTION ONLY
-*/
-
 selectedSaveFolder =
 folderName;
-
-
 
 
 
@@ -30688,15 +30672,49 @@ if(!container){
 
 
 
-container.innerHTML="";
 
 
-
-
-
-
+/*
+   SAFE MODE:
+   DO NOT DELETE EXISTING SAVE AS FOLDERS
+*/
 
 folders.forEach(function(folder){
+
+
+
+const exists =
+Array.from(
+container.children
+)
+.some(function(item){
+
+
+return (
+item.textContent
+.replace("📁","")
+.trim()
+===
+folder.name
+);
+
+
+});
+
+
+
+
+
+
+if(exists){
+
+    return;
+
+}
+
+
+
+
 
 
 
@@ -30714,7 +30732,6 @@ item.className =
 
 item.textContent =
 "📁 " + folder.name;
-
 
 
 
@@ -30814,7 +30831,7 @@ loadSaveAsFolders();
 
 
 
-},50);
+},100);
 
 
 
@@ -30832,6 +30849,9 @@ false
 
 
 })();
+
+
+
 
 
 
