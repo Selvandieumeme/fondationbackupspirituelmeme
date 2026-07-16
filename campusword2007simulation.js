@@ -30870,8 +30870,1193 @@ false
 
 
 
+/* =========================================================
+   CAMPUS WORD — SAVE AS FOLDER STORE ENGINE
+   STEP 1
+   DYNAMIC INDEXED DB STORE CREATION
+
+   FULL ISOLATION
+   NO STEP 1 MODIFICATION
+   NO LOCAL STORAGE
+   NO OLD FOLDER SYSTEM ACCESS
+   NO UI CONNECTION
+========================================================= */
+
+(function(){
 
 
+
+"use strict";
+
+
+
+
+
+const SAVE_AS_STORE =
+"saveAsFolders";
+
+
+
+
+
+
+function upgradeSaveAsStore(dbName,currentVersion){
+
+
+
+return new Promise(function(resolve,reject){
+
+
+
+const request =
+indexedDB.open(
+dbName,
+currentVersion + 1
+);
+
+
+
+
+
+
+
+request.onupgradeneeded =
+function(event){
+
+
+
+const db =
+event.target.result;
+
+
+
+
+
+
+if(
+!db.objectStoreNames.contains(
+SAVE_AS_STORE
+)
+){
+
+
+
+db.createObjectStore(
+SAVE_AS_STORE,
+{
+keyPath:"id",
+autoIncrement:true
+}
+);
+
+
+
+}
+
+
+
+};
+
+
+
+
+
+
+
+request.onsuccess =
+function(event){
+
+
+
+const db =
+event.target.result;
+
+
+
+/*
+   Refresh global DB reference
+   without touching other systems
+*/
+
+
+if(
+window.CampusWordStorageEngine
+){
+
+
+window.CampusWordStorageEngine.db =
+db;
+
+
+}
+
+
+
+
+
+console.log(
+"Save As Folder Store Ready"
+);
+
+
+
+resolve(
+db
+);
+
+
+
+};
+
+
+
+
+
+
+
+request.onerror =
+function(event){
+
+
+
+reject(
+event.target.error
+);
+
+
+
+};
+
+
+
+
+
+
+});
+
+
+
+}
+
+
+
+
+
+
+
+
+
+function initSaveAsFolderStore(){
+
+
+
+if(
+!window.CampusWordStorageEngine ||
+!window.CampusWordStorageEngine.db
+){
+
+
+
+console.warn(
+"Waiting for IndexedDB..."
+);
+
+
+
+return;
+
+}
+
+
+
+
+
+const db =
+window.CampusWordStorageEngine.db;
+
+
+
+
+
+
+if(
+db.objectStoreNames.contains(
+SAVE_AS_STORE
+)
+){
+
+
+
+console.log(
+"Save As Folder Store Already Exists"
+);
+
+
+
+return;
+
+}
+
+
+
+
+
+
+
+upgradeSaveAsStore(
+"CampusWordDB",
+db.version
+)
+
+.catch(function(error){
+
+
+
+console.error(
+"Save As Folder Store Error:",
+error
+);
+
+
+
+});
+
+
+
+}
+
+
+
+
+
+
+
+
+
+/*
+   Wait until main IndexedDB engine is ready
+*/
+
+
+
+
+if(
+window.CampusWordStorageEngine &&
+window.CampusWordStorageEngine.db
+){
+
+
+initSaveAsFolderStore();
+
+
+}
+
+else{
+
+
+
+document.addEventListener(
+"CampusWordIndexedDBReady",
+function(){
+
+
+initSaveAsFolderStore();
+
+
+},
+false
+);
+
+
+
+}
+
+
+
+
+
+
+
+})();
+
+
+
+
+
+
+
+
+
+
+
+/* =========================================================
+   CAMPUS WORD — SAVE AS FOLDER MANAGER
+   STEP 2
+   CREATE + LOAD SAVE AS FOLDERS
+
+   FULL ISOLATION
+   USES ONLY saveAsFolders STORE
+   NO LOCAL STORAGE
+   NO OLD FOLDER ENGINE
+   NO UI CONNECTION
+========================================================= */
+
+(function(){
+
+
+
+"use strict";
+
+
+
+
+
+
+const STORE =
+"saveAsFolders";
+
+
+
+
+
+
+
+
+function getDB(){
+
+
+
+if(
+!window.CampusWordStorageEngine ||
+!window.CampusWordStorageEngine.db
+){
+
+    return null;
+
+}
+
+
+
+return (
+window.CampusWordStorageEngine.db
+);
+
+
+
+}
+
+
+
+
+
+
+
+
+
+window.CampusWordSaveAsFolderEngine =
+{
+
+
+
+
+
+
+createFolder:function(folderName){
+
+
+
+return new Promise(function(resolve,reject){
+
+
+
+const db =
+getDB();
+
+
+
+
+
+
+if(!db){
+
+
+
+reject(
+"IndexedDB not ready"
+);
+
+
+
+return;
+
+}
+
+
+
+
+
+
+
+const transaction =
+db.transaction(
+STORE,
+"readwrite"
+);
+
+
+
+
+
+
+
+const store =
+transaction.objectStore(
+STORE
+);
+
+
+
+
+
+
+
+const request =
+store.add({
+
+
+
+name:
+folderName,
+
+
+
+createdAt:
+new Date().toISOString()
+
+
+
+});
+
+
+
+
+
+
+
+
+request.onsuccess =
+function(){
+
+
+
+resolve(
+request.result
+);
+
+
+
+};
+
+
+
+
+
+
+
+
+request.onerror =
+function(event){
+
+
+
+reject(
+event.target.error
+);
+
+
+
+};
+
+
+
+
+
+
+
+});
+
+
+
+},
+
+
+
+
+
+
+
+
+
+
+getFolders:function(){
+
+
+
+return new Promise(function(resolve,reject){
+
+
+
+const db =
+getDB();
+
+
+
+
+
+
+if(!db){
+
+
+
+reject(
+"IndexedDB not ready"
+);
+
+
+
+return;
+
+}
+
+
+
+
+
+
+
+const transaction =
+db.transaction(
+STORE,
+"readonly"
+);
+
+
+
+
+
+
+
+const store =
+transaction.objectStore(
+STORE
+);
+
+
+
+
+
+
+
+const request =
+store.getAll();
+
+
+
+
+
+
+
+request.onsuccess =
+function(){
+
+
+
+resolve(
+request.result
+);
+
+
+
+};
+
+
+
+
+
+
+
+request.onerror =
+function(event){
+
+
+
+reject(
+event.target.error
+);
+
+
+
+};
+
+
+
+
+
+
+});
+
+
+
+}
+
+
+
+
+
+
+
+
+};
+
+
+
+
+
+
+
+console.log(
+"Save As Folder Manager Ready"
+);
+
+
+
+
+
+
+
+})();
+
+
+
+
+
+
+
+
+
+/* =========================================================
+   CAMPUS WORD — SAVE AS FOLDER UI ENGINE
+   STEP 3
+
+   CREATE FOLDER INSIDE SAVE AS
+   LOAD SAVE AS FOLDERS
+   SELECT SAVE AS DESTINATION
+
+   FULL ISOLATION
+   NO LOCAL STORAGE
+   NO OLD FOLDER ENGINE
+   NO SAVE BUTTON CHANGE
+========================================================= */
+
+(function(){
+
+"use strict";
+
+
+let createBox = null;
+
+
+
+function engineReady(){
+
+
+return (
+window.CampusWordSaveAsFolderEngine &&
+CampusWordSaveAsFolderEngine.createFolder &&
+CampusWordSaveAsFolderEngine.getFolders
+);
+
+
+}
+
+
+
+
+
+function refreshSaveAsFolderList(){
+
+
+
+if(!engineReady()){
+
+    return;
+
+}
+
+
+
+const container =
+document.querySelector(
+".cwSaveAsFolderScroll"
+);
+
+
+
+if(!container){
+
+    return;
+
+}
+
+
+
+
+CampusWordSaveAsFolderEngine
+.getFolders()
+
+.then(function(folders){
+
+
+
+container.innerHTML="";
+
+
+
+
+
+folders.forEach(function(folder){
+
+
+
+const item =
+document.createElement(
+"div"
+);
+
+
+
+item.className =
+"cwSaveAsFolderItem";
+
+
+
+item.textContent =
+"📁 " + folder.name;
+
+
+
+
+
+
+item.onclick=function(e){
+
+
+
+e.stopPropagation();
+
+
+
+
+
+document
+.querySelectorAll(
+".cwSaveAsFolderItem"
+)
+.forEach(function(old){
+
+
+old.classList.remove(
+"active"
+);
+
+
+});
+
+
+
+
+
+item.classList.add(
+"active"
+);
+
+
+
+
+
+
+window.CampusWordSaveAsSelectedFolder =
+folder.name;
+
+
+
+
+
+
+
+console.log(
+"Save As Folder Selected:",
+folder.name
+);
+
+
+
+
+
+};
+
+
+
+
+
+
+
+container.appendChild(
+item
+);
+
+
+
+});
+
+
+
+
+})
+
+.catch(function(error){
+
+
+
+console.error(
+"Save As folder load error:",
+error
+);
+
+
+
+});
+
+
+
+}
+
+
+
+
+
+
+
+
+
+
+function openCreateFolderBox(){
+
+
+
+if(createBox){
+
+    return;
+
+}
+
+
+
+
+
+createBox =
+document.createElement(
+"div"
+);
+
+
+
+createBox.className =
+"cwSaveAsFolderCreateDialog";
+
+
+
+
+
+
+
+createBox.innerHTML = `
+
+
+<div class="cwSaveAsFolderCreateWindow">
+
+
+<h3>
+Create New Folder
+</h3>
+
+
+
+<input
+class="cwSaveAsFolderInput"
+type="text"
+placeholder="Folder name"
+/>
+
+
+
+
+<div class="cwSaveAsFolderButtons">
+
+
+<button class="cwSaveAsFolderCreate">
+Create
+</button>
+
+
+<button class="cwSaveAsFolderCancel">
+Cancel
+</button>
+
+
+</div>
+
+
+</div>
+
+`;
+
+
+
+
+
+
+document.body.appendChild(
+createBox
+);
+
+
+
+
+
+
+
+createBox.querySelector(
+".cwSaveAsFolderCancel"
+)
+.onclick=function(){
+
+
+
+createBox.remove();
+
+createBox=null;
+
+
+
+};
+
+
+
+
+
+
+
+
+createBox.querySelector(
+".cwSaveAsFolderCreate"
+)
+.onclick=function(){
+
+
+
+const input =
+createBox.querySelector(
+".cwSaveAsFolderInput"
+);
+
+
+
+
+
+
+const name =
+input.value.trim();
+
+
+
+
+
+
+if(!name){
+
+    return;
+
+}
+
+
+
+
+
+
+if(!engineReady()){
+
+    console.error(
+    "Save As Folder Engine Missing"
+    );
+
+    return;
+
+}
+
+
+
+
+
+
+
+CampusWordSaveAsFolderEngine
+.createFolder(name)
+
+.then(function(){
+
+
+
+console.log(
+"Save As Folder Created:",
+name
+);
+
+
+
+
+
+createBox.remove();
+
+createBox=null;
+
+
+
+
+
+
+refreshSaveAsFolderList();
+
+
+
+
+
+
+})
+
+.catch(function(error){
+
+
+
+console.error(
+"Save As Folder Create Error:",
+error
+);
+
+
+
+});
+
+
+
+};
+
+
+
+
+
+}
+
+
+
+
+
+
+
+
+
+
+document.addEventListener(
+"click",
+function(e){
+
+
+
+const saveAs =
+e.target.closest(
+'[data-action="save-as"]'
+);
+
+
+
+if(saveAs){
+
+
+
+setTimeout(function(){
+
+
+refreshSaveAsFolderList();
+
+
+},100);
+
+
+
+}
+
+
+
+
+
+
+
+
+const create =
+e.target.closest(
+'[data-action="saveas-new-folder"]'
+);
+
+
+
+if(create){
+
+
+
+e.preventDefault();
+
+e.stopPropagation();
+
+
+
+openCreateFolderBox();
+
+
+
+}
+
+
+
+
+
+},
+false
+);
+
+
+
+
+
+
+
+
+console.log(
+"Save As Folder UI Ready"
+);
+
+
+
+})();
 
 
 
