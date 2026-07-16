@@ -28587,11 +28587,6 @@ false
 
 
 
-
-
-
-
-
 /* =========================================================
    CAMPUS WORD — INDEXED DB STORAGE ENGINE
    STEP 1
@@ -28611,7 +28606,7 @@ const DB_NAME =
 
 
 const DB_VERSION =
-3;
+2;
 
 
 
@@ -28621,10 +28616,6 @@ const DOCUMENT_STORE =
 
 const FOLDER_STORE =
 "folders";
-
-
-const SAVE_AS_FOLDER_STORE =
-"saveAsFolders";
 
 
 
@@ -28710,37 +28701,6 @@ FOLDER_STORE
 
 db.createObjectStore(
 FOLDER_STORE,
-{
-keyPath:"id",
-autoIncrement:true
-}
-);
-
-
-}
-
-
-
-
-
-
-
-
-/* =========================
-   SAVE AS FOLDER STORE
-   ISOLATED SYSTEM
-========================= */
-
-
-if(
-!db.objectStoreNames.contains(
-SAVE_AS_FOLDER_STORE
-)
-){
-
-
-db.createObjectStore(
-SAVE_AS_FOLDER_STORE,
 {
 keyPath:"id",
 autoIncrement:true
@@ -28881,6 +28841,18 @@ CampusWordStorageEngine.init();
 
 
 })();
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 /* =========================================================
