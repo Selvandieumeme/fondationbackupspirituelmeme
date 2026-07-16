@@ -27832,164 +27832,6 @@ false
 
 
 
-/* =========================================================
-   CAMPUS WORD — FOLDER DELETE UI ADDON
-   ISOLATED MODULE
-   NO STEP 1 MODIFICATION
-   UI ONLY
-========================================================= */
-
-(function(){
-
-
-
-function addDeleteButtons(){
-
-
-
-const folders =
-document.querySelectorAll(
-".cwFolderItem"
-);
-
-
-
-
-
-folders.forEach(function(item){
-
-
-
-if(
-item.querySelector(
-".cwFolderDeleteBtn"
-)
-){
-
-    return;
-
-}
-
-
-
-
-
-
-
-const deleteBtn =
-document.createElement(
-"button"
-);
-
-
-
-deleteBtn.className =
-"cwFolderDeleteBtn";
-
-
-
-deleteBtn.textContent =
-"Delete";
-
-
-
-
-
-
-
-deleteBtn.addEventListener(
-"click",
-function(e){
-
-
-/*
-   Stop only Delete click
-   from affecting folder click
-*/
-
-e.stopPropagation();
-
-
-
-const folderName =
-item.textContent
-.replace(
-"Delete",
-""
-)
-.trim();
-
-
-
-console.log(
-"Delete requested:",
-folderName
-);
-
-
-
-},
-false
-);
-
-
-
-
-
-
-
-item.appendChild(
-deleteBtn
-);
-
-
-
-});
-
-
-
-}
-
-
-
-
-
-
-
-
-const observer =
-new MutationObserver(
-function(){
-
-addDeleteButtons();
-
-});
-
-
-
-
-
-
-
-
-observer.observe(
-document.body,
-{
-childList:true,
-subtree:true
-}
-);
-
-
-
-
-
-
-})();
-
-
-
-
 
 
 
@@ -29990,6 +29832,368 @@ event.target.error
 };
 
 
+
+
+
+
+
+
+})();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* =========================================================
+   CAMPUS WORD — FOLDER DELETE DIALOG ENGINE
+   ISOLATED ADDON
+   NO FOLDER CLICK INTERFERENCE
+   UI ONLY
+========================================================= */
+
+(function(){
+
+
+
+let deleteBox = null;
+
+let pressTimer = null;
+
+let selectedFolder = null;
+
+
+
+
+
+
+function openDeleteDialog(folderName){
+
+
+
+if(deleteBox){
+
+    deleteBox.remove();
+
+    deleteBox = null;
+
+}
+
+
+
+
+
+deleteBox =
+document.createElement(
+"div"
+);
+
+
+
+deleteBox.className =
+"cwFolderDeleteDialog";
+
+
+
+
+
+deleteBox.innerHTML = `
+
+<div class="cwFolderDeleteWindow">
+
+
+<h3>
+Delete Folder
+</h3>
+
+
+
+<p>
+${folderName}
+</p>
+
+
+
+<div>
+
+
+<button class="cwDeleteConfirm">
+Delete
+</button>
+
+
+
+<button class="cwDeleteCancel">
+Cancel
+</button>
+
+
+</div>
+
+
+
+</div>
+
+`;
+
+
+
+
+
+document.body.appendChild(
+deleteBox
+);
+
+
+
+
+
+
+
+deleteBox.querySelector(
+".cwDeleteCancel"
+)
+.onclick=function(){
+
+
+deleteBox.remove();
+
+deleteBox=null;
+
+
+};
+
+
+
+
+
+
+deleteBox.querySelector(
+".cwDeleteConfirm"
+)
+.onclick=function(){
+
+
+
+console.log(
+"Delete requested:",
+folderName
+);
+
+
+
+deleteBox.remove();
+
+deleteBox=null;
+
+
+
+};
+
+
+
+
+
+}
+
+
+
+
+
+
+
+
+
+function startPress(folder){
+
+
+
+clearTimeout(
+pressTimer
+);
+
+
+
+
+
+pressTimer =
+setTimeout(function(){
+
+
+
+const name =
+folder.textContent
+.replace(
+"📁",
+""
+)
+.trim();
+
+
+
+
+
+selectedFolder =
+name;
+
+
+
+openDeleteDialog(
+name
+);
+
+
+
+},
+700);
+
+
+
+}
+
+
+
+
+
+
+
+
+function cancelPress(){
+
+
+
+clearTimeout(
+pressTimer
+);
+
+
+}
+
+
+
+
+
+
+
+
+
+document.addEventListener(
+"mousedown",
+function(e){
+
+
+
+const folder =
+e.target.closest(
+".cwFolderItem"
+);
+
+
+
+if(!folder){
+
+    return;
+
+}
+
+
+
+startPress(folder);
+
+
+
+},
+false
+);
+
+
+
+
+
+
+
+
+document.addEventListener(
+"mouseup",
+function(){
+
+
+cancelPress();
+
+
+},
+false
+);
+
+
+
+
+
+
+
+
+document.addEventListener(
+"touchstart",
+function(e){
+
+
+
+const folder =
+e.target.closest(
+".cwFolderItem"
+);
+
+
+
+if(!folder){
+
+    return;
+
+}
+
+
+
+startPress(folder);
+
+
+
+},
+{
+passive:true
+}
+
+);
+
+
+
+
+
+
+
+
+document.addEventListener(
+"touchend",
+function(){
+
+
+cancelPress();
+
+
+},
+{
+passive:true
+}
+
+);
 
 
 
