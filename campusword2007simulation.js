@@ -30358,6 +30358,495 @@ false
 
 
 
+/* =========================================================
+   CAMPUS WORD — SAVE AS FILE BROWSER ENGINE
+   STEP 3
+   LOAD FOLDERS + DOCUMENTS FROM INDEXED DB
+   SAVE AS ONLY
+   NO ACTIVE FOLDER CHANGE
+   ISOLATED MODULE
+========================================================= */
+
+(function(){
+
+
+
+"use strict";
+
+
+
+
+
+
+let selectedSaveFolder = null;
+
+
+
+
+
+
+
+function getSaveAsFolders(){
+
+
+
+if(
+!window.CampusWordStorageEngine ||
+!window.CampusWordStorageEngine.getFolders
+){
+
+    return Promise.reject(
+    "Folder storage unavailable"
+    );
+
+}
+
+
+
+return (
+CampusWordStorageEngine.getFolders()
+);
+
+
+
+}
+
+
+
+
+
+
+
+
+
+function getSaveAsDocuments(){
+
+
+
+if(
+!window.CampusWordStorageEngine ||
+!window.CampusWordStorageEngine.getDocuments
+){
+
+    return Promise.reject(
+    "Document storage unavailable"
+    );
+
+}
+
+
+
+return (
+CampusWordStorageEngine.getDocuments()
+);
+
+
+
+}
+
+
+
+
+
+
+
+
+
+function showDocuments(folderName){
+
+
+
+const area =
+document.querySelector(
+".cwSaveAsFileSpace"
+);
+
+
+
+
+
+if(!area){
+
+    return;
+
+}
+
+
+
+
+
+area.innerHTML="";
+
+
+
+
+
+
+
+getSaveAsDocuments()
+
+.then(function(documents){
+
+
+
+
+
+
+const filtered =
+documents.filter(function(doc){
+
+
+
+return (
+doc.folder === folderName
+);
+
+
+
+});
+
+
+
+
+
+
+
+
+if(filtered.length===0){
+
+
+
+area.innerHTML =
+"<div>No documents saved in this folder</div>";
+
+
+
+return;
+
+
+
+}
+
+
+
+
+
+
+
+filtered.forEach(function(doc){
+
+
+
+const file =
+document.createElement(
+"div"
+);
+
+
+
+file.className =
+"cwSaveAsFileItem";
+
+
+
+file.textContent =
+"📄 " + doc.name;
+
+
+
+
+
+area.appendChild(
+file
+);
+
+
+
+
+
+});
+
+
+
+
+
+
+})
+
+.catch(function(error){
+
+
+
+console.error(
+"Save As file loading error:",
+error
+);
+
+
+
+});
+
+
+
+}
+
+
+
+
+
+
+
+
+
+function activateFolder(item,folderName){
+
+
+
+document
+.querySelectorAll(
+".cwSaveAsFolderItem"
+)
+.forEach(function(folder){
+
+
+folder.classList.remove(
+"active"
+);
+
+
+});
+
+
+
+
+
+item.classList.add(
+"active"
+);
+
+
+
+
+
+/*
+   LOCAL SAVE AS SELECTION ONLY
+*/
+
+selectedSaveFolder =
+folderName;
+
+
+
+
+
+
+
+showDocuments(
+folderName
+);
+
+
+
+}
+
+
+
+
+
+
+
+
+
+function loadSaveAsFolders(){
+
+
+
+getSaveAsFolders()
+
+.then(function(folders){
+
+
+
+
+
+const container =
+document.querySelector(
+".cwSaveAsFolderScroll"
+);
+
+
+
+
+
+if(!container){
+
+    return;
+
+}
+
+
+
+
+
+container.innerHTML="";
+
+
+
+
+
+
+
+folders.forEach(function(folder){
+
+
+
+const item =
+document.createElement(
+"div"
+);
+
+
+
+item.className =
+"cwSaveAsFolderItem";
+
+
+
+item.textContent =
+"📁 " + folder.name;
+
+
+
+
+
+
+
+
+item.onclick =
+function(){
+
+
+
+activateFolder(
+item,
+folder.name
+);
+
+
+
+};
+
+
+
+
+
+
+
+container.appendChild(
+item
+);
+
+
+
+
+
+});
+
+
+
+
+
+})
+
+.catch(function(error){
+
+
+
+console.error(
+"Save As folder loading error:",
+error
+);
+
+
+
+});
+
+
+
+}
+
+
+
+
+
+
+
+
+
+document.addEventListener(
+"click",
+function(e){
+
+
+
+const saveAsButton =
+e.target.closest(
+'[data-action="save-as"]'
+);
+
+
+
+if(!saveAsButton){
+
+    return;
+
+}
+
+
+
+
+
+setTimeout(function(){
+
+
+
+loadSaveAsFolders();
+
+
+
+},50);
+
+
+
+
+
+
+},
+false
+);
+
+
+
+
+
+
+
+})();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
