@@ -28858,14 +28858,11 @@ console.log(
 
 
 
-
-
-
 /* =========================================================
    CAMPUS WORD — SAVE AS UI CONNECTOR
    STEP 7
 
-   CONNECT SAVE AS UI WITH STORAGE CORE
+   CONNECT SAVE AS UI WITH STORAGE ENGINE
 
    CONNECTS:
    - Folder List
@@ -28899,12 +28896,12 @@ function loadFolders(){
 
 
 if(
-!window.CampusWordStorageCore ||
-!window.CampusWordStorageCore.getFolders
+!window.CampusWordStorageEngine ||
+!window.CampusWordStorageEngine.getFolders
 ){
 
 console.error(
-"Folder Core unavailable"
+"Folder Storage unavailable"
 );
 
 return;
@@ -28934,7 +28931,7 @@ return;
 
 
 
-CampusWordStorageCore
+CampusWordStorageEngine
 .getFolders()
 
 .then(function(folders){
@@ -28942,6 +28939,7 @@ CampusWordStorageCore
 
 
 list.innerHTML="";
+
 
 
 
@@ -28966,7 +28964,6 @@ item.className =
 
 item.textContent =
 "📁 " + folder.name;
-
 
 
 
@@ -29010,12 +29007,8 @@ item.classList.add(
 
 
 
-
-CampusWordStorageCore
-.SaveAs
-.setFolder(
-folder.id
-);
+window.CampusWordSaveAsSelectedFolder =
+folder.id;
 
 
 
@@ -29166,12 +29159,32 @@ page.innerHTML
 
 
 
+if(
+!window.CampusWordStorageEngine ||
+!window.CampusWordStorageEngine.saveDocument
+){
 
-CampusWordStorageCore
-.SaveAs
-.save({
+console.error(
+"Document Storage unavailable"
+);
+
+return;
+
+}
+
+
+
+
+
+
+
+CampusWordStorageEngine
+.saveDocument({
 
 name:name,
+
+folder:
+window.CampusWordSaveAsSelectedFolder || null,
 
 pages:pages
 
@@ -29354,6 +29367,7 @@ connectNewFolderButton();
 
 
 
+
 document.addEventListener(
 "click",
 function(e){
@@ -29413,6 +29427,11 @@ console.log(
 
 
 })();
+
+
+
+
+
 
 
 
