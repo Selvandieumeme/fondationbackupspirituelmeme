@@ -28180,6 +28180,219 @@ console.log(
 
 
 
+   /* =========================================================
+   CAMPUS WORD — SAVE AS CORE BRIDGE
+   STEP 5
+
+   SAVE AS FOUNDATION LAYER
+
+   COMPATIBLE WITH:
+   STEP 1 DATABASE CORE
+   STEP 2 FOLDER CORE
+   STEP 3 DOCUMENT CORE
+   STEP 4 RELATION CORE
+
+   NO UI
+   NO CSS
+   NO BUTTON
+   NO OLD SAVE SYSTEM
+   ISOLATED MODULE
+========================================================= */
+
+(function(){
+
+"use strict";
+
+
+
+
+
+let selectedFolderId = null;
+
+
+
+
+
+
+
+
+window.CampusWordStorageCore.SaveAs = {
+
+
+
+setFolder:function(folderId){
+
+
+
+selectedFolderId =
+folderId;
+
+
+
+},
+
+
+
+
+
+
+
+getFolder:function(){
+
+
+
+return (
+selectedFolderId
+);
+
+
+
+},
+
+
+
+
+
+
+
+
+save:function(data){
+
+
+
+return new Promise(function(resolve,reject){
+
+
+
+if(!selectedFolderId){
+
+
+
+reject(
+"No Save As folder selected"
+);
+
+
+
+return;
+
+}
+
+
+
+
+
+
+
+if(
+!window.CampusWordStorageCore ||
+!window.CampusWordStorageCore.saveDocument
+){
+
+
+
+reject(
+"Document Core unavailable"
+);
+
+
+
+return;
+
+}
+
+
+
+
+
+
+
+window.CampusWordStorageCore
+.saveDocument({
+
+name:
+data.name || "Untitled",
+
+
+folderId:
+selectedFolderId,
+
+
+pages:
+data.pages || []
+
+})
+
+.then(function(id){
+
+
+
+resolve(id);
+
+
+
+})
+
+.catch(function(error){
+
+
+
+reject(error);
+
+
+
+});
+
+
+
+});
+
+
+
+}
+
+
+
+};
+
+
+
+
+
+
+
+console.log(
+"CampusWord Save As Core Ready"
+);
+
+
+
+
+
+
+})();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
