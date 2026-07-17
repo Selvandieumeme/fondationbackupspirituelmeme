@@ -29204,6 +29204,21 @@ console.log(
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 /* =========================================================
    CAMPUS WORD — NEW FOLDER SYSTEM
    STEP 3
@@ -29546,26 +29561,19 @@ console.log(
 
 
 
+ /* =========================================================
+   CAMPUS WORD — NEW FOLDER CREATE ACTION
+   STEP 4
 
+   CREATE FOLDER INSIDE ACTIVE SAVE AS FOLDER
 
-
-
-/* =========================================================
-   CAMPUS WORD — NEW FOLDER SYSTEM
-   STEP 3
-
-   CREATE NEW FOLDER DIALOG
-   CONNECT NEW FOLDER BUTTON
-
-   INCLUDED:
-   - Open New Folder Dialog
-   - Close New Folder Dialog
+   CONNECTS:
+   - Active Folder Selection
    - Create Button
-   - Cancel Button
+   - Folder List Refresh
 
    NO INDEXEDDB
    NO SAVE LOGIC
-   NO DOCUMENT LOGIC
 ========================================================= */
 
 (function(){
@@ -29573,122 +29581,7 @@ console.log(
 "use strict";
 
 
-let newFolderDialog = null;
-
-
-
-
-function createNewFolderDialog(){
-
-
-if(newFolderDialog){
-
-return;
-
-}
-
-
-
-newFolderDialog =
-document.createElement("div");
-
-
-newFolderDialog.id =
-"cwNewFolderDialog";
-
-
-
-newFolderDialog.innerHTML = `
-
-<div class="cwNewFolderBox">
-
-
-<div class="cwNewFolderHeader">
-
-<h2>
-Create New Folder
-</h2>
-
-</div>
-
-
-
-<div class="cwNewFolderBody">
-
-<input
-class="cwNewFolderNameInput"
-type="text"
-placeholder="Folder name"
-/>
-
-</div>
-
-
-
-
-<div class="cwNewFolderFooter">
-
-
-<button
-class="cwNewFolderCreateBtn"
-type="button">
-
-Create
-
-</button>
-
-
-
-
-<button
-class="cwNewFolderCancelBtn"
-type="button">
-
-Cancel
-
-</button>
-
-
-
-</div>
-
-
-
-</div>
-
-`;
-
-
-
-document.body.appendChild(
-newFolderDialog
-);
-
-
-
-}
-
-
-
-
-function closeNewFolderDialog(){
-
-
-if(newFolderDialog){
-
-
-newFolderDialog.remove();
-
-newFolderDialog = null;
-
-
-}
-
-
-
-}
-
-
+let activeFolder = null;
 
 
 
@@ -29700,14 +29593,14 @@ function(e){
 
 
 
-const button =
+const folder =
 e.target.closest(
-".cwSaveAsNewFolderBtn"
+".cwSaveAsFolderItem"
 );
 
 
 
-if(!button){
+if(!folder){
 
 return;
 
@@ -29715,10 +29608,48 @@ return;
 
 
 
-e.preventDefault();
+
+document
+.querySelectorAll(
+".cwSaveAsFolderItem"
+)
+.forEach(function(item){
+
+item.classList.remove(
+"active"
+);
+
+});
 
 
-createNewFolderDialog();
+
+
+
+folder.classList.add(
+"active"
+);
+
+
+
+
+
+activeFolder =
+folder.dataset.folderId;
+
+
+
+
+
+window.CampusWordActiveFolder =
+activeFolder;
+
+
+
+
+console.log(
+"Active Folder:",
+activeFolder
+);
 
 
 
@@ -29726,41 +29657,6 @@ createNewFolderDialog();
 false
 );
 
-
-
-
-
-
-
-
-document.addEventListener(
-"click",
-function(e){
-
-
-
-const button =
-e.target.closest(
-".cwNewFolderCancelBtn"
-);
-
-
-
-if(!button){
-
-return;
-
-}
-
-
-
-closeNewFolderDialog();
-
-
-
-},
-false
-);
 
 
 
@@ -29801,7 +29697,7 @@ document.querySelector(
 
 
 
-const folderName =
+const name =
 input ?
 input.value.trim()
 :
@@ -29812,7 +29708,7 @@ input.value.trim()
 
 
 
-if(!folderName){
+if(!name){
 
 console.warn(
 "Folder name required"
@@ -29827,16 +29723,124 @@ return;
 
 
 
-console.log(
-"New Folder Created:",
-folderName
+if(!window.CampusWordActiveFolder){
+
+
+console.warn(
+"No active folder selected"
+);
+
+
+return;
+
+}
+
+
+
+
+
+
+
+const list =
+document.querySelector(
+".cwSaveAsFolderList"
 );
 
 
 
 
 
-closeNewFolderDialog();
+
+if(!list){
+
+return;
+
+}
+
+
+
+
+
+
+
+const item =
+document.createElement(
+"div"
+);
+
+
+
+
+
+
+item.className =
+"cwSaveAsFolderItem";
+
+
+
+
+
+item.dataset.folderId =
+"folder-" + Date.now();
+
+
+
+
+
+
+item.innerHTML =
+
+`
+<svg viewBox="0 0 24 24" width="20" height="20">
+<path d="M3 7h7l2 3h9v9H3z"
+fill="none"
+stroke="currentColor"
+stroke-width="2"/>
+</svg>
+
+<span>${name}</span>
+`;
+
+
+
+
+
+
+
+list.appendChild(
+item
+);
+
+
+
+
+
+
+console.log(
+"New Folder Added:",
+name,
+"Inside:",
+window.CampusWordActiveFolder
+);
+
+
+
+
+
+
+
+const dialog =
+document.querySelector(
+"#cwNewFolderDialog"
+);
+
+
+
+if(dialog){
+
+dialog.remove();
+
+}
 
 
 
@@ -29850,46 +29854,13 @@ false
 
 
 
-window.CampusWordNewFolderUI = {
-
-
-open:function(){
-
-createNewFolderDialog();
-
-},
-
-
-close:function(){
-
-closeNewFolderDialog();
-
-}
-
-
-};
-
-
-
-
-
-
-
 console.log(
-"Campus Word New Folder Step 3 Ready"
+"Campus Word New Folder Create Step 4 Ready"
 );
 
 
 
 })();
-
-
-
-
-
-
-
-
 
 
 
