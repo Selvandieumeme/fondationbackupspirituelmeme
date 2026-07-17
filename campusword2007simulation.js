@@ -29391,6 +29391,479 @@ console.log(
 
 
 
+/* =========================================================
+   CAMPUS WORD — DEFAULT STORAGE FOLDER BRIDGE
+   STEP 4
+
+   CREATE DEFAULT:
+   CampusWordStorage
+
+   CONNECT:
+   SAVE AS STORAGE FOLDER UI
+   WITH INDEXEDDB FOLDER ID
+
+   COMPATIBLE WITH:
+   STEP 1 DATABASE CORE
+   STEP 2 FOLDER CORE
+   STEP 5 SAVE AS CORE
+
+   NO DOCUMENT SAVE
+   NO UI CREATION
+   NO OLD SYSTEM
+========================================================= */
+
+(function(){
+
+"use strict";
+
+
+
+
+
+const STORAGE_FOLDER_NAME =
+"CampusWordStorage";
+
+
+
+
+
+
+
+let storageFolderId = null;
+
+
+
+
+
+
+
+
+function findStorageFolder(){
+
+
+
+return new Promise(function(resolve,reject){
+
+
+
+if(
+!window.CampusWordStorageCore ||
+!CampusWordStorageCore.getFolders
+){
+
+
+reject(
+"Folder Core unavailable"
+);
+
+
+return;
+
+}
+
+
+
+
+
+
+
+CampusWordStorageCore
+.getFolders()
+
+.then(function(folders){
+
+
+
+const folder =
+folders.find(function(item){
+
+
+
+return item.name === STORAGE_FOLDER_NAME;
+
+
+
+});
+
+
+
+
+
+resolve(folder || null);
+
+
+
+})
+
+.catch(function(error){
+
+
+reject(error);
+
+
+});
+
+
+
+});
+
+
+
+}
+
+
+
+
+
+
+
+
+
+function createStorageFolder(){
+
+
+
+return new Promise(function(resolve,reject){
+
+
+
+if(
+!window.CampusWordStorageCore ||
+!CampusWordStorageCore.createFolder
+){
+
+
+reject(
+"Folder Core unavailable"
+);
+
+
+return;
+
+}
+
+
+
+
+
+
+
+CampusWordStorageCore
+.createFolder(
+STORAGE_FOLDER_NAME
+)
+
+.then(function(id){
+
+
+
+resolve(id);
+
+
+
+})
+
+.catch(function(error){
+
+
+reject(error);
+
+
+});
+
+
+
+});
+
+
+
+}
+
+
+
+
+
+
+
+
+
+function ensureStorageFolder(){
+
+
+
+return new Promise(function(resolve,reject){
+
+
+
+findStorageFolder()
+
+.then(function(folder){
+
+
+
+if(folder){
+
+
+
+storageFolderId =
+folder.id;
+
+
+
+resolve(folder);
+
+
+
+return;
+
+}
+
+
+
+
+
+
+
+createStorageFolder()
+
+.then(function(id){
+
+
+
+storageFolderId =
+id;
+
+
+
+resolve({
+
+id:id,
+
+name:
+STORAGE_FOLDER_NAME
+
+});
+
+
+
+})
+
+.catch(reject);
+
+
+
+
+
+})
+
+.catch(reject);
+
+
+
+});
+
+
+
+}
+
+
+
+
+
+
+
+
+
+function connectStorageFolderButton(){
+
+
+
+document.addEventListener(
+"click",
+function(e){
+
+
+
+const item =
+e.target.closest(
+".cwSaveAsFolderItem"
+);
+
+
+
+
+
+if(!item){
+
+return;
+
+}
+
+
+
+
+
+
+
+const name =
+item.innerText.trim();
+
+
+
+
+
+
+if(
+name !== STORAGE_FOLDER_NAME
+){
+
+return;
+
+}
+
+
+
+
+
+
+
+
+if(storageFolderId === null){
+
+
+
+console.warn(
+"Storage folder ID not ready"
+);
+
+
+
+return;
+
+}
+
+
+
+
+
+
+
+
+if(
+window.CampusWordStorageCore &&
+CampusWordStorageCore.SaveAs &&
+CampusWordStorageCore.SaveAs.setFolder
+){
+
+
+
+CampusWordStorageCore.SaveAs
+.setFolder(
+storageFolderId
+);
+
+
+
+console.log(
+"Storage Folder Selected:",
+storageFolderId
+);
+
+
+
+}
+
+
+
+
+
+},
+false
+);
+
+
+
+}
+
+
+
+
+
+
+
+
+
+window.CampusWordStorageBridge = {
+
+
+init:function(){
+
+
+
+ensureStorageFolder()
+
+.then(function(folder){
+
+
+
+console.log(
+"CampusWordStorage Folder Ready:",
+folder.id
+);
+
+
+
+})
+
+.catch(function(error){
+
+
+
+console.error(
+"Storage Default Folder Error:",
+error
+);
+
+
+
+});
+
+
+
+}
+
+
+
+};
+
+
+
+
+
+
+
+
+CampusWordStorageBridge.init();
+
+
+connectStorageFolderButton();
+
+
+
+
+
+
+
+console.log(
+"CampusWord Storage Folder Bridge Ready"
+);
+
+
+
+
+
+
+})();
 
 
 
@@ -29408,6 +29881,352 @@ console.log(
 
 
 
+/* =========================================================
+   CAMPUS WORD — SAVE BUTTON BRIDGE
+   STEP 5
+
+   CONNECT:
+   SAVE BUTTON
+   WITH SAVE AS CORE
+
+   ACTIONS:
+   - READ FILE NAME
+   - SAVE DOCUMENT
+   - UPDATE TITLE BAR
+
+   COMPATIBLE WITH:
+   STEP 1 SAVE AS UI
+   STEP 2 NEW FOLDER UI
+   STEP 3 STORAGE FOLDER BRIDGE
+   STEP 5 SAVE AS CORE
+
+   NO DOCUMENT PANEL
+   NO FOLDER CREATION
+   NO DATABASE CHANGE
+========================================================= */
+
+(function(){
+
+"use strict";
+
+
+
+
+
+function updateDocumentTitle(name){
+
+
+
+const title =
+document.getElementById(
+"cwTitle"
+);
+
+
+
+
+
+if(!title){
+
+return;
+
+}
+
+
+
+
+
+title.textContent =
+name;
+
+
+
+}
+
+
+
+
+
+
+
+
+
+function getPages(){
+
+
+
+return Array.from(
+document.querySelectorAll(
+".cwPageContent"
+)
+
+)
+.map(function(page){
+
+
+return {
+
+html:
+page.innerHTML
+
+};
+
+
+});
+
+
+
+}
+
+
+
+
+
+
+
+
+
+function closeSaveAsWindow(){
+
+
+
+if(
+window.CampusWordSaveAsUI &&
+CampusWordSaveAsUI.close
+){
+
+
+
+CampusWordSaveAsUI.close();
+
+
+
+}
+
+
+
+}
+
+
+
+
+
+
+
+
+
+function connectSaveButton(){
+
+
+
+document.addEventListener(
+"click",
+function(e){
+
+
+
+const button =
+e.target.closest(
+".cwSaveAsConfirm"
+);
+
+
+
+
+
+
+if(!button){
+
+return;
+
+}
+
+
+
+
+
+
+
+e.preventDefault();
+
+e.stopPropagation();
+
+
+
+
+
+
+
+
+const input =
+document.querySelector(
+".cwSaveAsNameInput"
+);
+
+
+
+
+
+
+const name =
+input ?
+input.value.trim()
+:
+"";
+
+
+
+
+
+
+
+
+if(!name){
+
+
+
+console.warn(
+"Document name required"
+);
+
+
+
+return;
+
+
+
+}
+
+
+
+
+
+
+
+
+if(
+!window.CampusWordStorageCore ||
+!CampusWordStorageCore.SaveAs ||
+!CampusWordStorageCore.SaveAs.save
+){
+
+
+
+console.error(
+"Save As Core unavailable"
+);
+
+
+
+return;
+
+
+
+}
+
+
+
+
+
+
+
+
+CampusWordStorageCore.SaveAs
+
+.save({
+
+name:name,
+
+pages:
+getPages()
+
+})
+
+.then(function(id){
+
+
+
+console.log(
+"Document Saved:",
+id
+);
+
+
+
+
+
+
+
+updateDocumentTitle(
+name
+);
+
+
+
+
+
+
+
+closeSaveAsWindow();
+
+
+
+})
+
+.catch(function(error){
+
+
+
+console.error(
+"Document Save Error:",
+error
+);
+
+
+
+});
+
+
+
+
+
+
+
+},
+false
+);
+
+
+
+}
+
+
+
+
+
+
+
+
+
+connectSaveButton();
+
+
+
+
+
+
+
+
+console.log(
+"CampusWord Save Button Bridge Ready"
+);
+
+
+
+
+
+
+})();
 
 
 
@@ -29424,9 +30243,509 @@ console.log(
 
 
 
+/* =========================================================
+   CAMPUS WORD — DOCUMENTS PANEL BRIDGE
+   STEP 5
+
+   DISPLAY SAVED DOCUMENTS
+
+   CONNECT:
+   FOLDER SELECTION
+   WITH
+   DOCUMENT PANEL
+
+   COMPATIBLE WITH:
+   STEP 1 SAVE AS UI
+   STEP 2 NEW FOLDER UI
+   STEP 3 STORAGE FOLDER BRIDGE
+   STEP 4 SAVE BUTTON BRIDGE
+   STEP 5 SAVE AS CORE
+
+   NO DATABASE CHANGE
+   NO OLD SYSTEM
+   NO LAYOUT ENGINE ACCESS
+========================================================= */
+
+
+(function(){
+
+"use strict";
 
 
 
+
+
+
+function getDocumentsPanel(){
+
+
+
+return document.querySelector(
+".cwSaveAsDocumentList"
+);
+
+
+
+}
+
+
+
+
+
+
+
+
+function createDocumentItem(documentData){
+
+
+
+const item =
+document.createElement(
+"div"
+);
+
+
+
+item.className =
+"cwSaveAsDocumentItem";
+
+
+
+
+
+item.dataset.documentId =
+documentData.id;
+
+
+
+
+
+
+
+item.innerHTML = `
+
+
+<svg viewBox="0 0 24 24"
+width="18"
+height="18">
+
+<path d="M6 3h9l3 3v15H6z"
+fill="none"
+stroke="currentColor"
+stroke-width="2"/>
+
+<path d="M9 13h6M9 17h6"
+fill="none"
+stroke="currentColor"
+stroke-width="2"/>
+
+</svg>
+
+
+<span>
+${documentData.name}
+</span>
+
+
+`;
+
+
+
+
+
+
+
+
+item.onclick =
+function(){
+
+
+
+document
+.querySelectorAll(
+".cwSaveAsDocumentItem"
+)
+.forEach(function(old){
+
+
+old.classList.remove(
+"active"
+);
+
+
+});
+
+
+
+
+
+item.classList.add(
+"active"
+);
+
+
+
+
+
+
+};
+
+
+
+
+
+
+return item;
+
+
+}
+
+
+
+
+
+
+
+
+
+function displayDocuments(documents){
+
+
+
+const panel =
+getDocumentsPanel();
+
+
+
+
+
+
+if(!panel){
+
+return;
+
+}
+
+
+
+
+
+
+
+panel.innerHTML = "";
+
+
+
+
+
+
+
+
+documents.forEach(function(doc){
+
+
+
+panel.appendChild(
+createDocumentItem(
+doc
+)
+);
+
+
+
+});
+
+
+
+}
+
+
+
+
+
+
+
+
+
+function loadDocumentsByFolder(folderId){
+
+
+
+if(
+!window.CampusWordStorageCore ||
+!CampusWordStorageCore.getDocumentsByFolder
+){
+
+
+console.error(
+"Document Relation Core unavailable"
+);
+
+
+
+return;
+
+
+}
+
+
+
+
+
+
+
+
+CampusWordStorageCore
+
+.getDocumentsByFolder(
+folderId
+)
+
+.then(function(documents){
+
+
+
+displayDocuments(
+documents
+);
+
+
+
+})
+
+.catch(function(error){
+
+
+
+console.error(
+"Documents Load Error:",
+error
+);
+
+
+
+});
+
+
+
+}
+
+
+
+
+
+
+
+
+
+function connectFolderSelection(){
+
+
+
+document.addEventListener(
+"click",
+function(e){
+
+
+
+const folder =
+e.target.closest(
+".cwSaveAsFolderItem"
+);
+
+
+
+
+
+
+if(!folder){
+
+return;
+
+}
+
+
+
+
+
+
+
+const folderId =
+folder.dataset.folderId;
+
+
+
+
+
+
+if(!folderId){
+
+return;
+
+}
+
+
+
+
+
+
+
+
+loadDocumentsByFolder(
+folderId
+);
+
+
+
+},
+false
+);
+
+
+
+}
+
+
+
+
+
+
+
+
+
+function refreshDocuments(){
+
+
+
+if(
+window.CampusWordStorageCore &&
+CampusWordStorageCore.getDocuments
+){
+
+
+
+CampusWordStorageCore
+.getDocuments()
+
+.then(function(documents){
+
+
+
+displayDocuments(
+documents
+);
+
+
+
+});
+
+
+
+}
+
+
+
+}
+
+
+
+
+
+
+
+
+window.CampusWordDocumentsBridge = {
+
+
+
+refresh:
+refreshDocuments,
+
+
+
+loadFolder:
+loadDocumentsByFolder
+
+
+
+};
+
+
+
+
+
+
+
+
+connectFolderSelection();
+
+
+
+
+
+
+
+
+document.addEventListener(
+"click",
+function(e){
+
+
+
+const save =
+e.target.closest(
+".cwSaveAsConfirm"
+);
+
+
+
+
+
+
+if(!save){
+
+return;
+
+}
+
+
+
+
+
+
+
+setTimeout(function(){
+
+
+
+refreshDocuments();
+
+
+
+},500);
+
+
+
+},
+false
+);
+
+
+
+
+
+
+
+console.log(
+"CampusWord Documents Panel Bridge Ready"
+);
+
+
+
+
+
+
+})();
 
 
 
