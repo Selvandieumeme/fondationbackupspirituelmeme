@@ -29071,7 +29071,312 @@ console.log(
 
 
 
+/* =========================================================
+   CAMPUS WORD — NEW FOLDER DIALOG FOUNDATION
+   STEP 2A
 
+   CREATE NEW FOLDER WINDOW ONLY
+
+   CONNECTS:
+   - New Folder Button
+   - Open Dialog
+   - Close Dialog
+
+   NO INDEXEDDB
+   NO FOLDER CREATION
+   NO SAVE LOGIC
+   NO LIST REFRESH
+========================================================= */
+
+
+(function(){
+
+"use strict";
+
+
+
+let newFolderDialog = null;
+
+
+
+
+
+
+function createNewFolderDialog(){
+
+
+
+if(newFolderDialog){
+
+return;
+
+}
+
+
+
+
+
+newFolderDialog =
+document.createElement("div");
+
+
+
+newFolderDialog.id =
+"cwNewFolderDialog";
+
+
+
+
+
+newFolderDialog.innerHTML = `
+
+
+<div class="cwNewFolderBox">
+
+
+<div class="cwNewFolderHeader">
+
+<h2>
+Create New Folder
+</h2>
+
+</div>
+
+
+
+
+
+<div class="cwNewFolderBody">
+
+
+<input
+
+class="cwNewFolderNameInput"
+
+type="text"
+
+placeholder="Folder name"
+
+>
+
+
+
+</div>
+
+
+
+
+
+
+
+<div class="cwNewFolderFooter">
+
+
+<button
+
+class="cwNewFolderCreateBtn"
+
+type="button">
+
+Create
+
+</button>
+
+
+
+
+<button
+
+class="cwNewFolderCancelBtn"
+
+type="button">
+
+Cancel
+
+</button>
+
+
+
+</div>
+
+
+
+</div>
+
+
+`;
+
+
+
+
+
+document.body.appendChild(
+newFolderDialog
+);
+
+
+
+}
+
+
+
+
+
+
+
+
+
+function closeNewFolderDialog(){
+
+
+
+if(newFolderDialog){
+
+
+newFolderDialog.remove();
+
+newFolderDialog=null;
+
+
+}
+
+
+
+}
+
+
+
+
+
+
+
+
+
+document.addEventListener(
+"click",
+function(e){
+
+
+
+const button =
+e.target.closest(
+".cwSaveAsNewFolderBtn"
+);
+
+
+
+
+
+if(!button){
+
+return;
+
+}
+
+
+
+
+
+e.preventDefault();
+
+e.stopPropagation();
+
+
+
+
+
+
+createNewFolderDialog();
+
+
+
+},
+false
+);
+
+
+
+
+
+
+
+
+
+document.addEventListener(
+"click",
+function(e){
+
+
+
+const cancel =
+e.target.closest(
+".cwNewFolderCancelBtn"
+);
+
+
+
+
+
+
+if(!cancel){
+
+return;
+
+}
+
+
+
+
+
+
+
+closeNewFolderDialog();
+
+
+
+},
+false
+);
+
+
+
+
+
+
+
+
+window.CampusWordNewFolderUI = {
+
+
+open:function(){
+
+createNewFolderDialog();
+
+},
+
+
+close:function(){
+
+closeNewFolderDialog();
+
+}
+
+
+};
+
+
+
+
+
+
+
+console.log(
+"CampusWord New Folder UI Foundation Ready"
+);
+
+
+
+})();
 
 
 
