@@ -29873,6 +29873,491 @@ console.log(
 
 
 
+/* =========================================================
+   CAMPUS WORD — SAVE AS FINAL BRIDGE
+   STEP 5 FINAL
+
+   CONNECTS:
+   - Save As Save Button
+   - Active Folder
+   - File Name
+   - Storage Core SaveAs
+   - Documents Panel Refresh
+   - Title Bar Update
+
+   COMPATIBLE WITH:
+   STEP 1 DATABASE CORE
+   STEP 2 FOLDER CORE
+   STEP 3 DOCUMENT CORE
+   STEP 4 RELATION CORE
+   STEP 5 SAVE AS CORE
+
+   NO DATABASE CREATION
+   NO UI CREATION
+   NO CSS
+   NO OLD SYSTEM
+========================================================= */
+
+(function(){
+
+"use strict";
+
+
+
+
+
+function getPagesData(){
+
+
+if(
+window.CampusWord2007Simulateur &&
+CampusWord2007Simulateur.state &&
+CampusWord2007Simulateur.state.pages
+){
+
+
+return CampusWord2007Simulateur
+.state
+.pages
+.map(function(page){
+
+
+const content =
+page.querySelector(
+".cwPageContent"
+);
+
+
+return content ?
+content.innerText
+:
+"";
+
+
+});
+
+
+}
+
+
+
+return [];
+
+}
+
+
+
+
+
+
+
+
+
+function updateTitle(documentName){
+
+
+const title =
+document.getElementById(
+"cwTitle"
+);
+
+
+
+if(!title){
+
+return;
+
+}
+
+
+
+title.textContent =
+documentName +
+" - Campus Word 2007 Simulation";
+
+
+
+}
+
+
+
+
+
+
+
+
+
+function refreshDocuments(folderId){
+
+
+
+if(
+!window.CampusWordStorageCore ||
+!CampusWordStorageCore.getDocumentsByFolder
+){
+
+console.warn(
+"Relation Core unavailable"
+);
+
+
+return;
+
+}
+
+
+
+
+
+CampusWordStorageCore
+.getDocumentsByFolder(
+folderId
+)
+
+.then(function(documents){
+
+
+
+const list =
+document.querySelector(
+".cwSaveAsDocumentList"
+);
+
+
+
+
+
+if(!list){
+
+return;
+
+}
+
+
+
+list.innerHTML = "";
+
+
+
+
+
+
+
+documents.forEach(function(doc){
+
+
+
+const item =
+document.createElement("div");
+
+
+
+item.className =
+"cwSaveAsDocumentItem";
+
+
+
+item.dataset.documentId =
+doc.id;
+
+
+
+item.innerHTML =
+
+`
+📄
+<span>${doc.name}</span>
+`;
+
+
+
+list.appendChild(item);
+
+
+
+});
+
+
+
+
+
+console.log(
+"Documents Panel Updated:",
+documents
+);
+
+
+
+})
+
+.catch(function(error){
+
+
+console.error(
+"Documents Refresh Error:",
+error
+);
+
+
+});
+
+
+
+}
+
+
+
+
+
+
+
+
+
+document.addEventListener(
+"click",
+function(e){
+
+
+
+const button =
+e.target.closest(
+".cwSaveAsConfirm"
+);
+
+
+
+
+
+if(!button){
+
+return;
+
+}
+
+
+
+
+
+
+const input =
+document.querySelector(
+".cwSaveAsNameInput"
+);
+
+
+
+
+
+
+const name =
+input ?
+input.value.trim()
+:
+"";
+
+
+
+
+
+
+if(!name){
+
+
+
+console.warn(
+"Document name required"
+);
+
+
+
+return;
+
+}
+
+
+
+
+
+
+
+
+
+if(
+!window.CampusWordStorageCore ||
+!CampusWordStorageCore.SaveAs ||
+!CampusWordStorageCore.SaveAs.save
+){
+
+
+
+console.error(
+"Save As Core unavailable"
+);
+
+
+
+return;
+
+}
+
+
+
+
+
+
+
+
+
+const folderId =
+CampusWordStorageCore
+.SaveAs
+.getFolder();
+
+
+
+
+
+
+
+
+if(!folderId){
+
+
+
+console.warn(
+"No active folder selected"
+);
+
+
+
+return;
+
+}
+
+
+
+
+
+
+
+
+CampusWordStorageCore
+.SaveAs
+.save({
+
+name:name,
+
+pages:
+getPagesData()
+
+
+
+})
+
+.then(function(id){
+
+
+
+console.log(
+"Document Saved:",
+{
+id:id,
+name:name,
+folder:folderId
+}
+);
+
+
+
+
+
+updateTitle(name);
+
+
+
+
+
+
+refreshDocuments(
+folderId
+);
+
+
+
+
+
+
+if(
+window.CampusWordSaveAsUI &&
+CampusWordSaveAsUI.close
+){
+
+
+CampusWordSaveAsUI.close();
+
+
+}
+
+
+
+})
+
+.catch(function(error){
+
+
+
+console.error(
+"Save Error:",
+error
+);
+
+
+
+});
+
+
+
+
+
+
+},
+false
+);
+
+
+
+
+
+
+
+
+
+console.log(
+"Campus Word Save As Final Bridge Ready"
+);
+
+
+
+})();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
    
 
 
