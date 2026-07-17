@@ -27851,6 +27851,341 @@ console.log(
 
 
 
+/* =========================================================
+   CAMPUS WORD — STORAGE RELATION CORE
+   STEP 4
+
+   FOLDER + DOCUMENT RELATION LAYER
+
+   COMPATIBLE WITH:
+   STEP 1 — DATABASE CORE
+   STEP 2 — FOLDER CORE
+   STEP 3 — DOCUMENT CORE
+
+   NO UI
+   NO SAVE BUTTON
+   NO SAVE AS
+   NO OLD SYSTEM ACCESS
+   ISOLATED MODULE
+========================================================= */
+
+(function(){
+
+"use strict";
+
+
+
+
+
+function getDatabase(){
+
+
+if(
+!window.CampusWordStorageCore ||
+!window.CampusWordStorageCore.db
+){
+
+return null;
+
+}
+
+
+
+return (
+window.CampusWordStorageCore.db
+);
+
+
+
+}
+
+
+
+
+
+
+
+
+
+window.CampusWordStorageCore.getDocumentsByFolder =
+function(folderId){
+
+
+
+return new Promise(function(resolve,reject){
+
+
+
+const db =
+getDatabase();
+
+
+
+
+
+if(!db){
+
+
+
+reject(
+"Storage database not ready"
+);
+
+
+
+return;
+
+}
+
+
+
+
+
+
+
+const transaction =
+db.transaction(
+"documents",
+"readonly"
+);
+
+
+
+
+
+
+
+const store =
+transaction.objectStore(
+"documents"
+);
+
+
+
+
+
+
+
+
+const index =
+store.index(
+"folderId"
+);
+
+
+
+
+
+
+
+
+const request =
+index.getAll(
+folderId
+);
+
+
+
+
+
+
+
+
+request.onsuccess =
+function(){
+
+
+
+resolve(
+request.result
+);
+
+
+
+};
+
+
+
+
+
+
+
+
+request.onerror =
+function(event){
+
+
+
+reject(
+event.target.error
+);
+
+
+
+};
+
+
+
+
+
+
+});
+
+
+
+};
+
+
+
+
+
+
+
+
+
+window.CampusWordStorageCore.getFolderById =
+function(folderId){
+
+
+
+return new Promise(function(resolve,reject){
+
+
+
+const db =
+getDatabase();
+
+
+
+
+
+if(!db){
+
+
+
+reject(
+"Storage database not ready"
+);
+
+
+
+return;
+
+}
+
+
+
+
+
+
+const transaction =
+db.transaction(
+"folders",
+"readonly"
+);
+
+
+
+
+
+
+const store =
+transaction.objectStore(
+"folders"
+);
+
+
+
+
+
+
+const request =
+store.get(
+folderId
+);
+
+
+
+
+
+
+
+request.onsuccess =
+function(){
+
+
+
+resolve(
+request.result || null
+);
+
+
+
+};
+
+
+
+
+
+
+
+request.onerror =
+function(event){
+
+
+
+reject(
+event.target.error
+);
+
+
+
+};
+
+
+
+
+
+
+});
+
+
+
+};
+
+
+
+
+
+
+
+
+console.log(
+"CampusWord Relation Core Ready"
+);
+
+
+
+
+
+})();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
