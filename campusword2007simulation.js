@@ -28854,7 +28854,6 @@ console.log(
 
 
 
-
 /* =========================================================
    CAMPUS WORD — SAVE AS UI CONNECTOR
    STEP 7
@@ -28862,12 +28861,11 @@ console.log(
    CONNECT SAVE AS UI WITH STORAGE CORE
 
    CONNECTS:
-   - Folder List
-   - SVG Folder Icons
+   - Default Save As Folders
+   - IndexedDB Folders
    - Selected Folder
    - Save Button
    - Cancel Button
-   - New Folder Button Ready
 
    COMPATIBLE WITH:
    STEP 1 DATABASE CORE
@@ -28891,31 +28889,292 @@ console.log(
 
 
 
-
-function folderIcon(){
-
+function getIcon(type){
 
 
-return `
 
-<svg
-viewBox="0 0 24 24"
-width="18"
-height="18"
-fill="none"
-stroke="currentColor"
-stroke-width="2"
-stroke-linecap="round"
-stroke-linejoin="round">
+const icons = {
 
-<path d="M3 7h6l2 3h10v10H3z"></path>
 
-<path d="M3 7V5h6l2 2"></path>
+computer:`
 
+<svg viewBox="0 0 24 24" width="18" height="18">
+<rect x="3" y="4" width="18" height="13" rx="2"
+fill="none" stroke="currentColor" stroke-width="2"/>
+<path d="M8 21h8M12 17v4"
+fill="none" stroke="currentColor" stroke-width="2"/>
 </svg>
 
+`,
+
+
+
+
+documents:`
+
+<svg viewBox="0 0 24 24" width="18" height="18">
+<path d="M6 3h9l3 3v15H6z"
+fill="none" stroke="currentColor" stroke-width="2"/>
+<path d="M9 13h6M9 17h6"
+fill="none" stroke="currentColor" stroke-width="2"/>
+</svg>
+
+`,
+
+
+
+
+desktop:`
+
+<svg viewBox="0 0 24 24" width="18" height="18">
+<rect x="3" y="5" width="18" height="14"
+rx="2"
+fill="none"
+stroke="currentColor"
+stroke-width="2"/>
+</svg>
+
+`,
+
+
+
+
+storage:`
+
+<svg viewBox="0 0 24 24" width="18" height="18">
+<ellipse cx="12" cy="6" rx="8" ry="3"
+fill="none"
+stroke="currentColor"
+stroke-width="2"/>
+<path d="M4 6v12c0 2 16 2 16 0V6"
+fill="none"
+stroke="currentColor"
+stroke-width="2"/>
+</svg>
+
+`,
+
+
+
+
+drive:`
+
+<svg viewBox="0 0 24 24" width="18" height="18">
+<path d="M4 17l5-10h6l5 10H4z"
+fill="none"
+stroke="currentColor"
+stroke-width="2"/>
+</svg>
+
+`,
+
+
+
+
+folder:`
+
+<svg viewBox="0 0 24 24" width="18" height="18">
+<path d="M3 7h7l2 3h9v9H3z"
+fill="none"
+stroke="currentColor"
+stroke-width="2"/>
+</svg>
+
+`
+
+};
+
+
+
+return icons[type] || icons.folder;
+
+
+}
+
+
+
+
+
+
+
+
+
+const defaultFolders = [
+
+
+{
+id:"computer",
+name:"My Computer",
+icon:"computer"
+},
+
+
+{
+id:"documents",
+name:"My Documents",
+icon:"documents"
+},
+
+
+{
+id:"desktop",
+name:"Desktop",
+icon:"desktop"
+},
+
+
+{
+id:"storage",
+name:"CampusWordStorage",
+icon:"storage"
+},
+
+
+{
+id:"drive-e",
+name:"E:",
+icon:"drive"
+},
+
+
+{
+id:"drive-a",
+name:"A:",
+icon:"drive"
+}
+
+
+];
+
+
+
+
+
+
+
+
+
+function createFolderItem(folder, isDefault){
+
+
+
+const item =
+document.createElement(
+"div"
+);
+
+
+
+item.className =
+"cwSaveAsFolderItem";
+
+
+
+
+
+item.innerHTML =
+
+getIcon(
+folder.icon || "folder"
+)
+
++
+
+`
+<span>${folder.name}</span>
 `;
 
+
+
+
+
+
+
+item.onclick =
+function(e){
+
+
+
+e.stopPropagation();
+
+
+
+
+document
+.querySelectorAll(
+".cwSaveAsFolderItem"
+)
+.forEach(function(old){
+
+
+old.classList.remove(
+"active"
+);
+
+
+});
+
+
+
+
+
+item.classList.add(
+"active"
+);
+
+
+
+
+
+
+
+window.CampusWordSaveAsSelectedFolder =
+folder.id;
+
+
+
+
+
+
+
+
+if(
+window.CampusWordStorageCore &&
+CampusWordStorageCore.SaveAs &&
+CampusWordStorageCore.SaveAs.setFolder &&
+!isDefault
+){
+
+
+CampusWordStorageCore.SaveAs
+.setFolder(
+folder.id
+);
+
+
+}
+
+
+
+
+
+
+
+console.log(
+"Save As Folder Selected:",
+folder.name
+);
+
+
+
+};
+
+
+
+
+
+
+return item;
 
 
 }
@@ -28929,28 +29188,6 @@ stroke-linejoin="round">
 
 
 function loadFolders(){
-
-
-
-if(
-!window.CampusWordStorageCore ||
-!CampusWordStorageCore.getFolders
-){
-
-
-
-console.error(
-"Folder Core unavailable"
-);
-
-
-
-return;
-
-}
-
-
-
 
 
 
@@ -28974,15 +29211,6 @@ return;
 
 
 
-
-
-CampusWordStorageCore
-.getFolders()
-
-.then(function(folders){
-
-
-
 list.innerHTML="";
 
 
@@ -28991,65 +29219,16 @@ list.innerHTML="";
 
 
 
-folders.forEach(function(folder){
+
+defaultFolders.forEach(function(folder){
 
 
 
-const item =
-document.createElement(
-"div"
-);
-
-
-
-item.className =
-"cwSaveAsFolderItem";
-
-
-
-
-
-
-
-item.innerHTML =
-
-folderIcon() +
-
-`
-<span>
-${folder.name}
-</span>
-`;
-
-
-
-
-
-
-
-
-item.onclick =
-function(e){
-
-
-
-e.stopPropagation();
-
-
-
-
-
-
-document
-.querySelectorAll(
-".cwSaveAsFolderItem"
+list.appendChild(
+createFolderItem(
+folder,
+true
 )
-.forEach(function(old){
-
-
-
-old.classList.remove(
-"active"
 );
 
 
@@ -29062,29 +29241,19 @@ old.classList.remove(
 
 
 
-item.classList.add(
-"active"
-);
-
-
-
-
-
-
-
 
 if(
-CampusWordStorageCore.SaveAs &&
-CampusWordStorageCore.SaveAs.setFolder
+!window.CampusWordStorageCore ||
+!CampusWordStorageCore.getFolders
 ){
 
 
-
-CampusWordStorageCore.SaveAs
-.setFolder(
-folder.id
+console.warn(
+"Folder Core unavailable"
 );
 
+
+return;
 
 
 }
@@ -29095,40 +29264,33 @@ folder.id
 
 
 
-window.CampusWordSaveAsSelectedFolder =
-folder.id;
+CampusWordStorageCore
+.getFolders()
+
+.then(function(folders){
 
 
 
-
-
-
-
-console.log(
-"Save As Folder Selected:",
-folder.name
-);
-
-
-
-};
-
-
-
-
-
+folders.forEach(function(folder){
 
 
 
 list.appendChild(
-item
+
+createFolderItem(
+{
+id:folder.id,
+name:folder.name,
+icon:"folder"
+},
+false
+)
+
 );
 
 
 
 });
-
-
 
 
 
@@ -29172,11 +29334,14 @@ document.querySelector(
 
 
 
+
 if(!button){
 
 return;
 
 }
+
+
 
 
 
@@ -29211,18 +29376,15 @@ input.value.trim()
 if(!name){
 
 
-
 console.warn(
 "Document name required"
 );
 
 
-
 return;
 
+
 }
-
-
 
 
 
@@ -29238,14 +29400,12 @@ document.querySelectorAll(
 .map(function(page){
 
 
-
 return {
 
 html:
 page.innerHTML
 
 };
-
 
 
 });
@@ -29256,13 +29416,11 @@ page.innerHTML
 
 
 
-
-
 if(
+!window.CampusWordStorageCore ||
 !CampusWordStorageCore.SaveAs ||
 !CampusWordStorageCore.SaveAs.save
 ){
-
 
 
 console.error(
@@ -29270,10 +29428,11 @@ console.error(
 );
 
 
-
 return;
 
+
 }
+
 
 
 
@@ -29323,7 +29482,6 @@ error
 
 
 
-
 }
 
 
@@ -29342,7 +29500,6 @@ const button =
 document.querySelector(
 ".cwSaveAsCancel"
 );
-
 
 
 
@@ -29371,9 +29528,7 @@ CampusWordSaveAsUI.close
 ){
 
 
-
 CampusWordSaveAsUI.close();
-
 
 
 }
@@ -29408,13 +29563,11 @@ document.querySelector(
 
 
 
-
 if(!button){
 
 return;
 
 }
-
 
 
 
@@ -29477,7 +29630,6 @@ connectNewFolderButton();
 
 
 
-
 document.addEventListener(
 "click",
 function(e){
@@ -29528,7 +29680,6 @@ false
 
 
 
-
 console.log(
 "CampusWord Save As Connector Ready"
 );
@@ -29538,9 +29689,7 @@ console.log(
 
 
 
-
 })();
-
 
 
 
