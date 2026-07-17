@@ -29204,7 +29204,701 @@ console.log(
 
 
 
+/* =========================================================
+   CAMPUS WORD — NEW FOLDER SYSTEM
+   STEP 3
 
+   CREATE NEW FOLDER DIALOG
+   CONNECT NEW FOLDER BUTTON
+
+   INCLUDED:
+   - Open New Folder Dialog
+   - Close New Folder Dialog
+   - Create Button
+   - Cancel Button
+
+   NO INDEXEDDB
+   NO SAVE LOGIC
+   NO DOCUMENT LOGIC
+========================================================= */
+
+(function(){
+
+"use strict";
+
+
+let newFolderDialog = null;
+
+
+
+
+function createNewFolderDialog(){
+
+
+if(newFolderDialog){
+
+return;
+
+}
+
+
+
+newFolderDialog =
+document.createElement("div");
+
+
+newFolderDialog.id =
+"cwNewFolderDialog";
+
+
+
+newFolderDialog.innerHTML = `
+
+<div class="cwNewFolderBox">
+
+
+<div class="cwNewFolderHeader">
+
+<h2>
+Create New Folder
+</h2>
+
+</div>
+
+
+
+<div class="cwNewFolderBody">
+
+<input
+class="cwNewFolderNameInput"
+type="text"
+placeholder="Folder name"
+/>
+
+</div>
+
+
+
+
+<div class="cwNewFolderFooter">
+
+
+<button
+class="cwNewFolderCreateBtn"
+type="button">
+
+Create
+
+</button>
+
+
+
+
+<button
+class="cwNewFolderCancelBtn"
+type="button">
+
+Cancel
+
+</button>
+
+
+
+</div>
+
+
+
+</div>
+
+`;
+
+
+
+document.body.appendChild(
+newFolderDialog
+);
+
+
+
+}
+
+
+
+
+function closeNewFolderDialog(){
+
+
+if(newFolderDialog){
+
+
+newFolderDialog.remove();
+
+newFolderDialog = null;
+
+
+}
+
+
+
+}
+
+
+
+
+
+
+
+document.addEventListener(
+"click",
+function(e){
+
+
+
+const button =
+e.target.closest(
+".cwSaveAsNewFolderBtn"
+);
+
+
+
+if(!button){
+
+return;
+
+}
+
+
+
+e.preventDefault();
+
+
+createNewFolderDialog();
+
+
+
+},
+false
+);
+
+
+
+
+
+
+
+
+document.addEventListener(
+"click",
+function(e){
+
+
+
+const button =
+e.target.closest(
+".cwNewFolderCancelBtn"
+);
+
+
+
+if(!button){
+
+return;
+
+}
+
+
+
+closeNewFolderDialog();
+
+
+
+},
+false
+);
+
+
+
+
+
+
+
+
+document.addEventListener(
+"click",
+function(e){
+
+
+
+const button =
+e.target.closest(
+".cwNewFolderCreateBtn"
+);
+
+
+
+if(!button){
+
+return;
+
+}
+
+
+
+
+
+const input =
+document.querySelector(
+".cwNewFolderNameInput"
+);
+
+
+
+
+
+const folderName =
+input ?
+input.value.trim()
+:
+"";
+
+
+
+
+
+
+if(!folderName){
+
+console.warn(
+"Folder name required"
+);
+
+return;
+
+}
+
+
+
+
+
+
+console.log(
+"New Folder Created:",
+folderName
+);
+
+
+
+
+
+closeNewFolderDialog();
+
+
+
+},
+false
+);
+
+
+
+
+
+
+
+window.CampusWordNewFolderUI = {
+
+
+open:function(){
+
+createNewFolderDialog();
+
+},
+
+
+close:function(){
+
+closeNewFolderDialog();
+
+}
+
+
+};
+
+
+
+
+
+
+
+console.log(
+"Campus Word New Folder Step 3 Ready"
+);
+
+
+
+})();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* =========================================================
+   CAMPUS WORD — NEW FOLDER SYSTEM
+   STEP 3
+
+   CREATE NEW FOLDER DIALOG
+   CONNECT NEW FOLDER BUTTON
+
+   INCLUDED:
+   - Open New Folder Dialog
+   - Close New Folder Dialog
+   - Create Button
+   - Cancel Button
+
+   NO INDEXEDDB
+   NO SAVE LOGIC
+   NO DOCUMENT LOGIC
+========================================================= */
+
+(function(){
+
+"use strict";
+
+
+let newFolderDialog = null;
+
+
+
+
+function createNewFolderDialog(){
+
+
+if(newFolderDialog){
+
+return;
+
+}
+
+
+
+newFolderDialog =
+document.createElement("div");
+
+
+newFolderDialog.id =
+"cwNewFolderDialog";
+
+
+
+newFolderDialog.innerHTML = `
+
+<div class="cwNewFolderBox">
+
+
+<div class="cwNewFolderHeader">
+
+<h2>
+Create New Folder
+</h2>
+
+</div>
+
+
+
+<div class="cwNewFolderBody">
+
+<input
+class="cwNewFolderNameInput"
+type="text"
+placeholder="Folder name"
+/>
+
+</div>
+
+
+
+
+<div class="cwNewFolderFooter">
+
+
+<button
+class="cwNewFolderCreateBtn"
+type="button">
+
+Create
+
+</button>
+
+
+
+
+<button
+class="cwNewFolderCancelBtn"
+type="button">
+
+Cancel
+
+</button>
+
+
+
+</div>
+
+
+
+</div>
+
+`;
+
+
+
+document.body.appendChild(
+newFolderDialog
+);
+
+
+
+}
+
+
+
+
+function closeNewFolderDialog(){
+
+
+if(newFolderDialog){
+
+
+newFolderDialog.remove();
+
+newFolderDialog = null;
+
+
+}
+
+
+
+}
+
+
+
+
+
+
+
+document.addEventListener(
+"click",
+function(e){
+
+
+
+const button =
+e.target.closest(
+".cwSaveAsNewFolderBtn"
+);
+
+
+
+if(!button){
+
+return;
+
+}
+
+
+
+e.preventDefault();
+
+
+createNewFolderDialog();
+
+
+
+},
+false
+);
+
+
+
+
+
+
+
+
+document.addEventListener(
+"click",
+function(e){
+
+
+
+const button =
+e.target.closest(
+".cwNewFolderCancelBtn"
+);
+
+
+
+if(!button){
+
+return;
+
+}
+
+
+
+closeNewFolderDialog();
+
+
+
+},
+false
+);
+
+
+
+
+
+
+
+
+document.addEventListener(
+"click",
+function(e){
+
+
+
+const button =
+e.target.closest(
+".cwNewFolderCreateBtn"
+);
+
+
+
+if(!button){
+
+return;
+
+}
+
+
+
+
+
+const input =
+document.querySelector(
+".cwNewFolderNameInput"
+);
+
+
+
+
+
+const folderName =
+input ?
+input.value.trim()
+:
+"";
+
+
+
+
+
+
+if(!folderName){
+
+console.warn(
+"Folder name required"
+);
+
+return;
+
+}
+
+
+
+
+
+
+console.log(
+"New Folder Created:",
+folderName
+);
+
+
+
+
+
+closeNewFolderDialog();
+
+
+
+},
+false
+);
+
+
+
+
+
+
+
+window.CampusWordNewFolderUI = {
+
+
+open:function(){
+
+createNewFolderDialog();
+
+},
+
+
+close:function(){
+
+closeNewFolderDialog();
+
+}
+
+
+};
+
+
+
+
+
+
+
+console.log(
+"Campus Word New Folder Step 3 Ready"
+);
+
+
+
+})();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+   
 
 
 
