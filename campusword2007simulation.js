@@ -29461,11 +29461,15 @@ return;
 
 
 
+
 const input =
-document.querySelector(
+newFolderDialog.querySelector(
 ".cwNewFolderNameInput"
 );
 
+
+
+   
 
 
 
