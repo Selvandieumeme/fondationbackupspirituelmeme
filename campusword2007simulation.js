@@ -27515,6 +27515,351 @@ console.log(
 
 
 
+/* =========================================================
+   CAMPUS WORD — STORAGE CORE DOCUMENT MANAGER
+   STEP 3
+
+   CREATE + READ DOCUMENTS
+
+   COMPATIBLE WITH STEP 1 + STEP 2
+
+   USES ONLY CampusWordStorageCore
+
+   NO UI
+   NO OLD SAVE SYSTEM
+   NO LOCAL STORAGE
+========================================================= */
+
+(function(){
+
+"use strict";
+
+
+
+
+
+const STORE =
+"documents";
+
+
+
+
+
+
+
+function getDatabase(){
+
+
+
+if(
+!window.CampusWordStorageCore ||
+!window.CampusWordStorageCore.db
+){
+
+return null;
+
+}
+
+
+
+return (
+window.CampusWordStorageCore.db
+);
+
+
+
+}
+
+
+
+
+
+
+
+
+window.CampusWordStorageCore.saveDocument =
+function(documentData){
+
+
+
+return new Promise(function(resolve,reject){
+
+
+
+const db =
+getDatabase();
+
+
+
+
+
+if(!db){
+
+
+
+reject(
+"Storage database not ready"
+);
+
+
+
+return;
+
+}
+
+
+
+
+
+
+
+const transaction =
+db.transaction(
+STORE,
+"readwrite"
+);
+
+
+
+
+
+
+
+const store =
+transaction.objectStore(
+STORE
+);
+
+
+
+
+
+
+
+
+const request =
+store.add({
+
+name:
+documentData.name || "",
+
+
+folderId:
+documentData.folderId || null,
+
+
+pages:
+documentData.pages || [],
+
+
+createdAt:
+new Date().toISOString()
+
+
+
+});
+
+
+
+
+
+
+
+
+request.onsuccess =
+function(){
+
+
+
+resolve(
+request.result
+);
+
+
+
+};
+
+
+
+
+
+
+
+request.onerror =
+function(event){
+
+
+
+reject(
+event.target.error
+);
+
+
+
+};
+
+
+
+
+
+
+});
+
+
+
+};
+
+
+
+
+
+
+
+
+
+window.CampusWordStorageCore.getDocuments =
+function(){
+
+
+
+return new Promise(function(resolve,reject){
+
+
+
+const db =
+getDatabase();
+
+
+
+
+
+if(!db){
+
+
+
+reject(
+"Storage database not ready"
+);
+
+
+
+return;
+
+}
+
+
+
+
+
+
+const transaction =
+db.transaction(
+STORE,
+"readonly"
+);
+
+
+
+
+
+
+
+const store =
+transaction.objectStore(
+STORE
+);
+
+
+
+
+
+
+
+const request =
+store.getAll();
+
+
+
+
+
+
+
+request.onsuccess =
+function(){
+
+
+
+resolve(
+request.result
+);
+
+
+
+};
+
+
+
+
+
+
+
+request.onerror =
+function(event){
+
+
+
+reject(
+event.target.error
+);
+
+
+
+};
+
+
+
+
+
+
+});
+
+
+
+};
+
+
+
+
+
+
+
+console.log(
+"CampusWord Document Core Ready"
+);
+
+
+
+
+
+
+})();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
