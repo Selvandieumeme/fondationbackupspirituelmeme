@@ -4682,14 +4682,47 @@ bottom:-6px;
 
 
 
-/* =========================================================
-   CAMPUS WORD — SAVE AS UI STYLE
-   STEP 6 CSS
 
-   ISOLATED UI ONLY
-   NO RIBBON CHANGE
-   NO PAGE CHANGE
-   NO CARET CHANGE
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* =========================================================
+   CAMPUS WORD — SAVE AS UI FOUNDATION CSS
+   STEP 1A
+
+   SAVE AS WINDOW DISPLAY
+   TOUCH + DESKTOP READY
+
+   NO STORAGE
+   NO DATABASE
+   NO SAVE LOGIC
 ========================================================= */
 
 
@@ -4697,13 +4730,7 @@ bottom:-6px;
 
     position:fixed;
 
-    top:0;
-    left:0;
-
-    width:100%;
-    height:100%;
-
-    background:rgba(0,0,0,0.35);
+    inset:0;
 
     display:flex;
 
@@ -4711,11 +4738,12 @@ bottom:-6px;
 
     justify-content:center;
 
-    z-index:99999;
+    background:rgba(15,23,42,.35);
+
+    z-index:100000;
+
 
 }
-
-
 
 
 
@@ -4724,17 +4752,18 @@ bottom:-6px;
 
     width:760px;
 
-    max-width:90%;
+    max-width:94%;
 
     height:520px;
 
-    background:#ffffff;
+    max-height:90vh;
 
-    border:1px solid #888;
+    background:white;
 
-    border-radius:6px;
+    border-radius:14px;
 
-    box-shadow:0 10px 30px rgba(0,0,0,0.35);
+    box-shadow:
+    0 25px 60px rgba(0,0,0,.35);
 
     display:flex;
 
@@ -4742,34 +4771,25 @@ bottom:-6px;
 
     overflow:hidden;
 
+
 }
-
-
 
 
 
 
 .cwSaveAsHeader{
 
-    height:45px;
-
-    background:linear-gradient(
-        to bottom,
-        #f8f8f8,
-        #dcdcdc
-    );
-
-    border-bottom:1px solid #aaa;
+    height:55px;
 
     display:flex;
 
     align-items:center;
 
-    padding-left:15px;
+    padding:0 20px;
+
+    border-bottom:1px solid #e2e8f0;
 
 }
-
-
 
 
 
@@ -4777,12 +4797,13 @@ bottom:-6px;
 
     margin:0;
 
-    font-size:18px;
+    font-size:22px;
 
-    font-weight:600;
+    font-weight:800;
+
+    color:#1e293b;
 
 }
-
 
 
 
@@ -4796,9 +4817,8 @@ bottom:-6px;
 
     overflow:hidden;
 
+
 }
-
-
 
 
 
@@ -4806,18 +4826,18 @@ bottom:-6px;
 
 .cwSaveAsFolderPanel{
 
-    width:230px;
+    width:240px;
 
-    border-right:1px solid #ccc;
+    border-right:1px solid #e2e8f0;
 
     display:flex;
 
     flex-direction:column;
 
-    padding:10px;
+    padding:12px;
+
 
 }
-
 
 
 
@@ -4825,13 +4845,15 @@ bottom:-6px;
 .cwSaveAsFolderTitle,
 .cwSaveAsDocumentTitle{
 
-    font-weight:bold;
+    font-size:15px;
 
-    margin-bottom:8px;
+    font-weight:800;
+
+    color:#334155;
+
+    margin-bottom:10px;
 
 }
-
-
 
 
 
@@ -4840,52 +4862,55 @@ bottom:-6px;
 
     flex:1;
 
-    overflow:auto;
+    overflow-y:auto;
 
 }
-
-
 
 
 
 
 .cwSaveAsFolderItem{
 
-    padding:8px;
+    display:flex;
+
+    align-items:center;
+
+    gap:10px;
+
+    padding:10px;
+
+    border-radius:8px;
 
     cursor:pointer;
 
-    border-radius:4px;
-
     user-select:none;
 
+    font-size:14px;
+
+    font-weight:600;
+
+    color:#334155;
+
+
 }
-
-
 
 
 
 .cwSaveAsFolderItem:hover{
 
-    background:#eaf2ff;
+    background:#eff6ff;
 
 }
-
-
-
 
 
 
 .cwSaveAsFolderItem.active{
 
-    background:#cfe2ff;
+    background:#dbeafe;
 
-    outline:1px solid #4a90e2;
+    color:#2563eb;
 
 }
-
-
-
 
 
 
@@ -4894,13 +4919,22 @@ bottom:-6px;
 
     margin-top:10px;
 
-    height:32px;
+    padding:10px;
+
+    border:none;
+
+    border-radius:8px;
+
+    background:#2563eb;
+
+    color:white;
+
+    font-weight:800;
 
     cursor:pointer;
 
+
 }
-
-
 
 
 
@@ -4910,9 +4944,12 @@ bottom:-6px;
 
     flex:1;
 
-    padding:10px;
+    padding:12px;
 
-    overflow:auto;
+    display:flex;
+
+    flex-direction:column;
+
 
 }
 
@@ -4920,8 +4957,13 @@ bottom:-6px;
 
 
 
-
 .cwSaveAsDocumentList{
+
+    flex:1;
+
+    border:1px solid #e2e8f0;
+
+    border-radius:8px;
 
     overflow:auto;
 
@@ -4933,9 +4975,9 @@ bottom:-6px;
 
 .cwSaveAsFooter{
 
-    height:70px;
+    height:80px;
 
-    border-top:1px solid #ccc;
+    border-top:1px solid #e2e8f0;
 
     display:flex;
 
@@ -4943,13 +4985,12 @@ bottom:-6px;
 
     justify-content:space-between;
 
-    padding:10px;
+    padding:12px 18px;
 
-    background:#f7f7f7;
+    gap:15px;
+
 
 }
-
-
 
 
 
@@ -4967,18 +5008,33 @@ bottom:-6px;
 
 
 
+.cwSaveAsFileName label{
 
-.cwSaveAsNameInput{
+    font-weight:700;
 
-    width:260px;
-
-    height:28px;
-
-    padding:4px 8px;
+    color:#334155;
 
 }
 
 
+
+
+.cwSaveAsNameInput{
+
+    width:220px;
+
+    padding:10px;
+
+    border:1px solid #cbd5e1;
+
+    border-radius:8px;
+
+    outline:none;
+
+    font-size:15px;
+
+
+}
 
 
 
@@ -4993,12 +5049,18 @@ bottom:-6px;
 
 
 
+.cwSaveAsConfirm,
+.cwSaveAsCancel{
 
-.cwSaveAsButtons button{
+    min-width:90px;
 
-    min-width:80px;
+    padding:10px 16px;
 
-    height:32px;
+    border:none;
+
+    border-radius:8px;
+
+    font-weight:800;
 
     cursor:pointer;
 
@@ -5007,26 +5069,21 @@ bottom:-6px;
 
 
 
-
 .cwSaveAsConfirm{
 
-    background:#217346;
+    background:#16a34a;
 
     color:white;
 
-    border:1px solid #185c38;
-
 }
-
-
 
 
 
 .cwSaveAsCancel{
 
-    background:#ffffff;
+    background:#e2e8f0;
 
-    border:1px solid #888;
+    color:#1e293b;
 
 }
 
@@ -5035,17 +5092,16 @@ bottom:-6px;
 
 
 
+/* ANDROID / TOUCH */
 
-/* MOBILE / TABLET PROTECTION */
-
-@media(max-width:800px){
+@media(max-width:600px){
 
 
 .cwSaveAsDialog{
 
-    width:95%;
+    width:96%;
 
-    height:85%;
+    height:85vh;
 
 }
 
@@ -5053,7 +5109,27 @@ bottom:-6px;
 
 .cwSaveAsFolderPanel{
 
-    width:170px;
+    width:150px;
+
+}
+
+
+
+.cwSaveAsFooter{
+
+    flex-direction:column;
+
+    height:auto;
+
+    align-items:stretch;
+
+}
+
+
+
+.cwSaveAsFileName{
+
+    width:100%;
 
 }
 
@@ -5061,284 +5137,31 @@ bottom:-6px;
 
 .cwSaveAsNameInput{
 
-    width:140px;
+    flex:1;
 
-}
-
-
-}
-
-
-
-
-
-
-
-/* =========================================================
-   CAMPUS WORD — SAVE AS FOLDER SVG ICON STYLE
-   ISOLATED
-========================================================= */
-
-
-.cwSaveAsFolderItem{
-
-    display:flex;
-    align-items:center;
-    gap:8px;
+    width:auto;
 
 }
 
 
 
-.cwSaveAsFolderItem svg{
-
-    width:18px;
-
-    height:18px;
-
-    flex-shrink:0;
-
-    color:#2563eb;
-
-}
-
-
-
-
-
-.cwSaveAsFolderItem span{
-
-    line-height:18px;
-
-}
-
-
-
-
-
-.cwSaveAsFolderItem:hover svg{
-
-    color:#1d4ed8;
-
-}
-
-
-
-
-
-.cwSaveAsFolderItem.active svg{
-
-    color:#ffffff;
-
-}
-
-
-
-
-
-
-
-
-
-
-/* =========================================================
-   CAMPUS WORD — SAVE AS NEW FOLDER DIALOG STYLE
-
-   STEP 8 UI SUPPORT
-
-   FULL ISOLATION
-   NO SAVE AS LAYOUT CHANGE
-   NO RIBBON CHANGE
-   NO DOCUMENT CHANGE
-========================================================= */
-
-
-.cwSaveAsNewFolderDialog{
-
-    position:fixed;
-
-    top:0;
-    left:0;
-
-    width:100%;
-    height:100%;
-
-    background:rgba(0,0,0,0.25);
-
-    display:flex;
-
-    align-items:center;
-
-    justify-content:center;
-
-    z-index:99999;
-
-}
-
-
-
-
-.cwSaveAsNewFolderWindow{
-
-    width:360px;
-
-    background:#ffffff;
-
-    border:1px solid #b8b8b8;
-
-    border-radius:6px;
-
-    box-shadow:
-    0 8px 25px rgba(0,0,0,0.25);
-
-    padding:20px;
-
-    font-family:
-    "Segoe UI",
-    Arial,
-    sans-serif;
-
-}
-
-
-
-
-
-.cwSaveAsNewFolderWindow h3{
-
-    margin:0 0 18px 0;
-
-    font-size:18px;
-
-    font-weight:600;
-
-    color:#1f1f1f;
-
-    text-align:left;
-
-}
-
-
-
-
-
-.cwNewFolderNameInput{
+.cwSaveAsButtons{
 
     width:100%;
 
-    box-sizing:border-box;
-
-    height:36px;
-
-    padding:8px 10px;
-
-    border:1px solid #a6a6a6;
-
-    border-radius:4px;
-
-    font-size:14px;
-
-    outline:none;
-
 }
 
 
 
+.cwSaveAsConfirm,
+.cwSaveAsCancel{
 
+    flex:1;
 
-.cwNewFolderNameInput:focus{
-
-    border-color:#2563eb;
-
-    box-shadow:
-    0 0 0 2px rgba(37,99,235,0.15);
+    min-height:48px;
 
 }
 
 
-
-
-
-.cwNewFolderActions{
-
-    display:flex;
-
-    justify-content:flex-end;
-
-    gap:10px;
-
-    margin-top:20px;
-
-}
-
-
-
-
-
-.cwNewFolderCreateBtn,
-.cwNewFolderCancelBtn{
-
-    min-width:90px;
-
-    height:34px;
-
-    border-radius:4px;
-
-    border:1px solid #999;
-
-    cursor:pointer;
-
-    font-size:14px;
-
-    font-family:
-    "Segoe UI",
-    Arial,
-    sans-serif;
-
-}
-
-
-
-
-
-.cwNewFolderCreateBtn{
-
-    background:#2563eb;
-
-    color:white;
-
-    border-color:#2563eb;
-
-}
-
-
-
-
-
-.cwNewFolderCreateBtn:hover{
-
-    background:#1d4ed8;
-
-}
-
-
-
-
-
-.cwNewFolderCancelBtn{
-
-    background:#f3f4f6;
-
-    color:#222;
-
-}
-
-
-
-
-
-.cwNewFolderCancelBtn:hover{
-
-    background:#e5e7eb;
 
 }
