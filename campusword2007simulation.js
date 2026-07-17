@@ -29549,23 +29549,15 @@ CampusWordSaveAsUI.close();
 
 
 
+
 function connectNewFolderButton(){
 
+    /*
+       STEP 8 CONTROLS NEW FOLDER BUTTON
+       DO NOT OVERRIDE HERE
+    */
 
-
-const button =
-document.querySelector(
-".cwSaveAsNewFolderBtn"
-);
-
-
-
-
-
-
-if(!button){
-
-return;
+    return;
 
 }
 
@@ -29574,22 +29566,9 @@ return;
 
 
 
-button.onclick =
-function(){
 
 
 
-console.log(
-"New Folder connector ready"
-);
-
-
-
-};
-
-
-
-}
 
 
 
@@ -30048,8 +30027,6 @@ error
 
 
 
-
-
 function refreshFolderList(){
 
 
@@ -30058,8 +30035,6 @@ const list =
 document.querySelector(
 ".cwSaveAsFolderList"
 );
-
-
 
 
 
@@ -30074,6 +30049,31 @@ return;
 
 
 
+const existing =
+Array.from(
+list.querySelectorAll(
+".cwSaveAsFolderItem"
+)
+);
+
+
+
+
+
+const defaultItems =
+existing.filter(function(item){
+
+
+return item.dataset.default === "true";
+
+
+});
+
+
+
+
+
+
 CampusWordStorageCore
 .getFolders()
 
@@ -30081,12 +30081,33 @@ CampusWordStorageCore
 
 
 
-list.innerHTML="";
+list.innerHTML = "";
 
 
 
 
 
+/*
+ KEEP DEFAULT FOLDERS
+*/
+
+defaultItems.forEach(function(item){
+
+
+list.appendChild(item);
+
+
+});
+
+
+
+
+
+
+
+/*
+ ADD INDEXEDDB FOLDERS
+*/
 
 folders.forEach(function(folder){
 
@@ -30104,21 +30125,61 @@ item.className =
 
 
 
+item.dataset.folderId =
+folder.id;
+
+
+
 item.innerHTML = `
 
 <span class="cwSaveAsFolderIcon">
-
 📁
-
 </span>
 
+
 <span>
-
 ${folder.name}
-
 </span>
 
 `;
+
+
+
+
+
+item.onclick =
+function(){
+
+
+document
+.querySelectorAll(
+".cwSaveAsFolderItem"
+)
+.forEach(function(old){
+
+old.classList.remove(
+"active"
+);
+
+});
+
+
+
+item.classList.add(
+"active"
+);
+
+
+
+CampusWordStorageCore
+.SaveAs
+.setFolder(
+folder.id
+);
+
+
+
+};
 
 
 
@@ -30154,6 +30215,9 @@ error
 
 
 }
+
+
+
 
 
 
