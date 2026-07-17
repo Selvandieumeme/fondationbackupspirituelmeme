@@ -28855,20 +28855,19 @@ console.log(
 
 
 
-
-
-
 /* =========================================================
    CAMPUS WORD — SAVE AS UI CONNECTOR
    STEP 7
 
-   CONNECT SAVE AS UI WITH STORAGE ENGINE
+   CONNECT SAVE AS UI WITH STORAGE CORE
 
    CONNECTS:
    - Folder List
+   - SVG Folder Icons
    - Selected Folder
    - Save Button
    - Cancel Button
+   - New Folder Button Ready
 
    COMPATIBLE WITH:
    STEP 1 DATABASE CORE
@@ -28891,18 +28890,60 @@ console.log(
 
 
 
+
+
+function folderIcon(){
+
+
+
+return `
+
+<svg
+viewBox="0 0 24 24"
+width="18"
+height="18"
+fill="none"
+stroke="currentColor"
+stroke-width="2"
+stroke-linecap="round"
+stroke-linejoin="round">
+
+<path d="M3 7h6l2 3h10v10H3z"></path>
+
+<path d="M3 7V5h6l2 2"></path>
+
+</svg>
+
+`;
+
+
+
+}
+
+
+
+
+
+
+
+
+
 function loadFolders(){
 
 
 
 if(
-!window.CampusWordStorageEngine ||
-!window.CampusWordStorageEngine.getFolders
+!window.CampusWordStorageCore ||
+!CampusWordStorageCore.getFolders
 ){
 
+
+
 console.error(
-"Folder Storage unavailable"
+"Folder Core unavailable"
 );
+
+
 
 return;
 
@@ -28912,10 +28953,12 @@ return;
 
 
 
+
 const list =
 document.querySelector(
 ".cwSaveAsFolderList"
 );
+
 
 
 
@@ -28931,7 +28974,9 @@ return;
 
 
 
-CampusWordStorageEngine
+
+
+CampusWordStorageCore
 .getFolders()
 
 .then(function(folders){
@@ -28962,8 +29007,20 @@ item.className =
 
 
 
-item.textContent =
-"📁 " + folder.name;
+
+
+
+
+item.innerHTML =
+
+folderIcon() +
+
+`
+<span>
+${folder.name}
+</span>
+`;
+
 
 
 
@@ -28972,7 +29029,14 @@ item.textContent =
 
 
 item.onclick =
-function(){
+function(e){
+
+
+
+e.stopPropagation();
+
+
+
 
 
 
@@ -29007,6 +29071,30 @@ item.classList.add(
 
 
 
+
+
+if(
+CampusWordStorageCore.SaveAs &&
+CampusWordStorageCore.SaveAs.setFolder
+){
+
+
+
+CampusWordStorageCore.SaveAs
+.setFolder(
+folder.id
+);
+
+
+
+}
+
+
+
+
+
+
+
 window.CampusWordSaveAsSelectedFolder =
 folder.id;
 
@@ -29031,6 +29119,7 @@ folder.name
 
 
 
+
 list.appendChild(
 item
 );
@@ -29038,6 +29127,7 @@ item
 
 
 });
+
 
 
 
@@ -29106,6 +29196,7 @@ document.querySelector(
 
 
 
+
 const name =
 input ?
 input.value.trim()
@@ -29119,13 +29210,19 @@ input.value.trim()
 
 if(!name){
 
+
+
 console.warn(
 "Document name required"
 );
 
+
+
 return;
 
 }
+
+
 
 
 
@@ -29159,14 +29256,20 @@ page.innerHTML
 
 
 
+
+
 if(
-!window.CampusWordStorageEngine ||
-!window.CampusWordStorageEngine.saveDocument
+!CampusWordStorageCore.SaveAs ||
+!CampusWordStorageCore.SaveAs.save
 ){
 
+
+
 console.error(
-"Document Storage unavailable"
+"Save As Core unavailable"
 );
+
+
 
 return;
 
@@ -29178,13 +29281,11 @@ return;
 
 
 
-CampusWordStorageEngine
-.saveDocument({
+CampusWordStorageCore.SaveAs
+
+.save({
 
 name:name,
-
-folder:
-window.CampusWordSaveAsSelectedFolder || null,
 
 pages:pages
 
@@ -29218,13 +29319,13 @@ error
 
 
 
-
-
 };
 
 
 
+
 }
+
 
 
 
@@ -29246,11 +29347,14 @@ document.querySelector(
 
 
 
+
 if(!button){
 
 return;
 
 }
+
+
 
 
 
@@ -29303,11 +29407,15 @@ document.querySelector(
 
 
 
+
+
 if(!button){
 
 return;
 
 }
+
+
 
 
 
@@ -29368,6 +29476,8 @@ connectNewFolderButton();
 
 
 
+
+
 document.addEventListener(
 "click",
 function(e){
@@ -29383,11 +29493,13 @@ e.target.closest(
 
 
 
+
 if(!open){
 
 return;
 
 }
+
 
 
 
@@ -29416,6 +29528,7 @@ false
 
 
 
+
 console.log(
 "CampusWord Save As Connector Ready"
 );
@@ -29427,6 +29540,7 @@ console.log(
 
 
 })();
+
 
 
 
