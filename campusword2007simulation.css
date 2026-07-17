@@ -4665,3 +4665,408 @@ bottom:-6px;
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* =========================================================
+   CAMPUS WORD — SAVE AS UI STYLE
+   STEP 6 CSS
+
+   ISOLATED UI ONLY
+   NO RIBBON CHANGE
+   NO PAGE CHANGE
+   NO CARET CHANGE
+========================================================= */
+
+
+#cwSaveAsWindow{
+
+    position:fixed;
+
+    top:0;
+    left:0;
+
+    width:100%;
+    height:100%;
+
+    background:rgba(0,0,0,0.35);
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    z-index:99999;
+
+}
+
+
+
+
+
+
+.cwSaveAsDialog{
+
+    width:760px;
+
+    max-width:90%;
+
+    height:520px;
+
+    background:#ffffff;
+
+    border:1px solid #888;
+
+    border-radius:6px;
+
+    box-shadow:0 10px 30px rgba(0,0,0,0.35);
+
+    display:flex;
+
+    flex-direction:column;
+
+    overflow:hidden;
+
+}
+
+
+
+
+
+
+.cwSaveAsHeader{
+
+    height:45px;
+
+    background:linear-gradient(
+        to bottom,
+        #f8f8f8,
+        #dcdcdc
+    );
+
+    border-bottom:1px solid #aaa;
+
+    display:flex;
+
+    align-items:center;
+
+    padding-left:15px;
+
+}
+
+
+
+
+
+.cwSaveAsHeader h2{
+
+    margin:0;
+
+    font-size:18px;
+
+    font-weight:600;
+
+}
+
+
+
+
+
+
+.cwSaveAsBody{
+
+    flex:1;
+
+    display:flex;
+
+    overflow:hidden;
+
+}
+
+
+
+
+
+
+
+.cwSaveAsFolderPanel{
+
+    width:230px;
+
+    border-right:1px solid #ccc;
+
+    display:flex;
+
+    flex-direction:column;
+
+    padding:10px;
+
+}
+
+
+
+
+
+.cwSaveAsFolderTitle,
+.cwSaveAsDocumentTitle{
+
+    font-weight:bold;
+
+    margin-bottom:8px;
+
+}
+
+
+
+
+
+
+.cwSaveAsFolderList{
+
+    flex:1;
+
+    overflow:auto;
+
+}
+
+
+
+
+
+
+.cwSaveAsFolderItem{
+
+    padding:8px;
+
+    cursor:pointer;
+
+    border-radius:4px;
+
+    user-select:none;
+
+}
+
+
+
+
+
+.cwSaveAsFolderItem:hover{
+
+    background:#eaf2ff;
+
+}
+
+
+
+
+
+
+.cwSaveAsFolderItem.active{
+
+    background:#cfe2ff;
+
+    outline:1px solid #4a90e2;
+
+}
+
+
+
+
+
+
+
+.cwSaveAsNewFolderBtn{
+
+    margin-top:10px;
+
+    height:32px;
+
+    cursor:pointer;
+
+}
+
+
+
+
+
+
+
+.cwSaveAsDocumentPanel{
+
+    flex:1;
+
+    padding:10px;
+
+    overflow:auto;
+
+}
+
+
+
+
+
+
+.cwSaveAsDocumentList{
+
+    overflow:auto;
+
+}
+
+
+
+
+
+.cwSaveAsFooter{
+
+    height:70px;
+
+    border-top:1px solid #ccc;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:space-between;
+
+    padding:10px;
+
+    background:#f7f7f7;
+
+}
+
+
+
+
+
+
+.cwSaveAsFileName{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:10px;
+
+}
+
+
+
+
+
+.cwSaveAsNameInput{
+
+    width:260px;
+
+    height:28px;
+
+    padding:4px 8px;
+
+}
+
+
+
+
+
+.cwSaveAsButtons{
+
+    display:flex;
+
+    gap:10px;
+
+}
+
+
+
+
+
+.cwSaveAsButtons button{
+
+    min-width:80px;
+
+    height:32px;
+
+    cursor:pointer;
+
+}
+
+
+
+
+
+.cwSaveAsConfirm{
+
+    background:#217346;
+
+    color:white;
+
+    border:1px solid #185c38;
+
+}
+
+
+
+
+
+.cwSaveAsCancel{
+
+    background:#ffffff;
+
+    border:1px solid #888;
+
+}
+
+
+
+
+
+
+
+/* MOBILE / TABLET PROTECTION */
+
+@media(max-width:800px){
+
+
+.cwSaveAsDialog{
+
+    width:95%;
+
+    height:85%;
+
+}
+
+
+
+.cwSaveAsFolderPanel{
+
+    width:170px;
+
+}
+
+
+
+.cwSaveAsNameInput{
+
+    width:140px;
+
+}
+
+
+}
+
+
+
