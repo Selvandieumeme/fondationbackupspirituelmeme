@@ -5165,3 +5165,208 @@ bottom:-6px;
 
 
 }
+
+
+
+
+/* =========================================================
+   CAMPUS WORD — NEW FOLDER DIALOG CSS
+   STEP 2A
+========================================================= */
+
+
+#cwNewFolderDialog{
+
+    position:fixed;
+
+    inset:0;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    background:rgba(15,23,42,.35);
+
+    z-index:100001;
+
+}
+
+
+
+
+
+.cwNewFolderBox{
+
+    width:380px;
+
+    max-width:92%;
+
+    background:white;
+
+    border-radius:14px;
+
+    overflow:hidden;
+
+    box-shadow:
+    0 25px 60px rgba(0,0,0,.35);
+
+}
+
+
+
+
+
+.cwNewFolderHeader{
+
+    padding:18px;
+
+    border-bottom:1px solid #e2e8f0;
+
+}
+
+
+
+.cwNewFolderHeader h2{
+
+    margin:0;
+
+    font-size:22px;
+
+    font-weight:800;
+
+    color:#1e293b;
+
+    text-align:center;
+
+}
+
+
+
+
+
+.cwNewFolderBody{
+
+    padding:20px;
+
+}
+
+
+
+
+
+.cwNewFolderNameInput{
+
+    width:100%;
+
+    box-sizing:border-box;
+
+    padding:12px;
+
+    border:2px solid #cbd5e1;
+
+    border-radius:10px;
+
+    font-size:17px;
+
+    outline:none;
+
+}
+
+
+
+.cwNewFolderNameInput:focus{
+
+    border-color:#2563eb;
+
+}
+
+
+
+
+
+.cwNewFolderFooter{
+
+    display:flex;
+
+    gap:12px;
+
+    padding:16px;
+
+    border-top:1px solid #e2e8f0;
+
+}
+
+
+
+
+
+.cwNewFolderCreateBtn,
+.cwNewFolderCancelBtn{
+
+    flex:1;
+
+    padding:12px;
+
+    border:none;
+
+    border-radius:9px;
+
+    font-weight:800;
+
+    cursor:pointer;
+
+}
+
+
+
+.cwNewFolderCreateBtn{
+
+    background:#2563eb;
+
+    color:white;
+
+}
+
+
+
+.cwNewFolderCancelBtn{
+
+    background:#e2e8f0;
+
+    color:#1e293b;
+
+}
+
+
+
+
+
+
+
+@media(max-width:600px){
+
+
+.cwNewFolderBox{
+
+    width:94%;
+
+}
+
+
+.cwNewFolderCreateBtn,
+.cwNewFolderCancelBtn{
+
+    min-height:48px;
+
+}
+
+
+}
+
+
+
+
+
+
