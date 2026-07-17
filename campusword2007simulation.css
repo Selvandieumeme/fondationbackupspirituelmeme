@@ -5070,3 +5070,64 @@ bottom:-6px;
 
 
 
+
+
+
+
+/* =========================================================
+   CAMPUS WORD — SAVE AS FOLDER SVG ICON STYLE
+   ISOLATED
+========================================================= */
+
+
+.cwSaveAsFolderItem{
+
+    display:flex;
+    align-items:center;
+    gap:8px;
+
+}
+
+
+
+.cwSaveAsFolderItem svg{
+
+    width:18px;
+
+    height:18px;
+
+    flex-shrink:0;
+
+    color:#2563eb;
+
+}
+
+
+
+
+
+.cwSaveAsFolderItem span{
+
+    line-height:18px;
+
+}
+
+
+
+
+
+.cwSaveAsFolderItem:hover svg{
+
+    color:#1d4ed8;
+
+}
+
+
+
+
+
+.cwSaveAsFolderItem.active svg{
+
+    color:#ffffff;
+
+}
