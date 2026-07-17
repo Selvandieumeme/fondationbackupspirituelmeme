@@ -28387,32 +28387,38 @@ console.log(
 
 
 
+
+
+
+
+
+
+
+
+
 /* =========================================================
-   CAMPUS WORD — SAVE AS UI ENGINE
-   STEP 6
+   CAMPUS WORD — SAVE AS UI FOUNDATION
+   STEP 1A
 
-   SAVE AS WINDOW FOUNDATION
+   CREATE SAVE AS WINDOW STRUCTURE
 
-   BUTTONS INCLUDED:
-   - New Folder
-   - Save
-   - Cancel
+   INCLUDED:
+   - Folders panel
+   - Documents panel
+   - File Name area
+   - New Folder button
+   - Save button
+   - Cancel button
 
-   COMPATIBLE WITH:
-   STEP 5 — SAVE AS CORE
-
-   NO INDEXED DB DIRECT ACCESS
-   NO OLD SAVE SYSTEM
-   NO OLD SAVE AS SYSTEM
-   UI ONLY
+   NO INDEXEDDB
+   NO SAVE LOGIC
+   NO FOLDER CREATION LOGIC
+   NO OLD SYSTEM CONNECTION
 ========================================================= */
 
 (function(){
 
 "use strict";
-
-
-
 
 
 let saveAsWindow = null;
@@ -28420,477 +28426,7 @@ let saveAsWindow = null;
 
 
 
-
-
-
-
-function createSaveAsUI(){
-
-
-
-if(saveAsWindow){
-
-    return;
-
-}
-
-
-
-
-
-saveAsWindow =
-document.createElement(
-"div"
-);
-
-
-
-
-
-saveAsWindow.id =
-"cwSaveAsWindow";
-
-
-
-
-
-saveAsWindow.innerHTML = `
-
-<div class="cwSaveAsDialog">
-
-
-<div class="cwSaveAsHeader">
-
-<h2>
-Save As
-</h2>
-
-</div>
-
-
-
-
-
-<div class="cwSaveAsBody">
-
-
-
-<div class="cwSaveAsFolderPanel">
-
-
-<div class="cwSaveAsFolderTitle">
-
-Folders
-
-</div>
-
-
-
-
-<div class="cwSaveAsFolderList">
-
-
-</div>
-
-
-
-<button
-class="cwSaveAsNewFolderBtn"
-type="button">
-
-New Folder
-
-</button>
-
-
-
-
-</div>
-
-
-
-
-
-
-
-<div class="cwSaveAsDocumentPanel">
-
-
-<div class="cwSaveAsDocumentTitle">
-
-Documents
-
-</div>
-
-
-
-<div class="cwSaveAsDocumentList">
-
-
-</div>
-
-
-
-</div>
-
-
-
-
-</div>
-
-
-
-
-
-
-
-<div class="cwSaveAsFooter">
-
-
-
-<div class="cwSaveAsFileName">
-
-
-<label>
-File Name
-</label>
-
-
-
-<input
-class="cwSaveAsNameInput"
-type="text"
-/>
-
-
-
-</div>
-
-
-
-
-
-
-
-<div class="cwSaveAsButtons">
-
-
-<button
-class="cwSaveAsConfirm"
-type="button">
-
-Save
-
-</button>
-
-
-
-
-<button
-class="cwSaveAsCancel"
-type="button">
-
-Cancel
-
-</button>
-
-
-
-
-</div>
-
-
-
-</div>
-
-
-
-
-</div>
-
-`;
-
-
-
-
-
-
-document.body.appendChild(
-saveAsWindow
-);
-
-
-
-
-
-bindSaveAsButtons();
-
-
-
-
-
-
-}
-
-
-
-
-
-
-
-
-
-function bindSaveAsButtons(){
-
-
-
-const cancel =
-saveAsWindow.querySelector(
-".cwSaveAsCancel"
-);
-
-
-
-
-
-cancel.onclick =
-function(){
-
-
-
-closeSaveAsUI();
-
-
-
-};
-
-
-
-
-
-
-
-const newFolder =
-saveAsWindow.querySelector(
-".cwSaveAsNewFolderBtn"
-);
-
-
-
-
-
-newFolder.onclick =
-function(){
-
-
-
-console.log(
-"New Folder button ready"
-);
-
-
-
-};
-
-
-
-
-
-
-
-const save =
-saveAsWindow.querySelector(
-".cwSaveAsConfirm"
-);
-
-
-
-
-
-save.onclick =
-function(){
-
-
-
-console.log(
-"Save As button ready"
-);
-
-
-
-};
-
-
-
-}
-
-
-
-
-
-
-
-
-function closeSaveAsUI(){
-
-
-
-if(saveAsWindow){
-
-
-
-saveAsWindow.remove();
-
-saveAsWindow=null;
-
-
-
-}
-
-
-
-}
-
-
-
-
-
-
-
-
-window.CampusWordSaveAsUI = {
-
-
-
-open:function(){
-
-
-
-createSaveAsUI();
-
-
-
-},
-
-
-
-
-
-close:function(){
-
-
-
-closeSaveAsUI();
-
-
-
-}
-
-
-
-};
-
-
-
-
-
-
-
-document.addEventListener(
-"click",
-function(e){
-
-
-
-const button =
-e.target.closest(
-'[data-action="save-as"]'
-);
-
-
-
-
-
-if(!button){
-
-    return;
-
-}
-
-
-
-
-
-e.preventDefault();
-
-
-
-CampusWordSaveAsUI.open();
-
-
-
-},
-false
-);
-
-
-
-
-
-
-
-console.log(
-"CampusWord Save As UI Ready"
-);
-
-
-
-
-
-})();
-
-
-
-
-
-
-/* =========================================================
-   CAMPUS WORD — SAVE AS UI CONNECTOR
-   STEP 7
-
-   CONNECT SAVE AS UI WITH STORAGE CORE
-
-   CONNECTS:
-   - Default Save As Folders
-   - IndexedDB Folders
-   - Selected Folder
-   - Save Button
-   - Cancel Button
-
-   COMPATIBLE WITH:
-   STEP 1 DATABASE CORE
-   STEP 2 FOLDER CORE
-   STEP 3 DOCUMENT CORE
-   STEP 4 RELATION CORE
-   STEP 5 SAVE AS CORE
-   STEP 6 SAVE AS UI
-
-   NO OLD SAVE SYSTEM
-   NO OLD SAVE AS SYSTEM
-   ISOLATED MODULE
-========================================================= */
-
-(function(){
-
-"use strict";
-
-
-
-
-
-
-function getIcon(type){
-
+function getFolderIcon(type){
 
 
 const icons = {
@@ -28898,36 +28434,43 @@ const icons = {
 
 computer:`
 
-<svg viewBox="0 0 24 24" width="18" height="18">
-<rect x="3" y="4" width="18" height="13" rx="2"
-fill="none" stroke="currentColor" stroke-width="2"/>
+<svg viewBox="0 0 24 24" width="20" height="20">
+<rect x="3" y="4" width="18" height="13"
+rx="2"
+fill="none"
+stroke="currentColor"
+stroke-width="2"/>
 <path d="M8 21h8M12 17v4"
-fill="none" stroke="currentColor" stroke-width="2"/>
+fill="none"
+stroke="currentColor"
+stroke-width="2"/>
 </svg>
 
 `,
-
-
 
 
 documents:`
 
-<svg viewBox="0 0 24 24" width="18" height="18">
+<svg viewBox="0 0 24 24" width="20" height="20">
 <path d="M6 3h9l3 3v15H6z"
-fill="none" stroke="currentColor" stroke-width="2"/>
+fill="none"
+stroke="currentColor"
+stroke-width="2"/>
 <path d="M9 13h6M9 17h6"
-fill="none" stroke="currentColor" stroke-width="2"/>
+fill="none"
+stroke="currentColor"
+stroke-width="2"/>
 </svg>
 
 `,
 
 
-
-
 desktop:`
 
-<svg viewBox="0 0 24 24" width="18" height="18">
-<rect x="3" y="5" width="18" height="14"
+<svg viewBox="0 0 24 24" width="20" height="20">
+<rect x="3" y="5"
+width="18"
+height="14"
 rx="2"
 fill="none"
 stroke="currentColor"
@@ -28937,11 +28480,9 @@ stroke-width="2"/>
 `,
 
 
-
-
 storage:`
 
-<svg viewBox="0 0 24 24" width="18" height="18">
+<svg viewBox="0 0 24 24" width="20" height="20">
 <ellipse cx="12" cy="6" rx="8" ry="3"
 fill="none"
 stroke="currentColor"
@@ -28955,11 +28496,9 @@ stroke-width="2"/>
 `,
 
 
-
-
 drive:`
 
-<svg viewBox="0 0 24 24" width="18" height="18">
+<svg viewBox="0 0 24 24" width="20" height="20">
 <path d="M4 17l5-10h6l5 10H4z"
 fill="none"
 stroke="currentColor"
@@ -28969,11 +28508,9 @@ stroke-width="2"/>
 `,
 
 
-
-
 folder:`
 
-<svg viewBox="0 0 24 24" width="18" height="18">
+<svg viewBox="0 0 24 24" width="20" height="20">
 <path d="M3 7h7l2 3h9v9H3z"
 fill="none"
 stroke="currentColor"
@@ -28985,14 +28522,10 @@ stroke-width="2"/>
 };
 
 
-
 return icons[type] || icons.folder;
 
 
 }
-
-
-
 
 
 
@@ -29043,7 +28576,6 @@ name:"A:",
 icon:"drive"
 }
 
-
 ];
 
 
@@ -29051,17 +28583,206 @@ icon:"drive"
 
 
 
+function createSaveAsWindow(){
+
+
+if(saveAsWindow){
+
+return;
+
+}
 
 
 
-function createFolderItem(folder, isDefault){
+saveAsWindow =
+document.createElement("div");
+
+
+saveAsWindow.id =
+"cwSaveAsWindow";
+
+
+
+saveAsWindow.innerHTML = `
+
+
+<div class="cwSaveAsDialog">
+
+
+<div class="cwSaveAsHeader">
+
+<h2>
+Save As
+</h2>
+
+</div>
+
+
+
+
+<div class="cwSaveAsBody">
+
+
+
+<div class="cwSaveAsFolderPanel">
+
+
+<div class="cwSaveAsFolderTitle">
+Folders
+</div>
+
+
+
+<div class="cwSaveAsFolderList">
+
+</div>
+
+
+
+
+<button
+class="cwSaveAsNewFolderBtn"
+type="button">
+
+New Folder
+
+</button>
+
+
+
+</div>
+
+
+
+
+
+
+
+<div class="cwSaveAsDocumentPanel">
+
+
+<div class="cwSaveAsDocumentTitle">
+
+Documents
+
+</div>
+
+
+
+<div class="cwSaveAsDocumentList">
+
+</div>
+
+
+
+</div>
+
+
+
+</div>
+
+
+
+
+
+
+<div class="cwSaveAsFooter">
+
+
+<div class="cwSaveAsFileName">
+
+
+<label>
+File Name
+</label>
+
+
+<input
+class="cwSaveAsNameInput"
+type="text"
+/>
+
+
+
+</div>
+
+
+
+
+
+
+<div class="cwSaveAsButtons">
+
+
+<button
+class="cwSaveAsConfirm"
+type="button">
+
+Save
+
+</button>
+
+
+
+
+<button
+class="cwSaveAsCancel"
+type="button">
+
+Cancel
+
+</button>
+
+
+
+</div>
+
+
+
+</div>
+
+
+
+</div>
+
+
+
+`;
+
+
+
+
+document.body.appendChild(
+saveAsWindow
+);
+
+
+
+loadDefaultFolders();
+
+
+
+}
+
+
+
+
+function loadDefaultFolders(){
+
+
+const list =
+saveAsWindow.querySelector(
+".cwSaveAsFolderList"
+);
+
+
+
+defaultFolders.forEach(function(folder){
 
 
 
 const item =
-document.createElement(
-"div"
-);
+document.createElement("div");
 
 
 
@@ -29070,23 +28791,14 @@ item.className =
 
 
 
-
-if(isDefault){
-
-item.dataset.default = "true";
-
-}
-
-
-
+item.dataset.folderId =
+folder.id;
 
 
 
 item.innerHTML =
 
-getIcon(
-folder.icon || "folder"
-)
+getFolderIcon(folder.icon)
 
 +
 
@@ -29096,224 +28808,7 @@ folder.icon || "folder"
 
 
 
-
-
-
-
-item.onclick =
-function(e){
-
-
-
-e.stopPropagation();
-
-
-
-
-document
-.querySelectorAll(
-".cwSaveAsFolderItem"
-)
-.forEach(function(old){
-
-
-old.classList.remove(
-"active"
-);
-
-
-});
-
-
-
-
-
-item.classList.add(
-"active"
-);
-
-
-
-
-
-
-
-window.CampusWordSaveAsSelectedFolder =
-folder.id;
-
-
-
-
-
-
-
-
-if(
-window.CampusWordStorageCore &&
-CampusWordStorageCore.SaveAs &&
-CampusWordStorageCore.SaveAs.setFolder &&
-!isDefault
-){
-
-
-CampusWordStorageCore.SaveAs
-.setFolder(
-folder.id
-);
-
-
-}
-
-
-
-
-
-
-
-console.log(
-"Save As Folder Selected:",
-folder.name
-);
-
-
-
-};
-
-
-
-
-
-
-return item;
-
-
-}
-
-
-
-
-
-
-
-
-
-function loadFolders(){
-
-
-
-const list =
-document.querySelector(
-".cwSaveAsFolderList"
-);
-
-
-
-
-
-
-if(!list){
-
-return;
-
-}
-
-
-
-
-
-list.innerHTML="";
-
-
-
-
-
-
-
-
-defaultFolders.forEach(function(folder){
-
-
-
-list.appendChild(
-createFolderItem(
-folder,
-true
-)
-);
-
-
-
-});
-
-
-
-
-
-
-
-
-if(
-!window.CampusWordStorageCore ||
-!CampusWordStorageCore.getFolders
-){
-
-
-console.warn(
-"Folder Core unavailable"
-);
-
-
-return;
-
-
-}
-
-
-
-
-
-
-
-CampusWordStorageCore
-.getFolders()
-
-.then(function(folders){
-
-
-
-folders.forEach(function(folder){
-
-
-
-list.appendChild(
-
-createFolderItem(
-{
-id:folder.id,
-name:folder.name,
-icon:"folder"
-},
-false
-)
-
-);
-
-
-
-});
-
-
-
-})
-
-.catch(function(error){
-
-
-
-console.error(
-"Save As Folder Load Error:",
-error
-);
+list.appendChild(item);
 
 
 
@@ -29325,356 +28820,38 @@ error
 
 
 
+window.CampusWordSaveAsUI = {
 
 
+open:function(){
 
-
-
-
-function connectSaveButton(){
-
-
-
-const button =
-document.querySelector(
-".cwSaveAsConfirm"
-);
-
-
-
-
-
-
-if(!button){
-
-return;
-
-}
-
-
-
-
-
-
-
-button.onclick =
-function(){
-
-
-
-const input =
-document.querySelector(
-".cwSaveAsNameInput"
-);
-
-
-
-
-
-
-const name =
-input ?
-input.value.trim()
-:
-"";
-
-
-
-
-
-
-if(!name){
-
-
-console.warn(
-"Document name required"
-);
-
-
-return;
-
-
-}
-
-
-
-
-
-
-const pages =
-Array.from(
-document.querySelectorAll(
-".cwPageContent"
-)
-)
-.map(function(page){
-
-
-return {
-
-html:
-page.innerHTML
-
-};
-
-
-});
-
-
-
-
-
-
-
-if(
-!window.CampusWordStorageCore ||
-!CampusWordStorageCore.SaveAs ||
-!CampusWordStorageCore.SaveAs.save
-){
-
-
-console.error(
-"Save As Core unavailable"
-);
-
-
-return;
-
-
-}
-
-
-
-
-
-
-
-
-CampusWordStorageCore.SaveAs
-
-.save({
-
-name:name,
-
-pages:pages
-
-})
-
-.then(function(id){
-
-
-
-console.log(
-"Save As Success:",
-id
-);
-
-
-
-})
-
-.catch(function(error){
-
-
-
-console.error(
-"Save As Error:",
-error
-);
-
-
-
-});
-
-
-
-};
-
-
-
-}
-
-
-
-
-
-
-
-
-
-function connectCancelButton(){
-
-
-
-const button =
-document.querySelector(
-".cwSaveAsCancel"
-);
-
-
-
-
-
-if(!button){
-
-return;
-
-}
-
-
-
-
-
-
-
-button.onclick =
-function(){
-
-
-
-if(
-window.CampusWordSaveAsUI &&
-CampusWordSaveAsUI.close
-){
-
-
-CampusWordSaveAsUI.close();
-
-
-}
-
-
-
-};
-
-
-
-}
-
-
-
-
-
-
-
-
-
-
-function connectNewFolderButton(){
-
-    /*
-       STEP 8 CONTROLS NEW FOLDER BUTTON
-       DO NOT OVERRIDE HERE
-    */
-
-    return;
-
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-window.CampusWordSaveAsConnector = {
-
-
-
-init:function(){
-
-
-
-loadFolders();
-
-connectSaveButton();
-
-connectCancelButton();
-
-connectNewFolderButton();
-
-
-
-}
-
-
-
-};
-
-
-
-
-
-
-
-
-document.addEventListener(
-"click",
-function(e){
-
-
-
-const open =
-e.target.closest(
-'[data-action="save-as"]'
-);
-
-
-
-
-
-
-if(!open){
-
-return;
-
-}
-
-
-
-
-
-
-setTimeout(function(){
-
-
-
-CampusWordSaveAsConnector
-.init();
-
-
-
-},100);
-
-
+createSaveAsWindow();
 
 },
-false
-);
 
 
+close:function(){
+
+if(saveAsWindow){
+
+saveAsWindow.remove();
+
+saveAsWindow=null;
+
+}
+
+}
+
+
+};
 
 
 
 
 
 console.log(
-"CampusWord Save As Connector Ready"
+"CampusWord Save As UI Foundation Ready"
 );
-
-
-
 
 
 
@@ -29691,25 +28868,34 @@ console.log(
 
 
 
+
+
+
+
+
+
+
+
+
+
+
 /* =========================================================
-   CAMPUS WORD — SAVE AS NEW FOLDER ENGINE
-   STEP 8
+   CAMPUS WORD — SAVE AS UI CONNECTOR
+   STEP 1B
 
-   CREATE NEW FOLDER DIALOG
-   SAVE FOLDER TO STORAGE CORE
-   REFRESH SAVE AS FOLDER LIST
+   CONNECT SAVE AS BUTTON WITH UI FOUNDATION
 
-   COMPATIBLE WITH:
-   STEP 1 DATABASE CORE
-   STEP 2 FOLDER CORE
-   STEP 5 SAVE AS CORE
-   STEP 6 SAVE AS UI
-   STEP 7 SAVE AS CONNECTOR
+   CONNECTS:
+   - Save As Button
+   - Open Window
+   - Close Window
 
-   NO OLD SAVE SYSTEM
-   NO OLD SAVE AS SYSTEM
-   ISOLATED MODULE
+   NO INDEXEDDB
+   NO SAVE LOGIC
+   NO FOLDER LOGIC
+   NO OLD SYSTEM
 ========================================================= */
+
 
 (function(){
 
@@ -29718,522 +28904,8 @@ console.log(
 
 
 
-let newFolderBox = null;
 
-
-
-
-
-
-
-
-function openNewFolderDialog(){
-
-
-
-if(newFolderBox){
-
-    return;
-
-}
-
-
-
-
-
-
-newFolderBox =
-document.createElement(
-"div"
-);
-
-
-
-
-
-
-newFolderBox.className =
-"cwSaveAsNewFolderDialog";
-
-
-
-
-
-
-newFolderBox.innerHTML = `
-
-<div class="cwSaveAsNewFolderWindow">
-
-
-<h3>
-Create New Folder
-</h3>
-
-
-
-<input
-class="cwNewFolderNameInput"
-type="text"
-placeholder="Folder name"
-/>
-
-
-
-
-
-<div class="cwNewFolderActions">
-
-
-<button
-class="cwNewFolderCreateBtn"
-type="button">
-
-Create
-
-</button>
-
-
-
-
-<button
-class="cwNewFolderCancelBtn"
-type="button">
-
-Cancel
-
-</button>
-
-
-
-</div>
-
-
-
-</div>
-
-`;
-
-
-
-
-
-
-
-document.body.appendChild(
-newFolderBox
-);
-
-
-
-
-
-
-
-bindNewFolderActions();
-
-
-
-}
-
-
-
-
-
-
-
-
-
-function closeNewFolderDialog(){
-
-
-
-if(newFolderBox){
-
-
-
-newFolderBox.remove();
-
-newFolderBox=null;
-
-
-
-}
-
-
-
-}
-
-
-
-
-
-
-
-
-
-function bindNewFolderActions(){
-
-
-
-const cancel =
-newFolderBox.querySelector(
-".cwNewFolderCancelBtn"
-);
-
-
-
-
-
-cancel.onclick =
-function(){
-
-
-
-closeNewFolderDialog();
-
-
-
-};
-
-
-
-
-
-
-
-
-
-const create =
-newFolderBox.querySelector(
-".cwNewFolderCreateBtn"
-);
-
-
-
-
-
-create.onclick =
-function(){
-
-
-
-const input =
-newFolderBox.querySelector(
-".cwNewFolderNameInput"
-);
-
-
-
-
-
-const name =
-input.value.trim();
-
-
-
-
-
-
-
-if(!name){
-
-console.warn(
-"Folder name required"
-);
-
-return;
-
-}
-
-
-
-
-
-
-
-
-
-if(
-!window.CampusWordStorageCore ||
-!CampusWordStorageCore.createFolder
-){
-
-
-
-console.error(
-"Folder Core unavailable"
-);
-
-
-
-return;
-
-}
-
-
-
-
-
-
-
-
-
-CampusWordStorageCore
-.createFolder(name)
-
-.then(function(id){
-
-
-
-console.log(
-"New Folder Created:",
-name,
-id
-);
-
-
-
-
-
-
-
-closeNewFolderDialog();
-
-
-
-
-
-
-refreshFolderList();
-
-
-
-})
-
-.catch(function(error){
-
-
-
-console.error(
-"New Folder Create Error:",
-error
-);
-
-
-
-});
-
-
-
-};
-
-
-
-}
-
-
-
-
-
-
-
-function refreshFolderList(){
-
-
-
-const list =
-document.querySelector(
-".cwSaveAsFolderList"
-);
-
-
-
-if(!list){
-
-return;
-
-}
-
-
-
-
-
-
-const existing =
-Array.from(
-list.querySelectorAll(
-".cwSaveAsFolderItem"
-)
-);
-
-
-
-
-
-const defaultItems =
-existing.filter(function(item){
-
-
-return item.dataset.default === "true";
-
-
-});
-
-
-
-
-
-
-CampusWordStorageCore
-.getFolders()
-
-.then(function(folders){
-
-
-
-list.innerHTML = "";
-
-
-
-
-
-/*
- KEEP DEFAULT FOLDERS
-*/
-
-defaultItems.forEach(function(item){
-
-
-list.appendChild(item);
-
-
-});
-
-
-
-
-
-
-
-/*
- ADD INDEXEDDB FOLDERS
-*/
-
-folders.forEach(function(folder){
-
-
-
-const item =
-document.createElement(
-"div"
-);
-
-
-
-item.className =
-"cwSaveAsFolderItem";
-
-
-
-item.dataset.folderId =
-folder.id;
-
-
-
-item.innerHTML = `
-
-<span class="cwSaveAsFolderIcon">
-📁
-</span>
-
-
-<span>
-${folder.name}
-</span>
-
-`;
-
-
-
-
-
-item.onclick =
-function(){
-
-
-document
-.querySelectorAll(
-".cwSaveAsFolderItem"
-)
-.forEach(function(old){
-
-old.classList.remove(
-"active"
-);
-
-});
-
-
-
-item.classList.add(
-"active"
-);
-
-
-
-CampusWordStorageCore
-.SaveAs
-.setFolder(
-folder.id
-);
-
-
-
-};
-
-
-
-
-
-
-
-list.appendChild(
-item
-);
-
-
-
-});
-
-
-
-})
-
-.catch(function(error){
-
-
-
-console.error(
-"Folder Refresh Error:",
-error
-);
-
-
-
-});
-
-
-
-}
-
-
-
-
-
-
-
-
-
+function connectSaveAsButton(){
 
 
 
@@ -30245,9 +28917,8 @@ function(e){
 
 const button =
 e.target.closest(
-".cwSaveAsNewFolderBtn"
+'[data-action="save-as"]'
 );
-
 
 
 
@@ -30272,7 +28943,16 @@ e.stopPropagation();
 
 
 
-openNewFolderDialog();
+if(
+window.CampusWordSaveAsUI &&
+CampusWordSaveAsUI.open
+){
+
+
+CampusWordSaveAsUI.open();
+
+
+}
 
 
 
@@ -30282,12 +28962,29 @@ false
 
 
 
+}
 
 
 
 
-console.log(
-"CampusWord New Folder Engine Ready"
+
+
+
+
+
+function connectCancelButton(){
+
+
+
+document.addEventListener(
+"click",
+function(e){
+
+
+
+const button =
+e.target.closest(
+".cwSaveAsCancel"
 );
 
 
@@ -30295,8 +28992,81 @@ console.log(
 
 
 
+if(!button){
+
+return;
+
+}
+
+
+
+
+
+
+
+e.preventDefault();
+
+
+
+
+
+
+
+if(
+window.CampusWordSaveAsUI &&
+CampusWordSaveAsUI.close
+){
+
+
+CampusWordSaveAsUI.close();
+
+
+}
+
+
+
+},
+false
+);
+
+
+
+}
+
+
+
+
+
+
+
+
+connectSaveAsButton();
+
+connectCancelButton();
+
+
+
+
+
+
+
+console.log(
+"CampusWord Save As UI Connector Ready"
+);
+
+
+
+
+
 
 })();
+
+
+
+
+
+
+
 
 
 
