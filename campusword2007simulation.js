@@ -28387,6 +28387,1032 @@ console.log(
 
 
 
+/* =========================================================
+   CAMPUS WORD — SAVE AS UI ENGINE
+   STEP 6
+
+   SAVE AS WINDOW FOUNDATION
+
+   BUTTONS INCLUDED:
+   - New Folder
+   - Save
+   - Cancel
+
+   COMPATIBLE WITH:
+   STEP 5 — SAVE AS CORE
+
+   NO INDEXED DB DIRECT ACCESS
+   NO OLD SAVE SYSTEM
+   NO OLD SAVE AS SYSTEM
+   UI ONLY
+========================================================= */
+
+(function(){
+
+"use strict";
+
+
+
+
+
+let saveAsWindow = null;
+
+
+
+
+
+
+
+
+function createSaveAsUI(){
+
+
+
+if(saveAsWindow){
+
+    return;
+
+}
+
+
+
+
+
+saveAsWindow =
+document.createElement(
+"div"
+);
+
+
+
+
+
+saveAsWindow.id =
+"cwSaveAsWindow";
+
+
+
+
+
+saveAsWindow.innerHTML = `
+
+<div class="cwSaveAsDialog">
+
+
+<div class="cwSaveAsHeader">
+
+<h2>
+Save As
+</h2>
+
+</div>
+
+
+
+
+
+<div class="cwSaveAsBody">
+
+
+
+<div class="cwSaveAsFolderPanel">
+
+
+<div class="cwSaveAsFolderTitle">
+
+Folders
+
+</div>
+
+
+
+
+<div class="cwSaveAsFolderList">
+
+
+</div>
+
+
+
+<button
+class="cwSaveAsNewFolderBtn"
+type="button">
+
+New Folder
+
+</button>
+
+
+
+
+</div>
+
+
+
+
+
+
+
+<div class="cwSaveAsDocumentPanel">
+
+
+<div class="cwSaveAsDocumentTitle">
+
+Documents
+
+</div>
+
+
+
+<div class="cwSaveAsDocumentList">
+
+
+</div>
+
+
+
+</div>
+
+
+
+
+</div>
+
+
+
+
+
+
+
+<div class="cwSaveAsFooter">
+
+
+
+<div class="cwSaveAsFileName">
+
+
+<label>
+File Name
+</label>
+
+
+
+<input
+class="cwSaveAsNameInput"
+type="text"
+/>
+
+
+
+</div>
+
+
+
+
+
+
+
+<div class="cwSaveAsButtons">
+
+
+<button
+class="cwSaveAsConfirm"
+type="button">
+
+Save
+
+</button>
+
+
+
+
+<button
+class="cwSaveAsCancel"
+type="button">
+
+Cancel
+
+</button>
+
+
+
+
+</div>
+
+
+
+</div>
+
+
+
+
+</div>
+
+`;
+
+
+
+
+
+
+document.body.appendChild(
+saveAsWindow
+);
+
+
+
+
+
+bindSaveAsButtons();
+
+
+
+
+
+
+}
+
+
+
+
+
+
+
+
+
+function bindSaveAsButtons(){
+
+
+
+const cancel =
+saveAsWindow.querySelector(
+".cwSaveAsCancel"
+);
+
+
+
+
+
+cancel.onclick =
+function(){
+
+
+
+closeSaveAsUI();
+
+
+
+};
+
+
+
+
+
+
+
+const newFolder =
+saveAsWindow.querySelector(
+".cwSaveAsNewFolderBtn"
+);
+
+
+
+
+
+newFolder.onclick =
+function(){
+
+
+
+console.log(
+"New Folder button ready"
+);
+
+
+
+};
+
+
+
+
+
+
+
+const save =
+saveAsWindow.querySelector(
+".cwSaveAsConfirm"
+);
+
+
+
+
+
+save.onclick =
+function(){
+
+
+
+console.log(
+"Save As button ready"
+);
+
+
+
+};
+
+
+
+}
+
+
+
+
+
+
+
+
+function closeSaveAsUI(){
+
+
+
+if(saveAsWindow){
+
+
+
+saveAsWindow.remove();
+
+saveAsWindow=null;
+
+
+
+}
+
+
+
+}
+
+
+
+
+
+
+
+
+window.CampusWordSaveAsUI = {
+
+
+
+open:function(){
+
+
+
+createSaveAsUI();
+
+
+
+},
+
+
+
+
+
+close:function(){
+
+
+
+closeSaveAsUI();
+
+
+
+}
+
+
+
+};
+
+
+
+
+
+
+
+document.addEventListener(
+"click",
+function(e){
+
+
+
+const button =
+e.target.closest(
+'[data-action="save-as"]'
+);
+
+
+
+
+
+if(!button){
+
+    return;
+
+}
+
+
+
+
+
+e.preventDefault();
+
+
+
+CampusWordSaveAsUI.open();
+
+
+
+},
+false
+);
+
+
+
+
+
+
+
+console.log(
+"CampusWord Save As UI Ready"
+);
+
+
+
+
+
+})();
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* =========================================================
+   CAMPUS WORD — SAVE AS UI CONNECTOR
+   STEP 7
+
+   CONNECT SAVE AS UI WITH STORAGE CORE
+
+   CONNECTS:
+   - Folder List
+   - Selected Folder
+   - Save Button
+   - Cancel Button
+
+   COMPATIBLE WITH:
+   STEP 1 DATABASE CORE
+   STEP 2 FOLDER CORE
+   STEP 3 DOCUMENT CORE
+   STEP 4 RELATION CORE
+   STEP 5 SAVE AS CORE
+   STEP 6 SAVE AS UI
+
+   NO OLD SAVE SYSTEM
+   NO OLD SAVE AS SYSTEM
+   ISOLATED MODULE
+========================================================= */
+
+(function(){
+
+"use strict";
+
+
+
+
+
+function loadFolders(){
+
+
+
+if(
+!window.CampusWordStorageCore ||
+!window.CampusWordStorageCore.getFolders
+){
+
+console.error(
+"Folder Core unavailable"
+);
+
+return;
+
+}
+
+
+
+
+
+const list =
+document.querySelector(
+".cwSaveAsFolderList"
+);
+
+
+
+
+
+if(!list){
+
+return;
+
+}
+
+
+
+
+
+CampusWordStorageCore
+.getFolders()
+
+.then(function(folders){
+
+
+
+list.innerHTML="";
+
+
+
+
+
+
+folders.forEach(function(folder){
+
+
+
+const item =
+document.createElement(
+"div"
+);
+
+
+
+item.className =
+"cwSaveAsFolderItem";
+
+
+
+item.textContent =
+"📁 " + folder.name;
+
+
+
+
+
+
+
+
+item.onclick =
+function(){
+
+
+
+document
+.querySelectorAll(
+".cwSaveAsFolderItem"
+)
+.forEach(function(old){
+
+
+
+old.classList.remove(
+"active"
+);
+
+
+
+});
+
+
+
+
+
+
+
+item.classList.add(
+"active"
+);
+
+
+
+
+
+
+
+CampusWordStorageCore
+.SaveAs
+.setFolder(
+folder.id
+);
+
+
+
+
+
+
+
+console.log(
+"Save As Folder Selected:",
+folder.name
+);
+
+
+
+};
+
+
+
+
+
+
+
+list.appendChild(
+item
+);
+
+
+
+});
+
+
+
+
+})
+
+.catch(function(error){
+
+
+
+console.error(
+"Save As Folder Load Error:",
+error
+);
+
+
+
+});
+
+
+
+}
+
+
+
+
+
+
+
+
+
+function connectSaveButton(){
+
+
+
+const button =
+document.querySelector(
+".cwSaveAsConfirm"
+);
+
+
+
+
+
+if(!button){
+
+return;
+
+}
+
+
+
+
+
+button.onclick =
+function(){
+
+
+
+const input =
+document.querySelector(
+".cwSaveAsNameInput"
+);
+
+
+
+
+
+const name =
+input ?
+input.value.trim()
+:
+"";
+
+
+
+
+
+
+if(!name){
+
+console.warn(
+"Document name required"
+);
+
+return;
+
+}
+
+
+
+
+
+
+const pages =
+Array.from(
+document.querySelectorAll(
+".cwPageContent"
+)
+)
+.map(function(page){
+
+
+
+return {
+
+html:
+page.innerHTML
+
+};
+
+
+
+});
+
+
+
+
+
+
+
+
+CampusWordStorageCore
+.SaveAs
+.save({
+
+name:name,
+
+pages:pages
+
+})
+
+.then(function(id){
+
+
+
+console.log(
+"Save As Success:",
+id
+);
+
+
+
+})
+
+.catch(function(error){
+
+
+
+console.error(
+"Save As Error:",
+error
+);
+
+
+
+});
+
+
+
+
+
+};
+
+
+
+}
+
+
+
+
+
+
+
+
+function connectCancelButton(){
+
+
+
+const button =
+document.querySelector(
+".cwSaveAsCancel"
+);
+
+
+
+
+
+if(!button){
+
+return;
+
+}
+
+
+
+
+
+button.onclick =
+function(){
+
+
+
+if(
+window.CampusWordSaveAsUI &&
+CampusWordSaveAsUI.close
+){
+
+
+
+CampusWordSaveAsUI.close();
+
+
+
+}
+
+
+
+};
+
+
+
+}
+
+
+
+
+
+
+
+
+
+function connectNewFolderButton(){
+
+
+
+const button =
+document.querySelector(
+".cwSaveAsNewFolderBtn"
+);
+
+
+
+
+
+if(!button){
+
+return;
+
+}
+
+
+
+
+
+button.onclick =
+function(){
+
+
+
+console.log(
+"New Folder connector ready"
+);
+
+
+
+};
+
+
+
+}
+
+
+
+
+
+
+
+
+
+window.CampusWordSaveAsConnector = {
+
+
+
+init:function(){
+
+
+
+loadFolders();
+
+connectSaveButton();
+
+connectCancelButton();
+
+connectNewFolderButton();
+
+
+
+}
+
+
+
+};
+
+
+
+
+
+
+document.addEventListener(
+"click",
+function(e){
+
+
+
+const open =
+e.target.closest(
+'[data-action="save-as"]'
+);
+
+
+
+
+
+if(!open){
+
+return;
+
+}
+
+
+
+
+
+setTimeout(function(){
+
+
+
+CampusWordSaveAsConnector
+.init();
+
+
+
+},100);
+
+
+
+},
+false
+);
+
+
+
+
+
+
+
+console.log(
+"CampusWord Save As Connector Ready"
+);
+
+
+
+
+
+
+
+})();
 
 
 
