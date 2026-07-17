@@ -29702,6 +29702,546 @@ console.log(
 
 
 
+/* =========================================================
+   CAMPUS WORD — SAVE AS NEW FOLDER ENGINE
+   STEP 8
+
+   CREATE NEW FOLDER DIALOG
+   SAVE FOLDER TO STORAGE CORE
+   REFRESH SAVE AS FOLDER LIST
+
+   COMPATIBLE WITH:
+   STEP 1 DATABASE CORE
+   STEP 2 FOLDER CORE
+   STEP 5 SAVE AS CORE
+   STEP 6 SAVE AS UI
+   STEP 7 SAVE AS CONNECTOR
+
+   NO OLD SAVE SYSTEM
+   NO OLD SAVE AS SYSTEM
+   ISOLATED MODULE
+========================================================= */
+
+(function(){
+
+"use strict";
+
+
+
+
+let newFolderBox = null;
+
+
+
+
+
+
+
+
+function openNewFolderDialog(){
+
+
+
+if(newFolderBox){
+
+    return;
+
+}
+
+
+
+
+
+
+newFolderBox =
+document.createElement(
+"div"
+);
+
+
+
+
+
+
+newFolderBox.className =
+"cwSaveAsNewFolderDialog";
+
+
+
+
+
+
+newFolderBox.innerHTML = `
+
+<div class="cwSaveAsNewFolderWindow">
+
+
+<h3>
+Create New Folder
+</h3>
+
+
+
+<input
+class="cwNewFolderNameInput"
+type="text"
+placeholder="Folder name"
+/>
+
+
+
+
+
+<div class="cwNewFolderActions">
+
+
+<button
+class="cwNewFolderCreateBtn"
+type="button">
+
+Create
+
+</button>
+
+
+
+
+<button
+class="cwNewFolderCancelBtn"
+type="button">
+
+Cancel
+
+</button>
+
+
+
+</div>
+
+
+
+</div>
+
+`;
+
+
+
+
+
+
+
+document.body.appendChild(
+newFolderBox
+);
+
+
+
+
+
+
+
+bindNewFolderActions();
+
+
+
+}
+
+
+
+
+
+
+
+
+
+function closeNewFolderDialog(){
+
+
+
+if(newFolderBox){
+
+
+
+newFolderBox.remove();
+
+newFolderBox=null;
+
+
+
+}
+
+
+
+}
+
+
+
+
+
+
+
+
+
+function bindNewFolderActions(){
+
+
+
+const cancel =
+newFolderBox.querySelector(
+".cwNewFolderCancelBtn"
+);
+
+
+
+
+
+cancel.onclick =
+function(){
+
+
+
+closeNewFolderDialog();
+
+
+
+};
+
+
+
+
+
+
+
+
+
+const create =
+newFolderBox.querySelector(
+".cwNewFolderCreateBtn"
+);
+
+
+
+
+
+create.onclick =
+function(){
+
+
+
+const input =
+newFolderBox.querySelector(
+".cwNewFolderNameInput"
+);
+
+
+
+
+
+const name =
+input.value.trim();
+
+
+
+
+
+
+
+if(!name){
+
+console.warn(
+"Folder name required"
+);
+
+return;
+
+}
+
+
+
+
+
+
+
+
+
+if(
+!window.CampusWordStorageCore ||
+!CampusWordStorageCore.createFolder
+){
+
+
+
+console.error(
+"Folder Core unavailable"
+);
+
+
+
+return;
+
+}
+
+
+
+
+
+
+
+
+
+CampusWordStorageCore
+.createFolder(name)
+
+.then(function(id){
+
+
+
+console.log(
+"New Folder Created:",
+name,
+id
+);
+
+
+
+
+
+
+
+closeNewFolderDialog();
+
+
+
+
+
+
+refreshFolderList();
+
+
+
+})
+
+.catch(function(error){
+
+
+
+console.error(
+"New Folder Create Error:",
+error
+);
+
+
+
+});
+
+
+
+};
+
+
+
+}
+
+
+
+
+
+
+
+
+
+function refreshFolderList(){
+
+
+
+const list =
+document.querySelector(
+".cwSaveAsFolderList"
+);
+
+
+
+
+
+if(!list){
+
+return;
+
+}
+
+
+
+
+
+
+CampusWordStorageCore
+.getFolders()
+
+.then(function(folders){
+
+
+
+list.innerHTML="";
+
+
+
+
+
+
+folders.forEach(function(folder){
+
+
+
+const item =
+document.createElement(
+"div"
+);
+
+
+
+item.className =
+"cwSaveAsFolderItem";
+
+
+
+item.innerHTML = `
+
+<span class="cwSaveAsFolderIcon">
+
+📁
+
+</span>
+
+<span>
+
+${folder.name}
+
+</span>
+
+`;
+
+
+
+
+
+
+
+list.appendChild(
+item
+);
+
+
+
+});
+
+
+
+})
+
+.catch(function(error){
+
+
+
+console.error(
+"Folder Refresh Error:",
+error
+);
+
+
+
+});
+
+
+
+}
+
+
+
+
+
+
+
+
+
+document.addEventListener(
+"click",
+function(e){
+
+
+
+const button =
+e.target.closest(
+".cwSaveAsNewFolderBtn"
+);
+
+
+
+
+
+
+if(!button){
+
+return;
+
+}
+
+
+
+
+
+e.preventDefault();
+
+e.stopPropagation();
+
+
+
+
+
+
+openNewFolderDialog();
+
+
+
+},
+false
+);
+
+
+
+
+
+
+
+console.log(
+"CampusWord New Folder Engine Ready"
+);
+
+
+
+
+
+
+
+})();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
