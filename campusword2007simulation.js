@@ -29873,6 +29873,8 @@ console.log(
 
 
 
+
+
 /* =========================================================
    CAMPUS WORD — SAVE AS FINAL BRIDGE
    STEP 5 FINAL
@@ -29881,7 +29883,7 @@ console.log(
    - Save As Save Button
    - Active Folder
    - File Name
-   - Storage Core SaveAs
+   - Storage Core Document Save
    - Documents Panel Refresh
    - Title Bar Update
 
@@ -29890,7 +29892,6 @@ console.log(
    STEP 2 FOLDER CORE
    STEP 3 DOCUMENT CORE
    STEP 4 RELATION CORE
-   STEP 5 SAVE AS CORE
 
    NO DATABASE CREATION
    NO UI CREATION
@@ -29901,8 +29902,6 @@ console.log(
 (function(){
 
 "use strict";
-
-
 
 
 
@@ -29950,9 +29949,6 @@ return [];
 
 
 
-
-
-
 function updateTitle(documentName){
 
 
@@ -29978,9 +29974,6 @@ documentName +
 
 
 }
-
-
-
 
 
 
@@ -30025,8 +30018,6 @@ document.querySelector(
 
 
 
-
-
 if(!list){
 
 return;
@@ -30036,8 +30027,6 @@ return;
 
 
 list.innerHTML = "";
-
-
 
 
 
@@ -30104,7 +30093,6 @@ error
 
 
 }
-
 
 
 
@@ -30180,18 +30168,15 @@ return;
 
 
 
-
-
 if(
 !window.CampusWordStorageCore ||
-!CampusWordStorageCore.SaveAs ||
-!CampusWordStorageCore.SaveAs.save
+!CampusWordStorageCore.saveDocument
 ){
 
 
 
 console.error(
-"Save As Core unavailable"
+"Document Core unavailable"
 );
 
 
@@ -30206,13 +30191,8 @@ return;
 
 
 
-
-
 const folderId =
-CampusWordStorageCore
-.SaveAs
-.getFolder();
-
+window.CampusWordActiveFolder;
 
 
 
@@ -30233,7 +30213,6 @@ console.warn(
 return;
 
 }
-
 
 
 
@@ -30337,8 +30316,6 @@ console.log(
 
 
 })();
-
-
 
 
 
