@@ -4836,6 +4836,81 @@ bottom:-6px;
 
 
 
+/* =========================================================
+   CAMPUS WORD — NEW FOLDER BOX
+========================================================= */
 
+#cwNewFolderDialog{
+
+    display:none;
+
+    position:fixed;
+
+    inset:0;
+
+    z-index:100000;
+
+    background:rgba(0,0,0,.35);
+
+    align-items:center;
+
+    justify-content:center;
+
+}
+
+
+#cwNewFolderDialog.active{
+
+    display:flex;
+
+}
+
+
+
+.cwNewFolderBox{
+
+    width:320px;
+
+    background:white;
+
+    padding:15px;
+
+    border-radius:6px;
+
+}
+
+
+
+.cwNewFolderBody{
+
+    display:flex;
+
+    flex-direction:column;
+
+    gap:10px;
+
+    margin:15px 0;
+
+}
+
+
+
+#cwNewFolderName{
+
+    padding:8px;
+
+}
+
+
+
+.cwNewFolderFooter{
+
+    display:flex;
+
+    justify-content:flex-end;
+
+    gap:10px;
+
+}
 
 
