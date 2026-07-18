@@ -27831,17 +27831,13 @@ const CampusWordDocumentManager = (() => {
 
 /* =========================================================
    CAMPUS WORD — STEP 5
-   SAVE AS UI + DOCUMENT SAVE CONNECTION
+   COMPLETE SAVE AS CONNECTION
 ========================================================= */
 
 const CampusWordSaveAsUI = (() => {
 
 
-    let currentFolderId = null;
-
-
-
-    function createSaveAsWindow(){
+    function createUI(){
 
 
         if(document.getElementById("cwSaveAsDialog")){
@@ -27869,12 +27865,12 @@ const CampusWordSaveAsUI = (() => {
                     File name
                 </label>
 
-
                 <input 
                     id="cwSaveAsFileName"
                     type="text"
                     placeholder="Document name"
                 >
+
 
 
                 <label>
@@ -27892,6 +27888,7 @@ const CampusWordSaveAsUI = (() => {
 
 
             </div>
+
 
 
             <div class="cwSaveAsFooter">
@@ -27918,7 +27915,7 @@ const CampusWordSaveAsUI = (() => {
         document.body.appendChild(dialog);
 
 
-        bindEvents();
+        bind();
 
     }
 
@@ -27926,36 +27923,22 @@ const CampusWordSaveAsUI = (() => {
 
 
 
-    function open(){
+    async function open(){
 
 
-        createSaveAsWindow();
+        createUI();
 
 
-        loadFolders();
+        await loadFolders();
 
 
-        const dialog =
-            document.getElementById(
-                "cwSaveAsDialog"
-            );
-
-
-        dialog.classList.add(
+        document
+        .getElementById(
+            "cwSaveAsDialog"
+        )
+        .classList.add(
             "active"
         );
-
-
-        setTimeout(()=>{
-
-            document
-            .getElementById(
-                "cwSaveAsFileName"
-            )
-            .focus();
-
-
-        },100);
 
 
     }
@@ -27967,21 +27950,21 @@ const CampusWordSaveAsUI = (() => {
     async function loadFolders(){
 
 
-        const select =
-            document.getElementById(
-                "cwSaveAsFolderList"
-            );
+        const list =
+        document.getElementById(
+            "cwSaveAsFolderList"
+        );
 
 
-        if(!select) return;
+        if(!list) return;
 
 
-        select.innerHTML="";
+        list.innerHTML="";
 
 
         const folders =
-            await CampusWordFolderManager
-            .getAllFolders();
+        await CampusWordFolderManager
+        .getAllFolders();
 
 
 
@@ -27989,30 +27972,81 @@ const CampusWordSaveAsUI = (() => {
 
 
             const option =
-                document.createElement(
-                    "option"
-                );
+            document.createElement(
+                "option"
+            );
 
 
             option.value =
-                folder.folderId;
+            folder.folderId;
 
 
             option.textContent =
-                folder.folderName;
+            folder.folderName;
 
 
-            select.appendChild(option);
+            list.appendChild(option);
 
 
         });
 
 
+    }
 
-        if(folders.length){
 
-            currentFolderId =
-                folders[0].folderId;
+
+
+
+    function collectContent(){
+
+
+        const pages =
+        document.querySelectorAll(
+            ".cwPageContent"
+        );
+
+
+        let text="";
+
+
+        pages.forEach((page,index)=>{
+
+
+            text += page.innerText;
+
+
+            if(index < pages.length-1){
+
+                text += "\n\n";
+
+            }
+
+
+        });
+
+
+        return text;
+
+    }
+
+
+
+
+
+    function close(){
+
+
+        const dialog =
+        document.getElementById(
+            "cwSaveAsDialog"
+        );
+
+
+        if(dialog){
+
+            dialog.classList.remove(
+                "active"
+            );
 
         }
 
@@ -28023,44 +28057,7 @@ const CampusWordSaveAsUI = (() => {
 
 
 
-    function getDocumentContent(){
-
-
-        const pages =
-            document.querySelectorAll(
-                ".cwPageContent"
-            );
-
-
-        let content="";
-
-
-        pages.forEach((page,index)=>{
-
-
-            content +=
-                page.innerText;
-
-
-            if(index < pages.length-1){
-
-                content += "\n\n";
-
-            }
-
-
-        });
-
-
-        return content;
-
-    }
-
-
-
-
-
-    function bindEvents(){
+    function bind(){
 
 
         document.addEventListener(
@@ -28068,13 +28065,13 @@ const CampusWordSaveAsUI = (() => {
         async(e)=>{
 
 
-            const saveAs =
-                e.target.closest(
-                    '[data-action="save-as"]'
-                );
+            const saveAsButton =
+            e.target.closest(
+                '[data-action="save-as"]'
+            );
 
 
-            if(saveAs){
+            if(saveAsButton){
 
                 open();
 
@@ -28104,26 +28101,21 @@ const CampusWordSaveAsUI = (() => {
 
 
                 const title =
-                    document
-                    .getElementById(
-                        "cwSaveAsFileName"
-                    )
-                    .value
-                    .trim();
+                document
+                .getElementById(
+                    "cwSaveAsFileName"
+                )
+                .value
+                .trim();
 
 
 
                 const folder =
-                    document
-                    .getElementById(
-                        "cwSaveAsFolderList"
-                    )
-                    .value;
-
-
-
-                const content =
-                    getDocumentContent();
+                document
+                .getElementById(
+                    "cwSaveAsFolderList"
+                )
+                .value;
 
 
 
@@ -28143,29 +28135,68 @@ const CampusWordSaveAsUI = (() => {
 
                     title:title,
 
-                    content:content,
+                    content:
+                    collectContent(),
 
-                    folderId:Number(folder)
+                    folderId:
+                    Number(folder)
 
                 });
 
 
 
-                document
-                .getElementById(
+                const titleBar =
+                document.getElementById(
                     "cwTitle"
-                )
-                .textContent =
+                );
+
+
+                if(titleBar){
+
+                    titleBar.textContent =
                     title +
                     " - Campus Word 2007 Simulation";
+
+                }
 
 
 
                 close();
 
-
             }
 
+
+
+
+
+            if(
+            e.target.id ===
+            "cwSaveAsNewFolder"
+            ){
+
+
+                const name =
+                prompt(
+                "Folder name"
+                );
+
+
+
+                if(name){
+
+
+                    await CampusWordFolderManager
+                    .createFolder(name);
+
+
+
+                    loadFolders();
+
+
+                }
+
+
+            }
 
 
         });
@@ -28177,34 +28208,11 @@ const CampusWordSaveAsUI = (() => {
 
 
 
-    function close(){
-
-
-        const dialog =
-            document.getElementById(
-                "cwSaveAsDialog"
-            );
-
-
-        if(dialog){
-
-            dialog.classList.remove(
-                "active"
-            );
-
-        }
-
-    }
-
-
-
-
-
     return {
 
         init(){
 
-            createSaveAsWindow();
+            createUI();
 
         }
 
@@ -28216,6 +28224,11 @@ const CampusWordSaveAsUI = (() => {
 
 
 CampusWordSaveAsUI.init();
+
+
+
+
+
 
 
 
