@@ -27648,7 +27648,45 @@ CampusWord2007Simulateur.DocumentLibrary = {
 
 
 
+    },
+
+   renameDocument(id,newName){
+
+    const documents =
+    this.getDocuments();
+
+
+    const index =
+    documents.findIndex(
+        doc =>
+        doc.id === id
+    );
+
+
+    if(index === -1){
+
+        return false;
+
     }
+
+
+    documents[index].name =
+    newName;
+
+
+    documents[index].updated =
+    new Date()
+    .toISOString();
+
+
+    this.saveDocuments(
+        documents
+    );
+
+
+    return true;
+
+}
 
 
 
