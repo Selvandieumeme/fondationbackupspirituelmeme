@@ -27372,6 +27372,347 @@ CampusWord2007Simulateur
 
 
 
+/* =========================================================
+   CAMPUS WORD 2007 SIMULATEUR
+   SAVE AS ENGINE v2.0.0
+   DOCX EXPORT EXTENSION
+   SAFE ADDON - NO CORE MODIFICATION
+========================================================= */
+
+(function(){
+
+"use strict";
+
+
+if(!CampusWord2007Simulateur.SaveAsEngine){
+    return;
+}
+
+
+const SaveAsEngine =
+CampusWord2007Simulateur.SaveAsEngine;
+
+
+
+
+/* =========================
+   ADD DOCX EXPORT
+========================= */
+
+SaveAsEngine.exportDOCX = function(name){
+
+
+    const pages =
+    document.querySelectorAll(
+        ".cwPageContent"
+    );
+
+
+    let content = "";
+
+
+
+    pages.forEach((page)=>{
+
+
+        content +=
+        page.innerText +
+        "\n\n";
+
+
+    });
+
+
+
+
+
+    const blob =
+    new Blob(
+        [
+            content
+        ],
+        {
+
+            type:
+            "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+
+        }
+    );
+
+
+
+
+
+    const link =
+    document.createElement("a");
+
+
+
+    link.href =
+    URL.createObjectURL(blob);
+
+
+
+    link.download =
+    name + ".docx";
+
+
+
+    document.body.appendChild(link);
+
+
+
+    link.click();
+
+
+
+    link.remove();
+
+
+
+    URL.revokeObjectURL(
+        link.href
+    );
+
+
+
+    CampusWord2007Simulateur
+    .state.documentSaved = true;
+
+
+
+};
+
+
+
+
+
+
+
+/* =========================
+   ADD FORMAT SELECTOR
+   INTO EXISTING DIALOG
+========================= */
+
+const oldCreateDialog =
+SaveAsEngine.createDialog;
+
+
+
+
+SaveAsEngine.createDialog =
+function(){
+
+
+    oldCreateDialog.call(this);
+
+
+
+    const dialog =
+    document.querySelector(
+        ".cwSaveAsDialog"
+    );
+
+
+    if(!dialog) return;
+
+
+
+    const buttons =
+    dialog.querySelector(
+        ".cwSaveAsButtons"
+    );
+
+
+
+    if(!buttons) return;
+
+
+
+
+    const format =
+    document.createElement("select");
+
+
+
+    format.className =
+    "cwSaveFormat";
+
+
+
+    format.innerHTML = `
+
+    <option value="html">
+        HTML
+    </option>
+
+    <option value="docx">
+        DOCX
+    </option>
+
+    `;
+
+
+
+    buttons.parentNode.insertBefore(
+        format,
+        buttons
+    );
+
+
+
+
+
+
+    const saveButton =
+    dialog.querySelector(
+        ".cwSaveConfirm"
+    );
+
+
+
+    saveButton.onclick = ()=>{
+
+
+        const input =
+        dialog.querySelector(
+            ".cwSaveAsInput"
+        );
+
+
+
+        const name =
+        input.value.trim();
+
+
+
+        if(!name) return;
+
+
+
+
+        if(format.value === "docx"){
+
+
+            this.exportDOCX(name);
+
+
+        }
+        else{
+
+
+            this.exportHTML(name);
+
+
+        }
+
+
+
+        dialog.remove();
+
+
+
+        const overlay =
+        document.querySelector(
+            ".cwSaveAsOverlay"
+        );
+
+
+        if(overlay){
+            overlay.remove();
+        }
+
+
+
+    };
+
+
+
+};
+
+
+
+
+})();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
