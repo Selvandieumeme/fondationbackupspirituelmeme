@@ -4682,166 +4682,130 @@ bottom:-6px;
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
 /* =========================================================
-   CAMPUS WORD — STEP 5 SAVE AS WINDOW
+   CAMPUS WORD 2007
+   SAVE AS DIALOG BOX v1.0
 ========================================================= */
 
-#cwSaveAsDialog{
+.cwSaveAsDialog {
 
-    display:none;
+    position: fixed;
 
-    position:fixed;
+    top: 50%;
+    left: 50%;
 
-    inset:0;
+    transform: translate(-50%, -50%);
 
-    z-index:99999;
+    width: 360px;
 
-    background:rgba(0,0,0,.35);
+    background: #ffffff;
 
-    align-items:center;
+    border: 1px solid #8a8a8a;
 
-    justify-content:center;
+    border-radius: 6px;
 
-}
+    box-shadow: 0 8px 25px rgba(0,0,0,0.35);
 
+    padding: 20px;
 
-#cwSaveAsDialog.active{
+    z-index: 99999;
 
-    display:flex;
-
-}
-
-
-.cwSaveAsBox{
-
-    background:white;
-
-    width:360px;
-
-    padding:15px;
-
-    border-radius:6px;
-
-}
-
-
-.cwSaveAsBody{
-
-    display:flex;
-
-    flex-direction:column;
-
-    gap:10px;
-
-    margin:15px 0;
-
-}
-
-
-.cwSaveAsFooter{
-
-    display:flex;
-
-    justify-content:flex-end;
-
-    gap:10px;
+    font-family: "Segoe UI", Arial, sans-serif;
 
 }
 
 
 
+.cwSaveAsDialog h3 {
 
+    margin: 0 0 15px;
 
+    font-size: 17px;
 
-
-
-/* =========================================================
-   CAMPUS WORD — NEW FOLDER BOX
-========================================================= */
-
-#cwNewFolderDialog{
-
-    display:none;
-
-    position:fixed;
-
-    inset:0;
-
-    z-index:100000;
-
-    background:rgba(0,0,0,.35);
-
-    align-items:center;
-
-    justify-content:center;
-
-}
-
-
-#cwNewFolderDialog.active{
-
-    display:flex;
+    color: #222;
 
 }
 
 
 
-.cwNewFolderBox{
+.cwSaveAsDialog input {
 
-    width:320px;
+    width: 100%;
 
-    background:white;
+    box-sizing: border-box;
 
-    padding:15px;
+    height: 34px;
 
-    border-radius:6px;
+    padding: 6px 10px;
 
-}
+    border: 1px solid #aaa;
 
+    border-radius: 3px;
 
-
-.cwNewFolderBody{
-
-    display:flex;
-
-    flex-direction:column;
-
-    gap:10px;
-
-    margin:15px 0;
+    font-size: 14px;
 
 }
 
 
 
-#cwNewFolderName{
+.cwSaveAsButtons {
 
-    padding:8px;
+    margin-top: 18px;
+
+    text-align: right;
+
+}
+
+
+
+.cwSaveAsButtons button {
+
+    min-width: 80px;
+
+    height: 32px;
+
+    margin-left: 8px;
+
+    border: 1px solid #777;
+
+    background: #f3f3f3;
+
+    border-radius: 3px;
+
+    cursor: pointer;
 
 }
 
 
 
-.cwNewFolderFooter{
+.cwSaveAsButtons button:hover {
 
-    display:flex;
-
-    justify-content:flex-end;
-
-    gap:10px;
+    background: #e5e5e5;
 
 }
+
+
+
+/* Background overlay */
+
+.cwSaveAsOverlay {
+
+    position: fixed;
+
+    inset: 0;
+
+    background: rgba(0,0,0,0.25);
+
+    z-index: 99998;
+
+}
+
+
+
+
+
+
+
+
 
 
