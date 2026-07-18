@@ -4809,3 +4809,343 @@ bottom:-6px;
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* =========================================================
+   CAMPUS WORD 2007 SIMULATEUR
+   OPEN DIALOG ENGINE v1.0.0
+   DOCUMENT LIBRARY WINDOW STYLE
+========================================================= */
+
+
+/* =========================
+   OPEN OVERLAY
+========================= */
+
+.cwSaveAsOverlay{
+
+    position:fixed;
+
+    inset:0;
+
+    background:rgba(0,0,0,0.35);
+
+    z-index:9998;
+
+}
+
+
+
+
+
+
+/* =========================
+   OPEN DIALOG BOX
+========================= */
+
+.cwSaveAsDialog{
+
+    position:fixed;
+
+    top:50%;
+
+    left:50%;
+
+    transform:translate(-50%,-50%);
+
+
+    width:380px;
+
+    max-width:90%;
+
+
+    background:#ffffff;
+
+
+    border:1px solid #999;
+
+
+    border-radius:6px;
+
+
+    padding:20px;
+
+
+    box-shadow:
+    0 5px 20px rgba(0,0,0,0.25);
+
+
+    z-index:9999;
+
+
+    font-family:
+    "Segoe UI",
+    Arial,
+    sans-serif;
+
+
+}
+
+
+
+
+
+.cwSaveAsDialog h3{
+
+
+    margin:0 0 15px 0;
+
+
+    font-size:18px;
+
+
+    font-weight:600;
+
+
+}
+
+
+
+
+
+
+
+/* =========================
+   DOCUMENT LIST
+========================= */
+
+.cwOpenDocumentList{
+
+
+    max-height:250px;
+
+
+    overflow-y:auto;
+
+
+    border:1px solid #d0d0d0;
+
+
+    background:#fafafa;
+
+
+    border-radius:4px;
+
+
+    padding:5px;
+
+
+}
+
+
+
+
+
+
+
+/* =========================
+   DOCUMENT ITEM
+========================= */
+
+.cwOpenDocumentItem{
+
+
+    display:flex;
+
+
+    align-items:center;
+
+
+    gap:8px;
+
+
+    padding:10px;
+
+
+    cursor:pointer;
+
+
+    border-radius:3px;
+
+
+    font-size:14px;
+
+
+}
+
+
+
+
+
+.cwOpenDocumentItem:hover{
+
+
+    background:#e8f1ff;
+
+
+}
+
+
+
+
+
+
+
+.cwOpenDocumentItem:active{
+
+
+    background:#d6e7ff;
+
+
+}
+
+
+
+
+
+
+
+
+/* =========================
+   EMPTY LIBRARY
+========================= */
+
+.cwEmptyDocuments{
+
+
+    padding:20px;
+
+
+    text-align:center;
+
+
+    color:#777;
+
+
+    font-size:14px;
+
+
+}
+
+
+
+
+
+
+
+
+/* =========================
+   BUTTON AREA
+========================= */
+
+.cwSaveAsButtons{
+
+
+    margin-top:15px;
+
+
+    display:flex;
+
+
+    justify-content:flex-end;
+
+
+    gap:10px;
+
+
+}
+
+
+
+
+
+
+
+
+/* =========================
+   OPEN / CANCEL BUTTONS
+========================= */
+
+.cwOpenConfirm,
+.cwOpenCancel{
+
+
+    min-width:80px;
+
+
+    padding:7px 18px;
+
+
+    border:1px solid #777;
+
+
+    border-radius:3px;
+
+
+    cursor:pointer;
+
+
+    background:#f3f3f3;
+
+
+    font-size:14px;
+
+
+}
+
+
+
+
+
+
+
+.cwOpenConfirm:hover,
+.cwOpenCancel:hover{
+
+
+    background:#ddd;
+
+
+}
+
+
+
+
+
+
+
+.cwOpenConfirm:active,
+.cwOpenCancel:active{
+
+
+    transform:translateY(1px);
+
+
+}
