@@ -4692,9 +4692,10 @@ bottom:-6px;
 
 
 
+
+
 /* =========================================================
-   CAMPUS WORD — SAVE AS WINDOW UI
-   STEP 5 CSS
+   CAMPUS WORD — STEP 5 SAVE AS WINDOW
 ========================================================= */
 
 #cwSaveAsDialog{
@@ -4716,7 +4717,6 @@ bottom:-6px;
 }
 
 
-
 #cwSaveAsDialog.active{
 
     display:flex;
@@ -4724,37 +4724,17 @@ bottom:-6px;
 }
 
 
-
 .cwSaveAsBox{
+
+    background:white;
 
     width:360px;
 
-    background:#ffffff;
-
-    border:1px solid #999;
+    padding:15px;
 
     border-radius:6px;
 
-    padding:15px;
-
-    box-shadow:0 8px 25px rgba(0,0,0,.3);
-
 }
-
-
-
-.cwSaveAsHeader{
-
-    font-size:16px;
-
-    font-weight:bold;
-
-    padding-bottom:10px;
-
-    border-bottom:1px solid #ddd;
-
-}
-
 
 
 .cwSaveAsBody{
@@ -4765,45 +4745,12 @@ bottom:-6px;
 
     gap:10px;
 
-    margin-top:15px;
+    margin:15px 0;
 
 }
-
-
-
-#cwSaveAsFileName{
-
-    width:100%;
-
-    padding:8px;
-
-    box-sizing:border-box;
-
-}
-
-
-
-#cwSaveAsFolderList{
-
-    width:100%;
-
-    padding:8px;
-
-}
-
-
-
-#cwSaveAsNewFolder{
-
-    width:max-content;
-
-}
-
 
 
 .cwSaveAsFooter{
-
-    margin-top:15px;
 
     display:flex;
 
@@ -4812,22 +4759,6 @@ bottom:-6px;
     gap:10px;
 
 }
-
-
-
-.cwSaveAsFooter button{
-
-    padding:6px 15px;
-
-    cursor:pointer;
-
-}
-
-
-
-
-
-
 
 
 
