@@ -30242,15 +30242,13 @@ return;
 
 
 CampusWordStorageCore
-.SaveAs
-.save({
+.saveDocument({
 
 name:name,
 
-pages:
-getPagesData()
+folderId:folderId,
 
-
+pages:getPagesData()
 
 })
 
