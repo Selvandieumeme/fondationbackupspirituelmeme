@@ -26952,151 +26952,10 @@ false
 
 
 
-/* =========================================================
-   CAMPUS WORD DOCUMENTS CORE
-   STEP 1 — IndexedDB + Folders + Documents
-========================================================= */
-
-const CampusWordDocumentsCore = (() => {
-
-    const DB_NAME = "CampusWordDocuments";
-    const DB_VERSION = 1;
-
-    const STORES = {
-        FOLDERS: "folders",
-        DOCUMENTS: "documents"
-    };
-
-    let db = null;
-
-
-    function init(){
-
-        return new Promise((resolve, reject)=>{
-
-            const request = indexedDB.open(DB_NAME, DB_VERSION);
-
-
-            request.onupgradeneeded = (event)=>{
-
-                const database = event.target.result;
-
-
-                /* ===============================
-                   FOLDERS OBJECT STORE
-                =============================== */
-
-                if(!database.objectStoreNames.contains(STORES.FOLDERS)){
-
-                    const folderStore = database.createObjectStore(
-                        STORES.FOLDERS,
-                        {
-                            keyPath:"folderId",
-                            autoIncrement:true
-                        }
-                    );
-
-
-                    folderStore.createIndex(
-                        "folderName",
-                        "folderName",
-                        {
-                            unique:false
-                        }
-                    );
-
-                }
 
 
 
-                /* ===============================
-                   DOCUMENTS OBJECT STORE
-                =============================== */
 
-                if(!database.objectStoreNames.contains(STORES.DOCUMENTS)){
-
-                    const documentStore = database.createObjectStore(
-                        STORES.DOCUMENTS,
-                        {
-                            keyPath:"documentId",
-                            autoIncrement:true
-                        }
-                    );
-
-
-                    /*
-                       RELATION:
-                       document.folderId
-                       points to folders.folderId
-                    */
-
-                    documentStore.createIndex(
-                        "folderId",
-                        "folderId",
-                        {
-                            unique:false
-                        }
-                    );
-
-
-                    documentStore.createIndex(
-                        "title",
-                        "title",
-                        {
-                            unique:false
-                        }
-                    );
-
-                }
-
-            };
-
-
-            request.onsuccess = (event)=>{
-
-                db = event.target.result;
-
-                console.log(
-                    "CampusWordDocuments Database Ready"
-                );
-
-                resolve(db);
-
-            };
-
-
-            request.onerror = ()=>{
-
-                reject(
-                    request.error
-                );
-
-            };
-
-
-        });
-
-    }
-
-
-
-    function getDB(){
-
-        return db;
-
-    }
-
-
-
-    return {
-
-        init,
-        getDB
-
-    };
-
-
-})();
 
 
 
@@ -27108,1371 +26967,394 @@ const CampusWordDocumentsCore = (() => {
 
 
 /* =========================================================
-   CAMPUS WORD FOLDER MANAGER
-   STEP 2 — CREATE / READ / RENAME / DELETE FOLDERS
+   CAMPUS WORD 2007 SIMULATEUR
+   SAVE AS ENGINE v1.1.0
+   PROFESSIONAL HTML EXPORT FOUNDATION
 ========================================================= */
 
-const CampusWordFolderManager = (() => {
+(function () {
 
+"use strict";
 
-    const STORE_NAME = "folders";
 
+if (!CampusWord2007Simulateur.state) return;
 
-    function createFolder(folderName){
 
-        return new Promise((resolve, reject)=>{
 
+CampusWord2007Simulateur.state.documentName = "Document1";
+CampusWord2007Simulateur.state.documentSaved = false;
 
-            const db = CampusWordDocumentsCore.getDB();
 
 
-            const transaction = db.transaction(
-                STORE_NAME,
-                "readwrite"
-            );
+CampusWord2007Simulateur.SaveAsEngine = {
 
 
-            const store = transaction.objectStore(
-                STORE_NAME
-            );
 
-
-            const folder = {
-
-                folderName: folderName,
-
-                createdAt: Date.now()
-
-            };
-
-
-            const request = store.add(folder);
-
-
-            request.onsuccess = ()=>{
-
-                resolve(request.result);
-
-            };
-
-
-            request.onerror = ()=>{
-
-                reject(request.error);
-
-            };
-
-
-        });
-
-    }
-
-
-
-    function getAllFolders(){
-
-        return new Promise((resolve, reject)=>{
-
-
-            const db = CampusWordDocumentsCore.getDB();
-
-
-            const transaction = db.transaction(
-                STORE_NAME,
-                "readonly"
-            );
-
-
-            const store = transaction.objectStore(
-                STORE_NAME
-            );
-
-
-            const request = store.getAll();
-
-
-            request.onsuccess = ()=>{
-
-                resolve(request.result);
-
-            };
-
-
-            request.onerror = ()=>{
-
-                reject(request.error);
-
-            };
-
-
-        });
-
-    }
-
-
-
-    function renameFolder(folderId,newName){
-
-        return new Promise((resolve,reject)=>{
-
-
-            const db = CampusWordDocumentsCore.getDB();
-
-
-            const transaction = db.transaction(
-                STORE_NAME,
-                "readwrite"
-            );
-
-
-            const store = transaction.objectStore(
-                STORE_NAME
-            );
-
-
-            const request = store.get(folderId);
-
-
-            request.onsuccess = ()=>{
-
-
-                const folder = request.result;
-
-
-                if(!folder){
-
-                    reject(
-                        "Folder not found"
-                    );
-
-                    return;
-
-                }
-
-
-                folder.folderName = newName;
-
-
-                const update = store.put(folder);
-
-
-                update.onsuccess = ()=>{
-
-                    resolve(true);
-
-                };
-
-
-            };
-
-
-        });
-
-    }
-
-
-
-
-    function deleteFolder(folderId){
-
-        return new Promise((resolve,reject)=>{
-
-
-            const db = CampusWordDocumentsCore.getDB();
-
-
-            const transaction = db.transaction(
-                STORE_NAME,
-                "readwrite"
-            );
-
-
-            const store = transaction.objectStore(
-                STORE_NAME
-            );
-
-
-            const request = store.delete(folderId);
-
-
-            request.onsuccess = ()=>{
-
-                resolve(true);
-
-            };
-
-
-            request.onerror = ()=>{
-
-                reject(request.error);
-
-            };
-
-
-        });
-
-    }
-
-
-
-
-    return {
-
-        createFolder,
-
-        getAllFolders,
-
-        renameFolder,
-
-        deleteFolder
-
-    };
-
-
-})();
-
-
-
-
-
-
-
-
-
-
-
-
-/* =========================================================
-   CAMPUS WORD SAVE AS ENGINE
-   STEP 3 — SAVE DOCUMENT INTO FOLDER
-========================================================= */
-
-const CampusWordSaveAsEngine = (() => {
-
-
-    const STORE_NAME = "documents";
-
-    const EXPIRATION_DAYS = 30;
-
-
-
-    function saveAs({
-
-        title,
-        content,
-        folderId
-
-    }){
-
-
-        return new Promise((resolve,reject)=>{
-
-
-            const db = CampusWordDocumentsCore.getDB();
-
-
-            const transaction = db.transaction(
-                STORE_NAME,
-                "readwrite"
-            );
-
-
-            const store = transaction.objectStore(
-                STORE_NAME
-            );
-
-
-
-            const now = Date.now();
-
-
-            const documentData = {
-
-
-                title:title,
-
-
-                content:content,
-
-
-                folderId:folderId,
-
-
-                savedAt:now,
-
-
-                expiresAt:
-                    now +
-                    (
-                        EXPIRATION_DAYS *
-                        24 *
-                        60 *
-                        60 *
-                        1000
-                    )
-
-            };
-
-
-
-            const request = store.add(
-                documentData
-            );
-
-
-
-            request.onsuccess = ()=>{
-
-
-                resolve({
-
-                    success:true,
-
-                    documentId:
-                        request.result
-
-                });
-
-
-            };
-
-
-
-            request.onerror = ()=>{
-
-
-                reject(
-                    request.error
-                );
-
-
-            };
-
-
-        });
-
-
-    }
-
-
-
-
-    return {
-
-        saveAs
-
-    };
-
-
-})();
-
-
-
-
-
-
-
-
-
-
-
-
-
-/* =========================================================
-   CAMPUS WORD DOCUMENT MANAGER
-   STEP 4 — OPEN / LIST / DELETE / EXPIRATION CLEANER
-========================================================= */
-
-const CampusWordDocumentManager = (() => {
-
-
-    const STORE_NAME = "documents";
-
-
-
-    function getAllDocuments(){
-
-
-        return new Promise((resolve,reject)=>{
-
-
-            const db = CampusWordDocumentsCore.getDB();
-
-
-            const transaction = db.transaction(
-                STORE_NAME,
-                "readonly"
-            );
-
-
-            const store = transaction.objectStore(
-                STORE_NAME
-            );
-
-
-            const request = store.getAll();
-
-
-
-            request.onsuccess = ()=>{
-
-                resolve(
-                    request.result
-                );
-
-            };
-
-
-            request.onerror = ()=>{
-
-                reject(
-                    request.error
-                );
-
-            };
-
-
-        });
-
-
-    }
-
-
-
-
-
-    function getDocumentsByFolder(folderId){
-
-
-        return new Promise((resolve,reject)=>{
-
-
-            const db = CampusWordDocumentsCore.getDB();
-
-
-            const transaction = db.transaction(
-                STORE_NAME,
-                "readonly"
-            );
-
-
-            const store = transaction.objectStore(
-                STORE_NAME
-            );
-
-
-            const index = store.index(
-                "folderId"
-            );
-
-
-            const request = index.getAll(
-                folderId
-            );
-
-
-
-            request.onsuccess = ()=>{
-
-
-                resolve(
-                    request.result
-                );
-
-
-            };
-
-
-
-            request.onerror = ()=>{
-
-
-                reject(
-                    request.error
-                );
-
-
-            };
-
-
-        });
-
-
-    }
-
-
-
-
-
-    function openDocument(documentId){
-
-
-        return new Promise((resolve,reject)=>{
-
-
-            const db = CampusWordDocumentsCore.getDB();
-
-
-            const transaction = db.transaction(
-                STORE_NAME,
-                "readonly"
-            );
-
-
-            const store = transaction.objectStore(
-                STORE_NAME
-            );
-
-
-            const request = store.get(
-                documentId
-            );
-
-
-            request.onsuccess = ()=>{
-
-
-                resolve(
-                    request.result
-                );
-
-
-            };
-
-
-
-            request.onerror = ()=>{
-
-
-                reject(
-                    request.error
-                );
-
-
-            };
-
-
-        });
-
-
-    }
-
-
-
-
-
-    function deleteDocument(documentId){
-
-
-        return new Promise((resolve,reject)=>{
-
-
-            const db = CampusWordDocumentsCore.getDB();
-
-
-            const transaction = db.transaction(
-                STORE_NAME,
-                "readwrite"
-            );
-
-
-            const store = transaction.objectStore(
-                STORE_NAME
-            );
-
-
-            const request = store.delete(
-                documentId
-            );
-
-
-
-            request.onsuccess = ()=>{
-
-
-                resolve(true);
-
-
-            };
-
-
-
-            request.onerror = ()=>{
-
-
-                reject(
-                    request.error
-                );
-
-
-            };
-
-
-        });
-
-
-    }
-
-
-
-
-
-    function cleanExpiredDocuments(){
-
-
-        return new Promise((resolve,reject)=>{
-
-
-            getAllDocuments()
-
-            .then(documents=>{
-
-
-                const now = Date.now();
-
-
-                const expired = documents.filter(
-                    doc =>
-                    doc.expiresAt &&
-                    doc.expiresAt < now
-                );
-
-
-
-                const db = CampusWordDocumentsCore.getDB();
-
-
-
-                const transaction = db.transaction(
-                    STORE_NAME,
-                    "readwrite"
-                );
-
-
-                const store =
-                    transaction.objectStore(
-                        STORE_NAME
-                    );
-
-
-
-                expired.forEach(doc=>{
-
-
-                    store.delete(
-                        doc.documentId
-                    );
-
-
-                });
-
-
-
-                transaction.oncomplete = ()=>{
-
-
-                    resolve(
-                        expired.length
-                    );
-
-
-                };
-
-
-
-            })
-
-            .catch(reject);
-
-
-
-        });
-
-
-    }
-
-
-
-
-
-    return {
-
-
-        getAllDocuments,
-
-        getDocumentsByFolder,
-
-        openDocument,
-
-        deleteDocument,
-
-        cleanExpiredDocuments
-
-
-    };
-
-
-})();
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/* =========================================================
-   CAMPUS WORD — STEP 5
-   COMPLETE SAVE AS CONNECTION
-========================================================= */
-
-const CampusWordSaveAsUI = (() => {
-
-
-    function createUI(){
-
-
-        if(document.getElementById("cwSaveAsDialog")){
-            return;
-        }
-
-
-        const dialog = document.createElement("div");
-
-        dialog.id = "cwSaveAsDialog";
-
-        dialog.innerHTML = `
-
-        <div class="cwSaveAsBox">
-
-            <div class="cwSaveAsHeader">
-                Save As
-            </div>
-
-
-            <div class="cwSaveAsBody">
-
-
-                <label>
-                    File name
-                </label>
-
-                <input 
-                    id="cwSaveAsFileName"
-                    type="text"
-                    placeholder="Document name"
-                >
-
-
-
-                <label>
-                    Folder
-                </label>
-
-
-                <select id="cwSaveAsFolderList">
-                </select>
-
-
-                <button id="cwSaveAsNewFolder">
-                    New Folder
-                </button>
-
-
-            </div>
-
-
-
-            <div class="cwSaveAsFooter">
-
-
-                <button id="cwSaveAsCancel">
-                    Cancel
-                </button>
-
-
-                <button id="cwSaveAsConfirm">
-                    Save
-                </button>
-
-
-            </div>
-
-
-        </div>
-
-        `;
-
-
-        document.body.appendChild(dialog);
-
-
-        bind();
-
-    }
-
-
-
-
-
-    async function open(){
-
-
-        createUI();
-
-
-        await loadFolders();
-
-
-        document
-        .getElementById(
-            "cwSaveAsDialog"
-        )
-        .classList.add(
-            "active"
-        );
-
-
-    }
-
-
-
-
-
-    async function loadFolders(){
-
-
-        const list =
-        document.getElementById(
-            "cwSaveAsFolderList"
-        );
-
-
-        if(!list) return;
-
-
-        list.innerHTML="";
-
-
-        const folders =
-        await CampusWordFolderManager
-        .getAllFolders();
-
-
-
-        folders.forEach(folder=>{
-
-
-            const option =
-            document.createElement(
-                "option"
-            );
-
-
-            option.value =
-            folder.folderId;
-
-
-            option.textContent =
-            folder.folderName;
-
-
-            list.appendChild(option);
-
-
-        });
-
-
-    }
-
-
-
-
-
-    function collectContent(){
+    getDocumentHTML(){
 
 
         const pages =
-        document.querySelectorAll(
-            ".cwPageContent"
-        );
+        document.querySelectorAll(".cwPageContent");
 
 
-        let text="";
+        let content = "";
 
 
-        pages.forEach((page,index)=>{
+        pages.forEach((page)=>{
 
 
-            text += page.innerText;
-
-
-            if(index < pages.length-1){
-
-                text += "\n\n";
-
-            }
-
-
-        });
-
-
-        return text;
-
-    }
-
-
-
-
-
-    function close(){
-
-
-        const dialog =
-        document.getElementById(
-            "cwSaveAsDialog"
-        );
-
-
-        if(dialog){
-
-            dialog.classList.remove(
-                "active"
-            );
-
-        }
-
-
-    }
-
-
-
-
-
-    function bind(){
-
-
-        document.addEventListener(
-        "click",
-        async(e)=>{
-
-
-            const saveAsButton =
-            e.target.closest(
-                '[data-action="save-as"]'
-            );
-
-
-            if(saveAsButton){
-
-                open();
-
-            }
-
-
-
-
-
-            if(
-            e.target.id ===
-            "cwSaveAsCancel"
-            ){
-
-                close();
-
-            }
-
-
-
-
-
-            if(
-            e.target.id ===
-            "cwSaveAsConfirm"
-            ){
-
-
-                const title =
-                document
-                .getElementById(
-                    "cwSaveAsFileName"
-                )
-                .value
-                .trim();
-
-
-
-                const folder =
-                document
-                .getElementById(
-                    "cwSaveAsFolderList"
-                )
-                .value;
-
-
-
-                if(!title){
-
-                    alert(
-                    "Enter document name"
-                    );
-
-                    return;
-
-                }
-
-
-
-                await CampusWordSaveAsEngine.saveAs({
-
-                    title:title,
-
-                    content:
-                    collectContent(),
-
-                    folderId:
-                    Number(folder)
-
-                });
-
-
-
-                const titleBar =
-                document.getElementById(
-                    "cwTitle"
-                );
-
-
-                if(titleBar){
-
-                    titleBar.textContent =
-                    title +
-                    " - Campus Word 2007 Simulation";
-
-                }
-
-
-
-                close();
-
-            }
-
-
-
-
-
-            if(
-            e.target.id ===
-            "cwSaveAsNewFolder"
-            ){
-
-
-                const name =
-                prompt(
-                "Folder name"
-                );
-
-
-
-                if(name){
-
-
-                    await CampusWordFolderManager
-                    .createFolder(name);
-
-
-
-                    loadFolders();
-
-
-                }
-
-
-            }
-
-
-        });
-
-
-    }
-
-
-
-
-
-    return {
-
-        init(){
-
-            createUI();
-
-        }
-
-    };
-
-
-})();
-
-
-
-CampusWordSaveAsUI.init();
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/* =========================================================
-   CAMPUS WORD — NEW FOLDER WINDOW
-   SAVE AS FOLDER CREATION
-========================================================= */
-
-const CampusWordNewFolderUI = (() => {
-
-
-    function createBox(){
-
-
-        if(document.getElementById("cwNewFolderDialog")){
-            return;
-        }
-
-
-        const box = document.createElement("div");
-
-        box.id = "cwNewFolderDialog";
-
-
-        box.innerHTML = `
-
-            <div class="cwNewFolderBox">
-
-                <div class="cwNewFolderHeader">
-                    New Folder
-                </div>
-
-
-                <div class="cwNewFolderBody">
-
-                    <label>
-                        Folder name
-                    </label>
-
-
-                    <input 
-                    id="cwNewFolderName"
-                    type="text"
-                    placeholder="Folder name">
-
-
-                </div>
-
-
-                <div class="cwNewFolderFooter">
-
-
-                    <button id="cwNewFolderCancel">
-                        Cancel
-                    </button>
-
-
-                    <button id="cwNewFolderCreate">
-                        Create
-                    </button>
-
-
-                </div>
-
-
+            content += `
+            <div class="page">
+                ${page.innerHTML}
             </div>
-
-        `;
-
-
-        document.body.appendChild(box);
-
-
-        bindEvents();
-
-    }
-
-
-
-
-
-    function open(){
-
-
-        createBox();
-
-
-        document
-        .getElementById(
-            "cwNewFolderDialog"
-        )
-        .classList.add(
-            "active"
-        );
-
-
-        setTimeout(()=>{
-
-            document
-            .getElementById(
-                "cwNewFolderName"
-            )
-            .focus();
-
-        },100);
-
-
-    }
-
-
-
-
-
-    function close(){
-
-
-        document
-        .getElementById(
-            "cwNewFolderDialog"
-        )
-        .classList.remove(
-            "active"
-        );
-
-    }
-
-
-
-
-
-    function bindEvents(){
-
-
-        document.addEventListener(
-        "click",
-        async(e)=>{
-
-
-            if(
-            e.target.id ===
-            "cwSaveAsNewFolder"
-            ){
-
-                open();
-
-            }
-
-
-
-
-            if(
-            e.target.id ===
-            "cwNewFolderCancel"
-            ){
-
-                close();
-
-            }
-
-
-
-
-            if(
-            e.target.id ===
-            "cwNewFolderCreate"
-            ){
-
-
-                const name =
-                document
-                .getElementById(
-                    "cwNewFolderName"
-                )
-                .value
-                .trim();
-
-
-
-                if(!name){
-
-                    alert(
-                    "Enter folder name"
-                    );
-
-                    return;
-
-                }
-
-
-
-                await CampusWordFolderManager
-                .createFolder(name);
-
-
-
-                close();
-
-
-
-                if(
-                typeof CampusWordSaveAsUI !== "undefined"
-                ){
-
-                    CampusWordSaveAsUI.refreshFolders();
-
-                }
-
-
-            }
-
+            `;
 
 
         });
 
 
-    }
+
+        return `
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="UTF-8">
+
+<title>
+${this.escapeHTML(
+CampusWord2007Simulateur.state.documentName
+)}
+</title>
+
+
+<style>
+
+body{
+font-family:Arial,sans-serif;
+}
+
+.page{
+
+width:800px;
+min-height:1000px;
+margin:20px auto;
+padding:40px;
+border:1px solid #ccc;
+
+}
+
+</style>
+
+
+</head>
+
+
+<body>
+
+${content}
+
+</body>
+
+</html>
+`;
+
+
+
+},
+
+
+
+
+escapeHTML(text){
+
+return text
+.replace(/&/g,"&amp;")
+.replace(/</g,"&lt;")
+.replace(/>/g,"&gt;");
+
+},
 
 
 
 
 
-    return {
 
-        init(){
+updateTitle(name){
 
-            createBox();
 
-        }
+CampusWord2007Simulateur
+.state.documentName = name;
 
-    };
+
+
+const title =
+document.getElementById("cwTitle");
+
+
+
+if(title){
+
+title.textContent =
+name +
+" - Campus Word 2007 Simulation";
+
+}
+
+
+},
+
+
+
+
+
+
+createDialog(){
+
+
+
+const overlay =
+document.createElement("div");
+
+
+overlay.className =
+"cwSaveAsOverlay";
+
+
+
+
+
+const dialog =
+document.createElement("div");
+
+
+dialog.className =
+"cwSaveAsDialog";
+
+
+
+
+
+dialog.innerHTML = `
+
+
+<h3>
+Save As
+</h3>
+
+
+<input 
+type="text"
+class="cwSaveAsInput"
+value="${CampusWord2007Simulateur.state.documentName}"
+placeholder="Document name">
+
+
+<div class="cwSaveAsButtons">
+
+<button class="cwSaveConfirm">
+Save
+</button>
+
+
+<button class="cwSaveCancel">
+Cancel
+</button>
+
+
+</div>
+
+`;
+
+
+
+
+
+document.body.appendChild(overlay);
+
+document.body.appendChild(dialog);
+
+
+
+
+const input =
+dialog.querySelector(".cwSaveAsInput");
+
+
+
+input.focus();
+
+input.select();
+
+
+
+
+
+
+dialog
+.querySelector(".cwSaveCancel")
+.onclick = ()=>{
+
+
+dialog.remove();
+
+overlay.remove();
+
+
+};
+
+
+
+
+
+
+
+dialog
+.querySelector(".cwSaveConfirm")
+.onclick = ()=>{
+
+
+const name =
+input.value.trim();
+
+
+
+if(!name) return;
+
+
+
+this.exportHTML(name);
+
+
+
+dialog.remove();
+
+overlay.remove();
+
+
+
+};
+
+
+
+
+},
+
+
+
+
+
+
+exportHTML(name){
+
+
+
+this.updateTitle(name);
+
+
+
+const html =
+this.getDocumentHTML();
+
+
+
+const blob =
+new Blob(
+[html],
+{
+type:"text/html;charset=utf-8"
+}
+);
+
+
+
+
+const link =
+document.createElement("a");
+
+
+
+link.href =
+URL.createObjectURL(blob);
+
+
+
+link.download =
+name + ".html";
+
+
+
+document.body.appendChild(link);
+
+
+link.click();
+
+
+link.remove();
+
+
+
+
+URL.revokeObjectURL(link.href);
+
+
+
+CampusWord2007Simulateur
+.state.documentSaved = true;
+
+
+
+}
+
+
+
+
+
+
+};
+
+
+
+
+
+
+
+document.addEventListener(
+"click",
+function(e){
+
+
+const item =
+e.target.closest(".cwOfficeItem");
+
+
+
+if(!item) return;
+
+
+
+if(item.dataset.action === "save-as"){
+
+
+CampusWord2007Simulateur
+.SaveAsEngine
+.createDialog();
+
+
+}
+
+
+
+});
+
+
+
 
 
 })();
 
-
-
-CampusWordNewFolderUI.init();
 
 
 
