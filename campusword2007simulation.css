@@ -4711,609 +4711,132 @@ bottom:-6px;
 
 
 
-
-
 /* =========================================================
-   CAMPUS WORD — SAVE AS UI FOUNDATION CSS
-   STEP 1A
-
-   SAVE AS WINDOW DISPLAY
-   TOUCH + DESKTOP READY
-
-   NO STORAGE
-   NO DATABASE
-   NO SAVE LOGIC
+   CAMPUS WORD — SAVE AS WINDOW UI
+   STEP 5 CSS
 ========================================================= */
 
+#cwSaveAsDialog{
 
-#cwSaveAsWindow{
+    display:none;
 
     position:fixed;
 
     inset:0;
 
-    display:flex;
+    z-index:99999;
+
+    background:rgba(0,0,0,.35);
 
     align-items:center;
 
     justify-content:center;
 
-    background:rgba(15,23,42,.35);
-
-    z-index:100000;
-
-
 }
 
 
 
-
-.cwSaveAsDialog{
-
-    width:760px;
-
-    max-width:94%;
-
-    height:520px;
-
-    max-height:90vh;
-
-    background:white;
-
-    border-radius:14px;
-
-    box-shadow:
-    0 25px 60px rgba(0,0,0,.35);
+#cwSaveAsDialog.active{
 
     display:flex;
 
-    flex-direction:column;
-
-    overflow:hidden;
-
-
 }
 
+
+
+.cwSaveAsBox{
+
+    width:360px;
+
+    background:#ffffff;
+
+    border:1px solid #999;
+
+    border-radius:6px;
+
+    padding:15px;
+
+    box-shadow:0 8px 25px rgba(0,0,0,.3);
+
+}
 
 
 
 .cwSaveAsHeader{
 
-    height:55px;
+    font-size:16px;
 
-    display:flex;
+    font-weight:bold;
 
-    align-items:center;
+    padding-bottom:10px;
 
-    padding:0 20px;
-
-    border-bottom:1px solid #e2e8f0;
+    border-bottom:1px solid #ddd;
 
 }
-
-
-
-.cwSaveAsHeader h2{
-
-    margin:0;
-
-    font-size:22px;
-
-    font-weight:800;
-
-    color:#1e293b;
-
-}
-
-
 
 
 
 .cwSaveAsBody{
 
-    flex:1;
-
-    display:flex;
-
-    overflow:hidden;
-
-
-}
-
-
-
-
-
-.cwSaveAsFolderPanel{
-
-    width:240px;
-
-    border-right:1px solid #e2e8f0;
-
     display:flex;
 
     flex-direction:column;
 
-    padding:12px;
-
-
-}
-
-
-
-
-.cwSaveAsFolderTitle,
-.cwSaveAsDocumentTitle{
-
-    font-size:15px;
-
-    font-weight:800;
-
-    color:#334155;
-
-    margin-bottom:10px;
-
-}
-
-
-
-
-.cwSaveAsFolderList{
-
-    flex:1;
-
-    overflow-y:auto;
-
-}
-
-
-
-
-.cwSaveAsFolderItem{
-
-    display:flex;
-
-    align-items:center;
-
     gap:10px;
 
-    padding:10px;
-
-    border-radius:8px;
-
-    cursor:pointer;
-
-    user-select:none;
-
-    font-size:14px;
-
-    font-weight:600;
-
-    color:#334155;
-
+    margin-top:15px;
 
 }
 
 
 
-.cwSaveAsFolderItem:hover{
-
-    background:#eff6ff;
-
-}
-
-
-
-.cwSaveAsFolderItem.active{
-
-    background:#dbeafe;
-
-    color:#2563eb;
-
-}
-
-
-
-
-.cwSaveAsNewFolderBtn{
-
-    margin-top:10px;
-
-    padding:10px;
-
-    border:none;
-
-    border-radius:8px;
-
-    background:#2563eb;
-
-    color:white;
-
-    font-weight:800;
-
-    cursor:pointer;
-
-
-}
-
-
-
-
-
-.cwSaveAsDocumentPanel{
-
-    flex:1;
-
-    padding:12px;
-
-    display:flex;
-
-    flex-direction:column;
-
-
-}
-
-
-
-
-
-.cwSaveAsDocumentList{
-
-    flex:1;
-
-    border:1px solid #e2e8f0;
-
-    border-radius:8px;
-
-    overflow:auto;
-
-}
-
-
-
-
-
-.cwSaveAsFooter{
-
-    height:80px;
-
-    border-top:1px solid #e2e8f0;
-
-    display:flex;
-
-    align-items:center;
-
-    justify-content:space-between;
-
-    padding:12px 18px;
-
-    gap:15px;
-
-
-}
-
-
-
-
-.cwSaveAsFileName{
-
-    display:flex;
-
-    align-items:center;
-
-    gap:10px;
-
-}
-
-
-
-
-.cwSaveAsFileName label{
-
-    font-weight:700;
-
-    color:#334155;
-
-}
-
-
-
-
-.cwSaveAsNameInput{
-
-    width:220px;
-
-    padding:10px;
-
-    border:1px solid #cbd5e1;
-
-    border-radius:8px;
-
-    outline:none;
-
-    font-size:15px;
-
-
-}
-
-
-
-.cwSaveAsButtons{
-
-    display:flex;
-
-    gap:10px;
-
-}
-
-
-
-
-.cwSaveAsConfirm,
-.cwSaveAsCancel{
-
-    min-width:90px;
-
-    padding:10px 16px;
-
-    border:none;
-
-    border-radius:8px;
-
-    font-weight:800;
-
-    cursor:pointer;
-
-}
-
-
-
-
-.cwSaveAsConfirm{
-
-    background:#16a34a;
-
-    color:white;
-
-}
-
-
-
-.cwSaveAsCancel{
-
-    background:#e2e8f0;
-
-    color:#1e293b;
-
-}
-
-
-
-
-
-
-/* ANDROID / TOUCH */
-
-@media(max-width:600px){
-
-
-.cwSaveAsDialog{
-
-    width:96%;
-
-    height:85vh;
-
-}
-
-
-
-.cwSaveAsFolderPanel{
-
-    width:150px;
-
-}
-
-
-
-.cwSaveAsFooter{
-
-    flex-direction:column;
-
-    height:auto;
-
-    align-items:stretch;
-
-}
-
-
-
-.cwSaveAsFileName{
+#cwSaveAsFileName{
 
     width:100%;
 
-}
-
-
-
-.cwSaveAsNameInput{
-
-    flex:1;
-
-    width:auto;
-
-}
-
-
-
-.cwSaveAsButtons{
-
-    width:100%;
-
-}
-
-
-
-.cwSaveAsConfirm,
-.cwSaveAsCancel{
-
-    flex:1;
-
-    min-height:48px;
-
-}
-
-
-
-}
-
-
-
-
-/* =========================================================
-   CAMPUS WORD — NEW FOLDER DIALOG CSS
-   STEP 2A
-========================================================= */
-
-
-#cwNewFolderDialog{
-
-    position:fixed;
-
-    inset:0;
-
-    display:flex;
-
-    align-items:center;
-
-    justify-content:center;
-
-    background:rgba(15,23,42,.35);
-
-    z-index:100001;
-
-}
-
-
-
-
-
-.cwNewFolderBox{
-
-    width:380px;
-
-    max-width:92%;
-
-    background:white;
-
-    border-radius:14px;
-
-    overflow:hidden;
-
-    box-shadow:
-    0 25px 60px rgba(0,0,0,.35);
-
-}
-
-
-
-
-
-.cwNewFolderHeader{
-
-    padding:18px;
-
-    border-bottom:1px solid #e2e8f0;
-
-}
-
-
-
-.cwNewFolderHeader h2{
-
-    margin:0;
-
-    font-size:22px;
-
-    font-weight:800;
-
-    color:#1e293b;
-
-    text-align:center;
-
-}
-
-
-
-
-
-.cwNewFolderBody{
-
-    padding:20px;
-
-}
-
-
-
-
-
-.cwNewFolderNameInput{
-
-    width:100%;
+    padding:8px;
 
     box-sizing:border-box;
 
-    padding:12px;
+}
 
-    border:2px solid #cbd5e1;
 
-    border-radius:10px;
 
-    font-size:17px;
+#cwSaveAsFolderList{
 
-    outline:none;
+    width:100%;
+
+    padding:8px;
 
 }
 
 
 
-.cwNewFolderNameInput:focus{
+#cwSaveAsNewFolder{
 
-    border-color:#2563eb;
+    width:max-content;
 
 }
 
 
 
+.cwSaveAsFooter{
 
-
-.cwNewFolderFooter{
+    margin-top:15px;
 
     display:flex;
 
-    gap:12px;
+    justify-content:flex-end;
 
-    padding:16px;
-
-    border-top:1px solid #e2e8f0;
+    gap:10px;
 
 }
 
 
 
+.cwSaveAsFooter button{
 
-
-.cwNewFolderCreateBtn,
-.cwNewFolderCancelBtn{
-
-    flex:1;
-
-    padding:12px;
-
-    border:none;
-
-    border-radius:9px;
-
-    font-weight:800;
+    padding:6px 15px;
 
     cursor:pointer;
 
@@ -5321,49 +4844,8 @@ bottom:-6px;
 
 
 
-.cwNewFolderCreateBtn{
-
-    background:#2563eb;
-
-    color:white;
-
-}
 
 
-
-.cwNewFolderCancelBtn{
-
-    background:#e2e8f0;
-
-    color:#1e293b;
-
-}
-
-
-
-
-
-
-
-@media(max-width:600px){
-
-
-.cwNewFolderBox{
-
-    width:94%;
-
-}
-
-
-.cwNewFolderCreateBtn,
-.cwNewFolderCancelBtn{
-
-    min-height:48px;
-
-}
-
-
-}
 
 
 
