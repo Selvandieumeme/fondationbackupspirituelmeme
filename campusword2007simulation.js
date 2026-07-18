@@ -28149,34 +28149,41 @@ CampusWord2007Simulateur.OpenDialog = {
 
 
 
+<div class="cwSaveAsButtons">
 
 
-        <div class="cwSaveAsButtons">
+    <button class="cwOpenConfirm">
 
+        Open
 
-
-            <button class="cwOpenConfirm">
-
-                Open
-
-            </button>
+    </button>
 
 
 
+    <button class="cwRenameDocument">
 
+        Rename
 
-            <button class="cwOpenCancel">
-
-                Cancel
-
-            </button>
-
-
-
-        </div>
+    </button>
 
 
 
+    <button class="cwDeleteDocument">
+
+        Delete
+
+    </button>
+
+
+
+    <button class="cwOpenCancel">
+
+        Cancel
+
+    </button>
+
+
+</div>
 
         `;
 
@@ -28359,6 +28366,100 @@ CampusWord2007Simulateur.OpenDialog = {
 
 
 
+
+
+
+   dialog
+.querySelector(
+".cwRenameDocument"
+)
+.onclick = ()=>{
+
+
+if(!selectedDocument)
+return;
+
+
+
+const newName =
+prompt(
+"New document name:",
+selectedDocument.name
+);
+
+
+
+if(!newName)
+return;
+
+
+
+CampusWord2007Simulateur
+.DocumentLibrary
+.renameDocument(
+selectedDocument.id,
+newName.trim()
+);
+
+
+
+dialog.remove();
+
+overlay.remove();
+
+
+
+this.create();
+
+
+};
+
+
+
+
+
+dialog
+.querySelector(
+".cwDeleteDocument"
+)
+.onclick = ()=>{
+
+
+if(!selectedDocument)
+return;
+
+
+
+const ok =
+confirm(
+"Delete this document?"
+);
+
+
+
+if(!ok)
+return;
+
+
+
+CampusWord2007Simulateur
+.DocumentLibrary
+.deleteDocument(
+selectedDocument.id
+);
+
+
+
+dialog.remove();
+
+overlay.remove();
+
+
+
+this.create();
+
+
+};
 
 
 
