@@ -27260,6 +27260,30 @@ this.getDocumentHTML();
 
 
 
+
+/*
+   SAVE INTO DOCUMENT LIBRARY
+*/
+
+if(
+CampusWord2007Simulateur.DocumentLibrary
+){
+
+    CampusWord2007Simulateur
+    .DocumentLibrary
+    .addDocument(
+        name,
+        html
+    );
+
+}
+
+
+
+
+
+   
+
 const blob =
 new Blob(
 [html],
@@ -27354,6 +27378,1045 @@ CampusWord2007Simulateur
 
 
 })();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* =========================================================
+   CAMPUS WORD 2007 SIMULATEUR
+   DOCUMENT LIBRARY ENGINE v1.0.0
+   LOCAL DOCUMENT STORAGE FOUNDATION
+========================================================= */
+
+(function () {
+
+"use strict";
+
+
+if(!CampusWord2007Simulateur.state){
+    CampusWord2007Simulateur.state = {};
+}
+
+
+
+
+
+CampusWord2007Simulateur.DocumentLibrary = {
+
+
+
+    key:
+    "CampusWord2007_DocumentLibrary",
+
+
+
+
+
+
+    getDocuments(){
+
+
+        const data =
+        localStorage.getItem(
+            this.key
+        );
+
+
+
+        if(!data){
+
+            return [];
+
+        }
+
+
+
+        try{
+
+
+            return JSON.parse(
+                data
+            );
+
+
+        }
+        catch(error){
+
+
+            console.error(
+                "Document Library Error:",
+                error
+            );
+
+
+            return [];
+
+
+        }
+
+
+    },
+
+
+
+
+
+
+
+    saveDocuments(documents){
+
+
+        localStorage.setItem(
+            this.key,
+            JSON.stringify(
+                documents
+            )
+        );
+
+
+    },
+
+
+
+
+
+
+
+
+
+    addDocument(name,html){
+
+
+        const documents =
+        this.getDocuments();
+
+
+
+
+        const documentItem = {
+
+
+            id:
+            Date.now(),
+
+
+            name:
+            name,
+
+
+            html:
+            html,
+
+
+            created:
+            new Date()
+            .toISOString()
+
+
+
+        };
+
+
+
+
+
+        documents.push(
+            documentItem
+        );
+
+
+
+
+
+        this.saveDocuments(
+            documents
+        );
+
+
+
+        return documentItem;
+
+
+
+    },
+
+
+
+
+
+
+
+
+
+    updateDocument(id,html){
+
+
+        const documents =
+        this.getDocuments();
+
+
+
+
+        const index =
+        documents.findIndex(
+            doc =>
+            doc.id === id
+        );
+
+
+
+
+        if(index === -1){
+
+            return false;
+
+        }
+
+
+
+
+
+        documents[index].html =
+        html;
+
+
+
+
+
+        documents[index].updated =
+        new Date()
+        .toISOString();
+
+
+
+
+
+        this.saveDocuments(
+            documents
+        );
+
+
+
+        return true;
+
+
+
+    },
+
+
+
+
+
+
+
+
+
+    deleteDocument(id){
+
+
+        const documents =
+        this.getDocuments();
+
+
+
+
+        const filtered =
+        documents.filter(
+            doc =>
+            doc.id !== id
+        );
+
+
+
+
+
+        this.saveDocuments(
+            filtered
+        );
+
+
+
+    }
+
+
+
+
+
+};
+
+
+
+
+
+})();
+
+
+
+
+
+
+
+
+
+
+
+
+/* =========================================================
+   CAMPUS WORD 2007 SIMULATEUR
+   OPEN ENGINE v1.1.0
+   MULTI PAGE HTML DOCUMENT IMPORT
+========================================================= */
+
+(function () {
+
+"use strict";
+
+
+CampusWord2007Simulateur.OpenEngine = {
+
+
+
+    loadHTML(html){
+
+
+        const parser =
+        new DOMParser();
+
+
+
+        const doc =
+        parser.parseFromString(
+            html,
+            "text/html"
+        );
+
+
+
+        const savedPages =
+        doc.querySelectorAll(
+            ".page"
+        );
+
+
+
+        const workspace =
+        document.getElementById(
+            "cwDocumentContainer"
+        );
+
+
+
+        if(!workspace) return;
+
+
+
+        workspace.innerHTML = "";
+
+
+
+
+
+        /*
+           RESET PAGE STATE
+        */
+
+
+        if(
+            CampusWord2007Simulateur.state &&
+            CampusWord2007Simulateur.state.pages
+        ){
+
+            CampusWord2007Simulateur
+            .state.pages = [];
+
+        }
+
+
+
+
+
+
+        savedPages.forEach((savedPage,index)=>{
+
+
+            const newPage =
+            document.createElement("div");
+
+
+
+            newPage.className =
+            "cwPage";
+
+
+
+
+            if(index === 0){
+
+                newPage.classList.add(
+                    "active"
+                );
+
+            }
+
+
+
+
+
+            const content =
+            document.createElement("div");
+
+
+
+            content.className =
+            "cwPageContent";
+
+
+
+            content.contentEditable = true;
+
+
+
+            content.innerHTML =
+            savedPage.innerHTML;
+
+
+
+
+
+
+
+
+            /*
+              RECONNECT EDIT EVENTS
+            */
+
+
+            content.addEventListener(
+            "input",
+            ()=>{
+
+
+                requestAnimationFrame(
+                ()=>{
+
+
+                    if(
+                    CampusWord2007Simulateur
+                    .calculateWordCount
+                    ){
+
+
+                        CampusWord2007Simulateur
+                        .calculateWordCount(
+                            content.innerText
+                        );
+
+
+                    }
+
+
+
+
+
+                    if(
+                    CampusWord2007Simulateur
+                    .checkPageOverflow
+                    ){
+
+
+                        CampusWord2007Simulateur
+                        .checkPageOverflow(
+                            content
+                        );
+
+
+                    }
+
+
+
+                });
+
+
+            });
+
+
+
+
+
+
+
+            newPage.appendChild(
+                content
+            );
+
+
+
+            workspace.appendChild(
+                newPage
+            );
+
+
+
+
+
+
+
+            if(
+            CampusWord2007Simulateur.state &&
+            CampusWord2007Simulateur.state.pages
+            ){
+
+
+                CampusWord2007Simulateur
+                .state.pages
+                .push(
+                    newPage
+                );
+
+
+            }
+
+
+
+
+        });
+
+
+
+
+
+
+
+
+        /*
+          UPDATE PAGE STATUS
+        */
+
+
+        if(
+        CampusWord2007Simulateur.updatePageStatus
+        ){
+
+
+            CampusWord2007Simulateur
+            .updatePageStatus();
+
+
+        }
+
+
+
+
+
+
+
+
+        /*
+          RESTORE TITLE
+        */
+
+
+        const title =
+        document.getElementById(
+            "cwTitle"
+        );
+
+
+
+        if(title){
+
+
+            title.textContent =
+            CampusWord2007Simulateur
+            .state.documentName +
+            " - Campus Word 2007 Simulation";
+
+
+        }
+
+
+
+
+    }
+
+
+
+
+};
+
+
+
+
+
+})();
+
+
+
+
+
+
+
+
+
+
+
+/* =========================================================
+   CAMPUS WORD 2007 SIMULATEUR
+   OPEN DIALOG ENGINE v1.0.0
+   DOCUMENT LIBRARY OPEN WINDOW
+========================================================= */
+
+(function () {
+
+"use strict";
+
+
+
+CampusWord2007Simulateur.OpenDialog = {
+
+
+
+    create(){
+
+
+        const overlay =
+        document.createElement("div");
+
+
+        overlay.className =
+        "cwSaveAsOverlay";
+
+
+
+
+
+        const dialog =
+        document.createElement("div");
+
+
+        dialog.className =
+        "cwSaveAsDialog";
+
+
+
+
+
+
+
+        const documents =
+        CampusWord2007Simulateur
+        .DocumentLibrary
+        .getDocuments();
+
+
+
+
+
+
+        let listHTML = "";
+
+
+
+
+
+        documents.forEach((doc)=>{
+
+
+            listHTML += `
+
+
+            <div
+            class="cwOpenDocumentItem"
+            data-id="${doc.id}">
+
+
+                📄 ${doc.name}
+
+
+            </div>
+
+
+            `;
+
+
+
+        });
+
+
+
+
+
+
+        if(!documents.length){
+
+
+
+            listHTML = `
+
+
+            <div class="cwEmptyDocuments">
+
+                No saved documents
+
+
+            </div>
+
+
+            `;
+
+
+        }
+
+
+
+
+
+
+
+
+        dialog.innerHTML = `
+
+
+
+        <h3>
+
+            Open
+
+        </h3>
+
+
+
+
+
+        <div class="cwOpenDocumentList">
+
+
+            ${listHTML}
+
+
+        </div>
+
+
+
+
+
+
+        <div class="cwSaveAsButtons">
+
+
+
+            <button class="cwOpenConfirm">
+
+                Open
+
+            </button>
+
+
+
+
+
+            <button class="cwOpenCancel">
+
+                Cancel
+
+            </button>
+
+
+
+        </div>
+
+
+
+
+        `;
+
+
+
+
+
+
+
+        document.body.appendChild(
+            overlay
+        );
+
+
+
+        document.body.appendChild(
+            dialog
+        );
+
+
+
+
+
+
+
+
+
+        let selectedDocument = null;
+
+
+
+
+
+
+
+
+        dialog
+        .querySelectorAll(
+            ".cwOpenDocumentItem"
+        )
+        .forEach((item)=>{
+
+
+
+            item.onclick = ()=>{
+
+
+
+                const id =
+                Number(
+                    item.dataset.id
+                );
+
+
+
+
+
+                const docs =
+                CampusWord2007Simulateur
+                .DocumentLibrary
+                .getDocuments();
+
+
+
+
+
+                selectedDocument =
+                docs.find(
+                    doc =>
+                    doc.id === id
+                );
+
+
+
+
+            };
+
+
+
+        });
+
+
+
+
+
+
+
+
+
+
+        dialog
+        .querySelector(
+            ".cwOpenConfirm"
+        )
+        .onclick = ()=>{
+
+
+
+
+
+            if(selectedDocument){
+
+
+
+
+
+                CampusWord2007Simulateur
+                .OpenEngine
+                .loadHTML(
+                    selectedDocument.html
+                );
+
+
+
+
+
+
+                if(
+                CampusWord2007Simulateur.state
+                ){
+
+
+                    CampusWord2007Simulateur
+                    .state.documentName =
+                    selectedDocument.name;
+
+
+                }
+
+
+
+
+
+
+
+                const title =
+                document.getElementById(
+                    "cwTitle"
+                );
+
+
+
+
+
+                if(title){
+
+
+
+                    title.textContent =
+
+                    selectedDocument.name +
+
+                    " - Campus Word 2007 Simulation";
+
+
+
+                }
+
+
+
+
+
+            }
+
+
+
+
+
+
+
+            dialog.remove();
+
+            overlay.remove();
+
+
+
+
+
+        };
+
+
+
+
+
+
+
+
+
+        dialog
+        .querySelector(
+            ".cwOpenCancel"
+        )
+        .onclick = ()=>{
+
+
+
+            dialog.remove();
+
+            overlay.remove();
+
+
+
+        };
+
+
+
+
+
+    }
+
+
+
+
+
+};
+
+
+
+
+
+
+
+
+
+/* =========================================================
+   CONNECT OFFICE OPEN BUTTON
+========================================================= */
+
+
+document.addEventListener(
+"click",
+function(e){
+
+
+
+    const item =
+    e.target.closest(
+        ".cwOfficeItem"
+    );
+
+
+
+    if(!item) return;
+
+
+
+
+
+
+    if(
+    item.dataset.action === "open"
+    ){
+
+
+
+        CampusWord2007Simulateur
+        .OpenDialog
+        .create();
+
+
+
+    }
+
+
+
+});
+
+
+
+
+
+
+
+})();
+
+
+
+
 
 
 
