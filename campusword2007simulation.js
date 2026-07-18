@@ -26953,244 +26953,151 @@ false
 
 
 /* =========================================================
-   CAMPUS WORD — STORAGE CORE
-   STEP 1
-
-   NEW ISOLATED INDEXEDDB FOUNDATION
-
-   DATABASE:
-   CampusWordStorage
-
-   STORES:
-   folders
-   documents
-
-   NO UI
-   NO OLD SYSTEM CONNECTION
-   NO LOCAL STORAGE
-   FUTURE SAVE AS READY
+   CAMPUS WORD DOCUMENTS CORE
+   STEP 1 — IndexedDB + Folders + Documents
 ========================================================= */
 
-(function(){
+const CampusWordDocumentsCore = (() => {
 
-"use strict";
+    const DB_NAME = "CampusWordDocuments";
+    const DB_VERSION = 1;
 
+    const STORES = {
+        FOLDERS: "folders",
+        DOCUMENTS: "documents"
+    };
 
+    let db = null;
 
-const DB_NAME =
-"CampusWordStorage";
 
+    function init(){
 
-const DB_VERSION =
-1;
+        return new Promise((resolve, reject)=>{
 
+            const request = indexedDB.open(DB_NAME, DB_VERSION);
 
-const FOLDER_STORE =
-"folders";
 
+            request.onupgradeneeded = (event)=>{
 
-const DOCUMENT_STORE =
-"documents";
+                const database = event.target.result;
 
 
+                /* ===============================
+                   FOLDERS OBJECT STORE
+                =============================== */
 
+                if(!database.objectStoreNames.contains(STORES.FOLDERS)){
 
+                    const folderStore = database.createObjectStore(
+                        STORES.FOLDERS,
+                        {
+                            keyPath:"folderId",
+                            autoIncrement:true
+                        }
+                    );
 
-function openDatabase(){
 
+                    folderStore.createIndex(
+                        "folderName",
+                        "folderName",
+                        {
+                            unique:false
+                        }
+                    );
 
+                }
 
-return new Promise(function(resolve,reject){
 
 
+                /* ===============================
+                   DOCUMENTS OBJECT STORE
+                =============================== */
 
-const request =
-indexedDB.open(
-DB_NAME,
-DB_VERSION
-);
+                if(!database.objectStoreNames.contains(STORES.DOCUMENTS)){
 
+                    const documentStore = database.createObjectStore(
+                        STORES.DOCUMENTS,
+                        {
+                            keyPath:"documentId",
+                            autoIncrement:true
+                        }
+                    );
 
 
+                    /*
+                       RELATION:
+                       document.folderId
+                       points to folders.folderId
+                    */
 
+                    documentStore.createIndex(
+                        "folderId",
+                        "folderId",
+                        {
+                            unique:false
+                        }
+                    );
 
-request.onupgradeneeded =
-function(event){
 
+                    documentStore.createIndex(
+                        "title",
+                        "title",
+                        {
+                            unique:false
+                        }
+                    );
 
+                }
 
-const db =
-event.target.result;
+            };
 
 
+            request.onsuccess = (event)=>{
 
+                db = event.target.result;
 
+                console.log(
+                    "CampusWordDocuments Database Ready"
+                );
 
-if(
-!db.objectStoreNames.contains(
-FOLDER_STORE
-)
-){
+                resolve(db);
 
+            };
 
-db.createObjectStore(
-FOLDER_STORE,
-{
-keyPath:"id",
-autoIncrement:true
-}
-);
 
+            request.onerror = ()=>{
 
-}
+                reject(
+                    request.error
+                );
 
+            };
 
 
+        });
 
+    }
 
 
-if(
-!db.objectStoreNames.contains(
-DOCUMENT_STORE
-)
-){
 
+    function getDB(){
 
-const store =
-db.createObjectStore(
-DOCUMENT_STORE,
-{
-keyPath:"id",
-autoIncrement:true
-}
-);
+        return db;
 
+    }
 
 
-store.createIndex(
-"folderId",
-"folderId",
-{
-unique:false
-}
-);
 
+    return {
 
-}
+        init,
+        getDB
 
-
-
-};
-
-
-
-
-
-
-
-
-request.onsuccess =
-function(event){
-
-
-
-const db =
-event.target.result;
-
-
-
-window.CampusWordStorageCore =
-{
-db:db
-};
-
-
-
-console.log(
-"CampusWordStorage Ready"
-);
-
-
-
-resolve(db);
-
-
-
-};
-
-
-
-
-
-
-
-
-request.onerror =
-function(event){
-
-
-
-console.error(
-"CampusWordStorage Error:",
-event.target.error
-);
-
-
-
-reject(
-event.target.error
-);
-
-
-
-};
-
-
-
-
-
-});
-
-
-
-}
-
-
-
-
-
-
-
-window.CampusWordStorageCore =
-window.CampusWordStorageCore || {};
-
-
-
-
-
-window.CampusWordStorageCore.init =
-function(){
-
-
-
-return openDatabase();
-
-
-
-};
-
-
-
-
-
-
-window.CampusWordStorageCore.init();
-
-
-
+    };
 
 
 })();
+
 
 
 
@@ -27201,312 +27108,232 @@ window.CampusWordStorageCore.init();
 
 
 /* =========================================================
-   CAMPUS WORD — STORAGE CORE FOLDER MANAGER
-   STEP 2
-
-   CREATE + READ FOLDERS
-
-   COMPATIBLE WITH STEP 1
-   USES ONLY CampusWordStorageCore
-
-   NO UI
-   NO OLD SYSTEM
-   NO LOCAL STORAGE
+   CAMPUS WORD FOLDER MANAGER
+   STEP 2 — CREATE / READ / RENAME / DELETE FOLDERS
 ========================================================= */
 
-(function(){
+const CampusWordFolderManager = (() => {
 
-"use strict";
 
+    const STORE_NAME = "folders";
 
 
+    function createFolder(folderName){
 
+        return new Promise((resolve, reject)=>{
 
-const STORE =
-"folders";
 
+            const db = CampusWordDocumentsCore.getDB();
 
 
+            const transaction = db.transaction(
+                STORE_NAME,
+                "readwrite"
+            );
 
 
+            const store = transaction.objectStore(
+                STORE_NAME
+            );
 
-function getDatabase(){
 
+            const folder = {
 
+                folderName: folderName,
 
-if(
-!window.CampusWordStorageCore ||
-!window.CampusWordStorageCore.db
-){
+                createdAt: Date.now()
 
-return null;
+            };
 
-}
 
+            const request = store.add(folder);
 
 
-return (
-window.CampusWordStorageCore.db
-);
+            request.onsuccess = ()=>{
 
+                resolve(request.result);
 
+            };
 
-}
 
+            request.onerror = ()=>{
 
+                reject(request.error);
 
+            };
 
 
+        });
 
+    }
 
 
-window.CampusWordStorageCore.createFolder =
-function(folderName){
 
+    function getAllFolders(){
 
+        return new Promise((resolve, reject)=>{
 
-return new Promise(function(resolve,reject){
 
+            const db = CampusWordDocumentsCore.getDB();
 
 
-const db =
-getDatabase();
+            const transaction = db.transaction(
+                STORE_NAME,
+                "readonly"
+            );
 
 
+            const store = transaction.objectStore(
+                STORE_NAME
+            );
 
 
+            const request = store.getAll();
 
-if(!db){
 
+            request.onsuccess = ()=>{
 
+                resolve(request.result);
 
-reject(
-"Storage database not ready"
-);
+            };
 
 
+            request.onerror = ()=>{
 
-return;
+                reject(request.error);
 
-}
+            };
 
 
+        });
 
+    }
 
 
 
+    function renameFolder(folderId,newName){
 
-const transaction =
-db.transaction(
-STORE,
-"readwrite"
-);
+        return new Promise((resolve,reject)=>{
 
 
+            const db = CampusWordDocumentsCore.getDB();
 
 
+            const transaction = db.transaction(
+                STORE_NAME,
+                "readwrite"
+            );
 
-const store =
-transaction.objectStore(
-STORE
-);
 
+            const store = transaction.objectStore(
+                STORE_NAME
+            );
 
 
+            const request = store.get(folderId);
 
 
+            request.onsuccess = ()=>{
 
 
-const request =
-store.add({
+                const folder = request.result;
 
-name:
-folderName,
 
-createdAt:
-new Date().toISOString()
+                if(!folder){
 
-});
+                    reject(
+                        "Folder not found"
+                    );
 
+                    return;
 
+                }
 
 
+                folder.folderName = newName;
 
 
+                const update = store.put(folder);
 
-request.onsuccess =
-function(){
 
+                update.onsuccess = ()=>{
 
+                    resolve(true);
 
-resolve(
-request.result
-);
+                };
 
 
+            };
 
-};
 
+        });
 
+    }
 
 
 
 
-request.onerror =
-function(event){
+    function deleteFolder(folderId){
 
+        return new Promise((resolve,reject)=>{
 
 
-reject(
-event.target.error
-);
+            const db = CampusWordDocumentsCore.getDB();
 
 
+            const transaction = db.transaction(
+                STORE_NAME,
+                "readwrite"
+            );
 
-};
 
+            const store = transaction.objectStore(
+                STORE_NAME
+            );
 
 
+            const request = store.delete(folderId);
 
 
+            request.onsuccess = ()=>{
 
-});
+                resolve(true);
 
+            };
 
 
-};
+            request.onerror = ()=>{
 
+                reject(request.error);
 
+            };
 
 
+        });
 
+    }
 
 
 
 
-window.CampusWordStorageCore.getFolders =
-function(){
+    return {
 
+        createFolder,
 
+        getAllFolders,
 
-return new Promise(function(resolve,reject){
+        renameFolder,
 
+        deleteFolder
 
-
-const db =
-getDatabase();
-
-
-
-
-
-
-if(!db){
-
-
-
-reject(
-"Storage database not ready"
-);
-
-
-
-return;
-
-}
-
-
-
-
-
-
-const transaction =
-db.transaction(
-STORE,
-"readonly"
-);
-
-
-
-
-
-
-const store =
-transaction.objectStore(
-STORE
-);
-
-
-
-
-
-
-const request =
-store.getAll();
-
-
-
-
-
-
-
-request.onsuccess =
-function(){
-
-
-
-resolve(
-request.result
-);
-
-
-
-};
-
-
-
-
-
-
-request.onerror =
-function(event){
-
-
-
-reject(
-event.target.error
-);
-
-
-
-};
-
-
-
-
-
-});
-
-
-
-};
-
-
-
-
-
-
-
-console.log(
-"CampusWord Folder Core Ready"
-);
-
-
-
-
+    };
 
 
 })();
+
+
+
+
 
 
 
@@ -27516,333 +27343,133 @@ console.log(
 
 
 /* =========================================================
-   CAMPUS WORD — STORAGE CORE DOCUMENT MANAGER
-   STEP 3
-
-   CREATE + READ DOCUMENTS
-
-   COMPATIBLE WITH STEP 1 + STEP 2
-
-   USES ONLY CampusWordStorageCore
-
-   NO UI
-   NO OLD SAVE SYSTEM
-   NO LOCAL STORAGE
+   CAMPUS WORD SAVE AS ENGINE
+   STEP 3 — SAVE DOCUMENT INTO FOLDER
 ========================================================= */
 
-(function(){
+const CampusWordSaveAsEngine = (() => {
 
-"use strict";
 
+    const STORE_NAME = "documents";
 
+    const EXPIRATION_DAYS = 30;
 
 
 
-const STORE =
-"documents";
+    function saveAs({
 
+        title,
+        content,
+        folderId
 
+    }){
 
 
+        return new Promise((resolve,reject)=>{
 
 
+            const db = CampusWordDocumentsCore.getDB();
 
-function getDatabase(){
 
+            const transaction = db.transaction(
+                STORE_NAME,
+                "readwrite"
+            );
 
 
-if(
-!window.CampusWordStorageCore ||
-!window.CampusWordStorageCore.db
-){
+            const store = transaction.objectStore(
+                STORE_NAME
+            );
 
-return null;
 
-}
 
+            const now = Date.now();
 
 
-return (
-window.CampusWordStorageCore.db
-);
+            const documentData = {
 
 
+                title:title,
 
-}
 
+                content:content,
 
 
+                folderId:folderId,
 
 
+                savedAt:now,
 
 
+                expiresAt:
+                    now +
+                    (
+                        EXPIRATION_DAYS *
+                        24 *
+                        60 *
+                        60 *
+                        1000
+                    )
 
-window.CampusWordStorageCore.saveDocument =
-function(documentData){
+            };
 
 
 
-return new Promise(function(resolve,reject){
+            const request = store.add(
+                documentData
+            );
 
 
 
-const db =
-getDatabase();
+            request.onsuccess = ()=>{
 
 
+                resolve({
 
+                    success:true,
 
+                    documentId:
+                        request.result
 
-if(!db){
+                });
 
 
+            };
 
-reject(
-"Storage database not ready"
-);
 
 
+            request.onerror = ()=>{
 
-return;
 
-}
+                reject(
+                    request.error
+                );
 
 
+            };
 
 
+        });
 
 
+    }
 
-const transaction =
-db.transaction(
-STORE,
-"readwrite"
-);
 
 
 
+    return {
 
+        saveAs
 
-
-
-const store =
-transaction.objectStore(
-STORE
-);
-
-
-
-
-
-
-
-
-const request =
-store.add({
-
-name:
-documentData.name || "",
-
-
-folderId:
-documentData.folderId || null,
-
-
-pages:
-documentData.pages || [],
-
-
-createdAt:
-new Date().toISOString()
-
-
-
-});
-
-
-
-
-
-
-
-
-request.onsuccess =
-function(){
-
-
-
-resolve(
-request.result
-);
-
-
-
-};
-
-
-
-
-
-
-
-request.onerror =
-function(event){
-
-
-
-reject(
-event.target.error
-);
-
-
-
-};
-
-
-
-
-
-
-});
-
-
-
-};
-
-
-
-
-
-
-
-
-
-window.CampusWordStorageCore.getDocuments =
-function(){
-
-
-
-return new Promise(function(resolve,reject){
-
-
-
-const db =
-getDatabase();
-
-
-
-
-
-if(!db){
-
-
-
-reject(
-"Storage database not ready"
-);
-
-
-
-return;
-
-}
-
-
-
-
-
-
-const transaction =
-db.transaction(
-STORE,
-"readonly"
-);
-
-
-
-
-
-
-
-const store =
-transaction.objectStore(
-STORE
-);
-
-
-
-
-
-
-
-const request =
-store.getAll();
-
-
-
-
-
-
-
-request.onsuccess =
-function(){
-
-
-
-resolve(
-request.result
-);
-
-
-
-};
-
-
-
-
-
-
-
-request.onerror =
-function(event){
-
-
-
-reject(
-event.target.error
-);
-
-
-
-};
-
-
-
-
-
-
-});
-
-
-
-};
-
-
-
-
-
-
-
-console.log(
-"CampusWord Document Core Ready"
-);
-
-
-
-
+    };
 
 
 })();
+
+
+
+
+
 
 
 
@@ -27852,534 +27479,340 @@ console.log(
 
 
 /* =========================================================
-   CAMPUS WORD — STORAGE RELATION CORE
-   STEP 4
-
-   FOLDER + DOCUMENT RELATION LAYER
-
-   COMPATIBLE WITH:
-   STEP 1 — DATABASE CORE
-   STEP 2 — FOLDER CORE
-   STEP 3 — DOCUMENT CORE
-
-   NO UI
-   NO SAVE BUTTON
-   NO SAVE AS
-   NO OLD SYSTEM ACCESS
-   ISOLATED MODULE
+   CAMPUS WORD DOCUMENT MANAGER
+   STEP 4 — OPEN / LIST / DELETE / EXPIRATION CLEANER
 ========================================================= */
 
-(function(){
+const CampusWordDocumentManager = (() => {
 
-"use strict";
 
+    const STORE_NAME = "documents";
 
 
 
+    function getAllDocuments(){
 
-function getDatabase(){
 
+        return new Promise((resolve,reject)=>{
 
-if(
-!window.CampusWordStorageCore ||
-!window.CampusWordStorageCore.db
-){
 
-return null;
+            const db = CampusWordDocumentsCore.getDB();
 
-}
 
+            const transaction = db.transaction(
+                STORE_NAME,
+                "readonly"
+            );
 
 
-return (
-window.CampusWordStorageCore.db
-);
+            const store = transaction.objectStore(
+                STORE_NAME
+            );
 
 
+            const request = store.getAll();
 
-}
 
 
+            request.onsuccess = ()=>{
 
+                resolve(
+                    request.result
+                );
 
+            };
 
 
+            request.onerror = ()=>{
 
+                reject(
+                    request.error
+                );
 
+            };
 
-window.CampusWordStorageCore.getDocumentsByFolder =
-function(folderId){
 
+        });
 
 
-return new Promise(function(resolve,reject){
+    }
 
 
 
-const db =
-getDatabase();
 
 
+    function getDocumentsByFolder(folderId){
 
 
+        return new Promise((resolve,reject)=>{
 
-if(!db){
 
+            const db = CampusWordDocumentsCore.getDB();
 
 
-reject(
-"Storage database not ready"
-);
+            const transaction = db.transaction(
+                STORE_NAME,
+                "readonly"
+            );
 
 
+            const store = transaction.objectStore(
+                STORE_NAME
+            );
 
-return;
 
-}
+            const index = store.index(
+                "folderId"
+            );
 
 
+            const request = index.getAll(
+                folderId
+            );
 
 
 
+            request.onsuccess = ()=>{
 
 
-const transaction =
-db.transaction(
-"documents",
-"readonly"
-);
+                resolve(
+                    request.result
+                );
 
 
+            };
 
 
 
+            request.onerror = ()=>{
 
 
-const store =
-transaction.objectStore(
-"documents"
-);
+                reject(
+                    request.error
+                );
 
 
+            };
 
 
+        });
 
 
+    }
 
 
-const index =
-store.index(
-"folderId"
-);
 
 
 
+    function openDocument(documentId){
 
 
+        return new Promise((resolve,reject)=>{
 
 
+            const db = CampusWordDocumentsCore.getDB();
 
-const request =
-index.getAll(
-folderId
-);
 
+            const transaction = db.transaction(
+                STORE_NAME,
+                "readonly"
+            );
 
 
+            const store = transaction.objectStore(
+                STORE_NAME
+            );
 
 
+            const request = store.get(
+                documentId
+            );
 
 
+            request.onsuccess = ()=>{
 
-request.onsuccess =
-function(){
 
+                resolve(
+                    request.result
+                );
 
 
-resolve(
-request.result
-);
+            };
 
 
 
-};
+            request.onerror = ()=>{
 
 
+                reject(
+                    request.error
+                );
 
 
+            };
 
 
+        });
 
 
-request.onerror =
-function(event){
+    }
 
 
 
-reject(
-event.target.error
-);
 
 
+    function deleteDocument(documentId){
 
-};
 
+        return new Promise((resolve,reject)=>{
 
 
+            const db = CampusWordDocumentsCore.getDB();
 
 
+            const transaction = db.transaction(
+                STORE_NAME,
+                "readwrite"
+            );
 
-});
 
+            const store = transaction.objectStore(
+                STORE_NAME
+            );
 
 
-};
+            const request = store.delete(
+                documentId
+            );
 
 
 
+            request.onsuccess = ()=>{
 
 
+                resolve(true);
 
 
+            };
 
 
-window.CampusWordStorageCore.getFolderById =
-function(folderId){
 
+            request.onerror = ()=>{
 
 
-return new Promise(function(resolve,reject){
+                reject(
+                    request.error
+                );
 
 
+            };
 
-const db =
-getDatabase();
 
+        });
 
 
+    }
 
 
-if(!db){
 
 
 
-reject(
-"Storage database not ready"
-);
+    function cleanExpiredDocuments(){
 
 
+        return new Promise((resolve,reject)=>{
 
-return;
 
-}
+            getAllDocuments()
 
+            .then(documents=>{
 
 
+                const now = Date.now();
 
 
+                const expired = documents.filter(
+                    doc =>
+                    doc.expiresAt &&
+                    doc.expiresAt < now
+                );
 
-const transaction =
-db.transaction(
-"folders",
-"readonly"
-);
 
 
+                const db = CampusWordDocumentsCore.getDB();
 
 
 
+                const transaction = db.transaction(
+                    STORE_NAME,
+                    "readwrite"
+                );
 
-const store =
-transaction.objectStore(
-"folders"
-);
 
+                const store =
+                    transaction.objectStore(
+                        STORE_NAME
+                    );
 
 
 
+                expired.forEach(doc=>{
 
 
-const request =
-store.get(
-folderId
-);
+                    store.delete(
+                        doc.documentId
+                    );
 
 
+                });
 
 
 
+                transaction.oncomplete = ()=>{
 
 
-request.onsuccess =
-function(){
+                    resolve(
+                        expired.length
+                    );
 
 
+                };
 
-resolve(
-request.result || null
-);
 
 
+            })
 
-};
+            .catch(reject);
 
 
 
+        });
 
 
+    }
 
 
-request.onerror =
-function(event){
 
 
 
-reject(
-event.target.error
-);
+    return {
 
 
+        getAllDocuments,
 
-};
+        getDocumentsByFolder,
 
+        openDocument,
 
+        deleteDocument,
 
+        cleanExpiredDocuments
 
 
-
-});
-
-
-
-};
-
-
-
-
-
-
-
-
-console.log(
-"CampusWord Relation Core Ready"
-);
-
-
-
+    };
 
 
 })();
-
-
-
-
-
-
-
-
-
-
-
-   /* =========================================================
-   CAMPUS WORD — SAVE AS CORE BRIDGE
-   STEP 5
-
-   SAVE AS FOUNDATION LAYER
-
-   COMPATIBLE WITH:
-   STEP 1 DATABASE CORE
-   STEP 2 FOLDER CORE
-   STEP 3 DOCUMENT CORE
-   STEP 4 RELATION CORE
-
-   NO UI
-   NO CSS
-   NO BUTTON
-   NO OLD SAVE SYSTEM
-   ISOLATED MODULE
-========================================================= */
-
-(function(){
-
-"use strict";
-
-
-
-
-
-let selectedFolderId = null;
-
-
-
-
-
-
-
-
-window.CampusWordStorageCore.SaveAs = {
-
-
-
-setFolder:function(folderId){
-
-
-
-selectedFolderId =
-folderId;
-
-
-
-},
-
-
-
-
-
-
-
-getFolder:function(){
-
-
-
-return (
-selectedFolderId
-);
-
-
-
-},
-
-
-
-
-
-
-
-
-save:function(data){
-
-
-
-return new Promise(function(resolve,reject){
-
-
-
-if(!selectedFolderId){
-
-
-
-reject(
-"No Save As folder selected"
-);
-
-
-
-return;
-
-}
-
-
-
-
-
-
-
-if(
-!window.CampusWordStorageCore ||
-!window.CampusWordStorageCore.saveDocument
-){
-
-
-
-reject(
-"Document Core unavailable"
-);
-
-
-
-return;
-
-}
-
-
-
-
-
-
-
-window.CampusWordStorageCore
-.saveDocument({
-
-name:
-data.name || "Untitled",
-
-
-folderId:
-selectedFolderId,
-
-
-pages:
-data.pages || []
-
-})
-
-.then(function(id){
-
-
-
-resolve(id);
-
-
-
-})
-
-.catch(function(error){
-
-
-
-reject(error);
-
-
-
-});
-
-
-
-});
-
-
-
-}
-
-
-
-};
-
-
-
-
-
-
-
-console.log(
-"CampusWord Save As Core Ready"
-);
-
-
-
-
-
-
-})();
-
-
-
-
-
-
-
-
-
 
 
 
@@ -28397,1925 +27830,392 @@ console.log(
 
 
 /* =========================================================
-   CAMPUS WORD — SAVE AS UI FOUNDATION
-   STEP 1
-
-   CREATE SAVE AS WINDOW ONLY
-
-   INCLUDED:
-   - Save As Window
-   - Folders Panel
-   - Documents Panel
-   - File Name Area
-   - Save Button
-   - Cancel Button
-   - New Folder Button
-
-   NO INDEXEDDB
-   NO SAVE LOGIC
-   NO FOLDER CREATION LOGIC
+   CAMPUS WORD — STEP 5
+   SAVE AS UI + DOCUMENT SAVE CONNECTION
 ========================================================= */
 
-(function(){
+const CampusWordSaveAsUI = (() => {
 
-"use strict";
 
+    let currentFolderId = null;
 
-let saveAsWindow = null;
 
 
+    function createSaveAsWindow(){
 
-function createSaveAsWindow(){
 
+        if(document.getElementById("cwSaveAsDialog")){
+            return;
+        }
 
-if(saveAsWindow){
 
-return;
+        const dialog = document.createElement("div");
 
-}
+        dialog.id = "cwSaveAsDialog";
 
+        dialog.innerHTML = `
 
+        <div class="cwSaveAsBox">
 
-saveAsWindow =
-document.createElement("div");
+            <div class="cwSaveAsHeader">
+                Save As
+            </div>
 
 
-saveAsWindow.id =
-"cwSaveAsWindow";
+            <div class="cwSaveAsBody">
 
 
+                <label>
+                    File name
+                </label>
 
-saveAsWindow.innerHTML = `
 
-<div class="cwSaveAsDialog">
+                <input 
+                    id="cwSaveAsFileName"
+                    type="text"
+                    placeholder="Document name"
+                >
 
 
-<div class="cwSaveAsHeader">
+                <label>
+                    Folder
+                </label>
 
-<h2>
-Save As
-</h2>
 
-</div>
+                <select id="cwSaveAsFolderList">
+                </select>
 
 
+                <button id="cwSaveAsNewFolder">
+                    New Folder
+                </button>
 
-<div class="cwSaveAsBody">
 
+            </div>
 
 
-<div class="cwSaveAsFolderPanel">
+            <div class="cwSaveAsFooter">
 
 
-<div class="cwSaveAsFolderTitle">
-Folders
-</div>
+                <button id="cwSaveAsCancel">
+                    Cancel
+                </button>
 
 
+                <button id="cwSaveAsConfirm">
+                    Save
+                </button>
 
-<div class="cwSaveAsFolderList">
 
+            </div>
 
-<div class="cwSaveAsFolderItem"
-data-folder-id="computer">
 
-📁 My Computer
+        </div>
 
-</div>
+        `;
 
 
+        document.body.appendChild(dialog);
 
-<div class="cwSaveAsFolderItem"
-data-folder-id="documents">
 
-📁 My Documents
+        bindEvents();
 
-</div>
+    }
 
 
 
-<div class="cwSaveAsFolderItem"
-data-folder-id="desktop">
 
-📁 Desktop
 
-</div>
+    function open(){
 
 
+        createSaveAsWindow();
 
-<div class="cwSaveAsFolderItem"
-data-folder-id="storage">
 
-📁 CampusWordStorage
+        loadFolders();
 
-</div>
 
+        const dialog =
+            document.getElementById(
+                "cwSaveAsDialog"
+            );
 
 
-<div class="cwSaveAsFolderItem"
-data-folder-id="drive-e">
+        dialog.classList.add(
+            "active"
+        );
 
-📁 E:
 
-</div>
+        setTimeout(()=>{
 
+            document
+            .getElementById(
+                "cwSaveAsFileName"
+            )
+            .focus();
 
 
-<div class="cwSaveAsFolderItem"
-data-folder-id="drive-a">
+        },100);
 
-📁 A:
 
-</div>
+    }
 
 
 
-</div>
 
 
+    async function loadFolders(){
 
 
-<button
-class="cwSaveAsNewFolderBtn"
-type="button">
+        const select =
+            document.getElementById(
+                "cwSaveAsFolderList"
+            );
 
-New Folder
 
-</button>
+        if(!select) return;
 
 
+        select.innerHTML="";
 
-</div>
 
+        const folders =
+            await CampusWordFolderManager
+            .getAllFolders();
 
 
 
+        folders.forEach(folder=>{
 
 
+            const option =
+                document.createElement(
+                    "option"
+                );
 
-<div class="cwSaveAsDocumentPanel">
 
+            option.value =
+                folder.folderId;
 
-<div class="cwSaveAsDocumentTitle">
 
-Documents
+            option.textContent =
+                folder.folderName;
 
-</div>
 
+            select.appendChild(option);
 
 
-<div class="cwSaveAsDocumentList">
+        });
 
-</div>
 
 
+        if(folders.length){
 
-</div>
+            currentFolderId =
+                folders[0].folderId;
 
+        }
 
 
-</div>
+    }
 
 
 
 
 
+    function getDocumentContent(){
 
 
-<div class="cwSaveAsFooter">
+        const pages =
+            document.querySelectorAll(
+                ".cwPageContent"
+            );
 
 
-<div class="cwSaveAsFileName">
+        let content="";
 
 
-<label>
-File Name
-</label>
+        pages.forEach((page,index)=>{
 
 
-<input
-class="cwSaveAsNameInput"
-type="text"
-/>
+            content +=
+                page.innerText;
 
 
+            if(index < pages.length-1){
 
-</div>
+                content += "\n\n";
 
+            }
 
 
+        });
 
 
+        return content;
 
+    }
 
-<div class="cwSaveAsButtons">
 
 
-<button
-class="cwSaveAsConfirm"
-type="button">
 
-Save
 
-</button>
+    function bindEvents(){
 
 
+        document.addEventListener(
+        "click",
+        async(e)=>{
 
 
-<button
-class="cwSaveAsCancel"
-type="button">
+            const saveAs =
+                e.target.closest(
+                    '[data-action="save-as"]'
+                );
 
-Cancel
 
-</button>
+            if(saveAs){
 
+                open();
 
+            }
 
-</div>
 
 
 
-</div>
 
+            if(
+            e.target.id ===
+            "cwSaveAsCancel"
+            ){
 
+                close();
 
-</div>
+            }
 
-`;
 
 
 
 
-document.body.appendChild(
-saveAsWindow
-);
+            if(
+            e.target.id ===
+            "cwSaveAsConfirm"
+            ){
 
 
+                const title =
+                    document
+                    .getElementById(
+                        "cwSaveAsFileName"
+                    )
+                    .value
+                    .trim();
 
-}
 
 
+                const folder =
+                    document
+                    .getElementById(
+                        "cwSaveAsFolderList"
+                    )
+                    .value;
 
 
 
+                const content =
+                    getDocumentContent();
 
 
 
-window.CampusWordSaveAsUI = {
+                if(!title){
 
+                    alert(
+                    "Enter document name"
+                    );
 
-open:function(){
+                    return;
 
-createSaveAsWindow();
+                }
 
-},
 
 
+                await CampusWordSaveAsEngine.saveAs({
 
-close:function(){
+                    title:title,
 
+                    content:content,
 
-if(saveAsWindow){
+                    folderId:Number(folder)
 
+                });
 
-saveAsWindow.remove();
 
-saveAsWindow = null;
 
+                document
+                .getElementById(
+                    "cwTitle"
+                )
+                .textContent =
+                    title +
+                    " - Campus Word 2007 Simulation";
 
-}
 
 
-}
+                close();
 
 
+            }
 
-};
 
 
+        });
 
 
+    }
 
 
 
-document.addEventListener(
-"click",
-function(e){
 
 
+    function close(){
 
-const button =
-e.target.closest(
-'[data-action="save-as"]'
-);
 
+        const dialog =
+            document.getElementById(
+                "cwSaveAsDialog"
+            );
 
 
+        if(dialog){
 
-if(!button){
+            dialog.classList.remove(
+                "active"
+            );
 
-return;
+        }
 
-}
+    }
 
 
 
-e.preventDefault();
 
 
+    return {
 
-if(
-window.CampusWordSaveAsUI &&
-CampusWordSaveAsUI.open
-){
+        init(){
 
+            createSaveAsWindow();
 
-CampusWordSaveAsUI.open();
+        }
 
-
-}
-
-
-
-},
-false
-);
-
-
-
-
-
-
-
-document.addEventListener(
-"click",
-function(e){
-
-
-
-const button =
-e.target.closest(
-".cwSaveAsCancel"
-);
-
-
-
-
-
-if(!button){
-
-return;
-
-}
-
-
-
-
-if(
-window.CampusWordSaveAsUI &&
-CampusWordSaveAsUI.close
-){
-
-
-CampusWordSaveAsUI.close();
-
-
-}
-
-
-
-},
-false
-);
-
-
-
-
-
-
-
-console.log(
-"Campus Word Save As UI Step 1 Ready"
-);
-
+    };
 
 
 })();
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-/* =========================================================
-   CAMPUS WORD — SAVE AS CONNECTION LAYER
-   STEP 2
-
-   CONNECT ONLY
-
-   CONNECTS:
-   - Folder Selection
-   - Save Button
-   - Cancel Button
-   - New Folder Button
-
-   NO UI CREATION
-   NO CSS
-   NO OLD SYSTEM
-========================================================= */
-
-(function(){
-
-"use strict";
-
-
-
-let selectedFolderId = null;
-
-
-
-
-
-
-
-
-function connectFolderSelection(){
-
-
-
-document.addEventListener(
-"click",
-function(e){
-
-
-
-const folder =
-e.target.closest(
-".cwSaveAsFolderItem"
-);
-
-
-
-
-
-if(!folder){
-
-return;
-
-}
-
-
-
-
-
-
-
-document
-.querySelectorAll(
-".cwSaveAsFolderItem"
-)
-.forEach(function(item){
-
-
-item.classList.remove(
-"active"
-);
-
-
-});
-
-
-
-
-
-
-
-
-folder.classList.add(
-"active"
-);
-
-
-
-
-
-
-
-selectedFolderId =
-folder.dataset.folderId;
-
-
-
-
-
-
-
-console.log(
-"Selected Folder:",
-selectedFolderId
-);
-
-
-
-},
-false
-);
-
-
-
-}
-
-
-
-
-
-
-
-
-
-function connectSaveButton(){
-
-
-
-document.addEventListener(
-"click",
-function(e){
-
-
-
-const button =
-e.target.closest(
-".cwSaveAsConfirm"
-);
-
-
-
-
-
-
-if(!button){
-
-return;
-
-}
-
-
-
-
-
-
-
-
-const input =
-document.querySelector(
-".cwSaveAsNameInput"
-);
-
-
-
-
-
-
-const fileName =
-input ?
-input.value.trim()
-:
-"";
-
-
-
-
-
-
-
-if(!fileName){
-
-
-
-console.warn(
-"Document name required"
-);
-
-
-
-return;
-
-}
-
-
-
-
-
-
-
-
-console.log(
-"Save Requested:",
-{
-folder:selectedFolderId,
-name:fileName
-}
-
-);
-
-
-
-},
-false
-);
-
-
-
-}
-
-
-
-
-
-
-
-
-
-function connectCancelButton(){
-
-
-
-document.addEventListener(
-"click",
-function(e){
-
-
-
-const button =
-e.target.closest(
-".cwSaveAsCancel"
-);
-
-
-
-
-
-
-
-if(!button){
-
-return;
-
-}
-
-
-
-
-
-
-
-
-if(
-window.CampusWordSaveAsUI &&
-CampusWordSaveAsUI.close
-){
-
-
-
-CampusWordSaveAsUI.close();
-
-
-
-}
-
-
-
-},
-false
-);
-
-
-
-}
-
-
-
-
-
-
-
-
-
-function connectNewFolderButton(){
-
-
-
-document.addEventListener(
-"click",
-function(e){
-
-
-
-const button =
-e.target.closest(
-".cwSaveAsNewFolderBtn"
-);
-
-
-
-
-
-
-
-if(!button){
-
-return;
-
-}
-
-
-
-
-
-
-
-
-if(
-window.CampusWordNewFolderUI &&
-CampusWordNewFolderUI.open
-){
-
-
-
-CampusWordNewFolderUI.open();
-
-
-
-}
-
-
-
-},
-false
-);
-
-
-
-}
-
-
-
-
-
-
-
-
-
-
-connectFolderSelection();
-
-connectSaveButton();
-
-connectCancelButton();
-
-connectNewFolderButton();
-
-
-
-
-
-
-
-console.log(
-"Campus Word Save As Step 2 Connections Ready"
-);
-
-
-
-})();
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/* =========================================================
-   CAMPUS WORD — NEW FOLDER SYSTEM
-   STEP 3
-
-   CREATE NEW FOLDER DIALOG
-   CONNECT NEW FOLDER BUTTON
-
-   INCLUDED:
-   - Open New Folder Dialog
-   - Close New Folder Dialog
-   - Create Button
-   - Cancel Button
-
-   NO INDEXEDDB
-   NO SAVE LOGIC
-   NO DOCUMENT LOGIC
-========================================================= */
-
-(function(){
-
-"use strict";
-
-
-let newFolderDialog = null;
-
-
-
-
-function createNewFolderDialog(){
-
-
-if(newFolderDialog){
-
-return;
-
-}
-
-
-
-newFolderDialog =
-document.createElement("div");
-
-
-newFolderDialog.id =
-"cwNewFolderDialog";
-
-
-
-newFolderDialog.innerHTML = `
-
-<div class="cwNewFolderBox">
-
-
-<div class="cwNewFolderHeader">
-
-<h2>
-Create New Folder
-</h2>
-
-</div>
-
-
-
-<div class="cwNewFolderBody">
-
-<input
-class="cwNewFolderNameInput"
-type="text"
-placeholder="Folder name"
-/>
-
-</div>
-
-
-
-
-<div class="cwNewFolderFooter">
-
-
-<button
-class="cwNewFolderCreateBtn"
-type="button">
-
-Create
-
-</button>
-
-
-
-
-<button
-class="cwNewFolderCancelBtn"
-type="button">
-
-Cancel
-
-</button>
-
-
-
-</div>
-
-
-
-</div>
-
-`;
-
-
-
-document.body.appendChild(
-newFolderDialog
-);
-
-
-
-}
-
-
-
-
-function closeNewFolderDialog(){
-
-
-if(newFolderDialog){
-
-
-newFolderDialog.remove();
-
-newFolderDialog = null;
-
-
-}
-
-
-
-}
-
-
-
-
-
-
-
-document.addEventListener(
-"click",
-function(e){
-
-
-
-const button =
-e.target.closest(
-".cwSaveAsNewFolderBtn"
-);
-
-
-
-if(!button){
-
-return;
-
-}
-
-
-
-e.preventDefault();
-
-
-createNewFolderDialog();
-
-
-
-},
-false
-);
-
-
-
-
-
-
-
-
-document.addEventListener(
-"click",
-function(e){
-
-
-
-const button =
-e.target.closest(
-".cwNewFolderCancelBtn"
-);
-
-
-
-if(!button){
-
-return;
-
-}
-
-
-
-closeNewFolderDialog();
-
-
-
-},
-false
-);
-
-
-
-
-
-
-
-
-document.addEventListener(
-"click",
-function(e){
-
-
-
-const button =
-e.target.closest(
-".cwNewFolderCreateBtn"
-);
-
-
-
-if(!button){
-
-return;
-
-}
-
-
-
-
-
-
-const input =
-newFolderDialog.querySelector(
-".cwNewFolderNameInput"
-);
-
-
-
-   
-
-
-
-
-const folderName =
-input ?
-input.value.trim()
-:
-"";
-
-
-
-
-
-
-if(!folderName){
-
-console.warn(
-"Folder name required"
-);
-
-return;
-
-}
-
-
-
-
-
-
-console.log(
-"New Folder Created:",
-folderName
-);
-
-
-
-
-
-closeNewFolderDialog();
-
-
-
-},
-false
-);
-
-
-
-
-
-
-
-window.CampusWordNewFolderUI = {
-
-
-open:function(){
-
-createNewFolderDialog();
-
-},
-
-
-close:function(){
-
-closeNewFolderDialog();
-
-}
-
-
-};
-
-
-
-
-
-
-
-console.log(
-"Campus Word New Folder Step 3 Ready"
-);
-
-
-
-})();
-
-
-
-
-
-
-
-
-
-
- /* =========================================================
-   CAMPUS WORD — NEW FOLDER CREATE ACTION
-   STEP 4
-
-   CREATE FOLDER INSIDE ACTIVE SAVE AS FOLDER
-
-   CONNECTS:
-   - Active Folder Selection
-   - Create Button
-   - Folder List Refresh
-
-   NO INDEXEDDB
-   NO SAVE LOGIC
-========================================================= */
-
-(function(){
-
-"use strict";
-
-
-let activeFolder = null;
-
-
-
-
-
-document.addEventListener(
-"click",
-function(e){
-
-
-
-const folder =
-e.target.closest(
-".cwSaveAsFolderItem"
-);
-
-
-
-if(!folder){
-
-return;
-
-}
-
-
-
-
-document
-.querySelectorAll(
-".cwSaveAsFolderItem"
-)
-.forEach(function(item){
-
-item.classList.remove(
-"active"
-);
-
-});
-
-
-
-
-
-folder.classList.add(
-"active"
-);
-
-
-
-
-
-activeFolder =
-folder.dataset.folderId;
-
-
-
-
-
-window.CampusWordActiveFolder =
-activeFolder;
-
-
-
-
-console.log(
-"Active Folder:",
-activeFolder
-);
-
-
-
-},
-false
-);
-
-
-
-
-
-
-
-
-
-document.addEventListener(
-"click",
-function(e){
-
-
-
-const button =
-e.target.closest(
-".cwNewFolderCreateBtn"
-);
-
-
-
-if(!button){
-
-return;
-
-}
-
-
-
-
-
-const input =
-document.querySelector(
-".cwNewFolderNameInput"
-);
-
-
-
-
-
-const name =
-input ?
-input.value.trim()
-:
-"";
-
-
-
-
-
-
-if(!name){
-
-console.warn(
-"Folder name required"
-);
-
-return;
-
-}
-
-
-
-
-
-
-if(!window.CampusWordActiveFolder){
-
-
-console.warn(
-"No active folder selected"
-);
-
-
-return;
-
-}
-
-
-
-
-
-
-
-const list =
-document.querySelector(
-".cwSaveAsFolderList"
-);
-
-
-
-
-
-
-if(!list){
-
-return;
-
-}
-
-
-
-
-
-
-
-const item =
-document.createElement(
-"div"
-);
-
-
-
-
-
-
-item.className =
-"cwSaveAsFolderItem";
-
-
-
-
-
-item.dataset.folderId =
-"folder-" + Date.now();
-
-
-
-
-
-
-item.innerHTML =
-
-`
-<svg viewBox="0 0 24 24" width="20" height="20">
-<path d="M3 7h7l2 3h9v9H3z"
-fill="none"
-stroke="currentColor"
-stroke-width="2"/>
-</svg>
-
-<span>${name}</span>
-`;
-
-
-
-
-
-
-
-list.appendChild(
-item
-);
-
-
-
-
-
-
-console.log(
-"New Folder Added:",
-name,
-"Inside:",
-window.CampusWordActiveFolder
-);
-
-
-
-
-
-
-
-const dialog =
-document.querySelector(
-"#cwNewFolderDialog"
-);
-
-
-
-if(dialog){
-
-dialog.remove();
-
-}
-
-
-
-},
-false
-);
-
-
-
-
-
-
-
-console.log(
-"Campus Word New Folder Create Step 4 Ready"
-);
-
-
-
-})();
-
-
-
-
-
-
-
-
-
-
-/* =========================================================
-   CAMPUS WORD — SAVE AS FINAL BRIDGE
-   STEP 5 FINAL
-
-   CONNECTS:
-   - Save As Save Button
-   - Active Folder
-   - File Name
-   - Storage Core Document Save
-   - Documents Panel Refresh
-   - Title Bar Update
-
-   COMPATIBLE WITH:
-   STEP 1 DATABASE CORE
-   STEP 2 FOLDER CORE
-   STEP 3 DOCUMENT CORE
-   STEP 4 RELATION CORE
-
-   NO DATABASE CREATION
-   NO UI CREATION
-   NO CSS
-   NO OLD SYSTEM
-========================================================= */
-
-(function(){
-
-"use strict";
-
-
-
-function getPagesData(){
-
-
-if(
-window.CampusWord2007Simulateur &&
-CampusWord2007Simulateur.state &&
-CampusWord2007Simulateur.state.pages
-){
-
-
-return CampusWord2007Simulateur
-.state
-.pages
-.map(function(page){
-
-
-const content =
-page.querySelector(
-".cwPageContent"
-);
-
-
-return content ?
-content.innerText
-:
-"";
-
-
-});
-
-
-}
-
-
-
-return [];
-
-}
-
-
-
-
-
-
-function updateTitle(documentName){
-
-
-const title =
-document.getElementById(
-"cwTitle"
-);
-
-
-
-if(!title){
-
-return;
-
-}
-
-
-
-title.textContent =
-documentName +
-" - Campus Word 2007 Simulation";
-
-
-
-}
-
-
-
-
-
-
-function refreshDocuments(folderId){
-
-
-
-if(
-!window.CampusWordStorageCore ||
-!CampusWordStorageCore.getDocumentsByFolder
-){
-
-console.warn(
-"Relation Core unavailable"
-);
-
-
-return;
-
-}
-
-
-
-
-
-CampusWordStorageCore
-.getDocumentsByFolder(
-folderId
-)
-
-.then(function(documents){
-
-
-
-const list =
-document.querySelector(
-".cwSaveAsDocumentList"
-);
-
-
-
-if(!list){
-
-return;
-
-}
-
-
-
-list.innerHTML = "";
-
-
-
-
-
-documents.forEach(function(doc){
-
-
-
-const item =
-document.createElement("div");
-
-
-
-item.className =
-"cwSaveAsDocumentItem";
-
-
-
-item.dataset.documentId =
-doc.id;
-
-
-
-item.innerHTML =
-
-`
-📄
-<span>${doc.name}</span>
-`;
-
-
-
-list.appendChild(item);
-
-
-
-});
-
-
-
-
-
-console.log(
-"Documents Panel Updated:",
-documents
-);
-
-
-
-})
-
-.catch(function(error){
-
-
-console.error(
-"Documents Refresh Error:",
-error
-);
-
-
-});
-
-
-
-}
-
-
-
-
-
-
-
-
-document.addEventListener(
-"click",
-function(e){
-
-
-
-const button =
-e.target.closest(
-".cwSaveAsConfirm"
-);
-
-
-
-
-
-if(!button){
-
-return;
-
-}
-
-
-
-
-
-
-const input =
-document.querySelector(
-".cwSaveAsNameInput"
-);
-
-
-
-
-
-
-const name =
-input ?
-input.value.trim()
-:
-"";
-
-
-
-
-
-
-if(!name){
-
-
-
-console.warn(
-"Document name required"
-);
-
-
-
-return;
-
-}
-
-
-
-
-
-
-
-if(
-!window.CampusWordStorageCore ||
-!CampusWordStorageCore.saveDocument
-){
-
-
-
-console.error(
-"Document Core unavailable"
-);
-
-
-
-return;
-
-}
-
-
-
-
-
-
-
-const folderId =
-window.CampusWordActiveFolder;
-
-
-
-
-
-
-
-if(!folderId){
-
-
-
-console.warn(
-"No active folder selected"
-);
-
-
-
-return;
-
-}
-
-
-
-
-
-
-
-CampusWordStorageCore
-.saveDocument({
-
-name:name,
-
-folderId:folderId,
-
-pages:getPagesData()
-
-})
-
-.then(function(id){
-
-
-
-console.log(
-"Document Saved:",
-{
-id:id,
-name:name,
-folder:folderId
-}
-);
-
-
-
-
-
-updateTitle(name);
-
-
-
-
-
-
-refreshDocuments(
-folderId
-);
-
-
-
-
-
-
-if(
-window.CampusWordSaveAsUI &&
-CampusWordSaveAsUI.close
-){
-
-
-CampusWordSaveAsUI.close();
-
-
-}
-
-
-
-})
-
-.catch(function(error){
-
-
-
-console.error(
-"Save Error:",
-error
-);
-
-
-
-});
-
-
-
-
-
-
-},
-false
-);
-
-
-
-
-
-
-
-
-
-console.log(
-"Campus Word Save As Final Bridge Ready"
-);
-
-
-
-})();
+CampusWordSaveAsUI.init();
 
 
 
