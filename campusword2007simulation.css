@@ -5149,3 +5149,94 @@ bottom:-6px;
 
 
 }
+
+
+
+
+
+
+
+
+
+
+/* =========================================================
+   CAMPUS WORD 2007 SIMULATEUR
+   OPEN DIALOG BUTTON RESPONSIVE FIX
+========================================================= */
+
+
+.cwSaveAsDialog{
+
+    max-width:95vw;
+    box-sizing:border-box;
+    overflow:hidden;
+
+}
+
+
+
+.cwOpenButtons,
+.cwSaveAsButtons{
+
+    display:flex;
+
+    flex-wrap:wrap;
+
+    justify-content:center;
+
+    gap:8px;
+
+    width:100%;
+
+    box-sizing:border-box;
+
+}
+
+
+
+.cwOpenButtons button,
+.cwSaveAsButtons button{
+
+    flex:1 1 auto;
+
+    min-width:70px;
+
+    max-width:120px;
+
+    padding:7px 10px;
+
+    box-sizing:border-box;
+
+    white-space:nowrap;
+
+}
+
+
+
+
+@media(max-width:480px){
+
+
+.cwOpenButtons,
+.cwSaveAsButtons{
+
+    flex-direction:column;
+
+    align-items:stretch;
+
+}
+
+
+
+.cwOpenButtons button,
+.cwSaveAsButtons button{
+
+    width:100%;
+
+    max-width:none;
+
+}
+
+
+
+}
