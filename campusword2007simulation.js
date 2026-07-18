@@ -28226,6 +28226,243 @@ CampusWordSaveAsUI.init();
 
 
 
+/* =========================================================
+   CAMPUS WORD — NEW FOLDER WINDOW
+   SAVE AS FOLDER CREATION
+========================================================= */
+
+const CampusWordNewFolderUI = (() => {
+
+
+    function createBox(){
+
+
+        if(document.getElementById("cwNewFolderDialog")){
+            return;
+        }
+
+
+        const box = document.createElement("div");
+
+        box.id = "cwNewFolderDialog";
+
+
+        box.innerHTML = `
+
+            <div class="cwNewFolderBox">
+
+                <div class="cwNewFolderHeader">
+                    New Folder
+                </div>
+
+
+                <div class="cwNewFolderBody">
+
+                    <label>
+                        Folder name
+                    </label>
+
+
+                    <input 
+                    id="cwNewFolderName"
+                    type="text"
+                    placeholder="Folder name">
+
+
+                </div>
+
+
+                <div class="cwNewFolderFooter">
+
+
+                    <button id="cwNewFolderCancel">
+                        Cancel
+                    </button>
+
+
+                    <button id="cwNewFolderCreate">
+                        Create
+                    </button>
+
+
+                </div>
+
+
+            </div>
+
+        `;
+
+
+        document.body.appendChild(box);
+
+
+        bindEvents();
+
+    }
+
+
+
+
+
+    function open(){
+
+
+        createBox();
+
+
+        document
+        .getElementById(
+            "cwNewFolderDialog"
+        )
+        .classList.add(
+            "active"
+        );
+
+
+        setTimeout(()=>{
+
+            document
+            .getElementById(
+                "cwNewFolderName"
+            )
+            .focus();
+
+        },100);
+
+
+    }
+
+
+
+
+
+    function close(){
+
+
+        document
+        .getElementById(
+            "cwNewFolderDialog"
+        )
+        .classList.remove(
+            "active"
+        );
+
+    }
+
+
+
+
+
+    function bindEvents(){
+
+
+        document.addEventListener(
+        "click",
+        async(e)=>{
+
+
+            if(
+            e.target.id ===
+            "cwSaveAsNewFolder"
+            ){
+
+                open();
+
+            }
+
+
+
+
+            if(
+            e.target.id ===
+            "cwNewFolderCancel"
+            ){
+
+                close();
+
+            }
+
+
+
+
+            if(
+            e.target.id ===
+            "cwNewFolderCreate"
+            ){
+
+
+                const name =
+                document
+                .getElementById(
+                    "cwNewFolderName"
+                )
+                .value
+                .trim();
+
+
+
+                if(!name){
+
+                    alert(
+                    "Enter folder name"
+                    );
+
+                    return;
+
+                }
+
+
+
+                await CampusWordFolderManager
+                .createFolder(name);
+
+
+
+                close();
+
+
+
+                if(
+                typeof CampusWordSaveAsUI !== "undefined"
+                ){
+
+                    CampusWordSaveAsUI.refreshFolders();
+
+                }
+
+
+            }
+
+
+
+        });
+
+
+    }
+
+
+
+
+
+    return {
+
+        init(){
+
+            createBox();
+
+        }
+
+    };
+
+
+})();
+
+
+
+CampusWordNewFolderUI.init();
+
+
+
 
 
 
