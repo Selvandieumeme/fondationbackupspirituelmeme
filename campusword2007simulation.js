@@ -27560,12 +27560,8 @@ overlay.remove();
 
 
 
-this.exportHTML(
-    name,
-    CampusWord2007Simulateur
-    .SaveAsEngine
-    .selectedPassword || ""
-);
+this.exportHTML(name);
+    
 
 
 this.updateTitle(name);
