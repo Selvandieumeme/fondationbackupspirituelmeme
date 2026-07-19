@@ -27291,6 +27291,16 @@ optionsContent
 
 /*
 =========================================================
+PASSWORD TEMP STORAGE
+=========================================================
+*/
+
+let selectedPassword = "";
+
+   
+
+/*
+=========================================================
 PASSWORD DIALOG CONNECTION
 =========================================================
 */
@@ -27318,19 +27328,6 @@ if(passwordOption){
 
         const passwordDialog =
         document.createElement("div");
-
-
-
-/*
-=========================================================
-PASSWORD TEMP STORAGE
-=========================================================
-*/
-
-let selectedPassword = "";
-
-
-
 
 
         passwordDialog.className =
