@@ -27320,6 +27320,19 @@ if(passwordOption){
         document.createElement("div");
 
 
+
+/*
+=========================================================
+PASSWORD TEMP STORAGE
+=========================================================
+*/
+
+let selectedPassword = "";
+
+
+
+
+
         passwordDialog.className =
         "cwPasswordDialog";
 
@@ -27486,16 +27499,6 @@ dialog.querySelector(".cwSaveAsInput");
 input.focus();
 
 input.select();
-
-
-/*
-=========================================================
-PASSWORD TEMP STORAGE
-=========================================================
-*/
-
-let selectedPassword = "";
-
 
 
 
