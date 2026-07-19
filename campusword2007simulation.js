@@ -27583,7 +27583,8 @@ CampusWord2007Simulateur.DocumentLibrary
     .DocumentLibrary
     .addDocument(
         name,
-        html
+        html,
+        selectedPassword
     );
 
     CampusWord2007Simulateur
