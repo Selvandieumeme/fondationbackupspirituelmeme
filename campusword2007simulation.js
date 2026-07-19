@@ -29479,8 +29479,287 @@ function(e){
 
 
 
+/* =========================================================
+   CAMPUS WORD 2007 SIMULATEUR
+   REMOVE PASSWORD ENGINE v1.0.0
+   DOCUMENT PASSWORD MANAGEMENT
+========================================================= */
 
+(function () {
+
+"use strict";
+
+
+
+if(
+!CampusWord2007Simulateur
+){
+
+    return;
+
+}
+
+
+
+
+
+
+CampusWord2007Simulateur.RemovePasswordEngine = {
+
+
+
+    remove(){
+
+
+
+        /*
+           VERIFY CURRENT DOCUMENT
+        */
+
+        const currentId =
+        CampusWord2007Simulateur
+        .state
+        .currentDocumentId;
+
+
+
+        if(
+        !currentId
+        ){
+
+            alert(
+                "No document opened."
+            );
+
+            return;
+
+        }
+
+
+
+
+
+
+        /*
+           LOAD DOCUMENTS
+        */
+
+        const documents =
+        CampusWord2007Simulateur
+        .DocumentLibrary
+        .getDocuments();
+
+
+
+
+        const documentItem =
+        documents.find(
+            doc =>
+            doc.id === currentId
+        );
+
+
+
+
+        if(
+        !documentItem
+        ){
+
+            alert(
+                "Document not found."
+            );
+
+            return;
+
+        }
+
+
+
+
+
+
+        /*
+           VERIFY PASSWORD EXISTS
+        */
+
+        if(
+        !documentItem.password
+        ){
+
+            alert(
+                "This document has no password."
+            );
+
+            return;
+
+        }
+
+
+
+
+
+
+        /*
+           ASK CURRENT PASSWORD
+        */
+
+        const currentPassword =
+        prompt(
+            "Enter current password:"
+        );
+
+
+
+        if(
+        currentPassword !==
+        documentItem.password
+        ){
+
+            alert(
+                "Incorrect current password."
+            );
+
+            return;
+
+        }
    
+
+
+
+
+
+
+
+
+        /*
+           REMOVE PASSWORD ONLY
+        */
+
+        documentItem.password =
+        "";
+
+
+
+
+        documentItem.updated =
+        new Date()
+        .toISOString();
+
+
+
+
+
+
+        /*
+           SAVE LIBRARY
+        */
+
+        CampusWord2007Simulateur
+        .DocumentLibrary
+        .saveDocuments(
+            documents
+        );
+
+
+
+
+
+
+        alert(
+            "Password removed successfully."
+        );
+
+
+
+
+
+    }
+
+
+
+
+
+};
+
+
+
+
+
+
+
+
+/* =========================================================
+   CONNECT OFFICE MENU BUTTON
+========================================================= */
+
+
+document.addEventListener(
+"click",
+function(e){
+
+
+
+    const item =
+    e.target.closest(
+        ".cwOfficeItem"
+    );
+
+
+
+    if(!item)
+    return;
+
+
+
+
+
+
+    if(
+    item.dataset.action ===
+    "remove-password"
+    ){
+
+
+
+        CampusWord2007Simulateur
+        .RemovePasswordEngine
+        .remove();
+
+
+
+    }
+
+
+
+
+
+});
+
+
+
+
+
+
+
+})();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
