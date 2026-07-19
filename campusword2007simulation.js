@@ -27161,7 +27161,7 @@ Save As
 </h3>
 
 
-<input 
+<input
 type="text"
 class="cwSaveAsInput"
 value="${CampusWord2007Simulateur.state.documentName}"
@@ -27560,8 +27560,8 @@ overlay.remove();
 
 
 
-this.exportHTML(name);
-    
+exportHTML(name){
+
 
 
 this.updateTitle(name);
