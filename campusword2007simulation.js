@@ -27159,6 +27159,41 @@ value="${CampusWord2007Simulateur.state.documentName}"
 placeholder="Document name">
 
 
+
+
+
+
+<div class="cwSaveAsOptions">
+
+    <div class="cwSaveOptionsHeader">
+
+        <span class="cwSaveOptionsArrow">
+            ▶
+        </span>
+
+        <span class="cwSaveOptionsTitle">
+            Options
+        </span>
+
+    </div>
+
+    <div class="cwSaveOptionsContent">
+
+        <div class="cwPasswordOption">
+
+            🔒 Password...
+
+        </div>
+
+    </div>
+
+</div>
+
+
+
+
+
+   
 <div class="cwSaveAsButtons">
 
 <button class="cwSaveConfirm">
