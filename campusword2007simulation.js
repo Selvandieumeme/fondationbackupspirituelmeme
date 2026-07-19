@@ -28649,21 +28649,47 @@ CampusWord2007Simulateur.OpenDialog = {
 
 
 
-            if(selectedDocument){
+
+
+if(selectedDocument){
+
+
+    if(
+    selectedDocument.password
+    ){
+
+        const enteredPassword =
+        prompt(
+            "Enter document password:"
+        );
+
+
+        if(
+        enteredPassword !==
+        selectedDocument.password
+        ){
+
+            alert(
+                "Incorrect password"
+            );
+
+            return;
+
+        }
+
+    }
 
 
 
-
-
-                CampusWord2007Simulateur
-                .OpenEngine
-                .loadHTML(
-                    selectedDocument.html
-                );
-
+    CampusWord2007Simulateur
+    .OpenEngine
+    .loadHTML(
+        selectedDocument.html
+    );
 
 
 
+            
 
 
                 if(
