@@ -29106,6 +29106,353 @@ function(e){
 
 
 
+/* =========================================================
+   CAMPUS WORD 2007 SIMULATEUR
+   CHANGE PASSWORD ENGINE v1.0.0
+   DOCUMENT PASSWORD MANAGEMENT
+========================================================= */
+
+(function () {
+
+"use strict";
+
+
+
+if(
+!window.CampusWord2007Simulateur
+){
+
+    return;
+
+}
+
+
+
+
+
+
+CampusWord2007Simulateur.ChangePasswordEngine = {
+
+
+
+    change(){
+
+
+
+        /*
+           VERIFY CURRENT DOCUMENT
+        */
+
+
+        const currentId =
+        CampusWord2007Simulateur
+        .state
+        .currentDocumentId;
+
+
+
+        if(
+        !currentId
+        ){
+
+            alert(
+                "No document opened."
+            );
+
+            return;
+
+        }
+
+
+
+
+
+
+
+        /*
+           LOAD DOCUMENTS
+        */
+
+
+        const documents =
+        CampusWord2007Simulateur
+        .DocumentLibrary
+        .getDocuments();
+
+
+
+
+
+        const documentItem =
+        documents.find(
+            doc =>
+            doc.id === currentId
+        );
+
+
+
+
+
+
+        if(
+        !documentItem
+        ){
+
+            alert(
+                "Document not found."
+            );
+
+            return;
+
+        }
+
+
+
+
+
+
+
+
+        /*
+           ASK OLD PASSWORD
+        */
+
+
+        if(
+        documentItem.password
+        ){
+
+
+            const oldPassword =
+            prompt(
+                "Enter current password:"
+            );
+
+
+
+            if(
+            oldPassword !==
+            documentItem.password
+            ){
+
+
+                alert(
+                    "Incorrect current password."
+                );
+
+
+                return;
+
+
+            }
+
+
+        }
+
+
+
+
+
+
+
+        /*
+           NEW PASSWORD
+        */
+
+
+        const newPassword =
+        prompt(
+            "Enter new password:"
+        );
+
+
+
+
+
+        if(
+        !newPassword
+        ){
+
+            return;
+
+        }
+
+
+
+
+
+
+
+        const confirmPassword =
+        prompt(
+            "Confirm new password:"
+        );
+
+
+
+
+
+
+
+        if(
+        newPassword !==
+        confirmPassword
+        ){
+
+
+            alert(
+                "Passwords do not match."
+            );
+
+
+            return;
+
+
+        }
+
+
+
+
+
+
+
+
+        /*
+           UPDATE ONLY PASSWORD
+        */
+
+
+        documentItem.password =
+        newPassword;
+
+
+
+
+
+
+
+        documentItem.updated =
+        new Date()
+        .toISOString();
+
+
+
+
+
+
+
+        /*
+           SAVE LIBRARY
+        */
+
+
+        CampusWord2007Simulateur
+        .DocumentLibrary
+        .saveDocuments(
+            documents
+        );
+
+
+
+
+
+
+
+
+        alert(
+            "Password changed successfully."
+        );
+
+
+
+
+
+    }
+
+
+
+
+
+};
+
+
+
+
+
+
+
+/* =========================================================
+   CONNECT OFFICE MENU BUTTON
+========================================================= */
+
+
+document.addEventListener(
+"click",
+function(e){
+
+
+
+    const item =
+    e.target.closest(
+        ".cwOfficeItem"
+    );
+
+
+
+    if(!item)
+    return;
+
+
+
+
+
+
+    if(
+    item.dataset.action ===
+    "change-password"
+    ){
+
+
+
+        CampusWord2007Simulateur
+        .ChangePasswordEngine
+        .change();
+
+
+
+    }
+
+
+
+
+
+});
+
+
+
+
+
+})();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
