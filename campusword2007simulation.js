@@ -27221,6 +27221,74 @@ document.body.appendChild(dialog);
 
 
 
+
+
+/*
+=========================================================
+SAVE AS OPTIONS
+=========================================================
+*/
+
+const optionsHeader =
+dialog.querySelector(
+".cwSaveOptionsHeader"
+);
+
+const optionsArrow =
+dialog.querySelector(
+".cwSaveOptionsArrow"
+);
+
+const optionsContent =
+dialog.querySelector(
+".cwSaveOptionsContent"
+);
+
+if(
+optionsHeader &&
+optionsArrow &&
+optionsContent
+){
+
+    optionsContent.style.display =
+    "none";
+
+    optionsHeader.onclick = ()=>{
+
+        const opened =
+        optionsContent.style.display ===
+        "block";
+
+        if(opened){
+
+            optionsContent.style.display =
+            "none";
+
+            optionsArrow.textContent =
+            "▶";
+
+        }
+        else{
+
+            optionsContent.style.display =
+            "block";
+
+            optionsArrow.textContent =
+            "▼";
+
+        }
+
+    };
+
+}
+
+
+
+
+
+
+
+   
 const input =
 dialog.querySelector(".cwSaveAsInput");
 
