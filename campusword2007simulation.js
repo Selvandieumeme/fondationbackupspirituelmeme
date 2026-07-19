@@ -27836,7 +27836,7 @@ CampusWord2007Simulateur.DocumentLibrary = {
 
 
 
-   addDocument(name,html){
+   addDocument(name,html,password){
 
     const documents =
     this.getDocuments();
@@ -27894,6 +27894,9 @@ CampusWord2007Simulateur.DocumentLibrary = {
 
         html:
         html,
+       
+       password:
+        password,
 
         created:
         new Date()
