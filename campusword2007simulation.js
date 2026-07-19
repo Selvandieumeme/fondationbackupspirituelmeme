@@ -27616,7 +27616,7 @@ CampusWord2007Simulateur.DocumentLibrary = {
 
     return documentItem;
 
-}
+},
 
 
 
