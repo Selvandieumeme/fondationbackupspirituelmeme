@@ -27460,7 +27460,7 @@ if(passwordOption){
 
             }
 
-
+         selectedPassword = pass; 
 
             passwordDialog.remove();
 
