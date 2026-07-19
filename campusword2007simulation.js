@@ -28708,6 +28708,15 @@ if(selectedDocument){
                     selectedDocument.name;
 
 
+
+                  CampusWord2007Simulateur 
+                  .state.currentDocumentId = 
+                  selectedDocument.id;
+
+                  CampusWord2007Simulateur 
+                  .state.currentDocumentIsNew = 
+                  false; 
+                   
                 }
 
 
