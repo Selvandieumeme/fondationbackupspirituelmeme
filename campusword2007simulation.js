@@ -29118,13 +29118,20 @@ function(e){
 
 
 
+
+
+
 if(
-!window.CampusWord2007Simulateur
+!CampusWord2007Simulateur
 ){
 
     return;
 
 }
+
+
+
+
 
 
 
