@@ -26986,6 +26986,13 @@ CampusWord2007Simulateur.state.documentSaved = false;
 
 
 
+CampusWord2007Simulateur.state.currentDocumentId =
+null;
+
+CampusWord2007Simulateur.state.currentDocumentIsNew =
+true;
+   
+
 CampusWord2007Simulateur.SaveAsEngine = {
 
 
@@ -27265,9 +27272,12 @@ this.getDocumentHTML();
    SAVE INTO DOCUMENT LIBRARY
 */
 
+
 if(
 CampusWord2007Simulateur.DocumentLibrary
 ){
+
+    const savedDocument =
 
     CampusWord2007Simulateur
     .DocumentLibrary
@@ -27276,8 +27286,15 @@ CampusWord2007Simulateur.DocumentLibrary
         html
     );
 
-}
+    CampusWord2007Simulateur
+    .state.currentDocumentId =
+    savedDocument.id;
 
+    CampusWord2007Simulateur
+    .state.currentDocumentIsNew =
+    false;
+
+}
 
 
 
@@ -28552,6 +28569,159 @@ function(e){
 
 
 })();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* =========================================================
+   CAMPUS WORD 2007 SIMULATEUR
+   SAVE ENGINE v1.0.0
+   UPDATE CURRENT DOCUMENT
+========================================================= */
+
+(function () {
+
+"use strict";
+
+
+CampusWord2007Simulateur.SaveEngine = {
+
+
+    save(){
+
+
+        if(
+            !CampusWord2007Simulateur.state
+        ){
+            return;
+        }
+
+
+
+        /*
+           SI DOKIMAN AN PA JANM SOVE
+           -> OUVRI SAVE AS
+        */
+
+        if(
+
+            CampusWord2007Simulateur
+            .state.currentDocumentId === null
+
+        ){
+
+            CampusWord2007Simulateur
+            .SaveAsEngine
+            .createDialog();
+
+            return;
+
+        }
+
+
+
+        /*
+           REKIPERE HTML DOKIMAN AN
+        */
+
+        const html =
+        CampusWord2007Simulateur
+        .SaveAsEngine
+        .getDocumentHTML();
+
+
+
+
+        /*
+           METE AJOU DOKIMAN KI DEJA EGZISTE
+        */
+
+        const updated =
+
+        CampusWord2007Simulateur
+        .DocumentLibrary
+        .updateDocument(
+
+            CampusWord2007Simulateur
+            .state.currentDocumentId,
+
+            html
+
+        );
+
+
+
+
+        if(updated){
+
+            CampusWord2007Simulateur
+            .state.documentSaved = true;
+
+            console.log(
+                "Document updated successfully."
+            );
+
+        }
+
+
+    }
+
+
+};
+
+
+
+
+
+/* =========================================================
+   OFFICE SAVE BUTTON
+========================================================= */
+
+document.addEventListener(
+"click",
+function(e){
+
+
+    const item =
+    e.target.closest(
+        ".cwOfficeItem"
+    );
+
+
+    if(!item) return;
+
+
+
+    if(
+        item.dataset.action === "save"
+    ){
+
+        CampusWord2007Simulateur
+        .SaveEngine
+        .save();
+
+    }
+
+
+});
+
+
+})();
+
+
+
+
+
 
 
 
