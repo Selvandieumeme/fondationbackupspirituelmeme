@@ -27288,6 +27288,195 @@ optionsContent
 
 
 
+
+/*
+=========================================================
+PASSWORD DIALOG CONNECTION
+=========================================================
+*/
+
+const passwordOption =
+dialog.querySelector(
+".cwPasswordOption"
+);
+
+
+if(passwordOption){
+
+
+    passwordOption.onclick = ()=>{
+
+
+        const passwordOverlay =
+        document.createElement("div");
+
+
+        passwordOverlay.className =
+        "cwPasswordOverlay";
+
+
+
+        const passwordDialog =
+        document.createElement("div");
+
+
+        passwordDialog.className =
+        "cwPasswordDialog";
+
+
+
+        passwordDialog.innerHTML = `
+
+
+        <h3>
+            Password
+        </h3>
+
+
+
+        <label>
+            Password
+        </label>
+
+
+        <input
+        type="password"
+        class="cwPasswordInput"
+        placeholder="Enter password">
+
+
+
+        <label>
+            Confirm password
+        </label>
+
+
+        <input
+        type="password"
+        class="cwPasswordConfirmInput"
+        placeholder="Confirm password">
+
+
+
+
+
+        <div class="cwPasswordButtons">
+
+
+            <button class="cwPasswordOK">
+
+                OK
+
+            </button>
+
+
+
+            <button class="cwPasswordCancel">
+
+                Cancel
+
+            </button>
+
+
+        </div>
+
+
+        `;
+
+
+
+        document.body.appendChild(
+            passwordOverlay
+        );
+
+
+        document.body.appendChild(
+            passwordDialog
+        );
+
+
+
+
+
+        passwordDialog
+        .querySelector(
+            ".cwPasswordCancel"
+        )
+        .onclick = ()=>{
+
+
+            passwordDialog.remove();
+
+            passwordOverlay.remove();
+
+
+        };
+
+
+
+
+
+        passwordDialog
+        .querySelector(
+            ".cwPasswordOK"
+        )
+        .onclick = ()=>{
+
+
+            const pass =
+            passwordDialog.querySelector(
+            ".cwPasswordInput"
+            ).value;
+
+
+
+            const confirm =
+            passwordDialog.querySelector(
+            ".cwPasswordConfirmInput"
+            ).value;
+
+
+
+
+            if(
+            pass !== confirm
+            ){
+
+                alert(
+                "Passwords do not match"
+                );
+
+                return;
+
+            }
+
+
+
+            passwordDialog.remove();
+
+            passwordOverlay.remove();
+
+
+
+            alert(
+            "Password created successfully"
+            );
+
+
+
+        };
+
+
+
+    };
+
+
+}
+
+
+
+
+
    
 const input =
 dialog.querySelector(".cwSaveAsInput");
