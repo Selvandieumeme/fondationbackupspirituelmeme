@@ -26981,6 +26981,9 @@ if (!CampusWord2007Simulateur.state) return;
 
 
 
+
+   
+
 CampusWord2007Simulateur.state.documentName = "Document1";
 CampusWord2007Simulateur.state.documentSaved = false;
 
@@ -26995,7 +26998,13 @@ true;
 
 CampusWord2007Simulateur.SaveAsEngine = {
 
+/*
+=========================================================
+PASSWORD TEMP STORAGE
+=========================================================
+*/
 
+let selectedPassword = "";
 
     getDocumentHTML(){
 
@@ -27289,13 +27298,7 @@ optionsContent
 
 
 
-/*
-=========================================================
-PASSWORD TEMP STORAGE
-=========================================================
-*/
 
-let selectedPassword = "";
 
    
 
@@ -27460,7 +27463,10 @@ if(passwordOption){
 
             }
 
-         selectedPassword = pass; 
+         CampusWord2007Simulateur
+         .SaveAsEngine
+         .selectedPassword = pass;
+           
 
             passwordDialog.remove();
 
@@ -27584,7 +27590,7 @@ CampusWord2007Simulateur.DocumentLibrary
     .addDocument(
         name,
         html,
-        selectedPassword
+        this.selectedPassword
     );
 
     CampusWord2007Simulateur
