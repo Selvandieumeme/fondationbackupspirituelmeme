@@ -27411,6 +27411,30 @@ CampusWord2007Simulateur
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 /* =========================================================
    CAMPUS WORD 2007 SIMULATEUR
    DOCUMENT LIBRARY ENGINE v1.0.0
@@ -27511,68 +27535,88 @@ CampusWord2007Simulateur.DocumentLibrary = {
 
 
 
+   addDocument(name,html){
 
-
-    addDocument(name,html){
-
-
-        const documents =
-        this.getDocuments();
+    const documents =
+    this.getDocuments();
 
 
 
+    /*
+       CHECK SAME DOCUMENT NAME
+    */
 
-        const documentItem = {
+    const existing =
+    documents.find(
+        doc =>
 
-
-            id:
-            Date.now(),
-
-
-            name:
-            name,
-
-
-            html:
-            html,
-
-
-            created:
-            new Date()
-            .toISOString()
+        doc.name.trim().toLowerCase() ===
+        name.trim().toLowerCase()
+    );
 
 
 
-        };
+    /*
+       UPDATE EXISTING DOCUMENT
+    */
 
+    if(existing){
 
+        existing.html =
+        html;
 
-
-
-        documents.push(
-            documentItem
-        );
-
-
-
-
+        existing.updated =
+        new Date()
+        .toISOString();
 
         this.saveDocuments(
             documents
         );
 
+        return existing;
 
-
-        return documentItem;
-
-
-
-    },
+    }
 
 
 
+    /*
+       CREATE NEW DOCUMENT
+    */
+
+    const documentItem = {
+
+        id:
+        Date.now(),
+
+        name:
+        name,
+
+        html:
+        html,
+
+        created:
+        new Date()
+        .toISOString()
+
+    };
 
 
+
+    documents.push(
+        documentItem
+    );
+
+
+
+    this.saveDocuments(
+        documents
+    );
+
+
+
+    return documentItem;
+
+}
 
 
 
