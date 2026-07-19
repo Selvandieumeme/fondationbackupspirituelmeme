@@ -27004,7 +27004,7 @@ PASSWORD TEMP STORAGE
 =========================================================
 */
 
-let selectedPassword = "";
+selectedPassword = "",
 
     getDocumentHTML(){
 
