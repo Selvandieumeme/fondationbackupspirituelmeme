@@ -28424,7 +28424,7 @@ CampusWord2007Simulateur.OpenDialog = {
         .getDocuments();
 
 
-
+console.log(documents);
 
 
 
