@@ -29957,6 +29957,294 @@ function(e){
 
 
 
+/* =========================================================
+   CAMPUS WORD 2007 SIMULATEUR
+   SHARE ENGINE v1.0.0
+   DOCUMENT SHARING FOUNDATION
+========================================================= */
+
+(function () {
+
+"use strict";
+
+
+
+
+
+if(
+!CampusWord2007Simulateur
+){
+
+    return;
+
+}
+
+
+
+
+
+
+
+CampusWord2007Simulateur.ShareEngine = {
+
+
+
+    share(){
+
+
+
+        /*
+           VERIFY CURRENT DOCUMENT
+        */
+
+
+        if(
+        !CampusWord2007Simulateur.state
+        ){
+
+            alert(
+                "No document available."
+            );
+
+            return;
+
+        }
+
+
+
+
+
+
+        const currentId =
+        CampusWord2007Simulateur
+        .state
+        .currentDocumentId;
+
+
+
+
+
+
+        if(
+        !currentId
+        ){
+
+            alert(
+                "No document opened."
+            );
+
+            return;
+
+        }
+
+
+
+
+
+
+
+        /*
+           LOAD DOCUMENT INFORMATION
+        */
+
+
+        const documents =
+        CampusWord2007Simulateur
+        .DocumentLibrary
+        .getDocuments();
+
+
+
+
+
+
+        const documentItem =
+        documents.find(
+            doc =>
+            doc.id === currentId
+        );
+
+
+
+
+
+
+
+        if(
+        !documentItem
+        ){
+
+            alert(
+                "Document not found."
+            );
+
+            return;
+
+        }
+
+
+
+
+
+
+
+
+        /*
+           PREPARE SHARE MESSAGE
+        */
+
+
+        const shareText =
+
+        documentItem.name +
+
+        " - Created with Campus Word 2007 Simulation";
+
+
+
+
+
+
+
+
+        /*
+           USE DEVICE SHARE IF AVAILABLE
+        */
+
+
+        if(
+        navigator.share
+        ){
+
+
+
+            navigator.share({
+
+                title:
+                documentItem.name,
+
+                text:
+                shareText
+
+            })
+
+            .catch(
+                error =>
+                console.log(
+                    "Share cancelled:",
+                    error
+                )
+            );
+
+
+
+        }
+
+
+
+
+
+
+    }
+
+
+
+
+
+};
+
+
+
+
+
+
+
+
+/* =========================================================
+   CONNECT OFFICE SHARE BUTTON
+========================================================= */
+
+
+document.addEventListener(
+"click",
+function(e){
+
+
+
+    const item =
+    e.target.closest(
+        ".cwOfficeItem"
+    );
+
+
+
+    if(!item)
+    return;
+
+
+
+
+
+
+
+    if(
+    item.dataset.action ===
+    "share"
+    ){
+
+
+
+        CampusWord2007Simulateur
+        .ShareEngine
+        .share();
+
+
+
+    }
+
+
+
+
+
+});
+
+
+
+
+
+
+
+})();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
