@@ -30233,6 +30233,529 @@ function(e){
 
 
 
+/* =========================================================
+   CAMPUS WORD 2007 SIMULATEUR
+   EXPORT ENGINE v1.0.0
+   HTML DOCUMENT EXPORT FOUNDATION
+========================================================= */
+
+(function () {
+
+"use strict";
+
+
+
+
+
+if(
+!CampusWord2007Simulateur
+){
+
+    return;
+
+}
+
+
+
+
+
+
+
+CampusWord2007Simulateur.ExportEngine = {
+
+
+
+    exportHTML(){
+
+
+
+        /*
+           VERIFY CURRENT DOCUMENT
+        */
+
+
+        if(
+        !CampusWord2007Simulateur.state
+        ){
+
+            alert(
+                "No document available."
+            );
+
+            return;
+
+        }
+
+
+
+
+
+
+
+        const currentId =
+        CampusWord2007Simulateur
+        .state
+        .currentDocumentId;
+
+
+
+
+
+
+        if(
+        !currentId
+        ){
+
+            alert(
+                "No document opened."
+            );
+
+            return;
+
+        }
+
+
+
+
+
+
+
+        /*
+           GET DOCUMENT HTML
+        */
+
+
+        if(
+        !CampusWord2007Simulateur
+        .SaveAsEngine
+        ){
+
+            alert(
+                "Export system unavailable."
+            );
+
+            return;
+
+        }
+
+
+
+
+
+
+
+        const html =
+        CampusWord2007Simulateur
+        .SaveAsEngine
+        .getDocumentHTML();
+
+
+
+
+
+
+
+        /*
+           GET DOCUMENT NAME
+        */
+
+
+        let fileName =
+        CampusWord2007Simulateur
+        .state
+        .documentName ||
+        "Document1";
+
+
+
+
+
+
+        fileName =
+        fileName.replace(
+            /[^a-z0-9-_]/gi,
+            "_"
+        );
+
+
+
+
+
+
+
+        /*
+           CREATE EXPORT FILE
+        */
+
+
+        const blob =
+        new Blob(
+            [html],
+            {
+                type:
+                "text/html;charset=utf-8"
+            }
+        );
+
+
+
+
+
+
+
+        const link =
+        document.createElement(
+            "a"
+        );
+
+
+
+
+
+        link.href =
+        URL.createObjectURL(
+            blob
+        );
+
+
+
+
+
+
+        link.download =
+        fileName +
+        ".html";
+
+
+
+
+
+
+        document.body.appendChild(
+            link
+        );
+
+
+
+
+
+
+        link.click();
+
+
+
+
+
+
+        link.remove();
+
+
+
+
+
+
+        URL.revokeObjectURL(
+            link.href
+        );
+
+
+
+
+
+
+        alert(
+            "Document exported successfully."
+        );
+
+
+
+
+    }
+
+
+
+
+
+};
+
+
+
+
+/* =========================================================
+   CAMPUS WORD 2007 SIMULATEUR
+   EXPORT ENGINE v1.0.0
+   HTML DOCUMENT EXPORT FOUNDATION
+========================================================= */
+
+(function () {
+
+"use strict";
+
+
+
+
+
+if(
+!CampusWord2007Simulateur
+){
+
+    return;
+
+}
+
+
+
+
+
+
+
+CampusWord2007Simulateur.ExportEngine = {
+
+
+
+    exportHTML(){
+
+
+
+        /*
+           VERIFY CURRENT DOCUMENT
+        */
+
+
+        if(
+        !CampusWord2007Simulateur.state
+        ){
+
+            alert(
+                "No document available."
+            );
+
+            return;
+
+        }
+
+
+
+
+
+
+
+        const currentId =
+        CampusWord2007Simulateur
+        .state
+        .currentDocumentId;
+
+
+
+
+
+
+        if(
+        !currentId
+        ){
+
+            alert(
+                "No document opened."
+            );
+
+            return;
+
+        }
+
+
+
+
+
+
+
+        /*
+           GET DOCUMENT HTML
+        */
+
+
+        if(
+        !CampusWord2007Simulateur
+        .SaveAsEngine
+        ){
+
+            alert(
+                "Export system unavailable."
+            );
+
+            return;
+
+        }
+
+
+
+
+
+
+
+        const html =
+        CampusWord2007Simulateur
+        .SaveAsEngine
+        .getDocumentHTML();
+
+
+
+
+
+
+
+        /*
+           GET DOCUMENT NAME
+        */
+
+
+        let fileName =
+        CampusWord2007Simulateur
+        .state
+        .documentName ||
+        "Document1";
+
+
+
+
+
+
+        fileName =
+        fileName.replace(
+            /[^a-z0-9-_]/gi,
+            "_"
+        );
+
+
+
+
+
+
+
+        /*
+           CREATE EXPORT FILE
+        */
+
+
+        const blob =
+        new Blob(
+            [html],
+            {
+                type:
+                "text/html;charset=utf-8"
+            }
+        );
+
+
+
+
+
+
+
+        const link =
+        document.createElement(
+            "a"
+        );
+
+
+
+
+
+        link.href =
+        URL.createObjectURL(
+            blob
+        );
+
+
+
+
+
+
+        link.download =
+        fileName +
+        ".html";
+
+
+
+
+
+
+        document.body.appendChild(
+            link
+        );
+
+
+
+
+
+
+        link.click();
+
+
+
+
+
+
+        link.remove();
+
+
+
+
+
+
+        URL.revokeObjectURL(
+            link.href
+        );
+
+
+
+
+
+
+        alert(
+            "Document exported successfully."
+        );
+
+
+
+
+    }
+
+
+
+
+
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
