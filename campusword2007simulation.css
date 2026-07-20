@@ -5917,10 +5917,8 @@ bottom:-6px;
 
 
 
-
 /* =========================================================
-   PRINT PREVIEW SCALE FIX
-   FIT DOCUMENT INSIDE PREVIEW PAGE
+   PRINT PREVIEW SAFE FIT FIX
    ADD ONLY
 ========================================================= */
 
@@ -5929,7 +5927,11 @@ bottom:-6px;
 
     overflow:hidden;
 
-    position:relative;
+    display:flex;
+
+    align-items:flex-start;
+
+    justify-content:center;
 
 }
 
@@ -5939,54 +5941,39 @@ bottom:-6px;
 
 .cwPrintPreviewPage{
 
+    width:130px;
+
+    height:180px;
+
     overflow:hidden;
 
     box-sizing:border-box;
 
-    padding:12px;
+    padding:8px;
+
+    background:white;
+
+}
+
+
+
+
+
+.cwPrintPreviewPage > *{
+
+    transform:scale(0.30);
 
     transform-origin:top left;
 
-}
-
-
-
-
-
-.cwPrintPreviewPage .cwPageContent{
-
-    transform:scale(0.35);
-
-    transform-origin:top left;
-
-    width:285% !important;
+    width:333%;
 
 }
 
 
 
 
+.cwPrintPreviewPage *{
 
-.cwPrintPreviewPage .cwPageContent *{
-
-    max-width:100%;
-
-}
-
-
-
-
-
-@media(max-width:700px){
-
-
-    .cwPrintPreviewPage .cwPageContent{
-
-        transform:scale(0.25);
-
-        width:400% !important;
-
-    }
-
+    max-width:none;
 
 }
