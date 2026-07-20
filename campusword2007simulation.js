@@ -31071,7 +31071,218 @@ function(e){
 
 });
 
-   
+
+
+/* =========================================================
+   CAMPUS WORD 2007 SIMULATEUR
+   PRINT ENGINE v1.0.0
+   PRINT PREVIEW CONNECTOR
+========================================================= */
+
+
+
+CampusWord2007Simulateur.PrintEngine.updatePreview = function(){
+
+
+
+    const dialog =
+    document.getElementById(
+        "cwPrintDialog"
+    );
+
+
+
+    if(!dialog){
+
+        return;
+
+    }
+
+
+
+
+
+
+
+    const previewPage =
+    dialog.querySelector(
+        ".cwPrintPreviewPage"
+    );
+
+
+
+    if(!previewPage){
+
+        return;
+
+    }
+
+
+
+
+
+
+
+
+    /*
+       CLEAR OLD PREVIEW
+    */
+
+
+    previewPage.innerHTML = "";
+
+
+
+
+
+
+
+
+    /*
+       FIND DOCUMENT CONTENT
+    */
+
+
+    const pages =
+    document.querySelectorAll(
+        ".cwPageContent"
+    );
+
+
+
+
+
+    if(!pages.length){
+
+
+        previewPage.textContent =
+        "No document content";
+
+
+        return;
+
+
+    }
+
+
+
+
+
+
+
+
+
+    /*
+       CLONE CURRENT DOCUMENT CONTENT
+       WITHOUT TOUCHING ORIGINAL PAGE
+    */
+
+
+    pages.forEach((page)=>{
+
+
+        const clone =
+        page.cloneNode(true);
+
+
+
+
+        clone.removeAttribute(
+            "contenteditable"
+        );
+
+
+
+
+        clone.style.width =
+        "100%";
+
+
+
+        clone.style.minHeight =
+        "auto";
+
+
+
+        clone.style.padding =
+        "0";
+
+
+
+        clone.style.margin =
+        "0";
+
+
+
+        clone.style.border =
+        "none";
+
+
+
+
+        previewPage.appendChild(
+            clone
+        );
+
+
+
+
+    });
+
+
+
+
+
+
+
+};
+
+
+
+
+
+
+
+
+
+
+/* =========================================================
+   AUTO UPDATE PREVIEW WHEN DIALOG OPENS
+========================================================= */
+
+
+const oldCreate =
+CampusWord2007Simulateur
+.PrintEngine
+.create;
+
+
+
+
+
+CampusWord2007Simulateur
+.PrintEngine
+.create = function(){
+
+
+
+    oldCreate.call(this);
+
+
+
+    setTimeout(()=>{
+
+
+        this.updatePreview();
+
+
+
+    },50);
+
+
+
+};
+
 })();
 
 
@@ -31735,4 +31946,176 @@ function(e){
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* =========================================================
+   CAMPUS WORD — GLOBAL ERROR MONITOR
+   DEBUG ONLY
+   NO DOM CHANGE
+   NO FUNCTION INTERFERENCE
+   NO LAYOUT MODIFICATION
+========================================================= */
+
+(function(){
+
+
+
+window.addEventListener(
+    "error",
+    function(e){
+
+
+        console.group(
+            "🚨 CAMPUS WORD ERROR DETECTED"
+        );
+
+
+        console.error(
+            "Message:",
+            e.message
+        );
+
+
+        console.error(
+            "File:",
+            e.filename
+        );
+
+
+        console.error(
+            "Line:",
+            e.lineno
+        );
+
+
+        console.error(
+            "Column:",
+            e.colno
+        );
+
+
+        console.error(
+            "Error Object:",
+            e.error
+        );
+
+
+        console.groupEnd();
+
+
+    },
+    false
+);
+
+
+
+
+
+
+
+window.addEventListener(
+    "unhandledrejection",
+    function(e){
+
+
+
+        console.group(
+            "🚨 PROMISE ERROR DETECTED"
+        );
+
+
+        console.error(
+            e.reason
+        );
+
+
+        console.groupEnd();
+
+
+
+    },
+    false
+);
+
+
+
+
+
+
+
+
+document.addEventListener(
+    "DOMContentLoaded",
+    function(){
+
+
+        console.log(
+            "✅ Campus Word Debug Monitor Active"
+        );
+
+
+        console.log(
+            "DOM Elements Check:"
+        );
+
+
+        console.log(
+            "Pages:",
+            document.querySelectorAll(
+                ".cwPageContent"
+            ).length
+        );
+
+
+        console.log(
+            "Ribbon:",
+            document.querySelector(
+                "#cwRibbon"
+            )
+        );
+
+
+        console.log(
+            "Images:",
+            document.querySelectorAll(
+                ".cwInsertedImage"
+            ).length
+        );
+
+
+        console.log(
+            "Shapes:",
+            document.querySelectorAll(
+                ".cwInsertedShape"
+            ).length
+        );
+
+
+        console.log(
+            "ClipArts:",
+            document.querySelectorAll(
+                ".cwInsertedClipArt"
+            ).length
+        );
+
+
+    },
+    false
+);
+
+
+
+
+})();
 
