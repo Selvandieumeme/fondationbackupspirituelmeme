@@ -30237,8 +30237,8 @@ function(e){
 
 /* =========================================================
    CAMPUS WORD 2007 SIMULATEUR
-   PRINT DIALOG UI ENGINE v1.0.0
-   PRINT WINDOW FOUNDATION
+   PRINT ENGINE v1.0.0
+   PRINT DIALOG FOUNDATION
 ========================================================= */
 
 (function () {
@@ -30246,13 +30246,18 @@ function(e){
 "use strict";
 
 
-if(!window.CampusWord2007Simulateur){
+
+if(!CampusWord2007Simulateur){
+
     return;
+
 }
 
 
 
-CampusWord2007Simulateur.PrintDialogUIEngine = {
+
+
+CampusWord2007Simulateur.PrintEngine = {
 
 
 
@@ -30261,35 +30266,33 @@ CampusWord2007Simulateur.PrintDialogUIEngine = {
 
 
         /*
-        ================================================
         PREVENT DUPLICATE WINDOW
-        ================================================
         */
 
 
-        const existing =
-        document.querySelector(
-            ".cwPrintOverlay"
-        );
+        if(
+            document.getElementById(
+                "cwPrintOverlay"
+            )
+        ){
 
-
-        if(existing){
             return;
+
         }
 
 
 
 
 
-        /*
-        ================================================
-        OVERLAY
-        ================================================
-        */
-
 
         const overlay =
         document.createElement("div");
+
+
+
+        overlay.id =
+        "cwPrintOverlay";
+
 
 
         overlay.className =
@@ -30301,15 +30304,15 @@ CampusWord2007Simulateur.PrintDialogUIEngine = {
 
 
 
-        /*
-        ================================================
-        PRINT WINDOW
-        ================================================
-        */
-
 
         const dialog =
         document.createElement("div");
+
+
+
+        dialog.id =
+        "cwPrintDialog";
+
 
 
         dialog.className =
@@ -30320,24 +30323,18 @@ CampusWord2007Simulateur.PrintDialogUIEngine = {
 
 
 
+
+
         dialog.innerHTML = `
 
 
-        <div class="cwPrintHeader">
+        <div class="cwPrintTitleBar">
 
+            <span class="cwPrintTitle">
 
-            <span>
                 Print
+
             </span>
-
-
-
-            <button class="cwPrintClose">
-
-                ✕
-
-            </button>
-
 
         </div>
 
@@ -30348,97 +30345,11 @@ CampusWord2007Simulateur.PrintDialogUIEngine = {
         <div class="cwPrintBody">
 
 
-            <div class="cwPrintSection">
+            <div class="cwPrintMessage">
 
-                <h4>
-                    Printer
-                </h4>
-
-
-                <div class="cwPrinterBox">
-
-                    Default System Printer
-
-                    <br>
-
-                    <small>
-                        Status: Ready
-                    </small>
-
-
-                </div>
-
+                Print settings will appear here.
 
             </div>
-
-
-
-
-
-            <div class="cwPrintSection">
-
-
-                <h4>
-                    Page Range
-                </h4>
-
-
-
-                <label>
-
-                    <input 
-                    type="radio"
-                    name="cwPageRange"
-                    checked>
-
-                    All Pages
-
-
-                </label>
-
-
-                <br>
-
-
-                <label>
-
-                    <input 
-                    type="radio"
-                    name="cwPageRange">
-
-                    Current Page
-
-
-                </label>
-
-
-                <br>
-
-
-                <label>
-
-                    <input 
-                    type="radio"
-                    name="cwPageRange">
-
-
-                    Pages:
-
-
-                    <input
-                    type="text"
-                    class="cwPrintPagesInput"
-                    placeholder="1-3">
-
-
-                </label>
-
-
-
-            </div>
-
-
-
 
 
         </div>
@@ -30450,7 +30361,9 @@ CampusWord2007Simulateur.PrintDialogUIEngine = {
         <div class="cwPrintFooter">
 
 
-            <button class="cwPrintAction">
+            <button
+            type="button"
+            class="cwPrintStartBtn">
 
                 Print
 
@@ -30458,12 +30371,14 @@ CampusWord2007Simulateur.PrintDialogUIEngine = {
 
 
 
-
-            <button class="cwPrintCancel">
+            <button
+            type="button"
+            class="cwPrintCancelBtn">
 
                 Cancel
 
             </button>
+
 
 
         </div>
@@ -30494,50 +30409,69 @@ CampusWord2007Simulateur.PrintDialogUIEngine = {
 
 
 
+
         /*
-        ================================================
-        CLOSE EVENTS
-        ================================================
+        CANCEL BUTTON
         */
 
 
-        const close =
-        ()=>{
-
-
-            dialog.remove();
-
-            overlay.remove();
-
-
-        };
+        const cancelButton =
+        dialog.querySelector(
+            ".cwPrintCancelBtn"
+        );
 
 
 
+        if(cancelButton){
 
 
+            cancelButton.onclick = ()=>{
 
 
-        dialog
-        .querySelector(
-            ".cwPrintClose"
-        )
-        .onclick =
-        close;
+                dialog.remove();
+
+                overlay.remove();
 
 
+            };
+
+
+        }
 
 
 
 
-        dialog
-        .querySelector(
-            ".cwPrintCancel"
-        )
-        .onclick =
-        close;
 
 
+
+
+
+        /*
+        PRINT BUTTON PLACEHOLDER
+        */
+
+        const printButton =
+        dialog.querySelector(
+            ".cwPrintStartBtn"
+        );
+
+
+
+        if(printButton){
+
+
+            printButton.onclick = ()=>{
+
+
+                console.log(
+                    "Print action ready."
+                );
+
+
+            };
+
+
+        }
 
 
 
@@ -30547,7 +30481,14 @@ CampusWord2007Simulateur.PrintDialogUIEngine = {
 
 
 
+
+
 };
+
+
+
+
+
 
 
 
@@ -30555,9 +30496,11 @@ CampusWord2007Simulateur.PrintDialogUIEngine = {
    CONNECT OFFICE PRINT BUTTON
 ========================================================= */
 
+
 document.addEventListener(
 "click",
 function(e){
+
 
 
     const item =
@@ -30566,19 +30509,27 @@ function(e){
     );
 
 
-    if(!item)
-    return;
+
+    if(!item){
+
+        return;
+
+    }
+
+
+
 
 
 
 
     if(
-    item.dataset.action === "print"
+        item.dataset.action === "print"
     ){
 
 
+
         CampusWord2007Simulateur
-        .PrintDialogUIEngine
+        .PrintEngine
         .create();
 
 
@@ -30587,11 +30538,15 @@ function(e){
 
 
 
+
+
 });
 
 
 
-alert("Print Engine Loaded");
+
+
+
 })();
 
 
