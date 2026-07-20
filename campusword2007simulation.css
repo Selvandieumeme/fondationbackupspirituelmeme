@@ -5969,15 +5969,6 @@ bottom:-6px;
 ========================================================= */
 
 
-.cwPrintPreviewPage{
-
-    font-size:4px;
-
-    line-height:1.3;
-
-}
-
-
 .cwPrintPreviewPage *{
 
     max-width:100% !important;
@@ -5987,3 +5978,33 @@ bottom:-6px;
 }
 
 
+
+
+
+
+/* =========================================================
+   PRINT PREVIEW VISUAL SCALE ONLY
+   KEEP ORIGINAL DOCUMENT FONT SIZE
+========================================================= */
+
+
+.cwPrintPreviewPage{
+
+    overflow:hidden;
+
+    position:relative;
+
+}
+
+
+
+
+.cwPrintPreviewPage > div{
+
+    transform:scale(0.35);
+
+    transform-origin:top left;
+
+    width:285%;
+
+}
