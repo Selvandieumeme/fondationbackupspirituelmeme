@@ -6022,3 +6022,42 @@ bottom:-6px;
 
 
 
+
+
+
+
+
+
+
+
+
+/* =========================================================
+   PRINT PREVIEW CONTENT ALIGNMENT FIX
+========================================================= */
+
+
+.cwPrintPreviewPage{
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:flex-start;
+
+    overflow:hidden;
+
+}
+
+
+
+
+.cwPrintPreviewWrapper{
+
+    width:100%;
+
+    box-sizing:border-box;
+
+    transform-origin:top center;
+
+}
+
