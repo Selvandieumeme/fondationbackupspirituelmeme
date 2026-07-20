@@ -5975,44 +5975,17 @@ bottom:-6px;
 
 
 
-
-
-
-
-
-
-
-
-
 /* =========================================================
-   PRINT PREVIEW FINAL FIT ENGINE
-   KEEP ORIGINAL DOCUMENT STYLE
+   PRINT PREVIEW STABLE TEXT FIT
+   KEEP PREVIEW VISIBLE
 ========================================================= */
-
-
-.cwPrintPreview{
-
-    overflow:hidden;
-
-    display:flex;
-
-    justify-content:center;
-
-    align-items:flex-start;
-
-}
-
 
 
 .cwPrintPreviewPage{
 
-    width:130px;
-
-    height:180px;
-
     overflow:hidden;
 
-    background:#fff;
+    position:relative;
 
     box-sizing:border-box;
 
@@ -6023,29 +5996,22 @@ bottom:-6px;
 
 
 
+.cwPrintPreviewPage *{
 
-.cwPrintPreviewPage > *{
-
-    transform:scale(0.35);
-
-    transform-origin:top left;
-
-    width:285%;
+    box-sizing:border-box;
 
 }
 
 
 
 
-.cwPrintPreviewPage img,
-.cwPrintPreviewPage table{
+.cwPrintPreviewPage{
 
-    max-width:none;
+    font-size:4px;
+
+    line-height:1.3;
 
 }
-
-
-
 
 
 
