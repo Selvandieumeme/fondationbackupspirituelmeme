@@ -5906,3 +5906,87 @@ bottom:-6px;
 
 
 }
+
+
+
+
+
+
+
+
+
+
+
+
+/* =========================================================
+   PRINT PREVIEW SCALE FIX
+   FIT DOCUMENT INSIDE PREVIEW PAGE
+   ADD ONLY
+========================================================= */
+
+
+.cwPrintPreview{
+
+    overflow:hidden;
+
+    position:relative;
+
+}
+
+
+
+
+
+.cwPrintPreviewPage{
+
+    overflow:hidden;
+
+    box-sizing:border-box;
+
+    padding:12px;
+
+    transform-origin:top left;
+
+}
+
+
+
+
+
+.cwPrintPreviewPage .cwPageContent{
+
+    transform:scale(0.35);
+
+    transform-origin:top left;
+
+    width:285% !important;
+
+}
+
+
+
+
+
+.cwPrintPreviewPage .cwPageContent *{
+
+    max-width:100%;
+
+}
+
+
+
+
+
+@media(max-width:700px){
+
+
+    .cwPrintPreviewPage .cwPageContent{
+
+        transform:scale(0.25);
+
+        width:400% !important;
+
+    }
+
+
+}
