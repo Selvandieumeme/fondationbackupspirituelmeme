@@ -5964,42 +5964,67 @@ bottom:-6px;
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 /* =========================================================
-   PRINT PREVIEW TEXT FIT
+   PRINT PREVIEW FINAL FIT ENGINE
+   KEEP ORIGINAL DOCUMENT STYLE
 ========================================================= */
 
 
-.cwPrintPreviewPage *{
+.cwPrintPreview{
 
-    max-width:100% !important;
+    overflow:hidden;
 
-    box-sizing:border-box;
+    display:flex;
+
+    justify-content:center;
+
+    align-items:flex-start;
 
 }
 
-
-
-
-
-
-/* =========================================================
-   PRINT PREVIEW VISUAL SCALE ONLY
-   KEEP ORIGINAL DOCUMENT FONT SIZE
-========================================================= */
 
 
 .cwPrintPreviewPage{
 
+    width:130px;
+
+    height:180px;
+
     overflow:hidden;
 
-    position:relative;
+    background:#fff;
+
+    box-sizing:border-box;
+
+    padding:8px;
 
 }
 
 
 
 
-.cwPrintPreviewPage > div{
+
+.cwPrintPreviewPage > *{
 
     transform:scale(0.35);
 
@@ -6008,3 +6033,26 @@ bottom:-6px;
     width:285%;
 
 }
+
+
+
+
+.cwPrintPreviewPage img,
+.cwPrintPreviewPage table{
+
+    max-width:none;
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
