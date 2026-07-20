@@ -30325,59 +30325,288 @@ CampusWord2007Simulateur.PrintEngine = {
 
 
 
-        dialog.innerHTML = `
+       dialog.innerHTML = `
 
 
-        <div class="cwPrintTitleBar">
+<div class="cwPrintTitleBar">
 
-            <span class="cwPrintTitle">
+    <span class="cwPrintTitle">
 
-                Print
+        Print
 
-            </span>
+    </span>
 
-        </div>
-
-
+</div>
 
 
 
-        <div class="cwPrintBody">
 
 
-            <div class="cwPrintMessage">
+<div class="cwPrintBody">
 
-                Print settings will appear here.
+
+    <div class="cwPrintLayout">
+
+
+
+        <!-- LEFT SETTINGS PANEL -->
+
+        <div class="cwPrintSettingsPanel">
+
+
+
+            <!-- PRINTER -->
+
+            <div class="cwPrintSection">
+
+
+                <h3>
+                    Printer
+                </h3>
+
+
+                <label>
+                    Name
+                </label>
+
+
+                <select
+                class="cwPrintPrinterList">
+
+
+                    <option>
+                        Microsoft Print to PDF
+                    </option>
+
+
+                    <option>
+                        System Printer
+                    </option>
+
+
+                </select>
+
 
             </div>
 
 
+
+
+
+
+
+            <!-- COPIES -->
+
+            <div class="cwPrintSection">
+
+
+                <h3>
+                    Copies
+                </h3>
+
+
+
+                <label>
+                    Number of copies
+                </label>
+
+
+
+                <input
+
+                type="number"
+
+                class="cwPrintCopies"
+
+                min="1"
+
+                value="1">
+
+
+            </div>
+
+
+
+
+
+
+
+
+
+            <!-- PAGE RANGE -->
+
+            <div class="cwPrintSection">
+
+
+                <h3>
+                    Page Range
+                </h3>
+
+
+
+
+
+                <label>
+
+
+                    <input
+
+                    type="radio"
+
+                    name="cwPrintPageRange"
+
+                    class="cwPrintAllPages"
+
+                    checked>
+
+
+                    All Pages
+
+
+                </label>
+
+
+
+
+
+
+                <label>
+
+
+                    <input
+
+                    type="radio"
+
+                    name="cwPrintPageRange"
+
+                    class="cwPrintCurrentPage">
+
+
+                    Current Page
+
+
+                </label>
+
+
+
+
+
+
+                <label>
+
+
+                    <input
+
+                    type="radio"
+
+                    name="cwPrintPageRange"
+
+                    class="cwPrintSpecificPages">
+
+
+                    Pages:
+
+
+                </label>
+
+
+
+
+
+
+                <input
+
+                type="text"
+
+                class="cwPrintPageInput"
+
+                placeholder="1-3">
+
+
+            </div>
+
+
+
+
+
+
+
+
+
+
+            <!-- PROPERTIES -->
+
+            <div class="cwPrintSection">
+
+
+                <h3>
+                    Printer Properties
+                </h3>
+
+
+
+                <button
+
+                type="button"
+
+                class="cwPrintPropertiesBtn">
+
+
+                    Properties
+
+
+                </button>
+
+
+            </div>
+
+
+
+
+
         </div>
 
 
 
 
 
-        <div class="cwPrintFooter">
-
-
-            <button
-            type="button"
-            class="cwPrintStartBtn">
-
-                Print
-
-            </button>
 
 
 
-            <button
-            type="button"
-            class="cwPrintCancelBtn">
 
-                Cancel
 
-            </button>
+        <!-- RIGHT PREVIEW PANEL -->
+
+
+        <div class="cwPrintPreviewPanel">
+
+
+            <h3>
+
+                Preview
+
+            </h3>
+
+
+
+            <div
+
+            class="cwPrintPreview">
+
+
+                <div
+
+                class="cwPrintPreviewPage">
+
+
+                    Preview
+
+
+                </div>
+
+
+
+            </div>
 
 
 
@@ -30385,7 +30614,59 @@ CampusWord2007Simulateur.PrintEngine = {
 
 
 
-        `;
+
+
+
+    </div>
+
+
+
+</div>
+
+
+
+
+
+
+<div class="cwPrintFooter">
+
+
+    <button
+
+    type="button"
+
+    class="cwPrintStartBtn">
+
+
+        Print
+
+
+    </button>
+
+
+
+
+
+    <button
+
+    type="button"
+
+    class="cwPrintCancelBtn">
+
+
+        Cancel
+
+
+    </button>
+
+
+
+</div>
+
+
+
+`;
+
 
 
 
