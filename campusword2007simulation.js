@@ -29762,6 +29762,216 @@ function(e){
 
 
 
+/* =========================================================
+   CAMPUS WORD 2007 SIMULATEUR
+   CLOSE EXIT ENGINE v1.0.0
+   DOCUMENT CLOSE AND APP EXIT MANAGEMENT
+========================================================= */
+
+(function () {
+
+"use strict";
+
+
+
+
+if(
+!CampusWord2007Simulateur
+){
+
+    return;
+
+}
+
+
+
+
+
+
+
+CampusWord2007Simulateur.CloseExitEngine = {
+
+
+
+    close(){
+
+
+
+        /*
+           RESET CURRENT DOCUMENT STATE
+        */
+
+
+        if(
+        CampusWord2007Simulateur.state
+        ){
+
+            CampusWord2007Simulateur
+            .state
+            .currentDocumentId = null;
+
+
+
+            CampusWord2007Simulateur
+            .state
+            .currentDocumentIsNew = true;
+
+
+
+            CampusWord2007Simulateur
+            .state
+            .documentSaved = false;
+
+
+
+        }
+
+
+
+
+
+
+        /*
+           CLEAR DOCUMENT AREA
+        */
+
+
+        const workspace =
+        document.getElementById(
+            "cwDocumentContainer"
+        );
+
+
+
+        if(workspace){
+
+            workspace.innerHTML = "";
+
+        }
+
+
+
+
+
+
+        /*
+           REDIRECT TO CAMPUS LOGIN PAGE
+        */
+
+
+        window.location.href =
+        "https://fondationbackupspirituel.com/campusloginnumeriques";
+
+
+
+    }
+
+
+
+
+
+};
+
+
+
+
+
+
+/* =========================================================
+   CONNECT OFFICE CLOSE AND EXIT BUTTONS
+========================================================= */
+
+
+document.addEventListener(
+"click",
+function(e){
+
+
+
+    const item =
+    e.target.closest(
+        ".cwOfficeItem"
+    );
+
+
+
+    if(!item)
+    return;
+
+
+
+
+
+
+    const action =
+    item.dataset.action;
+
+
+
+
+
+
+    if(
+    action === "close" ||
+    action === "exit"
+    ){
+
+
+
+        CampusWord2007Simulateur
+        .CloseExitEngine
+        .close();
+
+
+
+    }
+
+
+
+
+
+});
+
+
+
+
+
+
+
+})();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
