@@ -5971,10 +5971,6 @@ bottom:-6px;
 
 
 
-
-
-
-
 /* =========================================================
    PRINT PREVIEW STABLE TEXT FIT
    KEEP PREVIEW VISIBLE
@@ -6005,20 +6001,23 @@ bottom:-6px;
 
 
 
-
 /* =========================================================
-   PRINT PREVIEW SIZE ADJUSTMENT
-   KEEP TEXT VISIBLE
+   PRINT PREVIEW CONTENT SCALE
 ========================================================= */
 
 
-.cwPrintPreviewPage{
+.cwPrintPreviewPage > *{
 
-    font-size:3px;
+    transform:scale(0.45);
 
-    line-height:1.2;
+    transform-origin:top left;
+
+    width:222%;
 
 }
+
+
+
 
 
 
