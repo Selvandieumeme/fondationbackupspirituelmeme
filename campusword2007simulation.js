@@ -31075,14 +31075,13 @@ function(e){
 
 /* =========================================================
    CAMPUS WORD 2007 SIMULATEUR
-   PRINT ENGINE v1.0.0
-   PRINT PREVIEW CONNECTOR
+   PRINT PREVIEW RENDER FIX
+   ISOLATED PREVIEW WRAPPER
+   DOES NOT MODIFY ORIGINAL DOCUMENT
 ========================================================= */
 
 
-
 CampusWord2007Simulateur.PrintEngine.updatePreview = function(){
-
 
 
     const dialog =
@@ -31097,8 +31096,6 @@ CampusWord2007Simulateur.PrintEngine.updatePreview = function(){
         return;
 
     }
-
-
 
 
 
@@ -31121,11 +31118,8 @@ CampusWord2007Simulateur.PrintEngine.updatePreview = function(){
 
 
 
-
-
-
     /*
-       CLEAR OLD PREVIEW
+       CLEAR OLD PREVIEW ONLY
     */
 
 
@@ -31136,10 +31130,29 @@ CampusWord2007Simulateur.PrintEngine.updatePreview = function(){
 
 
 
+    /*
+       CREATE PREVIEW WRAPPER
+       ONLY FOR PRINT WINDOW
+    */
+
+
+    const wrapper =
+    document.createElement(
+        "div"
+    );
+
+
+    wrapper.className =
+    "cwPrintPreviewWrapper";
+
+
+
+
+
 
 
     /*
-       FIND DOCUMENT CONTENT
+       FIND REAL DOCUMENT CONTENT
     */
 
 
@@ -31170,11 +31183,9 @@ CampusWord2007Simulateur.PrintEngine.updatePreview = function(){
 
 
 
-
-
     /*
-       CLONE CURRENT DOCUMENT CONTENT
-       WITHOUT TOUCHING ORIGINAL PAGE
+       CLONE DOCUMENT
+       ORIGINAL PAGE REMAINS UNTOUCHED
     */
 
 
@@ -31187,25 +31198,12 @@ CampusWord2007Simulateur.PrintEngine.updatePreview = function(){
 
 
 
+
         clone.removeAttribute(
             "contenteditable"
         );
 
 
-
-
-        clone.style.width =
-        "100%";
-
-
-
-        clone.style.minHeight =
-        "auto";
-
-
-
-        clone.style.padding =
-        "0";
 
 
 
@@ -31219,11 +31217,9 @@ CampusWord2007Simulateur.PrintEngine.updatePreview = function(){
 
 
 
-
-        previewPage.appendChild(
+        wrapper.appendChild(
             clone
         );
-
 
 
 
@@ -31235,8 +31231,20 @@ CampusWord2007Simulateur.PrintEngine.updatePreview = function(){
 
 
 
-};
 
+    /*
+       INSERT ONLY PREVIEW COPY
+    */
+
+
+    previewPage.appendChild(
+        wrapper
+    );
+
+
+
+
+};
 
 
 
