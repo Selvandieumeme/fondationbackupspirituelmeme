@@ -30827,38 +30827,74 @@ function(e){
 
 
 
+/* =========================================================
+   CAMPUS WORD 2007 SIMULATEUR
+   PRINT ENGINE v1.0.0
+   PRINT ACTION CONNECTION
+========================================================= */
 
-})();
 
+CampusWord2007Simulateur.PrintEngine.print = function(){
 
 
 
+    const dialog =
+    document.getElementById(
+        "cwPrintDialog"
+    );
 
 
 
+    if(!dialog){
 
+        return;
 
+    }
 
 
 
 
 
 
+    const printer =
+    dialog.querySelector(
+        ".cwPrintPrinterList"
+    );
 
 
 
+    const copies =
+    dialog.querySelector(
+        ".cwPrintCopies"
+    );
 
 
 
+    const allPages =
+    dialog.querySelector(
+        ".cwPrintAllPages"
+    );
 
 
 
+    const currentPage =
+    dialog.querySelector(
+        ".cwPrintCurrentPage"
+    );
 
 
 
+    const specificPages =
+    dialog.querySelector(
+        ".cwPrintSpecificPages"
+    );
 
 
 
+    const pageInput =
+    dialog.querySelector(
+        ".cwPrintPageInput"
+    );
 
 
 
@@ -30867,30 +30903,48 @@ function(e){
 
 
 
+    const printSettings = {
 
 
+        printer:
 
+        printer ?
+        printer.value :
+        null,
 
 
 
+        copies:
 
+        copies ?
+        Number(copies.value) :
+        1,
 
 
 
+        range:
 
+        allPages && allPages.checked ?
 
+        "all" :
 
 
 
+        currentPage && currentPage.checked ?
 
+        "current" :
 
 
 
+        specificPages && specificPages.checked ?
 
+        pageInput.value :
 
+        "all"
 
 
 
+    };
 
 
 
@@ -30898,6 +30952,10 @@ function(e){
 
 
 
+    console.log(
+        "Print settings:",
+        printSettings
+    );
 
 
 
@@ -30905,578 +30963,22 @@ function(e){
 
 
 
+    /*
+       TEMPORARY PRINT FOUNDATION
 
+       REAL PRINT ENGINE WILL BE
+       CONNECTED LATER
+    */
 
 
 
+    window.print();
 
 
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+};
 
 
 
@@ -31488,164 +30990,746 @@ function(e){
 
 
 /* =========================================================
-   CAMPUS WORD — GLOBAL ERROR MONITOR
-   DEBUG ONLY
-   NO DOM CHANGE
-   NO FUNCTION INTERFERENCE
-   NO LAYOUT MODIFICATION
+   CONNECT PRINT BUTTON INSIDE DIALOG
 ========================================================= */
-
-(function(){
-
-
-
-window.addEventListener(
-    "error",
-    function(e){
-
-
-        console.group(
-            "🚨 CAMPUS WORD ERROR DETECTED"
-        );
-
-
-        console.error(
-            "Message:",
-            e.message
-        );
-
-
-        console.error(
-            "File:",
-            e.filename
-        );
-
-
-        console.error(
-            "Line:",
-            e.lineno
-        );
-
-
-        console.error(
-            "Column:",
-            e.colno
-        );
-
-
-        console.error(
-            "Error Object:",
-            e.error
-        );
-
-
-        console.groupEnd();
-
-
-    },
-    false
-);
-
-
-
-
-
-
-
-window.addEventListener(
-    "unhandledrejection",
-    function(e){
-
-
-
-        console.group(
-            "🚨 PROMISE ERROR DETECTED"
-        );
-
-
-        console.error(
-            e.reason
-        );
-
-
-        console.groupEnd();
-
-
-
-    },
-    false
-);
-
-
-
-
-
-
 
 
 document.addEventListener(
-    "DOMContentLoaded",
-    function(){
+"click",
+function(e){
 
 
-        console.log(
-            "✅ Campus Word Debug Monitor Active"
-        );
+
+    const button =
+    e.target.closest(
+        ".cwPrintStartBtn"
+    );
 
 
-        console.log(
-            "DOM Elements Check:"
-        );
 
+    if(!button){
 
-        console.log(
-            "Pages:",
-            document.querySelectorAll(
-                ".cwPageContent"
-            ).length
-        );
+        return;
 
-
-        console.log(
-            "Ribbon:",
-            document.querySelector(
-                "#cwRibbon"
-            )
-        );
-
-
-        console.log(
-            "Images:",
-            document.querySelectorAll(
-                ".cwInsertedImage"
-            ).length
-        );
-
-
-        console.log(
-            "Shapes:",
-            document.querySelectorAll(
-                ".cwInsertedShape"
-            ).length
-        );
-
-
-        console.log(
-            "ClipArts:",
-            document.querySelectorAll(
-                ".cwInsertedClipArt"
-            ).length
-        );
-
-
-    },
-    false
-);
+    }
 
 
 
 
+    CampusWord2007Simulateur
+    .PrintEngine
+    .print();
+
+
+
+
+
+});
+
+
+
+
+
+
+
+
+/* =========================================================
+   CONNECT PROPERTIES BUTTON FOUNDATION
+========================================================= */
+
+
+document.addEventListener(
+"click",
+function(e){
+
+
+
+    const button =
+    e.target.closest(
+        ".cwPrintPropertiesBtn"
+    );
+
+
+
+    if(!button){
+
+        return;
+
+    }
+
+
+
+
+
+    console.log(
+        "Printer Properties ready."
+    );
+
+
+
+
+
+});
+
+   
 })();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
