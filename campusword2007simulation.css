@@ -6005,19 +6005,20 @@ bottom:-6px;
 
 
 
+
+/* =========================================================
+   PRINT PREVIEW SIZE ADJUSTMENT
+   KEEP TEXT VISIBLE
+========================================================= */
+
+
 .cwPrintPreviewPage{
 
-    font-size:2px;
+    font-size:3px;
 
-    line-height:1.3;
+    line-height:1.2;
 
 }
-
-
-
-
-
-
 
 
 
