@@ -29459,6 +29459,325 @@ function(e){
 
 
 
+/* =========================================================
+   CAMPUS WORD 2007 SIMULATEUR
+   PRINT DIALOG UI ENGINE v1.0.0
+   PRINT WINDOW FOUNDATION
+========================================================= */
+
+(function () {
+
+"use strict";
+
+
+if(!window.CampusWord2007Simulateur){
+    return;
+}
+
+
+
+CampusWord2007Simulateur.PrintDialogUIEngine = {
+
+
+
+    create(){
+
+
+
+        /*
+        ================================================
+        PREVENT DUPLICATE WINDOW
+        ================================================
+        */
+
+
+        const existing =
+        document.querySelector(
+            ".cwPrintOverlay"
+        );
+
+
+        if(existing){
+            return;
+        }
+
+
+
+
+
+        /*
+        ================================================
+        OVERLAY
+        ================================================
+        */
+
+
+        const overlay =
+        document.createElement("div");
+
+
+        overlay.className =
+        "cwPrintOverlay";
+
+
+
+
+
+
+
+        /*
+        ================================================
+        PRINT WINDOW
+        ================================================
+        */
+
+
+        const dialog =
+        document.createElement("div");
+
+
+        dialog.className =
+        "cwPrintDialog";
+
+
+
+
+
+
+        dialog.innerHTML = `
+
+
+        <div class="cwPrintHeader">
+
+
+            <span>
+                Print
+            </span>
+
+
+
+            <button class="cwPrintClose">
+
+                ✕
+
+            </button>
+
+
+        </div>
+
+
+
+
+
+        <div class="cwPrintBody">
+
+
+            <div class="cwPrintSection">
+
+                <h4>
+                    Printer
+                </h4>
+
+
+                <div class="cwPrinterBox">
+
+                    Default System Printer
+
+                    <br>
+
+                    <small>
+                        Status: Ready
+                    </small>
+
+
+                </div>
+
+
+            </div>
+
+
+
+
+
+            <div class="cwPrintSection">
+
+
+                <h4>
+                    Page Range
+                </h4>
+
+
+
+                <label>
+
+                    <input 
+                    type="radio"
+                    name="cwPageRange"
+                    checked>
+
+                    All Pages
+
+
+                </label>
+
+
+                <br>
+
+
+                <label>
+
+                    <input 
+                    type="radio"
+                    name="cwPageRange">
+
+                    Current Page
+
+
+                </label>
+
+
+                <br>
+
+
+                <label>
+
+                    <input 
+                    type="radio"
+                    name="cwPageRange">
+
+
+                    Pages:
+
+
+                    <input
+                    type="text"
+                    class="cwPrintPagesInput"
+                    placeholder="1-3">
+
+
+                </label>
+
+
+
+            </div>
+
+
+
+
+
+        </div>
+
+
+
+
+
+        <div class="cwPrintFooter">
+
+
+            <button class="cwPrintAction">
+
+                Print
+
+            </button>
+
+
+
+
+            <button class="cwPrintCancel">
+
+                Cancel
+
+            </button>
+
+
+        </div>
+
+
+
+        `;
+
+
+
+
+
+
+
+        document.body.appendChild(
+            overlay
+        );
+
+
+        document.body.appendChild(
+            dialog
+        );
+
+
+
+
+
+
+
+
+        /*
+        ================================================
+        CLOSE EVENTS
+        ================================================
+        */
+
+
+        const close =
+        ()=>{
+
+
+            dialog.remove();
+
+            overlay.remove();
+
+
+        };
+
+
+
+
+
+
+
+        dialog
+        .querySelector(
+            ".cwPrintClose"
+        )
+        .onclick =
+        close;
+
+
+
+
+
+
+        dialog
+        .querySelector(
+            ".cwPrintCancel"
+        )
+        .onclick =
+        close;
+
+
+
+
+
+
+
+    }
+
+
+
+};
+
+
+
+
+
+})();
 
 
 
