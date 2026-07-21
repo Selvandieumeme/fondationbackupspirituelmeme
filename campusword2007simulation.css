@@ -6325,3 +6325,174 @@ bottom:-6px;
 
 
 
+/* =========================================================
+   CAMPUS WORD 2007 SIMULATEUR
+   SMARTART HANDLES DISPLAY CSS
+   BLOCK 5A CSS
+   8 VISIBLE CONTROL POINTS ONLY
+   NO ACTION
+   NO RESIZE
+   NO MOVE
+   ISOLATED SYSTEM
+========================================================= */
+
+
+/* =========================
+   SMARTART HANDLES CONTAINER
+========================= */
+
+.cwSmartArtHandles{
+
+    position:absolute;
+
+    z-index:9999;
+
+    pointer-events:none;
+
+}
+
+
+
+/* =========================
+   SMARTART HANDLE POINT
+========================= */
+
+.cwSmartArtHandle{
+
+    position:absolute;
+
+    width:12px;
+
+    height:12px;
+
+    background:#2563eb;
+
+    border:2px solid white;
+
+    border-radius:50%;
+
+    box-sizing:border-box;
+
+    pointer-events:none;
+
+}
+
+
+
+/* =========================
+   TOP LEFT
+========================= */
+
+.cwSmartArtHandle.nw{
+
+    left:-7px;
+
+    top:-7px;
+
+}
+
+
+
+/* =========================
+   TOP CENTER
+========================= */
+
+.cwSmartArtHandle.n{
+
+    left:50%;
+
+    top:-7px;
+
+    transform:translateX(-50%);
+
+}
+
+
+
+/* =========================
+   TOP RIGHT
+========================= */
+
+.cwSmartArtHandle.ne{
+
+    right:-7px;
+
+    top:-7px;
+
+}
+
+
+
+/* =========================
+   LEFT CENTER
+========================= */
+
+.cwSmartArtHandle.w{
+
+    left:-7px;
+
+    top:50%;
+
+    transform:translateY(-50%);
+
+}
+
+
+
+/* =========================
+   RIGHT CENTER
+========================= */
+
+.cwSmartArtHandle.e{
+
+    right:-7px;
+
+    top:50%;
+
+    transform:translateY(-50%);
+
+}
+
+
+
+/* =========================
+   BOTTOM LEFT
+========================= */
+
+.cwSmartArtHandle.sw{
+
+    left:-7px;
+
+    bottom:-7px;
+
+}
+
+
+
+/* =========================
+   BOTTOM CENTER
+========================= */
+
+.cwSmartArtHandle.s{
+
+    left:50%;
+
+    bottom:-7px;
+
+    transform:translateX(-50%);
+
+}
+
+
+
+/* =========================
+   BOTTOM RIGHT
+========================= */
+
+.cwSmartArtHandle.se{
+
+    right:-7px;
+
+    bottom:-7px;
+
+}
