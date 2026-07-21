@@ -32285,6 +32285,292 @@ false
 
 
 
+/* =========================================================
+   CAMPUS WORD 2007 SIMULATEUR
+   SMARTART INSERT ENGINE v1.0.0
+   INSERT SELECTED SMARTART INTO DOCUMENT
+   ISOLATED SYSTEM
+   COMPATIBLE WITH SMARTART BLOCK 3
+========================================================= */
+
+
+(function(){
+
+"use strict";
+
+
+
+if(!CampusWord2007Simulateur){
+    return;
+}
+
+
+
+
+
+
+CampusWord2007Simulateur
+.SmartArtInsertEngine = {
+
+
+
+    insert(template, category){
+
+
+
+        const activePage =
+        document.querySelector(
+            ".cwPage.active .cwPageContent"
+        );
+
+
+
+        if(!activePage){
+
+            return;
+
+        }
+
+
+
+
+
+
+
+        const smartArt =
+        document.createElement(
+            "div"
+        );
+
+
+
+        smartArt.className =
+        "cwSmartArtObject";
+
+
+
+
+
+        smartArt.dataset.category =
+        category;
+
+
+
+
+
+        smartArt.dataset.template =
+        template;
+
+
+
+
+
+
+
+        smartArt.innerHTML = `
+
+
+            <div class="cwSmartArtTitle">
+
+                ${template}
+
+            </div>
+
+
+
+            <div class="cwSmartArtShape">
+
+
+                SmartArt
+
+
+            </div>
+
+
+        `;
+
+
+
+
+
+
+
+        activePage.appendChild(
+            smartArt
+        );
+
+
+
+
+
+    }
+
+
+
+
+
+};
+
+
+
+
+
+
+
+
+
+/*
+=========================================================
+CONNECT SMARTART GALLERY INSERT BUTTON
+=========================================================
+*/
+
+
+document.addEventListener(
+"click",
+function(e){
+
+
+
+    const button =
+    e.target.closest(
+        ".cwSmartArtInsertBtn"
+    );
+
+
+
+    if(!button){
+
+        return;
+
+    }
+
+
+
+
+
+    const engine =
+    CampusWord2007Simulateur
+    .SmartArtGalleryEngine;
+
+
+
+    if(!engine){
+
+        return;
+
+    }
+
+
+
+
+
+
+    if(!engine.selectedSmartArt){
+
+        return;
+
+    }
+
+
+
+
+
+
+    CampusWord2007Simulateur
+    .SmartArtInsertEngine
+    .insert(
+
+        engine.selectedSmartArt,
+
+        engine.activeCategory
+
+    );
+
+
+
+
+
+
+
+
+    const dialog =
+    document.getElementById(
+        "cwSmartArtGalleryDialog"
+    );
+
+
+
+    const overlay =
+    document.getElementById(
+        "cwSmartArtGalleryOverlay"
+    );
+
+
+
+
+
+    if(dialog){
+
+        dialog.remove();
+
+    }
+
+
+
+    if(overlay){
+
+        overlay.remove();
+
+    }
+
+
+
+
+
+
+},
+false
+);
+
+
+
+
+
+
+
+})();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
