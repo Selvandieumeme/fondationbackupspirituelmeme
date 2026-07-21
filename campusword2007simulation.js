@@ -32287,10 +32287,11 @@ false
 
 /* =========================================================
    CAMPUS WORD 2007 SIMULATEUR
-   SMARTART INSERT ENGINE v1.0.0
-   INSERT SELECTED SMARTART INTO DOCUMENT
+   SMARTART MODEL RENDER ENGINE v1.0.0
+   PART 1/3
+   SVG LIBRARY
+   LIST + PROCESS MODELS
    ISOLATED SYSTEM
-   COMPATIBLE WITH SMARTART BLOCK 3
 ========================================================= */
 
 
@@ -32301,7 +32302,9 @@ false
 
 
 if(!CampusWord2007Simulateur){
+
     return;
+
 }
 
 
@@ -32310,84 +32313,54 @@ if(!CampusWord2007Simulateur){
 
 
 CampusWord2007Simulateur
-.SmartArtInsertEngine = {
+.SmartArtRenderEngine = {
 
 
 
-    insert(template, category){
 
 
-
-        const activePage =
-        document.querySelector(
-            ".cwPage.active .cwPageContent"
-        );
-
-
-
-        if(!activePage){
-
-            return;
-
-        }
+svgLibrary:{
 
 
 
 
 
 
-
-        const smartArt =
-        document.createElement(
-            "div"
-        );
+/* =========================================================
+   LIST CATEGORY
+========================================================= */
 
 
 
-        smartArt.className =
-        "cwSmartArtObject";
+"Basic List":`
+
+<svg viewBox="0 0 320 180">
+
+
+<rect x="20" y="25"
+width="90"
+height="45"
+rx="6"/>
+
+
+<rect x="20" y="95"
+width="90"
+height="45"
+rx="6"/>
 
 
 
+<line x1="125" y1="47"
+x2="285" y2="47"/>
 
 
-        smartArt.dataset.category =
-        category;
+<line x1="125" y1="117"
+x2="285" y2="117"/>
 
 
+</svg>
 
-
-
-        smartArt.dataset.template =
-        template;
-
-
-
-
-
-
-
-        smartArt.innerHTML = `
-
-
-            <div class="cwSmartArtTitle">
-
-                ${template}
-
-            </div>
-
-
-
-            <div class="cwSmartArtShape">
-
-
-                SmartArt
-
-
-            </div>
-
-
-        `;
+`,
 
 
 
@@ -32395,143 +32368,249 @@ CampusWord2007Simulateur
 
 
 
-        activePage.appendChild(
-            smartArt
-        );
+"Horizontal List":`
+
+<svg viewBox="0 0 360 120">
+
+
+<circle cx="45" cy="60" r="25"/>
+
+
+<line x1="75" y1="60"
+x2="120" y2="60"/>
+
+
+<circle cx="150" cy="60" r="25"/>
+
+
+<line x1="180" y1="60"
+x2="225" y2="60"/>
+
+
+<circle cx="255" cy="60" r="25"/>
+
+
+</svg>
+
+`,
 
 
 
 
 
-    }
+
+
+
+"Vertical List":`
+
+<svg viewBox="0 0 200 320">
+
+
+<rect x="55" y="20"
+width="90"
+height="45"
+rx="6"/>
+
+
+<rect x="55" y="120"
+width="90"
+height="45"
+rx="6"/>
+
+
+<rect x="55" y="220"
+width="90"
+height="45"
+rx="6"/>
+
+
+</svg>
+
+`,
+
+
+
+
+
+
+
+
+"Picture List":`
+
+<svg viewBox="0 0 350 160">
+
+
+<circle cx="45" cy="45"
+r="25"/>
+
+
+<circle cx="45" cy="115"
+r="25"/>
+
+
+<rect x="90" y="25"
+width="220"
+height="40"
+rx="5"/>
+
+
+<rect x="90" y="95"
+width="220"
+height="40"
+rx="5"/>
+
+
+</svg>
+
+`,
+
+
+
+
+
+
+
+
+
+/* =========================================================
+   PROCESS CATEGORY
+========================================================= */
+
+
+
+"Basic Process":`
+
+<svg viewBox="0 0 380 120">
+
+
+<rect x="10" y="35"
+width="90"
+height="50"
+rx="8"/>
+
+
+<path d="M100 60 H140"/>
+
+
+<rect x="140" y="35"
+width="90"
+height="50"
+rx="8"/>
+
+
+<path d="M230 60 H270"/>
+
+
+<rect x="270" y="35"
+width="90"
+height="50"
+rx="8"/>
+
+
+</svg>
+
+`,
+
+
+
+
+
+
+
+
+"Accent Process":`
+
+<svg viewBox="0 0 380 140">
+
+
+<polygon points="
+20,30 110,30 130,70 110,110 20,110 40,70"/>
+
+
+<polygon points="
+130,30 220,30 240,70 220,110 130,110 150,70"/>
+
+
+<polygon points="
+240,30 330,30 350,70 330,110 240,110 260,70"/>
+
+
+</svg>
+
+`,
+
+
+
+
+
+
+
+
+"Continuous Process":`
+
+<svg viewBox="0 0 360 130">
+
+
+<path d="
+M20 65
+H330
+"/>
+
+
+<circle cx="60" cy="65" r="25"/>
+
+
+<circle cx="180" cy="65" r="25"/>
+
+
+<circle cx="300" cy="65" r="25"/>
+
+
+</svg>
+
+`,
+
+
+
+
+
+
+
+
+"Chevron Process":`
+
+<svg viewBox="0 0 380 120">
+
+
+<polygon points="
+20,20 120,20 160,60 120,100 20,100 60,60"/>
+
+
+<polygon points="
+140,20 240,20 280,60 240,100 140,100 180,60"/>
+
+
+<polygon points="
+260,20 360,20 380,60 360,100 260,100 300,60"/>
+
+
+</svg>
+
+`
+
+
+
+
+
+}
+
+
 
 
 
 
 
 };
-
-
-
-
-
-
-
-
-
-/*
-=========================================================
-CONNECT SMARTART GALLERY INSERT BUTTON
-=========================================================
-*/
-
-
-document.addEventListener(
-"click",
-function(e){
-
-
-
-    const button =
-    e.target.closest(
-        ".cwSmartArtInsertBtn"
-    );
-
-
-
-    if(!button){
-
-        return;
-
-    }
-
-
-
-
-
-    const engine =
-    CampusWord2007Simulateur
-    .SmartArtGalleryEngine;
-
-
-
-    if(!engine){
-
-        return;
-
-    }
-
-
-
-
-
-
-    if(!engine.selectedSmartArt){
-
-        return;
-
-    }
-
-
-
-
-
-
-    CampusWord2007Simulateur
-    .SmartArtInsertEngine
-    .insert(
-
-        engine.selectedSmartArt,
-
-        engine.activeCategory
-
-    );
-
-
-
-
-
-
-
-
-    const dialog =
-    document.getElementById(
-        "cwSmartArtGalleryDialog"
-    );
-
-
-
-    const overlay =
-    document.getElementById(
-        "cwSmartArtGalleryOverlay"
-    );
-
-
-
-
-
-    if(dialog){
-
-        dialog.remove();
-
-    }
-
-
-
-    if(overlay){
-
-        overlay.remove();
-
-    }
-
-
-
-
-
-
-},
-false
-);
 
 
 
