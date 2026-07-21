@@ -31542,6 +31542,773 @@ false
 
 
 
+/* =========================================================
+   CAMPUS WORD 2007 SIMULATEUR
+   SMARTART CATEGORY ACTION ENGINE v1.0.0
+   CATEGORY CLICK CONNECTOR
+   ISOLATED SYSTEM
+   NO DROPDOWN INTERFERENCE
+========================================================= */
+
+
+(function(){
+
+"use strict";
+
+
+
+const SmartArtCategoryEngine = {
+
+
+    openCategory(category){
+
+
+        console.log(
+            "SmartArt category:",
+            category
+        );
+
+
+
+        /*
+           PREPARE CATEGORY STATE
+        */
+
+
+        this.activeCategory =
+        category;
+
+
+
+        /*
+           FUTURE SMARTART GALLERY
+           CONNECTION POINT
+        */
+
+
+        const event =
+        new CustomEvent(
+            "cwSmartArtCategorySelected",
+            {
+                detail:{
+                    category:category
+                }
+            }
+        );
+
+
+
+        document.dispatchEvent(
+            event
+        );
+
+
+    },
+
+
+
+    activeCategory:null
+
+
+
+};
+
+
+
+
+
+
+
+document.addEventListener(
+"click",
+function(e){
+
+
+
+    const item =
+    e.target.closest(
+        "[data-action^='smartart-']"
+    );
+
+
+
+    if(!item){
+
+        return;
+
+    }
+
+
+
+
+    const action =
+    item.dataset.action;
+
+
+
+    switch(action){
+
+
+
+        case "smartart-list":
+
+            SmartArtCategoryEngine
+            .openCategory(
+                "List"
+            );
+
+        break;
+
+
+
+
+
+        case "smartart-process":
+
+            SmartArtCategoryEngine
+            .openCategory(
+                "Process"
+            );
+
+        break;
+
+
+
+
+
+        case "smartart-cycle":
+
+            SmartArtCategoryEngine
+            .openCategory(
+                "Cycle"
+            );
+
+        break;
+
+
+
+
+
+        case "smartart-hierarchy":
+
+            SmartArtCategoryEngine
+            .openCategory(
+                "Hierarchy"
+            );
+
+        break;
+
+
+
+
+
+        case "smartart-pyramid":
+
+            SmartArtCategoryEngine
+            .openCategory(
+                "Pyramid"
+            );
+
+        break;
+
+
+
+    }
+
+
+
+
+
+},
+false
+);
+
+
+
+
+
+
+CampusWord2007Simulateur
+.SmartArtCategoryEngine =
+SmartArtCategoryEngine;
+
+
+
+})();
+
+
+
+
+
+
+
+
+
+
+/* =========================================================
+   CAMPUS WORD 2007 SIMULATEUR
+   SMARTART GALLERY ENGINE v1.0.0
+   COMPLETE GALLERY SYSTEM
+   ISOLATED MODULE
+   COMPATIBLE WITH BLOCK 1 + BLOCK 2
+========================================================= */
+
+
+(function(){
+
+"use strict";
+
+
+
+if(!CampusWord2007Simulateur){
+    return;
+}
+
+
+
+
+
+
+CampusWord2007Simulateur
+.SmartArtGalleryEngine = {
+
+
+
+    activeCategory:null,
+
+    selectedSmartArt:null,
+
+
+
+
+
+    templates:{
+
+
+
+        List:[
+
+            "Basic List",
+
+            "Horizontal List",
+
+            "Vertical List",
+
+            "Picture List"
+
+        ],
+
+
+
+
+        Process:[
+
+            "Basic Process",
+
+            "Accent Process",
+
+            "Continuous Process",
+
+            "Chevron Process"
+
+        ],
+
+
+
+
+        Cycle:[
+
+            "Basic Cycle",
+
+            "Continuous Cycle",
+
+            "Radial Cycle",
+
+            "Circular Cycle"
+
+        ],
+
+
+
+
+        Hierarchy:[
+
+            "Organization Chart",
+
+            "Name and Title",
+
+            "Horizontal Hierarchy",
+
+            "Labeled Hierarchy"
+
+        ],
+
+
+
+
+        Pyramid:[
+
+            "Basic Pyramid",
+
+            "Segmented Pyramid",
+
+            "Pyramid List",
+
+            "Inverted Pyramid"
+
+        ]
+
+
+
+    },
+
+
+
+
+
+
+
+
+
+    open(category){
+
+
+
+        this.activeCategory =
+        category;
+
+
+
+        this.selectedSmartArt =
+        null;
+
+
+
+        this.createGallery();
+
+
+
+
+    },
+
+
+
+
+
+
+
+
+
+    createGallery(){
+
+
+
+        const old =
+        document.getElementById(
+            "cwSmartArtGalleryDialog"
+        );
+
+
+
+        if(old){
+
+            old.remove();
+
+        }
+
+
+
+
+
+        const overlay =
+        document.createElement(
+            "div"
+        );
+
+
+
+        overlay.id =
+        "cwSmartArtGalleryOverlay";
+
+
+
+        overlay.className =
+        "cwSmartArtGalleryOverlay";
+
+
+
+
+
+
+
+
+        const dialog =
+        document.createElement(
+            "div"
+        );
+
+
+
+        dialog.id =
+        "cwSmartArtGalleryDialog";
+
+
+
+        dialog.className =
+        "cwSmartArtGalleryDialog";
+
+
+
+
+
+
+        const models =
+        this.templates[
+            this.activeCategory
+        ] || [];
+
+
+
+
+
+
+
+        let items = "";
+
+
+
+
+
+        models.forEach((model)=>{
+
+
+            items += `
+
+
+            <div
+            class="cwSmartArtItem"
+            data-smartart="${model}">
+
+
+                <div class="cwSmartArtPreview">
+
+                    ${model}
+
+                </div>
+
+
+            </div>
+
+
+            `;
+
+
+        });
+
+
+
+
+
+
+
+        dialog.innerHTML = `
+
+
+        <div class="cwSmartArtHeader">
+
+
+            <span>
+                SmartArt Gallery
+            </span>
+
+
+
+            <span>
+                ${this.activeCategory}
+            </span>
+
+
+        </div>
+
+
+
+
+
+        <div class="cwSmartArtGalleryContent">
+
+
+            ${items}
+
+
+        </div>
+
+
+
+
+
+        <div class="cwSmartArtFooter">
+
+
+            <button
+            class="cwSmartArtInsertBtn">
+
+                Insert
+
+            </button>
+
+
+
+
+            <button
+            class="cwSmartArtCancelBtn">
+
+                Cancel
+
+            </button>
+
+
+        </div>
+
+
+
+        `;
+
+
+
+
+
+
+
+        document.body.appendChild(
+            overlay
+        );
+
+
+        document.body.appendChild(
+            dialog
+        );
+
+
+
+
+
+
+
+
+
+        dialog
+        .querySelectorAll(
+            ".cwSmartArtItem"
+        )
+        .forEach((item)=>{
+
+
+
+            item.onclick = ()=>{
+
+
+
+                dialog
+                .querySelectorAll(
+                    ".cwSmartArtItem"
+                )
+                .forEach((old)=>{
+
+
+                    old.classList.remove(
+                        "active"
+                    );
+
+
+                });
+
+
+
+
+
+
+                item.classList.add(
+                    "active"
+                );
+
+
+
+
+
+                this.selectedSmartArt =
+                item.dataset.smartart;
+
+
+
+            };
+
+
+
+
+        });
+
+
+
+
+
+
+
+
+        dialog
+        .querySelector(
+            ".cwSmartArtInsertBtn"
+        )
+        .onclick = ()=>{
+
+
+
+            if(!this.selectedSmartArt){
+
+                return;
+
+            }
+
+
+
+
+
+            console.log(
+                "Insert SmartArt:",
+                this.selectedSmartArt
+            );
+
+
+
+
+
+            dialog.remove();
+
+            overlay.remove();
+
+
+
+
+        };
+
+
+
+
+
+
+
+
+
+        dialog
+        .querySelector(
+            ".cwSmartArtCancelBtn"
+        )
+        .onclick = ()=>{
+
+
+            dialog.remove();
+
+            overlay.remove();
+
+
+        };
+
+
+
+
+    }
+
+
+
+
+
+};
+
+
+
+
+
+
+
+
+
+
+
+/*
+=========================================================
+CONNECT BLOCK 2 CATEGORY EVENT
+=========================================================
+*/
+
+
+document.addEventListener(
+"cwSmartArtCategorySelected",
+function(e){
+
+
+
+    if(!e.detail){
+
+        return;
+
+    }
+
+
+
+
+
+    CampusWord2007Simulateur
+    .SmartArtGalleryEngine
+    .open(
+        e.detail.category
+    );
+
+
+
+},
+false
+);
+
+
+
+
+
+
+})();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
