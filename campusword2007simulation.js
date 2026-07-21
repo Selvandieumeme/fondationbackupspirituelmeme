@@ -33861,6 +33861,731 @@ console.log(
 
 
 
+/* =========================================================
+   CAMPUS WORD 2007 SIMULATEUR
+
+   SMARTART RESIZE + ROTATE ENGINE
+   BLOCK 6
+
+   FEATURES:
+   - Resize Engine
+   - Rotate Engine
+
+   COMPATIBLE WITH:
+   BLOCK 4 — SMARTART RENDER ENGINE
+   BLOCK 5 — BASIC INTERACTION ENGINE
+
+   NO MOVE ENGINE REPLACEMENT
+   NO TEXT ENGINE
+   NO LAYOUT ENGINE
+   NO CARET ENGINE
+   ISOLATED SYSTEM
+========================================================= */
+
+(function(){
+
+"use strict";
+
+
+
+
+
+if(!window.CampusWord2007Simulateur){
+
+    return;
+
+}
+
+
+
+
+
+
+
+const SmartArtResizeRotateEngine = {
+
+
+
+activeObject:null,
+
+resizing:false,
+
+rotating:false,
+
+
+
+resizeDirection:null,
+
+
+
+startX:0,
+
+startY:0,
+
+
+
+startWidth:0,
+
+startHeight:0,
+
+
+
+startAngle:0,
+
+
+
+
+
+
+
+
+
+
+selectObject:function(object){
+
+
+
+this.removeHandles();
+
+
+
+this.activeObject =
+object;
+
+
+
+this.addHandles(
+object
+);
+
+
+
+},
+
+
+
+
+
+
+
+addHandles:function(object){
+
+
+
+if(
+object.querySelector(
+".cwSmartArtControlLayer"
+)
+){
+
+return;
+
+}
+
+
+
+
+
+
+const layer =
+document.createElement(
+"div"
+);
+
+
+
+layer.className =
+"cwSmartArtControlLayer";
+
+
+
+
+
+layer.innerHTML = `
+
+
+<div class="cwSmartArtResizeHandle tl"></div>
+
+<div class="cwSmartArtResizeHandle tr"></div>
+
+<div class="cwSmartArtResizeHandle bl"></div>
+
+<div class="cwSmartArtResizeHandle br"></div>
+
+
+<div class="cwSmartArtRotateHandle"></div>
+
+
+`;
+
+
+
+
+
+object.appendChild(
+layer
+);
+
+
+
+
+
+
+layer
+.querySelectorAll(
+".cwSmartArtResizeHandle"
+)
+.forEach((handle)=>{
+
+
+
+handle.addEventListener(
+"pointerdown",
+(e)=>{
+
+
+e.stopPropagation();
+
+
+this.startResize(
+e,
+object,
+handle
+);
+
+
+
+},
+false
+);
+
+
+
+});
+
+
+
+
+
+
+
+layer
+.querySelector(
+".cwSmartArtRotateHandle"
+)
+.addEventListener(
+"pointerdown",
+(e)=>{
+
+
+e.stopPropagation();
+
+
+this.startRotate(
+e,
+object
+);
+
+
+},
+false
+);
+
+
+
+},
+
+
+
+
+
+
+
+removeHandles:function(){
+
+
+
+document
+.querySelectorAll(
+".cwSmartArtControlLayer"
+)
+.forEach(function(layer){
+
+
+
+layer.remove();
+
+
+
+});
+
+
+
+},
+
+
+
+
+
+
+
+startResize:function(e,object,handle){
+
+
+
+this.resizing =
+true;
+
+
+
+this.activeObject =
+object;
+
+
+
+this.resizeDirection =
+Array
+.from(
+handle.classList
+)
+.find(function(c){
+
+return (
+c!=="cwSmartArtResizeHandle"
+);
+
+});
+
+
+
+
+
+this.startX =
+e.clientX;
+
+
+
+this.startY =
+e.clientY;
+
+
+
+this.startWidth =
+object.offsetWidth;
+
+
+
+this.startHeight =
+object.offsetHeight;
+
+
+
+},
+
+
+
+
+
+
+
+resize:function(e){
+
+
+
+if(
+!this.resizing ||
+!this.activeObject
+){
+
+return;
+
+}
+
+
+
+
+
+let width =
+this.startWidth +
+(
+e.clientX -
+this.startX
+);
+
+
+
+let height =
+this.startHeight +
+(
+e.clientY -
+this.startY
+);
+
+
+
+
+
+
+if(width < 50){
+
+width = 50;
+
+}
+
+
+
+if(height < 50){
+
+height = 50;
+
+}
+
+
+
+
+
+
+
+this.activeObject.style.width =
+width + "px";
+
+
+
+this.activeObject.style.height =
+height + "px";
+
+
+
+},
+
+
+
+
+
+
+
+startRotate:function(e,object){
+
+
+
+this.rotating =
+true;
+
+
+
+this.activeObject =
+object;
+
+
+
+
+
+
+const rect =
+object.getBoundingClientRect();
+
+
+
+
+
+const centerX =
+rect.left +
+rect.width / 2;
+
+
+
+const centerY =
+rect.top +
+rect.height / 2;
+
+
+
+
+
+
+this.rotateCenter = {
+
+x:centerX,
+
+y:centerY
+
+};
+
+
+
+},
+
+
+
+
+
+
+
+rotate:function(e){
+
+
+
+if(
+!this.rotating ||
+!this.activeObject
+){
+
+return;
+
+}
+
+
+
+
+
+const x =
+e.clientX -
+this.rotateCenter.x;
+
+
+
+const y =
+e.clientY -
+this.rotateCenter.y;
+
+
+
+
+
+
+const angle =
+Math.atan2(
+y,
+x
+)
+*
+(180 / Math.PI);
+
+
+
+
+
+
+
+this.activeObject.style.transform =
+
+"rotate("
+
++
+
+angle
+
++
+
+"deg)";
+
+
+
+
+
+},
+
+
+
+
+
+
+
+stop:function(){
+
+
+
+this.resizing =
+false;
+
+
+
+this.rotating =
+false;
+
+
+
+this.resizeDirection =
+null;
+
+
+
+}
+
+
+
+
+
+
+
+};
+
+
+
+
+
+
+
+
+
+CampusWord2007Simulateur
+.SmartArtResizeRotateEngine =
+SmartArtResizeRotateEngine;
+
+
+
+
+
+
+
+
+/*
+=========================================================
+CONNECT POINTER EVENTS
+=========================================================
+*/
+
+
+
+document.addEventListener(
+"pointerdown",
+function(e){
+
+
+
+const object =
+e.target.closest(
+".cwSmartArtObject"
+);
+
+
+
+
+
+if(
+!object
+){
+
+return;
+
+}
+
+
+
+
+
+if(
+e.target.closest(
+".cwSmartArtResizeHandle"
+)
+||
+e.target.closest(
+".cwSmartArtRotateHandle"
+)
+){
+
+return;
+
+}
+
+
+
+
+
+SmartArtResizeRotateEngine
+.selectObject(
+object
+);
+
+
+
+},
+false
+);
+
+
+
+
+
+
+
+
+
+document.addEventListener(
+"pointermove",
+function(e){
+
+
+
+SmartArtResizeRotateEngine
+.resize(
+e
+);
+
+
+
+SmartArtResizeRotateEngine
+.rotate(
+e
+);
+
+
+
+},
+false
+);
+
+
+
+
+
+
+
+
+document.addEventListener(
+"pointerup",
+function(){
+
+
+
+SmartArtResizeRotateEngine
+.stop();
+
+
+
+},
+false
+);
+
+
+
+
+
+
+
+
+
+console.log(
+"SmartArt Resize + Rotate Engine Ready"
+);
+
+
+
+
+
+
+})();
+
+
+
+
+
+
+
+
+
+
+
 
 
 
