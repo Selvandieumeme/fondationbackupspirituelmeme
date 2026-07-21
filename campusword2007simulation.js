@@ -33711,6 +33711,559 @@ window.CampusWordSelectedSmartArt
 
 
 
+/* =========================================================
+   CAMPUS WORD 2007 SIMULATEUR
+   SMARTART MOVE + RESIZE ENGINE
+   BLOCK 5B
+   MOVE + 8 HANDLE RESIZE
+   TOUCH + MOUSE SUPPORT
+   WORKS WITH BLOCK 4 + BLOCK 5A
+   ISOLATED SYSTEM
+========================================================= */
+
+(function(){
+
+"use strict";
+
+
+
+let moving = false;
+
+let resizing = false;
+
+
+let activeSmartArt = null;
+
+
+let resizeDirection = null;
+
+
+
+let startX = 0;
+
+let startY = 0;
+
+
+let startLeft = 0;
+
+let startTop = 0;
+
+
+let startWidth = 0;
+
+let startHeight = 0;
+
+
+
+
+
+
+
+
+
+/* =========================
+   MOVE SMARTART
+========================= */
+
+
+document.addEventListener(
+"pointerdown",
+function(e){
+
+
+
+const smartArt =
+e.target.closest(
+".cwSmartArtObject"
+);
+
+
+
+const handle =
+e.target.closest(
+".cwSmartArtHandle"
+);
+
+
+
+
+
+if(!smartArt || handle){
+
+return;
+
+}
+
+
+
+
+activeSmartArt =
+smartArt;
+
+
+
+moving = true;
+
+
+
+startX =
+e.clientX;
+
+
+startY =
+e.clientY;
+
+
+
+startLeft =
+smartArt.offsetLeft;
+
+
+startTop =
+smartArt.offsetTop;
+
+
+
+
+
+smartArt.setPointerCapture(
+e.pointerId
+);
+
+
+
+e.preventDefault();
+
+
+
+},
+{
+passive:false
+}
+);
+
+
+
+
+
+
+
+
+
+document.addEventListener(
+"pointermove",
+function(e){
+
+
+
+if(
+!moving ||
+!activeSmartArt
+){
+
+return;
+
+}
+
+
+
+
+const dx =
+e.clientX - startX;
+
+
+
+const dy =
+e.clientY - startY;
+
+
+
+
+
+activeSmartArt.style.left =
+(
+startLeft + dx
+)
++
+"px";
+
+
+
+
+
+activeSmartArt.style.top =
+(
+startTop + dy
+)
++
+"px";
+
+
+
+
+
+if(
+window.CampusWordRefreshSmartArtHandles
+){
+
+window.CampusWordRefreshSmartArtHandles();
+
+}
+
+
+
+
+
+},
+{
+passive:false
+}
+);
+
+
+
+
+
+
+
+
+
+document.addEventListener(
+"pointerup",
+function(){
+
+
+moving = false;
+
+
+},
+false
+);
+
+
+
+
+
+
+
+
+
+
+
+
+/* =========================
+   RESIZE START
+========================= */
+
+
+document.addEventListener(
+"pointerdown",
+function(e){
+
+
+
+const handle =
+e.target.closest(
+".cwSmartArtHandle"
+);
+
+
+
+if(!handle){
+
+return;
+
+}
+
+
+
+
+activeSmartArt =
+window.CampusWordSelectedSmartArt;
+
+
+
+if(!activeSmartArt){
+
+return;
+
+}
+
+
+
+
+
+resizeDirection =
+Array.from(
+handle.classList
+)
+.find(
+c =>
+c !== "cwSmartArtHandle"
+);
+
+
+
+
+
+startX =
+e.clientX;
+
+
+startY =
+e.clientY;
+
+
+
+startWidth =
+activeSmartArt.offsetWidth;
+
+
+startHeight =
+activeSmartArt.offsetHeight;
+
+
+
+startLeft =
+activeSmartArt.offsetLeft;
+
+
+startTop =
+activeSmartArt.offsetTop;
+
+
+
+
+
+resizing = true;
+
+
+
+e.preventDefault();
+
+
+
+},
+{
+passive:false
+}
+);
+
+
+
+
+
+
+
+
+
+
+
+/* =========================
+   RESIZE ACTION
+========================= */
+
+
+document.addEventListener(
+"pointermove",
+function(e){
+
+
+
+if(
+!resizing ||
+!activeSmartArt
+){
+
+return;
+
+}
+
+
+
+
+
+let width =
+startWidth;
+
+
+let height =
+startHeight;
+
+
+
+let left =
+startLeft;
+
+
+let top =
+startTop;
+
+
+
+
+const dx =
+e.clientX - startX;
+
+
+const dy =
+e.clientY - startY;
+
+
+
+
+
+
+if(
+resizeDirection.includes("e")
+){
+
+width =
+startWidth + dx;
+
+}
+
+
+
+
+if(
+resizeDirection.includes("s")
+){
+
+height =
+startHeight + dy;
+
+}
+
+
+
+
+if(
+resizeDirection.includes("w")
+){
+
+width =
+startWidth - dx;
+
+left =
+startLeft + dx;
+
+}
+
+
+
+
+
+if(
+resizeDirection.includes("n")
+){
+
+height =
+startHeight - dy;
+
+top =
+startTop + dy;
+
+}
+
+
+
+
+
+if(width < 60){
+
+width = 60;
+
+}
+
+
+
+if(height < 40){
+
+height = 40;
+
+}
+
+
+
+
+
+
+activeSmartArt.style.width =
+width + "px";
+
+
+
+activeSmartArt.style.height =
+height + "px";
+
+
+
+activeSmartArt.style.left =
+left + "px";
+
+
+
+activeSmartArt.style.top =
+top + "px";
+
+
+
+
+
+
+if(
+window.CampusWordRefreshSmartArtHandles
+){
+
+window.CampusWordRefreshSmartArtHandles();
+
+}
+
+
+
+
+
+},
+{
+passive:false
+}
+);
+
+
+
+
+
+
+
+
+
+document.addEventListener(
+"pointerup",
+function(){
+
+
+
+resizing = false;
+
+
+resizeDirection = null;
+
+
+activeSmartArt = null;
+
+
+
+},
+false
+);
+
+
+
+
+
+
+})();
 
 
 
