@@ -33425,27 +33425,27 @@ false
 /* =========================================================
    CAMPUS WORD 2007 SIMULATEUR
 
-   SMARTART INTERACTION ENGINE v1.0.0
+   SMARTART BASIC INTERACTION ENGINE
    BLOCK 5
 
    FEATURES:
    - Selection Engine
    - Move / Drag Engine
-   - Resize Engine
-   - Rotate Engine
 
    COMPATIBLE WITH:
-   BLOCK 1 — SmartArt Dropdown Engine
-   BLOCK 2 — SmartArt Category Engine
-   BLOCK 3 — SmartArt Gallery Engine
-   BLOCK 4 — SmartArt Render Engine
+   BLOCK 1 — SMARTART DROPDOWN ENGINE
+   BLOCK 2 — SMARTART CATEGORY ENGINE
+   BLOCK 3 — SMARTART GALLERY ENGINE
+   BLOCK 4 — SMARTART RENDER ENGINE
 
-   NO RIBBON INTERFERENCE
-   NO CARET INTERFERENCE
-   NO TEXT SELECTION INTERFERENCE
+   NO RESIZE
+   NO ROTATE
+   NO TEXT EDITING
+   NO LAYOUT ENGINE
+   NO CARET ENGINE
+   NO DOCUMENT ENGINE
    ISOLATED SYSTEM
 ========================================================= */
-
 
 (function(){
 
@@ -33466,35 +33466,50 @@ if(!window.CampusWord2007Simulateur){
 
 
 
+
 const SmartArtInteractionEngine = {
 
 
 
 
-
-selected:null,
-
+selectedObject:null,
 
 
 
 
-
-/* =========================================================
-   SELECTION ENGINE
-========================================================= */
-
-
-select(object){
+dragging:false,
 
 
 
-    this.clearSelection();
+offsetX:0,
+
+offsetY:0,
 
 
 
 
-    this.selected =
-    object;
+
+
+
+select:function(object){
+
+
+
+    document
+    .querySelectorAll(
+        ".cwSmartArtObject"
+    )
+    .forEach(function(item){
+
+
+
+        item.classList.remove(
+            "cwSmartArtSelected"
+        );
+
+
+    });
+
 
 
 
@@ -33508,12 +33523,67 @@ select(object){
 
 
 
-    this.createHandles(
+
+    this.selectedObject =
+    object;
+
+
+
+},
+
+
+
+
+
+
+
+startDrag:function(e,object){
+
+
+
+    this.dragging =
+    true;
+
+
+
+
+
+    this.select(
         object
     );
 
 
 
+
+
+    const rect =
+    object.getBoundingClientRect();
+
+
+
+
+
+    this.offsetX =
+    e.clientX - rect.left;
+
+
+
+
+
+    this.offsetY =
+    e.clientY - rect.top;
+
+
+
+
+
+    object.classList.add(
+        "cwSmartArtMoving"
+    );
+
+
+
+
 },
 
 
@@ -33522,52 +33592,78 @@ select(object){
 
 
 
-clearSelection(){
+move:function(e){
 
 
 
-    document
-    .querySelectorAll(
-        ".cwSmartArtSelected"
+    if(
+    !this.dragging ||
+    !this.selectedObject
+    ){
+
+        return;
+
+    }
+
+
+
+
+
+
+    const parent =
+    this.selectedObject
+    .offsetParent;
+
+
+
+
+
+
+    const parentRect =
+    parent
+    ?
+    parent.getBoundingClientRect()
+    :
+    {
+        left:0,
+        top:0
+    };
+
+
+
+
+
+
+
+
+    this.selectedObject.style.left =
+
+    (
+        e.clientX -
+        parentRect.left -
+        this.offsetX
+
     )
-    .forEach(function(item){
-
-
-
-        item.classList.remove(
-            "cwSmartArtSelected"
-        );
-
-
-
-    });
+    +
+    "px";
 
 
 
 
 
 
-    document
-    .querySelectorAll(
-        ".cwSmartArtResizeHandle, .cwSmartArtRotateHandle, .cwSmartArtRotateLine"
+    this.selectedObject.style.top =
+
+    (
+        e.clientY -
+        parentRect.top -
+        this.offsetY
+
     )
-    .forEach(function(handle){
+    +
+    "px";
 
 
-
-        handle.remove();
-
-
-
-    });
-
-
-
-
-
-
-    this.selected =
-    null;
 
 
 
@@ -33579,669 +33675,29 @@ clearSelection(){
 
 
 
-/* =========================================================
-   HANDLE CREATOR
-========================================================= */
-
-
-createHandles(object){
+stopDrag:function(){
 
 
 
-    const positions = [
-
-        "tl",
-        "tr",
-        "bl",
-        "br"
-
-    ];
+    this.dragging =
+    false;
 
 
 
 
 
-
-    positions.forEach(function(position){
-
+    if(this.selectedObject){
 
 
-        const handle =
-        document.createElement(
-            "div"
+
+        this.selectedObject.classList.remove(
+            "cwSmartArtMoving"
         );
 
 
+    }
 
-        handle.className =
-        "cwSmartArtResizeHandle " + position;
 
-
-
-
-        handle.dataset.handle =
-        position;
-
-
-
-
-        object.appendChild(
-            handle
-        );
-
-
-
-    });
-
-
-
-
-
-
-
-
-    const line =
-    document.createElement(
-        "div"
-    );
-
-
-
-    line.className =
-    "cwSmartArtRotateLine";
-
-
-
-    object.appendChild(
-        line
-    );
-
-
-
-
-
-
-
-
-    const rotate =
-    document.createElement(
-        "div"
-    );
-
-
-
-    rotate.className =
-    "cwSmartArtRotateHandle";
-
-
-
-    object.appendChild(
-        rotate
-    );
-
-
-
-
-
-},
-
-
-
-
-
-
-
-/* =========================================================
-   MOVE / DRAG ENGINE
-========================================================= */
-
-
-enableDrag(object){
-
-
-
-let startX = 0;
-
-let startY = 0;
-
-
-let startLeft = 0;
-
-let startTop = 0;
-
-
-
-
-
-
-object.addEventListener(
-"pointerdown",
-function(e){
-
-
-
-if(
-e.target.classList.contains(
-"cwSmartArtResizeHandle"
-)
-||
-e.target.classList.contains(
-"cwSmartArtRotateHandle"
-)
-){
-
-return;
-
-}
-
-
-
-
-
-
-SmartArtInteractionEngine.select(
-object
-);
-
-
-
-
-
-
-object.classList.add(
-"cwSmartArtMoving"
-);
-
-
-
-
-
-startX =
-e.clientX;
-
-
-
-startY =
-e.clientY;
-
-
-
-
-
-startLeft =
-object.offsetLeft;
-
-
-
-startTop =
-object.offsetTop;
-
-
-
-
-
-
-object.setPointerCapture(
-e.pointerId
-);
-
-
-
-
-
-function move(ev){
-
-
-
-const dx =
-ev.clientX - startX;
-
-
-
-const dy =
-ev.clientY - startY;
-
-
-
-
-
-object.style.left =
-(
-startLeft + dx
-)
-+
-"px";
-
-
-
-
-
-object.style.top =
-(
-startTop + dy
-)
-+
-"px";
-
-
-
-}
-
-
-
-
-
-
-
-function stop(ev){
-
-
-
-object.classList.remove(
-"cwSmartArtMoving"
-);
-
-
-
-
-object.releasePointerCapture(
-ev.pointerId
-);
-
-
-
-
-object.removeEventListener(
-"pointermove",
-move
-);
-
-
-
-object.removeEventListener(
-"pointerup",
-stop
-);
-
-
-
-}
-
-
-
-
-
-
-
-object.addEventListener(
-"pointermove",
-move
-);
-
-
-
-object.addEventListener(
-"pointerup",
-stop
-);
-
-
-
-});
-
-
-
-},
-
-
-
-
-
-
-
-/* =========================================================
-   RESIZE ENGINE
-========================================================= */
-
-
-enableResize(object){
-
-
-
-object.addEventListener(
-"pointerdown",
-function(e){
-
-
-
-if(
-!e.target.classList.contains(
-"cwSmartArtResizeHandle"
-)
-){
-
-return;
-
-}
-
-
-
-
-
-
-const handle =
-e.target.dataset.handle;
-
-
-
-
-
-const startWidth =
-object.offsetWidth;
-
-
-
-const startHeight =
-object.offsetHeight;
-
-
-
-const startX =
-e.clientX;
-
-
-
-const startY =
-e.clientY;
-
-
-
-
-
-
-
-
-function resize(ev){
-
-
-
-let width =
-startWidth;
-
-
-
-let height =
-startHeight;
-
-
-
-
-
-
-
-if(
-handle.includes("r")
-){
-
-width +=
-ev.clientX - startX;
-
-}
-
-
-
-
-
-if(
-handle.includes("b")
-){
-
-height +=
-ev.clientY - startY;
-
-}
-
-
-
-
-
-
-if(
-handle.includes("l")
-){
-
-width -=
-ev.clientX - startX;
-
-}
-
-
-
-
-
-if(
-handle.includes("t")
-){
-
-height -=
-ev.clientY - startY;
-
-}
-
-
-
-
-
-
-
-if(width > 80){
-
-object.style.width =
-width + "px";
-
-}
-
-
-
-if(height > 50){
-
-object.style.height =
-height + "px";
-
-}
-
-
-
-
-}
-
-
-
-
-
-
-
-function stop(){
-
-
-
-document.removeEventListener(
-"pointermove",
-resize
-);
-
-
-
-document.removeEventListener(
-"pointerup",
-stop
-);
-
-
-
-}
-
-
-
-
-
-
-
-document.addEventListener(
-"pointermove",
-resize
-);
-
-
-
-document.addEventListener(
-"pointerup",
-stop
-);
-
-
-
-
-
-
-});
-
-
-
-},
-
-
-
-
-
-
-
-
-
-/* =========================================================
-   ROTATE ENGINE
-========================================================= */
-
-
-enableRotate(object){
-
-
-
-object.addEventListener(
-"pointerdown",
-function(e){
-
-
-
-if(
-!e.target.classList.contains(
-"cwSmartArtRotateHandle"
-)
-){
-
-return;
-
-}
-
-
-
-
-
-
-const rect =
-object.getBoundingClientRect();
-
-
-
-
-
-
-function rotate(ev){
-
-
-
-const centerX =
-rect.left +
-rect.width / 2;
-
-
-
-const centerY =
-rect.top +
-rect.height / 2;
-
-
-
-
-
-const angle =
-Math.atan2(
-ev.clientY - centerY,
-ev.clientX - centerX
-)
-*
-(180 / Math.PI);
-
-
-
-
-
-
-object.style.transform =
-"rotate(" +
-angle +
-"deg)";
-
-
-
-}
-
-
-
-
-
-
-
-function stop(){
-
-
-
-document.removeEventListener(
-"pointermove",
-rotate
-);
-
-
-
-document.removeEventListener(
-"pointerup",
-stop
-);
-
-
-
-}
-
-
-
-
-
-
-document.addEventListener(
-"pointermove",
-rotate
-);
-
-
-
-document.addEventListener(
-"pointerup",
-stop
-);
-
-
-
-});
 
 
 
@@ -34262,49 +33718,9 @@ stop
 
 
 
-/* =========================================================
-   INITIALIZE EXISTING SMARTART OBJECTS
-========================================================= */
-
-
-function connectSmartArts(){
-
-
-
-document
-.querySelectorAll(
-".cwSmartArtObject"
-)
-.forEach(function(object){
-
-
-
-SmartArtInteractionEngine
-.enableDrag(
-object
-);
-
-
-
-SmartArtInteractionEngine
-.enableResize(
-object
-);
-
-
-
-SmartArtInteractionEngine
-.enableRotate(
-object
-);
-
-
-
-});
-
-
-
-}
+CampusWord2007Simulateur
+.SmartArtInteractionEngine =
+SmartArtInteractionEngine;
 
 
 
@@ -34314,40 +33730,95 @@ object
 
 
 
-/* =========================================================
-   SMARTART CLICK SELECTION
-========================================================= */
+/*
+=========================================================
+SMARTART SELECTION + DRAG EVENTS
+=========================================================
+*/
+
 
 
 document.addEventListener(
-"click",
+"pointerdown",
 function(e){
 
 
 
-const object =
-e.target.closest(
-".cwSmartArtObject"
+    const object =
+    e.target.closest(
+        ".cwSmartArtObject"
+    );
+
+
+
+
+
+
+    if(!object){
+
+        return;
+
+    }
+
+
+
+
+
+
+    SmartArtInteractionEngine
+    .startDrag(
+        e,
+        object
+    );
+
+
+
+
+
+
+},
+false
 );
 
 
 
 
 
-if(!object){
-
-return;
-
-}
 
 
 
+document.addEventListener(
+"pointermove",
+function(e){
 
 
 
-SmartArtInteractionEngine.select(
-object
+    SmartArtInteractionEngine
+    .move(
+        e
+    );
+
+
+
+},
+false
 );
+
+
+
+
+
+
+
+
+document.addEventListener(
+"pointerup",
+function(){
+
+
+
+    SmartArtInteractionEngine
+    .stopDrag();
 
 
 
@@ -34363,62 +33834,34 @@ false
 
 
 
-/* =========================================================
-   GLOBAL EXPORT
-========================================================= */
-
-
-CampusWord2007Simulateur
-.SmartArtInteractionEngine =
-SmartArtInteractionEngine;
-
-
-
-
-
-
-document.addEventListener(
-"cwSmartArtInserted",
-function(){
-
-
-
-connectSmartArts();
-
-
-
-});
-
-
-
-
-
-
-setTimeout(function(){
-
-
-
-connectSmartArts();
-
-
-
-},500);
-
-
-
-
-
-
-
 console.log(
-"Campus Word SmartArt Interaction Engine Ready"
+"SmartArt Basic Interaction Engine Ready"
 );
 
 
 
 
 
+
+
 })();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
