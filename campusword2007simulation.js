@@ -33422,6 +33422,1474 @@ false
 
 
 
+/* =========================================================
+   CAMPUS WORD 2007 SIMULATEUR
+
+   SMARTART INTERACTION ENGINE v1.0.0
+   BLOCK 5
+
+   FEATURES:
+   - Selection Engine
+   - Move / Drag Engine
+   - Resize Engine
+   - Rotate Engine
+
+   COMPATIBLE WITH:
+   BLOCK 1 — SmartArt Dropdown Engine
+   BLOCK 2 — SmartArt Category Engine
+   BLOCK 3 — SmartArt Gallery Engine
+   BLOCK 4 — SmartArt Render Engine
+
+   NO RIBBON INTERFERENCE
+   NO CARET INTERFERENCE
+   NO TEXT SELECTION INTERFERENCE
+   ISOLATED SYSTEM
+========================================================= */
+
+
+(function(){
+
+"use strict";
+
+
+
+
+
+if(!window.CampusWord2007Simulateur){
+
+    return;
+
+}
+
+
+
+
+
+
+const SmartArtInteractionEngine = {
+
+
+
+
+
+selected:null,
+
+
+
+
+
+
+/* =========================================================
+   SELECTION ENGINE
+========================================================= */
+
+
+select(object){
+
+
+
+    this.clearSelection();
+
+
+
+
+    this.selected =
+    object;
+
+
+
+
+
+    object.classList.add(
+        "cwSmartArtSelected"
+    );
+
+
+
+
+
+    this.createHandles(
+        object
+    );
+
+
+
+},
+
+
+
+
+
+
+
+clearSelection(){
+
+
+
+    document
+    .querySelectorAll(
+        ".cwSmartArtSelected"
+    )
+    .forEach(function(item){
+
+
+
+        item.classList.remove(
+            "cwSmartArtSelected"
+        );
+
+
+
+    });
+
+
+
+
+
+
+    document
+    .querySelectorAll(
+        ".cwSmartArtResizeHandle, .cwSmartArtRotateHandle, .cwSmartArtRotateLine"
+    )
+    .forEach(function(handle){
+
+
+
+        handle.remove();
+
+
+
+    });
+
+
+
+
+
+
+    this.selected =
+    null;
+
+
+
+},
+
+
+
+
+
+
+
+/* =========================================================
+   HANDLE CREATOR
+========================================================= */
+
+
+createHandles(object){
+
+
+
+    const positions = [
+
+        "tl",
+        "tr",
+        "bl",
+        "br"
+
+    ];
+
+
+
+
+
+
+    positions.forEach(function(position){
+
+
+
+        const handle =
+        document.createElement(
+            "div"
+        );
+
+
+
+        handle.className =
+        "cwSmartArtResizeHandle " + position;
+
+
+
+
+        handle.dataset.handle =
+        position;
+
+
+
+
+        object.appendChild(
+            handle
+        );
+
+
+
+    });
+
+
+
+
+
+
+
+
+    const line =
+    document.createElement(
+        "div"
+    );
+
+
+
+    line.className =
+    "cwSmartArtRotateLine";
+
+
+
+    object.appendChild(
+        line
+    );
+
+
+
+
+
+
+
+
+    const rotate =
+    document.createElement(
+        "div"
+    );
+
+
+
+    rotate.className =
+    "cwSmartArtRotateHandle";
+
+
+
+    object.appendChild(
+        rotate
+    );
+
+
+
+
+
+},
+
+
+
+
+
+
+
+/* =========================================================
+   MOVE / DRAG ENGINE
+========================================================= */
+
+
+enableDrag(object){
+
+
+
+let startX = 0;
+
+let startY = 0;
+
+
+let startLeft = 0;
+
+let startTop = 0;
+
+
+
+
+
+
+object.addEventListener(
+"pointerdown",
+function(e){
+
+
+
+if(
+e.target.classList.contains(
+"cwSmartArtResizeHandle"
+)
+||
+e.target.classList.contains(
+"cwSmartArtRotateHandle"
+)
+){
+
+return;
+
+}
+
+
+
+
+
+
+SmartArtInteractionEngine.select(
+object
+);
+
+
+
+
+
+
+object.classList.add(
+"cwSmartArtMoving"
+);
+
+
+
+
+
+startX =
+e.clientX;
+
+
+
+startY =
+e.clientY;
+
+
+
+
+
+startLeft =
+object.offsetLeft;
+
+
+
+startTop =
+object.offsetTop;
+
+
+
+
+
+
+object.setPointerCapture(
+e.pointerId
+);
+
+
+
+
+
+function move(ev){
+
+
+
+const dx =
+ev.clientX - startX;
+
+
+
+const dy =
+ev.clientY - startY;
+
+
+
+
+
+object.style.left =
+(
+startLeft + dx
+)
++
+"px";
+
+
+
+
+
+object.style.top =
+(
+startTop + dy
+)
++
+"px";
+
+
+
+}
+
+
+
+
+
+
+
+function stop(ev){
+
+
+
+object.classList.remove(
+"cwSmartArtMoving"
+);
+
+
+
+
+object.releasePointerCapture(
+ev.pointerId
+);
+
+
+
+
+object.removeEventListener(
+"pointermove",
+move
+);
+
+
+
+object.removeEventListener(
+"pointerup",
+stop
+);
+
+
+
+}
+
+
+
+
+
+
+
+object.addEventListener(
+"pointermove",
+move
+);
+
+
+
+object.addEventListener(
+"pointerup",
+stop
+);
+
+
+
+});
+
+
+
+},
+
+
+
+
+
+
+
+/* =========================================================
+   RESIZE ENGINE
+========================================================= */
+
+
+enableResize(object){
+
+
+
+object.addEventListener(
+"pointerdown",
+function(e){
+
+
+
+if(
+!e.target.classList.contains(
+"cwSmartArtResizeHandle"
+)
+){
+
+return;
+
+}
+
+
+
+
+
+
+const handle =
+e.target.dataset.handle;
+
+
+
+
+
+const startWidth =
+object.offsetWidth;
+
+
+
+const startHeight =
+object.offsetHeight;
+
+
+
+const startX =
+e.clientX;
+
+
+
+const startY =
+e.clientY;
+
+
+
+
+
+
+
+
+function resize(ev){
+
+
+
+let width =
+startWidth;
+
+
+
+let height =
+startHeight;
+
+
+
+
+
+
+
+if(
+handle.includes("r")
+){
+
+width +=
+ev.clientX - startX;
+
+}
+
+
+
+
+
+if(
+handle.includes("b")
+){
+
+height +=
+ev.clientY - startY;
+
+}
+
+
+
+
+
+
+if(
+handle.includes("l")
+){
+
+width -=
+ev.clientX - startX;
+
+}
+
+
+
+
+
+if(
+handle.includes("t")
+){
+
+height -=
+ev.clientY - startY;
+
+}
+
+
+
+
+
+
+
+if(width > 80){
+
+object.style.width =
+width + "px";
+
+}
+
+
+
+if(height > 50){
+
+object.style.height =
+height + "px";
+
+}
+
+
+
+
+}
+
+
+
+
+
+
+
+function stop(){
+
+
+
+document.removeEventListener(
+"pointermove",
+resize
+);
+
+
+
+document.removeEventListener(
+"pointerup",
+stop
+);
+
+
+
+}
+
+
+
+
+
+
+
+document.addEventListener(
+"pointermove",
+resize
+);
+
+
+
+document.addEventListener(
+"pointerup",
+stop
+);
+
+
+
+
+
+
+});
+
+
+
+},
+
+
+
+
+
+
+
+
+
+/* =========================================================
+   ROTATE ENGINE
+========================================================= */
+
+
+enableRotate(object){
+
+
+
+object.addEventListener(
+"pointerdown",
+function(e){
+
+
+
+if(
+!e.target.classList.contains(
+"cwSmartArtRotateHandle"
+)
+){
+
+return;
+
+}
+
+
+
+
+
+
+const rect =
+object.getBoundingClientRect();
+
+
+
+
+
+
+function rotate(ev){
+
+
+
+const centerX =
+rect.left +
+rect.width / 2;
+
+
+
+const centerY =
+rect.top +
+rect.height / 2;
+
+
+
+
+
+const angle =
+Math.atan2(
+ev.clientY - centerY,
+ev.clientX - centerX
+)
+*
+(180 / Math.PI);
+
+
+
+
+
+
+object.style.transform =
+"rotate(" +
+angle +
+"deg)";
+
+
+
+}
+
+
+
+
+
+
+
+function stop(){
+
+
+
+document.removeEventListener(
+"pointermove",
+rotate
+);
+
+
+
+document.removeEventListener(
+"pointerup",
+stop
+);
+
+
+
+}
+
+
+
+
+
+
+document.addEventListener(
+"pointermove",
+rotate
+);
+
+
+
+document.addEventListener(
+"pointerup",
+stop
+);
+
+
+
+});
+
+
+
+}
+
+
+
+
+
+
+};
+
+
+
+
+
+
+
+
+
+/* =========================================================
+   INITIALIZE EXISTING SMARTART OBJECTS
+========================================================= */
+
+
+function connectSmartArts(){
+
+
+
+document
+.querySelectorAll(
+".cwSmartArtObject"
+)
+.forEach(function(object){
+
+
+
+SmartArtInteractionEngine
+.enableDrag(
+object
+);
+
+
+
+SmartArtInteractionEngine
+.enableResize(
+object
+);
+
+
+
+SmartArtInteractionEngine
+.enableRotate(
+object
+);
+
+
+
+});
+
+
+
+}
+
+
+
+
+
+
+
+
+
+/* =========================================================
+   SMARTART CLICK SELECTION
+========================================================= */
+
+
+document.addEventListener(
+"click",
+function(e){
+
+
+
+const object =
+e.target.closest(
+".cwSmartArtObject"
+);
+
+
+
+
+
+if(!object){
+
+return;
+
+}
+
+
+
+
+
+
+SmartArtInteractionEngine.select(
+object
+);
+
+
+
+},
+false
+);
+
+
+
+
+
+
+
+
+
+/* =========================================================
+   GLOBAL EXPORT
+========================================================= */
+
+
+CampusWord2007Simulateur
+.SmartArtInteractionEngine =
+SmartArtInteractionEngine;
+
+
+
+
+
+
+document.addEventListener(
+"cwSmartArtInserted",
+function(){
+
+
+
+connectSmartArts();
+
+
+
+});
+
+
+
+
+
+
+setTimeout(function(){
+
+
+
+connectSmartArts();
+
+
+
+},500);
+
+
+
+
+
+
+
+console.log(
+"Campus Word SmartArt Interaction Engine Ready"
+);
+
+
+
+
+
+})();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* =========================================================
+   CAMPUS WORD 2007 SIMULATEUR
+   SMARTART TEXT EDITING ENGINE v1.0.0
+   BLOCK 6
+
+   DOUBLE CLICK TEXT EDIT MODE
+   SMARTART INTERNAL TEXT LAYER
+
+   COMPATIBLE WITH:
+   BLOCK 1 — DROPDOWN ENGINE
+   BLOCK 2 — CATEGORY ENGINE
+   BLOCK 3 — GALLERY ENGINE
+   BLOCK 4 — RENDER ENGINE
+   BLOCK 5 — INTERACTION ENGINE
+
+   NO LAYOUT ENGINE ACCESS
+   NO CARET ENGINE ACCESS
+   NO DOCUMENT ENGINE ACCESS
+   ISOLATED SYSTEM
+========================================================= */
+
+(function(){
+
+"use strict";
+
+
+
+if(!window.CampusWord2007Simulateur){
+
+    return;
+
+}
+
+
+
+
+
+
+const SmartArtTextEditingEngine = {
+
+
+
+activeObject:null,
+
+
+
+
+
+
+
+enterEditMode:function(object){
+
+
+
+    if(
+    this.activeObject
+    ){
+
+        this.exitEditMode();
+
+    }
+
+
+
+
+
+
+    this.activeObject =
+    object;
+
+
+
+
+
+    object.classList.add(
+        "cwSmartArtTextEditing"
+    );
+
+
+
+
+
+
+    const svgArea =
+    object.querySelector(
+        ".cwSmartArtSVG"
+    );
+
+
+
+
+
+    if(!svgArea){
+
+        return;
+
+    }
+
+
+
+
+
+
+
+
+    let editor =
+    object.querySelector(
+        ".cwSmartArtTextEditor"
+    );
+
+
+
+
+
+
+    if(editor){
+
+        editor.focus();
+
+        return;
+
+    }
+
+
+
+
+
+
+
+
+    editor =
+    document.createElement(
+        "div"
+    );
+
+
+
+
+
+    editor.className =
+    "cwSmartArtTextEditor";
+
+
+
+
+
+
+    editor.contentEditable =
+    "true";
+
+
+
+
+
+
+
+    editor.innerHTML =
+    object.dataset.text
+    ||
+    "SmartArt Text";
+
+
+
+
+
+
+
+    object.appendChild(
+        editor
+    );
+
+
+
+
+
+
+    editor.focus();
+
+
+
+
+
+
+
+    this.bindEditorSave(
+        editor,
+        object
+    );
+
+
+
+
+
+},
+
+
+
+
+
+
+
+bindEditorSave:function(editor,object){
+
+
+
+    editor.addEventListener(
+    "input",
+    function(){
+
+
+
+        object.dataset.text =
+        editor.innerHTML;
+
+
+
+    },
+    false
+    );
+
+
+
+
+},
+
+
+
+
+
+
+
+exitEditMode:function(){
+
+
+
+    if(!this.activeObject){
+
+        return;
+
+    }
+
+
+
+
+
+
+    const editor =
+    this.activeObject.querySelector(
+        ".cwSmartArtTextEditor"
+    );
+
+
+
+
+
+
+    if(editor){
+
+
+        this.activeObject.dataset.text =
+        editor.innerHTML;
+
+
+
+        editor.remove();
+
+
+    }
+
+
+
+
+
+
+    this.activeObject.classList.remove(
+        "cwSmartArtTextEditing"
+    );
+
+
+
+
+
+
+    this.activeObject =
+    null;
+
+
+
+}
+
+
+
+
+
+
+};
+
+
+
+
+
+
+
+
+CampusWord2007Simulateur
+.SmartArtTextEditingEngine =
+SmartArtTextEditingEngine;
+
+
+
+
+
+
+
+
+
+/*
+=========================================================
+DOUBLE CLICK SMARTART OBJECT
+=========================================================
+*/
+
+
+document.addEventListener(
+"dblclick",
+function(e){
+
+
+
+    const object =
+    e.target.closest(
+        ".cwSmartArtObject"
+    );
+
+
+
+
+
+
+    if(!object){
+
+        return;
+
+    }
+
+
+
+
+
+
+
+    SmartArtTextEditingEngine
+    .enterEditMode(
+        object
+    );
+
+
+
+},
+false
+);
+
+
+
+
+
+
+
+
+
+/*
+=========================================================
+ESC CLOSE TEXT EDIT MODE
+=========================================================
+*/
+
+
+document.addEventListener(
+"keydown",
+function(e){
+
+
+
+    if(
+    e.key !== "Escape"
+    ){
+
+        return;
+
+    }
+
+
+
+
+
+
+    SmartArtTextEditingEngine
+    .exitEditMode();
+
+
+
+},
+false
+);
+
+
+
+
+
+
+
+
+
+console.log(
+"SmartArt Text Editing Engine Ready"
+);
+
+
+
+
+
+
+})();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
