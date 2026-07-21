@@ -33411,6 +33411,331 @@ false
 
 
 
+/* =========================================================
+   CAMPUS WORD 2007 SIMULATEUR
+   SMARTART HANDLES DISPLAY ENGINE
+   BLOCK 5A
+   SHOW 8 RESIZE HANDLES ONLY
+   NO MOVE
+   NO RESIZE ACTION
+   NO ROTATE
+   ISOLATED SYSTEM
+========================================================= */
+
+(function(){
+
+
+"use strict";
+
+
+
+let selectedSmartArt = null;
+
+
+
+
+function removeSmartArtHandles(){
+
+
+const old =
+document.querySelector(
+".cwSmartArtHandles"
+);
+
+
+
+if(old){
+
+old.remove();
+
+}
+
+
+
+}
+
+
+
+
+
+
+
+
+function createSmartArtHandles(
+smartArt
+){
+
+
+
+removeSmartArtHandles();
+
+
+
+
+const handlesBox =
+document.createElement(
+"div"
+);
+
+
+
+handlesBox.className =
+"cwSmartArtHandles";
+
+
+
+
+handlesBox.style.position =
+"absolute";
+
+
+
+handlesBox.style.left =
+smartArt.offsetLeft + "px";
+
+
+
+handlesBox.style.top =
+smartArt.offsetTop + "px";
+
+
+
+handlesBox.style.width =
+smartArt.offsetWidth + "px";
+
+
+
+handlesBox.style.height =
+smartArt.offsetHeight + "px";
+
+
+
+
+
+handlesBox.innerHTML = `
+
+
+<div class="cwSmartArtHandle nw"></div>
+
+<div class="cwSmartArtHandle n"></div>
+
+<div class="cwSmartArtHandle ne"></div>
+
+
+<div class="cwSmartArtHandle w"></div>
+
+<div class="cwSmartArtHandle e"></div>
+
+
+<div class="cwSmartArtHandle sw"></div>
+
+<div class="cwSmartArtHandle s"></div>
+
+<div class="cwSmartArtHandle se"></div>
+
+
+`;
+
+
+
+
+
+smartArt.parentElement.appendChild(
+handlesBox
+);
+
+
+
+}
+
+
+
+
+
+
+
+
+
+document.addEventListener(
+"pointerdown",
+function(e){
+
+
+
+const smartArt =
+e.target.closest(
+".cwSmartArtObject"
+);
+
+
+
+
+
+if(!smartArt){
+
+return;
+
+}
+
+
+
+
+selectedSmartArt =
+smartArt;
+
+
+
+window.CampusWordSelectedSmartArt =
+smartArt;
+
+
+
+
+
+createSmartArtHandles(
+smartArt
+);
+
+
+
+},
+{
+passive:true
+}
+);
+
+
+
+
+
+
+
+
+
+document.addEventListener(
+"pointerdown",
+function(e){
+
+
+
+const insideSmartArt =
+e.target.closest(
+".cwSmartArtObject"
+);
+
+
+
+const insideHandles =
+e.target.closest(
+".cwSmartArtHandles"
+);
+
+
+
+
+
+if(
+insideSmartArt ||
+insideHandles
+){
+
+return;
+
+}
+
+
+
+
+
+
+removeSmartArtHandles();
+
+
+
+selectedSmartArt = null;
+
+
+
+window.CampusWordSelectedSmartArt =
+null;
+
+
+
+
+},
+{
+passive:true
+}
+);
+
+
+
+
+
+
+
+
+
+window.CampusWordRefreshSmartArtHandles =
+function(){
+
+
+
+if(
+window.CampusWordSelectedSmartArt
+){
+
+
+createSmartArtHandles(
+window.CampusWordSelectedSmartArt
+);
+
+
+
+}
+
+
+
+};
+
+
+
+
+
+})();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
