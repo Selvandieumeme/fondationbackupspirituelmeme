@@ -6323,39 +6323,35 @@ bottom:-6px;
 
 
 
-
-
-
-
-
-
-
-
 /* =========================================================
    CAMPUS WORD 2007 SIMULATEUR
 
-   SMARTART RESIZE + ROTATE ENGINE
-   BLOCK 6 CSS
+   SMARTART MOVE + RESIZE ENGINE
+   BLOCK 5 CSS
 
-   RESIZE HANDLES + ROTATE HANDLE
+   8 RESIZE HANDLES
+
+   COMPATIBLE WITH:
+   BLOCK 5 JS
 
    ISOLATED SYSTEM
 ========================================================= */
 
 
+
+
+
 /* =========================
-   SMARTART CONTROL LAYER
+   SMARTART HANDLE CONTAINER
 ========================= */
 
-.cwSmartArtControlLayer{
+.cwSmartArtHandles{
 
     position:absolute;
 
-    inset:0;
-
     pointer-events:none;
 
-    z-index:20;
+    z-index:9999;
 
 }
 
@@ -6363,11 +6359,13 @@ bottom:-6px;
 
 
 
+
+
 /* =========================
-   RESIZE HANDLES
+   SMARTART HANDLE BASE
 ========================= */
 
-.cwSmartArtResizeHandle{
+.cwSmartArtHandle{
 
     position:absolute;
 
@@ -6375,115 +6373,59 @@ bottom:-6px;
 
     height:10px;
 
-    background:#2176ff;
+    background:#2563eb;
 
     border:2px solid white;
 
-    border-radius:2px;
+    border-radius:50%;
+
+    box-sizing:border-box;
 
     pointer-events:auto;
 
-    z-index:30;
+    z-index:10000;
 
 }
 
 
-
-
-
-/* TOP LEFT */
-
-.cwSmartArtResizeHandle.tl{
-
-    top:-6px;
-
-    left:-6px;
-
-    cursor:nwse-resize;
-
-}
-
-
-
-
-
-/* TOP RIGHT */
-
-.cwSmartArtResizeHandle.tr{
-
-    top:-6px;
-
-    right:-6px;
-
-    cursor:nesw-resize;
-
-}
-
-
-
-
-
-/* BOTTOM LEFT */
-
-.cwSmartArtResizeHandle.bl{
-
-    bottom:-6px;
-
-    left:-6px;
-
-    cursor:nesw-resize;
-
-}
-
-
-
-
-
-/* BOTTOM RIGHT */
-
-.cwSmartArtResizeHandle.br{
-
-    bottom:-6px;
-
-    right:-6px;
-
-    cursor:nwse-resize;
-
-}
 
 
 
 
 
 /* =========================
-   ROTATE HANDLE
+   NORTH WEST
 ========================= */
 
-.cwSmartArtRotateHandle{
+.cwSmartArtHandle-nw{
 
-    position:absolute;
+    left:-6px;
 
-    top:-35px;
+    top:-6px;
+
+    cursor:nwse-resize;
+
+}
+
+
+
+
+
+
+
+/* =========================
+   NORTH
+========================= */
+
+.cwSmartArtHandle-n{
 
     left:50%;
 
+    top:-6px;
+
     transform:translateX(-50%);
 
-    width:14px;
-
-    height:14px;
-
-    border-radius:50%;
-
-    background:#2176ff;
-
-    border:2px solid white;
-
-    pointer-events:auto;
-
-    cursor:grab;
-
-    z-index:30;
+    cursor:ns-resize;
 
 }
 
@@ -6491,8 +6433,130 @@ bottom:-6px;
 
 
 
-.cwSmartArtRotateHandle:active{
 
-    cursor:grabbing;
+
+/* =========================
+   NORTH EAST
+========================= */
+
+.cwSmartArtHandle-ne{
+
+    right:-6px;
+
+    top:-6px;
+
+    cursor:nesw-resize;
 
 }
+
+
+
+
+
+
+
+/* =========================
+   WEST
+========================= */
+
+.cwSmartArtHandle-w{
+
+    left:-6px;
+
+    top:50%;
+
+    transform:translateY(-50%);
+
+    cursor:ew-resize;
+
+}
+
+
+
+
+
+
+
+/* =========================
+   EAST
+========================= */
+
+.cwSmartArtHandle-e{
+
+    right:-6px;
+
+    top:50%;
+
+    transform:translateY(-50%);
+
+    cursor:ew-resize;
+
+}
+
+
+
+
+
+
+
+/* =========================
+   SOUTH WEST
+========================= */
+
+.cwSmartArtHandle-sw{
+
+    left:-6px;
+
+    bottom:-6px;
+
+    cursor:nesw-resize;
+
+}
+
+
+
+
+
+
+
+/* =========================
+   SOUTH
+========================= */
+
+.cwSmartArtHandle-s{
+
+    left:50%;
+
+    bottom:-6px;
+
+    transform:translateX(-50%);
+
+    cursor:ns-resize;
+
+}
+
+
+
+
+
+
+
+/* =========================
+   SOUTH EAST
+========================= */
+
+.cwSmartArtHandle-se{
+
+    right:-6px;
+
+    bottom:-6px;
+
+    cursor:nwse-resize;
+
+}
+
+
+
+
+
+
