@@ -32289,7 +32289,1105 @@ false
 
 
 
+/* =========================================================
+   CAMPUS WORD 2007 SIMULATEUR
+   SMARTART MODEL RENDER ENGINE v1.0.0
+   PART 1/3
+   SVG LIBRARY
+   LIST + PROCESS MODELS
+   ISOLATED SYSTEM
+========================================================= */
 
+
+(function(){
+
+"use strict";
+
+
+
+if(!CampusWord2007Simulateur){
+
+    return;
+
+}
+
+
+
+
+
+
+CampusWord2007Simulateur
+.SmartArtRenderEngine = {
+
+
+
+
+
+svgLibrary:{
+
+
+
+
+
+
+/* =========================================================
+   LIST CATEGORY
+========================================================= */
+
+
+
+"Basic List":`
+
+<svg viewBox="0 0 320 180">
+
+
+<rect x="20" y="25"
+width="90"
+height="45"
+rx="6"/>
+
+
+<rect x="20" y="95"
+width="90"
+height="45"
+rx="6"/>
+
+
+
+<line x1="125" y1="47"
+x2="285" y2="47"/>
+
+
+<line x1="125" y1="117"
+x2="285" y2="117"/>
+
+
+</svg>
+
+`,
+
+
+
+
+
+
+
+"Horizontal List":`
+
+<svg viewBox="0 0 360 120">
+
+
+<circle cx="45" cy="60" r="25"/>
+
+
+<line x1="75" y1="60"
+x2="120" y2="60"/>
+
+
+<circle cx="150" cy="60" r="25"/>
+
+
+<line x1="180" y1="60"
+x2="225" y2="60"/>
+
+
+<circle cx="255" cy="60" r="25"/>
+
+
+</svg>
+
+`,
+
+
+
+
+
+
+
+
+"Vertical List":`
+
+<svg viewBox="0 0 200 320">
+
+
+<rect x="55" y="20"
+width="90"
+height="45"
+rx="6"/>
+
+
+<rect x="55" y="120"
+width="90"
+height="45"
+rx="6"/>
+
+
+<rect x="55" y="220"
+width="90"
+height="45"
+rx="6"/>
+
+
+</svg>
+
+`,
+
+
+
+
+
+
+
+
+"Picture List":`
+
+<svg viewBox="0 0 350 160">
+
+
+<circle cx="45" cy="45"
+r="25"/>
+
+
+<circle cx="45" cy="115"
+r="25"/>
+
+
+<rect x="90" y="25"
+width="220"
+height="40"
+rx="5"/>
+
+
+<rect x="90" y="95"
+width="220"
+height="40"
+rx="5"/>
+
+
+</svg>
+
+`,
+
+
+
+
+
+
+
+
+
+/* =========================================================
+   PROCESS CATEGORY
+========================================================= */
+
+
+
+"Basic Process":`
+
+<svg viewBox="0 0 380 120">
+
+
+<rect x="10" y="35"
+width="90"
+height="50"
+rx="8"/>
+
+
+<path d="M100 60 H140"/>
+
+
+<rect x="140" y="35"
+width="90"
+height="50"
+rx="8"/>
+
+
+<path d="M230 60 H270"/>
+
+
+<rect x="270" y="35"
+width="90"
+height="50"
+rx="8"/>
+
+
+</svg>
+
+`,
+
+
+
+
+
+
+
+
+"Accent Process":`
+
+<svg viewBox="0 0 380 140">
+
+
+<polygon points="
+20,30 110,30 130,70 110,110 20,110 40,70"/>
+
+
+<polygon points="
+130,30 220,30 240,70 220,110 130,110 150,70"/>
+
+
+<polygon points="
+240,30 330,30 350,70 330,110 240,110 260,70"/>
+
+
+</svg>
+
+`,
+
+
+
+
+
+
+
+
+"Continuous Process":`
+
+<svg viewBox="0 0 360 130">
+
+
+<path d="
+M20 65
+H330
+"/>
+
+
+<circle cx="60" cy="65" r="25"/>
+
+
+<circle cx="180" cy="65" r="25"/>
+
+
+<circle cx="300" cy="65" r="25"/>
+
+
+</svg>
+
+`,
+
+
+
+
+
+
+
+
+"Chevron Process":`
+
+<svg viewBox="0 0 380 120">
+
+
+<polygon points="
+20,20 120,20 160,60 120,100 20,100 60,60"/>
+
+
+<polygon points="
+140,20 240,20 280,60 240,100 140,100 180,60"/>
+
+
+<polygon points="
+260,20 360,20 380,60 360,100 260,100 300,60"/>
+
+
+</svg>
+
+`,
+
+   
+/* =========================================================
+   CYCLE CATEGORY
+========================================================= */
+
+
+
+"Basic Cycle":`
+
+<svg viewBox="0 0 260 260">
+
+
+<circle cx="130" cy="130"
+r="70"
+fill="none"
+stroke="currentColor"
+stroke-width="18"/>
+
+
+<path d="
+M130 30
+A100 100 0 0 1 230 130
+"/>
+
+
+</svg>
+
+`,
+
+
+
+
+
+
+
+
+"Continuous Cycle":`
+
+<svg viewBox="0 0 320 220">
+
+
+<circle cx="160" cy="110"
+r="70"
+fill="none"
+stroke="currentColor"
+stroke-width="16"/>
+
+
+<circle cx="160" cy="40"
+r="18"/>
+
+
+<circle cx="230" cy="110"
+r="18"/>
+
+
+<circle cx="160" cy="180"
+r="18"/>
+
+
+<circle cx="90" cy="110"
+r="18"/>
+
+
+</svg>
+
+`,
+
+
+
+
+
+
+
+
+"Radial Cycle":`
+
+<svg viewBox="0 0 320 260">
+
+
+<circle cx="160" cy="130"
+r="35"/>
+
+
+<circle cx="160" cy="35"
+r="25"/>
+
+
+<circle cx="260" cy="130"
+r="25"/>
+
+
+<circle cx="160" cy="225"
+r="25"/>
+
+
+<circle cx="60" cy="130"
+r="25"/>
+
+
+<line x1="160"
+y1="95"
+x2="160"
+y2="60"/>
+
+
+<line x1="195"
+y1="130"
+x2="235"
+y2="130"/>
+
+
+<line x1="160"
+y1="165"
+x2="160"
+y2="200"/>
+
+
+<line x1="125"
+y1="130"
+x2="85"
+y2="130"/>
+
+
+</svg>
+
+`,
+
+
+
+
+
+
+
+
+"Circular Cycle":`
+
+<svg viewBox="0 0 300 300">
+
+
+<circle cx="150"
+cy="150"
+r="90"
+fill="none"
+stroke="currentColor"
+stroke-width="12"/>
+
+
+<circle cx="150"
+cy="60"
+r="20"/>
+
+
+<circle cx="240"
+cy="150"
+r="20"/>
+
+
+<circle cx="150"
+cy="240"
+r="20"/>
+
+
+<circle cx="60"
+cy="150"
+r="20"/>
+
+
+</svg>
+
+`,
+
+
+
+
+
+
+
+
+
+/* =========================================================
+   HIERARCHY CATEGORY
+========================================================= */
+
+
+
+"Organization Chart":`
+
+<svg viewBox="0 0 400 260">
+
+
+<rect x="150"
+y="20"
+width="100"
+height="45"
+rx="6"/>
+
+
+<line x1="200"
+y1="65"
+x2="200"
+y2="110"/>
+
+
+<line x1="80"
+y1="110"
+x2="320"
+y2="110"/>
+
+
+<line x1="80"
+y1="110"
+x2="80"
+y2="150"/>
+
+
+<line x1="200"
+y1="110"
+x2="200"
+y2="150"/>
+
+
+<line x1="320"
+y1="110"
+x2="320"
+y2="150"/>
+
+
+
+<rect x="35"
+y="150"
+width="90"
+height="45"
+rx="6"/>
+
+
+<rect x="155"
+y="150"
+width="90"
+height="45"
+rx="6"/>
+
+
+<rect x="275"
+y="150"
+width="90"
+height="45"
+rx="6"/>
+
+
+</svg>
+
+`,
+
+
+
+
+
+
+
+
+"Name and Title":`
+
+<svg viewBox="0 0 360 220">
+
+
+<rect x="130"
+y="25"
+width="100"
+height="45"
+rx="6"/>
+
+
+<line x1="180"
+y1="70"
+x2="180"
+y2="120"/>
+
+
+<rect x="50"
+y="120"
+width="120"
+height="50"
+rx="6"/>
+
+
+<rect x="190"
+y="120"
+width="120"
+height="50"
+rx="6"/>
+
+
+</svg>
+
+`,
+
+
+
+
+
+
+
+
+"Horizontal Hierarchy":`
+
+<svg viewBox="0 0 420 180">
+
+
+<rect x="20"
+y="65"
+width="90"
+height="45"
+rx="6"/>
+
+
+<line x1="110"
+y1="87"
+x2="170"
+y2="87"/>
+
+
+<rect x="170"
+y="30"
+width="100"
+height="45"
+rx="6"/>
+
+
+<rect x="170"
+y="95"
+width="100"
+height="45"
+rx="6"/>
+
+
+<line x1="270"
+y1="52"
+x2="340"
+y2="52"/>
+
+
+<line x1="270"
+y1="117"
+x2="340"
+y2="117"/>
+
+
+</svg>
+
+`,
+
+
+
+
+
+
+
+
+"Labeled Hierarchy":`
+
+<svg viewBox="0 0 380 230">
+
+
+<rect x="140"
+y="20"
+width="100"
+height="45"
+rx="6"/>
+
+
+<line x1="190"
+y1="65"
+x2="190"
+y2="110"/>
+
+
+<rect x="40"
+y="110"
+width="120"
+height="50"
+rx="6"/>
+
+
+<rect x="220"
+y="110"
+width="120"
+height="50"
+rx="6"/>
+
+
+<line x1="160"
+y1="135"
+x2="220"
+y2="135"/>
+
+
+</svg>
+
+`,
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* =========================================================
+   PYRAMID CATEGORY
+========================================================= */
+
+
+
+"Basic Pyramid":`
+
+<svg viewBox="0 0 300 260">
+
+
+<polygon points="
+150,20
+280,220
+20,220"/>
+
+
+<line x1="70"
+y1="170"
+x2="230"
+y2="170"/>
+
+
+<line x1="100"
+y1="110"
+x2="200"
+y2="110"/>
+
+
+</svg>
+
+`,
+
+
+
+
+
+
+
+
+"Segmented Pyramid":`
+
+<svg viewBox="0 0 300 260">
+
+
+<polygon points="
+150,20
+280,220
+20,220"/>
+
+
+<line x1="55"
+y1="170"
+x2="245"
+y2="170"/>
+
+
+<line x1="95"
+y1="110"
+x2="205"
+y2="110"/>
+
+
+<line x1="75"
+y1="145"
+x2="225"
+y2="145"/>
+
+
+</svg>
+
+`,
+
+
+
+
+
+
+
+
+"Pyramid List":`
+
+<svg viewBox="0 0 320 250">
+
+
+<polygon points="
+160,20
+290,220
+30,220"/>
+
+
+<circle cx="160"
+cy="70"
+r="15"/>
+
+
+<circle cx="160"
+cy="130"
+r="15"/>
+
+
+<circle cx="160"
+cy="190"
+r="15"/>
+
+
+</svg>
+
+`,
+
+
+
+
+
+
+
+
+"Inverted Pyramid":`
+
+<svg viewBox="0 0 300 260">
+
+
+<polygon points="
+20,40
+280,40
+150,240"/>
+
+
+<line x1="70"
+y1="90"
+x2="230"
+y2="90"/>
+
+
+<line x1="100"
+y1="140"
+x2="200"
+y2="140"/>
+
+
+</svg>
+
+`
+
+
+
+},
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* =========================================================
+   SMARTART OBJECT CREATOR
+========================================================= */
+
+
+create(model){
+
+
+
+    const wrapper =
+    document.createElement(
+        "div"
+    );
+
+
+
+    wrapper.className =
+    "cwSmartArtObject";
+
+
+
+    wrapper.dataset.model =
+    model;
+
+
+
+
+    wrapper.innerHTML = `
+
+        <div class="cwSmartArtHeader">
+
+            ${model}
+
+        </div>
+
+
+        <div class="cwSmartArtSVG">
+
+            ${
+                this.svgLibrary[model]
+                ||
+                ""
+            }
+
+        </div>
+
+    `;
+
+
+
+    return wrapper;
+
+
+},
+
+
+
+
+
+
+
+
+/* =========================================================
+   INSERT SMARTART INTO ACTIVE DOCUMENT
+========================================================= */
+
+
+insert(model){
+
+
+
+    const page =
+    document.querySelector(
+        ".cwPage.active .cwPageContent"
+    );
+
+
+
+    if(!page){
+
+        return;
+
+    }
+
+
+
+
+    const object =
+    this.create(
+        model
+    );
+
+
+
+    page.appendChild(
+        object
+    );
+
+
+
+}
+   
+},
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* =========================================================
+   CONNECT SMARTART INSERT BUTTON
+   WORKS WITH BLOCK 3 ONLY
+========================================================= */
+
+
+document.addEventListener(
+"click",
+function(e){
+
+
+
+    const button =
+    e.target.closest(
+        ".cwSmartArtInsertBtn"
+    );
+
+
+
+    if(!button){
+
+        return;
+
+    }
+
+
+
+
+
+    const gallery =
+    CampusWord2007Simulateur
+    .SmartArtGalleryEngine;
+
+
+
+    if(!gallery){
+
+        return;
+
+    }
+
+
+
+
+
+    const model =
+    gallery.selectedSmartArt;
+
+
+
+    if(!model){
+
+        return;
+
+    }
+
+
+
+
+
+    CampusWord2007Simulateur
+    .SmartArtRenderEngine
+    .insert(
+        model
+    );
+
+
+
+},
+false
+);
+
+
+})();
 
 
 
