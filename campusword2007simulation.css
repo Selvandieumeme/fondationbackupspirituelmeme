@@ -6331,3 +6331,168 @@ bottom:-6px;
 
 
 
+/* =========================================================
+   CAMPUS WORD 2007 SIMULATEUR
+
+   SMARTART RESIZE + ROTATE ENGINE
+   BLOCK 6 CSS
+
+   RESIZE HANDLES + ROTATE HANDLE
+
+   ISOLATED SYSTEM
+========================================================= */
+
+
+/* =========================
+   SMARTART CONTROL LAYER
+========================= */
+
+.cwSmartArtControlLayer{
+
+    position:absolute;
+
+    inset:0;
+
+    pointer-events:none;
+
+    z-index:20;
+
+}
+
+
+
+
+
+/* =========================
+   RESIZE HANDLES
+========================= */
+
+.cwSmartArtResizeHandle{
+
+    position:absolute;
+
+    width:10px;
+
+    height:10px;
+
+    background:#2176ff;
+
+    border:2px solid white;
+
+    border-radius:2px;
+
+    pointer-events:auto;
+
+    z-index:30;
+
+}
+
+
+
+
+
+/* TOP LEFT */
+
+.cwSmartArtResizeHandle.tl{
+
+    top:-6px;
+
+    left:-6px;
+
+    cursor:nwse-resize;
+
+}
+
+
+
+
+
+/* TOP RIGHT */
+
+.cwSmartArtResizeHandle.tr{
+
+    top:-6px;
+
+    right:-6px;
+
+    cursor:nesw-resize;
+
+}
+
+
+
+
+
+/* BOTTOM LEFT */
+
+.cwSmartArtResizeHandle.bl{
+
+    bottom:-6px;
+
+    left:-6px;
+
+    cursor:nesw-resize;
+
+}
+
+
+
+
+
+/* BOTTOM RIGHT */
+
+.cwSmartArtResizeHandle.br{
+
+    bottom:-6px;
+
+    right:-6px;
+
+    cursor:nwse-resize;
+
+}
+
+
+
+
+
+/* =========================
+   ROTATE HANDLE
+========================= */
+
+.cwSmartArtRotateHandle{
+
+    position:absolute;
+
+    top:-35px;
+
+    left:50%;
+
+    transform:translateX(-50%);
+
+    width:14px;
+
+    height:14px;
+
+    border-radius:50%;
+
+    background:#2176ff;
+
+    border:2px solid white;
+
+    pointer-events:auto;
+
+    cursor:grab;
+
+    z-index:30;
+
+}
+
+
+
+
+
+.cwSmartArtRotateHandle:active{
+
+    cursor:grabbing;
+
+}
