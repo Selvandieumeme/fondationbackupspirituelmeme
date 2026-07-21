@@ -31304,6 +31304,260 @@ CampusWord2007Simulateur
 
 
 
+/* =========================================================
+   CAMPUS WORD 2007 SIMULATEUR
+   SMARTART DROPDOWN ENGINE v1.0.0
+   ISOLATED SYSTEM
+========================================================= */
+
+(function(){
+
+"use strict";
+
+
+
+document.addEventListener(
+"click",
+function(e){
+
+
+
+const smartArtButton =
+e.target.closest(
+".cwRibbonBtn.cwDropdownBtn"
+);
+
+
+
+if(!smartArtButton){
+
+    return;
+
+}
+
+
+
+
+const menu =
+smartArtButton.querySelector(
+".cwDropdownMenu"
+);
+
+
+
+if(!menu){
+
+    return;
+
+}
+
+
+
+
+/*
+   VERIFY SMARTART ONLY
+*/
+
+const hasSmartArt =
+menu.querySelector(
+'[data-action^="smartart-"]'
+);
+
+
+
+if(!hasSmartArt){
+
+    return;
+
+}
+
+
+
+
+
+e.stopPropagation();
+
+
+
+
+
+/*
+   CLOSE OTHER SMARTART STATE
+*/
+
+const opened =
+smartArtButton.classList.contains(
+"cwSmartArtOpen"
+);
+
+
+
+
+
+document
+.querySelectorAll(
+".cwSmartArtOpen"
+)
+.forEach(function(btn){
+
+    btn.classList.remove(
+        "cwSmartArtOpen"
+    );
+
+});
+
+
+
+
+
+document
+.querySelectorAll(
+".cwDropdownMenu"
+)
+.forEach(function(drop){
+
+    if(
+    drop !== menu
+    ){
+
+        drop.style.display =
+        "none";
+
+    }
+
+});
+
+
+
+
+
+
+
+
+if(!opened){
+
+
+smartArtButton.classList.add(
+"cwSmartArtOpen"
+);
+
+
+
+menu.style.display =
+"block";
+
+
+
+}
+else{
+
+
+menu.style.display =
+"none";
+
+
+}
+
+
+
+
+
+},
+false
+);
+
+
+
+
+
+
+
+
+
+/*
+   CLOSE WHEN CLICK OUTSIDE
+*/
+
+
+document.addEventListener(
+"click",
+function(e){
+
+
+if(
+e.target.closest(
+".cwRibbonBtn.cwDropdownBtn"
+)
+){
+
+    return;
+
+}
+
+
+
+document
+.querySelectorAll(
+".cwSmartArtOpen"
+)
+.forEach(function(btn){
+
+
+btn.classList.remove(
+"cwSmartArtOpen"
+);
+
+
+
+const menu =
+btn.querySelector(
+".cwDropdownMenu"
+);
+
+
+
+if(menu){
+
+menu.style.display =
+"none";
+
+}
+
+
+
+});
+
+
+},
+false
+);
+
+
+
+})();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
