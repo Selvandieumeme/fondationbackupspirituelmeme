@@ -33714,433 +33714,294 @@ window.CampusWordSelectedSmartArt
 
 
 
+
 /* =========================================================
    CAMPUS WORD 2007 SIMULATEUR
-   SMARTART MOVE + RESIZE ENGINE
-   BLOCK 5B
-   WORKS WITH BLOCK 4 + BLOCK 5A
-   USE EXISTING 8 HANDLES ONLY
-   NO HANDLE CREATION
-   NO SELECTION SYSTEM
-   NO ROTATE
-   ISOLATED SYSTEM
+   HYPERLINK DIALOG UI ENGINE
+   FOUNDATION v1.0.0
 ========================================================= */
 
-(function(){
+(function () {
 
 "use strict";
 
+if (!window.CampusWord2007Simulateur) {
+    return;
+}
 
-let mode = null;
+CampusWord2007Simulateur.HyperlinkDialogUIEngine = {
 
-let activeSmartArt = null;
+    create() {
 
-let resizeDirection = null;
+        /* ============================================
+           PREVENT DUPLICATE
+        ============================================ */
+
+        const existing =
+        document.querySelector(".cwHyperlinkOverlay");
+
+        if (existing) {
+            return;
+        }
+
+        /* ============================================
+           OVERLAY
+        ============================================ */
+
+        const overlay =
+        document.createElement("div");
+
+        overlay.className =
+        "cwHyperlinkOverlay";
+
+        /* ============================================
+           DIALOG
+        ============================================ */
+
+        const dialog =
+        document.createElement("div");
+
+        dialog.className =
+        "cwHyperlinkDialog";
+
+        dialog.innerHTML = `
+
+<div class="cwHyperlinkHeader">
+
+    <span>Insert Hyperlink</span>
+
+    <button
+    class="cwHyperlinkClose">
+        ✕
+    </button>
+
+</div>
+
+<div class="cwHyperlinkBody">
+
+    <div class="cwHyperlinkRow">
+
+        <label>
+            Text to display
+        </label>
+
+        <input
+        type="text"
+        class="cwHyperlinkText">
+
+    </div>
+
+    <div class="cwHyperlinkRow">
+
+        <label>
+            Address
+        </label>
+
+        <input
+        type="text"
+        class="cwHyperlinkAddress"
+        placeholder="https://">
+
+    </div>
+
+</div>
+
+<div class="cwHyperlinkFooter">
+
+    <button
+    class="cwHyperlinkOK">
+        OK
+    </button>
+
+    <button
+    class="cwHyperlinkCancel">
+        Cancel
+    </button>
+
+</div>
+
+`;
+
+        document.body.appendChild(overlay);
+        document.body.appendChild(dialog);
+
+        /* ============================================
+           CLOSE
+        ============================================ */
+
+        const close = () => {
+
+            dialog.remove();
+            overlay.remove();
+
+        };
+
+        dialog
+        .querySelector(".cwHyperlinkClose")
+        .onclick = close;
+
+        dialog
+        .querySelector(".cwHyperlinkCancel")
+        .onclick = close;
+
+        overlay.onclick = close;
+
+    }
+
+};
+
+})();
 
 
-let startX = 0;
-let startY = 0;
-
-let startLeft = 0;
-let startTop = 0;
-
-let startWidth = 0;
-let startHeight = 0;
 
 
 
-/* =========================
-   START MOVE
-========================= */
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* =========================================================
+   CAMPUS WORD 2007 SIMULATEUR
+   HYPERLINK DIALOG UI ENGINE
+   FOUNDATION PART 1B
+========================================================= */
+
+(function () {
+
+"use strict";
+
+if (!window.CampusWord2007Simulateur) {
+    return;
+}
+
+/* =========================================================
+   CONNECT RIBBON BUTTON
+========================================================= */
 
 document.addEventListener(
-"pointerdown",
-function(e){
+"click",
+function (e) {
+
+    const button =
+    e.target.closest(".cwRibbonBtn");
+
+    if (!button) {
+        return;
+    }
+
+    if (button.dataset.action !== "hyperlink") {
+        return;
+    }
+
+    CampusWord2007Simulateur
+    .HyperlinkDialogUIEngine
+    .create();
+
+});
 
 
-const handle =
-e.target.closest(
-".cwSmartArtHandle"
-);
-
-
-if(handle){
-
-return;
-
-}
-
-
-
-const smartArt =
-e.target.closest(
-".cwSmartArtObject"
-);
-
-
-
-if(!smartArt){
-
-return;
-
-}
-
-
-
-activeSmartArt = smartArt;
-
-
-window.CampusWordSelectedSmartArt =
-smartArt;
-
-
-
-mode = "move";
-
-
-startX = e.clientX;
-
-startY = e.clientY;
-
-
-startLeft =
-smartArt.offsetLeft;
-
-
-startTop =
-smartArt.offsetTop;
-
-
-
-e.preventDefault();
-
-
-
-},
-{
-passive:false
-}
-);
-
-
-
-
-
-/* =========================
-   START RESIZE
-========================= */
+/* =========================================================
+   DIALOG EVENTS
+========================================================= */
 
 document.addEventListener(
-"pointerdown",
-function(e){
+"click",
+function (e) {
 
+    if (
+        !e.target.classList.contains(
+            "cwHyperlinkOK"
+        )
+    ) {
+        return;
+    }
 
-const handle =
-e.target.closest(
-".cwSmartArtHandle"
-);
+    const dialog =
+    document.querySelector(
+        ".cwHyperlinkDialog"
+    );
 
+    if (!dialog) {
+        return;
+    }
 
+    const text =
+    dialog.querySelector(
+        ".cwHyperlinkText"
+    ).value.trim();
 
-if(!handle){
+    const address =
+    dialog.querySelector(
+        ".cwHyperlinkAddress"
+    ).value.trim();
 
-return;
+    if (address === "") {
 
-}
+        alert(
+        "Please enter a hyperlink."
+        );
 
+        return;
 
+    }
 
-activeSmartArt =
-window.CampusWordSelectedSmartArt;
+    if (
+        CampusWord2007Simulateur.SelectionEngine &&
+        typeof CampusWord2007Simulateur.SelectionEngine.getSelection
+        === "function"
+    ) {
 
+        CampusWord2007Simulateur
+        .SelectionEngine
+        .getSelection();
 
+    }
 
-if(!activeSmartArt){
+    if (
+        CampusWord2007Simulateur.HyperlinkEngine &&
+        typeof CampusWord2007Simulateur.HyperlinkEngine.insert
+        === "function"
+    ) {
 
-return;
+        CampusWord2007Simulateur
+        .HyperlinkEngine
+        .insert({
 
-}
+            text: text,
+            address: address
 
+        });
 
+    }
 
+    dialog.remove();
 
-resizeDirection =
-Array.from(
-handle.classList
-)
-.find(
-item =>
-item !== "cwSmartArtHandle"
-);
+    const overlay =
+    document.querySelector(
+        ".cwHyperlinkOverlay"
+    );
 
+    if (overlay) {
+        overlay.remove();
+    }
 
-
-mode = "resize";
-
-
-
-startX = e.clientX;
-
-startY = e.clientY;
-
-
-startWidth =
-activeSmartArt.offsetWidth;
-
-
-startHeight =
-activeSmartArt.offsetHeight;
-
-
-startLeft =
-activeSmartArt.offsetLeft;
-
-
-startTop =
-activeSmartArt.offsetTop;
-
-
-
-e.preventDefault();
-
-
-
-},
-{
-passive:false
-}
-);
-
-
-
-
-
-
-
-/* =========================
-   ACTION MOVE + RESIZE
-========================= */
-
-
-document.addEventListener(
-"pointermove",
-function(e){
-
-
-
-if(
-!mode ||
-!activeSmartArt
-){
-
-return;
-
-}
-
-
-
-
-const dx =
-e.clientX - startX;
-
-
-const dy =
-e.clientY - startY;
-
-
-
-
-
-/* MOVE */
-
-if(
-mode === "move"
-){
-
-
-activeSmartArt.style.left =
-(
-startLeft + dx
-)
-+
-"px";
-
-
-
-activeSmartArt.style.top =
-(
-startTop + dy
-)
-+
-"px";
-
-}
-
-
-
- 
-
-/* RESIZE */
-
-if(
-mode === "resize"
-){
-
-
-
-let width =
-startWidth;
-
-
-let height =
-startHeight;
-
-
-let left =
-startLeft;
-
-
-let top =
-startTop;
-
-
-
-
-if(
-resizeDirection.includes("e")
-){
-
-width =
-startWidth + dx;
-
-}
-
-
-
-if(
-resizeDirection.includes("w")
-){
-
-width =
-startWidth - dx;
-
-left =
-startLeft + dx;
-
-}
-
-
-
-if(
-resizeDirection.includes("s")
-){
-
-height =
-startHeight + dy;
-
-}
-
-
-
-if(
-resizeDirection.includes("n")
-){
-
-height =
-startHeight - dy;
-
-top =
-startTop + dy;
-
-}
-
-
-
-
-
-if(width < 60){
-
-width = 60;
-
-}
-
-
-
-if(height < 40){
-
-height = 40;
-
-}
-
-
-
-
-activeSmartArt.style.width =
-width + "px";
-
-
-activeSmartArt.style.height =
-height + "px";
-
-
-
-activeSmartArt.style.left =
-left + "px";
-
-
-activeSmartArt.style.top =
-top + "px";
-
-
-
-}
-
-
-
-if(
-window.CampusWordRefreshSmartArtHandles
-){
-
-window.CampusWordRefreshSmartArtHandles();
-
-}
-
-
-
-},
-{
-passive:false
-}
-);
-
-
-
-
-
-
-
-/* =========================
-   END ACTION
-========================= */
-
-
-document.addEventListener(
-"pointerup",
-function(){
-
-
-mode = null;
-
-activeSmartArt = null;
-
-resizeDirection = null;
-
-
-
-},
-false
-);
-
+});
 
 
 })();
