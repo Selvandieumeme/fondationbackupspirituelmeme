@@ -33718,133 +33718,197 @@ window.CampusWordSelectedSmartArt
 /* =========================================================
    CAMPUS WORD 2007 SIMULATEUR
    HYPERLINK DIALOG UI ENGINE
-   FOUNDATION v1.0.0
+   FOUNDATION v1.0.1
 ========================================================= */
 
 (function () {
 
 "use strict";
 
-if (!window.CampusWord2007Simulateur) {
-    return;
+if (!window.CampusWord2007Simulateur){
+    window.CampusWord2007Simulateur = {};
 }
 
 CampusWord2007Simulateur.HyperlinkDialogUIEngine = {
 
-    create() {
+    overlay : null,
 
-        /* ============================================
-           PREVENT DUPLICATE
-        ============================================ */
+    dialog : null,
 
-        const existing =
-        document.querySelector(".cwHyperlinkOverlay");
 
-        if (existing) {
+
+    create(){
+
+
+        if(this.dialog){
             return;
         }
 
-        /* ============================================
-           OVERLAY
-        ============================================ */
 
-        const overlay =
+
+        this.overlay =
         document.createElement("div");
 
-        overlay.className =
+        this.overlay.className =
         "cwHyperlinkOverlay";
 
-        /* ============================================
-           DIALOG
-        ============================================ */
 
-        const dialog =
+
+        this.dialog =
         document.createElement("div");
 
-        dialog.className =
+        this.dialog.className =
         "cwHyperlinkDialog";
 
-        dialog.innerHTML = `
+
+
+        this.dialog.innerHTML = `
 
 <div class="cwHyperlinkHeader">
 
-    <span>Insert Hyperlink</span>
+<span>Insert Hyperlink</span>
 
-    <button
-    class="cwHyperlinkClose">
-        ✕
-    </button>
+<button
+type="button"
+class="cwHyperlinkClose">
+✕
+</button>
 
 </div>
+
+
 
 <div class="cwHyperlinkBody">
 
-    <div class="cwHyperlinkRow">
+<div class="cwHyperlinkRow">
 
-        <label>
-            Text to display
-        </label>
+<label>
+Text to display
+</label>
 
-        <input
-        type="text"
-        class="cwHyperlinkText">
-
-    </div>
-
-    <div class="cwHyperlinkRow">
-
-        <label>
-            Address
-        </label>
-
-        <input
-        type="text"
-        class="cwHyperlinkAddress"
-        placeholder="https://">
-
-    </div>
+<input
+type="text"
+class="cwHyperlinkText">
 
 </div>
 
+
+
+<div class="cwHyperlinkRow">
+
+<label>
+Address
+</label>
+
+<input
+type="text"
+class="cwHyperlinkAddress"
+placeholder="https://">
+
+</div>
+
+</div>
+
+
+
 <div class="cwHyperlinkFooter">
 
-    <button
-    class="cwHyperlinkOK">
-        OK
-    </button>
+<button
+type="button"
+class="cwHyperlinkOK">
 
-    <button
-    class="cwHyperlinkCancel">
-        Cancel
-    </button>
+OK
+
+</button>
+
+
+<button
+type="button"
+class="cwHyperlinkCancel">
+
+Cancel
+
+</button>
 
 </div>
 
 `;
 
-        document.body.appendChild(overlay);
-        document.body.appendChild(dialog);
 
-        /* ============================================
-           CLOSE
-        ============================================ */
 
-        const close = () => {
+        document.body.appendChild(
+            this.overlay
+        );
 
-            dialog.remove();
-            overlay.remove();
+        document.body.appendChild(
+            this.dialog
+        );
+
+
+
+        this.bindEvents();
+
+    },
+
+
+
+    bindEvents(){
+
+
+        const self = this;
+
+
+
+        self.dialog
+        .querySelector(".cwHyperlinkClose")
+        .onclick = function(){
+
+            self.destroy();
 
         };
 
-        dialog
-        .querySelector(".cwHyperlinkClose")
-        .onclick = close;
 
-        dialog
+
+        self.dialog
         .querySelector(".cwHyperlinkCancel")
-        .onclick = close;
+        .onclick = function(){
 
-        overlay.onclick = close;
+            self.destroy();
+
+        };
+
+
+
+        self.overlay.onclick = function(){
+
+            self.destroy();
+
+        };
+
+    },
+
+
+
+    destroy(){
+
+
+        if(this.dialog){
+
+            this.dialog.remove();
+
+            this.dialog = null;
+
+        }
+
+
+
+        if(this.overlay){
+
+            this.overlay.remove();
+
+            this.overlay = null;
+
+        }
 
     }
 
@@ -33852,159 +33916,6 @@ CampusWord2007Simulateur.HyperlinkDialogUIEngine = {
 
 })();
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/* =========================================================
-   CAMPUS WORD 2007 SIMULATEUR
-   HYPERLINK DIALOG UI ENGINE
-   FOUNDATION PART 1B
-========================================================= */
-
-(function () {
-
-"use strict";
-
-if (!window.CampusWord2007Simulateur) {
-    return;
-}
-
-/* =========================================================
-   CONNECT RIBBON BUTTON
-========================================================= */
-
-document.addEventListener(
-"click",
-function (e) {
-
-    const button =
-    e.target.closest(".cwRibbonBtn");
-
-    if (!button) {
-        return;
-    }
-
-    if (button.dataset.action !== "hyperlink") {
-        return;
-    }
-
-    CampusWord2007Simulateur
-    .HyperlinkDialogUIEngine
-    .create();
-
-});
-
-
-/* =========================================================
-   DIALOG EVENTS
-========================================================= */
-
-document.addEventListener(
-"click",
-function (e) {
-
-    if (
-        !e.target.classList.contains(
-            "cwHyperlinkOK"
-        )
-    ) {
-        return;
-    }
-
-    const dialog =
-    document.querySelector(
-        ".cwHyperlinkDialog"
-    );
-
-    if (!dialog) {
-        return;
-    }
-
-    const text =
-    dialog.querySelector(
-        ".cwHyperlinkText"
-    ).value.trim();
-
-    const address =
-    dialog.querySelector(
-        ".cwHyperlinkAddress"
-    ).value.trim();
-
-    if (address === "") {
-
-        alert(
-        "Please enter a hyperlink."
-        );
-
-        return;
-
-    }
-
-    if (
-        CampusWord2007Simulateur.SelectionEngine &&
-        typeof CampusWord2007Simulateur.SelectionEngine.getSelection
-        === "function"
-    ) {
-
-        CampusWord2007Simulateur
-        .SelectionEngine
-        .getSelection();
-
-    }
-
-    if (
-        CampusWord2007Simulateur.HyperlinkEngine &&
-        typeof CampusWord2007Simulateur.HyperlinkEngine.insert
-        === "function"
-    ) {
-
-        CampusWord2007Simulateur
-        .HyperlinkEngine
-        .insert({
-
-            text: text,
-            address: address
-
-        });
-
-    }
-
-    dialog.remove();
-
-    const overlay =
-    document.querySelector(
-        ".cwHyperlinkOverlay"
-    );
-
-    if (overlay) {
-        overlay.remove();
-    }
-
-});
-
-
-})();
 
 
 
