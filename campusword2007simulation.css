@@ -6496,3 +6496,374 @@ bottom:-6px;
     bottom:-7px;
 
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* =========================================================
+   CAMPUS WORD 2007 SIMULATEUR
+   HYPERLINK DIALOG UI ENGINE
+   WORD 2007 STYLE
+========================================================= */
+
+/* ===========================
+   OVERLAY
+=========================== */
+
+.cwHyperlinkOverlay{
+
+    position:fixed;
+    inset:0;
+
+    background:rgba(0,0,0,.28);
+
+    z-index:90000;
+
+    animation:cwHyperlinkFade .18s ease;
+
+}
+
+
+/* ===========================
+   DIALOG
+=========================== */
+
+.cwHyperlinkDialog{
+
+    position:fixed;
+
+    top:50%;
+    left:50%;
+
+    transform:translate(-50%,-50%);
+
+    width:520px;
+    max-width:92vw;
+
+    background:#ffffff;
+
+    border:1px solid #8c8c8c;
+
+    border-radius:4px;
+
+    box-shadow:
+    0 10px 35px rgba(0,0,0,.35);
+
+    overflow:hidden;
+
+    z-index:90001;
+
+    font-family:
+    Calibri,
+    Arial,
+    sans-serif;
+
+    animation:
+    cwHyperlinkZoom .18s ease;
+
+}
+
+
+/* ===========================
+   HEADER
+=========================== */
+
+.cwHyperlinkHeader{
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:space-between;
+
+    height:38px;
+
+    padding:0 12px;
+
+    background:linear-gradient(
+        #f7f7f7,
+        #e8e8e8
+    );
+
+    border-bottom:
+    1px solid #cfcfcf;
+
+    font-size:15px;
+
+    font-weight:600;
+
+    color:#222;
+
+}
+
+.cwHyperlinkClose{
+
+    width:28px;
+    height:28px;
+
+    border:none;
+
+    background:transparent;
+
+    cursor:pointer;
+
+    font-size:16px;
+
+    border-radius:3px;
+
+}
+
+.cwHyperlinkClose:hover{
+
+    background:#e81123;
+
+    color:#fff;
+
+}
+
+
+/* ===========================
+   BODY
+=========================== */
+
+.cwHyperlinkBody{
+
+    padding:18px;
+
+    display:flex;
+
+    flex-direction:column;
+
+    gap:16px;
+
+}
+
+.cwHyperlinkRow{
+
+    display:flex;
+
+    flex-direction:column;
+
+    gap:6px;
+
+}
+
+.cwHyperlinkRow label{
+
+    font-size:13px;
+
+    font-weight:600;
+
+    color:#333;
+
+}
+
+.cwHyperlinkText,
+.cwHyperlinkAddress{
+
+    width:100%;
+
+    height:34px;
+
+    padding:0 10px;
+
+    border:1px solid #bdbdbd;
+
+    border-radius:3px;
+
+    outline:none;
+
+    font-size:14px;
+
+    background:#fff;
+
+    box-sizing:border-box;
+
+}
+
+.cwHyperlinkText:focus,
+.cwHyperlinkAddress:focus{
+
+    border-color:#4a8cf7;
+
+    box-shadow:
+    0 0 0 2px
+    rgba(74,140,247,.18);
+
+}
+
+
+/* ===========================
+   FOOTER
+=========================== */
+
+.cwHyperlinkFooter{
+
+    display:flex;
+
+    justify-content:flex-end;
+
+    gap:10px;
+
+    padding:12px 16px;
+
+    background:#f5f5f5;
+
+    border-top:
+    1px solid #d6d6d6;
+
+}
+
+.cwHyperlinkOK,
+.cwHyperlinkCancel{
+
+    min-width:82px;
+
+    height:32px;
+
+    border:1px solid #9d9d9d;
+
+    border-radius:3px;
+
+    background:
+    linear-gradient(
+        #ffffff,
+        #e8e8e8
+    );
+
+    cursor:pointer;
+
+    font-size:13px;
+
+}
+
+.cwHyperlinkOK:hover,
+.cwHyperlinkCancel:hover{
+
+    background:
+    linear-gradient(
+        #fff8d7,
+        #ffe082
+    );
+
+}
+
+.cwHyperlinkOK:active,
+.cwHyperlinkCancel:active{
+
+    transform:scale(.98);
+
+}
+
+
+/* ===========================
+   ANIMATION
+=========================== */
+
+@keyframes cwHyperlinkFade{
+
+    from{
+
+        opacity:0;
+
+    }
+
+    to{
+
+        opacity:1;
+
+    }
+
+}
+
+@keyframes cwHyperlinkZoom{
+
+    from{
+
+        opacity:0;
+
+        transform:
+        translate(-50%,-52%)
+        scale(.96);
+
+    }
+
+    to{
+
+        opacity:1;
+
+        transform:
+        translate(-50%,-50%)
+        scale(1);
+
+    }
+
+}
+
+
+/* ===========================
+   RESPONSIVE
+=========================== */
+
+@media (max-width:600px){
+
+    .cwHyperlinkDialog{
+
+        width:96vw;
+
+    }
+
+    .cwHyperlinkFooter{
+
+        flex-wrap:wrap;
+
+    }
+
+    .cwHyperlinkOK,
+    .cwHyperlinkCancel{
+
+        flex:1;
+
+    }
+
+}
