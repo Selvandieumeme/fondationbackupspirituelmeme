@@ -6545,14 +6545,11 @@ bottom:-6px;
 
 
 
-
-
-
 /* =========================================================
-   HYPERLINK BUTTON TEST ISOLATED CSS
+   HYPERLINK ACTIVE STATE
 ========================================================= */
 
-.cwHyperlinkBtnActiveTest{
+.cwRibbonBtn.cwHyperlinkActive{
 
     background:#28a745 !important;
 
@@ -6561,6 +6558,10 @@ bottom:-6px;
     border-color:#1e7e34 !important;
 
 }
+
+
+
+
 
 
 
