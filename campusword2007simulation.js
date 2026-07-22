@@ -34009,7 +34009,7 @@ CampusWord2007Simulateur
     this.dialog
 );
 
-}
+},
 
 
 
