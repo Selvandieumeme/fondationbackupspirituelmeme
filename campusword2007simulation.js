@@ -33715,6 +33715,93 @@ window.CampusWordSelectedSmartArt
 
 
 
+
+
+
+
+
+
+/* =========================================================
+   CAMPUS WORD 2007 SIMULATEUR
+   HYPERLINK BUTTON CLICK TEST MODULE
+   ISOLATED v1.0.0
+========================================================= */
+
+(function(){
+
+"use strict";
+
+
+const initHyperlinkButtonTest = () => {
+
+
+    const button =
+    document.querySelector(
+        '.cwRibbonBtn[data-action="hyperlink"]'
+    );
+
+
+    if(!button){
+
+        console.warn(
+        "Hyperlink button not found"
+        );
+
+        return;
+
+    }
+
+
+
+    button.addEventListener(
+    "click",
+    function(e){
+
+
+        e.stopPropagation();
+
+
+        this.classList.toggle(
+            "cwHyperlinkBtnActiveTest"
+        );
+
+
+    });
+
+
+
+};
+
+
+
+if(
+document.readyState === "loading"
+){
+
+    document.addEventListener(
+        "DOMContentLoaded",
+        initHyperlinkButtonTest
+    );
+
+}
+else{
+
+    initHyperlinkButtonTest();
+
+}
+
+
+
+})();
+
+
+
+
+
+
+
+
+
 /* =========================================================
    CAMPUS WORD 2007 SIMULATEUR
    HYPERLINK DIALOG UI ENGINE
