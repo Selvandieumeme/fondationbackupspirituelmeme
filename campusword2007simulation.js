@@ -34009,22 +34009,10 @@ CampusWord2007Simulateur
     this.dialog
 );
 
-},
-
-
-
-f(
-CampusWord2007Simulateur
-.HyperlinkDialogConnector
-){
-
-    CampusWord2007Simulateur
-    .HyperlinkDialogConnector
-    .fillSelectedText(
-        this.dialog
-    );
-
 }
+
+
+
 
 
 
