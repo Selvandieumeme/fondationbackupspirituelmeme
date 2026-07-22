@@ -33994,6 +33994,27 @@ Cancel
 
 
 
+
+
+
+
+       if(
+CampusWord2007Simulateur
+.HyperlinkDialogController
+){
+
+CampusWord2007Simulateur
+.HyperlinkDialogController
+.bindDialog(
+    this.dialog
+);
+
+}
+
+
+
+
+
         this.bindEvents();
 
     },
@@ -34063,6 +34084,289 @@ Cancel
 };
 
 })();
+
+
+
+
+
+
+
+
+
+
+
+
+/* =========================================================
+   CAMPUS WORD 2007 SIMULATEUR
+   HYPERLINK DIALOG UI ENGINE
+   FOUNDATION PART 1B
+   ISOLATED CONTROLLER v1.0.1
+========================================================= */
+
+(function () {
+
+"use strict";
+
+
+if (!window.CampusWord2007Simulateur) {
+    window.CampusWord2007Simulateur = {};
+}
+
+
+
+CampusWord2007Simulateur.HyperlinkDialogController = {
+
+
+    dialog:null,
+
+
+
+    init(){
+
+
+        this.bindButton();
+
+
+    },
+
+
+
+    bindButton(){
+
+
+        const button =
+        document.querySelector(
+            '.cwRibbonBtn[data-action="hyperlink"]'
+        );
+
+
+
+        if(!button){
+            return;
+        }
+
+
+
+        button.onclick = () => {
+
+
+            if(
+            CampusWord2007Simulateur
+            .HyperlinkDialogUIEngine
+            ){
+
+                CampusWord2007Simulateur
+                .HyperlinkDialogUIEngine
+                .create();
+
+
+            }
+
+
+        };
+
+
+    },
+
+
+
+    bindDialog(dialog){
+
+
+        this.dialog = dialog;
+
+
+
+        const ok =
+        dialog.querySelector(
+            ".cwHyperlinkOK"
+        );
+
+
+
+        if(ok){
+
+            ok.onclick = () => {
+
+
+                this.submit();
+
+
+            };
+
+        }
+
+
+
+        const cancel =
+        dialog.querySelector(
+            ".cwHyperlinkCancel"
+        );
+
+
+
+        if(cancel){
+
+            cancel.onclick = () => {
+
+
+                this.close();
+
+
+            };
+
+        }
+
+
+
+    },
+
+
+
+    submit(){
+
+
+        if(!this.dialog){
+            return;
+        }
+
+
+
+        const text =
+        this.dialog
+        .querySelector(
+            ".cwHyperlinkText"
+        )
+        .value
+        .trim();
+
+
+
+        const address =
+        this.dialog
+        .querySelector(
+            ".cwHyperlinkAddress"
+        )
+        .value
+        .trim();
+
+
+
+        if(!address){
+
+            alert(
+            "Please enter a hyperlink."
+            );
+
+            return;
+
+        }
+
+
+
+        if(
+        CampusWord2007Simulateur
+        .HyperlinkEngine
+        &&
+        typeof CampusWord2007Simulateur
+        .HyperlinkEngine.insert === "function"
+        ){
+
+
+            CampusWord2007Simulateur
+            .HyperlinkEngine
+            .insert({
+
+                text:text,
+
+                address:address
+
+            });
+
+
+        }
+
+
+
+        this.close();
+
+
+    },
+
+
+
+    close(){
+
+
+        if(
+        CampusWord2007Simulateur
+        .HyperlinkDialogUIEngine
+        &&
+        typeof CampusWord2007Simulateur
+        .HyperlinkDialogUIEngine.destroy
+        === "function"
+        ){
+
+
+            CampusWord2007Simulateur
+            .HyperlinkDialogUIEngine
+            .destroy();
+
+
+        }
+
+
+
+        this.dialog = null;
+
+
+    }
+
+
+};
+
+
+
+/* =========================================================
+   INITIALIZE MODULE
+========================================================= */
+
+
+if(
+document.readyState === "loading"
+){
+
+    document.addEventListener(
+        "DOMContentLoaded",
+        function(){
+
+            CampusWord2007Simulateur
+            .HyperlinkDialogController
+            .init();
+
+        }
+    );
+
+}
+else{
+
+
+    CampusWord2007Simulateur
+    .HyperlinkDialogController
+    .init();
+
+
+}
+
+
+
+})();
+
+
+
+
+
+
 
 
 
