@@ -33723,8 +33723,8 @@ window.CampusWordSelectedSmartArt
 
 /* =========================================================
    CAMPUS WORD 2007 SIMULATEUR
-   HYPERLINK BUTTON CLICK TEST MODULE
-   ISOLATED v1.0.0
+   HYPERLINK BUTTON CONTROLLER
+   ISOLATED MODULE v1.0.0
 ========================================================= */
 
 (function(){
@@ -33732,42 +33732,95 @@ window.CampusWordSelectedSmartArt
 "use strict";
 
 
-const initHyperlinkButtonTest = () => {
+const HyperlinkButtonController = {
 
 
-    const button =
-    document.querySelector(
-        '.cwRibbonBtn[data-action="hyperlink"]'
-    );
+    button:null,
 
 
-    if(!button){
+    init(){
 
-        console.warn(
-        "Hyperlink button not found"
+
+        this.button =
+        document.querySelector(
+            '.cwRibbonBtn[data-action="hyperlink"]'
         );
 
-        return;
+
+        if(!this.button){
+
+            return;
+
+        }
+
+
+        this.bind();
+
+
+    },
+
+
+
+    bind(){
+
+
+        this.button.addEventListener(
+        "click",
+        ()=>{
+
+
+            this.toggleState();
+
+
+            if(
+            window.CampusWord2007Simulateur &&
+            CampusWord2007Simulateur
+            .HyperlinkDialogUIEngine
+            ){
+
+                CampusWord2007Simulateur
+                .HyperlinkDialogUIEngine
+                .create();
+
+            }
+
+
+        });
+
+
+
+    },
+
+
+
+    toggleState(){
+
+
+        this.button
+        .classList
+        .toggle(
+            "cwHyperlinkActive"
+        );
+
+
+    },
+
+
+    reset(){
+
+
+        if(this.button){
+
+            this.button
+            .classList
+            .remove(
+                "cwHyperlinkActive"
+            );
+
+        }
+
 
     }
-
-
-
-    button.addEventListener(
-    "click",
-    function(e){
-
-
-        e.stopPropagation();
-
-
-        this.classList.toggle(
-            "cwHyperlinkBtnActiveTest"
-        );
-
-
-    });
-
 
 
 };
@@ -33779,20 +33832,28 @@ document.readyState === "loading"
 ){
 
     document.addEventListener(
-        "DOMContentLoaded",
-        initHyperlinkButtonTest
-    );
+    "DOMContentLoaded",
+    ()=>{
+
+        HyperlinkButtonController.init();
+
+    });
 
 }
 else{
 
-    initHyperlinkButtonTest();
+    HyperlinkButtonController.init();
 
 }
 
 
-
 })();
+
+
+
+
+
+
 
 
 
