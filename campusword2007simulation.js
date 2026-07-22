@@ -33711,13 +33711,18 @@ window.CampusWordSelectedSmartArt
 
 
 
+
+
+
 /* =========================================================
    CAMPUS WORD 2007 SIMULATEUR
    SMARTART MOVE + RESIZE ENGINE
    BLOCK 5B
-   MOVE + 8 HANDLE RESIZE
-   TOUCH + MOUSE SUPPORT
    WORKS WITH BLOCK 4 + BLOCK 5A
+   USE EXISTING 8 HANDLES ONLY
+   NO HANDLE CREATION
+   NO SELECTION SYSTEM
+   NO ROTATE
    ISOLATED SYSTEM
 ========================================================= */
 
@@ -33726,49 +33731,44 @@ window.CampusWordSelectedSmartArt
 "use strict";
 
 
-
-let moving = false;
-
-let resizing = false;
-
+let mode = null;
 
 let activeSmartArt = null;
-
 
 let resizeDirection = null;
 
 
-
 let startX = 0;
-
 let startY = 0;
 
-
 let startLeft = 0;
-
 let startTop = 0;
 
-
 let startWidth = 0;
-
 let startHeight = 0;
 
 
 
-
-
-
-
-
-
 /* =========================
-   MOVE SMARTART
+   START MOVE
 ========================= */
-
 
 document.addEventListener(
 "pointerdown",
 function(e){
+
+
+const handle =
+e.target.closest(
+".cwSmartArtHandle"
+);
+
+
+if(handle){
+
+return;
+
+}
 
 
 
@@ -33779,16 +33779,7 @@ e.target.closest(
 
 
 
-const handle =
-e.target.closest(
-".cwSmartArtHandle"
-);
-
-
-
-
-
-if(!smartArt || handle){
+if(!smartArt){
 
 return;
 
@@ -33796,23 +33787,20 @@ return;
 
 
 
+activeSmartArt = smartArt;
 
-activeSmartArt =
+
+window.CampusWordSelectedSmartArt =
 smartArt;
 
 
 
-moving = true;
+mode = "move";
 
 
+startX = e.clientX;
 
-startX =
-e.clientX;
-
-
-startY =
-e.clientY;
-
+startY = e.clientY;
 
 
 startLeft =
@@ -33821,14 +33809,6 @@ smartArt.offsetLeft;
 
 startTop =
 smartArt.offsetTop;
-
-
-
-
-
-smartArt.setPointerCapture(
-e.pointerId
-);
 
 
 
@@ -33846,120 +33826,13 @@ passive:false
 
 
 
-
-
-
-
-document.addEventListener(
-"pointermove",
-function(e){
-
-
-
-if(
-!moving ||
-!activeSmartArt
-){
-
-return;
-
-}
-
-
-
-
-const dx =
-e.clientX - startX;
-
-
-
-const dy =
-e.clientY - startY;
-
-
-
-
-
-activeSmartArt.style.left =
-(
-startLeft + dx
-)
-+
-"px";
-
-
-
-
-
-activeSmartArt.style.top =
-(
-startTop + dy
-)
-+
-"px";
-
-
-
-
-
-if(
-window.CampusWordRefreshSmartArtHandles
-){
-
-window.CampusWordRefreshSmartArtHandles();
-
-}
-
-
-
-
-
-},
-{
-passive:false
-}
-);
-
-
-
-
-
-
-
-
-
-document.addEventListener(
-"pointerup",
-function(){
-
-
-moving = false;
-
-
-},
-false
-);
-
-
-
-
-
-
-
-
-
-
-
-
 /* =========================
-   RESIZE START
+   START RESIZE
 ========================= */
-
 
 document.addEventListener(
 "pointerdown",
 function(e){
-
 
 
 const handle =
@@ -33977,7 +33850,6 @@ return;
 
 
 
-
 activeSmartArt =
 window.CampusWordSelectedSmartArt;
 
@@ -33992,27 +33864,24 @@ return;
 
 
 
-
 resizeDirection =
 Array.from(
 handle.classList
 )
 .find(
-c =>
-c !== "cwSmartArtHandle"
+item =>
+item !== "cwSmartArtHandle"
 );
 
 
 
+mode = "resize";
 
 
-startX =
-e.clientX;
 
+startX = e.clientX;
 
-startY =
-e.clientY;
-
+startY = e.clientY;
 
 
 startWidth =
@@ -34023,19 +33892,12 @@ startHeight =
 activeSmartArt.offsetHeight;
 
 
-
 startLeft =
 activeSmartArt.offsetLeft;
 
 
 startTop =
 activeSmartArt.offsetTop;
-
-
-
-
-
-resizing = true;
 
 
 
@@ -34055,12 +33917,8 @@ passive:false
 
 
 
-
-
-
-
 /* =========================
-   RESIZE ACTION
+   ACTION MOVE + RESIZE
 ========================= */
 
 
@@ -34071,33 +33929,13 @@ function(e){
 
 
 if(
-!resizing ||
+!mode ||
 !activeSmartArt
 ){
 
 return;
 
 }
-
-
-
-
-
-let width =
-startWidth;
-
-
-let height =
-startHeight;
-
-
-
-let left =
-startLeft;
-
-
-let top =
-startTop;
 
 
 
@@ -34113,6 +33951,60 @@ e.clientY - startY;
 
 
 
+/* MOVE */
+
+if(
+mode === "move"
+){
+
+
+activeSmartArt.style.left =
+(
+startLeft + dx
+)
++
+"px";
+
+
+
+activeSmartArt.style.top =
+(
+startTop + dy
+)
++
+"px";
+
+}
+
+
+
+ 
+
+/* RESIZE */
+
+if(
+mode === "resize"
+){
+
+
+
+let width =
+startWidth;
+
+
+let height =
+startHeight;
+
+
+let left =
+startLeft;
+
+
+let top =
+startTop;
+
+
+
 
 if(
 resizeDirection.includes("e")
@@ -34122,19 +34014,6 @@ width =
 startWidth + dx;
 
 }
-
-
-
-
-if(
-resizeDirection.includes("s")
-){
-
-height =
-startHeight + dy;
-
-}
-
 
 
 
@@ -34151,6 +34030,15 @@ startLeft + dx;
 }
 
 
+
+if(
+resizeDirection.includes("s")
+){
+
+height =
+startHeight + dy;
+
+}
 
 
 
@@ -34187,11 +34075,8 @@ height = 40;
 
 
 
-
-
 activeSmartArt.style.width =
 width + "px";
-
 
 
 activeSmartArt.style.height =
@@ -34203,12 +34088,12 @@ activeSmartArt.style.left =
 left + "px";
 
 
-
 activeSmartArt.style.top =
 top + "px";
 
 
 
+}
 
 
 
@@ -34219,8 +34104,6 @@ window.CampusWordRefreshSmartArtHandles
 window.CampusWordRefreshSmartArtHandles();
 
 }
-
-
 
 
 
@@ -34236,6 +34119,9 @@ passive:false
 
 
 
+/* =========================
+   END ACTION
+========================= */
 
 
 document.addEventListener(
@@ -34243,14 +34129,11 @@ document.addEventListener(
 function(){
 
 
-
-resizing = false;
-
-
-resizeDirection = null;
-
+mode = null;
 
 activeSmartArt = null;
+
+resizeDirection = null;
 
 
 
@@ -34260,10 +34143,8 @@ false
 
 
 
-
-
-
 })();
+
 
 
 
