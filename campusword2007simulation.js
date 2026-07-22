@@ -34013,7 +34013,25 @@ CampusWord2007Simulateur
 
 
 
+f(
+CampusWord2007Simulateur
+.HyperlinkDialogConnector
+){
 
+    CampusWord2007Simulateur
+    .HyperlinkDialogConnector
+    .fillSelectedText(
+        this.dialog
+    );
+
+}
+
+
+
+
+
+
+   
 
         this.bindEvents();
 
@@ -34361,6 +34379,457 @@ else{
 
 
 })();
+
+
+
+
+
+
+
+
+
+
+
+/* =========================================================
+   CAMPUS WORD 2007 SIMULATEUR
+   HYPERLINK ENGINE
+   FOUNDATION v1.0.0
+   ISOLATED MODULE
+========================================================= */
+
+(function(){
+
+"use strict";
+
+
+if(!window.CampusWord2007Simulateur){
+
+    window.CampusWord2007Simulateur = {};
+
+}
+
+
+
+CampusWord2007Simulateur.HyperlinkEngine = {
+
+
+    insert(data){
+
+
+        if(!data){
+            return;
+        }
+
+
+
+        const text =
+        data.text || "";
+
+
+
+        const address =
+        data.address || "";
+
+
+
+        if(!address){
+
+            return;
+
+        }
+
+
+
+        const hyperlinkData = {
+
+
+            text:text,
+
+            address:address,
+
+            createdAt:
+            Date.now()
+
+
+        };
+
+
+
+        /*
+        ==========================================
+        STORE CURRENT ACTION
+        ==========================================
+        */
+
+
+        this.lastHyperlink =
+        hyperlinkData;
+
+
+
+        /*
+        ==========================================
+        FUTURE DOCUMENT INTEGRATION POINT
+
+        Ici nou pral konekte ak:
+        - SelectionEngine
+        - TextEngine
+        - RenderEngine
+        - HistoryEngine
+        - UndoRedoEngine
+
+        ==========================================
+        */
+
+
+
+        console.log(
+            "Hyperlink created:",
+            hyperlinkData
+        );
+
+
+    }
+
+
+
+};
+
+
+
+})();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* =========================================================
+   CAMPUS WORD 2007 SIMULATEUR
+   HYPERLINK SELECTION BRIDGE
+   FOUNDATION v1.0.0
+   ISOLATED MODULE
+========================================================= */
+
+(function(){
+
+"use strict";
+
+
+if(!window.CampusWord2007Simulateur){
+
+    window.CampusWord2007Simulateur = {};
+
+}
+
+
+
+CampusWord2007Simulateur.HyperlinkSelectionBridge = {
+
+
+    currentSelection:null,
+
+
+
+    capture(){
+
+
+        const selection =
+        window.getSelection();
+
+
+
+        if(!selection){
+
+            return null;
+
+        }
+
+
+
+        const text =
+        selection
+        .toString()
+        .trim();
+
+
+
+        if(!text){
+
+            this.currentSelection = null;
+
+            return null;
+
+        }
+
+
+
+        this.currentSelection = {
+
+
+            text:text,
+
+
+            range:
+            selection
+            .getRangeAt(0)
+
+
+        };
+
+
+
+        return this.currentSelection;
+
+
+    },
+
+
+
+    getText(){
+
+
+        if(
+        this.currentSelection
+        ){
+
+            return this.currentSelection.text;
+
+        }
+
+
+
+        return "";
+
+    },
+
+
+
+    clear(){
+
+
+        this.currentSelection = null;
+
+
+    }
+
+
+
+};
+
+
+
+})();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* =========================================================
+   CAMPUS WORD 2007 SIMULATEUR
+   HYPERLINK DIALOG SELECTION CONNECTOR
+   v1.0.0
+   ISOLATED MODULE
+========================================================= */
+
+(function(){
+
+"use strict";
+
+
+if(!window.CampusWord2007Simulateur){
+
+    window.CampusWord2007Simulateur = {};
+
+}
+
+
+
+CampusWord2007Simulateur.HyperlinkDialogConnector = {
+
+
+    fillSelectedText(dialog){
+
+
+        if(!dialog){
+
+            return;
+
+        }
+
+
+
+        const input =
+        dialog.querySelector(
+            ".cwHyperlinkText"
+        );
+
+
+
+        if(!input){
+
+            return;
+
+        }
+
+
+
+        let selectedText = "";
+
+
+
+        if(
+        CampusWord2007Simulateur
+        .HyperlinkSelectionBridge
+        &&
+        typeof CampusWord2007Simulateur
+        .HyperlinkSelectionBridge
+        .getText
+        === "function"
+        ){
+
+
+            selectedText =
+            CampusWord2007Simulateur
+            .HyperlinkSelectionBridge
+            .getText();
+
+
+        }
+
+
+
+        if(selectedText){
+
+            input.value =
+            selectedText;
+
+        }
+
+
+    }
+
+
+
+};
+
+
+
+
+})();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
