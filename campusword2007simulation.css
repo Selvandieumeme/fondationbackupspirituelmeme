@@ -6540,6 +6540,45 @@ bottom:-6px;
 
 
 
+
+
+
+
+
+
+
+
+/* =========================================================
+   HYPERLINK BUTTON TEST ISOLATED CSS
+========================================================= */
+
+.cwHyperlinkBtnActiveTest{
+
+    background:#28a745 !important;
+
+    color:#ffffff !important;
+
+    border-color:#1e7e34 !important;
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 /* =========================================================
    CAMPUS WORD 2007 SIMULATEUR
    HYPERLINK DIALOG UI ENGINE
