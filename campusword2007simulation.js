@@ -35210,6 +35210,157 @@ CampusWord2007Simulateur.HyperlinkUpdateEngine = {
 
 
 
+/* =========================================================
+   CAMPUS WORD 2007 SIMULATEUR
+   HYPERLINK REMOVE ENGINE
+   FOUNDATION v1.0.0
+   ISOLATED MODULE
+========================================================= */
+
+(function(){
+
+"use strict";
+
+
+if(!window.CampusWord2007Simulateur){
+
+    window.CampusWord2007Simulateur = {};
+
+}
+
+
+
+CampusWord2007Simulateur.HyperlinkRemoveEngine = {
+
+
+    remove(){
+
+
+        const bridge =
+        CampusWord2007Simulateur
+        .HyperlinkEditorBridge;
+
+
+
+        if(
+        !bridge ||
+        typeof bridge.get !== "function"
+        ){
+
+            return;
+
+        }
+
+
+
+        const current =
+        bridge.get();
+
+
+
+        if(
+        !current ||
+        !current.element
+        ){
+
+            return;
+
+        }
+
+
+
+        const link =
+        current.element;
+
+
+
+        const parent =
+        link.parentNode;
+
+
+
+        if(!parent){
+
+            return;
+
+        }
+
+
+
+        const textNode =
+        document.createTextNode(
+            link.textContent
+        );
+
+
+
+        parent.replaceChild(
+            textNode,
+            link
+        );
+
+
+
+        document.dispatchEvent(
+            new CustomEvent(
+                "cwHyperlinkRemoved",
+                {
+                    detail:{
+                        text:
+                        textNode.textContent
+                    }
+                }
+            )
+        );
+
+
+
+        if(
+        typeof bridge.clear === "function"
+        ){
+
+            bridge.clear();
+
+        }
+
+
+
+    }
+
+
+
+};
+
+
+
+})();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
