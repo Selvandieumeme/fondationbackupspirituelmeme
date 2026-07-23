@@ -6907,3 +6907,45 @@ bottom:-6px;
     }
 
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* =========================================================
+   HYPERLINK DOCUMENT STYLE
+   ISOLATED MODULE
+========================================================= */
+
+.cwPageContent a{
+
+    color:#0563C1;
+
+    text-decoration:underline;
+
+    cursor:pointer;
+
+}
+
+.cwPageContent a:hover{
+
+    color:#0b5ed7;
+
+}
+
+.cwPageContent a:visited{
+
+    color:#800080;
+
+}
