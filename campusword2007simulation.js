@@ -34183,6 +34183,32 @@ CampusWord2007Simulateur.HyperlinkDialogController = {
 
 
 
+
+
+if(
+CampusWord2007Simulateur
+.HyperlinkDialogConnector
+&&
+typeof CampusWord2007Simulateur
+.HyperlinkDialogConnector
+.fillSelectedText === "function"
+){
+
+    CampusWord2007Simulateur
+    .HyperlinkDialogConnector
+    .fillSelectedText(
+        dialog
+    );
+
+}
+
+
+
+
+
+
+
+
         const ok =
         dialog.querySelector(
             ".cwHyperlinkOK"
