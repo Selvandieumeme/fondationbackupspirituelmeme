@@ -34424,7 +34424,7 @@ else{
 /* =========================================================
    CAMPUS WORD 2007 SIMULATEUR
    HYPERLINK ENGINE
-   ISOLATED DOCUMENT ACTION v1.0.1
+   ISOLATED DOCUMENT ACTION v1.0.2
 ========================================================= */
 
 (function(){
@@ -34479,6 +34479,7 @@ CampusWord2007Simulateur.HyperlinkEngine = {
 
 
 
+
         const hyperlink = {
 
 
@@ -34505,8 +34506,84 @@ CampusWord2007Simulateur.HyperlinkEngine = {
 
 
 
+
+
+        /*
+        ======================================
+        INSERT HYPERLINK INTO DOCUMENT
+        ======================================
+        */
+
+
+        if(
+        hyperlink.range
+        ){
+
+            try{
+
+
+                const link =
+                document.createElement(
+                    "a"
+                );
+
+
+                link.href =
+                hyperlink.address;
+
+
+                link.textContent =
+                hyperlink.text ||
+                hyperlink.range.toString();
+
+
+
+                link.target =
+                "_blank";
+
+
+
+                hyperlink.range
+                .deleteContents();
+
+
+
+                hyperlink.range
+                .insertNode(
+                    link
+                );
+
+
+
+                hyperlink.range
+                .collapse(
+                    false
+                );
+
+
+
+            }
+            catch(error){
+
+
+                console.error(
+                    "Hyperlink insertion error:",
+                    error
+                );
+
+
+            }
+
+
+        }
+
+
+
+
         this.lastHyperlink =
         hyperlink;
+
+
 
 
 
@@ -34538,7 +34615,6 @@ CampusWord2007Simulateur.HyperlinkEngine = {
 
 
 })();
-
 
 
 
