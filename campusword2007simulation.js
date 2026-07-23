@@ -34538,9 +34538,16 @@ link.setAttribute(
 );
 
 
-link.textContent =
-hyperlink.text ||
+const selectedText =
 hyperlink.range.toString();
+
+
+link.textContent =
+selectedText;
+
+
+
+       
 
 
 link.style.color =
