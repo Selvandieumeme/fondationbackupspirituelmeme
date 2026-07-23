@@ -34522,54 +34522,43 @@ CampusWord2007Simulateur.HyperlinkEngine = {
             try{
 
 
-                const link =
+     const link =
 document.createElement("a");
 
-
-
-
-
-
-
-let url = hyperlink.address;
+let url =
+hyperlink.address.trim();
 
 if(
-    !/^https?:\/\//i.test(url)
+!/^(https?:\/\/|mailto:|ftp:\/\/)/i.test(url)
 ){
-    url = "https://" + url;
+    url =
+    "https://" + url;
 }
 
 link.href = url;
 
+link.target = "_blank";
 
-
-
-               
-
-link.setAttribute(
-    "target",
-    "_blank"
-);
-
-
-const selectedText =
-hyperlink.range.toString();
-
+link.rel =
+"noopener noreferrer";
 
 link.textContent =
-selectedText;
-
-
-
-       
-
+hyperlink.range.toString();
 
 link.style.color =
 "#0563C1";
 
-
 link.style.textDecoration =
 "underline";
+
+link.style.cursor =
+"pointer";
+
+link.setAttribute(
+    "contenteditable",
+    "false"
+);
+
 
 
 
