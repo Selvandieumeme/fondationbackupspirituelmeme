@@ -34633,20 +34633,19 @@ CampusWord2007Simulateur.HyperlinkSelectionBridge = {
 
     getText(){
 
+    this.capture();
 
-        if(
-        this.currentSelection
-        ){
+    if(
+    this.currentSelection
+    ){
 
-            return this.currentSelection.text;
+        return this.currentSelection.text;
 
-        }
+    }
 
+    return "";
 
-
-        return "";
-
-    },
+},
 
 
 
