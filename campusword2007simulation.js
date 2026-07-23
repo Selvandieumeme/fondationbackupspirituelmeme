@@ -34424,8 +34424,7 @@ else{
 /* =========================================================
    CAMPUS WORD 2007 SIMULATEUR
    HYPERLINK ENGINE
-   FOUNDATION v1.0.0
-   ISOLATED MODULE
+   ISOLATED DOCUMENT ACTION v1.0.1
 ========================================================= */
 
 (function(){
@@ -34444,6 +34443,10 @@ if(!window.CampusWord2007Simulateur){
 CampusWord2007Simulateur.HyperlinkEngine = {
 
 
+    lastHyperlink:null,
+
+
+
     insert(data){
 
 
@@ -34453,30 +34456,46 @@ CampusWord2007Simulateur.HyperlinkEngine = {
 
 
 
-        const text =
-        data.text || "";
-
-
-
         const address =
-        data.address || "";
+        (data.address || "").trim();
 
 
 
         if(!address){
-
             return;
-
         }
 
 
 
-        const hyperlinkData = {
+        const selection =
+        CampusWord2007Simulateur
+        .HyperlinkSelectionBridge
+        ?
+        CampusWord2007Simulateur
+        .HyperlinkSelectionBridge
+        .currentSelection
+        :
+        null;
 
 
-            text:text,
+
+        const hyperlink = {
+
+
+            text:
+            data.text || "",
+
 
             address:address,
+
+
+            range:
+            selection
+            ?
+            selection.range
+            :
+            null,
+
 
             createdAt:
             Date.now()
@@ -34486,38 +34505,28 @@ CampusWord2007Simulateur.HyperlinkEngine = {
 
 
 
-        /*
-        ==========================================
-        STORE CURRENT ACTION
-        ==========================================
-        */
-
-
         this.lastHyperlink =
-        hyperlinkData;
+        hyperlink;
+
 
 
 
         /*
-        ==========================================
-        FUTURE DOCUMENT INTEGRATION POINT
-
-        Ici nou pral konekte ak:
-        - SelectionEngine
-        - TextEngine
-        - RenderEngine
-        - HistoryEngine
-        - UndoRedoEngine
-
-        ==========================================
+        ======================================
+        HYPERLINK ACTION EVENT
+        ======================================
         */
 
 
-
-        console.log(
-            "Hyperlink created:",
-            hyperlinkData
+        document.dispatchEvent(
+            new CustomEvent(
+                "cwInsertHyperlink",
+                {
+                    detail: hyperlink
+                }
+            )
         );
+
 
 
     }
@@ -34529,7 +34538,6 @@ CampusWord2007Simulateur.HyperlinkEngine = {
 
 
 })();
-
 
 
 
