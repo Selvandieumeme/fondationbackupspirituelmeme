@@ -34526,11 +34526,25 @@ CampusWord2007Simulateur.HyperlinkEngine = {
 document.createElement("a");
 
 
-link.setAttribute(
-    "href",
-    hyperlink.address
-);
 
+
+
+
+
+let url = hyperlink.address;
+
+if(
+    !/^https?:\/\//i.test(url)
+){
+    url = "https://" + url;
+}
+
+link.href = url;
+
+
+
+
+               
 
 link.setAttribute(
     "target",
