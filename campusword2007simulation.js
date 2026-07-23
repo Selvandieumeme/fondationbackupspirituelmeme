@@ -34523,26 +34523,42 @@ CampusWord2007Simulateur.HyperlinkEngine = {
 
 
                 const link =
-                document.createElement(
-                    "a"
-                );
+document.createElement("a");
 
 
-                link.href =
-                hyperlink.address;
+link.setAttribute(
+    "href",
+    hyperlink.address
+);
 
 
-                link.textContent =
-                hyperlink.text ||
-                hyperlink.range.toString();
+link.setAttribute(
+    "target",
+    "_blank"
+);
+
+
+link.textContent =
+hyperlink.text ||
+hyperlink.range.toString();
+
+
+link.style.color =
+"#0563C1";
+
+
+link.style.textDecoration =
+"underline";
 
 
 
-                link.target =
-                "_blank";
 
 
 
+
+
+
+               
                 hyperlink.range
                 .deleteContents();
 
