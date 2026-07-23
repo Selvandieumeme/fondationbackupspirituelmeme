@@ -34616,9 +34616,7 @@ CampusWord2007Simulateur.HyperlinkSelectionBridge = {
 
 
             range:
-            selection
-            .getRangeAt(0)
-
+selection.getRangeAt(0).cloneRange()
 
         };
 
