@@ -34898,6 +34898,331 @@ CampusWord2007Simulateur.HyperlinkDialogConnector = {
 
 
 
+/* =========================================================
+   CAMPUS WORD 2007 SIMULATEUR
+   HYPERLINK EDITOR BRIDGE
+   FOUNDATION v1.0.0
+   ISOLATED MODULE
+========================================================= */
+
+(function(){
+
+"use strict";
+
+
+if(!window.CampusWord2007Simulateur){
+
+    window.CampusWord2007Simulateur = {};
+
+}
+
+
+CampusWord2007Simulateur.HyperlinkEditorBridge = {
+
+
+    currentLink:null,
+
+
+
+    init(){
+
+
+        document.addEventListener(
+            "click",
+            this.capture.bind(this),
+            true
+        );
+
+
+    },
+
+
+
+    capture(event){
+
+
+        const link =
+        event.target.closest("a");
+
+
+        if(!link){
+            return;
+        }
+
+
+        this.currentLink = {
+
+            element:link,
+
+            text:link.textContent,
+
+            address:
+            link.getAttribute("href") || ""
+
+        };
+
+
+    },
+
+
+
+    get(){
+
+
+        return this.currentLink;
+
+
+    },
+
+
+
+    clear(){
+
+
+        this.currentLink = null;
+
+
+    }
+
+
+};
+
+
+
+if(
+document.readyState === "loading"
+){
+
+    document.addEventListener(
+        "DOMContentLoaded",
+        function(){
+
+            CampusWord2007Simulateur
+            .HyperlinkEditorBridge
+            .init();
+
+        }
+    );
+
+}
+else{
+
+    CampusWord2007Simulateur
+    .HyperlinkEditorBridge
+    .init();
+
+}
+
+
+})();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* =========================================================
+   CAMPUS WORD 2007 SIMULATEUR
+   HYPERLINK UPDATE ENGINE
+   FOUNDATION v1.0.0
+   ISOLATED MODULE
+========================================================= */
+
+(function(){
+
+"use strict";
+
+
+if(!window.CampusWord2007Simulateur){
+
+    window.CampusWord2007Simulateur = {};
+
+}
+
+
+
+CampusWord2007Simulateur.HyperlinkUpdateEngine = {
+
+
+    update(data){
+
+
+        if(!data){
+
+            return;
+
+        }
+
+
+
+        const bridge =
+        CampusWord2007Simulateur
+        .HyperlinkEditorBridge;
+
+
+
+        if(
+        !bridge ||
+        typeof bridge.get !== "function"
+        ){
+
+            return;
+
+        }
+
+
+
+        const current =
+        bridge.get();
+
+
+
+        if(
+        !current ||
+        !current.element
+        ){
+
+            return;
+
+        }
+
+
+
+        const link =
+        current.element;
+
+
+
+        const address =
+        (data.address || "").trim();
+
+
+
+        const text =
+        (data.text || "").trim();
+
+
+
+        if(address){
+
+
+            let url =
+            address;
+
+
+
+            if(
+            !/^(https?:\/\/|mailto:|ftp:\/\/)/i.test(url)
+            ){
+
+                url =
+                "https://" + url;
+
+            }
+
+
+
+            link.setAttribute(
+                "href",
+                url
+            );
+
+
+        }
+
+
+
+        if(text){
+
+            link.textContent =
+            text;
+
+        }
+
+
+
+        link.style.color =
+        "#0563C1";
+
+
+        link.style.textDecoration =
+        "underline";
+
+
+        link.style.cursor =
+        "pointer";
+
+
+
+        document.dispatchEvent(
+            new CustomEvent(
+                "cwHyperlinkUpdated",
+                {
+                    detail:{
+                        text:
+                        link.textContent,
+
+                        address:
+                        link.href
+                    }
+                }
+            )
+        );
+
+
+    }
+
+
+
+};
+
+
+
+})();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
