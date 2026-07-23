@@ -34154,8 +34154,25 @@ CampusWord2007Simulateur.HyperlinkDialogController = {
 
 
         button.onclick = () => {
+      
+           
+           if(
+CampusWord2007Simulateur
+.HyperlinkSelectionBridge
+&&
+typeof CampusWord2007Simulateur
+.HyperlinkSelectionBridge
+.capture === "function"
+){
+
+    CampusWord2007Simulateur
+    .HyperlinkSelectionBridge
+    .capture();
+
+}
 
 
+           
             if(
             CampusWord2007Simulateur
             .HyperlinkDialogUIEngine
