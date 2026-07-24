@@ -35387,11 +35387,10 @@ CampusWord2007Simulateur.HyperlinkRemoveEngine = {
 
 
 
-
 /* =========================================================
    CAMPUS WORD 2007 SIMULATEUR
    QUICK PARTS BUTTON STATE CONTROLLER
-   FOUNDATION v1.0.1
+   FOUNDATION v1.0.2
    ISOLATED MODULE
 ========================================================= */
 
@@ -35413,6 +35412,8 @@ CampusWord2007Simulateur.QuickPartsButtonStateController = {
 
     button:null,
 
+    menu:null,
+
 
 
     init(){
@@ -35429,6 +35430,23 @@ CampusWord2007Simulateur.QuickPartsButtonStateController = {
             return;
 
         }
+
+
+
+        this.menu =
+        this.button.querySelector(
+            ".cwDropdownMenu"
+        );
+
+
+
+        if(this.menu){
+
+            this.menu.style.display =
+            "none";
+
+        }
+
 
 
         this.bind();
@@ -35460,58 +35478,23 @@ CampusWord2007Simulateur.QuickPartsButtonStateController = {
 
 
 
+
                 /*
                 ======================================
-                OPEN / CLOSE QUICK PARTS
+                OPEN / CLOSE QUICK PARTS MENU
                 ======================================
                 */
 
 
-                if(active){
+                if(this.menu){
 
 
-                    if(
-                    CampusWord2007Simulateur
-                    .QuickPartsDialogUIEngine
-                    &&
-                    typeof CampusWord2007Simulateur
-                    .QuickPartsDialogUIEngine
-                    .create
-                    === "function"
-                    ){
-
-
-                        CampusWord2007Simulateur
-                        .QuickPartsDialogUIEngine
-                        .create(
-                            "quick-parts"
-                        );
-
-
-                    }
-
-
-                }
-                else{
-
-
-                    if(
-                    CampusWord2007Simulateur
-                    .QuickPartsDialogUIEngine
-                    &&
-                    typeof CampusWord2007Simulateur
-                    .QuickPartsDialogUIEngine
-                    .destroy
-                    === "function"
-                    ){
-
-
-                        CampusWord2007Simulateur
-                        .QuickPartsDialogUIEngine
-                        .destroy();
-
-
-                    }
+                    this.menu.style.display =
+                    active
+                    ?
+                    "block"
+                    :
+                    "none";
 
 
                 }
@@ -35520,6 +35503,43 @@ CampusWord2007Simulateur.QuickPartsButtonStateController = {
 
             }
         );
+
+
+
+
+        /*
+        ======================================
+        CLOSE WHEN CLICK OUTSIDE
+        ======================================
+        */
+
+
+        document.addEventListener(
+            "click",
+            ()=>{
+
+
+                this.button
+                .classList
+                .remove(
+                    "cwQuickPartsActive"
+                );
+
+
+
+                if(this.menu){
+
+
+                    this.menu.style.display =
+                    "none";
+
+
+                }
+
+
+            }
+        );
+
 
 
     }
@@ -35561,6 +35581,22 @@ else{
 
 
 })();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
