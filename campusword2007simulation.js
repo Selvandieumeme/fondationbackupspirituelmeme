@@ -34301,6 +34301,40 @@ typeof CampusWord2007Simulateur
 
 
 
+
+
+
+
+
+
+   if(
+text === ""
+&&
+CampusWord2007Simulateur
+.HyperlinkRemoveEngine
+&&
+typeof CampusWord2007Simulateur
+.HyperlinkRemoveEngine
+.remove === "function"
+){
+
+    CampusWord2007Simulateur
+    .HyperlinkRemoveEngine
+    .remove();
+
+    this.close();
+
+    return;
+
+}
+
+
+
+
+
+
+       
+
         if(!address){
 
             alert(
