@@ -6965,16 +6965,6 @@ bottom:-6px;
 
 
 
-
-
-
-
-
-
-
-
-
-
 /* =========================================================
    QUICK PARTS BUTTON ACTIVE STATE
 ========================================================= */
@@ -6989,11 +6979,79 @@ bottom:-6px;
 
 }
 
+
+
 .cwRibbonBtn.cwQuickPartsActive svg{
 
     color:#ffffff !important;
 
 }
+
+
+
+/* =========================================================
+   QUICK PARTS DROPDOWN MENU
+========================================================= */
+
+.cwRibbonBtn .cwDropdownMenu{
+
+    position:absolute;
+
+    top:100%;
+
+    left:0;
+
+    min-width:180px;
+
+    background:#ffffff;
+
+    border:1px solid #c8c8c8;
+
+    border-radius:4px;
+
+    box-shadow:0 4px 12px rgba(0,0,0,.18);
+
+    padding:4px 0;
+
+    z-index:9999;
+
+}
+
+
+
+/* =========================================================
+   QUICK PARTS ITEMS
+========================================================= */
+
+.cwRibbonBtn .cwDropdownMenu div{
+
+    padding:8px 14px;
+
+    font-size:13px;
+
+    color:#222222;
+
+    white-space:nowrap;
+
+    cursor:pointer;
+
+}
+
+
+
+/* HOVER EFFECT */
+
+.cwRibbonBtn .cwDropdownMenu div:hover{
+
+    background:#e8f1ff;
+
+    color:#000000;
+
+}
+
+
+
+
 
 
 
