@@ -35797,8 +35797,8 @@ else{
 
 /* =========================================================
    CAMPUS WORD 2007 SIMULATEUR
-   QUICK PARTS COMMAND BRIDGE
-   FOUNDATION v1.0.0
+   QUICK PARTS COMMAND ROUTER
+   FOUNDATION v1.0.1
    ISOLATED MODULE
 ========================================================= */
 
@@ -35815,7 +35815,7 @@ if(!window.CampusWord2007Simulateur){
 
 
 
-CampusWord2007Simulateur.QuickPartsCommandBridge = {
+CampusWord2007Simulateur.QuickPartsCommandRouter = {
 
 
 
@@ -35849,9 +35849,16 @@ CampusWord2007Simulateur.QuickPartsCommandBridge = {
                         event.stopPropagation();
 
 
+
+                        const action =
+                        item.dataset.action;
+
+
+
                         this.execute(
-                            item.dataset.action
+                            action
                         );
+
 
 
                     }
@@ -35860,6 +35867,7 @@ CampusWord2007Simulateur.QuickPartsCommandBridge = {
 
             }
         );
+
 
 
     },
@@ -35872,16 +35880,94 @@ CampusWord2007Simulateur.QuickPartsCommandBridge = {
 
 
 
-        document.dispatchEvent(
-            new CustomEvent(
-                "cwQuickPartsAction",
-                {
-                    detail:{
-                        action:action
-                    }
+        switch(action){
+
+
+
+            case "building-blocks":
+
+
+
+                if(
+                CampusWord2007Simulateur
+                .BuildingBlocksEngine
+                &&
+                typeof CampusWord2007Simulateur
+                .BuildingBlocksEngine
+                .open === "function"
+                ){
+
+
+                    CampusWord2007Simulateur
+                    .BuildingBlocksEngine
+                    .open();
+
+
                 }
-            )
-        );
+
+
+            break;
+
+
+
+
+
+            case "document-property":
+
+
+
+                if(
+                CampusWord2007Simulateur
+                .DocumentPropertyEngine
+                &&
+                typeof CampusWord2007Simulateur
+                .DocumentPropertyEngine
+                .open === "function"
+                ){
+
+
+                    CampusWord2007Simulateur
+                    .DocumentPropertyEngine
+                    .open();
+
+
+                }
+
+
+            break;
+
+
+
+
+
+
+            case "field":
+
+
+
+                if(
+                CampusWord2007Simulateur
+                .FieldEngine
+                &&
+                typeof CampusWord2007Simulateur
+                .FieldEngine
+                .open === "function"
+                ){
+
+
+                    CampusWord2007Simulateur
+                    .FieldEngine
+                    .open();
+
+
+                }
+
+
+            break;
+
+
+
+        }
 
 
 
@@ -35897,13 +35983,16 @@ CampusWord2007Simulateur.QuickPartsCommandBridge = {
 
 if(document.readyState === "loading"){
 
+
     document.addEventListener(
         "DOMContentLoaded",
         ()=>{
 
+
             CampusWord2007Simulateur
-            .QuickPartsCommandBridge
+            .QuickPartsCommandRouter
             .init();
+
 
         }
     );
@@ -35912,15 +36001,297 @@ if(document.readyState === "loading"){
 }
 else{
 
+
     CampusWord2007Simulateur
-    .QuickPartsCommandBridge
+    .QuickPartsCommandRouter
     .init();
+
 
 }
 
 
 
 })();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* =========================================================
+   CAMPUS WORD 2007 SIMULATEUR
+   BUILDING BLOCKS ENGINE
+   QUICK PARTS UI MODULE
+   FOUNDATION v1.0.0
+   ISOLATED MODULE
+========================================================= */
+
+(function(){
+
+"use strict";
+
+
+if(!window.CampusWord2007Simulateur){
+
+    window.CampusWord2007Simulateur = {};
+
+}
+
+
+
+CampusWord2007Simulateur.BuildingBlocksEngine = {
+
+
+    overlay:null,
+
+    dialog:null,
+
+
+
+    open(){
+
+
+        if(this.dialog){
+
+            return;
+
+        }
+
+
+
+
+        this.overlay =
+        document.createElement(
+            "div"
+        );
+
+
+        this.overlay.className =
+        "cwQuickPartsOverlay";
+
+
+
+
+
+        this.dialog =
+        document.createElement(
+            "div"
+        );
+
+
+        this.dialog.className =
+        "cwBuildingBlocksDialog";
+
+
+
+
+
+        this.dialog.innerHTML = `
+
+<div class="cwBuildingBlocksHeader">
+
+<span>
+Building Blocks
+</span>
+
+
+<button
+type="button"
+class="cwBuildingBlocksClose">
+✕
+</button>
+
+
+</div>
+
+
+
+<div class="cwBuildingBlocksBody">
+
+
+<div class="cwBuildingBlockItem">
+AutoText
+</div>
+
+
+<div class="cwBuildingBlockItem">
+Document Parts
+</div>
+
+
+<div class="cwBuildingBlockItem">
+Saved Building Blocks
+</div>
+
+
+</div>
+
+
+
+<div class="cwBuildingBlocksFooter">
+
+
+<button
+type="button"
+class="cwBuildingBlocksCancel">
+Cancel
+</button>
+
+
+</div>
+
+`;
+
+
+
+
+
+        document.body.appendChild(
+            this.overlay
+        );
+
+
+        document.body.appendChild(
+            this.dialog
+        );
+
+
+
+
+        this.bind();
+
+
+
+    },
+
+
+
+
+
+    bind(){
+
+
+        const close =
+        this.dialog.querySelector(
+            ".cwBuildingBlocksClose"
+        );
+
+
+
+        const cancel =
+        this.dialog.querySelector(
+            ".cwBuildingBlocksCancel"
+        );
+
+
+
+        if(close){
+
+            close.onclick =
+            ()=>{
+                this.close();
+            };
+
+        }
+
+
+
+        if(cancel){
+
+            cancel.onclick =
+            ()=>{
+                this.close();
+            };
+
+        }
+
+
+
+
+        if(this.overlay){
+
+            this.overlay.onclick =
+            ()=>{
+                this.close();
+            };
+
+        }
+
+
+
+    },
+
+
+
+
+
+
+    close(){
+
+
+
+        if(this.dialog){
+
+
+            this.dialog.remove();
+
+            this.dialog = null;
+
+
+        }
+
+
+
+
+        if(this.overlay){
+
+
+            this.overlay.remove();
+
+            this.overlay = null;
+
+
+        }
+
+
+
+    }
+
+
+
+};
+
+
+
+})();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
