@@ -35388,11 +35388,107 @@ CampusWord2007Simulateur.HyperlinkRemoveEngine = {
 
 
 
+/* =========================================================
+   CAMPUS WORD 2007 SIMULATEUR
+   QUICK PARTS BUTTON STATE CONTROLLER
+   FOUNDATION v1.0.0
+   ISOLATED MODULE
+========================================================= */
+
+(function(){
+
+"use strict";
+
+if(!window.CampusWord2007Simulateur){
+
+    window.CampusWord2007Simulateur = {};
+
+}
+
+CampusWord2007Simulateur.QuickPartsButtonStateController = {
+
+    button:null,
+
+    init(){
+
+        this.button =
+        document.querySelector(
+            '.cwRibbonBtn[data-action="quick-parts"]'
+        );
+
+        if(!this.button){
+            return;
+        }
+
+        this.bind();
+
+    },
+
+    bind(){
+
+        this.button.addEventListener(
+            "click",
+            (event)=>{
+
+                event.stopPropagation();
+
+                this.button.classList.toggle(
+                    "cwQuickPartsActive"
+                );
+
+            }
+        );
+
+    }
+
+};
+
+
+if(document.readyState === "loading"){
+
+    document.addEventListener(
+        "DOMContentLoaded",
+        function(){
+
+            CampusWord2007Simulateur
+            .QuickPartsButtonStateController
+            .init();
+
+        }
+    );
+
+}
+else{
+
+    CampusWord2007Simulateur
+    .QuickPartsButtonStateController
+    .init();
+
+}
+
+})();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 /* =========================================================
    CAMPUS WORD 2007 SIMULATEUR
-   QUICK PARTS BUTTON CONTROLLER
-   FOUNDATION v1.0.0
+   QUICK PARTS DROPDOWN CONTROLLER
+   FOUNDATION v1.0.1
    ISOLATED MODULE
 ========================================================= */
 
@@ -35409,7 +35505,7 @@ if(!window.CampusWord2007Simulateur){
 
 
 
-CampusWord2007Simulateur.QuickPartsButtonController = {
+CampusWord2007Simulateur.QuickPartsDropdownController = {
 
 
     button:null,
@@ -35428,9 +35524,7 @@ CampusWord2007Simulateur.QuickPartsButtonController = {
 
 
         if(!this.button){
-
             return;
-
         }
 
 
@@ -35439,6 +35533,11 @@ CampusWord2007Simulateur.QuickPartsButtonController = {
         this.button.querySelector(
             ".cwDropdownMenu"
         );
+
+
+        if(!this.menu){
+            return;
+        }
 
 
 
@@ -35456,12 +35555,9 @@ CampusWord2007Simulateur.QuickPartsButtonController = {
             "click",
             (event)=>{
 
-
                 event.stopPropagation();
 
-
-                this.toggleMenu();
-
+                this.toggle();
 
             }
         );
@@ -35472,87 +35568,85 @@ CampusWord2007Simulateur.QuickPartsButtonController = {
             "click",
             ()=>{
 
-
-                this.closeMenu();
-
+                this.close();
 
             }
         );
 
 
 
-        if(this.menu){
+        this.menu.addEventListener(
+            "click",
+            (event)=>{
 
+                event.stopPropagation();
 
-            this.menu.addEventListener(
-                "click",
-                (event)=>{
+                const item =
+                event.target.closest(
+                    "[data-action]"
+                );
 
-
-                    event.stopPropagation();
-
-
-                    const item =
-                    event.target.closest(
-                        "[data-action]"
-                    );
-
-
-                    if(!item){
-
-                        return;
-
-                    }
+                if(!item){
+                    return;
+                }
 
 
 
-                    const action =
-                    item.dataset.action;
+                this.close();
 
 
 
-                    this.closeMenu();
+                if(
+                CampusWord2007Simulateur
+                .QuickPartsDialogUIEngine
+                &&
+                typeof CampusWord2007Simulateur
+                .QuickPartsDialogUIEngine
+                .create === "function"
+                ){
 
-
-
-                    if(
                     CampusWord2007Simulateur
                     .QuickPartsDialogUIEngine
-                    &&
-                    typeof CampusWord2007Simulateur
-                    .QuickPartsDialogUIEngine
-                    .create === "function"
-                    ){
-
-                        CampusWord2007Simulateur
-                        .QuickPartsDialogUIEngine
-                        .create(
-                            action
-                        );
-
-                    }
-
+                    .create(
+                        item.dataset.action
+                    );
 
                 }
-            );
 
 
-        }
+
+                document.dispatchEvent(
+
+                    new CustomEvent(
+
+                        "cwQuickPartsSelect",
+
+                        {
+
+                            detail:{
+
+                                action:
+                                item.dataset.action
+
+                            }
+
+                        }
+
+                    )
+
+                );
+
+
+            }
+
+        );
 
 
     },
 
 
 
-    toggleMenu(){
-
-
-        if(!this.menu){
-
-            return;
-
-        }
-
+    toggle(){
 
 
         this.menu.classList.toggle(
@@ -35564,15 +35658,7 @@ CampusWord2007Simulateur.QuickPartsButtonController = {
 
 
 
-    closeMenu(){
-
-
-        if(!this.menu){
-
-            return;
-
-        }
-
+    close(){
 
 
         this.menu.classList.remove(
@@ -35597,7 +35683,7 @@ document.readyState === "loading"
         function(){
 
             CampusWord2007Simulateur
-            .QuickPartsButtonController
+            .QuickPartsDropdownController
             .init();
 
         }
@@ -35608,7 +35694,7 @@ else{
 
 
     CampusWord2007Simulateur
-    .QuickPartsButtonController
+    .QuickPartsDropdownController
     .init();
 
 
@@ -35617,18 +35703,6 @@ else{
 
 
 })();
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -35691,16 +35765,60 @@ CampusWord2007Simulateur.QuickPartsDialogUIEngine = {
 
 
 
+        let title = "Quick Parts";
+
+        let content = "";
+
+
+        switch(action){
+
+            case "building-blocks":
+
+                title = "Building Blocks";
+
+                content =
+                "Building Blocks will appear here.";
+
+            break;
+
+
+
+            case "document-property":
+
+                title = "Document Property";
+
+                content =
+                "Document Properties will appear here.";
+
+            break;
+
+
+
+            case "field":
+
+                title = "Field";
+
+                content =
+                "Available fields will appear here.";
+
+            break;
+
+        }
+
+
+
         this.dialog.innerHTML = `
 
 <div class="cwQuickPartsHeader">
 
-<span>Quick Parts</span>
+<span>${title}</span>
 
 <button
 type="button"
 class="cwQuickPartsClose">
+
 ✕
+
 </button>
 
 </div>
@@ -35709,21 +35827,17 @@ class="cwQuickPartsClose">
 
 <div class="cwQuickPartsBody">
 
-<div
-class="cwQuickPartsTitle">
+<div class="cwQuickPartsTitle">
 
-${action
-? action.replace(/-/g," ")
-: "Quick Parts"}
+${title}
 
 </div>
 
 
 
-<div
-class="cwQuickPartsContent">
+<div class="cwQuickPartsContent">
 
-This module is ready.
+${content}
 
 </div>
 
@@ -35859,8 +35973,26 @@ Cancel
 };
 
 
-
 })();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
