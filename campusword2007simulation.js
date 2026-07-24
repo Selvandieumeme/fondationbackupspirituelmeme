@@ -35389,6 +35389,491 @@ CampusWord2007Simulateur.HyperlinkRemoveEngine = {
 
 
 
+/* =========================================================
+   CAMPUS WORD 2007 SIMULATEUR
+   QUICK PARTS BUTTON CONTROLLER
+   FOUNDATION v1.0.0
+   ISOLATED MODULE
+========================================================= */
+
+(function(){
+
+"use strict";
+
+
+if(!window.CampusWord2007Simulateur){
+
+    window.CampusWord2007Simulateur = {};
+
+}
+
+
+
+CampusWord2007Simulateur.QuickPartsButtonController = {
+
+
+    button:null,
+
+    menu:null,
+
+
+
+    init(){
+
+
+        this.button =
+        document.querySelector(
+            '.cwRibbonBtn[data-action="quick-parts"]'
+        );
+
+
+        if(!this.button){
+
+            return;
+
+        }
+
+
+
+        this.menu =
+        this.button.querySelector(
+            ".cwDropdownMenu"
+        );
+
+
+
+        this.bind();
+
+
+    },
+
+
+
+    bind(){
+
+
+        this.button.addEventListener(
+            "click",
+            (event)=>{
+
+
+                event.stopPropagation();
+
+
+                this.toggleMenu();
+
+
+            }
+        );
+
+
+
+        document.addEventListener(
+            "click",
+            ()=>{
+
+
+                this.closeMenu();
+
+
+            }
+        );
+
+
+
+        if(this.menu){
+
+
+            this.menu.addEventListener(
+                "click",
+                (event)=>{
+
+
+                    event.stopPropagation();
+
+
+                    const item =
+                    event.target.closest(
+                        "[data-action]"
+                    );
+
+
+                    if(!item){
+
+                        return;
+
+                    }
+
+
+
+                    const action =
+                    item.dataset.action;
+
+
+
+                    this.closeMenu();
+
+
+
+                    if(
+                    CampusWord2007Simulateur
+                    .QuickPartsDialogUIEngine
+                    &&
+                    typeof CampusWord2007Simulateur
+                    .QuickPartsDialogUIEngine
+                    .create === "function"
+                    ){
+
+                        CampusWord2007Simulateur
+                        .QuickPartsDialogUIEngine
+                        .create(
+                            action
+                        );
+
+                    }
+
+
+                }
+            );
+
+
+        }
+
+
+    },
+
+
+
+    toggleMenu(){
+
+
+        if(!this.menu){
+
+            return;
+
+        }
+
+
+
+        this.menu.classList.toggle(
+            "active"
+        );
+
+
+    },
+
+
+
+    closeMenu(){
+
+
+        if(!this.menu){
+
+            return;
+
+        }
+
+
+
+        this.menu.classList.remove(
+            "active"
+        );
+
+
+    }
+
+
+
+};
+
+
+
+if(
+document.readyState === "loading"
+){
+
+    document.addEventListener(
+        "DOMContentLoaded",
+        function(){
+
+            CampusWord2007Simulateur
+            .QuickPartsButtonController
+            .init();
+
+        }
+    );
+
+}
+else{
+
+
+    CampusWord2007Simulateur
+    .QuickPartsButtonController
+    .init();
+
+
+}
+
+
+
+})();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* =========================================================
+   CAMPUS WORD 2007 SIMULATEUR
+   QUICK PARTS DIALOG UI ENGINE
+   FOUNDATION v1.0.0
+   ISOLATED MODULE
+========================================================= */
+
+(function(){
+
+"use strict";
+
+
+if(!window.CampusWord2007Simulateur){
+
+    window.CampusWord2007Simulateur = {};
+
+}
+
+
+
+CampusWord2007Simulateur.QuickPartsDialogUIEngine = {
+
+
+    overlay:null,
+
+    dialog:null,
+
+
+
+    create(action){
+
+
+        this.destroy();
+
+
+
+        this.overlay =
+        document.createElement("div");
+
+        this.overlay.className =
+        "cwQuickPartsOverlay";
+
+
+
+        this.dialog =
+        document.createElement("div");
+
+        this.dialog.className =
+        "cwQuickPartsDialog";
+
+
+
+        this.dialog.innerHTML = `
+
+<div class="cwQuickPartsHeader">
+
+<span>Quick Parts</span>
+
+<button
+type="button"
+class="cwQuickPartsClose">
+✕
+</button>
+
+</div>
+
+
+
+<div class="cwQuickPartsBody">
+
+<div
+class="cwQuickPartsTitle">
+
+${action
+? action.replace(/-/g," ")
+: "Quick Parts"}
+
+</div>
+
+
+
+<div
+class="cwQuickPartsContent">
+
+This module is ready.
+
+</div>
+
+</div>
+
+
+
+<div class="cwQuickPartsFooter">
+
+<button
+type="button"
+class="cwQuickPartsOK">
+
+OK
+
+</button>
+
+
+
+<button
+type="button"
+class="cwQuickPartsCancel">
+
+Cancel
+
+</button>
+
+</div>
+
+`;
+
+
+
+        document.body.appendChild(
+            this.overlay
+        );
+
+
+
+        document.body.appendChild(
+            this.dialog
+        );
+
+
+
+        this.bind();
+
+
+    },
+
+
+
+    bind(){
+
+
+        this.overlay.onclick =
+        ()=>{
+
+            this.destroy();
+
+        };
+
+
+
+        this.dialog
+        .querySelector(
+            ".cwQuickPartsClose"
+        )
+        .onclick =
+        ()=>{
+
+            this.destroy();
+
+        };
+
+
+
+        this.dialog
+        .querySelector(
+            ".cwQuickPartsCancel"
+        )
+        .onclick =
+        ()=>{
+
+            this.destroy();
+
+        };
+
+
+
+        this.dialog
+        .querySelector(
+            ".cwQuickPartsOK"
+        )
+        .onclick =
+        ()=>{
+
+            this.destroy();
+
+        };
+
+
+    },
+
+
+
+    destroy(){
+
+
+        if(this.dialog){
+
+            this.dialog.remove();
+
+            this.dialog = null;
+
+        }
+
+
+
+        if(this.overlay){
+
+            this.overlay.remove();
+
+            this.overlay = null;
+
+        }
+
+
+    }
+
+
+
+};
+
+
+
+})();
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
