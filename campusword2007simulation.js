@@ -35597,6 +35597,354 @@ else{
 
 
 
+/* =========================================================
+   CAMPUS WORD 2007 SIMULATEUR
+   QUICK PARTS MENU ACTION CONTROLLER
+   FOUNDATION v1.0.0
+   CONNECT QUICK PARTS MENU ITEMS
+========================================================= */
+
+(function(){
+
+"use strict";
+
+
+if(!window.CampusWord2007Simulateur){
+
+    window.CampusWord2007Simulateur = {};
+
+}
+
+
+
+CampusWord2007Simulateur.QuickPartsMenuActionController = {
+
+
+    menuItems:null,
+
+
+
+    init(){
+
+
+        this.menuItems =
+        document.querySelectorAll(
+            '.cwDropdownMenu [data-action]'
+        );
+
+
+
+        if(!this.menuItems.length){
+
+            return;
+
+        }
+
+
+
+        this.bind();
+
+
+
+    },
+
+
+
+    bind(){
+
+
+        this.menuItems.forEach(
+            (item)=>{
+
+
+                item.addEventListener(
+                    "click",
+                    (event)=>{
+
+
+                        event.stopPropagation();
+
+
+
+                        const action =
+                        item.dataset.action;
+
+
+
+                        this.execute(
+                            action
+                        );
+
+
+
+                    }
+                );
+
+
+            }
+        );
+
+
+    },
+
+
+
+    execute(action){
+
+
+        switch(action){
+
+
+
+            case "building-blocks":
+
+
+                console.log(
+                    "Quick Parts: Building Blocks"
+                );
+
+
+            break;
+
+
+
+
+            case "document-property":
+
+
+                console.log(
+                    "Quick Parts: Document Property"
+                );
+
+
+            break;
+
+
+
+
+            case "field":
+
+
+                console.log(
+                    "Quick Parts: Field"
+                );
+
+
+            break;
+
+
+
+        }
+
+
+    }
+
+
+
+};
+
+
+
+
+
+if(document.readyState === "loading"){
+
+
+    document.addEventListener(
+        "DOMContentLoaded",
+        ()=>{
+
+
+            CampusWord2007Simulateur
+            .QuickPartsMenuActionController
+            .init();
+
+
+        }
+    );
+
+
+}
+else{
+
+
+    CampusWord2007Simulateur
+    .QuickPartsMenuActionController
+    .init();
+
+
+}
+
+
+
+})();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* =========================================================
+   CAMPUS WORD 2007 SIMULATEUR
+   QUICK PARTS COMMAND BRIDGE
+   FOUNDATION v1.0.0
+   ISOLATED MODULE
+========================================================= */
+
+(function(){
+
+"use strict";
+
+
+if(!window.CampusWord2007Simulateur){
+
+    window.CampusWord2007Simulateur = {};
+
+}
+
+
+
+CampusWord2007Simulateur.QuickPartsCommandBridge = {
+
+
+
+    init(){
+
+
+        const items =
+        document.querySelectorAll(
+            '.cwDropdownMenu [data-action]'
+        );
+
+
+
+        if(!items.length){
+
+            return;
+
+        }
+
+
+
+        items.forEach(
+            (item)=>{
+
+
+                item.addEventListener(
+                    "click",
+                    (event)=>{
+
+
+                        event.stopPropagation();
+
+
+                        this.execute(
+                            item.dataset.action
+                        );
+
+
+                    }
+                );
+
+
+            }
+        );
+
+
+    },
+
+
+
+
+
+    execute(action){
+
+
+
+        document.dispatchEvent(
+            new CustomEvent(
+                "cwQuickPartsAction",
+                {
+                    detail:{
+                        action:action
+                    }
+                }
+            )
+        );
+
+
+
+    }
+
+
+
+};
+
+
+
+
+
+if(document.readyState === "loading"){
+
+    document.addEventListener(
+        "DOMContentLoaded",
+        ()=>{
+
+            CampusWord2007Simulateur
+            .QuickPartsCommandBridge
+            .init();
+
+        }
+    );
+
+
+}
+else{
+
+    CampusWord2007Simulateur
+    .QuickPartsCommandBridge
+    .init();
+
+}
+
+
+
+})();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
