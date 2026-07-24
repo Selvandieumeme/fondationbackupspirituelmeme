@@ -6962,6 +6962,53 @@ bottom:-6px;
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* =========================================================
+   QUICK PARTS BUTTON ACTIVE STATE
+========================================================= */
+
+.cwRibbonBtn.cwQuickPartsActive{
+
+    background:#28a745 !important;
+
+    color:#ffffff !important;
+
+    border-color:#1e7e34 !important;
+
+}
+
+.cwRibbonBtn.cwQuickPartsActive svg{
+
+    color:#ffffff !important;
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 /* =========================================================
    CAMPUS WORD 2007 SIMULATEUR
    QUICK PARTS DIALOG UI ENGINE
