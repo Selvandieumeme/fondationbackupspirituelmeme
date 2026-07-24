@@ -6949,3 +6949,331 @@ bottom:-6px;
     color:#800080;
 
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* =========================================================
+   CAMPUS WORD 2007 SIMULATEUR
+   QUICK PARTS DIALOG UI ENGINE
+   WORD 2007 STYLE
+========================================================= */
+
+/* ===========================
+   OVERLAY
+=========================== */
+
+.cwQuickPartsOverlay{
+
+    position:fixed;
+
+    inset:0;
+
+    background:rgba(0,0,0,.28);
+
+    z-index:90100;
+
+    animation:cwQuickPartsFade .18s ease;
+
+}
+
+
+/* ===========================
+   DIALOG
+=========================== */
+
+.cwQuickPartsDialog{
+
+    position:fixed;
+
+    top:50%;
+    left:50%;
+
+    transform:translate(-50%,-50%);
+
+    width:560px;
+
+    max-width:94vw;
+
+    background:#ffffff;
+
+    border:1px solid #8c8c8c;
+
+    border-radius:4px;
+
+    box-shadow:
+    0 10px 35px rgba(0,0,0,.35);
+
+    overflow:hidden;
+
+    z-index:90101;
+
+    font-family:
+    Calibri,
+    Arial,
+    sans-serif;
+
+    animation:
+    cwQuickPartsZoom .18s ease;
+
+}
+
+
+/* ===========================
+   HEADER
+=========================== */
+
+.cwQuickPartsHeader{
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:space-between;
+
+    height:38px;
+
+    padding:0 12px;
+
+    background:
+    linear-gradient(
+        #f7f7f7,
+        #e8e8e8
+    );
+
+    border-bottom:
+    1px solid #cfcfcf;
+
+    font-size:15px;
+
+    font-weight:600;
+
+    color:#222;
+
+}
+
+
+.cwQuickPartsClose{
+
+    width:28px;
+
+    height:28px;
+
+    border:none;
+
+    background:transparent;
+
+    border-radius:3px;
+
+    cursor:pointer;
+
+    font-size:16px;
+
+}
+
+
+.cwQuickPartsClose:hover{
+
+    background:#e81123;
+
+    color:#ffffff;
+
+}
+
+
+/* ===========================
+   BODY
+=========================== */
+
+.cwQuickPartsBody{
+
+    padding:18px;
+
+    display:flex;
+
+    flex-direction:column;
+
+    gap:14px;
+
+    min-height:220px;
+
+}
+
+
+.cwQuickPartsTitle{
+
+    font-size:15px;
+
+    font-weight:700;
+
+    color:#1b1b1b;
+
+}
+
+
+.cwQuickPartsContent{
+
+    flex:1;
+
+    border:1px solid #d2d2d2;
+
+    background:#ffffff;
+
+    padding:14px;
+
+    overflow:auto;
+
+    font-size:14px;
+
+    color:#444;
+
+}
+
+
+/* ===========================
+   FOOTER
+=========================== */
+
+.cwQuickPartsFooter{
+
+    display:flex;
+
+    justify-content:flex-end;
+
+    gap:10px;
+
+    padding:12px 16px;
+
+    background:#f5f5f5;
+
+    border-top:
+    1px solid #d6d6d6;
+
+}
+
+
+.cwQuickPartsOK,
+.cwQuickPartsCancel{
+
+    min-width:82px;
+
+    height:32px;
+
+    border:1px solid #9d9d9d;
+
+    border-radius:3px;
+
+    background:
+    linear-gradient(
+        #ffffff,
+        #e8e8e8
+    );
+
+    cursor:pointer;
+
+    font-size:13px;
+
+}
+
+
+.cwQuickPartsOK:hover,
+.cwQuickPartsCancel:hover{
+
+    background:
+    linear-gradient(
+        #fff8d7,
+        #ffe082
+    );
+
+}
+
+
+.cwQuickPartsOK:active,
+.cwQuickPartsCancel:active{
+
+    transform:scale(.98);
+
+}
+
+
+/* ===========================
+   ANIMATION
+=========================== */
+
+@keyframes cwQuickPartsFade{
+
+    from{
+
+        opacity:0;
+
+    }
+
+    to{
+
+        opacity:1;
+
+    }
+
+}
+
+
+@keyframes cwQuickPartsZoom{
+
+    from{
+
+        opacity:0;
+
+        transform:
+        translate(-50%,-52%)
+        scale(.96);
+
+    }
+
+    to{
+
+        opacity:1;
+
+        transform:
+        translate(-50%,-50%)
+        scale(1);
+
+    }
+
+}
+
+
+/* ===========================
+   RESPONSIVE
+=========================== */
+
+@media (max-width:600px){
+
+    .cwQuickPartsDialog{
+
+        width:96vw;
+
+    }
+
+    .cwQuickPartsFooter{
+
+        flex-wrap:wrap;
+
+    }
+
+    .cwQuickPartsOK,
+    .cwQuickPartsCancel{
+
+        flex:1;
+
+    }
+
+}
