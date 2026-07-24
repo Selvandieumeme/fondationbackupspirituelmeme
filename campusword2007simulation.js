@@ -36291,6 +36291,867 @@ Cancel
 
 
 
+/* =========================================================
+   CAMPUS WORD 2007 SIMULATEUR
+   DOCUMENT PROPERTY ENGINE
+   QUICK PARTS UI MODULE
+   FOUNDATION v1.0.0
+   ISOLATED MODULE
+========================================================= */
+
+(function(){
+
+"use strict";
+
+
+if(!window.CampusWord2007Simulateur){
+
+    window.CampusWord2007Simulateur = {};
+
+}
+
+
+
+CampusWord2007Simulateur.DocumentPropertyEngine = {
+
+
+    overlay:null,
+
+    dialog:null,
+
+
+
+    open(){
+
+
+        if(this.dialog){
+
+            return;
+
+        }
+
+
+
+
+
+        this.overlay =
+        document.createElement(
+            "div"
+        );
+
+
+        this.overlay.className =
+        "cwQuickPartsOverlay";
+
+
+
+
+
+
+
+        this.dialog =
+        document.createElement(
+            "div"
+        );
+
+
+        this.dialog.className =
+        "cwDocumentPropertyDialog";
+
+
+
+
+
+
+
+        this.dialog.innerHTML = `
+
+<div class="cwDocumentPropertyHeader">
+
+
+<span>
+Document Property
+</span>
+
+
+<button
+type="button"
+class="cwDocumentPropertyClose">
+✕
+</button>
+
+
+</div>
+
+
+
+
+
+<div class="cwDocumentPropertyBody">
+
+
+<div class="cwDocumentPropertyItem">
+
+Title
+
+<input
+type="text"
+class="cwDocTitle"
+placeholder="Document title">
+
+</div>
+
+
+
+
+<div class="cwDocumentPropertyItem">
+
+Author
+
+<input
+type="text"
+class="cwDocAuthor"
+placeholder="Author name">
+
+</div>
+
+
+
+
+
+<div class="cwDocumentPropertyItem">
+
+Subject
+
+<input
+type="text"
+class="cwDocSubject"
+placeholder="Document subject">
+
+</div>
+
+
+
+</div>
+
+
+
+
+
+
+<div class="cwDocumentPropertyFooter">
+
+
+<button
+type="button"
+class="cwDocumentPropertyOK">
+
+OK
+
+</button>
+
+
+
+<button
+type="button"
+class="cwDocumentPropertyCancel">
+
+Cancel
+
+</button>
+
+
+</div>
+
+`;
+
+
+
+
+
+
+
+        document.body.appendChild(
+            this.overlay
+        );
+
+
+        document.body.appendChild(
+            this.dialog
+        );
+
+
+
+
+        this.bind();
+
+
+
+    },
+
+
+
+
+
+
+    bind(){
+
+
+
+        const close =
+        this.dialog.querySelector(
+            ".cwDocumentPropertyClose"
+        );
+
+
+
+        const ok =
+        this.dialog.querySelector(
+            ".cwDocumentPropertyOK"
+        );
+
+
+
+        const cancel =
+        this.dialog.querySelector(
+            ".cwDocumentPropertyCancel"
+        );
+
+
+
+
+
+        if(close){
+
+            close.onclick =
+            ()=>{
+
+                this.close();
+
+            };
+
+        }
+
+
+
+
+
+
+        if(cancel){
+
+            cancel.onclick =
+            ()=>{
+
+                this.close();
+
+            };
+
+        }
+
+
+
+
+
+
+        if(ok){
+
+            ok.onclick =
+            ()=>{
+
+
+                this.close();
+
+
+            };
+
+        }
+
+
+
+
+
+
+
+        if(this.overlay){
+
+            this.overlay.onclick =
+            ()=>{
+
+                this.close();
+
+            };
+
+        }
+
+
+
+    },
+
+
+
+
+
+
+
+
+    close(){
+
+
+
+        if(this.dialog){
+
+
+            this.dialog.remove();
+
+            this.dialog = null;
+
+
+        }
+
+
+
+
+
+
+        if(this.overlay){
+
+
+            this.overlay.remove();
+
+            this.overlay = null;
+
+
+        }
+
+
+
+    }
+
+
+
+};
+
+
+
+})();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* =========================================================
+   CAMPUS WORD 2007 SIMULATEUR
+   FIELD ENGINE
+   QUICK PARTS UI MODULE
+   FOUNDATION v1.0.0
+   ISOLATED MODULE
+========================================================= */
+
+(function(){
+
+"use strict";
+
+
+if(!window.CampusWord2007Simulateur){
+
+    window.CampusWord2007Simulateur = {};
+
+}
+
+
+
+CampusWord2007Simulateur.FieldEngine = {
+
+
+    overlay:null,
+
+    dialog:null,
+
+
+
+    open(){
+
+
+        if(this.dialog){
+
+            return;
+
+        }
+
+
+
+
+
+        this.overlay =
+        document.createElement(
+            "div"
+        );
+
+
+        this.overlay.className =
+        "cwQuickPartsOverlay";
+
+
+
+
+
+
+
+        this.dialog =
+        document.createElement(
+            "div"
+        );
+
+
+        this.dialog.className =
+        "cwFieldDialog";
+
+
+
+
+
+
+
+        this.dialog.innerHTML = `
+
+<div class="cwFieldHeader">
+
+
+<span>
+Field
+</span>
+
+
+<button
+type="button"
+class="cwFieldClose">
+✕
+</button>
+
+
+</div>
+
+
+
+
+
+
+
+<div class="cwFieldBody">
+
+
+
+<div class="cwFieldRow">
+
+<label>
+Field Name
+</label>
+
+
+<select class="cwFieldSelect">
+
+
+<option value="">
+Select Field
+</option>
+
+
+<option value="date">
+Date
+</option>
+
+
+<option value="time">
+Time
+</option>
+
+
+<option value="page">
+Page Number
+</option>
+
+
+<option value="author">
+Author
+</option>
+
+
+<option value="title">
+Document Title
+</option>
+
+
+</select>
+
+
+</div>
+
+
+
+
+
+
+
+<div class="cwFieldPreview">
+
+
+Preview:
+<span class="cwFieldValue">
+</span>
+
+
+</div>
+
+
+
+
+</div>
+
+
+
+
+
+
+
+
+<div class="cwFieldFooter">
+
+
+<button
+type="button"
+class="cwFieldInsert">
+
+Insert
+
+</button>
+
+
+
+
+<button
+type="button"
+class="cwFieldCancel">
+
+Cancel
+
+</button>
+
+
+</div>
+
+`;
+
+
+
+
+
+
+
+        document.body.appendChild(
+            this.overlay
+        );
+
+
+        document.body.appendChild(
+            this.dialog
+        );
+
+
+
+
+
+        this.bind();
+
+
+
+    },
+
+
+
+
+
+
+
+    bind(){
+
+
+
+        const close =
+        this.dialog.querySelector(
+            ".cwFieldClose"
+        );
+
+
+
+        const cancel =
+        this.dialog.querySelector(
+            ".cwFieldCancel"
+        );
+
+
+
+        const insert =
+        this.dialog.querySelector(
+            ".cwFieldInsert"
+        );
+
+
+
+        const select =
+        this.dialog.querySelector(
+            ".cwFieldSelect"
+        );
+
+
+
+
+
+
+
+        if(close){
+
+            close.onclick =
+            ()=>{
+
+                this.close();
+
+            };
+
+        }
+
+
+
+
+
+
+
+
+        if(cancel){
+
+            cancel.onclick =
+            ()=>{
+
+                this.close();
+
+            };
+
+        }
+
+
+
+
+
+
+
+
+        if(insert){
+
+            insert.onclick =
+            ()=>{
+
+
+                this.insertField();
+
+
+            };
+
+        }
+
+
+
+
+
+
+
+        if(select){
+
+            select.onchange =
+            ()=>{
+
+
+                const preview =
+                this.dialog.querySelector(
+                    ".cwFieldValue"
+                );
+
+
+                if(preview){
+
+                    preview.textContent =
+                    select.value;
+
+                }
+
+
+            };
+
+        }
+
+
+
+
+
+
+
+        if(this.overlay){
+
+            this.overlay.onclick =
+            ()=>{
+
+                this.close();
+
+            };
+
+        }
+
+
+
+    },
+
+
+
+
+
+
+
+
+    insertField(){
+
+
+        const select =
+        this.dialog.querySelector(
+            ".cwFieldSelect"
+        );
+
+
+
+        if(!select || !select.value){
+
+            return;
+
+        }
+
+
+
+
+
+        const fieldData = {
+
+
+            type:
+            select.value,
+
+
+            createdAt:
+            Date.now()
+
+
+        };
+
+
+
+
+
+        document.dispatchEvent(
+            new CustomEvent(
+                "cwInsertField",
+                {
+                    detail:fieldData
+                }
+            )
+        );
+
+
+
+
+        this.close();
+
+
+
+    },
+
+
+
+
+
+
+
+
+    close(){
+
+
+
+        if(this.dialog){
+
+
+            this.dialog.remove();
+
+            this.dialog = null;
+
+
+        }
+
+
+
+
+
+
+        if(this.overlay){
+
+
+            this.overlay.remove();
+
+            this.overlay = null;
+
+
+        }
+
+
+
+    }
+
+
+
+};
+
+
+
+})();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
