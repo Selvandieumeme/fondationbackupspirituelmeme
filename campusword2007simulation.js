@@ -36255,7 +36255,6 @@ items.forEach((item)=>{
 
 /* ======================================
    SHOW SAVED QUICK PARTS
-   COMPATIBLE WITH SAVE QUICK PART ENGINE v2.0.0
 ====================================== */
 
 
@@ -36266,149 +36265,88 @@ this.dialog.querySelector(
 
 
 
-if(body){
-
-
-    const saved =
-    CampusWord2007Simulateur
-    .SaveQuickPartEngine
-    .getAll();
+const saved =
+CampusWord2007Simulateur
+.SaveQuickPartEngine
+.getAll();
 
 
 
-    if(
-    saved &&
-    saved.length
-    ){
+if(saved.length){
+
+
+    const title =
+    document.createElement(
+        "div"
+    );
+
+
+    title.textContent =
+    "Saved Quick Parts";
+
+
+    body.appendChild(
+        title
+    );
 
 
 
-        const title =
+    saved.forEach((part)=>{
+
+
+        const item =
         document.createElement(
             "div"
         );
 
 
-        title.textContent =
-        "Saved Quick Parts";
+        item.className =
+        "cwBuildingBlockItem";
 
 
-        title.className =
-        "cwBuildingBlocksSavedTitle";
+        item.textContent =
+        part.text;
+
+
+
+        item.onclick = ()=>{
+
+
+            document.dispatchEvent(
+
+                new CustomEvent(
+
+                    "cwInsertBuildingBlock",
+
+                    {
+
+                        detail:{
+
+                            type:
+                            part.text
+
+                        }
+
+                    }
+
+                )
+
+            );
+
+
+            this.close();
+
+
+        };
 
 
 
         body.appendChild(
-            title
+            item
         );
 
 
-
-
-
-
-        saved.forEach(
-        (part)=>{
-
-
-            const item =
-            document.createElement(
-                "div"
-            );
-
-
-
-            item.className =
-            "cwBuildingBlockItem";
-
-
-
-            item.textContent =
-            part.name ||
-            part.text;
-
-
-
-            item.dataset.quickpart =
-            part.id;
-
-
-
-
-
-            item.onclick = ()=>{
-
-
-
-                document.dispatchEvent(
-
-
-                    new CustomEvent(
-
-
-                        "cwInsertBuildingBlock",
-
-
-                        {
-
-
-                            detail:{
-
-
-                                id:
-                                part.id,
-
-
-                                name:
-                                part.name,
-
-
-                                text:
-                                part.text,
-
-
-                                html:
-                                part.html,
-
-
-                                createdAt:
-                                part.createdAt
-
-
-
-                            }
-
-
-                        }
-
-
-                    )
-
-
-                );
-
-
-
-                this.close();
-
-
-
-            };
-
-
-
-
-            body.appendChild(
-                item
-            );
-
-
-
-        });
-
-
-    }
-
+    });
 
 
 }
