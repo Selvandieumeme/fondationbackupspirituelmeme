@@ -36250,6 +36250,125 @@ items.forEach((item)=>{
 
 
 
+
+
+
+/* ======================================
+   LOAD SAVED QUICK PARTS
+====================================== */
+
+const savedContainer =
+document.createElement("div");
+
+savedContainer.className =
+"cwQuickPartsSavedContainer";
+
+
+const savedTitle =
+document.createElement("div");
+
+savedTitle.className =
+"cwQuickPartsSavedTitle";
+
+savedTitle.textContent =
+"Saved Quick Parts";
+
+
+this.dialog
+.querySelector(".cwBuildingBlocksBody")
+.appendChild(savedTitle);
+
+
+this.dialog
+.querySelector(".cwBuildingBlocksBody")
+.appendChild(savedContainer);
+
+
+
+if(
+CampusWord2007Simulateur
+.SaveQuickPartEngine
+&&
+typeof
+CampusWord2007Simulateur
+.SaveQuickPartEngine
+.getAll
+===
+"function"
+){
+
+    const parts =
+    CampusWord2007Simulateur
+    .SaveQuickPartEngine
+    .getAll();
+
+
+
+    parts.forEach((part)=>{
+
+
+        const item =
+        document.createElement("div");
+
+
+        item.className =
+        "cwBuildingBlockItem";
+
+
+        item.textContent =
+        part.text;
+
+
+
+        item.onclick = ()=>{
+
+
+            document.dispatchEvent(
+
+                new CustomEvent(
+
+                    "cwInsertBuildingBlock",
+
+                    {
+
+                        detail:{
+
+                            type:
+                            part.text
+
+                        }
+
+                    }
+
+                )
+
+            );
+
+
+            this.close();
+
+
+        };
+
+
+
+        savedContainer.appendChild(
+            item
+        );
+
+
+    });
+
+}
+
+
+
+
+       
+
+
+
+
         if(this.overlay){
 
             this.overlay.onclick =
@@ -37966,231 +38085,6 @@ ${part.text}
 
 
 
-
-/* =========================================================
-   CAMPUS WORD 2007 SIMULATEUR
-   QUICK PARTS BUILDING BLOCKS VIEW CONNECTOR
-   QUICK PARTS MODULE
-   FOUNDATION v1.0.1
-   ISOLATED MODULE
-========================================================= */
-
-(function(){
-
-"use strict";
-
-
-if(!window.CampusWord2007Simulateur){
-
-    window.CampusWord2007Simulateur = {};
-
-}
-
-
-
-CampusWord2007Simulateur.QuickPartsBuildingBlocksViewConnector = {
-
-
-    connected:false,
-
-
-
-    init(){
-
-
-        this.observe();
-
-
-    },
-
-
-
-
-    observe(){
-
-
-        const observer = new MutationObserver(()=>{
-
-
-            const dialog =
-            document.querySelector(
-                ".cwBuildingBlocksDialog"
-            );
-
-
-            if(dialog && !this.connected){
-
-
-                this.connect(
-                    dialog
-                );
-
-
-            }
-
-
-        });
-
-
-
-        observer.observe(
-
-            document.body,
-
-            {
-
-                childList:true,
-
-                subtree:true
-
-            }
-
-        );
-
-
-    },
-
-
-
-
-    connect(dialog){
-
-
-        const body =
-        dialog.querySelector(
-            ".cwBuildingBlocksBody"
-        );
-
-
-
-        if(!body){
-
-            return;
-
-        }
-
-
-
-
-        const savedTitle =
-        document.createElement(
-            "div"
-        );
-
-
-        savedTitle.className =
-        "cwQuickPartsSavedTitle";
-
-
-        savedTitle.textContent =
-        "Saved Quick Parts";
-
-
-
-
-
-        const savedContainer =
-        document.createElement(
-            "div"
-        );
-
-
-        savedContainer.className =
-        "cwQuickPartsSavedContainer";
-
-
-
-
-
-        body.appendChild(
-            savedTitle
-        );
-
-
-        body.appendChild(
-            savedContainer
-        );
-
-
-
-
-
-        if(
-
-        CampusWord2007Simulateur
-        .QuickPartsLibraryViewEngine
-
-        &&
-
-        typeof
-        CampusWord2007Simulateur
-        .QuickPartsLibraryViewEngine
-        .render
-        ===
-        "function"
-
-        ){
-
-
-            CampusWord2007Simulateur
-            .QuickPartsLibraryViewEngine
-            .render(
-                savedContainer
-            );
-
-
-        }
-
-
-
-        this.connected = true;
-
-
-
-    }
-
-
-
-
-};
-
-
-
-
-if(document.readyState === "loading"){
-
-
-    document.addEventListener(
-
-        "DOMContentLoaded",
-
-        ()=>{
-
-
-            CampusWord2007Simulateur
-            .QuickPartsBuildingBlocksViewConnector
-            .init();
-
-
-        }
-
-    );
-
-
-}
-else{
-
-
-    CampusWord2007Simulateur
-    .QuickPartsBuildingBlocksViewConnector
-    .init();
-
-
-}
-
-
-
-})();
 
 
 
