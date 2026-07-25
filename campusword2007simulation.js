@@ -36219,6 +36219,33 @@ Cancel
 
 
 
+
+   const items =
+this.dialog.querySelectorAll(
+    ".cwBuildingBlockItem"
+);
+
+
+items.forEach(
+
+    (item)=>{
+
+        item.onclick = ()=>{
+
+            this.selectBuildingBlock(
+
+                item.textContent.trim()
+
+            );
+
+        };
+
+    }
+
+);
+
+
+
         if(this.overlay){
 
             this.overlay.onclick =
@@ -36234,6 +36261,41 @@ Cancel
 
 
 
+
+
+
+
+selectBuildingBlock(type){
+
+    document.dispatchEvent(
+
+        new CustomEvent(
+
+            "cwInsertBuildingBlock",
+
+            {
+
+                detail:{
+
+                    type:type
+
+                }
+
+            )
+
+        )
+
+    );
+
+
+
+    this.close();
+
+},
+
+
+
+   
 
 
 
