@@ -36296,6 +36296,308 @@ Cancel
 
 
 
+/* =========================================================
+   CAMPUS WORD 2007 SIMULATEUR
+   DOCUMENT PROPERTY ENGINE
+   QUICK PARTS UI MODULE
+   FOUNDATION v2.0.0
+   100% ISOLATED
+========================================================= */
+
+(function(){
+
+"use strict";
+
+
+if(!window.CampusWord2007Simulateur){
+
+    window.CampusWord2007Simulateur = {};
+
+}
+
+
+
+CampusWord2007Simulateur.DocumentPropertyEngine = {
+
+
+    overlay:null,
+
+    dialog:null,
+
+
+
+    open(){
+
+
+        if(this.dialog){
+
+            return;
+
+        }
+
+
+
+        this.overlay =
+        document.createElement("div");
+
+        this.overlay.className =
+        "cwQuickPartsOverlay";
+
+
+
+        this.dialog =
+        document.createElement("div");
+
+        this.dialog.className =
+        "cwDocumentPropertyDialog";
+
+
+
+        this.dialog.innerHTML = `
+
+<div class="cwDocumentPropertyHeader">
+
+<span>Document Property</span>
+
+<button
+type="button"
+class="cwDocumentPropertyClose">
+✕
+</button>
+
+</div>
+
+
+
+<div class="cwDocumentPropertyBody">
+
+<div class="cwDocumentPropertyItem">
+
+<label>Title</label>
+
+<input
+type="text"
+class="cwDocTitle"
+placeholder="Document title">
+
+</div>
+
+
+
+<div class="cwDocumentPropertyItem">
+
+<label>Author</label>
+
+<input
+type="text"
+class="cwDocAuthor"
+placeholder="Author name">
+
+</div>
+
+
+
+<div class="cwDocumentPropertyItem">
+
+<label>Subject</label>
+
+<input
+type="text"
+class="cwDocSubject"
+placeholder="Document subject">
+
+</div>
+
+</div>
+
+
+
+<div class="cwDocumentPropertyFooter">
+
+<button
+type="button"
+class="cwDocumentPropertyOK">
+
+OK
+
+</button>
+
+<button
+type="button"
+class="cwDocumentPropertyCancel">
+
+Cancel
+
+</button>
+
+</div>
+
+`;
+
+
+        document.body.appendChild(
+            this.overlay
+        );
+
+        document.body.appendChild(
+            this.dialog
+        );
+
+
+        this.bind();
+
+
+    },
+
+
+
+    bind(){
+
+
+        const close =
+        this.dialog.querySelector(
+            ".cwDocumentPropertyClose"
+        );
+
+
+        const cancel =
+        this.dialog.querySelector(
+            ".cwDocumentPropertyCancel"
+        );
+
+
+        const ok =
+        this.dialog.querySelector(
+            ".cwDocumentPropertyOK"
+        );
+
+
+
+        if(close){
+
+            close.onclick = ()=>{
+
+                this.close();
+
+            };
+
+        }
+
+
+
+        if(cancel){
+
+            cancel.onclick = ()=>{
+
+                this.close();
+
+            };
+
+        }
+
+
+
+        if(ok){
+
+            ok.onclick = ()=>{
+
+                const data = {
+
+                    title:
+                    this.dialog.querySelector(".cwDocTitle").value,
+
+                    author:
+                    this.dialog.querySelector(".cwDocAuthor").value,
+
+                    subject:
+                    this.dialog.querySelector(".cwDocSubject").value,
+
+                    createdAt:
+                    Date.now()
+
+                };
+
+
+                document.dispatchEvent(
+
+                    new CustomEvent(
+
+                        "cwDocumentPropertyInsert",
+
+                        {
+
+                            detail:data
+
+                        }
+
+                    )
+
+                );
+
+
+                this.close();
+
+            };
+
+        }
+
+
+
+        if(this.overlay){
+
+            this.overlay.onclick = ()=>{
+
+                this.close();
+
+            };
+
+        }
+
+
+    },
+
+
+
+    close(){
+
+
+        if(this.dialog){
+
+            this.dialog.remove();
+
+            this.dialog = null;
+
+        }
+
+
+
+        if(this.overlay){
+
+            this.overlay.remove();
+
+            this.overlay = null;
+
+        }
+
+
+    }
+
+
+
+};
+
+
+})();
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -36780,6 +37082,318 @@ Cancel
 
 
 })();
+
+
+
+
+
+
+
+
+
+
+
+
+/* =========================================================
+   CAMPUS WORD 2007 SIMULATEUR
+   BUILDING BLOCKS EXECUTE ENGINE
+   QUICK PARTS MODULE
+   FOUNDATION v1.0.0
+   ISOLATED MODULE
+========================================================= */
+
+(function(){
+
+"use strict";
+
+
+if(!window.CampusWord2007Simulateur){
+
+    window.CampusWord2007Simulateur = {};
+
+}
+
+
+
+CampusWord2007Simulateur.BuildingBlocksExecuteEngine = {
+
+
+
+    init(){
+
+
+        document.addEventListener(
+
+            "cwInsertBuildingBlock",
+
+            (event)=>{
+
+                this.insert(
+                    event.detail
+                );
+
+            }
+
+        );
+
+
+    },
+
+
+
+
+    insert(data){
+
+
+        if(!data){
+
+            return;
+
+        }
+
+
+
+        const page =
+
+        document.querySelector(
+            ".cwPageContent"
+        );
+
+
+
+        if(!page){
+
+            return;
+
+        }
+
+
+
+        const block =
+
+        document.createElement(
+            "div"
+        );
+
+
+
+        block.className =
+        "cwInsertedBuildingBlock";
+
+
+
+        block.dataset.type =
+        data.type || "";
+
+
+
+        block.dataset.created =
+        Date.now();
+
+
+
+
+        block.contentEditable =
+        "false";
+
+
+
+        block.style.position =
+        "absolute";
+
+
+
+        block.style.left =
+        "100px";
+
+
+
+        block.style.top =
+        "100px";
+
+
+
+        block.style.minWidth =
+        "180px";
+
+
+
+        block.style.padding =
+        "10px 14px";
+
+
+
+        block.style.background =
+        "#ffffff";
+
+
+
+        block.style.border =
+        "1px solid #c8c8c8";
+
+
+
+        block.style.borderRadius =
+        "4px";
+
+
+
+        block.style.boxShadow =
+        "0 2px 8px rgba(0,0,0,.15)";
+
+
+
+        block.style.cursor =
+        "move";
+
+
+
+        block.style.userSelect =
+        "none";
+
+
+
+        switch(data.type){
+
+
+            case "AutoText":
+
+
+                block.innerHTML =
+
+                "<strong>AutoText</strong><br>" +
+
+                "Type your reusable text here.";
+
+
+            break;
+
+
+
+
+            case "Document Parts":
+
+
+                block.innerHTML =
+
+                "<strong>Document Parts</strong><br>" +
+
+                "Insert document component.";
+
+
+            break;
+
+
+
+
+            case "Saved Building Blocks":
+
+
+                block.innerHTML =
+
+                "<strong>Saved Building Blocks</strong><br>" +
+
+                "No saved building blocks.";
+
+
+            break;
+
+
+
+
+            default:
+
+
+                block.textContent =
+                data.type || "Building Block";
+
+
+        }
+
+
+
+        page.appendChild(
+            block
+        );
+
+
+
+        document.dispatchEvent(
+
+            new CustomEvent(
+
+                "cwBuildingBlockInserted",
+
+                {
+
+                    detail:{
+
+                        element:block,
+
+                        type:data.type
+
+                    }
+
+                }
+
+            )
+
+        );
+
+
+    }
+
+
+
+};
+
+
+
+
+if(document.readyState === "loading"){
+
+
+    document.addEventListener(
+
+        "DOMContentLoaded",
+
+        ()=>{
+
+            CampusWord2007Simulateur
+            .BuildingBlocksExecuteEngine
+            .init();
+
+        }
+
+    );
+
+
+}
+else{
+
+
+    CampusWord2007Simulateur
+    .BuildingBlocksExecuteEngine
+    .init();
+
+
+}
+
+
+
+})();
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
