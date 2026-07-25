@@ -36224,6 +36224,26 @@ Cancel
 this.dialog.querySelectorAll(
     ".cwBuildingBlockItem"
 );
+items.forEach((item)=>{
+
+    item.onclick = ()=>{
+
+        document.dispatchEvent(
+            new CustomEvent(
+                "cwInsertBuildingBlock",
+                {
+                    detail:{
+                        type:item.textContent.trim()
+                    }
+                }
+            )
+        );
+
+        this.close();
+
+    };
+
+});
 
 
 
