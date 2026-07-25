@@ -36226,23 +36226,7 @@ this.dialog.querySelectorAll(
 );
 
 
-items.forEach(
 
-    (item)=>{
-
-        item.onclick = ()=>{
-
-            this.selectBuildingBlock(
-
-                item.textContent.trim()
-
-            );
-
-        };
-
-    }
-
-);
 
 
 
@@ -36265,33 +36249,6 @@ items.forEach(
 
 
 
-selectBuildingBlock(type){
-
-    document.dispatchEvent(
-
-        new CustomEvent(
-
-            "cwInsertBuildingBlock",
-
-            {
-
-                detail:{
-
-                    type:type
-
-                }
-
-            )
-
-        )
-
-    );
-
-
-
-    this.close();
-
-},
 
 
 
