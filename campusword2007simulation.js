@@ -37484,6 +37484,490 @@ else{
 
 
 
+/* =========================================================
+   CAMPUS WORD 2007 SIMULATEUR
+   SAVE SELECTION TO QUICK PARTS ENGINE
+   QUICK PARTS MODULE
+   FOUNDATION v1.0.0
+   ISOLATED MODULE
+========================================================= */
+
+(function(){
+
+"use strict";
+
+
+if(!window.CampusWord2007Simulateur){
+
+    window.CampusWord2007Simulateur = {};
+
+}
+
+
+
+CampusWord2007Simulateur.SaveQuickPartEngine = {
+
+
+    savedParts:[],
+
+
+    save(){
+
+
+        const selection =
+        window.getSelection();
+
+
+
+        if(!selection){
+
+            return;
+
+        }
+
+
+
+        const text =
+        selection
+        .toString()
+        .trim();
+
+
+
+        if(!text){
+
+            return;
+
+        }
+
+
+
+        const part = {
+
+
+            id:
+            "quickpart_" + Date.now(),
+
+
+            text:text,
+
+
+            createdAt:
+            Date.now()
+
+
+        };
+
+
+
+        this.savedParts.push(
+            part
+        );
+
+
+
+        document.dispatchEvent(
+
+            new CustomEvent(
+
+                "cwQuickPartSaved",
+
+                {
+
+                    detail:part
+
+                }
+
+            )
+
+        );
+
+
+    },
+
+
+
+    getAll(){
+
+
+        return this.savedParts;
+
+
+    }
+
+
+
+};
+
+
+
+
+})();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* =========================================================
+   CAMPUS WORD 2007 SIMULATEUR
+   QUICK PARTS LIBRARY READER ENGINE
+   QUICK PARTS MODULE
+   FOUNDATION v1.0.0
+   ISOLATED MODULE
+========================================================= */
+
+(function(){
+
+"use strict";
+
+
+if(!window.CampusWord2007Simulateur){
+
+    window.CampusWord2007Simulateur = {};
+
+}
+
+
+
+CampusWord2007Simulateur.QuickPartsLibraryReader = {
+
+
+
+    getSavedParts(){
+
+
+        if(
+
+        CampusWord2007Simulateur
+        .SaveQuickPartEngine
+
+        &&
+
+        typeof
+        CampusWord2007Simulateur
+        .SaveQuickPartEngine
+        .getAll
+        ===
+        "function"
+
+        ){
+
+
+            return (
+
+            CampusWord2007Simulateur
+            .SaveQuickPartEngine
+            .getAll()
+
+            );
+
+
+        }
+
+
+
+        return [];
+
+
+
+    },
+
+
+
+
+    findById(id){
+
+
+        const parts =
+        this.getSavedParts();
+
+
+
+        return parts.find(
+
+            part =>
+
+            part.id === id
+
+        )
+        ||
+        null;
+
+
+    },
+
+
+
+
+    count(){
+
+
+        return this
+        .getSavedParts()
+        .length;
+
+
+    },
+
+
+
+
+    dispatchUpdate(){
+
+
+        document.dispatchEvent(
+
+            new CustomEvent(
+
+                "cwQuickPartsLibraryUpdated",
+
+                {
+
+                    detail:{
+
+                        items:
+                        this.getSavedParts()
+
+                    }
+
+                }
+
+            )
+
+        );
+
+
+    }
+
+
+
+};
+
+
+
+
+})();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* =========================================================
+   CAMPUS WORD 2007 SIMULATEUR
+   QUICK PARTS LIBRARY VIEW ENGINE
+   QUICK PARTS MODULE
+   FOUNDATION v1.0.0
+   ISOLATED MODULE
+========================================================= */
+
+(function(){
+
+"use strict";
+
+
+if(!window.CampusWord2007Simulateur){
+
+    window.CampusWord2007Simulateur = {};
+
+}
+
+
+
+CampusWord2007Simulateur.QuickPartsLibraryViewEngine = {
+
+
+
+    render(container){
+
+
+        if(!container){
+
+            return;
+
+        }
+
+
+
+        container.innerHTML = "";
+
+
+
+        const parts =
+
+        CampusWord2007Simulateur
+        .QuickPartsLibraryReader
+
+        ?
+
+        CampusWord2007Simulateur
+        .QuickPartsLibraryReader
+        .getSavedParts()
+
+        :
+
+        [];
+
+
+
+
+
+        if(!parts.length){
+
+
+            const empty =
+            document.createElement("div");
+
+
+            empty.className =
+            "cwQuickPartsEmpty";
+
+
+            empty.textContent =
+            "No saved Quick Parts.";
+
+
+            container.appendChild(
+                empty
+            );
+
+
+            return;
+
+
+        }
+
+
+
+
+
+        parts.forEach((part)=>{
+
+
+            const item =
+            document.createElement(
+                "div"
+            );
+
+
+            item.className =
+            "cwQuickPartLibraryItem";
+
+
+
+            item.dataset.id =
+            part.id;
+
+
+
+            item.innerHTML = `
+
+<strong>
+Quick Part
+</strong>
+
+<br>
+
+${part.text}
+
+`;
+
+
+
+            item.addEventListener(
+                "click",
+                ()=>{
+
+
+                    document.dispatchEvent(
+
+                        new CustomEvent(
+
+                            "cwInsertBuildingBlock",
+
+                            {
+
+                                detail:{
+
+                                    type:
+                                    part.text
+
+                                }
+
+                            }
+
+                        )
+
+                    );
+
+
+                }
+            );
+
+
+
+            container.appendChild(
+                item
+            );
+
+
+
+        });
+
+
+
+    }
+
+
+
+
+};
+
+
+
+})();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
