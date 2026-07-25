@@ -37675,11 +37675,11 @@ else{
 
 
 
-/* =========================================================
+* =========================================================
    CAMPUS WORD 2007 SIMULATEUR
    SAVE SELECTION TO QUICK PARTS ENGINE
    QUICK PARTS MODULE
-   FOUNDATION v2.0.0
+   FOUNDATION v2.1.0
    ISOLATED MODULE
 ========================================================= */
 
@@ -37809,6 +37809,17 @@ CampusWord2007Simulateur.SaveQuickPartEngine = {
 
 
 
+    saveCurrentSelection(){
+
+
+        return this.save();
+
+
+    },
+
+
+
+
     getAll(){
 
 
@@ -37831,6 +37842,8 @@ CampusWord2007Simulateur.SaveQuickPartEngine = {
 
 
 };
+
+
 
 
 })();
