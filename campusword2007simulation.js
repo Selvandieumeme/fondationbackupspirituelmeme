@@ -36254,50 +36254,61 @@ items.forEach((item)=>{
 
 
 /* ======================================
-   SHOW SAVED QUICK PARTS
+   LOAD SAVED QUICK PARTS
 ====================================== */
 
+const savedContainer =
+document.createElement("div");
 
-const body =
-this.dialog.querySelector(
-    ".cwBuildingBlocksBody"
-);
+savedContainer.className =
+"cwQuickPartsSavedContainer";
+
+
+const savedTitle =
+document.createElement("div");
+
+savedTitle.className =
+"cwQuickPartsSavedTitle";
+
+savedTitle.textContent =
+"Saved Quick Parts";
+
+
+this.dialog
+.querySelector(".cwBuildingBlocksBody")
+.appendChild(savedTitle);
+
+
+this.dialog
+.querySelector(".cwBuildingBlocksBody")
+.appendChild(savedContainer);
 
 
 
-const saved =
+if(
 CampusWord2007Simulateur
 .SaveQuickPartEngine
-.getAll();
+&&
+typeof
+CampusWord2007Simulateur
+.SaveQuickPartEngine
+.getAll
+===
+"function"
+){
+
+    const parts =
+    CampusWord2007Simulateur
+    .SaveQuickPartEngine
+    .getAll();
 
 
 
-if(saved.length){
-
-
-    const title =
-    document.createElement(
-        "div"
-    );
-
-
-    title.textContent =
-    "Saved Quick Parts";
-
-
-    body.appendChild(
-        title
-    );
-
-
-
-    saved.forEach((part)=>{
+    parts.forEach((part)=>{
 
 
         const item =
-        document.createElement(
-            "div"
-        );
+        document.createElement("div");
 
 
         item.className =
@@ -36341,17 +36352,14 @@ if(saved.length){
 
 
 
-        body.appendChild(
+        savedContainer.appendChild(
             item
         );
 
 
     });
 
-
 }
-
-
 
 
 
