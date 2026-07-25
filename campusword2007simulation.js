@@ -36255,6 +36255,7 @@ items.forEach((item)=>{
 
 /* ======================================
    SHOW SAVED QUICK PARTS
+   COMPATIBLE WITH SAVE QUICK PART ENGINE v2.0.0
 ====================================== */
 
 
@@ -36265,88 +36266,149 @@ this.dialog.querySelector(
 
 
 
-const saved =
-CampusWord2007Simulateur
-.SaveQuickPartEngine
-.getAll();
+if(body){
+
+
+    const saved =
+    CampusWord2007Simulateur
+    .SaveQuickPartEngine
+    .getAll();
 
 
 
-if(saved.length){
-
-
-    const title =
-    document.createElement(
-        "div"
-    );
-
-
-    title.textContent =
-    "Saved Quick Parts";
-
-
-    body.appendChild(
-        title
-    );
+    if(
+    saved &&
+    saved.length
+    ){
 
 
 
-    saved.forEach((part)=>{
-
-
-        const item =
+        const title =
         document.createElement(
             "div"
         );
 
 
-        item.className =
-        "cwBuildingBlockItem";
+        title.textContent =
+        "Saved Quick Parts";
 
 
-        item.textContent =
-        part.text;
-
-
-
-        item.onclick = ()=>{
-
-
-            document.dispatchEvent(
-
-                new CustomEvent(
-
-                    "cwInsertBuildingBlock",
-
-                    {
-
-                        detail:{
-
-                            type:
-                            part.text
-
-                        }
-
-                    }
-
-                )
-
-            );
-
-
-            this.close();
-
-
-        };
+        title.className =
+        "cwBuildingBlocksSavedTitle";
 
 
 
         body.appendChild(
-            item
+            title
         );
 
 
-    });
+
+
+
+
+        saved.forEach(
+        (part)=>{
+
+
+            const item =
+            document.createElement(
+                "div"
+            );
+
+
+
+            item.className =
+            "cwBuildingBlockItem";
+
+
+
+            item.textContent =
+            part.name ||
+            part.text;
+
+
+
+            item.dataset.quickpart =
+            part.id;
+
+
+
+
+
+            item.onclick = ()=>{
+
+
+
+                document.dispatchEvent(
+
+
+                    new CustomEvent(
+
+
+                        "cwInsertBuildingBlock",
+
+
+                        {
+
+
+                            detail:{
+
+
+                                id:
+                                part.id,
+
+
+                                name:
+                                part.name,
+
+
+                                text:
+                                part.text,
+
+
+                                html:
+                                part.html,
+
+
+                                createdAt:
+                                part.createdAt
+
+
+
+                            }
+
+
+                        }
+
+
+                    )
+
+
+                );
+
+
+
+                this.close();
+
+
+
+            };
+
+
+
+
+            body.appendChild(
+                item
+            );
+
+
+
+        });
+
+
+    }
+
 
 
 }
@@ -37603,7 +37665,7 @@ else{
    CAMPUS WORD 2007 SIMULATEUR
    SAVE SELECTION TO QUICK PARTS ENGINE
    QUICK PARTS MODULE
-   FOUNDATION v1.0.1
+   FOUNDATION v2.0.0
    ISOLATED MODULE
 ========================================================= */
 
@@ -37623,11 +37685,60 @@ if(!window.CampusWord2007Simulateur){
 CampusWord2007Simulateur.SaveQuickPartEngine = {
 
 
+    storageKey:
+    "CampusWord2007_QuickParts",
+
+
+
     savedParts:[],
 
 
 
-    save(){
+
+    init(){
+
+
+        const saved =
+        localStorage.getItem(
+            this.storageKey
+        );
+
+
+
+        if(saved){
+
+            try{
+
+
+                this.savedParts =
+                JSON.parse(
+                    saved
+                );
+
+
+            }
+            catch(error){
+
+
+                this.savedParts = [];
+
+
+            }
+
+
+        }
+
+
+
+    },
+
+
+
+
+
+
+
+    save(name){
 
 
         const selection =
@@ -37658,25 +37769,93 @@ CampusWord2007Simulateur.SaveQuickPartEngine = {
 
 
 
+
+        const range =
+        selection.getRangeAt(0);
+
+
+
+
+        const container =
+        document.createElement(
+            "div"
+        );
+
+
+
+        container.appendChild(
+            range.cloneContents()
+        );
+
+
+
+        const html =
+        container.innerHTML;
+
+
+
+
+
+
         const part = {
 
+
             id:
-            "quickpart_" + Date.now(),
+
+            "quickpart_" +
+            Date.now(),
+
+
+
+            name:
+
+            name ||
+            "Quick Part " +
+            (this.savedParts.length + 1),
+
 
 
             text:text,
 
 
+
+            html:html,
+
+
+
             createdAt:
+
             Date.now()
 
+
+
         };
+
+
+
+
 
 
 
         this.savedParts.push(
             part
         );
+
+
+
+
+
+        localStorage.setItem(
+
+            this.storageKey,
+
+            JSON.stringify(
+                this.savedParts
+            )
+
+        );
+
+
 
 
 
@@ -37688,10 +37867,34 @@ CampusWord2007Simulateur.SaveQuickPartEngine = {
 
 
 
+
+
+
+
     getAll(){
 
 
         return this.savedParts;
+
+
+    },
+
+
+
+
+
+
+
+    clear(){
+
+
+        this.savedParts = [];
+
+
+
+        localStorage.removeItem(
+            this.storageKey
+        );
 
 
     }
@@ -37699,6 +37902,14 @@ CampusWord2007Simulateur.SaveQuickPartEngine = {
 
 
 };
+
+
+
+
+
+CampusWord2007Simulateur
+.SaveQuickPartEngine
+.init();
 
 
 
