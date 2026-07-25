@@ -36287,16 +36287,12 @@ Cancel
 
 
 
-
-
-
-
 /* =========================================================
    CAMPUS WORD 2007 SIMULATEUR
    DOCUMENT PROPERTY ENGINE
    QUICK PARTS UI MODULE
-   FOUNDATION v1.0.0
-   ISOLATED MODULE
+   FOUNDATION v2.0.0
+   100% ISOLATED
 ========================================================= */
 
 (function(){
@@ -36332,35 +36328,19 @@ CampusWord2007Simulateur.DocumentPropertyEngine = {
 
 
 
-
-
         this.overlay =
-        document.createElement(
-            "div"
-        );
-
+        document.createElement("div");
 
         this.overlay.className =
         "cwQuickPartsOverlay";
 
 
 
-
-
-
-
         this.dialog =
-        document.createElement(
-            "div"
-        );
-
+        document.createElement("div");
 
         this.dialog.className =
         "cwDocumentPropertyDialog";
-
-
-
-
 
 
 
@@ -36368,11 +36348,7 @@ CampusWord2007Simulateur.DocumentPropertyEngine = {
 
 <div class="cwDocumentPropertyHeader">
 
-
-<span>
-Document Property
-</span>
-
+<span>Document Property</span>
 
 <button
 type="button"
@@ -36380,19 +36356,15 @@ class="cwDocumentPropertyClose">
 ✕
 </button>
 
-
 </div>
-
-
 
 
 
 <div class="cwDocumentPropertyBody">
 
-
 <div class="cwDocumentPropertyItem">
 
-Title
+<label>Title</label>
 
 <input
 type="text"
@@ -36403,10 +36375,9 @@ placeholder="Document title">
 
 
 
-
 <div class="cwDocumentPropertyItem">
 
-Author
+<label>Author</label>
 
 <input
 type="text"
@@ -36417,11 +36388,9 @@ placeholder="Author name">
 
 
 
-
-
 <div class="cwDocumentPropertyItem">
 
-Subject
+<label>Subject</label>
 
 <input
 type="text"
@@ -36430,17 +36399,11 @@ placeholder="Document subject">
 
 </div>
 
-
-
 </div>
 
 
 
-
-
-
 <div class="cwDocumentPropertyFooter">
-
 
 <button
 type="button"
@@ -36450,8 +36413,6 @@ OK
 
 </button>
 
-
-
 <button
 type="button"
 class="cwDocumentPropertyCancel">
@@ -36460,42 +36421,28 @@ Cancel
 
 </button>
 
-
 </div>
 
 `;
-
-
-
-
-
 
 
         document.body.appendChild(
             this.overlay
         );
 
-
         document.body.appendChild(
             this.dialog
         );
 
 
-
-
         this.bind();
-
 
 
     },
 
 
 
-
-
-
     bind(){
-
 
 
         const close =
@@ -36503,6 +36450,11 @@ Cancel
             ".cwDocumentPropertyClose"
         );
 
+
+        const cancel =
+        this.dialog.querySelector(
+            ".cwDocumentPropertyCancel"
+        );
 
 
         const ok =
@@ -36512,117 +36464,111 @@ Cancel
 
 
 
-        const cancel =
-        this.dialog.querySelector(
-            ".cwDocumentPropertyCancel"
-        );
-
-
-
-
-
         if(close){
 
-            close.onclick =
-            ()=>{
+            close.onclick = ()=>{
 
                 this.close();
 
             };
 
         }
-
-
-
 
 
 
         if(cancel){
 
-            cancel.onclick =
-            ()=>{
+            cancel.onclick = ()=>{
 
                 this.close();
 
             };
 
         }
-
-
-
 
 
 
         if(ok){
 
-            ok.onclick =
-            ()=>{
+            ok.onclick = ()=>{
+
+                const data = {
+
+                    title:
+                    this.dialog.querySelector(".cwDocTitle").value,
+
+                    author:
+                    this.dialog.querySelector(".cwDocAuthor").value,
+
+                    subject:
+                    this.dialog.querySelector(".cwDocSubject").value,
+
+                    createdAt:
+                    Date.now()
+
+                };
+
+
+                document.dispatchEvent(
+
+                    new CustomEvent(
+
+                        "cwDocumentPropertyInsert",
+
+                        {
+
+                            detail:data
+
+                        }
+
+                    )
+
+                );
 
 
                 this.close();
 
-
             };
 
         }
-
-
-
-
 
 
 
         if(this.overlay){
 
-            this.overlay.onclick =
-            ()=>{
+            this.overlay.onclick = ()=>{
 
                 this.close();
 
             };
 
         }
-
 
 
     },
 
 
 
-
-
-
-
-
     close(){
 
 
-
         if(this.dialog){
-
 
             this.dialog.remove();
 
             this.dialog = null;
 
-
         }
-
-
-
 
 
 
         if(this.overlay){
 
-
             this.overlay.remove();
 
             this.overlay = null;
 
-
         }
-
 
 
     }
@@ -36632,9 +36578,7 @@ Cancel
 };
 
 
-
 })();
-
 
 
 
