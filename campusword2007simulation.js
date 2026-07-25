@@ -37967,12 +37967,11 @@ ${part.text}
 
 
 
-
 /* =========================================================
    CAMPUS WORD 2007 SIMULATEUR
-   QUICK PARTS DIALOG LIBRARY CONNECTOR
+   QUICK PARTS BUILDING BLOCKS VIEW CONNECTOR
    QUICK PARTS MODULE
-   FOUNDATION v1.0.0
+   FOUNDATION v1.0.1
    ISOLATED MODULE
 ========================================================= */
 
@@ -37989,21 +37988,82 @@ if(!window.CampusWord2007Simulateur){
 
 
 
-CampusWord2007Simulateur.QuickPartsDialogLibraryConnector = {
+CampusWord2007Simulateur.QuickPartsBuildingBlocksViewConnector = {
+
+
+    connected:false,
 
 
 
-    connect(){
+    init(){
 
 
-        const container =
-        document.querySelector(
+        this.observe();
+
+
+    },
+
+
+
+
+    observe(){
+
+
+        const observer = new MutationObserver(()=>{
+
+
+            const dialog =
+            document.querySelector(
+                ".cwBuildingBlocksDialog"
+            );
+
+
+            if(dialog && !this.connected){
+
+
+                this.connect(
+                    dialog
+                );
+
+
+            }
+
+
+        });
+
+
+
+        observer.observe(
+
+            document.body,
+
+            {
+
+                childList:true,
+
+                subtree:true
+
+            }
+
+        );
+
+
+    },
+
+
+
+
+    connect(dialog){
+
+
+        const body =
+        dialog.querySelector(
             ".cwBuildingBlocksBody"
         );
 
 
 
-        if(!container){
+        if(!body){
 
             return;
 
@@ -38011,40 +38071,47 @@ CampusWord2007Simulateur.QuickPartsDialogLibraryConnector = {
 
 
 
-        const libraryTitle =
+
+        const savedTitle =
         document.createElement(
             "div"
         );
 
 
-        libraryTitle.className =
+        savedTitle.className =
         "cwQuickPartsSavedTitle";
 
 
-        libraryTitle.textContent =
+        savedTitle.textContent =
         "Saved Quick Parts";
 
 
 
-        const library =
+
+
+        const savedContainer =
         document.createElement(
             "div"
         );
 
 
-        library.className =
-        "cwQuickPartsSavedLibrary";
+        savedContainer.className =
+        "cwQuickPartsSavedContainer";
 
 
 
-        container.appendChild(
-            libraryTitle
+
+
+        body.appendChild(
+            savedTitle
         );
 
 
-        container.appendChild(
-            library
+        body.appendChild(
+            savedContainer
         );
+
+
 
 
 
@@ -38068,7 +38135,7 @@ CampusWord2007Simulateur.QuickPartsDialogLibraryConnector = {
             CampusWord2007Simulateur
             .QuickPartsLibraryViewEngine
             .render(
-                library
+                savedContainer
             );
 
 
@@ -38076,8 +38143,11 @@ CampusWord2007Simulateur.QuickPartsDialogLibraryConnector = {
 
 
 
-    }
+        this.connected = true;
 
+
+
+    }
 
 
 
@@ -38087,25 +38157,56 @@ CampusWord2007Simulateur.QuickPartsDialogLibraryConnector = {
 
 
 
-document.addEventListener(
-
-    "cwQuickPartsDialogOpened",
-
-    ()=>{
+if(document.readyState === "loading"){
 
 
-        CampusWord2007Simulateur
-        .QuickPartsDialogLibraryConnector
-        .connect();
+    document.addEventListener(
+
+        "DOMContentLoaded",
+
+        ()=>{
 
 
-    }
+            CampusWord2007Simulateur
+            .QuickPartsBuildingBlocksViewConnector
+            .init();
 
-);
+
+        }
+
+    );
+
+
+}
+else{
+
+
+    CampusWord2007Simulateur
+    .QuickPartsBuildingBlocksViewConnector
+    .init();
+
+
+}
 
 
 
 })();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
