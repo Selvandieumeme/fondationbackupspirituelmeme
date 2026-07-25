@@ -37675,7 +37675,7 @@ else{
 
 
 
-* =========================================================
+/* =========================================================
    CAMPUS WORD 2007 SIMULATEUR
    SAVE SELECTION TO QUICK PARTS ENGINE
    QUICK PARTS MODULE
