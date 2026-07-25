@@ -37968,6 +37968,166 @@ ${part.text}
 
 
 
+/* =========================================================
+   CAMPUS WORD 2007 SIMULATEUR
+   QUICK PARTS DIALOG LIBRARY CONNECTOR
+   QUICK PARTS MODULE
+   FOUNDATION v1.0.0
+   ISOLATED MODULE
+========================================================= */
+
+(function(){
+
+"use strict";
+
+
+if(!window.CampusWord2007Simulateur){
+
+    window.CampusWord2007Simulateur = {};
+
+}
+
+
+
+CampusWord2007Simulateur.QuickPartsDialogLibraryConnector = {
+
+
+
+    connect(){
+
+
+        const container =
+        document.querySelector(
+            ".cwBuildingBlocksBody"
+        );
+
+
+
+        if(!container){
+
+            return;
+
+        }
+
+
+
+        const libraryTitle =
+        document.createElement(
+            "div"
+        );
+
+
+        libraryTitle.className =
+        "cwQuickPartsSavedTitle";
+
+
+        libraryTitle.textContent =
+        "Saved Quick Parts";
+
+
+
+        const library =
+        document.createElement(
+            "div"
+        );
+
+
+        library.className =
+        "cwQuickPartsSavedLibrary";
+
+
+
+        container.appendChild(
+            libraryTitle
+        );
+
+
+        container.appendChild(
+            library
+        );
+
+
+
+        if(
+
+        CampusWord2007Simulateur
+        .QuickPartsLibraryViewEngine
+
+        &&
+
+        typeof
+        CampusWord2007Simulateur
+        .QuickPartsLibraryViewEngine
+        .render
+        ===
+        "function"
+
+        ){
+
+
+            CampusWord2007Simulateur
+            .QuickPartsLibraryViewEngine
+            .render(
+                library
+            );
+
+
+        }
+
+
+
+    }
+
+
+
+
+
+};
+
+
+
+
+document.addEventListener(
+
+    "cwQuickPartsDialogOpened",
+
+    ()=>{
+
+
+        CampusWord2007Simulateur
+        .QuickPartsDialogLibraryConnector
+        .connect();
+
+
+    }
+
+);
+
+
+
+})();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
