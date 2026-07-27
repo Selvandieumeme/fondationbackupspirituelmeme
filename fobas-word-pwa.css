@@ -1,0 +1,80 @@
+/* =========================================================
+   FOBAS WORD PWA
+   APPLICATION LAYER CSS
+   ========================================================= */
+
+
+:root {
+
+    --fobas-word-blue: #185ABD;
+    --fobas-word-bg: #ffffff;
+
+}
+
+
+/* PWA loading layer */
+
+.fobasWordPWALoader {
+
+    position: fixed;
+
+    inset: 0;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    background: var(--fobas-word-bg);
+
+    z-index: 99999;
+
+}
+
+
+/* Logo / icon loading */
+
+.fobasWordPWAIcon {
+
+    width: 96px;
+
+    height: 96px;
+
+    object-fit: contain;
+
+}
+
+
+/* Offline message */
+
+.fobasWordOfflineMessage {
+
+    position: fixed;
+
+    bottom: 20px;
+
+    left: 50%;
+
+    transform: translateX(-50%);
+
+    padding: 12px 20px;
+
+    border-radius: 8px;
+
+    background: #333;
+
+    color: white;
+
+    font-size: 14px;
+
+    display: none;
+
+}
+
+
+.fobasWordOfflineMessage.active {
+
+    display: block;
+
+}
