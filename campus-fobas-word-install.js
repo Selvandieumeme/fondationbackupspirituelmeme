@@ -246,32 +246,139 @@
 
 
 
-document
-
-        .getElementById(
-            "cwConfirmFobasWordRequest"
-        )
-
-        .onclick = function(){
 
 
-            alert(
-
-            "Demann FOBAS WORD an pare. Voye prèv peman an sou WhatsApp."
-
-            );
 
 
-        };
-
-
-    }
+      
 
 
 
 
 
-        
+
+
+
+  document
+
+.getElementById(
+    "cwConfirmFobasWordRequest"
+)
+
+.onclick = function(){
+
+
+    const requestData = {
+
+
+        application:
+        "FOBAS WORD",
+
+
+        deviceId:
+        deviceID,
+
+
+        amount:
+        "1500 HTG",
+
+
+        adminName:
+        "M. MEME Selvandieu",
+
+
+        natcash:
+        "+50943706706",
+
+
+        whatsapp:
+        "+50943706706",
+
+
+        status:
+        "PENDING",
+
+
+        createdAt:
+        new Date()
+
+        .toISOString()
+
+
+    };
+
+
+
+    fetch(
+
+        "https://api.fondationbackupspirituel.com/api/fobas-word/request",
+
+        {
+
+
+            method:
+            "POST",
+
+
+            headers:{
+
+
+                "Content-Type":
+                "application/json"
+
+
+            },
+
+
+            body:
+
+            JSON.stringify(
+
+                requestData
+
+            )
+
+
+        }
+
+    )
+
+
+
+    .then(function(){
+
+
+        alert(
+
+        "Demann FOBAS WORD ou a voye avèk siksè."
+
+        );
+
+
+    })
+
+
+
+    .catch(function(){
+
+
+        alert(
+
+        "Gen yon pwoblèm pandan voye demann lan."
+
+        );
+
+
+    });
+
+
+
+};
+
+
+
+
+
 
 
 
