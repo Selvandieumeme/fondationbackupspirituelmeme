@@ -226,6 +226,22 @@
 
 
 
+                if(!response.ok){
+
+
+                    throw new Error(
+
+                        "HTTP ERROR: " +
+
+                        response.status
+
+                    );
+
+
+                }
+
+
+
                 return response.json();
 
 
@@ -269,6 +285,8 @@
 
 
                 alert(
+
+                    result.message ||
 
                     "Demann FOBAS WORD ou a voye avèk siksè. Voye prèv peman an sou WhatsApp."
 
@@ -317,3 +335,5 @@
 
 
 })();
+
+
