@@ -239,215 +239,33 @@
 
 
 
+
+
+
+
+
+
+
 document
 
-.getElementById(
-    "cwConfirmFobasWordRequest"
-)
+        .getElementById(
+            "cwConfirmFobasWordRequest"
+        )
 
-.onclick = function(){
+        .onclick = function(){
 
 
-    const requestData = {
+            alert(
 
+            "Demann FOBAS WORD an pare. Voye prèv peman an sou WhatsApp."
 
-        requestId:
+            );
 
-        "FW-REQ-" +
 
-        Date.now()
+        };
 
-        .toString(36)
 
-        .toUpperCase(),
-
-
-
-        application:
-
-        "FOBAS WORD",
-
-
-
-        deviceId:
-
-        deviceID,
-
-
-
-        amount:
-
-        "1500 HTG",
-
-
-
-        adminName:
-
-        "M. MEME Selvandieu",
-
-
-
-        natcash:
-
-        "+50943706706",
-
-
-
-        whatsapp:
-
-        "+50943706706",
-
-
-
-        status:
-
-        "PENDING",
-
-
-
-        createdAt:
-
-        new Date()
-
-        .toISOString()
-
-
-    };
-
-
-
-
-
-    fetch(
-
-        "https://api.fondationbackupspirituel.com/api/fobas-word/request",
-
-        {
-
-
-            method:
-
-            "POST",
-
-
-
-            headers:{
-
-
-                "Content-Type":
-
-                "application/json"
-
-
-            },
-
-
-
-            body:
-
-            JSON.stringify(
-
-                requestData
-
-            )
-
-
-        }
-
-    )
-
-
-
-    .then(function(response){
-
-
-        return response.json();
-
-
-    })
-
-
-
-    .then(function(result){
-
-
-
-        console.log(
-
-            "FOBAS WORD REQUEST:",
-
-            result
-
-        );
-
-
-
-
-        localStorage.setItem(
-
-
-            "FOBAS_WORD_LAST_REQUEST",
-
-
-            JSON.stringify(
-
-                requestData
-
-            )
-
-
-        );
-
-
-
-
-        alert(
-
-            "Demann FOBAS WORD ou a voye avèk siksè. Voye prèv peman an sou WhatsApp."
-
-        );
-
-
-
-    })
-
-
-
-    .catch(function(error){
-
-
-
-        console.error(
-
-            "FOBAS WORD REQUEST ERROR:",
-
-            error
-
-        );
-
-
-
-
-        alert(
-
-            "Erè pandan voye demann FOBAS WORD la."
-
-        );
-
-
-
-    });
-
-
-}
-
-
-
-
-
-
-
-
+    }
 
 
 
