@@ -89,41 +89,6 @@
 
 
 
-    function createRequestID(){
-
-
-
-        return (
-
-            "FW-REQ-" +
-
-            Date.now()
-
-            .toString(36)
-
-            +
-
-            "-" +
-
-            Math.random()
-
-            .toString(36)
-
-            .substring(2,8)
-
-        )
-
-        .toUpperCase();
-
-
-
-    }
-
-
-
-
-
-
 
 
     document.addEventListener(
@@ -155,12 +120,6 @@
 
 
             const requestData = {
-
-
-
-                requestId:
-
-                createRequestID(),
 
 
 
