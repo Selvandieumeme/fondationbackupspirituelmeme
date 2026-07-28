@@ -141,6 +141,256 @@ Inscrivez-vous
 
 </section>
 
+
+
+
+
+
+<!-- =========================================================
+     BLOK 1
+     CAMPUS NUMERIQUE
+     FOBAS WORD INSTALL BUTTON
+     ========================================================= -->
+
+<div id="cwFobasWordInstallPanel" class="cwFobasWordInstallPanel">
+
+    <div class="cwFobasWordCard">
+
+        <div class="cwFobasWordLogo">
+
+            <img
+                src="/fobas-word-512.png"
+                alt="FOBAS WORD">
+
+        </div>
+
+        <div class="cwFobasWordInfos">
+
+            <h2>FOBAS WORD</h2>
+
+            <p>
+                Simulation Microsoft Word 2007
+                pou Android, Tablet,
+                Chromebook ak Desktop.
+            </p>
+
+            <div class="cwFobasWordPrice">
+
+                Pri Enstalasyon :
+                <strong>1 500 HTG</strong>
+
+            </div>
+
+        </div>
+
+        <button
+
+            id="cwInstallFobasWordBtn"
+
+            class="cwInstallFobasWordBtn"
+
+            type="button">
+
+            📥 Installer FOBAS WORD
+
+        </button>
+
+    </div>
+
+</div>
+
+
+
+<style>
+
+/* =========================================================
+   FOBAS WORD INSTALL PANEL
+   ========================================================= */
+
+#cwFobasWordInstallPanel{
+
+    width:100%;
+
+    display:flex;
+
+    justify-content:center;
+
+    margin:30px 0;
+
+    padding:15px;
+
+    box-sizing:border-box;
+
+}
+
+
+.cwFobasWordCard{
+
+    width:100%;
+
+    max-width:760px;
+
+    background:#ffffff;
+
+    border:1px solid #d6d6d6;
+
+    border-radius:14px;
+
+    box-shadow:0 8px 30px rgba(0,0,0,.12);
+
+    padding:30px;
+
+    text-align:center;
+
+}
+
+
+.cwFobasWordLogo img{
+
+    width:110px;
+
+    height:110px;
+
+    object-fit:contain;
+
+}
+
+
+.cwFobasWordInfos h2{
+
+    margin:15px 0 8px;
+
+    color:#185ABD;
+
+    font-size:30px;
+
+    font-weight:bold;
+
+}
+
+
+.cwFobasWordInfos p{
+
+    font-size:16px;
+
+    line-height:1.7;
+
+    color:#555;
+
+}
+
+
+.cwFobasWordPrice{
+
+    margin-top:18px;
+
+    font-size:20px;
+
+    color:#111;
+
+    font-weight:bold;
+
+}
+
+
+.cwInstallFobasWordBtn{
+
+    margin-top:25px;
+
+    width:100%;
+
+    max-width:360px;
+
+    height:58px;
+
+    border:none;
+
+    border-radius:12px;
+
+    background:#185ABD;
+
+    color:#fff;
+
+    font-size:20px;
+
+    font-weight:bold;
+
+    cursor:pointer;
+
+    transition:.25s;
+
+}
+
+
+.cwInstallFobasWordBtn:hover{
+
+    background:#0f4ca3;
+
+    transform:translateY(-2px);
+
+}
+
+
+.cwInstallFobasWordBtn:active{
+
+    transform:scale(.98);
+
+}
+
+</style>
+
+
+
+<script>
+
+/* =========================================================
+   FOBAS WORD
+   INSTALL BUTTON ENGINE
+   BLOK 1
+   ========================================================= */
+
+(function(){
+
+    "use strict";
+
+    const installButton=document.getElementById(
+
+        "cwInstallFobasWordBtn"
+
+    );
+
+    if(!installButton){
+
+        return;
+
+    }
+
+    installButton.addEventListener(
+
+        "click",
+
+        function(){
+
+            document.dispatchEvent(
+
+                new CustomEvent(
+
+                    "cwFobasWordInstallRequest"
+
+                )
+
+            );
+
+        }
+
+    );
+
+})();
+
+</script>
+
+
+
 <footer>
 
 <h3>
