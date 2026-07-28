@@ -10420,6 +10420,345 @@ app.post("/api/wallet/login", async (req, res) => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* =========================================================
+   FOBAS WORD
+   INSTALL REQUEST ROUTE
+   POST /api/fobas-word/request
+   ========================================================= */
+
+
+
+const fobasWordRequestSchema = new mongoose.Schema({
+
+
+    requestId: {
+
+        type: String,
+
+        unique: true,
+
+        required: true
+
+    },
+
+
+    application: {
+
+        type: String,
+
+        required: true
+
+    },
+
+
+    deviceId: {
+
+        type: String,
+
+        required: true
+
+    },
+
+
+    amount: {
+
+        type: String,
+
+        required: true
+
+    },
+
+
+    adminName: {
+
+        type: String,
+
+        required: true
+
+    },
+
+
+    natcash: {
+
+        type: String,
+
+        required: true
+
+    },
+
+
+    whatsapp: {
+
+        type: String,
+
+        required: true
+
+    },
+
+
+    status: {
+
+        type: String,
+
+        default: "PENDING"
+
+    },
+
+
+    createdAt: {
+
+        type: Date,
+
+        default: Date.now
+
+    },
+
+
+    serverCreatedAt: {
+
+        type: Date,
+
+        default: Date.now
+
+    }
+
+
+});
+
+
+
+
+
+const FobasWordRequest = mongoose.model(
+
+    "FobasWordRequest",
+
+    fobasWordRequestSchema
+
+);
+
+
+
+
+
+
+
+app.post(
+
+    "/api/fobas-word/request",
+
+    async function(req, res){
+
+
+
+        try {
+
+
+
+            const requestId =
+
+
+            "FW-REQ-" +
+
+            Date.now()
+
+            .toString(36)
+
+            .toUpperCase();
+
+
+
+
+
+
+            const newRequest = new FobasWordRequest({
+
+
+
+                requestId: requestId,
+
+
+
+                application:
+
+                req.body.application,
+
+
+
+                deviceId:
+
+                req.body.deviceId,
+
+
+
+                amount:
+
+                req.body.amount,
+
+
+
+                adminName:
+
+                req.body.adminName,
+
+
+
+                natcash:
+
+                req.body.natcash,
+
+
+
+                whatsapp:
+
+                req.body.whatsapp,
+
+
+
+                status:
+
+                req.body.status || "PENDING",
+
+
+
+                createdAt:
+
+                req.body.createdAt || new Date()
+
+
+
+            });
+
+
+
+
+
+
+            await newRequest.save();
+
+
+
+
+
+
+            return res.status(201).json({
+
+
+
+                success: true,
+
+
+
+                message:
+
+                "FOBAS WORD installation request saved",
+
+
+
+                requestId:
+
+                requestId
+
+
+
+            });
+
+
+
+
+
+
+        }
+
+        catch(error){
+
+
+
+            console.error(
+
+                "FOBAS WORD REQUEST ERROR:",
+
+                error
+
+            );
+
+
+
+            return res.status(500).json({
+
+
+
+                success:false,
+
+
+
+                message:
+
+                "FOBAS WORD request failed"
+
+
+
+            });
+
+
+
+        }
+
+
+
+    }
+
+
+);
+
+
+
+
+
+
+
 // 🚀 DEMARRE SERVEUR
 // ---------------------------
 const PORT = process.env.PORT || 4000;
