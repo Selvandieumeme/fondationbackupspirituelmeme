@@ -10450,18 +10450,6 @@ app.post("/api/wallet/login", async (req, res) => {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
 /* =========================================================
    FOBAS WORD
    INSTALL REQUEST ROUTE
@@ -10565,7 +10553,17 @@ const fobasWordRequestSchema = new mongoose.Schema({
     }
 
 
-});
+},
+
+{
+
+    collection:
+
+    "fobas_word_install_requests"
+
+}
+
+);
 
 
 
@@ -10752,6 +10750,58 @@ app.post(
 
 
 );
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
