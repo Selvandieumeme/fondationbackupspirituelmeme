@@ -214,6 +214,7 @@
 
 
 
+
         document.body.appendChild(modal);
 
 
@@ -232,6 +233,170 @@
 
         };
 
+
+
+
+
+        document
+
+        .getElementById(
+            "cwConfirmFobasWordRequest"
+        )
+
+        .addEventListener(
+
+            "click",
+
+            async function(){
+
+
+
+                const button = this;
+
+
+
+                button.disabled = true;
+
+
+
+                button.innerText =
+                "Ap voye demann lan...";
+
+
+
+                try {
+
+
+
+                    const response =
+                    await fetch(
+
+                        "/api/fobas-word/install-request",
+
+                        {
+
+
+                            method: "POST",
+
+
+                            headers: {
+
+                                "Content-Type":
+                                "application/json"
+
+                            },
+
+
+                            body: JSON.stringify({
+
+                                deviceID:
+                                deviceID,
+
+
+                                application:
+                                "FOBAS WORD",
+
+
+                                fee:
+                                "1500 HTG"
+
+                            })
+
+                        }
+
+                    );
+
+
+
+                    const result =
+                    await response.json();
+
+
+
+
+                    if(result.success){
+
+
+
+                        alert(
+
+                            result.message
+
+                        );
+
+
+
+                        modal.remove();
+
+
+
+                    }else{
+
+
+
+                        alert(
+
+                            result.message
+
+                        );
+
+
+
+                        button.disabled = false;
+
+
+
+                        button.innerText =
+                        "Konfime Demann";
+
+
+
+                    }
+
+
+
+
+                } catch(error) {
+
+
+
+                    console.error(
+
+                        "FOBAS WORD INSTALL ERROR:",
+
+                        error
+
+                    );
+
+
+
+                    alert(
+
+                        "Erè koneksyon ak sèvè a."
+
+                    );
+
+
+
+                    button.disabled = false;
+
+
+
+                    button.innerText =
+                    "Konfime Demann";
+
+
+
+                }
+
+
+
+            }
+
+        );
+
+
+
 }
 
 
@@ -244,51 +409,78 @@
 
 
 
-    document.addEventListener(
+document.addEventListener(
 
-        "DOMContentLoaded",
+    "DOMContentLoaded",
 
-        function(){
-
-
-            const button =
-            document.getElementById(
-                INSTALL_BUTTON_ID
-            );
+    function(){
 
 
-
-            if(!button){
-
-                console.warn(
-                    "Bouton FOBAS WORD pa jwenn."
-                );
-
-                return;
-
-            }
+        const button =
+        document.getElementById(
+            INSTALL_BUTTON_ID
+        );
 
 
 
-            button.addEventListener(
-
-                "click",
-
-                function(){
+        if(!button){
 
 
-                    openInstallWindow();
+            console.warn(
 
-
-                }
+                "Bouton FOBAS WORD pa jwenn."
 
             );
+
+
+            return;
 
 
         }
 
-    );
+
+
+        button.addEventListener(
+
+            "click",
+
+            function(){
+
+
+                openInstallWindow();
+
+
+            }
+
+        );
+
+
+
+    }
+
+);
 
 
 
 })();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
