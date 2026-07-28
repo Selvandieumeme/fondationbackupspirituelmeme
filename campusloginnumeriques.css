@@ -884,19 +884,32 @@ footer h3{
 
 
 
+
+
 /* =========================================================
-   FOBAS WORD INSTALL REQUEST MODAL
-   BLOK 3
+   FOBAS WORD
+   DIRECT INSTALL WINDOW STYLE
+   MODAL SYSTEM
    ========================================================= */
 
+
+/* =========================================================
+   FENET OVERLAY
+   ========================================================= */
 
 .cwFobasWordOverlay{
 
     position:fixed;
 
-    inset:0;
+    top:0;
 
-    background:rgba(0,0,0,.65);
+    left:0;
+
+    width:100%;
+
+    height:100%;
+
+    background:rgba(0,0,0,0.65);
 
     display:flex;
 
@@ -904,76 +917,177 @@ footer h3{
 
     align-items:center;
 
-    z-index:99999;
+    z-index:999999;
+
+    padding:20px;
+
+    box-sizing:border-box;
 
 }
 
 
+
+/* =========================================================
+   BWAT FENET FOBAS WORD
+   ========================================================= */
 
 .cwFobasWordInstallBox{
 
-    width:90%;
+    width:100%;
 
     max-width:520px;
 
-    background:white;
+    max-height:90vh;
 
-    border-radius:16px;
+    overflow-y:auto;
+
+    background:#ffffff;
+
+    border-radius:18px;
 
     padding:30px;
 
+    box-sizing:border-box;
+
+    box-shadow:
+
+    0 20px 60px rgba(0,0,0,0.35);
+
     text-align:center;
 
-    box-shadow:0 15px 40px rgba(0,0,0,.3);
+    animation:
+
+    cwFobasWordModalShow .25s ease;
 
 }
 
 
 
+/* =========================================================
+   ANIMATION OUVERTI
+   ========================================================= */
+
+@keyframes cwFobasWordModalShow{
+
+
+    from{
+
+        opacity:0;
+
+        transform:scale(.90);
+
+    }
+
+
+    to{
+
+        opacity:1;
+
+        transform:scale(1);
+
+    }
+
+
+}
+
+
+
+/* =========================================================
+   TIT YO
+   ========================================================= */
+
 .cwFobasWordInstallBox h2{
+
+    margin:0;
 
     color:#185ABD;
 
     font-size:32px;
 
+    font-weight:800;
+
 }
 
 
 
+.cwFobasWordInstallBox h3{
+
+    margin:10px 0 25px;
+
+    color:#333;
+
+    font-size:20px;
+
+}
+
+
+
+/* =========================================================
+   BLOK ENFOMASYON
+   ========================================================= */
+
 .cwFobasWordInfo,
+
 .cwPaymentInfo{
+
+
+    background:#f4f7fb;
+
+    border-radius:12px;
+
+    padding:18px;
+
+    margin-bottom:18px;
 
     text-align:left;
 
+    color:#333;
+
     line-height:1.7;
 
+    font-size:15px;
+
+
 }
 
 
 
-.cwInstallWarning{
+.cwFobasWordInfo p,
 
-    margin:20px 0;
+.cwPaymentInfo p{
 
-    padding:15px;
-
-    background:#f3f6fa;
-
-    border-radius:10px;
+    margin:10px 0;
 
 }
 
 
+
+.cwPaymentInfo h4{
+
+    margin-top:0;
+
+    color:#185ABD;
+
+    font-size:18px;
+
+}
+
+
+
+/* =========================================================
+   BOUTON KONFIME
+   ========================================================= */
 
 #cwConfirmFobasWordRequest{
 
+
     width:100%;
 
-    padding:15px;
+    height:52px;
 
     border:none;
 
-    border-radius:10px;
+    border-radius:12px;
 
     background:#185ABD;
 
@@ -985,29 +1099,112 @@ footer h3{
 
     cursor:pointer;
 
+    margin-top:10px;
+
+    transition:.25s;
+
+
 }
 
 
 
+#cwConfirmFobasWordRequest:hover{
+
+
+    background:#0f4ca3;
+
+
+}
+
+
+
+/* =========================================================
+   BOUTON FE FENET
+   ========================================================= */
+
 #cwCloseFobasWordRequest{
 
-    margin-top:12px;
 
     width:100%;
 
-    padding:12px;
+    height:48px;
 
     border:none;
 
-    border-radius:10px;
+    border-radius:12px;
 
     background:#777;
 
     color:white;
 
+    font-size:15px;
+
+    font-weight:bold;
+
     cursor:pointer;
 
+    margin-top:12px;
+
+    transition:.25s;
+
+
 }
+
+
+
+#cwCloseFobasWordRequest:hover{
+
+
+    background:#555;
+
+
+}
+
+
+
+/* =========================================================
+   RESPONSIVE ANDROID / TABLET
+   ========================================================= */
+
+@media(max-width:600px){
+
+
+    .cwFobasWordInstallBox{
+
+
+        padding:22px;
+
+        border-radius:14px;
+
+
+    }
+
+
+
+    .cwFobasWordInstallBox h2{
+
+
+        font-size:26px;
+
+
+    }
+
+
+
+    .cwFobasWordInstallBox h3{
+
+
+        font-size:18px;
+
+
+    }
+
+
+
+}
+
+
+
 
 
 
