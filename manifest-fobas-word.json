@@ -19,13 +19,13 @@
 
   "icons": [
     {
-      "src": "/icons/fobas-word-192.png",
+      "src": "/FOBASWORD192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "/icons/fobas-word-512.png",
+      "src": "/FOBASWORD512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
