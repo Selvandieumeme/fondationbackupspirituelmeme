@@ -1,3 +1,5 @@
+
+
 /* =========================================================
    FOBAS WORD
    DIRECT INSTALL WINDOW ENGINE
@@ -214,7 +216,6 @@
 
 
 
-
         document.body.appendChild(modal);
 
 
@@ -234,253 +235,71 @@
         };
 
 
+    }
 
 
 
-        document
 
-        .getElementById(
-            "cwConfirmFobasWordRequest"
-        )
 
-        .addEventListener(
 
-            "click",
 
-            async function(){
 
 
 
-                const button = this;
 
+    document.addEventListener(
 
+        "DOMContentLoaded",
 
-                button.disabled = true;
+        function(){
 
 
+            const button =
+            document.getElementById(
+                INSTALL_BUTTON_ID
+            );
 
-                button.innerText =
-                "Ap voye demann lan...";
 
 
+            if(!button){
 
-                try {
 
+                console.warn(
 
+                    "Bouton FOBAS WORD pa jwenn."
 
-                    const response =
-                    await fetch(
+                );
 
-                        "/api/fobas-word/install-request",
 
-                        {
+                return;
 
 
-                            method: "POST",
+            }
 
 
-                            headers: {
 
-                                "Content-Type":
-                                "application/json"
+            button.addEventListener(
 
-                            },
+                "click",
 
+                function(){
 
-                            body: JSON.stringify({
 
-                                deviceID:
-                                deviceID,
-
-
-                                application:
-                                "FOBAS WORD",
-
-
-                                fee:
-                                "1500 HTG"
-
-                            })
-
-                        }
-
-                    );
-
-
-
-                    const result =
-                    await response.json();
-
-
-
-
-                    if(result.success){
-
-
-
-                        alert(
-
-                            result.message
-
-                        );
-
-
-
-                        modal.remove();
-
-
-
-                    }else{
-
-
-
-                        alert(
-
-                            result.message
-
-                        );
-
-
-
-                        button.disabled = false;
-
-
-
-                        button.innerText =
-                        "Konfime Demann";
-
-
-
-                    }
-
-
-
-
-                } catch(error) {
-
-
-
-                    console.error(
-
-                        "FOBAS WORD INSTALL ERROR:",
-
-                        error
-
-                    );
-
-
-
-                    alert(
-
-                        "Erè koneksyon ak sèvè a."
-
-                    );
-
-
-
-                    button.disabled = false;
-
-
-
-                    button.innerText =
-                    "Konfime Demann";
-
+                    openInstallWindow();
 
 
                 }
 
-
-
-            }
-
-        );
-
-
-
-}
-
-
-
-
-
-
-
-
-
-
-
-document.addEventListener(
-
-    "DOMContentLoaded",
-
-    function(){
-
-
-        const button =
-        document.getElementById(
-            INSTALL_BUTTON_ID
-        );
-
-
-
-        if(!button){
-
-
-            console.warn(
-
-                "Bouton FOBAS WORD pa jwenn."
-
             );
 
-
-            return;
 
 
         }
 
-
-
-        button.addEventListener(
-
-            "click",
-
-            function(){
-
-
-                openInstallWindow();
-
-
-            }
-
-        );
-
-
-
-    }
-
-);
+    );
 
 
 
 })();
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
