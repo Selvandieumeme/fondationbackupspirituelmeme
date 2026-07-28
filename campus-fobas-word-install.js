@@ -236,13 +236,16 @@
 
 
 
+
+
+
 document
 
 .getElementById(
     "cwConfirmFobasWordRequest"
 )
 
-.onclick = async function(){
+.onclick = function(){
 
 
     const requestData = {
@@ -313,54 +316,59 @@ document
 
 
 
-    try {
 
 
-        const response =
+    fetch(
 
-        await fetch(
+        "https://api.fondationbackupspirituel.com/api/fobas-word/request",
 
-            "https://api.fondationbackupspirituel.com/api/fobas-word/request",
-
-            {
+        {
 
 
-                method:
+            method:
 
-                "POST",
+            "POST",
 
 
 
-                headers:{
+            headers:{
 
 
-                    "Content-Type":
+                "Content-Type":
 
-                    "application/json"
-
-
-                },
+                "application/json"
 
 
-
-                body:
-
-                JSON.stringify(
-
-                    requestData
-
-                )
-
-
-            }
-
-        );
+            },
 
 
 
-        const result =
+            body:
 
-        await response.json();
+            JSON.stringify(
+
+                requestData
+
+            )
+
+
+        }
+
+    )
+
+
+
+    .then(function(response){
+
+
+        return response.json();
+
+
+    })
+
+
+
+    .then(function(result){
 
 
 
@@ -371,6 +379,7 @@ document
             result
 
         );
+
 
 
 
@@ -386,7 +395,9 @@ document
 
             )
 
+
         );
+
 
 
 
@@ -398,9 +409,12 @@ document
 
 
 
-    }
+    })
 
-    catch(error){
+
+
+    .catch(function(error){
+
 
 
         console.error(
@@ -413,6 +427,7 @@ document
 
 
 
+
         alert(
 
             "Erè pandan voye demann FOBAS WORD la."
@@ -420,10 +435,15 @@ document
         );
 
 
-    }
+
+    });
 
 
 };
+
+
+
+
 
 
 
