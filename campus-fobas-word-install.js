@@ -137,7 +137,7 @@
 
                     <p>
                     <strong>Aplikasyon:</strong><br>
-                    FOBAS WORD PWA
+                    FOBAS WORD
                     </p>
 
 
