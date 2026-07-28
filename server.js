@@ -10453,126 +10453,206 @@ app.post("/api/wallet/login", async (req, res) => {
 
 
 
+
+
+
+
+
 /* =========================================================
    FOBAS WORD
-   INSTALL REQUEST ROUTE
-   POST /api/fobas-word/request
+   INSTALL REQUEST MODEL
+   + CONFIRM REQUEST ROUTE
    ========================================================= */
 
 
+const mongoose = require("mongoose");
 
-const fobasWordRequestSchema = new mongoose.Schema({
+const crypto = require("crypto");
 
 
-    requestId: {
 
-        type: String,
 
-        unique: true,
 
-        required: true
+/* =========================================================
+   MONGODB CONNECTION
+   URI FROM .ENV
+   ========================================================= */
+
+
+mongoose.connect(
+
+    process.env.MONGO_URI
+
+)
+
+.then(()=>{
+
+    console.log(
+        "MongoDB FOBAS WORD connected"
+    );
+
+})
+
+.catch((error)=>{
+
+
+    console.error(
+        "MongoDB connection error:",
+        error
+    );
+
+
+});
+
+
+
+
+
+
+
+/* =========================================================
+   FOBAS WORD REQUEST SCHEMA
+   ========================================================= */
+
+
+const fobasWordRequestSchema =
+
+new mongoose.Schema({
+
+
+
+    requestId:{
+
+
+        type:String,
+
+        unique:true,
+
+        required:true
+
 
     },
 
 
-    application: {
 
-        type: String,
+    application:{
 
-        required: true
+
+        type:String,
+
+        required:true
+
 
     },
 
 
-    deviceId: {
 
-        type: String,
+    deviceId:{
 
-        required: true
+
+        type:String,
+
+        required:true
+
 
     },
 
 
-    amount: {
 
-        type: String,
+    amount:{
 
-        required: true
+
+        type:String,
+
+        required:true
+
 
     },
 
 
-    adminName: {
 
-        type: String,
+    adminName:{
 
-        required: true
+
+        type:String,
+
+        required:true
+
 
     },
 
 
-    natcash: {
 
-        type: String,
+    natcash:{
 
-        required: true
+
+        type:String,
+
+        required:true
+
 
     },
 
 
-    whatsapp: {
 
-        type: String,
+    whatsapp:{
 
-        required: true
+
+        type:String,
+
+        required:true
+
 
     },
 
 
-    status: {
 
-        type: String,
+    status:{
 
-        default: "PENDING"
+
+        type:String,
+
+        default:"PENDING"
+
 
     },
 
 
-    createdAt: {
 
-        type: Date,
+    downloadAccess:{
 
-        default: Date.now
+
+        type:Boolean,
+
+        default:false
+
 
     },
 
 
-    serverCreatedAt: {
 
-        type: Date,
+    createdAt:{
 
-        default: Date.now
+
+        type:Date,
+
+        default:Date.now
+
 
     }
 
 
-},
-
-{
-
-    collection:
-
-    "fobas_word_install_requests"
-
-}
-
-);
+});
 
 
 
 
 
-const FobasWordRequest = mongoose.model(
+
+const FobasWordRequest =
+
+
+mongoose.model(
 
     "FobasWordRequest",
 
@@ -10586,173 +10666,227 @@ const FobasWordRequest = mongoose.model(
 
 
 
+
+
+/* =========================================================
+   FOBAS API
+   POST /api/fobas-word/request
+   ========================================================= */
+
+
+
 app.post(
 
-    "/api/fobas-word/request",
+"/api/fobas-word/request",
 
-    async function(req, res){
+async(req,res)=>{
 
 
+    try {
 
-        try {
 
 
+        const requestId =
 
-            const requestId =
 
+        "REQ-FW-" +
 
-            "FW-REQ-" +
+        Date.now()
 
-            Date.now()
+        .toString(36)
 
-            .toString(36)
+        +
 
-            .toUpperCase();
+        "-" +
 
+        crypto
 
+        .randomBytes(4)
 
+        .toString("hex")
 
+        .toUpperCase();
 
 
-            const newRequest = new FobasWordRequest({
 
 
 
-                requestId: requestId,
 
+        const newRequest =
 
 
-                application:
+        new FobasWordRequest({
 
-                req.body.application,
 
 
+            requestId:
 
-                deviceId:
 
-                req.body.deviceId,
 
+            requestId,
 
 
-                amount:
 
-                req.body.amount,
+            application:
 
 
+            req.body.application || "FOBAS WORD",
 
-                adminName:
 
-                req.body.adminName,
 
+            deviceId:
 
 
-                natcash:
+            req.body.deviceId,
 
-                req.body.natcash,
 
 
+            amount:
 
-                whatsapp:
 
-                req.body.whatsapp,
+            req.body.amount || "1500 HTG",
 
 
 
-                status:
+            adminName:
 
-                "PENDING",
 
+            req.body.adminName || "M. MEME Selvandieu",
 
 
-                createdAt:
 
-                new Date()
+            natcash:
 
 
+            req.body.natcash || "+50943706706",
 
-            });
 
 
+            whatsapp:
 
 
+            req.body.whatsapp || "+50943706706",
 
 
-            await newRequest.save();
 
+            status:
 
 
+            "PENDING",
 
 
 
-            return res.status(201).json({
+            downloadAccess:
 
 
+            false
 
-                success: true,
 
 
+        });
 
-                message:
 
-                "FOBAS WORD installation request saved",
 
 
 
-                requestId:
 
-                requestId
+        await newRequest.save();
 
 
 
-            });
 
 
 
 
+        return res.status(200).json({
 
 
-        }
 
-        catch(error){
+            success:true,
 
 
 
-            console.error(
+            message:
 
-                "FOBAS WORD REQUEST ERROR:",
+            "Demann FOBAS WORD anrejistre avèk siksè.",
 
-                error
 
-            );
 
+            requestId:
 
 
-            return res.status(500).json({
 
+            requestId
 
 
-                success:false,
 
+        });
 
 
-                message:
 
-                "FOBAS WORD request failed"
 
 
 
-            });
+    } catch(error){
 
 
 
-        }
+        console.error(
+
+
+            "FOBAS WORD REQUEST ERROR:",
+
+            error
+
+        );
+
+
+
+
+
+        return res.status(500).json({
+
+
+
+            success:false,
+
+
+
+            message:
+
+            "Erè server pandan anrejistreman demann FOBAS WORD la."
+
+
+
+        });
 
 
 
     }
 
 
-);
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
