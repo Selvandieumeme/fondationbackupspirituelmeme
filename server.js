@@ -10450,6 +10450,9 @@ app.post("/api/wallet/login", async (req, res) => {
 
 
 
+
+
+
 /* =========================================================
    FOBAS WORD
    INSTALL REQUEST ROUTE
@@ -10657,13 +10660,13 @@ app.post(
 
                 status:
 
-                req.body.status || "PENDING",
+                "PENDING",
 
 
 
                 createdAt:
 
-                req.body.createdAt || new Date()
+                new Date()
 
 
 
@@ -10750,6 +10753,19 @@ app.post(
 
 
 );
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
