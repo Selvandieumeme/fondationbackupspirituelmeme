@@ -1,7 +1,6 @@
 /* =========================================================
    FOBAS WORD
-   ON BUTTON ENGINE
-   DEVICE ID PROMPT
+   ON BUTTON INSTALL ACCESS ENGINE
    ========================================================= */
 
 
@@ -12,18 +11,9 @@
 
 
 
-
-
-const onButton =
-
-document.getElementById(
-
+const onButton = document.getElementById(
     "cwOnFobasWordBtn"
-
 );
-
-
-
 
 
 
@@ -37,31 +27,90 @@ if(!onButton){
 
 
 
-
-
-
 onButton.addEventListener(
+"click",
+function(){
 
 
-    "click",
+    const deviceId = prompt(
+        "Antre Device ID FOBAS WORD ou a:"
+    );
 
 
-    function(){
+
+    if(deviceId === null){
+
+        return;
+
+    }
 
 
 
-        const deviceId = prompt(
 
-            "Antre Device ID FOBAS WORD ou a:"
+    if(deviceId.trim() === ""){
 
+
+        alert(
+            "Tanpri antre Device ID ou a."
         );
 
+        return;
+
+    }
 
 
 
 
 
-        if(deviceId === null){
+
+    fetch(
+
+        "https://api.fondationbackupspirituel.com/api/fobas-word/download-access/device/" 
+        + 
+        encodeURIComponent(deviceId.trim())
+
+    )
+
+
+    .then(response => response.json())
+
+
+    .then(result => {
+
+
+
+        if(
+
+            result.access === true
+
+            &&
+
+            result.status === "APPROVED"
+
+        ){
+
+
+
+            const confirmDownload = confirm(
+
+                "FOBAS WORD APPROUVÉ.\n\nVotre accès est activé.\nCliquez sur OK pour lancer FOBAS WORD."
+
+            );
+
+
+
+
+            if(confirmDownload){
+
+
+                window.location.href =
+
+                result.downloadUrl;
+
+
+
+            }
+
 
 
 
@@ -76,23 +125,13 @@ onButton.addEventListener(
 
 
 
-        const cleanDeviceId =
-
-        deviceId.trim();
-
-
-
-
-
-
-
-        if(cleanDeviceId === ""){
+        if(result.status === "PENDING"){
 
 
 
             alert(
 
-                "Tanpri antre Device ID ou a."
+                "Votre demande FOBAS WORD est encore en attente d'approbation."
 
             );
 
@@ -108,13 +147,23 @@ onButton.addEventListener(
 
 
 
-        console.log(
 
-            "FOBAS WORD DEVICE ID:",
+        if(result.status === "REJECTED"){
 
-            cleanDeviceId
 
-        );
+
+            alert(
+
+                "Votre demande FOBAS WORD a été rejetée."
+
+            );
+
+
+            return;
+
+
+        }
+
 
 
 
@@ -123,7 +172,9 @@ onButton.addEventListener(
 
         alert(
 
-            "Device ID resevwa avèk siksè."
+            result.message ||
+
+            "Aucune autorisation FOBAS WORD trouvée."
 
         );
 
@@ -131,48 +182,42 @@ onButton.addEventListener(
 
 
 
-    }
-
-
-);
+    })
 
 
 
+
+    .catch(error => {
+
+
+
+        console.error(
+
+            "FOBAS WORD ACCESS ERROR:",
+
+            error
+
+        );
+
+
+
+        alert(
+
+            "Erreur de connexion au serveur FOBAS."
+
+        );
+
+
+
+    });
+
+
+
+
+});
 
 
 
 })();
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
