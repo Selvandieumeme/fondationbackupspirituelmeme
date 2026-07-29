@@ -11431,6 +11431,278 @@ async (req,res)=>{
 
 
 
+// =========================================================
+// FOBAS WORD
+// DOWNLOAD ACCESS VERIFICATION
+// GET /api/fobas-word/download-access/:requestId
+// =========================================================
+
+
+app.get(
+
+"/api/fobas-word/download-access/:requestId",
+
+async (req,res)=>{
+
+
+    try{
+
+
+        const requestId =
+
+        req.params.requestId;
+
+
+
+
+
+        // ==============================
+        // VALIDATION
+        // ==============================
+
+
+        if(
+
+            !requestId
+
+        ){
+
+
+            return res.status(400).json({
+
+
+                success:false,
+
+
+                access:false,
+
+
+                message:
+
+                "Request ID obligatwa."
+
+
+            });
+
+
+
+        }
+
+
+
+
+
+
+
+        // ==============================
+        // FIND REQUEST
+        // ==============================
+
+
+        const request =
+
+
+        await FobasWordRequest.findOne({
+
+
+            requestId
+
+
+        });
+
+
+
+
+
+
+
+
+        if(
+
+            !request
+
+        ){
+
+
+            return res.status(404).json({
+
+
+                success:false,
+
+
+                access:false,
+
+
+                message:
+
+                "Request FOBAS WORD sa pa egziste."
+
+
+            });
+
+
+
+        }
+
+
+
+
+
+
+
+
+
+        // ==============================
+        // ACCESS CHECK
+        // ==============================
+
+
+        if(
+
+            request.status !== "APPROVED"
+
+            ||
+
+            request.downloadAccess !== true
+
+        ){
+
+
+            return res.status(403).json({
+
+
+                success:false,
+
+
+                access:false,
+
+
+                message:
+
+                "Aksè download FOBAS WORD poko aktive."
+
+
+            });
+
+
+
+        }
+
+
+
+
+
+
+
+
+
+        // ==============================
+        // GRANT PWA ACCESS
+        // ==============================
+
+
+        return res.status(200).json({
+
+
+
+            success:true,
+
+
+
+            access:true,
+
+
+
+            message:
+
+            "Aksè FOBAS WORD valide.",
+
+
+
+            downloadUrl:
+
+            "https://fondationbackupspirituel.com/campusword2007simulation.html"
+
+
+
+        });
+
+
+
+
+
+
+
+    }
+
+    catch(error){
+
+
+
+        console.error(
+
+
+            "FOBAS WORD DOWNLOAD ACCESS ERROR:",
+
+
+            error.stack
+
+
+        );
+
+
+
+
+
+        return res.status(500).json({
+
+
+
+            success:false,
+
+
+
+            access:false,
+
+
+
+            message:
+
+            "Erè server pandan verifikasyon aksè FOBAS WORD la."
+
+
+        });
+
+
+
+    }
+
+
+
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
