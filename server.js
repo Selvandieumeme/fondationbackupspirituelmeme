@@ -11690,6 +11690,312 @@ async (req,res)=>{
 
 
 
+// =========================================================
+// FOBAS WORD
+// VERIFY DEVICE DOWNLOAD ACCESS
+// =========================================================
+// GET /api/fobas-word/download-access/device/:deviceId
+// =========================================================
+
+
+app.get(
+
+"/api/fobas-word/download-access/device/:deviceId",
+
+async (req, res)=>{
+
+
+    try {
+
+
+
+        const deviceId =
+
+        req.params.deviceId;
+
+
+
+
+
+
+
+        if(!deviceId){
+
+
+            return res.status(400).json({
+
+                success:false,
+
+                access:false,
+
+                message:
+
+                "Device ID obligatwa."
+
+            });
+
+
+        }
+
+
+
+
+
+
+
+
+        const request =
+
+        await FobasWordRequest.findOne({
+
+            deviceId: deviceId
+
+        });
+
+
+
+
+
+
+
+
+
+        if(!request){
+
+
+
+            return res.json({
+
+                success:false,
+
+                access:false,
+
+                message:
+
+                "Aucune demande FOBAS WORD trouvée. Veuillez installer FOBAS WORD d'abord."
+
+            });
+
+
+        }
+
+
+
+
+
+
+
+
+
+        if(
+
+            request.status === "APPROVED"
+
+            &&
+
+            request.downloadAccess === true
+
+        ){
+
+
+
+            return res.json({
+
+                success:true,
+
+                access:true,
+
+                status:
+
+                request.status,
+
+
+                message:
+
+                "Accès FOBAS WORD autorisé.",
+
+
+                downloadUrl:
+
+                "https://fondationbackupspirituel.com/campusword2007simulation.html"
+
+
+            });
+
+
+
+        }
+
+
+
+
+
+
+
+
+
+        if(
+
+            request.status === "PENDING"
+
+        ){
+
+
+
+            return res.json({
+
+                success:true,
+
+                access:false,
+
+                status:"PENDING",
+
+                message:
+
+                "Votre demande FOBAS WORD est encore en attente d'approbation."
+
+            });
+
+
+
+        }
+
+
+
+
+
+
+
+
+
+        if(
+
+            request.status === "REJECTED"
+
+        ){
+
+
+
+            return res.json({
+
+                success:true,
+
+                access:false,
+
+                status:"REJECTED",
+
+                message:
+
+                "Votre demande FOBAS WORD a été rejetée."
+
+            });
+
+
+
+        }
+
+
+
+
+
+
+
+
+
+        return res.json({
+
+            success:false,
+
+            access:false,
+
+            status:
+
+            request.status,
+
+            message:
+
+            "Accès FOBAS WORD indisponible."
+
+        });
+
+
+
+
+
+
+
+    }catch(error){
+
+
+
+        console.error(
+
+            "FOBAS WORD DEVICE ACCESS ERROR:",
+
+            error.stack
+
+        );
+
+
+
+
+
+        return res.status(500).json({
+
+            success:false,
+
+            access:false,
+
+            message:
+
+            "Erreur serveur pendant la vérification FOBAS WORD."
+
+        });
+
+
+
+    }
+
+
+
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
