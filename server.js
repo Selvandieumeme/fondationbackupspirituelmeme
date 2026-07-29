@@ -11081,6 +11081,367 @@ async (req,res)=>{
 
 
 
+// =========================================================
+// FOBAS WORD ADMIN
+// UPDATE REQUEST STATUS
+// PUT /api/fobas-word/admin/request/status
+// =========================================================
+
+
+app.put(
+
+"/api/fobas-word/admin/request/status",
+
+async (req,res)=>{
+
+
+    try{
+
+
+
+        const {
+
+
+            requestId,
+
+            status
+
+
+
+        } = req.body;
+
+
+
+
+
+
+        // ==============================
+        // VALIDATION
+        // ==============================
+
+
+        if(
+
+            !requestId ||
+
+            !status
+
+        ){
+
+
+            return res.status(400).json({
+
+
+                success:false,
+
+
+                message:
+
+                "Request ID ak Status obligatwa."
+
+
+            });
+
+
+
+        }
+
+
+
+
+
+
+
+
+        const allowedStatus = [
+
+
+            "PENDING",
+
+            "APPROVED",
+
+            "REJECTED"
+
+
+        ];
+
+
+
+
+
+
+
+        if(
+
+            !allowedStatus.includes(
+
+                status
+
+            )
+
+        ){
+
+
+            return res.status(400).json({
+
+
+                success:false,
+
+
+                message:
+
+                "Status sa a pa otorize."
+
+
+            });
+
+
+
+        }
+
+
+
+
+
+
+
+
+
+        // ==============================
+        // UPDATE REQUEST
+        // ==============================
+
+
+        const updateData = {
+
+
+            status
+
+
+
+        };
+
+
+
+
+
+
+
+
+        if(
+
+            status === "APPROVED"
+
+        ){
+
+
+            updateData.downloadAccess = true;
+
+
+        }
+
+
+
+
+
+
+
+        if(
+
+            status === "REJECTED"
+
+        ){
+
+
+            updateData.downloadAccess = false;
+
+
+        }
+
+
+
+
+
+
+
+
+
+        const updatedRequest =
+
+
+        await FobasWordRequest.findOneAndUpdate(
+
+
+            {
+
+
+                requestId
+
+
+            },
+
+
+            {
+
+
+                $set:updateData
+
+
+            },
+
+
+            {
+
+
+                new:true
+
+
+            }
+
+
+        );
+
+
+
+
+
+
+
+
+
+        if(
+
+            !updatedRequest
+
+        ){
+
+
+
+            return res.status(404).json({
+
+
+
+                success:false,
+
+
+
+                message:
+
+                "Request FOBAS WORD sa pa egziste."
+
+
+
+            });
+
+
+
+        }
+
+
+
+
+
+
+
+
+
+        return res.status(200).json({
+
+
+
+            success:true,
+
+
+
+            message:
+
+            "Status request FOBAS WORD mete ajou avèk siksè.",
+
+
+
+            request:
+
+            updatedRequest
+
+
+
+        });
+
+
+
+
+
+
+
+
+
+    }
+
+    catch(error){
+
+
+
+        console.error(
+
+
+            "FOBAS WORD ADMIN STATUS UPDATE ERROR:",
+
+
+            error.stack
+
+
+        );
+
+
+
+
+
+
+        return res.status(500).json({
+
+
+
+            success:false,
+
+
+
+            message:
+
+            "Erè server pandan mizajou status request FOBAS WORD la."
+
+
+
+        });
+
+
+
+    }
+
+
+
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
