@@ -10967,6 +10967,177 @@ async (req,res)=>{
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// =========================================================
+// FOBAS WORD ADMIN
+// GET ALL INSTALL REQUESTS
+// GET /api/fobas-word/admin/requests
+// =========================================================
+
+
+app.get(
+
+"/api/fobas-word/admin/requests",
+
+async (req,res)=>{
+
+
+    try{
+
+
+        const requests =
+
+        await FobasWordRequest
+
+        .find({})
+
+        .sort({
+
+            createdAt:-1
+
+        });
+
+
+
+
+
+        return res.status(200).json({
+
+
+            success:true,
+
+
+            requests
+
+
+
+        });
+
+
+
+    }
+
+    catch(error){
+
+
+
+        console.error(
+
+            "FOBAS WORD ADMIN REQUEST LOAD ERROR:",
+
+            error.stack
+
+        );
+
+
+
+
+        return res.status(500).json({
+
+
+            success:false,
+
+
+            message:
+
+            "Erè server pandan chajman request FOBAS WORD yo."
+
+
+        });
+
+
+
+    }
+
+
+
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 // 🚀 DEMARRE SERVEUR
 // ---------------------------
 const PORT = process.env.PORT || 4000;
