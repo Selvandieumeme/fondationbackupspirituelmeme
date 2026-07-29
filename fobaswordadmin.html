@@ -4,29 +4,133 @@
 <head>
 
 <meta charset="UTF-8">
+
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <title>FOBAS WORD Admin</title>
 
 
-<style>
-
-*{
-    box-sizing:border-box;
-}
+<link rel="stylesheet" href="css/fobaswordadmin.css">
 
 
-body{
-
-    margin:0;
-    padding:20px;
-    font-family:Arial, sans-serif;
-    background:#f1f3f6;
-
-}
+</head>
 
 
-.container{
+<body>
+
+
+
+<div class="container">
+
+
+
+    <div class="header">
+
+        <h1>
+            💻 Admin FOBAS WORD
+        </h1>
+
+
+        <a class="back-btn" href="/adminwallet.html">
+            ⬅ Retounen Admin Wallet
+        </a>
+
+
+    </div>
+
+
+
+
+
+    <div class="toolbar">
+
+
+        <input 
+        type="text"
+        id="search"
+        placeholder="Rechèch Request ID..."
+        >
+
+
+
+        <select id="statusFilter">
+
+
+            <option value="ALL">
+                TOUT STATUS
+            </option>
+
+
+            <option value="PENDING">
+                PENDING
+            </option>
+
+
+            <option value="APPROVED">
+                APPROVED
+            </option>
+
+
+            <option value="REJECTED">
+                REJECTED
+            </option>
+
+
+        </select>
+
+
+
+    </div>
+
+
+
+
+
+    <div 
+    id="requestContainer"
+    class="request-grid">
+    </div>
+
+
+
+
+</div>
+
+
+
+
+
+<script src="js/fobaswordadmin.js"></script>
+
+
+
+</body>
+
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     max-width:1200px;
     margin:auto;
