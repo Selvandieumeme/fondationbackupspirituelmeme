@@ -1,0 +1,299 @@
+/* =========================================================
+   FOBAS WORD DOWNLOAD PAGE CSS
+   Compatible with fobasword-download.html
+   ========================================================= */
+
+
+*{
+
+    box-sizing:border-box;
+
+}
+
+
+
+body{
+
+
+    margin:0;
+
+    padding:20px;
+
+    min-height:100vh;
+
+    font-family:Arial, sans-serif;
+
+    background:#f1f3f6;
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:center;
+
+
+}
+
+
+
+
+
+.download-container{
+
+
+    width:100%;
+
+    max-width:450px;
+
+
+}
+
+
+
+
+
+
+
+.download-card{
+
+
+    background:white;
+
+    padding:30px;
+
+    border-radius:15px;
+
+    box-shadow:0 5px 20px rgba(0,0,0,.12);
+
+    text-align:center;
+
+
+}
+
+
+
+
+
+
+
+.download-card h1{
+
+
+    margin:0 0 15px;
+
+    color:#185ABD;
+
+    font-size:28px;
+
+
+}
+
+
+
+
+
+
+
+.description{
+
+
+    color:#555;
+
+    font-size:15px;
+
+    line-height:1.5;
+
+    margin-bottom:25px;
+
+
+}
+
+
+
+
+
+
+
+#requestId{
+
+
+    width:100%;
+
+    padding:14px;
+
+    border:1px solid #ccc;
+
+    border-radius:10px;
+
+    font-size:15px;
+
+    outline:none;
+
+    margin-bottom:15px;
+
+
+}
+
+
+
+
+
+
+
+#requestId:focus{
+
+
+    border-color:#185ABD;
+
+
+}
+
+
+
+
+
+
+
+#verifyAccessBtn{
+
+
+    width:100%;
+
+    padding:14px;
+
+    border:none;
+
+    border-radius:10px;
+
+    background:#185ABD;
+
+    color:white;
+
+    font-size:16px;
+
+    font-weight:bold;
+
+    cursor:pointer;
+
+
+}
+
+
+
+
+
+
+
+#verifyAccessBtn:hover{
+
+
+    opacity:.9;
+
+
+}
+
+
+
+
+
+
+
+#message{
+
+
+    margin-top:20px;
+
+    min-height:25px;
+
+    font-size:15px;
+
+    font-weight:bold;
+
+
+}
+
+
+
+
+
+
+
+#downloadBtn{
+
+
+    display:block;
+
+    margin-top:20px;
+
+    padding:14px;
+
+    border-radius:10px;
+
+    background:#28a745;
+
+    color:white;
+
+    text-decoration:none;
+
+    font-weight:bold;
+
+    font-size:16px;
+
+
+}
+
+
+
+
+
+
+
+#downloadBtn:hover{
+
+
+    opacity:.9;
+
+
+}
+
+
+
+
+
+
+
+@media(max-width:480px){
+
+
+
+    body{
+
+        padding:15px;
+
+    }
+
+
+
+
+    .download-card{
+
+
+        padding:20px;
+
+
+    }
+
+
+
+
+    .download-card h1{
+
+
+        font-size:24px;
+
+
+    }
+
+
+
+}
