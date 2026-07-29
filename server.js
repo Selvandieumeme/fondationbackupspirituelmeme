@@ -26,6 +26,10 @@ const sharp = require('sharp');
 const fs = require('fs'); // <-- AJOUTE LIG SA A LA OUVÈTI BLOK LA
 const cron = require('node-cron');
 const Queue = require("bull");
+const crypto = require("crypto");
+
+
+
 
 
 
