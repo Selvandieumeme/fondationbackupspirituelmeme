@@ -1,0 +1,509 @@
+/* =========================================================
+   FOBAS WORD ADMIN
+   CSS STYLE ENGINE v1.0
+   Compatible with fobaswordadmin.html
+   ========================================================= */
+
+
+/* =========================
+   GLOBAL RESET
+   ========================= */
+
+*{
+    box-sizing:border-box;
+}
+
+
+html,
+body{
+
+    width:100%;
+    min-height:100%;
+
+}
+
+
+
+body{
+
+    margin:0;
+
+    padding:20px;
+
+    font-family:
+    Arial,
+    Helvetica,
+    sans-serif;
+
+    background:#f1f3f6;
+
+    color:#222;
+
+}
+
+
+
+
+/* =========================
+   MAIN CONTAINER
+   ========================= */
+
+.container{
+
+    width:100%;
+
+    max-width:1200px;
+
+    margin:0 auto;
+
+}
+
+
+
+
+
+/* =========================
+   HEADER
+   ========================= */
+
+.header{
+
+    background:#1a237e;
+
+    color:white;
+
+    padding:20px;
+
+    border-radius:12px;
+
+    margin-bottom:20px;
+
+}
+
+
+
+.header h1{
+
+    margin:0;
+
+    font-size:26px;
+
+    font-weight:bold;
+
+}
+
+
+
+
+
+/* =========================
+   BACK BUTTON
+   ========================= */
+
+.back-btn{
+
+    display:inline-flex;
+
+    align-items:center;
+
+    margin-top:15px;
+
+    padding:10px 16px;
+
+    background:white;
+
+    color:#1a237e;
+
+    text-decoration:none;
+
+    border-radius:8px;
+
+    font-weight:bold;
+
+    transition:.2s ease;
+
+}
+
+
+
+.back-btn:hover{
+
+    opacity:.85;
+
+}
+
+
+
+
+
+/* =========================
+   TOOLBAR
+   ========================= */
+
+.toolbar{
+
+    width:100%;
+
+    background:white;
+
+    padding:15px;
+
+    border-radius:12px;
+
+    margin-bottom:20px;
+
+    display:flex;
+
+    gap:15px;
+
+    flex-wrap:wrap;
+
+    box-shadow:
+    0 2px 8px rgba(0,0,0,.08);
+
+}
+
+
+
+
+.toolbar input,
+.toolbar select{
+
+    height:42px;
+
+    padding:0 14px;
+
+    border:1px solid #ccc;
+
+    border-radius:8px;
+
+    font-size:14px;
+
+    outline:none;
+
+    background:white;
+
+}
+
+
+
+.toolbar input{
+
+    flex:1;
+
+    min-width:220px;
+
+}
+
+
+
+.toolbar select{
+
+    min-width:180px;
+
+}
+
+
+
+
+.toolbar input:focus,
+.toolbar select:focus{
+
+    border-color:#1a237e;
+
+}
+
+
+
+
+
+/* =========================
+   REQUEST AREA
+   ========================= */
+
+.request-grid{
+
+    width:100%;
+
+    display:grid;
+
+    grid-template-columns:
+    repeat(auto-fit,minmax(320px,1fr));
+
+    gap:20px;
+
+}
+
+
+
+
+/* =========================
+   REQUEST CARD
+   Created by JS
+   ========================= */
+
+.request-card{
+
+    background:white;
+
+    border-radius:12px;
+
+    padding:20px;
+
+    box-shadow:
+    0 4px 12px rgba(0,0,0,.10);
+
+    transition:.2s ease;
+
+}
+
+
+
+.request-card:hover{
+
+    transform:translateY(-3px);
+
+}
+
+
+
+
+.request-card h2{
+
+    margin:0 0 15px;
+
+    color:#1a237e;
+
+    font-size:20px;
+
+}
+
+
+
+
+
+/* =========================
+   REQUEST DATA
+   ========================= */
+
+.field{
+
+    margin:10px 0;
+
+    font-size:14px;
+
+    line-height:1.5;
+
+    word-break:break-word;
+
+}
+
+
+
+.label{
+
+    font-weight:bold;
+
+    color:#333;
+
+}
+
+
+
+
+
+/* =========================
+   STATUS BADGE
+   ========================= */
+
+.status{
+
+    display:inline-block;
+
+    padding:6px 12px;
+
+    border-radius:20px;
+
+    font-size:12px;
+
+    font-weight:bold;
+
+}
+
+
+
+.pending{
+
+    background:#fff3cd;
+
+    color:#856404;
+
+}
+
+
+
+.approved{
+
+    background:#d4edda;
+
+    color:#155724;
+
+}
+
+
+
+.rejected{
+
+    background:#f8d7da;
+
+    color:#721c24;
+
+}
+
+
+
+
+
+/* =========================
+   ACTION BUTTONS
+   ========================= */
+
+.actions{
+
+    display:flex;
+
+    gap:10px;
+
+    margin-top:20px;
+
+}
+
+
+
+.actions button{
+
+    flex:1;
+
+    padding:10px 15px;
+
+    border:none;
+
+    border-radius:8px;
+
+    cursor:pointer;
+
+    font-weight:bold;
+
+}
+
+
+
+.approve{
+
+    background:#28a745;
+
+    color:white;
+
+}
+
+
+
+.reject{
+
+    background:#dc3545;
+
+    color:white;
+
+}
+
+
+
+.approve:hover,
+.reject:hover{
+
+    opacity:.85;
+
+}
+
+
+
+
+
+/* =========================
+   EMPTY MESSAGE
+   ========================= */
+
+.empty{
+
+    background:white;
+
+    padding:30px;
+
+    border-radius:12px;
+
+    text-align:center;
+
+    font-weight:bold;
+
+}
+
+
+
+
+
+/* =========================
+   RESPONSIVE
+   ========================= */
+
+@media(max-width:700px){
+
+
+    body{
+
+        padding:10px;
+
+    }
+
+
+
+    .header h1{
+
+        font-size:21px;
+
+    }
+
+
+
+    .toolbar{
+
+        flex-direction:column;
+
+    }
+
+
+
+    .toolbar input,
+    .toolbar select{
+
+        width:100%;
+
+    }
+
+
+
+    .request-grid{
+
+        grid-template-columns:1fr;
+
+    }
+
+
+
+    .actions{
+
+        flex-direction:column;
+
+    }
+
+
+}
