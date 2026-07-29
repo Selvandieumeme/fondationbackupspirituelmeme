@@ -1209,3 +1209,68 @@ footer h3{
 
 
 
+
+
+
+
+
+
+
+
+
+/* =========================================================
+   ON FOBAS WORD BUTTON
+   ========================================================= */
+
+
+.cwOnFobasWordBtn{
+
+
+    margin-top:12px;
+
+    width:100%;
+
+    max-width:360px;
+
+    height:42px;
+
+    border:none;
+
+    border-radius:10px;
+
+    background:#28a745;
+
+    color:#ffffff;
+
+    font-size:15px;
+
+    font-weight:bold;
+
+    cursor:pointer;
+
+    transition:.25s;
+
+
+}
+
+
+
+.cwOnFobasWordBtn:hover{
+
+
+    background:#218838;
+
+    transform:translateY(-1px);
+
+
+}
+
+
+
+.cwOnFobasWordBtn:active{
+
+
+    transform:scale(.98);
+
+
+}
