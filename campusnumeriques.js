@@ -261,7 +261,7 @@ const MicrosoftWordProgressEngine = {
 
         );
 
-    }
+    },
 
 
 
