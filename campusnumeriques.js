@@ -1380,6 +1380,140 @@ document.addEventListener(
 
 
 
+// =====================================
+// MICROSOFT WORD 2007 FORMATION
+// PROGRESS VALIDATION ENGINE
+// AUTO UNLOCK NEXT CHAPTER
+// =====================================
+
+
+const MicrosoftWordValidationEngine = {
+
+
+    completeChapter(chapterId){
+
+
+        const progress =
+
+        MicrosoftWordProgressEngine.get();
+
+
+
+        if(
+
+            !progress.completedChapters.includes(
+
+                chapterId
+
+            )
+
+        ){
+
+            progress.completedChapters.push(
+
+                chapterId
+
+            );
+
+        }
+
+
+
+
+
+        const currentIndex =
+
+        microsoftWordCourse.chapters.findIndex(
+
+            chapter =>
+
+            chapter.id === chapterId
+
+        );
+
+
+
+
+
+        if(
+
+            currentIndex !== -1 &&
+
+            microsoftWordCourse.chapters[currentIndex + 1]
+
+        ){
+
+
+            const nextChapter =
+
+            microsoftWordCourse.chapters[
+
+                currentIndex + 1
+
+            ];
+
+
+
+
+            if(
+
+                !progress.unlockedChapters.includes(
+
+                    nextChapter.id
+
+                )
+
+            ){
+
+
+                progress.unlockedChapters.push(
+
+                    nextChapter.id
+
+                );
+
+
+            }
+
+
+        }
+
+
+
+
+
+        MicrosoftWordProgressEngine.save(
+
+            progress
+
+        );
+
+
+
+    }
+
+
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
