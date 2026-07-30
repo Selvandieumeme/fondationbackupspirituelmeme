@@ -182,6 +182,9 @@ const microsoftWordCourse = {
 
 
 
+
+
+
 // =====================================
 // MICROSOFT WORD 2007 FORMATION
 // COURSE RENDERER ENGINE
@@ -567,6 +570,21 @@ document.querySelectorAll(
                 <div class="microsoft-word-course">
 
 
+                    <button
+
+                    id="backToWordChaptersBtn"
+                    class="wordBackBtn">
+
+
+                        ⬅️ Retour aux chapitres
+
+
+                    </button>
+
+
+
+
+
                     <h1>
 
                         📘 ${chapter.title}
@@ -696,6 +714,42 @@ document.querySelectorAll(
                 `;
 
 
+
+
+
+                const backButton =
+
+                document.getElementById(
+
+                    "backToWordChaptersBtn"
+
+                );
+
+
+
+
+                if(backButton){
+
+
+                    backButton.addEventListener(
+
+                        "click",
+
+                        ()=>{
+
+
+                            renderMicrosoftWordCourse();
+
+
+                        }
+
+                    );
+
+
+                }
+
+
+
             }
 
 
@@ -774,11 +828,6 @@ if(launchButton){
 
 
 }
-
-
-
-
-
 
 
 
