@@ -172,9 +172,6 @@ const microsoftWordCourse = {
 
    
 
-
-
-
 // =====================================
 // CHAPITRE 2
 // MAITRISE DE L'ONGLET HOME (ACCUEIL)
@@ -455,11 +452,291 @@ const microsoftWordCourse = {
 
                         ]
 
-                    },
+                    }
+
+                }
+
+            ]
+
+        },
 
 
 
 
+
+
+
+
+
+
+// =====================================
+// GROUPE POLICE (FONT)
+// =====================================
+
+{
+
+    id:
+    "font",
+
+
+    title:
+    "Groupe Police (Font)",
+
+
+    buttons:[
+
+
+        {
+
+            id:
+            "font-family",
+
+
+            title:
+            "Font (Police)",
+
+
+            theory:{
+
+                definition:
+                "Le bouton Font (Police) permet de choisir le type de caractères utilisé dans un document Microsoft Word 2007.",
+
+
+                role:
+                "Il permet de modifier l’apparence du texte afin d’obtenir une présentation adaptée au contexte professionnel.",
+
+
+                functionality:
+                "L’utilisateur sélectionne un texte puis choisit une police disponible dans la liste Font (Police).",
+
+
+                whenToUse:
+                "Utiliser Font (Police) lorsqu’il est nécessaire de changer le style visuel d’un texte.",
+
+
+                professionalExample:
+                "Un professionnel peut utiliser une police claire et adaptée pour créer un rapport, une lettre ou un document administratif."
+
+            },
+
+
+            practice:{
+
+                instructions:[
+
+                    "Créer un nouveau document Word.",
+
+                    "Écrire un titre et un paragraphe.",
+
+                    "Sélectionner le texte à modifier.",
+
+                    "Ouvrir la liste Font (Police).",
+
+                    "Choisir une nouvelle police."
+
+                ],
+
+
+                expectedResult:
+                "Le texte sélectionné apparaît avec la nouvelle police choisie."
+
+            },
+
+
+            exercise:{
+
+                task:
+                "Créer un document contenant un titre et un paragraphe puis appliquer différentes polices pour comparer les résultats."
+
+            },
+
+
+            homework:{
+
+                task:
+                "Créer un document professionnel en utilisant une police adaptée au type de document réalisé."
+
+            },
+
+
+            aiContext:{
+
+                learningGoal:
+                "Comprendre le rôle des polices dans la mise en forme professionnelle.",
+
+
+                commonErrors:[
+
+                    "L’étudiant change la police sans sélectionner le texte.",
+
+                    "L’étudiant utilise une police difficile à lire dans un document professionnel."
+
+                ],
+
+
+                aiAction:
+                "Expliquer le choix des polices et guider l’étudiant vers une présentation professionnelle."
+
+            },
+
+
+            validation:{
+
+                skills:[
+
+                    "Comprendre le rôle de Font (Police).",
+
+                    "Modifier la police d’un texte.",
+
+                    "Choisir une police adaptée au contexte professionnel."
+
+                ]
+
+            }
+
+        }
+
+    ]
+
+},
+
+
+
+
+
+
+
+
+
+// =====================================
+// BOUTON TAILLE DE POLICE (FONT SIZE)
+// =====================================
+
+{
+
+    id:
+    "font-size",
+
+
+    title:
+    "Font Size (Taille de police)",
+
+
+    theory:{
+
+        definition:
+        "Le bouton Font Size (Taille de police) permet de modifier la grandeur des caractères dans un document Microsoft Word 2007.",
+
+
+        role:
+        "Il permet d’adapter la taille du texte selon son importance et sa présentation professionnelle.",
+
+
+        functionality:
+        "L’utilisateur sélectionne un texte puis choisit une valeur de taille dans la liste Font Size (Taille de police).",
+
+
+        whenToUse:
+        "Utiliser Font Size (Taille de police) pour créer une hiérarchie visuelle entre les titres, sous-titres et paragraphes.",
+
+
+        professionalExample:
+        "Un rapport professionnel utilise généralement une taille plus grande pour les titres et une taille standard pour le contenu."
+
+    },
+
+
+    practice:{
+
+        instructions:[
+
+            "Créer un document Word.",
+
+            "Écrire un titre et un paragraphe.",
+
+            "Sélectionner le titre.",
+
+            "Modifier la taille avec Font Size (Taille de police).",
+
+            "Comparer le résultat avec le texte normal."
+
+        ],
+
+
+        expectedResult:
+        "Le texte sélectionné change de taille selon la valeur choisie."
+
+    },
+
+
+    exercise:{
+
+        task:
+        "Créer un document avec un titre, un sous-titre et un paragraphe puis appliquer différentes tailles de police."
+
+    },
+
+
+    homework:{
+
+        task:
+        "Créer une page professionnelle en utilisant plusieurs tailles de caractères pour organiser les informations."
+
+    },
+
+
+    aiContext:{
+
+        learningGoal:
+        "Comprendre l’utilisation professionnelle des tailles de texte.",
+
+
+        commonErrors:[
+
+            "L’étudiant modifie la taille sans sélectionner le texte.",
+
+            "L’étudiant utilise des tailles excessives qui rendent le document difficile à lire."
+
+        ],
+
+
+        aiAction:
+        "Expliquer comment choisir une taille adaptée selon le rôle du texte."
+
+    },
+
+
+    validation:{
+
+        skills:[
+
+            "Comprendre le rôle de Font Size (Taille de police).",
+
+            "Modifier la taille d’un texte.",
+
+            "Créer une présentation lisible."
+
+        ]
+
+    }
+
+}
+
+
+
+
+            ]
+
+        }
+
+    ]
+
+}
+
+
+    ]
+
+};
 
 
 
