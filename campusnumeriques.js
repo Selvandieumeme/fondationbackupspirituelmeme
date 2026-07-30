@@ -264,49 +264,6 @@ const MicrosoftWordProgressEngine = {
     }
 
 
-// =====================================
-// COMPLETE CHAPTER
-// =====================================
-
-completeChapter(chapterId){
-
-
-    const progress =
-
-    this.get();
-
-
-
-    if(
-
-        !progress.completedChapters.includes(
-
-            chapterId
-
-        )
-
-    ){
-
-        progress.completedChapters.push(
-
-            chapterId
-
-        );
-
-    }
-
-
-
-    this.save(
-
-        progress
-
-    );
-
-
-}
-
-
 };
 
 
