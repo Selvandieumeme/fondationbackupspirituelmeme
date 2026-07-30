@@ -185,6 +185,495 @@ const microsoftWordCourse = {
 
 
 
+
+// =====================================
+// MICROSOFT WORD 2007 FORMATION
+// COURSE RENDERER ENGINE
+// =====================================
+
+
+function renderMicrosoftWordCourse(){
+
+
+    const campusContent =
+
+    document.getElementById(
+        "campusContent"
+    );
+
+
+
+    if(!campusContent){
+
+        return;
+
+    }
+
+
+
+
+    if(typeof microsoftWordCourse === "undefined"){
+
+        return;
+
+    }
+
+
+
+
+
+    let chaptersHTML = "";
+
+
+
+
+    microsoftWordCourse.chapters.forEach(
+
+        chapter => {
+
+
+
+            let theoryHTML = "";
+
+
+
+            chapter.theory.forEach(
+
+                lesson => {
+
+
+                    theoryHTML += `
+
+                        <div class="word-theory-card">
+
+                            <h4>
+                                📘 ${lesson.title}
+                            </h4>
+
+
+                            <p>
+                                ${lesson.content}
+                            </p>
+
+                        </div>
+
+                    `;
+
+                }
+
+            );
+
+
+
+
+
+
+            let practiceHTML = "";
+
+
+
+            chapter.practice.forEach(
+
+                activity => {
+
+
+                    let stepsHTML = "";
+
+
+                    activity.steps.forEach(
+
+                        step => {
+
+
+                            stepsHTML += `
+
+                                <li>
+                                    ${step}
+                                </li>
+
+                            `;
+
+                        }
+
+                    );
+
+
+
+                    practiceHTML += `
+
+                        <div class="word-practice-card">
+
+
+                            <h4>
+                                🖥️ ${activity.title}
+                            </h4>
+
+
+                            <ol>
+
+                                ${stepsHTML}
+
+                            </ol>
+
+
+                        </div>
+
+                    `;
+
+                }
+
+            );
+
+
+
+
+
+
+            let exercisesHTML = "";
+
+
+
+            chapter.exercises.forEach(
+
+                exercise => {
+
+
+                    exercisesHTML += `
+
+                        <li>
+                            ${exercise}
+                        </li>
+
+                    `;
+
+                }
+
+            );
+
+
+
+
+
+
+
+
+            let evaluationHTML = "";
+
+
+
+            chapter.evaluation.forEach(
+
+                item => {
+
+
+                    evaluationHTML += `
+
+                        <li>
+                            ${item}
+                        </li>
+
+                    `;
+
+                }
+
+            );
+
+
+
+
+
+
+
+            chaptersHTML += `
+
+
+                <section class="microsoft-word-chapter">
+
+
+                    <h2>
+
+                        ${chapter.title}
+
+                    </h2>
+
+
+
+
+
+                    <div class="word-section">
+
+
+                        <h3>
+                            📚 Théorie
+                        </h3>
+
+
+                        ${theoryHTML}
+
+
+                    </div>
+
+
+
+
+
+
+
+                    <div class="word-section">
+
+
+                        <h3>
+                            🖥️ Pratique
+                        </h3>
+
+
+                        ${practiceHTML}
+
+
+                    </div>
+
+
+
+
+
+
+
+                    <div class="word-section">
+
+
+                        <h3>
+                            ✏️ Exercices
+                        </h3>
+
+
+                        <ul>
+
+                            ${exercisesHTML}
+
+                        </ul>
+
+
+                    </div>
+
+
+
+
+
+
+
+
+                    <div class="word-section">
+
+
+                        <h3>
+                            🏠 Devoir
+                        </h3>
+
+
+                        <p>
+
+                            ${chapter.homework}
+
+                        </p>
+
+
+                    </div>
+
+
+
+
+
+
+
+
+                    <div class="word-section">
+
+
+                        <h3>
+                            🎓 Évaluation
+                        </h3>
+
+
+                        <ul>
+
+                            ${evaluationHTML}
+
+                        </ul>
+
+
+                    </div>
+
+
+
+
+
+                </section>
+
+
+            `;
+
+
+
+        }
+
+    );
+
+
+
+
+
+
+
+    campusContent.innerHTML = `
+
+
+        <div class="microsoft-word-course">
+
+
+            <h1>
+
+                📘 ${microsoftWordCourse.title}
+
+            </h1>
+
+
+
+
+            ${chaptersHTML}
+
+
+
+        </div>
+
+
+    `;
+
+
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// =====================================
+// MICROSOFT WORD 2007 FORMATION
+// COURSE INTEGRATION ENGINE
+// =====================================
+
+
+function initializeMicrosoftWordFormation(){
+
+
+    const button =
+
+    document.getElementById(
+        "openMicrosoftWordBtn"
+    );
+
+
+
+    if(!button){
+
+        return;
+
+    }
+
+
+
+
+
+
+    button.addEventListener(
+
+        "click",
+
+        function(){
+
+
+
+            const campusContent =
+
+            document.getElementById(
+                "campusContent"
+            );
+
+
+
+            if(!campusContent){
+
+                return;
+
+            }
+
+
+
+
+
+
+            renderMicrosoftWordCourse();
+
+
+
+
+
+        }
+
+    );
+
+
+}
+
+
+
+
+
+
+
+// =====================================
+// AUTO INITIALIZATION
+// =====================================
+
+
+document.addEventListener(
+
+    "DOMContentLoaded",
+
+    function(){
+
+
+        initializeMicrosoftWordFormation();
+
+
+    }
+
+);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 // =====================================
 // LANGUES
 // =====================================
