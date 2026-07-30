@@ -670,9 +670,10 @@ function initializeMicrosoftWordFormation(){
 
 
 
+        openMicrosoftWordCourseMenu();
 
 
-            renderMicrosoftWordCourse();
+
 
 
 
