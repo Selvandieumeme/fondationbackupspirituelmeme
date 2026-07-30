@@ -724,16 +724,6 @@ const microsoftWordCourse = {
 
 
 
-
-            ]
-
-        }
-
-    ]
-
-}
-
-
     ]
 
 };
