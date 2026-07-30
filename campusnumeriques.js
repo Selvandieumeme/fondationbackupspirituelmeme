@@ -49,6 +49,9 @@ const microsoftWordCourse = {
 
             id:"chapitre1",
 
+            unlocked:true,
+
+
             title:
             "Chapitre 1 - Découverte générale de Microsoft Word 2007",
 
