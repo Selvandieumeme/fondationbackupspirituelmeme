@@ -3113,3 +3113,33 @@ body.dark-mode .premium-table td{
 
 
 
+/* =====================================
+   MICROSOFT WORD CHAPTER MENU BUTTONS
+   ===================================== */
+
+.wordChapterBtn{
+
+    width:100%;
+
+    padding:15px;
+
+    margin:10px 0;
+
+    border:none;
+
+    border-radius:12px;
+
+    cursor:pointer;
+
+    font-size:16px;
+
+    text-align:left;
+
+}
+
+
+.wordChapterBtn:hover{
+
+    opacity:0.85;
+
+}
