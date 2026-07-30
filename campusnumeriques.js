@@ -390,11 +390,15 @@ const microsoftWordCourse = {
 
             ]
 
-        },
+        }
 
 
 
 
+
+
+]
+};
 
 
 
