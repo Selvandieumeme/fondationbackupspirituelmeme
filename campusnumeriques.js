@@ -1345,7 +1345,8 @@ button.addEventListener(
     ()=>{
 
 
-        openMicrosoftWordFormationSpace();
+renderMicrosoftWordCourse();
+     
 
 
     }
@@ -1355,11 +1356,6 @@ button.addEventListener(
 }
 
 }
-
-
-
-
-
 
 
 
