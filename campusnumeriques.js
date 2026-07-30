@@ -29,85 +29,155 @@ const $$ = (selector) =>
 
 
 
-// =========================================================
-// FOBAS CAMPUS
-// MICROSOFT WORD COURSE DATA ENGINE
-// =========================================================
-
-const microsoftWordCourse = [
-
-    {
-        id:1,
-
-        title:
-        "Chapitre 1 : Découverte de Microsoft Word 2007",
-
-        description:
-        "Introduction au logiciel de traitement de texte et découverte des fonctions principales.",
-
-        lessons:[
-
-            "Présentation générale de Word 2007",
-
-            "Rôle d'un logiciel de traitement de texte",
-
-            "Création d'un nouveau document",
-
-            "Enregistrement d'un fichier"
-
-        ]
-
-    },
 
 
-    {
-        id:2,
-
-        title:
-        "Chapitre 2 : Interface Microsoft Word 2007",
-
-        description:
-        "Apprentissage de l'interface graphique de Word 2007.",
-
-        lessons:[
-
-            "Le bouton Office",
-
-            "La barre d'accès rapide",
-
-            "Le ruban et les onglets",
-
-            "La zone de travail"
-
-        ]
-
-    },
 
 
-    {
-        id:3,
+// =====================================
+// MICROSOFT WORD 2007 FORMATION
+// COURSE DATA ENGINE
+// =====================================
 
-        title:
-        "Chapitre 3 : Manipulation du texte",
+const microsoftWordCourse = {
 
-        description:
-        "Apprendre à saisir, corriger et organiser un texte.",
+    title:
+    "Formation Microsoft Word 2007",
 
-        lessons:[
+    chapters:[
 
-            "Saisie du texte",
+        {
 
-            "Sélectionner du texte",
+            id:"chapitre1",
 
-            "Copier et déplacer",
+            title:
+            "Chapitre 1 - Découverte générale de Microsoft Word 2007",
 
-            "Correction automatique"
 
-        ]
+            theory:[
 
-    }
+                {
 
-];
+                    title:
+                    "Qu’est-ce que Microsoft Word 2007 ?",
+
+
+                    content:
+                    "Microsoft Word 2007 est un logiciel de traitement de texte (Word Processing Software) développé par Microsoft permettant de créer, modifier, mettre en forme, enregistrer et imprimer des documents professionnels."
+
+                },
+
+
+                {
+
+                    title:
+                    "Rôle d’un logiciel de traitement de texte (Word Processing Software)",
+
+
+                    content:
+                    "Un logiciel de traitement de texte permet de produire des documents numériques, organiser les informations, appliquer une mise en forme professionnelle et faciliter la communication écrite."
+
+                },
+
+
+                {
+
+                    title:
+                    "Présentation générale de l’environnement Word 2007 (Word 2007 Interface)",
+
+
+                    content:
+                    "L’environnement Word 2007 est composé de plusieurs éléments principaux : la barre de titre (Title Bar), le bouton Office (Office Button), la barre d’accès rapide (Quick Access Toolbar), le ruban (Ribbon), la zone de travail (Document Area), les règles (Rulers) et la barre d’état (Status Bar)."
+
+                }
+
+            ],
+
+
+
+            practice:[
+
+                {
+
+                    title:
+                    "Pratique : Découvrir l’environnement Word 2007 (Word 2007 Interface)",
+
+
+                    steps:[
+
+                        "Identifier la barre de titre (Title Bar).",
+
+                        "Identifier le bouton Office (Office Button).",
+
+                        "Identifier le ruban (Ribbon).",
+
+                        "Identifier les onglets (Tabs).",
+
+                        "Identifier la zone de travail du document (Document Area).",
+
+                        "Créer un nouveau document (New Document)."
+
+                    ]
+
+                }
+
+            ],
+
+
+
+            exercises:[
+
+                "Identifier les principaux éléments de l’interface Word 2007.",
+
+                "Expliquer le rôle du bouton Office (Office Button).",
+
+                "Créer un premier document Word 2007."
+
+            ],
+
+
+
+            homework:
+
+            "Créer un document présentant les différents éléments découverts dans Microsoft Word 2007.",
+
+
+
+            evaluation:[
+
+                "Décrire l’environnement général de Word 2007.",
+
+                "Identifier les principaux composants de l’interface.",
+
+                "Créer et enregistrer un premier document."
+
+            ],
+
+
+
+            objective:[
+
+                "Comprendre l’environnement général de Microsoft Word 2007.",
+
+                "Identifier les différentes parties de l’interface.",
+
+                "Être capable de créer un premier document."
+
+            ]
+
+        }
+
+    ]
+
+};
+
+
+
+
+
+
+
+
+
 
 
 
