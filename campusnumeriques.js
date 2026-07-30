@@ -169,7 +169,6 @@ const microsoftWordCourse = {
 
 
 
-
 // =====================================
 // CHAPITRE 2
 // MAITRISE DE L'ONGLET HOME (ACCUEIL)
@@ -184,17 +183,103 @@ const microsoftWordCourse = {
     "Chapitre 2 - Maîtrise de l’onglet Home (Accueil) de Microsoft Word 2007",
 
 
+
+    theory:[
+
+        {
+
+            title:
+            "Présentation générale de l’onglet Home (Accueil) de Microsoft Word 2007",
+
+            content:
+            "L’onglet Home (Accueil) regroupe les principales commandes utilisées pour créer, modifier et mettre en forme un document professionnel. Il contient plusieurs groupes essentiels : Presse-papiers (Clipboard), Police (Font), Paragraphe (Paragraph), Style et Modification (Editing)."
+
+        },
+
+
+        {
+
+            title:
+            "Rôle de l’onglet Home (Accueil)",
+
+            content:
+            "L’onglet Home (Accueil) permet à l’utilisateur d’effectuer les opérations courantes de traitement de texte comme copier, couper, coller, modifier la police, organiser les paragraphes et rechercher du contenu."
+
+        }
+
+    ],
+
+
+
+    practice:[
+
+        {
+
+            title:
+            "Pratique : Découvrir les groupes de commandes de l’onglet Home (Accueil)",
+
+
+            steps:[
+
+                "Ouvrir Microsoft Word Simulator.",
+
+                "Identifier l’onglet Home (Accueil).",
+
+                "Identifier le groupe Presse-papiers (Clipboard).",
+
+                "Identifier le groupe Police (Font).",
+
+                "Identifier le groupe Paragraphe (Paragraph).",
+
+                "Identifier le groupe Style.",
+
+                "Identifier le groupe Modification (Editing)."
+
+            ]
+
+        }
+
+    ],
+
+
+
+    exercises:[
+
+        "Identifier les différents groupes de commandes de l’onglet Home (Accueil).",
+
+        "Expliquer le rôle des commandes principales de mise en forme.",
+
+        "Réaliser une première manipulation avec les outils Home."
+
+    ],
+
+
+
+    homework:
+
+    "Créer un document professionnel en utilisant plusieurs commandes de l’onglet Home (Accueil).",
+
+
+
+    evaluation:[
+
+        "Identifier les groupes de commandes de l’onglet Home.",
+
+        "Utiliser correctement les fonctions principales de mise en forme.",
+
+        "Réaliser une production professionnelle dans Microsoft Word Simulator."
+
+    ],
+
+
+
     objective:[
 
-        "Comprendre l’organisation générale de l’onglet Home (Accueil).",
+        "Comprendre l’organisation de l’onglet Home (Accueil).",
 
-        "Identifier les différents groupes de commandes du ruban Home.",
+        "Maîtriser progressivement les commandes essentielles.",
 
-        "Maîtriser les fonctions essentielles de création et de mise en forme d’un document.",
-
-        "Utiliser les commandes Home (Accueil) dans Microsoft Word Simulator.",
-
-        "Réaliser des documents professionnels avec les outils étudiés."
+        "Utiliser les outils Home dans un contexte professionnel."
 
     ],
 
@@ -244,10 +329,6 @@ const microsoftWordCourse = {
     groups:[
 
 
-        // =====================================
-        // GROUPE PRESSE-PAPIERS
-        // =====================================
-
         {
 
             id:
@@ -258,10 +339,7 @@ const microsoftWordCourse = {
             "Groupe Presse-papiers (Clipboard)",
 
 
-
             buttons:[
-
-
 
                 {
 
@@ -273,9 +351,7 @@ const microsoftWordCourse = {
                     "Paste (Coller)",
 
 
-
                     theory:{
-
 
                         definition:
                         "Le bouton Paste (Coller) permet d’insérer dans un document un élément précédemment placé dans le Presse-papiers (Clipboard).",
@@ -299,9 +375,7 @@ const microsoftWordCourse = {
                     },
 
 
-
                     practice:{
-
 
                         instructions:[
 
@@ -326,9 +400,7 @@ const microsoftWordCourse = {
                     },
 
 
-
                     exercise:{
-
 
                         task:
                         "Créer un paragraphe de cinq lignes puis reproduire une partie du texte avec Copy (Copier) et Paste (Coller)."
@@ -336,9 +408,7 @@ const microsoftWordCourse = {
                     },
 
 
-
                     homework:{
-
 
                         task:
                         "Créer un document professionnel contenant un titre et deux paragraphes utilisant les fonctions du Presse-papiers."
@@ -346,9 +416,7 @@ const microsoftWordCourse = {
                     },
 
 
-
                     aiContext:{
-
 
                         learningGoal:
                         "Comprendre le fonctionnement du Presse-papiers (Clipboard).",
@@ -369,9 +437,7 @@ const microsoftWordCourse = {
                     },
 
 
-
                     validation:{
-
 
                         skills:[
 
@@ -385,12 +451,24 @@ const microsoftWordCourse = {
 
                     }
 
-
                 }
 
             ]
 
         }
+
+    ]
+
+}
+
+
+
+
+
+
+
+
+
 
 
 
@@ -398,9 +476,6 @@ const microsoftWordCourse = {
 
 
 ]
-};
-
-
 
 
 
