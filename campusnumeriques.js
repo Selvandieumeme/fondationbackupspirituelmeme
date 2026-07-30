@@ -721,6 +721,283 @@ document.addEventListener(
 
 
 
+// =====================================
+// MICROSOFT WORD 2007 FORMATION
+// COURSE NAVIGATION ENGINE
+// =====================================
+
+
+function openMicrosoftWordCourseMenu(){
+
+
+    const campusContent =
+
+    document.getElementById(
+        "campusContent"
+    );
+
+
+
+    if(!campusContent){
+
+        return;
+
+    }
+
+
+
+
+    if(typeof microsoftWordCourse === "undefined"){
+
+        return;
+
+    }
+
+
+
+
+
+    let chaptersHTML = "";
+
+
+
+
+    microsoftWordCourse.chapters.forEach(
+
+        chapter => {
+
+
+            chaptersHTML += `
+
+
+                <button
+
+                class="cwWordChapterBtn"
+
+                data-chapter-id="${chapter.id}">
+
+
+                    📖 ${chapter.title}
+
+
+                </button>
+
+
+            `;
+
+
+        }
+
+    );
+
+
+
+
+
+
+    campusContent.innerHTML = `
+
+
+        <div class="cwWordCourseMenu">
+
+
+            <h1>
+
+                📘 ${microsoftWordCourse.title}
+
+            </h1>
+
+
+
+            <p>
+
+                Sélectionnez un chapitre pour commencer votre formation.
+
+            </p>
+
+
+
+
+            <div class="cwWordChapterList">
+
+
+                ${chaptersHTML}
+
+
+            </div>
+
+
+
+        </div>
+
+
+    `;
+
+
+
+
+
+
+
+    document
+    .querySelectorAll(
+        ".cwWordChapterBtn"
+    )
+    .forEach(
+
+        button => {
+
+
+            button.addEventListener(
+
+                "click",
+
+                ()=>{
+
+
+                    const chapterId =
+
+                    button.dataset.chapterId;
+
+
+
+                    openMicrosoftWordChapter(
+                        chapterId
+                    );
+
+
+                }
+
+            );
+
+
+        }
+
+    );
+
+
+}
+
+
+
+
+
+
+
+
+
+// =====================================
+// OPEN SINGLE CHAPTER
+// =====================================
+
+
+function openMicrosoftWordChapter(
+    chapterId
+){
+
+
+    const chapter =
+
+    microsoftWordCourse.chapters.find(
+
+        item =>
+
+        item.id === chapterId
+
+    );
+
+
+
+    if(!chapter){
+
+        return;
+
+    }
+
+
+
+
+    const originalCourse =
+
+    microsoftWordCourse.chapters;
+
+
+
+    microsoftWordCourse.chapters = [
+
+        chapter
+
+    ];
+
+
+
+    renderMicrosoftWordCourse();
+
+
+
+
+    microsoftWordCourse.chapters =
+
+    originalCourse;
+
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
