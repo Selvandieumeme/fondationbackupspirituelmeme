@@ -538,8 +538,15 @@ function renderMicrosoftWordCourse(){
 
 
 
+          
+<div class="word-chapters-container">
 
-        ${chaptersHTML}
+    ${chaptersHTML}
+
+</div>
+
+
+      
 
 
 
