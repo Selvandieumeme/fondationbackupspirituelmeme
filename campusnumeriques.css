@@ -3314,3 +3314,70 @@ body.dark-mode .premium-table td{
 
 
 }
+
+
+
+
+
+
+
+
+.cwSingleChapterPage{
+
+    width:100%;
+    padding:30px;
+    background:#ffffff;
+    border-radius:16px;
+
+}
+
+
+
+.cwSingleChapterPage h1{
+
+    color:#185ABD;
+    text-align:center;
+    margin-bottom:30px;
+
+}
+
+
+
+.cwChapterContent h2{
+
+    color:#185ABD;
+    margin-top:25px;
+    border-bottom:2px solid #185ABD;
+    padding-bottom:8px;
+
+}
+
+
+
+.cwLessonCard{
+
+    background:#f8f9fa;
+    padding:20px;
+    margin:15px 0;
+    border-radius:12px;
+    border-left:5px solid #185ABD;
+
+}
+
+
+
+.cwLessonCard h3{
+
+    color:#185ABD;
+
+}
+
+
+
+.cwLessonCard p,
+.cwLessonCard li{
+
+    line-height:1.7;
+    color:#444;
+
+}
