@@ -21,6 +21,100 @@ const $ = (selector) =>
 const $$ = (selector) =>
   document.querySelectorAll(selector);
 
+
+
+
+
+
+
+
+
+// =========================================================
+// FOBAS CAMPUS
+// MICROSOFT WORD COURSE DATA ENGINE
+// =========================================================
+
+const microsoftWordCourse = [
+
+    {
+        id:1,
+
+        title:
+        "Chapitre 1 : Découverte de Microsoft Word 2007",
+
+        description:
+        "Introduction au logiciel de traitement de texte et découverte des fonctions principales.",
+
+        lessons:[
+
+            "Présentation générale de Word 2007",
+
+            "Rôle d'un logiciel de traitement de texte",
+
+            "Création d'un nouveau document",
+
+            "Enregistrement d'un fichier"
+
+        ]
+
+    },
+
+
+    {
+        id:2,
+
+        title:
+        "Chapitre 2 : Interface Microsoft Word 2007",
+
+        description:
+        "Apprentissage de l'interface graphique de Word 2007.",
+
+        lessons:[
+
+            "Le bouton Office",
+
+            "La barre d'accès rapide",
+
+            "Le ruban et les onglets",
+
+            "La zone de travail"
+
+        ]
+
+    },
+
+
+    {
+        id:3,
+
+        title:
+        "Chapitre 3 : Manipulation du texte",
+
+        description:
+        "Apprendre à saisir, corriger et organiser un texte.",
+
+        lessons:[
+
+            "Saisie du texte",
+
+            "Sélectionner du texte",
+
+            "Copier et déplacer",
+
+            "Correction automatique"
+
+        ]
+
+    }
+
+];
+
+
+
+
+
+
+
 // =====================================
 // LANGUES
 // =====================================
