@@ -887,13 +887,10 @@ function openMicrosoftWordCourseMenu(){
 
 
 // =====================================
-// OPEN SINGLE CHAPTER
+// OPEN SINGLE CHAPTER ENGINE
 // =====================================
 
-
-function openMicrosoftWordChapter(
-    chapterId
-){
+function openMicrosoftWordChapter(chapterId){
 
 
     const chapter =
@@ -916,34 +913,164 @@ function openMicrosoftWordChapter(
 
 
 
+    const campusContent =
 
-    const originalCourse =
-
-    microsoftWordCourse.chapters;
-
-
-
-    microsoftWordCourse.chapters = [
-
-        chapter
-
-    ];
+    document.getElementById(
+        "campusContent"
+    );
 
 
 
-    renderMicrosoftWordCourse();
+    if(!campusContent){
+
+        return;
+
+    }
 
 
 
 
-    microsoftWordCourse.chapters =
+    campusContent.innerHTML = `
 
-    originalCourse;
+
+    <div class="cwSingleChapterPage">
+
+
+        <h1>
+
+            📖 ${chapter.title}
+
+        </h1>
+
+
+
+
+        <div class="cwChapterContent">
+
+
+            <h2>
+                📚 Théorie
+            </h2>
+
+
+            ${chapter.theory.map(item => `
+
+                <div class="cwLessonCard">
+
+                    <h3>
+                        📘 ${item.title}
+                    </h3>
+
+                    <p>
+                        ${item.content}
+                    </p>
+
+                </div>
+
+
+            `).join("")}
+
+
+
+            <h2>
+                🖥️ Pratique
+            </h2>
+
+
+
+            ${chapter.practice.map(item => `
+
+                <div class="cwLessonCard">
+
+                    <h3>
+                        🖥️ ${item.title}
+                    </h3>
+
+
+                    <ul>
+
+                    ${item.steps.map(step => `
+
+                        <li>
+                            ${step}
+                        </li>
+
+                    `).join("")}
+
+                    </ul>
+
+
+                </div>
+
+
+            `).join("")}
+
+
+
+
+            <h2>
+                ✏️ Exercices
+            </h2>
+
+
+            <ul>
+
+            ${chapter.exercises.map(item => `
+
+                <li>
+                    ${item}
+                </li>
+
+            `).join("")}
+
+            </ul>
+
+
+
+
+            <h2>
+                🏠 Devoir
+            </h2>
+
+
+            <p>
+                ${chapter.homework}
+            </p>
+
+
+
+
+            <h2>
+                🎓 Évaluation
+            </h2>
+
+
+            <ul>
+
+            ${chapter.evaluation.map(item => `
+
+                <li>
+                    ${item}
+                </li>
+
+            `).join("")}
+
+            </ul>
+
+
+
+        </div>
+
+
+
+    </div>
+
+
+`;
+
 
 
 }
-
-
 
 
 
