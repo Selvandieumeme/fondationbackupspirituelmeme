@@ -249,25 +249,28 @@ function renderMicrosoftWordCourse(){
 
 
 
+
+
             chaptersHTML += `
 
 
-                <button
+<button
 
-                class="wordChapterBtn"
+class="wordChapterBtn"
 
-                data-chapter="${chapter.id}">
+data-chapter="${chapter.id}"
 
-
-                    📘 ${chapter.title}
-
-
-                </button>
+${chapter.unlocked === false ? "disabled" : ""}>
 
 
+${chapter.unlocked === false ? "🔒" : "📘"} ${chapter.title}
 
-            `;
 
+</button>
+
+
+
+`;
 
 
         }
