@@ -527,36 +527,78 @@ function renderMicrosoftWordCourse(){
     campusContent.innerHTML = `
 
 
-        <div class="microsoft-word-course">
+    <div class="microsoft-word-course">
 
 
-            <h1>
+        <h1>
 
-                📘 ${microsoftWordCourse.title}
+            📘 ${microsoftWordCourse.title}
 
-            </h1>
-
-
-
-
-            ${chaptersHTML}
+        </h1>
 
 
 
-        </div>
+
+        ${chaptersHTML}
 
 
-    `;
+
+        <button
+            id="launchMicrosoftWordSimulationBtn"
+            class="cwLaunchWordSimulationBtn">
+
+            🚀 Ouvrir Microsoft Word Simulation
+
+        </button>
 
 
+
+    </div>
+
+
+`;
+
+
+
+const launchButton =
+    document.getElementById(
+        "launchMicrosoftWordSimulationBtn"
+    );
+
+
+if(launchButton){
+
+    launchButton.addEventListener(
+        "click",
+        ()=>{
+
+
+            campusContent.innerHTML = `
+
+
+                <iframe
+
+                src="https://www.fondationbackupspirituel.com/campusword2007simulation"
+
+                style="
+                width:100%;
+                height:900px;
+                border:none;
+                border-radius:12px;
+                "
+
+                title="Microsoft Word Simulation">
+
+                </iframe>
+
+
+            `;
+
+
+        }
+    );
 
 }
-
-
-
-
-
-
 
 
 
@@ -1367,83 +1409,6 @@ renderMicrosoftWordCourse();
 
 
 
-
-
-
-
-
-
-// =====================================
-// MICROSOFT WORD SIMULATION BUTTON
-// ISOLATED CONNECTOR
-// =====================================
-
-function initializeWordSimulationButton(){
-
-
-    const simulationButton =
-        document.getElementById(
-            "openWordSimulationBtn"
-        );
-
-
-    if(!simulationButton){
-
-        return;
-
-    }
-
-
-
-    simulationButton.addEventListener(
-
-        "click",
-
-        ()=>{
-
-
-            const campusContent =
-                document.getElementById(
-                    "campusContent"
-                );
-
-
-            if(!campusContent){
-
-                return;
-
-            }
-
-
-
-            campusContent.innerHTML = `
-
-
-                <iframe
-
-                src="https://www.fondationbackupspirituel.com/campusword2007simulation"
-
-                style="
-                width:100%;
-                height:900px;
-                border:none;
-                border-radius:12px;
-                "
-
-                title="Microsoft Word 2007 Simulation">
-
-                </iframe>
-
-
-            `;
-
-
-        }
-
-    );
-
-
-}
 
 
 
