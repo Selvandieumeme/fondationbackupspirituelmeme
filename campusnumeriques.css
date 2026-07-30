@@ -3026,3 +3026,261 @@ body.dark-mode .premium-table td{
 
 
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* =====================================
+   MICROSOFT WORD 2007 FORMATION
+   COURSE STYLE ENGINE
+   ISOLATED VERSION
+   ===================================== */
+
+
+#campusContent .microsoft-word-course{
+
+    width:100%;
+    padding:25px;
+    box-sizing:border-box;
+
+}
+
+
+
+
+
+#campusContent .microsoft-word-course > h1{
+
+    text-align:center;
+    color:#185ABD;
+    font-size:28px;
+    margin-bottom:30px;
+
+}
+
+
+
+
+
+#campusContent .microsoft-word-chapter{
+
+    background:#ffffff;
+    border-radius:14px;
+    padding:25px;
+    margin-bottom:30px;
+    box-shadow:0 5px 20px rgba(0,0,0,0.10);
+    border:1px solid #e0e0e0;
+
+}
+
+
+
+
+
+#campusContent .microsoft-word-chapter h2{
+
+    color:#185ABD;
+    font-size:24px;
+    margin-bottom:25px;
+    border-bottom:2px solid #185ABD;
+    padding-bottom:10px;
+
+}
+
+
+
+
+
+#campusContent .word-section{
+
+    margin-top:25px;
+    padding:20px;
+    border-radius:12px;
+    background:#f8f9fa;
+
+}
+
+
+
+
+
+#campusContent .word-section h3{
+
+    color:#333;
+    font-size:20px;
+    margin-bottom:15px;
+
+}
+
+
+
+
+
+#campusContent .word-theory-card{
+
+    background:#ffffff;
+    padding:15px;
+    margin-bottom:15px;
+    border-left:5px solid #185ABD;
+    border-radius:8px;
+
+}
+
+
+
+
+
+#campusContent .word-theory-card h4{
+
+    color:#185ABD;
+    margin-bottom:10px;
+
+}
+
+
+
+
+
+#campusContent .word-theory-card p{
+
+    color:#444;
+    line-height:1.7;
+
+}
+
+
+
+
+
+#campusContent .word-practice-card{
+
+    background:#ffffff;
+    padding:15px;
+    margin-bottom:15px;
+    border-left:5px solid #28a745;
+    border-radius:8px;
+
+}
+
+
+
+
+
+#campusContent .word-practice-card h4{
+
+    color:#28a745;
+
+}
+
+
+
+
+
+#campusContent .word-practice-card li{
+
+    margin-bottom:8px;
+    line-height:1.6;
+
+}
+
+
+
+
+
+#campusContent .word-section ul,
+#campusContent .word-section ol{
+
+    padding-left:25px;
+
+}
+
+
+
+
+
+#campusContent .word-section li{
+
+    margin-bottom:8px;
+
+}
+
+
+
+
+
+/* Exercices */
+
+#campusContent .word-section:nth-last-child(3){
+
+    border-left:5px solid #ffc107;
+
+}
+
+
+
+
+
+/* Devoir */
+
+#campusContent .word-section:nth-last-child(2){
+
+    border-left:5px solid #6f42c1;
+
+}
+
+
+
+
+
+/* Evaluation */
+
+#campusContent .word-section:last-child{
+
+    border-left:5px solid #dc3545;
+
+}
+
+
+
+
+
+@media(max-width:768px){
+
+
+    #campusContent .microsoft-word-course{
+
+        padding:15px;
+
+    }
+
+
+
+    #campusContent .microsoft-word-chapter{
+
+        padding:18px;
+
+    }
+
+
+
+    #campusContent .microsoft-word-course > h1{
+
+        font-size:22px;
+
+    }
+
+
+}
