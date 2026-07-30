@@ -164,11 +164,236 @@ const microsoftWordCourse = {
 
             ]
 
-        }
+        },
 
-    ]
 
-};
+
+
+
+// =====================================
+// CHAPITRE 2
+// MAITRISE DE L'ONGLET HOME (ACCUEIL)
+// MICROSOFT WORD 2007
+// =====================================
+
+{
+
+    id:"chapitre2",
+
+    title:
+    "Chapitre 2 - Maîtrise de l’onglet Home (Accueil) de Microsoft Word 2007",
+
+
+    objective:[
+
+        "Comprendre l’organisation générale de l’onglet Home (Accueil).",
+
+        "Identifier les différents groupes de commandes du ruban Home.",
+
+        "Maîtriser les fonctions essentielles de création et de mise en forme d’un document.",
+
+        "Utiliser les commandes Home (Accueil) dans Microsoft Word Simulator.",
+
+        "Réaliser des documents professionnels avec les outils étudiés."
+
+    ],
+
+
+
+    aiContext:{
+
+        role:
+        "Professeur IA CampusNumérique FOBAS",
+
+
+        mission:
+        "Accompagner l’étudiant dans l’apprentissage progressif de l’onglet Home (Accueil) de Microsoft Word 2007.",
+
+
+        teachingMethod:[
+
+            "Expliquer les notions avec des exemples professionnels.",
+
+            "Guider l’étudiant pendant les manipulations dans le Simulator.",
+
+            "Identifier les erreurs fréquentes.",
+
+            "Adapter les explications selon le niveau de l’étudiant.",
+
+            "Valider les compétences avant le passage à l’évaluation."
+
+        ],
+
+
+        supportedLanguages:[
+
+            "Français",
+
+            "English",
+
+            "Español",
+
+            "Kreyòl"
+
+        ]
+
+    },
+
+
+
+    groups:[
+
+
+        // =====================================
+        // GROUPE PRESSE-PAPIERS
+        // =====================================
+
+        {
+
+            id:
+            "clipboard",
+
+
+            title:
+            "Groupe Presse-papiers (Clipboard)",
+
+
+
+            buttons:[
+
+
+
+                {
+
+                    id:
+                    "paste",
+
+
+                    title:
+                    "Paste (Coller)",
+
+
+
+                    theory:{
+
+
+                        definition:
+                        "Le bouton Paste (Coller) permet d’insérer dans un document un élément précédemment placé dans le Presse-papiers (Clipboard).",
+
+
+                        role:
+                        "Il permet de récupérer un contenu copié ou coupé afin de le placer à un nouvel emplacement dans le document.",
+
+
+                        functionality:
+                        "L’utilisateur utilise d’abord Copy (Copier) ou Cut (Couper), puis utilise Paste (Coller) pour insérer le contenu.",
+
+
+                        whenToUse:
+                        "Utiliser Paste (Coller) lorsqu’un élément doit être réutilisé ou déplacé dans un document.",
+
+
+                        professionalExample:
+                        "Un assistant administratif peut réutiliser rapidement une partie d’un rapport existant dans un nouveau document."
+
+                    },
+
+
+
+                    practice:{
+
+
+                        instructions:[
+
+                            "Créer un nouveau document Word.",
+
+                            "Écrire un paragraphe de plusieurs lignes.",
+
+                            "Sélectionner une partie du texte.",
+
+                            "Utiliser Copy (Copier).",
+
+                            "Placer le curseur à un nouvel emplacement.",
+
+                            "Cliquer sur Paste (Coller)."
+
+                        ],
+
+
+                        expectedResult:
+                        "Le texte sélectionné apparaît dans le nouvel emplacement du document."
+
+                    },
+
+
+
+                    exercise:{
+
+
+                        task:
+                        "Créer un paragraphe de cinq lignes puis reproduire une partie du texte avec Copy (Copier) et Paste (Coller)."
+
+                    },
+
+
+
+                    homework:{
+
+
+                        task:
+                        "Créer un document professionnel contenant un titre et deux paragraphes utilisant les fonctions du Presse-papiers."
+
+                    },
+
+
+
+                    aiContext:{
+
+
+                        learningGoal:
+                        "Comprendre le fonctionnement du Presse-papiers (Clipboard).",
+
+
+                        commonErrors:[
+
+                            "L’étudiant utilise Paste (Coller) sans avoir copié un élément.",
+
+                            "L’étudiant confond Copy (Copier) et Cut (Couper)."
+
+                        ],
+
+
+                        aiAction:
+                        "Expliquer l’erreur et guider l’étudiant étape par étape."
+
+                    },
+
+
+
+                    validation:{
+
+
+                        skills:[
+
+                            "Comprendre le rôle de Paste (Coller).",
+
+                            "Réaliser une opération de collage.",
+
+                            "Utiliser correctement le Presse-papiers."
+
+                        ]
+
+                    }
+
+
+                }
+
+            ]
+
+        },
+
+
+
 
 
 
