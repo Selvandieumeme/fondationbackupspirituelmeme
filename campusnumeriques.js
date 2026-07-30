@@ -652,6 +652,11 @@ syncMicrosoftWordProgress();
 
 
 
+const progress =
+
+MicrosoftWordProgressEngine.get();
+
+
 
     microsoftWordCourse.chapters.forEach(
 
@@ -661,8 +666,18 @@ syncMicrosoftWordProgress();
 
 
 
-            chaptersHTML += `
+            const unlocked =
 
+progress.unlockedChapters.includes(
+
+    chapter.id
+
+);
+
+
+
+
+chaptersHTML += `
 
 <button
 
@@ -670,19 +685,15 @@ class="wordChapterBtn"
 
 data-chapter="${chapter.id}"
 
-${chapter.unlocked === false ? "disabled" : ""}>
+${!unlocked ? "disabled" : ""}>
 
 
-${chapter.unlocked === false ? "🔒" : "📘"} ${chapter.title}
+${!unlocked ? "🔒" : "📘"} ${chapter.title}
 
 
 </button>
 
-
-
 `;
-
-
         }
 
     );
