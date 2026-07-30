@@ -624,6 +624,124 @@ function openPage(pageId) {
 // DASHBOARD WIDGETS
 // =====================================
 
+
+
+
+// =====================================
+// MICROSOFT WORD FORMATION MODULE
+// =====================================
+
+function loadMicrosoftWordFormation(){
+
+    const formations =
+        document.getElementById(
+            "formationsWidget"
+        );
+
+
+    if(!formations){
+
+        return;
+
+    }
+
+
+
+    formations.innerHTML += `
+
+        <div class="formation-card">
+
+            <h3>
+                📘 Microsoft Word
+            </h3>
+
+
+            <p>
+                Formation complète sur
+                le traitement de texte
+                Microsoft Word 2007.
+            </p>
+
+
+            <button
+                id="openMicrosoftWordBtn">
+
+                Commencer la formation
+
+            </button>
+
+
+        </div>
+
+    `;
+
+
+
+    const button =
+        document.getElementById(
+            "openMicrosoftWordBtn"
+        );
+
+
+
+    if(button){
+
+
+        button.addEventListener(
+            "click",
+            ()=>{
+
+
+                const campusContent =
+                    document.getElementById(
+                        "campusContent"
+                    );
+
+
+                if(!campusContent){
+
+                    return;
+
+                }
+
+
+
+                campusContent.innerHTML = `
+
+
+                    <iframe
+
+                    src="https://www.fondationbackupspirituel.com/campusword2007simulation"
+
+                    style="
+                    width:100%;
+                    height:900px;
+                    border:none;
+                    border-radius:12px;
+                    "
+
+                    title="Microsoft Word Formation">
+
+                    </iframe>
+
+
+                `;
+
+
+            }
+        );
+
+
+    }
+
+}
+
+
+
+
+
+
+
 async function loadWidgets() {
 
     const formations =
@@ -651,10 +769,19 @@ async function loadWidgets() {
             "notificationsWidget"
         );
 
-    if (formations)
-        formations.innerHTML =
-            "<h3>Formations</h3>";
 
+  
+
+    if (formations){
+
+    formations.innerHTML =
+        "<h3>Formations</h3>";
+
+    loadMicrosoftWordFormation();
+
+};
+
+  
     if (examens)
         examens.innerHTML =
             "<h3>Examens</h3>";
