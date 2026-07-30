@@ -435,6 +435,112 @@ WordChapterUnlockEngine.checkProgress();
 
 
 
+// =====================================
+// MICROSOFT WORD 2007 FORMATION
+// CHAPTER COMPLETION ENGINE
+// FAZ 3.4 - ISOLATED VERSION
+// =====================================
+
+
+const WordChapterCompletionEngine = {
+
+
+    completeChapter:function(chapterId){
+
+
+
+        if(!chapterId){
+
+            return;
+
+        }
+
+
+
+
+
+        localStorage.setItem(
+
+            "word_" + chapterId + "_completed",
+
+            "true"
+
+        );
+
+
+
+
+
+        if(
+
+            chapterId === "chapitre1"
+
+        ){
+
+
+            localStorage.setItem(
+
+                "wordChapter1Completed",
+
+                "true"
+
+            );
+
+
+            localStorage.setItem(
+
+                "wordChapter2Unlocked",
+
+                "true"
+
+            );
+
+
+        }
+
+
+
+
+
+        if(
+
+            typeof WordChapterUnlockEngine !== "undefined"
+
+        ){
+
+
+            WordChapterUnlockEngine.checkProgress();
+
+
+        }
+
+
+
+    }
+
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 // =====================================
 // MICROSOFT WORD 2007 FORMATION
