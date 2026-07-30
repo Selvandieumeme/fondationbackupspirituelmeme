@@ -687,23 +687,162 @@ function loadMicrosoftWordFormation(){
     if(button){
 
 
-        button.addEventListener(
+button.addEventListener(
+    "click",
+    ()=>{
+
+
+        openMicrosoftWordFormationSpace();
+
+
+    }
+);
+
+
+}
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// =====================================
+// MICROSOFT WORD FORMATION SPACE ENGINE
+// =====================================
+
+function openMicrosoftWordFormationSpace(){
+
+
+    const campusContent =
+        document.getElementById(
+            "campusContent"
+        );
+
+
+    if(!campusContent){
+
+        return;
+
+    }
+
+
+
+    campusContent.innerHTML = `
+
+        <div class="cwWordFormationSpace">
+
+
+            <h2>
+                📘 Formation Microsoft Word 2007
+            </h2>
+
+
+            <p>
+                Apprenez le traitement de texte
+                Microsoft Word étape par étape.
+            </p>
+
+
+
+            <div class="cwWordLessons">
+
+
+                <button class="cwWordLessonBtn">
+
+                    📖 Introduction à Microsoft Word
+
+                </button>
+
+
+
+                <button class="cwWordLessonBtn">
+
+                    🖥️ Découvrir l'interface Word 2007
+
+                </button>
+
+
+
+                <button class="cwWordLessonBtn">
+
+                    ✏️ Mise en forme du texte
+
+                </button>
+
+
+
+                <button class="cwWordLessonBtn">
+
+                    📊 Tableaux et objets
+
+                </button>
+
+
+
+                <button class="cwWordLessonBtn">
+
+                    📝 Exercices pratiques
+
+                </button>
+
+
+
+                <button class="cwWordLessonBtn">
+
+                    🏆 Examens et certification
+
+                </button>
+
+
+            </div>
+
+
+
+            <button
+                id="launchMicrosoftWordSimulationBtn">
+
+                🚀 Ouvrir Microsoft Word Simulation
+
+            </button>
+
+
+        </div>
+
+    `;
+
+
+
+
+    const launchButton =
+        document.getElementById(
+            "launchMicrosoftWordSimulationBtn"
+        );
+
+
+
+    if(launchButton){
+
+
+        launchButton.addEventListener(
             "click",
             ()=>{
-
-
-                const campusContent =
-                    document.getElementById(
-                        "campusContent"
-                    );
-
-
-                if(!campusContent){
-
-                    return;
-
-                }
-
 
 
                 campusContent.innerHTML = `
@@ -720,7 +859,7 @@ function loadMicrosoftWordFormation(){
                     border-radius:12px;
                     "
 
-                    title="Microsoft Word Formation">
+                    title="Microsoft Word Simulation">
 
                     </iframe>
 
@@ -734,7 +873,24 @@ function loadMicrosoftWordFormation(){
 
     }
 
+
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
