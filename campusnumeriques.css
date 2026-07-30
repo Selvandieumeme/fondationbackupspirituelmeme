@@ -2775,3 +2775,254 @@ body.dark-mode .premium-table td{
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* =========================================================
+   FOBAS CAMPUS
+   MICROSOFT WORD FORMATION SPACE
+   ISOLATED STYLE MODULE
+   ========================================================= */
+
+
+.cwWordFormationSpace{
+
+    width:100%;
+
+    background:#ffffff;
+
+    border-radius:16px;
+
+    padding:30px;
+
+    box-sizing:border-box;
+
+    box-shadow:0 8px 25px rgba(0,0,0,0.08);
+
+    margin-top:20px;
+
+    text-align:center;
+
+}
+
+
+
+.cwWordFormationSpace h2{
+
+    margin-bottom:15px;
+
+    font-size:28px;
+
+    font-weight:bold;
+
+    color:#185ABD;
+
+}
+
+
+
+.cwWordFormationSpace p{
+
+    font-size:16px;
+
+    color:#555;
+
+    line-height:1.6;
+
+    margin-bottom:25px;
+
+}
+
+
+
+
+.cwWordLessons{
+
+    display:flex;
+
+    flex-direction:column;
+
+    gap:12px;
+
+    width:100%;
+
+    max-width:500px;
+
+    margin:0 auto 25px auto;
+
+}
+
+
+
+
+.cwWordLessonBtn{
+
+    width:100%;
+
+    min-height:45px;
+
+    border:none;
+
+    border-radius:10px;
+
+    background:#f1f5fb;
+
+    color:#185ABD;
+
+    font-size:16px;
+
+    font-weight:bold;
+
+    cursor:pointer;
+
+    transition:.25s;
+
+}
+
+
+
+.cwWordLessonBtn:hover{
+
+    background:#185ABD;
+
+    color:#ffffff;
+
+    transform:translateY(-2px);
+
+}
+
+
+
+.cwWordLessonBtn:active{
+
+    transform:scale(.98);
+
+}
+
+
+
+
+
+#launchMicrosoftWordSimulationBtn{
+
+
+    width:100%;
+
+    max-width:420px;
+
+    height:55px;
+
+    border:none;
+
+    border-radius:12px;
+
+    background:#185ABD;
+
+    color:#ffffff;
+
+    font-size:18px;
+
+    font-weight:bold;
+
+    cursor:pointer;
+
+    transition:.25s;
+
+
+}
+
+
+
+#launchMicrosoftWordSimulationBtn:hover{
+
+
+    background:#0f4ca3;
+
+    transform:translateY(-2px);
+
+
+}
+
+
+
+#launchMicrosoftWordSimulationBtn:active{
+
+
+    transform:scale(.98);
+
+
+}
+
+
+
+
+
+
+/* =========================================================
+   MOBILE RESPONSIVE
+   ========================================================= */
+
+
+@media(max-width:600px){
+
+
+    .cwWordFormationSpace{
+
+
+        padding:20px;
+
+
+    }
+
+
+
+    .cwWordFormationSpace h2{
+
+
+        font-size:22px;
+
+
+    }
+
+
+
+    .cwWordLessonBtn{
+
+
+        font-size:14px;
+
+
+    }
+
+
+
+    #launchMicrosoftWordSimulationBtn{
+
+
+        font-size:15px;
+
+
+        height:50px;
+
+
+    }
+
+
+}
