@@ -377,6 +377,9 @@ function renderMicrosoftWordCourse(){
 
 
 
+syncMicrosoftWordProgress();
+
+
 
     let chaptersHTML = "";
 
