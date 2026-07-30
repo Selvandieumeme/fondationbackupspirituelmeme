@@ -182,13 +182,6 @@ const microsoftWordCourse = {
 
 
 
-
-
-
-
-
-
-
 // =====================================
 // MICROSOFT WORD 2007 FORMATION
 // COURSE RENDERER ENGINE
@@ -230,287 +223,28 @@ function renderMicrosoftWordCourse(){
 
 
 
+
     microsoftWordCourse.chapters.forEach(
 
         chapter => {
 
 
 
-            let theoryHTML = "";
-
-
-
-            chapter.theory.forEach(
-
-                lesson => {
-
-
-                    theoryHTML += `
-
-                        <div class="word-theory-card">
-
-                            <h4>
-                                📘 ${lesson.title}
-                            </h4>
-
-
-                            <p>
-                                ${lesson.content}
-                            </p>
-
-                        </div>
-
-                    `;
-
-                }
-
-            );
-
-
-
-
-
-
-            let practiceHTML = "";
-
-
-
-            chapter.practice.forEach(
-
-                activity => {
-
-
-                    let stepsHTML = "";
-
-
-                    activity.steps.forEach(
-
-                        step => {
-
-
-                            stepsHTML += `
-
-                                <li>
-                                    ${step}
-                                </li>
-
-                            `;
-
-                        }
-
-                    );
-
-
-
-                    practiceHTML += `
-
-                        <div class="word-practice-card">
-
-
-                            <h4>
-                                🖥️ ${activity.title}
-                            </h4>
-
-
-                            <ol>
-
-                                ${stepsHTML}
-
-                            </ol>
-
-
-                        </div>
-
-                    `;
-
-                }
-
-            );
-
-
-
-
-
-
-            let exercisesHTML = "";
-
-
-
-            chapter.exercises.forEach(
-
-                exercise => {
-
-
-                    exercisesHTML += `
-
-                        <li>
-                            ${exercise}
-                        </li>
-
-                    `;
-
-                }
-
-            );
-
-
-
-
-
-
-
-
-            let evaluationHTML = "";
-
-
-
-            chapter.evaluation.forEach(
-
-                item => {
-
-
-                    evaluationHTML += `
-
-                        <li>
-                            ${item}
-                        </li>
-
-                    `;
-
-                }
-
-            );
-
-
-
-
-
-
-
             chaptersHTML += `
 
 
-                <section class="microsoft-word-chapter">
+                <button
 
+                class="wordChapterBtn"
 
-                    <h2>
+                data-chapter="${chapter.id}">
 
-                        ${chapter.title}
 
-                    </h2>
+                    📘 ${chapter.title}
 
 
+                </button>
 
-
-
-                    <div class="word-section">
-
-
-                        <h3>
-                            📚 Théorie
-                        </h3>
-
-
-                        ${theoryHTML}
-
-
-                    </div>
-
-
-
-
-
-
-
-                    <div class="word-section">
-
-
-                        <h3>
-                            🖥️ Pratique
-                        </h3>
-
-
-                        ${practiceHTML}
-
-
-                    </div>
-
-
-
-
-
-
-
-                    <div class="word-section">
-
-
-                        <h3>
-                            ✏️ Exercices
-                        </h3>
-
-
-                        <ul>
-
-                            ${exercisesHTML}
-
-                        </ul>
-
-
-                    </div>
-
-
-
-
-
-
-
-
-                    <div class="word-section">
-
-
-                        <h3>
-                            🏠 Devoir
-                        </h3>
-
-
-                        <p>
-
-                            ${chapter.homework}
-
-                        </p>
-
-
-                    </div>
-
-
-
-
-
-
-
-
-                    <div class="word-section">
-
-
-                        <h3>
-                            🎓 Évaluation
-                        </h3>
-
-
-                        <ul>
-
-                            ${evaluationHTML}
-
-                        </ul>
-
-
-                    </div>
-
-
-
-
-
-                </section>
 
 
             `;
@@ -541,15 +275,13 @@ function renderMicrosoftWordCourse(){
 
 
 
-          
-<div class="word-chapters-container">
-
-    ${chaptersHTML}
-
-</div>
+        <div class="word-chapters-container">
 
 
-      
+            ${chaptersHTML}
+
+
+        </div>
 
 
 
@@ -557,7 +289,9 @@ function renderMicrosoftWordCourse(){
             id="launchMicrosoftWordSimulationBtn"
             class="cwLaunchWordSimulationBtn">
 
+
             🚀 Ouvrir Microsoft Word Simulation
+
 
         </button>
 
@@ -570,16 +304,432 @@ function renderMicrosoftWordCourse(){
 
 
 
+
+
+
+
+document.querySelectorAll(
+
+    ".wordChapterBtn"
+
+).forEach(
+
+
+    button => {
+
+
+
+        button.addEventListener(
+
+            "click",
+
+            ()=>{
+
+
+
+                const chapterId =
+
+                button.dataset.chapter;
+
+
+
+
+
+                const chapter =
+
+                microsoftWordCourse.chapters.find(
+
+                    item =>
+
+                    item.id === chapterId
+
+                );
+
+
+
+
+
+                if(!chapter){
+
+                    return;
+
+                }
+
+
+
+
+
+                let theoryHTML = "";
+
+
+
+
+
+                chapter.theory.forEach(
+
+                    lesson => {
+
+
+                        theoryHTML += `
+
+
+                        <div class="word-theory-card">
+
+
+                            <h4>
+
+                                📘 ${lesson.title}
+
+                            </h4>
+
+
+                            <p>
+
+                                ${lesson.content}
+
+                            </p>
+
+
+                        </div>
+
+
+                        `;
+
+
+                    }
+
+                );
+
+
+
+
+
+
+
+                let practiceHTML = "";
+
+
+
+
+
+                chapter.practice.forEach(
+
+                    activity => {
+
+
+
+                        let stepsHTML = "";
+
+
+
+
+
+                        activity.steps.forEach(
+
+                            step => {
+
+
+
+                                stepsHTML += `
+
+
+                                <li>
+
+                                    ${step}
+
+                                </li>
+
+
+                                `;
+
+
+                            }
+
+                        );
+
+
+
+
+
+                        practiceHTML += `
+
+
+                        <div class="word-practice-card">
+
+
+                            <h4>
+
+                                🖥️ ${activity.title}
+
+                            </h4>
+
+
+                            <ol>
+
+                                ${stepsHTML}
+
+                            </ol>
+
+
+                        </div>
+
+
+                        `;
+
+
+                    }
+
+                );
+
+
+
+
+
+
+
+
+                let exercisesHTML = "";
+
+
+
+
+
+                chapter.exercises.forEach(
+
+                    exercise => {
+
+
+
+                        exercisesHTML += `
+
+
+                        <li>
+
+                            ${exercise}
+
+                        </li>
+
+
+                        `;
+
+
+                    }
+
+                );
+
+
+
+
+
+
+
+
+                let evaluationHTML = "";
+
+
+
+
+
+                chapter.evaluation.forEach(
+
+                    item => {
+
+
+
+                        evaluationHTML += `
+
+
+                        <li>
+
+                            ${item}
+
+                        </li>
+
+
+                        `;
+
+
+                    }
+
+                );
+
+
+
+
+
+
+
+
+                campusContent.innerHTML = `
+
+
+
+                <div class="microsoft-word-course">
+
+
+                    <h1>
+
+                        📘 ${chapter.title}
+
+                    </h1>
+
+
+
+
+
+                    <div class="word-section">
+
+
+                        <h3>
+
+                            📚 Théorie
+
+                        </h3>
+
+
+                        ${theoryHTML}
+
+
+                    </div>
+
+
+
+
+
+
+                    <div class="word-section">
+
+
+                        <h3>
+
+                            🖥️ Pratique
+
+                        </h3>
+
+
+                        ${practiceHTML}
+
+
+                    </div>
+
+
+
+
+
+
+                    <div class="word-section">
+
+
+                        <h3>
+
+                            ✏️ Exercices
+
+                        </h3>
+
+
+                        <ul>
+
+                            ${exercisesHTML}
+
+                        </ul>
+
+
+                    </div>
+
+
+
+
+
+
+
+                    <div class="word-section">
+
+
+                        <h3>
+
+                            🏠 Devoir
+
+                        </h3>
+
+
+                        <p>
+
+                            ${chapter.homework}
+
+                        </p>
+
+
+                    </div>
+
+
+
+
+
+
+
+                    <div class="word-section">
+
+
+                        <h3>
+
+                            🎓 Évaluation
+
+                        </h3>
+
+
+                        <ul>
+
+                            ${evaluationHTML}
+
+                        </ul>
+
+
+                    </div>
+
+
+
+
+                </div>
+
+
+
+                `;
+
+
+            }
+
+
+        );
+
+
+    }
+
+);
+
+
+
+
+
+
+
 const launchButton =
-    document.getElementById(
-        "launchMicrosoftWordSimulationBtn"
-    );
+
+document.getElementById(
+
+    "launchMicrosoftWordSimulationBtn"
+
+);
+
+
 
 
 if(launchButton){
 
+
     launchButton.addEventListener(
+
         "click",
+
         ()=>{
 
 
@@ -588,29 +738,55 @@ if(launchButton){
 
                 <iframe
 
+
                 src="https://www.fondationbackupspirituel.com/campusword2007simulation"
 
+
                 style="
+
                 width:100%;
+
                 height:900px;
+
                 border:none;
+
                 border-radius:12px;
+
                 "
+
 
                 title="Microsoft Word Simulation">
 
+
                 </iframe>
+
 
 
             `;
 
 
         }
+
     );
 
-}
 
 }
+
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
