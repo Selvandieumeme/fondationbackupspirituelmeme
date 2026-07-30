@@ -167,7 +167,20 @@ const microsoftWordCourse = {
 
             ]
 
-        }
+        },
+
+
+
+
+
+{
+        id:"chapitre2",
+        unlocked:false,
+        title:"Chapitre 2 - Maîtrise de l’onglet Home (Accueil) de Microsoft Word 2007",
+
+        // tout kontni Chapitre 2 la isit la
+
+    }
 
    
     ]
