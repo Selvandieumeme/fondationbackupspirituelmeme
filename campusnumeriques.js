@@ -201,6 +201,147 @@ const microsoftWordCourse = {
 
 
 
+
+
+// =====================================
+// MICROSOFT WORD 2007 FORMATION
+// PROGRESS ENGINE
+// LOCAL STORAGE
+// =====================================
+
+const MicrosoftWordProgressEngine = {
+
+
+    key:
+    "microsoftWordFormationProgress",
+
+
+
+    get(){
+
+        const data =
+
+        localStorage.getItem(
+
+            this.key
+
+        );
+
+
+        if(!data){
+
+            return {
+
+                completedChapters:[],
+
+                unlockedChapters:[
+
+                    "chapitre1"
+
+                ]
+
+            };
+
+        }
+
+
+        return JSON.parse(data);
+
+    },
+
+
+
+    save(data){
+
+        localStorage.setItem(
+
+            this.key,
+
+            JSON.stringify(data)
+
+        );
+
+    }
+
+};
+
+
+
+
+
+
+
+
+
+
+
+
+// =====================================
+// MICROSOFT WORD 2007 FORMATION
+// PROGRESS SYNC ENGINE
+// CONNECT PROGRESS TO COURSE DATA
+// =====================================
+
+function syncMicrosoftWordProgress(){
+
+
+    const progress =
+
+    MicrosoftWordProgressEngine.get();
+
+
+
+    microsoftWordCourse.chapters.forEach(
+
+        chapter => {
+
+
+            if(
+
+                progress.unlockedChapters.includes(
+
+                    chapter.id
+
+                )
+
+            ){
+
+                chapter.unlocked = true;
+
+            }
+
+
+        }
+
+    );
+
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 // =====================================
 // MICROSOFT WORD 2007 FORMATION
 // COURSE RENDERER ENGINE
