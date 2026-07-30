@@ -188,12 +188,6 @@ const microsoftWordCourse = {
 
 
 
-]
-
-
-
-
-
 
 
 
