@@ -3065,25 +3065,36 @@ body.dark-mode .premium-table td{
 
 
 
-
-
-
-
-
 /* =====================================
    WORD CHAPTERS WINDOW
    ISOLATED ONLY
+   COMPATIBLE WITH CHAPTER RENDERER
    ===================================== */
 
-.word-chapters-container {
+#campusContent .word-chapters-container {
 
-    max-height: 60vh;
+    max-height:60vh;
 
-    overflow-y: auto;
+    overflow-y:auto;
 
-    overflow-x: auto;
+    overflow-x:auto;
 
-    padding: 10px;
+    padding:10px;
+
+    box-sizing:border-box;
+
+}
+
+
+
+
+#campusContent .microsoft-word-course{
+
+    max-height:75vh;
+
+    overflow-y:auto;
+
+    overflow-x:auto;
 
 }
 
