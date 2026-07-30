@@ -3067,46 +3067,22 @@ body.dark-mode .premium-table td{
 
 
 
+
+
+
 /* =====================================
-   MICROSOFT WORD COURSE CHAPTER SCROLL
-   ISOLATED CONTAINER
+   WORD CHAPTERS WINDOW
+   ISOLATED ONLY
    ===================================== */
 
-.microsoft-word-course {
+.word-chapters-container {
 
-    max-height: 75vh;
-
-    overflow-x: auto;
+    max-height: 60vh;
 
     overflow-y: auto;
 
-    padding-right: 12px;
+    overflow-x: auto;
 
-}
-
-
-/* Scroll bar appearance */
-
-.microsoft-word-course::-webkit-scrollbar {
-
-    width: 10px;
-
-    height: 10px;
-
-}
-
-
-.microsoft-word-course::-webkit-scrollbar-thumb {
-
-    border-radius: 10px;
-
-}
-
-
-/* Keep chapters inside course area */
-
-.microsoft-word-chapter {
-
-    min-width: 700px;
+    padding: 10px;
 
 }
