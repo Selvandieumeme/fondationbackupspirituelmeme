@@ -3298,3 +3298,118 @@ document.addEventListener(
 
     }
 );
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// =====================================
+// CHAPITRE 1 - PROFESSEURE IA ASSISTANT
+// ISOLATED MODULE
+// =====================================
+
+function renderChapter1ProfessorIA(){
+
+
+    const campusContent =
+
+    document.getElementById(
+        "campusContent"
+    );
+
+
+    if(!campusContent){
+
+        return;
+
+    }
+
+
+
+    const existingIA =
+
+    document.getElementById(
+        "chapter1ProfessorIA"
+    );
+
+
+    if(existingIA){
+
+        return;
+
+    }
+
+
+
+    const iaBox =
+
+    document.createElement(
+        "div"
+    );
+
+
+    iaBox.id =
+    "chapter1ProfessorIA";
+
+
+
+    iaBox.innerHTML = `
+
+
+        <div class="chapter1-ia-card">
+
+
+            <img
+
+            src="ranise-moise-smile.png"
+
+            alt="Ranise MOISE Professeure IA">
+
+
+
+            <h3>
+                👩‍🏫 Ranise MOISE
+            </h3>
+
+
+            <p>
+                Professeure CampusNumérique FOBAS
+            </p>
+
+
+            <p>
+                Bienvenue dans le Chapitre 1 de la formation Microsoft Word 2007.
+            </p>
+
+
+        </div>
+
+
+    `;
+
+
+
+    campusContent.prepend(
+
+        iaBox
+
+    );
+
+
+}
