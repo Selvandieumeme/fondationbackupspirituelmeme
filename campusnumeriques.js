@@ -3332,13 +3332,9 @@ document.addEventListener(
 
 
 
-
-
-
-
-
-
-
+// =====================================
+// MOBILE SPEECH SYNTHESIS UNLOCK ENGINE
+// =====================================
 
 document.addEventListener(
     "click",
@@ -3362,6 +3358,10 @@ document.addEventListener(
         once:true
     }
 );
+
+
+
+
 
 
 
