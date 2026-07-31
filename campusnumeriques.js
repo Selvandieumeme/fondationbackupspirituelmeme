@@ -3490,7 +3490,12 @@ if(voice){
 }
 
 
-raniseStartTalking();
+
+speech.onstart = ()=>{
+
+    raniseStartTalking();
+
+};
 
 
 speech.onend = ()=>{
@@ -3508,6 +3513,7 @@ speech.onerror = ()=>{
 
 
 speechEngine.speak(speech);
+
 
     }
 
