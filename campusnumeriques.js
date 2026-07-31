@@ -776,8 +776,6 @@ document.querySelectorAll(
 
 
 
-
-
 // =====================================
 // CHAPTER 1 IA ACTIVATION
 // =====================================
@@ -788,9 +786,18 @@ if(chapterId === "chapitre1"){
 
         renderChapter1ProfessorIA();
 
+
+        speakProfessorIA(
+
+            "Bonjour et bienvenue dans le Chapitre 1 de la formation Microsoft Word deux mille sept. Je suis Ranise MOISE, votre professeure. Nous allons apprendre ensemble, étape par étape."
+
+        );
+
+
     },50);
 
 }
+
 
 
 
