@@ -3508,6 +3508,9 @@ speech.onstart = ()=>{
 };
 
 
+
+raniseStartTalking();
+
 speech.onend = ()=>{
 
     raniseStopTalking();
@@ -3523,6 +3526,9 @@ speech.onerror = ()=>{
 
 
 speechEngine.speak(speech);
+
+
+
 
 
     }
