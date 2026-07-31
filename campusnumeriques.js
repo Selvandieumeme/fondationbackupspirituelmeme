@@ -3446,13 +3446,6 @@ function renderChapter1ProfessorIA(){
 
 
 
-
-
-
-
-
-
-
 // =====================================
 // RANISE MOISE
 // FRENCH VOICE ENGINE
@@ -3460,93 +3453,57 @@ function renderChapter1ProfessorIA(){
 
 function speakProfessorIA(message){
 
-
-    if(
-
-        !("speechSynthesis" in window)
-
-    ){
-
+    if(!("speechSynthesis" in window)){
         return;
-
     }
-
-
 
     window.speechSynthesis.cancel();
 
-
-
     const speech =
+    new SpeechSynthesisUtterance(message);
 
-    new SpeechSynthesisUtterance(
+    speech.lang = "fr-FR";
+    speech.rate = 1;
+    speech.pitch = 1;
+    speech.volume = 1;
 
-        message
+    const startSpeech = ()=>{
 
-    );
+        const voices =
+        window.speechSynthesis.getVoices();
 
+        const frenchVoice =
+        voices.find(
+            voice =>
+            voice.lang &&
+            voice.lang.startsWith("fr")
+        );
 
+        if(frenchVoice){
+            speech.voice = frenchVoice;
+        }
 
-    speech.lang =
+        window.speechSynthesis.speak(
+            speech
+        );
 
-    "fr-FR";
+    };
 
+    if(
+        window.speechSynthesis.getVoices().length
+    ){
 
+        startSpeech();
 
-    speech.rate =
+    }else{
 
-    1;
-
-
-
-    speech.pitch =
-
-    1;
-
-
-
-    speech.volume =
-
-    1;
-
-
-
-    const voices =
-
-    window.speechSynthesis.getVoices();
-
-
-
-    const frenchVoice =
-
-    voices.find(
-
-        voice =>
-
-        voice.lang.startsWith(
-
-            "fr"
-
-        )
-
-    );
-
-
-
-    if(frenchVoice){
-
-        speech.voice =
-
-        frenchVoice;
+        window.speechSynthesis.onvoiceschanged =
+        startSpeech;
 
     }
 
-
-
-    window.speechSynthesis.speak(
-
-        speech
-
-    );
-
 }
+
+
+
+
