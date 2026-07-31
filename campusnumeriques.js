@@ -3579,7 +3579,7 @@ function raniseStartTalking(){
         }
 
 
-    },180);
+    },300);
 
 
 }
