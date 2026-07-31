@@ -2323,13 +2323,47 @@ async function loadWidgets() {
         examens.innerHTML =
             "<h3>Examens</h3>";
 
+
+
+
+
     if (certificats)
         certificats.innerHTML =
             "<h3>Certificats</h3>";
 
-    if (ai)
-        ai.innerHTML =
-            "<h3>Professeur IA</h3>";
+
+
+if (ai)
+
+    ai.innerHTML = `
+
+
+        <div class="ai-professor-card">
+
+
+            <img
+
+            src="ranise-moise-smile.png"
+
+            alt="Ranise MOISE Professeure IA">
+
+
+            <h3>
+                👩‍🏫 Ranise MOISE
+            </h3>
+
+
+            <p>
+                Professeure CampusNumérique FOBAS
+            </p>
+
+
+        </div>
+
+
+    `;
+
+
 
     if (notifications)
         notifications.innerHTML =
