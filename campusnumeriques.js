@@ -778,6 +778,25 @@ document.querySelectorAll(
 
 
 
+// =====================================
+// CHAPTER 1 IA ACTIVATION
+// =====================================
+
+if(chapterId === "chapitre1"){
+
+    setTimeout(()=>{
+
+        renderChapter1ProfessorIA();
+
+    },50);
+
+}
+
+
+
+
+
+
                 const chapter =
 
                 microsoftWordCourse.chapters.find(
