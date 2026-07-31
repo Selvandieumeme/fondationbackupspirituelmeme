@@ -3432,3 +3432,114 @@ function renderChapter1ProfessorIA(){
 
 
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// =====================================
+// RANISE MOISE
+// FRENCH VOICE ENGINE
+// =====================================
+
+function speakProfessorIA(message){
+
+
+    if(
+
+        !("speechSynthesis" in window)
+
+    ){
+
+        return;
+
+    }
+
+
+
+    window.speechSynthesis.cancel();
+
+
+
+    const speech =
+
+    new SpeechSynthesisUtterance(
+
+        message
+
+    );
+
+
+
+    speech.lang =
+
+    "fr-FR";
+
+
+
+    speech.rate =
+
+    1;
+
+
+
+    speech.pitch =
+
+    1;
+
+
+
+    speech.volume =
+
+    1;
+
+
+
+    const voices =
+
+    window.speechSynthesis.getVoices();
+
+
+
+    const frenchVoice =
+
+    voices.find(
+
+        voice =>
+
+        voice.lang.startsWith(
+
+            "fr"
+
+        )
+
+    );
+
+
+
+    if(frenchVoice){
+
+        speech.voice =
+
+        frenchVoice;
+
+    }
+
+
+
+    window.speechSynthesis.speak(
+
+        speech
+
+    );
+
+}
