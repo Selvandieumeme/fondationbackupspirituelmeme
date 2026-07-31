@@ -3488,6 +3488,9 @@ function speakProfessorIA(message){
             speech.voice = voice;
         }
 
+
+            raniseStartTalking();
+
         speechEngine.speak(speech);
 
     }
