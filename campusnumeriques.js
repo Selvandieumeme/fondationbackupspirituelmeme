@@ -3493,7 +3493,16 @@ function speakProfessorIA(message){
 
         speechEngine.speak(speech);
 
+
+
+      speech.onend = ()=>{
+
+    raniseStopTalking();
+
+};
     }
+
+
 
     if(speechEngine.getVoices().length > 0){
 
