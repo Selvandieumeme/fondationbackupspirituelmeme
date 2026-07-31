@@ -3340,6 +3340,43 @@ document.addEventListener(
 
 
 
+document.addEventListener(
+    "click",
+    ()=>{
+
+        if(window.speechSynthesis){
+
+            const unlock =
+            new SpeechSynthesisUtterance("");
+
+            unlock.volume = 0;
+
+            window.speechSynthesis.speak(
+                unlock
+            );
+
+        }
+
+    },
+    {
+        once:true
+    }
+);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
