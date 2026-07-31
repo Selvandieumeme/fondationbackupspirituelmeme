@@ -3484,22 +3484,31 @@ function speakProfessorIA(message){
 
         const voice = voices.find(v=>v.lang && v.lang.startsWith("fr"));
 
-        if(voice){
-            speech.voice = voice;
-        }
+
+if(voice){
+    speech.voice = voice;
+}
 
 
-            raniseStartTalking();
-
-        speechEngine.speak(speech);
+raniseStartTalking();
 
 
-
-      speech.onend = ()=>{
+speech.onend = ()=>{
 
     raniseStopTalking();
 
 };
+
+
+speech.onerror = ()=>{
+
+    raniseStopTalking();
+
+};
+
+
+speechEngine.speak(speech);
+
     }
 
 
