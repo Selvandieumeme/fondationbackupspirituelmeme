@@ -3507,3 +3507,78 @@ function speakProfessorIA(message){
     }
 
 }
+
+
+
+
+
+
+
+
+
+
+
+// =====================================
+// RANISE MOISE AVATAR TALKING ENGINE
+// =====================================
+
+let raniseTalkingTimer = null;
+
+function raniseStartTalking(){
+
+    const img = document.querySelector(
+        'img[alt="Ranise MOISE Professeure IA"]'
+    );
+
+    if(!img){
+        return;
+    }
+
+
+    let speaking = false;
+
+
+    clearInterval(raniseTalkingTimer);
+
+
+    raniseTalkingTimer = setInterval(()=>{
+
+
+        speaking = !speaking;
+
+
+        if(speaking){
+
+            img.src = "ranise-moise-speaking-smile.png";
+
+        }else{
+
+            img.src = "ranise-moise-smile.png";
+
+        }
+
+
+    },180);
+
+
+}
+
+
+
+function raniseStopTalking(){
+
+    clearInterval(raniseTalkingTimer);
+
+
+    const img = document.querySelector(
+        'img[alt="Ranise MOISE Professeure IA"]'
+    );
+
+
+    if(img){
+
+        img.src = "ranise-moise-smile.png";
+
+    }
+
+}
