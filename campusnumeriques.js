@@ -3401,12 +3401,22 @@ function renderChapter1ProfessorIA(){
         <div class="chapter1-ia-card">
 
 
-            <img
 
-            src="ranise-moise-smile.png"
+<img
 
-            alt="Ranise MOISE Professeure IA">
+id="chapterProfessorAvatar"
 
+src="ranise-moise-smile.png"
+
+alt="Ranise MOISE Professeure IA">
+
+
+
+
+
+
+
+            
 
 
             <h3>
