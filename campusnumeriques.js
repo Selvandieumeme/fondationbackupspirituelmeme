@@ -3563,9 +3563,14 @@ let raniseTalkingTimer = null;
 
 function raniseStartTalking(){
 
-    const img = document.querySelector(
-        'img[alt="Ranise MOISE Professeure IA"]'
-    );
+
+
+const img = document.getElementById(
+    "chapterProfessorAvatar"
+);
+
+
+ 
 
     if(!img){
         return;
@@ -3607,9 +3612,14 @@ function raniseStopTalking(){
     clearInterval(raniseTalkingTimer);
 
 
-    const img = document.querySelector(
-        'img[alt="Ranise MOISE Professeure IA"]'
-    );
+
+const img = document.getElementById(
+    "chapterProfessorAvatar"
+);
+
+
+
+
 
 
     if(img){
