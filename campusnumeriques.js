@@ -816,7 +816,12 @@ chapter1Audio.onerror = ()=>{
 };
 
 
-chapter1Audio.play();
+
+setTimeout(()=>{
+
+    chapter1Audio.play();
+
+},200);
 
 
     },50);
