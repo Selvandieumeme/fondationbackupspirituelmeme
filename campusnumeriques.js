@@ -3544,9 +3544,21 @@ function renderChapter1ProfessorIA(){
             Professor:
         </strong>
 
-        <span>
-            Bonjour, je suis Ranise MOISE, votre Professeure IA CampusNumérique. Je suis prête à vous accompagner dans votre formation Microsoft Word 2007. Posez-moi vos questions, je suis là pour vous aider.
-        </span>
+       <span>
+    Bonjour, je suis Ranise MOISE, votre Professeure IA CampusNumérique.
+
+    Je suis ravie de vous accueillir dans votre espace d’apprentissage dédié à Microsoft Word 2007.
+
+    Ma mission est de vous accompagner tout au long de votre formation, étape par étape, en vous expliquant les concepts importants, en répondant à vos questions et en vous aidant à développer vos compétences en bureautique.
+
+    Vous pouvez me demander des explications détaillées, des exemples pratiques, des conseils ou de l’aide pour réussir vos exercices.
+
+    Je m’adapte à votre niveau afin de vous proposer un accompagnement personnalisé et de vous permettre de progresser avec confiance.
+
+    Mon objectif est de vous aider à maîtriser Microsoft Word 2007 et à devenir plus autonome dans l’utilisation des outils informatiques.
+
+    Bienvenue dans votre formation avec CampusNumérique. Je suis prête à vous accompagner. Commençons ensemble.
+</span>    
 
     </div>
 
