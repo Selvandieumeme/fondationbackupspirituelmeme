@@ -3960,9 +3960,13 @@ async function talkToAIProfessorSend(){
         );
 
 
-        const fallback =
-            "I am ready to help you learn Microsoft Word 2007. Please make sure the AI Professor service is connected, then ask your question again.";
 
+const fallback =
+    "Je suis prête à vous aider à apprendre Microsoft Word 2007. Veuillez vérifier que le service Professeur IA est connecté, puis posez votre question.";
+
+
+
+        
 
         talkToAIProfessorAddMessage(
             "professor",
