@@ -3185,3 +3185,537 @@ body.dark-mode .premium-table td{
 
 }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* =====================================
+   TALK TO AI PROFESSOR
+   CHAPTER 1 ISOLATED UI
+===================================== */
+
+.chapter1-ia-card{
+
+    width:100%;
+    max-width:720px;
+
+    margin:0 auto 18px;
+
+    padding:14px;
+
+    box-sizing:border-box;
+
+    border-radius:16px;
+
+    background:#ffffff;
+
+    border:1px solid #dbe3ef;
+
+    box-shadow:0 5px 18px rgba(0,0,0,.08);
+
+}
+
+
+.chapter1-ia-topbar{
+
+    width:100%;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:space-between;
+
+    gap:10px;
+
+}
+
+
+.chapter1-ia-title{
+
+    min-width:0;
+
+    display:flex;
+
+    align-items:center;
+
+    gap:9px;
+
+}
+
+
+.chapter1-ia-icon{
+
+    font-size:28px;
+
+    flex:none;
+
+}
+
+
+.chapter1-ia-title h3{
+
+    margin:0;
+
+    font-size:16px;
+
+    line-height:1.2;
+
+}
+
+
+.chapter1-ia-title span{
+
+    display:block;
+
+    margin-top:2px;
+
+    font-size:12px;
+
+    opacity:.7;
+
+}
+
+
+.talk-to-ai-professor-btn{
+
+    flex:none;
+
+    border:0;
+
+    border-radius:999px;
+
+    padding:8px 12px;
+
+    background:#2563eb;
+
+    color:#ffffff;
+
+    font-size:13px;
+
+    font-weight:700;
+
+    cursor:pointer;
+
+    white-space:nowrap;
+
+}
+
+
+.talk-to-ai-professor-btn:active{
+
+    transform:scale(.97);
+
+}
+
+
+.chapter-professor-avatar{
+
+    display:block;
+
+    width:120px;
+
+    height:120px;
+
+    max-width:100%;
+
+    object-fit:contain;
+
+    margin:12px auto 8px;
+
+}
+
+
+.chapter1-ia-role{
+
+    margin:4px 0;
+
+    text-align:center;
+
+    font-size:13px;
+
+    font-weight:700;
+
+}
+
+
+.chapter1-ia-welcome{
+
+    margin:5px auto 0;
+
+    max-width:600px;
+
+    text-align:center;
+
+    font-size:13px;
+
+    line-height:1.45;
+
+}
+
+
+.talk-to-ai-professor-panel{
+
+    width:100%;
+
+    margin-top:12px;
+
+    padding:10px;
+
+    box-sizing:border-box;
+
+    border-radius:12px;
+
+    background:#f7f9fc;
+
+    border:1px solid #dbe3ef;
+
+}
+
+
+.talk-ai-header{
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:space-between;
+
+    gap:8px;
+
+    margin-bottom:8px;
+
+    font-size:13px;
+
+}
+
+
+.talk-ai-close-btn{
+
+    width:28px;
+
+    height:28px;
+
+    padding:0;
+
+    border:0;
+
+    border-radius:50%;
+
+    background:#e5e7eb;
+
+    cursor:pointer;
+
+    font-size:15px;
+
+}
+
+
+.talk-ai-conversation{
+
+    width:100%;
+
+    max-height:180px;
+
+    overflow-y:auto;
+
+    box-sizing:border-box;
+
+    padding:5px;
+
+    margin-bottom:8px;
+
+}
+
+
+.talk-ai-message{
+
+    display:flex;
+
+    flex-direction:column;
+
+    gap:3px;
+
+    max-width:92%;
+
+    margin-bottom:7px;
+
+    padding:8px 10px;
+
+    border-radius:10px;
+
+    font-size:13px;
+
+    line-height:1.4;
+
+    overflow-wrap:anywhere;
+
+}
+
+
+.professor-message{
+
+    margin-right:auto;
+
+    background:#e8f0ff;
+
+}
+
+
+.student-message{
+
+    margin-left:auto;
+
+    background:#e8e8e8;
+
+}
+
+
+.talk-ai-message strong{
+
+    font-size:11px;
+
+}
+
+
+.talk-ai-input-row{
+
+    display:flex;
+
+    align-items:flex-end;
+
+    gap:6px;
+
+}
+
+
+.talk-ai-input{
+
+    flex:1;
+
+    min-width:0;
+
+    min-height:38px;
+
+    max-height:90px;
+
+    resize:none;
+
+    box-sizing:border-box;
+
+    padding:9px 10px;
+
+    border:1px solid #cbd5e1;
+
+    border-radius:10px;
+
+    background:#ffffff;
+
+    font-family:inherit;
+
+    font-size:13px;
+
+    outline:none;
+
+}
+
+
+.talk-ai-input:focus{
+
+    border-color:#2563eb;
+
+}
+
+
+.talk-ai-send-btn{
+
+    flex:none;
+
+    width:40px;
+
+    height:40px;
+
+    border:0;
+
+    border-radius:10px;
+
+    background:#2563eb;
+
+    color:#ffffff;
+
+    cursor:pointer;
+
+    font-size:17px;
+
+}
+
+
+.talk-ai-actions{
+
+    display:flex;
+
+    gap:6px;
+
+    margin-top:7px;
+
+}
+
+
+.talk-ai-action-btn{
+
+    flex:1;
+
+    min-width:0;
+
+    padding:7px 8px;
+
+    border:1px solid #cbd5e1;
+
+    border-radius:9px;
+
+    background:#ffffff;
+
+    font-size:12px;
+
+    cursor:pointer;
+
+    white-space:nowrap;
+
+}
+
+
+.talk-ai-status{
+
+    min-height:15px;
+
+    margin-top:6px;
+
+    text-align:center;
+
+    font-size:11px;
+
+    opacity:.65;
+
+}
+
+
+@media(max-width:480px){
+
+    .chapter1-ia-card{
+
+        padding:10px;
+
+        border-radius:13px;
+
+    }
+
+
+    .chapter1-ia-topbar{
+
+        gap:6px;
+
+    }
+
+
+    .chapter1-ia-title h3{
+
+        font-size:14px;
+
+    }
+
+
+    .chapter1-ia-title span{
+
+        font-size:10px;
+
+    }
+
+
+    .talk-to-ai-professor-btn{
+
+        padding:7px 9px;
+
+        font-size:11px;
+
+    }
+
+
+    .chapter-professor-avatar{
+
+        width:96px;
+
+        height:96px;
+
+        margin-top:9px;
+
+    }
+
+
+    .chapter1-ia-role{
+
+        font-size:11px;
+
+    }
+
+
+    .chapter1-ia-welcome{
+
+        font-size:11px;
+
+    }
+
+
+    .talk-to-ai-professor-panel{
+
+        padding:8px;
+
+    }
+
+
+    .talk-ai-conversation{
+
+        max-height:150px;
+
+    }
+
+
+    .talk-ai-message{
+
+        font-size:12px;
+
+    }
+
+
+    .talk-ai-action-btn{
+
+        font-size:11px;
+
+        padding:7px 4px;
+
+    }
+
+}
