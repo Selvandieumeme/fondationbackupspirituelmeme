@@ -787,11 +787,36 @@ if(chapterId === "chapitre1"){
         renderChapter1ProfessorIA();
 
 
-        speakProfessorIA(
+const chapter1Audio = new Audio(
+    "message-bienvenue-chapitre1.mp3"
+);
 
-            "Bonjour et bienvenue dans le Chapitre 1 de la formation Microsoft Word deux mille sept. Je suis Ranise MOISE, votre professeure. Nous allons apprendre ensemble, étape par étape."
 
-        );
+chapter1Audio.volume = 1;
+
+
+chapter1Audio.onplay = ()=>{
+
+    raniseStartTalking();
+
+};
+
+
+chapter1Audio.onended = ()=>{
+
+    raniseStopTalking();
+
+};
+
+
+chapter1Audio.onerror = ()=>{
+
+    raniseStopTalking();
+
+};
+
+
+chapter1Audio.play();
 
 
     },50);
