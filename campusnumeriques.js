@@ -3531,25 +3531,28 @@ function renderChapter1ProfessorIA(){
 
 
 
-                <div
-                    id="talkAIConversation"
-                    class="talk-ai-conversation"
-                    aria-live="polite"
-                >
 
-                    <div class="talk-ai-message professor-message">
+<div
+    id="talkAIConversation"
+    class="talk-ai-conversation"
+    aria-live="polite"
+>
 
-                        <strong>
-                            Professor:
-                        </strong>
+    <div class="talk-ai-message professor-message">
 
-                        <span>
-                            How can I help you with Microsoft Word 2007?
-                        </span>
+        <strong>
+            Professor:
+        </strong>
 
-                    </div>
+        <span>
+            Bonjour, je suis Ranise MOISE, votre Professeure IA CampusNumérique. Je suis prête à vous accompagner dans votre formation Microsoft Word 2007. Posez-moi vos questions, je suis là pour vous aider.
+        </span>
 
-                </div>
+    </div>
+
+</div>
+
+
 
 
 
