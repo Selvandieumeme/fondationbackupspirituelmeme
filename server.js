@@ -592,6 +592,205 @@ ${language || 'fr-FR'}
 
 
 
+// =====================================
+// CAMPUS AI PROFESSOR
+// ELEVENLABS FRENCH TTS ENGINE
+// ISOLATED MODULE
+// =====================================
+
+app.post(
+    '/api/ai-professor/voice',
+    async (req, res) => {
+
+        try {
+
+            const text =
+                req.body &&
+                typeof req.body.text === "string"
+                    ? req.body.text.trim()
+                    : "";
+
+
+
+            if (!text) {
+
+                return res.status(400).json({
+
+                    error:
+                        "ELEVENLABS_TEXT_EMPTY"
+
+                });
+
+            }
+
+
+
+            const apiKey =
+                process.env.ELEVENLABS_API_KEY;
+
+
+
+            const voiceId =
+                process.env.ELEVENLABS_VOICE_ID;
+
+
+
+            const modelId =
+                process.env.ELEVENLABS_MODEL_ID ||
+                "eleven_multilingual_v2";
+
+
+
+            if (!apiKey) {
+
+                console.error(
+                    "ELEVENLABS_API_KEY_MISSING"
+                );
+
+                return res.status(500).json({
+
+                    error:
+                        "ELEVENLABS_API_KEY_MISSING"
+
+                });
+
+            }
+
+
+
+            if (!voiceId) {
+
+                console.error(
+                    "ELEVENLABS_VOICE_ID_MISSING"
+                );
+
+                return res.status(500).json({
+
+                    error:
+                        "ELEVENLABS_VOICE_ID_MISSING"
+
+                });
+
+            }
+
+
+
+            const elevenLabsResponse =
+                await axios.post(
+
+                    `https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`,
+
+                    {
+
+                        text: text,
+
+                        model_id:
+                            modelId
+
+                    },
+
+                    {
+
+                        headers: {
+
+                            "xi-api-key":
+                                apiKey,
+
+                            "Content-Type":
+                                "application/json",
+
+                            "Accept":
+                                "audio/mpeg"
+
+                        },
+
+                        params: {
+
+                            output_format:
+                                "mp3_44100_128"
+
+                        },
+
+                        responseType:
+                            "arraybuffer"
+
+                    }
+
+                );
+
+
+
+            const audioBase64 =
+                Buffer
+                    .from(
+                        elevenLabsResponse.data
+                    )
+                    .toString(
+                        "base64"
+                    );
+
+
+
+            return res.json({
+
+                audio:
+                    audioBase64,
+
+                mimeType:
+                    "audio/mpeg"
+
+            });
+
+
+        } catch (error) {
+
+
+            console.error(
+
+                "FOBAS ELEVENLABS TTS ERROR:",
+
+                error.response?.data
+                    ? Buffer
+                        .from(
+                            error.response.data
+                        )
+                        .toString("utf8")
+                    : error.message
+
+            );
+
+
+
+            return res.status(500).json({
+
+                error:
+                    "ElevenLabs TTS service unavailable."
+
+            });
+
+        }
+
+    }
+);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
