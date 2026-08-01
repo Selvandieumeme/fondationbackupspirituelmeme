@@ -4377,7 +4377,74 @@ window.CampusAIProfessor = {
 
 
 
+// =====================================
+// CAMPUS AI PROFESSOR
+// REQUEST BRIDGE
+// CONNECTS TALK UI TO GROQ BRIDGE
+// ISOLATED MODULE
+// =====================================
 
+async function requestCampusAIProfessor(message){
+
+    if(
+        !message ||
+        typeof message !== "string" ||
+        !message.trim()
+    ){
+
+        throw new Error(
+            "AI_MESSAGE_EMPTY"
+        );
+
+    }
+
+
+    if(
+        !window.CampusAIProfessor ||
+        typeof window.CampusAIProfessor.ask !== "function"
+    ){
+
+        throw new Error(
+            "CAMPUS_AI_PROFESSOR_BRIDGE_NOT_AVAILABLE"
+        );
+
+    }
+
+
+    const response =
+        await window.CampusAIProfessor.ask({
+
+            message:
+                message.trim(),
+
+            course:
+                "Microsoft Word 2007",
+
+            chapter:
+                "Chapitre 1",
+
+            language:
+                "fr-FR"
+
+        });
+
+
+    if(
+        !response ||
+        typeof response !== "string" ||
+        !response.trim()
+    ){
+
+        throw new Error(
+            "AI_EMPTY_RESPONSE"
+        );
+
+    }
+
+
+    return response.trim();
+
+}
 
 
 
