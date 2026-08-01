@@ -3380,10 +3380,9 @@ document.addEventListener(
 
 
 
-
-
 // =====================================
 // CHAPITRE 1 - PROFESSEURE IA ASSISTANT
+// TALK TO AI PROFESSOR
 // ISOLATED MODULE
 // =====================================
 
@@ -3391,10 +3390,9 @@ function renderChapter1ProfessorIA(){
 
 
     const campusContent =
-
-    document.getElementById(
-        "campusContent"
-    );
+        document.getElementById(
+            "campusContent"
+        );
 
 
     if(!campusContent){
@@ -3406,10 +3404,9 @@ function renderChapter1ProfessorIA(){
 
 
     const existingIA =
-
-    document.getElementById(
-        "chapter1ProfessorIA"
-    );
+        document.getElementById(
+            "chapter1ProfessorIA"
+        );
 
 
     if(existingIA){
@@ -3421,58 +3418,220 @@ function renderChapter1ProfessorIA(){
 
 
     const iaBox =
-
-    document.createElement(
-        "div"
-    );
+        document.createElement(
+            "div"
+        );
 
 
     iaBox.id =
-    "chapter1ProfessorIA";
+        "chapter1ProfessorIA";
 
 
 
     iaBox.innerHTML = `
 
-
         <div class="chapter1-ia-card">
 
 
+            <div class="chapter1-ia-topbar">
 
-<img
+                <div class="chapter1-ia-title">
 
-id="chapterProfessorAvatar"
+                    <span class="chapter1-ia-icon">
+                        👩‍🏫
+                    </span>
 
-src="ranise-moise-smile.png"
+                    <div>
 
-alt="Ranise MOISE Professeure IA">
+                        <h3>
+                            Ranise MOISE
+                        </h3>
 
+                        <span>
+                            Professeure IA
+                        </span>
 
+                    </div>
 
-
-
-
-
-            
-
-
-            <h3>
-                👩‍🏫 Ranise MOISE
-            </h3>
+                </div>
 
 
-            <p>
+
+                <button
+                    type="button"
+                    id="talkToAIProfessorBtn"
+                    class="talk-to-ai-professor-btn"
+                    aria-expanded="false"
+                    aria-controls="talkToAIProfessorPanel"
+                >
+
+                    🎤 Talk
+
+                </button>
+
+            </div>
+
+
+
+            <img
+
+                id="chapterProfessorAvatar"
+
+                src="ranise-moise-smile.png"
+
+                alt="Ranise MOISE Professeure IA"
+
+                class="chapter-professor-avatar"
+
+            >
+
+
+
+            <p class="chapter1-ia-role">
+
                 Professeure CampusNumérique FOBAS
+
             </p>
 
 
-            <p>
+
+            <p class="chapter1-ia-welcome">
+
                 Bienvenue dans le Chapitre 1 de la formation Microsoft Word 2007.
+
             </p>
+
+
+
+            <div
+                id="talkToAIProfessorPanel"
+                class="talk-to-ai-professor-panel"
+                hidden
+            >
+
+
+                <div class="talk-ai-header">
+
+                    <strong>
+                        🎓 Talk to AI Professor
+                    </strong>
+
+                    <button
+                        type="button"
+                        id="closeTalkToAIProfessorBtn"
+                        class="talk-ai-close-btn"
+                        aria-label="Close"
+                    >
+
+                        ✕
+
+                    </button>
+
+                </div>
+
+
+
+                <div
+                    id="talkAIConversation"
+                    class="talk-ai-conversation"
+                    aria-live="polite"
+                >
+
+                    <div class="talk-ai-message professor-message">
+
+                        <strong>
+                            Professor:
+                        </strong>
+
+                        <span>
+                            How can I help you with Microsoft Word 2007?
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+
+                <div class="talk-ai-input-row">
+
+
+                    <textarea
+
+                        id="talkAIProfessorInput"
+
+                        class="talk-ai-input"
+
+                        rows="1"
+
+                        placeholder="Type your question..."
+
+                        autocomplete="off"
+
+                    ></textarea>
+
+
+
+                    <button
+                        type="button"
+                        id="talkAISendBtn"
+                        class="talk-ai-send-btn"
+                        aria-label="Send"
+                    >
+
+                        ➤
+
+                    </button>
+
+
+                </div>
+
+
+
+                <div class="talk-ai-actions">
+
+
+                    <button
+                        type="button"
+                        id="talkAISpeakBtn"
+                        class="talk-ai-action-btn"
+                    >
+
+                        🎤 Speak
+
+                    </button>
+
+
+
+                    <button
+                        type="button"
+                        id="talkAIProfessorVoiceBtn"
+                        class="talk-ai-action-btn"
+                    >
+
+                        🔊 Professor
+
+                    </button>
+
+
+                </div>
+
+
+
+                <div
+                    id="talkAIStatus"
+                    class="talk-ai-status"
+                >
+
+                    Ready
+
+                </div>
+
+
+            </div>
 
 
         </div>
-
 
     `;
 
@@ -3485,7 +3644,731 @@ alt="Ranise MOISE Professeure IA">
     );
 
 
+
+    initializeTalkToAIProfessor();
+
 }
+
+
+
+
+
+
+
+// =====================================
+// TALK TO AI PROFESSOR
+// INITIALIZATION
+// =====================================
+
+function initializeTalkToAIProfessor(){
+
+
+    const talkButton =
+        document.getElementById(
+            "talkToAIProfessorBtn"
+        );
+
+
+    const closeButton =
+        document.getElementById(
+            "closeTalkToAIProfessorBtn"
+        );
+
+
+    const sendButton =
+        document.getElementById(
+            "talkAISendBtn"
+        );
+
+
+    const speakButton =
+        document.getElementById(
+            "talkAISpeakBtn"
+        );
+
+
+    const professorVoiceButton =
+        document.getElementById(
+            "talkAIProfessorVoiceBtn"
+        );
+
+
+    const input =
+        document.getElementById(
+            "talkAIProfessorInput"
+        );
+
+
+
+    if(!talkButton || !closeButton || !sendButton || !input){
+
+        return;
+
+    }
+
+
+
+    talkButton.onclick = function(){
+
+
+        const panel =
+            document.getElementById(
+                "talkToAIProfessorPanel"
+            );
+
+
+        if(!panel){
+
+            return;
+
+        }
+
+
+        const isOpen =
+            !panel.hidden;
+
+
+        panel.hidden =
+            isOpen;
+
+
+        talkButton.setAttribute(
+            "aria-expanded",
+            String(!isOpen)
+        );
+
+
+        if(!isOpen){
+
+            setTimeout(()=>{
+
+                input.focus();
+
+            },100);
+
+        }
+
+    };
+
+
+
+    closeButton.onclick = function(){
+
+
+        const panel =
+            document.getElementById(
+                "talkToAIProfessorPanel"
+            );
+
+
+        if(panel){
+
+            panel.hidden = true;
+
+        }
+
+
+        talkButton.setAttribute(
+            "aria-expanded",
+            "false"
+        );
+
+    };
+
+
+
+    sendButton.onclick = function(){
+
+        talkToAIProfessorSend();
+
+    };
+
+
+
+    input.addEventListener(
+        "keydown",
+        function(event){
+
+            if(
+                event.key === "Enter" &&
+                !event.shiftKey
+            ){
+
+                event.preventDefault();
+
+                talkToAIProfessorSend();
+
+            }
+
+        }
+    );
+
+
+
+    if(speakButton){
+
+        speakButton.onclick = function(){
+
+            talkToAIProfessorStartListening();
+
+        };
+
+    }
+
+
+
+    if(professorVoiceButton){
+
+        professorVoiceButton.onclick = function(){
+
+            const lastProfessorMessage =
+                window.campusLastProfessorResponse;
+
+
+            if(
+                lastProfessorMessage &&
+                typeof speakProfessorIA === "function"
+            ){
+
+                speakProfessorIA(
+                    lastProfessorMessage
+                );
+
+            }
+
+        };
+
+    }
+
+}
+
+
+
+
+
+
+
+// =====================================
+// TALK TO AI PROFESSOR
+// SEND TEXT
+// =====================================
+
+async function talkToAIProfessorSend(){
+
+
+    const input =
+        document.getElementById(
+            "talkAIProfessorInput"
+        );
+
+
+    if(!input){
+
+        return;
+
+    }
+
+
+
+    const message =
+        input.value.trim();
+
+
+    if(!message){
+
+        return;
+
+    }
+
+
+
+    input.value = "";
+
+
+
+    talkToAIProfessorAddMessage(
+        "student",
+        message
+    );
+
+
+
+    talkToAIProfessorSetStatus(
+        "Professor is thinking..."
+    );
+
+
+
+    try{
+
+
+        const response =
+            await requestCampusAIProfessor(
+                message
+            );
+
+
+
+        if(
+            !response ||
+            !response.trim()
+        ){
+
+            throw new Error(
+                "EMPTY_AI_RESPONSE"
+            );
+
+        }
+
+
+
+        window.campusLastProfessorResponse =
+            response;
+
+
+
+        talkToAIProfessorAddMessage(
+            "professor",
+            response
+        );
+
+
+
+        talkToAIProfessorSetStatus(
+            "Professor ready"
+        );
+
+
+
+        if(
+            typeof speakProfessorIA === "function"
+        ){
+
+            speakProfessorIA(
+                response
+            );
+
+        }
+
+
+    }catch(error){
+
+
+        console.error(
+            "Talk to AI Professor:",
+            error
+        );
+
+
+        const fallback =
+            "I am ready to help you learn Microsoft Word 2007. Please make sure the AI Professor service is connected, then ask your question again.";
+
+
+        talkToAIProfessorAddMessage(
+            "professor",
+            fallback
+        );
+
+
+        talkToAIProfessorSetStatus(
+            "AI connection unavailable"
+        );
+
+    }
+
+}
+
+
+
+
+
+
+
+// =====================================
+// TALK TO AI PROFESSOR
+// MESSAGE RENDERER
+// =====================================
+
+function talkToAIProfessorAddMessage(
+    sender,
+    message
+){
+
+
+    const conversation =
+        document.getElementById(
+            "talkAIConversation"
+        );
+
+
+    if(!conversation){
+
+        return;
+
+    }
+
+
+
+    const messageBox =
+        document.createElement(
+            "div"
+        );
+
+
+    messageBox.className =
+        sender === "student"
+        ? "talk-ai-message student-message"
+        : "talk-ai-message professor-message";
+
+
+
+    const label =
+        sender === "student"
+        ? "You:"
+        : "Professor:";
+
+
+
+    const strong =
+        document.createElement(
+            "strong"
+        );
+
+
+    strong.textContent =
+        label;
+
+
+
+    const text =
+        document.createElement(
+            "span"
+        );
+
+
+    text.textContent =
+        message;
+
+
+
+    messageBox.appendChild(
+        strong
+    );
+
+
+    messageBox.appendChild(
+        text
+    );
+
+
+
+    conversation.appendChild(
+        messageBox
+    );
+
+
+
+    conversation.scrollTop =
+        conversation.scrollHeight;
+
+}
+
+
+
+
+
+
+
+// =====================================
+// TALK TO AI PROFESSOR
+// STATUS
+// =====================================
+
+function talkToAIProfessorSetStatus(
+    message
+){
+
+
+    const status =
+        document.getElementById(
+            "talkAIStatus"
+        );
+
+
+    if(status){
+
+        status.textContent =
+            message;
+
+    }
+
+}
+
+
+
+
+
+
+
+// =====================================
+// TALK TO AI PROFESSOR
+// MICROPHONE / SPEECH TO TEXT
+// =====================================
+
+let campusProfessorRecognition = null;
+
+
+
+function talkToAIProfessorStartListening(){
+
+
+    const input =
+        document.getElementById(
+            "talkAIProfessorInput"
+        );
+
+
+    const speakButton =
+        document.getElementById(
+            "talkAISpeakBtn"
+        );
+
+
+    if(!input){
+
+        return;
+
+    }
+
+
+
+    const SpeechRecognition =
+        window.SpeechRecognition ||
+        window.webkitSpeechRecognition;
+
+
+
+    if(!SpeechRecognition){
+
+        talkToAIProfessorSetStatus(
+            "Speech recognition is not supported on this browser."
+        );
+
+        return;
+
+    }
+
+
+
+    if(campusProfessorRecognition){
+
+        try{
+
+            campusProfessorRecognition.stop();
+
+        }catch(error){}
+
+    }
+
+
+
+    campusProfessorRecognition =
+        new SpeechRecognition();
+
+
+
+    campusProfessorRecognition.lang =
+        "fr-FR";
+
+
+    campusProfessorRecognition.continuous =
+        false;
+
+
+    campusProfessorRecognition.interimResults =
+        false;
+
+
+    campusProfessorRecognition.maxAlternatives =
+        1;
+
+
+
+    if(speakButton){
+
+        speakButton.textContent =
+            "🎤 Listening...";
+
+    }
+
+
+
+    talkToAIProfessorSetStatus(
+        "Listening..."
+    );
+
+
+
+    campusProfessorRecognition.onresult =
+        function(event){
+
+
+            const transcript =
+                event.results[0][0].transcript;
+
+
+            input.value =
+                transcript;
+
+
+
+            talkToAIProfessorSetStatus(
+                "Message received"
+            );
+
+
+        };
+
+
+
+    campusProfessorRecognition.onerror =
+        function(event){
+
+
+            talkToAIProfessorSetStatus(
+                "Microphone error: " +
+                event.error
+            );
+
+
+        };
+
+
+
+    campusProfessorRecognition.onend =
+        function(){
+
+
+            if(speakButton){
+
+                speakButton.textContent =
+                    "🎤 Speak";
+
+            }
+
+
+        };
+
+
+
+    try{
+
+        campusProfessorRecognition.start();
+
+    }catch(error){
+
+        talkToAIProfessorSetStatus(
+            "Microphone could not start."
+        );
+
+    }
+
+}
+
+
+
+
+
+
+
+// =====================================
+// CAMPUS AI PROFESSOR
+// AI REQUEST BRIDGE
+// =====================================
+
+async function requestCampusAIProfessor(
+    message
+){
+
+
+    /*
+       IMPORTANT:
+
+       This is the only bridge between
+       Talk to AI Professor and the real
+       AI service.
+
+       The UI, microphone, conversation,
+       avatar and voice do NOT depend on
+       MP3 files.
+
+       Your real AI backend/service must
+       expose:
+
+       window.CampusAIProfessor.ask(message)
+
+    */
+
+
+
+    if(
+        window.CampusAIProfessor &&
+        typeof window.CampusAIProfessor.ask === "function"
+    ){
+
+        const result =
+            await window.CampusAIProfessor.ask({
+
+                message: message,
+
+                course:
+                    "Microsoft Word 2007",
+
+                chapter:
+                    "Chapter 1",
+
+                language:
+                    "fr-FR"
+
+            });
+
+
+
+        if(
+            typeof result === "string"
+        ){
+
+            return result;
+
+        }
+
+
+
+        if(
+            result &&
+            typeof result.text === "string"
+        ){
+
+            return result.text;
+
+        }
+
+    }
+
+
+
+    throw new Error(
+        "AI_PROFESSOR_SERVICE_NOT_CONNECTED"
+    );
+
+}
+
+
+
+
+
+
+
 
 
 
