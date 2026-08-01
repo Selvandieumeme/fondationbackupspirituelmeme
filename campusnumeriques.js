@@ -4302,85 +4302,70 @@ function talkToAIProfessorStartListening(){
 
 // =====================================
 // CAMPUS AI PROFESSOR
-// AI REQUEST BRIDGE
+// FOBAS GROQ BRIDGE
 // =====================================
 
-async function requestCampusAIProfessor(
-    message
-){
+window.CampusAIProfessor = {
 
+    async ask(data) {
 
-    /*
-       IMPORTANT:
+        const response = await fetch(
+            'https://api.fondationbackupspirituel.com/api/ai-professor',
+            {
 
-       This is the only bridge between
-       Talk to AI Professor and the real
-       AI service.
+                method: 'POST',
 
-       The UI, microphone, conversation,
-       avatar and voice do NOT depend on
-       MP3 files.
+                headers: {
 
-       Your real AI backend/service must
-       expose:
+                    'Content-Type':
+                        'application/json'
 
-       window.CampusAIProfessor.ask(message)
+                },
 
-    */
+                body: JSON.stringify({
 
+                    message:
+                        data.message,
 
+                    course:
+                        data.course,
 
-    if(
-        window.CampusAIProfessor &&
-        typeof window.CampusAIProfessor.ask === "function"
-    ){
+                    chapter:
+                        data.chapter,
+
+                    language:
+                        data.language
+
+                })
+
+            }
+        );
+
 
         const result =
-            await window.CampusAIProfessor.ask({
-
-                message: message,
-
-                course:
-                    "Microsoft Word 2007",
-
-                chapter:
-                    "Chapter 1",
-
-                language:
-                    "fr-FR"
-
-            });
+            await response.json();
 
 
+        if (!response.ok) {
 
-        if(
-            typeof result === "string"
-        ){
+            throw new Error(
 
-            return result;
+                result.error ||
+                'AI Professor request failed.'
+
+            );
 
         }
 
 
-
-        if(
-            result &&
-            typeof result.text === "string"
-        ){
-
-            return result.text;
-
-        }
+        return result.text;
 
     }
 
+};
 
 
-    throw new Error(
-        "AI_PROFESSOR_SERVICE_NOT_CONNECTED"
-    );
 
-}
 
 
 
