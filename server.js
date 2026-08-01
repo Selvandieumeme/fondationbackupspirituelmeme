@@ -413,6 +413,214 @@ app.use(express.json());
 
 
 
+
+
+// =====================================
+// FOBAS AI PROFESSOR - GROQ ENGINE
+// =====================================
+
+app.post('/api/ai-professor', async (req, res) => {
+
+    try {
+
+        const {
+            message,
+            course,
+            chapter,
+            language
+        } = req.body;
+
+
+        if (
+            !message ||
+            typeof message !== 'string' ||
+            !message.trim()
+        ) {
+
+            return res.status(400).json({
+
+                error: 'Message is required.'
+
+            });
+
+        }
+
+
+        const aiResponse = await axios.post(
+
+            'https://api.groq.com/openai/v1/chat/completions',
+
+            {
+
+                model: 'openai/gpt-oss-120b',
+
+                messages: [
+
+                    {
+
+                        role: 'system',
+
+                        content: `
+
+Tu es Ranise MOISE, une Professeure IA intelligente et pédagogique de CampusNumérique FOBAS.
+
+Tu accompagnes les étudiants dans leur formation informatique et bureautique.
+
+Tu dois répondre principalement en français.
+
+Tu dois expliquer les notions de manière claire, progressive et adaptée au niveau de l'étudiant.
+
+Tu ne dois pas simplement donner une réponse courte lorsque l'étudiant demande une explication.
+
+Tu dois utiliser des exemples pratiques lorsque cela peut aider.
+
+Tu peux accompagner l'étudiant étape par étape dans Microsoft Word 2007.
+
+Tu peux répondre aux questions sur les outils, menus, commandes, documents, mise en forme, tableaux, images, paragraphes, pages, impression et autres notions bureautiques.
+
+Si l'étudiant ne comprend pas une notion, explique-la d'une autre manière avec un exemple simple.
+
+Tu dois te comporter comme une véritable professeure numérique patiente, professionnelle, encourageante et pédagogique.
+
+Formation actuelle :
+${course || 'Microsoft Word 2007'}
+
+Chapitre actuel :
+${chapter || 'Non précisé'}
+
+Langue demandée :
+${language || 'fr-FR'}
+
+`
+
+                    },
+
+                    {
+
+                        role: 'user',
+
+                        content: message.trim()
+
+                    }
+
+                ],
+
+                temperature: 0.7,
+
+                max_tokens: 1200
+
+            },
+
+            {
+
+                headers: {
+
+                    'Authorization':
+                        `Bearer ${process.env.GROQ_API_KEY}`,
+
+                    'Content-Type':
+                        'application/json'
+
+                }
+
+            }
+
+        );
+
+
+        const professorText =
+            aiResponse.data
+                ?.choices?.[0]
+                ?.message?.content;
+
+
+        if (
+            !professorText ||
+            !professorText.trim()
+        ) {
+
+            return res.status(502).json({
+
+                error:
+                    'The AI Professor returned an empty response.'
+
+            });
+
+        }
+
+
+        return res.json({
+
+            text:
+                professorText.trim()
+
+        });
+
+
+    } catch (error) {
+
+
+        console.error(
+            'FOBAS AI PROFESSOR ERROR:',
+            error.response?.data ||
+            error.message
+        );
+
+
+        return res.status(500).json({
+
+            error:
+                'AI Professor service unavailable.'
+
+        });
+
+    }
+
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 // =====================================
 // 📤 MULTER STORAGE
 // =====================================
