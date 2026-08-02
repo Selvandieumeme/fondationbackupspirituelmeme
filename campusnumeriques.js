@@ -3670,6 +3670,13 @@ function renderChapter1ProfessorIA(){
 
 
 
+
+
+
+
+
+
+
 // =====================================
 // TALK TO AI PROFESSOR
 // INITIALIZATION
@@ -3715,7 +3722,12 @@ function initializeTalkToAIProfessor(){
 
 
 
-    if(!talkButton || !closeButton || !sendButton || !input){
+    if(
+        !talkButton ||
+        !closeButton ||
+        !sendButton ||
+        !input
+    ){
 
         return;
 
@@ -3832,31 +3844,36 @@ function initializeTalkToAIProfessor(){
 
 
 
-if(professorVoiceButton){
+    if(professorVoiceButton){
 
-    professorVoiceButton.onclick = async function(){
+        professorVoiceButton.onclick =
+            async function(){
 
-        const lastProfessorMessage =
-            window.campusLastProfessorResponse;
+                const lastProfessorMessage =
+                    window.campusLastProfessorResponse;
 
 
-        if(
-            lastProfessorMessage &&
-            typeof speakProfessorIAWithElevenLabs ===
-            "function"
-        ){
 
-            await speakProfessorIAWithElevenLabs(
-                lastProfessorMessage
-                );
+                if(
+                    lastProfessorMessage &&
+                    typeof speakProfessorIAWithPiper ===
+                    "function"
+                ){
 
-            }
+                    await speakProfessorIAWithPiper(
+                        lastProfessorMessage
+                    );
 
-        };
+                }
+
+            };
 
     }
 
 }
+
+
+
 
 
 
@@ -3958,15 +3975,16 @@ async function talkToAIProfessorSend(){
 
 
 if(
-    typeof speakProfessorIAWithElevenLabs ===
+    typeof speakProfessorIAWithPiper ===
     "function"
 ){
 
-    await speakProfessorIAWithElevenLabs(
+    await speakProfessorIAWithPiper(
         response
     );
 
 }
+
 
 
 
@@ -4383,16 +4401,11 @@ window.CampusAIProfessor = {
 
 
 
-
-
-
-
-
-
+```js
 // =====================================
 // CAMPUS AI PROFESSOR
-// ELEVENLABS FRENCH VOICE BRIDGE
-// CONNECTS GROQ TEXT TO ELEVENLABS TTS
+// PIPER FRENCH VOICE BRIDGE
+// CONNECTS GROQ TEXT TO PIPER TTS
 // ISOLATED MODULE
 // =====================================
 
@@ -4400,7 +4413,7 @@ let raniseProfessorAudio = null;
 
 
 
-async function speakProfessorIAWithElevenLabs(text){
+async function speakProfessorIAWithPiper(text){
 
     if(
         !text ||
@@ -4411,6 +4424,7 @@ async function speakProfessorIAWithElevenLabs(text){
         return;
 
     }
+
 
 
     try{
@@ -4442,18 +4456,21 @@ async function speakProfessorIAWithElevenLabs(text){
             );
 
 
+
         if(!response.ok){
 
             throw new Error(
-                "ELEVENLABS_TTS_REQUEST_FAILED_" +
+                "PIPER_TTS_REQUEST_FAILED_" +
                 response.status
             );
 
         }
 
 
+
         const result =
             await response.json();
+
 
 
         if(
@@ -4463,15 +4480,17 @@ async function speakProfessorIAWithElevenLabs(text){
         ){
 
             throw new Error(
-                "ELEVENLABS_AUDIO_MISSING"
+                "PIPER_AUDIO_MISSING"
             );
 
         }
 
 
+
         const mimeType =
             result.mimeType ||
-            "audio/mpeg";
+            "audio/wav";
+
 
 
         const binaryString =
@@ -4480,10 +4499,12 @@ async function speakProfessorIAWithElevenLabs(text){
             );
 
 
+
         const bytes =
             new Uint8Array(
                 binaryString.length
             );
+
 
 
         for(
@@ -4498,20 +4519,28 @@ async function speakProfessorIAWithElevenLabs(text){
         }
 
 
+
         const audioBlob =
             new Blob(
+
                 [bytes],
+
                 {
+
                     type:
                         mimeType
+
                 }
+
             );
+
 
 
         const audioUrl =
             URL.createObjectURL(
                 audioBlob
             );
+
 
 
         if(
@@ -4530,14 +4559,17 @@ async function speakProfessorIAWithElevenLabs(text){
         }
 
 
+
         raniseProfessorAudio =
             new Audio(
                 audioUrl
             );
 
 
+
         raniseProfessorAudio.volume =
             1;
+
 
 
         raniseProfessorAudio.onplay =
@@ -4555,6 +4587,7 @@ async function speakProfessorIAWithElevenLabs(text){
             };
 
 
+
         raniseProfessorAudio.onended =
             function(){
 
@@ -4568,11 +4601,13 @@ async function speakProfessorIAWithElevenLabs(text){
                 }
 
 
+
                 URL.revokeObjectURL(
                     audioUrl
                 );
 
             };
+
 
 
         raniseProfessorAudio.onerror =
@@ -4588,6 +4623,7 @@ async function speakProfessorIAWithElevenLabs(text){
                 }
 
 
+
                 URL.revokeObjectURL(
                     audioUrl
                 );
@@ -4595,9 +4631,13 @@ async function speakProfessorIAWithElevenLabs(text){
             };
 
 
+
         await raniseProfessorAudio.play();
 
+
+
     }catch(error){
+
 
         if(
             typeof raniseStopTalking ===
@@ -4609,14 +4649,27 @@ async function speakProfessorIAWithElevenLabs(text){
         }
 
 
+
         console.error(
-            "ElevenLabs French Voice:",
+
+            "Piper French Voice:",
+
             error
+
+        );
+
+
+
+        talkToAIProfessorSetStatus(
+
+            "French voice unavailable."
+
         );
 
     }
 
 }
+```
 
 
 
