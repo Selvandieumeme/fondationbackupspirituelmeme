@@ -3974,20 +3974,17 @@ async function talkToAIProfessorSend(){
 
 
 
+
 if(
     typeof speakProfessorIAWithPiper ===
     "function"
 ){
 
-    await speakProfessorIAWithPiper(
+    speakProfessorIAWithPiper(
         response
     );
 
 }
-
-
-
-
 
 
 
