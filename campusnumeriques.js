@@ -3671,12 +3671,6 @@ function renderChapter1ProfessorIA(){
 
 
 
-
-
-
-
-
-
 // =====================================
 // TALK TO AI PROFESSOR
 // INITIALIZATION
@@ -3856,11 +3850,11 @@ function initializeTalkToAIProfessor(){
 
                 if(
                     lastProfessorMessage &&
-                    typeof speakProfessorIAWithPiper ===
+                    typeof speakProfessorIAWithText2Wav ===
                     "function"
                 ){
 
-                    await speakProfessorIAWithPiper(
+                    await speakProfessorIAWithText2Wav(
                         lastProfessorMessage
                     );
 
