@@ -3955,15 +3955,19 @@ async function talkToAIProfessorSend(){
 
 
 
-        if(
-            typeof speakProfessorIA === "function"
-        ){
 
-            speakProfessorIA(
-                response
-            );
+if(
+    typeof speakProfessorIAWithElevenLabs ===
+    "function"
+){
 
-        }
+    speakProfessorIAWithElevenLabs(
+        response
+    );
+
+}
+
+
 
 
     }catch(error){
