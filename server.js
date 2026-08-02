@@ -662,12 +662,16 @@ app.post(
                         const piper =
                             spawn(
                                 PIPER_EXECUTABLE,
-                                [
-                                    "--model",
-                                    PIPER_MODEL,
-                                    "--output_file",
-                                    "-"
-                                ],
+      
+[
+    "--model",
+    PIPER_MODEL,
+    "--length_scale",
+    "1.20",
+    "--output_file",
+    "-"
+],
+
                                 {
                                     stdio: [
                                         "pipe",
