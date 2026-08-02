@@ -3832,21 +3832,22 @@ function initializeTalkToAIProfessor(){
 
 
 
-    if(professorVoiceButton){
+if(professorVoiceButton){
 
-        professorVoiceButton.onclick = function(){
+    professorVoiceButton.onclick = async function(){
 
-            const lastProfessorMessage =
-                window.campusLastProfessorResponse;
+        const lastProfessorMessage =
+            window.campusLastProfessorResponse;
 
 
-            if(
-                lastProfessorMessage &&
-                typeof speakProfessorIA === "function"
-            ){
+        if(
+            lastProfessorMessage &&
+            typeof speakProfessorIAWithElevenLabs ===
+            "function"
+        ){
 
-                speakProfessorIA(
-                    lastProfessorMessage
+            await speakProfessorIAWithElevenLabs(
+                lastProfessorMessage
                 );
 
             }
