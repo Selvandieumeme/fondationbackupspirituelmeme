@@ -605,19 +605,26 @@ ${language || 'fr-FR'}
 
 
 
-
 // =====================================
 // CAMPUS AI PROFESSOR
-// TEXT2WAV FRENCH TTS ENGINE
-// NODE.JS / ESPEAK-NG
-// REPLACES PIPER FRENCH TTS ENGINE
+// PIPER FRENCH FEMALE TTS ENGINE
+// NODE.JS / PIPER
+// fr_FR-siwis-medium
 // ISOLATED MODULE
 // =====================================
 
-const text2wav =
-    require(
-        "/home/fobas/walletfobas_git/text2wav-test/node_modules/text2wav"
-    );
+const { spawn } =
+    require("child_process");
+
+
+
+const PIPER_EXECUTABLE =
+    "/home/fobas/walletfobas_git/piper-fr/piper/piper";
+
+
+
+const PIPER_MODEL =
+    "/home/fobas/walletfobas_git/piper-fr/fr_FR-siwis-medium.onnx";
 
 
 
@@ -640,7 +647,7 @@ app.post(
                 return res.status(400).json({
 
                     error:
-                        "TEXT2WAV_TEXT_EMPTY"
+                        "PIPER_TEXT_EMPTY"
 
                 });
 
@@ -648,43 +655,142 @@ app.post(
 
 
 
-            const audio =
-                await text2wav(
-                    text,
-                    {
+            const audioBuffer =
+                await new Promise(
+                    (resolve, reject) => {
 
-                        voice:
-                            "fr",
+                        const piper =
+                            spawn(
+                                PIPER_EXECUTABLE,
+                                [
+                                    "--model",
+                                    PIPER_MODEL,
+                                    "--output_file",
+                                    "-"
+                                ],
+                                {
+                                    stdio: [
+                                        "pipe",
+                                        "pipe",
+                                        "pipe"
+                                    ]
+                                }
+                            );
 
-                        speed:
-                            165,
 
-                        pitch:
-                            50,
 
-                        noFinalPause:
-                            true
+                        const chunks = [];
+
+                        const errorChunks = [];
+
+
+
+                        piper.stdout.on(
+                            "data",
+                            (chunk) => {
+
+                                chunks.push(
+                                    chunk
+                                );
+
+                            }
+                        );
+
+
+
+                        piper.stderr.on(
+                            "data",
+                            (chunk) => {
+
+                                errorChunks.push(
+                                    chunk
+                                );
+
+                            }
+                        );
+
+
+
+                        piper.on(
+                            "error",
+                            (error) => {
+
+                                reject(
+                                    error
+                                );
+
+                            }
+                        );
+
+
+
+                        piper.on(
+                            "close",
+                            (code) => {
+
+                                if (code !== 0) {
+
+                                    reject(
+                                        new Error(
+                                            Buffer
+                                                .concat(
+                                                    errorChunks
+                                                )
+                                                .toString(
+                                                    "utf8"
+                                                ) ||
+                                            "PIPER_PROCESS_FAILED"
+                                        )
+                                    );
+
+                                    return;
+
+                                }
+
+
+
+                                const output =
+                                    Buffer.concat(
+                                        chunks
+                                    );
+
+
+
+                                if (
+                                    !output.length
+                                ) {
+
+                                    reject(
+                                        new Error(
+                                            "PIPER_AUDIO_EMPTY"
+                                        )
+                                    );
+
+                                    return;
+
+                                }
+
+
+
+                                resolve(
+                                    output
+                                );
+
+                            }
+                        );
+
+
+
+                        piper.stdin.write(
+                            text
+                        );
+
+
+
+                        piper.stdin.end();
 
                     }
                 );
-
-
-
-            if (
-                !audio ||
-                !audio.length
-            ) {
-
-                throw new Error(
-                    "TEXT2WAV_AUDIO_EMPTY"
-                );
-
-            }
-
-
-
-            const audioBuffer =
-                Buffer.from(audio);
 
 
 
@@ -711,7 +817,7 @@ app.post(
 
             console.error(
 
-                "FOBAS TEXT2WAV FRENCH TTS ERROR:",
+                "FOBAS PIPER FRENCH FEMALE TTS ERROR:",
 
                 error.message
 
@@ -722,7 +828,7 @@ app.post(
             return res.status(500).json({
 
                 error:
-                    "Text2Wav French TTS service unavailable."
+                    "Piper French TTS service unavailable."
 
             });
 
