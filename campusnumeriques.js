@@ -3961,11 +3961,14 @@ if(
     "function"
 ){
 
-    speakProfessorIAWithElevenLabs(
+    await speakProfessorIAWithElevenLabs(
         response
     );
 
 }
+
+
+
 
 
 
@@ -4385,19 +4388,16 @@ window.CampusAIProfessor = {
 
 
 
-
-
-
-
-
-
-
 // =====================================
 // CAMPUS AI PROFESSOR
 // ELEVENLABS FRENCH VOICE BRIDGE
 // CONNECTS GROQ TEXT TO ELEVENLABS TTS
 // ISOLATED MODULE
 // =====================================
+
+let raniseProfessorAudio = null;
+
+
 
 async function speakProfessorIAWithElevenLabs(text){
 
@@ -4444,7 +4444,8 @@ async function speakProfessorIAWithElevenLabs(text){
         if(!response.ok){
 
             throw new Error(
-                "ELEVENLABS_TTS_REQUEST_FAILED"
+                "ELEVENLABS_TTS_REQUEST_FAILED_" +
+                response.status
             );
 
         }
@@ -4478,19 +4479,15 @@ async function speakProfessorIAWithElevenLabs(text){
             );
 
 
-        const binaryLength =
-            binaryString.length;
-
-
         const bytes =
             new Uint8Array(
-                binaryLength
+                binaryString.length
             );
 
 
         for(
             let i = 0;
-            i < binaryLength;
+            i < binaryString.length;
             i++
         ){
 
@@ -4516,72 +4513,90 @@ async function speakProfessorIAWithElevenLabs(text){
             );
 
 
-        const audio =
+        if(
+            raniseProfessorAudio
+        ){
+
+            try{
+
+                raniseProfessorAudio.pause();
+
+                raniseProfessorAudio.currentTime =
+                    0;
+
+            }catch(error){}
+
+        }
+
+
+        raniseProfessorAudio =
             new Audio(
                 audioUrl
             );
 
 
-        audio.volume = 1;
+        raniseProfessorAudio.volume =
+            1;
 
 
-        audio.onplay = ()=>{
+        raniseProfessorAudio.onplay =
+            function(){
 
-            if(
-                typeof raniseStartTalking ===
-                "function"
-            ){
+                if(
+                    typeof raniseStartTalking ===
+                    "function"
+                ){
 
-                raniseStartTalking();
+                    raniseStartTalking();
 
-            }
+                }
 
-        };
-
-
-        audio.onended = ()=>{
-
-            if(
-                typeof raniseStopTalking ===
-                "function"
-            ){
-
-                raniseStopTalking();
-
-            }
+            };
 
 
-            URL.revokeObjectURL(
-                audioUrl
-            );
+        raniseProfessorAudio.onended =
+            function(){
 
-        };
+                if(
+                    typeof raniseStopTalking ===
+                    "function"
+                ){
 
+                    raniseStopTalking();
 
-        audio.onerror = ()=>{
-
-            if(
-                typeof raniseStopTalking ===
-                "function"
-            ){
-
-                raniseStopTalking();
-
-            }
+                }
 
 
-            URL.revokeObjectURL(
-                audioUrl
-            );
+                URL.revokeObjectURL(
+                    audioUrl
+                );
 
-        };
+            };
 
 
-        await audio.play();
+        raniseProfessorAudio.onerror =
+            function(){
 
+                if(
+                    typeof raniseStopTalking ===
+                    "function"
+                ){
+
+                    raniseStopTalking();
+
+                }
+
+
+                URL.revokeObjectURL(
+                    audioUrl
+                );
+
+            };
+
+
+        await raniseProfessorAudio.play();
 
     }catch(error){
-
 
         if(
             typeof raniseStopTalking ===
@@ -4601,7 +4616,6 @@ async function speakProfessorIAWithElevenLabs(text){
     }
 
 }
-
 
 
 
