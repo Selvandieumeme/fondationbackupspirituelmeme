@@ -35,6 +35,30 @@ const crypto = require("crypto");
 
 
 
+
+
+
+
+
+
+
+
+const text2wav =
+    require(
+        "/home/fobas/walletfobas_git/text2wav-test/node_modules/text2wav"
+    );
+
+
+
+
+
+
+
+
+
+
+
+
 const videoQueue = new Queue("fobas-video", {
   redis: {
     host: process.env.REDIS_HOST,
@@ -593,39 +617,22 @@ ${language || 'fr-FR'}
 
 // =====================================
 // CAMPUS AI PROFESSOR
-// PIPER FRENCH TTS ENGINE
-// FR_FR_SIWIS MEDIUM
+// TEXT2WAV FRENCH TTS ENGINE
+// NODE.JS / ESPEAK-NG
+// REPLACES PIPER FRENCH TTS ENGINE
 // ISOLATED MODULE
 // =====================================
 
-const {
-    spawn
-} = require("child_process");
-
-
-
-const os =
-    require("os");
-
-
-
-const PIPER_BINARY =
-    "/home/fobas/walletfobas_git/piper-fr/piper/piper";
-
-
-
-const PIPER_MODEL =
-    "/home/fobas/walletfobas_git/piper-fr/fr_FR-siwis-medium.onnx";
+const text2wav =
+    require(
+        "/home/fobas/walletfobas_git/text2wav-test/node_modules/text2wav"
+    );
 
 
 
 app.post(
     "/api/ai-professor/voice",
     async (req, res) => {
-
-        let outputFile = null;
-
-
 
         try {
 
@@ -642,208 +649,51 @@ app.post(
                 return res.status(400).json({
 
                     error:
-                        "PIPER_TEXT_EMPTY"
+                        "TEXT2WAV_TEXT_EMPTY"
 
                 });
 
             }
+
+
+
+            const audio =
+                await text2wav(
+                    text,
+                    {
+
+                        voice:
+                            "fr",
+
+                        speed:
+                            165,
+
+                        pitch:
+                            50,
+
+                        noFinalPause:
+                            true
+
+                    }
+                );
 
 
 
             if (
-                !fs.existsSync(
-                    PIPER_BINARY
-                )
+                !audio ||
+                !audio.length
             ) {
 
-                console.error(
-                    "PIPER_BINARY_NOT_FOUND:",
-                    PIPER_BINARY
+                throw new Error(
+                    "TEXT2WAV_AUDIO_EMPTY"
                 );
-
-                return res.status(500).json({
-
-                    error:
-                        "PIPER_BINARY_NOT_FOUND"
-
-                });
 
             }
-
-
-
-            if (
-                !fs.existsSync(
-                    PIPER_MODEL
-                )
-            ) {
-
-                console.error(
-                    "PIPER_MODEL_NOT_FOUND:",
-                    PIPER_MODEL
-                );
-
-                return res.status(500).json({
-
-                    error:
-                        "PIPER_MODEL_NOT_FOUND"
-
-                });
-
-            }
-
-
-
-            outputFile =
-                path.join(
-
-                    os.tmpdir(),
-
-                    "campus-ranise-" +
-                    Date.now() +
-                    "-" +
-                    Math.random()
-                        .toString(36)
-                        .slice(2) +
-                    ".wav"
-
-                );
-
-
-
-            await new Promise(
-                (
-                    resolve,
-                    reject
-                ) => {
-
-                    const piper =
-                        spawn(
-
-                            PIPER_BINARY,
-
-                            [
-
-                                "--model",
-                                PIPER_MODEL,
-
-                                "--output_file",
-                                outputFile
-
-                            ],
-
-                            {
-
-                                stdio: [
-                                    "pipe",
-                                    "pipe",
-                                    "pipe"
-                                ]
-
-                            }
-
-                        );
-
-
-
-                    let stderr = "";
-
-
-
-                    piper.stderr.on(
-                        "data",
-                        (data) => {
-
-                            stderr +=
-                                data.toString();
-
-                        }
-                    );
-
-
-
-                    piper.on(
-                        "error",
-                        (error) => {
-
-                            reject(
-                                error
-                            );
-
-                        }
-                    );
-
-
-
-                    piper.on(
-                        "close",
-                        (code) => {
-
-                            if (
-                                code !== 0
-                            ) {
-
-                                reject(
-
-                                    new Error(
-                                        "PIPER_EXIT_" +
-                                        code +
-                                        ": " +
-                                        stderr
-                                    )
-
-                                );
-
-                                return;
-
-                            }
-
-
-
-                            if (
-                                !fs.existsSync(
-                                    outputFile
-                                )
-                            ) {
-
-                                reject(
-
-                                    new Error(
-                                        "PIPER_AUDIO_FILE_NOT_CREATED"
-                                    )
-
-                                );
-
-                                return;
-
-                            }
-
-
-
-                            resolve();
-
-                        }
-                    );
-
-
-
-                    piper.stdin.write(
-                        text
-                    );
-
-
-
-                    piper.stdin.end();
-
-                }
-            );
 
 
 
             const audioBuffer =
-                await fs.promises.readFile(
-                    outputFile
-                );
+                Buffer.from(audio);
 
 
 
@@ -870,7 +720,7 @@ app.post(
 
             console.error(
 
-                "FOBAS PIPER FRENCH TTS ERROR:",
+                "FOBAS TEXT2WAV FRENCH TTS ERROR:",
 
                 error.message
 
@@ -881,45 +731,18 @@ app.post(
             return res.status(500).json({
 
                 error:
-                    "Piper French TTS service unavailable."
+                    "Text2Wav French TTS service unavailable."
 
             });
-
-
-        } finally {
-
-
-            if (
-                outputFile &&
-                fs.existsSync(
-                    outputFile
-                )
-            ) {
-
-                try {
-
-                    await fs.promises.unlink(
-                        outputFile
-                    );
-
-                } catch (cleanupError) {
-
-                    console.error(
-
-                        "PIPER_TEMP_FILE_CLEANUP_ERROR:",
-
-                        cleanupError.message
-
-                    );
-
-                }
-
-            }
 
         }
 
     }
 );
+
+
+
+
 
 
 
