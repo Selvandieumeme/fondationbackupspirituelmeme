@@ -588,19 +588,52 @@ ${language || 'fr-FR'}
 
 
 
-
-
-
-
 // =====================================
 // CAMPUS AI PROFESSOR
-// ELEVENLABS FRENCH TTS ENGINE
+// PIPER FRENCH TTS ENGINE
+// FR_FR_SIWIS MEDIUM
 // ISOLATED MODULE
+// REPLACES ELEVENLABS VOICE ROUTE
 // =====================================
 
+const {
+    spawn
+} = require("child_process");
+
+
+
+const fs =
+    require("fs");
+
+
+
+const path =
+    require("path");
+
+
+
+const os =
+    require("os");
+
+
+
+const PIPER_BINARY =
+    "/home/fobas/walletfobas_git/piper-fr/piper/piper";
+
+
+
+const PIPER_MODEL =
+    "/home/fobas/walletfobas_git/piper-fr/fr_FR-siwis-medium.onnx";
+
+
+
 app.post(
-    '/api/ai-professor/voice',
+    "/api/ai-professor/voice",
     async (req, res) => {
+
+        let outputFile = null;
+
+
 
         try {
 
@@ -617,7 +650,7 @@ app.post(
                 return res.status(400).json({
 
                     error:
-                        "ELEVENLABS_TEXT_EMPTY"
+                        "PIPER_TEXT_EMPTY"
 
                 });
 
@@ -625,32 +658,21 @@ app.post(
 
 
 
-            const apiKey =
-                process.env.ELEVENLABS_API_KEY;
-
-
-
-            const voiceId =
-                process.env.ELEVENLABS_VOICE_ID;
-
-
-
-            const modelId =
-                process.env.ELEVENLABS_MODEL_ID ||
-                "eleven_multilingual_v2";
-
-
-
-            if (!apiKey) {
+            if (
+                !fs.existsSync(
+                    PIPER_BINARY
+                )
+            ) {
 
                 console.error(
-                    "ELEVENLABS_API_KEY_MISSING"
+                    "PIPER_BINARY_NOT_FOUND:",
+                    PIPER_BINARY
                 );
 
                 return res.status(500).json({
 
                     error:
-                        "ELEVENLABS_API_KEY_MISSING"
+                        "PIPER_BINARY_NOT_FOUND"
 
                 });
 
@@ -658,16 +680,21 @@ app.post(
 
 
 
-            if (!voiceId) {
+            if (
+                !fs.existsSync(
+                    PIPER_MODEL
+                )
+            ) {
 
                 console.error(
-                    "ELEVENLABS_VOICE_ID_MISSING"
+                    "PIPER_MODEL_NOT_FOUND:",
+                    PIPER_MODEL
                 );
 
                 return res.status(500).json({
 
                     error:
-                        "ELEVENLABS_VOICE_ID_MISSING"
+                        "PIPER_MODEL_NOT_FOUND"
 
                 });
 
@@ -675,59 +702,163 @@ app.post(
 
 
 
-            const elevenLabsResponse =
-                await axios.post(
+            outputFile =
+                path.join(
 
-                    `https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`,
+                    os.tmpdir(),
 
-                    {
+                    "campus-ranise-" +
+                    Date.now() +
+                    "-" +
+                    Math.random()
+                        .toString(36)
+                        .slice(2) +
+                    ".wav"
 
-                        text: text,
+                );
 
-                        model_id:
-                            modelId
 
-                    },
 
-                    {
+            await new Promise(
+                (
+                    resolve,
+                    reject
+                ) => {
 
-                        headers: {
+                    const piper =
+                        spawn(
 
-                            "xi-api-key":
-                                apiKey,
+                            PIPER_BINARY,
 
-                            "Content-Type":
-                                "application/json",
+                            [
 
-                            "Accept":
-                                "audio/mpeg"
+                                "--model",
+                                PIPER_MODEL,
 
-                        },
+                                "--output_file",
+                                outputFile
 
-                        params: {
+                            ],
 
-                            output_format:
-                                "mp3_44100_128"
+                            {
 
-                        },
+                                stdio: [
+                                    "pipe",
+                                    "pipe",
+                                    "pipe"
+                                ]
 
-                        responseType:
-                            "arraybuffer"
+                            }
 
-                    }
+                        );
 
+
+
+                    let stderr = "";
+
+
+
+                    piper.stderr.on(
+                        "data",
+                        (data) => {
+
+                            stderr +=
+                                data.toString();
+
+                        }
+                    );
+
+
+
+                    piper.on(
+                        "error",
+                        (error) => {
+
+                            reject(
+                                error
+                            );
+
+                        }
+                    );
+
+
+
+                    piper.on(
+                        "close",
+                        (code) => {
+
+                            if (
+                                code !== 0
+                            ) {
+
+                                reject(
+
+                                    new Error(
+                                        "PIPER_EXIT_" +
+                                        code +
+                                        ": " +
+                                        stderr
+                                    )
+
+                                );
+
+                                return;
+
+                            }
+
+
+
+                            if (
+                                !fs.existsSync(
+                                    outputFile
+                                )
+                            ) {
+
+                                reject(
+
+                                    new Error(
+                                        "PIPER_AUDIO_FILE_NOT_CREATED"
+                                    )
+
+                                );
+
+                                return;
+
+                            }
+
+
+
+                            resolve();
+
+                        }
+                    );
+
+
+
+                    piper.stdin.write(
+                        text
+                    );
+
+
+
+                    piper.stdin.end();
+
+                }
+            );
+
+
+
+            const audioBuffer =
+                await fs.promises.readFile(
+                    outputFile
                 );
 
 
 
             const audioBase64 =
-                Buffer
-                    .from(
-                        elevenLabsResponse.data
-                    )
-                    .toString(
-                        "base64"
-                    );
+                audioBuffer.toString(
+                    "base64"
+                );
 
 
 
@@ -737,7 +868,7 @@ app.post(
                     audioBase64,
 
                 mimeType:
-                    "audio/mpeg"
+                    "audio/wav"
 
             });
 
@@ -747,15 +878,9 @@ app.post(
 
             console.error(
 
-                "FOBAS ELEVENLABS TTS ERROR:",
+                "FOBAS PIPER FRENCH TTS ERROR:",
 
-                error.response?.data
-                    ? Buffer
-                        .from(
-                            error.response.data
-                        )
-                        .toString("utf8")
-                    : error.message
+                error.message
 
             );
 
@@ -764,14 +889,49 @@ app.post(
             return res.status(500).json({
 
                 error:
-                    "ElevenLabs TTS service unavailable."
+                    "Piper French TTS service unavailable."
 
             });
+
+
+        } finally {
+
+
+            if (
+                outputFile &&
+                fs.existsSync(
+                    outputFile
+                )
+            ) {
+
+                try {
+
+                    await fs.promises.unlink(
+                        outputFile
+                    );
+
+                } catch (cleanupError) {
+
+                    console.error(
+
+                        "PIPER_TEMP_FILE_CLEANUP_ERROR:",
+
+                        cleanupError.message
+
+                    );
+
+                }
+
+            }
 
         }
 
     }
 );
+
+
+
+
 
 
 
