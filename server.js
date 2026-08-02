@@ -588,27 +588,19 @@ ${language || 'fr-FR'}
 
 
 
+
+
+
 // =====================================
 // CAMPUS AI PROFESSOR
 // PIPER FRENCH TTS ENGINE
 // FR_FR_SIWIS MEDIUM
 // ISOLATED MODULE
-// REPLACES ELEVENLABS VOICE ROUTE
 // =====================================
 
 const {
     spawn
 } = require("child_process");
-
-
-
-const fs =
-    require("fs");
-
-
-
-const path =
-    require("path");
 
 
 
@@ -928,10 +920,6 @@ app.post(
 
     }
 );
-
-
-
-
 
 
 
