@@ -1,5 +1,4 @@
 
-```js
 const fs = require("fs");
 const text2wav = require("./text2wav-test/node_modules/text2wav");
 
@@ -106,4 +105,3 @@ testText2Wav();
 }
 
 testText2Wav();
-EOF
