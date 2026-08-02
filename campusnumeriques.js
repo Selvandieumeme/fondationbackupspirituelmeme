@@ -4377,6 +4377,252 @@ window.CampusAIProfessor = {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+// =====================================
+// CAMPUS AI PROFESSOR
+// ELEVENLABS FRENCH VOICE BRIDGE
+// CONNECTS GROQ TEXT TO ELEVENLABS TTS
+// ISOLATED MODULE
+// =====================================
+
+async function speakProfessorIAWithElevenLabs(text){
+
+    if(
+        !text ||
+        typeof text !== "string" ||
+        !text.trim()
+    ){
+
+        return;
+
+    }
+
+
+    try{
+
+        const response =
+            await fetch(
+                "https://api.fondationbackupspirituel.com/api/ai-professor/voice",
+                {
+
+                    method:
+                        "POST",
+
+                    headers: {
+
+                        "Content-Type":
+                            "application/json"
+
+                    },
+
+                    body:
+                        JSON.stringify({
+
+                            text:
+                                text.trim()
+
+                        })
+
+                }
+            );
+
+
+        if(!response.ok){
+
+            throw new Error(
+                "ELEVENLABS_TTS_REQUEST_FAILED"
+            );
+
+        }
+
+
+        const result =
+            await response.json();
+
+
+        if(
+            !result ||
+            typeof result.audio !== "string" ||
+            !result.audio
+        ){
+
+            throw new Error(
+                "ELEVENLABS_AUDIO_MISSING"
+            );
+
+        }
+
+
+        const mimeType =
+            result.mimeType ||
+            "audio/mpeg";
+
+
+        const binaryString =
+            atob(
+                result.audio
+            );
+
+
+        const binaryLength =
+            binaryString.length;
+
+
+        const bytes =
+            new Uint8Array(
+                binaryLength
+            );
+
+
+        for(
+            let i = 0;
+            i < binaryLength;
+            i++
+        ){
+
+            bytes[i] =
+                binaryString.charCodeAt(i);
+
+        }
+
+
+        const audioBlob =
+            new Blob(
+                [bytes],
+                {
+                    type:
+                        mimeType
+                }
+            );
+
+
+        const audioUrl =
+            URL.createObjectURL(
+                audioBlob
+            );
+
+
+        const audio =
+            new Audio(
+                audioUrl
+            );
+
+
+        audio.volume = 1;
+
+
+        audio.onplay = ()=>{
+
+            if(
+                typeof raniseStartTalking ===
+                "function"
+            ){
+
+                raniseStartTalking();
+
+            }
+
+        };
+
+
+        audio.onended = ()=>{
+
+            if(
+                typeof raniseStopTalking ===
+                "function"
+            ){
+
+                raniseStopTalking();
+
+            }
+
+
+            URL.revokeObjectURL(
+                audioUrl
+            );
+
+        };
+
+
+        audio.onerror = ()=>{
+
+            if(
+                typeof raniseStopTalking ===
+                "function"
+            ){
+
+                raniseStopTalking();
+
+            }
+
+
+            URL.revokeObjectURL(
+                audioUrl
+            );
+
+        };
+
+
+        await audio.play();
+
+
+    }catch(error){
+
+
+        if(
+            typeof raniseStopTalking ===
+            "function"
+        ){
+
+            raniseStopTalking();
+
+        }
+
+
+        console.error(
+            "ElevenLabs French Voice:",
+            error
+        );
+
+    }
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 // =====================================
 // CAMPUS AI PROFESSOR
 // REQUEST BRIDGE
