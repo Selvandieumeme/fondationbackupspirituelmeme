@@ -3668,12 +3668,10 @@ function renderChapter1ProfessorIA(){
 
 
 
-
-
-
 // =====================================
 // TALK TO AI PROFESSOR
 // INITIALIZATION
+// PIPER FRENCH VOICE COMPATIBLE
 // =====================================
 
 function initializeTalkToAIProfessor(){
@@ -3875,6 +3873,8 @@ function initializeTalkToAIProfessor(){
 
 
 
+
+
 // =====================================
 // TALK TO AI PROFESSOR
 // SEND TEXT
@@ -3970,18 +3970,15 @@ async function talkToAIProfessorSend(){
 
 
 if(
-    typeof speakProfessorIAWithText2Wav ===
+    typeof speakProfessorIAWithPiper ===
     "function"
 ){
 
-    await speakProfessorIAWithText2Wav(
+    await speakProfessorIAWithPiper(
         response
     );
 
 }
-
-
-
 
 
 
@@ -4399,14 +4396,10 @@ window.CampusAIProfessor = {
 
 
 
-
-
-
-
 // =====================================
 // CAMPUS AI PROFESSOR
-// TEXT2WAV FRENCH VOICE BRIDGE
-// CONNECTS GROQ TEXT TO TEXT2WAV TTS
+// PIPER FRENCH VOICE BRIDGE
+// CONNECTS GROQ TEXT TO PIPER TTS
 // ISOLATED MODULE
 // =====================================
 
@@ -4461,7 +4454,7 @@ async function speakProfessorIAWithText2Wav(text){
         if(!response.ok){
 
             throw new Error(
-                "TEXT2WAV_TTS_REQUEST_FAILED_" +
+                "PIPER_TTS_REQUEST_FAILED_" +
                 response.status
             );
 
@@ -4481,7 +4474,7 @@ async function speakProfessorIAWithText2Wav(text){
         ){
 
             throw new Error(
-                "TEXT2WAV_AUDIO_MISSING"
+                "PIPER_AUDIO_MISSING"
             );
 
         }
@@ -4646,14 +4639,13 @@ async function speakProfessorIAWithText2Wav(text){
 
 
         console.error(
-            "Text2Wav French Voice:",
+            "Piper French Female Voice:",
             error
         );
 
     }
 
 }
-
 
 
 
