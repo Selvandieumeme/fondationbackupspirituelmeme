@@ -43,15 +43,6 @@ const crypto = require("crypto");
 
 
 
-const text2wav =
-    require(
-        "/home/fobas/walletfobas_git/text2wav-test/node_modules/text2wav"
-    );
-
-
-
-
-
 
 
 
