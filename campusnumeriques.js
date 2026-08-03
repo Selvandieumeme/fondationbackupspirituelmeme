@@ -4962,9 +4962,13 @@ async function raniseProfessorIAWithPiperInternal(text){
             "function"
         ){
 
+
+
             talkToAIProfessorSetStatus(
-                "French voice unavailable."
-            );
+    error && error.message
+        ? "Voice error: " + error.message
+        : "Voice error: unknown"
+);
 
         }
 
