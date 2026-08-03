@@ -4483,6 +4483,10 @@ async function requestCampusAIProfessor(message){
 
 
 
+
+
+
+```javascript
 // =====================================
 // CAMPUS AI PROFESSOR
 // PIPER FRENCH VOICE BRIDGE
@@ -4490,11 +4494,6 @@ async function requestCampusAIProfessor(message){
 // CONNECTS GROQ TEXT TO PIPER TTS
 // =====================================
 
-
-// =====================================
-// GLOBAL AUDIO ENGINE
-// ONE AUDIO ELEMENT FOR ENTIRE SESSION
-// =====================================
 
 let raniseProfessorAudio = null;
 
@@ -4550,16 +4549,6 @@ function raniseInitializePiperAudio(){
             console.log(
                 "PIPER: AUDIO PLAYING"
             );
-
-
-            if(
-                typeof raniseStartTalking ===
-                "function"
-            ){
-
-                raniseStartTalking();
-
-            }
 
         };
 
@@ -4738,167 +4727,7 @@ function raniseInitializePiperAudio(){
 
 
 // =====================================
-// OPTIONAL BROWSER AUDIO UNLOCK
-// IMPORTANT FOR ANDROID / MOBILE
-// =====================================
-
-function raniseUnlockPiperAudio(){
-
-    raniseInitializePiperAudio();
-
-
-
-    if(
-        !raniseProfessorAudio
-    ){
-
-        return;
-
-    }
-
-
-
-    try{
-
-        const currentVolume =
-            raniseProfessorAudio.volume;
-
-
-
-        raniseProfessorAudio.volume =
-            0;
-
-
-
-        const unlockPromise =
-            raniseProfessorAudio.play();
-
-
-
-        if(
-            unlockPromise &&
-            typeof unlockPromise.then ===
-            "function"
-        ){
-
-            unlockPromise
-                .then(function(){
-
-                    try{
-
-                        raniseProfessorAudio.pause();
-
-                        raniseProfessorAudio.currentTime =
-                            0;
-
-                    }catch(error){}
-
-
-
-                    raniseProfessorAudio.volume =
-                        currentVolume;
-
-                })
-                .catch(function(){
-
-                    raniseProfessorAudio.volume =
-                        currentVolume;
-
-                });
-
-        }else{
-
-            raniseProfessorAudio.volume =
-                currentVolume;
-
-        }
-
-    }catch(error){}
-
-}
-
-
-
-// =====================================
-// INSTALL MOBILE AUDIO UNLOCK ONCE
-// =====================================
-
-function raniseInstallPiperAudioUnlock(){
-
-    if(
-        raniseInstallPiperAudioUnlock.done
-    ){
-
-        return;
-
-    }
-
-
-
-    raniseInstallPiperAudioUnlock.done =
-        true;
-
-
-
-    const unlock =
-        function(){
-
-            raniseUnlockPiperAudio();
-
-        };
-
-
-
-    document.addEventListener(
-        "touchstart",
-        unlock,
-        {
-            passive:
-                true
-        }
-    );
-
-
-
-    document.addEventListener(
-        "pointerdown",
-        unlock,
-        {
-            passive:
-                true
-        }
-    );
-
-
-
-    document.addEventListener(
-        "click",
-        unlock,
-        {
-            passive:
-                true
-        }
-    );
-
-
-
-    document.addEventListener(
-        "keydown",
-        unlock,
-        {
-            passive:
-                true
-        }
-    );
-
-}
-
-
-
-// =====================================
-// PUBLIC FUNCTION
-// GROQ CALLS THIS EVERY TIME IA
-// HAS A NEW RESPONSE
+// PUBLIC PIPER FUNCTION
 // =====================================
 
 function speakProfessorIAWithPiper(text){
@@ -4916,8 +4745,6 @@ function speakProfessorIAWithPiper(text){
 
 
     raniseInitializePiperAudio();
-
-    raniseInstallPiperAudioUnlock();
 
 
 
@@ -4954,7 +4781,7 @@ function speakProfessorIAWithPiper(text){
 
 
 // =====================================
-// PROCESS ONE MESSAGE AT A TIME
+// PROCESS ONE AUDIO AT A TIME
 // =====================================
 
 async function raniseProcessPiperQueue(){
@@ -5011,7 +4838,7 @@ async function raniseProcessPiperQueue(){
     }catch(error){
 
         console.error(
-            "PIPER MESSAGE PLAYBACK ERROR:",
+            "PIPER MESSAGE ERROR:",
             error
         );
 
@@ -5034,10 +4861,6 @@ async function raniseProcessPiperQueue(){
             false;
 
 
-
-        // IMPORTANT:
-        // NEVER STOP THE CHAT VOICE SYSTEM
-        // BECAUSE ONE MESSAGE FAILED.
 
         setTimeout(
             function(){
@@ -5068,7 +4891,7 @@ async function raniseProcessPiperQueue(){
 
 
 // =====================================
-// REQUEST PIPER AUDIO + PLAY IT
+// REQUEST PIPER AUDIO + PLAY
 // =====================================
 
 async function raniseGenerateAndPlayPiper(text){
@@ -5080,55 +4903,31 @@ async function raniseGenerateAndPlayPiper(text){
 
 
 
-    let response;
+    const response =
+        await fetch(
+            "https://api.fondationbackupspirituel.com/api/ai-professor/voice",
+            {
 
+                method:
+                    "POST",
 
+                headers: {
 
-    try{
+                    "Content-Type":
+                        "application/json"
 
-        response =
-            await fetch(
-                "https://api.fondationbackupspirituel.com/api/ai-professor/voice",
-                {
+                },
 
-                    method:
-                        "POST",
+                body:
+                    JSON.stringify({
 
-                    headers: {
+                        text:
+                            text
 
-                        "Content-Type":
-                            "application/json"
+                    })
 
-                    },
-
-                    body:
-                        JSON.stringify({
-
-                            text:
-                                text
-
-                        })
-
-                }
-            );
-
-    }catch(networkError){
-
-        console.error(
-            "PIPER NETWORK ERROR:",
-            networkError
+            }
         );
-
-
-
-        // Do NOT display
-        // French voice unavailable.
-        //
-        // The next message remains usable.
-
-        throw networkError;
-
-    }
 
 
 
@@ -5246,11 +5045,12 @@ async function raniseGenerateAndPlayPiper(text){
 
 
     // =====================================
-    // ENSURE PREVIOUS AUDIO IS FINISHED
+    // STOP OLD AUDIO ONLY IF IT EXISTS
     // =====================================
 
     if(
-        raniseProfessorAudio
+        raniseProfessorAudio &&
+        !raniseProfessorAudio.paused
     ){
 
         try{
@@ -5259,6 +5059,26 @@ async function raniseGenerateAndPlayPiper(text){
 
             raniseProfessorAudio.currentTime =
                 0;
+
+        }catch(error){}
+
+    }
+
+
+
+    // =====================================
+    // CLEAR OLD URL
+    // =====================================
+
+    if(
+        ranisePiperCurrentUrl
+    ){
+
+        try{
+
+            URL.revokeObjectURL(
+                ranisePiperCurrentUrl
+            );
 
         }catch(error){}
 
@@ -5281,21 +5101,216 @@ async function raniseGenerateAndPlayPiper(text){
 
 
     // =====================================
-    // WAIT UNTIL THIS AUDIO REALLY ENDS
+    // WAIT FOR REAL AUDIO PLAYBACK
     // =====================================
 
     await new Promise(
         function(resolve, reject){
 
-            ranisePiperCurrentResolve =
-                resolve;
+            let settled =
+                false;
 
 
 
-            ranisePiperCurrentReject =
-                reject;
+            function cleanup(){
+
+                if(
+                    raniseProfessorAudio
+                ){
+
+                    raniseProfessorAudio.onended =
+                        null;
+
+                    raniseProfessorAudio.onerror =
+                        null;
+
+                    raniseProfessorAudio.onabort =
+                        null;
+
+                }
+
+            }
 
 
+
+            function finishSuccess(){
+
+                if(
+                    settled
+                ){
+
+                    return;
+
+                }
+
+
+
+                settled =
+                    true;
+
+
+
+                cleanup();
+
+
+
+                if(
+                    ranisePiperCurrentUrl
+                ){
+
+                    try{
+
+                        URL.revokeObjectURL(
+                            ranisePiperCurrentUrl
+                        );
+
+                    }catch(error){}
+
+
+
+                    ranisePiperCurrentUrl =
+                        null;
+
+                }
+
+
+
+                resolve();
+
+            }
+
+
+
+            function finishError(error){
+
+                if(
+                    settled
+                ){
+
+                    return;
+
+                }
+
+
+
+                settled =
+                    true;
+
+
+
+                cleanup();
+
+
+
+                if(
+                    typeof raniseStopTalking ===
+                    "function"
+                ){
+
+                    raniseStopTalking();
+
+                }
+
+
+
+                if(
+                    ranisePiperCurrentUrl
+                ){
+
+                    try{
+
+                        URL.revokeObjectURL(
+                            ranisePiperCurrentUrl
+                        );
+
+                    }catch(error){}
+
+
+
+                    ranisePiperCurrentUrl =
+                        null;
+
+                }
+
+
+
+                reject(
+                    error
+                );
+
+            }
+
+
+
+            raniseProfessorAudio.onended =
+                function(){
+
+                    console.log(
+                        "PIPER: AUDIO REALLY ENDED"
+                    );
+
+
+
+                    if(
+                        typeof raniseStopTalking ===
+                        "function"
+                    ){
+
+                        raniseStopTalking();
+
+                    }
+
+
+
+                    finishSuccess();
+
+                };
+
+
+
+            raniseProfessorAudio.onerror =
+                function(){
+
+                    console.error(
+                        "PIPER PLAYBACK ERROR:",
+                        raniseProfessorAudio.error
+                    );
+
+
+
+                    finishError(
+                        new Error(
+                            "PIPER_AUDIO_PLAYBACK_ERROR"
+                        )
+                    );
+
+                };
+
+
+
+            raniseProfessorAudio.onabort =
+                function(){
+
+                    console.warn(
+                        "PIPER AUDIO ABORTED"
+                    );
+
+
+
+                    finishError(
+                        new Error(
+                            "PIPER_AUDIO_ABORTED"
+                        )
+                    );
+
+                };
+
+
+
+            // =====================================
+            // START ONLY THE AUDIO THAT CAME
+            // FROM THE CURRENT GROQ RESPONSE
+            // =====================================
 
             let playPromise;
 
@@ -5308,19 +5323,9 @@ async function raniseGenerateAndPlayPiper(text){
 
             }catch(playError){
 
-                ranisePiperCurrentResolve =
-                    null;
-
-                ranisePiperCurrentReject =
-                    null;
-
-
-
-                reject(
+                finishError(
                     playError
                 );
-
-
 
                 return;
 
@@ -5338,55 +5343,13 @@ async function raniseGenerateAndPlayPiper(text){
                     function(playError){
 
                         console.error(
-                            "PIPER PLAY ERROR:",
+                            "PIPER PLAY FAILED:",
                             playError
                         );
 
 
 
-                        ranisePiperCurrentResolve =
-                            null;
-
-
-
-                        ranisePiperCurrentReject =
-                            null;
-
-
-
-                        if(
-                            ranisePiperCurrentUrl
-                        ){
-
-                            try{
-
-                                URL.revokeObjectURL(
-                                    ranisePiperCurrentUrl
-                                );
-
-                            }catch(error){}
-
-
-
-                            ranisePiperCurrentUrl =
-                                null;
-
-                        }
-
-
-
-                        if(
-                            typeof raniseStopTalking ===
-                            "function"
-                        ){
-
-                            raniseStopTalking();
-
-                        }
-
-
-
-                        reject(
+                        finishError(
                             playError
                         );
 
@@ -5400,11 +5363,76 @@ async function raniseGenerateAndPlayPiper(text){
 
 
 
+    // =====================================
+    // ONLY START AVATAR TALKING AFTER
+    // PLAY() HAS ACTUALLY SUCCEEDED
+    // =====================================
+
+    if(
+        raniseProfessorAudio &&
+        !raniseProfessorAudio.paused &&
+        !raniseProfessorAudio.ended
+    ){
+
+        if(
+            typeof raniseStartTalking ===
+            "function"
+        ){
+
+            raniseStartTalking();
+
+        }
+
+    }
+
+
+
     console.log(
         "PIPER: MESSAGE COMPLETELY FINISHED"
     );
 
 }
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
