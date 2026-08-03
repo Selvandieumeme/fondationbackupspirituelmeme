@@ -602,327 +602,64 @@ ${language || 'fr-FR'}
 
 
 
+// =================================================
+// FOBAS AI VOICE ENGINE - MARYTTS
+// =================================================
 
-// =====================================
-// CAMPUS AI PROFESSOR
-// PIPER FRENCH FEMALE TTS ENGINE
-// ISOLATED MODULE
-// fr_FR-siwis-medium
-// REPLACES ELEVENLABS TTS ENGINE
-// =====================================
+app.get('/api/tts', async (req, res) => {
 
-const {
-    spawn
-} = require("child_process");
+    try {
 
+        const text = req.query.text;
 
-const os =
-    require("os");
-
-
-
-
-const PIPER_EXECUTABLE =
-    "/home/fobas/walletfobas_git/piper-fr/piper/piper";
-
-
-
-const PIPER_MODEL =
-    "/home/fobas/walletfobas_git/piper-fr/fr_FR-siwis-medium.onnx";
-
-
-
-app.post(
-    "/api/ai-professor/voice",
-    async (req, res) => {
-
-        let temporaryWavFile =
-            null;
-
-
-
-        try {
-
-            const text =
-                req.body &&
-                typeof req.body.text === "string"
-                    ? req.body.text.trim()
-                    : "";
-
-
-
-            if (!text) {
-
-                return res.status(400).json({
-
-                    error:
-                        "PIPER_TEXT_EMPTY"
-
-                });
-
-            }
-
-
-
-            if (
-                !fs.existsSync(
-                    PIPER_EXECUTABLE
-                )
-            ) {
-
-                throw new Error(
-                    "PIPER_EXECUTABLE_NOT_FOUND"
-                );
-
-            }
-
-
-
-            if (
-                !fs.existsSync(
-                    PIPER_MODEL
-                )
-            ) {
-
-                throw new Error(
-                    "PIPER_MODEL_NOT_FOUND"
-                );
-
-            }
-
-
-
-            temporaryWavFile =
-                path.join(
-                    os.tmpdir(),
-                    "ranise-piper-" +
-                    Date.now() +
-                    "-" +
-                    Math.random()
-                        .toString(36)
-                        .slice(2) +
-                    ".wav"
-                );
-
-
-
-            await new Promise(
-                (
-                    resolve,
-                    reject
-                ) => {
-
-                    const piper =
-                        spawn(
-                            PIPER_EXECUTABLE,
-                            [
-
-                                "--model",
-                                PIPER_MODEL,
-
-                                "--length_scale",
-                                "1.20",
-
-                                "--output_file",
-                                temporaryWavFile
-
-                            ],
-                            {
-
-                                stdio: [
-                                    "pipe",
-                                    "ignore",
-                                    "pipe"
-                                ]
-
-                            }
-                        );
-
-
-
-                    let errorOutput =
-                        "";
-
-
-
-                    piper.stderr.on(
-                        "data",
-                        (chunk) => {
-
-                            errorOutput +=
-                                chunk.toString();
-
-                        }
-                    );
-
-
-
-                    piper.on(
-                        "error",
-                        (error) => {
-
-                            reject(
-                                error
-                            );
-
-                        }
-                    );
-
-
-
-                    piper.on(
-                        "close",
-                        (code) => {
-
-                            if (
-                                code !== 0
-                            ) {
-
-                                reject(
-                                    new Error(
-                                        errorOutput ||
-                                        "PIPER_PROCESS_FAILED"
-                                    )
-                                );
-
-                                return;
-
-                            }
-
-
-
-                            if (
-                                !fs.existsSync(
-                                    temporaryWavFile
-                                )
-                            ) {
-
-                                reject(
-                                    new Error(
-                                        "PIPER_AUDIO_FILE_NOT_CREATED"
-                                    )
-                                );
-
-                                return;
-
-                            }
-
-
-
-                            const stats =
-                                fs.statSync(
-                                    temporaryWavFile
-                                );
-
-
-
-                            if (
-                                !stats.size
-                            ) {
-
-                                reject(
-                                    new Error(
-                                        "PIPER_AUDIO_EMPTY"
-                                    )
-                                );
-
-                                return;
-
-                            }
-
-
-
-                            resolve();
-
-                        }
-
-                    );
-
-
-
-                    piper.stdin.write(
-                        text + "\n"
-                    );
-
-
-
-                    piper.stdin.end();
-
-                }
-            );
-
-
-
-            const audioBuffer =
-                await fs.promises.readFile(
-                    temporaryWavFile
-                );
-
-
-
-            const audioBase64 =
-                audioBuffer.toString(
-                    "base64"
-                );
-
-
-
-            return res.json({
-
-                audio:
-                    audioBase64,
-
-                mimeType:
-                    "audio/wav"
-
-            });
-
-
-        } catch (error) {
-
-
-            console.error(
-
-                "FOBAS PIPER FRENCH FEMALE TTS ERROR:",
-
-                error.message
-
-            );
-
-
-
-            return res.status(500).json({
-
-                error:
-                    "Piper French TTS service unavailable."
-
-            });
-
-
-        } finally {
-
-
-            if (
-                temporaryWavFile &&
-                fs.existsSync(
-                    temporaryWavFile
-                )
-            ) {
-
-                try {
-
-                    await fs.promises.unlink(
-                        temporaryWavFile
-                    );
-
-                } catch (cleanupError) {}
-
-            }
-
+        if(!text){
+            return res.status(400).send("Missing text");
         }
 
+
+        const maryUrl =
+        "http://localhost:59125/process";
+
+
+        const response = await axios.get(
+            maryUrl,
+            {
+                params:{
+                    INPUT_TEXT: text,
+                    INPUT_TYPE:"TEXT",
+                    OUTPUT_TYPE:"AUDIO",
+                    AUDIO:"WAVE",
+                    LOCALE:"fr",
+                    VOICE:"enst-camille-hsmm"
+                },
+                responseType:"arraybuffer"
+            }
+        );
+
+
+        res.set({
+            "Content-Type":"audio/wav",
+            "Content-Length":response.data.length
+        });
+
+
+        res.send(response.data);
+
+
+    } catch(error){
+
+        console.log("MARYTTS ERROR:", error.message);
+
+        res.status(500).send(
+            "Voice unavailable"
+        );
+
     }
-);
+
+});
+
+
+
 
 
 
