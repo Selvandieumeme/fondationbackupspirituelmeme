@@ -603,18 +603,27 @@ ${language || 'fr-FR'}
 
 
 
-
-
+```js
 // =====================================
 // CAMPUS AI PROFESSOR
 // PIPER FRENCH FEMALE TTS ENGINE
-// NODE.JS / PIPER
-// fr_FR-siwis-medium
 // ISOLATED MODULE
+// fr_FR-siwis-medium
+// REPLACES ELEVENLABS TTS ENGINE
 // =====================================
 
-const { spawn } =
-    require("child_process");
+const {
+    spawn
+} = require("child_process");
+
+const fs =
+    require("fs");
+
+const os =
+    require("os");
+
+const path =
+    require("path");
 
 
 
@@ -631,6 +640,11 @@ const PIPER_MODEL =
 app.post(
     "/api/ai-professor/voice",
     async (req, res) => {
+
+        let temporaryWavFile =
+            null;
+
+
 
         try {
 
@@ -655,145 +669,198 @@ app.post(
 
 
 
-            const audioBuffer =
-                await new Promise(
-                    (resolve, reject) => {
+            if (
+                !fs.existsSync(
+                    PIPER_EXECUTABLE
+                )
+            ) {
 
-                        const piper =
-                            spawn(
-                                PIPER_EXECUTABLE,
-      
-[
-    "--model",
-    PIPER_MODEL,
-    "--length_scale",
-    "1.20",
-    "--output_file",
-    "-"
-],
+                throw new Error(
+                    "PIPER_EXECUTABLE_NOT_FOUND"
+                );
 
-                                {
-                                    stdio: [
-                                        "pipe",
-                                        "pipe",
-                                        "pipe"
-                                    ]
-                                }
+            }
+
+
+
+            if (
+                !fs.existsSync(
+                    PIPER_MODEL
+                )
+            ) {
+
+                throw new Error(
+                    "PIPER_MODEL_NOT_FOUND"
+                );
+
+            }
+
+
+
+            temporaryWavFile =
+                path.join(
+                    os.tmpdir(),
+                    "ranise-piper-" +
+                    Date.now() +
+                    "-" +
+                    Math.random()
+                        .toString(36)
+                        .slice(2) +
+                    ".wav"
+                );
+
+
+
+            await new Promise(
+                (
+                    resolve,
+                    reject
+                ) => {
+
+                    const piper =
+                        spawn(
+                            PIPER_EXECUTABLE,
+                            [
+
+                                "--model",
+                                PIPER_MODEL,
+
+                                "--length_scale",
+                                "1.20",
+
+                                "--output_file",
+                                temporaryWavFile
+
+                            ],
+                            {
+
+                                stdio: [
+                                    "pipe",
+                                    "ignore",
+                                    "pipe"
+                                ]
+
+                            }
+                        );
+
+
+
+                    let errorOutput =
+                        "";
+
+
+
+                    piper.stderr.on(
+                        "data",
+                        (chunk) => {
+
+                            errorOutput +=
+                                chunk.toString();
+
+                        }
+                    );
+
+
+
+                    piper.on(
+                        "error",
+                        (error) => {
+
+                            reject(
+                                error
                             );
 
-
-
-                        const chunks = [];
-
-                        const errorChunks = [];
+                        }
+                    );
 
 
 
-                        piper.stdout.on(
-                            "data",
-                            (chunk) => {
+                    piper.on(
+                        "close",
+                        (code) => {
 
-                                chunks.push(
-                                    chunk
-                                );
-
-                            }
-                        );
-
-
-
-                        piper.stderr.on(
-                            "data",
-                            (chunk) => {
-
-                                errorChunks.push(
-                                    chunk
-                                );
-
-                            }
-                        );
-
-
-
-                        piper.on(
-                            "error",
-                            (error) => {
+                            if (
+                                code !== 0
+                            ) {
 
                                 reject(
-                                    error
+                                    new Error(
+                                        errorOutput ||
+                                        "PIPER_PROCESS_FAILED"
+                                    )
                                 );
 
+                                return;
+
                             }
-                        );
 
 
 
-                        piper.on(
-                            "close",
-                            (code) => {
+                            if (
+                                !fs.existsSync(
+                                    temporaryWavFile
+                                )
+                            ) {
 
-                                if (code !== 0) {
-
-                                    reject(
-                                        new Error(
-                                            Buffer
-                                                .concat(
-                                                    errorChunks
-                                                )
-                                                .toString(
-                                                    "utf8"
-                                                ) ||
-                                            "PIPER_PROCESS_FAILED"
-                                        )
-                                    );
-
-                                    return;
-
-                                }
-
-
-
-                                const output =
-                                    Buffer.concat(
-                                        chunks
-                                    );
-
-
-
-                                if (
-                                    !output.length
-                                ) {
-
-                                    reject(
-                                        new Error(
-                                            "PIPER_AUDIO_EMPTY"
-                                        )
-                                    );
-
-                                    return;
-
-                                }
-
-
-
-                                resolve(
-                                    output
+                                reject(
+                                    new Error(
+                                        "PIPER_AUDIO_FILE_NOT_CREATED"
+                                    )
                                 );
 
+                                return;
+
                             }
-                        );
 
 
 
-                        piper.stdin.write(
-                            text
-                        );
+                            const stats =
+                                fs.statSync(
+                                    temporaryWavFile
+                                );
 
 
 
-                        piper.stdin.end();
+                            if (
+                                !stats.size
+                            ) {
 
-                    }
+                                reject(
+                                    new Error(
+                                        "PIPER_AUDIO_EMPTY"
+                                    )
+                                );
+
+                                return;
+
+                            }
+
+
+
+                            resolve();
+
+                        }
+
+                    );
+
+
+
+                    piper.stdin.write(
+                        text + "\n"
+                    );
+
+
+
+                    piper.stdin.end();
+
+                }
+            );
+
+
+
+            const audioBuffer =
+                await fs.promises.readFile(
+                    temporaryWavFile
                 );
 
 
@@ -836,10 +903,32 @@ app.post(
 
             });
 
+
+        } finally {
+
+
+            if (
+                temporaryWavFile &&
+                fs.existsSync(
+                    temporaryWavFile
+                )
+            ) {
+
+                try {
+
+                    await fs.promises.unlink(
+                        temporaryWavFile
+                    );
+
+                } catch (cleanupError) {}
+
+            }
+
         }
 
     }
 );
+```
 
 
 
