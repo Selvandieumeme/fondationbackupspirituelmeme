@@ -4394,8 +4394,6 @@ window.CampusAIProfessor = {
 
 
 
-
-
 // =====================================
 // CAMPUS AI PROFESSOR
 // PIPER FRENCH VOICE BRIDGE
@@ -4407,7 +4405,7 @@ let raniseProfessorAudio = null;
 
 
 
-async function speakProfessorIAWithText2Wav(text){
+async function speakProfessorIAWithPiper(text){
 
     if(
         !text ||
@@ -4639,15 +4637,13 @@ async function speakProfessorIAWithText2Wav(text){
 
 
         console.error(
-            "Piper French Female Voice:",
+            "Piper French Voice:",
             error
         );
 
     }
 
 }
-
-
 
 
 
@@ -4837,6 +4833,14 @@ speechEngine.speak(speech);
     }
 
 }
+
+
+
+
+
+
+
+
 
 
 
