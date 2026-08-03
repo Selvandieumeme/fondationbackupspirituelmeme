@@ -4486,251 +4486,77 @@ async function requestCampusAIProfessor(message){
 
 
 
-```javascript
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 // =====================================
 // CAMPUS AI PROFESSOR
 // PIPER FRENCH VOICE BRIDGE
-// STABLE CONTINUOUS CHAT VERSION
+// TRUE SINGLE-AUDIO VERSION
 // CONNECTS GROQ TEXT TO PIPER TTS
 // =====================================
 
-
 let raniseProfessorAudio = null;
 
-let ranisePiperQueue = [];
 
-let ranisePiperBusy = false;
+// =====================================
+// PIPER AUDIO QUEUE
+// EACH RESPONSE MUST WAIT FOR
+// THE PREVIOUS AUDIO TO FINISH
+// =====================================
 
-let ranisePiperInitialized = false;
-
-let ranisePiperCurrentUrl = null;
-
-let ranisePiperCurrentResolve = null;
-
-let ranisePiperCurrentReject = null;
-
+let raniseProfessorAudioQueue =
+    Promise.resolve();
 
 
 // =====================================
-// CREATE AUDIO ENGINE ONCE
+// PUBLIC PIPER SPEAK FUNCTION
 // =====================================
 
-function raniseInitializePiperAudio(){
+function speakProfessorIAWithPiper(text){
 
-    if(
-        ranisePiperInitialized &&
-        raniseProfessorAudio
-    ){
+    raniseProfessorAudioQueue =
+        raniseProfessorAudioQueue
+            .catch(function(){
 
-        return;
+                // Keep queue alive
+                // after an audio error.
 
-    }
+            })
+            .then(function(){
 
-
-
-    raniseProfessorAudio =
-        new Audio();
-
-
-
-    raniseProfessorAudio.preload =
-        "auto";
-
-
-
-    raniseProfessorAudio.volume =
-        1;
-
-
-
-    raniseProfessorAudio.onplay =
-        function(){
-
-            console.log(
-                "PIPER: AUDIO PLAYING"
-            );
-
-        };
-
-
-
-    raniseProfessorAudio.onended =
-        function(){
-
-            console.log(
-                "PIPER: AUDIO ENDED"
-            );
-
-
-            if(
-                typeof raniseStopTalking ===
-                "function"
-            ){
-
-                raniseStopTalking();
-
-            }
-
-
-
-            if(
-                ranisePiperCurrentUrl
-            ){
-
-                try{
-
-                    URL.revokeObjectURL(
-                        ranisePiperCurrentUrl
-                    );
-
-                }catch(error){}
-
-
-
-                ranisePiperCurrentUrl =
-                    null;
-
-            }
-
-
-
-            if(
-                typeof ranisePiperCurrentResolve ===
-                "function"
-            ){
-
-                const resolve =
-                    ranisePiperCurrentResolve;
-
-
-
-                ranisePiperCurrentResolve =
-                    null;
-
-
-
-                ranisePiperCurrentReject =
-                    null;
-
-
-
-                resolve();
-
-            }
-
-
-
-            ranisePiperBusy =
-                false;
-
-
-
-            raniseProcessPiperQueue();
-
-        };
-
-
-
-    raniseProfessorAudio.onerror =
-        function(){
-
-            console.error(
-                "PIPER AUDIO ELEMENT ERROR:",
-                raniseProfessorAudio.error
-            );
-
-
-            if(
-                typeof raniseStopTalking ===
-                "function"
-            ){
-
-                raniseStopTalking();
-
-            }
-
-
-
-            if(
-                ranisePiperCurrentUrl
-            ){
-
-                try{
-
-                    URL.revokeObjectURL(
-                        ranisePiperCurrentUrl
-                    );
-
-                }catch(error){}
-
-
-
-                ranisePiperCurrentUrl =
-                    null;
-
-            }
-
-
-
-            if(
-                typeof ranisePiperCurrentReject ===
-                "function"
-            ){
-
-                const reject =
-                    ranisePiperCurrentReject;
-
-
-
-                ranisePiperCurrentResolve =
-                    null;
-
-
-
-                ranisePiperCurrentReject =
-                    null;
-
-
-
-                reject(
-                    new Error(
-                        "PIPER_AUDIO_ELEMENT_ERROR"
-                    )
+                return raniseProfessorIAWithPiperInternal(
+                    text
                 );
 
-            }
+            });
 
-
-
-            ranisePiperBusy =
-                false;
-
-
-
-            raniseProcessPiperQueue();
-
-        };
-
-
-
-    ranisePiperInitialized =
-        true;
-
-
-
-    console.log(
-        "PIPER: AUDIO ENGINE INITIALIZED"
-    );
+    return raniseProfessorAudioQueue;
 
 }
 
 
-
 // =====================================
-// PUBLIC PIPER FUNCTION
+// INTERNAL PIPER AUDIO ENGINE
 // =====================================
 
-function speakProfessorIAWithPiper(text){
+async function raniseProfessorIAWithPiperInternal(text){
 
     if(
         !text ||
@@ -4738,517 +4564,213 @@ function speakProfessorIAWithPiper(text){
         !text.trim()
     ){
 
-        return Promise.resolve();
-
-    }
-
-
-
-    raniseInitializePiperAudio();
-
-
-
-    const cleanText =
-        text.trim();
-
-
-
-    return new Promise(
-        function(resolve, reject){
-
-            ranisePiperQueue.push({
-
-                text:
-                    cleanText,
-
-                resolve:
-                    resolve,
-
-                reject:
-                    reject
-
-            });
-
-
-
-            raniseProcessPiperQueue();
-
-        }
-    );
-
-}
-
-
-
-// =====================================
-// PROCESS ONE AUDIO AT A TIME
-// =====================================
-
-async function raniseProcessPiperQueue(){
-
-    if(
-        ranisePiperBusy
-    ){
-
         return;
 
     }
 
 
+    let audio = null;
 
-    if(
-        !ranisePiperQueue.length
-    ){
-
-        return;
-
-    }
-
-
-
-    ranisePiperBusy =
-        true;
-
-
-
-    const job =
-        ranisePiperQueue.shift();
-
+    let audioUrl = null;
 
 
     try{
 
-        await raniseGenerateAndPlayPiper(
-            job.text
-        );
+
+        // =====================================
+        // REQUEST PIPER AUDIO
+        // =====================================
+
+        const response =
+            await fetch(
+                "https://api.fondationbackupspirituel.com/api/ai-professor/voice",
+                {
+
+                    method:
+                        "POST",
+
+                    headers: {
+
+                        "Content-Type":
+                            "application/json"
+
+                    },
+
+                    body:
+                        JSON.stringify({
+
+                            text:
+                                text.trim()
+
+                        })
+
+                }
+            );
 
 
+        if(!response.ok){
 
-        if(
-            typeof job.resolve ===
-            "function"
-        ){
-
-            job.resolve();
-
-        }
-
-
-
-    }catch(error){
-
-        console.error(
-            "PIPER MESSAGE ERROR:",
-            error
-        );
-
-
-
-        if(
-            typeof job.reject ===
-            "function"
-        ){
-
-            job.reject(
-                error
+            throw new Error(
+                "PIPER_TTS_REQUEST_FAILED_" +
+                response.status
             );
 
         }
 
 
+        const result =
+            await response.json();
 
-        ranisePiperBusy =
-            false;
 
+        if(
+            !result ||
+            typeof result.audio !== "string" ||
+            !result.audio
+        ){
 
-
-        setTimeout(
-            function(){
-
-                raniseProcessPiperQueue();
-
-            },
-            0
-        );
-
-
-
-        return;
-
-    }
-
-
-
-    ranisePiperBusy =
-        false;
-
-
-
-    raniseProcessPiperQueue();
-
-}
-
-
-
-// =====================================
-// REQUEST PIPER AUDIO + PLAY
-// =====================================
-
-async function raniseGenerateAndPlayPiper(text){
-
-    console.log(
-        "PIPER: REQUEST START",
-        text.slice(0, 100)
-    );
-
-
-
-    const response =
-        await fetch(
-            "https://api.fondationbackupspirituel.com/api/ai-professor/voice",
-            {
-
-                method:
-                    "POST",
-
-                headers: {
-
-                    "Content-Type":
-                        "application/json"
-
-                },
-
-                body:
-                    JSON.stringify({
-
-                        text:
-                            text
-
-                    })
-
-            }
-        );
-
-
-
-    console.log(
-        "PIPER BACKEND RESPONSE:",
-        response.status,
-        response.statusText
-    );
-
-
-
-    if(
-        !response.ok
-    ){
-
-        const errorText =
-            await response.text();
-
-
-
-        console.error(
-            "PIPER BACKEND ERROR:",
-            response.status,
-            errorText
-        );
-
-
-
-        throw new Error(
-            "PIPER_TTS_REQUEST_FAILED_" +
-            response.status
-        );
-
-    }
-
-
-
-    const result =
-        await response.json();
-
-
-
-    if(
-        !result ||
-        typeof result.audio !== "string" ||
-        !result.audio
-    ){
-
-        throw new Error(
-            "PIPER_AUDIO_MISSING"
-        );
-
-    }
-
-
-
-    const mimeType =
-        result.mimeType ||
-        "audio/wav";
-
-
-
-    // =====================================
-    // BASE64 → BINARY
-    // =====================================
-
-    const binaryString =
-        atob(
-            result.audio
-        );
-
-
-
-    const bytes =
-        new Uint8Array(
-            binaryString.length
-        );
-
-
-
-    for(
-        let i = 0;
-        i < binaryString.length;
-        i++
-    ){
-
-        bytes[i] =
-            binaryString.charCodeAt(i);
-
-    }
-
-
-
-    const audioBlob =
-        new Blob(
-
-            [bytes],
-
-            {
-
-                type:
-                    mimeType
-
-            }
-
-        );
-
-
-
-    const audioUrl =
-        URL.createObjectURL(
-            audioBlob
-        );
-
-
-
-    // =====================================
-    // STOP OLD AUDIO ONLY IF IT EXISTS
-    // =====================================
-
-    if(
-        raniseProfessorAudio &&
-        !raniseProfessorAudio.paused
-    ){
-
-        try{
-
-            raniseProfessorAudio.pause();
-
-            raniseProfessorAudio.currentTime =
-                0;
-
-        }catch(error){}
-
-    }
-
-
-
-    // =====================================
-    // CLEAR OLD URL
-    // =====================================
-
-    if(
-        ranisePiperCurrentUrl
-    ){
-
-        try{
-
-            URL.revokeObjectURL(
-                ranisePiperCurrentUrl
+            throw new Error(
+                "PIPER_AUDIO_MISSING"
             );
 
-        }catch(error){}
-
-    }
+        }
 
 
-
-    ranisePiperCurrentUrl =
-        audioUrl;
-
-
-
-    raniseProfessorAudio.src =
-        audioUrl;
+        const mimeType =
+            result.mimeType ||
+            "audio/wav";
 
 
+        // =====================================
+        // BASE64 → BINARY
+        // =====================================
 
-    raniseProfessorAudio.load();
-
-
-
-    // =====================================
-    // WAIT FOR REAL AUDIO PLAYBACK
-    // =====================================
-
-    await new Promise(
-        function(resolve, reject){
-
-            let settled =
-                false;
+        const binaryString =
+            atob(
+                result.audio
+            );
 
 
+        const bytes =
+            new Uint8Array(
+                binaryString.length
+            );
 
-            function cleanup(){
 
-                if(
-                    raniseProfessorAudio
-                ){
+        for(
+            let i = 0;
+            i < binaryString.length;
+            i++
+        ){
 
-                    raniseProfessorAudio.onended =
+            bytes[i] =
+                binaryString.charCodeAt(i);
+
+        }
+
+
+        const audioBlob =
+            new Blob(
+
+                [bytes],
+
+                {
+
+                    type:
+                        mimeType
+
+                }
+
+            );
+
+
+        audioUrl =
+            URL.createObjectURL(
+                audioBlob
+            );
+
+
+        // =====================================
+        // STOP PREVIOUS AUDIO IF ANY
+        // =====================================
+
+        if(
+            raniseProfessorAudio &&
+            !raniseProfessorAudio.paused
+        ){
+
+            try{
+
+                raniseProfessorAudio.pause();
+
+                raniseProfessorAudio.currentTime =
+                    0;
+
+            }catch(error){}
+
+        }
+
+
+        // =====================================
+        // CREATE CURRENT AUDIO
+        // =====================================
+
+        audio =
+            new Audio(
+                audioUrl
+            );
+
+
+        raniseProfessorAudio =
+            audio;
+
+
+        audio.volume =
+            1;
+
+
+        // =====================================
+        // CRITICAL PART
+        // WAIT UNTIL AUDIO REALLY ENDS
+        // =====================================
+
+        await new Promise(
+            function(resolve, reject){
+
+                let finished =
+                    false;
+
+
+                function cleanup(){
+
+                    audio.onplay =
                         null;
 
-                    raniseProfessorAudio.onerror =
+                    audio.onended =
                         null;
 
-                    raniseProfessorAudio.onabort =
+                    audio.onerror =
                         null;
 
-                }
-
-            }
-
-
-
-            function finishSuccess(){
-
-                if(
-                    settled
-                ){
-
-                    return;
-
-                }
-
-
-
-                settled =
-                    true;
-
-
-
-                cleanup();
-
-
-
-                if(
-                    ranisePiperCurrentUrl
-                ){
-
-                    try{
-
-                        URL.revokeObjectURL(
-                            ranisePiperCurrentUrl
-                        );
-
-                    }catch(error){}
-
-
-
-                    ranisePiperCurrentUrl =
-                        null;
-
-                }
-
-
-
-                resolve();
-
-            }
-
-
-
-            function finishError(error){
-
-                if(
-                    settled
-                ){
-
-                    return;
-
-                }
-
-
-
-                settled =
-                    true;
-
-
-
-                cleanup();
-
-
-
-                if(
-                    typeof raniseStopTalking ===
-                    "function"
-                ){
-
-                    raniseStopTalking();
-
-                }
-
-
-
-                if(
-                    ranisePiperCurrentUrl
-                ){
-
-                    try{
-
-                        URL.revokeObjectURL(
-                            ranisePiperCurrentUrl
-                        );
-
-                    }catch(error){}
-
-
-
-                    ranisePiperCurrentUrl =
+                    audio.onabort =
                         null;
 
                 }
 
 
+                function finishSuccess(){
 
-                reject(
-                    error
-                );
+                    if(finished){
 
-            }
+                        return;
+
+                    }
 
 
+                    finished =
+                        true;
 
-            raniseProfessorAudio.onended =
-                function(){
 
-                    console.log(
-                        "PIPER: AUDIO REALLY ENDED"
-                    );
-
+                    cleanup();
 
 
                     if(
@@ -5261,152 +4783,230 @@ async function raniseGenerateAndPlayPiper(text){
                     }
 
 
+                    resolve();
 
-                    finishSuccess();
-
-                };
-
+                }
 
 
-            raniseProfessorAudio.onerror =
-                function(){
+                function finishError(error){
 
-                    console.error(
-                        "PIPER PLAYBACK ERROR:",
-                        raniseProfessorAudio.error
-                    );
+                    if(finished){
 
-
-
-                    finishError(
-                        new Error(
-                            "PIPER_AUDIO_PLAYBACK_ERROR"
-                        )
-                    );
-
-                };
-
-
-
-            raniseProfessorAudio.onabort =
-                function(){
-
-                    console.warn(
-                        "PIPER AUDIO ABORTED"
-                    );
-
-
-
-                    finishError(
-                        new Error(
-                            "PIPER_AUDIO_ABORTED"
-                        )
-                    );
-
-                };
-
-
-
-            // =====================================
-            // START ONLY THE AUDIO THAT CAME
-            // FROM THE CURRENT GROQ RESPONSE
-            // =====================================
-
-            let playPromise;
-
-
-
-            try{
-
-                playPromise =
-                    raniseProfessorAudio.play();
-
-            }catch(playError){
-
-                finishError(
-                    playError
-                );
-
-                return;
-
-            }
-
-
-
-            if(
-                playPromise &&
-                typeof playPromise.catch ===
-                "function"
-            ){
-
-                playPromise.catch(
-                    function(playError){
-
-                        console.error(
-                            "PIPER PLAY FAILED:",
-                            playError
-                        );
-
-
-
-                        finishError(
-                            playError
-                        );
+                        return;
 
                     }
-                );
+
+
+                    finished =
+                        true;
+
+
+                    cleanup();
+
+
+                    if(
+                        typeof raniseStopTalking ===
+                        "function"
+                    ){
+
+                        raniseStopTalking();
+
+                    }
+
+
+                    reject(error);
+
+                }
+
+
+                // =====================================
+                // AUDIO REALLY STARTED
+                // =====================================
+
+                audio.onplay =
+                    function(){
+
+                        if(
+                            typeof raniseStartTalking ===
+                            "function"
+                        ){
+
+                            raniseStartTalking();
+
+                        }
+
+                    };
+
+
+                // =====================================
+                // AUDIO REALLY FINISHED
+                // THIS RESOLVES THE QUEUE
+                // =====================================
+
+                audio.onended =
+                    function(){
+
+                        finishSuccess();
+
+                    };
+
+
+                // =====================================
+                // AUDIO ERROR
+                // =====================================
+
+                audio.onerror =
+                    function(){
+
+                        finishError(
+                            new Error(
+                                "PIPER_AUDIO_PLAYBACK_ERROR"
+                            )
+                        );
+
+                    };
+
+
+                // =====================================
+                // AUDIO ABORTED
+                // =====================================
+
+                audio.onabort =
+                    function(){
+
+                        finishError(
+                            new Error(
+                                "PIPER_AUDIO_ABORTED"
+                            )
+                        );
+
+                    };
+
+
+                // =====================================
+                // START AUDIO
+                // =====================================
+
+                let playPromise;
+
+
+                try{
+
+                    playPromise =
+                        audio.play();
+
+                }catch(playError){
+
+                    finishError(
+                        playError
+                    );
+
+                    return;
+
+                }
+
+
+                // =====================================
+                // PLAY() ERROR
+                // IMPORTANT:
+                // play() SUCCESS DOES NOT MEAN
+                // AUDIO HAS FINISHED.
+                //
+                // THE PROMISE ABOVE ONLY RESOLVES
+                // FROM onended.
+                // =====================================
+
+                if(
+                    playPromise &&
+                    typeof playPromise.catch ===
+                    "function"
+                ){
+
+                    playPromise.catch(
+                        function(playError){
+
+                            finishError(
+                                playError
+                            );
+
+                        }
+                    );
+
+                }
 
             }
-
-        }
-    );
+        );
 
 
+    }catch(error){
 
-    // =====================================
-    // ONLY START AVATAR TALKING AFTER
-    // PLAY() HAS ACTUALLY SUCCEEDED
-    // =====================================
-
-    if(
-        raniseProfessorAudio &&
-        !raniseProfessorAudio.paused &&
-        !raniseProfessorAudio.ended
-    ){
 
         if(
-            typeof raniseStartTalking ===
+            typeof raniseStopTalking ===
             "function"
         ){
 
-            raniseStartTalking();
+            raniseStopTalking();
+
+        }
+
+
+        console.error(
+            "Piper French Voice:",
+            error
+        );
+
+
+        if(
+            typeof talkToAIProfessorSetStatus ===
+            "function"
+        ){
+
+            talkToAIProfessorSetStatus(
+                "French voice unavailable."
+            );
+
+        }
+
+    }finally{
+
+
+        // =====================================
+        // RELEASE CURRENT AUDIO
+        // ONLY AFTER PLAYBACK OR ERROR
+        // =====================================
+
+        if(
+            audio &&
+            raniseProfessorAudio ===
+            audio
+        ){
+
+            raniseProfessorAudio =
+                null;
+
+        }
+
+
+        if(audioUrl){
+
+            try{
+
+                URL.revokeObjectURL(
+                    audioUrl
+                );
+
+            }catch(error){}
+
+
+            audioUrl =
+                null;
 
         }
 
     }
 
-
-
-    console.log(
-        "PIPER: MESSAGE COMPLETELY FINISHED"
-    );
-
 }
-```
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
