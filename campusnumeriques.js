@@ -4748,6 +4748,9 @@ async function requestCampusAIProfessor(message){
 
 
 
+
+
+```js
 // =====================================
 // RANISE MOISE
 // FRENCH VOICE ENGINE
@@ -4755,86 +4758,31 @@ async function requestCampusAIProfessor(message){
 
 function speakProfessorIA(message){
 
-    if(!window.speechSynthesis){
+    if(
+        !message ||
+        typeof message !== "string" ||
+        !message.trim()
+    ){
+
         return;
-    }
-
-    const speechEngine = window.speechSynthesis;
-
-    speechEngine.cancel();
-
-    const speech = new SpeechSynthesisUtterance();
-
-    speech.text = message;
-    speech.lang = "fr-FR";
-    speech.rate = 1;
-    speech.pitch = 1;
-    speech.volume = 1;
-
-    function speakNow(){
-
-        const voices = speechEngine.getVoices();
-
-        const voice = voices.find(v=>v.lang && v.lang.startsWith("fr"));
-
-
-if(voice){
-    speech.voice = voice;
-}
-
-
-
-speech.onstart = ()=>{
-
-    raniseStartTalking();
-
-};
-
-
-
-raniseStartTalking();
-
-speech.onend = ()=>{
-
-    raniseStopTalking();
-
-};
-
-
-speech.onerror = ()=>{
-
-    raniseStopTalking();
-
-};
-
-
-speechEngine.speak(speech);
-
-
-
-
 
     }
 
 
 
-    if(speechEngine.getVoices().length > 0){
+    if(
+        typeof speakProfessorIAWithPiper ===
+        "function"
+    ){
 
-        setTimeout(speakNow,150);
-
-    }else{
-
-        speechEngine.onvoiceschanged = ()=>{
-
-            setTimeout(speakNow,150);
-
-        };
+        return speakProfessorIAWithPiper(
+            message
+        );
 
     }
 
 }
-
-
+```
 
 
 
