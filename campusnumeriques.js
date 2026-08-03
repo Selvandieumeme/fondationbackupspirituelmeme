@@ -4394,310 +4394,6 @@ window.CampusAIProfessor = {
 
 
 
-// =====================================
-// CAMPUS AI PROFESSOR
-// PIPER FRENCH VOICE BRIDGE
-// CONNECTS GROQ TEXT TO PIPER TTS
-// ISOLATED MODULE
-// =====================================
-
-let raniseProfessorAudio = null;
-let raniseProfessorAudioUrl = null;
-
-
-
-async function speakProfessorIAWithPiper(text){
-
-    if(
-        !text ||
-        typeof text !== "string" ||
-        !text.trim()
-    ){
-
-        return;
-
-    }
-
-
-
-    try{
-
-        const response =
-            await fetch(
-                "https://api.fondationbackupspirituel.com/api/ai-professor/voice",
-                {
-
-                    method:
-                        "POST",
-
-                    headers: {
-
-                        "Content-Type":
-                            "application/json"
-
-                    },
-
-                    body:
-                        JSON.stringify({
-
-                            text:
-                                text.trim()
-
-                        })
-
-                }
-            );
-
-
-
-        if(!response.ok){
-
-            throw new Error(
-                "PIPER_TTS_REQUEST_FAILED_" +
-                response.status
-            );
-
-        }
-
-
-
-        const result =
-            await response.json();
-
-
-
-        if(
-            !result ||
-            typeof result.audio !== "string" ||
-            !result.audio
-        ){
-
-            throw new Error(
-                "PIPER_AUDIO_MISSING"
-            );
-
-        }
-
-
-
-        const mimeType =
-            result.mimeType ||
-            "audio/wav";
-
-
-
-        const binaryString =
-            atob(
-                result.audio
-            );
-
-
-
-        const bytes =
-            new Uint8Array(
-                binaryString.length
-            );
-
-
-
-        for(
-            let i = 0;
-            i < binaryString.length;
-            i++
-        ){
-
-            bytes[i] =
-                binaryString.charCodeAt(i);
-
-        }
-
-
-
-        const audioBlob =
-            new Blob(
-                [bytes],
-                {
-                    type:
-                        mimeType
-                }
-            );
-
-
-
-        const audioUrl =
-            URL.createObjectURL(
-                audioBlob
-            );
-
-
-
-        if(
-            raniseProfessorAudio
-        ){
-
-            try{
-
-                raniseProfessorAudio.pause();
-
-                raniseProfessorAudio.currentTime =
-                    0;
-
-            }catch(error){}
-
-        }
-
-
-
-        if(
-            raniseProfessorAudioUrl
-        ){
-
-            try{
-
-                URL.revokeObjectURL(
-                    raniseProfessorAudioUrl
-                );
-
-            }catch(error){}
-
-        }
-
-
-
-        raniseProfessorAudioUrl =
-            audioUrl;
-
-
-
-        const audio =
-            new Audio();
-
-
-
-        raniseProfessorAudio =
-            audio;
-
-
-
-        audio.src =
-            audioUrl;
-
-
-
-        audio.preload =
-            "auto";
-
-
-
-        audio.volume =
-            1;
-
-
-
-        audio.onplay =
-            function(){
-
-                if(
-                    typeof raniseStartTalking ===
-                    "function"
-                ){
-
-                    raniseStartTalking();
-
-                }
-
-            };
-
-
-
-        audio.onended =
-            function(){
-
-                if(
-                    typeof raniseStopTalking ===
-                    "function"
-                ){
-
-                    raniseStopTalking();
-
-                }
-
-
-
-                if(
-                    raniseProfessorAudioUrl ===
-                    audioUrl
-                ){
-
-                    try{
-
-                        URL.revokeObjectURL(
-                            audioUrl
-                        );
-
-                    }catch(error){}
-
-
-
-                    raniseProfessorAudioUrl =
-                        null;
-
-                }
-
-            };
-
-
-
-        audio.onerror =
-            function(){
-
-                if(
-                    typeof raniseStopTalking ===
-                    "function"
-                ){
-
-                    raniseStopTalking();
-
-                }
-
-            };
-
-
-
-        await audio.play();
-
-    }catch(error){
-
-
-        if(
-            typeof raniseStopTalking ===
-            "function"
-        ){
-
-            raniseStopTalking();
-
-        }
-
-
-
-        console.error(
-            "PIPER FRONTEND PLAYBACK ERROR:",
-            error
-        );
-
-    }
-
-}
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -4786,6 +4482,628 @@ async function requestCampusAIProfessor(message){
 
 
 
+
+
+// =====================================
+// CAMPUS AI PROFESSOR
+// PIPER FRENCH VOICE BRIDGE
+// FIXED MULTI-AUDIO VERSION
+// CONNECTS GROQ TEXT TO PIPER TTS
+// =====================================
+
+let raniseProfessorAudio = null;
+
+
+// =====================================
+// PIPER AUDIO QUEUE
+// ENSURES ONE AUDIO PLAYS AT A TIME
+// =====================================
+
+let raniseProfessorAudioQueue =
+    Promise.resolve();
+
+
+// =====================================
+// PUBLIC PIPER SPEAK FUNCTION
+// EVERY NEW IA RESPONSE ENTERS QUEUE
+// =====================================
+
+function speakProfessorIAWithPiper(text){
+
+    raniseProfessorAudioQueue =
+        raniseProfessorAudioQueue
+            .catch(function(){
+
+                // Keep queue alive even if
+                // a previous audio failed.
+
+            })
+            .then(function(){
+
+                return raniseProfessorIAWithPiperInternal(
+                    text
+                );
+
+            });
+
+    return raniseProfessorAudioQueue;
+
+}
+
+
+
+// =====================================
+// INTERNAL PIPER AUDIO ENGINE
+// =====================================
+
+async function raniseProfessorIAWithPiperInternal(text){
+
+    console.log(
+        "=== PIPER FRONTEND TEST START ==="
+    );
+
+
+    console.log(
+        "PIPER STEP 1: FUNCTION CALLED"
+    );
+
+
+    if(
+        !text ||
+        typeof text !== "string" ||
+        !text.trim()
+    ){
+
+        console.error(
+            "PIPER STEP 1 ERROR: EMPTY TEXT"
+        );
+
+        return;
+
+    }
+
+
+
+    console.log(
+        "PIPER STEP 2: TEXT OK",
+        text.trim().slice(0, 100)
+    );
+
+
+
+    let audio = null;
+    let audioUrl = null;
+
+
+
+    try{
+
+        console.log(
+            "PIPER STEP 3: SENDING REQUEST TO BACKEND"
+        );
+
+
+        const response =
+            await fetch(
+                "https://api.fondationbackupspirituel.com/api/ai-professor/voice",
+                {
+
+                    method:
+                        "POST",
+
+                    headers: {
+
+                        "Content-Type":
+                            "application/json"
+
+                    },
+
+                    body:
+                        JSON.stringify({
+
+                            text:
+                                text.trim()
+
+                        })
+
+                }
+            );
+
+
+
+        console.log(
+            "PIPER STEP 4: BACKEND RESPONSE",
+            response.status,
+            response.statusText
+        );
+
+
+
+        if(!response.ok){
+
+            const errorText =
+                await response.text();
+
+            console.error(
+                "PIPER STEP 4 ERROR:",
+                response.status,
+                errorText
+            );
+
+            throw new Error(
+                "PIPER_TTS_REQUEST_FAILED_" +
+                response.status
+            );
+
+        }
+
+
+
+        console.log(
+            "PIPER STEP 5: READING JSON"
+        );
+
+
+        const result =
+            await response.json();
+
+
+
+        console.log(
+            "PIPER STEP 6: JSON RECEIVED",
+            {
+                hasAudio:
+                    !!(
+                        result &&
+                        typeof result.audio === "string" &&
+                        result.audio
+                    ),
+
+                mimeType:
+                    result?.mimeType,
+
+                audioLength:
+                    typeof result?.audio === "string"
+                        ? result.audio.length
+                        : 0
+
+            }
+        );
+
+
+
+        if(
+            !result ||
+            typeof result.audio !== "string" ||
+            !result.audio
+        ){
+
+            console.error(
+                "PIPER STEP 6 ERROR: AUDIO MISSING"
+            );
+
+            throw new Error(
+                "PIPER_AUDIO_MISSING"
+            );
+
+        }
+
+
+
+        const mimeType =
+            result.mimeType ||
+            "audio/wav";
+
+
+
+        console.log(
+            "PIPER STEP 7: DECODING BASE64"
+        );
+
+
+
+        const binaryString =
+            atob(
+                result.audio
+            );
+
+
+
+        console.log(
+            "PIPER STEP 8: BASE64 DECODED",
+            "bytes=" + binaryString.length
+        );
+
+
+
+        const bytes =
+            new Uint8Array(
+                binaryString.length
+            );
+
+
+
+        for(
+            let i = 0;
+            i < binaryString.length;
+            i++
+        ){
+
+            bytes[i] =
+                binaryString.charCodeAt(i);
+
+        }
+
+
+
+        const audioBlob =
+            new Blob(
+
+                [bytes],
+
+                {
+
+                    type:
+                        mimeType
+
+                }
+
+            );
+
+
+
+        console.log(
+            "PIPER STEP 9: AUDIO BLOB CREATED",
+            {
+                size:
+                    audioBlob.size,
+
+                type:
+                    audioBlob.type
+
+            }
+        );
+
+
+
+        audioUrl =
+            URL.createObjectURL(
+                audioBlob
+            );
+
+
+
+        console.log(
+            "PIPER STEP 10: AUDIO URL CREATED"
+        );
+
+
+
+        // =====================================
+        // STOP ONLY THE CURRENT PREVIOUS AUDIO
+        // =====================================
+
+        if(
+            raniseProfessorAudio &&
+            !raniseProfessorAudio.paused
+        ){
+
+            try{
+
+                raniseProfessorAudio.pause();
+
+                raniseProfessorAudio.currentTime =
+                    0;
+
+            }catch(error){
+
+                console.warn(
+                    "PIPER PREVIOUS AUDIO STOP WARNING:",
+                    error
+                );
+
+            }
+
+        }
+
+
+
+        // =====================================
+        // CREATE LOCAL AUDIO INSTANCE
+        // IMPORTANT:
+        // EVENT HANDLERS USE THIS LOCAL INSTANCE
+        // NOT THE GLOBAL VARIABLE
+        // =====================================
+
+        audio =
+            new Audio(
+                audioUrl
+            );
+
+
+        raniseProfessorAudio =
+            audio;
+
+
+
+        audio.volume =
+            1;
+
+
+
+        console.log(
+            "PIPER STEP 11: AUDIO OBJECT CREATED",
+            {
+                readyState:
+                    audio.readyState,
+
+                networkState:
+                    audio.networkState
+
+            }
+        );
+
+
+
+        audio.onloadedmetadata =
+            function(){
+
+                console.log(
+                    "PIPER STEP 12: AUDIO METADATA LOADED",
+                    {
+                        duration:
+                            audio.duration
+                    }
+                );
+
+            };
+
+
+
+        audio.oncanplay =
+            function(){
+
+                console.log(
+                    "PIPER STEP 13: AUDIO CAN PLAY"
+                );
+
+            };
+
+
+
+        audio.onplay =
+            function(){
+
+                console.log(
+                    "PIPER STEP 14: AUDIO PLAYING"
+                );
+
+
+                if(
+                    typeof raniseStartTalking ===
+                    "function"
+                ){
+
+                    raniseStartTalking();
+
+                }
+
+            };
+
+
+
+        audio.onended =
+            function(){
+
+                console.log(
+                    "PIPER STEP 15: AUDIO ENDED"
+                );
+
+
+                if(
+                    typeof raniseStopTalking ===
+                    "function"
+                ){
+
+                    raniseStopTalking();
+
+                }
+
+
+
+                if(
+                    audioUrl
+                ){
+
+                    URL.revokeObjectURL(
+                        audioUrl
+                    );
+
+                    audioUrl =
+                        null;
+
+                }
+
+
+
+                // Only clear global reference
+                // if this is still the active audio.
+
+                if(
+                    raniseProfessorAudio ===
+                    audio
+                ){
+
+                    raniseProfessorAudio =
+                        null;
+
+                }
+
+            };
+
+
+
+        audio.onerror =
+            function(){
+
+                console.error(
+                    "PIPER STEP AUDIO ERROR:",
+                    audio.error
+                );
+
+
+                if(
+                    typeof raniseStopTalking ===
+                    "function"
+                ){
+
+                    raniseStopTalking();
+
+                }
+
+
+
+                if(
+                    audioUrl
+                ){
+
+                    URL.revokeObjectURL(
+                        audioUrl
+                    );
+
+                    audioUrl =
+                        null;
+
+                }
+
+
+
+                // Do NOT replace the global
+                // reference if another audio
+                // has already become active.
+
+                if(
+                    raniseProfessorAudio ===
+                    audio
+                ){
+
+                    raniseProfessorAudio =
+                        null;
+
+                }
+
+            };
+
+
+
+        console.log(
+            "PIPER STEP 16: CALLING AUDIO.PLAY()"
+        );
+
+
+
+        try{
+
+            await audio.play();
+
+
+            console.log(
+                "PIPER STEP 17: AUDIO.PLAY() SUCCESS"
+            );
+
+
+        }catch(playError){
+
+            console.error(
+                "PIPER STEP 17 ERROR: AUDIO.PLAY() FAILED",
+                playError
+            );
+
+
+            throw playError;
+
+        }
+
+
+
+        console.log(
+            "=== PIPER FRONTEND TEST COMPLETE ==="
+        );
+
+
+
+    }catch(error){
+
+
+        if(
+            typeof raniseStopTalking ===
+            "function"
+        ){
+
+            raniseStopTalking();
+
+        }
+
+
+
+        if(
+            audioUrl
+        ){
+
+            try{
+
+                URL.revokeObjectURL(
+                    audioUrl
+                );
+
+            }catch(revokeError){}
+
+            audioUrl =
+                null;
+
+        }
+
+
+
+        if(
+            audio &&
+            raniseProfessorAudio ===
+            audio
+        ){
+
+            raniseProfessorAudio =
+                null;
+
+        }
+
+
+
+        console.error(
+            "=== PIPER FRONTEND TEST FAILED ==="
+        );
+
+
+        console.error(
+            "Piper French Voice:",
+            error
+        );
+
+
+
+        if(
+            typeof talkToAIProfessorSetStatus ===
+            "function"
+        ){
+
+            talkToAIProfessorSetStatus(
+                "French voice unavailable."
+            );
+
+        }
+
+    }
+
+}
 
 
 
