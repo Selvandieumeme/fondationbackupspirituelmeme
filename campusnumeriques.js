@@ -4394,29 +4394,19 @@ window.CampusAIProfessor = {
 
 
 
-
 // =====================================
 // CAMPUS AI PROFESSOR
 // PIPER FRENCH VOICE BRIDGE
-// DIAGNOSTIC VERSION
 // CONNECTS GROQ TEXT TO PIPER TTS
+// ISOLATED MODULE
 // =====================================
 
 let raniseProfessorAudio = null;
+let raniseProfessorAudioUrl = null;
 
 
 
 async function speakProfessorIAWithPiper(text){
-
-    console.log(
-        "=== PIPER FRONTEND TEST START ==="
-    );
-
-
-    console.log(
-        "PIPER STEP 1: FUNCTION CALLED"
-    );
-
 
     if(
         !text ||
@@ -4424,29 +4414,13 @@ async function speakProfessorIAWithPiper(text){
         !text.trim()
     ){
 
-        console.error(
-            "PIPER STEP 1 ERROR: EMPTY TEXT"
-        );
-
         return;
 
     }
 
 
 
-    console.log(
-        "PIPER STEP 2: TEXT OK",
-        text.trim().slice(0, 100)
-    );
-
-
-
     try{
-
-        console.log(
-            "PIPER STEP 3: SENDING REQUEST TO BACKEND"
-        );
-
 
         const response =
             await fetch(
@@ -4476,24 +4450,7 @@ async function speakProfessorIAWithPiper(text){
 
 
 
-        console.log(
-            "PIPER STEP 4: BACKEND RESPONSE",
-            response.status,
-            response.statusText
-        );
-
-
-
         if(!response.ok){
-
-            const errorText =
-                await response.text();
-
-            console.error(
-                "PIPER STEP 4 ERROR:",
-                response.status,
-                errorText
-            );
 
             throw new Error(
                 "PIPER_TTS_REQUEST_FAILED_" +
@@ -4504,36 +4461,8 @@ async function speakProfessorIAWithPiper(text){
 
 
 
-        console.log(
-            "PIPER STEP 5: READING JSON"
-        );
-
-
         const result =
             await response.json();
-
-
-
-        console.log(
-            "PIPER STEP 6: JSON RECEIVED",
-            {
-                hasAudio:
-                    !!(
-                        result &&
-                        typeof result.audio === "string" &&
-                        result.audio
-                    ),
-
-                mimeType:
-                    result?.mimeType,
-
-                audioLength:
-                    typeof result?.audio === "string"
-                        ? result.audio.length
-                        : 0
-
-            }
-        );
 
 
 
@@ -4542,10 +4471,6 @@ async function speakProfessorIAWithPiper(text){
             typeof result.audio !== "string" ||
             !result.audio
         ){
-
-            console.error(
-                "PIPER STEP 6 ERROR: AUDIO MISSING"
-            );
 
             throw new Error(
                 "PIPER_AUDIO_MISSING"
@@ -4561,23 +4486,10 @@ async function speakProfessorIAWithPiper(text){
 
 
 
-        console.log(
-            "PIPER STEP 7: DECODING BASE64"
-        );
-
-
-
         const binaryString =
             atob(
                 result.audio
             );
-
-
-
-        console.log(
-            "PIPER STEP 8: BASE64 DECODED",
-            "bytes=" + binaryString.length
-        );
 
 
 
@@ -4603,31 +4515,12 @@ async function speakProfessorIAWithPiper(text){
 
         const audioBlob =
             new Blob(
-
                 [bytes],
-
                 {
-
                     type:
                         mimeType
-
                 }
-
             );
-
-
-
-        console.log(
-            "PIPER STEP 9: AUDIO BLOB CREATED",
-            {
-                size:
-                    audioBlob.size,
-
-                type:
-                    audioBlob.type
-
-            }
-        );
 
 
 
@@ -4635,12 +4528,6 @@ async function speakProfessorIAWithPiper(text){
             URL.createObjectURL(
                 audioBlob
             );
-
-
-
-        console.log(
-            "PIPER STEP 10: AUDIO URL CREATED"
-        );
 
 
 
@@ -4661,65 +4548,54 @@ async function speakProfessorIAWithPiper(text){
 
 
 
+        if(
+            raniseProfessorAudioUrl
+        ){
+
+            try{
+
+                URL.revokeObjectURL(
+                    raniseProfessorAudioUrl
+                );
+
+            }catch(error){}
+
+        }
+
+
+
+        raniseProfessorAudioUrl =
+            audioUrl;
+
+
+
+        const audio =
+            new Audio();
+
+
+
         raniseProfessorAudio =
-            new Audio(
-                audioUrl
-            );
+            audio;
 
 
 
-        raniseProfessorAudio.volume =
+        audio.src =
+            audioUrl;
+
+
+
+        audio.preload =
+            "auto";
+
+
+
+        audio.volume =
             1;
 
 
 
-        console.log(
-            "PIPER STEP 11: AUDIO OBJECT CREATED",
-            {
-                readyState:
-                    raniseProfessorAudio.readyState,
-
-                networkState:
-                    raniseProfessorAudio.networkState
-
-            }
-        );
-
-
-
-        raniseProfessorAudio.onloadedmetadata =
+        audio.onplay =
             function(){
-
-                console.log(
-                    "PIPER STEP 12: AUDIO METADATA LOADED",
-                    {
-                        duration:
-                            raniseProfessorAudio.duration
-                    }
-                );
-
-            };
-
-
-
-        raniseProfessorAudio.oncanplay =
-            function(){
-
-                console.log(
-                    "PIPER STEP 13: AUDIO CAN PLAY"
-                );
-
-            };
-
-
-
-        raniseProfessorAudio.onplay =
-            function(){
-
-                console.log(
-                    "PIPER STEP 14: AUDIO PLAYING"
-                );
-
 
                 if(
                     typeof raniseStartTalking ===
@@ -4734,13 +4610,8 @@ async function speakProfessorIAWithPiper(text){
 
 
 
-        raniseProfessorAudio.onended =
+        audio.onended =
             function(){
-
-                console.log(
-                    "PIPER STEP 15: AUDIO ENDED"
-                );
-
 
                 if(
                     typeof raniseStopTalking ===
@@ -4752,22 +4623,33 @@ async function speakProfessorIAWithPiper(text){
                 }
 
 
-                URL.revokeObjectURL(
+
+                if(
+                    raniseProfessorAudioUrl ===
                     audioUrl
-                );
+                ){
+
+                    try{
+
+                        URL.revokeObjectURL(
+                            audioUrl
+                        );
+
+                    }catch(error){}
+
+
+
+                    raniseProfessorAudioUrl =
+                        null;
+
+                }
 
             };
 
 
 
-        raniseProfessorAudio.onerror =
+        audio.onerror =
             function(){
-
-                console.error(
-                    "PIPER STEP AUDIO ERROR:",
-                    raniseProfessorAudio.error
-                );
-
 
                 if(
                     typeof raniseStopTalking ===
@@ -4778,50 +4660,11 @@ async function speakProfessorIAWithPiper(text){
 
                 }
 
-
-                URL.revokeObjectURL(
-                    audioUrl
-                );
-
             };
 
 
 
-        console.log(
-            "PIPER STEP 16: CALLING AUDIO.PLAY()"
-        );
-
-
-
-        try{
-
-            await raniseProfessorAudio.play();
-
-
-            console.log(
-                "PIPER STEP 17: AUDIO.PLAY() SUCCESS"
-            );
-
-
-        }catch(playError){
-
-            console.error(
-                "PIPER STEP 17 ERROR: AUDIO.PLAY() FAILED",
-                playError
-            );
-
-
-            throw playError;
-
-        }
-
-
-
-        console.log(
-            "=== PIPER FRONTEND TEST COMPLETE ==="
-        );
-
-
+        await audio.play();
 
     }catch(error){
 
@@ -4838,31 +4681,20 @@ async function speakProfessorIAWithPiper(text){
 
 
         console.error(
-            "=== PIPER FRONTEND TEST FAILED ==="
-        );
-
-
-        console.error(
-            "Piper French Voice:",
+            "PIPER FRONTEND PLAYBACK ERROR:",
             error
         );
-
-
-
-        if(
-            typeof talkToAIProfessorSetStatus ===
-            "function"
-        ){
-
-            talkToAIProfessorSetStatus(
-                "French voice unavailable."
-            );
-
-        }
 
     }
 
 }
+
+
+
+
+
+
+
 
 
 
