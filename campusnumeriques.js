@@ -3672,12 +3672,10 @@ function renderChapter1ProfessorIA(){
 
 
 
-
-
 // =====================================
 // TALK TO AI PROFESSOR
 // INITIALIZATION
-// PIPER FRENCH VOICE COMPATIBLE
+// MARYTTS CAMILLE FRENCH VOICE COMPATIBLE
 // =====================================
 
 function initializeTalkToAIProfessor(){
@@ -3854,11 +3852,11 @@ function initializeTalkToAIProfessor(){
 
                 if(
                     lastProfessorMessage &&
-                    typeof speakProfessorIAWithPiper ===
+                    typeof speakProfessorIAWithMaryTTS ===
                     "function"
                 ){
 
-                    await speakProfessorIAWithPiper(
+                    await speakProfessorIAWithMaryTTS(
                         lastProfessorMessage
                     );
 
@@ -3869,9 +3867,6 @@ function initializeTalkToAIProfessor(){
     }
 
 }
-
-
-
 
 
 
@@ -3972,17 +3967,19 @@ async function talkToAIProfessorSend(){
 
 
 
-
 if(
-    typeof speakProfessorIAWithPiper ===
+    typeof speakProfessorIAWithMaryTTS ===
     "function"
 ){
 
-    await speakProfessorIAWithPiper(
+    await speakProfessorIAWithMaryTTS(
         response
     );
 
 }
+
+
+
 
 
 
@@ -4505,58 +4502,26 @@ async function requestCampusAIProfessor(message){
 
 
 
+
+
 // =====================================
 // CAMPUS AI PROFESSOR
-// PIPER FRENCH VOICE BRIDGE
-// TRUE SINGLE-AUDIO VERSION
-// CONNECTS GROQ TEXT TO PIPER TTS
+// MARYTTS CAMILLE FRENCH VOICE BRIDGE
+// CONNECTS GROQ TEXT TO MARYTTS
+// FULLY COMPATIBLE WITH
+// /api/ranise/voice
 // =====================================
 
 let raniseProfessorAudio = null;
 
 
-// =====================================
-// PIPER AUDIO QUEUE
-// EACH RESPONSE MUST WAIT FOR
-// THE PREVIOUS AUDIO TO FINISH
-// =====================================
 
-let raniseProfessorAudioQueue =
-    Promise.resolve();
+async function speakProfessorIAWithMaryTTS(text){
 
+    console.log(
+        "=== MARYTTS FRONTEND START ==="
+    );
 
-// =====================================
-// PUBLIC PIPER SPEAK FUNCTION
-// =====================================
-
-function speakProfessorIAWithPiper(text){
-
-    raniseProfessorAudioQueue =
-        raniseProfessorAudioQueue
-            .catch(function(){
-
-                // Keep queue alive
-                // after an audio error.
-
-            })
-            .then(function(){
-
-                return raniseProfessorIAWithPiperInternal(
-                    text
-                );
-
-            });
-
-    return raniseProfessorAudioQueue;
-
-}
-
-
-// =====================================
-// INTERNAL PIPER AUDIO ENGINE
-// =====================================
-
-async function raniseProfessorIAWithPiperInternal(text){
 
     if(
         !text ||
@@ -4564,32 +4529,34 @@ async function raniseProfessorIAWithPiperInternal(text){
         !text.trim()
     ){
 
+        console.error(
+            "MARYTTS ERROR: EMPTY TEXT"
+        );
+
         return;
 
     }
 
 
-    let audio = null;
-
-    let audioUrl = null;
-
 
     try{
 
+        console.log(
+            "MARYTTS: SENDING TEXT TO BACKEND"
+        );
 
-        // =====================================
-        // REQUEST PIPER AUDIO
-        // =====================================
+
 
         const response =
             await fetch(
-                "https://api.fondationbackupspirituel.com/api/ai-professor/voice",
+
+                "https://api.fondationbackupspirituel.com/api/ranise/voice",
+
                 {
 
-                    method:
-                        "POST",
+                    method:"POST",
 
-                    headers: {
+                    headers:{
 
                         "Content-Type":
                             "application/json"
@@ -4608,31 +4575,54 @@ async function raniseProfessorIAWithPiperInternal(text){
             );
 
 
+
+        console.log(
+
+            "MARYTTS RESPONSE:",
+
+            response.status
+
+        );
+
+
+
         if(!response.ok){
 
+            const errorText =
+                await response.text();
+
+            console.error(
+                "MARYTTS BACKEND ERROR:",
+                errorText
+            );
+
             throw new Error(
-                "PIPER_TTS_REQUEST_FAILED_" +
-                response.status
+                "MARYTTS_REQUEST_FAILED"
             );
 
         }
+
 
 
         const result =
             await response.json();
 
 
+
         if(
+
             !result ||
             typeof result.audio !== "string" ||
             !result.audio
+
         ){
 
             throw new Error(
-                "PIPER_AUDIO_MISSING"
+                "MARYTTS_AUDIO_MISSING"
             );
 
         }
+
 
 
         const mimeType =
@@ -4640,14 +4630,12 @@ async function raniseProfessorIAWithPiperInternal(text){
             "audio/wav";
 
 
-        // =====================================
-        // BASE64 → BINARY
-        // =====================================
 
         const binaryString =
             atob(
                 result.audio
             );
+
 
 
         const bytes =
@@ -4656,16 +4644,22 @@ async function raniseProfessorIAWithPiperInternal(text){
             );
 
 
+
         for(
+
             let i = 0;
+
             i < binaryString.length;
+
             i++
+
         ){
 
             bytes[i] =
                 binaryString.charCodeAt(i);
 
         }
+
 
 
         const audioBlob =
@@ -4683,19 +4677,16 @@ async function raniseProfessorIAWithPiperInternal(text){
             );
 
 
-        audioUrl =
+
+        const audioUrl =
             URL.createObjectURL(
                 audioBlob
             );
 
 
-        // =====================================
-        // STOP PREVIOUS AUDIO IF ANY
-        // =====================================
 
         if(
-            raniseProfessorAudio &&
-            !raniseProfessorAudio.paused
+            raniseProfessorAudio
         ){
 
             try{
@@ -4710,240 +4701,116 @@ async function raniseProfessorIAWithPiperInternal(text){
         }
 
 
-        // =====================================
-        // CREATE CURRENT AUDIO
-        // =====================================
 
-        audio =
+        raniseProfessorAudio =
             new Audio(
                 audioUrl
             );
 
 
-        raniseProfessorAudio =
-            audio;
 
+        raniseProfessorAudio.volume = 1;
 
-        audio.volume =
-            1;
 
 
-        // =====================================
-        // CRITICAL PART
-        // WAIT UNTIL AUDIO REALLY ENDS
-        // =====================================
+        raniseProfessorAudio.onplay =
+            function(){
 
-        await new Promise(
-            function(resolve, reject){
-
-                let finished =
-                    false;
-
-
-                function cleanup(){
-
-                    audio.onplay =
-                        null;
-
-                    audio.onended =
-                        null;
-
-                    audio.onerror =
-                        null;
-
-                    audio.onabort =
-                        null;
-
-                }
-
-
-                function finishSuccess(){
-
-                    if(finished){
-
-                        return;
-
-                    }
-
-
-                    finished =
-                        true;
-
-
-                    cleanup();
-
-
-                    if(
-                        typeof raniseStopTalking ===
-                        "function"
-                    ){
-
-                        raniseStopTalking();
-
-                    }
-
-
-                    resolve();
-
-                }
-
-
-                function finishError(error){
-
-                    if(finished){
-
-                        return;
-
-                    }
-
-
-                    finished =
-                        true;
-
-
-                    cleanup();
-
-
-                    if(
-                        typeof raniseStopTalking ===
-                        "function"
-                    ){
-
-                        raniseStopTalking();
-
-                    }
-
-
-                    reject(error);
-
-                }
-
-
-                // =====================================
-                // AUDIO REALLY STARTED
-                // =====================================
-
-                audio.onplay =
-                    function(){
-
-                        if(
-                            typeof raniseStartTalking ===
-                            "function"
-                        ){
-
-                            raniseStartTalking();
-
-                        }
-
-                    };
-
-
-                // =====================================
-                // AUDIO REALLY FINISHED
-                // THIS RESOLVES THE QUEUE
-                // =====================================
-
-                audio.onended =
-                    function(){
-
-                        finishSuccess();
-
-                    };
-
-
-                // =====================================
-                // AUDIO ERROR
-                // =====================================
-
-                audio.onerror =
-                    function(){
-
-                        finishError(
-                            new Error(
-                                "PIPER_AUDIO_PLAYBACK_ERROR"
-                            )
-                        );
-
-                    };
-
-
-                // =====================================
-                // AUDIO ABORTED
-                // =====================================
-
-                audio.onabort =
-                    function(){
-
-                        finishError(
-                            new Error(
-                                "PIPER_AUDIO_ABORTED"
-                            )
-                        );
-
-                    };
-
-
-                // =====================================
-                // START AUDIO
-                // =====================================
-
-                let playPromise;
-
-
-                try{
-
-                    playPromise =
-                        audio.play();
-
-                }catch(playError){
-
-                    finishError(
-                        playError
-                    );
-
-                    return;
-
-                }
-
-
-                // =====================================
-                // PLAY() ERROR
-                // IMPORTANT:
-                // play() SUCCESS DOES NOT MEAN
-                // AUDIO HAS FINISHED.
-                //
-                // THE PROMISE ABOVE ONLY RESOLVES
-                // FROM onended.
-                // =====================================
+                console.log(
+                    "MARYTTS AUDIO PLAYING"
+                );
 
                 if(
-                    playPromise &&
-                    typeof playPromise.catch ===
+
+                    typeof raniseStartTalking ===
                     "function"
+
                 ){
 
-                    playPromise.catch(
-                        function(playError){
-
-                            finishError(
-                                playError
-                            );
-
-                        }
-                    );
+                    raniseStartTalking();
 
                 }
 
-            }
+            };
+
+
+
+        raniseProfessorAudio.onended =
+            function(){
+
+                console.log(
+                    "MARYTTS AUDIO ENDED"
+                );
+
+                if(
+
+                    typeof raniseStopTalking ===
+                    "function"
+
+                ){
+
+                    raniseStopTalking();
+
+                }
+
+                URL.revokeObjectURL(
+                    audioUrl
+                );
+
+            };
+
+
+
+        raniseProfessorAudio.onerror =
+            function(){
+
+                console.error(
+                    "MARYTTS AUDIO ERROR"
+                );
+
+                if(
+
+                    typeof raniseStopTalking ===
+                    "function"
+
+                ){
+
+                    raniseStopTalking();
+
+                }
+
+                URL.revokeObjectURL(
+                    audioUrl
+                );
+
+            };
+
+
+
+        await raniseProfessorAudio.play();
+
+
+
+        console.log(
+            "=== MARYTTS SUCCESS ==="
         );
+
 
 
     }catch(error){
 
+        console.error(
+            "MARYTTS FRONTEND ERROR:",
+            error
+        );
+
+
 
         if(
+
             typeof raniseStopTalking ===
             "function"
+
         ){
 
             raniseStopTalking();
@@ -4951,74 +4818,25 @@ async function raniseProfessorIAWithPiperInternal(text){
         }
 
 
-        console.error(
-            "Piper French Voice:",
-            error
-        );
-
 
         if(
+
             typeof talkToAIProfessorSetStatus ===
             "function"
+
         ){
-
-
 
             talkToAIProfessorSetStatus(
-    error && error.message
-        ? "Voice error: " + error.message
-        : "Voice error: unknown"
-);
 
-        }
+                "French voice unavailable."
 
-    }finally{
-
-
-        // =====================================
-        // RELEASE CURRENT AUDIO
-        // ONLY AFTER PLAYBACK OR ERROR
-        // =====================================
-
-        if(
-            audio &&
-            raniseProfessorAudio ===
-            audio
-        ){
-
-            raniseProfessorAudio =
-                null;
-
-        }
-
-
-        if(audioUrl){
-
-            try{
-
-                URL.revokeObjectURL(
-                    audioUrl
-                );
-
-            }catch(error){}
-
-
-            audioUrl =
-                null;
+            );
 
         }
 
     }
 
 }
-
-
-
-
-
-
-
-
 
 
 
