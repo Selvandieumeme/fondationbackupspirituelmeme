@@ -4750,226 +4750,93 @@ async function requestCampusAIProfessor(message){
 
 
 
+
+
 // =====================================
 // RANISE MOISE
-// PIPER FRENCH FEMALE VOICE ENGINE
+// FRENCH VOICE ENGINE
 // =====================================
 
 function speakProfessorIA(message){
 
-    if(
-        !message ||
-        typeof message !== "string" ||
-        !message.trim()
-    ){
-
+    if(!window.speechSynthesis){
         return;
+    }
+
+    const speechEngine = window.speechSynthesis;
+
+    speechEngine.cancel();
+
+    const speech = new SpeechSynthesisUtterance();
+
+    speech.text = message;
+    speech.lang = "fr-FR";
+    speech.rate = 1;
+    speech.pitch = 1;
+    speech.volume = 1;
+
+    function speakNow(){
+
+        const voices = speechEngine.getVoices();
+
+        const voice = voices.find(v=>v.lang && v.lang.startsWith("fr"));
+
+
+if(voice){
+    speech.voice = voice;
+}
+
+
+
+speech.onstart = ()=>{
+
+    raniseStartTalking();
+
+};
+
+
+
+raniseStartTalking();
+
+speech.onend = ()=>{
+
+    raniseStopTalking();
+
+};
+
+
+speech.onerror = ()=>{
+
+    raniseStopTalking();
+
+};
+
+
+speechEngine.speak(speech);
+
+
+
+
 
     }
 
 
 
-    fetch(
-        "https://api.fondationbackupspirituel.com/api/ai-professor/voice",
-        {
+    if(speechEngine.getVoices().length > 0){
 
-            method:
-                "POST",
+        setTimeout(speakNow,150);
 
-            headers: {
+    }else{
 
-                "Content-Type":
-                    "application/json"
+        speechEngine.onvoiceschanged = ()=>{
 
-            },
+            setTimeout(speakNow,150);
 
-            body:
-                JSON.stringify({
+        };
 
-                    text:
-                        message.trim()
-
-                })
-
-        }
-    )
-    .then(
-        function(response){
-
-            if(!response.ok){
-
-                throw new Error(
-                    "PIPER_TTS_REQUEST_FAILED_" +
-                    response.status
-                );
-
-            }
-
-            return response.json();
-
-        }
-    )
-    .then(
-        function(result){
-
-            if(
-                !result ||
-                typeof result.audio !== "string" ||
-                !result.audio
-            ){
-
-                throw new Error(
-                    "PIPER_AUDIO_MISSING"
-                );
-
-            }
-
-
-
-            const mimeType =
-                result.mimeType ||
-                "audio/wav";
-
-
-
-            const binaryString =
-                atob(
-                    result.audio
-                );
-
-
-
-            const bytes =
-                new Uint8Array(
-                    binaryString.length
-                );
-
-
-
-            for(
-                let i = 0;
-                i < binaryString.length;
-                i++
-            ){
-
-                bytes[i] =
-                    binaryString.charCodeAt(i);
-
-            }
-
-
-
-            const audioBlob =
-                new Blob(
-                    [bytes],
-                    {
-                        type:
-                            mimeType
-                    }
-                );
-
-
-
-            const audioUrl =
-                URL.createObjectURL(
-                    audioBlob
-                );
-
-
-
-            if(
-                raniseProfessorAudio
-            ){
-
-                try{
-
-                    raniseProfessorAudio.pause();
-
-                    raniseProfessorAudio.currentTime =
-                        0;
-
-                }catch(error){}
-
-            }
-
-
-
-            raniseProfessorAudio =
-                new Audio(
-                    audioUrl
-                );
-
-
-
-            raniseProfessorAudio.volume =
-                1;
-
-
-
-            raniseProfessorAudio.onplay =
-                function(){
-
-                    raniseStartTalking();
-
-                };
-
-
-
-            raniseProfessorAudio.onended =
-                function(){
-
-                    raniseStopTalking();
-
-                    URL.revokeObjectURL(
-                        audioUrl
-                    );
-
-                };
-
-
-
-            raniseProfessorAudio.onerror =
-                function(){
-
-                    raniseStopTalking();
-
-                    URL.revokeObjectURL(
-                        audioUrl
-                    );
-
-                };
-
-
-
-            return raniseProfessorAudio.play();
-
-        }
-    )
-    .catch(
-        function(error){
-
-            raniseStopTalking();
-
-            console.error(
-                "FOBAS PIPER FRENCH FEMALE VOICE:",
-                error
-            );
-
-        }
-    );
+    }
 
 }
-
-
-
-
-
-
-
-
-
-
-
 
 
 
