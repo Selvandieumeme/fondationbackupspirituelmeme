@@ -599,64 +599,90 @@ ${language || 'fr-FR'}
 
 
 
+// =====================================
+// FOBAS AI RANISE
+// MARYTTS CAMILLE FRENCH FEMALE VOICE
+// ISOLATED MODULE
+// REPLACES PIPER TTS
+// =====================================
+
+app.post(
+    "/api/ranise/voice",
+    async (req,res)=>{
+
+        try {
+
+            const text =
+                req.body &&
+                typeof req.body.text === "string"
+                    ? req.body.text.trim()
+                    : "";
 
 
+            if(!text){
 
-// =================================================
-// FOBAS AI VOICE ENGINE - MARYTTS
-// =================================================
+                return res.status(400).json({
+                    error:"MARY_TEXT_EMPTY"
+                });
 
-app.get('/api/tts', async (req, res) => {
+            }
 
-    try {
 
-        const text = req.query.text;
+            const response =
+                await axios.get(
+                    "http://localhost:59125/process",
+                    {
+                        params:{
+                            INPUT_TEXT:text,
+                            INPUT_TYPE:"TEXT",
+                            OUTPUT_TYPE:"AUDIO",
+                            AUDIO:"WAVE",
+                            LOCALE:"fr",
+                            VOICE:"enst-camille-hsmm"
+                        },
+                        responseType:"arraybuffer"
+                    }
+                );
 
-        if(!text){
-            return res.status(400).send("Missing text");
+
+            const audioBase64 =
+                Buffer
+                .from(response.data)
+                .toString("base64");
+
+
+            return res.json({
+
+                audio: audioBase64,
+
+                mimeType:
+                    "audio/wav"
+
+            });
+
+
+        } catch(error){
+
+            console.error(
+                "FOBAS RANISE MARYTTS ERROR:",
+                error.message
+            );
+
+
+            return res.status(500).json({
+
+                error:
+                "MaryTTS Camille service unavailable."
+
+            });
+
         }
 
-
-        const maryUrl =
-        "http://localhost:59125/process";
-
-
-        const response = await axios.get(
-            maryUrl,
-            {
-                params:{
-                    INPUT_TEXT: text,
-                    INPUT_TYPE:"TEXT",
-                    OUTPUT_TYPE:"AUDIO",
-                    AUDIO:"WAVE",
-                    LOCALE:"fr",
-                    VOICE:"enst-camille-hsmm"
-                },
-                responseType:"arraybuffer"
-            }
-        );
-
-
-        res.set({
-            "Content-Type":"audio/wav",
-            "Content-Length":response.data.length
-        });
-
-
-        res.send(response.data);
-
-
-    } catch(error){
-
-        console.log("MARYTTS ERROR:", error.message);
-
-        res.status(500).send(
-            "Voice unavailable"
-        );
-
     }
+);
 
-});
+
+
 
 
 
