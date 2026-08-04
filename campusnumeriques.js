@@ -6831,13 +6831,19 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
 // =========================================================
 // CAMPUS WORD 2007
-// RANISE MOISE PRACTICE AVATAR
-// BLOCK PRACTICE AVATAR - ISOLATED
-// VISUAL ONLY
-// NO AUDIO
-// NO MARYTTS
-// NO PIPER
-// NO SPEECHSYNTHESIS
+// RANISE MOISE PRACTICE IA CARD
+// BLOCK - PRACTICE IA CARD POSITION ENGINE
+// ISOLATED / PROTECTED
+//
+// IMPORTANT:
+// - REUSES EXISTING .chapter1-ia-card
+// - DOES NOT CREATE A NEW AVATAR
+// - DOES NOT CREATE A NEW IA CARD
+// - DOES NOT TOUCH MARYTTS
+// - DOES NOT TOUCH PIPER
+// - DOES NOT TOUCH SPEECH SYNTHESIS
+// - DOES NOT MODIFY EXISTING IA LOGIC
+// - TOUCH + MOUSE DRAG
 // =========================================================
 
 (function(){
@@ -6846,33 +6852,12 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
 
     // =====================================================
-    // PRIVATE CONFIGURATION
-    // =====================================================
-
-    const RANISE_PRACTICE_CONFIG = {
-
-        avatarSrc:
-            "ranise-moise-smile.png",
-
-        avatarAlt:
-            "Ranise Moise",
-
-        avatarWidth:
-            76,
-
-        avatarHeight:
-            76
-
-    };
-
-
-    // =====================================================
     // PRIVATE STATE
     // =====================================================
 
-    let ranisePracticeAvatar = null;
+    let ranisePracticeCard = null;
 
-    let ranisePracticeContainer = null;
+    let ranisePracticeSimulation = null;
 
     let ranisePracticeDragging = false;
 
@@ -6882,29 +6867,76 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
     let ranisePracticeOffsetY = 0;
 
+    let ranisePracticeOriginalStyle = null;
+
 
     // =====================================================
-    // FIND REAL WORD SIMULATION CONTAINER
+    // FIND EXISTING RANISE IA CARD
     // =====================================================
 
-    function findSimulationContainer(){
+    function findExistingRaniseCard(){
 
-        const container =
+        const card =
             document.querySelector(
-                "#cwDocumentContainer"
+                ".chapter1-ia-card"
             );
 
 
-        if(container){
+        if(!card){
 
-            return container;
+            console.warn(
+                "RANISE PRACTICE IA: EXISTING .chapter1-ia-card NOT FOUND"
+            );
+
+            return null;
 
         }
 
 
-        console.warn(
-            "RANISE PRACTICE AVATAR: #cwDocumentContainer NOT FOUND"
-        );
+        return card;
+
+    }
+
+
+    // =====================================================
+    // FIND REAL WORD SIMULATION AREA
+    // =====================================================
+
+    function findPracticeSimulation(){
+
+        /*
+         * REAL WORD DOCUMENT WORKSPACE
+         */
+
+        const documentContainer =
+            document.getElementById(
+                "cwDocumentContainer"
+            );
+
+
+        if(documentContainer){
+
+            return documentContainer;
+
+        }
+
+
+        /*
+         * SAFE FALLBACK:
+         * COMPLETE WORD WINDOW
+         */
+
+        const wordWindow =
+            document.getElementById(
+                "cwWindow"
+            );
+
+
+        if(wordWindow){
+
+            return wordWindow;
+
+        }
 
 
         return null;
@@ -6913,92 +6945,14 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
 
     // =====================================================
-    // CREATE AVATAR
+    // SAVE ORIGINAL CARD STYLE
     // =====================================================
 
-    function createRaniseAvatar(container){
-
-        if(!container){
-
-            return null;
-
-        }
-
-
-        const existing =
-            container.querySelector(
-                ".ranisePratiqueAvatar"
-            );
-
-
-        if(existing){
-
-            return existing;
-
-        }
-
-
-        const avatar =
-            document.createElement(
-                "img"
-            );
-
-
-        avatar.className =
-            "ranisePratiqueAvatar";
-
-
-        avatar.src =
-            RANISE_PRACTICE_CONFIG.avatarSrc;
-
-
-        avatar.alt =
-            RANISE_PRACTICE_CONFIG.avatarAlt;
-
-
-        avatar.width =
-            RANISE_PRACTICE_CONFIG.avatarWidth;
-
-
-        avatar.height =
-            RANISE_PRACTICE_CONFIG.avatarHeight;
-
-
-        avatar.draggable =
-            false;
-
-
-        avatar.setAttribute(
-            "aria-label",
-            "Ranise Moise"
-        );
-
-
-        avatar.setAttribute(
-            "data-ranise-practice-avatar",
-            "true"
-        );
-
-
-        container.appendChild(
-            avatar
-        );
-
-
-        return avatar;
-
-    }
-
-
-    // =====================================================
-    // KEEP AVATAR INSIDE CONTAINER
-    // =====================================================
-
-    function keepInsideContainer(){
+    function saveOriginalStyle(card){
 
         if(
-            !ranisePracticeAvatar ||
-            !ranisePracticeContainer
+            ranisePracticeOriginalStyle ||
+            !card
         ){
 
             return;
@@ -7006,59 +6960,163 @@ const RaniseMoisePedagogicalExplanationEngine = {
         }
 
 
-        const containerRect =
-            ranisePracticeContainer
+        ranisePracticeOriginalStyle = {
+
+            position:
+                card.style.position,
+
+            left:
+                card.style.left,
+
+            top:
+                card.style.top,
+
+            width:
+                card.style.width,
+
+            maxWidth:
+                card.style.maxWidth,
+
+            margin:
+                card.style.margin,
+
+            zIndex:
+                card.style.zIndex,
+
+            touchAction:
+                card.style.touchAction,
+
+            boxSizing:
+                card.style.boxSizing
+
+        };
+
+    }
+
+
+    // =====================================================
+    // CALCULATE INITIAL POSITION
+    // =====================================================
+
+    function positionRaniseInsideSimulation(){
+
+        if(
+            !ranisePracticeCard ||
+            !ranisePracticeSimulation
+        ){
+
+            return;
+
+        }
+
+
+        const simulationRect =
+            ranisePracticeSimulation
                 .getBoundingClientRect();
 
 
-        const avatarRect =
-            ranisePracticeAvatar
+        const cardRect =
+            ranisePracticeCard
+                .getBoundingClientRect();
+
+
+        /*
+         * Small initial position:
+         * upper-right area of simulation.
+         */
+
+        const margin = 8;
+
+
+        let left =
+            simulationRect.width -
+            cardRect.width -
+            margin;
+
+
+        let top =
+            margin;
+
+
+        /*
+         * Prevent negative values on small screens.
+         */
+
+        left =
+            Math.max(
+                0,
+                left
+            );
+
+
+        top =
+            Math.max(
+                0,
+                top
+            );
+
+
+        ranisePracticeCard.style.left =
+            left + "px";
+
+
+        ranisePracticeCard.style.top =
+            top + "px";
+
+    }
+
+
+    // =====================================================
+    // KEEP CARD INSIDE SIMULATION
+    // =====================================================
+
+    function keepRaniseInsideSimulation(){
+
+        if(
+            !ranisePracticeCard ||
+            !ranisePracticeSimulation
+        ){
+
+            return;
+
+        }
+
+
+        const simulationRect =
+            ranisePracticeSimulation
+                .getBoundingClientRect();
+
+
+        const cardRect =
+            ranisePracticeCard
                 .getBoundingClientRect();
 
 
         let left =
             parseFloat(
-                ranisePracticeAvatar.style.left
-            );
+                ranisePracticeCard.style.left
+            ) || 0;
 
 
         let top =
             parseFloat(
-                ranisePracticeAvatar.style.top
-            );
-
-
-        if(
-            !Number.isFinite(left)
-        ){
-
-            left = 12;
-
-        }
-
-
-        if(
-            !Number.isFinite(top)
-        ){
-
-            top = 12;
-
-        }
+                ranisePracticeCard.style.top
+            ) || 0;
 
 
         const maxLeft =
             Math.max(
                 0,
-                containerRect.width -
-                avatarRect.width
+                simulationRect.width -
+                cardRect.width
             );
 
 
         const maxTop =
             Math.max(
                 0,
-                containerRect.height -
-                avatarRect.height
+                simulationRect.height -
+                cardRect.height
             );
 
 
@@ -7082,11 +7140,11 @@ const RaniseMoisePedagogicalExplanationEngine = {
             );
 
 
-        ranisePracticeAvatar.style.left =
+        ranisePracticeCard.style.left =
             left + "px";
 
 
-        ranisePracticeAvatar.style.top =
+        ranisePracticeCard.style.top =
             top + "px";
 
     }
@@ -7097,11 +7155,11 @@ const RaniseMoisePedagogicalExplanationEngine = {
     // TOUCH + MOUSE
     // =====================================================
 
-    function onPointerDown(event){
+    function onRanisePointerDown(event){
 
         if(
-            !ranisePracticeAvatar ||
-            !ranisePracticeContainer
+            !ranisePracticeCard ||
+            !ranisePracticeSimulation
         ){
 
             return;
@@ -7117,24 +7175,24 @@ const RaniseMoisePedagogicalExplanationEngine = {
             event.pointerId;
 
 
-        const avatarRect =
-            ranisePracticeAvatar
+        const cardRect =
+            ranisePracticeCard
                 .getBoundingClientRect();
 
 
         ranisePracticeOffsetX =
             event.clientX -
-            avatarRect.left;
+            cardRect.left;
 
 
         ranisePracticeOffsetY =
             event.clientY -
-            avatarRect.top;
+            cardRect.top;
 
 
         try{
 
-            ranisePracticeAvatar
+            ranisePracticeCard
                 .setPointerCapture(
                     event.pointerId
                 );
@@ -7142,8 +7200,8 @@ const RaniseMoisePedagogicalExplanationEngine = {
         }catch(error){}
 
 
-        ranisePracticeAvatar.classList.add(
-            "ranisePratiqueAvatarDragging"
+        ranisePracticeCard.classList.add(
+            "ranisePracticeCardDragging"
         );
 
 
@@ -7156,12 +7214,12 @@ const RaniseMoisePedagogicalExplanationEngine = {
     // POINTER MOVE
     // =====================================================
 
-    function onPointerMove(event){
+    function onRanisePointerMove(event){
 
         if(
             !ranisePracticeDragging ||
-            !ranisePracticeAvatar ||
-            !ranisePracticeContainer
+            !ranisePracticeCard ||
+            !ranisePracticeSimulation
         ){
 
             return;
@@ -7179,41 +7237,41 @@ const RaniseMoisePedagogicalExplanationEngine = {
         }
 
 
-        const containerRect =
-            ranisePracticeContainer
+        const simulationRect =
+            ranisePracticeSimulation
                 .getBoundingClientRect();
 
 
-        const avatarRect =
-            ranisePracticeAvatar
+        const cardRect =
+            ranisePracticeCard
                 .getBoundingClientRect();
 
 
         let left =
             event.clientX -
-            containerRect.left -
+            simulationRect.left -
             ranisePracticeOffsetX;
 
 
         let top =
             event.clientY -
-            containerRect.top -
+            simulationRect.top -
             ranisePracticeOffsetY;
 
 
         const maxLeft =
             Math.max(
                 0,
-                containerRect.width -
-                avatarRect.width
+                simulationRect.width -
+                cardRect.width
             );
 
 
         const maxTop =
             Math.max(
                 0,
-                containerRect.height -
-                avatarRect.height
+                simulationRect.height -
+                cardRect.height
             );
 
 
@@ -7237,11 +7295,11 @@ const RaniseMoisePedagogicalExplanationEngine = {
             );
 
 
-        ranisePracticeAvatar.style.left =
+        ranisePracticeCard.style.left =
             left + "px";
 
 
-        ranisePracticeAvatar.style.top =
+        ranisePracticeCard.style.top =
             top + "px";
 
 
@@ -7254,7 +7312,7 @@ const RaniseMoisePedagogicalExplanationEngine = {
     // POINTER UP
     // =====================================================
 
-    function onPointerUp(event){
+    function onRanisePointerUp(event){
 
         if(
             event.pointerId !==
@@ -7274,10 +7332,10 @@ const RaniseMoisePedagogicalExplanationEngine = {
             null;
 
 
-        if(ranisePracticeAvatar){
+        if(ranisePracticeCard){
 
-            ranisePracticeAvatar.classList.remove(
-                "ranisePratiqueAvatarDragging"
+            ranisePracticeCard.classList.remove(
+                "ranisePracticeCardDragging"
             );
 
         }
@@ -7289,25 +7347,120 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
 
     // =====================================================
-    // PREPARE REAL SIMULATION CONTAINER
+    // PREPARE EXISTING CARD
     // =====================================================
 
-    function prepareContainer(container){
+    function prepareExistingRaniseCard(card){
 
-        if(!container){
+        if(!card){
 
-            return;
+            return false;
 
         }
 
 
-        ranisePracticeContainer =
-            container;
+        saveOriginalStyle(
+            card
+        );
 
+
+        /*
+         * We reuse the existing card.
+         * We do NOT clone it.
+         */
+
+        card.classList.add(
+            "ranisePracticeCardActive"
+        );
+
+
+        card.style.position =
+            "absolute";
+
+
+        card.style.width =
+            "min(340px, calc(100% - 16px))";
+
+
+        card.style.maxWidth =
+            "340px";
+
+
+        card.style.margin =
+            "0";
+
+
+        card.style.boxSizing =
+            "border-box";
+
+
+        card.style.zIndex =
+            "999999";
+
+
+        card.style.touchAction =
+            "none";
+
+
+        /*
+         * IMPORTANT:
+         * We do not alter its inner HTML.
+         * Existing buttons and IA system remain intact.
+         */
+
+        return true;
+
+    }
+
+
+    // =====================================================
+    // OPEN PRACTICE IA
+    // =====================================================
+
+    function openRanisePracticeIA(){
+
+        const card =
+            findExistingRaniseCard();
+
+
+        if(!card){
+
+            return false;
+
+        }
+
+
+        const simulation =
+            findPracticeSimulation();
+
+
+        if(!simulation){
+
+            console.warn(
+                "RANISE PRACTICE IA: WORD SIMULATION AREA NOT FOUND"
+            );
+
+            return false;
+
+        }
+
+
+        ranisePracticeCard =
+            card;
+
+
+        ranisePracticeSimulation =
+            simulation;
+
+
+        /*
+         * Make simulation a positioning reference
+         * without replacing existing positioning.
+         */
 
         const computed =
             window.getComputedStyle(
-                container
+                simulation
             );
 
 
@@ -7316,132 +7469,30 @@ const RaniseMoisePedagogicalExplanationEngine = {
             "static"
         ){
 
-            container.style.position =
+            simulation.style.position =
                 "relative";
 
         }
 
-    }
-
-
-    // =====================================================
-    // BIND DRAG EVENTS ONCE ONLY
-    // =====================================================
-
-    function bindAvatarEvents(avatar){
-
-        if(!avatar){
-
-            return;
-
-        }
-
 
         if(
-            avatar.dataset.raniseDragBound ===
-            "true"
+            !prepareExistingRaniseCard(
+                card
+            )
         ){
-
-            return;
-
-        }
-
-
-        avatar.dataset.raniseDragBound =
-            "true";
-
-
-        avatar.addEventListener(
-            "pointerdown",
-            onPointerDown
-        );
-
-
-        avatar.addEventListener(
-            "pointermove",
-            onPointerMove
-        );
-
-
-        avatar.addEventListener(
-            "pointerup",
-            onPointerUp
-        );
-
-
-        avatar.addEventListener(
-            "pointercancel",
-            onPointerUp
-        );
-
-    }
-
-
-    // =====================================================
-    // MOUNT RANISE
-    // =====================================================
-
-    function mountRanise(container){
-
-        if(!container){
-
-            console.warn(
-                "RANISE PRACTICE AVATAR: SIMULATION CONTAINER NOT FOUND"
-            );
 
             return false;
 
         }
 
 
-        prepareContainer(
-            container
-        );
+        positionRaniseInsideSimulation();
 
-
-        ranisePracticeAvatar =
-            createRaniseAvatar(
-                container
-            );
-
-
-        if(!ranisePracticeAvatar){
-
-            return false;
-
-        }
-
-
-        bindAvatarEvents(
-            ranisePracticeAvatar
-        );
-
-
-        if(
-            !ranisePracticeAvatar.style.left
-        ){
-
-            ranisePracticeAvatar.style.left =
-                "12px";
-
-        }
-
-
-        if(
-            !ranisePracticeAvatar.style.top
-        ){
-
-            ranisePracticeAvatar.style.top =
-                "12px";
-
-        }
-
-
-        keepInsideContainer();
+        keepRaniseInsideSimulation();
 
 
         console.log(
-            "RANISE PRACTICE AVATAR: READY"
+            "RANISE PRACTICE IA: EXISTING CARD NOW ACTIVE IN WORD SIMULATION"
         );
 
 
@@ -7451,39 +7502,62 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
 
     // =====================================================
-    // PUBLIC OPEN FUNCTION
+    // INSTALL DRAG EVENTS ON EXISTING CARD
     // =====================================================
 
-    function openRanisePracticeAvatar(){
+    function installDragEvents(card){
 
-        const container =
-            findSimulationContainer();
+        if(!card){
+
+            return;
+
+        }
 
 
-        return mountRanise(
-            container
+        if(
+            card.dataset
+                .ranisePracticeDragReady ===
+            "true"
+        ){
+
+            return;
+
+        }
+
+
+        card.dataset
+            .ranisePracticeDragReady =
+            "true";
+
+
+        card.addEventListener(
+            "pointerdown",
+            onRanisePointerDown
+        );
+
+
+        card.addEventListener(
+            "pointermove",
+            onRanisePointerMove
+        );
+
+
+        card.addEventListener(
+            "pointerup",
+            onRanisePointerUp
+        );
+
+
+        card.addEventListener(
+            "pointercancel",
+            onRanisePointerUp
         );
 
     }
 
 
     // =====================================================
-    // PROTECTED PUBLIC NAMESPACE
-    // =====================================================
-
-    window.RaniseMoisePracticeAvatar = {
-
-        open:
-            openRanisePracticeAvatar,
-
-        mount:
-            mountRanise
-
-    };
-
-
-    // =====================================================
-    // SAFE BUTTON CONNECTION
+    // SAFE LAUNCH BUTTON CONNECTION
     // =====================================================
 
     document.addEventListener(
@@ -7504,20 +7578,30 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
 
             /*
-             * Nou pa anpeche okenn lòt
-             * click handler ki deja egziste.
-             *
-             * Nou tann simulation an monte
-             * anvan nou mete Ranise ladan l.
+             * Let the existing simulation launcher
+             * finish its own work first.
              */
 
             setTimeout(
                 function(){
 
-                    openRanisePracticeAvatar();
+                    const card =
+                        findExistingRaniseCard();
+
+
+                    if(card){
+
+                        installDragEvents(
+                            card
+                        );
+
+                    }
+
+
+                    openRanisePracticeIA();
 
                 },
-                0
+                100
             );
 
         },
@@ -7526,5 +7610,3 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
 
 })();
-
-
