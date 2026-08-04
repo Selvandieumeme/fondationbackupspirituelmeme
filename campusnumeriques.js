@@ -845,6 +845,22 @@ if(
 
 
 
+
+
+
+if(
+    typeof RaniseMoiseTheoryTeachingEngine !==
+    "undefined" &&
+    typeof RaniseMoiseTheoryTeachingEngine.teachFirstLesson ===
+    "function"
+){
+
+    await RaniseMoiseTheoryTeachingEngine
+        .teachFirstLesson();
+
+}
+
+
 },200);
 
     },50);
@@ -6293,6 +6309,379 @@ const RaniseMoiseTheoryTeachingEngine = {
 
         console.error(
             "RANISE THEORY TEACHING ENGINE: FIRST LESSON NOT AVAILABLE"
+        );
+
+    }
+
+
+})();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// =====================================
+// RANISE MOISE IA PROFESSOR
+// PEDAGOGICAL ENGINE
+// BLOCK 5 - PEDAGOGICAL EXPLANATION ENGINE
+// READ-ONLY / ISOLATED
+// MICROSOFT WORD 2007 - CHAPITRE 1
+// COMPATIBLE WITH BLOCK 1 + 2 + 3 + 4
+// MARYTTS ONLY
+// =====================================
+
+
+const RaniseMoisePedagogicalExplanationEngine = {
+
+
+    // =====================================
+    // GET CURRENT THEORY LESSON
+    // READ ONLY
+    // =====================================
+
+    getCurrentLesson:function(){
+
+
+        if(
+            typeof RaniseMoiseTheoryEngine ===
+            "undefined"
+        ){
+
+            return null;
+
+        }
+
+
+
+        return RaniseMoiseTheoryEngine
+            .getFirstLesson();
+
+
+    },
+
+
+
+
+
+    // =====================================
+    // BUILD PEDAGOGICAL EXPLANATION REQUEST
+    // READ ONLY
+    // =====================================
+
+    buildPedagogicalPrompt:function(lesson){
+
+
+        if(!lesson){
+
+            return null;
+
+        }
+
+
+
+        if(
+            typeof lesson.title !==
+            "string" ||
+            typeof lesson.content !==
+            "string"
+        ){
+
+            return null;
+
+        }
+
+
+
+        return (
+
+            "Tu es Ranise Moise, professeure IA de " +
+            "CampusNumérique FOBAS, spécialisée dans " +
+            "la formation Microsoft Word 2007. " +
+
+            "Tu viens de lire cette notion de cours. " +
+            "Maintenant, ne te contente surtout pas de " +
+            "répéter le texte du cours. " +
+
+            "Passe dans une véritable phase " +
+            "d'explication pédagogique destinée à un " +
+            "élève débutant. " +
+
+            "Explique avec des mots simples, clairs et " +
+            "progressifs. " +
+
+            "Décompose la notion en petites idées " +
+            "faciles à comprendre. " +
+
+            "Donne un exemple concret lié à " +
+            "Microsoft Word 2007 lorsque cela est " +
+            "pertinent. " +
+
+            "Explique pourquoi cette notion est " +
+            "importante pour l'élève. " +
+
+            "Termine par un court résumé de ce que " +
+            "l'élève doit retenir. " +
+
+            "Ne parle pas de ton fonctionnement interne. " +
+            "Ne mentionne ni API, ni backend, ni " +
+            "intelligence artificielle, ni MaryTTS. " +
+
+            "Adresse-toi directement à l'élève comme " +
+            "une véritable professeure. " +
+
+            "Notion à expliquer : " +
+
+            lesson.title +
+
+            ". " +
+
+            "Contenu de référence du cours : " +
+
+            lesson.content
+
+        );
+
+
+    },
+
+
+
+
+
+    // =====================================
+    // REQUEST PEDAGOGICAL EXPLANATION
+    // READ ONLY
+    // =====================================
+
+    requestExplanation:async function(prompt){
+
+
+        if(
+            !prompt ||
+            typeof prompt !== "string"
+        ){
+
+            return null;
+
+        }
+
+
+
+        if(
+            typeof requestCampusAIProfessor !==
+            "function"
+        ){
+
+            console.error(
+                "RANISE PEDAGOGICAL EXPLANATION ENGINE: AI REQUEST FUNCTION NOT AVAILABLE"
+            );
+
+            return null;
+
+        }
+
+
+
+        try{
+
+
+            const response =
+                await requestCampusAIProfessor(
+                    prompt
+                );
+
+
+
+            if(
+                !response ||
+                typeof response !== "string" ||
+                !response.trim()
+            ){
+
+                return null;
+
+            }
+
+
+
+            return response.trim();
+
+
+        }catch(error){
+
+
+            console.error(
+                "RANISE PEDAGOGICAL EXPLANATION ENGINE: AI REQUEST ERROR",
+                error
+            );
+
+
+            return null;
+
+
+        }
+
+
+    },
+
+
+
+
+
+    // =====================================
+    // TEACH PEDAGOGICAL EXPLANATION
+    // READ ONLY
+    // =====================================
+
+    teachExplanation:async function(){
+
+
+        const lesson =
+            this.getCurrentLesson();
+
+
+
+        if(!lesson){
+
+            console.error(
+                "RANISE PEDAGOGICAL EXPLANATION ENGINE: LESSON NOT AVAILABLE"
+            );
+
+            return false;
+
+        }
+
+
+
+        const prompt =
+            this.buildPedagogicalPrompt(
+                lesson
+            );
+
+
+
+        if(!prompt){
+
+            console.error(
+                "RANISE PEDAGOGICAL EXPLANATION ENGINE: PROMPT NOT AVAILABLE"
+            );
+
+            return false;
+
+        }
+
+
+
+        const explanation =
+            await this.requestExplanation(
+                prompt
+            );
+
+
+
+        if(!explanation){
+
+            console.error(
+                "RANISE PEDAGOGICAL EXPLANATION ENGINE: EXPLANATION NOT AVAILABLE"
+            );
+
+            return false;
+
+        }
+
+
+
+        console.log(
+            "RANISE PEDAGOGICAL EXPLANATION ENGINE: EXPLANATION READY",
+            lesson.title
+        );
+
+
+
+        if(
+            typeof speakProfessorIAWithMaryTTS !==
+            "function"
+        ){
+
+            console.error(
+                "RANISE PEDAGOGICAL EXPLANATION ENGINE: MARYTTS FUNCTION NOT AVAILABLE"
+            );
+
+            return false;
+
+        }
+
+
+
+        try{
+
+
+            await speakProfessorIAWithMaryTTS(
+                explanation
+            );
+
+
+
+            return true;
+
+
+        }catch(error){
+
+
+            console.error(
+                "RANISE PEDAGOGICAL EXPLANATION ENGINE: MARYTTS ERROR",
+                error
+            );
+
+
+            return false;
+
+
+        }
+
+
+    }
+
+
+};
+
+
+
+
+
+// =====================================
+// RANISE MOISE IA PROFESSOR
+// BLOCK 5 VERIFICATION
+// =====================================
+
+(function(){
+
+
+    const lesson =
+        RaniseMoisePedagogicalExplanationEngine
+            .getCurrentLesson();
+
+
+
+    if(lesson){
+
+        console.log(
+            "RANISE PEDAGOGICAL EXPLANATION ENGINE: READY"
+        );
+
+    }else{
+
+        console.error(
+            "RANISE PEDAGOGICAL EXPLANATION ENGINE: LESSON NOT AVAILABLE"
         );
 
     }
