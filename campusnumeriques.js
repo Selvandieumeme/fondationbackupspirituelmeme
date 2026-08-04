@@ -823,14 +823,11 @@ const chapter1Audio = {
 
 
 
-setTimeout(()=>{
+setTimeout(async ()=>{
 
-    speakProfessorIAWithMaryTTS(
+    await speakProfessorIAWithMaryTTS(
         chapter1AudioText
     );
-
-
-
 
 
 if(
