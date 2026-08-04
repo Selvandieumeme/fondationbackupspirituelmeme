@@ -790,7 +790,6 @@ if(chapterId === "chapitre1"){
 
 
 
-
 const chapter1AudioText =
 
 "Bienvenue dans votre première formation Microsoft Word 2007. " +
@@ -798,45 +797,39 @@ const chapter1AudioText =
 "Je vais vous accompagner étape par étape pour maîtriser le traitement de texte.";
 
 
+const chapter1Audio = {
 
-setTimeout(async ()=>{
+    volume: 1,
 
-
-    if(
-        typeof speakProfessorIACamille ===
-        "function"
-    ){
+    onplay: ()=>{
 
         raniseStartTalking();
 
+    },
 
-        try{
+    onended: ()=>{
 
-            await speakProfessorIACamille(
-                chapter1AudioText
-            );
+        raniseStopTalking();
 
+    },
 
-            raniseStopTalking();
+    onerror: ()=>{
 
-
-        }catch(error){
-
-            console.error(
-                "CHAPTER 1 VOICE ERROR:",
-                error
-            );
-
-
-            raniseStopTalking();
-
-        }
+        raniseStopTalking();
 
     }
 
+};
+
+
+
+setTimeout(()=>{
+
+    speakProfessorIAWithMaryTTS(
+        chapter1AudioText
+    );
 
 },200);
-
 
     },50);
 
