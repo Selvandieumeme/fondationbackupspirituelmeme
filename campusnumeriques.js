@@ -6826,24 +6826,11 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
 
 
-
-
-
 // =========================================================
 // CAMPUS WORD 2007
 // RANISE MOISE PRACTICE IA CARD
-// BLOCK - PRACTICE IA CARD POSITION ENGINE
-// ISOLATED / PROTECTED
-//
-// IMPORTANT:
-// - REUSES EXISTING .chapter1-ia-card
-// - DOES NOT CREATE A NEW AVATAR
-// - DOES NOT CREATE A NEW IA CARD
-// - DOES NOT TOUCH MARYTTS
-// - DOES NOT TOUCH PIPER
-// - DOES NOT TOUCH SPEECH SYNTHESIS
-// - DOES NOT MODIFY EXISTING IA LOGIC
-// - TOUCH + MOUSE DRAG
+// DYNAMIC CLONE ENGINE
+// ISOLATED / NON-DESTRUCTIVE
 // =========================================================
 
 (function(){
@@ -6852,40 +6839,69 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
 
     // =====================================================
-    // PRIVATE STATE
+    // PRIVATE CONFIGURATION
     // =====================================================
 
-    let ranisePracticeCard = null;
+    const PRACTICE_CARD_CLASS =
+        "ranisePracticeSimulationCard";
 
-    let ranisePracticeSimulation = null;
+    const SOURCE_CARD_SELECTOR =
+        ".chapter1-ia-card";
 
-    let ranisePracticeDragging = false;
+    const SIMULATION_SELECTOR =
+        "#cwWindow";
 
-    let ranisePracticePointerId = null;
-
-    let ranisePracticeOffsetX = 0;
-
-    let ranisePracticeOffsetY = 0;
-
-    let ranisePracticeOriginalStyle = null;
+    const LAUNCH_BUTTON_SELECTOR =
+        "#launchMicrosoftWordSimulationBtn";
 
 
     // =====================================================
-    // FIND EXISTING RANISE IA CARD
+    // REMOVE DUPLICATE IDS FROM CLONE
     // =====================================================
 
-    function findExistingRaniseCard(){
+    function removeDuplicateIds(element){
 
-        const card =
+        if(!element){
+
+            return;
+
+        }
+
+
+        if(element.id){
+
+            element.removeAttribute("id");
+
+        }
+
+
+        element.querySelectorAll("[id]").forEach(
+            function(child){
+
+                child.removeAttribute("id");
+
+            }
+        );
+
+    }
+
+
+    // =====================================================
+    // CREATE COPY OF EXISTING RANISE IA CARD
+    // =====================================================
+
+    function createPracticeCard(){
+
+        const simulation =
             document.querySelector(
-                ".chapter1-ia-card"
+                SIMULATION_SELECTOR
             );
 
 
-        if(!card){
+        if(!simulation){
 
             console.warn(
-                "RANISE PRACTICE IA: EXISTING .chapter1-ia-card NOT FOUND"
+                "RANISE PRACTICE IA: SIMULATION WINDOW NOT FOUND"
             );
 
             return null;
@@ -6893,671 +6909,73 @@ const RaniseMoisePedagogicalExplanationEngine = {
         }
 
 
-        return card;
-
-    }
-
-
-    // =====================================================
-    // FIND REAL WORD SIMULATION AREA
-    // =====================================================
-
-    function findPracticeSimulation(){
-
-        /*
-         * REAL WORD DOCUMENT WORKSPACE
-         */
-
-        const documentContainer =
-            document.getElementById(
-                "cwDocumentContainer"
+        const sourceCard =
+            document.querySelector(
+                SOURCE_CARD_SELECTOR
             );
 
 
-        if(documentContainer){
-
-            return documentContainer;
-
-        }
-
-
-        /*
-         * SAFE FALLBACK:
-         * COMPLETE WORD WINDOW
-         */
-
-        const wordWindow =
-            document.getElementById(
-                "cwWindow"
-            );
-
-
-        if(wordWindow){
-
-            return wordWindow;
-
-        }
-
-
-        return null;
-
-    }
-
-
-    // =====================================================
-    // SAVE ORIGINAL CARD STYLE
-    // =====================================================
-
-    function saveOriginalStyle(card){
-
-        if(
-            ranisePracticeOriginalStyle ||
-            !card
-        ){
-
-            return;
-
-        }
-
-
-        ranisePracticeOriginalStyle = {
-
-            position:
-                card.style.position,
-
-            left:
-                card.style.left,
-
-            top:
-                card.style.top,
-
-            width:
-                card.style.width,
-
-            maxWidth:
-                card.style.maxWidth,
-
-            margin:
-                card.style.margin,
-
-            zIndex:
-                card.style.zIndex,
-
-            touchAction:
-                card.style.touchAction,
-
-            boxSizing:
-                card.style.boxSizing
-
-        };
-
-    }
-
-
-    // =====================================================
-    // CALCULATE INITIAL POSITION
-    // =====================================================
-
-    function positionRaniseInsideSimulation(){
-
-        if(
-            !ranisePracticeCard ||
-            !ranisePracticeSimulation
-        ){
-
-            return;
-
-        }
-
-
-        const simulationRect =
-            ranisePracticeSimulation
-                .getBoundingClientRect();
-
-
-        const cardRect =
-            ranisePracticeCard
-                .getBoundingClientRect();
-
-
-        /*
-         * Small initial position:
-         * upper-right area of simulation.
-         */
-
-        const margin = 8;
-
-
-        let left =
-            simulationRect.width -
-            cardRect.width -
-            margin;
-
-
-        let top =
-            margin;
-
-
-        /*
-         * Prevent negative values on small screens.
-         */
-
-        left =
-            Math.max(
-                0,
-                left
-            );
-
-
-        top =
-            Math.max(
-                0,
-                top
-            );
-
-
-        ranisePracticeCard.style.left =
-            left + "px";
-
-
-        ranisePracticeCard.style.top =
-            top + "px";
-
-    }
-
-
-    // =====================================================
-    // KEEP CARD INSIDE SIMULATION
-    // =====================================================
-
-    function keepRaniseInsideSimulation(){
-
-        if(
-            !ranisePracticeCard ||
-            !ranisePracticeSimulation
-        ){
-
-            return;
-
-        }
-
-
-        const simulationRect =
-            ranisePracticeSimulation
-                .getBoundingClientRect();
-
-
-        const cardRect =
-            ranisePracticeCard
-                .getBoundingClientRect();
-
-
-        let left =
-            parseFloat(
-                ranisePracticeCard.style.left
-            ) || 0;
-
-
-        let top =
-            parseFloat(
-                ranisePracticeCard.style.top
-            ) || 0;
-
-
-        const maxLeft =
-            Math.max(
-                0,
-                simulationRect.width -
-                cardRect.width
-            );
-
-
-        const maxTop =
-            Math.max(
-                0,
-                simulationRect.height -
-                cardRect.height
-            );
-
-
-        left =
-            Math.max(
-                0,
-                Math.min(
-                    left,
-                    maxLeft
-                )
-            );
-
-
-        top =
-            Math.max(
-                0,
-                Math.min(
-                    top,
-                    maxTop
-                )
-            );
-
-
-        ranisePracticeCard.style.left =
-            left + "px";
-
-
-        ranisePracticeCard.style.top =
-            top + "px";
-
-    }
-
-
-    // =====================================================
-    // POINTER DOWN
-    // TOUCH + MOUSE
-    // =====================================================
-
-    function onRanisePointerDown(event){
-
-        if(
-            !ranisePracticeCard ||
-            !ranisePracticeSimulation
-        ){
-
-            return;
-
-        }
-
-
-        ranisePracticeDragging =
-            true;
-
-
-        ranisePracticePointerId =
-            event.pointerId;
-
-
-        const cardRect =
-            ranisePracticeCard
-                .getBoundingClientRect();
-
-
-        ranisePracticeOffsetX =
-            event.clientX -
-            cardRect.left;
-
-
-        ranisePracticeOffsetY =
-            event.clientY -
-            cardRect.top;
-
-
-        try{
-
-            ranisePracticeCard
-                .setPointerCapture(
-                    event.pointerId
-                );
-
-        }catch(error){}
-
-
-        ranisePracticeCard.classList.add(
-            "ranisePracticeCardDragging"
-        );
-
-
-        event.preventDefault();
-
-    }
-
-
-    // =====================================================
-    // POINTER MOVE
-    // =====================================================
-
-    function onRanisePointerMove(event){
-
-        if(
-            !ranisePracticeDragging ||
-            !ranisePracticeCard ||
-            !ranisePracticeSimulation
-        ){
-
-            return;
-
-        }
-
-
-        if(
-            event.pointerId !==
-            ranisePracticePointerId
-        ){
-
-            return;
-
-        }
-
-
-        const simulationRect =
-            ranisePracticeSimulation
-                .getBoundingClientRect();
-
-
-        const cardRect =
-            ranisePracticeCard
-                .getBoundingClientRect();
-
-
-        let left =
-            event.clientX -
-            simulationRect.left -
-            ranisePracticeOffsetX;
-
-
-        let top =
-            event.clientY -
-            simulationRect.top -
-            ranisePracticeOffsetY;
-
-
-        const maxLeft =
-            Math.max(
-                0,
-                simulationRect.width -
-                cardRect.width
-            );
-
-
-        const maxTop =
-            Math.max(
-                0,
-                simulationRect.height -
-                cardRect.height
-            );
-
-
-        left =
-            Math.max(
-                0,
-                Math.min(
-                    left,
-                    maxLeft
-                )
-            );
-
-
-        top =
-            Math.max(
-                0,
-                Math.min(
-                    top,
-                    maxTop
-                )
-            );
-
-
-        ranisePracticeCard.style.left =
-            left + "px";
-
-
-        ranisePracticeCard.style.top =
-            top + "px";
-
-
-        event.preventDefault();
-
-    }
-
-
-    // =====================================================
-    // POINTER UP
-    // =====================================================
-
-    function onRanisePointerUp(event){
-
-        if(
-            event.pointerId !==
-            ranisePracticePointerId
-        ){
-
-            return;
-
-        }
-
-
-        ranisePracticeDragging =
-            false;
-
-
-        ranisePracticePointerId =
-            null;
-
-
-        if(ranisePracticeCard){
-
-            ranisePracticeCard.classList.remove(
-                "ranisePracticeCardDragging"
-            );
-
-        }
-
-
-        event.preventDefault();
-
-    }
-
-
-    // =====================================================
-    // PREPARE EXISTING CARD
-    // =====================================================
-
-    function prepareExistingRaniseCard(card){
-
-        if(!card){
-
-            return false;
-
-        }
-
-
-        saveOriginalStyle(
-            card
-        );
-
-
-        /*
-         * We reuse the existing card.
-         * We do NOT clone it.
-         */
-
-        card.classList.add(
-            "ranisePracticeCardActive"
-        );
-
-
-        card.style.position =
-            "absolute";
-
-
-        card.style.width =
-            "min(340px, calc(100% - 16px))";
-
-
-        card.style.maxWidth =
-            "340px";
-
-
-        card.style.margin =
-            "0";
-
-
-        card.style.boxSizing =
-            "border-box";
-
-
-        card.style.zIndex =
-            "999999";
-
-
-        card.style.touchAction =
-            "none";
-
-
-        /*
-         * IMPORTANT:
-         * We do not alter its inner HTML.
-         * Existing buttons and IA system remain intact.
-         */
-
-        return true;
-
-    }
-
-
-    // =====================================================
-    // OPEN PRACTICE IA
-    // =====================================================
-
-    function openRanisePracticeIA(){
-
-        const card =
-            findExistingRaniseCard();
-
-
-        if(!card){
-
-            return false;
-
-        }
-
-
-        const simulation =
-            findPracticeSimulation();
-
-
-        if(!simulation){
+        if(!sourceCard){
 
             console.warn(
-                "RANISE PRACTICE IA: WORD SIMULATION AREA NOT FOUND"
+                "RANISE PRACTICE IA: ORIGINAL IA CARD NOT FOUND"
             );
 
-            return false;
+            return null;
 
         }
 
 
-        ranisePracticeCard =
-            card;
-
-
-        ranisePracticeSimulation =
-            simulation;
-
-
-        /*
-         * Make simulation a positioning reference
-         * without replacing existing positioning.
-         */
-
-        const computed =
-            window.getComputedStyle(
-                simulation
+        const oldCard =
+            simulation.querySelector(
+                "." + PRACTICE_CARD_CLASS
             );
 
 
-        if(
-            computed.position ===
-            "static"
-        ){
+        if(oldCard){
 
-            simulation.style.position =
-                "relative";
+            oldCard.remove();
 
         }
 
 
-        if(
-            !prepareExistingRaniseCard(
-                card
-            )
-        ){
-
-            return false;
-
-        }
+        const clonedCard =
+            sourceCard.cloneNode(true);
 
 
-        positionRaniseInsideSimulation();
-
-        keepRaniseInsideSimulation();
-
-
-        console.log(
-            "RANISE PRACTICE IA: EXISTING CARD NOW ACTIVE IN WORD SIMULATION"
+        removeDuplicateIds(
+            clonedCard
         );
 
 
-        return true;
+        clonedCard.classList.add(
+            PRACTICE_CARD_CLASS
+        );
+
+
+        simulation.appendChild(
+            clonedCard
+        );
+
+
+        return clonedCard;
 
     }
 
 
     // =====================================================
-    // INSTALL DRAG EVENTS ON EXISTING CARD
+    // OPEN PRACTICE IA CARD
     // =====================================================
 
-    function installDragEvents(card){
+    function openPracticeCard(){
 
-        if(!card){
-
-            return;
-
-        }
-
-
-        if(
-            card.dataset
-                .ranisePracticeDragReady ===
-            "true"
-        ){
-
-            return;
-
-        }
-
-
-        card.dataset
-            .ranisePracticeDragReady =
-            "true";
-
-
-        card.addEventListener(
-            "pointerdown",
-            onRanisePointerDown
-        );
-
-
-        card.addEventListener(
-            "pointermove",
-            onRanisePointerMove
-        );
-
-
-        card.addEventListener(
-            "pointerup",
-            onRanisePointerUp
-        );
-
-
-        card.addEventListener(
-            "pointercancel",
-            onRanisePointerUp
-        );
+        createPracticeCard();
 
     }
 
 
     // =====================================================
-    // SAFE LAUNCH BUTTON CONNECTION
+    // SAFE BUTTON CONNECTION
     // =====================================================
 
     document.addEventListener(
@@ -7566,7 +6984,7 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
             const button =
                 event.target.closest(
-                    "#launchMicrosoftWordSimulationBtn"
+                    LAUNCH_BUTTON_SELECTOR
                 );
 
 
@@ -7578,30 +6996,17 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
 
             /*
-             * Let the existing simulation launcher
-             * finish its own work first.
+             * Kite simulation an gen tan pou
+             * sistèm ki deja egziste yo fini ouvri li.
              */
 
             setTimeout(
                 function(){
 
-                    const card =
-                        findExistingRaniseCard();
-
-
-                    if(card){
-
-                        installDragEvents(
-                            card
-                        );
-
-                    }
-
-
-                    openRanisePracticeIA();
+                    openPracticeCard();
 
                 },
-                100
+                50
             );
 
         },
@@ -7609,4 +7014,21 @@ const RaniseMoisePedagogicalExplanationEngine = {
     );
 
 
+    // =====================================================
+    // PROTECTED PUBLIC NAMESPACE
+    // =====================================================
+
+    window.RaniseMoisePracticeIA = {
+
+        open:
+            openPracticeCard
+
+    };
+
+
 })();
+
+
+
+
+
