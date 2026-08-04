@@ -776,6 +776,8 @@ document.querySelectorAll(
 
 
 
+
+```js
 // =====================================
 // CHAPTER 1 IA ACTIVATION
 // =====================================
@@ -802,7 +804,7 @@ setTimeout(async ()=>{
 
 
     if(
-        typeof speakProfessorIACamille ===
+        typeof speakProfessorIAWithMaryTTS ===
         "function"
     ){
 
@@ -811,7 +813,7 @@ setTimeout(async ()=>{
 
         try{
 
-            await speakProfessorIACamille(
+            await speakProfessorIAWithMaryTTS(
                 chapter1AudioText
             );
 
@@ -840,6 +842,9 @@ setTimeout(async ()=>{
     },50);
 
 }
+```
+
+
 
 
 
