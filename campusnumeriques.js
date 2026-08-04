@@ -4530,6 +4530,11 @@ async function requestCampusAIProfessor(message){
 
 
 
+
+
+
+
+
 // =====================================
 // CAMPUS AI PROFESSOR
 // MARYTTS CAMILLE FRENCH VOICE BRIDGE
@@ -4739,86 +4744,247 @@ async function speakProfessorIAWithMaryTTS(text){
 
 
 
-        raniseProfessorAudio.onplay =
-            function(){
+        // =====================================
+        // WAIT FOR REAL AUDIO PLAYBACK
+        // =====================================
 
-                console.log(
-                    "MARYTTS AUDIO PLAYING"
-                );
+        await new Promise(
+            function(resolve, reject){
+
+                let finished =
+                    false;
+
+
+
+                function cleanup(){
+
+                    if(
+                        raniseProfessorAudio
+                    ){
+
+                        raniseProfessorAudio.onplay =
+                            null;
+
+                        raniseProfessorAudio.onended =
+                            null;
+
+                        raniseProfessorAudio.onerror =
+                            null;
+
+                    }
+
+                }
+
+
+
+                function finishSuccess(){
+
+                    if(finished){
+
+                        return;
+
+                    }
+
+
+
+                    finished =
+                        true;
+
+
+
+                    cleanup();
+
+
+
+                    if(
+
+                        typeof raniseStopTalking ===
+                        "function"
+
+                    ){
+
+                        raniseStopTalking();
+
+                    }
+
+
+
+                    try{
+
+                        URL.revokeObjectURL(
+                            audioUrl
+                        );
+
+                    }catch(error){}
+
+
+
+                    resolve();
+
+                }
+
+
+
+                function finishError(error){
+
+                    if(finished){
+
+                        return;
+
+                    }
+
+
+
+                    finished =
+                        true;
+
+
+
+                    cleanup();
+
+
+
+                    if(
+
+                        typeof raniseStopTalking ===
+                        "function"
+
+                    ){
+
+                        raniseStopTalking();
+
+                    }
+
+
+
+                    try{
+
+                        URL.revokeObjectURL(
+                            audioUrl
+                        );
+
+                    }catch(error){}
+
+
+
+                    reject(error);
+
+                }
+
+
+
+                raniseProfessorAudio.onplay =
+                    function(){
+
+                        console.log(
+                            "MARYTTS AUDIO PLAYING"
+                        );
+
+
+
+                        if(
+
+                            typeof raniseStartTalking ===
+                            "function"
+
+                        ){
+
+                            raniseStartTalking();
+
+                        }
+
+                    };
+
+
+
+                // =====================================
+                // CRITICAL:
+                // PROMISE RESOLVES ONLY WHEN
+                // THE COMPLETE AUDIO HAS ENDED
+                // =====================================
+
+                raniseProfessorAudio.onended =
+                    function(){
+
+                        console.log(
+                            "MARYTTS AUDIO ENDED"
+                        );
+
+
+
+                        finishSuccess();
+
+                    };
+
+
+
+                raniseProfessorAudio.onerror =
+                    function(){
+
+                        console.error(
+                            "MARYTTS AUDIO ERROR"
+                        );
+
+
+
+                        finishError(
+                            new Error(
+                                "MARYTTS_AUDIO_PLAYBACK_ERROR"
+                            )
+                        );
+
+                    };
+
+
+
+                let playPromise;
+
+
+
+                try{
+
+                    playPromise =
+                        raniseProfessorAudio.play();
+
+                }catch(playError){
+
+                    finishError(
+                        playError
+                    );
+
+                    return;
+
+                }
+
+
 
                 if(
 
-                    typeof raniseStartTalking ===
+                    playPromise &&
+                    typeof playPromise.catch ===
                     "function"
 
                 ){
 
-                    raniseStartTalking();
+                    playPromise.catch(
+                        function(playError){
+
+                            finishError(
+                                playError
+                            );
+
+                        }
+                    );
 
                 }
 
-            };
-
-
-
-        raniseProfessorAudio.onended =
-            function(){
-
-                console.log(
-                    "MARYTTS AUDIO ENDED"
-                );
-
-                if(
-
-                    typeof raniseStopTalking ===
-                    "function"
-
-                ){
-
-                    raniseStopTalking();
-
-                }
-
-                URL.revokeObjectURL(
-                    audioUrl
-                );
-
-            };
-
-
-
-        raniseProfessorAudio.onerror =
-            function(){
-
-                console.error(
-                    "MARYTTS AUDIO ERROR"
-                );
-
-                if(
-
-                    typeof raniseStopTalking ===
-                    "function"
-
-                ){
-
-                    raniseStopTalking();
-
-                }
-
-                URL.revokeObjectURL(
-                    audioUrl
-                );
-
-            };
-
-
-
-        await raniseProfessorAudio.play();
+            }
+        );
 
 
 
         console.log(
-            "=== MARYTTS SUCCESS ==="
+            "=== MARYTTS AUDIO COMPLETELY FINISHED ==="
         );
 
 
@@ -4863,12 +5029,6 @@ async function speakProfessorIAWithMaryTTS(text){
     }
 
 }
-
-
-
-
-
-
 
 
 
