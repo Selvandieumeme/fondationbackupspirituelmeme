@@ -787,39 +787,52 @@ if(chapterId === "chapitre1"){
         renderChapter1ProfessorIA();
 
 
-const chapter1Audio = new Audio(
-    "message-bienvenue-chapitre1.mp3"
-);
-
-
-chapter1Audio.volume = 1;
-
-
-chapter1Audio.onplay = ()=>{
-
-    raniseStartTalking();
-
-};
-
-
-chapter1Audio.onended = ()=>{
-
-    raniseStopTalking();
-
-};
-
-
-chapter1Audio.onerror = ()=>{
-
-    raniseStopTalking();
-
-};
 
 
 
-setTimeout(()=>{
+const chapter1AudioText =
 
-    chapter1Audio.play();
+"Bienvenue dans votre première formation Microsoft Word 2007. " +
+"Je suis Ranise Moise, votre professeure IA de CampusNumérique FOBAS. " +
+"Je vais vous accompagner étape par étape pour maîtriser le traitement de texte.";
+
+
+
+setTimeout(async ()=>{
+
+
+    if(
+        typeof speakProfessorIACamille ===
+        "function"
+    ){
+
+        raniseStartTalking();
+
+
+        try{
+
+            await speakProfessorIACamille(
+                chapter1AudioText
+            );
+
+
+            raniseStopTalking();
+
+
+        }catch(error){
+
+            console.error(
+                "CHAPTER 1 VOICE ERROR:",
+                error
+            );
+
+
+            raniseStopTalking();
+
+        }
+
+    }
+
 
 },200);
 
