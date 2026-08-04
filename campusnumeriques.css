@@ -3742,24 +3742,3 @@ body.dark-mode .premium-table td{
 
 
 
-
-/* =========================================================
-   RANISE IA CARD — SIMULATION AREA
-   ISOLATED ADD-ON
-========================================================= */
-
-.chapter1-ia-card-simulation-copy{
-
-    width:100%;
-
-    max-width:720px;
-
-    margin:0 auto 10px;
-
-    box-sizing:border-box;
-
-    position:relative;
-
-    z-index:2;
-
-}
