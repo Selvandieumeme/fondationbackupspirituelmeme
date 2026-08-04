@@ -5048,3 +5048,333 @@ const img = document.getElementById(
     }
 
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// =====================================
+// RANISE MOISE IA PROFESSOR
+// PEDAGOGICAL ENGINE
+// BLOCK 1 - COURSE READER
+// READ-ONLY / ISOLATED
+// MICROSOFT WORD 2007 - CHAPITRE 1
+// =====================================
+
+
+const RaniseMoisePedagogicalEngine = {
+
+
+    // =====================================
+    // GET CHAPTER
+    // READ ONLY
+    // =====================================
+
+    getChapter:function(chapterId){
+
+
+        if(
+            typeof microsoftWordCourse ===
+            "undefined"
+        ){
+
+            return null;
+
+        }
+
+
+
+        if(
+            !microsoftWordCourse.chapters ||
+            !Array.isArray(
+                microsoftWordCourse.chapters
+            )
+        ){
+
+            return null;
+
+        }
+
+
+
+        return microsoftWordCourse.chapters.find(
+
+            chapter =>
+
+            chapter.id === chapterId
+
+        ) || null;
+
+
+    },
+
+
+
+
+
+    // =====================================
+    // GET CHAPTER 1
+    // =====================================
+
+    getChapter1:function(){
+
+
+        return this.getChapter(
+            "chapitre1"
+        );
+
+
+    },
+
+
+
+
+
+    // =====================================
+    // VERIFY CHAPTER STRUCTURE
+    // READ ONLY
+    // =====================================
+
+    verifyChapter:function(chapter){
+
+
+        if(!chapter){
+
+            return false;
+
+        }
+
+
+
+        if(
+            typeof chapter.id !==
+            "string"
+        ){
+
+            return false;
+
+        }
+
+
+
+        if(
+            typeof chapter.title !==
+            "string"
+        ){
+
+            return false;
+
+        }
+
+
+
+        if(
+            !Array.isArray(
+                chapter.theory
+            )
+        ){
+
+            return false;
+
+        }
+
+
+
+        if(
+            !Array.isArray(
+                chapter.practice
+            )
+        ){
+
+            return false;
+
+        }
+
+
+
+        if(
+            !Array.isArray(
+                chapter.exercises
+            )
+        ){
+
+            return false;
+
+        }
+
+
+
+        if(
+            typeof chapter.homework !==
+            "string"
+        ){
+
+            return false;
+
+        }
+
+
+
+        if(
+            !Array.isArray(
+                chapter.evaluation
+            )
+        ){
+
+            return false;
+
+        }
+
+
+
+        if(
+            !Array.isArray(
+                chapter.objective
+            )
+        ){
+
+            return false;
+
+        }
+
+
+
+        return true;
+
+
+    },
+
+
+
+
+
+    // =====================================
+    // READ CHAPTER 1 PEDAGOGICAL DATA
+    // READ ONLY
+    // =====================================
+
+    readChapter1:function(){
+
+
+        const chapter =
+            this.getChapter1();
+
+
+
+        if(
+            !this.verifyChapter(
+                chapter
+            )
+        ){
+
+            return null;
+
+        }
+
+
+
+        return {
+
+            id:
+                chapter.id,
+
+            title:
+                chapter.title,
+
+            theory:
+                chapter.theory,
+
+            practice:
+                chapter.practice,
+
+            exercises:
+                chapter.exercises,
+
+            homework:
+                chapter.homework,
+
+            evaluation:
+                chapter.evaluation,
+
+            objective:
+                chapter.objective
+
+        };
+
+
+    },
+
+
+};
+
+
+
+
+
+// =====================================
+// RANISE MOISE IA PROFESSOR
+// BLOCK 1 VERIFICATION
+// =====================================
+
+(function(){
+
+    const chapter1 =
+        RaniseMoisePedagogicalEngine
+            .getChapter1();
+
+
+
+    if(
+        RaniseMoisePedagogicalEngine
+            .verifyChapter(
+                chapter1
+            )
+    ){
+
+        console.log(
+            "RANISE PEDAGOGICAL ENGINE: CHAPITRE 1 READY"
+        );
+
+    }else{
+
+        console.error(
+            "RANISE PEDAGOGICAL ENGINE: CHAPITRE 1 NOT AVAILABLE"
+        );
+
+    }
+
+})();
