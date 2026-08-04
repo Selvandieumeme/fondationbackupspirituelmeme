@@ -6847,45 +6847,67 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 // =========================================================
-// MICROSOFT WORD 2007
-// RANISE MOISE PRACTICE IA OVERLAY
-// SAFE / ISOLATED / NON-DESTRUCTIVE
-// USES THE EXISTING CHAPTER 1 IA CARD
+// CAMPUS WORD 2007
+// ISOLATED RANISE IA CARD ABOVE EXISTING SIMULATION
+// ADD-ON ONLY
+// DOES NOT REPLACE EXISTING CODE
+// DOES NOT RECREATE THE IFRAME
 // =========================================================
 
+(function(){
 
-const launchButton =
-
-document.getElementById(
-
-    "launchMicrosoftWordSimulationBtn"
-
-);
+    "use strict";
 
 
+    const RANISE_SIMULATION_CARD_CLASS =
+        "chapter1-ia-card-simulation-copy";
 
-if(launchButton){
 
-
-    launchButton.addEventListener(
+    document.addEventListener(
 
         "click",
 
-        function(){
+        function(event){
+
+            const launchButton =
+                event.target.closest(
+                    "#launchMicrosoftWordSimulationBtn"
+                );
 
 
-            // =================================================
-            // GET EXISTING CAMPUS SPACE
-            // =================================================
+            if(!launchButton){
+
+                return;
+
+            }
+
+
+            // =============================================
+            // CAPTURE THE EXISTING CHAPTER 1 RANISE CARD
+            // BEFORE THE EXISTING LAUNCH CODE REPLACES
+            // campusContent
+            // =============================================
 
             const campusContent =
-
-            document.getElementById(
-
-                "campusContent"
-
-            );
+                document.getElementById(
+                    "campusContent"
+                );
 
 
             if(!campusContent){
@@ -6895,514 +6917,96 @@ if(launchButton){
             }
 
 
-
-            // =================================================
-            // GET THE EXISTING RANISE IA CARD
-            // WE MOVE THE REAL CARD — WE DO NOT CLONE IT
-            // THIS PRESERVES ITS EXISTING FUNCTIONS/EVENTS
-            // =================================================
-
-            const raniseCard =
-
-            campusContent.querySelector(
-
-                ".chapter1-ia-card"
-
-            );
-
-
-            if(!raniseCard){
-
-                console.warn(
-
-                    "RANISE PRACTICE IA: EXISTING IA CARD NOT FOUND"
-
+            const originalCard =
+                campusContent.querySelector(
+                    ".chapter1-ia-card"
                 );
+
+
+            if(!originalCard){
+
+                return;
 
             }
 
 
+            const raniseCardCopy =
+                originalCard.cloneNode(true);
 
-            // =================================================
-            // CREATE SAFE SIMULATION WRAPPER
-            // =================================================
 
-            const simulationSpace =
-
-            document.createElement(
-
-                "div"
-
+            raniseCardCopy.classList.add(
+                RANISE_SIMULATION_CARD_CLASS
             );
 
 
-            simulationSpace.className =
+            // =============================================
+            // WAIT FOR THE EXISTING SIMULATION LAUNCH CODE
+            // TO FINISH CREATING ITS IFRAME
+            // =============================================
 
-                "ranisePracticeSimulationSpace";
+            setTimeout(function(){
 
+                const currentCampusContent =
+                    document.getElementById(
+                        "campusContent"
+                    );
 
-            simulationSpace.style.position =
 
-                "relative";
+                if(!currentCampusContent){
 
-
-            simulationSpace.style.width =
-
-                "100%";
-
-
-            simulationSpace.style.minHeight =
-
-                "900px";
-
-
-            simulationSpace.style.overflow =
-
-                "hidden";
-
-
-            simulationSpace.style.borderRadius =
-
-                "12px";
-
-
-
-            // =================================================
-            // CREATE THE EXISTING WORD SIMULATION IFRAME
-            // =================================================
-
-            const simulationFrame =
-
-            document.createElement(
-
-                "iframe"
-
-            );
-
-
-            simulationFrame.src =
-
-                "https://www.fondationbackupspirituel.com/campusword2007simulation";
-
-
-            simulationFrame.style.width =
-
-                "100%";
-
-
-            simulationFrame.style.height =
-
-                "900px";
-
-
-            simulationFrame.style.border =
-
-                "none";
-
-
-            simulationFrame.style.borderRadius =
-
-                "12px";
-
-
-            simulationFrame.title =
-
-                "Microsoft Word Simulation";
-
-
-
-            // =================================================
-            // IMPORTANT:
-            // PUT THE SIMULATION FIRST
-            // =================================================
-
-            simulationSpace.appendChild(
-
-                simulationFrame
-
-            );
-
-
-
-            // =================================================
-            // PUT THE EXISTING RANISE CARD ABOVE SIMULATION
-            // =================================================
-
-            if(raniseCard){
-
-
-                raniseCard.classList.add(
-
-                    "ranisePracticeSimulationCard"
-
-                );
-
-
-                raniseCard.style.position =
-
-                    "absolute";
-
-
-                raniseCard.style.top =
-
-                    "8px";
-
-
-                raniseCard.style.left =
-
-                    "50%";
-
-
-                raniseCard.style.transform =
-
-                    "translateX(-50%)";
-
-
-                raniseCard.style.zIndex =
-
-                    "99999";
-
-
-                raniseCard.style.margin =
-
-                    "0";
-
-
-                raniseCard.style.cursor =
-
-                    "grab";
-
-
-                raniseCard.style.touchAction =
-
-                    "none";
-
-
-                simulationSpace.appendChild(
-
-                    raniseCard
-
-                );
-
-            }
-
-
-
-            // =================================================
-            // REPLACE ONLY THE COURSE VIEW
-            // WITH THE SIMULATION SPACE
-            // =================================================
-
-            campusContent.innerHTML = "";
-
-
-            campusContent.appendChild(
-
-                simulationSpace
-
-            );
-
-
-
-            // =================================================
-            // RANISE CARD DRAG ENGINE
-            // TOUCH + MOUSE
-            // =================================================
-
-            if(raniseCard){
-
-
-                let dragging = false;
-
-                let pointerId = null;
-
-                let offsetX = 0;
-
-                let offsetY = 0;
-
-
-
-                raniseCard.addEventListener(
-
-                    "pointerdown",
-
-                    function(event){
-
-
-                        dragging = true;
-
-
-                        pointerId =
-
-                            event.pointerId;
-
-
-
-                        const rect =
-
-                            raniseCard.getBoundingClientRect();
-
-
-
-                        offsetX =
-
-                            event.clientX -
-
-                            rect.left;
-
-
-
-                        offsetY =
-
-                            event.clientY -
-
-                            rect.top;
-
-
-
-                        try{
-
-                            raniseCard.setPointerCapture(
-
-                                event.pointerId
-
-                            );
-
-                        }catch(error){}
-
-
-
-                        raniseCard.style.cursor =
-
-                            "grabbing";
-
-
-                        event.preventDefault();
-
-
-                    }
-
-                );
-
-
-
-                raniseCard.addEventListener(
-
-                    "pointermove",
-
-                    function(event){
-
-
-                        if(!dragging){
-
-                            return;
-
-                        }
-
-
-                        if(
-
-                            event.pointerId !==
-
-                            pointerId
-
-                        ){
-
-                            return;
-
-                        }
-
-
-
-                        const spaceRect =
-
-                            simulationSpace.getBoundingClientRect();
-
-
-
-                        const cardRect =
-
-                            raniseCard.getBoundingClientRect();
-
-
-
-                        let left =
-
-                            event.clientX -
-
-                            spaceRect.left -
-
-                            offsetX;
-
-
-
-                        let top =
-
-                            event.clientY -
-
-                            spaceRect.top -
-
-                            offsetY;
-
-
-
-                        const maxLeft =
-
-                            Math.max(
-
-                                0,
-
-                                spaceRect.width -
-
-                                cardRect.width
-
-                            );
-
-
-
-                        const maxTop =
-
-                            Math.max(
-
-                                0,
-
-                                spaceRect.height -
-
-                                cardRect.height
-
-                            );
-
-
-
-                        left =
-
-                            Math.max(
-
-                                0,
-
-                                Math.min(
-
-                                    left,
-
-                                    maxLeft
-
-                                )
-
-                            );
-
-
-
-                        top =
-
-                            Math.max(
-
-                                0,
-
-                                Math.min(
-
-                                    top,
-
-                                    maxTop
-
-                                )
-
-                            );
-
-
-
-                        raniseCard.style.left =
-
-                            left + "px";
-
-
-                        raniseCard.style.top =
-
-                            top + "px";
-
-
-                        raniseCard.style.transform =
-
-                            "none";
-
-
-                        event.preventDefault();
-
-
-                    }
-
-                );
-
-
-
-                function stopDragging(event){
-
-
-                    if(
-
-                        pointerId !== null &&
-
-                        event.pointerId !==
-
-                        pointerId
-
-                    ){
-
-                        return;
-
-                    }
-
-
-
-                    dragging = false;
-
-                    pointerId = null;
-
-
-                    raniseCard.style.cursor =
-
-                        "grab";
-
+                    return;
 
                 }
 
 
+                const simulationFrame =
+                    currentCampusContent.querySelector(
+                        'iframe[src*="campusword2007simulation"]'
+                    );
 
-                raniseCard.addEventListener(
 
-                    "pointerup",
+                if(!simulationFrame){
 
-                    stopDragging
+                    return;
 
+                }
+
+
+                // =========================================
+                // PROTECTION AGAINST DUPLICATION
+                // =========================================
+
+                const alreadyInserted =
+                    currentCampusContent.querySelector(
+                        "." +
+                        RANISE_SIMULATION_CARD_CLASS
+                    );
+
+
+                if(alreadyInserted){
+
+                    return;
+
+                }
+
+
+                // =========================================
+                // RANISE ABOVE EXISTING SIMULATION
+                // =========================================
+
+                currentCampusContent.insertBefore(
+                    raniseCardCopy,
+                    simulationFrame
                 );
 
 
-                raniseCard.addEventListener(
+            }, 0);
 
-                    "pointercancel",
+        },
 
-                    stopDragging
-
-                );
-
-
-
-            }
-
-
-
-            // =================================================
-            // FINAL CONFIRMATION
-            // =================================================
-
-            console.log(
-
-                "RANISE PRACTICE IA: CARD MOVED ABOVE WORD SIMULATION"
-
-            );
-
-
-        }
+        true
 
     );
 
-}
+
+})();
