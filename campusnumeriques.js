@@ -6093,6 +6093,8 @@ const RaniseMoiseTheoryEngine = {
 
 
 
+
+
 // =====================================
 // RANISE MOISE IA PROFESSOR
 // PEDAGOGICAL ENGINE
@@ -6128,6 +6130,52 @@ const RaniseMoiseTheoryTeachingEngine = {
 
         return RaniseMoiseTheoryEngine
             .getFirstLesson();
+
+
+    },
+
+
+
+
+
+    // =====================================
+    // GET ALL THEORY LESSONS
+    // READ ONLY
+    // ADDED WITHOUT CHANGING EXISTING
+    // FIRST LESSON ARCHITECTURE
+    // =====================================
+
+    getAllTheoryLessons:function(){
+
+
+        if(
+            typeof RaniseMoiseTheoryEngine ===
+            "undefined"
+        ){
+
+            return [];
+
+        }
+
+
+
+        const chapter =
+            RaniseMoiseTheoryEngine
+                .getTheory();
+
+
+
+        if(
+            !Array.isArray(chapter)
+        ){
+
+            return [];
+
+        }
+
+
+
+        return chapter;
 
 
     },
@@ -6193,41 +6241,25 @@ const RaniseMoiseTheoryTeachingEngine = {
     // =====================================
     // TEACH FIRST THEORY LESSON
     // READ ONLY
+    // NOW READS ALL THEORY PARTS
+    // ONE AFTER ANOTHER
     // =====================================
 
     teachFirstLesson:async function(){
 
 
-        const lesson =
-            this.getFirstLesson();
-
-
-
-        if(!lesson){
-
-            console.error(
-                "RANISE THEORY TEACHING ENGINE: FIRST LESSON NOT AVAILABLE"
-            );
-
-            return false;
-
-        }
-
-
-
-        const explanation =
-            this.buildExplanation(
-                lesson
-            );
+        const lessons =
+            this.getAllTheoryLessons();
 
 
 
         if(
-            !explanation
+            !Array.isArray(lessons) ||
+            !lessons.length
         ){
 
             console.error(
-                "RANISE THEORY TEACHING ENGINE: EXPLANATION NOT AVAILABLE"
+                "RANISE THEORY TEACHING ENGINE: THEORY LESSONS NOT AVAILABLE"
             );
 
             return false;
@@ -6237,8 +6269,8 @@ const RaniseMoiseTheoryTeachingEngine = {
 
 
         console.log(
-            "RANISE THEORY TEACHING ENGINE: TEACHING FIRST LESSON",
-            lesson.title
+            "RANISE THEORY TEACHING ENGINE: THEORY LESSONS READY",
+            lessons.length
         );
 
 
@@ -6266,8 +6298,81 @@ const RaniseMoiseTheoryTeachingEngine = {
         try{
 
 
-            await speakProfessorIAWithMaryTTS(
-                explanation
+            // =====================================
+            // READ EACH THEORY PART
+            // SEQUENTIALLY
+            //
+            // await guarantees:
+            //
+            // PART 1 AUDIO FINISHES
+            // BEFORE PART 2 STARTS
+            //
+            // PART 2 AUDIO FINISHES
+            // BEFORE PART 3 STARTS
+            // =====================================
+
+            for(
+                let i = 0;
+                i < lessons.length;
+                i++
+            ){
+
+
+                const lesson =
+                    lessons[i];
+
+
+
+                if(!lesson){
+
+                    continue;
+
+                }
+
+
+
+                const explanation =
+                    this.buildExplanation(
+                        lesson
+                    );
+
+
+
+                if(
+                    !explanation
+                ){
+
+                    console.error(
+                        "RANISE THEORY TEACHING ENGINE: THEORY PART NOT AVAILABLE",
+                        i
+                    );
+
+                    continue;
+
+                }
+
+
+
+                console.log(
+                    "RANISE THEORY TEACHING ENGINE: READING THEORY PART",
+                    i + 1,
+                    lessons.length,
+                    lesson.title
+                );
+
+
+
+                await speakProfessorIAWithMaryTTS(
+                    explanation
+                );
+
+
+            }
+
+
+
+            console.log(
+                "RANISE THEORY TEACHING ENGINE: ALL THEORY PARTS FINISHED"
             );
 
 
