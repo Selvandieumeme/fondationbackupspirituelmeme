@@ -832,11 +832,6 @@ setTimeout(()=>{
 
 
 
-// =====================================
-// RANISE IA
-// START FIRST THEORY LESSON
-// AFTER WELCOME AUDIO
-// =====================================
 
 if(
     typeof RaniseMoiseTheoryTeachingEngine !==
@@ -849,9 +844,6 @@ if(
         .teachFirstLesson();
 
 }
-
-
-
 
 
 
