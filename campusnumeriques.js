@@ -5869,3 +5869,259 @@ const RaniseMoiseTheoryEngine = {
 
 })();
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+// =====================================
+// RANISE MOISE IA PROFESSOR
+// PEDAGOGICAL ENGINE
+// BLOCK 4 - THEORY TEACHING ENGINE
+// READ-ONLY / ISOLATED
+// MICROSOFT WORD 2007 - CHAPITRE 1
+// COMPATIBLE WITH BLOCK 3
+// MARYTTS ONLY
+// =====================================
+
+
+const RaniseMoiseTheoryTeachingEngine = {
+
+
+    // =====================================
+    // GET FIRST THEORY LESSON
+    // READ ONLY
+    // =====================================
+
+    getFirstLesson:function(){
+
+
+        if(
+            typeof RaniseMoiseTheoryEngine ===
+            "undefined"
+        ){
+
+            return null;
+
+        }
+
+
+
+        return RaniseMoiseTheoryEngine
+            .getFirstLesson();
+
+
+    },
+
+
+
+
+
+    // =====================================
+    // BUILD PEDAGOGICAL EXPLANATION
+    // READ ONLY
+    // =====================================
+
+    buildExplanation:function(lesson){
+
+
+        if(!lesson){
+
+            return null;
+
+        }
+
+
+
+        if(
+            typeof lesson.title !==
+            "string" ||
+            typeof lesson.content !==
+            "string"
+        ){
+
+            return null;
+
+        }
+
+
+
+        const explanation =
+
+            "Commençons cette première notion. " +
+
+            "Le sujet que nous allons étudier est : " +
+
+            lesson.title +
+
+            ". " +
+
+            "Voici l’idée essentielle à comprendre : " +
+
+            lesson.content;
+
+
+
+        return explanation;
+
+
+    },
+
+
+
+
+
+    // =====================================
+    // TEACH FIRST THEORY LESSON
+    // READ ONLY
+    // =====================================
+
+    teachFirstLesson:async function(){
+
+
+        const lesson =
+            this.getFirstLesson();
+
+
+
+        if(!lesson){
+
+            console.error(
+                "RANISE THEORY TEACHING ENGINE: FIRST LESSON NOT AVAILABLE"
+            );
+
+            return false;
+
+        }
+
+
+
+        const explanation =
+            this.buildExplanation(
+                lesson
+            );
+
+
+
+        if(
+            !explanation
+        ){
+
+            console.error(
+                "RANISE THEORY TEACHING ENGINE: EXPLANATION NOT AVAILABLE"
+            );
+
+            return false;
+
+        }
+
+
+
+        console.log(
+            "RANISE THEORY TEACHING ENGINE: TEACHING FIRST LESSON",
+            lesson.title
+        );
+
+
+
+        if(
+            typeof speakProfessorIACamille !==
+            "function"
+        ){
+
+            console.error(
+                "RANISE THEORY TEACHING ENGINE: MARYTTS FUNCTION NOT AVAILABLE"
+            );
+
+            return false;
+
+        }
+
+
+
+        try{
+
+
+            if(
+                typeof raniseStartTalking ===
+                "function"
+            ){
+
+                raniseStartTalking();
+
+            }
+
+
+
+            await speakProfessorIACamille(
+                explanation
+            );
+
+
+
+            return true;
+
+
+
+        }catch(error){
+
+
+            console.error(
+                "RANISE THEORY TEACHING ENGINE: MARYTTS ERROR",
+                error
+            );
+
+
+            return false;
+
+
+        }
+
+
+    }
+
+
+};
+
+
+
+
+
+// =====================================
+// RANISE MOISE IA PROFESSOR
+// BLOCK 4 VERIFICATION
+// =====================================
+
+(function(){
+
+
+    const lesson =
+        RaniseMoiseTheoryTeachingEngine
+            .getFirstLesson();
+
+
+
+    if(lesson){
+
+        console.log(
+            "RANISE THEORY TEACHING ENGINE: FIRST LESSON READY TO TEACH"
+        );
+
+    }else{
+
+        console.error(
+            "RANISE THEORY TEACHING ENGINE: FIRST LESSON NOT AVAILABLE"
+        );
+
+    }
+
+
+})();
