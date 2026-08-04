@@ -3735,70 +3735,136 @@ body.dark-mode .premium-table td{
 
 
 
+
+
+
+
+
+
+
+
+
+
+
 /* =========================================================
    CAMPUS WORD 2007
    RANISE MOISE PRACTICE IA CARD
-   ISOLATED / PROTECTED CSS
-   COMPATIBLE WITH PRACTICE IA CARD JS
+   DYNAMIC CLONE
+   ISOLATED CSS
    ========================================================= */
 
 
-/* =========================================================
-   ACTIVE CARD INSIDE WORD SIMULATION
-   ========================================================= */
+#cwWindow .ranisePracticeSimulationCard{
 
-.chapter1-ia-card.ranisePracticeCardActive{
+    position:absolute;
 
-    position:absolute !important;
+    top:8px;
 
-    width:min(340px, calc(100% - 16px)) !important;
+    left:50%;
 
-    max-width:340px !important;
+    transform:translateX(-50%);
 
-    margin:0 !important;
+    width:calc(100% - 20px);
 
-    box-sizing:border-box !important;
+    max-width:360px;
 
-    z-index:999999 !important;
+    margin:0;
 
-    touch-action:none !important;
+    padding:8px;
 
-    user-select:none;
+    box-sizing:border-box;
 
-    -webkit-user-select:none;
-
-    -webkit-user-drag:none;
-
-    cursor:grab;
+    z-index:99999;
 
 }
 
 
 /* =========================================================
-   DRAGGING
+   COMPACT RANISE AVATAR
    ========================================================= */
 
-.chapter1-ia-card.ranisePracticeCardActive.ranisePracticeCardDragging{
-
-    cursor:grabbing;
-
-}
-
-
-/* =========================================================
-   RANISE IMAGE — KEEP SMALL INSIDE PRACTICE CARD
-   ========================================================= */
-
-.chapter1-ia-card.ranisePracticeCardActive
+#cwWindow .ranisePracticeSimulationCard
 .chapter-professor-avatar{
 
-    width:76px !important;
+    width:58px;
 
-    height:76px !important;
+    height:58px;
 
-    max-width:76px !important;
+    margin:5px auto 4px;
 
-    object-fit:contain;
+}
+
+
+/* =========================================================
+   COMPACT TITLE
+   ========================================================= */
+
+#cwWindow .ranisePracticeSimulationCard
+.chapter1-ia-title h3{
+
+    font-size:13px;
+
+}
+
+
+#cwWindow .ranisePracticeSimulationCard
+.chapter1-ia-title span{
+
+    font-size:9px;
+
+}
+
+
+/* =========================================================
+   COMPACT IA ICON
+   ========================================================= */
+
+#cwWindow .ranisePracticeSimulationCard
+.chapter1-ia-icon{
+
+    font-size:20px;
+
+}
+
+
+/* =========================================================
+   COMPACT WELCOME
+   ========================================================= */
+
+#cwWindow .ranisePracticeSimulationCard
+.chapter1-ia-welcome{
+
+    font-size:10px;
+
+    line-height:1.3;
+
+}
+
+
+/* =========================================================
+   COMPACT BUTTON
+   ========================================================= */
+
+#cwWindow .ranisePracticeSimulationCard
+.talk-to-ai-professor-btn{
+
+    padding:5px 8px;
+
+    font-size:10px;
+
+}
+
+
+/* =========================================================
+   COMPACT PANEL
+   ========================================================= */
+
+#cwWindow .ranisePracticeSimulationCard
+.talk-to-ai-professor-panel{
+
+    margin-top:7px;
+
+    padding:6px;
 
 }
 
@@ -3809,53 +3875,37 @@ body.dark-mode .premium-table td{
 
 @media(max-width:600px){
 
-    .chapter1-ia-card.ranisePracticeCardActive{
+    #cwWindow .ranisePracticeSimulationCard{
 
-        width:min(270px, calc(100% - 12px)) !important;
+        top:6px;
 
-        max-width:270px !important;
+        width:calc(100% - 12px);
 
-        padding:9px !important;
+        max-width:300px;
 
-        border-radius:13px;
+        padding:6px;
+
+        border-radius:12px;
 
     }
 
 
-    .chapter1-ia-card.ranisePracticeCardActive
+    #cwWindow .ranisePracticeSimulationCard
     .chapter-professor-avatar{
 
-        width:58px !important;
+        width:48px;
 
-        height:58px !important;
+        height:48px;
 
-        margin:6px auto !important;
-
-    }
-
-
-    .chapter1-ia-card.ranisePracticeCardActive
-    .chapter1-ia-title h3{
-
-        font-size:13px;
+        margin:3px auto;
 
     }
 
 
-    .chapter1-ia-card.ranisePracticeCardActive
-    .chapter1-ia-title span{
-
-        font-size:9px;
-
-    }
-
-
-    .chapter1-ia-card.ranisePracticeCardActive
+    #cwWindow .ranisePracticeSimulationCard
     .chapter1-ia-welcome{
 
-        font-size:10px;
-
-        line-height:1.35;
+        font-size:9px;
 
     }
 
@@ -3863,37 +3913,35 @@ body.dark-mode .premium-table td{
 
 
 /* =========================================================
-   VERY SMALL ANDROID PHONES
+   VERY SMALL ANDROID
    ========================================================= */
 
 @media(max-width:400px){
 
-    .chapter1-ia-card.ranisePracticeCardActive{
+    #cwWindow .ranisePracticeSimulationCard{
 
-        width:min(235px, calc(100% - 10px)) !important;
+        top:5px;
 
-        max-width:235px !important;
+        width:calc(100% - 10px);
 
-        padding:7px !important;
+        max-width:270px;
 
-        border-radius:11px;
+        padding:5px;
 
     }
 
 
-    .chapter1-ia-card.ranisePracticeCardActive
+    #cwWindow .ranisePracticeSimulationCard
     .chapter-professor-avatar{
 
-        width:48px !important;
+        width:42px;
 
-        height:48px !important;
-
-        margin:4px auto !important;
+        height:42px;
 
     }
 
 
-    .chapter1-ia-card.ranisePracticeCardActive
+    #cwWindow .ranisePracticeSimulationCard
     .chapter1-ia-title h3{
 
         font-size:12px;
@@ -3901,18 +3949,10 @@ body.dark-mode .premium-table td{
     }
 
 
-    .chapter1-ia-card.ranisePracticeCardActive
+    #cwWindow .ranisePracticeSimulationCard
     .chapter1-ia-title span{
 
         font-size:8px;
-
-    }
-
-
-    .chapter1-ia-card.ranisePracticeCardActive
-    .chapter1-ia-welcome{
-
-        font-size:9px;
 
     }
 
