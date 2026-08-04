@@ -829,6 +829,33 @@ setTimeout(()=>{
         chapter1AudioText
     );
 
+
+
+
+// =====================================
+// RANISE IA
+// START FIRST THEORY LESSON
+// AFTER WELCOME AUDIO
+// =====================================
+
+if(
+    typeof RaniseMoiseTheoryTeachingEngine !==
+    "undefined" &&
+    typeof RaniseMoiseTheoryTeachingEngine.teachFirstLesson ===
+    "function"
+){
+
+    await RaniseMoiseTheoryTeachingEngine
+        .teachFirstLesson();
+
+}
+
+
+
+
+
+
+
 },200);
 
     },50);
