@@ -6808,3 +6808,723 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
 
 })();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// =========================================================
+// CAMPUS WORD 2007
+// RANISE MOISE PRACTICE AVATAR
+// BLOCK PRACTICE AVATAR - ISOLATED
+// VISUAL ONLY
+// NO AUDIO
+// NO MARYTTS
+// NO PIPER
+// NO SPEECHSYNTHESIS
+// =========================================================
+
+(function(){
+
+    "use strict";
+
+
+    // =====================================================
+    // PRIVATE CONFIGURATION
+    // =====================================================
+
+    const RANISE_PRACTICE_CONFIG = {
+
+        avatarSrc:
+            "ranise-moise-smile.png",
+
+        avatarAlt:
+            "Ranise Moise",
+
+        avatarWidth:
+            76,
+
+        avatarHeight:
+            76
+
+    };
+
+
+    // =====================================================
+    // PRIVATE STATE
+    // =====================================================
+
+    let ranisePracticeAvatar = null;
+
+    let ranisePracticeContainer = null;
+
+    let ranisePracticeDragging = false;
+
+    let ranisePracticePointerId = null;
+
+    let ranisePracticeOffsetX = 0;
+
+    let ranisePracticeOffsetY = 0;
+
+
+    // =====================================================
+    // FIND REAL WORD SIMULATION CONTAINER
+    // =====================================================
+
+    function findSimulationContainer(){
+
+        const container =
+            document.querySelector(
+                "#cwDocumentContainer"
+            );
+
+
+        if(container){
+
+            return container;
+
+        }
+
+
+        console.warn(
+            "RANISE PRACTICE AVATAR: #cwDocumentContainer NOT FOUND"
+        );
+
+
+        return null;
+
+    }
+
+
+    // =====================================================
+    // CREATE AVATAR
+    // =====================================================
+
+    function createRaniseAvatar(container){
+
+        if(!container){
+
+            return null;
+
+        }
+
+
+        const existing =
+            container.querySelector(
+                ".ranisePratiqueAvatar"
+            );
+
+
+        if(existing){
+
+            return existing;
+
+        }
+
+
+        const avatar =
+            document.createElement(
+                "img"
+            );
+
+
+        avatar.className =
+            "ranisePratiqueAvatar";
+
+
+        avatar.src =
+            RANISE_PRACTICE_CONFIG.avatarSrc;
+
+
+        avatar.alt =
+            RANISE_PRACTICE_CONFIG.avatarAlt;
+
+
+        avatar.width =
+            RANISE_PRACTICE_CONFIG.avatarWidth;
+
+
+        avatar.height =
+            RANISE_PRACTICE_CONFIG.avatarHeight;
+
+
+        avatar.draggable =
+            false;
+
+
+        avatar.setAttribute(
+            "aria-label",
+            "Ranise Moise"
+        );
+
+
+        avatar.setAttribute(
+            "data-ranise-practice-avatar",
+            "true"
+        );
+
+
+        container.appendChild(
+            avatar
+        );
+
+
+        return avatar;
+
+    }
+
+
+    // =====================================================
+    // KEEP AVATAR INSIDE CONTAINER
+    // =====================================================
+
+    function keepInsideContainer(){
+
+        if(
+            !ranisePracticeAvatar ||
+            !ranisePracticeContainer
+        ){
+
+            return;
+
+        }
+
+
+        const containerRect =
+            ranisePracticeContainer
+                .getBoundingClientRect();
+
+
+        const avatarRect =
+            ranisePracticeAvatar
+                .getBoundingClientRect();
+
+
+        let left =
+            parseFloat(
+                ranisePracticeAvatar.style.left
+            );
+
+
+        let top =
+            parseFloat(
+                ranisePracticeAvatar.style.top
+            );
+
+
+        if(
+            !Number.isFinite(left)
+        ){
+
+            left = 12;
+
+        }
+
+
+        if(
+            !Number.isFinite(top)
+        ){
+
+            top = 12;
+
+        }
+
+
+        const maxLeft =
+            Math.max(
+                0,
+                containerRect.width -
+                avatarRect.width
+            );
+
+
+        const maxTop =
+            Math.max(
+                0,
+                containerRect.height -
+                avatarRect.height
+            );
+
+
+        left =
+            Math.max(
+                0,
+                Math.min(
+                    left,
+                    maxLeft
+                )
+            );
+
+
+        top =
+            Math.max(
+                0,
+                Math.min(
+                    top,
+                    maxTop
+                )
+            );
+
+
+        ranisePracticeAvatar.style.left =
+            left + "px";
+
+
+        ranisePracticeAvatar.style.top =
+            top + "px";
+
+    }
+
+
+    // =====================================================
+    // POINTER DOWN
+    // TOUCH + MOUSE
+    // =====================================================
+
+    function onPointerDown(event){
+
+        if(
+            !ranisePracticeAvatar ||
+            !ranisePracticeContainer
+        ){
+
+            return;
+
+        }
+
+
+        ranisePracticeDragging =
+            true;
+
+
+        ranisePracticePointerId =
+            event.pointerId;
+
+
+        const avatarRect =
+            ranisePracticeAvatar
+                .getBoundingClientRect();
+
+
+        ranisePracticeOffsetX =
+            event.clientX -
+            avatarRect.left;
+
+
+        ranisePracticeOffsetY =
+            event.clientY -
+            avatarRect.top;
+
+
+        try{
+
+            ranisePracticeAvatar
+                .setPointerCapture(
+                    event.pointerId
+                );
+
+        }catch(error){}
+
+
+        ranisePracticeAvatar.classList.add(
+            "ranisePratiqueAvatarDragging"
+        );
+
+
+        event.preventDefault();
+
+    }
+
+
+    // =====================================================
+    // POINTER MOVE
+    // =====================================================
+
+    function onPointerMove(event){
+
+        if(
+            !ranisePracticeDragging ||
+            !ranisePracticeAvatar ||
+            !ranisePracticeContainer
+        ){
+
+            return;
+
+        }
+
+
+        if(
+            event.pointerId !==
+            ranisePracticePointerId
+        ){
+
+            return;
+
+        }
+
+
+        const containerRect =
+            ranisePracticeContainer
+                .getBoundingClientRect();
+
+
+        const avatarRect =
+            ranisePracticeAvatar
+                .getBoundingClientRect();
+
+
+        let left =
+            event.clientX -
+            containerRect.left -
+            ranisePracticeOffsetX;
+
+
+        let top =
+            event.clientY -
+            containerRect.top -
+            ranisePracticeOffsetY;
+
+
+        const maxLeft =
+            Math.max(
+                0,
+                containerRect.width -
+                avatarRect.width
+            );
+
+
+        const maxTop =
+            Math.max(
+                0,
+                containerRect.height -
+                avatarRect.height
+            );
+
+
+        left =
+            Math.max(
+                0,
+                Math.min(
+                    left,
+                    maxLeft
+                )
+            );
+
+
+        top =
+            Math.max(
+                0,
+                Math.min(
+                    top,
+                    maxTop
+                )
+            );
+
+
+        ranisePracticeAvatar.style.left =
+            left + "px";
+
+
+        ranisePracticeAvatar.style.top =
+            top + "px";
+
+
+        event.preventDefault();
+
+    }
+
+
+    // =====================================================
+    // POINTER UP
+    // =====================================================
+
+    function onPointerUp(event){
+
+        if(
+            event.pointerId !==
+            ranisePracticePointerId
+        ){
+
+            return;
+
+        }
+
+
+        ranisePracticeDragging =
+            false;
+
+
+        ranisePracticePointerId =
+            null;
+
+
+        if(ranisePracticeAvatar){
+
+            ranisePracticeAvatar.classList.remove(
+                "ranisePratiqueAvatarDragging"
+            );
+
+        }
+
+
+        event.preventDefault();
+
+    }
+
+
+    // =====================================================
+    // PREPARE REAL SIMULATION CONTAINER
+    // =====================================================
+
+    function prepareContainer(container){
+
+        if(!container){
+
+            return;
+
+        }
+
+
+        ranisePracticeContainer =
+            container;
+
+
+        const computed =
+            window.getComputedStyle(
+                container
+            );
+
+
+        if(
+            computed.position ===
+            "static"
+        ){
+
+            container.style.position =
+                "relative";
+
+        }
+
+    }
+
+
+    // =====================================================
+    // BIND DRAG EVENTS ONCE ONLY
+    // =====================================================
+
+    function bindAvatarEvents(avatar){
+
+        if(!avatar){
+
+            return;
+
+        }
+
+
+        if(
+            avatar.dataset.raniseDragBound ===
+            "true"
+        ){
+
+            return;
+
+        }
+
+
+        avatar.dataset.raniseDragBound =
+            "true";
+
+
+        avatar.addEventListener(
+            "pointerdown",
+            onPointerDown
+        );
+
+
+        avatar.addEventListener(
+            "pointermove",
+            onPointerMove
+        );
+
+
+        avatar.addEventListener(
+            "pointerup",
+            onPointerUp
+        );
+
+
+        avatar.addEventListener(
+            "pointercancel",
+            onPointerUp
+        );
+
+    }
+
+
+    // =====================================================
+    // MOUNT RANISE
+    // =====================================================
+
+    function mountRanise(container){
+
+        if(!container){
+
+            console.warn(
+                "RANISE PRACTICE AVATAR: SIMULATION CONTAINER NOT FOUND"
+            );
+
+            return false;
+
+        }
+
+
+        prepareContainer(
+            container
+        );
+
+
+        ranisePracticeAvatar =
+            createRaniseAvatar(
+                container
+            );
+
+
+        if(!ranisePracticeAvatar){
+
+            return false;
+
+        }
+
+
+        bindAvatarEvents(
+            ranisePracticeAvatar
+        );
+
+
+        if(
+            !ranisePracticeAvatar.style.left
+        ){
+
+            ranisePracticeAvatar.style.left =
+                "12px";
+
+        }
+
+
+        if(
+            !ranisePracticeAvatar.style.top
+        ){
+
+            ranisePracticeAvatar.style.top =
+                "12px";
+
+        }
+
+
+        keepInsideContainer();
+
+
+        console.log(
+            "RANISE PRACTICE AVATAR: READY"
+        );
+
+
+        return true;
+
+    }
+
+
+    // =====================================================
+    // PUBLIC OPEN FUNCTION
+    // =====================================================
+
+    function openRanisePracticeAvatar(){
+
+        const container =
+            findSimulationContainer();
+
+
+        return mountRanise(
+            container
+        );
+
+    }
+
+
+    // =====================================================
+    // PROTECTED PUBLIC NAMESPACE
+    // =====================================================
+
+    window.RaniseMoisePracticeAvatar = {
+
+        open:
+            openRanisePracticeAvatar,
+
+        mount:
+            mountRanise
+
+    };
+
+
+    // =====================================================
+    // SAFE BUTTON CONNECTION
+    // =====================================================
+
+    document.addEventListener(
+        "click",
+        function(event){
+
+            const button =
+                event.target.closest(
+                    "#launchMicrosoftWordSimulationBtn"
+                );
+
+
+            if(!button){
+
+                return;
+
+            }
+
+
+            /*
+             * Nou pa anpeche okenn lòt
+             * click handler ki deja egziste.
+             *
+             * Nou tann simulation an monte
+             * anvan nou mete Ranise ladan l.
+             */
+
+            setTimeout(
+                function(){
+
+                    openRanisePracticeAvatar();
+
+                },
+                0
+            );
+
+        },
+        false
+    );
+
+
+})();
+
+
