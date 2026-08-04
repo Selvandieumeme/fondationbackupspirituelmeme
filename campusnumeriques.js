@@ -5594,3 +5594,278 @@ const RaniseMoiseLessonEngine = {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+// =====================================
+// RANISE MOISE IA PROFESSOR
+// PEDAGOGICAL ENGINE
+// BLOCK 3 - THEORY LESSON ENGINE
+// READ-ONLY / ISOLATED
+// MICROSOFT WORD 2007 - CHAPITRE 1
+// COMPATIBLE WITH BLOCK 1 + BLOCK 2
+// =====================================
+
+
+const RaniseMoiseTheoryEngine = {
+
+
+    // =====================================
+    // GET THEORY DATA
+    // READ ONLY
+    // =====================================
+
+    getTheory:function(){
+
+
+        if(
+            typeof RaniseMoiseLessonEngine ===
+            "undefined"
+        ){
+
+            return [];
+
+        }
+
+
+
+        const chapter =
+            RaniseMoiseLessonEngine
+                .getChapter1Data();
+
+
+
+        if(
+            !chapter ||
+            !Array.isArray(
+                chapter.theory
+            )
+        ){
+
+            return [];
+
+        }
+
+
+
+        return chapter.theory;
+
+    },
+
+
+
+
+
+    // =====================================
+    // GET THEORY LESSON
+    // READ ONLY
+    // =====================================
+
+    getLesson:function(index){
+
+
+        const theory =
+            this.getTheory();
+
+
+
+        if(
+            !Number.isInteger(index) ||
+            index < 0 ||
+            index >= theory.length
+        ){
+
+            return null;
+
+        }
+
+
+
+        const lesson =
+            theory[index];
+
+
+
+        if(
+            !lesson ||
+            typeof lesson.title !==
+            "string" ||
+            typeof lesson.content !==
+            "string"
+        ){
+
+            return null;
+
+        }
+
+
+
+        return {
+
+            index:
+                index,
+
+            title:
+                lesson.title,
+
+            content:
+                lesson.content
+
+        };
+
+    },
+
+
+
+
+
+    // =====================================
+    // GET FIRST THEORY LESSON
+    // READ ONLY
+    // =====================================
+
+    getFirstLesson:function(){
+
+
+        return this.getLesson(0);
+
+    },
+
+
+
+
+
+    // =====================================
+    // CREATE CURRENT LESSON STATE
+    // READ ONLY
+    // =====================================
+
+    createLessonState:function(index){
+
+
+        const lesson =
+            this.getLesson(index);
+
+
+
+        if(!lesson){
+
+            return null;
+
+        }
+
+
+
+        return {
+
+            chapterId:
+                "chapitre1",
+
+            section:
+                "theory",
+
+            lessonIndex:
+                lesson.index,
+
+            lessonTitle:
+                lesson.title,
+
+            lessonContent:
+                lesson.content,
+
+            status:
+                "ready"
+
+        };
+
+    },
+
+
+
+
+
+    // =====================================
+    // PREPARE FIRST THEORY LESSON
+    // READ ONLY
+    // =====================================
+
+    prepareFirstLesson:function(){
+
+
+        const lesson =
+            this.getFirstLesson();
+
+
+
+        if(!lesson){
+
+            return null;
+
+        }
+
+
+
+        return this.createLessonState(
+            lesson.index
+        );
+
+    }
+
+
+};
+
+
+
+
+
+// =====================================
+// RANISE MOISE IA PROFESSOR
+// BLOCK 3 VERIFICATION
+// =====================================
+
+(function(){
+
+
+    const firstLesson =
+        RaniseMoiseTheoryEngine
+            .prepareFirstLesson();
+
+
+
+    if(firstLesson){
+
+
+        console.log(
+            "RANISE THEORY ENGINE: FIRST LESSON READY"
+        );
+
+
+        console.log(
+            "RANISE THEORY LESSON:",
+            firstLesson.lessonTitle
+        );
+
+
+    }else{
+
+
+        console.error(
+            "RANISE THEORY ENGINE: FIRST LESSON NOT AVAILABLE"
+        );
+
+
+    }
+
+
+})();
+
