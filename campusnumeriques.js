@@ -5898,6 +5898,10 @@ const RaniseMoiseTheoryEngine = {
 
 
 
+
+
+
+
 // =====================================
 // RANISE MOISE IA PROFESSOR
 // PEDAGOGICAL ENGINE
@@ -6048,8 +6052,13 @@ const RaniseMoiseTheoryTeachingEngine = {
 
 
 
+        // =====================================
+        // MARYTTS ONLY
+        // SAME FUNCTION USED BY ACTIVATION
+        // =====================================
+
         if(
-            typeof speakProfessorIACamille !==
+            typeof speakProfessorIAWithMaryTTS !==
             "function"
         ){
 
@@ -6066,18 +6075,7 @@ const RaniseMoiseTheoryTeachingEngine = {
         try{
 
 
-            if(
-                typeof raniseStartTalking ===
-                "function"
-            ){
-
-                raniseStartTalking();
-
-            }
-
-
-
-            await speakProfessorIACamille(
+            await speakProfessorIAWithMaryTTS(
                 explanation
             );
 
