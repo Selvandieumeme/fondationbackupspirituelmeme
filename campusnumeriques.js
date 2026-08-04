@@ -777,6 +777,8 @@ document.querySelectorAll(
 
 
 
+
+
 // =====================================
 // CHAPTER 1 IA ACTIVATION
 // =====================================
@@ -830,35 +832,46 @@ setTimeout(async ()=>{
     );
 
 
-if(
-    typeof RaniseMoiseTheoryTeachingEngine !==
-    "undefined" &&
-    typeof RaniseMoiseTheoryTeachingEngine.teachFirstLesson ===
-    "function"
-){
 
-    await RaniseMoiseTheoryTeachingEngine
-        .teachFirstLesson();
+    // =====================================
+    // BLOCK 4
+    // FIRST THEORY LESSON READING
+    // MUST FINISH COMPLETELY FIRST
+    // =====================================
 
-}
+    if(
+        typeof RaniseMoiseTheoryTeachingEngine !==
+        "undefined" &&
+        typeof RaniseMoiseTheoryTeachingEngine.teachFirstLesson ===
+        "function"
+    ){
+
+        await RaniseMoiseTheoryTeachingEngine
+            .teachFirstLesson();
+
+    }
 
 
 
+    // =====================================
+    // BLOCK 5
+    // PEDAGOGICAL EXPLANATION
+    // STARTS ONLY AFTER BLOCK 4 FINISHES
+    // =====================================
+
+    if(
+        typeof RaniseMoisePedagogicalExplanationEngine !==
+        "undefined" &&
+        typeof RaniseMoisePedagogicalExplanationEngine.teachExplanation ===
+        "function"
+    ){
+
+        await RaniseMoisePedagogicalExplanationEngine
+            .teachExplanation();
+
+    }
 
 
-
-
-if(
-    typeof RaniseMoiseTheoryTeachingEngine !==
-    "undefined" &&
-    typeof RaniseMoiseTheoryTeachingEngine.teachFirstLesson ===
-    "function"
-){
-
-    await RaniseMoiseTheoryTeachingEngine
-        .teachFirstLesson();
-
-}
 
 
 },200);
@@ -866,6 +879,8 @@ if(
     },50);
 
 }
+
+
 
 
 
