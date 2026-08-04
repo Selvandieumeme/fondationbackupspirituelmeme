@@ -5378,3 +5378,219 @@ const RaniseMoisePedagogicalEngine = {
     }
 
 })();
+
+
+
+
+
+
+
+
+
+
+
+
+// =====================================
+// RANISE MOISE IA PROFESSOR
+// PEDAGOGICAL ENGINE
+// BLOCK 2 - LESSON STRUCTURE
+// READ-ONLY / ISOLATED
+// MICROSOFT WORD 2007 - CHAPITRE 1
+// COMPATIBLE WITH BLOCK 1
+// =====================================
+
+
+const RaniseMoiseLessonEngine = {
+
+
+    // =====================================
+    // GET CHAPTER 1 PEDAGOGICAL DATA
+    // READ ONLY
+    // =====================================
+
+    getChapter1Data:function(){
+
+
+        if(
+            typeof RaniseMoisePedagogicalEngine ===
+            "undefined"
+        ){
+
+            return null;
+
+        }
+
+
+
+        return RaniseMoisePedagogicalEngine
+            .readChapter1();
+
+
+    },
+
+
+
+
+
+    // =====================================
+    // COUNT THEORY LESSONS
+    // READ ONLY
+    // =====================================
+
+    getTheoryCount:function(){
+
+
+        const chapter =
+            this.getChapter1Data();
+
+
+
+        if(!chapter){
+
+            return 0;
+
+        }
+
+
+
+        return chapter.theory.length;
+
+
+    },
+
+
+
+
+
+    // =====================================
+    // COUNT PRACTICAL ACTIVITIES
+    // READ ONLY
+    // =====================================
+
+    getPracticeCount:function(){
+
+
+        const chapter =
+            this.getChapter1Data();
+
+
+
+        if(!chapter){
+
+            return 0;
+
+        }
+
+
+
+        return chapter.practice.length;
+
+
+    },
+
+
+
+
+
+    // =====================================
+    // COUNT EXERCISES
+    // READ ONLY
+    // =====================================
+
+    getExerciseCount:function(){
+
+
+        const chapter =
+            this.getChapter1Data();
+
+
+
+        if(!chapter){
+
+            return 0;
+
+        }
+
+
+
+        return chapter.exercises.length;
+
+
+    },
+
+
+
+
+
+    // =====================================
+    // BUILD LESSON MAP
+    // READ ONLY
+    // =====================================
+
+    buildChapter1Map:function(){
+
+
+        const chapter =
+            this.getChapter1Data();
+
+
+
+        if(!chapter){
+
+            return null;
+
+        }
+
+
+
+        return {
+
+            chapterId:
+                chapter.id,
+
+            title:
+                chapter.title,
+
+            objectives:
+                chapter.objective,
+
+            theory:
+                chapter.theory,
+
+            practice:
+                chapter.practice,
+
+            exercises:
+                chapter.exercises,
+
+            homework:
+                chapter.homework,
+
+            evaluation:
+                chapter.evaluation,
+
+            theoryCount:
+                chapter.theory.length,
+
+            practiceCount:
+                chapter.practice.length,
+
+            exerciseCount:
+                chapter.exercises.length
+
+        };
+
+
+    },
+
+
+};
+
+
+
+
+
+
+
+
+
