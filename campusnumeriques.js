@@ -6848,153 +6848,169 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
 
 
-// =========================================================
-// BLOCK 6
-// MICROSOFT WORD 2007 FORMATION
-// RANISE MOISE PRACTICE TEACHING ENGINE
-// =========================================================
-// ISOLATED ADD-ON
-// USES THE EXISTING RANISE VOICE SYSTEM
-// USES EXISTING COURSE PRACTICE DATA
-// THEORY REMAINS UNTOUCHED
-// BLOCK 5 REMAINS UNTOUCHED
-// DOES NOT MODIFY BLOCK 4
-// DOES NOT MODIFY BLOCK 5
-// STARTED ONLY AFTER BLOCK 5 FINISHES
-// =========================================================
-
-(function(){
-
-    "use strict";
 
 
-    // =====================================================
-    // PRACTICE TEACHING ENGINE
-    // =====================================================
-
-    window.RaniseMoisePracticeTeachingEngine = {
 
 
-        // =================================================
-        // EXISTING RANISE VOICE SYSTEM
-        // =================================================
 
-        async speak(text){
-
-            if(!text){
-
-                return;
-
-            }
-
-
-            if(
-                typeof raniseStartTalking ===
-                "function"
-            ){
-
-                raniseStartTalking();
-
-            }
+// =====================================
+// RANISE MOISE IA PROFESSOR
+// PRACTICE TEACHING ENGINE
+// BLOCK 6 - PRACTICE TEACHING ENGINE
+// READ-ONLY / ISOLATED
+// MICROSOFT WORD 2007 - CHAPITRE 1
+// COMPATIBLE WITH BLOCK 1 + 2 + 3 + 4 + 5
+// MARYTTS ONLY
+// =====================================
 
 
-            try{
-
-                if(
-                    typeof speakProfessorIAWithMaryTTS ===
-                    "function"
-                ){
-
-                    await speakProfessorIAWithMaryTTS(
-                        text
-                    );
-
-                }
-
-            }finally{
-
-                if(
-                    typeof raniseStopTalking ===
-                    "function"
-                ){
-
-                    raniseStopTalking();
-
-                }
-
-            }
-
-        },
+const RaniseMoisePracticeTeachingEngine = {
 
 
-        // =================================================
-        // CHAPTER 1 PRACTICE TEACHING
-        // =================================================
+    // =====================================
+    // GET CURRENT PRACTICE
+    // READ ONLY
+    // =====================================
 
-        async teachFirstPractice(){
-
-
-            // =============================================
-            // EXISTING COURSE DATA
-            // =============================================
-
-            if(
-                typeof microsoftWordCourse ===
-                "undefined"
-            ){
-
-                return;
-
-            }
+    getCurrentPractice:function(){
 
 
-            const chapter =
-                microsoftWordCourse.chapters.find(
+        if(
+            typeof microsoftWordCourse ===
+            "undefined"
+        ){
 
-                    item =>
-                        item.id === "chapitre1"
+            return null;
 
-                );
-
-
-            if(!chapter){
-
-                return;
-
-            }
+        }
 
 
-            if(
-                !Array.isArray(
-                    chapter.practice
-                ) ||
-                chapter.practice.length === 0
-            ){
 
-                return;
+        if(
+            !Array.isArray(
+                microsoftWordCourse.chapters
+            )
+        ){
 
-            }
+            return null;
+
+        }
 
 
-            // =============================================
+
+        const chapter =
+
+            microsoftWordCourse.chapters.find(
+
+                item =>
+
+                    item.id === "chapitre1"
+
+            );
+
+
+
+        if(!chapter){
+
+            return null;
+
+        }
+
+
+
+        if(
+            !Array.isArray(
+                chapter.practice
+            ) ||
+            chapter.practice.length === 0
+        ){
+
+            return null;
+
+        }
+
+
+
+        return chapter.practice;
+
+
+    },
+
+
+
+
+
+    // =====================================
+    // TEACH PRACTICE
+    // READ ONLY
+    // =====================================
+
+    teachFirstPractice:async function(){
+
+
+        const practice =
+
+            this.getCurrentPractice();
+
+
+
+        if(!practice){
+
+            console.error(
+
+                "RANISE PRACTICE TEACHING ENGINE: PRACTICE NOT AVAILABLE"
+
+            );
+
+            return false;
+
+        }
+
+
+
+        if(
+            typeof speakProfessorIAWithMaryTTS !==
+            "function"
+        ){
+
+            console.error(
+
+                "RANISE PRACTICE TEACHING ENGINE: MARYTTS FUNCTION NOT AVAILABLE"
+
+            );
+
+            return false;
+
+        }
+
+
+
+        try{
+
+
+            // =====================================
             // PRACTICE INTRODUCTION
-            // =============================================
+            // =====================================
 
-            await this.speak(
+            await speakProfessorIAWithMaryTTS(
 
                 "Maintenant, nous allons passer aux séances pratiques, toujours pour la première leçon Microsoft Word 2007."
 
             );
 
 
-            // =============================================
-            // READ PRACTICE DATA
-            // IN THE SAME ORDER AS COURSE DATA
-            // =============================================
+
+            // =====================================
+            // READ EXISTING PRACTICE DATA
+            // SAME COURSE DATA ORDER
+            // =====================================
 
             for(
-                const activity of chapter.practice
+
+                const activity of practice
+
             ){
+
 
                 if(!activity){
 
@@ -7003,13 +7019,18 @@ const RaniseMoisePedagogicalExplanationEngine = {
                 }
 
 
-                // =========================================
-                // PRACTICE TITLE
-                // =========================================
 
-                if(activity.title){
+                // =================================
+                // PRACTICE ACTIVITY TITLE
+                // =================================
 
-                    await this.speak(
+                if(
+                    typeof activity.title ===
+                    "string" &&
+                    activity.title.trim()
+                ){
+
+                    await speakProfessorIAWithMaryTTS(
 
                         activity.title
 
@@ -7018,15 +7039,17 @@ const RaniseMoisePedagogicalExplanationEngine = {
                 }
 
 
-                // =========================================
+
+                // =================================
                 // PRACTICE STEPS
-                // =========================================
+                // =================================
 
                 if(
                     Array.isArray(
                         activity.steps
                     )
                 ){
+
 
                     for(
 
@@ -7038,18 +7061,26 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
                     ){
 
+
                         const step =
+
                             activity.steps[i];
 
 
-                        if(!step){
+
+                        if(
+                            typeof step !==
+                            "string" ||
+                            !step.trim()
+                        ){
 
                             continue;
 
                         }
 
 
-                        await this.speak(
+
+                        await speakProfessorIAWithMaryTTS(
 
                             "Étape " +
                             (i + 1) +
@@ -7065,29 +7096,93 @@ const RaniseMoisePedagogicalExplanationEngine = {
             }
 
 
-            // =============================================
-            // FINAL INSTRUCTION
-            // =============================================
 
-            await this.speak(
+            // =====================================
+            // FINAL PRACTICE INSTRUCTION
+            // =====================================
+
+            await speakProfessorIAWithMaryTTS(
 
                 "Cliquez sur le bouton “🚀 Ouvrir Microsoft Word Simulation” pour ouvrir l’espace de simulation. Attendez-moi ici, car c’est moi qui vais vous guider étape par étape."
 
             );
 
+
+
+            console.log(
+
+                "RANISE PRACTICE TEACHING ENGINE: PRACTICE FINISHED"
+
+            );
+
+
+
+            return true;
+
+
+        }catch(error){
+
+
+            console.error(
+
+                "RANISE PRACTICE TEACHING ENGINE: MARYTTS ERROR",
+
+                error
+
+            );
+
+
+            return false;
+
+
         }
 
-    };
+
+    }
+
+
+};
+
+
+
+
+
+// =====================================
+// RANISE MOISE IA PROFESSOR
+// BLOCK 6 VERIFICATION
+// =====================================
+
+(function(){
+
+
+    const practice =
+
+        RaniseMoisePracticeTeachingEngine
+
+            .getCurrentPractice();
+
+
+
+    if(practice){
+
+        console.log(
+
+            "RANISE PRACTICE TEACHING ENGINE: READY"
+
+        );
+
+    }else{
+
+        console.error(
+
+            "RANISE PRACTICE TEACHING ENGINE: PRACTICE NOT AVAILABLE"
+
+        );
+
+    }
 
 
 })();
-
-
-
-
-
-
-
 
 
 
