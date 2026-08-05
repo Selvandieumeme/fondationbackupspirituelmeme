@@ -10224,19 +10224,40 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
 // =========================================================
 // RANISE DYNAMIC PRACTICE BRIDGE
 // MICROSOFT WORD 2007 SIMULATION
 // =========================================================
 // CENTRAL BRIDGE FOR RANISE PRACTICE AUDIO
 //
-// PURPOSE:
-// CONNECT BLOCK 7 → BLOCK 8 → BLOCK 9 → BLOCK 10...
+// FLOW:
+// BLOCK 7 WELCOME AUDIO
+//        ↓
+// EXACT MARYTTS AUDIO FINISH
+//        ↓
+// BLOCK 8
+//        ↓
+// BLOCK 9
+//        ↓
+// BLOCK 10...
 //
 // IMPORTANT:
 // - DOES NOT REPLACE BLOCK 7
 // - DOES NOT REPLACE BLOCK 8
-// - DOES NOT MODIFY MARYTTS
+// - DOES NOT MODIFY MARYTTS ENGINE
 // - DOES NOT MODIFY AVATAR ANIMATION
 // - DOES NOT CREATE PRACTICE CONTENT
 // - DOES NOT MODIFY MICROSOFT WORD COURSE DATA
@@ -10259,11 +10280,15 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
     let audioRunning = false;
 
-    let firstPracticeAudioFinished = false;
+    let block7WelcomeAudioFinished = false;
+
+    let block8Started = false;
 
     let originalMaryTTS = null;
 
     let maryTTSWrapped = false;
+
+    let maryTTSWatchTimer = null;
 
 
     // =====================================================
@@ -10271,6 +10296,18 @@ const RaniseMoisePedagogicalExplanationEngine = {
     // =====================================================
 
     const registeredBlocks = new Map();
+
+
+    // =====================================================
+    // EXACT BLOCK 7 WELCOME IDENTIFIER
+    // =====================================================
+    // Bridge la pa sèvi ak nenpòt odyo.
+    // Li rekonèt mesaj byenvini Block 7 la sèlman.
+    // =====================================================
+
+    const BLOCK7_WELCOME_MARKER =
+        "Bravo ! Vous venez de franchir la première étape pratique avec succès.";
+
 
 
     // =====================================================
@@ -10334,7 +10371,7 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
 
     // =====================================================
-    // REGISTER A FUTURE PRACTICE BLOCK
+    // REGISTER FUTURE PRACTICE BLOCK
     // =====================================================
 
     function registerBlock(
@@ -10442,8 +10479,40 @@ const RaniseMoisePedagogicalExplanationEngine = {
         );
 
 
-        currentBlock =
-            null;
+        if(
+            currentBlock === blockId
+        ){
+
+            currentBlock =
+                null;
+
+        }
+
+    }
+
+
+
+    // =====================================================
+    // CHECK WHETHER THIS IS BLOCK 7 WELCOME AUDIO
+    // =====================================================
+
+    function isBlock7WelcomeAudio(text){
+
+        if(
+            typeof text !== "string"
+        ){
+
+            return false;
+
+        }
+
+
+        return text
+            .toLowerCase()
+            .includes(
+                BLOCK7_WELCOME_MARKER
+                    .toLowerCase()
+            );
 
     }
 
@@ -10452,15 +10521,17 @@ const RaniseMoisePedagogicalExplanationEngine = {
     // =====================================================
     // MARYTTS AUDIO MONITOR
     // =====================================================
-    // THIS DOES NOT REPLACE MARYTTS.
-    // IT ONLY OBSERVES THE EXISTING FUNCTION.
+    // THIS WRAPS THE EXISTING MARYTTS FUNCTION ONLY TO
+    // OBSERVE START / END.
+    //
+    // THE ORIGINAL MARYTTS FUNCTION REMAINS IN CONTROL.
     // =====================================================
 
     function installMaryTTSBridge(){
 
         if(maryTTSWrapped){
 
-            return;
+            return true;
 
         }
 
@@ -10470,7 +10541,7 @@ const RaniseMoisePedagogicalExplanationEngine = {
             "function"
         ){
 
-            return;
+            return false;
 
         }
 
@@ -10481,6 +10552,12 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
         window.speakProfessorIAWithMaryTTS =
             async function(text){
+
+                const isBlock7Welcome =
+                    isBlock7WelcomeAudio(
+                        text
+                    );
+
 
                 if(
                     text &&
@@ -10498,6 +10575,19 @@ const RaniseMoisePedagogicalExplanationEngine = {
                                 text.trim()
                         }
                     );
+
+
+                    if(isBlock7Welcome){
+
+                        emit(
+                            "ranise:practice:block7-audio-start",
+                            {
+                                text:
+                                    text.trim()
+                            }
+                        );
+
+                    }
 
                 }
 
@@ -10523,9 +10613,18 @@ const RaniseMoisePedagogicalExplanationEngine = {
                     );
 
 
-                    handleAudioFinished(
-                        text
-                    );
+                    // -------------------------------------
+                    // ONLY THE EXACT BLOCK 7 WELCOME AUDIO
+                    // CAN TRIGGER BLOCK 8.
+                    // -------------------------------------
+
+                    if(isBlock7Welcome){
+
+                        handleBlock7WelcomeFinished(
+                            text
+                        );
+
+                    }
 
                 }
 
@@ -10535,21 +10634,86 @@ const RaniseMoisePedagogicalExplanationEngine = {
         maryTTSWrapped =
             true;
 
+
+        return true;
+
     }
 
 
 
     // =====================================================
-    // FIRST PRACTICE AUDIO FINISHED
+    // WAIT FOR MARYTTS TO EXIST
     // =====================================================
 
-    function handleAudioFinished(text){
+    function watchForMaryTTS(){
 
-        if(!simulationIsOpen()){
+        if(
+            maryTTSWrapped
+        ){
+
+            if(maryTTSWatchTimer){
+
+                clearInterval(
+                    maryTTSWatchTimer
+                );
+
+                maryTTSWatchTimer =
+                    null;
+
+            }
 
             return;
 
         }
+
+
+        if(
+            installMaryTTSBridge()
+        ){
+
+            if(maryTTSWatchTimer){
+
+                clearInterval(
+                    maryTTSWatchTimer
+                );
+
+                maryTTSWatchTimer =
+                    null;
+
+            }
+
+        }
+
+    }
+
+
+
+    // =====================================================
+    // BLOCK 7 WELCOME AUDIO FINISHED
+    // =====================================================
+
+    function handleBlock7WelcomeFinished(text){
+
+        if(
+            block7WelcomeAudioFinished
+        ){
+
+            return;
+
+        }
+
+
+        if(
+            !simulationIsOpen()
+        ){
+
+            return;
+
+        }
+
+
+        block7WelcomeAudioFinished =
+            true;
 
 
         emit(
@@ -10561,31 +10725,20 @@ const RaniseMoisePedagogicalExplanationEngine = {
         );
 
 
+        emit(
+            "ranise:practice:block7-finished",
+            {
+                reason:
+                    "Exact Block 7 welcome audio finished"
+            }
+        );
+
+
         // ---------------------------------------------
         // BLOCK 7 → BLOCK 8
         // ---------------------------------------------
 
-        if(
-            !firstPracticeAudioFinished &&
-            !currentBlock
-        ){
-
-            firstPracticeAudioFinished =
-                true;
-
-
-            emit(
-                "ranise:practice:block7-finished",
-                {
-                    reason:
-                        "Ranise welcome audio finished"
-                }
-            );
-
-
-            startInteractivePracticeBlock();
-
-        }
+        startInteractivePracticeBlock();
 
     }
 
@@ -10597,49 +10750,91 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
     async function startInteractivePracticeBlock(){
 
-        if(!simulationIsOpen()){
+        if(
+            !simulationIsOpen()
+        ){
 
             return;
 
         }
 
 
-        // ---------------------------------------------
-        // IF BLOCK 8 ALREADY STARTED,
-        // DO NOT START IT AGAIN.
-        // ---------------------------------------------
+        if(block8Started){
+
+            return;
+
+        }
+
 
         if(
-            window.RaniseMoiseInteractivePracticeEngine &&
+            !block7WelcomeAudioFinished
+        ){
+
+            return;
+
+        }
+
+
+        if(
+            !window.RaniseMoiseInteractivePracticeEngine ||
             typeof
-            window.RaniseMoiseInteractivePracticeEngine.start ===
+            window.RaniseMoiseInteractivePracticeEngine.start !==
             "function"
         ){
 
-            currentBlock =
-                "block8";
+            // ---------------------------------------------
+            // BLOCK 8 NOT LOADED YET.
+            // TRY AGAIN DYNAMICALLY.
+            // ---------------------------------------------
 
+            setTimeout(
+                function(){
 
-            emit(
-                "ranise:practice:block8-ready",
-                {}
+                    startInteractivePracticeBlock();
+
+                },
+                300
             );
 
+            return;
 
-            try{
+        }
 
-                await
-                window.RaniseMoiseInteractivePracticeEngine
-                    .start();
 
-            }catch(error){
+        block8Started =
+            true;
 
-                console.error(
-                    "RANISE BRIDGE: BLOCK 8 ERROR:",
-                    error
-                );
 
-            }
+        currentBlock =
+            "block8";
+
+
+        emit(
+            "ranise:practice:block8-ready",
+            {}
+        );
+
+
+        try{
+
+            await
+            window.RaniseMoiseInteractivePracticeEngine
+                .start();
+
+        }catch(error){
+
+            // ---------------------------------------------
+            // ALLOW A FUTURE RETRY IF BLOCK 8 FAILS.
+            // ---------------------------------------------
+
+            block8Started =
+                false;
+
+
+            console.error(
+                "RANISE BRIDGE: BLOCK 8 ERROR:",
+                error
+            );
 
         }
 
@@ -10667,6 +10862,25 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
 
             installMaryTTSBridge();
+
+
+            if(
+                !maryTTSWrapped
+            ){
+
+                if(
+                    !maryTTSWatchTimer
+                ){
+
+                    maryTTSWatchTimer =
+                        setInterval(
+                            watchForMaryTTS,
+                            250
+                        );
+
+                }
+
+            }
 
 
             emit(
@@ -10709,7 +10923,10 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
         reset:function(){
 
-            firstPracticeAudioFinished =
+            block7WelcomeAudioFinished =
+                false;
+
+            block8Started =
                 false;
 
             currentBlock =
@@ -10726,9 +10943,6 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
     // =====================================================
     // SIMULATION OBSERVER
-    // =====================================================
-    // THE BRIDGE BECOMES ACTIVE WHEN THE EXISTING
-    // WORD SIMULATION APPEARS.
     // =====================================================
 
     function watchSimulation(){
@@ -10800,7 +11014,10 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
         installMaryTTSBridge();
 
+        watchForMaryTTS();
+
         watchSimulation();
+
 
         emit(
             "ranise:practice:bridge-initialized",
@@ -10837,14 +11054,6 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
 
 })();
-
-
-
-
-
-
-
-
 
 
 
