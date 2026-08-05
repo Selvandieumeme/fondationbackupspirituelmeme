@@ -7232,51 +7232,62 @@ const RaniseMoisePedagogicalExplanationEngine = {
     // ISOLATED CSS
     // =====================================================
 
+
     const style =
         document.createElement(
             "style"
         );
 
 
-    style.textContent = `
+style.textContent = `
 
-        .${RANISE_SPACE_CLASS} {
+    .${RANISE_SPACE_CLASS} {
 
-            width: 100%;
+        width: 100%;
 
-            box-sizing: border-box;
+        box-sizing: border-box;
 
-            display: block;
+        display: flex;
 
-            margin: 0 0 10px 0;
+        justify-content: center;
 
-            padding: 0;
+        align-items: flex-start;
 
-            overflow: hidden;
+        margin: 0 0 8px 0;
 
-        }
+        padding: 0;
 
+        overflow: hidden;
 
-        .${RANISE_COPY_CLASS} {
-
-            width: 100% !important;
-
-            max-width: 100% !important;
-
-            box-sizing: border-box;
-
-            margin: 0 !important;
-
-        }
+    }
 
 
-        .${RANISE_COPY_CLASS} img {
+    .${RANISE_COPY_CLASS} {
 
-            max-width: 100%;
+        width: 55% !important;
 
-        }
+        max-width: 55% !important;
 
-    `;
+        transform: scale(0.75);
+
+        transform-origin: top center;
+
+        box-sizing: border-box;
+
+        margin: 0 !important;
+
+    }
+
+
+    .${RANISE_COPY_CLASS} img {
+
+        max-width: 100%;
+
+        height: auto;
+
+    }
+
+`;
 
 
     document.head.appendChild(
