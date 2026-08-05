@@ -7803,6 +7803,10 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
 
 
+
+
+
+
 // =========================================================
 // BLOCK 8
 // MICROSOFT WORD 2007 FORMATION
@@ -7810,6 +7814,7 @@ const RaniseMoisePedagogicalExplanationEngine = {
 // =========================================================
 // ISOLATED ADD-ON
 // USES EXISTING CHAPTER 1 PRACTICE DATA
+// WAITS FOR BLOCK 7 TO FINISH
 // DOES NOT MODIFY BLOCK 6
 // DOES NOT MODIFY BLOCK 7
 // DOES NOT MODIFY MARYTTS
@@ -7830,11 +7835,15 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
     let practiceStarted = false;
 
+    let block7Finished = false;
+
     let currentStepIndex = 0;
 
     let currentActivityIndex = 0;
 
     let waitingForStudentAction = false;
+
+    let studentActionBeingProcessed = false;
 
     let simulationFrame = null;
 
@@ -7848,8 +7857,8 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
     // =====================================================
     // RANISE SPEAK
-    // IMPORTANT:
-    // THIS BLOCK DOES NOT CONTROL AVATAR ANIMATION.
+    // =====================================================
+    // BLOCK 8 DOES NOT CONTROL AVATAR ANIMATION.
     // THE EXISTING RANISE ANIMATION SYSTEM REMAINS ISOLATED.
     // =====================================================
 
@@ -7861,7 +7870,7 @@ const RaniseMoisePedagogicalExplanationEngine = {
             !text.trim()
         ){
 
-            return;
+            return false;
 
         }
 
@@ -7875,7 +7884,7 @@ const RaniseMoisePedagogicalExplanationEngine = {
                 "BLOCK 8: MaryTTS indisponible."
             );
 
-            return;
+            return false;
 
         }
 
@@ -7886,12 +7895,16 @@ const RaniseMoisePedagogicalExplanationEngine = {
                 text.trim()
             );
 
+            return true;
+
         }catch(error){
 
             console.error(
                 "BLOCK 8: erreur MaryTTS:",
                 error
             );
+
+            return false;
 
         }
 
@@ -7976,9 +7989,11 @@ const RaniseMoisePedagogicalExplanationEngine = {
         }
 
 
-        return practice[
-            currentActivityIndex
-        ] || null;
+        return (
+            practice[
+                currentActivityIndex
+            ] || null
+        );
 
     }
 
@@ -8012,104 +8027,122 @@ const RaniseMoisePedagogicalExplanationEngine = {
         }
 
 
-        return activity.steps[
-            currentStepIndex
-        ] || null;
+        return (
+            activity.steps[
+                currentStepIndex
+            ] || null
+        );
 
     }
 
 
 
     // =====================================================
-    // EXTRACT IMPORTANT WORDS FROM THE PRACTICE STEP
+    // NORMALIZE TEXT
+    // =====================================================
+
+    function normalizeText(text){
+
+        if(
+            typeof text !== "string"
+        ){
+
+            return "";
+
+        }
+
+
+        return text
+            .toLowerCase()
+            .normalize("NFD")
+            .replace(
+                /[\u0300-\u036f]/g,
+                ""
+            )
+            .replace(
+                /[«»"'`]/g,
+                " "
+            )
+            .replace(
+                /[^\p{L}\p{N}]+/gu,
+                " "
+            )
+            .replace(
+                /\s+/g,
+                " "
+            )
+            .trim();
+
+    }
+
+
+
+    // =====================================================
+    // EXTRACT TARGET WORDS
     // =====================================================
 
     function extractKeywords(step){
 
-        if(
-            !step ||
-            typeof step !== "string"
-        ){
+        const text =
+            normalizeText(step);
+
+
+        if(!text){
 
             return [];
 
         }
 
 
-        let text =
-            step
-                .toLowerCase()
-                .normalize("NFD")
-                .replace(
-                    /[\u0300-\u036f]/g,
-                    ""
-                );
-
-
-        // ---------------------------------------------
-        // REMOVE GENERIC PEDAGOGICAL WORDS
-        // ---------------------------------------------
-
-        const ignoredWords = [
+        const ignoredWords = new Set([
 
             "identifier",
             "identifiez",
-            "identifier la",
-            "identifier le",
-            "identifier les",
+            "identifie",
             "cliquez",
             "clique",
+            "cliquer",
             "sur",
-            "le",
-            "la",
-            "les",
-            "un",
-            "une",
-            "des",
-            "du",
-            "de",
             "dans",
-            "l",
-            "et",
-            "ou",
+            "avec",
+            "pour",
             "faire",
             "faites",
+            "faire",
             "creer",
             "creez",
+            "creer",
             "nouveau",
             "nouvelle",
-            "document",
+            "les",
+            "des",
+            "une",
+            "un",
+            "le",
+            "la",
+            "de",
+            "du",
+            "et",
+            "ou",
+            "en",
+            "a",
+            "au",
+            "aux",
+            "l",
             "word",
             "microsoft",
             "2007"
 
-        ];
-
-
-        ignoredWords.forEach(
-            word => {
-
-                text =
-                    text.replace(
-                        new RegExp(
-                            "\\b" +
-                            word +
-                            "\\b",
-                            "gi"
-                        ),
-                        " "
-                    );
-
-            }
-        );
+        ]);
 
 
         const words =
             text
-                .split(/[^a-z0-9]+/)
+                .split(" ")
                 .filter(
                     word =>
-                        word.length >= 3
+                        word.length >= 3 &&
+                        !ignoredWords.has(word)
                 );
 
 
@@ -8122,34 +8155,76 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
 
     // =====================================================
-    // FIND THE IMPORTANT TARGET WORDS
-    // INSIDE THE SIMULATION
+    // TARGET WORDS FOR CURRENT STEP
     // =====================================================
 
     function findTargetKeywords(step){
 
-        const keywords =
-            extractKeywords(step);
-
-
-        if(
-            keywords.length > 0
-        ){
-
-            return keywords;
-
-        }
-
-
-        return [];
+        return extractKeywords(step);
 
     }
 
 
 
     // =====================================================
-    // CHECK WHETHER A CLICK CORRESPONDS
-    // TO THE CURRENT PRACTICE STEP
+    // GET ELEMENT TEXT
+    // =====================================================
+
+    function getElementText(element){
+
+        if(!element){
+
+            return "";
+
+        }
+
+
+        const parts = [
+
+            element.innerText,
+
+            element.textContent,
+
+            element.getAttribute(
+                "aria-label"
+            ),
+
+            element.getAttribute(
+                "title"
+            ),
+
+            element.getAttribute(
+                "alt"
+            ),
+
+            element.getAttribute(
+                "data-tooltip"
+            ),
+
+            element.getAttribute(
+                "data-title"
+            )
+
+        ];
+
+
+        return normalizeText(
+            parts
+                .filter(
+                    value =>
+                        typeof value ===
+                        "string" &&
+                        value.trim()
+                )
+                .join(" ")
+        );
+
+    }
+
+
+
+    // =====================================================
+    // CHECK CURRENT STUDENT ACTION
     // =====================================================
 
     function actionMatchesStep(element){
@@ -8158,7 +8233,7 @@ const RaniseMoisePedagogicalExplanationEngine = {
             getCurrentStep();
 
 
-        if(!step){
+        if(!step || !element){
 
             return false;
 
@@ -8166,7 +8241,9 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
 
         const keywords =
-            findTargetKeywords(step);
+            findTargetKeywords(
+                step
+            );
 
 
         if(
@@ -8178,110 +8255,103 @@ const RaniseMoisePedagogicalExplanationEngine = {
         }
 
 
-        if(!element){
+        const elementText =
+            getElementText(
+                element
+            );
+
+
+        if(!elementText){
 
             return false;
 
         }
 
 
-        const elementText = (
+        // ---------------------------------------------
+        // TARGET ELEMENT MUST CONTAIN THE PRACTICE
+        // TARGET WORD(S)
+        // ---------------------------------------------
 
-            element.innerText ||
-            element.textContent ||
-            element.getAttribute("aria-label") ||
-            element.getAttribute("title") ||
-            element.getAttribute("alt") ||
-            ""
+        for(
+            const keyword of keywords
+        ){
 
-        )
-        .toLowerCase()
-        .normalize("NFD")
-        .replace(
-            /[\u0300-\u036f]/g,
-            " "
-        );
+            if(
+                elementText.includes(
+                    keyword
+                )
+            ){
 
-
-        if(!elementText.trim()){
-
-            return false;
-
-        }
-
-
-        let matched = 0;
-
-
-        keywords.forEach(
-            keyword => {
-
-                if(
-                    elementText.includes(
-                        keyword
-                    )
-                ){
-
-                    matched++;
-
-                }
+                return true;
 
             }
-        );
+
+        }
 
 
-        // ---------------------------------------------
-        // AT LEAST ONE IMPORTANT TARGET WORD
-        // MUST BE FOUND IN THE CLICKED ELEMENT
-        // ---------------------------------------------
-
-        return matched > 0;
+        return false;
 
     }
 
 
 
     // =====================================================
-    // GET VISIBLE TEXT OF CLICKED ELEMENT
+    // FIND CLICKABLE ELEMENT
     // =====================================================
 
-    function getElementDescription(element){
+    function getClickableElement(target){
 
-        if(!element){
+        if(!target){
 
-            return "";
+            return null;
+
+        }
+
+
+        if(
+            typeof target.closest !==
+            "function"
+        ){
+
+            return target;
 
         }
 
 
         return (
-
-            element.innerText ||
-            element.textContent ||
-            element.getAttribute("aria-label") ||
-            element.getAttribute("title") ||
-            ""
-
-        ).trim();
+            target.closest(
+                "button, a, [role='button'], input, select, textarea, [onclick]"
+            ) ||
+            target
+        );
 
     }
 
 
 
     // =====================================================
-    // STUDENT MADE THE CORRECT ACTION
+    // CORRECT ACTION
     // =====================================================
 
     async function handleCorrectAction(){
 
-        if(!waitingForStudentAction){
+        if(
+            !waitingForStudentAction ||
+            studentActionBeingProcessed
+        ){
 
             return;
 
         }
 
 
-        waitingForStudentAction = false;
+        studentActionBeingProcessed =
+            true;
+
+
+        waitingForStudentAction =
+            false;
 
 
         const activity =
@@ -8292,7 +8362,13 @@ const RaniseMoisePedagogicalExplanationEngine = {
             getCurrentStep();
 
 
-        if(!activity || !step){
+        if(
+            !activity ||
+            !step
+        ){
+
+            studentActionBeingProcessed =
+                false;
 
             return;
 
@@ -8300,7 +8376,7 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
 
         // ---------------------------------------------
-        // AUTOMATIC SUCCESS MESSAGE
+        // SUCCESS
         // ---------------------------------------------
 
         await speak(
@@ -8314,7 +8390,7 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
 
         // ---------------------------------------------
-        // MORE STEPS IN SAME ACTIVITY
+        // NEXT STEP IN SAME ACTIVITY
         // ---------------------------------------------
 
         if(
@@ -8324,6 +8400,9 @@ const RaniseMoisePedagogicalExplanationEngine = {
             currentStepIndex <
             activity.steps.length
         ){
+
+            studentActionBeingProcessed =
+                false;
 
             await startCurrentStep();
 
@@ -8345,6 +8424,10 @@ const RaniseMoisePedagogicalExplanationEngine = {
             getPracticeData();
 
 
+        // ---------------------------------------------
+        // NEXT PRACTICE ACTIVITY
+        // ---------------------------------------------
+
         if(
             practice &&
             currentActivityIndex <
@@ -8353,10 +8436,13 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
             await speak(
 
-                "Excellent ! Nous avons terminé cette partie pratique. Passons maintenant à l'activité suivante."
+                "Excellent ! Cette partie pratique est terminée. Passons maintenant à l'activité suivante."
 
             );
 
+
+            studentActionBeingProcessed =
+                false;
 
             await startCurrentStep();
 
@@ -8366,8 +8452,12 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
 
         // ---------------------------------------------
-        // ALL PRACTICE COMPLETED
+        // ENTIRE PRACTICE SESSION FINISHED
         // ---------------------------------------------
+
+        studentActionBeingProcessed =
+            false;
+
 
         await finishPractice();
 
@@ -8376,69 +8466,60 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
 
     // =====================================================
-    // STUDENT MADE AN INCORRECT ACTION
+    // INCORRECT ACTION
     // =====================================================
 
-    async function handleIncorrectAction(element){
+    async function handleIncorrectAction(){
 
-        if(!waitingForStudentAction){
+        if(
+            !waitingForStudentAction ||
+            studentActionBeingProcessed
+        ){
 
             return;
 
         }
 
 
-        const clickedText =
-            getElementDescription(
-                element
-            );
+        waitingForStudentAction =
+            false;
 
 
-        if(clickedText){
+        await speak(
 
-            await speak(
+            "Ce n'est pas l'action demandée. Reprenons cette étape. Cherchez l'élément indiqué dans l'instruction, puis effectuez l'action demandée."
 
-                "Ce n'est pas l'action demandée. Reprenons cette étape. Cherchez l'élément indiqué dans l'instruction, puis effectuez l'action demandée."
-
-            );
-
-        }else{
-
-            await speak(
-
-                "Cette action ne correspond pas encore à l'étape demandée. Reprenons cette étape et cherchez l'élément indiqué."
-
-            );
-
-        }
+        );
 
 
         // ---------------------------------------------
-        // IMPORTANT:
-        // DO NOT ADVANCE
-        // STUDENT MUST TRY AGAIN
+        // SAME STEP REMAINS ACTIVE
         // ---------------------------------------------
 
-        waitingForStudentAction = true;
+        waitingForStudentAction =
+            true;
 
     }
 
 
 
     // =====================================================
-    // CLICK LISTENER INSIDE SIMULATION
+    // SIMULATION CLICK LISTENER
     // =====================================================
 
     function handleSimulationClick(event){
 
-        if(!waitingForStudentAction){
+        if(
+            !waitingForStudentAction ||
+            studentActionBeingProcessed
+        ){
 
             return;
 
         }
 
 
-        let target =
+        const target =
             event.target;
 
 
@@ -8449,19 +8530,10 @@ const RaniseMoisePedagogicalExplanationEngine = {
         }
 
 
-        // ---------------------------------------------
-        // FIND THE CLOSEST CLICKABLE ELEMENT
-        // ---------------------------------------------
-
-        const clickable =
-            target.closest(
-                "button, a, [role='button'], input, select, textarea, [onclick]"
-            );
-
-
         const element =
-            clickable ||
-            target;
+            getClickableElement(
+                target
+            );
 
 
         if(
@@ -8474,9 +8546,7 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
         }else{
 
-            handleIncorrectAction(
-                element
-            );
+            handleIncorrectAction();
 
         }
 
@@ -8485,7 +8555,7 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
 
     // =====================================================
-    // CONNECT TO SIMULATION DOCUMENT
+    // CONNECT TO SIMULATION
     // =====================================================
 
     function connectToSimulation(){
@@ -8538,10 +8608,6 @@ const RaniseMoisePedagogicalExplanationEngine = {
                 doc;
 
 
-            // -----------------------------------------
-            // PREVENT DUPLICATE LISTENERS
-            // -----------------------------------------
-
             if(
                 !doc.__raniseBlock8Connected
             ){
@@ -8561,7 +8627,6 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
             return true;
 
-
         }catch(error){
 
             console.error(
@@ -8579,7 +8644,7 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
 
     // =====================================================
-    // WAIT UNTIL SIMULATION EXISTS
+    // WAIT FOR SIMULATION
     // =====================================================
 
     function waitForSimulation(){
@@ -8588,9 +8653,7 @@ const RaniseMoisePedagogicalExplanationEngine = {
             connectToSimulation()
         ){
 
-            if(
-                scanTimer
-            ){
+            if(scanTimer){
 
                 clearInterval(
                     scanTimer
@@ -8636,11 +8699,13 @@ const RaniseMoisePedagogicalExplanationEngine = {
         }
 
 
-        waitingForStudentAction = false;
+        waitingForStudentAction =
+            false;
 
 
         // ---------------------------------------------
-        // INTRODUCE ACTIVITY ONLY IF NEEDED
+        // ACTIVITY INTRODUCTION
+        // ONLY ON FIRST STEP OF ACTIVITY
         // ---------------------------------------------
 
         if(
@@ -8659,7 +8724,7 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
 
         // ---------------------------------------------
-        // GIVE THE CURRENT INSTRUCTION
+        // CURRENT PRACTICE INSTRUCTION
         // ---------------------------------------------
 
         await speak(
@@ -8673,19 +8738,39 @@ const RaniseMoisePedagogicalExplanationEngine = {
         );
 
 
-        waitingForStudentAction = true;
+        // ---------------------------------------------
+        // ONLY NOW WAIT FOR STUDENT ACTION
+        // ---------------------------------------------
+
+        waitingForStudentAction =
+            true;
 
     }
 
 
 
     // =====================================================
-    // START INTERACTIVE PRACTICE
+    // START PRACTICE
     // =====================================================
 
     async function start(){
 
+        // ---------------------------------------------
+        // NEVER START TWICE
+        // ---------------------------------------------
+
         if(practiceStarted){
+
+            return;
+
+        }
+
+
+        // ---------------------------------------------
+        // BLOCK 8 MUST WAIT FOR BLOCK 7
+        // ---------------------------------------------
+
+        if(!block7Finished){
 
             return;
 
@@ -8707,16 +8792,24 @@ const RaniseMoisePedagogicalExplanationEngine = {
         }
 
 
-        practiceStarted = true;
+        practiceStarted =
+            true;
 
 
-        currentActivityIndex = 0;
+        currentActivityIndex =
+            0;
 
-        currentStepIndex = 0;
+
+        currentStepIndex =
+            0;
+
+
+        waitingForStudentAction =
+            false;
 
 
         // ---------------------------------------------
-        // WAIT FOR THE EXISTING SIMULATION
+        // WAIT FOR EXISTING SIMULATION
         // ---------------------------------------------
 
         if(
@@ -8735,14 +8828,16 @@ const RaniseMoisePedagogicalExplanationEngine = {
                                 scanTimer
                             );
 
-                            scanTimer = null;
+                            scanTimer =
+                                null;
+
 
                             startCurrentStep();
 
                         }
 
                     },
-                    500
+                    300
                 );
 
         }else{
@@ -8756,12 +8851,13 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
 
     // =====================================================
-    // FINISH PRACTICE
+    // FINISH ENTIRE PRACTICE SESSION
     // =====================================================
 
     async function finishPractice(){
 
-        waitingForStudentAction = false;
+        waitingForStudentAction =
+            false;
 
 
         await speak(
@@ -8771,9 +8867,42 @@ const RaniseMoisePedagogicalExplanationEngine = {
         );
 
 
-        practiceStarted = false;
+        practiceStarted =
+            false;
 
     }
+
+
+
+    // =====================================================
+    // BLOCK 7 → BLOCK 8 HANDSHAKE
+    // =====================================================
+    // BLOCK 8 DOES NOT GUESS WHEN BLOCK 7 FINISHES.
+    // IT WAITS FOR THE REAL FINISH SIGNAL.
+    // =====================================================
+
+    function receiveBlock7Finished(){
+
+        if(block7Finished){
+
+            return;
+
+        }
+
+
+        block7Finished =
+            true;
+
+
+        start();
+
+    }
+
+
+    window.addEventListener(
+        "ranise:block7:finished",
+        receiveBlock7Finished
+    );
 
 
 
@@ -8785,11 +8914,23 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
         start: start,
 
+
+        notifyBlock7Finished:
+            receiveBlock7Finished,
+
+
         stop: function(){
 
-            waitingForStudentAction = false;
+            waitingForStudentAction =
+                false;
 
-            practiceStarted = false;
+
+            practiceStarted =
+                false;
+
+
+            studentActionBeingProcessed =
+                false;
 
 
             if(scanTimer){
@@ -8798,7 +8939,8 @@ const RaniseMoisePedagogicalExplanationEngine = {
                     scanTimer
                 );
 
-                scanTimer = null;
+                scanTimer =
+                    null;
 
             }
 
@@ -8807,11 +8949,13 @@ const RaniseMoisePedagogicalExplanationEngine = {
     };
 
 
+
     // =====================================================
-    // AUTOMATIC DETECTION
+    // OBSERVE CAMPUS CONTENT
     // =====================================================
-    // THE ENGINE WAITS FOR THE EXISTING WORD SIMULATION.
-    // IT DOES NOT MODIFY THE SIMULATION LAUNCH CODE.
+    // THIS ONLY PREPARES THE SIMULATION CONNECTION.
+    // IT DOES NOT START PRACTICE.
+    // BLOCK 7 FINISH SIGNAL IS STILL REQUIRED.
     // =====================================================
 
     const campusContent =
@@ -8826,31 +8970,27 @@ const RaniseMoisePedagogicalExplanationEngine = {
             new MutationObserver(
                 function(){
 
+                    if(
+                        practiceStarted
+                    ){
+
+                        return;
+
+                    }
+
+
                     const frame =
                         campusContent.querySelector(
                             'iframe[src*="campusword2007simulation"]'
                         );
 
 
-                    if(
-                        frame &&
-                        !practiceStarted
-                    ){
+                    if(frame){
 
-                        setTimeout(
-                            function(){
+                        simulationFrame =
+                            frame;
 
-                                if(
-                                    !practiceStarted
-                                ){
-
-                                    start();
-
-                                }
-
-                            },
-                            800
-                        );
+                        connectToSimulation();
 
                     }
 
@@ -8861,17 +9001,646 @@ const RaniseMoisePedagogicalExplanationEngine = {
         observer.observe(
             campusContent,
             {
+
                 childList: true,
+
                 subtree: true
+
             }
         );
 
     }
 
 
+
 })();
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+// =========================================================
+// RANISE DYNAMIC PRACTICE BRIDGE
+// MICROSOFT WORD 2007 SIMULATION
+// =========================================================
+// CENTRAL BRIDGE FOR RANISE PRACTICE AUDIO
+//
+// PURPOSE:
+// CONNECT BLOCK 7 → BLOCK 8 → BLOCK 9 → BLOCK 10...
+//
+// IMPORTANT:
+// - DOES NOT REPLACE BLOCK 7
+// - DOES NOT REPLACE BLOCK 8
+// - DOES NOT MODIFY MARYTTS
+// - DOES NOT MODIFY AVATAR ANIMATION
+// - DOES NOT CREATE PRACTICE CONTENT
+// - DOES NOT MODIFY MICROSOFT WORD COURSE DATA
+// - DOES NOT MODIFY THE SIMULATION IFRAME
+// - FRENCH AUDIO REMAINS CONTROLLED BY EXISTING SYSTEM
+// =========================================================
+
+(function(){
+
+    "use strict";
+
+
+    // =====================================================
+    // PRIVATE BRIDGE STATE
+    // =====================================================
+
+    let bridgeStarted = false;
+
+    let currentBlock = null;
+
+    let audioRunning = false;
+
+    let firstPracticeAudioFinished = false;
+
+    let originalMaryTTS = null;
+
+    let maryTTSWrapped = false;
+
+
+    // =====================================================
+    // BLOCK REGISTRY
+    // =====================================================
+
+    const registeredBlocks = new Map();
+
+
+    // =====================================================
+    // SIMULATION DETECTION
+    // =====================================================
+
+    function simulationIsOpen(){
+
+        const campusContent =
+            document.getElementById(
+                "campusContent"
+            );
+
+
+        if(!campusContent){
+
+            return false;
+
+        }
+
+
+        return !!campusContent.querySelector(
+            'iframe[src*="campusword2007simulation"]'
+        );
+
+    }
+
+
+
+    // =====================================================
+    // BRIDGE EVENT DISPATCHER
+    // =====================================================
+
+    function emit(eventName, detail){
+
+        try{
+
+            document.dispatchEvent(
+
+                new CustomEvent(
+                    eventName,
+                    {
+                        detail:
+                            detail || {}
+                    }
+                )
+
+            );
+
+        }catch(error){
+
+            console.error(
+                "RANISE BRIDGE EVENT ERROR:",
+                error
+            );
+
+        }
+
+    }
+
+
+
+    // =====================================================
+    // REGISTER A FUTURE PRACTICE BLOCK
+    // =====================================================
+
+    function registerBlock(
+        blockId,
+        startFunction
+    ){
+
+        if(
+            !blockId ||
+            typeof startFunction !== "function"
+        ){
+
+            return false;
+
+        }
+
+
+        registeredBlocks.set(
+            blockId,
+            startFunction
+        );
+
+
+        return true;
+
+    }
+
+
+
+    // =====================================================
+    // START REGISTERED BLOCK
+    // =====================================================
+
+    async function startBlock(blockId){
+
+        const block =
+            registeredBlocks.get(
+                blockId
+            );
+
+
+        if(
+            typeof block !== "function"
+        ){
+
+            return false;
+
+        }
+
+
+        currentBlock =
+            blockId;
+
+
+        emit(
+            "ranise:practice:block-start",
+            {
+                block:
+                    blockId
+            }
+        );
+
+
+        try{
+
+            await block();
+
+            return true;
+
+        }catch(error){
+
+            console.error(
+                "RANISE BRIDGE BLOCK ERROR:",
+                blockId,
+                error
+            );
+
+            return false;
+
+        }
+
+    }
+
+
+
+    // =====================================================
+    // COMPLETE CURRENT BLOCK
+    // =====================================================
+
+    function completeBlock(blockId){
+
+        if(!blockId){
+
+            return;
+
+        }
+
+
+        emit(
+            "ranise:practice:block-complete",
+            {
+                block:
+                    blockId
+            }
+        );
+
+
+        currentBlock =
+            null;
+
+    }
+
+
+
+    // =====================================================
+    // MARYTTS AUDIO MONITOR
+    // =====================================================
+    // THIS DOES NOT REPLACE MARYTTS.
+    // IT ONLY OBSERVES THE EXISTING FUNCTION.
+    // =====================================================
+
+    function installMaryTTSBridge(){
+
+        if(maryTTSWrapped){
+
+            return;
+
+        }
+
+
+        if(
+            typeof window.speakProfessorIAWithMaryTTS !==
+            "function"
+        ){
+
+            return;
+
+        }
+
+
+        originalMaryTTS =
+            window.speakProfessorIAWithMaryTTS;
+
+
+        window.speakProfessorIAWithMaryTTS =
+            async function(text){
+
+                if(
+                    text &&
+                    typeof text === "string" &&
+                    text.trim()
+                ){
+
+                    audioRunning = true;
+
+
+                    emit(
+                        "ranise:practice:audio-start",
+                        {
+                            text:
+                                text.trim()
+                        }
+                    );
+
+                }
+
+
+                try{
+
+                    return await originalMaryTTS.apply(
+                        this,
+                        arguments
+                    );
+
+                }finally{
+
+                    audioRunning = false;
+
+
+                    emit(
+                        "ranise:practice:audio-end",
+                        {
+                            text:
+                                text || ""
+                        }
+                    );
+
+
+                    handleAudioFinished(
+                        text
+                    );
+
+                }
+
+            };
+
+
+        maryTTSWrapped =
+            true;
+
+    }
+
+
+
+    // =====================================================
+    // FIRST PRACTICE AUDIO FINISHED
+    // =====================================================
+
+    function handleAudioFinished(text){
+
+        if(!simulationIsOpen()){
+
+            return;
+
+        }
+
+
+        emit(
+            "ranise:practice:audio-finished",
+            {
+                text:
+                    text || ""
+            }
+        );
+
+
+        // ---------------------------------------------
+        // BLOCK 7 → BLOCK 8
+        // ---------------------------------------------
+
+        if(
+            !firstPracticeAudioFinished &&
+            !currentBlock
+        ){
+
+            firstPracticeAudioFinished =
+                true;
+
+
+            emit(
+                "ranise:practice:block7-finished",
+                {
+                    reason:
+                        "Ranise welcome audio finished"
+                }
+            );
+
+
+            startInteractivePracticeBlock();
+
+        }
+
+    }
+
+
+
+    // =====================================================
+    // START BLOCK 8
+    // =====================================================
+
+    async function startInteractivePracticeBlock(){
+
+        if(!simulationIsOpen()){
+
+            return;
+
+        }
+
+
+        // ---------------------------------------------
+        // IF BLOCK 8 ALREADY STARTED,
+        // DO NOT START IT AGAIN.
+        // ---------------------------------------------
+
+        if(
+            window.RaniseMoiseInteractivePracticeEngine &&
+            typeof
+            window.RaniseMoiseInteractivePracticeEngine.start ===
+            "function"
+        ){
+
+            currentBlock =
+                "block8";
+
+
+            emit(
+                "ranise:practice:block8-ready",
+                {}
+            );
+
+
+            try{
+
+                await
+                window.RaniseMoiseInteractivePracticeEngine
+                    .start();
+
+            }catch(error){
+
+                console.error(
+                    "RANISE BRIDGE: BLOCK 8 ERROR:",
+                    error
+                );
+
+            }
+
+        }
+
+    }
+
+
+
+    // =====================================================
+    // PUBLIC BRIDGE API
+    // =====================================================
+
+    window.RanisePracticeBridge = {
+
+        start:function(){
+
+            if(bridgeStarted){
+
+                return;
+
+            }
+
+
+            bridgeStarted =
+                true;
+
+
+            installMaryTTSBridge();
+
+
+            emit(
+                "ranise:practice:bridge-ready",
+                {}
+            );
+
+        },
+
+
+        registerBlock:
+            registerBlock,
+
+
+        startBlock:
+            startBlock,
+
+
+        completeBlock:
+            completeBlock,
+
+
+        isSimulationOpen:
+            simulationIsOpen,
+
+
+        isAudioRunning:function(){
+
+            return audioRunning;
+
+        },
+
+
+        getCurrentBlock:function(){
+
+            return currentBlock;
+
+        },
+
+
+        reset:function(){
+
+            firstPracticeAudioFinished =
+                false;
+
+            currentBlock =
+                null;
+
+            audioRunning =
+                false;
+
+        }
+
+    };
+
+
+
+    // =====================================================
+    // SIMULATION OBSERVER
+    // =====================================================
+    // THE BRIDGE BECOMES ACTIVE WHEN THE EXISTING
+    // WORD SIMULATION APPEARS.
+    // =====================================================
+
+    function watchSimulation(){
+
+        const campusContent =
+            document.getElementById(
+                "campusContent"
+            );
+
+
+        if(!campusContent){
+
+            return;
+
+        }
+
+
+        const observer =
+            new MutationObserver(
+
+                function(){
+
+                    if(
+                        simulationIsOpen()
+                    ){
+
+                        installMaryTTSBridge();
+
+
+                        emit(
+                            "ranise:practice:simulation-open",
+                            {}
+                        );
+
+                    }
+
+                }
+
+            );
+
+
+        observer.observe(
+            campusContent,
+            {
+                childList:true,
+                subtree:true
+            }
+
+        );
+
+
+        if(
+            simulationIsOpen()
+        ){
+
+            installMaryTTSBridge();
+
+        }
+
+    }
+
+
+
+    // =====================================================
+    // AUTOMATIC INITIALIZATION
+    // =====================================================
+
+    function initializeBridge(){
+
+        installMaryTTSBridge();
+
+        watchSimulation();
+
+        emit(
+            "ranise:practice:bridge-initialized",
+            {}
+        );
+
+    }
+
+
+
+    // =====================================================
+    // DOM READY
+    // =====================================================
+
+    if(
+        document.readyState ===
+        "loading"
+    ){
+
+        document.addEventListener(
+            "DOMContentLoaded",
+            initializeBridge,
+            {
+                once:true
+            }
+        );
+
+    }else{
+
+        initializeBridge();
+
+    }
+
+
+
+})();
 
 
 
