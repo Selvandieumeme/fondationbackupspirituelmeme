@@ -7080,6 +7080,745 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
 
 
+// =========================================================
+// BLOCK 7
+// MICROSOFT WORD 2007 FORMATION
+// RANISE MOISE PRACTICE SESSION CONTROL ENGINE
+// =========================================================
+// ISOLATED ADD-ON
+// DOES NOT MODIFY BLOCK 4
+// DOES NOT MODIFY BLOCK 5
+// DOES NOT MODIFY BLOCK 6
+// DOES NOT MODIFY EXISTING COURSE DATA
+// DOES NOT MODIFY EXISTING SIMULATION CODE
+// DOES NOT MODIFY EXISTING LAUNCH BUTTON
+// USES EXISTING RANISE MARY TTS SYSTEM
+// USES EXISTING RANISE ANIMATION SYSTEM
+// =========================================================
+
+(function(){
+
+    "use strict";
+
+
+    // =====================================================
+    // PRIVATE STATE
+    // =====================================================
+
+    let practiceSessionActive = false;
+
+    let practiceWelcomePlayed = false;
+
+    let currentPracticeActivityIndex = 0;
+
+    let currentPracticeStepIndex = 0;
+
+    let practiceData = [];
+
+    let simulationFrame = null;
+
+
+
+    // =====================================================
+    // RANISE PRACTICE WELCOME MESSAGE
+    // =====================================================
+
+    const PRACTICE_WELCOME_MESSAGE =
+
+        "Bravo ! Vous venez de franchir la première étape pratique avec succès. " +
+
+        "Je suis Ranise Moise, votre professeure IA. " +
+
+        "Je vais maintenant vous guider étape par étape dans cet espace de simulation Microsoft Word 2007.";
+
+
+
+    // =====================================================
+    // SAFE RANISE SPEAK FUNCTION
+    // =====================================================
+
+    async function speakRanise(text){
+
+        if(
+            !text ||
+            typeof text !== "string" ||
+            !text.trim()
+        ){
+
+            return false;
+
+        }
+
+
+        if(
+            typeof speakProfessorIAWithMaryTTS !==
+            "function"
+        ){
+
+            console.error(
+                "BLOCK 7: MaryTTS function unavailable."
+            );
+
+            return false;
+
+        }
+
+
+        try{
+
+            if(
+                typeof raniseStartTalking ===
+                "function"
+            ){
+
+                raniseStartTalking();
+
+            }
+
+
+            await speakProfessorIAWithMaryTTS(
+                text.trim()
+            );
+
+
+            return true;
+
+
+        }catch(error){
+
+            console.error(
+                "BLOCK 7: Ranise speech error.",
+                error
+            );
+
+            return false;
+
+
+        }finally{
+
+            if(
+                typeof raniseStopTalking ===
+                "function"
+            ){
+
+                raniseStopTalking();
+
+            }
+
+        }
+
+    }
+
+
+
+    // =====================================================
+    // LOAD EXISTING PRACTICE DATA
+    // DOES NOT CHANGE THE ORIGINAL DATA
+    // =====================================================
+
+    function loadPracticeData(){
+
+        if(
+            typeof microsoftWordCourse ===
+            "undefined"
+        ){
+
+            return false;
+
+        }
+
+
+        if(
+            !Array.isArray(
+                microsoftWordCourse.chapters
+            )
+        ){
+
+            return false;
+
+        }
+
+
+        const chapter =
+
+            microsoftWordCourse.chapters.find(
+
+                function(item){
+
+                    return (
+                        item &&
+                        item.id === "chapitre1"
+                    );
+
+                }
+
+            );
+
+
+        if(!chapter){
+
+            return false;
+
+        }
+
+
+        if(
+            !Array.isArray(
+                chapter.practice
+            )
+        ){
+
+            return false;
+
+        }
+
+
+        // -------------------------------------------------
+        // COPY ONLY
+        // ORIGINAL COURSE DATA REMAINS UNTOUCHED
+        // -------------------------------------------------
+
+        practiceData =
+
+            chapter.practice.map(
+
+                function(activity){
+
+                    return {
+
+                        title:
+                            activity &&
+                            typeof activity.title === "string"
+                                ? activity.title
+                                : "",
+
+                        steps:
+                            activity &&
+                            Array.isArray(activity.steps)
+                                ? activity.steps.slice()
+                                : []
+
+                    };
+
+                }
+
+            );
+
+
+        return true;
+
+    }
+
+
+
+    // =====================================================
+    // RESET PRACTICE SESSION
+    // =====================================================
+
+    function resetPracticeSession(){
+
+        practiceSessionActive =
+            false;
+
+        practiceWelcomePlayed =
+            false;
+
+        currentPracticeActivityIndex =
+            0;
+
+        currentPracticeStepIndex =
+            0;
+
+        practiceData =
+            [];
+
+        simulationFrame =
+            null;
+
+    }
+
+
+
+    // =====================================================
+    // START PRACTICE SESSION
+    // =====================================================
+
+    async function startPracticeSession(frame){
+
+        if(
+            !frame
+        ){
+
+            return;
+
+        }
+
+
+        if(
+            practiceSessionActive
+        ){
+
+            return;
+
+        }
+
+
+        if(
+            !loadPracticeData()
+        ){
+
+            console.error(
+                "BLOCK 7: Practice data unavailable."
+            );
+
+            return;
+
+        }
+
+
+        simulationFrame =
+            frame;
+
+
+        practiceSessionActive =
+            true;
+
+
+        currentPracticeActivityIndex =
+            0;
+
+
+        currentPracticeStepIndex =
+            0;
+
+
+
+        // -------------------------------------------------
+        // WELCOME IS SPOKEN ONLY ONCE
+        // -------------------------------------------------
+
+        if(
+            !practiceWelcomePlayed
+        ){
+
+            practiceWelcomePlayed =
+                true;
+
+
+            await speakRanise(
+                PRACTICE_WELCOME_MESSAGE
+            );
+
+        }
+
+    }
+
+
+
+    // =====================================================
+    // GUIDE ONE SPECIFIC PRACTICE STEP
+    // =====================================================
+
+    async function guidePracticeStep(
+        activityIndex,
+        stepIndex
+    ){
+
+        if(
+            !practiceSessionActive
+        ){
+
+            return false;
+
+        }
+
+
+        if(
+            !practiceData[
+                activityIndex
+            ]
+        ){
+
+            return false;
+
+        }
+
+
+        const activity =
+            practiceData[
+                activityIndex
+            ];
+
+
+        if(
+            !Array.isArray(
+                activity.steps
+            )
+        ){
+
+            return false;
+
+        }
+
+
+        const step =
+            activity.steps[
+                stepIndex
+            ];
+
+
+        if(
+            !step
+        ){
+
+            return false;
+
+        }
+
+
+        currentPracticeActivityIndex =
+            activityIndex;
+
+
+        currentPracticeStepIndex =
+            stepIndex;
+
+
+        return await speakRanise(
+
+            "Étape " +
+            (stepIndex + 1) +
+            ". " +
+            step
+
+        );
+
+    }
+
+
+
+    // =====================================================
+    // GUIDE NEXT PRACTICE STEP
+    // =====================================================
+
+    async function guideNextPracticeStep(){
+
+        if(
+            !practiceSessionActive
+        ){
+
+            return false;
+
+        }
+
+
+        const activity =
+            practiceData[
+                currentPracticeActivityIndex
+            ];
+
+
+        if(!activity){
+
+            return false;
+
+        }
+
+
+        if(
+            !Array.isArray(
+                activity.steps
+            )
+        ){
+
+            return false;
+
+        }
+
+
+        if(
+            currentPracticeStepIndex >=
+            activity.steps.length
+        ){
+
+            currentPracticeActivityIndex++;
+
+            currentPracticeStepIndex = 0;
+
+        }
+
+
+        const nextActivity =
+            practiceData[
+                currentPracticeActivityIndex
+            ];
+
+
+        if(!nextActivity){
+
+            return false;
+
+        }
+
+
+        const nextStep =
+            nextActivity.steps[
+                currentPracticeStepIndex
+            ];
+
+
+        if(!nextStep){
+
+            return false;
+
+        }
+
+
+        const spoken =
+            await speakRanise(
+
+                "Étape " +
+                (currentPracticeStepIndex + 1) +
+                ". " +
+                nextStep
+
+            );
+
+
+        if(
+            spoken
+        ){
+
+            currentPracticeStepIndex++;
+
+        }
+
+
+        return spoken;
+
+    }
+
+
+
+    // =====================================================
+    // PUBLIC ISOLATED ENGINE
+    // =====================================================
+
+    window.RaniseMoisePracticeSessionEngine = {
+
+        start:
+            startPracticeSession,
+
+        speak:
+            speakRanise,
+
+        guideStep:
+            guidePracticeStep,
+
+        guideNext:
+            guideNextPracticeStep,
+
+        reset:
+            resetPracticeSession,
+
+        getState:
+
+            function(){
+
+                return {
+
+                    active:
+                        practiceSessionActive,
+
+                    welcomePlayed:
+                        practiceWelcomePlayed,
+
+                    activityIndex:
+                        currentPracticeActivityIndex,
+
+                    stepIndex:
+                        currentPracticeStepIndex
+
+                };
+
+            }
+
+    };
+
+
+
+    // =====================================================
+    // DETECT THE EXISTING SIMULATION LAUNCH
+    // CAPTURE PHASE ONLY
+    // EXISTING LAUNCH CODE REMAINS UNTOUCHED
+    // =====================================================
+
+    document.addEventListener(
+
+        "click",
+
+        function(event){
+
+            const launchButton =
+
+                event.target.closest(
+                    "#launchMicrosoftWordSimulationBtn"
+                );
+
+
+            if(!launchButton){
+
+                return;
+
+            }
+
+
+            // ---------------------------------------------
+            // NEW SESSION
+            // ---------------------------------------------
+
+            resetPracticeSession();
+
+
+
+            // ---------------------------------------------
+            // WAIT FOR EXISTING SIMULATION TO APPEAR
+            // ---------------------------------------------
+
+            let attempts =
+                0;
+
+
+            const waitForSimulation =
+
+                setInterval(
+
+                    function(){
+
+                        attempts++;
+
+
+                        const campusContent =
+
+                            document.getElementById(
+                                "campusContent"
+                            );
+
+
+                        if(!campusContent){
+
+                            if(
+                                attempts >= 100
+                            ){
+
+                                clearInterval(
+                                    waitForSimulation
+                                );
+
+                            }
+
+                            return;
+
+                        }
+
+
+
+                        const frame =
+
+                            campusContent.querySelector(
+
+                                'iframe[src*="campusword2007simulation"]'
+
+                            );
+
+
+                        if(!frame){
+
+                            if(
+                                attempts >= 100
+                            ){
+
+                                clearInterval(
+                                    waitForSimulation
+                                );
+
+                            }
+
+                            return;
+
+                        }
+
+
+                        clearInterval(
+                            waitForSimulation
+                        );
+
+
+
+                        // ---------------------------------
+                        // START BLOCK 7
+                        // ---------------------------------
+
+                        startPracticeSession(
+                            frame
+                        );
+
+
+                    },
+
+                    50
+
+                );
+
+        },
+
+        true
+
+    );
+
+
+
+})();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
