@@ -869,13 +869,29 @@ setTimeout(async ()=>{
         await RaniseMoisePedagogicalExplanationEngine
             .teachExplanation();
 
-
-await RaniseMoisePracticeTeachingEngine
-        .teachFirstPractice();
-
-
     }
 
+
+
+
+
+// =====================================
+// BLOCK 6
+// PRACTICE TEACHING
+// STARTS ONLY AFTER BLOCK 5 FINISHES
+// =====================================
+
+if(
+    typeof RaniseMoisePracticeTeachingEngine !==
+    "undefined" &&
+    typeof RaniseMoisePracticeTeachingEngine.teachFirstPractice ===
+    "function"
+){
+
+    await RaniseMoisePracticeTeachingEngine
+        .teachFirstPractice();
+
+}
 
 
 
