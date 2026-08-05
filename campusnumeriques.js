@@ -7803,6 +7803,1093 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
 
 
+// =========================================================
+// BLOCK 8
+// MICROSOFT WORD 2007 FORMATION
+// RANISE MOISE INTERACTIVE PRACTICE ENGINE
+// =========================================================
+// ISOLATED ADD-ON
+// USES EXISTING CHAPTER 1 PRACTICE DATA
+// DOES NOT MODIFY BLOCK 6
+// DOES NOT MODIFY BLOCK 7
+// DOES NOT MODIFY MARYTTS
+// DOES NOT CONTROL AVATAR ANIMATION
+// DOES NOT CREATE NEW PRACTICE CONTENT
+// PRACTICE IS EXECUTED ONE STEP AT A TIME
+// RANISE SPEAKS FRENCH ONLY
+// =========================================================
+
+(function(){
+
+    "use strict";
+
+
+    // =====================================================
+    // INTERNAL STATE
+    // =====================================================
+
+    let practiceStarted = false;
+
+    let currentStepIndex = 0;
+
+    let currentActivityIndex = 0;
+
+    let waitingForStudentAction = false;
+
+    let simulationFrame = null;
+
+    let simulationDocument = null;
+
+    let observer = null;
+
+    let scanTimer = null;
+
+
+
+    // =====================================================
+    // RANISE SPEAK
+    // IMPORTANT:
+    // THIS BLOCK DOES NOT CONTROL AVATAR ANIMATION.
+    // THE EXISTING RANISE ANIMATION SYSTEM REMAINS ISOLATED.
+    // =====================================================
+
+    async function speak(text){
+
+        if(
+            !text ||
+            typeof text !== "string" ||
+            !text.trim()
+        ){
+
+            return;
+
+        }
+
+
+        if(
+            typeof speakProfessorIAWithMaryTTS !==
+            "function"
+        ){
+
+            console.error(
+                "BLOCK 8: MaryTTS indisponible."
+            );
+
+            return;
+
+        }
+
+
+        try{
+
+            await speakProfessorIAWithMaryTTS(
+                text.trim()
+            );
+
+        }catch(error){
+
+            console.error(
+                "BLOCK 8: erreur MaryTTS:",
+                error
+            );
+
+        }
+
+    }
+
+
+
+    // =====================================================
+    // GET CHAPTER 1 PRACTICE DATA
+    // =====================================================
+
+    function getPracticeData(){
+
+        if(
+            typeof microsoftWordCourse ===
+            "undefined"
+        ){
+
+            return null;
+
+        }
+
+
+        if(
+            !Array.isArray(
+                microsoftWordCourse.chapters
+            )
+        ){
+
+            return null;
+
+        }
+
+
+        const chapter =
+            microsoftWordCourse.chapters.find(
+                item =>
+                    item &&
+                    item.id === "chapitre1"
+            );
+
+
+        if(!chapter){
+
+            return null;
+
+        }
+
+
+        if(
+            !Array.isArray(
+                chapter.practice
+            ) ||
+            chapter.practice.length === 0
+        ){
+
+            return null;
+
+        }
+
+
+        return chapter.practice;
+
+    }
+
+
+
+    // =====================================================
+    // GET CURRENT ACTIVITY
+    // =====================================================
+
+    function getCurrentActivity(){
+
+        const practice =
+            getPracticeData();
+
+
+        if(!practice){
+
+            return null;
+
+        }
+
+
+        return practice[
+            currentActivityIndex
+        ] || null;
+
+    }
+
+
+
+    // =====================================================
+    // GET CURRENT STEP
+    // =====================================================
+
+    function getCurrentStep(){
+
+        const activity =
+            getCurrentActivity();
+
+
+        if(!activity){
+
+            return null;
+
+        }
+
+
+        if(
+            !Array.isArray(
+                activity.steps
+            )
+        ){
+
+            return null;
+
+        }
+
+
+        return activity.steps[
+            currentStepIndex
+        ] || null;
+
+    }
+
+
+
+    // =====================================================
+    // EXTRACT IMPORTANT WORDS FROM THE PRACTICE STEP
+    // =====================================================
+
+    function extractKeywords(step){
+
+        if(
+            !step ||
+            typeof step !== "string"
+        ){
+
+            return [];
+
+        }
+
+
+        let text =
+            step
+                .toLowerCase()
+                .normalize("NFD")
+                .replace(
+                    /[\u0300-\u036f]/g,
+                    ""
+                );
+
+
+        // ---------------------------------------------
+        // REMOVE GENERIC PEDAGOGICAL WORDS
+        // ---------------------------------------------
+
+        const ignoredWords = [
+
+            "identifier",
+            "identifiez",
+            "identifier la",
+            "identifier le",
+            "identifier les",
+            "cliquez",
+            "clique",
+            "sur",
+            "le",
+            "la",
+            "les",
+            "un",
+            "une",
+            "des",
+            "du",
+            "de",
+            "dans",
+            "l",
+            "et",
+            "ou",
+            "faire",
+            "faites",
+            "creer",
+            "creez",
+            "nouveau",
+            "nouvelle",
+            "document",
+            "word",
+            "microsoft",
+            "2007"
+
+        ];
+
+
+        ignoredWords.forEach(
+            word => {
+
+                text =
+                    text.replace(
+                        new RegExp(
+                            "\\b" +
+                            word +
+                            "\\b",
+                            "gi"
+                        ),
+                        " "
+                    );
+
+            }
+        );
+
+
+        const words =
+            text
+                .split(/[^a-z0-9]+/)
+                .filter(
+                    word =>
+                        word.length >= 3
+                );
+
+
+        return [
+            ...new Set(words)
+        ];
+
+    }
+
+
+
+    // =====================================================
+    // FIND THE IMPORTANT TARGET WORDS
+    // INSIDE THE SIMULATION
+    // =====================================================
+
+    function findTargetKeywords(step){
+
+        const keywords =
+            extractKeywords(step);
+
+
+        if(
+            keywords.length > 0
+        ){
+
+            return keywords;
+
+        }
+
+
+        return [];
+
+    }
+
+
+
+    // =====================================================
+    // CHECK WHETHER A CLICK CORRESPONDS
+    // TO THE CURRENT PRACTICE STEP
+    // =====================================================
+
+    function actionMatchesStep(element){
+
+        const step =
+            getCurrentStep();
+
+
+        if(!step){
+
+            return false;
+
+        }
+
+
+        const keywords =
+            findTargetKeywords(step);
+
+
+        if(
+            keywords.length === 0
+        ){
+
+            return false;
+
+        }
+
+
+        if(!element){
+
+            return false;
+
+        }
+
+
+        const elementText = (
+
+            element.innerText ||
+            element.textContent ||
+            element.getAttribute("aria-label") ||
+            element.getAttribute("title") ||
+            element.getAttribute("alt") ||
+            ""
+
+        )
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(
+            /[\u0300-\u036f]/g,
+            " "
+        );
+
+
+        if(!elementText.trim()){
+
+            return false;
+
+        }
+
+
+        let matched = 0;
+
+
+        keywords.forEach(
+            keyword => {
+
+                if(
+                    elementText.includes(
+                        keyword
+                    )
+                ){
+
+                    matched++;
+
+                }
+
+            }
+        );
+
+
+        // ---------------------------------------------
+        // AT LEAST ONE IMPORTANT TARGET WORD
+        // MUST BE FOUND IN THE CLICKED ELEMENT
+        // ---------------------------------------------
+
+        return matched > 0;
+
+    }
+
+
+
+    // =====================================================
+    // GET VISIBLE TEXT OF CLICKED ELEMENT
+    // =====================================================
+
+    function getElementDescription(element){
+
+        if(!element){
+
+            return "";
+
+        }
+
+
+        return (
+
+            element.innerText ||
+            element.textContent ||
+            element.getAttribute("aria-label") ||
+            element.getAttribute("title") ||
+            ""
+
+        ).trim();
+
+    }
+
+
+
+    // =====================================================
+    // STUDENT MADE THE CORRECT ACTION
+    // =====================================================
+
+    async function handleCorrectAction(){
+
+        if(!waitingForStudentAction){
+
+            return;
+
+        }
+
+
+        waitingForStudentAction = false;
+
+
+        const activity =
+            getCurrentActivity();
+
+
+        const step =
+            getCurrentStep();
+
+
+        if(!activity || !step){
+
+            return;
+
+        }
+
+
+        // ---------------------------------------------
+        // AUTOMATIC SUCCESS MESSAGE
+        // ---------------------------------------------
+
+        await speak(
+
+            "Bravo ! Vous venez de réussir cette étape avec succès. Nous pouvons maintenant passer à l'étape suivante."
+
+        );
+
+
+        currentStepIndex++;
+
+
+        // ---------------------------------------------
+        // MORE STEPS IN SAME ACTIVITY
+        // ---------------------------------------------
+
+        if(
+            Array.isArray(
+                activity.steps
+            ) &&
+            currentStepIndex <
+            activity.steps.length
+        ){
+
+            await startCurrentStep();
+
+            return;
+
+        }
+
+
+        // ---------------------------------------------
+        // CURRENT ACTIVITY FINISHED
+        // ---------------------------------------------
+
+        currentActivityIndex++;
+
+        currentStepIndex = 0;
+
+
+        const practice =
+            getPracticeData();
+
+
+        if(
+            practice &&
+            currentActivityIndex <
+            practice.length
+        ){
+
+            await speak(
+
+                "Excellent ! Nous avons terminé cette partie pratique. Passons maintenant à l'activité suivante."
+
+            );
+
+
+            await startCurrentStep();
+
+            return;
+
+        }
+
+
+        // ---------------------------------------------
+        // ALL PRACTICE COMPLETED
+        // ---------------------------------------------
+
+        await finishPractice();
+
+    }
+
+
+
+    // =====================================================
+    // STUDENT MADE AN INCORRECT ACTION
+    // =====================================================
+
+    async function handleIncorrectAction(element){
+
+        if(!waitingForStudentAction){
+
+            return;
+
+        }
+
+
+        const clickedText =
+            getElementDescription(
+                element
+            );
+
+
+        if(clickedText){
+
+            await speak(
+
+                "Ce n'est pas l'action demandée. Reprenons cette étape. Cherchez l'élément indiqué dans l'instruction, puis effectuez l'action demandée."
+
+            );
+
+        }else{
+
+            await speak(
+
+                "Cette action ne correspond pas encore à l'étape demandée. Reprenons cette étape et cherchez l'élément indiqué."
+
+            );
+
+        }
+
+
+        // ---------------------------------------------
+        // IMPORTANT:
+        // DO NOT ADVANCE
+        // STUDENT MUST TRY AGAIN
+        // ---------------------------------------------
+
+        waitingForStudentAction = true;
+
+    }
+
+
+
+    // =====================================================
+    // CLICK LISTENER INSIDE SIMULATION
+    // =====================================================
+
+    function handleSimulationClick(event){
+
+        if(!waitingForStudentAction){
+
+            return;
+
+        }
+
+
+        let target =
+            event.target;
+
+
+        if(!target){
+
+            return;
+
+        }
+
+
+        // ---------------------------------------------
+        // FIND THE CLOSEST CLICKABLE ELEMENT
+        // ---------------------------------------------
+
+        const clickable =
+            target.closest(
+                "button, a, [role='button'], input, select, textarea, [onclick]"
+            );
+
+
+        const element =
+            clickable ||
+            target;
+
+
+        if(
+            actionMatchesStep(
+                element
+            )
+        ){
+
+            handleCorrectAction();
+
+        }else{
+
+            handleIncorrectAction(
+                element
+            );
+
+        }
+
+    }
+
+
+
+    // =====================================================
+    // CONNECT TO SIMULATION DOCUMENT
+    // =====================================================
+
+    function connectToSimulation(){
+
+        const campusContent =
+            document.getElementById(
+                "campusContent"
+            );
+
+
+        if(!campusContent){
+
+            return false;
+
+        }
+
+
+        const frame =
+            campusContent.querySelector(
+                'iframe[src*="campusword2007simulation"]'
+            );
+
+
+        if(!frame){
+
+            return false;
+
+        }
+
+
+        simulationFrame =
+            frame;
+
+
+        try{
+
+            const doc =
+                frame.contentDocument ||
+                frame.contentWindow.document;
+
+
+            if(!doc){
+
+                return false;
+
+            }
+
+
+            simulationDocument =
+                doc;
+
+
+            // -----------------------------------------
+            // PREVENT DUPLICATE LISTENERS
+            // -----------------------------------------
+
+            if(
+                !doc.__raniseBlock8Connected
+            ){
+
+                doc.addEventListener(
+                    "click",
+                    handleSimulationClick,
+                    true
+                );
+
+
+                doc.__raniseBlock8Connected =
+                    true;
+
+            }
+
+
+            return true;
+
+
+        }catch(error){
+
+            console.error(
+                "BLOCK 8: impossible de connecter la simulation:",
+                error
+            );
+
+
+            return false;
+
+        }
+
+    }
+
+
+
+    // =====================================================
+    // WAIT UNTIL SIMULATION EXISTS
+    // =====================================================
+
+    function waitForSimulation(){
+
+        if(
+            connectToSimulation()
+        ){
+
+            if(
+                scanTimer
+            ){
+
+                clearInterval(
+                    scanTimer
+                );
+
+                scanTimer = null;
+
+            }
+
+
+            return true;
+
+        }
+
+
+        return false;
+
+    }
+
+
+
+    // =====================================================
+    // START CURRENT PRACTICE STEP
+    // =====================================================
+
+    async function startCurrentStep(){
+
+        const activity =
+            getCurrentActivity();
+
+
+        const step =
+            getCurrentStep();
+
+
+        if(
+            !activity ||
+            !step
+        ){
+
+            return;
+
+        }
+
+
+        waitingForStudentAction = false;
+
+
+        // ---------------------------------------------
+        // INTRODUCE ACTIVITY ONLY IF NEEDED
+        // ---------------------------------------------
+
+        if(
+            currentStepIndex === 0 &&
+            activity.title
+        ){
+
+            await speak(
+
+                "Nous allons maintenant pratiquer : " +
+                activity.title
+
+            );
+
+        }
+
+
+        // ---------------------------------------------
+        // GIVE THE CURRENT INSTRUCTION
+        // ---------------------------------------------
+
+        await speak(
+
+            "Étape " +
+            (currentStepIndex + 1) +
+            ". " +
+            step +
+            " Prenez votre temps et effectuez cette action dans la simulation."
+
+        );
+
+
+        waitingForStudentAction = true;
+
+    }
+
+
+
+    // =====================================================
+    // START INTERACTIVE PRACTICE
+    // =====================================================
+
+    async function start(){
+
+        if(practiceStarted){
+
+            return;
+
+        }
+
+
+        const practice =
+            getPracticeData();
+
+
+        if(!practice){
+
+            console.error(
+                "BLOCK 8: aucune donnée pratique disponible."
+            );
+
+            return;
+
+        }
+
+
+        practiceStarted = true;
+
+
+        currentActivityIndex = 0;
+
+        currentStepIndex = 0;
+
+
+        // ---------------------------------------------
+        // WAIT FOR THE EXISTING SIMULATION
+        // ---------------------------------------------
+
+        if(
+            !waitForSimulation()
+        ){
+
+            scanTimer =
+                setInterval(
+                    function(){
+
+                        if(
+                            waitForSimulation()
+                        ){
+
+                            clearInterval(
+                                scanTimer
+                            );
+
+                            scanTimer = null;
+
+                            startCurrentStep();
+
+                        }
+
+                    },
+                    500
+                );
+
+        }else{
+
+            await startCurrentStep();
+
+        }
+
+    }
+
+
+
+    // =====================================================
+    // FINISH PRACTICE
+    // =====================================================
+
+    async function finishPractice(){
+
+        waitingForStudentAction = false;
+
+
+        await speak(
+
+            "Félicitations ! Vous avez terminé avec succès toutes les étapes pratiques de cette séance. Excellent travail !"
+
+        );
+
+
+        practiceStarted = false;
+
+    }
+
+
+
+    // =====================================================
+    // PUBLIC ISOLATED ENGINE
+    // =====================================================
+
+    window.RaniseMoiseInteractivePracticeEngine = {
+
+        start: start,
+
+        stop: function(){
+
+            waitingForStudentAction = false;
+
+            practiceStarted = false;
+
+
+            if(scanTimer){
+
+                clearInterval(
+                    scanTimer
+                );
+
+                scanTimer = null;
+
+            }
+
+        }
+
+    };
+
+
+    // =====================================================
+    // AUTOMATIC DETECTION
+    // =====================================================
+    // THE ENGINE WAITS FOR THE EXISTING WORD SIMULATION.
+    // IT DOES NOT MODIFY THE SIMULATION LAUNCH CODE.
+    // =====================================================
+
+    const campusContent =
+        document.getElementById(
+            "campusContent"
+        );
+
+
+    if(campusContent){
+
+        observer =
+            new MutationObserver(
+                function(){
+
+                    const frame =
+                        campusContent.querySelector(
+                            'iframe[src*="campusword2007simulation"]'
+                        );
+
+
+                    if(
+                        frame &&
+                        !practiceStarted
+                    ){
+
+                        setTimeout(
+                            function(){
+
+                                if(
+                                    !practiceStarted
+                                ){
+
+                                    start();
+
+                                }
+
+                            },
+                            800
+                        );
+
+                    }
+
+                }
+            );
+
+
+        observer.observe(
+            campusContent,
+            {
+                childList: true,
+                subtree: true
+            }
+        );
+
+    }
+
+
+})();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
