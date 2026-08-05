@@ -7807,6 +7807,1202 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
 
 
+
+
+// =========================================================
+// CAMPUS WORD 2007
+// RANISE INTELLIGENT PRACTICE BRIDGE
+// =========================================================
+// ISOLATED CAMPUSNUMERIQUE ADD-ON
+//
+// PURPOSE:
+// CONNECT RANISE PRACTICE ENGINES WITH THE EXISTING
+// WORD SIMULATION IFRAME WITHOUT MODIFYING THE
+// SIMULATION JAVASCRIPT.
+//
+// IMPORTANT:
+// - DOES NOT MODIFY SIMULATION JS
+// - DOES NOT REPLACE SIMULATION HTML
+// - DOES NOT BLOCK CLICKS
+// - DOES NOT BLOCK TOUCH
+// - DOES NOT CREATE PRACTICE CONTENT
+// - DOES NOT CONTROL MARYTTS
+// - DOES NOT CONTROL AVATAR ANIMATION
+// - WORKS DYNAMICALLY WITH THE EXISTING IFRAME
+// - DESIGNED FOR BLOCK 8, BLOCK 9, BLOCK 10, ETC.
+// =========================================================
+
+(function(){
+
+    "use strict";
+
+
+    // =====================================================
+    // PROTECTED GLOBAL NAMESPACE
+    // =====================================================
+
+    if(
+        window.CampusWordPracticeBridge &&
+        window.CampusWordPracticeBridge.__raniseBridge
+    ){
+
+        return;
+
+    }
+
+
+    // =====================================================
+    // INTERNAL STATE
+    // =====================================================
+
+    let simulationFrame = null;
+
+    let simulationDocument = null;
+
+    let connected = false;
+
+    let observer = null;
+
+    let reconnectTimer = null;
+
+    let actionWaiter = null;
+
+    let lastInteractionSignature = "";
+
+    let lastInteractionTime = 0;
+
+
+
+    // =====================================================
+    // SIMULATION SELECTOR
+    // =====================================================
+
+    const SIMULATION_SELECTOR =
+        'iframe[src*="campusword2007simulation"]';
+
+
+
+    // =====================================================
+    // NORMALIZE TEXT
+    // =====================================================
+
+    function normalizeText(value){
+
+        if(
+            value === null ||
+            value === undefined
+        ){
+
+            return "";
+
+        }
+
+
+        return String(value)
+
+            .toLowerCase()
+
+            .normalize("NFD")
+
+            .replace(
+                /[\u0300-\u036f]/g,
+                ""
+            )
+
+            .replace(
+                /\s+/g,
+                " "
+            )
+
+            .trim();
+
+    }
+
+
+
+    // =====================================================
+    // GET ELEMENT DESCRIPTION
+    // READ-ONLY
+    // =====================================================
+
+    function getElementDescription(element){
+
+        if(!element){
+
+            return "";
+
+        }
+
+
+        const values = [
+
+            element.innerText,
+
+            element.textContent,
+
+            element.getAttribute("aria-label"),
+
+            element.getAttribute("title"),
+
+            element.getAttribute("alt"),
+
+            element.getAttribute("data-command"),
+
+            element.getAttribute("data-action"),
+
+            element.id,
+
+            element.className
+
+        ];
+
+
+        for(
+            const value of values
+        ){
+
+            if(
+                value !== null &&
+                value !== undefined &&
+                String(value).trim()
+            ){
+
+                return String(value).trim();
+
+            }
+
+        }
+
+
+        return "";
+
+    }
+
+
+
+    // =====================================================
+    // GET CLICKABLE PARENT
+    // READ-ONLY
+    // =====================================================
+
+    function getInteractiveElement(target){
+
+        if(!target){
+
+            return null;
+
+        }
+
+
+        if(
+            typeof target.closest ===
+            "function"
+        ){
+
+            const clickable =
+                target.closest(
+
+                    [
+                        "button",
+                        "a",
+                        "input",
+                        "select",
+                        "textarea",
+                        "label",
+                        "[role='button']",
+                        "[role='tab']",
+                        "[onclick]",
+                        "[data-action]",
+                        "[data-command]"
+                    ].join(",")
+
+                );
+
+
+            if(clickable){
+
+                return clickable;
+
+            }
+
+        }
+
+
+        return target;
+
+    }
+
+
+
+    // =====================================================
+    // EXTRACT INTERACTION INFORMATION
+    // =====================================================
+
+    function buildInteraction(target, event){
+
+        const element =
+            getInteractiveElement(
+                target
+            );
+
+
+        if(!element){
+
+            return null;
+
+        }
+
+
+        const description =
+            getElementDescription(
+                element
+            );
+
+
+        const interaction = {
+
+            element:
+                element,
+
+            tagName:
+                element.tagName ||
+                "",
+
+            id:
+                element.id ||
+                "",
+
+            className:
+                typeof element.className ===
+                "string"
+                    ? element.className
+                    : "",
+
+            text:
+                description,
+
+            normalizedText:
+                normalizeText(
+                    description
+                ),
+
+            eventType:
+                event?.type ||
+                "",
+
+            pointerType:
+                event?.pointerType ||
+                "",
+
+            x:
+                typeof event?.clientX ===
+                "number"
+                    ? event.clientX
+                    : null,
+
+            y:
+                typeof event?.clientY ===
+                "number"
+                    ? event.clientY
+                    : null,
+
+            timestamp:
+                Date.now()
+
+        };
+
+
+        return interaction;
+
+    }
+
+
+
+    // =====================================================
+    // INTERACTION DUPLICATE PROTECTION
+    // =====================================================
+
+    function isDuplicateInteraction(interaction){
+
+        if(!interaction){
+
+            return true;
+
+        }
+
+
+        const signature =
+
+            interaction.eventType +
+            "|" +
+            interaction.id +
+            "|" +
+            interaction.tagName +
+            "|" +
+            interaction.normalizedText;
+
+
+        const now =
+            Date.now();
+
+
+        if(
+            signature ===
+                lastInteractionSignature &&
+
+            now -
+                lastInteractionTime <
+                500
+        ){
+
+            return true;
+
+        }
+
+
+        lastInteractionSignature =
+            signature;
+
+
+        lastInteractionTime =
+            now;
+
+
+        return false;
+
+    }
+
+
+
+    // =====================================================
+    // TARGET MATCHING
+    // =====================================================
+    // BLOCKS CAN GIVE THE BRIDGE SIMPLE WORDS SUCH AS:
+    //
+    // "Office"
+    // "Ruban"
+    // "Onglets"
+    // "barre de titre"
+    //
+    // THE BRIDGE ONLY CHECKS WHAT IS ALREADY PRESENT
+    // INSIDE THE SIMULATION.
+    // =====================================================
+
+    function interactionMatchesKeywords(
+        interaction,
+        keywords
+    ){
+
+        if(
+            !interaction ||
+            !Array.isArray(keywords) ||
+            keywords.length === 0
+        ){
+
+            return false;
+
+        }
+
+
+        const targetText =
+            normalizeText(
+
+                [
+                    interaction.text,
+                    interaction.id,
+                    interaction.className
+                ].join(" ")
+
+            );
+
+
+        if(!targetText){
+
+            return false;
+
+        }
+
+
+        const normalizedKeywords =
+
+            keywords
+
+                .filter(
+                    keyword =>
+                        keyword !== null &&
+                        keyword !== undefined
+                )
+
+                .map(
+                    keyword =>
+                        normalizeText(keyword)
+                )
+
+                .filter(
+                    keyword =>
+                        keyword.length > 0
+                );
+
+
+        if(
+            normalizedKeywords.length === 0
+        ){
+
+            return false;
+
+        }
+
+
+        for(
+            const keyword
+            of normalizedKeywords
+        ){
+
+            if(
+                targetText.includes(
+                    keyword
+                )
+            ){
+
+                return true;
+
+            }
+
+        }
+
+
+        return false;
+
+    }
+
+
+
+    // =====================================================
+    // HANDLE SIMULATION INTERACTION
+    // =====================================================
+
+    function handleInteraction(event){
+
+        if(!connected){
+
+            return;
+
+        }
+
+
+        const interaction =
+            buildInteraction(
+                event.target,
+                event
+            );
+
+
+        if(!interaction){
+
+            return;
+
+        }
+
+
+        if(
+            isDuplicateInteraction(
+                interaction
+            )
+        ){
+
+            return;
+
+        }
+
+
+        // ---------------------------------------------
+        // IF A BLOCK IS CURRENTLY WAITING FOR AN ACTION
+        // ---------------------------------------------
+
+        if(
+            actionWaiter &&
+            typeof actionWaiter.resolve ===
+            "function"
+        ){
+
+            const waiter =
+                actionWaiter;
+
+
+            if(
+                interactionMatchesKeywords(
+                    interaction,
+                    waiter.keywords
+                )
+            ){
+
+                actionWaiter = null;
+
+
+                waiter.resolve({
+
+                    success:
+                        true,
+
+                    interaction:
+                        interaction
+
+                });
+
+
+                return;
+
+            }
+
+        }
+
+
+        // ---------------------------------------------
+        // GENERAL EVENT NOTIFICATION
+        // ---------------------------------------------
+
+        if(
+            typeof window
+                .RanisePracticeInteractionListener ===
+            "function"
+        ){
+
+            try{
+
+                window
+                    .RanisePracticeInteractionListener(
+                        interaction
+                    );
+
+            }catch(error){
+
+                console.error(
+                    "RANISE BRIDGE LISTENER ERROR:",
+                    error
+                );
+
+            }
+
+        }
+
+    }
+
+
+
+    // =====================================================
+    // CONNECT EVENT LISTENERS
+    // =====================================================
+
+    function attachListeners(){
+
+        if(
+            !simulationDocument ||
+            connected
+        ){
+
+            return false;
+
+        }
+
+
+        try{
+
+            // -----------------------------------------
+            // POINTER EVENTS
+            // -----------------------------------------
+
+            simulationDocument.addEventListener(
+                "pointerup",
+                handleInteraction,
+                true
+            );
+
+
+            // -----------------------------------------
+            // CLICK FALLBACK
+            // -----------------------------------------
+
+            simulationDocument.addEventListener(
+                "click",
+                handleInteraction,
+                true
+            );
+
+
+            connected = true;
+
+
+            return true;
+
+        }catch(error){
+
+            console.error(
+                "RANISE BRIDGE: CONNECTION ERROR:",
+                error
+            );
+
+
+            return false;
+
+        }
+
+    }
+
+
+
+    // =====================================================
+    // DISCONNECT EVENT LISTENERS
+    // =====================================================
+
+    function detachListeners(){
+
+        if(
+            !simulationDocument
+        ){
+
+            connected = false;
+
+            return;
+
+        }
+
+
+        try{
+
+            simulationDocument.removeEventListener(
+                "pointerup",
+                handleInteraction,
+                true
+            );
+
+
+            simulationDocument.removeEventListener(
+                "click",
+                handleInteraction,
+                true
+            );
+
+        }catch(error){}
+
+
+        connected = false;
+
+    }
+
+
+
+    // =====================================================
+    // CONNECT TO EXISTING SIMULATION
+    // =====================================================
+
+    function connect(){
+
+        const campusContent =
+            document.getElementById(
+                "campusContent"
+            );
+
+
+        if(!campusContent){
+
+            return false;
+
+        }
+
+
+        const frame =
+            campusContent.querySelector(
+                SIMULATION_SELECTOR
+            );
+
+
+        if(!frame){
+
+            return false;
+
+        }
+
+
+        if(
+            simulationFrame === frame &&
+            connected
+        ){
+
+            return true;
+
+        }
+
+
+        detachListeners();
+
+
+        simulationFrame =
+            frame;
+
+
+        try{
+
+            const doc =
+                frame.contentDocument ||
+                frame.contentWindow.document;
+
+
+            if(!doc){
+
+                return false;
+
+            }
+
+
+            simulationDocument =
+                doc;
+
+
+            return attachListeners();
+
+        }catch(error){
+
+            console.error(
+                "RANISE BRIDGE: impossible de lire la simulation:",
+                error
+            );
+
+
+            simulationFrame = null;
+
+            simulationDocument = null;
+
+            connected = false;
+
+
+            return false;
+
+        }
+
+    }
+
+
+
+    // =====================================================
+    // WAIT FOR SIMULATION
+    // =====================================================
+
+    function waitForConnection(){
+
+        return new Promise(
+            function(resolve){
+
+                if(
+                    connect()
+                ){
+
+                    resolve(true);
+
+                    return;
+
+                }
+
+
+                let attempts = 0;
+
+
+                const timer =
+                    setInterval(
+                        function(){
+
+                            attempts++;
+
+
+                            if(
+                                connect()
+                            ){
+
+                                clearInterval(
+                                    timer
+                                );
+
+
+                                resolve(true);
+
+                                return;
+
+                            }
+
+
+                            if(
+                                attempts >= 40
+                            ){
+
+                                clearInterval(
+                                    timer
+                                );
+
+
+                                resolve(false);
+
+                            }
+
+                        },
+                        250
+                    );
+
+            }
+        );
+
+    }
+
+
+
+    // =====================================================
+    // WAIT FOR A SPECIFIC STUDENT ACTION
+    // =====================================================
+    //
+    // EXAMPLE:
+    //
+    // await Bridge.waitForAction([
+    //     "Office"
+    // ]);
+    //
+    // THE BRIDGE WAITS FOR THE STUDENT TO INTERACT
+    // WITH AN ELEMENT WHOSE EXISTING TEXT / ID /
+    // CLASS MATCHES ONE OF THE PROVIDED WORDS.
+    // =====================================================
+
+    function waitForAction(keywords){
+
+        if(
+            !Array.isArray(keywords)
+        ){
+
+            return Promise.resolve({
+
+                success:
+                    false
+
+            });
+
+        }
+
+
+        cancelWaitingAction();
+
+
+        return new Promise(
+            function(resolve){
+
+                actionWaiter = {
+
+                    keywords:
+                        keywords,
+
+                    resolve:
+                        resolve
+
+                };
+
+            }
+        );
+
+    }
+
+
+
+    // =====================================================
+    // CANCEL CURRENT ACTION WAIT
+    // =====================================================
+
+    function cancelWaitingAction(){
+
+        if(
+            !actionWaiter
+        ){
+
+            return;
+
+        }
+
+
+        const waiter =
+            actionWaiter;
+
+
+        actionWaiter = null;
+
+
+        if(
+            typeof waiter.resolve ===
+            "function"
+        ){
+
+            waiter.resolve({
+
+                success:
+                    false,
+
+                cancelled:
+                    true
+
+            });
+
+        }
+
+    }
+
+
+
+    // =====================================================
+    // OBSERVE CAMPUS CONTENT
+    // =====================================================
+    // THIS ONLY DETECTS WHEN THE EXISTING IFRAME
+    // APPEARS OR IS REPLACED.
+    // =====================================================
+
+    function startCampusObserver(){
+
+        const campusContent =
+            document.getElementById(
+                "campusContent"
+            );
+
+
+        if(
+            !campusContent ||
+            observer
+        ){
+
+            return;
+
+        }
+
+
+        observer =
+            new MutationObserver(
+                function(){
+
+                    if(
+                        reconnectTimer
+                    ){
+
+                        clearTimeout(
+                            reconnectTimer
+                        );
+
+                    }
+
+
+                    reconnectTimer =
+                        setTimeout(
+                            function(){
+
+                                connect();
+
+                            },
+                            50
+                        );
+
+                }
+            );
+
+
+        observer.observe(
+            campusContent,
+            {
+
+                childList:
+                    true,
+
+                subtree:
+                    true
+
+            }
+        );
+
+    }
+
+
+
+    // =====================================================
+    // PUBLIC BRIDGE
+    // =====================================================
+
+    window.CampusWordPracticeBridge = {
+
+        __raniseBridge:
+            true,
+
+
+        connect:
+            connect,
+
+
+        waitForConnection:
+            waitForConnection,
+
+
+        waitForAction:
+            waitForAction,
+
+
+        cancelWaitingAction:
+            cancelWaitingAction,
+
+
+        isConnected:
+            function(){
+
+                return connected;
+
+            },
+
+
+        getSimulationFrame:
+            function(){
+
+                return simulationFrame;
+
+            },
+
+
+        getSimulationDocument:
+            function(){
+
+                return simulationDocument;
+
+            },
+
+
+        getElementDescription:
+            getElementDescription,
+
+
+        normalizeText:
+            normalizeText,
+
+
+        matchesKeywords:
+            interactionMatchesKeywords,
+
+
+        stop:
+            function(){
+
+                cancelWaitingAction();
+
+
+                if(
+                    observer
+                ){
+
+                    observer.disconnect();
+
+                    observer = null;
+
+                }
+
+
+                if(
+                    reconnectTimer
+                ){
+
+                    clearTimeout(
+                        reconnectTimer
+                    );
+
+                    reconnectTimer = null;
+
+                }
+
+
+                detachListeners();
+
+
+                simulationFrame = null;
+
+                simulationDocument = null;
+
+            }
+
+    };
+
+
+
+    // =====================================================
+    // START AUTOMATIC CONNECTION
+    // =====================================================
+
+    function initialize(){
+
+        startCampusObserver();
+
+        connect();
+
+    }
+
+
+    if(
+        document.readyState ===
+        "loading"
+    ){
+
+        document.addEventListener(
+            "DOMContentLoaded",
+            initialize,
+            {
+                once:
+                    true
+            }
+        );
+
+    }else{
+
+        initialize();
+
+    }
+
+
+})();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 // =========================================================
 // BLOCK 8
 // MICROSOFT WORD 2007 FORMATION
