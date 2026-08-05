@@ -6844,6 +6844,10 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
 
 
+
+
+
+
 // =========================================================
 // BLOCK 6
 // MICROSOFT WORD 2007 FORMATION
@@ -6854,93 +6858,14 @@ const RaniseMoisePedagogicalExplanationEngine = {
 // USES EXISTING COURSE PRACTICE DATA
 // THEORY REMAINS UNTOUCHED
 // BLOCK 5 REMAINS UNTOUCHED
+// DOES NOT MODIFY BLOCK 4
+// DOES NOT MODIFY BLOCK 5
+// STARTED BY EXISTING ACTIVATION AFTER BLOCK 5
 // =========================================================
 
 (function(){
 
     "use strict";
-
-
-    // =====================================================
-    // WAIT UNTIL THE EXISTING THEORY ENGINE EXISTS
-    // =====================================================
-
-    function connectPracticeTeaching(){
-
-        if(
-            typeof RaniseMoiseTheoryTeachingEngine ===
-            "undefined"
-        ){
-
-            setTimeout(
-                connectPracticeTeaching,
-                100
-            );
-
-            return;
-
-        }
-
-
-        if(
-            typeof RaniseMoiseTheoryTeachingEngine
-                .teachFirstLesson !==
-            "function"
-        ){
-
-            setTimeout(
-                connectPracticeTeaching,
-                100
-            );
-
-            return;
-
-        }
-
-
-        // =================================================
-        // PROTECTION AGAINST DOUBLE CONNECTION
-        // =================================================
-
-        if(
-            RaniseMoiseTheoryTeachingEngine
-                .__practiceTeachingConnected
-        ){
-
-            return;
-
-        }
-
-
-        RaniseMoiseTheoryTeachingEngine
-            .__practiceTeachingConnected = true;
-
-
-        const originalTeachFirstLesson =
-            RaniseMoiseTheoryTeachingEngine
-                .teachFirstLesson;
-
-
-        // =================================================
-        // THEORY FINISHES FIRST
-        // THEN PRACTICE STARTS
-        // =================================================
-
-        RaniseMoiseTheoryTeachingEngine
-            .teachFirstLesson = async function(){
-
-                await originalTeachFirstLesson.apply(
-                    this,
-                    arguments
-                );
-
-
-                await RaniseMoisePracticeTeachingEngine
-                    .teachFirstPractice();
-
-            };
-
-    }
 
 
     // =====================================================
@@ -7112,10 +7037,12 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
 
                         await this.speak(
+
                             "Étape " +
                             (i + 1) +
                             ". " +
                             step
+
                         );
 
                     }
@@ -7140,20 +7067,7 @@ const RaniseMoisePedagogicalExplanationEngine = {
     };
 
 
-    // =====================================================
-    // CONNECT BLOCK 6 TO THE EXISTING THEORY ENGINE
-    // =====================================================
-
-    connectPracticeTeaching();
-
-
 })();
-
-
-
-
-
-
 
 
 
