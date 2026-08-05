@@ -873,6 +873,29 @@ setTimeout(async ()=>{
 
 
 
+
+
+
+
+// =====================================
+// BLOCK 6
+// PRACTICE TEACHING
+// STARTS ONLY AFTER BLOCK 5 FINISHES
+// =====================================
+
+if(
+    typeof RaniseMoisePracticeTeachingEngine !==
+    "undefined" &&
+    typeof RaniseMoisePracticeTeachingEngine.teachFirstPractice ===
+    "function"
+){
+
+    await RaniseMoisePracticeTeachingEngine
+        .teachFirstPractice();
+
+}
+
+
 },200);
 
     },50);
@@ -6821,7 +6844,312 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
 
 
+```javascript
+// =========================================================
+// BLOCK 6
+// MICROSOFT WORD 2007 FORMATION
+// RANISE MOISE PRACTICE TEACHING ENGINE
+// =========================================================
+// ISOLATED ADD-ON
+// USES THE EXISTING RANISE VOICE SYSTEM
+// USES EXISTING COURSE PRACTICE DATA
+// THEORY REMAINS UNTOUCHED
+// BLOCK 5 REMAINS UNTOUCHED
+// =========================================================
 
+(function(){
+
+    "use strict";
+
+
+    // =====================================================
+    // WAIT UNTIL THE EXISTING THEORY ENGINE EXISTS
+    // =====================================================
+
+    function connectPracticeTeaching(){
+
+        if(
+            typeof RaniseMoiseTheoryTeachingEngine ===
+            "undefined"
+        ){
+
+            setTimeout(
+                connectPracticeTeaching,
+                100
+            );
+
+            return;
+
+        }
+
+
+        if(
+            typeof RaniseMoiseTheoryTeachingEngine
+                .teachFirstLesson !==
+            "function"
+        ){
+
+            setTimeout(
+                connectPracticeTeaching,
+                100
+            );
+
+            return;
+
+        }
+
+
+        // =================================================
+        // PROTECTION AGAINST DOUBLE CONNECTION
+        // =================================================
+
+        if(
+            RaniseMoiseTheoryTeachingEngine
+                .__practiceTeachingConnected
+        ){
+
+            return;
+
+        }
+
+
+        RaniseMoiseTheoryTeachingEngine
+            .__practiceTeachingConnected = true;
+
+
+        const originalTeachFirstLesson =
+            RaniseMoiseTheoryTeachingEngine
+                .teachFirstLesson;
+
+
+        // =================================================
+        // THEORY FINISHES FIRST
+        // THEN PRACTICE STARTS
+        // =================================================
+
+        RaniseMoiseTheoryTeachingEngine
+            .teachFirstLesson = async function(){
+
+                await originalTeachFirstLesson.apply(
+                    this,
+                    arguments
+                );
+
+
+                await RaniseMoisePracticeTeachingEngine
+                    .teachFirstPractice();
+
+            };
+
+    }
+
+
+    // =====================================================
+    // PRACTICE TEACHING ENGINE
+    // =====================================================
+
+    window.RaniseMoisePracticeTeachingEngine = {
+
+
+        async speak(text){
+
+            if(!text){
+
+                return;
+
+            }
+
+
+            // ---------------------------------------------
+            // USE THE SAME RANISE TALKING SYSTEM
+            // ---------------------------------------------
+
+            if(
+                typeof raniseStartTalking ===
+                "function"
+            ){
+
+                raniseStartTalking();
+
+            }
+
+
+            try{
+
+                if(
+                    typeof speakProfessorIAWithMaryTTS ===
+                    "function"
+                ){
+
+                    await speakProfessorIAWithMaryTTS(
+                        text
+                    );
+
+                }
+
+            }finally{
+
+                if(
+                    typeof raniseStopTalking ===
+                    "function"
+                ){
+
+                    raniseStopTalking();
+
+                }
+
+            }
+
+        },
+
+
+        async teachFirstPractice(){
+
+            // =================================================
+            // GET CHAPTER 1 FROM EXISTING COURSE DATA
+            // =================================================
+
+            if(
+                typeof microsoftWordCourse ===
+                "undefined"
+            ){
+
+                return;
+
+            }
+
+
+            const chapter =
+                microsoftWordCourse.chapters.find(
+                    item =>
+                        item.id === "chapitre1"
+                );
+
+
+            if(!chapter){
+
+                return;
+
+            }
+
+
+            if(
+                !Array.isArray(
+                    chapter.practice
+                ) ||
+                chapter.practice.length === 0
+            ){
+
+                return;
+
+            }
+
+
+            // =================================================
+            // PRACTICE INTRODUCTION
+            // =================================================
+
+            await this.speak(
+
+                "Maintenant, nous allons passer aux séances pratiques, toujours pour la première leçon Microsoft Word 2007."
+
+            );
+
+
+            // =================================================
+            // READ EXISTING PRACTICE CONTENT
+            // EXACTLY IN COURSE DATA ORDER
+            // =================================================
+
+            for(
+                const activity of chapter.practice
+            ){
+
+                if(!activity){
+
+                    continue;
+
+                }
+
+
+                // ---------------------------------------------
+                // PRACTICE ACTIVITY TITLE
+                // ---------------------------------------------
+
+                if(activity.title){
+
+                    await this.speak(
+                        activity.title
+                    );
+
+                }
+
+
+                // ---------------------------------------------
+                // PRACTICE STEPS
+                // ---------------------------------------------
+
+                if(
+                    Array.isArray(
+                        activity.steps
+                    )
+                ){
+
+                    for(
+                        let i = 0;
+                        i < activity.steps.length;
+                        i++
+                    ){
+
+                        const step =
+                            activity.steps[i];
+
+
+                        if(!step){
+
+                            continue;
+
+                        }
+
+
+                        await this.speak(
+                            "Étape " +
+                            (i + 1) +
+                            ". " +
+                            step
+                        );
+
+                    }
+
+                }
+
+            }
+
+
+            // =================================================
+            // FINAL INSTRUCTION
+            // =================================================
+
+            await this.speak(
+
+                "Cliquez sur le bouton “🚀 Ouvrir Microsoft Word Simulation” pour ouvrir l’espace de simulation. Attendez-moi ici, car c’est moi qui vais vous guider étape par étape."
+
+            );
+
+        }
+
+    };
+
+
+    // =====================================================
+    // CONNECT BLOCK 6 TO THE EXISTING THEORY ENGINE
+    // =====================================================
+
+    connectPracticeTeaching();
+
+
+})();
+```
 
 
 
