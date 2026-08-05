@@ -6844,7 +6844,6 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
 
 
-```javascript
 // =========================================================
 // BLOCK 6
 // MICROSOFT WORD 2007 FORMATION
@@ -7149,11 +7148,6 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
 
 })();
-```
-
-
-
-
 
 
 
