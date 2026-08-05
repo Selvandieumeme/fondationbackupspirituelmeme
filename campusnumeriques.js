@@ -874,13 +874,6 @@ setTimeout(async ()=>{
 
 
 
-
-// =====================================
-// BLOCK 6
-// PRACTICE TEACHING
-// STARTS ONLY AFTER BLOCK 5 FINISHES
-// =====================================
-
 if(
     typeof RaniseMoisePracticeTeachingEngine !==
     "undefined" &&
