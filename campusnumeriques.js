@@ -6875,19 +6875,57 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 // =========================================================
 // CAMPUS WORD 2007
-// RANISE IA ABOVE SIMULATION
-// OPTION A — ISOLATED VISUAL CONTAINER
+// RANISE IA COPY ABOVE WORD SIMULATION
+// OPTION A — ISOLATED ADD-ON
 //
-// IMPORTANT:
-// - DOES NOT MODIFY THE WORD SIMULATION
-// - DOES NOT MODIFY THE IFRAME SRC
-// - DOES NOT RECREATE THE IFRAME
-// - DOES NOT MODIFY CHAPTER 1
-// - DOES NOT MODIFY COURSE DATA
-// - DOES NOT MODIFY PROGRESS ENGINE
-// - ADD-ON ONLY
+// OBJECTIVE:
+// Copy the EXISTING Ranise IA card already displayed
+// somewhere in the Campus page and place the visual copy
+// above the EXISTING Word Simulation iframe.
+//
+// DOES NOT:
+// - modify Chapter 1
+// - modify Course Data
+// - modify Progress Engine
+// - modify the existing Ranise card
+// - recreate the Word iframe
+// - change the iframe src
+// - modify the Word Simulation itself
 // =========================================================
 
 (function(){
@@ -6895,31 +6933,31 @@ const RaniseMoisePedagogicalExplanationEngine = {
     "use strict";
 
 
-    // =============================================
-    // UNIQUE CLASSES
-    // =============================================
+    // =====================================================
+    // UNIQUE ADD-ON CLASSES
+    // =====================================================
 
-    const RANISE_SIMULATION_WRAPPER_CLASS =
+    const WRAPPER_CLASS =
         "ranise-word-simulation-wrapper";
 
 
-    const RANISE_SIMULATION_CARD_CLASS =
-        "ranise-word-simulation-ia-card";
+    const CARD_CLASS =
+        "ranise-word-simulation-copy";
 
 
-    const RANISE_SIMULATION_FRAME_CLASS =
-        "ranise-word-simulation-frame";
+    const FRAME_CLASS =
+        "ranise-word-simulation-existing-frame";
 
 
 
-    // =============================================
-    // ADD-ON STYLE
+    // =====================================================
+    // ADD-ON CSS
     // NO SEPARATE CSS BLOCK REQUIRED
-    // =============================================
+    // =====================================================
 
     if(
         !document.getElementById(
-            "raniseWordSimulationAddonStyle"
+            "raniseWordSimulationCopyStyle"
         )
     ){
 
@@ -6928,12 +6966,12 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
 
         style.id =
-            "raniseWordSimulationAddonStyle";
+            "raniseWordSimulationCopyStyle";
 
 
         style.textContent = `
 
-            .${RANISE_SIMULATION_WRAPPER_CLASS}{
+            .${WRAPPER_CLASS}{
                 width:100%;
                 box-sizing:border-box;
                 display:flex;
@@ -6945,24 +6983,30 @@ const RaniseMoisePedagogicalExplanationEngine = {
             }
 
 
-            .${RANISE_SIMULATION_CARD_CLASS}{
+            .${CARD_CLASS}{
                 width:100%;
                 max-width:100%;
                 box-sizing:border-box;
                 flex:0 0 auto;
+
                 position:relative !important;
-                left:auto !important;
-                right:auto !important;
+
                 top:auto !important;
+                right:auto !important;
                 bottom:auto !important;
+                left:auto !important;
+
                 transform:none !important;
+
                 margin:0 !important;
+
                 z-index:2;
+
                 overflow:hidden;
             }
 
 
-            .${RANISE_SIMULATION_FRAME_CLASS}{
+            .${FRAME_CLASS}{
                 display:block;
                 width:100%;
                 max-width:100%;
@@ -6973,15 +7017,14 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
             @media (max-width:600px){
 
-                .${RANISE_SIMULATION_WRAPPER_CLASS}{
+                .${WRAPPER_CLASS}{
                     gap:4px;
                 }
 
 
-                .${RANISE_SIMULATION_CARD_CLASS}{
+                .${CARD_CLASS}{
                     max-height:150px;
                     overflow:auto;
-                    font-size:12px;
                 }
 
             }
@@ -6995,36 +7038,47 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
 
 
-    // =============================================
-    // FIND EXISTING RANISE CARD
-    // =============================================
+    // =====================================================
+    // FIND THE EXISTING RANISE CARD
+    //
+    // IMPORTANT:
+    // Search the WHOLE DOCUMENT.
+    //
+    // NOT:
+    // campusContent.querySelector(...)
+    //
+    // The original Ranise card may live inside another
+    // Campus space.
+    // =====================================================
 
     function findExistingRaniseCard(){
 
-        const campusContent =
-            document.getElementById(
-                "campusContent"
+        const card =
+            document.querySelector(
+                ".chapter1-ia-card"
             );
 
 
-        if(!campusContent){
+        if(!card){
+
+            console.warn(
+                "RANISE SIMULATION ADD-ON: EXISTING RANISE CARD NOT FOUND."
+            );
 
             return null;
 
         }
 
 
-        return campusContent.querySelector(
-            ".chapter1-ia-card"
-        );
+        return card;
 
     }
 
 
 
-    // =============================================
+    // =====================================================
     // FIND THE EXISTING WORD SIMULATION IFRAME
-    // =============================================
+    // =====================================================
 
     function findWordSimulationFrame(){
 
@@ -7049,17 +7103,17 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
 
 
-    // =============================================
-    // BUILD THE VISUAL CONTAINER
-    // =============================================
+    // =====================================================
+    // ATTACH RANISE COPY ABOVE EXISTING SIMULATION
+    // =====================================================
 
-    function attachRaniseAboveSimulation(
-        raniseCardCopy,
+    function attachRaniseCopy(
+        raniseCopy,
         simulationFrame
     ){
 
         if(
-            !raniseCardCopy ||
+            !raniseCopy ||
             !simulationFrame
         ){
 
@@ -7083,14 +7137,13 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
 
 
-        // =========================================
-        // PREVENT DUPLICATION
-        // =========================================
+        // =================================================
+        // DO NOT DUPLICATE THE ADD-ON
+        // =================================================
 
         if(
             campusContent.querySelector(
-                "." +
-                RANISE_SIMULATION_WRAPPER_CLASS
+                "." + WRAPPER_CLASS
             )
         ){
 
@@ -7100,43 +7153,45 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
 
 
-        // =========================================
-        // CREATE VISUAL WRAPPER
-        // =========================================
+        // =================================================
+        // CREATE WRAPPER
+        // =================================================
 
         const wrapper =
-            document.createElement("div");
+            document.createElement(
+                "div"
+            );
 
 
         wrapper.className =
-            RANISE_SIMULATION_WRAPPER_CLASS;
+            WRAPPER_CLASS;
 
 
 
-        // =========================================
-        // PREPARE RANISE CARD
-        // =========================================
+        // =================================================
+        // MARK THE VISUAL COPY
+        // =================================================
 
-        raniseCardCopy.classList.add(
-            RANISE_SIMULATION_CARD_CLASS
+        raniseCopy.classList.add(
+            CARD_CLASS
         );
 
 
 
-        // =========================================
-        // PREPARE EXISTING IFRAME
-        // =========================================
+        // =================================================
+        // MARK THE EXISTING IFRAME
+        // =================================================
 
         simulationFrame.classList.add(
-            RANISE_SIMULATION_FRAME_CLASS
+            FRAME_CLASS
         );
 
 
 
-        // =========================================
-        // INSERT WRAPPER EXACTLY WHERE
-        // THE EXISTING IFRAME ALREADY IS
-        // =========================================
+        // =================================================
+        // PUT WRAPPER EXACTLY WHERE THE EXISTING
+        // SIMULATION IFRAME ALREADY IS
+        // =================================================
 
         campusContent.insertBefore(
             wrapper,
@@ -7145,19 +7200,24 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
 
 
-        // =========================================
-        // MOVE ONLY THE EXISTING IFRAME
-        // INTO THE WRAPPER
-        //
-        // IMPORTANT:
-        // THIS DOES NOT RECREATE IT.
-        // SAME IFRAME / SAME SRC / SAME PAGE.
-        // =========================================
+        // =================================================
+        // ADD THE RANISE COPY FIRST
+        // =================================================
 
         wrapper.appendChild(
-            raniseCardCopy
+            raniseCopy
         );
 
+
+
+        // =================================================
+        // MOVE THE EXISTING IFRAME INTO THE WRAPPER
+        //
+        // IMPORTANT:
+        // THIS DOES NOT CREATE A NEW IFRAME.
+        //
+        // THE SAME EXISTING IFRAME IS MOVED.
+        // =================================================
 
         wrapper.appendChild(
             simulationFrame
@@ -7166,9 +7226,8 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
 
         console.log(
-            "RANISE IA CARD ATTACHED ABOVE WORD SIMULATION"
+            "RANISE IA COPY SUCCESSFULLY PLACED ABOVE WORD SIMULATION."
         );
-
 
 
         return true;
@@ -7177,15 +7236,16 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
 
 
-    // =============================================
-    // WATCH FOR SIMULATION CREATION
-    // =============================================
+    // =====================================================
+    // LISTEN FOR THE EXACT EXISTING SIMULATION BUTTON
+    // =====================================================
 
     document.addEventListener(
 
         "click",
 
         function(event){
+
 
             const launchButton =
                 event.target.closest(
@@ -7201,15 +7261,19 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
 
 
-            const originalCard =
+            // =================================================
+            // IMPORTANT:
+            // CAPTURE THE EXISTING RANISE CARD BEFORE
+            // THE ORIGINAL SIMULATION CODE DOES:
+            //
+            // campusContent.innerHTML = iframe
+            // =================================================
+
+            const existingRaniseCard =
                 findExistingRaniseCard();
 
 
-            if(!originalCard){
-
-                console.warn(
-                    "RANISE ADD-ON: EXISTING IA CARD NOT FOUND"
-                );
+            if(!existingRaniseCard){
 
                 return;
 
@@ -7217,20 +7281,16 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
 
 
-            // =========================================
-            // COPY THE EXISTING RANISE CARD
-            // BEFORE CAMPUS CONTENT IS REPLACED
-            // =========================================
+            // =================================================
+            // CREATE VISUAL/HTML COPY
+            //
+            // ORIGINAL CARD STAYS WHERE IT IS.
+            // =================================================
 
-            const raniseCardCopy =
-                originalCard.cloneNode(true);
+            const raniseCopy =
+                existingRaniseCard.cloneNode(true);
 
 
-
-            // =========================================
-            // WAIT FOR EXISTING LAUNCH CODE
-            // TO INSERT ITS IFRAME
-            // =========================================
 
             const campusContent =
                 document.getElementById(
@@ -7246,17 +7306,22 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
 
 
-            let attached =
+            let finished =
                 false;
 
 
+
+            // =================================================
+            // WAIT FOR THE ORIGINAL SIMULATION LAUNCH CODE
+            // TO CREATE ITS EXISTING IFRAME
+            // =================================================
 
             const observer =
                 new MutationObserver(
 
                     function(){
 
-                        if(attached){
+                        if(finished){
 
                             return;
 
@@ -7277,15 +7342,17 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
 
 
-                        attached =
-                            attachRaniseAboveSimulation(
-                                raniseCardCopy,
+                        const success =
+                            attachRaniseCopy(
+                                raniseCopy,
                                 simulationFrame
                             );
 
 
 
-                        if(attached){
+                        if(success){
+
+                            finished = true;
 
                             observer.disconnect();
 
@@ -7313,15 +7380,15 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
 
 
-            // =========================================
-            // SAFETY CHECK
-            // =========================================
+            // =================================================
+            // BACKUP CHECK
+            // =================================================
 
             setTimeout(
 
                 function(){
 
-                    if(attached){
+                    if(finished){
 
                         observer.disconnect();
 
@@ -7338,11 +7405,18 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
                     if(simulationFrame){
 
-                        attached =
-                            attachRaniseAboveSimulation(
-                                raniseCardCopy,
+                        const success =
+                            attachRaniseCopy(
+                                raniseCopy,
                                 simulationFrame
                             );
+
+
+                        if(success){
+
+                            finished = true;
+
+                        }
 
                     }
 
@@ -7352,7 +7426,7 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
                 },
 
-                1000
+                1500
 
             );
 
@@ -7365,35 +7439,3 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
 
 })();
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
