@@ -12132,12 +12132,14 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
 
 
+
+
 // =========================================================
 // BLOCK 9
 // MICROSOFT WORD 2007 FORMATION
 // RANISE MOISE HOMEWORK MASTERY ENGINE
 // =========================================================
-// FINAL CORRECTED VERSION
+// PRODUCTION FINAL VERSION
 //
 // PURPOSE:
 // 1. START AUTOMATICALLY AFTER BLOCK 8 COMPLETES.
@@ -12145,23 +12147,33 @@ const RaniseMoisePedagogicalExplanationEngine = {
 // 3. READ CHAPTER 1 HOMEWORK DYNAMICALLY.
 // 4. READ CHAPTER 1 PRACTICE DYNAMICALLY.
 // 5. READ CHAPTER 1 EVALUATION DYNAMICALLY.
-// 6. REQUIRE THE REAL HOMEWORK WORK ONLY.
-// 7. REQUIRE THE FIVE REQUIRED ELEMENTS IN THE DOCUMENT.
-// 8. DETECT THE STUDENT'S REAL DOCUMENT TEXT AUTOMATICALLY.
-// 9. VALIDATE AUTOMATICALLY AS SOON AS ALL REQUIRED ELEMENTS EXIST.
-// 10. DO NOT REQUIRE SAVE / RECORD / ENREGISTREMENT.
-// 11. DO NOT REQUIRE ANY EXTRA DOCUMENT ACTION.
-// 12. DO NOT VALIDATE FROM A RANDOM CLICK.
-// 13. DO NOT VALIDATE FROM TEXT ALONE IF THE REQUIRED SIMULATION
-//     DOCUMENT IS NOT PRESENT.
-// 14. DO NOT MODIFY BLOCK 6.
-// 15. DO NOT MODIFY BLOCK 7.
-// 16. DO NOT MODIFY BLOCK 8.
-// 17. DO NOT MODIFY THE EXISTING SIMULATION ENGINE.
-// 18. DO NOT MODIFY MARYTTS + AVATAR.
-// 19. COMPLETE CHAPTER 1 ONLY AFTER REAL SUCCESS.
-// 20. PANEL REMAINS SMALL AND DRAGGABLE.
-// 21. PANEL DISAPPEARS AUTOMATICALLY AFTER VALIDATION.
+// 6. REQUIRE REAL SIMULATION ACTIONS.
+// 7. REQUIRE REAL TEXT IN THE DOCUMENT.
+// 8. REQUIRE A REAL CREATED DOCUMENT.
+// 9. VERIFY THE FINAL DOCUMENT CONTENT.
+// 10. VERIFY THE STUDENT'S REQUIRED WORK.
+// 11. NEVER VALIDATE FROM A RANDOM CLICK.
+// 12. NEVER VALIDATE FROM TEXT ALONE.
+// 13. NEVER VALIDATE FROM A SINGLE ACTION.
+// 14. GIVE BEGINNERS UNLIMITED PRACTICAL TIME.
+// 15. DO NOT REQUIRE ANY EXTRA DOCUMENT ACTION.
+// 16. DO NOT MODIFY BLOCK 6.
+// 17. DO NOT MODIFY BLOCK 7.
+// 18. DO NOT MODIFY BLOCK 8.
+// 19. DO NOT MODIFY THE EXISTING SIMULATION ENGINE.
+// 20. DO NOT MODIFY MARYTTS + AVATAR.
+// 21. COMPLETE CHAPTER 1 ONLY AFTER REAL SUCCESS.
+// 22. PANEL REMAINS SMALL AND DRAGGABLE.
+// 23. PANEL DISAPPEARS AUTOMATICALLY AFTER VALIDATION.
+//
+// NEW MASTERY RULE:
+// 24. FIVE REQUIRED TASKS HAVE FIVE REAL CHECKMARKS.
+// 25. EACH CHECKMARK APPEARS IMMEDIATELY AFTER ITS TASK SUCCEEDS.
+// 26. EACH CHECKMARK IS TIED TO THE REAL ACTION FLAG.
+// 27. FIVE CHECKMARKS = FIVE TASKS SUCCESSFULLY COMPLETED.
+// 28. RANISE PERFORMS FINAL DOCUMENT VALIDATION ONLY AFTER 5/5.
+// 29. AFTER SUCCESS, CHAPTER 1 HOMEWORK IS COMPLETED.
+// 30. EVALUATION IS UNLOCKED THROUGH THE EXISTING COURSE PROGRESS SYSTEM.
 // =========================================================
 
 (function () {
@@ -12209,15 +12221,11 @@ const state = {
 
     mutationObserver: null,
 
-    validationTimer: null,
-
-    monitorTimer: null,
+    typedResponseTimer: null,
 
     lastDocumentText: "",
 
     lastDocumentSignature: "",
-
-    lastValidationSignature: "",
 
     lastActionTime: 0,
 
@@ -12225,14 +12233,22 @@ const state = {
 
 
     // =================================================
-    // REAL SIMULATION EVIDENCE
+    // REAL STUDENT ACTIONS
     // =================================================
 
-    simulationEvidence: {
+    actionFlags: {
+
+        titleBarSeen: false,
+
+        officeButtonSeen: false,
+
+        ribbonSeen: false,
+
+        tabsSeen: false,
 
         documentAreaSeen: false,
 
-        documentInteracted: false,
+        newDocumentAction: false,
 
         textEntered: false
 
@@ -12247,9 +12263,30 @@ const state = {
 
         contentValid: false,
 
-        simulationValid: false,
+        actionsValid: false,
 
-        finalValid: false
+        finalValid: false,
+
+        fiveTasksCompleted: false
+
+    },
+
+
+    // =================================================
+    // FIVE TASK CHECKMARK STATE
+    // =================================================
+
+    taskChecks: {
+
+        titleBar: false,
+
+        officeButton: false,
+
+        ribbon: false,
+
+        tabs: false,
+
+        documentArea: false
 
     },
 
@@ -12270,7 +12307,9 @@ const state = {
 
         status: null,
 
-        details: null
+        details: null,
+
+        taskList: null
 
     }
 
@@ -12315,7 +12354,7 @@ function normalize(value) {
 
 
 // =====================================================
-// NORMALIZE RESPONSE
+// WORD NORMALIZATION
 // =====================================================
 
 function normalizeResponse(value) {
@@ -12622,7 +12661,229 @@ function getDocumentSignature() {
 
 
 // =====================================================
-// RECORD REAL ACTION
+// GET TITLE BAR
+// =====================================================
+
+function getTitleBar() {
+
+    if (
+        !state.simulationDocument
+    ) {
+
+        return null;
+
+    }
+
+
+    return state.simulationDocument.querySelector(
+
+        "#cwTitleBar"
+
+    );
+
+}
+
+
+// =====================================================
+// GET OFFICE BUTTON
+// =====================================================
+
+function getOfficeButton() {
+
+    if (
+        !state.simulationDocument
+    ) {
+
+        return null;
+
+    }
+
+
+    return state.simulationDocument.querySelector(
+
+        "#cwOfficeButton[data-role='office-button'], #cwOfficeButton"
+
+    );
+
+}
+
+
+// =====================================================
+// GET RIBBON
+// =====================================================
+
+function getRibbon() {
+
+    if (
+        !state.simulationDocument
+    ) {
+
+        return null;
+
+    }
+
+
+    return state.simulationDocument.querySelector(
+
+        "#cwRibbonContentArea"
+
+    );
+
+}
+
+
+// =====================================================
+// GET TABS
+// =====================================================
+
+function getTabs() {
+
+    if (
+        !state.simulationDocument
+    ) {
+
+        return [];
+
+    }
+
+
+    return Array.from(
+
+        state.simulationDocument.querySelectorAll(
+
+            "#cwRibbonTabBar .cwTabBtn"
+
+        )
+
+    );
+
+}
+
+
+// =====================================================
+// GET DOCUMENT AREA
+// =====================================================
+
+function getDocumentArea() {
+
+    if (
+        !state.simulationDocument
+    ) {
+
+        return null;
+
+    }
+
+
+    return state.simulationDocument.querySelector(
+
+        ".cwPageContent"
+
+    );
+
+}
+
+
+// =====================================================
+// GET ELEMENT DATA
+// =====================================================
+
+function getElementData(element) {
+
+    if (!element) {
+        return "";
+    }
+
+
+    return normalize(
+
+        [
+
+            element.id,
+
+            element.className,
+
+            element.innerText,
+
+            element.textContent,
+
+            element.getAttribute(
+                "title"
+            ),
+
+            element.getAttribute(
+                "aria-label"
+            ),
+
+            element.getAttribute(
+                "data-action"
+            ),
+
+            element.getAttribute(
+                "data-command"
+            ),
+
+            element.getAttribute(
+                "data-role"
+            ),
+
+            element.getAttribute(
+                "data-target"
+            )
+
+        ]
+
+        .filter(Boolean)
+
+        .join(" ")
+
+    );
+
+}
+
+
+// =====================================================
+// CLOSEST
+// =====================================================
+
+function closestFromTarget(
+    target,
+    selector
+) {
+
+    if (
+
+        !target ||
+
+        !selector ||
+
+        typeof target.closest !==
+        "function"
+
+    ) {
+
+        return null;
+
+    }
+
+
+    try {
+
+        return target.closest(
+            selector
+        );
+
+    } catch (error) {
+
+        return null;
+
+    }
+
+}
+
+
+// =====================================================
+// RECORD REAL STUDENT ACTION
 // =====================================================
 
 function recordAction(action) {
@@ -12689,6 +12950,10 @@ function createHomeworkUI() {
     root.id =
         "raniseBlock9HomeworkPanel";
 
+
+    // -------------------------------------------------
+    // SMALL PANEL
+    // -------------------------------------------------
 
     root.style.position =
         "fixed";
@@ -12809,6 +13074,183 @@ function createHomeworkUI() {
 
 
     // =================================================
+    // FIVE TASK CHECKMARK AREA
+    // =================================================
+
+    const taskList =
+        doc.createElement("div");
+
+
+    taskList.id =
+        "raniseBlock9TaskChecks";
+
+
+    taskList.style.marginBottom =
+        "8px";
+
+    taskList.style.padding =
+        "8px";
+
+    taskList.style.borderRadius =
+        "8px";
+
+    taskList.style.background =
+        "#f7f9fb";
+
+
+    // -------------------------------------------------
+    // FIVE REAL TASK ROWS
+    // -------------------------------------------------
+
+    const taskDefinitions = [
+
+        {
+            key:
+                "titleBar",
+
+            label:
+                "Barre de titre"
+        },
+
+        {
+            key:
+                "officeButton",
+
+            label:
+                "Bouton Office"
+        },
+
+        {
+            key:
+                "ribbon",
+
+            label:
+                "Ruban"
+        },
+
+        {
+            key:
+                "tabs",
+
+            label:
+                "Onglets"
+        },
+
+        {
+            key:
+                "documentArea",
+
+            label:
+                "Zone document"
+        }
+
+    ];
+
+
+    taskDefinitions.forEach(
+
+        task => {
+
+            const row =
+                doc.createElement("div");
+
+
+            row.setAttribute(
+                "data-ranise-task",
+                task.key
+            );
+
+
+            row.style.display =
+                "flex";
+
+            row.style.alignItems =
+                "center";
+
+            row.style.gap =
+                "7px";
+
+            row.style.minHeight =
+                "25px";
+
+            row.style.marginBottom =
+                "2px";
+
+
+            const check =
+                doc.createElement("span");
+
+
+            check.className =
+                "raniseTaskCheck";
+
+
+            check.setAttribute(
+                "data-check-for",
+                task.key
+            );
+
+
+            check.textContent =
+                "☐";
+
+
+            check.style.display =
+                "inline-flex";
+
+            check.style.alignItems =
+                "center";
+
+            check.style.justifyContent =
+                "center";
+
+            check.style.width =
+                "20px";
+
+            check.style.minWidth =
+                "20px";
+
+            check.style.height =
+                "20px";
+
+            check.style.fontSize =
+                "18px";
+
+            check.style.fontWeight =
+                "700";
+
+
+            const label =
+                doc.createElement("span");
+
+
+            label.className =
+                "raniseTaskLabel";
+
+
+            label.textContent =
+                task.label;
+
+
+            row.appendChild(
+                check
+            );
+
+            row.appendChild(
+                label
+            );
+
+
+            taskList.appendChild(
+                row
+            );
+
+        }
+
+    );
+
+
+    // =================================================
     // STATUS
     // =================================================
 
@@ -12850,6 +13292,8 @@ function createHomeworkUI() {
 
     root.appendChild(instruction);
 
+    root.appendChild(taskList);
+
     root.appendChild(status);
 
     root.appendChild(details);
@@ -12879,8 +13323,13 @@ function createHomeworkUI() {
     state.ui.details =
         details;
 
+    state.ui.taskList =
+        taskList;
+
 
     enableHomeworkPanelDragging();
+
+    updateTaskCheckmarks();
 
 }
 
@@ -13208,6 +13657,174 @@ function enableHomeworkPanelDragging() {
 
 
 // =====================================================
+// COUNT FIVE COMPLETED TASKS
+// =====================================================
+
+function getCompletedTaskCount() {
+
+    return [
+
+        state.taskChecks.titleBar,
+
+        state.taskChecks.officeButton,
+
+        state.taskChecks.ribbon,
+
+        state.taskChecks.tabs,
+
+        state.taskChecks.documentArea
+
+    ].filter(Boolean).length;
+
+}
+
+
+// =====================================================
+// VERIFY FIVE TASKS
+// =====================================================
+//
+// IMPORTANT:
+//
+// These five checkmarks are NOT generated from text.
+//
+// They are generated only from REAL interaction flags
+// already collected by the Block 9 simulation listener.
+//
+// Therefore:
+// - typing "Ruban" cannot create the Ruban checkmark
+// - random document text cannot create a checkmark
+// - a random click cannot create all five
+//
+// Each checkmark belongs to one specific real task.
+// =====================================================
+
+function evaluateFiveTasks() {
+
+    state.taskChecks.titleBar =
+
+        state.actionFlags.titleBarSeen ===
+        true;
+
+
+    state.taskChecks.officeButton =
+
+        state.actionFlags.officeButtonSeen ===
+        true;
+
+
+    state.taskChecks.ribbon =
+
+        state.actionFlags.ribbonSeen ===
+        true;
+
+
+    state.taskChecks.tabs =
+
+        state.actionFlags.tabsSeen ===
+        true;
+
+
+    state.taskChecks.documentArea =
+
+        state.actionFlags.documentAreaSeen ===
+        true;
+
+
+    state.validation.fiveTasksCompleted =
+
+        getCompletedTaskCount() === 5;
+
+}
+
+
+// =====================================================
+// UPDATE FIVE CHECKMARKS
+// =====================================================
+//
+// This function is called after real interaction events.
+//
+// A checkmark appears immediately when its corresponding
+// task becomes successful.
+// =====================================================
+
+function updateTaskCheckmarks() {
+
+    if (!state.ui.taskList) {
+        return;
+    }
+
+
+    evaluateFiveTasks();
+
+
+    const checks =
+
+        state.ui.taskList.querySelectorAll(
+
+            ".raniseTaskCheck"
+
+        );
+
+
+    checks.forEach(
+
+        check => {
+
+            const key =
+
+                check.getAttribute(
+                    "data-check-for"
+                );
+
+
+            if (
+                state.taskChecks[key] ===
+                true
+            ) {
+
+                check.textContent =
+                    "✓";
+
+                check.setAttribute(
+                    "data-completed",
+                    "true"
+                );
+
+            } else {
+
+                check.textContent =
+                    "☐";
+
+                check.setAttribute(
+                    "data-completed",
+                    "false"
+                );
+
+            }
+
+        }
+
+    );
+
+
+    if (
+        state.ui.progress
+    ) {
+
+        state.ui.progress.textContent =
+
+            "Devoir — Chapitre 1 — " +
+
+            getCompletedTaskCount() +
+
+            "/5 tâches réussies";
+
+    }
+
+}
+
+
+// =====================================================
 // UPDATE PANEL
 // =====================================================
 
@@ -13218,8 +13835,10 @@ function updateHomeworkUI() {
     }
 
 
-    state.ui.progress.textContent =
-        "Devoir — Chapitre 1";
+    evaluateFiveTasks();
+
+
+    updateTaskCheckmarks();
 
 
     state.ui.instruction.textContent =
@@ -13229,21 +13848,15 @@ function updateHomeworkUI() {
         "Réalisez le devoir demandé.";
 
 
-    const concepts =
-        validateRequiredConcepts(
-            state.lastDocumentText
-        );
-
-
     state.ui.details.innerHTML =
 
-        "Éléments demandés dans le document :<br>" +
+        "Contrôle du professeur :<br>" +
 
         "• Barre de titre : " +
 
         (
 
-            concepts.result.titleBar
+            state.actionFlags.titleBarSeen
                 ? "✓"
                 : "…"
 
@@ -13255,7 +13868,7 @@ function updateHomeworkUI() {
 
         (
 
-            concepts.result.officeButton
+            state.actionFlags.officeButtonSeen
                 ? "✓"
                 : "…"
 
@@ -13267,7 +13880,7 @@ function updateHomeworkUI() {
 
         (
 
-            concepts.result.ribbon
+            state.actionFlags.ribbonSeen
                 ? "✓"
                 : "…"
 
@@ -13279,7 +13892,7 @@ function updateHomeworkUI() {
 
         (
 
-            concepts.result.tabs
+            state.actionFlags.tabsSeen
                 ? "✓"
                 : "…"
 
@@ -13287,15 +13900,47 @@ function updateHomeworkUI() {
 
         "<br>" +
 
-        "• Zone de travail : " +
+        "• Zone document : " +
 
         (
 
-            concepts.result.documentArea
+            state.actionFlags.documentAreaSeen
                 ? "✓"
                 : "…"
 
-        );
+        ) +
+
+        "<br>" +
+
+        "• Document créé : " +
+
+        (
+
+            state.actionFlags.newDocumentAction
+                ? "✓"
+                : "…"
+
+        ) +
+
+        "<br>" +
+
+        "• Contenu du devoir : " +
+
+        (
+
+            state.actionFlags.textEntered
+                ? "✓"
+                : "…"
+
+        ) +
+
+        "<br>" +
+
+        "<strong>Progression des 5 tâches : " +
+
+        getCompletedTaskCount() +
+
+        "/5</strong>";
 
 }
 
@@ -13319,114 +13964,284 @@ function setStatus(message) {
 
 
 // =====================================================
-// REAL SIMULATION INTERACTION
+// FIND NEW DOCUMENT ACTION
 // =====================================================
 
-function registerDocumentInteraction(target) {
+function isNewDocumentAction(target) {
+
+    if (!target) {
+        return false;
+    }
+
+
+    const actionTarget =
+
+        closestFromTarget(
+
+            target,
+
+            [
+
+                "[data-action='new']",
+
+                "[data-action='new-document']",
+
+                "[data-command='new']",
+
+                "[data-command='new-document']"
+
+            ].join(",")
+
+        );
+
+
+    if (actionTarget) {
+        return true;
+    }
+
+
+    const officeItem =
+
+        closestFromTarget(
+
+            target,
+
+            "#cwOfficeMenu .cwOfficeItem"
+
+        );
+
+
+    if (officeItem) {
+
+        const action =
+
+            normalize(
+
+                officeItem.getAttribute(
+                    "data-action"
+                )
+
+            );
+
+
+        return (
+
+            action === "new" ||
+
+            action === "new-document"
+
+        );
+
+    }
+
+
+    return false;
+
+}
+
+
+// =====================================================
+// RECORD INTERFACE ACTIONS
+// =====================================================
+
+function inspectInterfaceTarget(target) {
 
     if (!target) {
         return;
     }
 
 
-    const page =
+    if (
+
+        closestFromTarget(
+            target,
+            "#cwTitleBar"
+        )
+
+    ) {
+
+        state.actionFlags.titleBarSeen =
+            true;
+
+        recordAction(
+            "title-bar"
+        );
+
+    }
+
+
+    if (
+
+        closestFromTarget(
+
+            target,
+
+            "#cwOfficeButton[data-role='office-button'], #cwOfficeButton"
+
+        )
+
+    ) {
+
+        state.actionFlags.officeButtonSeen =
+            true;
+
+        recordAction(
+            "office-button"
+        );
+
+    }
+
+
+    if (
+
+        closestFromTarget(
+
+            target,
+
+            "#cwRibbonContentArea"
+
+        )
+
+    ) {
+
+        state.actionFlags.ribbonSeen =
+            true;
+
+        recordAction(
+            "ribbon"
+        );
+
+    }
+
+
+    if (
+
+        closestFromTarget(
+
+            target,
+
+            "#cwRibbonTabBar .cwTabBtn"
+
+        )
+
+    ) {
+
+        state.actionFlags.tabsSeen =
+            true;
+
+        recordAction(
+            "tab"
+        );
+
+    }
+
+
+    if (
+
         closestFromTarget(
 
             target,
 
             ".cwPageContent"
 
-        );
-
-
-    if (!page) {
-        return;
-    }
-
-
-    state.simulationEvidence.documentAreaSeen =
-        true;
-
-
-    state.simulationEvidence.documentInteracted =
-        true;
-
-
-    recordAction(
-        "document-interaction"
-    );
-
-}
-
-
-// =====================================================
-// CLOSEST
-// =====================================================
-
-function closestFromTarget(
-    target,
-    selector
-) {
-
-    if (
-
-        !target ||
-
-        !selector ||
-
-        typeof target.closest !==
-        "function"
+        )
 
     ) {
 
-        return null;
+        state.actionFlags.documentAreaSeen =
+            true;
 
-    }
-
-
-    try {
-
-        return target.closest(
-            selector
+        recordAction(
+            "document-area"
         );
 
-    } catch (error) {
+    }
 
-        return null;
+
+    if (
+        isNewDocumentAction(target)
+    ) {
+
+        state.actionFlags.newDocumentAction =
+            true;
+
+        recordAction(
+            "new-document"
+        );
 
     }
 
-}
+
+    // -------------------------------------------------
+    // IMMEDIATE CHECKMARK REFRESH
+    // -------------------------------------------------
+
+    updateTaskCheckmarks();
 
 
-// =====================================================
-// CHECK MEANINGFUL DOCUMENT TEXT
-//
-// NO ARTIFICIAL WORD COUNT.
-// NO ARTIFICIAL CHARACTER COUNT.
-// The five required concepts are the real requirement.
-// =====================================================
-
-function hasDocumentText(text) {
-
-    return normalize(text).length > 0;
+    updateHomeworkUI();
 
 }
 
 
 // =====================================================
-// FIVE REQUIRED HOMEWORK ELEMENTS
+// CHECK IF TEXT IS MEANINGFUL
+// =====================================================
+
+function hasMeaningfulText(text) {
+
+    const value =
+        normalizeResponse(text);
+
+
+    if (!value) {
+        return false;
+    }
+
+
+    if (
+        value.length < 40
+    ) {
+
+        return false;
+
+    }
+
+
+    const words =
+
+        value
+            .split(" ")
+            .filter(Boolean);
+
+
+    if (
+        words.length < 8
+    ) {
+
+        return false;
+
+    }
+
+
+    return true;
+
+}
+
+
+// =====================================================
+// VERIFY REQUIRED WORD 2007 CONCEPTS
 //
-// These correspond to the five principal elements
-// from Chapter 1 practice:
+// FIVE CORE ELEMENTS ARE REQUIRED.
 //
-// 1. Barre de titre
-// 2. Bouton Office
-// 3. Ruban
-// 4. Onglets
-// 5. Zone de travail / document
+// 1. BARRE DE TITRE
+// 2. BOUTON OFFICE
+// 3. RUBAN
+// 4. ONGLET(S)
+// 5. ZONE DE TRAVAIL / DOCUMENT
 //
-// Nothing about saving/recording is required.
+// RÈGLES + BARRE D'ÉTAT ARE OPTIONAL SUPPORTING
+// CONCEPTS AND ARE NOT REQUIRED FOR PASSING.
 // =====================================================
 
 function validateRequiredConcepts(text) {
@@ -13441,7 +14256,9 @@ function validateRequiredConcepts(text) {
 
             "barre de titre",
 
-            "title bar"
+            "title bar",
+
+            "titre"
 
         ],
 
@@ -13450,7 +14267,9 @@ function validateRequiredConcepts(text) {
 
             "bouton office",
 
-            "office button"
+            "office button",
+
+            "office"
 
         ],
 
@@ -13484,6 +14303,30 @@ function validateRequiredConcepts(text) {
             "zone document",
 
             "document area"
+
+        ],
+
+
+        ruler: [
+
+            "regle",
+
+            "regles",
+
+            "ruler",
+
+            "rulers"
+
+        ],
+
+
+        statusBar: [
+
+            "barre d etat",
+
+            "barre etat",
+
+            "status bar"
 
         ]
 
@@ -13546,7 +14389,7 @@ function validateRequiredConcepts(text) {
     return {
 
         correct:
-            discovered.length === 5,
+            discovered.length >= 5,
 
         result:
             result,
@@ -13574,7 +14417,7 @@ function validateDocumentContent() {
 
 
     if (
-        !hasDocumentText(text)
+        !hasMeaningfulText(text)
     ) {
 
         return {
@@ -13583,7 +14426,7 @@ function validateDocumentContent() {
                 false,
 
             reason:
-                "Le document est encore vide."
+                "Le document ne contient pas encore suffisamment de contenu."
 
         };
 
@@ -13607,8 +14450,40 @@ function validateDocumentContent() {
                 false,
 
             reason:
+                "Les cinq principaux éléments demandés ne sont pas encore tous présents dans le document."
 
-                "Les cinq éléments demandés ne sont pas encore tous présents."
+        };
+
+    }
+
+
+    const normalized =
+
+        normalizeResponse(
+            text
+        );
+
+
+    const wordContext =
+
+        normalized.includes(
+            "word"
+        ) ||
+
+        normalized.includes(
+            "microsoft"
+        );
+
+
+    if (!wordContext) {
+
+        return {
+
+            correct:
+                false,
+
+            reason:
+                "Le contenu ne montre pas clairement qu'il présente Microsoft Word 2007."
 
         };
 
@@ -13621,8 +14496,7 @@ function validateDocumentContent() {
             true,
 
         reason:
-
-            "Les cinq éléments demandés sont présents dans le document."
+            "Le document présente les cinq éléments principaux demandés de l'environnement Word 2007."
 
     };
 
@@ -13630,51 +14504,62 @@ function validateDocumentContent() {
 
 
 // =====================================================
-// VERIFY REAL SIMULATION
-//
-// IMPORTANT:
-// No artificial requirement to click five interface
-// objects.
-//
-// The student only needs to actually work inside
-// the Word simulation and enter the homework.
+// VERIFY REAL SIMULATION ACTIONS
 // =====================================================
 
 function validateSimulationActions() {
 
-    const evidence =
-        state.simulationEvidence;
+    const flags =
+        state.actionFlags;
 
 
-    const hasSimulation =
-        !!state.simulationDocument;
+    // -------------------------------------------------
+    // FIRST: REFRESH THE FIVE REAL TASK CHECKS
+    // -------------------------------------------------
+
+    evaluateFiveTasks();
 
 
-    const interacted =
-        evidence.documentInteracted;
+    const interfaceActions =
+
+        state.validation.fiveTasksCompleted;
+
+
+    const documentCreated =
+
+        flags.newDocumentAction;
 
 
     const textEntered =
-        evidence.textEntered;
+
+        flags.textEntered;
 
 
     return {
 
         correct:
 
-            hasSimulation &&
+            interfaceActions &&
 
-            interacted &&
+            documentCreated &&
 
             textEntered,
 
 
-        simulationPresent:
-            hasSimulation,
+        interfaceActions:
+            interfaceActions,
 
 
-        documentInteracted:
-            interacted,
+        fiveTasksCompleted:
+            state.validation.fiveTasksCompleted,
+
+
+        completedTaskCount:
+            getCompletedTaskCount(),
+
+
+        documentCreated:
+            documentCreated,
 
 
         textEntered:
@@ -13686,12 +14571,15 @@ function validateSimulationActions() {
 
 
 // =====================================================
-// FINAL HOMEWORK VALIDATION
+// VERIFY COMPLETE HOMEWORK
+//
+// IMPORTANT:
+// VALIDATION DEPENDS ONLY ON THE REQUIRED WORK.
 // =====================================================
 
 function validateFinalHomework() {
 
-    const simulationValidation =
+    const actionValidation =
 
         validateSimulationActions();
 
@@ -13701,9 +14589,9 @@ function validateFinalHomework() {
         validateDocumentContent();
 
 
-    state.validation.simulationValid =
+    state.validation.actionsValid =
 
-        simulationValidation.correct;
+        actionValidation.correct;
 
 
     state.validation.contentValid =
@@ -13713,7 +14601,7 @@ function validateFinalHomework() {
 
     state.validation.finalValid =
 
-        simulationValidation.correct &&
+        actionValidation.correct &&
 
         contentValidation.correct;
 
@@ -13723,8 +14611,8 @@ function validateFinalHomework() {
         finalValid:
             state.validation.finalValid,
 
-        simulation:
-            simulationValidation,
+        actions:
+            actionValidation,
 
         content:
             contentValidation
@@ -13753,62 +14641,94 @@ function updateIntelligentStatus() {
     }
 
 
+    evaluateFiveTasks();
+
+
     const result =
         validateFinalHomework();
 
 
+    // -------------------------------------------------
+    // FIVE TASKS COMPLETED
+    // -------------------------------------------------
+
     if (
-        result.finalValid
+        result.actions.fiveTasksCompleted
     ) {
 
-        setStatus(
+        if (
+            result.finalValid
+        ) {
 
-            "Tout le travail demandé est détecté. Ranise valide maintenant votre devoir."
+            setStatus(
 
-        );
+                "5/5 tâches réussies. Tout le travail demandé est détecté. Ranise effectue maintenant la vérification finale."
 
-        return;
+            );
+
+            return;
+
+        }
+
+
+        if (
+            !result.actions.documentCreated
+        ) {
+
+            setStatus(
+
+                "5/5 tâches réussies. Créez maintenant le document demandé."
+
+            );
+
+            return;
+
+        }
+
+
+        if (
+            !result.actions.textEntered
+        ) {
+
+            setStatus(
+
+                "5/5 tâches réussies. Rédigez maintenant votre travail dans le document."
+
+            );
+
+            return;
+
+        }
+
+
+        if (
+            !result.content.correct
+        ) {
+
+            setStatus(
+
+                "5/5 tâches réussies. Je vérifie maintenant le contenu réel de votre document."
+
+            );
+
+            return;
+
+        }
 
     }
 
 
+    // -------------------------------------------------
+    // STILL WORKING ON THE FIVE TASKS
+    // -------------------------------------------------
+
     if (
-        !result.simulation.simulationPresent
+        !result.actions.fiveTasksCompleted
     ) {
 
         setStatus(
 
-            "La simulation Word 2007 est encore en préparation."
-
-        );
-
-        return;
-
-    }
-
-
-    if (
-        !result.simulation.documentInteracted
-    ) {
-
-        setStatus(
-
-            "Commencez le travail demandé directement dans le document Word 2007."
-
-        );
-
-        return;
-
-    }
-
-
-    if (
-        !result.content.correct
-    ) {
-
-        setStatus(
-
-            "Je vérifie le contenu réel de votre document. Complétez uniquement les éléments demandés."
+            "Je vérifie vos 5 tâches une par une. Prenez votre temps."
 
         );
 
@@ -13870,10 +14790,10 @@ function handleDocumentChange() {
 
 
         if (
-            hasDocumentText(text)
+            text.trim().length > 0
         ) {
 
-            state.simulationEvidence.textEntered =
+            state.actionFlags.textEntered =
                 true;
 
             recordAction(
@@ -13883,15 +14803,11 @@ function handleDocumentChange() {
         }
 
 
+        updateTaskCheckmarks();
+
         updateHomeworkUI();
 
         updateIntelligentStatus();
-
-
-        // IMPORTANT:
-        // VALIDATION STARTS AUTOMATICALLY
-        // AFTER EVERY REAL DOCUMENT CHANGE.
-        scheduleValidation();
 
     }
 
@@ -13908,7 +14824,9 @@ function handleSimulationInput(event) {
 
         !state.started ||
 
-        state.completed
+        state.completed ||
+
+        state.processing
 
     ) {
 
@@ -13918,15 +14836,28 @@ function handleSimulationInput(event) {
 
 
     if (
+
         event &&
-        event.target
+
+        event.target &&
+
+        closestFromTarget(
+
+            event.target,
+
+            ".cwPageContent"
+
+        )
+
     ) {
 
-        registerDocumentInteraction(
-            event.target
-        );
+        state.actionFlags.documentAreaSeen =
+            true;
 
     }
+
+
+    updateTaskCheckmarks();
 
 
     handleDocumentChange();
@@ -13958,51 +14889,42 @@ function handleSimulationClick(event) {
     }
 
 
-    registerDocumentInteraction(
+    inspectInterfaceTarget(
         event.target
     );
 
 
-    handleDocumentChange();
-
-
-    scheduleValidation();
-
-}
-
-
-// =====================================================
-// KEYUP EVENT
-// =====================================================
-
-function handleSimulationKeyup(event) {
-
     if (
 
-        !state.started ||
+        closestFromTarget(
 
-        state.completed
+            event.target,
+
+            ".cwPageContent"
+
+        )
 
     ) {
 
-        return;
+        state.actionFlags.documentAreaSeen =
+            true;
 
-    }
-
-
-    if (
-        event &&
-        event.target
-    ) {
-
-        registerDocumentInteraction(
-            event.target
+        recordAction(
+            "document-area-click"
         );
 
     }
 
 
+    // -------------------------------------------------
+    // IMMEDIATE CHECKMARK
+    // -------------------------------------------------
+
+    updateTaskCheckmarks();
+
+
     handleDocumentChange();
+
 
     scheduleValidation();
 
@@ -14010,10 +14932,10 @@ function handleSimulationKeyup(event) {
 
 
 // =====================================================
-// CHANGE EVENT
+// KEYUP
 // =====================================================
 
-function handleSimulationChange() {
+function handleSimulationKeyup() {
 
     if (
 
@@ -14029,6 +14951,8 @@ function handleSimulationChange() {
 
 
     handleDocumentChange();
+
+    updateTaskCheckmarks();
 
     scheduleValidation();
 
@@ -14042,89 +14966,30 @@ function handleSimulationChange() {
 function scheduleValidation() {
 
     if (
-        state.validationTimer
+        state.typedResponseTimer
     ) {
 
         clearTimeout(
-            state.validationTimer
+            state.typedResponseTimer
         );
 
     }
 
 
-    state.validationTimer =
+    state.typedResponseTimer =
 
         setTimeout(
 
             function () {
 
-                state.validationTimer =
+                state.typedResponseTimer =
                     null;
 
                 attemptFinalValidation();
 
             },
 
-            250
-
-        );
-
-}
-
-
-// =====================================================
-// CONTINUOUS AUTOMATIC VALIDATION
-//
-// This catches simulation editors whose content changes
-// without firing a normal input event.
-// =====================================================
-
-function startAutomaticDocumentMonitor() {
-
-    if (
-        state.monitorTimer
-    ) {
-
-        return;
-
-    }
-
-
-    state.monitorTimer =
-
-        setInterval(
-
-            function () {
-
-                if (
-
-                    !state.started ||
-
-                    state.completed
-
-                ) {
-
-                    return;
-
-                }
-
-
-                // Reconnect if simulation document
-                // reference changes.
-                if (
-                    !state.simulationDocument
-                ) {
-
-                    connectToSimulation();
-
-                }
-
-
-                handleDocumentChange();
-
-            },
-
-            250
+            700
 
         );
 
@@ -14152,11 +15017,14 @@ async function attemptFinalValidation() {
     }
 
 
-    const result =
-        validateFinalHomework();
+    updateTaskCheckmarks();
 
 
     updateHomeworkUI();
+
+
+    const result =
+        validateFinalHomework();
 
 
     if (
@@ -14170,25 +15038,6 @@ async function attemptFinalValidation() {
     }
 
 
-    // Prevent repeating the exact same validation.
-    const signature =
-        getDocumentSignature();
-
-
-    if (
-        signature ===
-        state.lastValidationSignature
-    ) {
-
-        return;
-
-    }
-
-
-    state.lastValidationSignature =
-        signature;
-
-
     await completeHomework();
 
 }
@@ -14197,6 +15046,7 @@ async function attemptFinalValidation() {
 // =====================================================
 // REMOVE HOMEWORK PANEL
 //
+// IMPORTANT:
 // PANEL DISAPPEARS AUTOMATICALLY AFTER VALIDATION.
 // =====================================================
 
@@ -14245,38 +15095,27 @@ function removeHomeworkPanel() {
     state.ui.details =
         null;
 
+    state.ui.taskList =
+        null;
+
 }
 
 
 // =====================================================
-// STOP INTERNAL MONITORING
+// STOP INTERNAL OBSERVERS / TIMERS
 // =====================================================
 
 function stopBlock9Monitoring() {
 
     if (
-        state.validationTimer
+        state.typedResponseTimer
     ) {
 
         clearTimeout(
-            state.validationTimer
+            state.typedResponseTimer
         );
 
-        state.validationTimer =
-            null;
-
-    }
-
-
-    if (
-        state.monitorTimer
-    ) {
-
-        clearInterval(
-            state.monitorTimer
-        );
-
-        state.monitorTimer =
+        state.typedResponseTimer =
             null;
 
     }
@@ -14330,7 +15169,7 @@ async function completeHomework() {
     try {
 
         // ---------------------------------------------
-        // FINAL REAL VERIFICATION
+        // FINAL SECOND VERIFICATION
         // ---------------------------------------------
 
         const finalCheck =
@@ -14348,6 +15187,27 @@ async function completeHomework() {
         }
 
 
+        // ---------------------------------------------
+        // SAFETY:
+        // THE FIVE CHECKMARKS MUST REALLY BE 5/5.
+        // ---------------------------------------------
+
+        if (
+            getCompletedTaskCount() !== 5
+        ) {
+
+            state.validation.fiveTasksCompleted =
+                false;
+
+            updateTaskCheckmarks();
+
+            updateIntelligentStatus();
+
+            return;
+
+        }
+
+
         state.completed =
             true;
 
@@ -14357,15 +15217,31 @@ async function completeHomework() {
 
 
         // ---------------------------------------------
-        // CHAPTER 1 HOMEWORK COMPLETED
+        // RECORD CHAPTER 1 COMPLETION FLAG
         //
-        // This is ONLY course progress.
+        // This is course progress only.
         // It is NOT document saving.
         // ---------------------------------------------
 
         localStorage.setItem(
 
             "wordChapter1HomeworkCompleted",
+
+            "true"
+
+        );
+
+
+        // ---------------------------------------------
+        // RECORD EVALUATION UNLOCK
+        //
+        // This is course progression only.
+        // It is NOT document saving.
+        // ---------------------------------------------
+
+        localStorage.setItem(
+
+            "wordChapter1EvaluationUnlocked",
 
             "true"
 
@@ -14396,7 +15272,7 @@ async function completeHomework() {
 
 
         // ---------------------------------------------
-        // KEEP EXISTING PROGRESS ENGINE SYNCHRONIZED
+        // KEEP PROGRESS ENGINE SYNCHRONIZED
         // ---------------------------------------------
 
         if (
@@ -14448,7 +15324,7 @@ async function completeHomework() {
 
 
         // ---------------------------------------------
-        // UNLOCK NEXT CHAPTER
+        // UNLOCK NEXT CHAPTER / COURSE PROGRESSION
         // ---------------------------------------------
 
         if (
@@ -14467,7 +15343,51 @@ async function completeHomework() {
 
 
         // ---------------------------------------------
-        // PANEL MUST DISAPPEAR FIRST.
+        // BROADCAST SUCCESS TO EXISTING COURSE UI
+        //
+        // This does not modify the simulation engine.
+        // It simply announces that the homework is done.
+        // ---------------------------------------------
+
+        try {
+
+            window.dispatchEvent(
+
+                new CustomEvent(
+
+                    "ranise:chapter1-homework-completed",
+
+                    {
+
+                        detail: {
+
+                            chapter:
+                                "chapitre1",
+
+                            tasksCompleted:
+                                5,
+
+                            evaluationUnlocked:
+                                true
+
+                        }
+
+                    }
+
+                )
+
+            );
+
+        } catch (error) {}
+
+
+        // ---------------------------------------------
+        // IMPORTANT:
+        // REMOVE PANEL AUTOMATICALLY.
+        //
+        // The student should NOT continue seeing
+        // the homework instruction card after Ranise
+        // has validated the work.
         // ---------------------------------------------
 
         removeHomeworkPanel();
@@ -14488,13 +15408,13 @@ async function completeHomework() {
 
             "Excellent travail. " +
 
-            "J'ai vérifié votre travail dans la simulation ainsi que le contenu réel de votre document. " +
+            "J'ai vérifié votre utilisation réelle de la simulation ainsi que le contenu réel de votre document. " +
 
-            "Les cinq éléments demandés sont bien présents. " +
+            "Les cinq tâches demandées sont réussies et les cinq vérifications sont validées. " +
 
             "Votre devoir du Chapitre 1 est maintenant validé. " +
 
-            "Félicitations."
+            "Félicitations, vous pouvez passer à l'évaluation."
 
         );
 
@@ -14503,7 +15423,7 @@ async function completeHomework() {
 
             "RANISE BLOCK 9: " +
 
-            "CHAPTER 1 HOMEWORK COMPLETED AND VALIDATED"
+            "CHAPTER 1 HOMEWORK COMPLETED AND VALIDATED — 5/5 TASKS"
 
         );
 
@@ -14573,6 +15493,8 @@ function attachMutationObserver() {
                 ) {
 
                     handleDocumentChange();
+
+                    updateTaskCheckmarks();
 
                 }
 
@@ -14667,7 +15589,7 @@ function attachListeners() {
 
         "change",
 
-        handleSimulationChange,
+        handleDocumentChange,
 
         true
 
@@ -14679,8 +15601,6 @@ function attachListeners() {
 
 
     attachMutationObserver();
-
-    startAutomaticDocumentMonitor();
 
 }
 
@@ -14698,13 +15618,15 @@ async function announceHomework() {
 
         "Nous passons maintenant au devoir du Chapitre 1. " +
 
-        "Réalisez uniquement le travail demandé dans votre document Word 2007. " +
+        "Cette fois, je vais observer votre travail dans la simulation et vérifier le document que vous allez produire. " +
 
-        "Présentez les différents éléments découverts dans Microsoft Word 2007. " +
+        "Prenez tout le temps dont vous avez besoin. " +
 
-        "Je vais vérifier automatiquement votre travail pendant que vous le réalisez. " +
+        "Votre devoir consiste à créer un document présentant les différents éléments que vous avez découverts dans Microsoft Word 2007. " +
 
-        "Dès que tous les éléments demandés seront correctement présents, je validerai votre devoir."
+        "Utilisez réellement l'interface, créez le document et rédigez votre travail dans la zone du document. " +
+
+        "Je ne validerai le devoir que lorsque les cinq tâches demandées seront réussies et que le contenu réel du document sera correctement réalisé."
 
     );
 
@@ -14715,7 +15637,7 @@ async function announceHomework() {
 
     setStatus(
 
-        "Commencez le devoir. Je vérifie automatiquement votre travail."
+        "Commencez le devoir. Je vous laisse travailler à votre rythme et je vérifie chaque tâche automatiquement."
 
     );
 
@@ -14859,14 +15781,13 @@ async function startBlock9() {
         getDocumentSignature();
 
 
-    state.lastDocumentText =
-        readDocumentText();
-
-
     createHomeworkUI();
 
 
     attachListeners();
+
+
+    updateTaskCheckmarks();
 
 
     updateHomeworkUI();
@@ -14878,9 +15799,7 @@ async function startBlock9() {
 
         "Nous allons maintenant passer au devoir. " +
 
-        "Réalisez uniquement la mission demandée. " +
-
-        "Je vais vérifier automatiquement votre travail dans la simulation et dans le document."
+        "Je vais vous laisser travailler de manière autonome, mais cette fois je vais contrôler beaucoup plus précisément votre travail."
 
     );
 
@@ -15067,6 +15986,9 @@ window.RaniseMoiseHomeworkMasteryEngine = {
 
         function () {
 
+            evaluateFiveTasks();
+
+
             return {
 
                 started:
@@ -15084,15 +16006,33 @@ window.RaniseMoiseHomeworkMasteryEngine = {
                 transitionDetected:
                     state.transitionDetected,
 
-                simulationEvidence:
+                actionFlags:
 
                     Object.assign(
 
                         {},
 
-                        state.simulationEvidence
+                        state.actionFlags
 
                     ),
+
+                taskChecks:
+
+                    Object.assign(
+
+                        {},
+
+                        state.taskChecks
+
+                    ),
+
+                completedTaskCount:
+
+                    getCompletedTaskCount(),
+
+                fiveTasksCompleted:
+
+                    state.validation.fiveTasksCompleted,
 
                 validation:
 
@@ -15114,6 +16054,16 @@ window.RaniseMoiseHomeworkMasteryEngine = {
 };
 
 })();
+
+
+
+
+
+
+
+
+
+
 
 
 
