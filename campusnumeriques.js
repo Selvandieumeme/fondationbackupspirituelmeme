@@ -12127,6 +12127,13 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
 
 
+
+
+
+
+
+
+
 // =========================================================
 // BLOCK 9
 // MICROSOFT WORD 2007 FORMATION
@@ -12149,7 +12156,7 @@ const RaniseMoisePedagogicalExplanationEngine = {
 // 12. NEVER VALIDATE FROM TEXT ALONE.
 // 13. NEVER VALIDATE FROM A SINGLE ACTION.
 // 14. GIVE BEGINNERS UNLIMITED PRACTICAL TIME.
-// 15. DO NOT REQUIRE SAVE / ENREGISTRER.
+// 15. DO NOT REQUIRE ANY EXTRA DOCUMENT ACTION.
 // 16. DO NOT MODIFY BLOCK 6.
 // 17. DO NOT MODIFY BLOCK 7.
 // 18. DO NOT MODIFY BLOCK 8.
@@ -14159,7 +14166,7 @@ const RaniseMoisePedagogicalExplanationEngine = {
     // VERIFY COMPLETE HOMEWORK
     //
     // IMPORTANT:
-    // NO SAVE CONDITION EXISTS HERE.
+    // VALIDATION DEPENDS ONLY ON THE REQUIRED WORK.
     // =====================================================
 
     function validateFinalHomework() {
@@ -14729,7 +14736,7 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
 
             // ---------------------------------------------
-            // SAVE CHAPTER 1 COMPLETION FLAG
+            // RECORD CHAPTER 1 COMPLETION FLAG
             //
             // This is course progress only.
             // It is NOT document saving.
@@ -15486,6 +15493,31 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
 
 })();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
