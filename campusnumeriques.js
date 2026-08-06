@@ -8288,45 +8288,11 @@ const RaniseMoisePedagogicalExplanationEngine = {
             state.waitingForAction = false;
 
 
-            // ---------------------------------------------
-            // VALIDATE CHAPTER 1
-            // ---------------------------------------------
-
-            if (
-                typeof MicrosoftWordValidationEngine !==
-                "undefined" &&
-                typeof MicrosoftWordValidationEngine
-                    .completeChapter ===
-                    "function"
-            ) {
-
-                MicrosoftWordValidationEngine
-                    .completeChapter(
-                        "chapitre1"
-                    );
-
-            }
 
 
-            // ---------------------------------------------
-            // ALSO KEEP LEGACY COMPLETION ENGINE
-            // IF IT EXISTS
-            // ---------------------------------------------
 
-            if (
-                typeof WordChapterCompletionEngine !==
-                "undefined" &&
-                typeof WordChapterCompletionEngine
-                    .completeChapter ===
-                    "function"
-            ) {
 
-                WordChapterCompletionEngine
-                    .completeChapter(
-                        "chapitre1"
-                    );
 
-            }
 
 
             await speak(
