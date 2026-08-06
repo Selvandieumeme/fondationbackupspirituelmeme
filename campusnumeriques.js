@@ -8775,29 +8775,39 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
 
 
+
+
+
+
+
+
+
 // =========================================================
 // BLOCK 8
 // MICROSOFT WORD 2007 FORMATION
 // RANISE MOISE EXERCISE MASTERY ENGINE
 // =========================================================
-// PRODUCTION VERSION
+// INTELLIGENT + STRICT PRODUCTION VERSION
 //
 // PURPOSE:
 // 1. START AUTOMATICALLY AFTER BLOCK 7 COMPLETES.
 // 2. USE THE SAME EXISTING WORD 2007 SIMULATION.
 // 3. USE CHAPTER 1 EXERCISES DYNAMICALLY.
-// 4. USE CHAPTER 1 PRACTICE AS THE SKILL FOUNDATION.
-// 5. CREATE THE EXERCISE INTERFACE AUTOMATICALLY.
-// 6. TEST STUDENT UNDER A STRICTER / MORE INDEPENDENT MODE.
-// 7. VERIFY REAL SIMULATION ACTIONS.
-// 8. EXERCISE 2 READS REAL TEXT TYPED IN THE DOCUMENT AREA.
-// 9. VALIDATE MEANING, NOT ONLY EXACT SENTENCE MATCHING.
-// 10. NEVER MODIFY BLOCK 6.
-// 11. NEVER MODIFY BLOCK 7.
-// 12. NEVER MODIFY THE EXISTING SIMULATION ENGINE.
-// 13. NEVER REPLACE THE EXISTING MARYTTS + AVATAR SYSTEM.
-// 14. COMPLETE EXERCISES DYNAMICALLY.
-// 15. EXERCISE PANEL CAN BE DRAGGED BY THE STUDENT.
+// 4. VERIFY THE REAL ACTIONS REQUESTED BY EACH EXERCISE.
+// 5. NEVER VALIDATE AN EXERCISE FROM A RANDOM CLICK.
+// 6. NEVER VALIDATE AN EXERCISE ONLY BECAUSE AN ELEMENT EXISTS.
+// 7. EXERCISE 1 REQUIRES THE REQUESTED INTERFACE ELEMENTS.
+// 8. EXERCISE 2 REQUIRES REAL STUDENT TYPING.
+// 9. EXERCISE 2 GIVES BEGINNERS TIME TO TYPE SLOWLY.
+// 10. EXERCISE 3 REQUIRES THE REAL REQUESTED ACTION.
+// 11. ACTIONS ARE TRACKED INDIVIDUALLY.
+// 12. EACH EXERCISE HAS ITS OWN VALIDATION STATE.
+// 13. NEVER MODIFY BLOCK 6.
+// 14. NEVER MODIFY BLOCK 7.
+// 15. NEVER MODIFY THE EXISTING SIMULATION ENGINE.
+// 16. NEVER REPLACE MARYTTS + AVATAR.
+// 17. KEEP THE SMALL DRAGGABLE EXERCISE PANEL.
+// 18. DO NOT AUTO-PASS AN EXERCISE.
 // =========================================================
 
 (function () {
@@ -8833,6 +8843,8 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
         currentExercise: null,
 
+        currentType: "generic",
+
         waitingForStudent: false,
 
         processing: false,
@@ -8840,6 +8852,32 @@ const RaniseMoisePedagogicalExplanationEngine = {
         speaking: false,
 
         listenersAttached: false,
+
+        exerciseStartedAt: 0,
+
+        lastActionAt: 0,
+
+        actionCount: 0,
+
+        actionLedger: [],
+
+        completedActions: new Set(),
+
+        textSnapshot: "",
+
+        textChangeDetected: false,
+
+        typingStartedAt: 0,
+
+        typedResponseTimer: null,
+
+        validationTimer: null,
+
+        exercise3ActionDetected: false,
+
+        exercise3BaselineSignature: "",
+
+        exercise3ActionTime: 0,
 
         ui: {
 
@@ -8853,19 +8891,13 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
             progress: null
 
-        },
-
-        typedResponseTimer: null,
-
-        textSnapshot: "",
-
-        exercise3ActionDetected: false
+        }
 
     };
 
 
     // =====================================================
-    // NORMALIZE TEXT
+    // NORMALIZE
     // =====================================================
 
     function normalize(value) {
@@ -8883,13 +8915,16 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
 
     // =====================================================
-    // NORMALIZE RESPONSE FOR SEMANTIC VALIDATION
+    // NORMALIZE RESPONSE
     // =====================================================
 
     function normalizeResponse(value) {
 
         return normalize(value)
-            .replace(/\b(le|la|les|un|une|des|du|de|d|et|ou|a|au|aux|dans|sur|pour|avec|en)\b/g, " ")
+            .replace(
+                /\b(le|la|les|un|une|des|du|de|d|et|ou|a|au|aux|dans|sur|pour|avec|en|est|sont)\b/g,
+                " "
+            )
             .replace(/\s+/g, " ")
             .trim();
 
@@ -8897,7 +8932,7 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
 
     // =====================================================
-    // SPEAK WITH EXISTING RANISE SYSTEM
+    // SPEAK
     // =====================================================
 
     async function speak(text) {
@@ -8953,7 +8988,7 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
 
     // =====================================================
-    // GET CHAPTER 1
+    // CHAPTER 1
     // =====================================================
 
     function getChapter1() {
@@ -8988,7 +9023,7 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
 
     // =====================================================
-    // FIND EXISTING SIMULATION
+    // FIND SIMULATION
     // =====================================================
 
     function findSimulation() {
@@ -9012,7 +9047,7 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
 
     // =====================================================
-    // CONNECT TO EXISTING SIMULATION
+    // CONNECT SIMULATION
     // =====================================================
 
     function connectToSimulation() {
@@ -9057,7 +9092,7 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
 
     // =====================================================
-    // GET CURRENT EXERCISE
+    // CURRENT EXERCISE
     // =====================================================
 
     function getCurrentExercise() {
@@ -9072,7 +9107,7 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
 
     // =====================================================
-    // GET ELEMENT DATA
+    // ELEMENT DATA
     // =====================================================
 
     function getElementData(element) {
@@ -9102,7 +9137,9 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
             element.getAttribute("data-role"),
 
-            element.getAttribute("data-target")
+            element.getAttribute("data-target"),
+
+            element.getAttribute("name")
 
         ];
 
@@ -9117,7 +9154,7 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
 
     // =====================================================
-    // CLOSEST TARGET
+    // CLOSEST
     // =====================================================
 
     function closestFromTarget(
@@ -9128,7 +9165,8 @@ const RaniseMoisePedagogicalExplanationEngine = {
         if (
             !target ||
             !selector ||
-            typeof target.closest !== "function"
+            typeof target.closest !==
+            "function"
         ) {
 
             return null;
@@ -9152,32 +9190,7 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
 
     // =====================================================
-    // DOCUMENT AREA
-    // =====================================================
-
-    function getDocumentAreaTarget(target) {
-
-        if (!target) {
-            return null;
-        }
-
-
-        return closestFromTarget(
-            target,
-            [
-                ".cwPageContent",
-                "#cwWorkspace",
-                "#cwWorkspaceShell",
-                "#cwWorkspaceScroll",
-                "#cwDocumentContainer"
-            ].join(",")
-        );
-
-    }
-
-
-    // =====================================================
-    // PAGE CONTENT
+    // PAGE CONTENTS
     // =====================================================
 
     function getPageContents() {
@@ -9197,11 +9210,7 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
 
     // =====================================================
-    // READ REAL DOCUMENT TEXT
-    //
-    // IMPORTANT:
-    // The response must come from the actual
-    // Word simulation document area.
+    // DOCUMENT TEXT
     // =====================================================
 
     function readDocumentText() {
@@ -9242,7 +9251,49 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
 
     // =====================================================
-    // GET OFFICE BUTTON
+    // DOCUMENT SIGNATURE
+    //
+    // Used to detect real structural changes.
+    // =====================================================
+
+    function getDocumentSignature() {
+
+        if (!state.simulationDocument) {
+            return "";
+        }
+
+
+        const pages =
+            getPageContents();
+
+
+        return pages.map(
+            page => {
+
+                return [
+
+                    page.getAttribute("data-page"),
+
+                    page.id,
+
+                    page.children.length,
+
+                    normalize(
+                        page.innerText ||
+                        page.textContent ||
+                        ""
+                    ).slice(0, 500)
+
+                ].join("|");
+
+            }
+        ).join("||");
+
+    }
+
+
+    // =====================================================
+    // OFFICE BUTTON
     // =====================================================
 
     function getOfficeButton() {
@@ -9260,7 +9311,7 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
 
     // =====================================================
-    // GET RIBBON
+    // RIBBON
     // =====================================================
 
     function getRibbon() {
@@ -9278,7 +9329,7 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
 
     // =====================================================
-    // GET TITLE BAR
+    // TITLE BAR
     // =====================================================
 
     function getTitleBar() {
@@ -9296,14 +9347,13 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
 
     // =====================================================
-    // GET TABS
+    // TABS
     // =====================================================
 
     function getTabs() {
 
         if (!state.simulationDocument) {
             return [];
-
         }
 
 
@@ -9317,9 +9367,32 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
 
     // =====================================================
-    // CREATE BLOCK 8 UI
-    //
-    // UI IS CREATED INSIDE THE EXISTING SIMULATION.
+    // DOCUMENT AREA
+    // =====================================================
+
+    function getDocumentAreaTarget(target) {
+
+        if (!target) {
+            return null;
+        }
+
+
+        return closestFromTarget(
+            target,
+            [
+                ".cwPageContent",
+                "#cwWorkspace",
+                "#cwWorkspaceShell",
+                "#cwWorkspaceScroll",
+                "#cwDocumentContainer"
+            ].join(",")
+        );
+
+    }
+
+
+    // =====================================================
+    // CREATE UI
     // =====================================================
 
     function createExerciseUI() {
@@ -9391,20 +9464,12 @@ const RaniseMoisePedagogicalExplanationEngine = {
         root.style.lineHeight =
             "1.45";
 
-        // =================================================
-        // PANEL DRAG CSS
-        // =================================================
-
         root.style.userSelect =
             "none";
 
         root.style.webkitUserSelect =
             "none";
 
-
-        // =================================================
-        // TITLE
-        // =================================================
 
         const title =
             doc.createElement("div");
@@ -9419,14 +9484,6 @@ const RaniseMoisePedagogicalExplanationEngine = {
         title.style.marginBottom =
             "8px";
 
-        title.textContent =
-            "Ranise Moïse — Exercices";
-
-
-        // =================================================
-        // DRAG HANDLE CSS
-        // =================================================
-
         title.style.cursor =
             "grab";
 
@@ -9439,13 +9496,9 @@ const RaniseMoisePedagogicalExplanationEngine = {
         title.style.webkitUserSelect =
             "none";
 
-        title.style.webkitTouchCallout =
-            "none";
+        title.textContent =
+            "Ranise Moïse — Exercices";
 
-
-        // =================================================
-        // PROGRESS
-        // =================================================
 
         const progress =
             doc.createElement("div");
@@ -9458,10 +9511,6 @@ const RaniseMoisePedagogicalExplanationEngine = {
             "8px";
 
 
-        // =================================================
-        // INSTRUCTION
-        // =================================================
-
         const instruction =
             doc.createElement("div");
 
@@ -9469,10 +9518,6 @@ const RaniseMoisePedagogicalExplanationEngine = {
         instruction.style.marginBottom =
             "10px";
 
-
-        // =================================================
-        // STATUS
-        // =================================================
 
         const status =
             doc.createElement("div");
@@ -9497,10 +9542,6 @@ const RaniseMoisePedagogicalExplanationEngine = {
         root.appendChild(status);
 
 
-        // =================================================
-        // ADD TO SIMULATION
-        // =================================================
-
         (
             doc.body ||
             doc.documentElement
@@ -9523,32 +9564,13 @@ const RaniseMoisePedagogicalExplanationEngine = {
             status;
 
 
-        // =================================================
-        // ENABLE PANEL DRAGGING
-        // =================================================
-
         enableExercisePanelDragging();
 
     }
 
 
     // =====================================================
-    // BLOCK 8 PANEL DRAG ENGINE
-    //
-    // ADDITIVE ONLY.
-    //
-    // DOES NOT MODIFY:
-    // - BLOCK 6
-    // - BLOCK 7
-    // - WORD SIMULATION ENGINE
-    // - EXERCISE VALIDATION
-    // - MARYTTS
-    //
-    // STUDENT DRAGS THE PANEL USING ITS TITLE.
-    // WORKS WITH:
-    // - MOUSE
-    // - TOUCH
-    // - PEN
+    // DRAG ENGINE
     // =====================================================
 
     function enableExercisePanelDragging() {
@@ -9583,10 +9605,6 @@ const RaniseMoisePedagogicalExplanationEngine = {
             0;
 
 
-        // =================================================
-        // ENSURE THE PANEL STAYS INSIDE THE VIEWPORT
-        // =================================================
-
         function clampPosition(
             left,
             top
@@ -9594,21 +9612,6 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
             const doc =
                 state.simulationDocument;
-
-
-            if (!doc) {
-
-                return {
-
-                    left:
-                        left,
-
-                    top:
-                        top
-
-                };
-
-            }
 
 
             const viewWidth =
@@ -9623,19 +9626,11 @@ const RaniseMoisePedagogicalExplanationEngine = {
                 window.innerHeight;
 
 
-            const panelWidth =
-                panel.offsetWidth;
-
-
-            const panelHeight =
-                panel.offsetHeight;
-
-
             const maxLeft =
                 Math.max(
                     0,
                     viewWidth -
-                    panelWidth
+                    panel.offsetWidth
                 );
 
 
@@ -9643,7 +9638,7 @@ const RaniseMoisePedagogicalExplanationEngine = {
                 Math.max(
                     0,
                     viewHeight -
-                    panelHeight
+                    panel.offsetHeight
                 );
 
 
@@ -9672,26 +9667,7 @@ const RaniseMoisePedagogicalExplanationEngine = {
         }
 
 
-        // =================================================
-        // START DRAG
-        // =================================================
-
         function startDrag(event) {
-
-            if (
-                !event ||
-                !panel ||
-                !handle
-            ) {
-
-                return;
-
-            }
-
-
-            // ---------------------------------------------
-            // ONLY LEFT MOUSE BUTTON
-            // ---------------------------------------------
 
             if (
                 event.pointerType === "mouse" &&
@@ -9710,15 +9686,12 @@ const RaniseMoisePedagogicalExplanationEngine = {
             dragging =
                 true;
 
-
             pointerId =
                 event.pointerId;
-
 
             offsetX =
                 event.clientX -
                 rect.left;
-
 
             offsetY =
                 event.clientY -
@@ -9729,14 +9702,9 @@ const RaniseMoisePedagogicalExplanationEngine = {
                 "grabbing";
 
 
-            panel.style.transition =
-                "none";
-
-
             if (
                 typeof handle.setPointerCapture ===
-                "function" &&
-                event.pointerId !== undefined
+                "function"
             ) {
 
                 try {
@@ -9755,19 +9723,10 @@ const RaniseMoisePedagogicalExplanationEngine = {
         }
 
 
-        // =================================================
-        // MOVE PANEL
-        // =================================================
-
         function moveDrag(event) {
 
-            if (
-                !dragging ||
-                !event
-            ) {
-
+            if (!dragging) {
                 return;
-
             }
 
 
@@ -9801,12 +9760,6 @@ const RaniseMoisePedagogicalExplanationEngine = {
                 position.top + "px";
 
 
-            // ---------------------------------------------
-            // IMPORTANT:
-            // RIGHT IS REMOVED AFTER FIRST MOVEMENT.
-            // This allows LEFT/TOP to control position.
-            // ---------------------------------------------
-
             panel.style.right =
                 "auto";
 
@@ -9816,144 +9769,509 @@ const RaniseMoisePedagogicalExplanationEngine = {
         }
 
 
-        // =================================================
-        // END DRAG
-        // =================================================
-
         function stopDrag(event) {
 
             if (!dragging) {
-
                 return;
-
-            }
-
-
-            if (
-                event &&
-                pointerId !== null &&
-                event.pointerId !== pointerId
-            ) {
-
-                return;
-
             }
 
 
             dragging =
                 false;
 
-
             pointerId =
                 null;
-
 
             handle.style.cursor =
                 "grab";
 
-
-            panel.style.transition =
-                "";
-
-
-            if (
-                event &&
-                typeof handle.releasePointerCapture ===
-                "function" &&
-                event.pointerId !== undefined
-            ) {
-
-                try {
-
-                    handle.releasePointerCapture(
-                        event.pointerId
-                    );
-
-                } catch (error) {}
-
-            }
-
         }
 
 
-        // =================================================
-        // POINTER EVENTS
-        // =================================================
-
         handle.addEventListener(
-
             "pointerdown",
-
             startDrag,
-
             true
-
         );
 
-
         handle.addEventListener(
-
             "pointermove",
-
             moveDrag,
-
             true
-
         );
 
-
         handle.addEventListener(
-
             "pointerup",
-
             stopDrag,
-
             true
-
         );
 
-
         handle.addEventListener(
-
             "pointercancel",
-
             stopDrag,
-
             true
-
-        );
-
-
-        handle.addEventListener(
-
-            "lostpointercapture",
-
-            function () {
-
-                if (dragging) {
-
-                    dragging =
-                        false;
-
-                    pointerId =
-                        null;
-
-                    handle.style.cursor =
-                        "grab";
-
-                }
-
-            },
-
-            true
-
         );
 
     }
 
 
     // =====================================================
-    // UPDATE EXERCISE UI
+    // EXERCISE TYPE
+    // =====================================================
+
+    function getExerciseType(exercise) {
+
+        const text =
+            normalize(exercise);
+
+
+        if (
+            (
+                text.includes("identifier") ||
+                text.includes("identifiez") ||
+                text.includes("montrez") ||
+                text.includes("repérez") ||
+                text.includes("reperez")
+            ) &&
+            (
+                text.includes("interface") ||
+                text.includes("éléments") ||
+                text.includes("elements") ||
+                text.includes("composants")
+            )
+        ) {
+
+            return "identify-interface";
+
+        }
+
+
+        if (
+            (
+                text.includes("expliquer") ||
+                text.includes("expliquez") ||
+                text.includes("explique")
+            ) &&
+            (
+                text.includes("bouton office") ||
+                text.includes("office button")
+            )
+        ) {
+
+            return "office-button-explanation";
+
+        }
+
+
+        if (
+            (
+                text.includes("créer") ||
+                text.includes("creer") ||
+                text.includes("create")
+            ) &&
+            (
+                text.includes("document") ||
+                text.includes("fichier") ||
+                text.includes("file")
+            )
+        ) {
+
+            return "create-document";
+
+        }
+
+
+        return "generic";
+
+    }
+
+
+    // =====================================================
+    // INTERFACE TARGET DEFINITIONS
+    // =====================================================
+
+    function getInterfaceTargets() {
+
+        return {
+
+            titleBar: {
+
+                keywords: [
+                    "barre de titre",
+                    "barre titre",
+                    "title bar"
+                ],
+
+                selector:
+                    "#cwTitleBar"
+
+            },
+
+            officeButton: {
+
+                keywords: [
+                    "bouton office",
+                    "office button"
+                ],
+
+                selector:
+                    "#cwOfficeButton[data-role='office-button'], #cwOfficeButton"
+
+            },
+
+            ribbon: {
+
+                keywords: [
+                    "ruban",
+                    "ribbon"
+                ],
+
+                selector:
+                    "#cwRibbonContentArea"
+
+            },
+
+            tabs: {
+
+                keywords: [
+                    "onglets",
+                    "onglet",
+                    "tabs"
+                ],
+
+                selector:
+                    "#cwRibbonTabBar .cwTabBtn"
+
+            },
+
+            documentArea: {
+
+                keywords: [
+                    "zone de travail",
+                    "zone du document",
+                    "zone document",
+                    "document area"
+                ],
+
+                selector:
+                    ".cwPageContent"
+
+            }
+
+        };
+
+    }
+
+
+    // =====================================================
+    // BUILD STRICT ACTION LEDGER
+    //
+    // IMPORTANT:
+    // An exercise can require MULTIPLE actions.
+    // Every required action receives its own state.
+    // =====================================================
+
+    function buildActionLedger(exercise) {
+
+        const type =
+            getExerciseType(exercise);
+
+
+        const text =
+            normalize(exercise);
+
+
+        const ledger = [];
+
+
+        if (
+            type ===
+            "identify-interface"
+        ) {
+
+            const targets =
+                getInterfaceTargets();
+
+
+            Object.keys(targets).forEach(
+                key => {
+
+                    const item =
+                        targets[key];
+
+
+                    const mentioned =
+                        item.keywords.some(
+                            keyword =>
+                                text.includes(
+                                    normalize(keyword)
+                                )
+                        );
+
+
+                    if (mentioned) {
+
+                        ledger.push({
+
+                            id:
+                                "interface-" +
+                                key,
+
+                            label:
+                                item.keywords[0],
+
+                            selector:
+                                item.selector,
+
+                            required:
+                                true,
+
+                            completed:
+                                false,
+
+                            clicks:
+                                0
+
+                        });
+
+                    }
+
+                }
+            );
+
+
+            // ------------------------------------------------
+            // If the wording is broad, require the main
+            // Word interface components rather than one
+            // random click.
+            // ------------------------------------------------
+
+            if (!ledger.length) {
+
+                [
+                    "titleBar",
+                    "officeButton",
+                    "ribbon",
+                    "tabs",
+                    "documentArea"
+                ].forEach(
+                    key => {
+
+                        const item =
+                            targets[key];
+
+
+                        ledger.push({
+
+                            id:
+                                "interface-" +
+                                key,
+
+                            label:
+                                item.keywords[0],
+
+                            selector:
+                                item.selector,
+
+                            required:
+                                true,
+
+                            completed:
+                                false,
+
+                            clicks:
+                                0
+
+                        });
+
+                    }
+                );
+
+            }
+
+        }
+
+
+        if (
+            type ===
+            "office-button-explanation"
+        ) {
+
+            ledger.push({
+
+                id:
+                    "real-typing",
+
+                label:
+                    "Réponse réellement tapée",
+
+                required:
+                    true,
+
+                completed:
+                    false,
+
+                clicks:
+                    0
+
+            });
+
+        }
+
+
+        if (
+            type ===
+            "create-document"
+        ) {
+
+            ledger.push({
+
+                id:
+                    "new-document-action",
+
+                label:
+                    "Création réelle du document",
+
+                required:
+                    true,
+
+                completed:
+                    false,
+
+                clicks:
+                    0
+
+            });
+
+        }
+
+
+        if (
+            type ===
+            "generic"
+        ) {
+
+            ledger.push({
+
+                id:
+                    "real-student-action",
+
+                label:
+                    "Action réelle dans la simulation",
+
+                required:
+                    true,
+
+                completed:
+                    false,
+
+                clicks:
+                    0
+
+            });
+
+        }
+
+
+        return ledger;
+
+    }
+
+
+    // =====================================================
+    // RESET EXERCISE VALIDATION
+    // =====================================================
+
+    function resetExerciseValidation() {
+
+        state.completedActions =
+            new Set();
+
+
+        state.actionLedger =
+            buildActionLedger(
+                getCurrentExercise()
+            );
+
+
+        state.actionCount =
+            0;
+
+        state.lastActionAt =
+            0;
+
+        state.exerciseStartedAt =
+            Date.now();
+
+        state.textSnapshot =
+            readDocumentText();
+
+        state.textChangeDetected =
+            false;
+
+        state.typingStartedAt =
+            0;
+
+        state.exercise3ActionDetected =
+            false;
+
+        state.exercise3ActionTime =
+            0;
+
+        state.exercise3BaselineSignature =
+            getDocumentSignature();
+
+
+        if (state.validationTimer) {
+
+            clearInterval(
+                state.validationTimer
+            );
+
+            state.validationTimer =
+                null;
+
+        }
+
+    }
+
+
+    // =====================================================
+    // UI ACTION CHECKLIST
+    // =====================================================
+
+    function getLedgerStatusText() {
+
+        if (!state.actionLedger.length) {
+
+            return "";
+
+        }
+
+
+        const completed =
+            state.actionLedger.filter(
+                item =>
+                    item.completed
+            ).length;
+
+
+        const total =
+            state.actionLedger.length;
+
+
+        return (
+            "Actions validées : " +
+            completed +
+            " / " +
+            total
+        );
+
+    }
+
+
+    // =====================================================
+    // UPDATE UI
     // =====================================================
 
     function updateExerciseUI() {
@@ -9984,178 +10302,110 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
 
         state.ui.status.textContent =
-            "À vous de jouer. Je vérifie votre travail.";
+            getLedgerStatusText() +
+            " — À vous de jouer. Je vérifie chaque action.";
 
     }
 
 
     // =====================================================
-    // DETERMINE EXERCISE TYPE
+    // FIND TARGET FROM EVENT
     // =====================================================
 
-    function getExerciseType(exercise) {
-
-        const text =
-            normalize(exercise);
-
-
-        // -------------------------------------------------
-        // EXERCISE 1
-        // -------------------------------------------------
+    function eventMatchesSelector(
+        target,
+        selector
+    ) {
 
         if (
-            (
-                text.includes("identifier") ||
-                text.includes("identifiez")
-            ) &&
-            (
-                text.includes("interface") ||
-                text.includes("éléments") ||
-                text.includes("composants")
-            )
+            !target ||
+            !selector
         ) {
 
-            return "identify-interface";
+            return false;
 
         }
 
 
-        // -------------------------------------------------
-        // EXERCISE 2
-        // -------------------------------------------------
-
-        if (
-            (
-                text.includes("expliquer") ||
-                text.includes("expliquez") ||
-                text.includes("role")
-            ) &&
-            (
-                text.includes("bouton office") ||
-                text.includes("office button")
-            )
-        ) {
-
-            return "office-button-explanation";
-
-        }
-
-
-        // -------------------------------------------------
-        // EXERCISE 3
-        // -------------------------------------------------
-
-        if (
-            (
-                text.includes("créer") ||
-                text.includes("creer") ||
-                text.includes("create")
-            ) &&
-            text.includes("document")
-        ) {
-
-            return "create-document";
-
-        }
-
-
-        return "generic";
+        return !!closestFromTarget(
+            target,
+            selector
+        );
 
     }
 
 
     // =====================================================
-    // REQUIRED INTERFACE ELEMENTS
-    // FOR EXERCISE 1
+    // MARK ACTION
     // =====================================================
 
-    function getRequiredInterfaceElements() {
+    function markActionCompleted(id) {
 
-        const elements = {
-
-
-            titleBar: {
-
-                keywords: [
-                    "barre de titre",
-                    "title bar"
-                ],
-
-                element:
-                    getTitleBar()
-
-            },
+        const item =
+            state.actionLedger.find(
+                action =>
+                    action.id === id
+            );
 
 
-            officeButton: {
-
-                keywords: [
-                    "bouton office",
-                    "office button"
-                ],
-
-                element:
-                    getOfficeButton()
-
-            },
+        if (!item) {
+            return false;
+        }
 
 
-            ribbon: {
+        if (!item.completed) {
 
-                keywords: [
-                    "ruban",
-                    "ribbon"
-                ],
+            item.completed =
+                true;
 
-                element:
-                    getRibbon()
+            state.completedActions.add(
+                id
+            );
 
-            },
+            state.actionCount++;
 
+            state.lastActionAt =
+                Date.now();
 
-            tabs: {
-
-                keywords: [
-                    "onglets",
-                    "onglet",
-                    "tabs"
-                ],
-
-                element:
-                    getTabs()
-
-            },
+        }
 
 
-            documentArea: {
-
-                keywords: [
-                    "zone de travail",
-                    "zone du document",
-                    "document area"
-                ],
-
-                element:
-                    getDocumentAreaTarget(
-                        getPageContents()[0]
-                    )
-
-            }
-
-        };
+        updateExerciseUI();
 
 
-        return elements;
+        return true;
 
     }
 
 
     // =====================================================
-    // EXERCISE 1:
-    // IDENTIFY INTERFACE
+    // ALL REQUIRED ACTIONS COMPLETE?
+    // =====================================================
+
+    function allRequiredActionsComplete() {
+
+        if (!state.actionLedger.length) {
+
+            return false;
+
+        }
+
+
+        return state.actionLedger.every(
+            item =>
+                item.required === false ||
+                item.completed === true
+        );
+
+    }
+
+
+    // =====================================================
+    // EXERCISE 1 STRICT VALIDATION
     //
-    // Student must interact with the real interface.
-    // Random clicks do not validate the exercise.
+    // A RANDOM CLICK IS NEVER ENOUGH.
+    //
+    // The student must touch EACH required target.
     // =====================================================
 
     function validateInterfaceIdentification(
@@ -10172,95 +10422,70 @@ const RaniseMoisePedagogicalExplanationEngine = {
         }
 
 
-        const target =
-            event.target;
+        let matched =
+            false;
 
 
-        const elements =
-            getRequiredInterfaceElements();
+        state.actionLedger.forEach(
+            item => {
+
+                if (
+                    item.completed ||
+                    !item.selector
+                ) {
+
+                    return;
+
+                }
 
 
-        const targetData =
-            getElementData(target);
+                if (
+                    eventMatchesSelector(
+                        event.target,
+                        item.selector
+                    )
+                ) {
+
+                    item.clicks++;
 
 
-        const clickedTitle =
-            !!closestFromTarget(
-                target,
-                "#cwTitleBar"
-            );
+                    markActionCompleted(
+                        item.id
+                    );
 
 
-        const clickedOffice =
-            !!closestFromTarget(
-                target,
-                "#cwOfficeButton[data-role='office-button'], #cwOfficeButton"
-            );
+                    matched =
+                        true;
+
+                }
+
+            }
+        );
 
 
-        const clickedRibbon =
-            !!closestFromTarget(
-                target,
-                "#cwRibbonContentArea"
-            );
+        if (matched) {
+
+            if (
+                allRequiredActionsComplete()
+            ) {
+
+                return true;
+
+            }
 
 
-        const clickedTab =
-            !!closestFromTarget(
-                target,
-                "#cwRibbonTabBar .cwTabBtn"
-            );
+            if (state.ui.status) {
 
+                state.ui.status.textContent =
+                    getLedgerStatusText() +
+                    " — Bien. Continuez avec les éléments restants demandés.";
 
-        const clickedDocument =
-            !!closestFromTarget(
-                target,
-                ".cwPageContent"
-            );
-
-
-        // -------------------------------------------------
-        // A REAL INTERFACE TARGET WAS TOUCHED.
-        // -------------------------------------------------
-
-        if (
-            clickedTitle ||
-            clickedOffice ||
-            clickedRibbon ||
-            clickedTab ||
-            clickedDocument
-        ) {
-
-            return true;
+            }
 
         }
 
 
-        // -------------------------------------------------
-        // SECONDARY DATA CHECK
-        // -------------------------------------------------
-
-        const knownKeywords = [
-
-            ...elements.titleBar.keywords,
-
-            ...elements.officeButton.keywords,
-
-            ...elements.ribbon.keywords,
-
-            ...elements.tabs.keywords,
-
-            ...elements.documentArea.keywords
-
-        ];
-
-
-        return knownKeywords.some(
-            keyword =>
-                targetData.includes(
-                    normalize(keyword)
-                )
-        );
+        return false;
 
     }
 
@@ -10279,12 +10504,13 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
         if (
             !value ||
-            value.length < 15
+            value.length < 20
         ) {
 
             return {
 
-                correct: false,
+                correct:
+                    false,
 
                 reason:
                     "La réponse est trop courte."
@@ -10293,10 +10519,6 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
         }
 
-
-        // -------------------------------------------------
-        // OFFICE BUTTON CONTEXT
-        // -------------------------------------------------
 
         const officeContext =
             value.includes("office") ||
@@ -10307,7 +10529,8 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
             return {
 
-                correct: false,
+                correct:
+                    false,
 
                 reason:
                     "La réponse ne montre pas clairement qu'elle concerne le bouton Office."
@@ -10317,81 +10540,53 @@ const RaniseMoisePedagogicalExplanationEngine = {
         }
 
 
-        // -------------------------------------------------
-        // FUNCTIONAL CONCEPTS
-        // -------------------------------------------------
-
         const concepts = {
 
-
             create: [
-
                 "nouveau",
                 "creer",
                 "créer",
                 "new"
-
             ],
-
 
             open: [
-
                 "ouvrir",
                 "open"
-
             ],
 
-
             save: [
-
                 "enregistrer",
                 "sauvegarder",
                 "save"
-
             ],
 
-
             print: [
-
                 "imprimer",
                 "impression",
                 "print"
-
             ],
 
-
             close: [
-
                 "fermer",
                 "fermeture",
                 "close"
-
             ],
 
-
             document: [
-
                 "document",
                 "fichier",
                 "file"
-
             ],
 
-
             commands: [
-
                 "commande",
                 "commandes",
                 "fonctions",
-                "options"
-
+                "options",
+                "actions"
             ]
 
         };
-
-
-        let matched =
-            0;
 
 
         const matchedGroups =
@@ -10401,18 +10596,14 @@ const RaniseMoisePedagogicalExplanationEngine = {
         Object.keys(concepts).forEach(
             group => {
 
-                const found =
+                if (
                     concepts[group].some(
                         word =>
                             value.includes(
                                 normalize(word)
                             )
-                    );
-
-
-                if (found) {
-
-                    matched++;
+                    )
+                ) {
 
                     matchedGroups.add(
                         group
@@ -10424,41 +10615,54 @@ const RaniseMoisePedagogicalExplanationEngine = {
         );
 
 
-        // -------------------------------------------------
-        // STRICT BUT SEMANTIC RULE
-        //
-        // Student must identify Office Button
-        // AND explain its purpose with at least
-        // TWO meaningful functional concepts.
-        // -------------------------------------------------
+        const functionalGroups =
+            [
+                "create",
+                "open",
+                "save",
+                "print",
+                "close"
+            ].filter(
+                group =>
+                    matchedGroups.has(group)
+            );
 
-        const enoughFunctionalContent =
-            matchedGroups.has("commands") ||
-            matched >= 2;
+
+        // ------------------------------------------------
+        // STRICT SEMANTIC RULE:
+        //
+        // Office + at least TWO real functions
+        // OR Office + document management concept
+        // combined with one real function.
+        // ------------------------------------------------
+
+        const twoFunctions =
+            functionalGroups.length >= 2;
 
 
         const documentManagement =
             matchedGroups.has("document") &&
-            (
-                matchedGroups.has("create") ||
-                matchedGroups.has("open") ||
-                matchedGroups.has("save") ||
-                matchedGroups.has("print") ||
-                matchedGroups.has("close")
-            );
+            functionalGroups.length >= 1;
+
+
+        const commandExplanation =
+            matchedGroups.has("commands") &&
+            functionalGroups.length >= 1;
 
 
         if (
-            enoughFunctionalContent ||
-            documentManagement
+            twoFunctions ||
+            documentManagement ||
+            commandExplanation
         ) {
 
             return {
 
-                correct: true,
+                correct:
+                    true,
 
                 reason:
-                    "La réponse montre une compréhension fonctionnelle du bouton Office."
+                    "Compréhension fonctionnelle détectée."
 
             };
 
@@ -10467,10 +10671,11 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
         return {
 
-            correct: false,
+            correct:
+                false,
 
             reason:
-                "La réponse mentionne le bouton Office, mais elle n'explique pas suffisamment ses fonctions principales."
+                "La réponse mentionne le bouton Office, mais n'explique pas encore suffisamment ses fonctions."
 
         };
 
@@ -10478,8 +10683,177 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
 
     // =====================================================
-    // EXERCISE 3:
-    // CREATE FIRST DOCUMENT
+    // REAL TYPING DETECTION
+    //
+    // CRITICAL:
+    // Existing text from BEFORE the exercise cannot
+    // automatically validate Exercise 2.
+    // =====================================================
+
+    function processExercise2Input() {
+
+        const currentText =
+            readDocumentText();
+
+
+        if (
+            currentText ===
+            state.textSnapshot
+        ) {
+
+            return false;
+
+        }
+
+
+        state.textChangeDetected =
+            true;
+
+
+        if (!state.typingStartedAt) {
+
+            state.typingStartedAt =
+                Date.now();
+
+        }
+
+
+        const validation =
+            validateOfficeButtonExplanation(
+                currentText
+            );
+
+
+        if (
+            validation.correct &&
+            state.textChangeDetected
+        ) {
+
+            markActionCompleted(
+                "real-typing"
+            );
+
+
+            return true;
+
+        }
+
+
+        if (state.ui.status) {
+
+            state.ui.status.textContent =
+                getLedgerStatusText() +
+                " — Je vois votre saisie. Prenez votre temps et complétez votre explication.";
+
+        }
+
+
+        return false;
+
+    }
+
+
+    // =====================================================
+    // START EXERCISE 2 MONITOR
+    //
+    // Long monitoring interval intentionally kept alive
+    // so slow beginners are not rushed.
+    // =====================================================
+
+    function beginExercise2Monitoring() {
+
+        if (state.typedResponseTimer) {
+
+            clearInterval(
+                state.typedResponseTimer
+            );
+
+        }
+
+
+        state.textSnapshot =
+            readDocumentText();
+
+        state.textChangeDetected =
+            false;
+
+        state.typingStartedAt =
+            0;
+
+
+        state.typedResponseTimer =
+            setInterval(
+
+                function () {
+
+                    if (
+                        state.completed ||
+                        state.processing ||
+                        !state.waitingForStudent
+                    ) {
+
+                        return;
+
+                    }
+
+
+                    if (
+                        state.currentType !==
+                        "office-button-explanation"
+                    ) {
+
+                        return;
+
+                    }
+
+
+                    if (
+                        processExercise2Input()
+                    ) {
+
+                        clearInterval(
+                            state.typedResponseTimer
+                        );
+
+                        state.typedResponseTimer =
+                            null;
+
+
+                        moveToNextExercise();
+
+                    }
+
+                },
+
+                350
+
+            );
+
+    }
+
+
+    // =====================================================
+    // STOP EXERCISE 2
+    // =====================================================
+
+    function stopExercise2Monitoring() {
+
+        if (state.typedResponseTimer) {
+
+            clearInterval(
+                state.typedResponseTimer
+            );
+
+            state.typedResponseTimer =
+                null;
+
+        }
+
+    }
+
+
+    // =====================================================
+    // DETECT REAL NEW-DOCUMENT ACTION
     // =====================================================
 
     function detectCreateDocumentAction(
@@ -10500,48 +10874,34 @@ const RaniseMoisePedagogicalExplanationEngine = {
             event.target;
 
 
-        // -------------------------------------------------
-        // REAL NEW ACTION
-        // -------------------------------------------------
+        const candidates = [
 
-        const newAction =
-            closestFromTarget(
-                target,
-                "[data-action='new'], [data-action='new-document']"
-            );
+            "[data-action='new']",
 
+            "[data-action='new-document']",
 
-        if (newAction) {
+            "[data-command='new']",
 
-            return true;
+            "[data-command='new-document']",
 
-        }
+            "#cwOfficeMenu [data-action='new']",
 
+            "#cwOfficeMenu [data-action='new-document']"
 
-        // -------------------------------------------------
-        // OFFICE MENU NEW ITEM
-        // -------------------------------------------------
-
-        const officeItem =
-            closestFromTarget(
-                target,
-                "#cwOfficeMenu .cwOfficeItem"
-            );
+        ];
 
 
-        if (officeItem) {
-
-            const action =
-                normalize(
-                    officeItem.getAttribute(
-                        "data-action"
-                    )
-                );
-
+        for (
+            let i = 0;
+            i < candidates.length;
+            i++
+        ) {
 
             if (
-                action === "new" ||
-                action === "new-document"
+                closestFromTarget(
+                    target,
+                    candidates[i]
+                )
             ) {
 
                 return true;
@@ -10551,34 +10911,61 @@ const RaniseMoisePedagogicalExplanationEngine = {
         }
 
 
-        return false;
+        // ------------------------------------------------
+        // DATA TEXT FALLBACK
+        // ------------------------------------------------
+
+        const element =
+            closestFromTarget(
+                target,
+                "#cwOfficeMenu .cwOfficeItem, button, [role='button'], [role='menuitem']"
+            );
+
+
+        if (!element) {
+            return false;
+        }
+
+
+        const data =
+            getElementData(element);
+
+
+        return (
+            (
+                data.includes("nouveau") ||
+                data.includes("new")
+            ) &&
+            (
+                data.includes("document") ||
+                data.includes("fichier") ||
+                data.includes("file")
+            )
+        );
 
     }
 
 
     // =====================================================
-    // EXERCISE 3:
-    // VERIFY DOCUMENT CREATION
+    // VERIFY REAL DOCUMENT CHANGE
     // =====================================================
 
-    function validateCreatedDocument() {
+    function verifyDocumentCreation() {
+
+        const currentSignature =
+            getDocumentSignature();
+
+
+        const signatureChanged =
+            currentSignature !==
+            state.exercise3BaselineSignature;
+
 
         const pages =
             getPageContents();
 
 
-        if (!pages.length) {
-
-            return false;
-
-        }
-
-
-        // -------------------------------------------------
-        // A REAL DOCUMENT AREA MUST EXIST.
-        // -------------------------------------------------
-
-        const area =
+        const hasRealArea =
             pages.some(
                 page =>
                     page &&
@@ -10586,39 +10973,36 @@ const RaniseMoisePedagogicalExplanationEngine = {
             );
 
 
-        if (!area) {
-
-            return false;
-
-        }
-
-
-        return true;
+        return (
+            state.exercise3ActionDetected &&
+            hasRealArea &&
+            (
+                signatureChanged ||
+                Date.now() -
+                state.exercise3ActionTime >=
+                500
+            )
+        );
 
     }
 
 
     // =====================================================
-    // EXERCISE 2:
-    // WAIT FOR STUDENT TEXT
+    // EXERCISE 3 MONITOR
     // =====================================================
 
-    function beginExercise2Monitoring() {
+    function beginExercise3Monitoring() {
 
-        if (state.typedResponseTimer) {
+        if (state.validationTimer) {
 
             clearInterval(
-                state.typedResponseTimer
+                state.validationTimer
             );
 
         }
 
 
-        state.textSnapshot =
-            readDocumentText();
-
-
-        state.typedResponseTimer =
+        state.validationTimer =
             setInterval(
 
                 function () {
@@ -10626,28 +11010,17 @@ const RaniseMoisePedagogicalExplanationEngine = {
                     if (
                         state.completed ||
                         state.processing ||
-                        state.exerciseIndex < 0
+                        !state.waitingForStudent
                     ) {
 
                         return;
 
-                    }
-
-
-                    const exercise =
-                        getCurrentExercise();
-
-
-                    if (!exercise) {
-                        return;
                     }
 
 
                     if (
-                        getExerciseType(
-                            exercise
-                        ) !==
-                        "office-button-explanation"
+                        state.currentType !==
+                        "create-document"
                     ) {
 
                         return;
@@ -10655,25 +11028,39 @@ const RaniseMoisePedagogicalExplanationEngine = {
                     }
 
 
-                    const currentText =
-                        readDocumentText();
+                    if (
+                        !state.exercise3ActionDetected
+                    ) {
+
+                        return;
+
+                    }
 
 
                     if (
-                        currentText !==
-                        state.textSnapshot
+                        verifyDocumentCreation()
                     ) {
 
-                        state.textSnapshot =
-                            currentText;
+                        markActionCompleted(
+                            "new-document-action"
+                        );
 
-                        updateExercise2Status();
+
+                        clearInterval(
+                            state.validationTimer
+                        );
+
+                        state.validationTimer =
+                            null;
+
+
+                        moveToNextExercise();
 
                     }
 
                 },
 
-                250
+                300
 
             );
 
@@ -10681,64 +11068,21 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
 
     // =====================================================
-    // EXERCISE 2 STATUS
+    // STOP ALL MONITORS
     // =====================================================
 
-    function updateExercise2Status() {
+    function stopAllMonitors() {
 
-        if (!state.ui.status) {
-            return;
-        }
+        stopExercise2Monitoring();
 
 
-        const text =
-            readDocumentText();
-
-
-        if (!text) {
-
-            state.ui.status.textContent =
-                "Cliquez dans la zone de travail et tapez votre réponse.";
-
-            return;
-
-        }
-
-
-        const validation =
-            validateOfficeButtonExplanation(
-                text
-            );
-
-
-        if (validation.correct) {
-
-            state.ui.status.textContent =
-                "Réponse détectée. Validation en cours...";
-
-        } else {
-
-            state.ui.status.textContent =
-                "Votre réponse est enregistrée. Vérifiez que vous expliquez réellement le rôle du bouton Office.";
-
-        }
-
-    }
-
-
-    // =====================================================
-    // STOP EXERCISE 2 MONITOR
-    // =====================================================
-
-    function stopExercise2Monitoring() {
-
-        if (state.typedResponseTimer) {
+        if (state.validationTimer) {
 
             clearInterval(
-                state.typedResponseTimer
+                state.validationTimer
             );
 
-            state.typedResponseTimer =
+            state.validationTimer =
                 null;
 
         }
@@ -10747,7 +11091,7 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
 
     // =====================================================
-    // SPEAK EXERCISE
+    // ANNOUNCE EXERCISE
     // =====================================================
 
     async function announceCurrentExercise() {
@@ -10761,17 +11105,20 @@ const RaniseMoisePedagogicalExplanationEngine = {
         }
 
 
-        updateExerciseUI();
-
-
-        const type =
+        state.currentType =
             getExerciseType(
                 exercise
             );
 
 
+        resetExerciseValidation();
+
+
+        updateExerciseUI();
+
+
         if (
-            type ===
+            state.currentType ===
             "identify-interface"
         ) {
 
@@ -10781,7 +11128,7 @@ const RaniseMoisePedagogicalExplanationEngine = {
                 (state.exerciseIndex + 1) +
                 ". " +
                 exercise +
-                " Vous connaissez déjà l'environnement. Cette fois, je veux que vous me montriez vous-même les principaux éléments de l'interface."
+                " Je vais vérifier chaque élément que je vous demande de montrer. Un simple clic au hasard ne permettra pas de valider l'exercice. Prenez le temps nécessaire pour effectuer chaque action."
 
             );
 
@@ -10792,7 +11139,7 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
 
         if (
-            type ===
+            state.currentType ===
             "office-button-explanation"
         ) {
 
@@ -10802,7 +11149,7 @@ const RaniseMoisePedagogicalExplanationEngine = {
                 (state.exerciseIndex + 1) +
                 ". " +
                 exercise +
-                " Cliquez directement dans la zone de travail du document et tapez votre réponse. Je vais analyser ce que vous écrivez et vérifier si vous avez réellement compris le rôle du bouton Office."
+                " Cliquez dans la zone de travail et tapez votre propre réponse. Je vais attendre votre saisie et analyser réellement ce que vous écrivez. Si vous êtes débutant et que vous tapez lentement, prenez votre temps."
 
             );
 
@@ -10816,7 +11163,7 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
 
         if (
-            type ===
+            state.currentType ===
             "create-document"
         ) {
 
@@ -10826,9 +11173,12 @@ const RaniseMoisePedagogicalExplanationEngine = {
                 (state.exerciseIndex + 1) +
                 ". " +
                 exercise +
-                " Réalisez maintenant l'action dans la simulation, sans que je vous donne la procédure étape par étape."
+                " Effectuez réellement l'action demandée dans la simulation. Je vais vérifier l'action avant de valider."
 
             );
+
+
+            beginExercise3Monitoring();
 
 
             return;
@@ -10841,7 +11191,8 @@ const RaniseMoisePedagogicalExplanationEngine = {
             "Exercice " +
             (state.exerciseIndex + 1) +
             ". " +
-            exercise
+            exercise +
+            " Effectuez réellement la tâche demandée dans la simulation. Je vais vérifier votre action avant de valider."
 
         );
 
@@ -10849,14 +11200,14 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
 
     // =====================================================
-    // EXERCISE 1 SUCCESS FEEDBACK
+    // SUCCESS EXERCISE 1
     // =====================================================
 
     async function confirmExercise1() {
 
         await speak(
 
-            "Très bien. Vous avez correctement identifié un élément réel de l'interface Word 2007. Continuez ainsi."
+            "Très bien. Vous avez effectué toutes les actions demandées sur les éléments réels de l'interface. Je valide l'exercice."
 
         );
 
@@ -10864,7 +11215,7 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
 
     // =====================================================
-    // EXERCISE 2 SUCCESS FEEDBACK
+    // SUCCESS EXERCISE 2
     // =====================================================
 
     async function confirmExercise2() {
@@ -10875,14 +11226,14 @@ const RaniseMoisePedagogicalExplanationEngine = {
         if (state.ui.status) {
 
             state.ui.status.textContent =
-                "Réponse correcte. Compréhension validée.";
+                "Réponse réellement saisie et comprise. Exercice validé.";
 
         }
 
 
         await speak(
 
-            "Très bien. Votre réponse montre que vous avez compris le rôle du bouton Office. Je valide cet exercice."
+            "Très bien. J'ai vérifié votre saisie réelle et votre explication montre que vous avez compris le rôle du bouton Office. Je valide l'exercice."
 
         );
 
@@ -10890,7 +11241,7 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
 
     // =====================================================
-    // EXERCISE 3 SUCCESS FEEDBACK
+    // SUCCESS EXERCISE 3
     // =====================================================
 
     async function confirmExercise3() {
@@ -10898,14 +11249,14 @@ const RaniseMoisePedagogicalExplanationEngine = {
         if (state.ui.status) {
 
             state.ui.status.textContent =
-                "Document créé. Exercice validé.";
+                "Action réelle détectée et vérifiée. Exercice validé.";
 
         }
 
 
         await speak(
 
-            "Excellent. Vous avez réussi à créer un document dans la simulation. L'exercice est validé."
+            "Excellent. J'ai détecté et vérifié l'action réelle demandée dans la simulation. L'exercice est validé."
 
         );
 
@@ -10913,7 +11264,7 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
 
     // =====================================================
-    // MOVE TO NEXT EXERCISE
+    // MOVE NEXT
     // =====================================================
 
     async function moveToNextExercise() {
@@ -10928,24 +11279,64 @@ const RaniseMoisePedagogicalExplanationEngine = {
         }
 
 
-        state.processing = true;
+        // ------------------------------------------------
+        // NEVER MOVE FORWARD WITHOUT COMPLETE LEDGER.
+        // ------------------------------------------------
+
+        if (
+            !allRequiredActionsComplete()
+        ) {
+
+            return;
+
+        }
+
+
+        state.processing =
+            true;
 
 
         try {
 
-            stopExercise2Monitoring();
+            stopAllMonitors();
 
 
             state.waitingForStudent =
                 false;
 
 
+            if (
+                state.currentType ===
+                "identify-interface"
+            ) {
+
+                await confirmExercise1();
+
+            }
+
+
+            if (
+                state.currentType ===
+                "office-button-explanation"
+            ) {
+
+                await confirmExercise2();
+
+            }
+
+
+            if (
+                state.currentType ===
+                "create-document"
+            ) {
+
+                await confirmExercise3();
+
+            }
+
+
             state.exerciseIndex++;
 
-
-            // =============================================
-            // ALL EXERCISES COMPLETE
-            // =============================================
 
             if (
                 state.exerciseIndex >=
@@ -10962,10 +11353,6 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
             state.currentExercise =
                 getCurrentExercise();
-
-
-            state.exercise3ActionDetected =
-                false;
 
 
             await announceCurrentExercise();
@@ -10985,67 +11372,59 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
 
     // =====================================================
-    // COMPLETE BLOCK 8
+    // GENERIC EXERCISE
+    //
+    // Does NOT auto-pass.
+    // A real simulation interaction is required.
     // =====================================================
 
-    async function completeBlock8() {
+    function validateGenericAction(event) {
 
-        state.completed =
-            true;
+        if (
+            !event ||
+            !event.target
+        ) {
 
-        state.waitingForStudent =
-            false;
-
-
-        stopExercise2Monitoring();
-
-
-        if (state.ui.progress) {
-
-            state.ui.progress.textContent =
-                "Exercices terminés";
+            return false;
 
         }
 
 
-        if (state.ui.instruction) {
+        const target =
+            event.target;
 
-            state.ui.instruction.textContent =
-                "Tous les exercices du Chapitre 1 sont validés.";
+
+        const insideSimulation =
+            !!closestFromTarget(
+                target,
+                [
+                    "#cwTitleBar",
+                    "#cwRibbonContentArea",
+                    "#cwRibbonTabBar",
+                    "#cwOfficeButton",
+                    ".cwPageContent",
+                    "#cwWorkspace",
+                    "#cwWorkspaceShell",
+                    "#cwDocumentContainer",
+                    "button",
+                    "[role='button']"
+                ].join(",")
+            );
+
+
+        if (!insideSimulation) {
+
+            return false;
 
         }
 
 
-        if (state.ui.status) {
-
-            state.ui.status.textContent =
-                "Félicitations. Vous avez réussi la phase Exercises.";
-
-        }
-
-
-        // -------------------------------------------------
-        // SAVE A BLOCK 8 COMPLETION FLAG
-        // WITHOUT MODIFYING EXISTING ENGINES.
-        // -------------------------------------------------
-
-        localStorage.setItem(
-            "wordChapter1ExercisesCompleted",
-            "true"
+        markActionCompleted(
+            "real-student-action"
         );
 
 
-        await speak(
-
-            "Excellent travail. Vous avez terminé et réussi tous les exercices du Chapitre 1. " +
-            "Vous avez maintenant démontré que vous pouvez utiliser les connaissances acquises pendant la pratique avec davantage d'autonomie."
-
-        );
-
-
-        console.log(
-            "RANISE BLOCK 8: CHAPTER 1 EXERCISES COMPLETED AND VALIDATED"
-        );
+        return true;
 
     }
 
@@ -11079,6 +11458,7 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
 
         const type =
+            state.currentType ||
             getExerciseType(
                 exercise
             );
@@ -11096,7 +11476,8 @@ const RaniseMoisePedagogicalExplanationEngine = {
             if (
                 validateInterfaceIdentification(
                     event
-                )
+                ) &&
+                allRequiredActionsComplete()
             ) {
 
                 moveToNextExercise();
@@ -11112,8 +11493,8 @@ const RaniseMoisePedagogicalExplanationEngine = {
         // =================================================
         // EXERCISE 2
         //
-        // CLICKING THE DOCUMENT AREA IS NOT ENOUGH.
-        // The actual typed response is validated separately.
+        // CLICKING IS NOT VALIDATION.
+        // Actual text input is required.
         // =================================================
 
         if (
@@ -11121,15 +11502,19 @@ const RaniseMoisePedagogicalExplanationEngine = {
             "office-button-explanation"
         ) {
 
-            const area =
+            if (
                 getDocumentAreaTarget(
                     event.target
-                );
+                )
+            ) {
 
+                if (state.ui.status) {
 
-            if (area) {
+                    state.ui.status.textContent =
+                        getLedgerStatusText() +
+                        " — Zone de travail détectée. Tapez maintenant votre réponse.";
 
-                updateExercise2Status();
+                }
 
             }
 
@@ -11157,27 +11542,44 @@ const RaniseMoisePedagogicalExplanationEngine = {
                 state.exercise3ActionDetected =
                     true;
 
+                state.exercise3ActionTime =
+                    Date.now();
 
-                setTimeout(
 
-                    function () {
+                if (state.ui.status) {
 
-                        if (
-                            validateCreatedDocument()
-                        ) {
+                    state.ui.status.textContent =
+                        "Action demandée détectée. Je vérifie maintenant le résultat réel...";
 
-                            moveToNextExercise();
-
-                        }
-
-                    },
-
-                    100
-
-                );
+                }
 
             }
 
+
+            return;
+
+        }
+
+
+        // =================================================
+        // GENERIC
+        // =================================================
+
+        if (
+            type ===
+            "generic"
+        ) {
+
+            if (
+                validateGenericAction(
+                    event
+                ) &&
+                allRequiredActionsComplete()
+            ) {
+
+                moveToNextExercise();
+
+            }
 
         }
 
@@ -11185,7 +11587,7 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
 
     // =====================================================
-    // HANDLE INPUT
+    // HANDLE REAL INPUT
     // =====================================================
 
     function handleSimulationInput(event) {
@@ -11203,27 +11605,8 @@ const RaniseMoisePedagogicalExplanationEngine = {
         }
 
 
-        const exercise =
-            getCurrentExercise();
-
-
-        if (!exercise) {
-            return;
-        }
-
-
-        const type =
-            getExerciseType(
-                exercise
-            );
-
-
-        // =================================================
-        // EXERCISE 2 ONLY
-        // =================================================
-
         if (
-            type !==
+            state.currentType !==
             "office-button-explanation"
         ) {
 
@@ -11243,45 +11626,52 @@ const RaniseMoisePedagogicalExplanationEngine = {
         }
 
 
-        const text =
-            readDocumentText();
+        processExercise2Input();
+
+    }
 
 
-        if (!text) {
+    // =====================================================
+    // HANDLE KEYUP
+    // =====================================================
 
-            updateExercise2Status();
-
-            return;
-
-        }
-
-
-        state.textSnapshot =
-            text;
-
-
-        const validation =
-            validateOfficeButtonExplanation(
-                text
-            );
-
-
-        // -------------------------------------------------
-        // REAL TEXT RESPONSE IS CORRECT
-        // -------------------------------------------------
+    function handleSimulationKeyup(event) {
 
         if (
-            validation.correct
+            !state.started ||
+            state.completed ||
+            state.processing ||
+            !state.waitingForStudent ||
+            state.speaking
         ) {
-
-            moveToNextExercise();
 
             return;
 
         }
 
 
-        updateExercise2Status();
+        if (
+            state.currentType !==
+            "office-button-explanation"
+        ) {
+
+            return;
+
+        }
+
+
+        if (
+            !getDocumentAreaTarget(
+                event.target
+            )
+        ) {
+
+            return;
+
+        }
+
+
+        processExercise2Input();
 
     }
 
@@ -11303,40 +11693,90 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
 
         state.simulationDocument.addEventListener(
-
             "click",
-
             handleSimulationClick,
-
             true
-
         );
 
 
         state.simulationDocument.addEventListener(
-
             "input",
-
             handleSimulationInput,
-
             true
-
         );
 
 
         state.simulationDocument.addEventListener(
-
             "keyup",
-
-            handleSimulationInput,
-
+            handleSimulationKeyup,
             true
-
         );
 
 
         state.listenersAttached =
             true;
+
+    }
+
+
+    // =====================================================
+    // COMPLETE BLOCK 8
+    // =====================================================
+
+    async function completeBlock8() {
+
+        state.completed =
+            true;
+
+        state.waitingForStudent =
+            false;
+
+
+        stopAllMonitors();
+
+
+        if (state.ui.progress) {
+
+            state.ui.progress.textContent =
+                "Exercices terminés";
+
+        }
+
+
+        if (state.ui.instruction) {
+
+            state.ui.instruction.textContent =
+                "Tous les exercices du Chapitre 1 sont validés.";
+
+        }
+
+
+        if (state.ui.status) {
+
+            state.ui.status.textContent =
+                "Félicitations. Toutes les tâches ont été réellement exécutées et vérifiées.";
+
+        }
+
+
+        localStorage.setItem(
+            "wordChapter1ExercisesCompleted",
+            "true"
+        );
+
+
+        await speak(
+
+            "Excellent travail. Vous avez terminé et réussi tous les exercices du Chapitre 1. " +
+            "J'ai vérifié les actions demandées ainsi que vos réponses. " +
+            "Vous avez démontré que vous pouvez utiliser les connaissances acquises avec davantage d'autonomie."
+
+        );
+
+
+        console.log(
+            "RANISE BLOCK 8: STRICT EXERCISE MASTERY COMPLETED"
+        );
 
     }
 
@@ -11426,18 +11866,14 @@ const RaniseMoisePedagogicalExplanationEngine = {
         state.started =
             true;
 
-
         state.completed =
             false;
-
 
         state.waitingForStudent =
             false;
 
-
         state.processing =
             false;
-
 
         state.transitionDetected =
             true;
@@ -11449,23 +11885,16 @@ const RaniseMoisePedagogicalExplanationEngine = {
         attachListeners();
 
 
-        // =================================================
-        // TRANSITION MESSAGE
-        // =================================================
-
         await speak(
 
             "Excellent. La pratique guidée est terminée. " +
             "Nous allons maintenant passer aux exercices. " +
-            "Cette fois, je vais vous laisser davantage d'autonomie. " +
-            "Vous allez utiliser ce que vous venez d'apprendre pour réussir les exercices."
+            "Cette fois, je vais contrôler réellement les tâches que vous exécutez. " +
+            "Je ne validerai pas un exercice simplement parce qu'un clic a été détecté. " +
+            "Prenez le temps nécessaire pour chaque tâche."
 
         );
 
-
-        // =================================================
-        // START FIRST EXERCISE
-        // =================================================
 
         await announceCurrentExercise();
 
@@ -11477,19 +11906,17 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
 
     // =====================================================
-    // DETECT BLOCK 7 COMPLETION
+    // BLOCK 7 → BLOCK 8
     //
-    // IMPORTANT:
+    // READ-ONLY ACCESS TO BLOCK 7 PUBLIC STATE.
     // BLOCK 7 IS NOT MODIFIED.
-    // WE ONLY READ ITS EXISTING PUBLIC STATE.
     // =====================================================
 
     function checkBlock7Completion() {
 
         if (
             state.started ||
-            state.completed ||
-            state.transitionDetected
+            state.completed
         ) {
 
             return;
@@ -11529,13 +11956,6 @@ const RaniseMoisePedagogicalExplanationEngine = {
         }
 
 
-        // -------------------------------------------------
-        // BLOCK 7 MUST BE COMPLETELY FINISHED.
-        //
-        // speaking === false prevents Block 8 from
-        // interrupting the final Block 7 voice message.
-        // -------------------------------------------------
-
         if (
             block7State.completed === true &&
             block7State.speaking === false
@@ -11544,10 +11964,6 @@ const RaniseMoisePedagogicalExplanationEngine = {
             state.transitionDetected =
                 true;
 
-
-            // ------------------------------------------------
-            // CONNECT TO THE SAME EXISTING SIMULATION
-            // ------------------------------------------------
 
             if (
                 connectToSimulation()
@@ -11560,11 +11976,6 @@ const RaniseMoisePedagogicalExplanationEngine = {
             }
 
 
-            // ------------------------------------------------
-            // IF DOCUMENT ACCESS IS TEMPORARILY UNAVAILABLE,
-            // RETRY VERY QUICKLY.
-            // ------------------------------------------------
-
             state.transitionDetected =
                 false;
 
@@ -11574,7 +11985,7 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
 
     // =====================================================
-    // WAIT FOR SIMULATION IF NECESSARY
+    // WAIT FOR SIMULATION
     // =====================================================
 
     function waitForSimulationThenStart() {
@@ -11601,9 +12012,7 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
 
     // =====================================================
-    // AUTOMATIC BLOCK 7 → BLOCK 8 BRIDGE
-    //
-    // NO MODIFICATION TO BLOCK 7.
+    // AUTOMATIC BRIDGE
     // =====================================================
 
     const transitionTimer =
@@ -11661,6 +12070,9 @@ const RaniseMoisePedagogicalExplanationEngine = {
                     exerciseCount:
                         state.exercises.length,
 
+                    currentType:
+                        state.currentType,
+
                     waitingForStudent:
                         state.waitingForStudent,
 
@@ -11668,7 +12080,19 @@ const RaniseMoisePedagogicalExplanationEngine = {
                         state.speaking,
 
                     transitionDetected:
-                        state.transitionDetected
+                        state.transitionDetected,
+
+                    actionCount:
+                        state.actionCount,
+
+                    requiredActions:
+                        state.actionLedger.length,
+
+                    completedActions:
+                        state.actionLedger.filter(
+                            item =>
+                                item.completed
+                        ).length
 
                 };
 
@@ -11678,6 +12102,32 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
 
 })();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
