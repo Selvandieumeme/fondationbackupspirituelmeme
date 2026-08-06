@@ -12120,7 +12120,3388 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
 
 
+// =========================================================
+// BLOCK 9
+// MICROSOFT WORD 2007 FORMATION
+// RANISE MOISE HOMEWORK MASTERY ENGINE
+// =========================================================
+// PRODUCTION VERSION
+//
+// PURPOSE:
+// 1. START AUTOMATICALLY AFTER BLOCK 8 COMPLETES.
+// 2. USE THE SAME EXISTING WORD 2007 SIMULATION.
+// 3. READ CHAPTER 1 HOMEWORK DYNAMICALLY.
+// 4. READ CHAPTER 1 PRACTICE DYNAMICALLY.
+// 5. READ CHAPTER 1 EVALUATION DYNAMICALLY.
+// 6. REQUIRE REAL SIMULATION ACTIONS.
+// 7. REQUIRE REAL TEXT IN THE DOCUMENT.
+// 8. REQUIRE A REAL CREATED DOCUMENT.
+// 9. REQUIRE A REAL SAVE ACTION.
+// 10. VERIFY THE FINAL DOCUMENT CONTENT.
+// 11. VERIFY THE STUDENT'S REQUIRED WORK.
+// 12. NEVER VALIDATE FROM A RANDOM CLICK.
+// 13. NEVER VALIDATE FROM TEXT ALONE.
+// 14. NEVER VALIDATE FROM A SINGLE ACTION.
+// 15. GIVE BEGINNERS UNLIMITED PRACTICAL TIME.
+// 16. DO NOT MODIFY BLOCK 6.
+// 17. DO NOT MODIFY BLOCK 7.
+// 18. DO NOT MODIFY BLOCK 8.
+// 19. DO NOT MODIFY THE EXISTING SIMULATION ENGINE.
+// 20. DO NOT MODIFY MARYTTS + AVATAR.
+// 21. COMPLETE CHAPTER 1 ONLY AFTER REAL SUCCESS.
+// 22. PANEL REMAINS SMALL AND DRAGGABLE.
+// =========================================================
 
+(function () {
+
+    "use strict";
+
+
+    // =====================================================
+    // BLOCK 9 STATE
+    // =====================================================
+
+    const state = {
+
+        initialized: false,
+
+        started: false,
+
+        completed: false,
+
+        transitionDetected: false,
+
+        simulationFrame: null,
+
+        simulationDocument: null,
+
+        chapter: null,
+
+        homework: "",
+
+        practice: [],
+
+        evaluation: [],
+
+        objective: [],
+
+        waitingForStudent: false,
+
+        processing: false,
+
+        speaking: false,
+
+        listenersAttached: false,
+
+        observerAttached: false,
+
+        mutationObserver: null,
+
+        typedResponseTimer: null,
+
+        saveVerificationTimer: null,
+
+        lastDocumentText: "",
+
+        lastDocumentSignature: "",
+
+        lastActionTime: 0,
+
+        actionHistory: [],
+
+        actionFlags: {
+
+            titleBarSeen: false,
+
+            officeButtonSeen: false,
+
+            ribbonSeen: false,
+
+            tabsSeen: false,
+
+            documentAreaSeen: false,
+
+            newDocumentAction: false,
+
+            textEntered: false,
+
+            saveAction: false,
+
+            saveVerified: false
+
+        },
+
+        validation: {
+
+            contentValid: false,
+
+            actionsValid: false,
+
+            saveValid: false,
+
+            finalValid: false
+
+        },
+
+        ui: {
+
+            root: null,
+
+            title: null,
+
+            progress: null,
+
+            instruction: null,
+
+            status: null,
+
+            details: null
+
+        }
+
+    };
+
+
+    // =====================================================
+    // NORMALIZE
+    // =====================================================
+
+    function normalize(value) {
+
+        return String(value || "")
+
+            .normalize("NFD")
+
+            .replace(/[\u0300-\u036f]/g, "")
+
+            .toLowerCase()
+
+            .replace(/[“”"«»]/g, " ")
+
+            .replace(/[.,;:!?()[\]{}]/g, " ")
+
+            .replace(/\s+/g, " ")
+
+            .trim();
+
+    }
+
+
+    // =====================================================
+    // WORD NORMALIZATION
+    // =====================================================
+
+    function normalizeResponse(value) {
+
+        return normalize(value)
+
+            .replace(
+                /\b(le|la|les|un|une|des|du|de|d|et|ou|a|au|aux|dans|sur|pour|avec|en|ce|cette|ces)\b/g,
+                " "
+            )
+
+            .replace(/\s+/g, " ")
+
+            .trim();
+
+    }
+
+
+    // =====================================================
+    // SPEAK USING EXISTING MARYTTS SYSTEM
+    // =====================================================
+
+    async function speak(text) {
+
+        if (!text) {
+            return;
+        }
+
+
+        state.speaking = true;
+
+
+        if (
+            typeof raniseStartTalking ===
+            "function"
+        ) {
+
+            raniseStartTalking();
+
+        }
+
+
+        try {
+
+            if (
+                typeof speakProfessorIAWithMaryTTS ===
+                "function"
+            ) {
+
+                await speakProfessorIAWithMaryTTS(
+                    text
+                );
+
+            }
+
+        } finally {
+
+            state.speaking = false;
+
+
+            if (
+                typeof raniseStopTalking ===
+                "function"
+            ) {
+
+                raniseStopTalking();
+
+            }
+
+        }
+
+    }
+
+
+    // =====================================================
+    // GET CHAPTER 1
+    // =====================================================
+
+    function getChapter1() {
+
+        if (
+            typeof microsoftWordCourse ===
+            "undefined"
+        ) {
+
+            return null;
+
+        }
+
+
+        if (
+            !Array.isArray(
+                microsoftWordCourse.chapters
+            )
+        ) {
+
+            return null;
+
+        }
+
+
+        return microsoftWordCourse.chapters.find(
+
+            chapter =>
+                chapter &&
+                chapter.id === "chapitre1"
+
+        ) || null;
+
+    }
+
+
+    // =====================================================
+    // FIND EXISTING SIMULATION
+    // =====================================================
+
+    function findSimulation() {
+
+        const campusContent =
+            document.getElementById(
+                "campusContent"
+            );
+
+
+        if (!campusContent) {
+
+            return null;
+
+        }
+
+
+        return campusContent.querySelector(
+
+            'iframe[src*="campusword2007simulation"]'
+
+        ) || null;
+
+    }
+
+
+    // =====================================================
+    // CONNECT TO EXISTING SIMULATION
+    // =====================================================
+
+    function connectToSimulation() {
+
+        const frame =
+            findSimulation();
+
+
+        if (!frame) {
+
+            return false;
+
+        }
+
+
+        try {
+
+            const doc =
+
+                frame.contentDocument ||
+
+                frame.contentWindow.document;
+
+
+            if (!doc) {
+
+                return false;
+
+            }
+
+
+            state.simulationFrame =
+                frame;
+
+            state.simulationDocument =
+                doc;
+
+
+            return true;
+
+        } catch (error) {
+
+            return false;
+
+        }
+
+    }
+
+
+    // =====================================================
+    // GET PAGE CONTENTS
+    // =====================================================
+
+    function getPageContents() {
+
+        if (
+            !state.simulationDocument
+        ) {
+
+            return [];
+
+        }
+
+
+        return Array.from(
+
+            state.simulationDocument.querySelectorAll(
+
+                ".cwPageContent"
+
+            )
+
+        );
+
+    }
+
+
+    // =====================================================
+    // READ REAL DOCUMENT TEXT
+    // =====================================================
+
+    function readDocumentText() {
+
+        const pages =
+            getPageContents();
+
+
+        if (!pages.length) {
+
+            return "";
+
+        }
+
+
+        let output = "";
+
+
+        pages.forEach(
+
+            page => {
+
+                output +=
+                    " " +
+                    (
+                        page.innerText ||
+                        page.textContent ||
+                        ""
+                    );
+
+            }
+
+        );
+
+
+        return output
+
+            .replace(/\u00a0/g, " ")
+
+            .replace(/\s+/g, " ")
+
+            .trim();
+
+    }
+
+
+    // =====================================================
+    // DOCUMENT SIGNATURE
+    //
+    // Detects real document changes without depending
+    // on the simulation's internal implementation.
+    // =====================================================
+
+    function getDocumentSignature() {
+
+        const text =
+            readDocumentText();
+
+
+        const pages =
+            getPageContents();
+
+
+        return [
+
+            pages.length,
+
+            text.length,
+
+            normalize(text)
+
+        ].join("|");
+
+    }
+
+
+    // =====================================================
+    // GET TITLE BAR
+    // =====================================================
+
+    function getTitleBar() {
+
+        if (
+            !state.simulationDocument
+        ) {
+
+            return null;
+
+        }
+
+
+        return state.simulationDocument.querySelector(
+
+            "#cwTitleBar"
+
+        );
+
+    }
+
+
+    // =====================================================
+    // GET OFFICE BUTTON
+    // =====================================================
+
+    function getOfficeButton() {
+
+        if (
+            !state.simulationDocument
+        ) {
+
+            return null;
+
+        }
+
+
+        return state.simulationDocument.querySelector(
+
+            "#cwOfficeButton[data-role='office-button'], #cwOfficeButton"
+
+        );
+
+    }
+
+
+    // =====================================================
+    // GET RIBBON
+    // =====================================================
+
+    function getRibbon() {
+
+        if (
+            !state.simulationDocument
+        ) {
+
+            return null;
+
+        }
+
+
+        return state.simulationDocument.querySelector(
+
+            "#cwRibbonContentArea"
+
+        );
+
+    }
+
+
+    // =====================================================
+    // GET TABS
+    // =====================================================
+
+    function getTabs() {
+
+        if (
+            !state.simulationDocument
+        ) {
+
+            return [];
+
+        }
+
+
+        return Array.from(
+
+            state.simulationDocument.querySelectorAll(
+
+                "#cwRibbonTabBar .cwTabBtn"
+
+            )
+
+        );
+
+    }
+
+
+    // =====================================================
+    // GET DOCUMENT AREA
+    // =====================================================
+
+    function getDocumentArea() {
+
+        if (
+            !state.simulationDocument
+        ) {
+
+            return null;
+
+        }
+
+
+        return state.simulationDocument.querySelector(
+
+            ".cwPageContent"
+
+        );
+
+    }
+
+
+    // =====================================================
+    // GET ELEMENT DATA
+    // =====================================================
+
+    function getElementData(element) {
+
+        if (!element) {
+
+            return "";
+
+        }
+
+
+        return normalize(
+
+            [
+
+                element.id,
+
+                element.className,
+
+                element.innerText,
+
+                element.textContent,
+
+                element.getAttribute(
+                    "title"
+                ),
+
+                element.getAttribute(
+                    "aria-label"
+                ),
+
+                element.getAttribute(
+                    "data-action"
+                ),
+
+                element.getAttribute(
+                    "data-command"
+                ),
+
+                element.getAttribute(
+                    "data-role"
+                ),
+
+                element.getAttribute(
+                    "data-target"
+                )
+
+            ]
+
+            .filter(Boolean)
+
+            .join(" ")
+
+        );
+
+    }
+
+
+    // =====================================================
+    // CLOSEST
+    // =====================================================
+
+    function closestFromTarget(
+        target,
+        selector
+    ) {
+
+        if (
+            !target ||
+            !selector ||
+            typeof target.closest !==
+            "function"
+        ) {
+
+            return null;
+
+        }
+
+
+        try {
+
+            return target.closest(
+                selector
+            );
+
+        } catch (error) {
+
+            return null;
+
+        }
+
+    }
+
+
+    // =====================================================
+    // RECORD REAL STUDENT ACTION
+    // =====================================================
+
+    function recordAction(
+        action
+    ) {
+
+        if (!action) {
+
+            return;
+
+        }
+
+
+        state.lastActionTime =
+            Date.now();
+
+
+        state.actionHistory.push({
+
+            action:
+                action,
+
+            timestamp:
+                Date.now()
+
+        });
+
+
+        // -------------------------------------------------
+        // Keep history bounded.
+        // -------------------------------------------------
+
+        if (
+            state.actionHistory.length >
+            300
+        ) {
+
+            state.actionHistory.shift();
+
+        }
+
+    }
+
+
+    // =====================================================
+    // CREATE EXERCISE PANEL
+    // =====================================================
+
+    function createHomeworkUI() {
+
+        if (
+            !state.simulationDocument ||
+            state.ui.root
+        ) {
+
+            return;
+
+        }
+
+
+        const doc =
+            state.simulationDocument;
+
+
+        const root =
+            doc.createElement("div");
+
+
+        root.id =
+            "raniseBlock9HomeworkPanel";
+
+
+        // -------------------------------------------------
+        // SMALL PANEL
+        // -------------------------------------------------
+
+        root.style.position =
+            "fixed";
+
+        root.style.top =
+            "12px";
+
+        root.style.right =
+            "12px";
+
+        root.style.width =
+            "min(360px, calc(100vw - 24px))";
+
+        root.style.maxWidth =
+            "calc(100vw - 24px)";
+
+        root.style.maxHeight =
+            "calc(100vh - 24px)";
+
+        root.style.overflowY =
+            "auto";
+
+        root.style.zIndex =
+            "2147483640";
+
+        root.style.background =
+            "rgba(255,255,255,0.97)";
+
+        root.style.border =
+            "2px solid #1f4e79";
+
+        root.style.borderRadius =
+            "12px";
+
+        root.style.boxShadow =
+            "0 8px 30px rgba(0,0,0,0.25)";
+
+        root.style.padding =
+            "12px";
+
+        root.style.fontFamily =
+            "Arial, sans-serif";
+
+        root.style.fontSize =
+            "13px";
+
+        root.style.lineHeight =
+            "1.4";
+
+        root.style.boxSizing =
+            "border-box";
+
+        root.style.userSelect =
+            "none";
+
+        root.style.webkitUserSelect =
+            "none";
+
+
+        // =================================================
+        // TITLE / DRAG HANDLE
+        // =================================================
+
+        const title =
+            doc.createElement("div");
+
+
+        title.style.fontWeight =
+            "700";
+
+        title.style.fontSize =
+            "16px";
+
+        title.style.marginBottom =
+            "7px";
+
+        title.style.cursor =
+            "grab";
+
+        title.style.touchAction =
+            "none";
+
+        title.style.userSelect =
+            "none";
+
+        title.style.webkitUserSelect =
+            "none";
+
+        title.textContent =
+            "Ranise Moïse — Devoir";
+
+
+        // =================================================
+        // PROGRESS
+        // =================================================
+
+        const progress =
+            doc.createElement("div");
+
+
+        progress.style.fontWeight =
+            "600";
+
+        progress.style.marginBottom =
+            "7px";
+
+
+        // =================================================
+        // HOMEWORK
+        // =================================================
+
+        const instruction =
+            doc.createElement("div");
+
+
+        instruction.style.marginBottom =
+            "8px";
+
+
+        // =================================================
+        // STATUS
+        // =================================================
+
+        const status =
+            doc.createElement("div");
+
+
+        status.style.padding =
+            "7px";
+
+        status.style.borderRadius =
+            "7px";
+
+        status.style.background =
+            "#eef4f8";
+
+        status.style.marginBottom =
+            "7px";
+
+
+        // =================================================
+        // DETAILS
+        // =================================================
+
+        const details =
+            doc.createElement("div");
+
+
+        details.style.fontSize =
+            "12px";
+
+        details.style.lineHeight =
+            "1.35";
+
+
+        root.appendChild(title);
+
+        root.appendChild(progress);
+
+        root.appendChild(instruction);
+
+        root.appendChild(status);
+
+        root.appendChild(details);
+
+
+        (
+            doc.body ||
+            doc.documentElement
+        ).appendChild(root);
+
+
+        state.ui.root =
+            root;
+
+        state.ui.title =
+            title;
+
+        state.ui.progress =
+            progress;
+
+        state.ui.instruction =
+            instruction;
+
+        state.ui.status =
+            status;
+
+        state.ui.details =
+            details;
+
+
+        enableHomeworkPanelDragging();
+
+    }
+
+
+    // =====================================================
+    // DRAG ENGINE
+    // =====================================================
+
+    function enableHomeworkPanelDragging() {
+
+        if (
+            !state.ui.root ||
+            !state.ui.title
+        ) {
+
+            return;
+
+        }
+
+
+        const panel =
+            state.ui.root;
+
+        const handle =
+            state.ui.title;
+
+
+        let dragging =
+            false;
+
+        let pointerId =
+            null;
+
+        let offsetX =
+            0;
+
+        let offsetY =
+            0;
+
+
+        function clampPosition(
+            left,
+            top
+        ) {
+
+            const doc =
+                state.simulationDocument;
+
+
+            const viewWidth =
+                doc?.documentElement?.clientWidth ||
+                window.innerWidth;
+
+
+            const viewHeight =
+                doc?.documentElement?.clientHeight ||
+                window.innerHeight;
+
+
+            const panelWidth =
+                panel.offsetWidth;
+
+
+            const panelHeight =
+                panel.offsetHeight;
+
+
+            return {
+
+                left:
+
+                    Math.max(
+
+                        0,
+
+                        Math.min(
+
+                            left,
+
+                            Math.max(
+                                0,
+                                viewWidth -
+                                panelWidth
+                            )
+
+                        )
+
+                    ),
+
+                top:
+
+                    Math.max(
+
+                        0,
+
+                        Math.min(
+
+                            top,
+
+                            Math.max(
+                                0,
+                                viewHeight -
+                                panelHeight
+                            )
+
+                        )
+
+                    )
+
+            };
+
+        }
+
+
+        function startDrag(event) {
+
+            if (!event) {
+
+                return;
+
+            }
+
+
+            if (
+                event.pointerType ===
+                "mouse" &&
+                event.button !== 0
+            ) {
+
+                return;
+
+            }
+
+
+            const rect =
+                panel.getBoundingClientRect();
+
+
+            dragging =
+                true;
+
+
+            pointerId =
+                event.pointerId;
+
+
+            offsetX =
+                event.clientX -
+                rect.left;
+
+
+            offsetY =
+                event.clientY -
+                rect.top;
+
+
+            handle.style.cursor =
+                "grabbing";
+
+
+            if (
+                typeof handle.setPointerCapture ===
+                "function" &&
+                event.pointerId !== undefined
+            ) {
+
+                try {
+
+                    handle.setPointerCapture(
+                        event.pointerId
+                    );
+
+                } catch (error) {}
+
+            }
+
+
+            event.preventDefault();
+
+        }
+
+
+        function moveDrag(event) {
+
+            if (
+                !dragging ||
+                !event
+            ) {
+
+                return;
+
+            }
+
+
+            if (
+                pointerId !== null &&
+                event.pointerId !== pointerId
+            ) {
+
+                return;
+
+            }
+
+
+            const position =
+                clampPosition(
+
+                    event.clientX -
+                    offsetX,
+
+                    event.clientY -
+                    offsetY
+
+                );
+
+
+            panel.style.left =
+                position.left + "px";
+
+
+            panel.style.top =
+                position.top + "px";
+
+
+            panel.style.right =
+                "auto";
+
+
+            event.preventDefault();
+
+        }
+
+
+        function stopDrag(event) {
+
+            if (!dragging) {
+
+                return;
+
+            }
+
+
+            if (
+                event &&
+                pointerId !== null &&
+                event.pointerId !== pointerId
+            ) {
+
+                return;
+
+            }
+
+
+            dragging =
+                false;
+
+
+            pointerId =
+                null;
+
+
+            handle.style.cursor =
+                "grab";
+
+        }
+
+
+        handle.addEventListener(
+            "pointerdown",
+            startDrag,
+            true
+        );
+
+
+        handle.addEventListener(
+            "pointermove",
+            moveDrag,
+            true
+        );
+
+
+        handle.addEventListener(
+            "pointerup",
+            stopDrag,
+            true
+        );
+
+
+        handle.addEventListener(
+            "pointercancel",
+            stopDrag,
+            true
+        );
+
+    }
+
+
+    // =====================================================
+    // UPDATE PANEL
+    // =====================================================
+
+    function updateHomeworkUI() {
+
+        if (!state.ui.root) {
+
+            return;
+
+        }
+
+
+        state.ui.progress.textContent =
+            "Devoir — Chapitre 1";
+
+
+        state.ui.instruction.textContent =
+            state.homework ||
+            "Réalisez le devoir demandé.";
+
+
+        const actionCount =
+            Object.values(
+                state.actionFlags
+            )
+            .filter(Boolean)
+            .length;
+
+
+        state.ui.details.innerHTML =
+
+            "Contrôle du professeur :<br>" +
+
+            "• Interface : " +
+            (
+                state.actionFlags.titleBarSeen &&
+                state.actionFlags.officeButtonSeen &&
+                state.actionFlags.ribbonSeen &&
+                state.actionFlags.tabsSeen
+                    ? "✓"
+                    : "…"
+            ) +
+            "<br>" +
+
+            "• Zone document : " +
+            (
+                state.actionFlags.documentAreaSeen
+                    ? "✓"
+                    : "…"
+            ) +
+            "<br>" +
+
+            "• Création document : " +
+            (
+                state.actionFlags.newDocumentAction
+                    ? "✓"
+                    : "…"
+            ) +
+            "<br>" +
+
+            "• Texte du devoir : " +
+            (
+                state.actionFlags.textEntered
+                    ? "✓"
+                    : "…"
+            ) +
+            "<br>" +
+
+            "• Enregistrement : " +
+            (
+                state.actionFlags.saveVerified
+                    ? "✓"
+                    : "…"
+            );
+
+    }
+
+
+    // =====================================================
+    // STATUS MESSAGE
+    // =====================================================
+
+    function setStatus(message) {
+
+        if (
+            state.ui.status
+        ) {
+
+            state.ui.status.textContent =
+                message;
+
+        }
+
+    }
+
+
+    // =====================================================
+    // FIND NEW DOCUMENT ACTION
+    // =====================================================
+
+    function isNewDocumentAction(
+        target
+    ) {
+
+        if (!target) {
+
+            return false;
+
+        }
+
+
+        const actionTarget =
+            closestFromTarget(
+
+                target,
+
+                [
+
+                    "[data-action='new']",
+
+                    "[data-action='new-document']",
+
+                    "[data-command='new']",
+
+                    "[data-command='new-document']"
+
+                ].join(",")
+
+            );
+
+
+        if (actionTarget) {
+
+            return true;
+
+        }
+
+
+        const officeItem =
+            closestFromTarget(
+
+                target,
+
+                "#cwOfficeMenu .cwOfficeItem"
+
+            );
+
+
+        if (officeItem) {
+
+            const action =
+                normalize(
+
+                    officeItem.getAttribute(
+                        "data-action"
+                    )
+
+                );
+
+
+            return (
+
+                action === "new" ||
+
+                action === "new-document"
+
+            );
+
+        }
+
+
+        return false;
+
+    }
+
+
+    // =====================================================
+    // FIND SAVE ACTION
+    // =====================================================
+
+    function isSaveAction(
+        target
+    ) {
+
+        if (!target) {
+
+            return false;
+
+        }
+
+
+        const data =
+            getElementData(
+                target
+            );
+
+
+        if (
+            data.includes("save") ||
+            data.includes("enregistrer") ||
+            data.includes("sauvegarder")
+        ) {
+
+            return true;
+
+        }
+
+
+        const actionTarget =
+            closestFromTarget(
+
+                target,
+
+                [
+
+                    "[data-action='save']",
+
+                    "[data-action='save-document']",
+
+                    "[data-command='save']",
+
+                    "[data-command='save-document']"
+
+                ].join(",")
+
+            );
+
+
+        return !!actionTarget;
+
+    }
+
+
+    // =====================================================
+    // RECORD INTERFACE ACTIONS
+    // =====================================================
+
+    function inspectInterfaceTarget(
+        target
+    ) {
+
+        if (!target) {
+
+            return;
+
+        }
+
+
+        if (
+            closestFromTarget(
+                target,
+                "#cwTitleBar"
+            )
+        ) {
+
+            state.actionFlags.titleBarSeen =
+                true;
+
+            recordAction(
+                "title-bar"
+            );
+
+        }
+
+
+        if (
+            closestFromTarget(
+
+                target,
+
+                "#cwOfficeButton[data-role='office-button'], #cwOfficeButton"
+
+            )
+
+        ) {
+
+            state.actionFlags.officeButtonSeen =
+                true;
+
+            recordAction(
+                "office-button"
+            );
+
+        }
+
+
+        if (
+            closestFromTarget(
+
+                target,
+
+                "#cwRibbonContentArea"
+
+            )
+
+        ) {
+
+            state.actionFlags.ribbonSeen =
+                true;
+
+            recordAction(
+                "ribbon"
+            );
+
+        }
+
+
+        if (
+            closestFromTarget(
+
+                target,
+
+                "#cwRibbonTabBar .cwTabBtn"
+
+            )
+
+        ) {
+
+            state.actionFlags.tabsSeen =
+                true;
+
+            recordAction(
+                "tab"
+            );
+
+        }
+
+
+        if (
+            closestFromTarget(
+
+                target,
+
+                ".cwPageContent"
+
+            )
+
+        ) {
+
+            state.actionFlags.documentAreaSeen =
+                true;
+
+            recordAction(
+                "document-area"
+            );
+
+        }
+
+
+        if (
+            isNewDocumentAction(target)
+        ) {
+
+            state.actionFlags.newDocumentAction =
+                true;
+
+            recordAction(
+                "new-document"
+            );
+
+        }
+
+
+        if (
+            isSaveAction(target)
+        ) {
+
+            state.actionFlags.saveAction =
+                true;
+
+            recordAction(
+                "save-action"
+            );
+
+        }
+
+
+        updateHomeworkUI();
+
+    }
+
+
+    // =====================================================
+    // CHECK IF TEXT IS MEANINGFUL
+    // =====================================================
+
+    function hasMeaningfulText(
+        text
+    ) {
+
+        const value =
+            normalizeResponse(
+                text
+            );
+
+
+        if (!value) {
+
+            return false;
+
+        }
+
+
+        // -------------------------------------------------
+        // A FEW RANDOM WORDS MUST NOT PASS.
+        // -------------------------------------------------
+
+        if (
+            value.length < 40
+        ) {
+
+            return false;
+
+        }
+
+
+        const words =
+            value.split(" ")
+                .filter(Boolean);
+
+
+        if (
+            words.length < 8
+        ) {
+
+            return false;
+
+        }
+
+
+        return true;
+
+    }
+
+
+    // =====================================================
+    // VERIFY REQUIRED WORD 2007 CONCEPTS
+    // =====================================================
+
+    function validateRequiredConcepts(
+        text
+    ) {
+
+        const value =
+            normalizeResponse(
+                text
+            );
+
+
+        const groups = {
+
+            titleBar: [
+
+                "barre de titre",
+
+                "title bar",
+
+                "titre"
+
+            ],
+
+
+            officeButton: [
+
+                "bouton office",
+
+                "office button",
+
+                "office"
+
+            ],
+
+
+            ribbon: [
+
+                "ruban",
+
+                "ribbon"
+
+            ],
+
+
+            tabs: [
+
+                "onglet",
+
+                "onglets",
+
+                "tabs"
+
+            ],
+
+
+            documentArea: [
+
+                "zone de travail",
+
+                "zone du document",
+
+                "zone document",
+
+                "document area"
+
+            ],
+
+
+            ruler: [
+
+                "regle",
+
+                "regles",
+
+                "ruler",
+
+                "rulers"
+
+            ],
+
+
+            statusBar: [
+
+                "barre d etat",
+
+                "barre etat",
+
+                "status bar"
+
+            ]
+
+        };
+
+
+        const result = {};
+
+
+        Object.keys(groups).forEach(
+
+            group => {
+
+                result[group] =
+                    groups[group].some(
+
+                        keyword =>
+                            value.includes(
+                                normalize(keyword)
+                            )
+
+                    );
+
+            }
+
+        );
+
+
+        const requiredGroups = [
+
+            "titleBar",
+
+            "officeButton",
+
+            "ribbon",
+
+            "tabs",
+
+            "documentArea"
+
+        ];
+
+
+        const discovered =
+            requiredGroups.filter(
+
+                group =>
+                    result[group]
+
+            );
+
+
+        // -------------------------------------------------
+        // THE HOMEWORK SAYS "DIFFÉRENTS ÉLÉMENTS".
+        //
+        // Five major elements are required.
+        // Rules and Status Bar strengthen the answer,
+        // but are not mandatory if the five principal
+        // elements are correctly presented.
+        // -------------------------------------------------
+
+        const minimumCore =
+            discovered.length >= 5;
+
+
+        return {
+
+            correct:
+                minimumCore,
+
+            result:
+                result,
+
+            discovered:
+                discovered.length
+
+        };
+
+    }
+
+
+    // =====================================================
+    // VERIFY DOCUMENT CONTENT
+    // =====================================================
+
+    function validateDocumentContent() {
+
+        const text =
+            readDocumentText();
+
+
+        state.lastDocumentText =
+            text;
+
+
+        if (
+            !hasMeaningfulText(text)
+        ) {
+
+            return {
+
+                correct:
+                    false,
+
+                reason:
+                    "Le document ne contient pas encore un contenu suffisamment développé."
+
+            };
+
+        }
+
+
+        const concepts =
+            validateRequiredConcepts(
+                text
+            );
+
+
+        if (
+            !concepts.correct
+        ) {
+
+            return {
+
+                correct:
+                    false,
+
+                reason:
+                    "Le document ne présente pas encore suffisamment des principaux éléments de l'environnement Word 2007."
+
+            };
+
+        }
+
+
+        // -------------------------------------------------
+        // WORD / MICROSOFT CONTEXT
+        // -------------------------------------------------
+
+        const normalized =
+            normalizeResponse(
+                text
+            );
+
+
+        const wordContext =
+
+            normalized.includes(
+                "word"
+            ) ||
+
+            normalized.includes(
+                "microsoft"
+            );
+
+
+        if (!wordContext) {
+
+            return {
+
+                correct:
+                    false,
+
+                reason:
+                    "Le contenu ne montre pas clairement qu'il présente l'environnement Microsoft Word 2007."
+
+            };
+
+        }
+
+
+        return {
+
+            correct:
+                true,
+
+            reason:
+                "Le document contient une présentation suffisamment complète des principaux éléments de Word 2007."
+
+        };
+
+    }
+
+
+    // =====================================================
+    // VERIFY REAL SIMULATION ACTIONS
+    // =====================================================
+
+    function validateSimulationActions() {
+
+        const flags =
+            state.actionFlags;
+
+
+        // -------------------------------------------------
+        // PRINCIPAL INTERFACE DISCOVERY
+        // -------------------------------------------------
+
+        const interfaceActions =
+
+            flags.titleBarSeen &&
+
+            flags.officeButtonSeen &&
+
+            flags.ribbonSeen &&
+
+            flags.tabsSeen &&
+
+            flags.documentAreaSeen;
+
+
+        // -------------------------------------------------
+        // DOCUMENT CREATION
+        // -------------------------------------------------
+
+        const documentCreated =
+            flags.newDocumentAction;
+
+
+        // -------------------------------------------------
+        // TEXT ENTERED
+        // -------------------------------------------------
+
+        const textEntered =
+            flags.textEntered;
+
+
+        return {
+
+            correct:
+
+                interfaceActions &&
+
+                documentCreated &&
+
+                textEntered,
+
+            interfaceActions:
+                interfaceActions,
+
+            documentCreated:
+                documentCreated,
+
+            textEntered:
+                textEntered
+
+        };
+
+    }
+
+
+    // =====================================================
+    // VERIFY SAVE
+    //
+    // We use multiple safe signals because different
+    // versions of the simulation may implement saving
+    // differently.
+    // =====================================================
+
+    function verifySaveState() {
+
+        if (
+            state.actionFlags.saveAction
+        ) {
+
+            state.actionFlags.saveVerified =
+                true;
+
+            return true;
+
+        }
+
+
+        const doc =
+            state.simulationDocument;
+
+
+        if (!doc) {
+
+            return false;
+
+        }
+
+
+        // -------------------------------------------------
+        // Search for common simulation save indicators.
+        // -------------------------------------------------
+
+        const possibleIndicators = [
+
+            "[data-saved='true']",
+
+            "[data-save-state='saved']",
+
+            ".cwSaved",
+
+            ".cwDocumentSaved",
+
+            "#cwSaveStatus"
+
+        ];
+
+
+        for (
+            const selector of possibleIndicators
+        ) {
+
+            try {
+
+                const found =
+                    doc.querySelector(
+                        selector
+                    );
+
+
+                if (found) {
+
+                    const data =
+                        normalize(
+                            found.textContent ||
+                            found.getAttribute(
+                                "data-saved"
+                            ) ||
+                            found.getAttribute(
+                                "data-save-state"
+                            ) ||
+                            ""
+                        );
+
+
+                    if (
+                        data.includes("saved") ||
+                        data.includes("enregistre") ||
+                        data === "true"
+                    ) {
+
+                        state.actionFlags.saveVerified =
+                            true;
+
+                        return true;
+
+                    }
+
+                }
+
+            } catch (error) {}
+
+        }
+
+
+        return false;
+
+    }
+
+
+    // =====================================================
+    // VERIFY COMPLETE HOMEWORK
+    // =====================================================
+
+    function validateFinalHomework() {
+
+        const actionValidation =
+            validateSimulationActions();
+
+
+        const contentValidation =
+            validateDocumentContent();
+
+
+        const saveValidation =
+            verifySaveState();
+
+
+        state.validation.actionsValid =
+            actionValidation.correct;
+
+
+        state.validation.contentValid =
+            contentValidation.correct;
+
+
+        state.validation.saveValid =
+            saveValidation;
+
+
+        state.validation.finalValid =
+
+            actionValidation.correct &&
+
+            contentValidation.correct &&
+
+            saveValidation;
+
+
+        return {
+
+            finalValid:
+                state.validation.finalValid,
+
+            actions:
+                actionValidation,
+
+            content:
+                contentValidation,
+
+            save:
+                saveValidation
+
+        };
+
+    }
+
+
+    // =====================================================
+    // STATUS INTELLIGENCE
+    // =====================================================
+
+    function updateIntelligentStatus() {
+
+        if (
+            state.completed ||
+            !state.ui.status
+        ) {
+
+            return;
+
+        }
+
+
+        const result =
+            validateFinalHomework();
+
+
+        if (
+            result.finalValid
+        ) {
+
+            setStatus(
+                "Travail complet détecté. Vérification finale du professeur..."
+            );
+
+            return;
+
+        }
+
+
+        if (
+            !result.actions.interfaceActions
+        ) {
+
+            setStatus(
+
+                "Je vérifie encore votre utilisation réelle de l'interface Word 2007. Prenez votre temps."
+
+            );
+
+            return;
+
+        }
+
+
+        if (
+            !result.actions.documentCreated
+        ) {
+
+            setStatus(
+
+                "Les éléments de l'interface sont repérés. Vous devez maintenant créer le document demandé."
+
+            );
+
+            return;
+
+        }
+
+
+        if (
+            !result.content.correct
+        ) {
+
+            setStatus(
+
+                "Le document existe. Présentez maintenant les différents éléments découverts dans Word 2007 avec suffisamment d'explications."
+
+            );
+
+            return;
+
+        }
+
+
+        if (
+            !result.save
+        ) {
+
+            setStatus(
+
+                "Votre contenu est suffisamment complet. Enregistrez maintenant le document."
+
+            );
+
+            return;
+
+        }
+
+
+        setStatus(
+
+            "Vérification finale en cours..."
+
+        );
+
+    }
+
+
+    // =====================================================
+    // DOCUMENT CHANGE HANDLER
+    // =====================================================
+
+    function handleDocumentChange() {
+
+        if (
+            !state.started ||
+            state.completed
+        ) {
+
+            return;
+
+        }
+
+
+        const text =
+            readDocumentText();
+
+
+        const signature =
+            getDocumentSignature();
+
+
+        if (
+            signature !==
+            state.lastDocumentSignature
+        ) {
+
+            state.lastDocumentSignature =
+                signature;
+
+
+            state.lastDocumentText =
+                text;
+
+
+            if (
+                text.trim().length > 0
+            ) {
+
+                state.actionFlags.textEntered =
+                    true;
+
+                recordAction(
+                    "document-text"
+                );
+
+            }
+
+
+            updateHomeworkUI();
+
+            updateIntelligentStatus();
+
+        }
+
+    }
+
+
+    // =====================================================
+    // INPUT EVENT
+    // =====================================================
+
+    function handleSimulationInput(
+        event
+    ) {
+
+        if (
+            !state.started ||
+            state.completed ||
+            state.processing
+        ) {
+
+            return;
+
+        }
+
+
+        if (
+            event &&
+            event.target
+        ) {
+
+            if (
+                closestFromTarget(
+                    event.target,
+                    ".cwPageContent"
+                )
+            ) {
+
+                state.actionFlags.documentAreaSeen =
+                    true;
+
+            }
+
+        }
+
+
+        handleDocumentChange();
+
+    }
+
+
+    // =====================================================
+    // CLICK EVENT
+    // =====================================================
+
+    function handleSimulationClick(
+        event
+    ) {
+
+        if (
+            !state.started ||
+            state.completed
+        ) {
+
+            return;
+
+        }
+
+
+        if (!event) {
+
+            return;
+
+        }
+
+
+        inspectInterfaceTarget(
+            event.target
+        );
+
+
+        // -------------------------------------------------
+        // SAVE ACTION
+        // -------------------------------------------------
+
+        if (
+            isSaveAction(
+                event.target
+            )
+        ) {
+
+            state.actionFlags.saveAction =
+                true;
+
+            recordAction(
+                "save"
+            );
+
+
+            // Give the simulation a moment to update.
+            setTimeout(
+
+                function () {
+
+                    verifySaveState();
+
+                    updateHomeworkUI();
+
+                    updateIntelligentStatus();
+
+                },
+
+                250
+
+            );
+
+        }
+
+
+        // -------------------------------------------------
+        // DOCUMENT AREA
+        // -------------------------------------------------
+
+        if (
+            closestFromTarget(
+
+                event.target,
+
+                ".cwPageContent"
+
+            )
+        ) {
+
+            state.actionFlags.documentAreaSeen =
+                true;
+
+            recordAction(
+                "document-area-click"
+            );
+
+        }
+
+
+        handleDocumentChange();
+
+
+        // -------------------------------------------------
+        // FINAL VALIDATION
+        //
+        // We do NOT immediately pass from a click.
+        // The complete state must satisfy every condition.
+        // -------------------------------------------------
+
+        scheduleValidation();
+
+    }
+
+
+    // =====================================================
+    // KEYUP
+    // =====================================================
+
+    function handleSimulationKeyup() {
+
+        if (
+            !state.started ||
+            state.completed
+        ) {
+
+            return;
+
+        }
+
+
+        handleDocumentChange();
+
+        scheduleValidation();
+
+    }
+
+
+    // =====================================================
+    // SCHEDULE VALIDATION
+    // =====================================================
+
+    function scheduleValidation() {
+
+        if (
+            state.typedResponseTimer
+        ) {
+
+            clearTimeout(
+                state.typedResponseTimer
+            );
+
+        }
+
+
+        state.typedResponseTimer =
+            setTimeout(
+
+                function () {
+
+                    state.typedResponseTimer =
+                        null;
+
+                    attemptFinalValidation();
+
+                },
+
+                700
+
+            );
+
+    }
+
+
+    // =====================================================
+    // FINAL VALIDATION
+    // =====================================================
+
+    async function attemptFinalValidation() {
+
+        if (
+            !state.started ||
+            state.completed ||
+            state.processing
+        ) {
+
+            return;
+
+        }
+
+
+        updateHomeworkUI();
+
+
+        const result =
+            validateFinalHomework();
+
+
+        if (
+            !result.finalValid
+        ) {
+
+            updateIntelligentStatus();
+
+            return;
+
+        }
+
+
+        // -------------------------------------------------
+        // ALL CONDITIONS ARE NOW REAL.
+        // -------------------------------------------------
+
+        await completeHomework();
+
+    }
+
+
+    // =====================================================
+    // SUCCESS FEEDBACK
+    // =====================================================
+
+    async function completeHomework() {
+
+        if (
+            state.completed ||
+            state.processing
+        ) {
+
+            return;
+
+        }
+
+
+        state.processing =
+            true;
+
+
+        try {
+
+            // ------------------------------------------------
+            // FINAL SECOND VERIFICATION
+            // ------------------------------------------------
+
+            const finalCheck =
+                validateFinalHomework();
+
+
+            if (
+                !finalCheck.finalValid
+            ) {
+
+                updateIntelligentStatus();
+
+                return;
+
+            }
+
+
+            state.completed =
+                true;
+
+            state.waitingForStudent =
+                false;
+
+
+            // ------------------------------------------------
+            // SAVE CHAPTER 1 COMPLETION
+            // ------------------------------------------------
+
+            localStorage.setItem(
+
+                "wordChapter1HomeworkCompleted",
+
+                "true"
+
+            );
+
+
+            // ------------------------------------------------
+            // COMPLETE EXISTING CHAPTER SYSTEM
+            // ------------------------------------------------
+
+            if (
+                typeof WordChapterCompletionEngine !==
+                "undefined" &&
+                typeof WordChapterCompletionEngine.completeChapter ===
+                "function"
+            ) {
+
+                WordChapterCompletionEngine.completeChapter(
+                    "chapitre1"
+                );
+
+            }
+
+
+            // ------------------------------------------------
+            // KEEP PROGRESS ENGINE SYNCHRONIZED
+            // ------------------------------------------------
+
+            if (
+                typeof MicrosoftWordProgressEngine !==
+                "undefined"
+            ) {
+
+                const progress =
+                    MicrosoftWordProgressEngine.get();
+
+
+                if (
+                    !Array.isArray(
+                        progress.completedChapters
+                    )
+                ) {
+
+                    progress.completedChapters =
+                        [];
+
+                }
+
+
+                if (
+                    !progress.completedChapters.includes(
+                        "chapitre1"
+                    )
+                ) {
+
+                    progress.completedChapters.push(
+                        "chapitre1"
+                    );
+
+                }
+
+
+                MicrosoftWordProgressEngine.save(
+                    progress
+                );
+
+            }
+
+
+            // ------------------------------------------------
+            // UNLOCK NEXT CHAPTER THROUGH EXISTING ENGINE
+            // ------------------------------------------------
+
+            if (
+                typeof WordChapterUnlockEngine !==
+                "undefined" &&
+                typeof WordChapterUnlockEngine.checkProgress ===
+                "function"
+            ) {
+
+                WordChapterUnlockEngine.checkProgress();
+
+            }
+
+
+            // ------------------------------------------------
+            // UI
+            // ------------------------------------------------
+
+            if (
+                state.ui.progress
+            ) {
+
+                state.ui.progress.textContent =
+                    "Devoir validé ✓";
+
+            }
+
+
+            if (
+                state.ui.instruction
+            ) {
+
+                state.ui.instruction.textContent =
+
+                    "Devoir du Chapitre 1 terminé avec succès.";
+
+            }
+
+
+            if (
+                state.ui.status
+            ) {
+
+                state.ui.status.textContent =
+
+                    "Excellent travail. Votre devoir respecte les exigences demandées.";
+
+            }
+
+
+            if (
+                state.ui.details
+            ) {
+
+                state.ui.details.innerHTML =
+
+                    "✓ Actions réelles vérifiées<br>" +
+
+                    "✓ Document créé<br>" +
+
+                    "✓ Contenu vérifié<br>" +
+
+                    "✓ Enregistrement vérifié<br>" +
+
+                    "✓ Chapitre 1 validé";
+
+            }
+
+
+            await speak(
+
+                "Excellent travail. " +
+
+                "J'ai vérifié votre travail dans la simulation ainsi que le contenu réel de votre document. " +
+
+                "Vous avez présenté les différents éléments découverts dans Microsoft Word 2007, réalisé les actions demandées et enregistré votre document. " +
+
+                "Votre devoir du Chapitre 1 est maintenant validé."
+
+            );
+
+
+            console.log(
+
+                "RANISE BLOCK 9: " +
+                "CHAPTER 1 HOMEWORK COMPLETED AND VALIDATED"
+
+            );
+
+        } finally {
+
+            state.processing =
+                false;
+
+        }
+
+    }
+
+
+    // =====================================================
+    // ATTACH OBSERVER
+    // =====================================================
+
+    function attachMutationObserver() {
+
+        if (
+            state.observerAttached ||
+            !state.simulationDocument
+        ) {
+
+            return;
+
+        }
+
+
+        if (
+            typeof MutationObserver ===
+            "undefined"
+        ) {
+
+            return;
+
+        }
+
+
+        const target =
+            state.simulationDocument.body ||
+            state.simulationDocument.documentElement;
+
+
+        if (!target) {
+
+            return;
+
+        }
+
+
+        state.mutationObserver =
+
+            new MutationObserver(
+
+                function () {
+
+                    if (
+                        state.started &&
+                        !state.completed
+                    ) {
+
+                        handleDocumentChange();
+
+                    }
+
+                }
+
+            );
+
+
+        state.mutationObserver.observe(
+
+            target,
+
+            {
+
+                subtree:
+                    true,
+
+                childList:
+                    true,
+
+                characterData:
+                    true
+
+            }
+
+        );
+
+
+        state.observerAttached =
+            true;
+
+    }
+
+
+    // =====================================================
+    // ATTACH EVENT LISTENERS
+    // =====================================================
+
+    function attachListeners() {
+
+        if (
+            !state.simulationDocument ||
+            state.listenersAttached
+        ) {
+
+            return;
+
+        }
+
+
+        const doc =
+            state.simulationDocument;
+
+
+        doc.addEventListener(
+
+            "click",
+
+            handleSimulationClick,
+
+            true
+
+        );
+
+
+        doc.addEventListener(
+
+            "input",
+
+            handleSimulationInput,
+
+            true
+
+        );
+
+
+        doc.addEventListener(
+
+            "keyup",
+
+            handleSimulationKeyup,
+
+            true
+
+        );
+
+
+        doc.addEventListener(
+
+            "change",
+
+            handleDocumentChange,
+
+            true
+
+        );
+
+
+        state.listenersAttached =
+            true;
+
+
+        attachMutationObserver();
+
+    }
+
+
+    // =====================================================
+    // ANNOUNCE HOMEWORK
+    // =====================================================
+
+    async function announceHomework() {
+
+        updateHomeworkUI();
+
+
+        await speak(
+
+            "Nous passons maintenant au devoir du Chapitre 1. " +
+
+            "Cette fois, je ne vais pas simplement vérifier une petite action. " +
+
+            "Je vais observer votre travail dans la simulation et vérifier le document que vous allez produire. " +
+
+            "Prenez tout le temps dont vous avez besoin. " +
+
+            "Votre devoir consiste à créer un document présentant les différents éléments que vous avez découverts dans Microsoft Word 2007. " +
+
+            "Vous devez réellement utiliser l'interface, créer le document, rédiger votre travail dans la zone du document et enregistrer votre résultat. " +
+
+            "Je ne validerai le devoir que lorsque l'ensemble du travail sera correctement réalisé."
+
+        );
+
+
+        state.waitingForStudent =
+            true;
+
+
+        setStatus(
+
+            "Commencez le devoir. Je vous laisse travailler à votre rythme et je vérifie chaque étape."
+
+        );
+
+    }
+
+
+    // =====================================================
+    // LOAD DYNAMIC COURSE DATA
+    // =====================================================
+
+    function loadChapterData() {
+
+        const chapter =
+            getChapter1();
+
+
+        if (!chapter) {
+
+            return false;
+
+        }
+
+
+        state.chapter =
+            chapter;
+
+
+        state.homework =
+            String(
+                chapter.homework ||
+                ""
+            ).trim();
+
+
+        state.practice =
+
+            Array.isArray(
+                chapter.practice
+            )
+
+                ? chapter.practice
+
+                : [];
+
+
+        state.evaluation =
+
+            Array.isArray(
+                chapter.evaluation
+            )
+
+                ? chapter.evaluation
+
+                : [];
+
+
+        state.objective =
+
+            Array.isArray(
+                chapter.objective
+            )
+
+                ? chapter.objective
+
+                : [];
+
+
+        return !!state.homework;
+
+    }
+
+
+    // =====================================================
+    // START BLOCK 9
+    // =====================================================
+
+    async function startBlock9() {
+
+        if (
+            state.started ||
+            state.completed
+        ) {
+
+            return;
+
+        }
+
+
+        if (
+            !connectToSimulation()
+        ) {
+
+            return;
+
+        }
+
+
+        if (
+            !loadChapterData()
+        ) {
+
+            console.error(
+
+                "RANISE BLOCK 9: " +
+                "Chapter 1 homework unavailable."
+
+            );
+
+            return;
+
+        }
+
+
+        state.started =
+            true;
+
+        state.completed =
+            false;
+
+        state.waitingForStudent =
+            false;
+
+        state.processing =
+            false;
+
+        state.transitionDetected =
+            true;
+
+
+        state.lastDocumentSignature =
+            getDocumentSignature();
+
+
+        createHomeworkUI();
+
+        attachListeners();
+
+        updateHomeworkUI();
+
+
+        await speak(
+
+            "Très bien. Les exercices sont terminés. " +
+
+            "Nous allons maintenant passer au devoir. " +
+
+            "Je vais vous laisser travailler de manière autonome, mais cette fois je vais contrôler beaucoup plus précisément votre travail."
+
+        );
+
+
+        await announceHomework();
+
+    }
+
+
+    // =====================================================
+    // DETECT BLOCK 8 COMPLETION
+    //
+    // BLOCK 8 IS READ ONLY.
+    // =====================================================
+
+    function checkBlock8Completion() {
+
+        if (
+            state.started ||
+            state.completed ||
+            state.transitionDetected
+        ) {
+
+            return;
+
+        }
+
+
+        if (
+            !window.RaniseMoiseExerciseMasteryEngine ||
+            typeof
+                window.RaniseMoiseExerciseMasteryEngine.getState !==
+                "function"
+        ) {
+
+            return;
+
+        }
+
+
+        let block8State;
+
+
+        try {
+
+            block8State =
+
+                window.RaniseMoiseExerciseMasteryEngine
+                    .getState();
+
+        } catch (error) {
+
+            return;
+
+        }
+
+
+        if (!block8State) {
+
+            return;
+
+        }
+
+
+        // -------------------------------------------------
+        // BLOCK 9 MUST NOT INTERRUPT BLOCK 8.
+        // -------------------------------------------------
+
+        if (
+            block8State.completed === true &&
+            block8State.speaking === false
+        ) {
+
+            state.transitionDetected =
+                true;
+
+
+            if (
+                connectToSimulation()
+            ) {
+
+                startBlock9();
+
+                return;
+
+            }
+
+
+            state.transitionDetected =
+                false;
+
+        }
+
+    }
+
+
+    // =====================================================
+    // WAIT FOR SIMULATION
+    // =====================================================
+
+    function waitForSimulationThenStart() {
+
+        if (
+            state.started ||
+            state.completed
+        ) {
+
+            return;
+
+        }
+
+
+        if (
+            connectToSimulation()
+        ) {
+
+            checkBlock8Completion();
+
+        }
+
+    }
+
+
+    // =====================================================
+    // AUTOMATIC BLOCK 8 → BLOCK 9 BRIDGE
+    // =====================================================
+
+    const transitionTimer =
+
+        setInterval(
+
+            function () {
+
+                if (
+                    state.started ||
+                    state.completed
+                ) {
+
+                    clearInterval(
+                        transitionTimer
+                    );
+
+                    return;
+
+                }
+
+
+                waitForSimulationThenStart();
+
+            },
+
+            100
+
+        );
+
+
+    // =====================================================
+    // PUBLIC API
+    // =====================================================
+
+    window.RaniseMoiseHomeworkMasteryEngine = {
+
+        start:
+            startBlock9,
+
+
+        getState:
+
+            function () {
+
+                return {
+
+                    started:
+                        state.started,
+
+                    completed:
+                        state.completed,
+
+                    waitingForStudent:
+                        state.waitingForStudent,
+
+                    speaking:
+                        state.speaking,
+
+                    transitionDetected:
+                        state.transitionDetected,
+
+                    actionFlags:
+                        Object.assign(
+                            {},
+                            state.actionFlags
+                        ),
+
+                    validation:
+                        Object.assign(
+                            {},
+                            state.validation
+                        ),
+
+                    homework:
+                        state.homework
+
+                };
+
+            }
+
+    };
+
+
+})();
 
 
 
