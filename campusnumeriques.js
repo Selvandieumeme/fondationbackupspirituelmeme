@@ -12120,12 +12120,19 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
 
 
+
+
+
+
+
+
+
 // =========================================================
 // BLOCK 9
 // MICROSOFT WORD 2007 FORMATION
 // RANISE MOISE HOMEWORK MASTERY ENGINE
 // =========================================================
-// PRODUCTION VERSION
+// PRODUCTION FINAL VERSION
 //
 // PURPOSE:
 // 1. START AUTOMATICALLY AFTER BLOCK 8 COMPLETES.
@@ -12136,13 +12143,13 @@ const RaniseMoisePedagogicalExplanationEngine = {
 // 6. REQUIRE REAL SIMULATION ACTIONS.
 // 7. REQUIRE REAL TEXT IN THE DOCUMENT.
 // 8. REQUIRE A REAL CREATED DOCUMENT.
-// 9. REQUIRE A REAL SAVE ACTION.
-// 10. VERIFY THE FINAL DOCUMENT CONTENT.
-// 11. VERIFY THE STUDENT'S REQUIRED WORK.
-// 12. NEVER VALIDATE FROM A RANDOM CLICK.
-// 13. NEVER VALIDATE FROM TEXT ALONE.
-// 14. NEVER VALIDATE FROM A SINGLE ACTION.
-// 15. GIVE BEGINNERS UNLIMITED PRACTICAL TIME.
+// 9. VERIFY THE FINAL DOCUMENT CONTENT.
+// 10. VERIFY THE STUDENT'S REQUIRED WORK.
+// 11. NEVER VALIDATE FROM A RANDOM CLICK.
+// 12. NEVER VALIDATE FROM TEXT ALONE.
+// 13. NEVER VALIDATE FROM A SINGLE ACTION.
+// 14. GIVE BEGINNERS UNLIMITED PRACTICAL TIME.
+// 15. DO NOT REQUIRE SAVE / ENREGISTRER.
 // 16. DO NOT MODIFY BLOCK 6.
 // 17. DO NOT MODIFY BLOCK 7.
 // 18. DO NOT MODIFY BLOCK 8.
@@ -12150,6 +12157,7 @@ const RaniseMoisePedagogicalExplanationEngine = {
 // 20. DO NOT MODIFY MARYTTS + AVATAR.
 // 21. COMPLETE CHAPTER 1 ONLY AFTER REAL SUCCESS.
 // 22. PANEL REMAINS SMALL AND DRAGGABLE.
+// 23. PANEL DISAPPEARS AUTOMATICALLY AFTER VALIDATION.
 // =========================================================
 
 (function () {
@@ -12199,8 +12207,6 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
         typedResponseTimer: null,
 
-        saveVerificationTimer: null,
-
         lastDocumentText: "",
 
         lastDocumentSignature: "",
@@ -12208,6 +12214,11 @@ const RaniseMoisePedagogicalExplanationEngine = {
         lastActionTime: 0,
 
         actionHistory: [],
+
+
+        // =================================================
+        // REAL STUDENT ACTIONS
+        // =================================================
 
         actionFlags: {
 
@@ -12223,13 +12234,14 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
             newDocumentAction: false,
 
-            textEntered: false,
-
-            saveAction: false,
-
-            saveVerified: false
+            textEntered: false
 
         },
+
+
+        // =================================================
+        // VALIDATION STATE
+        // =================================================
 
         validation: {
 
@@ -12237,11 +12249,14 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
             actionsValid: false,
 
-            saveValid: false,
-
             finalValid: false
 
         },
+
+
+        // =================================================
+        // UI
+        // =================================================
 
         ui: {
 
@@ -12272,15 +12287,27 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
             .normalize("NFD")
 
-            .replace(/[\u0300-\u036f]/g, "")
+            .replace(
+                /[\u0300-\u036f]/g,
+                ""
+            )
 
             .toLowerCase()
 
-            .replace(/[“”"«»]/g, " ")
+            .replace(
+                /[“”"«»]/g,
+                " "
+            )
 
-            .replace(/[.,;:!?()[\]{}]/g, " ")
+            .replace(
+                /[.,;:!?()[\]{}]/g,
+                " "
+            )
 
-            .replace(/\s+/g, " ")
+            .replace(
+                /\s+/g,
+                " "
+            )
 
             .trim();
 
@@ -12300,7 +12327,10 @@ const RaniseMoisePedagogicalExplanationEngine = {
                 " "
             )
 
-            .replace(/\s+/g, " ")
+            .replace(
+                /\s+/g,
+                " "
+            )
 
             .trim();
 
@@ -12393,8 +12423,11 @@ const RaniseMoisePedagogicalExplanationEngine = {
         return microsoftWordCourse.chapters.find(
 
             chapter =>
+
                 chapter &&
-                chapter.id === "chapitre1"
+
+                chapter.id ===
+                "chapitre1"
 
         ) || null;
 
@@ -12408,15 +12441,14 @@ const RaniseMoisePedagogicalExplanationEngine = {
     function findSimulation() {
 
         const campusContent =
+
             document.getElementById(
                 "campusContent"
             );
 
 
         if (!campusContent) {
-
             return null;
-
         }
 
 
@@ -12440,9 +12472,7 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
 
         if (!frame) {
-
             return false;
-
         }
 
 
@@ -12456,9 +12486,7 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
 
             if (!doc) {
-
                 return false;
-
             }
 
 
@@ -12519,9 +12547,7 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
 
         if (!pages.length) {
-
             return "";
-
         }
 
 
@@ -12533,11 +12559,17 @@ const RaniseMoisePedagogicalExplanationEngine = {
             page => {
 
                 output +=
+
                     " " +
+
                     (
+
                         page.innerText ||
+
                         page.textContent ||
+
                         ""
+
                     );
 
             }
@@ -12547,9 +12579,15 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
         return output
 
-            .replace(/\u00a0/g, " ")
+            .replace(
+                /\u00a0/g,
+                " "
+            )
 
-            .replace(/\s+/g, " ")
+            .replace(
+                /\s+/g,
+                " "
+            )
 
             .trim();
 
@@ -12558,9 +12596,6 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
     // =====================================================
     // DOCUMENT SIGNATURE
-    //
-    // Detects real document changes without depending
-    // on the simulation's internal implementation.
     // =====================================================
 
     function getDocumentSignature() {
@@ -12717,9 +12752,7 @@ const RaniseMoisePedagogicalExplanationEngine = {
     function getElementData(element) {
 
         if (!element) {
-
             return "";
-
         }
 
 
@@ -12780,10 +12813,14 @@ const RaniseMoisePedagogicalExplanationEngine = {
     ) {
 
         if (
+
             !target ||
+
             !selector ||
+
             typeof target.closest !==
             "function"
+
         ) {
 
             return null;
@@ -12810,14 +12847,10 @@ const RaniseMoisePedagogicalExplanationEngine = {
     // RECORD REAL STUDENT ACTION
     // =====================================================
 
-    function recordAction(
-        action
-    ) {
+    function recordAction(action) {
 
         if (!action) {
-
             return;
-
         }
 
 
@@ -12836,10 +12869,6 @@ const RaniseMoisePedagogicalExplanationEngine = {
         });
 
 
-        // -------------------------------------------------
-        // Keep history bounded.
-        // -------------------------------------------------
-
         if (
             state.actionHistory.length >
             300
@@ -12853,14 +12882,17 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
 
     // =====================================================
-    // CREATE EXERCISE PANEL
+    // CREATE HOMEWORK PANEL
     // =====================================================
 
     function createHomeworkUI() {
 
         if (
+
             !state.simulationDocument ||
+
             state.ui.root
+
         ) {
 
             return;
@@ -13086,8 +13118,11 @@ const RaniseMoisePedagogicalExplanationEngine = {
     function enableHomeworkPanelDragging() {
 
         if (
+
             !state.ui.root ||
+
             !state.ui.title
+
         ) {
 
             return;
@@ -13125,12 +13160,16 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
 
             const viewWidth =
+
                 doc?.documentElement?.clientWidth ||
+
                 window.innerWidth;
 
 
             const viewHeight =
+
                 doc?.documentElement?.clientHeight ||
+
                 window.innerHeight;
 
 
@@ -13155,14 +13194,18 @@ const RaniseMoisePedagogicalExplanationEngine = {
                             left,
 
                             Math.max(
+
                                 0,
+
                                 viewWidth -
                                 panelWidth
+
                             )
 
                         )
 
                     ),
+
 
                 top:
 
@@ -13175,9 +13218,12 @@ const RaniseMoisePedagogicalExplanationEngine = {
                             top,
 
                             Math.max(
+
                                 0,
+
                                 viewHeight -
                                 panelHeight
+
                             )
 
                         )
@@ -13192,16 +13238,17 @@ const RaniseMoisePedagogicalExplanationEngine = {
         function startDrag(event) {
 
             if (!event) {
-
                 return;
-
             }
 
 
             if (
+
                 event.pointerType ===
                 "mouse" &&
+
                 event.button !== 0
+
             ) {
 
                 return;
@@ -13236,9 +13283,13 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
 
             if (
+
                 typeof handle.setPointerCapture ===
                 "function" &&
-                event.pointerId !== undefined
+
+                event.pointerId !==
+                undefined
+
             ) {
 
                 try {
@@ -13260,8 +13311,11 @@ const RaniseMoisePedagogicalExplanationEngine = {
         function moveDrag(event) {
 
             if (
+
                 !dragging ||
+
                 !event
+
             ) {
 
                 return;
@@ -13270,8 +13324,12 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
 
             if (
+
                 pointerId !== null &&
-                event.pointerId !== pointerId
+
+                event.pointerId !==
+                pointerId
+
             ) {
 
                 return;
@@ -13311,16 +13369,19 @@ const RaniseMoisePedagogicalExplanationEngine = {
         function stopDrag(event) {
 
             if (!dragging) {
-
                 return;
-
             }
 
 
             if (
+
                 event &&
+
                 pointerId !== null &&
-                event.pointerId !== pointerId
+
+                event.pointerId !==
+                pointerId
+
             ) {
 
                 return;
@@ -13379,9 +13440,7 @@ const RaniseMoisePedagogicalExplanationEngine = {
     function updateHomeworkUI() {
 
         if (!state.ui.root) {
-
             return;
-
         }
 
 
@@ -13390,62 +13449,96 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
 
         state.ui.instruction.textContent =
+
             state.homework ||
+
             "Réalisez le devoir demandé.";
-
-
-        const actionCount =
-            Object.values(
-                state.actionFlags
-            )
-            .filter(Boolean)
-            .length;
 
 
         state.ui.details.innerHTML =
 
             "Contrôle du professeur :<br>" +
 
-            "• Interface : " +
+            "• Barre de titre : " +
+
             (
-                state.actionFlags.titleBarSeen &&
-                state.actionFlags.officeButtonSeen &&
-                state.actionFlags.ribbonSeen &&
+
+                state.actionFlags.titleBarSeen
+                    ? "✓"
+                    : "…"
+
+            ) +
+
+            "<br>" +
+
+            "• Bouton Office : " +
+
+            (
+
+                state.actionFlags.officeButtonSeen
+                    ? "✓"
+                    : "…"
+
+            ) +
+
+            "<br>" +
+
+            "• Ruban : " +
+
+            (
+
+                state.actionFlags.ribbonSeen
+                    ? "✓"
+                    : "…"
+
+            ) +
+
+            "<br>" +
+
+            "• Onglets : " +
+
+            (
+
                 state.actionFlags.tabsSeen
                     ? "✓"
                     : "…"
+
             ) +
+
             "<br>" +
 
             "• Zone document : " +
+
             (
+
                 state.actionFlags.documentAreaSeen
                     ? "✓"
                     : "…"
+
             ) +
+
             "<br>" +
 
-            "• Création document : " +
+            "• Document créé : " +
+
             (
+
                 state.actionFlags.newDocumentAction
                     ? "✓"
                     : "…"
+
             ) +
+
             "<br>" +
 
-            "• Texte du devoir : " +
+            "• Contenu du devoir : " +
+
             (
+
                 state.actionFlags.textEntered
                     ? "✓"
                     : "…"
-            ) +
-            "<br>" +
 
-            "• Enregistrement : " +
-            (
-                state.actionFlags.saveVerified
-                    ? "✓"
-                    : "…"
             );
 
     }
@@ -13473,18 +13566,15 @@ const RaniseMoisePedagogicalExplanationEngine = {
     // FIND NEW DOCUMENT ACTION
     // =====================================================
 
-    function isNewDocumentAction(
-        target
-    ) {
+    function isNewDocumentAction(target) {
 
         if (!target) {
-
             return false;
-
         }
 
 
         const actionTarget =
+
             closestFromTarget(
 
                 target,
@@ -13505,13 +13595,12 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
 
         if (actionTarget) {
-
             return true;
-
         }
 
 
         const officeItem =
+
             closestFromTarget(
 
                 target,
@@ -13524,6 +13613,7 @@ const RaniseMoisePedagogicalExplanationEngine = {
         if (officeItem) {
 
             const action =
+
                 normalize(
 
                     officeItem.getAttribute(
@@ -13550,82 +13640,23 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
 
     // =====================================================
-    // FIND SAVE ACTION
-    // =====================================================
-
-    function isSaveAction(
-        target
-    ) {
-
-        if (!target) {
-
-            return false;
-
-        }
-
-
-        const data =
-            getElementData(
-                target
-            );
-
-
-        if (
-            data.includes("save") ||
-            data.includes("enregistrer") ||
-            data.includes("sauvegarder")
-        ) {
-
-            return true;
-
-        }
-
-
-        const actionTarget =
-            closestFromTarget(
-
-                target,
-
-                [
-
-                    "[data-action='save']",
-
-                    "[data-action='save-document']",
-
-                    "[data-command='save']",
-
-                    "[data-command='save-document']"
-
-                ].join(",")
-
-            );
-
-
-        return !!actionTarget;
-
-    }
-
-
-    // =====================================================
     // RECORD INTERFACE ACTIONS
     // =====================================================
 
-    function inspectInterfaceTarget(
-        target
-    ) {
+    function inspectInterfaceTarget(target) {
 
         if (!target) {
-
             return;
-
         }
 
 
         if (
+
             closestFromTarget(
                 target,
                 "#cwTitleBar"
             )
+
         ) {
 
             state.actionFlags.titleBarSeen =
@@ -13639,6 +13670,7 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
 
         if (
+
             closestFromTarget(
 
                 target,
@@ -13660,6 +13692,7 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
 
         if (
+
             closestFromTarget(
 
                 target,
@@ -13681,6 +13714,7 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
 
         if (
+
             closestFromTarget(
 
                 target,
@@ -13702,6 +13736,7 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
 
         if (
+
             closestFromTarget(
 
                 target,
@@ -13736,20 +13771,6 @@ const RaniseMoisePedagogicalExplanationEngine = {
         }
 
 
-        if (
-            isSaveAction(target)
-        ) {
-
-            state.actionFlags.saveAction =
-                true;
-
-            recordAction(
-                "save-action"
-            );
-
-        }
-
-
         updateHomeworkUI();
 
     }
@@ -13759,26 +13780,16 @@ const RaniseMoisePedagogicalExplanationEngine = {
     // CHECK IF TEXT IS MEANINGFUL
     // =====================================================
 
-    function hasMeaningfulText(
-        text
-    ) {
+    function hasMeaningfulText(text) {
 
         const value =
-            normalizeResponse(
-                text
-            );
+            normalizeResponse(text);
 
 
         if (!value) {
-
             return false;
-
         }
 
-
-        // -------------------------------------------------
-        // A FEW RANDOM WORDS MUST NOT PASS.
-        // -------------------------------------------------
 
         if (
             value.length < 40
@@ -13790,7 +13801,9 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
 
         const words =
-            value.split(" ")
+
+            value
+                .split(" ")
                 .filter(Boolean);
 
 
@@ -13810,16 +13823,23 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
     // =====================================================
     // VERIFY REQUIRED WORD 2007 CONCEPTS
+    //
+    // FIVE CORE ELEMENTS ARE REQUIRED.
+    //
+    // 1. BARRE DE TITRE
+    // 2. BOUTON OFFICE
+    // 3. RUBAN
+    // 4. ONGLET(S)
+    // 5. ZONE DE TRAVAIL / DOCUMENT
+    //
+    // RÈGLES + BARRE D'ÉTAT ARE OPTIONAL SUPPORTING
+    // CONCEPTS AND ARE NOT REQUIRED FOR PASSING.
     // =====================================================
 
-    function validateRequiredConcepts(
-        text
-    ) {
+    function validateRequiredConcepts(text) {
 
         const value =
-            normalizeResponse(
-                text
-            );
+            normalizeResponse(text);
 
 
         const groups = {
@@ -13913,11 +13933,17 @@ const RaniseMoisePedagogicalExplanationEngine = {
             group => {
 
                 result[group] =
+
                     groups[group].some(
 
                         keyword =>
+
                             value.includes(
-                                normalize(keyword)
+
+                                normalize(
+                                    keyword
+                                )
+
                             )
 
                     );
@@ -13943,6 +13969,7 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
 
         const discovered =
+
             requiredGroups.filter(
 
                 group =>
@@ -13951,23 +13978,10 @@ const RaniseMoisePedagogicalExplanationEngine = {
             );
 
 
-        // -------------------------------------------------
-        // THE HOMEWORK SAYS "DIFFÉRENTS ÉLÉMENTS".
-        //
-        // Five major elements are required.
-        // Rules and Status Bar strengthen the answer,
-        // but are not mandatory if the five principal
-        // elements are correctly presented.
-        // -------------------------------------------------
-
-        const minimumCore =
-            discovered.length >= 5;
-
-
         return {
 
             correct:
-                minimumCore,
+                discovered.length >= 5,
 
             result:
                 result,
@@ -14004,7 +14018,7 @@ const RaniseMoisePedagogicalExplanationEngine = {
                     false,
 
                 reason:
-                    "Le document ne contient pas encore un contenu suffisamment développé."
+                    "Le document ne contient pas encore suffisamment de contenu."
 
             };
 
@@ -14012,6 +14026,7 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
 
         const concepts =
+
             validateRequiredConcepts(
                 text
             );
@@ -14027,18 +14042,15 @@ const RaniseMoisePedagogicalExplanationEngine = {
                     false,
 
                 reason:
-                    "Le document ne présente pas encore suffisamment des principaux éléments de l'environnement Word 2007."
+                    "Les cinq principaux éléments demandés ne sont pas encore tous présents dans le document."
 
             };
 
         }
 
 
-        // -------------------------------------------------
-        // WORD / MICROSOFT CONTEXT
-        // -------------------------------------------------
-
         const normalized =
+
             normalizeResponse(
                 text
             );
@@ -14063,7 +14075,7 @@ const RaniseMoisePedagogicalExplanationEngine = {
                     false,
 
                 reason:
-                    "Le contenu ne montre pas clairement qu'il présente l'environnement Microsoft Word 2007."
+                    "Le contenu ne montre pas clairement qu'il présente Microsoft Word 2007."
 
             };
 
@@ -14076,7 +14088,7 @@ const RaniseMoisePedagogicalExplanationEngine = {
                 true,
 
             reason:
-                "Le document contient une présentation suffisamment complète des principaux éléments de Word 2007."
+                "Le document présente les cinq éléments principaux demandés de l'environnement Word 2007."
 
         };
 
@@ -14093,10 +14105,6 @@ const RaniseMoisePedagogicalExplanationEngine = {
             state.actionFlags;
 
 
-        // -------------------------------------------------
-        // PRINCIPAL INTERFACE DISCOVERY
-        // -------------------------------------------------
-
         const interfaceActions =
 
             flags.titleBarSeen &&
@@ -14110,19 +14118,13 @@ const RaniseMoisePedagogicalExplanationEngine = {
             flags.documentAreaSeen;
 
 
-        // -------------------------------------------------
-        // DOCUMENT CREATION
-        // -------------------------------------------------
-
         const documentCreated =
+
             flags.newDocumentAction;
 
 
-        // -------------------------------------------------
-        // TEXT ENTERED
-        // -------------------------------------------------
-
         const textEntered =
+
             flags.textEntered;
 
 
@@ -14136,11 +14138,14 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
                 textEntered,
 
+
             interfaceActions:
                 interfaceActions,
 
+
             documentCreated:
                 documentCreated,
+
 
             textEntered:
                 textEntered
@@ -14151,146 +14156,39 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
 
     // =====================================================
-    // VERIFY SAVE
-    //
-    // We use multiple safe signals because different
-    // versions of the simulation may implement saving
-    // differently.
-    // =====================================================
-
-    function verifySaveState() {
-
-        if (
-            state.actionFlags.saveAction
-        ) {
-
-            state.actionFlags.saveVerified =
-                true;
-
-            return true;
-
-        }
-
-
-        const doc =
-            state.simulationDocument;
-
-
-        if (!doc) {
-
-            return false;
-
-        }
-
-
-        // -------------------------------------------------
-        // Search for common simulation save indicators.
-        // -------------------------------------------------
-
-        const possibleIndicators = [
-
-            "[data-saved='true']",
-
-            "[data-save-state='saved']",
-
-            ".cwSaved",
-
-            ".cwDocumentSaved",
-
-            "#cwSaveStatus"
-
-        ];
-
-
-        for (
-            const selector of possibleIndicators
-        ) {
-
-            try {
-
-                const found =
-                    doc.querySelector(
-                        selector
-                    );
-
-
-                if (found) {
-
-                    const data =
-                        normalize(
-                            found.textContent ||
-                            found.getAttribute(
-                                "data-saved"
-                            ) ||
-                            found.getAttribute(
-                                "data-save-state"
-                            ) ||
-                            ""
-                        );
-
-
-                    if (
-                        data.includes("saved") ||
-                        data.includes("enregistre") ||
-                        data === "true"
-                    ) {
-
-                        state.actionFlags.saveVerified =
-                            true;
-
-                        return true;
-
-                    }
-
-                }
-
-            } catch (error) {}
-
-        }
-
-
-        return false;
-
-    }
-
-
-    // =====================================================
     // VERIFY COMPLETE HOMEWORK
+    //
+    // IMPORTANT:
+    // NO SAVE CONDITION EXISTS HERE.
     // =====================================================
 
     function validateFinalHomework() {
 
         const actionValidation =
+
             validateSimulationActions();
 
 
         const contentValidation =
+
             validateDocumentContent();
 
 
-        const saveValidation =
-            verifySaveState();
-
-
         state.validation.actionsValid =
+
             actionValidation.correct;
 
 
         state.validation.contentValid =
+
             contentValidation.correct;
-
-
-        state.validation.saveValid =
-            saveValidation;
 
 
         state.validation.finalValid =
 
             actionValidation.correct &&
 
-            contentValidation.correct &&
-
-            saveValidation;
+            contentValidation.correct;
 
 
         return {
@@ -14302,10 +14200,7 @@ const RaniseMoisePedagogicalExplanationEngine = {
                 actionValidation,
 
             content:
-                contentValidation,
-
-            save:
-                saveValidation
+                contentValidation
 
         };
 
@@ -14313,14 +14208,17 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
 
     // =====================================================
-    // STATUS INTELLIGENCE
+    // INTELLIGENT STATUS
     // =====================================================
 
     function updateIntelligentStatus() {
 
         if (
+
             state.completed ||
+
             !state.ui.status
+
         ) {
 
             return;
@@ -14337,7 +14235,9 @@ const RaniseMoisePedagogicalExplanationEngine = {
         ) {
 
             setStatus(
-                "Travail complet détecté. Vérification finale du professeur..."
+
+                "Tout le travail demandé est détecté. Ranise effectue maintenant la vérification finale."
+
             );
 
             return;
@@ -14381,22 +14281,7 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
             setStatus(
 
-                "Le document existe. Présentez maintenant les différents éléments découverts dans Word 2007 avec suffisamment d'explications."
-
-            );
-
-            return;
-
-        }
-
-
-        if (
-            !result.save
-        ) {
-
-            setStatus(
-
-                "Votre contenu est suffisamment complet. Enregistrez maintenant le document."
+                "Le document existe. Continuez à présenter dans le document les différents éléments demandés. Je vérifie le contenu réel."
 
             );
 
@@ -14407,7 +14292,7 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
         setStatus(
 
-            "Vérification finale en cours..."
+            "Vérification finale du devoir en cours..."
 
         );
 
@@ -14421,8 +14306,11 @@ const RaniseMoisePedagogicalExplanationEngine = {
     function handleDocumentChange() {
 
         if (
+
             !state.started ||
+
             state.completed
+
         ) {
 
             return;
@@ -14439,8 +14327,11 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
 
         if (
+
             signature !==
+
             state.lastDocumentSignature
+
         ) {
 
             state.lastDocumentSignature =
@@ -14478,14 +14369,16 @@ const RaniseMoisePedagogicalExplanationEngine = {
     // INPUT EVENT
     // =====================================================
 
-    function handleSimulationInput(
-        event
-    ) {
+    function handleSimulationInput(event) {
 
         if (
+
             !state.started ||
+
             state.completed ||
+
             state.processing
+
         ) {
 
             return;
@@ -14494,21 +14387,23 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
 
         if (
+
             event &&
-            event.target
+
+            event.target &&
+
+            closestFromTarget(
+
+                event.target,
+
+                ".cwPageContent"
+
+            )
+
         ) {
 
-            if (
-                closestFromTarget(
-                    event.target,
-                    ".cwPageContent"
-                )
-            ) {
-
-                state.actionFlags.documentAreaSeen =
-                    true;
-
-            }
+            state.actionFlags.documentAreaSeen =
+                true;
 
         }
 
@@ -14522,13 +14417,14 @@ const RaniseMoisePedagogicalExplanationEngine = {
     // CLICK EVENT
     // =====================================================
 
-    function handleSimulationClick(
-        event
-    ) {
+    function handleSimulationClick(event) {
 
         if (
+
             !state.started ||
+
             state.completed
+
         ) {
 
             return;
@@ -14537,9 +14433,7 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
 
         if (!event) {
-
             return;
-
         }
 
 
@@ -14548,49 +14442,8 @@ const RaniseMoisePedagogicalExplanationEngine = {
         );
 
 
-        // -------------------------------------------------
-        // SAVE ACTION
-        // -------------------------------------------------
-
         if (
-            isSaveAction(
-                event.target
-            )
-        ) {
 
-            state.actionFlags.saveAction =
-                true;
-
-            recordAction(
-                "save"
-            );
-
-
-            // Give the simulation a moment to update.
-            setTimeout(
-
-                function () {
-
-                    verifySaveState();
-
-                    updateHomeworkUI();
-
-                    updateIntelligentStatus();
-
-                },
-
-                250
-
-            );
-
-        }
-
-
-        // -------------------------------------------------
-        // DOCUMENT AREA
-        // -------------------------------------------------
-
-        if (
             closestFromTarget(
 
                 event.target,
@@ -14598,6 +14451,7 @@ const RaniseMoisePedagogicalExplanationEngine = {
                 ".cwPageContent"
 
             )
+
         ) {
 
             state.actionFlags.documentAreaSeen =
@@ -14613,13 +14467,6 @@ const RaniseMoisePedagogicalExplanationEngine = {
         handleDocumentChange();
 
 
-        // -------------------------------------------------
-        // FINAL VALIDATION
-        //
-        // We do NOT immediately pass from a click.
-        // The complete state must satisfy every condition.
-        // -------------------------------------------------
-
         scheduleValidation();
 
     }
@@ -14632,8 +14479,11 @@ const RaniseMoisePedagogicalExplanationEngine = {
     function handleSimulationKeyup() {
 
         if (
+
             !state.started ||
+
             state.completed
+
         ) {
 
             return;
@@ -14666,6 +14516,7 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
 
         state.typedResponseTimer =
+
             setTimeout(
 
                 function () {
@@ -14691,9 +14542,13 @@ const RaniseMoisePedagogicalExplanationEngine = {
     async function attemptFinalValidation() {
 
         if (
+
             !state.started ||
+
             state.completed ||
+
             state.processing
+
         ) {
 
             return;
@@ -14719,11 +14574,104 @@ const RaniseMoisePedagogicalExplanationEngine = {
         }
 
 
-        // -------------------------------------------------
-        // ALL CONDITIONS ARE NOW REAL.
-        // -------------------------------------------------
-
         await completeHomework();
+
+    }
+
+
+    // =====================================================
+    // REMOVE HOMEWORK PANEL
+    //
+    // IMPORTANT:
+    // PANEL DISAPPEARS AUTOMATICALLY AFTER VALIDATION.
+    // =====================================================
+
+    function removeHomeworkPanel() {
+
+        if (
+            state.ui.root
+        ) {
+
+            try {
+
+                state.ui.root.remove();
+
+            } catch (error) {
+
+                if (
+                    state.ui.root.parentNode
+                ) {
+
+                    state.ui.root.parentNode.removeChild(
+                        state.ui.root
+                    );
+
+                }
+
+            }
+
+        }
+
+
+        state.ui.root =
+            null;
+
+        state.ui.title =
+            null;
+
+        state.ui.progress =
+            null;
+
+        state.ui.instruction =
+            null;
+
+        state.ui.status =
+            null;
+
+        state.ui.details =
+            null;
+
+    }
+
+
+    // =====================================================
+    // STOP INTERNAL OBSERVERS / TIMERS
+    // =====================================================
+
+    function stopBlock9Monitoring() {
+
+        if (
+            state.typedResponseTimer
+        ) {
+
+            clearTimeout(
+                state.typedResponseTimer
+            );
+
+            state.typedResponseTimer =
+                null;
+
+        }
+
+
+        if (
+            state.mutationObserver
+        ) {
+
+            try {
+
+                state.mutationObserver.disconnect();
+
+            } catch (error) {}
+
+            state.mutationObserver =
+                null;
+
+        }
+
+
+        state.observerAttached =
+            false;
 
     }
 
@@ -14735,8 +14683,11 @@ const RaniseMoisePedagogicalExplanationEngine = {
     async function completeHomework() {
 
         if (
+
             state.completed ||
+
             state.processing
+
         ) {
 
             return;
@@ -14750,9 +14701,9 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
         try {
 
-            // ------------------------------------------------
+            // ---------------------------------------------
             // FINAL SECOND VERIFICATION
-            // ------------------------------------------------
+            // ---------------------------------------------
 
             const finalCheck =
                 validateFinalHomework();
@@ -14772,13 +14723,17 @@ const RaniseMoisePedagogicalExplanationEngine = {
             state.completed =
                 true;
 
+
             state.waitingForStudent =
                 false;
 
 
-            // ------------------------------------------------
-            // SAVE CHAPTER 1 COMPLETION
-            // ------------------------------------------------
+            // ---------------------------------------------
+            // SAVE CHAPTER 1 COMPLETION FLAG
+            //
+            // This is course progress only.
+            // It is NOT document saving.
+            // ---------------------------------------------
 
             localStorage.setItem(
 
@@ -14789,41 +14744,51 @@ const RaniseMoisePedagogicalExplanationEngine = {
             );
 
 
-            // ------------------------------------------------
+            // ---------------------------------------------
             // COMPLETE EXISTING CHAPTER SYSTEM
-            // ------------------------------------------------
+            // ---------------------------------------------
 
             if (
+
                 typeof WordChapterCompletionEngine !==
                 "undefined" &&
+
                 typeof WordChapterCompletionEngine.completeChapter ===
                 "function"
+
             ) {
 
                 WordChapterCompletionEngine.completeChapter(
+
                     "chapitre1"
+
                 );
 
             }
 
 
-            // ------------------------------------------------
+            // ---------------------------------------------
             // KEEP PROGRESS ENGINE SYNCHRONIZED
-            // ------------------------------------------------
+            // ---------------------------------------------
 
             if (
+
                 typeof MicrosoftWordProgressEngine !==
                 "undefined"
+
             ) {
 
                 const progress =
+
                     MicrosoftWordProgressEngine.get();
 
 
                 if (
+
                     !Array.isArray(
                         progress.completedChapters
                     )
+
                 ) {
 
                     progress.completedChapters =
@@ -14833,9 +14798,11 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
 
                 if (
+
                     !progress.completedChapters.includes(
                         "chapitre1"
                     )
+
                 ) {
 
                     progress.completedChapters.push(
@@ -14852,15 +14819,18 @@ const RaniseMoisePedagogicalExplanationEngine = {
             }
 
 
-            // ------------------------------------------------
-            // UNLOCK NEXT CHAPTER THROUGH EXISTING ENGINE
-            // ------------------------------------------------
+            // ---------------------------------------------
+            // UNLOCK NEXT CHAPTER
+            // ---------------------------------------------
 
             if (
+
                 typeof WordChapterUnlockEngine !==
                 "undefined" &&
+
                 typeof WordChapterUnlockEngine.checkProgress ===
                 "function"
+
             ) {
 
                 WordChapterUnlockEngine.checkProgress();
@@ -14868,70 +14838,40 @@ const RaniseMoisePedagogicalExplanationEngine = {
             }
 
 
-            // ------------------------------------------------
-            // UI
-            // ------------------------------------------------
+            // ---------------------------------------------
+            // IMPORTANT:
+            // REMOVE PANEL AUTOMATICALLY.
+            //
+            // The student should NOT continue seeing
+            // the homework instruction card after Ranise
+            // has validated the work.
+            // ---------------------------------------------
 
-            if (
-                state.ui.progress
-            ) {
-
-                state.ui.progress.textContent =
-                    "Devoir validé ✓";
-
-            }
+            removeHomeworkPanel();
 
 
-            if (
-                state.ui.instruction
-            ) {
+            // ---------------------------------------------
+            // STOP BLOCK 9 INTERNAL MONITORING
+            // ---------------------------------------------
 
-                state.ui.instruction.textContent =
-
-                    "Devoir du Chapitre 1 terminé avec succès.";
-
-            }
+            stopBlock9Monitoring();
 
 
-            if (
-                state.ui.status
-            ) {
-
-                state.ui.status.textContent =
-
-                    "Excellent travail. Votre devoir respecte les exigences demandées.";
-
-            }
-
-
-            if (
-                state.ui.details
-            ) {
-
-                state.ui.details.innerHTML =
-
-                    "✓ Actions réelles vérifiées<br>" +
-
-                    "✓ Document créé<br>" +
-
-                    "✓ Contenu vérifié<br>" +
-
-                    "✓ Enregistrement vérifié<br>" +
-
-                    "✓ Chapitre 1 validé";
-
-            }
-
+            // ---------------------------------------------
+            // FINAL PROFESSOR VOICE
+            // ---------------------------------------------
 
             await speak(
 
                 "Excellent travail. " +
 
-                "J'ai vérifié votre travail dans la simulation ainsi que le contenu réel de votre document. " +
+                "J'ai vérifié votre utilisation réelle de la simulation ainsi que le contenu réel de votre document. " +
 
-                "Vous avez présenté les différents éléments découverts dans Microsoft Word 2007, réalisé les actions demandées et enregistré votre document. " +
+                "Les différents éléments demandés pour ce devoir sont bien présents. " +
 
-                "Votre devoir du Chapitre 1 est maintenant validé."
+                "Votre devoir du Chapitre 1 est maintenant validé. " +
+
+                "Félicitations, vous avez terminé cette étape."
 
             );
 
@@ -14939,6 +14879,7 @@ const RaniseMoisePedagogicalExplanationEngine = {
             console.log(
 
                 "RANISE BLOCK 9: " +
+
                 "CHAPTER 1 HOMEWORK COMPLETED AND VALIDATED"
 
             );
@@ -14954,14 +14895,17 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
 
     // =====================================================
-    // ATTACH OBSERVER
+    // ATTACH MUTATION OBSERVER
     // =====================================================
 
     function attachMutationObserver() {
 
         if (
+
             state.observerAttached ||
+
             !state.simulationDocument
+
         ) {
 
             return;
@@ -14980,14 +14924,14 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
 
         const target =
+
             state.simulationDocument.body ||
+
             state.simulationDocument.documentElement;
 
 
         if (!target) {
-
             return;
-
         }
 
 
@@ -14998,8 +14942,11 @@ const RaniseMoisePedagogicalExplanationEngine = {
                 function () {
 
                     if (
+
                         state.started &&
+
                         !state.completed
+
                     ) {
 
                         handleDocumentChange();
@@ -15044,8 +14991,11 @@ const RaniseMoisePedagogicalExplanationEngine = {
     function attachListeners() {
 
         if (
+
             !state.simulationDocument ||
+
             state.listenersAttached
+
         ) {
 
             return;
@@ -15123,17 +15073,15 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
             "Nous passons maintenant au devoir du Chapitre 1. " +
 
-            "Cette fois, je ne vais pas simplement vérifier une petite action. " +
-
-            "Je vais observer votre travail dans la simulation et vérifier le document que vous allez produire. " +
+            "Cette fois, je vais observer votre travail dans la simulation et vérifier le document que vous allez produire. " +
 
             "Prenez tout le temps dont vous avez besoin. " +
 
             "Votre devoir consiste à créer un document présentant les différents éléments que vous avez découverts dans Microsoft Word 2007. " +
 
-            "Vous devez réellement utiliser l'interface, créer le document, rédiger votre travail dans la zone du document et enregistrer votre résultat. " +
+            "Utilisez réellement l'interface, créez le document et rédigez votre travail dans la zone du document. " +
 
-            "Je ne validerai le devoir que lorsque l'ensemble du travail sera correctement réalisé."
+            "Je ne validerai le devoir que lorsque les actions demandées et le contenu réel du document seront correctement réalisés."
 
         );
 
@@ -15162,9 +15110,7 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
 
         if (!chapter) {
-
             return false;
-
         }
 
 
@@ -15173,9 +15119,13 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
 
         state.homework =
+
             String(
+
                 chapter.homework ||
+
                 ""
+
             ).trim();
 
 
@@ -15224,8 +15174,11 @@ const RaniseMoisePedagogicalExplanationEngine = {
     async function startBlock9() {
 
         if (
+
             state.started ||
+
             state.completed
+
         ) {
 
             return;
@@ -15249,6 +15202,7 @@ const RaniseMoisePedagogicalExplanationEngine = {
             console.error(
 
                 "RANISE BLOCK 9: " +
+
                 "Chapter 1 homework unavailable."
 
             );
@@ -15261,14 +15215,18 @@ const RaniseMoisePedagogicalExplanationEngine = {
         state.started =
             true;
 
+
         state.completed =
             false;
+
 
         state.waitingForStudent =
             false;
 
+
         state.processing =
             false;
+
 
         state.transitionDetected =
             true;
@@ -15280,7 +15238,9 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
         createHomeworkUI();
 
+
         attachListeners();
+
 
         updateHomeworkUI();
 
@@ -15310,9 +15270,13 @@ const RaniseMoisePedagogicalExplanationEngine = {
     function checkBlock8Completion() {
 
         if (
+
             state.started ||
+
             state.completed ||
+
             state.transitionDetected
+
         ) {
 
             return;
@@ -15321,10 +15285,13 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
 
         if (
+
             !window.RaniseMoiseExerciseMasteryEngine ||
+
             typeof
                 window.RaniseMoiseExerciseMasteryEngine.getState !==
                 "function"
+
         ) {
 
             return;
@@ -15350,9 +15317,7 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
 
         if (!block8State) {
-
             return;
-
         }
 
 
@@ -15361,8 +15326,13 @@ const RaniseMoisePedagogicalExplanationEngine = {
         // -------------------------------------------------
 
         if (
-            block8State.completed === true &&
-            block8State.speaking === false
+
+            block8State.completed ===
+            true &&
+
+            block8State.speaking ===
+            false
+
         ) {
 
             state.transitionDetected =
@@ -15395,8 +15365,11 @@ const RaniseMoisePedagogicalExplanationEngine = {
     function waitForSimulationThenStart() {
 
         if (
+
             state.started ||
+
             state.completed
+
         ) {
 
             return;
@@ -15426,8 +15399,11 @@ const RaniseMoisePedagogicalExplanationEngine = {
             function () {
 
                 if (
+
                     state.started ||
+
                     state.completed
+
                 ) {
 
                     clearInterval(
@@ -15480,15 +15456,23 @@ const RaniseMoisePedagogicalExplanationEngine = {
                         state.transitionDetected,
 
                     actionFlags:
+
                         Object.assign(
+
                             {},
+
                             state.actionFlags
+
                         ),
 
                     validation:
+
                         Object.assign(
+
                             {},
+
                             state.validation
+
                         ),
 
                     homework:
@@ -15502,6 +15486,44 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
 
 })();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
