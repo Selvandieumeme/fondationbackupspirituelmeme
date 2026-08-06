@@ -12132,11 +12132,6 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
 
 
-
-
-
-
-
 // =========================================================
 // BLOCK 9
 // MICROSOFT WORD 2007 FORMATION
@@ -15119,20 +15114,6 @@ window.RaniseMoiseHomeworkMasteryEngine = {
 };
 
 })();
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
