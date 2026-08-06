@@ -7108,33 +7108,27 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
 
 
-
-
-
-
-
-
-
-
-
-
 // =========================================================
 // BLOCK 7
 // MICROSOFT WORD 2007 FORMATION
 // RANISE MOISE PRACTICAL GUIDANCE ENGINE
 // =========================================================
-// ISOLATED ADD-ON
-// STARTS ONLY INSIDE THE WORD SIMULATION
-// USES EXISTING CHAPTER 1 PRACTICE DATA
-// USES EXISTING RANISE VOICE SYSTEM
-// DOES NOT MODIFY BLOCK 4
-// DOES NOT MODIFY BLOCK 5
-// DOES NOT MODIFY BLOCK 6
-// DOES NOT MODIFY THE SIMULATION HTML
-// DOES NOT REPLACE THE SIMULATION IFRAME
+// PRODUCTION VERSION — REAL SIMULATION ACTION VALIDATION
+//
+// RESPONSIBILITIES:
+// 1. Read Chapter 1 practice data.
+// 2. Enter the existing simulation only after it is launched.
+// 3. Guide the student one practice step at a time.
+// 4. Verify the REAL corresponding action in the simulation.
+// 5. Never advance because of an unrelated click.
+// 6. Use the existing MaryTTS + avatar system.
+// 7. Keep Block 4, Block 5 and Block 6 untouched.
+// 8. Keep the existing simulation iframe untouched.
+// 9. Use the REAL HTML structure of Campus Word 2007.
+// 10. Complete Chapter 1 only after ALL practice steps pass.
 // =========================================================
 
-(function(){
+(function () {
 
     "use strict";
 
@@ -7143,27 +7137,31 @@ const RaniseMoisePedagogicalExplanationEngine = {
     // BLOCK 7 STATE
     // =====================================================
 
-    let simulationFrame = null;
+    const state = {
 
-    let simulationDocument = null;
+        simulationFrame: null,
 
-    let currentPractice = null;
+        simulationDocument: null,
 
-    let currentStepIndex = 0;
+        practice: null,
 
-    let currentActivityIndex = 0;
+        activityIndex: 0,
 
-    let guidanceStarted = false;
+        stepIndex: 0,
 
-    let waitingForStudentAction = false;
+        started: false,
 
-    let currentStepValidated = false;
+        waitingForAction: false,
 
-    let lastObservedAction = null;
+        completed: false,
 
-    let validationInProgress = false;
+        listenersAttached: false,
 
-    let simulationListenersAttached = false;
+        speaking: false,
+
+        processingAction: false
+
+    };
 
 
     // =====================================================
@@ -7171,54 +7169,42 @@ const RaniseMoisePedagogicalExplanationEngine = {
     // READ ONLY
     // =====================================================
 
-    function getChapter1Practice(){
+    function getChapter1Practice() {
 
-        if(
+        if (
             typeof microsoftWordCourse ===
             "undefined"
-        ){
-
+        ) {
             return null;
-
         }
 
 
-        if(
+        if (
             !Array.isArray(
                 microsoftWordCourse.chapters
             )
-        ){
-
+        ) {
             return null;
-
         }
 
 
         const chapter =
             microsoftWordCourse.chapters.find(
-
-                item =>
-                    item.id === "chapitre1"
-
+                chapterItem =>
+                    chapterItem.id === "chapitre1"
             );
 
 
-        if(!chapter){
-
+        if (!chapter) {
             return null;
-
         }
 
 
-        if(
-            !Array.isArray(
-                chapter.practice
-            ) ||
+        if (
+            !Array.isArray(chapter.practice) ||
             chapter.practice.length === 0
-        ){
-
+        ) {
             return null;
-
         }
 
 
@@ -7231,47 +7217,55 @@ const RaniseMoisePedagogicalExplanationEngine = {
     // EXISTING RANISE VOICE
     // =====================================================
 
-    async function speak(text){
+    async function speak(text) {
 
-        if(!text){
-
+        if (!text) {
             return;
-
         }
 
 
-        if(
+        if (
             typeof speakProfessorIAWithMaryTTS !==
             "function"
-        ){
+        ) {
+
+            console.warn(
+                "RANISE BLOCK 7: MaryTTS unavailable."
+            );
 
             return;
 
         }
 
 
-        if(
+        state.speaking = true;
+
+
+        if (
             typeof raniseStartTalking ===
             "function"
-        ){
+        ) {
 
             raniseStartTalking();
 
         }
 
 
-        try{
+        try {
 
             await speakProfessorIAWithMaryTTS(
                 text
             );
 
-        }finally{
+        } finally {
 
-            if(
+            state.speaking = false;
+
+
+            if (
                 typeof raniseStopTalking ===
                 "function"
-            ){
+            ) {
 
                 raniseStopTalking();
 
@@ -7283,10 +7277,10 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
 
     // =====================================================
-    // FIND THE CURRENT SIMULATION IFRAME
+    // FIND EXISTING SIMULATION
     // =====================================================
 
-    function findSimulation(){
+    function findSimulation() {
 
         const campusContent =
             document.getElementById(
@@ -7294,65 +7288,237 @@ const RaniseMoisePedagogicalExplanationEngine = {
             );
 
 
-        if(!campusContent){
-
+        if (!campusContent) {
             return null;
-
         }
 
 
         return campusContent.querySelector(
-
             'iframe[src*="campusword2007simulation"]'
-
         );
 
     }
 
 
     // =====================================================
-    // GET SIMULATION DOCUMENT
-    // SAME-ORIGIN ONLY
+    // CONNECT TO EXISTING SIMULATION
+    // SAME ORIGIN ONLY
     // =====================================================
 
-    function connectToSimulation(){
+    function connectToSimulation() {
 
-        simulationFrame =
+        const frame =
             findSimulation();
 
 
-        if(!simulationFrame){
-
+        if (!frame) {
             return false;
-
         }
 
 
-        try{
+        try {
 
-            simulationDocument =
-                simulationFrame.contentDocument ||
-                simulationFrame.contentWindow.document;
+            const doc =
+                frame.contentDocument ||
+                frame.contentWindow.document;
 
-        }catch(error){
+
+            if (!doc) {
+                return false;
+            }
+
+
+            state.simulationFrame =
+                frame;
+
+            state.simulationDocument =
+                doc;
+
+
+            return true;
+
+        } catch (error) {
 
             console.error(
-
-                "RANISE BLOCK 7: SIMULATION DOCUMENT UNAVAILABLE",
-
+                "RANISE BLOCK 7: Cannot access simulation document.",
                 error
-
             );
 
             return false;
 
         }
 
+    }
 
-        if(!simulationDocument){
 
+    // =====================================================
+    // CURRENT ACTIVITY
+    // =====================================================
+
+    function getCurrentActivity() {
+
+        if (!state.practice) {
+            return null;
+        }
+
+
+        return state.practice[
+            state.activityIndex
+        ] || null;
+
+    }
+
+
+    // =====================================================
+    // CURRENT STEP
+    // =====================================================
+
+    function getCurrentStep() {
+
+        const activity =
+            getCurrentActivity();
+
+
+        if (!activity) {
+            return null;
+        }
+
+
+        if (
+            !Array.isArray(
+                activity.steps
+            )
+        ) {
+            return null;
+        }
+
+
+        return activity.steps[
+            state.stepIndex
+        ] || null;
+
+    }
+
+
+    // =====================================================
+    // NORMALIZE TEXT
+    // =====================================================
+
+    function normalize(value) {
+
+        return String(value || "")
+            .normalize("NFD")
+            .replace(/[\u0300-\u036f]/g, "")
+            .toLowerCase()
+            .replace(/\s+/g, " ")
+            .trim();
+
+    }
+
+
+    // =====================================================
+    // GET ELEMENT DATA
+    // =====================================================
+
+    function getElementData(element) {
+
+        if (!element) {
+            return "";
+        }
+
+
+        const values = [
+
+            element.id,
+
+            element.className,
+
+            element.innerText,
+
+            element.textContent,
+
+            element.getAttribute("title"),
+
+            element.getAttribute("aria-label"),
+
+            element.getAttribute("data-action"),
+
+            element.getAttribute("data-command"),
+
+            element.getAttribute("data-role"),
+
+            element.getAttribute("data-target")
+
+        ];
+
+
+        return normalize(
+            values
+                .filter(Boolean)
+                .join(" ")
+        );
+
+    }
+
+
+    // =====================================================
+    // GET REAL EVENT ELEMENT
+    // =====================================================
+
+    function closestFromTarget(
+        target,
+        selector
+    ) {
+
+        if (
+            !target ||
+            !selector
+        ) {
+            return null;
+        }
+
+
+        if (
+            typeof target.closest !==
+            "function"
+        ) {
+            return null;
+        }
+
+
+        try {
+
+            return target.closest(
+                selector
+            );
+
+        } catch (error) {
+
+            return null;
+
+        }
+
+    }
+
+
+    // =====================================================
+    // DETECT REAL TITLE BAR
+    //
+    // REAL HTML:
+    // <div id="cwTitleBar">
+    // =====================================================
+
+    function isTitleBarTarget(target) {
+
+        const titleBar =
+            closestFromTarget(
+                target,
+                "#cwTitleBar"
+            );
+
+
+        if (!titleBar) {
             return false;
-
         }
 
 
@@ -7362,65 +7528,462 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
 
     // =====================================================
-    // GET CURRENT PRACTICE STEP
+    // DETECT REAL OFFICE BUTTON
+    //
+    // REAL HTML:
+    // <div id="cwOfficeButton"
+    //      data-role="office-button">
     // =====================================================
 
-    function getCurrentStep(){
+    function isOfficeButtonTarget(target) {
 
-        if(!currentPractice){
+        const officeButton =
+            closestFromTarget(
+                target,
+                "#cwOfficeButton[data-role='office-button']"
+            );
 
-            return null;
 
+        if (officeButton) {
+            return true;
         }
 
 
-        const activity =
-            currentPractice[
-                currentActivityIndex
-            ];
+        const fallback =
+            closestFromTarget(
+                target,
+                "#cwOfficeButton"
+            );
 
 
-        if(!activity){
-
-            return null;
-
-        }
-
-
-        if(
-            !Array.isArray(
-                activity.steps
-            )
-        ){
-
-            return null;
-
-        }
-
-
-        return activity.steps[
-            currentStepIndex
-        ] || null;
+        return !!fallback;
 
     }
 
 
     // =====================================================
-    // READ CURRENT PRACTICE STEP
+    // DETECT REAL RIBBON CONTENT AREA
+    //
+    // REAL HTML:
+    // <div id="cwRibbonContentArea">
     // =====================================================
 
-    async function speakCurrentStep(){
+    function isRibbonTarget(target) {
 
-        const activity =
-            currentPractice[
-                currentActivityIndex
-            ];
+        const ribbonArea =
+            closestFromTarget(
+                target,
+                "#cwRibbonContentArea"
+            );
 
 
-        if(!activity){
+        if (ribbonArea) {
+            return true;
+        }
 
-            return;
 
+        const ribbonPanel =
+            closestFromTarget(
+                target,
+                "#cwRibbonContentArea .cwRibbonPanel"
+            );
+
+
+        return !!ribbonPanel;
+
+    }
+
+
+    // =====================================================
+    // DETECT REAL TAB BAR
+    //
+    // REAL HTML:
+    // <div id="cwRibbonTabBar">
+    //
+    // <button class="cwTabBtn"
+    //         data-target="tab-home">
+    // =====================================================
+
+    function isTabTarget(target) {
+
+        const tab =
+            closestFromTarget(
+                target,
+                "#cwRibbonTabBar .cwTabBtn"
+            );
+
+
+        if (!tab) {
+            return false;
+        }
+
+
+        return true;
+
+    }
+
+
+    // =====================================================
+    // DETECT SPECIFIC TAB
+    // =====================================================
+
+    function getClickedTabId(target) {
+
+        const tab =
+            closestFromTarget(
+                target,
+                "#cwRibbonTabBar .cwTabBtn"
+            );
+
+
+        if (!tab) {
+            return "";
+
+        }
+
+
+        return normalize(
+            tab.getAttribute(
+                "data-target"
+            )
+        );
+
+    }
+
+
+    // =====================================================
+    // DETECT DOCUMENT WORKSPACE
+    // =====================================================
+
+    function isDocumentAreaTarget(target) {
+
+        if (!target) {
+            return false;
+        }
+
+
+        const pageContent =
+            closestFromTarget(
+                target,
+                ".cwPageContent"
+            );
+
+
+        if (pageContent) {
+            return true;
+        }
+
+
+        const workspace =
+            closestFromTarget(
+                target,
+                [
+                    "#cwWorkspace",
+                    "#cwWorkspaceShell",
+                    "#cwWorkspaceScroll",
+                    "#cwDocumentContainer"
+                ].join(",")
+            );
+
+
+        if (workspace) {
+            return true;
+        }
+
+
+        return false;
+
+    }
+
+
+    // =====================================================
+    // DETECT REAL NEW ACTION
+    //
+    // REAL HTML:
+    // <div class="cwOfficeItem"
+    //      data-action="new">
+    // =====================================================
+
+    function isNewDocumentTarget(target) {
+
+        if (!target) {
+            return false;
+        }
+
+
+        const newAction =
+            closestFromTarget(
+                target,
+                "[data-action='new']"
+            );
+
+
+        if (newAction) {
+            return true;
+        }
+
+
+        const newDocument =
+            closestFromTarget(
+                target,
+                "[data-action='new-document']"
+            );
+
+
+        if (newDocument) {
+            return true;
+        }
+
+
+        return false;
+
+    }
+
+
+    // =====================================================
+    // DETECT REAL OFFICE MENU ITEM
+    // =====================================================
+
+    function isOfficeMenuTarget(target) {
+
+        const menuItem =
+            closestFromTarget(
+                target,
+                "#cwOfficeMenu .cwOfficeItem"
+            );
+
+
+        return !!menuItem;
+
+    }
+
+
+    // =====================================================
+    // GET OFFICE MENU ACTION
+    // =====================================================
+
+    function getOfficeMenuAction(target) {
+
+        const menuItem =
+            closestFromTarget(
+                target,
+                "#cwOfficeMenu .cwOfficeItem"
+            );
+
+
+        if (!menuItem) {
+            return "";
+        }
+
+
+        return normalize(
+            menuItem.getAttribute(
+                "data-action"
+            )
+        );
+
+    }
+
+
+    // =====================================================
+    // DETERMINE PRACTICE OBJECTIVE
+    // =====================================================
+
+    function getStepType(step) {
+
+        const text =
+            normalize(step);
+
+
+        // -------------------------------------------------
+        // TITLE BAR
+        // -------------------------------------------------
+
+        if (
+            text.includes("barre de titre") ||
+            text.includes("barre du titre") ||
+            text.includes("title bar")
+        ) {
+
+            return "title-bar";
+
+        }
+
+
+        // -------------------------------------------------
+        // OFFICE BUTTON
+        // -------------------------------------------------
+
+        if (
+            text.includes("bouton office") ||
+            text.includes("office button")
+        ) {
+
+            return "office-button";
+
+        }
+
+
+        // -------------------------------------------------
+        // RIBBON
+        // -------------------------------------------------
+
+        if (
+            text.includes("identifier le ruban") ||
+            text.includes("identifiez le ruban") ||
+            text.includes("repérer le ruban") ||
+            text.includes("reperez le ruban") ||
+            text.includes("ruban") ||
+            text.includes("ribbon")
+        ) {
+
+            return "ribbon";
+
+        }
+
+
+        // -------------------------------------------------
+        // TABS
+        // -------------------------------------------------
+
+        if (
+            text.includes("identifier les onglets") ||
+            text.includes("identifiez les onglets") ||
+            text.includes("identifier l'onglet") ||
+            text.includes("identifier les onglet") ||
+            text.includes("onglets du ruban") ||
+            text.includes("onglet du ruban") ||
+            text.includes("ribbon tabs") ||
+            text.includes("identify the tabs")
+        ) {
+
+            return "tabs";
+
+        }
+
+
+        // -------------------------------------------------
+        // DOCUMENT AREA
+        // -------------------------------------------------
+
+        if (
+            text.includes("zone de travail") ||
+            text.includes("zone du document") ||
+            text.includes("zone de document") ||
+            text.includes("document area") ||
+            text.includes("espace de travail")
+        ) {
+
+            return "document-area";
+
+        }
+
+
+        // -------------------------------------------------
+        // NEW DOCUMENT
+        // -------------------------------------------------
+
+        if (
+            text.includes("nouveau document") ||
+            text.includes("créer un nouveau document") ||
+            text.includes("creer un nouveau document") ||
+            text.includes("new document")
+        ) {
+
+            return "new-document";
+
+        }
+
+
+        return "unknown";
+
+    }
+
+
+    // =====================================================
+    // DETECT POSSIBLE SPECIFIC TAB FROM STEP
+    // =====================================================
+
+    function getRequestedTab(step) {
+
+        const text =
+            normalize(step);
+
+
+        if (
+            text.includes("home")
+        ) {
+            return "tab-home";
+        }
+
+
+        if (
+            text.includes("insert")
+        ) {
+            return "tab-insert";
+        }
+
+
+        if (
+            text.includes("page layout")
+        ) {
+            return "tab-page-layout";
+        }
+
+
+        if (
+            text.includes("references")
+        ) {
+            return "tab-references";
+        }
+
+
+        if (
+            text.includes("mailings")
+        ) {
+            return "tab-mailings";
+        }
+
+
+        if (
+            text.includes("review")
+        ) {
+            return "tab-review";
+        }
+
+
+        if (
+            text.includes("view")
+        ) {
+            return "tab-view";
+        }
+
+
+        if (
+            text.includes("format")
+        ) {
+            return "tab-format";
+        }
+
+
+        return "";
+
+    }
+
+
+    // =====================================================
+    // VERIFY CURRENT STUDENT ACTION
+    // =====================================================
+
+    function studentPerformedCorrectAction(
+        event
+    ) {
+
+        if (
+            !event ||
+            !event.target
+        ) {
+            return false;
         }
 
 
@@ -7428,29 +7991,194 @@ const RaniseMoisePedagogicalExplanationEngine = {
             getCurrentStep();
 
 
-        if(!step){
-
-            return;
-
+        if (!step) {
+            return false;
         }
 
 
-        currentStepValidated = false;
+        const type =
+            getStepType(step);
 
-        lastObservedAction = null;
+
+        const target =
+            event.target;
+
+
+        // =================================================
+        // IMPORTANT:
+        // NO GENERIC "ANY BUTTON = CORRECT".
+        // EVERY STEP HAS ITS OWN REAL TARGET.
+        // =================================================
+
+        switch (type) {
+
+
+            // =============================================
+            // TITLE BAR
+            // =============================================
+
+            case "title-bar":
+
+                return isTitleBarTarget(
+                    target
+                );
+
+
+            // =============================================
+            // OFFICE BUTTON
+            // =============================================
+
+            case "office-button":
+
+                return isOfficeButtonTarget(
+                    target
+                );
+
+
+            // =============================================
+            // RIBBON
+            // =============================================
+
+            case "ribbon":
+
+                return isRibbonTarget(
+                    target
+                );
+
+
+            // =============================================
+            // TABS
+            // =============================================
+
+            case "tabs": {
+
+                if (
+                    !isTabTarget(
+                        target
+                    )
+                ) {
+                    return false;
+                }
+
+
+                const requestedTab =
+                    getRequestedTab(
+                        step
+                    );
+
+
+                if (!requestedTab) {
+
+                    return true;
+
+                }
+
+
+                return (
+                    getClickedTabId(
+                        target
+                    ) === requestedTab
+                );
+
+            }
+
+
+            // =============================================
+            // DOCUMENT AREA
+            // =============================================
+
+            case "document-area":
+
+                return isDocumentAreaTarget(
+                    target
+                );
+
+
+            // =============================================
+            // NEW DOCUMENT
+            // =============================================
+
+            case "new-document":
+
+                return isNewDocumentTarget(
+                    target
+                );
+
+
+            // =============================================
+            // UNKNOWN
+            // =============================================
+
+            default:
+
+                return false;
+
+        }
+
+    }
+
+
+    // =====================================================
+    // EXPLAIN CURRENT STEP
+    // =====================================================
+
+    async function speakCurrentStep() {
+
+        const activity =
+            getCurrentActivity();
+
+
+        if (!activity) {
+            return;
+        }
+
+
+        const step =
+            getCurrentStep();
+
+
+        if (!step) {
+            return;
+        }
+
+
+        state.waitingForAction = false;
 
 
         await speak(
 
             "Étape " +
-            (currentStepIndex + 1) +
+            (state.stepIndex + 1) +
             ". " +
-            step
+            step +
+            " Faites cette action maintenant."
 
         );
 
 
-        waitingForStudentAction = true;
+        if (
+            !state.completed
+        ) {
+
+            state.waitingForAction = true;
+
+        }
+
+    }
+
+
+    // =====================================================
+    // STEP COMPLETED FEEDBACK
+    // =====================================================
+
+    async function confirmStep() {
+
+        state.waitingForAction = false;
+
+
+        await speak(
+            "Très bien. C'est correct."
+        );
 
     }
 
@@ -7459,835 +8187,246 @@ const RaniseMoisePedagogicalExplanationEngine = {
     // MOVE TO NEXT PRACTICE STEP
     // =====================================================
 
-    async function nextPracticeStep(){
+    async function nextPracticeStep() {
 
-        currentStepValidated = false;
-
-        lastObservedAction = null;
-
-        waitingForStudentAction = false;
-
-
-        const activity =
-            currentPractice[
-                currentActivityIndex
-            ];
-
-
-        if(!activity){
-
+        if (
+            state.completed ||
+            state.processingAction
+        ) {
             return;
-
         }
 
 
-        if(
-            Array.isArray(activity.steps) &&
-            currentStepIndex <
-            activity.steps.length - 1
-        ){
-
-            currentStepIndex++;
-
-            await speakCurrentStep();
-
-            return;
-
-        }
+        state.processingAction = true;
 
 
-        // =================================================
-        // CURRENT ACTIVITY FINISHED
-        // =================================================
+        try {
 
-        if(
-            currentActivityIndex <
-            currentPractice.length - 1
-        ){
-
-            currentActivityIndex++;
-
-            currentStepIndex = 0;
+            await confirmStep();
 
 
-            const nextActivity =
-                currentPractice[
-                    currentActivityIndex
-                ];
+            const activity =
+                getCurrentActivity();
 
 
-            if(
-                nextActivity &&
-                nextActivity.title
-            ){
+            if (!activity) {
+                return;
+            }
 
-                await speak(
 
-                    "Très bien. Nous passons maintenant à l'activité suivante : " +
+            // =============================================
+            // NEXT STEP — SAME ACTIVITY
+            // =============================================
+
+            if (
+                Array.isArray(
+                    activity.steps
+                ) &&
+                state.stepIndex <
+                activity.steps.length - 1
+            ) {
+
+                state.stepIndex++;
+
+
+                await speakCurrentStep();
+
+
+                return;
+
+            }
+
+
+            // =============================================
+            // NEXT ACTIVITY
+            // =============================================
+
+            if (
+                state.activityIndex <
+                state.practice.length - 1
+            ) {
+
+                state.activityIndex++;
+
+                state.stepIndex = 0;
+
+
+                const nextActivity =
+                    getCurrentActivity();
+
+
+                if (
+                    nextActivity &&
                     nextActivity.title
+                ) {
 
-                );
+                    await speak(
 
-            }
+                        "Excellent. Vous avez terminé cette activité. " +
+                        "Nous passons maintenant à l'activité suivante : " +
+                        nextActivity.title
 
-
-            await speakCurrentStep();
-
-            return;
-
-        }
-
-
-        // =================================================
-        // ENTIRE PRACTICE FINISHED
-        // =================================================
-
-        await speak(
-
-            "Excellent. Vous avez terminé cette séance pratique. Bravo pour votre travail."
-
-        );
-
-
-        console.log(
-
-            "RANISE BLOCK 7: PRACTICE GUIDANCE FINISHED"
-
-        );
-
-    }
-
-
-    // =====================================================
-    // BASIC TARGET DESCRIPTION
-    // READ ONLY
-    // =====================================================
-
-    function getTargetText(target){
-
-        if(!target){
-
-            return "";
-
-        }
-
-
-        return (
-
-            (
-                target.innerText ||
-                target.textContent ||
-                target.getAttribute("title") ||
-                target.getAttribute("aria-label") ||
-                target.getAttribute("data-command") ||
-                target.getAttribute("data-action") ||
-                ""
-            )
-
-            .trim()
-
-            .toLowerCase()
-
-        );
-
-    }
-
-
-    // =====================================================
-    // NORMALIZE TEXT
-    // READ ONLY
-    // =====================================================
-
-    function normalizeText(value){
-
-        return String(
-            value || ""
-        )
-        .toLowerCase()
-        .normalize("NFD")
-        .replace(
-            /[\u0300-\u036f]/g,
-            ""
-        )
-        .replace(
-            /[^a-z0-9]+/g,
-            " "
-        )
-        .trim();
-
-    }
-
-
-    // =====================================================
-    // FIND EFFECTIVE TARGET
-    // =====================================================
-
-    function getEffectiveTarget(target){
-
-        if(!target){
-
-            return null;
-
-        }
-
-
-        if(
-            typeof target.closest ===
-            "function"
-        ){
-
-            return (
-                target.closest(
-                    "button, " +
-                    "[role='button'], " +
-                    "[role='tab'], " +
-                    "[data-command], " +
-                    "[data-action], " +
-                    "[title], " +
-                    "[aria-label]"
-                ) ||
-                target
-            );
-
-        }
-
-
-        return target;
-
-    }
-
-
-    // =====================================================
-    // EXTRACT TARGET IDENTIFIERS
-    // READ ONLY
-    // =====================================================
-
-    function getTargetIdentifiers(target){
-
-        if(!target){
-
-            return [];
-
-        }
-
-
-        const values = [
-
-            getTargetText(target),
-
-            target.getAttribute
-                ? target.getAttribute(
-                    "data-command"
-                )
-                : "",
-
-            target.getAttribute
-                ? target.getAttribute(
-                    "data-action"
-                )
-                : "",
-
-            target.getAttribute
-                ? target.getAttribute(
-                    "title"
-                )
-                : "",
-
-            target.getAttribute
-                ? target.getAttribute(
-                    "aria-label"
-                )
-                : ""
-
-        ];
-
-
-        return values
-
-            .map(
-                value =>
-                    normalizeText(value)
-            )
-
-            .filter(
-                value =>
-                    value.length > 0
-            );
-
-    }
-
-
-    // =====================================================
-    // CHECK WHETHER STEP REQUESTS A SPECIFIC WORD ACTION
-    // =====================================================
-
-    function stepRequestsAction(
-        normalizedStep,
-        aliases
-    ){
-
-        return aliases.some(
-
-            alias =>
-                normalizedStep.includes(
-                    normalizeText(alias)
-                )
-
-        );
-
-    }
-
-
-    // =====================================================
-    // VERIFY TARGET AGAINST STEP
-    // READ ONLY
-    // =====================================================
-
-    function targetMatchesStep(
-        target,
-        normalizedStep
-    ){
-
-        if(!target){
-
-            return false;
-
-        }
-
-
-        const identifiers =
-            getTargetIdentifiers(
-                target
-            );
-
-
-        if(
-            identifiers.length === 0
-        ){
-
-            return false;
-
-        }
-
-
-        // =================================================
-        // OFFICE / WORD BASIC INTERFACE
-        // =================================================
-
-        const actionGroups = [
-
-            {
-                aliases:[
-                    "barre de titre",
-                    "title bar"
-                ],
-
-                targetAliases:[
-                    "barre de titre",
-                    "title bar"
-                ]
-            },
-
-            {
-                aliases:[
-                    "bouton office",
-                    "office button"
-                ],
-
-                targetAliases:[
-                    "bouton office",
-                    "office button"
-                ]
-            },
-
-            {
-                aliases:[
-                    "ruban",
-                    "ribbon"
-                ],
-
-                targetAliases:[
-                    "ruban",
-                    "ribbon"
-                ]
-            },
-
-            {
-                aliases:[
-                    "zone de travail",
-                    "document area"
-                ],
-
-                targetAliases:[
-                    "zone de travail",
-                    "document area"
-                ]
-            },
-
-            {
-                aliases:[
-                    "nouveau document",
-                    "new document",
-                    "new"
-                ],
-
-                targetAliases:[
-                    "nouveau document",
-                    "new document",
-                    "new"
-                ]
-            },
-
-            {
-                aliases:[
-                    "gras",
-                    "mettre en gras",
-                    "bold"
-                ],
-
-                targetAliases:[
-                    "gras",
-                    "bold"
-                ]
-            },
-
-            {
-                aliases:[
-                    "italique",
-                    "mettre en italique",
-                    "italic"
-                ],
-
-                targetAliases:[
-                    "italique",
-                    "italic"
-                ]
-            },
-
-            {
-                aliases:[
-                    "souligne",
-                    "souligner",
-                    "underline"
-                ],
-
-                targetAliases:[
-                    "souligne",
-                    "souligner",
-                    "underline"
-                ]
-            },
-
-            {
-                aliases:[
-                    "copier",
-                    "copy"
-                ],
-
-                targetAliases:[
-                    "copier",
-                    "copy"
-                ]
-            },
-
-            {
-                aliases:[
-                    "couper",
-                    "cut"
-                ],
-
-                targetAliases:[
-                    "couper",
-                    "cut"
-                ]
-            },
-
-            {
-                aliases:[
-                    "coller",
-                    "paste"
-                ],
-
-                targetAliases:[
-                    "coller",
-                    "paste"
-                ]
-            },
-
-            {
-                aliases:[
-                    "enregistrer",
-                    "save"
-                ],
-
-                targetAliases:[
-                    "enregistrer",
-                    "save"
-                ]
-            },
-
-            {
-                aliases:[
-                    "imprimer",
-                    "print"
-                ],
-
-                targetAliases:[
-                    "imprimer",
-                    "print"
-                ]
-            },
-
-            {
-                aliases:[
-                    "insertion",
-                    "insert",
-                    "onglet insertion",
-                    "tab insertion"
-                ],
-
-                targetAliases:[
-                    "insertion",
-                    "insert"
-                ]
-            },
-
-            {
-                aliases:[
-                    "accueil",
-                    "home",
-                    "onglet accueil",
-                    "tab accueil"
-                ],
-
-                targetAliases:[
-                    "accueil",
-                    "home"
-                ]
-            },
-
-            {
-                aliases:[
-                    "mise en page",
-                    "page layout"
-                ],
-
-                targetAliases:[
-                    "mise en page",
-                    "page layout"
-                ]
-            },
-
-            {
-                aliases:[
-                    "references",
-                    "références"
-                ],
-
-                targetAliases:[
-                    "references",
-                    "références"
-                ]
-            },
-
-            {
-                aliases:[
-                    "publipostage",
-                    "mailings"
-                ],
-
-                targetAliases:[
-                    "publipostage",
-                    "mailings"
-                ]
-            },
-
-            {
-                aliases:[
-                    "revision",
-                    "révision",
-                    "review"
-                ],
-
-                targetAliases:[
-                    "revision",
-                    "révision",
-                    "review"
-                ]
-            },
-
-            {
-                aliases:[
-                    "affichage",
-                    "view"
-                ],
-
-                targetAliases:[
-                    "affichage",
-                    "view"
-                ]
-            }
-
-        ];
-
-
-        for(
-            const group of actionGroups
-        ){
-
-            if(
-                !stepRequestsAction(
-                    normalizedStep,
-                    group.aliases
-                )
-            ){
-
-                continue;
-
-            }
-
-
-            for(
-                const targetAlias
-                of group.targetAliases
-            ){
-
-                const normalizedAlias =
-                    normalizeText(
-                        targetAlias
                     );
-
-
-                const matched =
-                    identifiers.some(
-                        identifier =>
-                            identifier.includes(
-                                normalizedAlias
-                            ) ||
-                            normalizedAlias.includes(
-                                identifier
-                            )
-                    );
-
-
-                if(matched){
-
-                    return true;
 
                 }
 
+
+                await speakCurrentStep();
+
+
+                return;
+
             }
 
-        }
+
+            // =============================================
+            // ENTIRE PRACTICE COMPLETED
+            // =============================================
+
+            state.completed = true;
+
+            state.waitingForAction = false;
 
 
-        return false;
+            // ---------------------------------------------
+            // VALIDATE CHAPTER 1
+            // ---------------------------------------------
 
-    }
+            if (
+                typeof MicrosoftWordValidationEngine !==
+                "undefined" &&
+                typeof MicrosoftWordValidationEngine
+                    .completeChapter ===
+                    "function"
+            ) {
 
+                MicrosoftWordValidationEngine
+                    .completeChapter(
+                        "chapitre1"
+                    );
 
-    // =====================================================
-    // FIND ACTIVE TAB
-    // READ ONLY
-    // =====================================================
-
-    function getActiveTab(){
-
-        if(!simulationDocument){
-
-            return null;
-
-        }
-
-
-        return simulationDocument.querySelector(
-
-            ".cwTabBtn.active, " +
-            ".cwTabBtn[aria-selected='true'], " +
-            ".cwTabBtn[aria-current='true'], " +
-            "[role='tab'][aria-selected='true']"
-
-        );
-
-    }
+            }
 
 
-    // =====================================================
-    // VERIFY ACTIVE TAB STATE
-    // READ ONLY
-    // =====================================================
+            // ---------------------------------------------
+            // ALSO KEEP LEGACY COMPLETION ENGINE
+            // IF IT EXISTS
+            // ---------------------------------------------
 
-    function verifyActiveTab(
-        normalizedStep
-    ){
+            if (
+                typeof WordChapterCompletionEngine !==
+                "undefined" &&
+                typeof WordChapterCompletionEngine
+                    .completeChapter ===
+                    "function"
+            ) {
 
-        const activeTab =
-            getActiveTab();
+                WordChapterCompletionEngine
+                    .completeChapter(
+                        "chapitre1"
+                    );
+
+            }
 
 
-        if(!activeTab){
+            await speak(
 
-            return false;
+                "Excellent. Vous avez terminé toutes les étapes de la séance pratique du Chapitre 1. " +
+                "Votre pratique est maintenant validée. Bravo pour votre travail."
 
-        }
-
-
-        const activeText =
-            normalizeText(
-                getTargetText(
-                    activeTab
-                )
             );
 
 
-        if(!activeText){
-
-            return false;
-
-        }
-
-
-        const tabGroups = [
-
-            {
-                aliases:[
-                    "insertion",
-                    "insert",
-                    "onglet insertion",
-                    "tab insertion"
-                ],
-
-                expected:[
-                    "insertion",
-                    "insert"
-                ]
-            },
-
-            {
-                aliases:[
-                    "accueil",
-                    "home",
-                    "onglet accueil",
-                    "tab accueil"
-                ],
-
-                expected:[
-                    "accueil",
-                    "home"
-                ]
-            },
-
-            {
-                aliases:[
-                    "mise en page",
-                    "page layout"
-                ],
-
-                expected:[
-                    "mise en page",
-                    "page layout"
-                ]
-            },
-
-            {
-                aliases:[
-                    "references",
-                    "références"
-                ],
-
-                expected:[
-                    "references",
-                    "références"
-                ]
-            },
-
-            {
-                aliases:[
-                    "publipostage",
-                    "mailings"
-                ],
-
-                expected:[
-                    "publipostage",
-                    "mailings"
-                ]
-            },
-
-            {
-                aliases:[
-                    "revision",
-                    "révision",
-                    "review"
-                ],
-
-                expected:[
-                    "revision",
-                    "révision",
-                    "review"
-                ]
-            },
-
-            {
-                aliases:[
-                    "affichage",
-                    "view"
-                ],
-
-                expected:[
-                    "affichage",
-                    "view"
-                ]
-            }
-
-        ];
-
-
-        for(
-            const group of tabGroups
-        ){
-
-            if(
-                !stepRequestsAction(
-                    normalizedStep,
-                    group.aliases
-                )
-            ){
-
-                continue;
-
-            }
-
-
-            return group.expected.some(
-
-                expected =>
-                    activeText.includes(
-                        normalizeText(
-                            expected
-                        )
-                    )
-
+            console.log(
+                "RANISE BLOCK 7: CHAPTER 1 PRACTICE COMPLETED AND VALIDATED"
             );
 
+        } finally {
+
+            state.processingAction = false;
+
         }
-
-
-        return false;
 
     }
 
 
     // =====================================================
-    // VERIFY REAL SIMULATION STATE
-    // READ ONLY
+    // REAL SIMULATION CLICK LISTENER
     // =====================================================
 
-    function verifyCurrentPracticeStep(){
+    function handleSimulationClick(event) {
 
-        if(!simulationDocument){
+        if (!state.started) {
+            return;
+        }
 
-            return false;
 
+        if (state.completed) {
+            return;
+        }
+
+
+        if (state.speaking) {
+            return;
+        }
+
+
+        if (state.processingAction) {
+            return;
+        }
+
+
+        if (!state.waitingForAction) {
+            return;
+        }
+
+
+        if (
+            studentPerformedCorrectAction(
+                event
+            )
+        ) {
+
+            nextPracticeStep();
+
+        }
+
+    }
+
+
+    // =====================================================
+    // INPUT LISTENER
+    //
+    // IMPORTANT:
+    // Do NOT treat every input as a correct action.
+    // Input only validates an actual document-area
+    // interaction when the current step requires it.
+    // =====================================================
+
+    function handleSimulationInput(event) {
+
+        if (!state.started) {
+            return;
+        }
+
+
+        if (state.completed) {
+            return;
+        }
+
+
+        if (state.speaking) {
+            return;
+        }
+
+
+        if (state.processingAction) {
+            return;
+        }
+
+
+        if (!state.waitingForAction) {
+            return;
         }
 
 
@@ -8295,506 +8434,100 @@ const RaniseMoisePedagogicalExplanationEngine = {
             getCurrentStep();
 
 
-        if(!step){
-
-            return false;
-
+        if (!step) {
+            return;
         }
 
 
-        const normalizedStep =
-            normalizeText(
-                step
-            );
+        const type =
+            getStepType(step);
 
 
-        if(!normalizedStep){
-
-            return false;
-
+        if (
+            type !== "document-area"
+        ) {
+            return;
         }
 
 
-        // =================================================
-        // TAB STATE VERIFICATION
-        // =================================================
+        if (
+            isDocumentAreaTarget(
+                event.target
+            )
+        ) {
 
-        const asksForTab =
-            stepRequestsAction(
-
-                normalizedStep,
-
-                [
-                    "onglet",
-                    "tab",
-                    "insertion",
-                    "insert",
-                    "accueil",
-                    "home",
-                    "mise en page",
-                    "page layout",
-                    "references",
-                    "références",
-                    "publipostage",
-                    "mailings",
-                    "revision",
-                    "révision",
-                    "review",
-                    "affichage",
-                    "view"
-                ]
-
-            );
-
-
-        if(asksForTab){
-
-            return verifyActiveTab(
-                normalizedStep
-            );
+            nextPracticeStep();
 
         }
-
-
-        // =================================================
-        // CURRENT OBSERVED TARGET
-        // =================================================
-
-        if(
-            !lastObservedAction ||
-            !lastObservedAction.target
-        ){
-
-            return false;
-
-        }
-
-
-        // =================================================
-        // TARGET MUST MATCH THE REQUESTED ACTION
-        // =================================================
-
-        return targetMatchesStep(
-
-            lastObservedAction.target,
-
-            normalizedStep
-
-        );
 
     }
 
 
     // =====================================================
-    // DETECT WHETHER STUDENT INTERACTED
-    // WITH THE WORD SIMULATION
+    // ATTACH SIMULATION LISTENERS
     // =====================================================
 
-    function studentPerformedAction(event){
+    function attachSimulationListeners() {
 
-        if(!event){
-
-            return false;
-
-        }
-
-
-        const target =
-            event.target;
-
-
-        if(!target){
-
-            return false;
-
-        }
-
-
-        const step =
-            getCurrentStep();
-
-
-        if(!step){
-
-            return false;
-
-        }
-
-
-        const effectiveTarget =
-            getEffectiveTarget(
-                target
-            );
-
-
-        if(!effectiveTarget){
-
-            return false;
-
-        }
-
-
-        const normalizedStep =
-            normalizeText(
-                step
-            );
-
-
-        const targetText =
-            getTargetText(
-                effectiveTarget
-            );
-
-
-        // =================================================
-        // SAVE OBSERVED ACTION
-        // =================================================
-
-        lastObservedAction = {
-
-            eventType:
-                event.type,
-
-            target:
-                effectiveTarget,
-
-            text:
-                targetText,
-
-            time:
-                Date.now()
-
-        };
-
-
-        // =================================================
-        // A TARGET MUST EXIST
-        // =================================================
-
-        if(
-            !targetText &&
-            !effectiveTarget.getAttribute
-        ){
-
-            return false;
-
-        }
-
-
-        // =================================================
-        // SPECIFIC WORD INTERFACE ACTION
-        // =================================================
-
-        if(
-            targetMatchesStep(
-                effectiveTarget,
-                normalizedStep
-            )
-        ){
-
-            return true;
-
-        }
-
-
-        // =================================================
-        // TAB CLICK:
-        // THE FINAL VERIFICATION WILL CHECK
-        // THE REAL ACTIVE TAB AFTER THE SIMULATION
-        // UPDATES ITS STATE.
-        // =================================================
-
-        if(
-            effectiveTarget.matches &&
-            effectiveTarget.matches(
-                ".cwTabBtn, [role='tab']"
-            )
-        ){
-
-            return true;
-
-        }
-
-
-        // =================================================
-        // NO GENERIC BUTTON ACCEPTANCE
-        // =================================================
-
-        return false;
-
-    }
-
-
-    // =====================================================
-    // LISTEN TO REAL USER ACTIONS
-    // INSIDE SIMULATION
-    // READ ONLY LISTENERS
-    // =====================================================
-
-    function attachSimulationListeners(){
-
-        if(!simulationDocument){
-
+        if (
+            !state.simulationDocument ||
+            state.listenersAttached
+        ) {
             return;
-
         }
 
 
-        if(simulationListenersAttached){
-
-            return;
-
-        }
-
-
-        simulationListenersAttached = true;
-
-
-        simulationDocument.addEventListener(
+        state.simulationDocument.addEventListener(
 
             "click",
 
-            async function(event){
-
-                if(!guidanceStarted){
-
-                    return;
-
-                }
-
-
-                if(!waitingForStudentAction){
-
-                    return;
-
-                }
-
-
-                if(validationInProgress){
-
-                    return;
-
-                }
-
-
-                if(
-                    !studentPerformedAction(
-                        event
-                    )
-                ){
-
-                    return;
-
-                }
-
-
-                validationInProgress = true;
-
-
-                try{
-
-                    // =====================================
-                    // LET THE SIMULATION FINISH ITS OWN
-                    // CLICK HANDLER BEFORE VERIFICATION
-                    // =====================================
-
-                    await new Promise(
-
-                        resolve =>
-
-                            setTimeout(
-                                resolve,
-                                0
-                            )
-
-                    );
-
-
-                    // =====================================
-                    // REAL STEP VERIFICATION
-                    // =====================================
-
-                    const verified =
-                        verifyCurrentPracticeStep();
-
-
-                    if(!verified){
-
-                        return;
-
-                    }
-
-
-                    currentStepValidated = true;
-
-                    waitingForStudentAction = false;
-
-
-                    await nextPracticeStep();
-
-                }finally{
-
-                    validationInProgress = false;
-
-                }
-
-            },
+            handleSimulationClick,
 
             true
 
         );
 
 
-        simulationDocument.addEventListener(
+        state.simulationDocument.addEventListener(
 
             "input",
 
-            async function(event){
-
-                if(!guidanceStarted){
-
-                    return;
-
-                }
-
-
-                if(!waitingForStudentAction){
-
-                    return;
-
-                }
-
-
-                if(validationInProgress){
-
-                    return;
-
-                }
-
-
-                const target =
-                    event.target;
-
-
-                if(!target){
-
-                    return;
-
-                }
-
-
-                // =========================================
-                // SAVE REAL INPUT TARGET
-                // =========================================
-
-                lastObservedAction = {
-
-                    eventType:
-                        "input",
-
-                    target:
-                        target,
-
-                    text:
-                        getTargetText(
-                            target
-                        ),
-
-                    time:
-                        Date.now()
-
-                };
-
-
-                validationInProgress = true;
-
-
-                try{
-
-                    // =====================================
-                    // LET SIMULATION UPDATE ITS STATE
-                    // =====================================
-
-                    await new Promise(
-
-                        resolve =>
-
-                            setTimeout(
-                                resolve,
-                                0
-                            )
-
-                    );
-
-
-                    // =====================================
-                    // VERIFY AFTER INPUT
-                    // =====================================
-
-                    const verified =
-                        verifyCurrentPracticeStep();
-
-
-                    if(!verified){
-
-                        return;
-
-                    }
-
-
-                    currentStepValidated = true;
-
-                    waitingForStudentAction = false;
-
-
-                    await nextPracticeStep();
-
-                }finally{
-
-                    validationInProgress = false;
-
-                }
-
-            },
+            handleSimulationInput,
 
             true
 
         );
+
+
+        state.listenersAttached = true;
 
     }
 
 
     // =====================================================
     // START BLOCK 7
-    // ONLY AFTER SIMULATION LOADS
     // =====================================================
 
-    async function startBlock7(){
+    async function startBlock7() {
 
-        if(guidanceStarted){
-
+        if (state.started) {
             return;
-
         }
 
 
-        if(!connectToSimulation()){
-
+        if (!connectToSimulation()) {
             return;
-
         }
 
 
-        currentPractice =
+        const practice =
             getChapter1Practice();
 
 
-        if(!currentPractice){
+        if (!practice) {
 
             console.error(
-
-                "RANISE BLOCK 7: PRACTICE DATA NOT AVAILABLE"
-
+                "RANISE BLOCK 7: Chapter 1 practice unavailable."
             );
 
             return;
@@ -8802,54 +8535,69 @@ const RaniseMoisePedagogicalExplanationEngine = {
         }
 
 
-        guidanceStarted = true;
+        state.practice =
+            practice;
 
-        currentActivityIndex = 0;
+        state.activityIndex =
+            0;
 
-        currentStepIndex = 0;
+        state.stepIndex =
+            0;
 
-        currentStepValidated = false;
+        state.started =
+            true;
 
-        lastObservedAction = null;
+        state.completed =
+            false;
 
-        validationInProgress = false;
+        state.waitingForAction =
+            false;
+
+        state.processingAction =
+            false;
 
 
         attachSimulationListeners();
 
 
         // =================================================
-        // WELCOME MESSAGE
+        // PRACTICE WELCOME
         // =================================================
 
         await speak(
 
-            "Bienvenue dans l’espace de simulation Microsoft Word 2007. Vous êtes maintenant dans la séance pratique. Je vais vous guider étape par étape. Écoutez bien mes instructions et réalisez chaque action dans la simulation."
+            "Bienvenue dans l'espace de simulation Microsoft Word 2007. " +
+            "Nous allons maintenant réaliser la pratique du Chapitre 1 ensemble. " +
+            "Je vais vous donner une consigne à la fois. " +
+            "Après chaque consigne, effectuez réellement l'action demandée dans la simulation. " +
+            "Je vérifierai votre action avant de passer à l'étape suivante."
 
         );
 
 
         // =================================================
-        // FIRST PRACTICE STEP
+        // FIRST ACTIVITY
         // =================================================
 
         const firstActivity =
-            currentPractice[0];
+            state.practice[0];
 
 
-        if(
+        if (
             firstActivity &&
             firstActivity.title
-        ){
+        ) {
 
             await speak(
-
                 firstActivity.title
-
             );
 
         }
 
+
+        // =================================================
+        // FIRST STEP
+        // =================================================
 
         await speakCurrentStep();
 
@@ -8857,10 +8605,10 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
 
     // =====================================================
-    // WAIT FOR SIMULATION IFRAME
+    // WAIT FOR EXISTING SIMULATION
     // =====================================================
 
-    function waitForSimulation(){
+    function waitForSimulation() {
 
         let attempts = 0;
 
@@ -8868,7 +8616,7 @@ const RaniseMoisePedagogicalExplanationEngine = {
         const timer =
             setInterval(
 
-                function(){
+                function () {
 
                     attempts++;
 
@@ -8877,14 +8625,18 @@ const RaniseMoisePedagogicalExplanationEngine = {
                         findSimulation();
 
 
-                    if(!frame){
+                    if (!frame) {
 
-                        if(
+                        if (
                             attempts >= 100
-                        ){
+                        ) {
 
                             clearInterval(
                                 timer
+                            );
+
+                            console.warn(
+                                "RANISE BLOCK 7: Simulation iframe not found."
                             );
 
                         }
@@ -8899,15 +8651,19 @@ const RaniseMoisePedagogicalExplanationEngine = {
                     );
 
 
-                    // =========================================
-                    // WAIT FOR THE SIMULATION DOCUMENT
-                    // =========================================
+                    state.simulationFrame =
+                        frame;
 
-                    if(
+
+                    // =====================================
+                    // SIMULATION ALREADY LOADED
+                    // =====================================
+
+                    if (
                         frame.contentDocument &&
                         frame.contentDocument.readyState ===
                         "complete"
-                    ){
+                    ) {
 
                         startBlock7();
 
@@ -8916,18 +8672,22 @@ const RaniseMoisePedagogicalExplanationEngine = {
                     }
 
 
+                    // =====================================
+                    // WAIT FOR EXISTING IFRAME LOAD
+                    // =====================================
+
                     frame.addEventListener(
 
                         "load",
 
-                        function(){
+                        function () {
 
                             startBlock7();
 
                         },
 
                         {
-                            once:true
+                            once: true
                         }
 
                     );
@@ -8942,39 +8702,31 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
 
     // =====================================================
-    // DETECT THE EXISTING SIMULATION LAUNCH
-    // WITHOUT MODIFYING IT
+    // OBSERVE EXISTING SIMULATION LAUNCH
+    //
+    // DOES NOT REPLACE THE EXISTING LAUNCH CODE.
     // =====================================================
 
     document.addEventListener(
 
         "click",
 
-        function(event){
+        function (event) {
 
             const launchButton =
                 event.target.closest(
-
                     "#launchMicrosoftWordSimulationBtn"
-
                 );
 
 
-            if(!launchButton){
-
+            if (!launchButton) {
                 return;
-
             }
 
 
-            // =============================================
-            // BLOCK 7 ONLY OBSERVES THE LAUNCH
-            // EXISTING LAUNCH CODE REMAINS UNTOUCHED
-            // =============================================
-
             setTimeout(
 
-                function(){
+                function () {
 
                     waitForSimulation();
 
@@ -8992,38 +8744,46 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
 
     // =====================================================
-    // PUBLIC BLOCK 7 ENGINE
+    // PUBLIC API
     // =====================================================
 
     window.RaniseMoisePracticeGuidanceEngine = {
 
-        start:startBlock7
+        start:
+            startBlock7,
+
+
+        getState:
+            function () {
+
+                return {
+
+                    started:
+                        state.started,
+
+                    completed:
+                        state.completed,
+
+                    activityIndex:
+                        state.activityIndex,
+
+                    stepIndex:
+                        state.stepIndex,
+
+                    waitingForAction:
+                        state.waitingForAction,
+
+                    speaking:
+                        state.speaking
+
+                };
+
+            }
 
     };
 
 
 })();
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
