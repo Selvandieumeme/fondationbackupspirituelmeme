@@ -8771,6 +8771,10 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
 
 
+
+
+
+
 // =========================================================
 // BLOCK 8
 // MICROSOFT WORD 2007 FORMATION
@@ -8793,6 +8797,7 @@ const RaniseMoisePedagogicalExplanationEngine = {
 // 12. NEVER MODIFY THE EXISTING SIMULATION ENGINE.
 // 13. NEVER REPLACE THE EXISTING MARYTTS + AVATAR SYSTEM.
 // 14. COMPLETE EXERCISES DYNAMICALLY.
+// 15. EXERCISE PANEL CAN BE DRAGGED BY THE STUDENT.
 // =========================================================
 
 (function () {
@@ -9386,6 +9391,16 @@ const RaniseMoisePedagogicalExplanationEngine = {
         root.style.lineHeight =
             "1.45";
 
+        // =================================================
+        // PANEL DRAG CSS
+        // =================================================
+
+        root.style.userSelect =
+            "none";
+
+        root.style.webkitUserSelect =
+            "none";
+
 
         // =================================================
         // TITLE
@@ -9406,6 +9421,26 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
         title.textContent =
             "Ranise Moïse — Exercices";
+
+
+        // =================================================
+        // DRAG HANDLE CSS
+        // =================================================
+
+        title.style.cursor =
+            "grab";
+
+        title.style.touchAction =
+            "none";
+
+        title.style.userSelect =
+            "none";
+
+        title.style.webkitUserSelect =
+            "none";
+
+        title.style.webkitTouchCallout =
+            "none";
 
 
         // =================================================
@@ -9486,6 +9521,433 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
         state.ui.status =
             status;
+
+
+        // =================================================
+        // ENABLE PANEL DRAGGING
+        // =================================================
+
+        enableExercisePanelDragging();
+
+    }
+
+
+    // =====================================================
+    // BLOCK 8 PANEL DRAG ENGINE
+    //
+    // ADDITIVE ONLY.
+    //
+    // DOES NOT MODIFY:
+    // - BLOCK 6
+    // - BLOCK 7
+    // - WORD SIMULATION ENGINE
+    // - EXERCISE VALIDATION
+    // - MARYTTS
+    //
+    // STUDENT DRAGS THE PANEL USING ITS TITLE.
+    // WORKS WITH:
+    // - MOUSE
+    // - TOUCH
+    // - PEN
+    // =====================================================
+
+    function enableExercisePanelDragging() {
+
+        if (
+            !state.ui.root ||
+            !state.ui.title
+        ) {
+
+            return;
+
+        }
+
+
+        const panel =
+            state.ui.root;
+
+        const handle =
+            state.ui.title;
+
+
+        let dragging =
+            false;
+
+        let pointerId =
+            null;
+
+        let offsetX =
+            0;
+
+        let offsetY =
+            0;
+
+
+        // =================================================
+        // ENSURE THE PANEL STAYS INSIDE THE VIEWPORT
+        // =================================================
+
+        function clampPosition(
+            left,
+            top
+        ) {
+
+            const doc =
+                state.simulationDocument;
+
+
+            if (!doc) {
+
+                return {
+
+                    left:
+                        left,
+
+                    top:
+                        top
+
+                };
+
+            }
+
+
+            const viewWidth =
+                doc.documentElement.clientWidth ||
+                doc.body.clientWidth ||
+                window.innerWidth;
+
+
+            const viewHeight =
+                doc.documentElement.clientHeight ||
+                doc.body.clientHeight ||
+                window.innerHeight;
+
+
+            const panelWidth =
+                panel.offsetWidth;
+
+
+            const panelHeight =
+                panel.offsetHeight;
+
+
+            const maxLeft =
+                Math.max(
+                    0,
+                    viewWidth -
+                    panelWidth
+                );
+
+
+            const maxTop =
+                Math.max(
+                    0,
+                    viewHeight -
+                    panelHeight
+                );
+
+
+            return {
+
+                left:
+                    Math.max(
+                        0,
+                        Math.min(
+                            left,
+                            maxLeft
+                        )
+                    ),
+
+                top:
+                    Math.max(
+                        0,
+                        Math.min(
+                            top,
+                            maxTop
+                        )
+                    )
+
+            };
+
+        }
+
+
+        // =================================================
+        // START DRAG
+        // =================================================
+
+        function startDrag(event) {
+
+            if (
+                !event ||
+                !panel ||
+                !handle
+            ) {
+
+                return;
+
+            }
+
+
+            // ---------------------------------------------
+            // ONLY LEFT MOUSE BUTTON
+            // ---------------------------------------------
+
+            if (
+                event.pointerType === "mouse" &&
+                event.button !== 0
+            ) {
+
+                return;
+
+            }
+
+
+            const rect =
+                panel.getBoundingClientRect();
+
+
+            dragging =
+                true;
+
+
+            pointerId =
+                event.pointerId;
+
+
+            offsetX =
+                event.clientX -
+                rect.left;
+
+
+            offsetY =
+                event.clientY -
+                rect.top;
+
+
+            handle.style.cursor =
+                "grabbing";
+
+
+            panel.style.transition =
+                "none";
+
+
+            if (
+                typeof handle.setPointerCapture ===
+                "function" &&
+                event.pointerId !== undefined
+            ) {
+
+                try {
+
+                    handle.setPointerCapture(
+                        event.pointerId
+                    );
+
+                } catch (error) {}
+
+            }
+
+
+            event.preventDefault();
+
+        }
+
+
+        // =================================================
+        // MOVE PANEL
+        // =================================================
+
+        function moveDrag(event) {
+
+            if (
+                !dragging ||
+                !event
+            ) {
+
+                return;
+
+            }
+
+
+            if (
+                pointerId !== null &&
+                event.pointerId !== pointerId
+            ) {
+
+                return;
+
+            }
+
+
+            const position =
+                clampPosition(
+
+                    event.clientX -
+                    offsetX,
+
+                    event.clientY -
+                    offsetY
+
+                );
+
+
+            panel.style.left =
+                position.left + "px";
+
+
+            panel.style.top =
+                position.top + "px";
+
+
+            // ---------------------------------------------
+            // IMPORTANT:
+            // RIGHT IS REMOVED AFTER FIRST MOVEMENT.
+            // This allows LEFT/TOP to control position.
+            // ---------------------------------------------
+
+            panel.style.right =
+                "auto";
+
+
+            event.preventDefault();
+
+        }
+
+
+        // =================================================
+        // END DRAG
+        // =================================================
+
+        function stopDrag(event) {
+
+            if (!dragging) {
+
+                return;
+
+            }
+
+
+            if (
+                event &&
+                pointerId !== null &&
+                event.pointerId !== pointerId
+            ) {
+
+                return;
+
+            }
+
+
+            dragging =
+                false;
+
+
+            pointerId =
+                null;
+
+
+            handle.style.cursor =
+                "grab";
+
+
+            panel.style.transition =
+                "";
+
+
+            if (
+                event &&
+                typeof handle.releasePointerCapture ===
+                "function" &&
+                event.pointerId !== undefined
+            ) {
+
+                try {
+
+                    handle.releasePointerCapture(
+                        event.pointerId
+                    );
+
+                } catch (error) {}
+
+            }
+
+        }
+
+
+        // =================================================
+        // POINTER EVENTS
+        // =================================================
+
+        handle.addEventListener(
+
+            "pointerdown",
+
+            startDrag,
+
+            true
+
+        );
+
+
+        handle.addEventListener(
+
+            "pointermove",
+
+            moveDrag,
+
+            true
+
+        );
+
+
+        handle.addEventListener(
+
+            "pointerup",
+
+            stopDrag,
+
+            true
+
+        );
+
+
+        handle.addEventListener(
+
+            "pointercancel",
+
+            stopDrag,
+
+            true
+
+        );
+
+
+        handle.addEventListener(
+
+            "lostpointercapture",
+
+            function () {
+
+                if (dragging) {
+
+                    dragging =
+                        false;
+
+                    pointerId =
+                        null;
+
+                    handle.style.cursor =
+                        "grab";
+
+                }
+
+            },
+
+            true
+
+        );
 
     }
 
@@ -11216,15 +11678,6 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
 
 })();
-
-
-
-
-
-
-
-
-
 
 
 
