@@ -18333,21 +18333,48 @@ async function startBlock10() {
 }
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 // =========================================================
-// CHECK BLOCK 9
+// BLOCK 9 → BLOCK 10
+// ROBUST AUTOMATIC TRANSITION BRIDGE
+// =========================================================
+
+let block9ToBlock10Timer = null;
+
+let block9ToBlock10Started = false;
+
+
+// =========================================================
+// CHECK BLOCK 9 COMPLETION
 // READ ONLY
 // =========================================================
 
 function checkBlock9Completion() {
 
+    // -----------------------------------------------------
+    // BLOCK 10 ALREADY STARTED
+    // -----------------------------------------------------
+
     if (
-
         state.started ||
-
-        state.completed ||
-
-        state.transitionDetected
-
+        state.completed
     ) {
 
         return;
@@ -18355,14 +18382,28 @@ function checkBlock9Completion() {
     }
 
 
+    // -----------------------------------------------------
+    // PREVENT DUPLICATE START ATTEMPTS
+    // -----------------------------------------------------
+
     if (
+        block9ToBlock10Started
+    ) {
 
+        return;
+
+    }
+
+
+    // -----------------------------------------------------
+    // BLOCK 9 API MUST EXIST
+    // -----------------------------------------------------
+
+    if (
         !window.RaniseMoiseHomeworkMasteryEngine ||
-
         typeof
             window.RaniseMoiseHomeworkMasteryEngine.getState !==
             "function"
-
     ) {
 
         return;
@@ -18394,57 +18435,12 @@ function checkBlock9Completion() {
     }
 
 
-    // =====================================================
-    // CRITICAL:
-    // BLOCK 10 DOES NOT START WHILE BLOCK 9 IS STILL
-    // SPEAKING OR PROCESSING.
-    // =====================================================
+    // -----------------------------------------------------
+    // BLOCK 9 MUST BE COMPLETELY VALIDATED
+    // -----------------------------------------------------
 
     if (
-
-        block9State.completed ===
-        true &&
-
-        block9State.speaking ===
-        false
-
-    ) {
-
-        state.transitionDetected =
-            true;
-
-
-        if (
-            connectToSimulation()
-        ) {
-
-            startBlock10();
-
-            return;
-
-        }
-
-
-        state.transitionDetected =
-            false;
-
-    }
-
-}
-
-
-// =========================================================
-// WAIT FOR SIMULATION
-// =========================================================
-
-function waitForSimulationThenStart() {
-
-    if (
-
-        state.started ||
-
-        state.completed
-
+        block9State.completed !== true
     ) {
 
         return;
@@ -18452,11 +18448,80 @@ function waitForSimulationThenStart() {
     }
 
 
+    // -----------------------------------------------------
+    // THE SIMULATION MUST BE AVAILABLE
+    // -----------------------------------------------------
+
     if (
-        connectToSimulation()
+        !connectToSimulation()
     ) {
 
-        checkBlock9Completion();
+        return;
+
+    }
+
+
+    // -----------------------------------------------------
+    // IMPORTANT:
+    // MARK TRANSITION ONLY AFTER THE SIMULATION
+    // CONNECTION HAS SUCCEEDED.
+    // -----------------------------------------------------
+
+    block9ToBlock10Started = true;
+
+    state.transitionDetected = true;
+
+
+    // -----------------------------------------------------
+    // START BLOCK 10 IMMEDIATELY
+    // -----------------------------------------------------
+
+    try {
+
+        const result =
+            startBlock10();
+
+
+        // -------------------------------------------------
+        // If Block 10 could not start because its own
+        // initialization was not ready, release the lock
+        // so the bridge can retry safely.
+        // -------------------------------------------------
+
+        Promise.resolve(result)
+            .then(function () {
+
+                if (
+                    !state.started &&
+                    !state.completed
+                ) {
+
+                    block9ToBlock10Started = false;
+
+                    state.transitionDetected = false;
+
+                }
+
+            })
+            .catch(function () {
+
+                block9ToBlock10Started = false;
+
+                state.transitionDetected = false;
+
+            });
+
+    } catch (error) {
+
+        block9ToBlock10Started = false;
+
+        state.transitionDetected = false;
+
+
+        console.error(
+            "RANISE BLOCK 10: Block 9 → Block 10 transition error",
+            error
+        );
 
     }
 
@@ -18464,42 +18529,59 @@ function waitForSimulationThenStart() {
 
 
 // =========================================================
-// AUTOMATIC BLOCK 9 → BLOCK 10
+// AUTOMATIC BLOCK 9 → BLOCK 10 MONITOR
 // =========================================================
 
-state.transitionTimer =
+block9ToBlock10Timer =
 
     setInterval(
 
         function () {
 
+            // -------------------------------------------------
+            // BLOCK 10 HAS STARTED
+            // STOP THE TRANSITION MONITOR
+            // -------------------------------------------------
+
             if (
-
                 state.started ||
-
                 state.completed
-
             ) {
 
                 clearInterval(
-                    state.transitionTimer
+                    block9ToBlock10Timer
                 );
 
-                state.transitionTimer =
-                    null;
+                block9ToBlock10Timer = null;
 
                 return;
 
             }
 
 
-            waitForSimulationThenStart();
+            // -------------------------------------------------
+            // CHECK BLOCK 9 CONTINUOUSLY
+            // -------------------------------------------------
+
+            checkBlock9Completion();
 
         },
 
         100
 
     );
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 // =========================================================
