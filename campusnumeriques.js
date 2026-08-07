@@ -12137,8 +12137,6 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
 
 
-
-
 // =========================================================
 // BLOCK 9
 // MICROSOFT WORD 2007 FORMATION
@@ -12230,11 +12228,6 @@ const state = {
 
     actionHistory: [],
 
-
-    // =================================================
-    // REAL SIMULATION EVIDENCE
-    // =================================================
-
     simulationEvidence: {
 
         documentAreaSeen: false,
@@ -12244,11 +12237,6 @@ const state = {
         textEntered: false
 
     },
-
-
-    // =================================================
-    // FIVE REAL HOMEWORK TASKS
-    // =================================================
 
     tasks: {
 
@@ -12264,11 +12252,6 @@ const state = {
 
     },
 
-
-    // =================================================
-    // VALIDATION STATE
-    // =================================================
-
     validation: {
 
         contentValid: false,
@@ -12280,11 +12263,6 @@ const state = {
         completedTasks: 0
 
     },
-
-
-    // =================================================
-    // UI
-    // =================================================
 
     ui: {
 
@@ -12304,7 +12282,6 @@ const state = {
 
 };
 
-
 // =====================================================
 // NORMALIZE
 // =====================================================
@@ -12312,35 +12289,15 @@ const state = {
 function normalize(value) {
 
     return String(value || "")
-
         .normalize("NFD")
-
-        .replace(
-            /[\u0300-\u036f]/g,
-            ""
-        )
-
+        .replace(/[\u0300-\u036f]/g, "")
         .toLowerCase()
-
-        .replace(
-            /[“”"«»]/g,
-            " "
-        )
-
-        .replace(
-            /[.,;:!?()[\]{}]/g,
-            " "
-        )
-
-        .replace(
-            /\s+/g,
-            " "
-        )
-
+        .replace(/[“”"«»]/g, " ")
+        .replace(/[.,;:!?()[\]{}]/g, " ")
+        .replace(/\s+/g, " ")
         .trim();
 
 }
-
 
 // =====================================================
 // NORMALIZE RESPONSE
@@ -12349,45 +12306,39 @@ function normalize(value) {
 function normalizeResponse(value) {
 
     return normalize(value)
-
         .replace(
             /\b(le|la|les|un|une|des|du|de|d|et|ou|a|au|aux|dans|sur|pour|avec|en|ce|cette|ces)\b/g,
             " "
         )
-
-        .replace(
-            /\s+/g,
-            " "
-        )
-
+        .replace(/\s+/g, " ")
         .trim();
 
 }
 
-
 // =====================================================
 // SPEAK USING EXISTING MARYTTS SYSTEM
+//
+// IMPORTANT:
+// - DOES NOT replace MaryTTS.
+// - DOES NOT create another TTS system.
+// - DOES NOT let a voice error cancel the homework.
 // =====================================================
 
 async function speak(text) {
 
     if (!text) {
-        return;
+        return false;
     }
-
 
     state.speaking = true;
 
+    if (typeof raniseStartTalking === "function") {
 
-    if (
-        typeof raniseStartTalking ===
-        "function"
-    ) {
-
-        raniseStartTalking();
+        try {
+            raniseStartTalking();
+        } catch (error) {}
 
     }
-
 
     try {
 
@@ -12396,23 +12347,28 @@ async function speak(text) {
             "function"
         ) {
 
-            await speakProfessorIAWithMaryTTS(
-                text
+            await Promise.resolve(
+                speakProfessorIAWithMaryTTS(text)
             );
 
+            return true;
         }
+
+        return false;
+
+    } catch (error) {
+
+        return false;
 
     } finally {
 
         state.speaking = false;
 
+        if (typeof raniseStopTalking === "function") {
 
-        if (
-            typeof raniseStopTalking ===
-            "function"
-        ) {
-
-            raniseStopTalking();
+            try {
+                raniseStopTalking();
+            } catch (error) {}
 
         }
 
@@ -12420,6 +12376,74 @@ async function speak(text) {
 
 }
 
+// =====================================================
+// FIRE FINAL MARYTTS WITHOUT BLOCKING VALIDATION
+// =====================================================
+
+function speakFinalReaction(text) {
+
+    if (!text) {
+        return;
+    }
+
+    state.speaking = true;
+
+    if (typeof raniseStartTalking === "function") {
+
+        try {
+            raniseStartTalking();
+        } catch (error) {}
+
+    }
+
+    if (
+        typeof speakProfessorIAWithMaryTTS !==
+        "function"
+    ) {
+
+        state.speaking = false;
+
+        if (typeof raniseStopTalking === "function") {
+
+            try {
+                raniseStopTalking();
+            } catch (error) {}
+
+        }
+
+        return;
+
+    }
+
+    Promise.resolve()
+
+        .then(function () {
+
+            return speakProfessorIAWithMaryTTS(text);
+
+        })
+
+        .catch(function () {
+
+            // Voice failure must NEVER undo homework validation.
+
+        })
+
+        .finally(function () {
+
+            state.speaking = false;
+
+            if (typeof raniseStopTalking === "function") {
+
+                try {
+                    raniseStopTalking();
+                } catch (error) {}
+
+            }
+
+        });
+
+}
 
 // =====================================================
 // GET CHAPTER 1
@@ -12436,7 +12460,6 @@ function getChapter1() {
 
     }
 
-
     if (
         !Array.isArray(
             microsoftWordCourse.chapters
@@ -12447,20 +12470,17 @@ function getChapter1() {
 
     }
 
-
     return microsoftWordCourse.chapters.find(
 
         chapter =>
 
             chapter &&
 
-            chapter.id ===
-            "chapitre1"
+            chapter.id === "chapitre1"
 
     ) || null;
 
 }
-
 
 // =====================================================
 // FIND EXISTING SIMULATION
@@ -12469,25 +12489,17 @@ function getChapter1() {
 function findSimulation() {
 
     const campusContent =
-
-        document.getElementById(
-            "campusContent"
-        );
-
+        document.getElementById("campusContent");
 
     if (!campusContent) {
         return null;
     }
 
-
     return campusContent.querySelector(
-
         'iframe[src*="campusword2007simulation"]'
-
     ) || null;
 
 }
-
 
 // =====================================================
 // CONNECT TO EXISTING SIMULATION
@@ -12495,35 +12507,24 @@ function findSimulation() {
 
 function connectToSimulation() {
 
-    const frame =
-        findSimulation();
-
+    const frame = findSimulation();
 
     if (!frame) {
         return false;
     }
 
-
     try {
 
         const doc =
-
             frame.contentDocument ||
-
             frame.contentWindow.document;
-
 
         if (!doc) {
             return false;
         }
 
-
-        state.simulationFrame =
-            frame;
-
-        state.simulationDocument =
-            doc;
-
+        state.simulationFrame = frame;
+        state.simulationDocument = doc;
 
         return true;
 
@@ -12535,34 +12536,23 @@ function connectToSimulation() {
 
 }
 
-
 // =====================================================
 // GET PAGE CONTENTS
 // =====================================================
 
 function getPageContents() {
 
-    if (
-        !state.simulationDocument
-    ) {
-
+    if (!state.simulationDocument) {
         return [];
-
     }
 
-
     return Array.from(
-
         state.simulationDocument.querySelectorAll(
-
             ".cwPageContent"
-
         )
-
     );
 
 }
-
 
 // =====================================================
 // READ REAL DOCUMENT TEXT
@@ -12570,57 +12560,32 @@ function getPageContents() {
 
 function readDocumentText() {
 
-    const pages =
-        getPageContents();
-
+    const pages = getPageContents();
 
     if (!pages.length) {
         return "";
     }
 
-
     let output = "";
 
+    pages.forEach(function (page) {
 
-    pages.forEach(
+        output +=
+            " " +
+            (
+                page.innerText ||
+                page.textContent ||
+                ""
+            );
 
-        page => {
-
-            output +=
-
-                " " +
-
-                (
-
-                    page.innerText ||
-
-                    page.textContent ||
-
-                    ""
-
-                );
-
-        }
-
-    );
-
+    });
 
     return output
-
-        .replace(
-            /\u00a0/g,
-            " "
-        )
-
-        .replace(
-            /\s+/g,
-            " "
-        )
-
+        .replace(/\u00a0/g, " ")
+        .replace(/\s+/g, " ")
         .trim();
 
 }
-
 
 // =====================================================
 // DOCUMENT SIGNATURE
@@ -12628,26 +12593,17 @@ function readDocumentText() {
 
 function getDocumentSignature() {
 
-    const text =
-        readDocumentText();
+    const text = readDocumentText();
 
-
-    const pages =
-        getPageContents();
-
+    const pages = getPageContents();
 
     return [
-
         pages.length,
-
         text.length,
-
         normalize(text)
-
     ].join("|");
 
 }
-
 
 // =====================================================
 // RECORD REAL ACTION
@@ -12659,21 +12615,15 @@ function recordAction(action) {
         return;
     }
 
-
-    state.lastActionTime =
-        Date.now();
-
+    state.lastActionTime = Date.now();
 
     state.actionHistory.push({
 
-        action:
-            action,
+        action: action,
 
-        timestamp:
-            Date.now()
+        timestamp: Date.now()
 
     });
-
 
     if (
         state.actionHistory.length >
@@ -12686,7 +12636,6 @@ function recordAction(action) {
 
 }
 
-
 // =====================================================
 // COUNT COMPLETED TASKS
 // =====================================================
@@ -12698,7 +12647,6 @@ function getCompletedTaskCount() {
     ).filter(Boolean).length;
 
 }
-
 
 // =====================================================
 // TASK LABEL
@@ -12725,11 +12673,9 @@ function getTaskLabel(task) {
 
     };
 
-
     return labels[task] || task;
 
 }
-
 
 // =====================================================
 // CREATE HOMEWORK PANEL
@@ -12738,29 +12684,20 @@ function getTaskLabel(task) {
 function createHomeworkUI() {
 
     if (
-
         !state.simulationDocument ||
-
         state.ui.root
-
     ) {
 
         return;
 
     }
 
+    const doc = state.simulationDocument;
 
-    const doc =
-        state.simulationDocument;
-
-
-    const root =
-        doc.createElement("div");
-
+    const root = doc.createElement("div");
 
     root.id =
         "raniseBlock9HomeworkPanel";
-
 
     root.style.position =
         "fixed";
@@ -12819,14 +12756,11 @@ function createHomeworkUI() {
     root.style.webkitUserSelect =
         "none";
 
-
     // =================================================
     // TITLE / DRAG HANDLE
     // =================================================
 
-    const title =
-        doc.createElement("div");
-
+    const title = doc.createElement("div");
 
     title.style.fontWeight =
         "700";
@@ -12852,21 +12786,17 @@ function createHomeworkUI() {
     title.textContent =
         "Ranise Moïse — Devoir";
 
-
     // =================================================
     // PROGRESS
     // =================================================
 
-    const progress =
-        doc.createElement("div");
-
+    const progress = doc.createElement("div");
 
     progress.style.fontWeight =
         "600";
 
     progress.style.marginBottom =
         "7px";
-
 
     // =================================================
     // HOMEWORK
@@ -12875,10 +12805,8 @@ function createHomeworkUI() {
     const instruction =
         doc.createElement("div");
 
-
     instruction.style.marginBottom =
         "8px";
-
 
     // =================================================
     // STATUS
@@ -12886,7 +12814,6 @@ function createHomeworkUI() {
 
     const status =
         doc.createElement("div");
-
 
     status.style.padding =
         "7px";
@@ -12900,7 +12827,6 @@ function createHomeworkUI() {
     status.style.marginBottom =
         "7px";
 
-
     // =================================================
     // DETAILS
     // =================================================
@@ -12908,30 +12834,22 @@ function createHomeworkUI() {
     const details =
         doc.createElement("div");
 
-
     details.style.fontSize =
         "12px";
 
     details.style.lineHeight =
         "1.35";
 
-
     root.appendChild(title);
-
     root.appendChild(progress);
-
     root.appendChild(instruction);
-
     root.appendChild(status);
-
     root.appendChild(details);
-
 
     (
         doc.body ||
         doc.documentElement
     ).appendChild(root);
-
 
     state.ui.root =
         root;
@@ -12951,11 +12869,9 @@ function createHomeworkUI() {
     state.ui.details =
         details;
 
-
     enableHomeworkPanelDragging();
 
 }
-
 
 // =====================================================
 // DRAG ENGINE
@@ -12964,17 +12880,13 @@ function createHomeworkUI() {
 function enableHomeworkPanelDragging() {
 
     if (
-
         !state.ui.root ||
-
         !state.ui.title
-
     ) {
 
         return;
 
     }
-
 
     const panel =
         state.ui.root;
@@ -12982,104 +12894,64 @@ function enableHomeworkPanelDragging() {
     const handle =
         state.ui.title;
 
+    let dragging = false;
 
-    let dragging =
-        false;
+    let pointerId = null;
 
-    let pointerId =
-        null;
+    let offsetX = 0;
 
-    let offsetX =
-        0;
+    let offsetY = 0;
 
-    let offsetY =
-        0;
-
-
-    function clampPosition(
-        left,
-        top
-    ) {
+    function clampPosition(left, top) {
 
         const doc =
             state.simulationDocument;
 
-
         const viewWidth =
-
             doc?.documentElement?.clientWidth ||
-
             window.innerWidth;
 
-
         const viewHeight =
-
             doc?.documentElement?.clientHeight ||
-
             window.innerHeight;
-
 
         const panelWidth =
             panel.offsetWidth;
 
-
         const panelHeight =
             panel.offsetHeight;
-
 
         return {
 
             left:
-
                 Math.max(
-
                     0,
-
                     Math.min(
-
                         left,
-
                         Math.max(
-
                             0,
-
                             viewWidth -
                             panelWidth
-
                         )
-
                     )
-
                 ),
 
-
             top:
-
                 Math.max(
-
                     0,
-
                     Math.min(
-
                         top,
-
                         Math.max(
-
                             0,
-
                             viewHeight -
                             panelHeight
-
                         )
-
                     )
-
                 )
 
         };
 
     }
-
 
     function startDrag(event) {
 
@@ -13087,55 +12959,38 @@ function enableHomeworkPanelDragging() {
             return;
         }
 
-
         if (
-
-            event.pointerType ===
-            "mouse" &&
-
+            event.pointerType === "mouse" &&
             event.button !== 0
-
         ) {
 
             return;
 
         }
 
-
         const rect =
             panel.getBoundingClientRect();
 
-
-        dragging =
-            true;
-
+        dragging = true;
 
         pointerId =
             event.pointerId;
-
 
         offsetX =
             event.clientX -
             rect.left;
 
-
         offsetY =
             event.clientY -
             rect.top;
 
-
         handle.style.cursor =
             "grabbing";
 
-
         if (
-
             typeof handle.setPointerCapture ===
             "function" &&
-
-            event.pointerId !==
-            undefined
-
+            event.pointerId !== undefined
         ) {
 
             try {
@@ -13148,40 +13003,29 @@ function enableHomeworkPanelDragging() {
 
         }
 
-
         event.preventDefault();
 
     }
 
-
     function moveDrag(event) {
 
         if (
-
             !dragging ||
-
             !event
-
         ) {
 
             return;
 
         }
-
 
         if (
-
             pointerId !== null &&
-
-            event.pointerId !==
-            pointerId
-
+            event.pointerId !== pointerId
         ) {
 
             return;
 
         }
-
 
         const position =
             clampPosition(
@@ -13194,23 +13038,18 @@ function enableHomeworkPanelDragging() {
 
             );
 
-
         panel.style.left =
             position.left + "px";
-
 
         panel.style.top =
             position.top + "px";
 
-
         panel.style.right =
             "auto";
-
 
         event.preventDefault();
 
     }
-
 
     function stopDrag(event) {
 
@@ -13218,36 +13057,24 @@ function enableHomeworkPanelDragging() {
             return;
         }
 
-
         if (
-
             event &&
-
             pointerId !== null &&
-
-            event.pointerId !==
-            pointerId
-
+            event.pointerId !== pointerId
         ) {
 
             return;
 
         }
 
+        dragging = false;
 
-        dragging =
-            false;
-
-
-        pointerId =
-            null;
-
+        pointerId = null;
 
         handle.style.cursor =
             "grab";
 
     }
-
 
     handle.addEventListener(
         "pointerdown",
@@ -13255,20 +13082,17 @@ function enableHomeworkPanelDragging() {
         true
     );
 
-
     handle.addEventListener(
         "pointermove",
         moveDrag,
         true
     );
 
-
     handle.addEventListener(
         "pointerup",
         stopDrag,
         true
     );
-
 
     handle.addEventListener(
         "pointercancel",
@@ -13277,7 +13101,6 @@ function enableHomeworkPanelDragging() {
     );
 
 }
-
 
 // =====================================================
 // UPDATE PANEL
@@ -13289,121 +13112,84 @@ function updateHomeworkUI() {
         return;
     }
 
-
     const completed =
         getCompletedTaskCount();
 
-
     state.ui.progress.textContent =
-
         "Devoir — Chapitre 1 — " +
-
         completed +
-
         "/5 tâches exécutées";
 
-
     state.ui.instruction.textContent =
-
         state.homework ||
-
         "Exécutez les cinq tâches demandées dans la simulation Word 2007.";
-
 
     const tasks = [
 
         "titleBar",
-
         "officeButton",
-
         "ribbon",
-
         "tabs",
-
         "documentArea"
 
     ];
 
-
     let html =
-
         "<div style=\"font-weight:700;margin-bottom:5px\">" +
-
         "Progression des tâches :" +
-
         "</div>";
 
+    tasks.forEach(function (task) {
 
-    tasks.forEach(
+        const checked =
+            state.tasks[task];
 
-        task => {
+        html +=
+            "<div style=\"" +
+            "display:flex;" +
+            "align-items:center;" +
+            "gap:7px;" +
+            "margin:4px 0;" +
+            "\">" +
 
-            const checked =
-                state.tasks[task];
+            "<span style=\"" +
+            "display:inline-flex;" +
+            "align-items:center;" +
+            "justify-content:center;" +
+            "width:20px;" +
+            "height:20px;" +
+            "border-radius:50%;" +
+            "font-weight:700;" +
+            "font-size:14px;" +
 
-
-            html +=
-
-                "<div style=\"" +
-
-                "display:flex;" +
-
-                "align-items:center;" +
-
-                "gap:7px;" +
-
-                "margin:4px 0;" +
-
-                "\">" +
-
-                "<span style=\"" +
-
-                "display:inline-flex;" +
-
-                "align-items:center;" +
-
-                "justify-content:center;" +
-
-                "width:20px;" +
-
-                "height:20px;" +
-
-                "border-radius:50%;" +
-
-                "font-weight:700;" +
-
-                "font-size:14px;" +
-
-                (checked
-
+            (
+                checked
                     ? "background:#2e7d32;color:#fff;"
+                    : "background:#e8edf1;color:#71808c;"
+            ) +
 
-                    : "background:#e8edf1;color:#71808c;") +
+            "\">" +
 
-                "\">" +
+            (
+                checked
+                    ? "✓"
+                    : "○"
+            ) +
 
-                (checked ? "✓" : "○") +
+            "</span>" +
 
-                "</span>" +
+            "<span>" +
+            getTaskLabel(task) +
+            "</span>" +
 
-                "<span>" +
+            "</div>";
 
-                getTaskLabel(task) +
-
-                "</span>" +
-
-                "</div>";
-
-        }
-
-    );
-
+    });
 
     state.ui.details.innerHTML =
         html;
 
 }
-
 
 // =====================================================
 // STATUS MESSAGE
@@ -13411,9 +13197,7 @@ function updateHomeworkUI() {
 
 function setStatus(message) {
 
-    if (
-        state.ui.status
-    ) {
+    if (state.ui.status) {
 
         state.ui.status.textContent =
             message;
@@ -13421,7 +13205,6 @@ function setStatus(message) {
     }
 
 }
-
 
 // =====================================================
 // REAL SIMULATION INTERACTION
@@ -13433,36 +13216,27 @@ function registerDocumentInteraction(target) {
         return;
     }
 
-
     const page =
         closestFromTarget(
-
             target,
-
             ".cwPageContent"
-
         );
-
 
     if (!page) {
         return;
     }
 
-
     state.simulationEvidence.documentAreaSeen =
         true;
 
-
     state.simulationEvidence.documentInteracted =
         true;
-
 
     recordAction(
         "document-interaction"
     );
 
 }
-
 
 // =====================================================
 // CLOSEST
@@ -13474,20 +13248,15 @@ function closestFromTarget(
 ) {
 
     if (
-
         !target ||
-
         !selector ||
-
         typeof target.closest !==
         "function"
-
     ) {
 
         return null;
 
     }
-
 
     try {
 
@@ -13503,7 +13272,6 @@ function closestFromTarget(
 
 }
 
-
 // =====================================================
 // FIND TEXT IN ELEMENT
 // =====================================================
@@ -13517,30 +13285,28 @@ function elementContainsText(
         return false;
     }
 
+    const text =
+        normalize(
 
-    const text = normalize(
+            element.innerText ||
 
-        element.innerText ||
+            element.textContent ||
 
-        element.textContent ||
+            element.getAttribute?.(
+                "aria-label"
+            ) ||
 
-        element.getAttribute?.(
-            "aria-label"
-        ) ||
+            element.getAttribute?.(
+                "title"
+            ) ||
 
-        element.getAttribute?.(
-            "title"
-        ) ||
+            ""
 
-        ""
-
-    );
-
+        );
 
     return words.some(
 
         word =>
-
             text.includes(
                 normalize(word)
             )
@@ -13548,7 +13314,6 @@ function elementContainsText(
     );
 
 }
-
 
 // =====================================================
 // IDENTIFY REAL SIMULATION TASK
@@ -13564,10 +13329,8 @@ function identifySimulationTask(target) {
         return null;
     }
 
-
     let current =
         target;
-
 
     for (
         let level = 0;
@@ -13586,84 +13349,52 @@ function identifySimulationTask(target) {
 
                 : "";
 
+        const id =
+            normalize(
+                current.id || ""
+            );
 
-        const id = normalize(
+        const aria =
+            normalize(
+                current.getAttribute?.(
+                    "aria-label"
+                ) || ""
+            );
 
-            current.id ||
+        const title =
+            normalize(
+                current.getAttribute?.(
+                    "title"
+                ) || ""
+            );
 
-            ""
+        const dataAction =
+            normalize(
+                current.getAttribute?.(
+                    "data-action"
+                ) || ""
+            );
 
-        );
-
-
-        const aria = normalize(
-
-            current.getAttribute?.(
-                "aria-label"
-            ) ||
-
-            ""
-
-        );
-
-
-        const title = normalize(
-
-            current.getAttribute?.(
-                "title"
-            ) ||
-
-            ""
-
-        );
-
-
-        const dataAction = normalize(
-
-            current.getAttribute?.(
-                "data-action"
-            ) ||
-
-            ""
-
-        );
-
-
-        const dataCommand = normalize(
-
-            current.getAttribute?.(
-                "data-command"
-            ) ||
-
-            ""
-
-        );
-
+        const dataCommand =
+            normalize(
+                current.getAttribute?.(
+                    "data-command"
+                ) || ""
+            );
 
         const combined =
 
             className +
-
             " " +
-
             id +
-
             " " +
-
             aria +
-
             " " +
-
             title +
-
             " " +
-
             dataAction +
-
             " " +
-
             dataCommand;
-
 
         // ---------------------------------------------
         // OFFICE BUTTON
@@ -13677,18 +13408,13 @@ function identifySimulationTask(target) {
 
             combined.includes("cw office") ||
 
-            combined.includes("cwOffice".toLowerCase()) ||
-
             elementContainsText(
 
                 current,
 
                 [
-
                     "bouton office",
-
                     "office button"
-
                 ]
 
             )
@@ -13698,7 +13424,6 @@ function identifySimulationTask(target) {
             return "officeButton";
 
         }
-
 
         // ---------------------------------------------
         // TITLE BAR
@@ -13719,11 +13444,8 @@ function identifySimulationTask(target) {
                 current,
 
                 [
-
                     "barre de titre",
-
                     "title bar"
-
                 ]
 
             )
@@ -13733,7 +13455,6 @@ function identifySimulationTask(target) {
             return "titleBar";
 
         }
-
 
         // ---------------------------------------------
         // RIBBON
@@ -13745,12 +13466,8 @@ function identifySimulationTask(target) {
 
             combined.includes("ruban") ||
 
-            combined.includes("cwRibbon".toLowerCase()) ||
-
             current.matches?.(
-
                 ".cwRibbon, .cwRibbonPanel, .cwRibbonGroup"
-
             )
 
         ) {
@@ -13758,7 +13475,6 @@ function identifySimulationTask(target) {
             return "ribbon";
 
         }
-
 
         // ---------------------------------------------
         // TABS
@@ -13775,9 +13491,7 @@ function identifySimulationTask(target) {
             combined.includes("onglet") ||
 
             current.matches?.(
-
                 ".cwTabBtn"
-
             )
 
         ) {
@@ -13785,7 +13499,6 @@ function identifySimulationTask(target) {
             return "tabs";
 
         }
-
 
         // ---------------------------------------------
         // DOCUMENT AREA
@@ -13805,17 +13518,14 @@ function identifySimulationTask(target) {
 
         }
 
-
         current =
             current.parentElement;
 
     }
 
-
     return null;
 
 }
-
 
 // =====================================================
 // ACTIVATE TASK CHECKMARK
@@ -13824,17 +13534,13 @@ function identifySimulationTask(target) {
 function activateTask(task) {
 
     if (
-
         !task ||
-
         state.completed
-
     ) {
 
         return false;
 
     }
-
 
     if (
         !Object.prototype.hasOwnProperty.call(
@@ -13847,7 +13553,6 @@ function activateTask(task) {
 
     }
 
-
     if (
         state.tasks[task]
     ) {
@@ -13856,44 +13561,27 @@ function activateTask(task) {
 
     }
 
-
     state.tasks[task] =
         true;
-
 
     state.lastActionTime =
         Date.now();
 
-
     recordAction(
-
-        "task-" +
-        task
-
+        "task-" + task
     );
 
-
     updateHomeworkUI();
-
 
     setStatus(
 
         "✓ " +
-
         getTaskLabel(task) +
-
         " exécuté. " +
-
         getCompletedTaskCount() +
-
         "/5."
 
     );
-
-
-    // ---------------------------------------------
-    // AUTOMATIC VALIDATION AFTER EVERY TASK
-    // ---------------------------------------------
 
     if (
         getCompletedTaskCount() === 5
@@ -13903,11 +13591,9 @@ function activateTask(task) {
 
     }
 
-
     return true;
 
 }
-
 
 // =====================================================
 // CHECK REAL SIMULATION ACTION
@@ -13916,36 +13602,27 @@ function activateTask(task) {
 function checkRealSimulationAction(event) {
 
     if (
-
         !state.started ||
-
         state.completed ||
-
         !event ||
-
         !event.target
-
     ) {
 
         return;
 
     }
 
-
     const target =
         event.target;
-
 
     registerDocumentInteraction(
         target
     );
 
-
     const task =
         identifySimulationTask(
             target
         );
-
 
     if (task) {
 
@@ -13955,21 +13632,11 @@ function checkRealSimulationAction(event) {
 
     }
 
-
-    // ---------------------------------------------
-    // If the click happened inside the document
-    // area, register document-area task.
-    // ---------------------------------------------
-
     const page =
         closestFromTarget(
-
             target,
-
             ".cwPageContent"
-
         );
-
 
     if (page) {
 
@@ -13981,12 +13648,11 @@ function checkRealSimulationAction(event) {
 
 }
 
-
 // =====================================================
-// DOCUMENT TEXT
+// CHECK DOCUMENT TEXT
 //
-// Text is monitored only as evidence.
-// It does NOT replace the five real task checks.
+// Text is evidence only.
+// It NEVER substitutes the five tasks.
 // =====================================================
 
 function hasDocumentText(text) {
@@ -13995,13 +13661,8 @@ function hasDocumentText(text) {
 
 }
 
-
 // =====================================================
 // VERIFY DOCUMENT CONTENT
-//
-// No artificial word requirement.
-// No artificial character requirement.
-// No text-based five-task validation.
 // =====================================================
 
 function validateDocumentContent() {
@@ -14009,10 +13670,8 @@ function validateDocumentContent() {
     const text =
         readDocumentText();
 
-
     state.lastDocumentText =
         text;
-
 
     return {
 
@@ -14026,7 +13685,6 @@ function validateDocumentContent() {
 
 }
 
-
 // =====================================================
 // VERIFY REAL SIMULATION TASKS
 // =====================================================
@@ -14036,34 +13694,26 @@ function validateSimulationActions() {
     const completedTasks =
         getCompletedTaskCount();
 
-
     const hasSimulation =
         !!state.simulationDocument;
-
 
     return {
 
         correct:
 
             hasSimulation &&
-
             completedTasks === 5,
-
 
         simulationPresent:
             hasSimulation,
 
-
         completedTasks:
             completedTasks,
-
 
         totalTasks:
             5,
 
-
         tasks:
-
             Object.assign(
                 {},
                 state.tasks
@@ -14073,7 +13723,6 @@ function validateSimulationActions() {
 
 }
 
-
 // =====================================================
 // FINAL HOMEWORK VALIDATION
 // =====================================================
@@ -14081,36 +13730,24 @@ function validateSimulationActions() {
 function validateFinalHomework() {
 
     const simulationValidation =
-
         validateSimulationActions();
 
-
     const contentValidation =
-
         validateDocumentContent();
 
-
     state.validation.simulationValid =
-
         simulationValidation.correct;
 
-
     state.validation.contentValid =
-
         contentValidation.correct;
 
-
     state.validation.completedTasks =
-
         simulationValidation.completedTasks;
-
 
     state.validation.finalValid =
 
         simulationValidation.correct &&
-
         contentValidation.correct;
-
 
     return {
 
@@ -14127,7 +13764,6 @@ function validateFinalHomework() {
 
 }
 
-
 // =====================================================
 // INTELLIGENT STATUS
 // =====================================================
@@ -14135,47 +13771,37 @@ function validateFinalHomework() {
 function updateIntelligentStatus() {
 
     if (
-
         state.completed ||
-
         !state.ui.status
-
     ) {
 
         return;
 
     }
 
-
     const result =
         validateFinalHomework();
-
 
     if (
         result.finalValid
     ) {
 
         setStatus(
-
             "✓ 5/5 tâches exécutées. Ranise valide maintenant votre devoir."
-
         );
 
         return;
 
     }
 
-
     setStatus(
 
         result.simulation.completedTasks +
-
         "/5 tâches exécutées. Continuez le devoir dans la simulation."
 
     );
 
 }
-
 
 // =====================================================
 // DOCUMENT CHANGE HANDLER
@@ -14184,41 +13810,30 @@ function updateIntelligentStatus() {
 function handleDocumentChange() {
 
     if (
-
         !state.started ||
-
         state.completed
-
     ) {
 
         return;
 
     }
 
-
     const text =
         readDocumentText();
-
 
     const signature =
         getDocumentSignature();
 
-
     if (
-
         signature !==
-
         state.lastDocumentSignature
-
     ) {
 
         state.lastDocumentSignature =
             signature;
 
-
         state.lastDocumentText =
             text;
-
 
         if (
             hasDocumentText(text)
@@ -14233,7 +13848,6 @@ function handleDocumentChange() {
 
         }
 
-
         updateHomeworkUI();
 
         updateIntelligentStatus();
@@ -14242,7 +13856,6 @@ function handleDocumentChange() {
 
 }
 
-
 // =====================================================
 // INPUT EVENT
 // =====================================================
@@ -14250,17 +13863,13 @@ function handleDocumentChange() {
 function handleSimulationInput(event) {
 
     if (
-
         !state.started ||
-
         state.completed
-
     ) {
 
         return;
 
     }
-
 
     if (
         event &&
@@ -14273,51 +13882,42 @@ function handleSimulationInput(event) {
 
     }
 
-
     handleDocumentChange();
 
 }
 
-
 // =====================================================
 // CLICK EVENT
 //
-// THIS IS THE IMPORTANT FIX.
-// Every real simulation click is inspected here.
+// IMPORTANT:
+// CAPTURE ONLY OBSERVES.
+// IT DOES NOT STOP SIMULATION EVENTS.
 // =====================================================
 
 function handleSimulationClick(event) {
 
     if (
-
         !state.started ||
-
         state.completed
-
     ) {
 
         return;
 
     }
 
-
     if (!event) {
         return;
     }
-
 
     checkRealSimulationAction(
         event
     );
 
-
     handleDocumentChange();
-
 
     scheduleValidation();
 
 }
-
 
 // =====================================================
 // KEYUP EVENT
@@ -14326,17 +13926,13 @@ function handleSimulationClick(event) {
 function handleSimulationKeyup(event) {
 
     if (
-
         !state.started ||
-
         state.completed
-
     ) {
 
         return;
 
     }
-
 
     if (
         event &&
@@ -14349,11 +13945,9 @@ function handleSimulationKeyup(event) {
 
     }
 
-
     handleDocumentChange();
 
 }
-
 
 // =====================================================
 // CHANGE EVENT
@@ -14362,22 +13956,17 @@ function handleSimulationKeyup(event) {
 function handleSimulationChange() {
 
     if (
-
         !state.started ||
-
         state.completed
-
     ) {
 
         return;
 
     }
 
-
     handleDocumentChange();
 
 }
-
 
 // =====================================================
 // SCHEDULE VALIDATION
@@ -14394,7 +13983,6 @@ function scheduleValidation() {
         );
 
     }
-
 
     state.validationTimer =
 
@@ -14415,7 +14003,6 @@ function scheduleValidation() {
 
 }
 
-
 // =====================================================
 // CONTINUOUS AUTOMATIC VALIDATION
 // =====================================================
@@ -14430,7 +14017,6 @@ function startAutomaticDocumentMonitor() {
 
     }
 
-
     state.monitorTimer =
 
         setInterval(
@@ -14438,17 +14024,13 @@ function startAutomaticDocumentMonitor() {
             function () {
 
                 if (
-
                     !state.started ||
-
                     state.completed
-
                 ) {
 
                     return;
 
                 }
-
 
                 if (
                     !state.simulationDocument
@@ -14458,13 +14040,7 @@ function startAutomaticDocumentMonitor() {
 
                 }
 
-
                 handleDocumentChange();
-
-
-                // -------------------------------------
-                // CHECK 5/5 AUTOMATICALLY
-                // -------------------------------------
 
                 if (
                     getCompletedTaskCount() === 5
@@ -14482,7 +14058,6 @@ function startAutomaticDocumentMonitor() {
 
 }
 
-
 // =====================================================
 // FINAL VALIDATION
 // =====================================================
@@ -14490,26 +14065,19 @@ function startAutomaticDocumentMonitor() {
 async function attemptFinalValidation() {
 
     if (
-
         !state.started ||
-
         state.completed ||
-
         state.processing
-
     ) {
 
         return;
 
     }
 
-
     const result =
         validateFinalHomework();
 
-
     updateHomeworkUI();
-
 
     if (
         !result.finalValid
@@ -14521,28 +14089,23 @@ async function attemptFinalValidation() {
 
     }
 
-
     const signature =
 
         [
-
             getCompletedTaskCount(),
 
             getDocumentSignature(),
 
             Object.keys(state.tasks)
-
                 .map(
                     task =>
                         state.tasks[task]
                             ? "1"
                             : "0"
                 )
-
                 .join("")
 
         ].join("|");
-
 
     if (
         signature ===
@@ -14553,15 +14116,12 @@ async function attemptFinalValidation() {
 
     }
 
-
     state.lastValidationSignature =
         signature;
-
 
     await completeHomework();
 
 }
-
 
 // =====================================================
 // REMOVE HOMEWORK PANEL
@@ -14593,7 +14153,6 @@ function removeHomeworkPanel() {
 
     }
 
-
     state.ui.root =
         null;
 
@@ -14614,7 +14173,6 @@ function removeHomeworkPanel() {
 
 }
 
-
 // =====================================================
 // STOP INTERNAL MONITORING
 // =====================================================
@@ -14634,7 +14192,6 @@ function stopBlock9Monitoring() {
 
     }
 
-
     if (
         state.monitorTimer
     ) {
@@ -14647,7 +14204,6 @@ function stopBlock9Monitoring() {
             null;
 
     }
-
 
     if (
         state.mutationObserver
@@ -14664,35 +14220,16 @@ function stopBlock9Monitoring() {
 
     }
 
-
     state.observerAttached =
         false;
 
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 // =====================================================
 // FINAL HOMEWORK COMPLETION
-// SAME FINALIZATION PRINCIPLE AS BLOCK 7 + BLOCK 8
 // =====================================================
 
 async function completeHomework() {
-
-    // ---------------------------------------------
-    // PROTECTION
-    // ---------------------------------------------
 
     if (
         state.completed ||
@@ -14703,9 +14240,7 @@ async function completeHomework() {
 
     }
 
-
     state.processing = true;
-
 
     try {
 
@@ -14715,7 +14250,6 @@ async function completeHomework() {
 
         const finalCheck =
             validateFinalHomework();
-
 
         if (
             !finalCheck.finalValid
@@ -14729,49 +14263,38 @@ async function completeHomework() {
 
         }
 
+        // ---------------------------------------------
+        // FIVE TASKS REALLY COMPLETE
+        // ---------------------------------------------
 
-        // =================================================
-        // 1. FIVE TASKS ARE REALLY COMPLETE
-        // =================================================
-
-        state.waitingForStudent = false;
-
+        state.waitingForStudent =
+            false;
 
         setStatus(
-
-            "✓ 5/5 tâches exécutées. " +
-            "Devoir vérifié et validé par Ranise."
-
+            "✓ 5/5 tâches exécutées. Devoir vérifié et validé par Ranise."
         );
-
 
         updateHomeworkUI();
 
+        // ---------------------------------------------
+        // CHAPTER 1 HOMEWORK COMPLETED
+        // ---------------------------------------------
 
-        // =================================================
-        // 2. CHAPTER 1 HOMEWORK IS COMPLETED
-        // =================================================
+        state.completed =
+            true;
 
-        state.completed = true;
+        try {
 
+            localStorage.setItem(
+                "wordChapter1HomeworkCompleted",
+                "true"
+            );
 
-        localStorage.setItem(
+        } catch (error) {}
 
-            "wordChapter1HomeworkCompleted",
-
-            "true"
-
-        );
-
-
-        // =================================================
-        // 3. COMPLETE EXISTING CHAPTER SYSTEM
-        //
-        // IMPORTANT:
-        // BLOCK 9 DOES NOT UNLOCK ANY NEW CHAPTER.
-        // BLOCK 10 WILL HANDLE CHAPTER CLOSURE
-        // AND NEXT-CHAPTER UNLOCKING.
-        // =================================================
+        // ---------------------------------------------
+        // COMPLETE EXISTING CHAPTER SYSTEM
+        // ---------------------------------------------
 
         if (
 
@@ -14789,27 +14312,17 @@ async function completeHomework() {
                     "chapitre1"
                 );
 
-            } catch (error) {
-
-                console.error(
-                    "RANISE BLOCK 9: Chapter completion error",
-                    error
-                );
-
-            }
+            } catch (error) {}
 
         }
 
-
-        // =================================================
-        // 4. SYNCHRONIZE EXISTING PROGRESS ENGINE
-        // =================================================
+        // ---------------------------------------------
+        // SYNCHRONIZE EXISTING PROGRESS ENGINE
+        // ---------------------------------------------
 
         if (
-
             typeof MicrosoftWordProgressEngine !==
             "undefined"
-
         ) {
 
             try {
@@ -14817,26 +14330,21 @@ async function completeHomework() {
                 const progress =
                     MicrosoftWordProgressEngine.get();
 
-
                 if (
-
                     !Array.isArray(
                         progress.completedChapters
                     )
-
                 ) {
 
-                    progress.completedChapters = [];
+                    progress.completedChapters =
+                        [];
 
                 }
 
-
                 if (
-
                     !progress.completedChapters.includes(
                         "chapitre1"
                     )
-
                 ) {
 
                     progress.completedChapters.push(
@@ -14845,213 +14353,59 @@ async function completeHomework() {
 
                 }
 
-
                 MicrosoftWordProgressEngine.save(
                     progress
                 );
 
-            } catch (error) {
-
-                console.error(
-                    "RANISE BLOCK 9: Progress synchronization error",
-                    error
-                );
-
-            }
+            } catch (error) {}
 
         }
 
+        // ---------------------------------------------
+        // NO CHAPTER UNLOCK HERE.
+        // BLOCK 10 REMAINS RESPONSIBLE.
+        // ---------------------------------------------
 
-        // =================================================
-        // IMPORTANT:
-        // NO UNLOCK CODE HERE.
-        //
-        // DO NOT ADD:
-        // WordChapterUnlockEngine.checkProgress()
-        //
-        // BLOCK 10 ONLY HANDLES NEXT CHAPTER UNLOCK.
-        // =================================================
-
-
-        // =================================================
-        // 5. STOP BLOCK 9 MONITORING
-        // =================================================
+        // ---------------------------------------------
+        // STOP MONITORING
+        // ---------------------------------------------
 
         stopBlock9Monitoring();
 
-
-        // =================================================
-        // 6. REMOVE HOMEWORK PANEL AUTOMATICALLY
-        // =================================================
+        // ---------------------------------------------
+        // REMOVE PANEL IMMEDIATELY
+        // ---------------------------------------------
 
         removeHomeworkPanel();
 
-
-        // =================================================
-        // 7. FINAL RANISE REACTION
+        // ---------------------------------------------
+        // FINAL RANISE REACTION
         //
         // IMPORTANT:
-        // DO NOT AWAIT MARYTTS.
-        //
-        // The five tasks have already been validated.
-        // The final reaction starts immediately and
-        // cannot block completion.
-        // =================================================
+        // VALIDATION IS ALREADY FINISHED.
+        // MARYTTS CANNOT CANCEL IT.
+        // ---------------------------------------------
 
         const finalMessage =
 
             "Excellent travail. " +
-
-            "J'ai vérifié les cinq tâches " +
-
-            "de votre devoir. " +
-
+            "J'ai vérifié les cinq tâches de votre devoir. " +
             "Les cinq tâches sont correctement réalisées. " +
-
             "Votre devoir du Chapitre 1 est maintenant validé. " +
-
             "Félicitations.";
 
-
-        try {
-
-            // ---------------------------------------------
-            // START RANISE AVATAR
-            // ---------------------------------------------
-
-            if (
-
-                typeof raniseStartTalking ===
-                "function"
-
-            ) {
-
-                raniseStartTalking();
-
-            }
-
-
-            // ---------------------------------------------
-            // START EXISTING MARYTTS IMMEDIATELY
-            // ---------------------------------------------
-
-            if (
-
-                typeof speakProfessorIAWithMaryTTS ===
-                "function"
-
-            ) {
-
-                Promise.resolve(
-
-                    speakProfessorIAWithMaryTTS(
-                        finalMessage
-                    )
-
-                )
-
-                .catch(
-
-                    error => {
-
-                        console.error(
-                            "RANISE BLOCK 9: MaryTTS final reaction error",
-                            error
-                        );
-
-                    }
-
-                )
-
-                .finally(
-
-                    function () {
-
-                        if (
-
-                            typeof raniseStopTalking ===
-                            "function"
-
-                        ) {
-
-                            raniseStopTalking();
-
-                        }
-
-                    }
-
-                );
-
-            } else {
-
-                // -----------------------------------------
-                // MARYTTS BRIDGE UNAVAILABLE
-                // NEVER BLOCK VALIDATION
-                // -----------------------------------------
-
-                if (
-
-                    typeof raniseStopTalking ===
-                    "function"
-
-                ) {
-
-                    raniseStopTalking();
-
-                }
-
-            }
-
-        } catch (error) {
-
-            if (
-
-                typeof raniseStopTalking ===
-                "function"
-
-            ) {
-
-                raniseStopTalking();
-
-            }
-
-
-            console.error(
-                "RANISE BLOCK 9: Final voice error",
-                error
-            );
-
-        }
-
-
-        // =================================================
-        // 8. FINAL LOG
-        // =================================================
-
-        console.log(
-
-            "RANISE BLOCK 9: " +
-
-            "CHAPTER 1 HOMEWORK COMPLETED AND VALIDATED — 5/5 TASKS"
-
+        speakFinalReaction(
+            finalMessage
         );
-
 
     } finally {
 
-        state.processing = false;
+        state.processing =
+            false;
 
     }
 
 }
-
-
-
-
-
-
-
-
 
 // =====================================================
 // ATTACH MUTATION OBSERVER
@@ -15060,17 +14414,13 @@ async function completeHomework() {
 function attachMutationObserver() {
 
     if (
-
         state.observerAttached ||
-
         !state.simulationDocument
-
     ) {
 
         return;
 
     }
-
 
     if (
         typeof MutationObserver ===
@@ -15081,18 +14431,15 @@ function attachMutationObserver() {
 
     }
 
-
     const target =
 
         state.simulationDocument.body ||
 
         state.simulationDocument.documentElement;
 
-
     if (!target) {
         return;
     }
-
 
     state.mutationObserver =
 
@@ -15101,11 +14448,8 @@ function attachMutationObserver() {
             function () {
 
                 if (
-
                     state.started &&
-
                     !state.completed
-
                 ) {
 
                     handleDocumentChange();
@@ -15115,7 +14459,6 @@ function attachMutationObserver() {
             }
 
         );
-
 
     state.mutationObserver.observe(
 
@@ -15136,12 +14479,10 @@ function attachMutationObserver() {
 
     );
 
-
     state.observerAttached =
         true;
 
 }
-
 
 // =====================================================
 // ATTACH EVENT LISTENERS
@@ -15150,81 +14491,56 @@ function attachMutationObserver() {
 function attachListeners() {
 
     if (
-
         !state.simulationDocument ||
-
         state.listenersAttached
-
     ) {
 
         return;
 
     }
 
-
     const doc =
         state.simulationDocument;
 
-
     // IMPORTANT:
     // CAPTURE = TRUE
-    // This lets Block 9 SEE clicks without
-    // replacing or stopping the simulation's
-    // own handlers.
-    doc.addEventListener(
+    // BLOCK 9 OBSERVES ONLY.
+    // IT DOES NOT stopPropagation().
+    // IT DOES NOT preventDefault().
+    // IT DOES NOT REPLACE SIMULATION EVENTS.
 
+    doc.addEventListener(
         "click",
-
         handleSimulationClick,
-
         true
-
     );
 
-
     doc.addEventListener(
-
         "input",
-
         handleSimulationInput,
-
         true
-
     );
 
-
     doc.addEventListener(
-
         "keyup",
-
         handleSimulationKeyup,
-
         true
-
     );
-
 
     doc.addEventListener(
-
         "change",
-
         handleSimulationChange,
-
         true
-
     );
-
 
     state.listenersAttached =
         true;
-
 
     attachMutationObserver();
 
     startAutomaticDocumentMonitor();
 
 }
-
 
 // =====================================================
 // ANNOUNCE HOMEWORK
@@ -15233,7 +14549,6 @@ function attachListeners() {
 async function announceHomework() {
 
     updateHomeworkUI();
-
 
     await speak(
 
@@ -15249,19 +14564,22 @@ async function announceHomework() {
 
     );
 
+    if (
+        state.completed
+    ) {
+
+        return;
+
+    }
 
     state.waitingForStudent =
         true;
 
-
     setStatus(
-
         "0/5 tâches exécutées. Commencez le devoir dans la simulation."
-
     );
 
 }
-
 
 // =====================================================
 // LOAD DYNAMIC COURSE DATA
@@ -15272,64 +14590,43 @@ function loadChapterData() {
     const chapter =
         getChapter1();
 
-
     if (!chapter) {
         return false;
     }
 
-
     state.chapter =
         chapter;
 
-
     state.homework =
-
         String(
-
             chapter.homework ||
-
             ""
-
         ).trim();
 
-
     state.practice =
-
         Array.isArray(
             chapter.practice
         )
-
             ? chapter.practice
-
             : [];
 
-
     state.evaluation =
-
         Array.isArray(
             chapter.evaluation
         )
-
             ? chapter.evaluation
-
             : [];
 
-
     state.objective =
-
         Array.isArray(
             chapter.objective
         )
-
             ? chapter.objective
-
             : [];
-
 
     return !!state.homework;
 
 }
-
 
 // =====================================================
 // RESET FIVE TASKS
@@ -15352,12 +14649,10 @@ function resetFiveTasks() {
     state.tasks.documentArea =
         false;
 
-
     state.validation.completedTasks =
         0;
 
 }
-
 
 // =====================================================
 // START BLOCK 9
@@ -15366,17 +14661,13 @@ function resetFiveTasks() {
 async function startBlock9() {
 
     if (
-
         state.started ||
-
         state.completed
-
     ) {
 
         return;
 
     }
-
 
     if (
         !connectToSimulation()
@@ -15386,81 +14677,70 @@ async function startBlock9() {
 
     }
 
-
     if (
         !loadChapterData()
     ) {
-
-        console.error(
-
-            "RANISE BLOCK 9: " +
-
-            "Chapter 1 homework unavailable."
-
-        );
 
         return;
 
     }
 
-
     resetFiveTasks();
-
 
     state.started =
         true;
 
-
     state.completed =
         false;
-
 
     state.waitingForStudent =
         false;
 
-
     state.processing =
         false;
-
 
     state.transitionDetected =
         true;
 
-
     state.lastDocumentSignature =
         getDocumentSignature();
-
 
     state.lastDocumentText =
         readDocumentText();
 
-
     createHomeworkUI();
-
 
     attachListeners();
 
-
     updateHomeworkUI();
 
+    // ---------------------------------------------
+    // IMPORTANT:
+    // One single initial transition announcement.
+    // Then announceHomework() gives the detailed
+    // homework instructions.
+    // ---------------------------------------------
 
     await speak(
 
         "Très bien. Les exercices sont terminés. " +
-
         "Nous allons maintenant passer au devoir. " +
-
         "Réalisez uniquement la mission demandée dans la simulation. " +
-
         "Je vais détecter chaque tâche que vous exécutez."
 
     );
 
+    if (
+        state.completed
+    ) {
+
+        return;
+
+    }
 
     await announceHomework();
 
 }
-
 
 // =====================================================
 // DETECT BLOCK 8 COMPLETION
@@ -15471,42 +14751,31 @@ async function startBlock9() {
 function checkBlock8Completion() {
 
     if (
-
         state.started ||
-
         state.completed ||
-
         state.transitionDetected
-
     ) {
 
         return;
 
     }
 
-
     if (
-
         !window.RaniseMoiseExerciseMasteryEngine ||
-
         typeof
             window.RaniseMoiseExerciseMasteryEngine.getState !==
             "function"
-
     ) {
 
         return;
 
     }
 
-
     let block8State;
-
 
     try {
 
         block8State =
-
             window.RaniseMoiseExerciseMasteryEngine
                 .getState();
 
@@ -15516,40 +14785,42 @@ function checkBlock8Completion() {
 
     }
 
-
     if (!block8State) {
         return;
     }
 
-
     // -------------------------------------------------
-    // BLOCK 9 MUST NOT INTERRUPT BLOCK 8.
+    // BLOCK 9 DOES NOT INTERRUPT BLOCK 8.
+    //
+    // IMPORTANT FIX:
+    // completion is the real transition signal.
+    // We do NOT make Block 9 permanently wait
+    // for speaking === false.
     // -------------------------------------------------
 
     if (
-
-        block8State.completed ===
-        true &&
-
-        block8State.speaking ===
-        false
-
+        block8State.completed === true
     ) {
 
         state.transitionDetected =
             true;
 
-
         if (
             connectToSimulation()
         ) {
 
-            startBlock9();
+            Promise.resolve(
+                startBlock9()
+            ).catch(function () {
+
+                state.transitionDetected =
+                    false;
+
+            });
 
             return;
 
         }
-
 
         state.transitionDetected =
             false;
@@ -15558,7 +14829,6 @@ function checkBlock8Completion() {
 
 }
 
-
 // =====================================================
 // WAIT FOR SIMULATION
 // =====================================================
@@ -15566,17 +14836,13 @@ function checkBlock8Completion() {
 function waitForSimulationThenStart() {
 
     if (
-
         state.started ||
-
         state.completed
-
     ) {
 
         return;
 
     }
-
 
     if (
         connectToSimulation()
@@ -15587,7 +14853,6 @@ function waitForSimulationThenStart() {
     }
 
 }
-
 
 // =====================================================
 // AUTOMATIC BLOCK 8 → BLOCK 9 BRIDGE
@@ -15600,11 +14865,8 @@ state.transitionTimer =
         function () {
 
             if (
-
                 state.started ||
-
                 state.completed
-
             ) {
 
                 clearInterval(
@@ -15618,7 +14880,6 @@ state.transitionTimer =
 
             }
 
-
             waitForSimulationThenStart();
 
         },
@@ -15627,16 +14888,17 @@ state.transitionTimer =
 
     );
 
-
 // =====================================================
 // PUBLIC API
+//
+// IMPORTANT FIX:
+// NO BACKSLASH BEFORE window.
 // =====================================================
 
 window.RaniseMoiseHomeworkMasteryEngine = {
 
     start:
         startBlock9,
-
 
     getState:
 
@@ -15659,39 +14921,26 @@ window.RaniseMoiseHomeworkMasteryEngine = {
                 transitionDetected:
                     state.transitionDetected,
 
-
                 simulationEvidence:
 
                     Object.assign(
-
                         {},
-
                         state.simulationEvidence
-
                     ),
-
 
                 tasks:
 
                     Object.assign(
-
                         {},
-
                         state.tasks
-
                     ),
-
 
                 validation:
 
                     Object.assign(
-
                         {},
-
                         state.validation
-
                     ),
-
 
                 homework:
                     state.homework
@@ -15703,11 +14952,6 @@ window.RaniseMoiseHomeworkMasteryEngine = {
 };
 
 })();
-
-
-
-
-
 
 
 
