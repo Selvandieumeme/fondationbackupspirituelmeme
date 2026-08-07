@@ -18349,28 +18349,26 @@ async function startBlock10() {
 
 
 
-
-
 // =========================================================
 // BLOCK 9 → BLOCK 10
-// ROBUST AUTOMATIC TRANSITION BRIDGE
+// SAFE AUTOMATIC TRANSITION BRIDGE
+// READS BLOCK 9 ONLY
+// DOES NOT TOUCH BLOCK 9
 // =========================================================
 
 let block9ToBlock10Timer = null;
-
 let block9ToBlock10Started = false;
 
 
 // =========================================================
-// CHECK BLOCK 9 COMPLETION
-// READ ONLY
+// CHECK BLOCK 9 ONLY
 // =========================================================
 
 function checkBlock9Completion() {
 
-    // -----------------------------------------------------
+    // ---------------------------------------------
     // BLOCK 10 ALREADY STARTED
-    // -----------------------------------------------------
+    // ---------------------------------------------
 
     if (
         state.started ||
@@ -18382,9 +18380,9 @@ function checkBlock9Completion() {
     }
 
 
-    // -----------------------------------------------------
-    // PREVENT DUPLICATE START ATTEMPTS
-    // -----------------------------------------------------
+    // ---------------------------------------------
+    // PREVENT DUPLICATE START
+    // ---------------------------------------------
 
     if (
         block9ToBlock10Started
@@ -18395,34 +18393,41 @@ function checkBlock9Completion() {
     }
 
 
-    // -----------------------------------------------------
-    // BLOCK 9 API MUST EXIST
-    // -----------------------------------------------------
+    // ---------------------------------------------
+    // BLOCK 9 MUST EXIST
+    // ---------------------------------------------
+
+    const block9 =
+        window.RaniseMoiseHomeworkMasteryEngine;
+
 
     if (
-        !window.RaniseMoiseHomeworkMasteryEngine ||
-        typeof
-            window.RaniseMoiseHomeworkMasteryEngine.getState !==
-            "function"
+        !block9 ||
+        typeof block9.getState !==
+        "function"
     ) {
 
+        // BLOCK 9 HAS NOT BEEN CREATED YET.
+        // DO NOTHING.
         return;
 
     }
 
 
-    let block9State;
+    // ---------------------------------------------
+    // READ BLOCK 9 STATE
+    // ---------------------------------------------
 
+    let block9State;
 
     try {
 
         block9State =
-
-            window.RaniseMoiseHomeworkMasteryEngine
-                .getState();
+            block9.getState();
 
     } catch (error) {
 
+        // NEVER INTERRUPT BLOCK 9.
         return;
 
     }
@@ -18435,9 +18440,11 @@ function checkBlock9Completion() {
     }
 
 
-    // -----------------------------------------------------
-    // BLOCK 9 MUST BE COMPLETELY VALIDATED
-    // -----------------------------------------------------
+    // ---------------------------------------------
+    // CRITICAL:
+    // BLOCK 9 MUST REALLY BE COMPLETED.
+    // NOTHING ELSE CAN START BLOCK 10.
+    // ---------------------------------------------
 
     if (
         block9State.completed !== true
@@ -18448,33 +18455,18 @@ function checkBlock9Completion() {
     }
 
 
-    // -----------------------------------------------------
-    // THE SIMULATION MUST BE AVAILABLE
-    // -----------------------------------------------------
+    // ---------------------------------------------
+    // BLOCK 9 IS FINISHED.
+    // BLOCK 10 TAKES OVER.
+    // ---------------------------------------------
 
-    if (
-        !connectToSimulation()
-    ) {
-
-        return;
-
-    }
+    block9ToBlock10Started =
+        true;
 
 
-    // -----------------------------------------------------
-    // IMPORTANT:
-    // MARK TRANSITION ONLY AFTER THE SIMULATION
-    // CONNECTION HAS SUCCEEDED.
-    // -----------------------------------------------------
+    state.transitionDetected =
+        true;
 
-    block9ToBlock10Started = true;
-
-    state.transitionDetected = true;
-
-
-    // -----------------------------------------------------
-    // START BLOCK 10 IMMEDIATELY
-    // -----------------------------------------------------
 
     try {
 
@@ -18482,46 +18474,47 @@ function checkBlock9Completion() {
             startBlock10();
 
 
-        // -------------------------------------------------
-        // If Block 10 could not start because its own
-        // initialization was not ready, release the lock
-        // so the bridge can retry safely.
-        // -------------------------------------------------
-
         Promise.resolve(result)
+
             .then(function () {
+
+                // ---------------------------------
+                // IF BLOCK 10 DID NOT START,
+                // ALLOW A SAFE RETRY.
+                // ---------------------------------
 
                 if (
                     !state.started &&
                     !state.completed
                 ) {
 
-                    block9ToBlock10Started = false;
+                    block9ToBlock10Started =
+                        false;
 
-                    state.transitionDetected = false;
+                    state.transitionDetected =
+                        false;
 
                 }
 
             })
+
             .catch(function () {
 
-                block9ToBlock10Started = false;
+                block9ToBlock10Started =
+                    false;
 
-                state.transitionDetected = false;
+                state.transitionDetected =
+                    false;
 
             });
 
     } catch (error) {
 
-        block9ToBlock10Started = false;
+        block9ToBlock10Started =
+            false;
 
-        state.transitionDetected = false;
-
-
-        console.error(
-            "RANISE BLOCK 10: Block 9 → Block 10 transition error",
-            error
-        );
+        state.transitionDetected =
+            false;
 
     }
 
@@ -18538,10 +18531,10 @@ block9ToBlock10Timer =
 
         function () {
 
-            // -------------------------------------------------
-            // BLOCK 10 HAS STARTED
-            // STOP THE TRANSITION MONITOR
-            // -------------------------------------------------
+            // -----------------------------------------
+            // BLOCK 10 STARTED
+            // STOP THIS MONITOR
+            // -----------------------------------------
 
             if (
                 state.started ||
@@ -18552,16 +18545,17 @@ block9ToBlock10Timer =
                     block9ToBlock10Timer
                 );
 
-                block9ToBlock10Timer = null;
+                block9ToBlock10Timer =
+                    null;
 
                 return;
 
             }
 
 
-            // -------------------------------------------------
-            // CHECK BLOCK 9 CONTINUOUSLY
-            // -------------------------------------------------
+            // -----------------------------------------
+            // ONLY READ BLOCK 9
+            // -----------------------------------------
 
             checkBlock9Completion();
 
@@ -18570,11 +18564,6 @@ block9ToBlock10Timer =
         100
 
     );
-
-
-
-
-
 
 
 
