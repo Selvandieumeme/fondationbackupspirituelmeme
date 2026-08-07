@@ -14674,11 +14674,25 @@ function stopBlock9Monitoring() {
 
 
 
+
+
+
+
+
+
+
+
+
 // =====================================================
-// SUCCESS FEEDBACK + FINAL HOMEWORK VALIDATION
+// FINAL HOMEWORK COMPLETION
+// SAME FINALIZATION PRINCIPLE AS BLOCK 7 + BLOCK 8
 // =====================================================
 
 async function completeHomework() {
+
+    // ---------------------------------------------
+    // PROTECTION
+    // ---------------------------------------------
 
     if (
         state.completed ||
@@ -14707,7 +14721,7 @@ async function completeHomework() {
             !finalCheck.finalValid
         ) {
 
-            state.processing = false;
+            updateHomeworkUI();
 
             updateIntelligentStatus();
 
@@ -14716,11 +14730,9 @@ async function completeHomework() {
         }
 
 
-        // ---------------------------------------------
-        // IMPORTANT:
-        // DO NOT COMPLETE / REMOVE PANEL YET.
-        // RANISE MUST REACT FIRST.
-        // ---------------------------------------------
+        // =================================================
+        // 1. FIVE TASKS ARE REALLY COMPLETE
+        // =================================================
 
         state.waitingForStudent = false;
 
@@ -14728,7 +14740,7 @@ async function completeHomework() {
         setStatus(
 
             "✓ 5/5 tâches exécutées. " +
-            "Ranise vérifie maintenant votre devoir..."
+            "Devoir vérifié et validé par Ranise."
 
         );
 
@@ -14736,36 +14748,11 @@ async function completeHomework() {
         updateHomeworkUI();
 
 
-        // ---------------------------------------------
-        // FINAL PROFESSOR REACTION
-        // ---------------------------------------------
-
-        await speak(
-
-            "Excellent travail. " +
-
-            "J'ai détecté et vérifié les cinq tâches " +
-
-            "demandées dans votre devoir. " +
-
-            "Les cinq éléments sont correctement réalisés. " +
-
-            "Votre devoir du Chapitre 1 est maintenant validé. " +
-
-            "Félicitations."
-
-        );
-
-
-        // ---------------------------------------------
-        // ONLY NOW:
-        // CHAPTER 1 HOMEWORK IS COMPLETED
-        // ---------------------------------------------
+        // =================================================
+        // 2. CHAPTER 1 HOMEWORK IS COMPLETED
+        // =================================================
 
         state.completed = true;
-
-
-        state.waitingForStudent = false;
 
 
         localStorage.setItem(
@@ -14777,9 +14764,14 @@ async function completeHomework() {
         );
 
 
-        // ---------------------------------------------
-        // COMPLETE EXISTING CHAPTER SYSTEM
-        // ---------------------------------------------
+        // =================================================
+        // 3. COMPLETE EXISTING CHAPTER SYSTEM
+        //
+        // IMPORTANT:
+        // BLOCK 9 DOES NOT UNLOCK ANY NEW CHAPTER.
+        // BLOCK 10 WILL HANDLE CHAPTER CLOSURE
+        // AND NEXT-CHAPTER UNLOCKING.
+        // =================================================
 
         if (
 
@@ -14791,18 +14783,27 @@ async function completeHomework() {
 
         ) {
 
-            WordChapterCompletionEngine.completeChapter(
+            try {
 
-                "chapitre1"
+                WordChapterCompletionEngine.completeChapter(
+                    "chapitre1"
+                );
 
-            );
+            } catch (error) {
+
+                console.error(
+                    "RANISE BLOCK 9: Chapter completion error",
+                    error
+                );
+
+            }
 
         }
 
 
-        // ---------------------------------------------
-        // KEEP EXISTING PROGRESS ENGINE SYNCHRONIZED
-        // ---------------------------------------------
+        // =================================================
+        // 4. SYNCHRONIZE EXISTING PROGRESS ENGINE
+        // =================================================
 
         if (
 
@@ -14811,83 +14812,226 @@ async function completeHomework() {
 
         ) {
 
-            const progress =
+            try {
 
-                MicrosoftWordProgressEngine.get();
-
-
-            if (
-
-                !Array.isArray(
-                    progress.completedChapters
-                )
-
-            ) {
-
-                progress.completedChapters = [];
-
-            }
+                const progress =
+                    MicrosoftWordProgressEngine.get();
 
 
-            if (
+                if (
 
-                !progress.completedChapters.includes(
-                    "chapitre1"
-                )
+                    !Array.isArray(
+                        progress.completedChapters
+                    )
 
-            ) {
+                ) {
 
-                progress.completedChapters.push(
-                    "chapitre1"
+                    progress.completedChapters = [];
+
+                }
+
+
+                if (
+
+                    !progress.completedChapters.includes(
+                        "chapitre1"
+                    )
+
+                ) {
+
+                    progress.completedChapters.push(
+                        "chapitre1"
+                    );
+
+                }
+
+
+                MicrosoftWordProgressEngine.save(
+                    progress
+                );
+
+            } catch (error) {
+
+                console.error(
+                    "RANISE BLOCK 9: Progress synchronization error",
+                    error
                 );
 
             }
 
+        }
 
-            MicrosoftWordProgressEngine.save(
-                progress
+
+        // =================================================
+        // IMPORTANT:
+        // NO UNLOCK CODE HERE.
+        //
+        // DO NOT ADD:
+        // WordChapterUnlockEngine.checkProgress()
+        //
+        // BLOCK 10 ONLY HANDLES NEXT CHAPTER UNLOCK.
+        // =================================================
+
+
+        // =================================================
+        // 5. STOP BLOCK 9 MONITORING
+        // =================================================
+
+        stopBlock9Monitoring();
+
+
+        // =================================================
+        // 6. REMOVE HOMEWORK PANEL AUTOMATICALLY
+        // =================================================
+
+        removeHomeworkPanel();
+
+
+        // =================================================
+        // 7. FINAL RANISE REACTION
+        //
+        // IMPORTANT:
+        // DO NOT AWAIT MARYTTS.
+        //
+        // The five tasks have already been validated.
+        // The final reaction starts immediately and
+        // cannot block completion.
+        // =================================================
+
+        const finalMessage =
+
+            "Excellent travail. " +
+
+            "J'ai vérifié les cinq tâches " +
+
+            "de votre devoir. " +
+
+            "Les cinq tâches sont correctement réalisées. " +
+
+            "Votre devoir du Chapitre 1 est maintenant validé. " +
+
+            "Félicitations.";
+
+
+        try {
+
+            // ---------------------------------------------
+            // START RANISE AVATAR
+            // ---------------------------------------------
+
+            if (
+
+                typeof raniseStartTalking ===
+                "function"
+
+            ) {
+
+                raniseStartTalking();
+
+            }
+
+
+            // ---------------------------------------------
+            // START EXISTING MARYTTS IMMEDIATELY
+            // ---------------------------------------------
+
+            if (
+
+                typeof speakProfessorIAWithMaryTTS ===
+                "function"
+
+            ) {
+
+                Promise.resolve(
+
+                    speakProfessorIAWithMaryTTS(
+                        finalMessage
+                    )
+
+                )
+
+                .catch(
+
+                    error => {
+
+                        console.error(
+                            "RANISE BLOCK 9: MaryTTS final reaction error",
+                            error
+                        );
+
+                    }
+
+                )
+
+                .finally(
+
+                    function () {
+
+                        if (
+
+                            typeof raniseStopTalking ===
+                            "function"
+
+                        ) {
+
+                            raniseStopTalking();
+
+                        }
+
+                    }
+
+                );
+
+            } else {
+
+                // -----------------------------------------
+                // MARYTTS BRIDGE UNAVAILABLE
+                // NEVER BLOCK VALIDATION
+                // -----------------------------------------
+
+                if (
+
+                    typeof raniseStopTalking ===
+                    "function"
+
+                ) {
+
+                    raniseStopTalking();
+
+                }
+
+            }
+
+        } catch (error) {
+
+            if (
+
+                typeof raniseStopTalking ===
+                "function"
+
+            ) {
+
+                raniseStopTalking();
+
+            }
+
+
+            console.error(
+                "RANISE BLOCK 9: Final voice error",
+                error
             );
 
         }
 
 
-        // ---------------------------------------------
-        // UNLOCK NEXT CHAPTER
-        // ---------------------------------------------
-
-        if (
-
-            typeof WordChapterUnlockEngine !==
-            "undefined" &&
-
-            typeof WordChapterUnlockEngine.checkProgress ===
-            "function"
-
-        ) {
-
-            WordChapterUnlockEngine.checkProgress();
-
-        }
-
-
-        // ---------------------------------------------
-        // PANEL DISAPPEARS AUTOMATICALLY
-        // AFTER FINAL VALIDATION + RANISE REACTION
-        // ---------------------------------------------
-
-        removeHomeworkPanel();
-
-
-        // ---------------------------------------------
-        // STOP BLOCK 9 INTERNAL MONITORING
-        // ---------------------------------------------
-
-        stopBlock9Monitoring();
-
+        // =================================================
+        // 8. FINAL LOG
+        // =================================================
 
         console.log(
 
             "RANISE BLOCK 9: " +
+
             "CHAPTER 1 HOMEWORK COMPLETED AND VALIDATED — 5/5 TASKS"
 
         );
@@ -14900,6 +15044,11 @@ async function completeHomework() {
     }
 
 }
+
+
+
+
+
 
 
 
