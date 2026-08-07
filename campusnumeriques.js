@@ -14671,18 +14671,18 @@ function stopBlock9Monitoring() {
 }
 
 
+
+
+
 // =====================================================
-// SUCCESS FEEDBACK
+// SUCCESS FEEDBACK + FINAL HOMEWORK VALIDATION
 // =====================================================
 
 async function completeHomework() {
 
     if (
-
         state.completed ||
-
         state.processing
-
     ) {
 
         return;
@@ -14690,8 +14690,7 @@ async function completeHomework() {
     }
 
 
-    state.processing =
-        true;
+    state.processing = true;
 
 
     try {
@@ -14708,6 +14707,8 @@ async function completeHomework() {
             !finalCheck.finalValid
         ) {
 
+            state.processing = false;
+
             updateIntelligentStatus();
 
             return;
@@ -14715,17 +14716,57 @@ async function completeHomework() {
         }
 
 
-        state.completed =
-            true;
+        // ---------------------------------------------
+        // IMPORTANT:
+        // DO NOT COMPLETE / REMOVE PANEL YET.
+        // RANISE MUST REACT FIRST.
+        // ---------------------------------------------
+
+        state.waitingForStudent = false;
 
 
-        state.waitingForStudent =
-            false;
+        setStatus(
+
+            "✓ 5/5 tâches exécutées. " +
+            "Ranise vérifie maintenant votre devoir..."
+
+        );
+
+
+        updateHomeworkUI();
 
 
         // ---------------------------------------------
-        // CHAPTER 1 HOMEWORK COMPLETED
+        // FINAL PROFESSOR REACTION
         // ---------------------------------------------
+
+        await speak(
+
+            "Excellent travail. " +
+
+            "J'ai détecté et vérifié les cinq tâches " +
+
+            "demandées dans votre devoir. " +
+
+            "Les cinq éléments sont correctement réalisés. " +
+
+            "Votre devoir du Chapitre 1 est maintenant validé. " +
+
+            "Félicitations."
+
+        );
+
+
+        // ---------------------------------------------
+        // ONLY NOW:
+        // CHAPTER 1 HOMEWORK IS COMPLETED
+        // ---------------------------------------------
+
+        state.completed = true;
+
+
+        state.waitingForStudent = false;
+
 
         localStorage.setItem(
 
@@ -14783,8 +14824,7 @@ async function completeHomework() {
 
             ) {
 
-                progress.completedChapters =
-                    [];
+                progress.completedChapters = [];
 
             }
 
@@ -14831,7 +14871,8 @@ async function completeHomework() {
 
 
         // ---------------------------------------------
-        // PANEL DISAPPEARS
+        // PANEL DISAPPEARS AUTOMATICALLY
+        // AFTER FINAL VALIDATION + RANISE REACTION
         // ---------------------------------------------
 
         removeHomeworkPanel();
@@ -14844,29 +14885,9 @@ async function completeHomework() {
         stopBlock9Monitoring();
 
 
-        // ---------------------------------------------
-        // FINAL PROFESSOR VOICE
-        // ---------------------------------------------
-
-        await speak(
-
-            "Excellent travail. " +
-
-            "J'ai vérifié les cinq tâches exécutées dans la simulation. " +
-
-            "Les cinq éléments demandés sont bien réalisés. " +
-
-            "Votre devoir du Chapitre 1 est maintenant validé. " +
-
-            "Félicitations."
-
-        );
-
-
         console.log(
 
             "RANISE BLOCK 9: " +
-
             "CHAPTER 1 HOMEWORK COMPLETED AND VALIDATED — 5/5 TASKS"
 
         );
@@ -14874,12 +14895,13 @@ async function completeHomework() {
 
     } finally {
 
-        state.processing =
-            false;
+        state.processing = false;
 
     }
 
 }
+
+
 
 
 // =====================================================
