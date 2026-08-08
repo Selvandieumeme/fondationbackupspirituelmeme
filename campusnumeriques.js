@@ -14492,14 +14492,25 @@ window.RaniseMoiseHomeworkMasteryEngine = {
 
 
 
+
+
+
+
+
+
+
+
+
+
 // =========================================================
 // BLOCK 10
 // MICROSOFT WORD 2007 FORMATION
-// RANISE MOISE EVALUATION & CHAPTER COMPLETION ENGINE
+// RANISE MOISE FINAL EVALUATION ENGINE
 // =========================================================
 // ISOLATED FINAL VERSION
 //
-// IMPORTANT:
+// RULES:
+//
 // 1. BLOCK 10 WAITS FOR BLOCK 9.
 // 2. BLOCK 10 STARTS ONLY WHEN BLOCK 9.completed === true.
 // 3. BLOCK 10 NEVER MODIFIES BLOCK 9.
@@ -14507,14 +14518,19 @@ window.RaniseMoiseHomeworkMasteryEngine = {
 // 5. BLOCK 10 NEVER MODIFIES BLOCK 7.
 // 6. BLOCK 10 NEVER MODIFIES BLOCK 6.
 // 7. BLOCK 10 DOES NOT MODIFY THE SIMULATION ENGINE.
-// 8. BLOCK 10 USES THE EXISTING MARYTTS + AVATAR SYSTEM.
-// 9. BLOCK 10 VALIDATES THE CHAPTER 1 EVALUATION.
-// 10. THE EVALUATION PANEL IS SMALL, RESPONSIVE AND DRAGGABLE.
-// 11. THE CLOSE BUTTON APPEARS ONLY AFTER FINAL VALIDATION.
-// 12. AFTER FINAL VALIDATION CHAPTER 1 IS COMPLETED.
-// 13. AFTER FINAL VALIDATION CHAPTER 2 IS UNLOCKED.
-// 14. BLOCK 10 SYNCHRONIZES BOTH PROGRESS SYSTEMS.
-// 15. BLOCK 10 NEVER UNLOCKS CHAPTER 2 BEFORE SUCCESS.
+// 8. FOUR REAL EVALUATION TASKS.
+// 9. EACH TASK = 25 POINTS.
+// 10. TOTAL = 100 POINTS.
+// 11. 3/4 = 75/100 = SUCCESS.
+// 12. 4/4 = 100/100 = SUCCESS.
+// 13. VALIDATION STARTS IMMEDIATELY AT 75/100.
+// 14. RANISE DOES NOT WAIT FOR THE FOURTH TASK.
+// 15. CLOSE BUTTON APPEARS IMMEDIATELY AFTER SUCCESS.
+// 16. CHAPTER 1 IS COMPLETED AFTER SUCCESS.
+// 17. CHAPTER 2 IS UNLOCKED AFTER SUCCESS.
+// 18. PANEL IS SMALL AND DRAGGABLE.
+// 19. PANEL DOES NOT BLOCK THE SIMULATION.
+// 20. EXISTING MARYTTS + AVATAR SYSTEM IS USED.
 // =========================================================
 
 (function () {
@@ -14551,9 +14567,11 @@ const state = {
 
     closeEnabled: false,
 
+    lastActionTime: 0,
+
     actionHistory: [],
 
-    lastActionTime: 0,
+    score: 0,
 
     tasks: {
 
@@ -14640,7 +14658,7 @@ function normalize(value) {
 
 
 // =========================================================
-// CHAPTER 1
+// GET CHAPTER 1
 // =========================================================
 
 function getChapter1() {
@@ -14837,7 +14855,7 @@ function speak(text) {
 
 
 // =========================================================
-// COMPLETED TASK COUNT
+// COUNT COMPLETED TASKS
 // =========================================================
 
 function completedTaskCount() {
@@ -14845,6 +14863,20 @@ function completedTaskCount() {
     return Object.values(
         state.tasks
     ).filter(Boolean).length;
+
+}
+
+
+// =========================================================
+// CALCULATE SCORE
+// =========================================================
+
+function calculateScore() {
+
+    state.score =
+        completedTaskCount() * 25;
+
+    return state.score;
 
 }
 
@@ -14858,7 +14890,7 @@ function taskLabel(task) {
     const labels = {
 
         environment:
-            "Environnement Word 2007",
+            "Environnement général",
 
         components:
             "Composants de l’interface",
@@ -14877,7 +14909,7 @@ function taskLabel(task) {
 
 
 // =========================================================
-// CREATE EVALUATION PANEL
+// CREATE PANEL
 // =========================================================
 
 function createEvaluationPanel() {
@@ -14955,7 +14987,7 @@ function createEvaluationPanel() {
         "flex:1;";
 
     // =====================================================
-    // CLOSE
+    // CLOSE BUTTON
     // =====================================================
 
     const close =
@@ -15045,8 +15077,8 @@ function createEvaluationPanel() {
 
     instruction.textContent =
 
-        "Réalisez l’évaluation du Chapitre 1. " +
-        "Ranise vérifiera vos actions réelles.";
+        "Évaluation finale du Chapitre 1. " +
+        "Chaque tâche vaut 25 points.";
 
     // =====================================================
     // STATUS
@@ -15063,7 +15095,7 @@ function createEvaluationPanel() {
         "margin-bottom:8px;";
 
     // =====================================================
-    // TASKS
+    // TASK LIST
     // =====================================================
 
     const tasks =
@@ -15127,22 +15159,16 @@ function updatePanel() {
     const count =
         completedTaskCount();
 
-    const total =
-        Object.keys(
-            state.tasks
-        ).length;
+    const score =
+        calculateScore();
 
     state.ui.progress.textContent =
 
         "Évaluation — Chapitre 1 — " +
 
-        count +
+        score +
 
-        "/" +
-
-        total +
-
-        " validations";
+        "/100 points";
 
     const taskNames = [
 
@@ -15211,6 +15237,8 @@ function updatePanel() {
                 "<span>" +
 
                 taskLabel(task) +
+
+                " — 25 pts" +
 
                 "</span>" +
 
@@ -15535,7 +15563,7 @@ function closest(target, selector) {
 
 
 // =========================================================
-// GET COMBINED ELEMENT DATA
+// ELEMENT DATA
 // =========================================================
 
 function getElementData(node) {
@@ -15630,10 +15658,6 @@ function identifyInterfaceTask(target) {
             ) ||
 
             combined.includes(
-                "barre de titre"
-            ) ||
-
-            combined.includes(
                 "barretitre"
             )
 
@@ -15710,7 +15734,7 @@ function identifyInterfaceTask(target) {
             ) ||
 
             combined.includes(
-                "ribbon tab"
+                "ribbontab"
             ) ||
 
             combined.includes(
@@ -15754,7 +15778,7 @@ function identifyInterfaceTask(target) {
 
 
 // =========================================================
-// DETECT NEW DOCUMENT ACTION
+// NEW DOCUMENT DETECTION
 // =========================================================
 
 function isNewDocumentAction(target) {
@@ -15820,7 +15844,7 @@ function isNewDocumentAction(target) {
 
 
 // =========================================================
-// DETECT SAVE ACTION
+// SAVE DETECTION
 // =========================================================
 
 function isSaveAction(target) {
@@ -15843,7 +15867,7 @@ function isSaveAction(target) {
         const combined =
             getElementData(node);
 
-        const isSave =
+        if (
 
             combined.includes(
                 "save"
@@ -15867,9 +15891,9 @@ function isSaveAction(target) {
 
             combined.includes(
                 "sauvegarder"
-            );
+            )
 
-        if (isSave) {
+        ) {
 
             return true;
 
@@ -15886,7 +15910,7 @@ function isSaveAction(target) {
 
 
 // =========================================================
-// ACTIVATE INTERFACE OBSERVATION
+// ACTIVATE INTERFACE TASK
 // =========================================================
 
 function activateInterfaceTask(task) {
@@ -15897,31 +15921,91 @@ function activateInterfaceTask(task) {
 
     }
 
-    if (
-        !Object.prototype.hasOwnProperty.call(
-            state.observedInterface,
-            task
-        )
-    ) {
+    // =====================================================
+    // TASK 1 — ENVIRONMENT
+    //
+    // The student must interact with the real
+    // Word 2007 interface environment.
+    // =====================================================
 
-        return;
+    if (task === "titleBar") {
+
+        state.observedInterface.titleBar =
+            true;
 
     }
 
-    state.observedInterface[task] =
-        true;
+    // =====================================================
+    // TASK 2 — COMPONENTS
+    //
+    // The student must interact with the main
+    // interface components.
+    // =====================================================
 
-    recordAction(
-        "evaluation-interface-" + task
-    );
+    if (task === "officeButton") {
+
+        state.observedInterface.officeButton =
+            true;
+
+    }
+
+    if (task === "ribbon") {
+
+        state.observedInterface.ribbon =
+            true;
+
+    }
+
+    if (task === "tabs") {
+
+        state.observedInterface.tabs =
+            true;
+
+    }
+
+    if (task === "documentArea") {
+
+        state.observedInterface.documentArea =
+            true;
+
+    }
 
     // =====================================================
-    // ENVIRONMENT = ALL FIVE MAIN COMPONENTS
+    // TASK 1
+    //
+    // Environment becomes complete when the title bar
+    // is genuinely reached.
     // =====================================================
 
     if (
-
         state.observedInterface.titleBar &&
+        !state.tasks.environment
+    ) {
+
+        state.tasks.environment =
+            true;
+
+        recordAction(
+            "evaluation-environment"
+        );
+
+        setStatus(
+            "✓ Environnement général identifié — 25/100."
+        );
+
+    }
+
+    // =====================================================
+    // TASK 2
+    //
+    // Components becomes complete after the student
+    // genuinely interacts with the main components.
+    //
+    // At minimum:
+    // Office + Ribbon + Tabs + Document Area.
+    // =====================================================
+
+    if (
 
         state.observedInterface.officeButton &&
 
@@ -15929,18 +16013,23 @@ function activateInterfaceTask(task) {
 
         state.observedInterface.tabs &&
 
-        state.observedInterface.documentArea
+        state.observedInterface.documentArea &&
+
+        !state.tasks.components
 
     ) {
-
-        state.tasks.environment =
-            true;
 
         state.tasks.components =
             true;
 
+        recordAction(
+            "evaluation-components"
+        );
+
         setStatus(
-            "✓ L’environnement et les composants principaux sont identifiés."
+            "✓ Composants principaux identifiés — " +
+            calculateScore() +
+            "/100."
         );
 
     }
@@ -15974,7 +16063,9 @@ function activateNewDocument() {
     );
 
     setStatus(
-        "✓ Nouveau document créé."
+        "✓ Nouveau document créé — " +
+        calculateScore() +
+        "/100."
     );
 
     updatePanel();
@@ -16006,7 +16097,9 @@ function activateSave() {
     );
 
     setStatus(
-        "✓ Document enregistré."
+        "✓ Document enregistré — " +
+        calculateScore() +
+        "/100."
     );
 
     updatePanel();
@@ -16017,7 +16110,7 @@ function activateSave() {
 
 
 // =========================================================
-// HANDLE CLICK
+// CLICK HANDLER
 // =========================================================
 
 function handleClick(event) {
@@ -16075,7 +16168,7 @@ function handleClick(event) {
 
 
 // =========================================================
-// HANDLE INPUT
+// INPUT HANDLER
 // =========================================================
 
 function handleInput(event) {
@@ -16103,9 +16196,6 @@ function handleInput(event) {
 
     ) {
 
-        // A document input confirms that the
-        // document area is actively being used.
-
         state.observedInterface.documentArea =
             true;
 
@@ -16119,7 +16209,7 @@ function handleInput(event) {
 
 
 // =========================================================
-// FINAL VALIDATION
+// FINAL VALIDATION CHECK
 // =========================================================
 
 function checkFinalValidation() {
@@ -16136,25 +16226,20 @@ function checkFinalValidation() {
 
     }
 
-    const count =
-        completedTaskCount();
+    const score =
+        calculateScore();
 
-    if (count !== 4) {
-
-        return;
-
-    }
+    // =====================================================
+    // CRITICAL RULE:
+    //
+    // 75/100 IS ENOUGH.
+    //
+    // DO NOT WAIT FOR 100.
+    // DO NOT WAIT FOR TASK 4.
+    // =====================================================
 
     if (
-
-        !state.tasks.environment ||
-
-        !state.tasks.components ||
-
-        !state.tasks.createDocument ||
-
-        !state.tasks.saveDocument
-
+        score < 75
     ) {
 
         return;
@@ -16173,7 +16258,7 @@ function checkFinalValidation() {
 function completeChapter1() {
 
     // =====================================================
-    // 1. EXISTING CHAPTER COMPLETION ENGINE
+    // 1. EXISTING COMPLETION ENGINE
     // =====================================================
 
     if (
@@ -16195,32 +16280,10 @@ function completeChapter1() {
 
         } catch (error) {}
 
-    } else {
-
-        // Fallback only if engine is unavailable.
-
-        try {
-
-            localStorage.setItem(
-                "word_chapitre1_completed",
-                "true"
-            );
-
-            localStorage.setItem(
-                "wordChapter1Completed",
-                "true"
-            );
-
-        } catch (error) {}
-
     }
-
 
     // =====================================================
     // 2. PROGRESS ENGINE
-    //
-    // Renderer uses unlockedChapters.
-    // Therefore chapitre2 MUST be added there.
     // =====================================================
 
     if (
@@ -16279,6 +16342,10 @@ function completeChapter1() {
 
             }
 
+            // =================================================
+            // CHAPTER 2 UNLOCK
+            // =================================================
+
             if (
                 !progress.unlockedChapters.includes(
                     "chapitre2"
@@ -16299,9 +16366,8 @@ function completeChapter1() {
 
     }
 
-
     // =====================================================
-    // 3. DIRECT UNLOCK FLAG
+    // 3. DIRECT LOCAL STORAGE FLAGS
     // =====================================================
 
     try {
@@ -16323,9 +16389,8 @@ function completeChapter1() {
 
     } catch (error) {}
 
-
     // =====================================================
-    // 4. SYNCHRONIZE COURSE OBJECT
+    // 4. COURSE OBJECT SYNCHRONIZATION
     // =====================================================
 
     try {
@@ -16363,7 +16428,6 @@ function completeChapter1() {
         }
 
     } catch (error) {}
-
 
     // =====================================================
     // 5. RUN UNLOCK ENGINE AGAIN
@@ -16409,13 +16473,20 @@ function validateEvaluationImmediately() {
 
     }
 
+    const score =
+        calculateScore();
+
     if (
-        completedTaskCount() !== 4
+        score < 75
     ) {
 
         return;
 
     }
+
+    // =====================================================
+    // LOCK VALIDATION ONCE ONLY
+    // =====================================================
 
     state.validationStarted =
         true;
@@ -16427,23 +16498,33 @@ function validateEvaluationImmediately() {
         true;
 
     // =====================================================
-    // CHAPTER 1 COMPLETION + CHAPTER 2 UNLOCK
+    // COMPLETE CHAPTER + UNLOCK CHAPTER 2
     // =====================================================
 
     completeChapter1();
+
+    // =====================================================
+    // UPDATE UI IMMEDIATELY
+    // =====================================================
 
     updatePanel();
 
     setStatus(
 
-        "✓ Évaluation réussie. " +
+        "✓ Évaluation réussie — " +
+
+        score +
+
+        "/100. " +
+
         "Chapitre 1 terminé. " +
-        "Chapitre 2 est maintenant déverrouillé."
+
+        "Chapitre 2 déverrouillé."
 
     );
 
     // =====================================================
-    // CLOSE APPEARS ONLY AFTER VALIDATION
+    // CLOSE BUTTON APPEARS IMMEDIATELY
     // =====================================================
 
     if (
@@ -16452,6 +16533,23 @@ function validateEvaluationImmediately() {
 
         state.ui.close.style.display =
             "inline-flex";
+
+    }
+
+    // =====================================================
+    // STOP WAITING FOR BLOCK 9
+    // =====================================================
+
+    if (
+        state.transitionTimer
+    ) {
+
+        clearInterval(
+            state.transitionTimer
+        );
+
+        state.transitionTimer =
+            null;
 
     }
 
@@ -16465,19 +16563,26 @@ function validateEvaluationImmediately() {
 
         "J'ai vérifié votre évaluation du Chapitre 1. " +
 
-        "Vous avez correctement identifié " +
-        "l'environnement et les principaux composants " +
-        "de Microsoft Word 2007. " +
+        "Vous avez obtenu " +
 
-        "Vous avez également créé et enregistré " +
-        "votre document. " +
+        score +
+
+        " points sur 100. " +
 
         "Votre évaluation est réussie. " +
 
-        "Le Chapitre 1 est maintenant terminé " +
-        "et le Chapitre 2 est déverrouillé. " +
+        "Le Chapitre 1 est maintenant terminé. " +
+
+        "Le Chapitre 2 est déverrouillé. " +
 
         "Excellent travail.";
+
+    // =====================================================
+    // IMPORTANT:
+    // AUDIO STARTS IMMEDIATELY.
+    // NO await.
+    // NO DELAY.
+    // =====================================================
 
     speak(message);
 
@@ -16539,7 +16644,7 @@ function removePanel() {
 
 
 // =========================================================
-// LOAD EVALUATION DATA
+// LOAD CHAPTER DATA
 // =========================================================
 
 function loadChapterData() {
@@ -16594,7 +16699,11 @@ function resetState() {
     state.closeEnabled =
         false;
 
-    state.actionHistory = [];
+    state.score =
+        0;
+
+    state.actionHistory =
+        [];
 
     state.observedInterface.titleBar =
         false;
@@ -16644,6 +16753,16 @@ function startBlock10() {
 
     }
 
+    // =====================================================
+    // BLOCK 9 MUST ALREADY BE FINISHED.
+    // =====================================================
+
+    if (!state.block9CompletionDetected) {
+
+        return;
+
+    }
+
     if (
         !connectToSimulation()
     ) {
@@ -16668,9 +16787,6 @@ function startBlock10() {
     state.waitingForBlock9 =
         false;
 
-    state.block9CompletionDetected =
-        true;
-
     createEvaluationPanel();
 
     attachSimulationListeners();
@@ -16679,28 +16795,32 @@ function startBlock10() {
 
     setStatus(
 
-        "0/4 validations. " +
-        "Commencez l’évaluation du Chapitre 1."
+        "0/100 points. " +
+        "Chaque tâche vaut 25 points. " +
+        "75/100 suffisent pour réussir."
 
     );
 
     // =====================================================
-    // INTRODUCTION
+    // RANISE STARTS IMMEDIATELY AFTER BLOCK 9.
     // =====================================================
 
     speak(
 
-        "Très bien. Le devoir est terminé. " +
+        "Très bien. " +
+
+        "Votre devoir est terminé. " +
 
         "Nous passons maintenant à l'évaluation finale " +
         "du Chapitre 1. " +
 
-        "Je vais vérifier vos actions réelles dans " +
-        "la simulation Word 2007. " +
+        "Chaque tâche vaut vingt-cinq points. " +
 
-        "Identifiez les principaux éléments de " +
-        "l'environnement, puis créez et enregistrez " +
-        "un premier document."
+        "Vous devez obtenir au moins soixante-quinze " +
+        "points sur cent pour réussir. " +
+
+        "Je vais vérifier vos actions réelles " +
+        "dans la simulation Word 2007."
 
     );
 
@@ -16729,8 +16849,8 @@ function attachSimulationListeners() {
         state.simulationDocument;
 
     // =====================================================
-    // OBSERVE ONLY
-    // NEVER BLOCK THE SIMULATION
+    // OBSERVE ONLY.
+    // NEVER BLOCK THE SIMULATION.
     // =====================================================
 
     doc.addEventListener(
@@ -16806,9 +16926,7 @@ function checkBlock9Completion() {
     }
 
     // =====================================================
-    // ABSOLUTE CONDITION
-    //
-    // BLOCK 9 FALSE = BLOCK 10 DOES NOTHING.
+    // BLOCK 9 FALSE = NOTHING HAPPENS.
     // =====================================================
 
     if (
@@ -16876,7 +16994,19 @@ state.transitionTimer =
 window.RaniseMoiseEvaluationEngine = {
 
     start:
-        startBlock10,
+        function () {
+
+            if (
+                !state.block9CompletionDetected
+            ) {
+
+                return;
+
+            }
+
+            startBlock10();
+
+        },
 
     getState:
 
@@ -16898,6 +17028,9 @@ window.RaniseMoiseEvaluationEngine = {
 
                 closeEnabled:
                     state.closeEnabled,
+
+                score:
+                    calculateScore(),
 
                 completedTasks:
                     completedTaskCount(),
@@ -16924,6 +17057,62 @@ window.RaniseMoiseEvaluationEngine = {
 };
 
 })();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
