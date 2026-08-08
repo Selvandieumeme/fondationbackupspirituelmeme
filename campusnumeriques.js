@@ -14495,33 +14495,26 @@ window.RaniseMoiseHomeworkMasteryEngine = {
 // =========================================================
 // BLOCK 10
 // MICROSOFT WORD 2007 FORMATION
-// RANISE MOISE EVALUATION MASTERY ENGINE
+// RANISE MOISE EVALUATION & CHAPTER COMPLETION ENGINE
 // =========================================================
-// FINAL CORRECTED VERSION
+// ISOLATED FINAL VERSION
 //
-// PURPOSE:
-// 1. START AUTOMATICALLY ONLY AFTER BLOCK 9 IS COMPLETED.
-// 2. NEVER MODIFY BLOCK 9.
-// 3. NEVER STOP BLOCK 9.
-// 4. NEVER RESET BLOCK 9.
-// 5. NEVER INTERFERE WITH THE SIMULATION ENGINE.
-// 6. USE THE EXISTING WORD 2007 SIMULATION.
-// 7. READ CHAPTER 1 EVALUATION DYNAMICALLY.
-// 8. TASK 1 = 25 POINTS.
-// 9. TASK 2 = 25 POINTS.
-// 10. TASK 3 = 50 POINTS.
-// 11. TOTAL = 100 POINTS.
-// 12. PASS MARK = 75/100.
-// 13. DETECT REAL STUDENT ACTIONS.
-// 14. ONE GREEN CHECK FOR EACH VALIDATED TASK.
-// 15. VALIDATE IMMEDIATELY WHEN SCORE >= 75.
-// 16. USE EXISTING MARYTTS + RANISE AVATAR.
-// 17. NO PIPER.
-// 18. SMALL MOBILE-FRIENDLY PANEL.
-// 19. PANEL IS DRAGGABLE.
-// 20. PANEL HAS MANUAL CLOSE BUTTON.
-// 21. AFTER SUCCESS CHAPTER 1 IS COMPLETED.
-// 22. AFTER SUCCESS CHAPTER 2 IS UNLOCKED.
+// IMPORTANT:
+// 1. BLOCK 10 WAITS FOR BLOCK 9.
+// 2. BLOCK 10 STARTS ONLY WHEN BLOCK 9.completed === true.
+// 3. BLOCK 10 NEVER MODIFIES BLOCK 9.
+// 4. BLOCK 10 NEVER MODIFIES BLOCK 8.
+// 5. BLOCK 10 NEVER MODIFIES BLOCK 7.
+// 6. BLOCK 10 NEVER MODIFIES BLOCK 6.
+// 7. BLOCK 10 DOES NOT MODIFY THE SIMULATION ENGINE.
+// 8. BLOCK 10 USES THE EXISTING MARYTTS + AVATAR SYSTEM.
+// 9. BLOCK 10 VALIDATES THE CHAPTER 1 EVALUATION.
+// 10. THE EVALUATION PANEL IS SMALL, RESPONSIVE AND DRAGGABLE.
+// 11. THE CLOSE BUTTON APPEARS ONLY AFTER FINAL VALIDATION.
+// 12. AFTER FINAL VALIDATION CHAPTER 1 IS COMPLETED.
+// 13. AFTER FINAL VALIDATION CHAPTER 2 IS UNLOCKED.
+// 14. BLOCK 10 SYNCHRONIZES BOTH PROGRESS SYSTEMS.
+// 15. BLOCK 10 NEVER UNLOCKS CHAPTER 2 BEFORE SUCCESS.
 // =========================================================
 
 (function () {
@@ -14538,7 +14531,9 @@ const state = {
 
     completed: false,
 
-    transitionDetected: false,
+    waitingForBlock9: true,
+
+    block9CompletionDetected: false,
 
     simulationFrame: null,
 
@@ -14548,81 +14543,17 @@ const state = {
 
     evaluation: [],
 
-    waitingForStudent: false,
-
-    processing: false,
-
-    speaking: false,
-
     listenersAttached: false,
-
-    observerAttached: false,
-
-    mutationObserver: null,
-
-    validationTimer: null,
-
-    monitorTimer: null,
 
     transitionTimer: null,
 
-    lastDocumentSignature: "",
+    validationStarted: false,
 
-    lastValidationSignature: "",
-
-    lastActionTime: 0,
+    closeEnabled: false,
 
     actionHistory: [],
 
-
-    // =====================================================
-    // REAL EVIDENCE
-    // =====================================================
-
-    evidence: {
-
-        environmentDescription: {
-
-            titleBar: false,
-
-            officeButton: false,
-
-            ribbon: false,
-
-            tabs: false,
-
-            documentArea: false
-
-        },
-
-
-        interfaceComponents: {
-
-            titleBar: false,
-
-            officeButton: false,
-
-            ribbon: false,
-
-            tabs: false,
-
-            documentArea: false
-
-        },
-
-
-        documentCreation: false,
-
-        documentSave: false,
-
-        documentTextEntered: false
-
-    },
-
-
-    // =====================================================
-    // THREE EVALUATION TASKS
-    // =====================================================
+    lastActionTime: 0,
 
     tasks: {
 
@@ -14630,33 +14561,25 @@ const state = {
 
         components: false,
 
-        createAndSave: false
+        createDocument: false,
+
+        saveDocument: false
 
     },
 
+    observedInterface: {
 
-    // =====================================================
-    // SCORE
-    // =====================================================
+        titleBar: false,
 
-    score: {
+        officeButton: false,
 
-        environment: 0,
+        ribbon: false,
 
-        components: 0,
+        tabs: false,
 
-        createAndSave: 0,
-
-        total: 0,
-
-        passed: false
+        documentArea: false
 
     },
-
-
-    // =====================================================
-    // UI
-    // =====================================================
 
     ui: {
 
@@ -14672,7 +14595,7 @@ const state = {
 
         status: null,
 
-        details: null
+        tasks: null
 
     }
 
@@ -14717,78 +14640,7 @@ function normalize(value) {
 
 
 // =========================================================
-// SPEAK
-// EXISTING MARYTTS ONLY
-// =========================================================
-
-async function speak(text) {
-
-    if (!text) {
-
-        return;
-
-    }
-
-
-    state.speaking = true;
-
-
-    if (
-        typeof raniseStartTalking ===
-        "function"
-    ) {
-
-        try {
-
-            raniseStartTalking();
-
-        } catch (error) {}
-
-    }
-
-
-    try {
-
-        if (
-            typeof speakProfessorIAWithMaryTTS ===
-            "function"
-        ) {
-
-            await speakProfessorIAWithMaryTTS(
-                text
-            );
-
-        }
-
-    } catch (error) {
-
-        // MaryTTS failure must never break Block 10.
-
-    } finally {
-
-        state.speaking = false;
-
-
-        if (
-            typeof raniseStopTalking ===
-            "function"
-        ) {
-
-            try {
-
-                raniseStopTalking();
-
-            } catch (error) {}
-
-        }
-
-    }
-
-}
-
-
-// =========================================================
-// GET CHAPTER 1
+// CHAPTER 1
 // =========================================================
 
 function getChapter1() {
@@ -14802,7 +14654,6 @@ function getChapter1() {
 
     }
 
-
     if (
         !Array.isArray(
             microsoftWordCourse.chapters
@@ -14813,15 +14664,13 @@ function getChapter1() {
 
     }
 
-
     return microsoftWordCourse.chapters.find(
 
         chapter =>
 
             chapter &&
 
-            chapter.id ===
-            "chapitre1"
+            chapter.id === "chapitre1"
 
     ) || null;
 
@@ -14829,7 +14678,7 @@ function getChapter1() {
 
 
 // =========================================================
-// FIND SIMULATION
+// FIND EXISTING SIMULATION
 // =========================================================
 
 function findSimulation() {
@@ -14840,13 +14689,11 @@ function findSimulation() {
             "campusContent"
         );
 
-
     if (!campusContent) {
 
         return null;
 
     }
-
 
     return campusContent.querySelector(
 
@@ -14866,13 +14713,11 @@ function connectToSimulation() {
     const frame =
         findSimulation();
 
-
     if (!frame) {
 
         return false;
 
     }
-
 
     try {
 
@@ -14882,20 +14727,17 @@ function connectToSimulation() {
 
             frame.contentWindow.document;
 
-
         if (!doc) {
 
             return false;
 
         }
 
-
         state.simulationFrame =
             frame;
 
         state.simulationDocument =
             doc;
-
 
         return true;
 
@@ -14909,248 +14751,85 @@ function connectToSimulation() {
 
 
 // =========================================================
-// GET PAGE CONTENTS
+// SPEAK
 // =========================================================
 
-function getPageContents() {
+function speak(text) {
 
-    if (
-        !state.simulationDocument
-    ) {
-
-        return [];
-
-    }
-
-
-    return Array.from(
-
-        state.simulationDocument.querySelectorAll(
-
-            ".cwPageContent"
-
-        )
-
-    );
-
-}
-
-
-// =========================================================
-// READ DOCUMENT TEXT
-// =========================================================
-
-function readDocumentText() {
-
-    const pages =
-        getPageContents();
-
-
-    if (!pages.length) {
-
-        return "";
-
-    }
-
-
-    let output = "";
-
-
-    pages.forEach(
-
-        page => {
-
-            output +=
-
-                " " +
-
-                (
-
-                    page.innerText ||
-
-                    page.textContent ||
-
-                    ""
-
-                );
-
-        }
-
-    );
-
-
-    return output
-
-        .replace(
-            /\u00a0/g,
-            " "
-        )
-
-        .replace(
-            /\s+/g,
-            " "
-        )
-
-        .trim();
-
-}
-
-
-// =========================================================
-// DOCUMENT SIGNATURE
-// =========================================================
-
-function getDocumentSignature() {
-
-    const text =
-        readDocumentText();
-
-
-    const pages =
-        getPageContents();
-
-
-    return [
-
-        pages.length,
-
-        text.length,
-
-        normalize(text)
-
-    ].join("|");
-
-}
-
-
-// =========================================================
-// RECORD ACTION
-// =========================================================
-
-function recordAction(action) {
-
-    if (!action) {
+    if (!text) {
 
         return;
 
     }
 
-
-    state.lastActionTime =
-        Date.now();
-
-
-    state.actionHistory.push({
-
-        action:
-            action,
-
-        timestamp:
-            Date.now()
-
-    });
-
-
-    if (
-        state.actionHistory.length >
-        500
-    ) {
-
-        state.actionHistory.shift();
-
-    }
-
-}
-
-
-// =========================================================
-// ELEMENT TEXT
-// =========================================================
-
-function getElementText(element) {
-
-    if (!element) {
-
-        return "";
-
-    }
-
-
-    return normalize(
-
-        (
-
-            element.innerText ||
-
-            element.textContent ||
-
-            ""
-
-        ) +
-
-        " " +
-
-        (
-
-            element.getAttribute?.(
-                "aria-label"
-            ) ||
-
-            ""
-
-        ) +
-
-        " " +
-
-        (
-
-            element.getAttribute?.(
-                "title"
-            ) ||
-
-            ""
-
-        )
-
-    );
-
-}
-
-
-// =========================================================
-// CLOSEST
-// =========================================================
-
-function closestFromTarget(
-    target,
-    selector
-) {
-
-    if (
-
-        !target ||
-
-        !selector ||
-
-        typeof target.closest !==
-        "function"
-
-    ) {
-
-        return null;
-
-    }
-
-
     try {
 
-        return target.closest(
-            selector
-        );
+        if (
+            typeof raniseStartTalking ===
+            "function"
+        ) {
+
+            raniseStartTalking();
+
+        }
+
+        if (
+            typeof speakProfessorIAWithMaryTTS ===
+            "function"
+        ) {
+
+            Promise.resolve(
+
+                speakProfessorIAWithMaryTTS(
+                    text
+                )
+
+            )
+
+            .catch(
+                function () {}
+            )
+
+            .finally(
+
+                function () {
+
+                    if (
+                        typeof raniseStopTalking ===
+                        "function"
+                    ) {
+
+                        raniseStopTalking();
+
+                    }
+
+                }
+
+            );
+
+        } else {
+
+            if (
+                typeof raniseStopTalking ===
+                "function"
+            ) {
+
+                raniseStopTalking();
+
+            }
+
+        }
 
     } catch (error) {
 
-        return null;
+        if (
+            typeof raniseStopTalking ===
+            "function"
+        ) {
+
+            raniseStopTalking();
+
+        }
 
     }
 
@@ -15158,313 +14837,50 @@ function closestFromTarget(
 
 
 // =========================================================
-// IDENTIFY REAL SIMULATION AREA
+// COMPLETED TASK COUNT
 // =========================================================
 
-function identifySimulationTask(target) {
-
-    if (!target) {
-
-        return null;
-
-    }
-
-
-    let current =
-        target;
-
-
-    for (
-        let level = 0;
-        level < 8 && current;
-        level++
-    ) {
-
-        const className =
-
-            typeof current.className ===
-            "string"
-
-                ? normalize(
-                    current.className
-                )
-
-                : "";
-
-
-        const id = normalize(
-
-            current.id ||
-
-            ""
-
-        );
-
-
-        const aria = normalize(
-
-            current.getAttribute?.(
-                "aria-label"
-            ) ||
-
-            ""
-
-        );
-
-
-        const title = normalize(
-
-            current.getAttribute?.(
-                "title"
-            ) ||
-
-            ""
-
-        );
-
-
-        const dataRole = normalize(
-
-            current.getAttribute?.(
-                "data-role"
-            ) ||
-
-            ""
-
-        );
-
-
-        const dataAction = normalize(
-
-            current.getAttribute?.(
-                "data-action"
-            ) ||
-
-            ""
-
-        );
-
-
-        const dataCommand = normalize(
-
-            current.getAttribute?.(
-                "data-command"
-            ) ||
-
-            ""
-
-        );
-
-
-        const combined =
-
-            className +
-
-            " " +
-
-            id +
-
-            " " +
-
-            aria +
-
-            " " +
-
-            title +
-
-            " " +
-
-            dataRole +
-
-            " " +
-
-            dataAction +
-
-            " " +
-
-            dataCommand;
-
-
-        // =================================================
-        // TITLE BAR
-        // =================================================
-
-        if (
-
-            current.matches?.(
-                ".cwTitleBar"
-            ) ||
-
-            combined.includes(
-                "titlebar"
-            ) ||
-
-            combined.includes(
-                "title bar"
-            ) ||
-
-            combined.includes(
-                "barretitre"
-            ) ||
-
-            combined.includes(
-                "barre titre"
-            )
-
-        ) {
-
-            return "titleBar";
-
-        }
-
-
-        // =================================================
-        // OFFICE BUTTON
-        // =================================================
-
-        if (
-
-            current.matches?.(
-                ".cwOfficeButton"
-            ) ||
-
-            dataRole ===
-            "office-button" ||
-
-            combined.includes(
-                "officebutton"
-            ) ||
-
-            combined.includes(
-                "office button"
-            )
-
-        ) {
-
-            return "officeButton";
-
-        }
-
-
-        // =================================================
-        // RIBBON
-        // =================================================
-
-        if (
-
-            current.matches?.(
-                ".cwRibbon"
-            ) ||
-
-            current.matches?.(
-                ".cwRibbonPanel"
-            ) ||
-
-            current.matches?.(
-                ".cwRibbonGroup"
-            ) ||
-
-            combined.includes(
-                "ribbon"
-            ) ||
-
-            combined.includes(
-                "ruban"
-            )
-
-        ) {
-
-            return "ribbon";
-
-        }
-
-
-        // =================================================
-        // TABS
-        // =================================================
-
-        if (
-
-            current.matches?.(
-                ".cwTabBtn"
-            ) ||
-
-            combined.includes(
-                "tabbtn"
-            ) ||
-
-            combined.includes(
-                "tab btn"
-            ) ||
-
-            combined.includes(
-                "ribbontab"
-            ) ||
-
-            combined.includes(
-                "onglet"
-            )
-
-        ) {
-
-            return "tabs";
-
-        }
-
-
-        // =================================================
-        // DOCUMENT AREA
-        // =================================================
-
-        if (
-
-            current.matches?.(
-                ".cwPageContent"
-            ) ||
-
-            current.matches?.(
-                ".cwPage"
-            ) ||
-
-            current.matches?.(
-                ".cwDocument"
-            ) ||
-
-            current.matches?.(
-                ".cwDocumentArea"
-            ) ||
-
-            current.matches?.(
-                ".cwEditor"
-            ) ||
-
-            current.matches?.(
-                '[contenteditable="true"]'
-            )
-
-        ) {
-
-            return "documentArea";
-
-        }
-
-
-        current =
-            current.parentElement;
-
-    }
-
-
-    return null;
+function completedTaskCount() {
+
+    return Object.values(
+        state.tasks
+    ).filter(Boolean).length;
 
 }
 
 
 // =========================================================
-// CREATE PANEL
+// TASK LABEL
 // =========================================================
 
-function createEvaluationUI() {
+function taskLabel(task) {
+
+    const labels = {
+
+        environment:
+            "Environnement Word 2007",
+
+        components:
+            "Composants de l’interface",
+
+        createDocument:
+            "Créer un document",
+
+        saveDocument:
+            "Enregistrer le document"
+
+    };
+
+    return labels[task] || task;
+
+}
+
+
+// =========================================================
+// CREATE EVALUATION PANEL
+// =========================================================
+
+function createEvaluationPanel() {
 
     if (
 
@@ -15478,83 +14894,36 @@ function createEvaluationUI() {
 
     }
 
-
     const doc =
         state.simulationDocument;
-
 
     const root =
         doc.createElement("div");
 
-
     root.id =
         "raniseBlock10EvaluationPanel";
 
+    root.style.cssText =
 
-    // =====================================================
-    // SMALL MOBILE PANEL
-    // =====================================================
-
-    root.style.position =
-        "fixed";
-
-    root.style.top =
-        "10px";
-
-    root.style.right =
-        "10px";
-
-    root.style.left =
-        "auto";
-
-    root.style.width =
-        "min(310px, calc(100vw - 20px))";
-
-    root.style.maxWidth =
-        "calc(100vw - 20px)";
-
-    root.style.maxHeight =
-        "calc(100vh - 20px)";
-
-    root.style.overflowY =
-        "auto";
-
-    root.style.boxSizing =
-        "border-box";
-
-    root.style.padding =
-        "9px";
-
-    root.style.background =
-        "rgba(255,255,255,0.97)";
-
-    root.style.border =
-        "2px solid #1f4e79";
-
-    root.style.borderRadius =
-        "10px";
-
-    root.style.boxShadow =
-        "0 6px 24px rgba(0,0,0,0.22)";
-
-    root.style.zIndex =
-        "2147483640";
-
-    root.style.fontFamily =
-        "Arial,sans-serif";
-
-    root.style.fontSize =
-        "12px";
-
-    root.style.lineHeight =
-        "1.35";
-
-    root.style.userSelect =
-        "none";
-
-    root.style.webkitUserSelect =
-        "none";
-
+        "position:fixed;" +
+        "top:12px;" +
+        "right:12px;" +
+        "width:min(330px,calc(100vw - 24px));" +
+        "max-width:calc(100vw - 24px);" +
+        "max-height:calc(100vh - 24px);" +
+        "overflow:auto;" +
+        "z-index:2147483640;" +
+        "background:rgba(255,255,255,.97);" +
+        "border:2px solid #1f4e79;" +
+        "border-radius:12px;" +
+        "box-shadow:0 8px 30px rgba(0,0,0,.25);" +
+        "padding:12px;" +
+        "font-family:Arial,sans-serif;" +
+        "font-size:13px;" +
+        "line-height:1.4;" +
+        "box-sizing:border-box;" +
+        "user-select:none;" +
+        "-webkit-user-select:none;";
 
     // =====================================================
     // HEADER
@@ -15563,58 +14932,34 @@ function createEvaluationUI() {
     const header =
         doc.createElement("div");
 
+    header.style.cssText =
 
-    header.style.display =
-        "flex";
-
-    header.style.alignItems =
-        "center";
-
-    header.style.justifyContent =
-        "space-between";
-
-    header.style.gap =
-        "6px";
-
-    header.style.marginBottom =
-        "6px";
-
-
-    // =====================================================
-    // TITLE
-    // =====================================================
+        "display:flex;" +
+        "align-items:center;" +
+        "justify-content:space-between;" +
+        "gap:8px;" +
+        "margin-bottom:7px;";
 
     const title =
         doc.createElement("div");
 
-
     title.textContent =
         "Ranise Moïse — Évaluation";
 
+    title.style.cssText =
 
-    title.style.fontWeight =
-        "700";
-
-    title.style.fontSize =
-        "14px";
-
-    title.style.cursor =
-        "grab";
-
-    title.style.touchAction =
-        "none";
-
-    title.style.flex =
-        "1";
-
+        "font-weight:700;" +
+        "font-size:15px;" +
+        "cursor:grab;" +
+        "touch-action:none;" +
+        "flex:1;";
 
     // =====================================================
-    // CLOSE BUTTON
+    // CLOSE
     // =====================================================
 
     const close =
         doc.createElement("button");
-
 
     close.type =
         "button";
@@ -15622,51 +14967,28 @@ function createEvaluationUI() {
     close.textContent =
         "×";
 
-    close.setAttribute(
-        "aria-label",
-        "Fermer"
-    );
-
     close.title =
         "Fermer";
 
+    close.setAttribute(
+        "aria-label",
+        "Fermer l'évaluation"
+    );
 
-    close.style.width =
-        "25px";
+    close.style.cssText =
 
-    close.style.height =
-        "25px";
-
-    close.style.minWidth =
-        "25px";
-
-    close.style.padding =
-        "0";
-
-    close.style.border =
-        "none";
-
-    close.style.borderRadius =
-        "50%";
-
-    close.style.background =
-        "#e9eef2";
-
-    close.style.color =
-        "#333";
-
-    close.style.fontSize =
-        "19px";
-
-    close.style.fontWeight =
-        "700";
-
-    close.style.lineHeight =
-        "25px";
-
-    close.style.cursor =
-        "pointer";
-
+        "width:26px;" +
+        "height:26px;" +
+        "border:0;" +
+        "border-radius:50%;" +
+        "background:#e9eef2;" +
+        "color:#52616b;" +
+        "font-size:20px;" +
+        "font-weight:700;" +
+        "line-height:24px;" +
+        "padding:0;" +
+        "cursor:pointer;" +
+        "display:none;";
 
     close.addEventListener(
 
@@ -15678,7 +15000,15 @@ function createEvaluationUI() {
 
             event.stopPropagation();
 
-            removeEvaluationPanel();
+            if (
+                !state.closeEnabled
+            ) {
+
+                return;
+
+            }
+
+            removePanel();
 
         },
 
@@ -15686,11 +15016,9 @@ function createEvaluationUI() {
 
     );
 
-
     header.appendChild(title);
 
     header.appendChild(close);
-
 
     // =====================================================
     // PROGRESS
@@ -15699,13 +15027,10 @@ function createEvaluationUI() {
     const progress =
         doc.createElement("div");
 
+    progress.style.cssText =
 
-    progress.style.fontWeight =
-        "700";
-
-    progress.style.marginBottom =
-        "6px";
-
+        "font-weight:700;" +
+        "margin-bottom:7px;";
 
     // =====================================================
     // INSTRUCTION
@@ -15714,10 +15039,14 @@ function createEvaluationUI() {
     const instruction =
         doc.createElement("div");
 
+    instruction.style.cssText =
 
-    instruction.style.marginBottom =
-        "6px";
+        "margin-bottom:8px;";
 
+    instruction.textContent =
+
+        "Réalisez l’évaluation du Chapitre 1. " +
+        "Ranise vérifiera vos actions réelles.";
 
     // =====================================================
     // STATUS
@@ -15726,34 +15055,19 @@ function createEvaluationUI() {
     const status =
         doc.createElement("div");
 
+    status.style.cssText =
 
-    status.style.padding =
-        "6px";
-
-    status.style.borderRadius =
-        "6px";
-
-    status.style.background =
-        "#eef4f8";
-
-    status.style.marginBottom =
-        "6px";
-
+        "padding:7px;" +
+        "border-radius:7px;" +
+        "background:#eef4f8;" +
+        "margin-bottom:8px;";
 
     // =====================================================
-    // DETAILS
+    // TASKS
     // =====================================================
 
-    const details =
+    const tasks =
         doc.createElement("div");
-
-
-    details.style.fontSize =
-        "11px";
-
-    details.style.lineHeight =
-        "1.3";
-
 
     root.appendChild(header);
 
@@ -15763,14 +15077,12 @@ function createEvaluationUI() {
 
     root.appendChild(status);
 
-    root.appendChild(details);
-
+    root.appendChild(tasks);
 
     (
         doc.body ||
         doc.documentElement
     ).appendChild(root);
-
 
     state.ui.root =
         root;
@@ -15790,389 +15102,12 @@ function createEvaluationUI() {
     state.ui.status =
         status;
 
-    state.ui.details =
-        details;
+    state.ui.tasks =
+        tasks;
 
+    enableDragging();
 
-    enableEvaluationPanelDragging();
-
-}
-
-
-// =========================================================
-// DRAG PANEL
-// =========================================================
-
-function enableEvaluationPanelDragging() {
-
-    if (
-
-        !state.ui.root ||
-
-        !state.ui.title
-
-    ) {
-
-        return;
-
-    }
-
-
-    const panel =
-        state.ui.root;
-
-    const handle =
-        state.ui.title;
-
-
-    let dragging =
-        false;
-
-    let pointerId =
-        null;
-
-    let offsetX =
-        0;
-
-    let offsetY =
-        0;
-
-
-    function getViewportWidth() {
-
-        return (
-
-            state.simulationDocument
-                ?.documentElement
-                ?.clientWidth
-
-            ||
-
-            window.innerWidth
-
-        );
-
-    }
-
-
-    function getViewportHeight() {
-
-        return (
-
-            state.simulationDocument
-                ?.documentElement
-                ?.clientHeight
-
-            ||
-
-            window.innerHeight
-
-        );
-
-    }
-
-
-    function clamp(left, top) {
-
-        const width =
-            getViewportWidth();
-
-        const height =
-            getViewportHeight();
-
-        const panelWidth =
-            panel.offsetWidth;
-
-        const panelHeight =
-            panel.offsetHeight;
-
-
-        return {
-
-            left:
-
-                Math.max(
-
-                    0,
-
-                    Math.min(
-
-                        left,
-
-                        Math.max(
-
-                            0,
-
-                            width -
-                            panelWidth
-
-                        )
-
-                    )
-
-                ),
-
-
-            top:
-
-                Math.max(
-
-                    0,
-
-                    Math.min(
-
-                        top,
-
-                        Math.max(
-
-                            0,
-
-                            height -
-                            panelHeight
-
-                        )
-
-                    )
-
-                )
-
-        };
-
-    }
-
-
-    function startDrag(event) {
-
-        if (!event) {
-
-            return;
-
-        }
-
-
-        if (
-
-            event.pointerType ===
-            "mouse" &&
-
-            event.button !== 0
-
-        ) {
-
-            return;
-
-        }
-
-
-        const rect =
-            panel.getBoundingClientRect();
-
-
-        dragging =
-            true;
-
-
-        pointerId =
-            event.pointerId;
-
-
-        offsetX =
-            event.clientX -
-            rect.left;
-
-
-        offsetY =
-            event.clientY -
-            rect.top;
-
-
-        handle.style.cursor =
-            "grabbing";
-
-
-        try {
-
-            if (
-                handle.setPointerCapture
-            ) {
-
-                handle.setPointerCapture(
-                    event.pointerId
-                );
-
-            }
-
-        } catch (error) {}
-
-
-        event.preventDefault();
-
-    }
-
-
-    function moveDrag(event) {
-
-        if (
-
-            !dragging ||
-
-            !event
-
-        ) {
-
-            return;
-
-        }
-
-
-        if (
-
-            pointerId !== null &&
-
-            event.pointerId !==
-            pointerId
-
-        ) {
-
-            return;
-
-        }
-
-
-        const position =
-            clamp(
-
-                event.clientX -
-                offsetX,
-
-                event.clientY -
-                offsetY
-
-            );
-
-
-        panel.style.left =
-            position.left + "px";
-
-        panel.style.top =
-            position.top + "px";
-
-        panel.style.right =
-            "auto";
-
-
-        event.preventDefault();
-
-    }
-
-
-    function stopDrag(event) {
-
-        if (!dragging) {
-
-            return;
-
-        }
-
-
-        if (
-
-            event &&
-
-            pointerId !== null &&
-
-            event.pointerId !==
-            pointerId
-
-        ) {
-
-            return;
-
-        }
-
-
-        dragging =
-            false;
-
-        pointerId =
-            null;
-
-
-        handle.style.cursor =
-            "grab";
-
-    }
-
-
-    handle.addEventListener(
-        "pointerdown",
-        startDrag,
-        true
-    );
-
-
-    handle.addEventListener(
-        "pointermove",
-        moveDrag,
-        true
-    );
-
-
-    handle.addEventListener(
-        "pointerup",
-        stopDrag,
-        true
-    );
-
-
-    handle.addEventListener(
-        "pointercancel",
-        stopDrag,
-        true
-    );
-
-}
-
-
-// =========================================================
-// UPDATE SCORE
-// =========================================================
-
-function updateScore() {
-
-    state.score.environment =
-
-        state.tasks.environment
-            ? 25
-            : 0;
-
-
-    state.score.components =
-
-        state.tasks.components
-            ? 25
-            : 0;
-
-
-    state.score.createAndSave =
-
-        state.tasks.createAndSave
-            ? 50
-            : 0;
-
-
-    state.score.total =
-
-        state.score.environment +
-
-        state.score.components +
-
-        state.score.createAndSave;
-
-
-    state.score.passed =
-
-        state.score.total >= 75;
+    updatePanel();
 
 }
 
@@ -16181,7 +15116,7 @@ function updateScore() {
 // UPDATE PANEL
 // =========================================================
 
-function updateEvaluationUI() {
+function updatePanel() {
 
     if (!state.ui.root) {
 
@@ -16189,125 +15124,75 @@ function updateEvaluationUI() {
 
     }
 
+    const count =
+        completedTaskCount();
 
-    updateScore();
-
+    const total =
+        Object.keys(
+            state.tasks
+        ).length;
 
     state.ui.progress.textContent =
 
-        "Évaluation : " +
+        "Évaluation — Chapitre 1 — " +
 
-        state.score.total +
+        count +
 
-        "/100";
+        "/" +
 
+        total +
 
-    state.ui.instruction.textContent =
+        " validations";
 
-        "Objectif : obtenir au moins 75/100.";
+    const taskNames = [
 
+        "environment",
 
-    const taskRows = [
+        "components",
 
-        {
+        "createDocument",
 
-            key:
-                "environment",
-
-            label:
-                "Décrire l’environnement général",
-
-            points:
-                25
-
-        },
-
-        {
-
-            key:
-                "components",
-
-            label:
-                "Identifier les composants",
-
-            points:
-                25
-
-        },
-
-        {
-
-            key:
-                "createAndSave",
-
-            label:
-                "Créer et enregistrer un document",
-
-            points:
-                50
-
-        }
+        "saveDocument"
 
     ];
 
-
     let html = "";
 
-
-    taskRows.forEach(
+    taskNames.forEach(
 
         task => {
 
             const checked =
-                state.tasks[task.key];
-
+                state.tasks[task];
 
             html +=
 
                 "<div style=\"" +
 
                 "display:flex;" +
-
                 "align-items:center;" +
-
-                "gap:6px;" +
-
-                "margin:4px 0;" +
+                "gap:8px;" +
+                "margin:5px 0;" +
 
                 "\">" +
-
 
                 "<span style=\"" +
 
                 "display:inline-flex;" +
-
                 "align-items:center;" +
-
                 "justify-content:center;" +
-
-                "width:19px;" +
-
-                "height:19px;" +
-
-                "min-width:19px;" +
-
+                "width:21px;" +
+                "height:21px;" +
                 "border-radius:50%;" +
-
                 "font-weight:700;" +
-
-                "font-size:13px;" +
 
                 (
 
                     checked
 
-                        ?
+                        ? "background:#16a34a;color:white;"
 
-                    "background:#2e7d32;color:#fff;"
-
-                        :
-
-                    "background:#e8edf1;color:#71808c;"
+                        : "background:#e8edf1;color:#74808a;"
 
                 ) +
 
@@ -16316,35 +15201,18 @@ function updateEvaluationUI() {
                 (
 
                     checked
-
-                        ?
-
-                    "✓"
-
-                        :
-
-                    "○"
+                        ? "✓"
+                        : "○"
 
                 ) +
 
                 "</span>" +
 
+                "<span>" +
 
-                "<span style=\"flex:1\">" +
-
-                task.label +
+                taskLabel(task) +
 
                 "</span>" +
-
-
-                "<strong>" +
-
-                task.points +
-
-                " pts" +
-
-                "</strong>" +
-
 
                 "</div>";
 
@@ -16352,47 +15220,8 @@ function updateEvaluationUI() {
 
     );
 
-
-    state.ui.details.innerHTML =
+    state.ui.tasks.innerHTML =
         html;
-
-
-    if (
-        state.score.passed
-    ) {
-
-        setStatus(
-
-            "✓ " +
-
-            state.score.total +
-
-            "/100 — Évaluation validée."
-
-        );
-
-    } else {
-
-        const missing =
-            Math.max(
-                0,
-                75 - state.score.total
-            );
-
-
-        setStatus(
-
-            state.score.total +
-
-            "/100 — " +
-
-            missing +
-
-            " points nécessaires."
-
-        );
-
-    }
 
 }
 
@@ -16416,240 +15245,255 @@ function setStatus(message) {
 
 
 // =========================================================
-// ENVIRONMENT EVIDENCE
+// DRAG PANEL
 // =========================================================
 
-function registerEnvironmentEvidence(task) {
+function enableDragging() {
 
-    if (!task) {
+    if (
+
+        !state.ui.root ||
+
+        !state.ui.title
+
+    ) {
 
         return;
 
     }
 
+    const panel =
+        state.ui.root;
 
-    if (
-        task === "titleBar"
-    ) {
+    const handle =
+        state.ui.title;
 
-        state.evidence.environmentDescription.titleBar =
-            true;
+    let dragging = false;
 
-        state.evidence.interfaceComponents.titleBar =
-            true;
+    let pointerId = null;
+
+    let offsetX = 0;
+
+    let offsetY = 0;
+
+    handle.addEventListener(
+
+        "pointerdown",
+
+        function (event) {
+
+            if (
+
+                event.pointerType === "mouse" &&
+
+                event.button !== 0
+
+            ) {
+
+                return;
+
+            }
+
+            const rect =
+                panel.getBoundingClientRect();
+
+            dragging = true;
+
+            pointerId =
+                event.pointerId;
+
+            offsetX =
+                event.clientX -
+                rect.left;
+
+            offsetY =
+                event.clientY -
+                rect.top;
+
+            handle.style.cursor =
+                "grabbing";
+
+            try {
+
+                handle.setPointerCapture(
+                    event.pointerId
+                );
+
+            } catch (error) {}
+
+            event.preventDefault();
+
+        },
+
+        true
+
+    );
+
+    handle.addEventListener(
+
+        "pointermove",
+
+        function (event) {
+
+            if (
+
+                !dragging ||
+
+                event.pointerId !== pointerId
+
+            ) {
+
+                return;
+
+            }
+
+            const doc =
+                state.simulationDocument;
+
+            const width =
+
+                doc?.documentElement?.clientWidth ||
+
+                window.innerWidth;
+
+            const height =
+
+                doc?.documentElement?.clientHeight ||
+
+                window.innerHeight;
+
+            const rect =
+                panel.getBoundingClientRect();
+
+            const left = Math.max(
+
+                0,
+
+                Math.min(
+
+                    event.clientX -
+                    offsetX,
+
+                    Math.max(
+                        0,
+                        width -
+                        rect.width
+                    )
+
+                )
+
+            );
+
+            const top = Math.max(
+
+                0,
+
+                Math.min(
+
+                    event.clientY -
+                    offsetY,
+
+                    Math.max(
+                        0,
+                        height -
+                        rect.height
+                    )
+
+                )
+
+            );
+
+            panel.style.left =
+                left + "px";
+
+            panel.style.top =
+                top + "px";
+
+            panel.style.right =
+                "auto";
+
+            event.preventDefault();
+
+        },
+
+        true
+
+    );
+
+    function stopDrag(event) {
+
+        if (
+
+            !dragging ||
+
+            (
+
+                event &&
+
+                event.pointerId !== pointerId
+
+            )
+
+        ) {
+
+            return;
+
+        }
+
+        dragging = false;
+
+        pointerId = null;
+
+        handle.style.cursor =
+            "grab";
 
     }
 
-
-    if (
-        task === "officeButton"
-    ) {
-
-        state.evidence.environmentDescription.officeButton =
-            true;
-
-        state.evidence.interfaceComponents.officeButton =
-            true;
-
-    }
-
-
-    if (
-        task === "ribbon"
-    ) {
-
-        state.evidence.environmentDescription.ribbon =
-            true;
-
-        state.evidence.interfaceComponents.ribbon =
-            true;
-
-    }
-
-
-    if (
-        task === "tabs"
-    ) {
-
-        state.evidence.environmentDescription.tabs =
-            true;
-
-        state.evidence.interfaceComponents.tabs =
-            true;
-
-    }
-
-
-    if (
-        task === "documentArea"
-    ) {
-
-        state.evidence.environmentDescription.documentArea =
-            true;
-
-        state.evidence.interfaceComponents.documentArea =
-            true;
-
-    }
-
-}
-
-
-// =========================================================
-// CHECK ENVIRONMENT TASK
-// =========================================================
-
-function validateEnvironmentTask() {
-
-    const evidence =
-        state.evidence.environmentDescription;
-
-
-    const count = [
-
-        evidence.titleBar,
-
-        evidence.officeButton,
-
-        evidence.ribbon,
-
-        evidence.tabs,
-
-        evidence.documentArea
-
-    ].filter(Boolean).length;
-
-
-    return count >= 5;
-
-}
-
-
-// =========================================================
-// CHECK COMPONENT TASK
-// =========================================================
-
-function validateComponentsTask() {
-
-    const evidence =
-        state.evidence.interfaceComponents;
-
-
-    const count = [
-
-        evidence.titleBar,
-
-        evidence.officeButton,
-
-        evidence.ribbon,
-
-        evidence.tabs,
-
-        evidence.documentArea
-
-    ].filter(Boolean).length;
-
-
-    return count >= 5;
-
-}
-
-
-// =========================================================
-// DOCUMENT CREATION EVIDENCE
-// =========================================================
-
-function registerDocumentInteraction(target) {
-
-    if (!target) {
-
-        return;
-
-    }
-
-
-    const page =
-        closestFromTarget(
-
-            target,
-
-            ".cwPageContent"
-
-        );
-
-
-    if (!page) {
-
-        return;
-
-    }
-
-
-    state.evidence.documentCreation =
-        true;
-
-
-    recordAction(
-        "document-area-interaction"
+    handle.addEventListener(
+        "pointerup",
+        stopDrag,
+        true
+    );
+
+    handle.addEventListener(
+        "pointercancel",
+        stopDrag,
+        true
     );
 
 }
 
 
 // =========================================================
-// DOCUMENT TEXT EVIDENCE
+// RECORD ACTION
 // =========================================================
 
-function handleDocumentChange() {
+function recordAction(name) {
 
-    if (
-
-        !state.started ||
-
-        state.completed
-
-    ) {
+    if (!name) {
 
         return;
 
     }
 
+    state.lastActionTime =
+        Date.now();
 
-    const text =
-        readDocumentText();
+    state.actionHistory.push({
 
+        name:
+            name,
 
-    const signature =
-        getDocumentSignature();
+        time:
+            Date.now()
 
+    });
 
     if (
-
-        signature !==
-        state.lastDocumentSignature
-
+        state.actionHistory.length > 200
     ) {
 
-        state.lastDocumentSignature =
-            signature;
-
-
-        if (
-            normalize(text).length > 0
-        ) {
-
-            state.evidence.documentTextEntered =
-                true;
-
-
-            recordAction(
-                "document-text-entered"
-            );
-
-        }
-
-
-        updateEvaluationUI();
+        state.actionHistory.shift();
 
     }
 
@@ -16657,10 +15501,263 @@ function handleDocumentChange() {
 
 
 // =========================================================
-// SAVE DETECTION
+// CLOSEST
 // =========================================================
 
-function isSaveTarget(target) {
+function closest(target, selector) {
+
+    if (
+
+        !target ||
+
+        typeof target.closest !==
+        "function"
+
+    ) {
+
+        return null;
+
+    }
+
+    try {
+
+        return target.closest(
+            selector
+        );
+
+    } catch (error) {
+
+        return null;
+
+    }
+
+}
+
+
+// =========================================================
+// GET COMBINED ELEMENT DATA
+// =========================================================
+
+function getElementData(node) {
+
+    if (!node) {
+
+        return "";
+
+    }
+
+    const values = [
+
+        node.className,
+
+        node.id,
+
+        node.getAttribute?.(
+            "data-role"
+        ),
+
+        node.getAttribute?.(
+            "data-action"
+        ),
+
+        node.getAttribute?.(
+            "data-command"
+        ),
+
+        node.getAttribute?.(
+            "data-command-id"
+        ),
+
+        node.getAttribute?.(
+            "aria-label"
+        ),
+
+        node.getAttribute?.(
+            "title"
+        ),
+
+        node.textContent
+
+    ];
+
+    return normalize(
+        values.join(" ")
+    );
+
+}
+
+
+// =========================================================
+// IDENTIFY INTERFACE TASK
+// =========================================================
+
+function identifyInterfaceTask(target) {
+
+    if (!target) {
+
+        return null;
+
+    }
+
+    let node =
+        target;
+
+    for (
+        let i = 0;
+        i < 12 && node;
+        i++
+    ) {
+
+        const combined =
+            getElementData(node);
+
+        // -------------------------------------------------
+        // TITLE BAR
+        // -------------------------------------------------
+
+        if (
+
+            node.matches?.(
+                ".cwTitleBar"
+            ) ||
+
+            combined.includes(
+                "cwtitlebar"
+            ) ||
+
+            combined.includes(
+                "titlebar"
+            ) ||
+
+            combined.includes(
+                "barre de titre"
+            ) ||
+
+            combined.includes(
+                "barretitre"
+            )
+
+        ) {
+
+            return "titleBar";
+
+        }
+
+        // -------------------------------------------------
+        // OFFICE BUTTON
+        // -------------------------------------------------
+
+        if (
+
+            node.matches?.(
+                ".cwOfficeButton,[data-role=\"office-button\"]"
+            ) ||
+
+            combined.includes(
+                "cwofficebutton"
+            ) ||
+
+            combined.includes(
+                "officebutton"
+            ) ||
+
+            combined.includes(
+                "bouton office"
+            )
+
+        ) {
+
+            return "officeButton";
+
+        }
+
+        // -------------------------------------------------
+        // RIBBON
+        // -------------------------------------------------
+
+        if (
+
+            node.matches?.(
+                ".cwRibbon"
+            ) ||
+
+            combined.includes(
+                "cwribbon"
+            ) ||
+
+            combined.includes(
+                "ruban"
+            )
+
+        ) {
+
+            return "ribbon";
+
+        }
+
+        // -------------------------------------------------
+        // TABS
+        // -------------------------------------------------
+
+        if (
+
+            node.matches?.(
+                ".cwTabBtn"
+            ) ||
+
+            combined.includes(
+                "cwtabbtn"
+            ) ||
+
+            combined.includes(
+                "ribbon tab"
+            ) ||
+
+            combined.includes(
+                "onglet"
+            )
+
+        ) {
+
+            return "tabs";
+
+        }
+
+        // -------------------------------------------------
+        // DOCUMENT AREA
+        // -------------------------------------------------
+
+        if (
+
+            node.matches?.(
+                ".cwPageContent"
+            ) ||
+
+            combined.includes(
+                "cwpagecontent"
+            )
+
+        ) {
+
+            return "documentArea";
+
+        }
+
+        node =
+            node.parentElement;
+
+    }
+
+    return null;
+
+}
+
+
+// =========================================================
+// DETECT NEW DOCUMENT ACTION
+// =========================================================
+
+function isNewDocumentAction(target) {
 
     if (!target) {
 
@@ -16668,104 +15765,42 @@ function isSaveTarget(target) {
 
     }
 
-
-    let current =
+    let node =
         target;
 
-
     for (
-        let level = 0;
-        level < 8 && current;
-        level++
+        let i = 0;
+        i < 12 && node;
+        i++
     ) {
 
-        const text =
-            getElementText(
-                current
-            );
-
-
-        const dataAction =
-            normalize(
-
-                current.getAttribute?.(
-                    "data-action"
-                ) ||
-
-                ""
-
-            );
-
-
-        const dataCommand =
-            normalize(
-
-                current.getAttribute?.(
-                    "data-command"
-                ) ||
-
-                ""
-
-            );
-
-
-        const aria =
-            normalize(
-
-                current.getAttribute?.(
-                    "aria-label"
-                ) ||
-
-                ""
-
-            );
-
-
-        const title =
-            normalize(
-
-                current.getAttribute?.(
-                    "title"
-                ) ||
-
-                ""
-
-            );
-
-
         const combined =
-
-            text +
-
-            " " +
-
-            dataAction +
-
-            " " +
-
-            dataCommand +
-
-            " " +
-
-            aria +
-
-            " " +
-
-            title;
-
+            getElementData(node);
 
         if (
 
             combined.includes(
-                "save"
+                "new document"
             ) ||
 
             combined.includes(
-                "enregistrer"
+                "newdocument"
             ) ||
 
             combined.includes(
-                "enreg"
+                "nouveau document"
+            ) ||
+
+            combined.includes(
+                "nouveaudocument"
+            ) ||
+
+            combined.includes(
+                "new-document"
+            ) ||
+
+            combined.includes(
+                "new_document"
             )
 
         ) {
@@ -16774,12 +15809,10 @@ function isSaveTarget(target) {
 
         }
 
-
-        current =
-            current.parentElement;
+        node =
+            node.parentElement;
 
     }
-
 
     return false;
 
@@ -16787,10 +15820,207 @@ function isSaveTarget(target) {
 
 
 // =========================================================
-// REAL ACTION HANDLER
+// DETECT SAVE ACTION
 // =========================================================
 
-function handleSimulationClick(event) {
+function isSaveAction(target) {
+
+    if (!target) {
+
+        return false;
+
+    }
+
+    let node =
+        target;
+
+    for (
+        let i = 0;
+        i < 12 && node;
+        i++
+    ) {
+
+        const combined =
+            getElementData(node);
+
+        const isSave =
+
+            combined.includes(
+                "save"
+            ) ||
+
+            combined.includes(
+                "saveas"
+            ) ||
+
+            combined.includes(
+                "save as"
+            ) ||
+
+            combined.includes(
+                "enregistrer"
+            ) ||
+
+            combined.includes(
+                "enregistrer sous"
+            ) ||
+
+            combined.includes(
+                "sauvegarder"
+            );
+
+        if (isSave) {
+
+            return true;
+
+        }
+
+        node =
+            node.parentElement;
+
+    }
+
+    return false;
+
+}
+
+
+// =========================================================
+// ACTIVATE INTERFACE OBSERVATION
+// =========================================================
+
+function activateInterfaceTask(task) {
+
+    if (!task) {
+
+        return;
+
+    }
+
+    if (
+        !Object.prototype.hasOwnProperty.call(
+            state.observedInterface,
+            task
+        )
+    ) {
+
+        return;
+
+    }
+
+    state.observedInterface[task] =
+        true;
+
+    recordAction(
+        "evaluation-interface-" + task
+    );
+
+    // =====================================================
+    // ENVIRONMENT = ALL FIVE MAIN COMPONENTS
+    // =====================================================
+
+    if (
+
+        state.observedInterface.titleBar &&
+
+        state.observedInterface.officeButton &&
+
+        state.observedInterface.ribbon &&
+
+        state.observedInterface.tabs &&
+
+        state.observedInterface.documentArea
+
+    ) {
+
+        state.tasks.environment =
+            true;
+
+        state.tasks.components =
+            true;
+
+        setStatus(
+            "✓ L’environnement et les composants principaux sont identifiés."
+        );
+
+    }
+
+    updatePanel();
+
+    checkFinalValidation();
+
+}
+
+
+// =========================================================
+// ACTIVATE NEW DOCUMENT
+// =========================================================
+
+function activateNewDocument() {
+
+    if (
+        state.tasks.createDocument
+    ) {
+
+        return;
+
+    }
+
+    state.tasks.createDocument =
+        true;
+
+    recordAction(
+        "evaluation-create-document"
+    );
+
+    setStatus(
+        "✓ Nouveau document créé."
+    );
+
+    updatePanel();
+
+    checkFinalValidation();
+
+}
+
+
+// =========================================================
+// ACTIVATE SAVE
+// =========================================================
+
+function activateSave() {
+
+    if (
+        state.tasks.saveDocument
+    ) {
+
+        return;
+
+    }
+
+    state.tasks.saveDocument =
+        true;
+
+    recordAction(
+        "evaluation-save-document"
+    );
+
+    setStatus(
+        "✓ Document enregistré."
+    );
+
+    updatePanel();
+
+    checkFinalValidation();
+
+}
+
+
+// =========================================================
+// HANDLE CLICK
+// =========================================================
+
+function handleClick(event) {
 
     if (
 
@@ -16808,150 +16038,47 @@ function handleSimulationClick(event) {
 
     }
 
-
-    const target =
-        event.target;
-
-
-    // =====================================================
-    // SAVE
-    // =====================================================
-
-    if (
-        isSaveTarget(target)
-    ) {
-
-        state.evidence.documentSave =
-            true;
-
-
-        recordAction(
-            "real-save"
-        );
-
-    }
-
-
-    // =====================================================
-    // DOCUMENT AREA
-    // =====================================================
-
-    registerDocumentInteraction(
-        target
-    );
-
-
-    // =====================================================
-    // MAIN INTERFACE COMPONENT
-    // =====================================================
-
-    const simulationTask =
-        identifySimulationTask(
-            target
-        );
-
-
-    if (simulationTask) {
-
-        registerEnvironmentEvidence(
-            simulationTask
-        );
-
-    }
-
-
-    // =====================================================
-    // NEVER STOP PROPAGATION.
-    // NEVER PREVENT DEFAULT.
-    // SIMULATION REMAINS OWNER OF ITS EVENT.
-    // =====================================================
-
-    evaluateAllTasks();
-
-}
-
-
-// =========================================================
-// INPUT
-// =========================================================
-
-function handleSimulationInput(event) {
-
-    if (
-
-        !state.started ||
-
-        state.completed
-
-    ) {
-
-        return;
-
-    }
-
-
-    if (
-        event &&
-        event.target
-    ) {
-
-        registerDocumentInteraction(
+    const interfaceTask =
+        identifyInterfaceTask(
             event.target
         );
 
-    }
+    if (interfaceTask) {
 
-
-    handleDocumentChange();
-
-    evaluateAllTasks();
-
-}
-
-
-// =========================================================
-// KEYUP
-// =========================================================
-
-function handleSimulationKeyup(event) {
-
-    if (
-
-        !state.started ||
-
-        state.completed
-
-    ) {
-
-        return;
+        activateInterfaceTask(
+            interfaceTask
+        );
 
     }
 
-
     if (
-        event &&
-        event.target
-    ) {
-
-        registerDocumentInteraction(
+        isNewDocumentAction(
             event.target
-        );
+        )
+    ) {
+
+        activateNewDocument();
 
     }
 
+    if (
+        isSaveAction(
+            event.target
+        )
+    ) {
 
-    handleDocumentChange();
+        activateSave();
 
-    evaluateAllTasks();
+    }
 
 }
 
 
 // =========================================================
-// CHANGE
+// HANDLE INPUT
 // =========================================================
 
-function handleSimulationChange() {
+function handleInput(event) {
 
     if (
 
@@ -16965,159 +16092,28 @@ function handleSimulationChange() {
 
     }
 
-
-    handleDocumentChange();
-
-    evaluateAllTasks();
-
-}
-
-
-// =========================================================
-// EVALUATE ALL TASKS
-// =========================================================
-
-function evaluateAllTasks() {
-
     if (
 
-        !state.started ||
+        event?.target &&
 
-        state.completed
+        closest(
+            event.target,
+            ".cwPageContent"
+        )
 
     ) {
 
-        return;
+        // A document input confirms that the
+        // document area is actively being used.
 
-    }
-
-
-    // =====================================================
-    // TASK 1 — 25 POINTS
-    // =====================================================
-
-    if (
-
-        !state.tasks.environment &&
-
-        validateEnvironmentTask()
-
-    ) {
-
-        state.tasks.environment =
+        state.observedInterface.documentArea =
             true;
 
-
-        recordAction(
-            "evaluation-task-1-complete"
+        activateInterfaceTask(
+            "documentArea"
         );
 
     }
-
-
-    // =====================================================
-    // TASK 2 — 25 POINTS
-    // =====================================================
-
-    if (
-
-        !state.tasks.components &&
-
-        validateComponentsTask()
-
-    ) {
-
-        state.tasks.components =
-            true;
-
-
-        recordAction(
-            "evaluation-task-2-complete"
-        );
-
-    }
-
-
-    // =====================================================
-    // TASK 3 — 50 POINTS
-    // =====================================================
-
-    if (
-
-        !state.tasks.createAndSave &&
-
-        state.evidence.documentCreation &&
-
-        state.evidence.documentTextEntered &&
-
-        state.evidence.documentSave
-
-    ) {
-
-        state.tasks.createAndSave =
-            true;
-
-
-        recordAction(
-            "evaluation-task-3-complete"
-        );
-
-    }
-
-
-    updateScore();
-
-    updateEvaluationUI();
-
-
-    // =====================================================
-    // IMMEDIATE VALIDATION AT 75/100
-    // =====================================================
-
-    if (
-        state.score.total >= 75
-    ) {
-
-        scheduleFinalValidation();
-
-    }
-
-}
-
-
-// =========================================================
-// SCHEDULE FINAL VALIDATION
-// =========================================================
-
-function scheduleFinalValidation() {
-
-    if (
-        state.validationTimer
-    ) {
-
-        clearTimeout(
-            state.validationTimer
-        );
-
-    }
-
-
-    state.validationTimer =
-
-        setTimeout(
-
-            function () {
-
-                state.validationTimer =
-                    null;
-
-                attemptFinalValidation();
-
-            },
-
-            20
-
-        );
 
 }
 
@@ -17126,15 +16122,13 @@ function scheduleFinalValidation() {
 // FINAL VALIDATION
 // =========================================================
 
-async function attemptFinalValidation() {
+function checkFinalValidation() {
 
     if (
-
-        !state.started ||
 
         state.completed ||
 
-        state.processing
+        state.validationStarted
 
     ) {
 
@@ -17142,46 +16136,24 @@ async function attemptFinalValidation() {
 
     }
 
+    const count =
+        completedTaskCount();
 
-    evaluateAllTasks();
-
-    updateScore();
-
-
-    if (
-        state.score.total < 75
-    ) {
+    if (count !== 4) {
 
         return;
 
     }
-
-
-    const signature =
-
-        [
-
-            state.score.total,
-
-            state.tasks.environment
-                ? "1"
-                : "0",
-
-            state.tasks.components
-                ? "1"
-                : "0",
-
-            state.tasks.createAndSave
-                ? "1"
-                : "0"
-
-        ].join("|");
-
 
     if (
 
-        signature ===
-        state.lastValidationSignature
+        !state.tasks.environment ||
+
+        !state.tasks.components ||
+
+        !state.tasks.createDocument ||
+
+        !state.tasks.saveDocument
 
     ) {
 
@@ -17189,12 +16161,325 @@ async function attemptFinalValidation() {
 
     }
 
+    validateEvaluationImmediately();
 
-    state.lastValidationSignature =
-        signature;
+}
 
 
-    await completeEvaluation();
+// =========================================================
+// COMPLETE CHAPTER 1
+// =========================================================
+
+function completeChapter1() {
+
+    // =====================================================
+    // 1. EXISTING CHAPTER COMPLETION ENGINE
+    // =====================================================
+
+    if (
+
+        typeof WordChapterCompletionEngine !==
+        "undefined" &&
+
+        typeof WordChapterCompletionEngine.completeChapter ===
+        "function"
+
+    ) {
+
+        try {
+
+            WordChapterCompletionEngine
+                .completeChapter(
+                    "chapitre1"
+                );
+
+        } catch (error) {}
+
+    } else {
+
+        // Fallback only if engine is unavailable.
+
+        try {
+
+            localStorage.setItem(
+                "word_chapitre1_completed",
+                "true"
+            );
+
+            localStorage.setItem(
+                "wordChapter1Completed",
+                "true"
+            );
+
+        } catch (error) {}
+
+    }
+
+
+    // =====================================================
+    // 2. PROGRESS ENGINE
+    //
+    // Renderer uses unlockedChapters.
+    // Therefore chapitre2 MUST be added there.
+    // =====================================================
+
+    if (
+
+        typeof MicrosoftWordProgressEngine !==
+        "undefined"
+
+    ) {
+
+        try {
+
+            const progress =
+                MicrosoftWordProgressEngine.get();
+
+            if (
+                !Array.isArray(
+                    progress.completedChapters
+                )
+            ) {
+
+                progress.completedChapters = [];
+
+            }
+
+            if (
+                !progress.completedChapters.includes(
+                    "chapitre1"
+                )
+            ) {
+
+                progress.completedChapters.push(
+                    "chapitre1"
+                );
+
+            }
+
+            if (
+                !Array.isArray(
+                    progress.unlockedChapters
+                )
+            ) {
+
+                progress.unlockedChapters = [];
+
+            }
+
+            if (
+                !progress.unlockedChapters.includes(
+                    "chapitre1"
+                )
+            ) {
+
+                progress.unlockedChapters.push(
+                    "chapitre1"
+                );
+
+            }
+
+            if (
+                !progress.unlockedChapters.includes(
+                    "chapitre2"
+                )
+            ) {
+
+                progress.unlockedChapters.push(
+                    "chapitre2"
+                );
+
+            }
+
+            MicrosoftWordProgressEngine.save(
+                progress
+            );
+
+        } catch (error) {}
+
+    }
+
+
+    // =====================================================
+    // 3. DIRECT UNLOCK FLAG
+    // =====================================================
+
+    try {
+
+        localStorage.setItem(
+            "wordChapter1Completed",
+            "true"
+        );
+
+        localStorage.setItem(
+            "wordChapter2Unlocked",
+            "true"
+        );
+
+        localStorage.setItem(
+            "word_chapitre1_completed",
+            "true"
+        );
+
+    } catch (error) {}
+
+
+    // =====================================================
+    // 4. SYNCHRONIZE COURSE OBJECT
+    // =====================================================
+
+    try {
+
+        const chapter1 =
+            microsoftWordCourse.chapters.find(
+
+                chapter =>
+                    chapter.id ===
+                    "chapitre1"
+
+            );
+
+        const chapter2 =
+            microsoftWordCourse.chapters.find(
+
+                chapter =>
+                    chapter.id ===
+                    "chapitre2"
+
+            );
+
+        if (chapter1) {
+
+            chapter1.unlocked =
+                true;
+
+        }
+
+        if (chapter2) {
+
+            chapter2.unlocked =
+                true;
+
+        }
+
+    } catch (error) {}
+
+
+    // =====================================================
+    // 5. RUN UNLOCK ENGINE AGAIN
+    // =====================================================
+
+    if (
+
+        typeof WordChapterUnlockEngine !==
+        "undefined" &&
+
+        typeof WordChapterUnlockEngine.checkProgress ===
+        "function"
+
+    ) {
+
+        try {
+
+            WordChapterUnlockEngine
+                .checkProgress();
+
+        } catch (error) {}
+
+    }
+
+}
+
+
+// =========================================================
+// VALIDATE EVALUATION IMMEDIATELY
+// =========================================================
+
+function validateEvaluationImmediately() {
+
+    if (
+
+        state.completed ||
+
+        state.validationStarted
+
+    ) {
+
+        return;
+
+    }
+
+    if (
+        completedTaskCount() !== 4
+    ) {
+
+        return;
+
+    }
+
+    state.validationStarted =
+        true;
+
+    state.completed =
+        true;
+
+    state.closeEnabled =
+        true;
+
+    // =====================================================
+    // CHAPTER 1 COMPLETION + CHAPTER 2 UNLOCK
+    // =====================================================
+
+    completeChapter1();
+
+    updatePanel();
+
+    setStatus(
+
+        "✓ Évaluation réussie. " +
+        "Chapitre 1 terminé. " +
+        "Chapitre 2 est maintenant déverrouillé."
+
+    );
+
+    // =====================================================
+    // CLOSE APPEARS ONLY AFTER VALIDATION
+    // =====================================================
+
+    if (
+        state.ui.close
+    ) {
+
+        state.ui.close.style.display =
+            "inline-flex";
+
+    }
+
+    // =====================================================
+    // FINAL RANISE AUDIO
+    // =====================================================
+
+    const message =
+
+        "Félicitations. " +
+
+        "J'ai vérifié votre évaluation du Chapitre 1. " +
+
+        "Vous avez correctement identifié " +
+        "l'environnement et les principaux composants " +
+        "de Microsoft Word 2007. " +
+
+        "Vous avez également créé et enregistré " +
+        "votre document. " +
+
+        "Votre évaluation est réussie. " +
+
+        "Le Chapitre 1 est maintenant terminé " +
+        "et le Chapitre 2 est déverrouillé. " +
+
+        "Excellent travail.";
+
+    speak(message);
 
 }
 
@@ -17203,7 +16488,7 @@ async function attemptFinalValidation() {
 // REMOVE PANEL
 // =========================================================
 
-function removeEvaluationPanel() {
+function removePanel() {
 
     if (
         state.ui.root
@@ -17229,7 +16514,6 @@ function removeEvaluationPanel() {
 
     }
 
-
     state.ui.root =
         null;
 
@@ -17248,80 +16532,111 @@ function removeEvaluationPanel() {
     state.ui.status =
         null;
 
-    state.ui.details =
+    state.ui.tasks =
         null;
 
 }
 
 
 // =========================================================
-// STOP MONITORING
+// LOAD EVALUATION DATA
 // =========================================================
 
-function stopBlock10Monitoring() {
+function loadChapterData() {
 
-    if (
-        state.validationTimer
-    ) {
+    const chapter =
+        getChapter1();
 
-        clearTimeout(
-            state.validationTimer
-        );
+    if (!chapter) {
 
-        state.validationTimer =
-            null;
+        return false;
 
     }
 
+    state.chapter =
+        chapter;
+
+    state.evaluation =
+
+        Array.isArray(
+            chapter.evaluation
+        )
+
+            ? chapter.evaluation.slice()
+
+            : [];
 
     if (
-        state.monitorTimer
+        state.evaluation.length === 0
     ) {
 
-        clearInterval(
-            state.monitorTimer
-        );
-
-        state.monitorTimer =
-            null;
+        return false;
 
     }
 
+    return true;
 
-    if (
-        state.mutationObserver
-    ) {
-
-        try {
-
-            state.mutationObserver.disconnect();
-
-        } catch (error) {}
+}
 
 
-        state.mutationObserver =
-            null;
+// =========================================================
+// RESET
+// =========================================================
 
-    }
+function resetState() {
 
+    state.completed =
+        false;
 
-    state.observerAttached =
+    state.validationStarted =
+        false;
+
+    state.closeEnabled =
+        false;
+
+    state.actionHistory = [];
+
+    state.observedInterface.titleBar =
+        false;
+
+    state.observedInterface.officeButton =
+        false;
+
+    state.observedInterface.ribbon =
+        false;
+
+    state.observedInterface.tabs =
+        false;
+
+    state.observedInterface.documentArea =
+        false;
+
+    state.tasks.environment =
+        false;
+
+    state.tasks.components =
+        false;
+
+    state.tasks.createDocument =
+        false;
+
+    state.tasks.saveDocument =
         false;
 
 }
 
 
 // =========================================================
-// COMPLETE EVALUATION
+// START BLOCK 10
 // =========================================================
 
-async function completeEvaluation() {
+function startBlock10() {
 
     if (
 
-        state.completed ||
+        state.started ||
 
-        state.processing
+        state.completed
 
     ) {
 
@@ -17329,477 +16644,74 @@ async function completeEvaluation() {
 
     }
 
-
-    state.processing = true;
-
-
-    try {
-
-        updateScore();
-
-
-        // =================================================
-        // ABSOLUTE PASS PROTECTION
-        // =================================================
-
-        if (
-            state.score.total < 75
-        ) {
-
-            return;
-
-        }
-
-
-        state.score.passed =
-            true;
-
-
-        state.waitingForStudent =
-            false;
-
-
-        setStatus(
-
-            "✓ " +
-
-            state.score.total +
-
-            "/100 — Évaluation validée avec succès."
-
-        );
-
-
-        updateEvaluationUI();
-
-
-        // =================================================
-        // BLOCK 10 COMPLETED
-        // =================================================
-
-        state.completed =
-            true;
-
-
-        // =================================================
-        // CHAPTER 1 COMPLETED
-        // =================================================
-
-        localStorage.setItem(
-
-            "word_chapitre1_completed",
-
-            "true"
-
-        );
-
-
-        localStorage.setItem(
-
-            "wordChapter1Completed",
-
-            "true"
-
-        );
-
-
-        // =================================================
-        // EXISTING PROGRESS ENGINE
-        // =================================================
-
-        if (
-
-            typeof MicrosoftWordProgressEngine !==
-            "undefined"
-
-        ) {
-
-            try {
-
-                const progress =
-                    MicrosoftWordProgressEngine.get();
-
-
-                if (
-
-                    !Array.isArray(
-                        progress.completedChapters
-                    )
-
-                ) {
-
-                    progress.completedChapters = [];
-
-                }
-
-
-                if (
-
-                    !progress.completedChapters.includes(
-                        "chapitre1"
-                    )
-
-                ) {
-
-                    progress.completedChapters.push(
-                        "chapitre1"
-                    );
-
-                }
-
-
-                if (
-
-                    !Array.isArray(
-                        progress.unlockedChapters
-                    )
-
-                ) {
-
-                    progress.unlockedChapters = [];
-
-                }
-
-
-                if (
-
-                    !progress.unlockedChapters.includes(
-                        "chapitre1"
-                    )
-
-                ) {
-
-                    progress.unlockedChapters.push(
-                        "chapitre1"
-                    );
-
-                }
-
-
-                if (
-
-                    !progress.unlockedChapters.includes(
-                        "chapitre2"
-                    )
-
-                ) {
-
-                    progress.unlockedChapters.push(
-                        "chapitre2"
-                    );
-
-                }
-
-
-                MicrosoftWordProgressEngine.save(
-                    progress
-                );
-
-            } catch (error) {}
-
-        }
-
-
-        // =================================================
-        // OFFICIAL CHAPTER COMPLETION ENGINE
-        // =================================================
-
-        if (
-
-            typeof WordChapterCompletionEngine !==
-            "undefined" &&
-
-            typeof WordChapterCompletionEngine.completeChapter ===
-            "function"
-
-        ) {
-
-            try {
-
-                WordChapterCompletionEngine.completeChapter(
-                    "chapitre1"
-                );
-
-            } catch (error) {}
-
-        } else {
-
-            localStorage.setItem(
-
-                "wordChapter1Completed",
-
-                "true"
-
-            );
-
-
-            localStorage.setItem(
-
-                "wordChapter2Unlocked",
-
-                "true"
-
-            );
-
-        }
-
-
-        // =================================================
-        // SYNC COURSE DATA
-        // =================================================
-
-        if (
-            typeof syncMicrosoftWordProgress ===
-            "function"
-        ) {
-
-            try {
-
-                syncMicrosoftWordProgress();
-
-            } catch (error) {}
-
-        }
-
-
-        // =================================================
-        // STOP BLOCK 10 MONITORING
-        // =================================================
-
-        stopBlock10Monitoring();
-
-
-        // =================================================
-        // FINAL RANISE VALIDATION
-        // =================================================
-
-        const finalMessage =
-
-            "Félicitations ! " +
-
-            "Vous avez obtenu " +
-
-            state.score.total +
-
-            " points sur 100. " +
-
-            "Votre note est supérieure ou égale à 75 sur 100. " +
-
-            "Votre évaluation du Chapitre 1 est donc validée. " +
-
-            "Vous avez terminé avec succès le Chapitre 1. " +
-
-            "Le Chapitre 2 est maintenant débloqué. " +
-
-            "Excellent travail !";
-
-
-        // =================================================
-        // PANEL DISAPPEARS AFTER VALIDATION
-        // =================================================
-
-        removeEvaluationPanel();
-
-
-        // =================================================
-        // MARYTTS
-        // =================================================
-
-        try {
-
-            if (
-
-                typeof raniseStartTalking ===
-                "function"
-
-            ) {
-
-                raniseStartTalking();
-
-            }
-
-
-            if (
-
-                typeof speakProfessorIAWithMaryTTS ===
-                "function"
-
-            ) {
-
-                Promise.resolve(
-
-                    speakProfessorIAWithMaryTTS(
-                        finalMessage
-                    )
-
-                )
-
-                .catch(
-                    function () {}
-                )
-
-                .finally(
-
-                    function () {
-
-                        if (
-
-                            typeof raniseStopTalking ===
-                            "function"
-
-                        ) {
-
-                            raniseStopTalking();
-
-                        }
-
-                    }
-
-                );
-
-            } else {
-
-                if (
-
-                    typeof raniseStopTalking ===
-                    "function"
-
-                ) {
-
-                    raniseStopTalking();
-
-                }
-
-            }
-
-        } catch (error) {
-
-            if (
-
-                typeof raniseStopTalking ===
-                "function"
-
-            ) {
-
-                raniseStopTalking();
-
-            }
-
-        }
-
-
-    } finally {
-
-        state.processing =
-            false;
-
-    }
-
-}
-
-
-// =========================================================
-// MUTATION OBSERVER
-// =========================================================
-
-function attachMutationObserver() {
-
     if (
-
-        state.observerAttached ||
-
-        !state.simulationDocument
-
+        !connectToSimulation()
     ) {
 
         return;
 
     }
 
-
     if (
-        typeof MutationObserver ===
-        "undefined"
+        !loadChapterData()
     ) {
 
         return;
 
     }
 
+    resetState();
 
-    const target =
+    state.started =
+        true;
 
-        state.simulationDocument.body ||
+    state.waitingForBlock9 =
+        false;
 
-        state.simulationDocument.documentElement;
+    state.block9CompletionDetected =
+        true;
 
+    createEvaluationPanel();
 
-    if (!target) {
+    attachSimulationListeners();
 
-        return;
+    updatePanel();
 
-    }
+    setStatus(
 
-
-    state.mutationObserver =
-
-        new MutationObserver(
-
-            function () {
-
-                if (
-
-                    state.started &&
-
-                    !state.completed
-
-                ) {
-
-                    handleDocumentChange();
-
-                    evaluateAllTasks();
-
-                }
-
-            }
-
-        );
-
-
-    state.mutationObserver.observe(
-
-        target,
-
-        {
-
-            subtree:
-                true,
-
-            childList:
-                true,
-
-            characterData:
-                true,
-
-            attributes:
-                true
-
-        }
+        "0/4 validations. " +
+        "Commencez l’évaluation du Chapitre 1."
 
     );
 
+    // =====================================================
+    // INTRODUCTION
+    // =====================================================
 
-    state.observerAttached =
-        true;
+    speak(
+
+        "Très bien. Le devoir est terminé. " +
+
+        "Nous passons maintenant à l'évaluation finale " +
+        "du Chapitre 1. " +
+
+        "Je vais vérifier vos actions réelles dans " +
+        "la simulation Word 2007. " +
+
+        "Identifiez les principaux éléments de " +
+        "l'environnement, puis créez et enregistrez " +
+        "un premier document."
+
+    );
 
 }
 
 
 // =========================================================
-// EVENT LISTENERS
+// ATTACH SIMULATION EVENTS
 // =========================================================
 
-function attachListeners() {
+function attachSimulationListeners() {
 
     if (
 
@@ -17813,422 +16725,38 @@ function attachListeners() {
 
     }
 
-
     const doc =
         state.simulationDocument;
 
-
-    // =================================================
-    // CAPTURE ONLY.
-    //
-    // IMPORTANT:
-    // NO STOP PROPAGATION.
-    // NO PREVENT DEFAULT.
-    // NO MODIFICATION OF SIMULATION.
-    // =================================================
+    // =====================================================
+    // OBSERVE ONLY
+    // NEVER BLOCK THE SIMULATION
+    // =====================================================
 
     doc.addEventListener(
-
         "click",
-
-        handleSimulationClick,
-
+        handleClick,
         true
-
     );
 
-
     doc.addEventListener(
-
         "input",
-
-        handleSimulationInput,
-
+        handleInput,
         true
-
     );
-
-
-    doc.addEventListener(
-
-        "keyup",
-
-        handleSimulationKeyup,
-
-        true
-
-    );
-
-
-    doc.addEventListener(
-
-        "change",
-
-        handleSimulationChange,
-
-        true
-
-    );
-
 
     state.listenersAttached =
         true;
 
-
-    attachMutationObserver();
-
-
-    startAutomaticMonitor();
-
 }
 
 
 // =========================================================
-// AUTOMATIC MONITOR
-// =========================================================
-
-function startAutomaticMonitor() {
-
-    if (
-        state.monitorTimer
-    ) {
-
-        return;
-
-    }
-
-
-    state.monitorTimer =
-
-        setInterval(
-
-            function () {
-
-                if (
-
-                    !state.started ||
-
-                    state.completed
-
-                ) {
-
-                    return;
-
-                }
-
-
-                if (
-                    !state.simulationDocument
-                ) {
-
-                    connectToSimulation();
-
-                }
-
-
-                handleDocumentChange();
-
-                evaluateAllTasks();
-
-
-                if (
-                    state.score.total >= 75
-                ) {
-
-                    scheduleFinalValidation();
-
-                }
-
-            },
-
-            100
-
-        );
-
-}
-
-
-// =========================================================
-// LOAD EVALUATION DATA
-// =========================================================
-
-function loadEvaluationData() {
-
-    const chapter =
-        getChapter1();
-
-
-    if (!chapter) {
-
-        return false;
-
-    }
-
-
-    state.chapter =
-        chapter;
-
-
-    state.evaluation =
-
-        Array.isArray(
-            chapter.evaluation
-        )
-
-            ? chapter.evaluation
-
-            : [];
-
-
-    // =================================================
-    // EXACT CHAPTER 1 EVALUATION
-    //
-    // 1. Décrire l’environnement général de Word 2007.
-    // 2. Identifier les principaux composants de l’interface.
-    // 3. Créer et enregistrer un premier document.
-    // =================================================
-
-    return (
-        state.evaluation.length >= 3
-    );
-
-}
-
-
-// =========================================================
-// RESET
-// =========================================================
-
-function resetEvaluation() {
-
-    state.tasks.environment =
-        false;
-
-    state.tasks.components =
-        false;
-
-    state.tasks.createAndSave =
-        false;
-
-
-    state.score.environment =
-        0;
-
-    state.score.components =
-        0;
-
-    state.score.createAndSave =
-        0;
-
-    state.score.total =
-        0;
-
-    state.score.passed =
-        false;
-
-
-    state.evidence.environmentDescription.titleBar =
-        false;
-
-    state.evidence.environmentDescription.officeButton =
-        false;
-
-    state.evidence.environmentDescription.ribbon =
-        false;
-
-    state.evidence.environmentDescription.tabs =
-        false;
-
-    state.evidence.environmentDescription.documentArea =
-        false;
-
-
-    state.evidence.interfaceComponents.titleBar =
-        false;
-
-    state.evidence.interfaceComponents.officeButton =
-        false;
-
-    state.evidence.interfaceComponents.ribbon =
-        false;
-
-    state.evidence.interfaceComponents.tabs =
-        false;
-
-    state.evidence.interfaceComponents.documentArea =
-        false;
-
-
-    state.evidence.documentCreation =
-        false;
-
-    state.evidence.documentSave =
-        false;
-
-    state.evidence.documentTextEntered =
-        false;
-
-
-    state.actionHistory = [];
-
-    state.lastValidationSignature = "";
-
-}
-
-
-// =========================================================
-// START BLOCK 10
-// =========================================================
-
-async function startBlock10() {
-
-    if (
-
-        state.started ||
-
-        state.completed
-
-    ) {
-
-        return;
-
-    }
-
-
-    // =====================================================
-    // BLOCK 10 ONLY STARTS IF SIMULATION EXISTS.
-    // =====================================================
-
-    if (
-        !connectToSimulation()
-    ) {
-
-        return;
-
-    }
-
-
-    if (
-        !loadEvaluationData()
-    ) {
-
-        return;
-
-    }
-
-
-    resetEvaluation();
-
-
-    state.started =
-        true;
-
-
-    state.completed =
-        false;
-
-
-    state.processing =
-        false;
-
-
-    state.waitingForStudent =
-        false;
-
-
-    state.transitionDetected =
-        true;
-
-
-    state.lastDocumentSignature =
-        getDocumentSignature();
-
-
-    createEvaluationUI();
-
-
-    attachListeners();
-
-
-    updateEvaluationUI();
-
-
-    // =====================================================
-    // RANISE INTRODUCTION
-    // =====================================================
-
-    await speak(
-
-        "Très bien. Vous avez terminé le devoir. " +
-
-        "Nous passons maintenant à l’évaluation finale du Chapitre 1. " +
-
-        "Cette évaluation comporte trois tâches. " +
-
-        "La première vaut vingt-cinq points. " +
-
-        "La deuxième vaut vingt-cinq points. " +
-
-        "La troisième vaut cinquante points. " +
-
-        "Vous devez obtenir au moins soixante-quinze points sur cent pour réussir. " +
-
-        "Je vais détecter vos actions réelles dans la simulation."
-
-    );
-
-
-    state.waitingForStudent =
-        true;
-
-
-    setStatus(
-        "0/100 — Objectif : 75/100."
-    );
-
-
-    updateEvaluationUI();
-
-}
-
-
-// =========================================================
-// BLOCK 9 → BLOCK 10
-// SAFE READ-ONLY TRANSITION
-//
-// IMPORTANT:
-// THIS SECTION DOES NOT MODIFY BLOCK 9.
-//
-// It only:
-// - checks whether Block 9 exists
-// - reads getState()
-// - waits for completed === true
-// - then launches Block 10
-//
-// It does NOT:
-// - stop Block 9
-// - reset Block 9
-// - change Block 9 state
-// - touch Block 9 listeners
-// - touch Block 9 panel
-// - touch Block 9 speaking state
-// =========================================================
-
-let block9ToBlock10Timer = null;
-
-let block9ToBlock10Started = false;
-
-
-// =========================================================
-// CHECK BLOCK 9
+// CHECK BLOCK 9 COMPLETION
 // =========================================================
 
 function checkBlock9Completion() {
 
-    // -----------------------------------------------------
-    // BLOCK 10 ALREADY ACTIVE
-    // -----------------------------------------------------
-
     if (
 
         state.started ||
@@ -18241,39 +16769,15 @@ function checkBlock9Completion() {
 
     }
 
-
-    // -----------------------------------------------------
-    // TRANSITION ALREADY LAUNCHED
-    // -----------------------------------------------------
-
-    if (
-        block9ToBlock10Started
-    ) {
-
-        return;
-
-    }
-
-
-    // -----------------------------------------------------
-    // READ BLOCK 9 ONLY
-    // -----------------------------------------------------
-
-    const block9 =
+    const engine =
 
         window.RaniseMoiseHomeworkMasteryEngine;
 
-
-    // -----------------------------------------------------
-    // IF BLOCK 9 IS NOT READY:
-    // DO ABSOLUTELY NOTHING.
-    // -----------------------------------------------------
-
     if (
 
-        !block9 ||
+        !engine ||
 
-        typeof block9.getState !==
+        typeof engine.getState !==
         "function"
 
     ) {
@@ -18282,23 +16786,18 @@ function checkBlock9Completion() {
 
     }
 
-
     let block9State;
-
 
     try {
 
         block9State =
-            block9.getState();
+            engine.getState();
 
     } catch (error) {
-
-        // NEVER INTERRUPT BLOCK 9.
 
         return;
 
     }
-
 
     if (!block9State) {
 
@@ -18306,10 +16805,11 @@ function checkBlock9Completion() {
 
     }
 
-
-    // -----------------------------------------------------
-    // BLOCK 9 MUST REALLY BE COMPLETED.
-    // -----------------------------------------------------
+    // =====================================================
+    // ABSOLUTE CONDITION
+    //
+    // BLOCK 9 FALSE = BLOCK 10 DOES NOTHING.
+    // =====================================================
 
     if (
         block9State.completed !== true
@@ -18319,102 +16819,27 @@ function checkBlock9Completion() {
 
     }
 
+    // =====================================================
+    // BLOCK 9 REALLY FINISHED.
+    // =====================================================
 
-    // -----------------------------------------------------
-    // BLOCK 9 HAS FINISHED.
-    // NOW BLOCK 10 MAY START.
-    // -----------------------------------------------------
-
-    block9ToBlock10Started =
+    state.block9CompletionDetected =
         true;
 
-
-    state.transitionDetected =
-        true;
-
-
-    try {
-
-        const result =
-            startBlock10();
-
-
-        Promise.resolve(result)
-
-            .then(
-
-                function () {
-
-                    // If Block 10 could not connect,
-                    // allow a future safe retry.
-
-                    if (
-
-                        !state.started &&
-
-                        !state.completed
-
-                    ) {
-
-                        block9ToBlock10Started =
-                            false;
-
-                        state.transitionDetected =
-                            false;
-
-                    }
-
-                }
-
-            )
-
-            .catch(
-
-                function () {
-
-                    block9ToBlock10Started =
-                        false;
-
-                    state.transitionDetected =
-                        false;
-
-                }
-
-            );
-
-    } catch (error) {
-
-        block9ToBlock10Started =
-            false;
-
-        state.transitionDetected =
-            false;
-
-    }
+    startBlock10();
 
 }
 
 
 // =========================================================
-// AUTOMATIC BLOCK 9 → BLOCK 10 MONITOR
-//
-// IMPORTANT:
-// THIS TIMER DOES NOT START UNTIL BLOCK 9 EXISTS
-// AND REPORTS completed === true.
-//
-// IT DOES NOT TOUCH BLOCK 9.
+// WAIT FOR BLOCK 9
 // =========================================================
 
-block9ToBlock10Timer =
+state.transitionTimer =
 
     setInterval(
 
         function () {
-
-            // -------------------------------------------------
-            // BLOCK 10 STARTED
-            // STOP ONLY THIS BLOCK 10 BRIDGE TIMER.
-            // -------------------------------------------------
 
             if (
 
@@ -18425,20 +16850,15 @@ block9ToBlock10Timer =
             ) {
 
                 clearInterval(
-                    block9ToBlock10Timer
+                    state.transitionTimer
                 );
 
-                block9ToBlock10Timer =
+                state.transitionTimer =
                     null;
 
                 return;
 
             }
-
-
-            // -------------------------------------------------
-            // READ BLOCK 9 ONLY.
-            // -------------------------------------------------
 
             checkBlock9Completion();
 
@@ -18453,18 +16873,14 @@ block9ToBlock10Timer =
 // PUBLIC API
 // =========================================================
 
-window.RaniseMoiseEvaluationMasteryEngine = {
+window.RaniseMoiseEvaluationEngine = {
 
     start:
         startBlock10,
 
-
     getState:
 
         function () {
-
-            updateScore();
-
 
             return {
 
@@ -18474,51 +16890,32 @@ window.RaniseMoiseEvaluationMasteryEngine = {
                 completed:
                     state.completed,
 
-                waitingForStudent:
-                    state.waitingForStudent,
+                waitingForBlock9:
+                    state.waitingForBlock9,
 
-                speaking:
-                    state.speaking,
+                block9CompletionDetected:
+                    state.block9CompletionDetected,
 
-                transitionDetected:
-                    state.transitionDetected,
+                closeEnabled:
+                    state.closeEnabled,
 
+                completedTasks:
+                    completedTaskCount(),
 
                 tasks:
-
                     Object.assign(
-
                         {},
-
                         state.tasks
-
                     ),
 
-
-                score:
-
+                observedInterface:
                     Object.assign(
-
                         {},
-
-                        state.score
-
+                        state.observedInterface
                     ),
-
-
-                evidence:
-
-                    JSON.parse(
-
-                        JSON.stringify(
-                            state.evidence
-                        )
-
-                    ),
-
 
                 evaluation:
-                    state.evaluation
+                    state.evaluation.slice()
 
             };
 
@@ -18527,15 +16924,6 @@ window.RaniseMoiseEvaluationMasteryEngine = {
 };
 
 })();
-
-
-
-
-
-
-
-
-
 
 
 
