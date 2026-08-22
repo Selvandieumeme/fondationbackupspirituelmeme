@@ -832,6 +832,55 @@ document.querySelectorAll(
 
 
 
+
+
+
+
+
+
+
+// =====================================
+// CHAPTER 2 PARTS LOCK / UNLOCK
+// =====================================
+
+if(chapterId === "chapitre2"){
+
+    const chapter =
+
+        microsoftWordCourse.chapters.find(
+
+            item =>
+            item.id === chapterId
+
+        );
+
+
+    if(!chapter){
+
+        return;
+
+    }
+
+
+    WordChapter2PartsEngine.render(
+
+        chapter
+
+    );
+
+
+    return;
+
+}
+
+
+
+
+
+
+
+
+
 // =====================================
 // CHAPTER 1 IA ACTIVATION
 // =====================================
@@ -1387,6 +1436,270 @@ if(
     }
 
 );
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// =====================================================
+// CHAPITRE 2 — PARTS LOCK / UNLOCK DISPLAY ENGINE
+// ISOLATED MODULE
+// NE MODIFIE PAS CHAPITRE 1
+// NE MODIFIE PAS LES AUTRES SYSTÈMES
+// =====================================================
+
+const WordChapter2PartsEngine = {
+
+    key: "wordChapter2PartsProgress",
+
+    getProgress: function(){
+
+        const saved =
+            localStorage.getItem(this.key);
+
+        if(saved){
+
+            try{
+
+                return JSON.parse(saved);
+
+            }catch(error){
+
+                console.error(
+                    "Chapter 2 Parts Progress Error:",
+                    error
+                );
+
+            }
+
+        }
+
+        return {
+
+            theory: true,
+
+            practice: false,
+
+            exercises: false,
+
+            homework: false,
+
+            evaluation: false
+
+        };
+
+    },
+
+
+    saveProgress: function(progress){
+
+        localStorage.setItem(
+
+            this.key,
+
+            JSON.stringify(progress)
+
+        );
+
+    },
+
+
+    isUnlocked: function(part){
+
+        const progress =
+            this.getProgress();
+
+        return progress[part] === true;
+
+    },
+
+
+    render: function(chapter){
+
+        if(!chapter){
+
+            return;
+
+        }
+
+
+        const campusContent =
+            document.getElementById(
+                "campusContent"
+            );
+
+        if(!campusContent){
+
+            return;
+
+        }
+
+
+        const progress =
+            this.getProgress();
+
+
+        let theoryHTML = "";
+
+        if(
+            chapter.theory &&
+            progress.theory === true
+        ){
+
+            chapter.theory.forEach(
+                lesson => {
+
+                    theoryHTML += `
+
+                        <div class="word-theory-card">
+
+                            <h4>
+                                📘 ${lesson.title}
+                            </h4>
+
+                            <p>
+                                ${lesson.content}
+                            </p>
+
+                        </div>
+
+                    `;
+
+                }
+            );
+
+        }
+
+
+        campusContent.innerHTML = `
+
+            <div class="microsoft-word-course">
+
+                <button
+                    id="backToWordChaptersBtn"
+                    class="wordBackBtn">
+
+                    ⬅️ Retour aux chapitres
+
+                </button>
+
+
+                <h1>
+
+                    📘 ${chapter.title}
+
+                </h1>
+
+
+                <div class="word-section">
+
+                    <h3>
+                        📚 Théorie
+                    </h3>
+
+                    ${theoryHTML}
+
+                </div>
+
+
+                <div class="word-section">
+
+                    <h3>
+                        🖥️ Pratique 🔒
+                    </h3>
+
+                </div>
+
+
+                <div class="word-section">
+
+                    <h3>
+                        ✏️ Exercices 🔒
+                    </h3>
+
+                </div>
+
+
+                <div class="word-section">
+
+                    <h3>
+                        🏠 Devoir 🔒
+                    </h3>
+
+                </div>
+
+
+                <div class="word-section">
+
+                    <h3>
+                        🎓 Évaluation 🔒
+                    </h3>
+
+                </div>
+
+            </div>
+
+        `;
+
+
+        const backButton =
+            document.getElementById(
+                "backToWordChaptersBtn"
+            );
+
+
+        if(backButton){
+
+            backButton.addEventListener(
+
+                "click",
+
+                function(){
+
+                    renderMicrosoftWordCourse();
+
+                }
+
+            );
+
+        }
+
+    }
+
+};
+
+
+
+
+
+
+
+
+
+
+
 
 
 
