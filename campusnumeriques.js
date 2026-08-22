@@ -222,11 +222,15 @@ const microsoftWordCourse = {
 
         "Développer une maîtrise pratique et progressive des outils de l’onglet Home."
 
-    ]
+   
 
-},
+]
 
+}
 
+]
+
+};
 
 
 
