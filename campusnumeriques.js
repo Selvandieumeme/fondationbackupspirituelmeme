@@ -433,10 +433,41 @@ const microsoftWordCourse = {
 
 
     homework:
-    "",
+"Réaliser un document Microsoft Word 2007 permettant de démontrer la maîtrise des notions étudiées dans le groupe Presse-papiers (Clipboard) et le groupe Police (Font). L’élève doit saisir un court texte, puis sélectionner différentes parties de ce texte afin d’effectuer les opérations Copier (Copy), Couper (Cut) et Coller (Paste). Il doit ensuite modifier le type de police (Font), la taille de police (Font Size), appliquer le Gras (Bold), l’Italique (Italic) et le Souligné (Underline), modifier la Couleur de police (Font Color) et appliquer une Surbrillance (Text Highlight Color). Le document final doit présenter clairement les différentes mises en forme réalisées. L’élève doit être capable d’expliquer les commandes utilisées et de montrer que chaque opération a été réalisée correctement."
 
 
-    evaluation: [],
+
+
+
+
+
+
+
+
+    evaluation: [
+
+    "Expliquer le rôle général de l’onglet Home (Accueil) de Microsoft Word 2007 et identifier les groupes Presse-papiers (Clipboard) et Police (Font) étudiés dans cette partie de la formation.",
+
+    "Expliquer la différence entre Copier (Copy), Couper (Cut) et Coller (Paste), puis démontrer correctement leur utilisation dans un document.",
+
+    "Démontrer la capacité à sélectionner un texte et à modifier son type de police (Font) ainsi que sa taille (Font Size).",
+
+    "Démontrer l’utilisation correcte des commandes Gras (Bold), Italique (Italic) et Souligné (Underline) sur différentes parties d’un texte.",
+
+    "Démontrer la capacité à modifier la Couleur de police (Font Color) et à appliquer une Surbrillance (Text Highlight Color) à un texte sélectionné.",
+
+    "Réaliser une mise en forme complète d’un court document en utilisant correctement les commandes du groupe Presse-papiers (Clipboard) et du groupe Police (Font) étudiées dans cette formation.",
+
+    "Expliquer oralement ou par écrit les différentes opérations réalisées et justifier l’utilisation de chaque commande.",
+
+    "Réaliser l’ensemble de l’évaluation de manière autonome afin de démontrer la maîtrise des notions théoriques et pratiques étudiées dans cette partie du Chapitre 2."
+
+],
+
+
+
+
+
 
 
     objective: [
