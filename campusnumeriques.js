@@ -392,7 +392,44 @@ const microsoftWordCourse = {
 
 
 
-    exercises: [],
+    exercises: [
+
+    "Identifier le rôle du groupe Presse-papiers (Clipboard) dans l’onglet Home (Accueil).",
+
+    "Expliquer la différence entre les commandes Copier (Copy) et Couper (Cut).",
+
+    "Sélectionner un texte, le copier, puis le coller à un autre endroit du document.",
+
+    "Sélectionner un texte, le couper, puis le coller à un nouvel emplacement.",
+
+    "Modifier le type de police (Font) d’un texte sélectionné.",
+
+    "Modifier la taille de police (Font Size) d’un texte sélectionné.",
+
+    "Appliquer le Gras (Bold), l’Italique (Italic) et le Souligné (Underline) à des parties différentes d’un texte.",
+
+    "Modifier la couleur de police (Font Color) d’un texte sélectionné.",
+
+    "Appliquer une couleur de surbrillance (Text Highlight Color) à un passage de texte.",
+
+    "Réaliser une mise en forme complète d’un court texte en utilisant uniquement les commandes étudiées dans le groupe Presse-papiers (Clipboard) et le groupe Police (Font)."
+
+],
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
     homework:
