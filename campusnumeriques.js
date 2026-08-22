@@ -4382,6 +4382,484 @@ function renderChapter1ProfessorIA(){
 
 
 
+// =====================================
+// CHAPITRE 2 - PROFESSEURE IA ASSISTANT
+// ISOLATED MODULE
+// NO CONFLICT WITH CHAPTER 1
+// =====================================
+
+function renderChapter2ProfessorIA(){
+
+    const campusContent =
+        document.getElementById(
+            "campusContent"
+        );
+
+    if(!campusContent){
+        return;
+    }
+
+
+    const existingIA =
+        document.getElementById(
+            "chapter2ProfessorIA"
+        );
+
+    if(existingIA){
+        return;
+    }
+
+
+    const iaBox =
+        document.createElement(
+            "div"
+        );
+
+    iaBox.id =
+        "chapter2ProfessorIA";
+
+
+    iaBox.innerHTML = `
+
+        <div class="chapter1-ia-card">
+
+            <div class="chapter1-ia-topbar">
+
+                <div class="chapter1-ia-title">
+
+                    <span class="chapter1-ia-icon">
+                        👩‍🏫
+                    </span>
+
+                    <div>
+
+                        <h3>
+                            Ranise MOISE
+                        </h3>
+
+                        <span>
+                            Professeure IA
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+                <button
+                    type="button"
+                    id="chapter2TalkButton"
+                    class="talk-to-ai-professor-btn"
+                    aria-expanded="false"
+                    aria-controls="chapter2TalkPanel"
+                >
+
+                    🎤 Talk
+
+                </button>
+
+            </div>
+
+
+            <img
+                id="chapter2ProfessorAvatar"
+                src="ranise-moise-smile.png"
+                alt="Ranise MOISE Professeure IA"
+                class="chapter-professor-avatar"
+            >
+
+
+            <p class="chapter1-ia-role">
+
+                Professeure CampusNumérique FOBAS
+
+            </p>
+
+
+            <p class="chapter1-ia-welcome">
+
+                Bienvenue dans le Chapitre 2 de la formation
+                Microsoft Word 2007.
+                Je vais vous accompagner étape par étape
+                dans la maîtrise de l’onglet Home (Accueil).
+
+            </p>
+
+
+            <div
+                id="chapter2TalkPanel"
+                class="talk-to-ai-professor-panel"
+                hidden
+            >
+
+                <div class="talk-ai-header">
+
+                    <strong>
+                        🎓 Talk to AI Professor
+                    </strong>
+
+
+                    <button
+                        type="button"
+                        id="chapter2CloseTalkButton"
+                        class="talk-ai-close-btn"
+                        aria-label="Close"
+                    >
+
+                        ✕
+
+                    </button>
+
+                </div>
+
+
+                <div
+                    id="chapter2Conversation"
+                    class="talk-ai-conversation"
+                    aria-live="polite"
+                >
+
+                    <div class="talk-ai-message professor-message">
+
+                        <strong>
+                            Professor:
+                        </strong>
+
+                        <span>
+
+                            Bonjour, je suis Ranise MOISE,
+                            votre Professeure IA CampusNumérique.
+
+                            Bienvenue dans le Chapitre 2 de votre
+                            formation Microsoft Word 2007.
+
+                            Nous allons étudier progressivement
+                            l’onglet Home (Accueil), en commençant
+                            par la théorie, puis la pratique.
+
+                            Je vais vous accompagner étape par étape
+                            afin que chaque notion soit comprise
+                            avant de passer à la suivante.
+
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+                <div class="talk-ai-input-row">
+
+                    <textarea
+                        id="chapter2ProfessorInput"
+                        class="talk-ai-input"
+                        rows="1"
+                        placeholder="Type your question..."
+                        autocomplete="off"
+                    ></textarea>
+
+
+                    <button
+                        type="button"
+                        id="chapter2SendButton"
+                        class="talk-ai-send-btn"
+                        aria-label="Send"
+                    >
+
+                        ➤
+
+                    </button>
+
+                </div>
+
+
+                <div class="talk-ai-actions">
+
+                    <button
+                        type="button"
+                        id="chapter2SpeakButton"
+                        class="talk-ai-action-btn"
+                    >
+
+                        🎤 Speak
+
+                    </button>
+
+
+                    <button
+                        type="button"
+                        id="chapter2VoiceButton"
+                        class="talk-ai-action-btn"
+                    >
+
+                        🔊 Professor
+
+                    </button>
+
+                </div>
+
+
+                <div
+                    id="chapter2Status"
+                    class="talk-ai-status"
+                >
+
+                    Ready
+
+                </div>
+
+            </div>
+
+        </div>
+
+    `;
+
+
+    campusContent.prepend(
+        iaBox
+    );
+
+
+    // =====================================
+    // CHAPTER 2 - LOCAL CONTROLS ONLY
+    // =====================================
+
+    const talkButton =
+        document.getElementById(
+            "chapter2TalkButton"
+        );
+
+
+    const closeButton =
+        document.getElementById(
+            "chapter2CloseTalkButton"
+        );
+
+
+    const panel =
+        document.getElementById(
+            "chapter2TalkPanel"
+        );
+
+
+    const input =
+        document.getElementById(
+            "chapter2ProfessorInput"
+        );
+
+
+    const sendButton =
+        document.getElementById(
+            "chapter2SendButton"
+        );
+
+
+    const speakButton =
+        document.getElementById(
+            "chapter2SpeakButton"
+        );
+
+
+    const voiceButton =
+        document.getElementById(
+            "chapter2VoiceButton"
+        );
+
+
+    if(
+        !talkButton ||
+        !closeButton ||
+        !panel ||
+        !input
+    ){
+
+        return;
+
+    }
+
+
+    // =====================================
+    // OPEN / CLOSE
+    // =====================================
+
+    talkButton.onclick = function(){
+
+        const isOpen =
+            !panel.hidden;
+
+
+        panel.hidden =
+            isOpen;
+
+
+        talkButton.setAttribute(
+            "aria-expanded",
+            String(!isOpen)
+        );
+
+
+        if(!isOpen){
+
+            setTimeout(
+                function(){
+
+                    input.focus();
+
+                },
+                100
+            );
+
+        }
+
+    };
+
+
+    closeButton.onclick = function(){
+
+        panel.hidden =
+            true;
+
+
+        talkButton.setAttribute(
+            "aria-expanded",
+            "false"
+        );
+
+    };
+
+
+    // =====================================
+    // SEND
+    // REUSE EXISTING AI ENGINE
+    // WITHOUT REUSING CHAPTER 1 DOM IDs
+    // =====================================
+
+    if(sendButton){
+
+        sendButton.onclick =
+            function(){
+
+                const message =
+                    input.value.trim();
+
+
+                if(!message){
+                    return;
+                }
+
+
+                window.campusLastProfessorResponse =
+                    message;
+
+
+                if(
+                    typeof talkToAIProfessorSend ===
+                    "function"
+                ){
+
+                    talkToAIProfessorSend();
+
+                }
+
+            };
+
+    }
+
+
+    input.addEventListener(
+        "keydown",
+        function(event){
+
+            if(
+                event.key === "Enter" &&
+                !event.shiftKey
+            ){
+
+                event.preventDefault();
+
+
+                if(sendButton){
+
+                    sendButton.click();
+
+                }
+
+            }
+
+        }
+    );
+
+
+    // =====================================
+    // VOICE INPUT
+    // =====================================
+
+    if(speakButton){
+
+        speakButton.onclick =
+            function(){
+
+                if(
+                    typeof talkToAIProfessorStartListening ===
+                    "function"
+                ){
+
+                    talkToAIProfessorStartListening();
+
+                }
+
+            };
+
+    }
+
+
+    // =====================================
+    // MARYTTS
+    // =====================================
+
+    if(voiceButton){
+
+        voiceButton.onclick =
+            async function(){
+
+                const lastMessage =
+                    window.campusLastProfessorResponse;
+
+
+                if(
+                    lastMessage &&
+                    typeof speakProfessorIAWithMaryTTS ===
+                    "function"
+                ){
+
+                    await speakProfessorIAWithMaryTTS(
+                        lastMessage
+                    );
+
+                }
+
+            };
+
+    }
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
