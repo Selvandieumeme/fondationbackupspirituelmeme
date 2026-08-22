@@ -174,18 +174,67 @@ const microsoftWordCourse = {
 
 
 {
-        id:"chapitre2",
-        unlocked:false,
-        title:"Chapitre 2 - Maîtrise de l’onglet Home (Accueil) de Microsoft Word 2007",
+    id:"chapitre2",
 
-        // tout kontni Chapitre 2 la isit la
+    unlocked:false,
 
-    }
+    title:
+    "Chapitre 2 - Maîtrise de l’onglet Home (Accueil) de Microsoft Word 2007",
 
-   
+
+    // =====================================
+    // CHAPITRE 2 — PARTIES
+    // THÉORIE OUVERTE
+    // TOUT LE RESTE VERROUILLÉ
+    // =====================================
+
+    theory: [
+
+        {
+            title:
+            "Introduction à l’onglet Home (Accueil)",
+
+            content:
+            "L’onglet Home (Accueil) de Microsoft Word 2007 regroupe les principaux outils permettant de saisir, modifier, mettre en forme et organiser le contenu d’un document."
+        }
+
+    ],
+
+
+    practice: [],
+
+
+    exercises: [],
+
+
+    homework:
+    "",
+
+
+    evaluation: [],
+
+
+    objective: [
+
+        "Maîtriser progressivement les outils de l’onglet Home (Accueil) de Microsoft Word 2007.",
+
+        "Apprendre à utiliser les commandes de mise en forme et de modification du texte.",
+
+        "Développer une maîtrise pratique et progressive des outils de l’onglet Home."
+
     ]
 
-};
+},
+
+
+
+
+
+
+
+
+
+
 
 
 
