@@ -227,7 +227,169 @@ const microsoftWordCourse = {
     ],
 
 
-    practice: [],
+
+
+
+
+
+
+
+
+
+
+
+    practice: [
+
+    {
+
+        title:
+        "Pratique : Groupe Presse-papiers (Clipboard) — Copier, Couper et Coller",
+
+        steps: [
+
+            "Ouvrir un document Microsoft Word 2007 et saisir un court texte.",
+
+            "Sélectionner une partie du texte à l’aide de la souris ou du clavier.",
+
+            "Utiliser la commande Copier (Copy) pour placer une copie du texte sélectionné dans le Presse-papiers sans supprimer le texte original.",
+
+            "Placer le curseur à un autre endroit du document.",
+
+            "Utiliser la commande Coller (Paste) afin d’insérer la copie du texte à l’endroit choisi.",
+
+            "Sélectionner ensuite une partie du texte à déplacer.",
+
+            "Utiliser la commande Couper (Cut) afin de retirer le texte de son emplacement actuel et de le placer dans le Presse-papiers.",
+
+            "Placer le curseur à l’endroit où le texte doit être déplacé.",
+
+            "Utiliser la commande Coller (Paste) afin de placer le texte coupé à son nouvel emplacement.",
+
+            "Vérifier que la copie conserve le texte original tandis que la coupe déplace le texte vers un nouvel emplacement."
+
+        ]
+
+    },
+
+
+    {
+
+        title:
+        "Pratique : Groupe Police (Font) — Type et taille de police",
+
+        steps: [
+
+            "Saisir une phrase dans un document Microsoft Word 2007.",
+
+            "Sélectionner la phrase à modifier.",
+
+            "Ouvrir la liste des polices du groupe Police (Font).",
+
+            "Choisir un autre type de police (Font), par exemple Arial, Calibri ou Times New Roman.",
+
+            "Observer immédiatement la modification de l’apparence des caractères sélectionnés.",
+
+            "Conserver le texte sélectionné et ouvrir la liste Taille de police (Font Size).",
+
+            "Choisir une taille différente pour agrandir ou réduire les caractères.",
+
+            "Observer la nouvelle dimension du texte.",
+
+            "Vérifier que la modification du type et de la taille de police s’applique uniquement au texte sélectionné."
+
+        ]
+
+    },
+
+
+    {
+
+        title:
+        "Pratique : Groupe Police (Font) — Gras, Italique et Souligné",
+
+        steps: [
+
+            "Saisir une nouvelle phrase dans le document.",
+
+            "Sélectionner le mot ou le groupe de mots à mettre en forme.",
+
+            "Activer la commande Gras (Bold) afin de rendre le texte plus épais et plus visible.",
+
+            "Sélectionner une autre partie du texte et activer la commande Italique (Italic) afin d’incliner les caractères.",
+
+            "Sélectionner une autre partie du texte et activer la commande Souligné (Underline) afin d’ajouter une ligne sous les caractères.",
+
+            "Observer visuellement la différence entre le texte en Gras, le texte en Italique et le texte Souligné.",
+
+            "Sélectionner un texte et combiner plusieurs commandes de mise en forme lorsque cela est nécessaire.",
+
+            "Vérifier que les commandes appliquées produisent bien l’apparence souhaitée."
+
+        ]
+
+    },
+
+
+    {
+
+        title:
+        "Pratique : Groupe Police (Font) — Couleur de police",
+
+        steps: [
+
+            "Saisir une phrase dans le document.",
+
+            "Sélectionner le texte dont la couleur doit être modifiée.",
+
+            "Ouvrir la commande Couleur de police (Font Color).",
+
+            "Choisir une couleur disponible dans la palette.",
+
+            "Observer la modification de la couleur des caractères sélectionnés.",
+
+            "Sélectionner une autre partie du texte et lui appliquer une couleur différente.",
+
+            "Comparer les différentes couleurs appliquées.",
+
+            "Vérifier que seule la partie sélectionnée a reçu la couleur choisie."
+
+        ]
+
+    },
+
+
+    {
+
+        title:
+        "Pratique : Groupe Police (Font) — Surbrillance",
+
+        steps: [
+
+            "Saisir une phrase ou un court paragraphe dans le document.",
+
+            "Sélectionner le mot ou le passage à mettre en évidence.",
+
+            "Utiliser la commande Surbrillance (Text Highlight Color).",
+
+            "Choisir une couleur de surbrillance.",
+
+            "Observer la couleur appliquée derrière les caractères sélectionnés.",
+
+            "Sélectionner un autre passage du texte et lui appliquer une surbrillance.",
+
+            "Comparer le texte normal avec le texte mis en surbrillance.",
+
+            "Vérifier que la surbrillance permet de faire ressortir visuellement les informations importantes."
+
+        ]
+
+    }
+
+],
+
+
+
+
 
 
     exercises: [],
