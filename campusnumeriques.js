@@ -173,6 +173,8 @@ const microsoftWordCourse = {
 
 
 
+
+
 {
     id:"chapitre2",
 
@@ -191,11 +193,35 @@ const microsoftWordCourse = {
     theory: [
 
         {
+
             title:
             "Introduction à l’onglet Home (Accueil)",
 
             content:
-            "L’onglet Home (Accueil) de Microsoft Word 2007 regroupe les principaux outils permettant de saisir, modifier, mettre en forme et organiser le contenu d’un document."
+            "L’onglet Home (Accueil) de Microsoft Word 2007 regroupe plusieurs outils essentiels permettant de travailler efficacement sur le contenu d’un document. Il permet notamment d’accéder rapidement aux commandes de manipulation, de modification et de mise en forme du texte. Dans cette formation, nous allons commencer par découvrir deux groupes essentiels de l’onglet Home : le groupe Presse-papiers (Clipboard) et le groupe Police (Font). Le groupe Presse-papiers permet principalement de copier, couper, coller et reproduire une mise en forme. Le groupe Police permet de modifier l’apparence des caractères et du texte, notamment le type de police, la taille, le style, la couleur et la surbrillance. Cette première partie théorique constitue la base nécessaire avant de passer à la pratique."
+        
+        },
+
+
+        {
+
+            title:
+            "Groupe Presse-papiers (Clipboard)",
+
+            content:
+            "Le groupe Presse-papiers (Clipboard) est l’un des groupes importants de l’onglet Home (Accueil) de Microsoft Word 2007. Il contient plusieurs commandes permettant de manipuler le contenu d’un document. La commande Coller (Paste) permet d’insérer dans le document un contenu qui a préalablement été placé dans le Presse-papiers après une opération de copie ou de coupe. La commande Couper (Cut) permet de retirer un contenu de son emplacement actuel et de le placer temporairement dans le Presse-papiers afin de pouvoir le coller à un autre endroit du document ou dans un autre document. La commande Copier (Copy) permet de créer une copie du contenu sélectionné dans le Presse-papiers sans supprimer le contenu original. Le contenu original reste donc à son emplacement. La commande Reproduire la mise en forme (Format Painter) permet de copier uniquement la mise en forme d’un élément, puis de l’appliquer à un autre élément. Cette commande est particulièrement utile lorsqu’on souhaite donner rapidement la même apparence à plusieurs éléments d’un document. Avant d’utiliser les commandes Couper (Cut) ou Copier (Copy), il faut généralement sélectionner le contenu concerné. Après avoir effectué une copie ou une coupe, la commande Coller (Paste) permet de placer le contenu à l’endroit souhaité. La maîtrise du groupe Presse-papiers permet donc de déplacer, dupliquer et reproduire efficacement le contenu et sa mise en forme dans un document Word 2007."
+        
+        },
+
+
+        {
+
+            title:
+            "Groupe Police (Font)",
+
+            content:
+            "Le groupe Police (Font) de l’onglet Home (Accueil) regroupe les principaux outils permettant de modifier l’apparence des caractères et du texte dans un document Microsoft Word 2007. Le type de police (Font) permet de choisir la forme des caractères utilisés pour afficher le texte, par exemple Arial, Calibri ou Times New Roman. La taille de la police (Font Size) permet d’agrandir ou de réduire les caractères afin d’adapter leur dimension au contenu du document. La commande Gras (Bold) permet de rendre les caractères plus épais et plus visibles. La commande Italique (Italic) permet d’incliner les caractères afin de donner un style particulier au texte. La commande Souligné (Underline) permet d’ajouter une ligne sous le texte sélectionné. La commande Couleur de police (Font Color) permet de modifier la couleur des caractères afin de mettre certains éléments en évidence ou d’améliorer la présentation du document. La commande Surbrillance (Text Highlight Color) permet d’appliquer une couleur de fond derrière les caractères, comme si le texte était marqué avec un surligneur. Ces différents outils peuvent être utilisés individuellement ou combinés afin de créer une présentation claire, lisible et professionnelle. Pour appliquer correctement la plupart de ces commandes à un texte déjà présent dans le document, il faut d’abord sélectionner le texte concerné, puis choisir l’outil de mise en forme souhaité. La maîtrise du groupe Police constitue donc une étape fondamentale pour apprendre à mettre en forme efficacement un document Word 2007."
+        
         }
 
     ],
@@ -216,15 +242,19 @@ const microsoftWordCourse = {
 
     objective: [
 
-        "Maîtriser progressivement les outils de l’onglet Home (Accueil) de Microsoft Word 2007.",
+        "Comprendre le rôle général de l’onglet Home (Accueil) de Microsoft Word 2007.",
 
-        "Apprendre à utiliser les commandes de mise en forme et de modification du texte.",
+        "Identifier et comprendre les commandes principales du groupe Presse-papiers (Clipboard).",
 
-        "Développer une maîtrise pratique et progressive des outils de l’onglet Home."
+        "Comprendre le fonctionnement des commandes Coller (Paste), Couper (Cut), Copier (Copy) et Reproduire la mise en forme (Format Painter).",
 
-   
+        "Identifier et comprendre les principales commandes du groupe Police (Font).",
 
-]
+        "Comprendre le rôle du type de police, de la taille, du Gras, de l’Italique, du Souligné, de la couleur de police et de la surbrillance.",
+
+        "Être capable d’expliquer théoriquement l’utilisation de ces outils avant de passer à la pratique."
+
+    ]
 
 }
 
