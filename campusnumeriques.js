@@ -4378,95 +4378,227 @@ function renderChapter1ProfessorIA(){
 
 
 
+// =====================================================
+// MICROSOFT WORD 2007
+// DYNAMIC RANISE IA PROFESSOR ENGINE
+// ONE ENGINE FOR ALL CHAPTERS
+// ISOLATED FROM CHAPTER-SPECIFIC CODE
+// REUSES EXISTING AI + MARYTTS SYSTEM
+// =====================================================
 
+function renderChapterProfessorIA(chapter){
 
-
-
-// =====================================
-// CHAPITRE 2 - PROFESSEURE IA ASSISTANT
-// ISOLATED MODULE
-// NO CONFLICT WITH CHAPTER 1
-// =====================================
-
-function renderChapter2ProfessorIA(){
 
     const campusContent =
         document.getElementById(
             "campusContent"
         );
 
-    if(!campusContent){
+
+    if(
+        !campusContent ||
+        !chapter ||
+        !chapter.id
+    ){
+
         return;
+
     }
+
+
+
+    // =====================================
+    // UNIQUE CHAPTER IDENTIFIER
+    // =====================================
+
+    const chapterKey =
+        String(
+            chapter.id
+        )
+        .replace(
+            /[^a-zA-Z0-9_-]/g,
+            ""
+        );
+
+
+    if(!chapterKey){
+
+        return;
+
+    }
+
+
+
+    const iaId =
+        "chapterProfessorIA_" +
+        chapterKey;
 
 
     const existingIA =
         document.getElementById(
-            "chapter2ProfessorIA"
+            iaId
         );
 
+
     if(existingIA){
+
         return;
+
     }
 
+
+
+    // =====================================
+    // CHAPTER TITLE
+    // =====================================
+
+    const chapterTitle =
+        chapter.title ||
+        "ce chapitre";
+
+
+
+    // =====================================
+    // DYNAMIC DOM IDS
+    // =====================================
+
+    const talkButtonId =
+        "chapterTalkButton_" +
+        chapterKey;
+
+
+    const panelId =
+        "chapterTalkPanel_" +
+        chapterKey;
+
+
+    const closeButtonId =
+        "chapterCloseTalkButton_" +
+        chapterKey;
+
+
+    const inputId =
+        "chapterProfessorInput_" +
+        chapterKey;
+
+
+    const sendButtonId =
+        "chapterSendButton_" +
+        chapterKey;
+
+
+    const speakButtonId =
+        "chapterSpeakButton_" +
+        chapterKey;
+
+
+    const voiceButtonId =
+        "chapterVoiceButton_" +
+        chapterKey;
+
+
+    const conversationId =
+        "chapterConversation_" +
+        chapterKey;
+
+
+    const statusId =
+        "chapterStatus_" +
+        chapterKey;
+
+
+    const avatarId =
+        "chapterProfessorAvatar_" +
+        chapterKey;
+
+
+
+    // =====================================
+    // CREATE RANISE CARD
+    // =====================================
 
     const iaBox =
         document.createElement(
             "div"
         );
 
+
     iaBox.id =
-        "chapter2ProfessorIA";
+        iaId;
+
 
 
     iaBox.innerHTML = `
 
         <div class="chapter1-ia-card">
 
+
             <div class="chapter1-ia-topbar">
+
 
                 <div class="chapter1-ia-title">
 
+
                     <span class="chapter1-ia-icon">
+
                         👩‍🏫
+
                     </span>
+
 
                     <div>
 
+
                         <h3>
+
                             Ranise MOISE
+
                         </h3>
 
+
                         <span>
+
                             Professeure IA
+
                         </span>
 
+
                     </div>
+
 
                 </div>
 
 
+
                 <button
                     type="button"
-                    id="chapter2TalkButton"
+                    id="${talkButtonId}"
                     class="talk-to-ai-professor-btn"
                     aria-expanded="false"
-                    aria-controls="chapter2TalkPanel"
+                    aria-controls="${panelId}"
                 >
 
                     🎤 Talk
 
                 </button>
 
+
             </div>
 
 
+
             <img
-                id="chapter2ProfessorAvatar"
+
+                id="${avatarId}"
+
                 src="ranise-moise-smile.png"
+
                 alt="Ranise MOISE Professeure IA"
+
                 class="chapter-professor-avatar"
+
             >
+
 
 
             <p class="chapter1-ia-role">
@@ -4476,32 +4608,44 @@ function renderChapter2ProfessorIA(){
             </p>
 
 
+
             <p class="chapter1-ia-welcome">
 
-                Bienvenue dans le Chapitre 2 de la formation
-                Microsoft Word 2007.
-                Je vais vous accompagner étape par étape
-                dans la maîtrise de l’onglet Home (Accueil).
+                Bienvenue dans le
+                ${chapterTitle}.
+
+                Je suis Ranise MOISE,
+                votre Professeure IA.
+
+                Je vais vous accompagner
+                étape par étape dans cette
+                formation Microsoft Word 2007.
 
             </p>
 
 
+
             <div
-                id="chapter2TalkPanel"
+                id="${panelId}"
                 class="talk-to-ai-professor-panel"
                 hidden
             >
 
+
                 <div class="talk-ai-header">
 
+
                     <strong>
+
                         🎓 Talk to AI Professor
+
                     </strong>
+
 
 
                     <button
                         type="button"
-                        id="chapter2CloseTalkButton"
+                        id="${closeButtonId}"
                         class="talk-ai-close-btn"
                         aria-label="Close"
                     >
@@ -4510,48 +4654,66 @@ function renderChapter2ProfessorIA(){
 
                     </button>
 
+
                 </div>
 
 
+
                 <div
-                    id="chapter2Conversation"
+                    id="${conversationId}"
                     class="talk-ai-conversation"
                     aria-live="polite"
                 >
 
-                    <div class="talk-ai-message professor-message">
+
+                    <div
+                        class="talk-ai-message professor-message"
+                    >
+
 
                         <strong>
+
                             Professor:
+
                         </strong>
+
 
                         <span>
 
                             Bonjour, je suis Ranise MOISE,
                             votre Professeure IA CampusNumérique.
 
-                            Bienvenue dans le Chapitre 2 de votre
-                            formation Microsoft Word 2007.
+                            Bienvenue dans le
+                            ${chapterTitle}.
 
-                            Nous allons étudier progressivement
-                            l’onglet Home (Accueil), en commençant
-                            par la théorie, puis la pratique.
+                            Je vais vous accompagner
+                            progressivement dans cette
+                            formation.
 
-                            Je vais vous accompagner étape par étape
-                            afin que chaque notion soit comprise
-                            avant de passer à la suivante.
+                            Nous commencerons par les
+                            notions théoriques nécessaires,
+                            puis nous passerons à la pratique
+                            et aux étapes suivantes.
+
+                            Mon objectif est de vous aider
+                            à comprendre chaque notion avant
+                            de poursuivre votre apprentissage.
 
                         </span>
 
+
                     </div>
+
 
                 </div>
 
 
+
                 <div class="talk-ai-input-row">
 
+
                     <textarea
-                        id="chapter2ProfessorInput"
+                        id="${inputId}"
                         class="talk-ai-input"
                         rows="1"
                         placeholder="Type your question..."
@@ -4559,9 +4721,10 @@ function renderChapter2ProfessorIA(){
                     ></textarea>
 
 
+
                     <button
                         type="button"
-                        id="chapter2SendButton"
+                        id="${sendButtonId}"
                         class="talk-ai-send-btn"
                         aria-label="Send"
                     >
@@ -4570,14 +4733,17 @@ function renderChapter2ProfessorIA(){
 
                     </button>
 
+
                 </div>
+
 
 
                 <div class="talk-ai-actions">
 
+
                     <button
                         type="button"
-                        id="chapter2SpeakButton"
+                        id="${speakButtonId}"
                         class="talk-ai-action-btn"
                     >
 
@@ -4586,9 +4752,10 @@ function renderChapter2ProfessorIA(){
                     </button>
 
 
+
                     <button
                         type="button"
-                        id="chapter2VoiceButton"
+                        id="${voiceButtonId}"
                         class="talk-ai-action-btn"
                     >
 
@@ -4596,11 +4763,13 @@ function renderChapter2ProfessorIA(){
 
                     </button>
 
+
                 </div>
 
 
+
                 <div
-                    id="chapter2Status"
+                    id="${statusId}"
                     class="talk-ai-status"
                 >
 
@@ -4608,62 +4777,71 @@ function renderChapter2ProfessorIA(){
 
                 </div>
 
+
             </div>
+
 
         </div>
 
     `;
 
 
+
+    // =====================================
+    // INSERT ABOVE CHAPTER CONTENT
+    // =====================================
+
     campusContent.prepend(
         iaBox
     );
 
 
+
     // =====================================
-    // CHAPTER 2 - LOCAL CONTROLS ONLY
+    // GET DYNAMIC ELEMENTS
     // =====================================
 
     const talkButton =
         document.getElementById(
-            "chapter2TalkButton"
+            talkButtonId
         );
 
 
     const closeButton =
         document.getElementById(
-            "chapter2CloseTalkButton"
+            closeButtonId
         );
 
 
     const panel =
         document.getElementById(
-            "chapter2TalkPanel"
+            panelId
         );
 
 
     const input =
         document.getElementById(
-            "chapter2ProfessorInput"
+            inputId
         );
 
 
     const sendButton =
         document.getElementById(
-            "chapter2SendButton"
+            sendButtonId
         );
 
 
     const speakButton =
         document.getElementById(
-            "chapter2SpeakButton"
+            speakButtonId
         );
 
 
     const voiceButton =
         document.getElementById(
-            "chapter2VoiceButton"
+            voiceButtonId
         );
+
 
 
     if(
@@ -4678,60 +4856,68 @@ function renderChapter2ProfessorIA(){
     }
 
 
+
     // =====================================
-    // OPEN / CLOSE
+    // OPEN / CLOSE RANISE PANEL
     // =====================================
 
-    talkButton.onclick = function(){
-
-        const isOpen =
-            !panel.hidden;
+    talkButton.onclick =
+        function(){
 
 
-        panel.hidden =
-            isOpen;
+            const isOpen =
+                !panel.hidden;
 
 
-        talkButton.setAttribute(
-            "aria-expanded",
-            String(!isOpen)
-        );
+            panel.hidden =
+                isOpen;
 
 
-        if(!isOpen){
-
-            setTimeout(
-                function(){
-
-                    input.focus();
-
-                },
-                100
+            talkButton.setAttribute(
+                "aria-expanded",
+                String(
+                    !isOpen
+                )
             );
 
-        }
 
-    };
+            if(!isOpen){
+
+                setTimeout(
+                    function(){
+
+                        input.focus();
+
+                    },
+                    100
+                );
+
+            }
+
+        };
 
 
-    closeButton.onclick = function(){
 
-        panel.hidden =
-            true;
+    closeButton.onclick =
+        function(){
 
 
-        talkButton.setAttribute(
-            "aria-expanded",
-            "false"
-        );
+            panel.hidden =
+                true;
 
-    };
+
+            talkButton.setAttribute(
+                "aria-expanded",
+                "false"
+            );
+
+        };
+
 
 
     // =====================================
-    // SEND
+    // SEND QUESTION
     // REUSE EXISTING AI ENGINE
-    // WITHOUT REUSING CHAPTER 1 DOM IDs
     // =====================================
 
     if(sendButton){
@@ -4739,12 +4925,15 @@ function renderChapter2ProfessorIA(){
         sendButton.onclick =
             function(){
 
+
                 const message =
                     input.value.trim();
 
 
                 if(!message){
+
                     return;
+
                 }
 
 
@@ -4766,9 +4955,15 @@ function renderChapter2ProfessorIA(){
     }
 
 
+
+    // =====================================
+    // ENTER = SEND
+    // =====================================
+
     input.addEventListener(
         "keydown",
         function(event){
+
 
             if(
                 event.key === "Enter" &&
@@ -4790,6 +4985,7 @@ function renderChapter2ProfessorIA(){
     );
 
 
+
     // =====================================
     // VOICE INPUT
     // =====================================
@@ -4798,6 +4994,7 @@ function renderChapter2ProfessorIA(){
 
         speakButton.onclick =
             function(){
+
 
                 if(
                     typeof talkToAIProfessorStartListening ===
@@ -4813,14 +5010,16 @@ function renderChapter2ProfessorIA(){
     }
 
 
+
     // =====================================
-    // MARYTTS
+    // MARYTTS PROFESSOR VOICE
     // =====================================
 
     if(voiceButton){
 
         voiceButton.onclick =
             async function(){
+
 
                 const lastMessage =
                     window.campusLastProfessorResponse;
@@ -4843,7 +5042,6 @@ function renderChapter2ProfessorIA(){
     }
 
 }
-
 
 
 
