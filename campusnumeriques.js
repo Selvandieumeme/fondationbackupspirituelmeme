@@ -1652,6 +1652,56 @@ if(
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// =====================================
+// AUTO RENDER RANISE FOR ANY CHAPTER
+// =====================================
+
+setTimeout(function(){
+
+    if(
+        typeof renderChapterProfessorIA ===
+        "function"
+    ){
+
+        renderChapterProfessorIA(
+            chapterId
+        );
+
+    }
+
+},50);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
                 const backButton =
 
                 document.getElementById(
