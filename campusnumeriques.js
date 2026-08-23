@@ -1127,9 +1127,37 @@ if(chapterId === "chapitre2"){
     );
 
 
+    // =====================================
+    // CHAPTER 2 IA RENDER
+    // RENDER RANISE AFTER CHAPTER 2
+    // CONTENT HAS BEEN CREATED
+    // =====================================
+
+    setTimeout(function(){
+
+        if(
+            typeof renderChapterProfessorIA ===
+            "function"
+        ){
+
+            renderChapterProfessorIA(
+                chapterId
+            );
+
+        }
+
+    },50);
+
+
     return;
 
 }
+
+
+
+
+
+
 
 
 
