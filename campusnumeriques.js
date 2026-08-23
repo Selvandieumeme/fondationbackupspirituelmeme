@@ -18340,6 +18340,409 @@ window.RaniseMoiseEvaluationEngine = {
 
 
 
+// =========================================================
+// MICROSOFT WORD 2007 FORMATION
+// RANISE MOISE — DYNAMIC THEORY TEACHING ENGINE
+// CHAPTER 2+ ONLY
+// =========================================================
+// ISOLATED ADD-ON
+// DOES NOT MODIFY BLOCK 4
+// DOES NOT MODIFY BLOCK 5
+// DOES NOT MODIFY BLOCK 6
+// DOES NOT MODIFY CHAPTER 1
+// USES EXISTING COURSE DATA
+// USES EXISTING MARYTTS SYSTEM
+// READS ALL THEORY LESSONS SEQUENTIALLY
+// AUTOMATICALLY WORKS FOR CHAPTER 2, 3, 4, 5...
+// =========================================================
+
+(function(){
+
+    "use strict";
+
+
+    window.RaniseDynamicTheoryTeachingEngine = {
+
+
+        // =====================================================
+        // GET CHAPTER
+        // =====================================================
+
+        getChapter:function(chapterId){
+
+            if(
+                !chapterId ||
+                chapterId === "chapitre1"
+            ){
+
+                return null;
+
+            }
+
+
+            if(
+                typeof microsoftWordCourse ===
+                "undefined"
+            ){
+
+                return null;
+
+            }
+
+
+            if(
+                !Array.isArray(
+                    microsoftWordCourse.chapters
+                )
+            ){
+
+                return null;
+
+            }
+
+
+            return microsoftWordCourse.chapters.find(
+
+                chapter =>
+                    chapter &&
+                    chapter.id === chapterId
+
+            ) || null;
+
+        },
+
+
+        // =====================================================
+        // GET ALL THEORY LESSONS
+        // =====================================================
+
+        getTheoryLessons:function(chapterId){
+
+            const chapter =
+                this.getChapter(
+                    chapterId
+                );
+
+
+            if(!chapter){
+
+                return [];
+
+            }
+
+
+            if(
+                !Array.isArray(
+                    chapter.theory
+                )
+            ){
+
+                return [];
+
+            }
+
+
+            return chapter.theory;
+
+        },
+
+
+        // =====================================================
+        // BUILD THEORY EXPLANATION
+        // SAME BASIC PRINCIPLE AS BLOCK 4
+        // =====================================================
+
+        buildExplanation:function(lesson){
+
+            if(!lesson){
+
+                return null;
+
+            }
+
+
+            if(
+                typeof lesson.title !==
+                "string" ||
+                typeof lesson.content !==
+                "string"
+            ){
+
+                return null;
+
+            }
+
+
+            return (
+
+                "Commençons cette notion. " +
+
+                "Le sujet que nous allons étudier est : " +
+
+                lesson.title +
+
+                ". " +
+
+                "Voici l’idée essentielle à comprendre : " +
+
+                lesson.content
+
+            );
+
+        },
+
+
+        // =====================================================
+        // TEACH ALL THEORY
+        // CHAPTER 2+
+        // =====================================================
+
+        teachTheory:async function(chapterId){
+
+            // -------------------------------------------------
+            // ABSOLUTE PROTECTION OF CHAPTER 1
+            // -------------------------------------------------
+
+            if(
+                !chapterId ||
+                chapterId === "chapitre1"
+            ){
+
+                return false;
+
+            }
+
+
+            // -------------------------------------------------
+            // VERIFY MARYTTS
+            // -------------------------------------------------
+
+            if(
+                typeof speakProfessorIAWithMaryTTS !==
+                "function"
+            ){
+
+                console.error(
+
+                    "RANISE DYNAMIC THEORY ENGINE: " +
+                    "MARYTTS FUNCTION NOT AVAILABLE"
+
+                );
+
+                return false;
+
+            }
+
+
+            // -------------------------------------------------
+            // GET CURRENT CHAPTER
+            // -------------------------------------------------
+
+            const chapter =
+                this.getChapter(
+                    chapterId
+                );
+
+
+            if(!chapter){
+
+                console.error(
+
+                    "RANISE DYNAMIC THEORY ENGINE: " +
+                    "CHAPTER NOT FOUND",
+                    chapterId
+
+                );
+
+                return false;
+
+            }
+
+
+            // -------------------------------------------------
+            // GET THEORY
+            // -------------------------------------------------
+
+            const lessons =
+                this.getTheoryLessons(
+                    chapterId
+                );
+
+
+            if(
+                !Array.isArray(lessons) ||
+                lessons.length === 0
+            ){
+
+                console.error(
+
+                    "RANISE DYNAMIC THEORY ENGINE: " +
+                    "THEORY NOT AVAILABLE",
+                    chapterId
+
+                );
+
+                return false;
+
+            }
+
+
+            console.log(
+
+                "RANISE DYNAMIC THEORY ENGINE: " +
+                "STARTING THEORY",
+                chapterId,
+                lessons.length
+
+            );
+
+
+            try{
+
+
+                // =============================================
+                // READ EVERY THEORY LESSON IN ORDER
+                // =============================================
+
+                for(
+                    let i = 0;
+                    i < lessons.length;
+                    i++
+                ){
+
+                    const lesson =
+                        lessons[i];
+
+
+                    if(!lesson){
+
+                        continue;
+
+                    }
+
+
+                    const explanation =
+                        this.buildExplanation(
+                            lesson
+                        );
+
+
+                    if(!explanation){
+
+                        console.error(
+
+                            "RANISE DYNAMIC THEORY ENGINE: " +
+                            "INVALID THEORY LESSON",
+                            i + 1,
+                            chapterId
+
+                        );
+
+                        continue;
+
+                    }
+
+
+                    console.log(
+
+                        "RANISE DYNAMIC THEORY ENGINE: " +
+                        "READING THEORY",
+                        chapterId,
+                        i + 1,
+                        lessons.length,
+                        lesson.title
+
+                    );
+
+
+                    // -----------------------------------------
+                    // IMPORTANT:
+                    // WAIT UNTIL THIS THEORY LESSON FINISHES
+                    // BEFORE STARTING THE NEXT ONE
+                    // -----------------------------------------
+
+                    await speakProfessorIAWithMaryTTS(
+
+                        explanation
+
+                    );
+
+                }
+
+
+                console.log(
+
+                    "RANISE DYNAMIC THEORY ENGINE: " +
+                    "ALL THEORY PARTS FINISHED",
+                    chapterId
+
+                );
+
+
+                return true;
+
+
+            }catch(error){
+
+                console.error(
+
+                    "RANISE DYNAMIC THEORY ENGINE: " +
+                    "MARYTTS ERROR",
+                    chapterId,
+                    error
+
+                );
+
+                return false;
+
+            }
+
+        }
+
+    };
+
+
+})();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
