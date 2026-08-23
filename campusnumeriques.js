@@ -1151,35 +1151,53 @@ if(chapterId === "chapitre2"){
 
 
 
-
-
-
-
-
-
-
 // =====================================
-// RANISE DYNAMIC THEORY TEACHING
+// RANISE DYNAMIC THEORY + BLOCK 5
 // CHAPTER 2+
-// START AFTER CHAPTER CONTENT IS RENDERED
+// THEORY MUST FINISH BEFORE EXPLANATION
+// CHAPTER 1 COMPLETELY EXCLUDED
 // =====================================
 
-setTimeout(function(){
+if(chapterId !== "chapitre1"){
 
-    if(
-        typeof RaniseDynamicTheoryTeachingEngine !==
-        "undefined" &&
-        typeof RaniseDynamicTheoryTeachingEngine.teachTheory ===
-        "function"
-    ){
+    setTimeout(async function(){
 
-        RaniseDynamicTheoryTeachingEngine.teachTheory(
-            chapterId
-        );
+        if(
+            typeof RaniseDynamicTheoryTeachingEngine !==
+            "undefined" &&
+            typeof RaniseDynamicTheoryTeachingEngine.teachTheory ===
+            "function"
+        ){
 
-    }
+            const theoryFinished =
 
-},100);
+                await RaniseDynamicTheoryTeachingEngine
+                    .teachTheory(
+                        chapterId
+                    );
+
+
+            if(
+                theoryFinished === true &&
+                typeof RaniseDynamicPedagogicalExplanationEngine !==
+                "undefined" &&
+                typeof RaniseDynamicPedagogicalExplanationEngine
+                    .teachExplanation ===
+                    "function"
+            ){
+
+                await RaniseDynamicPedagogicalExplanationEngine
+                    .teachExplanation(
+                        chapterId
+                    );
+
+            }
+
+        }
+
+    },100);
+
+}
 
 
     return;
