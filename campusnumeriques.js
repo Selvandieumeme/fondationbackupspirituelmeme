@@ -1694,25 +1694,34 @@ if(
 
 
 
+
+
+
+
 // =====================================
 // AUTO RENDER RANISE FOR ANY CHAPTER
+// EXCEPT CHAPTER 1
+// CHAPTER 1 HAS ITS OWN IA RENDERER
 // =====================================
 
-setTimeout(function(){
+if(chapterId !== "chapitre1"){
 
-    if(
-        typeof renderChapterProfessorIA ===
-        "function"
-    ){
+    setTimeout(function(){
 
-        renderChapterProfessorIA(
-            chapterId
-        );
+        if(
+            typeof renderChapterProfessorIA ===
+            "function"
+        ){
 
-    }
+            renderChapterProfessorIA(
+                chapterId
+            );
 
-},50);
+        }
 
+    },50);
+
+}
 
 
 
