@@ -1732,6 +1732,44 @@ if(chapterId !== "chapitre1"){
 
 
 
+// =====================================
+// RANISE DYNAMIC THEORY TEACHING
+// CHAPTER 2+
+// AUTOMATIC FOR EVERY NEW CHAPTER
+// CHAPTER 1 COMPLETELY EXCLUDED
+// =====================================
+
+if(chapterId !== "chapitre1"){
+
+    setTimeout(function(){
+
+        if(
+            typeof RaniseDynamicTheoryTeachingEngine !==
+            "undefined" &&
+            typeof RaniseDynamicTheoryTeachingEngine.teachTheory ===
+            "function"
+        ){
+
+            RaniseDynamicTheoryTeachingEngine.teachTheory(
+                chapterId
+            );
+
+        }
+
+    },100);
+
+}
+
+
+
+
+
+
+
+
+
+
+
 
 
 
