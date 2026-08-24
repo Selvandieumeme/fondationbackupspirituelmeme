@@ -19777,10 +19777,6 @@ window.RaniseMoiseEvaluationEngine = {
 
 
 
-
-
-
-
 // =========================================
 // VALIDATE THEORY + UNLOCK PRACTICE
 // + IMMEDIATE UI RE-RENDER
@@ -19831,16 +19827,28 @@ if(
 }
 
 
+}catch(error){
+
+    console.error(
+
+        "RANISE DYNAMIC PEDAGOGICAL ENGINE: " +
+        "TEACHING PROCESS ERROR",
+
+        error
+
+    );
+
+    return false;
+
 }
 
 
-   }
+}
 
-    };
 
+};
 
 })();
-
 
 
 
