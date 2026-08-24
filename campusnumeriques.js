@@ -1191,6 +1191,41 @@ if(chapterId !== "chapitre1"){
                         chapterId
                     );
 
+
+
+
+
+// =========================================
+                // BLOCK 6 DYNAMIC CONNECTION
+                // PRACTICE UNLOCKED → TEACH PRACTICE
+                // =========================================
+
+                const progress =
+                    RaniseDynamicUnlockRenderBridge
+                        .getProgress(
+                            chapterId
+                        );
+
+
+                if(
+                    progress &&
+                    progress.practice === true &&
+                    typeof RaniseDynamicPracticeTeachingEngine !==
+                    "undefined" &&
+                    typeof RaniseDynamicPracticeTeachingEngine.teachPractice ===
+                    "function"
+                ){
+
+
+
+await RaniseDynamicPracticeTeachingEngine
+                        .teachPractice(
+                            chapterId
+                        );
+
+                }
+
+
             }
 
         }
