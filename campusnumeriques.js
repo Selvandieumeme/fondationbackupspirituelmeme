@@ -1949,6 +1949,41 @@ const WordChapter2PartsEngine = {
         }
 
 
+
+
+
+
+        // =====================================================
+        // DELEGATE TO RANISE DYNAMIC UNLOCK / RENDER BRIDGE
+        // PRESERVE UNLOCKED STATE AFTER RETURNING TO CHAPTER
+        // =====================================================
+
+        if(
+            typeof RaniseDynamicUnlockRenderBridge !==
+            "undefined" &&
+            typeof RaniseDynamicUnlockRenderBridge.renderChapterParts ===
+            "function"
+        ){
+
+            return RaniseDynamicUnlockRenderBridge
+                .renderChapterParts(
+                    "chapitre2"
+                );
+
+        }
+
+
+
+
+
+
+
+
+
+
+
+
+
         const campusContent =
             document.getElementById(
                 "campusContent"
