@@ -18775,49 +18775,55 @@ window.RaniseMoiseEvaluationEngine = {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 // =========================================================
 // MICROSOFT WORD 2007 FORMATION
 // RANISE MOISE — DYNAMIC PEDAGOGICAL EXPLANATION ENGINE
-// DYNAMIC BLOCK 5 — CHAPTER 2+
+// DYNAMIC CHAPTER 2+
 // =========================================================
-// SAME MAIN OBJECTIVE AS ORIGINAL BLOCK 5
-// CHAPTER 1 COMPLETELY PROTECTED
-// DOES NOT MODIFY ORIGINAL BLOCK 5
+// ISOLATED ADD-ON
 // DOES NOT MODIFY BLOCK 4
+// DOES NOT MODIFY CHAPTER 1 BLOCK 5
 // DOES NOT MODIFY BLOCK 6
+// DOES NOT MODIFY EXISTING COURSE DATA
 // USES EXISTING COURSE DATA
 // USES EXISTING AI PROFESSOR REQUEST SYSTEM
 // USES EXISTING MARYTTS SYSTEM
-// EXPLAINS ALL THEORY LESSONS SEQUENTIALLY
-// AFTER COMPLETE SUCCESS:
-// THEORY VALIDATED
-// PRACTICE UNLOCKED
+//
+// WORKFLOW:
+//
+// THEORY READING
+//        ↓
+// PEDAGOGICAL EXPLANATION
+//        ↓
+// EXPLANATION FOR EVERY THEORY LESSON
+//        ↓
+// FINAL THEORY SUMMARY
+//        ↓
+// THEORY VALIDATION MESSAGE
+//        ↓
+// SAVE THEORY AS COMPLETED
+//        ↓
+// UNLOCK PRACTICE
+//
+// CHAPTER 1 COMPLETELY EXCLUDED
 // =========================================================
+
 
 (function(){
 
     "use strict";
 
 
+    // =====================================================
+    // DYNAMIC PEDAGOGICAL EXPLANATION ENGINE
+    // =====================================================
+
     window.RaniseDynamicPedagogicalExplanationEngine = {
 
 
-        // =====================================================
-        // GET CHAPTER
-        // =====================================================
+        // =================================================
+        // GET CURRENT CHAPTER
+        // =================================================
 
         getChapter:function(chapterId){
 
@@ -18855,6 +18861,7 @@ window.RaniseMoiseEvaluationEngine = {
             return microsoftWordCourse.chapters.find(
 
                 chapter =>
+
                     chapter &&
                     chapter.id === chapterId
 
@@ -18863,9 +18870,12 @@ window.RaniseMoiseEvaluationEngine = {
         },
 
 
-        // =====================================================
+
+
+
+        // =================================================
         // GET ALL THEORY LESSONS
-        // =====================================================
+        // =================================================
 
         getTheoryLessons:function(chapterId){
 
@@ -18898,12 +18908,18 @@ window.RaniseMoiseEvaluationEngine = {
         },
 
 
-        // =====================================================
-        // BUILD PEDAGOGICAL PROMPT
-        // SAME MAIN OBJECTIVE AS ORIGINAL BLOCK 5
-        // =====================================================
 
-        buildPedagogicalPrompt:function(lesson){
+
+
+        // =================================================
+        // BUILD PEDAGOGICAL PROMPT
+        // =================================================
+
+        buildPedagogicalPrompt:function(
+            lesson,
+            lessonIndex,
+            totalLessons
+        ){
 
             if(!lesson){
 
@@ -18930,45 +18946,50 @@ window.RaniseMoiseEvaluationEngine = {
                 "CampusNumérique FOBAS, spécialisée dans " +
                 "la formation Microsoft Word 2007. " +
 
-                "Tu viens de lire cette notion de cours. " +
+                "Tu viens de terminer la lecture de cette " +
+                "notion de cours. " +
 
-                "Maintenant, ne te contente surtout pas de " +
-                "répéter le texte du cours. " +
+                "Tu dois maintenant fournir une véritable " +
+                "explication pédagogique approfondie. " +
 
-                "Passe dans une véritable phase " +
-                "d'explication pédagogique destinée à un " +
-                "élève débutant. " +
+                "Ne te contente surtout pas de répéter " +
+                "le texte du cours. " +
 
-                "Explique avec des mots simples, clairs et " +
-                "progressifs. " +
+                "Explique la notion avec des mots simples, " +
+                "clairs, précis et progressifs afin qu'un " +
+                "élève débutant puisse réellement la comprendre. " +
 
-                "Décompose la notion en petites idées " +
-                "faciles à comprendre. " +
+                "Décompose la notion en plusieurs idées " +
+                "faciles à suivre. " +
+
+                "Explique chaque élément important de la notion. " +
 
                 "Donne des exemples concrets liés à " +
-                "Microsoft Word 2007 lorsque cela est " +
-                "pertinent. " +
+                "Microsoft Word 2007 lorsque cela est pertinent. " +
 
-                "Explique pourquoi cette notion est " +
-                "importante pour l'élève. " +
+                "Explique comment cette notion peut être " +
+                "utilisée dans un document Word 2007. " +
 
-                "Explique précisément comment l'élève doit " +
-                "comprendre et utiliser cette notion. " +
+                "Explique pourquoi cette notion est importante " +
+                "pour l'élève et ce qu'il doit savoir faire " +
+                "après cette explication. " +
 
-                "Évite toute explication vague ou trop courte. " +
-
-                "Termine par un court résumé de ce que " +
-                "l'élève doit absolument retenir. " +
-
-                "Ne parle jamais de ton fonctionnement interne. " +
-
-                "Ne mentionne ni API, ni backend, ni " +
-                "intelligence artificielle, ni MaryTTS. " +
+                "Évite les explications trop courtes. " +
 
                 "Adresse-toi directement à l'élève comme " +
                 "une véritable professeure. " +
 
-                "Notion à expliquer : " +
+                "À la fin de cette explication, termine par " +
+                "un court rappel des points essentiels de " +
+                "cette notion. " +
+
+                "Tu expliques actuellement la leçon " +
+                (lessonIndex + 1) +
+                " sur " +
+                totalLessons +
+                ". " +
+
+                "Titre de la notion : " +
 
                 lesson.title +
 
@@ -18983,9 +19004,12 @@ window.RaniseMoiseEvaluationEngine = {
         },
 
 
-        // =====================================================
-        // REQUEST AI PEDAGOGICAL EXPLANATION
-        // =====================================================
+
+
+
+        // =================================================
+        // REQUEST AI EXPLANATION
+        // =================================================
 
         requestExplanation:async function(prompt){
 
@@ -19006,7 +19030,7 @@ window.RaniseMoiseEvaluationEngine = {
 
                 console.error(
 
-                    "RANISE DYNAMIC BLOCK 5: " +
+                    "RANISE DYNAMIC PEDAGOGICAL ENGINE: " +
                     "AI REQUEST FUNCTION NOT AVAILABLE"
 
                 );
@@ -19019,6 +19043,7 @@ window.RaniseMoiseEvaluationEngine = {
             try{
 
                 const response =
+
                     await requestCampusAIProfessor(
                         prompt
                     );
@@ -19042,7 +19067,7 @@ window.RaniseMoiseEvaluationEngine = {
 
                 console.error(
 
-                    "RANISE DYNAMIC BLOCK 5: " +
+                    "RANISE DYNAMIC PEDAGOGICAL ENGINE: " +
                     "AI REQUEST ERROR",
 
                     error
@@ -19056,9 +19081,163 @@ window.RaniseMoiseEvaluationEngine = {
         },
 
 
-        // =====================================================
-        // UNLOCK PRACTICE AFTER COMPLETE THEORY EXPLANATION
-        // =====================================================
+
+
+
+        // =================================================
+        // FINAL THEORY SUMMARY PROMPT
+        // =================================================
+
+        buildFinalSummaryPrompt:function(
+            chapter,
+            lessons
+        ){
+
+            if(
+                !chapter ||
+                !Array.isArray(lessons) ||
+                !lessons.length
+            ){
+
+                return null;
+
+            }
+
+
+            let lessonTitles = "";
+
+
+            lessons.forEach(
+                (lesson,index)=>{
+
+                    if(
+                        lesson &&
+                        typeof lesson.title === "string"
+                    ){
+
+                        lessonTitles +=
+
+                            (index + 1) +
+                            ". " +
+                            lesson.title +
+                            ". ";
+
+                    }
+
+                }
+            );
+
+
+            return (
+
+                "Tu es Ranise Moise, professeure IA de " +
+                "CampusNumérique FOBAS. " +
+
+                "Tu viens de terminer l'explication " +
+                "pédagogique de toutes les notions théoriques " +
+                "de ce chapitre Microsoft Word 2007. " +
+
+                "Maintenant, fais un résumé général de toute " +
+                "la partie Théorie que l'élève vient d'étudier. " +
+
+                "Ne répète pas intégralement les cours. " +
+
+                "Rassemble les idées essentielles. " +
+
+                "Montre les relations importantes entre les " +
+                "différentes notions étudiées. " +
+
+                "Explique clairement ce que l'élève doit " +
+                "absolument retenir avant de passer à la pratique. " +
+
+                "Termine par une courte phrase indiquant que " +
+                "la partie Théorie vient d'être étudiée " +
+                "et qu'elle est prête à être validée. " +
+
+                "Adresse-toi directement à l'élève. " +
+
+                "Chapitre : " +
+                chapter.title +
+                ". " +
+
+                "Notions étudiées : " +
+                lessonTitles
+
+            );
+
+        },
+
+
+
+
+
+        // =================================================
+        // SPEAK USING EXISTING RANISE VOICE
+        // =================================================
+
+        speak:async function(text){
+
+            if(
+                !text ||
+                typeof text !== "string"
+            ){
+
+                return false;
+
+            }
+
+
+            if(
+                typeof speakProfessorIAWithMaryTTS !==
+                "function"
+            ){
+
+                console.error(
+
+                    "RANISE DYNAMIC PEDAGOGICAL ENGINE: " +
+                    "MARYTTS FUNCTION NOT AVAILABLE"
+
+                );
+
+                return false;
+
+            }
+
+
+            try{
+
+                await speakProfessorIAWithMaryTTS(
+                    text
+                );
+
+
+                return true;
+
+
+            }catch(error){
+
+                console.error(
+
+                    "RANISE DYNAMIC PEDAGOGICAL ENGINE: " +
+                    "MARYTTS ERROR",
+
+                    error
+
+                );
+
+                return false;
+
+            }
+
+        },
+
+
+
+
+
+        // =================================================
+        // UNLOCK PRACTICE
+        // =================================================
 
         unlockPractice:function(chapterId){
 
@@ -19072,59 +19251,216 @@ window.RaniseMoiseEvaluationEngine = {
             }
 
 
+            // =============================================
+            // CHAPTER 2
+            // USE EXISTING CHAPTER 2 PARTS ENGINE
+            // =============================================
+
             if(
-                typeof WordChapter2PartsEngine ===
+                chapterId === "chapitre2" &&
+                typeof WordChapter2PartsEngine !==
                 "undefined"
             ){
 
+                try{
+
+                    const progress =
+
+                        WordChapter2PartsEngine
+                            .getProgress();
+
+
+                    progress.theory = true;
+
+                    progress.practice = true;
+
+
+                    WordChapter2PartsEngine
+                        .saveProgress(
+                            progress
+                        );
+
+
+                    console.log(
+
+                        "RANISE DYNAMIC PEDAGOGICAL ENGINE: " +
+                        "CHAPTER 2 THEORY VALIDATED — " +
+                        "PRACTICE UNLOCKED"
+
+                    );
+
+
+                    return true;
+
+
+                }catch(error){
+
+                    console.error(
+
+                        "RANISE DYNAMIC PEDAGOGICAL ENGINE: " +
+                        "CHAPTER 2 PRACTICE UNLOCK ERROR",
+
+                        error
+
+                    );
+
+                }
+
+            }
+
+
+            // =============================================
+            // FUTURE CHAPTERS
+            // GENERIC DYNAMIC PROGRESS
+            // =============================================
+
+            try{
+
+                const key =
+
+                    "word_" +
+                    chapterId +
+                    "_partsProgress";
+
+
+                let progress = {
+
+
+                    theory:true,
+
+                    practice:true,
+
+                    exercises:false,
+
+                    homework:false,
+
+                    evaluation:false
+
+                };
+
+
+                const saved =
+
+                    localStorage.getItem(
+                        key
+                    );
+
+
+                if(saved){
+
+                    try{
+
+                        const existing =
+
+                            JSON.parse(
+                                saved
+                            );
+
+
+                        if(
+                            existing &&
+                            typeof existing ===
+                            "object"
+                        ){
+
+                            progress = {
+
+                                ...progress,
+                                ...existing,
+
+                                theory:true,
+                                practice:true
+
+                            };
+
+                        }
+
+                    }catch(error){
+
+                        console.error(
+
+                            "RANISE DYNAMIC PEDAGOGICAL ENGINE: " +
+                            "PROGRESS PARSE ERROR",
+
+                            error
+
+                        );
+
+                    }
+
+                }
+
+
+                localStorage.setItem(
+
+                    key,
+
+                    JSON.stringify(
+                        progress
+                    )
+
+                );
+
+
+                console.log(
+
+                    "RANISE DYNAMIC PEDAGOGICAL ENGINE: " +
+                    "PRACTICE UNLOCKED",
+
+                    chapterId
+
+                );
+
+
+                return true;
+
+
+            }catch(error){
+
                 console.error(
 
-                    "RANISE DYNAMIC BLOCK 5: " +
-                    "WORD CHAPTER PARTS ENGINE NOT AVAILABLE"
+                    "RANISE DYNAMIC PEDAGOGICAL ENGINE: " +
+                    "PRACTICE UNLOCK ERROR",
+
+                    chapterId,
+                    error
 
                 );
+
 
                 return false;
 
             }
 
-
-            const progress =
-                WordChapter2PartsEngine
-                    .getProgress();
+        },
 
 
-            if(!progress){
+
+
+
+        // =================================================
+        // FINAL VALIDATION MESSAGE
+        // =================================================
+
+        validateTheory:function(chapterId){
+
+            const chapter =
+                this.getChapter(
+                    chapterId
+                );
+
+
+            if(!chapter){
 
                 return false;
 
             }
-
-
-            // ---------------------------------------------
-            // THEORY IS NOW VALIDATED
-            // ---------------------------------------------
-
-            progress.theory = true;
-
-
-            // ---------------------------------------------
-            // PRACTICE IS NOW UNLOCKED
-            // ---------------------------------------------
-
-            progress.practice = true;
-
-
-            WordChapter2PartsEngine
-                .saveProgress(
-                    progress
-                );
 
 
             console.log(
 
-                "RANISE DYNAMIC BLOCK 5: " +
-                "THEORY VALIDATED — PRACTICE UNLOCKED",
+                "RANISE DYNAMIC PEDAGOGICAL ENGINE: " +
+                "THEORY VALIDATED",
 
                 chapterId
 
@@ -19136,16 +19472,18 @@ window.RaniseMoiseEvaluationEngine = {
         },
 
 
-        // =====================================================
-        // TEACH ALL PEDAGOGICAL EXPLANATIONS
-        // CHAPTER 2+
-        // =====================================================
+
+
+
+        // =================================================
+        // MAIN DYNAMIC TEACHING PROCESS
+        // =================================================
 
         teachExplanation:async function(chapterId){
 
-            // -------------------------------------------------
+            // =============================================
             // ABSOLUTE CHAPTER 1 PROTECTION
-            // -------------------------------------------------
+            // =============================================
 
             if(
                 !chapterId ||
@@ -19157,52 +19495,6 @@ window.RaniseMoiseEvaluationEngine = {
             }
 
 
-            // -------------------------------------------------
-            // VERIFY AI REQUEST SYSTEM
-            // -------------------------------------------------
-
-            if(
-                typeof requestCampusAIProfessor !==
-                "function"
-            ){
-
-                console.error(
-
-                    "RANISE DYNAMIC BLOCK 5: " +
-                    "AI PROFESSOR FUNCTION NOT AVAILABLE"
-
-                );
-
-                return false;
-
-            }
-
-
-            // -------------------------------------------------
-            // VERIFY MARYTTS
-            // -------------------------------------------------
-
-            if(
-                typeof speakProfessorIAWithMaryTTS !==
-                "function"
-            ){
-
-                console.error(
-
-                    "RANISE DYNAMIC BLOCK 5: " +
-                    "MARYTTS FUNCTION NOT AVAILABLE"
-
-                );
-
-                return false;
-
-            }
-
-
-            // -------------------------------------------------
-            // GET CHAPTER
-            // -------------------------------------------------
-
             const chapter =
                 this.getChapter(
                     chapterId
@@ -19213,7 +19505,7 @@ window.RaniseMoiseEvaluationEngine = {
 
                 console.error(
 
-                    "RANISE DYNAMIC BLOCK 5: " +
+                    "RANISE DYNAMIC PEDAGOGICAL ENGINE: " +
                     "CHAPTER NOT FOUND",
 
                     chapterId
@@ -19224,10 +19516,6 @@ window.RaniseMoiseEvaluationEngine = {
 
             }
 
-
-            // -------------------------------------------------
-            // GET THEORY
-            // -------------------------------------------------
 
             const lessons =
                 this.getTheoryLessons(
@@ -19242,8 +19530,8 @@ window.RaniseMoiseEvaluationEngine = {
 
                 console.error(
 
-                    "RANISE DYNAMIC BLOCK 5: " +
-                    "THEORY NOT AVAILABLE",
+                    "RANISE DYNAMIC PEDAGOGICAL ENGINE: " +
+                    "THEORY LESSONS NOT AVAILABLE",
 
                     chapterId
 
@@ -19256,7 +19544,7 @@ window.RaniseMoiseEvaluationEngine = {
 
             console.log(
 
-                "RANISE DYNAMIC BLOCK 5: " +
+                "RANISE DYNAMIC PEDAGOGICAL ENGINE: " +
                 "STARTING PEDAGOGICAL EXPLANATION",
 
                 chapterId,
@@ -19267,11 +19555,10 @@ window.RaniseMoiseEvaluationEngine = {
 
             try{
 
-
-                // =================================================
+                // =========================================
                 // EXPLAIN EVERY THEORY LESSON
                 // ONE AFTER ANOTHER
-                // =================================================
+                // =========================================
 
                 for(
                     let i = 0;
@@ -19290,26 +19577,14 @@ window.RaniseMoiseEvaluationEngine = {
                     }
 
 
-                    console.log(
-
-                        "RANISE DYNAMIC BLOCK 5: " +
-                        "EXPLAINING THEORY LESSON",
-
-                        chapterId,
-                        i + 1,
-                        lessons.length,
-                        lesson.title
-
-                    );
-
-
-                    // ---------------------------------------------
-                    // BUILD PEDAGOGICAL REQUEST
-                    // ---------------------------------------------
-
                     const prompt =
+
                         this.buildPedagogicalPrompt(
-                            lesson
+
+                            lesson,
+                            i,
+                            lessons.length
+
                         );
 
 
@@ -19317,24 +19592,21 @@ window.RaniseMoiseEvaluationEngine = {
 
                         console.error(
 
-                            "RANISE DYNAMIC BLOCK 5: " +
-                            "PROMPT NOT AVAILABLE",
+                            "RANISE DYNAMIC PEDAGOGICAL ENGINE: " +
+                            "INVALID LESSON",
 
                             i + 1,
                             chapterId
 
                         );
 
-                        return false;
+                        continue;
 
                     }
 
 
-                    // ---------------------------------------------
-                    // ASK AI FOR REAL EXPLANATION
-                    // ---------------------------------------------
-
                     const explanation =
+
                         await this.requestExplanation(
                             prompt
                         );
@@ -19344,13 +19616,17 @@ window.RaniseMoiseEvaluationEngine = {
 
                         console.error(
 
-                            "RANISE DYNAMIC BLOCK 5: " +
-                            "EXPLANATION NOT AVAILABLE",
+                            "RANISE DYNAMIC PEDAGOGICAL ENGINE: " +
+                            "EXPLANATION FAILED",
 
                             i + 1,
                             chapterId
 
                         );
+
+                        // IMPORTANT:
+                        // DO NOT VALIDATE THEORY
+                        // IF ONE EXPLANATION FAILED.
 
                         return false;
 
@@ -19359,62 +19635,73 @@ window.RaniseMoiseEvaluationEngine = {
 
                     console.log(
 
-                        "RANISE DYNAMIC BLOCK 5: " +
+                        "RANISE DYNAMIC PEDAGOGICAL ENGINE: " +
                         "EXPLANATION READY",
 
                         chapterId,
                         i + 1,
-                        lessons.length
+                        lessons.length,
+                        lesson.title
 
                     );
 
 
-                    // ---------------------------------------------
-                    // SPEAK THE COMPLETE EXPLANATION
-                    // WAIT UNTIL FINISHED
-                    // ---------------------------------------------
+                    const spoken =
 
-                    await speakProfessorIAWithMaryTTS(
+                        await this.speak(
+                            explanation
+                        );
 
-                        explanation
 
-                    );
+                    if(!spoken){
+
+                        // =================================
+                        // DO NOT CONTINUE TO VALIDATION
+                        // IF AUDIO FAILED
+                        // =================================
+
+                        return false;
+
+                    }
 
                 }
 
 
-                // =================================================
-                // ALL THEORY EXPLANATIONS FINISHED
-                // =================================================
 
-                console.log(
+                // =========================================
+                // FINAL THEORY SUMMARY
+                // =========================================
 
-                    "RANISE DYNAMIC BLOCK 5: " +
-                    "ALL THEORY EXPLANATIONS FINISHED",
+                const summaryPrompt =
 
-                    chapterId
+                    this.buildFinalSummaryPrompt(
 
-                );
+                        chapter,
+                        lessons
 
-
-                // =================================================
-                // VALIDATE THEORY
-                // UNLOCK PRACTICE
-                // =================================================
-
-                const unlocked =
-                    this.unlockPractice(
-                        chapterId
                     );
 
 
-                if(!unlocked){
+                if(!summaryPrompt){
+
+                    return false;
+
+                }
+
+
+                const summary =
+
+                    await this.requestExplanation(
+                        summaryPrompt
+                    );
+
+
+                if(!summary){
 
                     console.error(
 
-                        "RANISE DYNAMIC BLOCK 5: " +
-                        "THEORY FINISHED BUT PRACTICE " +
-                        "COULD NOT BE UNLOCKED",
+                        "RANISE DYNAMIC PEDAGOGICAL ENGINE: " +
+                        "FINAL SUMMARY FAILED",
 
                         chapterId
 
@@ -19427,8 +19714,125 @@ window.RaniseMoiseEvaluationEngine = {
 
                 console.log(
 
-                    "RANISE DYNAMIC BLOCK 5: " +
-                    "CHAPTER THEORY VALIDATED",
+                    "RANISE DYNAMIC PEDAGOGICAL ENGINE: " +
+                    "FINAL THEORY SUMMARY READY",
+
+                    chapterId
+
+                );
+
+
+                const summarySpoken =
+
+                    await this.speak(
+                        summary
+                    );
+
+
+                if(!summarySpoken){
+
+                    return false;
+
+                }
+
+
+
+                // =========================================
+                // FINAL VALIDATION MESSAGE
+                // =========================================
+
+                const validationMessage =
+
+                    "Très bien. " +
+
+                    "Nous avons terminé toute la partie Théorie " +
+                    "du " +
+                    chapter.title +
+                    ". " +
+
+                    "Vous avez maintenant étudié et compris " +
+                    "les notions essentielles de cette partie. " +
+
+                    "La partie Théorie est maintenant validée. " +
+
+                    "Nous pouvons passer à la partie Pratique. " +
+
+                    "La partie Pratique vient d'être déverrouillée. " +
+
+                    "Nous allons maintenant continuer étape par étape.";
+
+
+                const validationSpoken =
+
+                    await this.speak(
+                        validationMessage
+                    );
+
+
+                if(!validationSpoken){
+
+                    return false;
+
+                }
+
+
+
+                // =========================================
+                // VALIDATE THEORY
+                // =========================================
+
+                const validated =
+
+                    this.validateTheory(
+                        chapterId
+                    );
+
+
+                if(!validated){
+
+                    return false;
+
+                }
+
+
+
+                // =========================================
+                // UNLOCK PRACTICE
+                // =========================================
+
+                const practiceUnlocked =
+
+                    this.unlockPractice(
+                        chapterId
+                    );
+
+
+                if(!practiceUnlocked){
+
+                    console.error(
+
+                        "RANISE DYNAMIC PEDAGOGICAL ENGINE: " +
+                        "PRACTICE COULD NOT BE UNLOCKED",
+
+                        chapterId
+
+                    );
+
+                    return false;
+
+                }
+
+
+
+                // =========================================
+                // FINAL SUCCESS
+                // =========================================
+
+                console.log(
+
+                    "RANISE DYNAMIC PEDAGOGICAL ENGINE: " +
+                    "THEORY COMPLETE — " +
+                    "PRACTICE UNLOCKED",
 
                     chapterId
 
@@ -19442,13 +19846,14 @@ window.RaniseMoiseEvaluationEngine = {
 
                 console.error(
 
-                    "RANISE DYNAMIC BLOCK 5: " +
-                    "PEDAGOGICAL EXPLANATION ERROR",
+                    "RANISE DYNAMIC PEDAGOGICAL ENGINE: " +
+                    "FATAL TEACHING ERROR",
 
                     chapterId,
                     error
 
                 );
+
 
                 return false;
 
@@ -19460,6 +19865,12 @@ window.RaniseMoiseEvaluationEngine = {
 
 
 })();
+
+
+
+
+
+
 
 
 
