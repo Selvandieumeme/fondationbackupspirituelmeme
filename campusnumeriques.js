@@ -19709,6 +19709,581 @@ window.RaniseMoiseEvaluationEngine = {
 
 
 
+
+
+
+
+
+
+
+// =========================================================
+// BLOCK 6
+// MICROSOFT WORD 2007 FORMATION
+// RANISE MOISE — DYNAMIC PRACTICE TEACHING ENGINE
+// =========================================================
+// PURPOSE:
+// DYNAMIC PRACTICE TEACHING
+//
+// CHAPTER 1 COMPLETELY EXCLUDED
+// STARTS FROM CHAPTER 2+
+//
+// USES EXISTING COURSE DATA
+// USES EXISTING RANISE VOICE SYSTEM
+// DOES NOT MODIFY BLOCK 4
+// DOES NOT MODIFY BLOCK 5
+// DOES NOT MODIFY UNLOCK BRIDGE
+//
+// WORKFLOW:
+//
+// PRACTICE UNLOCKED
+//        ↓
+// GET CURRENT CHAPTER
+//        ↓
+// READ EXISTING PRACTICE DATA
+//        ↓
+// READ EVERY PRACTICE ACTIVITY
+//        ↓
+// READ EVERY STEP IN ORIGINAL ORDER
+//        ↓
+// RANISE EXPLAINS EVERYTHING
+//        ↓
+// FINAL PRACTICE INSTRUCTION
+// =========================================================
+
+
+(function(){
+
+    "use strict";
+
+
+    // =====================================================
+    // DYNAMIC PRACTICE TEACHING ENGINE
+    // =====================================================
+
+    window.RaniseDynamicPracticeTeachingEngine = {
+
+
+        // =================================================
+        // GET CURRENT CHAPTER
+        // =================================================
+
+        getChapter:function(chapterId){
+
+            if(
+                !chapterId ||
+                chapterId === "chapitre1"
+            ){
+
+                return null;
+
+            }
+
+
+            if(
+                typeof microsoftWordCourse ===
+                "undefined"
+            ){
+
+                return null;
+
+            }
+
+
+            if(
+                !Array.isArray(
+                    microsoftWordCourse.chapters
+                )
+            ){
+
+                return null;
+
+            }
+
+
+            return microsoftWordCourse.chapters.find(
+
+                chapter =>
+
+                    chapter &&
+                    chapter.id === chapterId
+
+            ) || null;
+
+        },
+
+
+
+
+
+        // =================================================
+        // GET PRACTICE ACTIVITIES
+        // =================================================
+
+        getPracticeActivities:function(chapterId){
+
+            const chapter =
+                this.getChapter(
+                    chapterId
+                );
+
+
+            if(!chapter){
+
+                return [];
+
+            }
+
+
+            if(
+                !Array.isArray(
+                    chapter.practice
+                )
+            ){
+
+                return [];
+
+            }
+
+
+            return chapter.practice;
+
+        },
+
+
+
+
+
+        // =================================================
+        // SPEAK USING EXISTING RANISE VOICE
+        // =================================================
+
+        speak:async function(text){
+
+            if(
+                !text ||
+                typeof text !== "string"
+            ){
+
+                return false;
+
+            }
+
+
+            if(
+                typeof speakProfessorIAWithMaryTTS !==
+                "function"
+            ){
+
+                console.error(
+
+                    "RANISE DYNAMIC PRACTICE ENGINE: " +
+                    "MARYTTS FUNCTION NOT AVAILABLE"
+
+                );
+
+                return false;
+
+            }
+
+
+            if(
+                typeof raniseStartTalking ===
+                "function"
+            ){
+
+                raniseStartTalking();
+
+            }
+
+
+            try{
+
+                await speakProfessorIAWithMaryTTS(
+                    text
+                );
+
+
+                return true;
+
+            }catch(error){
+
+                console.error(
+
+                    "RANISE DYNAMIC PRACTICE ENGINE: " +
+                    "MARYTTS ERROR",
+
+                    error
+
+                );
+
+                return false;
+
+            }finally{
+
+                if(
+                    typeof raniseStopTalking ===
+                    "function"
+                ){
+
+                    raniseStopTalking();
+
+                }
+
+            }
+
+        },
+
+
+
+
+
+        // =================================================
+        // MAIN DYNAMIC PRACTICE TEACHING
+        // =================================================
+
+        teachPractice:async function(
+            chapterId
+        ){
+
+            // ---------------------------------------------
+            // ABSOLUTE CHAPTER 1 PROTECTION
+            // ---------------------------------------------
+
+            if(
+                !chapterId ||
+                chapterId === "chapitre1"
+            ){
+
+                return false;
+
+            }
+
+
+            const chapter =
+                this.getChapter(
+                    chapterId
+                );
+
+
+            if(!chapter){
+
+                console.error(
+
+                    "RANISE DYNAMIC PRACTICE ENGINE: " +
+                    "CHAPTER NOT FOUND",
+
+                    chapterId
+
+                );
+
+                return false;
+
+            }
+
+
+            const activities =
+                this.getPracticeActivities(
+                    chapterId
+                );
+
+
+            if(
+                !Array.isArray(activities) ||
+                activities.length === 0
+            ){
+
+                console.error(
+
+                    "RANISE DYNAMIC PRACTICE ENGINE: " +
+                    "PRACTICE ACTIVITIES NOT AVAILABLE",
+
+                    chapterId
+
+                );
+
+                return false;
+
+            }
+
+
+            console.log(
+
+                "RANISE DYNAMIC PRACTICE ENGINE: " +
+                "STARTING PRACTICE TEACHING",
+
+                chapterId,
+                activities.length
+
+            );
+
+
+            try{
+
+                // =========================================
+                // PRACTICE INTRODUCTION
+                // =========================================
+
+                const introduction =
+
+                    "Maintenant, nous allons passer à la " +
+                    "partie Pratique du " +
+                    chapter.title +
+                    ". " +
+                    "Je vais vous guider étape par étape.";
+
+                
+                if(
+                    !(await this.speak(
+                        introduction
+                    ))
+                ){
+
+                    return false;
+
+                }
+
+
+                // =========================================
+                // READ EVERY PRACTICE ACTIVITY
+                // IN ORIGINAL COURSE DATA ORDER
+                // =========================================
+
+                for(
+                    let activityIndex = 0;
+                    activityIndex < activities.length;
+                    activityIndex++
+                ){
+
+                    const activity =
+                        activities[activityIndex];
+
+
+                    if(!activity){
+
+                        continue;
+
+                    }
+
+
+                    // -------------------------------------
+                    // ACTIVITY TITLE
+                    // -------------------------------------
+
+                    if(
+                        typeof activity.title ===
+                        "string" &&
+                        activity.title.trim()
+                    ){
+
+                        if(
+                            !(await this.speak(
+                                activity.title
+                            ))
+                        ){
+
+                            return false;
+
+                        }
+
+                    }
+
+
+                    // -------------------------------------
+                    // ACTIVITY STEPS
+                    // -------------------------------------
+
+                    if(
+                        Array.isArray(
+                            activity.steps
+                        )
+                    ){
+
+                        for(
+                            let stepIndex = 0;
+                            stepIndex <
+                            activity.steps.length;
+                            stepIndex++
+                        ){
+
+                            const step =
+                                activity.steps[
+                                    stepIndex
+                                ];
+
+
+                            if(
+                                typeof step !==
+                                "string" ||
+                                !step.trim()
+                            ){
+
+                                continue;
+
+                            }
+
+
+                            const spokenStep =
+
+                                "Étape " +
+                                (stepIndex + 1) +
+                                ". " +
+                                step;
+
+
+                            if(
+                                !(await this.speak(
+                                    spokenStep
+                                ))
+                            ){
+
+                                return false;
+
+                            }
+
+                        }
+
+                    }
+
+                }
+
+
+                // =========================================
+                // FINAL PRACTICE INSTRUCTION
+                // =========================================
+
+                const finalInstruction =
+
+                    "Très bien. " +
+                    "Nous avons parcouru toute la partie " +
+                    "Pratique du " +
+                    chapter.title +
+                    ". " +
+                    "Cliquez maintenant sur le bouton " +
+                    "« 🚀 Ouvrir Microsoft Word Simulation » " +
+                    "pour ouvrir l'espace de simulation. " +
+                    "Je vais vous guider étape par étape.";
+
+                
+                if(
+                    !(await this.speak(
+                        finalInstruction
+                    ))
+                ){
+
+                    return false;
+
+                }
+
+
+                console.log(
+
+                    "RANISE DYNAMIC PRACTICE ENGINE: " +
+                    "PRACTICE TEACHING COMPLETED",
+
+                    chapterId
+
+                );
+
+
+                return true;
+
+
+            }catch(error){
+
+                console.error(
+
+                    "RANISE DYNAMIC PRACTICE ENGINE: " +
+                    "PRACTICE TEACHING ERROR",
+
+                    chapterId,
+                    error
+
+                );
+
+                return false;
+
+            }
+
+        }
+
+    };
+
+
+})();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 // =========================================================
 // MICROSOFT WORD 2007 FORMATION
 // RANISE — DYNAMIC UNLOCK / RENDER BRIDGE
