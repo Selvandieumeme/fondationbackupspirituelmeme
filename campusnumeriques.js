@@ -20275,260 +20275,351 @@ window.RaniseMoiseEvaluationEngine = {
 
 
 
-
-
-
-
-
 // =========================================================
-// BLOCK 7 DYNAMIC PRACTICE ENGINE
+// BLOCK 7 DYNAMIC PRACTICE
 // MICROSOFT WORD 2007 FORMATION
-// RANISE MOISE — DYNAMIC PRACTICAL GUIDANCE
+// RANISE MOISE — DYNAMIC PRACTICAL GUIDANCE ENGINE
 // =========================================================
 //
-// ISOLATED FROM CHAPTER 1 BLOCK 7
+// PRODUCTION VERSION
 //
-// RESPONSIBILITIES:
-// 1. Works for CHAPTER 2+ only.
-// 2. Reads the active chapter.practice dynamically.
-// 3. Uses the existing Campus Word 2007 iframe.
-// 4. Guides the student one step at a time.
-// 5. Validates REAL simulation actions.
-// 6. Does NOT treat any random click as valid.
-// 7. Supports:
-//    - Copy
-//    - Cut
-//    - Paste
-//    - Font Family
-//    - Font Size
-//    - Bold
-//    - Italic
-//    - Underline
-//    - Font Color
-//    - Text Highlight
-//    - Real document input
-// 8. When ALL practice steps are completed:
-//    - practice = validated
-//    - exercises = unlocked
-// 9. Does NOT touch Exercises / Homework / Evaluation engines.
-// 10. Does NOT replace Chapter 1 Block 7.
+// CHAPTER 1:
+//     COMPLETELY EXCLUDED
+//
+// CHAPTER 2+:
+//     READS chapter.practice DYNAMICALLY
+//     GUIDES STUDENT STEP BY STEP
+//     VALIDATES REAL SIMULATION STATE
+//     DOES NOT ACCEPT UNRELATED CLICKS
+//
+// PRACTICE COMPLETION:
+//     PRACTICE = VALIDATED
+//          ↓
+//     EXISTING DYNAMIC UNLOCK BRIDGE
+//          ↓
+//     EXERCISES = UNLOCKED
+//
+// IMPORTANT:
+//     THIS BLOCK DOES NOT REPLACE:
+//         - CHAPTER 1 BLOCK 7
+//         - BLOCK 4
+//         - BLOCK 5
+//         - BLOCK 6
+//         - EXISTING SIMULATION
+//         - EXISTING DYNAMIC BRIDGE
+//
 // =========================================================
 
-(function () {
+(function(){
 
     "use strict";
 
 
     // =====================================================
-    // PRIVATE STATE
+    // GLOBAL STATE
     // =====================================================
 
     const state = {
 
-        chapterId: null,
+        chapterId:null,
 
-        simulationFrame: null,
+        simulationFrame:null,
 
-        simulationDocument: null,
+        simulationDocument:null,
 
-        practice: null,
+        practice:null,
 
-        activityIndex: 0,
+        activityIndex:0,
 
-        stepIndex: 0,
+        stepIndex:0,
 
-        started: false,
+        started:false,
 
-        completed: false,
+        waitingForAction:false,
 
-        waitingForAction: false,
+        completed:false,
 
-        processingAction: false,
+        listenersAttached:false,
 
-        speaking: false,
+        speaking:false,
 
-        listenersAttached: false,
+        processingAction:false,
 
-        lastActionTime: 0
+        actionSnapshot:null,
+
+        lastValidationTime:0
 
     };
 
 
+
     // =====================================================
-    // CHAPTER 1 IS COMPLETELY PROTECTED
+    // CHAPTER 1 ABSOLUTE PROTECTION
     // =====================================================
 
-    function isChapter1(chapterId) {
+    function isChapter1(chapterId){
 
-        return String(chapterId || "")
-            .toLowerCase()
-            .trim() === "chapitre1";
+        return (
+            String(chapterId || "").toLowerCase() ===
+            "chapitre1"
+        );
 
     }
 
 
+
     // =====================================================
-    // NORMALIZE
+    // NORMALIZE TEXT
     // =====================================================
 
-    function normalize(value) {
+    function normalize(value){
 
         return String(value || "")
             .normalize("NFD")
-            .replace(/[\u0300-\u036f]/g, "")
+            .replace(/[\u0300-\u036f]/g,"")
             .toLowerCase()
-            .replace(/\s+/g, " ")
+            .replace(/\s+/g," ")
             .trim();
 
     }
 
 
+
     // =====================================================
-    // FIND COURSE
+    // GET ACTIVE CHAPTER
     // =====================================================
 
-    function getCourse() {
+    function getChapter(chapterId){
 
-        if (
-            typeof microsoftWordCourse ===
-            "undefined"
-        ) {
+        if(
+            !chapterId ||
+            isChapter1(chapterId)
+        ){
+
             return null;
+
         }
 
-        if (
-            !microsoftWordCourse ||
+
+        if(
+            typeof microsoftWordCourse ===
+            "undefined"
+        ){
+
+            return null;
+
+        }
+
+
+        if(
             !Array.isArray(
                 microsoftWordCourse.chapters
             )
-        ) {
+        ){
+
             return null;
+
         }
 
-        return microsoftWordCourse;
 
-    }
+        return microsoftWordCourse.chapters.find(
 
+            chapter =>
 
-    // =====================================================
-    // FIND CHAPTER DYNAMICALLY
-    // =====================================================
+                chapter &&
+                chapter.id === chapterId
 
-    function getChapter(chapterId) {
-
-        const course =
-            getCourse();
-
-        if (!course) {
-            return null;
-        }
-
-        return course.chapters.find(
-            chapter => {
-
-                return String(
-                    chapter.id || ""
-                ).toLowerCase() ===
-                String(
-                    chapterId || ""
-                ).toLowerCase();
-
-            }
         ) || null;
 
     }
 
 
+
     // =====================================================
-    // GET PRACTICE DYNAMICALLY
+    // GET PRACTICE
     // =====================================================
 
-    function getPractice(chapterId) {
-
-        if (isChapter1(chapterId)) {
-
-            console.warn(
-                "RANISE DYNAMIC BLOCK 7: Chapter 1 protected."
-            );
-
-            return null;
-
-        }
+    function getChapterPractice(chapterId){
 
         const chapter =
             getChapter(chapterId);
 
-        if (!chapter) {
+
+        if(!chapter){
+
             return null;
+
         }
 
-        if (
+
+        if(
             !Array.isArray(
                 chapter.practice
             )
-        ) {
+        ){
+
             return null;
+
         }
 
-        if (
+
+        if(
             chapter.practice.length === 0
-        ) {
+        ){
+
             return null;
+
         }
+
 
         return chapter.practice;
 
     }
 
 
+
     // =====================================================
-    // EXISTING RANISE VOICE
+    // CURRENT ACTIVITY
     // =====================================================
 
-    async function speak(text) {
+    function getCurrentActivity(){
 
-        if (!text) {
-            return;
+        if(
+            !Array.isArray(
+                state.practice
+            )
+        ){
+
+            return null;
+
         }
 
-        if (
+
+        return state.practice[
+            state.activityIndex
+        ] || null;
+
+    }
+
+
+
+    // =====================================================
+    // CURRENT STEP
+    // =====================================================
+
+    function getCurrentStep(){
+
+        const activity =
+            getCurrentActivity();
+
+
+        if(!activity){
+
+            return null;
+
+        }
+
+
+        if(
+            !Array.isArray(
+                activity.steps
+            )
+        ){
+
+            return null;
+
+        }
+
+
+        return activity.steps[
+            state.stepIndex
+        ] || null;
+
+    }
+
+
+
+    // =====================================================
+    // CHAPTER NAME
+    // =====================================================
+
+    function chapterNameForSpeech(chapterId){
+
+        const chapter =
+            getChapter(chapterId);
+
+
+        if(
+            chapter &&
+            chapter.title
+        ){
+
+            return chapter.title;
+
+        }
+
+
+        return chapterId || "";
+
+    }
+
+
+
+    // =====================================================
+    // RANISE VOICE
+    // =====================================================
+
+    async function speak(text){
+
+        if(!text){
+
+            return;
+
+        }
+
+
+        if(
             typeof speakProfessorIAWithMaryTTS !==
             "function"
-        ) {
+        ){
 
             console.warn(
-                "RANISE DYNAMIC BLOCK 7: MaryTTS unavailable."
+                "RANISE DYNAMIC BLOCK 7: Voice unavailable."
             );
 
             return;
 
         }
 
+
         state.speaking = true;
 
-        if (
+
+        if(
             typeof raniseStartTalking ===
             "function"
-        ) {
+        ){
 
             raniseStartTalking();
 
         }
 
-        try {
+
+        try{
 
             await speakProfessorIAWithMaryTTS(
                 text
             );
 
-        } finally {
+        }finally{
 
             state.speaking = false;
 
-            if (
+
+            if(
                 typeof raniseStopTalking ===
                 "function"
-            ) {
+            ){
 
                 raniseStopTalking();
 
@@ -20539,20 +20630,25 @@ window.RaniseMoiseEvaluationEngine = {
     }
 
 
+
     // =====================================================
-    // FIND EXISTING SIMULATION
+    // FIND EXISTING WORD SIMULATION
     // =====================================================
 
-    function findSimulation() {
+    function findSimulation(){
 
         const campusContent =
             document.getElementById(
                 "campusContent"
             );
 
-        if (!campusContent) {
+
+        if(!campusContent){
+
             return null;
+
         }
+
 
         return campusContent.querySelector(
             'iframe[src*="campusword2007simulation"]'
@@ -20561,28 +20657,37 @@ window.RaniseMoiseEvaluationEngine = {
     }
 
 
+
     // =====================================================
     // CONNECT TO EXISTING SIMULATION
     // =====================================================
 
-    function connectToSimulation() {
+    function connectToSimulation(){
 
         const frame =
             findSimulation();
 
-        if (!frame) {
+
+        if(!frame){
+
             return false;
+
         }
 
-        try {
+
+        try{
 
             const doc =
                 frame.contentDocument ||
                 frame.contentWindow.document;
 
-            if (!doc) {
+
+            if(!doc){
+
                 return false;
+
             }
+
 
             state.simulationFrame =
                 frame;
@@ -20590,12 +20695,14 @@ window.RaniseMoiseEvaluationEngine = {
             state.simulationDocument =
                 doc;
 
+
             return true;
 
-        } catch (error) {
+        }catch(error){
 
             console.error(
-                "RANISE DYNAMIC BLOCK 7: Simulation connection failed.",
+                "RANISE DYNAMIC BLOCK 7: " +
+                "Simulation access error.",
                 error
             );
 
@@ -20606,66 +20713,27 @@ window.RaniseMoiseEvaluationEngine = {
     }
 
 
-    // =====================================================
-    // CURRENT ACTIVITY
-    // =====================================================
-
-    function getCurrentActivity() {
-
-        if (!state.practice) {
-            return null;
-        }
-
-        return state.practice[
-            state.activityIndex
-        ] || null;
-
-    }
-
 
     // =====================================================
-    // CURRENT STEP
+    // ELEMENT DATA
     // =====================================================
 
-    function getCurrentStep() {
+    function getElementData(element){
 
-        const activity =
-            getCurrentActivity();
+        if(!element){
 
-        if (!activity) {
-            return null;
-        }
-
-        if (
-            !Array.isArray(
-                activity.steps
-            )
-        ) {
-            return null;
-        }
-
-        return activity.steps[
-            state.stepIndex
-        ] || null;
-
-    }
-
-
-    // =====================================================
-    // GET TARGET DATA
-    // =====================================================
-
-    function getElementData(element) {
-
-        if (!element) {
             return "";
+
         }
+
 
         const values = [
 
             element.id,
 
-            element.className,
+            typeof element.className === "string"
+                ? element.className
+                : "",
 
             element.innerText,
 
@@ -20689,13 +20757,17 @@ window.RaniseMoiseEvaluationEngine = {
 
         ];
 
+
         return normalize(
+
             values
                 .filter(Boolean)
                 .join(" ")
+
         );
 
     }
+
 
 
     // =====================================================
@@ -20705,24 +20777,27 @@ window.RaniseMoiseEvaluationEngine = {
     function closestFromTarget(
         target,
         selector
-    ) {
+    ){
 
-        if (
+        if(
             !target ||
             !selector ||
             typeof target.closest !==
             "function"
-        ) {
+        ){
+
             return null;
+
         }
 
-        try {
+
+        try{
 
             return target.closest(
                 selector
             );
 
-        } catch (error) {
+        }catch(error){
 
             return null;
 
@@ -20730,131 +20805,552 @@ window.RaniseMoiseEvaluationEngine = {
 
     }
 
-
-    // =====================================================
-    // REAL SIMULATION BUTTON
-    // =====================================================
-
-    function isActionTarget(
-        target,
-        actions
-    ) {
-
-        if (!target) {
-            return false;
-        }
-
-        const selector =
-            actions
-                .map(
-                    action =>
-                        `[data-action="${action}"]`
-                )
-                .join(",");
-
-        if (!selector) {
-            return false;
-        }
-
-        return !!closestFromTarget(
-            target,
-            selector
-        );
-
-    }
-
-
-    // =====================================================
-    // GET REAL ACTION
-    // =====================================================
-
-    function getRealAction(target) {
-
-        const element =
-            closestFromTarget(
-                target,
-                "[data-action]"
-            );
-
-        if (!element) {
-            return "";
-
-        }
-
-        return normalize(
-            element.getAttribute(
-                "data-action"
-            )
-        );
-
-    }
 
 
     // =====================================================
     // DOCUMENT AREA
     // =====================================================
 
-    function isDocumentAreaTarget(target) {
+    function isDocumentAreaTarget(target){
 
-        if (!target) {
+        if(!target){
+
             return false;
+
         }
 
-        if (
+
+        const page =
             closestFromTarget(
                 target,
                 ".cwPageContent"
-            )
-        ) {
+            );
+
+
+        if(page){
+
             return true;
+
         }
 
-        if (
+
+        const workspace =
             closestFromTarget(
+
                 target,
-                "#cwDocumentContainer"
-            )
-        ) {
-            return true;
+
+                [
+                    "#cwWorkspace",
+                    "#cwWorkspaceShell",
+                    "#cwWorkspaceScroll",
+                    "#cwDocumentContainer"
+                ].join(",")
+
+            );
+
+
+        return !!workspace;
+
+    }
+
+
+
+    // =====================================================
+    // RIBBON BUTTON
+    // =====================================================
+
+    function getRibbonButton(target){
+
+        return closestFromTarget(
+
+            target,
+
+            [
+                "#cwRibbonContentArea .cwRibbonBtn",
+                "#cwRibbonContentArea button",
+                ".cwRibbonBtn"
+            ].join(",")
+
+        );
+
+    }
+
+
+
+    // =====================================================
+    // RIBBON ACTION
+    // =====================================================
+
+    function getRibbonAction(target){
+
+        const button =
+            getRibbonButton(target);
+
+
+        if(!button){
+
+            return "";
+
         }
 
-        if (
-            closestFromTarget(
-                target,
-                "#cwWorkspace"
+
+        return normalize(
+
+            button.getAttribute(
+                "data-action"
             )
-        ) {
-            return true;
+
+        );
+
+    }
+
+
+
+    // =====================================================
+    // RIBBON DATA
+    // =====================================================
+
+    function getRibbonButtonData(target){
+
+        const button =
+            getRibbonButton(target);
+
+
+        if(!button){
+
+            return "";
+
         }
 
-        if (
+
+        return getElementData(
+            button
+        );
+
+    }
+
+
+
+    // =====================================================
+    // OFFICE MENU ACTION
+    // =====================================================
+
+    function getOfficeAction(target){
+
+        const item =
             closestFromTarget(
+
                 target,
-                "#cwWorkspaceShell"
-            )
-        ) {
-            return true;
+
+                "#cwOfficeMenu .cwOfficeItem"
+
+            );
+
+
+        if(!item){
+
+            return "";
+
         }
 
-        if (
-            closestFromTarget(
-                target,
-                "#cwWorkspaceScroll"
+
+        return normalize(
+
+            item.getAttribute(
+                "data-action"
             )
-        ) {
-            return true;
+
+        );
+
+    }
+
+
+
+    // =====================================================
+    // TAB
+    // =====================================================
+
+    function getClickedTab(target){
+
+        const tab =
+            closestFromTarget(
+
+                target,
+
+                "#cwRibbonTabBar .cwTabBtn"
+
+            );
+
+
+        if(!tab){
+
+            return "";
+
         }
+
+
+        return normalize(
+
+            tab.getAttribute(
+                "data-target"
+            )
+
+        );
+
+    }
+
+
+
+    // =====================================================
+    // SELECTED TEXT
+    // =====================================================
+
+    function getSelectionState(){
+
+        const doc =
+            state.simulationDocument;
+
+
+        if(!doc){
+
+            return {
+
+                exists:false,
+
+                text:"",
+
+                normalized:"",
+
+                rangeCount:0
+
+            };
+
+        }
+
+
+        try{
+
+            const selection =
+                doc.getSelection
+                ? doc.getSelection()
+                : doc.defaultView?.getSelection();
+
+
+            if(!selection){
+
+                return {
+
+                    exists:false,
+
+                    text:"",
+
+                    normalized:"",
+
+                    rangeCount:0
+
+                };
+
+            }
+
+
+            const text =
+                selection.toString();
+
+
+            return {
+
+                exists:
+                    selection.rangeCount > 0 &&
+                    text.trim() !== "",
+
+                text:text,
+
+                normalized:
+                    normalize(text),
+
+                rangeCount:
+                    selection.rangeCount
+
+            };
+
+        }catch(error){
+
+            return {
+
+                exists:false,
+
+                text:"",
+
+                normalized:"",
+
+                rangeCount:0
+
+            };
+
+        }
+
+    }
+
+
+
+    // =====================================================
+    // SELECTION IS INSIDE WORD DOCUMENT
+    // =====================================================
+
+    function selectionInsideDocument(){
+
+        const doc =
+            state.simulationDocument;
+
+
+        if(!doc){
+
+            return false;
+
+        }
+
+
+        try{
+
+            const selection =
+                doc.getSelection
+                ? doc.getSelection()
+                : doc.defaultView?.getSelection();
+
+
+            if(
+                !selection ||
+                selection.rangeCount === 0
+            ){
+
+                return false;
+
+            }
+
+
+            const range =
+                selection.getRangeAt(0);
+
+
+            const node =
+                range.commonAncestorContainer;
+
+
+            if(!node){
+
+                return false;
+
+            }
+
+
+            if(node.nodeType === 3){
+
+                return !!node.parentElement?.closest(
+                    ".cwPageContent"
+                );
+
+            }
+
+
+            return !!node.closest?.(
+                ".cwPageContent"
+            );
+
+        }catch(error){
+
+            return false;
+
+        }
+
+    }
+
+
+
+    // =====================================================
+    // SELECTION SNAPSHOT
+    // =====================================================
+
+    function captureSelectionSnapshot(){
+
+        const selection =
+            getSelectionState();
+
+
+        return {
+
+            text:
+                selection.normalized,
+
+            exists:
+                selection.exists,
+
+            inside:
+                selectionInsideDocument()
+
+        };
+
+    }
+
+
+
+    // =====================================================
+    // FORMAT SIGNATURE
+    // =====================================================
+
+    function getFormatSignature(){
+
+        const doc =
+            state.simulationDocument;
+
+
+        if(!doc){
+
+            return "";
+
+        }
+
+
+        try{
+
+            const selection =
+                doc.getSelection
+                ? doc.getSelection()
+                : doc.defaultView?.getSelection();
+
+
+            if(
+                !selection ||
+                selection.rangeCount === 0
+            ){
+
+                return "";
+
+            }
+
+
+            const node =
+                selection.anchorNode;
+
+
+            if(!node){
+
+                return "";
+
+            }
+
+
+            const element =
+                node.nodeType === 1
+                ? node
+                : node.parentElement;
+
+
+            if(!element){
+
+                return "";
+
+            }
+
+
+            const style =
+                doc.defaultView.getComputedStyle(
+                    element
+                );
+
+
+            return [
+
+                style.fontWeight,
+
+                style.fontStyle,
+
+                style.textDecorationLine,
+
+                style.fontSize,
+
+                style.fontFamily,
+
+                style.color,
+
+                style.backgroundColor
+
+            ].join("|");
+
+        }catch(error){
+
+            return "";
+
+        }
+
+    }
+
+
+
+    // =====================================================
+    // TEXT SEARCH IN DOCUMENT
+    // =====================================================
+
+    function documentContainsText(text){
+
+        if(!text){
+
+            return false;
+
+        }
+
+
+        const doc =
+            state.simulationDocument;
+
+
+        if(!doc){
+
+            return false;
+
+        }
+
+
+        const wanted =
+            normalize(text);
+
+
+        const pages =
+            doc.querySelectorAll(
+                ".cwPageContent"
+            );
+
+
+        for(
+            const page of pages
+        ){
+
+            if(
+                normalize(
+                    page.innerText ||
+                    page.textContent
+                ).includes(
+                    wanted
+                )
+            ){
+
+                return true;
+
+            }
+
+        }
+
 
         return false;
 
     }
 
 
+
     // =====================================================
-    // DETECT STEP TYPE
+    // STEP TYPE
     // =====================================================
 
-    function getStepType(step) {
+    function getStepType(step){
 
         const text =
             normalize(step);
@@ -20864,11 +21360,10 @@ window.RaniseMoiseEvaluationEngine = {
         // COPY
         // -------------------------------------------------
 
-        if (
+        if(
             text.includes("copier") ||
-            text.includes("copie") ||
             text.includes("copy")
-        ) {
+        ){
 
             return "copy";
 
@@ -20879,10 +21374,10 @@ window.RaniseMoiseEvaluationEngine = {
         // CUT
         // -------------------------------------------------
 
-        if (
+        if(
             text.includes("couper") ||
             text.includes("cut")
-        ) {
+        ){
 
             return "cut";
 
@@ -20893,10 +21388,10 @@ window.RaniseMoiseEvaluationEngine = {
         // PASTE
         // -------------------------------------------------
 
-        if (
+        if(
             text.includes("coller") ||
             text.includes("paste")
-        ) {
+        ){
 
             return "paste";
 
@@ -20907,20 +21402,11 @@ window.RaniseMoiseEvaluationEngine = {
         // FONT FAMILY
         // -------------------------------------------------
 
-        if (
-            text.includes("type de police") ||
-            text.includes("liste des polices") ||
-            text.includes("police (font)") ||
+        if(
+            text.includes("police") ||
             text.includes("font family") ||
-            text.includes("font")
-        ) {
-
-            if (
-                text.includes("taille") ||
-                text.includes("size")
-            ) {
-                return "font-size";
-            }
+            text.includes("type de police")
+        ){
 
             return "font-family";
 
@@ -20931,11 +21417,13 @@ window.RaniseMoiseEvaluationEngine = {
         // FONT SIZE
         // -------------------------------------------------
 
-        if (
+        if(
             text.includes("taille de police") ||
-            text.includes("taille différente") ||
-            text.includes("font size")
-        ) {
+            text.includes("font size") ||
+            text.includes("agrandir") ||
+            text.includes("réduire") ||
+            text.includes("reduire")
+        ){
 
             return "font-size";
 
@@ -20946,10 +21434,10 @@ window.RaniseMoiseEvaluationEngine = {
         // BOLD
         // -------------------------------------------------
 
-        if (
+        if(
             text.includes("gras") ||
             text.includes("bold")
-        ) {
+        ){
 
             return "bold";
 
@@ -20960,10 +21448,10 @@ window.RaniseMoiseEvaluationEngine = {
         // ITALIC
         // -------------------------------------------------
 
-        if (
+        if(
             text.includes("italique") ||
             text.includes("italic")
-        ) {
+        ){
 
             return "italic";
 
@@ -20974,13 +21462,27 @@ window.RaniseMoiseEvaluationEngine = {
         // UNDERLINE
         // -------------------------------------------------
 
-        if (
-            text.includes("souligné") ||
-            text.includes("souligne") ||
+        if(
+            text.includes("soulign") ||
             text.includes("underline")
-        ) {
+        ){
 
             return "underline";
+
+        }
+
+
+        // -------------------------------------------------
+        // STRIKE
+        // -------------------------------------------------
+
+        if(
+            text.includes("barré") ||
+            text.includes("barre") ||
+            text.includes("strike")
+        ){
+
+            return "strike";
 
         }
 
@@ -20989,11 +21491,12 @@ window.RaniseMoiseEvaluationEngine = {
         // FONT COLOR
         // -------------------------------------------------
 
-        if (
+        if(
             text.includes("couleur de police") ||
-            text.includes("font color") ||
-            text.includes("couleur des caractères")
-        ) {
+            text.includes("couleur des caractères") ||
+            text.includes("couleur des caracteres") ||
+            text.includes("font color")
+        ){
 
             return "font-color";
 
@@ -21004,11 +21507,10 @@ window.RaniseMoiseEvaluationEngine = {
         // HIGHLIGHT
         // -------------------------------------------------
 
-        if (
+        if(
             text.includes("surbrillance") ||
-            text.includes("text highlight") ||
-            text.includes("highlight color")
-        ) {
+            text.includes("highlight")
+        ){
 
             return "highlight";
 
@@ -21016,21 +21518,53 @@ window.RaniseMoiseEvaluationEngine = {
 
 
         // -------------------------------------------------
-        // DOCUMENT INPUT
+        // SELECT
         // -------------------------------------------------
 
-        if (
+        if(
+            text.includes("sélectionner") ||
+            text.includes("selectionner") ||
+            text.includes("sélectionnez") ||
+            text.includes("selectionnez")
+        ){
+
+            return "select-text";
+
+        }
+
+
+        // -------------------------------------------------
+        // TYPE
+        // -------------------------------------------------
+
+        if(
             text.includes("saisir") ||
-            text.includes("taper") ||
+            text.includes("saisissez") ||
             text.includes("écrire") ||
             text.includes("ecrire") ||
-            text.includes("phrase") ||
-            text.includes("texte") ||
-            text.includes("sélectionner") ||
-            text.includes("selectionner")
-        ) {
+            text.includes("écrivez") ||
+            text.includes("ecrivez") ||
+            text.includes("taper") ||
+            text.includes("entrez") ||
+            text.includes("entrer du texte")
+        ){
 
-            return "document";
+            return "type-text";
+
+        }
+
+
+        // -------------------------------------------------
+        // DOCUMENT
+        // -------------------------------------------------
+
+        if(
+            text.includes("curseur") ||
+            text.includes("document") ||
+            text.includes("zone de texte")
+        ){
+
+            return "document-area";
 
         }
 
@@ -21040,439 +21574,356 @@ window.RaniseMoiseEvaluationEngine = {
     }
 
 
+
     // =====================================================
-    // COPY TARGET
+    // REQUIRED RIBBON ACTIONS
     // =====================================================
 
-    function isCopyTarget(target) {
+    function requiredRibbonActions(type){
 
-        return isActionTarget(
-            target,
-            [
-                "copy",
-                "copier"
+        const map = {
+
+            copy:[
+                "copy"
+            ],
+
+            cut:[
+                "cut"
+            ],
+
+            paste:[
+                "paste"
+            ],
+
+            font-family:[
+                "font-family",
+                "fontfamily",
+                "font"
+            ],
+
+            font-size:[
+                "font-size",
+                "grow-font",
+                "shrink-font"
+            ],
+
+            bold:[
+                "bold"
+            ],
+
+            italic:[
+                "italic"
+            ],
+
+            underline:[
+                "underline"
+            ],
+
+            strike:[
+                "strike"
+            ],
+
+            "font-color":[
+                "color",
+                "font-color",
+                "fontcolor"
+            ],
+
+            highlight:[
+                "highlight",
+                "text-highlight",
+                "text-highlight-color"
             ]
-        );
+
+        };
+
+
+        return map[type] || [];
 
     }
 
 
-    // =====================================================
-    // CUT TARGET
-    // =====================================================
-
-    function isCutTarget(target) {
-
-        return isActionTarget(
-            target,
-            [
-                "cut",
-                "couper"
-            ]
-        );
-
-    }
-
 
     // =====================================================
-    // PASTE TARGET
+    // CHECK RIBBON ACTION
     // =====================================================
 
-    function isPasteTarget(target) {
-
-        return isActionTarget(
-            target,
-            [
-                "paste",
-                "coller"
-            ]
-        );
-
-    }
-
-
-    // =====================================================
-    // FONT FAMILY TARGET
-    // =====================================================
-
-    function isFontFamilyTarget(target) {
-
-        if (!target) {
-            return false;
-        }
+    function isCorrectRibbonAction(
+        target,
+        type
+    ){
 
         const action =
-            getRealAction(target);
-
-        const data =
-            getElementData(target);
+            getRibbonAction(target);
 
 
-        if (
-            action === "font-family" ||
-            action === "fontfamily" ||
-            action === "font-name"
-        ) {
-            return true;
-        }
+        const allowed =
+            requiredRibbonActions(type);
 
 
-        return (
-            data.includes("font family") ||
-            data.includes("font-family") ||
-            data.includes("police")
-        );
+        if(
+            !action ||
+            allowed.length === 0
+        ){
 
-    }
-
-
-    // =====================================================
-    // FONT SIZE TARGET
-    // =====================================================
-
-    function isFontSizeTarget(target) {
-
-        if (!target) {
             return false;
-        }
 
-        const action =
-            getRealAction(target);
-
-        const data =
-            getElementData(target);
-
-
-        if (
-            action === "font-size" ||
-            action === "fontsize" ||
-            action === "size"
-        ) {
-            return true;
         }
 
 
-        return (
-            data.includes("font size") ||
-            data.includes("fontsize") ||
-            data.includes("taille")
+        return allowed.includes(
+            action
         );
 
     }
 
 
-    // =====================================================
-    // BOLD TARGET
-    // =====================================================
-
-    function isBoldTarget(target) {
-
-        return isActionTarget(
-            target,
-            [
-                "bold",
-                "gras"
-            ]
-        );
-
-    }
-
 
     // =====================================================
-    // ITALIC TARGET
+    // GET ALL CLICK DATA
     // =====================================================
 
-    function isItalicTarget(target) {
+    function getClickedElementData(target){
 
-        return isActionTarget(
-            target,
-            [
-                "italic",
-                "italique"
-            ]
-        );
+        if(!target){
 
-    }
-
-
-    // =====================================================
-    // UNDERLINE TARGET
-    // =====================================================
-
-    function isUnderlineTarget(target) {
-
-        return isActionTarget(
-            target,
-            [
-                "underline",
-                "underline-text",
-                "souligner",
-                "souligné"
-            ]
-        );
-
-    }
-
-
-    // =====================================================
-    // COLOR TARGET
-    // REAL HTML USES data-action="color"
-    // =====================================================
-
-    function isColorTarget(target) {
-
-        if (!target) {
-            return false;
-        }
-
-        const button =
-            closestFromTarget(
-                target,
-                "[data-action='color']"
-            );
-
-        if (button) {
-            return true;
-        }
-
-        const dot =
-            closestFromTarget(
-                target,
-                ".cwColorDot"
-            );
-
-        return !!dot;
-
-    }
-
-
-    // =====================================================
-    // GET COLOR VALUE
-    // =====================================================
-
-    function getColorValue(target) {
-
-        const dot =
-            closestFromTarget(
-                target,
-                ".cwColorDot"
-            );
-
-        if (!dot) {
             return "";
+
         }
+
+
+        const elements = [];
+
+
+        const ribbon =
+            getRibbonButton(target);
+
+
+        if(ribbon){
+
+            elements.push(ribbon);
+
+        }
+
+
+        const tab =
+            closestFromTarget(
+                target,
+                "#cwRibbonTabBar .cwTabBtn"
+            );
+
+
+        if(tab){
+
+            elements.push(tab);
+
+        }
+
+
+        const office =
+            closestFromTarget(
+                target,
+                "#cwOfficeMenu .cwOfficeItem"
+            );
+
+
+        if(office){
+
+            elements.push(office);
+
+        }
+
+
+        if(target.nodeType === 1){
+
+            elements.push(target);
+
+        }
+
 
         return normalize(
-            dot.getAttribute(
-                "data-color"
-            )
+
+            elements
+                .map(
+                    element =>
+                        getElementData(element)
+                )
+                .filter(Boolean)
+                .join(" ")
+
         );
 
     }
 
 
+
     // =====================================================
-    // HIGHLIGHT TARGET
+    // CURRENT SIMULATION SNAPSHOT
     // =====================================================
 
-    function isHighlightTarget(target) {
+    function createActionSnapshot(){
 
-        if (!target) {
+        return {
+
+            selection:
+                captureSelectionSnapshot(),
+
+            format:
+                getFormatSignature(),
+
+            bodyText:
+                state.simulationDocument
+                ? normalize(
+                    state.simulationDocument.body?.innerText ||
+                    state.simulationDocument.body?.textContent
+                )
+                : ""
+
+        };
+
+    }
+
+
+
+    // =====================================================
+    // SNAPSHOT CHANGED
+    // =====================================================
+
+    function snapshotChanged(){
+
+        const previous =
+            state.actionSnapshot;
+
+
+        if(!previous){
+
             return false;
+
         }
 
-        const action =
-            getRealAction(target);
 
-        const data =
-            getElementData(target);
-
-
-        if (
-            action === "highlight" ||
-            action === "text-highlight" ||
-            action === "highlight-color"
-        ) {
-            return true;
-        }
+        const current =
+            createActionSnapshot();
 
 
         return (
-            data.includes("highlight") ||
-            data.includes("surbrillance")
+
+            previous.format !==
+            current.format
+
+            ||
+
+            previous.bodyText !==
+            current.bodyText
+
+            ||
+
+            previous.selection.text !==
+            current.selection.text
+
         );
 
     }
 
 
+
     // =====================================================
-    // VERIFY REAL ACTION
+    // CHECK FORMAT REALITY
     // =====================================================
 
-    function studentPerformedCorrectAction(
-        event
-    ) {
+    function checkRealFormat(type){
 
-        if (
-            !event ||
-            !event.target
-        ) {
+        const signature =
+            getFormatSignature();
+
+
+        if(!signature){
+
             return false;
+
         }
 
-        const step =
-            getCurrentStep();
 
-        if (!step) {
-            return false;
-        }
-
-        const type =
-            getStepType(step);
-
-        const target =
-            event.target;
+        const parts =
+            signature.split("|");
 
 
-        // =================================================
-        // COPY
-        // =================================================
+        const weight =
+            parts[0];
 
-        if (type === "copy") {
+        const style =
+            parts[1];
 
-            return isCopyTarget(
-                target
+        const decoration =
+            parts[2];
+
+
+        if(type === "bold"){
+
+            return (
+                weight === "bold" ||
+                parseInt(weight) >= 600
             );
 
         }
 
 
-        // =================================================
-        // CUT
-        // =================================================
+        if(type === "italic"){
 
-        if (type === "cut") {
-
-            return isCutTarget(
-                target
+            return (
+                style === "italic" ||
+                style === "oblique"
             );
 
         }
 
 
-        // =================================================
-        // PASTE
-        // =================================================
+        if(type === "underline"){
 
-        if (type === "paste") {
-
-            return isPasteTarget(
-                target
+            return (
+                decoration.includes(
+                    "underline"
+                )
             );
 
         }
 
 
-        // =================================================
-        // FONT FAMILY
-        // =================================================
+        if(type === "strike"){
 
-        if (type === "font-family") {
-
-            return isFontFamilyTarget(
-                target
+            return (
+                decoration.includes(
+                    "line-through"
+                )
             );
 
         }
 
 
-        // =================================================
-        // FONT SIZE
-        // =================================================
+        if(type === "font-family"){
 
-        if (type === "font-size") {
-
-            return isFontSizeTarget(
-                target
-            );
+            return !!parts[4];
 
         }
 
 
-        // =================================================
-        // BOLD
-        // =================================================
+        if(type === "font-size"){
 
-        if (type === "bold") {
-
-            return isBoldTarget(
-                target
-            );
+            return !!parts[3];
 
         }
 
 
-        // =================================================
-        // ITALIC
-        // =================================================
+        if(type === "font-color"){
 
-        if (type === "italic") {
-
-            return isItalicTarget(
-                target
-            );
+            return !!parts[5];
 
         }
 
 
-        // =================================================
-        // UNDERLINE
-        // =================================================
+        if(type === "highlight"){
 
-        if (type === "underline") {
-
-            return isUnderlineTarget(
-                target
-            );
-
-        }
-
-
-        // =================================================
-        // FONT COLOR
-        // =================================================
-
-        if (type === "font-color") {
-
-            return isColorTarget(
-                target
-            );
-
-        }
-
-
-        // =================================================
-        // HIGHLIGHT
-        // =================================================
-
-        if (type === "highlight") {
-
-            return isHighlightTarget(
-                target
-            );
-
-        }
-
-
-        // =================================================
-        // DOCUMENT
-        // =================================================
-
-        if (type === "document") {
-
-            return isDocumentAreaTarget(
-                target
-            );
+            return !!parts[6];
 
         }
 
@@ -21482,27 +21933,383 @@ window.RaniseMoiseEvaluationEngine = {
     }
 
 
+
     // =====================================================
-    // INPUT VALIDATION
+    // CHECK COPY / CUT / PASTE REAL EFFECT
     // =====================================================
 
-    function studentPerformedCorrectInput(
-        event
-    ) {
+    function checkClipboardOperation(type){
+
+        const doc =
+            state.simulationDocument;
+
+
+        if(!doc){
+
+            return false;
+
+        }
+
+
+        const body =
+            doc.body;
+
+
+        if(!body){
+
+            return false;
+
+        }
+
+
+        const action =
+            getCurrentStepActionName();
+
+
+        if(
+            action &&
+            action !== type
+        ){
+
+            return false;
+
+        }
+
+
+        // -------------------------------------------------
+        // Clipboard event evidence
+        // -------------------------------------------------
+
+        if(
+            state.lastClipboardAction ===
+            type
+        ){
+
+            state.lastClipboardAction =
+                null;
+
+            return true;
+
+        }
+
+
+        // -------------------------------------------------
+        // Real DOM mutation evidence
+        // -------------------------------------------------
+
+        if(
+            snapshotChanged()
+        ){
+
+            return true;
+
+        }
+
+
+        return false;
+
+    }
+
+
+
+    // =====================================================
+    // CURRENT STEP ACTION NAME
+    // =====================================================
+
+    function getCurrentStepActionName(){
 
         const step =
             getCurrentStep();
 
-        if (!step) {
-            return false;
+
+        if(!step){
+
+            return "";
+
         }
 
+
+        const text =
+            normalize(step);
+
+
+        if(
+            text.includes("copier") ||
+            text.includes("copy")
+        ){
+
+            return "copy";
+
+        }
+
+
+        if(
+            text.includes("couper") ||
+            text.includes("cut")
+        ){
+
+            return "cut";
+
+        }
+
+
+        if(
+            text.includes("coller") ||
+            text.includes("paste")
+        ){
+
+            return "paste";
+
+        }
+
+
+        return "";
+
+    }
+
+
+
+    // =====================================================
+    // CLIPBOARD EVENT MONITOR
+    // =====================================================
+
+    function handleClipboardEvent(event){
+
+        if(
+            !state.started ||
+            !state.waitingForAction
+        ){
+
+            return;
+
+        }
+
+
+        if(
+            !event ||
+            !event.type
+        ){
+
+            return;
+
+        }
+
+
+        const typeMap = {
+
+            copy:"copy",
+
+            cut:"cut",
+
+            paste:"paste"
+
+        };
+
+
         const type =
-            getStepType(step);
+            typeMap[
+                event.type
+            ];
 
 
-        if (type !== "document") {
+        if(!type){
+
+            return;
+
+        }
+
+
+        state.lastClipboardAction =
+            type;
+
+
+        if(
+            state.processingAction ||
+            state.speaking
+        ){
+
+            return;
+
+        }
+
+
+        if(
+            getStepType(
+                getCurrentStep()
+            ) === type
+        ){
+
+            setTimeout(
+                validateCurrentAction,
+                0
+            );
+
+        }
+
+    }
+
+
+
+    // =====================================================
+    // INPUT VALIDATION
+    // =====================================================
+
+    function validateTextInput(event){
+
+        if(
+            !event ||
+            !event.target
+        ){
+
             return false;
+
+        }
+
+
+        if(
+            !isDocumentAreaTarget(
+                event.target
+            )
+        ){
+
+            return false;
+
+        }
+
+
+        const step =
+            getCurrentStep();
+
+
+        if(!step){
+
+            return false;
+
+        }
+
+
+        const wanted =
+            extractQuotedText(
+                step
+            );
+
+
+        if(!wanted){
+
+            return true;
+
+        }
+
+
+        return documentContainsText(
+            wanted
+        );
+
+    }
+
+
+
+    // =====================================================
+    // EXTRACT QUOTED TEXT
+    // =====================================================
+
+    function extractQuotedText(step){
+
+        const value =
+            String(step || "");
+
+
+        const match =
+            value.match(
+                /["«“”']([^"«“”']+)["»“”']/
+            );
+
+
+        if(
+            match &&
+            match[1]
+        ){
+
+            return match[1].trim();
+
+        }
+
+
+        return "";
+
+    }
+
+
+
+    // =====================================================
+    // SELECT TEXT VALIDATION
+    // =====================================================
+
+    function validateSelection(){
+
+        const selection =
+            getSelectionState();
+
+
+        if(
+            !selection.exists
+        ){
+
+            return false;
+
+        }
+
+
+        if(
+            !selectionInsideDocument()
+        ){
+
+            return false;
+
+        }
+
+
+        const step =
+            getCurrentStep();
+
+
+        const wanted =
+            extractQuotedText(
+                step
+            );
+
+
+        if(
+            !wanted
+        ){
+
+            return true;
+
+        }
+
+
+        return (
+            selection.normalized ===
+            normalize(wanted)
+        );
+
+    }
+
+
+
+    // =====================================================
+    // DOCUMENT AREA VALIDATION
+    // =====================================================
+
+    function validateDocumentArea(event){
+
+        if(
+            !event ||
+            !event.target
+        ){
+
+            return false;
+
         }
 
 
@@ -21513,28 +22320,594 @@ window.RaniseMoiseEvaluationEngine = {
     }
 
 
+
     // =====================================================
-    // EXPLAIN CURRENT STEP
+    // REAL ACTION VALIDATION
     // =====================================================
 
-    async function speakCurrentStep() {
+    function studentPerformedCorrectAction(event){
 
-        const activity =
-            getCurrentActivity();
+        if(
+            !event ||
+            !event.target
+        ){
 
-        if (!activity) {
-            return;
+            return false;
+
         }
+
 
         const step =
             getCurrentStep();
 
-        if (!step) {
-            return;
+
+        if(!step){
+
+            return false;
+
         }
+
+
+        const type =
+            getStepType(step);
+
+
+        const target =
+            event.target;
+
+
+
+        // -------------------------------------------------
+        // SELECTION
+        // -------------------------------------------------
+
+        if(type === "select-text"){
+
+            return validateSelection();
+
+        }
+
+
+
+        // -------------------------------------------------
+        // TEXT INPUT
+        // -------------------------------------------------
+
+        if(type === "type-text"){
+
+            return validateTextInput(
+                event
+            );
+
+        }
+
+
+
+        // -------------------------------------------------
+        // DOCUMENT AREA
+        // -------------------------------------------------
+
+        if(type === "document-area"){
+
+            return validateDocumentArea(
+                event
+            );
+
+        }
+
+
+
+        // -------------------------------------------------
+        // COPY
+        // -------------------------------------------------
+
+        if(type === "copy"){
+
+            if(
+                !validateSelection()
+            ){
+
+                return false;
+
+            }
+
+
+            return isCorrectRibbonAction(
+                target,
+                "copy"
+            ) ||
+            checkClipboardOperation(
+                "copy"
+            );
+
+        }
+
+
+
+        // -------------------------------------------------
+        // CUT
+        // -------------------------------------------------
+
+        if(type === "cut"){
+
+            if(
+                !validateSelection()
+            ){
+
+                return false;
+
+            }
+
+
+            return isCorrectRibbonAction(
+                target,
+                "cut"
+            ) ||
+            checkClipboardOperation(
+                "cut"
+            );
+
+        }
+
+
+
+        // -------------------------------------------------
+        // PASTE
+        // -------------------------------------------------
+
+        if(type === "paste"){
+
+            return (
+                isCorrectRibbonAction(
+                    target,
+                    "paste"
+                ) ||
+                checkClipboardOperation(
+                    "paste"
+                )
+            );
+
+        }
+
+
+
+        // -------------------------------------------------
+        // FORMATTING
+        // -------------------------------------------------
+
+        if(
+
+            type === "bold" ||
+            type === "italic" ||
+            type === "underline" ||
+            type === "strike" ||
+            type === "font-family" ||
+            type === "font-size" ||
+            type === "font-color" ||
+            type === "highlight"
+
+        ){
+
+            if(
+                !validateSelection()
+            ){
+
+                return false;
+
+            }
+
+
+            if(
+                !isCorrectRibbonAction(
+                    target,
+                    type
+                )
+            ){
+
+                return false;
+
+            }
+
+
+            // ---------------------------------------------
+            // Allow simulation's formatting handler to run
+            // before checking resulting state.
+            // ---------------------------------------------
+
+            setTimeout(
+
+                function(){
+
+                    validateFormattingResult(
+                        type
+                    );
+
+                },
+
+                0
+
+            );
+
+
+            return false;
+
+        }
+
+
+
+        return false;
+
+    }
+
+
+
+    // =====================================================
+    // FORMAT RESULT VALIDATION
+    // =====================================================
+
+    function validateFormattingResult(type){
+
+        if(
+            !state.started ||
+            state.completed ||
+            state.processingAction ||
+            !state.waitingForAction
+        ){
+
+            return;
+
+        }
+
+
+        if(
+            getStepType(
+                getCurrentStep()
+            ) !== type
+        ){
+
+            return;
+
+        }
+
+
+        if(
+            checkRealFormat(type)
+        ){
+
+            nextPracticeStep();
+
+        }
+
+    }
+
+
+
+    // =====================================================
+    // INPUT LISTENER
+    // =====================================================
+
+    function handleSimulationInput(event){
+
+        if(
+            !state.started ||
+            state.completed ||
+            state.speaking ||
+            state.processingAction ||
+            !state.waitingForAction
+        ){
+
+            return;
+
+        }
+
+
+        const type =
+            getStepType(
+                getCurrentStep()
+            );
+
+
+        if(
+            type !== "type-text"
+        ){
+
+            return;
+
+        }
+
+
+        if(
+            validateTextInput(event)
+        ){
+
+            nextPracticeStep();
+
+        }
+
+    }
+
+
+
+    // =====================================================
+    // CLICK LISTENER
+    // =====================================================
+
+    function handleSimulationClick(event){
+
+        if(
+            !state.started ||
+            state.completed ||
+            state.speaking ||
+            state.processingAction ||
+            !state.waitingForAction
+        ){
+
+            return;
+
+        }
+
+
+        const now =
+            Date.now();
+
+
+        if(
+            now -
+            state.lastValidationTime <
+            150
+        ){
+
+            return;
+
+        }
+
+
+        const type =
+            getStepType(
+                getCurrentStep()
+            );
+
+
+        // -------------------------------------------------
+        // Formatting actions need DOM update first
+        // -------------------------------------------------
+
+        if(
+
+            type === "bold" ||
+            type === "italic" ||
+            type === "underline" ||
+            type === "strike" ||
+            type === "font-family" ||
+            type === "font-size" ||
+            type === "font-color" ||
+            type === "highlight"
+
+        ){
+
+            if(
+                !validateSelection()
+            ){
+
+                return;
+
+            }
+
+
+            if(
+                !isCorrectRibbonAction(
+                    event.target,
+                    type
+                )
+            ){
+
+                return;
+
+            }
+
+
+            state.lastValidationTime =
+                now;
+
+
+            setTimeout(
+
+                function(){
+
+                    validateFormattingResult(
+                        type
+                    );
+
+                },
+
+                30
+
+            );
+
+
+            return;
+
+        }
+
+
+
+        // -------------------------------------------------
+        // Other real actions
+        // -------------------------------------------------
+
+        if(
+            studentPerformedCorrectAction(
+                event
+            )
+        ){
+
+            state.lastValidationTime =
+                now;
+
+
+            nextPracticeStep();
+
+        }
+
+    }
+
+
+
+    // =====================================================
+    // ATTACH LISTENERS
+    // =====================================================
+
+    function attachSimulationListeners(){
+
+        if(
+            !state.simulationDocument ||
+            state.listenersAttached
+        ){
+
+            return;
+
+        }
+
+
+        const doc =
+            state.simulationDocument;
+
+
+        doc.addEventListener(
+            "click",
+            handleSimulationClick,
+            true
+        );
+
+
+        doc.addEventListener(
+            "input",
+            handleSimulationInput,
+            true
+        );
+
+
+        doc.addEventListener(
+            "copy",
+            handleClipboardEvent,
+            true
+        );
+
+
+        doc.addEventListener(
+            "cut",
+            handleClipboardEvent,
+            true
+        );
+
+
+        doc.addEventListener(
+            "paste",
+            handleClipboardEvent,
+            true
+        );
+
+
+        state.listenersAttached =
+            true;
+
+    }
+
+
+
+    // =====================================================
+    // RESET STATE
+    // =====================================================
+
+    function resetState(chapterId){
+
+        state.chapterId =
+            chapterId;
+
+        state.simulationFrame =
+            null;
+
+        state.simulationDocument =
+            null;
+
+        state.practice =
+            null;
+
+        state.activityIndex =
+            0;
+
+        state.stepIndex =
+            0;
+
+        state.started =
+            false;
 
         state.waitingForAction =
             false;
+
+        state.completed =
+            false;
+
+        state.listenersAttached =
+            false;
+
+        state.speaking =
+            false;
+
+        state.processingAction =
+            false;
+
+        state.actionSnapshot =
+            null;
+
+        state.lastValidationTime =
+            0;
+
+        state.lastClipboardAction =
+            null;
+
+    }
+
+
+
+    // =====================================================
+    // EXPLAIN CURRENT STEP
+    // =====================================================
+
+    async function speakCurrentStep(){
+
+        const activity =
+            getCurrentActivity();
+
+
+        if(!activity){
+
+            return;
+
+        }
+
+
+        const step =
+            getCurrentStep();
+
+
+        if(!step){
+
+            return;
+
+        }
+
+
+        state.waitingForAction =
+            false;
+
+
+        state.actionSnapshot =
+            createActionSnapshot();
+
+
+        state.lastClipboardAction =
+            null;
 
 
         await speak(
@@ -21548,21 +22921,27 @@ window.RaniseMoiseEvaluationEngine = {
         );
 
 
-        if (!state.completed) {
+        if(
+            !state.completed
+        ){
 
             state.waitingForAction =
                 true;
+
+            state.actionSnapshot =
+                createActionSnapshot();
 
         }
 
     }
 
 
+
     // =====================================================
-    // STEP FEEDBACK
+    // STEP CONFIRMATION
     // =====================================================
 
-    async function confirmStep() {
+    async function confirmStep(){
 
         state.waitingForAction =
             false;
@@ -21575,236 +22954,20 @@ window.RaniseMoiseEvaluationEngine = {
     }
 
 
-    // =====================================================
-    // UNLOCK EXERCISES
-    // ONLY PRACTICE PROGRESS
-    // =====================================================
-
-    function unlockExercises() {
-
-        const chapterId =
-            state.chapterId;
-
-        if (
-            !chapterId ||
-            isChapter1(chapterId)
-        ) {
-            return;
-        }
-
-
-        // -------------------------------------------------
-        // USE EXISTING PARTS ENGINE IF AVAILABLE
-        // -------------------------------------------------
-
-        if (
-            typeof WordChapter2PartsEngine !==
-            "undefined"
-        ) {
-
-            try {
-
-                const progress =
-                    WordChapter2PartsEngine
-                        .getProgress();
-
-                progress.practice =
-                    true;
-
-                progress.exercises =
-                    true;
-
-                WordChapter2PartsEngine
-                    .saveProgress(
-                        progress
-                    );
-
-            } catch (error) {
-
-                console.warn(
-                    "RANISE DYNAMIC BLOCK 7: Existing parts engine unavailable.",
-                    error
-                );
-
-            }
-
-        }
-
-
-        // -------------------------------------------------
-        // GENERIC DYNAMIC PROGRESS
-        // -------------------------------------------------
-
-        const key =
-            "word_" +
-            chapterId +
-            "_partsProgress";
-
-
-        let progress = {
-
-            theory: true,
-
-            practice: false,
-
-            exercises: false,
-
-            homework: false,
-
-            evaluation: false
-
-        };
-
-
-        try {
-
-            const saved =
-                localStorage.getItem(
-                    key
-                );
-
-            if (saved) {
-
-                const parsed =
-                    JSON.parse(saved);
-
-                if (
-                    parsed &&
-                    typeof parsed === "object"
-                ) {
-
-                    progress =
-                        Object.assign(
-                            progress,
-                            parsed
-                        );
-
-                }
-
-            }
-
-        } catch (error) {
-
-            console.warn(
-                "RANISE DYNAMIC BLOCK 7: Progress read error.",
-                error
-            );
-
-        }
-
-
-        progress.practice =
-            true;
-
-        progress.exercises =
-            true;
-
-
-        try {
-
-            localStorage.setItem(
-
-                key,
-
-                JSON.stringify(
-                    progress
-                )
-
-            );
-
-        } catch (error) {
-
-            console.warn(
-                "RANISE DYNAMIC BLOCK 7: Progress save error.",
-                error
-            );
-
-        }
-
-
-        // -------------------------------------------------
-        // DYNAMIC RENDER BRIDGE
-        // -------------------------------------------------
-
-        if (
-            typeof RaniseDynamicUnlockRenderBridge !==
-            "undefined" &&
-            typeof RaniseDynamicUnlockRenderBridge
-                .renderChapterParts ===
-            "function"
-        ) {
-
-            try {
-
-                RaniseDynamicUnlockRenderBridge
-                    .renderChapterParts(
-                        chapterId
-                    );
-
-            } catch (error) {
-
-                console.warn(
-                    "RANISE DYNAMIC BLOCK 7: Unlock render bridge error.",
-                    error
-                );
-
-            }
-
-        }
-
-    }
-
 
     // =====================================================
-    // COMPLETE CURRENT PRACTICE
+    // NEXT STEP
     // =====================================================
 
-    async function completePractice() {
+    async function nextPracticeStep(){
 
-        if (state.completed) {
-            return;
-        }
-
-
-        state.completed =
-            true;
-
-        state.waitingForAction =
-            false;
-
-
-        await speak(
-
-            "Excellent. Vous avez terminé toutes les étapes de la séance pratique. " +
-            "Votre pratique est maintenant validée. " +
-            "La partie Exercices est maintenant débloquée. " +
-            "Bravo pour votre travail."
-
-        );
-
-
-        unlockExercises();
-
-
-        console.log(
-            "RANISE DYNAMIC BLOCK 7: PRACTICE COMPLETED.",
-            state.chapterId
-        );
-
-    }
-
-
-    // =====================================================
-    // MOVE TO NEXT STEP
-    // =====================================================
-
-    async function nextPracticeStep() {
-
-        if (
+        if(
             state.completed ||
             state.processingAction
-        ) {
+        ){
+
             return;
+
         }
 
 
@@ -21812,7 +22975,7 @@ window.RaniseMoiseEvaluationEngine = {
             true;
 
 
-        try {
+        try{
 
             await confirmStep();
 
@@ -21821,22 +22984,28 @@ window.RaniseMoiseEvaluationEngine = {
                 getCurrentActivity();
 
 
-            if (!activity) {
+            if(!activity){
+
                 return;
+
             }
 
 
-            // =============================================
-            // NEXT STEP — SAME ACTIVITY
-            // =============================================
 
-            if (
+            // =================================================
+            // NEXT STEP SAME ACTIVITY
+            // =================================================
+
+            if(
+
                 Array.isArray(
                     activity.steps
                 ) &&
+
                 state.stepIndex <
                 activity.steps.length - 1
-            ) {
+
+            ){
 
                 state.stepIndex++;
 
@@ -21849,14 +23018,17 @@ window.RaniseMoiseEvaluationEngine = {
             }
 
 
-            // =============================================
-            // NEXT ACTIVITY
-            // =============================================
 
-            if (
+            // =================================================
+            // NEXT ACTIVITY
+            // =================================================
+
+            if(
+
                 state.activityIndex <
                 state.practice.length - 1
-            ) {
+
+            ){
 
                 state.activityIndex++;
 
@@ -21868,10 +23040,10 @@ window.RaniseMoiseEvaluationEngine = {
                     getCurrentActivity();
 
 
-                if (
+                if(
                     nextActivity &&
                     nextActivity.title
-                ) {
+                ){
 
                     await speak(
 
@@ -21892,14 +23064,79 @@ window.RaniseMoiseEvaluationEngine = {
             }
 
 
-            // =============================================
-            // ALL PRACTICE COMPLETED
-            // =============================================
 
-            await completePractice();
+            // =================================================
+            // PRACTICE COMPLETED
+            // =================================================
+
+            state.completed =
+                true;
+
+            state.waitingForAction =
+                false;
 
 
-        } finally {
+            await speak(
+
+                "Excellent. Vous avez terminé toutes les étapes de la séance pratique du " +
+                chapterNameForSpeech(
+                    state.chapterId
+                ) +
+                ". Votre pratique est maintenant validée. " +
+                "La partie Exercices est maintenant déverrouillée. " +
+                "Bravo pour votre travail."
+
+            );
+
+
+            // =================================================
+            // EXISTING DYNAMIC BRIDGE ONLY
+            // =================================================
+
+            if(
+
+                typeof RaniseDynamicUnlockRenderBridge !==
+                "undefined" &&
+
+                RaniseDynamicUnlockRenderBridge &&
+
+                typeof RaniseDynamicUnlockRenderBridge
+                    .unlockNextPart ===
+                "function"
+
+            ){
+
+                RaniseDynamicUnlockRenderBridge
+                    .unlockNextPart(
+
+                        state.chapterId,
+
+                        "practice"
+
+                    );
+
+            }else{
+
+                console.error(
+
+                    "RANISE DYNAMIC BLOCK 7: " +
+                    "Existing Dynamic Unlock Bridge unavailable."
+
+                );
+
+            }
+
+
+            console.log(
+
+                "RANISE DYNAMIC BLOCK 7: " +
+                "PRACTICE COMPLETED — EXERCISES UNLOCK REQUESTED",
+
+                state.chapterId
+
+            );
+
+        }finally{
 
             state.processingAction =
                 false;
@@ -21909,363 +23146,6 @@ window.RaniseMoiseEvaluationEngine = {
     }
 
 
-    // =====================================================
-    // REAL SIMULATION CLICK
-    // =====================================================
-
-    function handleSimulationClick(event) {
-
-        if (!state.started) {
-            return;
-        }
-
-        if (state.completed) {
-            return;
-        }
-
-        if (state.speaking) {
-            return;
-        }
-
-        if (state.processingAction) {
-            return;
-        }
-
-        if (!state.waitingForAction) {
-            return;
-        }
-
-
-        const now =
-            Date.now();
-
-
-        if (
-            now -
-            state.lastActionTime <
-            250
-        ) {
-            return;
-        }
-
-
-        if (
-            studentPerformedCorrectAction(
-                event
-            )
-        ) {
-
-            state.lastActionTime =
-                now;
-
-            nextPracticeStep();
-
-        }
-
-    }
-
-
-    // =====================================================
-    // REAL DOCUMENT INPUT
-    // =====================================================
-
-    function handleSimulationInput(event) {
-
-        if (!state.started) {
-            return;
-        }
-
-        if (state.completed) {
-            return;
-        }
-
-        if (state.speaking) {
-            return;
-        }
-
-        if (state.processingAction) {
-            return;
-        }
-
-        if (!state.waitingForAction) {
-            return;
-        }
-
-
-        if (
-            studentPerformedCorrectInput(
-                event
-            )
-        ) {
-
-            state.lastActionTime =
-                Date.now();
-
-            nextPracticeStep();
-
-        }
-
-    }
-
-
-    // =====================================================
-    // SELECTION / COPY / CUT / PASTE EVENTS
-    // =====================================================
-
-    function handleSimulationBeforeInput(event) {
-
-        if (!state.started) {
-            return;
-        }
-
-        if (state.completed) {
-            return;
-        }
-
-        if (state.speaking) {
-            return;
-        }
-
-        if (state.processingAction) {
-            return;
-        }
-
-        if (!state.waitingForAction) {
-            return;
-        }
-
-
-        const step =
-            getCurrentStep();
-
-        if (!step) {
-            return;
-        }
-
-
-        const type =
-            getStepType(step);
-
-
-        const inputType =
-            normalize(
-                event.inputType
-            );
-
-
-        // -------------------------------------------------
-        // REAL INSERT FROM PASTE
-        // -------------------------------------------------
-
-        if (
-            type === "paste" &&
-            (
-                inputType ===
-                "insertfrompaste" ||
-                inputType ===
-                "insertreplacementtext"
-            )
-        ) {
-
-            nextPracticeStep();
-
-            return;
-
-        }
-
-
-        // -------------------------------------------------
-        // REAL CUT
-        // -------------------------------------------------
-
-        if (
-            type === "cut" &&
-            (
-                inputType ===
-                "deletebycut"
-            )
-        ) {
-
-            nextPracticeStep();
-
-        }
-
-    }
-
-
-    // =====================================================
-    // KEYBOARD VALIDATION
-    // =====================================================
-
-    function handleSimulationKeydown(event) {
-
-        if (!state.started) {
-            return;
-        }
-
-        if (state.completed) {
-            return;
-        }
-
-        if (state.speaking) {
-            return;
-        }
-
-        if (state.processingAction) {
-            return;
-        }
-
-        if (!state.waitingForAction) {
-            return;
-        }
-
-
-        const step =
-            getCurrentStep();
-
-        if (!step) {
-            return;
-        }
-
-
-        const type =
-            getStepType(step);
-
-
-        const key =
-            normalize(
-                event.key
-            );
-
-
-        const modifier =
-            event.ctrlKey ||
-            event.metaKey;
-
-
-        // -------------------------------------------------
-        // COPY
-        // -------------------------------------------------
-
-        if (
-            type === "copy" &&
-            modifier &&
-            key === "c"
-        ) {
-
-            event.__raniseDynamicValidated =
-                true;
-
-            nextPracticeStep();
-
-            return;
-
-        }
-
-
-        // -------------------------------------------------
-        // CUT
-        // -------------------------------------------------
-
-        if (
-            type === "cut" &&
-            modifier &&
-            key === "x"
-        ) {
-
-            event.__raniseDynamicValidated =
-                true;
-
-            nextPracticeStep();
-
-            return;
-
-        }
-
-
-        // -------------------------------------------------
-        // PASTE
-        // -------------------------------------------------
-
-        if (
-            type === "paste" &&
-            modifier &&
-            key === "v"
-        ) {
-
-            event.__raniseDynamicValidated =
-                true;
-
-            nextPracticeStep();
-
-        }
-
-    }
-
-
-    // =====================================================
-    // ATTACH LISTENERS
-    // =====================================================
-
-    function attachSimulationListeners() {
-
-        if (
-            !state.simulationDocument ||
-            state.listenersAttached
-        ) {
-            return;
-        }
-
-
-        state.simulationDocument.addEventListener(
-
-            "click",
-
-            handleSimulationClick,
-
-            true
-
-        );
-
-
-        state.simulationDocument.addEventListener(
-
-            "input",
-
-            handleSimulationInput,
-
-            true
-
-        );
-
-
-        state.simulationDocument.addEventListener(
-
-            "beforeinput",
-
-            handleSimulationBeforeInput,
-
-            true
-
-        );
-
-
-        state.simulationDocument.addEventListener(
-
-            "keydown",
-
-            handleSimulationKeydown,
-
-            true
-
-        );
-
-
-        state.listenersAttached =
-            true;
-
-    }
-
 
     // =====================================================
     // START DYNAMIC BLOCK 7
@@ -22273,75 +23153,89 @@ window.RaniseMoiseEvaluationEngine = {
 
     async function startBlock7Dynamic(
         chapterId
-    ) {
+    ){
 
-        if (!chapterId) {
-            return;
-        }
+        // -------------------------------------------------
+        // ABSOLUTE CHAPTER 1 PROTECTION
+        // -------------------------------------------------
 
+        if(
+            !chapterId ||
+            isChapter1(chapterId)
+        ){
 
-        // =================================================
-        // NEVER TOUCH CHAPTER 1
-        // =================================================
-
-        if (
-            isChapter1(
-                chapterId
-            )
-        ) {
-
-            console.warn(
-                "RANISE DYNAMIC BLOCK 7: Chapter 1 excluded."
-            );
-
-            return;
+            return false;
 
         }
 
 
-        if (
+        // -------------------------------------------------
+        // DUPLICATE START PROTECTION
+        // -------------------------------------------------
+
+        if(
+
             state.started &&
-            state.chapterId ===
-            chapterId
-        ) {
-            return;
+            state.chapterId === chapterId
+
+        ){
+
+            return true;
+
         }
 
+
+        resetState(
+            chapterId
+        );
+
+
+        // -------------------------------------------------
+        // GET PRACTICE
+        // -------------------------------------------------
 
         const practice =
-            getPractice(
+            getChapterPractice(
                 chapterId
             );
 
 
-        if (!practice) {
+        if(!practice){
 
             console.error(
-                "RANISE DYNAMIC BLOCK 7: Practice unavailable for",
+
+                "RANISE DYNAMIC BLOCK 7: " +
+                "Practice unavailable.",
+
                 chapterId
+
             );
 
-            return;
+            return false;
 
         }
 
-
-        if (!connectToSimulation()) {
-            return;
-        }
-
-
-        state.chapterId =
-            chapterId;
 
         state.practice =
             practice;
 
-        state.activityIndex =
-            0;
 
-        state.stepIndex =
-            0;
+        // -------------------------------------------------
+        // CONNECT TO EXISTING SIMULATION
+        // -------------------------------------------------
+
+        if(
+            !connectToSimulation()
+        ){
+
+            return false;
+
+        }
+
+
+        // -------------------------------------------------
+        // START
+        // -------------------------------------------------
 
         state.started =
             true;
@@ -22355,40 +23249,41 @@ window.RaniseMoiseEvaluationEngine = {
         state.processingAction =
             false;
 
-        state.listenersAttached =
-            false;
-
 
         attachSimulationListeners();
 
 
-        // =================================================
+        // -------------------------------------------------
         // WELCOME
-        // =================================================
+        // -------------------------------------------------
 
         await speak(
 
             "Bienvenue dans l'espace de simulation Microsoft Word 2007. " +
-            "Nous allons maintenant réaliser la pratique du " +
-            chapterId +
-            " ensemble. " +
-            "Je vais vous accompagner étape par étape et vérifier chaque action réelle avant de continuer."
+            "Nous allons maintenant réaliser ensemble la séance pratique du " +
+            chapterNameForSpeech(
+                chapterId
+            ) +
+            ". " +
+            "Je vais vous guider étape par étape et lentement. " +
+            "Après chaque consigne, effectuez réellement l'action demandée dans la simulation. " +
+            "Je vérifierai votre action avant de passer à l'étape suivante."
 
         );
 
 
-        // =================================================
+        // -------------------------------------------------
         // FIRST ACTIVITY
-        // =================================================
+        // -------------------------------------------------
 
         const firstActivity =
             getCurrentActivity();
 
 
-        if (
+        if(
             firstActivity &&
             firstActivity.title
-        ) {
+        ){
 
             await speak(
                 firstActivity.title
@@ -22397,13 +23292,116 @@ window.RaniseMoiseEvaluationEngine = {
         }
 
 
-        // =================================================
+        // -------------------------------------------------
         // FIRST STEP
-        // =================================================
+        // -------------------------------------------------
 
         await speakCurrentStep();
 
+
+        return true;
+
     }
+
+
+
+    // =====================================================
+    // DETECT CURRENT CHAPTER
+    // =====================================================
+
+    function detectCurrentChapterId(){
+
+        let chapterId =
+            null;
+
+
+        // -------------------------------------------------
+        // GLOBAL
+        // -------------------------------------------------
+
+        if(
+            typeof currentChapterId !==
+            "undefined" &&
+            currentChapterId
+        ){
+
+            chapterId =
+                currentChapterId;
+
+        }
+
+
+        // -------------------------------------------------
+        // WINDOW
+        // -------------------------------------------------
+
+        if(
+            !chapterId &&
+            window.currentChapterId
+        ){
+
+            chapterId =
+                window.currentChapterId;
+
+        }
+
+
+        // -------------------------------------------------
+        // RANISE ACTIVE CHAPTER
+        // -------------------------------------------------
+
+        if(
+            !chapterId &&
+            window.RaniseActiveChapterId
+        ){
+
+            chapterId =
+                window.RaniseActiveChapterId;
+
+        }
+
+
+        // -------------------------------------------------
+        // DATA ATTRIBUTE
+        // -------------------------------------------------
+
+        if(!chapterId){
+
+            const element =
+                document.querySelector(
+                    "[data-chapter-id]"
+                );
+
+
+            if(element){
+
+                chapterId =
+                    element.getAttribute(
+                        "data-chapter-id"
+                    );
+
+            }
+
+        }
+
+
+        // -------------------------------------------------
+        // NORMALIZE CHAPTER ID
+        // -------------------------------------------------
+
+        if(chapterId){
+
+            chapterId =
+                String(chapterId)
+                    .trim();
+
+        }
+
+
+        return chapterId;
+
+    }
+
 
 
     // =====================================================
@@ -22412,15 +23410,15 @@ window.RaniseMoiseEvaluationEngine = {
 
     function waitForSimulation(
         chapterId
-    ) {
+    ){
 
-        if (
+        if(
             !chapterId ||
-            isChapter1(
-                chapterId
-            )
-        ) {
+            isChapter1(chapterId)
+        ){
+
             return;
+
         }
 
 
@@ -22431,7 +23429,7 @@ window.RaniseMoiseEvaluationEngine = {
         const timer =
             setInterval(
 
-                function () {
+                function(){
 
                     attempts++;
 
@@ -22440,18 +23438,24 @@ window.RaniseMoiseEvaluationEngine = {
                         findSimulation();
 
 
-                    if (!frame) {
+                    if(!frame){
 
-                        if (
+                        if(
                             attempts >= 100
-                        ) {
+                        ){
 
                             clearInterval(
                                 timer
                             );
 
+
                             console.warn(
-                                "RANISE DYNAMIC BLOCK 7: Simulation iframe not found."
+
+                                "RANISE DYNAMIC BLOCK 7: " +
+                                "Simulation iframe not found.",
+
+                                chapterId
+
                             );
 
                         }
@@ -22470,15 +23474,19 @@ window.RaniseMoiseEvaluationEngine = {
                         frame;
 
 
-                    // =====================================
+                    // -------------------------------------------------
                     // ALREADY LOADED
-                    // =====================================
+                    // -------------------------------------------------
 
-                    if (
+                    if(
+
                         frame.contentDocument &&
-                        frame.contentDocument.readyState ===
+
+                        frame.contentDocument
+                            .readyState ===
                         "complete"
-                    ) {
+
+                    ){
 
                         startBlock7Dynamic(
                             chapterId
@@ -22489,15 +23497,15 @@ window.RaniseMoiseEvaluationEngine = {
                     }
 
 
-                    // =====================================
-                    // WAIT FOR IFRAME LOAD
-                    // =====================================
+                    // -------------------------------------------------
+                    // WAIT LOAD
+                    // -------------------------------------------------
 
                     frame.addEventListener(
 
                         "load",
 
-                        function () {
+                        function(){
 
                             startBlock7Dynamic(
                                 chapterId
@@ -22506,7 +23514,7 @@ window.RaniseMoiseEvaluationEngine = {
                         },
 
                         {
-                            once: true
+                            once:true
                         }
 
                     );
@@ -22520,16 +23528,18 @@ window.RaniseMoiseEvaluationEngine = {
     }
 
 
+
     // =====================================================
     // OBSERVE EXISTING SIMULATION LAUNCH
-    // DOES NOT REPLACE EXISTING LAUNCH CODE
+    //
+    // DOES NOT REPLACE EXISTING LAUNCH
     // =====================================================
 
     document.addEventListener(
 
         "click",
 
-        function (event) {
+        function(event){
 
             const launchButton =
                 event.target.closest(
@@ -22537,70 +23547,34 @@ window.RaniseMoiseEvaluationEngine = {
                 );
 
 
-            if (!launchButton) {
+            if(!launchButton){
+
                 return;
-            }
-
-
-            // ---------------------------------------------
-            // DETERMINE ACTIVE CHAPTER
-            // ---------------------------------------------
-
-            let chapterId = null;
-
-
-            if (
-                typeof window.currentWordChapterId !==
-                "undefined"
-            ) {
-
-                chapterId =
-                    window.currentWordChapterId;
 
             }
 
 
-            if (!chapterId) {
-
-                const activeChapter =
-                    document.querySelector(
-                        "[data-chapter-id].active"
-                    );
+            const chapterId =
+                detectCurrentChapterId();
 
 
-                if (activeChapter) {
+            // -------------------------------------------------
+            // CHAPTER 1 NEVER ENTERS THIS ENGINE
+            // -------------------------------------------------
 
-                    chapterId =
-                        activeChapter.getAttribute(
-                            "data-chapter-id"
-                        );
+            if(
+                !chapterId ||
+                isChapter1(chapterId)
+            ){
 
-                }
-
-            }
-
-
-            if (!chapterId) {
                 return;
-            }
 
-
-            // ---------------------------------------------
-            // CHAPTER 1 PROTECTION
-            // ---------------------------------------------
-
-            if (
-                isChapter1(
-                    chapterId
-                )
-            ) {
-                return;
             }
 
 
             setTimeout(
 
-                function () {
+                function(){
 
                     waitForSimulation(
                         chapterId
@@ -22619,22 +23593,19 @@ window.RaniseMoiseEvaluationEngine = {
     );
 
 
+
     // =====================================================
     // PUBLIC API
     // =====================================================
 
-    window.RaniseDynamicPracticeGuidanceEngine = {
+    window.RaniseMoiseDynamicPracticeGuidanceEngine = {
 
         start:
             startBlock7Dynamic,
 
 
-        waitForSimulation:
-            waitForSimulation,
-
-
         getState:
-            function () {
+            function(){
 
                 return {
 
@@ -22667,6 +23638,7 @@ window.RaniseMoiseEvaluationEngine = {
 
 
 })();
+
 
 
 
