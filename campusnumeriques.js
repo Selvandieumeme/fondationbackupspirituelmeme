@@ -21581,61 +21581,62 @@ window.RaniseMoiseEvaluationEngine = {
 
     function requiredRibbonActions(type){
 
-        const map = {
 
-            copy:[
-                "copy"
-            ],
+const map = {
 
-            cut:[
-                "cut"
-            ],
+    copy:[
+        "copy"
+    ],
 
-            paste:[
-                "paste"
-            ],
+    cut:[
+        "cut"
+    ],
 
-            font-family:[
-                "font-family",
-                "fontfamily",
-                "font"
-            ],
+    paste:[
+        "paste"
+    ],
 
-            font-size:[
-                "font-size",
-                "grow-font",
-                "shrink-font"
-            ],
+    "font-family":[
+        "font-family",
+        "fontfamily",
+        "font"
+    ],
 
-            bold:[
-                "bold"
-            ],
+    "font-size":[
+        "font-size",
+        "grow-font",
+        "shrink-font"
+    ],
 
-            italic:[
-                "italic"
-            ],
+    bold:[
+        "bold"
+    ],
 
-            underline:[
-                "underline"
-            ],
+    italic:[
+        "italic"
+    ],
 
-            strike:[
-                "strike"
-            ],
+    underline:[
+        "underline"
+    ],
 
-            "font-color":[
-                "color",
-                "font-color",
-                "fontcolor"
-            ],
+    strike:[
+        "strike"
+    ],
 
-            highlight:[
-                "highlight",
-                "text-highlight",
-                "text-highlight-color"
-            ]
+    "font-color":[
+        "color",
+        "font-color",
+        "fontcolor"
+    ],
 
-        };
+    highlight:[
+        "highlight",
+        "text-highlight",
+        "text-highlight-color"
+    ]
+
+};
 
 
         return map[type] || [];
