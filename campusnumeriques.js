@@ -20280,6 +20280,2460 @@ window.RaniseMoiseEvaluationEngine = {
 
 
 
+// =========================================================
+// BLOCK 7 DYNAMIC PRACTICE ENGINE
+// MICROSOFT WORD 2007 FORMATION
+// RANISE MOISE — DYNAMIC PRACTICAL GUIDANCE
+// =========================================================
+//
+// ISOLATED FROM CHAPTER 1 BLOCK 7
+//
+// RESPONSIBILITIES:
+// 1. Works for CHAPTER 2+ only.
+// 2. Reads the active chapter.practice dynamically.
+// 3. Uses the existing Campus Word 2007 iframe.
+// 4. Guides the student one step at a time.
+// 5. Validates REAL simulation actions.
+// 6. Does NOT treat any random click as valid.
+// 7. Supports:
+//    - Copy
+//    - Cut
+//    - Paste
+//    - Font Family
+//    - Font Size
+//    - Bold
+//    - Italic
+//    - Underline
+//    - Font Color
+//    - Text Highlight
+//    - Real document input
+// 8. When ALL practice steps are completed:
+//    - practice = validated
+//    - exercises = unlocked
+// 9. Does NOT touch Exercises / Homework / Evaluation engines.
+// 10. Does NOT replace Chapter 1 Block 7.
+// =========================================================
+
+(function () {
+
+    "use strict";
+
+
+    // =====================================================
+    // PRIVATE STATE
+    // =====================================================
+
+    const state = {
+
+        chapterId: null,
+
+        simulationFrame: null,
+
+        simulationDocument: null,
+
+        practice: null,
+
+        activityIndex: 0,
+
+        stepIndex: 0,
+
+        started: false,
+
+        completed: false,
+
+        waitingForAction: false,
+
+        processingAction: false,
+
+        speaking: false,
+
+        listenersAttached: false,
+
+        lastActionTime: 0
+
+    };
+
+
+    // =====================================================
+    // CHAPTER 1 IS COMPLETELY PROTECTED
+    // =====================================================
+
+    function isChapter1(chapterId) {
+
+        return String(chapterId || "")
+            .toLowerCase()
+            .trim() === "chapitre1";
+
+    }
+
+
+    // =====================================================
+    // NORMALIZE
+    // =====================================================
+
+    function normalize(value) {
+
+        return String(value || "")
+            .normalize("NFD")
+            .replace(/[\u0300-\u036f]/g, "")
+            .toLowerCase()
+            .replace(/\s+/g, " ")
+            .trim();
+
+    }
+
+
+    // =====================================================
+    // FIND COURSE
+    // =====================================================
+
+    function getCourse() {
+
+        if (
+            typeof microsoftWordCourse ===
+            "undefined"
+        ) {
+            return null;
+        }
+
+        if (
+            !microsoftWordCourse ||
+            !Array.isArray(
+                microsoftWordCourse.chapters
+            )
+        ) {
+            return null;
+        }
+
+        return microsoftWordCourse;
+
+    }
+
+
+    // =====================================================
+    // FIND CHAPTER DYNAMICALLY
+    // =====================================================
+
+    function getChapter(chapterId) {
+
+        const course =
+            getCourse();
+
+        if (!course) {
+            return null;
+        }
+
+        return course.chapters.find(
+            chapter => {
+
+                return String(
+                    chapter.id || ""
+                ).toLowerCase() ===
+                String(
+                    chapterId || ""
+                ).toLowerCase();
+
+            }
+        ) || null;
+
+    }
+
+
+    // =====================================================
+    // GET PRACTICE DYNAMICALLY
+    // =====================================================
+
+    function getPractice(chapterId) {
+
+        if (isChapter1(chapterId)) {
+
+            console.warn(
+                "RANISE DYNAMIC BLOCK 7: Chapter 1 protected."
+            );
+
+            return null;
+
+        }
+
+        const chapter =
+            getChapter(chapterId);
+
+        if (!chapter) {
+            return null;
+        }
+
+        if (
+            !Array.isArray(
+                chapter.practice
+            )
+        ) {
+            return null;
+        }
+
+        if (
+            chapter.practice.length === 0
+        ) {
+            return null;
+        }
+
+        return chapter.practice;
+
+    }
+
+
+    // =====================================================
+    // EXISTING RANISE VOICE
+    // =====================================================
+
+    async function speak(text) {
+
+        if (!text) {
+            return;
+        }
+
+        if (
+            typeof speakProfessorIAWithMaryTTS !==
+            "function"
+        ) {
+
+            console.warn(
+                "RANISE DYNAMIC BLOCK 7: MaryTTS unavailable."
+            );
+
+            return;
+
+        }
+
+        state.speaking = true;
+
+        if (
+            typeof raniseStartTalking ===
+            "function"
+        ) {
+
+            raniseStartTalking();
+
+        }
+
+        try {
+
+            await speakProfessorIAWithMaryTTS(
+                text
+            );
+
+        } finally {
+
+            state.speaking = false;
+
+            if (
+                typeof raniseStopTalking ===
+                "function"
+            ) {
+
+                raniseStopTalking();
+
+            }
+
+        }
+
+    }
+
+
+    // =====================================================
+    // FIND EXISTING SIMULATION
+    // =====================================================
+
+    function findSimulation() {
+
+        const campusContent =
+            document.getElementById(
+                "campusContent"
+            );
+
+        if (!campusContent) {
+            return null;
+        }
+
+        return campusContent.querySelector(
+            'iframe[src*="campusword2007simulation"]'
+        );
+
+    }
+
+
+    // =====================================================
+    // CONNECT TO EXISTING SIMULATION
+    // =====================================================
+
+    function connectToSimulation() {
+
+        const frame =
+            findSimulation();
+
+        if (!frame) {
+            return false;
+        }
+
+        try {
+
+            const doc =
+                frame.contentDocument ||
+                frame.contentWindow.document;
+
+            if (!doc) {
+                return false;
+            }
+
+            state.simulationFrame =
+                frame;
+
+            state.simulationDocument =
+                doc;
+
+            return true;
+
+        } catch (error) {
+
+            console.error(
+                "RANISE DYNAMIC BLOCK 7: Simulation connection failed.",
+                error
+            );
+
+            return false;
+
+        }
+
+    }
+
+
+    // =====================================================
+    // CURRENT ACTIVITY
+    // =====================================================
+
+    function getCurrentActivity() {
+
+        if (!state.practice) {
+            return null;
+        }
+
+        return state.practice[
+            state.activityIndex
+        ] || null;
+
+    }
+
+
+    // =====================================================
+    // CURRENT STEP
+    // =====================================================
+
+    function getCurrentStep() {
+
+        const activity =
+            getCurrentActivity();
+
+        if (!activity) {
+            return null;
+        }
+
+        if (
+            !Array.isArray(
+                activity.steps
+            )
+        ) {
+            return null;
+        }
+
+        return activity.steps[
+            state.stepIndex
+        ] || null;
+
+    }
+
+
+    // =====================================================
+    // GET TARGET DATA
+    // =====================================================
+
+    function getElementData(element) {
+
+        if (!element) {
+            return "";
+        }
+
+        const values = [
+
+            element.id,
+
+            element.className,
+
+            element.innerText,
+
+            element.textContent,
+
+            element.getAttribute("title"),
+
+            element.getAttribute("aria-label"),
+
+            element.getAttribute("data-action"),
+
+            element.getAttribute("data-command"),
+
+            element.getAttribute("data-role"),
+
+            element.getAttribute("data-target"),
+
+            element.getAttribute("name"),
+
+            element.getAttribute("value")
+
+        ];
+
+        return normalize(
+            values
+                .filter(Boolean)
+                .join(" ")
+        );
+
+    }
+
+
+    // =====================================================
+    // SAFE CLOSEST
+    // =====================================================
+
+    function closestFromTarget(
+        target,
+        selector
+    ) {
+
+        if (
+            !target ||
+            !selector ||
+            typeof target.closest !==
+            "function"
+        ) {
+            return null;
+        }
+
+        try {
+
+            return target.closest(
+                selector
+            );
+
+        } catch (error) {
+
+            return null;
+
+        }
+
+    }
+
+
+    // =====================================================
+    // REAL SIMULATION BUTTON
+    // =====================================================
+
+    function isActionTarget(
+        target,
+        actions
+    ) {
+
+        if (!target) {
+            return false;
+        }
+
+        const selector =
+            actions
+                .map(
+                    action =>
+                        `[data-action="${action}"]`
+                )
+                .join(",");
+
+        if (!selector) {
+            return false;
+        }
+
+        return !!closestFromTarget(
+            target,
+            selector
+        );
+
+    }
+
+
+    // =====================================================
+    // GET REAL ACTION
+    // =====================================================
+
+    function getRealAction(target) {
+
+        const element =
+            closestFromTarget(
+                target,
+                "[data-action]"
+            );
+
+        if (!element) {
+            return "";
+
+        }
+
+        return normalize(
+            element.getAttribute(
+                "data-action"
+            )
+        );
+
+    }
+
+
+    // =====================================================
+    // DOCUMENT AREA
+    // =====================================================
+
+    function isDocumentAreaTarget(target) {
+
+        if (!target) {
+            return false;
+        }
+
+        if (
+            closestFromTarget(
+                target,
+                ".cwPageContent"
+            )
+        ) {
+            return true;
+        }
+
+        if (
+            closestFromTarget(
+                target,
+                "#cwDocumentContainer"
+            )
+        ) {
+            return true;
+        }
+
+        if (
+            closestFromTarget(
+                target,
+                "#cwWorkspace"
+            )
+        ) {
+            return true;
+        }
+
+        if (
+            closestFromTarget(
+                target,
+                "#cwWorkspaceShell"
+            )
+        ) {
+            return true;
+        }
+
+        if (
+            closestFromTarget(
+                target,
+                "#cwWorkspaceScroll"
+            )
+        ) {
+            return true;
+        }
+
+        return false;
+
+    }
+
+
+    // =====================================================
+    // DETECT STEP TYPE
+    // =====================================================
+
+    function getStepType(step) {
+
+        const text =
+            normalize(step);
+
+
+        // -------------------------------------------------
+        // COPY
+        // -------------------------------------------------
+
+        if (
+            text.includes("copier") ||
+            text.includes("copie") ||
+            text.includes("copy")
+        ) {
+
+            return "copy";
+
+        }
+
+
+        // -------------------------------------------------
+        // CUT
+        // -------------------------------------------------
+
+        if (
+            text.includes("couper") ||
+            text.includes("cut")
+        ) {
+
+            return "cut";
+
+        }
+
+
+        // -------------------------------------------------
+        // PASTE
+        // -------------------------------------------------
+
+        if (
+            text.includes("coller") ||
+            text.includes("paste")
+        ) {
+
+            return "paste";
+
+        }
+
+
+        // -------------------------------------------------
+        // FONT FAMILY
+        // -------------------------------------------------
+
+        if (
+            text.includes("type de police") ||
+            text.includes("liste des polices") ||
+            text.includes("police (font)") ||
+            text.includes("font family") ||
+            text.includes("font")
+        ) {
+
+            if (
+                text.includes("taille") ||
+                text.includes("size")
+            ) {
+                return "font-size";
+            }
+
+            return "font-family";
+
+        }
+
+
+        // -------------------------------------------------
+        // FONT SIZE
+        // -------------------------------------------------
+
+        if (
+            text.includes("taille de police") ||
+            text.includes("taille différente") ||
+            text.includes("font size")
+        ) {
+
+            return "font-size";
+
+        }
+
+
+        // -------------------------------------------------
+        // BOLD
+        // -------------------------------------------------
+
+        if (
+            text.includes("gras") ||
+            text.includes("bold")
+        ) {
+
+            return "bold";
+
+        }
+
+
+        // -------------------------------------------------
+        // ITALIC
+        // -------------------------------------------------
+
+        if (
+            text.includes("italique") ||
+            text.includes("italic")
+        ) {
+
+            return "italic";
+
+        }
+
+
+        // -------------------------------------------------
+        // UNDERLINE
+        // -------------------------------------------------
+
+        if (
+            text.includes("souligné") ||
+            text.includes("souligne") ||
+            text.includes("underline")
+        ) {
+
+            return "underline";
+
+        }
+
+
+        // -------------------------------------------------
+        // FONT COLOR
+        // -------------------------------------------------
+
+        if (
+            text.includes("couleur de police") ||
+            text.includes("font color") ||
+            text.includes("couleur des caractères")
+        ) {
+
+            return "font-color";
+
+        }
+
+
+        // -------------------------------------------------
+        // HIGHLIGHT
+        // -------------------------------------------------
+
+        if (
+            text.includes("surbrillance") ||
+            text.includes("text highlight") ||
+            text.includes("highlight color")
+        ) {
+
+            return "highlight";
+
+        }
+
+
+        // -------------------------------------------------
+        // DOCUMENT INPUT
+        // -------------------------------------------------
+
+        if (
+            text.includes("saisir") ||
+            text.includes("taper") ||
+            text.includes("écrire") ||
+            text.includes("ecrire") ||
+            text.includes("phrase") ||
+            text.includes("texte") ||
+            text.includes("sélectionner") ||
+            text.includes("selectionner")
+        ) {
+
+            return "document";
+
+        }
+
+
+        return "unknown";
+
+    }
+
+
+    // =====================================================
+    // COPY TARGET
+    // =====================================================
+
+    function isCopyTarget(target) {
+
+        return isActionTarget(
+            target,
+            [
+                "copy",
+                "copier"
+            ]
+        );
+
+    }
+
+
+    // =====================================================
+    // CUT TARGET
+    // =====================================================
+
+    function isCutTarget(target) {
+
+        return isActionTarget(
+            target,
+            [
+                "cut",
+                "couper"
+            ]
+        );
+
+    }
+
+
+    // =====================================================
+    // PASTE TARGET
+    // =====================================================
+
+    function isPasteTarget(target) {
+
+        return isActionTarget(
+            target,
+            [
+                "paste",
+                "coller"
+            ]
+        );
+
+    }
+
+
+    // =====================================================
+    // FONT FAMILY TARGET
+    // =====================================================
+
+    function isFontFamilyTarget(target) {
+
+        if (!target) {
+            return false;
+        }
+
+        const action =
+            getRealAction(target);
+
+        const data =
+            getElementData(target);
+
+
+        if (
+            action === "font-family" ||
+            action === "fontfamily" ||
+            action === "font-name"
+        ) {
+            return true;
+        }
+
+
+        return (
+            data.includes("font family") ||
+            data.includes("font-family") ||
+            data.includes("police")
+        );
+
+    }
+
+
+    // =====================================================
+    // FONT SIZE TARGET
+    // =====================================================
+
+    function isFontSizeTarget(target) {
+
+        if (!target) {
+            return false;
+        }
+
+        const action =
+            getRealAction(target);
+
+        const data =
+            getElementData(target);
+
+
+        if (
+            action === "font-size" ||
+            action === "fontsize" ||
+            action === "size"
+        ) {
+            return true;
+        }
+
+
+        return (
+            data.includes("font size") ||
+            data.includes("fontsize") ||
+            data.includes("taille")
+        );
+
+    }
+
+
+    // =====================================================
+    // BOLD TARGET
+    // =====================================================
+
+    function isBoldTarget(target) {
+
+        return isActionTarget(
+            target,
+            [
+                "bold",
+                "gras"
+            ]
+        );
+
+    }
+
+
+    // =====================================================
+    // ITALIC TARGET
+    // =====================================================
+
+    function isItalicTarget(target) {
+
+        return isActionTarget(
+            target,
+            [
+                "italic",
+                "italique"
+            ]
+        );
+
+    }
+
+
+    // =====================================================
+    // UNDERLINE TARGET
+    // =====================================================
+
+    function isUnderlineTarget(target) {
+
+        return isActionTarget(
+            target,
+            [
+                "underline",
+                "underline-text",
+                "souligner",
+                "souligné"
+            ]
+        );
+
+    }
+
+
+    // =====================================================
+    // COLOR TARGET
+    // REAL HTML USES data-action="color"
+    // =====================================================
+
+    function isColorTarget(target) {
+
+        if (!target) {
+            return false;
+        }
+
+        const button =
+            closestFromTarget(
+                target,
+                "[data-action='color']"
+            );
+
+        if (button) {
+            return true;
+        }
+
+        const dot =
+            closestFromTarget(
+                target,
+                ".cwColorDot"
+            );
+
+        return !!dot;
+
+    }
+
+
+    // =====================================================
+    // GET COLOR VALUE
+    // =====================================================
+
+    function getColorValue(target) {
+
+        const dot =
+            closestFromTarget(
+                target,
+                ".cwColorDot"
+            );
+
+        if (!dot) {
+            return "";
+        }
+
+        return normalize(
+            dot.getAttribute(
+                "data-color"
+            )
+        );
+
+    }
+
+
+    // =====================================================
+    // HIGHLIGHT TARGET
+    // =====================================================
+
+    function isHighlightTarget(target) {
+
+        if (!target) {
+            return false;
+        }
+
+        const action =
+            getRealAction(target);
+
+        const data =
+            getElementData(target);
+
+
+        if (
+            action === "highlight" ||
+            action === "text-highlight" ||
+            action === "highlight-color"
+        ) {
+            return true;
+        }
+
+
+        return (
+            data.includes("highlight") ||
+            data.includes("surbrillance")
+        );
+
+    }
+
+
+    // =====================================================
+    // VERIFY REAL ACTION
+    // =====================================================
+
+    function studentPerformedCorrectAction(
+        event
+    ) {
+
+        if (
+            !event ||
+            !event.target
+        ) {
+            return false;
+        }
+
+        const step =
+            getCurrentStep();
+
+        if (!step) {
+            return false;
+        }
+
+        const type =
+            getStepType(step);
+
+        const target =
+            event.target;
+
+
+        // =================================================
+        // COPY
+        // =================================================
+
+        if (type === "copy") {
+
+            return isCopyTarget(
+                target
+            );
+
+        }
+
+
+        // =================================================
+        // CUT
+        // =================================================
+
+        if (type === "cut") {
+
+            return isCutTarget(
+                target
+            );
+
+        }
+
+
+        // =================================================
+        // PASTE
+        // =================================================
+
+        if (type === "paste") {
+
+            return isPasteTarget(
+                target
+            );
+
+        }
+
+
+        // =================================================
+        // FONT FAMILY
+        // =================================================
+
+        if (type === "font-family") {
+
+            return isFontFamilyTarget(
+                target
+            );
+
+        }
+
+
+        // =================================================
+        // FONT SIZE
+        // =================================================
+
+        if (type === "font-size") {
+
+            return isFontSizeTarget(
+                target
+            );
+
+        }
+
+
+        // =================================================
+        // BOLD
+        // =================================================
+
+        if (type === "bold") {
+
+            return isBoldTarget(
+                target
+            );
+
+        }
+
+
+        // =================================================
+        // ITALIC
+        // =================================================
+
+        if (type === "italic") {
+
+            return isItalicTarget(
+                target
+            );
+
+        }
+
+
+        // =================================================
+        // UNDERLINE
+        // =================================================
+
+        if (type === "underline") {
+
+            return isUnderlineTarget(
+                target
+            );
+
+        }
+
+
+        // =================================================
+        // FONT COLOR
+        // =================================================
+
+        if (type === "font-color") {
+
+            return isColorTarget(
+                target
+            );
+
+        }
+
+
+        // =================================================
+        // HIGHLIGHT
+        // =================================================
+
+        if (type === "highlight") {
+
+            return isHighlightTarget(
+                target
+            );
+
+        }
+
+
+        // =================================================
+        // DOCUMENT
+        // =================================================
+
+        if (type === "document") {
+
+            return isDocumentAreaTarget(
+                target
+            );
+
+        }
+
+
+        return false;
+
+    }
+
+
+    // =====================================================
+    // INPUT VALIDATION
+    // =====================================================
+
+    function studentPerformedCorrectInput(
+        event
+    ) {
+
+        const step =
+            getCurrentStep();
+
+        if (!step) {
+            return false;
+        }
+
+        const type =
+            getStepType(step);
+
+
+        if (type !== "document") {
+            return false;
+        }
+
+
+        return isDocumentAreaTarget(
+            event.target
+        );
+
+    }
+
+
+    // =====================================================
+    // EXPLAIN CURRENT STEP
+    // =====================================================
+
+    async function speakCurrentStep() {
+
+        const activity =
+            getCurrentActivity();
+
+        if (!activity) {
+            return;
+        }
+
+        const step =
+            getCurrentStep();
+
+        if (!step) {
+            return;
+        }
+
+        state.waitingForAction =
+            false;
+
+
+        await speak(
+
+            "Étape " +
+            (state.stepIndex + 1) +
+            ". " +
+            step +
+            " Faites cette action maintenant."
+
+        );
+
+
+        if (!state.completed) {
+
+            state.waitingForAction =
+                true;
+
+        }
+
+    }
+
+
+    // =====================================================
+    // STEP FEEDBACK
+    // =====================================================
+
+    async function confirmStep() {
+
+        state.waitingForAction =
+            false;
+
+
+        await speak(
+            "Très bien. C'est correct."
+        );
+
+    }
+
+
+    // =====================================================
+    // UNLOCK EXERCISES
+    // ONLY PRACTICE PROGRESS
+    // =====================================================
+
+    function unlockExercises() {
+
+        const chapterId =
+            state.chapterId;
+
+        if (
+            !chapterId ||
+            isChapter1(chapterId)
+        ) {
+            return;
+        }
+
+
+        // -------------------------------------------------
+        // USE EXISTING PARTS ENGINE IF AVAILABLE
+        // -------------------------------------------------
+
+        if (
+            typeof WordChapter2PartsEngine !==
+            "undefined"
+        ) {
+
+            try {
+
+                const progress =
+                    WordChapter2PartsEngine
+                        .getProgress();
+
+                progress.practice =
+                    true;
+
+                progress.exercises =
+                    true;
+
+                WordChapter2PartsEngine
+                    .saveProgress(
+                        progress
+                    );
+
+            } catch (error) {
+
+                console.warn(
+                    "RANISE DYNAMIC BLOCK 7: Existing parts engine unavailable.",
+                    error
+                );
+
+            }
+
+        }
+
+
+        // -------------------------------------------------
+        // GENERIC DYNAMIC PROGRESS
+        // -------------------------------------------------
+
+        const key =
+            "word_" +
+            chapterId +
+            "_partsProgress";
+
+
+        let progress = {
+
+            theory: true,
+
+            practice: false,
+
+            exercises: false,
+
+            homework: false,
+
+            evaluation: false
+
+        };
+
+
+        try {
+
+            const saved =
+                localStorage.getItem(
+                    key
+                );
+
+            if (saved) {
+
+                const parsed =
+                    JSON.parse(saved);
+
+                if (
+                    parsed &&
+                    typeof parsed === "object"
+                ) {
+
+                    progress =
+                        Object.assign(
+                            progress,
+                            parsed
+                        );
+
+                }
+
+            }
+
+        } catch (error) {
+
+            console.warn(
+                "RANISE DYNAMIC BLOCK 7: Progress read error.",
+                error
+            );
+
+        }
+
+
+        progress.practice =
+            true;
+
+        progress.exercises =
+            true;
+
+
+        try {
+
+            localStorage.setItem(
+
+                key,
+
+                JSON.stringify(
+                    progress
+                )
+
+            );
+
+        } catch (error) {
+
+            console.warn(
+                "RANISE DYNAMIC BLOCK 7: Progress save error.",
+                error
+            );
+
+        }
+
+
+        // -------------------------------------------------
+        // DYNAMIC RENDER BRIDGE
+        // -------------------------------------------------
+
+        if (
+            typeof RaniseDynamicUnlockRenderBridge !==
+            "undefined" &&
+            typeof RaniseDynamicUnlockRenderBridge
+                .renderChapterParts ===
+            "function"
+        ) {
+
+            try {
+
+                RaniseDynamicUnlockRenderBridge
+                    .renderChapterParts(
+                        chapterId
+                    );
+
+            } catch (error) {
+
+                console.warn(
+                    "RANISE DYNAMIC BLOCK 7: Unlock render bridge error.",
+                    error
+                );
+
+            }
+
+        }
+
+    }
+
+
+    // =====================================================
+    // COMPLETE CURRENT PRACTICE
+    // =====================================================
+
+    async function completePractice() {
+
+        if (state.completed) {
+            return;
+        }
+
+
+        state.completed =
+            true;
+
+        state.waitingForAction =
+            false;
+
+
+        await speak(
+
+            "Excellent. Vous avez terminé toutes les étapes de la séance pratique. " +
+            "Votre pratique est maintenant validée. " +
+            "La partie Exercices est maintenant débloquée. " +
+            "Bravo pour votre travail."
+
+        );
+
+
+        unlockExercises();
+
+
+        console.log(
+            "RANISE DYNAMIC BLOCK 7: PRACTICE COMPLETED.",
+            state.chapterId
+        );
+
+    }
+
+
+    // =====================================================
+    // MOVE TO NEXT STEP
+    // =====================================================
+
+    async function nextPracticeStep() {
+
+        if (
+            state.completed ||
+            state.processingAction
+        ) {
+            return;
+        }
+
+
+        state.processingAction =
+            true;
+
+
+        try {
+
+            await confirmStep();
+
+
+            const activity =
+                getCurrentActivity();
+
+
+            if (!activity) {
+                return;
+            }
+
+
+            // =============================================
+            // NEXT STEP — SAME ACTIVITY
+            // =============================================
+
+            if (
+                Array.isArray(
+                    activity.steps
+                ) &&
+                state.stepIndex <
+                activity.steps.length - 1
+            ) {
+
+                state.stepIndex++;
+
+
+                await speakCurrentStep();
+
+
+                return;
+
+            }
+
+
+            // =============================================
+            // NEXT ACTIVITY
+            // =============================================
+
+            if (
+                state.activityIndex <
+                state.practice.length - 1
+            ) {
+
+                state.activityIndex++;
+
+                state.stepIndex =
+                    0;
+
+
+                const nextActivity =
+                    getCurrentActivity();
+
+
+                if (
+                    nextActivity &&
+                    nextActivity.title
+                ) {
+
+                    await speak(
+
+                        "Excellent. Vous avez terminé cette activité. " +
+                        "Nous passons maintenant à l'activité suivante : " +
+                        nextActivity.title
+
+                    );
+
+                }
+
+
+                await speakCurrentStep();
+
+
+                return;
+
+            }
+
+
+            // =============================================
+            // ALL PRACTICE COMPLETED
+            // =============================================
+
+            await completePractice();
+
+
+        } finally {
+
+            state.processingAction =
+                false;
+
+        }
+
+    }
+
+
+    // =====================================================
+    // REAL SIMULATION CLICK
+    // =====================================================
+
+    function handleSimulationClick(event) {
+
+        if (!state.started) {
+            return;
+        }
+
+        if (state.completed) {
+            return;
+        }
+
+        if (state.speaking) {
+            return;
+        }
+
+        if (state.processingAction) {
+            return;
+        }
+
+        if (!state.waitingForAction) {
+            return;
+        }
+
+
+        const now =
+            Date.now();
+
+
+        if (
+            now -
+            state.lastActionTime <
+            250
+        ) {
+            return;
+        }
+
+
+        if (
+            studentPerformedCorrectAction(
+                event
+            )
+        ) {
+
+            state.lastActionTime =
+                now;
+
+            nextPracticeStep();
+
+        }
+
+    }
+
+
+    // =====================================================
+    // REAL DOCUMENT INPUT
+    // =====================================================
+
+    function handleSimulationInput(event) {
+
+        if (!state.started) {
+            return;
+        }
+
+        if (state.completed) {
+            return;
+        }
+
+        if (state.speaking) {
+            return;
+        }
+
+        if (state.processingAction) {
+            return;
+        }
+
+        if (!state.waitingForAction) {
+            return;
+        }
+
+
+        if (
+            studentPerformedCorrectInput(
+                event
+            )
+        ) {
+
+            state.lastActionTime =
+                Date.now();
+
+            nextPracticeStep();
+
+        }
+
+    }
+
+
+    // =====================================================
+    // SELECTION / COPY / CUT / PASTE EVENTS
+    // =====================================================
+
+    function handleSimulationBeforeInput(event) {
+
+        if (!state.started) {
+            return;
+        }
+
+        if (state.completed) {
+            return;
+        }
+
+        if (state.speaking) {
+            return;
+        }
+
+        if (state.processingAction) {
+            return;
+        }
+
+        if (!state.waitingForAction) {
+            return;
+        }
+
+
+        const step =
+            getCurrentStep();
+
+        if (!step) {
+            return;
+        }
+
+
+        const type =
+            getStepType(step);
+
+
+        const inputType =
+            normalize(
+                event.inputType
+            );
+
+
+        // -------------------------------------------------
+        // REAL INSERT FROM PASTE
+        // -------------------------------------------------
+
+        if (
+            type === "paste" &&
+            (
+                inputType ===
+                "insertfrompaste" ||
+                inputType ===
+                "insertreplacementtext"
+            )
+        ) {
+
+            nextPracticeStep();
+
+            return;
+
+        }
+
+
+        // -------------------------------------------------
+        // REAL CUT
+        // -------------------------------------------------
+
+        if (
+            type === "cut" &&
+            (
+                inputType ===
+                "deletebycut"
+            )
+        ) {
+
+            nextPracticeStep();
+
+        }
+
+    }
+
+
+    // =====================================================
+    // KEYBOARD VALIDATION
+    // =====================================================
+
+    function handleSimulationKeydown(event) {
+
+        if (!state.started) {
+            return;
+        }
+
+        if (state.completed) {
+            return;
+        }
+
+        if (state.speaking) {
+            return;
+        }
+
+        if (state.processingAction) {
+            return;
+        }
+
+        if (!state.waitingForAction) {
+            return;
+        }
+
+
+        const step =
+            getCurrentStep();
+
+        if (!step) {
+            return;
+        }
+
+
+        const type =
+            getStepType(step);
+
+
+        const key =
+            normalize(
+                event.key
+            );
+
+
+        const modifier =
+            event.ctrlKey ||
+            event.metaKey;
+
+
+        // -------------------------------------------------
+        // COPY
+        // -------------------------------------------------
+
+        if (
+            type === "copy" &&
+            modifier &&
+            key === "c"
+        ) {
+
+            event.__raniseDynamicValidated =
+                true;
+
+            nextPracticeStep();
+
+            return;
+
+        }
+
+
+        // -------------------------------------------------
+        // CUT
+        // -------------------------------------------------
+
+        if (
+            type === "cut" &&
+            modifier &&
+            key === "x"
+        ) {
+
+            event.__raniseDynamicValidated =
+                true;
+
+            nextPracticeStep();
+
+            return;
+
+        }
+
+
+        // -------------------------------------------------
+        // PASTE
+        // -------------------------------------------------
+
+        if (
+            type === "paste" &&
+            modifier &&
+            key === "v"
+        ) {
+
+            event.__raniseDynamicValidated =
+                true;
+
+            nextPracticeStep();
+
+        }
+
+    }
+
+
+    // =====================================================
+    // ATTACH LISTENERS
+    // =====================================================
+
+    function attachSimulationListeners() {
+
+        if (
+            !state.simulationDocument ||
+            state.listenersAttached
+        ) {
+            return;
+        }
+
+
+        state.simulationDocument.addEventListener(
+
+            "click",
+
+            handleSimulationClick,
+
+            true
+
+        );
+
+
+        state.simulationDocument.addEventListener(
+
+            "input",
+
+            handleSimulationInput,
+
+            true
+
+        );
+
+
+        state.simulationDocument.addEventListener(
+
+            "beforeinput",
+
+            handleSimulationBeforeInput,
+
+            true
+
+        );
+
+
+        state.simulationDocument.addEventListener(
+
+            "keydown",
+
+            handleSimulationKeydown,
+
+            true
+
+        );
+
+
+        state.listenersAttached =
+            true;
+
+    }
+
+
+    // =====================================================
+    // START DYNAMIC BLOCK 7
+    // =====================================================
+
+    async function startBlock7Dynamic(
+        chapterId
+    ) {
+
+        if (!chapterId) {
+            return;
+        }
+
+
+        // =================================================
+        // NEVER TOUCH CHAPTER 1
+        // =================================================
+
+        if (
+            isChapter1(
+                chapterId
+            )
+        ) {
+
+            console.warn(
+                "RANISE DYNAMIC BLOCK 7: Chapter 1 excluded."
+            );
+
+            return;
+
+        }
+
+
+        if (
+            state.started &&
+            state.chapterId ===
+            chapterId
+        ) {
+            return;
+        }
+
+
+        const practice =
+            getPractice(
+                chapterId
+            );
+
+
+        if (!practice) {
+
+            console.error(
+                "RANISE DYNAMIC BLOCK 7: Practice unavailable for",
+                chapterId
+            );
+
+            return;
+
+        }
+
+
+        if (!connectToSimulation()) {
+            return;
+        }
+
+
+        state.chapterId =
+            chapterId;
+
+        state.practice =
+            practice;
+
+        state.activityIndex =
+            0;
+
+        state.stepIndex =
+            0;
+
+        state.started =
+            true;
+
+        state.completed =
+            false;
+
+        state.waitingForAction =
+            false;
+
+        state.processingAction =
+            false;
+
+        state.listenersAttached =
+            false;
+
+
+        attachSimulationListeners();
+
+
+        // =================================================
+        // WELCOME
+        // =================================================
+
+        await speak(
+
+            "Bienvenue dans l'espace de simulation Microsoft Word 2007. " +
+            "Nous allons maintenant réaliser la pratique du " +
+            chapterId +
+            " ensemble. " +
+            "Je vais vous accompagner étape par étape et vérifier chaque action réelle avant de continuer."
+
+        );
+
+
+        // =================================================
+        // FIRST ACTIVITY
+        // =================================================
+
+        const firstActivity =
+            getCurrentActivity();
+
+
+        if (
+            firstActivity &&
+            firstActivity.title
+        ) {
+
+            await speak(
+                firstActivity.title
+            );
+
+        }
+
+
+        // =================================================
+        // FIRST STEP
+        // =================================================
+
+        await speakCurrentStep();
+
+    }
+
+
+    // =====================================================
+    // WAIT FOR EXISTING SIMULATION
+    // =====================================================
+
+    function waitForSimulation(
+        chapterId
+    ) {
+
+        if (
+            !chapterId ||
+            isChapter1(
+                chapterId
+            )
+        ) {
+            return;
+        }
+
+
+        let attempts =
+            0;
+
+
+        const timer =
+            setInterval(
+
+                function () {
+
+                    attempts++;
+
+
+                    const frame =
+                        findSimulation();
+
+
+                    if (!frame) {
+
+                        if (
+                            attempts >= 100
+                        ) {
+
+                            clearInterval(
+                                timer
+                            );
+
+                            console.warn(
+                                "RANISE DYNAMIC BLOCK 7: Simulation iframe not found."
+                            );
+
+                        }
+
+                        return;
+
+                    }
+
+
+                    clearInterval(
+                        timer
+                    );
+
+
+                    state.simulationFrame =
+                        frame;
+
+
+                    // =====================================
+                    // ALREADY LOADED
+                    // =====================================
+
+                    if (
+                        frame.contentDocument &&
+                        frame.contentDocument.readyState ===
+                        "complete"
+                    ) {
+
+                        startBlock7Dynamic(
+                            chapterId
+                        );
+
+                        return;
+
+                    }
+
+
+                    // =====================================
+                    // WAIT FOR IFRAME LOAD
+                    // =====================================
+
+                    frame.addEventListener(
+
+                        "load",
+
+                        function () {
+
+                            startBlock7Dynamic(
+                                chapterId
+                            );
+
+                        },
+
+                        {
+                            once: true
+                        }
+
+                    );
+
+                },
+
+                100
+
+            );
+
+    }
+
+
+    // =====================================================
+    // OBSERVE EXISTING SIMULATION LAUNCH
+    // DOES NOT REPLACE EXISTING LAUNCH CODE
+    // =====================================================
+
+    document.addEventListener(
+
+        "click",
+
+        function (event) {
+
+            const launchButton =
+                event.target.closest(
+                    "#launchMicrosoftWordSimulationBtn"
+                );
+
+
+            if (!launchButton) {
+                return;
+            }
+
+
+            // ---------------------------------------------
+            // DETERMINE ACTIVE CHAPTER
+            // ---------------------------------------------
+
+            let chapterId = null;
+
+
+            if (
+                typeof window.currentWordChapterId !==
+                "undefined"
+            ) {
+
+                chapterId =
+                    window.currentWordChapterId;
+
+            }
+
+
+            if (!chapterId) {
+
+                const activeChapter =
+                    document.querySelector(
+                        "[data-chapter-id].active"
+                    );
+
+
+                if (activeChapter) {
+
+                    chapterId =
+                        activeChapter.getAttribute(
+                            "data-chapter-id"
+                        );
+
+                }
+
+            }
+
+
+            if (!chapterId) {
+                return;
+            }
+
+
+            // ---------------------------------------------
+            // CHAPTER 1 PROTECTION
+            // ---------------------------------------------
+
+            if (
+                isChapter1(
+                    chapterId
+                )
+            ) {
+                return;
+            }
+
+
+            setTimeout(
+
+                function () {
+
+                    waitForSimulation(
+                        chapterId
+                    );
+
+                },
+
+                100
+
+            );
+
+        },
+
+        true
+
+    );
+
+
+    // =====================================================
+    // PUBLIC API
+    // =====================================================
+
+    window.RaniseDynamicPracticeGuidanceEngine = {
+
+        start:
+            startBlock7Dynamic,
+
+
+        waitForSimulation:
+            waitForSimulation,
+
+
+        getState:
+            function () {
+
+                return {
+
+                    chapterId:
+                        state.chapterId,
+
+                    started:
+                        state.started,
+
+                    completed:
+                        state.completed,
+
+                    activityIndex:
+                        state.activityIndex,
+
+                    stepIndex:
+                        state.stepIndex,
+
+                    waitingForAction:
+                        state.waitingForAction,
+
+                    speaking:
+                        state.speaking
+
+                };
+
+            }
+
+    };
+
+
+})();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
