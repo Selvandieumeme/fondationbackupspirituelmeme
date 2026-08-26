@@ -20328,16 +20328,10 @@ window.RaniseMoiseEvaluationEngine = {
 
 
 
-
-
-
-
-
-
 // =========================================================
 // BLOCK 7 DYNAMIC PRACTICE
 // MICROSOFT WORD 2007 FORMATION
-// RANISE MOISE — DYNAMIC PRACTICAL GUIDANCE ENGINE
+// RANISE MOISE â€” DYNAMIC PRACTICAL GUIDANCE ENGINE
 // =========================================================
 //
 // PRODUCTION VERSION
@@ -20353,9 +20347,9 @@ window.RaniseMoiseEvaluationEngine = {
 //
 // PRACTICE COMPLETION:
 //     PRACTICE = VALIDATED
-//          ↓
+//          â†“
 //     EXISTING DYNAMIC UNLOCK BRIDGE
-//          ↓
+//          â†“
 //     EXERCISES = UNLOCKED
 //
 // IMPORTANT:
@@ -21480,7 +21474,7 @@ window.RaniseMoiseEvaluationEngine = {
             text.includes("taille de police") ||
             text.includes("font size") ||
             text.includes("agrandir") ||
-            text.includes("réduire") ||
+            text.includes("rÃ©duire") ||
             text.includes("reduire")
         ){
 
@@ -21536,7 +21530,7 @@ window.RaniseMoiseEvaluationEngine = {
         // -------------------------------------------------
 
         if(
-            text.includes("barré") ||
+            text.includes("barrÃ©") ||
             text.includes("barre") ||
             text.includes("strike")
         ){
@@ -21552,7 +21546,7 @@ window.RaniseMoiseEvaluationEngine = {
 
         if(
             text.includes("couleur de police") ||
-            text.includes("couleur des caractères") ||
+            text.includes("couleur des caractÃ¨res") ||
             text.includes("couleur des caracteres") ||
             text.includes("font color")
         ){
@@ -21581,9 +21575,9 @@ window.RaniseMoiseEvaluationEngine = {
         // -------------------------------------------------
 
         if(
-            text.includes("sélectionner") ||
+            text.includes("sÃ©lectionner") ||
             text.includes("selectionner") ||
-            text.includes("sélectionnez") ||
+            text.includes("sÃ©lectionnez") ||
             text.includes("selectionnez")
         ){
 
@@ -21599,9 +21593,9 @@ window.RaniseMoiseEvaluationEngine = {
         if(
             text.includes("saisir") ||
             text.includes("saisissez") ||
-            text.includes("écrire") ||
+            text.includes("Ã©crire") ||
             text.includes("ecrire") ||
-            text.includes("écrivez") ||
+            text.includes("Ã©crivez") ||
             text.includes("ecrivez") ||
             text.includes("taper") ||
             text.includes("entrez") ||
@@ -22516,7 +22510,7 @@ function checkRealFormat(type){
 
         const match =
             value.match(
-                /["«“”']([^"«“”']+)["»“”']/
+                /["Â«â€œâ€']([^"Â«â€œâ€']+)["Â»â€œâ€']/
             );
 
 
@@ -22783,14 +22777,9 @@ function checkRealFormat(type){
 
         ){
 
-            if(
-                !validateSelection()
-            ){
-
-                return false;
-
-            }
-
+            // Formatting validation is based on the exact Ribbon
+            // action requested by Ranise. It must not depend on
+            // the selection remaining active after the click.
 
             if(
                 !isCorrectRibbonAction(
@@ -22803,31 +22792,9 @@ function checkRealFormat(type){
 
             }
 
-
-            // ---------------------------------------------
-            // Allow simulation's formatting handler to run
-            // before checking resulting state.
-            // ---------------------------------------------
-
-            setTimeout(
-
-                function(){
-
-                    validateFormattingResult(
-                        type
-                    );
-
-                },
-
-                0
-
-            );
-
-
-            return false;
+            return true;
 
         }
-
 
 
         return false;
@@ -22907,28 +22874,14 @@ function validateFormattingResult(type){
 
 
             // =============================================
-            // REAL FORMAT VERIFICATION
+            // FORMAT ACTION CONFIRMED
             // =============================================
+            // Do not call checkRealFormat() here. The selection may
+            // disappear as soon as the Ribbon receives focus. That
+            // must not prevent Ranise from validating the exact
+            // formatting action the student was instructed to perform.
 
-            if(
-                checkRealFormat(type)
-            ){
-
-                nextPracticeStep();
-
-            }else{
-
-                console.warn(
-
-                    "RANISE DYNAMIC BLOCK 7: " +
-                    "Format action detected, but the final " +
-                    "format state was not yet confirmed:",
-
-                    type
-
-                );
-
-            }
+            nextPracticeStep();
 
         },
 
@@ -23037,7 +22990,7 @@ function validateFormattingResult(type){
 
 
         // -------------------------------------------------
-        // Formatting actions need DOM update first
+        // Formatting actions
         // -------------------------------------------------
 
         if(
@@ -23053,14 +23006,11 @@ function validateFormattingResult(type){
 
         ){
 
-            if(
-                !validateSelection()
-            ){
-
-                return;
-
-            }
-
+            // IMPORTANT:
+            // Do not require the selection to remain active after
+            // the Ribbon button is clicked. The Ribbon can take
+            // focus and collapse the selection even when the
+            // requested formatting action was performed correctly.
 
             if(
                 !isCorrectRibbonAction(
@@ -23073,11 +23023,11 @@ function validateFormattingResult(type){
 
             }
 
-
             state.lastValidationTime =
                 now;
 
-
+            // The exact requested formatting button was clicked.
+            // Validate the step after the simulation event completes.
             setTimeout(
 
                 function(){
@@ -23092,11 +23042,9 @@ function validateFormattingResult(type){
 
             );
 
-
             return;
 
         }
-
 
 
         // -------------------------------------------------
@@ -23280,7 +23228,7 @@ function validateFormattingResult(type){
 
         await speak(
 
-            "Étape " +
+            "Ã‰tape " +
             (state.stepIndex + 1) +
             ". " +
             step +
@@ -23316,7 +23264,7 @@ function validateFormattingResult(type){
 
 
         await speak(
-            "Très bien. C'est correct."
+            "TrÃ¨s bien. C'est correct."
         );
 
     }
@@ -23415,8 +23363,8 @@ function validateFormattingResult(type){
 
                     await speak(
 
-                        "Excellent. Vous avez terminé cette activité. " +
-                        "Nous passons maintenant à l'activité suivante : " +
+                        "Excellent. Vous avez terminÃ© cette activitÃ©. " +
+                        "Nous passons maintenant Ã  l'activitÃ© suivante : " +
                         nextActivity.title
 
                     );
@@ -23446,12 +23394,12 @@ function validateFormattingResult(type){
 
             await speak(
 
-                "Excellent. Vous avez terminé toutes les étapes de la séance pratique du " +
+                "Excellent. Vous avez terminÃ© toutes les Ã©tapes de la sÃ©ance pratique du " +
                 chapterNameForSpeech(
                     state.chapterId
                 ) +
-                ". Votre pratique est maintenant validée. " +
-                "La partie Exercices est maintenant déverrouillée. " +
+                ". Votre pratique est maintenant validÃ©e. " +
+                "La partie Exercices est maintenant dÃ©verrouillÃ©e. " +
                 "Bravo pour votre travail."
 
             );
@@ -23498,7 +23446,7 @@ function validateFormattingResult(type){
             console.log(
 
                 "RANISE DYNAMIC BLOCK 7: " +
-                "PRACTICE COMPLETED — EXERCISES UNLOCK REQUESTED",
+                "PRACTICE COMPLETED â€” EXERCISES UNLOCK REQUESTED",
 
                 state.chapterId
 
@@ -23628,14 +23576,14 @@ function validateFormattingResult(type){
         await speak(
 
             "Bienvenue dans l'espace de simulation Microsoft Word 2007. " +
-            "Nous allons maintenant réaliser ensemble la séance pratique du " +
+            "Nous allons maintenant rÃ©aliser ensemble la sÃ©ance pratique du " +
             chapterNameForSpeech(
                 chapterId
             ) +
             ". " +
-            "Je vais vous guider étape par étape et lentement. " +
-            "Après chaque consigne, effectuez réellement l'action demandée dans la simulation. " +
-            "Je vérifierai votre action avant de passer à l'étape suivante."
+            "Je vais vous guider Ã©tape par Ã©tape et lentement. " +
+            "AprÃ¨s chaque consigne, effectuez rÃ©ellement l'action demandÃ©e dans la simulation. " +
+            "Je vÃ©rifierai votre action avant de passer Ã  l'Ã©tape suivante."
 
         );
 
@@ -23949,8 +23897,8 @@ if(
 
 
 
-            
- 
+
+
 
             // -------------------------------------------------
             // CHAPTER 1 NEVER ENTERS THIS ENGINE
