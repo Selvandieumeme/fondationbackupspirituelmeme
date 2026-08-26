@@ -287,14 +287,13 @@ const microsoftWordCourse = {
 
             "Choisir un autre type de police (Font), par exemple Arial, Calibri ou Times New Roman.",
 
-            "Observer immédiatement la modification de l’apparence des caractères sélectionnés.",
+            
 
             "Conserver le texte sélectionné et ouvrir la liste Taille de police (Font Size).",
 
             "Choisir une taille différente pour agrandir ou réduire les caractères.",
 
-            "Observer la nouvelle dimension du texte.",
-
+            
             "Vérifier que la modification du type et de la taille de police s’applique uniquement au texte sélectionné."
 
         ]
@@ -319,7 +318,7 @@ const microsoftWordCourse = {
 
             "Sélectionner une autre partie du texte et activer la commande Souligné (Underline) afin d’ajouter une ligne sous les caractères.",
 
-            "Observer visuellement la différence entre le texte en Gras, le texte en Italique et le texte Souligné.",
+    
 
             "Sélectionner un texte et combiner plusieurs commandes de mise en forme lorsque cela est nécessaire.",
 
@@ -345,7 +344,7 @@ const microsoftWordCourse = {
 
             "Choisir une couleur disponible dans la palette.",
 
-            "Observer la modification de la couleur des caractères sélectionnés.",
+            
 
             "Sélectionner une autre partie du texte et lui appliquer une couleur différente.",
 
@@ -373,7 +372,7 @@ const microsoftWordCourse = {
 
             "Choisir une couleur de surbrillance.",
 
-            "Observer la couleur appliquée derrière les caractères sélectionnés.",
+     
 
             "Sélectionner un autre passage du texte et lui appliquer une surbrillance.",
 
