@@ -2261,6 +2261,58 @@ if(launchButton){
 
 
 
+// =====================================
+// MICROSOFT WORD 2007 FORMATION
+// CHAPTER 2 SIMULATION LAUNCH ENGINE
+// =====================================
+
+const launchChapter2Button =
+document.getElementById(
+    "launchMicrosoftWordChapter2SimulationBtn"
+);
+
+if(launchChapter2Button){
+
+    launchChapter2Button.addEventListener(
+
+        "click",
+
+        ()=>{
+
+            campusContent.innerHTML = `
+
+                <iframe
+
+                src="https://www.fondationbackupspirituel.com/campusword2007simulation"
+
+                style="
+
+                width:100%;
+
+                height:900px;
+
+                border:none;
+
+                border-radius:12px;
+
+                "
+
+                title="Microsoft Word Simulation — Chapitre 2">
+
+                </iframe>
+
+            `;
+
+        }
+
+    );
+
+}
+
+
+
+
+
 
 
 
