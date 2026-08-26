@@ -25085,11 +25085,11 @@ const map = {
 
         function(event){
 
-            const launchButton =
-                event.target.closest(
-                    "#launchMicrosoftWordSimulationBtn"
-                );
 
+const launchButton =
+    event.target.closest(
+        "#launchMicrosoftWordSimulationBtn, #launchMicrosoftWordChapter2SimulationBtn"
+    );      
 
             if(!launchButton){
 
@@ -25130,11 +25130,13 @@ const map = {
 
         function(event){
 
-            const launchButton =
-                event.target.closest(
-                    "#launchMicrosoftWordSimulationBtn"
-                );
 
+
+const launchButton =
+    event.target.closest(
+        "#launchMicrosoftWordSimulationBtn, #launchMicrosoftWordChapter2SimulationBtn"
+    );
+            
 
             if(!launchButton){
 
