@@ -23600,22 +23600,48 @@ const map = {
 
         function(event){
 
-            const launchButton =
-                event.target.closest(
-                    "#launchMicrosoftWordSimulationBtn"
-                );
 
 
-            if(!launchButton){
+const launchButton =
+    event.target.closest(
+        "#launchMicrosoftWordSimulationBtn, " +
+        "#launchMicrosoftWordChapter2SimulationBtn"
+    );
 
-                return;
+if(!launchButton){
 
-            }
+    return;
+
+}
 
 
-            const chapterId =
-                detectCurrentChapterId();
 
+let chapterId =
+    detectCurrentChapterId();
+
+
+// =====================================================
+// CHAPTER 2 SIMULATION BUTTON
+// EXPLICIT CHAPTER CONNECTION
+// =====================================================
+
+if(
+    launchButton.id ===
+    "launchMicrosoftWordChapter2SimulationBtn"
+){
+
+    chapterId =
+        "chapitre2";
+
+}
+
+
+
+
+
+
+            
+ 
 
             // -------------------------------------------------
             // CHAPTER 1 NEVER ENTERS THIS ENGINE
