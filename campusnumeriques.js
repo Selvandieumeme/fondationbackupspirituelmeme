@@ -310,15 +310,19 @@ const microsoftWordCourse = {
 
             "Saisir une nouvelle phrase dans le document.",
 
-            "Sélectionner le mot ou le groupe de mots à mettre en forme.",
-
-            "Activer la commande Gras (Bold) afin de rendre le texte plus épais et plus visible.",
+       
 
             "Sélectionner une autre partie du texte et activer la commande Italique (Italic) afin d’incliner les caractères.",
 
             "Sélectionner une autre partie du texte et activer la commande Souligné (Underline) afin d’ajouter une ligne sous les caractères.",
 
     
+
+     "Sélectionner le mot ou le groupe de mots à mettre en forme.",
+
+            "Activer la commande Gras (Bold) afin de rendre le texte plus épais et plus visible.",
+
+
 
             "Sélectionner un texte et combiner plusieurs commandes de mise en forme lorsque cela est nécessaire.",
 
