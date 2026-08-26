@@ -21883,110 +21883,345 @@ const map = {
 
 
 
-    // =====================================================
-    // CHECK FORMAT REALITY
-    // =====================================================
-
-    function checkRealFormat(type){
-
-        const signature =
-            getFormatSignature();
 
 
-        if(!signature){
+
+// =====================================================
+// CHECK FORMAT REALITY
+// =====================================================
+
+function checkRealFormat(type){
+
+    const doc =
+        state.simulationDocument;
+
+
+    if(!doc){
+
+        return false;
+
+    }
+
+
+    try{
+
+        const selection =
+            doc.getSelection
+            ? doc.getSelection()
+            : doc.defaultView?.getSelection();
+
+
+        if(
+            !selection ||
+            selection.rangeCount === 0
+        ){
 
             return false;
 
         }
 
 
-        const parts =
-            signature.split("|");
+        // =================================================
+        // GET SELECTED RANGE
+        // =================================================
+
+        const range =
+            selection.getRangeAt(0);
+
+
+        if(!range){
+
+            return false;
+
+        }
+
+
+        // =================================================
+        // FIND A REAL ELEMENT INSIDE THE SELECTION
+        // =================================================
+
+        let element = null;
+
+
+        const anchor =
+            selection.anchorNode;
+
+
+        if(anchor){
+
+            element =
+                anchor.nodeType === 1
+                ? anchor
+                : anchor.parentElement;
+
+        }
+
+
+        // =================================================
+        // IF ANCHOR IS NOT ENOUGH, CHECK RANGE CONTAINER
+        // =================================================
+
+        if(!element){
+
+            const node =
+                range.commonAncestorContainer;
+
+
+            element =
+                node.nodeType === 1
+                ? node
+                : node.parentElement;
+
+        }
+
+
+        if(!element){
+
+            return false;
+
+        }
+
+
+        // =================================================
+        // MAKE SURE WE ARE INSIDE THE WORD DOCUMENT
+        // =================================================
+
+        if(
+            !element.closest(
+                ".cwPageContent"
+            )
+        ){
+
+            return false;
+
+        }
+
+
+        // =================================================
+        // READ REAL COMPUTED FORMAT
+        // =================================================
+
+        const style =
+            doc.defaultView.getComputedStyle(
+                element
+            );
+
+
+        if(!style){
+
+            return false;
+
+        }
 
 
         const weight =
-            parts[0];
+            String(
+                style.fontWeight || ""
+            )
+            .toLowerCase()
+            .trim();
 
-        const style =
-            parts[1];
+
+        const fontStyle =
+            String(
+                style.fontStyle || ""
+            )
+            .toLowerCase()
+            .trim();
+
 
         const decoration =
-            parts[2];
+            String(
+                style.textDecorationLine ||
+                style.textDecoration ||
+                ""
+            )
+            .toLowerCase();
 
+
+        const fontSize =
+            String(
+                style.fontSize || ""
+            );
+
+
+        const fontFamily =
+            String(
+                style.fontFamily || ""
+            );
+
+
+        const color =
+            String(
+                style.color || ""
+            );
+
+
+        const background =
+            String(
+                style.backgroundColor || ""
+            );
+
+
+
+        // =================================================
+        // BOLD
+        // =================================================
 
         if(type === "bold"){
 
+            const numericWeight =
+                parseInt(
+                    weight,
+                    10
+                );
+
+
             return (
+
                 weight === "bold" ||
-                parseInt(weight) >= 600
+
+                weight === "bolder" ||
+
+                numericWeight >= 600
+
             );
 
         }
 
+
+
+        // =================================================
+        // ITALIC
+        // =================================================
 
         if(type === "italic"){
 
             return (
-                style === "italic" ||
-                style === "oblique"
+
+                fontStyle === "italic" ||
+
+                fontStyle === "oblique"
+
             );
 
         }
 
+
+
+        // =================================================
+        // UNDERLINE
+        // =================================================
 
         if(type === "underline"){
 
-            return (
-                decoration.includes(
-                    "underline"
-                )
+            return decoration.includes(
+                "underline"
             );
 
         }
 
+
+
+        // =================================================
+        // STRIKE
+        // =================================================
 
         if(type === "strike"){
 
-            return (
-                decoration.includes(
-                    "line-through"
-                )
+            return decoration.includes(
+                "line-through"
             );
 
         }
 
 
+
+        // =================================================
+        // FONT FAMILY
+        // =================================================
+
         if(type === "font-family"){
 
-            return !!parts[4];
+            return (
+                fontFamily.trim() !== ""
+            );
 
         }
 
+
+
+        // =================================================
+        // FONT SIZE
+        // =================================================
 
         if(type === "font-size"){
 
-            return !!parts[3];
+            return (
+                fontSize.trim() !== ""
+            );
 
         }
 
+
+
+        // =================================================
+        // FONT COLOR
+        // =================================================
 
         if(type === "font-color"){
 
-            return !!parts[5];
+            return (
+                color.trim() !== ""
+            );
 
         }
 
+
+
+        // =================================================
+        // HIGHLIGHT
+        // =================================================
 
         if(type === "highlight"){
 
-            return !!parts[6];
+            return (
+
+                background.trim() !== "" &&
+
+                background !==
+                "rgba(0, 0, 0, 0)" &&
+
+                background !==
+                "transparent"
+
+            );
 
         }
+
+
+
+        return false;
+
+    }catch(error){
+
+        console.error(
+
+            "RANISE DYNAMIC BLOCK 7: " +
+            "Format verification error:",
+
+            error
+
+        );
 
 
         return false;
 
     }
+
+}
+
+
 
 
 
