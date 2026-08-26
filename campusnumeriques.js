@@ -1039,17 +1039,13 @@ ${!unlocked ? "🔒" : "📘"} ${chapter.title}
 
 
 
-        <button
-            id="launchMicrosoftWordSimulationBtn"
-            class="cwLaunchWordSimulationBtn">
+<button
+    id="launchMicrosoftWordSimulationBtn"
+    class="cwLaunchWordSimulationBtn">
 
+    🚀 Ouvrir Microsoft Word Simulation
 
-            🚀 Ouvrir Microsoft Word Simulation
-
-
-        </button>
-
-
+</button>
 
 
 <button
@@ -1059,7 +1055,6 @@ ${!unlocked ? "🔒" : "📘"} ${chapter.title}
     🚀 Ouvrir Microsoft Word Simulation — Chapitre 2
 
 </button>
-
 
 
 
