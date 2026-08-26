@@ -1029,37 +1029,39 @@ ${!unlocked ? "🔒" : "📘"} ${chapter.title}
 
 
 
-        <div class="word-chapters-container">
 
 
-            ${chaptersHTML}
+<div class="word-chapters-scroll-container">
 
+    <div class="word-chapters-container">
 
-        </div>
-
-
-
-<button
-    id="launchMicrosoftWordSimulationBtn"
-    class="cwLaunchWordSimulationBtn">
-
-    🚀 Ouvrir Microsoft Word Simulation
-
-</button>
-
-
-<button
-    id="launchMicrosoftWordChapter2SimulationBtn"
-    class="cwLaunchWordSimulationBtn">
-
-    🚀 Ouvrir Microsoft Word Simulation — Chapitre 2
-
-</button>
-
-
+        ${chaptersHTML}
 
     </div>
 
+
+    <div class="word-simulations-container">
+
+        <button
+            id="launchMicrosoftWordSimulationBtn"
+            class="cwLaunchWordSimulationBtn">
+
+            🚀 Ouvrir Microsoft Word Simulation
+
+        </button>
+
+
+        <button
+            id="launchMicrosoftWordChapter2SimulationBtn"
+            class="cwLaunchWordSimulationBtn">
+
+            🚀 Ouvrir Microsoft Word Simulation — Chapitre 2
+
+        </button>
+
+    </div>
+
+</div>
 
 `;
 
