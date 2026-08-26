@@ -265,7 +265,7 @@ const microsoftWordCourse = {
 
             "Utiliser la commande Coller (Paste) afin de placer le texte coupé à son nouvel emplacement.",
 
-            "Vérifier que la copie conserve le texte original tandis que la coupe déplace le texte vers un nouvel emplacement."
+            
 
         ]
 
@@ -294,7 +294,7 @@ const microsoftWordCourse = {
             "Choisir une taille différente pour agrandir ou réduire les caractères.",
 
             
-            "Vérifier que la modification du type et de la taille de police s’applique uniquement au texte sélectionné."
+            
 
         ]
 
@@ -322,7 +322,7 @@ const microsoftWordCourse = {
 
             "Sélectionner un texte et combiner plusieurs commandes de mise en forme lorsque cela est nécessaire.",
 
-            "Vérifier que les commandes appliquées produisent bien l’apparence souhaitée."
+   
 
         ]
 
@@ -350,7 +350,7 @@ const microsoftWordCourse = {
 
             "Comparer les différentes couleurs appliquées.",
 
-            "Vérifier que seule la partie sélectionnée a reçu la couleur choisie."
+       
 
         ]
 
@@ -376,9 +376,7 @@ const microsoftWordCourse = {
 
             "Sélectionner un autre passage du texte et lui appliquer une surbrillance.",
 
-            "Comparer le texte normal avec le texte mis en surbrillance.",
-
-            "Vérifier que la surbrillance permet de faire ressortir visuellement les informations importantes."
+            
 
         ]
 
