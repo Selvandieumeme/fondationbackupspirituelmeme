@@ -22597,44 +22597,117 @@ const map = {
 
 
 
-    // =====================================================
-    // FORMAT RESULT VALIDATION
-    // =====================================================
 
-    function validateFormattingResult(type){
+// =====================================================
+// FORMAT RESULT VALIDATION
+// =====================================================
 
-        if(
-            !state.started ||
-            state.completed ||
-            state.processingAction ||
-            !state.waitingForAction
-        ){
+function validateFormattingResult(type){
 
-            return;
+    if(
+        !state.started ||
+        state.completed ||
+        state.processingAction ||
+        !state.waitingForAction
+    ){
 
-        }
-
-
-        if(
-            getStepType(
-                getCurrentStep()
-            ) !== type
-        ){
-
-            return;
-
-        }
-
-
-        if(
-            checkRealFormat(type)
-        ){
-
-            nextPracticeStep();
-
-        }
+        return;
 
     }
+
+
+    // =================================================
+    // VERIFY THAT THIS IS STILL THE CURRENT STEP
+    // =================================================
+
+    if(
+        getStepType(
+            getCurrentStep()
+        ) !== type
+    ){
+
+        return;
+
+    }
+
+
+    // =================================================
+    // GIVE MICROSOFT WORD SIMULATION TIME
+    // TO FINISH APPLYING THE FORMAT
+    // =================================================
+
+    setTimeout(
+
+        function(){
+
+            if(
+                !state.started ||
+                state.completed ||
+                state.processingAction ||
+                !state.waitingForAction
+            ){
+
+                return;
+
+            }
+
+
+            // =============================================
+            // VERIFY AGAIN THAT THE STEP DID NOT CHANGE
+            // =============================================
+
+            if(
+                getStepType(
+                    getCurrentStep()
+                ) !== type
+            ){
+
+                return;
+
+            }
+
+
+            // =============================================
+            // REAL FORMAT VERIFICATION
+            // =============================================
+
+            if(
+                checkRealFormat(type)
+            ){
+
+                nextPracticeStep();
+
+            }else{
+
+                console.warn(
+
+                    "RANISE DYNAMIC BLOCK 7: " +
+                    "Format action detected, but the final " +
+                    "format state was not yet confirmed:",
+
+                    type
+
+                );
+
+            }
+
+        },
+
+        100
+
+    );
+
+}
+
+
+
+
+
+
+
+
+
+
 
 
 
