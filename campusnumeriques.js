@@ -27229,11 +27229,77 @@ if(
 
 
 
+
+
+
+
+
 // -------------------------------------------------
-// IMMEDIATE RE-RENDER
+// IMMEDIATE RE-RENDER — SAFE SIMULATION MODE
+// -------------------------------------------------
+// IMPORTANT:
+// The unlock/progress has ALREADY been saved above.
+//
+// If the Word Simulation iframe is currently active,
+// DO NOT call renderChapterParts().
+//
+// renderChapterParts() rebuilds campusContent.innerHTML
+// and would therefore destroy:
+//     - the active Word Simulation iframe
+//     - Ranise above the simulation
+//     - the current simulation state
+//
+// The ONLY thing this bridge must do here is preserve
+// the active simulation while keeping the newly unlocked
+// progress saved for the next part.
 // -------------------------------------------------
 
 setTimeout(()=>{
+
+    const campusContent =
+        document.getElementById(
+            "campusContent"
+        );
+
+
+    const activeSimulation =
+        campusContent
+        ? campusContent.querySelector(
+            'iframe[src*="campusword2007simulation"]'
+        )
+        : null;
+
+
+    // -------------------------------------------------
+    // SIMULATION IS ACTIVE
+    // -------------------------------------------------
+    // KEEP THE ENTIRE SIMULATION SCREEN UNTOUCHED.
+    // Progress was already saved above.
+    // -------------------------------------------------
+
+    if(activeSimulation){
+
+        console.log(
+
+            "RANISE UNLOCK BRIDGE: " +
+            "NEXT PART UNLOCKED — " +
+            "SIMULATION PRESERVED",
+
+            chapterId,
+            completedPart
+
+        );
+
+        return;
+
+    }
+
+
+    // -------------------------------------------------
+    // NO SIMULATION ACTIVE
+    // -------------------------------------------------
+    // Keep the original dynamic rendering behavior.
+    // -------------------------------------------------
 
     this.renderChapterParts(
         chapterId
@@ -27243,9 +27309,6 @@ setTimeout(()=>{
 
 
 return true;
-
-},
-
 
 
 
