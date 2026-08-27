@@ -345,15 +345,6 @@ const microsoftWordCourse = {
 
 
 
-  "Sélectionner le texte dont la couleur doit être modifiée.",
-
-            "Ouvrir la commande Couleur de police (Font Color).",
-
-            "Choisir une couleur disponible dans la palette.",
-
-
-
-
 "Sélectionner une autre partie du texte et lui appliquer une couleur différente.",
 
 
