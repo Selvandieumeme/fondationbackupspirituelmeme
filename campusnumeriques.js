@@ -24098,6 +24098,29 @@ if(
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 // =========================================================
 // BLOCK 8 DYNAMIC EXERCISES
 // MICROSOFT WORD 2007 FORMATION
@@ -24111,29 +24134,32 @@ if(
 //     READS chapter.exercises DYNAMICALLY
 //     USES THE EXISTING WORD 2007 SIMULATION
 //     EXERCISES 1–2: STUDENT ANSWERS DIRECTLY IN DOCUMENT
-//     EXERCISES 3–10: OBSERVES REAL SIMULATION ACTIONS
+//     EXERCISES 3+: OBSERVES REAL SIMULATION ACTIONS
 //     VALIDATES EXERCISES SEQUENTIALLY
 //     RANISE CONFIRMS EACH VALID EXERCISE
 //     LAST EXERCISE VALIDATION UNLOCKS DEVOIR
 //
 // IMPORTANT:
-//     DOES NOT MODIFY BLOCK 7.
-//     DOES NOT MODIFY THE EXISTING SIMULATION.
-//     DOES NOT MODIFY THEORY OR PRACTICE.
-//     USES THE EXISTING DYNAMIC UNLOCK BRIDGE.
+//     DOES NOT MODIFY BLOCK 7
+//     DOES NOT MODIFY THE DYNAMIC UNLOCK BRIDGE
+//     DOES NOT RE-RENDER campusContent
+//     DOES NOT REMOVE STUDENT FROM SIMULATION
 //
-// IMPORTANT AUTO-LAUNCH:
-//     WHEN THE BRIDGE UNLOCKS "exercises",
-//     BLOCK 8 DETECTS IT AUTOMATICALLY.
-//     IT STARTS INSIDE THE EXISTING SIMULATION.
-//     IT DOES NOT RE-RENDER campusContent.
-//     IT DOES NOT REMOVE THE STUDENT FROM THE SIMULATION.
+// AUTO-LAUNCH:
+//     BRIDGE ONLY UNLOCKS "exercises"
+//     BLOCK 8 DETECTS THAT UNLOCK
+//     BLOCK 8 CONNECTS TO THE EXISTING SIMULATION
+//     BLOCK 8 LAUNCHES RANISE AUTOMATICALLY
 // =========================================================
 
 (function(){
 
     "use strict";
 
+
+    // =====================================================
+    // STATE
+    // =====================================================
 
     const state = {
 
@@ -24182,7 +24208,6 @@ if(
     };
 
 
-
     // =====================================================
     // CHAPTER 1 PROTECTION
     // =====================================================
@@ -24190,10 +24215,10 @@ if(
     function isChapter1(chapterId){
 
         return String(chapterId || "")
-            .toLowerCase() === "chapitre1";
+            .toLowerCase()
+            .trim() === "chapitre1";
 
     }
-
 
 
     // =====================================================
@@ -24212,9 +24237,8 @@ if(
     }
 
 
-
     // =====================================================
-    // ACTIVE CHAPTER
+    // GET CHAPTER
     // =====================================================
 
     function getChapter(chapterId){
@@ -24240,6 +24264,7 @@ if(
 
 
         if(
+            !microsoftWordCourse ||
             !Array.isArray(
                 microsoftWordCourse.chapters
             )
@@ -24255,7 +24280,8 @@ if(
 
                 return (
                     chapter &&
-                    chapter.id === chapterId
+                    String(chapter.id) ===
+                    String(chapterId)
                 );
 
             }
@@ -24264,9 +24290,8 @@ if(
     }
 
 
-
     // =====================================================
-    // GET EXERCISES
+    // GET CHAPTER EXERCISES
     // =====================================================
 
     function getChapterExercises(chapterId){
@@ -24287,27 +24312,25 @@ if(
         }
 
 
-        if(
-            chapter.exercises.length === 0
-        ){
+        const exercises =
+            chapter.exercises
+                .map(function(item){
 
-            return null;
+                    return String(
+                        item || ""
+                    ).trim();
 
-        }
+                })
+                .filter(Boolean);
 
 
-        return chapter.exercises
-            .map(function(item){
-
-                return String(
-                    item || ""
-                ).trim();
-
-            })
-            .filter(Boolean);
+        return exercises.length
+            ?
+            exercises
+            :
+            null;
 
     }
-
 
 
     // =====================================================
@@ -24325,12 +24348,11 @@ if(
             chapter.title
         )
         ?
-        chapter.title
+        String(chapter.title)
         :
-        (chapterId || "");
+        String(chapterId || "");
 
     }
-
 
 
     // =====================================================
@@ -24352,7 +24374,7 @@ if(
         ){
 
             console.warn(
-                "RANISE DYNAMIC BLOCK 8: Voice unavailable."
+                "RANISE BLOCK 8: MaryTTS unavailable."
             );
 
             return;
@@ -24360,7 +24382,8 @@ if(
         }
 
 
-        state.speaking = true;
+        state.speaking =
+            true;
 
 
         if(
@@ -24368,7 +24391,18 @@ if(
             "function"
         ){
 
-            raniseStartTalking();
+            try{
+
+                raniseStartTalking();
+
+            }catch(error){
+
+                console.warn(
+                    "RANISE BLOCK 8: raniseStartTalking error.",
+                    error
+                );
+
+            }
 
         }
 
@@ -24379,9 +24413,17 @@ if(
                 text
             );
 
+        }catch(error){
+
+            console.error(
+                "RANISE BLOCK 8: Voice error.",
+                error
+            );
+
         }finally{
 
-            state.speaking = false;
+            state.speaking =
+                false;
 
 
             if(
@@ -24389,7 +24431,18 @@ if(
                 "function"
             ){
 
-                raniseStopTalking();
+                try{
+
+                    raniseStopTalking();
+
+                }catch(error){
+
+                    console.warn(
+                        "RANISE BLOCK 8: raniseStopTalking error.",
+                        error
+                    );
+
+                }
 
             }
 
@@ -24398,9 +24451,8 @@ if(
     }
 
 
-
     // =====================================================
-    // FIND WORD SIMULATION
+    // FIND CURRENT WORD SIMULATION
     // =====================================================
 
     function findSimulation(){
@@ -24418,10 +24470,6 @@ if(
         }
 
 
-        // ---------------------------------------------
-        // Primary simulation selector
-        // ---------------------------------------------
-
         let frame =
             campusContent.querySelector(
                 'iframe[src*="campusword2007simulation"]'
@@ -24435,9 +24483,18 @@ if(
         }
 
 
-        // ---------------------------------------------
-        // Fallback: any iframe containing Word simulation
-        // ---------------------------------------------
+        frame =
+            campusContent.querySelector(
+                'iframe[data-chapter-id]'
+            );
+
+
+        if(frame){
+
+            return frame;
+
+        }
+
 
         frame =
             campusContent.querySelector(
@@ -24450,9 +24507,213 @@ if(
     }
 
 
+    // =====================================================
+    // READ CHAPTER ID FROM AN ELEMENT
+    // =====================================================
+
+    function getChapterIdFromElement(element){
+
+        if(!element){
+
+            return null;
+
+        }
+
+
+        const attributes = [
+
+            "data-chapter-id",
+            "data-chapter",
+            "data-current-chapter",
+            "data-chapterid"
+
+        ];
+
+
+        for(
+            let i = 0;
+            i < attributes.length;
+            i++
+        ){
+
+            try{
+
+                const value =
+                    element.getAttribute(
+                        attributes[i]
+                    );
+
+
+                if(
+                    value &&
+                    !isChapter1(value)
+                ){
+
+                    return String(value).trim();
+
+                }
+
+            }catch(error){}
+
+        }
+
+
+        return null;
+
+    }
+
 
     // =====================================================
-    // CONNECT SIMULATION
+    // DETECT CURRENT CHAPTER
+    // =====================================================
+
+    function detectCurrentChapterId(){
+
+        let chapterId =
+            null;
+
+
+        // -------------------------------------------------
+        // EXISTING GLOBAL
+        // -------------------------------------------------
+
+        if(
+            typeof currentChapterId !==
+            "undefined" &&
+            currentChapterId
+        ){
+
+            chapterId =
+                String(
+                    currentChapterId
+                ).trim();
+
+        }
+
+
+        if(
+            !chapterId &&
+            window.currentChapterId
+        ){
+
+            chapterId =
+                String(
+                    window.currentChapterId
+                ).trim();
+
+        }
+
+
+        if(
+            !chapterId &&
+            window.RaniseActiveChapterId
+        ){
+
+            chapterId =
+                String(
+                    window.RaniseActiveChapterId
+                ).trim();
+
+        }
+
+
+        // -------------------------------------------------
+        // CAMPUS CONTENT
+        // -------------------------------------------------
+
+        const campusContent =
+            document.getElementById(
+                "campusContent"
+            );
+
+
+        if(!chapterId && campusContent){
+
+            chapterId =
+                getChapterIdFromElement(
+                    campusContent
+                );
+
+        }
+
+
+        // -------------------------------------------------
+        // SIMULATION IFRAME
+        // -------------------------------------------------
+
+        if(!chapterId){
+
+            const frame =
+                findSimulation();
+
+
+            if(frame){
+
+                chapterId =
+                    getChapterIdFromElement(
+                        frame
+                    );
+
+            }
+
+        }
+
+
+        // -------------------------------------------------
+        // SEARCH ACTIVE CHAPTER ELEMENTS
+        // -------------------------------------------------
+
+        if(!chapterId){
+
+            const candidates =
+                document.querySelectorAll(
+                    "[data-chapter-id], [data-chapter], [data-current-chapter]"
+                );
+
+
+            for(
+                let i = 0;
+                i < candidates.length;
+                i++
+            ){
+
+                const candidateId =
+                    getChapterIdFromElement(
+                        candidates[i]
+                    );
+
+
+                if(candidateId){
+
+                    chapterId =
+                        candidateId;
+
+                    break;
+
+                }
+
+            }
+
+        }
+
+
+        if(
+            !chapterId ||
+            isChapter1(chapterId)
+        ){
+
+            return null;
+
+        }
+
+
+        return chapterId;
+
+    }
+
+
+    // =====================================================
+    // CONNECT TO EXISTING SIMULATION
     // =====================================================
 
     function connectToSimulation(){
@@ -24500,11 +24761,8 @@ if(
         }catch(error){
 
             console.error(
-
-                "RANISE DYNAMIC BLOCK 8: Simulation access error.",
-
+                "RANISE BLOCK 8: Simulation connection error.",
                 error
-
             );
 
 
@@ -24513,7 +24771,6 @@ if(
         }
 
     }
-
 
 
     // =====================================================
@@ -24567,15 +24824,21 @@ if(
             return Array.from(editable)
                 .map(function(node){
 
-                    return typeof node.value === "string"
-                        ?
-                        node.value
-                        :
-                        (
-                            node.innerText ||
-                            node.textContent ||
-                            ""
-                        );
+                    if(
+                        typeof node.value ===
+                        "string"
+                    ){
+
+                        return node.value;
+
+                    }
+
+
+                    return (
+                        node.innerText ||
+                        node.textContent ||
+                        ""
+                    );
 
                 })
                 .join(" ");
@@ -24596,9 +24859,8 @@ if(
     }
 
 
-
     // =====================================================
-    // SELECTED TEXT
+    // GET SELECTION TEXT
     // =====================================================
 
     function getSelectionText(){
@@ -24616,24 +24878,38 @@ if(
 
         try{
 
-            const selection =
-                doc.getSelection
-                ?
-                doc.getSelection()
-                :
-                (
-                    doc.defaultView &&
-                    doc.defaultView.getSelection
-                    ?
-                    doc.defaultView.getSelection()
-                    :
-                    null
-                );
+            let selection = null;
+
+
+            if(
+                typeof doc.getSelection ===
+                "function"
+            ){
+
+                selection =
+                    doc.getSelection();
+
+            }
+
+
+            if(
+                !selection &&
+                doc.defaultView &&
+                typeof doc.defaultView.getSelection ===
+                "function"
+            ){
+
+                selection =
+                    doc.defaultView.getSelection();
+
+            }
 
 
             return selection
                 ?
-                selection.toString().trim()
+                String(
+                    selection.toString() || ""
+                ).trim()
                 :
                 "";
 
@@ -24644,7 +24920,6 @@ if(
         }
 
     }
-
 
 
     // =====================================================
@@ -24660,41 +24935,48 @@ if(
         }
 
 
-        return normalize([
+        try{
 
-            element.id,
+            return normalize([
 
-            typeof element.className ===
-            "string"
-            ?
-            element.className
-            :
-            "",
+                element.id,
 
-            element.innerText,
+                typeof element.className ===
+                "string"
+                ?
+                element.className
+                :
+                "",
 
-            element.textContent,
+                element.innerText,
 
-            element.getAttribute("title"),
+                element.textContent,
 
-            element.getAttribute("aria-label"),
+                element.getAttribute("title"),
 
-            element.getAttribute("data-action"),
+                element.getAttribute("aria-label"),
 
-            element.getAttribute("data-command"),
+                element.getAttribute("data-action"),
 
-            element.getAttribute("data-role"),
+                element.getAttribute("data-command"),
 
-            element.getAttribute("name"),
+                element.getAttribute("data-role"),
 
-            element.getAttribute("value")
+                element.getAttribute("name"),
 
-        ]
-        .filter(Boolean)
-        .join(" "));
+                element.getAttribute("value")
+
+            ]
+            .filter(Boolean)
+            .join(" "));
+
+        }catch(error){
+
+            return "";
+
+        }
 
     }
-
 
 
     // =====================================================
@@ -24729,19 +25011,19 @@ if(
     }
 
 
-
     // =====================================================
-    // RIBBON ACTION
+    // RIBBON ACTION DETECTION
     // =====================================================
 
     function ribbonAction(target){
 
-        let node = target;
+        let node =
+            target;
 
 
         for(
             let i = 0;
-            i < 7 && node;
+            i < 8 && node;
             i++
         ){
 
@@ -24876,7 +25158,6 @@ if(
     }
 
 
-
     // =====================================================
     // EXERCISE TYPE
     // =====================================================
@@ -24900,9 +25181,7 @@ if(
 
 
         if(
-            value.includes(
-                "expliquer la difference"
-            ) &&
+            value.includes("expliquer la difference") &&
             (
                 value.includes("copier") ||
                 value.includes("couper")
@@ -24957,7 +25236,10 @@ if(
         if(
             value.includes("gras") &&
             value.includes("italique") &&
-            value.includes("souligne")
+            (
+                value.includes("souligne") ||
+                value.includes("soulign")
+            )
         ){
 
             return "three-format";
@@ -24999,7 +25281,6 @@ if(
     }
 
 
-
     // =====================================================
     // ANSWER VALIDATION
     // =====================================================
@@ -25010,7 +25291,9 @@ if(
             normalize(text);
 
 
-        if(value.length < 12){
+        if(
+            value.length < 12
+        ){
 
             return 0;
 
@@ -25034,7 +25317,8 @@ if(
             ];
 
 
-            let score = 0;
+            let score =
+                0;
 
 
             terms.forEach(function(term){
@@ -25086,8 +25370,11 @@ if(
             ];
 
 
-            let copyScore = 0;
-            let cutScore = 0;
+            let copyScore =
+                0;
+
+            let cutScore =
+                0;
 
 
             copyTerms.forEach(function(term){
@@ -25141,16 +25428,17 @@ if(
     }
 
 
-
     // =====================================================
-    // EXERCISE 1–2 INPUT OBSERVATION
+    // VALIDATE DIRECT ANSWER
     // =====================================================
 
     function validateAnswerExercise(){
 
         if(
             !state.exercises ||
-            !state.exercises[state.exerciseIndex]
+            !state.exercises[
+                state.exerciseIndex
+            ]
         ){
 
             return false;
@@ -25204,9 +25492,8 @@ if(
     }
 
 
-
     // =====================================================
-    // ACTION RECORDING
+    // RECORD ACTION
     // =====================================================
 
     function recordAction(action){
@@ -25227,9 +25514,8 @@ if(
     }
 
 
-
     // =====================================================
-    // SELECTION RECORDING
+    // RECORD SELECTION
     // =====================================================
 
     function recordSelection(){
@@ -25238,32 +25524,35 @@ if(
             getSelectionText();
 
 
-        if(text){
+        if(!text){
 
-            state.lastSelectionText =
-                text;
+            return;
 
-
-            const normalized =
-                normalize(text);
+        }
 
 
-            if(
-                !state.currentSelections.includes(
-                    normalized
-                )
-            ){
+        state.lastSelectionText =
+            text;
 
-                state.currentSelections.push(
-                    normalized
-                );
 
-            }
+        const normalized =
+            normalize(text);
+
+
+        if(
+            normalized &&
+            !state.currentSelections.includes(
+                normalized
+            )
+        ){
+
+            state.currentSelections.push(
+                normalized
+            );
 
         }
 
     }
-
 
 
     // =====================================================
@@ -25284,7 +25573,9 @@ if(
 
 
         const type =
-            normalize(event.type);
+            normalize(
+                event.type
+            );
 
 
         if(
@@ -25295,7 +25586,6 @@ if(
 
             state.clipboardEvents[type]++;
 
-
             recordAction(type);
 
         }
@@ -25303,9 +25593,8 @@ if(
     }
 
 
-
     // =====================================================
-    // REAL EXERCISE VALIDATION
+    // VALIDATE REAL SIMULATION ACTION
     // =====================================================
 
     function validateExerciseAction(){
@@ -25313,7 +25602,8 @@ if(
         if(
             !state.started ||
             state.completed ||
-            !state.waiting
+            !state.waiting ||
+            !state.exercises
         ){
 
             return false;
@@ -25327,8 +25617,17 @@ if(
             ];
 
 
+        if(!exercise){
+
+            return false;
+
+        }
+
+
         const type =
-            exerciseType(exercise);
+            exerciseType(
+                exercise
+            );
 
 
         if(
@@ -25442,9 +25741,8 @@ if(
     }
 
 
-
     // =====================================================
-    // CLICK OBSERVER
+    // SIMULATION CLICK OBSERVER
     // =====================================================
 
     function handleSimulationClick(event){
@@ -25481,8 +25779,7 @@ if(
 
 
         // -------------------------------------------------
-        // Capture selection BEFORE Ribbon focus
-        // removes it.
+        // Selection must be captured BEFORE ribbon focus.
         // -------------------------------------------------
 
         recordSelection();
@@ -25501,15 +25798,15 @@ if(
         }
 
 
-        // -------------------------------------------------
-        // Additional simulation controls
-        // -------------------------------------------------
-
         const data =
             elementData(
                 event.target
             );
 
+
+        // -------------------------------------------------
+        // Font family
+        // -------------------------------------------------
 
         if(
             data.includes("font family") ||
@@ -25524,6 +25821,10 @@ if(
         }
 
 
+        // -------------------------------------------------
+        // Font size
+        // -------------------------------------------------
+
         if(
             data.includes("font size") ||
             data.includes("taille de police")
@@ -25535,6 +25836,10 @@ if(
 
         }
 
+
+        // -------------------------------------------------
+        // Font color
+        // -------------------------------------------------
 
         if(
             data.includes("font color") ||
@@ -25549,6 +25854,10 @@ if(
         }
 
 
+        // -------------------------------------------------
+        // Highlight
+        // -------------------------------------------------
+
         if(
             data.includes("highlight") ||
             data.includes("surbrillance")
@@ -25562,7 +25871,7 @@ if(
 
 
         // -------------------------------------------------
-        // Give simulation time to finish action.
+        // Give simulation time to complete action.
         // -------------------------------------------------
 
         setTimeout(function(){
@@ -25575,10 +25884,9 @@ if(
 
             }
 
-        },100);
+        },120);
 
     }
-
 
 
     // =====================================================
@@ -25593,6 +25901,13 @@ if(
             state.speaking ||
             !state.waiting
         ){
+
+            return;
+
+        }
+
+
+        if(!state.exercises){
 
             return;
 
@@ -25627,30 +25942,29 @@ if(
 
             }
 
-        },120);
+        },150);
 
     }
 
 
-
     // =====================================================
-    // LISTENERS
+    // ATTACH SIMULATION LISTENERS
     // =====================================================
 
     function attachSimulationListeners(){
 
+        const doc =
+            state.simulationDocument;
+
+
         if(
-            !state.simulationDocument ||
+            !doc ||
             state.listenersAttached
         ){
 
             return;
 
         }
-
-
-        const doc =
-            state.simulationDocument;
 
 
         doc.addEventListener(
@@ -25701,9 +26015,8 @@ if(
     }
 
 
-
     // =====================================================
-    // RESET EXERCISE OBSERVATION
+    // RESET CURRENT EXERCISE OBSERVATION
     // =====================================================
 
     function resetExerciseObservation(){
@@ -25743,24 +26056,28 @@ if(
     }
 
 
-
     // =====================================================
     // SPEAK CURRENT EXERCISE
     // =====================================================
 
     async function speakCurrentExercise(){
 
-        const exercise =
-            state.exercises[
+        if(
+            !state.exercises ||
+            !state.exercises[
                 state.exerciseIndex
-            ];
-
-
-        if(!exercise){
+            ]
+        ){
 
             return;
 
         }
+
+
+        const exercise =
+            state.exercises[
+                state.exerciseIndex
+            ];
 
 
         state.waiting =
@@ -25783,10 +26100,11 @@ if(
         );
 
 
-        if(!state.completed){
+        if(
+            !state.completed
+        ){
 
             resetExerciseObservation();
-
 
             state.waiting =
                 true;
@@ -25794,7 +26112,6 @@ if(
         }
 
     }
-
 
 
     // =====================================================
@@ -25812,7 +26129,6 @@ if(
         );
 
     }
-
 
 
     // =====================================================
@@ -25841,6 +26157,10 @@ if(
             await confirmExercise();
 
 
+            // -------------------------------------------------
+            // NEXT EXERCISE
+            // -------------------------------------------------
+
             if(
                 state.exerciseIndex <
                 state.exercises.length - 1
@@ -25848,9 +26168,7 @@ if(
 
                 state.exerciseIndex++;
 
-
                 await speakCurrentExercise();
-
 
                 return;
 
@@ -25881,13 +26199,14 @@ if(
 
 
             // =================================================
-            // EXISTING DYNAMIC UNLOCK BRIDGE
-            // EXERCISES → HOMEWORK
+            // BLOCK 8 → BRIDGE
             //
-            // IMPORTANT:
-            // Block 8 ONLY requests the unlock.
-            // It does NOT render campusContent.
-            // It does NOT leave the simulation.
+            // BLOCK 8 REQUESTS ONLY:
+            // exercises → homework
+            //
+            // NO RENDER
+            // NO SIMULATION CLOSE
+            // NO CAMPUS CONTENT REPLACEMENT
             // =================================================
 
             if(
@@ -25910,20 +26229,11 @@ if(
 
                 console.error(
 
-                    "RANISE DYNAMIC BLOCK 8: Existing Dynamic Unlock Bridge unavailable."
+                    "RANISE BLOCK 8: Dynamic Unlock Bridge unavailable."
 
                 );
 
             }
-
-
-            console.log(
-
-                "RANISE DYNAMIC BLOCK 8: EXERCISES COMPLETED — HOMEWORK UNLOCK REQUESTED",
-
-                state.chapterId
-
-            );
 
 
         }finally{
@@ -25934,7 +26244,6 @@ if(
         }
 
     }
-
 
 
     // =====================================================
@@ -25952,6 +26261,16 @@ if(
 
         }
 
+
+        chapterId =
+            String(
+                chapterId
+            ).trim();
+
+
+        // -------------------------------------------------
+        // Prevent duplicate launch.
+        // -------------------------------------------------
 
         if(
             state.started &&
@@ -25971,9 +26290,9 @@ if(
 
         if(!exercises){
 
-            console.error(
+            console.warn(
 
-                "RANISE DYNAMIC BLOCK 8: Exercises unavailable.",
+                "RANISE BLOCK 8: No exercises found for",
 
                 chapterId
 
@@ -25985,16 +26304,13 @@ if(
         }
 
 
+        // -------------------------------------------------
+        // The student must already be inside Word simulation.
+        // -------------------------------------------------
+
         if(
             !connectToSimulation()
         ){
-
-            console.error(
-
-                "RANISE DYNAMIC BLOCK 8: Word simulation unavailable."
-
-            );
-
 
             return false;
 
@@ -26055,7 +26371,13 @@ if(
         );
 
 
-        await speakCurrentExercise();
+        if(
+            !state.completed
+        ){
+
+            await speakCurrentExercise();
+
+        }
 
 
         return true;
@@ -26063,93 +26385,18 @@ if(
     }
 
 
-
     // =====================================================
-    // DETECT CHAPTER
-    // =====================================================
-
-    function detectCurrentChapterId(){
-
-        let chapterId =
-            null;
-
-
-        if(
-            typeof currentChapterId !==
-            "undefined" &&
-            currentChapterId
-        ){
-
-            chapterId =
-                currentChapterId;
-
-        }
-
-
-        if(
-            !chapterId &&
-            window.currentChapterId
-        ){
-
-            chapterId =
-                window.currentChapterId;
-
-        }
-
-
-        if(
-            !chapterId &&
-            window.RaniseActiveChapterId
-        ){
-
-            chapterId =
-                window.RaniseActiveChapterId;
-
-        }
-
-
-        if(!chapterId){
-
-            const element =
-                document.querySelector(
-                    "[data-chapter-id]"
-                );
-
-
-            if(element){
-
-                chapterId =
-                    element.getAttribute(
-                        "data-chapter-id"
-                    );
-
-            }
-
-        }
-
-
-        return chapterId
-            ?
-            String(chapterId).trim()
-            :
-            null;
-
-    }
-
-
-
-    // =====================================================
-    // CHECK WHETHER EXERCISES ARE UNLOCKED
+    // READ PART PROGRESS
     // =====================================================
 
-    function areExercisesUnlocked(chapterId){
+    function getPartsProgress(chapterId){
 
         if(
             !chapterId ||
             isChapter1(chapterId)
         ){
 
-            return false;
+            return null;
 
         }
 
@@ -26162,29 +26409,20 @@ if(
             chapterId === "chapitre2" &&
             typeof WordChapter2PartsEngine !==
             "undefined" &&
+            WordChapter2PartsEngine &&
             typeof WordChapter2PartsEngine.getProgress ===
             "function"
         ){
 
             try{
 
-                const progress =
-                    WordChapter2PartsEngine.getProgress();
-
-
-                return !!(
-                    progress &&
-                    progress.exercises === true
-                );
+                return WordChapter2PartsEngine.getProgress();
 
             }catch(error){
 
                 console.warn(
-
-                    "RANISE DYNAMIC BLOCK 8: Unable to read Chapter 2 progress.",
-
+                    "RANISE BLOCK 8: Chapter 2 progress read failed.",
                     error
-
                 );
 
             }
@@ -26202,15 +26440,26 @@ if(
             "_partsProgress";
 
 
-        const saved =
-            localStorage.getItem(
-                key
-            );
+        let saved = null;
+
+
+        try{
+
+            saved =
+                localStorage.getItem(
+                    key
+                );
+
+        }catch(error){
+
+            return null;
+
+        }
 
 
         if(!saved){
 
-            return false;
+            return null;
 
         }
 
@@ -26218,36 +26467,272 @@ if(
         try{
 
             const progress =
-                JSON.parse(saved);
+                JSON.parse(
+                    saved
+                );
 
 
-            return !!(
+            return (
                 progress &&
-                progress.exercises === true
-            );
+                typeof progress ===
+                "object"
+            )
+            ?
+            progress
+            :
+            null;
 
         }catch(error){
 
-            console.warn(
-
-                "RANISE DYNAMIC BLOCK 8: Exercise unlock state read error.",
-
-                chapterId,
-                error
-
-            );
-
-
-            return false;
+            return null;
 
         }
 
     }
 
 
+    // =====================================================
+    // CHECK EXERCISES UNLOCK
+    // =====================================================
+
+    function areExercisesUnlocked(chapterId){
+
+        const progress =
+            getPartsProgress(
+                chapterId
+            );
+
+
+        return !!(
+            progress &&
+            progress.exercises === true
+        );
+
+    }
+
 
     // =====================================================
-    // WAIT FOR SIMULATION
+    // FIND ACTIVE UNLOCKED CHAPTER
+    //
+    // IMPORTANT:
+    // If currentChapterId is temporarily unavailable,
+    // search all chapters and only use a chapter that has
+    // exercises unlocked AND whose Word simulation exists.
+    // =====================================================
+
+    function findUnlockedActiveChapter(){
+
+        const directId =
+            detectCurrentChapterId();
+
+
+        if(
+            directId &&
+            areExercisesUnlocked(
+                directId
+            )
+        ){
+
+            return directId;
+
+        }
+
+
+        if(
+            typeof microsoftWordCourse ===
+            "undefined" ||
+            !microsoftWordCourse ||
+            !Array.isArray(
+                microsoftWordCourse.chapters
+            )
+        ){
+
+            return null;
+
+        }
+
+
+        const frame =
+            findSimulation();
+
+
+        if(!frame){
+
+            return null;
+
+        }
+
+
+        // -------------------------------------------------
+        // Prefer chapter ID attached to simulation.
+        // -------------------------------------------------
+
+        const frameChapterId =
+            getChapterIdFromElement(
+                frame
+            );
+
+
+        if(
+            frameChapterId &&
+            areExercisesUnlocked(
+                frameChapterId
+            )
+        ){
+
+            return frameChapterId;
+
+        }
+
+
+        // -------------------------------------------------
+        // Use an active chapter marker if available.
+        // -------------------------------------------------
+
+        for(
+            let i = 0;
+            i <
+            microsoftWordCourse.chapters.length;
+            i++
+        ){
+
+            const chapter =
+                microsoftWordCourse.chapters[i];
+
+
+            if(!chapter){
+
+                continue;
+
+            }
+
+
+            const chapterId =
+                String(
+                    chapter.id || ""
+                ).trim();
+
+
+            if(
+                !chapterId ||
+                isChapter1(chapterId)
+            ){
+
+                continue;
+
+            }
+
+
+            if(
+                areExercisesUnlocked(
+                    chapterId
+                )
+            ){
+
+                // -------------------------------------------------
+                // If this is the chapter currently represented by
+                // the course/simulation, use it.
+                // -------------------------------------------------
+
+                const activeElements =
+                    document.querySelectorAll(
+                        "[data-chapter-id], [data-chapter], [data-current-chapter]"
+                    );
+
+
+                let belongsToActiveChapter =
+                    false;
+
+
+                for(
+                    let j = 0;
+                    j < activeElements.length;
+                    j++
+                ){
+
+                    const candidate =
+                        getChapterIdFromElement(
+                            activeElements[j]
+                        );
+
+
+                    if(
+                        candidate ===
+                        chapterId
+                    ){
+
+                        belongsToActiveChapter =
+                            true;
+
+                        break;
+
+                    }
+
+                }
+
+
+                if(
+                    belongsToActiveChapter
+                ){
+
+                    return chapterId;
+
+                }
+
+            }
+
+        }
+
+
+        // -------------------------------------------------
+        // Final fallback:
+        // If exactly one chapter has exercises unlocked,
+        // use it.
+        // -------------------------------------------------
+
+        const unlocked =
+            microsoftWordCourse.chapters.filter(
+                function(chapter){
+
+                    if(
+                        !chapter ||
+                        !chapter.id ||
+                        isChapter1(
+                            chapter.id
+                        )
+                    ){
+
+                        return false;
+
+                    }
+
+
+                    return areExercisesUnlocked(
+                        chapter.id
+                    );
+
+                }
+            );
+
+
+        if(
+            unlocked.length === 1
+        ){
+
+            return String(
+                unlocked[0].id
+            ).trim();
+
+        }
+
+
+        return null;
+
+    }
+
+
+    // =====================================================
+    // WAIT FOR EXISTING SIMULATION
     // =====================================================
 
     function waitForSimulation(
@@ -26275,7 +26760,7 @@ if(
             ?
             maxAttempts
             :
-            150;
+            200;
 
 
         const timer =
@@ -26285,7 +26770,7 @@ if(
 
 
                 // -------------------------------------------------
-                // Stop if another mechanism already started Block 8
+                // Block 8 already started.
                 // -------------------------------------------------
 
                 if(
@@ -26312,15 +26797,6 @@ if(
 
                         clearInterval(timer);
 
-
-                        console.warn(
-
-                            "RANISE DYNAMIC BLOCK 8: Simulation iframe not found.",
-
-                            chapterId
-
-                        );
-
                     }
 
 
@@ -26329,28 +26805,36 @@ if(
                 }
 
 
-                clearInterval(timer);
-
-
-                state.simulationFrame =
-                    frame;
-
-
                 // -------------------------------------------------
-                // Simulation already loaded
+                // Try immediately.
                 // -------------------------------------------------
 
                 try{
 
+                    const doc =
+                        frame.contentDocument ||
+                        (
+                            frame.contentWindow
+                            ?
+                            frame.contentWindow.document
+                            :
+                            null
+                        );
+
+
                     if(
-                        frame.contentDocument &&
-                        frame.contentDocument.readyState ===
-                        "complete"
+                        doc &&
+                        doc.readyState !==
+                        "loading"
                     ){
+
+                        clearInterval(timer);
+
 
                         startBlock8Dynamic(
                             chapterId
                         );
+
 
                         return;
 
@@ -26358,104 +26842,123 @@ if(
 
                 }catch(error){
 
-                    console.warn(
-
-                        "RANISE DYNAMIC BLOCK 8: Simulation document not ready.",
-
-                        error
-
-                    );
+                    // Wait for iframe load below.
 
                 }
 
 
                 // -------------------------------------------------
-                // Wait for iframe load
+                // Iframe may still be loading.
                 // -------------------------------------------------
 
-                frame.addEventListener(
+                if(
+                    attempts >= limit
+                ){
 
-                    "load",
+                    clearInterval(timer);
 
-                    function(){
+                    return;
 
-                        startBlock8Dynamic(
-                            chapterId
-                        );
+                }
 
-                    },
 
-                    {once:true}
+                // Do not attach endless duplicate load handlers.
+                if(
+                    !frame.__raniseBlock8LoadAttached
+                ){
 
-                );
+                    frame.__raniseBlock8LoadAttached =
+                        true;
 
+
+                    frame.addEventListener(
+
+                        "load",
+
+                        function(){
+
+                            frame.__raniseBlock8LoadAttached =
+                                false;
+
+
+                            if(
+                                !state.started
+                            ){
+
+                                startBlock8Dynamic(
+                                    chapterId
+                                );
+
+                            }
+
+                        },
+
+                        {once:true}
+
+                    );
+
+                }
 
             },100);
 
     }
 
 
-
     // =====================================================
-    // AUTOMATIC EXERCISES LAUNCH
+    // AUTOMATIC UNLOCK WATCHER
     //
-    // IMPORTANT:
-    // This does NOT click/re-render the course.
-    // It simply waits until:
+    // BRIDGE:
+    //     unlockNextPart(chapterId,"practice")
     //
-    //     Bridge → exercises === true
+    // SAVES:
+    //     exercises:true
     //
-    // Then Block 8 starts inside the existing simulation.
+    // BLOCK 8:
+    //     DETECTS exercises:true
+    //     FINDS EXISTING SIMULATION
+    //     STARTS RANISE
+    //
+    // NO RENDER
     // =====================================================
 
     function watchExercisesUnlock(){
 
-        let lastChapterId =
-            null;
-
-
-        let launchInProgress =
+        let launchLock =
             false;
 
 
         setInterval(function(){
 
+            // -------------------------------------------------
+            // Do not launch Chapter 1.
+            // -------------------------------------------------
+
+            if(
+                state.started &&
+                state.chapterId
+            ){
+
+                return;
+
+            }
+
+
+            if(
+                launchLock
+            ){
+
+                return;
+
+            }
+
+
             const chapterId =
-                detectCurrentChapterId();
+                findUnlockedActiveChapter();
 
 
             if(
                 !chapterId ||
                 isChapter1(chapterId)
-            ){
-
-                return;
-
-            }
-
-
-            if(
-                state.completed &&
-                state.chapterId === chapterId
-            ){
-
-                return;
-
-            }
-
-
-            if(
-                state.started &&
-                state.chapterId === chapterId
-            ){
-
-                return;
-
-            }
-
-
-            if(
-                launchInProgress
             ){
 
                 return;
@@ -26475,20 +26978,11 @@ if(
 
 
             // -------------------------------------------------
-            // Exercises just became unlocked.
+            // Exercises have been unlocked.
+            // Block 8 now takes responsibility for launch.
             // -------------------------------------------------
 
-            if(
-                lastChapterId !== chapterId
-            ){
-
-                lastChapterId =
-                    chapterId;
-
-            }
-
-
-            launchInProgress =
+            launchLock =
                 true;
 
 
@@ -26497,33 +26991,30 @@ if(
 
 
             waitForSimulation(
-                chapterId
+                chapterId,
+                200
             );
 
 
             // -------------------------------------------------
-            // Release guard after enough time for iframe
-            // discovery / start.
+            // Release lock so another check can recover if the
+            // iframe was temporarily unavailable.
             // -------------------------------------------------
 
             setTimeout(function(){
 
-                launchInProgress =
+                launchLock =
                     false;
 
             },5000);
-
 
         },250);
 
     }
 
 
-
     // =====================================================
-    // OBSERVE EXERCISES PART LAUNCH
-    //
-    // This remains as a fallback for manual opening.
+    // MANUAL EXERCISES OPEN FALLBACK
     // =====================================================
 
     document.addEventListener(
@@ -26537,6 +27028,15 @@ if(
 
 
             if(!target){
+
+                return;
+
+            }
+
+
+            if(
+                state.started
+            ){
 
                 return;
 
@@ -26580,27 +27080,19 @@ if(
                 );
 
 
-            const isExercisesPart =
+            const isExercisesPart = (
 
                 data === "exercices" ||
 
                 (
-                    data.includes(
-                        "exercices"
-                    ) &&
-                    !data.includes(
-                        "pratique"
-                    ) &&
-                    !data.includes(
-                        "theorie"
-                    ) &&
-                    !data.includes(
-                        "devoir"
-                    ) &&
-                    !data.includes(
-                        "evaluation"
-                    )
-                );
+                    data.includes("exercices") &&
+                    !data.includes("pratique") &&
+                    !data.includes("theorie") &&
+                    !data.includes("devoir") &&
+                    !data.includes("evaluation")
+                )
+
+            );
 
 
             if(!isExercisesPart){
@@ -26610,10 +27102,22 @@ if(
             }
 
 
+            if(
+                !areExercisesUnlocked(
+                    chapterId
+                )
+            ){
+
+                return;
+
+            }
+
+
             setTimeout(function(){
 
                 waitForSimulation(
-                    chapterId
+                    chapterId,
+                    200
                 );
 
             },100);
@@ -26625,13 +27129,11 @@ if(
     );
 
 
-
     // =====================================================
-    // START AUTOMATIC UNLOCK WATCHER
+    // START WATCHER
     // =====================================================
 
     watchExercisesUnlock();
-
 
 
     // =====================================================
@@ -26677,17 +27179,6 @@ if(
 
 
 })();
-
-
-
-
-
-
-
-
-
-
-
 
 
 
