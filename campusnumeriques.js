@@ -344,19 +344,20 @@ const microsoftWordCourse = {
 
 
 
-"Sélectionner une autre partie du texte et lui appliquer une couleur différente.",
 
-
-
-            "Sélectionner le texte dont la couleur doit être modifiée.",
+  "Sélectionner le texte dont la couleur doit être modifiée.",
 
             "Ouvrir la commande Couleur de police (Font Color).",
 
             "Choisir une couleur disponible dans la palette.",
 
-            
 
-            
+
+
+"Sélectionner une autre partie du texte et lui appliquer une couleur différente.",
+
+
+         
             
 
        
@@ -20913,54 +20914,154 @@ window.RaniseMoiseEvaluationEngine = {
 
 
 
-    // =====================================================
-    // RIBBON BUTTON
-    // =====================================================
 
-    function getRibbonButton(target){
+// =====================================================
+// RIBBON BUTTON — UNIVERSAL
+// =====================================================
 
-        return closestFromTarget(
+function getRibbonButton(target){
 
-            target,
+    if(!target){
+        return null;
+    }
 
-            [
-                "#cwRibbonContentArea .cwRibbonBtn",
-                "#cwRibbonContentArea button",
-                ".cwRibbonBtn"
-            ].join(",")
+    const selectors = [
+        "#cwRibbonContentArea .cwRibbonBtn",
+        "#cwRibbonContentArea button",
+        ".cwRibbonBtn",
+        "[data-action]",
+        "[data-command]",
+        "[data-role]"
+    ];
 
-        );
+    for(
+        const selector of selectors
+    ){
+
+        const found =
+            closestFromTarget(
+                target,
+                selector
+            );
+
+        if(found){
+            return found;
+        }
 
     }
 
+    return null;
+}
 
 
-    // =====================================================
-    // RIBBON ACTION
-    // =====================================================
-
-    function getRibbonAction(target){
-
-        const button =
-            getRibbonButton(target);
 
 
-        if(!button){
 
-            return "";
+// =====================================================
+// RIBBON ACTION — COLOR AWARE
+// =====================================================
+
+function getRibbonAction(target){
+
+    if(!target){
+        return "";
+    }
+
+    const button =
+        getRibbonButton(target);
+
+    if(button){
+
+        const directAction =
+            normalize(
+                button.getAttribute(
+                    "data-action"
+                )
+            );
+
+        if(directAction){
+            return directAction;
+        }
+
+        const command =
+            normalize(
+                button.getAttribute(
+                    "data-command"
+                )
+            );
+
+        if(command){
+            return command;
+        }
+
+        const role =
+            normalize(
+                button.getAttribute(
+                    "data-role"
+                )
+            );
+
+        if(
+            role.includes("color") ||
+            role.includes("fontcolor") ||
+            role.includes("font-color")
+        ){
+
+            return "color";
 
         }
 
+    }
 
-        return normalize(
+    let element =
+        target;
 
-            button.getAttribute(
-                "data-action"
-            )
+    for(
+        let i = 0;
+        i < 6 && element;
+        i++
+    ){
 
-        );
+        const data =
+            normalize(
+                [
+                    element.id,
+                    element.className,
+                    element.getAttribute("title"),
+                    element.getAttribute("aria-label"),
+                    element.getAttribute("data-action"),
+                    element.getAttribute("data-command"),
+                    element.getAttribute("data-role"),
+                    element.getAttribute("name")
+                ]
+                .filter(Boolean)
+                .join(" ")
+            );
+
+        if(
+            data.includes("font color") ||
+            data.includes("fontcolor") ||
+            data.includes("font-color") ||
+            data.includes("couleur de police") ||
+            data.includes("couleur police") ||
+            data.includes("color")
+        ){
+
+            return "color";
+
+        }
+
+        element =
+            element.parentElement;
 
     }
+
+    return "";
+}
+
+
+
+
 
 
 
