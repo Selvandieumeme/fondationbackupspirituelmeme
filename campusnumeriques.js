@@ -342,6 +342,12 @@ const microsoftWordCourse = {
 
             "Saisir une phrase dans le document.",
 
+
+
+"Sélectionner une autre partie du texte et lui appliquer une couleur différente.",
+
+
+
             "Sélectionner le texte dont la couleur doit être modifiée.",
 
             "Ouvrir la commande Couleur de police (Font Color).",
@@ -350,9 +356,8 @@ const microsoftWordCourse = {
 
             
 
-            "Sélectionner une autre partie du texte et lui appliquer une couleur différente.",
-
-            "Comparer les différentes couleurs appliquées.",
+            
+            
 
        
 
