@@ -27229,30 +27229,17 @@ if(
 
 
 
-
-
-
 // -------------------------------------------------
-// UNLOCK ONLY — DO NOT RE-RENDER
-// KEEP THE CURRENT WORD SIMULATION OPEN
+// IMMEDIATE RE-RENDER
 // -------------------------------------------------
 
+setTimeout(()=>{
 
-console.log(
+    this.renderChapterParts(
+        chapterId
+    );
 
-    "RANISE UNLOCK BRIDGE: " +
-    "NEXT PART UNLOCKED — " +
-    "CURRENT SIMULATION PRESERVED",
-
-    chapterId,
-    completedPart,
-    progress
-
-);
-
-return true;
-
-},
+},0);
 
 
 
