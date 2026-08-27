@@ -25761,22 +25761,28 @@ if(
             );
 
 
-            // -------------------------------------------------
-            // IMMEDIATE RE-RENDER
-            // -------------------------------------------------
-
-            setTimeout(()=>{
-
-                this.renderChapterParts(
-                    chapterId
-                );
-
-            },0);
 
 
-            return true;
 
-        },
+
+
+// -------------------------------------------------
+// UNLOCK ONLY — DO NOT RE-RENDER
+// KEEP THE CURRENT WORD SIMULATION OPEN
+// -------------------------------------------------
+
+console.log(
+
+    "RANISE UNLOCK BRIDGE: " +
+    "NEXT PART UNLOCKED — " +
+    "CURRENT SIMULATION PRESERVED",
+
+    chapterId,
+    completedPart,
+    progress
+
+);
+
 
 
 
