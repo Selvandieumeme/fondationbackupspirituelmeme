@@ -24093,6 +24093,1162 @@ if(
 
 
 
+// =========================================================
+// BLOCK 8 DYNAMIC EXERCISES
+// MICROSOFT WORD 2007 FORMATION
+// RANISE MOISE â€” DYNAMIC EXERCISE EVALUATION ENGINE
+// =========================================================
+//
+// CHAPTER 1:
+//     COMPLETELY EXCLUDED
+//
+// CHAPTER 2+:
+//     READS chapter.exercises DYNAMICALLY
+//     USES THE EXISTING WORD 2007 SIMULATION
+//     EXERCISES 1â€“2: STUDENT ANSWERS DIRECTLY IN DOCUMENT
+//     EXERCISES 3â€“10: OBSERVES REAL SIMULATION ACTIONS
+//     VALIDATES EXERCISES SEQUENTIALLY
+//     RANISE CONFIRMS EACH VALID EXERCISE
+//     LAST EXERCISE VALIDATION UNLOCKS DEVOIR
+//
+// IMPORTANT:
+//     DOES NOT MODIFY BLOCK 7.
+//     DOES NOT MODIFY THE EXISTING SIMULATION.
+//     DOES NOT MODIFY THEORY OR PRACTICE.
+//     USES THE EXISTING DYNAMIC UNLOCK BRIDGE.
+// =========================================================
+
+(function(){
+
+    "use strict";
+
+    const state = {
+        chapterId:null,
+        simulationFrame:null,
+        simulationDocument:null,
+        exercises:null,
+        exerciseIndex:0,
+        started:false,
+        waiting:false,
+        completed:false,
+        speaking:false,
+        processing:false,
+        listenersAttached:false,
+        baselineText:"",
+        currentAnswerText:"",
+        lastSelectionText:"",
+        currentActions:{},
+        currentSelections:[],
+        clipboardEvents:{copy:0,cut:0,paste:0},
+        lastActionTime:0
+    };
+
+
+    // =====================================================
+    // CHAPTER 1 PROTECTION
+    // =====================================================
+
+    function isChapter1(chapterId){
+        return String(chapterId || "").toLowerCase() === "chapitre1";
+    }
+
+
+    // =====================================================
+    // NORMALIZE
+    // =====================================================
+
+    function normalize(value){
+        return String(value || "")
+            .normalize("NFD")
+            .replace(/[\u0300-\u036f]/g,"")
+            .toLowerCase()
+            .replace(/\s+/g," ")
+            .trim();
+    }
+
+
+    // =====================================================
+    // ACTIVE CHAPTER
+    // =====================================================
+
+    function getChapter(chapterId){
+
+        if(!chapterId || isChapter1(chapterId)){
+            return null;
+        }
+
+        if(typeof microsoftWordCourse === "undefined"){
+            return null;
+        }
+
+        if(!Array.isArray(microsoftWordCourse.chapters)){
+            return null;
+        }
+
+        return microsoftWordCourse.chapters.find(function(chapter){
+            return chapter && chapter.id === chapterId;
+        }) || null;
+    }
+
+
+    // =====================================================
+    // GET EXERCISES
+    // =====================================================
+
+    function getChapterExercises(chapterId){
+
+        const chapter = getChapter(chapterId);
+
+        if(!chapter || !Array.isArray(chapter.exercises)){
+            return null;
+        }
+
+        if(chapter.exercises.length === 0){
+            return null;
+        }
+
+        return chapter.exercises.map(function(item){
+            return String(item || "").trim();
+        }).filter(Boolean);
+    }
+
+
+    // =====================================================
+    // CHAPTER NAME
+    // =====================================================
+
+    function chapterName(chapterId){
+        const chapter = getChapter(chapterId);
+        return chapter && chapter.title ? chapter.title : (chapterId || "");
+    }
+
+
+    // =====================================================
+    // RANISE VOICE
+    // =====================================================
+
+    async function speak(text){
+
+        if(!text){
+            return;
+        }
+
+        if(typeof speakProfessorIAWithMaryTTS !== "function"){
+            console.warn("RANISE DYNAMIC BLOCK 8: Voice unavailable.");
+            return;
+        }
+
+        state.speaking = true;
+
+        if(typeof raniseStartTalking === "function"){
+            raniseStartTalking();
+        }
+
+        try{
+            await speakProfessorIAWithMaryTTS(text);
+        }finally{
+            state.speaking = false;
+
+            if(typeof raniseStopTalking === "function"){
+                raniseStopTalking();
+            }
+        }
+    }
+
+
+    // =====================================================
+    // FIND WORD SIMULATION
+    // =====================================================
+
+    function findSimulation(){
+
+        const campusContent = document.getElementById("campusContent");
+
+        if(!campusContent){
+            return null;
+        }
+
+        return campusContent.querySelector(
+            'iframe[src*="campusword2007simulation"]'
+        );
+    }
+
+
+    // =====================================================
+    // CONNECT SIMULATION
+    // =====================================================
+
+    function connectToSimulation(){
+
+        const frame = findSimulation();
+
+        if(!frame){
+            return false;
+        }
+
+        try{
+            const doc = frame.contentDocument || frame.contentWindow.document;
+
+            if(!doc){
+                return false;
+            }
+
+            state.simulationFrame = frame;
+            state.simulationDocument = doc;
+            return true;
+
+        }catch(error){
+            console.error(
+                "RANISE DYNAMIC BLOCK 8: Simulation access error.",
+                error
+            );
+            return false;
+        }
+    }
+
+
+    // =====================================================
+    // DOCUMENT TEXT
+    // =====================================================
+
+    function getDocumentText(){
+
+        const doc = state.simulationDocument;
+
+        if(!doc){
+            return "";
+        }
+
+        const pages = doc.querySelectorAll(".cwPageContent");
+
+        if(pages.length){
+            return Array.from(pages).map(function(page){
+                return page.innerText || page.textContent || "";
+            }).join(" ");
+        }
+
+        const editable = doc.querySelectorAll(
+            '[contenteditable="true"], textarea, input[type="text"]'
+        );
+
+        if(editable.length){
+            return Array.from(editable).map(function(node){
+                return typeof node.value === "string"
+                    ? node.value
+                    : (node.innerText || node.textContent || "");
+            }).join(" ");
+        }
+
+        return doc.body ? (doc.body.innerText || doc.body.textContent || "") : "";
+    }
+
+
+    // =====================================================
+    // SELECTED TEXT
+    // =====================================================
+
+    function getSelectionText(){
+
+        const doc = state.simulationDocument;
+
+        if(!doc){
+            return "";
+        }
+
+        try{
+            const selection = doc.getSelection
+                ? doc.getSelection()
+                : doc.defaultView && doc.defaultView.getSelection
+                    ? doc.defaultView.getSelection()
+                    : null;
+
+            return selection ? selection.toString().trim() : "";
+
+        }catch(error){
+            return "";
+        }
+    }
+
+
+    // =====================================================
+    // ELEMENT DATA
+    // =====================================================
+
+    function elementData(element){
+
+        if(!element){
+            return "";
+        }
+
+        return normalize([
+            element.id,
+            typeof element.className === "string" ? element.className : "",
+            element.innerText,
+            element.textContent,
+            element.getAttribute("title"),
+            element.getAttribute("aria-label"),
+            element.getAttribute("data-action"),
+            element.getAttribute("data-command"),
+            element.getAttribute("data-role"),
+            element.getAttribute("name"),
+            element.getAttribute("value")
+        ].filter(Boolean).join(" "));
+    }
+
+
+    function closest(target, selector){
+
+        if(!target || typeof target.closest !== "function"){
+            return null;
+        }
+
+        try{
+            return target.closest(selector);
+        }catch(error){
+            return null;
+        }
+    }
+
+
+    // =====================================================
+    // RIBBON ACTION
+    // =====================================================
+
+    function ribbonAction(target){
+
+        let node = target;
+
+        for(let i=0; i<7 && node; i++){
+
+            const action = normalize(
+                node.getAttribute && node.getAttribute("data-action")
+            );
+
+            const command = normalize(
+                node.getAttribute && node.getAttribute("data-command")
+            );
+
+            const data = elementData(node);
+
+            if(action){
+                return action;
+            }
+
+            if(command){
+                return command;
+            }
+
+            if(data.includes("copy")) return "copy";
+            if(data.includes("copier")) return "copy";
+            if(data.includes("cut")) return "cut";
+            if(data.includes("couper")) return "cut";
+            if(data.includes("paste")) return "paste";
+            if(data.includes("coller")) return "paste";
+            if(data.includes("font color")) return "color";
+            if(data.includes("couleur de police")) return "color";
+            if(data.includes("highlight")) return "highlight";
+            if(data.includes("surbrillance")) return "highlight";
+            if(data.includes("font size")) return "font-size";
+            if(data.includes("taille de police")) return "font-size";
+            if(data.includes("bold")) return "bold";
+            if(data.includes("gras")) return "bold";
+            if(data.includes("italic")) return "italic";
+            if(data.includes("italique")) return "italic";
+            if(data.includes("underline")) return "underline";
+            if(data.includes("soulign")) return "underline";
+            if(data.includes("font family")) return "font-family";
+            if(data.includes("type de police")) return "font-family";
+            if(data.includes("police")) return "font-family";
+
+            node = node.parentElement;
+        }
+
+        return "";
+    }
+
+
+    // =====================================================
+    // EXERCISE TYPE
+    // =====================================================
+
+    function exerciseType(text){
+
+        const value = normalize(text);
+
+        if(value.includes("identifier le role") || value.includes("identifier le role du groupe presse-papiers")){
+            return "answer-clipboard-role";
+        }
+
+        if(value.includes("expliquer la difference") &&
+           (value.includes("copier") || value.includes("couper"))){
+            return "answer-copy-cut";
+        }
+
+        if(value.includes("copier") && value.includes("coller")){
+            return "copy-paste";
+        }
+
+        if(value.includes("couper") && value.includes("coller")){
+            return "cut-paste";
+        }
+
+        if(value.includes("type de police") || value.includes("police (font)")){
+            return "font-family";
+        }
+
+        if(value.includes("taille de police") || value.includes("font size")){
+            return "font-size";
+        }
+
+        if(value.includes("gras") && value.includes("italique") && value.includes("souligne")){
+            return "three-format";
+        }
+
+        if(value.includes("couleur de police") || value.includes("font color")){
+            return "font-color";
+        }
+
+        if(value.includes("surbrillance") || value.includes("highlight")){
+            return "highlight";
+        }
+
+        if(value.includes("mise en forme complete")){
+            return "complete-format";
+        }
+
+        return "generic";
+    }
+
+
+    // =====================================================
+    // ANSWER VALIDATION
+    // =====================================================
+
+    function answerScore(text, type){
+
+        const value = normalize(text);
+
+        if(value.length < 12){
+            return 0;
+        }
+
+        if(type === "answer-clipboard-role"){
+
+            const terms = [
+                "copier",
+                "couper",
+                "coller",
+                "transfÃ©rer",
+                "transferer",
+                "deplacer",
+                "dÃ©placer",
+                "presse-papiers",
+                "presse papiers"
+            ];
+
+            let score = 0;
+            terms.forEach(function(term){
+                if(value.includes(normalize(term))) score++;
+            });
+
+            return score >= 2 ? score : 0;
+        }
+
+        if(type === "answer-copy-cut"){
+
+            const copyTerms = ["copier", "copie", "dupliquer", "original"];
+            const cutTerms = ["couper", "coupe", "supprimer", "deplacer", "dÃ©placer", "retirer"];
+
+            let copyScore = 0;
+            let cutScore = 0;
+
+            copyTerms.forEach(function(term){
+                if(value.includes(normalize(term))) copyScore++;
+            });
+
+            cutTerms.forEach(function(term){
+                if(value.includes(normalize(term))) cutScore++;
+            });
+
+            return copyScore > 0 && cutScore > 0 ? 2 : 0;
+        }
+
+        return value.length >= 20 ? 1 : 0;
+    }
+
+
+    // =====================================================
+    // EXERCISE 1â€“2 INPUT OBSERVATION
+    // =====================================================
+
+    function validateAnswerExercise(){
+
+        const type = exerciseType(state.exercises[state.exerciseIndex]);
+        const text = getDocumentText();
+        const baseline = normalize(state.baselineText);
+        const current = normalize(text);
+
+        if(!current || current === baseline){
+            return false;
+        }
+
+        state.currentAnswerText = text;
+
+        return answerScore(text, type) > 0;
+    }
+
+
+    // =====================================================
+    // ACTION RECORDING
+    // =====================================================
+
+    function recordAction(action){
+
+        if(!action){
+            return;
+        }
+
+        state.currentActions[action] =
+            (state.currentActions[action] || 0) + 1;
+    }
+
+
+    function recordSelection(){
+
+        const text = getSelectionText();
+
+        if(text){
+            state.lastSelectionText = text;
+
+            if(!state.currentSelections.includes(normalize(text))){
+                state.currentSelections.push(normalize(text));
+            }
+        }
+    }
+
+
+    // =====================================================
+    // CLIPBOARD EVENTS
+    // =====================================================
+
+    function handleClipboardEvent(event){
+
+        if(!state.started || state.completed || !state.waiting){
+            return;
+        }
+
+        const type = normalize(event.type);
+
+        if(type === "copy" || type === "cut" || type === "paste"){
+            state.clipboardEvents[type]++;
+            recordAction(type);
+        }
+    }
+
+
+    // =====================================================
+    // REAL EXERCISE VALIDATION
+    // =====================================================
+
+    function validateExerciseAction(){
+
+        if(!state.started || state.completed || !state.waiting){
+            return false;
+        }
+
+        const exercise = state.exercises[state.exerciseIndex];
+        const type = exerciseType(exercise);
+
+        if(type === "answer-clipboard-role" || type === "answer-copy-cut"){
+            return validateAnswerExercise();
+        }
+
+        if(type === "copy-paste"){
+            return (
+                state.currentActions.copy > 0 &&
+                state.currentActions.paste > 0
+            );
+        }
+
+        if(type === "cut-paste"){
+            return (
+                state.currentActions.cut > 0 &&
+                state.currentActions.paste > 0
+            );
+        }
+
+        if(type === "font-family"){
+            return state.currentActions["font-family"] > 0;
+        }
+
+        if(type === "font-size"){
+            return state.currentActions["font-size"] > 0;
+        }
+
+        if(type === "three-format"){
+            return (
+                state.currentActions.bold > 0 &&
+                state.currentActions.italic > 0 &&
+                state.currentActions.underline > 0 &&
+                state.currentSelections.length >= 2
+            );
+        }
+
+        if(type === "font-color"){
+            return state.currentActions.color > 0;
+        }
+
+        if(type === "highlight"){
+            return state.currentActions.highlight > 0;
+        }
+
+        if(type === "complete-format"){
+            return (
+                state.currentActions.copy > 0 ||
+                state.currentActions.cut > 0
+            ) &&
+            state.currentActions.paste > 0 &&
+            state.currentActions["font-family"] > 0 &&
+            state.currentActions["font-size"] > 0 &&
+            state.currentActions.bold > 0 &&
+            state.currentActions.italic > 0 &&
+            state.currentActions.underline > 0 &&
+            state.currentActions.color > 0 &&
+            state.currentActions.highlight > 0;
+        }
+
+        return false;
+    }
+
+
+    // =====================================================
+    // CLICK OBSERVER
+    // =====================================================
+
+    function handleSimulationClick(event){
+
+        if(!state.started || state.completed || state.speaking || !state.waiting){
+            return;
+        }
+
+        const now = Date.now();
+
+        if(now - state.lastActionTime < 80){
+            return;
+        }
+
+        state.lastActionTime = now;
+
+        // Capture selection BEFORE Ribbon focus can remove it.
+        recordSelection();
+
+        const action = ribbonAction(event.target);
+
+        if(action){
+            recordAction(action);
+        }
+
+        // Some simulation controls expose a role rather than an action.
+        const data = elementData(event.target);
+
+        if(
+            data.includes("font family") ||
+            data.includes("type de police") ||
+            data.includes("police")
+        ){
+            recordAction("font-family");
+        }
+
+        if(
+            data.includes("font size") ||
+            data.includes("taille de police")
+        ){
+            recordAction("font-size");
+        }
+
+        if(
+            data.includes("font color") ||
+            data.includes("couleur de police") ||
+            data.includes("color")
+        ){
+            recordAction("color");
+        }
+
+        if(
+            data.includes("highlight") ||
+            data.includes("surbrillance")
+        ){
+            recordAction("highlight");
+        }
+
+        // Give the simulation time to finish the clicked action.
+        setTimeout(function(){
+
+            if(validateExerciseAction()){
+                nextExercise();
+            }
+
+        }, 100);
+    }
+
+
+    // =====================================================
+    // INPUT OBSERVER
+    // =====================================================
+
+    function handleSimulationInput(){
+
+        if(!state.started || state.completed || state.speaking || !state.waiting){
+            return;
+        }
+
+        const type = exerciseType(state.exercises[state.exerciseIndex]);
+
+        if(type !== "answer-clipboard-role" && type !== "answer-copy-cut"){
+            return;
+        }
+
+        setTimeout(function(){
+
+            if(validateExerciseAction()){
+                nextExercise();
+            }
+
+        }, 120);
+    }
+
+
+    // =====================================================
+    // LISTENERS
+    // =====================================================
+
+    function attachSimulationListeners(){
+
+        if(!state.simulationDocument || state.listenersAttached){
+            return;
+        }
+
+        const doc = state.simulationDocument;
+
+        doc.addEventListener("click", handleSimulationClick, true);
+        doc.addEventListener("input", handleSimulationInput, true);
+        doc.addEventListener("copy", handleClipboardEvent, true);
+        doc.addEventListener("cut", handleClipboardEvent, true);
+        doc.addEventListener("paste", handleClipboardEvent, true);
+
+        // Track selection while the student is selecting text.
+        doc.addEventListener("selectionchange", recordSelection, true);
+
+        state.listenersAttached = true;
+    }
+
+
+    // =====================================================
+    // RESET EXERCISE OBSERVATION
+    // =====================================================
+
+    function resetExerciseObservation(){
+
+        state.baselineText = getDocumentText();
+        state.currentAnswerText = "";
+        state.lastSelectionText = "";
+        state.currentActions = {};
+        state.currentSelections = [];
+        state.clipboardEvents = {copy:0,cut:0,paste:0};
+        state.lastActionTime = 0;
+    }
+
+
+    // =====================================================
+    // SPEAK CURRENT EXERCISE
+    // =====================================================
+
+    async function speakCurrentExercise(){
+
+        const exercise = state.exercises[state.exerciseIndex];
+
+        if(!exercise){
+            return;
+        }
+
+        state.waiting = false;
+        resetExerciseObservation();
+
+        await speak(
+            "Exercice " +
+            (state.exerciseIndex + 1) +
+            ". " +
+            exercise +
+            " RÃ©alisez maintenant cet exercice directement dans la simulation Microsoft Word 2007. Je vÃ©rifierai votre travail avant de passer au suivant."
+        );
+
+        if(!state.completed){
+            resetExerciseObservation();
+            state.waiting = true;
+        }
+    }
+
+
+    // =====================================================
+    // CONFIRM EXERCISE
+    // =====================================================
+
+    async function confirmExercise(){
+
+        state.waiting = false;
+
+        await speak(
+            "TrÃ¨s bien. C'est correct."
+        );
+    }
+
+
+    // =====================================================
+    // NEXT EXERCISE
+    // =====================================================
+
+    async function nextExercise(){
+
+        if(
+            state.completed ||
+            state.processing ||
+            !state.waiting
+        ){
+            return;
+        }
+
+        state.processing = true;
+
+        try{
+
+            await confirmExercise();
+
+            if(
+                state.exerciseIndex <
+                state.exercises.length - 1
+            ){
+
+                state.exerciseIndex++;
+
+                await speakCurrentExercise();
+                return;
+            }
+
+            // =================================================
+            // ALL EXERCISES COMPLETED
+            // =================================================
+
+            state.completed = true;
+            state.waiting = false;
+
+            await speak(
+                "Excellent. Vous avez terminÃ© et validÃ© tous les exercices du " +
+                chapterName(state.chapterId) +
+                ". La partie Exercices est maintenant validÃ©e. " +
+                "La partie Devoir est maintenant dÃ©verrouillÃ©e. Bravo pour votre travail."
+            );
+
+            // =================================================
+            // EXISTING DYNAMIC UNLOCK BRIDGE
+            // EXERCISES â†’ HOMEWORK
+            // =================================================
+
+            if(
+                typeof RaniseDynamicUnlockRenderBridge !== "undefined" &&
+                RaniseDynamicUnlockRenderBridge &&
+                typeof RaniseDynamicUnlockRenderBridge.unlockNextPart === "function"
+            ){
+
+                RaniseDynamicUnlockRenderBridge.unlockNextPart(
+                    state.chapterId,
+                    "exercises"
+                );
+
+            }else{
+
+                console.error(
+                    "RANISE DYNAMIC BLOCK 8: Existing Dynamic Unlock Bridge unavailable."
+                );
+            }
+
+            console.log(
+                "RANISE DYNAMIC BLOCK 8: EXERCISES COMPLETED â€” HOMEWORK UNLOCK REQUESTED",
+                state.chapterId
+            );
+
+        }finally{
+            state.processing = false;
+        }
+    }
+
+
+    // =====================================================
+    // START BLOCK 8
+    // =====================================================
+
+    async function startBlock8Dynamic(chapterId){
+
+        if(!chapterId || isChapter1(chapterId)){
+            return false;
+        }
+
+        if(
+            state.started &&
+            state.chapterId === chapterId
+        ){
+            return true;
+        }
+
+        const exercises = getChapterExercises(chapterId);
+
+        if(!exercises){
+            console.error(
+                "RANISE DYNAMIC BLOCK 8: Exercises unavailable.",
+                chapterId
+            );
+            return false;
+        }
+
+        if(!connectToSimulation()){
+            console.error(
+                "RANISE DYNAMIC BLOCK 8: Word simulation unavailable."
+            );
+            return false;
+        }
+
+        state.chapterId = chapterId;
+        state.simulationFrame = state.simulationFrame;
+        state.exercises = exercises;
+        state.exerciseIndex = 0;
+        state.started = true;
+        state.waiting = false;
+        state.completed = false;
+        state.speaking = false;
+        state.processing = false;
+        state.listenersAttached = false;
+
+        attachSimulationListeners();
+
+        await speak(
+            "Bienvenue dans la partie Exercices du " +
+            chapterName(chapterId) +
+            ". Ici, je vais vÃ©rifier votre capacitÃ© Ã  appliquer les notions Ã©tudiÃ©es. Pour les questions, Ã©crivez directement vos rÃ©ponses dans le document de la simulation. Pour les exercices pratiques, rÃ©alisez les actions demandÃ©es directement dans Microsoft Word 2007."
+        );
+
+        await speakCurrentExercise();
+
+        return true;
+    }
+
+
+    // =====================================================
+    // DETECT CHAPTER
+    // =====================================================
+
+    function detectCurrentChapterId(){
+
+        let chapterId = null;
+
+        if(typeof currentChapterId !== "undefined" && currentChapterId){
+            chapterId = currentChapterId;
+        }
+
+        if(!chapterId && window.currentChapterId){
+            chapterId = window.currentChapterId;
+        }
+
+        if(!chapterId && window.RaniseActiveChapterId){
+            chapterId = window.RaniseActiveChapterId;
+        }
+
+        if(!chapterId){
+            const element = document.querySelector("[data-chapter-id]");
+            if(element){
+                chapterId = element.getAttribute("data-chapter-id");
+            }
+        }
+
+        return chapterId ? String(chapterId).trim() : null;
+    }
+
+
+    // =====================================================
+    // WAIT FOR SIMULATION
+    // =====================================================
+
+    function waitForSimulation(chapterId){
+
+        if(!chapterId || isChapter1(chapterId)){
+            return;
+        }
+
+        let attempts = 0;
+
+        const timer = setInterval(function(){
+
+            attempts++;
+
+            const frame = findSimulation();
+
+            if(!frame){
+
+                if(attempts >= 100){
+                    clearInterval(timer);
+                    console.warn(
+                        "RANISE DYNAMIC BLOCK 8: Simulation iframe not found.",
+                        chapterId
+                    );
+                }
+
+                return;
+            }
+
+            clearInterval(timer);
+
+            state.simulationFrame = frame;
+
+            if(
+                frame.contentDocument &&
+                frame.contentDocument.readyState === "complete"
+            ){
+                startBlock8Dynamic(chapterId);
+                return;
+            }
+
+            frame.addEventListener(
+                "load",
+                function(){
+                    startBlock8Dynamic(chapterId);
+                },
+                {once:true}
+            );
+
+        },100);
+    }
+
+
+    // =====================================================
+    // OBSERVE EXERCISES PART LAUNCH
+    // DOES NOT REPLACE EXISTING RENDERER
+    // =====================================================
+
+    document.addEventListener("click", function(event){
+
+        const target = event.target;
+
+        if(!target){
+            return;
+        }
+
+        const chapterId = detectCurrentChapterId();
+
+        if(!chapterId || isChapter1(chapterId)){
+            return;
+        }
+
+        const clickable = closest(
+            target,
+            "button, a, [role='button'], [data-part], [data-section], [data-tab], .cwCoursePart, .coursePart"
+        );
+
+        if(!clickable){
+            return;
+        }
+
+        const data = elementData(clickable);
+
+        const isExercisesPart =
+            data === "exercices" ||
+            data.includes("exercices") &&
+            !data.includes("pratique") &&
+            !data.includes("theorie") &&
+            !data.includes("devoir") &&
+            !data.includes("evaluation");
+
+        if(!isExercisesPart){
+            return;
+        }
+
+        setTimeout(function(){
+            waitForSimulation(chapterId);
+        },100);
+
+    }, true);
+
+
+    // =====================================================
+    // PUBLIC API
+    // =====================================================
+
+    window.RaniseMoiseDynamicExerciseEvaluationEngine = {
+
+        start:startBlock8Dynamic,
+
+        getState:function(){
+            return {
+                chapterId:state.chapterId,
+                started:state.started,
+                completed:state.completed,
+                exerciseIndex:state.exerciseIndex,
+                waiting:state.waiting,
+                speaking:state.speaking
+            };
+        }
+    };
+
+})();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
