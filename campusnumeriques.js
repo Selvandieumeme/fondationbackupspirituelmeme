@@ -423,18 +423,16 @@ const microsoftWordCourse = {
 
 
 
-
-
-
-
-
-
-
-    homework: [
-"Réaliser un document Microsoft Word 2007 permettant de démontrer la maîtrise des notions étudiées dans le groupe Presse-papiers (Clipboard) et le groupe Police (Font). L’élève doit saisir un court texte, puis sélectionner différentes parties de ce texte afin d’effectuer les opérations Copier (Copy), Couper (Cut) et Coller (Paste). Il doit ensuite modifier le type de police (Font), la taille de police (Font Size), appliquer le Gras (Bold), l’Italique (Italic) et le Souligné (Underline), modifier la Couleur de police (Font Color) et appliquer une Surbrillance (Text Highlight Color). Le document final doit présenter clairement les différentes mises en forme réalisées. L’élève doit être capable d’expliquer les commandes utilisées et de montrer que chaque opération a été réalisée correctement."
-
-
+homework: [
+    "Réaliser un document Microsoft Word 2007 en utilisant les notions étudiées dans les groupes Presse-papiers (Clipboard) et Police (Font). L’élève doit saisir un court texte, puis effectuer les opérations Copier (Copy), Couper (Cut) et Coller (Paste) sur différentes parties du texte. Il doit ensuite modifier le type de police (Font), la taille de police (Font Size), appliquer le Gras (Bold), l’Italique (Italic) et le Souligné (Underline), puis modifier la Couleur de police (Font Color) et appliquer une Surbrillance (Text Highlight Color). Le document final doit présenter clairement les différentes opérations et mises en forme réalisées."
 ],
+
+
+
+
+
+
+    
 
 
 
