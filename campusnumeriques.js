@@ -13588,2288 +13588,2277 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
 
 // =========================================================
-// BLOCK 9
+// BLOCK 9 DYNAMIC HOMEWORK
 // MICROSOFT WORD 2007 FORMATION
-// RANISE MOISE HOMEWORK MASTERY ENGINE
+// RANISE MOISE — DYNAMIC HOMEWORK ENGINE
 // =========================================================
-// ISOLATED FINAL VERSION
+//
+// CHAPTER 1:
+//     COMPLETELY EXCLUDED
+//
+// CHAPTER 2+:
+//     READS chapter.homework DYNAMICALLY
+//     USES THE EXISTING WORD 2007 SIMULATION
+//     STUDENT WRITES THE HOMEWORK DIRECTLY IN THE DOCUMENT
+//     RANISE READS THE STUDENT'S DOCUMENT
+//     RANISE VALIDATES THE HOMEWORK
+//     VALIDATION UNLOCKS EVALUATION
+//
+// CRITICAL LAUNCH ORDER:
+//
+//     BLOCK 7
+//        ↓
+//     PRACTICE VALIDATED
+//        ↓
+//     BRIDGE unlocks "exercises"
+//        ↓
+//     BLOCK 8
+//        ↓
+//     ALL EXERCISES VALIDATED
+//        ↓
+//     BRIDGE unlocks "homework"
+//        ↓
+//     BLOCK 9
+//        ↓
+//     HOMEWORK VALIDATED
+//        ↓
+//     BRIDGE unlocks "evaluation"
 //
 // IMPORTANT:
-// 1. BLOCK 9 WAITS FOR BLOCK 8.
-// 2. BLOCK 9 STARTS ONLY WHEN BLOCK 8.completed === true.
-// 3. BLOCK 9 NEVER UNLOCKS THE NEXT CHAPTER.
-// 4. BLOCK 9 DOES NOT MODIFY BLOCK 8.
-// 5. BLOCK 9 DOES NOT MODIFY BLOCK 7.
-// 6. BLOCK 9 DOES NOT MODIFY BLOCK 6.
-// 7. BLOCK 9 DOES NOT MODIFY THE SIMULATION ENGINE.
-// 8. BLOCK 9 USES THE EXISTING MARYTTS + AVATAR SYSTEM.
-// 9. FIVE REAL TASKS ARE COUNTED.
-// 10. ONE GREEN CHECKMARK = ONE REAL EXECUTED TASK.
-// 11. AT 5/5 THE FINAL VALIDATION AUDIO STARTS IMMEDIATELY.
-// 12. THE HOMEWORK PANEL GETS A CLOSE BUTTON AFTER VALIDATION.
-// =========================================================
-
-(function () {
-
-"use strict";
-
-
-// =========================================================
-// STATE
-// =========================================================
-
-const state = {
-
-    started: false,
-
-    completed: false,
-
-    waitingForBlock8: true,
-
-    block8CompletionDetected: false,
-
-    simulationFrame: null,
-
-    simulationDocument: null,
-
-    chapter: null,
-
-    homework: "",
-
-    listenersAttached: false,
-
-    transitionTimer: null,
-
-    monitorTimer: null,
-
-    validationStarted: false,
-
-    closeEnabled: false,
-
-    lastActionTime: 0,
-
-    actionHistory: [],
-
-    lastDocumentSignature: "",
-
-    lastTaskSignature: "",
-
-
-    // =====================================================
-    // FIVE REAL HOMEWORK TASKS
-    // =====================================================
-
-    tasks: {
-
-        titleBar: false,
-
-        officeButton: false,
-
-        ribbon: false,
-
-        tabs: false,
-
-        documentArea: false
-
-    },
-
-
-    // =====================================================
-    // UI
-    // =====================================================
-
-    ui: {
-
-        root: null,
-
-        title: null,
-
-        close: null,
-
-        progress: null,
-
-        instruction: null,
-
-        status: null,
-
-        tasks: null
-
-    }
-
-};
-
-
-// =========================================================
-// NORMALIZE
-// =========================================================
-
-function normalize(value) {
-
-    return String(value || "")
-
-        .normalize("NFD")
-
-        .replace(
-            /[\u0300-\u036f]/g,
-            ""
-        )
-
-        .toLowerCase()
-
-        .replace(
-            /[“”"«»]/g,
-            " "
-        )
-
-        .replace(
-            /[.,;:!?()[\]{}]/g,
-            " "
-        )
-
-        .replace(
-            /\s+/g,
-            " "
-        )
-
-        .trim();
-
-}
-
-
-// =========================================================
-// CHAPTER 1
-// =========================================================
-
-function getChapter1() {
-
-    if (
-        typeof microsoftWordCourse ===
-        "undefined"
-    ) {
-
-        return null;
-
-    }
-
-
-    if (
-        !Array.isArray(
-            microsoftWordCourse.chapters
-        )
-    ) {
-
-        return null;
-
-    }
-
-
-    return microsoftWordCourse.chapters.find(
-
-        chapter =>
-
-            chapter &&
-
-            chapter.id === "chapitre1"
-
-    ) || null;
-
-}
-
-
-// =========================================================
-// FIND EXISTING SIMULATION
-// =========================================================
-
-function findSimulation() {
-
-    const campusContent =
-
-        document.getElementById(
-            "campusContent"
-        );
-
-
-    if (!campusContent) {
-
-        return null;
-
-    }
-
-
-    return campusContent.querySelector(
-
-        'iframe[src*="campusword2007simulation"]'
-
-    ) || null;
-
-}
-
-
-// =========================================================
-// CONNECT TO SIMULATION
-// =========================================================
-
-function connectToSimulation() {
-
-    const frame =
-        findSimulation();
-
-
-    if (!frame) {
-
-        return false;
-
-    }
-
-
-    try {
-
-        const doc =
-
-            frame.contentDocument ||
-
-            frame.contentWindow.document;
-
-
-        if (!doc) {
-
-            return false;
-
-        }
-
-
-        state.simulationFrame =
-            frame;
-
-        state.simulationDocument =
-            doc;
-
-
-        return true;
-
-    } catch (error) {
-
-        return false;
-
-    }
-
-}
-
-
-// =========================================================
-// READ DOCUMENT
-// =========================================================
-
-function readDocumentText() {
-
-    if (
-        !state.simulationDocument
-    ) {
-
-        return "";
-
-    }
-
-
-    const pages =
-
-        Array.from(
-
-            state.simulationDocument.querySelectorAll(
-                ".cwPageContent"
-            )
-
-        );
-
-
-    let text = "";
-
-
-    pages.forEach(
-
-        page => {
-
-            text +=
-
-                " " +
-
-                (
-
-                    page.innerText ||
-
-                    page.textContent ||
-
-                    ""
-
-                );
-
-        }
-
-    );
-
-
-    return text
-
-        .replace(
-            /\u00a0/g,
-            " "
-        )
-
-        .replace(
-            /\s+/g,
-            " "
-        )
-
-        .trim();
-
-}
-
-
-// =========================================================
-// DOCUMENT SIGNATURE
-// =========================================================
-
-function getDocumentSignature() {
-
-    const text =
-        readDocumentText();
-
-
-    const pages =
-
-        state.simulationDocument
-
-            ? state.simulationDocument
-                .querySelectorAll(
-                    ".cwPageContent"
-                ).length
-
-            : 0;
-
-
-    return [
-
-        pages,
-
-        text.length,
-
-        normalize(text)
-
-    ].join("|");
-
-}
-
-
-// =========================================================
-// SPEAK
+//     BLOCK 9 MUST NEVER launch during PRACTICE.
+//     BLOCK 9 MUST NEVER launch during EXERCISES.
+//     BLOCK 9 launches ONLY after:
+//         progress.homework === true
 //
-// IMPORTANT:
-// NEVER BLOCK FINAL VALIDATION WITH AWAIT.
+//     DOES NOT MODIFY BLOCK 7
+//     DOES NOT MODIFY BLOCK 8
+//     DOES NOT MODIFY THE DYNAMIC UNLOCK BRIDGE
+//     DOES NOT RE-RENDER campusContent
+//     DOES NOT CLOSE THE SIMULATION
 // =========================================================
 
-function speak(text) {
+(function(){
 
-    if (!text) {
-
-        return;
-
-    }
+    "use strict";
 
 
-    try {
+    // =====================================================
+    // STATE
+    // =====================================================
 
-        if (
-            typeof raniseStartTalking ===
-            "function"
-        ) {
+    const state = {
 
-            raniseStartTalking();
+        chapterId:null,
 
-        }
+        simulationFrame:null,
 
+        simulationDocument:null,
 
-        if (
-            typeof speakProfessorIAWithMaryTTS ===
-            "function"
-        ) {
+        homework:null,
 
-            Promise.resolve(
+        homeworkIndex:0,
 
-                speakProfessorIAWithMaryTTS(
-                    text
-                )
+        started:false,
 
-            )
+        waiting:false,
 
-            .catch(
-                function () {}
-            )
+        completed:false,
 
-            .finally(
+        speaking:false,
 
-                function () {
+        processing:false,
 
-                    if (
-                        typeof raniseStopTalking ===
-                        "function"
-                    ) {
+        listenersAttached:false,
 
-                        raniseStopTalking();
+        autoLaunchStarted:false,
 
-                    }
+        baselineText:"",
 
-                }
+        currentDocumentText:"",
 
-            );
-
-        } else {
-
-            if (
-                typeof raniseStopTalking ===
-                "function"
-            ) {
-
-                raniseStopTalking();
-
-            }
-
-        }
-
-    } catch (error) {
-
-        if (
-            typeof raniseStopTalking ===
-            "function"
-        ) {
-
-            raniseStopTalking();
-
-        }
-
-    }
-
-}
-
-
-// =========================================================
-// COUNT TASKS
-// =========================================================
-
-function completedTaskCount() {
-
-    return Object.values(
-        state.tasks
-    ).filter(Boolean).length;
-
-}
-
-
-// =========================================================
-// TASK LABEL
-// =========================================================
-
-function taskLabel(task) {
-
-    const labels = {
-
-        titleBar:
-            "Barre de titre",
-
-        officeButton:
-            "Bouton Office",
-
-        ribbon:
-            "Ruban",
-
-        tabs:
-            "Onglets",
-
-        documentArea:
-            "Zone de travail"
+        lastActionTime:0
 
     };
 
 
-    return labels[task] || task;
+    // =====================================================
+    // CHAPTER 1 PROTECTION
+    // =====================================================
 
-}
+    function isChapter1(chapterId){
 
-
-// =========================================================
-// CREATE HOMEWORK PANEL
-// =========================================================
-
-function createHomeworkPanel() {
-
-    if (
-
-        !state.simulationDocument ||
-
-        state.ui.root
-
-    ) {
-
-        return;
+        return String(chapterId || "")
+            .toLowerCase()
+            .trim() === "chapitre1";
 
     }
 
 
-    const doc =
-        state.simulationDocument;
-
-
-    const root =
-        doc.createElement("div");
-
-
-    root.id =
-        "raniseBlock9HomeworkPanel";
-
-
-    root.style.cssText =
-
-        "position:fixed;" +
-        "top:12px;" +
-        "right:12px;" +
-        "width:min(330px,calc(100vw - 24px));" +
-        "max-width:calc(100vw - 24px);" +
-        "max-height:calc(100vh - 24px);" +
-        "overflow:auto;" +
-        "z-index:2147483640;" +
-        "background:rgba(255,255,255,.97);" +
-        "border:2px solid #1f4e79;" +
-        "border-radius:12px;" +
-        "box-shadow:0 8px 30px rgba(0,0,0,.25);" +
-        "padding:12px;" +
-        "font-family:Arial,sans-serif;" +
-        "font-size:13px;" +
-        "line-height:1.4;" +
-        "box-sizing:border-box;" +
-        "user-select:none;" +
-        "-webkit-user-select:none;";
-
-
     // =====================================================
-    // HEADER
+    // NORMALIZE
     // =====================================================
 
-    const header =
-        doc.createElement("div");
-
-
-    header.style.cssText =
-
-        "display:flex;" +
-        "align-items:center;" +
-        "justify-content:space-between;" +
-        "gap:8px;" +
-        "margin-bottom:7px;";
-
-
-    const title =
-        doc.createElement("div");
-
-
-    title.textContent =
-        "Ranise Moïse — Devoir";
-
-
-    title.style.cssText =
-
-        "font-weight:700;" +
-        "font-size:15px;" +
-        "cursor:grab;" +
-        "touch-action:none;" +
-        "flex:1;";
-
-
-    // =====================================================
-    // CLOSE BUTTON
-    // =====================================================
-
-    const close =
-        doc.createElement("button");
-
-
-    close.type =
-        "button";
-
-
-    close.textContent =
-        "×";
-
-
-    close.title =
-        "Fermer";
-
-
-    close.setAttribute(
-        "aria-label",
-        "Fermer le devoir"
-    );
-
-
-    close.style.cssText =
-
-        "width:26px;" +
-        "height:26px;" +
-        "border:0;" +
-        "border-radius:50%;" +
-        "background:#e9eef2;" +
-        "color:#52616b;" +
-        "font-size:20px;" +
-        "font-weight:700;" +
-        "line-height:24px;" +
-        "padding:0;" +
-        "cursor:pointer;" +
-        "display:none;";
-
-
-    close.addEventListener(
-
-        "click",
-
-        function (event) {
-
-            event.preventDefault();
-
-            event.stopPropagation();
-
-
-            if (
-                !state.closeEnabled
-            ) {
-
-                return;
-
-            }
-
-
-            removePanel();
-
-        },
-
-        true
-
-    );
-
-
-    header.appendChild(title);
-
-    header.appendChild(close);
-
-
-    // =====================================================
-    // PROGRESS
-    // =====================================================
-
-    const progress =
-        doc.createElement("div");
-
-
-    progress.style.cssText =
-
-        "font-weight:700;" +
-        "margin-bottom:7px;";
-
-
-    // =====================================================
-    // INSTRUCTION
-    // =====================================================
-
-    const instruction =
-        doc.createElement("div");
-
-
-    instruction.style.cssText =
-
-        "margin-bottom:8px;";
-
-
-    instruction.textContent =
-
-        state.homework ||
-
-        "Réalisez le devoir demandé dans la simulation Word 2007.";
-
-
-    // =====================================================
-    // STATUS
-    // =====================================================
-
-    const status =
-        doc.createElement("div");
-
-
-    status.style.cssText =
-
-        "padding:7px;" +
-        "border-radius:7px;" +
-        "background:#eef4f8;" +
-        "margin-bottom:8px;";
-
-
-    // =====================================================
-    // TASK LIST
-    // =====================================================
-
-    const tasks =
-        doc.createElement("div");
-
-
-    root.appendChild(header);
-
-    root.appendChild(progress);
-
-    root.appendChild(instruction);
-
-    root.appendChild(status);
-
-    root.appendChild(tasks);
-
-
-    (
-        doc.body ||
-        doc.documentElement
-    ).appendChild(root);
-
-
-    state.ui.root =
-        root;
-
-    state.ui.title =
-        title;
-
-    state.ui.close =
-        close;
-
-    state.ui.progress =
-        progress;
-
-    state.ui.instruction =
-        instruction;
-
-    state.ui.status =
-        status;
-
-    state.ui.tasks =
-        tasks;
-
-
-    enableDragging();
-
-    updatePanel();
-
-}
-
-
-// =========================================================
-// UPDATE PANEL
-// =========================================================
-
-function updatePanel() {
-
-    if (!state.ui.root) {
-
-        return;
+    function normalize(value){
+
+        return String(value || "")
+            .normalize("NFD")
+            .replace(/[\u0300-\u036f]/g,"")
+            .toLowerCase()
+            .replace(/\s+/g," ")
+            .trim();
 
     }
 
 
-    const count =
-        completedTaskCount();
+    // =====================================================
+    // GET CHAPTER
+    // =====================================================
 
+    function getChapter(chapterId){
 
-    state.ui.progress.textContent =
+        if(
+            !chapterId ||
+            isChapter1(chapterId)
+        ){
 
-        "Devoir — Chapitre 1 — " +
-
-        count +
-
-        "/5 tâches exécutées";
-
-
-    const taskNames = [
-
-        "titleBar",
-
-        "officeButton",
-
-        "ribbon",
-
-        "tabs",
-
-        "documentArea"
-
-    ];
-
-
-    let html = "";
-
-
-    taskNames.forEach(
-
-        task => {
-
-            const checked =
-                state.tasks[task];
-
-
-            html +=
-
-                "<div style=\"" +
-
-                "display:flex;" +
-                "align-items:center;" +
-                "gap:8px;" +
-                "margin:5px 0;" +
-
-                "\">" +
-
-                "<span style=\"" +
-
-                "display:inline-flex;" +
-                "align-items:center;" +
-                "justify-content:center;" +
-                "width:21px;" +
-                "height:21px;" +
-                "border-radius:50%;" +
-                "font-weight:700;" +
-
-                (
-
-                    checked
-
-                        ? "background:#16a34a;color:white;"
-
-                        : "background:#e8edf1;color:#74808a;"
-
-                ) +
-
-                "\">" +
-
-                (
-
-                    checked
-
-                        ? "✓"
-
-                        : "○"
-
-                ) +
-
-                "</span>" +
-
-                "<span>" +
-
-                taskLabel(task) +
-
-                "</span>" +
-
-                "</div>";
+            return null;
 
         }
 
-    );
+
+        if(
+            typeof microsoftWordCourse ===
+            "undefined"
+        ){
+
+            return null;
+
+        }
 
 
-    state.ui.tasks.innerHTML =
-        html;
+        if(
+            !microsoftWordCourse ||
+            !Array.isArray(
+                microsoftWordCourse.chapters
+            )
+        ){
+
+            return null;
+
+        }
 
 
-    if (
-        count === 5 &&
-        !state.completed
-    ) {
+        return microsoftWordCourse.chapters.find(
+            function(chapter){
 
-        state.ui.status.textContent =
-
-            "✓ 5/5 tâches exécutées. Validation en cours.";
-
-    }
-
-}
-
-
-// =========================================================
-// STATUS
-// =========================================================
-
-function setStatus(message) {
-
-    if (
-        state.ui.status
-    ) {
-
-        state.ui.status.textContent =
-            message;
-
-    }
-
-}
-
-
-// =========================================================
-// DRAG PANEL
-// =========================================================
-
-function enableDragging() {
-
-    if (
-
-        !state.ui.root ||
-
-        !state.ui.title
-
-    ) {
-
-        return;
-
-    }
-
-
-    const panel =
-        state.ui.root;
-
-    const handle =
-        state.ui.title;
-
-
-    let dragging = false;
-
-    let pointerId = null;
-
-    let offsetX = 0;
-
-    let offsetY = 0;
-
-
-    handle.addEventListener(
-
-        "pointerdown",
-
-        function (event) {
-
-            if (
-
-                event.pointerType === "mouse" &&
-
-                event.button !== 0
-
-            ) {
-
-                return;
-
-            }
-
-
-            const rect =
-                panel.getBoundingClientRect();
-
-
-            dragging = true;
-
-            pointerId =
-                event.pointerId;
-
-
-            offsetX =
-                event.clientX -
-                rect.left;
-
-            offsetY =
-                event.clientY -
-                rect.top;
-
-
-            handle.style.cursor =
-                "grabbing";
-
-
-            try {
-
-                handle.setPointerCapture(
-                    event.pointerId
+                return (
+                    chapter &&
+                    String(chapter.id) ===
+                    String(chapterId)
                 );
 
-            } catch (error) {}
-
-
-            event.preventDefault();
-
-        },
-
-        true
-
-    );
-
-
-    handle.addEventListener(
-
-        "pointermove",
-
-        function (event) {
-
-            if (
-                !dragging ||
-                event.pointerId !== pointerId
-            ) {
-
-                return;
-
             }
+        ) || null;
+
+    }
 
 
-            const doc =
-                state.simulationDocument;
+    // =====================================================
+    // GET CHAPTER HOMEWORK
+    // =====================================================
+
+    function getChapterHomework(chapterId){
+
+        const chapter =
+            getChapter(chapterId);
 
 
-            const width =
-
-                doc?.documentElement?.clientWidth ||
-
-                window.innerWidth;
-
-
-            const height =
-
-                doc?.documentElement?.clientHeight ||
-
-                window.innerHeight;
-
-
-            const rect =
-                panel.getBoundingClientRect();
-
-
-            const left = Math.max(
-
-                0,
-
-                Math.min(
-
-                    event.clientX -
-                    offsetX,
-
-                    Math.max(
-                        0,
-                        width -
-                        rect.width
-                    )
-
-                )
-
-            );
-
-
-            const top = Math.max(
-
-                0,
-
-                Math.min(
-
-                    event.clientY -
-                    offsetY,
-
-                    Math.max(
-                        0,
-                        height -
-                        rect.height
-                    )
-
-                )
-
-            );
-
-
-            panel.style.left =
-                left + "px";
-
-            panel.style.top =
-                top + "px";
-
-            panel.style.right =
-                "auto";
-
-
-            event.preventDefault();
-
-        },
-
-        true
-
-    );
-
-
-    function stopDrag(event) {
-
-        if (
-
-            !dragging ||
-
-            (
-
-                event &&
-
-                event.pointerId !== pointerId
-
+        if(
+            !chapter ||
+            !Array.isArray(
+                chapter.homework
             )
+        ){
 
-        ) {
+            return null;
+
+        }
+
+
+        const homework =
+            chapter.homework
+                .map(function(item){
+
+                    return String(
+                        item || ""
+                    ).trim();
+
+                })
+                .filter(Boolean);
+
+
+        return homework.length
+            ?
+            homework
+            :
+            null;
+
+    }
+
+
+    // =====================================================
+    // CHAPTER NAME
+    // =====================================================
+
+    function chapterName(chapterId){
+
+        const chapter =
+            getChapter(chapterId);
+
+
+        return (
+            chapter &&
+            chapter.title
+        )
+        ?
+        String(chapter.title)
+        :
+        String(chapterId || "");
+
+    }
+
+
+    // =====================================================
+    // RANISE VOICE
+    // =====================================================
+
+    async function speak(text){
+
+        if(!text){
 
             return;
 
         }
 
 
-        dragging = false;
+        if(
+            typeof speakProfessorIAWithMaryTTS !==
+            "function"
+        ){
 
-        pointerId = null;
-
-        handle.style.cursor =
-            "grab";
-
-    }
-
-
-    handle.addEventListener(
-        "pointerup",
-        stopDrag,
-        true
-    );
-
-
-    handle.addEventListener(
-        "pointercancel",
-        stopDrag,
-        true
-    );
-
-}
-
-
-// =========================================================
-// RECORD ACTION
-// =========================================================
-
-function recordAction(name) {
-
-    if (!name) {
-
-        return;
-
-    }
-
-
-    state.lastActionTime =
-        Date.now();
-
-
-    state.actionHistory.push({
-
-        name:
-            name,
-
-        time:
-            Date.now()
-
-    });
-
-
-    if (
-        state.actionHistory.length > 200
-    ) {
-
-        state.actionHistory.shift();
-
-    }
-
-}
-
-
-// =========================================================
-// CLOSEST
-// =========================================================
-
-function closest(target, selector) {
-
-    if (
-
-        !target ||
-
-        typeof target.closest !==
-        "function"
-
-    ) {
-
-        return null;
-
-    }
-
-
-    try {
-
-        return target.closest(
-            selector
-        );
-
-    } catch (error) {
-
-        return null;
-
-    }
-
-}
-
-
-// =========================================================
-// REAL TARGET IDENTIFICATION
-// =========================================================
-
-function identifyTask(target) {
-
-    if (!target) {
-
-        return null;
-
-    }
-
-
-    let node =
-        target;
-
-
-    for (
-        let i = 0;
-        i < 10 && node;
-        i++
-    ) {
-
-        const cls =
-
-            typeof node.className === "string"
-
-                ? normalize(node.className)
-
-                : "";
-
-
-        const id =
-            normalize(node.id || "");
-
-
-        const role =
-
-            normalize(
-
-                node.getAttribute?.(
-                    "data-role"
-                ) || ""
-
+            console.warn(
+                "RANISE BLOCK 9: MaryTTS unavailable."
             );
 
-
-        const action =
-
-            normalize(
-
-                node.getAttribute?.(
-                    "data-action"
-                ) || ""
-
-            );
-
-
-        const command =
-
-            normalize(
-
-                node.getAttribute?.(
-                    "data-command"
-                ) || ""
-
-            );
-
-
-        const aria =
-
-            normalize(
-
-                node.getAttribute?.(
-                    "aria-label"
-                ) || ""
-
-            );
-
-
-        const combined =
-
-            cls + " " +
-            id + " " +
-            role + " " +
-            action + " " +
-            command + " " +
-            aria;
-
-
-        // -------------------------------------------------
-        // TITLE BAR
-        // -------------------------------------------------
-
-        if (
-
-            node.matches?.(
-                ".cwTitleBar"
-            ) ||
-
-            combined.includes("cwtitlebar") ||
-
-            combined.includes("titlebar") ||
-
-            combined.includes("barretitre")
-
-        ) {
-
-            return "titleBar";
+            return;
 
         }
 
 
-        // -------------------------------------------------
-        // OFFICE BUTTON
-        // -------------------------------------------------
+        state.speaking =
+            true;
 
-        if (
 
-            node.matches?.(
-                '.cwOfficeButton,[data-role="office-button"]'
-            ) ||
+        if(
+            typeof raniseStartTalking ===
+            "function"
+        ){
 
-            combined.includes("cwofficebutton") ||
+            try{
 
-            combined.includes("officebutton")
+                raniseStartTalking();
 
-        ) {
+            }catch(error){
 
-            return "officeButton";
-
-        }
-
-
-        // -------------------------------------------------
-        // RIBBON
-        // -------------------------------------------------
-
-        if (
-
-            node.matches?.(
-                ".cwRibbon"
-            ) ||
-
-            combined.includes("cwribbon")
-
-        ) {
-
-            return "ribbon";
-
-        }
-
-
-        // -------------------------------------------------
-        // TABS
-        // -------------------------------------------------
-
-        if (
-
-            node.matches?.(
-                ".cwTabBtn"
-            ) ||
-
-            combined.includes("cwtabbtn") ||
-
-            combined.includes("ribbontab")
-
-        ) {
-
-            return "tabs";
-
-        }
-
-
-        // -------------------------------------------------
-        // DOCUMENT AREA
-        // -------------------------------------------------
-
-        if (
-
-            node.matches?.(
-                ".cwPageContent"
-            )
-
-        ) {
-
-            return "documentArea";
-
-        }
-
-
-        node =
-            node.parentElement;
-
-    }
-
-
-    return null;
-
-}
-
-
-// =========================================================
-// ACTIVATE ONE TASK
-// =========================================================
-
-function activateTask(task) {
-
-    if (
-
-        !task ||
-
-        state.completed ||
-
-        state.tasks[task]
-
-    ) {
-
-        return;
-
-    }
-
-
-    if (
-
-        !Object.prototype.hasOwnProperty.call(
-            state.tasks,
-            task
-        )
-
-    ) {
-
-        return;
-
-    }
-
-
-    state.tasks[task] =
-        true;
-
-
-    recordAction(
-        "homework-" + task
-    );
-
-
-    updatePanel();
-
-
-    const count =
-        completedTaskCount();
-
-
-    setStatus(
-
-        "✓ " +
-
-        taskLabel(task) +
-
-        " exécuté. " +
-
-        count +
-
-        "/5."
-
-    );
-
-
-    // =====================================================
-    // CRITICAL:
-    // THE MOMENT 5 GREEN CHECKMARKS EXIST,
-    // VALIDATE WITHOUT WAITING.
-    // =====================================================
-
-    if (
-        count === 5
-    ) {
-
-        validateHomeworkImmediately();
-
-    }
-
-}
-
-
-// =========================================================
-// CLICK
-// =========================================================
-
-function handleClick(event) {
-
-    if (
-
-        !state.started ||
-
-        state.completed ||
-
-        !event ||
-
-        !event.target
-
-    ) {
-
-        return;
-
-    }
-
-
-    const task =
-        identifyTask(
-            event.target
-        );
-
-
-    if (task) {
-
-        activateTask(task);
-
-        return;
-
-    }
-
-
-    // Document area is also recognized
-    // from real clicks inside the page.
-
-    if (
-
-        closest(
-            event.target,
-            ".cwPageContent"
-        )
-
-    ) {
-
-        activateTask(
-            "documentArea"
-        );
-
-    }
-
-}
-
-
-// =========================================================
-// INPUT
-// =========================================================
-
-function handleInput(event) {
-
-    if (
-
-        !state.started ||
-
-        state.completed
-
-    ) {
-
-        return;
-
-    }
-
-
-    if (
-
-        event?.target &&
-
-        closest(
-            event.target,
-            ".cwPageContent"
-        )
-
-    ) {
-
-        activateTask(
-            "documentArea"
-        );
-
-    }
-
-}
-
-
-// =========================================================
-// VALIDATE HOMEWORK IMMEDIATELY
-// =========================================================
-
-function validateHomeworkImmediately() {
-
-    if (
-
-        state.completed ||
-
-        state.validationStarted
-
-    ) {
-
-        return;
-
-    }
-
-
-    if (
-        completedTaskCount() !== 5
-    ) {
-
-        return;
-
-    }
-
-
-    state.validationStarted =
-        true;
-
-
-    state.completed =
-        true;
-
-
-    state.closeEnabled =
-        true;
-
-
-    updatePanel();
-
-
-    setStatus(
-
-        "✓ 5/5 — Devoir validé par Ranise."
-
-    );
-
-
-    // =====================================================
-    // CLOSE BUTTON APPEARS ONLY AFTER VALIDATION
-    // =====================================================
-
-    if (
-        state.ui.close
-    ) {
-
-        state.ui.close.style.display =
-            "inline-flex";
-
-    }
-
-
-    // =====================================================
-    // SAVE CHAPTER 1 HOMEWORK COMPLETION
-    // =====================================================
-
-    try {
-
-        localStorage.setItem(
-
-            "wordChapter1HomeworkCompleted",
-
-            "true"
-
-        );
-
-    } catch (error) {}
-
-
-    // =====================================================
-    // SYNC EXISTING PROGRESS ENGINE ONLY
-    //
-    // NO NEXT CHAPTER UNLOCK.
-    // =====================================================
-
-    if (
-
-        typeof MicrosoftWordProgressEngine !==
-        "undefined"
-
-    ) {
-
-        try {
-
-            const progress =
-                MicrosoftWordProgressEngine.get();
-
-
-            if (
-
-                !Array.isArray(
-                    progress.completedChapters
-                )
-
-            ) {
-
-                progress.completedChapters = [];
-
-            }
-
-
-            if (
-
-                !progress.completedChapters.includes(
-                    "chapitre1"
-                )
-
-            ) {
-
-                progress.completedChapters.push(
-                    "chapitre1"
-                );
-
-            }
-
-
-            MicrosoftWordProgressEngine.save(
-                progress
-            );
-
-        } catch (error) {}
-
-    }
-
-
-    // =====================================================
-    // IMPORTANT:
-    // NO UNLOCK ENGINE HERE.
-    // BLOCK 10 OWNS NEXT-CHAPTER UNLOCKING.
-    // =====================================================
-
-
-    stopMonitoring();
-
-
-    // =====================================================
-    // IMMEDIATE RANISE AUDIO
-    //
-    // NO await.
-    // NO delay.
-    // NO blocking validation.
-    // =====================================================
-
-    const message =
-
-        "Excellent travail. " +
-
-        "J'ai vérifié les cinq tâches de votre devoir. " +
-
-        "Les cinq tâches sont correctement réalisées. " +
-
-        "Votre devoir du Chapitre 1 est validé. " +
-
-        "Félicitations.";
-
-
-    speak(message);
-
-}
-
-
-// =========================================================
-// REMOVE PANEL
-// =========================================================
-
-function removePanel() {
-
-    if (
-        state.ui.root
-    ) {
-
-        try {
-
-            state.ui.root.remove();
-
-        } catch (error) {
-
-            if (
-                state.ui.root.parentNode
-            ) {
-
-                state.ui.root.parentNode.removeChild(
-                    state.ui.root
+                console.warn(
+                    "RANISE BLOCK 9: raniseStartTalking error.",
+                    error
                 );
 
             }
 
         }
 
+
+        try{
+
+            await speakProfessorIAWithMaryTTS(
+                text
+            );
+
+        }catch(error){
+
+            console.error(
+                "RANISE BLOCK 9: Voice error.",
+                error
+            );
+
+        }finally{
+
+            state.speaking =
+                false;
+
+
+            if(
+                typeof raniseStopTalking ===
+                "function"
+            ){
+
+                try{
+
+                    raniseStopTalking();
+
+                }catch(error){
+
+                    console.warn(
+                        "RANISE BLOCK 9: raniseStopTalking error.",
+                        error
+                    );
+
+                }
+
+            }
+
+        }
+
     }
 
 
-    state.ui.root =
-        null;
+    // =====================================================
+    // FIND CURRENT WORD SIMULATION
+    // =====================================================
 
-    state.ui.title =
-        null;
+    function findSimulation(){
 
-    state.ui.close =
-        null;
-
-    state.ui.progress =
-        null;
-
-    state.ui.instruction =
-        null;
-
-    state.ui.status =
-        null;
-
-    state.ui.tasks =
-        null;
-
-}
+        const campusContent =
+            document.getElementById(
+                "campusContent"
+            );
 
 
-// =========================================================
-// STOP MONITORING
-// =========================================================
+        if(!campusContent){
 
-function stopMonitoring() {
+            return null;
 
-    if (
-        state.monitorTimer
-    ) {
+        }
 
-        clearInterval(
-            state.monitorTimer
-        );
 
-        state.monitorTimer =
+        let frame =
+            campusContent.querySelector(
+                'iframe[src*="campusword2007simulation"]'
+            );
+
+
+        if(frame){
+
+            return frame;
+
+        }
+
+
+        frame =
+            campusContent.querySelector(
+                'iframe[data-chapter-id]'
+            );
+
+
+        if(frame){
+
+            return frame;
+
+        }
+
+
+        frame =
+            campusContent.querySelector(
+                "iframe"
+            );
+
+
+        return frame || null;
+
+    }
+
+
+    // =====================================================
+    // READ CHAPTER ID FROM ELEMENT
+    // =====================================================
+
+    function getChapterIdFromElement(element){
+
+        if(!element){
+
+            return null;
+
+        }
+
+
+        const attributes = [
+
+            "data-chapter-id",
+            "data-chapter",
+            "data-current-chapter",
+            "data-chapterid"
+
+        ];
+
+
+        for(
+            let i = 0;
+            i < attributes.length;
+            i++
+        ){
+
+            try{
+
+                const value =
+                    element.getAttribute(
+                        attributes[i]
+                    );
+
+
+                if(
+                    value &&
+                    !isChapter1(value)
+                ){
+
+                    return String(
+                        value
+                    ).trim();
+
+                }
+
+            }catch(error){}
+
+        }
+
+
+        return null;
+
+    }
+
+
+    // =====================================================
+    // DETECT CURRENT CHAPTER
+    // =====================================================
+
+    function detectCurrentChapterId(){
+
+        let chapterId =
             null;
 
-    }
 
-}
+        // -------------------------------------------------
+        // EXISTING GLOBAL
+        // -------------------------------------------------
 
+        if(
+            typeof currentChapterId !==
+            "undefined" &&
+            currentChapterId
+        ){
 
-// =========================================================
-// ATTACH SIMULATION EVENTS
-// =========================================================
+            chapterId =
+                String(
+                    currentChapterId
+                ).trim();
 
-function attachSimulationListeners() {
+        }
 
-    if (
 
-        !state.simulationDocument ||
+        if(
+            !chapterId &&
+            window.currentChapterId
+        ){
 
-        state.listenersAttached
+            chapterId =
+                String(
+                    window.currentChapterId
+                ).trim();
 
-    ) {
+        }
 
-        return;
 
-    }
+        if(
+            !chapterId &&
+            window.RaniseActiveChapterId
+        ){
 
+            chapterId =
+                String(
+                    window.RaniseActiveChapterId
+                ).trim();
 
-    const doc =
-        state.simulationDocument;
+        }
 
 
-    // CAPTURE ONLY:
-    // Block 9 OBSERVES.
-    // It does not stop the simulation.
+        // -------------------------------------------------
+        // CAMPUS CONTENT
+        // -------------------------------------------------
 
-    doc.addEventListener(
-        "click",
-        handleClick,
-        true
-    );
+        const campusContent =
+            document.getElementById(
+                "campusContent"
+            );
 
 
-    doc.addEventListener(
-        "input",
-        handleInput,
-        true
-    );
+        if(
+            !chapterId &&
+            campusContent
+        ){
 
-
-    state.listenersAttached =
-        true;
-
-
-    state.monitorTimer =
-
-        setInterval(
-
-            function () {
-
-                if (
-
-                    state.completed ||
-
-                    !state.started
-
-                ) {
-
-                    return;
-
-                }
-
-
-                // Reconnect if iframe document changed.
-
-                if (
-                    !state.simulationDocument
-                ) {
-
-                    connectToSimulation();
-
-                }
-
-
-                // CRITICAL:
-                // NEVER validate before 5/5.
-
-                if (
-                    completedTaskCount() === 5
-                ) {
-
-                    validateHomeworkImmediately();
-
-                }
-
-            },
-
-            100
-
-        );
-
-}
-
-
-// =========================================================
-// LOAD DATA
-// =========================================================
-
-function loadChapterData() {
-
-    const chapter =
-        getChapter1();
-
-
-    if (!chapter) {
-
-        return false;
-
-    }
-
-
-    state.chapter =
-        chapter;
-
-
-    state.homework =
-
-        String(
-
-            chapter.homework ||
-
-            ""
-
-        ).trim();
-
-
-    return true;
-
-}
-
-
-// =========================================================
-// RESET
-// =========================================================
-
-function resetState() {
-
-    state.tasks.titleBar =
-        false;
-
-    state.tasks.officeButton =
-        false;
-
-    state.tasks.ribbon =
-        false;
-
-    state.tasks.tabs =
-        false;
-
-    state.tasks.documentArea =
-        false;
-
-
-    state.completed =
-        false;
-
-    state.validationStarted =
-        false;
-
-    state.closeEnabled =
-        false;
-
-    state.actionHistory = [];
-
-}
-
-
-// =========================================================
-// START BLOCK 9
-// =========================================================
-
-async function startBlock9() {
-
-    if (
-
-        state.started ||
-
-        state.completed
-
-    ) {
-
-        return;
-
-    }
-
-
-    if (
-        !connectToSimulation()
-    ) {
-
-        return;
-
-    }
-
-
-    if (
-        !loadChapterData()
-    ) {
-
-        return;
-
-    }
-
-
-    resetState();
-
-
-    state.started =
-        true;
-
-    state.waitingForBlock8 =
-        false;
-
-    state.block8CompletionDetected =
-        true;
-
-
-    state.lastDocumentSignature =
-        getDocumentSignature();
-
-
-    createHomeworkPanel();
-
-
-    attachSimulationListeners();
-
-
-    updatePanel();
-
-
-    setStatus(
-
-        "0/5 tâches exécutées. Commencez le devoir."
-
-    );
-
-
-    // -----------------------------------------------------
-    // INTRODUCTION
-    // -----------------------------------------------------
-
-    speak(
-
-        "Très bien. Nous passons maintenant au devoir " +
-        "du Chapitre 1. Réalisez uniquement les tâches " +
-        "demandées dans la simulation. Je vais vérifier " +
-        "chaque tâche réelle et afficher une coche verte " +
-        "pour chaque tâche exécutée."
-
-    );
-
-}
-
-
-// =========================================================
-// BLOCK 8 → BLOCK 9
-//
-// THIS IS THE CRITICAL PROTECTION.
-// NEVER START WHILE BLOCK 8 IS FALSE.
-// =========================================================
-
-function checkBlock8Completion() {
-
-    // -----------------------------------------------------
-    // BLOCK 9 MUST NOT START IF ALREADY RUNNING.
-    // -----------------------------------------------------
-
-    if (
-
-        state.started ||
-
-        state.completed
-
-    ) {
-
-        return;
-
-    }
-
-
-    const engine =
-
-        window.RaniseMoiseExerciseMasteryEngine;
-
-
-    if (
-
-        !engine ||
-
-        typeof engine.getState !==
-        "function"
-
-    ) {
-
-        return;
-
-    }
-
-
-    let block8State;
-
-
-    try {
-
-        block8State =
-            engine.getState();
-
-    } catch (error) {
-
-        return;
-
-    }
-
-
-    if (!block8State) {
-
-        return;
-
-    }
-
-
-    // =====================================================
-    // ABSOLUTE CONDITION:
-    //
-    // FALSE = DO NOTHING.
-    // TRUE = BLOCK 9 MAY START.
-    //
-    // NO SPEAK.
-    // NO PANEL.
-    // NO TASK LIST.
-    // NO SIMULATION VALIDATION.
-    // =====================================================
-
-    if (
-        block8State.completed !== true
-    ) {
-
-        return;
-
-    }
-
-
-    // =====================================================
-    // BLOCK 8 IS REALLY COMPLETE.
-    // =====================================================
-
-    state.block8CompletionDetected =
-        true;
-
-
-    startBlock9();
-
-}
-
-
-// =========================================================
-// WAIT FOR BLOCK 8
-// =========================================================
-
-state.transitionTimer =
-
-    setInterval(
-
-        function () {
-
-            if (
-
-                state.started ||
-
-                state.completed
-
-            ) {
-
-                clearInterval(
-                    state.transitionTimer
+            chapterId =
+                getChapterIdFromElement(
+                    campusContent
                 );
 
-                state.transitionTimer =
-                    null;
+        }
+
+
+        // -------------------------------------------------
+        // SIMULATION
+        // -------------------------------------------------
+
+        if(!chapterId){
+
+            const frame =
+                findSimulation();
+
+
+            if(frame){
+
+                chapterId =
+                    getChapterIdFromElement(
+                        frame
+                    );
+
+            }
+
+        }
+
+
+        // -------------------------------------------------
+        // ACTIVE CHAPTER ELEMENTS
+        // -------------------------------------------------
+
+        if(!chapterId){
+
+            const candidates =
+                document.querySelectorAll(
+                    "[data-chapter-id], [data-chapter], [data-current-chapter]"
+                );
+
+
+            for(
+                let i = 0;
+                i < candidates.length;
+                i++
+            ){
+
+                const candidateId =
+                    getChapterIdFromElement(
+                        candidates[i]
+                    );
+
+
+                if(candidateId){
+
+                    chapterId =
+                        candidateId;
+
+                    break;
+
+                }
+
+            }
+
+        }
+
+
+        if(
+            !chapterId ||
+            isChapter1(chapterId)
+        ){
+
+            return null;
+
+        }
+
+
+        return chapterId;
+
+    }
+
+
+    // =====================================================
+    // CONNECT TO EXISTING SIMULATION
+    // =====================================================
+
+    function connectToSimulation(){
+
+        const frame =
+            findSimulation();
+
+
+        if(!frame){
+
+            return false;
+
+        }
+
+
+        try{
+
+            const doc =
+                frame.contentDocument ||
+                (
+                    frame.contentWindow
+                    ?
+                    frame.contentWindow.document
+                    :
+                    null
+                );
+
+
+            if(!doc){
+
+                return false;
+
+            }
+
+
+            state.simulationFrame =
+                frame;
+
+            state.simulationDocument =
+                doc;
+
+
+            return true;
+
+        }catch(error){
+
+            console.error(
+                "RANISE BLOCK 9: Simulation connection error.",
+                error
+            );
+
+
+            return false;
+
+        }
+
+    }
+
+
+    // =====================================================
+    // READ COMPLETE STUDENT DOCUMENT
+    // =====================================================
+
+    function getDocumentText(){
+
+        const doc =
+            state.simulationDocument;
+
+
+        if(!doc){
+
+            return "";
+
+        }
+
+
+        const pages =
+            doc.querySelectorAll(
+                ".cwPageContent"
+            );
+
+
+        if(pages.length){
+
+            return Array.from(pages)
+                .map(function(page){
+
+                    return (
+                        page.innerText ||
+                        page.textContent ||
+                        ""
+                    );
+
+                })
+                .join("\n");
+
+        }
+
+
+        const editable =
+            doc.querySelectorAll(
+                '[contenteditable="true"], textarea, input[type="text"]'
+            );
+
+
+        if(editable.length){
+
+            return Array.from(editable)
+                .map(function(node){
+
+                    if(
+                        typeof node.value ===
+                        "string"
+                    ){
+
+                        return node.value;
+
+                    }
+
+
+                    return (
+                        node.innerText ||
+                        node.textContent ||
+                        ""
+                    );
+
+                })
+                .join("\n");
+
+        }
+
+
+        return doc.body
+            ?
+            (
+                doc.body.innerText ||
+                doc.body.textContent ||
+                ""
+            )
+            :
+            "";
+
+    }
+
+
+    // =====================================================
+    // COUNT REAL STUDENT TEXT
+    // =====================================================
+
+    function getStudentWrittenText(){
+
+        const text =
+            getDocumentText();
+
+
+        const baseline =
+            normalize(
+                state.baselineText
+            );
+
+
+        const current =
+            normalize(
+                text
+            );
+
+
+        if(
+            !current
+        ){
+
+            return "";
+
+        }
+
+
+        if(
+            current === baseline
+        ){
+
+            return "";
+
+        }
+
+
+        return text;
+
+    }
+
+
+    // =====================================================
+    // HOMEWORK CONTENT VALIDATION
+    //
+    // The homework asks the student to:
+    //
+    // 1. Type a short text
+    // 2. Copy
+    // 3. Cut
+    // 4. Paste
+    // 5. Change font
+    // 6. Change font size
+    // 7. Bold
+    // 8. Italic
+    // 9. Underline
+    // 10. Font color
+    // 11. Highlight
+    //
+    // Block 9 validates the final document by reading
+    // the actual text written by the student.
+    // =====================================================
+
+    function validateHomeworkText(){
+
+        const text =
+            getStudentWrittenText();
+
+
+        if(!text){
+
+            return false;
+
+        }
+
+
+        const value =
+            normalize(text);
+
+
+        // -------------------------------------------------
+        // Student must have produced a meaningful document.
+        // -------------------------------------------------
+
+        const words =
+            value
+                .split(/\s+/)
+                .filter(Boolean);
+
+
+        if(
+            words.length < 5
+        ){
+
+            return false;
+
+        }
+
+
+        // -------------------------------------------------
+        // Avoid accepting a document containing only the
+        // original exercise instruction.
+        // -------------------------------------------------
+
+        const homeworkInstruction =
+            normalize(
+                state.homework &&
+                state.homework[
+                    state.homeworkIndex
+                ]
+            );
+
+
+        if(
+            homeworkInstruction &&
+            value === homeworkInstruction
+        ){
+
+            return false;
+
+        }
+
+
+        // -------------------------------------------------
+        // The final homework is intentionally simple.
+        //
+        // Block 8 has already verified the student's ability
+        // to perform the required Word actions.
+        //
+        // Therefore Block 9 does NOT force the student to
+        // repeat every command.
+        //
+        // It verifies that a real written document exists.
+        // -------------------------------------------------
+
+        return true;
+
+    }
+
+
+    // =====================================================
+    // REQUEST AI VALIDATION
+    //
+    // Ranise reads what the student actually wrote and
+    // determines whether the response/document satisfies
+    // the homework requirement.
+    // =====================================================
+
+    async function validateHomeworkWithAI(){
+
+        const studentText =
+            getStudentWrittenText();
+
+
+        if(!studentText){
+
+            return false;
+
+        }
+
+
+        if(
+            typeof requestCampusAIProfessor !==
+            "function"
+        ){
+
+            console.warn(
+                "RANISE BLOCK 9: AI Professor unavailable."
+            );
+
+            return false;
+
+        }
+
+
+        const homeworkInstruction =
+            state.homework &&
+            state.homework[
+                state.homeworkIndex
+            ]
+            ?
+            state.homework[
+                state.homeworkIndex
+            ]
+            :
+            "";
+
+
+        const prompt =
+
+            "Tu es Ranise MOISE, professeure de Microsoft Word 2007. " +
+            "Tu dois corriger le devoir de l'élève avec bienveillance, " +
+            "mais avec une vraie exigence pédagogique. " +
+            "Voici la consigne du devoir : " +
+            homeworkInstruction +
+            "\n\n" +
+            "Voici le contenu actuellement écrit par l'élève dans le document : " +
+            "\n---\n" +
+            studentText +
+            "\n---\n\n" +
+            "Analyse uniquement le travail réel de l'élève. " +
+            "Le devoir demandé est volontairement simple. " +
+            "L'élève doit principalement avoir produit un court document " +
+            "et avoir démontré les notions Word étudiées. " +
+            "Les opérations Copier, Couper, Coller et les mises en forme " +
+            "ont déjà été travaillées et validées pendant les parties " +
+            "Pratique et Exercices. " +
+            "Ne demande PAS à l'élève d'expliquer chaque commande. " +
+            "Ne demande PAS une nouvelle répétition inutile des exercices. " +
+            "Décide si le document est suffisamment réel, cohérent et " +
+            "conforme à la consigne pour être validé.\n\n" +
+            "Réponds uniquement avec : VALIDÉ ou À_CORRIGER. " +
+            "Réponds VALIDÉ si le devoir est raisonnablement réalisé " +
+            "et conforme. Réponds À_CORRIGER seulement si le document " +
+            "est clairement vide, insignifiant ou hors sujet.";
+
+
+        try{
+
+            const response =
+                await requestCampusAIProfessor(
+                    prompt
+                );
+
+
+            const result =
+                normalize(
+                    response
+                );
+
+
+            if(
+                result.includes("valide") ||
+                result.includes("validé") ||
+                result.includes("validee") ||
+                result.includes("validée")
+            ){
+
+                return true;
+
+            }
+
+
+            if(
+                result.includes("a_corriger") ||
+                result.includes("a corriger")
+            ){
+
+                return false;
+
+            }
+
+
+            return false;
+
+        }catch(error){
+
+            console.error(
+                "RANISE BLOCK 9: AI homework validation error.",
+                error
+            );
+
+
+            return false;
+
+        }
+
+    }
+
+
+    // =====================================================
+    // FINAL HOMEWORK VALIDATION
+    // =====================================================
+
+    async function validateHomework(){
+
+        if(
+            !state.started ||
+            state.completed ||
+            !state.waiting ||
+            state.processing
+        ){
+
+            return;
+
+        }
+
+
+        state.processing =
+            true;
+
+
+        try{
+
+            // -------------------------------------------------
+            // First local validation.
+            // -------------------------------------------------
+
+            if(
+                !validateHomeworkText()
+            ){
 
                 return;
 
             }
 
 
-            // IMPORTANT:
-            // Do NOT set transitionDetected here.
-            // Do NOT assume Block 8 is complete.
-            // Only check its real state.
+            state.waiting =
+                false;
 
-            checkBlock8Completion();
+
+            await speak(
+                "Je vais maintenant lire votre document et vérifier votre devoir."
+            );
+
+
+            // -------------------------------------------------
+            // AI reads and evaluates the real document.
+            // -------------------------------------------------
+
+            const valid =
+                await validateHomeworkWithAI();
+
+
+            if(!valid){
+
+                state.waiting =
+                    true;
+
+
+                await speak(
+
+                    "Votre devoir a besoin d'une petite correction. Relisez simplement la consigne et complétez votre document, puis je le vérifierai à nouveau."
+
+                );
+
+
+                return;
+
+            }
+
+
+            // =================================================
+            // HOMEWORK VALIDATED
+            // =================================================
+
+            state.completed =
+                true;
+
+
+            state.waiting =
+                false;
+
+
+            await speak(
+
+                "Excellent. Votre devoir est correctement réalisé et validé. Bravo pour votre travail. La partie Évaluation est maintenant déverrouillée."
+
+            );
+
+
+            // =================================================
+            // BLOCK 9 → BRIDGE
+            //
+            // ONLY:
+            // homework → evaluation
+            //
+            // NO RENDER
+            // NO SIMULATION CLOSE
+            // NO CAMPUS CONTENT REPLACEMENT
+            // =================================================
+
+            if(
+                typeof RaniseDynamicUnlockRenderBridge !==
+                "undefined" &&
+                RaniseDynamicUnlockRenderBridge &&
+                typeof RaniseDynamicUnlockRenderBridge.unlockNextPart ===
+                "function"
+            ){
+
+                RaniseDynamicUnlockRenderBridge.unlockNextPart(
+
+                    state.chapterId,
+
+                    "homework"
+
+                );
+
+            }else{
+
+                console.error(
+
+                    "RANISE BLOCK 9: Dynamic Unlock Bridge unavailable."
+
+                );
+
+            }
+
+        }finally{
+
+            state.processing =
+                false;
+
+        }
+
+    }
+
+
+    // =====================================================
+    // DOCUMENT INPUT OBSERVER
+    // =====================================================
+
+    function handleSimulationInput(){
+
+        if(
+            !state.started ||
+            state.completed ||
+            state.speaking ||
+            !state.waiting ||
+            state.processing
+        ){
+
+            return;
+
+        }
+
+
+        clearTimeout(
+            state.validationTimer
+        );
+
+
+        state.validationTimer =
+            setTimeout(function(){
+
+                if(
+                    validateHomeworkText()
+                ){
+
+                    validateHomework();
+
+                }
+
+            },800);
+
+    }
+
+
+    // =====================================================
+    // SIMULATION CLICK OBSERVER
+    // =====================================================
+
+    function handleSimulationClick(){
+
+        if(
+            !state.started ||
+            state.completed ||
+            state.speaking ||
+            !state.waiting ||
+            state.processing
+        ){
+
+            return;
+
+        }
+
+
+        state.lastActionTime =
+            Date.now();
+
+
+        // -------------------------------------------------
+        // Do not validate immediately after a click.
+        // Give Word simulation time to update.
+        // -------------------------------------------------
+
+        setTimeout(function(){
+
+            if(
+                validateHomeworkText()
+            ){
+
+                validateHomework();
+
+            }
+
+        },500);
+
+    }
+
+
+    // =====================================================
+    // ATTACH SIMULATION LISTENERS
+    // =====================================================
+
+    function attachSimulationListeners(){
+
+        const doc =
+            state.simulationDocument;
+
+
+        if(
+            !doc ||
+            state.listenersAttached
+        ){
+
+            return;
+
+        }
+
+
+        doc.addEventListener(
+            "input",
+            handleSimulationInput,
+            true
+        );
+
+
+        doc.addEventListener(
+            "click",
+            handleSimulationClick,
+            true
+        );
+
+
+        state.listenersAttached =
+            true;
+
+    }
+
+
+    // =====================================================
+    // RESET OBSERVATION
+    // =====================================================
+
+    function resetObservation(){
+
+        state.baselineText =
+            getDocumentText();
+
+        state.currentDocumentText =
+            "";
+
+        state.lastActionTime =
+            0;
+
+    }
+
+
+    // =====================================================
+    // SPEAK HOMEWORK
+    // =====================================================
+
+    async function speakHomework(){
+
+        if(
+            !state.homework ||
+            !state.homework[
+                state.homeworkIndex
+            ]
+        ){
+
+            return;
+
+        }
+
+
+        const homework =
+            state.homework[
+                state.homeworkIndex
+            ];
+
+
+        state.waiting =
+            false;
+
+
+        resetObservation();
+
+
+        await speak(
+
+            "Devoir. " +
+            homework +
+            " Prenez votre temps et réalisez ce devoir directement dans le document de la simulation Microsoft Word 2007. Lorsque vous aurez terminé, je lirai votre travail et je le corrigerai."
+
+        );
+
+
+        if(
+            !state.completed
+        ){
+
+            resetObservation();
+
+            state.waiting =
+                true;
+
+        }
+
+    }
+
+
+    // =====================================================
+    // START BLOCK 9
+    // =====================================================
+
+    async function startBlock9Dynamic(chapterId){
+
+        if(
+            !chapterId ||
+            isChapter1(chapterId)
+        ){
+
+            return false;
+
+        }
+
+
+        chapterId =
+            String(
+                chapterId
+            ).trim();
+
+
+        // -------------------------------------------------
+        // Prevent duplicate launch.
+        // -------------------------------------------------
+
+        if(
+            state.started &&
+            state.chapterId === chapterId
+        ){
+
+            return true;
+
+        }
+
+
+        const homework =
+            getChapterHomework(
+                chapterId
+            );
+
+
+        if(!homework){
+
+            console.warn(
+
+                "RANISE BLOCK 9: No homework found for",
+
+                chapterId
+
+            );
+
+
+            return false;
+
+        }
+
+
+        // -------------------------------------------------
+        // HARD LAUNCH PROTECTION
+        //
+        // This is the critical correction.
+        //
+        // Block 9 cannot start unless the Bridge has
+        // already unlocked the homework part.
+        // -------------------------------------------------
+
+        if(
+            !areHomeworkUnlocked(
+                chapterId
+            )
+        ){
+
+            return false;
+
+        }
+
+
+        // -------------------------------------------------
+        // Student must already be inside Word simulation.
+        // -------------------------------------------------
+
+        if(
+            !connectToSimulation()
+        ){
+
+            return false;
+
+        }
+
+
+        state.chapterId =
+            chapterId;
+
+
+        state.homework =
+            homework;
+
+
+        state.homeworkIndex =
+            0;
+
+
+        state.started =
+            true;
+
+
+        state.waiting =
+            false;
+
+
+        state.completed =
+            false;
+
+
+        state.speaking =
+            false;
+
+
+        state.processing =
+            false;
+
+
+        state.autoLaunchStarted =
+            true;
+
+
+        state.listenersAttached =
+            false;
+
+
+        attachSimulationListeners();
+
+
+        await speak(
+
+            "Bienvenue dans la partie Devoir du " +
+            chapterName(
+                chapterId
+            ) +
+            ". Vous allez maintenant réaliser votre devoir directement dans la simulation Microsoft Word 2007."
+
+        );
+
+
+        if(
+            !state.completed
+        ){
+
+            await speakHomework();
+
+        }
+
+
+        return true;
+
+    }
+
+
+    // =====================================================
+    // READ PART PROGRESS
+    // =====================================================
+
+    function getPartsProgress(chapterId){
+
+        if(
+            !chapterId ||
+            isChapter1(chapterId)
+        ){
+
+            return null;
+
+        }
+
+
+        // -------------------------------------------------
+        // Chapter 2 existing engine.
+        // -------------------------------------------------
+
+        if(
+            chapterId === "chapitre2" &&
+            typeof WordChapter2PartsEngine !==
+            "undefined" &&
+            WordChapter2PartsEngine &&
+            typeof WordChapter2PartsEngine.getProgress ===
+            "function"
+        ){
+
+            try{
+
+                return WordChapter2PartsEngine.getProgress();
+
+            }catch(error){
+
+                console.warn(
+                    "RANISE BLOCK 9: Chapter 2 progress read failed.",
+                    error
+                );
+
+            }
+
+        }
+
+
+        // -------------------------------------------------
+        // Generic Chapter 2+
+        // -------------------------------------------------
+
+        const key =
+            "word_" +
+            chapterId +
+            "_partsProgress";
+
+
+        let saved =
+            null;
+
+
+        try{
+
+            saved =
+                localStorage.getItem(
+                    key
+                );
+
+        }catch(error){
+
+            return null;
+
+        }
+
+
+        if(!saved){
+
+            return null;
+
+        }
+
+
+        try{
+
+            const progress =
+                JSON.parse(
+                    saved
+                );
+
+
+            return (
+                progress &&
+                typeof progress ===
+                "object"
+            )
+            ?
+            progress
+            :
+            null;
+
+        }catch(error){
+
+            return null;
+
+        }
+
+    }
+
+
+    // =====================================================
+    // CHECK HOMEWORK UNLOCK
+    //
+    // CRITICAL:
+    //
+    // homework === true
+    //
+    // means Block 8 already finished and the Bridge
+    // already unlocked Devoir.
+    // =====================================================
+
+    function areHomeworkUnlocked(chapterId){
+
+        const progress =
+            getPartsProgress(
+                chapterId
+            );
+
+
+        return !!(
+            progress &&
+            progress.homework === true
+        );
+
+    }
+
+
+    // =====================================================
+    // FIND ACTIVE HOMEWORK-UNLOCKED CHAPTER
+    // =====================================================
+
+    function findHomeworkUnlockedActiveChapter(){
+
+        const directId =
+            detectCurrentChapterId();
+
+
+        if(
+            directId &&
+            areHomeworkUnlocked(
+                directId
+            )
+        ){
+
+            return directId;
+
+        }
+
+
+        if(
+            typeof microsoftWordCourse ===
+            "undefined" ||
+            !microsoftWordCourse ||
+            !Array.isArray(
+                microsoftWordCourse.chapters
+            )
+        ){
+
+            return null;
+
+        }
+
+
+        const frame =
+            findSimulation();
+
+
+        if(!frame){
+
+            return null;
+
+        }
+
+
+        // -------------------------------------------------
+        // Prefer chapter ID attached to simulation.
+        // -------------------------------------------------
+
+        const frameChapterId =
+            getChapterIdFromElement(
+                frame
+            );
+
+
+        if(
+            frameChapterId &&
+            areHomeworkUnlocked(
+                frameChapterId
+            )
+        ){
+
+            return frameChapterId;
+
+        }
+
+
+        // -------------------------------------------------
+        // Search active chapter markers.
+        // -------------------------------------------------
+
+        const activeElements =
+            document.querySelectorAll(
+                "[data-chapter-id], [data-chapter], [data-current-chapter]"
+            );
+
+
+        for(
+            let i = 0;
+            i < activeElements.length;
+            i++
+        ){
+
+            const candidateId =
+                getChapterIdFromElement(
+                    activeElements[i]
+                );
+
+
+            if(
+                candidateId &&
+                areHomeworkUnlocked(
+                    candidateId
+                )
+            ){
+
+                return candidateId;
+
+            }
+
+        }
+
+
+        // -------------------------------------------------
+        // Final fallback:
+        // only if exactly ONE chapter has homework unlocked.
+        // -------------------------------------------------
+
+        const unlocked =
+            microsoftWordCourse.chapters.filter(
+                function(chapter){
+
+                    if(
+                        !chapter ||
+                        !chapter.id ||
+                        isChapter1(
+                            chapter.id
+                        )
+                    ){
+
+                        return false;
+
+                    }
+
+
+                    return areHomeworkUnlocked(
+                        chapter.id
+                    );
+
+                }
+            );
+
+
+        if(
+            unlocked.length === 1
+        ){
+
+            return String(
+                unlocked[0].id
+            ).trim();
+
+        }
+
+
+        return null;
+
+    }
+
+
+    // =====================================================
+    // WAIT FOR EXISTING SIMULATION
+    // =====================================================
+
+    function waitForSimulation(
+        chapterId,
+        maxAttempts
+    ){
+
+        if(
+            !chapterId ||
+            isChapter1(chapterId)
+        ){
+
+            return;
+
+        }
+
+
+        let attempts =
+            0;
+
+
+        const limit =
+            typeof maxAttempts ===
+            "number"
+            ?
+            maxAttempts
+            :
+            200;
+
+
+        const timer =
+            setInterval(function(){
+
+                attempts++;
+
+
+                // -------------------------------------------------
+                // Block 9 already started.
+                // -------------------------------------------------
+
+                if(
+                    state.started &&
+                    state.chapterId === chapterId
+                ){
+
+                    clearInterval(timer);
+
+                    return;
+
+                }
+
+
+                // -------------------------------------------------
+                // HARD PROTECTION:
+                // Homework must STILL be unlocked.
+                // -------------------------------------------------
+
+                if(
+                    !areHomeworkUnlocked(
+                        chapterId
+                    )
+                ){
+
+                    clearInterval(timer);
+
+                    return;
+
+                }
+
+
+                const frame =
+                    findSimulation();
+
+
+                if(!frame){
+
+                    if(
+                        attempts >= limit
+                    ){
+
+                        clearInterval(timer);
+
+                    }
+
+
+                    return;
+
+                }
+
+
+                try{
+
+                    const doc =
+                        frame.contentDocument ||
+                        (
+                            frame.contentWindow
+                            ?
+                            frame.contentWindow.document
+                            :
+                            null
+                        );
+
+
+                    if(
+                        doc &&
+                        doc.readyState !==
+                        "loading"
+                    ){
+
+                        clearInterval(timer);
+
+
+                        startBlock9Dynamic(
+                            chapterId
+                        );
+
+
+                        return;
+
+                    }
+
+                }catch(error){
+
+                    // iframe may still be loading
+
+                }
+
+
+                if(
+                    attempts >= limit
+                ){
+
+                    clearInterval(timer);
+
+                    return;
+
+                }
+
+
+                // -------------------------------------------------
+                // One temporary load listener.
+                // -------------------------------------------------
+
+                if(
+                    !frame.__raniseBlock9LoadAttached
+                ){
+
+                    frame.__raniseBlock9LoadAttached =
+                        true;
+
+
+                    frame.addEventListener(
+
+                        "load",
+
+                        function(){
+
+                            frame.__raniseBlock9LoadAttached =
+                                false;
+
+
+                            if(
+                                !state.started &&
+                                areHomeworkUnlocked(
+                                    chapterId
+                                )
+                            ){
+
+                                startBlock9Dynamic(
+                                    chapterId
+                                );
+
+                            }
+
+                        },
+
+                        {once:true}
+
+                    );
+
+                }
+
+            },100);
+
+    }
+
+
+    // =====================================================
+    // AUTOMATIC HOMEWORK UNLOCK WATCHER
+    //
+    // THIS IS THE ONLY AUTOMATIC LAUNCH PATH.
+    //
+    // Block 9 waits for:
+    //
+    //     homework === true
+    //
+    // It does NOT react to:
+    //
+    //     practice === true
+    //     exercises === true
+    //
+    // Therefore:
+    //
+    // Block 7 cannot launch Block 9.
+    // Block 8 cannot accidentally launch Block 9
+    // before its final Bridge unlock.
+    // =====================================================
+
+    function watchHomeworkUnlock(){
+
+        let launchLock =
+            false;
+
+
+        setInterval(function(){
+
+            // -------------------------------------------------
+            // Already running.
+            // -------------------------------------------------
+
+            if(
+                state.started &&
+                state.chapterId
+            ){
+
+                return;
+
+            }
+
+
+            if(
+                launchLock
+            ){
+
+                return;
+
+            }
+
+
+            const chapterId =
+                findHomeworkUnlockedActiveChapter();
+
+
+            if(
+                !chapterId ||
+                isChapter1(chapterId)
+            ){
+
+                return;
+
+            }
+
+
+            // -------------------------------------------------
+            // FINAL HARD GATE
+            // -------------------------------------------------
+
+            if(
+                !areHomeworkUnlocked(
+                    chapterId
+                )
+            ){
+
+                return;
+
+            }
+
+
+            // -------------------------------------------------
+            // Homework has been unlocked by the Bridge.
+            // Block 9 can now launch.
+            // -------------------------------------------------
+
+            launchLock =
+                true;
+
+
+            state.autoLaunchStarted =
+                true;
+
+
+            waitForSimulation(
+                chapterId,
+                200
+            );
+
+
+            setTimeout(function(){
+
+                launchLock =
+                    false;
+
+            },5000);
+
+        },250);
+
+    }
+
+
+    // =====================================================
+    // MANUAL HOMEWORK OPEN FALLBACK
+    //
+    // Even manual opening is protected by:
+    //
+    //     homework === true
+    //
+    // So clicking Devoir during Practice or Exercises
+    // cannot launch Block 9.
+    // =====================================================
+
+    document.addEventListener(
+
+        "click",
+
+        function(event){
+
+            const target =
+                event.target;
+
+
+            if(!target){
+
+                return;
+
+            }
+
+
+            if(
+                state.started
+            ){
+
+                return;
+
+            }
+
+
+            const chapterId =
+                detectCurrentChapterId();
+
+
+            if(
+                !chapterId ||
+                isChapter1(chapterId)
+            ){
+
+                return;
+
+            }
+
+
+            // -------------------------------------------------
+            // HARD GATE
+            // -------------------------------------------------
+
+            if(
+                !areHomeworkUnlocked(
+                    chapterId
+                )
+            ){
+
+                return;
+
+            }
+
+
+            const clickable =
+                typeof target.closest ===
+                "function"
+                ?
+                target.closest(
+
+                    "button, a, [role='button'], [data-part], [data-section], [data-tab], .cwCoursePart, .coursePart"
+
+                )
+                :
+                null;
+
+
+            if(!clickable){
+
+                return;
+
+            }
+
+
+            const data =
+                normalize(
+                    (
+                        clickable.innerText ||
+                        clickable.textContent ||
+                        ""
+                    ) +
+                    " " +
+                    (
+                        clickable.getAttribute &&
+                        clickable.getAttribute(
+                            "data-part"
+                        )
+                        ||
+                        ""
+                    ) +
+                    " " +
+                    (
+                        clickable.getAttribute &&
+                        clickable.getAttribute(
+                            "data-section"
+                        )
+                        ||
+                        ""
+                    )
+                );
+
+
+            if(
+                !data.includes("devoir") &&
+                !data.includes("homework")
+            ){
+
+                return;
+
+            }
+
+
+            setTimeout(function(){
+
+                if(
+                    areHomeworkUnlocked(
+                        chapterId
+                    )
+                ){
+
+                    waitForSimulation(
+                        chapterId,
+                        200
+                    );
+
+                }
+
+            },100);
 
         },
 
-        100
+        true
 
     );
 
 
-// =========================================================
-// PUBLIC API
-// =========================================================
+    // =====================================================
+    // START WATCHER
+    // =====================================================
 
-window.RaniseMoiseHomeworkMasteryEngine = {
-
-    start:
-        startBlock9,
+    watchHomeworkUnlock();
 
 
-    getState:
+    // =====================================================
+    // PUBLIC API
+    // =====================================================
 
-        function () {
+    window.RaniseMoiseDynamicHomeworkEvaluationEngine = {
+
+        start:
+            startBlock9Dynamic,
+
+
+        getState:function(){
 
             return {
+
+                chapterId:
+                    state.chapterId,
 
                 started:
                     state.started,
@@ -15877,33 +15866,24 @@ window.RaniseMoiseHomeworkMasteryEngine = {
                 completed:
                     state.completed,
 
-                waitingForBlock8:
-                    state.waitingForBlock8,
+                homeworkIndex:
+                    state.homeworkIndex,
 
-                block8CompletionDetected:
-                    state.block8CompletionDetected,
+                waiting:
+                    state.waiting,
 
-                closeEnabled:
-                    state.closeEnabled,
+                speaking:
+                    state.speaking,
 
-                tasks:
-
-                    Object.assign(
-                        {},
-                        state.tasks
-                    ),
-
-                completedTasks:
-                    completedTaskCount(),
-
-                homework:
-                    state.homework
+                autoLaunchStarted:
+                    state.autoLaunchStarted
 
             };
 
         }
 
-};
+    };
+
 
 })();
 
